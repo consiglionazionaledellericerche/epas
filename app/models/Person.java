@@ -7,6 +7,7 @@ import com.google.common.collect.Sets;
 import it.cnr.iit.epas.NullStringBinder;
 
 import models.base.MutableModel;
+import models.base.PeriodModel;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -48,7 +49,7 @@ import javax.persistence.Version;
 @Entity
 @Audited
 @Table(name = "persons")
-public class Person extends MutableModel implements Comparable<Person> {
+public class Person extends PeriodModel {
 
   private static final long serialVersionUID = -2293369685203872207L;
 
@@ -251,12 +252,12 @@ public class Person extends MutableModel implements Comparable<Person> {
     return getFullname();
   }
 
-  @Override
-  public int compareTo(Person person) {
-
-    int res = (this.surname.compareTo(person.surname) == 0)
-        ? this.name.compareTo(person.name) : this.surname.compareTo(person.surname);
-    return res;
-  }
+//  @Override
+//  public int compareTo(Person person) {
+//
+//    int res = (this.surname.compareTo(person.surname) == 0)
+//        ? this.name.compareTo(person.name) : this.surname.compareTo(person.surname);
+//    return res;
+//  }
 
 }

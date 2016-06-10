@@ -344,7 +344,7 @@ public class ConsistencyManager {
     LocalDate officeLimit = person.office.getBeginDate();
 
     // Calcolo a partire da
-    LocalDate lowerBoundDate = new LocalDate(person.createdAt);
+    LocalDate lowerBoundDate = new LocalDate(person.beginDate);
 
     if (officeLimit.isAfter(lowerBoundDate)) {
       lowerBoundDate = officeLimit;

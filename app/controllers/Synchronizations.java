@@ -35,22 +35,22 @@ import models.UsersRolesOffices;
 import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
-import synch.perseoconsumers.contracts.ContractPerseoConsumer;
-import synch.perseoconsumers.office.OfficePerseoConsumer;
-import synch.perseoconsumers.people.PeoplePerseoConsumer;
-import synch.perseoconsumers.roles.RolePerseoConsumer;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
+
+import synch.perseoconsumers.contracts.ContractPerseoConsumer;
+import synch.perseoconsumers.office.OfficePerseoConsumer;
+import synch.perseoconsumers.people.PeoplePerseoConsumer;
+import synch.perseoconsumers.roles.RolePerseoConsumer;
 
 @Slf4j
 @With({Resecure.class, RequestInit.class})
@@ -522,8 +522,7 @@ public class Synchronizations extends Controller {
   private static Optional<Person> personCreator(Person person) {
 
     try {
-      // FIXME: patch da sistemare quando si creeranno i periodi
-      person.createdAt = LocalDateTime.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
+      person.beginDate = LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
       person.user = userManager.createUser(person);
       person.save();
 

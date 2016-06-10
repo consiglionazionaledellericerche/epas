@@ -40,7 +40,6 @@ import net.sf.oval.constraint.MinLength;
 
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 
 import play.data.validation.Required;
 import play.data.validation.Valid;
@@ -51,6 +50,7 @@ import play.i18n.Messages;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.List;
@@ -170,7 +170,7 @@ public class Persons extends Controller {
 
     //La ricomputazione nel caso di creazione persona viene fatta alla fine.
     person = personDao.getPersonById(person.id);
-    person.createdAt = LocalDateTime.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
+    person.beginDate = LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
     person.save();
 
     contractManager.recomputeContract(contract, Optional.<LocalDate>absent(), true, false);
