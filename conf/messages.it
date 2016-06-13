@@ -20,7 +20,7 @@ absenceTypeGroup.minutesExcess= Minuti in eccesso
 absenceTypeGroup.replacingAbsenceType= Codice per sotituzione
 
 administrations= Amministrazione
-administrator=Amministratore
+administrator= Amministratore
 adminPassword= Password Amministratore
 adminPasswordRetype= Reinserire Password
 
@@ -98,8 +98,7 @@ contract.sourceVacationLastYearUsed= Giorni di ferie utilizzati dell'anno passat
 contract.mealTicketInitBeforeGeneralInit = Per il contratto attuale è stata definita una inizializzazione buoni pasto precedente all'inizializzazione generale. Questo potrebbe portare	a calcoli errati o inattesi circa il residuo dei buoni pasto per il dipendente.
 
 contractStampProfile.fixedworkingtime=Presenza Automatica
-ContractStampProfile=Periodo Presenza Automatica
-ContractStampProfile=Periodo Presenza Automatica
+ContractStampProfile= Periodo Presenza Automatica
 ContractWorkingTimeType=Periodo Tipo Orario
 contractWorkingTimeType=Periodo Tipo Orario
 
