@@ -126,5 +126,11 @@ public interface IWrapperPerson extends IWrapperModel<Person> {
    */
   public Contract perseoContract(Long perseoId);
   
+  /**
+   * 
+   * @return true se la persona è un tecnico (liv. IV - VIII), false altrimenti
+   */
+  public boolean isTechnician();
+  
 
 }

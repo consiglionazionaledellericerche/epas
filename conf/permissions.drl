@@ -6,6 +6,9 @@ import models.UsersRolesOffices;
 import models.ShiftType;
 import models.Person;
 import models.Role;
+import models.Configuration;
+import models.enumerate.EpasParam;
+import models.Qualification;
 
 global models.User currentOperator;
 
@@ -42,8 +45,10 @@ when
   		/* Ritorna allo user developer */
      	"Administration.restoreUser",
      	
-     	/* Eventuale inserimento di timbratura per lavoro fuori sede*/
-     	"Stampings.insertWorkingOffSitePresence",
+     	/* Eventuale inserimento di timbratura per lavoro fuori sede
+     	/* Stampings.insertWorkingOffSitePresence*/
+     	/* Stampings.saveWorkingOffSitePresence*/
+     	
      	
      	/* Situazione Mensile */
      	"Stampings.stampings",
@@ -776,6 +781,43 @@ when
 		"BadgeSystems.deleteBadge"
                
        ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Azioni per utente employee ma abilitato alla timbratura fuori sede
+ ******************************************************************************/
+rule Working_offsite
+when
+ $uro: UsersRolesOffices()
+ $p: Person() from currentOperator.person
+ Role(name == Role.EMPLOYEE) from $uro.role
+ Qualification(qualification < 4) from $p.qualification
+ $o: Office() from $p.office
+ Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
+ $c: PermissionCheck(action in (
+ 	"Stampings.blankForEmployee",
+    "Stampings.edit",
+    "Stampings.save"
+ ), granted == false, target == null)
+then
+ $c.grant();
+end
+
+rule Working_offsite_in_office
+when
+ $uro: UsersRolesOffices()
+ $p: Person() from currentOperator.person
+ Role(name == Role.EMPLOYEE) from $uro.role
+ Qualification(qualification < 4) from $p.qualification
+ $o: Office() from $p.office
+ Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
+ $c: PermissionCheck(action in (
+ 	"Stampings.blank",
+    "Stampings.edit",
+    "Stampings.save"
+ ), granted == false, target == $p)
 then
  $c.grant();
 end

@@ -5,5 +5,79 @@
 <div class="container">
 #{title title:('Inserimento tempo a lavoro fuori sede per ' + person.fullName()) /}
 
+#{tabs}
+#{tabItem id:'stamping', title:'Inserisci timbratura', active:true /}
+#{tabItemDisabled id:'dayJustified', title:'Inserisci giustificativo giornaliero' /}
+#{/tabs}
 
+#{tabContent}
+
+#{tabContentItem id:'stamping', active:true}
+<br>
+<div id="stampingData">
+  #{form action:@saveWorkingOffSitePresence(), method:'POST', class:'form form-horizontal'}  
+ 
+    #{alert color:'info',center:true}
+     <p>Inserisci i dati della nuova timbratura.</p>
+     Il sistema permette l'inserimento di timbrature per tutti i giorni non appartenenti a mesi già inviati ad Attestati.
+    #{/alert}
+  
+
+  #{f.hidden 'person.id', value:person.id /}
+  
+  #{f.date 'date',required:'true'/}
+  #{f.input 'time', popover:'true', value:stamping?.formattedHour(), required:true/}
+  #{f.radioEnum 'stamping.way', items:models.Stamping.WayType, required:true /}
+  #{f.selectEnum 'stamping.stampType', items:models.enumerate.StampTypes.onlyActive() /}
+  #{f.input 'stamping.note' /}
+
+  #{b.buttons center:true}
+ 
+    #{b.submit 'Inserisci'/}
+
+  #{/b.buttons}
+
+  #{/form}
+
+</div>
+#{/tabContentItem}
+
+#{tabContentItem id:'dayJustified', disabled:'true'}
+<br>
+<div id="absenceData">
+
+  #{form action:@Absences.save(), method:'POST', class:'form form-horizontal'}
+  
+  	#{alert color:'info',center:true}
+     <p>Giustifica l'intera giornata lavorativa.</p>
+     Il sistema permette l'inserimento di un codice di presenza a giustificazione dell'intera giornata lavorativa, ovvero
+     permette la giustificazione dell'intero tempo di lavoro previsto dal proprio orario di lavoro.
+    #{/alert}
+   	
+	<input type="hidden" name="person.id" value="${person.id}"/>
+	<input type="hidden" name="dateFrom" value="${dateFrom.format()}"/>
+
+	#{f.select 'absenceType', required:true}
+	  <option></option>
+      #{list templateUtility.frequentAbsenceTypeList()}
+	    <option value="${_.id}"#{if field.value?.id == _.id} selected#{/if}>${_.label()}</option>
+  	  #{/list}
+	#{/f.select}
+	
+    #{f.date 'date', value:dateFrom?.format()/}
+    
+    *{ #{f.input 'absenceFile', type:'file' /} }*
+
+    #{b.buttons center:true}   
+      #{b.submit 'Inserisci'/}
+    #{/b.buttons}
+        
+  #{/form}
+  
+
+
+
+</div>
+#{/tabContentItem}
+#{/tabContent}
 </div>

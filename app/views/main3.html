@@ -90,8 +90,7 @@
               <div class="visible-lg-inline visible-xs-inline"> ${session.username}<span class="caret"></span></div>
             </a>
             <ul class="dropdown-menu">
-              <li><a href="@{Stampings.insertWorkingOffSitePresence(session.get("yearSelected"), session.get("monthSelected"))}">Tempo per lavoro fuori sede</a></li>	
-              <li class="divider"></li>
+              
               <li><a href="@{Stampings.stampings(session.get("yearSelected"), session.get("monthSelected"))}">Situazione mensile</a></li>
 
               <li><a href="@{Absences.absences(session.get("yearSelected"), session.get("monthSelected"))}">Assenze mensili</a></li>

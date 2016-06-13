@@ -60,3 +60,20 @@
       #{/if}
     </td>
     #{/if}
+    #{elseif showLinkForEmployee}    
+    
+    <td class="inserisciTimbratura default-single">
+      #{if !dayRecap.personDay.future}
+      #{secure.link @Stampings.blankForEmployee('id':dayRecap.personDay.person.id, dayRecap.personDay.date.format()),modal:'#modalStamping'}
+        +++
+      #{/secure.link}
+      #{/if}
+    </td>
+    #{/elseif}
+    #{else}
+    #{/else}
+    
+    
+    
+    
+    
