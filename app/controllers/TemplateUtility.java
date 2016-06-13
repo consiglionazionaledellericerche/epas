@@ -330,6 +330,15 @@ public class TemplateUtility {
   public List<AbsenceType> allAbsenceCodes(LocalDate date) {
     return absenceTypeDao.getAbsenceTypeFromEffectiveDate(date);
   }
+  
+  /**
+   * 
+   * @return i codici di assenza per i livelli I - III.
+   */
+  public List<AbsenceType> absencesForEmployees() {
+    List<String> codesForEmployees = Lists.newArrayList();
+    return absenceTypeDao.getAbsenceTypeForEmployee(codesForEmployees);
+  }
 
 
   /**

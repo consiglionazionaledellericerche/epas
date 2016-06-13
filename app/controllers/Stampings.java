@@ -6,9 +6,11 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import dao.CertificationDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
+import dao.PersonMonthRecapDao;
 import dao.StampingDao;
 import dao.history.HistoryValue;
 import dao.history.StampingHistoryDao;
@@ -25,6 +27,7 @@ import it.cnr.iit.epas.NullStringBinder;
 
 import lombok.extern.slf4j.Slf4j;
 
+import manager.ConfigurationManager;
 import manager.ConsistencyManager;
 import manager.SecureManager;
 import manager.StampingManager;
@@ -34,11 +37,16 @@ import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.recaps.troubles.PersonTroublesInMonthRecap;
 import manager.recaps.troubles.PersonTroublesInMonthRecapFactory;
 
+import models.Absence;
+import models.CertificatedData;
+import models.Certification;
+import models.Configuration;
 import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
 import models.User;
+import models.enumerate.EpasParam;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -94,6 +102,13 @@ public class Stampings extends Controller {
   private static StampingHistoryDao stampingsHistoryDao;
   @Inject
   private static OfficeDao officeDao;
+  @Inject
+  private static ConfigurationManager confManager;
+
+//  @Inject
+//  private static CertificationDao certificationDao;
+//  @Inject
+//  private static PersonMonthRecapDao pmrDao;
 
   /**
    * Tabellone timbrature dipendente.
@@ -103,24 +118,31 @@ public class Stampings extends Controller {
    */
   public static void stampings(final Integer year, final Integer month) {
 
-    IWrapperPerson person = wrapperFactory
+    IWrapperPerson wrperson = wrapperFactory
         .create(Security.getUser().get().person);
 
-    if (!person.isActiveInMonth(new YearMonth(year, month))) {
+    if (!wrperson.isActiveInMonth(new YearMonth(year, month))) {
       flash.error("Non esiste situazione mensile per il mese di %s %s",
           DateUtility.fromIntToStringMonth(month), year);
 
-      YearMonth last = person.getLastActiveMonth();
+      YearMonth last = wrperson.getLastActiveMonth();
       stampings(last.getYear(), last.getMonthOfYear());
     }
 
     PersonStampingRecap psDto = stampingsRecapFactory
-        .create(person.getValue(), year, month, true);
+        .create(wrperson.getValue(), year, month, true);
 
     //Per dire al template generico di non visualizzare i link di modifica
     boolean showLink = false;
-
-    render("@personStamping", psDto, person, showLink);
+    boolean showLinkForEmployee = false;
+    if (!wrperson.isTechnician() && 
+        (Boolean)confManager.configValue(wrperson.getValue().office, EpasParam.WORKING_OFF_SITE).equals(true)){
+      showLinkForEmployee = true;
+      //render("@personStamping", psDto, showLink, );
+    }
+      
+    Person person = wrperson.getValue();
+    render("@personStamping", psDto, person, showLink, showLinkForEmployee);
   }
 
 
@@ -153,8 +175,9 @@ public class Stampings extends Controller {
 
     //Per dire al template generico di non visualizzare i link di modifica
     boolean showLink = true;
+    boolean showLinkForEmployee = false;
 
-    render(psDto, person, showLink);
+    render(psDto, person, showLink, showLinkForEmployee);
   }
 
   /**
@@ -172,6 +195,25 @@ public class Stampings extends Controller {
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
 
     rules.checkIfPermitted(person.office);
+
+    render("@edit", person, date);
+  }
+  
+  /**
+   * Nuova timbratura inserita dall'impiegato di livello I - III
+   * 
+   * @param person la persona (se stesso) per cui inserire la timbratura
+   * @param date la data in cui inserire la timbratura
+   */
+  public static void blankForEmployee(@Required Person person, @Required LocalDate date) {
+
+    if (!person.isPersistent()) {
+      notFound();
+    }
+
+    Preconditions.checkState(!date.isAfter(LocalDate.now()));
+
+    rules.checkIfPermitted(person);
 
     render("@edit", person, date);
   }
@@ -523,15 +565,64 @@ public class Stampings extends Controller {
   }
 
 
-  /**
-   * funzionalità di inserimento della presenza per lavoro fuori sede.
-   * @param year l'anno di riferimento
-   * @param month il mese di riferimentos
-   */
-  public static void insertWorkingOffSitePresence(final Integer year, final Integer month){
-    Person person = Security.getUser().get().person;
-    render(person);
-  }
+//  /**
+//   * funzionalità di inserimento della presenza per lavoro fuori sede.
+//   * @param year l'anno di riferimento
+//   * @param month il mese di riferimentos
+//   */
+//  public static void insertWorkingOffSitePresence(final Integer year, final Integer month){
+//    Person person = Security.getUser().get().person;
+//    Stamping stamping = new Stamping(null, null);
+//    Absence absence = new Absence();
+//    LocalDate dateFrom = LocalDate.now();
+//    render(person, stamping, absence, dateFrom);
+//  }
+//  
+//  /**
+//   * salva la timbratura inserita dal dipendente solo dopo controlli di integrità.
+//   * @param person la persona che inserisce la timbratura
+//   * @param date la data in cui inserire la timbratura
+//   * @param stamping la timbratura
+//   * @param time l'ora e i minuti della timbratura
+//   */
+//  public static void saveWorkingOffSitePresence(@Required Person person, @Required LocalDate date,
+//      @Valid Stamping stamping, @CheckWith(StringIsTime.class) String time) {
+//        
+//    PersonDay personDay = personDayDao.getOrBuildPersonDay(person, date);
+//    
+//    if (!stamping.isPersistent()) {
+//      stamping.personDay = personDay;
+//    }
+//    
+//    if (!validation.hasErrors()) {
+//      List<Certification> cert = certificationDao
+//          .personCertifications(person, date.getYear(), date.getMonthOfYear());
+//      CertificatedData cdata = pmrDao
+//          .getPersonCertificatedData(person, date.getMonthOfYear(), date.getYear());
+//      if (!cert.isEmpty() || cdata != null) {
+//        validation.addError("date",
+//            "non può essere inserita una timbratura per un giorno di "
+//            + "un mese già inviato ad attestati");
+//        response.status = 400;
+//        log.info(validation.errorsMap().toString());
+//        render("@insertWorkingOffSitePresence", stamping, person, date, time);
+//      }
+//
+//    }
+//    personDay.save();
+//    stamping.date = stampingManager.deparseStampingDateTime(date, time);
+//    stamping.markedByEmployee = true;
+//    stamping.markedByAdmin = false;
+//
+//    personDay.stampings.add(stamping);
+//    personDay.save();
+//
+//    consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
+//
+//    flash.success(Web.msgSaved(Stampings.class));
+//    
+//    Stampings.stampings(date.getYear(), date.getMonthOfYear());
+//  }
 
 }
 
