@@ -97,6 +97,12 @@
       <p>Tramite questo parametro è possibile specificare la finestra temporale all'interno della quale verrà conteggiato il tempo a lavoro dei dipendenti.</p>
     #{/if}
     
+     #{if configuration.epasParam.equals(models.enumerate.EpasParam.OFF_SITE_STAMPING) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente le timbratura di lavoro fuori sede.
+      </p> 
+    #{/if}
+    
   #{/alert} 
   
   <!-- Riepilogo delle ricomputazioni eventuali -->
@@ -141,10 +147,11 @@
 	  <p><i class="fa fa-thumbs-o-up"></i> La modifica del valore di questo parametro non comporta alcun tipo di riconteggio 
 	    o sincronizzazione.
 	  </p> }*
-      #{/if}#{else}
+    #{/if}
+    #{else}
       <p><strong>Effetti</strong></p>
 	  <p><i class="fa fa-exclamation-triangle"></i> La modifica di questo paramatro comporta la sincronizzazzione per tutti i dipendenti 
-	    di <strong>${configuration.office.name}</strong> di tipo:</p>
+	    coinvolti</strong> di tipo:</p>
 	    <ul> 
 	    #{list items:configuration.epasParam.recomputationTypes, as:'recomputationType'}
 	      <li>&{recomputationType}</li>

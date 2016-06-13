@@ -1,7 +1,7 @@
 #{modalAsync noTitle:true}
   
   <div class="text-center">
-  <h3>Modifica Configurazione ${configuration.office.name}</h3>
+  <h3>Modifica Configurazione ${configuration.person.fullname}</h3>
   <br>
   </div>
   
@@ -12,14 +12,14 @@
   <!-- Visualizzazione stato attuale -->
   #{if configuration.epasParam.general }
     
-    <p>Questo parametro per la sede <strong>${configuration.office.name}</strong> 
+    <p>Questo parametro per la persona <strong>${configuration.person.fullname}</strong> 
     è attualmente impostato a 
     <strong>${templateUtility.getObjectInConfiguration(configuration.epasParam, configuration.fieldValue).label()}</strong>.
     <p>
   #{/if}
   
   #{if configuration.epasParam.yearly || configuration.epasParam.periodic}
-    <p>I Valori assunti da questo parametro per la sede <strong>${configuration.office.name}</strong> 
+    <p>I Valori assunti da questo parametro per la persona <strong>${configuration.person.fullname}</strong> 
     e loro validità sono:
     <p>
     <table class="table">
@@ -30,7 +30,7 @@
     </tr>
     
     
-    #{list items:configuration.office.periods(configuration.type), as:'conf'}
+    #{list items:configuration.person.periods(configuration.type), as:'conf'}
     <tr>
 	  <td class="col-xs-3"><em>${conf.beginDate.format()}</em></td>
 	  #{if conf.calculatedEnd()}
@@ -50,7 +50,7 @@
     
   <!-- Form per la modifica -->
      <div id="configData">
-     #{form action:@Configurations.update(), method:'POST', autocomplete:false,
+     #{form action:@Configurations.personUpdate(), method:'POST', autocomplete:false,
 		    class:'form form-horizontal', 'data-async':'#page_content',
 		    'data-async-error':'#configData', 'data-spinner':'#defaultSpinner'}
 		
@@ -69,7 +69,7 @@
 	    #{else}
 	      <!--bottoni -->
 		  #{b.buttons center:true}
-		    #{b.cancel @show(configuration.office.id) /}
+		    #{b.cancel @personShow(configuration.person.id) /}
 		    #{b.submit 'Conferma'/}
 		  #{/b.buttons}
 		 #{/else}

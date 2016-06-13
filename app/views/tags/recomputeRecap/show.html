@@ -11,13 +11,13 @@
  #{alert color:color } 
    
   <div class="text-dark">
-   #{if _recomputeRecap.configuration }
+   #{if _recomputeRecap.epasParam }
 	  
 	  <!-- Recap Configurazioni --> 
-	  #{if _recomputeRecap.configuration.epasParam.yearly || _recomputeRecap.configuration.epasParam.periodic }
+	  #{if _recomputeRecap.epasParam.yearly || _recomputeRecap.epasParam.periodic }
         #{recomputeRecap.periods periods:_recomputeRecap.periods /}
       #{/if}
-      #{if !_recomputeRecap.configuration.epasParam.recomputationTypes.empty && _recomputeRecap.needRecomputation }
+      #{if !_recomputeRecap.epasParam.recomputationTypes.empty && _recomputeRecap.needRecomputation }
 			  <p>
 			        ePAS effettuerà il ricalcolo di tutti i dati dei dipendenti 
 		 	        dal <strong>${_recomputeRecap.recomputeFrom.format()}</strong>
@@ -39,7 +39,7 @@
       <!-- Recap contratti -->
       #{recomputeRecap.periods periods:_recomputeRecap.periods /}
 	  #{if _recomputeRecap.initMissing}
-	    <p>Finchè non verrà inserita l'inizializzazione non verranno effettuati i ricalcoli.>
+	    <p>Finchè non verrà inserita l'inizializzazione non verranno effettuati i ricalcoli.
 	  #{/if}
 	  #{else}  
 	    #{if _recomputeRecap.needRecomputation }

@@ -18,12 +18,12 @@ import javax.persistence.Table;
 
 @Audited
 @Entity
-@Table(name = "configurations")
-public class Configuration extends PropertyInPeriod {
+@Table(name = "person_configurations")
+public class PersonConfiguration extends PropertyInPeriod {
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "office_id")
-  public Office office;
+  @JoinColumn(name = "person_id")
+  public Person person;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "epas_param")
@@ -34,12 +34,12 @@ public class Configuration extends PropertyInPeriod {
 
   @Override
   public IPropertiesInPeriodOwner getOwner() {
-    return this.office;
+    return this.person;
   }
 
   @Override
   public void setOwner(IPropertiesInPeriodOwner target) {
-    this.office = (Office) target;
+    this.person = (Person) target;
   }
 
   @Override
@@ -71,6 +71,5 @@ public class Configuration extends PropertyInPeriod {
     }
     return false;
   }
-
 
 }

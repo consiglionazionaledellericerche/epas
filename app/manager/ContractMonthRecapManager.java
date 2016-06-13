@@ -57,79 +57,24 @@ public class ContractMonthRecapManager {
   private ConfigurationManager configurationManager;
 
   /**
-   * Metodo da utilizzare per calcolare i minuti di residuo disponibili per riposo compensativo. Per
-   * adesso è in questa classe per proteggere l'istanza effettiva di ContractMonthRecap in modo che
-   * non si corra il rischio di sovrascriverla con quella provvisoria. Capire ...
-   */
-  public int getMinutesForCompensatoryRest(Contract contract, LocalDate date, 
-      List<Absence> otherCompensatoryRest) {
-
-    Optional<YearMonth> firstContractMonthRecap = wrapperFactory
-        .create(contract).getFirstMonthToRecap();
-    if (!firstContractMonthRecap.isPresent()) {
-      //TODO: Meglio ancora eccezione.
-      return 0;
-    }
-
-    ContractMonthRecap cmr = new ContractMonthRecap();
-    cmr.year = date.getYear();
-    cmr.month = date.getMonthOfYear();
-    cmr.contract = contract;
-
-    YearMonth yearMonth = new YearMonth(date);
-
-    //FIXME: questo funziona nel caso di otherCompensatoryRest vuoto.
-    // nel caso di simulazione inserimento riposi compensativi che impattano
-    // su due mesi potrebbe non fornire il risultato desiderato.
-    //TODO: se in otherComensatoryRest ci sono assenze dei mesi precedenti,
-    //ricalcolare anche quelli.
-
-    //Se serve il riepilogo precedente devo recuperarlo.
-    Optional<ContractMonthRecap> previousMonthRecap =
-        Optional.<ContractMonthRecap>absent();
-    if (yearMonth.isAfter(firstContractMonthRecap.get())) {
-      previousMonthRecap = wrapperFactory.create(contract)
-          .getContractMonthRecap(yearMonth.minusMonths(1));
-      if (!previousMonthRecap.isPresent()) {
-        //TODO: Meglio ancora eccezione.
-        return 0;
-      }
-    }
-
-
-    Optional<ContractMonthRecap> recap = computeResidualModule(cmr,
-        previousMonthRecap, yearMonth, date, otherCompensatoryRest);
-
-    if (recap.isPresent()) {
-      return recap.get().remainingMinutesCurrentYear
-          + recap.get().remainingMinutesLastYear;
-    }
-    return 0;
-  }
-
-  /**
-   * Nota bene: il metodo non effettua salvataggi ma solo assegnamenti.<br> 
-   * Nota bene 2: il metodo assume che se il precedente riepilogo è absent() significa che non 
-   * serve ai fini della computazione. Il controllo di fornire il parametro corretto è 
-   * demandato al chiamante. <br>
-   * 
-   * Aggiorna i campi del riepilogo contenuto in cmr, nella parte residuale ovvero:<br> 
-   *   - residui anno corrente <br> 
-   *   - residui anno passato <br> 
-   *   - buoni pasto rimanenti <br> 
-   * alla data calcolaFinoA.<br>
-   * 
-   * Durante la computazione memorizza anche le seguenti informazioni in cmr: <br>
-   * - progressivo finale totale, positivo e negativo del mese <br> 
-   * - straordinari s1, s2, s3 assegnati nel mese<br> 
-   * - riposi compensativi effettuati in numero e minuti totali<br> 
-   * - buoni pasto consegnati ed consumati nel mese <br>
+   * Nota bene: il metodo non effettua salvataggi ma solo assegnamenti.<br> Nota bene 2: il metodo
+   * assume che se il precedente riepilogo è absent() significa che non serve ai fini della
+   * computazione. Il controllo di fornire il parametro corretto è demandato al chiamante. <br>
+   *
+   * Aggiorna i campi del riepilogo contenuto in cmr, nella parte residuale ovvero:<br> - residui
+   * anno corrente <br> - residui anno passato <br> - buoni pasto rimanenti <br> alla data
+   * calcolaFinoA.<br>
+   *
+   * Durante la computazione memorizza anche le seguenti informazioni in cmr: <br> - progressivo
+   * finale totale, positivo e negativo del mese <br> - straordinari s1, s2, s3 assegnati nel
+   * mese<br> - riposi compensativi effettuati in numero e minuti totali<br> - buoni pasto
+   * consegnati ed consumati nel mese <br>
    *
    * @param recapPreviousMonth    se presente è il riepilogo precedente.
    * @param otherCompensatoryRest altri riposi compensativi non persistiti nel db.
    */
   public Optional<ContractMonthRecap> computeResidualModule(ContractMonthRecap cmr,
-      Optional<ContractMonthRecap> recapPreviousMonth, YearMonth yearMonth, LocalDate calcolaFinoA, 
+      Optional<ContractMonthRecap> recapPreviousMonth, YearMonth yearMonth, LocalDate calcolaFinoA,
       List<Absence> otherCompensatoryRest) {
 
     Contract contract = cmr.contract;
@@ -276,7 +221,7 @@ public class ContractMonthRecapManager {
    * database.
    */
   private DateInterval buildIntervalForProgressive(YearMonth yearMonth,
-                                                   LocalDate calcolaFinoA, Contract contract) {
+      LocalDate calcolaFinoA, Contract contract) {
 
     LocalDate firstDayOfRequestedMonth =
         new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1);
@@ -329,7 +274,7 @@ public class ContractMonthRecapManager {
    * ulteriormente in base agli estremi del contratto nel database.
    */
   private DateInterval buildIntervalForCompensatoryRest(YearMonth yearMonth,
-                                                        Contract contract) {
+      Contract contract) {
 
     DateInterval contractDatabaseInterval =
         wrapperFactory.create(contract).getContractDatabaseInterval();
@@ -414,7 +359,7 @@ public class ContractMonthRecapManager {
    * cmr.progressivoFinalePositivoMeseAux <br> cmr.progressivoFinaleNegativoMese <br>
    */
   private void setPersonDayInformation(ContractMonthRecap cmr,
-                                       DateInterval validDataForPersonDay) {
+      DateInterval validDataForPersonDay) {
 
     if (validDataForPersonDay != null) {
 
@@ -461,7 +406,7 @@ public class ContractMonthRecapManager {
    *                                buoni pasto utilizzati e buoni pasto consegnati.
    */
   private void setMealTicketsInformation(ContractMonthRecap cmr,
-                                         DateInterval validDataForMealTickets) {
+      DateInterval validDataForMealTickets) {
 
     if (validDataForMealTickets != null) {
       List<PersonDay> pdList = personDayDao.getPersonDayInPeriod(cmr.person,
