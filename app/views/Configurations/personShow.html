@@ -4,7 +4,7 @@
 
 <div class="container">
 
-  #{title title:('Parametri configurazione ' + office.name), administration:true /}
+  #{title title:('Parametri configurazione ' + person.fullname), administration:true /}
   
   #{tabs}
     #{tabItem id:'general', title:'Generali', active:true /}
@@ -19,8 +19,8 @@
   #{tabContentItem id:'general', active:true}
     <div id="editGeneral">
 	  #{alert color:'info'}
-	   <p>Elenco dei parametri generali di configurazione per la sede 
-	   <strong>${office.name}</strong> ed il loro valore.</p>
+	   <p>Elenco dei parametri generali di configurazione per la persona 
+	   <strong>${person.fullname}</strong> ed il loro valore.</p>
 	  #{/alert}
 	  
 	  <table class="table">
@@ -31,7 +31,7 @@
 	  #{list items:currentConfiguration, as:'conf'}
 	    #{if conf.epasParam.general}
 	  	<tr>
-	  	  <td>#{secure.link @Configurations.edit(conf.id), modal:'#defaultModal'}
+	  	  <td>#{secure.link @Configurations.personEdit(conf.id), modal:'#defaultModal'}
 	  	  &{conf.epasParam}#{/secure.link}</td>
 	  	  <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
 	  	</tr>
@@ -44,8 +44,8 @@
   #{tabContentItem id:'yearly'}
     <div id="editYearly">
 	  #{alert color:'info'}
-	   <p>Elenco dei parametri di configurazione a cadenza annuale per la sede 
-	   <strong>${office.name}</strong> ed il loro valore attuale.</p>
+	   <p>Elenco dei parametri di configurazione a cadenza annuale per la persona 
+	   <strong>${person.fullname}</strong> ed il loro valore attuale.</p>
 	  #{/alert}
 	  
 	  <table class="table">
@@ -56,7 +56,7 @@
 	  #{list items:currentConfiguration, as:'conf'}
 	  	#{if conf.epasParam.yearly}
 	  	<tr>
-	  	  <td>#{secure.link @Configurations.edit(conf.id), modal:'#defaultModal'}
+	  	  <td>#{secure.link @Configurations.personEdit(conf.id), modal:'#defaultModal'}
 	  	  &{conf.epasParam}#{/secure.link}</td>
 	  	  <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
 	  	</tr>
@@ -69,8 +69,8 @@
   #{tabContentItem id:'periodic'}
     <div id="editPeriodic">
 	  #{alert color:'info'}
-	   <p>Elenco dei parametri di configurazione a cadenza periodica per la sede 
-	   <strong>${office.name}</strong>, il loro valore attuale ed il periodo di riferimento.</p>
+	   <p>Elenco dei parametri di configurazione a cadenza periodica per la persona
+	   <strong>${person.fullname}</strong>, il loro valore attuale ed il periodo di riferimento.</p>
 	  #{/alert}
 	
 	  <table class="table">
@@ -83,7 +83,7 @@
 	  #{list items:currentConfiguration, as:'conf'}
 	  	#{if conf.epasParam.periodic}
 	  	<tr>
-	  	  <td>#{secure.link @Configurations.edit(conf.id), modal:'#defaultModal'}
+	  	  <td>#{secure.link @Configurations.personEdit(conf.id), modal:'#defaultModal'}
 	  	  &{conf.epasParam}#{/secure.link}</td>
 	  	  <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
 	  	  <td>${conf.beginDate.format()}</td>
