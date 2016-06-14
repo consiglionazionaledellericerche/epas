@@ -48,9 +48,16 @@ public class SwitchTemplate extends Controller {
       VacationsAdmin.list(year, officeId);
     }
 
-
     if (action.equals("Persons.changePassword")) {
       Persons.changePassword();
+    }
+    
+    if (action.equals("Persons.children")) {
+      Persons.children(personId);
+    }
+    
+    if (action.equals("Persons.edit")) {
+      Persons.edit(personId);
     }
 
     if (action.equals("Absences.absences")) {
@@ -79,6 +86,10 @@ public class SwitchTemplate extends Controller {
 
     if (action.equals("Configurations.show")) {
       Configurations.show(officeId);
+    }
+    
+    if (action.equals("Configurations.personShow")) {
+      Configurations.personShow(personId);
     }
 
     if (action.equals("Competences.showCompetences")) {
@@ -164,27 +175,39 @@ public class SwitchTemplate extends Controller {
     if (action.equals("MealTickets.recapPersonMealTickets")) {
       MealTickets.recapPersonMealTickets(personId);
     }
+    
     if (action.equals("Synchronizations.oldPeople")) {
       Synchronizations.oldPeople(officeId);
     }
+    
     if (action.equals("Synchronizations.people")) {
       Synchronizations.people(officeId);
     }
+    
     if (action.equals("Synchronizations.oldActiveContracts")) {
       Synchronizations.oldActiveContracts(officeId);
     }
+    
     if (action.equals("Certifications.certifications")) {
       Certifications.certifications(officeId, year, month);
     }
+    
     if (action.equals("Certifications.processAll")) {
       Certifications.certifications(officeId, year, month); //Voluto. Lo switch non processa.
     }
+    
     if (action.equals("Certifications.emptyCertifications")) {
       Certifications.certifications(officeId, year, month); //Voluto. Lo switch non svuota.
     }
+    
     if (action.equals("PersonMonths.visualizePeopleTrainingHours")) {
       PersonMonths.visualizePeopleTrainingHours(year, month, officeId);
     }
+    
+    if (action.equals("BadgeSystems.personBadges")) {
+      BadgeSystems.personBadges(personId);
+    }
+
 
   }
 

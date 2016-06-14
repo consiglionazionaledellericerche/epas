@@ -2,25 +2,23 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Parametri di configurazione' /}
 
+
+#{set breadcrumbs:['Lista Persone':@Persons.list(), 
+  (person.fullname):null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+#{persons.personsTabs activeAction:'personShow' /}
+
+
 <div class="container">
 
-  #{title title:('Parametri configurazione ' + person.fullname), administration:true /}
   
-  #{tabs}
-    #{tabItem id:'general', title:'Generali', active:true /}
-    #{tabItem id:'yearly', title:'Annuali' /}
-    #{tabItem id:'periodic', title:'Periodici' /}
-  #{/tabs}
 
 <br>
 
-#{tabContent}
-
-  #{tabContentItem id:'general', active:true}
     <div id="editGeneral">
 	  #{alert color:'info'}
-	   <p>Elenco dei parametri generali di configurazione per la persona 
-	   <strong>${person.fullname}</strong> ed il loro valore.</p>
+	   <p>Elenco dei parametri <em><strong>generali</strong></em> di configurazione ed il loro valore.</p>
 	  #{/alert}
 	  
 	  <table class="table">
@@ -39,13 +37,10 @@
 	  #{/list}
 	  </table>
 	</div>
-  #{/tabContentItem}
-  
-  #{tabContentItem id:'yearly'}
+<!--  
     <div id="editYearly">
-	  #{alert color:'info'}
-	   <p>Elenco dei parametri di configurazione a cadenza annuale per la persona 
-	   <strong>${person.fullname}</strong> ed il loro valore attuale.</p>
+	  #{alert color:'warning'}
+	   <p>Elenco dei parametri di configurazione <strong>a cadenza annuale ed il loro valore attuale.</p>
 	  #{/alert}
 	  
 	  <table class="table">
@@ -64,13 +59,12 @@
 	  #{/list}
 	  </table>
 	</div>  
-  #{/tabContentItem}
-  
-  #{tabContentItem id:'periodic'}
+-->
+
+
     <div id="editPeriodic">
 	  #{alert color:'info'}
-	   <p>Elenco dei parametri di configurazione a cadenza periodica per la persona
-	   <strong>${person.fullname}</strong>, il loro valore attuale ed il periodo di riferimento.</p>
+	   <p>Elenco dei parametri di configurazione a <em><strong>cadenza periodica </strong></em>, il loro valore attuale ed il periodo di riferimento.</p>
 	  #{/alert}
 	
 	  <table class="table">
@@ -93,7 +87,6 @@
 	  #{/list}
 	  </table>
 	</div>
-  #{/tabContentItem}
-#{/tabContent}
+
   
 </div>
