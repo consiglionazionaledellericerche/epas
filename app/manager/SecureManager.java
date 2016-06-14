@@ -1,30 +1,16 @@
 package manager;
 
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
-
-import dao.OfficeDao;
-import dao.RoleDao;
 
 import models.Office;
 import models.Role;
 import models.User;
-import models.UsersRolesOffices;
 
-import java.util.List;
 import java.util.Set;
-
-import javax.inject.Inject;
+import java.util.stream.Collectors;
 
 public class SecureManager {
-
-  @Inject
-  private RoleDao roleDao;
-  @Inject
-  private OfficeDao officeDao;
 
   /**
    * @return la lista degli uffici permessi per l'utente user passato come parametro.
@@ -34,23 +20,8 @@ public class SecureManager {
     Preconditions.checkNotNull(user);
     Preconditions.checkState(user.isPersistent());
 
-    final List<Role> roles = roleDao.getRolesByNames(rolesNames);
-
-    return FluentIterable.from(user.usersRolesOffices)
-        .filter(new Predicate<UsersRolesOffices>() {
-          @Override
-          public boolean apply(UsersRolesOffices input) {
-            return roles.contains(input.role);
-          }
-        }).transform(new Function<UsersRolesOffices, Office>() {
-          @Override
-          public Office apply(UsersRolesOffices uro) {
-            if (roles.contains(uro.role)) {
-              return uro.office;
-            }
-            return null;
-          }
-        }).toSet();
+    return user.usersRolesOffices.stream().filter(uro -> rolesNames.contains(uro.role.name))
+        .map(uro -> uro.office).distinct().collect(Collectors.toSet());
   }
 
   /**
