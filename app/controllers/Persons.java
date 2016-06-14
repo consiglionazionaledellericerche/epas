@@ -19,6 +19,7 @@ import helpers.Web;
 
 import lombok.extern.slf4j.Slf4j;
 
+import manager.ConfigurationManager;
 import manager.ContractManager;
 import manager.EmailManager;
 import manager.OfficeManager;
@@ -87,6 +88,8 @@ public class Persons extends Controller {
   static IWrapperFactory wrapperFactory;
   @Inject
   static PersonChildrenDao personChildrenDao;
+  @Inject
+  static ConfigurationManager configurationManager;
 
   /**
    * il metodo per ritornare la lista delle persone.
@@ -172,6 +175,8 @@ public class Persons extends Controller {
     person = personDao.getPersonById(person.id);
     person.beginDate = LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
     person.save();
+    
+    configurationManager.updateConfigurations(person);
 
     contractManager.recomputeContract(contract, Optional.<LocalDate>absent(), true, false);
 
