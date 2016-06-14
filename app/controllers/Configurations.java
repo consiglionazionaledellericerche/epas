@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import manager.ConfigurationManager;
 import manager.ConsistencyManager;
 import manager.PeriodManager;
+import manager.configurations.ConfigurationDto;
 import manager.recaps.recomputation.RecomputeRecap;
 
 import models.Configuration;
@@ -54,75 +55,7 @@ public class Configurations extends Controller {
   @Inject
   private static SecurityRules rules;
 
-  @Data
-  public static class ConfigurationDto {
 
-    public LocalDate validityBegin;
-    public LocalDate validityEnd;
-    
-    public Integer validityYear;
-    public Boolean toTheEnd = false;
-    
-    public Boolean booleanNewValue;
-    public String stringNewValue;
-    public Integer integerNewValue;
-    public LocalDate localdateNewValue;
-    
-    /**
-     * Default constructor.
-     */
-    public ConfigurationDto() {
-      
-    }
-    
-    /**
-     * Constructor from configuration (contiene i valori del dto iniziale).
-     * @param configuration
-     */
-    public ConfigurationDto(EpasParam epasParam, LocalDate beginDate, LocalDate calculatedEnd, Object value ) {
-      
-      if (epasParam.isGeneral()) {
-        this.validityBegin = beginDate;
-        this.validityEnd = calculatedEnd;
-      }
-      if (epasParam.isYearly()) {
-        this.validityYear = LocalDate.now().getYear();
-      }
-      if (epasParam.isPeriodic()) {
-        this.validityBegin = beginDate;
-        this.validityEnd = calculatedEnd;
-      }
-
-      if (epasParam.epasParamValueType.equals(EpasParamValueType.BOOLEAN)) {
-        this.booleanNewValue = (Boolean)value;
-      }
-      if (epasParam.epasParamValueType.equals(EpasParamValueType.INTEGER)) {
-        this.integerNewValue = (Integer)value;
-      }
-      if (epasParam.epasParamValueType.equals(EpasParamValueType.IP_LIST)) {
-        this.stringNewValue = EpasParamValueType.formatValue((IpList)value);
-      }
-      if (epasParam.epasParamValueType.equals(EpasParamValueType.LOCALDATE)) {
-        this.localdateNewValue = (LocalDate)value;
-      }
-      if (epasParam.epasParamValueType.equals(EpasParamValueType.EMAIL)) {
-        this.stringNewValue = (String)value;
-      }
-      if (epasParam.epasParamValueType.equals(EpasParamValueType.DAY_MONTH)) {
-        this.stringNewValue = EpasParamValueType.formatValue((MonthDay)value);
-      }
-      if (epasParam.epasParamValueType.equals(EpasParamValueType.MONTH)) {
-        this.integerNewValue = (Integer)value;
-      }
-      if (epasParam.epasParamValueType.equals(EpasParamValueType.LOCALTIME)) {
-        this.stringNewValue = EpasParamValueType.formatValue((LocalTime)value);
-      }
-      if (epasParam.epasParamValueType.equals(EpasParamValueType.LOCALTIME_INTERVAL)) {
-        this.stringNewValue = EpasParamValueType
-            .formatValue((LocalTimeInterval)value);
-      }
-    }
-  }
 
   private static IPropertyInPeriod compute(IPropertyInPeriod configuration, EpasParam epasParam,
       ConfigurationDto configurationDto) {

@@ -535,5 +535,12 @@ public class Persons extends Controller {
         supervisor.surname);
     workGroup(supervisor.id);
   }
+  
+  
+  public static void personConfiguration(Long personId) {
+    Person person = personDao.getPersonById(personId);
+    
+    render(person);
+  }
 
 }

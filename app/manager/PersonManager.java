@@ -221,7 +221,8 @@ public class PersonManager {
     Contract newerContract = contractsInPeriod.stream()
         .max(Comparator.comparing(Contract::getSourceDateResidual)).get();
 
-    if (newerContract != null && !newerContract.sourceDateResidual.isBefore(begin)
+    if (newerContract != null && newerContract.sourceDateResidual != null &&
+        !newerContract.sourceDateResidual.isBefore(begin)
         && !newerContract.sourceDateResidual.isAfter(end)) {
       return newerContract.sourceRecoveryDayUsed +
           absenceDao.absenceInPeriod(person, newerContract.sourceDateResidual, end, "91").size();

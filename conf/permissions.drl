@@ -539,6 +539,9 @@ when
      	"Persons.updateUsername",
         "Persons.deletePerson",
      	"Persons.deletePersonConfirmed",
+     	"Configurations.personShow",
+     	"Configurations.personEdit",
+     	"Configurations.personUpdate",
         
         "Contracts.personContracts",
         "Contracts.insert",
@@ -667,6 +670,10 @@ when
         "Persons.deletePerson",
      	"Persons.deletePersonConfirmed",
      	
+     	"Configurations.personShow",
+     	"Configurations.personEdit",
+     	"Configurations.personUpdate",
+     	     	
         "Contracts.personContracts",
         "Contracts.insert",
         "Contracts.save",

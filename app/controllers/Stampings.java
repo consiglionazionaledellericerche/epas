@@ -105,10 +105,6 @@ public class Stampings extends Controller {
   @Inject
   private static ConfigurationManager confManager;
 
-//  @Inject
-//  private static CertificationDao certificationDao;
-//  @Inject
-//  private static PersonMonthRecapDao pmrDao;
 
   /**
    * Tabellone timbrature dipendente.
@@ -135,12 +131,14 @@ public class Stampings extends Controller {
     //Per dire al template generico di non visualizzare i link di modifica
     boolean showLink = false;
     boolean showLinkForEmployee = false;
-    if (!wrperson.isTechnician() && 
-        (Boolean)confManager.configValue(wrperson.getValue().office, EpasParam.WORKING_OFF_SITE).equals(true)){
+    if ((Boolean)confManager
+        .configValue(wrperson.getValue().office, EpasParam.WORKING_OFF_SITE).equals(true)
+        && (Boolean)confManager
+        .configValue(wrperson.getValue(), EpasParam.OFF_SITE_STAMPING).equals(true)) {
       showLinkForEmployee = true;
-      //render("@personStamping", psDto, showLink, );
-    }
       
+    }
+       
     Person person = wrperson.getValue();
     render("@personStamping", psDto, person, showLink, showLinkForEmployee);
   }

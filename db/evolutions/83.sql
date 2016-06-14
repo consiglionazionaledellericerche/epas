@@ -3,7 +3,7 @@
 # -- Nuova struttura dati per attestati
 
 ALTER TABLE persons RENAME COLUMN created_at TO begin_date;
-ALTER TABLE persons RENAME COLUMN update_at TO end_date;
+ALTER TABLE persons RENAME COLUMN updated_at TO end_date;
 
 ALTER TABLE persons ALTER COLUMN begin_date SET DATA TYPE date;
 ALTER TABLE persons ALTER COLUMN end_date SET DATA TYPE date;
