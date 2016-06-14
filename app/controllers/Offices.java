@@ -12,9 +12,9 @@ import dao.wrapper.IWrapperOffice;
 
 import helpers.Web;
 
-import manager.ConfigurationManager;
 import manager.OfficeManager;
 import manager.PeriodManager;
+import manager.configurations.ConfigurationManager;
 
 import models.Institute;
 import models.Office;

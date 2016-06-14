@@ -3,8 +3,9 @@ package manager.recaps.recomputation;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
+import manager.configurations.EpasParam;
+
 import models.base.IPropertyInPeriod;
-import models.enumerate.EpasParam;
 
 import org.joda.time.LocalDate;
 

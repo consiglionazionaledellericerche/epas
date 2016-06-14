@@ -13,13 +13,15 @@ import dao.wrapper.IWrapperPersonDay;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
+
 import models.AbsenceType;
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Person;
 import models.PersonDay;
 import models.WorkingTimeTypeDay;
-import models.enumerate.EpasParam;
 
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;

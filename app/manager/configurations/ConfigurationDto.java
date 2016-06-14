@@ -4,10 +4,9 @@ import controllers.Configurations;
 
 import lombok.Data;
 
-import models.enumerate.EpasParam;
-import models.enumerate.EpasParam.EpasParamValueType;
-import models.enumerate.EpasParam.EpasParamValueType.IpList;
-import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
+import manager.configurations.EpasParam.EpasParamValueType;
+import manager.configurations.EpasParam.EpasParamValueType.IpList;
+import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;

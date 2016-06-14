@@ -11,13 +11,13 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
 
-import manager.ConfigurationManager;
 import manager.attestati.service.CertificationService;
 import manager.attestati.service.PersonCertificationStatus;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 
 import models.Office;
 import models.Person;
-import models.enumerate.EpasParam;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;

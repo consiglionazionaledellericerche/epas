@@ -7,7 +7,7 @@ import models.ShiftType;
 import models.Person;
 import models.Role;
 import models.Configuration;
-import models.enumerate.EpasParam;
+import manager.configurations.EpasParam;
 import models.Qualification;
 
 global models.User currentOperator;

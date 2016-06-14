@@ -20,6 +20,8 @@ import it.cnr.iit.epas.CheckMessage;
 
 import lombok.extern.slf4j.Slf4j;
 
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
 import manager.services.vacations.IVacationsService;
@@ -35,7 +37,6 @@ import models.PersonReperibilityDay;
 import models.PersonShiftDay;
 import models.Qualification;
 import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.EpasParam;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.QualificationMapping;
 

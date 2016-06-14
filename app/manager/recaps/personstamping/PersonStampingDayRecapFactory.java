@@ -5,10 +5,10 @@ import com.google.common.base.Optional;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 
-import manager.ConfigurationManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
 import manager.cache.StampTypeManager;
+import manager.configurations.ConfigurationManager;
 
 import models.Contract;
 import models.PersonDay;

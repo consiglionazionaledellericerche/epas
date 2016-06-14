@@ -19,8 +19,9 @@ import dao.wrapper.IWrapperFactory;
 
 import it.cnr.iit.epas.DateUtility;
 
-import manager.ConfigurationManager;
 import manager.SecureManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 
 import models.AbsenceType;
 import models.BadgeReader;
@@ -34,7 +35,6 @@ import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
 import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.EpasParam;
 
 import org.joda.time.LocalDate;
 

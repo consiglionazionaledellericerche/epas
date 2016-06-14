@@ -19,12 +19,12 @@ import helpers.Web;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.ConfigurationManager;
 import manager.ContractManager;
 import manager.EmailManager;
 import manager.OfficeManager;
 import manager.SecureManager;
 import manager.UserManager;
+import manager.configurations.ConfigurationManager;
 
 import models.Contract;
 import models.ContractWorkingTimeType;
