@@ -129,6 +129,14 @@ public enum EpasParam {
 
   //#######################################
   // PERIODIC PARAMS
+  
+  MATERNITY_PERIOD("maternity_period",
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS, 
+          RecomputationType.RESIDUAL_MEALTICKETS),
+      Person.class),
 
   HOUR_MAX_TO_CALCULATE_WORKTIME("hour_max_to_calculate_worktime",
       EpasParamTimeType.PERIODIC,
