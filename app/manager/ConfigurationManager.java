@@ -409,22 +409,22 @@ public class ConfigurationManager {
   }
 
   /**
-   * Preleva il valore della configurazione per la sede, il tipo e la data passata.
+   * Preleva il valore della configurazione per l'owner, il tipo e la data.
    * Nota Bene: <br>
    * Nel caso il parametro di configurazione mancasse per la data specificata, 
    * si distinguono i casi:<br>
-   * 1) Parametro necessario (appartiene all'intervallo di vita della sede): eccezione. 
+   * 1) Parametro necessario (appartiene all'intervallo di vita dell'owner): eccezione. 
    *    Questo stato non si verifica e non si deve verificare mai. 
    *    E' giusto interrompere bruscamente la richiesta per evitare effetti collaterali.<br>
-   * 2) Parametro non necessario (data al di fuori della vita dell'office). Di norma è il chiamante
+   * 2) Parametro non necessario (data al di fuori della vita dell'owner). Di norma è il chiamante
    *    che dovrebbe occuparsi di fare questo controllo, siccome non è sempre così si ritorna un 
-   *    valore di cortesia (il default o il più prossimo fra quelli definiti nell'office).<br>    
+   *    valore di cortesia (il default o il più prossimo fra quelli definiti nell'owner).<br>    
    * @param owner sede o persona
    * @param epasParam parametro da ricercare
    * @param date data del valore
    * @return valore formato Object
    */
-  private Object getOfficeConfigurationValue(IPropertiesInPeriodOwner owner, 
+  private Object getConfigurationValue(IPropertiesInPeriodOwner owner, 
       EpasParam epasParam, LocalDate date) {
     
     // Casi illegali
@@ -551,7 +551,7 @@ public class ConfigurationManager {
    */
   public Object configValue(IPropertiesInPeriodOwner owner, EpasParam epasParam) {
     Preconditions.checkArgument(epasParam.isGeneral());
-    return getOfficeConfigurationValue(owner, epasParam, LocalDate.now());
+    return getConfigurationValue(owner, epasParam, LocalDate.now());
   }
 
   /**
@@ -562,10 +562,7 @@ public class ConfigurationManager {
    * @return value
    */
   public Object configValue(IPropertiesInPeriodOwner owner, EpasParam epasParam, LocalDate date) {
-    return getOfficeConfigurationValue(owner, epasParam, date);
-    
-    //return EpasParamValueType.parseValue(configuration.epasParam.epasParamValueType, 
-    //    configuration.fieldValue);
+    return getConfigurationValue(owner, epasParam, date);
   }
   
   /**
@@ -586,7 +583,7 @@ public class ConfigurationManager {
   
   /**
    * Aggiunge i nuovi epasParam quando vengono definiti (con il valore di default).
-   * Da chiamare al momento della creazione dell'office ed al bootstrap di epas.
+   * Da chiamare al momento della creazione dell'owner (person/office) ed al bootstrap di epas.
    * @param owner sede o persona
    */
   public void updateConfigurations(IPropertiesInPeriodOwner owner) {
