@@ -85,6 +85,8 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final SetPath<models.PersonChildren, QPersonChildren> personChildren = this.<models.PersonChildren, QPersonChildren>createSet("personChildren", models.PersonChildren.class, QPersonChildren.class, PathInits.DIRECT2);
 
+    public final ListPath<models.PersonConfiguration, QPersonConfiguration> personConfigurations = this.<models.PersonConfiguration, QPersonConfiguration>createList("personConfigurations", models.PersonConfiguration.class, QPersonConfiguration.class, PathInits.DIRECT2);
+
     public final ListPath<models.PersonDay, QPersonDay> personDays = this.<models.PersonDay, QPersonDay>createList("personDays", models.PersonDay.class, QPersonDay.class, PathInits.DIRECT2);
 
     public final QPersonHourForOvertime personHourForOvertime;

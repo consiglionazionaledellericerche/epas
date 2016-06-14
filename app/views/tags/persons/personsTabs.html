@@ -18,6 +18,9 @@
     <li #{if _activeAction.equals("personContracts")} class="active" #{/if}>
       <a href="@{Contracts.personContracts(person.id)}">Dati Contrattuali</a>
     </li>
+    <li #{if _activeAction.equals("personShow")} class="active" #{/if}>
+      <a href="@{Configurations.personShow(person.id)}">Configurazione personale</a>
+    </li>
     #{if person.isPersonInCharge}
     <li #{if _activeAction.equals("workGroup")} class="active" #{/if}>
       <a href="@{Persons.workGroup(person.id)}">Gruppo Di Lavoro</a>
