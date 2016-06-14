@@ -96,6 +96,10 @@
       </p> 
     #{/if}
     
+     #{if configuration.epasParam.equals(models.enumerate.EpasParam.MATERNITY_PERIOD) }
+      <p>Inserire lo stato di maternità per il dipendente <strong>${configuration.person.fullname}</strong> e la date di inizio e fine periodo.</p>
+    #{/if}
+    
   #{/alert} 
   
   <!-- Riepilogo delle ricomputazioni eventuali -->

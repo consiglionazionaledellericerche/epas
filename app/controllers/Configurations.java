@@ -148,9 +148,7 @@ public class Configurations extends Controller {
       //validazione periodo
     }
     if (validation.hasErrors()) {
-      response.status = 400;
-      log.warn("validation errors: {}", validation.errorsMap());
-      render("@edit", configuration, configurationDto);
+      return newConfiguration;
     }
 
     if (epasParam.epasParamValueType.equals(EpasParamValueType.BOOLEAN)) {
