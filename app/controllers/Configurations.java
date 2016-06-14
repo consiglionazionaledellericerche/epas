@@ -10,10 +10,14 @@ import dao.PersonDao;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import manager.ConfigurationManager;
 import manager.ConsistencyManager;
 import manager.PeriodManager;
 import manager.configurations.ConfigurationDto;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
+import manager.configurations.EpasParam.EpasParamValueType;
+import manager.configurations.EpasParam.EpasParamValueType.IpList;
+import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import manager.recaps.recomputation.RecomputeRecap;
 
 import models.Configuration;
@@ -21,10 +25,6 @@ import models.Office;
 import models.Person;
 import models.PersonConfiguration;
 import models.base.IPropertyInPeriod;
-import models.enumerate.EpasParam;
-import models.enumerate.EpasParam.EpasParamValueType;
-import models.enumerate.EpasParam.EpasParamValueType.IpList;
-import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;

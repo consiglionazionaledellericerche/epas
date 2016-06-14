@@ -27,10 +27,11 @@ import it.cnr.iit.epas.NullStringBinder;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.ConfigurationManager;
 import manager.ConsistencyManager;
 import manager.SecureManager;
 import manager.StampingManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
@@ -46,7 +47,6 @@ import models.Person;
 import models.PersonDay;
 import models.Stamping;
 import models.User;
-import models.enumerate.EpasParam;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;

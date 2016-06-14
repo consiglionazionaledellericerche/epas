@@ -7,8 +7,10 @@ import com.google.inject.Inject;
 
 import lombok.extern.slf4j.Slf4j;
 
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
+
 import models.Person;
-import models.enumerate.EpasParam;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;

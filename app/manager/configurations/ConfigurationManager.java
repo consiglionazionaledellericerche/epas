@@ -1,4 +1,4 @@
-package manager;
+package manager.configurations;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -15,17 +15,19 @@ import it.cnr.iit.epas.DateUtility;
 
 import lombok.extern.slf4j.Slf4j;
 
+import manager.PeriodManager;
+import manager.configurations.EpasParam.EpasParamTimeType;
+import manager.configurations.EpasParam.EpasParamValueType;
+import manager.configurations.EpasParam.EpasParamValueType.IpList;
+import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
+
+
 import models.Configuration;
 import models.Office;
 import models.Person;
 import models.PersonConfiguration;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
-import models.enumerate.EpasParam;
-import models.enumerate.EpasParam.EpasParamTimeType;
-import models.enumerate.EpasParam.EpasParamValueType;
-import models.enumerate.EpasParam.EpasParamValueType.IpList;
-import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
 import models.query.QConfiguration;
 
 import org.joda.time.LocalDate;

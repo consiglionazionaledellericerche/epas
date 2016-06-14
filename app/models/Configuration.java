@@ -1,8 +1,9 @@
 package models;
 
+import manager.configurations.EpasParam;
+
 import models.base.IPropertiesInPeriodOwner;
 import models.base.PropertyInPeriod;
-import models.enumerate.EpasParam;
 
 import org.hibernate.envers.Audited;
 

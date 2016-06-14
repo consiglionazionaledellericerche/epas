@@ -35,7 +35,7 @@ public class QPersonConfiguration extends EntityPathBase<PersonConfiguration> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
-    public final EnumPath<models.enumerate.EpasParam> epasParam = createEnum("epasParam", models.enumerate.EpasParam.class);
+    public final EnumPath<manager.configurations.EpasParam> epasParam = createEnum("epasParam", manager.configurations.EpasParam.class);
 
     public final StringPath fieldValue = createString("fieldValue");
 

@@ -13,8 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import manager.BadgeManager;
 import manager.ConfGeneralManager;
 import manager.ConfYearManager;
-import manager.ConfigurationManager;
 import manager.PeriodManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 
 import models.Badge;
 import models.Office;
@@ -24,7 +25,6 @@ import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
-import models.enumerate.EpasParam;
 import models.enumerate.Parameter;
 
 import org.dbunit.DatabaseUnitException;

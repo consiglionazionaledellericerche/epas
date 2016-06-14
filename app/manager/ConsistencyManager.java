@@ -17,6 +17,10 @@ import dao.wrapper.IWrapperPersonDay;
 import it.cnr.iit.epas.DateInterval;
 
 import manager.cache.StampTypeManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
+import manager.configurations.EpasParam.RecomputationType;
+import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 
 import models.Absence;
 import models.Contract;
@@ -30,9 +34,6 @@ import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
 import models.base.IPropertiesInPeriodOwner;
-import models.enumerate.EpasParam;
-import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
-import models.enumerate.EpasParam.RecomputationType;
 import models.enumerate.Troubles;
 
 import org.joda.time.DateTimeConstants;

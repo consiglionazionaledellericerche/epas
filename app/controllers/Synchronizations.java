@@ -20,11 +20,11 @@ import helpers.rest.ApiRequestException;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.ConfigurationManager;
 import manager.ContractManager;
 import manager.OfficeManager;
 import manager.PeriodManager;
 import manager.UserManager;
+import manager.configurations.ConfigurationManager;
 
 import models.Contract;
 import models.Institute;

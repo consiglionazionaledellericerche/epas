@@ -12,14 +12,14 @@ import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import manager.ConfigurationManager;
 import manager.ConsistencyManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 
 import models.Contract;
 import models.ContractMonthRecap;
 import models.MealTicket;
 import models.PersonDay;
-import models.enumerate.EpasParam;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;

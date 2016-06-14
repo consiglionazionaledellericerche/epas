@@ -1,12 +1,13 @@
-package models.enumerate;
+package manager.configurations;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
+import manager.configurations.EpasParam.EpasParamValueType.IpList;
+import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
+
 import models.Office;
 import models.Person;
-import models.enumerate.EpasParam.EpasParamValueType.IpList;
-import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;

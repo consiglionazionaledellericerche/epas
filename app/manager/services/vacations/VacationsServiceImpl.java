@@ -13,8 +13,9 @@ import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import manager.ConfigurationManager;
 import manager.cache.AbsenceTypeManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 
 import models.Absence;
 import models.AbsenceType;
@@ -22,7 +23,6 @@ import models.Contract;
 import models.Office;
 import models.Person;
 import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.EpasParam;
 
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
