@@ -1,8 +1,7 @@
 package controllers;
 
-import com.google.common.base.Optional;
-
-import org.joda.time.LocalDate;
+import models.Office;
+import models.Person;
 
 import play.mvc.Controller;
 
@@ -17,7 +16,7 @@ public class SwitchTemplate extends Controller {
     Integer day = Integer.parseInt(session.get("daySelected"));
     Long personId = Long.parseLong(session.get("personSelected"));
     Long officeId = Long.parseLong(session.get("officeSelected"));
-    
+
     session.put("actionSelected", action);
 
     if (action.equals("Stampings.stampings")) {
@@ -196,46 +195,45 @@ public class SwitchTemplate extends Controller {
       flash.error("La sessione è scaduta. Effettuare nuovamente login.");
       Secure.login();
     }
-    
+
     session.put("daySelected", day);
 
     executeAction(action);
 
   }
 
-  public static void updatePerson(Long personId, final String actionSelected) throws Throwable {
-
-    if (actionSelected == null) {
-
-      flash.error("La sessione è scaduta. Effettuare nuovamente login.");
-      Secure.login();
-    }
-
-    if (personId == null) {
-
-      Application.index();
-    }
-
-    session.put("personSelected", personId);
-
-    executeAction(actionSelected);
-  }
-
-  public static void updateOffice(Long officeId, final String actionSelected) throws Throwable {
+  public static void updatePerson(Person person, final String actionSelected) throws Throwable {
 
     if (actionSelected == null) {
       flash.error("La sessione è scaduta. Effettuare nuovamente login.");
       Secure.login();
     }
-    if (officeId == null) {
+
+    if (person == null) {
       Application.index();
     }
 
-    session.put("officeSelected", officeId);
+    session.put("personSelected", person.id);
 
     executeAction(actionSelected);
   }
-  
+
+  public static void updateOffice(Office office, final String actionSelected) throws Throwable {
+
+    if (actionSelected == null) {
+      flash.error("La sessione è scaduta. Effettuare nuovamente login.");
+      Secure.login();
+    }
+
+    if (office == null) {
+      Application.index();
+    }
+
+    session.put("officeSelected", office.id);
+
+    executeAction(actionSelected);
+  }
+
 }
 
 

@@ -177,7 +177,10 @@ $(function($) {
 	  });
 	});  
 
-    //$(':input[data-selectize]', this).select2({allowClear:true});
+    $(':input[data-switcher]', this).select2({
+      width: 'resolve',
+      containerCssClass: "switcher",
+      dropdownCssClass: "switcher"});
     $(':input[select2]', this).select2({
       allowClear: true,
       theme: "bootstrap",
