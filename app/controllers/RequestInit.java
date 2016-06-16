@@ -238,7 +238,8 @@ public class RequestInit extends Controller {
         "Certifications.certifications",
         "Certifications.processAll",
         "Certifications.emptyCertifications",
-        "PersonMonths.visualizePeopleTrainingHours");
+        "PersonMonths.visualizePeopleTrainingHours",
+        "Persons.list");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
         "Stampings.stampings",
