@@ -45,7 +45,7 @@ public class AbsenceGroupManager {
   public CheckMessage checkAbsenceGroup(AbsenceType absenceType, Person person, LocalDate date) {
     CheckMessage check = null;
     if (absenceType.absenceTypeGroup.accumulationBehaviour.equals(AccumulationBehaviour.nothing)) {
-      check = canTakeAbsenceWithNoAccumulation(absenceType, person, date);
+      return new CheckMessage(true, "E' possibile prendere il codice d'assenza", null);
     }
     if (absenceType.absenceTypeGroup.accumulationBehaviour
         .equals(AccumulationBehaviour.noMoreAbsencesAccepted)) {
@@ -57,19 +57,6 @@ public class AbsenceGroupManager {
     }
     return check;
 
-  }
-
-  /**
-   * @return true se si può prendere il codice di assenza passato, considerando che quel codice
-   *     d'assenza ha un gruppo che non prevede l'accumulo di valori: 
-   *     in effetti bisognerebbe capire se abbia senso una cosa del genere visto che allora 
-   *     non esistono casi che possano verificare la situazione opposta.
-   */
-  private CheckMessage canTakeAbsenceWithNoAccumulation(AbsenceType absenceType, 
-      Person person, LocalDate date) {
-
-
-    return new CheckMessage(true, "E' possibile prendere il codice d'assenza", null);
   }
 
   /**
@@ -243,22 +230,23 @@ public class AbsenceGroupManager {
   private CheckMessage canTakeAbsenceWithNoMoreAbsencesAccepted(AbsenceType absenceType,
       Person person, LocalDate date) {
 
-    int workingMinutes = workingTimeTypeDao
+    int dateWorkingMinutes = workingTimeTypeDao
         .getWorkingTimeType(date, person).get()
         .workingTimeTypeDays.get(date.getDayOfWeek() - 1).workingTime;
     
     int totalMinutesJustified = 0;
-    int toAddMinutes = justifiedMinutes(workingMinutes, absenceType);
+    int toAddMinutes = justifiedMinutes(dateWorkingMinutes, absenceType);
     int limitInMinute = absenceType.absenceTypeGroup.limitInMinute;
     
     LocalDate from = date;
-
     if (absenceType.absenceTypeGroup.accumulationType.equals(AccumulationType.monthly)) {
       // Accumulo Mensile (inizio mese)
       from = date.dayOfMonth().withMinimumValue();
     } else if (absenceType.absenceTypeGroup.accumulationType.equals(AccumulationType.yearly)) {
       // Accumulo Annuale (inizio anno)
       from = date.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue();
+//    } else if (absenceType.absenceTypeGroup.accumulationType.equals(AccumulationType.always)) {
+//      //from = 
     } else {
       // TODO: To implement
       return new CheckMessage(false, "Caso non gestito effettuare una segnalazione.", null);
@@ -269,13 +257,13 @@ public class AbsenceGroupManager {
 
     for (Absence abs : absList) {
       totalMinutesJustified = totalMinutesJustified +
-          justifiedMinutes(workingMinutes, abs.absenceType);
+          justifiedMinutes(dateWorkingMinutes, abs.absenceType);
     }
 
     if (limitInMinute >= totalMinutesJustified + toAddMinutes) {
       return new CheckMessage(true, "E' possibile prendere il codice di assenza", null);
     } else {
-      return new CheckMessage(false, "La quantità usata nell'arco del mese "
+      return new CheckMessage(false, "La quantità usata nel periodo di accumulo "
           + "per questo codice ha raggiunto il limite. "
           + "Non si può usarne un altro.", null);
     }
