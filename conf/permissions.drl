@@ -800,7 +800,6 @@ when
  $uro: UsersRolesOffices()
  $p: Person() from currentOperator.person
  Role(name == Role.EMPLOYEE) from $uro.role
- Qualification(qualification < 4) from $p.qualification
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
  $c: PermissionCheck(action in (
@@ -817,17 +816,17 @@ when
  $uro: UsersRolesOffices()
  $p: Person() from currentOperator.person
  Role(name == Role.EMPLOYEE) from $uro.role
- Qualification(qualification < 4) from $p.qualification
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
  $c: PermissionCheck(action in (
- 	"Stampings.blank",
+ 	"Stampings.blankForEmployee",
     "Stampings.edit",
     "Stampings.save"
  ), granted == false, target == $p)
 then
  $c.grant();
 end
+
 
 /*******************************************************************************
  * Azioni utente con ruolo BADGE_READER
