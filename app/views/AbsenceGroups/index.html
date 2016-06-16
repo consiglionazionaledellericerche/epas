@@ -7,20 +7,31 @@
   <table class="table">
     <tr>
       <th>Label</th>
-      <th>Eccesso (minuti)</th>
-      <th>Limite (minuti)</th>
-      <th>Tipo Accumulo</th>
+      *{ <th>Eccesso (minuti)</th> }*
+      <th>Limite<br> (minuti)</th>
+      <th>Tipo<br>Accumulo</th>
       <th>Comportamento</th>
-      <th>Rimpiazzo</th>
+      <th>Rimpiazzo e codici</th>
     </tr>
     #{list items:groups, as:'group'}
       <tr>
         <td>${group.label}</td>
-        <td>${group.minutesExcess}</td>
-        <td>${group.limitInMinute}</td>
+        *{ <td>${group.minutesExcess}</td> }*
+        <td>${group.limitInMinute.printHourMinute()}</td>
         <td>${group.accumulationType.description}</td>
         <td>${group.accumulationBehaviour.description}</td>
-        <td>${group.replacingAbsenceType?.code}</td>
+        <td>
+          <strong>${group.replacingAbsenceType?.code} ${group.replacingAbsenceType?.description}</strong> 
+          #{if group.replacingAbsenceType != null && group.replacingAbsenceType.absences != null}
+            (${group.replacingAbsenceType.absences.size()})
+          #{/if}
+          
+          <br>
+          #{list group.absenceTypes, as:'abt'}
+            ${abt.code} ${abt.description} (${abt.absences.size()})<br>
+          #{/list}
+        </td>
+        
         
       </tr>
       
