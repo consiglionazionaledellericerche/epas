@@ -147,7 +147,7 @@ public class RequestInit extends Controller {
     } else if (session.get("officeSelected") != null) {
       officeId = Long.valueOf(session.get("officeSelected"));
     } else {
-      officeId = offices.iterator().next().id;
+      officeId = offices.stream().sorted((o, o1) -> o.name.compareTo(o1.name)).findFirst().get().id;
     }
 
     session.put("officeSelected", officeId);
