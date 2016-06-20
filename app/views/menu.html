@@ -51,33 +51,30 @@
 #{/form}
 #{/if}
 #{if switchPerson}
-#{form @SwitchTemplate.updatePerson(),
-class: 'navbar-form navbar-left my-navbar-form',
+#{form @SwitchTemplate.updatePerson(), class: 'navbar-form navbar-left my-navbar-form',
 onChange:'javascript:this.form.submit()' }
 #{f.hidden 'actionSelected' /}
 <div class="form-group">
-  <!-- Lista persone -->
-  #{select 'personId', value:session.get("personSelected"),
-  class:'form-control', id:'person', onChange:'javascript:this.form.submit()'}
-  #{list items:navPersons, as:'person'}
-  #{option person.id}${person.surname + ' ' + person.name}#{/option}
-  #{/list}
-  #{/select}
+  <div class="form-group">
+    <select name="person.id" data-switcher onChange="javascript:this.form.submit()">
+      #{list items:navPersons, as:'person'}
+      <option value="${person.id}" #{if person?.id == currentData.personId} selected#{/if}>${person.surname + ' ' + person.name}</option>
+      #{/list}
+    </select>
+  </div>
 </div>
 #{/form}
 #{/if}
 #{if switchOffice}
-#{form @SwitchTemplate.updateOffice(),
-class: 'navbar-form navbar-left my-navbar-form',
+#{form @SwitchTemplate.updateOffice(), class: 'navbar-form navbar-left my-navbar-form',
 onChange:'javascript:this.form.submit()' }
 #{f.hidden 'actionSelected' /}
 <div class="form-group">
-  #{select 'officeId', value:session.get("officeSelected"),
-  class:'form-control', id:'office', onChange:'javascript:this.form.submit()'}
-  #{list items:navOffices, as:'office'}
-  #{option office.id}${office.name}#{/option}
-  #{/list}
-  #{/select}
+  <select name="office.id" data-switcher onChange="javascript:this.form.submit()">
+    #{list items:navOffices, as:'office'}
+      <option value="${office.id}" #{if office?.id == currentData.officeId} selected#{/if}>${office.name}</option>
+    #{/list}
+  </select>
 </div>
 #{/form}
 #{/if}

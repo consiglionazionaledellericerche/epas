@@ -3,10 +3,12 @@ package controllers;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.hash.Hashing;
 import com.google.gdata.util.common.base.Preconditions;
 
+import dao.OfficeDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
 import dao.UserDao;
@@ -87,23 +89,33 @@ public class Persons extends Controller {
   static IWrapperFactory wrapperFactory;
   @Inject
   static PersonChildrenDao personChildrenDao;
+  @Inject
+  static OfficeDao officeDao;
 
   /**
    * il metodo per ritornare la lista delle persone.
    *
    * @param name l'eventuale nome su cui restringere la ricerca.
    */
-  public static void list(String name) {
+  public static void list(Long officeId, String name) {
 
-    List<Person> simplePersonList = personDao
-        .listFetched(Optional.fromNullable(name),
-            secureManager.officesReadAllowed(Security.getUser().get()), false, null, null, false)
-        .list();
+    Office office;
+    if (officeId == null) {
+      office = officeDao.getOfficeById(Long.parseLong(session.get("officeSelected")));
+    } else {
+      office = officeDao.getOfficeById(officeId);
+    }
+    notFoundIfNull(office);
 
-    List<IWrapperPerson> personList =
-        FluentIterable.from(simplePersonList).transform(wrapperFunctionFactory.person()).toList();
+    rules.checkIfPermitted(office);
+
+    List<Person> simplePersonList = personDao.listFetched(Optional.fromNullable(name),
+        ImmutableSet.of(office), false, null, null, false).list();
+
+    List<IWrapperPerson> personList = FluentIterable.from(simplePersonList)
+        .transform(wrapperFunctionFactory.person()).toList();
+
     render(personList);
-
   }
 
   /**
@@ -177,7 +189,7 @@ public class Persons extends Controller {
 
     flash.success("Persona inserita correttamente in anagrafica - %s", person.fullName());
 
-    list(null);
+    list(null, null);
   }
 
   /**
@@ -281,7 +293,7 @@ public class Persons extends Controller {
     flash.success("La persona %s %s eliminata dall'anagrafica" + " insieme a tutti i suoi dati.",
         person.name, person.surname);
 
-    list(null);
+    list(null, null);
 
   }
 

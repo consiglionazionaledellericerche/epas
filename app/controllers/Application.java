@@ -30,7 +30,7 @@ public class Application extends Controller {
     //Utenti di sistema (developer,admin)
     if (Security.getUser().get().person == null) {
 
-      Persons.list(null);
+      Persons.list(null, null);
       return;
     }
 

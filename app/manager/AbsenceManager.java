@@ -27,6 +27,7 @@ import manager.services.vacations.IVacationsService;
 import models.Absence;
 import models.AbsenceType;
 import models.Contract;
+import models.ContractMonthRecap;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
@@ -41,6 +42,7 @@ import models.enumerate.QualificationMapping;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import play.db.jpa.Blob;
 import play.libs.Mail;
@@ -73,23 +75,25 @@ public class AbsenceManager {
   private final PersonChildrenDao personChildrenDao;
   private final ConsistencyManager consistencyManager;
   private final ConfigurationManager configurationManager;
+  private final IWrapperFactory wrapperFactory;
 
   /**
    * Costruttore.
-   * @param personDayDao personDayDao
-   * @param workingTimeTypeDao workingTimeTypeDao
-   * @param contractDao contractDao
-   * @param absenceDao absenceDao
-   * @param personReperibilityDayDao personReperibilityDayDao
-   * @param personShiftDayDao personShiftDayDao
-   * @param personChildrenDao personChildrenDao
+   *
+   * @param personDayDao              personDayDao
+   * @param workingTimeTypeDao        workingTimeTypeDao
+   * @param contractDao               contractDao
+   * @param absenceDao                absenceDao
+   * @param personReperibilityDayDao  personReperibilityDayDao
+   * @param personShiftDayDao         personShiftDayDao
+   * @param personChildrenDao         personChildrenDao
    * @param contractMonthRecapManager contractMonthRecapManager
-   * @param personManager personManager
-   * @param absenceGroupManager absenceGroupManager
-   * @param consistencyManager consistencyManager
-   * @param configurationManager configurationManager
-   * @param wrapperFactory wrapperFactory
-   * @param vacationsService vacationsService
+   * @param personManager             personManager
+   * @param absenceGroupManager       absenceGroupManager
+   * @param consistencyManager        consistencyManager
+   * @param configurationManager      configurationManager
+   * @param wrapperFactory            wrapperFactory
+   * @param vacationsService          vacationsService
    */
   @Inject
   public AbsenceManager(
@@ -123,6 +127,7 @@ public class AbsenceManager {
     this.personShiftDayDao = personShiftDayDao;
     this.personChildrenDao = personChildrenDao;
     this.consistencyManager = consistencyManager;
+    this.wrapperFactory = wrapperFactory;
   }
 
   /**
@@ -131,37 +136,70 @@ public class AbsenceManager {
    * il residuo a ieri. N.B Non posso inserire un riposo compensativo oltre il mese successivo a
    * oggi.
    */
-  private boolean canTakeCompensatoryRest(
-      Person person, LocalDate date, List<Absence> otherAbsences) {
+  private boolean canTakeCompensatoryRest(Person person, LocalDate date,
+      List<Absence> otherCompensatoryRest) {
     //Data da considerare
 
     // (1) Se voglio inserire un riposo compensativo per il mese successivo considero il residuo
     // a ieri.
     //N.B Non posso inserire un riposo compensativo oltre il mese successivo.
-    LocalDate dateToCheck = date;
+    LocalDate dateForRecap = date;
     //Caso generale
-    if (dateToCheck.getMonthOfYear() == LocalDate.now().getMonthOfYear() + 1) {
-      dateToCheck = LocalDate.now();
-    } else if (dateToCheck.getYear() == LocalDate.now().getYear() + 1
-        && dateToCheck.getMonthOfYear() == 1 && LocalDate.now().getMonthOfYear() == 12) {
+    if (dateForRecap.getMonthOfYear() == LocalDate.now().getMonthOfYear() + 1) {
+      dateForRecap = LocalDate.now();
+    } else if (dateForRecap.getYear() == LocalDate.now().getYear() + 1
+        && dateForRecap.getMonthOfYear() == 1 && LocalDate.now().getMonthOfYear() == 12) {
       //Caso particolare dicembre - gennaio
-      dateToCheck = LocalDate.now();
+      dateForRecap = LocalDate.now();
     }
 
     // (2) Calcolo il residuo alla data precedente di quella che voglio considerare.
-    if (dateToCheck.getDayOfMonth() > 1) {
-      dateToCheck = dateToCheck.minusDays(1);
+    if (dateForRecap.getDayOfMonth() > 1) {
+      dateForRecap = dateForRecap.minusDays(1);
     }
 
-    Contract contract = contractDao.getContract(dateToCheck, person);
+    Contract contract = contractDao.getContract(dateForRecap, person);
 
-    int minutesForCompensatoryRest = contractMonthRecapManager
-        .getMinutesForCompensatoryRest(contract, dateToCheck, otherAbsences);
+    Optional<YearMonth> firstContractMonthRecap = wrapperFactory
+        .create(contract).getFirstMonthToRecap();
+    if (!firstContractMonthRecap.isPresent()) {
+      //TODO: Meglio ancora eccezione.
+      return false;
+    }
 
-    if (minutesForCompensatoryRest
-        > workingTimeTypeDao.getWorkingTimeType(dateToCheck, person).get()
-        .workingTimeTypeDays.get(dateToCheck.getDayOfWeek() - 1).workingTime) {
-      return true;
+    ContractMonthRecap cmr = new ContractMonthRecap();
+    cmr.year = dateForRecap.getYear();
+    cmr.month = dateForRecap.getMonthOfYear();
+    cmr.contract = contract;
+
+    YearMonth yearMonth = new YearMonth(dateForRecap);
+
+    //Se serve il riepilogo precedente devo recuperarlo.
+    Optional<ContractMonthRecap> previousMonthRecap = Optional.<ContractMonthRecap>absent();
+
+    if (yearMonth.isAfter(firstContractMonthRecap.get())) {
+      previousMonthRecap = wrapperFactory.create(contract)
+          .getContractMonthRecap(yearMonth.minusMonths(1));
+      if (!previousMonthRecap.isPresent()) {
+        //TODO: Meglio ancora eccezione.
+        return false;
+      }
+    }
+
+    Optional<ContractMonthRecap> recap = contractMonthRecapManager.computeResidualModule(cmr,
+        previousMonthRecap, yearMonth, dateForRecap, otherCompensatoryRest);
+
+    if (recap.isPresent()) {
+      int residualMinutes = recap.get().remainingMinutesCurrentYear
+          + recap.get().remainingMinutesLastYear;
+
+      for (Absence a : otherCompensatoryRest) {
+        residualMinutes -= workingTimeTypeDao.getWorkingTimeType(a.date, contract.person)
+            .get().workingTimeTypeDays.get(a.date.getDayOfWeek() - 1).workingTime;
+      }
+      return residualMinutes >= workingTimeTypeDao
+          .getWorkingTimeType(date, contract.person).get().workingTimeTypeDays
+          .get(date.getDayOfWeek() - 1).workingTime;
     }
     return false;
   }
@@ -392,8 +430,8 @@ public class AbsenceManager {
         }
 
         log.info("Inserita nuova assenza {} per {} in data: {}",
-                absence.absenceType.code, absence.personDay.person.getFullname(),
-                absence.personDay.date);
+            absence.absenceType.code, absence.personDay.person.getFullname(),
+            absence.personDay.date);
 
         pd.absences.add(absence);
         pd.save();
@@ -416,7 +454,7 @@ public class AbsenceManager {
    * Controlla che nell'intervallo passato in args non esistano già assenze per quel tipo.
    */
   private List<Absence> absenceTypeAlreadyExist(Person person, LocalDate dateFrom,
-                                                LocalDate dateTo, AbsenceType absenceType) {
+      LocalDate dateTo, AbsenceType absenceType) {
 
     return absenceDao.findByPersonAndDate(person, dateFrom, Optional.of(dateTo),
         Optional.of(absenceType)).list();
@@ -476,43 +514,40 @@ public class AbsenceManager {
       Person person, LocalDate date, AbsenceType absenceType,
       Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
 
-    Integer maxRecoveryDaysOneThree = (Integer) configurationManager
-        .configValue(person.office, EpasParam.MAX_RECOVERY_DAYS_13, date.getYear());
+    // I riposi compensativi sono su base annua e non 'per contratto'
+    final LocalDate beginOfYear = new LocalDate(date.getYear(), 1, 1);
+    int used = personManager.numberOfCompensatoryRestUntilToday(person, beginOfYear, date)
+        + otherAbsences.size();
 
-    // TODO le assenze con codice 91 non sono sufficienti a coprire tutti i casi.
-    // Bisogna considerare anche eventuali inizializzazioni
-    int alreadyUsed = 0;
-    List<Absence> absences91 = absenceDao.getAbsenceByCodeInPeriod(
-        Optional.fromNullable(person), Optional.fromNullable(absenceType.code),
-        date.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(),
-        date, Optional.<JustifiedTimeAtWork>absent(), false, false);
-    if (absences91 != null) {
-      alreadyUsed = absences91.size();
+    Integer maxRecoveryDays;
+    if (person.qualification.qualification <= 3) {
+      maxRecoveryDays = (Integer) configurationManager
+          .configValue(person.office, EpasParam.MAX_RECOVERY_DAYS_13, date.getYear());
+    } else {
+      maxRecoveryDays = (Integer) configurationManager
+          .configValue(person.office, EpasParam.MAX_RECOVERY_DAYS_49, date.getYear());
     }
 
-    // verifica se ha esaurito il bonus per l'anno
-    if (person.qualification.qualification > 0 && person.qualification.qualification < 4
-        && alreadyUsed >= maxRecoveryDaysOneThree) {
-      // TODO questo è il caso semplice,c'è da considerare anche eventuali cambi di contratto,
-      // assenze richieste per gennaio con residui dell'anno precedente sufficienti etc..
+    // Raggiunto il limite dei riposi compensativi utilizzabili
+    // maxRecoveryDays = 0 -> nessun vincolo sul numero utilizzabile
+    if (maxRecoveryDays != 0 && (used >= maxRecoveryDays)) {
       return new AbsencesResponse(date, absenceType.code,
-          String.format(AbsencesResponse.RIPOSI_COMPENSATIVI_ESAURITI
-              + " - Usati %s", alreadyUsed));
+          String.format(AbsencesResponse.RIPOSI_COMPENSATIVI_ESAURITI + " - Usati %s", used));
     }
+
     //Controllo del residuo
     if (canTakeCompensatoryRest(person, date, otherAbsences)) {
       return insert(person, date, absenceType, file, Optional.<Integer>absent(), persist);
     }
 
-    return new AbsencesResponse(date, absenceType.code,
-        AbsencesResponse.MONTE_ORE_INSUFFICIENTE);
+    return new AbsencesResponse(date, absenceType.code, AbsencesResponse.MONTE_ORE_INSUFFICIENTE);
   }
 
   /**
    * Gestisce l'inserimento esplicito dei codici 31, 32 e 94.
    */
   private AbsencesResponse handler31_32_94(Person person, LocalDate date, AbsenceType absenceType,
-                                           Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
+      Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
 
 
     if (AbsenceTypeMapping.FERIE_ANNO_CORRENTE.is(absenceType)
@@ -539,7 +574,7 @@ public class AbsenceManager {
    * Gestisce una richiesta di inserimento codice 37 (utilizzo ferie anno precedente scadute).
    */
   private AbsencesResponse handler37(Person person, LocalDate date, AbsenceType absenceType,
-                                     Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
+      Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
 
     if (AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.is(absenceType)
         && vacationsService.canTake37(person, date, otherAbsences)) {
@@ -622,7 +657,7 @@ public class AbsenceManager {
    * Gestore della logica ticket forzato dall'amministratore, risponde solo in caso di codice 92.
    */
   private void checkMealTicket(LocalDate date, Person person, String mealTicket,
-                               AbsenceType abt, boolean persist) {
+      AbsenceType abt, boolean persist) {
 
     if (!persist) {
       return;
@@ -790,7 +825,7 @@ public class AbsenceManager {
    * Costruisce la liste delle persone assenti nel periodo indicato.
    *
    * @param absencePersonDays lista di giorni di assenza effettuati
-   * @return absentPersons lista delle persone assenti coinvolte nelle assenze passate 
+   * @return absentPersons lista delle persone assenti coinvolte nelle assenze passate
    * @author arianna
    */
   public List<Person> getPersonsFromAbsentDays(List<Absence> absencePersonDays) {
