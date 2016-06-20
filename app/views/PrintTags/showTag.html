@@ -107,21 +107,61 @@
 	    </td>
 	    <td>
 	      #{ifnot ignore}
-	      ${dayRecap.wttd.get().workingTimeType.description}
+        #{if dayRecap.wttd.get().workingTimeType.description.length() > 7 }
+          ${dayRecap.wttd.get().workingTimeType.description.substring(0, 7)}
+        #{/if}
+        #{else}
+          ${dayRecap.wttd.get().workingTimeType.description}
+        #{/else}
 	      #{/ifnot}
 	    </td>
 	  </tr>
   #{/list}
 </table>
 <br>
-<p>
-  Il numero di buoni pasto maturati per questo mese e': <strong>${psDto.numberOfMealTicketToUse}</strong>
-  <br>Il numero di giorni lavorativi in sede è di: <strong>${psDto.basedWorkingDays}</strong>
-  <br>Il numero di ore di lavoro effettuate nel mese è di: <strong>${psDto.totalWorkingTime.toHourTime()}</strong>
-  <br>Il numero di ore di disponibile per gli straordinari nel mese è di: <strong>${psDto.positiveResidualInMonth} ore</strong>
-</p>
 
-<p style="text-align: right;margin-top:6em;">
+  #{list items:psDto.contractMonths, as:'mese'}
+
+  <!-- solo last in month -->
+  #{if mese.contract.isLastInMonth((int)psDto.month, (int)psDto.year)}
+    <br>Numero di giorni lavorativi in sede: <strong>${psDto.basedWorkingDays}</strong>
+    <br>Numero di riposi compensativi usati fin'ora (nell'anno in corso): <strong>${psDto.numberOfCompensatoryRestUntilToday} giorni</strong>
+  #{/if}
+  #{else}
+    <em>Il contratto e' terminato nel corso di questo mese.</em>
+  #{/else}
+  <br>Numero di buoni pasto maturati in questo mese: <strong>${psDto.numberOfMealTicketToUse}</strong>
+  <br>Totale ore di lavoro effettuate nel mese: <strong>${psDto.totalWorkingTime.toHourTime()}</strong>
+  #{if mese.getPreviousRecapInYear().present}
+    <br>Monte ore all'inizio del mese:
+    <strong>${mese.getPreviousRecapInYear().get().remainingMinutesCurrentYear.toHourTime()}</strong>
+  #{/if}
+  <br>Residuo del mese positivo (imputabili come straordinari):
+  <strong>${mese.value.getPositiveResidualInMonth().toHourTimeWithPlus()}</strong>
+  #{if mese.value.straordinariMinutiS1Print != 0}
+    <br>Ore assegnate per straordinario diurno nei giorni lavorativi:
+    <strong>${mese.value.straordinariMinutiS1Print.toHourTimeWithMinus()}</strong>
+  #{/if}
+  #{if mese.value.straordinariMinutiS2Print != 0}
+    <br>Ore assegnate per straordinario diurno nei giorni festivi o notturno nei giorni lavorativi:
+    <strong>${mese.value.straordinariMinutiS2Print.toHourTimeWithMinus()}</strong>
+  #{/if}
+  #{if mese.value.straordinariMinutiS3Print != 0}
+    <br>Ore assegnate per straordinario notturno nei giorni festivi:
+    <strong>${mese.value.straordinariMinutiS3Print.toHourTimeWithMinus()}</strong>
+  #{/if}
+  #{if mese.value.riposiCompensativiMinutiImputatoAnnoCorrente != 0}
+    <br>Residuo utilizzato come riposo compensativo:
+    <strong>${mese.value.riposiCompensativiMinutiImputatoAnnoCorrente.toHourTimeWithMinus()}</strong>
+  #{/if}
+  #{if mese.value.progressivoFinaleNegativoMeseImputatoAnnoCorrente != 0}
+    <br>Residuo utilizzato come recupero ore:
+    <strong>${mese.value.progressivoFinaleNegativoMeseImputatoAnnoCorrente.toHourTimeWithMinus()}</strong>
+  #{/if}
+  <br>Totale monte ore a fine mese: <strong>${(mese.value.remainingMinutesLastYear+mese.value.remainingMinutesCurrentYear).toHourTime()}</strong>
+  #{/list}
+
+<p style="text-align: right;margin-top:2em;">
   AUTOCERTIFICAZIONE
   <br><br>
   Firma

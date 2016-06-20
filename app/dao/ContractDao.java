@@ -1,6 +1,7 @@
 package dao;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Provider;
 
 import com.mysema.query.BooleanBuilder;
@@ -38,7 +39,7 @@ public class ContractDao extends DaoBase {
 
   @Inject
   ContractDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp,
-              IWrapperFactory factory) {
+      IWrapperFactory factory) {
     super(queryFactory, emp);
     this.factory = factory;
   }
@@ -49,40 +50,51 @@ public class ContractDao extends DaoBase {
   public Contract getContractById(Long id) {
     QContract contract = QContract.contract;
     final JPQLQuery query = getQueryFactory().from(contract)
-            .where(contract.id.eq(id));
+        .where(contract.id.eq(id));
     return query.singleResult(contract);
   }
 
   /**
    * @return la lista di contratti che sono attivi nel periodo compreso tra begin e end.
    */
-  public List<Contract> getActiveContractsInPeriod(
-          LocalDate begin, Optional<LocalDate> end) {
+  public List<Contract> getActiveContractsInPeriod(Optional<List<Person>> people,
+      LocalDate begin, Optional<LocalDate> end) {
 
-    if (!end.isPresent()) {
-      end = Optional.fromNullable(new LocalDate(9999, 01, 01));
+    final QContract contract = QContract.contract;
+
+    final BooleanBuilder condition = new BooleanBuilder()
+        .andAnyOf(contract.endContract.isNull().and(contract.endDate.isNull()),
+            contract.endContract.isNull().and(contract.endDate.goe(begin)),
+            contract.endDate.isNull().and(contract.endContract.goe(begin)));
+
+    if (end.isPresent()) {
+      condition.and(contract.beginDate.loe(end.get()));
     }
 
-    QContract contract = QContract.contract;
-    final JPQLQuery query =
-        getQueryFactory().from(contract)
-          .where(contract.endContract.isNull().andAnyOf(
-                   contract.endDate.isNull().and(contract.beginDate.loe(end.get())),
-                   contract.endDate.isNotNull().and(contract.beginDate.loe(end.get())
-                       .and(contract.endDate.goe(begin))))
-                    .or(contract.endContract.isNotNull().and(contract.beginDate.loe(end.get())
-                        .and(contract.endContract.goe(begin)))));
-    return query.list(contract);
+    if (people.isPresent()) {
+      condition.and(contract.person.in(people.get()));
+    }
+
+    return getQueryFactory().from(contract).where(condition).list(contract);
+  }
+
+  public List<Contract> getActiveContractsInPeriod(LocalDate begin, Optional<LocalDate> end) {
+    return getActiveContractsInPeriod(Optional.absent(), begin, end);
+  }
+
+  public List<Contract> getActiveContractsInPeriod(Person person, LocalDate begin,
+      Optional<LocalDate> end) {
+    return getActiveContractsInPeriod(Optional.of(ImmutableList.of(person)), begin, end);
   }
 
   /**
    * @return la lista di contratti associati alla persona person passata come parametro ordinati per
-   *     data inizio contratto.
+   * data inizio contratto.
    */
   public List<Contract> getPersonContractList(Person person) {
     QContract contract = QContract.contract;
     final JPQLQuery query = getQueryFactory().from(contract)
-            .where(contract.person.eq(person)).orderBy(contract.beginDate.asc());
+        .where(contract.person.eq(person)).orderBy(contract.beginDate.asc());
     return query.list(contract);
   }
 
@@ -94,7 +106,7 @@ public class ContractDao extends DaoBase {
     QContractWorkingTimeType cwtt = QContractWorkingTimeType.contractWorkingTimeType;
     QContract contract = QContract.contract;
     final JPQLQuery query = getQueryFactory().from(contract)
-            .leftJoin(contract.contractWorkingTimeType, cwtt).where(cwtt.workingTimeType.eq(wtt));
+        .leftJoin(contract.contractWorkingTimeType, cwtt).where(cwtt.workingTimeType.eq(wtt));
 
     return query.list(contract);
   }
@@ -135,12 +147,12 @@ public class ContractDao extends DaoBase {
 
   /**
    * @return la lista dei contractStampProfile relativi alla persona person o al contratto contract
-   *     passati come parametro e ordinati per data inizio del contractStampProfile La funzione
-   *     permette di scegliere quale dei due parametri indicare per effettuare la ricerca. Sono
-   *     mutuamente esclusivi.
+   * passati come parametro e ordinati per data inizio del contractStampProfile La funzione permette
+   * di scegliere quale dei due parametri indicare per effettuare la ricerca. Sono mutuamente
+   * esclusivi.
    */
   public List<ContractStampProfile> getPersonContractStampProfile(Optional<Person> person,
-                                                                  Optional<Contract> contract) {
+      Optional<Contract> contract) {
     QContractStampProfile csp = QContractStampProfile.contractStampProfile;
     final BooleanBuilder condition = new BooleanBuilder();
     if (person.isPresent()) {
@@ -150,7 +162,7 @@ public class ContractDao extends DaoBase {
       condition.and(csp.contract.eq(contract.get()));
     }
     final JPQLQuery query = getQueryFactory().from(csp)
-            .where(condition).orderBy(csp.beginDate.asc());
+        .where(condition).orderBy(csp.beginDate.asc());
     return query.list(csp);
 
   }
@@ -161,7 +173,7 @@ public class ContractDao extends DaoBase {
   public ContractStampProfile getContractStampProfileById(Long id) {
     QContractStampProfile csp = QContractStampProfile.contractStampProfile;
     final JPQLQuery query = getQueryFactory().from(csp)
-            .where(csp.id.eq(id));
+        .where(csp.id.eq(id));
     return query.singleResult(csp);
   }
 
@@ -179,7 +191,7 @@ public class ContractDao extends DaoBase {
   public List<ContractWorkingTimeType> getContractWorkingTimeTypeList(Contract contract) {
     QContractWorkingTimeType cwtt = QContractWorkingTimeType.contractWorkingTimeType;
     final JPQLQuery query = getQueryFactory().from(cwtt)
-            .where(cwtt.contract.eq(contract));
+        .where(cwtt.contract.eq(contract));
     return query.list(cwtt);
 
   }
