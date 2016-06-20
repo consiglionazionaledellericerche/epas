@@ -26,10 +26,10 @@ import java.util.List;
 public class BlockMealTicket {
 
   private Contract contract;
-  private Integer codeBlock;
+  private Long codeBlock;
   private List<MealTicket> mealTickets;
 
-  protected BlockMealTicket(Integer codeBlock) {
+  protected BlockMealTicket(Long codeBlock) {
 
     this.codeBlock = codeBlock;
     this.mealTickets = Lists.newArrayList();
