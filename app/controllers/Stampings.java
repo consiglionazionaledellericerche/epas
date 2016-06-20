@@ -136,9 +136,9 @@ public class Stampings extends Controller {
         && (Boolean)confManager
         .configValue(wrperson.getValue(), EpasParam.OFF_SITE_STAMPING).equals(true)) {
       showLinkForEmployee = true;
-      
+
     }
-       
+
     Person person = wrperson.getValue();
     render("@personStamping", psDto, person, showLink, showLinkForEmployee);
   }
@@ -196,24 +196,24 @@ public class Stampings extends Controller {
 
     render("@edit", person, date);
   }
-  
+
   /**
    * Nuova timbratura inserita dall'impiegato di livello I - III
    * 
    * @param person la persona (se stesso) per cui inserire la timbratura
    * @param date la data in cui inserire la timbratura
    */
-  public static void blankForEmployee(@Required Person person, @Required LocalDate date) {
+  public static void blankForEmployee(Person person, LocalDate date) {
 
     if (!person.isPersistent()) {
       notFound();
     }
 
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
-
+    boolean employee = true;
     rules.checkIfPermitted(person);
 
-    render("@edit", person, date);
+    render("@edit", person, date, employee);
   }
 
   /**
@@ -229,6 +229,8 @@ public class Stampings extends Controller {
 
     final List<HistoryValue<Stamping>> historyStamping = stampingsHistoryDao
         .stampings(stamping.id);
+
+
 
     rules.checkIfPermitted(stamping.personDay.person.office);
 
@@ -246,13 +248,19 @@ public class Stampings extends Controller {
    * @param stamping timbratura
    * @param time     orario
    */
-  public static void save(@Required Person person, @Required LocalDate date,
+  public static void save(Long personId, LocalDate date,
       @Valid Stamping stamping, @CheckWith(StringIsTime.class) String time) {
 
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
+    
+    Person person = personDao.getPersonById(personId);
+    if (person == null) {
+      // TODO: implementare una render corretta
+    }
 
     PersonDay personDay = personDayDao.getOrBuildPersonDay(person, date);
 
+    
     rules.checkIfPermitted(person.office);
 
     if (!stamping.isPersistent()) {
@@ -281,11 +289,16 @@ public class Stampings extends Controller {
     consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
 
     flash.success(Web.msgSaved(Stampings.class));
+    
+    if (Security.getUser().get().person.id.equals(person.id)) {
+      Stampings.stampings(date.getYear(), date.getMonthOfYear());
+    }
 
     Stampings.personStamping(person.id,
         date.getYear(), date.getMonthOfYear());
 
   }
+  
 
   /**
    * Elimina la timbratura.
@@ -563,64 +576,64 @@ public class Stampings extends Controller {
   }
 
 
-//  /**
-//   * funzionalità di inserimento della presenza per lavoro fuori sede.
-//   * @param year l'anno di riferimento
-//   * @param month il mese di riferimentos
-//   */
-//  public static void insertWorkingOffSitePresence(final Integer year, final Integer month){
-//    Person person = Security.getUser().get().person;
-//    Stamping stamping = new Stamping(null, null);
-//    Absence absence = new Absence();
-//    LocalDate dateFrom = LocalDate.now();
-//    render(person, stamping, absence, dateFrom);
-//  }
-//  
-//  /**
-//   * salva la timbratura inserita dal dipendente solo dopo controlli di integrità.
-//   * @param person la persona che inserisce la timbratura
-//   * @param date la data in cui inserire la timbratura
-//   * @param stamping la timbratura
-//   * @param time l'ora e i minuti della timbratura
-//   */
-//  public static void saveWorkingOffSitePresence(@Required Person person, @Required LocalDate date,
-//      @Valid Stamping stamping, @CheckWith(StringIsTime.class) String time) {
-//        
-//    PersonDay personDay = personDayDao.getOrBuildPersonDay(person, date);
-//    
-//    if (!stamping.isPersistent()) {
-//      stamping.personDay = personDay;
-//    }
-//    
-//    if (!validation.hasErrors()) {
-//      List<Certification> cert = certificationDao
-//          .personCertifications(person, date.getYear(), date.getMonthOfYear());
-//      CertificatedData cdata = pmrDao
-//          .getPersonCertificatedData(person, date.getMonthOfYear(), date.getYear());
-//      if (!cert.isEmpty() || cdata != null) {
-//        validation.addError("date",
-//            "non può essere inserita una timbratura per un giorno di "
-//            + "un mese già inviato ad attestati");
-//        response.status = 400;
-//        log.info(validation.errorsMap().toString());
-//        render("@insertWorkingOffSitePresence", stamping, person, date, time);
-//      }
-//
-//    }
-//    personDay.save();
-//    stamping.date = stampingManager.deparseStampingDateTime(date, time);
-//    stamping.markedByEmployee = true;
-//    stamping.markedByAdmin = false;
-//
-//    personDay.stampings.add(stamping);
-//    personDay.save();
-//
-//    consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
-//
-//    flash.success(Web.msgSaved(Stampings.class));
-//    
-//    Stampings.stampings(date.getYear(), date.getMonthOfYear());
-//  }
+  //  /**
+  //   * funzionalità di inserimento della presenza per lavoro fuori sede.
+  //   * @param year l'anno di riferimento
+  //   * @param month il mese di riferimentos
+  //   */
+  //  public static void insertWorkingOffSitePresence(final Integer year, final Integer month){
+  //    Person person = Security.getUser().get().person;
+  //    Stamping stamping = new Stamping(null, null);
+  //    Absence absence = new Absence();
+  //    LocalDate dateFrom = LocalDate.now();
+  //    render(person, stamping, absence, dateFrom);
+  //  }
+  //  
+  //  /**
+  //   * salva la timbratura inserita dal dipendente solo dopo controlli di integrità.
+  //   * @param person la persona che inserisce la timbratura
+  //   * @param date la data in cui inserire la timbratura
+  //   * @param stamping la timbratura
+  //   * @param time l'ora e i minuti della timbratura
+  //   */
+  //  public static void saveWorkingOffSitePresence(@Required Person person, @Required LocalDate date,
+  //      @Valid Stamping stamping, @CheckWith(StringIsTime.class) String time) {
+  //        
+  //    PersonDay personDay = personDayDao.getOrBuildPersonDay(person, date);
+  //    
+  //    if (!stamping.isPersistent()) {
+  //      stamping.personDay = personDay;
+  //    }
+  //    
+  //    if (!validation.hasErrors()) {
+  //      List<Certification> cert = certificationDao
+  //          .personCertifications(person, date.getYear(), date.getMonthOfYear());
+  //      CertificatedData cdata = pmrDao
+  //          .getPersonCertificatedData(person, date.getMonthOfYear(), date.getYear());
+  //      if (!cert.isEmpty() || cdata != null) {
+  //        validation.addError("date",
+  //            "non può essere inserita una timbratura per un giorno di "
+  //            + "un mese già inviato ad attestati");
+  //        response.status = 400;
+  //        log.info(validation.errorsMap().toString());
+  //        render("@insertWorkingOffSitePresence", stamping, person, date, time);
+  //      }
+  //
+  //    }
+  //    personDay.save();
+  //    stamping.date = stampingManager.deparseStampingDateTime(date, time);
+  //    stamping.markedByEmployee = true;
+  //    stamping.markedByAdmin = false;
+  //
+  //    personDay.stampings.add(stamping);
+  //    personDay.save();
+  //
+  //    consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
+  //
+  //    flash.success(Web.msgSaved(Stampings.class));
+  //    
+  //    Stampings.stampings(date.getYear(), date.getMonthOfYear());
+  //  }
 
 }
 

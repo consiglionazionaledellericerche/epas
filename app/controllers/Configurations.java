@@ -330,6 +330,16 @@ public class Configurations extends Controller {
     
     PersonConfiguration newConfiguration = (PersonConfiguration)compute(configuration, 
         configuration.epasParam, configurationDto);
+    
+    if (!validation.hasErrors()) {
+      if (configuration.epasParam.equals(EpasParam.OFF_SITE_STAMPING) 
+          && !(Boolean)configurationManager.configValue(configuration.person.office, 
+              EpasParam.WORKING_OFF_SITE)) {
+        validation.addError("configurationDto.booleanNewValue",
+            "per poter modifcare questo parametro, occorre prima impostare il parametro "
+            + "di abilitazione alla timbratura fuori sede per i dipendenti.");
+      }        
+    }
 
     if (validation.hasErrors()) {
       response.status = 400;
