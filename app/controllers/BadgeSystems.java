@@ -174,10 +174,17 @@ public class BadgeSystems extends Controller {
 
     rules.checkIfPermitted(badgeSystem.office);
 
-    List<Person> activePersons = personDao.list(Optional.<String>absent(),
-        Sets.newHashSet(badgeSystem.office), false, null, null, true).list();
+    /**
+     * Dato che nell'edit della singola persona non viene inibito per nessuno l'inserimento dei
+     * badge, anche qui recupero la lista completa del personale dell'ufficio.
+     * Decidere se c'è la necessità di impedirlo per qualcuno e uniformare questa decisione sia
+     * in questa vista che nell'edit della singola persona. (e ovviamente implementare lo stesso
+     * controllo anche nella save).
+     */
+    List<Person> officePeople = personDao.list(Optional.<String>absent(),
+        Sets.newHashSet(badgeSystem.office), false, null, null, false).list();
 
-    render("@joinBadges", badgeSystem, activePersons);
+    render("@joinBadges", badgeSystem, officePeople);
   }
 
   public static void joinBadgesPerson(Long personId) {
