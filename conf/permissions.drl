@@ -822,7 +822,7 @@ when
  	"Stampings.blankForEmployee",
     "Stampings.edit",
     "Stampings.save"
- ), granted == false, target == $p)
+ ), granted == false, target == $o)
 then
  $c.grant();
 end
