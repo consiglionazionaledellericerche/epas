@@ -9,7 +9,10 @@ import com.mysema.query.jpa.JPQLQueryFactory;
 
 import models.Badge;
 import models.BadgeReader;
+import models.Person;
 import models.query.QBadge;
+
+import java.util.List;
 
 import javax.persistence.EntityManager;
 
@@ -46,5 +49,16 @@ public class BadgeDao extends DaoBase {
     return query.singleResult(badge);
   }
 
+  /**
+   * @param code   il numero badge
+   * @param person la persona proprietaria dei badge
+   * @return la lista di tutti i record di badge con lo stesso code per la persona specificata
+   */
+  public List<Badge> byCodeAndPerson(String code, Person person) {
+    final QBadge badge = QBadge.badge;
+
+    return queryFactory.from(badge).where(badge.code.eq(code).and(badge.person.eq(person)))
+        .list(badge);
+  }
 
 }

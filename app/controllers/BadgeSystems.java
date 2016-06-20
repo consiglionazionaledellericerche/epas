@@ -27,11 +27,13 @@ import org.slf4j.LoggerFactory;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
+import play.db.jpa.GenericModel;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -71,7 +73,6 @@ public class BadgeSystems extends Controller {
     render(results, name);
   }
 
-
   /**
    * @param id identificativo del gruppo badge.
    */
@@ -93,21 +94,8 @@ public class BadgeSystems extends Controller {
     SearchResults<?> badgeReadersResults = badgeReaderDao.badgeReaders(Optional.<String>absent(),
         Optional.fromNullable(badgeSystem)).listResults();
 
-    List<Badge> allBadges = badgeSystemDao.badges(badgeSystem);
-    List<Badge> badges = Lists.newArrayList();
-    // FIXME: metodo non efficiente.
-    for (Badge badge : allBadges) {
-      boolean toPick = true;
-      // TODO: al posto di questo for usare una mappa
-      for (Badge picked : badges) {
-        if (badge.badgeSystem.equals(picked.badgeSystem) && badge.code.equals(picked.code)) {
-          toPick = false;
-        }
-      }
-      if (toPick) {
-        badges.add(badge);
-      }
-    }
+    List<Badge> badges = badgeSystemDao.badges(badgeSystem)
+        .stream().distinct().collect(Collectors.toList());
 
     List<Person> personsOldBadge = personDao.activeWithBadgeNumber(badgeSystem.office);
 
@@ -187,7 +175,7 @@ public class BadgeSystems extends Controller {
     rules.checkIfPermitted(badgeSystem.office);
 
     List<Person> activePersons = personDao.list(Optional.<String>absent(),
-        Sets.newHashSet(badgeSystem.office), false, LocalDate.now(), LocalDate.now(), true).list();
+        Sets.newHashSet(badgeSystem.office), false, null, null, true).list();
 
     render("@joinBadges", badgeSystem, activePersons);
   }
@@ -401,22 +389,7 @@ public class BadgeSystems extends Controller {
     notFoundIfNull(person.office);
     rules.checkIfPermitted(person.office);
 
-    // FIXME: metodo non efficiente.
-    List<Badge> badges = Lists.newArrayList();
-    for (Badge badge : person.badges) {
-      boolean toPick = true;
-      // TODO: al posto di questo for usare una mappa
-      for (Badge picked : badges) {
-        if (badge.badgeSystem.equals(picked.badgeSystem) && badge.code.equals(picked.code)) {
-          toPick = false;
-        }
-      }
-      if (toPick) {
-        badges.add(badge);
-      }
-    }
-
-    render(person, badges);
+    render(person);
   }
 
   public static void deleteBadgePerson(Long badgeId) {
@@ -428,7 +401,6 @@ public class BadgeSystems extends Controller {
     boolean personFixed = true;
     boolean confirmed = true;
     render("@delete", badge, personFixed, confirmed);
-
   }
 
   public static void deleteBadge(Long badgeId, boolean confirmed, boolean personFixed) {
@@ -441,13 +413,7 @@ public class BadgeSystems extends Controller {
       render("@delete", badge, confirmed);
     }
 
-    for (Badge badgeToRemove : badge.person.badges) {
-      if (badgeToRemove.badgeSystem.equals(badge.badgeSystem)
-          && badgeToRemove.code.equals(badge.code)) {
-
-        badgeToRemove.delete();
-      }
-    }
+    badgeDao.byCodeAndPerson(badge.code, badge.person).forEach(GenericModel::delete);
 
     flash.success("Badge Rimosso con successo");
 
@@ -456,8 +422,6 @@ public class BadgeSystems extends Controller {
     }
 
     edit(badge.badgeSystem.id);
-
   }
-
 
 }
