@@ -57,7 +57,6 @@ import javax.inject.Inject;
  */
 public class TemplateUtility {
 
-
   private final SecureManager secureManager;
   private final OfficeDao officeDao;
   private final PersonDao personDao;

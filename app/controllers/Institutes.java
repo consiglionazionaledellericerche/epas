@@ -22,7 +22,7 @@ import play.mvc.With;
 import javax.inject.Inject;
 
 @Slf4j
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class Institutes extends Controller {
 
   @Inject

@@ -53,9 +53,8 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
-
 @Slf4j
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class Administration extends Controller {
 
   static final String SUDO_USERNAME = "sudo.username";
@@ -443,7 +442,7 @@ public class Administration extends Controller {
   }
 
   public static void changePeopleEmailDomain(@Required Office office, @Required String domain,
-                                             boolean sendMail) {
+      boolean sendMail) {
 
     final Pattern domainPattern = Pattern.compile("(?:[\\w](?:[\\w-]*[\\w])?\\.)+[a-zA-Z0-9](?:[\\w-]*[\\w])?");
 
