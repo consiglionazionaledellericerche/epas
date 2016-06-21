@@ -141,8 +141,7 @@ public class Competences extends Controller {
 
     rules.checkIfPermitted(office);
     LocalDate date = new LocalDate();
-    List<Person> personList = personDao.list(Optional.<String>absent(),
-        Sets.newHashSet(office),
+    List<Person> personList = personDao.list(Optional.<String>absent(), Sets.newHashSet(office),
         false, date, date.dayOfMonth().withMaximumValue(), true).list();
 
     // TODO: togliere questa storpiaggine.
