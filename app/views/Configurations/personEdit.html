@@ -57,10 +57,11 @@
 		#{p.hidden 'configuration.id', value:configuration.id /}
 		
 		#{f.hidden 'confirmed' /}
-		#{configuration.typeform configuration:configuration, confirmed:confirmed, 
-		configurationDto:configurationDto /}
 		
-	    #{if !confirmed}
+		#{configuration.typeform configuration:configuration, confirmed:confirmed, 
+		configurationDto:configurationDto /}		
+		
+		#{if !confirmed}
 	    	<!--bottoni -->
 			#{b.buttons center:true}   
 		       #{b.submit 'Aggiorna'/}
@@ -73,6 +74,7 @@
 		    #{b.submit 'Conferma'/}
 		  #{/b.buttons}
 		 #{/else}
+		
 	    
 	 #{/form}
      </div>	 
