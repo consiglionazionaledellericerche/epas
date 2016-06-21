@@ -42,17 +42,8 @@ public class RequestInit extends Controller {
   @Inject
   static PersonDao personDao;
   @Inject
-  static TemplateUtility templateUtility;
-  @Inject
   static UsersRolesOfficesDao uroDao;
  
-
-  @Before(priority = 1)
-  static void injectUtility() {
-
-    renderArgs.put("templateUtility", templateUtility);
-  }
-
   @Before(priority = 1)
   static void injectMenu() {
 
