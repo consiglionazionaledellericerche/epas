@@ -181,34 +181,8 @@
         #{include '/menu.html' /}
 
         <ul class="nav navbar-nav navbar-right">
-          #{if templateUtility.notifications.count > 0}
-          <li class="dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-              <i class="fa fa-bell fa-fw"></i>
-              <span class="label label-danger label-badge">
-                ${templateUtility.notifications.count}
-              </span>
-              <b class="caret"></b>
-            </a>
-            <ul class="dropdown-menu">
-              #{list items:templateUtility.notifications.partialList, as:'notification'}
-              <li>
-                <a href="@{Notifications.readAndRedirect(notification.id)}">
-                  <i class="fa fa-comment fa-fw"></i>
-                  ${notification.message} - <time datetime="${notification.createdAt}"
-                  title="${notification.createdAt.format()}">${notification.createdAt.toDate().since()}</time>
-                </a>
-              </li>
-              #{/list}
-              #{secure.check 'Notifications.list'}
-                <li class="divider"></li>
-                <li><a href="@{Notifications.list()}"><i class="fa fa-bell fa-fw"></i> &{'notification.list'}</span></a></li>
-                <li><a href="@Notifications.archiveds()}"><i class="fa fa-bell-o fa-fw"></i> &{'notification.archiveds'}</span></a></li>
-              #{/secure.check}
-            </ul>
-          </li>
-          #{/if}
 
+          #{include './_notificationsMenu.html' /}
           #{if session.contains("sudo.username")}
 
           #{if loginResponse != null}

@@ -1,6 +1,9 @@
 #{extends 'main.html' /}
+#{set header:'navbar' /}
 #{set title:messages.get(request.action.endsWith('list') ? 'notification.list' : 'notification.archiveds') /}
 
+<div class="container">
+#{title title:title /}
 #{paginate notifications, 'data-remote':'#notifications'}
  <ul class="list-group">
    #{list items:notifications.results, as:'notification'}
@@ -8,3 +11,4 @@
    #{/list}
   </ul>
 #{/paginate}
+</div>

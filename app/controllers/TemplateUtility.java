@@ -70,6 +70,7 @@ public class TemplateUtility {
   private final SynchDiagnostic synchDiagnostic;
 
   private final MemoizedCollection<Notification> notifications;
+  private final MemoizedCollection<Notification> archivedNotifications;
 
   @Inject
   public TemplateUtility(
@@ -97,6 +98,14 @@ public class TemplateUtility {
           public ModelQuery.SimpleResults<Notification> get() {
             return notificationDao.listUnreadFor(
                 Security.getUser().get());
+          }
+        });
+
+    archivedNotifications = MemoizedResults
+        .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
+          @Override
+          public ModelQuery.SimpleResults<Notification> get() {
+            return notificationDao.listFor(Security.getUser().get(), true);
           }
         });
   }
@@ -365,5 +374,9 @@ public class TemplateUtility {
 
   public MemoizedCollection<Notification> getNotifications() {
     return notifications;
+  }
+
+  public MemoizedCollection<Notification> getArchivedNotifications() {
+    return archivedNotifications;
   }
 }
