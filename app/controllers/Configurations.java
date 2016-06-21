@@ -70,7 +70,7 @@ public class Configurations extends Controller {
       configurationDto.validityBegin = configurationManager
           .targetYearBegin(configuration.getOwner(), configurationDto.validityYear);
       if (!configurationDto.toTheEnd) {
-      configurationDto.validityEnd = configurationManager
+        configurationDto.validityEnd = configurationManager
           .targetYearEnd(configuration.getOwner(), configurationDto.validityYear);
       } 
       if (configurationDto.validityBegin == null) {
@@ -183,7 +183,8 @@ public class Configurations extends Controller {
             Optional.fromNullable(configurationDto.validityBegin),
             Optional.fromNullable(configurationDto.validityEnd), false);
       } else {
-        validation.addError("configurationDto.stringNewValue", "valore non valido. Formato accettato HH:mm-HH:mm");
+        validation.addError("configurationDto.stringNewValue", 
+            "valore non valido. Formato accettato HH:mm-HH:mm");
       }
     }
     
@@ -192,7 +193,7 @@ public class Configurations extends Controller {
   
   /**
    * Visualizzazioine nuova gestione configurazione.
-   * @param officeId
+   * @param officeId l'id della sede di cui visualizzare le configurazioni.
    */
   public static void show(Long officeId) {
     
@@ -209,7 +210,7 @@ public class Configurations extends Controller {
   
   /**
    * Edit del parametro di configurazione.
-   * @param configuration
+   * @param configurationId  l'id della configurazione da editare.
    */
   public static void edit(Long configurationId) {
     
@@ -225,13 +226,10 @@ public class Configurations extends Controller {
   }
   
   /**
-   * Aggiornamento di un parametro di configurazione.
-   * @param configuration
-   * @param validityYear
-   * @param validityBegin
-   * @param validityEnd
-   * @param booleanNewValue
-   * @param confirmed
+   * 
+   * @param configuration la configurazione da modificare.
+   * @param configurationDto l'oggetto contenente la nuova configurazione.
+   * @param confirmed se siamo nel caso della conferma o no.
    */
   public static void update(Configuration configuration, 
       ConfigurationDto configurationDto, boolean confirmed) {
@@ -278,7 +276,7 @@ public class Configurations extends Controller {
   
   /**
    * Visualizzazioine nuova gestione configurazione.
-   * @param officeId
+   * @param personId l'id della persona di cui vedere la configurazione.
    */
   public static void personShow(Long personId) {
     
@@ -295,7 +293,7 @@ public class Configurations extends Controller {
   
   /**
    * Edit del parametro di configurazione.
-   * @param configuration
+   * @param configurationId l'id della configurazione della persona da editare.
    */
   public static void personEdit(Long configurationId) {
     
@@ -311,13 +309,10 @@ public class Configurations extends Controller {
   }
   
   /**
-   * Aggiornamento di un parametro di configurazione.
-   * @param configuration
-   * @param validityYear
-   * @param validityBegin
-   * @param validityEnd
-   * @param booleanNewValue
-   * @param confirmed
+   * 
+   * @param configuration la configurazione della persona da modificare.
+   * @param configurationDto l'oggetto contenente la configurazione nuova.
+   * @param confirmed se siamo nello stato di conferma delle operazioni.
    */
   public static void personUpdate(PersonConfiguration configuration, 
       ConfigurationDto configurationDto, boolean confirmed) {
@@ -331,19 +326,10 @@ public class Configurations extends Controller {
     PersonConfiguration newConfiguration = (PersonConfiguration)compute(configuration, 
         configuration.epasParam, configurationDto);
     
-    if (!validation.hasErrors()) {
-      if (configuration.epasParam.equals(EpasParam.OFF_SITE_STAMPING) 
-          && !(Boolean)configurationManager.configValue(configuration.person.office, 
-              EpasParam.WORKING_OFF_SITE)) {
-        validation.addError("configurationDto.booleanNewValue",
-            "per poter modifcare questo parametro, occorre prima impostare il parametro "
-            + "di abilitazione alla timbratura fuori sede per i dipendenti.");
-      }        
-    }
-
     if (validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors: {}", validation.errorsMap());
+     
       render("@personEdit", configuration, configurationDto);
     }
     
@@ -361,6 +347,15 @@ public class Configurations extends Controller {
       response.status = 400;
       confirmed = true;
       render("@personEdit", confirmed, recomputeRecap, configuration, configurationDto);
+    }
+    
+    if (configuration.epasParam.equals(EpasParam.OFF_SITE_STAMPING) 
+        && !(Boolean)configurationManager.configValue(configuration.person.office, 
+          EpasParam.WORKING_OFF_SITE)) {
+      response.status = 400;
+      flash.error("Prima abilitare la timbratura per lavoro fuori sede per i dipendenti "
+          + "tra i parametri della sede.");
+      personShow(configuration.person.id);
     }
     
     periodManager.updatePeriods(newConfiguration, true);
