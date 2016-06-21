@@ -221,6 +221,9 @@ note= Note
 notify.error =Attenzione
 notify.success =Ok
 
+nuovaPassword= Nuova Password
+confermaPassword= Ripeti Password
+
 notSentToAttestati= le ore di formazione sono state inserite dopo l'ultima validazione degli attestati o non sono ancora state inviate ad attestati. 
 sentToAttestati= le ore di formazione sono state inviate correttamente ad attestati.
 errorsInSendingToOldAttestati= Ci sono stati errori nell'invio dei dati al vecchio attestati. Controllare tra i certificated_data.
