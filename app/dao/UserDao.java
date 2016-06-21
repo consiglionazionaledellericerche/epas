@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -34,9 +35,6 @@ public class UserDao extends DaoBase {
 
   public static final String ADMIN_USERNAME = "admin";
   public static final String DEVELOPER_USERNAME = "developer";
-
-  @Inject
-  public UsersRolesOfficesDao usersRolesOfficesDao;
 
   @Inject
   UserDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
@@ -191,5 +189,13 @@ public class UserDao extends DaoBase {
       nameCondition.and(user.username.containsIgnoreCase(token));
     }
     return nameCondition.or(user.username.startsWithIgnoreCase(name));
+  }
+
+  public boolean haveAdminRoles(User user) {
+    Preconditions.checkNotNull(user);
+
+    return user.usersRolesOffices.stream().filter(uro ->
+        ImmutableList.of(Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.TECNICAL_ADMIN)
+            .contains(uro.role.name)).findAny().isPresent();
   }
 }

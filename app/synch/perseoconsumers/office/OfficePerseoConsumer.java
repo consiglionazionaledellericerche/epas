@@ -2,14 +2,13 @@ package synch.perseoconsumers.office;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-
-import com.beust.jcommander.internal.Maps;
 
 import helpers.rest.ApiRequestException;
 

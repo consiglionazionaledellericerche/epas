@@ -25,9 +25,26 @@
 		    <tr class="warning">
 		      <td>#{ifnot stamping.typeIsDel()}${stamping.value.label}#{/ifnot}</td>
 		      <td>${stamping.formattedRevisionDate()}</td>
-		      <td>${stamping.formattedOwner()}</td>
+		      <td>
+					<span
+					#{if stamping.revision?.owner?.badgeReader}
+						class="badge" webui-popover-hover data-url="#${stamping.revision.id}">${stamping.formattedOwner()} <i class="fa fa-info-circle" aria-hidden="true"></i>
+					#{/if}
+					#{else}
+						> ${stamping.formattedOwner()}
+					#{/else}
+					</span>
+					</td>
 		      <td class="${stamping.type}">&{stamping.type}</td>
 		    </tr>
+					#{if stamping.revision?.owner?.badgeReader}
+					<div class="webui-popover-content" id="${stamping.revision.id}">
+						<strong>${stamping.revision.owner?.badgeReader?.code}</strong><br>
+						<em>${stamping.revision.owner?.badgeReader?.description}</em><br>
+						<strong>Posizione:</strong><em> ${stamping.revision.owner?.badgeReader?.location}</em><br>
+						<strong>IP:</strong><span class="text-info"> ${stamping.revision?.ipaddress}</span>
+					</div>
+					#{/if}
 		    #{/list}
 		    </table>
 	    #{/list}

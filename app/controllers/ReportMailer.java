@@ -3,11 +3,15 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+
+import dao.UserDao;
 
 import helpers.deserializers.InlineStreamHandler;
 
 import lombok.extern.slf4j.Slf4j;
 
+import models.Role;
 import models.User;
 import models.exports.ReportData;
 
@@ -22,27 +26,24 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 
+import javax.inject.Inject;
+
 /**
- * Invio delle segnalazioni per email.
- * Nella configurazione ci possono essere:
- * <dl>
- *  <dt>report.to</dt><dd>Destinatari separati da virgole</dd>
- *  <dt>report.from</dt><dd>Email mittente</dd>
- *  <dt>report.subject</dt><dd>Oggetto della email</dd>
- * </dl>
- * Comunque ci sono dei default.
+ * Invio delle segnalazioni per email. Nella configurazione ci possono essere: <dl>
+ * <dt>report.to</dt><dd>Destinatari separati da virgole</dd> <dt>report.from</dt><dd>Email
+ * mittente</dd> <dt>report.subject</dt><dd>Oggetto della email</dd> </dl> Comunque ci sono dei
+ * default.
  *
  * @author marco
- *
  */
 @Slf4j
 public class ReportMailer extends Mailer {
 
   /**
-   * È possibile configurare l'email inserendo questi parametri nella
-   * configurazione del play.
+   * È possibile configurare l'email inserendo questi parametri nella configurazione del play.
    */
   private static final String EMAIL_TO = "report.to";
   private static final String EMAIL_FROM = "report.from";
@@ -57,18 +58,35 @@ public class ReportMailer extends Mailer {
   private static final Splitter COMMAS = Splitter.on(',').trimResults()
       .omitEmptyStrings();
 
+  @Inject
+  static UserDao userDao;
+
+
   /**
    * Costruisce e invia il report agli utenti indicati nella configurazione.
    *
-   * @param data i dati del feedback da inviare
+   * @param data    i dati del feedback da inviare
    * @param session la sessione http corrente
-   * @param user l'eventuale utente loggato
+   * @param user    l'eventuale utente loggato
    */
-  public static void feedback(ReportData data, Scope.Session session,
-      Optional<User> user) {
+  public static void feedback(ReportData data, Scope.Session session, Optional<User> user) {
 
-    final List<String> dests = COMMAS.splitToList(Play.configuration
-        .getProperty(EMAIL_TO, DEFAULT_EMAIL_TO));
+    List<String> dests = Lists.newArrayList();
+
+    if (user.isPresent() && !userDao.haveAdminRoles(user.get())) {
+      if (user.get().person != null) {
+        // A partire dagli userRoleOffices dell'ufficio della persona recupero gli indirizzi email
+        // degli amministrativi.....un pò brutto così?
+        dests = user.get().person.office.usersRolesOffices.stream()
+            .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN))
+            .map(uro -> uro.user).filter(u -> u.person != null).map(u -> u.person.email)
+            .collect(Collectors.toList());
+      }
+    } else {
+      dests = COMMAS.splitToList(Play.configuration
+          .getProperty(EMAIL_TO, DEFAULT_EMAIL_TO));
+    }
+
     if (dests.isEmpty()) {
       log.error("please correct {} in application.conf", EMAIL_TO);
       return;

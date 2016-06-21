@@ -78,9 +78,6 @@
     #{/else}
         
 	#{/panel} 
-  	
-  	  
-
 
 	#{panel title:'Gestisci Contratti', color:'primary'}
 	   <div class="text-center">
@@ -97,30 +94,25 @@
 			<th>Data terminazione<br>esperienza</th>
 			<th>Gestisci</th>
 		</tr>
-        #{list items:contractList, as:'contract'}
+    #{list items:contractList, as:'contract'}
  		<tr>
-			<td>${contract.value.beginDate.format()}</td>
-			
+			<td>${contract.value.beginDate?.format()}</td>
 			<td>
-			  #{if contract.value.isTemporary}
-                #{if contract.value.endDate}
-                  ${contract.value.endDate.format()}
-                #{/if}
-                #{else}
-                  <em class="text-danger">Tempo determinato da definire !!!</em>
-                #{/else}
-              #{/if}
-              #{else}
-                <em>Indeterminato</em>
-              #{/else} 
+        #{if contract.value.endDate}
+          ${contract.value.endDate.format()}
+        #{/if}
+			  #{elseif contract.value.isTemporary}
+          <em class="text-danger">Tempo determinato da definire !!!</em>
+        #{/elseif}
+        #{else}
+          <em>Indeterminato</em>
+        #{/else}
 			</td>
-			
-			<td>${contract.value.endContract}</td>
-			
+			<td>${contract.value.endContract?.format()}</td>
 			<td>
 			#{b.buttons center:true}
-          	  #{b.link @Contracts.edit(contract.value.id), color:'primary', title:'Gestisci'/}
-        	#{/b.buttons}
+        #{b.link @Contracts.edit(contract.value.id), color:'primary', title:'Gestisci'/}
+      #{/b.buttons}
 			</td>
 		</tr>
 	  #{/list}

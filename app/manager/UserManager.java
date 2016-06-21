@@ -29,7 +29,8 @@ import java.util.Set;
 import javax.inject.Inject;
 
 /**
- * Created by daniele on 13/10/15.
+ * @author daniele
+ * @since 13/10/15.
  */
 @Slf4j
 public class UserManager {
@@ -69,7 +70,8 @@ public class UserManager {
 
     final String username;
     final String standardUsername = CharMatcher.WHITESPACE.removeFrom(
-            Joiner.on(".").skipNulls().join(name, surname).toLowerCase());
+        Joiner.on(".").skipNulls().join(name.replaceAll("\\W", ""), surname.replaceAll("\\W", ""))
+            .toLowerCase());
 
     List<String> overlapUsers = userDao.containsUsername(standardUsername);
     //  Caso standard
@@ -118,13 +120,14 @@ public class UserManager {
 
     return user;
   }
-  
+
   /**
    * funzione che salva l'utente e genere i ruoli sugli uffici.
-   * @param user l'user da salvare
+   *
+   * @param user    l'user da salvare
    * @param offices la lista degli uffici
-   * @param roles la lista dei ruoli
-   * @param enable se deve essere disabilitato
+   * @param roles   la lista dei ruoli
+   * @param enable  se deve essere disabilitato
    */
   public void saveUser(User user, Set<Office> offices, Set<Role> roles, boolean enable) {
     Codec codec = new Codec();
@@ -142,8 +145,8 @@ public class UserManager {
         uro.role = role;
         uro.save();
       }
-    }   
-    
+    }
+
   }
 
 }

@@ -14,6 +14,8 @@ import models.base.PeriodModel;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
+import play.data.validation.Max;
+import play.data.validation.Min;
 import play.data.validation.Required;
 
 import java.util.Collection;
@@ -38,16 +40,16 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -4472102414284745470L;
 
-  @Column(name="perseo_id")
+  @Column(name = "perseo_id")
   public Long perseoId;
-  
+
   /**
-   * Patch per gestire i contratti con dati mancanti da dcp.
-   * E' true unicamente per segnalare tempo determinato senza data fine specificata.
+   * Patch per gestire i contratti con dati mancanti da dcp. E' true unicamente per segnalare tempo
+   * determinato senza data fine specificata.
    */
-  @Column(name="is_temporary")
+  @Column(name = "is_temporary")
   public boolean isTemporary = false;
-  
+
   /*
    * Quando viene valorizzata la sourceDateResidual, deve essere valorizzata
    * anche la sourceDateMealTicket
@@ -63,18 +65,20 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @Column(name = "source_by_admin")
   public boolean sourceByAdmin = true;
 
-  @Getter
+  @Getter @Min(0) @Max(32)
   @Column(name = "source_vacation_last_year_used")
   public Integer sourceVacationLastYearUsed = null;
 
-  @Getter
+  @Getter @Min(0) @Max(32)
   @Column(name = "source_vacation_current_year_used")
   public Integer sourceVacationCurrentYearUsed = null;
 
-  @Getter
+  @Getter @Min(0) @Max(4)
   @Column(name = "source_permission_used")
   public Integer sourcePermissionUsed = null;
 
+  // Valore puramente indicativo per impedire che vengano inseriti i riposi compensativi in minuti
+  @Min(0) @Max(100)
   @Column(name = "source_recovery_day_used")
   public Integer sourceRecoveryDayUsed = null;
 
@@ -91,7 +95,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "person_id")
   public Person person;
-  
+
   @Getter
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   @OrderBy("beginDate")
@@ -129,8 +133,8 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @Override
   public String toString() {
     return String.format("Contract[%d] - person.id = %d, "
-        + "beginDate = %s, endDate = %s, endContract = %s",
-            id, person.id, beginDate, endDate, endContract);
+            + "beginDate = %s, endDate = %s, endContract = %s",
+        id, person.id, beginDate, endDate, endContract);
   }
 
   /**
@@ -149,6 +153,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   /**
    * La lista ordinata dei contractWorkingTimeType.
+   *
    * @return lista
    */
   @Transient
@@ -176,7 +181,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
     }
     return null;
   }
-  
+
   @Override
   public Collection<Object> types() {
     return ImmutableSet.of(ContractWorkingTimeType.class, ContractStampProfile.class,
@@ -187,14 +192,14 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   public LocalDate calculatedEnd() {
     return computeEnd(this.endDate, this.endContract);
   }
-  
+
   public static LocalDate computeEnd(LocalDate endDate, LocalDate endContract) {
     if (endContract != null) {
       return endContract;
     }
     return endDate;
   }
-  
+
   @Transient
   public boolean isProperSynchronized() {
     if (this.calculatedEnd() == null || !this.calculatedEnd().isBefore(LocalDate.now())) {

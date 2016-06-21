@@ -1,15 +1,14 @@
 package manager.attestati.dto.show;
 
 import com.google.common.base.MoreObjects;
-
-import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.Lists;
 
 import java.util.List;
 
 /**
  * Json sulla situazione della persona per il mese specificato da Attestati.
- * @author alessandro
  *
+ * @author alessandro
  */
 public class SeatCertification {
 
@@ -17,7 +16,7 @@ public class SeatCertification {
   public int anno;
   public int mese;
   public List<PersonCertification> dipendenti = Lists.newArrayList();
-  
+
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(SeatCertification.class)
@@ -27,7 +26,7 @@ public class SeatCertification {
         .add("dipendenti", dipendenti)
         .toString();
   }
-  
+
   public static class PersonCertification {
     public int matricola;
     public boolean validato;
@@ -35,7 +34,7 @@ public class SeatCertification {
     public List<RigaAssenza> righeAssenza = Lists.newArrayList();
     public List<RigaCompetenza> righeCompetenza = Lists.newArrayList(); //??
     public List<RigaFormazione> righeFormazione = Lists.newArrayList();
-    
+
     @Override
     public String toString() {
       return MoreObjects.toStringHelper(PersonCertification.class)
@@ -46,5 +45,5 @@ public class SeatCertification {
           .toString();
     }
   }
-  
+
 }

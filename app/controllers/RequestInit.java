@@ -1,6 +1,15 @@
 package controllers;
 
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.joda.time.LocalDate;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -8,31 +17,23 @@ import com.google.common.collect.Lists;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.UsersRolesOfficesDao;
-
+import helpers.TemplateDataInjector;
 import manager.SecureManager;
-
 import models.Office;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
-
-import org.joda.time.LocalDate;
-
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
+import play.mvc.With;
 
 
 /**
  * @author cristian.
  */
+@With(TemplateDataInjector.class)
 public class RequestInit extends Controller {
 
   @Inject
@@ -43,7 +44,7 @@ public class RequestInit extends Controller {
   static PersonDao personDao;
   @Inject
   static UsersRolesOfficesDao uroDao;
- 
+
   @Before(priority = 1)
   static void injectMenu() {
 
@@ -137,17 +138,17 @@ public class RequestInit extends Controller {
     } else if (session.get("officeSelected") != null) {
       officeId = Long.valueOf(session.get("officeSelected"));
     } else {
-      officeId = offices.iterator().next().id;
+      officeId = offices.stream().sorted((o, o1) -> o.name.compareTo(o1.name)).findFirst().get().id;
     }
 
     session.put("officeSelected", officeId);
 
     //TODO: Da offices rimuovo la sede di cui ho solo il ruolo employee
-    
+
     computeActionSelected(currentUser, offices, year, month);
     renderArgs.put("currentData", new CurrentData(year, month, day, personId, officeId));
   }
-  
+
   private static void computeActionSelected(User user, Set<Office> offices, Integer year, Integer month) {
 
     final String currentAction = Http.Request.current().action;
@@ -228,7 +229,8 @@ public class RequestInit extends Controller {
         "Certifications.certifications",
         "Certifications.processAll",
         "Certifications.emptyCertifications",
-        "PersonMonths.visualizePeopleTrainingHours");
+        "PersonMonths.visualizePeopleTrainingHours",
+        "Persons.list");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
         "Stampings.stampings",
@@ -302,7 +304,9 @@ public class RequestInit extends Controller {
       renderArgs.put("switchPerson", true);
     }
     if (officeSwitcher.contains(currentAction)) {
-      renderArgs.put("navOffices", offices);
+
+      renderArgs.put("navOffices", offices.stream().sorted((o, o1) -> o.name.compareTo(o1.name))
+          .collect(Collectors.toList()));
       renderArgs.put("switchOffice", true);
     }
     if (dropDownEmployeeActions.contains(currentAction)) {
@@ -442,11 +446,9 @@ public class RequestInit extends Controller {
       this.personId = personId;
       this.officeId = officeId;
     }
-    
+
     /**
      * Il day in sessione per il mese passato, oppure il massimo se non appartiene al range.
-     * @param month
-     * @return
      */
     public Integer getDayOfMonth(Integer month) {
       try {
@@ -456,10 +458,9 @@ public class RequestInit extends Controller {
       }
       return day;
     }
-    
+
     /**
      * Il numero massimo di giorni per il mese in sessione.
-     * @return
      */
     public Integer daysInMonth() {
       return new LocalDate(year, month, day).dayOfMonth().withMaximumValue().getDayOfMonth();
