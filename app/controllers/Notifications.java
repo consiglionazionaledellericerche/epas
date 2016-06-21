@@ -60,7 +60,7 @@ public class Notifications extends Controller {
    *
    * @param id id of the Notification to read
    */
-  public static void readAndRedirect(int id) {
+  public static void readAndRedirect(Long id) {
     final Notification notification = Notification.findById(id);
     notFoundIfNull(notification);
     rules.checkIfPermitted(notification);
@@ -75,13 +75,13 @@ public class Notifications extends Controller {
    *
    * @param id id of the Notification to read
    */
-  public static void read(int id) {
+  public static void read(Long id) {
     final Notification notification = Notification.findById(id);
     notFoundIfNull(notification);
     rules.checkIfPermitted(notification);
 
     notification.read = true;
     notification.save();
-    render("/Notifications/notification.html", notification);
+    list();
   }
 }

@@ -6,6 +6,7 @@ import models.UsersRolesOffices;
 import models.ShiftType;
 import models.Person;
 import models.Role;
+import models.Notification
 
 global models.User currentOperator;
 
@@ -24,7 +25,9 @@ when
   $c: PermissionCheck(action in (
      	"Application.index",
      	"Version.showVersion",
-     	"Notifications.list"
+     	"Notifications.list",
+     	"Notifications.archiveds",
+     	"Notifications.read"
        ), target == null, granted == false)
 then
  $c.grant();
@@ -901,7 +904,6 @@ when
  $uro: UsersRolesOffices()
  $p: Role(name == "reperibilityManager") from $uro.role
  $c: PermissionCheck(action in (
-        
         "Reperibility.personList",
         "Reperibility.find",
         "Reperibility.who",
@@ -912,8 +914,15 @@ when
         "Reperibility.exportYearAsPDF", 
         "Reperibility.exportMonthAsPDF",
         "Reperibility.iCal"
-        
        ), target == null, granted == false)
 then
  $c.grant();
+end
+
+rule Notifications
+when
+  $n: Notification(recipient == currentOperator)
+  $c: PermissionCheck(target == $n, granted == false)
+then
+  $c.grant();
 end
