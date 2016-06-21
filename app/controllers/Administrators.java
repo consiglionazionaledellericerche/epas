@@ -21,7 +21,7 @@ import security.SecurityRules;
 
 import javax.inject.Inject;
 
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class Administrators extends Controller {
 
   private static final Logger log = LoggerFactory.getLogger(Institutes.class);

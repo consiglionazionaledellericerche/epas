@@ -23,6 +23,7 @@ import models.Notification;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.Role;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
@@ -45,7 +46,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-@With({RequestInit.class, Resecure.class})
+@With({Resecure.class})
 public class Clocks extends Controller {
 
   @Inject
@@ -179,7 +180,7 @@ public class Clocks extends Controller {
    * @param note      eventuali note.
    */
   public static void insertWebStamping(@Required WayType way, StampTypes stampType,
-                                       @As(binder = NullStringBinder.class) String note) {
+      @As(binder = NullStringBinder.class) String note) {
 
     final User user = Security.getUser().get();
 
@@ -218,10 +219,6 @@ public class Clocks extends Controller {
     stamping.markedByAdmin = false;
 
     stamping.save();
-
-    new Notification.NotificationBuilder().destination(personDao.getPersonById(121L).user)
-        .message(String.format("Il Tizio %s ha appena eseguito una timbratura web!!!", user.username))
-        .subject(NotificationSubject.MESSAGE).create();
 
     consistencyManager.updatePersonSituation(user.person.id, stamping.personDay.date);
 

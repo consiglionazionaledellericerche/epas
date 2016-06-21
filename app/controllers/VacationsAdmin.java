@@ -33,7 +33,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-@With({Secure.class, RequestInit.class})
+@With({Resecure.class})
 public class VacationsAdmin extends Controller {
 
   @Inject

@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class BadgeSystems extends Controller {
 
   private static final Logger log = LoggerFactory.getLogger(BadgeSystems.class);

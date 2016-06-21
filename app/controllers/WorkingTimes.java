@@ -48,10 +48,10 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class WorkingTimes extends Controller {
 
-  private static final String VERTICAL_WORKING_TIME_STEP = "vwt"; 
+  private static final String VERTICAL_WORKING_TIME_STEP = "vwt";
   public static final int NUMBER_OF_DAYS = 7;
 
   @Inject
@@ -73,11 +73,12 @@ public class WorkingTimes extends Controller {
 
   /**
    * Gestione dei tipi orario.
+   *
    * @param officeId sede
    */
   public static void manageWorkingTime(Long officeId) {
 
-    Office  office = officeDao.getOfficeById(officeId);
+    Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
 
@@ -90,11 +91,12 @@ public class WorkingTimes extends Controller {
 
   /**
    * Gestione dei tipi orario particolari.
+   *
    * @param officeId sede
    */
   public static void manageOfficeWorkingTime(Long officeId) {
 
-    Office  office = officeDao.getOfficeById(officeId);
+    Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
 
@@ -116,11 +118,10 @@ public class WorkingTimes extends Controller {
   }
 
 
-
   /**
    * I contratti attivi che per quella sede hanno quel tipo orario.
    *
-   * @param wttId orario
+   * @param wttId    orario
    * @param officeId sede
    */
   public static void showContract(Long wttId, Long officeId) {
@@ -159,39 +160,39 @@ public class WorkingTimes extends Controller {
   }
 
   /**
-   * 
+   *
    * @param officeId
    * @param compute
    * @param name
    * @param workingTimeTypePattern
    */
-  public static void insertWorkingTimeBaseInformation(Long officeId, boolean compute, 
+  public static void insertWorkingTimeBaseInformation(Long officeId, boolean compute,
       String name, WorkingTimeTypePattern workingTimeTypePattern) {
-    
+
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-    
+
     if (!compute) {
       workingTimeTypePattern = WorkingTimeTypePattern.HORIZONTAL;
       render(office, workingTimeTypePattern);
     }
-    
+
     //Controllo unicità
-    if (name == null || name.isEmpty()) { 
+    if (name == null || name.isEmpty()) {
       validation.addError("name", "non può essere vuoto");
     } else {
-      WorkingTimeType wtt = workingTimeTypeDao.workingTypeTypeByDescription(name, 
+      WorkingTimeType wtt = workingTimeTypeDao.workingTypeTypeByDescription(name,
           Optional.<Office>absent());
       if (wtt != null) {
         validation.addError("name", "già presente in archivio.");
       }
     }
-    
-    if (validation.hasErrors()){
+
+    if (validation.hasErrors()) {
       render(office, name, workingTimeTypePattern);
     }
-    
+
     if (workingTimeTypePattern.equals(WorkingTimeTypePattern.HORIZONTAL)) {
       HorizontalWorkingTime horizontalPattern = new HorizontalWorkingTime();
       horizontalPattern.name = name;
@@ -202,12 +203,12 @@ public class WorkingTimes extends Controller {
       Set<Integer> daysProcessed = dayProcessed(vwtProcessedList);
       int step = 1;
       VerticalWorkingTime vwt = get(vwtProcessedList, step, Optional.<VerticalWorkingTime>absent());
-      
-      render("@insertVerticalWorkingTime", office,  vwt, name, step, daysProcessed);
+
+      render("@insertVerticalWorkingTime", office, vwt, name, step, daysProcessed);
     }
   }
-  
-  private static VerticalWorkingTime get(List<VerticalWorkingTime> wttList, int step, 
+
+  private static VerticalWorkingTime get(List<VerticalWorkingTime> wttList, int step,
       Optional<VerticalWorkingTime> lastInsert) {
     VerticalWorkingTime vwt = null;
     for (VerticalWorkingTime processed : wttList) {
@@ -224,7 +225,7 @@ public class WorkingTimes extends Controller {
     }
     return vwt;
   }
-  
+
   private static void add(List<VerticalWorkingTime> wttList, VerticalWorkingTime vwt, int step) {
     //rimuovere il vecchio
     VerticalWorkingTime toDelete = null;
@@ -238,7 +239,7 @@ public class WorkingTimes extends Controller {
     }
     wttList.add(vwt);
   }
-  
+
   private static List<VerticalWorkingTime> processed(String key) {
     List<VerticalWorkingTime> vwtProcessedList = Cache.get(key, List.class);
     if (vwtProcessedList == null) {
@@ -246,7 +247,7 @@ public class WorkingTimes extends Controller {
     }
     return vwtProcessedList;
   }
-  
+
   private static Set<Integer> dayProcessed(List<VerticalWorkingTime> wttList) {
     Set<Integer> daysProcessed = Sets.newHashSet();
     for (VerticalWorkingTime processed : wttList) {
@@ -254,9 +255,9 @@ public class WorkingTimes extends Controller {
     }
     return daysProcessed;
   }
-   
+
   /**
-   * 
+   *
    * @param officeId
    * @param name
    * @param step
@@ -264,26 +265,26 @@ public class WorkingTimes extends Controller {
    * @param submit
    * @param vwt
    */
-  public static void insertVerticalWorkingTime(Long officeId, @Required String name, int step, 
+  public static void insertVerticalWorkingTime(Long officeId, @Required String name, int step,
       boolean switchDay, boolean submit, @Valid VerticalWorkingTime vwt) {
 
     flash.clear();
-    
+
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-     
+
     final String key = VERTICAL_WORKING_TIME_STEP + name + Security.getUser().get().username;
     List<VerticalWorkingTime> vwtProcessedList = processed(key);
     Set<Integer> daysProcessed = dayProcessed(vwtProcessedList);
-    
+
     //Caso del cambio giorno ...
     if (switchDay) {
       validation.clear();
       vwt = get(vwtProcessedList, step, Optional.<VerticalWorkingTime>absent());
       render(office, vwt, name, step, daysProcessed);
     }
-    
+
     //Persistenza ...
     if (submit) {
       // TODO: validatore
@@ -294,39 +295,41 @@ public class WorkingTimes extends Controller {
 
     Preconditions.checkNotNull(vwt);
     // Validazione dto
-    if (validation.hasErrors()){
+    if (validation.hasErrors()) {
       flash.error("Occorre correggere gli errori riportati.");
       render(office, vwt, name, step, daysProcessed);
     }
 
     // Next step
     vwt.dayOfWeek = step;
-    add(vwtProcessedList, vwt, step);  
-    Cache.safeAdd(key, vwtProcessedList, "30mn");  
+    add(vwtProcessedList, vwt, step);
+    Cache.safeAdd(key, vwtProcessedList, "30mn");
     daysProcessed.add(vwt.dayOfWeek);
-    if (step < NUMBER_OF_DAYS) {      
+    if (step < NUMBER_OF_DAYS) {
       step++;
       vwt = get(vwtProcessedList, step, Optional.fromNullable(vwt));
-    } 
+    }
     render(vwt, step, name, office, daysProcessed);
 
 
   }
-  
+
   /**
    * TODO: per la renderizzazione dell'orario verticale prima del salvataggio.
+   *
    * @param officeId l'id dell'ufficio in cui si vuole inserire il nuovo orario
-   * @param list la lista dei dto contenente le info per il nuovo orario
+   * @param list     la lista dei dto contenente le info per il nuovo orario
    */
-  public static void renderVerticalWorkingTime(Long officeId, List<VerticalWorkingTime> list){
+  public static void renderVerticalWorkingTime(Long officeId, List<VerticalWorkingTime> list) {
     Office office = officeDao.getOfficeById(officeId);
     render(office, list);
   }
 
   /**
    * metodo che consente la creazione di un nuovo orario di lavoro orizzontale.
+   *
    * @param horizontalPattern il dto contenente le informazioni da persistere
-   * @param office l'ufficio a cui associare l'orario di lavoro
+   * @param office            l'ufficio a cui associare l'orario di lavoro
    */
   public static void saveHorizontal(@Valid HorizontalWorkingTime horizontalPattern,
       @Required Office office) {
@@ -445,6 +448,7 @@ public class WorkingTimes extends Controller {
 
   /**
    * Abilita/Disabilita il tipo orario.
+   *
    * @param wttId tipo orario
    */
   public static void toggleWorkingTimeTypeEnabled(Long wttId) {
@@ -619,7 +623,7 @@ public class WorkingTimes extends Controller {
           + "contratti.", contractChanges);
     } else {
       flash.error("Aggiornati correttamente %s contratti. Si sono verificati errori per"
-          + " %s contratti. Riprovare o effettuare una segnalazione.",
+              + " %s contratti. Riprovare o effettuare una segnalazione.",
           contractChanges, contractError);
     }
 
