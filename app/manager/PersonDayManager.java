@@ -182,62 +182,6 @@ public class PersonDayManager {
   }
 
   /**
-   * La condizione Gianvito è una condizione che deteriorerà l'efficienza! Per attribuire il buono
-   * pasto oltre a soddisfare le soglie di tempo di lavoro minimo per buono pasto e il tempo di
-   * lavoro minimo pomeridiano, devo anche avere giustificativi e/o flessibilità sufficiente a
-   * raggiungere il tempo di orario giornaliero.
-   *
-   *<p>Per fare questo conteggio devo calcolarmi la situazione residua al giorno precedente che non
-   * è persistita. Per tornare ad essere efficienti si deve injettare nella populate person day la
-   * situazione calcolata al giorno precedente.</p>
-   *
-   * <p>Secondo me nascono delle problematiche significative nel caso in cui volessi inserire dei
-   * riposi compensativi nel passato. Questo comporterebbe il ricalcolo dei giorni e potrebbe
-   * risultare cambiata in negativo una decisione passata di attribuzione del buono pasto. Per
-   * ovviare a questa evenienza si dovrebbe effettuare un check di ogni giorno successivo al riposo
-   * compensativo da inserire e verificare che con tale assenza inserita non si va mai in negativo.
-   * Ma questo fatto potrebbe essere intercettato dal dipendente che si vede attribuire il riposo
-   * compensativo e cancellare il buono pasto e quindi potrebbe contattare la segreteria.</p>
-   *
-   * <p>Una soluzione a ogni problema potrebbe essere quella di persistere nel db in ogni personDay
-   * la situazione di flessibilità raggiunta - residui anno passato, anno corrente e buoni pasto.
-   * In questo modo l'utente anche visivamente avrebbe la percezione di quello che sta succedendo
-   * nel giorno.</p>
-   */
-  @SuppressWarnings("unused")
-  private boolean isGianvitoConditionSatisfied(
-      int workingTimeDecurted, int justifiedTimeAtWork, LocalDate date, Contract contract,
-      WorkingTimeTypeDay wttd) {
-
-    // - Ho il tempo di lavoro (eventualmente decurtato) che raggiunge il tempo di lavoro
-    //   giornaliero.
-    // ok buono pasto
-    if (workingTimeDecurted >= wttd.workingTime) {
-      return true;
-    }
-
-    // - Ho il tempo di lavoro (eventualmente decurtato) che non raggiunge il tempo di lavoro
-    //   giornaliero.
-    // - Aggiungo PEPE
-    //     - livello raggiunto ok buono pasto
-    //TODO: capire se in justifiedTimeAtWork posso considerare tutte le assenze
-    // orarie o solo PEPE e gravi motivi personali.
-    if (workingTimeDecurted + justifiedTimeAtWork >= wttd.workingTime) {
-      return true;
-    }
-
-    log.info(contract.person.toString() + date);
-    //Ultimo tentativo con flessibilità
-    int flexibility = contractMonthRecapManager
-        .getMinutesForCompensatoryRest(contract, date.minusDays(1), new ArrayList<Absence>());
-    if (workingTimeDecurted + justifiedTimeAtWork + flexibility >= wttd.workingTime) {
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
    * Costruisce la lista di coppie di timbrature (uscita/entrata) che rappresentano le potenziali
    * pause pranzo.<br> 
    * L'algoritmo filtra le coppie che appartengono alla fascia pranzo passata come parametro.<br>

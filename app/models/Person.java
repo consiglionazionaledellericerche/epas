@@ -52,9 +52,9 @@ public class Person extends MutableModel implements Comparable<Person> {
 
   private static final long serialVersionUID = -2293369685203872207L;
 
-  @Column(name="perseo_id")
+  @Column(name = "perseo_id")
   public Long perseoId;
-  
+
   @Version
   public Integer version;
 
@@ -176,7 +176,7 @@ public class Person extends MutableModel implements Comparable<Person> {
   @NotAudited
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public List<Competence> competences = Lists.newArrayList();
-  
+
   /**
    * relazione con la tabella dei codici competenza per stabilire se una persona ha diritto o meno a
    * una certa competenza.
@@ -203,12 +203,12 @@ public class Person extends MutableModel implements Comparable<Person> {
   @JoinColumn(name = "office_id")
   @Required
   public Office office;
-  
+
   /**
-   * TODO: da rimuovere quando si userà lo storico per intercettare il cambio di sede
-   * per adesso è popolato dal valore su perseo alla costruzione dell'oggetto.
+   * TODO: da rimuovere quando si userà lo storico per intercettare il cambio di sede per adesso è
+   * popolato dal valore su perseo alla costruzione dell'oggetto.
    */
-  @Transient 
+  @Transient
   public Long perseoOfficeId = null;
 
   /**
@@ -218,6 +218,12 @@ public class Person extends MutableModel implements Comparable<Person> {
   @As(binder = NullStringBinder.class)
   public String badgeNumber;
 
+  /**
+   * Sono stati implementati i metodi Equals e HashCode sulla classe Badge in modo che Se sono
+   * presenti più badge per la persona che differiscono solo per il campo badgeReader venga
+   * restituito un solo elemento (effettivamente per noi è lo stesso badge).Quindi person.badges non
+   * restituisce i duplicati
+   */
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public Set<Badge> badges = Sets.newHashSet();
 
