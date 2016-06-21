@@ -464,3 +464,30 @@ body.modal-open #wrapper{
 	background: black;
 	/*background: rgba(0, 51, 128, 0.57);*/
 }
+
+/* REGOLE PER LE SELECT 2 UTILIZZARE PER GLI SWITCHER NEL MENU */
+
+.select2-container.switcher {
+  height: 1em;
+
+}
+
+.select2-container.switcher .select2-choice {
+  height: 25px;
+  line-height: 1;
+    border-radius: 8px;
+}
+
+.select2-container.switcher .select2-arrow b {
+  background-position: inherit;
+}
+
+
+.select2-drop.switcher {
+   margin-top: -7px;
+   border-top: none;
+}
+
+.select2-drop.switcher input {
+   padding: 0;
+}

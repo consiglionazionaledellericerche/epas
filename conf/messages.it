@@ -20,7 +20,7 @@ absenceTypeGroup.minutesExcess= Minuti in eccesso
 absenceTypeGroup.replacingAbsenceType= Codice per sotituzione
 
 administrations= Amministrazione
-administrator=Amministratore
+administrator= Amministratore
 adminPassword= Password Amministratore
 adminPasswordRetype= Reinserire Password
 
@@ -79,27 +79,26 @@ configurations= Configurazione
 configurations.entries= Parametri di Configurazione Play
 
 
-contract.beginDate=Inizio Contratto
-contract=Contratto
-Contract=Contratto
-contract.endContract=Terminato Il
-contract.endDate=Fine Contratto
-contract.onCertificate=In attestati
-contract.sourceDateMealTicket=Data inizializzazione
-contract.sourceDateResidual=Data inizializzazione
-contract.sourcePermissionUsed=Permessi utilizzati anno corrente
-contract.sourceRecoveryDayUsed=Riposi compensativi effettuati anno corrente
-contract.sourceRemainingMealTicket=Buoni pasto residui
-contract.sourceRemainingMinutesCurrentYear=Residuo anno corrente (in minuti)
-contract.sourceRemainingMinutesLastYear=Residuo anno passato (in minuti)
-contract.sourceVacationCurrentYearUsed= Ferie utilizzate anno corrente
-contract.sourceVacationLastYearUsed=Ferie utilizzate anno passato
+contract.beginDate= Inizio Contratto
+contract= Contratto
+Contract= Contratto
+contract.endContract= Terminato Il
+contract.endDate= Fine Contratto
+contract.onCertificate= In attestati
+contract.sourceDateMealTicket= Data inizializzazione
+contract.sourceDateResidual= Data inizializzazione
+contract.sourcePermissionUsed= Giorni di permesso utilizzati anno corrente
+contract.sourceRecoveryDayUsed= Giorni di riposo compensativo effettuati nell'anno corrente
+contract.sourceRemainingMealTicket= Buoni pasto residui
+contract.sourceRemainingMinutesCurrentYear= Residuo anno corrente (in minuti)
+contract.sourceRemainingMinutesLastYear= Residuo anno passato (in minuti)
+contract.sourceVacationCurrentYearUsed= Giorni di ferie utilizzati dell'anno corrente
+contract.sourceVacationLastYearUsed= Giorni di ferie utilizzati dell'anno passato
 
 contract.mealTicketInitBeforeGeneralInit = Per il contratto attuale è stata definita una inizializzazione buoni pasto precedente all'inizializzazione generale. Questo potrebbe portare	a calcoli errati o inattesi circa il residuo dei buoni pasto per il dipendente.
 
 contractStampProfile.fixedworkingtime=Presenza Automatica
-ContractStampProfile=Periodo Presenza Automatica
-ContractStampProfile=Periodo Presenza Automatica
+ContractStampProfile= Periodo Presenza Automatica
 ContractWorkingTimeType=Periodo Tipo Orario
 contractWorkingTimeType=Periodo Tipo Orario
 
@@ -221,6 +220,9 @@ note= Note
 
 notify.error =Attenzione
 notify.success =Ok
+
+nuovaPassword= Nuova Password
+confermaPassword= Ripeti Password
 
 notSentToAttestati= le ore di formazione sono state inserite dopo l'ultima validazione degli attestati o non sono ancora state inviate ad attestati. 
 sentToAttestati= le ore di formazione sono state inviate correttamente ad attestati.
