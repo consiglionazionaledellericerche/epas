@@ -40,7 +40,7 @@ public interface IMealTicketsService {
    * @param expireDate la data di scadenza
    * @return la lista dei buoni
    */
-  List<MealTicket> buildBlockMealTicket(Integer codeBlock, Integer first, Integer last,
+  List<MealTicket> buildBlockMealTicket(Long codeBlock, Integer first, Integer last,
       LocalDate expireDate);
 
   /**

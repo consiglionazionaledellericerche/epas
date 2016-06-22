@@ -219,22 +219,23 @@ public class PersonManager {
   }
 
   /**
-   * Il numero di riposi compensativi utilizzati tra 2 date
-   * (in linea di massima ha senso dall'inizio dell'anno a una certa data)
+   * Il numero di riposi compensativi utilizzati tra 2 date (in linea di massima ha senso
+   * dall'inizio dell'anno a una certa data)
    */
   public int numberOfCompensatoryRestUntilToday(Person person, LocalDate begin, LocalDate end) {
 
     List<Contract> contractsInPeriod = contractDao
         .getActiveContractsInPeriod(person, begin, Optional.of(end));
 
-    Contract newerContract = contractsInPeriod.stream()
-        .max(Comparator.comparing(Contract::getSourceDateResidual)).get();
+    Contract newerContract = contractsInPeriod.stream().filter(contract ->
+        contract.sourceDateResidual != null).max(Comparator
+        .comparing(Contract::getSourceDateResidual)).orElse(null);
 
     if (newerContract != null && newerContract.sourceDateResidual != null &&
         !newerContract.sourceDateResidual.isBefore(begin)
         && !newerContract.sourceDateResidual.isAfter(end)) {
-      return newerContract.sourceRecoveryDayUsed +
-          absenceDao.absenceInPeriod(person, newerContract.sourceDateResidual, end, "91").size();
+      return newerContract.sourceRecoveryDayUsed + absenceDao
+          .absenceInPeriod(person, newerContract.sourceDateResidual, end, "91").size();
     }
 
     return absenceDao.absenceInPeriod(person, begin, end, "91").size();

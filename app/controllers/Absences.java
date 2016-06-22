@@ -288,7 +288,7 @@ public class Absences extends Controller {
     Person person = personDao.getPersonById(personId);
     if (person == null) {
       flash.error("La persona non esiste!");
-      Persons.list(null);
+      Persons.list(null,null);
     }
     if (Validation.hasErrors()) {
 
