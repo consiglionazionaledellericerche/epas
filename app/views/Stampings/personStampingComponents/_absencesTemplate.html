@@ -7,10 +7,18 @@
       #{/secure.link}
   #{/secure.checkAction}
   #{/if}
+  #{if showLinkForEmployee}
+  
+      #{secure.link @Absences.blankForEmployee(dayRecap.personDay.person.id,
+      dayRecap.personDay.date?.format()),modal:'#modalAbsence'}
+      ___
+      #{/secure.link}
+  
+  #{/if}
   
   #{list items:dayRecap.personDay.absences, as:'absence'}
   
-    #{if showLink}
+    #{if showLink || showLinkForEmployee}
 	     #{secure.link @Absences.edit(absence.id), modal:'#modalAbsence'}
 	      <span webui-popover-hover data-url="#${absence.id}">
 	      ${absence.absenceType.code}

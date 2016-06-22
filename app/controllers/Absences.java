@@ -247,6 +247,28 @@ public class Absences extends Controller {
 
     render(person, dateFrom, dateTo);
   }
+  
+  /**
+   * metodo che renderizza la pagina di inserimento di una nuova assenza.
+   *
+   * @param personId l'id della persona di cui si vuole inserire l'assenza
+   * @param dateFrom la data da cui si vuole inserire l'assenza
+   */
+  public static void blankForEmployee(Long personId, LocalDate dateFrom) {
+
+    if (validation.hasErrors()) {
+      flash.error(validation.errors().toString());
+      render();
+    }
+
+    Person person = personDao.getPersonById(personId);
+    Preconditions.checkNotNull(person);
+
+    rules.checkIfPermitted(person.office);
+    LocalDate dateTo = dateFrom;
+    boolean employee = true;
+    render(person, dateFrom, dateTo, employee);
+  }
 
   /**
    * metodo che permette il salvataggio di un certo codice di assenza per una persona per un giorno
@@ -258,11 +280,16 @@ public class Absences extends Controller {
    * @param absenceType il tipo di assenza da salvare
    * @param file        l'eventuale allegato
    */
-  public static void save(@Required Person person,
-      @Required LocalDate dateFrom, @Required LocalDate dateTo,
-      @Required @Valid AbsenceType absenceType,
+  public static void save(Long personId,
+      LocalDate dateFrom, LocalDate dateTo,
+      @Valid AbsenceType absenceType,
       Blob file) {
 
+    Person person = personDao.getPersonById(personId);
+    if (person == null) {
+      flash.error("La persona non esiste!");
+      Persons.list(null);
+    }
     if (Validation.hasErrors()) {
 
       response.status = 400;
@@ -307,7 +334,10 @@ public class Absences extends Controller {
           air.getTotalAbsenceInsert(),
           air.getAbsences().iterator().next().getAbsenceCode());
     }
-
+    if (Security.getUser().get().person.id.equals(person.id)) {
+      Stampings.stampings(dateFrom.getYear(), dateFrom.getMonthOfYear());
+    }
+    
     Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
   }
 
@@ -367,7 +397,10 @@ public class Absences extends Controller {
     if (deleted > 0) {
       flash.success("Rimossi %s codici assenza di tipo %s", deleted, absence.absenceType.code);
     }
-
+    
+    if (Security.getUser().get().person.id.equals(person.id)) {
+      Stampings.stampings(dateFrom.getYear(), dateFrom.getMonthOfYear());
+    }
     Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
   }
 
