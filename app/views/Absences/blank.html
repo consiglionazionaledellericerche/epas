@@ -12,7 +12,7 @@
    	
 	<input type="hidden" name="person.id" value="${person.id}"/>
 	<input type="hidden" name="dateFrom" value="${dateFrom.format()}"/>
-
+	#{f.hidden 'personId', value:person.id /}
 	#{f.select 'absenceType', required:true}
 	  <option></option>
       #{list templateUtility.frequentAbsenceTypeList()}

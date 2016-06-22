@@ -264,11 +264,23 @@ public class Stampings extends Controller {
     }
 
     PersonDay personDay = personDayDao.getOrBuildPersonDay(person, date);
+    if (Security.getUser().get().person.id.equals(person.id) 
+        && !personManager.isPersonnelAdmin(Security.getUser().get())) {
+      rules.checkIfPermitted(person);
+    } else {
+      rules.checkIfPermitted(person.office);
+    }
     
-    rules.checkIfPermitted(person.office);
-
     if (!stamping.isPersistent()) {
       stamping.personDay = personDay;
+    }
+    
+    if (Security.getUser().get().person.id.equals(person.id) 
+        && !personManager.isPersonnelAdmin(Security.getUser().get())
+        && !stampingManager.checkStampType(stamping, Security.getUser().get(), person)) {
+      flash.error("Non si hanno privilegi sufficienti per inserire una timbratura "
+          + "con causale diversa da lavoro fuori sede");
+      Stampings.stampings(date.getYear(), date.getMonthOfYear());
     }
 
     if (Validation.hasErrors()) {

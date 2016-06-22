@@ -831,7 +831,7 @@ when
     "Absences.edit",
     "Absences.delete",
     "Absences.save"
- ), granted == false, target == $o)
+ ), granted == false, target == $p)
 then
  $c.grant();
 end
