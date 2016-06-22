@@ -22,6 +22,7 @@ import org.joda.time.LocalDate;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -157,6 +158,20 @@ public class AbsenceTypeDao extends DaoBase {
 
   }
 
+  /**
+   * Le absenceType con quei codici di assenza.
+   * @param codes
+   * @return
+   */
+  public List<AbsenceType> absenceTypeCodeSet(Set<String> codes) {
+    
+    QAbsenceType absenceType = QAbsenceType.absenceType;
+
+    final JPQLQuery query = getQueryFactory().from(absenceType)
+        .where(absenceType.code.in(codes));
+    return query.list(absenceType);
+  }
+  
   /**
    * Una mappa contenente gli AbsenceType fatte dalle persona nel mese e numero di assenze fatte per
    * ogni tipo.

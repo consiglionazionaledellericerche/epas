@@ -214,7 +214,7 @@ public class Absences extends Controller {
       absenceType.qualifications.add(qual);
     }
 
-    if (!Strings.isNullOrEmpty(absenceTypeGroup.label) && !absenceType.isPersistent()) {
+    if (!Strings.isNullOrEmpty(absenceTypeGroup.label)) {
       absenceType.absenceTypeGroup = absenceTypeGroup;
       absenceTypeGroup.save();
     }
