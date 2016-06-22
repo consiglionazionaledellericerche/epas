@@ -805,7 +805,11 @@ when
  $c: PermissionCheck(action in (
  	"Stampings.blankForEmployee",
     "Stampings.edit",
-    "Stampings.save"
+    "Stampings.save",
+    "Absences.blankForEmployee",
+    "Absences.edit",
+    "Absences.delete",
+    "Absences.save"
  ), granted == false, target == null)
 then
  $c.grant();
@@ -821,7 +825,11 @@ when
  $c: PermissionCheck(action in (
  	"Stampings.blankForEmployee",
     "Stampings.edit",
-    "Stampings.save"
+    "Stampings.save",
+    "Absences.blankForEmployee",
+    "Absences.edit",
+    "Absences.delete",
+    "Absences.save"
  ), granted == false, target == $o)
 then
  $c.grant();

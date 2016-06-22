@@ -28,6 +28,7 @@ import it.cnr.iit.epas.NullStringBinder;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ConsistencyManager;
+import manager.PersonManager;
 import manager.SecureManager;
 import manager.StampingManager;
 import manager.configurations.ConfigurationManager;
@@ -47,6 +48,7 @@ import models.Person;
 import models.PersonDay;
 import models.Stamping;
 import models.User;
+import models.UsersRolesOffices;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -104,6 +106,8 @@ public class Stampings extends Controller {
   private static OfficeDao officeDao;
   @Inject
   private static ConfigurationManager confManager;
+  @Inject
+  private static PersonManager personManager;
 
 
   /**
@@ -255,11 +259,11 @@ public class Stampings extends Controller {
     
     Person person = personDao.getPersonById(personId);
     if (person == null) {
-      // TODO: implementare una render corretta
+      flash.error("La persona non esiste!");
+      Persons.list(null);
     }
 
     PersonDay personDay = personDayDao.getOrBuildPersonDay(person, date);
-
     
     rules.checkIfPermitted(person.office);
 
@@ -281,7 +285,13 @@ public class Stampings extends Controller {
 
     personDay.save();
     stamping.date = stampingManager.deparseStampingDateTime(date, time);
-    stamping.markedByAdmin = true;
+    if (Security.getUser().get().person.id.equals(person.id) 
+        && !personManager.isPersonnelAdmin(Security.getUser().get())) {
+      stamping.markedByEmployee = true;
+      stamping.markedByAdmin = false;
+    } else {
+      stamping.markedByAdmin = true; 
+    }       
 
     personDay.stampings.add(stamping);
     personDay.save();
@@ -290,7 +300,8 @@ public class Stampings extends Controller {
 
     flash.success(Web.msgSaved(Stampings.class));
     
-    if (Security.getUser().get().person.id.equals(person.id)) {
+    if (Security.getUser().get().person.id.equals(person.id) 
+        && !personManager.isPersonnelAdmin(Security.getUser().get())) {
       Stampings.stampings(date.getYear(), date.getMonthOfYear());
     }
 

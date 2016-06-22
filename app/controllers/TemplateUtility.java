@@ -35,6 +35,7 @@ import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
 import models.enumerate.AbsenceTypeMapping;
+import models.enumerate.CodesForEmployee;
 
 import org.joda.time.LocalDate;
 
@@ -342,6 +343,7 @@ public class TemplateUtility {
    */
   public List<AbsenceType> absencesForEmployees() {
     List<String> codesForEmployees = Lists.newArrayList();
+    codesForEmployees.add(CodesForEmployee.BP.getDescription());
     return absenceTypeDao.getAbsenceTypeForEmployee(codesForEmployees);
   }
 

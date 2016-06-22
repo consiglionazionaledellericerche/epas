@@ -7,6 +7,7 @@ import dao.AbsenceDao;
 import dao.ContractDao;
 import dao.PersonChildrenDao;
 import dao.PersonDayDao;
+import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
 
@@ -21,6 +22,9 @@ import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Person;
 import models.PersonDay;
+import models.Role;
+import models.User;
+import models.UsersRolesOffices;
 import models.WorkingTimeTypeDay;
 
 import org.joda.time.LocalDate;
@@ -44,6 +48,7 @@ public class PersonManager {
   private final IWrapperFactory wrapperFactory;
   private final AbsenceDao absenceDao;
   private final ConfigurationManager configurationManager;
+  private final UsersRolesOfficesDao uroDao;
 
   /**
    * Costrutture.
@@ -63,13 +68,15 @@ public class PersonManager {
       AbsenceDao absenceDao,
       PersonDayManager personDayManager,
       IWrapperFactory wrapperFactory,
-      ConfigurationManager configurationManager) {
+      ConfigurationManager configurationManager,
+      UsersRolesOfficesDao uroDao) {
     this.contractDao = contractDao;
     this.personDayDao = personDayDao;
     this.absenceDao = absenceDao;
     this.personDayManager = personDayManager;
     this.wrapperFactory = wrapperFactory;
     this.configurationManager = configurationManager;
+    this.uroDao = uroDao;
   }
 
   /**
@@ -304,6 +311,16 @@ public class PersonManager {
       value += pd.timeAtWork;
     }
     return value;
+  }
+  
+  
+  public boolean isPersonnelAdmin(User user) {
+    List<UsersRolesOffices> uros = uroDao.getUsersRolesOfficesByUser(user);
+    long count = uros.stream().filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)).count();
+    if (count > 0) {
+      return true;
+    }      
+    return false;
   }
 
 }
