@@ -1,0 +1,43 @@
+#{if templateUtility.notifications.count > 0 || templateUtility.archivedNotifications.count > 0}
+<li class="dropdown" id="notifications">
+  <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+    <i class="fa fa-bell fa-fw"></i>
+    #{if templateUtility.notifications.count > 0}
+      <span class="label label-danger label-badge">${templateUtility.notifications.count}</span>
+    #{/if}
+    <b class="caret"></b>
+  </a>
+  <ul class="dropdown-menu">
+    #{list items:templateUtility.notifications.partialList, as:'notification'}
+    <li>
+      <a #{if notification.redirect}href="@{Notifications.readAndRedirect(notification.id)}"#{/if}
+        #{else}href="@{Notifications.read(notification.id)}" data-async="#notifications"#{/else}>
+      <i class="fa fa-comment fa-fw"></i> ${notification.message}
+        <span class="badge">
+          <time datetime="${notification.createdAt}"
+            title="${notification.createdAt.format()}">${notification.createdAt.toDate().since()}
+          </time>
+        </span>
+      </a>
+    </li>
+    #{if notification_isLast}
+    <li class="divider"></li>
+    #{/if}
+    #{/list}
+    #{secure.check 'Notifications.list'}
+    <li>
+      <a href="@{Notifications.list()}">
+        <i class="fa fa-bell fa-fw"></i> &{'notification.list'}
+        <span class="badge">${templateUtility.notifications.count}</span>
+      </a>
+    </li>
+    <li>
+      <a href="@{Notifications.archiveds()}">
+        <i class="fa fa-bell-o fa-fw"></i> &{'notification.archiveds'}
+        <span class="badge">${templateUtility.archivedNotifications.count}</span>
+      </a>
+    </li>
+    #{/secure.check}
+  </ul>
+</li>
+#{/if}

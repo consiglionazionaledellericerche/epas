@@ -2,6 +2,7 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Supplier;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -10,12 +11,17 @@ import com.google.common.collect.Sets;
 import dao.AbsenceTypeDao;
 import dao.BadgeReaderDao;
 import dao.BadgeSystemDao;
+import dao.MemoizedCollection;
+import dao.MemoizedResults;
+import dao.NotificationDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.QualificationDao;
 import dao.RoleDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
+
+import helpers.jpa.ModelQuery;
 
 import it.cnr.iit.epas.DateUtility;
 
@@ -27,6 +33,7 @@ import models.AbsenceType;
 import models.BadgeReader;
 import models.BadgeSystem;
 import models.Institute;
+import models.Notification;
 import models.Office;
 import models.Person;
 import models.Qualification;
@@ -53,7 +60,6 @@ import javax.inject.Inject;
  */
 public class TemplateUtility {
 
-
   private final SecureManager secureManager;
   private final OfficeDao officeDao;
   private final PersonDao personDao;
@@ -67,13 +73,17 @@ public class TemplateUtility {
   private final SynchDiagnostic synchDiagnostic;
   private final ConfigurationManager configurationManager;
 
+  private final MemoizedCollection<Notification> notifications;
+  private final MemoizedCollection<Notification> archivedNotifications;
+
   @Inject
   public TemplateUtility(
       SecureManager secureManager, OfficeDao officeDao, PersonDao personDao,
       QualificationDao qualificationDao, AbsenceTypeDao absenceTypeDao,
       RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao,
-      IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao, 
-      SynchDiagnostic synchDiagnostic, ConfigurationManager configurationManager) {
+      IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao,
+      SynchDiagnostic synchDiagnostic, ConfigurationManager configurationManager,
+      NotificationDao notificationDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -87,6 +97,23 @@ public class TemplateUtility {
     this.badgeSystemDao = badgeSystemDao;
     this.synchDiagnostic = synchDiagnostic;
     this.configurationManager = configurationManager;
+
+    notifications = MemoizedResults
+        .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
+          @Override
+          public ModelQuery.SimpleResults<Notification> get() {
+            return notificationDao.listUnreadFor(
+                Security.getUser().get());
+          }
+        });
+
+    archivedNotifications = MemoizedResults
+        .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
+          @Override
+          public ModelQuery.SimpleResults<Notification> get() {
+            return notificationDao.listFor(Security.getUser().get(), true);
+          }
+        });
   }
 
 
@@ -170,13 +197,13 @@ public class TemplateUtility {
 
   public ImmutableList<String> getAllDays() {
     return ImmutableList.of("lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato",
-            "domenica");
+        "domenica");
   }
 
   public List<WorkingTimeType> getEnabledWorkingTimeTypeForOffice(Office office) {
     return workingTimeTypeDao.getEnabledWorkingTimeTypeForOffice(office);
   }
-  
+
   public List<BadgeReader> getAllBadgeReader(Person person) {
     return badgeReaderDao.getBadgeReaderByOffice(person.office);
   }
@@ -193,12 +220,12 @@ public class TemplateUtility {
     // Per poter nominarlo amministratore tecnico di ogni sede di milano
     // Decidere una soluzione migliore e meno sbrigativa.
 
-    if (Security.getUser().get().username.equals("developer")){
+    if (Security.getUser().get().username.equals("developer")) {
       offices = Sets.newHashSet(officeDao.allOffices().list());
     }
 
     List<Person> personList = personDao.listPerseo(Optional.<String>absent(), offices, false,
-            LocalDate.now(), LocalDate.now(), true).list();
+        LocalDate.now(), LocalDate.now(), true).list();
 
     List<User> users = Lists.newArrayList();
     for (Person person : personList) {
@@ -223,7 +250,7 @@ public class TemplateUtility {
     }
     return roles;
   }
-  
+
   public List<Role> allSystemRoles() {
     List<Role> roles = Lists.newArrayList();
     Optional<User> user = Security.getUser();
@@ -235,8 +262,8 @@ public class TemplateUtility {
     }
     return roles;
   }
-  
-  public List<Role> allPhysicalRoles(){
+
+  public List<Role> allPhysicalRoles() {
     List<Role> roles = Lists.newArrayList();
     Optional<User> user = Security.getUser();
     if (user.isPresent()) {
@@ -323,11 +350,11 @@ public class TemplateUtility {
   public List<AbsenceType> frequentAbsenceTypeList() {
 
     Optional<AbsenceType> ferCode = absenceTypeDao
-            .getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode());
+        .getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode());
     Preconditions.checkState(ferCode.isPresent());
 
     return FluentIterable.from(Lists.newArrayList(ferCode.get()))
-            .append(absenceTypeDao.getFrequentTypes()).toList();
+        .append(absenceTypeDao.getFrequentTypes()).toList();
   }
 
   /**
@@ -336,9 +363,9 @@ public class TemplateUtility {
   public List<AbsenceType> allAbsenceCodes(LocalDate date) {
     return absenceTypeDao.getAbsenceTypeFromEffectiveDate(date);
   }
-  
+
   /**
-   * 
+   *
    * @return i codici di assenza per i livelli I - III.
    */
   public List<AbsenceType> absencesForEmployees() {
@@ -350,17 +377,26 @@ public class TemplateUtility {
 
   /**
    * L'istanza del wrapperFactory disponibile nei template.
+   *
    * @return wrapperFactory
    */
   public IWrapperFactory getWrapperFactory() {
     return this.wrapperFactory;
   }
-  
+
   public SynchDiagnostic getSyncDiagnostic() {
     return this.synchDiagnostic;
   }
-  
+
   public Object getObjectInConfiguration(EpasParam epasParam, String fieldValue) {
     return configurationManager.parseValue(epasParam, fieldValue);
+  }
+
+  public MemoizedCollection<Notification> getNotifications() {
+    return notifications;
+  }
+
+  public MemoizedCollection<Notification> getArchivedNotifications() {
+    return archivedNotifications;
   }
 }

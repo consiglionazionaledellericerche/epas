@@ -27,7 +27,7 @@ import javax.inject.Inject;
  *
  * @author marco
  */
-@With({Resecure.class,RequestInit.class})
+@With({Resecure.class})
 public class PersonDayHistory extends Controller {
 
   @Inject
@@ -55,7 +55,7 @@ public class PersonDayHistory extends Controller {
     }
     found = true;
     List<HistoryValue<Absence>> allAbsences = personDayHistoryDao
-            .absences(personDayId);
+        .absences(personDayId);
 
     Set<Long> absenceIds = Sets.newHashSet();
     for (HistoryValue<Absence> historyValue : allAbsences) {
@@ -71,12 +71,12 @@ public class PersonDayHistory extends Controller {
     for (Long absenceId : sortedAbsencesIds) {
 
       List<HistoryValue<Absence>> historyAbsence = absenceHistoryDao
-              .absences(absenceId);
+          .absences(absenceId);
       historyAbsencesList.add(historyAbsence);
     }
 
     List<HistoryValue<Stamping>> allStampings = personDayHistoryDao
-            .stampings(personDayId);
+        .stampings(personDayId);
 
     Set<Long> stampingIds = Sets.newHashSet();
     for (HistoryValue<Stamping> historyValue : allStampings) {
@@ -92,7 +92,7 @@ public class PersonDayHistory extends Controller {
     for (Long stampingId : sortedStampingsIds) {
 
       List<HistoryValue<Stamping>> historyStamping = stampingHistoryDao
-              .stampings(stampingId);
+          .stampings(stampingId);
       historyStampingsList.add(historyStamping);
     }
     render(historyStampingsList, historyAbsencesList, personDay, found);

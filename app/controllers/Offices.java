@@ -32,7 +32,7 @@ import security.SecurityRules;
 
 import javax.inject.Inject;
 
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class Offices extends Controller {
 
   private static final Logger log = LoggerFactory.getLogger(Offices.class);
@@ -122,7 +122,7 @@ public class Offices extends Controller {
   public static void save(@Valid Office office) {
 
     Preconditions.checkNotNull(office.institute);
-    
+
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors for {}: {}", office,
@@ -136,13 +136,13 @@ public class Offices extends Controller {
     } else {
       office.beginDate = new LocalDate(LocalDate.now().getYear() - 1, 12, 31);
       office.save();
-      
+
       // Per i permessi di developer e admin...
       officeManager.setSystemUserPermission(office);
-      
+
       // Configurazione iniziale di default ...
       configurationManager.updateConfigurations(office);
-      
+
       periodManager.updatePropertiesInPeriodOwner(office);
       flash.success(Web.msgSaved(Office.class));
       Institutes.index();
