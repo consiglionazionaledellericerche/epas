@@ -340,7 +340,8 @@ public class Absences extends Controller {
           air.getTotalAbsenceInsert(),
           air.getAbsences().iterator().next().getAbsenceCode());
     }
-    if (Security.getUser().get().person.id.equals(person.id)) {
+    if (Security.getUser().get().person.id.equals(person.id)
+        && !personManager.isPersonnelAdmin(Security.getUser().get())) {
       Stampings.stampings(dateFrom.getYear(), dateFrom.getMonthOfYear());
     }
     
@@ -420,7 +421,8 @@ public class Absences extends Controller {
       flash.success("Rimossi %s codici assenza di tipo %s", deleted, absence.absenceType.code);
     }
     
-    if (Security.getUser().get().person.id.equals(person.id)) {
+    if (Security.getUser().get().person.id.equals(person.id)
+        && !personManager.isPersonnelAdmin(Security.getUser().get())) {
       Stampings.stampings(dateFrom.getYear(), dateFrom.getMonthOfYear());
     }
     Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
