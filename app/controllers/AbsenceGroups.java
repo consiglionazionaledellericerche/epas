@@ -1,9 +1,24 @@
 package controllers;
 
+import dao.PersonDao;
+import dao.PersonDayDao;
+
+import lombok.extern.slf4j.Slf4j;
+
+import manager.ConsistencyManager;
+import manager.services.absences.AbsenceEngine;
+import manager.services.absences.AbsenceEngine.AbsencePeriod;
+import manager.services.absences.AbsenceEngine.GroupAbsenceType;
+
+import models.Absence;
+import models.AbsenceType;
 import models.AbsenceTypeGroup;
 import models.Office;
+import models.Person;
+import models.PersonDay;
 import models.enumerate.AccumulationBehaviour;
 
+import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
 
 import play.mvc.Controller;
@@ -11,9 +26,21 @@ import play.mvc.With;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
+@Slf4j
 @With({Resecure.class, RequestInit.class})
 public class AbsenceGroups extends Controller {
-
+  
+  @Inject
+  private static PersonDao personDao;
+  @Inject
+  private static PersonDayDao personDayDao;
+  @Inject
+  private static AbsenceEngine absenceEngine;
+  @Inject
+  private static ConsistencyManager consistencyManager;
+  
   public static void index(Office office) {
     
     
@@ -38,4 +65,34 @@ public class AbsenceGroups extends Controller {
     render(noMoreAbsencesAccepted, replaceCodeAndDecreaseAccumulation, otherGroups);
   }
   
+  public static void insert(Long personId, LocalDate date, String group) {
+    
+    Person person = personDao.getPersonById(personId);
+    
+    AbsencePeriod absencePeriod = absenceEngine.buildAbsencePeriod(person, 
+        GroupAbsenceType.group661, date);
+    
+    AbsenceType absenceType = absencePeriod.takableCodes.iterator().next(); 
+    
+    boolean result = absenceEngine.canTakeAbsenceInPeriod(absencePeriod,
+        absenceType, date);
+    
+    if (result) {
+      PersonDay personDay = personDayDao.getOrBuildPersonDay(person, date);
+      Absence absence = new Absence();
+      absence.absenceType = absenceType;
+      absence.personDay = personDay;
+      personDay.absences.add(absence);
+      personDay.save();
+      
+      consistencyManager.updatePersonSituation(person.id, date);
+      
+      log.info("Inserita assenza {}.", absenceType.code);
+    } else {
+      log.info("Rifiutata assenza {}.", absenceType.code);
+    }
+    
+    renderText(result);
+    
+  }
 }
