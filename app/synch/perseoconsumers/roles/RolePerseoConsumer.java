@@ -2,6 +2,8 @@ package synch.perseoconsumers.roles;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
@@ -9,9 +11,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
-
-import com.beust.jcommander.internal.Maps;
-import com.beust.jcommander.internal.Sets;
 
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -48,7 +47,8 @@ public class RolePerseoConsumer {
 
   /**
    * Costruttore.
-   * @param personDao inject
+   *
+   * @param personDao              inject
    * @param wrapperFunctionFactory inject
    */
   @Inject
@@ -60,7 +60,6 @@ public class RolePerseoConsumer {
     this.uroDao = uroDao;
   }
 
- 
 
   /**
    * @return La lista dei ruoli assegnati su perseo alle sedi.
@@ -139,9 +138,9 @@ public class RolePerseoConsumer {
     } else {
       // TODO: richiesta per tutte le sedi, mettercele tutte
     }
-    
+
     Map<Long, Set<String>> peoplePerseoRoles = Maps.newHashMap();
-    
+
     for (PerseoRole perseoRole : perseoRoles) {
       Office officeRole = mapOffices.get(perseoRole.perseoDepartmentId);
       if (officeRole == null) {
@@ -152,7 +151,7 @@ public class RolePerseoConsumer {
         // Non dovrebbero arrivare ruoli non epas....
         continue;
       }
-      
+
       Set<String> personRoles = peoplePerseoRoles.get(perseoRole.personPerseoId);
       if (personRoles == null) {
         personRoles = Sets.newHashSet();
@@ -162,18 +161,18 @@ public class RolePerseoConsumer {
         personRoles.add(role.toString() + " - " + officeRole.name);
       }
     }
-    
+
     return peoplePerseoRoles;
   }
-  
-  
+
+
   /**
    * La lista dei ruoli in perseo per l'office, sotto forma di usersRolesOffices
-   * @param office
+   *
    * @return la lista
    */
   public List<UsersRolesOffices> perseoUsersRolesOffices(Office office) {
-    
+
     // Ruoli sede di perseo
     List<PerseoRole> perseoRoles = Lists.newArrayList();
     try {
@@ -184,7 +183,7 @@ public class RolePerseoConsumer {
       log.error(error);
       throw new ApiRequestException(error);
     }
-   
+
     //Persone epas per perseoId.
     Map<Long, Person> epasPeople = Maps.newHashMap();
     for (Person person : personDao.list(Optional.of(office)).list()) {
@@ -192,17 +191,17 @@ public class RolePerseoConsumer {
         epasPeople.put(person.perseoId, person);
       }
     }
-    
+
     // Sedi per perseoId
     Map<Long, Office> epasOffices = Maps.newHashMap();
-    for (Office seat: officeDao.allOffices().list()) {
+    for (Office seat : officeDao.allOffices().list()) {
       if (seat.perseoId != null) {
         epasOffices.put(seat.perseoId, seat);
       }
     }
-    
+
     List<UsersRolesOffices> uroList = Lists.newArrayList();
-    
+
     for (PerseoRole perseoRole : perseoRoles) {
       Person epasPerson = epasPeople.get(perseoRole.personPerseoId);
       if (epasPerson == null) {
@@ -212,13 +211,13 @@ public class RolePerseoConsumer {
       if (epasOffice == null) {
         continue;
       }
-      Role role  = roleFromPerseo(perseoRole.roleName);
+      Role role = roleFromPerseo(perseoRole.roleName);
       if (role == null) {
         continue;
       }
       Optional<UsersRolesOffices> uroOpt = uroDao
-          .getUsersRolesOffices(epasPerson.user, role, epasOffice); 
-      if(uroOpt.isPresent()) {
+          .getUsersRolesOffices(epasPerson.user, role, epasOffice);
+      if (uroOpt.isPresent()) {
         uroList.add(uroOpt.get());
       } else {
         UsersRolesOffices uro = new UsersRolesOffices();

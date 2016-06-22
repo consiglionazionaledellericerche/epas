@@ -105,8 +105,7 @@ public class MonthRecaps extends Controller {
    * @param month    mese
    * @param officeId sede
    */
-  public static void customRecap(final int year, final int month,
-      Long officeId) {
+  public static void customRecap(final int year, final int month, Long officeId) {
 
     Set<Office> offices = secureManager
         .officesReadAllowed(Security.getUser().get());

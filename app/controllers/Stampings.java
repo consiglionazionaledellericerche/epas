@@ -260,7 +260,7 @@ public class Stampings extends Controller {
     Person person = personDao.getPersonById(personId);
     if (person == null) {
       flash.error("La persona non esiste!");
-      Persons.list(null);
+      Persons.list(null,null);
     }
 
     PersonDay personDay = personDayDao.getOrBuildPersonDay(person, date);
@@ -518,11 +518,14 @@ public class Stampings extends Controller {
     PersonDay pd = personDayDao.getPersonDayById(personDayId);
     Preconditions.checkNotNull(pd);
     Preconditions.checkNotNull(pd.isPersistent());
-    Preconditions.checkState(pd.isHoliday == true && pd.timeAtWork > 0);
+    Preconditions.checkState(pd.isHoliday && pd.timeAtWork > 0);
 
     rules.checkIfPermitted(pd.person.office);
 
     pd.acceptedHolidayWorkingTime = !pd.acceptedHolidayWorkingTime;
+    if (!pd.acceptedHolidayWorkingTime){
+      pd.isTicketForcedByAdmin = false;
+    }
     pd.save();
 
     consistencyManager.updatePersonSituation(pd.person.id, pd.date);

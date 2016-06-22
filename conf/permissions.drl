@@ -435,6 +435,7 @@ when
  $c: PermissionCheck(action in (
  	
  	   /* Vecchio permesso viewPerson */
+ 	   "Persons.list",
  	   "Persons.showCurrentVacation",
        "Persons.showCurrentContractWorkingTimeType",
        

@@ -42,6 +42,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
   private ConsistencyManager consistencyManager;
   private MealTicketRecapBuilder mealTicketRecapBuilder;
   private ConfigurationManager configurationManager;
+
   /**
    * Costrutture.
    *
@@ -53,11 +54,11 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
    */
   @Inject
   public MealTicketsServiceImpl(PersonDao personDao,
-                                MealTicketDao mealTicketDao,
-                                ConsistencyManager consistencyManager,
-                                ConfigurationManager configurationManager,
-                                MealTicketRecapBuilder mealTicketRecapBuilder,
-                                IWrapperFactory wrapperFactory) {
+      MealTicketDao mealTicketDao,
+      ConsistencyManager consistencyManager,
+      ConfigurationManager configurationManager,
+      MealTicketRecapBuilder mealTicketRecapBuilder,
+      IWrapperFactory wrapperFactory) {
 
     this.personDao = personDao;
     this.mealTicketDao = mealTicketDao;
@@ -136,8 +137,8 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
    * @return la lista dei buoni
    */
   @Override
-  public List<MealTicket> buildBlockMealTicket(Integer codeBlock, Integer first, Integer last,
-                                               LocalDate expireDate) {
+  public List<MealTicket> buildBlockMealTicket(Long codeBlock, Integer first, Integer last,
+      LocalDate expireDate) {
 
     List<MealTicket> mealTicketList = Lists.newArrayList();
 
