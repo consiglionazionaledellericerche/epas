@@ -66,8 +66,7 @@ import java.util.zip.ZipOutputStream;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
-
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class Absences extends Controller {
 
   @Inject

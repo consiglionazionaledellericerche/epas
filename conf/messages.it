@@ -223,6 +223,11 @@ note= Note
 notify.error =Attenzione
 notify.success =Ok
 
+notification.list= Notifiche da leggere
+notification.archiveds= Notifiche archiviate
+notification.archive= Archivia Notifica
+notification.show= Visualizza Dettaglio
+
 nuovaPassword= Nuova Password
 confermaPassword= Ripeti Password
 

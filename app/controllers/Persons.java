@@ -61,9 +61,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-
 @Slf4j
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class Persons extends Controller {
 
   @Inject
@@ -119,7 +118,7 @@ public class Persons extends Controller {
     List<IWrapperPerson> personList = FluentIterable.from(simplePersonList)
         .transform(wrapperFunctionFactory.person()).toList();
 
-    render(personList);
+    render(personList, office);
   }
 
   /**
