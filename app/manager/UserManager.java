@@ -29,7 +29,8 @@ import java.util.Set;
 import javax.inject.Inject;
 
 /**
- * Created by daniele on 13/10/15.
+ * @author daniele
+ * @since 13/10/15.
  */
 @Slf4j
 public class UserManager {
