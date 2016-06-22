@@ -57,7 +57,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 @Slf4j
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class Competences extends Controller {
 
   @Inject
