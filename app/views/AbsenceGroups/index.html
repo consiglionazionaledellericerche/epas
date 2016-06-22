@@ -4,37 +4,136 @@
 
 <div class="container">
 
-  <table class="table">
+#{title title:'Gruppi di Assenze' /}
+
+  #{alert color:'info'}
+   <p>Raggiunto il limite non accetta ulteriori assenze.</p>
+  #{/alert}
+
+  <table class="table table-bordered">
     <tr>
       <th>Label</th>
+      <th>Descrizione</th>
       *{ <th>Eccesso (minuti)</th> }*
-      <th>Limite<br> (minuti)</th>
+      <th>Limite</th>
+      <th>Tipo<br>Accumulo</th>
+      <th class="col-md-5">Codici</th>
+    </tr>
+    #{list items:noMoreAbsencesAccepted, as:'group'}
+      <tr>
+        <td><span class="label label-warning">${group.label}</span></td>
+        <td>${group.description}</td>
+        *{ <td>${group.minutesExcess}</td> }*
+        <td>${group.limitInMinute.printHourMinute()}</td>
+        <td>${group.accumulationType.description}</td>
+        <td>
+          #{if group.replacingAbsenceType}
+
+          <span class="label label-success">${group.replacingAbsenceType?.code}</span>
+           <strong>${group.replacingAbsenceType?.description}</strong> 
+          #{if group.replacingAbsenceType != null && group.replacingAbsenceType.absences != null}
+            <span class="label label-default">${group.replacingAbsenceType.absences.size()}</span>
+          #{/if}
+          <br>
+          #{/if}
+          
+          
+          #{list group.absenceTypes, as:'abt'}
+            <span class="label label-info">${abt.code}</span> ${abt.description} 
+            <span class="label label-default">${abt.absences.size()}</span>
+            <br>
+          #{/list}
+        </td>
+      </tr>
+    #{/list}
+  </table>
+  
+   #{alert color:'info'}
+   <p>Raggiunto il limite inserisce il codice di completamento e resetta l'accumulo.</p>
+  #{/alert}
+
+  <table class="table table-bordered">
+    <tr>
+      <th>Label</th>
+      <th>Descrizione</th>
+      *{ <th>Eccesso (minuti)</th> }*
+      <th>Limite</th>
+      <th>Tipo<br>Accumulo</th>
+      *{ <th>Comportamento</th> }*
+      <th class="col-md-5">Rimpiazzo e codici</th>
+    </tr>
+    #{list items:replaceCodeAndDecreaseAccumulation, as:'group'}
+      <tr>
+        <td><span class="label label-warning">${group.label}</span></td>
+        <td>${group.description}</td>
+        *{ <td>${group.minutesExcess}</td> }*
+        <td>${group.limitInMinute.printHourMinute()}</td>
+        <td>${group.accumulationType.description}</td>
+        *{ <td>${group.accumulationBehaviour.description}</td> }*
+        <td>
+          #{if group.replacingAbsenceType}
+          
+          <span class="label label-success">${group.replacingAbsenceType?.code}</span>
+           <strong>${group.replacingAbsenceType?.description}</strong> 
+          #{if group.replacingAbsenceType != null && group.replacingAbsenceType.absences != null}
+            <span class="label label-default">${group.replacingAbsenceType.absences.size()}</span>
+          #{/if}
+          <br>
+          #{/if}
+          
+          
+          #{list group.absenceTypes, as:'abt'}
+            <span class="label label-info">${abt.code}</span> ${abt.description} 
+            <span class="label label-default">${abt.absences.size()}</span>
+            <br>
+          #{/list}
+        </td>
+      </tr>
+    #{/list}
+  </table>
+  
+  #{alert color:'danger'}
+   <p>Altri gruppi definiti (da verificare).</p>
+  #{/alert}
+
+  <table class="table table-bordered">
+    <tr>
+      <th>Label</th>
+      <th>Descrizione</th>
+      *{ <th>Eccesso (minuti)</th> }*
+      <th>Limite</th>
       <th>Tipo<br>Accumulo</th>
       <th>Comportamento</th>
-      <th>Rimpiazzo e codici</th>
+      <th class="col-md-5">Rimpiazzo e codici</th>
     </tr>
-    #{list items:groups, as:'group'}
+    #{list items:otherGroups, as:'group'}
       <tr>
-        <td>${group.label}</td>
+        <td><span class="label label-warning">${group.label}</span></td>
+        <td>${group.description}</td>
         *{ <td>${group.minutesExcess}</td> }*
         <td>${group.limitInMinute.printHourMinute()}</td>
         <td>${group.accumulationType.description}</td>
         <td>${group.accumulationBehaviour.description}</td>
         <td>
-          <strong>${group.replacingAbsenceType?.code} ${group.replacingAbsenceType?.description}</strong> 
+          #{if group.replacingAbsenceType}
+          
+          <span class="label label-success">${group.replacingAbsenceType?.code}</span>
+           <strong>${group.replacingAbsenceType?.description}</strong> 
           #{if group.replacingAbsenceType != null && group.replacingAbsenceType.absences != null}
-            (${group.replacingAbsenceType.absences.size()})
+            <span class="label label-default">${group.replacingAbsenceType.absences.size()}</span>
+          #{/if}
+          <br>
           #{/if}
           
-          <br>
+          
           #{list group.absenceTypes, as:'abt'}
-            ${abt.code} ${abt.description} (${abt.absences.size()})<br>
+            <span class="label label-info">${abt.code}</span> ${abt.description} 
+            <span class="label label-default">${abt.absences.size()}</span>
+            <br>
           #{/list}
         </td>
-        
-        
       </tr>
-      
     #{/list}
   </table>
+  
 </div>

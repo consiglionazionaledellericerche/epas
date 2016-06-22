@@ -32,6 +32,8 @@ public class AbsenceTypeGroup extends BaseModel {
   @OneToMany(mappedBy = "absenceTypeGroup")
   public List<AbsenceType> absenceTypes;
 
+  public String description;
+  
   @Required
   public String label;
 
