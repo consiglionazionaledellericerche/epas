@@ -27,6 +27,7 @@ CREATE TABLE person_configurations_history (
   field_value TEXT,
   begin_date DATE,
   end_date DATE
+);
 
 CREATE TABLE notifications (
     id BIGSERIAL PRIMARY KEY,

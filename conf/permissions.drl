@@ -9,6 +9,7 @@ import models.Role;
 import models.Configuration;
 import manager.configurations.EpasParam;
 import models.Qualification;
+import models.Notification;
 
 global models.User currentOperator;
 
@@ -26,7 +27,10 @@ rule AnyUser
 when
   $c: PermissionCheck(action in (
      	"Application.index",
-     	"Version.showVersion"
+     	"Version.showVersion",
+     	"Notifications.list",
+     	"Notifications.archiveds",
+     	"Notifications.read"
        ), target == null, granted == false)
 then
  $c.grant();
@@ -974,4 +978,12 @@ when
        ), target == null, granted == false)
 then
  $c.grant();
+end
+
+rule Notifications
+when
+  $n: Notification(recipient == currentOperator)
+  $c: PermissionCheck(target == $n, granted == false)
+then
+  $c.grant();
 end
