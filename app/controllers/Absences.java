@@ -268,7 +268,7 @@ public class Absences extends Controller {
     Person person = personDao.getPersonById(personId);
     Preconditions.checkNotNull(person);
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person);
     LocalDate dateTo = dateFrom;
     boolean employee = true;
     render(person, dateFrom, dateTo, employee);
@@ -301,8 +301,11 @@ public class Absences extends Controller {
 
       render("@blank", person, dateFrom, dateTo);
     }
-
-    rules.checkIfPermitted(person.office);
+    if (Security.getUser().get().person.id.equals(person.id)) {
+      rules.checkIfPermitted(person);
+    } else {
+      rules.checkIfPermitted(person.office);
+    }    
 
     AbsenceInsertReport air = absenceManager.insertAbsenceRecompute(
         person, dateFrom, Optional.fromNullable(dateTo),
