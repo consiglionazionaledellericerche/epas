@@ -75,7 +75,7 @@ import javax.inject.Inject;
  * @author alessandro
  */
 @Slf4j
-@With({RequestInit.class, Resecure.class})
+@With({Resecure.class})
 public class Stampings extends Controller {
 
   @Inject
@@ -523,7 +523,7 @@ public class Stampings extends Controller {
     rules.checkIfPermitted(pd.person.office);
 
     pd.acceptedHolidayWorkingTime = !pd.acceptedHolidayWorkingTime;
-    if (!pd.acceptedHolidayWorkingTime){
+    if (!pd.acceptedHolidayWorkingTime) {
       pd.isTicketForcedByAdmin = false;
     }
     pd.save();

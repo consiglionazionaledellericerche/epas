@@ -11,7 +11,7 @@ import play.mvc.With;
 
 import javax.inject.Inject;
 
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class Application extends Controller {
 
   @Inject

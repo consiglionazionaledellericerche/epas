@@ -50,7 +50,7 @@ import javax.inject.Inject;
  * @author cristian
  */
 @Slf4j
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class UploadSituation extends Controller {
 
   public static final String LOGIN_RESPONSE_CACHED = "loginResponse";
@@ -109,7 +109,7 @@ public class UploadSituation extends Controller {
 
     render(wrOffice, monthToUpload, sessionAttestati);
   }
-  
+
   /**
    * Modale Cambia il mese e la sede.
    *
@@ -164,7 +164,7 @@ public class UploadSituation extends Controller {
    * @param month  mese
    */
   public static void computeCreateFile(@Valid Office office,
-                                       @Required Integer year, @Required Integer month) {
+      @Required Integer year, @Required Integer month) {
 
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
@@ -185,7 +185,7 @@ public class UploadSituation extends Controller {
       Optional<YearMonth> monthToUpload = Optional.of(new YearMonth(year, month));
       render("@createFile", wrOffice, monthToUpload);
     }
-    
+
     String body = updloadSituationManager.createFile(office, year, month);
     String fileName = FILE_PREFIX + office.codeId + " - " + year + month + FILE_SUFFIX;
     renderBinary(IOUtils.toInputStream(body), fileName);
@@ -202,7 +202,7 @@ public class UploadSituation extends Controller {
    * @param attestatiPassword pass
    */
   public static void fetchData(@Valid Office office, Integer year, Integer month,
-                               final String attestatiLogin, final String attestatiPassword, boolean updateSession) {
+      final String attestatiLogin, final String attestatiPassword, boolean updateSession) {
 
     rules.checkIfPermitted(office);
     IWrapperOffice wrOffice = factory.create(office);

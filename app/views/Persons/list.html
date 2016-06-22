@@ -1,4 +1,4 @@
-#{extends 'main3.html' /}
+#{extends 'main.html' /}
 #{set header:'navbar' /}
 #{set title: 'ePAS - Dati del personale'  /}
 
@@ -13,7 +13,7 @@
 #{/secure.checkAction}
 
 <div class="container">
-  #{title title:'Lista Del Personale' /}
+  #{title title:'Lista del personale di ' + office /}
 
   #{tabs}
   #{tabItem id:'attivo', title:'Personale Attivo', active:true /}

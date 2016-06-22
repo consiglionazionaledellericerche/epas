@@ -1,28 +1,6 @@
 package controllers;
 
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-
-import dao.OfficeDao;
-import dao.PersonDao;
-import dao.UsersRolesOfficesDao;
-
-import manager.SecureManager;
-
-import models.Office;
-import models.Role;
-import models.User;
-import models.UsersRolesOffices;
-
-import org.joda.time.LocalDate;
-
-import play.i18n.Messages;
-import play.mvc.Before;
-import play.mvc.Controller;
-import play.mvc.Http;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -30,10 +8,32 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.joda.time.LocalDate;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+
+import dao.OfficeDao;
+import dao.PersonDao;
+import dao.UsersRolesOfficesDao;
+import helpers.TemplateDataInjector;
+import manager.SecureManager;
+import models.Office;
+import models.Role;
+import models.User;
+import models.UsersRolesOffices;
+import play.i18n.Messages;
+import play.mvc.Before;
+import play.mvc.Controller;
+import play.mvc.Http;
+import play.mvc.With;
+
 
 /**
  * @author cristian.
  */
+@With(TemplateDataInjector.class)
 public class RequestInit extends Controller {
 
   @Inject
@@ -43,16 +43,7 @@ public class RequestInit extends Controller {
   @Inject
   static PersonDao personDao;
   @Inject
-  static TemplateUtility templateUtility;
-  @Inject
   static UsersRolesOfficesDao uroDao;
-
-
-  @Before(priority = 1)
-  static void injectUtility() {
-
-    renderArgs.put("templateUtility", templateUtility);
-  }
 
   @Before(priority = 1)
   static void injectMenu() {

@@ -27,7 +27,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class PrintTags extends Controller {
 
   @Inject
