@@ -300,11 +300,14 @@ public class Absences extends Controller {
 
       render("@blank", person, dateFrom, dateTo);
     }
-    if (Security.getUser().get().person.id.equals(person.id)) {
-      rules.checkIfPermitted(person);
-    } else {
-      rules.checkIfPermitted(person.office);
-    }    
+    
+    if(!Security.getUser().get().isSystemUser()) {
+      if (Security.getUser().get().person.id.equals(person.id)) {
+        rules.checkIfPermitted(person);
+      } else {
+        rules.checkIfPermitted(person.office);
+      }   
+    }     
 
     AbsenceInsertReport air = absenceManager.insertAbsenceRecompute(
         person, dateFrom, Optional.fromNullable(dateTo),
@@ -340,11 +343,14 @@ public class Absences extends Controller {
           air.getTotalAbsenceInsert(),
           air.getAbsences().iterator().next().getAbsenceCode());
     }
-    if (Security.getUser().get().person.id.equals(person.id)
-        && !personManager.isPersonnelAdmin(Security.getUser().get())) {
-      Stampings.stampings(dateFrom.getYear(), dateFrom.getMonthOfYear());
-    }
     
+    if (!Security.getUser().get().isSystemUser()) {
+      if (Security.getUser().get().person.id.equals(person.id)
+          && !personManager.isPersonnelAdmin(Security.getUser().get())) {
+        Stampings.stampings(dateFrom.getYear(), dateFrom.getMonthOfYear());
+      }
+    }
+        
     Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
   }
 

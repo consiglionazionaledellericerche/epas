@@ -264,25 +264,30 @@ public class Stampings extends Controller {
     }
 
     PersonDay personDay = personDayDao.getOrBuildPersonDay(person, date);
-    if (Security.getUser().get().person.id.equals(person.id) 
-        && !personManager.isPersonnelAdmin(Security.getUser().get())) {
-      rules.checkIfPermitted(person);
-    } else {
-      rules.checkIfPermitted(person.office);
+    if (!Security.getUser().get().isSystemUser()) {
+      if (Security.getUser().get().person.id.equals(person.id) 
+          && !personManager.isPersonnelAdmin(Security.getUser().get())) {
+        rules.checkIfPermitted(person);
+      } else {
+        rules.checkIfPermitted(person.office);
+      }
     }
+    
     
     if (!stamping.isPersistent()) {
       stamping.personDay = personDay;
     }
     
-    if (Security.getUser().get().person.id.equals(person.id) 
-        && !personManager.isPersonnelAdmin(Security.getUser().get())
-        && !stampingManager.checkStampType(stamping, Security.getUser().get(), person)) {
-      flash.error("Non si hanno privilegi sufficienti per inserire una timbratura "
-          + "con causale diversa da lavoro fuori sede");
-      Stampings.stampings(date.getYear(), date.getMonthOfYear());
+    if (!Security.getUser().get().isSystemUser()) {
+      if (Security.getUser().get().person.id.equals(person.id) 
+          && !personManager.isPersonnelAdmin(Security.getUser().get())
+          && !stampingManager.checkStampType(stamping, Security.getUser().get(), person)) {
+        flash.error("Non si hanno privilegi sufficienti per inserire una timbratura "
+            + "con causale diversa da lavoro fuori sede");
+        Stampings.stampings(date.getYear(), date.getMonthOfYear());
+      }
     }
-
+    
     if (Validation.hasErrors()) {
       response.status = 400;
 
@@ -297,14 +302,18 @@ public class Stampings extends Controller {
 
     personDay.save();
     stamping.date = stampingManager.deparseStampingDateTime(date, time);
-    if (Security.getUser().get().person.id.equals(person.id) 
-        && !personManager.isPersonnelAdmin(Security.getUser().get())) {
-      stamping.markedByEmployee = true;
-      stamping.markedByAdmin = false;
+    if (!Security.getUser().get().isSystemUser()) {
+      if (Security.getUser().get().person.id.equals(person.id) 
+          && !personManager.isPersonnelAdmin(Security.getUser().get())) {
+        stamping.markedByEmployee = true;
+        stamping.markedByAdmin = false;
+      } else {
+        stamping.markedByAdmin = true;
+      }
     } else {
-      stamping.markedByAdmin = true; 
-    }       
-
+      stamping.markedByAdmin = true;
+    }
+    
     personDay.stampings.add(stamping);
     personDay.save();
 
@@ -312,11 +321,13 @@ public class Stampings extends Controller {
 
     flash.success(Web.msgSaved(Stampings.class));
     
-    if (Security.getUser().get().person.id.equals(person.id) 
-        && !personManager.isPersonnelAdmin(Security.getUser().get())) {
-      Stampings.stampings(date.getYear(), date.getMonthOfYear());
+    if (!Security.getUser().get().isSystemUser()) {
+      if (Security.getUser().get().person.id.equals(person.id) 
+          && !personManager.isPersonnelAdmin(Security.getUser().get())) {
+        Stampings.stampings(date.getYear(), date.getMonthOfYear());
+      }
     }
-
+    
     Stampings.personStamping(person.id,
         date.getYear(), date.getMonthOfYear());
 
