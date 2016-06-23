@@ -21,6 +21,13 @@ public enum EpasParam {
   
   //#######################################
   // GENERAL PARAMS
+  
+  ABSENCES_FOR_EMPLOYEE("absences_for_employee",
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
 
   OFF_SITE_STAMPING("off_site_stamping",
       EpasParamTimeType.GENERAL,
