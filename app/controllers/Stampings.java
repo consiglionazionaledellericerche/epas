@@ -43,12 +43,14 @@ import models.Absence;
 import models.CertificatedData;
 import models.Certification;
 import models.Configuration;
+import models.Notification;
 import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
 import models.User;
 import models.UsersRolesOffices;
+import models.enumerate.NotificationSubject;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
