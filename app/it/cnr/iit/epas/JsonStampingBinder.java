@@ -11,8 +11,6 @@ import dao.PersonDao;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.SecureManager;
-
 import models.Person;
 import models.User;
 import models.enumerate.StampTypes;
@@ -39,8 +37,6 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
   @Inject
   private static PersonDao personDao;
-  @Inject
-  private static SecureManager secureManager;
 
   /**
    * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[],
