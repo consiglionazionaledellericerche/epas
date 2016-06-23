@@ -25,7 +25,7 @@ public enum NotificationSubject {
    */
   MESSAGE;
 
-  private String toUrl(String action, Integer id) {
+  private String toUrl(String action, Long id) {
     if (id == null) {
       return Router.reverse(action).url;
     } else {
@@ -35,7 +35,7 @@ public enum NotificationSubject {
     }
   }
 
-  public String toUrl(Integer referenceId) {
+  public String toUrl(Long referenceId) {
     switch (this) {
       case COMMENT:
         return toUrl("Comments.show", referenceId);

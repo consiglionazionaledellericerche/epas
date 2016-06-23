@@ -34,13 +34,12 @@ CREATE TABLE notifications (
     version integer,
     message TEXT,
     reference TEXT,
-    subject_id INT,
+    subject_id BIGINT,
     subject TEXT,
     recipient_id BIGINT NOT NULL REFERENCES users(id),
     read BOOLEAN NOT NULL DEFAULT FALSE,
     created_at timestamp without time zone,
     updated_at timestamp without time zone
-
 );
 
 # ---!Downs
@@ -53,6 +52,6 @@ ALTER TABLE persons ALTER COLUMN begin_date SET DATA TYPE timestamp with time zo
 ALTER TABLE persons ALTER COLUMN end_date SET DATA TYPE timestamp with time zone;
 
 ALTER TABLE persons RENAME COLUMN begin_date TO created_at;
-ALTER TABLE persons RENAME COLUMN end_date TO update_at;
+ALTER TABLE persons RENAME COLUMN end_date TO updated_at;
 
 DROP TABLE notifications;
