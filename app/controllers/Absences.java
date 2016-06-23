@@ -366,13 +366,15 @@ public class Absences extends Controller {
 
     Verify.verify(absence != null, "Assenza specificata inesistente!");
 
-    if (Security.getUser().get().person.id.equals(absence.personDay.person.id) 
-        && !personManager.isPersonnelAdmin(Security.getUser().get())) {
-      rules.checkIfPermitted(absence.personDay.person);
-    } else {
-      rules.checkIfPermitted(absence.personDay.person.office);
-    }    
-    
+    if (!Security.getUser().get().isSystemUser()) {
+      if (Security.getUser().get().person.id.equals(absence.personDay.person.id) 
+          && !personManager.isPersonnelAdmin(Security.getUser().get())) {
+        rules.checkIfPermitted(absence.personDay.person);
+      } else {
+        rules.checkIfPermitted(absence.personDay.person.office);
+      }  
+    }
+        
     List<HistoryValue<Absence>> historyAbsence = absenceHistoryDao
         .absences(absenceId);
 
@@ -394,23 +396,28 @@ public class Absences extends Controller {
 
     Verify.verify(absence.isPersistent(), "Assenza specificata inesistente!");
 
-    if (Security.getUser().get().person.id.equals(absence.personDay.person.id) 
-        && !personManager.isPersonnelAdmin(Security.getUser().get())) {
-      rules.checkIfPermitted(absence.personDay.person);
-    } else {
-      rules.checkIfPermitted(absence.personDay.person.office);
-    }    
-
+    if (!Security.getUser().get().isSystemUser()) {
+      if (Security.getUser().get().person.id.equals(absence.personDay.person.id) 
+          && !personManager.isPersonnelAdmin(Security.getUser().get())) {
+        rules.checkIfPermitted(absence.personDay.person);
+      } else {
+        rules.checkIfPermitted(absence.personDay.person.office);
+      }  
+    }
+    
     Person person = absence.personDay.person;
     LocalDate dateFrom = absence.personDay.date;
 
-    if (Security.getUser().get().person.id.equals(absence.personDay.person.id) 
-        && !personManager.isPersonnelAdmin(Security.getUser().get())) {
-      if (!absence.absenceType.code.equals(CodesForEmployee.BP.getDescription())){
-        flash.error("Non si dispone dei privilegi per eliminare questo tipo di assenza");
-        Stampings.stampings(dateFrom.getYear(), dateFrom.getMonthOfYear());
+    if (!Security.getUser().get().isSystemUser()) {
+      if (Security.getUser().get().person.id.equals(absence.personDay.person.id) 
+          && !personManager.isPersonnelAdmin(Security.getUser().get())) {
+        if (!absence.absenceType.code.equals(CodesForEmployee.BP.getDescription())){
+          flash.error("Non si dispone dei privilegi per eliminare questo tipo di assenza");
+          Stampings.stampings(dateFrom.getYear(), dateFrom.getMonthOfYear());
+        }
       }
     }
+    
     if (dateTo != null && dateTo.isBefore(dateFrom)) {
       flash.error("Errore nell'inserimento del campo Fino a, inserire una data valida. "
           + "Operazione annullata");
@@ -427,10 +434,13 @@ public class Absences extends Controller {
       flash.success("Rimossi %s codici assenza di tipo %s", deleted, absence.absenceType.code);
     }
     
-    if (Security.getUser().get().person.id.equals(person.id)
-        && !personManager.isPersonnelAdmin(Security.getUser().get())) {
-      Stampings.stampings(dateFrom.getYear(), dateFrom.getMonthOfYear());
+    if (!Security.getUser().get().isSystemUser()) {
+      if (Security.getUser().get().person.id.equals(person.id)
+          && !personManager.isPersonnelAdmin(Security.getUser().get())) {
+        Stampings.stampings(dateFrom.getYear(), dateFrom.getMonthOfYear());
+      }
     }
+    
     Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
   }
 
