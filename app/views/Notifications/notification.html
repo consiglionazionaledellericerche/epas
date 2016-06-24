@@ -1,0 +1,20 @@
+<li class="list-group-item" id="notification_${notification.id}">
+  ${notification.message}
+  <div class="pull-right">
+     <span class="label label-info">
+      <time datetime="${notification.createdAt}" title="${notification.createdAt.format()}">
+         ${notification.createdAt.toDate().since()}
+      </time>
+     </span>
+    &nbsp;
+    <div class="btn-group">
+      #{if notification.redirect}
+        #{b.link notification.url, fa:'arrow-circle-right'}&{'notification.show'}#{/b.link}
+      #{/if}
+      #{if !notification.read}
+        #{b.link @Notifications.read(notification.id), color:'info', fa:'check-circle'}&{'notification.archive'}#{/b.link}
+      #{/if}
+    </div>
+  </div>
+  <span class="clearfix"></span>
+</li>

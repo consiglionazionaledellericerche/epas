@@ -140,6 +140,8 @@ VacationCode.CODE_21_3= 21+3
 VacationCode.CODE_30_4= 30+4
 VacationCode.CODE_32_4= 32+4
 
+date= Data
+
 date.modified= Data della Modifica
 dateFrom=Dal
 dateOfPatron= Data del Patrono
@@ -221,6 +223,14 @@ note= Note
 notify.error =Attenzione
 notify.success =Ok
 
+notification.list= Notifiche da leggere
+notification.archiveds= Notifiche archiviate
+notification.archive= Archivia Notifica
+notification.show= Visualizza Dettaglio
+
+nuovaPassword= Nuova Password
+confermaPassword= Ripeti Password
+
 notSentToAttestati= le ore di formazione sono state inserite dopo l'ultima validazione degli attestati o non sono ancora state inviate ad attestati. 
 sentToAttestati= le ore di formazione sono state inviate correttamente ad attestati.
 errorsInSendingToOldAttestati= Ci sono stati errori nell'invio dei dati al vecchio attestati. Controllare tra i certificated_data.
@@ -296,6 +306,8 @@ stamping.out= Timbratura di uscita
 stamping.stampType= Causale Timbratura
 stamping.stampModificationType= Modifiche Timbratura
 stamping.way= Verso Timbratura
+
+stampings= Timbratura
 stampType= Causale
 
 synch.offices=Sincronizza sedi
@@ -445,7 +457,7 @@ DATE_START_MEAL_TICKET=Data inizio gestione Ticket Restaurant
 SEND_EMAIL=Invio email di avviso ai dipendenti
 NEW_ATTESTATI=Nuovo Attestati
 EMAIL_TO_CONTACT=Indirizzo email segreteria
-
+WORKING_OFF_SITE=Lavoro fuori sede
 
 EXPIRY_VACATION_PAST_YEAR=Giorno massimo utilizzo ferie dell'anno precedente
 MONTH_EXPIRY_RECOVERY_DAYS_13=Mese massimo per utilizzo residui dell'anno precedente per i livelli da 1 a 3
@@ -457,6 +469,9 @@ DAY_OF_PATRON=Festa del Patrono
 HOUR_MAX_TO_CALCULATE_WORKTIME=Limite orario massimo per timbratura notturna 	
 LUNCH_INTERVAL=Intervallo in cui ricercare le pause per pranzo
 WORK_INTERVAL=Intervallo apertura / chiusura istituto
+
+OFF_SITE_STAMPING=Inserimento timbratura lavoro fuori sede
+MATERNITY_PERIOD=Periodo Maternità
 
 DAYS=Ricalcoli giornalieri.
 RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.

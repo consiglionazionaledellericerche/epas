@@ -26,6 +26,7 @@ import manager.EmailManager;
 import manager.OfficeManager;
 import manager.SecureManager;
 import manager.UserManager;
+import manager.configurations.ConfigurationManager;
 
 import models.Contract;
 import models.ContractWorkingTimeType;
@@ -42,7 +43,6 @@ import net.sf.oval.constraint.MinLength;
 
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 
 import play.data.validation.Required;
 import play.data.validation.Valid;
@@ -53,6 +53,7 @@ import play.i18n.Messages;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.List;
@@ -60,9 +61,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-
 @Slf4j
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class Persons extends Controller {
 
   @Inject
@@ -90,7 +90,10 @@ public class Persons extends Controller {
   @Inject
   static PersonChildrenDao personChildrenDao;
   @Inject
+  static ConfigurationManager configurationManager;
+  @Inject
   static OfficeDao officeDao;
+
 
   /**
    * il metodo per ritornare la lista delle persone.
@@ -115,7 +118,7 @@ public class Persons extends Controller {
     List<IWrapperPerson> personList = FluentIterable.from(simplePersonList)
         .transform(wrapperFunctionFactory.person()).toList();
 
-    render(personList);
+    render(personList, office);
   }
 
   /**
@@ -182,8 +185,10 @@ public class Persons extends Controller {
 
     //La ricomputazione nel caso di creazione persona viene fatta alla fine.
     person = personDao.getPersonById(person.id);
-    person.createdAt = LocalDateTime.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
+    person.beginDate = LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
     person.save();
+    
+    configurationManager.updateConfigurations(person);
 
     contractManager.recomputeContract(contract, Optional.<LocalDate>absent(), true, false);
 
@@ -374,38 +379,6 @@ public class Persons extends Controller {
     user.save();
     flash.success(Messages.get("passwordSuccessfullyChanged"));
     changePassword();
-  }
-
-  /**
-   * Salva la nuova password.
-   *
-   * @param nuovaPassword    nuovaPassword
-   * @param confermaPassword confermaPassword
-   * @throws Throwable boh.
-   */
-  public static void resetPassword(@MinLength(5) @Required String nuovaPassword,
-      @MinLength(5) @Required String confermaPassword) throws Throwable {
-
-    User user = Security.getUser().get();
-    if (user.expireRecoveryToken == null || !user.expireRecoveryToken.equals(LocalDate.now())) {
-      flash.error("La procedura di recovery password è scaduta. Operazione annullata.");
-      Secure.login();
-    }
-
-    if (validation.hasErrors() || !nuovaPassword.equals(confermaPassword)) {
-      flash.error("Tutti i campi devono essere valorizzati. "
-          + "La passord deve essere almeno lunga 5 caratteri. Operazione annullata.");
-      LostPassword.lostPasswordRecovery(user.recoveryToken);
-    }
-
-    Codec codec = new Codec();
-    user.password = codec.hexMD5(nuovaPassword);
-    user.recoveryToken = null;
-    user.expireRecoveryToken = null;
-    user.save();
-
-    flash.success("La password è stata resettata con successo.");
-    Stampings.stampings(new LocalDate().getYear(), new LocalDate().getMonthOfYear());
   }
 
   /**

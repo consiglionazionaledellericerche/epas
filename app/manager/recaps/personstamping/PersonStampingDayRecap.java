@@ -11,10 +11,12 @@ import it.cnr.iit.epas.DateUtility;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.ConfigurationManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
 import manager.cache.StampTypeManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
+import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 
 import models.Contract;
 import models.PersonDay;
@@ -22,8 +24,6 @@ import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
 import models.WorkingTimeTypeDay;
-import models.enumerate.EpasParam;
-import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
 
 import java.util.List;
 
@@ -135,7 +135,7 @@ public class PersonStampingDayRecap {
         if (contract.getBeginDate().isAfter(personDay.getDate()) 
             || (contract.getSourceDateResidual() != null 
             && !personDay.getDate().isAfter(contract.getSourceDateResidual())) 
-            || personDay.getDate().isBefore(personDay.getPerson().createdAt.toLocalDate())) {
+            || personDay.getDate().isBefore(personDay.getPerson().beginDate)) {
           this.ignoreDay = true;
         }
 

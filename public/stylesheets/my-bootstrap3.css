@@ -444,6 +444,26 @@ i[red] {
 	color: red;
 }
 
+.label-badge {
+    border-radius: 1em;
+}
+
+/* Add blur effect to background when modal is opened*/
+body.modal-open #wrapper{
+    -webkit-filter: blur(1px);
+    -moz-filter: blur(1px);
+    -o-filter: blur(1px);
+    -ms-filter: blur(1px);
+    filter: blur(1px);
+}
+
+.modal-backdrop,
+.modal-backdrop.fade.in{
+	opacity: 0.3;
+	filter: alpha(opacity=70);
+	background: black;
+	/*background: rgba(0, 51, 128, 0.57);*/
+}
 
 /* REGOLE PER LE SELECT 2 UTILIZZARE PER GLI SWITCHER NEL MENU */
 
@@ -471,4 +491,3 @@ i[red] {
 .select2-drop.switcher input {
    padding: 0;
 }
-

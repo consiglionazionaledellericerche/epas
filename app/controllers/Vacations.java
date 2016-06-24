@@ -23,7 +23,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class Vacations extends Controller {
 
   @Inject
@@ -33,6 +33,7 @@ public class Vacations extends Controller {
 
   /**
    * Vista riepiloghi ferie per l'employee.
+   *
    * @param year anno.
    */
   public static void show(Integer year) {
@@ -59,7 +60,7 @@ public class Vacations extends Controller {
     List<VacationsRecap> vacationsRecapList = Lists.newArrayList();
 
     List<Contract> notInitializedContracts = Lists.newArrayList();
-    
+
     for (Contract contract : contractList) {
       Optional<VacationsRecap> vacationsRecap;
 
@@ -77,6 +78,7 @@ public class Vacations extends Controller {
 
   /**
    * La situazione dell'employee ferie anno corrente per l'anno.
+   *
    * @param anno anno
    */
   public static void vacationsCurrentYear(Integer anno) {
@@ -88,7 +90,7 @@ public class Vacations extends Controller {
     }
 
     Optional<Contract> contract = wrapperFactory.create(currentUser.get().person)
-            .getCurrentContract();
+        .getCurrentContract();
 
     Preconditions.checkState(contract.isPresent());
 
@@ -106,6 +108,7 @@ public class Vacations extends Controller {
 
   /**
    * La situazione dell'employee ferie anno passato per l'anno.
+   *
    * @param anno anno
    */
   public static void vacationsLastYear(Integer anno) {
@@ -117,7 +120,7 @@ public class Vacations extends Controller {
     }
 
     Optional<Contract> contract = wrapperFactory.create(currentUser.get().person)
-            .getCurrentContract();
+        .getCurrentContract();
 
     Preconditions.checkState(contract.isPresent());
 
@@ -134,6 +137,7 @@ public class Vacations extends Controller {
 
   /**
    * La situazione dell'employee permessi per l'anno.
+   *
    * @param anno anno
    */
   public static void permissionCurrentYear(Integer anno) {
@@ -145,7 +149,7 @@ public class Vacations extends Controller {
     }
 
     Optional<Contract> contract = wrapperFactory.create(currentUser.get().person)
-            .getCurrentContract();
+        .getCurrentContract();
 
     Preconditions.checkState(contract.isPresent());
 

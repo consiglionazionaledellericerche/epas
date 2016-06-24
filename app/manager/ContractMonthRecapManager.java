@@ -15,6 +15,8 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import manager.cache.CompetenceCodeManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import manager.services.mealtickets.MealTicketsServiceImpl.MealTicketOrder;
 
 import models.Absence;
@@ -25,7 +27,6 @@ import models.ContractMonthRecap;
 import models.ContractWorkingTimeType;
 import models.PersonDay;
 import models.WorkingTimeTypeDay;
-import models.enumerate.EpasParam;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;

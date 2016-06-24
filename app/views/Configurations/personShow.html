@@ -1,0 +1,92 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Parametri di configurazione' /}
+
+
+#{set breadcrumbs:['Lista Persone':@Persons.list(), 
+  (person.fullname):null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+#{persons.personsTabs activeAction:'personShow' /}
+
+
+<div class="container">
+
+  
+
+<br>
+
+    <div id="editGeneral">
+	  #{alert color:'info'}
+	   <p>Elenco dei parametri <em><strong>generali</strong></em> di configurazione ed il loro valore.</p>
+	  #{/alert}
+	  
+	  <table class="table">
+	    <tr>
+	      <th>Parametro</th>
+	      <th>Valore</th>
+	    </tr>
+	  #{list items:currentConfiguration, as:'conf'}
+	    #{if conf.epasParam.general}
+	  	<tr>
+	  	  <td>#{secure.link @Configurations.personEdit(conf.id), modal:'#defaultModal'}
+	  	  &{conf.epasParam}#{/secure.link}</td>
+	  	  <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
+	  	</tr>
+	  	#{/if}
+	  #{/list}
+	  </table>
+	</div>
+<!--  
+    <div id="editYearly">
+	  #{alert color:'warning'}
+	   <p>Elenco dei parametri di configurazione <strong>a cadenza annuale ed il loro valore attuale.</p>
+	  #{/alert}
+	  
+	  <table class="table">
+	    <tr>
+	      <th>Parametro</th>
+	      <th>Valore</th>
+	    </tr>
+	  #{list items:currentConfiguration, as:'conf'}
+	  	#{if conf.epasParam.yearly}
+	  	<tr>
+	  	  <td>#{secure.link @Configurations.personEdit(conf.id), modal:'#defaultModal'}
+	  	  &{conf.epasParam}#{/secure.link}</td>
+	  	  <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
+	  	</tr>
+	  	#{/if}
+	  #{/list}
+	  </table>
+	</div>  
+-->
+
+
+    <div id="editPeriodic">
+	  #{alert color:'info'}
+	   <p>Elenco dei parametri di configurazione a <em><strong>cadenza periodica </strong></em>, il loro valore attuale ed il periodo di riferimento.</p>
+	  #{/alert}
+	
+	  <table class="table">
+	    <tr>
+	      <th>Parametro</th>
+	      <th>Valore</th>
+	      <th>Dal</th>
+	      <th>Al</th>
+	    </tr>
+	  #{list items:currentConfiguration, as:'conf'}
+	  	#{if conf.epasParam.periodic}
+	  	<tr>
+	  	  <td>#{secure.link @Configurations.personEdit(conf.id), modal:'#defaultModal'}
+	  	  &{conf.epasParam}#{/secure.link}</td>
+	  	  <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
+	  	  <td>${conf.beginDate.format()}</td>
+	  	  <td>${conf.calculatedEnd()?.format()}</td>
+	  	</tr>
+	  	#{/if}
+	  #{/list}
+	  </table>
+	</div>
+
+  
+</div>

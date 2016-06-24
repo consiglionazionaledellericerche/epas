@@ -27,16 +27,18 @@ import org.slf4j.LoggerFactory;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
+import play.db.jpa.GenericModel;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class BadgeSystems extends Controller {
 
   private static final Logger log = LoggerFactory.getLogger(BadgeSystems.class);
@@ -71,7 +73,6 @@ public class BadgeSystems extends Controller {
     render(results, name);
   }
 
-
   /**
    * @param id identificativo del gruppo badge.
    */
@@ -93,21 +94,8 @@ public class BadgeSystems extends Controller {
     SearchResults<?> badgeReadersResults = badgeReaderDao.badgeReaders(Optional.<String>absent(),
         Optional.fromNullable(badgeSystem)).listResults();
 
-    List<Badge> allBadges = badgeSystemDao.badges(badgeSystem);
-    List<Badge> badges = Lists.newArrayList();
-    // FIXME: metodo non efficiente.
-    for (Badge badge : allBadges) {
-      boolean toPick = true;
-      // TODO: al posto di questo for usare una mappa
-      for (Badge picked : badges) {
-        if (badge.badgeSystem.equals(picked.badgeSystem) && badge.code.equals(picked.code)) {
-          toPick = false;
-        }
-      }
-      if (toPick) {
-        badges.add(badge);
-      }
-    }
+    List<Badge> badges = badgeSystemDao.badges(badgeSystem)
+        .stream().distinct().collect(Collectors.toList());
 
     List<Person> personsOldBadge = personDao.activeWithBadgeNumber(badgeSystem.office);
 
@@ -186,10 +174,17 @@ public class BadgeSystems extends Controller {
 
     rules.checkIfPermitted(badgeSystem.office);
 
-    List<Person> activePersons = personDao.list(Optional.<String>absent(),
-        Sets.newHashSet(badgeSystem.office), false, LocalDate.now(), LocalDate.now(), true).list();
+    /**
+     * Dato che nell'edit della singola persona non viene inibito per nessuno l'inserimento dei
+     * badge, anche qui recupero la lista completa del personale dell'ufficio.
+     * Decidere se c'è la necessità di impedirlo per qualcuno e uniformare questa decisione sia
+     * in questa vista che nell'edit della singola persona. (e ovviamente implementare lo stesso
+     * controllo anche nella save).
+     */
+    List<Person> officePeople = personDao.list(Optional.<String>absent(),
+        Sets.newHashSet(badgeSystem.office), false, null, null, false).list();
 
-    render("@joinBadges", badgeSystem, activePersons);
+    render("@joinBadges", badgeSystem, officePeople);
   }
 
   public static void joinBadgesPerson(Long personId) {
@@ -401,22 +396,7 @@ public class BadgeSystems extends Controller {
     notFoundIfNull(person.office);
     rules.checkIfPermitted(person.office);
 
-    // FIXME: metodo non efficiente.
-    List<Badge> badges = Lists.newArrayList();
-    for (Badge badge : person.badges) {
-      boolean toPick = true;
-      // TODO: al posto di questo for usare una mappa
-      for (Badge picked : badges) {
-        if (badge.badgeSystem.equals(picked.badgeSystem) && badge.code.equals(picked.code)) {
-          toPick = false;
-        }
-      }
-      if (toPick) {
-        badges.add(badge);
-      }
-    }
-
-    render(person, badges);
+    render(person);
   }
 
   public static void deleteBadgePerson(Long badgeId) {
@@ -428,7 +408,6 @@ public class BadgeSystems extends Controller {
     boolean personFixed = true;
     boolean confirmed = true;
     render("@delete", badge, personFixed, confirmed);
-
   }
 
   public static void deleteBadge(Long badgeId, boolean confirmed, boolean personFixed) {
@@ -441,13 +420,7 @@ public class BadgeSystems extends Controller {
       render("@delete", badge, confirmed);
     }
 
-    for (Badge badgeToRemove : badge.person.badges) {
-      if (badgeToRemove.badgeSystem.equals(badge.badgeSystem)
-          && badgeToRemove.code.equals(badge.code)) {
-
-        badgeToRemove.delete();
-      }
-    }
+    badgeDao.byCodeAndPerson(badge.code, badge.person).forEach(GenericModel::delete);
 
     flash.success("Badge Rimosso con successo");
 
@@ -456,8 +429,6 @@ public class BadgeSystems extends Controller {
     }
 
     edit(badge.badgeSystem.id);
-
   }
-
 
 }

@@ -1,6 +1,7 @@
 package manager.services.absences;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
@@ -19,6 +20,8 @@ import org.joda.time.LocalDate;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class AbsenceEngine {
   
@@ -76,84 +79,111 @@ public class AbsenceEngine {
 
     }
     
-    absencePeriod.periodAmountType = groupAbsenceType.periodAmountType;
-    
     //////////////////////////////////////////////////////////////////////////////////////
-    /* Takable/taken model */
+    /* Build Takable Component */
     
-    TakableAbsenceGroup takableAbsenceGroup = groupAbsenceType.takableAbsenceGroup;
-    
-    absencePeriod.periodTakableAmount = takableAbsenceGroup.periodTakableAmount;
-    if (!takableAbsenceGroup.computeTakableAmountBehaviour.equals(ComputeAmountBehaviour.normal)) {
-      // TODO: ex. workingTimePercent
-    }
-    
-    absencePeriod.takableCountBehaviour = takableAbsenceGroup.takableCountBehaviour;
-    absencePeriod.takenCountBehaviour = takableAbsenceGroup.takenCountBehaviour;
-    
-    absencePeriod.takenCodes = 
-        Sets.newHashSet(absenceTypeDao.absenceTypeCodeSet(takableAbsenceGroup.takenCodes));
-    absencePeriod.takableCodes = 
-        Sets.newHashSet(absenceTypeDao.absenceTypeCodeSet(takableAbsenceGroup.takableCodes));
-    
-    //TODO: le other absences vanno aggiunte!
-    absencePeriod.takenAbsences = absenceDao.getAbsencesInCodeList(person, 
-        absencePeriod.from, absencePeriod.to, Lists.newArrayList(absencePeriod.takenCodes), true);
+    if (groupAbsenceType.takableAbsenceGroup != null) {
+      
+      TakableComponent takableComponent = new TakableComponent();
+      
+      TakableAbsenceGroup takableAbsenceGroup = groupAbsenceType.takableAbsenceGroup;
 
-    absencePeriod.periodTakenAmount = 0;
-    for (Absence absence : absencePeriod.takenAbsences) {
-
-      if (absencePeriod.periodAmountType.equals(AmountType.units)) {
-        absencePeriod.periodTakenAmount++;
-        continue;
-      } 
-      if (absencePeriod.periodAmountType.equals(AmountType.minutes)) {
-        // TODO: renderlo efficiente...
-        
-        absencePeriod.periodTakenAmount += justifiedMinutes(person, date, absence.absenceType);
-        continue;
+      takableComponent.takeAmountType = takableAbsenceGroup.takeAmountType;
+      
+      takableComponent.periodTakableAmount = takableAbsenceGroup.periodTakableAmount;
+      if (!takableAbsenceGroup.computeTakableAmountBehaviour
+          .equals(ComputeAmountBehaviour.normal)) {
+        // TODO: ex. workingTimePercent
       }
 
+      takableComponent.takableCountBehaviour = takableAbsenceGroup.takableCountBehaviour;
+      takableComponent.takenCountBehaviour = takableAbsenceGroup.takenCountBehaviour;
+
+      takableComponent.takenCodes = 
+          Sets.newHashSet(absenceTypeDao.absenceTypeCodeSet(takableAbsenceGroup.takenCodes));
+      takableComponent.takableCodes = 
+          Sets.newHashSet(absenceTypeDao.absenceTypeCodeSet(takableAbsenceGroup.takableCodes));
+
+      //TODO: le other absences vanno aggiunte!
+      takableComponent.takenAbsences = absenceDao.getAbsencesInCodeList(person, 
+          absencePeriod.from, absencePeriod.to, Lists.newArrayList(takableComponent.takenCodes), true);
+
+      takableComponent.periodTakenAmount = 0;
+      for (Absence absence : takableComponent.takenAbsences) {
+        takableComponent.periodTakenAmount += 
+            computeAbsenceAmount(person, date, absence.absenceType, takableComponent.takeAmountType);
+      }
+      
+      absencePeriod.takableComponent = Optional.of(takableComponent);
+
     }
+    
+    //////////////////////////////////////////////////////////////////////////////////////
+    /* Build Complation component */
+    
+    if (groupAbsenceType.complationAbsenceGroup != null) {
+      
+      ComplationComponent complationComponent = new ComplationComponent();
+      
+      ComplationAbsenceGroup complationAbsenceGroup = groupAbsenceType.complationAbsenceGroup;
+      complationComponent.complationAmountType = complationAbsenceGroup.complationAmountType;
+      
+      complationComponent.complationLimitAmount = complationAbsenceGroup.complationLimitAmount;
+      
+      complationComponent.replacingCode = 
+          absenceTypeDao.getAbsenceTypeByCode(complationAbsenceGroup.replacingCode).get();
+      
+      complationComponent.complationCodes = 
+          Sets.newHashSet(absenceTypeDao.absenceTypeCodeSet(complationAbsenceGroup.complationCodes));
+      
+      //TODO: le other absences vanno aggiunte!
+      complationComponent.replacingAbsences = 
+          absenceDao.getAbsencesInCodeList(person, absencePeriod.from, 
+          absencePeriod.to, Lists.newArrayList(complationComponent.replacingCode), true);
+  
+      complationComponent.complationAbsences = 
+          absenceDao.getAbsencesInCodeList(person, absencePeriod.from, 
+          absencePeriod.to, Lists.newArrayList(complationComponent.complationCodes), true);
+      
+      complationComponent.complationConsumedAmount = 0;
+      for (Absence absence : Stream.concat(complationComponent.complationAbsences.stream(), 
+          complationComponent.replacingAbsences.stream()).collect(Collectors.toList())) {
+        
+          complationComponent.complationConsumedAmount += computeAbsenceAmount(person, date, 
+              absence.absenceType, complationComponent.complationAmountType);
+      }
+      
+      absencePeriod.complationComponent = Optional.of(complationComponent);
+            
+      //Un illegal state è  absencePeriod.complationConsumedAmount < 0 ...
+    }
+    
     return absencePeriod;
 
   }
   
-  /**
-   * 
-   * @param absencePeriod
-   * @param absenceType
-   * @param date
-   * @return
-   */
-  public boolean canTakeAbsenceInPeriod(AbsencePeriod absencePeriod, AbsenceType absenceType, 
-      LocalDate date) {
-    
-    int absenceAmount = 0;
-    if (absencePeriod.periodAmountType.equals(AmountType.minutes)) {
-      absenceAmount =  justifiedMinutes(absencePeriod.person, date, absenceType);
-    }
-    if (absencePeriod.periodAmountType.equals(AmountType.units)) {
-      absenceAmount =  1;
-    }
-    
-    int takableAmount = absencePeriod.periodTakableAmount;
-    if (!absencePeriod.takableCountBehaviour.equals(CountBehaviour.period)) {
+  public int computeTakableAmount(TakableComponent takableComponent) {
+    int takableAmount = takableComponent.periodTakableAmount;
+    if (!takableComponent.takableCountBehaviour.equals(CountBehaviour.period)) {
       // TODO: sumAllPeriod, sumUntilPeriod; 
     }
-    int takenAmount = absencePeriod.periodTakenAmount;
-    if (!absencePeriod.takenCountBehaviour.equals(CountBehaviour.period)) {
-      // TODO: sumAllPeriod, sumUntilPeriod; 
-    } 
-    
-    return takableAmount - takenAmount - absenceAmount > 0;
+    return takableAmount;
   }
   
-  /**
-   * TODO: spostarlo in un manager più opportuno ..Calcola i minuti giustificati dal tipo assenza... 
-   */
-  private int justifiedMinutes(Person person, LocalDate date, AbsenceType absenceType) {
+  public int computeTakenAmount(TakableComponent takableComponent) {
+    int takenAmount = takableComponent.periodTakenAmount;
+    if (!takableComponent.takenCountBehaviour.equals(CountBehaviour.period)) {
+      // TODO: sumAllPeriod, sumUntilPeriod; 
+    } 
+    return takenAmount;
+  }
+
+  private int computeAbsenceAmount(Person person, LocalDate date, 
+      AbsenceType absenceType, AmountType amountType) {
     
+    if (amountType.equals(AmountType.units)) {
+      return 1;
+    }
     // TODO: trattare anche gli altri enumerati.....
     if (absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay) {
       int dateWorkingMinutes = workingTimeTypeDao
@@ -165,9 +195,59 @@ public class AbsenceEngine {
     }
   }
   
+  /**
+   * 
+   * @param absencePeriod
+   * @param absenceType
+   * @param date
+   * @return
+   */
+  public boolean requestForAbsenceInPeriod(AbsencePeriod absencePeriod, 
+      AbsenceRequestType absenceRequestType, 
+      AbsenceType absenceType, LocalDate date) {
+    
+    // Solo Takable component
+    if (absencePeriod.takableComponent.isPresent() && !absencePeriod.complationComponent.isPresent()) {
+      
+      Preconditions.checkState(absenceRequestType.equals(AbsenceRequestType.insertTakable) 
+          || absenceRequestType.equals(AbsenceRequestType.deleteTakable));
+      
+      Preconditions.checkState(absencePeriod.takableComponent.get().takableCodes.contains(absenceType));
+      
+      int absenceAmount = computeAbsenceAmount(absencePeriod.person, date, absenceType, 
+          absencePeriod.takableComponent.get().takeAmountType );
+      int takableAmount = computeTakableAmount(absencePeriod.takableComponent.get());
+      int takenAmount = computeTakenAmount(absencePeriod.takableComponent.get());
+      
+      return takableAmount - takenAmount - absenceAmount > 0;
+
+      
+    }
+    // Solo Complation component
+    if (!absencePeriod.takableComponent.isPresent() && absencePeriod.complationComponent.isPresent()) {
+
+      Preconditions.checkState(absenceRequestType.equals(AbsenceRequestType.insertComplation) 
+          || absenceRequestType.equals(AbsenceRequestType.deleteComplation));
+
+      // inserisco il codice
+      
+      // se supero il limite aggiungo anche il codice di completamento 
+      
+    }
+    
+    // Entrambi i componenti
+    if (absencePeriod.takableComponent.isPresent() && absencePeriod.complationComponent.isPresent()) {
+      
+    }
+
+    return false; //illegal state
+  }
+  
+ 
   public enum TakableAbsenceGroup {
     
     takable661(
+        AmountType.minutes,
         CountBehaviour.period,
         CountBehaviour.period,
         ComputeAmountBehaviour.normal,
@@ -176,6 +256,7 @@ public class AbsenceEngine {
         codes661),
     
     takable18(
+        AmountType.minutes,
         CountBehaviour.period,
         CountBehaviour.period,
         ComputeAmountBehaviour.normal,
@@ -184,6 +265,7 @@ public class AbsenceEngine {
         codes18),
     
     takable19(
+        AmountType.minutes,
         CountBehaviour.period,
         CountBehaviour.period,
         ComputeAmountBehaviour.normal,
@@ -197,13 +279,16 @@ public class AbsenceEngine {
     public Integer periodTakableAmount;
     public Set<String> takenCodes; 
     public Set<String> takableCodes;
+    public AmountType takeAmountType;
      
     private TakableAbsenceGroup( 
+        AmountType takeAmountType,
         CountBehaviour takableCountBehaviour, 
         CountBehaviour takenCountBehaviour, 
         ComputeAmountBehaviour computeTakableAmountBehaviour,
         Integer periodTakableAmount,
         Set<String> takenCodes, Set<String> takableCodes) {
+      this.takeAmountType = takeAmountType;
       this.takableCountBehaviour = takableCountBehaviour;
       this.takenCountBehaviour = takenCountBehaviour;
       this.computeTakableAmountBehaviour = computeTakableAmountBehaviour;
@@ -214,13 +299,16 @@ public class AbsenceEngine {
   }
   
   public enum ComplationAbsenceGroup {
-    complation09(432, "90B", codesCompl09);
+    complation09(AmountType.minutes, 432, "90B", codesCompl09);
 
     public int complationLimitAmount;
     public String replacingCode;
     public Set<String> complationCodes;
+    public AmountType complationAmountType;
 
-    private ComplationAbsenceGroup(int complationLimitAmount, String replacingCode, Set<String> complationCodes) {
+    private ComplationAbsenceGroup(AmountType complationAmountType, 
+        int complationLimitAmount, String replacingCode, Set<String> complationCodes) {
+      this.complationAmountType = complationAmountType;
       this.complationLimitAmount = complationLimitAmount;
       this.replacingCode = replacingCode;
       this.complationCodes = complationCodes;
@@ -233,40 +321,33 @@ public class AbsenceEngine {
     
     group661(
         PeriodType.year,
-        AmountType.minutes,
         TakableAbsenceGroup.takable661,
         null),
     
     group18(
         PeriodType.month,
-        AmountType.minutes,
         TakableAbsenceGroup.takable18,
         null),
     
     group19(
         PeriodType.month,
-        AmountType.minutes,
         TakableAbsenceGroup.takable19,
         null),
     
     group09(
         PeriodType.always,
-        AmountType.minutes,
         null,
         ComplationAbsenceGroup.complation09);
     
     public PeriodType periodType;
-    public AmountType periodAmountType;
     public TakableAbsenceGroup takableAbsenceGroup;
     public ComplationAbsenceGroup complationAbsenceGroup;
     
      
     private GroupAbsenceType(PeriodType periodType, 
-        AmountType periodAmountType, 
         TakableAbsenceGroup takableAbsenceGroup,
         ComplationAbsenceGroup complationAbsenceGroup) {
       this.periodType = periodType;
-      this.periodAmountType = periodAmountType;
       this.takableAbsenceGroup = takableAbsenceGroup;
       this.complationAbsenceGroup = complationAbsenceGroup;
     }
@@ -280,11 +361,22 @@ public class AbsenceEngine {
     /*Period*/
     public LocalDate from;                      // Data inizio
     public LocalDate to;                        // Data fine
-    public AmountType periodAmountType;         // Il tipo di ammontare del periodo 
     
-    /*Takable/taken model*/
+    public Optional<TakableComponent> takableComponent;
+    public Optional<ComplationComponent> complationComponent;
+    
+    /*Next Period*/
+    public AbsencePeriod nextAbsencePeriod;     // Puntatore al periodo successivo ->
+    public AbsencePeriod previousAbsencePeriod; // <- puntatore al periodo precedente
+    
+  }
+  
+  public static class TakableComponent {
+
+    public AmountType takeAmountType;         // Il tipo di ammontare del periodo
+    
     public CountBehaviour takableCountBehaviour;// Come contare il tetto totale
-    public int periodTakableAmount;             // Il tetto massimo   
+    public int periodTakableAmount;             // Il tetto massimo
     
     public CountBehaviour takenCountBehaviour;  // Come contare il tetto consumato
     public int periodTakenAmount;               // Il tetto consumato
@@ -293,9 +385,12 @@ public class AbsenceEngine {
     public Set<AbsenceType> takenCodes;         // I tipi di assenza consumati del periodo
 
     public List<Absence> takenAbsences;         // Le assenze consumate
-    
-    /*Complation model*/
+  }
+  
+  public static class ComplationComponent {
+
     public AmountType complationAmountType;     // Tipo di ammontare completamento
+    
     public int complationLimitAmount;           // Limite di completamento
     public int complationConsumedAmount;        // Ammontare completamento attualmente consumato
     
@@ -304,11 +399,6 @@ public class AbsenceEngine {
     
     public List<Absence> replacingAbsences;     // Le assenze di rimpiazzamento (solo l'ultima??)     
     public List<Absence> complationAbsences;    // Le assenze di completamento
-    
-    /*Next Period*/
-    public AbsencePeriod nextAbsencePeriod;     // Puntatore al periodo successivo ->
-    public AbsencePeriod previousAbsencePeriod; // <- puntatore al periodo precedente
-    
   }
   
   public enum CountBehaviour {
@@ -325,6 +415,10 @@ public class AbsenceEngine {
   
   public enum ComputeAmountBehaviour {
     normal, workingTimePercent;
+  }
+  
+  public enum AbsenceRequestType {
+    insertTakable, insertComplation, deleteTakable, deleteComplation;
   }
     
 }

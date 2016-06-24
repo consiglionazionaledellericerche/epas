@@ -44,7 +44,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class MealTickets extends Controller {
 
   @Inject
@@ -246,10 +246,10 @@ public class MealTickets extends Controller {
    * @param deliveryDate     data consegna
    * @param expireDate       data scadenza
    */
-  public static void submitPersonMealTicket(Long personId, @Required Integer codeBlock,
-                                            @Required @Min(1) @Max(99) Integer ticketNumberFrom,
-                                            @Required @Min(1) @Max(99) Integer ticketNumberTo,
-                                            @Valid @Required LocalDate deliveryDate, @Valid @Required LocalDate expireDate) {
+  public static void submitPersonMealTicket(Long personId, @Required Long codeBlock,
+      @Required @Min(1) @Max(99) Integer ticketNumberFrom,
+      @Required @Min(1) @Max(99) Integer ticketNumberTo,
+      @Valid @Required LocalDate deliveryDate, @Valid @Required LocalDate expireDate) {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
@@ -330,7 +330,7 @@ public class MealTickets extends Controller {
    * @param undo       se voglio annullare la restituzione
    */
   public static void returnPersonCodeBlock(Long contractId, int codeBlock, int first, int last,
-                                           boolean undo) {
+      boolean undo) {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
@@ -359,7 +359,7 @@ public class MealTickets extends Controller {
    * @param confirmed  conferma
    */
   public static void performReturnPersonCodeBlock(Long contractId, int codeBlock,
-                                                  int first, int last, boolean undo, boolean confirmed) {
+      int first, int last, boolean undo, boolean confirmed) {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
@@ -445,7 +445,7 @@ public class MealTickets extends Controller {
    * @param confirmed  conferma
    */
   public static void performDeletePersonCodeBlock(Long contractId, int codeBlock,
-                                                  int first, int last, boolean confirmed) {
+      int first, int last, boolean confirmed) {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);

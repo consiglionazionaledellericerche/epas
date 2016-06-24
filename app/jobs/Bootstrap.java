@@ -5,6 +5,7 @@ import com.google.common.base.Splitter;
 import com.google.common.io.Resources;
 
 import dao.OfficeDao;
+import dao.PersonDao;
 import dao.UserDao;
 
 import lombok.extern.slf4j.Slf4j;
@@ -12,17 +13,18 @@ import lombok.extern.slf4j.Slf4j;
 import manager.BadgeManager;
 import manager.ConfGeneralManager;
 import manager.ConfYearManager;
-import manager.ConfigurationManager;
 import manager.PeriodManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 
 import models.Badge;
 import models.Office;
+import models.Person;
 import models.Qualification;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
-import models.enumerate.EpasParam;
 import models.enumerate.Parameter;
 
 import org.dbunit.DatabaseUnitException;
@@ -67,6 +69,8 @@ public class Bootstrap extends Job<Void> {
   static FixUserPermission fixUserPermission;
   @Inject
   static UserDao userDao;
+  @Inject
+  static PersonDao personDao;
   @Inject
   static OfficeDao officeDao;
   @Inject
@@ -232,16 +236,28 @@ public class Bootstrap extends Job<Void> {
 
   public void doJob() throws IOException {
 
-    if (Play.runingInTestMode()) {
-      log.info("Application in test mode, default boostrap job not started");
-      return;
+    // Questo update permette di instanziare gli eventuali nuovi parametri enumerati epasParam 
+    // per ogni ufficio e persona
+    List<Office> offices = officeDao.allOffices().list();
+    for (Office office : offices) {
+      configurationManager.updateConfigurations(office);
     }
+    List<Person> people  = Person.findAll();
+    for (Person person : people) {
+      log.info(person.fullName());
+      configurationManager.updateConfigurations(person);
+    }
+    
+//    if (Play.runingInTestMode()) {
+//      log.info("Application in test mode, default boostrap job not started");
+//      return;
+//    }
 
-    // in modo da inibire l'esecuzione dei job in base alla configurazione
-    if ("false".equals(Play.configuration.getProperty(JOBS_CONF))) {
-      log.info("Bootstrap Interrotto. Disattivato dalla configurazione.");
-      return;
-    }
+//    // in modo da inibire l'esecuzione dei job in base alla configurazione
+//    if ("false".equals(Play.configuration.getProperty(JOBS_CONF))) {
+//      log.info("Bootstrap Interrotto. Disattivato dalla configurazione.");
+//      return;
+//    }
 
     Session session = (Session) JPA.em().getDelegate();
 
@@ -291,12 +307,7 @@ public class Bootstrap extends Job<Void> {
     // gestione delle configurazioni) appena verrà effettuato l'aggiornamento dell'ise.
     migrateConfiguration();
     
-    // Questo update permette di instanziare gli eventuali nuovi parametri enumerati epasParam 
-    // per ogni ufficio.
-    List<Office> offices = officeDao.allOffices().list();
-    for (Office office : offices) {
-      configurationManager.updateOfficeConfigurations(office);
-    }
+
     
     // Rimuove gli zeri iniziali se il codice badge è un intero.
     List<Badge> badges = Badge.findAll();

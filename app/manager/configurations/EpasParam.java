@@ -1,10 +1,13 @@
-package models.enumerate;
+package manager.configurations;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
-import models.enumerate.EpasParam.EpasParamValueType.IpList;
-import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
+import manager.configurations.EpasParam.EpasParamValueType.IpList;
+import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
+
+import models.Office;
+import models.Person;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
@@ -18,50 +21,64 @@ public enum EpasParam {
   
   //#######################################
   // GENERAL PARAMS
-  
+
+  OFF_SITE_STAMPING("off_site_stamping",
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Person.class),
+
   DAY_OF_PATRON("dayOfPatron", 
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.DAY_MONTH,
       EpasParamValueType.formatValue(new MonthDay(1,1)),
       Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS, 
-          RecomputationType.RESIDUAL_MEALTICKETS)),
-  
+          RecomputationType.RESIDUAL_MEALTICKETS),
+      Office.class),
+
   WEB_STAMPING_ALLOWED("web_stamping_allowed",
       EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(false),
-      Lists.<RecomputationType>newArrayList()),
-        
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
   ADDRESSES_ALLOWED("addresses_allowed",
       EpasParamTimeType.GENERAL,
       EpasParamValueType.IP_LIST,
       EpasParamValueType.formatValue(new IpList(Lists.<String>newArrayList())),
-      Lists.<RecomputationType>newArrayList()),
-  
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
   NUMBER_OF_VIEWING_COUPLE("number_of_viewing_couple",
       EpasParamTimeType.GENERAL,
       EpasParamValueType.INTEGER,
       EpasParamValueType.formatValue(2),
-      Lists.<RecomputationType>newArrayList()),
-  
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
   DATE_START_MEAL_TICKET("date_start_meal_ticket",
       EpasParamTimeType.GENERAL,
       EpasParamValueType.LOCALDATE,
       EpasParamValueType.formatValue(new LocalDate(2014, 7, 1)),
-      Lists.newArrayList(RecomputationType.RESIDUAL_MEALTICKETS)),
-  
+      Lists.newArrayList(RecomputationType.RESIDUAL_MEALTICKETS),
+      Office.class),
+
   SEND_EMAIL("send_email",
       EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(false),
-      Lists.<RecomputationType>newArrayList()),
-  
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
   NEW_ATTESTATI("new_attestati",
       EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(false),
-      Lists.<RecomputationType>newArrayList()),
-        
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
   /**
    * Viene utilizzato per popolare il campo replyTo delle mail inviate dal sistema. 
    */
@@ -69,92 +86,123 @@ public enum EpasParam {
       EpasParamTimeType.GENERAL,
       EpasParamValueType.EMAIL,
       EpasParamValueType.formatValue(""),
-      Lists.<RecomputationType>newArrayList()),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
   
+  /**
+   * Nuovo parametro per consentire/inibire la possibilità del dipendente di gestirsi 
+   * l'orario di lavoro fuori sede.
+   */
+  WORKING_OFF_SITE("working_off_site",
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),  
+      Office.class),
+
+
   //#######################################
   // YEARLY PARAMS
-  
+
   EXPIRY_VACATION_PAST_YEAR("expiry_vacation_past_year",
       EpasParamTimeType.YEARLY,
       EpasParamValueType.DAY_MONTH,
       EpasParamValueType.formatValue(new MonthDay(8,31)),
-      Lists.<RecomputationType>newArrayList()),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
 
   MONTH_EXPIRY_RECOVERY_DAYS_13("month_expire_recovery_days_13",
       EpasParamTimeType.YEARLY,
       EpasParamValueType.MONTH,
       EpasParamValueType.formatValue(0),
-      Lists.newArrayList(RecomputationType.RESIDUAL_HOURS)),
+      Lists.newArrayList(RecomputationType.RESIDUAL_HOURS),
+      Office.class),
 
-  
+
   MONTH_EXPIRY_RECOVERY_DAYS_49("month_expire_recovery_days_49",
       EpasParamTimeType.YEARLY,
       EpasParamValueType.MONTH,
       EpasParamValueType.formatValue(3),
-      Lists.newArrayList(RecomputationType.RESIDUAL_HOURS)),
+      Lists.newArrayList(RecomputationType.RESIDUAL_HOURS),
+      Office.class),
 
   MAX_RECOVERY_DAYS_13("max_recovery_days_13",
       EpasParamTimeType.YEARLY,
       EpasParamValueType.INTEGER,
       EpasParamValueType.formatValue(22),
-      Lists.<RecomputationType>newArrayList()),
-  
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
   MAX_RECOVERY_DAYS_49("max_recovery_days_49",
       EpasParamTimeType.YEARLY,
       EpasParamValueType.INTEGER,
       EpasParamValueType.formatValue(0),
-      Lists.<RecomputationType>newArrayList()),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
 
   //#######################################
   // PERIODIC PARAMS
   
+  MATERNITY_PERIOD("maternity_period",
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS, 
+          RecomputationType.RESIDUAL_MEALTICKETS),
+      Person.class),
+
   HOUR_MAX_TO_CALCULATE_WORKTIME("hour_max_to_calculate_worktime",
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.LOCALTIME,
       EpasParamValueType.formatValue(new LocalTime(5, 0)),
       Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS, 
-          RecomputationType.RESIDUAL_MEALTICKETS)),
-  
+          RecomputationType.RESIDUAL_MEALTICKETS),
+      Office.class),
+
   LUNCH_INTERVAL("lunch_interval",
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.LOCALTIME_INTERVAL,
       EpasParamValueType
       .formatValue(new LocalTimeInterval(new LocalTime(12,0), new LocalTime(15,0))),
       Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS, 
-          RecomputationType.RESIDUAL_MEALTICKETS)),
-  
+          RecomputationType.RESIDUAL_MEALTICKETS),
+      Office.class),
+
   WORK_INTERVAL("work_interval",
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.LOCALTIME_INTERVAL,
       EpasParamValueType
       .formatValue(new LocalTimeInterval(new LocalTime(0,0), new LocalTime(23,59))),
       Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS, 
-          RecomputationType.RESIDUAL_MEALTICKETS));
+          RecomputationType.RESIDUAL_MEALTICKETS),
+      Office.class);
 
   public final String name;
   public final EpasParamTimeType epasParamTimeType;
   public final EpasParamValueType epasParamValueType;
   public final List<RecomputationType> recomputationTypes;
   public final Object defaultValue;
-  
+  public final Class target;
+
   EpasParam(String name, EpasParamTimeType epasParamTimeType, EpasParamValueType epasParamValueType,
-      Object defaultValue, List<RecomputationType> recomputationTypes) {
+      Object defaultValue, List<RecomputationType> recomputationTypes, Class target) {
     this.name = name;
     this.epasParamTimeType = epasParamTimeType;
     this.epasParamValueType = epasParamValueType;
     this.defaultValue = defaultValue;
     this.recomputationTypes = recomputationTypes;
+    this.target = target;
   }
-  
+
   public boolean isYearly() {
     return this.epasParamTimeType.equals(EpasParamTimeType.YEARLY);
   }
-  
+
   public boolean isGeneral() {
     return this.epasParamTimeType.equals(EpasParamTimeType.GENERAL);
   }
 
-  
+
   public boolean isPeriodic() {
     return this.epasParamTimeType.equals(EpasParamTimeType.PERIODIC);
   }
