@@ -1,4 +1,4 @@
-#{extends 'main3.html' /}
+#{extends 'main.html' /}
 #{set header:'navbar' /}
 #{set title: 'ePAS - Timbrature'  /}
 
@@ -22,9 +22,9 @@
       <th class="group-right">${i}<sup>a</sup> <br/>uscita</th>
       #{/list}
       
-      #{if showLink}
+      #{if showLink || showLinkForEmployee}
       <th class="group-single">Inserisci<br>timbratura</th>
-	    #{/if}
+	  #{/if}
 
       <th class="invisible"></th>
 

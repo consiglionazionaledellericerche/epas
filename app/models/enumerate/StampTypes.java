@@ -103,4 +103,8 @@ public enum StampTypes {
     }
     return false;
   }
+  
+  public static StampTypes offSiteWorkingForEmployee() {
+    return StampTypes.LAVORO_FUORI_SEDE;
+  }
 }

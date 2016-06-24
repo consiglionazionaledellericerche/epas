@@ -1,6 +1,6 @@
 package controllers;
 
-import com.beust.jcommander.internal.Maps;
+import com.google.common.collect.Maps;
 
 import models.Office;
 import models.Person;
@@ -29,9 +29,11 @@ public class SwitchTemplate extends Controller {
     args.put("personId", personId);
     args.put("officeId", officeId);
 
+
     if (action.equals("Certifications.processAll")) {
       Certifications.certifications(officeId, year, month); //Voluto. Lo switch non processa.
     }
+    
     if (action.equals("Certifications.emptyCertifications")) {
       Certifications.certifications(officeId, year, month); //Voluto. Lo switch non svuota.
     }

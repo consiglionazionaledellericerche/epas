@@ -14,16 +14,16 @@ import dao.wrapper.IWrapperFactory;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.ConfigurationManager;
 import manager.attestati.dto.show.CodiceAssenza;
 import manager.attestati.service.CertificationService;
 import manager.attestati.service.PersonCertificationStatus;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 
 import models.Absence;
 import models.AbsenceType;
 import models.Office;
 import models.Person;
-import models.enumerate.EpasParam;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -41,12 +41,11 @@ import javax.inject.Inject;
 
 /**
  * Il controller per l'invio dei dati certificati al nuovo attestati.
- * 
- * @author alessandro
  *
+ * @author alessandro
  */
 @Slf4j
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class Certifications extends Controller {
 
   @Inject
@@ -65,26 +64,26 @@ public class Certifications extends Controller {
 
   /**
    * Pagina principale nuovo invio attestati.
-   * 
+   *
    * @param officeId sede
-   * @param year anno
-   * @param month mese
+   * @param year     anno
+   * @param month    mese
    */
   public static void certifications(Long officeId, Integer year, Integer month) {
 
-    flash.clear(); // non avendo per adesso un meccanismo di redirect pulisco il flash...
+    flash.clear();  //non avendo per adesso un meccanismo di redirect pulisco il flash...
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
 
-    // Nuovo attestati?
+    //Nuovo attestati?
     if (!(Boolean) configurationManager.configValue(office, EpasParam.NEW_ATTESTATI)) {
       flash.error("La sede non è configurata all'utilizzo del nuovo attestati.");
       forbidden();
     }
 
-    // Mese selezionato
+    //Mese selezionato
     Optional<YearMonth> monthToUpload = factory.create(office).nextYearMonthToUpload();
     Verify.verify(monthToUpload.isPresent());
 
@@ -101,18 +100,19 @@ public class Certifications extends Controller {
     // occuparsene la RequestInit.
     session.put("monthSelected", monthToUpload.get().getMonthOfYear());
     session.put("yearSelected", monthToUpload.get().getYear());
-    renderArgs.put("currentData",
-        new CurrentData(monthToUpload.get().getYear(), monthToUpload.get().getMonthOfYear(),
-            Integer.parseInt(session.get("daySelected")),
-            Long.parseLong(session.get("personSelected")), office.id));
+    renderArgs.put("currentData", new CurrentData(monthToUpload.get().getYear(),
+        monthToUpload.get().getMonthOfYear(),
+        Integer.parseInt(session.get("daySelected")),
+        Long.parseLong(session.get("personSelected")),
+        office.id));
     // ##########################################################################
 
-    LocalDate monthBegin =
-        new LocalDate(monthToUpload.get().getYear(), monthToUpload.get().getMonthOfYear(), 1);
+    LocalDate monthBegin = new LocalDate(monthToUpload.get().getYear(),
+        monthToUpload.get().getMonthOfYear(), 1);
     LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
 
 
-    // Il mese selezionato è abilitato?
+    //Il mese selezionato è abilitato?
     Optional<String> token = certificationService.buildToken();
     if (!token.isPresent()) {
       flash.error("Impossibile instaurare il collegamento col server di attestati."
@@ -125,7 +125,7 @@ public class Certifications extends Controller {
       render(office, year, month);
     }
 
-    // Lo stralcio è stato effettuato?
+    //Lo stralcio è stato effettuato?
     Set<Integer> numbers = certificationService.peopleList(office, year, month, token);
     if (numbers.isEmpty()) {
       flash.error("E' necessario effettuare lo stralcio dei dati per processare "
@@ -141,8 +141,8 @@ public class Certifications extends Controller {
     for (Person person : people) {
 
       // Costruisco lo status generale
-      PersonCertificationStatus personCertificationStatus =
-          certificationService.buildPersonStaticStatus(person, year, month, numbers, token);
+      PersonCertificationStatus personCertificationStatus = certificationService
+          .buildPersonStaticStatus(person, year, month, numbers, token);
 
       if (personCertificationStatus.match()) {
         // La matricola la rimuovo da quelle in attestati (alla fine rimangono quelle non trovate)
@@ -161,20 +161,20 @@ public class Certifications extends Controller {
 
   /**
    * Elaborazione.
-   * 
+   *
    * @param officeId sede
-   * @param year anno
-   * @param month mese
+   * @param year     anno
+   * @param month    mese
    */
   public static void processAll(Long officeId, Integer year, Integer month) {
 
-    flash.clear(); // non avendo per adesso un meccanismo di redirect pulisco il flash...
+    flash.clear();  //non avendo per adesso un meccanismo di redirect pulisco il flash...
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
 
-    // Nuovo attestati
+    //Nuovo attestati
     if (!(Boolean) configurationManager.configValue(office, EpasParam.NEW_ATTESTATI)) {
       forbidden();
     }
@@ -182,7 +182,7 @@ public class Certifications extends Controller {
     LocalDate monthBegin = new LocalDate(year, month, 1);
     LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
 
-    // Il mese selezionato è abilitato?
+    //Il mese selezionato è abilitato?
     Optional<String> token = certificationService.buildToken();
     boolean autenticate = certificationService.authentication(office, token, true);
     if (!autenticate) {
@@ -190,7 +190,7 @@ public class Certifications extends Controller {
       renderTemplate("@certifications", office, year, month);
     }
 
-    // Lo stralcio è stato effettuato?
+    //Lo stralcio è stato effettuato?
     Set<Integer> numbers = certificationService.peopleList(office, year, month, token);
     if (numbers.isEmpty()) {
       flash.error("E' necessario effettuare lo stralcio dei dati per processare "
@@ -207,8 +207,8 @@ public class Certifications extends Controller {
     for (Person person : people) {
 
       // Costruisco lo status generale
-      PersonCertificationStatus personCertificationStatus =
-          certificationService.buildPersonStaticStatus(person, year, month, numbers, token);
+      PersonCertificationStatus personCertificationStatus = certificationService
+          .buildPersonStaticStatus(person, year, month, numbers, token);
 
       if (personCertificationStatus.match()) {
 
@@ -234,20 +234,20 @@ public class Certifications extends Controller {
   }
 
   /**
-   * 
+   *
    * @param officeId
    * @param year
    * @param month
    */
   public static void emptyCertifications(Long officeId, int year, int month) {
 
-    flash.clear(); // non avendo per adesso un meccanismo di redirect pulisco il flash...
+    flash.clear();  //non avendo per adesso un meccanismo di redirect pulisco il flash...
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
 
-    // Nuovo attestati
+    //Nuovo attestati
     if (!(Boolean) configurationManager.configValue(office, EpasParam.NEW_ATTESTATI)) {
       forbidden();
     }
@@ -255,7 +255,7 @@ public class Certifications extends Controller {
     LocalDate monthBegin = new LocalDate(year, month, 1);
     LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
 
-    // Il mese selezionato è abilitato?
+    //Il mese selezionato è abilitato?
     Optional<String> token = certificationService.buildToken();
     boolean autenticate = certificationService.authentication(office, token, true);
     if (!autenticate) {
@@ -263,7 +263,7 @@ public class Certifications extends Controller {
       renderTemplate("@certifications", office, year, month);
     }
 
-    // Lo stralcio è stato effettuato?
+    //Lo stralcio è stato effettuato?
     Set<Integer> numbers = certificationService.peopleList(office, year, month, token);
     if (numbers.isEmpty()) {
       flash.error("E' necessario effettuare lo stralcio dei dati per processare "
@@ -280,15 +280,15 @@ public class Certifications extends Controller {
     for (Person person : people) {
 
       // Costruisco lo status generale
-      PersonCertificationStatus personCertificationStatus =
-          certificationService.buildPersonStaticStatus(person, year, month, numbers, token);
+      PersonCertificationStatus personCertificationStatus = certificationService
+          .buildPersonStaticStatus(person, year, month, numbers, token);
 
       // Elimino ogni record
       certificationService.emptyAttestati(personCertificationStatus, token);
 
       // Ricostruzione nuovo stato (coi record eliminati)
-      personCertificationStatus =
-          certificationService.buildPersonStaticStatus(person, year, month, numbers, token);
+      personCertificationStatus = certificationService
+          .buildPersonStaticStatus(person, year, month, numbers, token);
 
       if (personCertificationStatus.match()) {
         // La matricola la rimuovo da quelle in attestati (alla fine rimangono quelle non trovate)
@@ -308,7 +308,7 @@ public class Certifications extends Controller {
         peopleCertificationStatus);
 
   }
-
+  
   /**
    * I codici assenza in attestati.
    */

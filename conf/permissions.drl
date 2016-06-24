@@ -6,6 +6,10 @@ import models.UsersRolesOffices;
 import models.ShiftType;
 import models.Person;
 import models.Role;
+import models.Configuration;
+import manager.configurations.EpasParam;
+import models.Qualification;
+import models.Notification;
 
 global models.User currentOperator;
 
@@ -23,7 +27,10 @@ rule AnyUser
 when
   $c: PermissionCheck(action in (
      	"Application.index",
-     	"Version.showVersion"
+     	"Version.showVersion",
+     	"Notifications.list",
+     	"Notifications.archiveds",
+     	"Notifications.read"
        ), target == null, granted == false)
 then
  $c.grant();
@@ -41,6 +48,11 @@ when
   $c: PermissionCheck(action in (
   		/* Ritorna allo user developer */
      	"Administration.restoreUser",
+     	
+     	/* Eventuale inserimento di timbratura per lavoro fuori sede
+     	/* Stampings.insertWorkingOffSitePresence*/
+     	/* Stampings.saveWorkingOffSitePresence*/
+     	
      	
      	/* Situazione Mensile */
      	"Stampings.stampings",
@@ -532,6 +544,9 @@ when
      	"Persons.updateUsername",
         "Persons.deletePerson",
      	"Persons.deletePersonConfirmed",
+     	"Configurations.personShow",
+     	"Configurations.personEdit",
+     	"Configurations.personUpdate",
         
         "Contracts.personContracts",
         "Contracts.insert",
@@ -660,6 +675,10 @@ when
         "Persons.deletePerson",
      	"Persons.deletePersonConfirmed",
      	
+     	"Configurations.personShow",
+     	"Configurations.personEdit",
+     	"Configurations.personUpdate",
+     	     	
         "Contracts.personContracts",
         "Contracts.insert",
         "Contracts.save",
@@ -777,6 +796,50 @@ when
 then
  $c.grant();
 end
+
+/*******************************************************************************
+ * Azioni per utente employee ma abilitato alla timbratura fuori sede
+ ******************************************************************************/
+rule Working_offsite
+when
+ $uro: UsersRolesOffices()
+ $p: Person() from currentOperator.person
+ Role(name == Role.EMPLOYEE) from $uro.role
+ $o: Office() from $p.office
+ Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
+ $c: PermissionCheck(action in (
+ 	"Stampings.blankForEmployee",
+    "Stampings.edit",
+    "Stampings.save",
+    "Absences.blankForEmployee",
+    "Absences.edit",
+    "Absences.delete",
+    "Absences.save"
+ ), granted == false, target == null)
+then
+ $c.grant();
+end
+
+rule Working_offsite_in_office
+when
+ $uro: UsersRolesOffices()
+ $p: Person() from currentOperator.person
+ Role(name == Role.EMPLOYEE) from $uro.role
+ $o: Office() from $p.office
+ Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
+ $c: PermissionCheck(action in (
+ 	"Stampings.blankForEmployee",
+    "Stampings.edit",
+    "Stampings.save",
+    "Absences.blankForEmployee",
+    "Absences.edit",
+    "Absences.delete",
+    "Absences.save"
+ ), granted == false, target == $p)
+then
+ $c.grant();
+end
+
 
 /*******************************************************************************
  * Azioni utente con ruolo BADGE_READER
@@ -915,4 +978,12 @@ when
        ), target == null, granted == false)
 then
  $c.grant();
+end
+
+rule Notifications
+when
+  $n: Notification(recipient == currentOperator)
+  $c: PermissionCheck(target == $n, granted == false)
+then
+  $c.grant();
 end

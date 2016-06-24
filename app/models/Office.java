@@ -5,10 +5,11 @@ import com.google.common.collect.Sets;
 
 import it.cnr.iit.epas.NullStringBinder;
 
+import manager.configurations.EpasParam;
+
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
-import models.enumerate.EpasParam;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;

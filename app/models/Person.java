@@ -6,7 +6,11 @@ import com.google.common.collect.Sets;
 
 import it.cnr.iit.epas.NullStringBinder;
 
-import models.base.MutableModel;
+import manager.configurations.EpasParam;
+
+import models.base.IPropertiesInPeriodOwner;
+import models.base.IPropertyInPeriod;
+import models.base.PeriodModel;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -17,6 +21,8 @@ import play.data.validation.Email;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -48,13 +54,13 @@ import javax.persistence.Version;
 @Entity
 @Audited
 @Table(name = "persons")
-public class Person extends MutableModel implements Comparable<Person> {
+public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -2293369685203872207L;
 
-  @Column(name="perseo_id")
+  @Column(name = "perseo_id")
   public Long perseoId;
-  
+
   @Version
   public Integer version;
 
@@ -176,7 +182,7 @@ public class Person extends MutableModel implements Comparable<Person> {
   @NotAudited
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public List<Competence> competences = Lists.newArrayList();
-  
+
   /**
    * relazione con la tabella dei codici competenza per stabilire se una persona ha diritto o meno a
    * una certa competenza.
@@ -203,12 +209,12 @@ public class Person extends MutableModel implements Comparable<Person> {
   @JoinColumn(name = "office_id")
   @Required
   public Office office;
-  
+
   /**
-   * TODO: da rimuovere quando si userà lo storico per intercettare il cambio di sede
-   * per adesso è popolato dal valore su perseo alla costruzione dell'oggetto.
+   * TODO: da rimuovere quando si userà lo storico per intercettare il cambio di sede per adesso è
+   * popolato dal valore su perseo alla costruzione dell'oggetto.
    */
-  @Transient 
+  @Transient
   public Long perseoOfficeId = null;
 
   /**
@@ -218,8 +224,21 @@ public class Person extends MutableModel implements Comparable<Person> {
   @As(binder = NullStringBinder.class)
   public String badgeNumber;
 
+  /**
+   * Sono stati implementati i metodi Equals e HashCode sulla classe Badge in modo che Se sono
+   * presenti più badge per la persona che differiscono solo per il campo badgeReader venga
+   * restituito un solo elemento (effettivamente per noi è lo stesso badge).Quindi person.badges non
+   * restituisce i duplicati
+   */
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public Set<Badge> badges = Sets.newHashSet();
+  
+  /**
+   * Le configurazioni della persona.
+   */
+  @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
+  public List<PersonConfiguration> personConfigurations = Lists.newArrayList();
+
 
 
   public String getName() {
@@ -252,11 +271,32 @@ public class Person extends MutableModel implements Comparable<Person> {
   }
 
   @Override
-  public int compareTo(Person person) {
-
-    int res = (this.surname.compareTo(person.surname) == 0)
-        ? this.name.compareTo(person.name) : this.surname.compareTo(person.surname);
-    return res;
+  public Collection<IPropertyInPeriod> periods(Object type) {
+    
+    if (type.getClass().equals(EpasParam.class)) {
+      return (Collection<IPropertyInPeriod>)filterConfigurations((EpasParam)type);
+    }
+    return null;
+  }
+  
+  @Override
+  public Collection<Object> types() {
+    return Sets.newHashSet(Arrays.asList(EpasParam.values()));
+  }
+  
+  /**
+   * Filtra dalla lista di configurations le occorrenze del tipo epasParam.
+   * @param epasPersonParam filtro
+   * @return insieme filtrato
+   */
+  private Set<IPropertyInPeriod> filterConfigurations(EpasParam epasPersonParam) {
+    Set<IPropertyInPeriod> configurations = Sets.newHashSet();
+    for (PersonConfiguration configuration : this.personConfigurations) {
+      if (configuration.epasParam.equals(epasPersonParam)) {
+        configurations.add(configuration);
+      }
+    }
+    return configurations;
   }
 
 }

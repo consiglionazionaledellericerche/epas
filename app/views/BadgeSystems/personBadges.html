@@ -1,4 +1,4 @@
-#{extends 'main3.html' /}
+#{extends 'main.html' /}
 #{set header:'navbar' /}
 #{set title: 'ePAS - Associazione badge ai lettori badge'  /}
 
@@ -21,7 +21,7 @@
   <br>
   #{/secure.checkAction}
 
-  #{if badges.size() > 0}
+  #{if person.badges.size() > 0}
   <div class="alert alert-info" role="alert">
     Lista badge già associati a <strong>${person.fullname}</strong>.
   </div>
@@ -32,7 +32,7 @@
       <th>Elimina</th>
     </tr>
 
-    #{list items:badges, as:'badge'}
+    #{list items:person.badges, as:'badge'}
     <tr>
       <td>${badge.badgeSystem.name}</td>
       <td>${badge.code}</td>

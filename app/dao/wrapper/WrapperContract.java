@@ -261,7 +261,7 @@ public class WrapperContract implements IWrapperContract {
   public LocalDate dateForInitialization() {
 
     LocalDate officeBegin = value.person.office.getBeginDate();
-    LocalDate personCreation = new LocalDate(value.person.createdAt);
+    LocalDate personCreation = new LocalDate(value.person.beginDate);
     LocalDate candidate = value.getBeginDate();
 
     if (candidate.isBefore(officeBegin)) {

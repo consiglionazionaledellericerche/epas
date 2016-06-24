@@ -10,14 +10,16 @@ import dao.OfficeDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
 
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
+import manager.configurations.EpasParam.EpasParamValueType;
+import manager.configurations.EpasParam.EpasParamValueType.IpList;
+
 import models.Configuration;
 import models.Office;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
-import models.enumerate.EpasParam;
-import models.enumerate.EpasParam.EpasParamValueType;
-import models.enumerate.EpasParam.EpasParamValueType.IpList;
 
 import play.Play;
 

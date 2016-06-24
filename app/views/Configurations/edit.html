@@ -13,7 +13,8 @@
   #{if configuration.epasParam.general }
     
     <p>Questo parametro per la sede <strong>${configuration.office.name}</strong> 
-    è attualmente impostato a <strong>${configuration.parseValue().label()}</strong>.
+    è attualmente impostato a 
+    <strong>${templateUtility.getObjectInConfiguration(configuration.epasParam, configuration.fieldValue).label()}</strong>.
     <p>
   #{/if}
   

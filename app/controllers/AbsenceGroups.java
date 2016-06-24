@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
 import manager.services.absences.AbsenceEngine;
 import manager.services.absences.AbsenceEngine.AbsencePeriod;
+import manager.services.absences.AbsenceEngine.AbsenceRequestType;
 import manager.services.absences.AbsenceEngine.GroupAbsenceType;
 
 import models.Absence;
@@ -72,10 +73,10 @@ public class AbsenceGroups extends Controller {
     AbsencePeriod absencePeriod = absenceEngine.buildAbsencePeriod(person, 
         GroupAbsenceType.group661, date);
     
-    AbsenceType absenceType = absencePeriod.takableCodes.iterator().next(); 
+    AbsenceType absenceType = absencePeriod.takableComponent.get().takableCodes.iterator().next(); 
     
-    boolean result = absenceEngine.canTakeAbsenceInPeriod(absencePeriod,
-        absenceType, date);
+    boolean result = absenceEngine.requestForAbsenceInPeriod(absencePeriod, 
+        AbsenceRequestType.insertTakable, absenceType, date);
     
     if (result) {
       PersonDay personDay = personDayDao.getOrBuildPersonDay(person, date);

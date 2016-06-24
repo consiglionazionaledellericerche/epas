@@ -29,8 +29,10 @@ import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.Role;
 import models.Stamping;
 import models.User;
+import models.UsersRolesOffices;
 import models.enumerate.JustifiedTimeAtWork;
 
 import org.apache.commons.lang.WordUtils;
@@ -49,13 +51,14 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
-
 @Slf4j
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class Administration extends Controller {
 
   static final String SUDO_USERNAME = "sudo.username";
@@ -443,7 +446,7 @@ public class Administration extends Controller {
   }
 
   public static void changePeopleEmailDomain(@Required Office office, @Required String domain,
-                                             boolean sendMail) {
+      boolean sendMail) {
 
     final Pattern domainPattern = Pattern.compile("(?:[\\w](?:[\\w-]*[\\w])?\\.)+[a-zA-Z0-9](?:[\\w-]*[\\w])?");
 
@@ -473,4 +476,18 @@ public class Administration extends Controller {
 
     utilities();
   }
+  
+  
+  public static void administratorsEmails() {
+    
+    List<UsersRolesOffices> uros = UsersRolesOffices.findAll();
+    
+    List<String> emails = uros.stream().filter(uro -> {
+      return uro.role.name.equals(Role.PERSONNEL_ADMIN) && uro.user.person != null;
+    }).map(uro -> uro.user.person.email).collect(Collectors.toList());
+    
+    renderText(emails);
+    
+  }
+
 }

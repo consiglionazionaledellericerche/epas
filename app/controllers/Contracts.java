@@ -44,9 +44,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-
 @Slf4j
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class Contracts extends Controller {
 
   @Inject
@@ -121,8 +120,8 @@ public class Contracts extends Controller {
    * @param confirmed     step di conferma
    */
   public static void update(@Valid Contract contract, @Required LocalDate beginDate,
-                            @Valid LocalDate endDate, @Valid LocalDate endContract,
-                            boolean onCertificate, boolean confirmed) {
+      @Valid LocalDate endDate, @Valid LocalDate endContract,
+      boolean onCertificate, boolean confirmed) {
 
     notFoundIfNull(contract);
     rules.checkIfPermitted(contract.person.office);
@@ -439,7 +438,7 @@ public class Contracts extends Controller {
     }
 
   }
-  
+
   /**
    * Crud gestione periodi presenza automatica.
    *
@@ -645,8 +644,8 @@ public class Contracts extends Controller {
    * @param confirmedMeal        step di conferma ricevuta.
    */
   public static void saveMealTicketSourceContract(@Valid final Contract contract,
-                                                  @Valid @Required final LocalDate sourceDateMealTicket,
-                                                  boolean confirmedMeal) {
+      @Valid @Required final LocalDate sourceDateMealTicket,
+      boolean confirmedMeal) {
 
     notFoundIfNull(contract);
 

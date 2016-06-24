@@ -466,4 +466,12 @@ public class WrapperPerson implements IWrapperPerson {
     }
     return null;
   }
+
+  @Override
+  public boolean isTechnician() {
+    if (this.value.qualification.qualification > 3) {
+      return true;
+    }
+    return false;
+  }
 }

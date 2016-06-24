@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import manager.configurations.EpasParam;
 import manager.recaps.recomputation.RecomputeRecap;
 
 import models.base.IPropertiesInPeriodOwner;
@@ -141,6 +142,9 @@ public class PeriodManager {
     if (persist) {
       for (IPropertyInPeriod periodRemoved : toRemove) {
         periodRemoved._delete();
+      }
+      if (propertyInPeriod.getType().equals(EpasParam.WORKING_OFF_SITE)) {
+        
       }
       for (IPropertyInPeriod periodInsert : periodList) {
         periodInsert._save();
