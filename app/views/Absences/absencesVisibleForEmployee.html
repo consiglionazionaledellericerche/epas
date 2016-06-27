@@ -1,0 +1,32 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Assenze dei colleghi' /}
+
+#{switcher year:true, month:true, day:true /}
+
+<div class="container">
+#{title title:('Assenze giornaliere dei colleghi della sede ' + person.office.name) + ' in data ' + date.format()/}
+
+	<table class="table table-striped table-border table-condensed" datatable>
+		<thead>	
+	    <tr>
+		  <th>Dipendente</th>
+		  <th>Presente</th>		  
+	    </tr>
+	    </thead>
+	    <tbody>
+	    #{list items:pdList, as:'pd'}
+	    <tr>
+	        <td>${pd.person.fullname}</td>
+	        <td>#{if pd.absences.size() > 0}
+	        		<em>No</em>
+	        	#{/if}
+	        	#{else}
+	        		<em>Sì</em>
+	        	#{/else}
+	        </td>	        
+		</tr>
+		 #{/list}
+		 </tbody>
+     </table>
+</div>

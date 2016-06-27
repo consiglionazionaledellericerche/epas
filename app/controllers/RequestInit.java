@@ -19,6 +19,9 @@ import dao.PersonDao;
 import dao.UsersRolesOfficesDao;
 import helpers.TemplateDataInjector;
 import manager.SecureManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
+
 import models.Office;
 import models.Role;
 import models.User;
@@ -44,6 +47,8 @@ public class RequestInit extends Controller {
   static PersonDao personDao;
   @Inject
   static UsersRolesOfficesDao uroDao;
+  @Inject
+  static ConfigurationManager confManager;
 
   @Before(priority = 1)
   static void injectMenu() {
@@ -60,7 +65,10 @@ public class RequestInit extends Controller {
     final User currentUser = user.get();
 
     if (currentUser.person != null) {
+      boolean asd = (Boolean) confManager
+          .configValue(currentUser.person.office, EpasParam.ABSENCES_FOR_EMPLOYEE);
       renderArgs.put("isPersonInCharge", currentUser.person.isPersonInCharge);
+      renderArgs.put("absencesForEmployee", asd);
     }
 
     // year init /////////////////////////////////////////////////////////////////
@@ -158,6 +166,7 @@ public class RequestInit extends Controller {
 
     final Collection<String> dayMonthYearSwitcher = ImmutableList.of(
         "Stampings.dailyPresence",
+        "Absences.absencesVisibleForEmployee",
         "Stampings.dailyPresenceForPersonInCharge");
 
     final Collection<String> monthYearSwitcher = ImmutableList.of(

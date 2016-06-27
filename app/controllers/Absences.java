@@ -17,6 +17,7 @@ import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.PersonDayDao;
 import dao.QualificationDao;
 import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
@@ -27,6 +28,8 @@ import manager.AbsenceManager;
 import manager.PersonManager;
 import manager.SecureManager;
 import manager.YearlyAbsencesManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import manager.recaps.YearlyAbsencesRecap;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
@@ -36,6 +39,7 @@ import models.AbsenceType;
 import models.AbsenceTypeGroup;
 import models.Office;
 import models.Person;
+import models.PersonDay;
 import models.Qualification;
 import models.User;
 import models.enumerate.AbsenceTypeMapping;
@@ -93,6 +97,10 @@ public class Absences extends Controller {
   private static YearlyAbsencesManager yearlyAbsencesManager;
   @Inject
   private static PersonManager personManager;
+  @Inject
+  private static PersonDayDao personDayDao;
+  @Inject
+  private static ConfigurationManager confManager;
 
   /**
    * Le assenze della persona nel mese.
@@ -801,6 +809,27 @@ public class Absences extends Controller {
     }
 
     render(person, absenceToRender);
+  }
+  
+  /**
+   * metodo che renderizza la lista dei dipendenti per verificare se siano o meno a lavoro 
+   * un certo giorno.
+   * @param year l'anno 
+   * @param month il mese
+   * @param day il giorno
+   */
+  public static void absencesVisibleForEmployee(int year, int month, int day) {
+    if (!(Boolean) confManager
+          .configValue(Security.getUser().get().person.office, EpasParam.ABSENCES_FOR_EMPLOYEE)) {
+      flash.error("Per accedere a questa funzione, occorre modificare il valore del "
+          + "parametro 'Assenze visibili dai dipendenti'.");
+      Stampings.stampings(year, month);
+    }
+    Person person = Security.getUser().get().person;
+    List<Person> list = personDao.byOffice(person.office);
+    LocalDate date = new LocalDate(year, month, day);
+    List<PersonDay> pdList = personDayDao.getPersonDayForPeopleInDay(list, date);
+    render(pdList, person, date);
   }
 
   public static class AttachmentsPerCodeRecap {
