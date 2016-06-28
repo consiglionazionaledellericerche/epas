@@ -102,6 +102,10 @@
               <li><a href="@{PrintTags.showTag('id':session.get("personSelected"), session.get("monthSelected"),session.get("yearSelected"), true)}">Stampa cartellino presenze</a></li>
               <li class="divider"></li>
               <li><a href="@{Persons.changePassword()}">Gestione password</a></li>
+              #{secure.checkAction 'Absences.absencesVisibleForEmployee'}
+              <li class="divider"></li>
+              <li><a href="@{Absences.absencesVisibleForEmployee(session.get("yearSelected"), session.get("monthSelected"), session.get("daySelected"))}">Presenza colleghi</a></li>
+              #{/secure.checkAction}
             </ul>
           </li>
         </ul>
