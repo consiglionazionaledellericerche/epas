@@ -15,7 +15,7 @@
 
       #{if stampingTemplate.date}
 	      #{if showLink}
-		      #{secure.link @Stampings.edit('stamping.id':stampingTemplate.stampingId),modal:'#modalStamping'}
+		      #{secure.link @Stampings.edit('stamping.id':stampingTemplate.stampingId), 'data-async-modal':'#modalStamping'}
 		        ${stampingTemplate.hour}
 		      #{/secure.link}
 		  #{/if}    
@@ -55,12 +55,12 @@
     <td class="inserisciTimbratura default-single">
       #{if !dayRecap.personDay.future}
       	#{if showLink}
-      		#{secure.link @Stampings.blank('id':dayRecap.personDay.person.id, dayRecap.personDay.date.format()),modal:'#modalStamping'}
+      		#{secure.link @Stampings.blank('id':dayRecap.personDay.person.id, dayRecap.personDay.date.format()),'data-async-modal':'#modalStamping'}
         		+++
       		#{/secure.link}
       	#{/if}
       	#{if showLinkForEmployee}
-            #{secure.link @Stampings.blankForEmployee('id':dayRecap.personDay.person.id, dayRecap.personDay.date.format()),modal:'#modalStamping'}
+            #{secure.link @Stampings.blankForEmployee('id':dayRecap.personDay.person.id, dayRecap.personDay.date.format()),'data-async-modal':'#modalStamping'}
         		+++
       		#{/secure.link}
       	#{/if}

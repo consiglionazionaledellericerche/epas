@@ -1,11 +1,11 @@
 <td class="assenza default-single">
   #{if showLink}
-  #{secure.checkAction 'Stampings.blank', target:person.office}
+  #{secure.check 'Stampings.blank', target:person.office}
       #{secure.link @Absences.blank(dayRecap.personDay.person.id,
       dayRecap.personDay.date?.format()),modal:'#modalAbsence'}
       ___
       #{/secure.link}
-  #{/secure.checkAction}
+  #{/secure.check}
   #{/if}
   #{if showLinkForEmployee}
   
@@ -19,7 +19,7 @@
   #{list items:dayRecap.personDay.absences, as:'absence'}
   
     #{if showLink || showLinkForEmployee}
-	     #{secure.link @Absences.edit(absence.id), modal:'#modalAbsence'}
+	     #{secure.link @Absences.edit(absence.id), 'data-async-modal':'#modalAbsence'}
 	      <span webui-popover-hover data-url="#${absence.id}">
 	      ${absence.absenceType.code}
 	      </span>

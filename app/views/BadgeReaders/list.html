@@ -40,13 +40,13 @@
 	#{/form}
 
 	
-	#{secure.checkAction 'BadgeReaders.blank'}
+	#{secure.check 'BadgeReaders.blank'}
 	  #{b.actions}
 	    <a class="btn btn-success" href="@{blank()}" data-async-modal="#modalInsertBadgeReader">
 	      <i class="fa fa-plus"></i> &{'BadgeReader.blank'}
 	    </a>
       #{/b.actions}
-    #{/secure.checkAction}
+    #{/secure.check}
 	
 	<div id="badgeReaderList"> <!-- per il risultato della modale asincrona -->
 	

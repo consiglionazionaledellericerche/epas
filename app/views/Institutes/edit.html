@@ -33,7 +33,7 @@
   </div>
   
   #{if institute.seats.empty}
-   #{secure.checkAction 'Institutes.delete'}
+   #{secure.check 'Institutes.delete'}
     #{accordionGroup 'delete'}
      #{accordionItem 'deleteItem', parent:'delete', title:'Eliminare questo istituto', open:false, color:'danger'}
 	  
@@ -44,7 +44,7 @@
 	  
      #{/accordionItem}
     #{/accordionGroup }  
-   #{/secure.checkAction}
+   #{/secure.check}
   #{/if}
   
 #{/modalAsync}
