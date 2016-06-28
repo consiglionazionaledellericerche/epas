@@ -87,11 +87,11 @@ public class Resecure extends Controller {
   }
 
   public static boolean check(String action, Object instance) {
-    return rules.check(action, instance);
-  }
-
-  public static boolean checkAction(String action) {
-    return rules.checkAction(action);
+    if (instance != null) {
+      return session.contains("username") && rules.check(action, instance);
+    } else {
+      return session.contains("username") && rules.checkAction(action);
+    }
   }
 
   /**

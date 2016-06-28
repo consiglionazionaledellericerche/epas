@@ -44,8 +44,8 @@
 	    #{if dayRecap.firstDay }<i class="fa fa-flag-checkered" aria-hidden="true" popover-hover data-content="&{'firstDay'}"></i>#{/if}
 	    #{if showLink}
 	      
-	      #{secure.link @PersonDayHistory.personDayHistory(dayRecap.personDay.id), modal:'#defaultModal'} 
-	      *{ #{secure.link @Stampings.forceMealTicket(dayRecap.personDay.id), modal:'#defaultModal'} }*
+	      #{secure.link @PersonDayHistory.personDayHistory(dayRecap.personDay.id), 'data-async-modal':'#defaultModal'}
+	      *{ #{secure.link @Stampings.forceMealTicket(dayRecap.personDay.id), 'data-async-modal':'#defaultModal'} }*
 	      ${dayRecap.personDay.date.shortDayName()}
 	      #{/secure.link}
 	    #{/if}

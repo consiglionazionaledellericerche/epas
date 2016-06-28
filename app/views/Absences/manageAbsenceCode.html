@@ -2,13 +2,13 @@
 #{set header:'navbar' /}
 #{set title:'ePAS - Codici di assenza' /}
 
-#{secure.checkAction 'Absences.insertCode' }
+#{secure.check 'Absences.insertCode' }
 <div class="row text-center">
 	#{secure.link @Absences.insertCode(), class:'btn btn-primary',fa:'plus' }
 		<em>Definisci nuovo codice di assenza</em>
 	#{/secure.link}
 </div>
-#{/secure.checkAction}
+#{/secure.check}
 
 	<table class="table table-striped table-hover" width="100%" datatable>
 	 <thead>

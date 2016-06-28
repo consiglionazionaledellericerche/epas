@@ -37,13 +37,13 @@
   #{/form}
 
 
-  #{secure.checkAction 'BadgeSystems.blank'}
+  #{secure.check 'BadgeSystems.blank'}
   #{b.actions}
   <a class="btn btn-success" href="@{blank()}" data-async-modal="#defaultModal">
     <i class="fa fa-plus"></i> &{'BadgeSystems.blank'}
   </a>
   #{/b.actions}
-  #{/secure.checkAction}
+  #{/secure.check}
 
   <div id="badgeSystemList"> <!-- per il risultato della modale asincrona -->
 

@@ -67,9 +67,9 @@
  </div> 
 
  <div class="container-fluid center">
- #{secure.checkAction 'Absences.insertCode' }
+ #{secure.check 'Absences.insertCode' }
 	<input class="btn btn-primary" type="submit" value="Ok">  
- #{/secure.checkAction}
+ #{/secure.check}
  <input class="btn" action="action" type="button" value="Indietro" onclick="history.go(-1);">
  </div>
 #{/form}
