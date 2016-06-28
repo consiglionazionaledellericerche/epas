@@ -819,12 +819,17 @@ public class Absences extends Controller {
    * @param day il giorno
    */
   public static void absencesVisibleForEmployee(int year, int month, int day) {
+    if (Security.getUser().get().person == null) {
+      flash.error("Utente di sistema non abilitato alla funzionalità");
+      Persons.list(null, null);
+    }
     if (!(Boolean) confManager
           .configValue(Security.getUser().get().person.office, EpasParam.ABSENCES_FOR_EMPLOYEE)) {
       flash.error("Per accedere a questa funzione, occorre modificare il valore del "
           + "parametro 'Assenze visibili dai dipendenti'.");
       Stampings.stampings(year, month);
     }
+    
     Person person = Security.getUser().get().person;
     List<Person> list = personDao.byOffice(person.office);
     LocalDate date = new LocalDate(year, month, day);

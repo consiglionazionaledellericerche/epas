@@ -64,11 +64,8 @@ public class RequestInit extends Controller {
 
     final User currentUser = user.get();
 
-    if (currentUser.person != null) {
-      boolean asd = (Boolean) confManager
-          .configValue(currentUser.person.office, EpasParam.ABSENCES_FOR_EMPLOYEE);
-      renderArgs.put("isPersonInCharge", currentUser.person.isPersonInCharge);
-      renderArgs.put("absencesForEmployee", asd);
+    if (currentUser.person != null) {      
+      renderArgs.put("isPersonInCharge", currentUser.person.isPersonInCharge);      
     }
 
     // year init /////////////////////////////////////////////////////////////////

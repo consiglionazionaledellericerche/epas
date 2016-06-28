@@ -135,10 +135,8 @@ when
      	
      	/*Possibilità di inviare report*/
      	"ReportCentre.generateReport",
-     	"ReportCentre.sendProblem",
-     	
-     	/*Possibilità di vedere la situazione presenze dei colleghi*/
-     	"Absences.absencesVisibleForEmployee"   	
+     	"ReportCentre.sendProblem"
+	
      	
        ), target == null, granted == false)
 then
