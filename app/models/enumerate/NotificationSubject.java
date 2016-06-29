@@ -2,6 +2,8 @@ package models.enumerate;
 
 import com.google.common.collect.Maps;
 
+import models.Stamping;
+
 import play.mvc.Router;
 
 import java.util.Map;
@@ -23,24 +25,35 @@ public enum NotificationSubject {
   /**
    * Messaggio.
    */
-  MESSAGE;
+  MESSAGE,
+  /**
+   * Notifiche relative a timbrature inserite
+   */
+  STAMPING;
 
-  private String toUrl(String action, Long id) {
-    if (id == null) {
+  private String toUrl(String action, Map<String, Object> params) {
+    if (params == null) {
       return Router.reverse(action).url;
     } else {
-      final Map<String, Object> params = Maps.newHashMap();
-      params.put("id", id);
       return Router.reverse(action, params).url;
     }
   }
 
   public String toUrl(Long referenceId) {
+    final Map<String, Object> params = Maps.newHashMap();
     switch (this) {
       case COMMENT:
-        return toUrl("Comments.show", referenceId);
+        params.put("id", referenceId);
+        return toUrl("Comments.show", params);
       case MESSAGE:
-        return toUrl("Messages.show", referenceId);
+        params.put("id", referenceId);
+        return toUrl("Messages.show", params);
+      case STAMPING:
+        final Stamping stamping = Stamping.findById(referenceId);
+        params.put("month", stamping.date.getMonthOfYear());
+        params.put("year", stamping.date.getYear());
+        params.put("personId", stamping.personDay.person.id);
+        return toUrl("Stampings.personStamping", params);
       // case SYSTEM:
       default:
         throw new IllegalStateException("unknown target: " + this.name());

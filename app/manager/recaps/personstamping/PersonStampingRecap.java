@@ -183,7 +183,7 @@ public class PersonStampingRecap {
         .numberOfCompensatoryRestUntilToday(person, year, month);
     
     this.basedWorkingDays = personManager.basedWorkingDays(personDays, monthContracts, end);
-    this.absenceCodeMap = personManager.getAllAbsenceCodeInMonth(totalPersonDays);
+    this.absenceCodeMap = personManager.countAbsenceCodes(totalPersonDays);
 
   }
 }
