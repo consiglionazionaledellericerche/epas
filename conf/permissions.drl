@@ -30,6 +30,7 @@ when
      	"Version.showVersion",
      	"Notifications.list",
      	"Notifications.archiveds",
+     	"Notifications.readAndRedirect",
      	"Notifications.read"
        ), target == null, granted == false)
 then
