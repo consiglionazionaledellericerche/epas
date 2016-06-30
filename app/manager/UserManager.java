@@ -102,8 +102,6 @@ public class UserManager {
 
   public User createUser(final Person person) {
 
-    //Preconditions.checkState(person.isPersistent());
-
     User user = new User();
 
     user.username = generateUserName(person.name, person.surname);
@@ -114,7 +112,6 @@ public class UserManager {
     user.save();
 
     person.user = user;
-    person.save();
 
     log.info("Creato nuovo user per {}: username = {}", person.fullName(), user.username);
 

@@ -152,7 +152,6 @@ public class Persons extends Controller {
     person.surname = WordUtils.capitalizeFully(person.surname);
 
     person.user = userManager.createUser(person);
-
     person.save();
 
     Role employee = Role.find("byName", Role.EMPLOYEE).first();
@@ -204,7 +203,7 @@ public class Persons extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
-    //rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.office);
 
     render(person);
   }
