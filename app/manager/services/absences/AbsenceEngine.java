@@ -11,6 +11,10 @@ import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.WorkingTimeTypeDao;
 
+import manager.services.absences.AbsenceEnums.ComplationAbsenceGroup;
+import manager.services.absences.AbsenceEnums.GroupAbsenceType;
+import manager.services.absences.AbsenceEnums.TakableAbsenceGroup;
+
 import models.Absence;
 import models.AbsenceType;
 import models.Person;
@@ -25,16 +29,7 @@ import java.util.stream.Stream;
 
 public class AbsenceEngine {
   
-  public static final Set<String> codes661 = 
-      Sets.newHashSet("661h1", "661h2", "661h3", "661h4", "661h5", "661h6", "661h7", 
-          "661h8", "661h9");
-  public static final Set<String> codes18 = 
-      Sets.newHashSet("18h1", "18h2", "18h3", "18h4", "18h5", "18h6", "18h7", "18h8", "18h9");
-  public static final Set<String> codes19 = 
-      Sets.newHashSet("19h1", "19h2", "19h3", "19h4", "19h5", "19h6", "19h7", "19h8", "19h9");
-  
-  public static final Set<String> codesCompl09 = 
-      Sets.newHashSet("09h1", "09h2", "09h3", "09h4", "09h5", "09h6", "09h7");
+
   
   private final AbsenceTypeDao absenceTypeDao;
   private final AbsenceDao absenceDao;
@@ -91,8 +86,7 @@ public class AbsenceEngine {
       takableComponent.takeAmountType = takableAbsenceGroup.takeAmountType;
       
       takableComponent.periodTakableAmount = takableAbsenceGroup.periodTakableAmount;
-      if (!takableAbsenceGroup.computeTakableAmountBehaviour
-          .equals(ComputeAmountBehaviour.normal)) {
+      if (!takableAbsenceGroup.computeTakableAmountBehaviour.isEmpty()) {
         // TODO: ex. workingTimePercent
       }
 
@@ -127,8 +121,6 @@ public class AbsenceEngine {
       
       ComplationAbsenceGroup complationAbsenceGroup = groupAbsenceType.complationAbsenceGroup;
       complationComponent.complationAmountType = complationAbsenceGroup.complationAmountType;
-      
-      complationComponent.complationLimitAmount = complationAbsenceGroup.complationLimitAmount;
       
       complationComponent.replacingCode = 
           absenceTypeDao.getAbsenceTypeByCode(complationAbsenceGroup.replacingCode).get();
@@ -205,23 +197,22 @@ public class AbsenceEngine {
   public boolean requestForAbsenceInPeriod(AbsencePeriod absencePeriod, 
       AbsenceRequestType absenceRequestType, 
       AbsenceType absenceType, LocalDate date) {
-    
+
     // Solo Takable component
     if (absencePeriod.takableComponent.isPresent() && !absencePeriod.complationComponent.isPresent()) {
-      
+
       Preconditions.checkState(absenceRequestType.equals(AbsenceRequestType.insertTakable) 
           || absenceRequestType.equals(AbsenceRequestType.deleteTakable));
-      
+
       Preconditions.checkState(absencePeriod.takableComponent.get().takableCodes.contains(absenceType));
-      
+
       int absenceAmount = computeAbsenceAmount(absencePeriod.person, date, absenceType, 
           absencePeriod.takableComponent.get().takeAmountType );
       int takableAmount = computeTakableAmount(absencePeriod.takableComponent.get());
       int takenAmount = computeTakenAmount(absencePeriod.takableComponent.get());
-      
+
       return takableAmount - takenAmount - absenceAmount > 0;
 
-      
     }
     // Solo Complation component
     if (!absencePeriod.takableComponent.isPresent() && absencePeriod.complationComponent.isPresent()) {
@@ -229,139 +220,55 @@ public class AbsenceEngine {
       Preconditions.checkState(absenceRequestType.equals(AbsenceRequestType.insertComplation) 
           || absenceRequestType.equals(AbsenceRequestType.deleteComplation));
 
+      // Trovare la percentuale di completamento alla 
+      
+      // Ricostruisco la storia nel periodo per capire quanto ho di residuo.
+      int initialPercent = computeInitialComplationPercent();  
+      LocalDate initialDate = getInitialComplationDate(absencePeriod);
+
+
       // inserisco il codice
-      
+
       // se supero il limite aggiungo anche il codice di completamento 
-      
+
     }
-    
+
     // Entrambi i componenti
     if (absencePeriod.takableComponent.isPresent() && absencePeriod.complationComponent.isPresent()) {
-      
+
     }
 
     return false; //illegal state
   }
-  
- 
-  public enum TakableAbsenceGroup {
-    
-    takable661(
-        AmountType.minutes,
-        CountBehaviour.period,
-        CountBehaviour.period,
-        ComputeAmountBehaviour.normal,
-        1080,
-        codes661,
-        codes661),
-    
-    takable18(
-        AmountType.minutes,
-        CountBehaviour.period,
-        CountBehaviour.period,
-        ComputeAmountBehaviour.normal,
-        1080,
-        codes18,
-        codes18),
-    
-    takable19(
-        AmountType.minutes,
-        CountBehaviour.period,
-        CountBehaviour.period,
-        ComputeAmountBehaviour.normal,
-        1080,
-        codes19,
-        codes19);
-    
-    public CountBehaviour takableCountBehaviour;
-    public CountBehaviour takenCountBehaviour;
-    public ComputeAmountBehaviour computeTakableAmountBehaviour;
-    public Integer periodTakableAmount;
-    public Set<String> takenCodes; 
-    public Set<String> takableCodes;
-    public AmountType takeAmountType;
-     
-    private TakableAbsenceGroup( 
-        AmountType takeAmountType,
-        CountBehaviour takableCountBehaviour, 
-        CountBehaviour takenCountBehaviour, 
-        ComputeAmountBehaviour computeTakableAmountBehaviour,
-        Integer periodTakableAmount,
-        Set<String> takenCodes, Set<String> takableCodes) {
-      this.takeAmountType = takeAmountType;
-      this.takableCountBehaviour = takableCountBehaviour;
-      this.takenCountBehaviour = takenCountBehaviour;
-      this.computeTakableAmountBehaviour = computeTakableAmountBehaviour;
-      this.periodTakableAmount = periodTakableAmount;
-      this.takenCodes = takenCodes;
-      this.takableCodes = takableCodes;
-    }
-  }
-  
-  public enum ComplationAbsenceGroup {
-    complation09(AmountType.minutes, 432, "90B", codesCompl09);
 
-    public int complationLimitAmount;
-    public String replacingCode;
-    public Set<String> complationCodes;
-    public AmountType complationAmountType;
+  /**
+   * Il valore già utilizzato da inizializzazione.
+   * @return
+   */
+  private int computeInitialComplationPercent() {
+    // TODO: recuperare la percentuale inizializzazione quando ci sarà.
+    return 0;
+  }
+  
+  /**
+   * La data cui si riferisce la percentuale inizializzazione.
+   * @param absencePeriod
+   * @return
+   */
+  private LocalDate getInitialComplationDate(AbsencePeriod absencePeriod) {
+    // TODO: utilizzare le strutture dati quando ci saranno.
+    return absencePeriod.from;
+  }
 
-    private ComplationAbsenceGroup(AmountType complationAmountType, 
-        int complationLimitAmount, String replacingCode, Set<String> complationCodes) {
-      this.complationAmountType = complationAmountType;
-      this.complationLimitAmount = complationLimitAmount;
-      this.replacingCode = replacingCode;
-      this.complationCodes = complationCodes;
-      
-    }
-    
-  }
-  
-  public enum GroupAbsenceType {
-    
-    group661(
-        PeriodType.year,
-        TakableAbsenceGroup.takable661,
-        null),
-    
-    group18(
-        PeriodType.month,
-        TakableAbsenceGroup.takable18,
-        null),
-    
-    group19(
-        PeriodType.month,
-        TakableAbsenceGroup.takable19,
-        null),
-    
-    group09(
-        PeriodType.always,
-        null,
-        ComplationAbsenceGroup.complation09);
-    
-    public PeriodType periodType;
-    public TakableAbsenceGroup takableAbsenceGroup;
-    public ComplationAbsenceGroup complationAbsenceGroup;
-    
-     
-    private GroupAbsenceType(PeriodType periodType, 
-        TakableAbsenceGroup takableAbsenceGroup,
-        ComplationAbsenceGroup complationAbsenceGroup) {
-      this.periodType = periodType;
-      this.takableAbsenceGroup = takableAbsenceGroup;
-      this.complationAbsenceGroup = complationAbsenceGroup;
-    }
-    
-  }
-  
+
   public static class AbsencePeriod {
-    
+
     public Person person;
-    
+
     /*Period*/
     public LocalDate from;                      // Data inizio
     public LocalDate to;                        // Data fine
-    
+
     public Optional<TakableComponent> takableComponent;
     public Optional<ComplationComponent> complationComponent;
     
@@ -373,7 +280,7 @@ public class AbsenceEngine {
   
   public static class TakableComponent {
 
-    public AmountType takeAmountType;         // Il tipo di ammontare del periodo
+    public AmountType takeAmountType;           // Il tipo di ammontare del periodo
     
     public CountBehaviour takableCountBehaviour;// Come contare il tetto totale
     public int periodTakableAmount;             // Il tetto massimo
@@ -413,12 +320,13 @@ public class AbsenceEngine {
     always, year, month;
   }
   
-  public enum ComputeAmountBehaviour {
-    normal, workingTimePercent;
+  public enum ComputeAmountRestriction {
+    workingTimePercent, workingPeriodPercent;
   }
   
   public enum AbsenceRequestType {
     insertTakable, insertComplation, deleteTakable, deleteComplation;
   }
-    
+  
+      
 }
