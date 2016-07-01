@@ -6,27 +6,80 @@
 
 <div class="container">
 
-<div class="panel panel-primary">
-		  <div class="panel-heading">
-		    <h4 class="panel-title">Carica il file (formato .csv) su cui fare il controllo</h4>
-		  </div>
-		<div class="panel-body">
+#{title title:('Controllo schedone ') /}
+<div id="process">
 
-#{form @Charts.processLastYearAbsences() ,  enctype:'multipart/form-data'}
+#{if !process}
+#{form @Charts.checkLastYearAbsences() ,  enctype:'multipart/form-data', class:'form-horizontal', 
+	'data-async':'#page_content', 'data-async-error':'#process', 
+	'data-spinner':'#defaultSpinner'}
+	#{f.hidden 'officeId', value:office.id /}
+	#{alert color:'info'}
+		Carica il file (formato .csv) su cui effettuare il controllo</h4>
+	#{/alert}
 
 	    <input type="file" name="file">
-		
-		<div class="container-fluid center">
-      		<input class="btn btn-primary" type="submit" value="Avanti" />
-      	</div>
 
+   	    #{b.buttons center:true}   
+      		#{b.submit 'Avanti'/}
+    	#{/b.buttons}
 #{/form}
-	</div>
+#{/if}
+#{else}
+
+<table class="span10 table table-condensed table-striped" datatable>
+<thead>
+<tr>
+	<th>Matricola</th>
+	<th>Nome e cognome</th>
+	<th>Data assenza rilevata</th>
+	<th>Codice di assenza rilevato dallo schedone</th>
+	<th>Esito confronto con anagrafica</th>
+	<th>Motivazione</th>
+	<th>Codice di assenza in anagrafica</th>
+</tr>
+</thead>
+<tbody>
+#{list items:listTrueFalse, as:'result'}
+#{if result != null}
+	#{if result.type.getDescription().equals('warning')}
+	<tr class="warning">
+	#{/if}
+	#{elseif result.type.getDescription().equals('danger')}
+	<tr class="danger">
+	#{/elseif}
+  	#{else}
+	<tr class="success">
+	#{/else}
+		<td>${result.matricola}</td>
+		<td>${result.nome} ${result.cognome}</td>
+		<td>${result.data}</td>
+		<td>${result.codice}</td>
+		<td>
+		  #{if result.check}
+		    <i style="color: green"class="fa fa-check"></i>
+		  #{/if}
+		  #{else}
+		    <i style="color: red" class="fa fa-times"></i>
+		  #{/else}	
+		</td>
+		<td>
+			#{if result.message != null}
+			${result.message}
+			#{/if}
+		</td>
+		<td>
+		#{if result.codiceInAnagrafica != null}
+			${result.codiceInAnagrafica}
+		#{/if}
+		</td>
+	</tr>
+
+#{/if}
+#{/list}
+</tbody>
+</table>
+
+#{/else}
 </div>
-
-<ul class="pager">
-  <li><a href="/application/indexAdmin">Home</a></li>
-  <li><a href="/stampings/personStamping">Timbrature</a></li>
-</ul>
-
 </div>

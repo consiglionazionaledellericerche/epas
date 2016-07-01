@@ -241,7 +241,8 @@ public class RequestInit extends Controller {
         "Certifications.processAll",
         "Certifications.emptyCertifications",
         "PersonMonths.visualizePeopleTrainingHours",
-        "Persons.list");
+        "Persons.list",
+        "Charts.checkLastYearAbsences");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
         "Stampings.insertWorkingOffSitePresence",

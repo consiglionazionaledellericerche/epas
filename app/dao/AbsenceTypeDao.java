@@ -151,7 +151,7 @@ public class AbsenceTypeDao extends DaoBase {
     QAbsenceType absenceType = QAbsenceType.absenceType;
 
     final JPQLQuery query = getQueryFactory().from(absenceType)
-        .where(absenceType.code.eq(string));
+        .where(absenceType.code.eq(string).or(absenceType.code.equalsIgnoreCase(string)));
 
     return Optional.fromNullable(query.singleResult(absenceType));
 
