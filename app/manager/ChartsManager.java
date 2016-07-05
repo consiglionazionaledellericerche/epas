@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.gdata.util.common.base.Preconditions;
 
 import com.beust.jcommander.internal.Maps;
+import com.sun.net.httpserver.Filter;
 
 import controllers.Security;
 
@@ -37,6 +38,7 @@ import models.WorkingTimeType;
 import models.enumerate.CheckType;
 import models.exports.PersonOvertime;
 
+import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import org.slf4j.Logger;
@@ -54,9 +56,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
@@ -69,10 +77,10 @@ public class ChartsManager {
   private final CompetenceManager competenceManager;
   private final PersonDao personDao;
   private final AbsenceDao absenceDao;
-  private final AbsenceTypeDao absenceTypeDao;
+
   private final IVacationsService vacationsService;
   private final IWrapperFactory wrapperFactory;
-  private final PersonDayDao personDayDao;
+
 
   /**
    * Costruttore.
@@ -88,17 +96,14 @@ public class ChartsManager {
   public ChartsManager(CompetenceCodeDao competenceCodeDao,
       CompetenceDao competenceDao, CompetenceManager competenceManager,
       PersonDao personDao, IVacationsService vacationsService,
-      AbsenceDao absenceDao, AbsenceTypeDao absenceTypeDao, 
-      IWrapperFactory wrapperFactory, PersonDayDao personDayDao) {
+      AbsenceDao absenceDao, IWrapperFactory wrapperFactory) {
     this.competenceCodeDao = competenceCodeDao;
     this.competenceDao = competenceDao;
     this.competenceManager = competenceManager;
     this.personDao = personDao;
-    this.absenceDao = absenceDao;
-    this.absenceTypeDao = absenceTypeDao;
+    this.absenceDao = absenceDao;    
     this.vacationsService = vacationsService;
-    this.wrapperFactory = wrapperFactory;
-    this.personDayDao = personDayDao;
+    this.wrapperFactory = wrapperFactory;    
   }
 
   /**
@@ -219,18 +224,18 @@ public class ChartsManager {
    * @param file file 
    * @return la situazione dopo il check del file.
    */
-  public RenderList checkSituationPastYear(File file) {
+  public RenderList checkSituationPastYear(File file, boolean alsoPastYear) {
     if (file == null) {
       log.error("file nullo nella chiamata della checkSituationPastYear");
     }
     log.debug("Passato il file {}", file.getName());
     List<RenderResult> listTrueFalse = new ArrayList<RenderResult>();
     List<RenderResult> listNull = new ArrayList<RenderResult>();
-    final Map<Integer, List<ResultFromFile>> map = createMap(file);
+    final Map<Integer, List<ResultFromFile>> map = createMap(file, alsoPastYear);
     if (map != null) {
       map.forEach((key,value)-> {
         Person person = personDao.getPersonByNumber(key);
-        List<RenderResult> listForPerson = transformInRenderList(person, map.get(key));
+        List<RenderResult> listForPerson = transformInRenderList(person, map.get(key), alsoPastYear);
         listForPerson.forEach(item-> {
           listTrueFalse.add(item);
         }); 
@@ -267,8 +272,8 @@ public class ChartsManager {
     out.write("Cognome Nome,");
     for (int i = 1; i <= month; i++) {
       out.append("ore straordinari " + DateUtility.fromIntToStringMonth(i)
-          + ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i)
-          + ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
+      + ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i)
+      + ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
     }
 
     out.append("ore straordinari TOTALI,ore riposi compensativi TOTALI, ore in più TOTALI");
@@ -458,11 +463,18 @@ public class ChartsManager {
    * @return una mappa con chiave le matricole dei dipendenti e con valori le liste di oggetti
    *     di tipo ResultFromFile che contengono l'assenza e la data in cui l'assenza è stata presa.
    */
-  @SuppressWarnings("deprecation")
-  private Map<Integer, List<ResultFromFile>> createMap(File file) {
+  
+  private Map<Integer, List<ResultFromFile>> createMap(File file, boolean alsoPastYear) {
     if (file == null) {
       log.error("file nullo nella chiamata della checkSituationPastYear");
     }    
+    String year = "";
+    Pattern pattern = Pattern.compile("-?\\d+");
+    Matcher match = pattern.matcher(file.getName());
+    while (match.find()) {
+      year = match.group();
+    }
+    int anno = new Integer(year.substring(1)).intValue();
 
     Map<Integer, List<ResultFromFile>> map = Maps.newHashMap();
     try {
@@ -507,7 +519,13 @@ public class ChartsManager {
           int matricola = Integer.parseInt(removeApice(tokenList.get(indexMatricola)));
           String assenza = removeApice(tokenList.get(indexAssenza));
           LocalDate dataAssenza = buildDate(tokenList.get(indexDataAssenza));
-
+          
+          if (!alsoPastYear) {
+            if (dataAssenza.getYear() == anno -1) {
+              log.debug("Trovata assenza dell'anno precedente alla data dello schedone. Scartata.");
+              continue;
+            }
+          }
           ResultFromFile result = new ResultFromFile(assenza, dataAssenza);
           List<ResultFromFile> list = map.get(matricola);
           if (list == null) {
@@ -520,11 +538,9 @@ public class ChartsManager {
               .findFirst();
           if (!value.isPresent()) {
             list.add(result);
+            Collections.sort(list, (rff1, rff2) -> rff1.dataAssenza.compareTo(rff2.dataAssenza));
             map.put(matricola, list);
           }                    
-
-          JPAPlugin.closeTx(false);
-          JPAPlugin.startTx(false);
 
         } catch (Exception e) {
           log.warn("La linea {} del file non è nel formato corretto per essere parsata.", line);
@@ -546,67 +562,53 @@ public class ChartsManager {
    * @return una lista di RenderResult che contengono un riepilogo, assenza per assenza, 
    *     della situazione di esse sul db locale.
    */
-  private List<RenderResult> transformInRenderList(Person person, List<ResultFromFile> list) {
-    Map<String, AbsenceType> mappaCodiciTipi = Maps.newHashMap();
+  private List<RenderResult> transformInRenderList(Person person, List<ResultFromFile> list, 
+      boolean alsoPastYear) {
+
+    Long start = System.nanoTime();
     List<RenderResult> resultList = Lists.newArrayList();
+    LocalDate dateFrom = null;
+    LocalDate dateTo = list.get(list.size() - 1).dataAssenza;
+    if (alsoPastYear) {      
+      dateFrom = list.get(0).dataAssenza; 
+    } else {
+      dateFrom = dateTo.withYear(dateTo.getYear())
+          .withMonthOfYear(DateTimeConstants.JANUARY).withDayOfMonth(1);
+    }    
+    
+    List<Absence> absences = absenceDao.findByPersonAndDate(person, 
+        dateFrom, Optional.fromNullable(dateTo), Optional.<AbsenceType>absent()).list();
+
     list.forEach(item-> {
-
-      AbsenceType abt = mappaCodiciTipi.get(item.codice);
-      if (abt == null) {
-        Optional<AbsenceType> absenceType = absenceTypeDao.getAbsenceTypeByCode(item.codice);
-        if (absenceType.isPresent()) {
-          abt = absenceType.get();          
-        } else {
-          abt = new AbsenceType();
-          abt.code = item.codice;          
-        }
-        mappaCodiciTipi.put(item.codice, abt);
-      }
       RenderResult result = null;
-      PersonDay pd = personDayDao.getOrBuildPersonDay(person, item.dataAssenza);
-
-      if (pd != null) {
-        if (pd.absences.size() > 1) {
-          final String codice = abt.code;
-          java.util.Optional<Absence> value = pd.absences
-              .stream()
-              .filter(r ->codice.equals(r.absenceType.code)).findFirst();
-          if (value.isPresent()) {
-            result = new RenderResult(null, person.number, person.name, 
-                person.surname, item.codice, item.dataAssenza, true, "Ok", 
-                codice, CheckType.SUCCESS);
-          } else {
-            result = new RenderResult(null, person.number, person.name, 
-                person.surname, item.codice, item.dataAssenza, false, 
-                "Nessuna assenza per il giorno", null, CheckType.DANGER);
-          }
+      List<Absence> values = absences
+          .stream()
+          .filter(r -> r.personDay.date.isEqual(item.dataAssenza))
+          .collect(Collectors.toList());      
+      if (!values.isEmpty()) {
+        Predicate<Absence> a1 = a -> a.absenceType.code.equalsIgnoreCase(item.codice) 
+            || a.absenceType.certificateCode.equalsIgnoreCase(item.codice);
+        if (values.stream().anyMatch(a1)) {          
+          result = new RenderResult(null, person.number, person.name, 
+              person.surname, item.codice, item.dataAssenza, true, "Ok", 
+              values.stream().filter(r1 -> r1.absenceType.code.equalsIgnoreCase(item.codice)
+                  || r1.absenceType.certificateCode.equalsIgnoreCase(item.codice))
+              .findFirst().get().absenceType.code, CheckType.SUCCESS);
         } else {
-          Absence ab = absenceDao.checkAbsence(pd);
-          if (ab == null) {
-            result = new RenderResult(null, person.number, person.name, 
-                person.surname, item.codice, item.dataAssenza, false, 
-                "Nessuna assenza per il giorno", null, CheckType.DANGER);
-          } else {
-
-            if (abt.code.equalsIgnoreCase(ab.absenceType.code) 
-                || abt.code.equalsIgnoreCase(ab.absenceType.certificateCode)) {
-              result = new RenderResult(null, person.number, person.name, 
-                  person.surname, item.codice, item.dataAssenza, true, "Ok", 
-                  ab.absenceType.code, CheckType.SUCCESS);
-            } else {
-              result = new RenderResult(null, person.number, person.name, 
-                  person.surname, item.codice, item.dataAssenza, false, 
-                  "Mismatch tra assenza trovata e quella dello schedone", 
-                  ab.absenceType.code, CheckType.WARNING);
-            }          
-          }
+          result = new RenderResult(null, person.number, person.name, 
+              person.surname, item.codice, item.dataAssenza, false, 
+              "Mismatch tra assenza trovata e quella dello schedone", 
+              values.stream().findFirst().get().absenceType.code, CheckType.WARNING);
         }        
-
       } else {
-        log.warn("Non esiste il personday per il giorno {}", item.dataAssenza);
-      }      
+        result = new RenderResult(null, person.number, person.name, 
+            person.surname, item.codice, item.dataAssenza, false, 
+            "Nessuna assenza per il giorno", null, CheckType.DANGER);
+      }    
       resultList.add(result);      
     });
+    Long end = System.nanoTime();
+    log.debug("TEMPO per la persona {}: {} ms",person , (end - start) / 1000000 );
     return resultList;
   }
 
@@ -701,7 +703,8 @@ public class ChartsManager {
     public ResultFromFile(String codice, LocalDate dataAssenza) {
       this.codice = codice;
       this.dataAssenza = dataAssenza;
-    }
+    }   
+
   }
 
   // *********** Fine parte di business logic ****************/
