@@ -8,6 +8,8 @@ import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 
+import lombok.extern.slf4j.Slf4j;
+
 import manager.ChartsManager;
 import manager.ChartsManager.Month;
 import manager.ChartsManager.RenderList;
@@ -39,6 +41,7 @@ import javax.inject.Inject;
 //import play.Logger;
 
 @With({Resecure.class})
+@Slf4j
 public class Charts extends Controller {
 
   //private final static Logger log = LoggerFactory.getLogger(Charts.class);
@@ -163,7 +166,7 @@ public class Charts extends Controller {
   }
 
 
-  public static void checkLastYearAbsences(File file, Long officeId) {
+  public static void checkLastYearAbsences(File file, Long officeId, boolean alsoPastYear) {
     
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -174,9 +177,11 @@ public class Charts extends Controller {
       render(process, office);
     }        
     process = true;
-    RenderList render = chartsManager.checkSituationPastYear(file);
+    long start = System.nanoTime();
+    RenderList render = chartsManager.checkSituationPastYear(file, alsoPastYear);
     List<RenderResult> listTrueFalse = render.getListTrueFalse();
-    
+    long end = System.nanoTime();
+    log.debug("Tempo di esecuzione del metodo: {} secondi", (end - start)/1000000000);
     render(listTrueFalse, process, office);
   }
 

@@ -15,11 +15,24 @@
 	'data-spinner':'#defaultSpinner'}
 	#{f.hidden 'officeId', value:office.id /}
 	#{alert color:'info'}
-		Carica il file (formato .csv) su cui effettuare il controllo</h4>
+		<i class="fa fa-info-circle fa-2x" aria-hidden="true"> Info:</i><br><br>
+		Ogni anno l'amministrazione centrale invia alle amministrazioni delle singole sedi uno schedone riepilogativo (in formato <strong>.csv</strong>)
+		contenente tutte le assenze fatte dai dipendenti di quella sede nel corso dell'anno precedente.<br>
+		Selezionando e caricando quel file in questa pagina, verrà analizzato il contenuto del file stesso in relazione alle
+		assenze salvate sul database di modo da fornire un parallelo tra le due situazioni, evidenziando i casi critici:
+		<li> i giorni in cui le assenze tra lo schedone e il database differiscono
+		<li> i giorni in cui sul database non sono presenti assenze invece presenti nello schedone. <br><br>
+		
+		<i class="fa fa-exclamation" aria-hidden="true"> <strong><u>Importante:</u></strong></i> Nello schedone possono essere 
+		contenute anche assenze relative all'anno ancora precedente a quello riportato, selezionando
+		correttamente il bottone sottostante è possibile consentire il controllo anche su quelle assenze, oppure evitarlo 
+		(selezionando anche le assenze dell'anno precedente, l'elaborazione sarà più lunga).
+		
 	#{/alert}
 
-	    <input type="file" name="file">
-
+	    
+	    #{f.input 'file', type:'file' /}
+		#{f.booleanRadio 'alsoPastYear', label:'Controlla anche anno precedente', value:false /}
    	    #{b.buttons center:true}   
       		#{b.submit 'Avanti'/}
     	#{/b.buttons}
