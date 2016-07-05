@@ -67,6 +67,8 @@
        #{/if}
        
        *{ Utility Stampa Cartellino / Utility }*
+       <li><a href="@{Charts.checkLastYearAbsences(null,session.get("officeSelected"), false)}">Controlli ed esportazioni</a></li>
+       
        
        #{if ip.viewPersonDay }
        <li><a href="@{PrintTags.listPersonForPrintTags(session.get("yearSelected"),
