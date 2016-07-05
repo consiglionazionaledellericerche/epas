@@ -27,7 +27,6 @@ public class Notification extends MutableModel {
 
   @NotNull
   @ManyToOne(optional = false)
-
   public User recipient;
 
   @Required

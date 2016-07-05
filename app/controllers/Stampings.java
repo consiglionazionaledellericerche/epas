@@ -6,11 +6,9 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import dao.CertificationDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
-import dao.PersonMonthRecapDao;
 import dao.StampingDao;
 import dao.history.HistoryValue;
 import dao.history.StampingHistoryDao;
@@ -18,7 +16,6 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
-import helpers.PersonTags;
 import helpers.Web;
 import helpers.validators.StringIsTime;
 
@@ -28,6 +25,7 @@ import it.cnr.iit.epas.NullStringBinder;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ConsistencyManager;
+import manager.NotificationManager;
 import manager.PersonManager;
 import manager.SecureManager;
 import manager.StampingManager;
@@ -39,18 +37,11 @@ import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.recaps.troubles.PersonTroublesInMonthRecap;
 import manager.recaps.troubles.PersonTroublesInMonthRecapFactory;
 
-import models.Absence;
-import models.CertificatedData;
-import models.Certification;
-import models.Configuration;
-import models.Notification;
 import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
 import models.User;
-import models.UsersRolesOffices;
-import models.enumerate.NotificationSubject;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -110,6 +101,8 @@ public class Stampings extends Controller {
   private static ConfigurationManager confManager;
   @Inject
   private static PersonManager personManager;
+  @Inject
+  private static NotificationManager notiicaNotificationManager;
 
 
   /**
@@ -137,9 +130,9 @@ public class Stampings extends Controller {
     //Per dire al template generico di non visualizzare i link di modifica
     boolean showLink = false;
     boolean showLinkForEmployee = false;
-    if ((Boolean)confManager
+    if ((Boolean) confManager
         .configValue(wrperson.getValue().office, EpasParam.WORKING_OFF_SITE).equals(true)
-        && (Boolean)confManager
+        && (Boolean) confManager
         .configValue(wrperson.getValue(), EpasParam.OFF_SITE_STAMPING).equals(true)) {
       showLinkForEmployee = true;
 
@@ -205,9 +198,9 @@ public class Stampings extends Controller {
 
   /**
    * Nuova timbratura inserita dall'impiegato di livello I - III
-   * 
+   *
    * @param person la persona (se stesso) per cui inserire la timbratura
-   * @param date la data in cui inserire la timbratura
+   * @param date   la data in cui inserire la timbratura
    */
   public static void blankForEmployee(Person person, LocalDate date) {
 
@@ -237,7 +230,6 @@ public class Stampings extends Controller {
         .stampings(stamping.id);
 
 
-
     rules.checkIfPermitted(stamping.personDay.person.office);
 
     final Person person = stamping.personDay.person;
@@ -254,42 +246,39 @@ public class Stampings extends Controller {
    * @param stamping timbratura
    * @param time     orario
    */
-  public static void save(Long personId, LocalDate date,
-      @Valid Stamping stamping, @CheckWith(StringIsTime.class) String time) {
+  public static void save(Long personId, LocalDate date, @Valid Stamping stamping,
+      @CheckWith(StringIsTime.class) String time) {
 
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
-    
+
     Person person = personDao.getPersonById(personId);
     if (person == null) {
       flash.error("La persona non esiste!");
-      Persons.list(null,null);
+      Persons.list(null, null);
     }
 
     PersonDay personDay = personDayDao.getOrBuildPersonDay(person, date);
-    if (!Security.getUser().get().isSystemUser()) {
-      if (Security.getUser().get().person.id.equals(person.id) 
-          && !personManager.isPersonnelAdmin(Security.getUser().get())) {
-        rules.checkIfPermitted(person);
-      } else {
-        rules.checkIfPermitted(person.office);
-      }
+    final User currentUser = Security.getUser().get();
+
+    if (!currentUser.isSystemUser() && currentUser.person.id.equals(person.id)
+        && !personManager.isPersonnelAdmin(currentUser)) {
+      rules.checkIfPermitted(person);
+    } else {
+      rules.checkIfPermitted(person.office);
     }
-    
-    
+
     if (!stamping.isPersistent()) {
       stamping.personDay = personDay;
     }
-    
-    if (!Security.getUser().get().isSystemUser()) {
-      if (Security.getUser().get().person.id.equals(person.id) 
-          && !personManager.isPersonnelAdmin(Security.getUser().get())
-          && !stampingManager.checkStampType(stamping, Security.getUser().get(), person)) {
-        flash.error("Non si hanno privilegi sufficienti per inserire una timbratura "
-            + "con causale diversa da lavoro fuori sede");
-        Stampings.stampings(date.getYear(), date.getMonthOfYear());
-      }
+
+    if (!currentUser.isSystemUser() && currentUser.person.id.equals(person.id)
+        && !personManager.isPersonnelAdmin(currentUser)
+        && !stampingManager.checkStampType(stamping, currentUser, person)) {
+      flash.error("Non si hanno privilegi sufficienti per inserire una timbratura "
+          + "con causale diversa da lavoro fuori sede");
+      Stampings.stampings(date.getYear(), date.getMonthOfYear());
     }
-    
+
     if (Validation.hasErrors()) {
       response.status = 400;
 
@@ -304,9 +293,9 @@ public class Stampings extends Controller {
 
     personDay.save();
     stamping.date = stampingManager.deparseStampingDateTime(date, time);
-    if (!Security.getUser().get().isSystemUser()) {
-      if (Security.getUser().get().person.id.equals(person.id) 
-          && !personManager.isPersonnelAdmin(Security.getUser().get())) {
+    if (!currentUser.isSystemUser()) {
+      if (currentUser.person.id.equals(person.id)
+          && !personManager.isPersonnelAdmin(currentUser)) {
         stamping.markedByEmployee = true;
         stamping.markedByAdmin = false;
       } else {
@@ -315,26 +304,23 @@ public class Stampings extends Controller {
     } else {
       stamping.markedByAdmin = true;
     }
-    
+
     personDay.stampings.add(stamping);
     personDay.save();
 
     consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
 
     flash.success(Web.msgSaved(Stampings.class));
-    
-    if (!Security.getUser().get().isSystemUser()) {
-      if (Security.getUser().get().person.id.equals(person.id) 
-          && !personManager.isPersonnelAdmin(Security.getUser().get())) {
-        Stampings.stampings(date.getYear(), date.getMonthOfYear());
-      }
-    }
-    
-    Stampings.personStamping(person.id,
-        date.getYear(), date.getMonthOfYear());
 
+    if (!currentUser.isSystemUser() && currentUser.person.id.equals(person.id)
+        && !personManager.isPersonnelAdmin(currentUser)) {
+      notiicaNotificationManager.notifyStamping(stamping);
+      Stampings.stampings(date.getYear(), date.getMonthOfYear());
+    }
+
+    Stampings.personStamping(person.id, date.getYear(), date.getMonthOfYear());
   }
-  
+
 
   /**
    * Elimina la timbratura.
@@ -384,9 +370,8 @@ public class Stampings extends Controller {
 
     consistencyManager.updatePersonSituation(stamp.personDay.person.id, stamp.personDay.date);
 
-    flash.success(
-        "Timbratura per il giorno %s per %s aggiornata.",
-        PersonTags.toDateTime(stamp.date.toLocalDate()), stamp.personDay.person.fullName());
+    flash.success("Aggiornata timbratura del %s di %s.", stamp.date.toString("dd/MM/YYYY"),
+        stamp.personDay.person.fullName());
 
     Stampings.stampings(stamp.personDay.date.getYear(), stamp.personDay.date.getMonthOfYear());
   }
@@ -609,70 +594,8 @@ public class Stampings extends Controller {
 
   }
 
-  public static enum MealTicketDecision {
-
+  public enum MealTicketDecision {
     COMPUTED, FORCED_TRUE, FORCED_FALSE;
   }
-
-
-  //  /**
-  //   * funzionalità di inserimento della presenza per lavoro fuori sede.
-  //   * @param year l'anno di riferimento
-  //   * @param month il mese di riferimentos
-  //   */
-  //  public static void insertWorkingOffSitePresence(final Integer year, final Integer month){
-  //    Person person = Security.getUser().get().person;
-  //    Stamping stamping = new Stamping(null, null);
-  //    Absence absence = new Absence();
-  //    LocalDate dateFrom = LocalDate.now();
-  //    render(person, stamping, absence, dateFrom);
-  //  }
-  //  
-  //  /**
-  //   * salva la timbratura inserita dal dipendente solo dopo controlli di integrità.
-  //   * @param person la persona che inserisce la timbratura
-  //   * @param date la data in cui inserire la timbratura
-  //   * @param stamping la timbratura
-  //   * @param time l'ora e i minuti della timbratura
-  //   */
-  //  public static void saveWorkingOffSitePresence(@Required Person person, @Required LocalDate date,
-  //      @Valid Stamping stamping, @CheckWith(StringIsTime.class) String time) {
-  //        
-  //    PersonDay personDay = personDayDao.getOrBuildPersonDay(person, date);
-  //    
-  //    if (!stamping.isPersistent()) {
-  //      stamping.personDay = personDay;
-  //    }
-  //    
-  //    if (!validation.hasErrors()) {
-  //      List<Certification> cert = certificationDao
-  //          .personCertifications(person, date.getYear(), date.getMonthOfYear());
-  //      CertificatedData cdata = pmrDao
-  //          .getPersonCertificatedData(person, date.getMonthOfYear(), date.getYear());
-  //      if (!cert.isEmpty() || cdata != null) {
-  //        validation.addError("date",
-  //            "non può essere inserita una timbratura per un giorno di "
-  //            + "un mese già inviato ad attestati");
-  //        response.status = 400;
-  //        log.info(validation.errorsMap().toString());
-  //        render("@insertWorkingOffSitePresence", stamping, person, date, time);
-  //      }
-  //
-  //    }
-  //    personDay.save();
-  //    stamping.date = stampingManager.deparseStampingDateTime(date, time);
-  //    stamping.markedByEmployee = true;
-  //    stamping.markedByAdmin = false;
-  //
-  //    personDay.stampings.add(stamping);
-  //    personDay.save();
-  //
-  //    consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
-  //
-  //    flash.success(Web.msgSaved(Stampings.class));
-  //    
-  //    Stampings.stampings(date.getYear(), date.getMonthOfYear());
-  //  }
-
 }
 
