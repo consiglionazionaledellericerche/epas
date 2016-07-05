@@ -2,10 +2,10 @@ package manager;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 
 import dao.AbsenceDao;
 import dao.ContractDao;
-import dao.PersonChildrenDao;
 import dao.PersonDayDao;
 import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
@@ -33,7 +33,6 @@ import org.joda.time.MonthDay;
 import play.db.jpa.JPA;
 
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +53,6 @@ public class PersonManager {
    * Costrutture.
    *
    * @param contractDao          contractDao
-   * @param personChildrenDao    personChildrenDao
    * @param personDayDao         personDayDao
    * @param absenceDao           absenceDao
    * @param personDayManager     personDayManager
@@ -63,7 +61,6 @@ public class PersonManager {
    */
   @Inject
   public PersonManager(ContractDao contractDao,
-      PersonChildrenDao personChildrenDao,
       PersonDayDao personDayDao,
       AbsenceDao absenceDao,
       PersonDayManager personDayManager,
@@ -146,36 +143,19 @@ public class PersonManager {
   }
 
   /**
-   * //TODO utilizzare jpa per prendere direttamente i codici (e migrare ad una lista).
-   *
    * @param personDays lista di PersonDay
-   * @return la lista contenente le assenze fatte nell'arco di tempo dalla persona
+   * @return La mappa dei codici di assenza utilizzati nei persondays specificati
    */
-  public Map<AbsenceType, Integer> getAllAbsenceCodeInMonth(List<PersonDay> personDays) {
-    int month = personDays.get(0).date.getMonthOfYear();
-    int year = personDays.get(0).date.getYear();
-    LocalDate beginMonth = new LocalDate(year, month, 1);
-    LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
-    Person person = personDays.get(0).person;
+  public Map<AbsenceType, Integer> countAbsenceCodes(List<PersonDay> personDays) {
 
-    List<AbsenceType> abtList =
-        AbsenceType.find(
-            "Select abt from AbsenceType abt, Absence ab, PersonDay pd where ab.personDay = pd "
-                + "and ab.absenceType = abt and pd.person = ? and pd.date between ? and ?",
-            person, beginMonth, endMonth).fetch();
-    Map<AbsenceType, Integer> absenceCodeMap = new HashMap<AbsenceType, Integer>();
-    int index = 0;
-    for (AbsenceType abt : abtList) {
-      boolean stato = absenceCodeMap.containsKey(abt);
-      if (stato == false) {
-        index = 1;
-        absenceCodeMap.put(abt, index);
-      } else {
-        index = absenceCodeMap.get(abt);
-        absenceCodeMap.remove(abt);
-        absenceCodeMap.put(abt, index + 1);
-      }
-    }
+    final Map<AbsenceType, Integer> absenceCodeMap = Maps.newHashMap();
+
+    personDays.stream().flatMap(personDay -> personDay.absences.stream()
+        .<AbsenceType>map(absence -> absence.absenceType)).forEach(absenceType -> {
+      Integer count = absenceCodeMap.get(absenceType);
+      absenceCodeMap.put(absenceType, (count == null) ? 1 : count + 1);
+    });
+
     return absenceCodeMap;
   }
 
@@ -313,9 +293,8 @@ public class PersonManager {
     }
     return value;
   }
-  
+
   /**
-   * 
    * @param user l'utente
    * @return true se l'utente è amministratore del personale, false altrimenti.
    */
@@ -324,7 +303,7 @@ public class PersonManager {
     long count = uros.stream().filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)).count();
     if (count > 0) {
       return true;
-    }      
+    }
     return false;
   }
 
