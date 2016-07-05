@@ -469,12 +469,12 @@ public class ChartsManager {
       log.error("file nullo nella chiamata della checkSituationPastYear");
     }    
     String year = "";
-    Pattern pattern = Pattern.compile("-?\\d+");
+    Pattern pattern = Pattern.compile("\\d+");
     Matcher match = pattern.matcher(file.getName());
     while (match.find()) {
       year = match.group();
     }
-    int anno = new Integer(year.substring(1)).intValue();
+    int anno = new Integer(year).intValue();
 
     Map<Integer, List<ResultFromFile>> map = Maps.newHashMap();
     try {
