@@ -1,28 +1,28 @@
 package manager;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Optional;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.gdata.util.common.base.Preconditions;
-
-import com.beust.jcommander.internal.Maps;
-import com.sun.net.httpserver.Filter;
 
 import controllers.Security;
 
 import dao.AbsenceDao;
-import dao.AbsenceTypeDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.PersonDao;
-import dao.PersonDayDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 
-import helpers.jpa.ModelQuery.SimpleResults;
-
 import it.cnr.iit.epas.DateUtility;
 
+import jobs.chartJob;
+
+import manager.recaps.charts.RenderResult;
+import manager.recaps.charts.ResultFromFile;
 import manager.services.vacations.IVacationsService;
 import manager.services.vacations.VacationsRecap;
 
@@ -33,7 +33,6 @@ import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
-import models.PersonDay;
 import models.WorkingTimeType;
 import models.enumerate.CheckType;
 import models.exports.PersonOvertime;
@@ -41,11 +40,12 @@ import models.exports.PersonOvertime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import play.db.jpa.Blob;
-import play.db.jpa.JPAPlugin;
+import play.libs.F;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -55,17 +55,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -84,13 +77,14 @@ public class ChartsManager {
 
   /**
    * Costruttore.
+   *
    * @param competenceCodeDao competenceCodeDao
-   * @param competenceDao competenceDao
+   * @param competenceDao     competenceDao
    * @param competenceManager competenceManager
-   * @param personDao personDao
-   * @param vacationsService vacationsService
-   * @param absenceDao absenceDao
-   * @param wrapperFactory wrapperFactory
+   * @param personDao         personDao
+   * @param vacationsService  vacationsService
+   * @param absenceDao        absenceDao
+   * @param wrapperFactory    wrapperFactory
    */
   @Inject
   public ChartsManager(CompetenceCodeDao competenceCodeDao,
@@ -101,9 +95,9 @@ public class ChartsManager {
     this.competenceDao = competenceDao;
     this.competenceManager = competenceManager;
     this.personDao = personDao;
-    this.absenceDao = absenceDao;    
+    this.absenceDao = absenceDao;
     this.vacationsService = vacationsService;
-    this.wrapperFactory = wrapperFactory;    
+    this.wrapperFactory = wrapperFactory;
   }
 
   /**
@@ -151,7 +145,7 @@ public class ChartsManager {
 
   /**
    * @return la lista dei competenceCode che comprende tutti i codici di straordinario presenti in
-   *     anagrafica.
+   * anagrafica.
    */
   public List<CompetenceCode> populateOvertimeCodeList() {
     List<CompetenceCode> codeList = Lists.newArrayList();
@@ -176,8 +170,8 @@ public class ChartsManager {
         Long val = null;
         Optional<Integer> result =
             competenceDao
-            .valueOvertimeApprovedByMonthAndYear(
-                year, Optional.fromNullable(month), Optional.fromNullable(p), codeList);
+                .valueOvertimeApprovedByMonthAndYear(
+                    year, Optional.fromNullable(month), Optional.fromNullable(p), codeList);
         if (result.isPresent()) {
           val = result.get().longValue();
         }
@@ -201,7 +195,7 @@ public class ChartsManager {
 
   /**
    * @return il totale delle ore residue per anno totali sommando quelle che ha ciascuna persona
-   *     della lista personeProva.
+   * della lista personeProva.
    */
   public int calculateTotalResidualHour(List<Person> personeProva, int year) {
     int totaleOreResidue = 0;
@@ -221,37 +215,39 @@ public class ChartsManager {
 
   /**
    * Javadoc da scrivere
-   * @param file file 
+   *
+   * @param file file
    * @return la situazione dopo il check del file.
    */
-  public RenderList checkSituationPastYear(File file, boolean alsoPastYear) {
+  public F.Promise<List<List<RenderResult>>> checkSituationPastYear(File file) {
+
     if (file == null) {
       log.error("file nullo nella chiamata della checkSituationPastYear");
     }
     log.debug("Passato il file {}", file.getName());
-    List<RenderResult> listTrueFalse = new ArrayList<RenderResult>();
-    List<RenderResult> listNull = new ArrayList<RenderResult>();
-    final Map<Integer, List<ResultFromFile>> map = createMap(file, alsoPastYear);
-    if (map != null) {
-      map.forEach((key,value)-> {
-        Person person = personDao.getPersonByNumber(key);
-        List<RenderResult> listForPerson = transformInRenderList(person, map.get(key), alsoPastYear);
-        listForPerson.forEach(item-> {
-          listTrueFalse.add(item);
-        }); 
+
+    final Map<Integer, List<ResultFromFile>> map = createMap(file);
+
+    final List<F.Promise<List<RenderResult>>> promises = Lists.newArrayList();
+    if (map != null && !map.isEmpty()) {
+      map.forEach((key, value) -> {
+        final Person person = personDao.getPersonByNumber(key);
+        if (person != null) {
+          promises.add(new chartJob(person, map.get(key)).now());
+        }
       });
+
     } else {
       log.warn("Problemi nella costruzione della mappa che risulta nulla.");
     }
-
-    return new RenderList(listNull, listTrueFalse);
+    return F.Promise.waitAll(promises);
   }
 
   /**
    * @return il file contenente la situazione di ore in più, ore di straordinario e riposi
-   *     compensativi per ciascuna persona della lista passata come parametro relativa all'anno
-   *     year.
+   * compensativi per ciascuna persona della lista passata come parametro relativa all'anno year.
    */
+
   public FileInputStream export(Integer year, List<Person> personList) throws IOException {
     final File tempFile = File.createTempFile("straordinari" + year, ".csv");
     final FileInputStream inputStream = new FileInputStream(tempFile);
@@ -272,8 +268,8 @@ public class ChartsManager {
     out.write("Cognome Nome,");
     for (int i = 1; i <= month; i++) {
       out.append("ore straordinari " + DateUtility.fromIntToStringMonth(i)
-      + ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i)
-      + ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
+          + ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i)
+          + ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
     }
 
     out.append("ore straordinari TOTALI,ore riposi compensativi TOTALI, ore in più TOTALI");
@@ -312,7 +308,7 @@ public class ChartsManager {
                   + (new Integer(recap.get().straordinariMinuti / 60).toString())
                   + ',' + (new Integer(recap.get().riposiCompensativiMinuti / 60).toString())
                   + ',' + (new Integer((recap.get().getPositiveResidualInMonth()
-                      + recap.get().straordinariMinuti) / 60).toString())
+                  + recap.get().straordinariMinuti) / 60).toString())
                   + ',';
               totalOvertime = totalOvertime + new Integer(recap.get().straordinariMinuti / 60);
               totalCompensatoryRest =
@@ -344,7 +340,7 @@ public class ChartsManager {
 
   /**
    * @return la situazione in termini di ferie usate anno corrente e passato, permessi usati e
-   *     residuo per la persona passata come parametro.
+   * residuo per la persona passata come parametro.
    */
   public FileInputStream exportDataSituation(Person person) throws IOException {
     File tempFile = File.createTempFile("esportazioneSituazioneFinale" + person.surname, ".csv");
@@ -363,7 +359,7 @@ public class ChartsManager {
 
     Preconditions.checkState(contract.isPresent());
 
-    Optional<VacationsRecap> vr = vacationsService.create(LocalDate.now().getYear(), 
+    Optional<VacationsRecap> vr = vacationsService.create(LocalDate.now().getYear(),
         contract.get());
 
     Preconditions.checkState(vr.isPresent());
@@ -382,10 +378,10 @@ public class ChartsManager {
 
     out.append(person.surname + ' ' + person.name + ',');
 
-    out.append(new Integer(vr.get().getVacationsCurrentYear().getUsed()).toString() + ',' 
-        + new Integer(vr.get().getVacationsLastYear().getUsed()).toString() + ',' 
-        + new Integer(vr.get().getPermissions().getUsed()).toString() + ',' 
-        + new Integer(recap.get().remainingMinutesCurrentYear).toString() + ',' 
+    out.append(new Integer(vr.get().getVacationsCurrentYear().getUsed()).toString() + ','
+        + new Integer(vr.get().getVacationsLastYear().getUsed()).toString() + ','
+        + new Integer(vr.get().getPermissions().getUsed()).toString() + ','
+        + new Integer(recap.get().remainingMinutesCurrentYear).toString() + ','
         + new Integer(recap.get().remainingMinutesLastYear).toString() + ',');
 
     int workingTime = wtt.get().workingTimeTypeDays.get(0).workingTime;
@@ -406,81 +402,20 @@ public class ChartsManager {
   }
 
   /**
-   * Metodi privati per il calcolo da utilizzare per la restituzione al controller del dato
-   * richiesto.
-   **/
-  private String removeApice(String token) {
-    if (token.startsWith("\"")) {
-      token = token.substring(1);
-    }
-    if (token.endsWith("\"")) {
-      token = token.substring(0, token.length() - 1);
-    }
-    return token;
-  }
-
-  /**
-   * 
-   * @param token una stringa contenente i campi per costruire la data
-   * @return la data.
+   * @param file file daparsare per il recupero delle informazioni sulle assenze
+   * @return una mappa con chiave le matricole dei dipendenti e con valori le liste di oggetti di
+   * tipo ResultFromFile che contengono l'assenza e la data in cui l'assenza è stata presa.
    */
-  private LocalDate buildDate(String token) {
-    token = removeApice(token);
-    token = token.substring(0, 10);
-    String[] elements = token.split("/");
-    LocalDate date =
-        new LocalDate(
-            Integer.parseInt(elements[2]), Integer.parseInt(elements[1]),
-            Integer.parseInt(elements[0]));
-    return date;
-  }
-
-  /**
-   * 
-   * @param line la linea del file da splittare
-   * @return una lista di stringhe che sono le stringhe separate dal separatore.
-   */
-  private List<String> splitter(String line) {
-    line = removeApice(line);
-    List<String> list = new ArrayList<String>();
-    boolean hasNext = true;
-    while (hasNext) {
-      if (line.contains("\",\"")) {
-        int index = line.indexOf("\",\"");
-        String aux = removeApice(line.substring(0, index));
-        list.add(aux);
-        line = line.substring(index + 2, line.length() - 1);
-      } else {
-        hasNext = false;
-      }
-    }
-    return list;
-  }
-
-  /**
-   * 
-   * @param File file da cui estrapolare le informazioni sulle assenze
-   * @return una mappa con chiave le matricole dei dipendenti e con valori le liste di oggetti
-   *     di tipo ResultFromFile che contengono l'assenza e la data in cui l'assenza è stata presa.
-   */
-  
-  private Map<Integer, List<ResultFromFile>> createMap(File file, boolean alsoPastYear) {
+  private Map<Integer, List<ResultFromFile>> createMap(File file) {
     if (file == null) {
       log.error("file nullo nella chiamata della checkSituationPastYear");
-    }    
-    String year = "";
-    Pattern pattern = Pattern.compile("\\d+");
-    Matcher match = pattern.matcher(file.getName());
-    while (match.find()) {
-      year = match.group();
     }
-    int anno = new Integer(year).intValue();
-
+    final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/YYYY H.mm.ss");
     Map<Integer, List<ResultFromFile>> map = Maps.newHashMap();
     try {
       InputStream targetStream = new FileInputStream(file);
       BufferedReader in = new BufferedReader(new InputStreamReader(targetStream));
-      String line = null;
+      String line;
 
       int indexMatricola = 0;
       int indexAssenza = 0;
@@ -488,9 +423,10 @@ public class ChartsManager {
 
       while ((line = in.readLine()) != null) {
 
-        if (line.contains("Query 3")) {
+        if (line.isEmpty() || line.contains("Query 3")) {
           continue;
         }
+
         if (line.contains("Query")) {
           String[] tokens = line.split(",");
           for (int i = 0; i < tokens.length; i++) {
@@ -507,108 +443,87 @@ public class ChartsManager {
           continue;
         }
 
-        // condizionato sulla base di quale schedone si sta cercando di analizzare
-        if (file.getName().contains("2015")) {
-          line.replaceAll("\"\",\"\"", "\",\"");
-          int pos = line.indexOf(",");
-          line = new StringBuilder(line).insert(pos, "\"").toString();
-        }        
-        List<String> tokenList = splitter(line);
+        List<String> elements = Splitter.on(",").trimResults(CharMatcher.is('"')).splitToList(line);
 
         try {
-          int matricola = Integer.parseInt(removeApice(tokenList.get(indexMatricola)));
-          String assenza = removeApice(tokenList.get(indexAssenza));
-          LocalDate dataAssenza = buildDate(tokenList.get(indexDataAssenza));
-          
-          if (!alsoPastYear) {
-            if (dataAssenza.getYear() == anno -1) {
-              log.debug("Trovata assenza dell'anno precedente alla data dello schedone. Scartata.");
-              continue;
-            }
-          }
+
+          int matricola = Integer.parseInt(elements.get(indexMatricola));
+          String assenza = elements.get(indexAssenza);
+          LocalDate dataAssenza = LocalDate.parse(elements.get(indexDataAssenza), dtf);
+
           ResultFromFile result = new ResultFromFile(assenza, dataAssenza);
           List<ResultFromFile> list = map.get(matricola);
           if (list == null) {
-            list = Lists.newArrayList();            
+            list = Lists.newArrayList();
           }
-          java.util.Optional<ResultFromFile> value = list
-              .stream()
-              .filter(r -> r.codice.equals(result.codice) 
-                  && r.dataAssenza.isEqual(result.dataAssenza))              
-              .findFirst();
-          if (!value.isPresent()) {
-            list.add(result);
-            Collections.sort(list, (rff1, rff2) -> rff1.dataAssenza.compareTo(rff2.dataAssenza));
-            map.put(matricola, list);
-          }                    
-
+          list.add(result);
+          map.put(matricola, list);
         } catch (Exception e) {
-          log.warn("La linea {} del file non è nel formato corretto per essere parsata.", line);
-          continue;         
-        }        
-      }      
+          log.debug("La linea {} del file non è nel formato corretto per essere parsata.", line);
+          continue;
+        }
+      }
       in.close();
     } catch (Exception e) {
-      log.warn("C'è del casino...");
-      return null;
+      log.error("Errori durante il parsing del file delle timbrature {}", file.getName());
+      return Maps.newHashMap();
     }
     return map;
   }
 
   /**
-   * 
    * @param person la persona di cui si cercano le assenze.
-   * @param list la lista delle assenze con data che si vuol verificare.
-   * @return una lista di RenderResult che contengono un riepilogo, assenza per assenza, 
-   *     della situazione di esse sul db locale.
+   * @param list   la lista delle assenze con data che si vuol verificare.
+   * @return una lista di RenderResult che contengono un riepilogo, assenza per assenza, della
+   * situazione di esse sul db locale.
    */
-  private List<RenderResult> transformInRenderList(Person person, List<ResultFromFile> list, 
+  private List<RenderResult> transformInRenderList(Person person, List<ResultFromFile> list,
       boolean alsoPastYear) {
 
     Long start = System.nanoTime();
     List<RenderResult> resultList = Lists.newArrayList();
     LocalDate dateFrom = null;
     LocalDate dateTo = list.get(list.size() - 1).dataAssenza;
-    if (alsoPastYear) {      
-      dateFrom = list.get(0).dataAssenza; 
+    if (alsoPastYear) {
+      dateFrom = list.get(0).dataAssenza;
     } else {
       dateFrom = dateTo.withYear(dateTo.getYear())
           .withMonthOfYear(DateTimeConstants.JANUARY).withDayOfMonth(1);
-    }    
-    
-    List<Absence> absences = absenceDao.findByPersonAndDate(person, 
+    }
+
+    List<Absence> absences = absenceDao.findByPersonAndDate(person,
         dateFrom, Optional.fromNullable(dateTo), Optional.<AbsenceType>absent()).list();
 
-    list.forEach(item-> {
+    list.forEach(item -> {
       RenderResult result = null;
       List<Absence> values = absences
           .stream()
           .filter(r -> r.personDay.date.isEqual(item.dataAssenza))
-          .collect(Collectors.toList());      
+          .collect(Collectors.toList());
       if (!values.isEmpty()) {
-        Predicate<Absence> a1 = a -> a.absenceType.code.equalsIgnoreCase(item.codice) 
+        Predicate<Absence> a1 = a -> a.absenceType.code.equalsIgnoreCase(item.codice)
             || a.absenceType.certificateCode.equalsIgnoreCase(item.codice);
-        if (values.stream().anyMatch(a1)) {          
-          result = new RenderResult(null, person.number, person.name, 
-              person.surname, item.codice, item.dataAssenza, true, "Ok", 
+        if (values.stream().anyMatch(a1)) {
+          result = new RenderResult(null, person.number, person.name,
+              person.surname, item.codice, item.dataAssenza, true, "Ok",
               values.stream().filter(r1 -> r1.absenceType.code.equalsIgnoreCase(item.codice)
                   || r1.absenceType.certificateCode.equalsIgnoreCase(item.codice))
-              .findFirst().get().absenceType.code, CheckType.SUCCESS);
+                  .findFirst().get().absenceType.code, CheckType.SUCCESS);
         } else {
-          result = new RenderResult(null, person.number, person.name, 
-              person.surname, item.codice, item.dataAssenza, false, 
-              "Mismatch tra assenza trovata e quella dello schedone", 
+          result = new RenderResult(null, person.number, person.name,
+              person.surname, item.codice, item.dataAssenza, false,
+              "Mismatch tra assenza trovata e quella dello schedone",
               values.stream().findFirst().get().absenceType.code, CheckType.WARNING);
-        }        
+        }
       } else {
-        result = new RenderResult(null, person.number, person.name, 
-            person.surname, item.codice, item.dataAssenza, false, 
+        result = new RenderResult(null, person.number, person.name,
+            person.surname, item.codice, item.dataAssenza, false,
             "Nessuna assenza per il giorno", null, CheckType.DANGER);
-      }    
-      resultList.add(result);      
+      }
+      resultList.add(result);
     });
     Long end = System.nanoTime();
-    log.debug("TEMPO per la persona {}: {} ms",person , (end - start) / 1000000 );
+    log.debug("TEMPO per la persona {}: {} ms", person, (end - start) / 1000000);
     return resultList;
   }
 
@@ -635,78 +550,7 @@ public class ChartsManager {
     }
   }
 
-  /**
-   * Classe per la restituzione di un oggetto al controller che contenga le liste per la verifica di
-   * quanto trovato all'interno del file dello schedone.
-   **/
-
-  public static final class RenderList {
-    private List<RenderResult> listNull;
-    private List<RenderResult> listTrueFalse;
-
-    private RenderList(List<RenderResult> listNull, List<RenderResult> listTrueFalse) {
-      this.listNull = listNull;
-      this.listTrueFalse = listTrueFalse;
-    }
-
-    public List<RenderResult> getListNull() {
-      return this.listNull;
-    }
-
-    public List<RenderResult> getListTrueFalse() {
-      return this.listTrueFalse;
-
-    }
-  }
-
-  /**
-   * classe privata per la restituzione del risultato relativo al processo di controllo sulle
-   * assenze dell'anno passato.
-   **/
-  public class RenderResult {
-    public String line;
-    public Integer matricola;
-    public String nome;
-    public String cognome;
-    public String codice;
-    public LocalDate data;
-    public boolean check;
-    public String message;
-    public String codiceInAnagrafica;
-    public CheckType type;
-
-    /**
-     * Costruttore.
-     */
-    public RenderResult(
-        String line, Integer matricola, String nome, String cognome, String codice,
-        LocalDate data, boolean check, String message, String codiceInAnagrafica, CheckType type) {
-      this.line = line;
-      this.matricola = matricola;
-      this.nome = nome;
-      this.codice = codice;
-      this.cognome = cognome;
-      this.data = data;
-      this.check = check;
-      this.message = message;
-      this.codiceInAnagrafica = codiceInAnagrafica;
-      this.type = type;
-
-    }
-  }
-
-  public class ResultFromFile {
-
-    public String codice;
-    public LocalDate dataAssenza;
-
-    public ResultFromFile(String codice, LocalDate dataAssenza) {
-      this.codice = codice;
-      this.dataAssenza = dataAssenza;
-    }   
-
-  }
-
-  // *********** Fine parte di business logic ****************/
-
 }
+
+// *********** Fine parte di business logic ****************/
+

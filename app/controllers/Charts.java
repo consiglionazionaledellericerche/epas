@@ -12,10 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import manager.ChartsManager;
 import manager.ChartsManager.Month;
-import manager.ChartsManager.RenderList;
-import manager.ChartsManager.RenderResult;
 import manager.ChartsManager.Year;
 import manager.SecureManager;
+import manager.recaps.charts.RenderResult;
 
 import models.CompetenceCode;
 import models.Office;
@@ -25,7 +24,6 @@ import models.exports.PersonOvertime;
 import org.joda.time.LocalDate;
 
 import play.Logger;
-import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -33,31 +31,29 @@ import security.SecurityRules;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-
-//import play.Logger;
 
 @With({Resecure.class})
 @Slf4j
 public class Charts extends Controller {
 
-  //private final static Logger log = LoggerFactory.getLogger(Charts.class);
-
   @Inject
-  private static SecurityRules rules;
+  static SecurityRules rules;
   @Inject
-  private static ChartsManager chartsManager;
+  static ChartsManager chartsManager;
   @Inject
-  private static SecureManager secureManager;
+  static SecureManager secureManager;
   @Inject
-  private static PersonDao personDao;
+  static PersonDao personDao;
   @Inject
-  private static CompetenceDao competenceDao;
+  static CompetenceDao competenceDao;
   @Inject
-  private static OfficeDao officeDao;
+  static OfficeDao officeDao;
 
   public static void overtimeOnPositiveResidual(Integer year, Integer month) {
 
@@ -91,7 +87,7 @@ public class Charts extends Controller {
 
 
   public static void indexCharts() {
-    
+
     render();
   }
 
@@ -166,22 +162,24 @@ public class Charts extends Controller {
   }
 
 
-  public static void checkLastYearAbsences(File file, Long officeId, boolean alsoPastYear) {
-    
+  public static void checkLastYearAbsences(File file, Long officeId) {
+
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-    
+
     boolean process = false;
     if (file == null) {
       render(process, office);
-    }        
+    }
     process = true;
     long start = System.nanoTime();
-    RenderList render = chartsManager.checkSituationPastYear(file, alsoPastYear);
-    List<RenderResult> listTrueFalse = render.getListTrueFalse();
+
+    List<List<RenderResult>> results = await(chartsManager.checkSituationPastYear(file));
+    List<RenderResult> listTrueFalse = results.stream().flatMap(Collection::stream)
+        .collect(Collectors.toList());
     long end = System.nanoTime();
-    log.debug("Tempo di esecuzione del metodo: {} secondi", (end - start)/1000000000);
+    log.debug("Tempo di esecuzione elaborazione schedone: {} secondi", (end - start) / 1000000000);
     render(listTrueFalse, process, office);
   }
 
