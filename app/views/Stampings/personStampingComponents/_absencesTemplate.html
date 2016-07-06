@@ -2,7 +2,7 @@
   #{if showLink}
   #{secure.check 'Stampings.blank', target:person.office}
       #{secure.link @Absences.blank(dayRecap.personDay.person.id,
-      dayRecap.personDay.date?.format()),modal:'#modalAbsence'}
+      dayRecap.personDay.date?.format()),'data-async-modal':'#modalAbsence'}
       ___
       #{/secure.link}
   #{/secure.check}
@@ -10,7 +10,7 @@
   #{if showLinkForEmployee}
   
       #{secure.link @Absences.blankForEmployee(dayRecap.personDay.person.id,
-      dayRecap.personDay.date?.format()),modal:'#modalAbsence'}
+      dayRecap.personDay.date?.format()),'data-async-modal':'#modalAbsence'}
       ___
       #{/secure.link}
   
