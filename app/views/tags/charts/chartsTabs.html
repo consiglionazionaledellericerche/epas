@@ -12,7 +12,7 @@
       <a href="@{Charts.indexCharts()}">Grafici</a>
     </li>-->
     <li #{if _activeAction.equals("checkLastYearAbsences")} class="active" #{/if}>
-      <a href="@{Charts.checkLastYearAbsences()}">Controllo schedone anno passato</a>
+      <a href="@{Charts.checkLastYearAbsences(null,session.get("officeSelected"))}">Controllo schedone anno passato</a>
     </li>
     <li #{if _activeAction.equals("exportHourAndOvertime")} class="active" #{/if}>
       <a href="@{Charts.exportHourAndOvertime()}">Esportazione ore in più e di straordinario</a>
