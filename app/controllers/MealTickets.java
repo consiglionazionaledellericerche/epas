@@ -313,7 +313,7 @@ public class MealTickets extends Controller {
       contractUpdated.add(mealTicket.contract);
     }
 
-    consistencyManager.updatePersonSituation(person.id, LocalDate.now());
+    consistencyManager.updatePersonRecaps(person.id, deliveryDate);
 
     flash.success("Il blocco inserito è stato salvato correttamente.");
 
