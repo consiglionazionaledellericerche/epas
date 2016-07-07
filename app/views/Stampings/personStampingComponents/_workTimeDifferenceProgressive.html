@@ -1,69 +1,71 @@
-
-
 <td class="tempoLavoro default-single"
-   #{if dayRecap.personDay.past || dayRecap.personDay.today}
-      *{  info tempo lavorato (i) }*
-      #{if !dayRecap.workTimeExplanation.empty}
-	         popover-hover
-	         data-html="true"
-	         data-content="${(dayRecap.workTimeExplanation).escape()}"
-	         title="<strong>Riepilogo Tempo a lavoro </strong>#{if dayRecap.personDay.isConsideredExitingNow}<br><br> <em>Stima calcolata considerando l'uscita in questo momento</em> #{/if}" >
-	         #{if dayRecap.personDay.isConsideredExitingNow}
-	           <em class="text-primary">${dayRecap.personDay.timeAtWork.printHourMinute()}</em>
-	         #{/if}
-	         #{else}
-	           <span class="text-primary">${dayRecap.personDay.timeAtWork.printHourMinute()}</span>
-	         #{/else}
+    #{if dayRecap.personDay?.timeAtWork > 0 }
+      webui-popover-hover
+      data-url="#wt-${dayRecap.personDay.id}"
+      data-title="<strong>Riepilogo Tempo a lavoro</strong>">
+
+      #{if dayRecap.personDay.isConsideredExitingNow}
+        <em class="text-primary">${dayRecap.personDay.timeAtWork.printHourMinute()}</em>
       #{/if}
       #{else}
-        >${dayRecap.personDay.timeAtWork.printHourMinute()}
+        <span class="text-primary">${dayRecap.personDay.timeAtWork.printHourMinute()}</span>
       #{/else}
-	  	
-      <!-- toggle holidayWork-->
-      #{if showLink}
-	      #{if dayRecap.personDay.isHoliday && dayRecap.personDay.timeAtWork > 0 }
-		      #{if dayRecap.personDay.acceptedHolidayWorkingTime }
-		      <a href="@{Stampings.toggleWorkingHoliday(dayRecap.personDay.id)}">Disabilita</a>
-		      #{/if}
-		      #{else}
-		      <a href="@{Stampings.toggleWorkingHoliday(dayRecap.personDay.id)}">Abilita</a>
-		      #{/else}
-	      #{/if}
-      #{/if}
-      
-   #{/if}
+    #{/if}
+    #{elseif dayRecap.personDay.past || dayRecap.personDay.today}
+      >${dayRecap.personDay.timeAtWork.printHourMinute()}
+    #{/elseif}
+
+  <!-- toggle holidayWork-->
+  #{if dayRecap.personDay.isHoliday && dayRecap.personDay.timeAtWork > 0 }
+    #{secure.check 'Stampings.toggleWorkingHoliday', target: person.office}
+      <a href="@{Stampings.toggleWorkingHoliday(dayRecap.personDay.id)}">
+        #{if dayRecap.personDay.acceptedHolidayWorkingTime } Disabilita#{/if}
+        #{else} Abilita#{/else}
+      </a>
+    #{/secure.check}
+  #{/if}
 
 </td>
+<div class="webui-popover-content" id="wt-${dayRecap.personDay.id}">
+  #{if dayRecap.personDay.isConsideredExitingNow}
+    <small><em>Stima calcolata considerando l'uscita in questo momento</em></small><br><br>
+  #{/if}
+  #{if dayRecap.personDay?.timeAtWork}
+    Tempo a lavoro totale: <strong>${dayRecap.personDay.timeAtWork.printHourMinute()}</strong>
+  #{/if}
+  #{if dayRecap.fixedWorkingTimeCode} {
+    <br><em>${dayRecap.fixedWorkingTimeCode.description}</em>
+  #{/if}
+  #{if dayRecap.personDay?.stampingsTime > 0}
+    <br>Da timbrature: <strong>${dayRecap.personDay.stampingsTime.printHourMinute()}</strong>
+  #{/if}
+  #{if dayRecap.personDay.decurtedWork > 0}
+    <br>Sottratto perchè al di fuori della finestra orario: <strong>${dayRecap.personDay.decurtedWork.printHourMinute()}</strong>
+  #{/if}
+  #{if dayRecap.personDay?.justifiedTimeNoMeal > 0}
+    <br>Giustificato da assenze: <strong>${dayRecap.personDay.justifiedTimeNoMeal.printHourMinute()}</strong>
+  #{/if}
+  #{if dayRecap.personDay?.justifiedTimeMeal > 0}
+    <br>Giustificato da assenze che concorrono al calcolo del buono pasto: <strong>${dayRecap.personDay.justifiedTimeMeal.printHourMinute()}</strong>
+  #{/if}
+  #{if dayRecap.personDay?.decurted > 0}
+    <br>Sottratto per pausa pranzo assente o troppo breve: <strong>${dayRecap.personDay.decurted.printHourMinute()}</strong>
+  #{/if}
+</div>
+<!-- difference -->
+<!-- colore test cella... -->
+<td class="differenza default-single"#{if dayRecap.personDay.difference < 0} style="color: red;"#{/if}>
+  <!-- valore ... -->
+  #{if dayRecap.personDay.past || dayRecap.personDay.today}
+    ${dayRecap.personDay.difference.printHourMinute()}
+  #{/if}
+</td>
 
-	<!-- difference -->
-	<!-- colore test cella... -->
-    #{if dayRecap.personDay.difference < 0}
-      <td class="differenza  default-single" style="color: red;">
-    #{/if}
-    #{else}
-      <td class="differenza default-single">
-    #{/else}
-    <!-- valore ... -->
-    #{if dayRecap.personDay.past || dayRecap.personDay.today}
-      ${dayRecap.personDay.difference.printHourMinute()}
-    #{/if}
-    #{else}
-      *{ ${0.printHourMinute()} }* 
-    #{/else}
-    </td>
-    
-    <!-- progressive -->
-    <!-- colore test cella... -->
-    #{if dayRecap.personDay.progressive < 0}
-    <td class="progressivo default-single" style="color: red;">
-    #{/if}
-    #{else}
-    <td class="progressivo default-single">
-    #{/else}
-    <!-- valore ... -->
-    #{if dayRecap.personDay.past || dayRecap.personDay.today}
-      ${dayRecap.personDay.progressive.printHourMinute()}
-    #{/if}
-    #{else}
-      *{ ${0.printHourMinute()} }*
-    #{/else}
+<!-- progressive -->
+<!-- colore test cella... -->
+<td class="progressivo default-single"#{if dayRecap.personDay.progressive < 0} style="color: red;"#{/if}>
+  <!-- valore ... -->
+  #{if dayRecap.personDay.past || dayRecap.personDay.today}
+    ${dayRecap.personDay.progressive.printHourMinute()}
+  #{/if}
+</td>

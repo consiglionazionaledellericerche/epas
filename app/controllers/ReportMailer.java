@@ -73,7 +73,7 @@ public class ReportMailer extends Mailer {
 
     List<String> dests = Lists.newArrayList();
 
-    if (user.isPresent() && !userDao.haveAdminRoles(user.get())) {
+    if (user.isPresent() && !userDao.hasAdminRoles(user.get())) {
       if (user.get().person != null) {
         // A partire dagli userRoleOffices dell'ufficio della persona recupero gli indirizzi email
         // degli amministrativi.....un pò brutto così?

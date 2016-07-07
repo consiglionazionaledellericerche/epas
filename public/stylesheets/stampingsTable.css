@@ -1,0 +1,184 @@
+/* CSS Tabellone Timbrature */
+/* tabella default
+table{ border: 1px solid #aaa; }
+th { background: #eee}
+td, th { padding: 5px; text-align: left; border-right: 1px solid #aaa; border-bottom: 1px solid #aaa; }
+*/
+/* tabellone timbrature */
+table#tabellonetimbrature {
+  font-size: small;
+  border: 0;
+  border-spacing: 0 1px;
+  border-collapse: separate;
+/* per i bordi tondiiiiiiiii */
+}
+
+/* header */
+table#tabellonetimbrature th {
+  border: 1px solid #bbb;
+  background-color: #d3d3d3;
+  text-align: center;
+  padding-left:0 !important;
+  padding-right:0 !important;
+}
+
+table#tabellonetimbrature th.group-left {
+  border-radius: 5px 0 0 5px;
+  border-right: none;
+}
+
+table#tabellonetimbrature th.group-right {
+  border-radius: 0 5px 5px 0;
+  border-left: none;
+}
+
+table#tabellonetimbrature th.group-center {
+  border-radius: none;
+  border-left: none;
+  border-right: none;
+}
+
+table#tabellonetimbrature th.group-single {
+  border-radius: 5px;
+}
+
+table#tabellonetimbrature th.invisible {
+  border: none;
+  padding-left: 2px;
+  padding-right: 1px;
+}
+
+table#tabellonetimbrature td.invisible {
+  border: none;
+  padding-left: 2px;
+  padding-right: 1px;
+}
+
+/* celle */
+table#tabellonetimbrature td.default-single {
+  border-radius: 5px;
+  border-color: #bbb;
+}
+
+table#tabellonetimbrature td.default-left {
+  border-radius: 5px 0 0 5px;
+  border-color: #bbb;
+  border-right: none;
+}
+
+table#tabellonetimbrature td.default-right {
+  border-radius: 0 5px 5px 0;
+  border-color: #bbb;
+  border-left: none;
+}
+
+table#tabellonetimbrature td {
+  text-align: center;
+  padding-left: 0;
+  padding-right: 0;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+table#tabellonetimbrature td.stamping {
+  max-width: 7em;
+}
+
+table#tabellonetimbrature td.positionleft {
+  border-radius: 10px 0 0 10px;
+  border-color: gray;
+  border-right-style: none;
+  background-color: rgba(205,245,255,0.48);
+}
+
+table#tabellonetimbrature td.positionright {
+  border-radius: 0 10px 10px 0;
+  border-color: gray;
+  border-left-style: none;
+  background-color: rgba(205,245,255,0.48);
+}
+
+table#tabellonetimbrature td.positioncenter.default-left,table#tabellonetimbrature td.positioncenter.default-right {
+  border-radius: 0 0 0 0;
+  border-left-style: none;
+  border-right-style: none;
+  border-color: gray;
+  background-color: rgba(205,245,255,0.48);
+}
+
+table#tabellonetimbrature td.positioncenter.warn {
+  border-left-style: none;
+  border-right-style: none;
+  border-color: gray;
+  background-color: rgba(205,245,255,0.48);
+}
+
+table#tabellonetimbrature td.positionnone.warn {
+  border-radius: 10px 10px 10px 10px;
+  border-color: gray;
+  background-color: #ff0;
+}
+
+table#tabellonetimbrature td.festivi {
+  background-color: #fac08d;
+}
+
+table#tabellonetimbrature td.assenza {
+  background-color: #ffffcf;
+}
+
+table#tabellonetimbrature td.progressivo {
+  background-color: #ffffcf;
+}
+
+table#tabellonetimbrature td.capitalized {
+  text-transform: capitalize;
+}
+
+table#tabellonetimbrature td.note {
+  padding: 0;
+}
+
+table#tabellonetimbrature a.btn.note {
+  padding: 0;
+}
+
+table#tabellonetimbrature tr.ignore_day > td {
+  background-color: rgba(226,226,226,1);
+}
+
+/* bordatura */
+table#tabellonetimbrature th,table#tabellonetimbrature td {
+  border: 1px solid #bbb;
+}
+
+.col-xs-12,.col-sm-12,.col-md-6 {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.col-xs-10,.col-xs-2 {
+/* tabelle riepilogo responsive */
+  border: 1px solid #d3d3d3;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+.col-xs-2 {
+  text-align: center;
+}
+
+@media (max-width: 767px) {
+  #tabellonetimbrature {
+    font-size: 10px !important;
+  /* min-width: 600px; */
+  }
+
+  #padre {
+  /* min-width: 640px; */
+  }
+
+  #riepiloghi {
+    font-size: 12px !important;
+  }
+}
