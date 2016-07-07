@@ -18,6 +18,7 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.QualificationDao;
 import dao.RoleDao;
+import dao.UserDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 
@@ -64,6 +65,7 @@ public class TemplateUtility {
   private final SecureManager secureManager;
   private final OfficeDao officeDao;
   private final PersonDao personDao;
+  private final UserDao userDao;
   private final QualificationDao qualificationDao;
   private final AbsenceTypeDao absenceTypeDao;
   private final RoleDao roleDao;
@@ -84,7 +86,7 @@ public class TemplateUtility {
       RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao,
       IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao,
       SynchDiagnostic synchDiagnostic, ConfigurationManager configurationManager,
-      NotificationDao notificationDao) {
+      NotificationDao notificationDao, UserDao userDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -98,6 +100,7 @@ public class TemplateUtility {
     this.badgeSystemDao = badgeSystemDao;
     this.synchDiagnostic = synchDiagnostic;
     this.configurationManager = configurationManager;
+    this.userDao = userDao;
 
     notifications = MemoizedResults
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
@@ -348,33 +351,27 @@ public class TemplateUtility {
 
   /**
    * I codici di assenza ordinati dai più utilizzati.
+   * Se non si hanno i privilegi di amministratore restituisco solo quelli abilitati
+   * per il dipendente.
    */
-  public List<AbsenceType> frequentAbsenceTypeList() {
+  public List<AbsenceType> getAbsenceTypes() {
 
-    Optional<AbsenceType> ferCode = absenceTypeDao
-        .getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode());
-    Preconditions.checkState(ferCode.isPresent());
+    if (userDao.hasAdminRoles(Security.getUser().get())) {
+      Optional<AbsenceType> ferCode = absenceTypeDao
+          .getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode());
+      Preconditions.checkState(ferCode.isPresent());
 
-    return FluentIterable.from(Lists.newArrayList(ferCode.get()))
-        .append(absenceTypeDao.getFrequentTypes()).toList();
+      return FluentIterable.from(Lists.newArrayList(ferCode.get()))
+          .append(absenceTypeDao.getFrequentTypes()).toList();
+    } else {
+      return absenceTypeDao.getAbsenceTypeForEmployee(ImmutableList
+          .of(CodesForEmployee.BP.getDescription()));
+    }
   }
 
-  /**
-   * I codici di assenza attivi ordinati per codice.
-   */
-  public List<AbsenceType> allAbsenceCodes(LocalDate date) {
-    return absenceTypeDao.getAbsenceTypeFromEffectiveDate(date);
+  public boolean hasAdminRole() {
+    return userDao.hasAdminRoles(Security.getUser().get());
   }
-
-  /**
-   * @return i codici di assenza per i livelli I - III.
-   */
-  public List<AbsenceType> absencesForEmployees() {
-    List<String> codesForEmployees = Lists.newArrayList();
-    codesForEmployees.add(CodesForEmployee.BP.getDescription());
-    return absenceTypeDao.getAbsenceTypeForEmployee(codesForEmployees);
-  }
-
 
   /**
    * L'istanza del wrapperFactory disponibile nei template.

@@ -87,7 +87,7 @@ public class PersonStampingDayRecap {
     this.personDay = personDay;
 
     if (personDay.isToday()) {
-      log.debug("Instanziato PersonStampingDayRecap relativo al giorno corrente.");
+      log.debug("Istanziato PersonStampingDayRecap relativo al giorno corrente.");
     }
 
     if (!personDay.isPersistent()) {

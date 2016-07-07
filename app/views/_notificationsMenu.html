@@ -25,18 +25,22 @@
     #{/if}
     #{/list}
     #{secure.check 'Notifications.list'}
+    #{if templateUtility.notifications.count > 0}
     <li>
       <a href="@{Notifications.list()}">
         <i class="fa fa-bell fa-fw"></i> &{'notification.list'}
-        <span class="label label-danger label-badge">${templateUtility.notifications.count}</span>
+          <span class="label label-danger label-badge">${templateUtility.notifications.count}</span>
       </a>
     </li>
+    #{/if}
+    #{if templateUtility.archivedNotifications.count > 0}
     <li>
       <a href="@{Notifications.archiveds()}">
         <i class="fa fa-bell-o fa-fw"></i> &{'notification.archiveds'}
-        <span class="label label-default label-badge">${templateUtility.archivedNotifications.count}</span>
+          <span class="label label-default label-badge">${templateUtility.archivedNotifications.count}</span>
       </a>
     </li>
+    #{/if}
     #{/secure.check}
   </ul>
 </li>
