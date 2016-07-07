@@ -7,16 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import manager.ConsistencyManager;
 import manager.services.absences.AbsenceEngine;
-import manager.services.absences.AbsenceEngine.AbsencePeriod;
-import manager.services.absences.AbsenceEngine.AbsenceRequestType;
-import manager.services.absences.AbsenceEnums.GroupAbsenceType;
 
 import models.AbsenceTypeGroup;
 import models.Office;
 import models.Person;
-import models.PersonDay;
-import models.absences.Absence;
-import models.absences.AbsenceType;
 import models.enumerate.AccumulationBehaviour;
 
 import org.joda.time.LocalDate;
@@ -70,30 +64,30 @@ public class AbsenceGroups extends Controller {
     
     Person person = personDao.getPersonById(personId);
     
-    AbsencePeriod absencePeriod = absenceEngine.buildAbsencePeriod(person, 
-        GroupAbsenceType.group661, date);
-    
-    AbsenceType absenceType = absencePeriod.takableComponent.get().takableCodes.iterator().next(); 
-    
-    boolean result = absenceEngine.requestForAbsenceInPeriod(absencePeriod, 
-        AbsenceRequestType.insertTakable, absenceType, date);
-    
-    if (result) {
-      PersonDay personDay = personDayDao.getOrBuildPersonDay(person, date);
-      Absence absence = new Absence();
-      absence.absenceType = absenceType;
-      absence.personDay = personDay;
-      personDay.absences.add(absence);
-      personDay.save();
-      
-      consistencyManager.updatePersonSituation(person.id, date);
-      
-      log.info("Inserita assenza {}.", absenceType.code);
-    } else {
-      log.info("Rifiutata assenza {}.", absenceType.code);
-    }
-    
-    renderText(result);
+//    AbsencePeriod absencePeriod = absenceEngine.buildAbsencePeriod(person, 
+//        GroupAbsenceType.group661, date);
+//    
+//    AbsenceType absenceType = absencePeriod.takableComponent.get().takableCodes.iterator().next(); 
+//    
+//    boolean result = absenceEngine.requestForAbsenceInPeriod(absencePeriod, 
+//        AbsenceRequestType.insertTakable, absenceType, date);
+//    
+//    if (result) {
+//      PersonDay personDay = personDayDao.getOrBuildPersonDay(person, date);
+//      Absence absence = new Absence();
+//      absence.absenceType = absenceType;
+//      absence.personDay = personDay;
+//      personDay.absences.add(absence);
+//      personDay.save();
+//      
+//      consistencyManager.updatePersonSituation(person.id, date);
+//      
+//      log.info("Inserita assenza {}.", absenceType.code);
+//    } else {
+//      log.info("Rifiutata assenza {}.", absenceType.code);
+//    }
+//    
+//    renderText(result);
     
   }
 }
