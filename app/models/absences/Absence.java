@@ -1,7 +1,8 @@
-package models;
+package models.absences;
 
 import lombok.Getter;
 
+import models.PersonDay;
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;

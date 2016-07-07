@@ -29,8 +29,6 @@ public class QNotification extends EntityPathBase<Notification> {
     //inherited
     public final DateTimePath<org.joda.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final QUser destination;
-
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
@@ -44,9 +42,11 @@ public class QNotification extends EntityPathBase<Notification> {
 
     public final BooleanPath read = createBoolean("read");
 
+    public final QUser recipient;
+
     public final EnumPath<models.enumerate.NotificationSubject> subject = createEnum("subject", models.enumerate.NotificationSubject.class);
 
-    public final NumberPath<Integer> subjectId = createNumber("subjectId", Integer.class);
+    public final NumberPath<Long> subjectId = createNumber("subjectId", Long.class);
 
     //inherited
     public final DateTimePath<org.joda.time.LocalDateTime> updatedAt = _super.updatedAt;
@@ -69,7 +69,7 @@ public class QNotification extends EntityPathBase<Notification> {
 
     public QNotification(Class<? extends Notification> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.destination = inits.isInitialized("recipient") ? new QUser(forProperty("recipient"), inits.get("recipient")) : null;
+        this.recipient = inits.isInitialized("recipient") ? new QUser(forProperty("recipient"), inits.get("recipient")) : null;
     }
 
 }

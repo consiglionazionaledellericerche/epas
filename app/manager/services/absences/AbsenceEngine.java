@@ -15,9 +15,9 @@ import manager.services.absences.AbsenceEnums.ComplationAbsenceGroup;
 import manager.services.absences.AbsenceEnums.GroupAbsenceType;
 import manager.services.absences.AbsenceEnums.TakableAbsenceGroup;
 
-import models.Absence;
-import models.AbsenceType;
 import models.Person;
+import models.absences.Absence;
+import models.absences.AbsenceType;
 import models.enumerate.JustifiedTimeAtWork;
 
 import org.joda.time.LocalDate;

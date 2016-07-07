@@ -11,12 +11,12 @@ import manager.services.absences.AbsenceEngine.AbsencePeriod;
 import manager.services.absences.AbsenceEngine.AbsenceRequestType;
 import manager.services.absences.AbsenceEnums.GroupAbsenceType;
 
-import models.Absence;
-import models.AbsenceType;
 import models.AbsenceTypeGroup;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.absences.Absence;
+import models.absences.AbsenceType;
 import models.enumerate.AccumulationBehaviour;
 
 import org.joda.time.LocalDate;

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFilter;
 
 import helpers.rest.JacksonModule;
 
-import models.Absence;
+import models.absences.Absence;
 
 import org.joda.time.LocalDate;
 

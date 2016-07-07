@@ -150,7 +150,7 @@ public class MealTicketDao extends DaoBase {
    * @param contract  contratto
    * @return la lista dei meal tickets nel blocco.
    */
-  public List<MealTicket> getMealTicketsInCodeBlock(Integer codeBlock,
+  public List<MealTicket> getMealTicketsInCodeBlock(Long codeBlock,
                                                     Optional<Contract> contract) {
 
     final QMealTicket mealTicket = QMealTicket.mealTicket;

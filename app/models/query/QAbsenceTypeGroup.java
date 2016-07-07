@@ -26,11 +26,13 @@ public class QAbsenceTypeGroup extends EntityPathBase<AbsenceTypeGroup> {
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
-    public final ListPath<models.AbsenceType, QAbsenceType> absenceTypes = this.<models.AbsenceType, QAbsenceType>createList("absenceTypes", models.AbsenceType.class, QAbsenceType.class, PathInits.DIRECT2);
+    public final ListPath<models.absences.AbsenceType, models.absences.query.QAbsenceType> absenceTypes = this.<models.absences.AbsenceType, models.absences.query.QAbsenceType>createList("absenceTypes", models.absences.AbsenceType.class, models.absences.query.QAbsenceType.class, PathInits.DIRECT2);
 
     public final EnumPath<models.enumerate.AccumulationBehaviour> accumulationBehaviour = createEnum("accumulationBehaviour", models.enumerate.AccumulationBehaviour.class);
 
     public final EnumPath<models.enumerate.AccumulationType> accumulationType = createEnum("accumulationType", models.enumerate.AccumulationType.class);
+
+    public final StringPath description = createString("description");
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
@@ -47,7 +49,7 @@ public class QAbsenceTypeGroup extends EntityPathBase<AbsenceTypeGroup> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
-    public final QAbsenceType replacingAbsenceType;
+    public final models.absences.query.QAbsenceType replacingAbsenceType;
 
     public QAbsenceTypeGroup(String variable) {
         this(AbsenceTypeGroup.class, forVariable(variable), INITS);
@@ -67,7 +69,7 @@ public class QAbsenceTypeGroup extends EntityPathBase<AbsenceTypeGroup> {
 
     public QAbsenceTypeGroup(Class<? extends AbsenceTypeGroup> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.replacingAbsenceType = inits.isInitialized("replacingAbsenceType") ? new QAbsenceType(forProperty("replacingAbsenceType"), inits.get("replacingAbsenceType")) : null;
+        this.replacingAbsenceType = inits.isInitialized("replacingAbsenceType") ? new models.absences.query.QAbsenceType(forProperty("replacingAbsenceType"), inits.get("replacingAbsenceType")) : null;
     }
 
 }

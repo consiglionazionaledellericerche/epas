@@ -6,9 +6,9 @@ import com.google.common.collect.TreeBasedTable;
 
 import dao.AbsenceDao;
 
-import models.Absence;
-import models.AbsenceType;
 import models.Person;
+import models.absences.Absence;
+import models.absences.AbsenceType;
 import models.enumerate.JustifiedTimeAtWork;
 
 import org.joda.time.LocalDate;

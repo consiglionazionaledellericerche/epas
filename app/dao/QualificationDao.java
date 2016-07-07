@@ -8,8 +8,8 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
-import models.AbsenceType;
 import models.Qualification;
+import models.absences.AbsenceType;
 import models.query.QQualification;
 
 import java.util.List;

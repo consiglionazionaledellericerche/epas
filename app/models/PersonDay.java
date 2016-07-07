@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import models.absences.Absence;
 import models.base.BaseModel;
 
 import org.apache.commons.beanutils.BeanUtils;

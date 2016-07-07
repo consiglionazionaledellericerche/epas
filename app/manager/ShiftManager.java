@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import manager.services.PairStamping;
 
-import models.Absence;
 import models.CertificatedData;
 import models.Competence;
 import models.CompetenceCode;
@@ -34,6 +33,7 @@ import models.PersonShiftDay;
 import models.ShiftCancelled;
 import models.ShiftCategories;
 import models.ShiftType;
+import models.absences.Absence;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.ShiftSlot;
 import models.exports.AbsenceShiftPeriod;

@@ -24,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.ReperibilityManager;
 
-import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
@@ -32,6 +31,7 @@ import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
 import models.User;
+import models.absences.Absence;
 import models.exports.AbsenceReperibilityPeriod;
 import models.exports.ReperibilityPeriod;
 import models.exports.ReperibilityPeriods;

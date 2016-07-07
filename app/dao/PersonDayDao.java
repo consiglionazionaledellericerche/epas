@@ -10,8 +10,8 @@ import com.mysema.query.jpa.JPQLQueryFactory;
 
 import models.Person;
 import models.PersonDay;
-import models.query.QAbsence;
-import models.query.QAbsenceType;
+import models.absences.query.QAbsence;
+import models.absences.query.QAbsenceType;
 import models.query.QAbsenceTypeGroup;
 import models.query.QPersonDay;
 import models.query.QPersonDayInTrouble;

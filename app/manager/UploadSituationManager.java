@@ -12,11 +12,11 @@ import dao.wrapper.IWrapperContractMonthRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 
-import models.Absence;
 import models.Competence;
 import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
+import models.absences.Absence;
 
 import play.Play;
 

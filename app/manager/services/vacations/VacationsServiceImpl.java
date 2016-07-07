@@ -17,11 +17,11 @@ import manager.cache.AbsenceTypeManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 
-import models.Absence;
-import models.AbsenceType;
 import models.Contract;
 import models.Office;
 import models.Person;
+import models.absences.Absence;
+import models.absences.AbsenceType;
 import models.enumerate.AbsenceTypeMapping;
 
 import org.joda.time.LocalDate;

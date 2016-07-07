@@ -17,13 +17,13 @@ import helpers.jpa.ModelQuery;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import models.Absence;
-import models.AbsenceType;
 import models.Contract;
 import models.Person;
+import models.absences.Absence;
+import models.absences.AbsenceType;
+import models.absences.query.QAbsence;
 import models.enumerate.JustifiedTimeAtWork;
 import models.exports.FrequentAbsenceCode;
-import models.query.QAbsence;
 import models.query.QPersonDay;
 
 import org.joda.time.LocalDate;

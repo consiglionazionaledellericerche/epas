@@ -4,9 +4,9 @@ import static org.mockito.Mockito.when;
 
 import lombok.Builder;
 
-import models.Absence;
-import models.AbsenceType;
 import models.PersonDay;
+import models.absences.Absence;
+import models.absences.AbsenceType;
 
 import org.joda.time.LocalDate;
 
