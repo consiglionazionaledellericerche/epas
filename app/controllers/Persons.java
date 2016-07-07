@@ -1,11 +1,9 @@
 package controllers;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.google.common.hash.Hashing;
 import com.google.gdata.util.common.base.Preconditions;
 
 import dao.OfficeDao;
@@ -39,11 +37,11 @@ import models.User;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 
-import net.sf.oval.constraint.MinLength;
-
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
 
+import play.data.validation.Equals;
+import play.data.validation.MinSize;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -53,7 +51,6 @@ import play.i18n.Messages;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 import java.util.List;
@@ -155,7 +152,6 @@ public class Persons extends Controller {
     person.surname = WordUtils.capitalizeFully(person.surname);
 
     person.user = userManager.createUser(person);
-
     person.save();
 
     Role employee = Role.find("byName", Role.EMPLOYEE).first();
@@ -187,7 +183,7 @@ public class Persons extends Controller {
     person = personDao.getPersonById(person.id);
     person.beginDate = LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
     person.save();
-    
+
     configurationManager.updateConfigurations(person);
 
     contractManager.recomputeContract(contract, Optional.<LocalDate>absent(), true, false);
@@ -207,7 +203,7 @@ public class Persons extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
-    //rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.office);
 
     render(person);
   }
@@ -354,28 +350,28 @@ public class Persons extends Controller {
   }
 
   public static void savePassword(@Required String vecchiaPassword,
-      @MinLength(5) @Required String nuovaPassword,
-      @MinLength(5) @Required String confermaPassword) {
+      @MinSize(5) @Required String nuovaPassword,
+      @Required @Equals(value = "nuovaPassword", message = "Le password non corrispondono")
+          String confermaPassword) {
 
-    User user = userDao.getUserByUsernameAndPassword(Security.getUser().get().username, Optional
-        .fromNullable(Hashing.md5().hashString(vecchiaPassword, Charsets.UTF_8).toString()));
+
+    if (validation.hasErrors()) {
+      flash.error("Correggere gli errori riportati");
+      final User user = Security.getUser().get();
+      render("@changePassword",vecchiaPassword, nuovaPassword, confermaPassword, user);
+    }
+
+    User user = userDao.getUserByUsernameAndPassword(Security.getUser().get().username,
+        Optional.of(Codec.hexMD5(vecchiaPassword)));
 
     if (user == null) {
       flash.error("Nessuna corrispondenza trovata fra utente e vecchia password inserita.");
       changePassword();
     }
 
-    if (validation.hasErrors() || !nuovaPassword.equals(confermaPassword)) {
-      flash.error("Tutti i campi devono essere valorizzati. "
-          + "La passord deve essere almeno lunga 5 caratteri. Operazione annullata.");
-      changePassword();
-    }
-
     notFoundIfNull(user);
 
-    Codec codec = new Codec();
-
-    user.password = codec.hexMD5(nuovaPassword);
+    user.password = Codec.hexMD5(nuovaPassword);
     user.save();
     flash.success(Messages.get("passwordSuccessfullyChanged"));
     changePassword();

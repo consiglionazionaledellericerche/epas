@@ -4,6 +4,12 @@
     
     *{ howTo sui parametri }*
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ABSENCES_FOR_EMPLOYEE) }
+      <p>Abilitando questa funzionalità sarà possibile permettere ai dipendenti di sapere se i propri colleghi sono assenti in un determinato giorno.<br>
+       Non verrà visualizzato il codice di assenza, ma solo la dicitura "Assente".
+      </p> 
+    #{/if}
+    
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.WEB_STAMPING_ALLOWED) }
       <p>Abilitando questa funzionalità sarà possibile accedere alla timbratura via web per i dipendenti di <strong>${configuration.office.name}</strong>.<br>
       <i class="fa fa-exclamation-triangle"></i> E' altamente consigliato impostare anche il filtro sugli indirizzi IP autorizzati alla timbratura via web. 

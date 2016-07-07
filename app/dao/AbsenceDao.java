@@ -378,5 +378,4 @@ public class AbsenceDao extends DaoBase {
     return getAbsencesInPeriod(Optional.fromNullable(person),
         new LocalDate(year, 1, 1), Optional.of(new LocalDate(year, 12, 31)), false);
   }
-  
 }

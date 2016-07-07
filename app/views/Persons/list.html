@@ -8,9 +8,9 @@
 </style>
 #{/set}
 
-#{secure.checkAction 'Administration.switchUserTo'}
+#{secure.check 'Administration.switchUserTo'}
   #{set switchUser:true /}
-#{/secure.checkAction}
+#{/secure.check}
 
 <div class="container">
   #{title title:'Lista del personale di ' + office /}

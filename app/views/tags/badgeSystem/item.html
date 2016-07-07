@@ -7,9 +7,9 @@ edit: se voglio il link a edit
   <i class="fa fa-credit-card"></i>
 
   #{if _edit}
-  #{secure.checkAction 'BadgeSystems.edit', target:_item.office}
+  #{secure.check 'BadgeSystems.edit', target:_item.office}
   <a class="list-group-item-heading" href="@{edit(_item.id)}">
-    #{/secure.checkAction}
+    #{/secure.check}
     ${_item.name}</a></em>
   #{/if}
   #{else}

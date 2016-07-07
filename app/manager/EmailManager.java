@@ -29,7 +29,6 @@ public class EmailManager {
   @Inject
   public EmailManager(ConfigurationManager configurationManager) {
     this.configurationManager = configurationManager;
-    
   }
   
   

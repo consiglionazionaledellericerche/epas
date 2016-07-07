@@ -37,6 +37,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -297,6 +298,11 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
       }
     }
     return configurations;
+  }
+
+  @PrePersist
+  private void onCreation(){
+    this.beginDate = LocalDate.now().minusYears(1).withMonthOfYear(12).withDayOfMonth(31);
   }
 
 }

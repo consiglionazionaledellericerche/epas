@@ -29,7 +29,7 @@
 	  #{list items:currentConfiguration, as:'conf'}
 	    #{if conf.epasParam.general}
 	  	<tr>
-	  	  <td>#{secure.link @Configurations.personEdit(conf.id), modal:'#defaultModal'}
+	  	  <td>#{secure.link @Configurations.personEdit(conf.id), 'data-async-modal':'#defaultModal'}
 	  	  &{conf.epasParam}#{/secure.link}</td>
 	  	  <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
 	  	</tr>
@@ -77,7 +77,7 @@
 	  #{list items:currentConfiguration, as:'conf'}
 	  	#{if conf.epasParam.periodic}
 	  	<tr>
-	  	  <td>#{secure.link @Configurations.personEdit(conf.id), modal:'#defaultModal'}
+	  	  <td>#{secure.link @Configurations.personEdit(conf.id), 'data-async-modal':'#defaultModal'}
 	  	  &{conf.epasParam}#{/secure.link}</td>
 	  	  <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
 	  	  <td>${conf.beginDate.format()}</td>

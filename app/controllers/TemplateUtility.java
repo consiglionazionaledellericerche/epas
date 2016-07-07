@@ -50,6 +50,7 @@ import synch.diagnostic.SynchDiagnostic;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -183,8 +184,9 @@ public class TemplateUtility {
 
   // Liste di utilità per i template
 
-  public Set<Office> officesAllowed() {
-    return secureManager.officesWriteAllowed(Security.getUser().get());
+  public List<Office> officesAllowed() {
+    return secureManager.officesWriteAllowed(Security.getUser().get())
+        .stream().sorted((o, o1) -> o.name.compareTo(o1.name)).collect(Collectors.toList());
   }
 
   public List<Qualification> getAllQualifications() {
@@ -365,7 +367,6 @@ public class TemplateUtility {
   }
 
   /**
-   *
    * @return i codici di assenza per i livelli I - III.
    */
   public List<AbsenceType> absencesForEmployees() {
