@@ -33,7 +33,7 @@
   #{if dayRecap.personDay?.timeAtWork}
     Tempo a lavoro totale: <strong>${dayRecap.personDay.timeAtWork.printHourMinute()}</strong>
   #{/if}
-  #{if dayRecap.fixedWorkingTimeCode} {
+  #{if dayRecap.fixedWorkingTimeCode}
     <br><em>${dayRecap.fixedWorkingTimeCode.description}</em>
   #{/if}
   #{if dayRecap.personDay?.stampingsTime > 0}

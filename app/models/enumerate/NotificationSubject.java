@@ -2,6 +2,7 @@ package models.enumerate;
 
 import com.google.common.collect.Maps;
 
+import models.Absence;
 import models.Stamping;
 
 import play.mvc.Router;
@@ -27,9 +28,13 @@ public enum NotificationSubject {
    */
   MESSAGE,
   /**
-   * Notifiche relative a timbrature inserite
+   * Notifiche relative a timbrature inserite o modificate
    */
-  STAMPING;
+  STAMPING,
+  /**
+   * Notifiche relative alle assenze inserite o modificate
+   */
+  ABSENCE;
 
   private String toUrl(String action, Map<String, Object> params) {
     if (params == null) {
@@ -53,6 +58,12 @@ public enum NotificationSubject {
         params.put("month", stamping.date.getMonthOfYear());
         params.put("year", stamping.date.getYear());
         params.put("personId", stamping.personDay.person.id);
+        return toUrl("Stampings.personStamping", params);
+      case ABSENCE:
+        final Absence absence = Absence.findById(referenceId);
+        params.put("month", absence.personDay.date.getMonthOfYear());
+        params.put("year", absence.personDay.date.getYear());
+        params.put("personId", absence.personDay.person.id);
         return toUrl("Stampings.personStamping", params);
       // case SYSTEM:
       default:
