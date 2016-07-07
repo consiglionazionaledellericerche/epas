@@ -5,9 +5,9 @@ import com.google.common.collect.TreeBasedTable;
 
 import it.cnr.iit.epas.DateUtility;
 
-import models.Absence;
-import models.AbsenceType;
 import models.Person;
+import models.absences.Absence;
+import models.absences.AbsenceType;
 import models.enumerate.JustifiedTimeAtWork;
 
 import java.util.HashMap;

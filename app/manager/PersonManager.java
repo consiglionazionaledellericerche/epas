@@ -17,7 +17,6 @@ import it.cnr.iit.epas.DateUtility;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 
-import models.AbsenceType;
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Person;
@@ -26,6 +25,7 @@ import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeTypeDay;
+import models.absences.AbsenceType;
 
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;

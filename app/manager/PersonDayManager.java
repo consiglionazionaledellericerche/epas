@@ -23,7 +23,6 @@ import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import manager.services.PairStamping;
 
-import models.Absence;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
@@ -31,6 +30,7 @@ import models.PersonDayInTrouble;
 import models.PersonShiftDay;
 import models.Stamping;
 import models.Stamping.WayType;
+import models.absences.Absence;
 import models.WorkingTimeTypeDay;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;

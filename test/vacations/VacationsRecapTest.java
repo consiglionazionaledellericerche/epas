@@ -9,10 +9,10 @@ import manager.ContractManager;
 import manager.services.vacations.VacationsRecap;
 import manager.services.vacations.VacationsRecapBuilder;
 
-import models.Absence;
-import models.AbsenceType;
 import models.Contract;
 import models.PersonDay;
+import models.absences.Absence;
+import models.absences.AbsenceType;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.VacationCode;
 

@@ -9,9 +9,9 @@ import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.jpa.impl.JPAQueryFactory;
 
-import models.AbsenceType;
+import models.absences.AbsenceType;
+import models.absences.query.QAbsenceType;
 import models.enumerate.AbsenceTypeMapping;
-import models.query.QAbsenceType;
 
 import org.apache.commons.lang.NotImplementedException;
 

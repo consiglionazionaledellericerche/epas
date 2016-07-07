@@ -1,10 +1,12 @@
-package models;
+package models.absences;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 
 import lombok.Getter;
 
+import models.AbsenceTypeGroup;
+import models.Qualification;
 import models.base.BaseModel;
 import models.enumerate.JustifiedTimeAtWork;
 

@@ -22,12 +22,12 @@ import manager.attestati.dto.show.RispostaAttestati;
 import manager.attestati.dto.show.SeatCertification;
 import manager.attestati.dto.show.SeatCertification.PersonCertification;
 
-import models.Absence;
 import models.Certification;
 import models.Competence;
 import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
+import models.absences.Absence;
 import models.enumerate.CertificationType;
 
 import org.assertj.core.util.Maps;

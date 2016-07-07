@@ -8,9 +8,9 @@ import it.cnr.iit.epas.DateUtility;
 
 import manager.services.vacations.VacationsTypeResult.TypeVacation;
 
-import models.Absence;
 import models.Contract;
 import models.VacationPeriod;
+import models.absences.Absence;
 import models.enumerate.VacationCode;
 
 import org.joda.time.LocalDate;

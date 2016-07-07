@@ -1,5 +1,6 @@
 package models;
 
+import models.absences.AbsenceType;
 import models.base.BaseModel;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;

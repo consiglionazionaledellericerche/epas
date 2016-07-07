@@ -18,7 +18,6 @@ import helpers.BadRequest;
 
 import lombok.extern.slf4j.Slf4j;
 
-import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
@@ -26,6 +25,7 @@ import models.PersonDay;
 import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
+import models.absences.Absence;
 import models.enumerate.JustifiedTimeAtWork;
 import models.exports.AbsenceReperibilityPeriod;
 import models.exports.ReperibilityPeriod;

@@ -34,14 +34,14 @@ import manager.recaps.YearlyAbsencesRecap;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
 
-import models.Absence;
-import models.AbsenceType;
 import models.AbsenceTypeGroup;
 import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.Qualification;
 import models.User;
+import models.absences.Absence;
+import models.absences.AbsenceType;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.CodesForEmployee;
 import models.enumerate.JustifiedTimeAtWork;

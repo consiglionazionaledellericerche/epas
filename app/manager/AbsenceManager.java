@@ -26,8 +26,6 @@ import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
 import manager.services.vacations.IVacationsService;
 
-import models.Absence;
-import models.AbsenceType;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
@@ -36,6 +34,8 @@ import models.PersonDay;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
 import models.Qualification;
+import models.absences.Absence;
+import models.absences.AbsenceType;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.QualificationMapping;

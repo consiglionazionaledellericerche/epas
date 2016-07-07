@@ -29,7 +29,6 @@ import manager.SecureManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 
-import models.AbsenceType;
 import models.BadgeReader;
 import models.BadgeSystem;
 import models.Institute;
@@ -41,6 +40,7 @@ import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
+import models.absences.AbsenceType;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.CodesForEmployee;
 

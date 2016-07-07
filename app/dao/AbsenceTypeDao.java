@@ -12,10 +12,10 @@ import com.mysema.query.types.Projections;
 
 import helpers.jpa.ModelQuery;
 
-import models.AbsenceType;
 import models.Person;
-import models.query.QAbsence;
-import models.query.QAbsenceType;
+import models.absences.AbsenceType;
+import models.absences.query.QAbsence;
+import models.absences.query.QAbsenceType;
 
 import org.bouncycastle.util.Strings;
 import org.joda.time.LocalDate;

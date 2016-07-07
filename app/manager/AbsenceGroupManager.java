@@ -9,9 +9,9 @@ import dao.WorkingTimeTypeDao;
 
 import it.cnr.iit.epas.CheckMessage;
 
-import models.Absence;
-import models.AbsenceType;
 import models.Person;
+import models.absences.Absence;
+import models.absences.AbsenceType;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
 import models.enumerate.JustifiedTimeAtWork;

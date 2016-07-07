@@ -11,7 +11,6 @@ import dao.wrapper.IWrapperFactory;
 import manager.PersonDayManager;
 import manager.PersonManager;
 
-import models.AbsenceType;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
@@ -19,6 +18,7 @@ import models.PersonDay;
 import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
+import models.absences.AbsenceType;
 import models.enumerate.StampTypes;
 
 import org.joda.time.LocalDate;

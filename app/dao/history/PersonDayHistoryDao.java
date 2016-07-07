@@ -4,8 +4,8 @@ import com.google.common.collect.FluentIterable;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-import models.Absence;
 import models.Stamping;
+import models.absences.Absence;
 
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.query.AuditEntity;

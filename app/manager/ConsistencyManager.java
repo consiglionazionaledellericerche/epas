@@ -22,7 +22,6 @@ import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.RecomputationType;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 
-import models.Absence;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
@@ -32,6 +31,7 @@ import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
 import models.Stamping.WayType;
+import models.absences.Absence;
 import models.User;
 import models.base.IPropertiesInPeriodOwner;
 import models.enumerate.Troubles;

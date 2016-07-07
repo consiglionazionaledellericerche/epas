@@ -1,7 +1,7 @@
-package models.query;
+package models.absences.query;
 
 import static com.mysema.query.types.PathMetadataFactory.*;
-import models.AbsenceType;
+import models.absences.AbsenceType;
 
 
 import com.mysema.query.types.path.*;
@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
-    private static final long serialVersionUID = 1593874803L;
+    private static final long serialVersionUID = -2064225309L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
@@ -26,9 +26,9 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
-    public final SetPath<models.Absence, QAbsence> absences = this.<models.Absence, QAbsence>createSet("absences", models.Absence.class, QAbsence.class, PathInits.DIRECT2);
+    public final SetPath<models.absences.Absence, QAbsence> absences = this.<models.absences.Absence, QAbsence>createSet("absences", models.absences.Absence.class, QAbsence.class, PathInits.DIRECT2);
 
-    public final QAbsenceTypeGroup absenceTypeGroup;
+    public final models.query.QAbsenceTypeGroup absenceTypeGroup;
 
     public final StringPath certificateCode = createString("certificateCode");
 
@@ -51,7 +51,7 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
-    public final ListPath<models.Qualification, QQualification> qualifications = this.<models.Qualification, QQualification>createList("qualifications", models.Qualification.class, QQualification.class, PathInits.DIRECT2);
+    public final ListPath<models.Qualification, models.query.QQualification> qualifications = this.<models.Qualification, models.query.QQualification>createList("qualifications", models.Qualification.class, models.query.QQualification.class, PathInits.DIRECT2);
 
     public final DatePath<org.joda.time.LocalDate> validFrom = createDate("validFrom", org.joda.time.LocalDate.class);
 
@@ -75,7 +75,7 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
     public QAbsenceType(Class<? extends AbsenceType> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.absenceTypeGroup = inits.isInitialized("absenceTypeGroup") ? new QAbsenceTypeGroup(forProperty("absenceTypeGroup"), inits.get("absenceTypeGroup")) : null;
+        this.absenceTypeGroup = inits.isInitialized("absenceTypeGroup") ? new models.query.QAbsenceTypeGroup(forProperty("absenceTypeGroup"), inits.get("absenceTypeGroup")) : null;
     }
 
 }
