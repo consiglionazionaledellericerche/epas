@@ -173,16 +173,17 @@ public class ChartsManager {
         IWrapperContract wrContract = wrapperFactory.create(contract);
         Optional<ContractMonthRecap> recap =
             wrContract.getContractMonthRecap(new YearMonth(year, month));
-        if (recap.isPresent()) {
+        if (recap.isPresent() && recap.get().getStraordinarioMinuti() != 0) {
           po.overtimeHour = new Long(recap.get().getStraordinarioMinuti()/60);
           po.positiveHourForOvertime = recap.get().getPositiveResidualInMonth()/60;
-        }
+          po.month = month;
+          po.year = year;
+          po.name = p.name;
+          po.surname = p.surname;      
+          poList.add(po);
+        }        
       }
-      po.month = month;
-      po.year = year;
-      po.name = p.name;
-      po.surname = p.surname;      
-      poList.add(po);
+      
       log.debug("Aggiunto {} {} alla lista con i suoi dati", p.name, p.surname);
 
     }
