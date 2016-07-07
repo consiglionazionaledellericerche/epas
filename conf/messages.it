@@ -162,6 +162,8 @@ expireDate=Data Scadenza
 feedback.subject =EPAS - Segnalazione utente
 feedback.staff =Lo staff di EPAS
 
+file =File schedone da analizzare
+
 firstDay= Giorno inizio contratto
 
 history.back= Indietro
@@ -458,6 +460,7 @@ SEND_EMAIL=Invio email di avviso ai dipendenti
 NEW_ATTESTATI=Nuovo Attestati
 EMAIL_TO_CONTACT=Indirizzo email segreteria
 WORKING_OFF_SITE=Lavoro fuori sede
+ABSENCES_FOR_EMPLOYEE=Assenze visibili ai dipendenti 
 
 EXPIRY_VACATION_PAST_YEAR=Giorno massimo utilizzo ferie dell'anno precedente
 MONTH_EXPIRY_RECOVERY_DAYS_13=Mese massimo per utilizzo residui dell'anno precedente per i livelli da 1 a 3

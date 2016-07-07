@@ -33,7 +33,7 @@
 <dataset>
   <users id="146" expire_recovery_token="2015-10-05" password="d0edb37694f3ad4b8ef76b6340ff72b4" recovery_token="rke2pgqa8120riruv3stdaom86" username="cristian.lucchesi" disabled="false"/>
 
-  <persons id="146" email="cristian.lucchesi@iit.cnr.it" name="Cristian" number="9802" oldid="146" surname="Lucchesi" version="16" qualification_id="6" office_id="1" user_id="146" telephone="No internal number" want_email="true" birthday="1974-09-10"  is_person_in_charge="false" eppn="cristian.lucchesi@iit.cnr.it" created_at="2013-11-24 20:01:31.0" updated_at="2015-12-18 16:48:53.511"/>
+  <persons id="146" email="cristian.lucchesi@iit.cnr.it" name="Cristian" number="9802" oldid="146" surname="Lucchesi" version="16" qualification_id="6" office_id="1" user_id="146" telephone="No internal number" want_email="true" birthday="1974-09-10"  is_person_in_charge="false" eppn="cristian.lucchesi@iit.cnr.it" begin_date="2013-11-24 20:01:31.0" end_date="2015-12-18 16:48:53.511"/>
 
   <badges id="161" code="9802" person_id="146" badge_reader_id="1" badge_system_id="1"/>
 

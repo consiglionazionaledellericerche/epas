@@ -30,6 +30,7 @@ when
      	"Version.showVersion",
      	"Notifications.list",
      	"Notifications.archiveds",
+     	"Notifications.readAndRedirect",
      	"Notifications.read"
        ), target == null, granted == false)
 then
@@ -41,6 +42,21 @@ end
  *  (Ricalca il più possibile la struttura del dropdown menu della persona 
  *  oltre i calendari iCal e le azioni REST)
  */
+ 
+rule isEmployeeAbsencesVisible
+when
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $p: Person() from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ABSENCES_FOR_EMPLOYEE, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action in (
+  		"Absences.absencesVisibleForEmployee"), granted == false, target == null)
+then
+ $c.grant();
+end
+  
+  
 rule IsEmployee
 when
   $uro: UsersRolesOffices()
@@ -120,7 +136,8 @@ when
      	
      	/*Possibilità di inviare report*/
      	"ReportCentre.generateReport",
-     	"ReportCentre.sendProblem"   	
+     	"ReportCentre.sendProblem"
+	
      	
        ), target == null, granted == false)
 then

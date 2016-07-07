@@ -264,4 +264,17 @@ public class PersonDayDao extends DaoBase {
     return query.orderBy(personDay.person.surname.asc())
             .orderBy(personDay.date.asc()).list(personDay);
   }
+  
+  
+  /**
+   * 
+   * @param personList
+   * @param date
+   * @return la lista dei personDay relativi a un singolo giorno di tutte le persone presenti nella lista.
+   */
+  public List<PersonDay> getPersonDayForPeopleInDay(List<Person> personList, LocalDate date) {
+    QPersonDay personDay = QPersonDay.personDay;
+    final JPQLQuery query = getQueryFactory().from(personDay).where(personDay.date.eq(date).and(personDay.person.in(personList)));
+    return query.orderBy(personDay.person.surname.asc()).list(personDay);
+  }
 }

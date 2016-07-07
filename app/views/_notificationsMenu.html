@@ -13,7 +13,7 @@
       <a #{if notification.redirect}href="@{Notifications.readAndRedirect(notification.id)}"#{/if}
         #{else}href="@{Notifications.read(notification.id)}" data-async="#notifications"#{/else}>
       <i class="fa fa-comment fa-fw"></i> ${notification.message}
-        <span class="badge">
+        <span class="label label-info label-badge">
           <time datetime="${notification.createdAt}"
             title="${notification.createdAt.format()}">${notification.createdAt.toDate().since()}
           </time>
@@ -28,13 +28,13 @@
     <li>
       <a href="@{Notifications.list()}">
         <i class="fa fa-bell fa-fw"></i> &{'notification.list'}
-        <span class="badge">${templateUtility.notifications.count}</span>
+        <span class="label label-danger label-badge">${templateUtility.notifications.count}</span>
       </a>
     </li>
     <li>
       <a href="@{Notifications.archiveds()}">
         <i class="fa fa-bell-o fa-fw"></i> &{'notification.archiveds'}
-        <span class="badge">${templateUtility.archivedNotifications.count}</span>
+        <span class="label label-default label-badge">${templateUtility.archivedNotifications.count}</span>
       </a>
     </li>
     #{/secure.check}

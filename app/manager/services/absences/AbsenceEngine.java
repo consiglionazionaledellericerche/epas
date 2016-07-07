@@ -122,8 +122,8 @@ public class AbsenceEngine {
       ComplationAbsenceGroup complationAbsenceGroup = groupAbsenceType.complationAbsenceGroup;
       complationComponent.complationAmountType = complationAbsenceGroup.complationAmountType;
       
-      complationComponent.replacingCode = 
-          absenceTypeDao.getAbsenceTypeByCode(complationAbsenceGroup.replacingCode).get();
+      complationComponent.replacingCodes = Sets.newHashSet(absenceTypeDao
+          .absenceTypeCodeSet(complationAbsenceGroup.replacingCodes));
       
       complationComponent.complationCodes = 
           Sets.newHashSet(absenceTypeDao.absenceTypeCodeSet(complationAbsenceGroup.complationCodes));
@@ -131,7 +131,7 @@ public class AbsenceEngine {
       //TODO: le other absences vanno aggiunte!
       complationComponent.replacingAbsences = 
           absenceDao.getAbsencesInCodeList(person, absencePeriod.from, 
-          absencePeriod.to, Lists.newArrayList(complationComponent.replacingCode), true);
+          absencePeriod.to, Lists.newArrayList(complationComponent.replacingCodes), true);
   
       complationComponent.complationAbsences = 
           absenceDao.getAbsencesInCodeList(person, absencePeriod.from, 
@@ -301,7 +301,7 @@ public class AbsenceEngine {
     public int complationLimitAmount;           // Limite di completamento
     public int complationConsumedAmount;        // Ammontare completamento attualmente consumato
     
-    public AbsenceType replacingCode;           // Codice di rimpiazzamento      
+    public Set<AbsenceType> replacingCodes;     // Codici di rimpiazzamento      
     public Set<AbsenceType> complationCodes;    // Codici di completamento
     
     public List<Absence> replacingAbsences;     // Le assenze di rimpiazzamento (solo l'ultima??)     

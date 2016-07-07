@@ -19,14 +19,14 @@ import javax.validation.constraints.NotNull;
  *
  * @author marco
  */
-@Entity @Table(name = "notifications")
+@Entity
+@Table(name = "notifications")
 public class Notification extends MutableModel {
 
   private static final long serialVersionUID = -7368104051600322496L;
 
   @NotNull
   @ManyToOne(optional = false)
-
   public User recipient;
 
   @Required
@@ -40,7 +40,7 @@ public class Notification extends MutableModel {
 
   // id dell'oggetto correlato indicato dal target.
   @Column(name = "subject_id")
-  public Integer subjectId;
+  public Long subjectId;
 
   @NotNull
   public boolean read = false;
@@ -63,7 +63,7 @@ public class Notification extends MutableModel {
 
     NotificationBuilderTypeCreate subject(NotificationSubject type);
 
-    NotificationBuilderTypeCreate subject(NotificationSubject type, Integer id);
+    NotificationBuilderTypeCreate subject(NotificationSubject type, Long id);
 
   }
 
@@ -82,7 +82,7 @@ public class Notification extends MutableModel {
     private User destination;
     private String message;
     private NotificationSubject subject;
-    private Integer subjectId;
+    private Long subjectId;
 
     @Override
     public NotificationBuilderMessage destination(User operator) {
@@ -104,7 +104,7 @@ public class Notification extends MutableModel {
 
     @Override
     public NotificationBuilderTypeCreate subject(final NotificationSubject type,
-                                                 final Integer tid) {
+        final Long tid) {
       subject = type;
       subjectId = tid;
       return this;

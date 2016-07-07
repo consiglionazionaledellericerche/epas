@@ -6,27 +6,93 @@
 
 <div class="container">
 
-<div class="panel panel-primary">
-		  <div class="panel-heading">
-		    <h4 class="panel-title">Carica il file (formato .csv) su cui fare il controllo</h4>
-		  </div>
-		<div class="panel-body">
+  #{title title:('Controllo schedone ') /}
+  <div id="process">
 
-#{form @Charts.processLastYearAbsences() ,  enctype:'multipart/form-data'}
+    #{if !process}
+    #{form @Charts.checkLastYearAbsences() , enctype:'multipart/form-data', class:'form-horizontal',
+    'data-async':'#page_content', 'data-async-error':'#process',
+    'data-spinner':'#defaultSpinner'}
+    #{f.hidden 'officeId', value:office.id /}
+    #{alert color:'info'}
+    <i class="fa fa-info-circle fa-2x" aria-hidden="true"> Info:</i><br><br>
+    Ogni anno l'amministrazione centrale invia alle amministrazioni delle singole sedi uno schedone riepilogativo (in formato <strong>.csv</strong>)
+    contenente tutte le assenze fatte dai dipendenti di quella sede nel corso dell'anno precedente.<br>
+    Selezionando e caricando quel file in questa pagina, verrà analizzato il contenuto del file stesso in relazione alle
+    assenze salvate sul database di modo da fornire un parallelo tra le due situazioni, evidenziando i casi critici:
+    <li> i giorni in cui le assenze tra lo schedone e il database differiscono
+    <li> i giorni in cui sul database non sono presenti assenze invece presenti nello schedone. <br><br>
 
-	    <input type="file" name="file">
-		
-		<div class="container-fluid center">
-      		<input class="btn btn-primary" type="submit" value="Avanti" />
-      	</div>
+      <i class="fa fa-exclamation" aria-hidden="true"> <strong><u>Importante:</u></strong></i> Nello schedone possono essere
+      contenute anche assenze relative all'anno ancora precedente a quello riportato, selezionando
+      correttamente il bottone sottostante è possibile consentire il controllo anche su quelle assenze, oppure evitarlo
+      (selezionando anche le assenze dell'anno precedente, l'elaborazione sarà più lunga).
 
-#{/form}
-	</div>
-</div>
+      #{/alert}
 
-<ul class="pager">
-  <li><a href="/application/indexAdmin">Home</a></li>
-  <li><a href="/stampings/personStamping">Timbrature</a></li>
-</ul>
 
+      #{f.input 'file', type:'file' /}
+
+        #{b.buttons center:true}
+          #{b.submit 'Avanti'/}
+        #{/b.buttons}
+      #{/form}
+      #{/if}
+      #{else}
+
+      <table class="span10 table table-condensed table-striped" datatable>
+        <thead>
+        <tr>
+          <th>Matricola</th>
+          <th>Nome e cognome</th>
+          <th>Data assenza rilevata</th>
+          <th>Codice di assenza rilevato dallo schedone</th>
+          <th>Esito confronto con anagrafica</th>
+          <th>Motivazione</th>
+          <th>Codice di assenza in anagrafica</th>
+        </tr>
+        </thead>
+        <tbody>
+        #{list items:listTrueFalse, as:'result'}
+        #{if result != null}
+        #{if result.type.getDescription().equals('warning')}
+        <tr class="warning">
+          #{/if}
+          #{elseif result.type.getDescription().equals('danger')}
+        <tr class="danger">
+          #{/elseif}
+          #{else}
+        <tr class="success">
+          #{/else}
+          <td>${result.matricola}</td>
+          <td>${result.nome} ${result.cognome}</td>
+          <td>${result.data}</td>
+          <td>${result.codice}</td>
+          <td>
+            #{if result.check}
+            <i style="color: green" class="fa fa-check"></i>
+            #{/if}
+            #{else}
+            <i style="color: red" class="fa fa-times"></i>
+            #{/else}
+          </td>
+          <td>
+            #{if result.message != null}
+            ${result.message}
+            #{/if}
+          </td>
+          <td>
+            #{if result.codiceInAnagrafica != null}
+            ${result.codiceInAnagrafica}
+            #{/if}
+          </td>
+        </tr>
+
+        #{/if}
+        #{/list}
+        </tbody>
+      </table>
+
+      #{/else}
+  </div>
 </div>
