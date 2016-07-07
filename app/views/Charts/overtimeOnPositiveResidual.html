@@ -1,89 +1,46 @@
 #{extends 'main.html' /}
 #{set header:'navbar' /}
+#{set title: 'ePAS - Controllo schedone anno passato' /}
+
+#{charts.chartsTabs activeAction:'overtimeOnPositiveResidual' /}
 
 <div class="container">
-#{if yearChart == null && monthChart == null }
-	<div class="panel panel-primary">
-		  <div class="panel-heading">
-		    <h4 class="panel-title">Seleziona mese e anno</h4>
-		  </div>
-		<div class="panel-body">
-#{form @Charts.overtimeOnPositiveResidual()}
 
-
-#{select 'yearChart', id:'yearChart'}
-	#{list annoList}
-		#{option _.anno}${_.anno}#{/option}
-	#{/list}				
-#{/select}
-
-#{select 'monthChart', id:'meseChart'}
-	#{list meseList}
-		#{option _.id}${_.mese}#{/option}
-	#{/list}		
-#{/select}
-<input class="btn btn-primary span1" type="submit" value="Ok"/>
-#{/form}
-		</div>
-	</div>
-	
-	#{/if}
-#{else}
-<div class="panel panel-primary">
-		  <div class="panel-heading">
-		    <h4 class="panel-title">Ore di straordinario a confronto con le ore in più per &{'views.tags.display.date.month.' + monthChart} ${yearChart} </h4>
-		  </div>
-		<div class="panel-body">
-#{form @Charts.overtimeOnPositiveResidual()}
-
-
-#{select 'yearChart', value:session.get("yearChart"), id:'yearChart'}
-	#{list annoList}
-		#{option _.anno}${_.anno}#{/option}
-	#{/list}			
-#{/select}
-
-#{select 'monthChart', value: session.get("monthChart"), id:'meseChart'}
-	#{list meseList}
-		#{option _.id}${_.mese}#{/option}
-	#{/list}			
-#{/select}
-<input class="btn btn-primary span1" type="submit" value="Ok"/>
-#{/form}
-		</div>
-	</div>
-#{/else}
+	#{alert color:'info'}
+		<i class="fa fa-info-circle fa-large" aria-hidden="true"> Info:</i><br><br>
+		Selezionando anno e mese dal menu sulla barra è possibile visualizzare, per ogni persona della sede, il residuo delle ore positive
+		in relazione alle ore di straordinario prese.
+	#{/alert}
 </div>
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawVisualization);
 
-#{if yearChart != 0 && monthChart != 0 }
-<div class="container-fluid">
-<div id="myfirstchart" style="height: 950px; margin-left: 30px;">
+      function drawVisualization() {
+        // Some raw data (not necessarily accurate)
+        var data = google.visualization.arrayToDataTable([
+         ['Dipendente', 'Ore di straordinario', 'Ore in più'],
+         #{list poList, as:'person'}
+         ['${person.surname} ${person.name}',  ${person.overtimeHour},      ${person.positiveHourForOvertime}],
+         #{/list}
+      ]);
 
-</div>
- 	#{set 'moreScripts'}
-<script type="text/javascript">
-	new Morris.Bar({
-	  element: 'myfirstchart',
-	  data: [
-		#{list poList, as:'person'}
-	    {y: '${person.surname}', a: '${person.overtimeHour}', b: '${person.positiveHourForOvertime}'},
-	    #{/list}
-	  ],
-	  xkey: 'y',
-	  ykeys: ['a', 'b'],
-	  labels: ['Ore straordinario', 'Ore positive usabili'],
-	  xLabelAngle: 80.0,
-	  gridTextSize: 14
-	});
+    var options = {
+      height: 700,
+      width: 1900,
+      vAxis: {title: 'Ore'},
+      hAxis: {title: 'Dipendenti'},
+      seriesType: 'bars',
+      series: {2: {type: 'line'}}
+    };
 
-</script>
+    var chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
+    chart.draw(data, options);
+  }
+  </script>
 	
-	#{/set}
+<div id="chart_div" class="center"></div>
 
-#{/if}
 
-<ul class="pager">
-  <li><a href="/charts/indexCharts">Indietro</a></li>
-  
-</ul>
-</div>	
+

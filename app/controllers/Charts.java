@@ -4,9 +4,12 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+
+import helpers.jpa.ModelQuery.SimpleResults;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,6 +25,7 @@ import models.Person;
 import models.exports.PersonOvertime;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import play.Logger;
 import play.mvc.Controller;
@@ -54,35 +58,30 @@ public class Charts extends Controller {
   static CompetenceDao competenceDao;
   @Inject
   static OfficeDao officeDao;
+  @Inject
+  static CompetenceCodeDao competenceCodeDao;
 
-  public static void overtimeOnPositiveResidual(Integer year, Integer month) {
+  public static void overtimeOnPositiveResidual(Integer year, Integer month, Long officeId) {
 
-    rules.checkIfPermitted(Security.getUser().get().person.office);
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    Set<Office> set = Sets.newHashSet();
+    set.add(office);
+    LocalDate beginMonth = new LocalDate(year, month, 1);
+    LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
+    CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
+    SimpleResults<Person> people = personDao.listForCompetence(code, Optional.<String>absent(), 
+        set, true, beginMonth, endMonth, Optional.<Person>absent());
+    List<Person> peopleActive = people.list();
 
-    List<Year> annoList = chartsManager.populateYearList(Security.getUser().get().person.office);
-    List<Month> meseList = chartsManager.populateMonthList();
-
-    if (params.get("yearChart") == null || params.get("monthChart") == null) {
-
-      Logger.info("Params year: %s", params.get("yearChart", Integer.class));
-      Logger.info("Chiamato metodo con anno e mese nulli");
-      render(annoList, meseList);
-    }
-
-    year = params.get("yearChart", Integer.class);
-    month = params.get("monthChart", Integer.class);
-
-    List<Person> personeProva = personDao.list(
-        Optional.<String>absent(),
-        secureManager.officesReadAllowed(Security.getUser().get()),
-        true, new LocalDate(year, month, 1),
-        new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true).list();
+    log.debug("Dimensione attivi per straordinario: {}", peopleActive.size());
 
     List<CompetenceCode> codeList = chartsManager.populateOvertimeCodeList();
     List<PersonOvertime> poList =
-        chartsManager.populatePersonOvertimeList(personeProva, codeList, year, month);
+        chartsManager.populatePersonOvertimeList(peopleActive, codeList, year, month);
 
-    render(poList, year, month, annoList, meseList);
+    render(poList, year, month);
   }
 
 
@@ -244,5 +243,9 @@ public class Charts extends Controller {
     FileInputStream inputStream = chartsManager.exportDataSituation(person);
     renderBinary(inputStream, "exportDataSituation" + person.surname + ".csv");
 
+  }
+  
+  public static void test() {
+    render();
   }
 }
