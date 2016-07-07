@@ -165,26 +165,25 @@ public class ChartsManager {
       List<Person> personList, List<CompetenceCode> codeList, int year, int month) {
     List<PersonOvertime> poList = Lists.newArrayList();
     for (Person p : personList) {
-      if (p.office.equals(Security.getUser().get().person.office)) {
-        PersonOvertime po = new PersonOvertime();
-        Long val = null;
-        Optional<Integer> result =
-            competenceDao
-                .valueOvertimeApprovedByMonthAndYear(
-                    year, Optional.fromNullable(month), Optional.fromNullable(p), codeList);
-        if (result.isPresent()) {
-          val = result.get().longValue();
-        }
 
-        po.month = month;
-        po.year = year;
-        po.overtimeHour = val;
-        po.name = p.name;
-        po.surname = p.surname;
-        po.positiveHourForOvertime = competenceManager.positiveResidualInMonth(p, year, month) / 60;
-        poList.add(po);
-        log.info("Aggiunto {} {} alla lista con i suoi dati", p.name, p.surname);
+      PersonOvertime po = new PersonOvertime();
+      List<Contract> monthContracts = wrapperFactory
+          .create(p).getMonthContracts(year, month);
+      for (Contract contract : monthContracts) {
+        IWrapperContract wrContract = wrapperFactory.create(contract);
+        Optional<ContractMonthRecap> recap =
+            wrContract.getContractMonthRecap(new YearMonth(year, month));
+        if (recap.isPresent()) {
+          po.overtimeHour = new Long(recap.get().getStraordinarioMinuti()/60);
+          po.positiveHourForOvertime = recap.get().getPositiveResidualInMonth()/60;
+        }
       }
+      po.month = month;
+      po.year = year;
+      po.name = p.name;
+      po.surname = p.surname;      
+      poList.add(po);
+      log.debug("Aggiunto {} {} alla lista con i suoi dati", p.name, p.surname);
 
     }
     return poList;
@@ -268,8 +267,8 @@ public class ChartsManager {
     out.write("Cognome Nome,");
     for (int i = 1; i <= month; i++) {
       out.append("ore straordinari " + DateUtility.fromIntToStringMonth(i)
-          + ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i)
-          + ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
+      + ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i)
+      + ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
     }
 
     out.append("ore straordinari TOTALI,ore riposi compensativi TOTALI, ore in più TOTALI");
@@ -308,7 +307,7 @@ public class ChartsManager {
                   + (new Integer(recap.get().straordinariMinuti / 60).toString())
                   + ',' + (new Integer(recap.get().riposiCompensativiMinuti / 60).toString())
                   + ',' + (new Integer((recap.get().getPositiveResidualInMonth()
-                  + recap.get().straordinariMinuti) / 60).toString())
+                      + recap.get().straordinariMinuti) / 60).toString())
                   + ',';
               totalOvertime = totalOvertime + new Integer(recap.get().straordinariMinuti / 60);
               totalCompensatoryRest =
@@ -508,7 +507,7 @@ public class ChartsManager {
               person.surname, item.codice, item.dataAssenza, true, "Ok",
               values.stream().filter(r1 -> r1.absenceType.code.equalsIgnoreCase(item.codice)
                   || r1.absenceType.certificateCode.equalsIgnoreCase(item.codice))
-                  .findFirst().get().absenceType.code, CheckType.SUCCESS);
+              .findFirst().get().absenceType.code, CheckType.SUCCESS);
         } else {
           result = new RenderResult(null, person.number, person.name,
               person.surname, item.codice, item.dataAssenza, false,

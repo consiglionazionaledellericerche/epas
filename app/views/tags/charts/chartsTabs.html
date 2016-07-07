@@ -8,17 +8,18 @@
    
 <div id="container-nav-tabs" class="container">
   <ul class="nav nav-tabs">
-<!--      <li #{if _activeAction.equals("indexCharts")} class="active" #{/if}>
-      <a href="@{Charts.indexCharts()}">Grafici</a>
-    </li>-->
-    <li #{if _activeAction.equals("checkLastYearAbsences")} class="active" #{/if}>
+
+	<li #{if _activeAction.equals("checkLastYearAbsences")} class="active" #{/if}>
       <a href="@{Charts.checkLastYearAbsences(null,session.get("officeSelected"))}">Controllo schedone anno passato</a>
     </li>
+    <li #{if _activeAction.equals("overtimeOnPositiveResidual")} class="active" #{/if}>
+      <a href="@{Charts.overtimeOnPositiveResidual(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected"))}">Ore positive vs. straordinari mensili</a>
+    </li>    
     <li #{if _activeAction.equals("exportHourAndOvertime")} class="active" #{/if}>
-      <a href="@{Charts.exportHourAndOvertime()}">Esportazione ore in più e di straordinario</a>
+      <a href="@{Charts.exportHourAndOvertime()}">Export ore in più e di straordinario</a>
     </li>
     <li #{if _activeAction.equals("exportFinalSituation")} class="active" #{/if}>
-      <a href="@{Charts.exportFinalSituation()}">Esportazione informazioni finali di un dipendente</a>
+      <a href="@{Charts.exportFinalSituation()}">Export informazioni finali di un dipendente</a>
     </li>
     
   </ul>
