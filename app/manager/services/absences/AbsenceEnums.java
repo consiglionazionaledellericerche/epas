@@ -21,9 +21,15 @@ public class AbsenceEnums {
   public static final Set<String> codes19 = 
       Sets.newHashSet("19h1", "19h2", "19h3", "19h4", "19h5", "19h6", "19h7", "19h8", "19h9");
 
-  public static final Set<String> codesCompl09 = 
+  public static final Set<String> codes09 = 
       Sets.newHashSet("09h1", "09h2", "09h3", "09h4", "09h5", "09h6", "09h7");
 
+  public static final Set<String> complCodes18 = Sets.newHashSet("18");
+  public static final Set<String> complCodes19 = Sets.newHashSet("19");
+  public static final Set<String> complCodes09 = Sets.newHashSet("09B");
+  public static final Set<String> complCodes661 = Sets.newHashSet("661h1", "661h2", "661h3", 
+      "661h4", "661h5", "661h6", "661h7", "661h8", "661h9");
+  
   public enum TakableAbsenceGroup {
 
     /* Permesso Orario Permesso Personale 18h anno (no completamenti) */ 
@@ -84,17 +90,19 @@ public class AbsenceEnums {
 
   public enum ComplationAbsenceGroup {
     
-    complation09(AmountType.minutes, "90B", codesCompl09),
-    complation18(AmountType.minutes, "18", codes18);
+    complation09(AmountType.minutes, complCodes09, codes09),
+    complation18(AmountType.minutes, complCodes18, codes18),
+    complation19(AmountType.minutes, complCodes19, codes19),
+    complation661(AmountType.minutes, complCodes661, codes661);
 
     public AmountType complationAmountType;
-    public String replacingCode;
+    public Set<String> replacingCodes;
     public Set<String> complationCodes;
 
     private ComplationAbsenceGroup(AmountType complationAmountType, 
-        String replacingCode, Set<String> complationCodes) {
+        Set<String> replacingCodes, Set<String> complationCodes) {
       this.complationAmountType = complationAmountType;
-      this.replacingCode = replacingCode;
+      this.replacingCodes = replacingCodes;
       this.complationCodes = complationCodes;
     }
   }

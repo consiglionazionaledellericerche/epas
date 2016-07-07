@@ -9,7 +9,7 @@ import manager.ConsistencyManager;
 import manager.services.absences.AbsenceEngine;
 import manager.services.absences.AbsenceEngine.AbsencePeriod;
 import manager.services.absences.AbsenceEngine.AbsenceRequestType;
-import manager.services.absences.AbsenceEngine.GroupAbsenceType;
+import manager.services.absences.AbsenceEnums.GroupAbsenceType;
 
 import models.Absence;
 import models.AbsenceType;
