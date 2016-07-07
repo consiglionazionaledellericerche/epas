@@ -102,7 +102,7 @@ public class Stampings extends Controller {
   @Inject
   private static PersonManager personManager;
   @Inject
-  private static NotificationManager notiicaNotificationManager;
+  private static NotificationManager notificationManager;
   @Inject
   private static JavaRules jRules;
   @Inject
@@ -237,7 +237,11 @@ public class Stampings extends Controller {
     PersonDay personDay = personDayDao.getOrBuildPersonDay(person, date);
     final User currentUser = Security.getUser().get();
 
+    // server per poter discriminare dopo aver fatto la save della timbratura se si
+    // trattava di una nuova timbratura o di una modifica
+    boolean newInsert = false;
     if (!stamping.isPersistent()) {
+      newInsert = true;
       stamping.personDay = personDay;
     }
 
@@ -285,7 +289,8 @@ public class Stampings extends Controller {
 
     if (!currentUser.isSystemUser() && currentUser.person.id.equals(person.id)
         && !personManager.isPersonnelAdmin(currentUser)) {
-      notiicaNotificationManager.notifyStamping(stamping);
+      notificationManager.notifyStamping(stamping,
+          newInsert ? NotificationManager.CRUD.CREATE : NotificationManager.CRUD.UPDATE);
       Stampings.stampings(date.getYear(), date.getMonthOfYear());
     }
 
@@ -311,6 +316,7 @@ public class Stampings extends Controller {
       // FIXME questa è una porcheria fatta perchè le drools in alcuni casi non funzionano come dovrebbero
       // da rimuovere non appena si riesce a risolvere il problema sulle drools
       jRules.checkForStamping(stamping);
+      notificationManager.notifyStamping(stamping, NotificationManager.CRUD.DELETE);
     }
 
     final PersonDay personDay = stamping.personDay;
@@ -319,6 +325,11 @@ public class Stampings extends Controller {
     consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
 
     flash.success("Timbratura rimossa correttamente.");
+
+    if (!user.isSystemUser() && user.person.id.equals(personDay.person.id)
+        && !personManager.isPersonnelAdmin(user)) {
+      Stampings.stampings(personDay.date.getYear(), personDay.date.getMonthOfYear());
+    }
 
     personStamping(personDay.person.id, personDay.date.getYear(),
         personDay.date.getMonthOfYear());

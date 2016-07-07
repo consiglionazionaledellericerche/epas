@@ -7,8 +7,6 @@ import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
 
-import it.cnr.iit.epas.DateUtility;
-
 import lombok.extern.slf4j.Slf4j;
 
 import manager.PersonDayManager;
@@ -52,9 +50,8 @@ public class PersonStampingDayRecap {
   public boolean ignoreDay = false;
   public boolean firstDay = false;
   public List<StampingTemplate> stampingsTemplate;
-  
+
   // visualizzazioni particolari da spostare
-  public String workTimeExplanation = "";
   public String mealTicket;
 
   public StampModificationType fixedWorkingTimeCode = null;
@@ -65,24 +62,24 @@ public class PersonStampingDayRecap {
   /**
    * Costruisce l'oggetto contenente un giorno lavorativo da visualizzare nel tabellone timbrature.
    *
-   * @param personDayManager        injected
-   * @param personManager           injected
-   * @param stampTypeManager        injected
-   * @param wrapperFactory          injected
-   * @param workingTimeTypeDao      injected
-   * @param configurationManager    injected
-   * @param personDay               personDay
-   * @param numberOfInOut           numero di colonne del tabellone a livello mensile.
-   * @param considerExitingNow      se considerare nel calcolo l'uscita in questo momento
-   * @param monthContracts          il riepiloghi del mese
+   * @param personDayManager     injected
+   * @param personManager        injected
+   * @param stampTypeManager     injected
+   * @param wrapperFactory       injected
+   * @param workingTimeTypeDao   injected
+   * @param configurationManager injected
+   * @param personDay            personDay
+   * @param numberOfInOut        numero di colonne del tabellone a livello mensile.
+   * @param considerExitingNow   se considerare nel calcolo l'uscita in questo momento
+   * @param monthContracts       il riepiloghi del mese
    */
   public PersonStampingDayRecap(PersonDayManager personDayManager, PersonManager personManager,
-                                StampingTemplateFactory stampingTemplateFactory,
-                                StampTypeManager stampTypeManager, IWrapperFactory wrapperFactory,
-                                WorkingTimeTypeDao workingTimeTypeDao,
-                                ConfigurationManager configurationManager, PersonDay personDay,
-                                int numberOfInOut, boolean considerExitingNow, 
-                                Optional<List<Contract>> monthContracts) {
+      StampingTemplateFactory stampingTemplateFactory,
+      StampTypeManager stampTypeManager, IWrapperFactory wrapperFactory,
+      WorkingTimeTypeDao workingTimeTypeDao,
+      ConfigurationManager configurationManager, PersonDay personDay,
+      int numberOfInOut, boolean considerExitingNow,
+      Optional<List<Contract>> monthContracts) {
 
     this.personDay = personDay;
 
@@ -94,23 +91,23 @@ public class PersonStampingDayRecap {
       this.personDay.setHoliday(personManager
           .isHoliday(personDay.getPerson(), personDay.getDate()));
     }
-   
+
     this.wrPersonDay = wrapperFactory.create(personDay);
 
-    this.stampingsTemplate = getStampingsTemplate(wrPersonDay, stampingTemplateFactory, 
+    this.stampingsTemplate = getStampingsTemplate(wrPersonDay, stampingTemplateFactory,
         personDayManager, numberOfInOut, considerExitingNow);
-    
+
     this.note.addAll(getStampingsNote(this.stampingsTemplate));
 
     this.wttd = this.wrPersonDay.getWorkingTimeTypeDay();
 
-    this.lunchInterval = (LocalTimeInterval)configurationManager.configValue(
+    this.lunchInterval = (LocalTimeInterval) configurationManager.configValue(
         personDay.getPerson().office, EpasParam.LUNCH_INTERVAL, personDay.getDate());
-    this.workInterval = (LocalTimeInterval)configurationManager.configValue(
+    this.workInterval = (LocalTimeInterval) configurationManager.configValue(
         personDay.getPerson().office, EpasParam.WORK_INTERVAL, personDay.getDate());
-    
+
     boolean thereAreAllDayAbsences = personDayManager.isAllDayAbsences(personDay);
-    
+
     if (wrPersonDay.isFixedTimeAtWork() && !personDay.isHoliday && !thereAreAllDayAbsences) {
       if (fixedStampModificationType == null) {
         fixedStampModificationType =
@@ -119,22 +116,22 @@ public class PersonStampingDayRecap {
       }
       this.fixedWorkingTimeCode = fixedStampModificationType;
     }
-    
-    this.computeWorkTime(personDay.getTimeAtWork());
+
+//    this.computeWorkTime(personDay.getTimeAtWork());
 
     // is sourceContract (solo se monthContracts presente)
     if (monthContracts.isPresent()) {
       for (Contract contract : monthContracts.get()) {
-        
+
         // Se il giorno è:
         // Precedente all'inizio del contratto
         // Oppure precedente a un'inizializzazione definita
         // Oppure precedente alla data di inserimento della persona
         // v.iene Ignorato
-         
-        if (contract.getBeginDate().isAfter(personDay.getDate()) 
-            || (contract.getSourceDateResidual() != null 
-            && !personDay.getDate().isAfter(contract.getSourceDateResidual())) 
+
+        if (contract.getBeginDate().isAfter(personDay.getDate())
+            || (contract.getSourceDateResidual() != null
+            && !personDay.getDate().isAfter(contract.getSourceDateResidual()))
             || personDay.getDate().isBefore(personDay.getPerson().beginDate)) {
           this.ignoreDay = true;
         }
@@ -144,35 +141,36 @@ public class PersonStampingDayRecap {
         }
       }
     }
-    
+
     this.computeMealTicket(personDay, thereAreAllDayAbsences);
   }
 
 
   /**
    * Imposta il valore della colonna buono pasto nel tabellone timbrature.
-   * @param personDay giorno sul quale impostare il valore relativo al buono
+   *
+   * @param personDay              giorno sul quale impostare il valore relativo al buono
    * @param thereAreAllDayAbsences specifica se sono presenti assenze giornaliere
    */
   private void computeMealTicket(PersonDay personDay, boolean thereAreAllDayAbsences) {
 
     // ##### Giorno ignorato (fuori contratto)
-    
+
     if (this.ignoreDay || !this.personDay.isPersistent()) {
       this.mealTicket = MEALTICKET_EMPTY;
       return;
     }
-    
+
     // ##### Giorno festivo
-    
+
     if (personDay.isHoliday() && !personDay.acceptedHolidayWorkingTime &&
         !personDay.isTicketForcedByAdmin) {
       this.mealTicket = MEALTICKET_EMPTY;
       return;
     }
-    
+
     // ##### Giorni futuri
-    
+
     if (personDay.isFuture()) {
       if (thereAreAllDayAbsences) {
         this.mealTicket = MEALTICKET_NO;
@@ -181,14 +179,14 @@ public class PersonStampingDayRecap {
       }
       return;
     }
-    
+
     // ##### Giorni Passati e giorno attuale
     // ##### Available
-    
+
     if (personDay.isTicketAvailable()) {
       if (personDay.isTicketForcedByAdmin) {
         // si e forzato
-        this.mealTicket = MEALTICKET_YES; 
+        this.mealTicket = MEALTICKET_YES;
       } else if (personDay.isToday()) {
         if (thereAreAllDayAbsences) {
           // si non forzato oggi con assenze giornalire FIXME: perchè decido qua no?
@@ -208,10 +206,10 @@ public class PersonStampingDayRecap {
       }
       return;
     }
-    
+
     // ##### Giorni Passati e giorno attuale
     // ##### Not Available
-    
+
     if (!personDay.isTicketAvailable) {
       if (personDay.isTicketForcedByAdmin) {
         // no forzato
@@ -240,8 +238,8 @@ public class PersonStampingDayRecap {
    * @param numberOfInOut numero di timbrature.
    * @return la lista di timbrature per il template.
    */
-  private List<StampingTemplate> getStampingsTemplate(IWrapperPersonDay wrPersonDay, 
-      StampingTemplateFactory stampingTemplateFactory, PersonDayManager personDayManager, 
+  private List<StampingTemplate> getStampingsTemplate(IWrapperPersonDay wrPersonDay,
+      StampingTemplateFactory stampingTemplateFactory, PersonDayManager personDayManager,
       int numberOfInOut, boolean considerExitingNow) {
 
     List<Stamping> stampings = personDayManager
@@ -287,62 +285,4 @@ public class PersonStampingDayRecap {
     return note;
   }
 
-
-  /**
-   * Formatta il valore del tempo lavorato nel giorno (lordo comprensivo di tempo decurtato).
-   *
-   * @param workTime minuti lavorati
-   */
-  private void computeWorkTime(int workTime) {
-
-    if (this.fixedWorkingTimeCode != null) {
-      this.workTimeExplanation = this.workTimeExplanation 
-          + "<br>" + italic(this.fixedWorkingTimeCode.description);
-    }
-    
-    if (personDay.stampingsTime != null && personDay.stampingsTime > 0) {
-      this.workTimeExplanation = this.workTimeExplanation
-          + "<br>Da timbrature: " 
-          + stronger(DateUtility.fromMinuteToHourMinute(personDay.stampingsTime));
-    }
-    
-    if (personDay.getDecurtedWork() > 0) {
-      this.workTimeExplanation = this.workTimeExplanation
-          + "<br>Sottratto perchè al di fuori della finestra orario: " 
-          + stronger(DateUtility.fromMinuteToHourMinute(personDay.getDecurtedWork()));
-    }
-
-    if (personDay.justifiedTimeNoMeal != null && personDay.justifiedTimeNoMeal > 0) {
-      this.workTimeExplanation = this.workTimeExplanation
-          + "<br>Giustificato da assenze: " 
-          + stronger(DateUtility.fromMinuteToHourMinute(personDay.justifiedTimeNoMeal));
-    }
-
-    if (personDay.justifiedTimeMeal != null && personDay.justifiedTimeMeal > 0) {
-      this.workTimeExplanation = this.workTimeExplanation
-          + "<br>Giustificato da assenze che concorrono al calcolo del buono pasto: " 
-          + stronger(DateUtility.fromMinuteToHourMinute(personDay.justifiedTimeMeal));
-    }
-
-    if (personDay.decurted != null && personDay.decurted > 0) {
-      this.workTimeExplanation = this.workTimeExplanation
-          + "<br>Sottratto per pausa pranzo assente o troppo breve: " 
-          + stronger(DateUtility.fromMinuteToHourMinute(personDay.decurted));
-    }
-    if (!this.workTimeExplanation.isEmpty()) {
-      this.workTimeExplanation =
-          "Tempo a lavoro totale: " + stronger(DateUtility.fromMinuteToHourMinute(workTime)) 
-          + this.workTimeExplanation;
-    }
-    
-  }
-
-  private String stronger(String string) {
-    return "<strong>" + string + "</strong>";
-  }
-  
-  private String italic(String string) {
-    return "<em>" + string + "</em>";
-  }
- 
 }

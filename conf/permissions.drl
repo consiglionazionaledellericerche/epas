@@ -882,6 +882,7 @@ when
     "Stampings.blank",
     "Stampings.edit",
     "Stampings.save",
+    "Stampings.delete",
     "Absences.blank",
     "Absences.edit",
     "Absences.delete",

@@ -26,6 +26,7 @@ import dao.history.HistoryValue;
 import it.cnr.iit.epas.DateUtility;
 
 import manager.AbsenceManager;
+import manager.NotificationManager;
 import manager.PersonManager;
 import manager.SecureManager;
 import manager.YearlyAbsencesManager;
@@ -105,6 +106,8 @@ public class Absences extends Controller {
   private static ConfigurationManager confManager;
   @Inject
   private static UserDao userDao;
+  @Inject
+  private static NotificationManager notificationManager;
 
   /**
    * Le assenze della persona nel mese.
@@ -339,6 +342,9 @@ public class Absences extends Controller {
     if (!Security.getUser().get().isSystemUser()) {
       if (Security.getUser().get().person.id.equals(person.id)
           && !personManager.isPersonnelAdmin(Security.getUser().get())) {
+        air.getAbsences().forEach(ab -> {
+          notificationManager.notifyAbsence(ab.getAbsenceAdded(), NotificationManager.CRUD.CREATE);
+        });
         Stampings.stampings(dateFrom.getYear(), dateFrom.getMonthOfYear());
       }
     }

@@ -439,12 +439,12 @@ public class AbsenceManager {
 
       } else {
         absence.date = pd.date;
-        ar.setAbsenceAdded(absence);
 
         log.info("Simulato inserimento nuova assenza {} per {} in data: {}",
             absence.absenceType.code, pd.person.getFullname(), absence.date);
       }
 
+      ar.setAbsenceAdded(absence);
       ar.setAbsenceCode(absenceType.code);
       ar.setInsertSucceeded(true);
     }
