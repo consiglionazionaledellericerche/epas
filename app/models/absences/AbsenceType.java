@@ -1,6 +1,7 @@
 package models.absences;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import lombok.Getter;
@@ -17,7 +18,6 @@ import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -42,12 +42,21 @@ public class AbsenceType extends BaseModel {
 
   private static final long serialVersionUID = 7157167508454574329L;
 
+  // Vecchia Modellazione (Da rimuovere)
+  
   @ManyToOne
   @JoinColumn(name = "absence_type_group_id")
   public AbsenceTypeGroup absenceTypeGroup;
 
+  @Required
+  @Enumerated(EnumType.STRING)
+  @Column(name = "justified_time_at_work")
+  public JustifiedTimeAtWork justifiedTimeAtWork;
+  
+  // Nuova Modellazione
+  
   @ManyToMany
-  public List<Qualification> qualifications = new ArrayList<Qualification>();
+  public List<Qualification> qualifications = Lists.newArrayList();
 
   @Getter
   @Required
@@ -69,19 +78,38 @@ public class AbsenceType extends BaseModel {
 
   @Column(name = "considered_week_end")
   public boolean consideredWeekEnd = false;
-
-  @Required
+  
+  @Column(name = "time_for_mealticket")
+  public boolean timeForMealTicket = false;
+  
+  @Column(name = "justified_time")
+  public Integer justifiedTime;
+  
+  @Column(name = "justified_type_permitted")
   @Enumerated(EnumType.STRING)
-  @Column(name = "justified_time_at_work")
-  public JustifiedTimeAtWork justifiedTimeAtWork;
-
-  /**
-   * Relazione inversa con le assenze.
-   */
+  public JustifiedTypePermitted justifiedTypePermitted;
+  
+  
   @OneToMany(mappedBy = "absenceType")
   @LazyCollection(LazyCollectionOption.EXTRA)
   public Set<Absence> absences = Sets.newHashSet();
 
+  @ManyToMany(mappedBy = "takenCodes")
+  public Set<TakableAbsenceBehaviour> takenGroup;
+
+  @ManyToMany(mappedBy = "takableCodes")
+  public Set<TakableAbsenceBehaviour> takableGroup;
+  
+  @ManyToMany(mappedBy = "complationCodes")
+  public Set<ComplationAbsenceBehaviour> complationGroup;
+  
+  @ManyToMany(mappedBy = "replacingCodes")
+  public Set<ComplationAbsenceBehaviour> replacingGroup;
+  
+  
+  
+  // Metodi
+  
   @Transient
   public String getShortDescription() {
     if (description != null && description.length() > 60) {
@@ -103,4 +131,8 @@ public class AbsenceType extends BaseModel {
     return Joiner.on(" - ").skipNulls().join(code, description);
   }
 
+  
+  public enum JustifiedTypePermitted {
+    absence_type, minutes, quelloCheManca;
+  }
 }
