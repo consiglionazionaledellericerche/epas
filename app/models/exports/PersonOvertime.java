@@ -6,7 +6,7 @@ public class PersonOvertime {
   public String surname;
   public int year;
   public int month;
-  public Long overtimeHour;
+  public int overtimeHour;
   public int positiveHourForOvertime;
 
 }
