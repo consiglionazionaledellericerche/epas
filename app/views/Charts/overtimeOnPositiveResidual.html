@@ -11,36 +11,39 @@
 		Selezionando anno e mese dal menu sulla barra è possibile visualizzare, per ogni persona della sede, il residuo delle ore positive
 		in relazione alle ore di straordinario prese.
 	#{/alert}
-</div>
-	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/javascript">
-      google.charts.load('current', {'packages':['corechart']});
-      google.charts.setOnLoadCallback(drawVisualization);
-
-      function drawVisualization() {
-        // Some raw data (not necessarily accurate)
-        var data = google.visualization.arrayToDataTable([
-         ['Dipendente', 'Ore di straordinario', 'Ore in più'],
-         #{list poList, as:'person'}
-         ['${person.surname} ${person.name}',  ${person.overtimeHour},      ${person.positiveHourForOvertime}],
-         #{/list}
-      ]);
-
-    var options = {
-      height: 700,
-      width: 1900,
-      vAxis: {title: 'Ore'},
-      hAxis: {title: 'Dipendenti'},
-      seriesType: 'bars',
-      series: {2: {type: 'line'}}
-    };
-
-    var chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
-    chart.draw(data, options);
-  }
-  </script>
 	
-<div id="chart_div" class="center"></div>
+
+</div>
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>    
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['bar']});
+      google.charts.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+          ['Dipendente', 'Ore di straordinario', 'Ore in più'],
+          #{list poList, as:'person'}
+          ['${person?.surname} ${person?.name}', ${person?.overtimeHour}, ${person?.positiveHourForOvertime}],
+          #{/list}
+        ]);
+
+        var options = {
+          height: 800,
+          width: 1000,
+          chart: {
+            title: 'Ore di straordinario in relazione alle ore in più',
+            subtitle: 'Controllo solo tra coloro che hanno usufruito di straordinari nel mese e anno indicati',
+          },
+          bars: 'horizontal' // Required for Material Bar Charts.
+        };
+
+        var chart = new google.charts.Bar(document.getElementById('barchart_material'));
+
+        chart.draw(data, options);
+      }
+    </script>
+    <div class="container">
+    <div id="barchart_material" class="center"></div>
+  	</div>
 
 
 
