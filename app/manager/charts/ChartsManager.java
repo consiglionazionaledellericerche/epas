@@ -1,4 +1,4 @@
-package manager;
+package manager.charts;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Optional;
@@ -21,6 +21,7 @@ import it.cnr.iit.epas.DateUtility;
 
 import jobs.chartJob;
 
+import manager.CompetenceManager;
 import manager.recaps.charts.RenderResult;
 import manager.recaps.charts.ResultFromFile;
 import manager.services.vacations.IVacationsService;

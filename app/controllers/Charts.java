@@ -13,15 +13,16 @@ import helpers.jpa.ModelQuery.SimpleResults;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.ChartsManager;
-import manager.ChartsManager.Month;
-import manager.ChartsManager.Year;
 import manager.SecureManager;
+import manager.charts.ChartsManager;
+import manager.charts.ChartsManager.Month;
+import manager.charts.ChartsManager.Year;
 import manager.recaps.charts.RenderResult;
 
 import models.CompetenceCode;
 import models.Office;
 import models.Person;
+
 import models.exports.PersonOvertime;
 
 import org.joda.time.LocalDate;
@@ -80,6 +81,10 @@ public class Charts extends Controller {
     List<CompetenceCode> codeList = chartsManager.populateOvertimeCodeList();
     List<PersonOvertime> poList =
         chartsManager.populatePersonOvertimeList(peopleActive, codeList, year, month);
+    if (poList.isEmpty()) {
+      flash.error("Nel mese selezionato non sono ancora stati assegnati gli straordinari");
+      render(year, month);
+    }
 
     render(poList, year, month);
   }
@@ -245,7 +250,30 @@ public class Charts extends Controller {
 
   }
   
-  public static void test() {
-    render();
+  public static void test(Integer year, Integer month, Long officeId) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    Set<Office> set = Sets.newHashSet();
+    set.add(office);
+    LocalDate beginMonth = new LocalDate(year, month, 1);
+    LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
+    CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
+    SimpleResults<Person> people = personDao.listForCompetence(code, Optional.<String>absent(), 
+        set, true, beginMonth, endMonth, Optional.<Person>absent());
+    List<Person> peopleActive = people.list();
+
+    log.debug("Dimensione attivi per straordinario: {}", peopleActive.size());
+
+    List<CompetenceCode> codeList = chartsManager.populateOvertimeCodeList();
+    List<PersonOvertime> poList =
+        chartsManager.populatePersonOvertimeList(peopleActive, codeList, year, month);
+    if (poList.isEmpty()) {
+      flash.error("Nel mese selezionato non sono ancora stati assegnati gli straordinari");
+      render(year, month);
+    }
+
+    render(poList, year, month);
   }
 }
