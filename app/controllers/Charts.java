@@ -15,8 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import manager.SecureManager;
 import manager.charts.ChartsManager;
-import manager.charts.ChartsManager.Month;
-import manager.charts.ChartsManager.Year;
+import manager.charts.ChartsManager.RenderChart;
 import manager.recaps.charts.RenderResult;
 
 import models.CompetenceCode;
@@ -79,14 +78,17 @@ public class Charts extends Controller {
     log.debug("Dimensione attivi per straordinario: {}", peopleActive.size());
 
     List<CompetenceCode> codeList = chartsManager.populateOvertimeCodeList();
-    List<PersonOvertime> poList =
+    
+    RenderChart render =
         chartsManager.populatePersonOvertimeList(peopleActive, codeList, year, month);
+    List<PersonOvertime> poList = render.personOvertime;
     if (poList.isEmpty()) {
       flash.error("Nel mese selezionato non sono ancora stati assegnati gli straordinari");
-      render(year, month);
+      render(poList);
     }
 
-    render(poList, year, month);
+    List<Person> noOvertimePeople = render.noOvertimePeople;
+    render(poList, year, month, noOvertimePeople);
   }
 
 
@@ -102,69 +104,42 @@ public class Charts extends Controller {
    *
    * @param year l'anno di riferimento
    */
-  public static void overtimeOnPositiveResidualInYear(Integer year) {
+  public static void overtimeOnPositiveResidualInYear(Integer year, Long officeId) {
 
-    rules.checkIfPermitted(Security.getUser().get().person.office);
-    List<Year> annoList = chartsManager.populateYearList(Security.getUser().get().person.office);
-
-    if (params.get("yearChart") == null && year == null) {
-      Logger.debug("Params year: %s", params.get("yearChart", Integer.class));
-      Logger.debug("Chiamato metodo con anno e mese nulli");
-      render(annoList);
-    }
-    year = params.get("yearChart", Integer.class);
-    Logger.debug("Anno preso dai params: %d", year);
-
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    Set<Office> set = Sets.newHashSet();
+    set.add(office);
+    LocalDate begin = new LocalDate(year, 1, 1);
+    LocalDate end = begin.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue();
+    
+    CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
+    SimpleResults<Person> people = personDao.listForCompetence(code, Optional.<String>absent(), 
+        set, true, begin, end, Optional.<Person>absent());
+    List<Person> peopleActive = people.list();
     List<CompetenceCode> codeList = chartsManager.populateOvertimeCodeList();
-    Long val = null;
-    Optional<Integer> result =
-        competenceDao.valueOvertimeApprovedByMonthAndYear(
-            year, Optional.<Integer>absent(), Optional.<Person>absent(), codeList);
-    if (result.isPresent()) {
-      val = result.get().longValue();
+    RenderChart render =
+        chartsManager.populatePersonOvertimeListInYear(peopleActive, codeList, year);
+    List<PersonOvertime> poList = render.personOvertime;
+    List<Person> noOvertimeList = render.noOvertimePeople;
+    if (poList.isEmpty()) {
+      flash.error("Nel mese selezionato non sono ancora stati assegnati gli straordinari");
+      render(poList);
     }
-    List<Person> personeProva = personDao.list(
-        Optional.<String>absent(),
-        secureManager.officesReadAllowed(Security.getUser().get()),
-        true, new LocalDate(year, 1, 1), new LocalDate(year, 12, 31), true).list();
-    int totaleOreResidue = chartsManager.calculateTotalResidualHour(personeProva, year);
-
-    render(annoList, val, totaleOreResidue);
+    render(poList, year, noOvertimeList);
 
   }
 
-  public static void whichAbsenceInYear(Integer year) {
-
+  /**
+   * esporta le ore e gli straordinari.
+   */
+  public static void exportHourAndOvertime() {
     rules.checkIfPermitted(Security.getUser().get().person.office);
-    List<Year> annoList = chartsManager.populateYearList(Security.getUser().get().person.office);
+  //  List<Year> annoList = chartsManager.populateYearList(Security.getUser().get().person.office);
 
-
-    if (params.get("yearChart") == null && year == null) {
-      Logger.debug("Params year: %s", params.get("yearChart", Integer.class));
-      Logger.debug("Chiamato metodo con anno e mese nulli");
-      render(annoList);
-    }
-
-    year = params.get("yearChart", Integer.class);
-    Logger.debug("Anno preso dai params: %d", year);
-
-
-    List<String> absenceCode = Lists.newArrayList();
-    absenceCode.add("92");
-    absenceCode.add("91");
-    absenceCode.add("111");
-    //LocalDate beginYear = new LocalDate(year, 1,1);
-    //LocalDate endYear = beginYear.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue()
-    // FIXME da rifattorizzare tutta questa parte e renderla funzione dell'office
-    long missioniSize = 0; //absenceDao.howManyAbsenceInPeriod(beginYear, endYear, "92")
-    long riposiCompensativiSize = 0; //absenceDao.howManyAbsenceInPeriod(beginYear, endYear, "91")
-    long malattiaSize = 0; //absenceDao.howManyAbsenceInPeriod(beginYear, endYear, "111")
-    long altreSize = 0; //absenceDao.howManyAbsenceInPeriodNotInList(beginYear, endYear,absenceCode)
-
-    render(annoList, missioniSize, riposiCompensativiSize, malattiaSize, altreSize);
-
+    render();
   }
-
 
   public static void checkLastYearAbsences(File file, Long officeId) {
 
@@ -187,16 +162,6 @@ public class Charts extends Controller {
     render(listTrueFalse, process, office);
   }
 
-
-  /**
-   * esporta le ore e gli straordinari.
-   */
-  public static void exportHourAndOvertime() {
-    rules.checkIfPermitted(Security.getUser().get().person.office);
-    List<Year> annoList = chartsManager.populateYearList(Security.getUser().get().person.office);
-
-    render(annoList);
-  }
 
   /**
    * metodo che compone il file .csv contenente, per ogni persona, le ore in più, gli straordinari e
@@ -252,28 +217,8 @@ public class Charts extends Controller {
   
   public static void test(Integer year, Integer month, Long officeId) {
     
-    Office office = officeDao.getOfficeById(officeId);
-    notFoundIfNull(office);
-    rules.checkIfPermitted(office);
-    Set<Office> set = Sets.newHashSet();
-    set.add(office);
-    LocalDate beginMonth = new LocalDate(year, month, 1);
-    LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
-    CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
-    SimpleResults<Person> people = personDao.listForCompetence(code, Optional.<String>absent(), 
-        set, true, beginMonth, endMonth, Optional.<Person>absent());
-    List<Person> peopleActive = people.list();
+    
 
-    log.debug("Dimensione attivi per straordinario: {}", peopleActive.size());
-
-    List<CompetenceCode> codeList = chartsManager.populateOvertimeCodeList();
-    List<PersonOvertime> poList =
-        chartsManager.populatePersonOvertimeList(peopleActive, codeList, year, month);
-    if (poList.isEmpty()) {
-      flash.error("Nel mese selezionato non sono ancora stati assegnati gli straordinari");
-      render(year, month);
-    }
-
-    render(poList, year, month);
+    render();
   }
 }

@@ -21,6 +21,8 @@ import it.cnr.iit.epas.DateUtility;
 
 import jobs.chartJob;
 
+import lombok.Getter;
+
 import manager.CompetenceManager;
 import manager.recaps.charts.RenderResult;
 import manager.recaps.charts.ResultFromFile;
@@ -101,48 +103,6 @@ public class ChartsManager {
     this.wrapperFactory = wrapperFactory;
   }
 
-  /**
-   * @return la lista di oggetti Year a partire dall'inizio di utilizzo del programma a oggi.
-   */
-  public List<Year> populateYearList(Office office) {
-    List<Year> annoList = Lists.newArrayList();
-    Integer yearBegin = null;
-    int counter = 0;
-
-    counter++;
-    LocalDate date = office.getBeginDate();
-    yearBegin = date.getYear();
-    annoList.add(new Year(counter, yearBegin));
-
-    if (yearBegin != null) {
-      for (int i = yearBegin; i <= LocalDate.now().getYear(); i++) {
-        counter++;
-        annoList.add(new Year(counter, i));
-      }
-    }
-
-    return annoList;
-  }
-
-  /**
-   * @return la lista degli oggetti Month.
-   */
-  public List<Month> populateMonthList() {
-    List<Month> meseList = Lists.newArrayList();
-    meseList.add(new Month(1, "Gennaio"));
-    meseList.add(new Month(2, "Febbraio"));
-    meseList.add(new Month(3, "Marzo"));
-    meseList.add(new Month(4, "Aprile"));
-    meseList.add(new Month(5, "Maggio"));
-    meseList.add(new Month(6, "Giugno"));
-    meseList.add(new Month(7, "Luglio"));
-    meseList.add(new Month(8, "Agosto"));
-    meseList.add(new Month(9, "Settembre"));
-    meseList.add(new Month(10, "Ottobre"));
-    meseList.add(new Month(11, "Novembre"));
-    meseList.add(new Month(12, "Dicembre"));
-    return meseList;
-  }
 
   /**
    * @return la lista dei competenceCode che comprende tutti i codici di straordinario presenti in
@@ -162,9 +122,10 @@ public class ChartsManager {
   /**
    * @return la lista dei personOvertime.
    */
-  public List<PersonOvertime> populatePersonOvertimeList(
+  public RenderChart populatePersonOvertimeList(
       List<Person> personList, List<CompetenceCode> codeList, int year, int month) {
     List<PersonOvertime> poList = Lists.newArrayList();
+    List<Person> noOvertimePeople = Lists.newArrayList();
     for (Person p : personList) {
 
       PersonOvertime po = new PersonOvertime();
@@ -175,44 +136,73 @@ public class ChartsManager {
         Optional<ContractMonthRecap> recap =
             wrContract.getContractMonthRecap(new YearMonth(year, month));
         if (recap.isPresent() && recap.get().getStraordinarioMinuti() != 0) {
-          po.overtimeHour = new Long(recap.get().getStraordinarioMinuti()/60);
-          po.positiveHourForOvertime = recap.get().getPositiveResidualInMonth()/60;
+          po.overtimeHour = recap.get().getStraordinarioMinuti() 
+              / DateTimeConstants.MINUTES_PER_HOUR;
+          po.positiveHourForOvertime = 
+              recap.get().getPositiveResidualInMonth() 
+              / DateTimeConstants.MINUTES_PER_HOUR;
           po.month = month;
           po.year = year;
           po.name = p.name;
           po.surname = p.surname;      
           poList.add(po);
-        }        
+        } else {
+          log.debug("{} pur avendo ore in più non ha usufruito di straordinari questo mese", p.fullName());
+          noOvertimePeople.add(p);
+        }
       }
-      
+
       log.debug("Aggiunto {} {} alla lista con i suoi dati", p.name, p.surname);
 
     }
-    return poList;
+    return new RenderChart(poList, noOvertimePeople);
+  }
+  
+  
+  /**
+   * @return la lista dei personOvertime con i valori su base annuale.
+   */ 
+  public RenderChart populatePersonOvertimeListInYear(
+      List<Person> personList, List<CompetenceCode> codeList, int year) {
+    List<Person> noOvertimeList = Lists.newArrayList();
+    List<PersonOvertime> poList = Lists.newArrayList();
+    for (Person p : personList) {
+      PersonOvertime po = new PersonOvertime();
+      List<Contract> yearContracts = wrapperFactory
+          .create(p).getYearContracts(year);
+      for (Contract contract: yearContracts) {
+        IWrapperContract wrContract = wrapperFactory.create(contract);
+        for (int i = 1; i < 13; i++) {
+          int month = i;
+          Optional<ContractMonthRecap> recap =
+              wrContract.getContractMonthRecap(new YearMonth(year, month));
+          if (recap.isPresent() && recap.get().getStraordinarioMinuti() != 0) {
+            po.overtimeHour = po.overtimeHour 
+                + recap.get().getStraordinarioMinuti() / DateTimeConstants.MINUTES_PER_HOUR;
+            po.positiveHourForOvertime = po.positiveHourForOvertime 
+                + (recap.get().getPositiveResidualInMonth()) / DateTimeConstants.MINUTES_PER_HOUR;
+            po.year = year;
+            po.name = p.name;
+            po.surname = p.surname;      
+            
+          }    
+        }
+        if (po.overtimeHour != 0) {
+          poList.add(po);
+        } else {
+          log.debug("Il dipendente {} non ha effettuato ore di straordinario "
+              + "nell'anno pur avendo ore in più", p.fullName());
+          noOvertimeList.add(p);
+        }
+      }
+    }
+    return new RenderChart(poList, noOvertimeList);
   }
 
 
   // ******* Inizio parte di business logic *********/
 
-  /**
-   * @return il totale delle ore residue per anno totali sommando quelle che ha ciascuna persona
-   * della lista personeProva.
-   */
-  public int calculateTotalResidualHour(List<Person> personeProva, int year) {
-    int totaleOreResidue = 0;
-    for (Person p : personeProva) {
-      if (p.office.equals(Security.getUser().get().person.office)) {
-        for (int month = 1; month < 13; month++) {
-          totaleOreResidue =
-              totaleOreResidue + (competenceManager.positiveResidualInMonth(p, year, month) / 60);
-        }
-        log.debug("Ore in più per {} nell'anno {}: {}",
-            new Object[]{p.getFullname(), year, totaleOreResidue});
-      }
 
-    }
-    return totaleOreResidue;
-  }
 
   /**
    * Javadoc da scrivere
@@ -246,7 +236,7 @@ public class ChartsManager {
 
   /**
    * @return il file contenente la situazione di ore in più, ore di straordinario e riposi
-   * compensativi per ciascuna persona della lista passata come parametro relativa all'anno year.
+   *     compensativi per ciascuna persona della lista passata come parametro relativa all'anno year.
    */
 
   public FileInputStream export(Integer year, List<Person> personList) throws IOException {
@@ -269,8 +259,8 @@ public class ChartsManager {
     out.write("Cognome Nome,");
     for (int i = 1; i <= month; i++) {
       out.append("ore straordinari " + DateUtility.fromIntToStringMonth(i)
-      + ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i)
-      + ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
+          + ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i)
+          + ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
     }
 
     out.append("ore straordinari TOTALI,ore riposi compensativi TOTALI, ore in più TOTALI");
@@ -528,29 +518,16 @@ public class ChartsManager {
     return resultList;
   }
 
-  /**
-   * Classi innestate che servono per la restituzione delle liste di anni e mesi per i grafici.
-   **/
-  public static final class Month {
-    public int id;
-    public String mese;
-
-    private Month(int id, String mese) {
-      this.id = id;
-      this.mese = mese;
+  @Getter
+  public static final class RenderChart {
+    public List<PersonOvertime> personOvertime;
+    public List<Person> noOvertimePeople;
+    
+    public RenderChart(List<PersonOvertime> personOvertime, List<Person> noOvertimePeople) {
+      this.noOvertimePeople = noOvertimePeople;
+      this.personOvertime = personOvertime;
     }
   }
-
-  public static final class Year {
-    public int id;
-    public int anno;
-
-    private Year(int id, int anno) {
-      this.id = id;
-      this.anno = anno;
-    }
-  }
-
 }
 
 // *********** Fine parte di business logic ****************/
