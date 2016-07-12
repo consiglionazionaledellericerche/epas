@@ -13,6 +13,7 @@ import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.PersonDao;
+import dao.PersonDayDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
@@ -36,8 +37,10 @@ import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
+import models.PersonDay;
 import models.WorkingTimeType;
 import models.enumerate.CheckType;
+import models.enumerate.JustifiedTimeAtWork;
 import models.exports.PersonOvertime;
 
 import org.joda.time.DateTimeConstants;
@@ -73,7 +76,7 @@ public class ChartsManager {
   private final CompetenceManager competenceManager;
   private final PersonDao personDao;
   private final AbsenceDao absenceDao;
-
+  private final PersonDayDao personDayDao;
   private final IVacationsService vacationsService;
   private final IWrapperFactory wrapperFactory;
 
@@ -93,12 +96,13 @@ public class ChartsManager {
   public ChartsManager(CompetenceCodeDao competenceCodeDao,
       CompetenceDao competenceDao, CompetenceManager competenceManager,
       PersonDao personDao, IVacationsService vacationsService,
-      AbsenceDao absenceDao, IWrapperFactory wrapperFactory) {
+      AbsenceDao absenceDao, PersonDayDao personDayDao, IWrapperFactory wrapperFactory) {
     this.competenceCodeDao = competenceCodeDao;
     this.competenceDao = competenceDao;
     this.competenceManager = competenceManager;
     this.personDao = personDao;
     this.absenceDao = absenceDao;
+    this.personDayDao = personDayDao;
     this.vacationsService = vacationsService;
     this.wrapperFactory = wrapperFactory;
   }
@@ -127,7 +131,11 @@ public class ChartsManager {
     List<PersonOvertime> poList = Lists.newArrayList();
     List<Person> noOvertimePeople = Lists.newArrayList();
     for (Person p : personList) {
-
+      if (p.surname.equals("Baesso")) {
+        log.debug("eccoci");
+      }
+//      PersonDay pd = personDayDao.getOrBuildPersonDay(p, new LocalDate(year, month, 1));
+//      int workingTime = wrapperFactory.create(pd).getWorkingTimeTypeDay().get().workingTime;
       PersonOvertime po = new PersonOvertime();
       List<Contract> monthContracts = wrapperFactory
           .create(p).getMonthContracts(year, month);
@@ -139,7 +147,7 @@ public class ChartsManager {
           po.overtimeHour = recap.get().getStraordinarioMinuti() 
               / DateTimeConstants.MINUTES_PER_HOUR;
           po.positiveHourForOvertime = 
-              recap.get().getPositiveResidualInMonth() 
+              (recap.get().getPositiveResidualInMonth()/* - recap.get().recoveryDayUsed * workingTime*/)
               / DateTimeConstants.MINUTES_PER_HOUR;
           po.month = month;
           po.year = year;
@@ -167,6 +175,16 @@ public class ChartsManager {
     List<Person> noOvertimeList = Lists.newArrayList();
     List<PersonOvertime> poList = Lists.newArrayList();
     for (Person p : personList) {
+      List<Absence> abList = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(p), 
+          Optional.fromNullable("91"), 
+          LocalDate.now().withYear(year).dayOfMonth().withMinimumValue().monthOfYear().withMinimumValue(), 
+          LocalDate.now().withYear(year).dayOfMonth().withMaximumValue().monthOfYear().withMaximumValue(), 
+          Optional.<JustifiedTimeAtWork>absent(), false, false);
+      int workingTime = 0;
+      for (Absence abs : abList) {
+        workingTime = workingTime 
+            + wrapperFactory.create(abs.personDay).getWorkingTimeTypeDay().get().workingTime;
+      }
       PersonOvertime po = new PersonOvertime();
       List<Contract> yearContracts = wrapperFactory
           .create(p).getYearContracts(year);
@@ -188,6 +206,8 @@ public class ChartsManager {
           }    
         }
         if (po.overtimeHour != 0) {
+          po.positiveHourForOvertime = po.positiveHourForOvertime 
+              - workingTime / DateTimeConstants.MINUTES_PER_HOUR;
           poList.add(po);
         } else {
           log.debug("Il dipendente {} non ha effettuato ore di straordinario "
