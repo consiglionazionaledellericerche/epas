@@ -3,7 +3,7 @@
 --- 1) takable_absence_behaviours
 CREATE TABLE takable_absence_behaviours (
   id BIGSERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
+  name TEXT NOT NULL UNIQUE,
   amount_type TEXT NOT NULL,
   --- takable_count_behaviour TEXT NOT NULL, (per ora inutile 
   --- takaen_count_behaviour TEXT NOT NULL,   sempre period)
@@ -60,7 +60,7 @@ CREATE TABLE takable_codes_group_history (
 --- 4) complation_absence_behaviours
 CREATE TABLE complation_absence_behaviours (
   id BIGSERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
+  name TEXT NOT NULL UNIQUE,
   amount_type TEXT NOT NULL
 );
 
@@ -111,7 +111,8 @@ CREATE TABLE replacing_codes_group_history (
 
 CREATE TABLE group_absence_types (
   id BIGSERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
+  name TEXT NOT NULL UNIQUE,
+  description TEXT,
   pattern TEXT NOT NULL,
   period_type TEXT,
   takable_behaviour_id BIGINT,
@@ -127,6 +128,7 @@ CREATE TABLE group_absence_types_history (
   _revision INTEGER NOT NULL REFERENCES revinfo(rev),
   _revision_type SMALLINT,
   name TEXT,
+  description TEXT,
   pattern TEXT,
   period_type TEXT,
   takable_behaviour_id BIGINT,
@@ -134,23 +136,99 @@ CREATE TABLE group_absence_types_history (
   next_group_to_check_id BIGINT
 );
 
+--- Assenze / Tipi Assenze
+
+CREATE TABLE justified_types (
+  id BIGSERIAL PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE justified_types_history (
+  id BIGINT NOT NULL,
+  _revision INTEGER NOT NULL REFERENCES revinfo(rev),
+  _revision_type SMALLINT,
+  name TEXT
+);
+
+CREATE TABLE absence_types_justified_types (
+  id BIGSERIAL PRIMARY KEY,
+  absence_types_id BIGINT NOT NULL REFERENCES absence_types (id),
+  justified_types_id BIGINT NOT NULL REFERENCES justified_types (id)
+);
+
+CREATE TABLE absence_types_justified_types_history (
+  id BIGINT NOT NULL,
+  _revision INTEGER NOT NULL REFERENCES revinfo(rev),
+  _revision_type SMALLINT,
+  absence_types_id BIGINT,
+  justified_types_id BIGINT
+);
+
 ALTER TABLE absence_types ADD COLUMN time_for_mealticket BOOLEAN default false;
 ALTER TABLE absence_types ADD COLUMN justified_time INT;
-ALTER TABLE absence_types ADD COLUMN justified_type_permitted TEXT;
 
 ALTER TABLE absence_types_history ADD COLUMN time_for_mealticket BOOLEAN;
 ALTER TABLE absence_types_history ADD COLUMN justified_time INT;
-ALTER TABLE absence_types_history ADD COLUMN justified_type_permitted TEXT;
+
+ALTER TABLE absences ADD COLUMN justified_type_id BIGINT REFERENCES justified_types(id); 
+ALTER TABLE absences_history ADD COLUMN justified_type_id BIGINT REFERENCES justified_types(id); 
+
+CREATE TABLE initialization_groups (
+  id BIGSERIAL PRIMARY KEY,
+
+  person_id BIGINT NOT NULL REFERENCES persons(id),
+  group_absence_type_id BIGINT NOT NULL REFERENCES group_absence_types(id),
+  initialization_date DATE NOT NULL,
+
+  forced_begin DATE,
+  forced_end DATE,
+  takable_total INT,
+  takable_used INT,
+  complation_used INT,
+  vacation_year INT,
+  residual_minutes_last_year INT,
+  residual_minutes_current_year INT,
+  UNIQUE (person_id, group_absence_type_id, initialization_date)
+);
+
+CREATE TABLE initialization_groups_history (
+  id BIGINT NOT NULL,
+  _revision INTEGER NOT NULL REFERENCES revinfo(rev),
+  _revision_type SMALLINT,
+  
+  person_id BIGINT,
+  group_absence_type_id BIGINT,
+  initialization_date DATE,
+  
+  forced_begin DATE,
+  forced_end DATE,
+  takable_total INT,
+  takable_used INT,
+  complation_used INT,
+  vacation_year INT,
+  residual_minutes_last_year INT,
+  residual_minutes_current_year INT
+);
 
 # ---!Downs
 
+DROP TABLE initialization_groups;
+DROP TABLE initialization_groups_history;
+
+DROP TABLE absence_types_justified_types;
+DROP TABLE absence_types_justified_types_history;
+
+ALTER TABLE absences DROP COLUMN justified_type_id;
+ALTER TABLE absences_history DROP COLUMN justified_type_id;
+
 ALTER TABLE absence_types DROP COLUMN time_for_mealticket;
 ALTER TABLE absence_types DROP COLUMN justified_time;
-ALTER TABLE absence_types DROP COLUMN justifiedTypePermitted;
 
 ALTER TABLE absence_types_history DROP COLUMN time_for_mealticket;
 ALTER TABLE absence_types_history DROP COLUMN justified_time;
-ALTER TABLE absence_types_history DROP COLUMN justified_type_permitted;
+
+DROP TABLE justified_types;
+DROP TABLE justified_types_history;
 
 DROP TABLE taken_codes_group;
 DROP TABLE taken_codes_group_history;

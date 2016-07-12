@@ -17,7 +17,7 @@ public abstract class DaoBase {
   protected final JPQLQueryFactory queryFactory;
   protected final Provider<EntityManager> emp;
 
-  DaoBase(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
+  protected DaoBase(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
     this.emp = emp;
     this.queryFactory = new JPAQueryFactory(this.emp);
   }

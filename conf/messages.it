@@ -19,6 +19,19 @@ absenceTypeGroup.limitInMinute= Limite accumulo
 absenceTypeGroup.minutesExcess= Minuti in eccesso
 absenceTypeGroup.replacingAbsenceType= Codice per sotituzione
 
+absence_type_minutes=Tempo Specificato nel Tipo Assenza
+all_day=Tutto Il Giorno
+specified_minutes=Tempo Specificato nella singola Assenza
+nothing=Niente
+minutes=Minuti
+units=Giorni
+month=Mese
+year=Anno
+programmed=Programmato
+child0_12=Figlio 0-12 anni
+child0_6=Figlio 0-6 anni 
+workingTimeAndWorkingPeriodPercent=Percentuale Tempo Lavoro e Orario Lavoro
+
 administrations= Amministrazione
 administrator= Amministratore
 adminPassword= Password Amministratore
@@ -216,7 +229,6 @@ Month.6=Giugno
 Month.7=Luglio
 Month.8=Agosto
 Month.9=Settembre
-month= Mese (se presente)
 
 name=Nome
 noResultFound=Nessuna corrispondenza trovata.
@@ -374,7 +386,6 @@ wtt= Tipo Orario
 WorkingTimeTypePattern.HORIZONTAL = Orario Orizzontale
 WorkingTimeTypePattern.VERTICAL = Orario Verticale
 workingTimeTypePattern=Tipo Orario
-year= Anno (se presente)
 
 vwt.name= Nome orario
 

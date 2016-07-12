@@ -1,0 +1,56 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Assenze'  /}
+
+<div class="container">
+
+#{title title:'Gruppi di Assenze' /}
+
+  #{list items:groups, as:'group'}
+
+  <ul class="list-group">
+    <li class="list-group-item list-group-item-info""><strong>${group.description}</strong><br> </li>
+    <li class="list-group-item">
+      
+      *{ <span class="label label-default">Codice</span> &{group.name}<br> }* 
+
+      <span class="label label-default">Tipologia</span> &{group.pattern} <br>
+      <span class="label label-default">Periodo</span> &{group.periodType} <br>
+      #{if group.nextGropToCheck}
+      <span class="label label-default">Gruppo successivo</span> <strong>${group.nextGropToCheck.description}</strong>
+      #{/if}
+    </li>
+    #{if group.takableAbsenceBehaviour}  
+    <li class="list-group-item">
+      <span class="label label-primary">Limite</span>  <span class="label label-danger"> ${group.takableAbsenceBehaviour.fixedLimit} &{group.takableAbsenceBehaviour.amountType} </span><br>
+      #{if group.takableAbsenceBehaviour.takableAmountAdjustment }
+      <span class="label label-primary">Aggiustamento</span> <span class="label label-danger"> &{group.takableAbsenceBehaviour.takableAmountAdjustment}</span><br>  
+      #{/if}
+      
+      *{ <span class="label label-primary">Codice</span> ${group.takableAbsenceBehaviour.name}<br> }*
+      <span class="label label-primary">Codici considerati</span> 
+     
+      #{absences.absenceType codes:group.takableAbsenceBehaviour.takableCodes /}
+      
+    </li>
+    #{/if}
+    #{if group.complationAbsenceBehaviour}  
+    <li class="list-group-item">
+    
+      <span class="label label-primary">Completamento</span> &{group.complationAbsenceBehaviour.amountType}<br>
+      *{ <span class="label label-primary">Codice</span> ${group.complationAbsenceBehaviour.name}<br> }*
+      <span class="label label-primary">Codici considerati</span> 
+      #{absences.absenceType codes:group.complationAbsenceBehaviour.complationCodes /}<br>
+      
+      <span class="label label-primary">Codici completamento</span> 
+      #{absences.absenceType codes:group.complationAbsenceBehaviour.replacingCodes /}
+      
+    </li>
+    #{/if}
+    
+  </ul>
+  
+  #{/list}
+
+  
+</div>

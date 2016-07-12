@@ -16,6 +16,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
 @Audited
@@ -38,6 +39,7 @@ public class TakableAbsenceBehaviour extends BaseModel {
   @JoinTable(name = "taken_codes_group", 
   joinColumns = { @JoinColumn(name = "takable_behaviour_id") }, 
   inverseJoinColumns = { @JoinColumn(name = "absence_types_id") })
+  @OrderBy("code")
   public Set<AbsenceType> takenCodes;
   
 //  @Column(name = "takable_count_behaviour")
@@ -48,6 +50,7 @@ public class TakableAbsenceBehaviour extends BaseModel {
   @JoinTable(name = "takable_codes_group", 
   joinColumns = { @JoinColumn(name = "takable_behaviour_id") }, 
   inverseJoinColumns = { @JoinColumn(name = "absence_types_id") })
+  @OrderBy("code")
   public Set<AbsenceType> takableCodes;
   
   @Column(name = "fixed_limit")
