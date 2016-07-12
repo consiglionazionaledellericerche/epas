@@ -215,9 +215,7 @@ public class Charts extends Controller {
 
   }
   
-  public static void test(Integer year, Integer month, Long officeId) {
-    
-    
+  public static void test() {   
 
     render();
   }
