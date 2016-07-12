@@ -22,10 +22,13 @@ import dao.QualificationDao;
 import dao.UserDao;
 import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
 
 import it.cnr.iit.epas.DateUtility;
 
 import manager.AbsenceManager;
+import manager.ConsistencyManager;
 import manager.NotificationManager;
 import manager.PersonManager;
 import manager.SecureManager;
@@ -33,6 +36,8 @@ import manager.YearlyAbsencesManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.recaps.YearlyAbsencesRecap;
+import manager.recaps.personstamping.PersonStampingRecap;
+import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
 
@@ -108,6 +113,12 @@ public class Absences extends Controller {
   private static UserDao userDao;
   @Inject
   private static NotificationManager notificationManager;
+  @Inject
+  private static IWrapperFactory wrapperFactory;
+  @Inject
+  private static PersonStampingRecapFactory stampingsRecapFactory;
+  @Inject
+  private static ConsistencyManager consistencyManager;
 
   /**
    * Le assenze della persona nel mese.
@@ -252,7 +263,7 @@ public class Absences extends Controller {
    */
   // FIXME sono stati rimossi i validatori perchè impedivano alle drools di funzionare correttamente
   // da ripristinare appena si risolve il problema .
-  public static void blank(Long personId, LocalDate dateFrom) {
+  public static void blank(Long personId, LocalDate dateFrom, boolean forceInsert) {
 
     if (validation.hasErrors()) {
       flash.error(validation.errors().toString());
@@ -263,9 +274,9 @@ public class Absences extends Controller {
     Preconditions.checkNotNull(person);
 
     rules.checkIfPermitted(person);
-    LocalDate dateTo = dateFrom;
+    final LocalDate dateTo = dateFrom;
 
-    render(person, dateFrom, dateTo);
+    render(person, dateFrom, dateTo, forceInsert);
   }
 
   /**
@@ -278,10 +289,8 @@ public class Absences extends Controller {
    * @param absenceType il tipo di assenza da salvare
    * @param file        l'eventuale allegato
    */
-  public static void save(Long personId,
-      LocalDate dateFrom, LocalDate dateTo,
-      @Valid AbsenceType absenceType,
-      Blob file) {
+  public static void save(Long personId, LocalDate dateFrom, LocalDate dateTo,
+      @Valid AbsenceType absenceType, Blob file) {
 
     Person person = personDao.getPersonById(personId);
     if (person == null) {
@@ -829,6 +838,96 @@ public class Absences extends Controller {
     LocalDate date = new LocalDate(year, month, day);
     List<PersonDay> pdList = personDayDao.getPersonDayForPeopleInDay(list, date);
     render(pdList, person, date);
+  }
+
+  public static void forceAbsences(int year, int month, Long personId) {
+
+    if (personId == null) {
+      personId = Long.valueOf(session.get("personSelected"));
+    }
+    if (year == 0) {
+      year = Integer.parseInt(session.get("yearSelected"));
+    }
+    if (month == 0) {
+      month = Integer.parseInt(session.get("monthSelected"));
+    }
+    Person person = personDao.getPersonById(personId);
+    Preconditions.checkNotNull(person);
+
+    rules.checkIfPermitted(person);
+
+    IWrapperPerson wrPerson = wrapperFactory.create(person);
+
+    if (!wrPerson.isActiveInMonth(new YearMonth(year, month))) {
+
+      flash.error("Non esiste situazione mensile per il mese di %s",
+          person.fullName(), DateUtility.fromIntToStringMonth(month));
+
+      YearMonth last = wrapperFactory.create(person).getLastActiveMonth();
+      forceAbsences(last.getYear(), last.getMonthOfYear(), personId);
+    }
+
+    PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, true);
+    render(year, month, person, psDto);
+  }
+
+  public static void forceRemoval(Absence absence) {
+    notFoundIfNull(absence);
+    int year = absence.personDay.date.getYear();
+    int month = absence.personDay.date.getMonthOfYear();
+    if (absence.isPersistent()) {
+      absenceManager.removeAbsencesInPeriod(absence.personDay.person,
+          absence.personDay.date, absence.personDay.date, absence.absenceType);
+      flash.success("Assenza Eliminata");
+    }
+    forceAbsences(year, month, null);
+  }
+
+
+  public static void forceInsert(Long personId, LocalDate dateFrom, LocalDate dateTo,
+      @Valid AbsenceType absenceType) {
+
+    Person person = personDao.getPersonById(personId);
+    if (person == null) {
+      flash.error("La persona non esiste!");
+      Persons.list(null, null);
+    }
+
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      boolean forceInsert = true;
+      render("@blank", person, dateFrom, dateTo, forceInsert);
+    }
+
+    rules.checkIfPermitted(person);
+
+    Optional<AbsenceType> ferCode = absenceTypeDao
+        .getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode());
+
+    if (ferCode.isPresent() && ferCode.get() == absenceType) {
+      flash.error("Utilizzare i codici specifici d'assenza " +
+          "per l'inserimento delle ferie (31, 32, 94)");
+      int year = Integer.parseInt(session.get("yearSelected"));
+      int month = Integer.parseInt(session.get("monthSelected"));
+      forceAbsences(year, month, null);
+    }
+
+    LocalDate actualDate = dateFrom;
+    while (!actualDate.isAfter(dateTo)) {
+      final PersonDay personDay = personDayDao.getOrBuildPersonDay(person, actualDate);
+      Absence absence = new Absence();
+      absence.absenceType = absenceType;
+      absence.personDay = personDay;
+      personDay.absences.add(absence);
+      personDay.save();
+      actualDate = actualDate.plusDays(1);
+    }
+
+    consistencyManager.updatePersonSituation(person.id, dateFrom);
+
+    int year = Integer.parseInt(session.get("yearSelected"));
+    int month = Integer.parseInt(session.get("monthSelected"));
+    forceAbsences(year, month, null);
   }
 
   public static class AttachmentsPerCodeRecap {

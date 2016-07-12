@@ -6,12 +6,18 @@ title:'Nuovo codice assenza in data ' + dateFrom.format()
 
 <div id="absenceData">
 
-  #{form action:@Absences.save(), method:'POST', autocomplete:false,
+  #{if forceInsert}
+    #{set action:@Absences.forceInsert() /}
+  #{/if}
+  #{else}
+    #{set action:@Absences.save() /}
+  #{/else}
+
+  #{form action:action, method:'POST', autocomplete:false,
   class:'form form-horizontal', 'data-async':'#page_content',
   'data-async-error':'#absenceData'}
 
-  <input type="hidden" name="person.id" value="${person.id}"/>
-  <input type="hidden" name="dateFrom" value="${dateFrom.format()}"/>
+  #{f.hidden 'dateFrom', value:dateFrom.format() /}
   #{f.hidden 'personId', value:person.id /}
   #{f.selectModel 'absenceType', items: templateUtility.absenceTypes, required:true /}
   #{f.view 'dateFrom', value:dateFrom.format()/}

@@ -597,7 +597,12 @@ when
  $uro: UsersRolesOffices()
  Role(name == Role.PERSONNEL_ADMIN) from $uro.role
  $c: PermissionCheck(action in (
- 		
+
+ 		/*Metodi per la gestione delle assenze bypassando i controlli*/
+ 		"Absences.forceAbsences",
+ 		"Absences.forceRemoval",
+ 		"Absences.forceInsert",
+
  		/* Vecchio permesso editPerson */
         "Persons.insertPerson",
 		
