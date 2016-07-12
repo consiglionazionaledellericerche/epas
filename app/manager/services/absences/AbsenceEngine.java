@@ -16,9 +16,8 @@ import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
-import models.absences.TakableAbsenceBehaviour;
-import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.GroupAbsenceType.PeriodType;
+import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 import models.enumerate.JustifiedTimeAtWork;
 
@@ -41,22 +40,6 @@ public class AbsenceEngine {
     this.absenceTypeDao = absenceTypeDao;
     this.absenceDao = absenceDao;
     this.workingTimeTypeDao = workingTimeTypeDao;
-  }
-  
-  public void buildDefaultGroups() { 
-    
-    if (GroupAbsenceType.findAll().isEmpty()) {
-      
-      GroupAbsenceType group18 = new GroupAbsenceType();
-      group18.name = "18";
-      group18.pattern = GroupAbsenceTypePattern.programmed;
-      group18.periodType = PeriodType.month;
-      
-      TakableAbsenceBehaviour takable18 = new TakableAbsenceBehaviour();
-      takable18.amountType = AmountType.units;
-      
-    }
-    
   }
   
   /**
@@ -93,11 +76,11 @@ public class AbsenceEngine {
     //////////////////////////////////////////////////////////////////////////////////////
     /* Build Takable Component */
     
-    if (groupAbsenceType.takableAbsenceBehavior != null) {
+    if (groupAbsenceType.takableAbsenceBehaviour != null) {
       
       TakableComponent takableComponent = new TakableComponent();
       
-      TakableAbsenceBehaviour takableAbsenceGroup = groupAbsenceType.takableAbsenceBehavior;
+      TakableAbsenceBehaviour takableAbsenceGroup = groupAbsenceType.takableAbsenceBehaviour;
 
       takableComponent.takeAmountType = takableAbsenceGroup.amountType;
       
@@ -129,11 +112,11 @@ public class AbsenceEngine {
     //////////////////////////////////////////////////////////////////////////////////////
     /* Build Complation component */
     
-    if (groupAbsenceType.complationAbsenceGroup != null) {
+    if (groupAbsenceType.complationAbsenceBehaviour != null) {
       
       ComplationComponent complationComponent = new ComplationComponent();
       
-      ComplationAbsenceBehaviour complationAbsenceGroup = groupAbsenceType.complationAbsenceGroup;
+      ComplationAbsenceBehaviour complationAbsenceGroup = groupAbsenceType.complationAbsenceBehaviour;
       complationComponent.complationAmountType = complationAbsenceGroup.amountType;
       
       complationComponent.replacingCodes = complationAbsenceGroup.replacingCodes;
@@ -329,6 +312,48 @@ public class AbsenceEngine {
   
   public enum AbsenceRequestType {
     insertTakable, insertComplation, deleteTakable, deleteComplation;
+  }
+  
+  /**
+   * Record di esito inserimento assenza.
+   * 
+   * @author alessandro
+   *
+   */
+  public static class ResponseItem {
+
+    public enum AbsenceOperation {
+      insert, insert_complation, remaing, calcel;
+    }
+    
+    public enum AbsenceProblem {
+      limitExceeded, wrongComplationPosition;
+    }
+    
+    public static class ConsumedResidualAmount {
+      public AmountType amountType;     // | units | minutes | units |
+      public int amount;                // | 02:00 | 01:00   |   1   |
+      public int workingTime;           // | 07:12 |
+      public int getPercent() {         // | 25%   |
+        // TODO: implementare la percentuale
+        return 0;
+      }
+      
+      public String residualName;       // | res. anno passato | residuo anno corrente | lim. anno |
+      public LocalDate expireResidual;  // |     31/03/2016    |      31/03/2017       | 31/12/2016| 
+      public int beforeResidual;        // |     20:00         |      07:00            |    22     |
+      public int getAfterResidual() {   // |     13:00         |      07:00            |    21     |         
+        return beforeResidual - amount;    
+      }
+    }
+    
+    public LocalDate date;
+    public AbsenceType absenceType;
+    public AbsenceOperation operation;
+    public List<ConsumedResidualAmount> consumedResidualAmount;
+    public AbsenceProblem absenceProblem;
+    
+    
   }
   
       

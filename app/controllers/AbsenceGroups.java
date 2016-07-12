@@ -6,11 +6,13 @@ import dao.PersonDayDao;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ConsistencyManager;
+import manager.services.absences.AbsenceConstructor;
 import manager.services.absences.AbsenceEngine;
 
 import models.AbsenceTypeGroup;
 import models.Office;
 import models.Person;
+import models.absences.GroupAbsenceType;
 import models.enumerate.AccumulationBehaviour;
 
 import org.joda.time.LocalDate;
@@ -35,6 +37,22 @@ public class AbsenceGroups extends Controller {
   private static AbsenceEngine absenceEngine;
   @Inject
   private static ConsistencyManager consistencyManager;
+  @Inject
+  private static AbsenceConstructor absenceConstructor;
+  
+  public static void migrate() {
+    
+    absenceConstructor.buildDefaultGroups();
+    renderText("ok");
+    
+  }
+  
+  public static void show() {
+    
+    List<GroupAbsenceType> groups = GroupAbsenceType.findAll();
+    render(groups);
+    
+  }
   
   public static void index(Office office) {
     

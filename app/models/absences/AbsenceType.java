@@ -26,6 +26,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -84,11 +85,12 @@ public class AbsenceType extends BaseModel {
   
   @Column(name = "justified_time")
   public Integer justifiedTime;
-  
-  @Column(name = "justified_type_permitted")
-  @Enumerated(EnumType.STRING)
-  public JustifiedTypePermitted justifiedTypePermitted;
-  
+
+  @ManyToMany
+  @JoinTable(name = "absence_types_justified_types", 
+  joinColumns = { @JoinColumn(name = "absence_types_id") }, 
+  inverseJoinColumns = { @JoinColumn(name = "justified_types_id") })
+  public Set<JustifiedType> justifiedTypesPermitted;
   
   @OneToMany(mappedBy = "absenceType")
   @LazyCollection(LazyCollectionOption.EXTRA)
@@ -105,8 +107,6 @@ public class AbsenceType extends BaseModel {
   
   @ManyToMany(mappedBy = "replacingCodes")
   public Set<ComplationAbsenceBehaviour> replacingGroup;
-  
-  
   
   // Metodi
   
@@ -130,9 +130,45 @@ public class AbsenceType extends BaseModel {
   public String toString() {
     return Joiner.on(" - ").skipNulls().join(code, description);
   }
-
   
-  public enum JustifiedTypePermitted {
-    absence_type, minutes, quelloCheManca;
+  @Transient
+  public boolean isAllDayPermitted() {
+    for (JustifiedType justifiedType: this.justifiedTypesPermitted) {
+      if (justifiedType.name.equals(JustifiedType.JustifiedTypeName.all_day)) {
+        return true;
+      }
+    }
+    return false;
   }
+  
+  @Transient
+  public boolean isAbsenceTypeMinutesPermitted() {
+    for (JustifiedType justifiedType: this.justifiedTypesPermitted) {
+      if (justifiedType.name.equals(JustifiedType.JustifiedTypeName.absence_type_minutes)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  @Transient
+  public boolean isSpecifiedMinutesPermitted() {
+    for (JustifiedType justifiedType: this.justifiedTypesPermitted) {
+      if (justifiedType.name.equals(JustifiedType.JustifiedTypeName.specified_minutes)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  @Transient
+  public boolean isNothingPermitted() {
+    for (JustifiedType justifiedType: this.justifiedTypesPermitted) {
+      if (justifiedType.name.equals(JustifiedType.JustifiedTypeName.nothing)) {
+        return true;
+      }
+    }
+    return false;
+  }
+   
 }

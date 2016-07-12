@@ -1,0 +1,44 @@
+
+
+#{list items:_codes, as:'code'}
+  
+  <span class="label  
+  #{if code.isAllDayPermitted() }
+    label-info 
+  #{/if}
+  #{elseif code.isAbsenceTypeMinutesPermitted()}
+    label-warning 
+  #{/elseif}
+  #{elseif code.isSpecifiedMinutesPermitted()}
+    label-success 
+  #{/elseif}
+  #{elseif code.isNothingPermitted()}
+    label-default 
+  #{/elseif}
+  " webui-popover-hover data-url="#${code.id}">${code.code}</span>
+  
+  
+  
+  *{ <strong webui-popover-hover data-url="#${code.id}">${code.code}</strong> }*
+
+  <div class="webui-popover-content" id="${code.id}">
+    <strong>Tipo Assenza ${code.code}</strong><br><br>
+    <strong>Descrizione:</strong> &{code.description}<br>  
+    <strong>Come giustifica:</strong> 
+    #{list items:code.justifiedTypesPermitted, as:'justifiedType'}
+      &{justifiedType.name}
+    #{/list}<br> 
+    #{if code.justifiedTime > 0}
+      #{if  code.isNothingPermitted()}
+      #{/if}
+        <strong>Tempo Completamento:</strong> 
+      #{else}
+        <strong>Tempo Specificato:</strong> 
+      #{/else}
+    ${code.justifiedTime.printHourMinute()}
+    #{/if} 
+  </div>
+
+#{/list}
+
+   

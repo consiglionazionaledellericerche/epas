@@ -18,8 +18,11 @@ import javax.persistence.Table;
 @Table(name = "group_absence_types")
 public class GroupAbsenceType extends BaseModel {
 
-  @Column(name = "name")
+  @Column
   public String name;
+  
+  @Column
+  public String description;
   
   @Column(name = "pattern")
   @Enumerated(EnumType.STRING)
@@ -29,15 +32,13 @@ public class GroupAbsenceType extends BaseModel {
   @Enumerated(EnumType.STRING)
   public PeriodType periodType;
   
-
-  
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "takable_behaviour_id")
-  public TakableAbsenceBehaviour takableAbsenceBehavior;
+  public TakableAbsenceBehaviour takableAbsenceBehaviour;
   
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "complation_behaviour_id")
-  public ComplationAbsenceBehaviour complationAbsenceGroup;
+  public ComplationAbsenceBehaviour complationAbsenceBehaviour;
   
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "next_group_to_check_id")

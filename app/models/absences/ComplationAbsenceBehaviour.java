@@ -1,5 +1,7 @@
 package models.absences;
 
+import com.google.common.collect.Sets;
+
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -13,6 +15,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
 @Audited
@@ -31,14 +34,15 @@ public class ComplationAbsenceBehaviour extends BaseModel {
   @JoinTable(name = "complation_codes_group", 
   joinColumns = { @JoinColumn(name = "complation_behaviour_id") }, 
   inverseJoinColumns = { @JoinColumn(name = "absence_types_id") })
-  public Set<AbsenceType> complationCodes;
+  @OrderBy("code")
+  public Set<AbsenceType> complationCodes = Sets.newHashSet();
 
   @ManyToMany
   @JoinTable(name = "replacing_codes_group", 
   joinColumns = { @JoinColumn(name = "complation_behaviour_id") }, 
   inverseJoinColumns = { @JoinColumn(name = "absence_types_id") })
-
-  public Set<AbsenceType> replacingCodes;
+  @OrderBy("code")
+  public Set<AbsenceType> replacingCodes = Sets.newHashSet();;
   
 
 

@@ -38,6 +38,8 @@ public class QAbsence extends EntityPathBase<Absence> {
 
     public final NumberPath<Integer> justifiedMinutes = createNumber("justifiedMinutes", Integer.class);
 
+    public final QJustifiedType justifiedType;
+
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
@@ -62,6 +64,7 @@ public class QAbsence extends EntityPathBase<Absence> {
     public QAbsence(Class<? extends Absence> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
         this.absenceType = inits.isInitialized("absenceType") ? new QAbsenceType(forProperty("absenceType"), inits.get("absenceType")) : null;
+        this.justifiedType = inits.isInitialized("justifiedType") ? new QJustifiedType(forProperty("justifiedType")) : null;
         this.personDay = inits.isInitialized("personDay") ? new models.query.QPersonDay(forProperty("personDay"), inits.get("personDay")) : null;
     }
 

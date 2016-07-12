@@ -12,9 +12,12 @@ import play.db.jpa.Blob;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -29,30 +32,33 @@ public class Absence extends BaseModel {
 
   private static final long serialVersionUID = -1963061850354314327L;
 
-  @Getter
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "absence_type_id")
-  public AbsenceType absenceType;
+  // Vecchia Modellazione (da rimuovere)
   
   @Getter
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "personDay_id", nullable = false)
   public PersonDay personDay;
 
+  // Nuova Modellazione
+  
+  @Getter
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "absence_type_id")
+  public AbsenceType absenceType;
+  
+  @Column(name = "absence_file", nullable = true)
+  public Blob absenceFile;
+
   @Column(name = "justified_minutes", nullable = true)
   public Integer justifiedMinutes;
 
-  @Column(name = "absence_file", nullable = true)
-  public Blob absenceFile;
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @JoinColumn(name = "justified_type_id")
+  private JustifiedType justifiedType;
   
-  /**
-   * Questo campo serve nel caso in cui debba essere valorizzata la data di inserimento di
-   * un'assenza senza che questa debba essere associata a un personDay. In particolare nel caso in
-   * cui venga richiesto via rest il controllo sulla possibilità di inserire un certo codice di
-   * assenza, senza che questo debba essere persistito, questo campo viene valorizzato per tenere
-   * traccia di quale giorno debba contenere l'assenza in modo che, successivamente, possano essere
-   * eseguiti tutti i calcoli senza però impattare sul database
-   */
+  // TODO: spostare la relazione dal person day alla person e persistere il campo date.
+
+  /** Data da valorizzare in caso di assenza non persistita per simulazione */
   @Getter
   @Transient
   public LocalDate date;
