@@ -140,7 +140,7 @@ public class Contracts extends Controller {
       if (endContract != null && endContract.isBefore(beginDate)) {
         validation.addError("endContract", "non può precedere l'inizio del contratto.");
       }
-      if (endDate != null && endContract != null && !endContract.isBefore(beginDate)) {
+      if (endDate != null && endContract != null && endContract.isAfter(endDate)) {
         validation.addError("endContract", "non può essere successivo alla scadenza del contratto");
       }
     }
