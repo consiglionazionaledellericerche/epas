@@ -432,8 +432,7 @@ public class Stampings extends Controller {
     daysRecap = stampingManager.populatePersonStampingDayRecapList(
         activePersonsInDay, date, numberOfInOut);
 
-    boolean showLink = false;
-    render(daysRecap, office, date, numberOfInOut, showLink);
+    render(daysRecap, office, date, numberOfInOut);
   }
 
   /**
