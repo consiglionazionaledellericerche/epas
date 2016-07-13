@@ -8,15 +8,23 @@ import com.beust.jcommander.internal.Lists;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
+import dao.PersonChildrenDao;
 import dao.WorkingTimeTypeDao;
 
+import it.cnr.iit.epas.DateInterval;
+
+import manager.services.absences.AbsenceEngine.ResponseItem.AbsenceProblem;
+
+import models.Contract;
 import models.Person;
+import models.PersonChildren;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.PeriodType;
+import models.absences.InitializationGroup;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 import models.enumerate.JustifiedTimeAtWork;
@@ -33,60 +41,203 @@ public class AbsenceEngine {
   private final AbsenceTypeDao absenceTypeDao;
   private final AbsenceDao absenceDao;
   private final WorkingTimeTypeDao workingTimeTypeDao;
+  private final PersonChildrenDao personChildrenDao;
 
   @Inject
   public AbsenceEngine(AbsenceTypeDao absenceTypeDao, AbsenceDao absenceDao, 
-      WorkingTimeTypeDao workingTimeTypeDao) {
+      WorkingTimeTypeDao workingTimeTypeDao, PersonChildrenDao personChildrenDao) {
     this.absenceTypeDao = absenceTypeDao;
     this.absenceDao = absenceDao;
     this.workingTimeTypeDao = workingTimeTypeDao;
+    this.personChildrenDao = personChildrenDao;
+  }
+  
+  public static class AbsenceEngineInstance {
+
+    // Dati della richiesta
+    public LocalDate date;
+    public GroupAbsenceType groupAbsenceType;
+    public Person person;
+    
+    // Errori
+    public Optional<AbsenceEngineProblem> absenceEngineProblem = Optional.absent();
+
+    // Strutture ausiliare lazy
+    protected Contract contract = null;
+    protected List<PersonChildren> orderedChildren = null;
+    protected List<Absence> absences = null;
+    protected InitializationGroup initializationGroup = null;
+    
+    // Ultima richiesta
+    protected AbsencePeriod absencePeriod;
+    protected List<ResponseItem> responseItems;
+    
+    protected AbsenceEngineInstance(Person person, GroupAbsenceType groupAbsenceType, 
+        LocalDate date) {
+      this.person = person;
+      this.groupAbsenceType = groupAbsenceType;
+      this.date = date;
+    }
+  }
+  
+  public void buildAbsenceEngineInstance(Person person, GroupAbsenceType groupAbsenceType,
+      LocalDate date) {
+    
+    AbsenceEngineInstance engineInstance = new AbsenceEngineInstance(person, groupAbsenceType, date);
+    
+    if (groupAbsenceType.pattern.equals(GroupAbsenceType.GroupAbsenceTypePattern.vacationsCnr) || 
+        groupAbsenceType.pattern.equals(GroupAbsenceType.GroupAbsenceTypePattern.compensatoryRestCnr)) {
+      
+      // TODO: Implementare costruzione ferie e riposi compensativi
+      engineInstance.absenceEngineProblem = Optional.of(AbsenceEngineProblem.unsupportedOperation);
+      return;
+    }
+    
+    buildDefaultAbsencePeriod(engineInstance);
+    
+    
+    
+    //buildPeriod
+    
+    //buildTakable
+    
+    //buildComplation
+   
   }
   
   /**
-   * Costruisce la situazione periodica per il gruppo / persona e alla data richiesta!
-   * @param person
-   * @param groupAbsenceType
-   * @param date
+   * Costruisce l'AbsencePeriod relativo all'istanza. Se il gruppo è ricorsivo costruisce anche
+   * i periodi seguenti.
+   * @param engineInstance
    * @return
    */
-  public AbsencePeriod buildAbsencePeriod(Person person, GroupAbsenceType groupAbsenceType,
-      LocalDate date) { 
+  public void buildDefaultAbsencePeriod(AbsenceEngineInstance engineInstance) { 
    
-    // TODO: gli absenceGroupParticolari devono essere costruiti in modo puntuale...
-       // Congedi
-       // Ferie
+    if (engineInstance.absencePeriod != null) {
+      // TODO: Implementare logica di verifica data 
+      // richiesta compatibile col precedente absencePeriod
+      engineInstance.absenceEngineProblem = Optional.of(AbsenceEngineProblem.unsupportedOperation);
+      return;
+    }
+    
+    GroupAbsenceType currentGroupAbsenceType = engineInstance.groupAbsenceType;
+    engineInstance.absencePeriod = new AbsencePeriod();
+    AbsencePeriod currentAbsencePeriod = engineInstance.absencePeriod;  
+    while (true) {
 
-    AbsencePeriod absencePeriod = new AbsencePeriod();
-    
-    //////////////////////////////////////////////////////////////////////////////////////
-    /* Period */
-    
-    if (groupAbsenceType.periodType.equals(PeriodType.year)) {
-      absencePeriod.from = new LocalDate(date.getYear(), 1, 1);
-      absencePeriod.to = new LocalDate(date.getYear(), 12, 31);
-    }
-    if (groupAbsenceType.periodType.equals(PeriodType.month)) {
-      absencePeriod.from = date.dayOfMonth().withMinimumValue();
-      absencePeriod.to = date.dayOfMonth().withMaximumValue();
-    }
-    if (groupAbsenceType.periodType.equals(PeriodType.always)) {
+      // recuperare l'inizializzazione (questo lo posso fare anche fuori) per i fix sulle date.
 
+      if (currentGroupAbsenceType.periodType.equals(PeriodType.year)) {
+        currentAbsencePeriod.from = new LocalDate(engineInstance.date.getYear(), 1, 1);
+        currentAbsencePeriod.to = new LocalDate(engineInstance.date.getYear(), 12, 31);
+        return;
+      }
+      if (currentGroupAbsenceType.periodType.equals(PeriodType.month)) {
+        currentAbsencePeriod.from = engineInstance.date.dayOfMonth().withMinimumValue();
+        currentAbsencePeriod.to = engineInstance.date.dayOfMonth().withMaximumValue();
+        return;
+      }
+      if (currentGroupAbsenceType.periodType.equals(PeriodType.always)) {
+        currentAbsencePeriod.from = null;
+        currentAbsencePeriod.to = null;
+        return;
+      }
+
+      // Caso inerente i figli.
+      if (currentGroupAbsenceType.periodType.isChildPeriod()) {
+        if (engineInstance.orderedChildren == null) {
+          engineInstance.orderedChildren = 
+              personChildrenDao.getAllPersonChildren(engineInstance.person);
+        }
+        try {
+          DateInterval childInterval = currentGroupAbsenceType.periodType
+              .getChildInterval(engineInstance.orderedChildren
+                  .get(currentGroupAbsenceType.periodType.childNumber).bornDate);
+          currentAbsencePeriod.from = childInterval.getBegin();
+          currentAbsencePeriod.to = childInterval.getEnd();
+          return;
+        } catch (Exception e) {
+          engineInstance.absenceEngineProblem = Optional.of(AbsenceEngineProblem.noChildExist);
+          return;
+        }
+      }
+      
+      if (currentGroupAbsenceType.nextGropToCheck == null) {
+        break;
+      }
+      
+      currentGroupAbsenceType = currentGroupAbsenceType.nextGropToCheck;
+      currentAbsencePeriod.nextAbsencePeriod = new AbsencePeriod();
+      currentAbsencePeriod.nextAbsencePeriod.previousAbsencePeriod = currentAbsencePeriod; //capire se serve.. 
+      currentAbsencePeriod = currentAbsencePeriod.nextAbsencePeriod;
     }
+  }
+
+
+
+
+  public void setComplationComponent(AbsenceEngineInstance engineInstance) {
     
-    //////////////////////////////////////////////////////////////////////////////////////
-    /* Build Takable Component */
+//    //Scorciatoie ..
+//    TakableAbsenceBehaviour takableAbsenceGroup = 
+//        engineInstance.groupAbsenceType.takableAbsenceBehaviour;
+//    AbsencePeriod absencePeriod = engineInstance.absencePeriod;
+//    
+//    if (groupAbsenceType.complationAbsenceBehaviour != null) {
+//      
+//      ComplationComponent complationComponent = new ComplationComponent();
+//      
+//      ComplationAbsenceBehaviour complationAbsenceGroup = groupAbsenceType.complationAbsenceBehaviour;
+//      complationComponent.complationAmountType = complationAbsenceGroup.amountType;
+//      
+//      complationComponent.replacingCodes = complationAbsenceGroup.replacingCodes;
+//      
+//      complationComponent.complationCodes = complationAbsenceGroup.complationCodes;
+//      
+//      //TODO: le other absences vanno aggiunte!
+//      complationComponent.replacingAbsences = 
+//          absenceDao.getAbsencesInCodeList(person, absencePeriod.from, 
+//          absencePeriod.to, Lists.newArrayList(complationComponent.replacingCodes), true);
+//  
+//      complationComponent.complationAbsences = 
+//          absenceDao.getAbsencesInCodeList(person, absencePeriod.from, 
+//          absencePeriod.to, Lists.newArrayList(complationComponent.complationCodes), true);
+//      
+//      complationComponent.complationConsumedAmount = 0;
+//      for (Absence absence : Stream.concat(complationComponent.complationAbsences.stream(), 
+//          complationComponent.replacingAbsences.stream()).collect(Collectors.toList())) {
+//        
+//          complationComponent.complationConsumedAmount += computeAbsenceAmount(person, date, 
+//              absence.absenceType, complationComponent.complationAmountType);
+//      }
+//      
+//      absencePeriod.complationComponent = Optional.of(complationComponent);
+//            
+//      //Un illegal state è  absencePeriod.complationConsumedAmount < 0 ...
+//    }
+//    
+//    engineInstance.absencePeriod = absencePeriod;
+//    
+//    return absencePeriod;
+
+  }
+
+  public void setTakableComponent(AbsenceEngineInstance engineInstance) {
     
-    if (groupAbsenceType.takableAbsenceBehaviour != null) {
+    if (engineInstance.groupAbsenceType.takableAbsenceBehaviour != null) {
+
+      //Scorciatoie ..
+      TakableAbsenceBehaviour takableAbsenceGroup = 
+          engineInstance.groupAbsenceType.takableAbsenceBehaviour;
+      AbsencePeriod absencePeriod = engineInstance.absencePeriod;
       
       TakableComponent takableComponent = new TakableComponent();
-      
-      TakableAbsenceBehaviour takableAbsenceGroup = groupAbsenceType.takableAbsenceBehaviour;
-
       takableComponent.takeAmountType = takableAbsenceGroup.amountType;
-      
+
       takableComponent.periodTakableAmount = takableAbsenceGroup.fixedLimit;
       if (takableAbsenceGroup.takableAmountAdjustment != null) {
         // TODO: ex. workingTimePercent
+        engineInstance.absenceEngineProblem = Optional.of(AbsenceEngineProblem.unsupportedOperation);
       }
 
       takableComponent.takableCountBehaviour = TakeCountBehaviour.period;
@@ -95,58 +246,28 @@ public class AbsenceEngine {
       takableComponent.takenCodes = takableAbsenceGroup.takenCodes;
       takableComponent.takableCodes = takableAbsenceGroup.takableCodes;
 
-      //TODO: le other absences vanno aggiunte!
-      takableComponent.takenAbsences = absenceDao.getAbsencesInCodeList(person, 
+      if (engineInstance.absences == null) {
+        //Carico da db le assenze che mi servono
+        // 1) Costruire l'intorno dei periodi (anche quelli ricorsivi)
+        
+        // 2) Prendere tutti i codici (anche quelli ricorsivi)
+      }
+      takableComponent.takenAbsences = absenceDao.getAbsencesInCodeList(engineInstance.person, 
           absencePeriod.from, absencePeriod.to, Lists.newArrayList(takableComponent.takenCodes), true);
 
       takableComponent.periodTakenAmount = 0;
       for (Absence absence : takableComponent.takenAbsences) {
         takableComponent.periodTakenAmount += 
-            computeAbsenceAmount(person, date, absence.absenceType, takableComponent.takeAmountType);
+            computeAbsenceAmount(engineInstance.person, engineInstance.date, absence.absenceType, takableComponent.takeAmountType);
       }
-      
+
       absencePeriod.takableComponent = Optional.of(takableComponent);
 
     }
-    
-    //////////////////////////////////////////////////////////////////////////////////////
-    /* Build Complation component */
-    
-    if (groupAbsenceType.complationAbsenceBehaviour != null) {
-      
-      ComplationComponent complationComponent = new ComplationComponent();
-      
-      ComplationAbsenceBehaviour complationAbsenceGroup = groupAbsenceType.complationAbsenceBehaviour;
-      complationComponent.complationAmountType = complationAbsenceGroup.amountType;
-      
-      complationComponent.replacingCodes = complationAbsenceGroup.replacingCodes;
-      
-      complationComponent.complationCodes = complationAbsenceGroup.complationCodes;
-      
-      //TODO: le other absences vanno aggiunte!
-      complationComponent.replacingAbsences = 
-          absenceDao.getAbsencesInCodeList(person, absencePeriod.from, 
-          absencePeriod.to, Lists.newArrayList(complationComponent.replacingCodes), true);
+  }
   
-      complationComponent.complationAbsences = 
-          absenceDao.getAbsencesInCodeList(person, absencePeriod.from, 
-          absencePeriod.to, Lists.newArrayList(complationComponent.complationCodes), true);
-      
-      complationComponent.complationConsumedAmount = 0;
-      for (Absence absence : Stream.concat(complationComponent.complationAbsences.stream(), 
-          complationComponent.replacingAbsences.stream()).collect(Collectors.toList())) {
-        
-          complationComponent.complationConsumedAmount += computeAbsenceAmount(person, date, 
-              absence.absenceType, complationComponent.complationAmountType);
-      }
-      
-      absencePeriod.complationComponent = Optional.of(complationComponent);
-            
-      //Un illegal state è  absencePeriod.complationConsumedAmount < 0 ...
-    }
-    
-    return absencePeriod;
-
+  public int childNumber(PeriodType type) {
+   return 0;
   }
   
   public int computeTakableAmount(TakableComponent takableComponent) {
@@ -312,6 +433,12 @@ public class AbsenceEngine {
   
   public enum AbsenceRequestType {
     insertTakable, insertComplation, deleteTakable, deleteComplation;
+  }
+  
+  public enum AbsenceEngineProblem {
+    noChildExist,         // quando provo a assegnare una tutela per figlio non inserito
+    dateOutOfContract,    // quando provo assengare esempio ferie fuori contratto
+    unsupportedOperation, // ancora non implementato
   }
   
   /**

@@ -9,7 +9,7 @@
   #{list items:groups, as:'group'}
 
   <ul class="list-group">
-    <li class="list-group-item list-group-item-info""><strong>${group.description}</strong><br> </li>
+    <li class="list-group-item list-group-item-info""><strong>${group.description.label()}</strong><br> </li>
     <li class="list-group-item">
       
       *{ <span class="label label-default">Codice</span> &{group.name}<br> }* 
@@ -17,7 +17,7 @@
       <span class="label label-default">Tipologia</span> &{group.pattern} <br>
       <span class="label label-default">Periodo</span> &{group.periodType} <br>
       #{if group.nextGropToCheck}
-      <span class="label label-default">Gruppo successivo</span> <strong>${group.nextGropToCheck.description}</strong>
+      <span class="label label-default">Gruppo successivo</span> <strong>${group.nextGropToCheck.description.label()}</strong>
       #{/if}
     </li>
     #{if group.takableAbsenceBehaviour}  

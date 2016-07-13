@@ -458,20 +458,20 @@ public class AbsenceConstructor {
 
       //Update AbsenceType
       AbsenceType cnr25 = absenceComponentDao.buildOrEditAbsenceType("25", 
-          "Astensione facoltativa post partum 30 primo figlio intera giornata", 
+          "Astensione facoltativa post partum 30% primo figlio intera giornata", 
           0, Sets.newHashSet(allDay), false, false, false, "25");
       
       //Update AbsenceType
       AbsenceType cnr25u = absenceComponentDao.buildOrEditAbsenceType("25U", 
-          "Astensione facoltativa post partum 30 primo figlio intera giornata altro genitore", 
+          "Astensione facoltativa post partum 30% primo figlio intera giornata altro genitore", 
           0, Sets.newHashSet(nothing), false, false, false, null);
       
       AbsenceType cnr25h7 = absenceComponentDao.buildOrEditAbsenceType("25H7", 
-          "Astensione facoltativa post partum 30 primo figlio completamento giornata", 
+          "Astensione facoltativa post partum 30% primo figlio completamento giornata", 
           0, Sets.newHashSet(nothing), false, false, false, "25H7");
       
       AbsenceType m25 = absenceComponentDao.buildOrEditAbsenceType("25M", 
-          "Astensione facoltativa post partum 30 primo figlio in ore e minuti", 
+          "Astensione facoltativa post partum 30% primo figlio in ore e minuti", 
           0, Sets.newHashSet(specifiedMinutes), true, false, false, null);
 
 
@@ -508,9 +508,9 @@ public class AbsenceConstructor {
       // Group Creation
       GroupAbsenceType group25 = new GroupAbsenceType();
       group25.name = DefaultGroup.G_25.name();
-      group25.description = "Astensione facoltativa post partum 30 primo figlio 0-6 anni 30 giorni";
+      group25.description = "Astensione facoltativa post partum 30% primo figlio 0-6 anni 150 giorni";
       group25.pattern = GroupAbsenceTypePattern.programmed;
-      group25.periodType = PeriodType.child0_6;
+      group25.periodType = PeriodType.child1_0_6;
       group25.complationAbsenceBehaviour = c25.get();
       group25.takableAbsenceBehaviour = t25.get();
       group25.save();
@@ -522,20 +522,20 @@ public class AbsenceConstructor {
 
       //Update AbsenceType
       AbsenceType cnr23 = absenceComponentDao.buildOrEditAbsenceType("23", 
-          "Astensione facoltativa post partum 100 primo figlio intera giornata", 
+          "Astensione facoltativa post partum 100% primo figlio intera giornata", 
           0, Sets.newHashSet(allDay), false, false, false, "23");
       
       //Update AbsenceType
       AbsenceType cnr23u = absenceComponentDao.buildOrEditAbsenceType("23U", 
-          "Astensione facoltativa post partum 100 primo figlio intera giornata altro genitore", 
+          "Astensione facoltativa post partum 100% primo figlio intera giornata altro genitore", 
           0, Sets.newHashSet(nothing), false, false, false, null);
       
       AbsenceType cnr23h7 = absenceComponentDao.buildOrEditAbsenceType("23H7", 
-          "Astensione facoltativa post partum 100 primo figlio completamento giornata", 
+          "Astensione facoltativa post partum 100% primo figlio completamento giornata", 
           0, Sets.newHashSet(nothing), false, false, false, "23H7");
       
       AbsenceType m23 = absenceComponentDao.buildOrEditAbsenceType("23M", 
-          "Astensione facoltativa post partum 100 primo figlio in ore e minuti", 
+          "Astensione facoltativa post partum 100% primo figlio in ore e minuti", 
           0, Sets.newHashSet(specifiedMinutes), true, false, false, null);
 
 
@@ -572,9 +572,9 @@ public class AbsenceConstructor {
       // Group Creation
       GroupAbsenceType group23 = new GroupAbsenceType();
       group23.name = DefaultGroup.G_23.name();
-      group23.description = "Astensione facoltativa post partum 100 primo figlio 0-12 anni 30 giorni";
+      group23.description = "Astensione facoltativa post partum 100% primo figlio 0-12 anni 30 giorni";
       group23.pattern = GroupAbsenceTypePattern.programmed;
-      group23.periodType = PeriodType.child0_12;
+      group23.periodType = PeriodType.child1_0_12;
       group23.complationAbsenceBehaviour = c23.get();
       group23.takableAbsenceBehaviour = t23.get();
       
