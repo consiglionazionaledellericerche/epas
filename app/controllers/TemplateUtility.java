@@ -373,6 +373,7 @@ public class TemplateUtility {
     return userDao.hasAdminRoles(Security.getUser().get());
   }
 
+
   /**
    * L'istanza del wrapperFactory disponibile nei template.
    *

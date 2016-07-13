@@ -186,7 +186,9 @@ public class RequestInit extends Controller {
         "Certifications.processAll",
         "Certifications.emptyCertifications",
         "PersonMonths.visualizePeopleTrainingHours",
-        "Absences.forceAbsences");
+        "Absences.forceAbsences",
+        "Charts.overtimeOnPositiveResidual");
+
 
     final Collection<String> yearSwitcher = ImmutableList.of(
         "Absences.yearlyAbsences",
@@ -200,7 +202,8 @@ public class RequestInit extends Controller {
         "VacationsAdmin.list",
         "Certifications.certifications",
         "Certifications.processAll",
-        "Certifications.emptyCertifications");
+        "Certifications.emptyCertifications",
+        "Charts.overtimeOnPositiveResidualInYear");
 
     final Collection<String> personSwitcher = ImmutableList.of(
         "Stampings.personStamping",
@@ -243,7 +246,9 @@ public class RequestInit extends Controller {
         "Certifications.emptyCertifications",
         "PersonMonths.visualizePeopleTrainingHours",
         "Persons.list",
-        "Charts.checkLastYearAbsences");
+        "Charts.checkLastYearAbsences",
+        "Charts.overtimeOnPositiveResidual",
+        "Charts.overtimeOnPositiveResidualInYear");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
         "Stampings.insertWorkingOffSitePresence",
