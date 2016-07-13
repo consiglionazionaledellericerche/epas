@@ -1,0 +1,11 @@
+<div class="panel-heading"><i class="fa fa-envelope-o"></i> &{'notification.list'}
+ <span class="badge">${notifications.total}</span></div>
+      <div class="panel-body">
+        #{paginate notifications, 'data-remote':'#notifications'}
+        <ul class="list-group">
+        #{list items:notifications.results, as:'notification'}
+                #{include './notification.html' /}
+        #{/list}
+        </ul>
+        #{/paginate}
+</div>

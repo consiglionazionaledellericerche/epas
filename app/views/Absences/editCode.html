@@ -1,4 +1,4 @@
-#{extends 'main3.html' /}
+#{extends 'main.html' /}
 #{set header:'navbar' /}
 #{set title:'ePAS - Gestione codice d\'assenza' /}
  		
@@ -67,9 +67,9 @@
  </div> 
 
  <div class="container-fluid center">
- #{secure.checkAction 'Absences.insertCode' }
+ #{secure.check 'Absences.insertCode' }
 	<input class="btn btn-primary" type="submit" value="Ok">  
- #{/secure.checkAction}
+ #{/secure.check}
  <input class="btn" action="action" type="button" value="Indietro" onclick="history.go(-1);">
  </div>
 #{/form}

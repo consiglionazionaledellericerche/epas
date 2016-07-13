@@ -27,7 +27,7 @@ import security.SecurityRules;
 import javax.inject.Inject;
 
 
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class StampingsFromClient extends Controller {
 
   @Inject
@@ -64,7 +64,7 @@ public class StampingsFromClient extends Controller {
    * Inserimento timbratura senza ricalcolo.
    */
   @BasicAuth
-  public static String createNotRecompute(@As(binder = JsonStampingBinder.class) 
+  public static String createNotRecompute(@As(binder = JsonStampingBinder.class)
       StampingFromClient body) {
 
     //rulesssssssssssssss
@@ -96,12 +96,12 @@ public class StampingsFromClient extends Controller {
     Optional<Integer> justifiedMinutes = Optional.<Integer>absent();
     if (!Strings.isNullOrEmpty(body.inizio) && !Strings.isNullOrEmpty(body.fine)) {
       justifiedMinutes = Optional.fromNullable(Integer.parseInt(body.fine)
-              - Integer.parseInt(body.inizio));
+          - Integer.parseInt(body.inizio));
     }
 
     absenceManager.insertAbsenceRecompute(body.person, body.date,
-            Optional.fromNullable(body.date),
-            abt, Optional.<Blob>absent(), Optional.<String>absent(), justifiedMinutes);
+        Optional.fromNullable(body.date),
+        abt, Optional.<Blob>absent(), Optional.<String>absent(), justifiedMinutes);
 
     renderText("ok");
   }
@@ -121,12 +121,12 @@ public class StampingsFromClient extends Controller {
     Optional<Integer> justifiedMinutes = Optional.<Integer>absent();
     if (!Strings.isNullOrEmpty(body.inizio) && !Strings.isNullOrEmpty(body.fine)) {
       justifiedMinutes = Optional.fromNullable(Integer.parseInt(body.fine)
-              - Integer.parseInt(body.inizio));
+          - Integer.parseInt(body.inizio));
     }
 
     absenceManager.insertAbsenceNotRecompute(body.person, body.date,
-            Optional.fromNullable(body.date),
-            abt, Optional.<Blob>absent(), Optional.<String>absent(), justifiedMinutes);
+        Optional.fromNullable(body.date),
+        abt, Optional.<Blob>absent(), Optional.<String>absent(), justifiedMinutes);
 
     renderText("ok");
   }

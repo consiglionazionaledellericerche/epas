@@ -36,7 +36,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class MonthRecaps extends Controller {
 
   @Inject

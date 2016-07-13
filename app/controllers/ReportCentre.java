@@ -59,7 +59,7 @@ public class ReportCentre extends Controller {
     final Optional<User> currentUser = Security.getUser();
     ReportMailer.feedback(data, session, currentUser);
     if ("true".equals(Play.configuration.getProperty("oil.enabled")) && currentUser.isPresent()
-        && userDao.haveAdminRoles(currentUser.get())) {
+        && userDao.hasAdminRoles(currentUser.get())) {
       OilMailer.sendFeedbackToOil(data, session, currentUser.get());
     }
   }

@@ -1,4 +1,4 @@
-#{extends 'main3.html' /}
+#{extends 'main.html' /}
 #{set header:'navbar' /}
 #{set title: 'ePAS - Parametri di configurazione' /}
 
@@ -31,9 +31,9 @@
 	  #{list items:currentConfiguration, as:'conf'}
 	    #{if conf.epasParam.general}
 	  	<tr>
-	  	  <td>#{secure.link @Configurations.edit(conf.id), modal:'#defaultModal'}
+	  	  <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
 	  	  &{conf.epasParam}#{/secure.link}</td>
-	  	  <td>${conf.parseValue().label()}</td>
+	  	  <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
 	  	</tr>
 	  	#{/if}
 	  #{/list}
@@ -56,9 +56,9 @@
 	  #{list items:currentConfiguration, as:'conf'}
 	  	#{if conf.epasParam.yearly}
 	  	<tr>
-	  	  <td>#{secure.link @Configurations.edit(conf.id), modal:'#defaultModal'}
+	  	  <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
 	  	  &{conf.epasParam}#{/secure.link}</td>
-	  	  <td>${conf.parseValue().label()}</td>
+	  	  <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
 	  	</tr>
 	  	#{/if}
 	  #{/list}
@@ -83,9 +83,9 @@
 	  #{list items:currentConfiguration, as:'conf'}
 	  	#{if conf.epasParam.periodic}
 	  	<tr>
-	  	  <td>#{secure.link @Configurations.edit(conf.id), modal:'#defaultModal'}
+	  	  <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
 	  	  &{conf.epasParam}#{/secure.link}</td>
-	  	  <td>${conf.parseValue().label()}</td>
+	  	  <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
 	  	  <td>${conf.beginDate.format()}</td>
 	  	  <td>${conf.calculatedEnd()?.format()}</td>
 	  	</tr>

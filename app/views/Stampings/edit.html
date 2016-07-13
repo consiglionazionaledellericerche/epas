@@ -32,7 +32,7 @@ title:(Action + ' timbratura del ' + date.format() + ' per ' + person.fullname)}
     #{/alert}
   #{/else}
 
-  #{f.hidden 'person.id', value:person.id /}
+  #{f.hidden 'personId', value:person.id /}
   #{f.hidden 'date', value:date.format() /}
 
   #{if stamping?.persistent}
@@ -41,7 +41,12 @@ title:(Action + ' timbratura del ' + date.format() + ' per ' + person.fullname)}
 
   #{f.input 'time', popover:'true', value:stamping?.formattedHour(), required:true/}
   #{f.radioEnum 'stamping.way', items:models.Stamping.WayType, required:true /}
-  #{f.selectEnum 'stamping.stampType', items:models.enumerate.StampTypes.onlyActive() /}
+  #{if templateUtility.hasAdminRole()}
+  	#{f.selectEnum 'stamping.stampType', items:models.enumerate.StampTypes.onlyActive() /}
+  #{/if}
+  #{else}
+  	#{f.input 'stamping.stampType', value:models.enumerate.StampTypes.offSiteWorkingForEmployee(), readonly:'true' /}
+  #{/else}
   #{f.input 'stamping.note' /}
 
   #{b.buttons center:true}

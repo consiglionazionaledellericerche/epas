@@ -1,16 +1,17 @@
-#{extends 'main3.html' /}
+#{extends 'main.html' /}
 #{set header:'navbar' /}
 #{set title: 'ePAS - Esportazione situazione finale dipendente' /}
 
 #{charts.chartsTabs activeAction:'exportFinalSituation' /}
 
 <div class="container">
-<div class="panel panel-primary">
-		  <div class="panel-heading">
-		    <h4 class="panel-title">Seleziona il dipendente per il quale esportare la situazione al termine del contratto</h4>
-		  </div>
-		<div class="panel-body">
+#{title title:('Export situazione dipendente') /}
+	#{alert color:'info'}
+		Seleziona il dipendente per il quale esportare la situazione al termine del contratto</h4>
+	#{/alert}
 
+<div class="col-sm-3"></div>
+	<div class="container col-sm-6">
 	#{form @Charts.exportDataSituation()}
 
 		#{select 'personId', class:'form-control', id:'person'}
@@ -18,10 +19,11 @@
 		    		#{option person.id}${person.surname + ' ' + person.name}#{/option}
 	  			#{/list}
 		 #{/select}
-		<div class="container-fluid center">
-      		<input class="btn btn-primary" type="submit" value="Avanti" />
-      	</div>
-#{/form}
-		</div>
+	<br>
+	#{b.buttons center:true}   
+	      #{b.submit 'Avanti'/}
+	#{/b.buttons}
+	#{/form}
 	</div>
 </div>
+

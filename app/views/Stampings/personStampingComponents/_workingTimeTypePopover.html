@@ -1,22 +1,26 @@
-<td class="default-single"
-        #{if dayRecap.wttd.present}
-         popover-hover
-         data-html="true"
-         data-content="${(
-	    		'Tempo Lavoro: <strong>'+dayRecap.wttd.get().workingTime.printHourMinute()+'</strong>'+
-	    		'<br>Tempo lavoro per buono pasto: <strong>'+dayRecap.wttd.get().mealTicketTime.printHourMinute()+'</strong>'+
-	    		'<br>Durata minima intervallo pranzo: <strong>'+dayRecap.wttd.get().breakTicketTime.printHourMinute()+'</strong>'+
-	    		'<br>Finestra intervallo pranzo: <strong>'+dayRecap.lunchInterval+'</strong>'+' (estremi compresi)'+
-	    		'<br>Finestra apertura/chiusura sede: <strong>'+dayRecap.workInterval+'</strong>'+' (estremi compresi)').escape()}"
-         title="<strong>${dayRecap.wttd.get().workingTimeType.description}</strong> Info orario giornaliero">
-              #{if dayRecap.wttd.get().workingTimeType.description.length() > 8 }
-              <span class="text-primary">${dayRecap.wttd.get().workingTimeType.description.substring(0, 8)}.</span>
-              #{/if}
-              #{else}
-       		    <span class="text-primary">${dayRecap.wttd.get().workingTimeType.description}</span>
-              #{/else}
-       #{/if}
-       #{else}
-       >
-       #{/else}
+#{if dayRecap.wttd.present}
+<td class="default-single" webui-popover-hover data-url="#wtt-${dayRecap.personDay.id}"  data-title="Info orario giornaliero">
+  #{if dayRecap.wttd.get().workingTimeType.description.length() > 8 }
+    <span class="text-info">${dayRecap.wttd.get().workingTimeType.description.substring(0, 8)}.</span>
+  #{/if}
+  #{else}
+    <span class="text-info">${dayRecap.wttd.get().workingTimeType.description}</span>
+  #{/else}
 </td>
+<div class="webui-popover-content" id="wtt-${dayRecap.personDay.id}">
+  <strong>${dayRecap.wttd.get().workingTimeType.description}</strong><br>
+  Tempo lavoro: <strong>${dayRecap.wttd.get().workingTime.printHourMinute()}</strong><br>
+  Tempo lavoro per buono pasto: <strong>${dayRecap.wttd.get().mealTicketTime.printHourMinute()}</strong><br>
+  Durata minima intervallo pranzo: <strong>${dayRecap.wttd.get().breakTicketTime.printHourMinute()}</strong><br>
+  Finestra intervallo pranzo: <strong>${dayRecap.lunchInterval}</strong> (estremi compresi)<br>
+  Finestra apertura/chiusura sede: <strong>${dayRecap.workInterval}</strong> (estremi compresi)
+</div>
+#{/if}
+#{else}
+  <td class="default-single"></td>
+#{/else}
+
+
+
+
+

@@ -110,10 +110,24 @@ else
   sed 's#{{SMTP_PROTOCOL}}#'"${SMTP_PROTOCOL}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
+URL_ATTESTATI=${URL_ATTESTATI:-https://attestativ2.rm.cnr.it}
+
 if [ -z "${URL_ATTESTATI}" ]; then
   sed -n '/URL_ATTESTATI/!p' -i ${APP_HOME}/conf/prod.conf
 else
   sed 's#{{URL_ATTESTATI}}#'"${URL_ATTESTATI}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${URL_USER}" ]; then
+  sed -n '/URL_USER/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{URL_USER}}#'"${URL_USER}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${URL_PASS}" ]; then
+  sed -n '/URL_PASS/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{URL_PASS}}#'"${URL_PASS}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
 if [ -z "${JOBS_ACTIVE}" ]; then

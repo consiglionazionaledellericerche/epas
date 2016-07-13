@@ -1,8 +1,9 @@
 package models;
 
+import manager.configurations.EpasParam;
+
 import models.base.IPropertiesInPeriodOwner;
 import models.base.PropertyInPeriod;
-import models.enumerate.EpasParam;
 
 import org.hibernate.envers.Audited;
 
@@ -70,15 +71,6 @@ public class Configuration extends PropertyInPeriod {
       }
     }
     return false;
-  }
-
-  /**
-   *
-   * @return
-   */
-  public Object parseValue() {
-    return this.epasParam.epasParamValueType
-        .parseValue(this.epasParam.epasParamValueType, this.fieldValue);
   }
 
 

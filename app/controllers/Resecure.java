@@ -6,6 +6,7 @@ import play.Play;
 import play.cache.Cache;
 import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.With;
 import security.SecurityRules;
 
 import java.lang.annotation.ElementType;
@@ -16,10 +17,11 @@ import java.lang.annotation.Target;
 import javax.inject.Inject;
 
 /**
- * Contiene metodi per l'attivazione dei controlli sui permessi per le richieste
- * ai controller.
+ * Contiene metodi per l'attivazione dei controlli sui permessi per le richieste ai controller.
+ *
  * @author marco
  */
+@With(RequestInit.class)
 public class Resecure extends Controller {
 
   public static final String OFFICE_COUNT = "officeCount";
@@ -45,11 +47,11 @@ public class Resecure extends Controller {
   @Before(priority = 1, unless = {"login", "authenticate", "logout"})
   static void checkAccess() throws Throwable {
     if (getActionAnnotation(NoCheck.class) != null
-            || getControllerInheritedAnnotation(NoCheck.class) != null) {
+        || getControllerInheritedAnnotation(NoCheck.class) != null) {
       return;
     } else {
       if (getActionAnnotation(BasicAuth.class) != null
-            || getControllerInheritedAnnotation(BasicAuth.class) != null) {
+          || getControllerInheritedAnnotation(BasicAuth.class) != null) {
         if (request.user == null
             || !Security.authenticate(request.user, request.password)) {
           unauthorized(REALM);
@@ -85,11 +87,11 @@ public class Resecure extends Controller {
   }
 
   public static boolean check(String action, Object instance) {
-    return rules.check(action, instance);
-  }
-
-  public static boolean checkAction(String action) {
-    return rules.checkAction(action);
+    if (instance != null) {
+      return session.contains("username") && rules.check(action, instance);
+    } else {
+      return session.contains("username") && rules.checkAction(action);
+    }
   }
 
   /**

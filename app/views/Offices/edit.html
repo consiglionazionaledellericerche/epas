@@ -1,4 +1,4 @@
-#{extends 'main3.html' /}
+#{extends 'main.html' /}
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione sede'  /}
 
@@ -108,7 +108,7 @@
 	<br>
   
   #{if office.persons.empty}
-   #{secure.checkAction 'Office.delete', target:office}
+   #{secure.check 'Office.delete', target:office}
     #{accordionGroup 'delete'}
      #{accordionItem 'deleteItem', parent:'delete', title:'Eliminare questa sede', open:false, color:'danger'}
 	  <div class="text-danger center">
@@ -117,7 +117,7 @@
 	  </div>
      #{/accordionItem}
     #{/accordionGroup }  
-   #{/secure.checkAction}
+   #{/secure.check}
   #{/if}
 
 </div>

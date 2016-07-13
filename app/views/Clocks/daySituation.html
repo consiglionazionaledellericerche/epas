@@ -1,4 +1,4 @@
-#{extends 'main3.html' /}
+#{extends 'main.html' /}
 #{set header:'clock' /}
 #{set title: 'ePAS - Timbratura web'  /}
 
@@ -71,8 +71,8 @@
       <td class="${dayRecap.personDay.holiday ? 'festivi' : 'capitalized'} default-single">
         #{if showLink}
         #{if dayRecap.firstDay }F#{/if}
-        #{secure.link @PersonDayHistory.personDayHistory(dayRecap.personDay.id), modal:'#defaultModal'}
-        *{ #{secure.link @Stampings.forceMealTicket(dayRecap.personDay.id), modal:'#defaultModal'} }*
+        #{secure.link @PersonDayHistory.personDayHistory(dayRecap.personDay.id), 'data-async-modal':'#defaultModal'}
+        *{ #{secure.link @Stampings.forceMealTicket(dayRecap.personDay.id), 'data-async-modal':'#defaultModal'} }*
         ${dayRecap.personDay.date.shortDayName()}
         #{/secure.link}
         #{/if}

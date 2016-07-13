@@ -1,4 +1,4 @@
-#{extends 'main3.html' /}
+#{extends 'main.html' /}
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione sedi'  /}
 
@@ -20,13 +20,13 @@
   </div>
   #{/form}
 
-  #{secure.checkAction 'Institutes.blank'}
+  #{secure.check 'Institutes.blank'}
   #{b.actions}
   <a class="btn btn-success" href="@{blank()}" data-async-modal="#modalEditInstitute">
     <i class="fa fa-plus"></i> &{'Institutes.blank'}
   </a>
   #{/b.actions}
-  #{/secure.checkAction}
+  #{/secure.check}
 
   <div id="instituteList"> <!-- per il risultato della modale asincrona -->
 
@@ -37,13 +37,13 @@
       <ul class="list-group">
         <li class="list-group-item list-group-item-grey">
           <div class="pull-right btn-group">
-            #{secure.checkAction 'Offices.blank'}
+            #{secure.check 'Offices.blank'}
             <a class="btn btn-sm btn-default" href="@{Offices.blank(item.id)}" data-async-modal="#modalInsertOffice">
               <i class="fa fa-plus"></i> Aggiungi sede</a>
-            #{/secure.checkAction}
+            #{/secure.check}
           </div>
           <h4 style="color: black">
-            #{secure.link @edit(item.id), modal:'#modalEditInstitute',fa:'university'}
+            #{secure.link @edit(item.id), 'data-async-modal':'#modalEditInstitute',fa:'university'}
               ${item.name}
             #{/secure.link}
           </h4>
