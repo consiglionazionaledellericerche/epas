@@ -126,7 +126,7 @@ public class ChartsManager {
   /**
    * @return la lista dei personOvertime.
    */
-  public RenderChart populatePersonOvertimeList(
+  public List<PersonOvertime> populatePersonOvertimeList(
       List<Person> personList, List<CompetenceCode> codeList, int year, int month) {
     List<PersonOvertime> poList = Lists.newArrayList();
     List<Person> noOvertimePeople = Lists.newArrayList();
@@ -163,28 +163,19 @@ public class ChartsManager {
       log.debug("Aggiunto {} {} alla lista con i suoi dati", p.name, p.surname);
 
     }
-    return new RenderChart(poList, noOvertimePeople);
+    return poList;
   }
   
   
   /**
    * @return la lista dei personOvertime con i valori su base annuale.
    */ 
-  public RenderChart populatePersonOvertimeListInYear(
+  public List<PersonOvertime> populatePersonOvertimeListInYear(
       List<Person> personList, List<CompetenceCode> codeList, int year) {
-    List<Person> noOvertimeList = Lists.newArrayList();
+    
     List<PersonOvertime> poList = Lists.newArrayList();
     for (Person p : personList) {
-      List<Absence> abList = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(p), 
-          Optional.fromNullable("91"), 
-          LocalDate.now().withYear(year).dayOfMonth().withMinimumValue().monthOfYear().withMinimumValue(), 
-          LocalDate.now().withYear(year).dayOfMonth().withMaximumValue().monthOfYear().withMaximumValue(), 
-          Optional.<JustifiedTimeAtWork>absent(), false, false);
-      int workingTime = 0;
-      for (Absence abs : abList) {
-        workingTime = workingTime 
-            + wrapperFactory.create(abs.personDay).getWorkingTimeTypeDay().get().workingTime;
-      }
+      
       PersonOvertime po = new PersonOvertime();
       List<Contract> yearContracts = wrapperFactory
           .create(p).getYearContracts(year);
@@ -205,18 +196,15 @@ public class ChartsManager {
             
           }    
         }
-        if (po.overtimeHour != 0) {
-          po.positiveHourForOvertime = po.positiveHourForOvertime 
-              - workingTime / DateTimeConstants.MINUTES_PER_HOUR;
+        if (po.overtimeHour != 0) {          
           poList.add(po);
         } else {
           log.debug("Il dipendente {} non ha effettuato ore di straordinario "
               + "nell'anno pur avendo ore in più", p.fullName());
-          noOvertimeList.add(p);
-        }
+          }
       }
     }
-    return new RenderChart(poList, noOvertimeList);
+    return poList;
   }
 
 

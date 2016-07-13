@@ -8,8 +8,8 @@
 
 	#{alert color:'info'}
 		<i class="fa fa-info-circle fa-2x" aria-hidden="true"> Info:</i><br><br>
-		Selezionando l'anno dal menu sulla barra è possibile visualizzare, per ogni persona della sede, il residuo delle ore positive
-		in relazione alle ore di straordinario prese.
+		Selezionando l'anno dal menu sulla barra è possibile visualizzare, per ogni persona della sede, quanto incidono 
+		le ore di straordinario prese sul residuo delle ore positive disponibili in quell'anno.
 	#{/alert}
 	
 
@@ -17,7 +17,7 @@
 #{if poList != null && !poList.isEmpty()}
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>    
     <script type="text/javascript">
-      google.charts.load('current', {'packages':['bar']});
+      google.charts.load('current', {'packages':['corechart']});
       google.charts.setOnLoadCallback(drawChart);
       function drawChart() {
         var data = google.visualization.arrayToDataTable([
@@ -28,43 +28,45 @@
         ]);
 
         var options = {
-          height: 1000,
-          width: 1000,
-          chart: {
-            title: 'Ore di straordinario in relazione alle ore in più',
-            subtitle: 'Controllo solo tra coloro che hanno usufruito di straordinari nell&#39anno indicato',
-          },
-          bars: 'horizontal' // Required for Material Bar Charts.
+        	      title: 'Ore di straordinario in relazione alle ore in più per il ${year}',		
+        	      backgroundColor: 'white',	
+        	      fontSize: 16,
+        	      height: 1100,
+        	      width: 1100,
+        	      vAxis: {title: 'Dipendenti',
+        	    	  textStyle: {color: 'black', italic: true},
+        	    	  baselineColor: 'green'},
+        	      hAxis: {title: 'Ore',
+        	    	  textStyle: {color: 'black', italic: true}},
+        	      seriesType: 'bars',
+        	      series: {2: {type: 'line'}},
+        	      chartArea:{
+        	    	  top:45
+        	      },
+        	      chart: {
+        	        title: 'Ore di straordinario in relazione alle ore in più',
+        	        subtitle: 'Controllo solo tra coloro che hanno usufruito di straordinari nel mese e anno indicati',
+        	      },
+        	      bars: 'horizontal' // Required for Material Bar Charts.
         };
 
-        var chart = new google.charts.Bar(document.getElementById('barchart_material'));
+        var chart_div = document.getElementById('barchart_material');
+        var chart = new google.visualization.BarChart(chart_div);
+           
+        google.visualization.events.addListener(chart, 'ready', function () {
+            chart_div.innerHTML = '<img src="' + chart.getImageURI() + '">';
+            console.log(chart_div.innerHTML);
+          });
 
         chart.draw(data, options);
+        
+        document.getElementById('png').outerHTML = '<a class="center" href="' + chart.getImageURI() + '">Versione stampabile</a>';
       }
     </script>
 
 #{/if}
 
 <div class="container">
-    <div id="barchart_material" class="center"></div>
-    
-    <div class="">
-    #{alert color:'warning'}
-		Questa la lista dei dipendenti che pur avendo ore in più disponibili, non hanno usufruito di straordinari.
-	#{/alert}
-    	<table class="table table-striped table-border table-condensed">
-    	<tr class="warning">
-		  <th>Dipendente</th>
-		  <th>Matricola</th>
-		  <th>Numero badge</th>
-	    <tr>
-	    #{list items:noOvertimeList, as:'person'}
-	    <tr>
-	      <td>${person.fullname}</td>
-	      <td>${person.number}</td>
-	      <td>${person.badgeNumber}</td>	
-	    </tr>
-	    #{/list}
-    	</table>
-    </div>
+	<div id='png' ></div>
+    <div id="barchart_material" class="center"></div>    
 </div>
