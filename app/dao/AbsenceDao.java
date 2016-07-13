@@ -21,6 +21,7 @@ import models.Absence;
 import models.AbsenceType;
 import models.Contract;
 import models.Person;
+import models.PersonDay;
 import models.enumerate.JustifiedTimeAtWork;
 import models.exports.FrequentAbsenceCode;
 import models.query.QAbsence;
@@ -395,5 +396,18 @@ public class AbsenceDao extends DaoBase {
         new LocalDate(year, 1, 1), Optional.of(new LocalDate(year, 12, 31)), false);
   }
 
-
+  /**
+   * 
+   * @param pd il personDay
+   * @param abt il tipo di assenza
+   * @return un absence se esiste un'assenza giornaliera nel personday passato.
+   * Null altrimenti.
+   */
+  public Absence checkAbsence(PersonDay pd) {
+    QAbsence absence = QAbsence.absence;
+    final JPQLQuery query = getQueryFactory().from(absence)
+        .where(absence.personDay.eq(pd));
+    return query.singleResult(absence);
+  }
+  
 }

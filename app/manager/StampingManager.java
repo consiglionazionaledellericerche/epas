@@ -15,6 +15,8 @@ import models.Person;
 import models.PersonDay;
 import models.Stamping;
 import models.Stamping.WayType;
+import models.User;
+import models.enumerate.StampTypes;
 import models.exports.StampingFromClient;
 
 import org.joda.time.LocalDate;
@@ -208,5 +210,20 @@ public class StampingManager {
     return daysRecap;
   }
 
+  /**
+   * 
+   * @param stamping  la timbratura da controllare
+   * @param user l'utente che vuole inserire la timbratura
+   * @param employee la persona per cui si vuole inserire la timbratura
+   * @return true se lo stampType relativo alla timbratura da inserire è tra quelli
+   * previsti per la timbratura fuori sede, false altrimenti.
+   */
+  public boolean checkStampType(Stamping stamping, User user, Person employee) {
+    if (user.person.id.equals(employee.id)
+       && stamping.stampType.equals(StampTypes.LAVORO_FUORI_SEDE)) {
+      return true;
+    }
+    return false;
+  }
 
 }

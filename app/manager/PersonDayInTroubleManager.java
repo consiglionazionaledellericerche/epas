@@ -16,12 +16,14 @@ import it.cnr.iit.epas.DateUtility;
 
 import lombok.extern.slf4j.Slf4j;
 
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
+
 import models.Contract;
 import models.ContractStampProfile;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
-import models.enumerate.EpasParam;
 import models.enumerate.Troubles;
 
 import org.apache.commons.mail.SimpleEmail;

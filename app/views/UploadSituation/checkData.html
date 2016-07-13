@@ -1,4 +1,4 @@
-#{extends 'main3.html' /}
+#{extends 'main.html' /}
 #{set header:'navbar' /}
 #{set title: 'ePAS - Invio Attestati'  /}
 
@@ -27,9 +27,9 @@
 
 		<br>
 		#{b.buttons center:true}
-            *{ #{b.cancel @updateSourceContract(contract.id) /} }*
-            #{b.submit 'Verifica'/}
-          #{/b.buttons}
+      *{ #{b.cancel @updateSourceContract(contract.id) /} }*
+    	#{b.submit 'Verifica'/}
+    #{/b.buttons}
 	#{/form}
 	
 	#{if results}
@@ -56,22 +56,22 @@
 	    #{if wrPerson.getCertificatedData(year, month) != null}
 	      #{if wrPerson.getCertificatedData(year, month).isOk }     
 		      <td class="bg-success">
-			  #{secure.link @UploadSituation.showCertificatedData(wrPerson.getCertificatedData(year, month).id), modal:'#modalCerts'}
-	      				  dati
-	      	  #{/secure.link}
+			  #{secure.link @UploadSituation.showCertificatedData(wrPerson.getCertificatedData(year, month).id), 'data-async-modal':'#modalCerts'}
+	      	dati
+	      #{/secure.link}
 			  </td>
 			  <td></td>
 		  #{/if}
 		  #{else}
 		      <td class="bg-danger">
-			  #{secure.link @UploadSituation.showCertificatedData(wrPerson.getCertificatedData(year, month).id), modal:'#modalCerts'}
-	      				  dati
-	      	  #{/secure.link}
+			  #{secure.link @UploadSituation.showCertificatedData(wrPerson.getCertificatedData(year, month).id), 'data-async-modal':'#modalCerts'}
+	      	dati
+	      #{/secure.link}
 			  </td>
 			  <td>
-			  #{secure.link @UploadSituation.showProblems(wrPerson.getCertificatedData(year, month).id), modal:'#modalCerts'}
-	      				problemi
-	      	  #{/secure.link}
+			  #{secure.link @UploadSituation.showProblems(wrPerson.getCertificatedData(year, month).id), 'data-async-modal':'#modalCerts'}
+	      	problemi
+	      #{/secure.link}
 			  </td>
 		  #{/else}	  
 		#{/if}

@@ -24,11 +24,14 @@ public class QPerson extends EntityPathBase<Person> {
 
     public static final QPerson person = new QPerson("person");
 
-    public final models.base.query.QMutableModel _super = new models.base.query.QMutableModel(this);
+    public final models.base.query.QPeriodModel _super = new models.base.query.QPeriodModel(this);
 
     public final StringPath badgeNumber = createString("badgeNumber");
 
     public final SetPath<models.Badge, QBadge> badges = this.<models.Badge, QBadge>createSet("badges", models.Badge.class, QBadge.class, PathInits.DIRECT2);
+
+    //inherited
+    public final DatePath<org.joda.time.LocalDate> beginDate = _super.beginDate;
 
     public final DatePath<org.joda.time.LocalDate> birthday = createDate("birthday", org.joda.time.LocalDate.class);
 
@@ -40,10 +43,10 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final ListPath<models.Contract, QContract> contracts = this.<models.Contract, QContract>createList("contracts", models.Contract.class, QContract.class, PathInits.DIRECT2);
 
-    //inherited
-    public final DateTimePath<org.joda.time.LocalDateTime> createdAt = _super.createdAt;
-
     public final StringPath email = createString("email");
+
+    //inherited
+    public final DatePath<org.joda.time.LocalDate> endDate = _super.endDate;
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
@@ -82,6 +85,8 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final SetPath<models.PersonChildren, QPersonChildren> personChildren = this.<models.PersonChildren, QPersonChildren>createSet("personChildren", models.PersonChildren.class, QPersonChildren.class, PathInits.DIRECT2);
 
+    public final ListPath<models.PersonConfiguration, QPersonConfiguration> personConfigurations = this.<models.PersonConfiguration, QPersonConfiguration>createList("personConfigurations", models.PersonConfiguration.class, QPersonConfiguration.class, PathInits.DIRECT2);
+
     public final ListPath<models.PersonDay, QPersonDay> personDays = this.<models.PersonDay, QPersonDay>createList("personDays", models.PersonDay.class, QPersonDay.class, PathInits.DIRECT2);
 
     public final QPersonHourForOvertime personHourForOvertime;
@@ -101,9 +106,6 @@ public class QPerson extends EntityPathBase<Person> {
     public final StringPath surname = createString("surname");
 
     public final StringPath telephone = createString("telephone");
-
-    //inherited
-    public final DateTimePath<org.joda.time.LocalDateTime> updatedAt = _super.updatedAt;
 
     public final QUser user;
 

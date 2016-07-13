@@ -18,6 +18,9 @@ import it.cnr.iit.epas.DateUtility;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.cache.StampTypeManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
+import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import manager.services.PairStamping;
 
 import models.Absence;
@@ -30,8 +33,6 @@ import models.Stamping;
 import models.Stamping.WayType;
 import models.WorkingTimeTypeDay;
 import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.EpasParam;
-import models.enumerate.EpasParam.EpasParamValueType.LocalTimeInterval;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.StampTypes;
 import models.enumerate.Troubles;

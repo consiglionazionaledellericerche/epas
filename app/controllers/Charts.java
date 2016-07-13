@@ -5,14 +5,16 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import dao.CompetenceDao;
+import dao.OfficeDao;
 import dao.PersonDao;
+
+import lombok.extern.slf4j.Slf4j;
 
 import manager.ChartsManager;
 import manager.ChartsManager.Month;
-import manager.ChartsManager.RenderList;
-import manager.ChartsManager.RenderResult;
 import manager.ChartsManager.Year;
 import manager.SecureManager;
+import manager.recaps.charts.RenderResult;
 
 import models.CompetenceCode;
 import models.Office;
@@ -22,35 +24,36 @@ import models.exports.PersonOvertime;
 import org.joda.time.LocalDate;
 
 import play.Logger;
-import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-//import play.Logger;
-
-@With({Secure.class, RequestInit.class})
+@With({Resecure.class})
+@Slf4j
 public class Charts extends Controller {
 
-  //private final static Logger log = LoggerFactory.getLogger(Charts.class);
-
   @Inject
-  private static SecurityRules rules;
+  static SecurityRules rules;
   @Inject
-  private static ChartsManager chartsManager;
+  static ChartsManager chartsManager;
   @Inject
-  private static SecureManager secureManager;
+  static SecureManager secureManager;
   @Inject
-  private static PersonDao personDao;
+  static PersonDao personDao;
   @Inject
-  private static CompetenceDao competenceDao;
+  static CompetenceDao competenceDao;
+  @Inject
+  static OfficeDao officeDao;
 
   public static void overtimeOnPositiveResidual(Integer year, Integer month) {
 
@@ -70,10 +73,10 @@ public class Charts extends Controller {
     month = params.get("monthChart", Integer.class);
 
     List<Person> personeProva = personDao.list(
-            Optional.<String>absent(),
-            secureManager.officesReadAllowed(Security.getUser().get()),
-            true, new LocalDate(year, month, 1),
-            new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true).list();
+        Optional.<String>absent(),
+        secureManager.officesReadAllowed(Security.getUser().get()),
+        true, new LocalDate(year, month, 1),
+        new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true).list();
 
     List<CompetenceCode> codeList = chartsManager.populateOvertimeCodeList();
     List<PersonOvertime> poList =
@@ -84,14 +87,15 @@ public class Charts extends Controller {
 
 
   public static void indexCharts() {
-    rules.checkIfPermitted(Security.getUser().get().person.office);
+
     render();
   }
 
 
   /**
-   * metodo che ritorna il template degli straordinari calcolati sulle ore positive 
-   * di residuo nell'anno.
+   * metodo che ritorna il template degli straordinari calcolati sulle ore positive di residuo
+   * nell'anno.
+   *
    * @param year l'anno di riferimento
    */
   public static void overtimeOnPositiveResidualInYear(Integer year) {
@@ -116,15 +120,14 @@ public class Charts extends Controller {
       val = result.get().longValue();
     }
     List<Person> personeProva = personDao.list(
-            Optional.<String>absent(),
-            secureManager.officesReadAllowed(Security.getUser().get()),
-            true, new LocalDate(year, 1, 1), new LocalDate(year, 12, 31), true).list();
+        Optional.<String>absent(),
+        secureManager.officesReadAllowed(Security.getUser().get()),
+        true, new LocalDate(year, 1, 1), new LocalDate(year, 12, 31), true).list();
     int totaleOreResidue = chartsManager.calculateTotalResidualHour(personeProva, year);
 
     render(annoList, val, totaleOreResidue);
 
   }
-
 
   public static void whichAbsenceInYear(Integer year) {
 
@@ -159,26 +162,27 @@ public class Charts extends Controller {
   }
 
 
-  public static void checkLastYearAbsences() {
-    rules.checkIfPermitted(Security.getUser().get().person.office);
-    render();
+  public static void checkLastYearAbsences(File file, Long officeId) {
+
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+
+    boolean process = false;
+    if (file == null) {
+      render(process, office);
+    }
+    process = true;
+    long start = System.nanoTime();
+
+    List<List<RenderResult>> results = await(chartsManager.checkSituationPastYear(file));
+    List<RenderResult> listTrueFalse = results.stream().flatMap(Collection::stream)
+        .collect(Collectors.toList());
+    long end = System.nanoTime();
+    log.debug("Tempo di esecuzione elaborazione schedone: {} secondi", (end - start) / 1000000000);
+    render(listTrueFalse, process, office);
   }
 
-
-  /**
-   * restituisce la lista delle assenze che combaciano e no rispetto allo schedone.
-   * @param file il file dello schedone
-   */
-  public static void processLastYearAbsences(Blob file) {
-
-    rules.checkIfPermitted(Security.getUser().get().person.office);
-
-    RenderList render = chartsManager.checkSituationPastYear(file);
-    List<RenderResult> listTrueFalse = render.getListTrueFalse();
-    List<RenderResult> listNull = render.getListNull();
-
-    render(listTrueFalse, listNull);
-  }
 
   /**
    * esporta le ore e gli straordinari.
@@ -191,18 +195,19 @@ public class Charts extends Controller {
   }
 
   /**
-   * metodo che compone il file .csv contenente, per ogni persona, le ore in più, gli straordinari 
-   * e i riposi compensativi suddivisi per mese nell'anno passato come parametro.
+   * metodo che compone il file .csv contenente, per ogni persona, le ore in più, gli straordinari e
+   * i riposi compensativi suddivisi per mese nell'anno passato come parametro.
+   *
    * @param year l'anno di riferimento
-   * @throws IOException eccezione in formazione del file 
+   * @throws IOException eccezione in formazione del file
    */
   public static void export(Integer year) throws IOException {
     rules.checkIfPermitted(Security.getUser().get().person.office);
 
     List<Person> personList = personDao.list(
-            Optional.<String>absent(),
-            secureManager.officesReadAllowed(Security.getUser().get()),
-            true, new LocalDate(year, 1, 1), LocalDate.now(), true).list();
+        Optional.<String>absent(),
+        secureManager.officesReadAllowed(Security.getUser().get()),
+        true, new LocalDate(year, 1, 1), LocalDate.now(), true).list();
     Logger.debug("Esporto dati per %s persone", personList.size());
     FileInputStream inputStream = chartsManager.export(year, personList);
 
@@ -219,14 +224,15 @@ public class Charts extends Controller {
     offices.add(Security.getUser().get().person.office);
     String name = null;
     List<Person> personList = personDao.list(
-            Optional.fromNullable(name),
-            secureManager.officesReadAllowed(Security.getUser().get()),
-            false, LocalDate.now(), LocalDate.now(), true).list();
+        Optional.fromNullable(name),
+        secureManager.officesReadAllowed(Security.getUser().get()),
+        false, LocalDate.now(), LocalDate.now(), true).list();
     render(personList);
   }
 
   /**
    * genera il file .csv contenente le informazioni finali della persona richiesta.
+   *
    * @param personId l'id della persona di cui si vogliono le informazioni
    * @throws IOException eventuale eccezione generata dalla creazione del file
    */

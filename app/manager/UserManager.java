@@ -29,7 +29,8 @@ import java.util.Set;
 import javax.inject.Inject;
 
 /**
- * Created by daniele on 13/10/15.
+ * @author daniele
+ * @since 13/10/15.
  */
 @Slf4j
 public class UserManager {
@@ -101,8 +102,6 @@ public class UserManager {
 
   public User createUser(final Person person) {
 
-    //Preconditions.checkState(person.isPersistent());
-
     User user = new User();
 
     user.username = generateUserName(person.name, person.surname);
@@ -113,7 +112,6 @@ public class UserManager {
     user.save();
 
     person.user = user;
-    person.save();
 
     log.info("Creato nuovo user per {}: username = {}", person.fullName(), user.username);
 

@@ -9,20 +9,18 @@ import dao.UserDao;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.BadgeManager;
 import manager.ConfGeneralManager;
 import manager.ConfYearManager;
-import manager.ConfigurationManager;
 import manager.PeriodManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 
-import models.Badge;
 import models.Office;
 import models.Qualification;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
-import models.enumerate.EpasParam;
 import models.enumerate.Parameter;
 
 import org.dbunit.DatabaseUnitException;
@@ -77,8 +75,6 @@ public class Bootstrap extends Job<Void> {
   static ConfGeneralManager confGeneralManager;
   @Inject
   static PeriodManager periodManager;
-  @Inject
-  static BadgeManager badgeManager;
 
   /**
    * Procedura abilitata solo all'utente developer per compiere la migrazione alla nuova gestione
@@ -290,20 +286,6 @@ public class Bootstrap extends Job<Void> {
     // La migrateConfiguration và rimossa (e con lei anche tabelle e compagnia inerenti la vecchia 
     // gestione delle configurazioni) appena verrà effettuato l'aggiornamento dell'ise.
     migrateConfiguration();
-    
-    // Questo update permette di instanziare gli eventuali nuovi parametri enumerati epasParam 
-    // per ogni ufficio.
-    List<Office> offices = officeDao.allOffices().list();
-    for (Office office : offices) {
-      configurationManager.updateOfficeConfigurations(office);
-    }
-    
-    // Rimuove gli zeri iniziali se il codice badge è un intero.
-    List<Badge> badges = Badge.findAll();
-    for (Badge badge : badges) {
-      badgeManager.normalizeBadgeCode(badge, true);
-    }
-
   }
 
   public static class DatasetImport implements Work {

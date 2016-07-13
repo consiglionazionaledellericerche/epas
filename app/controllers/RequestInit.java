@@ -9,6 +9,8 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.UsersRolesOfficesDao;
 
+import helpers.TemplateDataInjector;
+
 import manager.SecureManager;
 
 import models.Office;
@@ -22,6 +24,7 @@ import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http;
+import play.mvc.With;
 
 import java.util.Collection;
 import java.util.List;
@@ -34,6 +37,7 @@ import javax.inject.Inject;
 /**
  * @author cristian.
  */
+@With(TemplateDataInjector.class)
 public class RequestInit extends Controller {
 
   @Inject
@@ -43,16 +47,7 @@ public class RequestInit extends Controller {
   @Inject
   static PersonDao personDao;
   @Inject
-  static TemplateUtility templateUtility;
-  @Inject
   static UsersRolesOfficesDao uroDao;
-
-
-  @Before(priority = 1)
-  static void injectUtility() {
-
-    renderArgs.put("templateUtility", templateUtility);
-  }
 
   @Before(priority = 1)
   static void injectMenu() {
@@ -167,10 +162,12 @@ public class RequestInit extends Controller {
 
     final Collection<String> dayMonthYearSwitcher = ImmutableList.of(
         "Stampings.dailyPresence",
+        "Absences.absencesVisibleForEmployee",
         "Stampings.dailyPresenceForPersonInCharge");
 
     final Collection<String> monthYearSwitcher = ImmutableList.of(
         "Stampings.stampings",
+        "Stampings.insertWorkingOffSitePresence",
         "Absences.absences",
         "Competences.competences",
         "Stampings.personStamping",
@@ -188,7 +185,8 @@ public class RequestInit extends Controller {
         "Certifications.certifications",
         "Certifications.processAll",
         "Certifications.emptyCertifications",
-        "PersonMonths.visualizePeopleTrainingHours");
+        "PersonMonths.visualizePeopleTrainingHours",
+        "Absences.forceAbsences");
 
     final Collection<String> yearSwitcher = ImmutableList.of(
         "Absences.yearlyAbsences",
@@ -208,11 +206,16 @@ public class RequestInit extends Controller {
         "Stampings.personStamping",
         "Absences.manageAttachmentsPerPerson",
         "Contracts.personContracts",
+        "Configurations.personShow",
+        "BadgeSystems.personBadges",
+        "Persons.children",
+        "Persons.edit",
         "Absences.absenceInPeriod",
         "Absences.yearlyAbsences",
         "MealTickets.personMealTickets",
         "MealTickets.editPersonMealTickets",
-        "MealTickets.recapPersonMealTickets");
+        "MealTickets.recapPersonMealTickets",
+        "Absences.forceAbsences");
 
     final Collection<String> officeSwitcher = ImmutableList.of(
         "Stampings.missingStamping",
@@ -239,9 +242,11 @@ public class RequestInit extends Controller {
         "Certifications.processAll",
         "Certifications.emptyCertifications",
         "PersonMonths.visualizePeopleTrainingHours",
-        "Persons.list");
+        "Persons.list",
+        "Charts.checkLastYearAbsences");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
+        "Stampings.insertWorkingOffSitePresence",
         "Stampings.stampings",
         "Absences.absences",
         "Competences.competences",

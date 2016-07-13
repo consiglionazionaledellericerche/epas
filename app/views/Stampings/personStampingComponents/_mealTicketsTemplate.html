@@ -1,7 +1,5 @@
-
-#{if dayRecap.personDay.isTicketForcedByAdmin} 
-
-      <td class="default-single" popover-hover
+#{if dayRecap.personDay.isTicketForcedByAdmin}
+      <td class="default-single" webui-popover-hover
       #{if dayRecap.mealTicket.equals("NO")}
         data-content="&{'mealTicket.forcedNotAquired'}"><i class="fa fa-ban forced"></i>
       #{/if}
@@ -13,16 +11,16 @@
 #{else}
     <td class="default-single" 
       #{if dayRecap.mealTicket.equals("NO")}
-         popover-hover data-content="&{'mealTicket.notAquired'}"><i class="fa fa-ban"></i> 
+         webui-popover-hover data-content="&{'mealTicket.notAquired'}"><i class="fa fa-ban"></i>
       #{/if}
       #{if dayRecap.mealTicket.equals("NOT_YET")}
-         popover-hover data-content="&{'mealTicket.notYetAquired'}"><i class="fa fa-cutlery notyet"></i> 
+        webui-popover-hover data-content="&{'mealTicket.notYetAquired'}"><i class="fa fa-cutlery notyet"></i>
       #{/if}
       #{if dayRecap.mealTicket.equals("YES")}
-         popover-hover data-content="&{'mealTicket.aquired'}"><i class="fa fa-cutlery"></i>
+        webui-popover-hover data-content="&{'mealTicket.aquired'}"><i class="fa fa-cutlery"></i>
       #{/if}
       #{if dayRecap.mealTicket.equals("YES_IF_EXIT_NOW")}
-        popover-hover data-content="&{'mealTicket.aquiredExitingNow'}"><i class="fa fa-cutlery exitingnow"></i> 
+        webui-popover-hover data-content="&{'mealTicket.aquiredExitingNow'}"><i class="fa fa-cutlery exitingnow"></i>
       #{/if}
       #{if dayRecap.mealTicket.equals("")}
       >

@@ -1,30 +1,20 @@
 *{ arg: (href) required
 target: optional target for security check
 class: optional classes for a element
-modal: optional id of modal div
 fa: optional fontawesome code
+display: optional (hidden, denied) display the link as denied or display nothing if not permitted
 }*
-%{
-  if ( _target){
-    check = session.username && controllers.Resecure.check(_arg.action, _target);
-  }
-  else {
-    check = session.username && controllers.Resecure.checkAction(_arg.action);
-  }
-}%
-#{if check == true }
-  <a href="${_arg}"#{if _class} class="${_class}"#{/if}#{if _modal} data-async-modal="${_modal}"#{/if}
-  ${helpers.Web.serialize(_attrs, "arg", "class", "fa", "target").raw()}>
-  #{if _fa}<i class="fa fa-${_fa}"></i>
-  <span class="hidden-xs"> #{/if}
+#{if controllers.Resecure.check(_arg.action, _target)}
+<a href="${_arg}"#{if _class} class="${_class}"#{/if}
+${helpers.Web.serialize(_attrs, "arg", "class", "fa", "target", "hide").raw()}>
+#{if _fa}<i class="fa fa-${_fa}"></i><span class="hidden-xs">#{/if}
+  #{doBody/}
+#{if _fa}</span>#{/if}#{if _title}${_title}#{/if}
+</a>
+#{/if}
+#{elseif _display != 'hidden'}
+#{if _display == 'denied'}<span notAllowed data-original-title="&{'link.denied'}">#{/if}
+  #{if _fa}<i class="fa fa-${_fa}"></i><span class="hidden-xs">#{/if}
     #{doBody/}
   #{if _fa}</span>#{/if}#{if _title}${_title}#{/if}
-  </a>
-#{/if}
-#{else}
-	  <span notAllowed data-original-title="&{'link.denied'}">
-	  #{if _fa}<i class="fa fa-${_fa}"></i>
-	  <span class="hidden-xs"> #{/if}
-	   #{doBody/}
-	  </span>
-#{/else}
+#{/elseif}

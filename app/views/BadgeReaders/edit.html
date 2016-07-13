@@ -1,4 +1,4 @@
-#{extends 'main3.html' /}
+#{extends 'main.html' /}
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione sede'  /}
 
@@ -63,7 +63,7 @@
 
 
 	*{ TODO il target }*
-	#{secure.checkAction 'BadgeReaders.joinBadgeSystems'}
+	#{secure.check 'BadgeReaders.joinBadgeSystems'}
 	<div class="text-center">
 		<a class="btn btn-success" href="@{joinBadgeSystems(badgeReader.id)}"
 			 data-async-modal="#defaultModal">
@@ -71,7 +71,7 @@
 		</a>
 	</div>
 	<br>
-	#{/secure.checkAction}
+	#{/secure.check}
 
 	#{alert color:'info'}
 	<p>La lista dei <strong><i class="fa fa-credit-card"></i> &{'badgeSystems'}</strong> attualmente

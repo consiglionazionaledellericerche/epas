@@ -39,7 +39,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class BadgeReaders extends Controller {
 
   private static final Logger log = LoggerFactory.getLogger(BadgeReaders.class);
@@ -61,7 +61,6 @@ public class BadgeReaders extends Controller {
   }
 
   /**
-   *
    * @param name nome del lettore badge su cui si vuole filtrare.
    */
   public static void list(String name) {
@@ -75,7 +74,6 @@ public class BadgeReaders extends Controller {
 
 
   /**
-   *
    * @param id identificativo del lettore badge.
    */
   public static void show(Long id) {
@@ -85,7 +83,6 @@ public class BadgeReaders extends Controller {
   }
 
   /**
-   *
    * @param id identificativo del lettore badge.
    */
   public static void edit(Long id) {
@@ -134,7 +131,6 @@ public class BadgeReaders extends Controller {
 
 
   /**
-   *
    * @param badgeReader l'oggetto per cui si vogliono cambiare le impostazioni.
    */
   public static void updateInfo(@Valid BadgeReader badgeReader, @Valid Office owner) {
@@ -157,11 +153,11 @@ public class BadgeReaders extends Controller {
 
 
   /**
-   * @param user Utente a cui modificare la password.
+   * @param user    Utente a cui modificare la password.
    * @param newPass nuova password da associare al lettore.
    */
   public static void changePassword(@Valid User user,
-                                    @MinSize(5) @Required String newPass) {
+      @MinSize(5) @Required String newPass) {
 
     notFoundIfNull(user.badgeReader);
     BadgeReader badgeReader = user.badgeReader;
@@ -184,9 +180,8 @@ public class BadgeReaders extends Controller {
   }
 
   /**
-   *
    * @param badgeReader l'oggetto badge reader da salvare.
-   * @param user l'utente creato a partire dal badge reader.
+   * @param user        l'utente creato a partire dal badge reader.
    */
   public static void save(@Valid BadgeReader badgeReader, @Valid Office office, @Valid User user) {
 
@@ -201,7 +196,7 @@ public class BadgeReaders extends Controller {
       validation.addError("user.password", "almeno 5 caratteri");
       render("@blank", badgeReader, office, user);
     }
-    
+
     rules.checkIfPermitted(office);
 
     badgeReader.user = user;

@@ -38,7 +38,7 @@ import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 
-@With({Resecure.class, RequestInit.class})
+@With({Resecure.class})
 public class PersonMonths extends Controller {
 
   @Inject
@@ -57,6 +57,7 @@ public class PersonMonths extends Controller {
 
   /**
    * metodo che renderizza la visualizzazione del riepilogo orario.
+   *
    * @param year l'anno
    */
   public static void hourRecap(int year) {
@@ -95,6 +96,7 @@ public class PersonMonths extends Controller {
 
   /**
    * Le ore di formazione del dipendente nell'anno.
+   *
    * @param year year
    */
   public static void trainingHours(int year) {
@@ -102,9 +104,9 @@ public class PersonMonths extends Controller {
     Person person = Security.getUser().get().person;
 
     List<PersonMonthRecap> personMonthRecapList = personMonthRecapDao
-        .getPersonMonthRecapInYearOrWithMoreDetails(person, year, 
+        .getPersonMonthRecapInYearOrWithMoreDetails(person, year,
             Optional.<Integer>absent(), Optional.<Boolean>absent());
-    
+
     LocalDate today = new LocalDate();
 
     render(person, year, personMonthRecapList, today);
@@ -113,34 +115,36 @@ public class PersonMonths extends Controller {
 
   /**
    * CRUD Inserimento le ore di formazione.
+   *
    * @param month month
-   * @param year year
+   * @param year  year
    */
   public static void insertTrainingHours(int month, int year) {
 
     Person person = Security.getUser().get().person;
-    
+
     render(person, month, year);
   }
 
   /**
    * Salva l'ora di formazione.
+   *
    * @param begin inizio
-   * @param end fine
+   * @param end   fine
    * @param value quantità
-   * @param month mese 
-   * @param year anno
+   * @param month mese
+   * @param year  anno
    */
-  public static void saveTrainingHours(@Valid @Min(0) Integer begin, @Min(0) @Valid Integer end, 
+  public static void saveTrainingHours(@Valid @Min(0) Integer begin, @Min(0) @Valid Integer end,
       @Required @Valid @Min(0) Integer value, int month, int year, Long personMonthSituationId) {
-    
+
     Person person = Security.getUser().get().person;
-   
+
     if (personMonthSituationId != null) {
       PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);
-      
+
       Verify.verify(pm.isEditable());
-      
+
       if (!validation.hasErrors()) {
         if (value > 24 * (pm.toDate.getDayOfMonth() - pm.fromDate.getDayOfMonth() + 1)) {
           validation.addError("value",
@@ -149,7 +153,7 @@ public class PersonMonths extends Controller {
       }
       if (validation.hasErrors()) {
         response.status = 400;
-        render("@insertTrainingHours", 
+        render("@insertTrainingHours",
             person, month, year, begin, end, value, personMonthSituationId);
       }
       pm.trainingHours = value;
@@ -157,7 +161,7 @@ public class PersonMonths extends Controller {
       flash.success("Ore di formazione aggiornate.", value);
 
       PersonMonths.trainingHours(year);
-    
+
     }
 
     if (!validation.hasErrors()) {
@@ -173,7 +177,7 @@ public class PersonMonths extends Controller {
       if (begin > endMonth) {
         validation.addError("begin",
             "deve appartenere al mese selezionato");
-      } 
+      }
       if (end > endMonth) {
         validation.addError("end",
             "deve appartenere al mese selezionato");
@@ -196,7 +200,7 @@ public class PersonMonths extends Controller {
       response.status = 400;
       render("@insertTrainingHours", person, month, year, begin, end, value);
     }
-    
+
     LocalDate beginDate = new LocalDate(year, month, begin);
     LocalDate endDate = new LocalDate(year, month, end);
 //    if (!validation.hasErrors()) {
@@ -216,19 +220,20 @@ public class PersonMonths extends Controller {
       response.status = 400;
       render("@insertTrainingHours", person, month, year, begin, end, value);
     }
-    
+
     PersonMonthRecap pm = new PersonMonthRecap(person, year, month);
-    
+
     Verify.verify(pm.isEditable());
-    
+
     personMonthsManager.saveTrainingHours(pm, false, value, beginDate, endDate);
     flash.success("Salvate %d ore di formazione ", value);
 
     PersonMonths.trainingHours(year);
   }
- 
+
   /**
    * Modifica delle ore di formazione.
+   *
    * @param personMonthSituationId id
    */
   public static void modifyTrainingHours(Long personMonthSituationId) {
@@ -238,22 +243,23 @@ public class PersonMonths extends Controller {
     int year = pm.year;
     int month = pm.month;
     Person person = pm.person;
-    
+
     int begin = pm.fromDate.getDayOfMonth();
     int end = pm.toDate.getDayOfMonth();
     int value = pm.trainingHours;
-    
+
     LocalDate dateFrom = new LocalDate(year, month, begin);
     LocalDate dateTo = new LocalDate(year, month, end);
-    
-    render("@insertTrainingHours",  
+
+    render("@insertTrainingHours",
         dateFrom, dateTo, person, month, year, personMonthSituationId, begin, end, value);
   }
 
 
   /**
    * metodo che renderizza la form di conferma cancellazione di ore di formazione.
-   * @param personId l'id della persona
+   *
+   * @param personId           l'id della persona
    * @param personMonthRecapId l'id del personMonthRecap
    */
   public static void deleteTrainingHours(Long personId, Long personMonthRecapId) {
@@ -269,6 +275,7 @@ public class PersonMonths extends Controller {
 
   /**
    * metodo che cancella dal db le ore di formazione specificate.
+   *
    * @param personMonthRecapId l'id delle ore di formazione da cancellare
    */
   public static void deleteTrainingHoursConfirmed(Long personMonthRecapId) {
@@ -289,27 +296,27 @@ public class PersonMonths extends Controller {
     flash.error("Ore di formazione eliminate con successo.");
     PersonMonths.trainingHours(pm.year);
   }
-  
+
   /**
-   * 
+   *
    * @param year
    * @param month
    * @param officeId
    */
-  public static void visualizePeopleTrainingHours(int year, int month, Long officeId){
+  public static void visualizePeopleTrainingHours(int year, int month, Long officeId) {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
     Set<Office> offices = Sets.newHashSet();
     offices.add(office);
-    List<Person> personList = personDao.getActivePersonInMonth(offices, new YearMonth(year,month));
+    List<Person> personList = personDao.getActivePersonInMonth(offices, new YearMonth(year, month));
 //    Table<Person, String, List<TrainingHoursRecap>> table = TreeBasedTable
 //        .create(personMonthsManager.personNameComparator,
 //            personMonthsManager.stringComparator);
 //    
 //    table = personMonthsManager.createTable(personList, year, month); 
     Map<Person, List<PersonMonthRecap>> map = personMonthsManager.createMap(personList, year, month);
-    
+
     render(map, year, month, office);
   }
 }

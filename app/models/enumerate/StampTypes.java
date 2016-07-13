@@ -4,7 +4,9 @@ import lombok.Getter;
 
 import org.testng.collections.Lists;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author cristian.
@@ -83,13 +85,16 @@ public enum StampTypes {
    * @return la lista degli stamptypes attivi.
    */
   public static List<StampTypes> onlyActive(){
-    List<StampTypes> list = Lists.newArrayList();
-    for (StampTypes value : values()) {
-      if (value.isActive) {
-        list.add(value);
-      }
-    }
-    return list;
+
+    return Arrays.stream(values()).filter(StampTypes::isActive).collect(Collectors.toList());
+
+//    List<StampTypes> list = Lists.newArrayList();
+//    for (StampTypes value : values()) {
+//      if (value.isActive) {
+//        list.add(value);
+//      }
+//    }
+//    return list;
   }
   
   /**
@@ -102,5 +107,9 @@ public enum StampTypes {
       return true;
     }
     return false;
+  }
+  
+  public static StampTypes offSiteWorkingForEmployee() {
+    return StampTypes.LAVORO_FUORI_SEDE;
   }
 }

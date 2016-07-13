@@ -1,43 +1,25 @@
 <td class="assenza default-single">
-  #{if showLink}
-  #{secure.checkAction 'Stampings.blank', target:person.office}
-      #{secure.link @Absences.blank(dayRecap.personDay.person.id,
-      dayRecap.personDay.date?.format()),modal:'#modalAbsence'}
+  #{secure.link @Absences.blank(dayRecap.personDay.person.id, dayRecap.personDay.date?.format()),
+      target:person, display:'hidden', 'data-async-modal':'#modalAbsence'}
       ___
-      #{/secure.link}
-  #{/secure.checkAction}
-  #{/if}
-  
+  #{/secure.link}
+
   #{list items:dayRecap.personDay.absences, as:'absence'}
-  
-    #{if showLink}
-	     #{secure.link @Absences.edit(absence.id), modal:'#modalAbsence'}
-	      <span webui-popover-hover data-url="#${absence.id}">
-	      ${absence.absenceType.code}
-	      </span>
-	      #{if absence.justifiedMinutes}
-	      ${absence.justifiedMinutes}min
-	      #{/if}
-	     #{/secure.link}
-	     
-	     #{if absence.absenceFile.exists()}
-	      #{secure.link @Absences.downloadAttachment(absence.id),fa:'paperclip'}
-	      #{/secure.link}
-	     #{/if}
-    #{/if}
-    #{else}
-      <span webui-popover-hover data-url="#${absence?.id}">${absence.absenceType.code}</span>
-	  #{if absence.justifiedMinutes}
-	    ${absence.justifiedMinutes}min
-	  #{/if}
-    #{/else} 
-    
-    <div class="webui-popover-content" id="${absence.id}">
-      <strong>${absence.absenceType.code}</strong> ${absence.absenceType.description} 
-    </div>
+
+  #{secure.link @Absences.edit('absence.id':absence.id), target: absence, 'data-async-modal':'#modalAbsence'}
+    <span webui-popover-hover data-url="#${absence.id}">
+	    ${absence.absenceType.code}
+	  </span>
+    #{if absence.justifiedMinutes}${absence.justifiedMinutes}min #{/if}
+  #{/secure.link}
+
+  #{if absence.absenceFile.exists()}
+    #{secure.link @Absences.downloadAttachment(absence.id), fa:'paperclip'}#{/secure.link}
+  #{/if}
+
+  <div class="webui-popover-content" id="${absence.id}">
+    <strong>${absence.absenceType.code}</strong> ${absence.absenceType.description}
+  </div>
 
   #{/list}
-  
-  
-  
 </td>

@@ -4,23 +4,28 @@
     
     *{ howTo sui parametri }*
     
-
-    #{if configuration.epasParam.equals(models.enumerate.EpasParam.WEB_STAMPING_ALLOWED) }
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ABSENCES_FOR_EMPLOYEE) }
+      <p>Abilitando questa funzionalità sarà possibile permettere ai dipendenti di sapere se i propri colleghi sono assenti in un determinato giorno.<br>
+       Non verrà visualizzato il codice di assenza, ma solo la dicitura "Assente".
+      </p> 
+    #{/if}
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.WEB_STAMPING_ALLOWED) }
       <p>Abilitando questa funzionalità sarà possibile accedere alla timbratura via web per i dipendenti di <strong>${configuration.office.name}</strong>.<br>
       <i class="fa fa-exclamation-triangle"></i> E' altamente consigliato impostare anche il filtro sugli indirizzi IP autorizzati alla timbratura via web. 
       </p> 
     #{/if}
     
-    #{if configuration.epasParam.equals(models.enumerate.EpasParam.ADDRESSES_ALLOWED) }
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ADDRESSES_ALLOWED) }
       <p>Tramite questo parametro è possibile attuare una restrizione sui terminali abilitati alla timbratura
       via web dei dipendenti.</p> 
     #{/if}
     
-    #{if configuration.epasParam.equals(models.enumerate.EpasParam.NUMBER_OF_VIEWING_COUPLE) }
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.NUMBER_OF_VIEWING_COUPLE) }
       <p>Il numero di coppie di timbrature visibili di default nella pagina Timbrature.</p> 
     #{/if}
     
-    #{if configuration.epasParam.equals(models.enumerate.EpasParam.DATE_START_MEAL_TICKET) }
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.DATE_START_MEAL_TICKET) }
       <p>Tramite questo parametro è possibile specificare la data in cui <strong>${configuration.office.name}</strong> 
       ha iniziato ad utilizzare i Ticket Restaurant.</p>
       <p> A partire da tale data i dipendenti inizieranno a maturare i buoni pasto.</p>
@@ -28,13 +33,20 @@
       modificando i loro dati iniziali da Lista Persone.</p>
     #{/if}
     
-    #{if configuration.epasParam.equals(models.enumerate.EpasParam.EMAIL_TO_CONTACT) }
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.EMAIL_TO_CONTACT) }
       <p>Tramite questo parametro è possibile specificare l'indirizzo email di risposta nelle email inviate dal sistema.</p>
       <p><i class="fa fa-info-circle"></i> Inserire per esempio un indirizzo di segreteria amministrativa.</p>
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.WORKING_OFF_SITE) }
+      <p>Tramite questo parametro è possibile permettere ai dipendenti che lavorano fuori sede di giustificare l'intera giornata
+      lavorativa o inserire le proprie timbrature con causale "Lavoro fuori sede".</p>
+      <p><i class="fa fa-info-circle"></i> Selezionando "sì", sarà permesso ai dipendenti di specificare le proprie timbrature con causale preimpostata "lavoro fuori sede"
+      o di inserire il codice giustificativo giornaliero "105BP".</p>
+    #{/if}
     
-    #{if configuration.epasParam.equals(models.enumerate.EpasParam.SEND_EMAIL) }
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.SEND_EMAIL) }
       <p>Abilitando questa funzionalità sarà possibile notificare a tutti i dipendenti di <strong>${configuration.office.name}</strong> 
       i giorni di presenza con problemi.<br> L'invio delle notifiche via email è configurato secondo la seguente schedulazione:<p>
       <ul>
@@ -48,46 +60,56 @@
       
     #{/if}
     
-    #{if configuration.epasParam.equals(models.enumerate.EpasParam.NEW_ATTESTATI) }
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.NEW_ATTESTATI) }
       <p>Abilitando questa funzionalità la sede <strong>${configuration.office.name}</strong> 
       passerà all'utilizzo della nuova piattaforma CNR di invio attestati.</p>
     #{/if}
         
-    #{if configuration.epasParam.equals(models.enumerate.EpasParam.EXPIRY_VACATION_PAST_YEAR) }
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.EXPIRY_VACATION_PAST_YEAR) }
       <p>Questo parametro configurabile su base annuale specifica il giorno di scadenza delle ferie anno precedente.
       <p>Esempio: <em>impostando il valore 31/8 per l'anno 2016 si otterrà che le ferie dell'anno 2015 si
       esauriranno in data 31/8/2016.</em></p> 
     #{/if}
     
-    #{if configuration.epasParam.equals(models.enumerate.EpasParam.MONTH_EXPIRY_RECOVERY_DAYS_13) 
-         || configuration.epasParam.equals(models.enumerate.EpasParam.MONTH_EXPIRY_RECOVERY_DAYS_49)  }
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.MONTH_EXPIRY_RECOVERY_DAYS_13) 
+         || configuration.epasParam.equals(manager.configurations.EpasParam.MONTH_EXPIRY_RECOVERY_DAYS_49)  }
       <p>Questo parametro configurabile su base annuale specifica il mese massimo di utilizzo per il residuo ore dell'anno precedente.
       <p>Esempio: <em>Impostando il valore 3 per l'anno 2016 si otterrà che il residuo ore rimanente dal 2015 sarà utilizzabile entro il 31/3/2016.</em></p>
       <p><i class="fa fa-info-circle"></i> Per impostare l'utilizzo illimitato del residuo anno precedente inserire nel campo il valore 0.</p>
     #{/if}
     
-    #{if configuration.epasParam.equals(models.enumerate.EpasParam.MAX_RECOVERY_DAYS_13) 
-         || configuration.epasParam.equals(models.enumerate.EpasParam.MAX_RECOVERY_DAYS_49)  }
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.MAX_RECOVERY_DAYS_13) 
+         || configuration.epasParam.equals(manager.configurations.EpasParam.MAX_RECOVERY_DAYS_49)  }
       <p>Questo parametro configurabile su base annuale specifica il numero massimo di riposi usufruibili nell'anno solare.
       <p><i class="fa fa-info-circle"></i> Per impostare un numero illimitato di riposi inserire nel campo il valore 0.</p>
     #{/if}
     
-    #{if configuration.epasParam.equals(models.enumerate.EpasParam.DAY_OF_PATRON) }
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.DAY_OF_PATRON) }
       <p>Inserire il giorno festivo per la Festa del Santo Patrono per la sede <strong>${configuration.office.name}</strong> e la date di inizio e fine validità.
     #{/if}
     
-    #{if configuration.epasParam.equals(models.enumerate.EpasParam.HOUR_MAX_TO_CALCULATE_WORKTIME) }
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.HOUR_MAX_TO_CALCULATE_WORKTIME) }
       <p>Tramite questo parametro è possibile specificare l'orario massimo del giorno successivo all'interno del quale cercare una timbratura di uscita.</p>
       Esempio: <em>Se un dipendente risulta in istituto alla mezzanotte ed effettuerà una timbratura di uscita nel giorno successivo prima dell'orario massimo, il software provvederà ad inserire
       due timbrature fittizie (uscita/ingresso) a mezzanotte in modo che sia possibile considerare il tempo nel calcolo delle ore lavorate.</em>
     #{/if}
     
-    #{if configuration.epasParam.equals(models.enumerate.EpasParam.LUNCH_INTERVAL) }
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.LUNCH_INTERVAL) }
       <p>Tramite questo parametro è possibile specificare la finestra temporale all'interno della quale cercare le uscite per pranzo.</p>
     #{/if}
     
-    #{if configuration.epasParam.equals(models.enumerate.EpasParam.WORK_INTERVAL) }
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.WORK_INTERVAL) }
       <p>Tramite questo parametro è possibile specificare la finestra temporale all'interno della quale verrà conteggiato il tempo a lavoro dei dipendenti.</p>
+    #{/if}
+    
+     #{if configuration.epasParam.equals(manager.configurations.EpasParam.OFF_SITE_STAMPING) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente le timbratura di lavoro fuori sede.
+      </p> 
+    #{/if}
+    
+     #{if configuration.epasParam.equals(manager.configurations.EpasParam.MATERNITY_PERIOD) }
+      <p>Inserire lo stato di maternità per il dipendente <strong>${configuration.person.fullname}</strong> e la date di inizio e fine periodo.</p>
     #{/if}
     
   #{/alert} 
@@ -96,31 +118,31 @@
   #{alert color:'warning', textcolor:'dark'}
     <p><strong>Guida alla Modifica</strong></p>
     
-    #{if configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.BOOLEAN) }
+    #{if configuration.epasParam.epasParamValueType.equals(manager.configurations.EpasParam.EpasParamValueType.BOOLEAN) }
       <p>Selezionare il nuovo valore dalla form sottostante. </p>
     #{/if}
-    #{if configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.INTEGER) }
+    #{if configuration.epasParam.epasParamValueType.equals(manager.configurations.EpasParam.EpasParamValueType.INTEGER) }
       <p>Inserire il nuovo valore numerico nella form sottostante. </p>
     #{/if}
-    #{if configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.LOCALDATE) }
+    #{if configuration.epasParam.epasParamValueType.equals(manager.configurations.EpasParam.EpasParamValueType.LOCALDATE) }
       <p>Seleziona la nuova data.</p>
     #{/if}
-    #{if configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.EMAIL) }
+    #{if configuration.epasParam.epasParamValueType.equals(manager.configurations.EpasParam.EpasParamValueType.EMAIL) }
       <p>Inserire un indirizzo email valido.</p>
     #{/if}
-    #{if configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.MONTH) }
+    #{if configuration.epasParam.epasParamValueType.equals(manager.configurations.EpasParam.EpasParamValueType.MONTH) }
       <p>Inserire il mese nel formato numerico.</p>
     #{/if}
-    #{if configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.IP_LIST) }
+    #{if configuration.epasParam.epasParamValueType.equals(manager.configurations.EpasParam.EpasParamValueType.IP_LIST) }
       <p>Inserire ogni IP separato da quello precedente tramite una virgola ed uno spazio.</p>
     #{/if}
-    #{if configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.DAY_MONTH) }
+    #{if configuration.epasParam.epasParamValueType.equals(manager.configurations.EpasParam.EpasParamValueType.DAY_MONTH) }
       <p>Inserire il giorno-mese nel formato GG/MM.</p>
     #{/if}
-    #{if configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.LOCALTIME) }
+    #{if configuration.epasParam.epasParamValueType.equals(manager.configurations.EpasParam.EpasParamValueType.LOCALTIME) }
       <p>Inserire l'orario nel formato HH:mm (dove HH può assumere valori da 0 a 23).</p>
     #{/if}
-    #{if configuration.epasParam.epasParamValueType.equals(models.enumerate.EpasParam.EpasParamValueType.LOCALTIME_INTERVAL) }
+    #{if configuration.epasParam.epasParamValueType.equals(manager.configurations.EpasParam.EpasParamValueType.LOCALTIME_INTERVAL) }
       <p>Inserire l'intervallo orario nel formato HH:mm-HH:mm (dove HH può assumere valori da 0 a 23).</p>
     #{/if}
     
@@ -134,10 +156,11 @@
 	  <p><i class="fa fa-thumbs-o-up"></i> La modifica del valore di questo parametro non comporta alcun tipo di riconteggio 
 	    o sincronizzazione.
 	  </p> }*
-      #{/if}#{else}
+    #{/if}
+    #{else}
       <p><strong>Effetti</strong></p>
 	  <p><i class="fa fa-exclamation-triangle"></i> La modifica di questo paramatro comporta la sincronizzazzione per tutti i dipendenti 
-	    di <strong>${configuration.office.name}</strong> di tipo:</p>
+	    coinvolti</strong> di tipo:</p>
 	    <ul> 
 	    #{list items:configuration.epasParam.recomputationTypes, as:'recomputationType'}
 	      <li>&{recomputationType}</li>

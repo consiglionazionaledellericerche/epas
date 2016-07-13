@@ -1,12 +1,13 @@
-#{extends 'main3.html' /}
+#{extends 'main.html' /}
 #{set header:'navbar' /}
 #{set title: 'ePAS - Grafici' /}
 
+#{switcher year:true/}
 
 #{charts.chartsTabs activeAction:'indexCharts' /}
 
 <div class="container">
-
+#{title title:('Indice grafici e controlli ') /}
 <div class="panel panel-primary">
 		  <div class="panel-heading">
 		    <h4 class="panel-title">Seleziona il grafico che ti interessa visualizzare</h4>
