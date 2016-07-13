@@ -28,7 +28,7 @@ public class QMealTicket extends EntityPathBase<MealTicket> {
 
     public final QPerson admin;
 
-    public final NumberPath<Integer> block = createNumber("block", Integer.class);
+    public final NumberPath<Long> block = createNumber("block", Long.class);
 
     public final StringPath code = createString("code");
 
