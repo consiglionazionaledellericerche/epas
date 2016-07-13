@@ -23,7 +23,7 @@
 
   <div class="webui-popover-content" id="${code.id}">
     <strong>Tipo Assenza ${code.code}</strong><br><br>
-    <strong>Descrizione:</strong> &{code.description}<br>  
+    <strong>Descrizione:</strong> ${code.description.label()}<br>  
     <strong>Come giustifica:</strong> 
     #{list items:code.justifiedTypesPermitted, as:'justifiedType'}
       &{justifiedType.name}
