@@ -78,17 +78,15 @@ public class Charts extends Controller {
     log.debug("Dimensione attivi per straordinario: {}", peopleActive.size());
 
     List<CompetenceCode> codeList = chartsManager.populateOvertimeCodeList();
-    
-    RenderChart render =
+        
+    List<PersonOvertime> poList = 
         chartsManager.populatePersonOvertimeList(peopleActive, codeList, year, month);
-    List<PersonOvertime> poList = render.personOvertime;
     if (poList.isEmpty()) {
       flash.error("Nel mese selezionato non sono ancora stati assegnati gli straordinari");
       render(poList);
     }
-
-    List<Person> noOvertimePeople = render.noOvertimePeople;
-    render(poList, year, month, noOvertimePeople);
+   
+    render(poList, year, month);
   }
 
 
@@ -119,15 +117,15 @@ public class Charts extends Controller {
         set, true, begin, end, Optional.<Person>absent());
     List<Person> peopleActive = people.list();
     List<CompetenceCode> codeList = chartsManager.populateOvertimeCodeList();
-    RenderChart render =
+    
+    List<PersonOvertime> poList = 
         chartsManager.populatePersonOvertimeListInYear(peopleActive, codeList, year);
-    List<PersonOvertime> poList = render.personOvertime;
-    List<Person> noOvertimeList = render.noOvertimePeople;
+    
     if (poList.isEmpty()) {
       flash.error("Nel mese selezionato non sono ancora stati assegnati gli straordinari");
       render(poList);
     }
-    render(poList, year, noOvertimeList);
+    render(poList, year);
 
   }
 
