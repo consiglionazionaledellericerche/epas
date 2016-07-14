@@ -1,89 +1,74 @@
 #{extends 'main.html' /}
 #{set header:'navbar' /}
+#{set title: 'ePAS - Straordinari e ore in più sul mese' /}
+
+#{charts.chartsTabs activeAction:'overtimeOnPositiveResidual' /}
 
 <div class="container">
-#{if yearChart == null && monthChart == null }
-	<div class="panel panel-primary">
-		  <div class="panel-heading">
-		    <h4 class="panel-title">Seleziona mese e anno</h4>
-		  </div>
-		<div class="panel-body">
-#{form @Charts.overtimeOnPositiveResidual()}
 
-
-#{select 'yearChart', id:'yearChart'}
-	#{list annoList}
-		#{option _.anno}${_.anno}#{/option}
-	#{/list}				
-#{/select}
-
-#{select 'monthChart', id:'meseChart'}
-	#{list meseList}
-		#{option _.id}${_.mese}#{/option}
-	#{/list}		
-#{/select}
-<input class="btn btn-primary span1" type="submit" value="Ok"/>
-#{/form}
-		</div>
-	</div>
+	#{alert color:'info'}
+		<i class="fa fa-info-circle fa-2x" aria-hidden="true"> Info:</i><br><br>
+		Selezionando anno e mese dal menu sulla barra è possibile visualizzare, per ogni persona della sede, quanto incidono 
+		le ore di straordinario prese sul residuo delle ore positive disponibili in quel mese.
+	#{/alert}
 	
-	#{/if}
-#{else}
-<div class="panel panel-primary">
-		  <div class="panel-heading">
-		    <h4 class="panel-title">Ore di straordinario a confronto con le ore in più per &{'views.tags.display.date.month.' + monthChart} ${yearChart} </h4>
-		  </div>
-		<div class="panel-body">
-#{form @Charts.overtimeOnPositiveResidual()}
-
-
-#{select 'yearChart', value:session.get("yearChart"), id:'yearChart'}
-	#{list annoList}
-		#{option _.anno}${_.anno}#{/option}
-	#{/list}			
-#{/select}
-
-#{select 'monthChart', value: session.get("monthChart"), id:'meseChart'}
-	#{list meseList}
-		#{option _.id}${_.mese}#{/option}
-	#{/list}			
-#{/select}
-<input class="btn btn-primary span1" type="submit" value="Ok"/>
-#{/form}
-		</div>
-	</div>
-#{/else}
-</div>
-
-#{if yearChart != 0 && monthChart != 0 }
-<div class="container-fluid">
-<div id="myfirstchart" style="height: 950px; margin-left: 30px;">
 
 </div>
- 	#{set 'moreScripts'}
+
+#{if poList != null && !poList.isEmpty()}
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>    
 <script type="text/javascript">
-	new Morris.Bar({
-	  element: 'myfirstchart',
-	  data: [
-		#{list poList, as:'person'}
-	    {y: '${person.surname}', a: '${person.overtimeHour}', b: '${person.positiveHourForOvertime}'},
-	    #{/list}
-	  ],
-	  xkey: 'y',
-	  ykeys: ['a', 'b'],
-	  labels: ['Ore straordinario', 'Ore positive usabili'],
-	  xLabelAngle: 80.0,
-	  gridTextSize: 14
-	});
+  google.charts.load('current', {'packages':['corechart']});
+  google.charts.setOnLoadCallback(drawChart);
+  function drawChart() {
+    var data = google.visualization.arrayToDataTable([
+      ['Dipendente', 'Ore di straordinario', 'Ore in più'],
+      #{list poList, as:'person'}
+      ['${person?.surname} ${person?.name}', ${person?.overtimeHour}, ${person?.positiveHourForOvertime}],
+      #{/list}
+    ]);
 
+    var options = {
+      title: 'Ore di straordinario in relazione alle ore in più su base mensile',		
+      backgroundColor: 'white',	
+      fontSize: 16,
+      height: 900,
+      width: 1100,
+      vAxis: {title: 'Dipendenti',
+    	  textStyle: {color: 'black', italic: true},
+    	  baselineColor: 'green'},
+      hAxis: {title: 'Ore',
+    	  textStyle: {color: 'black', italic: true}},
+      seriesType: 'bars',
+      series: {2: {type: 'line'}},
+      chartArea:{
+    	  top:45
+      },
+      chart: {
+        title: 'Ore di straordinario in relazione alle ore in più',
+        subtitle: 'Controllo solo tra coloro che hanno usufruito di straordinari nel mese e anno indicati',
+      },
+      bars: 'horizontal' // Required for Material Bar Charts.
+    };
+
+    var chart_div = document.getElementById('barchart_material');
+    var chart = new google.visualization.BarChart(chart_div);
+       
+    google.visualization.events.addListener(chart, 'ready', function () {
+        chart_div.innerHTML = '<img src="' + chart.getImageURI() + '">';
+        console.log(chart_div.innerHTML);
+      });
+
+    chart.draw(data, options);
+    
+    document.getElementById('png').outerHTML = '<a class="center" href="' + chart.getImageURI() + '">Versione stampabile</a>';
+  }
 </script>
-	
-	#{/set}
-
 #{/if}
+<div class="container">
+	<div id='png' ></div>
+	<div id="barchart_material" class="center"></div>
+</div>
 
-<ul class="pager">
-  <li><a href="/charts/indexCharts">Indietro</a></li>
-  
-</ul>
-</div>	
+
