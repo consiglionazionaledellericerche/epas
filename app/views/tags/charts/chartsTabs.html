@@ -18,12 +18,6 @@
     <li #{if _activeAction.equals("overtimeOnPositiveResidualInYear")} class="active" #{/if}>
       <a href="@{Charts.overtimeOnPositiveResidualInYear(session.get("yearSelected"), session.get("officeSelected"))}">Ore positive vs. <br>straordinari annuali</a>
     </li>    
-    <li #{if _activeAction.equals("exportHourAndOvertime")} class="active" #{/if}>
-      <a href="@{Charts.exportHourAndOvertime()}">Export ore in più <br>e di straordinario</a>
-    </li>
-    <li #{if _activeAction.equals("exportFinalSituation")} class="active" #{/if}>
-      <a href="@{Charts.exportFinalSituation()}">Export informazioni finali <br>di un dipendente</a>
-    </li>
     
   </ul>
 </div>
