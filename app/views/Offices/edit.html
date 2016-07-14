@@ -34,13 +34,14 @@
   
    #{accordionGroup 'ammi'}
     #{accordionItem 'amministratori', parent:'ammi', title:'Amministratori', open:true}
-  
-    <div class="row">
-      <a class="btn btn-success col-sm-offset-5 col-sm-2" href="@{Administrators.blank(office.id)}" data-async-modal="#modalInsertUro">
-      <i class="fa fa-plus"></i> Nuovo amministratore </a>
-	</div>
 
-    <div id="uroList">
+  #{b.buttons center:true}
+  <a class="btn btn-success centre" href="@{Administrators.blank(office.id)}" data-async-modal="#modalInsertUro">
+    <i class="fa fa-plus"></i> Assegna Ruolo
+  </a>
+  #{/b.buttons}
+
+	<div class="col-sm-offset-2 col-sm-8" id="uroList">
 
 	<h4>Amministratore tecnico</h4>    
     #{if wrOffice.tecnicalAdmins.empty }
@@ -50,13 +51,12 @@
     #{/if}
     #{else}
 	    <ul class="list-group">
-	       #{list items:wrOffice.tecnicalAdmins, as:'uroAdmin'}
-	         <li class="list-group-item list-group-item-info">
-	            <div class="pull-right btn-group">
-	              <a class="btn btn-sm btn-danger" href="@{Administrators.delete(uroAdmin.id)}" >
-		          <i class="fa fa-trash"></i> Rimuovi</a>
-	            </div>
-	            ${uroAdmin.user.person.fullname}
+	       #{list items:wrOffice.tecnicalAdmins, as:'userRole'}
+	         <li class="list-group-item clearfix">
+						 <span class="label label-info"> ${userRole.user.person.fullname}</span>
+             <a class="label label-badge label-danger pull-right" href="@{Administrators.delete(userRole.id)}" webui-popover-hover data-content="Revoca Ruolo" >
+               <i class="fa fa-trash"></i> Rimuovi
+             </a>
 	          </li>
 	       #{/list}
 	    </ul>
@@ -69,32 +69,32 @@
       </div>
     #{/if}
     #{else}
-	    <ul class="list-group">
-	       #{list items:wrOffice.personnelAdmins, as:'uroAdmin'}
-	         <li class="list-group-item list-group-item-info">
-	            <div class="pull-right btn-group">
-	              <a class="btn btn-sm btn-danger" href="@{Administrators.delete(uroAdmin.id)}" >
-		          <i class="fa fa-trash"></i> Rimuovi</a>
-	            </div>
-	            ${uroAdmin.user.person.fullname}
-	          </li>
-	       #{/list}
-	    </ul>
+		<ul class="list-group">
+			#{list items:wrOffice.personnelAdmins, as:'userRole'}
+			<li class="list-group-item clearfix">
+				<span class="label label-success"> ${userRole.user.person.fullname}</span>
+				<a class="label label-badge label-danger pull-right" href="@{Administrators.delete(userRole.id)}" webui-popover-hover data-content="Revoca Ruolo" >
+					<i class="fa fa-trash"></i> Rimuovi
+				</a>
+			</li>
+			#{/list}
+		</ul>
     #{/else}
 	
 	
     #{if !wrOffice.miniAdmins.empty }
       <h4>Amministratore del personale sola lettura</h4>    
 	    <ul class="list-group">
-	       #{list items:wrOffice.miniAdmins, as:'uroAdmin'}
-	         <li class="list-group-item list-group-item-info">
-	            <div class="pull-right btn-group">
-	              <a class="btn btn-sm btn-danger" href="@{Administrators.delete(uroAdmin.id)}" >
-		          <i class="fa fa-trash"></i> Rimuovi</a>
-	            </div>
-	            ${uroAdmin.user.person.fullname}
-	          </li>
-	       #{/list}
+        <ul class="list-group">
+          #{list items:wrOffice.miniAdmins, as:'userRole'}
+          <li class="list-group-item clearfix">
+            <span class="label label-warning"> ${userRole.user.person.fullname}</span>
+            <a class="label label-badge label-danger pull-right" href="@{Administrators.delete(userRole.id)}" webui-popover-hover data-content="Revoca Ruolo" >
+              <i class="fa fa-trash"></i> Rimuovi
+            </a>
+          </li>
+          #{/list}
+        </ul>
 	    </ul>
     #{/if}
     
