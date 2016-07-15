@@ -108,7 +108,7 @@ public class AbsenceComponentDao extends DaoBase {
         .where(takableAbsenceBehaviour.name.eq(name)).singleResult(takableAbsenceBehaviour));
   }
   
-  public Optional<GroupAbsenceType> GroupAbsenceTypeByName(String name) {
+  public Optional<GroupAbsenceType> groupAbsenceTypeByName(String name) {
     
     QGroupAbsenceType groupAbsenceType = QGroupAbsenceType.groupAbsenceType;
     

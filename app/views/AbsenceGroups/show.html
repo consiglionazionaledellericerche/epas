@@ -9,7 +9,10 @@
   #{list items:groups, as:'group'}
 
   <ul class="list-group">
-    <li class="list-group-item list-group-item-info""><strong>${group.description.label()}</strong><br> </li>
+    <li class="list-group-item list-group-item-info"">
+      <strong>${group.description.label()}</strong>
+      <span class="label label-info">${group.name}</span> 
+    </li>
     <li class="list-group-item">
       
       *{ <span class="label label-default">Codice</span> &{group.name}<br> }* 

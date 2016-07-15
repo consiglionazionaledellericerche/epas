@@ -1,17 +1,24 @@
 package controllers;
 
+import com.google.common.base.Optional;
+
 import dao.PersonDao;
 import dao.PersonDayDao;
-
-import lombok.extern.slf4j.Slf4j;
+import dao.absences.AbsenceComponentDao;
 
 import manager.ConsistencyManager;
-import manager.services.absences.AbsenceConstructor;
 import manager.services.absences.AbsenceEngine;
+import manager.services.absences.AbsenceEngine.AbsenceRequestType;
+import manager.services.absences.AbsenceEngine.ResponseItem;
+import manager.services.absences.AbsenceEngineInstance;
+import manager.services.absences.AbsenceMigration;
 
 import models.AbsenceTypeGroup;
 import models.Office;
 import models.Person;
+import models.PersonDay;
+import models.absences.Absence;
+import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
 import models.enumerate.AccumulationBehaviour;
 
@@ -25,7 +32,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-@Slf4j
+//@Slf4j
 @With({Resecure.class, RequestInit.class})
 public class AbsenceGroups extends Controller {
   
@@ -34,15 +41,18 @@ public class AbsenceGroups extends Controller {
   @Inject
   private static PersonDayDao personDayDao;
   @Inject
+  private static AbsenceComponentDao absenceComponentDao;
+  @Inject
   private static AbsenceEngine absenceEngine;
   @Inject
   private static ConsistencyManager consistencyManager;
   @Inject
-  private static AbsenceConstructor absenceConstructor;
+  private static AbsenceMigration absenceMigration;
   
   public static void migrate() {
     
-    absenceConstructor.buildDefaultGroups();
+    absenceMigration.buildDefaultGroups();
+    
     renderText("ok");
     
   }
@@ -78,34 +88,34 @@ public class AbsenceGroups extends Controller {
     render(noMoreAbsencesAccepted, replaceCodeAndDecreaseAccumulation, otherGroups);
   }
   
-  public static void insert(Long personId, LocalDate date, String group) {
+  public static void insert(Long personId, LocalDate date, String group, String code) {
     
     Person person = personDao.getPersonById(personId);
+    Optional<GroupAbsenceType> groupAbsenceType = absenceComponentDao.groupAbsenceTypeByName(group);
+    Optional<AbsenceType> absenceType = absenceComponentDao.absenceTypeByCode(code);
+    if (person == null || date == null || !groupAbsenceType.isPresent() 
+        || !absenceType.isPresent())  {
+      render();
+    }
     
-//    AbsencePeriod absencePeriod = absenceEngine.buildAbsencePeriod(person, 
-//        GroupAbsenceType.group661, date);
-//    
-//    AbsenceType absenceType = absencePeriod.takableComponent.get().takableCodes.iterator().next(); 
-//    
-//    boolean result = absenceEngine.requestForAbsenceInPeriod(absencePeriod, 
-//        AbsenceRequestType.insertTakable, absenceType, date);
-//    
-//    if (result) {
-//      PersonDay personDay = personDayDao.getOrBuildPersonDay(person, date);
-//      Absence absence = new Absence();
-//      absence.absenceType = absenceType;
-//      absence.personDay = personDay;
-//      personDay.absences.add(absence);
-//      personDay.save();
-//      
-//      consistencyManager.updatePersonSituation(person.id, date);
-//      
-//      log.info("Inserita assenza {}.", absenceType.code);
-//    } else {
-//      log.info("Rifiutata assenza {}.", absenceType.code);
-//    }
-//    
-//    renderText(result);
+    AbsenceEngineInstance engineInstance = absenceEngine
+        .buildAbsenceEngineInstance(person, groupAbsenceType.get(), date);
+    Absence absence = new Absence();
     
+    absenceEngine.doRequest(engineInstance, AbsenceRequestType.insert, absenceType.get());
+    
+    if (!engineInstance.absenceEngineProblem.isPresent()) {
+      for (ResponseItem responseItem : engineInstance.responseItems) {
+        PersonDay personDay = personDayDao.getOrBuildPersonDay(person, responseItem.date);
+        responseItem.absence.personDay = personDay;
+        personDay.absences.add(absence);
+        //personDay.save();
+        //consistencyManager.updatePersonSituation(person.id, date);  
+      }
+    } else {
+      
+    }
+    
+    render(engineInstance);
   }
 }

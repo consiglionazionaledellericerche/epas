@@ -1,39 +1,28 @@
 package manager.services.absences;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
-import dao.AbsenceDao;
-import dao.AbsenceTypeDao;
-import dao.WorkingTimeTypeDao;
 import dao.absences.AbsenceComponentDao;
 
-import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
-import models.absences.TakableAbsenceBehaviour;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.GroupAbsenceType.PeriodType;
-import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.JustifiedType;
+import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
-import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 import models.enumerate.JustifiedTimeAtWork;
 
-import org.joda.time.LocalDate;
-
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class AbsenceConstructor {
+//@Slf4j
+public class AbsenceMigration {
   
   private final AbsenceComponentDao absenceComponentDao;
 
@@ -50,8 +39,64 @@ public class AbsenceConstructor {
   }
   
   @Inject
-  public AbsenceConstructor(AbsenceComponentDao absenceComponentDao) {
+  public AbsenceMigration(AbsenceComponentDao absenceComponentDao) {
     this.absenceComponentDao = absenceComponentDao;
+  }
+  
+  public void migrateAbsence(Absence absence) {
+    
+    final JustifiedType nothing = absenceComponentDao
+        .getOrBuildJustifiedType(JustifiedTypeName.nothing);
+    final JustifiedType specifiedMinutes = absenceComponentDao
+        .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
+    final JustifiedType absenceTypeMinutes = absenceComponentDao
+        .getOrBuildJustifiedType(JustifiedTypeName.absence_type_minutes);
+    final JustifiedType allDay = absenceComponentDao
+        .getOrBuildJustifiedType(JustifiedTypeName.all_day);
+    final JustifiedType halfDay = absenceComponentDao
+        .getOrBuildJustifiedType(JustifiedTypeName.half_day);
+    final JustifiedType assignAllDay = absenceComponentDao
+        .getOrBuildJustifiedType(JustifiedTypeName.assign_all_day); 
+
+    if (absence.absenceType.justifiedTimeAtWork == null) {
+      return;
+    }
+
+    // Assenze orarie.
+    if (absence.absenceType.justifiedTimeAtWork.minutes != null 
+        && absence.absenceType.justifiedTimeAtWork.minutes > 0) {
+      absence.justifiedType = absenceTypeMinutes;
+      absence.save();
+      return;
+    }
+
+    if (absence.absenceType.justifiedTime != null && absence.absenceType.justifiedTime > 0) {
+      absence.justifiedType = specifiedMinutes; //PEPE //RITING
+      absence.save();
+      return;
+    }
+
+    if (absence.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)) {  
+      absence.justifiedType = allDay;
+      absence.save();
+      return;
+    }
+    if (absence.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.Nothing)) { 
+      absence.justifiedType = nothing;
+      absence.save();
+      return;
+    }
+    if (absence.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.HalfDay)) {
+      absence.justifiedType = halfDay;
+      absence.save();
+      return;
+    }
+    if (absence.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AssignAllDay)) {
+      absence.justifiedType = assignAllDay;
+      absence.save();
+      return;
+    }
+
   }
   
   public void buildDefaultGroups() { 
@@ -141,7 +186,7 @@ public class AbsenceConstructor {
     // OSS 60 nothing perchè non giustifica niente ma serve per il completamento orario... 
     // vedere se modellarlo.
 
-    if (!absenceComponentDao.GroupAbsenceTypeByName(DefaultGroup.G_18.name()).isPresent()) {
+    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_18.name()).isPresent()) {
 
       //Update AbsenceType
       AbsenceType cnr18 = absenceComponentDao.buildOrEditAbsenceType("18", 
@@ -245,7 +290,7 @@ public class AbsenceConstructor {
 
     }
     
-    if (!absenceComponentDao.GroupAbsenceTypeByName(DefaultGroup.G_19.name()).isPresent()) {
+    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_19.name()).isPresent()) {
 
       //Update AbsenceType
       AbsenceType cnr19 = absenceComponentDao.buildOrEditAbsenceType("19", 
@@ -349,7 +394,7 @@ public class AbsenceConstructor {
 
     }
     
-    if (!absenceComponentDao.GroupAbsenceTypeByName(DefaultGroup.G_661.name()).isPresent()) {
+    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_661.name()).isPresent()) {
 
       //Update AbsenceType
 //      AbsenceType cnr661 = absenceComponentDao.buildOrEditAbsenceType("661", 
@@ -454,7 +499,7 @@ public class AbsenceConstructor {
 
     }
     
-    if (!absenceComponentDao.GroupAbsenceTypeByName(DefaultGroup.G_25.name()).isPresent()) {
+    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_25.name()).isPresent()) {
 
       //Update AbsenceType
       AbsenceType cnr25 = absenceComponentDao.buildOrEditAbsenceType("25", 
@@ -499,8 +544,8 @@ public class AbsenceConstructor {
         t25 = Optional.fromNullable(new TakableAbsenceBehaviour());
         t25.get().name = DefaultTakable.T_25.name();
         t25.get().amountType = AmountType.units;
-        t25.get().takableCodes = Sets.newHashSet(cnr25, cnr25u);
-        t25.get().takenCodes = Sets.newHashSet(cnr25, cnr25u);
+        t25.get().takableCodes = Sets.newHashSet(cnr25, cnr25u, m25);
+        t25.get().takenCodes = Sets.newHashSet(cnr25, cnr25u, m25);
         t25.get().fixedLimit = 150;
         t25.get().save();
       }
@@ -518,7 +563,7 @@ public class AbsenceConstructor {
     }
     
     
-    if (!absenceComponentDao.GroupAbsenceTypeByName(DefaultGroup.G_23.name()).isPresent()) {
+    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_23.name()).isPresent()) {
 
       //Update AbsenceType
       AbsenceType cnr23 = absenceComponentDao.buildOrEditAbsenceType("23", 
@@ -563,8 +608,8 @@ public class AbsenceConstructor {
         t23 = Optional.fromNullable(new TakableAbsenceBehaviour());
         t23.get().name = DefaultTakable.T_23.name();
         t23.get().amountType = AmountType.units;
-        t23.get().takableCodes = Sets.newHashSet(cnr23, cnr23u);
-        t23.get().takenCodes = Sets.newHashSet(cnr23, cnr23u);
+        t23.get().takableCodes = Sets.newHashSet(cnr23, cnr23u, m23);
+        t23.get().takenCodes = Sets.newHashSet(cnr23, cnr23u, m23);
         t23.get().fixedLimit = 30;
         t23.get().save();
       }
@@ -578,13 +623,13 @@ public class AbsenceConstructor {
       group23.complationAbsenceBehaviour = c23.get();
       group23.takableAbsenceBehaviour = t23.get();
       
-      group23.nextGropToCheck = absenceComponentDao.GroupAbsenceTypeByName(DefaultGroup.G_25.name()).get();
+      group23.nextGropToCheck = absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_25.name()).get();
       
       group23.save();
 
     }
     
-    if (!absenceComponentDao.GroupAbsenceTypeByName(DefaultGroup.G_89.name()).isPresent()) {
+    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_89.name()).isPresent()) {
 
       //Update AbsenceType
       AbsenceType cnr89 = absenceComponentDao.buildOrEditAbsenceType("89", 
@@ -639,7 +684,7 @@ public class AbsenceConstructor {
 
     }
     
-    if (!absenceComponentDao.GroupAbsenceTypeByName(DefaultGroup.G_09.name()).isPresent()) {
+    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_09.name()).isPresent()) {
 
       //Update AbsenceType
       AbsenceType cnr09B = absenceComponentDao.buildOrEditAbsenceType("09B", 
