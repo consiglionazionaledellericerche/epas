@@ -54,7 +54,7 @@ public class Absence extends BaseModel {
 
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "justified_type_id")
-  private JustifiedType justifiedType;
+  public JustifiedType justifiedType;
   
   // TODO: spostare la relazione dal person day alla person e persistere il campo date.
 
