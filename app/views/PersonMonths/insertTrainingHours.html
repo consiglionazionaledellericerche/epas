@@ -23,8 +23,8 @@
 			    'data-async-error':'#insertHour', 'data-spinner':'#defaultSpinner'}
 	  
 	  <input name="personId" type="hidden" value="${person.id}"/>
-	  <input name="month" type="hidden" value="${month}"/>
-	  <input name="year" type="hidden" value="${year}"/>
+	  #{f.hidden 'month', value:month /}
+  	  #{f.hidden 'year', value:year /}
 	  #{if personMonthSituationId != null}
 	  		<input name="personMonthSituationId" type="hidden" value="${personMonthSituationId}"/>
 	  		<input name="begin" type="hidden" value="${begin}"/>
