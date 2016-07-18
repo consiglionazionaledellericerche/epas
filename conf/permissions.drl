@@ -493,11 +493,7 @@ when
         "WorkingTimes.showWorkingTimeType",
         "WorkingTimes.showContractWorkingTimeType",		
         "WorkingTimes.showContract",
-        "WorkingTimes.showHorizontal",
-        
-        "PersonMonths.visualizePeopleTrainingHours",
-        "PersonMonths.insertPeopleTrainingHours",
-        "PersonMonths.save"		
+        "WorkingTimes.showHorizontal"      	
 
         ), target == null, granted == false)
 then
@@ -580,13 +576,8 @@ when
         "WorkingTimes.showContractWorkingTimeType",		
         "WorkingTimes.showContract",
         "WorkingTimes.showHorizontal",
-        "WorkingTimes.insertVerticalWorkingTime",
-        
-        "PersonMonths.visualizePeopleTrainingHours",
-        "PersonMonths.insertPeopleTrainingHours",
-        "PersonMonths.save"	
-        			
-               
+        "WorkingTimes.insertVerticalWorkingTime"
+                       
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -732,7 +723,15 @@ when
 		"BadgeSystems.joinBadgesPerson",
 		"BadgeSystems.saveBadges",
 		"BadgeSystems.deleteBadgePerson",
-		"BadgeSystems.deleteBadge"
+		"BadgeSystems.deleteBadge",
+		/*ore di formazione*/
+		"PersonMonths.visualizePeopleTrainingHours",
+        "PersonMonths.insertPeopleTrainingHours",
+        "PersonMonths.deleteTrainingHours",
+        "PersonMonths.deleteTrainingHoursConfirmed",
+        "PersonMonths.modifyTrainingHours",
+        "PersonMonths.save",
+        "PersonMonths.saveTrainingHours"	
         
         ), target == null, granted == false)
 then
@@ -870,7 +869,16 @@ when
 		"BadgeSystems.joinBadgesPerson",
 		"BadgeSystems.saveBadges",
 		"BadgeSystems.deleteBadgePerson",
-		"BadgeSystems.deleteBadge"
+		"BadgeSystems.deleteBadge",
+		
+		/*Ore di formazione*/
+		"PersonMonths.visualizePeopleTrainingHours",
+        "PersonMonths.insertPeopleTrainingHours",
+        "PersonMonths.deleteTrainingHours",
+        "PersonMonths.deleteTrainingHoursConfirmed",
+        "PersonMonths.modifyTrainingHours",
+        "PersonMonths.save",
+        "PersonMonths.saveTrainingHours"
                
        ), target == $o, granted == false)
 then

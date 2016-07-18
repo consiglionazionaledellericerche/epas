@@ -30,7 +30,16 @@
 				
 				<td class="center">	
 				#{list items:key.getValue(), as:'pmr'}
-					<strong>${pmr.trainingHours}</strong> ore dal <strong>${pmr.fromDate.format()}</strong> al <strong>${pmr.toDate.format()}</strong><br>
+					#{if pmr.isEditable()}
+						<a href="@{PersonMonths.modifyTrainingHours(pmr.id)}" data-async-modal="#defaultModal">
+						${pmr.trainingHours} ore dal ${pmr.fromDate.format()} al ${pmr.toDate.format()}</a>						
+						<a href="@{PersonMonths.deleteTrainingHours(pmr.person.id, pmr.id)}" 
+						   data-async-modal="#defaultModal"><span class="glyphicon glyphicon-trash"></span></a><br>
+					#{/if}
+					#{else}
+						<strong>${pmr.trainingHours}</strong> ore dal <strong>${pmr.fromDate.format()}</strong> al <strong>${pmr.toDate.format()}</strong><br>
+					#{/else}
+					
 				#{/list}	
 				</td>				
 			</tr>

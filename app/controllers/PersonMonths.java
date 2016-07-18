@@ -11,6 +11,7 @@ import com.google.gdata.util.common.base.Preconditions;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonMonthRecapDao;
+import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
@@ -24,7 +25,9 @@ import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
+import models.Role;
 import models.User;
+import models.UsersRolesOffices;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -34,6 +37,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+import java.nio.file.attribute.UserPrincipalLookupService;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -59,6 +63,8 @@ public class PersonMonths extends Controller {
   private static SecurityRules rules;
   @Inject
   static WrapperModelFunctionFactory wrapperFunctionFactory;
+  @Inject
+  private static UsersRolesOfficesDao uroDao;
 
   /**
    * metodo che renderizza la visualizzazione del riepilogo orario.
@@ -127,6 +133,13 @@ public class PersonMonths extends Controller {
   public static void insertTrainingHours(Integer month, Integer year) {
 
     Person person = Security.getUser().get().person;
+    java.util.Optional<UsersRolesOffices> uro = uroDao.getUsersRolesOfficesByUser(person.user)
+        .stream()
+        .filter(a -> a.role.name.equals(Role.PERSONNEL_ADMIN) && a.office.equals(person.office))
+        .findFirst();
+    if (uro.isPresent()) {
+      rules.checkIfPermitted(person.office);
+    } 
 
     render(person, month, year);
   }
@@ -147,21 +160,39 @@ public class PersonMonths extends Controller {
     Person person = Security.getUser().get().person;
 
     if (personMonthSituationId != null) {
+      java.util.Optional<UsersRolesOffices> uro = null;
       PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);
-
+      if (person == null) {
+        //ruolo di sistema 
+      } else {
+        uro = uroDao.getUsersRolesOfficesByUser(person.user)
+            .stream()
+            .filter(a -> a.role.name.equals(Role.PERSONNEL_ADMIN) 
+                && a.office.equals(pm.person.office))
+            .findFirst();
+        if (uro == null || uro.isPresent()) {
+          rules.checkIfPermitted(person.office);
+        }
+      }
+      
       Verify.verify(pm.isEditable());
       checkErrorsInUpdate(value, pm);
 
       if (validation.hasErrors()) {
+        LocalDate dateFrom = new LocalDate(year, month, begin);
+        LocalDate dateTo = new LocalDate(year, month, end); 
         response.status = 400;
         render("@insertTrainingHours",
-            person, month, year, begin, end, value, personMonthSituationId);
+            person, month, year, begin, end, value, personMonthSituationId, dateFrom, dateTo);
       }
       pm.trainingHours = value;
       pm.save();
       flash.success("Ore di formazione aggiornate.", value);
-
-      PersonMonths.trainingHours(year);
+      if (uro == null || uro.isPresent()) {
+        PersonMonths.visualizePeopleTrainingHours(year, month, pm.person.office.id);        
+      } else {
+        PersonMonths.trainingHours(year);
+      }      
 
     }
     checkErrors(begin, end, year, month, value);
@@ -213,12 +244,22 @@ public class PersonMonths extends Controller {
    * @param personMonthRecapId l'id del personMonthRecap
    */
   public static void deleteTrainingHours(Long personId, Long personMonthRecapId) {
+    Person person = personDao.getPersonById(personId);    
     PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthRecapId);
     if (pm == null) {
       flash.error("Ore di formazioni inesistenti. Operazione annullata.");
       PersonMonths.trainingHours(LocalDate.now().getYear());
 
     }
+    java.util.Optional<UsersRolesOffices> uro = uroDao.getUsersRolesOfficesByUser(person.user)
+        .stream()
+        .filter(a -> a.role.name.equals(Role.PERSONNEL_ADMIN) 
+            && a.office.equals(pm.person.office))
+        .findFirst();
+    if (uro.isPresent()) {
+      rules.checkIfPermitted(person.office);
+    } 
+    
     render(pm);
   }
 
@@ -235,16 +276,29 @@ public class PersonMonths extends Controller {
       flash.error("Ore di formazioni inesistenti. Operazione annullata.");
       Stampings.stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
     }
-
+    
     Person person = Security.getUser().get().person;
-    if (person == null || !person.id.equals(pm.person.id)) {
-      flash.error("Accesso negato.");
-      renderTemplate("Application/indexAdmin.html");
+    java.util.Optional<UsersRolesOffices> uro = null;
+    if (person == null) {
+      //ruolo di sistema
+    } else {
+      uro = uroDao.getUsersRolesOfficesByUser(person.user)
+          .stream()
+          .filter(a -> a.role.name.equalsIgnoreCase(Role.PERSONNEL_ADMIN) 
+              && a.office.equals(pm.person.office))
+          .findFirst();
+      if (uro.isPresent()) {
+        rules.checkIfPermitted(person.office);
+      } 
     }
-
+    
     pm.delete();
     flash.error("Ore di formazione eliminate con successo.");
-    PersonMonths.trainingHours(pm.year);
+    if (uro == null || uro.isPresent()) {
+      PersonMonths.visualizePeopleTrainingHours(pm.year, pm.month, pm.person.office.id);
+    } else {
+      PersonMonths.trainingHours(pm.year);      
+    }
   }
 
   /**
@@ -275,12 +329,7 @@ public class PersonMonths extends Controller {
    * @param year l'anno di riferimento
    */
   public static void insertPeopleTrainingHours(Long officeId, int month, int year) {
-    Office office;
-    if (officeId == null) {
-      office = officeDao.getOfficeById(Long.parseLong(session.get("officeSelected")));
-    } else {
-      office = officeDao.getOfficeById(officeId);
-    }
+    Office office = officeDao.getOfficeById(officeId);    
     notFoundIfNull(office);
 
     rules.checkIfPermitted(office);
@@ -301,14 +350,14 @@ public class PersonMonths extends Controller {
    * @param person la persona che ha fatto la formazione
    */
   public static void save(@Valid @Min(0) Integer begin, @Min(0) @Valid Integer end,
-      @Required @Valid @Min(0) Integer value, Integer month, Integer year, Person person) {
+      @Required @Valid @Min(0) Integer value, Integer month, Integer year, @Valid Person person) {
     checkErrors(begin, end, year, month, value);
     if (validation.hasErrors()) {
       response.status = 400;
       render("@insertPeopleTrainingHours",
           person, month, year, begin, end, value);
     }
-    //Verify.verify(pm.isEditable());
+
     personMonthsManager.saveTrainingHours(person, year, month, begin, end, false, value);
     flash.success("Salvate %d ore di formazione per %s", value, person.fullName());
     PersonMonths.visualizePeopleTrainingHours(year, month, person.office.id);
