@@ -92,7 +92,7 @@ public class PersonMonthsManager {
    * @return un Insertable che verifica se le ore di formazione per anno e mese richieste sono già
    *     state inviate.
    */
-  public Insertable checkIfAlreadySend(Person person, int year, int month) {
+  public Insertable checkIfAlreadySent(Person person, int year, int month) {
     Insertable rr = new Insertable(true, "");
     List<PersonMonthRecap> list = personMonthRecapDao
         .getPersonMonthRecapInYearOrWithMoreDetails(person, year,
