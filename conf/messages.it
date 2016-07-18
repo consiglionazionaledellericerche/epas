@@ -286,6 +286,8 @@ person.telephone=Telefono
 person.user.username= Username in ePAS
 person.wantEmail=Invio Email
 
+PersonMonths.insertPeopleTrainingHours= Inserisci ore di formazione
+
 peopleGroupId= Persone del gruppo di Lavoro
 qualification=Livello
 

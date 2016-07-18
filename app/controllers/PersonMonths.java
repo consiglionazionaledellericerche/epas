@@ -2,6 +2,8 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
@@ -12,6 +14,8 @@ import dao.PersonMonthRecapDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 
 import manager.PersonMonthsManager;
 
@@ -51,9 +55,10 @@ public class PersonMonths extends Controller {
   private static OfficeDao officeDao;
   @Inject
   private static PersonDao personDao;
-
   @Inject
   private static SecurityRules rules;
+  @Inject
+  static WrapperModelFunctionFactory wrapperFunctionFactory;
 
   /**
    * metodo che renderizza la visualizzazione del riepilogo orario.
@@ -119,7 +124,7 @@ public class PersonMonths extends Controller {
    * @param month month
    * @param year  year
    */
-  public static void insertTrainingHours(int month, int year) {
+  public static void insertTrainingHours(Integer month, Integer year) {
 
     Person person = Security.getUser().get().person;
 
@@ -136,7 +141,8 @@ public class PersonMonths extends Controller {
    * @param year  anno
    */
   public static void saveTrainingHours(@Valid @Min(0) Integer begin, @Min(0) @Valid Integer end,
-      @Required @Valid @Min(0) Integer value, int month, int year, Long personMonthSituationId) {
+      @Required @Valid @Min(0) Integer value, Integer month, Integer year, 
+      Long personMonthSituationId) {
 
     Person person = Security.getUser().get().person;
 
@@ -144,13 +150,8 @@ public class PersonMonths extends Controller {
       PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);
 
       Verify.verify(pm.isEditable());
+      checkErrorsInUpdate(value, pm);
 
-      if (!validation.hasErrors()) {
-        if (value > 24 * (pm.toDate.getDayOfMonth() - pm.fromDate.getDayOfMonth() + 1)) {
-          validation.addError("value",
-              "valore troppo alto");
-        }
-      }
       if (validation.hasErrors()) {
         response.status = 400;
         render("@insertTrainingHours",
@@ -163,69 +164,18 @@ public class PersonMonths extends Controller {
       PersonMonths.trainingHours(year);
 
     }
-
-    if (!validation.hasErrors()) {
-      if (begin == null) {
-        validation.addError("begin", "Richiesto");
-      }
-      if (end == null) {
-        validation.addError("end", "Richiesto");
-      }
-    }
-    if (!validation.hasErrors()) {
-      int endMonth = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue().getDayOfMonth();
-      if (begin > endMonth) {
-        validation.addError("begin",
-            "deve appartenere al mese selezionato");
-      }
-      if (end > endMonth) {
-        validation.addError("end",
-            "deve appartenere al mese selezionato");
-      }
-    }
-    if (!validation.hasErrors()) {
-      if (begin > end) {
-        validation.addError("begin",
-            "inizio intervallo  non valido");
-      }
-    }
-    if (!validation.hasErrors()) {
-      if (value > 24 * (end - begin + 1)) {
-        validation.addError("value",
-            "valore troppo alto");
-      }
-    }
-
+    checkErrors(begin, end, year, month, value);
     if (validation.hasErrors()) {
       response.status = 400;
       render("@insertTrainingHours", person, month, year, begin, end, value);
     }
 
-    LocalDate beginDate = new LocalDate(year, month, begin);
-    LocalDate endDate = new LocalDate(year, month, end);
-//    if (!validation.hasErrors()) {
-//      if (!personMonthsManager
-//          .checkIfPeriodAlreadyExists(person, year, month, beginDate, endDate).getResult()) {
-//        validation.addError("begin",
-//            "ore già presenti per l'intervallo selezionato");
-//      }
-//    }
-    if (!validation.hasErrors()) {
-      if (!personMonthsManager.checkIfAlreadySend(person, year, month).getResult()) {
-        flash.error("Le ore di formazione per il mese selezionato sono già state approvate.");
-        trainingHours(year);
-      }
-    }
-    if (validation.hasErrors()) {
-      response.status = 400;
-      render("@insertTrainingHours", person, month, year, begin, end, value);
+    if (!personMonthsManager.checkIfAlreadySent(person, year, month).getResult()) {
+      flash.error("Le ore di formazione per il mese selezionato sono già state approvate.");
+      trainingHours(year);
     }
 
-    PersonMonthRecap pm = new PersonMonthRecap(person, year, month);
-
-    Verify.verify(pm.isEditable());
-
-    personMonthsManager.saveTrainingHours(pm, false, value, beginDate, endDate);
+    personMonthsManager.saveTrainingHours(person, year, month, begin, end, false, value);
     flash.success("Salvate %d ore di formazione ", value);
 
     PersonMonths.trainingHours(year);
@@ -298,10 +248,11 @@ public class PersonMonths extends Controller {
   }
 
   /**
-   *
-   * @param year
-   * @param month
-   * @param officeId
+   * visualizza il tabellone riepilogativo delle ore di formazione in un determinato mese e anno 
+   * per l'ufficio con id officeId.
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   * @param officeId l'id dell'ufficio di riferimento
    */
   public static void visualizePeopleTrainingHours(int year, int month, Long officeId) {
     Office office = officeDao.getOfficeById(officeId);
@@ -310,13 +261,111 @@ public class PersonMonths extends Controller {
     Set<Office> offices = Sets.newHashSet();
     offices.add(office);
     List<Person> personList = personDao.getActivePersonInMonth(offices, new YearMonth(year, month));
-//    Table<Person, String, List<TrainingHoursRecap>> table = TreeBasedTable
-//        .create(personMonthsManager.personNameComparator,
-//            personMonthsManager.stringComparator);
-//    
-//    table = personMonthsManager.createTable(personList, year, month); 
-    Map<Person, List<PersonMonthRecap>> map = personMonthsManager.createMap(personList, year, month);
+
+    Map<Person, List<PersonMonthRecap>> map = personMonthsManager
+        .createMap(personList, year, month);
 
     render(map, year, month, office);
   }
+
+  /**
+   * visualizza la form di inserimento per l'amministratore delle ore di formazione.
+   * @param officeId l'id dell'ufficio di cui si vuole inserire le ore di formazione
+   * @param month il mese di riferimento
+   * @param year l'anno di riferimento
+   */
+  public static void insertPeopleTrainingHours(Long officeId, int month, int year) {
+    Office office;
+    if (officeId == null) {
+      office = officeDao.getOfficeById(Long.parseLong(session.get("officeSelected")));
+    } else {
+      office = officeDao.getOfficeById(officeId);
+    }
+    notFoundIfNull(office);
+
+    rules.checkIfPermitted(office);
+
+    List<Person> simplePersonList = personDao.listFetched(Optional.<String>absent(),
+        ImmutableSet.of(office), false, null, null, false).list();
+
+    render(month, year, simplePersonList);
+  }
+
+  /**
+   * salvataggio delle ore di formazione inserite dall'amministratore.
+   * @param begin il giorno di inizio della formazione
+   * @param end il giorno di fine della formazione
+   * @param value la quantità di ore di formazione
+   * @param month il mese in cui si è fatta formazione
+   * @param year l'anno in cui si è fatta la formazione
+   * @param person la persona che ha fatto la formazione
+   */
+  public static void save(@Valid @Min(0) Integer begin, @Min(0) @Valid Integer end,
+      @Required @Valid @Min(0) Integer value, Integer month, Integer year, Person person) {
+    checkErrors(begin, end, year, month, value);
+    if (validation.hasErrors()) {
+      response.status = 400;
+      render("@insertPeopleTrainingHours",
+          person, month, year, begin, end, value);
+    }
+    //Verify.verify(pm.isEditable());
+    personMonthsManager.saveTrainingHours(person, year, month, begin, end, false, value);
+    flash.success("Salvate %d ore di formazione per %s", value, person.fullName());
+    PersonMonths.visualizePeopleTrainingHours(year, month, person.office.id);
+  }
+
+  /**
+   * metodo privato che aggiunge al validation eventuali errori riscontrati nel passaggio
+   * dei parametri.
+   * @param begin il giorno di inizio della formazione
+   * @param end il giorno di fine della formazione
+   * @param year l'anno di formazione
+   * @param month il mese di formazione
+   * @param value la quantità di ore di formazione
+   */
+  private static void checkErrors(Integer begin, Integer end, Integer year, 
+      Integer month, Integer value) {
+    if (!validation.hasErrors()) {
+      if (begin == null) {
+        validation.addError("begin", "Richiesto");
+      }
+      if (end == null) {
+        validation.addError("end", "Richiesto");
+      }    
+      int endMonth = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue().getDayOfMonth();
+      if (begin > endMonth) {
+        validation.addError("begin",
+            "deve appartenere al mese selezionato");
+      }
+      if (end > endMonth) {
+        validation.addError("end",
+            "deve appartenere al mese selezionato");
+      }
+      if (begin > end) {
+        validation.addError("begin",
+            "inizio intervallo  non valido");
+      }
+
+      if (value > 24 * (end - begin + 1) && end - begin >= 0) {
+        validation.addError("value",
+            "valore troppo alto");
+      }
+    }
+  }
+
+  /**
+   * aggiunge al validation l'eventuale errore relativo al quantitativo orario che può superare
+   * le ore possibili prendibili per quel giorno.
+   * @param value il quantitativo di ore di formazione
+   * @param pm il personMonthRecap da modificare con le ore passate come parametro
+   */
+  private static void checkErrorsInUpdate(Integer value, PersonMonthRecap pm) {
+    if (!validation.hasErrors()) {
+      if (value > 24 * (pm.toDate.getDayOfMonth() - pm.fromDate.getDayOfMonth() + 1)) {
+        validation.addError("value",
+            "valore troppo alto");
+      }
+    }
+  }
+
 }
