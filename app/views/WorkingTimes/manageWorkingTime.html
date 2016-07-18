@@ -3,65 +3,67 @@
 #{set title: 'ePAS - Gestione tipi orario'  /}
 
 <div class="container">
-#{title title:'Gestione Dei Tipi Orario' /}
+  #{title title:'Gestione Dei Tipi Orario' /}
 </div>
 
 #{workingTime.workingTimeTabs activeAction:'manageWorkingTime' /}
- 
+
 <div class="container">
 
-	  #{panel title:'Tipi Orario Predefiniti CNR', color:'primary'}
-	  	
-	  	<div class="alert alert-info" role="alert">
-	   	  I <strong>tipi orario predefiniti</strong> possono essere assegnati ad ogni dipendente di ogni sede.<br>
-	   	  Non possono essere modificati o aggiunti ma possono essere presi ad esempio da parte degli amministratori
-	   	  del personale per creare nuovi tipi orario particolari per le sedi amministrate. 
-	   </div>
-	  
-	    <table class="table table-hover">
-	      <tr>
-	         <th>Descrizione</th>
-	         <th>Orizzontale</th>
-	         <th>Contratti attivi<br>attualmente associati<br>(alla data di oggi)</th>
-	         <th>Periodi associati<br>a contratti attivi</th> 
-	         <!-- 	
-	         <th class="center">Cambia orario<br>a tutti</th>
-	          -->
-	      </tr>
-	      #{list items:wttDefault, as:'wtt'}
-	      <tr>
-	        <td>
-	          #{if wtt.value.horizontal}
-	          <a href="@{WorkingTimes.showHorizontal(wtt.value.id)}" data-async-modal="#defaultModal">${wtt.value.description}</a>
-	          #{/if}
-	          #{else}
-	          <a href="@{WorkingTimes.showWorkingTimeType(wtt.value.id)}">${wtt.value.description}</a>
-	          #{/else}
-	          
-	        </td>
-	        <td> 
-	        #{if wtt.value.horizontal} Si #{/if}
-	        #{else} No#{/else}
-	        </td>
-	        <td>
-	          <a href="@{WorkingTimes.showContract(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
-	            ${wtt.getAssociatedActiveContract(office.id).size()}
-	    	  </a>    
-	        </td>
-	        <td>
-	          <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
-	            ${wtt.getAssociatedPeriodInActiveContract(office.id).size()}
-	          </a>
-	        </td>
-	        <!-- 
-	        <td class="center">
-	          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.value.id, office.id)}" data-modal=".my-modal">
-	            Cambia
-	    	  </a>
-	        </td>
-	         -->
-	       </tr>	
-	       #{/list}
-		</table>
-	  #{/panel}
+  #{panel title:'Tipi Orario Predefiniti CNR', color:'primary'}
+
+  <div class="alert alert-info" role="alert">
+    I <strong>tipi orario predefiniti</strong> possono essere assegnati ad ogni dipendente di ogni sede.<br>
+    Non possono essere modificati o aggiunti ma possono essere presi ad esempio da parte degli amministratori
+    del personale per creare nuovi tipi orario particolari per le sedi amministrate.
   </div>
+
+  <table class="table table-hover">
+    <tr>
+      <th>Descrizione</th>
+      <th>Orizzontale</th>
+      <th>Contratti attivi<br>attualmente associati<br>(alla data di oggi)</th>
+      <th>Periodi associati<br>a contratti attivi</th>
+      <!--
+      <th class="center">Cambia orario<br>a tutti</th>
+       -->
+    </tr>
+    #{list items:wttDefault, as:'wtt'}
+    <tr>
+      <td>
+        <a
+        #{if wtt.value.horizontal}
+          href="@{WorkingTimes.showHorizontal(wtt.value.id)}"
+        #{/if}
+        #{else}
+          href="@{WorkingTimes.showWorkingTimeType(wtt.value.id)}"
+        #{/else}
+          data-async-modal="#defaultModal">${wtt.value.description}
+        </a>
+      </td>
+      <td>
+        #{if wtt.value.horizontal} Si #{/if}
+        #{else} No#{/else}
+      </td>
+      <td>
+        <a href="@{WorkingTimes.showContract(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
+          ${wtt.getAssociatedActiveContract(office.id).size()}
+        </a>
+      </td>
+      <td>
+        <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
+          ${wtt.getAssociatedPeriodInActiveContract(office.id).size()}
+        </a>
+      </td>
+      <!--
+      <td class="center">
+        <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.value.id, office.id)}" data-modal=".my-modal">
+          Cambia
+      </a>
+      </td>
+       -->
+    </tr>
+    #{/list}
+  </table>
+  #{/panel}
+</div>
