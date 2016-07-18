@@ -77,6 +77,7 @@ public class AbsenceManager {
   private final ConsistencyManager consistencyManager;
   private final ConfigurationManager configurationManager;
   private final IWrapperFactory wrapperFactory;
+  private final PersonDayManager personDayManager;
 
   /**
    * Costruttore.
@@ -111,6 +112,7 @@ public class AbsenceManager {
       AbsenceGroupManager absenceGroupManager,
       ConsistencyManager consistencyManager,
       ConfigurationManager configurationManager,
+      PersonDayManager personDayManager,
 
       IWrapperFactory wrapperFactory,
       IVacationsService vacationsService) {
@@ -129,6 +131,7 @@ public class AbsenceManager {
     this.personChildrenDao = personChildrenDao;
     this.consistencyManager = consistencyManager;
     this.wrapperFactory = wrapperFactory;
+    this.personDayManager = personDayManager;
   }
 
   /**
@@ -381,7 +384,7 @@ public class AbsenceManager {
     AbsencesResponse ar = new AbsencesResponse(date, absenceType.code);
 
     //se non devo considerare festa ed è festa non inserisco l'assenza
-    if (!absenceType.consideredWeekEnd && personManager.isHoliday(person, date)) {
+    if (!absenceType.consideredWeekEnd && personDayManager.isHoliday(person, date)) {
       ar.setHoliday(true);
       ar.setWarning(AbsencesResponse.NON_UTILIZZABILE_NEI_FESTIVI);
 
@@ -391,12 +394,8 @@ public class AbsenceManager {
         ar.setDayInReperibilityOrShift(true);
       }
 
-      PersonDay pd = personDayDao.getPersonDay(person, date).orNull();
+      final PersonDay pd = personDayManager.getOrCreateAndPersistPersonDay(person, date);
 
-      if (pd == null) {
-        pd = new PersonDay(person, date);
-        pd.save();
-      }
       LocalDate startAbsence = null;
       if (file.isPresent()) {
         startAbsence = beginDateToInsertAbsenceFile(date, person, absenceType);
