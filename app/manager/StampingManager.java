@@ -5,7 +5,8 @@ import com.google.inject.Inject;
 
 import dao.PersonDao;
 import dao.PersonDayDao;
-import dao.StampingDao;
+
+import lombok.extern.slf4j.Slf4j;
 
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingDayRecapFactory;
@@ -21,15 +22,13 @@ import models.exports.StampingFromClient;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class StampingManager {
 
-  private final Logger log = LoggerFactory.getLogger(StampingManager.class);
   private final PersonDayDao personDayDao;
   private final PersonDao personDao;
   private final PersonDayManager personDayManager;
@@ -37,22 +36,18 @@ public class StampingManager {
   private final ConsistencyManager consistencyManager;
 
   /**
-   *
-   * @param stampingDao il dao per cercare le stampings
-   * @param personDayDao il dao per cercare i personday
-   * @param personDao il dao per cercare le persone
-   * @param personDayManager il manager per lavorare sui personday
+   * @param personDayDao            il dao per cercare i personday
+   * @param personDao               il dao per cercare le persone
+   * @param personDayManager        il manager per lavorare sui personday
    * @param stampingDayRecapFactory il factory per lavorare sugli stampingDayRecap
-   * @param consistencyManager
-   * il costruttore dell'injector.
+   * @param consistencyManager      il costruttore dell'injector.
    */
   @Inject
-  public StampingManager(StampingDao stampingDao,
-                         PersonDayDao personDayDao,
-                         PersonDao personDao,
-                         PersonDayManager personDayManager,
-                         PersonStampingDayRecapFactory stampingDayRecapFactory,
-                         ConsistencyManager consistencyManager) {
+  public StampingManager(PersonDayDao personDayDao,
+      PersonDao personDao,
+      PersonDayManager personDayManager,
+      PersonStampingDayRecapFactory stampingDayRecapFactory,
+      ConsistencyManager consistencyManager) {
 
     this.personDayDao = personDayDao;
     this.personDao = personDao;
@@ -63,12 +58,12 @@ public class StampingManager {
 
 
   /**
-   * @param pd il personday
+   * @param pd       il personday
    * @param stamping la timbratura
    * @return true se esiste una timbratura nel personday uguale a quella passata.
    */
   private static boolean checkDuplicateStamping(
-          PersonDay pd, StampingFromClient stamping) {
+      PersonDay pd, StampingFromClient stamping) {
 
     for (Stamping s : pd.stampings) {
 
@@ -76,8 +71,8 @@ public class StampingManager {
         return true;
       }
       if (s.date.isEqual(stamping.dateTime.minusMinutes(1))
-              && ((s.isIn() && stamping.inOut == 0)
-              || (s.isOut() && stamping.inOut == 1))) {
+          && ((s.isIn() && stamping.inOut == 0)
+          || (s.isOut() && stamping.inOut == 1))) {
         return true;
       }
     }
@@ -94,7 +89,7 @@ public class StampingManager {
     Integer hour = Integer.parseInt(time.substring(0, 2));
     Integer minute = Integer.parseInt(time.substring(2, 4));
     return new LocalDateTime(date.getYear(), date.getMonthOfYear(),
-            date.getDayOfMonth(), hour, minute);
+        date.getDayOfMonth(), hour, minute);
 
   }
 
@@ -107,7 +102,7 @@ public class StampingManager {
    * @return numero di coppie
    */
   public final int maxNumberOfStampingsInMonth(final LocalDate date,
-                                               final List<Person> activePersonsInDay) {
+      final List<Person> activePersonsInDay) {
 
     int max = 0;
 
@@ -133,7 +128,7 @@ public class StampingManager {
    * Stamping dal formato del client al formato ePAS.
    */
   public boolean createStampingFromClient(
-          StampingFromClient stampingFromClient, boolean recompute) {
+      StampingFromClient stampingFromClient, boolean recompute) {
 
     // Check della richiesta
 
@@ -144,21 +139,21 @@ public class StampingManager {
     Person person = personDao.getPersonById(stampingFromClient.personId);
     if (person == null) {
       log.warn("L'id della persona passata tramite json non ha trovato "
-              + "corrispondenza nell'anagrafica del personale. "
-              + "Controllare id = {}", stampingFromClient.personId);
+          + "corrispondenza nell'anagrafica del personale. "
+          + "Controllare id = {}", stampingFromClient.personId);
       return false;
     }
 
     // Recuperare il personDay
-    PersonDay personDay = personDayDao
-            .getOrCreateAndPersistPersonDay(person, stampingFromClient.dateTime.toLocalDate());
+    PersonDay personDay = personDayManager
+        .getOrCreateAndPersistPersonDay(person, stampingFromClient.dateTime.toLocalDate());
 
     // Check stamping duplicata
     if (checkDuplicateStamping(personDay, stampingFromClient)) {
       log.info("All'interno della lista di timbrature di {} nel giorno {} "
-                      + "c'è una timbratura uguale a quella passata dallo"
-                      + "stampingsFromClient: {}",
-              new Object[]{person.getFullname(), personDay.date, stampingFromClient.dateTime});
+              + "c'è una timbratura uguale a quella passata dallo"
+              + "stampingsFromClient: {}",
+          new Object[]{person.getFullname(), personDay.date, stampingFromClient.dateTime});
       return true;
     }
 
@@ -186,8 +181,8 @@ public class StampingManager {
    * La lista dei PersonStampingDayRecap renderizzata da presenza giornaliera.
    */
   public List<PersonStampingDayRecap> populatePersonStampingDayRecapList(
-          List<Person> activePersonsInDay,
-          LocalDate dayPresence, int numberOfInOut) {
+      List<Person> activePersonsInDay,
+      LocalDate dayPresence, int numberOfInOut) {
 
     List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
     for (Person person : activePersonsInDay) {
@@ -204,23 +199,22 @@ public class StampingManager {
 
       personDayManager.setValidPairStampings(personDay);
       daysRecap.add(stampingDayRecapFactory
-              .create(personDay, numberOfInOut, true, Optional.<List<Contract>>absent()));
+          .create(personDay, numberOfInOut, true, Optional.<List<Contract>>absent()));
 
     }
     return daysRecap;
   }
 
   /**
-   * 
-   * @param stamping  la timbratura da controllare
-   * @param user l'utente che vuole inserire la timbratura
+   * @param stamping la timbratura da controllare
+   * @param user     l'utente che vuole inserire la timbratura
    * @param employee la persona per cui si vuole inserire la timbratura
-   * @return true se lo stampType relativo alla timbratura da inserire è tra quelli
-   * previsti per la timbratura fuori sede, false altrimenti.
+   * @return true se lo stampType relativo alla timbratura da inserire è tra quelli previsti per la
+   * timbratura fuori sede, false altrimenti.
    */
   public boolean checkStampType(Stamping stamping, User user, Person employee) {
     if (user.person.id.equals(employee.id)
-       && stamping.stampType.equals(StampTypes.LAVORO_FUORI_SEDE)) {
+        && stamping.stampType.equals(StampTypes.LAVORO_FUORI_SEDE)) {
       return true;
     }
     return false;

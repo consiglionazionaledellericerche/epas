@@ -3,14 +3,12 @@ package manager.recaps.personstamping;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
-import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
 
 import lombok.extern.slf4j.Slf4j;
 
 import manager.PersonDayManager;
-import manager.PersonManager;
 import manager.cache.StampTypeManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
@@ -63,20 +61,17 @@ public class PersonStampingDayRecap {
    * Costruisce l'oggetto contenente un giorno lavorativo da visualizzare nel tabellone timbrature.
    *
    * @param personDayManager     injected
-   * @param personManager        injected
    * @param stampTypeManager     injected
    * @param wrapperFactory       injected
-   * @param workingTimeTypeDao   injected
    * @param configurationManager injected
    * @param personDay            personDay
    * @param numberOfInOut        numero di colonne del tabellone a livello mensile.
    * @param considerExitingNow   se considerare nel calcolo l'uscita in questo momento
    * @param monthContracts       il riepiloghi del mese
    */
-  public PersonStampingDayRecap(PersonDayManager personDayManager, PersonManager personManager,
+  public PersonStampingDayRecap(PersonDayManager personDayManager,
       StampingTemplateFactory stampingTemplateFactory,
       StampTypeManager stampTypeManager, IWrapperFactory wrapperFactory,
-      WorkingTimeTypeDao workingTimeTypeDao,
       ConfigurationManager configurationManager, PersonDay personDay,
       int numberOfInOut, boolean considerExitingNow,
       Optional<List<Contract>> monthContracts) {
@@ -87,10 +82,12 @@ public class PersonStampingDayRecap {
       log.debug("Istanziato PersonStampingDayRecap relativo al giorno corrente.");
     }
 
-    if (!personDay.isPersistent()) {
-      this.personDay.setHoliday(personManager
-          .isHoliday(personDay.getPerson(), personDay.getDate()));
-    }
+    //FIXME è stato rimossa la condizione che comportava il calcolo dei festivi solo sui
+    // personDay non persistenti per rattoppare la visualizzazione in quei casi in cui i personDay
+    // sono stati persistiti senza calcolare questa informazione.
+    // Appena l'informazione persistita diventerà affidabile si può reinserire la condizione.
+    this.personDay.setHoliday(personDayManager.
+        isHoliday(personDay.getPerson(), personDay.getDate()));
 
     this.wrPersonDay = wrapperFactory.create(personDay);
 
