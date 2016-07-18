@@ -495,7 +495,9 @@ when
         "WorkingTimes.showContract",
         "WorkingTimes.showHorizontal",
         
-        "PersonMonths.visualizePeopleTrainingHours"		
+        "PersonMonths.visualizePeopleTrainingHours",
+        "PersonMonths.insertPeopleTrainingHours",
+        "PersonMonths.save"		
 
         ), target == null, granted == false)
 then
@@ -580,7 +582,9 @@ when
         "WorkingTimes.showHorizontal",
         "WorkingTimes.insertVerticalWorkingTime",
         
-        "PersonMonths.visualizePeopleTrainingHours"
+        "PersonMonths.visualizePeopleTrainingHours",
+        "PersonMonths.insertPeopleTrainingHours",
+        "PersonMonths.save"	
         			
                
        ), target == $o, granted == false)
