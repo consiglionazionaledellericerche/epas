@@ -30,6 +30,7 @@ import it.cnr.iit.epas.DateUtility;
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.NotificationManager;
+import manager.PersonDayManager;
 import manager.PersonManager;
 import manager.SecureManager;
 import manager.YearlyAbsencesManager;
@@ -119,6 +120,8 @@ public class Absences extends Controller {
   private static PersonStampingRecapFactory stampingsRecapFactory;
   @Inject
   private static ConsistencyManager consistencyManager;
+  @Inject
+  private static PersonDayManager personDayManager;
 
   /**
    * Le assenze della persona nel mese.
@@ -283,7 +286,7 @@ public class Absences extends Controller {
    * metodo che permette il salvataggio di un certo codice di assenza per una persona per un giorno
    * o un periodo temporale.
    *
-   * @param person      la persona per cui si vuole salvare l'assenza
+   * @param personId    la persona per cui si vuole salvare l'assenza
    * @param dateFrom    la data da cui si vuole salvare l'assenza
    * @param dateTo      la data entro cui si vuole salvare l'assenza
    * @param absenceType il tipo di assenza da salvare
@@ -363,9 +366,9 @@ public class Absences extends Controller {
 
 
   /**
-   * metodo che renderizza la pagina di modifica di un certo codice di assenza.
+   * metodo che renderizza la pagina di modifica di una determinata assenza.
    *
-   * @param absenceId l'id della assenza
+   * @param absence l'assenza da modificare
    */
   public static void edit(Absence absence) {
 
@@ -380,8 +383,7 @@ public class Absences extends Controller {
       jRules.checkForAbsences(absence);
     }
 
-    List<HistoryValue<Absence>> historyAbsence = absenceHistoryDao
-        .absences(absence.id);
+    List<HistoryValue<Absence>> historyAbsence = absenceHistoryDao.absences(absence.id);
 
     LocalDate dateFrom = absence.personDay.date;
     LocalDate dateTo = absence.personDay.date;
@@ -487,9 +489,9 @@ public class Absences extends Controller {
   /**
    * Gli allegati alle assenze nel mese. Bisogna renderlo parametrico alla sede.
    *
-   * @param year   anno
-   * @param month  mese
-   * @param office office
+   * @param year     anno
+   * @param month    mese
+   * @param officeId id office
    */
   public static void manageAttachmentsPerCode(Integer year, Integer month, Long officeId) {
 
@@ -914,7 +916,8 @@ public class Absences extends Controller {
 
     LocalDate actualDate = dateFrom;
     while (!actualDate.isAfter(dateTo)) {
-      final PersonDay personDay = personDayDao.getOrBuildPersonDay(person, actualDate);
+      final PersonDay personDay = personDayManager
+          .getOrCreateAndPersistPersonDay(person, actualDate);
       Absence absence = new Absence();
       absence.absenceType = absenceType;
       absence.personDay = personDay;
