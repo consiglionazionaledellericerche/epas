@@ -8,7 +8,13 @@
     #{alert color:'info'}
      <p>Lista delle ore di formazione inserite dai dipendenti per il mese e la sede selezionati.</p>
     #{/alert}
-
+	#{f.hidden 'month', value:month /}
+  	#{f.hidden 'year', value:year /}
+  	#{b.buttons center:true}
+  	<a class="btn btn-success" href="@{PersonMonths.insertPeopleTrainingHours(session.get("officeSelected"),month,year)}" data-async-modal="#defaultModal">
+    	<i class="fa fa-plus"></i> &{'PersonMonths.insertPeopleTrainingHours'}
+  	</a>
+  	#{/b.buttons}
 	<table class="table table-striped table-hover" width="100%" datatable>
 		<thead>
 			<tr>

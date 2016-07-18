@@ -33,12 +33,15 @@ public class PersonMonthsManager {
    * @param from data inizio del periodo di formazione
    * @param to data fine del periodo di formazione.
    */
-  public void saveTrainingHours(
-      PersonMonthRecap pm, boolean approved, Integer value, LocalDate from, LocalDate to) {
+  public void saveTrainingHours(Person person, Integer year, Integer month, Integer begin, Integer end,
+      boolean approved, Integer value) {
+    PersonMonthRecap pm = new PersonMonthRecap(person, year, month);
+    LocalDate beginDate = new LocalDate(year, month, begin);
+    LocalDate endDate = new LocalDate(year, month, end);
     pm.hoursApproved = false;
     pm.trainingHours = value;
-    pm.fromDate = from;
-    pm.toDate = to;
+    pm.fromDate = beginDate;
+    pm.toDate = endDate;
     pm.save();
   }
 
