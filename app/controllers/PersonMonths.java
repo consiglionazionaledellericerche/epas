@@ -151,7 +151,7 @@ public class PersonMonths extends Controller {
 
       Verify.verify(pm.isEditable());
       checkErrorsInUpdate(value, pm);
-      
+
       if (validation.hasErrors()) {
         response.status = 400;
         render("@insertTrainingHours",
@@ -169,12 +169,10 @@ public class PersonMonths extends Controller {
       response.status = 400;
       render("@insertTrainingHours", person, month, year, begin, end, value);
     }
-    
-    if (!validation.hasErrors()) {
-      if (!personMonthsManager.checkIfAlreadySend(person, year, month).getResult()) {
-        flash.error("Le ore di formazione per il mese selezionato sono già state approvate.");
-        trainingHours(year);
-      }
+
+    if (!personMonthsManager.checkIfAlreadySent(person, year, month).getResult()) {
+      flash.error("Le ore di formazione per il mese selezionato sono già state approvate.");
+      trainingHours(year);
     }
 
     personMonthsManager.saveTrainingHours(person, year, month, begin, end, false, value);
@@ -269,7 +267,7 @@ public class PersonMonths extends Controller {
 
     render(map, year, month, office);
   }
-  
+
   /**
    * visualizza la form di inserimento per l'amministratore delle ore di formazione.
    * @param officeId l'id dell'ufficio di cui si vuole inserire le ore di formazione
@@ -292,7 +290,7 @@ public class PersonMonths extends Controller {
 
     render(month, year, simplePersonList);
   }
-  
+
   /**
    * salvataggio delle ore di formazione inserite dall'amministratore.
    * @param begin il giorno di inizio della formazione
@@ -315,7 +313,7 @@ public class PersonMonths extends Controller {
     flash.success("Salvate %d ore di formazione per %s", value, person.fullName());
     PersonMonths.visualizePeopleTrainingHours(year, month, person.office.id);
   }
-  
+
   /**
    * metodo privato che aggiunge al validation eventuali errori riscontrati nel passaggio
    * dei parametri.
@@ -347,14 +345,14 @@ public class PersonMonths extends Controller {
         validation.addError("begin",
             "inizio intervallo  non valido");
       }
-    
+
       if (value > 24 * (end - begin + 1) && end - begin >= 0) {
         validation.addError("value",
             "valore troppo alto");
       }
     }
   }
-  
+
   /**
    * aggiunge al validation l'eventuale errore relativo al quantitativo orario che può superare
    * le ore possibili prendibili per quel giorno.
