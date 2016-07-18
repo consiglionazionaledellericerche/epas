@@ -36,7 +36,7 @@ public class PersonDaysTest {
   public static StampTypes serviceST = StampTypes.MOTIVI_DI_SERVIZIO;
   
   public static PersonDayManager personDayManager = new PersonDayManager(
-      null, null, null, null, null, null, null);
+      null, null, null, null, null);
   
   /**
    * Test su un giorno Normale.
