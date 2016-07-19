@@ -189,7 +189,7 @@ CREATE TABLE initialization_groups (
   residual_minutes_last_year INT,
   residual_minutes_current_year INT,
   UNIQUE (person_id, group_absence_type_id, initialization_date)
-);
+);;
 
 CREATE TABLE initialization_groups_history (
   id BIGINT NOT NULL,
@@ -209,6 +209,7 @@ CREATE TABLE initialization_groups_history (
   residual_minutes_last_year INT,
   residual_minutes_current_year INT
 );
+
 
 # ---!Downs
 

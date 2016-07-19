@@ -4,18 +4,45 @@
 
 <div class="container">
 
-#{title title:'Esito Inserimento Assenza' /}
+#{title title:'Inserimento Assenza' /}
 
-  ${engineInstance.person.fullname}<br>
-  ${engineInstance.date}<br>
-  ${engineInstance.groupAbsenceType}<br>
+  <strong>Persona</strong> ${absenceRequest.person.fullname}<br>
+  <strong>Dal</strong> ${absenceRequest.from}<br>
+  <strong>Al</strong> ${absenceRequest.from}<br>
+  <br>
   
-  #{if engineInstance.absenceEngineProblem.present}
-    Problema riscontrato: engineInstance.absenceEngineProblem.get()}
-  #{/if}
-  #{else}
-    Tutto ok.
-  #{/else}
+  <br>
+  
+   #{form action:@AbsenceGroups.insert(), method:'POST', autocomplete:false, class:'form form-horizontal'}
+   
+     #{f.selectModel 'groupAbsenceType', required:true, personalizeItems:true}
+        #{list absenceRequest.items, as:'groupAbsenceTypeItem'}
+	      <option value="${groupAbsenceTypeItem.groupAbsenceType.id}"
+	        #{if groupAbsenceTypeItem.selected} selected #{/if}> ${groupAbsenceTypeItem.groupAbsenceType.description} </option>
+  	    #{/list}
+     #{/f.selectModel}
+   #{/form}
+   
+   
+  #{list items:absenceRequest.items, as:'item'}
+   <strong>${item.groupAbsenceType.name} (${item.groupAbsenceType.name})</strong> selected : ${item.selected} <br>
+   #{list items:item.subAbsenceGroups, as:'subItem'}
+     
+     code: <em>${subItem.absenceType.description} (${subItem.absenceType.code})</em> 
+     selected: ${subItem.selected}   
+     #{list items:subItem.absenceType.justifiedTypesPermitted, as:'justifiedType'}
+     justifiedType: ${justifiedType} #{if justifiedType.equals(subItem.selectedJustified)} selected #{/if}
+     specifiedMinutes: ${subItem.specifiedMinutes}
+     <br>
+     #{/list}
+     
+     
+     <br>
+   #{/list}
+   
+  <br>
+  #{/list} 
+  
 
   
 </div>

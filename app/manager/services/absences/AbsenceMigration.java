@@ -31,11 +31,11 @@ public class AbsenceMigration {
   }
   
   public enum DefaultTakable {
-    T_18, T_19, T_661, T_23, T_25, T_89, T_09;
+    T_18, T_19, T_661, T_23, T_25, T_89, T_09, T_MISSIONE, T_ALTRI;
   }
   
   public enum DefaultGroup {
-    G_18, G_19, G_661, G_23, G_25, G_89, G_09, FERIE_CNR, RIPOSI_CNR;
+    G_18, G_19, G_661, G_23, G_25, G_89, G_09, MISSIONE, ALTRI, FERIE_CNR, RIPOSI_CNR;
   }
   
   @Inject
@@ -721,8 +721,99 @@ public class AbsenceMigration {
       group09.save();
 
     }
+    
+    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MISSIONE.name()).isPresent()) {
+      
+      //Complation Creation
+      Optional<TakableAbsenceBehaviour> tMissione = absenceComponentDao
+          .takableAbsenceBehaviourByName(DefaultTakable.T_MISSIONE.name());
 
+      if (!tMissione.isPresent()) {
 
+        tMissione = Optional.fromNullable(new TakableAbsenceBehaviour());
+        tMissione.get().name = DefaultTakable.T_MISSIONE.name();
+        tMissione.get().amountType = AmountType.units;
+
+        AbsenceType missione92 = absenceComponentDao.buildOrEditAbsenceType("92", 
+            "Missione", 0, Sets.newHashSet(allDay), false, true, false, "92");
+        
+        AbsenceType h192 = absenceComponentDao.buildOrEditAbsenceType("92H1", 
+            "Missione 1 ora", 60, Sets.newHashSet(absenceTypeMinutes), false, true, false, "92H1");
+        
+        AbsenceType h292 = absenceComponentDao.buildOrEditAbsenceType("92H2", 
+            "Missione 2 ore", 60, Sets.newHashSet(absenceTypeMinutes), false, true, false, "92H2");
+        
+        AbsenceType h392 = absenceComponentDao.buildOrEditAbsenceType("92H3", 
+            "Missione 3 ore", 60, Sets.newHashSet(absenceTypeMinutes), false, true, false, "92H3");
+        
+        AbsenceType h492 = absenceComponentDao.buildOrEditAbsenceType("92H4", 
+            "Missione 4 ore", 60, Sets.newHashSet(absenceTypeMinutes), false, true, false, "92H4");
+        
+        AbsenceType h592 = absenceComponentDao.buildOrEditAbsenceType("92H5", 
+            "Missione 5 ore", 60, Sets.newHashSet(absenceTypeMinutes), false, true, false, "92H5");
+        
+        AbsenceType h692 = absenceComponentDao.buildOrEditAbsenceType("92H6", 
+            "Missione 6 ore", 60, Sets.newHashSet(absenceTypeMinutes), false, true, false, "92H6");
+        
+        AbsenceType h792 = absenceComponentDao.buildOrEditAbsenceType("92H7", 
+            "Missione 7 ore", 60, Sets.newHashSet(absenceTypeMinutes), false, true, false, "92H7");
+        
+        tMissione.get().takableCodes = Sets
+            .newHashSet(missione92, h192, h292, h392, h492, h592, h692, h792);
+        
+        //tMissione.get().takenCodes = Sets
+        //    .newHashSet(missione92, h192, h292, h392, h492, h592, h692, h792);
+        tMissione.get().fixedLimit = -1;
+        tMissione.get().save();
+
+      }
+      
+      // Group Creation
+      GroupAbsenceType groupMission = new GroupAbsenceType();
+      groupMission.name = DefaultGroup.MISSIONE.name();
+      groupMission.description = "Missione";
+      groupMission.pattern = GroupAbsenceTypePattern.simpleGrouping;
+      groupMission.periodType = PeriodType.always;
+      groupMission.takableAbsenceBehaviour = tMissione.get();
+      groupMission.save();
+    }
+    
+    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.ALTRI.name()).isPresent()) {
+      
+      //Complation Creation
+      Optional<TakableAbsenceBehaviour> tAltri = absenceComponentDao
+          .takableAbsenceBehaviourByName(DefaultTakable.T_ALTRI.name());
+      
+      if (!tAltri.isPresent()) {
+
+        tAltri = Optional.fromNullable(new TakableAbsenceBehaviour());
+        tAltri.get().name = DefaultTakable.T_ALTRI.name();
+        tAltri.get().amountType = AmountType.units;
+        tAltri.get().takableCodes = Sets.newHashSet();
+        tAltri.get().takenCodes = Sets.newHashSet();
+        tAltri.get().fixedLimit = -1;
+        tAltri.get().save();
+      }
+      
+      // Set boolean independente
+      absenceTypes = AbsenceType.findAll();
+      for (AbsenceType absenceType : absenceTypes) {
+        if (absenceType.takableGroup.isEmpty() && absenceType.takenGroup.isEmpty() 
+            && absenceType.complationGroup.isEmpty() && absenceType.replacingGroup.isEmpty()) {
+          tAltri.get().takableCodes.add(absenceType);
+          tAltri.get().save();
+        }
+      }
+
+      // Group Creation
+      GroupAbsenceType groupAltri = new GroupAbsenceType();
+      groupAltri.name = DefaultGroup.ALTRI.name();
+      groupAltri.description = "Missione";
+      groupAltri.pattern = GroupAbsenceTypePattern.simpleGrouping;
+      groupAltri.periodType = PeriodType.always;
+      groupAltri.takableAbsenceBehaviour = tAltri.get();
+      groupAltri.save();
+    }
   }
 
 }

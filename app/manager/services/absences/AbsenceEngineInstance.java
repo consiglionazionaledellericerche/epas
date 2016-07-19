@@ -147,7 +147,7 @@ public class AbsenceEngineInstance {
 
       // 2) Scaricare le assenze
       this.absences = this.absenceDao.getAbsencesInCodeList(this.person, 
-          this.from, this.to, Lists.newArrayList(absenceTypes), true);
+          this.getFrom(), this.getTo(), Lists.newArrayList(absenceTypes), true);
 
       // 2bis) Deve diventare un job efficiente da fare al bootstrap.
       for (Absence absence : this.absences) {
@@ -155,6 +155,34 @@ public class AbsenceEngineInstance {
           absenceMigration.migrateAbsence(absence);
         }
       }
+      
+      // 3) Popolare le liste taken e complation absences.
+//      currentAbsencePeriod = this.absencePeriod;
+//      while (currentAbsencePeriod != null) {
+//
+//        for (Absence absence : this.absences) {
+//          // stesso period
+//          if (DateUtility.isDateIntoInterval(absence.getAbsenceDate(), currentAbsencePeriod.periodInterval())) {
+//            
+//            // codice appartenente agli elenchi
+//            if (currentAbsencePeriod.takableComponent.isPresent()) {
+//              if (currentAbsencePeriod.takableComponent.get().takenCodes.contains(absence.absenceType)) {
+//                currentAbsencePeriod.takableComponent.get().takenAbsences.add(absence);
+//              }
+//            }
+//            if (currentAbsencePeriod.complationComponent.isPresent()) {
+//              if (currentAbsencePeriod.complationComponent.get().complationCodes.contains(absence.absenceType)) {
+//                currentAbsencePeriod.complationComponent.get().complationAbsences.add(absence);
+//              }
+//              if (currentAbsencePeriod.complationComponent.get().replacingCodes.contains(absence.absenceType)) {
+//                currentAbsencePeriod.complationComponent.get().replacingAbsences.add(absence);
+//              }
+//            }
+//          }
+//
+//        }
+//        currentAbsencePeriod = currentAbsencePeriod.nextAbsencePeriod;
+//      }
     }
     
     return this.absences;

@@ -88,7 +88,11 @@ public class GroupAbsenceType extends BaseModel {
   }
   
   public enum GroupAbsenceTypePattern {
-    programmed, vacationsCnr, compensatoryRestCnr;
+    simpleGrouping,              // semplice raggruppamento senza controlli o automatismi
+    programmed,                  
+    vacationsCnr,                // custom ferie cnr
+    compensatoryRestCnr;         // custom riposi compensativi cnr
+    
   }
 
   

@@ -1,5 +1,7 @@
 package models.absences;
 
+import com.google.common.base.Preconditions;
+
 import lombok.Getter;
 
 import models.PersonDay;
@@ -62,6 +64,17 @@ public class Absence extends BaseModel {
   @Getter
   @Transient
   public LocalDate date;
+  
+  @Transient
+  public LocalDate getAbsenceDate() {
+    if (this.personDay != null && this.personDay.date != null) { 
+      return this.personDay.date;
+    } 
+    if (this.date != null) {
+      return this.date;
+    }
+    throw new IllegalStateException();
+  }
 
   @Override
   public String toString() {
