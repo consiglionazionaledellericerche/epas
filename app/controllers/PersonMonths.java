@@ -350,12 +350,17 @@ public class PersonMonths extends Controller {
    * @param person la persona che ha fatto la formazione
    */
   public static void save(@Valid @Min(0) Integer begin, @Min(0) @Valid Integer end,
-      @Required @Valid @Min(0) Integer value, Integer month, Integer year, @Valid Person person) {
+      @Required @Valid @Min(0) Integer value, Integer month, Integer year, Person person) {
+    
+    rules.checkIfPermitted(Security.getUser().get().person.office);
     checkErrors(begin, end, year, month, value);
+    checkPerson(person);
     if (validation.hasErrors()) {
+      List<Person> simplePersonList = personDao.listFetched(Optional.<String>absent(),
+          ImmutableSet.of(Security.getUser().get().person.office), false, null, null, false).list();
       response.status = 400;
       render("@insertPeopleTrainingHours",
-          person, month, year, begin, end, value);
+          person, month, year, begin, end, value,simplePersonList);
     }
 
     personMonthsManager.saveTrainingHours(person, year, month, begin, end, false, value);
@@ -414,6 +419,16 @@ public class PersonMonths extends Controller {
         validation.addError("value",
             "valore troppo alto");
       }
+    }
+  }
+  
+  /**
+   * aggiunge al validation un controllo sulla presenza della persona passata come parametro
+   * @param person
+   */
+  private static void checkPerson(Person person) {
+    if (person == null || person.name == null || person.surname == null) {
+      validation.addError("person", "la persona non può essere nulla");
     }
   }
 
