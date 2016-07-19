@@ -21,6 +21,7 @@ import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
+import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.GroupAbsenceType.PeriodType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
@@ -28,6 +29,7 @@ import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 
 import org.joda.time.LocalDate;
+import org.testng.collections.Lists;
 
 import java.util.List;
 import java.util.Set;
@@ -265,7 +267,7 @@ public class AbsenceEngine {
       AbsenceRequestType absenceRequestType, AbsenceType absenceType) {
     
     //la precondition è che per absenceType ci sia una unica tipologia di justifiedType.
-    if (absenceType.justifiedTypesPermitted.size() > 1) {
+    if (absenceType.justifiedTypesPermitted.size() != 1) {
       engineInstance.absenceEngineProblem = Optional.of(AbsenceEngineProblem.wrongJustifiedType);
       return engineInstance;
     }
@@ -281,6 +283,11 @@ public class AbsenceEngine {
   private AbsenceEngineInstance doRequest(AbsenceEngineInstance engineInstance, 
       AbsenceRequestType absenceRequestType, AbsenceType absenceType, JustifiedType justifiedType, 
       Optional<Integer> specifiedMinutes) {
+    
+    if (!absenceType.justifiedTypesPermitted.contains(justifiedType)) {
+      engineInstance.absenceEngineProblem = Optional.of(AbsenceEngineProblem.wrongJustifiedType);
+      return engineInstance;
+    }
     
     // Costruzione assenza.
     Absence absence = new Absence();
@@ -318,6 +325,14 @@ public class AbsenceEngine {
   private AbsenceEngineInstance checkRequest(AbsenceEngineInstance engineInstance, 
       AbsencePeriod absencePeriod, AbsenceRequestType absenceRequestType,
       Absence absence) {
+    
+    //simple grouping
+    // TODO: bisogna capire dove inserire i controlli di compatibilità (ex. festivo, assenze lo stesso giorno etc)  
+    if (absencePeriod.groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.simpleGrouping)) {
+      ResponseItem responseItem = new ResponseItem(absence.absenceType, 
+          AbsenceOperation.insert, engineInstance.date);
+      engineInstance.responseItems.add(responseItem);
+    }
 
     //Struttura del caso base di risposta (senza errori di superamento tetto o completamento errato)
     
@@ -346,7 +361,8 @@ public class AbsenceEngine {
         return engineInstance;
       }
 
-      ResponseItem responseItem = new ResponseItem(absence.absenceType, AbsenceOperation.insert);
+      ResponseItem responseItem = new ResponseItem(absence.absenceType, 
+          AbsenceOperation.insert, engineInstance.date);
       
       ConsumedResidualAmount consumedResidualAmount = ConsumedResidualAmount.builder()
           .amountType(takableComponent.takeAmountType)
@@ -355,7 +371,6 @@ public class AbsenceEngine {
           .amount(computeAbsenceAmount(engineInstance, absence, takableComponent.takeAmountType))
           .workingTime(engineInstance.workingTime(engineInstance.date))
           .build();
-      responseItem.consumedResidualAmount.add(consumedResidualAmount);
       if (consumedResidualAmount.canTake()) {
         responseItem.consumedResidualAmount.add(consumedResidualAmount);
         responseItem.absence = absence;
@@ -437,7 +452,7 @@ public class AbsenceEngine {
     public Set<AbsenceType> takableCodes;            // I tipi assenza prendibili del periodo
     public Set<AbsenceType> takenCodes;              // I tipi di assenza consumati del periodo
 
-    public List<Absence> takenAbsences;              // Le assenze consumate
+    public List<Absence> takenAbsences = Lists.newArrayList();           // Le assenze consumate
     
     public int computeTakableAmount() {
       if (!takableCountBehaviour.equals(TakeCountBehaviour.period)) {
@@ -464,8 +479,8 @@ public class AbsenceEngine {
     public Set<AbsenceType> replacingCodes;     // Codici di rimpiazzamento      
     public Set<AbsenceType> complationCodes;    // Codici di completamento
     
-    public List<Absence> replacingAbsences;     // Le assenze di rimpiazzamento (solo l'ultima??)     
-    public List<Absence> complationAbsences;    // Le assenze di completamento
+    public List<Absence> replacingAbsences = Lists.newArrayList();     // Le assenze di rimpiazzamento (solo l'ultima??)     
+    public List<Absence> complationAbsences = Lists.newArrayList();    // Le assenze di completamento
   }
   
 
@@ -523,9 +538,13 @@ public class AbsenceEngine {
       public int residualBefore() {
         return this.totalResidual - this.usedResidualBefore;
       }
+
+      public int residualAfter() {
+        return this.residualBefore() - this.amount;
+      }
       
       public boolean canTake() {
-        return this.residualBefore() > this.amount;
+        return residualAfter() >= 0;
       }
     }
     
@@ -533,14 +552,14 @@ public class AbsenceEngine {
     public Absence absence;
     public AbsenceType absenceType;
     public AbsenceOperation operation;
-    public List<ConsumedResidualAmount> consumedResidualAmount;
+    public List<ConsumedResidualAmount> consumedResidualAmount = Lists.newArrayList();
     public AbsenceProblem absenceProblem;
     
-    public ResponseItem(AbsenceType absenceType, AbsenceOperation operation) {
+    public ResponseItem(AbsenceType absenceType, AbsenceOperation operation, LocalDate date) {
       this.absenceType = absenceType;
       this.operation = operation;
+      this.date = date;
     }
-
   }
   
       

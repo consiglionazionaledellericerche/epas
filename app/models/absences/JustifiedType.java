@@ -40,5 +40,10 @@ public class JustifiedType extends BaseModel {
   
   @OneToMany(mappedBy = "justifiedType")
   public List<Absence> absences = Lists.newArrayList();
+  
+  @Override
+  public String toString() {
+    return this.name.name();
+  }
 
 }

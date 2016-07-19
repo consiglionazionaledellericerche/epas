@@ -5,7 +5,7 @@
 	    _body.setProperty('field', field)
 	  }
 	}%
-	#{f.edit _arg, label:_label,feedback:'true'}
+	#{f.edit _arg, label:_label, feedback:'true'}
 		<select class="form-control ${_class}" name="${field.name}.id" id="${field.id}"#{ifnot _select2} select2#{/ifnot}#{if _disabled} disabled#{/if}#{if _popover} popover data-content='&{field.name+'.popover'}'#{/if} >
 			#{doBody /}
 		</select>

@@ -9,17 +9,21 @@
     value = _attrs.containsKey('value') ? _value : field.value
   }%
   <select class="form-control ${_class}" name="${field.name}.id" id="${field.id}"#{ifnot _select2} select2#{/ifnot}#{if _disabled} disabled#{/if}#{if _popover} popover data-content='&{field.name+'.popover'}'#{/if} >
-  <option></option>
-    #{list _items}
-       
-      <option value="${_.id}"#{if value?.id == _.id} selected#{/if}>
-        #{if _getLabel}
-          ${_.getLabel()}
-        #{/if}
-        #{else}
-          ${_.label()}
-        #{/else}  
-      </option>
-    #{/list}
+    #{if _personalizeItems}
+      #{doBody /}
+    #{/if}
+    #{else}
+	    <option></option>
+	    #{list _items}
+	      <option value="${_.id}"#{if value?.id == _.id} selected#{/if}>
+	        #{if _getLabel}
+	          ${_.getLabel()}
+	        #{/if}
+	        #{else}
+	          ${_.label()}
+	        #{/else}  
+	      </option>
+	    #{/list}
+	 #{/else}   
   </select>
 #{/f.edit}

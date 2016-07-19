@@ -76,7 +76,7 @@ public class AbsenceType extends BaseModel {
 
   @Column(name = "internal_use")
   public boolean internalUse = false;
-
+  
   @Column(name = "considered_week_end")
   public boolean consideredWeekEnd = false;
   
@@ -90,7 +90,7 @@ public class AbsenceType extends BaseModel {
   @JoinTable(name = "absence_types_justified_types", 
   joinColumns = { @JoinColumn(name = "absence_types_id") }, 
   inverseJoinColumns = { @JoinColumn(name = "justified_types_id") })
-  public Set<JustifiedType> justifiedTypesPermitted;
+  public Set<JustifiedType> justifiedTypesPermitted = Sets.newHashSet();
   
   @OneToMany(mappedBy = "absenceType")
   @LazyCollection(LazyCollectionOption.EXTRA)
