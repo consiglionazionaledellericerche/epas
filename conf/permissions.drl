@@ -1,15 +1,22 @@
 package security;
  
-import security.PermissionCheck;
-import models.Office;
-import models.UsersRolesOffices;
-import models.ShiftType;
-import models.Person;
-import models.Role;
-import models.Configuration;
 import manager.configurations.EpasParam;
-import models.Qualification;
+import models.enumerate.CodesForEmployee;
+import models.enumerate.StampTypes;
+import models.Absence;
+import models.AbsenceType;
+import models.Configuration;
 import models.Notification;
+import models.Office;
+import models.Person;
+import models.PersonConfiguration;
+import models.PersonDay;
+import models.Qualification;
+import models.Role;
+import models.ShiftType;
+import models.Stamping;
+import models.UsersRolesOffices;
+import security.PermissionCheck;
 
 global models.User currentOperator;
 
@@ -64,11 +71,6 @@ when
   $c: PermissionCheck(action in (
   		/* Ritorna allo user developer */
      	"Administration.restoreUser",
-     	
-     	/* Eventuale inserimento di timbratura per lavoro fuori sede
-     	/* Stampings.insertWorkingOffSitePresence*/
-     	/* Stampings.saveWorkingOffSitePresence*/
-     	
      	
      	/* Situazione Mensile */
      	"Stampings.stampings",
@@ -144,6 +146,34 @@ then
  $c.grant();
 end
 
+/*
+ * L'amministratore del personale può modificare una determinata assenza se:
+ */
+rule AdminCanEditAbsence
+when
+ $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
+ $a: Absence()
+ $pd: PersonDay() from $a.personDay
+ Office(persons.contains($pd.person)) from $uro.office
+ $c: PermissionCheck(target == $a, granted == false )
+then
+ $c.grant();
+end
+
+/*
+ * L'amministratore del personale può modificare una determinata timbratura se:
+ */
+rule AdminCanEditStamping
+when
+ $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
+ $s: Stamping()
+ $pd: PersonDay() from $s.personDay
+ Office(persons.contains($pd.person)) from $uro.office
+ $c: PermissionCheck(target == $s, granted == false )
+then
+ $c.grant();
+end
+
 /* Azioni eseguibili da qualsiasi utente che abbiano come destinatario 
  * dell'azione se stesso
  */
@@ -151,22 +181,46 @@ end
 rule HasRightOnHimself
 when
   $p: Person(this == currentOperator.person)
-  $c: PermissionCheck(target == $p, granted == false)
+  $c: PermissionCheck(action not in (
+      "Stampings.blank",
+      "Stampings.edit",
+      "Stampings.save",
+      "Absences.blank",
+      "Absences.edit",
+      "Absences.delete",
+      "Absences.save"
+  ),target == $p, granted == false)
 then
  $c.grant();
 end
 
-
-/* Consente agli amministratori e agli amministratori in sola lettura di avere
- * diritti di visualizzazione su situazioni relative a una specifica persona che
- * appartiene allo stesso ufficio dell'amministratore 
+/*
+ * L'Amministratore del personale può fare tutto sulle persone del proprio ufficio
  */
- 
-rule HasRightOnPerson
+rule PersonnelAdmin_onPerson
 when
-  $uro: UsersRolesOffices(role.name in("personnelAdmin","personnelAdminMini"))
+  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
   $o: Office() from $uro.office
   $c: PermissionCheck($o.persons contains target, granted == false)
+then
+ $c.grant();
+end
+
+/*
+ * L'Amministratore del personale in sola lettura può fare quasi tutto sulle persone del proprio ufficio
+ */
+rule HasRightOnPerson
+when
+  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN_MINI)
+  $o: Office() from $uro.office
+  $c: PermissionCheck(action not in (
+    "Stampings.blank",
+    "Stampings.edit",
+    "Stampings.save",
+    "Absences.blank",
+    "Absences.edit",
+    "Absences.delete",
+    "Absences.save"), $o.persons contains target, granted == false)
 then
  $c.grant();
 end
@@ -439,9 +493,7 @@ when
         "WorkingTimes.showWorkingTimeType",
         "WorkingTimes.showContractWorkingTimeType",		
         "WorkingTimes.showContract",
-        "WorkingTimes.showHorizontal",
-        
-        "PersonMonths.visualizePeopleTrainingHours"		
+        "WorkingTimes.showHorizontal"      	
 
         ), target == null, granted == false)
 then
@@ -524,11 +576,8 @@ when
         "WorkingTimes.showContractWorkingTimeType",		
         "WorkingTimes.showContract",
         "WorkingTimes.showHorizontal",
-        "WorkingTimes.insertVerticalWorkingTime",
-        
-        "PersonMonths.visualizePeopleTrainingHours"
-        			
-               
+        "WorkingTimes.insertVerticalWorkingTime"
+                       
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -543,7 +592,12 @@ when
  $uro: UsersRolesOffices()
  Role(name == Role.PERSONNEL_ADMIN) from $uro.role
  $c: PermissionCheck(action in (
- 		
+
+ 		/*Metodi per la gestione delle assenze bypassando i controlli*/
+ 		"Absences.forceAbsences",
+ 		"Absences.forceRemoval",
+ 		"Absences.forceInsert",
+
  		/* Vecchio permesso editPerson */
         "Persons.insertPerson",
 		
@@ -669,7 +723,15 @@ when
 		"BadgeSystems.joinBadgesPerson",
 		"BadgeSystems.saveBadges",
 		"BadgeSystems.deleteBadgePerson",
-		"BadgeSystems.deleteBadge"
+		"BadgeSystems.deleteBadge",
+		/*ore di formazione*/
+		"PersonMonths.visualizePeopleTrainingHours",
+        "PersonMonths.insertPeopleTrainingHours",
+        "PersonMonths.deleteTrainingHours",
+        "PersonMonths.deleteTrainingHoursConfirmed",
+        "PersonMonths.modifyTrainingHours",
+        "PersonMonths.save",
+        "PersonMonths.saveTrainingHours"	
         
         ), target == null, granted == false)
 then
@@ -807,7 +869,16 @@ when
 		"BadgeSystems.joinBadgesPerson",
 		"BadgeSystems.saveBadges",
 		"BadgeSystems.deleteBadgePerson",
-		"BadgeSystems.deleteBadge"
+		"BadgeSystems.deleteBadge",
+		
+		/*Ore di formazione*/
+		"PersonMonths.visualizePeopleTrainingHours",
+        "PersonMonths.insertPeopleTrainingHours",
+        "PersonMonths.deleteTrainingHours",
+        "PersonMonths.deleteTrainingHoursConfirmed",
+        "PersonMonths.modifyTrainingHours",
+        "PersonMonths.save",
+        "PersonMonths.saveTrainingHours"
                
        ), target == $o, granted == false)
 then
@@ -815,20 +886,21 @@ then
 end
 
 /*******************************************************************************
- * Azioni per utente employee ma abilitato alla timbratura fuori sede
+ * Azioni per utente employee abilitato alla timbratura fuori sede
  ******************************************************************************/
 rule Working_offsite
 when
- $uro: UsersRolesOffices()
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
- Role(name == Role.EMPLOYEE) from $uro.role
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
+ PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
  $c: PermissionCheck(action in (
- 	"Stampings.blankForEmployee",
+    "Stampings.blank",
     "Stampings.edit",
     "Stampings.save",
-    "Absences.blankForEmployee",
+    "Stampings.delete",
+    "Absences.blank",
     "Absences.edit",
     "Absences.delete",
     "Absences.save"
@@ -837,22 +909,54 @@ then
  $c.grant();
 end
 
-rule Working_offsite_in_office
+/*
+ * L'impiegato può modificare/salvare una determinata assenza se:
+ */
+rule EmployeeCanEditAbsence
 when
- $uro: UsersRolesOffices()
- $p: Person() from currentOperator.person
- Role(name == Role.EMPLOYEE) from $uro.role
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $a: Absence()
+ $at: AbsenceType(CodesForEmployee.getCodes().contains(code)) from $a.absenceType
+ $pd: PersonDay() from $a.personDay
+ $p: Person(this == currentOperator.person) from $pd.person
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
+ PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
+ $c: PermissionCheck(target == $a, granted == false )
+then
+ $c.grant();
+end
+
+/*
+ * L'impiegato può modificare/salvare una determinata timbratura se:
+ */
+rule EmployeeCanEditStamping
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $s: Stamping(StampTypes.LAVORO_FUORI_SEDE == stampType)
+ $pd: PersonDay() from $s.personDay
+ $p: Person(this == currentOperator.person) from $pd.person
+ $o: Office() from $p.office
+ Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
+ PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
+ $c: PermissionCheck(target == $s, granted == false )
+then
+ $c.grant();
+end
+
+
+/*******************************************************************************
+ * Azioni per utente employee abilitato alla timbratura fuori sede
+ ******************************************************************************/
+rule Working_offsite_withTarget
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ $o: Office() from $p.office
+ Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
+ PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
  $c: PermissionCheck(action in (
- 	"Stampings.blankForEmployee",
-    "Stampings.edit",
-    "Stampings.save",
-    "Absences.blankForEmployee",
-    "Absences.edit",
-    "Absences.delete",
-    "Absences.save"
- ), granted == false, target == $p)
+    "Absences.blank","Stampings.blank", "Stampings.save" ), granted == false, target == $p)
 then
  $c.grant();
 end
@@ -997,6 +1101,9 @@ then
  $c.grant();
 end
 
+/*
+ * Permessi sulle proprie notifiche
+ */
 rule Notifications
 when
   $n: Notification(recipient == currentOperator)

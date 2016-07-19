@@ -191,11 +191,12 @@ public class UserDao extends DaoBase {
     return nameCondition.or(user.username.startsWithIgnoreCase(name));
   }
 
-  public boolean haveAdminRoles(User user) {
+  public boolean hasAdminRoles(User user) {
     Preconditions.checkNotNull(user);
 
     return user.usersRolesOffices.stream().filter(uro ->
-        ImmutableList.of(Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.TECNICAL_ADMIN)
+        ImmutableList.of(Role.DEVELOPER, Role.ADMIN, Role.PERSONNEL_ADMIN,
+            Role.PERSONNEL_ADMIN_MINI, Role.TECNICAL_ADMIN)
             .contains(uro.role.name)).findAny().isPresent();
   }
 }

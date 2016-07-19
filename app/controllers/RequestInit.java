@@ -1,15 +1,6 @@
 package controllers;
 
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -17,20 +8,30 @@ import com.google.common.collect.Lists;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.UsersRolesOfficesDao;
+
 import helpers.TemplateDataInjector;
+
 import manager.SecureManager;
-import manager.configurations.ConfigurationManager;
-import manager.configurations.EpasParam;
 
 import models.Office;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
+
+import org.joda.time.LocalDate;
+
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 
 /**
@@ -47,8 +48,6 @@ public class RequestInit extends Controller {
   static PersonDao personDao;
   @Inject
   static UsersRolesOfficesDao uroDao;
-  @Inject
-  static ConfigurationManager confManager;
 
   @Before(priority = 1)
   static void injectMenu() {
@@ -64,8 +63,8 @@ public class RequestInit extends Controller {
 
     final User currentUser = user.get();
 
-    if (currentUser.person != null) {      
-      renderArgs.put("isPersonInCharge", currentUser.person.isPersonInCharge);      
+    if (currentUser.person != null) {
+      renderArgs.put("isPersonInCharge", currentUser.person.isPersonInCharge);
     }
 
     // year init /////////////////////////////////////////////////////////////////
@@ -186,7 +185,10 @@ public class RequestInit extends Controller {
         "Certifications.certifications",
         "Certifications.processAll",
         "Certifications.emptyCertifications",
-        "PersonMonths.visualizePeopleTrainingHours");
+        "PersonMonths.visualizePeopleTrainingHours",
+        "Absences.forceAbsences",
+        "Charts.overtimeOnPositiveResidual");
+
 
     final Collection<String> yearSwitcher = ImmutableList.of(
         "Absences.yearlyAbsences",
@@ -200,7 +202,8 @@ public class RequestInit extends Controller {
         "VacationsAdmin.list",
         "Certifications.certifications",
         "Certifications.processAll",
-        "Certifications.emptyCertifications");
+        "Certifications.emptyCertifications",
+        "Charts.overtimeOnPositiveResidualInYear");
 
     final Collection<String> personSwitcher = ImmutableList.of(
         "Stampings.personStamping",
@@ -214,7 +217,8 @@ public class RequestInit extends Controller {
         "Absences.yearlyAbsences",
         "MealTickets.personMealTickets",
         "MealTickets.editPersonMealTickets",
-        "MealTickets.recapPersonMealTickets");
+        "MealTickets.recapPersonMealTickets",
+        "Absences.forceAbsences");
 
     final Collection<String> officeSwitcher = ImmutableList.of(
         "Stampings.missingStamping",
@@ -242,7 +246,9 @@ public class RequestInit extends Controller {
         "Certifications.emptyCertifications",
         "PersonMonths.visualizePeopleTrainingHours",
         "Persons.list",
-        "Charts.checkLastYearAbsences");
+        "Charts.checkLastYearAbsences",
+        "Charts.overtimeOnPositiveResidual",
+        "Charts.overtimeOnPositiveResidualInYear");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
         "Stampings.insertWorkingOffSitePresence",

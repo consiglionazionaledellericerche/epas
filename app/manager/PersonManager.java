@@ -1,7 +1,6 @@
 package manager;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
 import dao.AbsenceDao;
@@ -11,24 +10,17 @@ import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
 
-import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import manager.configurations.ConfigurationManager;
-import manager.configurations.EpasParam;
-
 import models.Contract;
-import models.ContractWorkingTimeType;
 import models.Person;
 import models.PersonDay;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
-import models.WorkingTimeTypeDay;
 import models.absences.AbsenceType;
 
 import org.joda.time.LocalDate;
-import org.joda.time.MonthDay;
 
 import play.db.jpa.JPA;
 
@@ -43,21 +35,19 @@ public class PersonManager {
 
   private final ContractDao contractDao;
   private final PersonDayDao personDayDao;
-  private final PersonDayManager personDayManager;
+  public final PersonDayManager personDayManager;
   private final IWrapperFactory wrapperFactory;
   private final AbsenceDao absenceDao;
-  private final ConfigurationManager configurationManager;
   private final UsersRolesOfficesDao uroDao;
 
   /**
    * Costrutture.
    *
-   * @param contractDao          contractDao
-   * @param personDayDao         personDayDao
-   * @param absenceDao           absenceDao
-   * @param personDayManager     personDayManager
-   * @param wrapperFactory       wrapperFactory
-   * @param configurationManager configurationManager
+   * @param contractDao      contractDao
+   * @param personDayDao     personDayDao
+   * @param absenceDao       absenceDao
+   * @param personDayManager personDayManager
+   * @param wrapperFactory   wrapperFactory
    */
   @Inject
   public PersonManager(ContractDao contractDao,
@@ -65,52 +55,13 @@ public class PersonManager {
       AbsenceDao absenceDao,
       PersonDayManager personDayManager,
       IWrapperFactory wrapperFactory,
-      ConfigurationManager configurationManager,
       UsersRolesOfficesDao uroDao) {
     this.contractDao = contractDao;
     this.personDayDao = personDayDao;
     this.absenceDao = absenceDao;
     this.personDayManager = personDayManager;
     this.wrapperFactory = wrapperFactory;
-    this.configurationManager = configurationManager;
     this.uroDao = uroDao;
-  }
-
-  /**
-   * Se il giorno è festivo per la persona.
-   */
-  public boolean isHoliday(Person person, LocalDate date) {
-
-    MonthDay patron = (MonthDay) configurationManager
-        .configValue(person.office, EpasParam.DAY_OF_PATRON, date);
-
-    if (DateUtility.isGeneralHoliday(Optional.fromNullable(patron), date)) {
-      return true;
-    }
-
-    Contract contract = contractDao.getContract(date, person);
-    if (contract == null) {
-      //persona fuori contratto
-      return false;
-    }
-
-    for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
-      if (DateUtility.isDateIntoInterval(date,
-          new DateInterval(cwtt.beginDate, cwtt.endDate))) {
-
-        int dayOfWeekIndex = date.getDayOfWeek() - 1;
-        WorkingTimeTypeDay wttd = cwtt.workingTimeType
-            .workingTimeTypeDays.get(dayOfWeekIndex);
-        Preconditions.checkState(wttd.dayOfWeek == date.getDayOfWeek());
-        return wttd.holiday;
-
-      }
-    }
-
-    throw new IllegalStateException();
-    //se il db è consistente non si verifica mai
-    //return false;
-
   }
 
   /**
