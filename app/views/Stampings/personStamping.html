@@ -3,12 +3,12 @@
 #{set title: 'ePAS - Timbrature'  /}
 
 #{set 'moreStyles'}
-  #{include './personStampingComponents/_personStampingStyle.html' /}
+  #{stylesheet 'stampingsTable.css'/}
 #{/set}
 
 <div class="col-xs-12 col-lg-8">
-  <table id="tabellonetimbrature" class="table table-bordered table-condensed">
 
+  <table id="tabellonetimbrature" class="table table-bordered table-condensed">
 
     <tr>
       <th class="group-single">Giorno</th>
@@ -21,10 +21,10 @@
       <th class="group-left">${i}<sup>a</sup> <br/>entrata</th>
       <th class="group-right">${i}<sup>a</sup> <br/>uscita</th>
       #{/list}
-      
-      #{if showLink || showLinkForEmployee}
-      <th class="group-single">Inserisci<br>timbratura</th>
-	  #{/if}
+
+      #{secure.check 'Stampings.blank', target:person}
+        <th class="group-single">Inserisci<br>timbratura</th>
+      #{/secure.check}
 
       <th class="invisible"></th>
 
@@ -32,54 +32,30 @@
       <th class="group-single">Diffe-<br/>renza</th>
       <th class="group-single">Progres-<br/>sivo</th>
       <th class="group-single">Tipo<br>Orario</th>
-      <th class="group-single">Note</th>
     </tr>
-
 
     #{list items:psDto.daysRecap, as:'dayRecap'}
 
-	    <tr#{if dayRecap.ignoreDay} class="ignore_day"#{/if}>
-	    
-	    <td class="${dayRecap.personDay.holiday ? 'festivi' : 'capitalized'} default-single">
-	    #{if dayRecap.firstDay }<i class="fa fa-flag-checkered" aria-hidden="true" popover-hover data-content="&{'firstDay'}"></i>#{/if}
-	    #{if showLink}
-	      
-	      #{secure.link @PersonDayHistory.personDayHistory(dayRecap.personDay.id), 'data-async-modal':'#defaultModal'}
-	      *{ #{secure.link @Stampings.forceMealTicket(dayRecap.personDay.id), 'data-async-modal':'#defaultModal'} }*
-	      ${dayRecap.personDay.date.shortDayName()}
-	      #{/secure.link}
-	    #{/if}
-	    #{else}
-	      ${dayRecap.personDay.date.shortDayName()}
-	    #{/else}
-	    </td>
-	    
-	    #{include './personStampingComponents/_mealTicketsTemplate.html' /}
-	
-	    <td class="invisible"></td>
-	
-	    #{include './personStampingComponents/_absencesTemplate.html' /}
-	
-	    #{include './personStampingComponents/_stampingsTemplate.html' /}
-	   
-	    <td class="invisible"></td>
-	
-	    #{include './personStampingComponents/_workTimeDifferenceProgressive.html' /}
+    <tr#{if dayRecap.ignoreDay} class="ignore_day"#{/if}>
 
-		  #{include './personStampingComponents/_workingTimeTypePopover.html' /}
-	    
-	    <td class="default-single note">
-	      #{if dayRecap.note.size != 0}
-	
-	      <a href="#" class="btn btn-small note" popover-hover
-	         data-html="true"
-	         data-content="${('<ul><li>'+dayRecap.note.join('</li><li>')+'</li></ul>').escape()}"
-	         title="Info timbrature">Info</a>
-	
-	      #{/if}
-	    </td>
-	
-	    </tr>
+    <td class="${dayRecap.personDay.holiday ? 'festivi' : 'capitalized'} default-single">
+      #{if dayRecap.firstDay }<i class="fa fa-flag-checkered" aria-hidden="true" webui-popover-hover data-content="&{'firstDay'}"></i>#{/if}
+      #{secure.link @PersonDayHistory.personDayHistory(dayRecap.personDay.id), 'data-async-modal':'#defaultModal'}
+      ${dayRecap.personDay.date.shortDayName()}
+      #{/secure.link}
+    </td>
+
+    #{include './personStampingComponents/_mealTicketsTemplate.html' /}
+
+    <td class="invisible"></td>
+
+    #{include './personStampingComponents/_absencesTemplate.html' /}
+
+    #{include './personStampingComponents/_stampingsTemplate.html' /}
+    <td class="invisible"></td>
+    #{include './personStampingComponents/_workTimeDifferenceProgressive.html' /}
+    #{include './personStampingComponents/_workingTimeTypePopover.html' /}
+    </tr>
     #{/list}
   </table>
 </div>
@@ -87,7 +63,7 @@
 <div id="riepiloghi">
 
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 left">
-    
+
     #{include './personStampingComponents/_alerts.html' /}
     #{include './personStampingComponents/_contractsRecap.html' /}
   </div>
@@ -96,7 +72,6 @@
     #{include './personStampingComponents/_notes.html' /}
   </div>
 </div>
-
 
 <div id="modalStamping" class="modal fade container" tabindex="-1"></div>
 

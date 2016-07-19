@@ -12,8 +12,8 @@ ${helpers.Web.serialize(_attrs, "arg", "class", "fa", "target", "hide").raw()}>
 #{if _fa}</span>#{/if}#{if _title}${_title}#{/if}
 </a>
 #{/if}
-#{elseif display != 'hidden'}
-#{if display == 'denied'}<span notAllowed data-original-title="&{'link.denied'}">#{/if}
+#{elseif _display != 'hidden'}
+#{if _display == 'denied'}<span notAllowed data-original-title="&{'link.denied'}">#{/if}
   #{if _fa}<i class="fa fa-${_fa}"></i><span class="hidden-xs">#{/if}
     #{doBody/}
   #{if _fa}</span>#{/if}#{if _title}${_title}#{/if}

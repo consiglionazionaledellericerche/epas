@@ -63,7 +63,7 @@ public class MealTicketDao extends DaoBase {
    * @param returned se voglio quelli riconsegnati o quelli disponibili
    */
   public List<MealTicket> contractMealTickets(Contract contract, Optional<DateInterval> interval,
-                                              MealTicketOrder order, boolean returned) {
+      MealTicketOrder order, boolean returned) {
 
     final QMealTicket mealTicket = QMealTicket.mealTicket;
 
@@ -150,8 +150,7 @@ public class MealTicketDao extends DaoBase {
    * @param contract  contratto
    * @return la lista dei meal tickets nel blocco.
    */
-  public List<MealTicket> getMealTicketsInCodeBlock(Long codeBlock,
-                                                    Optional<Contract> contract) {
+  public List<MealTicket> getMealTicketsInCodeBlock(Long codeBlock, Optional<Contract> contract) {
 
     final QMealTicket mealTicket = QMealTicket.mealTicket;
 

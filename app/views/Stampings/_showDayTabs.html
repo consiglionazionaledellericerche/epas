@@ -1,11 +1,13 @@
 <ul class="nav nav-tabs">
   #{if personDay}
-  <li#{if actionSelected.equals("PersonDayHistory.personDayHistory")} class="active"#{/if}>
+  <li#{if actionSelected == 'PersonDayHistory.personDayHistory'} class="active"#{/if}>
       <a href="@{PersonDayHistory.personDayHistory(personDay.id)}" data-async="#showDay">Storia Del Giorno</a>
   </li>
-  <li#{if actionSelected.equals("Stampings.forceMealTicket")} class="active"#{/if}>
+  #{secure.check 'Stampings.forceMealTicket'}
+  <li#{if actionSelected == 'Stampings.forceMealTicket'} class="active"#{/if}>
     <a href="@{Stampings.forceMealTicket(personDay.id)}" data-async="#showDay">Buono Pasto</a>
   </li>
+  #{/secure.check}
   #{/if}
   #{else}
       <li><a class="active">Storia Del Giorno</a></li>

@@ -8,22 +8,23 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
-import dao.AbsenceDao;
+import dao.ContractDao;
 import dao.PersonDayDao;
 import dao.PersonShiftDayDao;
 import dao.wrapper.IWrapperPersonDay;
 
+import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.cache.StampTypeManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import manager.services.PairStamping;
 
 import models.Contract;
+import models.ContractWorkingTimeType;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
@@ -40,6 +41,7 @@ import models.enumerate.Troubles;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
+import org.joda.time.MonthDay;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,37 +54,32 @@ public class PersonDayManager {
 
   private final ConfigurationManager configurationManager;
   private final PersonDayInTroubleManager personDayInTroubleManager;
-  private final ContractMonthRecapManager contractMonthRecapManager;
   private final PersonShiftDayDao personShiftDayDao;
+  private final PersonDayDao personDayDao;
+  private final ContractDao contractDao;
 
   /**
    * Costruttore.
-   * @param personDayDao personDao
-   * @param stampTypeManager stampTypeManager
-   * @param absenceDao absenceDao
-   * @param configurationManager configurationManager
+   *
+   * @param configurationManager      configurationManager
    * @param personDayInTroubleManager personDayInTroubleManager
-   * @param contractMonthRecapManager contractMonthRecapManager
-   * @param personShiftDayDao personShiftDayDao
+   * @param personShiftDayDao         personShiftDayDao
    */
   @Inject
-  public PersonDayManager(PersonDayDao personDayDao,
-      StampTypeManager stampTypeManager,
-      AbsenceDao absenceDao,
-      ConfigurationManager configurationManager,
-      PersonDayInTroubleManager personDayInTroubleManager,
-      ContractMonthRecapManager contractMonthRecapManager,
-      PersonShiftDayDao personShiftDayDao) {
+  public PersonDayManager(ConfigurationManager configurationManager,
+      PersonDayInTroubleManager personDayInTroubleManager, PersonDayDao personDayDao,
+      PersonShiftDayDao personShiftDayDao, ContractDao contractDao) {
 
     this.configurationManager = configurationManager;
     this.personDayInTroubleManager = personDayInTroubleManager;
-    this.contractMonthRecapManager = contractMonthRecapManager;
     this.personShiftDayDao = personShiftDayDao;
+    this.personDayDao = personDayDao;
+    this.contractDao = contractDao;
   }
 
   /**
    * Se nel giorno vi è una assenza giornaliera.
-   * 
+   *
    * @return esito
    */
   public boolean isAllDayAbsences(PersonDay pd) {
@@ -97,7 +94,7 @@ public class PersonDayManager {
       //} else 
       if (abs.justifiedMinutes == null //eludo PEPE, RITING etc...
           && (abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)
-              || abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AssignAllDay))) {
+          || abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AssignAllDay))) {
         return true;
       }
     }
@@ -106,10 +103,11 @@ public class PersonDayManager {
 
   /**
    * Se le assenze orarie giustificano abbanstanza per ritenere il dipendente a lavoro.
-   * @return  esito.
+   *
+   * @return esito.
    */
   public boolean isEnoughHourlyAbsences(IWrapperPersonDay pd) {
-    
+
     Preconditions.checkState(pd.getWorkingTimeTypeDay().isPresent());
 
     // Calcolo i minuti giustificati dalle assenze.
@@ -119,7 +117,7 @@ public class PersonDayManager {
         justifiedTime = justifiedTime + abs.absenceType.justifiedTimeAtWork.minutes;
       }
     }
-    
+
     // Livelli VI - VIII
     if (pd.getValue().person.qualification.qualification > 3) {
       return pd.getWorkingTimeTypeDay().get().workingTime / 2 < justifiedTime;
@@ -184,18 +182,19 @@ public class PersonDayManager {
 
   /**
    * Costruisce la lista di coppie di timbrature (uscita/entrata) che rappresentano le potenziali
-   * pause pranzo.<br> 
+   * pause pranzo.<br>
    * L'algoritmo filtra le coppie che appartengono alla fascia pranzo passata come parametro.<br>
-   * Nel caso in cui una sola timbratura appartenga alla fascia pranzo, l'algoritmo provvede a 
-   * ricomputare il timeInPair della coppia assumendo la timbratura al di fuori della fascia uguale 
-   * al limite di tale fascia. (Le timbrature vengono tuttavia mantenute originali per garantire 
+   * Nel caso in cui una sola timbratura appartenga alla fascia pranzo, l'algoritmo provvede a
+   * ricomputare il timeInPair della coppia assumendo la timbratura al di fuori della fascia uguale
+   * al limite di tale fascia. (Le timbrature vengono tuttavia mantenute originali per garantire
    * l'usabilità anche ai controller che gestiscono reperibilità e turni).<br>
-   * @param personDay personDay
+   *
+   * @param personDay  personDay
    * @param startLunch inizio fascia pranzo istituto
-   * @param endLunch fine fascia pranzo istituto
+   * @param endLunch   fine fascia pranzo istituto
    * @return la lista delle pause pranzo
    */
-  public List<PairStamping> getGapLunchPairs(PersonDay personDay, LocalTime startLunch, 
+  public List<PairStamping> getGapLunchPairs(PersonDay personDay, LocalTime startLunch,
       LocalTime endLunch) {
 
     List<PairStamping> validPairs = computeValidPairStampings(personDay);
@@ -206,14 +205,14 @@ public class PersonDayManager {
     PairStamping previous = null;
     for (PairStamping validPair : validPairs) {
       if (previous != null) {
-        if ((previous.second.stampType == null 
+        if ((previous.second.stampType == null
             || StampTypes.PAUSA_PRANZO.equals(previous.second.stampType))
-            && (validPair.first.stampType == null 
-            || StampTypes.PAUSA_PRANZO.equals(validPair.first.stampType)) ) {
+            && (validPair.first.stampType == null
+            || StampTypes.PAUSA_PRANZO.equals(validPair.first.stampType))) {
 
           allGapPairs.add(new PairStamping(previous.second, validPair.first));
         }
-      } 
+      }
       previous = validPair;
     }
 
@@ -253,12 +252,13 @@ public class PersonDayManager {
 
   /**
    * Calcolo del tempo a lavoro e del buono pasto.
+   *
    * @param personDay personDay.
-   * @param wttd tipo orario personDay.
+   * @param wttd      tipo orario personDay.
    * @return oggetto modificato.
    */
-  public PersonDay updateTimeAtWork(PersonDay personDay, WorkingTimeTypeDay wttd, 
-      boolean fixedTimeAtWork, LocalTime startLunch, LocalTime endLunch, 
+  public PersonDay updateTimeAtWork(PersonDay personDay, WorkingTimeTypeDay wttd,
+      boolean fixedTimeAtWork, LocalTime startLunch, LocalTime endLunch,
       LocalTime startWork, LocalTime endWork) {
 
     // Pulizia stato personDay.
@@ -304,10 +304,10 @@ public class PersonDayManager {
       // Giustificativi grana ore (discriminare per calcolo buono o no)
       if (abs.absenceType.justifiedTimeAtWork.minutes != null) {
         if (abs.absenceType.justifiedTimeAtWork.mealTimeCounting) {
-          personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal() 
+          personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal()
               + abs.absenceType.justifiedTimeAtWork.minutes);
         } else {
-          personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal() 
+          personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
               + abs.absenceType.justifiedTimeAtWork.minutes);
         }
         continue;
@@ -315,7 +315,7 @@ public class PersonDayManager {
 
       // Mezza giornata giustificata.
       if (abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.HalfDay) {
-        personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal() 
+        personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
             + (wttd.workingTime / 2));
         continue;
       }
@@ -333,15 +333,15 @@ public class PersonDayManager {
 
     //Le coppie valide
     List<PairStamping> validPairs = computeValidPairStampings(personDay);
-    
+
     // Minuti derivanti dalle timbrature
     personDay.setStampingsTime(stampingMinutes(validPairs));
-    
+
     // Minuti effettivi decurtati della fascia istituto
     int workingMinutesInValidPairs = (workingMinutes(validPairs, startWork, endWork));
-    
+
     // Imposto il tempo a lavoro come somma di tutte le poste calcolate.
-    personDay.setTimeAtWork(workingMinutesInValidPairs + personDay.getJustifiedTimeMeal() 
+    personDay.setTimeAtWork(workingMinutesInValidPairs + personDay.getJustifiedTimeMeal()
         + personDay.getJustifiedTimeNoMeal());
 
     // Se è festa ho finito ...
@@ -355,12 +355,12 @@ public class PersonDayManager {
       setTicketStatusIfNotForced(personDay, false);
       return personDay;
     }
-    
+
     // Se il buono pasto è forzato a no non effettuo ulteriori calcoli e ho finito ...
     if (personDay.isTicketForcedByAdmin && !personDay.isTicketAvailable) {
       return personDay;
     }
-    
+
     // #######################################################################################
     // IL PRANZO E' SERVITOOOOO????
     // Questa parte determina se il buono pasto è ottenuto e la eventuale quantità decurtata
@@ -444,11 +444,12 @@ public class PersonDayManager {
 
   /**
    * Popola il campo difference del PersonDay.
-   * @param personDay personDay
-   * @param wttd wttd
+   *
+   * @param personDay       personDay
+   * @param wttd            wttd
    * @param fixedTimeAtWork fixedTimeAtWork
    */
-  public void updateDifference(PersonDay personDay, WorkingTimeTypeDay wttd, 
+  public void updateDifference(PersonDay personDay, WorkingTimeTypeDay wttd,
       boolean fixedTimeAtWork) {
 
     //persona fixed
@@ -491,19 +492,20 @@ public class PersonDayManager {
     }
 
     //caso generale
-    personDay.setProgressive(personDay.getDifference() 
+    personDay.setProgressive(personDay.getDifference()
         + previousForProgressive.get().getProgressive());
 
   }
 
   /**
    * Popola il campo isTicketAvailable.
-   * @param personDay personDay 
-   * @param wttd wttd
+   *
+   * @param personDay       personDay
+   * @param wttd            wttd
    * @param fixedTimeAtWork fixedTimeAtWork
    * @return personDay
    */
-  public PersonDay updateTicketAvailable(PersonDay personDay, WorkingTimeTypeDay wttd, 
+  public PersonDay updateTicketAvailable(PersonDay personDay, WorkingTimeTypeDay wttd,
       boolean fixedTimeAtWork) {
 
     //caso forced by admin
@@ -530,7 +532,8 @@ public class PersonDayManager {
 
   /**
    * Setta il valore della variabile isTicketAvailable solo se isTicketForcedByAdmin è false.
-   * @param pd personDay
+   *
+   * @param pd                personDay
    * @param isTicketAvailable value.
    */
   public void setTicketStatusIfNotForced(PersonDay pd, boolean isTicketAvailable) {
@@ -553,14 +556,14 @@ public class PersonDayManager {
 
     Preconditions.checkArgument(pd.getWorkingTimeTypeDay().isPresent());
 
-    LocalTimeInterval lunchInterval = (LocalTimeInterval)configurationManager.configValue(
+    LocalTimeInterval lunchInterval = (LocalTimeInterval) configurationManager.configValue(
         pd.getValue().person.office, EpasParam.LUNCH_INTERVAL, pd.getValue().getDate());
-    
-    LocalTimeInterval workInterval = (LocalTimeInterval)configurationManager.configValue(
+
+    LocalTimeInterval workInterval = (LocalTimeInterval) configurationManager.configValue(
         pd.getValue().person.office, EpasParam.WORK_INTERVAL, pd.getValue().getDate());
-        
-    updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(), 
-        pd.isFixedTimeAtWork(), lunchInterval.from, lunchInterval.to, workInterval.from, 
+
+    updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(),
+        pd.isFixedTimeAtWork(), lunchInterval.from, lunchInterval.to, workInterval.from,
         workInterval.to);
 
     updateDifference(pd.getValue(), pd.getWorkingTimeTypeDay().get(), pd.isFixedTimeAtWork());
@@ -570,7 +573,6 @@ public class PersonDayManager {
     updateTicketAvailable(pd.getValue(), pd.getWorkingTimeTypeDay().get(), pd.isFixedTimeAtWork());
 
   }
-
 
 
   /**
@@ -606,7 +608,7 @@ public class PersonDayManager {
     }
 
     setValidPairStampings(pd.getValue());
-   
+
     if (pd.isFixedTimeAtWork()) {
       //persona fixed
       if (allValidStampings(pd.getValue())) {
@@ -620,8 +622,8 @@ public class PersonDayManager {
 
       // ### CASO 1
       //caso no festa + no assenze giornaliere + no timbrature + (qualcosa capire cosa) 
-      if (!pd.getValue().isHoliday 
-          && !isAllDayAbsences(pd.getValue()) 
+      if (!pd.getValue().isHoliday
+          && !isAllDayAbsences(pd.getValue())
           && pd.getValue().stampings.isEmpty()
           && !isEnoughHourlyAbsences(pd)) {
 
@@ -632,8 +634,8 @@ public class PersonDayManager {
 
       // ### CASO 2
       //caso no festa + no assenze giornaliere + timbrature disaccoppiate
-      if (!pd.getValue().isHoliday 
-          && !isAllDayAbsences(pd.getValue()) 
+      if (!pd.getValue().isHoliday
+          && !isAllDayAbsences(pd.getValue())
           && !allValidStampings(pd.getValue())) {
 
         troubles.put(Troubles.UNCOUPLED_WORKING, Boolean.TRUE);
@@ -643,8 +645,8 @@ public class PersonDayManager {
 
       // ### CASO 3
       //caso è festa + no assenze giornaliere + timbrature disaccoppiate
-      if (pd.getValue().isHoliday 
-          && !isAllDayAbsences(pd.getValue()) 
+      if (pd.getValue().isHoliday
+          && !isAllDayAbsences(pd.getValue())
           && !allValidStampings(pd.getValue())) {
 
         troubles.put(Troubles.UNCOUPLED_HOLIDAY, Boolean.TRUE);
@@ -683,8 +685,8 @@ public class PersonDayManager {
    * calcolare il tempo di lavoro provvisorio <br> (3) l'inserimento di timbrature null per arrivare
    * alla dimensione del numberOfInOut
    *
-   * @param wrPersonDay   personDay
-   * @param numberOfInOut numero minimo di coppie  da visualizzare.
+   * @param wrPersonDay        personDay
+   * @param numberOfInOut      numero minimo di coppie  da visualizzare.
    * @param considerExitingNow se voglio considerare la timbratura uscendo adesso.
    * @return lista di stampings per il template.
    */
@@ -912,9 +914,9 @@ public class PersonDayManager {
 
   /**
    * 1) Setta il campo valid per ciascuna stamping del personDay (sulla base del loro valore al
-   *    momento della call) <br> 
+   * momento della call) <br>
    * 2) Associa ogni stamping alla coppia valida individuata se presente
-   *    (campo stamping.pairId) <br>
+   * (campo stamping.pairId) <br>
    *
    * @param pd il PersonDay.
    */
@@ -1026,6 +1028,7 @@ public class PersonDayManager {
 
   /**
    * Se la persona è in missione nel giorno.
+   *
    * @param personDay giorno
    * @return esito
    */
@@ -1102,6 +1105,7 @@ public class PersonDayManager {
 
   /**
    * Restituisce la quantita' in minuti del'orario dovuto alle timbrature valide in un giono.
+   *
    * @param validPairs coppie valide di timbrature per il tempo a lavoro.
    * @return minuti
    */
@@ -1115,20 +1119,21 @@ public class PersonDayManager {
 
     return stampingMinutes;
   }
-  
+
   /**
-   * Restituisce la quantita' in minuti del'orario dovuto alle timbrature valide in un giono, 
+   * Restituisce la quantita' in minuti del'orario dovuto alle timbrature valide in un giono,
    * che facciano parte della finestra temporale specificata.
+   *
    * @param validPairs coppie valide di timbrature per il tempo a lavoro
-   * @param startWork inizio finestra
-   * @param endWork fine finestra
+   * @param startWork  inizio finestra
+   * @param endWork    fine finestra
    * @return minuti
    */
-  private int workingMinutes(List<PairStamping> validPairs, 
+  private int workingMinutes(List<PairStamping> validPairs,
       LocalTime startWork, LocalTime endWork) {
-    
+
     int workingMinutes = 0;
-    
+
     //Per ogni coppia valida butto via il tempo oltre la fascia.
     for (PairStamping validPair : validPairs) {
       LocalTime consideredStart = new LocalTime(validPair.first.date);
@@ -1147,13 +1152,14 @@ public class PersonDayManager {
       }
       workingMinutes += DateUtility.toMinute(consideredEnd) - DateUtility.toMinute(consideredStart);
     }
-    
+
     return workingMinutes;
-    
+
   }
 
   /**
    * Se le stampings nel giorno sono tutte valide.
+   *
    * @param personDay personDay
    * @return esito
    */
@@ -1168,4 +1174,56 @@ public class PersonDayManager {
         }).isEmpty();
   }
 
+  /**
+   * Cerca il personDay se non esiste lo crea e lo persiste.
+   */
+  public PersonDay getOrCreateAndPersistPersonDay(Person person, LocalDate date) {
+
+    Optional<PersonDay> optPersonDay = personDayDao.getPersonDay(person, date);
+    if (optPersonDay.isPresent()) {
+      return optPersonDay.get();
+    }
+    PersonDay personDay = new PersonDay(person, date);
+    personDay.isHoliday = isHoliday(person, date);
+    personDay.create();
+    return personDay;
+  }
+
+
+  /**
+   * Se il giorno è festivo per la persona.
+   */
+  public boolean isHoliday(Person person, LocalDate date) {
+
+    MonthDay patron = (MonthDay) configurationManager
+        .configValue(person.office, EpasParam.DAY_OF_PATRON, date);
+
+    if (DateUtility.isGeneralHoliday(Optional.fromNullable(patron), date)) {
+      return true;
+    }
+
+    Contract contract = contractDao.getContract(date, person);
+    if (contract == null) {
+      //persona fuori contratto
+      return false;
+    }
+
+    for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
+      if (DateUtility.isDateIntoInterval(date,
+          new DateInterval(cwtt.beginDate, cwtt.endDate))) {
+
+        int dayOfWeekIndex = date.getDayOfWeek() - 1;
+        WorkingTimeTypeDay wttd = cwtt.workingTimeType
+            .workingTimeTypeDays.get(dayOfWeekIndex);
+        Preconditions.checkState(wttd.dayOfWeek == date.getDayOfWeek());
+        return wttd.holiday;
+
+      }
+    }
+
+    throw new IllegalStateException();
+    //se il db è consistente non si verifica mai
+    //return false;
+
+  }
 }

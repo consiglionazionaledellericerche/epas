@@ -2,6 +2,8 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
@@ -9,9 +11,12 @@ import com.google.gdata.util.common.base.Preconditions;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonMonthRecapDao;
+import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 
 import manager.PersonMonthsManager;
 
@@ -20,7 +25,9 @@ import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
+import models.Role;
 import models.User;
+import models.UsersRolesOffices;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -30,6 +37,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+import java.nio.file.attribute.UserPrincipalLookupService;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,9 +59,12 @@ public class PersonMonths extends Controller {
   private static OfficeDao officeDao;
   @Inject
   private static PersonDao personDao;
-
   @Inject
   private static SecurityRules rules;
+  @Inject
+  static WrapperModelFunctionFactory wrapperFunctionFactory;
+  @Inject
+  private static UsersRolesOfficesDao uroDao;
 
   /**
    * metodo che renderizza la visualizzazione del riepilogo orario.
@@ -119,9 +130,16 @@ public class PersonMonths extends Controller {
    * @param month month
    * @param year  year
    */
-  public static void insertTrainingHours(int month, int year) {
+  public static void insertTrainingHours(Integer month, Integer year) {
 
     Person person = Security.getUser().get().person;
+    java.util.Optional<UsersRolesOffices> uro = uroDao.getUsersRolesOfficesByUser(person.user)
+        .stream()
+        .filter(a -> a.role.name.equals(Role.PERSONNEL_ADMIN) && a.office.equals(person.office))
+        .findFirst();
+    if (uro.isPresent()) {
+      rules.checkIfPermitted(person.office);
+    } 
 
     render(person, month, year);
   }
@@ -136,96 +154,59 @@ public class PersonMonths extends Controller {
    * @param year  anno
    */
   public static void saveTrainingHours(@Valid @Min(0) Integer begin, @Min(0) @Valid Integer end,
-      @Required @Valid @Min(0) Integer value, int month, int year, Long personMonthSituationId) {
+      @Required @Valid @Min(0) Integer value, Integer month, Integer year, 
+      Long personMonthSituationId) {
 
     Person person = Security.getUser().get().person;
 
     if (personMonthSituationId != null) {
+      java.util.Optional<UsersRolesOffices> uro = null;
       PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);
-
-      Verify.verify(pm.isEditable());
-
-      if (!validation.hasErrors()) {
-        if (value > 24 * (pm.toDate.getDayOfMonth() - pm.fromDate.getDayOfMonth() + 1)) {
-          validation.addError("value",
-              "valore troppo alto");
+      if (person == null) {
+        //ruolo di sistema 
+      } else {
+        uro = uroDao.getUsersRolesOfficesByUser(person.user)
+            .stream()
+            .filter(a -> a.role.name.equals(Role.PERSONNEL_ADMIN) 
+                && a.office.equals(pm.person.office))
+            .findFirst();
+        if (uro == null || uro.isPresent()) {
+          rules.checkIfPermitted(person.office);
         }
       }
+      
+      Verify.verify(pm.isEditable());
+      checkErrorsInUpdate(value, pm);
+
       if (validation.hasErrors()) {
+        LocalDate dateFrom = new LocalDate(year, month, begin);
+        LocalDate dateTo = new LocalDate(year, month, end); 
         response.status = 400;
         render("@insertTrainingHours",
-            person, month, year, begin, end, value, personMonthSituationId);
+            person, month, year, begin, end, value, personMonthSituationId, dateFrom, dateTo);
       }
       pm.trainingHours = value;
       pm.save();
       flash.success("Ore di formazione aggiornate.", value);
+      if (uro == null || uro.isPresent()) {
+        PersonMonths.visualizePeopleTrainingHours(year, month, pm.person.office.id);        
+      } else {
+        PersonMonths.trainingHours(year);
+      }      
 
-      PersonMonths.trainingHours(year);
-
     }
-
-    if (!validation.hasErrors()) {
-      if (begin == null) {
-        validation.addError("begin", "Richiesto");
-      }
-      if (end == null) {
-        validation.addError("end", "Richiesto");
-      }
-    }
-    if (!validation.hasErrors()) {
-      int endMonth = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue().getDayOfMonth();
-      if (begin > endMonth) {
-        validation.addError("begin",
-            "deve appartenere al mese selezionato");
-      }
-      if (end > endMonth) {
-        validation.addError("end",
-            "deve appartenere al mese selezionato");
-      }
-    }
-    if (!validation.hasErrors()) {
-      if (begin > end) {
-        validation.addError("begin",
-            "inizio intervallo  non valido");
-      }
-    }
-    if (!validation.hasErrors()) {
-      if (value > 24 * (end - begin + 1)) {
-        validation.addError("value",
-            "valore troppo alto");
-      }
-    }
-
+    checkErrors(begin, end, year, month, value);
     if (validation.hasErrors()) {
       response.status = 400;
       render("@insertTrainingHours", person, month, year, begin, end, value);
     }
 
-    LocalDate beginDate = new LocalDate(year, month, begin);
-    LocalDate endDate = new LocalDate(year, month, end);
-//    if (!validation.hasErrors()) {
-//      if (!personMonthsManager
-//          .checkIfPeriodAlreadyExists(person, year, month, beginDate, endDate).getResult()) {
-//        validation.addError("begin",
-//            "ore già presenti per l'intervallo selezionato");
-//      }
-//    }
-    if (!validation.hasErrors()) {
-      if (!personMonthsManager.checkIfAlreadySend(person, year, month).getResult()) {
-        flash.error("Le ore di formazione per il mese selezionato sono già state approvate.");
-        trainingHours(year);
-      }
-    }
-    if (validation.hasErrors()) {
-      response.status = 400;
-      render("@insertTrainingHours", person, month, year, begin, end, value);
+    if (!personMonthsManager.checkIfAlreadySent(person, year, month).getResult()) {
+      flash.error("Le ore di formazione per il mese selezionato sono già state approvate.");
+      trainingHours(year);
     }
 
-    PersonMonthRecap pm = new PersonMonthRecap(person, year, month);
-
-    Verify.verify(pm.isEditable());
-
-    personMonthsManager.saveTrainingHours(pm, false, value, beginDate, endDate);
+    personMonthsManager.saveTrainingHours(person, year, month, begin, end, false, value);
     flash.success("Salvate %d ore di formazione ", value);
 
     PersonMonths.trainingHours(year);
@@ -263,12 +244,22 @@ public class PersonMonths extends Controller {
    * @param personMonthRecapId l'id del personMonthRecap
    */
   public static void deleteTrainingHours(Long personId, Long personMonthRecapId) {
+    Person person = personDao.getPersonById(personId);    
     PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthRecapId);
     if (pm == null) {
       flash.error("Ore di formazioni inesistenti. Operazione annullata.");
       PersonMonths.trainingHours(LocalDate.now().getYear());
 
     }
+    java.util.Optional<UsersRolesOffices> uro = uroDao.getUsersRolesOfficesByUser(person.user)
+        .stream()
+        .filter(a -> a.role.name.equals(Role.PERSONNEL_ADMIN) 
+            && a.office.equals(pm.person.office))
+        .findFirst();
+    if (uro.isPresent()) {
+      rules.checkIfPermitted(person.office);
+    } 
+    
     render(pm);
   }
 
@@ -285,23 +276,37 @@ public class PersonMonths extends Controller {
       flash.error("Ore di formazioni inesistenti. Operazione annullata.");
       Stampings.stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
     }
-
+    
     Person person = Security.getUser().get().person;
-    if (person == null || !person.id.equals(pm.person.id)) {
-      flash.error("Accesso negato.");
-      renderTemplate("Application/indexAdmin.html");
+    java.util.Optional<UsersRolesOffices> uro = null;
+    if (person == null) {
+      //ruolo di sistema
+    } else {
+      uro = uroDao.getUsersRolesOfficesByUser(person.user)
+          .stream()
+          .filter(a -> a.role.name.equalsIgnoreCase(Role.PERSONNEL_ADMIN) 
+              && a.office.equals(pm.person.office))
+          .findFirst();
+      if (uro.isPresent()) {
+        rules.checkIfPermitted(person.office);
+      } 
     }
-
+    
     pm.delete();
     flash.error("Ore di formazione eliminate con successo.");
-    PersonMonths.trainingHours(pm.year);
+    if (uro == null || uro.isPresent()) {
+      PersonMonths.visualizePeopleTrainingHours(pm.year, pm.month, pm.person.office.id);
+    } else {
+      PersonMonths.trainingHours(pm.year);      
+    }
   }
 
   /**
-   *
-   * @param year
-   * @param month
-   * @param officeId
+   * visualizza il tabellone riepilogativo delle ore di formazione in un determinato mese e anno 
+   * per l'ufficio con id officeId.
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   * @param officeId l'id dell'ufficio di riferimento
    */
   public static void visualizePeopleTrainingHours(int year, int month, Long officeId) {
     Office office = officeDao.getOfficeById(officeId);
@@ -310,13 +315,121 @@ public class PersonMonths extends Controller {
     Set<Office> offices = Sets.newHashSet();
     offices.add(office);
     List<Person> personList = personDao.getActivePersonInMonth(offices, new YearMonth(year, month));
-//    Table<Person, String, List<TrainingHoursRecap>> table = TreeBasedTable
-//        .create(personMonthsManager.personNameComparator,
-//            personMonthsManager.stringComparator);
-//    
-//    table = personMonthsManager.createTable(personList, year, month); 
-    Map<Person, List<PersonMonthRecap>> map = personMonthsManager.createMap(personList, year, month);
+
+    Map<Person, List<PersonMonthRecap>> map = personMonthsManager
+        .createMap(personList, year, month);
 
     render(map, year, month, office);
   }
+
+  /**
+   * visualizza la form di inserimento per l'amministratore delle ore di formazione.
+   * @param officeId l'id dell'ufficio di cui si vuole inserire le ore di formazione
+   * @param month il mese di riferimento
+   * @param year l'anno di riferimento
+   */
+  public static void insertPeopleTrainingHours(Long officeId, int month, int year) {
+    Office office = officeDao.getOfficeById(officeId);    
+    notFoundIfNull(office);
+
+    rules.checkIfPermitted(office);
+
+    List<Person> simplePersonList = personDao.listFetched(Optional.<String>absent(),
+        ImmutableSet.of(office), false, null, null, false).list();
+
+    render(month, year, simplePersonList);
+  }
+
+  /**
+   * salvataggio delle ore di formazione inserite dall'amministratore.
+   * @param begin il giorno di inizio della formazione
+   * @param end il giorno di fine della formazione
+   * @param value la quantità di ore di formazione
+   * @param month il mese in cui si è fatta formazione
+   * @param year l'anno in cui si è fatta la formazione
+   * @param person la persona che ha fatto la formazione
+   */
+  public static void save(@Valid @Min(0) Integer begin, @Min(0) @Valid Integer end,
+      @Required @Valid @Min(0) Integer value, Integer month, Integer year, Person person) {
+    
+    rules.checkIfPermitted(Security.getUser().get().person.office);
+    checkErrors(begin, end, year, month, value);
+    checkPerson(person);
+    if (validation.hasErrors()) {
+      List<Person> simplePersonList = personDao.listFetched(Optional.<String>absent(),
+          ImmutableSet.of(Security.getUser().get().person.office), false, null, null, false).list();
+      response.status = 400;
+      render("@insertPeopleTrainingHours",
+          person, month, year, begin, end, value,simplePersonList);
+    }
+
+    personMonthsManager.saveTrainingHours(person, year, month, begin, end, false, value);
+    flash.success("Salvate %d ore di formazione per %s", value, person.fullName());
+    PersonMonths.visualizePeopleTrainingHours(year, month, person.office.id);
+  }
+
+  /**
+   * metodo privato che aggiunge al validation eventuali errori riscontrati nel passaggio
+   * dei parametri.
+   * @param begin il giorno di inizio della formazione
+   * @param end il giorno di fine della formazione
+   * @param year l'anno di formazione
+   * @param month il mese di formazione
+   * @param value la quantità di ore di formazione
+   */
+  private static void checkErrors(Integer begin, Integer end, Integer year, 
+      Integer month, Integer value) {
+    if (!validation.hasErrors()) {
+      if (begin == null) {
+        validation.addError("begin", "Richiesto");
+      }
+      if (end == null) {
+        validation.addError("end", "Richiesto");
+      }    
+      int endMonth = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue().getDayOfMonth();
+      if (begin > endMonth) {
+        validation.addError("begin",
+            "deve appartenere al mese selezionato");
+      }
+      if (end > endMonth) {
+        validation.addError("end",
+            "deve appartenere al mese selezionato");
+      }
+      if (begin > end) {
+        validation.addError("begin",
+            "inizio intervallo  non valido");
+      }
+
+      if (value > 24 * (end - begin + 1) && end - begin >= 0) {
+        validation.addError("value",
+            "valore troppo alto");
+      }
+    }
+  }
+
+  /**
+   * aggiunge al validation l'eventuale errore relativo al quantitativo orario che può superare
+   * le ore possibili prendibili per quel giorno.
+   * @param value il quantitativo di ore di formazione
+   * @param pm il personMonthRecap da modificare con le ore passate come parametro
+   */
+  private static void checkErrorsInUpdate(Integer value, PersonMonthRecap pm) {
+    if (!validation.hasErrors()) {
+      if (value > 24 * (pm.toDate.getDayOfMonth() - pm.fromDate.getDayOfMonth() + 1)) {
+        validation.addError("value",
+            "valore troppo alto");
+      }
+    }
+  }
+  
+  /**
+   * aggiunge al validation un controllo sulla presenza della persona passata come parametro
+   * @param person
+   */
+  private static void checkPerson(Person person) {
+    if (person == null || person.name == null || person.surname == null) {
+      validation.addError("person", "la persona non può essere nulla");
+    }
+  }
+
 }

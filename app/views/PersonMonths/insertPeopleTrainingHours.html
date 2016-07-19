@@ -1,0 +1,28 @@
+#{modalAsync id:'defaultModal', title:'Inserisci ore di formazione per anno ' +year }
+
+#{alert color:'info'}
+	Inserisci le ore di formazione scegliendo la persona per cui inserirle, specificando il giorno di inizio, 
+	il giorno di fine e il quantitativo.
+#{/alert}
+
+<div id="insertHour">
+	#{form @PersonMonths.save(), class:'form-horizontal', 'data-async':'#page_content',
+			    'data-async-error':'#insertHour', 'data-spinner':'#defaultSpinner'}
+
+  	  #{f.hidden 'month', value:month /}
+  	  #{f.hidden 'year', value:year /}
+  	  #{f.selectModel 'person', items: simplePersonList, required:true /}
+	  #{f.input 'begin', label:'Giorno Iniziale', type:'number', required:'true' /}
+	  #{f.input 'end', label:'Giorno Finale', type:'number', required:'true' /}	
+	  #{f.input 'value', label:'Quantità', type:'number', required:'true' /}
+	  	  
+
+	  #{b.buttons center:'true'}
+	    <button type="submit" class="btn btn-primary" value="Ok">Invio</button>
+	  #{/b.buttons}
+
+
+	#{/form}
+</div>
+  
+#{/modalAsync}

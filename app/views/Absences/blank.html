@@ -1,52 +1,51 @@
-#{modalAsync id:'modalAbsence', button:'Salva', 
-  title:'Nuovo codice assenza in data ' + dateFrom.format() 
-           + ' per ' + person.fullname }
+#{modalAsync id:'modalAbsence', button:'Salva',
+title:'Nuovo codice assenza in data ' + dateFrom.format()
++ ' per ' + person.fullname }
 
 <div class="alert alert-success center">Inserisci il nuovo codice di assenza.</div>
 
 <div id="absenceData">
 
-  #{form action:@Absences.save(), method:'POST', autocomplete:false,
-	    class:'form form-horizontal', 'data-async':'#page_content',
-	    'data-async-error':'#absenceData'}
-   	
-	<input type="hidden" name="person.id" value="${person.id}"/>
-	<input type="hidden" name="dateFrom" value="${dateFrom.format()}"/>
-	#{f.hidden 'personId', value:person.id /}
-	#{f.select 'absenceType', required:true}
-	  <option></option>
-      #{list templateUtility.frequentAbsenceTypeList()}
-	    <option value="${_.id}"#{if field.value?.id == _.id} selected#{/if}>${_.label()}</option>
-  	  #{/list}
-	#{/f.select}
-	
-    #{f.view 'dateFrom', value:dateFrom.format()/}
-    #{f.date 'dateTo', value:dateTo?.format()/}
-    
-    *{ #{f.input 'absenceFile', type:'file' /} }*
+  #{if forceInsert}
+    #{set action:@Absences.forceInsert() /}
+  #{/if}
+  #{else}
+    #{set action:@Absences.save() /}
+  #{/else}
 
-    #{b.buttons center:true}   
-      #{b.submit 'Inserisci'/}
-    #{/b.buttons}
-        
+  #{form action:action, method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#absenceData'}
+
+  #{f.hidden 'dateFrom', value:dateFrom.format() /}
+  #{f.hidden 'personId', value:person.id /}
+  #{f.selectModel 'absenceType', items: templateUtility.absenceTypes, required:true /}
+  #{f.view 'dateFrom', value:dateFrom.format()/}
+  #{f.date 'dateTo', value:dateTo?.format()/}
+
+  *{ #{f.input 'absenceFile', type:'file' /} }*
+
+  #{b.buttons center:true}
+  #{b.submit 'Inserisci'/}
+  #{/b.buttons}
+
   #{/form}
-  
 
-     #{accordionItem 'nuovaAssenza', parent:'info', title:'Informazioni utili', open:true }
-       <p>Se si vuole inserire un'assenza per più giorni, inserire nel campo <strong>Fino a</strong> 
-       il giorno fino al quale si vuole inserire tale codice d'assenza.</p>
-	   <p>Di default, in tale campo, viene visualizzato il giorno di partenza per cui si vuole inserire l'assenza</p>
-	   <p class="text-info" style="margin-top: 5px;"><em>N.B. Non e' possibile inserire in uno stesso giorno 
-	   due codici di assenza che giustificano tutto il giorno</em></p>
-	   <p>Utilizzando il codice <em>FER</em> il software provvederà ad assegnare ferie e permessi 
-	   fin quando disponibili nel seguente ordine di priorità: 
-	      <ul>
-	        <li>31 (recupero ferie anno precedente)</li>
-	        <li>94 (permesso)</li>
-	        <li>32 (ferie anno corrente)</li>	        
-	      </ul>
-	  </p>
-     #{/accordionItem}
+  #{accordionItem 'nuovaAssenza', parent:'info', title:'Informazioni utili', open:true }
+  <p>Se si vuole inserire un'assenza per più giorni, inserire nel campo <strong>Fino a</strong>
+    il giorno fino al quale si vuole inserire tale codice d'assenza.</p>
+  <p>Di default, in tale campo, viene visualizzato il giorno di partenza per cui si vuole inserire l'assenza</p>
+  <p class="text-info" style="margin-top: 5px;"><em>N.B. Non e' possibile inserire in uno stesso giorno
+    due codici di assenza che giustificano tutto il giorno</em></p>
+  <p>Utilizzando il codice <em>FER</em> il software provvederà ad assegnare ferie e permessi
+    fin quando disponibili nel seguente ordine di priorità:
+  <ul>
+    <li>31 (recupero ferie anno precedente)</li>
+    <li>94 (permesso)</li>
+    <li>32 (ferie anno corrente)</li>
+  </ul>
+  </p>
+  #{/accordionItem}
 
 
 </div>

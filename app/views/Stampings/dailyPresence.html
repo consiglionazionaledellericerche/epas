@@ -2,56 +2,107 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Presenza Giornaliera'  /}
 
+#{set 'moreStyles'}
+#{stylesheet 'stampingsTable.css'/}
+#{/set}
+
 <div class="container">
   #{if office}
-    #{title title:'Controllo presenze ' + office.name /}
+  #{title title:'Controllo presenze ' + office.name /}
   #{/if}
   #{else}
-    #{title title:'Controllo presenze ' + date.format() /}
+  #{title title:'Controllo presenze ' + date.format() /}
   #{/else}
 </div>
 
 #{if !groupView}
-	#{stampings.presenceDashboardTabs activeAction:'dailyPresence' /}
+#{stampings.presenceDashboardTabs activeAction:'dailyPresence' /}
 #{/if}
 
 <div class="container-fluid col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
-   <div class="center">
-   #{title title:date.format()/}
-   </div>
-	   <table id="tabellonetimbrature" class="table table-bordered table-condensed table-hover">
-	      <tr>
-			<th class="group-single">Nome</th>
-			<th class="group-single">Assenza</th>
-			<th class="group-single">Tempo<br>Lavoro</th>
-			#{list items:1..numberOfInOut, as:'i'}
-				<th class="group-left">${i}° entrata</th>
-				<th class="group-right">${i}° uscita</th>
-			#{/list}
-			<th class="group-single">Buono<br>Mensa</th>
-		  </tr>
-	
-	    
-	    
-		#{list items:daysRecap, as:'dayRecap'}
-		%{
-		  person = dayRecap.personDay.person;
-		  link = false;
-		}%
-		<tr>
-			<td class="default-single">
-			<a href="@{Stampings.personStamping(dayRecap.personDay.person.id,date.getYear(),date.getMonthOfYear())}">${dayRecap.personDay.person.fullname}</a>
-			</td>
-			
-			#{include './personStampingComponents/_absencesTemplate.html' /}
-			
-			<td class="default-single">${dayRecap.personDay.timeAtWork.printHourMinute()}</td>
-			
-			#{include './personStampingComponents/_stampingsTemplate.html' /}
-		    
-		    #{include './personStampingComponents/_mealTicketsTemplate.html' /}
-			
-		</tr>	
-		#{/list}
-	  </table>
+  <div class="center">
+    #{title title:date.format()/}
+  </div>
+  <table id="tabellonetimbrature" class="table table-bordered table-condensed table-hover">
+    <tr>
+      <th class="group-single">Nome</th>
+      <th class="group-single">Assenza</th>
+      <th class="group-single">Tempo<br>Lavoro</th>
+      #{list items:1..numberOfInOut, as:'i'}
+      <th class="group-left">${i}° entrata</th>
+      <th class="group-right">${i}° uscita</th>
+      #{/list}
+      <th class="group-single">Buono<br>Mensa</th>
+    </tr>
+
+
+    #{list items:daysRecap, as:'dayRecap'}
+    <tr>
+      <!-- Colonna Persona-->
+      <td class="default-single">
+        <a href="@{Stampings.personStamping(dayRecap.personDay.person.id,date.getYear(),date.getMonthOfYear())}">${dayRecap.personDay.person.fullname}</a>
+      </td>
+      <!-- Colonna Assenze-->
+      <td class="assenza default-single">
+        #{list items:dayRecap.personDay.absences, as:'absence'}
+    		<span webui-popover-hover data-url="#${absence.id}">
+	    		${absence.absenceType.code}#{if absence.justifiedMinutes} ${absence.justifiedMinutes}min #{/if}
+	  		</span>
+
+        <div class="webui-popover-content" id="${absence.id}">
+          <strong>${absence.absenceType.code}</strong> ${absence.absenceType.description}
+        </div>
+        #{/list}
+      </td>
+      <!--Colonna tempo a lavoro-->
+      <td class="default-single">${dayRecap.personDay.timeAtWork.printHourMinute()}</td>
+      <!--Colonne Assenze-->
+      #{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
+
+      *{ posizione timbratura }*
+      <td class="position${stampingTemplate.pairPosition} stamping
+
+    *{ colore timbratura }*
+    #{if stampingTemplate.colour.equals("in")} default-left" #{/if}
+      #{elseif stampingTemplate.colour.equals("out")} default-right" #{/elseif}
+      #{elseif stampingTemplate.colour.equals("warn")} warn" #{/elseif}
+
+      *{ popover }*
+      #{if stampingTemplate.showPopover()} webui-popover-hover data-url="#${stampingTemplate.stamping.id}" #{/if}
+      >
+
+      #{if stampingTemplate.date}
+      ${stampingTemplate.hour}
+      #{/if}
+
+      #{elseif stampingTemplate.pairPosition.equals("center")}
+      <a title="Timbratura di servizio mancante" class="initialism">
+        <i class="icon-warning-sign"></i>
+      </a>
+      #{/elseif}
+
+      #{if stampingTemplate.stamping.stampType}
+      <strong>${stampingTemplate.stamping.stampType.identifier}</strong>
+      #{/if}
+      #{list items:stampingTemplate.stampModificationTypes, as:'smt'}
+      <strong>${smt.code}</strong>
+      #{/list}
+      </td>
+      #{if stampingTemplate.showPopover()}
+      <div class="webui-popover-content" id="${stampingTemplate.stamping.id}">
+        #{if stampingTemplate.stamping.stampType}
+        <p><strong>${stampingTemplate.stamping.stampType.identifier}</strong> ${stampingTemplate.stamping.stampType.description}</p>
+        #{/if}
+        #{list items:stampingTemplate.stampModificationTypes, as:'smt'}
+        <p><strong>${smt.code}</strong> ${smt.description}</p>
+        #{/list}
+      </div>
+      #{/if}
+      #{/list}
+
+      #{include './personStampingComponents/_mealTicketsTemplate.html' /}
+
+    </tr>
+    #{/list}
+  </table>
 </div>

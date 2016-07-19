@@ -19,8 +19,8 @@ import it.cnr.iit.epas.DateInterval;
 import manager.cache.StampTypeManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
-import manager.configurations.EpasParam.RecomputationType;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
+import manager.configurations.EpasParam.RecomputationType;
 
 import models.Contract;
 import models.ContractMonthRecap;
@@ -58,7 +58,6 @@ public class ConsistencyManager {
   private static final Logger log = LoggerFactory.getLogger(ConsistencyManager.class);
   private final SecureManager secureManager;
   private final OfficeDao officeDao;
-  private final PersonManager personManager;
   private final PersonDao personDao;
   private final PersonDayManager personDayManager;
   private final ContractMonthRecapManager contractMonthRecapManager;
@@ -71,17 +70,17 @@ public class ConsistencyManager {
 
   /**
    * Constructor.
-   * @param secureManager secureManager
-   * @param officeDao officeDao
-   * @param personDao personDao
-   * @param personDayDao personDayDao
-   * @param personManager personManager
-   * @param personDayManager personDayManager
+   *
+   * @param secureManager             secureManager
+   * @param officeDao                 officeDao
+   * @param personDao                 personDao
+   * @param personDayDao              personDayDao
+   * @param personDayManager          personDayManager
    * @param contractMonthRecapManager contractMonthRecapManager
    * @param personDayInTroubleManager personDayInTroubleManager
-   * @param configurationManager configurationManager
-   * @param stampTypeManager stampTypeManager
-   * @param wrapperFactory wrapperFactory
+   * @param configurationManager      configurationManager
+   * @param stampTypeManager          stampTypeManager
+   * @param wrapperFactory            wrapperFactory
    */
   @Inject
   public ConsistencyManager(SecureManager secureManager,
@@ -89,7 +88,6 @@ public class ConsistencyManager {
       PersonDao personDao,
       PersonDayDao personDayDao,
 
-      PersonManager personManager,
       PersonDayManager personDayManager,
       ContractMonthRecapManager contractMonthRecapManager,
       PersonDayInTroubleManager personDayInTroubleManager,
@@ -100,7 +98,6 @@ public class ConsistencyManager {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
-    this.personManager = personManager;
     this.personDao = personDao;
     this.personDayManager = personDayManager;
     this.contractMonthRecapManager = contractMonthRecapManager;
@@ -121,7 +118,7 @@ public class ConsistencyManager {
    * @param onlyRecap se si vuole aggiornare solo i riepiloghi
    */
   public void fixPersonSituation(Optional<Person> person, Optional<User> user, LocalDate fromDate,
-                                 boolean sendMail, boolean onlyRecap) {
+      boolean sendMail, boolean onlyRecap) {
 
     Set<Office> offices = user.isPresent() ? secureManager.officesWriteAllowed(user.get())
         : Sets.newHashSet(officeDao.getAllOffices());
@@ -235,7 +232,7 @@ public class ConsistencyManager {
   /**
    * Effettua la ricomputazione.
    */
-  public void performRecomputation(IPropertiesInPeriodOwner target, 
+  public void performRecomputation(IPropertiesInPeriodOwner target,
       List<RecomputationType> recomputationTypes, LocalDate recomputeFrom) {
 
     if (recomputationTypes.isEmpty()) {
@@ -246,13 +243,13 @@ public class ConsistencyManager {
     }
 
     List<Person> personToRecompute = Lists.newArrayList();
-    
+
     if (target instanceof Office) {
-      personToRecompute = ((Office)target).persons;
+      personToRecompute = ((Office) target).persons;
     } else if (target instanceof Person) {
-      personToRecompute.add((Person)target);
+      personToRecompute.add((Person) target);
     }
-    
+
     for (Person person : personToRecompute) {
       if (recomputationTypes.contains(RecomputationType.DAYS)) {
         updatePersonSituation(person.id, recomputeFrom);
@@ -262,12 +259,12 @@ public class ConsistencyManager {
       }
       JPA.em().flush();
       JPA.em().clear();
-    }  
+    }
   }
 
 
   private void updatePersonSituationEngine(Long personId, LocalDate from, Optional<LocalDate> to,
-                                           boolean updateOnlyRecaps) {
+      boolean updateOnlyRecaps) {
 
     final Person person = personDao.fetchPersonForComputation(personId, Optional.fromNullable(from),
         Optional.<LocalDate>absent());
@@ -402,7 +399,7 @@ public class ConsistencyManager {
     }
 
     // decido festivo / lavorativo
-    pd.getValue().isHoliday = personManager.isHoliday(pd.getValue().person, pd.getValue().date);
+    pd.getValue().isHoliday = personDayManager.isHoliday(pd.getValue().person, pd.getValue().date);
     pd.getValue().save();
 
     // controllo uscita notturna
@@ -540,7 +537,7 @@ public class ConsistencyManager {
    * yearMonth specificati viene azzerato.
    */
   private ContractMonthRecap buildContractMonthRecap(IWrapperContract contract,
-                                                     YearMonth yearMonth) {
+      YearMonth yearMonth) {
 
     Optional<ContractMonthRecap> cmrOld = contract.getContractMonthRecap(yearMonth);
 
@@ -565,7 +562,7 @@ public class ConsistencyManager {
    * la stessa procedura dall'inizio del contratto. (Capire se questo caso si verifica mai).
    */
   private void populateContractMonthRecap(IWrapperContract contract,
-                                          Optional<YearMonth> yearMonthFrom) {
+      Optional<YearMonth> yearMonthFrom) {
 
     // Conterrà il riepilogo precedente di quello da costruire all'iterazione n.
     Optional<ContractMonthRecap> previousMonthRecap = Optional.<ContractMonthRecap>absent();
@@ -640,7 +637,7 @@ public class ConsistencyManager {
    * successivo alla inizializzazione). <br>
    */
   private ContractMonthRecap populateContractMonthFromSource(IWrapperContract contract,
-                                                             YearMonth yearMonthToCompute) {
+      YearMonth yearMonthToCompute) {
 
     // Caso semplice ultimo giorno del mese
     LocalDate lastDayInSourceMonth =
