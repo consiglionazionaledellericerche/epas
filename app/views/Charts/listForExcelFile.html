@@ -1,0 +1,31 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Export situazione mensile' /}
+
+#{charts.chartsTabs activeAction:'listForExcelFile' /}
+
+<div class="container">
+
+#{title title:('Export in formato .xls della situazione mensile ') /}
+
+	#{alert color:'info'}
+		<i class="fa fa-info-circle fa-2x" aria-hidden="true"> Info:</i><br><br>
+  		<p>Sarà generato un file Excel in formato .xls contenente la situazione mensile della persona selezionata utilizzabile al fine di avere un riscontro orario per 
+  		la rendicontazione dei progetti.</p>
+  		<p>Usando i menu in alto per anno, mese e sede, sarà possibile ottenere la situazione della persona desiderata nel periodo di interesse.
+  		</p>
+  		<p>Selezionare uno dei nomi presenti nella lista e premere ok.</p>
+  	#{/alert}
+  	
+  	#{form @Charts.test(), method:'POST', autocomplete:false, class:'form form-horizontal'}
+  	<input type="hidden" name="month" value="${date.getMonthOfYear()}"/>
+  	<input type="hidden" name="year" value="${date.getYear()}"/>
+
+  		#{f.selectModel 'person', items:personList /}
+  		#{b.buttons center:'true'}
+  		#{b.back /}
+  		#{b.ok /}
+  		#{/b.buttons}
+  	#{/form}
+
+</div>
