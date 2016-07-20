@@ -17,7 +17,10 @@
     </li>    
     <li #{if _activeAction.equals("overtimeOnPositiveResidualInYear")} class="active" #{/if}>
       <a href="@{Charts.overtimeOnPositiveResidualInYear(session.get("yearSelected"), session.get("officeSelected"))}">Ore positive vs. <br>straordinari annuali</a>
-    </li>    
+    </li>
+    <li #{if _activeAction.equals("listForExcelFile")} class="active" #{/if}>
+      <a href="@{Charts.listForExcelFile(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected"))}">Export in excel <br> della situazione mensile</a>
+    </li>     
     
   </ul>
 </div>

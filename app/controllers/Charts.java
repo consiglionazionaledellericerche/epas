@@ -11,19 +11,35 @@ import dao.PersonDao;
 
 import helpers.jpa.ModelQuery.SimpleResults;
 
+import it.cnr.iit.epas.DateUtility;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.SecureManager;
 import manager.charts.ChartsManager;
 import manager.charts.ChartsManager.RenderChart;
 import manager.recaps.charts.RenderResult;
+import manager.recaps.personstamping.PersonStampingDayRecap;
+import manager.recaps.personstamping.PersonStampingRecap;
+import manager.recaps.personstamping.PersonStampingRecapFactory;
 
+import models.Absence;
 import models.CompetenceCode;
 import models.Office;
 import models.Person;
 
 import models.exports.PersonOvertime;
 
+import org.apache.poi.hssf.record.*;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
@@ -34,6 +50,8 @@ import security.SecurityRules;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -60,6 +78,8 @@ public class Charts extends Controller {
   static OfficeDao officeDao;
   @Inject
   static CompetenceCodeDao competenceCodeDao;
+  @Inject
+  static PersonStampingRecapFactory stampingsRecapFactory;
 
   public static void overtimeOnPositiveResidual(Integer year, Integer month, Long officeId) {
 
@@ -78,14 +98,14 @@ public class Charts extends Controller {
     log.debug("Dimensione attivi per straordinario: {}", peopleActive.size());
 
     List<CompetenceCode> codeList = chartsManager.populateOvertimeCodeList();
-        
+
     List<PersonOvertime> poList = 
         chartsManager.populatePersonOvertimeList(peopleActive, codeList, year, month);
     if (poList.isEmpty()) {
       flash.error("Nel mese selezionato non sono ancora stati assegnati gli straordinari");
       render(poList);
     }
-   
+
     render(poList, year, month);
   }
 
@@ -111,16 +131,16 @@ public class Charts extends Controller {
     set.add(office);
     LocalDate begin = new LocalDate(year, 1, 1);
     LocalDate end = begin.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue();
-    
+
     CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
     SimpleResults<Person> people = personDao.listForCompetence(code, Optional.<String>absent(), 
         set, true, begin, end, Optional.<Person>absent());
     List<Person> peopleActive = people.list();
     List<CompetenceCode> codeList = chartsManager.populateOvertimeCodeList();
-    
+
     List<PersonOvertime> poList = 
         chartsManager.populatePersonOvertimeListInYear(peopleActive, codeList, year);
-    
+
     if (poList.isEmpty()) {
       flash.error("Nel mese selezionato non sono ancora stati assegnati gli straordinari");
       render(poList);
@@ -134,7 +154,7 @@ public class Charts extends Controller {
    */
   public static void exportHourAndOvertime() {
     rules.checkIfPermitted(Security.getUser().get().person.office);
-  //  List<Year> annoList = chartsManager.populateYearList(Security.getUser().get().person.office);
+    //  List<Year> annoList = chartsManager.populateYearList(Security.getUser().get().person.office);
 
     render();
   }
@@ -212,9 +232,43 @@ public class Charts extends Controller {
     renderBinary(inputStream, "exportDataSituation" + person.surname + ".csv");
 
   }
-  
-  public static void test() {   
 
-    render();
+  /**
+   * ritorna la lista delle persone attive nell'anno e nel mese.
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   */
+  public static void listForExcelFile(int year, int month, Long officeId) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    Set<Office> set = Sets.newHashSet();
+    set.add(office);
+    LocalDate date = new LocalDate(year, month, 1);
+
+    List<Person> personList = personDao.list(
+        Optional.<String>absent(), set, false, date, 
+        date.dayOfMonth().withMaximumValue(), true).list();
+
+    render(personList, date, year, month);
+  }
+
+
+  /**
+   * ritorna un file in formato excel contenente la situazione mensile esportata a fini
+   * di rendicontazione.
+   * @param person la persona di cui si vuole la situazione mensile
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   */
+  public static void test(Person person, int year, int month) {   
+    rules.checkIfPermitted(person.office);
+    File file = new File("situazioneMensile" + person.surname
+        + DateUtility.fromIntToStringMonth(month) + year + ".xls");
+    PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
+    file = chartsManager.createFileToExport(psDto, file);
+
+    renderBinary(file);
   }
 }
