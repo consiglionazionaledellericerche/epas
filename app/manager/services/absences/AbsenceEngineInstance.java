@@ -90,6 +90,9 @@ public class AbsenceEngineInstance {
     for (Contract contract : this.contracts) {
       for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
         if (DateUtility.isDateIntoInterval(date, cwtt.periodInterval())) {
+          if (cwtt.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek() - 1).holiday) {
+            return 0;
+          }
           return cwtt.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek() - 1)
               .workingTime;
         }

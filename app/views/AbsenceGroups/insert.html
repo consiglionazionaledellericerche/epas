@@ -4,45 +4,153 @@
 
 <div class="container">
 
-#{title title:'Inserimento Assenza' /}
+#{title title:'Inserimento Assenza ' + absenceRequestForm.person.fullname /}
 
-  <strong>Persona</strong> ${absenceRequest.person.fullname}<br>
-  <strong>Dal</strong> ${absenceRequest.from}<br>
-  <strong>Al</strong> ${absenceRequest.from}<br>
-  <br>
-  
-  <br>
-  
-   #{form action:@AbsenceGroups.insert(), method:'POST', autocomplete:false, class:'form form-horizontal'}
-   
-     #{f.selectModel 'groupAbsenceType', required:true, personalizeItems:true}
-        #{list absenceRequest.items, as:'groupAbsenceTypeItem'}
-	      <option value="${groupAbsenceTypeItem.groupAbsenceType.id}"
-	        #{if groupAbsenceTypeItem.selected} selected #{/if}> ${groupAbsenceTypeItem.groupAbsenceType.description} </option>
+   #{form action:@AbsenceGroups.insert(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit'}
+     
+     #{f.hidden 'personId', value:absenceRequestForm.person.id /}
+     #{f.hidden 'from', value:absenceRequestForm.from?.format() /}
+     #{f.hidden 'to', value:absenceRequestForm.to?.format() /}
+     
+     #{f.selectModel 'groupAbsenceType', label:'Tipologia Assenza', personalizeItems:true}
+        <option></option>      
+        *{ same priority }*
+        #{list absenceRequestForm.categoriesWithSamePriority.values(), as:'categoryList'}
+         *{ same category }*
+         #{list categoryList, as:'category'}
+           <optgroup label="${category.categoryType.name}">
+           #{list category.items, as:'groupAbsenceTypeItem'}
+	         <option value="${groupAbsenceTypeItem.groupAbsenceType.id}"
+	          #{if groupAbsenceTypeItem.selected} selected #{/if}> ${groupAbsenceTypeItem.getLabel()} </option>
+  	       #{/list}
+  	       </optgroup>
+  	     #{/list}
   	    #{/list}
      #{/f.selectModel}
+   
    #{/form}
-   
-   
-  #{list items:absenceRequest.items, as:'item'}
-   <strong>${item.groupAbsenceType.name} (${item.groupAbsenceType.name})</strong> selected : ${item.selected} <br>
-   #{list items:item.subAbsenceGroups, as:'subItem'}
-     
-     code: <em>${subItem.absenceType.description} (${subItem.absenceType.code})</em> 
-     selected: ${subItem.selected}   
-     #{list items:subItem.absenceType.justifiedTypesPermitted, as:'justifiedType'}
-     justifiedType: ${justifiedType} #{if justifiedType.equals(subItem.selectedJustified)} selected #{/if}
-     specifiedMinutes: ${subItem.specifiedMinutes}
-     <br>
-     #{/list}
-     
-     
-     <br>
-   #{/list}
-   
-  <br>
-  #{/list} 
-  
 
+   %{ selectedFormItem = absenceRequestForm.selectedAbsenceGroupFormItem; }%
+   %{ selecteSubItem = selectedFormItem?.selectedSubAbsenceGroupFormItems; }%
+   %{ alldaySelected = selecteSubItem.selectedJustified.name.equals(models.absences.JustifiedType.JustifiedTypeName.all_day) }%
+   %{ specifiedMinuteSelected = selecteSubItem.selectedJustified.name.equals(models.absences.JustifiedType.JustifiedTypeName.specified_minutes) }%
+   
+   #{if selectedFormItem}
+
+    <div class="panel panel-primary">
+    <div class="panel-heading">${selectedFormItem.groupAbsenceType.description}</div>
+    <div class="panel-body">
+   
+    #{form action:@AbsenceGroups.configureInsert(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit'}
+
+
+   
+     #{f.hidden 'personId', value:absenceRequestForm.person.id /}
+     
+     #{if alldaySelected }
+       #{f.date 'from', value:absenceRequestForm.from?.format() /}
+       #{f.date 'to', value:absenceRequestForm.to?.format() /}
+     #{/if}
+     #{else}
+       #{f.date 'from', value:absenceRequestForm.from?.format() /}
+       #{f.date 'to', disabled:true  /} 
+     #{/else}
+     
+   
+     #{f.hidden 'groupAbsenceType.id', value:selectedFormItem.groupAbsenceType.id /}
+
+     *{ seleziona sub item group}*
+     #{if selectedFormItem.subAbsenceGroupFormItems.size() > 1 } 
+	  #{f.selectModel 'absenceType', label:'Modalità inserimento', personalizeItems:true}
+	    #{list selectedFormItem.subAbsenceGroupFormItems, as:'subItemm'}
+	      <option value="${subItemm.absenceType?.id}"
+	        #{if subItemm.selected} selected #{/if}>${subItemm.getLabel()} </option>
+		#{/list}
+	  #{/f.selectModel}
+     #{/if}
+     #{else}
+       #{f.hidden 'absenceType.id', value:selecteSubItem.absenceType?.id /}
+       #{f.view 'absenceType', value:selecteSubItem.getLabel() /}
+     #{/else}
+   
+     *{ seleziona tempo giustificato }*
+     #{if selecteSubItem.getJustifiedTypesPermitted().size() > 1 } 			     
+       #{f.selectModel 'justifiedType', items:selecteSubItem.getJustifiedTypesPermitted(), value:selecteSubItem.selectedJustified /}
+     #{/if}
+     #{else}
+       #{f.hidden 'justifiedType.id', value:selecteSubItem.selectedJustified.id /}
+       #{f.view 'justifiedType', value:selecteSubItem.selectedJustified.label() /}
+     #{/else}
+         
+	#{/form}
+	
+    
+    *{ save request }* 
+	 
+	#{form action:@AbsenceGroups.save(), method:'POST', autocomplete:false, class:'form form-horizontal'}
+	 
+       #{f.hidden 'personId', value:absenceRequestForm.person.id /}
+       #{f.hidden 'from', value:absenceRequestForm.from?.format() /}
+       #{f.hidden 'to', value:absenceRequestForm.to?.format() /}
+	   #{f.hidden 'groupAbsenceType.id', value:selectedFormItem.groupAbsenceType.id /}
+	   #{f.hidden 'absenceType.id', value:selecteSubItem.absenceType?.id /}
+	   #{f.hidden 'justifiedType.id', value:selecteSubItem.selectedJustified.id /}
+	   
+	   *{ seleziona minuti }*    
+       #{if selecteSubItem.selectedJustified.name.equals(models.absences.JustifiedType.JustifiedTypeName.specified_minutes) }
+         #{f.input 'specifiedMinutes', type:'number', value:selecteSubItem.specifiedMinutes /}
+       #{/if}     
+	   
+	   #{b.buttons center:true}
+         #{b.submit 'Verifica'/}
+       #{/b.buttons}
+	 #{/form}
+	 	   
+   #{/if} 
+   #{if engineInstance}
+	   #{if engineInstance.absenceEngineProblem.present}
+	    Problema riscontrato: ${engineInstance.absenceEngineProblem.get()}
+	  #{/if}
+	  #{else}
+	    <table class="table">
+	      <tr>
+	        <th>Data</th>
+	        <th>Codice</th>
+	        <th>Operazione</th>
+	        <th>Consumo</th>
+	        <th>Residuo</th>
+	        <th>Problemi</th>
+	      </tr>
+	      #{list items:engineInstance.responseItems, as:'responseItem'}
+	      <tr>
+	        <td>${responseItem.date.format()}</td>
+	        <td>${responseItem.absenceType.code}</td>
+	        <td>${responseItem.operation}</td>
+	        <td>
+	          #{list items:responseItem.consumedResidualAmount, as:'cra'}
+	            ${cra.printAmount(cra.amount)}<br>
+	          #{/list}
+	        </td>
+	        <td>
+	          #{list items:responseItem.consumedResidualAmount, as:'cra'}
+	            ${cra.printAmount(cra.residualAfter())}<br>
+	          #{/list}
+	        </td>
+	        <td>
+	        #{if responseItem.absenceProblem}
+	          ${responseItem.absenceProblem}
+	        #{/if}
+	        </td>
+	        
+	      </tr>
+	      #{/list}
+	    </table>
+	  #{/else}
+  #{/if}
+   
+   </div>
+   </div>
+  
+   
   
 </div>

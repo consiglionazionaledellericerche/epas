@@ -1,14 +1,13 @@
 package models.absences;
 
-import com.google.common.base.Preconditions;
-
 import it.cnr.iit.epas.DateInterval;
 
-import models.absences.GroupAbsenceType.PeriodType;
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
+
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,7 +15,9 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Audited
@@ -27,8 +28,18 @@ public class GroupAbsenceType extends BaseModel {
   @Column
   public String name;
   
+  //Astensione facoltativa post partum 100% primo figlio 0-12 anni 30 giorni 
   @Column
   public String description;
+
+  //Se i gruppi sono concatenati e si vuole una unica etichetta (da assegnare alla radice)
+  // Esempio Congedi primo figlio 100%, Congedi primo figlio 30% hanno una unica chainDescription
+  @Column(name = "chain_description")
+  public String chainDescription;
+  
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "category_type_id")
+  public CategoryGroupAbsenceType category;
   
   @Column(name = "pattern")
   @Enumerated(EnumType.STRING)
@@ -48,8 +59,11 @@ public class GroupAbsenceType extends BaseModel {
   
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "next_group_to_check_id")
-  public GroupAbsenceType nextGropToCheck;
-  
+  public GroupAbsenceType nextGroupToCheck;
+
+  @OneToMany(mappedBy = "nextGroupToCheck", fetch = FetchType.LAZY)
+  public Set<GroupAbsenceType> previousGroupChecked;
+
 
   
   public enum PeriodType {

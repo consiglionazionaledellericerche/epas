@@ -102,7 +102,7 @@ public class AbsenceEngine {
         TakableComponent takableComponent = currentAbsencePeriod.takableComponent.get();
         takableComponent.periodTakenAmount = 0;
         for (Absence absence : takableComponent.takenAbsences) {
-          int amount = computeAbsenceAmount(engineInstance, absence, takableComponent.takeAmountType);
+          long amount = computeAbsenceAmount(engineInstance, absence, takableComponent.takeAmountType);
           if (amount < 0) {
             engineInstance.absenceEngineProblem = Optional.of(AbsenceEngineProblem.unsupportedOperation);
             return engineInstance;
@@ -141,7 +141,7 @@ public class AbsenceEngine {
       engineInstance.absencePeriod = currentAbsencePeriod;
     } else {
       //Seguenti
-      currentAbsencePeriod = new AbsencePeriod(previousAbsencePeriod.groupAbsenceType.nextGropToCheck);
+      currentAbsencePeriod = new AbsencePeriod(previousAbsencePeriod.groupAbsenceType.nextGroupToCheck);
       currentAbsencePeriod.previousAbsencePeriod = previousAbsencePeriod; //vedere se serve...
     }
 
@@ -172,6 +172,9 @@ public class AbsenceEngine {
       }
     }
     
+    currentAbsencePeriod.takableComponent = Optional.absent();
+    currentAbsencePeriod.complationComponent = Optional.absent();
+    
     // Parte takable
     if (currentAbsencePeriod.groupAbsenceType.takableAbsenceBehaviour != null) {
 
@@ -181,7 +184,7 @@ public class AbsenceEngine {
       TakableComponent takableComponent = new TakableComponent();
       takableComponent.takeAmountType = takableBehaviour.amountType;
 
-      takableComponent.periodTakableAmount = takableBehaviour.fixedLimit;
+      takableComponent.periodTakableAmount = takableBehaviour.fixedLimit * 100;
       if (takableBehaviour.takableAmountAdjustment != null) {
         // TODO: ex. workingTimePercent
         engineInstance.absenceEngineProblem = Optional.of(AbsenceEngineProblem.unsupportedOperation);
@@ -210,7 +213,7 @@ public class AbsenceEngine {
     }
 
     //Chiamata ricorsiva
-    if (currentAbsencePeriod.groupAbsenceType.nextGropToCheck != null) {
+    if (currentAbsencePeriod.groupAbsenceType.nextGroupToCheck != null) {
       currentAbsencePeriod.nextAbsencePeriod = 
           buildEngineAbsencePeriods(engineInstance, currentAbsencePeriod);
     }
@@ -230,57 +233,54 @@ public class AbsenceEngine {
   private int computeAbsenceAmount(AbsenceEngineInstance engineInstance, Absence absence, 
       AmountType amountType) {
     
-    if (amountType.equals(AmountType.units)) {
-      return 1;
-    }
+    int amount = 0;
 
     if (absence.justifiedType.name.equals(JustifiedTypeName.nothing)) {
-      return 0;
+      amount = 0;
     } 
-    if (absence.justifiedType.name.equals(JustifiedTypeName.all_day)) {
-      return engineInstance.workingTime(engineInstance.date);
+    else if (absence.justifiedType.name.equals(JustifiedTypeName.all_day)) {
+      amount = engineInstance.workingTime(engineInstance.date);
     } 
-    if (absence.justifiedType.name.equals(JustifiedTypeName.half_day)) {
-      return engineInstance.workingTime(engineInstance.date) / 2;
+    else if (absence.justifiedType.name.equals(JustifiedTypeName.half_day)) {
+      amount = engineInstance.workingTime(engineInstance.date) / 2;
     }
-    if (absence.justifiedType.name.equals(JustifiedTypeName.missing_time) ||
+    else if (absence.justifiedType.name.equals(JustifiedTypeName.missing_time) ||
         absence.justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
       // TODO: quello che manca va implementato. Occorre persistere la dacisione di quanto manca
       // se non si vogliono fare troppi calcoli.
       if (absence.justifiedMinutes == null) {
-        return -1;
+        amount = -1;
       } else {
-        return absence.justifiedMinutes;
+        amount = absence.justifiedMinutes;
       }
     }
-    if (absence.justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
-      return absence.absenceType.justifiedTime;
+    else if (absence.justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
+      amount = absence.absenceType.justifiedTime;
     }
-    if (absence.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) {
-      return -1;
+    else if (absence.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) {
+      amount = -1;
     }
     
-    return -1;
-  }
-  
-  public AbsenceEngineInstance doRequest(AbsenceEngineInstance engineInstance, 
-      AbsenceRequestType absenceRequestType, AbsenceType absenceType) {
-    
-    //la precondition è che per absenceType ci sia una unica tipologia di justifiedType.
-    if (absenceType.justifiedTypesPermitted.size() != 1) {
-      engineInstance.absenceEngineProblem = Optional.of(AbsenceEngineProblem.wrongJustifiedType);
-      return engineInstance;
+    if (amountType.equals(AmountType.units)) {
+      int work = engineInstance.workingTime(engineInstance.date);
+      int result = amount * 100 / work;
+      return result;
+    } else {
+      return amount;
     }
-    return doRequest(engineInstance, absenceRequestType, absenceType, 
-        absenceType.justifiedTypesPermitted.iterator().next(), Optional.absent());
+    
   }
   
+  /**  
+   * 
+   * @param engineInstance
+   * @param absenceRequestType
+   * @param absenceType
+   * @param justifiedType
+   * @param specifiedMinutes
+   * @return
+   */
   public AbsenceEngineInstance doRequest(AbsenceEngineInstance engineInstance, 
-      AbsenceRequestType absenceRequestType, AbsenceType absenceType, int specifiedMinutes) {
-    return null;
-  }
-  
-  private AbsenceEngineInstance doRequest(AbsenceEngineInstance engineInstance, 
       AbsenceRequestType absenceRequestType, AbsenceType absenceType, JustifiedType justifiedType, 
       Optional<Integer> specifiedMinutes) {
     
@@ -375,6 +375,7 @@ public class AbsenceEngine {
         responseItem.consumedResidualAmount.add(consumedResidualAmount);
         responseItem.absence = absence;
       } else {
+        responseItem.consumedResidualAmount.add(consumedResidualAmount);
         responseItem.absenceProblem = AbsenceProblem.limitExceeded;
       }
       
@@ -522,12 +523,16 @@ public class AbsenceEngine {
     public static class ConsumedResidualAmount {
       
       public AmountType amountType;                     // | units | minutes | units |
-      public int amount;                                // | 02:00 | 01:00   |   1   |
+      public int amount;                               // | 02:00 | 01:00   |   1   |
       public int workingTime;                           // | 07:12 |
       
-      public int getPercent() {                         // | 25%   |
-        // TODO: implementare la percentuale
-        return 0;
+      public String printAmount(int amount) {
+        if (amountType.equals(AmountType.units)) {
+          int units = amount / 100;
+          int percent = amount % 100;
+          return units + " + " + percent + "%";
+        }
+        return amount + "";
       }
       
       public String residualName;       // | res. anno passato | residuo anno corrente | lim. anno |

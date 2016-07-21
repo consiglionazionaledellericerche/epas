@@ -26,6 +26,10 @@ public class QGroupAbsenceType extends EntityPathBase<GroupAbsenceType> {
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
+    public final QCategoryGroupAbsenceType category;
+
+    public final StringPath chainDescription = createString("chainDescription");
+
     public final QComplationAbsenceBehaviour complationAbsenceBehaviour;
 
     public final StringPath description = createString("description");
@@ -38,7 +42,7 @@ public class QGroupAbsenceType extends EntityPathBase<GroupAbsenceType> {
 
     public final StringPath name = createString("name");
 
-    public final QGroupAbsenceType nextGropToCheck;
+    public final QGroupAbsenceType nextGroupToCheck;
 
     public final EnumPath<GroupAbsenceType.GroupAbsenceTypePattern> pattern = createEnum("pattern", GroupAbsenceType.GroupAbsenceTypePattern.class);
 
@@ -46,6 +50,8 @@ public class QGroupAbsenceType extends EntityPathBase<GroupAbsenceType> {
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
+
+    public final SetPath<GroupAbsenceType, QGroupAbsenceType> previousGroupChecked = this.<GroupAbsenceType, QGroupAbsenceType>createSet("previousGroupChecked", GroupAbsenceType.class, QGroupAbsenceType.class, PathInits.DIRECT2);
 
     public final QTakableAbsenceBehaviour takableAbsenceBehaviour;
 
@@ -67,8 +73,9 @@ public class QGroupAbsenceType extends EntityPathBase<GroupAbsenceType> {
 
     public QGroupAbsenceType(Class<? extends GroupAbsenceType> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.category = inits.isInitialized("category") ? new QCategoryGroupAbsenceType(forProperty("category")) : null;
         this.complationAbsenceBehaviour = inits.isInitialized("complationAbsenceBehaviour") ? new QComplationAbsenceBehaviour(forProperty("complationAbsenceBehaviour")) : null;
-        this.nextGropToCheck = inits.isInitialized("nextGropToCheck") ? new QGroupAbsenceType(forProperty("nextGropToCheck"), inits.get("nextGropToCheck")) : null;
+        this.nextGroupToCheck = inits.isInitialized("nextGroupToCheck") ? new QGroupAbsenceType(forProperty("nextGroupToCheck"), inits.get("nextGroupToCheck")) : null;
         this.takableAbsenceBehaviour = inits.isInitialized("takableAbsenceBehaviour") ? new QTakableAbsenceBehaviour(forProperty("takableAbsenceBehaviour")) : null;
     }
 

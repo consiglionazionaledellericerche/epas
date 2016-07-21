@@ -16,6 +16,7 @@ import helpers.jpa.ModelQuery;
 
 import models.Person;
 import models.absences.AbsenceType;
+import models.absences.CategoryGroupAbsenceType;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
@@ -23,6 +24,7 @@ import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
+import models.absences.query.QCategoryGroupAbsenceType;
 import models.absences.query.QComplationAbsenceBehaviour;
 import models.absences.query.QGroupAbsenceType;
 import models.absences.query.QJustifiedType;
@@ -85,6 +87,30 @@ public class AbsenceComponentDao extends DaoBase {
     if (obj == null) {
       obj = new JustifiedType();
       obj.name = name;
+      obj.save();
+    }
+    return obj;
+  }
+  
+  /**
+   * Ritorna il JustifiedType con quel nome. Se non esiste lo crea.
+   * @param name
+   * @return
+   */
+  public CategoryGroupAbsenceType getOrBuildCategoryType(String name, int priority) {
+    
+    QCategoryGroupAbsenceType categoryType = QCategoryGroupAbsenceType.categoryGroupAbsenceType;
+    CategoryGroupAbsenceType obj = getQueryFactory().from(categoryType)
+        .where(categoryType.name.eq(name))
+        .singleResult(categoryType);
+    if (obj == null) {
+      obj = new CategoryGroupAbsenceType();
+      obj.name = name;
+      obj.priority = priority;
+      obj.save();
+    }
+    if (obj.priority != priority) {
+      obj.priority = priority;
       obj.save();
     }
     return obj;

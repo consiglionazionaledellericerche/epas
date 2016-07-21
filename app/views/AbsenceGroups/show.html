@@ -17,10 +17,11 @@
       
       *{ <span class="label label-default">Codice</span> &{group.name}<br> }* 
 
+      <span class="label label-default">Categoria</span> ${group.category.name} <br>
       <span class="label label-default">Tipologia</span> &{group.pattern} <br>
       <span class="label label-default">Periodo</span> &{group.periodType} <br>
-      #{if group.nextGropToCheck}
-      <span class="label label-default">Gruppo successivo</span> <strong>${group.nextGropToCheck.description.label()}</strong>
+      #{if group.nextGroupToCheck}
+      <span class="label label-default">Gruppo successivo</span> <strong>${group.nextGroupToCheck.description.label()}</strong>
       #{/if}
     </li>
     #{if group.takableAbsenceBehaviour}  

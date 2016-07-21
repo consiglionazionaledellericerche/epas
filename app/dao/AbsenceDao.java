@@ -294,11 +294,19 @@ public class AbsenceDao extends DaoBase {
 
     final QAbsence absence = QAbsence.absence;
 
+    BooleanBuilder conditions = new BooleanBuilder();
+    if (begin != null) {
+      conditions.and(absence.personDay.date.goe(begin));
+    }
+    if (end!= null) {
+      conditions.and(absence.personDay.date.loe(end));
+    }
+    
     final JPQLQuery query = getQueryFactory().from(absence)
         .leftJoin(absence.personDay).fetch()
         .where(absence.personDay.person.eq(person)
-            .and(absence.personDay.date.between(begin, end)
-                .and(absence.absenceType.in(codeList))));
+            .and(conditions)
+            .and(absence.absenceType.in(codeList)));
 
     if (ordered) {
       query.orderBy(absence.personDay.date.asc());

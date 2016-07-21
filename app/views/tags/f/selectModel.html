@@ -16,12 +16,8 @@
 	    <option></option>
 	    #{list _items}
 	      <option value="${_.id}"#{if value?.id == _.id} selected#{/if}>
-	        #{if _getLabel}
-	          ${_.getLabel()}
-	        #{/if}
-	        #{else}
-	          ${_.label()}
-	        #{/else}  
+	        #{if _getLabel} ${_.getLabel()} #{/if}
+	        #{else} ${_.label()} #{/else}  
 	      </option>
 	    #{/list}
 	 #{/else}   

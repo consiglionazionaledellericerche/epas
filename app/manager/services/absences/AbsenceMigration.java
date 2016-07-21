@@ -9,6 +9,7 @@ import dao.absences.AbsenceComponentDao;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
+import models.absences.CategoryGroupAbsenceType;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
@@ -26,12 +27,30 @@ public class AbsenceMigration {
   
   private final AbsenceComponentDao absenceComponentDao;
 
+  public enum DefaultCategoryType {
+    
+    GENERAL("Assenze generali cnr", 1),
+    PERMISSION("Permessi vari", 2),
+    POST_PARTUM("Congedi parentali", 3),
+    LAW_104_92("Disabilità legge 104/92", 4), 
+    OTHER("Altre tipologie", 5);
+    
+    public String name;
+    public int priority;
+    
+    private DefaultCategoryType(String name, int priority) {
+      this.name = name;
+      this.priority = priority;
+    }
+    
+  }
+  
   public enum DefaultComplation {
     C_18, C_19, C_661, C_23, C_25, C_89, C_09;
   }
   
   public enum DefaultTakable {
-    T_18, T_19, T_661, T_23, T_25, T_89, T_09, T_MISSIONE, T_ALTRI;
+    T_18, T_19, T_661, T_23, T_25, T_89, T_09, T_FERIE_CNR, T_RIPOSI_CNR, T_MISSIONE, T_ALTRI;
   }
   
   public enum DefaultGroup {
@@ -113,7 +132,26 @@ public class AbsenceMigration {
         .getOrBuildJustifiedType(JustifiedTypeName.half_day);
     final JustifiedType assignAllDay = absenceComponentDao
         .getOrBuildJustifiedType(JustifiedTypeName.assign_all_day); 
+
+    final CategoryGroupAbsenceType generalCategory = absenceComponentDao
+        .getOrBuildCategoryType(DefaultCategoryType.GENERAL.name, 
+            DefaultCategoryType.GENERAL.priority);
     
+    final CategoryGroupAbsenceType permissionCategory = absenceComponentDao
+        .getOrBuildCategoryType(DefaultCategoryType.PERMISSION.name, 
+            DefaultCategoryType.PERMISSION.priority);
+    
+    final CategoryGroupAbsenceType postpartumCategory = absenceComponentDao
+        .getOrBuildCategoryType(DefaultCategoryType.POST_PARTUM.name, 
+            DefaultCategoryType.POST_PARTUM.priority);
+    
+    final CategoryGroupAbsenceType lawCategory = absenceComponentDao
+        .getOrBuildCategoryType(DefaultCategoryType.LAW_104_92.name, 
+            DefaultCategoryType.LAW_104_92.priority);
+    
+    final CategoryGroupAbsenceType otherCategory = absenceComponentDao
+        .getOrBuildCategoryType(DefaultCategoryType.OTHER.name, 
+            DefaultCategoryType.OTHER.priority);
     
     List<AbsenceType> absenceTypes = AbsenceType.findAll();
     for (AbsenceType absenceType : absenceTypes) {
@@ -280,6 +318,7 @@ public class AbsenceMigration {
 
       // Group Creation
       GroupAbsenceType group18 = new GroupAbsenceType();
+      group18.category = lawCategory;
       group18.name = DefaultGroup.G_18.name();
       group18.description = "Permesso assistenza parenti/affini disabili L. 104/92 tre giorni mese";
       group18.pattern = GroupAbsenceTypePattern.programmed;
@@ -384,6 +423,7 @@ public class AbsenceMigration {
 
       // Group Creation
       GroupAbsenceType group19 = new GroupAbsenceType();
+      group19.category = lawCategory;
       group19.name = DefaultGroup.G_19.name();
       group19.description = "Permesso per dipendente disabile L. 104/92 tre giorni mese";
       group19.pattern = GroupAbsenceTypePattern.programmed;
@@ -489,6 +529,7 @@ public class AbsenceMigration {
 
       // Group Creation
       GroupAbsenceType group661 = new GroupAbsenceType();
+      group661.category = permissionCategory;
       group661.name = DefaultGroup.G_661.name();
       group661.description = "Permesso orario per motivi personali 18 ore anno";
       group661.pattern = GroupAbsenceTypePattern.programmed;
@@ -552,6 +593,7 @@ public class AbsenceMigration {
 
       // Group Creation
       GroupAbsenceType group25 = new GroupAbsenceType();
+      group25.category = postpartumCategory;
       group25.name = DefaultGroup.G_25.name();
       group25.description = "Astensione facoltativa post partum 30% primo figlio 0-6 anni 150 giorni";
       group25.pattern = GroupAbsenceTypePattern.programmed;
@@ -616,14 +658,16 @@ public class AbsenceMigration {
 
       // Group Creation
       GroupAbsenceType group23 = new GroupAbsenceType();
+      group23.category = postpartumCategory;
       group23.name = DefaultGroup.G_23.name();
       group23.description = "Astensione facoltativa post partum 100% primo figlio 0-12 anni 30 giorni";
+      group23.chainDescription = "Astensione facoltativa post partum primo figlio";
       group23.pattern = GroupAbsenceTypePattern.programmed;
       group23.periodType = PeriodType.child1_0_12;
       group23.complationAbsenceBehaviour = c23.get();
       group23.takableAbsenceBehaviour = t23.get();
       
-      group23.nextGropToCheck = absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_25.name()).get();
+      group23.nextGroupToCheck = absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_25.name()).get();
       
       group23.save();
 
@@ -674,6 +718,7 @@ public class AbsenceMigration {
 
       // Group Creation
       GroupAbsenceType group89 = new GroupAbsenceType();
+      group89.category = permissionCategory;
       group89.name = DefaultGroup.G_89.name();
       group89.description = "Permesso diritto allo studio 150 ore anno";
       group89.pattern = GroupAbsenceTypePattern.programmed;
@@ -713,6 +758,7 @@ public class AbsenceMigration {
 
       // Group Creation
       GroupAbsenceType group09 = new GroupAbsenceType();
+      group09.category = permissionCategory;
       group09.name = DefaultGroup.G_09.name();
       group09.description = "Permesso visita medica";
       group09.pattern = GroupAbsenceTypePattern.programmed;
@@ -770,6 +816,7 @@ public class AbsenceMigration {
       
       // Group Creation
       GroupAbsenceType groupMission = new GroupAbsenceType();
+      groupMission.category = generalCategory;
       groupMission.name = DefaultGroup.MISSIONE.name();
       groupMission.description = "Missione";
       groupMission.pattern = GroupAbsenceTypePattern.simpleGrouping;
@@ -807,13 +854,95 @@ public class AbsenceMigration {
 
       // Group Creation
       GroupAbsenceType groupAltri = new GroupAbsenceType();
+      groupAltri.category = otherCategory;
       groupAltri.name = DefaultGroup.ALTRI.name();
-      groupAltri.description = "Missione";
+      groupAltri.description = "Altri Codici";
       groupAltri.pattern = GroupAbsenceTypePattern.simpleGrouping;
       groupAltri.periodType = PeriodType.always;
       groupAltri.takableAbsenceBehaviour = tAltri.get();
       groupAltri.save();
     }
+    
+    
+    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).isPresent()) {
+      
+      //Complation Creation
+      Optional<TakableAbsenceBehaviour> tFerie = absenceComponentDao
+          .takableAbsenceBehaviourByName(DefaultTakable.T_FERIE_CNR.name());
+      
+      if (!tFerie.isPresent()) {
+
+        tFerie = Optional.fromNullable(new TakableAbsenceBehaviour());
+        tFerie.get().name = DefaultTakable.T_FERIE_CNR.name();
+        tFerie.get().amountType = AmountType.units;
+        tFerie.get().takableCodes = Sets.newHashSet();
+        tFerie.get().takenCodes = Sets.newHashSet();
+        tFerie.get().fixedLimit = -1;
+        
+        AbsenceType ferie32 = absenceComponentDao.buildOrEditAbsenceType("32", 
+            "Ferie anno corrente", 0, Sets.newHashSet(allDay), false, true, false, "32");
+        
+        AbsenceType ferie31 = absenceComponentDao.buildOrEditAbsenceType("31", 
+            "Ferie anno precedente", 0, Sets.newHashSet(allDay), false, true, false, "31");
+        
+        AbsenceType ferie37 = absenceComponentDao.buildOrEditAbsenceType("37", 
+            "ferie anno precedente (dopo il 31/8)", 0, Sets.newHashSet(allDay), false, true, false, "37");
+        
+        AbsenceType permesso94 = absenceComponentDao.buildOrEditAbsenceType("94", 
+            "festività soppresse (ex legge 937/77)", 0, Sets.newHashSet(allDay), false, true, false, "94");
+        
+        tFerie.get().takableCodes = Sets.newHashSet(ferie31, ferie32, ferie37, permesso94);
+        
+        tFerie.get().save();
+      }
+      
+      
+
+      // Group Creation
+      GroupAbsenceType groupFerieCnr = new GroupAbsenceType();
+      groupFerieCnr.category = generalCategory;
+      groupFerieCnr.name = DefaultGroup.FERIE_CNR.name();
+      groupFerieCnr.description = "Ferie e permessi legge CNR";
+      groupFerieCnr.pattern = GroupAbsenceTypePattern.vacationsCnr;
+      groupFerieCnr.periodType = PeriodType.always;
+      groupFerieCnr.takableAbsenceBehaviour = tFerie.get();
+      groupFerieCnr.save();
+    }
+    
+    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.RIPOSI_CNR.name()).isPresent()) {
+      
+      //Complation Creation
+      Optional<TakableAbsenceBehaviour> tRiposi = absenceComponentDao
+          .takableAbsenceBehaviourByName(DefaultTakable.T_RIPOSI_CNR.name());
+      
+      if (!tRiposi.isPresent()) {
+
+        tRiposi = Optional.fromNullable(new TakableAbsenceBehaviour());
+        tRiposi.get().name = DefaultTakable.T_RIPOSI_CNR.name();
+        tRiposi.get().amountType = AmountType.units;
+        tRiposi.get().takableCodes = Sets.newHashSet();
+        tRiposi.get().takenCodes = Sets.newHashSet();
+        tRiposi.get().fixedLimit = -1;
+        
+        AbsenceType riposo91 = absenceComponentDao.buildOrEditAbsenceType("91", 
+            "Riposo compensativo", 0, Sets.newHashSet(allDay), false, true, false, "92");
+        
+        tRiposi.get().takableCodes = Sets.newHashSet(riposo91);
+        
+        tRiposi.get().save();
+      }
+
+      // Group Creation
+      GroupAbsenceType groupRiposi = new GroupAbsenceType();
+      groupRiposi.category = generalCategory;
+      groupRiposi.name = DefaultGroup.RIPOSI_CNR.name();
+      groupRiposi.description = "Riposi compensativi CNR";
+      groupRiposi.pattern = GroupAbsenceTypePattern.compensatoryRestCnr;
+      groupRiposi.periodType = PeriodType.always;
+      groupRiposi.takableAbsenceBehaviour = tRiposi.get();
+      groupRiposi.save();
+    }
+    
   }
 
 }
