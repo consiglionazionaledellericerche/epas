@@ -18,6 +18,9 @@ absenceTypeGroup.label= Etichetta gruppo
 absenceTypeGroup.limitInMinute= Limite accumulo
 absenceTypeGroup.minutesExcess= Minuti in eccesso
 absenceTypeGroup.replacingAbsenceType= Codice per sotituzione
+groupAbsenceType=Gruppo di Codici
+
+justifiedType=Tempo giustificato
 
 absence_type_minutes=Tempo Specificato nel Tipo Assenza
 all_day=Tutto Il Giorno
@@ -73,6 +76,9 @@ badgeSystems= Gruppi Badge
 BadgeSystems.joinBadges= Associa Badge
 
 beginDate=Data Inizio
+endDate=Data Fine
+from=Da
+to=A
 
 child.bornDate= Data di Nascita
 child.name= Nome
@@ -169,7 +175,6 @@ done.by= Effettuata da
 
 emailToContact= Indirizzo email dell&#39;amministrazione
 endContract=Data Risoluzione 
-endDate=Data Fine
 expireDate=Data Scadenza
 
 feedback.subject =EPAS - Segnalazione utente

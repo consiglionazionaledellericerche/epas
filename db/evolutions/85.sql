@@ -9,7 +9,7 @@ CREATE TABLE takable_absence_behaviours (
   --- takaen_count_behaviour TEXT NOT NULL,   sempre period)
   fixed_limit INT NOT NULL,
   takable_amount_adjust TEXT
-);
+);;
 
 CREATE TABLE takable_absence_behaviours_history (
   id BIGINT NOT NULL,
@@ -109,15 +109,34 @@ CREATE TABLE replacing_codes_group_history (
 
 --- 7) group_absence_types
 
+CREATE TABLE category_group_absence_types (
+  id BIGSERIAL PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE,
+  description TEXT,
+  priority INTEGER NOT NULL
+);
+
+CREATE TABLE category_group_absence_types_history (
+  id BIGINT NOT NULL,
+  _revision INTEGER NOT NULL REFERENCES revinfo(rev),
+  _revision_type SMALLINT,
+  name TEXT,
+  description TEXT,
+  priority INTEGER
+);
+
 CREATE TABLE group_absence_types (
   id BIGSERIAL PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   description TEXT,
+  chain_description TEXT,
+  category_type_id BIGINT NOT NULL,
   pattern TEXT NOT NULL,
   period_type TEXT,
   takable_behaviour_id BIGINT,
   complation_behaviour_id BIGINT,
   next_group_to_check_id BIGINT,
+  FOREIGN KEY (category_type_id) REFERENCES category_group_absence_types (id),
   FOREIGN KEY (takable_behaviour_id) REFERENCES takable_absence_behaviours (id),
   FOREIGN KEY (complation_behaviour_id) REFERENCES complation_absence_behaviours (id),
   FOREIGN KEY (next_group_to_check_id) REFERENCES group_absence_types (id)
@@ -129,6 +148,8 @@ CREATE TABLE group_absence_types_history (
   _revision_type SMALLINT,
   name TEXT,
   description TEXT,
+  chain_description TEXT,
+  category_type_id BIGINT,
   pattern TEXT,
   period_type TEXT,
   takable_behaviour_id BIGINT,
@@ -189,7 +210,7 @@ CREATE TABLE initialization_groups (
   residual_minutes_last_year INT,
   residual_minutes_current_year INT,
   UNIQUE (person_id, group_absence_type_id, initialization_date)
-);;
+);
 
 CREATE TABLE initialization_groups_history (
   id BIGINT NOT NULL,
@@ -243,6 +264,9 @@ DROP TABLE replacing_codes_group_history;
 
 DROP TABLE group_absence_types;
 DROP TABLE group_absence_types_history;
+
+DROP TABLE category_group_absence_types;
+DROP TABLE category_group_absence_types_history;
 
 DROP TABLE takable_absence_behaviours;
 DROP TABLE takable_absence_behaviours_history;
