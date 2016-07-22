@@ -3,7 +3,6 @@ package controllers;
 import dao.PersonDao;
 import dao.PersonDayDao;
 
-import manager.services.absences.AbsenceEngineCore;
 import manager.services.absences.AbsenceMigration;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.model.AbsenceEngine;
@@ -42,14 +41,11 @@ public class AbsenceGroups extends Controller {
   @Inject
   private static AbsenceService absenceService;
   @Inject
-  private static AbsenceEngineCore absenceEngine;
-  @Inject
   private static AbsenceMigration absenceMigration;
   
   public static void migrate() {
     
     absenceMigration.buildDefaultGroups();
-    
     renderText("ok");
     
   }

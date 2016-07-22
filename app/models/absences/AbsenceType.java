@@ -97,16 +97,16 @@ public class AbsenceType extends BaseModel {
   public Set<Absence> absences = Sets.newHashSet();
 
   @ManyToMany(mappedBy = "takenCodes")
-  public Set<TakableAbsenceBehaviour> takenGroup;
+  public Set<TakableAbsenceBehaviour> takenGroup = Sets.newHashSet();
 
   @ManyToMany(mappedBy = "takableCodes")
-  public Set<TakableAbsenceBehaviour> takableGroup;
+  public Set<TakableAbsenceBehaviour> takableGroup = Sets.newHashSet();
   
   @ManyToMany(mappedBy = "complationCodes")
-  public Set<ComplationAbsenceBehaviour> complationGroup;
+  public Set<ComplationAbsenceBehaviour> complationGroup = Sets.newHashSet();
   
   @ManyToMany(mappedBy = "replacingCodes")
-  public Set<ComplationAbsenceBehaviour> replacingGroup;
+  public Set<ComplationAbsenceBehaviour> replacingGroup = Sets.newHashSet();
   
   // Metodi
   

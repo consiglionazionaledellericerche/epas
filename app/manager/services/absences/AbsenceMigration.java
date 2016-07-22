@@ -4,7 +4,11 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
+import controllers.AbsenceGroups;
+
 import dao.absences.AbsenceComponentDao;
+
+import lombok.extern.slf4j.Slf4j;
 
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -20,9 +24,13 @@ import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
 import models.enumerate.JustifiedTimeAtWork;
 
-import java.util.List;
+import play.db.jpa.JPA;
+import play.db.jpa.JPAPlugin;
 
-//@Slf4j
+import java.util.List;
+import java.util.Set;
+
+@Slf4j
 public class AbsenceMigration {
   
   private final AbsenceComponentDao absenceComponentDao;
@@ -62,22 +70,79 @@ public class AbsenceMigration {
     this.absenceComponentDao = absenceComponentDao;
   }
   
-  public void migrateAbsence(Absence absence) {
+  @SuppressWarnings("deprecation")
+  private void migrateAllAbsences() {
     
-    final JustifiedType nothing = absenceComponentDao
+    JustifiedType nothing = absenceComponentDao
         .getOrBuildJustifiedType(JustifiedTypeName.nothing);
-    final JustifiedType specifiedMinutes = absenceComponentDao
+    JustifiedType specifiedMinutes = absenceComponentDao
         .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
-    final JustifiedType absenceTypeMinutes = absenceComponentDao
+    JustifiedType absenceTypeMinutes = absenceComponentDao
         .getOrBuildJustifiedType(JustifiedTypeName.absence_type_minutes);
-    final JustifiedType allDay = absenceComponentDao
+    JustifiedType allDay = absenceComponentDao
         .getOrBuildJustifiedType(JustifiedTypeName.all_day);
-    final JustifiedType halfDay = absenceComponentDao
+    JustifiedType halfDay = absenceComponentDao
         .getOrBuildJustifiedType(JustifiedTypeName.half_day);
-    final JustifiedType assignAllDay = absenceComponentDao
+    JustifiedType assignAllDay = absenceComponentDao
         .getOrBuildJustifiedType(JustifiedTypeName.assign_all_day); 
-
+    
+    int absencesToUpdate = 50;
+    
+    List<GroupAbsenceType> groupAbsenceTypes = GroupAbsenceType.findAll();
+    for (GroupAbsenceType groupAbsenceType : groupAbsenceTypes) {
+      groupAbsenceType = GroupAbsenceType.findById(groupAbsenceType.id);
+      log.info(groupAbsenceType.name);
+      if (groupAbsenceType.name.equals(DefaultGroup.ALTRI.name())) {
+        continue;
+      }
+      Set<AbsenceType> absenceTypes = Sets.newHashSet();
+      if (groupAbsenceType.takableAbsenceBehaviour != null) {
+        absenceTypes.addAll(groupAbsenceType.takableAbsenceBehaviour.takenCodes);
+        absenceTypes.addAll(groupAbsenceType.takableAbsenceBehaviour.takableCodes);
+      }
+      if (groupAbsenceType.complationAbsenceBehaviour != null) {
+        absenceTypes.addAll(groupAbsenceType.complationAbsenceBehaviour.complationCodes);
+        absenceTypes.addAll(groupAbsenceType.complationAbsenceBehaviour.replacingCodes);
+      }
+      for (AbsenceType absenceType : absenceTypes) {
+        absenceType = AbsenceType.findById(absenceType.id);
+        for (Absence absence : absenceType.absences) {
+          absence = Absence.findById(absence.id);
+          log.info("{} {}", absence.absenceType.code, absence.personDay.person.fullName());
+          migrateAbsence(absence, 
+              nothing, specifiedMinutes, absenceTypeMinutes, allDay, halfDay, assignAllDay);
+          
+          absencesToUpdate--;
+          if (absencesToUpdate == 0) {
+            absencesToUpdate = 100;
+            JPAPlugin.closeTx(false);
+            JPAPlugin.startTx(false);
+            nothing = JustifiedType.findById(nothing.id);
+            specifiedMinutes = JustifiedType.findById(specifiedMinutes.id);
+            absenceTypeMinutes = JustifiedType.findById(absenceTypeMinutes.id);
+            allDay = JustifiedType.findById(allDay.id);
+            halfDay = JustifiedType.findById(halfDay.id);
+            assignAllDay = JustifiedType.findById(assignAllDay.id);
+          }
+        }
+      }
+    }
+    
+  }
+  
+  private void migrateAbsence(Absence absence, JustifiedType nothing,
+      JustifiedType specifiedMinutes, JustifiedType absenceTypeMinutes, JustifiedType allDay,
+      JustifiedType halfDay, JustifiedType assignAllDay) {
+ 
     if (absence.absenceType.justifiedTimeAtWork == null) {
+      return;
+    }
+    
+    // Fix 661H7
+    if (absence.absenceType.code.equals("661H7") 
+        && absence.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)) {
+      absence.justifiedType = absenceTypeMinutes;
+      absence.save();
       return;
     }
     
@@ -115,15 +180,11 @@ public class AbsenceMigration {
       absence.save();
       return;
     }
-
     
-
-    
-
   }
   
   public void buildDefaultGroups() { 
-
+    
     final JustifiedType nothing = absenceComponentDao
         .getOrBuildJustifiedType(JustifiedTypeName.nothing);
     final JustifiedType specifiedMinutes = absenceComponentDao
@@ -165,6 +226,16 @@ public class AbsenceMigration {
         // TODO: andrebbero disabilitate.
         continue;
       }
+      
+      // Fix 661H7
+      if (absenceType.code.equals("661H7") 
+          && absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)) {
+        absenceType.justifiedTypesPermitted.add(absenceTypeMinutes);
+        absenceType.justifiedTime = 60 * 7;
+        absenceType.save();
+        continue;
+      }
+      
       if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.Nothing)) {
         absenceType.justifiedTypesPermitted.add(nothing);
       }
@@ -946,6 +1017,8 @@ public class AbsenceMigration {
       groupRiposi.takableAbsenceBehaviour = tRiposi.get();
       groupRiposi.save();
     }
+    
+    migrateAllAbsences();
     
   }
 

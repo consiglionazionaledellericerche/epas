@@ -213,9 +213,7 @@ public class AbsenceRequestFormFactory {
     }
     return absenceGroupFormItem;
   }
-  
-  
- 
+
   
   /**
    * SubAbsenceGroupItemForm: la scelta all'interno di un AbsenceGroupItemForm.
