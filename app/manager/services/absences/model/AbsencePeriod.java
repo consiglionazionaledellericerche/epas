@@ -85,9 +85,7 @@ public class AbsencePeriod {
     public List<Absence> complationAbsences = Lists.newArrayList();    // Le assenze di completamento
   }
 
-
-
-
+  
   public enum ComputeAmountRestriction {
     workingTimePercent, workingPeriodPercent;
   }

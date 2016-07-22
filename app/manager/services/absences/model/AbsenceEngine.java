@@ -1,6 +1,7 @@
 package manager.services.absences.model;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -10,8 +11,6 @@ import dao.PersonChildrenDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import manager.services.absences.AbsenceService;
-import manager.services.absences.AbsenceMigration;
 import manager.services.absences.model.AbsencePeriod.AbsenceEngineProblem;
 import manager.services.absences.web.AbsenceRequestForm;
 
@@ -33,7 +32,6 @@ public class AbsenceEngine {
 
   //Dependencies Injected
   private final AbsenceDao absenceDao;
-  private final AbsenceMigration absenceMigration;
   private final PersonChildrenDao personChildrenDao;
   
   // Form della riechiesta
@@ -62,11 +60,10 @@ public class AbsenceEngine {
   // AbsencePeriod
   public AbsencePeriod absencePeriod;
   
-  public AbsenceEngine(AbsenceDao absenceDao, AbsenceMigration absenceMigration,
-      PersonChildrenDao personChildrenDao, Person person, GroupAbsenceType groupAbsenceType, 
+  public AbsenceEngine(AbsenceDao absenceDao, PersonChildrenDao personChildrenDao, 
+      Person person, GroupAbsenceType groupAbsenceType, 
       LocalDate date) {
     this.absenceDao = absenceDao;
-    this.absenceMigration = absenceMigration;
     this.personChildrenDao = personChildrenDao;
     this.person = person;
     this.groupAbsenceType = groupAbsenceType;
@@ -156,11 +153,8 @@ public class AbsenceEngine {
       this.absences = this.absenceDao.getAbsencesInCodeList(this.person, 
           this.getFrom(), this.getTo(), Lists.newArrayList(absenceTypes), true);
 
-      // 2bis) Deve diventare un job efficiente da fare al bootstrap.
       for (Absence absence : this.absences) {
-        if (absence.justifiedType == null) {
-          absenceMigration.migrateAbsence(absence);
-        }
+        Verify.verifyNotNull(absence.justifiedType == null );
       }
     }
     

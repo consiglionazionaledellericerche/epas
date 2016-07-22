@@ -6,11 +6,14 @@ import dao.UserDao;
 
 import lombok.extern.slf4j.Slf4j;
 
+import manager.services.absences.AbsenceMigration;
+
 import models.Qualification;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
+import models.absences.GroupAbsenceType;
 
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
@@ -52,6 +55,8 @@ public class Bootstrap extends Job<Void> {
   static FixUserPermission fixUserPermission;
   @Inject
   static UserDao userDao;
+  @Inject
+  static AbsenceMigration absenceMigration;
 
 
   public void doJob() throws IOException {
@@ -78,7 +83,13 @@ public class Bootstrap extends Job<Void> {
       session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
           .getResource("../db/import/absence-type-and-qualification-phase2.xml")));
     }
-
+    
+    if (GroupAbsenceType.count() == 0) {
+      log.info("Iniziata migrazione assenze!");
+      absenceMigration.buildDefaultGroups();
+      log.info("Conclusa migrazione assenze!");
+    }
+    
     if (User.find("byUsername", "developer").fetch().isEmpty()) {
       Fixtures.loadModels("../db/import/developer.yml");
     }

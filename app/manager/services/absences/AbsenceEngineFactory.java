@@ -29,15 +29,13 @@ import org.joda.time.LocalDate;
 public class AbsenceEngineFactory {
   
   private AbsenceDao absenceDao;
-  private AbsenceMigration absenceMigration;
   private PersonChildrenDao personChildrenDao;
   private AbsenceEngineUtility absenceEngineUtility;
 
   @Inject
-  public AbsenceEngineFactory(AbsenceDao absenceDao, AbsenceMigration absenceMigration, 
+  public AbsenceEngineFactory(AbsenceDao absenceDao,
       PersonChildrenDao personChildrenDao, AbsenceEngineUtility absenceEngineUtility) {
         this.absenceDao = absenceDao;
-        this.absenceMigration = absenceMigration;
         this.personChildrenDao = personChildrenDao;
         this.absenceEngineUtility = absenceEngineUtility;
   }
@@ -45,8 +43,8 @@ public class AbsenceEngineFactory {
   public AbsenceEngine buildAbsenceEngineInstance(Person person, GroupAbsenceType groupAbsenceType,
       LocalDate date) {
     
-    AbsenceEngine engineInstance = new AbsenceEngine(absenceDao, absenceMigration, 
-        personChildrenDao, person, groupAbsenceType, date);
+    AbsenceEngine engineInstance = new AbsenceEngine(absenceDao, personChildrenDao, 
+        person, groupAbsenceType, date);
     
     if (groupAbsenceType.pattern.equals(GroupAbsenceType.GroupAbsenceTypePattern.vacationsCnr) || 
         groupAbsenceType.pattern.equals(GroupAbsenceType.GroupAbsenceTypePattern.compensatoryRestCnr)) {

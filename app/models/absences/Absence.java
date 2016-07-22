@@ -54,7 +54,7 @@ public class Absence extends BaseModel {
   @Column(name = "justified_minutes", nullable = true)
   public Integer justifiedMinutes;
 
-  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "justified_type_id")
   public JustifiedType justifiedType;
   
