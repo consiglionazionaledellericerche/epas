@@ -1,20 +1,14 @@
 package dao.absences;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
-import com.mysema.query.types.Projections;
 
 import dao.DaoBase;
 
-import helpers.jpa.ModelQuery;
-
-import models.Person;
 import models.absences.AbsenceType;
 import models.absences.CategoryGroupAbsenceType;
 import models.absences.ComplationAbsenceBehaviour;
@@ -22,7 +16,6 @@ import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
-import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
 import models.absences.query.QCategoryGroupAbsenceType;
 import models.absences.query.QComplationAbsenceBehaviour;
@@ -30,11 +23,7 @@ import models.absences.query.QGroupAbsenceType;
 import models.absences.query.QJustifiedType;
 import models.absences.query.QTakableAbsenceBehaviour;
 
-import org.bouncycastle.util.Strings;
-import org.joda.time.LocalDate;
-
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -172,9 +161,7 @@ public class AbsenceComponentDao extends DaoBase {
     
     obj.save();
     return obj;
-  
-    
-  }
 
+  }
 
 }
