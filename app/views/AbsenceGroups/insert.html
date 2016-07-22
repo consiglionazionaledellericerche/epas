@@ -32,8 +32,8 @@
 
    %{ selectedFormItem = absenceRequestForm.selectedAbsenceGroupFormItem; }%
    %{ selecteSubItem = selectedFormItem?.selectedSubAbsenceGroupFormItems; }%
-   %{ alldaySelected = selecteSubItem.selectedJustified.name.equals(models.absences.JustifiedType.JustifiedTypeName.all_day) }%
-   %{ specifiedMinuteSelected = selecteSubItem.selectedJustified.name.equals(models.absences.JustifiedType.JustifiedTypeName.specified_minutes) }%
+   %{ alldaySelected = selecteSubItem?.selectedJustified?.name.equals(models.absences.JustifiedType.JustifiedTypeName.all_day) }%
+   %{ specifiedMinuteSelected = selecteSubItem?.selectedJustified?.name.equals(models.absences.JustifiedType.JustifiedTypeName.specified_minutes) }%
    
    #{if selectedFormItem}
 
@@ -107,9 +107,9 @@
 	 #{/form}
 	 	   
    #{/if} 
-   #{if engineInstance}
-	   #{if engineInstance.absenceEngineProblem.present}
-	    Problema riscontrato: ${engineInstance.absenceEngineProblem.get()}
+   #{if absenceEngine}
+	   #{if absenceEngine.absenceEngineProblem.present}
+	    Problema riscontrato: ${absenceEngine.absenceEngineProblem.get()}
 	  #{/if}
 	  #{else}
 	    <table class="table">
@@ -121,7 +121,7 @@
 	        <th>Residuo</th>
 	        <th>Problemi</th>
 	      </tr>
-	      #{list items:engineInstance.responseItems, as:'responseItem'}
+	      #{list items:absenceEngine.responseItems, as:'responseItem'}
 	      <tr>
 	        <td>${responseItem.date.format()}</td>
 	        <td>${responseItem.absenceType.code}</td>

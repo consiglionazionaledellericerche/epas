@@ -1,4 +1,4 @@
-package manager.services.absences;
+package manager.services.absences.model;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -10,9 +10,10 @@ import dao.PersonChildrenDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import manager.services.absences.AbsenceEngine.AbsenceEngineProblem;
-import manager.services.absences.AbsenceEngine.AbsencePeriod;
-import manager.services.absences.AbsenceEngine.ResponseItem;
+import manager.services.absences.AbsenceService;
+import manager.services.absences.AbsenceMigration;
+import manager.services.absences.model.AbsencePeriod.AbsenceEngineProblem;
+import manager.services.absences.web.AbsenceRequestForm;
 
 import models.Contract;
 import models.ContractWorkingTimeType;
@@ -28,12 +29,15 @@ import org.joda.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
-public class AbsenceEngineInstance {
+public class AbsenceEngine {
 
   //Dependencies Injected
   private final AbsenceDao absenceDao;
   private final AbsenceMigration absenceMigration;
   private final PersonChildrenDao personChildrenDao;
+  
+  // Form della riechiesta
+  public AbsenceRequestForm absenceRequestForm;
   
   // Dati della richiesta
   public LocalDate date;
@@ -56,9 +60,9 @@ public class AbsenceEngineInstance {
   private InitializationGroup initializationGroup = null;
   
   // AbsencePeriod
-  protected AbsencePeriod absencePeriod;
+  public AbsencePeriod absencePeriod;
   
-  protected AbsenceEngineInstance(AbsenceDao absenceDao, AbsenceMigration absenceMigration,
+  public AbsenceEngine(AbsenceDao absenceDao, AbsenceMigration absenceMigration,
       PersonChildrenDao personChildrenDao, Person person, GroupAbsenceType groupAbsenceType, 
       LocalDate date) {
     this.absenceDao = absenceDao;
@@ -158,34 +162,6 @@ public class AbsenceEngineInstance {
           absenceMigration.migrateAbsence(absence);
         }
       }
-      
-      // 3) Popolare le liste taken e complation absences.
-//      currentAbsencePeriod = this.absencePeriod;
-//      while (currentAbsencePeriod != null) {
-//
-//        for (Absence absence : this.absences) {
-//          // stesso period
-//          if (DateUtility.isDateIntoInterval(absence.getAbsenceDate(), currentAbsencePeriod.periodInterval())) {
-//            
-//            // codice appartenente agli elenchi
-//            if (currentAbsencePeriod.takableComponent.isPresent()) {
-//              if (currentAbsencePeriod.takableComponent.get().takenCodes.contains(absence.absenceType)) {
-//                currentAbsencePeriod.takableComponent.get().takenAbsences.add(absence);
-//              }
-//            }
-//            if (currentAbsencePeriod.complationComponent.isPresent()) {
-//              if (currentAbsencePeriod.complationComponent.get().complationCodes.contains(absence.absenceType)) {
-//                currentAbsencePeriod.complationComponent.get().complationAbsences.add(absence);
-//              }
-//              if (currentAbsencePeriod.complationComponent.get().replacingCodes.contains(absence.absenceType)) {
-//                currentAbsencePeriod.complationComponent.get().replacingAbsences.add(absence);
-//              }
-//            }
-//          }
-//
-//        }
-//        currentAbsencePeriod = currentAbsencePeriod.nextAbsencePeriod;
-//      }
     }
     
     return this.absences;

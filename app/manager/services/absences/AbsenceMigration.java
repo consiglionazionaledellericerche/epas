@@ -80,7 +80,13 @@ public class AbsenceMigration {
     if (absence.absenceType.justifiedTimeAtWork == null) {
       return;
     }
-
+    
+    if (absence.absenceType.code.equals("PEPE") || absence.absenceType.code.equals("RITING")) {
+      absence.justifiedType = specifiedMinutes; //PEPE //RITING
+      absence.save();
+      return;
+    }
+    
     // Assenze orarie.
     if (absence.absenceType.justifiedTimeAtWork.minutes != null 
         && absence.absenceType.justifiedTimeAtWork.minutes > 0) {
@@ -88,13 +94,7 @@ public class AbsenceMigration {
       absence.save();
       return;
     }
-
-    if (absence.absenceType.justifiedTime != null && absence.absenceType.justifiedTime > 0) {
-      absence.justifiedType = specifiedMinutes; //PEPE //RITING
-      absence.save();
-      return;
-    }
-
+    
     if (absence.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)) {  
       absence.justifiedType = allDay;
       absence.save();
@@ -115,6 +115,10 @@ public class AbsenceMigration {
       absence.save();
       return;
     }
+
+    
+
+    
 
   }
   

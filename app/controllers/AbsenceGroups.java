@@ -1,23 +1,15 @@
 package controllers;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Verify;
-import com.google.common.collect.Sets;
-
 import dao.PersonDao;
 import dao.PersonDayDao;
-import dao.absences.AbsenceComponentDao;
 
-import manager.ConsistencyManager;
-import manager.services.absences.AbsenceEngine;
-import manager.services.absences.AbsenceEngine.AbsenceRequestType;
-import manager.services.absences.AbsenceEngine.ResponseItem;
-import manager.services.absences.AbsenceEngineInstance;
+import manager.services.absences.AbsenceEngineCore;
 import manager.services.absences.AbsenceMigration;
-import manager.services.absences.AbsenceRequestInterface;
-import manager.services.absences.AbsenceRequestInterface.AbsenceRequestForm;
-import manager.services.absences.AbsenceRequestInterface.AbsenceGroupFormItem;
+import manager.services.absences.AbsenceService;
+import manager.services.absences.model.AbsenceEngine;
+import manager.services.absences.model.AbsencePeriod.AbsenceRequestType;
+import manager.services.absences.model.ResponseItem;
+import manager.services.absences.web.AbsenceRequestForm;
 
 import models.AbsenceTypeGroup;
 import models.Office;
@@ -26,9 +18,7 @@ import models.PersonDay;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
-import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.JustifiedType;
-import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AccumulationBehaviour;
 
 import org.joda.time.LocalDate;
@@ -38,7 +28,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -51,13 +40,9 @@ public class AbsenceGroups extends Controller {
   @Inject
   private static PersonDayDao personDayDao;
   @Inject
-  private static AbsenceComponentDao absenceComponentDao;
+  private static AbsenceService absenceService;
   @Inject
-  private static AbsenceRequestInterface absenceRequestInterface;
-  @Inject
-  private static AbsenceEngine absenceEngine;
-  @Inject
-  private static ConsistencyManager consistencyManager;
+  private static AbsenceEngineCore absenceEngine;
   @Inject
   private static AbsenceMigration absenceMigration;
   
@@ -112,7 +97,7 @@ public class AbsenceGroups extends Controller {
       groupAbsenceType = null;
     }
         
-    AbsenceRequestForm absenceRequestForm = absenceRequestInterface
+    AbsenceRequestForm absenceRequestForm = absenceService
         .buildInsertForm(person, from, to, groupAbsenceType);
     
     render(absenceRequestForm);
@@ -132,7 +117,7 @@ public class AbsenceGroups extends Controller {
       absenceType = null;
     }
     
-    AbsenceRequestForm absenceRequestForm = absenceRequestInterface.configureInsertForm(person, from, to,
+    AbsenceRequestForm absenceRequestForm = absenceService.configureInsertForm(person, from, to,
         groupAbsenceType, absenceType, justifiedType, specifiedMinutes);
     
     render("@insert", absenceRequestForm);
@@ -151,18 +136,16 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(absenceType);
     notFoundIfNull(justifiedType);
     
-    AbsenceRequestForm absenceRequest = absenceRequestInterface.configureInsertForm(person, from, to,
-        groupAbsenceType, absenceType, justifiedType, specifiedMinutes);
+    if (!absenceType.isPersistent()) {
+      absenceType = null;
+    }
     
-    AbsenceEngineInstance engineInstance = absenceEngine
-        .buildAbsenceEngineInstance(person, groupAbsenceType, from);
+    AbsenceEngine absenceEngine = absenceService.doRequest(person, groupAbsenceType, from, to, 
+        AbsenceRequestType.insert, absenceType, justifiedType, specifiedMinutes);
+    
     Absence absence = new Absence();
-    
-    absenceEngine.doRequest(engineInstance, AbsenceRequestType.insert, absenceType, justifiedType, 
-        Optional.fromNullable(specifiedMinutes));
-    
-    if (!engineInstance.absenceEngineProblem.isPresent()) {
-      for (ResponseItem responseItem : engineInstance.responseItems) {
+    if (!absenceEngine.absenceEngineProblem.isPresent()) {
+      for (ResponseItem responseItem : absenceEngine.responseItems) {
         // TODO: almeno un errore!!!
         if (responseItem.absenceProblem == null) {
           PersonDay personDay = personDayDao.getOrBuildPersonDay(person, responseItem.date);
@@ -176,7 +159,10 @@ public class AbsenceGroups extends Controller {
 
     }
 
-    render("@insert", absenceRequest, engineInstance);
+    AbsenceRequestForm absenceRequestForm = absenceService.configureInsertForm(person, from, to,
+        groupAbsenceType, absenceType, justifiedType, specifiedMinutes);
+    
+    render("@insert", absenceRequestForm, absenceEngine);
   }
   
 
