@@ -4,11 +4,14 @@ import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
+import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import dao.DaoBase;
 
+import models.Person;
+import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.CategoryGroupAbsenceType;
 import models.absences.ComplationAbsenceBehaviour;
@@ -16,12 +19,15 @@ import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
+import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
 import models.absences.query.QCategoryGroupAbsenceType;
 import models.absences.query.QComplationAbsenceBehaviour;
 import models.absences.query.QGroupAbsenceType;
 import models.absences.query.QJustifiedType;
 import models.absences.query.QTakableAbsenceBehaviour;
+
+import org.joda.time.LocalDate;
 
 import java.util.List;
 import java.util.Set;
@@ -163,5 +169,35 @@ public class AbsenceComponentDao extends DaoBase {
     return obj;
 
   }
+  
+  /**
+   * Le assenze effettuate dalla persona nel periodo specificato e con i codici riportati.
+   * @param person
+   * @param begin
+   * @param end
+   * @param codeList
+   * @param ordered
+   * @return
+   */
+  public List<Absence> getAbsencesInCodeList(Person person, LocalDate begin, LocalDate end, 
+      List<AbsenceType> codeList, boolean ordered) {
 
+    final QAbsence absence = QAbsence.absence;
+    BooleanBuilder conditions = new BooleanBuilder();
+    if (begin != null) {
+      conditions.and(absence.personDay.date.goe(begin));
+    }
+    if (end!= null) {
+      conditions.and(absence.personDay.date.loe(end));
+    }
+    final JPQLQuery query = getQueryFactory().from(absence)
+        .leftJoin(absence.personDay).fetch()
+        .where(absence.personDay.person.eq(person)
+            .and(conditions)
+            .and(absence.absenceType.in(codeList)));
+    if (ordered) {
+      query.orderBy(absence.personDay.date.asc());
+    }
+    return query.list(absence);
+  }
 }
