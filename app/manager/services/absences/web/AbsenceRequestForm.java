@@ -68,6 +68,7 @@ public class AbsenceRequestForm {
     public GroupAbsenceType groupAbsenceType;
 
     public boolean selected = false;
+    public boolean containsAutomatic = false;
 
     public List<SubAbsenceGroupFormItem> subAbsenceGroupFormItems = Lists.newArrayList();
     public SubAbsenceGroupFormItem selectedSubAbsenceGroupFormItems = null;
@@ -98,13 +99,14 @@ public class AbsenceRequestForm {
   @Getter
   public static class SubAbsenceGroupFormItem {
 
-    // campi per modalità automatica
+    public boolean selected = false;
     public String name;
-    public List<JustifiedType> justifiedTypes;
 
     // campi per modalità assenza
-    public boolean selected = false;
     public AbsenceType absenceType;            
+   
+    // campo per modalità automatica
+    public List<JustifiedType> justifiedTypes;
 
     public JustifiedType selectedJustified;
     public Integer specifiedMinutes;
@@ -116,6 +118,10 @@ public class AbsenceRequestForm {
 
     public SubAbsenceGroupFormItem(String name) {
       this.name = name;
+    }
+    
+    public boolean isAutomatic() {
+      return this.absenceType == null;
     }
 
     public String getLabel() {
@@ -130,6 +136,22 @@ public class AbsenceRequestForm {
         return Lists.newArrayList(absenceType.justifiedTypesPermitted);
       }
       return justifiedTypes;
+    }
+    
+    public int getHours() {
+      if (this.specifiedMinutes == null || this.getSpecifiedMinutes() < 0) {
+        return 0;
+      } else {
+        return this.specifiedMinutes / 60;
+      }
+    }
+    
+    public int getMinutes() {
+      if (this.specifiedMinutes == null || this.getSpecifiedMinutes() < 0) {
+        return 0;
+      } else {
+        return this.specifiedMinutes % 60;
+      }
     }
   }
 }

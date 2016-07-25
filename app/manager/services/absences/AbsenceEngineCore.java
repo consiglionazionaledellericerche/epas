@@ -71,6 +71,9 @@ public class AbsenceEngineCore {
         if (engineInstance.absenceEngineProblem.isPresent()) {
           return engineInstance;
         }
+        if (engineInstance.success) {
+          return engineInstance;
+        }
       }
       
       //Al giro dopo devo inferire nuovamente il tipo quindi resetto l'assenza
@@ -102,12 +105,17 @@ public class AbsenceEngineCore {
       return engineInstance;
     }
     
+    if (absence.absenceType.consideredWeekEnd) {
+      
+    }
+    
     //simple grouping
     // TODO: bisogna capire dove inserire i controlli di compatibilità (ex. festivo, assenze lo stesso giorno etc)  
     if (absencePeriod.groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.simpleGrouping)) {
       ResponseItem responseItem = new ResponseItem(absence.absenceType, 
           AbsenceOperation.insert, engineInstance.date);
       engineInstance.responseItems.add(responseItem);
+      return engineInstance;
     }
 
     //Struttura del caso base di risposta (senza errori di superamento tetto o completamento errato)
@@ -137,6 +145,16 @@ public class AbsenceEngineCore {
         return engineInstance;
       }
 
+//      ResponseItem responseItem = new ResponseItem(absence.absenceType, 
+//          AbsenceOperation.remainingBefore, engineInstance.date);
+//      ConsumedResidualAmount consumedResidualAmount = ConsumedResidualAmount.builder()
+//          .amountType(takableComponent.takeAmountType)
+//          .totalResidual(takableComponent.computeTakableAmount())
+//          .usedResidualBefore(takableComponent.computeTakenAmount())
+//          .build();
+//      responseItem.consumedResidualAmount.add(consumedResidualAmount);
+//      engineInstance.responseItems.add(responseItem);
+      
       ResponseItem responseItem = new ResponseItem(absence.absenceType, 
           AbsenceOperation.insert, engineInstance.date);
       
@@ -157,6 +175,8 @@ public class AbsenceEngineCore {
       }
       
       engineInstance.responseItems.add(responseItem);
+      engineInstance.success = true;
+      
     }
     
     // Se il codice da prendere appartiene a complationCodes 

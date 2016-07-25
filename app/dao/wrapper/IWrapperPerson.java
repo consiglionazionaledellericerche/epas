@@ -62,7 +62,7 @@ public interface IWrapperPerson extends IWrapperModel<Person> {
   Optional<ContractStampProfile> getCurrentContractStampProfile();
 
   /**
-   * I contratti della persona nell'anno.
+   * I contratti della persona nell'anno ordina.
    */
   List<Contract> getYearContracts(int year);
 
