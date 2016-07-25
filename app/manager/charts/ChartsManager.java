@@ -141,7 +141,7 @@ public class ChartsManager {
       //      int workingTime = wrapperFactory.create(pd).getWorkingTimeTypeDay().get().workingTime;
       PersonOvertime po = new PersonOvertime();
       List<Contract> monthContracts = wrapperFactory
-          .create(p).getMonthContracts(year, month);
+          .create(p).orderedMonthContracts(year, month);
       for (Contract contract : monthContracts) {
         IWrapperContract wrContract = wrapperFactory.create(contract);
         Optional<ContractMonthRecap> recap =
@@ -182,7 +182,7 @@ public class ChartsManager {
 
       PersonOvertime po = new PersonOvertime();
       List<Contract> yearContracts = wrapperFactory
-          .create(p).getYearContracts(year);
+          .create(p).orderedYearContracts(year);
       for (Contract contract: yearContracts) {
         IWrapperContract wrContract = wrapperFactory.create(contract);
         for (int i = 1; i < 13; i++) {
