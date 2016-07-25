@@ -40,43 +40,29 @@
 
     <section id="results">
    	#{paginate results} 
-	   
-	   <table class="table table-hover table-bordered">
-	     <tr class="warning">
-	       <th>Nome e cognome</th>
-	       <th>${wrCompetenceCode.value.description} ${wrCompetenceCode.value.code}</th>
-	     </tr>
-		
-		
-	   #{list items:results.results, as:'person'}
-	    <tr>
-	       %{ wrPerson = person.getWrapper(templateUtility.wrapperFactory); }%
-   
-           <td class="person">${person.fullname}</td>
-           <td>
-           
-    	      #{if wrCompetenceCode.value.code.equals('S1')}
-    	        (${wrPerson.getPositiveResidualInMonth(year,month)})
-             #{/if}
-           
-             <a 
-             #{if editCompetence} data-x-editable href="#" data-type="number" 
-             data-pk="${wrPerson.competence(wrCompetenceCode.value,year,month).id}" data-name="value"
-     	     data-url="@{updateCompetence()}" 
-     	     data-title="Modifica ${wrCompetenceCode.value.description} per ${person.fullname}"
-     	  	 #{/if}
-     	     >
-   	 	     ${wrPerson.competence(wrCompetenceCode.value,year,month).valueApproved}
-    	    </a>
-
-           </td>
-         </tr>
-	    #{/list}
-	    </table>      
-	    #{/paginate}
-
-
-
+	   <table class="table">
+      		<thead>
+      		<tr>
+        		<th>Nome e cognome</th>
+        		<th>${wrCompetenceCode.value.description} ${wrCompetenceCode.value.code}</th>
+      		</tr>
+      		</thead>
+      		<tbody>
+      		#{list items:results.results, as:'person'}
+      		<tr>
+      		 %{ wrPerson = person.getWrapper(templateUtility.wrapperFactory); }%
+				<td class="person">${person.fullname}</td>
+				<td>
+				<a href="@{Competences.insertCompetence('id':dayRecap.personDay.person.id, dayRecap.personDay.date.format())}" data-async-modal="#modalCompetenceCode">
+        		+++
+      			</a>
+				</td>				
+			</tr>
+      		#{/list}
+      		</tbody>
+       </table>
+     
+	#{/paginate}
   <br>
   <br>
   #{alert color:'warning'}
@@ -113,3 +99,5 @@
       </table>
   #{/alert}
 </div> <!-- end container-fluid -->
+
+<div id="modalCompetenceCode" class="modal fade container" tabindex="-1"></div>

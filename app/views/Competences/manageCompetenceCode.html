@@ -2,32 +2,67 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione Codici competenze' /}
 
-<div class="container col-lg-6 col-lg-offset-3">
-
-  #{b.buttons center:true}
-    #{b.link @Competences.insertCompetenceCode(), color:'primary'
-  , title:messages.get('competenceCode.new'),fa:'plus', modal:'#modalCompetenceCode' /}
-  #{/b.buttons}
-
-<div class="span10">
-<table class="table table-striped" id="tabellaCodiciCompetenza">
-	<tr>
-		<th>Codice</th>
-		<th>Codice per attestato di presenza</th>
-		<th>Descrizione</th>
-		
-	</tr>
-	#{list items:compCodeList, as:'compCode'}
-	
-	<tr>
-		<td><a href="@{Competences.edit(compCode.id)}" data-async-modal="#modalCompetenceCode">${compCode.code}</a></td>
-		<td>${compCode.codeToPresence}</td>
-		<td>${compCode.description}</td>
-		
-	</tr>
-	#{/list}
-</table>
+<div class="container">
+#{secure.check 'Competences.insertCompetenceCode' }
+<div class="row text-center">
+	#{secure.link @Competences.insertCompetenceCode(), 'data-async-modal':'#modalCompetenceCode', class:'btn btn-primary',fa:'plus' }
+		<em>Definisci nuovo codice di competenza</em>
+	#{/secure.link}
 </div>
+#{/secure.check}
+
+	<br>
+	#{accordionGroup 'codici'}	 
+	 	#{accordionItem 'CodiciSenzaGruppo', parent:'codici', title:'Codici senza gruppo', open:false, color:'warning'}
+	 	<div class="col-md-8 col-md-offset-2">
+    		<table class="table">
+      		<thead>
+      		<tr>
+        		<th>Codice</th>
+        		<th>Codice per Attestati</th>
+        		<th>Descrizione</th>
+      		</tr>
+      		</thead>
+      		<tbody>
+      		#{list items:compCodeList, as:'compCode'}	
+      		<tr>
+				<td><a href="@{Competences.edit(compCode.id)}" data-async-modal="#modalCompetenceCode">${compCode.code}</a></td>
+				<td>${compCode.codeToPresence}</td>
+				<td>${compCode.description}</td>		
+			</tr>
+      		#{/list}
+      		</tbody>
+    		</table>
+  		</div>	 	
+	 	#{/accordionItem}	 
+	#{/accordionGroup}	
+	#{accordionGroup 'codiciGruppo'}
+	 #{list items:groupList, as:'group'}
+	 	#{accordionItem group.id, parent:'codiciGruppo', title:group.label, open:true, color:'info'}
+	 	<div class="col-md-8 col-md-offset-2">
+    		<table class="table">
+      		<thead>
+      		<tr>
+        		<th>Codice</th>
+        		<th>Codice per Attestati</th>
+        		<th>Descrizione</th>
+      		</tr>
+      		</thead>
+      		<tbody>
+      		#{list items:group.competenceCodes, as:'compCode'}
+      		<tr>
+				<td><a href="@{Competences.edit(compCode.id)}" data-async-modal="#modalCompetenceCode">${compCode.code}</a></td>
+				<td>${compCode.codeToPresence}</td>
+				<td>${compCode.description}</td>		
+			</tr>
+      		#{/list}
+      		</tbody>
+    		</table>
+  		</div>	 	
+	 	#{/accordionItem}
+	 #{/list}
+	#{/accordionGroup}
+
 </div>
 
 <div id="modalCompetenceCode" class="modal fade container" tabindex="-1"></div>

@@ -7,7 +7,9 @@ import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import models.CompetenceCode;
+import models.CompetenceCodeGroup;
 import models.query.QCompetenceCode;
+import models.query.QCompetenceCodeGroup;
 
 import java.util.List;
 
@@ -24,7 +26,7 @@ public class CompetenceCodeDao extends DaoBase {
   }
 
   /**
-   * @return il competenceCode relativo al codice passato come parametro
+   * @return il competenceCode relativo al codice passato come parametro.
    */
   public CompetenceCode getCompetenceCodeByCode(String code) {
     final QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
@@ -37,7 +39,7 @@ public class CompetenceCodeDao extends DaoBase {
   }
 
   /**
-   * @return il codice competenza relativo alla descrizione passata come parametro
+   * @return il codice competenza relativo alla descrizione passata come parametro.
    */
   public CompetenceCode getCompetenceCodeByDescription(String description) {
 
@@ -51,7 +53,7 @@ public class CompetenceCodeDao extends DaoBase {
   }
 
   /**
-   * @return il codice di competenza relativo all'id passato come parametro
+   * @return il codice di competenza relativo all'id passato come parametro.
    */
   public CompetenceCode getCompetenceCodeById(Long id) {
 
@@ -65,7 +67,7 @@ public class CompetenceCodeDao extends DaoBase {
   }
 
   /**
-   * @return la lista di tutti i codici di competenza presenti nel database
+   * @return la lista di tutti i codici di competenza presenti nel database.
    */
   public List<CompetenceCode> getAllCompetenceCode() {
 
@@ -73,5 +75,26 @@ public class CompetenceCodeDao extends DaoBase {
 
     final JPQLQuery query = getQueryFactory().from(competenceCode);
     return query.orderBy(competenceCode.id.asc()).list(competenceCode);
+  }
+  
+  /**
+   * 
+   * @return la lista dei gruppi di competenze presenti nel db.
+   */
+  public List<CompetenceCodeGroup> getAllGroups() {
+    final QCompetenceCodeGroup group = QCompetenceCodeGroup.competenceCodeGroup;
+    final JPQLQuery query = getQueryFactory().from(group);
+    return query.orderBy(group.label.asc()).list(group);
+  }
+  
+  /**
+   * 
+   * @return la lista di tutti i codici di competenza che non appartengono ad alcun gruppo.
+   */
+  public List<CompetenceCode> getCodeWithoutGroup() {
+    final QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
+    final JPQLQuery query = getQueryFactory().from(competenceCode)
+        .where(competenceCode.competenceCodeGroup.isNull());
+    return query.orderBy(competenceCode.code.asc()).list(competenceCode);
   }
 }

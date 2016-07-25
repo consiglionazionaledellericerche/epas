@@ -587,6 +587,17 @@ public final class PersonDao extends DaoBase {
     return query.list(person);
 
   }
+  
+  /**
+   * 
+   * @param code il competence_code da cercare
+   * @return la lista delle persone che hanno il codice di competenza code abilitato.
+   */
+  public List<Person> peopleWithCompetenceCodeActive(CompetenceCode code) {
+    final QPerson person = QPerson.person;
+    JPQLQuery query = getQueryFactory().from(person).where(person.competenceCode.contains(code));
+    return query.list(person);
+  }
 
 
   /**
