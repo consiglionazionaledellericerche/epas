@@ -262,6 +262,17 @@ public class CompetenceDao extends DaoBase {
 
     return myCompetence;
   }
+  
+  /**
+   * 
+   * @param code il codice competenza da cercare
+   * @return la lista di tutte le competenze che contengono quel codice competenza.
+   */
+  public List<Competence> findCompetence(CompetenceCode code) {
+    final QCompetence comp = QCompetence.competence;
+    final JPQLQuery query = getQueryFactory().from(comp).where(comp.competenceCode.eq(code));
+    return query.list(comp);
+  }
 
 
   /**

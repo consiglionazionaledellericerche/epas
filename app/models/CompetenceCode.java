@@ -1,6 +1,8 @@
 package models;
 
 import models.base.BaseModel;
+import models.enumerate.AccumulationType;
+import models.enumerate.LimitType;
 
 import play.data.validation.Required;
 import play.data.validation.Unique;
@@ -9,7 +11,11 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -30,6 +36,10 @@ public class CompetenceCode extends BaseModel {
 
   @ManyToMany(mappedBy = "competenceCode")
   public List<Person> persons;
+  
+  @ManyToOne
+  @JoinColumn(name = "competence_code_group_id")
+  public CompetenceCodeGroup competenceCodeGroup;
 
   @Required
   @Unique
@@ -40,6 +50,14 @@ public class CompetenceCode extends BaseModel {
 
   @Required
   public String description;
+  
+  @Required
+  @Enumerated(EnumType.STRING)
+  @Column(name = "limit_type")
+  public LimitType limitType;
+  
+  @Column(name = "limit_value")
+  public Integer limitValue;
 
   @Override
   public String toString() {

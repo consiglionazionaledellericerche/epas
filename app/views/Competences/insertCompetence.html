@@ -1,0 +1,11 @@
+#{modalAsync id:'modalCompetenceCode', button:'Salva', 
+title:'Inserisci il quantitativo per la competenza'}
+<div id="absenceCodeData">
+  #{form action:@Competences.saveCompetence(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#absenceCodeData'}
+  
+	  
+  #{/form}
+</div>
+#{/modalAsync}

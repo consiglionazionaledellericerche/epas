@@ -72,6 +72,8 @@ competenceCode.code= Codice Competenza
 competenceCode.codeToPresence= Codice per attestato di presenza
 competenceCode.description= Descrizione
 competenceCode.new= Nuovo codice di competenza
+competenceCode.limitType=Limite di utilizzo
+competenceCode.limitValue= Valore limite
 
 configuration.entry= Parametro
 configuration.entry.value= Valore parametro
@@ -443,6 +445,10 @@ JustifiedTimeAtWork.Nothing= Niente
 JustifiedTimeAtWork.TimeToComplete= Quello che manca
 JustifiedTimeAtWork.ReduceWorkingTimeOfTwoHours= Riduce orario di lavoro di 2 ore
 JustifiedTimeAtWork.AssignAllDay= Assegna intera giornata
+
+LimitType.monthly= Mensile
+LimitType.yearly= Annuale
+LimitType.noLimit= Senza limite
 
 StampTypes.MOTIVI_DI_SERVIZIO= Motivi di Servizio
 StampTypes.VISITA_MEDICA= Visita Medica

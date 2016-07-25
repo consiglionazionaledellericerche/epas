@@ -33,6 +33,7 @@ import manager.recaps.competence.PersonMonthCompetenceRecapFactory;
 
 import models.Competence;
 import models.CompetenceCode;
+import models.CompetenceCodeGroup;
 import models.Contract;
 import models.Office;
 import models.Person;
@@ -88,8 +89,9 @@ public class Competences extends Controller {
    */
   public static void manageCompetenceCode() {
 
-    List<CompetenceCode> compCodeList = competenceCodeDao.getAllCompetenceCode();
-    render(compCodeList);
+    List<CompetenceCode> compCodeList = competenceCodeDao.getCodeWithoutGroup();
+    List<CompetenceCodeGroup> groupList = competenceCodeDao.getAllGroups();
+    render(compCodeList, groupList);
   }
 
   /**
@@ -337,8 +339,15 @@ public class Competences extends Controller {
     rules.checkIfPermitted(competence.person.office);
 
     log.info("Anno competenza: {} Mese competenza: {}", competence.year, competence.month);
-
-    competence.valueApproved = value;
+    
+    /* qui va messa la parte di controllo sull'eventuale superamento dei tetti previsti per il codice 
+     * di competenza che si intende salvare
+     */
+    if (competenceManager.canAddCompetence(competence, value)) {
+      competence.valueApproved = value;
+    } else {
+      renderText("fail");
+    }
 
     log.info("value approved before = {}", competence.valueApproved);
 
@@ -353,6 +362,13 @@ public class Competences extends Controller {
     renderText("ok");
   }
 
+  public static void insertCompetence() {
+    
+  }
+  
+  public static void saveCompetence() {
+    
+  }
 
   /**
    * Pagina riepilogo monte ore per anno e sede.

@@ -708,7 +708,6 @@ when
         
         /* Vecchio permesso editCompetenceCode */
         /* FIXME vedi in regola onlyForPersonnelAdmin_InOffice */
-        "Competences.insertCompetenceCode",
         "Competences.edit",
         "Competences.save",      
         
@@ -856,7 +855,6 @@ when
  	     *  Quest'ultima soluzione potrebbe essere la più opportuna e meno dispendiosa in ottica
  	     *  centralizzazione.
  	     */
-        "Competences.insertCompetenceCode",
         "Competences.edit",
         "Competences.save",
         

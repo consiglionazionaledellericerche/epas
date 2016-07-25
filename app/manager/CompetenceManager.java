@@ -9,6 +9,7 @@ import com.google.inject.Inject;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
+import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
@@ -23,6 +24,7 @@ import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.TotalOvertime;
+import models.enumerate.LimitType;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -44,6 +46,7 @@ public class CompetenceManager {
   private static final Logger log = LoggerFactory.getLogger(CompetenceManager.class);
   private final CompetenceCodeDao competenceCodeDao;
   private final OfficeDao officeDao;
+  private final PersonDao personDao;
   private final PersonDayDao personDayDao;
   private final CompetenceDao competenceDao;
   private final IWrapperFactory wrapperFactory;
@@ -61,11 +64,12 @@ public class CompetenceManager {
    */
   @Inject
   public CompetenceManager(CompetenceCodeDao competenceCodeDao,
-      OfficeDao officeDao, CompetenceDao competenceDao,
+      OfficeDao officeDao, PersonDao personDao,CompetenceDao competenceDao,
       PersonDayDao personDayDao, IWrapperFactory wrapperFactory,
       PersonDayManager personDayManager) {
     this.competenceCodeDao = competenceCodeDao;
     this.officeDao = officeDao;
+    this.personDao = personDao;
     this.competenceDao = competenceDao;
     this.personDayDao = personDayDao;
     this.wrapperFactory = wrapperFactory;
@@ -322,6 +326,64 @@ public class CompetenceManager {
       }
     }
     return competenceCodeList;
+  }
+  
+  /**
+   * 
+   * @param comp la competenza da aggiornare
+   * @param value il quantitativo per quella competenza da aggiornare
+   * @return true se è possibile assegnare la quantità value alla competenza comp.
+   */
+  public boolean canAddCompetence(Competence comp, Integer value) {
+    
+    /**
+     * bisogna considerare i gruppi di appartenenza della competenza e verificare se il quantitativo
+     * che si vuole prendere di quella competenza non sfora il valore massimo della singola competenza
+     * o del gruppo
+     */
+    if (comp.competenceCode.limitType.equals(LimitType.monthly)) {
+      if (comp.valueApproved + value > comp.competenceCode.limitValue) {
+        return false;
+      } else {
+        return true;
+      }
+    } 
+    if (comp.competenceCode.limitType.equals(LimitType.yearly)) {
+      /*completare cercando nell'anno la somma di tutti i valori di quella competenza*/
+      if (comp.valueApproved + value > comp.competenceCode.limitValue) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * questo metodo si è reso necessario dal momento che nel tempo alcuni codici di competenza non 
+   * risultano più fruibili, pertanto devono essere eliminati dalla lista dei codici prendibili.
+   */
+  public void deleteObsoleteCompetenceCodes() {
+    CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("050");
+    if (code == null) {
+      return;
+    }      
+    List<Competence> complist = competenceDao.findCompetence(code);
+    if (!complist.isEmpty()) {
+      for (Competence comp : complist) {
+        if (comp.year < personDayDao.getOldestPersonDay().date.getYear()) {
+          comp.delete();
+        }
+      }
+    }      
+    List<Person> personList = personDao.peopleWithCompetenceCodeActive(code);
+    if(!personList.isEmpty()) {
+      for (Person person : personList) {
+        person.competenceCode.remove(code);
+        person.save();
+      }
+    }
+    code.delete();
   }
 
 
