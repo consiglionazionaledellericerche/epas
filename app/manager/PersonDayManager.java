@@ -8,9 +8,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
-import dao.ContractDao;
 import dao.PersonDayDao;
 import dao.PersonShiftDayDao;
+import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperPersonDay;
 
 import it.cnr.iit.epas.DateInterval;
@@ -32,6 +32,7 @@ import models.PersonDayInTrouble;
 import models.PersonShiftDay;
 import models.Stamping;
 import models.Stamping.WayType;
+import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;
@@ -56,7 +57,7 @@ public class PersonDayManager {
   private final PersonDayInTroubleManager personDayInTroubleManager;
   private final PersonShiftDayDao personShiftDayDao;
   private final PersonDayDao personDayDao;
-  private final ContractDao contractDao;
+  private final WorkingTimeTypeDao workingTimeTypeDao;
 
   /**
    * Costruttore.
@@ -68,13 +69,13 @@ public class PersonDayManager {
   @Inject
   public PersonDayManager(ConfigurationManager configurationManager,
       PersonDayInTroubleManager personDayInTroubleManager, PersonDayDao personDayDao,
-      PersonShiftDayDao personShiftDayDao, ContractDao contractDao) {
+      PersonShiftDayDao personShiftDayDao, WorkingTimeTypeDao workingTimeTypeDao) {
 
     this.configurationManager = configurationManager;
     this.personDayInTroubleManager = personDayInTroubleManager;
     this.personShiftDayDao = personShiftDayDao;
     this.personDayDao = personDayDao;
-    this.contractDao = contractDao;
+    this.workingTimeTypeDao = workingTimeTypeDao;
   }
 
   /**
@@ -1189,41 +1190,51 @@ public class PersonDayManager {
     return personDay;
   }
 
-
   /**
    * Se il giorno è festivo per la persona.
+   * @param person
+   * @param date
+   * @return
    */
   public boolean isHoliday(Person person, LocalDate date) {
 
+    //Festività generale
     MonthDay patron = (MonthDay) configurationManager
         .configValue(person.office, EpasParam.DAY_OF_PATRON, date);
-
     if (DateUtility.isGeneralHoliday(Optional.fromNullable(patron), date)) {
       return true;
     }
 
-    Contract contract = contractDao.getContract(date, person);
-    if (contract == null) {
-      //persona fuori contratto
+    Optional<WorkingTimeType> workingTimeType = workingTimeTypeDao.getWorkingTimeType(date, person);
+    
+    //persona fuori contratto
+    if (!workingTimeType.isPresent()) {
       return false;
     }
 
-    for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
-      if (DateUtility.isDateIntoInterval(date,
-          new DateInterval(cwtt.beginDate, cwtt.endDate))) {
+    //tempo a lavoro
+    return workingTimeTypeDao.isWorkingTypeTypeHoliday(date, workingTimeType.get());
+  }
+  
+  /**
+   * I giorni festivi della persona nella finestra specificata.
+   * @param person
+   * @param from
+   * @param to
+   * @return
+   */
+  public List<LocalDate> holidays(Person person, LocalDate from, LocalDate to) {
 
-        int dayOfWeekIndex = date.getDayOfWeek() - 1;
-        WorkingTimeTypeDay wttd = cwtt.workingTimeType
-            .workingTimeTypeDays.get(dayOfWeekIndex);
-        Preconditions.checkState(wttd.dayOfWeek == date.getDayOfWeek());
-        return wttd.holiday;
+    List<LocalDate> holidays = Lists.newArrayList();
 
+    LocalDate date = from;
+    while (!date.isAfter(to)) {
+      if (isHoliday(person, date)) {
+        holidays.add(date);
+        date = date.plusDays(1);
       }
     }
-
-    throw new IllegalStateException();
-    //se il db è consistente non si verifica mai
-    //return false;
-
+    return holidays;
   }
+
 }
