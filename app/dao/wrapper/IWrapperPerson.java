@@ -62,14 +62,19 @@ public interface IWrapperPerson extends IWrapperModel<Person> {
   Optional<ContractStampProfile> getCurrentContractStampProfile();
 
   /**
-   * I contratti della persona nell'anno ordina.
+   * I contratti della persona ordinati per date crescenti.
    */
-  List<Contract> getYearContracts(int year);
+  List<Contract> orderedContracts();
+  
+  /**
+   * I contratti della persona nell'anno ordinati per date crescenti.
+   */
+  List<Contract> orderedYearContracts(int year);
 
   /**
-   * I contratti della persona nel mese.
+   * I contratti della persona nel mese ordinati per date crescenti.
    */
-  List<Contract> getMonthContracts(int year, int month);
+  List<Contract> orderedMonthContracts(int year, int month);
 
   /**
    * L'ultimo contratto attivo della persona nel mese.

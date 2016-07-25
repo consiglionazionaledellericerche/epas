@@ -94,7 +94,7 @@ public class PersonDays extends Controller {
      */
     rules.checkIfPermitted(person);
     List<Contract> monthContracts = wrapperFactory
-            .create(person).getMonthContracts(year, month);
+            .create(person).orderedMonthContracts(year, month);
     PersonMonthDto pmDTO = new PersonMonthDto();
     for (Contract contract : monthContracts) {
       Optional<ContractMonthRecap> cmr = wrapperFactory.create(contract)

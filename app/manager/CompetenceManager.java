@@ -277,7 +277,7 @@ public class CompetenceManager {
   public Integer positiveResidualInMonth(Person person, int year, int month) {
 
     List<Contract> monthContracts = wrapperFactory
-        .create(person).getMonthContracts(year, month);
+        .create(person).orderedMonthContracts(year, month);
     int differenceForShift = 0;
     List<PersonDay> pdList = personDayDao.getPersonDayInMonth(person, new YearMonth(year, month));
     for (Contract contract : monthContracts) {

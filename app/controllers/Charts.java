@@ -1,7 +1,6 @@
 package controllers;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import dao.CompetenceCodeDao;
@@ -17,41 +16,25 @@ import lombok.extern.slf4j.Slf4j;
 
 import manager.SecureManager;
 import manager.charts.ChartsManager;
-import manager.charts.ChartsManager.RenderChart;
 import manager.recaps.charts.RenderResult;
-import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 
-import models.Absence;
 import models.CompetenceCode;
 import models.Office;
 import models.Person;
-
 import models.exports.PersonOvertime;
 
-import org.apache.poi.hssf.record.*;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.DataFormat;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
