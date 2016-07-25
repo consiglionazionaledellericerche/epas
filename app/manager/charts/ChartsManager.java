@@ -27,6 +27,8 @@ import lombok.Getter;
 import manager.CompetenceManager;
 import manager.recaps.charts.RenderResult;
 import manager.recaps.charts.ResultFromFile;
+import manager.recaps.personstamping.PersonStampingDayRecap;
+import manager.recaps.personstamping.PersonStampingRecap;
 import manager.services.vacations.IVacationsService;
 import manager.services.vacations.VacationsRecap;
 
@@ -43,6 +45,14 @@ import models.enumerate.CheckType;
 import models.enumerate.JustifiedTimeAtWork;
 import models.exports.PersonOvertime;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -57,6 +67,8 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -72,11 +84,8 @@ public class ChartsManager {
 
   private static final Logger log = LoggerFactory.getLogger(ChartsManager.class);
   private final CompetenceCodeDao competenceCodeDao;
-  private final CompetenceDao competenceDao;
-  private final CompetenceManager competenceManager;
   private final PersonDao personDao;
   private final AbsenceDao absenceDao;
-  private final PersonDayDao personDayDao;
   private final IVacationsService vacationsService;
   private final IWrapperFactory wrapperFactory;
 
@@ -85,8 +94,6 @@ public class ChartsManager {
    * Costruttore.
    *
    * @param competenceCodeDao competenceCodeDao
-   * @param competenceDao     competenceDao
-   * @param competenceManager competenceManager
    * @param personDao         personDao
    * @param vacationsService  vacationsService
    * @param absenceDao        absenceDao
@@ -94,15 +101,11 @@ public class ChartsManager {
    */
   @Inject
   public ChartsManager(CompetenceCodeDao competenceCodeDao,
-      CompetenceDao competenceDao, CompetenceManager competenceManager,
       PersonDao personDao, IVacationsService vacationsService,
-      AbsenceDao absenceDao, PersonDayDao personDayDao, IWrapperFactory wrapperFactory) {
+      AbsenceDao absenceDao, IWrapperFactory wrapperFactory) {
     this.competenceCodeDao = competenceCodeDao;
-    this.competenceDao = competenceDao;
-    this.competenceManager = competenceManager;
     this.personDao = personDao;
     this.absenceDao = absenceDao;
-    this.personDayDao = personDayDao;
     this.vacationsService = vacationsService;
     this.wrapperFactory = wrapperFactory;
   }
@@ -110,7 +113,7 @@ public class ChartsManager {
 
   /**
    * @return la lista dei competenceCode che comprende tutti i codici di straordinario presenti in
-   * anagrafica.
+   *     anagrafica.
    */
   public List<CompetenceCode> populateOvertimeCodeList() {
     List<CompetenceCode> codeList = Lists.newArrayList();
@@ -134,8 +137,8 @@ public class ChartsManager {
       if (p.surname.equals("Baesso")) {
         log.debug("eccoci");
       }
-//      PersonDay pd = personDayDao.getOrBuildPersonDay(p, new LocalDate(year, month, 1));
-//      int workingTime = wrapperFactory.create(pd).getWorkingTimeTypeDay().get().workingTime;
+      //      PersonDay pd = personDayDao.getOrBuildPersonDay(p, new LocalDate(year, month, 1));
+      //      int workingTime = wrapperFactory.create(pd).getWorkingTimeTypeDay().get().workingTime;
       PersonOvertime po = new PersonOvertime();
       List<Contract> monthContracts = wrapperFactory
           .create(p).getMonthContracts(year, month);
@@ -147,7 +150,7 @@ public class ChartsManager {
           po.overtimeHour = recap.get().getStraordinarioMinuti() 
               / DateTimeConstants.MINUTES_PER_HOUR;
           po.positiveHourForOvertime = 
-              (recap.get().getPositiveResidualInMonth()/* - recap.get().recoveryDayUsed * workingTime*/)
+              (recap.get().getPositiveResidualInMonth())
               / DateTimeConstants.MINUTES_PER_HOUR;
           po.month = month;
           po.year = year;
@@ -155,7 +158,8 @@ public class ChartsManager {
           po.surname = p.surname;      
           poList.add(po);
         } else {
-          log.debug("{} pur avendo ore in più non ha usufruito di straordinari questo mese", p.fullName());
+          log.debug("{} pur avendo ore in più non ha usufruito di straordinari questo mese", 
+              p.fullName());
           noOvertimePeople.add(p);
         }
       }
@@ -165,17 +169,17 @@ public class ChartsManager {
     }
     return poList;
   }
-  
-  
+
+
   /**
    * @return la lista dei personOvertime con i valori su base annuale.
    */ 
   public List<PersonOvertime> populatePersonOvertimeListInYear(
       List<Person> personList, List<CompetenceCode> codeList, int year) {
-    
+
     List<PersonOvertime> poList = Lists.newArrayList();
     for (Person p : personList) {
-      
+
       PersonOvertime po = new PersonOvertime();
       List<Contract> yearContracts = wrapperFactory
           .create(p).getYearContracts(year);
@@ -193,7 +197,7 @@ public class ChartsManager {
             po.year = year;
             po.name = p.name;
             po.surname = p.surname;      
-            
+
           }    
         }
         if (po.overtimeHour != 0) {          
@@ -201,7 +205,7 @@ public class ChartsManager {
         } else {
           log.debug("Il dipendente {} non ha effettuato ore di straordinario "
               + "nell'anno pur avendo ore in più", p.fullName());
-          }
+        }
       }
     }
     return poList;
@@ -244,7 +248,8 @@ public class ChartsManager {
 
   /**
    * @return il file contenente la situazione di ore in più, ore di straordinario e riposi
-   *     compensativi per ciascuna persona della lista passata come parametro relativa all'anno year.
+   *     compensativi per ciascuna persona della lista passata come parametro 
+   *     relativa all'anno year.
    */
 
   public FileInputStream export(Integer year, List<Person> personList) throws IOException {
@@ -474,7 +479,7 @@ public class ChartsManager {
    * @param person la persona di cui si cercano le assenze.
    * @param list   la lista delle assenze con data che si vuol verificare.
    * @return una lista di RenderResult che contengono un riepilogo, assenza per assenza, della
-   * situazione di esse sul db locale.
+   *     situazione di esse sul db locale.
    */
   private List<RenderResult> transformInRenderList(Person person, List<ResultFromFile> list,
       boolean alsoPastYear) {
@@ -530,13 +535,157 @@ public class ChartsManager {
   public static final class RenderChart {
     public List<PersonOvertime> personOvertime;
     public List<Person> noOvertimePeople;
-    
+
     public RenderChart(List<PersonOvertime> personOvertime, List<Person> noOvertimePeople) {
       this.noOvertimePeople = noOvertimePeople;
       this.personOvertime = personOvertime;
     }
   }
+
+  /**
+   * 
+   * @param psDto il personStampingRecap contenente le info sul mese trascorso dalla persona
+   * @param file il file in cui caricare le informazioni
+   * @return il file contenente la situazione mensile della persona a cui fa riferimento
+   *     il personStampingRecap passato come parametro.
+   */
+  public File createFileToExport(PersonStampingRecap psDto, File file) {
+    try {
+      FileOutputStream out = new FileOutputStream(file);
+      Workbook wb = new HSSFWorkbook();
+      Sheet sheet = wb.createSheet();
+      CellStyle cs = createHeader(wb);
+      Row row = null;
+      Cell cell = null;
+
+      row = sheet.createRow(0);
+      row.setHeightInPoints(30);
+      for (int i = 0; i < 3; i++) {
+        sheet.setColumnWidth((short) (i), (short) ((50 * 8) / ((double) 1 / 20)));
+        cell = row.createCell(i);
+        cell.setCellStyle(cs);
+        switch (i) {
+          case 0:            
+            cell.setCellValue("Giorno");
+            break;
+          case 1:
+            cell.setCellValue("Ore di lavoro (hh:mm)");
+            break;
+          case 2:
+            cell.setCellValue("Assenza");
+            break;
+          default:
+            break;
+        }
+      }
+      int rownum = 1;
+      for (PersonStampingDayRecap day : psDto.daysRecap) {
+        row = sheet.createRow(rownum);
+        for (int cellnum = 0; cellnum < 3; cellnum++) {
+          cell = row.createCell(cellnum);
+          cell = configureDay(day, cell, wb);
+          switch (cellnum) {
+            case 0:              
+              cell.setCellValue(day.personDay.date.toString());              
+              break;
+            case 1:
+              cell.setCellValue(DateUtility.fromMinuteToHourMinute(day.personDay.getTimeAtWork()));
+              break;
+            case 2:
+              if (!day.personDay.absences.isEmpty()) {
+                String code = "";
+                for (Absence abs : day.personDay.absences) {
+                  code = code + " " + abs.absenceType.code;                  
+                }
+                cell.setCellValue(code);                
+              } else {
+                cell.setCellValue(" ");
+              }              
+              break;
+            default:
+              break;
+          }          
+        }
+        rownum++;
+      }
+
+      try {
+        wb.write(out);
+        wb.close();
+        out.close();
+      } catch (IOException e) {
+        log.debug("problema in chiusura stream");
+        e.printStackTrace();
+      }
+    } catch (FileNotFoundException e) {
+      log.debug("Problema in riconoscimento file");
+      e.printStackTrace();
+    }
+    return file;
+  }
+
+  /**
+   * 
+   * @param wb il workbook su cui applicare lo stile
+   * @return lo stile per una cella di intestazione.
+   */
+  private CellStyle createHeader(Workbook wb) {
+    
+    Font font = wb.createFont();
+    font.setFontHeightInPoints((short) 12);
+    font.setColor( (short)0xc );
+    font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+    CellStyle cs = wb.createCellStyle();
+    cs.setFont(font);
+    cs.setBorderBottom(cs.BORDER_DOUBLE);
+    cs.setAlignment(cs.ALIGN_CENTER);
+    return cs;
+  }
+
+  /**
+   * 
+   * @param wb il workbook su cui applicare lo stile
+   * @return lo stile per una cella che identifica un giorno di vacanza.
+   */
+  private CellStyle createHoliday(Workbook wb) {
+    CellStyle cs = wb.createCellStyle();
+    cs.setFillForegroundColor(IndexedColors.BLUE_GREY.getIndex());
+    Font font = wb.createFont();
+    font.setColor(Font.COLOR_RED);
+    cs.setAlignment(cs.ALIGN_CENTER);
+    cs.setFont(font);    
+    return cs;
+  }
+  
+  /**
+   * 
+   * @param wb il workbook su cui applicare lo stile
+   * @return lo stile per una cella che identifica un giorno lavorativo.
+   */
+  private CellStyle createWorkingday(Workbook wb) {
+    CellStyle cs = wb.createCellStyle();
+    Font font = wb.createFont();
+    cs.setAlignment(cs.ALIGN_CENTER);
+    cs.setFont(font);
+    return cs;
+  }
+  
+  /**
+   * 
+   * @param day il giorno di riferimento
+   * @param cell la cella a cui applicare lo stile
+   * @param wb il workbook a cui la cella appartiene
+   * @return la cella configurata secondo la tipologia di giorno.
+   */
+  private Cell configureDay(PersonStampingDayRecap day, Cell cell, Workbook wb) {
+    if (day.personDay.isHoliday) {
+      cell.setCellStyle(createHoliday(wb));
+    } else {
+      cell.setCellStyle(createWorkingday(wb));
+    }
+    return cell;
+  }
 }
 
-// *********** Fine parte di business logic ****************/
+
 

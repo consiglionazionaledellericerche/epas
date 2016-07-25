@@ -731,7 +731,9 @@ when
         "PersonMonths.deleteTrainingHoursConfirmed",
         "PersonMonths.modifyTrainingHours",
         "PersonMonths.save",
-        "PersonMonths.saveTrainingHours"	
+        "PersonMonths.saveTrainingHours",
+        "Charts.listForExcelFile",
+        "Charts.test"	
         
         ), target == null, granted == false)
 then
@@ -878,7 +880,9 @@ when
         "PersonMonths.deleteTrainingHoursConfirmed",
         "PersonMonths.modifyTrainingHours",
         "PersonMonths.save",
-        "PersonMonths.saveTrainingHours"
+        "PersonMonths.saveTrainingHours",
+        "Charts.listForExcelFile",
+        "Charts.test"	
                
        ), target == $o, granted == false)
 then
