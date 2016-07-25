@@ -43,6 +43,13 @@ public class PrintTags extends Controller {
   @Inject
   static IWrapperFactory wrapperFactory;
 
+  /**
+   * stampa un file pdf contenente la situazione mensile della persona selezionata.
+   * @param person la persona selezionata
+   * @param month il mese di interesse
+   * @param year l'anno di interesse
+   * @param includeStampingDetails se includere anche i dettagli
+   */
   public static void showTag(Person person, int month, int year, boolean includeStampingDetails) {
 
     if (person == null) {
@@ -70,6 +77,12 @@ public class PrintTags extends Controller {
     renderPDF(psDto, includeStampingDetails, historyStampingsList);
   }
 
+  /**
+   * restituisce il template contenente la lista di persone attive per cui stampare il 
+   * cartellino nell'anno e nel mese passati come parametro.
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   */
   public static void listPersonForPrintTags(int year, int month) {
 
     LocalDate date = new LocalDate(year, month, 1);
