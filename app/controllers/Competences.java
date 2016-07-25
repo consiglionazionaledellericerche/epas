@@ -339,7 +339,7 @@ public class Competences extends Controller {
     rules.checkIfPermitted(competence.person.office);
 
     log.info("Anno competenza: {} Mese competenza: {}", competence.year, competence.month);
-    
+
     /* qui va messa la parte di controllo sull'eventuale superamento dei tetti previsti per il codice 
      * di competenza che si intende salvare
      */
@@ -363,11 +363,11 @@ public class Competences extends Controller {
   }
 
   public static void insertCompetence() {
-    
+    render(); 
   }
-  
+
   public static void saveCompetence() {
-    
+
   }
 
   /**

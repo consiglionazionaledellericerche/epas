@@ -51,10 +51,15 @@
       		#{list items:results.results, as:'person'}
       		<tr>
       		 %{ wrPerson = person.getWrapper(templateUtility.wrapperFactory); }%
-				<td class="person">${person.fullname}</td>
+				<td>${person.fullname}</td>
 				<td>
-				<a href="@{Competences.insertCompetence('id':dayRecap.personDay.person.id, dayRecap.personDay.date.format())}" data-async-modal="#modalCompetenceCode">
-        		+++
+				<a href="@{Competences.insertCompetence()}" data-async-modal="#modalCompetenceCode">
+				#{if wrPerson.competence(wrCompetenceCode.value,year,month).valueApproved != null}
+					${wrPerson.competence(wrCompetenceCode.value,year,month).valueApproved}
+				#{/if}
+				#{else}
+					<em>Inserisci</em>
+				#{/else}        		
       			</a>
 				</td>				
 			</tr>
