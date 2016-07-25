@@ -19,12 +19,26 @@ import java.util.List;
  */
 public class ResponseItem {
 
+  public LocalDate date;
+  public Absence absence;
+  public AbsenceType absenceType;
+  public AbsenceOperation operation;
+  public List<ConsumedResidualAmount> consumedResidualAmount = Lists.newArrayList();
+  public AbsenceProblem absenceProblem;
+
+  public ResponseItem(AbsenceType absenceType, AbsenceOperation operation, LocalDate date) {
+    this.absenceType = absenceType;
+    this.operation = operation;
+    this.date = date;
+  }
+  
+  
   public enum AbsenceOperation {
     insert, insertComplation, remainingBefore, remainingAfter, cancel;
   }
 
   public enum AbsenceProblem {
-    limitExceeded, wrongComplationPosition;
+    limitExceeded, wrongComplationPosition, notAtTheWeekEnd;
   }
 
   @Builder
@@ -61,18 +75,5 @@ public class ResponseItem {
     public boolean canTake() {
       return residualAfter() >= 0;
     }
-  }
-
-  public LocalDate date;
-  public Absence absence;
-  public AbsenceType absenceType;
-  public AbsenceOperation operation;
-  public List<ConsumedResidualAmount> consumedResidualAmount = Lists.newArrayList();
-  public AbsenceProblem absenceProblem;
-
-  public ResponseItem(AbsenceType absenceType, AbsenceOperation operation, LocalDate date) {
-    this.absenceType = absenceType;
-    this.operation = operation;
-    this.date = date;
   }
 }

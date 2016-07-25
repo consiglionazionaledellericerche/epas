@@ -43,26 +43,26 @@ public class AbsenceEngineFactory {
   public AbsenceEngine buildAbsenceEngineInstance(Person person, GroupAbsenceType groupAbsenceType,
       LocalDate date) {
     
-    AbsenceEngine engineInstance = new AbsenceEngine(absenceDao, personChildrenDao, 
+    AbsenceEngine absenceEngine = new AbsenceEngine(absenceDao, personChildrenDao, 
         person, groupAbsenceType, date);
     
     if (groupAbsenceType.pattern.equals(GroupAbsenceType.GroupAbsenceTypePattern.vacationsCnr) || 
         groupAbsenceType.pattern.equals(GroupAbsenceType.GroupAbsenceTypePattern.compensatoryRestCnr)) {
       
       // TODO: Implementare costruzione ferie e riposi compensativi
-      engineInstance.absenceEngineProblem = Optional.of(AbsenceEngineProblem.unsupportedOperation);
-      return engineInstance;
+      absenceEngine.absenceEngineProblem = Optional.of(AbsenceEngineProblem.unsupportedOperation);
+      return absenceEngine;
     }
     
-    buildEngineAbsencePeriods(engineInstance, null);
-    if (engineInstance.absenceEngineProblem.isPresent()) {
-      return engineInstance;
+    buildEngineAbsencePeriods(absenceEngine, null);
+    if (absenceEngine.absenceEngineProblem.isPresent()) {
+      return absenceEngine;
     }
     
     // Assegnare ad ogni periodo le assenze di competenza (fase da migliorare) e calcoli
-    AbsencePeriod absencePeriod = engineInstance.absencePeriod;
+    AbsencePeriod absencePeriod = absenceEngine.absencePeriod;
     while (absencePeriod != null) {
-      for (Absence absence : engineInstance.getAbsences()) {
+      for (Absence absence : absenceEngine.getAbsences()) {
         if (!DateUtility
             .isDateIntoInterval(absence.personDay.date, absencePeriod.periodInterval())) {
           continue;
@@ -85,17 +85,17 @@ public class AbsenceEngineFactory {
     }
     
     // Altre Computazioni di supporto: takenAmount 
-    AbsencePeriod currentAbsencePeriod = engineInstance.absencePeriod;
+    AbsencePeriod currentAbsencePeriod = absenceEngine.absencePeriod;
     while (currentAbsencePeriod != null) {
       if (currentAbsencePeriod.takableComponent.isPresent()) {
         TakableComponent takableComponent = currentAbsencePeriod.takableComponent.get();
         takableComponent.periodTakenAmount = 0;
         for (Absence absence : takableComponent.takenAbsences) {
           long amount = absenceEngineUtility
-              .computeAbsenceAmount(engineInstance, absence, takableComponent.takeAmountType);
+              .computeAbsenceAmount(absenceEngine, absence, takableComponent.takeAmountType);
           if (amount < 0) {
-            engineInstance.absenceEngineProblem = Optional.of(AbsenceEngineProblem.unsupportedOperation);
-            return engineInstance;
+            absenceEngine.absenceEngineProblem = Optional.of(AbsenceEngineProblem.unsupportedOperation);
+            return absenceEngine;
           }
           takableComponent.periodTakenAmount += amount; 
         }
@@ -103,32 +103,32 @@ public class AbsenceEngineFactory {
       currentAbsencePeriod = currentAbsencePeriod.nextAbsencePeriod;
     }
     
-    return engineInstance;
+    return absenceEngine;
    
   }
   
   /**
    * Costruisce le date dell'AbsencePeriod relativo all'istanza. 
    * Se il gruppo è ricorsivo costruisce anche le date dei periodi seguenti.
-   * @param engineInstance
+   * @param absenceEngine
    * @return
    */
-  private AbsencePeriod buildEngineAbsencePeriods(AbsenceEngine engineInstance, 
+  private AbsencePeriod buildEngineAbsencePeriods(AbsenceEngine absenceEngine, 
       AbsencePeriod previousAbsencePeriod) { 
    
-    if (engineInstance.absencePeriod != null) {
+    if (previousAbsencePeriod == null && absenceEngine.absencePeriod != null) {
       // TODO: Implementare logica di verifica data 
       // richiesta compatibile col precedente absencePeriod
-      engineInstance.absenceEngineProblem = Optional.of(AbsenceEngineProblem.unsupportedOperation);
-      return engineInstance.absencePeriod;
+      absenceEngine.absenceEngineProblem = Optional.of(AbsenceEngineProblem.unsupportedOperation);
+      return absenceEngine.absencePeriod;
     }
     
     AbsencePeriod currentAbsencePeriod;
     
     if (previousAbsencePeriod == null) {
       //Primo absencePeriod
-      currentAbsencePeriod = new AbsencePeriod(engineInstance.groupAbsenceType);
-      engineInstance.absencePeriod = currentAbsencePeriod;
+      currentAbsencePeriod = new AbsencePeriod(absenceEngine.groupAbsenceType);
+      absenceEngine.absencePeriod = currentAbsencePeriod;
     } else {
       //Seguenti
       currentAbsencePeriod = new AbsencePeriod(previousAbsencePeriod.groupAbsenceType.nextGroupToCheck);
@@ -138,11 +138,11 @@ public class AbsenceEngineFactory {
     // recuperare l'inizializzazione (questo lo posso fare anche fuori) per i fix sulle date.
 
     if (currentAbsencePeriod.groupAbsenceType.periodType.equals(PeriodType.year)) {
-      currentAbsencePeriod.from = new LocalDate(engineInstance.date.getYear(), 1, 1);
-      currentAbsencePeriod.to = new LocalDate(engineInstance.date.getYear(), 12, 31);
+      currentAbsencePeriod.from = new LocalDate(absenceEngine.date.getYear(), 1, 1);
+      currentAbsencePeriod.to = new LocalDate(absenceEngine.date.getYear(), 12, 31);
     } else if (currentAbsencePeriod.groupAbsenceType.periodType.equals(PeriodType.month)) {
-      currentAbsencePeriod.from = engineInstance.date.dayOfMonth().withMinimumValue();
-      currentAbsencePeriod.to = engineInstance.date.dayOfMonth().withMaximumValue();
+      currentAbsencePeriod.from = absenceEngine.date.dayOfMonth().withMinimumValue();
+      currentAbsencePeriod.to = absenceEngine.date.dayOfMonth().withMaximumValue();
     } else if (currentAbsencePeriod.groupAbsenceType.periodType.equals(PeriodType.always)) {
       currentAbsencePeriod.from = null;
       currentAbsencePeriod.to = null;
@@ -152,12 +152,12 @@ public class AbsenceEngineFactory {
     else if (currentAbsencePeriod.groupAbsenceType.periodType.isChildPeriod()) {
       try {
         DateInterval childInterval = currentAbsencePeriod.groupAbsenceType.periodType
-            .getChildInterval(engineInstance.getOrderedChildren()
-                .get(currentAbsencePeriod.groupAbsenceType.periodType.childNumber).bornDate);
+            .getChildInterval(absenceEngine.getOrderedChildren()
+                .get(currentAbsencePeriod.groupAbsenceType.periodType.childNumber - 1).bornDate);
         currentAbsencePeriod.from = childInterval.getBegin();
         currentAbsencePeriod.to = childInterval.getEnd();
       } catch (Exception e) {
-        engineInstance.absenceEngineProblem = Optional.of(AbsenceEngineProblem.noChildExist);
+        absenceEngine.absenceEngineProblem = Optional.of(AbsenceEngineProblem.noChildExist);
         return currentAbsencePeriod;
       }
     }
@@ -210,7 +210,7 @@ public class AbsenceEngineFactory {
     //Chiamata ricorsiva
     if (currentAbsencePeriod.groupAbsenceType.nextGroupToCheck != null) {
       currentAbsencePeriod.nextAbsencePeriod = 
-          buildEngineAbsencePeriods(engineInstance, currentAbsencePeriod);
+          buildEngineAbsencePeriods(absenceEngine, currentAbsencePeriod);
     }
  
     return currentAbsencePeriod;

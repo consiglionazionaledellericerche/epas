@@ -46,6 +46,7 @@ public class AbsenceEngine {
   public Optional<AbsenceEngineProblem> absenceEngineProblem = Optional.absent();
 
   // Risultato richiesta
+  public boolean success = false;
   public List<ResponseItem> responseItems = Lists.newArrayList();
   
   // Strutture ausiliare lazy

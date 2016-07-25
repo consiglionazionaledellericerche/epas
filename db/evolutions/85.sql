@@ -9,7 +9,7 @@ CREATE TABLE takable_absence_behaviours (
   --- takaen_count_behaviour TEXT NOT NULL,   sempre period)
   fixed_limit INT NOT NULL,
   takable_amount_adjust TEXT
-);;
+);
 
 CREATE TABLE takable_absence_behaviours_history (
   id BIGINT NOT NULL,

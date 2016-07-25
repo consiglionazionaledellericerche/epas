@@ -1,6 +1,7 @@
 package manager.services.absences.web;
 
 import com.google.common.base.Verify;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
@@ -23,6 +24,7 @@ import org.testng.collections.Lists;
 
 import java.util.List;
 import java.util.Set;
+import java.util.SortedMap;
 
 public class AbsenceRequestFormFactory {
   
@@ -169,6 +171,7 @@ public class AbsenceRequestFormFactory {
           automaticSubFormItem.specifiedMinutes = selectedSpecifiedMinutes;
 
           absenceGroupFormItem.subAbsenceGroupFormItems.add(automaticSubFormItem);
+          absenceGroupFormItem.containsAutomatic = true;
           
           if (selectNextSubGroup) {
             selectNextSubGroup = false; // è true solo la prima volta
@@ -183,22 +186,26 @@ public class AbsenceRequestFormFactory {
       }
 
       // Sub Group Each Code takable e complation (anche dei gruppi annidati)
-      Set<AbsenceType> typeConsidered = Sets.newHashSet();
+      SortedMap<String, AbsenceType> typeConsidered = Maps.newTreeMap();
       
       GroupAbsenceType currentGroupAbsenceType = groupAbsenceType; 
       while (currentGroupAbsenceType != null) {
         
         if (currentGroupAbsenceType.takableAbsenceBehaviour != null) {
           for (AbsenceType takable : currentGroupAbsenceType.takableAbsenceBehaviour.takableCodes) {
-            typeConsidered.add(takable);
+            typeConsidered.put(takable.code, takable);
           }
         }
         if (currentGroupAbsenceType.complationAbsenceBehaviour != null) {
           for (AbsenceType complation : currentGroupAbsenceType.complationAbsenceBehaviour.complationCodes) {
-            typeConsidered.add(complation);
+            typeConsidered.put(complation.code, complation);
           }
         }
-        for (AbsenceType absenceType : typeConsidered) {
+        for (AbsenceType absenceType : typeConsidered.values()) {
+          if (absenceType.justifiedTypesPermitted.isEmpty()) {
+            // TODO: questo evento andrebbe segnalato.
+            continue;
+          }
           SubAbsenceGroupFormItem  subAbsenceGroupFormItem = buildSubAbsenceGroupItemForm(absenceType, 
               selectedAbsenceType, selectedJustifiedType, selectedSpecifiedMinutes, selectNextSubGroup);
           selectNextSubGroup = false; // è true solo la prima volta

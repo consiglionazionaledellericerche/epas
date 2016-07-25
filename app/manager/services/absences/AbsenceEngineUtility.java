@@ -121,7 +121,7 @@ public class AbsenceEngineUtility {
    * @param amountType
    * @return
    */
-  public int computeAbsenceAmount(AbsenceEngine engineInstance, Absence absence, 
+  public int computeAbsenceAmount(AbsenceEngine absenceEngine, Absence absence, 
       AmountType amountType) {
     
     int amount = 0;
@@ -130,17 +130,17 @@ public class AbsenceEngineUtility {
       amount = 0;
     } 
     else if (absence.justifiedType.name.equals(JustifiedTypeName.all_day)) {
-      amount = engineInstance.workingTime(engineInstance.date);
+      amount = absenceEngine.workingTime(absenceEngine.date);
     } 
     else if (absence.justifiedType.name.equals(JustifiedTypeName.half_day)) {
-      amount = engineInstance.workingTime(engineInstance.date) / 2;
+      amount = absenceEngine.workingTime(absenceEngine.date) / 2;
     }
     else if (absence.justifiedType.name.equals(JustifiedTypeName.missing_time) ||
         absence.justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
       // TODO: quello che manca va implementato. Occorre persistere la dacisione di quanto manca
       // se non si vogliono fare troppi calcoli.
       if (absence.justifiedMinutes == null) {
-        amount = -1;
+        amount = 0;
       } else {
         amount = absence.justifiedMinutes;
       }
@@ -153,7 +153,7 @@ public class AbsenceEngineUtility {
     }
     
     if (amountType.equals(AmountType.units)) {
-      int work = engineInstance.workingTime(engineInstance.date);
+      int work = absenceEngine.workingTime(absenceEngine.date);
       int result = amount * 100 / work;
       return result;
     } else {
@@ -235,6 +235,20 @@ public class AbsenceEngineUtility {
   public LocalDate getInitialComplationDate(AbsencePeriod absencePeriod) {
     // TODO: utilizzare le strutture dati quando ci saranno.
     return absencePeriod.from;
+  }
+  
+  /**
+   * 
+   * @param hours
+   * @param minutes
+   * @return
+   */
+  public Integer getMinutes(Integer hours, Integer minutes) {
+    Integer selectedSpecifiedMinutes = null;
+    if (hours != null && minutes != null) {
+      selectedSpecifiedMinutes = (hours * 60) + minutes; 
+    }
+    return selectedSpecifiedMinutes;
   }
   
       

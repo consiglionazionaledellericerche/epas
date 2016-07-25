@@ -9,6 +9,7 @@ import manager.services.absences.model.AbsenceEngine;
 import manager.services.absences.model.AbsencePeriod.AbsenceRequestType;
 import manager.services.absences.model.ResponseItem;
 import manager.services.absences.web.AbsenceRequestForm;
+import manager.services.absences.web.AbsenceRequestForm.SubAbsenceGroupFormItem;
 
 import models.AbsenceTypeGroup;
 import models.Office;
@@ -75,7 +76,6 @@ public class AbsenceGroups extends Controller {
       } else {
         otherGroups.add(group);
       }
-      
     }
     
     render(noMoreAbsencesAccepted, replaceCodeAndDecreaseAccumulation, otherGroups);
@@ -96,12 +96,22 @@ public class AbsenceGroups extends Controller {
     AbsenceRequestForm absenceRequestForm = absenceService
         .buildInsertForm(person, from, to, groupAbsenceType);
     
-    render(absenceRequestForm);
+    AbsenceEngine absenceEngine = null;
+    if (absenceRequestForm.selectedAbsenceGroupFormItem != null) {
+      SubAbsenceGroupFormItem selected = absenceRequestForm
+          .selectedAbsenceGroupFormItem.selectedSubAbsenceGroupFormItems;
+      
+      absenceEngine = absenceService.doRequest(person, groupAbsenceType, from, to, 
+          AbsenceRequestType.insert, selected.absenceType, 
+          selected.selectedJustified, selected.getHours(), selected.getMinutes());  
+    }
+    
+    render(absenceRequestForm, absenceEngine);
   }
   
   public static void configureInsert(Long personId, LocalDate from, LocalDate to, 
       GroupAbsenceType groupAbsenceType, AbsenceType absenceType, 
-      JustifiedType justifiedType, Integer specifiedMinutes) {
+      JustifiedType justifiedType, Integer hours, Integer minutes) {
   
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
@@ -114,16 +124,26 @@ public class AbsenceGroups extends Controller {
     }
     
     AbsenceRequestForm absenceRequestForm = absenceService.configureInsertForm(person, from, to,
-        groupAbsenceType, absenceType, justifiedType, specifiedMinutes);
+        groupAbsenceType, absenceType, justifiedType, hours, minutes);
     
-    render("@insert", absenceRequestForm);
+    AbsenceEngine absenceEngine = null;
+    if (absenceRequestForm.selectedAbsenceGroupFormItem != null) {
+      SubAbsenceGroupFormItem selected = absenceRequestForm
+          .selectedAbsenceGroupFormItem.selectedSubAbsenceGroupFormItems;
+      
+      absenceEngine = absenceService.doRequest(person, groupAbsenceType, from, to, 
+          AbsenceRequestType.insert, selected.absenceType, 
+          selected.selectedJustified, selected.getHours(), selected.getMinutes());  
+    }
+    
+    render("@insert", absenceRequestForm, absenceEngine);
     
   }
   
   
   public static void save(Long personId, LocalDate from, LocalDate to, 
       GroupAbsenceType groupAbsenceType, AbsenceType absenceType, 
-      JustifiedType justifiedType, Integer specifiedMinutes) {
+      JustifiedType justifiedType, Integer hours, Integer minutes) {
     
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
@@ -137,26 +157,10 @@ public class AbsenceGroups extends Controller {
     }
     
     AbsenceEngine absenceEngine = absenceService.doRequest(person, groupAbsenceType, from, to, 
-        AbsenceRequestType.insert, absenceType, justifiedType, specifiedMinutes);
+        AbsenceRequestType.insert, absenceType, justifiedType, hours, minutes);
     
-    Absence absence = new Absence();
-    if (!absenceEngine.absenceEngineProblem.isPresent()) {
-      for (ResponseItem responseItem : absenceEngine.responseItems) {
-        // TODO: almeno un errore!!!
-        if (responseItem.absenceProblem == null) {
-          PersonDay personDay = personDayDao.getOrBuildPersonDay(person, responseItem.date);
-          responseItem.absence.personDay = personDay;
-          personDay.absences.add(absence);
-          //personDay.save();
-          //consistencyManager.updatePersonSituation(person.id, date);
-        }
-      }
-    } else {
-
-    }
-
     AbsenceRequestForm absenceRequestForm = absenceService.configureInsertForm(person, from, to,
-        groupAbsenceType, absenceType, justifiedType, specifiedMinutes);
+        groupAbsenceType, absenceType, justifiedType, hours, minutes);
     
     render("@insert", absenceRequestForm, absenceEngine);
   }

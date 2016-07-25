@@ -37,13 +37,7 @@
    
    #{if selectedFormItem}
 
-    <div class="panel panel-primary">
-    <div class="panel-heading">${selectedFormItem.groupAbsenceType.description}</div>
-    <div class="panel-body">
-   
     #{form action:@AbsenceGroups.configureInsert(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit'}
-
-
    
      #{f.hidden 'personId', value:absenceRequestForm.person.id /}
      
@@ -62,10 +56,25 @@
      *{ seleziona sub item group}*
      #{if selectedFormItem.subAbsenceGroupFormItems.size() > 1 } 
 	  #{f.selectModel 'absenceType', label:'Modalità inserimento', personalizeItems:true}
+	    #{if selectedFormItem.containsAutomatic}
+	      <optgroup label="Inserimento Automatico">
+	      #{list selectedFormItem.subAbsenceGroupFormItems, as:'subItemm'}
+	        #{if subItemm.isAutomatic()}
+	         <option value="${subItemm.absenceType?.id}"
+	          #{if subItemm.selected} selected #{/if}>Automatico</option>
+		    #{/if}
+          #{/list}
+		  <optgroup/>
+	    #{/if}
+	    <optgroup label="Codice Specifico">
 	    #{list selectedFormItem.subAbsenceGroupFormItems, as:'subItemm'}
+	      #{if !subItemm.isAutomatic()}
 	      <option value="${subItemm.absenceType?.id}"
 	        #{if subItemm.selected} selected #{/if}>${subItemm.getLabel()} </option>
+	      #{/if}  
 		#{/list}
+		<optgroup/>
+
 	  #{/f.selectModel}
      #{/if}
      #{else}
@@ -98,8 +107,13 @@
 	   
 	   *{ seleziona minuti }*    
        #{if selecteSubItem.selectedJustified.name.equals(models.absences.JustifiedType.JustifiedTypeName.specified_minutes) }
-         #{f.input 'specifiedMinutes', type:'number', value:selecteSubItem.specifiedMinutes /}
-       #{/if}     
+         #{f.input 'hours', type:'number', value:selecteSubItem.hours /}
+         #{f.input 'minutes', type:'number', value:selecteSubItem.minutes /}
+       #{/if}
+       
+       #{if !selecteSubItem.isAutomatic() }
+         #{f.checkbox 'forceInsert', value:forceInsert /}
+       #{/if}      
 	   
 	   #{b.buttons center:true}
          #{b.submit 'Verifica'/}
@@ -139,7 +153,9 @@
 	        <td>
 	        #{if responseItem.absenceProblem}
 	          ${responseItem.absenceProblem}
-	        #{/if}
+	        #{/if} #{else}
+	        <i class="fa fa-check fa-2x text-success" aria-hidden="true"></i>
+	        #{/else}
 	        </td>
 	        
 	      </tr>
@@ -148,9 +164,4 @@
 	  #{/else}
   #{/if}
    
-   </div>
-   </div>
-  
-   
-  
 </div>

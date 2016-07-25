@@ -24,9 +24,10 @@ justifiedType=Tempo giustificato
 
 absence_type_minutes=Tempo Specificato nel Tipo Assenza
 all_day=Tutto Il Giorno
-specified_minutes=Tempo Specificato nella singola Assenza
+specified_minutes=Specifica Ore e Minuti
 nothing=Niente
 minutes=Minuti
+hours=Ore
 units=Giorni
 month=Mese
 year=Anno
@@ -183,6 +184,8 @@ feedback.staff =Lo staff di EPAS
 file =File schedone da analizzare
 
 firstDay= Giorno inizio contratto
+
+forceInsert= Forza Inserimento
 
 history.back= Indietro
 history.type= Operazione

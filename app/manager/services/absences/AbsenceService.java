@@ -27,13 +27,17 @@ public class AbsenceService {
   private final AbsenceRequestFormFactory absenceRequestFormFactory;
   private final AbsenceEngineFactory absenceEngineFactory;
   private final AbsenceEngineCore absenceEngineCore;
+  private final AbsenceEngineUtility absenceEngineUtility;
+  
 
   @Inject
   public AbsenceService(AbsenceRequestFormFactory absenceRequestFormFactory, 
-      AbsenceEngineFactory absenceEngineFactory, AbsenceEngineCore absenceEngineCore) {
+      AbsenceEngineFactory absenceEngineFactory, AbsenceEngineCore absenceEngineCore,
+      AbsenceEngineUtility absenceEngineUtility) {
     this.absenceRequestFormFactory = absenceRequestFormFactory;
     this.absenceEngineFactory = absenceEngineFactory;
     this.absenceEngineCore = absenceEngineCore;
+    this.absenceEngineUtility = absenceEngineUtility;
   }
   
   /**
@@ -66,10 +70,11 @@ public class AbsenceService {
    */
   public AbsenceRequestForm configureInsertForm(Person person, LocalDate from, LocalDate to, 
       GroupAbsenceType groupAbsenceType, AbsenceType absenceType, 
-      JustifiedType justifiedType, Integer specifiedMinutes) {
+      JustifiedType justifiedType, Integer hours, Integer minutes) {
     
     return absenceRequestFormFactory.buildAbsenceRequestForm(person, from, to, 
-        groupAbsenceType, absenceType, justifiedType, specifiedMinutes);
+        groupAbsenceType, absenceType, justifiedType, 
+        absenceEngineUtility.getMinutes(hours, minutes));
   }
 
 
@@ -87,7 +92,7 @@ public class AbsenceService {
    */
   public AbsenceEngine doRequest(Person person, GroupAbsenceType groupAbsenceType, LocalDate from,
       LocalDate to, AbsenceRequestType absenceTypeRequest, AbsenceType absenceType, 
-      JustifiedType justifiedType, Integer specifiedMinutes) {
+      JustifiedType justifiedType, Integer hours, Integer minutes) {
 
     AbsenceEngine absenceEngine = absenceEngineFactory
         .buildAbsenceEngineInstance(person, groupAbsenceType, from);
@@ -102,7 +107,7 @@ public class AbsenceService {
     }
     
     absenceEngineCore.doRequest(absenceEngine, AbsenceRequestType.insert, absenceType, 
-        justifiedType, Optional.fromNullable(specifiedMinutes));
+        justifiedType, Optional.fromNullable(absenceEngineUtility.getMinutes(hours, minutes)));
     
     return absenceEngine;
   }
