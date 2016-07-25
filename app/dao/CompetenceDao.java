@@ -63,7 +63,7 @@ public class CompetenceDao extends DaoBase {
     final QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
 
     return getQueryFactory().from(competenceCode)
-            .where(competenceCode.persons.any().office.eq(office))
+            .where(competenceCode.persons.any().office.eq(office)).orderBy(competenceCode.code.asc())
             .distinct().list(competenceCode);
   }
 
