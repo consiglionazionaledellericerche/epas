@@ -1,6 +1,7 @@
 package dao;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.inject.Provider;
 
 import com.mysema.query.jpa.JPQLQuery;
@@ -15,6 +16,7 @@ import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
 import models.WorkingTimeType;
+import models.WorkingTimeTypeDay;
 import models.query.QWorkingTimeType;
 
 import org.joda.time.LocalDate;
@@ -137,5 +139,18 @@ public class WorkingTimeTypeDao extends DaoBase {
     return getWorkingTimeType(date, person).get().workingTimeTypeDays.get(date.getDayOfWeek() - 1)
         .workingTime;
   }
-
+  
+  /**
+   * Se per il tipo orario la data è un giorno festivo.
+   * @param date
+   * @param workingTimeType
+   * @return
+   */
+  public boolean isWorkingTypeTypeHoliday(LocalDate date, WorkingTimeType workingTimeType) {
+    int dayOfWeekIndex = date.getDayOfWeek() - 1;
+    WorkingTimeTypeDay wttd = workingTimeType.workingTimeTypeDays.get(dayOfWeekIndex);
+    Preconditions.checkState(wttd.dayOfWeek == date.getDayOfWeek());
+    return wttd.holiday;
+  }
+  
 }
