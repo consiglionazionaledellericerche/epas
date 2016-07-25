@@ -3,8 +3,8 @@ package manager.services.absences;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 
-import dao.AbsenceDao;
 import dao.PersonChildrenDao;
+import dao.absences.AbsenceComponentDao;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
@@ -28,14 +28,14 @@ import org.joda.time.LocalDate;
 
 public class AbsenceEngineFactory {
   
-  private AbsenceDao absenceDao;
+  private AbsenceComponentDao absenceComponentDao;
   private PersonChildrenDao personChildrenDao;
   private AbsenceEngineUtility absenceEngineUtility;
 
   @Inject
-  public AbsenceEngineFactory(AbsenceDao absenceDao,
+  public AbsenceEngineFactory(AbsenceComponentDao absenceComponentDao,
       PersonChildrenDao personChildrenDao, AbsenceEngineUtility absenceEngineUtility) {
-        this.absenceDao = absenceDao;
+        this.absenceComponentDao = absenceComponentDao;
         this.personChildrenDao = personChildrenDao;
         this.absenceEngineUtility = absenceEngineUtility;
   }
@@ -43,7 +43,7 @@ public class AbsenceEngineFactory {
   public AbsenceEngine buildAbsenceEngineInstance(Person person, GroupAbsenceType groupAbsenceType,
       LocalDate date) {
     
-    AbsenceEngine absenceEngine = new AbsenceEngine(absenceDao, personChildrenDao, 
+    AbsenceEngine absenceEngine = new AbsenceEngine(absenceComponentDao, personChildrenDao, 
         person, groupAbsenceType, date);
     
     if (groupAbsenceType.pattern.equals(GroupAbsenceType.GroupAbsenceTypePattern.vacationsCnr) || 

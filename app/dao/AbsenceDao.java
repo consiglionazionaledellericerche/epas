@@ -285,36 +285,7 @@ public class AbsenceDao extends DaoBase {
     return query.list(absence);
   }
 
-  /**
-   * @return il numero delle assenze effettuate nel period begin-end dalla persona con codice in
-   * codeList.
-   */
-  public List<Absence> getAbsencesInCodeList(Person person, LocalDate begin, LocalDate end, 
-      List<AbsenceType> codeList, boolean ordered) {
-
-    final QAbsence absence = QAbsence.absence;
-
-    BooleanBuilder conditions = new BooleanBuilder();
-    if (begin != null) {
-      conditions.and(absence.personDay.date.goe(begin));
-    }
-    if (end!= null) {
-      conditions.and(absence.personDay.date.loe(end));
-    }
-    
-    final JPQLQuery query = getQueryFactory().from(absence)
-        .leftJoin(absence.personDay).fetch()
-        .where(absence.personDay.person.eq(person)
-            .and(conditions)
-            .and(absence.absenceType.in(codeList)));
-
-    if (ordered) {
-      query.orderBy(absence.personDay.date.asc());
-    }
-
-    return query.list(absence);
-
-  }
+  
 
   /**
    * @return la lista di assenze effettuate dal titolare del contratto del tipo ab nell'intervallo

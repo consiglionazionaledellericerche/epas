@@ -16,6 +16,8 @@ import models.absences.JustifiedType;
 
 import org.joda.time.LocalDate;
 
+import java.util.List;
+
 /**
  * Interfaccia epas per il componente assenze.
  * le richieste via form.

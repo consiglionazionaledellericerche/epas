@@ -1,21 +1,18 @@
 package controllers;
 
 import dao.PersonDao;
-import dao.PersonDayDao;
 
+import manager.PersonDayManager;
 import manager.services.absences.AbsenceMigration;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.model.AbsenceEngine;
 import manager.services.absences.model.AbsencePeriod.AbsenceRequestType;
-import manager.services.absences.model.ResponseItem;
 import manager.services.absences.web.AbsenceRequestForm;
 import manager.services.absences.web.AbsenceRequestForm.SubAbsenceGroupFormItem;
 
 import models.AbsenceTypeGroup;
 import models.Office;
 import models.Person;
-import models.PersonDay;
-import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
@@ -38,7 +35,7 @@ public class AbsenceGroups extends Controller {
   @Inject
   private static PersonDao personDao;
   @Inject
-  private static PersonDayDao personDayDao;
+  private static PersonDayManager personDayManager;
   @Inject
   private static AbsenceService absenceService;
   @Inject

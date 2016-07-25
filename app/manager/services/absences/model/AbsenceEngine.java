@@ -5,8 +5,8 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import dao.AbsenceDao;
 import dao.PersonChildrenDao;
+import dao.absences.AbsenceComponentDao;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
@@ -31,7 +31,7 @@ import java.util.Set;
 public class AbsenceEngine {
 
   //Dependencies Injected
-  private final AbsenceDao absenceDao;
+  private final AbsenceComponentDao absenceComponentDao;
   private final PersonChildrenDao personChildrenDao;
   
   // Form della riechiesta
@@ -61,10 +61,10 @@ public class AbsenceEngine {
   // AbsencePeriod
   public AbsencePeriod absencePeriod;
   
-  public AbsenceEngine(AbsenceDao absenceDao, PersonChildrenDao personChildrenDao, 
+  public AbsenceEngine(AbsenceComponentDao absenceComponentDao, PersonChildrenDao personChildrenDao, 
       Person person, GroupAbsenceType groupAbsenceType, 
       LocalDate date) {
-    this.absenceDao = absenceDao;
+    this.absenceComponentDao = absenceComponentDao;
     this.personChildrenDao = personChildrenDao;
     this.person = person;
     this.groupAbsenceType = groupAbsenceType;
@@ -151,7 +151,7 @@ public class AbsenceEngine {
       }
 
       // 2) Scaricare le assenze
-      this.absences = this.absenceDao.getAbsencesInCodeList(this.person, 
+      this.absences = this.absenceComponentDao.getAbsencesInCodeList(this.person, 
           this.getFrom(), this.getTo(), Lists.newArrayList(absenceTypes), true);
 
       for (Absence absence : this.absences) {
