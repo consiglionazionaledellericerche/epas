@@ -25,6 +25,7 @@ public class ResponseItem {
   public AbsenceOperation operation;
   public List<ConsumedResidualAmount> consumedResidualAmount = Lists.newArrayList();
   public AbsenceProblem absenceProblem;
+  public AbsenceWarning absenceWarning;
 
   public ResponseItem(AbsenceType absenceType, AbsenceOperation operation, LocalDate date) {
     this.absenceType = absenceType;
@@ -38,7 +39,11 @@ public class ResponseItem {
   }
 
   public enum AbsenceProblem {
-    limitExceeded, wrongComplationPosition, notAtTheWeekEnd;
+    limitExceeded, wrongComplationPosition;
+  }
+  
+  public enum AbsenceWarning {
+    notOnHoliday;
   }
 
   @Builder

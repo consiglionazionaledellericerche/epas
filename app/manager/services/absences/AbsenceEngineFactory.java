@@ -12,7 +12,9 @@ import it.cnr.iit.epas.DateUtility;
 import manager.services.absences.model.AbsenceEngine;
 import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.AbsencePeriod.AbsenceEngineProblem;
+import manager.services.absences.model.AbsencePeriod.AbsenceErrorType;
 import manager.services.absences.model.AbsencePeriod.ComplationComponent;
+import manager.services.absences.model.AbsencePeriod.SuperAbsence;
 import manager.services.absences.model.AbsencePeriod.TakableComponent;
 
 import models.Person;
@@ -67,41 +69,35 @@ public class AbsenceEngineFactory {
             .isDateIntoInterval(absence.personDay.date, absencePeriod.periodInterval())) {
           continue;
         }
-        if (absencePeriod.takableComponent.isPresent()) {
-          if (absencePeriod.takableComponent.get().takableCodes.contains(absence.absenceType)) {
-            absencePeriod.takableComponent.get().takenAbsences.add(absence);
-          }
-        }
-        if (absencePeriod.complationComponent.isPresent()) {
-          if (absencePeriod.complationComponent.get().replacingCodes.contains(absence.absenceType)) {
-            absencePeriod.complationComponent.get().replacingAbsences.add(absence);
-          }
-          if (absencePeriod.complationComponent.get().complationCodes.contains(absence.absenceType)) {
-            absencePeriod.complationComponent.get().complationAbsences.add(absence);
-          }
+        dispatchSuperAbsence(absencePeriod, absenceEngine, absence);
+        if (absenceEngine.absenceEngineProblem.isPresent()) {
+          return absenceEngine;
         }
       }
       absencePeriod = absencePeriod.nextAbsencePeriod;
     }
     
-    // Altre Computazioni di supporto: takenAmount 
-    AbsencePeriod currentAbsencePeriod = absenceEngine.absencePeriod;
-    while (currentAbsencePeriod != null) {
-      if (currentAbsencePeriod.takableComponent.isPresent()) {
-        TakableComponent takableComponent = currentAbsencePeriod.takableComponent.get();
-        takableComponent.periodTakenAmount = 0;
-        for (Absence absence : takableComponent.takenAbsences) {
-          long amount = absenceEngineUtility
-              .computeAbsenceAmount(absenceEngine, absence, takableComponent.takeAmountType);
-          if (amount < 0) {
-            absenceEngine.absenceEngineProblem = Optional.of(AbsenceEngineProblem.unsupportedOperation);
-            return absenceEngine;
-          }
-          takableComponent.periodTakenAmount += amount; 
-        }
-      }
-      currentAbsencePeriod = currentAbsencePeriod.nextAbsencePeriod;
-    }
+//    // Altre Computazioni di supporto:
+//    //takenAmount 
+//    AbsencePeriod currentAbsencePeriod = absenceEngine.absencePeriod;
+//    while (currentAbsencePeriod != null) {
+//      if (currentAbsencePeriod.takableComponent.isPresent()) {
+//        TakableComponent takableComponent = currentAbsencePeriod.takableComponent.get();
+//        takableComponent.resetPeriodTakenAmount();
+//        for (Absence absence : takableComponent.takenAbsences) {
+//          long amount = absenceEngineUtility
+//              .computeAbsenceAmount(absenceEngine, absence, takableComponent.takeAmountType);
+//          if (amount < 0) {
+//            absenceEngine.absenceEngineProblem = Optional.of(AbsenceEngineProblem.unsupportedOperation);
+//            return absenceEngine;
+//          }
+//          takableComponent.periodTakenAmount += amount; 
+//        }
+//      }
+//      currentAbsencePeriod = currentAbsencePeriod.nextAbsencePeriod;
+//    }
+//    
+//    //takenAmount
     
     return absenceEngine;
    
@@ -174,10 +170,10 @@ public class AbsenceEngineFactory {
       TakableComponent takableComponent = new TakableComponent();
       takableComponent.takeAmountType = takableBehaviour.amountType;
 
-      takableComponent.periodTakableAmount = takableBehaviour.fixedLimit;
+      takableComponent.fixedPeriodTakableAmount = takableBehaviour.fixedLimit;
       if (takableComponent.takeAmountType.equals(AmountType.units)) {
         // Per non fare operazioni in virgola mobile...
-        takableComponent.periodTakableAmount = takableComponent.periodTakableAmount * 100;
+        takableComponent.fixedPeriodTakableAmount = takableComponent.fixedPeriodTakableAmount * 100;
       }
       if (takableBehaviour.takableAmountAdjustment != null) {
         // TODO: ex. workingTimePercent
@@ -214,6 +210,64 @@ public class AbsenceEngineFactory {
     }
  
     return currentAbsencePeriod;
+  }
+  
+  /**
+   * 
+   * @param absencePeriod
+   * @param absenceEngine
+   * @param absence
+   */
+  private void dispatchSuperAbsence(AbsencePeriod absencePeriod, AbsenceEngine absenceEngine, 
+      Absence absence) {
+    
+    if (absencePeriod.takableComponent.isPresent()) {
+      TakableComponent takableComponent = absencePeriod.takableComponent.get();
+      if (takableComponent.takableCodes.contains(absence.absenceType)) {
+        int amount = absenceEngineUtility
+            .computeAbsenceAmount(absenceEngine, absence, takableComponent.takeAmountType);
+        if (amount < 0) {
+          absenceEngine.absenceEngineProblem = Optional.of(AbsenceEngineProblem.unsupportedOperation);
+          return;
+        }
+        takableComponent.periodTakenAmount += amount;
+        Optional<AbsenceErrorType> absenceErrorType = Optional.absent();
+        if (takableComponent.getPeriodTakableAmount() - takableComponent.getPeriodTakenAmount() < 0) {
+          absenceErrorType = Optional.of(AbsenceErrorType.takableLimitExceed);
+        }
+        takableComponent.takenSuperAbsence.add(
+            SuperAbsence.builder()
+            .absence(absence)
+            .computedJustifiedTime(amount)
+            .errorType(absenceErrorType)
+            .build());
+      }
+    }
+    if (absencePeriod.complationComponent.isPresent()) {
+      ComplationComponent complationComponent = absencePeriod.complationComponent.get(); 
+      if (complationComponent.replacingCodes.contains(absence.absenceType)) {
+        int amount = absenceEngineUtility
+            .computeAbsenceAmount(absenceEngine, absence, complationComponent.complationAmountType);
+        Optional<AbsenceErrorType> absenceErrorType = Optional.absent();
+        complationComponent.replacingSuperAbsences.add(
+            SuperAbsence.builder()
+            .absence(absence)
+            .computedJustifiedTime(amount)
+            .errorType(absenceErrorType)
+            .build());
+      }
+      if (complationComponent.complationCodes.contains(absence.absenceType)) {
+        int amount = absenceEngineUtility
+            .computeAbsenceAmount(absenceEngine, absence, complationComponent.complationAmountType);
+        Optional<AbsenceErrorType> absenceErrorType = Optional.absent();
+        complationComponent.complationSuperAbsences.add(
+            SuperAbsence.builder()
+            .absence(absence)
+            .computedJustifiedTime(amount)
+            .errorType(absenceErrorType)
+            .build());
+      }
+    }
   }
 
 }

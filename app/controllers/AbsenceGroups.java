@@ -5,8 +5,8 @@ import dao.PersonDao;
 import manager.PersonDayManager;
 import manager.services.absences.AbsenceMigration;
 import manager.services.absences.AbsenceService;
+import manager.services.absences.AbsenceService.AbsenceRequestType;
 import manager.services.absences.model.AbsenceEngine;
-import manager.services.absences.model.AbsencePeriod.AbsenceRequestType;
 import manager.services.absences.web.AbsenceRequestForm;
 import manager.services.absences.web.AbsenceRequestForm.SubAbsenceGroupFormItem;
 
