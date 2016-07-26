@@ -5,6 +5,7 @@ import com.google.common.base.Optional;
 import it.cnr.iit.epas.DateInterval;
 
 import lombok.Builder;
+import lombok.Getter;
 
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -46,26 +47,28 @@ public class AbsencePeriod {
     public AmountType takeAmountType;                // Il tipo di ammontare del periodo
 
     public TakeCountBehaviour takableCountBehaviour; // Come contare il tetto totale
-    public int periodTakableAmount;                  // Il tetto massimo
+    public int fixedPeriodTakableAmount = 0;         // Il tetto massimo
 
     public TakeCountBehaviour takenCountBehaviour;   // Come contare il tetto consumato
-    public int periodTakenAmount;                    // Il tetto consumato
+    public int periodTakenAmount = 0;                // Il tetto consumato
 
     public Set<AbsenceType> takableCodes;            // I tipi assenza prendibili del periodo
     public Set<AbsenceType> takenCodes;              // I tipi di assenza consumati del periodo
 
-    public List<Absence> takenAbsences = Lists.newArrayList();           // Le assenze consumate
+    public List<SuperAbsence> takenSuperAbsence = Lists.newArrayList(); // Le assenze consumate
 
-    public int computeTakableAmount() {
+    public int getPeriodTakableAmount() {
       if (!takableCountBehaviour.equals(TakeCountBehaviour.period)) {
-        // TODO: sumAllPeriod, sumUntilPeriod; 
+        // TODO: sumAllPeriod, sumUntilPeriod;
+        return 0;
       }
-      return this.periodTakableAmount;
+      return this.fixedPeriodTakableAmount;
     }
-
-    public int computeTakenAmount() {
+    
+    public int getPeriodTakenAmount() {
       if (!takenCountBehaviour.equals(TakeCountBehaviour.period)) {
-        // TODO: sumAllPeriod, sumUntilPeriod; 
+        // TODO: sumAllPeriod, sumUntilPeriod;
+        return 0;
       } 
       return periodTakenAmount;
     }
@@ -75,23 +78,28 @@ public class AbsencePeriod {
 
     public AmountType complationAmountType;     // Tipo di ammontare completamento
 
-    public int complationLimitAmount;           // Limite di completamento
+    //public int complationLimitAmount;           // Limite di completamento
     public int complationConsumedAmount;        // Ammontare completamento attualmente consumato
 
     public Set<AbsenceType> replacingCodes;     // Codici di rimpiazzamento      
     public Set<AbsenceType> complationCodes;    // Codici di completamento
 
-    public List<Absence> replacingAbsences = Lists.newArrayList();     // Le assenze di rimpiazzamento (solo l'ultima??)     
-    public List<Absence> complationAbsences = Lists.newArrayList();    // Le assenze di completamento
-  }
+    public List<SuperAbsence> replacingSuperAbsences = Lists.newArrayList(); // Le assenze di rimpiazzamento     
+    public List<SuperAbsence> complationSuperAbsences = Lists.newArrayList();// Le assenze di completamento 
+    
+    public boolean hasError = false;
 
+  }
   
-  public enum ComputeAmountRestriction {
-    workingTimePercent, workingPeriodPercent;
+  @Builder @Getter
+  public static class SuperAbsence {
+    private final Absence absence;
+    private final Integer computedJustifiedTime;
+    private final Optional<AbsenceErrorType> errorType;
   }
-
-  public enum AbsenceRequestType {
-    insert, cancel; // insertSimulated, cancelSimulated;
+  
+  public enum AbsenceErrorType {
+    replacingTooEarly, replacingTooLate, takableLimitExceed;
   }
 
   public enum AbsenceEngineProblem {

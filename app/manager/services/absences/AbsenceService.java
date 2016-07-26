@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 
 import manager.services.absences.model.AbsenceEngine;
 import manager.services.absences.model.AbsencePeriod.AbsenceEngineProblem;
-import manager.services.absences.model.AbsencePeriod.AbsenceRequestType;
 import manager.services.absences.web.AbsenceRequestForm;
 import manager.services.absences.web.AbsenceRequestFormFactory;
 
@@ -15,8 +14,6 @@ import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
 
 /**
  * Interfaccia epas per il componente assenze.
@@ -31,7 +28,6 @@ public class AbsenceService {
   private final AbsenceEngineCore absenceEngineCore;
   private final AbsenceEngineUtility absenceEngineUtility;
   
-
   @Inject
   public AbsenceService(AbsenceRequestFormFactory absenceRequestFormFactory, 
       AbsenceEngineFactory absenceEngineFactory, AbsenceEngineCore absenceEngineCore,
@@ -112,6 +108,10 @@ public class AbsenceService {
         justifiedType, Optional.fromNullable(absenceEngineUtility.getMinutes(hours, minutes)));
     
     return absenceEngine;
+  }
+  
+  public enum AbsenceRequestType {
+    insert, cancel; // insertSimulated, cancelSimulated;
   }
   
   

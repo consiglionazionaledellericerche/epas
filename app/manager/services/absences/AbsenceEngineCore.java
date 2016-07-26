@@ -5,14 +5,18 @@ import com.google.inject.Inject;
 
 import it.cnr.iit.epas.DateUtility;
 
+import manager.PersonDayManager;
+import manager.services.absences.AbsenceService.AbsenceRequestType;
 import manager.services.absences.model.AbsenceEngine;
 import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.AbsencePeriod.AbsenceEngineProblem;
-import manager.services.absences.model.AbsencePeriod.AbsenceRequestType;
+import manager.services.absences.model.AbsencePeriod.ComplationComponent;
+import manager.services.absences.model.AbsencePeriod.SuperAbsence;
 import manager.services.absences.model.AbsencePeriod.TakableComponent;
 import manager.services.absences.model.ResponseItem;
 import manager.services.absences.model.ResponseItem.AbsenceOperation;
 import manager.services.absences.model.ResponseItem.AbsenceProblem;
+import manager.services.absences.model.ResponseItem.AbsenceWarning;
 import manager.services.absences.model.ResponseItem.ConsumedResidualAmount;
 
 import models.absences.Absence;
@@ -23,10 +27,13 @@ import models.absences.JustifiedType;
 public class AbsenceEngineCore {
   
   private final AbsenceEngineUtility absenceEngineUtility;
+  private final PersonDayManager personDayManager;
 
   @Inject
-  public AbsenceEngineCore(AbsenceEngineUtility absenceEngineUtility) {
+  public AbsenceEngineCore(AbsenceEngineUtility absenceEngineUtility, 
+      PersonDayManager personDayManager) {
     this.absenceEngineUtility = absenceEngineUtility;
+    this.personDayManager = personDayManager;
   }
   
   /**  
@@ -95,27 +102,33 @@ public class AbsenceEngineCore {
    * @param date
    * @return
    */
-  public AbsenceEngine checkRequest(AbsenceEngine engineInstance, 
+  public AbsenceEngine checkRequest(AbsenceEngine absenceEngine, 
       AbsencePeriod absencePeriod, AbsenceRequestType absenceRequestType,
       Absence absence) {
     
     //Controllo integrità absenceType - justifiedType
     if (!absence.absenceType.justifiedTypesPermitted.contains(absence.justifiedType)) {
-      engineInstance.absenceEngineProblem = Optional.of(AbsenceEngineProblem.wrongJustifiedType);
-      return engineInstance;
+      absenceEngine.absenceEngineProblem = Optional.of(AbsenceEngineProblem.wrongJustifiedType);
+      return absenceEngine;
     }
     
-    if (absence.absenceType.consideredWeekEnd) {
-      
+    //Codice non prendibile nei giorni di festa ed è festa.
+    if (!absence.absenceType.consideredWeekEnd && personDayManager.isHoliday(absenceEngine.person,
+        absence.date)) {
+      ResponseItem responseItem = new ResponseItem(absence.absenceType, 
+          AbsenceOperation.insert, absenceEngine.date);
+      responseItem.absenceWarning = AbsenceWarning.notOnHoliday;
+      absenceEngine.responseItems.add(responseItem);
+      return absenceEngine;
     }
     
     //simple grouping
     // TODO: bisogna capire dove inserire i controlli di compatibilità (ex. festivo, assenze lo stesso giorno etc)  
     if (absencePeriod.groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.simpleGrouping)) {
       ResponseItem responseItem = new ResponseItem(absence.absenceType, 
-          AbsenceOperation.insert, engineInstance.date);
-      engineInstance.responseItems.add(responseItem);
-      return engineInstance;
+          AbsenceOperation.insert, absenceEngine.date);
+      absenceEngine.responseItems.add(responseItem);
+      return absenceEngine;
     }
 
     //Struttura del caso base di risposta (senza errori di superamento tetto o completamento errato)
@@ -141,30 +154,30 @@ public class AbsenceEngineCore {
       TakableComponent takableComponent = absencePeriod.takableComponent.get();
       
       if (!takableComponent.takableCodes.contains(absence.absenceType)) {
-        engineInstance.absenceEngineProblem = Optional.of(AbsenceEngineProblem.absenceCodeNotAllowed);
-        return engineInstance;
+        absenceEngine.absenceEngineProblem = Optional.of(AbsenceEngineProblem.absenceCodeNotAllowed);
+        return absenceEngine;
       }
 
-//      ResponseItem responseItem = new ResponseItem(absence.absenceType, 
-//          AbsenceOperation.remainingBefore, engineInstance.date);
-//      ConsumedResidualAmount consumedResidualAmount = ConsumedResidualAmount.builder()
-//          .amountType(takableComponent.takeAmountType)
-//          .totalResidual(takableComponent.computeTakableAmount())
-//          .usedResidualBefore(takableComponent.computeTakenAmount())
-//          .build();
-//      responseItem.consumedResidualAmount.add(consumedResidualAmount);
-//      engineInstance.responseItems.add(responseItem);
+//    ResponseItem responseItem = new ResponseItem(absence.absenceType, 
+//    AbsenceOperation.remainingBefore, engineInstance.date);
+//ConsumedResidualAmount consumedResidualAmount = ConsumedResidualAmount.builder()
+//    .amountType(takableComponent.takeAmountType)
+//    .totalResidual(takableComponent.computeTakableAmount())
+//    .usedResidualBefore(takableComponent.computeTakenAmount())
+//    .build();
+//responseItem.consumedResidualAmount.add(consumedResidualAmount);
+//engineInstance.responseItems.add(responseItem);
       
       ResponseItem responseItem = new ResponseItem(absence.absenceType, 
-          AbsenceOperation.insert, engineInstance.date);
+          AbsenceOperation.insert, absenceEngine.date);
       
       ConsumedResidualAmount consumedResidualAmount = ConsumedResidualAmount.builder()
           .amountType(takableComponent.takeAmountType)
-          .totalResidual(takableComponent.computeTakableAmount())
-          .usedResidualBefore(takableComponent.computeTakenAmount())
+          .totalResidual(takableComponent.getPeriodTakableAmount())
+          .usedResidualBefore(takableComponent.getPeriodTakenAmount())
           .amount(absenceEngineUtility
-              .computeAbsenceAmount(engineInstance, absence, takableComponent.takeAmountType))
-          .workingTime(engineInstance.workingTime(engineInstance.date))
+              .computeAbsenceAmount(absenceEngine, absence, takableComponent.takeAmountType))
+          .workingTime(absenceEngine.workingTime(absenceEngine.date))
           .build();
       if (consumedResidualAmount.canTake()) {
         responseItem.consumedResidualAmount.add(consumedResidualAmount);
@@ -174,22 +187,19 @@ public class AbsenceEngineCore {
         responseItem.absenceProblem = AbsenceProblem.limitExceeded;
       }
       
-      engineInstance.responseItems.add(responseItem);
-      engineInstance.success = true;
+      absenceEngine.responseItems.add(responseItem);
+      absenceEngine.success = true;
       
     }
     
     // Se il codice da prendere appartiene a complationCodes 
     //          -> Calcolare il residuo di completamento alla data
-    
-    
-    
     //Complation component
     if (absencePeriod.complationComponent.isPresent()) {
+      
     }
 
-    return engineInstance; 
+    return absenceEngine; 
   }
-
-
+ 
 }
