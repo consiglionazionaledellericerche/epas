@@ -196,7 +196,6 @@ public class AbsenceEngineCore {
     //          -> Calcolare il residuo di completamento alla data
     //Complation component
     if (absencePeriod.complationComponent.isPresent()) {
-      
     }
 
     return absenceEngine; 

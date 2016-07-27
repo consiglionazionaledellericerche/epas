@@ -1,11 +1,14 @@
 package manager.services.absences.model;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
 
 import it.cnr.iit.epas.DateInterval;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -18,6 +21,7 @@ import org.testng.collections.Lists;
 
 import java.util.List;
 import java.util.Set;
+import java.util.SortedMap;
 
 public class AbsencePeriod {
 
@@ -55,7 +59,8 @@ public class AbsencePeriod {
     public Set<AbsenceType> takableCodes;            // I tipi assenza prendibili del periodo
     public Set<AbsenceType> takenCodes;              // I tipi di assenza consumati del periodo
 
-    public List<SuperAbsence> takenSuperAbsence = Lists.newArrayList(); // Le assenze consumate
+    // Le assenze consumate potenziate con informazioni aggiuntive
+    public List<SuperAbsence> takenSuperAbsence = Lists.newArrayList(); 
 
     public int getPeriodTakableAmount() {
       if (!takableCountBehaviour.equals(TakeCountBehaviour.period)) {
@@ -78,29 +83,43 @@ public class AbsencePeriod {
 
     public AmountType complationAmountType;     // Tipo di ammontare completamento
 
-    //public int complationLimitAmount;           // Limite di completamento
     public int complationConsumedAmount;        // Ammontare completamento attualmente consumato
 
     public Set<AbsenceType> replacingCodes;     // Codici di rimpiazzamento      
     public Set<AbsenceType> complationCodes;    // Codici di completamento
 
-    public List<SuperAbsence> replacingSuperAbsences = Lists.newArrayList(); // Le assenze di rimpiazzamento     
-    public List<SuperAbsence> complationSuperAbsences = Lists.newArrayList();// Le assenze di completamento 
+    // Le assenze di rimpiazzamento
+    public List<Absence> replacingAbsences = Lists.newArrayList();
+    // Le assenze di rimpiazzamento potenziate con informazioni aggiuntive
+    public SortedMap<LocalDate, SuperAbsence> replacingSuperAbsencesByDay = Maps.newTreeMap(); 
     
-    public boolean hasError = false;
+    // Le assenze di completamento
+    public List<Absence> complationAbsences = Lists.newArrayList();
+    // Le assenze di completamento potenziate con informazioni aggiuntive
+    public SortedMap<LocalDate, SuperAbsence> complationSuperAbsencesByDay = Maps.newTreeMap(); 
 
   }
   
-  @Builder @Getter
+  /**
+   * Le assenze preesistenti. Con informazioni aggiuntive.
+   * @author alessandro
+   *
+   */
+  @Builder @Getter @Setter(AccessLevel.PACKAGE)
   public static class SuperAbsence {
-    private final Absence absence;
-    private final Integer justifiedTime;                    //tempo giustificato
-    private final Integer complationTime;                   //tempo per completamento
-    private final Optional<AbsenceErrorType> errorType;
+    private final Absence absence;                    //assenza  
+    private Integer justifiedTime;                    //tempo giustificato
+    private Integer complationTime;                   //tempo per completamento
+
+    private Optional<AbsenceErrorType> errorType;
+    
+    private boolean isAlreadyAssigned = false;        //ogni assenza deve appartenere 
+                                                      //ad uno e uno solo period
   }
   
   public enum AbsenceErrorType {
-    replacingTooEarly, replacingTooLate, takableLimitExceed;
+    replacingTooEarly, replacingTooLate, takableLimitExceed, 
+    twoReplacingSameDay, twoComplationSameDay;
   }
 
   public enum AbsenceEngineProblem {
@@ -109,7 +128,16 @@ public class AbsencePeriod {
     dateOutOfContract,    // quando provo assengare esempio ferie fuori contratto
     absenceCodeNotAllowed,// se passo un codice di assenza da inserire non prendibile
     cantInferAbsenceCode, // se non posso inferire il codice d'assenza
-    unsupportedOperation; // ancora non implementato
+    unsupportedOperation, // ancora non implementato
+    
+    //Errori di modellazione (sono i più gravi)
+    modelErrorTwoPeriods,          //quando una assenza è assegnata a più di un periodo
+    modelErrorComplationCode,      //quando un codice è di completamento ma anche t o r. (bootstrap)
+    
+    //Errori assenze
+    limitAlreadyExceed,            //quando le assenze inserite hanno superato il tetto
+    compromisedReplacingSequence;  //i completamenti e rimpiazzamenti sono disallineati
+    
   }
 
   
