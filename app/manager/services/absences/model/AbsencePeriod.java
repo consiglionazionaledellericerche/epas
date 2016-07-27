@@ -94,7 +94,8 @@ public class AbsencePeriod {
   @Builder @Getter
   public static class SuperAbsence {
     private final Absence absence;
-    private final Integer computedJustifiedTime;
+    private final Integer justifiedTime;                    //tempo giustificato
+    private final Integer complationTime;                   //tempo per completamento
     private final Optional<AbsenceErrorType> errorType;
   }
   

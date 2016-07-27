@@ -126,8 +126,8 @@ public class VacationsServiceImpl implements IVacationsService {
 
     // Le assenze
     List<Absence> absencesForVacationsRecap = absenceComponentDao
-            .getAbsencesInCodeList(person, dateFrom, dateTo,
-                absenceTypeManager.codesForVacations(), true);
+            .orderedAbsences(person, dateFrom, dateTo,
+                absenceTypeManager.codesForVacations());
 
     return absencesForVacationsRecap;
   }

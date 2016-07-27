@@ -85,12 +85,19 @@ public class AbsenceType extends BaseModel {
   
   @Column(name = "justified_time")
   public Integer justifiedTime;
-
+  
   @ManyToMany
   @JoinTable(name = "absence_types_justified_types", 
   joinColumns = { @JoinColumn(name = "absence_types_id") }, 
   inverseJoinColumns = { @JoinColumn(name = "justified_types_id") })
   public Set<JustifiedType> justifiedTypesPermitted = Sets.newHashSet();
+  
+  @Column(name = "complation_time")
+  public Integer complationTime;
+  
+  @ManyToOne
+  @JoinColumn(name = "complation_type_id")
+  public JustifiedType complationType;
   
   @OneToMany(mappedBy = "absenceType")
   @LazyCollection(LazyCollectionOption.EXTRA)

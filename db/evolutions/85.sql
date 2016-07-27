@@ -187,9 +187,13 @@ CREATE TABLE absence_types_justified_types_history (
 
 ALTER TABLE absence_types ADD COLUMN time_for_mealticket BOOLEAN default false;
 ALTER TABLE absence_types ADD COLUMN justified_time INT;
+ALTER TABLE absence_types ADD COLUMN complation_time INT;
+ALTER TABLE absence_types ADD COLUMN complation_type_id BIGINT;
 
 ALTER TABLE absence_types_history ADD COLUMN time_for_mealticket BOOLEAN;
 ALTER TABLE absence_types_history ADD COLUMN justified_time INT;
+ALTER TABLE absence_types_history ADD COLUMN complation_time INT;
+ALTER TABLE absence_types_history ADD COLUMN complation_type_id BIGINT;
 
 ALTER TABLE absences ADD COLUMN justified_type_id BIGINT REFERENCES justified_types(id); 
 ALTER TABLE absences_history ADD COLUMN justified_type_id BIGINT REFERENCES justified_types(id); 
@@ -245,9 +249,13 @@ ALTER TABLE absences_history DROP COLUMN justified_type_id;
 
 ALTER TABLE absence_types DROP COLUMN time_for_mealticket;
 ALTER TABLE absence_types DROP COLUMN justified_time;
+ALTER TABLE absence_types DROP COLUMN complation_time;
+ALTER TABLE absence_types DROP COLUMN complation_type_id;
 
 ALTER TABLE absence_types_history DROP COLUMN time_for_mealticket;
 ALTER TABLE absence_types_history DROP COLUMN justified_time;
+ALTER TABLE absence_types_history DROP COLUMN complation_time;
+ALTER TABLE absence_types_history DROP COLUMN complation_type_id;
 
 DROP TABLE justified_types;
 DROP TABLE justified_types_history;
