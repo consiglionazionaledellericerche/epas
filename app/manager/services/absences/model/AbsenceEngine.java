@@ -12,6 +12,7 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import manager.services.absences.model.AbsencePeriod.AbsenceEngineProblem;
+import manager.services.absences.model.AbsencePeriod.SuperAbsence;
 import manager.services.absences.web.AbsenceRequestForm;
 
 import models.Contract;
@@ -55,7 +56,7 @@ public class AbsenceEngine {
   private LocalDate to = null;
   private List<Contract> contracts = null;
   private List<PersonChildren> orderedChildren = null;
-  private List<Absence> orderedAbsences = null;
+  private List<SuperAbsence> orderedSuperAbsences = null;
   private InitializationGroup initializationGroup = null;
   
   // AbsencePeriod
@@ -133,8 +134,8 @@ public class AbsenceEngine {
     }
   }
   
-  public List<Absence> getOrderedAbsences() {
-    if (this.orderedAbsences == null) {
+  public List<SuperAbsence> getOrderedAbsences() {
+    if (this.orderedSuperAbsences == null) {
       // 1) Prendere tutti i codici (anche quelli ricorsivi)
       Set<AbsenceType> absenceTypes = Sets.newHashSet();
       AbsencePeriod currentAbsencePeriod = this.absencePeriod;
@@ -151,15 +152,17 @@ public class AbsenceEngine {
       }
 
       // 2) Scaricare le assenze
-      this.orderedAbsences = this.absenceComponentDao.orderedAbsences(this.person, 
+      List<Absence> orderedAbsences = this.absenceComponentDao.orderedAbsences(this.person, 
           this.getFrom(), this.getTo(), Lists.newArrayList(absenceTypes));
 
-      for (Absence absence : this.orderedAbsences) {
+      this.orderedSuperAbsences = Lists.newArrayList();
+      for (Absence absence : orderedAbsences) {
         Verify.verifyNotNull(absence.justifiedType == null );
+        this.orderedSuperAbsences.add(SuperAbsence.builder().absence(absence).build());
       }
     }
     
-    return this.orderedAbsences;
+    return this.orderedSuperAbsences;
   }
   
 }

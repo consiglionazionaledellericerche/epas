@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.inject.Inject;
 
 import manager.services.absences.model.AbsenceEngine;
+import manager.services.absences.model.AbsenceEngineFactory;
 import manager.services.absences.model.AbsencePeriod.AbsenceEngineProblem;
 import manager.services.absences.web.AbsenceRequestForm;
 import manager.services.absences.web.AbsenceRequestFormFactory;
