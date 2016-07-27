@@ -146,7 +146,8 @@ public class AbsenceComponentDao extends DaoBase {
 
   
   public AbsenceType buildOrEditAbsenceType(String code, String description, int minutes, 
-      Set<JustifiedType> justifiedTypePermitted, boolean internalUse, boolean consideredWeekEnd, 
+      Set<JustifiedType> justifiedTypePermitted, JustifiedType complationType, int complationTime, 
+      boolean internalUse, boolean consideredWeekEnd, 
       boolean timeForMealticket, String certificateCode) {
     
     QAbsenceType absenceType = QAbsenceType.absenceType;
@@ -160,10 +161,13 @@ public class AbsenceComponentDao extends DaoBase {
     obj.description = description;
     obj.justifiedTime = minutes;
     obj.justifiedTypesPermitted = justifiedTypePermitted;
+    obj.complationType = complationType;
+    obj.complationTime = complationTime;
     obj.internalUse = internalUse;
     obj.timeForMealTicket = timeForMealticket;
     obj.consideredWeekEnd = consideredWeekEnd;
-    obj.certificateCode = code;         
+    obj.certificateCode = code;
+    
     
     obj.save();
     return obj;
@@ -172,6 +176,7 @@ public class AbsenceComponentDao extends DaoBase {
   
   /**
    * Le assenze effettuate dalla persona nel periodo specificato e con i codici riportati.
+   * Ordinamento per data in ordine crescente.
    * @param person
    * @param begin
    * @param end
@@ -179,8 +184,8 @@ public class AbsenceComponentDao extends DaoBase {
    * @param ordered
    * @return
    */
-  public List<Absence> getAbsencesInCodeList(Person person, LocalDate begin, LocalDate end, 
-      List<AbsenceType> codeList, boolean ordered) {
+  public List<Absence> orderedAbsences(Person person, LocalDate begin, LocalDate end, 
+      List<AbsenceType> codeList) {
 
     final QAbsence absence = QAbsence.absence;
     BooleanBuilder conditions = new BooleanBuilder();
@@ -190,14 +195,11 @@ public class AbsenceComponentDao extends DaoBase {
     if (end!= null) {
       conditions.and(absence.personDay.date.loe(end));
     }
-    final JPQLQuery query = getQueryFactory().from(absence)
+    return getQueryFactory().from(absence)
         .leftJoin(absence.personDay).fetch()
         .where(absence.personDay.person.eq(person)
             .and(conditions)
-            .and(absence.absenceType.in(codeList)));
-    if (ordered) {
-      query.orderBy(absence.personDay.date.asc());
-    }
-    return query.list(absence);
+            .and(absence.absenceType.in(codeList)))
+        .orderBy(absence.personDay.date.asc()).list(absence);
   }
 }

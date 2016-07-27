@@ -12,31 +12,36 @@
   #{elseif code.isSpecifiedMinutesPermitted()}
     label-success 
   #{/elseif}
-  #{elseif code.isNothingPermitted()}
+  #{elseif code.complationType}
     label-default 
   #{/elseif}
   " webui-popover-hover data-url="#${code.id}">${code.code}</span>
-  
-  
   
   *{ <strong webui-popover-hover data-url="#${code.id}">${code.code}</strong> }*
 
   <div class="webui-popover-content" id="${code.id}">
     <strong>Tipo Assenza ${code.code}</strong><br><br>
     <strong>Descrizione:</strong> ${code.description.label()}<br>  
-    <strong>Come giustifica:</strong> 
+     
+    
+    *{ tempo giustificato }*
+    <strong>Come giustifica:</strong>
     #{list items:code.justifiedTypesPermitted, as:'justifiedType'}
       &{justifiedType.name}
     #{/list}<br> 
     #{if code.justifiedTime > 0}
-      #{if  code.isNothingPermitted()}
+      <strong>Tempo Giustificato:</strong> ${code.justifiedTime.printHourMinute()} 
+    #{/if}
+    
+    
+    *{ tempo completamento }*
+    #{if code.complationType}
+      <strong>Come completa:</strong> &{code.complationType} <br>
+      #{if code.complationTime > 0}
+      <strong>Tempo Completamento:</strong> ${code.complationTime.printHourMinute()}
       #{/if}
-        <strong>Tempo Completamento:</strong> 
-      #{else}
-        <strong>Tempo Specificato:</strong> 
-      #{/else}
-    ${code.justifiedTime.printHourMinute()}
-    #{/if} 
+    #{/if}
+
   </div>
 
 #{/list}

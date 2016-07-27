@@ -159,7 +159,41 @@ public class AbsenceEngineUtility {
     } else {
       return amount;
     }
+  }
+  
+  /**
+   * Quanto completa l'assenza passata.
+   * Se non si riesce a stabilire il tempo di completamento si ritorna un numero negativo.
+   * @param person
+   * @param date
+   * @param absence
+   * @param amountType
+   * @return
+   */
+  public int computeAbsenceComplationAmount(AbsenceEngine absenceEngine, Absence absence, 
+      AmountType amountType) {
+
+    //TODO: studiare meglio questa parte... 
+    //Casi trattati:
+    // 1) tipo completamento unità -> codice completamento un giorno
+    //    ex:  89, 09B, 23H7, 25H7 
+    // 2) tipo completamento minuti -> codice completamento minuti specificati assenza
+    //    ex:  661H1C, 18H1C, 19H1C 
     
+    if (absence.absenceType == null) {
+      return -1;
+    }
+    if (amountType.equals(AmountType.units) 
+        && absence.absenceType.complationType.name.equals(JustifiedTypeName.all_day)) {
+        return 1 * 100; //una unità
+    } 
+    if (amountType.equals(AmountType.minutes) 
+        && absence.absenceType.complationType.name.equals(JustifiedTypeName.absence_type_minutes)) {
+      return absence.absenceType.complationTime;
+    }
+    
+    return -1;
+
   }
   
   /**
@@ -216,27 +250,6 @@ public class AbsenceEngineUtility {
     return absence;
   }
  
-  /**
-   * Il valore già utilizzato da inizializzazione.
-   * @return
-   */
-  @SuppressWarnings("unused")
-  public int computeInitialComplationPercent() {
-    // TODO: recuperare la percentuale inizializzazione quando ci sarà.
-    return 0;
-  }
-  
-  /**
-   * La data cui si riferisce la percentuale inizializzazione.
-   * @param absencePeriod
-   * @return
-   */
-  @SuppressWarnings("unused")
-  public LocalDate getInitialComplationDate(AbsencePeriod absencePeriod) {
-    // TODO: utilizzare le strutture dati quando ci saranno.
-    return absencePeriod.from;
-  }
-  
   /**
    * 
    * @param hours

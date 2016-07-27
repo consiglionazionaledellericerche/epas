@@ -305,60 +305,60 @@ public class AbsenceMigration {
       //Update AbsenceType
       AbsenceType cnr18 = absenceComponentDao.buildOrEditAbsenceType("18", 
           "Permesso assistenza parenti/affini disabili L. 104/92 intera giornata", 
-          0, Sets.newHashSet(allDay), false, false, false, "18");
+          0, Sets.newHashSet(allDay), null, 0, false, false, false, "18");
 
       AbsenceType h118 = absenceComponentDao.buildOrEditAbsenceType("18H1", 
           "Permesso assistenza parenti/affini disabili L. 104/92 1 ora", 
-          60, Sets.newHashSet(absenceTypeMinutes), false, false, false, "18H1");
+          60, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "18H1");
       AbsenceType h218 = absenceComponentDao.buildOrEditAbsenceType("18H2", 
           "Permesso assistenza parenti/affini disabili L. 104/92 2 ore", 
-          120, Sets.newHashSet(absenceTypeMinutes), false, false, false, "18H2");
+          120, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "18H2");
       AbsenceType h318 = absenceComponentDao.buildOrEditAbsenceType("18H3", 
           "Permesso assistenza parenti/affini disabili L. 104/92 3 ore", 
-          180, Sets.newHashSet(absenceTypeMinutes), false, false, false, "18H3");
+          180, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "18H3");
       AbsenceType h418 = absenceComponentDao.buildOrEditAbsenceType("18H4", 
           "Permesso assistenza parenti/affini disabili L. 104/92 4 ore", 
-          240, Sets.newHashSet(absenceTypeMinutes), false, false, false, "18H4");
+          240, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "18H4");
       AbsenceType h518 = absenceComponentDao.buildOrEditAbsenceType("18H5", 
           "Permesso assistenza parenti/affini disabili L. 104/92 5 ore", 
-          300, Sets.newHashSet(absenceTypeMinutes), false, false, false, "18H5");
+          300, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "18H5");
       AbsenceType h618 = absenceComponentDao.buildOrEditAbsenceType("18H6", 
           "Permesso assistenza parenti/affini disabili L. 104/92 6 ore", 
-          360, Sets.newHashSet(absenceTypeMinutes), false, false, false, "18H6");
+          360, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "18H6");
       AbsenceType h718 = absenceComponentDao.buildOrEditAbsenceType("18H7", 
           "Permesso assistenza parenti/affini disabili L. 104/92 7 ore", 
-          420, Sets.newHashSet(absenceTypeMinutes), false, false, false, "18H7");
+          420, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "18H7");
       AbsenceType h818 = absenceComponentDao.buildOrEditAbsenceType("18H8", 
           "Permesso assistenza parenti/affini disabili L. 104/92 8 ore", 
-          480, Sets.newHashSet(absenceTypeMinutes), false, false, false, "18H8");
+          480, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "18H8");
 
       AbsenceType m18 = absenceComponentDao.buildOrEditAbsenceType("18M", 
           "Permesso assistenza parenti/affini disabili L. 104/92 in ore e minuti", 
-          0, Sets.newHashSet(specifiedMinutes), true, false, false, null);
+          0, Sets.newHashSet(specifiedMinutes), null, 0, true, false, false, null);
       AbsenceType h1c18 = absenceComponentDao.buildOrEditAbsenceType("18H1C", 
           "Permesso assistenza parenti/affini disabili L. 104/92 completamento 1 ora", 
-          60, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 60, true, false, false, null);
       AbsenceType h2c18 = absenceComponentDao.buildOrEditAbsenceType("18H2C", 
           "Permesso assistenza parenti/affini disabili L. 104/92 completamento 2 ore", 
-          120, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 120, true, false, false, null);
       AbsenceType h3c18 = absenceComponentDao.buildOrEditAbsenceType("18H3C", 
           "Permesso assistenza parenti/affini disabili L. 104/92 completamento 3 ore", 
-          180, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 180, true, false, false, null);
       AbsenceType h4c18 = absenceComponentDao.buildOrEditAbsenceType("18H4C", 
           "Permesso assistenza parenti/affini disabili L. 104/92 completamento 4 ore", 
-          240, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 240, true, false, false, null);
       AbsenceType h5c18 = absenceComponentDao.buildOrEditAbsenceType("18H5C", 
           "Permesso assistenza parenti/affini disabili L. 104/92 completamento 5 ore", 
-          300, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 300, true, false, false, null);
       AbsenceType h6c18 = absenceComponentDao.buildOrEditAbsenceType("18H6C", 
           "Permesso assistenza parenti/affini disabili L. 104/92 completamento 6 ore", 
-          360, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 360, true, false, false, null);
       AbsenceType h7c18 = absenceComponentDao.buildOrEditAbsenceType("18H7C", 
           "Permesso assistenza parenti/affini disabili L. 104/92 completamento 7 ore", 
-          420, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 420, true, false, false, null);
       AbsenceType h8c18 = absenceComponentDao.buildOrEditAbsenceType("18H8C", 
           "Permesso assistenza parenti/affini disabili L. 104/92 completamento 8 ore", 
-          480, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 480, true, false, false, null);
 
 
       //Complation Creation
@@ -410,60 +410,60 @@ public class AbsenceMigration {
       //Update AbsenceType
       AbsenceType cnr19 = absenceComponentDao.buildOrEditAbsenceType("19", 
           "Permesso per dipendente disabile L. 104/92 intera giornata", 
-          0, Sets.newHashSet(allDay), false, false, false, "19");
+          0, Sets.newHashSet(allDay), null, 0, false, false, false, "19");
 
       AbsenceType h119 = absenceComponentDao.buildOrEditAbsenceType("19H1", 
           "Permesso per dipendente disabile L. 104/92 1 ora", 
-          60, Sets.newHashSet(absenceTypeMinutes), false, false, false, "19H1");
+          60, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "19H1");
       AbsenceType h219 = absenceComponentDao.buildOrEditAbsenceType("19H2", 
           "Permesso per dipendente disabile L. 104/92 2 ore", 
-          120, Sets.newHashSet(absenceTypeMinutes), false, false, false, "19H2");
+          120, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "19H2");
       AbsenceType h319 = absenceComponentDao.buildOrEditAbsenceType("19H3", 
           "Permesso per dipendente disabile L. 104/92 3 ore", 
-          180, Sets.newHashSet(absenceTypeMinutes), false, false, false, "19H3");
+          180, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "19H3");
       AbsenceType h419 = absenceComponentDao.buildOrEditAbsenceType("19H4", 
           "Permesso per dipendente disabile L. 104/92 4 ore", 
-          240, Sets.newHashSet(absenceTypeMinutes), false, false, false, "19H4");
+          240, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "19H4");
       AbsenceType h519 = absenceComponentDao.buildOrEditAbsenceType("19H5", 
           "Permesso per dipendente disabile L. 104/92 5 ore", 
-          300, Sets.newHashSet(absenceTypeMinutes), false, false, false, "19H5");
+          300, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "19H5");
       AbsenceType h619 = absenceComponentDao.buildOrEditAbsenceType("19H6", 
           "Permesso per dipendente disabile L. 104/92 6 ore", 
-          360, Sets.newHashSet(absenceTypeMinutes), false, false, false, "19H6");
+          360, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "19H6");
       AbsenceType h719 = absenceComponentDao.buildOrEditAbsenceType("19H7", 
           "Permesso per dipendente disabile L. 104/92 7 ore", 
-          420, Sets.newHashSet(absenceTypeMinutes), false, false, false, "19H7");
+          420, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "19H7");
       AbsenceType h819 = absenceComponentDao.buildOrEditAbsenceType("19H8", 
           "Permesso per dipendente disabile L. 104/92 8 ore", 
-          480, Sets.newHashSet(absenceTypeMinutes), false, false, false, "19H8");
+          480, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "19H8");
 
       AbsenceType m19 = absenceComponentDao.buildOrEditAbsenceType("19M", 
           "Permesso per dipendente disabile L. 104/92 in ore e minuti", 
-          0, Sets.newHashSet(specifiedMinutes), true, false, false, null);
+          0, Sets.newHashSet(specifiedMinutes), null, 0, true, false, false, null);
       AbsenceType h1c19 = absenceComponentDao.buildOrEditAbsenceType("19H1C", 
           "Permesso per dipendente disabile L. 104/92 completamento 1 ora", 
-          60, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 60, true, false, false, null);
       AbsenceType h2c19 = absenceComponentDao.buildOrEditAbsenceType("19H2C", 
           "Permesso per dipendente disabile L. 104/92 completamento 2 ore", 
-          120, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 120, true, false, false, null);
       AbsenceType h3c19 = absenceComponentDao.buildOrEditAbsenceType("19H3C", 
           "Permesso per dipendente disabile L. 104/92 completamento 3 ore", 
-          180, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 180, true, false, false, null);
       AbsenceType h4c19 = absenceComponentDao.buildOrEditAbsenceType("19H4C", 
           "Permesso per dipendente disabile L. 104/92 completamento 4 ore", 
-          240, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 240, true, false, false, null);
       AbsenceType h5c19 = absenceComponentDao.buildOrEditAbsenceType("19H5C", 
           "Permesso per dipendente disabile L. 104/92 completamento 5 ore", 
-          300, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 300, true, false, false, null);
       AbsenceType h6c19 = absenceComponentDao.buildOrEditAbsenceType("19H6C", 
           "Permesso per dipendente disabile L. 104/92 completamento 6 ore", 
-          360, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 360, true, false, false, null);
       AbsenceType h7c19 = absenceComponentDao.buildOrEditAbsenceType("19H7C", 
           "Permesso per dipendente disabile L. 104/92 completamento 7 ore", 
-          420, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 420, true, false, false, null);
       AbsenceType h8c19 = absenceComponentDao.buildOrEditAbsenceType("19H8C", 
           "Permesso per dipendente disabile L. 104/92 completamento 8 ore", 
-          480, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 480, true, false, false, null);
 
 
       //Complation Creation
@@ -519,56 +519,56 @@ public class AbsenceMigration {
 
       AbsenceType h1661 = absenceComponentDao.buildOrEditAbsenceType("661H1", 
           "Permesso orario per motivi personali 1 ora", 
-          60, Sets.newHashSet(absenceTypeMinutes), false, false, false, "661H1");
+          60, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "661H1");
       AbsenceType h2661 = absenceComponentDao.buildOrEditAbsenceType("661H2", 
           "Permesso orario per motivi personali 2 ore", 
-          120, Sets.newHashSet(absenceTypeMinutes), false, false, false, "661H2");
+          120, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "661H2");
       AbsenceType h3661 = absenceComponentDao.buildOrEditAbsenceType("661H3", 
           "Permesso orario per motivi personali 3 ore", 
-          180, Sets.newHashSet(absenceTypeMinutes), false, false, false, "661H3");
+          180, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "661H3");
       AbsenceType h4661 = absenceComponentDao.buildOrEditAbsenceType("661H4", 
           "Permesso orario per motivi personali 4 ore", 
-          240, Sets.newHashSet(absenceTypeMinutes), false, false, false, "661H4");
+          240, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "661H4");
       AbsenceType h5661 = absenceComponentDao.buildOrEditAbsenceType("661H5", 
           "Permesso orario per motivi personali 5 ore", 
-          300, Sets.newHashSet(absenceTypeMinutes), false, false, false, "661H5");
+          300, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "661H5");
       AbsenceType h6661 = absenceComponentDao.buildOrEditAbsenceType("661H6", 
           "Permesso orario per motivi personali 6 ore", 
-          360, Sets.newHashSet(absenceTypeMinutes), false, false, false, "661H6");
+          360, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "661H6");
       AbsenceType h7661 = absenceComponentDao.buildOrEditAbsenceType("661H7", 
           "Permesso orario per motivi personali 7 ore", 
-          420, Sets.newHashSet(absenceTypeMinutes), false, false, false, "661H7");
+          420, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "661H7");
       AbsenceType h8661 = absenceComponentDao.buildOrEditAbsenceType("661H8", 
           "Permesso orario per motivi personali 8 ore", 
-          480, Sets.newHashSet(absenceTypeMinutes), false, false, false, "661H8");
+          480, Sets.newHashSet(absenceTypeMinutes), null, 0, false, false, false, "661H8");
 
       AbsenceType m661 = absenceComponentDao.buildOrEditAbsenceType("661M", 
           "Permesso orario per motivi personali in ore e minuti", 
-          0, Sets.newHashSet(specifiedMinutes), true, false, false, null);
+          0, Sets.newHashSet(specifiedMinutes), null, 0, true, false, false, null);
       AbsenceType h1c661 = absenceComponentDao.buildOrEditAbsenceType("661H1C", 
           "Permesso orario per motivi personali completamento 1 ora", 
-          60, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 60, true, false, false, null);
       AbsenceType h2c661 = absenceComponentDao.buildOrEditAbsenceType("661H2C", 
           "Permesso orario per motivi personali completamento 2 ore", 
-          120, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 120, true, false, false, null);
       AbsenceType h3c661 = absenceComponentDao.buildOrEditAbsenceType("661H3C", 
           "Permesso orario per motivi personali completamento 3 ore", 
-          180, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 180, true, false, false, null);
       AbsenceType h4c661 = absenceComponentDao.buildOrEditAbsenceType("661H4C", 
           "Permesso orario per motivi personali completamento 4 ore", 
-          240, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 240, true, false, false, null);
       AbsenceType h5c661 = absenceComponentDao.buildOrEditAbsenceType("661H5C", 
           "Permesso orario per motivi personali completamento 5 ore", 
-          300, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 300, true, false, false, null);
       AbsenceType h6c661 = absenceComponentDao.buildOrEditAbsenceType("661H6C", 
           "Permesso orario per motivi personali completamento 6 ore", 
-          360, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 360, true, false, false, null);
       AbsenceType h7c661 = absenceComponentDao.buildOrEditAbsenceType("661H7C", 
           "Permesso orario per motivi personali completamento 7 ore", 
-          420, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 420, true, false, false, null);
       AbsenceType h8c661 = absenceComponentDao.buildOrEditAbsenceType("661H8C", 
           "Permesso orario per motivi personali completamento 8 ore", 
-          480, Sets.newHashSet(nothing), true, false, false, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 480, true, false, false, null);
 
 
       //Complation Creation
@@ -621,21 +621,20 @@ public class AbsenceMigration {
       //Update AbsenceType
       AbsenceType cnr25 = absenceComponentDao.buildOrEditAbsenceType("25", 
           "Astensione facoltativa post partum 30% primo figlio intera giornata", 
-          0, Sets.newHashSet(allDay), false, false, false, "25");
+          0, Sets.newHashSet(allDay), null, 0, false, false, false, "25");
       
       //Update AbsenceType
       AbsenceType cnr25u = absenceComponentDao.buildOrEditAbsenceType("25U", 
           "Astensione facoltativa post partum 30% primo figlio intera giornata altro genitore", 
-          0, Sets.newHashSet(nothing), false, false, false, null);
+          0, Sets.newHashSet(nothing), null, 0, false, false, false, null);
+     
+      AbsenceType m25 = absenceComponentDao.buildOrEditAbsenceType("25M", 
+          "Astensione facoltativa post partum 30% primo figlio in ore e minuti", 
+          0, Sets.newHashSet(specifiedMinutes), null, 0, true, false, false, null);
       
       AbsenceType cnr25h7 = absenceComponentDao.buildOrEditAbsenceType("25H7", 
           "Astensione facoltativa post partum 30% primo figlio completamento giornata", 
-          0, Sets.newHashSet(nothing), false, false, false, "25H7");
-      
-      AbsenceType m25 = absenceComponentDao.buildOrEditAbsenceType("25M", 
-          "Astensione facoltativa post partum 30% primo figlio in ore e minuti", 
-          0, Sets.newHashSet(specifiedMinutes), true, false, false, null);
-
+          0, Sets.newHashSet(nothing), allDay, 0, false, false, false, "25H7");
 
       //Complation Creation
       Optional<ComplationAbsenceBehaviour> c25 = absenceComponentDao
@@ -686,21 +685,20 @@ public class AbsenceMigration {
       //Update AbsenceType
       AbsenceType cnr23 = absenceComponentDao.buildOrEditAbsenceType("23", 
           "Astensione facoltativa post partum 100% primo figlio intera giornata", 
-          0, Sets.newHashSet(allDay), false, false, false, "23");
+          0, Sets.newHashSet(allDay), null, 0, false, false, false, "23");
       
       //Update AbsenceType
       AbsenceType cnr23u = absenceComponentDao.buildOrEditAbsenceType("23U", 
           "Astensione facoltativa post partum 100% primo figlio intera giornata altro genitore", 
-          0, Sets.newHashSet(nothing), false, false, false, null);
-      
-      AbsenceType cnr23h7 = absenceComponentDao.buildOrEditAbsenceType("23H7", 
-          "Astensione facoltativa post partum 100% primo figlio completamento giornata", 
-          0, Sets.newHashSet(nothing), false, false, false, "23H7");
+          0, Sets.newHashSet(nothing), null, 0, false, false, false, null);
       
       AbsenceType m23 = absenceComponentDao.buildOrEditAbsenceType("23M", 
           "Astensione facoltativa post partum 100% primo figlio in ore e minuti", 
-          0, Sets.newHashSet(specifiedMinutes), true, false, false, null);
-
+          0, Sets.newHashSet(specifiedMinutes), null, 0, true, false, false, null);
+      
+      AbsenceType cnr23h7 = absenceComponentDao.buildOrEditAbsenceType("23H7", 
+          "Astensione facoltativa post partum 100% primo figlio completamento giornata", 
+          0, Sets.newHashSet(nothing), allDay, 0, false, false, false, "23H7");
 
       //Complation Creation
       Optional<ComplationAbsenceBehaviour> c23 = absenceComponentDao
@@ -754,11 +752,11 @@ public class AbsenceMigration {
       //Update AbsenceType
       AbsenceType cnr89 = absenceComponentDao.buildOrEditAbsenceType("89", 
           "Permesso diritto allo studio completamento giornata", 
-          0, Sets.newHashSet(nothing), false, false, false, "89");
+          0, Sets.newHashSet(nothing), allDay, 0, false, false, false, "89");
       
       AbsenceType m89 = absenceComponentDao.buildOrEditAbsenceType("89M", 
           "Permesso diritto allo studio in ore e minuti", 
-          0, Sets.newHashSet(specifiedMinutes), true, false, false, null);
+          0, Sets.newHashSet(specifiedMinutes), null, 0, true, false, false, null);
 
 
       //Complation Creation
@@ -810,11 +808,11 @@ public class AbsenceMigration {
       //Update AbsenceType
       AbsenceType cnr09B = absenceComponentDao.buildOrEditAbsenceType("09B", 
           "Permesso visita medica completamento giornata", 
-          0, Sets.newHashSet(nothing), false, false, false, "09B");
+          0, Sets.newHashSet(nothing), allDay, 0, false, false, false, "09B");
       
       AbsenceType m09 = absenceComponentDao.buildOrEditAbsenceType("09M", 
           "Permesso visita medica in ore e minuti", 
-          0, Sets.newHashSet(specifiedMinutes), true, false, false, null);
+          0, Sets.newHashSet(specifiedMinutes), null, 0, true, false, false, null);
 
 
       //Complation Creation
@@ -857,28 +855,28 @@ public class AbsenceMigration {
         tMissione.get().amountType = AmountType.units;
 
         AbsenceType missione92 = absenceComponentDao.buildOrEditAbsenceType("92", 
-            "Missione", 0, Sets.newHashSet(allDay), false, true, false, "92");
+            "Missione", 0, Sets.newHashSet(allDay), null, 0, false, true, false, "92");
         
         AbsenceType h192 = absenceComponentDao.buildOrEditAbsenceType("92H1", 
-            "Missione 1 ora", 60, Sets.newHashSet(absenceTypeMinutes), false, true, false, "92H1");
+            "Missione 1 ora", 60, Sets.newHashSet(absenceTypeMinutes), null, 0, false, true, false, "92H1");
         
         AbsenceType h292 = absenceComponentDao.buildOrEditAbsenceType("92H2", 
-            "Missione 2 ore", 60, Sets.newHashSet(absenceTypeMinutes), false, true, false, "92H2");
+            "Missione 2 ore", 60, Sets.newHashSet(absenceTypeMinutes), null, 0, false, true, false, "92H2");
         
         AbsenceType h392 = absenceComponentDao.buildOrEditAbsenceType("92H3", 
-            "Missione 3 ore", 60, Sets.newHashSet(absenceTypeMinutes), false, true, false, "92H3");
+            "Missione 3 ore", 60, Sets.newHashSet(absenceTypeMinutes), null, 0, false, true, false, "92H3");
         
         AbsenceType h492 = absenceComponentDao.buildOrEditAbsenceType("92H4", 
-            "Missione 4 ore", 60, Sets.newHashSet(absenceTypeMinutes), false, true, false, "92H4");
+            "Missione 4 ore", 60, Sets.newHashSet(absenceTypeMinutes), null, 0, false, true, false, "92H4");
         
         AbsenceType h592 = absenceComponentDao.buildOrEditAbsenceType("92H5", 
-            "Missione 5 ore", 60, Sets.newHashSet(absenceTypeMinutes), false, true, false, "92H5");
+            "Missione 5 ore", 60, Sets.newHashSet(absenceTypeMinutes), null, 0, false, true, false, "92H5");
         
         AbsenceType h692 = absenceComponentDao.buildOrEditAbsenceType("92H6", 
-            "Missione 6 ore", 60, Sets.newHashSet(absenceTypeMinutes), false, true, false, "92H6");
+            "Missione 6 ore", 60, Sets.newHashSet(absenceTypeMinutes), null, 0, false, true, false, "92H6");
         
         AbsenceType h792 = absenceComponentDao.buildOrEditAbsenceType("92H7", 
-            "Missione 7 ore", 60, Sets.newHashSet(absenceTypeMinutes), false, true, false, "92H7");
+            "Missione 7 ore", 60, Sets.newHashSet(absenceTypeMinutes), null, 0, false, true, false, "92H7");
         
         tMissione.get().takableCodes = Sets
             .newHashSet(missione92, h192, h292, h392, h492, h592, h692, h792);
@@ -920,16 +918,16 @@ public class AbsenceMigration {
         tFerie.get().fixedLimit = -1;
         
         AbsenceType ferie32 = absenceComponentDao.buildOrEditAbsenceType("32", 
-            "Ferie anno corrente", 0, Sets.newHashSet(allDay), false, true, false, "32");
+            "Ferie anno corrente", 0, Sets.newHashSet(allDay), null, 0, false, true, false, "32");
         
         AbsenceType ferie31 = absenceComponentDao.buildOrEditAbsenceType("31", 
-            "Ferie anno precedente", 0, Sets.newHashSet(allDay), false, true, false, "31");
+            "Ferie anno precedente", 0, Sets.newHashSet(allDay), null, 0, false, true, false, "31");
         
         AbsenceType ferie37 = absenceComponentDao.buildOrEditAbsenceType("37", 
-            "ferie anno precedente (dopo il 31/8)", 0, Sets.newHashSet(allDay), false, true, false, "37");
+            "ferie anno precedente (dopo il 31/8)", 0, Sets.newHashSet(allDay), null, 0, false, true, false, "37");
         
         AbsenceType permesso94 = absenceComponentDao.buildOrEditAbsenceType("94", 
-            "festività soppresse (ex legge 937/77)", 0, Sets.newHashSet(allDay), false, true, false, "94");
+            "festività soppresse (ex legge 937/77)", 0, Sets.newHashSet(allDay), null, 0, false, true, false, "94");
         
         tFerie.get().takableCodes = Sets.newHashSet(ferie31, ferie32, ferie37, permesso94);
         
@@ -963,7 +961,7 @@ public class AbsenceMigration {
         tRiposi.get().fixedLimit = -1;
         
         AbsenceType riposo91 = absenceComponentDao.buildOrEditAbsenceType("91", 
-            "Riposo compensativo", 0, Sets.newHashSet(allDay), false, true, false, "92");
+            "Riposo compensativo", 0, Sets.newHashSet(allDay), null, 0, false, true, false, "91");
         
         tRiposi.get().takableCodes = Sets.newHashSet(riposo91);
         

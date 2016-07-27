@@ -55,7 +55,7 @@ public class AbsenceEngine {
   private LocalDate to = null;
   private List<Contract> contracts = null;
   private List<PersonChildren> orderedChildren = null;
-  private List<Absence> absences = null;
+  private List<Absence> orderedAbsences = null;
   private InitializationGroup initializationGroup = null;
   
   // AbsencePeriod
@@ -133,8 +133,8 @@ public class AbsenceEngine {
     }
   }
   
-  public List<Absence> getAbsences() {
-    if (this.absences == null) {
+  public List<Absence> getOrderedAbsences() {
+    if (this.orderedAbsences == null) {
       // 1) Prendere tutti i codici (anche quelli ricorsivi)
       Set<AbsenceType> absenceTypes = Sets.newHashSet();
       AbsencePeriod currentAbsencePeriod = this.absencePeriod;
@@ -151,15 +151,15 @@ public class AbsenceEngine {
       }
 
       // 2) Scaricare le assenze
-      this.absences = this.absenceComponentDao.getAbsencesInCodeList(this.person, 
-          this.getFrom(), this.getTo(), Lists.newArrayList(absenceTypes), true);
+      this.orderedAbsences = this.absenceComponentDao.orderedAbsences(this.person, 
+          this.getFrom(), this.getTo(), Lists.newArrayList(absenceTypes));
 
-      for (Absence absence : this.absences) {
+      for (Absence absence : this.orderedAbsences) {
         Verify.verifyNotNull(absence.justifiedType == null );
       }
     }
     
-    return this.absences;
+    return this.orderedAbsences;
   }
   
 }

@@ -64,7 +64,7 @@ public class AbsenceEngineFactory {
     // Assegnare ad ogni periodo le assenze di competenza (fase da migliorare) e calcoli
     AbsencePeriod absencePeriod = absenceEngine.absencePeriod;
     while (absencePeriod != null) {
-      for (Absence absence : absenceEngine.getAbsences()) {
+      for (Absence absence : absenceEngine.getOrderedAbsences()) {
         if (!DateUtility
             .isDateIntoInterval(absence.personDay.date, absencePeriod.periodInterval())) {
           continue;
@@ -76,28 +76,6 @@ public class AbsenceEngineFactory {
       }
       absencePeriod = absencePeriod.nextAbsencePeriod;
     }
-    
-//    // Altre Computazioni di supporto:
-//    //takenAmount 
-//    AbsencePeriod currentAbsencePeriod = absenceEngine.absencePeriod;
-//    while (currentAbsencePeriod != null) {
-//      if (currentAbsencePeriod.takableComponent.isPresent()) {
-//        TakableComponent takableComponent = currentAbsencePeriod.takableComponent.get();
-//        takableComponent.resetPeriodTakenAmount();
-//        for (Absence absence : takableComponent.takenAbsences) {
-//          long amount = absenceEngineUtility
-//              .computeAbsenceAmount(absenceEngine, absence, takableComponent.takeAmountType);
-//          if (amount < 0) {
-//            absenceEngine.absenceEngineProblem = Optional.of(AbsenceEngineProblem.unsupportedOperation);
-//            return absenceEngine;
-//          }
-//          takableComponent.periodTakenAmount += amount; 
-//        }
-//      }
-//      currentAbsencePeriod = currentAbsencePeriod.nextAbsencePeriod;
-//    }
-//    
-//    //takenAmount
     
     return absenceEngine;
    
@@ -238,35 +216,42 @@ public class AbsenceEngineFactory {
         takableComponent.takenSuperAbsence.add(
             SuperAbsence.builder()
             .absence(absence)
-            .computedJustifiedTime(amount)
+            .justifiedTime(amount)
             .errorType(absenceErrorType)
             .build());
       }
     }
     if (absencePeriod.complationComponent.isPresent()) {
-      ComplationComponent complationComponent = absencePeriod.complationComponent.get(); 
-      if (complationComponent.replacingCodes.contains(absence.absenceType)) {
+      ComplationComponent complationComponent = absencePeriod.complationComponent.get();
+      boolean isReplacingCode = complationComponent.replacingCodes.contains(absence.absenceType);
+      boolean isComplationCode = complationComponent.complationCodes.contains(absence.absenceType);
+      if (isReplacingCode || isComplationCode) {
         int amount = absenceEngineUtility
             .computeAbsenceAmount(absenceEngine, absence, complationComponent.complationAmountType);
+        int complationAmount = absenceEngineUtility
+            .computeAbsenceComplationAmount(absenceEngine, absence, complationComponent.complationAmountType);
         Optional<AbsenceErrorType> absenceErrorType = Optional.absent();
-        complationComponent.replacingSuperAbsences.add(
-            SuperAbsence.builder()
+
+        
+        //Se la somma del residuo da completamento e il tempo giustificato della assenza
+        // superano uno dei limiti di completamento dei codici in replacingCodes
+        
+        //L'assenza successiva deve essere
+        
+        SuperAbsence superAbsence = SuperAbsence.builder()
             .absence(absence)
-            .computedJustifiedTime(amount)
+            .complationTime(complationAmount)
+            .justifiedTime(amount)
             .errorType(absenceErrorType)
-            .build());
+            .build();
+        if (isReplacingCode) {
+          complationComponent.replacingSuperAbsences.add(superAbsence);
+        }
+        if (complationComponent.complationCodes.contains(absence.absenceType)) {
+          complationComponent.complationSuperAbsences.add(superAbsence);
+        }
       }
-      if (complationComponent.complationCodes.contains(absence.absenceType)) {
-        int amount = absenceEngineUtility
-            .computeAbsenceAmount(absenceEngine, absence, complationComponent.complationAmountType);
-        Optional<AbsenceErrorType> absenceErrorType = Optional.absent();
-        complationComponent.complationSuperAbsences.add(
-            SuperAbsence.builder()
-            .absence(absence)
-            .computedJustifiedTime(amount)
-            .errorType(absenceErrorType)
-            .build());
-      }
+      
     }
   }
 
