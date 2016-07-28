@@ -1,5 +1,6 @@
 package manager.services.absences;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
@@ -7,6 +8,7 @@ import dao.absences.AbsenceComponentDao;
 
 import manager.services.absences.model.AbsenceEngine;
 import manager.services.absences.model.AbsencePeriod;
+import manager.services.absences.model.AbsencePeriod.ComplationComponent;
 
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -15,11 +17,11 @@ import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 
-import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
 
 import java.util.List;
 import java.util.Map;
+
 
 public class AbsenceEngineUtility {
   
@@ -121,7 +123,7 @@ public class AbsenceEngineUtility {
    * @param amountType
    * @return
    */
-  public int computeAbsenceAmount(AbsenceEngine absenceEngine, Absence absence, 
+  public int absenceJustifiedAmount(AbsenceEngine absenceEngine, Absence absence, 
       AmountType amountType) {
     
     int amount = 0;
@@ -154,6 +156,9 @@ public class AbsenceEngineUtility {
     
     if (amountType.equals(AmountType.units)) {
       int work = absenceEngine.workingTime(absenceEngine.date);
+      if (work == 0) {
+        return 0;
+      }
       int result = amount * 100 / work;
       return result;
     } else {
@@ -170,7 +175,7 @@ public class AbsenceEngineUtility {
    * @param amountType
    * @return
    */
-  public int computeAbsenceComplationAmount(AbsenceEngine absenceEngine, Absence absence, 
+  public int replacingAmount(AbsenceEngine absenceEngine, AbsenceType absenceType, 
       AmountType amountType) {
 
     //TODO: studiare meglio questa parte... 
@@ -180,16 +185,16 @@ public class AbsenceEngineUtility {
     // 2) tipo completamento minuti -> codice completamento minuti specificati assenza
     //    ex:  661H1C, 18H1C, 19H1C 
     
-    if (absence.absenceType == null) {
+    if (absenceType == null) {
       return -1;
     }
     if (amountType.equals(AmountType.units) 
-        && absence.absenceType.complationType.name.equals(JustifiedTypeName.all_day)) {
+        && absenceType.replacingType.name.equals(JustifiedTypeName.all_day)) {
         return 1 * 100; //una unità
     } 
     if (amountType.equals(AmountType.minutes) 
-        && absence.absenceType.complationType.name.equals(JustifiedTypeName.absence_type_minutes)) {
-      return absence.absenceType.complationTime;
+        && absenceType.replacingType.name.equals(JustifiedTypeName.absence_type_minutes)) {
+      return absenceType.replacingTime;
     }
     
     return -1;
@@ -264,5 +269,20 @@ public class AbsenceEngineUtility {
     return selectedSpecifiedMinutes;
   }
   
+  /**
+   * 
+   * @param complationComponent
+   * @param complationAmount
+   * @return
+   */
+  public Optional<AbsenceType> whichReplacingCode(ComplationComponent complationComponent, 
+      int complationAmount) {
+    for (Integer replacingTime : complationComponent.replacingCodesDesc.keySet()) {
+      if (replacingTime <= complationAmount) {
+        return Optional.of(complationComponent.replacingCodesDesc.get(replacingTime));
+      }
+    }
+    return Optional.absent();
+  }
       
 }

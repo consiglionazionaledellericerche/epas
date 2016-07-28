@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 
 import manager.services.absences.model.AbsenceEngine;
 import manager.services.absences.model.AbsenceEngineFactory;
-import manager.services.absences.model.AbsencePeriod.AbsenceEngineProblem;
+import manager.services.absences.model.AbsencePeriod.ProblemType;
 import manager.services.absences.web.AbsenceRequestForm;
 import manager.services.absences.web.AbsenceRequestFormFactory;
 
@@ -101,7 +101,7 @@ public class AbsenceService {
     }
     
     if (!absenceTypeRequest.equals(absenceTypeRequest.insert)) {
-      absenceEngine.absenceEngineProblem = Optional.of(AbsenceEngineProblem.unsupportedOperation);
+      absenceEngine.setProblem(ProblemType.unsupportedOperation);
       return absenceEngine;
     }
     

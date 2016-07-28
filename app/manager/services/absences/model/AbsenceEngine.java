@@ -11,7 +11,9 @@ import dao.absences.AbsenceComponentDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import manager.services.absences.ResponseItem;
 import manager.services.absences.model.AbsencePeriod.AbsenceEngineProblem;
+import manager.services.absences.model.AbsencePeriod.ProblemType;
 import manager.services.absences.model.AbsencePeriod.SuperAbsence;
 import manager.services.absences.web.AbsenceRequestForm;
 
@@ -145,7 +147,8 @@ public class AbsenceEngine {
           //absenceTypes.addAll(currentAbsencePeriod.takableComponent.get().takableCodes);
         }
         if (currentAbsencePeriod.complationComponent.isPresent()) {
-          absenceTypes.addAll(currentAbsencePeriod.complationComponent.get().replacingCodes);
+          absenceTypes.addAll(currentAbsencePeriod.complationComponent.get()
+              .replacingCodesDesc.values());
           absenceTypes.addAll(currentAbsencePeriod.complationComponent.get().complationCodes);
         }
         currentAbsencePeriod = currentAbsencePeriod.nextAbsencePeriod;
@@ -163,6 +166,18 @@ public class AbsenceEngine {
     }
     
     return this.orderedSuperAbsences;
+  }
+  
+  public void setProblem(ProblemType problemType) {
+    this.absenceEngineProblem = Optional.fromNullable(AbsenceEngineProblem
+        .builder().problemType(problemType).build());
+  }
+  
+  public void setProblem(ProblemType problemType, LocalDate date) {
+    this.absenceEngineProblem = Optional.fromNullable(AbsenceEngineProblem
+        .builder()
+        .date(date)
+        .problemType(problemType).build());
   }
   
 }

@@ -161,8 +161,8 @@ public class AbsenceComponentDao extends DaoBase {
     obj.description = description;
     obj.justifiedTime = minutes;
     obj.justifiedTypesPermitted = justifiedTypePermitted;
-    obj.complationType = complationType;
-    obj.complationTime = complationTime;
+    obj.replacingType = complationType;
+    obj.replacingTime = complationTime;
     obj.internalUse = internalUse;
     obj.timeForMealTicket = timeForMealticket;
     obj.consideredWeekEnd = consideredWeekEnd;
