@@ -1,11 +1,8 @@
 package manager.services.absences.model;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.gdata.util.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-
-import com.beust.jcommander.internal.Sets;
 
 import dao.PersonChildrenDao;
 import dao.absences.AbsenceComponentDao;
@@ -13,15 +10,19 @@ import dao.absences.AbsenceComponentDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+
 import manager.services.absences.AbsenceEngineUtility;
-import manager.services.absences.model.AbsencePeriod.AbsenceEngineProblem;
-import manager.services.absences.model.AbsencePeriod.AbsenceErrorType;
 import manager.services.absences.model.AbsencePeriod.ComplationComponent;
+import manager.services.absences.model.AbsencePeriod.ProblemType;
 import manager.services.absences.model.AbsencePeriod.SuperAbsence;
 import manager.services.absences.model.AbsencePeriod.TakableComponent;
 
 import models.Person;
-import models.absences.Absence;
+import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
@@ -31,8 +32,7 @@ import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 
 import org.joda.time.LocalDate;
 
-import java.util.List;
-import java.util.Set;
+import java.util.SortedMap;
 
 public class AbsenceEngineFactory {
   
@@ -58,7 +58,7 @@ public class AbsenceEngineFactory {
         groupAbsenceType.pattern.equals(GroupAbsenceType.GroupAbsenceTypePattern.compensatoryRestCnr)) {
       
       // TODO: Implementare costruzione ferie e riposi compensativi
-      absenceEngine.absenceEngineProblem = Optional.of(AbsenceEngineProblem.unsupportedOperation);
+      absenceEngine.setProblem(ProblemType.unsupportedOperation);
       return absenceEngine;
     }
     
@@ -74,7 +74,7 @@ public class AbsenceEngineFactory {
     }
     
     // Effettuare i precalcoli sugli ammontare dei periodi e delle specifiche assenze.
-    computeAmounts(absenceEngine);
+    computeSoundness(absenceEngine);
     
     return absenceEngine;
   }
@@ -91,7 +91,7 @@ public class AbsenceEngineFactory {
     if (previousAbsencePeriod == null && absenceEngine.absencePeriod != null) {
       // TODO: Implementare logica di verifica data 
       // richiesta compatibile col precedente absencePeriod
-      absenceEngine.absenceEngineProblem = Optional.of(AbsenceEngineProblem.unsupportedOperation);
+      absenceEngine.setProblem(ProblemType.unsupportedOperation);
       return absenceEngine.absencePeriod;
     }
     
@@ -129,7 +129,7 @@ public class AbsenceEngineFactory {
         currentAbsencePeriod.from = childInterval.getBegin();
         currentAbsencePeriod.to = childInterval.getEnd();
       } catch (Exception e) {
-        absenceEngine.absenceEngineProblem = Optional.of(AbsenceEngineProblem.noChildExist);
+        absenceEngine.setProblem(ProblemType.noChildExist);
         return currentAbsencePeriod;
       }
     }
@@ -173,9 +173,22 @@ public class AbsenceEngineFactory {
       
       ComplationComponent complationComponent = new ComplationComponent();
       complationComponent.complationAmountType = complationBehaviour.amountType;
-      complationComponent.replacingCodes = complationBehaviour.replacingCodes;
       complationComponent.complationCodes = complationBehaviour.complationCodes;
-      
+      // i codici di rimpiazzamento li preparo ordinati per ammontare di rimpiazzamento
+      for (AbsenceType absenceType : complationBehaviour.replacingCodes) {
+        int amount = absenceEngineUtility.replacingAmount(absenceEngine, absenceType, 
+            complationComponent.complationAmountType);
+        if (amount < 1) {
+          absenceEngine.setProblem(ProblemType.modelErrorAmountType);
+          return currentAbsencePeriod;
+        }
+        if (complationComponent.replacingCodesDesc.get(amount) != null) {
+          absenceEngine.setProblem(ProblemType.modelErrorReplacingCode);
+          return currentAbsencePeriod;
+        }
+        complationComponent.replacingCodesDesc.put(amount, absenceType);
+        complationComponent.replacingTimes.put(absenceType, amount);
+      }
       currentAbsencePeriod.complationComponent = Optional.of(complationComponent);
     }
 
@@ -195,7 +208,7 @@ public class AbsenceEngineFactory {
    * @param absence
    */
   private void dispatchAbsence(AbsenceEngine absenceEngine) {
-    boolean hasError = false;
+
     AbsencePeriod absencePeriod = absenceEngine.absencePeriod;
     while (absencePeriod != null) {
       for (SuperAbsence superAbsence : absenceEngine.getOrderedAbsences()) {
@@ -213,20 +226,19 @@ public class AbsenceEngineFactory {
         }
         if (absencePeriod.complationComponent.isPresent()) {
           complationComponent = absencePeriod.complationComponent.get();
-          isReplacing = complationComponent.replacingCodes.contains(superAbsence.getAbsence().absenceType);
+          isReplacing = complationComponent.replacingCodesDesc.values()
+              .contains(superAbsence.getAbsence().absenceType);
           isComplation = complationComponent.complationCodes.contains(superAbsence.getAbsence().absenceType);
         }
         if ( (isTaken || isComplation || isReplacing) && superAbsence.isAlreadyAssigned() ) {
           //una assenza può essere assegnata ad un solo period
-          absenceEngine.absenceEngineProblem = 
-              Optional.of(AbsenceEngineProblem.modelErrorTwoPeriods);
+          absenceEngine.setProblem(ProblemType.modelErrorTwoPeriods);
           return;
         }
         
         if (isComplation && (isReplacing || isTaken)) {
           //una assenza può essere completamento e nient'altro
-          absenceEngine.absenceEngineProblem = 
-              Optional.of(AbsenceEngineProblem.modelErrorComplationCode);
+          absenceEngine.setProblem(ProblemType.modelErrorComplationCode);
           return;  
         }
         if (isTaken || isComplation || isReplacing) {
@@ -234,39 +246,39 @@ public class AbsenceEngineFactory {
           date = superAbsence.getAbsence().getAbsenceDate();
         }
         if (isTaken) {
+          if (setJustifiedTime(absenceEngine, takableComponent, superAbsence)) {
+            absenceEngine.setProblem(ProblemType.modelErrorAmountType, date);
+            return;
+          }
           absencePeriod.takableComponent.get().takenSuperAbsence.add(superAbsence);
         }
         
         if (isComplation) {
-          SuperAbsence previous = complationComponent.complationSuperAbsencesByDay.get(date);
+          SuperAbsence previous = complationComponent.complationAbsencesByDay.get(date);
           if (previous != null ) {
             //una sola assenza di completamento per quel giorno
-            previous.setErrorType(Optional.of(AbsenceErrorType.twoComplationSameDay));
-            superAbsence.setErrorType(Optional.of(AbsenceErrorType.twoComplationSameDay));
-            hasError = true;
+            absenceEngine.setProblem(ProblemType.stateErrorTwoComplationSameDay, date);
             return;
           }
-          complationComponent.complationSuperAbsencesByDay.put(date, superAbsence);
+          if (setJustifiedTime(absenceEngine, takableComponent, superAbsence)) {
+            absenceEngine.setProblem(ProblemType.modelErrorAmountType, date);
+            return;
+          }
+          complationComponent.complationAbsencesByDay.put(date, superAbsence);
         }
         if (isReplacing) {
-          SuperAbsence previous = complationComponent.replacingSuperAbsencesByDay.get(date);
+          SuperAbsence previous = complationComponent.replacingAbsencesByDay.get(date);
           if (previous != null) {
             //una sola assenza di rimpiazzamento per quel giorno
-            previous.setErrorType(Optional.of(AbsenceErrorType.twoReplacingSameDay));
-            superAbsence.setErrorType(Optional.of(AbsenceErrorType.twoReplacingSameDay));
-            hasError = true;
+            absenceEngine.setProblem(ProblemType.stateErrorTwoReplacingSameDay, date);
             return;
           }
-          complationComponent.replacingSuperAbsencesByDay.put(date, superAbsence);
+          complationComponent.replacingAbsencesByDay.put(date, superAbsence);
         }
       }
       absencePeriod = absencePeriod.nextAbsencePeriod;
     }
     
-    if (hasError) {
-      absenceEngine.absenceEngineProblem = 
-          Optional.of(AbsenceEngineProblem.compromisedReplacingSequence);
-    }
 
   }
   
@@ -276,7 +288,7 @@ public class AbsenceEngineFactory {
    * @param absenceEngine
    * @param absence
    */
-  private void computeAmounts(AbsenceEngine absenceEngine) {
+  private void computeSoundness(AbsenceEngine absenceEngine) {
     
     AbsencePeriod absencePeriod = absenceEngine.absencePeriod;
     while (absencePeriod != null) {
@@ -285,68 +297,122 @@ public class AbsenceEngineFactory {
       if (absencePeriod.takableComponent.isPresent()) {
         TakableComponent takableComponent = absencePeriod.takableComponent.get();
         for (SuperAbsence superAbsence : takableComponent.takenSuperAbsence) {
-          int amount = absenceEngineUtility.computeAbsenceAmount(absenceEngine, 
-              superAbsence.getAbsence(), takableComponent.takeAmountType);
-          if (amount < 0) {
-            absenceEngine.absenceEngineProblem = Optional.of(AbsenceEngineProblem.unsupportedOperation);
-            return;
-          }
-          superAbsence.setJustifiedTime(amount);
-          takableComponent.periodTakenAmount += amount;
-          if (takableComponent.getPeriodTakableAmount() - takableComponent.getPeriodTakenAmount() < 0) {
-            superAbsence.setErrorType(Optional.of(AbsenceErrorType.takableLimitExceed));
+          takableComponent.periodTakenAmount += superAbsence.getJustifiedTime();
+          if (takableComponent.getPeriodTakableAmount() 
+              - takableComponent.getPeriodTakenAmount() < 0) {
+            absenceEngine.setProblem(ProblemType.stateErrorLimitlimitExceeded, 
+                superAbsence.getAbsence().getAbsenceDate());
           }
         }
         
         //Complation
         if (absencePeriod.complationComponent.isPresent()) {
           ComplationComponent complationComponent = absencePeriod.complationComponent.get();
-          
-          //Prendere le complation absences e quando c'è il replacing potenziale vedere se esiste.
-          
-          
-        }
         
+          int complationAmount = 0;
+          SortedMap<LocalDate, ReplacingDay> replacingDays = Maps.newTreeMap();
+          for (SuperAbsence superAbsence : complationComponent
+              .replacingAbsencesByDay.values()) {
+            replacingDays.put(superAbsence.getAbsence().getAbsenceDate(), 
+                ReplacingDay.builder()
+                .existentReplacing(superAbsence.getAbsence().getAbsenceType())
+                .date(superAbsence.getAbsence().getAbsenceDate())
+                .build());
+          }
+          
+          //Le assenze di completamento ordinate per data. Genero i rimpiazzamenti ipotetici
+          for (SuperAbsence superAbsence : complationComponent
+              .complationAbsencesByDay.values()) {
+            complationAmount += superAbsence.getJustifiedTime();
+            Optional<AbsenceType> replacingCode = absenceEngineUtility
+                .whichReplacingCode(complationComponent, complationAmount);
+            if (replacingCode.isPresent()) {
+              LocalDate replacingDate = superAbsence.getAbsence().getAbsenceDate();
+              ReplacingDay replacingDay = replacingDays.get(replacingDate);
+              if (replacingDay == null) {
+                replacingDay = ReplacingDay.builder()
+                    .correctReplacing(replacingCode.get())
+                    .date(replacingDate)
+                    .build();
+                replacingDays.put(replacingDate, replacingDay);
+              } else {
+                replacingDay.setCorrectReplacing(replacingCode.get());
+              }
+              complationAmount -= complationComponent.replacingTimes.get(replacingCode.get());
+            }
+          }
+          complationComponent.complationConsumedAmount = complationAmount;
+          
+          //Controllo che i rimpiazzamenti ipotetici collimino con quelli reali
+          for (ReplacingDay replacingDay : replacingDays.values()) {
+            if (replacingDay.wrongType()) {
+              absenceEngine.setProblem(ProblemType.stateErrorWrongReplacing, 
+                  replacingDay.getDate()); 
+              return;
+            }
+            if (replacingDay.onlyCorrect()) {
+              absenceEngine.setProblem(ProblemType.stateErrorMissingReplacing, 
+                  replacingDay.getDate()); 
+              return;
+            }
+            if (replacingDay.onlyExisting()) {
+              absenceEngine.setProblem(ProblemType.stateErrorTooEarlyReplacing, 
+                  replacingDay.getDate());
+              return;
+            }
+          }
+        }
       }
-     
-      
       absencePeriod = absencePeriod.nextAbsencePeriod;
     }
-    
-    
-
-//    if (absencePeriod.complationComponent.isPresent()) {
-//      ComplationComponent complationComponent = absencePeriod.complationComponent.get();
-//      boolean isReplacingCode = complationComponent.replacingCodes.contains(absence.absenceType);
-//      boolean isComplationCode = complationComponent.complationCodes.contains(absence.absenceType);
-//      if (isReplacingCode || isComplationCode) {
-//        int amount = absenceEngineUtility
-//            .computeAbsenceAmount(absenceEngine, absence, complationComponent.complationAmountType);
-//        int complationAmount = absenceEngineUtility
-//            .computeAbsenceComplationAmount(absenceEngine, absence, complationComponent.complationAmountType);
-//        Optional<AbsenceErrorType> absenceErrorType = Optional.absent();
-//
-//        
-//        //Se la somma del residuo da completamento e il tempo giustificato della assenza
-//        // superano uno dei limiti di completamento dei codici in replacingCodes
-//        
-//        //L'assenza successiva deve essere
-//        
-//        SuperAbsence superAbsence = SuperAbsence.builder()
-//            .absence(absence)
-//            .complationTime(complationAmount)
-//            .justifiedTime(amount)
-//            .errorType(absenceErrorType)
-//            .build();
-//        if (isReplacingCode) {
-//          complationComponent.replacingSuperAbsences.add(superAbsence);
-//        }
-//        if (complationComponent.complationCodes.contains(absence.absenceType)) {
-//          complationComponent.complationSuperAbsences.add(superAbsence);
-//        }
-//      }
-//      
-//    }
   }
+  
 
+  
+  /**
+   * Imposta il justifiedTime della superAbsence se non è già calcolato.
+   * In caso di errore ritorna false.
+   * @param absenceEngine
+   * @param takableComponent
+   * @param superAbsence
+   * @return
+   */
+  private boolean setJustifiedTime(AbsenceEngine absenceEngine, TakableComponent takableComponent,
+      SuperAbsence superAbsence) {
+    if (superAbsence.getJustifiedTime() == null) {
+      int amount = absenceEngineUtility.absenceJustifiedAmount(absenceEngine, 
+          superAbsence.getAbsence(), takableComponent.takeAmountType);
+      if (amount < 0) {
+        return false;
+      }
+      superAbsence.setJustifiedTime(amount);
+    }
+    return true;
+  }
+  
+  /**
+   * Lo stato dei rimpiazzamenti, data per date, quelli corretti e quelli esistenti.
+   * @author alessandro
+   *
+   */
+  @Builder @Getter @Setter(AccessLevel.PRIVATE)
+  private static class ReplacingDay {
+    private LocalDate date;
+    private AbsenceType existentReplacing;
+    private AbsenceType correctReplacing;
+    
+    public boolean wrongType() {
+      return correctReplacing != null && existentReplacing != null 
+          && !existentReplacing.equals(correctReplacing);
+    }
+    
+    public boolean onlyCorrect() {
+      return correctReplacing != null && existentReplacing == null;
+    }
+    
+    public boolean onlyExisting() {
+      return correctReplacing == null && existentReplacing != null;
+    }
+
+  }
 }

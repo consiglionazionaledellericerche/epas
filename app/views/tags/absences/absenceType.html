@@ -12,7 +12,7 @@
   #{elseif code.isSpecifiedMinutesPermitted()}
     label-success 
   #{/elseif}
-  #{elseif code.complationType}
+  #{elseif code.replacingType}
     label-default 
   #{/elseif}
   " webui-popover-hover data-url="#${code.id}">${code.code}</span>
@@ -35,10 +35,10 @@
     
     
     *{ tempo completamento }*
-    #{if code.complationType}
-      <strong>Come completa:</strong> &{code.complationType} <br>
-      #{if code.complationTime > 0}
-      <strong>Tempo Completamento:</strong> ${code.complationTime.printHourMinute()}
+    #{if code.replacingType}
+      <strong>Come completa:</strong> &{code.replacingType} <br>
+      #{if code.replacingTime > 0}
+      <strong>Tempo Completamento:</strong> ${code.replacingTime.printHourMinute()}
       #{/if}
     #{/if}
 
