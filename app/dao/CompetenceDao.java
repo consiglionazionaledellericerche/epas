@@ -67,21 +67,42 @@ public class CompetenceDao extends DaoBase {
             .distinct().list(competenceCode);
   }
 
+  /**
+   * 
+   * @param person
+   * @param year
+   * @param month
+   * @param codes
+   * @return la lista di competenze appartenenti alla lista di codici codes relative all'anno year 
+   *     e al mese month per la persona person.
+   */
   public List<Competence> getCompetences(
-      Person person, Integer year, Integer month, List<CompetenceCode> codes) {
+      Person person, Integer year, Optional<Integer> month, List<CompetenceCode> codes) {
 
     final QCompetence competence = QCompetence.competence;
-
+    final BooleanBuilder condition = new BooleanBuilder();
+    condition.and(competence.person.eq(person))
+    .and(competence.year.eq(year)
+        .and(competence.competenceCode.in(codes)));
+    if (month.isPresent()) {
+      condition.and(competence.month.eq(month.get()));
+    }
     final JPQLQuery query = getQueryFactory().from(competence)
             .leftJoin(competence.competenceCode).fetch()
-            .where(competence.person.eq(person)
-                    .and(competence.year.eq(year)
-                            .and(competence.month.eq(month)
-                                    .and(competence.competenceCode.in(codes)))));
+            .where(condition);
 
     return query.list(competence);
   }
 
+  /**
+   * 
+   * @param person
+   * @param year
+   * @param month
+   * @param code
+   * @return la competenza se esiste relativa all'anno year e al mese month con codice code per la 
+   * persona person.
+   */
   public Optional<Competence> getCompetence(
       Person person, Integer year, Integer month, CompetenceCode code) {
 

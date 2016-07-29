@@ -97,4 +97,16 @@ public class CompetenceCodeDao extends DaoBase {
         .where(competenceCode.competenceCodeGroup.isNull());
     return query.orderBy(competenceCode.code.asc()).list(competenceCode);
   }
+  
+  /**
+   * 
+   * @param group il gruppo di codici di competenza
+   * @return la lista dei codici di competenza che appartengono al gruppo passato come parametro.
+   */
+  public List<CompetenceCode> getCodeWithGroup(CompetenceCodeGroup group) {
+    final QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
+    final JPQLQuery query = getQueryFactory().from(competenceCode)
+        .where(competenceCode.competenceCodeGroup.eq(group));
+    return query.orderBy(competenceCode.code.asc()).list(competenceCode);
+  }
 }

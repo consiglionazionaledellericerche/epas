@@ -16,6 +16,8 @@ import dao.wrapper.IWrapperFactory;
 
 import helpers.jpa.ModelQuery.SimpleResults;
 
+import manager.AbsenceManager.AbsenceToDate;
+
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
@@ -158,8 +160,8 @@ public class CompetenceManager {
 
   /**
    * @return la tabella formata da persone, dato e valore intero relativi ai quantitativi orari su
-   * orario di lavoro, straordinario, riposi compensativi per l'anno year e il mese month per le
-   * persone dell'ufficio office.
+   *     orario di lavoro, straordinario, riposi compensativi per l'anno year e il mese month per le
+   *     persone dell'ufficio office.
    */
   public Table<Person, String, Integer> composeTableForOvertime(
       int year, int month, Integer page,
@@ -206,7 +208,7 @@ public class CompetenceManager {
 
   /**
    * @return true se avviene correttamente il cambiamento della lista di competenze attive per la
-   * persona Person passata come parametro.
+   *     persona Person passata come parametro.
    */
   public boolean saveNewCompetenceEnabledConfiguration(
       Map<String, Boolean> competence,
@@ -238,7 +240,7 @@ public class CompetenceManager {
 
   /**
    * @return il file contenente tutti gli straordinari effettuati dalle persone presenti nella lista
-   * personList nell'anno year.
+   *     personList nell'anno year.
    */
   public FileInputStream getOvertimeInYear(int year, List<Person> personList) throws IOException {
     FileInputStream inputStream = null;
@@ -335,26 +337,26 @@ public class CompetenceManager {
    * @return true se è possibile assegnare la quantità value alla competenza comp.
    */
   public boolean canAddCompetence(Competence comp, Integer value) {
-    
-    /**
-     * bisogna considerare i gruppi di appartenenza della competenza e verificare se il quantitativo
-     * che si vuole prendere di quella competenza non sfora il valore massimo della singola competenza
-     * o del gruppo
-     */
+
     if (comp.competenceCode.limitType.equals(LimitType.monthly)) {
       if (comp.valueApproved + value > comp.competenceCode.limitValue) {
-        return false;
-      } else {
-        return true;
-      }
+        List<CompetenceCode> group = competenceCodeDao
+            .getCodeWithGroup(comp.competenceCode.competenceCodeGroup);
+        List<Competence> compList = competenceDao.getCompetences(comp.person, comp.year, 
+            Optional.fromNullable(comp.month), group);
+        int sum = compList.stream().mapToInt(i -> i.valueApproved).sum();
+        if (sum + value > comp.competenceCode.competenceCodeGroup.limitValue) {
+          return false;
+        }        
+      } 
     } 
     if (comp.competenceCode.limitType.equals(LimitType.yearly)) {
-      /*completare cercando nell'anno la somma di tutti i valori di quella competenza*/
-      if (comp.valueApproved + value > comp.competenceCode.limitValue) {
+      List<Competence> compList = competenceDao.getCompetences(comp.person, comp.year, 
+          Optional.<Integer>absent(), Lists.newArrayList(comp.competenceCode));
+      int sum = compList.stream().mapToInt(i -> i.valueApproved).sum();      
+      if (sum + value > comp.competenceCode.limitValue) {
         return false;
-      } else {
-        return true;
-      }
+      } 
     }
     return true;
   }
@@ -377,13 +379,24 @@ public class CompetenceManager {
       }
     }      
     List<Person> personList = personDao.peopleWithCompetenceCodeActive(code);
-    if(!personList.isEmpty()) {
+    if (!personList.isEmpty()) {
       for (Person person : personList) {
         person.competenceCode.remove(code);
         person.save();
       }
     }
     code.delete();
+  }
+  
+  /**
+   * persiste la competenza aggiornando il valore approvato per essa.
+   * @param competence la competenza da aggiornare
+   * @param value il valore con cui aggiornare la competenza
+   */
+  public void saveCompetence(Competence competence, Integer value) {
+    competence.valueApproved = value;
+    competence.save();
+    log.debug("Salvata la competenza {} con il nuovo valore {}", competence, value);
   }
 
 

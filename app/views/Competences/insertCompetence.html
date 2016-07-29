@@ -1,10 +1,30 @@
-#{modalAsync id:'modalCompetenceCode', button:'Salva', 
-title:'Inserisci il quantitativo per la competenza'}
-<div id="absenceCodeData">
-  #{form action:@Competences.saveCompetence(), method:'POST', autocomplete:false,
+#{modalAsync id:'modalCompetence',
+title:'Inserisci il quantitativo per la competenza ' + competence.competenceCode.code}
+
+<div class="col-sm-2"></div>
+<div id="competenceData" class="col-sm-8">
+#{include './_tutorialCodes.html' /}
+  #{form action:@saveCompetence(), method:'POST', autocomplete:false,
   class:'form form-horizontal', 'data-async':'#page_content',
-  'data-async-error':'#absenceCodeData'}
-  
+  'data-async-error':'#competenceData','data-spinner':'#defaultSpinner'}
+  #{f.hidden 'officeId', value:office.id /}
+	#{if psDto != null}
+		#{list items:psDto.contractMonths, as:'mese'}
+			Tempo per straordinari: <strong>${mese.value.progressivoFinalePositivoMese.toHourTime()}</strong> ore - 
+			Residuo mensile: <strong>${mese.value.progressivoFinaleMese.toHourTime()}</strong> ore - 
+			Residuo annuale: <strong>${mese.value.remainingMinutesCurrentYear.toHourTime()}</strong> ore
+		#{/list}
+	#{/if}
+  	<br>
+  	<br>
+
+	#{f.input 'valueApproved',type:'number', value:competence?.valueApproved, required:true /}
+	#{if competence?.persistent}
+    	#{f.hidden 'competence.id', value:competence.id /}
+  	#{/if}
+	#{b.buttons center:true}
+		#{b.submit 'Modifica'/}
+	#{/b.buttons}
 	  
   #{/form}
 </div>
