@@ -1,0 +1,39 @@
+ *{ howTo sui tipi di codice }*
+ 
+	#{alert color:'info', textcolor:'dark'}
+	#{if competence.competenceCode.code.equals('S1')}
+  		<p>Per assegnare gli straordinari vengono proposti alcuni valori che possono essere considerati per attribuire il giusto numero di <strong>ore</strong>:
+  		<ul>
+  			<li> tempo disponibile per gli straordinari
+  			<li> residuo del mese
+  			<li> residuo dell'anno
+  		</ul>
+  		Il tutto deve comunque essere subordinato al fatto che, al massimo, in un anno di straordinari per persona 
+  		possono essere attribuite <strong>200 ore</strong>.
+  		</p>
+  	#{/if}
+  	#{if competence.competenceCode.code.equals('207')}
+  		<p>In questo caso il valore viene espresso in <strong>giorni</strong>:
+  		<ul>
+  			<li> Il limite massimo assegnabile a un dipendente è di <strong>12 giorni</strong>.
+  			<li> Si può superare quel limite solo se contestualmente non viene assegnato alcun codice '208', quindi
+  				il massimo disponibile in giorni per reperibilità (<strong>16</strong>) può essere raggiunto aumentando i giorni per il codice '207'.
+  		</ul>  			
+  		</p>
+  	#{/if}
+  	#{if competence.competenceCode.code.equals('208')}
+  		<p>Per la reperibilità festiva il valore massimo assegnabile è <strong>4 giorni</strong>. 
+  			Non sono previsti aggiustamenti in caso di riduzione dei giorni di reperibilità feriale.  			
+  		</p>
+  	#{/if}
+  	#{if competence.competenceCode.code.equals('T1')}
+  		<p>Per il turno ordinario feriale il quantitativo massimo assegnabile è di <strong>150 ore</strong>.<br>
+  			Non esistono casi di assegnamento di valori superiori a quel limite.
+  		</p>
+  	#{/if}
+  	#{if competence.competenceCode.code.equals('T2')}
+  		<p>Per il turno ordinario festivo il quantitativo massimo assegnabile è di <strong>15 ore</strong>.<br>
+  			Non esistono casi di assegnamento di valori superiori a quel limite.
+  		</p>
+  	#{/if}
+    #{/alert}

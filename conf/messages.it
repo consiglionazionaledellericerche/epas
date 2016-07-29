@@ -68,6 +68,9 @@ child.surname= Cognome
 codeBlock=Codice Blocco
 
 code=Codice
+
+valueApproved= Valore per competenza
+
 competenceCode.code= Codice Competenza
 competenceCode.codeToPresence= Codice per attestato di presenza
 competenceCode.description= Descrizione

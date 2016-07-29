@@ -11,9 +11,7 @@
   #{alert color:'info'}
   <p>Per assengnare la competenza individuare il dipendente ed il tipo di competenza nella
     tabella sottostante e cliccare sul valore attualmente assegnato.
-
   <p>
-
   <p>I valori per le reperibilità sono espressi in <strong>giorni</strong>,
     quelli per straordinari e turni in <strong>ore</strong>.</p>
   #{/alert}
@@ -24,23 +22,15 @@
 	<input type="hidden" name="year" value="${year}"/>
     <input type="hidden" name="month" value="${month}"/>
     <input type="hidden" name="officeId" value="${office.id}"/>
-	
-	<div class="row">
-	  <div class="col-md-6">
-	    #{f.selectModel 'competenceCode', label:'Codice', items:competenceCodeList,
-    		value:wrCompetenceCode.value /}
-	  </div>
-	   <div class="col-md-6">
-	    #{f.input 'name', label:'Nome', 'data-autochange':true, value:name, autofocus:true,
-            placeholder:'nome'.label() /}
-	  </div>
-	</div>    
+  
+	#{f.selectModel 'competenceCode', label:'Codice', items:competenceCodeList,
+    	value:wrCompetenceCode.value /}
     
     #{/form}
 
     <section id="results">
-   	#{paginate results} 
-	   <table class="table">
+   
+	   <table class="table" datatable>
       		<thead>
       		<tr>
         		<th>Nome e cognome</th>
@@ -48,14 +38,13 @@
       		</tr>
       		</thead>
       		<tbody>
-      		#{list items:results.results, as:'person'}
-      		<tr>
-      		 %{ wrPerson = person.getWrapper(templateUtility.wrapperFactory); }%
-				<td>${person.fullname}</td>
+      		#{list items:compList, as:'competence'}
+      		<tr>      		 
+				<td>${competence.person.fullname}</td>
 				<td>
-				<a href="@{Competences.insertCompetence()}" data-async-modal="#modalCompetenceCode">
-				#{if wrPerson.competence(wrCompetenceCode.value,year,month).valueApproved != null}
-					${wrPerson.competence(wrCompetenceCode.value,year,month).valueApproved}
+				<a href="@{Competences.insertCompetence(competence.id)}" data-async-modal="#modalCompetence" >
+				#{if competence.valueApproved != null}
+					${competence.valueApproved}
 				#{/if}
 				#{else}
 					<em>Inserisci</em>
@@ -65,9 +54,8 @@
 			</tr>
       		#{/list}
       		</tbody>
-       </table>
-     
-	#{/paginate}
+       </table>     
+	
   <br>
   <br>
   #{alert color:'warning'}
@@ -105,4 +93,4 @@
   #{/alert}
 </div> <!-- end container-fluid -->
 
-<div id="modalCompetenceCode" class="modal fade container" tabindex="-1"></div>
+<div id="modalCompetence" class="modal fade container" tabindex="-1"></div>
