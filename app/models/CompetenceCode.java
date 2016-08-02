@@ -2,7 +2,9 @@ package models;
 
 import models.base.BaseModel;
 import models.enumerate.AccumulationType;
+import models.enumerate.LimitDescription;
 import models.enumerate.LimitType;
+import models.enumerate.LimitUnit;
 
 import play.data.validation.Required;
 import play.data.validation.Unique;
@@ -58,10 +60,19 @@ public class CompetenceCode extends BaseModel {
   
   @Column(name = "limit_value")
   public Integer limitValue;
+  
+  @Enumerated(EnumType.STRING)
+  @Column(name = "limit_unit")
+  public LimitUnit limitUnit;
+  
+  @Enumerated(EnumType.STRING)
+  @Column(name = "limit_description")
+  public LimitDescription limitDescription;
+  
 
   @Override
   public String toString() {
-    return String.format("CompetenceCode[%d] - description = %s", id, description);
+    return String.format("%s - %s", code, description);
   }
   
   @Override

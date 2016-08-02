@@ -4,6 +4,7 @@ public enum LimitType {
 
   monthly("mensile"),
   yearly("annuale"),
+  onMonthlyPresence("su presenza mensile"),
   noLimit("senza limite");
   
   public String description;

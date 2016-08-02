@@ -221,6 +221,10 @@ public class TemplateUtility {
     return competenceCodeDao.getAllCompetenceCode();
   }
   
+  public List<CompetenceCode> allCodesWithoutGroup() {    
+    return competenceCodeDao.getCodeWithoutGroup();
+  }
+  
   /**
    * Gli user associati a tutte le persone appartenenti all'istituto.
    */
@@ -346,6 +350,8 @@ public class TemplateUtility {
     return badgeSystemDao.badgeSystems(Optional.<String>absent(),
         Optional.<BadgeReader>absent()).list();
   }
+  
+
 
   public List<BadgeSystem> getConfiguredBadgeSystems(Office office) {
     List<BadgeSystem> configuredBadgeSystem = Lists.newArrayList();
