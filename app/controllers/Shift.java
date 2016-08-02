@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -231,7 +232,7 @@ public class Shift extends Controller {
 
     // crea la tabella per registrare le assenze e le timbrature inconsistenti con i turni trovati
     Table<Person, String, List<String>> inconsistentAbsence =
-        TreeBasedTable.<Person, String, List<String>>create();
+        HashBasedTable.<Person, String, List<String>>create();
 
     // seleziona le persone nel turno 'shiftType' da inizio a fine mese
     List<PersonShiftDay> personShiftDays =
@@ -262,14 +263,22 @@ public class Shift extends Controller {
     final LocalDate firstOfMonth = new LocalDate(year, month, 1);
     final LocalDate lastOfMonth = firstOfMonth.dayOfMonth().withMaximumValue();
 
+    Comparator<String> nullSafeStringComparator = Comparator
+            .nullsFirst(String::compareToIgnoreCase); 
+        
+    
     //  Used TreeBasedTable becouse of the alphabetical name order (persona, A/B, num. giorni)
     Table<Person, String, Integer> personsShiftsWorkedDays =
-        TreeBasedTable.<Person, String, Integer>create();
+        TreeBasedTable.<Person, String, Integer>create(Person.personComparator(), nullSafeStringComparator);
 
     // crea la tabella per registrare le assenze e le timbrature inconsistenti con i turni trovati
-    // (person, [thAbsences, thNoStampings,thBadStampings], <giorni/fasce orarie inconsistenti>)
+    // (person, [thAbsences, thNoStampings, thBadStampings], <giorni/fasce orarie inconsistenti>)
     Table<Person, String, List<String>> personsShiftInconsistentAbsences =
-        TreeBasedTable.<Person, String, List<String>>create();
+        TreeBasedTable.<Person, String, List<String>>create(Person.personComparator(), nullSafeStringComparator);
+    
+    // Contains the number of the effective hours of worked shifts
+    Table<Person, String, Integer> totalPersonShiftWorkedTime =
+        TreeBasedTable.<Person, String, Integer>create(Person.personComparator(), nullSafeStringComparator);
 
     ShiftCategories shiftCategory = ShiftCategories.findById(shiftCategoryId);
     if (shiftCategory == null) {
@@ -296,6 +305,7 @@ public class Shift extends Controller {
       log.debug("CALCOLA IL NUM DI GIORNI EFFETTUATI NEL TURNO PER OGNI PERSONA");
       // conta e memorizza i giorni di turno per ogni persona
       shiftManager.countPersonsShiftsDays(personsShiftDays, personsShiftsWorkedDays);
+      log.debug("* Num di persone nella personsShiftsWorkedDays = {}", personsShiftsWorkedDays.rowKeySet().size());
 
 
       // Memorizzo le inconsistenze del turno
@@ -303,15 +313,13 @@ public class Shift extends Controller {
           + "del turno %s e memorizzarle", type);
       shiftManager.getShiftInconsistencyTimestampTable(
           personsShiftDays, personsShiftInconsistentAbsences);
-
+      log.debug("* Num di persone nella personsShiftInconsistentAbsences = {}", personsShiftInconsistentAbsences.rowKeySet().size());
     }
+    
 
     log.debug("CALCOLA I MINUTI MANCANTI DA personsShiftInconsistentAbsences E LI METTE "
         + "in totalShiftSumHours");
 
-    // Contains the number of the effective hours of worked shifts
-    Table<Person, String, Integer> totalPersonShiftWorkedTime =
-        TreeBasedTable.<Person, String, Integer>create();
 
     // Calcola i giorni totali di turno effettuati e le eventuali ore mancanti
     totalPersonShiftWorkedTime =
@@ -327,7 +335,7 @@ public class Shift extends Controller {
 
     // Contains for each person the numer of days and hours of worked shift
     Table<Person, String, String> totalShiftInfo =
-        TreeBasedTable.<Person, String, String>create();
+        HashBasedTable.<Person, String, String>create();
 
     // crea la tabella con le informazioni per il report PDF mensile
     totalShiftInfo =
