@@ -8,7 +8,13 @@
     #{alert color:'info'}
      <p>Lista delle ore di formazione inserite dai dipendenti per il mese e la sede selezionati.</p>
     #{/alert}
-
+	#{f.hidden 'month', value:month /}
+  	#{f.hidden 'year', value:year /}
+  	#{b.buttons center:true}
+  	<a class="btn btn-success" href="@{PersonMonths.insertPeopleTrainingHours(session.get("officeSelected"),month,year)}" data-async-modal="#defaultModal">
+    	<i class="fa fa-plus"></i> &{'PersonMonths.insertPeopleTrainingHours'}
+  	</a>
+  	#{/b.buttons}
 	<table class="table table-striped table-hover" width="100%" datatable>
 		<thead>
 			<tr>
@@ -24,7 +30,16 @@
 				
 				<td class="center">	
 				#{list items:key.getValue(), as:'pmr'}
-					<strong>${pmr.trainingHours}</strong> ore dal <strong>${pmr.fromDate.format()}</strong> al <strong>${pmr.toDate.format()}</strong><br>
+					#{if pmr.isEditable()}
+						<a href="@{PersonMonths.modifyTrainingHours(pmr.id)}" data-async-modal="#defaultModal">
+						${pmr.trainingHours} ore dal ${pmr.fromDate.format()} al ${pmr.toDate.format()}</a>						
+						<a href="@{PersonMonths.deleteTrainingHours(pmr.person.id, pmr.id)}" 
+						   data-async-modal="#defaultModal"><span class="glyphicon glyphicon-trash"></span></a><br>
+					#{/if}
+					#{else}
+						<strong>${pmr.trainingHours}</strong> ore dal <strong>${pmr.fromDate.format()}</strong> al <strong>${pmr.toDate.format()}</strong><br>
+					#{/else}
+					
 				#{/list}	
 				</td>				
 			</tr>

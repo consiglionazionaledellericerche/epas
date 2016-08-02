@@ -33,12 +33,15 @@ public class PersonMonthsManager {
    * @param from data inizio del periodo di formazione
    * @param to data fine del periodo di formazione.
    */
-  public void saveTrainingHours(
-      PersonMonthRecap pm, boolean approved, Integer value, LocalDate from, LocalDate to) {
+  public void saveTrainingHours(Person person, Integer year, Integer month, Integer begin, Integer end,
+      boolean approved, Integer value) {
+    PersonMonthRecap pm = new PersonMonthRecap(person, year, month);
+    LocalDate beginDate = new LocalDate(year, month, begin);
+    LocalDate endDate = new LocalDate(year, month, end);
     pm.hoursApproved = false;
     pm.trainingHours = value;
-    pm.fromDate = from;
-    pm.toDate = to;
+    pm.fromDate = beginDate;
+    pm.toDate = endDate;
     pm.save();
   }
 
@@ -89,7 +92,7 @@ public class PersonMonthsManager {
    * @return un Insertable che verifica se le ore di formazione per anno e mese richieste sono già
    *     state inviate.
    */
-  public Insertable checkIfAlreadySend(Person person, int year, int month) {
+  public Insertable checkIfAlreadySent(Person person, int year, int month) {
     Insertable rr = new Insertable(true, "");
     List<PersonMonthRecap> list = personMonthRecapDao
         .getPersonMonthRecapInYearOrWithMoreDetails(person, year,

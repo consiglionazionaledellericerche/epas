@@ -4,24 +4,44 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 
+import helpers.jpa.ModelQuery.SimpleResults;
+
+import it.cnr.iit.epas.DateUtility;
+
 import lombok.extern.slf4j.Slf4j;
 
-import manager.ChartsManager;
-import manager.ChartsManager.Month;
-import manager.ChartsManager.Year;
 import manager.SecureManager;
+import manager.charts.ChartsManager;
+import manager.charts.ChartsManager.RenderChart;
 import manager.recaps.charts.RenderResult;
+import manager.recaps.personstamping.PersonStampingDayRecap;
+import manager.recaps.personstamping.PersonStampingRecap;
+import manager.recaps.personstamping.PersonStampingRecapFactory;
 
+import models.Absence;
 import models.CompetenceCode;
 import models.Office;
 import models.Person;
+
 import models.exports.PersonOvertime;
 
+import org.apache.poi.hssf.record.*;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import play.Logger;
 import play.mvc.Controller;
@@ -30,6 +50,8 @@ import security.SecurityRules;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -54,35 +76,37 @@ public class Charts extends Controller {
   static CompetenceDao competenceDao;
   @Inject
   static OfficeDao officeDao;
+  @Inject
+  static CompetenceCodeDao competenceCodeDao;
+  @Inject
+  static PersonStampingRecapFactory stampingsRecapFactory;
 
-  public static void overtimeOnPositiveResidual(Integer year, Integer month) {
+  public static void overtimeOnPositiveResidual(Integer year, Integer month, Long officeId) {
 
-    rules.checkIfPermitted(Security.getUser().get().person.office);
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    Set<Office> set = Sets.newHashSet();
+    set.add(office);
+    LocalDate beginMonth = new LocalDate(year, month, 1);
+    LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
+    CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
+    SimpleResults<Person> people = personDao.listForCompetence(code, Optional.<String>absent(), 
+        set, true, beginMonth, endMonth, Optional.<Person>absent());
+    List<Person> peopleActive = people.list();
 
-    List<Year> annoList = chartsManager.populateYearList(Security.getUser().get().person.office);
-    List<Month> meseList = chartsManager.populateMonthList();
-
-    if (params.get("yearChart") == null || params.get("monthChart") == null) {
-
-      Logger.info("Params year: %s", params.get("yearChart", Integer.class));
-      Logger.info("Chiamato metodo con anno e mese nulli");
-      render(annoList, meseList);
-    }
-
-    year = params.get("yearChart", Integer.class);
-    month = params.get("monthChart", Integer.class);
-
-    List<Person> personeProva = personDao.list(
-        Optional.<String>absent(),
-        secureManager.officesReadAllowed(Security.getUser().get()),
-        true, new LocalDate(year, month, 1),
-        new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true).list();
+    log.debug("Dimensione attivi per straordinario: {}", peopleActive.size());
 
     List<CompetenceCode> codeList = chartsManager.populateOvertimeCodeList();
-    List<PersonOvertime> poList =
-        chartsManager.populatePersonOvertimeList(personeProva, codeList, year, month);
 
-    render(poList, year, month, annoList, meseList);
+    List<PersonOvertime> poList = 
+        chartsManager.populatePersonOvertimeList(peopleActive, codeList, year, month);
+    if (poList.isEmpty()) {
+      flash.error("Nel mese selezionato non sono ancora stati assegnati gli straordinari");
+      render(poList);
+    }
+
+    render(poList, year, month);
   }
 
 
@@ -98,69 +122,42 @@ public class Charts extends Controller {
    *
    * @param year l'anno di riferimento
    */
-  public static void overtimeOnPositiveResidualInYear(Integer year) {
+  public static void overtimeOnPositiveResidualInYear(Integer year, Long officeId) {
 
-    rules.checkIfPermitted(Security.getUser().get().person.office);
-    List<Year> annoList = chartsManager.populateYearList(Security.getUser().get().person.office);
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    Set<Office> set = Sets.newHashSet();
+    set.add(office);
+    LocalDate begin = new LocalDate(year, 1, 1);
+    LocalDate end = begin.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue();
 
-    if (params.get("yearChart") == null && year == null) {
-      Logger.debug("Params year: %s", params.get("yearChart", Integer.class));
-      Logger.debug("Chiamato metodo con anno e mese nulli");
-      render(annoList);
-    }
-    year = params.get("yearChart", Integer.class);
-    Logger.debug("Anno preso dai params: %d", year);
-
+    CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
+    SimpleResults<Person> people = personDao.listForCompetence(code, Optional.<String>absent(), 
+        set, true, begin, end, Optional.<Person>absent());
+    List<Person> peopleActive = people.list();
     List<CompetenceCode> codeList = chartsManager.populateOvertimeCodeList();
-    Long val = null;
-    Optional<Integer> result =
-        competenceDao.valueOvertimeApprovedByMonthAndYear(
-            year, Optional.<Integer>absent(), Optional.<Person>absent(), codeList);
-    if (result.isPresent()) {
-      val = result.get().longValue();
-    }
-    List<Person> personeProva = personDao.list(
-        Optional.<String>absent(),
-        secureManager.officesReadAllowed(Security.getUser().get()),
-        true, new LocalDate(year, 1, 1), new LocalDate(year, 12, 31), true).list();
-    int totaleOreResidue = chartsManager.calculateTotalResidualHour(personeProva, year);
 
-    render(annoList, val, totaleOreResidue);
+    List<PersonOvertime> poList = 
+        chartsManager.populatePersonOvertimeListInYear(peopleActive, codeList, year);
+
+    if (poList.isEmpty()) {
+      flash.error("Nel mese selezionato non sono ancora stati assegnati gli straordinari");
+      render(poList);
+    }
+    render(poList, year);
 
   }
 
-  public static void whichAbsenceInYear(Integer year) {
-
+  /**
+   * esporta le ore e gli straordinari.
+   */
+  public static void exportHourAndOvertime() {
     rules.checkIfPermitted(Security.getUser().get().person.office);
-    List<Year> annoList = chartsManager.populateYearList(Security.getUser().get().person.office);
+    //  List<Year> annoList = chartsManager.populateYearList(Security.getUser().get().person.office);
 
-
-    if (params.get("yearChart") == null && year == null) {
-      Logger.debug("Params year: %s", params.get("yearChart", Integer.class));
-      Logger.debug("Chiamato metodo con anno e mese nulli");
-      render(annoList);
-    }
-
-    year = params.get("yearChart", Integer.class);
-    Logger.debug("Anno preso dai params: %d", year);
-
-
-    List<String> absenceCode = Lists.newArrayList();
-    absenceCode.add("92");
-    absenceCode.add("91");
-    absenceCode.add("111");
-    //LocalDate beginYear = new LocalDate(year, 1,1);
-    //LocalDate endYear = beginYear.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue()
-    // FIXME da rifattorizzare tutta questa parte e renderla funzione dell'office
-    long missioniSize = 0; //absenceDao.howManyAbsenceInPeriod(beginYear, endYear, "92")
-    long riposiCompensativiSize = 0; //absenceDao.howManyAbsenceInPeriod(beginYear, endYear, "91")
-    long malattiaSize = 0; //absenceDao.howManyAbsenceInPeriod(beginYear, endYear, "111")
-    long altreSize = 0; //absenceDao.howManyAbsenceInPeriodNotInList(beginYear, endYear,absenceCode)
-
-    render(annoList, missioniSize, riposiCompensativiSize, malattiaSize, altreSize);
-
+    render();
   }
-
 
   public static void checkLastYearAbsences(File file, Long officeId) {
 
@@ -183,16 +180,6 @@ public class Charts extends Controller {
     render(listTrueFalse, process, office);
   }
 
-
-  /**
-   * esporta le ore e gli straordinari.
-   */
-  public static void exportHourAndOvertime() {
-    rules.checkIfPermitted(Security.getUser().get().person.office);
-    List<Year> annoList = chartsManager.populateYearList(Security.getUser().get().person.office);
-
-    render(annoList);
-  }
 
   /**
    * metodo che compone il file .csv contenente, per ogni persona, le ore in più, gli straordinari e
@@ -244,5 +231,44 @@ public class Charts extends Controller {
     FileInputStream inputStream = chartsManager.exportDataSituation(person);
     renderBinary(inputStream, "exportDataSituation" + person.surname + ".csv");
 
+  }
+
+  /**
+   * ritorna la lista delle persone attive nell'anno e nel mese.
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   */
+  public static void listForExcelFile(int year, int month, Long officeId) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    Set<Office> set = Sets.newHashSet();
+    set.add(office);
+    LocalDate date = new LocalDate(year, month, 1);
+
+    List<Person> personList = personDao.list(
+        Optional.<String>absent(), set, false, date, 
+        date.dayOfMonth().withMaximumValue(), true).list();
+
+    render(personList, date, year, month);
+  }
+
+
+  /**
+   * ritorna un file in formato excel contenente la situazione mensile esportata a fini
+   * di rendicontazione.
+   * @param person la persona di cui si vuole la situazione mensile
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   */
+  public static void test(Person person, int year, int month) {   
+    rules.checkIfPermitted(person.office);
+    File file = new File("situazioneMensile" + person.surname
+        + DateUtility.fromIntToStringMonth(month) + year + ".xls");
+    PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
+    file = chartsManager.createFileToExport(psDto, file);
+
+    renderBinary(file);
   }
 }

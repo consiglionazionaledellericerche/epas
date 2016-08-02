@@ -132,16 +132,6 @@ public class ContractDao extends DaoBase {
         return c;
       }
     }
-    /*
-    //FIXME sommani aprile 2014, lui ha due contratti ma nello heap ce ne sono due identici e
-    //manca quello nuovo.
-    List<Contract> contractList = getPersonContractList(person);
-    for(Contract c : contractList){
-      if(DateUtility.isDateIntoInterval(date, factory.create(c).getContractDateInterval()))
-        return c;
-    }
-    */
-    //-----------------------
     return null;
   }
 

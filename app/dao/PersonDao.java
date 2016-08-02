@@ -26,6 +26,7 @@ import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.query.QBadge;
+import models.query.QCompetenceCode;
 import models.query.QContract;
 import models.query.QContractStampProfile;
 import models.query.QContractWorkingTimeType;
@@ -836,6 +837,25 @@ public final class PersonDao extends DaoBase {
 
     return lightQuery.list(bean);
 
+  }
+  
+  /**
+   * 
+   * @param offices
+   * @param onlyTechnician
+   * @param year
+   * @param month
+   * @param onlyOnCertificate
+   * @param code
+   * @return
+   */
+  public List<Person> getPeopleWithOvertimeEnabled(Set<Office> offices, CompetenceCode code, List<Person> list) {
+
+    final QPerson person = QPerson.person;
+    JPQLQuery query = getQueryFactory().from(person)
+        .where(person.in(list).and(person.office.in(offices)
+            .and(person.competenceCode.contains(code)))).orderBy(person.surname.asc());
+    return query.list(person);
   }
 
   /**
