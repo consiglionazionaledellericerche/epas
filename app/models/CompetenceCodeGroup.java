@@ -1,7 +1,9 @@
 package models;
 
 import models.base.BaseModel;
+import models.enumerate.LimitDescription;
 import models.enumerate.LimitType;
+import models.enumerate.LimitUnit;
 
 import play.data.validation.Required;
 
@@ -31,6 +33,15 @@ public class CompetenceCodeGroup extends BaseModel{
   
   @Column(name = "limit_value")
   public Integer limitValue;
+  
+  @Enumerated(EnumType.STRING)
+  @Column(name = "limit_description")
+  public LimitDescription limitDescription;
+  
+  @Required
+  @Enumerated(EnumType.STRING)
+  @Column(name = "limit_unit")
+  public LimitUnit limitUnit;
   
 
 }

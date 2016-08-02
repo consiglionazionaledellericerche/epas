@@ -109,6 +109,14 @@ public class Competences extends Controller {
 
     render("@edit");
   }
+  
+  /**
+   * Nuovo Codice Competenza.
+   */
+  public static void insertCompetenceCodeGroup() {
+    CompetenceCodeGroup group = new CompetenceCodeGroup();
+    render(group);
+  }
 
   /**
    * Modifica codice competence.
@@ -137,6 +145,30 @@ public class Competences extends Controller {
     competenceCode.save();
 
     flash.success(String.format("Codice %s aggiunto con successo", competenceCode.code));
+
+    manageCompetenceCode();
+  }
+  
+  public static void saveGroup(@Valid final CompetenceCodeGroup group) {
+    if (!Validation.hasErrors()) {
+      if (group.limitValue != null && group.limitDescription != null) {
+        validation.addError("group.limitValue", "Non valorizzare se valorizzato il campo descrizione limite");
+        
+      }
+    }
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      flash.error(Web.msgHasErrors());
+
+      render("@insertCompetenceCodeGroup", group);
+    }
+    group.save();
+    for (CompetenceCode code : group.competenceCodes) {
+      code.competenceCodeGroup = group;
+      code.save();
+    }
+
+    flash.success(String.format("Gruppo %s aggiunto con successo", group.label));
 
     manageCompetenceCode();
   }

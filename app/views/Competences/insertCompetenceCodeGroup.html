@@ -1,0 +1,28 @@
+#{modalAsync id:'modalCompetenceCode', button:'Salva', 
+title:(group?.persistent ? 'Modifica codice competenza' : 'Nuovo gruppo di codici competenza')}
+<div id="absenceCodeData">
+	#{alert color:'info', textcolor:'dark'}
+		<p>Compilare i campi selezionando i codici di competenza che si intende inserire nel gruppo.</p>
+	#{/alert}
+  #{form action:@Competences.saveGroup(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#absenceCodeData'}
+  
+	  #{f.hidden 'group.id' /}
+	
+	  #{f.input 'group.label'/}
+	  #{f.input 'group.limitValue'/}
+	  #{f.selectEnum 'group.limitUnit',items:models.enumerate.LimitUnit,select2:'off'/}
+	  #{f.selectEnum 'group.limitDescription',items:models.enumerate.LimitDescription,select2:'off'/}	  
+	  #{f.selectMultipleModel 'group.competenceCodes',
+  		values:templateUtility.allCodesWithoutGroup(), placeholder:'I codici di competenza' /}
+	  #{f.selectEnum 'group.limitType',items:models.enumerate.LimitType,select2:'off'/}  	
+	  	  
+	  
+	  #{b.buttons center:true}
+	      #{b.submit 'Inserisci'/}
+	  #{/b.buttons}
+	  	  
+  #{/form}
+</div>
+#{/modalAsync}

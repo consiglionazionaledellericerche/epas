@@ -10,10 +10,10 @@ title:(competenceCode?.persistent ? 'Modifica codice competenza' : 'Nuovo codice
 	  #{f.input 'competenceCode.code'/}
 	  #{f.input 'competenceCode.codeToPresence'/}
 	  #{f.input 'competenceCode.description'/}
-	  
+	  #{f.selectEnum 'competenceCode.limitDescription',items:models.enumerate.LimitDescription,select2:'off'/}
 	  #{f.selectEnum 'competenceCode.limitType',items:models.enumerate.LimitType,select2:'off'/}  	
 	  #{f.input 'competenceCode.limitValue' /}
-	  
+	  #{f.selectEnum 'competenceCode.limitUnit',items:models.enumerate.LimitUnit,select2:'off'/}
 	  #{if competenceCode != null}
 		  #{b.buttons center:true}
 		    #{b.submit 'Modifica'/}

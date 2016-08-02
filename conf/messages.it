@@ -77,6 +77,8 @@ competenceCode.description= Descrizione
 competenceCode.new= Nuovo codice di competenza
 competenceCode.limitType=Limite di utilizzo
 competenceCode.limitValue= Valore limite
+competenceCode.limitUnit =Unità di misura
+competenceCode.limitDescription =Descrizione limite
 
 configuration.entry= Parametro
 configuration.entry.value= Valore parametro
@@ -170,6 +172,13 @@ feedback.staff =Lo staff di EPAS
 file =File schedone da analizzare
 
 firstDay= Giorno inizio contratto
+
+group.label =Nome gruppo
+group.limitType =Periodo di utililzzo limite
+group.limitValue =Valore limite
+group.competenceCodes =Codici competenza associati
+group.limitUnit =Unità di misura
+group.limitDescription =Descrizione limite
 
 history.back= Indietro
 history.type= Operazione
@@ -452,6 +461,14 @@ JustifiedTimeAtWork.AssignAllDay= Assegna intera giornata
 LimitType.monthly= Mensile
 LimitType.yearly= Annuale
 LimitType.noLimit= Senza limite
+LimitType.onMonthlyPresence= Su base mensile
+
+LimitUnit.minutes =Minuti
+LimitUnit.hours =Ore
+LimitUnit.days =Giorni
+
+LimitDescription.daysOfMonth =Giorni del mese
+LimitDescription.daysOfYear =Giorni dell'anno
 
 StampTypes.MOTIVI_DI_SERVIZIO= Motivi di Servizio
 StampTypes.VISITA_MEDICA= Visita Medica
