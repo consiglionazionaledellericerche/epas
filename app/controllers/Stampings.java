@@ -30,7 +30,6 @@ import manager.NotificationManager;
 import manager.PersonManager;
 import manager.SecureManager;
 import manager.StampingManager;
-import manager.configurations.ConfigurationManager;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
@@ -97,8 +96,6 @@ public class Stampings extends Controller {
   private static StampingHistoryDao stampingsHistoryDao;
   @Inject
   private static OfficeDao officeDao;
-  @Inject
-  private static ConfigurationManager confManager;
   @Inject
   private static PersonManager personManager;
   @Inject
@@ -218,7 +215,7 @@ public class Stampings extends Controller {
   /**
    * Salva timbratura.
    *
-   * @param person   persona
+   * @param personId id persona
    * @param date     data
    * @param stamping timbratura
    * @param time     orario
@@ -432,8 +429,7 @@ public class Stampings extends Controller {
     daysRecap = stampingManager.populatePersonStampingDayRecapList(
         activePersonsInDay, date, numberOfInOut);
 
-    boolean showLink = false;
-    render(daysRecap, office, date, numberOfInOut, showLink);
+    render(daysRecap, office, date, numberOfInOut);
   }
 
   /**

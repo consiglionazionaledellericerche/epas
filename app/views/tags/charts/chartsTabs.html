@@ -8,18 +8,19 @@
    
 <div id="container-nav-tabs" class="container">
   <ul class="nav nav-tabs">
-<!--      <li #{if _activeAction.equals("indexCharts")} class="active" #{/if}>
-      <a href="@{Charts.indexCharts()}">Grafici</a>
-    </li>-->
-    <li #{if _activeAction.equals("checkLastYearAbsences")} class="active" #{/if}>
-      <a href="@{Charts.checkLastYearAbsences(null,session.get("officeSelected"))}">Controllo schedone anno passato</a>
+
+	<li #{if _activeAction.equals("checkLastYearAbsences")} class="active" #{/if}>
+      <a href="@{Charts.checkLastYearAbsences(null,session.get("officeSelected"))}">Controllo schedone<br> anno passato</a>
     </li>
-    <li #{if _activeAction.equals("exportHourAndOvertime")} class="active" #{/if}>
-      <a href="@{Charts.exportHourAndOvertime()}">Esportazione ore in più e di straordinario</a>
+    <li #{if _activeAction.equals("overtimeOnPositiveResidual")} class="active" #{/if}>
+      <a href="@{Charts.overtimeOnPositiveResidual(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected"))}">Ore positive vs. <br>straordinari mensili</a>
+    </li>    
+    <li #{if _activeAction.equals("overtimeOnPositiveResidualInYear")} class="active" #{/if}>
+      <a href="@{Charts.overtimeOnPositiveResidualInYear(session.get("yearSelected"), session.get("officeSelected"))}">Ore positive vs. <br>straordinari annuali</a>
     </li>
-    <li #{if _activeAction.equals("exportFinalSituation")} class="active" #{/if}>
-      <a href="@{Charts.exportFinalSituation()}">Esportazione informazioni finali di un dipendente</a>
-    </li>
+    <li #{if _activeAction.equals("listForExcelFile")} class="active" #{/if}>
+      <a href="@{Charts.listForExcelFile(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected"))}">Export in excel <br> della situazione mensile</a>
+    </li>     
     
   </ul>
 </div>

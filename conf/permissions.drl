@@ -493,9 +493,7 @@ when
         "WorkingTimes.showWorkingTimeType",
         "WorkingTimes.showContractWorkingTimeType",		
         "WorkingTimes.showContract",
-        "WorkingTimes.showHorizontal",
-        
-        "PersonMonths.visualizePeopleTrainingHours"		
+        "WorkingTimes.showHorizontal"      	
 
         ), target == null, granted == false)
 then
@@ -578,11 +576,8 @@ when
         "WorkingTimes.showContractWorkingTimeType",		
         "WorkingTimes.showContract",
         "WorkingTimes.showHorizontal",
-        "WorkingTimes.insertVerticalWorkingTime",
-        
-        "PersonMonths.visualizePeopleTrainingHours"
-        			
-               
+        "WorkingTimes.insertVerticalWorkingTime"
+                       
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -728,7 +723,17 @@ when
 		"BadgeSystems.joinBadgesPerson",
 		"BadgeSystems.saveBadges",
 		"BadgeSystems.deleteBadgePerson",
-		"BadgeSystems.deleteBadge"
+		"BadgeSystems.deleteBadge",
+		/*ore di formazione*/
+		"PersonMonths.visualizePeopleTrainingHours",
+        "PersonMonths.insertPeopleTrainingHours",
+        "PersonMonths.deleteTrainingHours",
+        "PersonMonths.deleteTrainingHoursConfirmed",
+        "PersonMonths.modifyTrainingHours",
+        "PersonMonths.save",
+        "PersonMonths.saveTrainingHours",
+        "Charts.listForExcelFile",
+        "Charts.test"	
         
         ), target == null, granted == false)
 then
@@ -866,7 +871,18 @@ when
 		"BadgeSystems.joinBadgesPerson",
 		"BadgeSystems.saveBadges",
 		"BadgeSystems.deleteBadgePerson",
-		"BadgeSystems.deleteBadge"
+		"BadgeSystems.deleteBadge",
+		
+		/*Ore di formazione*/
+		"PersonMonths.visualizePeopleTrainingHours",
+        "PersonMonths.insertPeopleTrainingHours",
+        "PersonMonths.deleteTrainingHours",
+        "PersonMonths.deleteTrainingHoursConfirmed",
+        "PersonMonths.modifyTrainingHours",
+        "PersonMonths.save",
+        "PersonMonths.saveTrainingHours",
+        "Charts.listForExcelFile",
+        "Charts.test"	
                
        ), target == $o, granted == false)
 then
