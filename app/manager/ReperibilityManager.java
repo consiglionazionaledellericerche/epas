@@ -729,13 +729,14 @@ public class ReperibilityManager {
   /**
    * @param competenceList            lista di competenze.
    * @param personsApprovedCompetence tabella contnente per ogni persona, coinvolta nelle competenze
-   *                                  passate come eparametro, e per ogni tipo di competenza, il
+   *                                  passate come parametro, e per ogni tipo di competenza, il
    *                                  valore approvato per quella competenza.
    */
   public void updateReperibilityDaysReportFromCompetences(
       Table<Person, String, Integer> personsApprovedCompetence, List<Competence> competenceList) {
     for (Competence competence : competenceList) {
-      log.debug("Metto nella tabella competence = {}", competence.toString());
+      log.debug("-- Metto nella tabella competence = {}", competence.toString());
+      log.debug("La tabella contiene {} ? {}", competence.person, personsApprovedCompetence.containsRow(competence.person));
       personsApprovedCompetence.put(
           competence.person, competence.competenceCode.codeToPresence, competence.valueApproved);
     }
@@ -770,7 +771,7 @@ public class ReperibilityManager {
       LocalDate startDate, LocalDate endDate) {
     // for each person contains days with absences and no-stamping  matching the reperibility days
     Table<Person, String, List<String>> inconsistentAbsenceTable =
-        TreeBasedTable.<Person, String, List<String>>create();
+        HashBasedTable.<Person, String, List<String>>create();
 
     // lista dei giorni di assenza e mancata timbratura
     List<String> noStampingDays = new ArrayList<String>();
