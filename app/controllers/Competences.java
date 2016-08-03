@@ -149,17 +149,20 @@ public class Competences extends Controller {
     manageCompetenceCode();
   }
   
+  /**
+   * salva il gruppo di codici competenza con i codici associati.
+   * @param group il gruppo di codici competenza
+   */
   public static void saveGroup(@Valid final CompetenceCodeGroup group) {
     if (!Validation.hasErrors()) {
       if (group.limitValue != null && group.limitDescription != null) {
-        validation.addError("group.limitValue", "Non valorizzare se valorizzato il campo descrizione limite");
-        
+        validation.addError("group.limitValue", 
+            "Non valorizzare se valorizzato il campo descrizione limite");        
       }
     }
     if (Validation.hasErrors()) {
       response.status = 400;
       flash.error(Web.msgHasErrors());
-
       render("@insertCompetenceCodeGroup", group);
     }
     group.save();
@@ -170,6 +173,26 @@ public class Competences extends Controller {
 
     flash.success(String.format("Gruppo %s aggiunto con successo", group.label));
 
+    manageCompetenceCode();
+  }
+  
+  /**
+   * cancella il codice di competenza dal gruppo.
+   * @param competenceCodeId l'id del codice di competenza da cancellare
+   */
+  public static void deleteCompetenceFromGroup(Long competenceCodeId, boolean confirmed) {
+    CompetenceCode code = competenceCodeDao.getCompetenceCodeById(competenceCodeId);
+    notFoundIfNull(code);
+    if (!confirmed) {
+      confirmed = true;
+      render(code, confirmed);
+    }
+    CompetenceCodeGroup group = code.competenceCodeGroup;
+    group.competenceCodes.remove(code);
+    group.save();
+    code.competenceCodeGroup = null;
+    code.save();
+    flash.success("Codice rimosso con successo");
     manageCompetenceCode();
   }
 
