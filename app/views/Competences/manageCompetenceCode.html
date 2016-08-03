@@ -4,18 +4,15 @@
 
 <div class="container">
 #{secure.check 'Competences.insertCompetenceCode' }
-<div class="row text-center">
-	#{secure.link @Competences.insertCompetenceCode(), 'data-async-modal':'#modalCompetenceCode', class:'btn btn-primary',fa:'plus' }
-		<em>Definisci nuovo codice di competenza</em>
-	#{/secure.link}
-</div>
-<div class="row text-center">
-	#{secure.link @Competences.insertCompetenceCodeGroup(), 'data-async-modal':'#modalCompetenceCode', class:'btn btn-info',fa:'cubes' }
-		<em>Definisci nuovo gruppo di codici di competenza</em>
-	#{/secure.link}
-</div>
+	#{b.buttons center:true}
+	  		#{secure.link @Competences.insertCompetenceCode(), 'data-async-modal':'#modalCompetenceCode', class:'btn btn-primary',fa:'plus' }
+				<em>Definisci nuovo codice di competenza</em>
+			#{/secure.link}
+	      	#{secure.link @Competences.insertCompetenceCodeGroup(), 'data-async-modal':'#modalCompetenceCode', class:'btn btn-info',fa:'cubes' }
+				<em>Definisci nuovo gruppo di codici di competenza</em>
+			#{/secure.link}
+	#{/b.buttons}
 #{/secure.check}
-
 	<br>
 	#{accordionGroup 'codici'}	 
 	 	#{accordionItem 'CodiciSenzaGruppo', parent:'codici', title:'Codici senza gruppo', open:false, color:'warning'}
@@ -26,6 +23,7 @@
         		<th>Codice</th>
         		<th>Codice per Attestati</th>
         		<th>Descrizione</th>
+        		
       		</tr>
       		</thead>
       		<tbody>
@@ -33,7 +31,8 @@
       		<tr>
 				<td><a href="@{Competences.edit(compCode.id)}" data-async-modal="#modalCompetenceCode">${compCode.code}</a></td>
 				<td>${compCode.codeToPresence}</td>
-				<td>${compCode.description}</td>		
+				<td>${compCode.description}</td>
+						
 			</tr>
       		#{/list}
       		</tbody>
@@ -51,6 +50,7 @@
         		<th>Codice</th>
         		<th>Codice per Attestati</th>
         		<th>Descrizione</th>
+        		<th>Elimina</th>
       		</tr>
       		</thead>
       		<tbody>
@@ -58,7 +58,9 @@
       		<tr>
 				<td><a href="@{Competences.edit(compCode.id)}" data-async-modal="#modalCompetenceCode">${compCode.code}</a></td>
 				<td>${compCode.codeToPresence}</td>
-				<td>${compCode.description}</td>		
+				<td>${compCode.description}</td>
+				<td><a class="btn btn-danger btn-xs" href="@{Competences.deleteCompetenceFromGroup(compCode.id)}"
+           			data-async-modal="#modalCompetenceCode">Rimuovi</a></td>		
 			</tr>
       		#{/list}
       		</tbody>
