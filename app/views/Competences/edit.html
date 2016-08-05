@@ -9,11 +9,19 @@ title:(competenceCode?.persistent ? 'Modifica codice competenza' : 'Nuovo codice
 	
 	  #{f.input 'competenceCode.code'/}
 	  #{f.input 'competenceCode.codeToPresence'/}
+	  <div class="row">
+	  <div class="col-sm-2"></div>
+	  <div class="col-sm-4">
+	  #{f.input 'competenceCode.limitValue', type:'number'/}
+	  </div>
+	  <div class="col-sm-4">
+	  #{f.selectEnum 'competenceCode.limitUnit',items:models.enumerate.LimitUnit,select2:'off'/}
+	  </div>	  
+	  </div>
 	  #{f.input 'competenceCode.description'/}
 	  #{f.selectEnum 'competenceCode.limitDescription',items:models.enumerate.LimitDescription,select2:'off'/}
 	  #{f.selectEnum 'competenceCode.limitType',items:models.enumerate.LimitType,select2:'off'/}  	
-	  #{f.input 'competenceCode.limitValue' /}
-	  #{f.selectEnum 'competenceCode.limitUnit',items:models.enumerate.LimitUnit,select2:'off'/}
+	#{secure.check 'Competences.insertCompetenceCode'}
 	  #{if competenceCode != null}
 		  #{b.buttons center:true}
 		    #{b.submit 'Modifica'/}
@@ -24,6 +32,7 @@ title:(competenceCode?.persistent ? 'Modifica codice competenza' : 'Nuovo codice
 	        #{b.submit 'Inserisci'/}
 	      #{/b.buttons}
 	  #{/else}	  
+	#{/secure.check}
   #{/form}
 </div>
 #{/modalAsync}

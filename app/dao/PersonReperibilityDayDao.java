@@ -7,6 +7,7 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
+import models.Office;
 import models.Person;
 import models.PersonReperibility;
 import models.PersonReperibilityDay;
@@ -29,10 +30,6 @@ import javax.persistence.EntityManager;
  */
 public class PersonReperibilityDayDao extends DaoBase {
 
-  private static final QPersonReperibilityDay prd = QPersonReperibilityDay.personReperibilityDay;
-  private static final QPersonReperibilityType prt = QPersonReperibilityType.personReperibilityType;
-  private static final QPersonReperibility pr = QPersonReperibility.personReperibility;
-
   @Inject
   PersonReperibilityDayDao(JPQLQueryFactory queryFactory,
                            Provider<EntityManager> emp) {
@@ -49,7 +46,7 @@ public class PersonReperibilityDayDao extends DaoBase {
    *     reperibile. Null altrimenti.
    */
   public Optional<PersonReperibilityDay> getPersonReperibilityDay(Person person, LocalDate date) {
-
+    QPersonReperibilityDay prd = QPersonReperibilityDay.personReperibilityDay;
     JPQLQuery query = getQueryFactory().from(prd)
             .where(prd.personReperibility.person.eq(person).and(prd.date.eq(date)));
 
@@ -63,6 +60,7 @@ public class PersonReperibilityDayDao extends DaoBase {
    */
   public PersonReperibilityDay getPersonReperibilityDayByTypeAndDate(
       PersonReperibilityType type, LocalDate date) {
+    QPersonReperibilityDay prd = QPersonReperibilityDay.personReperibilityDay;
     JPQLQuery query =
         getQueryFactory().from(prd)
           .where(prd.date.eq(date).and(prd.reperibilityType.eq(type)));
@@ -74,6 +72,7 @@ public class PersonReperibilityDayDao extends DaoBase {
    */
   public List<PersonReperibilityDay> getPersonReperibilityDayFromPeriodAndType(
       LocalDate begin, LocalDate to, PersonReperibilityType type, Optional<PersonReperibility> pr) {
+    QPersonReperibilityDay prd = QPersonReperibilityDay.personReperibilityDay;
     BooleanBuilder condition = new BooleanBuilder();
     if (pr.isPresent()) {
       condition.and(prd.personReperibility.eq(pr.get()));
@@ -89,6 +88,7 @@ public class PersonReperibilityDayDao extends DaoBase {
    *     il giorno day.
    */
   public long deletePersonReperibilityDay(PersonReperibilityType type, LocalDate day) {
+    QPersonReperibilityDay prd = QPersonReperibilityDay.personReperibilityDay;
     Long deleted =
         getQueryFactory().delete(prd)
           .where(prd.reperibilityType.eq(type).and(prd.date.eq(day))).execute();
@@ -103,8 +103,30 @@ public class PersonReperibilityDayDao extends DaoBase {
    * @return il personReperibilityType relativo all'id passato come parametro.
    */
   public PersonReperibilityType getPersonReperibilityTypeById(Long id) {
+    QPersonReperibilityType prt = QPersonReperibilityType.personReperibilityType;
     JPQLQuery query = getQueryFactory().from(prt).where(prt.id.eq(id));
     return query.singleResult(prt);
+  }
+  
+  /**
+   * 
+   * @return la lista di tutti i PersonReperibilityType presenti sul db.
+   */
+  public List<PersonReperibilityType> getAllReperibilityType() {
+    QPersonReperibilityType prt = QPersonReperibilityType.personReperibilityType;
+    JPQLQuery query = getQueryFactory().from(prt).orderBy(prt.description.asc());
+    return query.list(prt);
+  }
+  
+  /**
+   * 
+   * @param office l'ufficio per cui ritornare la lista dei servizi per cui si richiede la reperibilità
+   * @return la lista dei servizi per cui si vuole la reperibilità.
+   */
+  public List<PersonReperibilityType> getReperibilityTypeByOffice(Office office) {
+    QPersonReperibilityType prt = QPersonReperibilityType.personReperibilityType;
+    JPQLQuery query = getQueryFactory().from(prt).where(prt.office.eq(office));
+    return query.list(prt);
   }
 
   //***************************************************************/
@@ -117,6 +139,7 @@ public class PersonReperibilityDayDao extends DaoBase {
    */
   public PersonReperibility getPersonReperibilityByPersonAndType(
       Person person, PersonReperibilityType type) {
+    QPersonReperibility pr = QPersonReperibility.personReperibility;
     JPQLQuery query =
         getQueryFactory().from(pr)
           .where(pr.person.eq(person).and(pr.personReperibilityType.eq(type)));
@@ -130,6 +153,7 @@ public class PersonReperibilityDayDao extends DaoBase {
    *     come parametro.
    */
   public List<PersonReperibility> getPersonReperibilityByType(PersonReperibilityType type) {
+    QPersonReperibility pr = QPersonReperibility.personReperibility;
     JPQLQuery query = getQueryFactory().from(pr).where(pr.personReperibilityType.eq(type));
     return query.list(pr);
   }

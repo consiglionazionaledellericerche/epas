@@ -21,6 +21,10 @@ ALTER TABLE competence_codes ADD COLUMN limit_unit TEXT;
 ALTER TABLE competence_codes ADD COLUMN limit_description TEXT;
 ALTER TABLE competence_codes ADD FOREIGN KEY (competence_code_group_id) REFERENCES competence_code_groups(id);
 
+ALTER TABLE person_reperibility_types_history ADD COLUMN office_id BIGINT;
+ALTER TABLE person_reperibility_types ADD COLUMN office_id BIGINT;
+ALTER TABLE person_reperibility_types ADD FOREIGN KEY (office_id) REFERENCES office(id);
+
 UPDATE competence_codes SET limit_type = 'monthly' WHERE code in ('207', '208', 'T1', 'T2', 'T3', '351', '352', '353', '354', '355');
 UPDATE competence_codes SET limit_type = 'yearly' WHERE code in ('S1', 'S2', 'S3');
 UPDATE competence_codes SET limit_type = 'noLimit' WHERE code not in ('207', '208', 'S1', 'S2', 'S3', 'T1', 'T2', 'T3', '351', '352', '353', '354', '355');
@@ -56,8 +60,13 @@ WHERE competence_codes.code in ('351', '352', '353', '354', '355') and competenc
 
 ALTER TABLE competence_codes DROP COLUMN limit_value;
 ALTER TABLE competence_codes DROP COLUMN limit_type;
+ALTER TABLE competence_codes DROP COLUMN limit_unit;
+ALTER TABLE competence_codes DROP COLUMN limit_description;
 ALTER TABLE competence_codes DROP CONSTRAINT competence_codes_competence_code_group_id_fkey;
 ALTER TABLE competence_codes DROP COLUMN competence_code_group_id;
+
+ALTER TABLE person_reperibility_types DROP CONSTRAINT person_reperibility_types_office_id fkey;
+ALTER TABLE person_reperibility_types DROP COLUMN office_id;
 
 DROP TABLE competence_code_groups;
 

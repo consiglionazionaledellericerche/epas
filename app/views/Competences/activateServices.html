@@ -1,0 +1,43 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Attiva servizi'  /}
+
+#{competences.manageCompetencesTabs activeAction:'activateServices' /}
+
+<div class="container">
+#{title title:'Attiva servizi per reperibilità', administration:true /}
+
+#{alert color:'info'}
+	In questa pagina è possibile abilitare i servizi che la sede <strong>${office.code} - ${office.name}</strong> mette a disposizione e sui quali è stata
+	richiesta (e ottenuta) l'autorizzazione a fornire <strong>Reperibilità</strong> ai propri dipendenti.<br>
+	Per ciascun servizio che la sede si vede abilitare per reperibilità, la sede centrale eroga giorni di reperibilità in numero 
+	uguale ai giorni del mese in cui la reperibilità è attiva. <br><strong>Es.:</strong> Giugno <i class="fa fa-long-arrow-right" aria-hidden="true"></i> 30 gg 
+	<i class="fa fa-long-arrow-right" aria-hidden="true"></i> 30gg di reperibilità per ciascun servizio
+#{/alert}
+
+#{b.buttons center:true}
+	<a class="btn btn-success" href="@{addService()}" data-async-modal="#modalEditInstitute">
+    <i class="fa fa-plus"></i> Nuovo servizio per reperibilità
+  </a>
+#{/b.buttons}
+<table class="table">
+      		<thead>
+      		<tr>
+        		<th>Nome</th>
+        		<th>Eventuale supervisore</th>
+        		
+
+      		</tr>
+      		</thead>
+      		<tbody>
+      		#{list items:prtList, as:'prt'}
+      		<tr>
+				<td>${prt.description}</td>
+				<td>${prt.supervisor}</td>
+			</tr>
+      		#{/list}
+      		</tbody>
+    		</table>
+</div>
+
+<div id="modalEditInstitute" class="modal fade container" tabindex="-1"></div>

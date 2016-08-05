@@ -10,9 +10,16 @@ title:(group?.persistent ? 'Modifica codice competenza' : 'Nuovo gruppo di codic
   
 	  #{f.hidden 'group.id' /}
 	
-	  #{f.input 'group.label'/}
+	  #{f.input 'group.label'/}	  
+	  <div class="row">
+	  <div class="col-sm-2"></div>
+	  <div class="col-sm-4">
 	  #{f.input 'group.limitValue'/}
-	  #{f.selectEnum 'group.limitUnit',items:models.enumerate.LimitUnit,select2:'off'/}
+	  </div>
+	  <div class="col-sm-4">
+	 #{f.selectEnum 'group.limitUnit',items:models.enumerate.LimitUnit,select2:'off'/}
+	  </div>	  
+	  </div>
 	  #{f.selectEnum 'group.limitDescription',items:models.enumerate.LimitDescription,select2:'off'/}	  
 	  #{f.selectMultipleModel 'group.competenceCodes',
   		values:templateUtility.allCodesWithoutGroup(), placeholder:'I codici di competenza' /}
