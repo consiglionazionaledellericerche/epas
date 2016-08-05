@@ -76,7 +76,7 @@ competenceCode.codeToPresence= Codice per attestato di presenza
 competenceCode.description= Descrizione
 competenceCode.new= Nuovo codice di competenza
 competenceCode.limitType=Limite di utilizzo
-competenceCode.limitValue= Valore limite
+competenceCode.limitValue= Quantità massima
 competenceCode.limitUnit =Unità di misura
 competenceCode.limitDescription =Descrizione limite
 
@@ -175,7 +175,7 @@ firstDay= Giorno inizio contratto
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite
-group.limitValue =Valore limite
+group.limitValue =Quantità massima
 group.competenceCodes =Codici competenza associati
 group.limitUnit =Unità di misura
 group.limitDescription =Descrizione limite

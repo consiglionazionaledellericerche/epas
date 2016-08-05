@@ -15,6 +15,7 @@ import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonMonthRecapDao;
+import dao.PersonReperibilityDayDao;
 import dao.wrapper.IWrapperCompetenceCode;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperContractMonthRecap;
@@ -43,6 +44,7 @@ import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
+import models.PersonReperibilityType;
 import models.TotalOvertime;
 import models.User;
 
@@ -91,6 +93,8 @@ public class Competences extends Controller {
   private static ConsistencyManager consistencyManager;
   @Inject
   private static PersonStampingRecapFactory stampingsRecapFactory;
+  @Inject
+  private static PersonReperibilityDayDao reperibilityDao;
 
   /**
    * Crud CompetenceCode.
@@ -111,7 +115,7 @@ public class Competences extends Controller {
   }
   
   /**
-   * Nuovo Codice Competenza.
+   * Nuovo gruppo di codici competenza.
    */
   public static void insertCompetenceCodeGroup() {
     CompetenceCodeGroup group = new CompetenceCodeGroup();
@@ -119,7 +123,7 @@ public class Competences extends Controller {
   }
 
   /**
-   * Modifica codice competence.
+   * Modifica codice competenza.
    *
    * @param competenceCodeId codice
    */
@@ -135,7 +139,12 @@ public class Competences extends Controller {
    * @param competenceCode codice
    */
   public static void save(@Valid final CompetenceCode competenceCode) {
-
+    if (!Validation.hasErrors()) {
+      if (competenceCode.limitValue != null && competenceCode.limitDescription != null) {
+        validation.addError("competenceCode.limitValue", 
+            "Non valorizzare se valorizzato il campo descrizione limite");        
+      }
+    }
     if (Validation.hasErrors()) {
       response.status = 400;
       flash.error(Web.msgHasErrors());
@@ -618,5 +627,23 @@ public class Competences extends Controller {
       render(tableFeature, yearParams, monthParams, simpleResults, name);
     }
   }
+  
+  /**
+   * 
+   * @param officeId
+   */
+  public static void activateServices(Long officeId) {
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
 
+    rules.checkIfPermitted(office);
+    List<PersonReperibilityType> prtList = reperibilityDao.getReperibilityTypeByOffice(office);
+    
+    render(office, prtList);
+  }
+
+  
+  public static void addService() {
+    
+  }
 }

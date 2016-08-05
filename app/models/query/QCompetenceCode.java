@@ -42,7 +42,11 @@ public class QCompetenceCode extends EntityPathBase<CompetenceCode> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
+    public final EnumPath<models.enumerate.LimitDescription> limitDescription = createEnum("limitDescription", models.enumerate.LimitDescription.class);
+
     public final EnumPath<models.enumerate.LimitType> limitType = createEnum("limitType", models.enumerate.LimitType.class);
+
+    public final EnumPath<models.enumerate.LimitUnit> limitUnit = createEnum("limitUnit", models.enumerate.LimitUnit.class);
 
     public final NumberPath<Integer> limitValue = createNumber("limitValue", Integer.class);
 

@@ -1,0 +1,14 @@
+
+
+<div id="container-nav-tabs" class="container">
+  <ul class="nav nav-tabs">
+    <li #{if _activeAction.equals("manageCompetenceCode")} class="active" #{/if}>
+      <a href="@{Competences.manageCompetenceCode()}">Gestione codici e gruppi di competenze</a>
+    </li>
+    <li #{if _activeAction.equals("activeServices")} class="active" #{/if}>
+      <a href="@{Competences.activateServices(session.get("officeSelected"))}">Attiva servizi per reperibilità</a>
+    </li>
+    
+  </ul>
+</div>
+<br>

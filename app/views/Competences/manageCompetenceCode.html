@@ -2,7 +2,10 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione Codici competenze' /}
 
+#{competences.manageCompetencesTabs activeAction:'manageCompetenceCode' /}
+
 <div class="container">
+#{title title:'Codici e gruppi di competenza', administration:true /}
 #{secure.check 'Competences.insertCompetenceCode' }
 	#{b.buttons center:true}
 	  		#{secure.link @Competences.insertCompetenceCode(), 'data-async-modal':'#modalCompetenceCode', class:'btn btn-primary',fa:'plus' }
@@ -15,7 +18,7 @@
 #{/secure.check}
 	<br>
 	#{accordionGroup 'codici'}	 
-	 	#{accordionItem 'CodiciSenzaGruppo', parent:'codici', title:'Codici senza gruppo', open:false, color:'warning'}
+	 	#{accordionItem 'CodiciSenzaGruppo', parent:'codici', title:'Codici senza gruppo', open:true, color:'warning'}
 	 	<div class="col-md-8 col-md-offset-2">
     		<table class="table">
       		<thead>
@@ -42,7 +45,7 @@
 	#{/accordionGroup}	
 	#{accordionGroup 'codiciGruppo'}
 	 #{list items:groupList, as:'group'}
-	 	#{accordionItem group.id, parent:'codiciGruppo', title:group.label, open:true, color:'info'}
+	 	#{accordionItem group.id, parent:'codiciGruppo', title:group.label, open:false, color:'info'}
 	 	<div class="col-md-8 col-md-offset-2">
     		<table class="table">
       		<thead>
@@ -50,7 +53,9 @@
         		<th>Codice</th>
         		<th>Codice per Attestati</th>
         		<th>Descrizione</th>
+        		 #{secure.check 'Competences.insertCompetenceCode'}
         		<th>Elimina</th>
+        		#{/secure.check}
       		</tr>
       		</thead>
       		<tbody>
@@ -59,8 +64,10 @@
 				<td><a href="@{Competences.edit(compCode.id)}" data-async-modal="#modalCompetenceCode">${compCode.code}</a></td>
 				<td>${compCode.codeToPresence}</td>
 				<td>${compCode.description}</td>
+				#{secure.check 'Competences.insertCompetenceCode'}
 				<td><a class="btn btn-danger btn-xs" href="@{Competences.deleteCompetenceFromGroup(compCode.id)}"
-           			data-async-modal="#modalCompetenceCode">Rimuovi</a></td>		
+           			data-async-modal="#modalCompetenceCode">Rimuovi</a></td>	
+           		#{/secure.check}	
 			</tr>
       		#{/list}
       		</tbody>
