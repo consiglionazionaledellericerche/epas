@@ -1,0 +1,15 @@
+#{modalAsync id:'modalActivateService', button:'Salva', 
+title:('Attiva nuovo servizio per reperibilità ' )}
+<div id="absenceCodeData">
+  #{form action:@Competences.saveService(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#absenceCodeData'}
+  
+  #{f.hidden 'type.id' /}
+  #{f.input 'type.description'/}
+  #{f.selectModel 'type.office', items: templateUtility.officesAllowed(), required:true /}
+  #{f.selectModel 'type.supervisor', items: officePeople, required:true /}
+
+  #{/form}
+</div>
+#{/modalAsync}
