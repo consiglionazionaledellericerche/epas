@@ -1,6 +1,7 @@
 #{modalAsync id:'modalCompetenceCode', button:'Salva', 
 title:(competenceCode?.persistent ? 'Modifica codice competenza' : 'Nuovo codice competenza')}
 <div id="absenceCodeData">
+  #{include './_tutorialFill.html' /}
   #{form action:@Competences.save(), method:'POST', autocomplete:false,
   class:'form form-horizontal', 'data-async':'#page_content',
   'data-async-error':'#absenceCodeData'}
@@ -9,6 +10,7 @@ title:(competenceCode?.persistent ? 'Modifica codice competenza' : 'Nuovo codice
 	
 	  #{f.input 'competenceCode.code'/}
 	  #{f.input 'competenceCode.codeToPresence'/}
+	  #{f.input 'competenceCode.description'/}
 	  <div class="row">
 	  <div class="col-sm-2"></div>
 	  <div class="col-sm-4">
@@ -18,7 +20,7 @@ title:(competenceCode?.persistent ? 'Modifica codice competenza' : 'Nuovo codice
 	  #{f.selectEnum 'competenceCode.limitUnit',items:models.enumerate.LimitUnit,select2:'off'/}
 	  </div>	  
 	  </div>
-	  #{f.input 'competenceCode.description'/}
+	  
 	  #{f.selectEnum 'competenceCode.limitDescription',items:models.enumerate.LimitDescription,select2:'off'/}
 	  #{f.selectEnum 'competenceCode.limitType',items:models.enumerate.LimitType,select2:'off'/}  	
 	#{secure.check 'Competences.insertCompetenceCode'}
