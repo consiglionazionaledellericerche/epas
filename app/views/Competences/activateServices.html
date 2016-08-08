@@ -16,10 +16,16 @@
 #{/alert}
 
 #{b.buttons center:true}
-	<a class="btn btn-success" href="@{addService()}" data-async-modal="#modalEditInstitute">
+	<a class="btn btn-success" href="@{addService(session.get("officeSelected"))}" data-async-modal="#modalActivateService">
     <i class="fa fa-plus"></i> Nuovo servizio per reperibilità
   </a>
 #{/b.buttons}
+#{if prtList.isEmpty()}
+	#{alert color:'warning'}
+	<p>Al momento per la sede selezionata non sono state assegnate reperibilità per alcun servizio</p>
+	#{/alert}
+#{/if}
+#{else}
 <table class="table">
       		<thead>
       		<tr>
@@ -35,7 +41,8 @@
 			</tr>
       		#{/list}
       		</tbody>
-    		</table>
+</table>
+#{/else}
 </div>
 
-<div id="modalEditInstitute" class="modal fade container" tabindex="-1"></div>
+<div id="modalActivateService" class="modal fade container" tabindex="-1"></div>

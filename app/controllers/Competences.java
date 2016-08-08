@@ -123,7 +123,7 @@ public class Competences extends Controller {
   }
 
   /**
-   * Modifica codice competenza.
+   * Modifica codice competenza. Chiama la show se chi invoca il metodo è un utente fisico.
    *
    * @param competenceCodeId codice
    */
@@ -136,6 +136,10 @@ public class Competences extends Controller {
     }    
   }
 
+  /**
+   * metodo che renderizza la sola visualizzazione dei dati di un competenceCode.
+   * @param competenceCode il codice di competenza da visualizzare
+   */
   public static void show(CompetenceCode competenceCode) {
     render(competenceCode);
   }
@@ -650,8 +654,26 @@ public class Competences extends Controller {
     render(office, prtList);
   }
 
+  /**
+   * Metodo che renderizza la form di inserimento di un nuovo servizio da attivare per la reperibilità.
+   * @param officeId
+   */
+  public static void addService(Long officeId) {
+    PersonReperibilityType type = new PersonReperibilityType();
+    Office office = officeDao.getOfficeById(officeId);
+    rules.checkIfPermitted(office);
+    List<Person> officePeople = personDao.list(Optional.<String>absent(),
+        Sets.newHashSet(office), false, null, null, false).list();
+        
+    render(type, officePeople);
+  }
   
-  public static void addService() {
-    
+  /**
+   * Metodo per la persistenza del servizio creato dalla form.
+   */
+  public static void saveService(PersonReperibilityType type) {
+    /*
+     * TODO:Inserire la logica di salvataggio del tipo di servizio per reperibilità.
+     */
   }
 }

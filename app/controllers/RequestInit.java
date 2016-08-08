@@ -250,7 +250,8 @@ public class RequestInit extends Controller {
         "Charts.checkLastYearAbsences",
         "Charts.overtimeOnPositiveResidual",
         "Charts.overtimeOnPositiveResidualInYear",
-        "Charts.listForExcelFile");
+        "Charts.listForExcelFile",
+        "Competences.activateServices");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
         "Stampings.insertWorkingOffSitePresence",
