@@ -1,9 +1,7 @@
 #{modalAsync id:'modalCompetenceCode', button:'Salva', 
 title:(group?.persistent ? 'Modifica codice competenza' : 'Nuovo gruppo di codici competenza')}
 <div id="absenceCodeData">
-	#{alert color:'info', textcolor:'dark'}
-		<p>Compilare i campi selezionando i codici di competenza che si intende inserire nel gruppo.</p>
-	#{/alert}
+  #{include './_tutorialFill.html' /}	
   #{form action:@Competences.saveGroup(), method:'POST', autocomplete:false,
   class:'form form-horizontal', 'data-async':'#page_content',
   'data-async-error':'#absenceCodeData'}

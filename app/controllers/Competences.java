@@ -128,11 +128,19 @@ public class Competences extends Controller {
    * @param competenceCodeId codice
    */
   public static void edit(Long competenceCodeId) {
-
     CompetenceCode competenceCode = competenceCodeDao.getCompetenceCodeById(competenceCodeId);
-    render(competenceCode);
+    if (Security.getUser().get().person != null) {
+      render("@show", competenceCode);
+    } else {      
+      render(competenceCode);
+    }    
   }
 
+  public static void show(CompetenceCode competenceCode) {
+    render(competenceCode);
+  }
+  
+  
   /**
    * Salva codice competenza.
    *
