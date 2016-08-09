@@ -284,6 +284,7 @@ PDFReport.thWarnStampings=Orario incompleto fuori tolleranza
 person.badgeNumber=Numero Badge
 person.badge= Numero badge
 person.birthday=Data di nascita
+person.competenceCode =Codici di competenza abilitati
 person.currentVacationPeriod= Ferie
 person.currentWorkingTimeType= Tipo Orario
 person.email=Email
