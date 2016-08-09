@@ -114,6 +114,28 @@ public class Competences extends Controller {
 
     render("@edit");
   }
+  
+  /**
+   * 
+   * @param competenceCodeId
+   * @param confirmed
+   */
+  public static void evaluateCompetenceCode(Long competenceCodeId, boolean confirmed) {
+    CompetenceCode comp = competenceCodeDao.getCompetenceCodeById(competenceCodeId);
+    notFoundIfNull(comp);
+    if (!confirmed) {
+      confirmed = true;
+      render(comp, confirmed);
+    }
+    if (comp.disabled) {
+      comp.disabled = false;
+    } else {
+      comp.disabled = true;
+    }    
+    comp.save();
+    flash.success("Operazione effettuata");
+    manageCompetenceCode();
+  }
 
   /**
    * Nuovo gruppo di codici competenza.

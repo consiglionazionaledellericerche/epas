@@ -25,16 +25,28 @@
       		<tr>
         		<th>Codice</th>
         		<th>Codice per Attestati</th>
-        		<th>Descrizione</th>        		
+        		<th>Descrizione</th>
+        		<th>Disabilitato</th>        		
       		</tr>
       		</thead>
       		<tbody>
-      		#{list items:compCodeList, as:'compCode'}	
-      		<tr>
+      		#{list items:compCodeList, as:'compCode'}
+      			
+      		<tr #{if compCode.disabled}class="danger" #{/if}>
 				<td><a href="@{Competences.edit(compCode.id)}" data-async-modal="#modalCompetenceCode">${compCode.code}</a></td>
 				<td>${compCode.codeToPresence}</td>
-				<td>${compCode.description}</td>						
+				<td>${compCode.description}</td>
+				<td>#{if compCode.disabled}
+						<a class="fa fa-check" aria-hidden="true" href="@{Competences.evaluateCompetenceCode(compCode.id)}"
+           			data-async-modal="#modalCompetenceCode"></a>
+					#{/if}
+					#{else}
+						<a class="fa fa-times" aria-hidden="true" href="@{Competences.evaluateCompetenceCode(compCode.id)}"
+           			data-async-modal="#modalCompetenceCode"></a>
+					#{/else}
+				</td>						
 			</tr>
+			
       		#{/list}
       		</tbody>
     		</table>

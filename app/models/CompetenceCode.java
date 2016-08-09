@@ -53,6 +53,8 @@ public class CompetenceCode extends BaseModel {
   @Required
   public String description;
   
+  public boolean disabled;
+  
   @Required
   @Enumerated(EnumType.STRING)
   @Column(name = "limit_type")

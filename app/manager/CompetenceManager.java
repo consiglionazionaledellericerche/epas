@@ -361,32 +361,7 @@ public class CompetenceManager {
     return true;
   }
 
-  /**
-   * questo metodo si è reso necessario dal momento che nel tempo alcuni codici di competenza non 
-   * risultano più fruibili, pertanto devono essere eliminati dalla lista dei codici prendibili.
-   */
-  public void deleteObsoleteCompetenceCodes() {
-    CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("050");
-    if (code == null) {
-      return;
-    }      
-    List<Competence> complist = competenceDao.findCompetence(code);
-    if (!complist.isEmpty()) {
-      for (Competence comp : complist) {
-        if (comp.year < personDayDao.getOldestPersonDay().date.getYear()) {
-          comp.delete();
-        }
-      }
-    }      
-    List<Person> personList = personDao.peopleWithCompetenceCodeActive(code);
-    if (!personList.isEmpty()) {
-      for (Person person : personList) {
-        person.competenceCode.remove(code);
-        person.save();
-      }
-    }
-    code.delete();
-  }
+
   
   /**
    * persiste la competenza aggiornando il valore approvato per essa.
