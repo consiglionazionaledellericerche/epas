@@ -36,6 +36,8 @@ public class QCompetenceCode extends EntityPathBase<CompetenceCode> {
 
     public final StringPath description = createString("description");
 
+    public final BooleanPath disabled = createBoolean("disabled");
+
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 

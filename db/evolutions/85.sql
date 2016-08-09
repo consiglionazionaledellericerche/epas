@@ -14,6 +14,7 @@ INSERT INTO competence_code_groups(label, limit_type, limit_value, limit_descrip
 INSERT INTO competence_code_groups(label, limit_type, limit_value, limit_description, limit_unit) values('Gruppo turni', 'monthly', 165, null, 'hours');
 INSERT INTO competence_code_groups(label, limit_type, limit_value, limit_description, limit_unit) values('Gruppo Ind.tà rischio', 'monthly', null, 'daysOfMonth', 'days');
 
+ALTER TABLE competence_codes ADD COLUMN disabled BOOLEAN;
 ALTER TABLE competence_codes ADD COLUMN limit_value INTEGER;
 ALTER TABLE competence_codes ADD COLUMN limit_type TEXT;
 ALTER TABLE competence_codes ADD COLUMN competence_code_group_id BIGINT;
@@ -38,6 +39,8 @@ UPDATE competence_codes SET limit_unit = 'days' where code in ('207', '208', '35
 UPDATE competence_codes SET limit_unit = 'hours' where code in ('T1', 'T2', 'T3', 'S1', 'S2', 'S3');
 UPDATE competence_codes SET limit_description = 'daysOfMonth' where code in ('351', '352', '353', '354', '355');
 
+UPDATE competence_codes SET disabled = 'true' WHERE code = '050';
+UPDATE competence_codes SET disabled = 'false' WHERE code <> '050';
 
 UPDATE competence_codes SET competence_code_group_id = competence_code_groups.id
 FROM competence_code_groups

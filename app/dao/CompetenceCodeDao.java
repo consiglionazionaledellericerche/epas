@@ -95,7 +95,7 @@ public class CompetenceCodeDao extends DaoBase {
     final QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
     final JPQLQuery query = getQueryFactory().from(competenceCode)
         .where(competenceCode.competenceCodeGroup.isNull());
-    return query.orderBy(competenceCode.code.asc()).list(competenceCode);
+    return query.orderBy(competenceCode.disabled.asc(), competenceCode.code.asc()).list(competenceCode);
   }
   
   /**
