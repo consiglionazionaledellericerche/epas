@@ -114,7 +114,7 @@ public class Competences extends Controller {
 
     render("@edit");
   }
-  
+
   /**
    * Nuovo gruppo di codici competenza.
    */
@@ -144,8 +144,8 @@ public class Competences extends Controller {
   public static void show(CompetenceCode competenceCode) {
     render(competenceCode);
   }
-  
-  
+
+
   /**
    * Salva codice competenza.
    *
@@ -170,7 +170,7 @@ public class Competences extends Controller {
 
     manageCompetenceCode();
   }
-  
+
   /**
    * salva il gruppo di codici competenza con i codici associati.
    * @param group il gruppo di codici competenza
@@ -197,7 +197,7 @@ public class Competences extends Controller {
 
     manageCompetenceCode();
   }
-  
+
   /**
    * cancella il codice di competenza dal gruppo.
    * @param competenceCodeId l'id del codice di competenza da cancellare
@@ -230,7 +230,7 @@ public class Competences extends Controller {
     LocalDate date = new LocalDate();
     List<Person> personList = personDao.list(Optional.<String>absent(), Sets.newHashSet(office),
         false, date, date.dayOfMonth().withMaximumValue(), true).list();
-   
+
     render(personList, office);
   }
 
@@ -390,14 +390,14 @@ public class Competences extends Controller {
   public static void insertCompetence(Long competenceId) {
     Competence competence = competenceDao.getCompetenceById(competenceId);
     notFoundIfNull(competence);
-       
+
     Office office = competence.person.office;
     if (competence.competenceCode.code.equals("S1")) {
       PersonStampingRecap psDto = stampingsRecapFactory.create(competence.person, 
           competence.year, competence.month, true);
       render(competence, psDto, office);
     }
-   
+
     render(competence, office); 
   }
 
@@ -406,13 +406,13 @@ public class Competences extends Controller {
    * @param competence la competenza relativa alla persona
    */
   public static void saveCompetence(Integer valueApproved, Competence competence) {
-    
+
     notFoundIfNull(competence);
     Office office = competence.person.office;
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
     if (!validation.hasErrors()) {
-      
+
       if (!competenceManager.canAddCompetence(competence, valueApproved)) {
         validation.addError("valueApproved", "Non può superare il limite previsto per il codice");
       }
@@ -421,7 +421,7 @@ public class Competences extends Controller {
       response.status = 400;
       render("@insertCompetence", competence, office);
     }
-    
+
     competenceManager.saveCompetence(competence, valueApproved);
     consistencyManager.updatePersonSituation(competence.person.id, 
         new LocalDate(competence.year, competence.month, 1));
@@ -598,49 +598,33 @@ public class Competences extends Controller {
    *
    * @param year  l'anno di riferimento
    * @param month il mese di riferimento
-   * @param name  il nome su cui filtrare
-   * @param page  la pagina su cui filtrare
    */
-  public static void monthlyOvertime(Integer year, Integer month, String name, Integer page) {
+  public static void monthlyOvertime(Integer year, Integer month) {
 
     if (!Security.getUser().get().person.isPersonInCharge) {
       forbidden();
     }
-
     User user = Security.getUser().get();
-    if (page == null) {
-      page = 0;
-    }
     Table<Person, String, Integer> tableFeature = null;
     LocalDate beginMonth = null;
-    if (year == 0 && month == 0) {
-      int yearParams = params.get("year", Integer.class);
-      int monthParams = params.get("month", Integer.class);
-      beginMonth = new LocalDate(yearParams, monthParams, 1);
-    } else {
-      beginMonth = new LocalDate(year, month, 1);
-    }
+
+    beginMonth = new LocalDate(year, month, 1);
+
     CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
     SimpleResults<Person> simpleResults = personDao.listForCompetence(code,
-        Optional.fromNullable(name),
+        Optional.<String>absent(),
         Sets.newHashSet(user.person.office),
         false,
         new LocalDate(year, month, 1),
         new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(),
         Optional.fromNullable(user.person));
     tableFeature = competenceManager.composeTableForOvertime(year, month,
-        page, name, user.person.office, beginMonth, simpleResults, code);
+        null, null, user.person.office, beginMonth, simpleResults, code);
 
+    render(tableFeature, year, month, simpleResults);
 
-    if (year != 0 && month != 0) {
-      render(tableFeature, year, month, simpleResults, name);
-    } else {
-      int yearParams = params.get("year", Integer.class);
-      int monthParams = params.get("month", Integer.class);
-      render(tableFeature, yearParams, monthParams, simpleResults, name);
-    }
   }
-  
+
   /**
    * 
    * @param officeId
@@ -651,7 +635,7 @@ public class Competences extends Controller {
 
     rules.checkIfPermitted(office);
     List<PersonReperibilityType> prtList = reperibilityDao.getReperibilityTypeByOffice(office);
-    
+
     render(office, prtList);
   }
 
@@ -665,10 +649,10 @@ public class Competences extends Controller {
     rules.checkIfPermitted(office);
     List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office), 
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
-        
+
     render(type, officePeople);
   }
-  
+
   /**
    * Metodo per la persistenza del servizio creato dalla form.
    */
@@ -681,7 +665,7 @@ public class Competences extends Controller {
       render("@addService", type, officePeople);
     }
     type.save();
-    flash.success("Nuovo servizio inserito correttamente");
+    flash.success("Nuovo servizio %s inserito correttamente per la sede %s", type.description, type.office);
     activateServices(type.office.id);
   }
 }

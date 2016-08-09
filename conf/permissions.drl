@@ -676,6 +676,9 @@ when
         "Competences.saveOvertime",
         "Competences.updatePersonCompetence",
         "Competences.saveNewCompetenceConfiguration",
+        "Competences.addService",
+        "Competences.activateServices",
+        "Competences.saveService",
         
         /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
@@ -816,6 +819,9 @@ when
         "Competences.saveOvertime",
         "Competences.updatePersonCompetence",
         "Competences.saveNewCompetenceConfiguration",
+        "Competences.addService",
+        "Competences.activateServices",
+        "Competences.saveService",
         
          /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
