@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.SecureManager;
-import manager.recaps.PersonCompetenceRecap;
+
 import manager.recaps.competence.PersonMonthCompetenceRecap;
 import manager.recaps.competence.PersonMonthCompetenceRecapFactory;
 import manager.recaps.personstamping.PersonStampingRecap;
@@ -270,10 +270,8 @@ public class Competences extends Controller {
     }
     Person person = personDao.getPersonById(personId);
     rules.checkIfPermitted(person.office);
-    PersonCompetenceRecap pcr = new PersonCompetenceRecap(
-        person, competenceCodeDao.getAllCompetenceCode());
-
-    render(pcr, person);
+    
+    render(person);
   }
 
   /**
@@ -284,6 +282,7 @@ public class Competences extends Controller {
    */
   public static void saveNewCompetenceConfiguration(Long personId,
       Map<String, Boolean> competence) {
+    //TODO: terminare cambiando il controller
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
