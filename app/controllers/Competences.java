@@ -49,6 +49,7 @@ import models.TotalOvertime;
 import models.User;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -662,8 +663,8 @@ public class Competences extends Controller {
     PersonReperibilityType type = new PersonReperibilityType();
     Office office = officeDao.getOfficeById(officeId);
     rules.checkIfPermitted(office);
-    List<Person> officePeople = personDao.list(Optional.<String>absent(),
-        Sets.newHashSet(office), false, null, null, false).list();
+    List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office), 
+        new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
         
     render(type, officePeople);
   }
@@ -671,9 +672,16 @@ public class Competences extends Controller {
   /**
    * Metodo per la persistenza del servizio creato dalla form.
    */
-  public static void saveService(PersonReperibilityType type) {
-    /*
-     * TODO:Inserire la logica di salvataggio del tipo di servizio per reperibilità.
-     */
+  public static void saveService(@Valid PersonReperibilityType type) {
+    rules.checkIfPermitted(type.office);
+    if (validation.hasErrors()) {      
+      response.status = 400;
+      List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(type.office), 
+          new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
+      render("@addService", type, officePeople);
+    }
+    type.save();
+    flash.success("Nuovo servizio inserito correttamente");
+    activateServices(type.office.id);
   }
 }

@@ -5,6 +5,7 @@ import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 
 import play.data.validation.Required;
+import play.data.validation.Unique;
 
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class PersonReperibilityType extends BaseModel {
   private static final long serialVersionUID = 3234688199593333012L;
 
   @Required
+  @Unique
   public String description;
 
   @OneToMany(mappedBy = "personReperibilityType")

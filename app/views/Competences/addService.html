@@ -10,6 +10,9 @@ title:('Attiva nuovo servizio per reperibilità ' )}
   #{f.selectModel 'type.office', items: templateUtility.officesAllowed(), required:true /}
   #{f.selectModel 'type.supervisor', items: officePeople, required:true /}
 
+	#{b.buttons center:true}
+		#{b.submit 'Inserisci'/}
+	#{/b.buttons}
   #{/form}
 </div>
 #{/modalAsync}
