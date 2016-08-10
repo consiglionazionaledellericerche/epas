@@ -21,6 +21,6 @@ public enum LimitType {
         return lt;
       }
     }
-    throw new IllegalStateException(String.format("unknonw LimitType %s", description));
+    throw new IllegalArgumentException(String.format("unknonw LimitType %s", description));
   }
 }
