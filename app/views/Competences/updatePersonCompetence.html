@@ -1,19 +1,21 @@
 #{modalAsync id:'modalCompetenceCode', title: 'Abilita competenze per ' + person.fullname }
 <div id="updateCompetenceModal" class="col-xs-8 col-xs-offset-2">
+	#{alert color:'info'}
+		Cliccando all'interno della finestra sottostante, selezionare le competenze che si intendono assegnare al dipendente o eventualmente rimuovere
+		quelle in precedenza assegnate e non più valide.
+	#{/alert}
   #{form action:@Competences.saveNewCompetenceConfiguration(), method:'POST', autocomplete:false,
   class:'form form-horizontal', 'data-async':'#page_content',
   'data-async-error':'#updateCompetenceModal'}
 
-  
-  #{f.hidden 'personId', value:person.id /}
-  
-  
   #{f.selectMultipleModel 'person.competenceCode',
   values:templateUtility.allCodeList(), placeholder:'I codici di competenza' /}
 
-
+  #{if person?.persistent}
+    	#{f.hidden 'person.id', value:person.id /}
+  #{/if}  
   #{b.buttons center:true}
-  #{b.submit 'Ok'/}
+  		#{b.submit 'Ok'/}
   #{/b.buttons}
 
   #{/form}
