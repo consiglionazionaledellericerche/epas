@@ -21,7 +21,7 @@ public enum LimitDescription {
       }
     }
 
-    throw new IllegalStateException(String.format("unknonw LimitDescription %s", description));
+    throw new IllegalArgumentException(String.format("unknonw LimitDescription %s", description));
 
   }
   

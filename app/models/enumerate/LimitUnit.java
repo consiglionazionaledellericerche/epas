@@ -20,7 +20,7 @@ public enum LimitUnit {
         return lu;
       }
     }
-    throw new IllegalStateException(String.format("unknonw LimitUnit %s", description));
+    throw new IllegalArgumentException(String.format("unknonw LimitUnit %s", description));
   }
 
 }
