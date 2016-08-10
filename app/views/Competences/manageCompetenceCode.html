@@ -32,7 +32,7 @@
       		</tr>
       		</thead>
       		<tbody>
-      		#{list items:compCodeList, as:'compCode'}
+      		#{list items:templateUtility.allCodesWithoutGroup(), as:'compCode'}
       			
       		<tr #{if compCode.disabled}class="danger" webui-popover-hover data-content="&{'disabled'}"#{/if}>
 				<td><a href="@{Competences.edit(compCode.id)}" data-async-modal="#modalCompetenceCode">${compCode.code}</a></td>
@@ -101,6 +101,10 @@
       		#{/list}
       		</tbody>
     		</table>
+    		#{b.buttons center:true}
+				<a class="btn btn-success" href="@{addCompetenceCodeToGroup(group.id)}" data-async-modal="#modalAddCompetenceCodeToGroup">
+    			<i class="fa fa-plus"></i> Aggiungi codice al gruppo</a>
+			#{/b.buttons}
   		</div>	 	
 	 	#{/accordionItem}
 	 #{/list}
@@ -109,3 +113,4 @@
 </div>
 
 <div id="modalCompetenceCode" class="modal fade container" tabindex="-1"></div>
+<div id="modalAddCompetenceCodeToGroup" class="modal fade container" tabindex="-1"></div>
