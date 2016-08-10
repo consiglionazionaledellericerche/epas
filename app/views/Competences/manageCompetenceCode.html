@@ -101,10 +101,12 @@
       		#{/list}
       		</tbody>
     		</table>
+    		#{secure.check 'Competences.insertCompetenceCode'}
     		#{b.buttons center:true}
 				<a class="btn btn-success" href="@{addCompetenceCodeToGroup(group.id)}" data-async-modal="#modalAddCompetenceCodeToGroup">
     			<i class="fa fa-plus"></i> Aggiungi codice al gruppo</a>
 			#{/b.buttons}
+			#{/secure.check}
   		</div>	 	
 	 	#{/accordionItem}
 	 #{/list}

@@ -1,14 +1,17 @@
+*{
+	activeAction: la action tab attiva
+}*
 
+%{W officeId = session.get("officeSelected"); }%
 
 <div id="container-nav-tabs" class="container">
   <ul class="nav nav-tabs">
     <li #{if _activeAction.equals("manageCompetenceCode")} class="active" #{/if}>
       <a href="@{Competences.manageCompetenceCode()}">Gestione codici e gruppi di competenze</a>
     </li>
-    <li #{if _activeAction.equals("activeServices")} class="active" #{/if}>
+    <li #{if _activeAction.equals("activateServices")} class="active" #{/if}>
       <a href="@{Competences.activateServices(session.get("officeSelected"))}">Attiva servizi per reperibilità</a>
-    </li>
-    
+    </li>    
   </ul>
 </div>
 <br>

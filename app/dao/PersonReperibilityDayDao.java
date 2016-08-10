@@ -120,13 +120,28 @@ public class PersonReperibilityDayDao extends DaoBase {
   
   /**
    * 
-   * @param office l'ufficio per cui ritornare la lista dei servizi per cui si richiede la reperibilità
-   * @return la lista dei servizi per cui si vuole la reperibilità.
+   * @param office l'ufficio per cui ritornare la lista dei servizi per cui si richiede la 
+   *     reperibilità.
+   * @return la lista dei servizi per cui si vuole la reperibilità
    */
   public List<PersonReperibilityType> getReperibilityTypeByOffice(Office office) {
     QPersonReperibilityType prt = QPersonReperibilityType.personReperibilityType;
     JPQLQuery query = getQueryFactory().from(prt).where(prt.office.eq(office));
     return query.list(prt);
+  }
+  
+  /**
+   * 
+   * @param description il nome del servizio
+   * @return il tipo di reperibilità, se esiste, con descrizione uguale a quella passata 
+   *     come parametro.
+   */
+  public Optional<PersonReperibilityType> getReperibilityTypeByDescription(String description, 
+      Office office) {
+    QPersonReperibilityType prt = QPersonReperibilityType.personReperibilityType;
+    JPQLQuery query = getQueryFactory().from(prt)
+        .where(prt.description.eq(description).and(prt.office.eq(office)));
+    return Optional.fromNullable(query.singleResult(prt));
   }
 
   //***************************************************************/

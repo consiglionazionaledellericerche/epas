@@ -653,8 +653,8 @@ public class Competences extends Controller {
   }
 
   /**
-   * 
-   * @param officeId
+   * Metodo che renderizza la form di visualizzazione dei servizi attivi per un ufficio.
+   * @param officeId l'id dell'ufficio per cui visualizzare i servizi attivi
    */
   public static void activateServices(Long officeId) {
     Office office = officeDao.getOfficeById(officeId);
@@ -667,8 +667,9 @@ public class Competences extends Controller {
   }
 
   /**
-   * Metodo che renderizza la form di inserimento di un nuovo servizio da attivare per la reperibilità.
-   * @param officeId
+   * Metodo che renderizza la form di inserimento di un nuovo servizio da attivare 
+   *     per la reperibilità.
+   * @param officeId l'id dell'ufficio a cui associare il servizio
    */
   public static void addService(Long officeId) {
     PersonReperibilityType type = new PersonReperibilityType();
@@ -683,16 +684,38 @@ public class Competences extends Controller {
   /**
    * Metodo per la persistenza del servizio creato dalla form.
    */
-  public static void saveService(@Valid PersonReperibilityType type) {
-    rules.checkIfPermitted(type.office);
+  public static void saveService(PersonReperibilityType type, Office office) {
+    
+    rules.checkIfPermitted(office);
+    type.office = office;
+    if (!validation.hasErrors()) {
+      if (type.office == null) {
+        validation.addError("type.office",
+            "non può essere null");
+      }
+      if (type.supervisor == null) {
+        validation.addError("type.supervisor", "non può essere null");
+      }
+      if (type.description == null || type.description.isEmpty()) {
+        validation.addError("type.description", "non può essere null");
+      } else {
+        if (reperibilityDao
+            .getReperibilityTypeByDescription(type.description, office).isPresent()) {
+          validation.addError("type.description", "Servizio già presente nella sede");
+        }
+      }
+    }
     if (validation.hasErrors()) {      
       response.status = 400;
-      List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(type.office), 
+      List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office), 
           new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
-      render("@addService", type, officePeople);
+      render("@addService", type, officePeople, office);
     }
     type.save();
-    flash.success("Nuovo servizio %s inserito correttamente per la sede %s", type.description, type.office);
+    flash.success("Nuovo servizio %s inserito correttamente per la sede %s", 
+        type.description, type.office);
     activateServices(type.office.id);
   }
+  
+  
 }

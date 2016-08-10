@@ -7,7 +7,10 @@ title:('Attiva nuovo servizio per reperibilità ' )}
   
   #{f.hidden 'type.id' /}
   #{f.input 'type.description'/}
-  #{f.selectModel 'type.office', items: templateUtility.officesAllowed(), required:true /}
+  #{if office?.persistent}
+    	#{f.hidden 'office.id', value:office.id /}
+  #{/if}
+  #{f.view 'type.office', value:office /}
   #{f.selectModel 'type.supervisor', items: officePeople, required:true /}
 
 	#{b.buttons center:true}
