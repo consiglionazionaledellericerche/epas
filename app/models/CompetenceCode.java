@@ -1,7 +1,6 @@
 package models;
 
 import models.base.BaseModel;
-import models.enumerate.AccumulationType;
 import models.enumerate.LimitDescription;
 import models.enumerate.LimitType;
 import models.enumerate.LimitUnit;
@@ -21,23 +20,30 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+
+import com.google.common.collect.Lists;
+
 
 /**
- * tabella di decodifica dei codici di competenza
+ * Tabella di decodifica dei codici di competenza.
  *
  * @author dario.
  */
+@Audited
 @Entity
 @Table(name = "competence_codes")
 public class CompetenceCode extends BaseModel {
 
   private static final long serialVersionUID = 9211205948423608460L;
 
+  @NotAudited
   @OneToMany(mappedBy = "competenceCode")
-  public List<Competence> competence;
+  public List<Competence> competence = Lists.newArrayList();
 
   @ManyToMany(mappedBy = "competenceCode")
-  public List<Person> persons;
+  public List<Person> persons = Lists.newArrayList();
   
   @ManyToOne
   @JoinColumn(name = "competence_code_group_id")
@@ -79,7 +85,7 @@ public class CompetenceCode extends BaseModel {
   
   @Override
   public String getLabel() {
-    return this.code + " - " + this.description;
+    return String.format("%s - %s", this.code, this.description);
   }
   
 

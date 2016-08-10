@@ -16,12 +16,26 @@ import javax.persistence.Enumerated;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.envers.Audited;
+
+import com.beust.jcommander.internal.Lists;
+
+/**
+ * I gruppi servono per descrivere comportamenti e limiti comuni a più
+ * codici di competenza.
+ * 
+ * @author dario
+ *
+ */
+@Audited
 @Entity
 @Table(name = "competence_code_groups")
-public class CompetenceCodeGroup extends BaseModel{
+public class CompetenceCodeGroup extends BaseModel {
+
+  private static final long serialVersionUID = 6486248571013912369L;
 
   @OneToMany(mappedBy = "competenceCodeGroup")
-  public List<CompetenceCode> competenceCodes;
+  public List<CompetenceCode> competenceCodes = Lists.newArrayList();
   
   @Required
   public String label;
