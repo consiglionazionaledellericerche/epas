@@ -102,9 +102,8 @@ public class Competences extends Controller {
    */
   public static void manageCompetenceCode() {
 
-    List<CompetenceCode> compCodeList = competenceCodeDao.getCodeWithoutGroup();
     List<CompetenceCodeGroup> groupList = competenceCodeDao.getAllGroups();
-    render(compCodeList, groupList);
+    render(groupList);
   }
 
   /**
@@ -114,11 +113,11 @@ public class Competences extends Controller {
 
     render("@edit");
   }
-  
+
   /**
-   * 
-   * @param competenceCodeId
-   * @param confirmed
+   * salva la competenza come abilitata/disabilitata.
+   * @param competenceCodeId l'id della competenza da abilitare/disabilitare
+   * @param confirmed se siamo in fase di conferma o meno
    */
   public static void evaluateCompetenceCode(Long competenceCodeId, boolean confirmed) {
     CompetenceCode comp = competenceCodeDao.getCompetenceCodeById(competenceCodeId);
@@ -138,6 +137,27 @@ public class Competences extends Controller {
   }
 
   /**
+   * restituisce la form per l'aggiunta di un codice di competenza a un gruppo.
+   * @param competenceCodeGroupId
+   */
+  public static void addCompetenceCodeToGroup(Long competenceCodeGroupId) {
+    CompetenceCodeGroup group = competenceCodeDao.getGroupById(competenceCodeGroupId);
+    notFoundIfNull(group);
+    render(group);
+  }
+
+  /**
+   * aggiunge le competenze al gruppo passato come parametro.
+   * @param group il gruppo a cui aggiungere competenze
+   */
+  public static void addCompetences(CompetenceCodeGroup group) {
+    notFoundIfNull(group);
+    group.save();
+    flash.success(String.format("Aggiornate con successo le competenze del gruppo %s",
+        group.label));
+    manageCompetenceCode();
+  }
+  /**
    * Nuovo gruppo di codici competenza.
    */
   public static void insertCompetenceCodeGroup() {
@@ -147,7 +167,6 @@ public class Competences extends Controller {
 
   /**
    * Modifica codice competenza. Chiama la show se chi invoca il metodo è un utente fisico.
-   *
    * @param competenceCodeId codice
    */
   public static void edit(Long competenceCodeId) {
@@ -266,7 +285,7 @@ public class Competences extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
-    
+
     render(person);
   }
 
@@ -276,12 +295,12 @@ public class Competences extends Controller {
    * @param person la persona per cui si intende salvare le competenze abilitate
    */
   public static void saveNewCompetenceConfiguration(Person person) {
-    
+
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
     person.save();
     flash.success(String.format("Aggiornate con successo le competenze per %s",
-      person.fullName()));
+        person.fullName()));
     Competences.enabledCompetences(person.office.id);
 
   }
@@ -299,7 +318,7 @@ public class Competences extends Controller {
 
     if (!user.isPresent() || user.get().person == null) {
       flash.error("Accesso negato.");
-      renderTemplate("Application/indexAdmin.html");
+      Stampings.stampings(year, month);
     }
 
     //Redirect in caso di mese futuro
@@ -317,7 +336,7 @@ public class Competences extends Controller {
 
     if (!contract.isPresent()) {
       flash.error("Nessun contratto attivo nel mese.");
-      renderTemplate("Application/indexAdmin.html");
+      Stampings.stampings(year, month);
     }
 
     Optional<PersonMonthCompetenceRecap> personMonthCompetenceRecap =
@@ -658,7 +677,7 @@ public class Competences extends Controller {
     List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office), 
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
 
-    render(type, officePeople);
+    render(type, officePeople, office);
   }
 
   /**
