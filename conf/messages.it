@@ -171,6 +171,8 @@ feedback.staff =Lo staff di EPAS
 
 file =File schedone da analizzare
 
+disabled= Codice di competenza disabilitato
+enabled= Abilita Codice di competenza
 firstDay= Giorno inizio contratto
 
 group.label =Nome gruppo
