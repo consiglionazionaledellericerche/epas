@@ -26,16 +26,19 @@
         		<th>Codice</th>
         		<th>Codice per Attestati</th>
         		<th>Descrizione</th>
-        		<th>Disabilitato</th>        		
+        		#{secure.check 'Competences.insertCompetenceCode' }
+        		<th>Disabilitato</th>    
+        		#{/secure.check}    		
       		</tr>
       		</thead>
       		<tbody>
       		#{list items:compCodeList, as:'compCode'}
       			
-      		<tr #{if compCode.disabled}class="danger" #{/if}>
+      		<tr #{if compCode.disabled}class="danger" webui-popover-hover data-content="&{'disabled'}"#{/if}>
 				<td><a href="@{Competences.edit(compCode.id)}" data-async-modal="#modalCompetenceCode">${compCode.code}</a></td>
 				<td>${compCode.codeToPresence}</td>
 				<td>${compCode.description}</td>
+				#{secure.check 'Competences.insertCompetenceCode' }
 				<td>#{if compCode.disabled}
 						#{secure.link @Competences.evaluateCompetenceCode(compCode.id), 'data-async-modal':'#modalCompetenceCode'}
 							<i class="fa fa-check" aria-hidden="true"></i>
@@ -46,7 +49,8 @@
 							<i class="fa fa-times" aria-hidden="true"></i>
            				#{/secure.link}
 					#{/else}
-				</td>						
+				</td>	
+				#{/secure.check}					
 			</tr>
 			
       		#{/list}
