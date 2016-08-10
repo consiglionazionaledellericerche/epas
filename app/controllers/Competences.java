@@ -652,6 +652,11 @@ public class Competences extends Controller {
 
   }
 
+  
+  /* ********************************************************
+   * Parte relativa ai servizi da attivare per reperibilità *
+   * ********************************************************/
+  
   /**
    * Metodo che renderizza la form di visualizzazione dei servizi attivi per un ufficio.
    * @param officeId l'id dell'ufficio per cui visualizzare i servizi attivi
@@ -717,5 +722,13 @@ public class Competences extends Controller {
     activateServices(type.office.id);
   }
   
+  public static void deleteService(Long reperibilityTypeId) {
+    
+  }
+  
+  
+  public static void editService(Long reperibilityTypeId) {
+    
+  }
   
 }

@@ -31,13 +31,17 @@
       		<tr>
         		<th>Servizio</th>
         		<th>Eventuale supervisore</th>
+        		<th>Elimina</th>
       		</tr>
       		</thead>
       		<tbody>
       		#{list items:prtList, as:'prt'}
       		<tr>
-				<td>${prt.description}</td>
+				<td><a href="@{Competences.editService(prt.id)}"
+           			data-async-modal="#defaultModal">${prt.description}</a></td>
 				<td>${prt.supervisor}</td>
+				<td><a class="btn btn-danger btn-xs" href="@{Competences.deleteService(prt.id)}"
+           			data-async-modal="#defaultModal">Rimuovi</a></td>
 			</tr>
       		#{/list}
       		</tbody>
@@ -46,3 +50,4 @@
 </div>
 
 <div id="modalActivateService" class="modal fade container" tabindex="-1"></div>
+<div id="defaultModal" class="modal fade container" tabindex="-1"></div>
