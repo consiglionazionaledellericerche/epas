@@ -171,12 +171,14 @@ feedback.staff =Lo staff di EPAS
 
 file =File schedone da analizzare
 
+disabled= Codice di competenza disabilitato
+enabled= Abilita Codice di competenza
 firstDay= Giorno inizio contratto
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite
 group.limitValue =Quantità massima
-group.competenceCodes =Codici competenza associati
+group.competenceCodes =Codici competenza da associare
 group.limitUnit =Unità di misura
 group.limitDescription =Descrizione limite
 

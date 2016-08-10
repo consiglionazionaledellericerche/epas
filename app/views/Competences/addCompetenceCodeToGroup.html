@@ -1,0 +1,42 @@
+#{modalAsync id:'modalAddCompetenceCodeToGroup', button:'Salva', 
+title:('Aggiungi codici di competenza al '+group.label )}
+<div id="absenceCodeData">
+	#{alert color:'info'}
+		Vengono proposti i codici già associati al gruppo. Selezionare, tra quelli proposti cliccando nell'apposita finestra sottostante,
+		quelli che si intende aggiungere al gruppo.
+	#{/alert}
+  #{form action:@Competences.addCompetences(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#absenceCodeData'}
+  
+    #{if group?.persistent}
+    	#{f.hidden 'group.id', value:group.id /}
+  	#{/if}
+  <div class="col-md-8 col-md-offset-2">
+  <table class="table">
+      		<thead>
+      		<tr>
+        		<th>Codice</th>
+        		<th>Descrizione</th>        		    		
+      		</tr>
+      		</thead>
+      		<tbody>
+      		#{list items:group.competenceCodes, as:'compCode'}
+      		<tr>
+      			<td>${compCode.code}</td>
+      			<td>${compCode.description}</td>
+      		</tr>
+      		#{/list}
+      		</tbody>
+  </table>
+  </div>  
+  #{f.selectMultipleModel 'group.competenceCodes',
+  values:templateUtility.allCodesWithoutGroup(), placeholder:'I codici di competenza' /}
+
+
+	#{b.buttons center:true}
+		#{b.submit 'Aggiungi'/}
+	#{/b.buttons}
+  #{/form}
+</div>
+#{/modalAsync}
