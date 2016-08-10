@@ -37,12 +37,14 @@
 				<td>${compCode.codeToPresence}</td>
 				<td>${compCode.description}</td>
 				<td>#{if compCode.disabled}
-						<a class="fa fa-check" aria-hidden="true" href="@{Competences.evaluateCompetenceCode(compCode.id)}"
-           			data-async-modal="#modalCompetenceCode"></a>
+						#{secure.link @Competences.evaluateCompetenceCode(compCode.id), 'data-async-modal':'#modalCompetenceCode'}
+							<i class="fa fa-check" aria-hidden="true"></i>
+           				#{/secure.link}
 					#{/if}
 					#{else}
-						<a class="fa fa-times" aria-hidden="true" href="@{Competences.evaluateCompetenceCode(compCode.id)}"
-           			data-async-modal="#modalCompetenceCode"></a>
+						#{secure.link @Competences.evaluateCompetenceCode(compCode.id), 'data-async-modal':'#modalCompetenceCode'}
+							<i class="fa fa-times" aria-hidden="true"></i>
+           				#{/secure.link}
 					#{/else}
 				</td>						
 			</tr>
