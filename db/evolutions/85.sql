@@ -22,7 +22,9 @@ ALTER TABLE competence_codes ADD COLUMN limit_unit TEXT;
 ALTER TABLE competence_codes ADD COLUMN limit_description TEXT;
 
 ALTER TABLE person_reperibility_types_history ADD COLUMN office_id BIGINT;
+ALTER TABLE person_reperibility_types_history ADD COLUMN disabled BOOLEAN;
 ALTER TABLE person_reperibility_types ADD COLUMN office_id BIGINT;
+ALTER TABLE person_reperibility_types ADD COLUMN disabled BOOLEAN;
 ALTER TABLE person_reperibility_types ADD FOREIGN KEY (office_id) REFERENCES office(id);
 
 UPDATE competence_codes SET limit_type = 'monthly' WHERE code in ('207', '208', 'T1', 'T2', 'T3', '351', '352', '353', '354', '355');
@@ -56,6 +58,8 @@ WHERE competence_codes.code in ('T1', 'T2') and competence_code_groups.label = '
 UPDATE competence_codes SET competence_code_group_id = competence_code_groups.id
 FROM competence_code_groups
 WHERE competence_codes.code in ('351', '352', '353', '354', '355') and competence_code_groups.label = 'Gruppo Ind.tà rischio';
+
+UPDATE person_reperibility_types SET disabled = false;
 
 CREATE TABLE competence_codes_history (
   id BIGINT NOT NULL,

@@ -39,9 +39,12 @@ public class PersonReperibilityType extends BaseModel {
   @JoinColumn(name = "supervisor")
   public Person supervisor;
   
+  public boolean disabled;
+  
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "office_id")
-  public Office office;
+  public Office office; 
+ 
 
   @Override
   public String toString() {
