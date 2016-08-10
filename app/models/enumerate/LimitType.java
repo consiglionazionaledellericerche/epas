@@ -1,5 +1,7 @@
 package models.enumerate;
 
+import lombok.val;
+
 public enum LimitType {
 
   monthly("mensile"),
@@ -14,16 +16,11 @@ public enum LimitType {
   }
   
   public static LimitType getByDescription(String description) {
-    if (description.equals("senza limite")) {
-      return LimitType.noLimit;
+    for (val lt : values()) {
+      if (lt.description.equals(description)) {
+        return lt;
+      }
     }
-    if (description.equals("annuale")) {
-      return LimitType.yearly;
-    }
-    if (description.equals("mensile")) {
-      return LimitType.monthly;
-    }
-
-    return null;
+    throw new IllegalStateException(String.format("unknonw LimitType %s", description));
   }
 }

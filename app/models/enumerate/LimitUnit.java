@@ -1,29 +1,26 @@
 package models.enumerate;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+
+@RequiredArgsConstructor
 public enum LimitUnit {
 
   minutes("minuti"),
   hours("ore"),
   days("giorni");
 
-  public String description;
-
-  LimitUnit(String description) {
-    this.description = description;
-  }
+  @Getter
+  private final String description;
 
   public static LimitUnit getByDescription(String description) {
-    if (description.equals("ore")) {
-      return LimitUnit.hours;
+    for (val lu : values()) {
+      if (lu.description.equals(description)) {
+        return lu;
+      }
     }
-    if (description.equals("giorni")) {
-      return LimitUnit.days;
-    }
-    if (description.equals("minuti")) {
-      return LimitUnit.minutes;
-    }
-
-    return null;
+    throw new IllegalStateException(String.format("unknonw LimitUnit %s", description));
   }
 
 }

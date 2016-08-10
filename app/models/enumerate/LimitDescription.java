@@ -1,26 +1,28 @@
 package models.enumerate;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+
+@RequiredArgsConstructor
 public enum LimitDescription {
 
   daysOfMonth("giorni del mese"),
   daysOfYear("giorni dell'anno");
   
-  public String description;
+  @Getter
+  private final String description;
   
-  LimitDescription(String description) {
-    this.description = description;
-  }
   
   public static LimitDescription getByDescription(String description) {
-    if (description.equals("giorni del mese")) {
-      return LimitDescription.daysOfMonth;
-    }
-    if (description.equals("giorni dell'anno")) {
-      return LimitDescription.daysOfYear;
+    for (val lu : values()) {
+      if (lu.description.equals(description)) {
+        return lu;
+      }
     }
 
+    throw new IllegalStateException(String.format("unknonw LimitDescription %s", description));
 
-    return null;
   }
   
 }
