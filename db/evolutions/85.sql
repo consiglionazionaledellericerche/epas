@@ -9,18 +9,17 @@ CREATE TABLE competence_code_groups (
   limit_unit TEXT NOT NULL
 );
 
-INSERT INTO competence_code_groups(label, limit_type, limit_value, limit_description, limit_unit) values('Gruppo reperibilità', 'monthly', 16, null, 'days');
-INSERT INTO competence_code_groups(label, limit_type, limit_value, limit_description, limit_unit) values('Gruppo straordinari', 'yearly', 200, null, 'hours');
-INSERT INTO competence_code_groups(label, limit_type, limit_value, limit_description, limit_unit) values('Gruppo turni', 'monthly', 165, null, 'hours');
-INSERT INTO competence_code_groups(label, limit_type, limit_value, limit_description, limit_unit) values('Gruppo Ind.tà rischio', 'monthly', null, 'daysOfMonth', 'days');
+INSERT INTO competence_code_groups (label, limit_type, limit_value, limit_description, limit_unit) values('Gruppo reperibilità', 'monthly', 16, null, 'days');
+INSERT INTO competence_code_groups (label, limit_type, limit_value, limit_description, limit_unit) values('Gruppo straordinari', 'yearly', 200, null, 'hours');
+INSERT INTO competence_code_groups (label, limit_type, limit_value, limit_description, limit_unit) values('Gruppo turni', 'monthly', 165, null, 'hours');
+INSERT INTO competence_code_groups (label, limit_type, limit_value, limit_description, limit_unit) values('Gruppo Ind.tà rischio', 'monthly', null, 'daysOfMonth', 'days');
 
 ALTER TABLE competence_codes ADD COLUMN disabled BOOLEAN;
 ALTER TABLE competence_codes ADD COLUMN limit_value INTEGER;
 ALTER TABLE competence_codes ADD COLUMN limit_type TEXT;
-ALTER TABLE competence_codes ADD COLUMN competence_code_group_id BIGINT;
+ALTER TABLE competence_codes ADD COLUMN competence_code_group_id BIGINT REFERENCES competence_code_groups(id);
 ALTER TABLE competence_codes ADD COLUMN limit_unit TEXT;
 ALTER TABLE competence_codes ADD COLUMN limit_description TEXT;
-ALTER TABLE competence_codes ADD FOREIGN KEY (competence_code_group_id) REFERENCES competence_code_groups(id);
 
 ALTER TABLE person_reperibility_types_history ADD COLUMN office_id BIGINT;
 ALTER TABLE person_reperibility_types ADD COLUMN office_id BIGINT;
@@ -57,7 +56,40 @@ WHERE competence_codes.code in ('T1', 'T2') and competence_code_groups.label = '
 UPDATE competence_codes SET competence_code_group_id = competence_code_groups.id
 FROM competence_code_groups
 WHERE competence_codes.code in ('351', '352', '353', '354', '355') and competence_code_groups.label = 'Gruppo Ind.tà rischio';
+
+CREATE TABLE competence_codes_history (
+  id BIGINT NOT NULL,
+  _revision INTEGER NOT NULL REFERENCES revinfo(rev),
+  _revision_type SMALLINT,
+  code TEXT,
+  codetopresence TEXT,
+  description TEXT,
+  disabled BOOLEAN,
+  limit_value INTEGER,
+  limit_type TEXT,
+  competence_code_group_id BIGINT,
+  limit_unit TEXT,
+  limit_description TEXT
+);
+
+CREATE TABLE competence_code_groups_history (
+  id BIGINT NOT NULL,
+  _revision INTEGER NOT NULL REFERENCES revinfo(rev),
+  _revision_type SMALLINT,  
+  label TEXT,
+  limit_type TEXT,
+  limit_value INTEGER,
+  limit_description TEXT,
+  limit_unit TEXT
+);
+
+INSERT INTO competence_codes_history
+  SELECT id, (SELECT MIN(rev) FROM revinfo), 0, code,  codetopresence, description, disabled, 
+    limit_value, limit_type, competence_code_group_id, limit_unit, limit_description FROM competence_codes;
     
+INSERT INTO competence_code_groups_history
+  SELECT id, (SELECT MIN(rev) FROM revinfo), 0, label, limit_type, limit_value, limit_description, 
+    limit_unit FROM competence_code_groups;
 
 # ---!Downs
 
@@ -68,8 +100,9 @@ ALTER TABLE competence_codes DROP COLUMN limit_description;
 ALTER TABLE competence_codes DROP CONSTRAINT competence_codes_competence_code_group_id_fkey;
 ALTER TABLE competence_codes DROP COLUMN competence_code_group_id;
 
-ALTER TABLE person_reperibility_types DROP CONSTRAINT person_reperibility_types_office_id fkey;
+ALTER TABLE person_reperibility_types DROP CONSTRAINT person_reperibility_types_office_id_fkey;
 ALTER TABLE person_reperibility_types DROP COLUMN office_id;
 
 DROP TABLE competence_code_groups;
-
+DROP TABLE competence_code_groups_history;
+DROP TABLE competence_codes_history;
