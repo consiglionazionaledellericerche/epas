@@ -116,9 +116,9 @@ public class Competences extends Controller {
   }
   
   /**
-   * 
-   * @param competenceCodeId
-   * @param confirmed
+   * salva la competenza come abilitata/disabilitata.
+   * @param competenceCodeId l'id della competenza da abilitare/disabilitare
+   * @param confirmed se siamo in fase di conferma o meno
    */
   public static void evaluateCompetenceCode(Long competenceCodeId, boolean confirmed) {
     CompetenceCode comp = competenceCodeDao.getCompetenceCodeById(competenceCodeId);
@@ -146,8 +146,7 @@ public class Competences extends Controller {
   }
 
   /**
-   * Modifica codice competenza. Chiama la show se chi invoca il metodo è un utente fisico.
-   *
+   * Modifica codice competenza. Chiama la show se chi invoca il metodo è un utente fisico.   *
    * @param competenceCodeId codice
    */
   public static void edit(Long competenceCodeId) {
@@ -658,7 +657,7 @@ public class Competences extends Controller {
     List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office), 
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
 
-    render(type, officePeople);
+    render(type, officePeople, office);
   }
 
   /**

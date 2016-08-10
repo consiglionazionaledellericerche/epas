@@ -672,10 +672,11 @@ when
      	"Stampings.forceMealTicket",
      	
      	/* Vecchio permesso editCompetence */
-        "Competences.updateCompetence",
         "Competences.saveOvertime",
         "Competences.updatePersonCompetence",
         "Competences.saveNewCompetenceConfiguration",
+        "Competences.insertCompetence",
+        "Competences.saveCompetence",
         "Competences.addService",
         "Competences.activateServices",
         "Competences.saveService",
@@ -815,10 +816,11 @@ when
      	"Stampings.forceMealTicket",
      	
      	/* Vecchio permesso editCompetence */
-        "Competences.updateCompetence",
         "Competences.saveOvertime",
         "Competences.updatePersonCompetence",
         "Competences.saveNewCompetenceConfiguration",
+        "Competences.insertCompetence",
+        "Competences.saveCompetence",
         "Competences.addService",
         "Competences.activateServices",
         "Competences.saveService",
