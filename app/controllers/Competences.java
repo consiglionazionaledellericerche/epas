@@ -263,12 +263,8 @@ public class Competences extends Controller {
    */
   public static void updatePersonCompetence(Long personId) {
 
-    if (personId == null) {
-
-      flash.error("Persona inesistente");
-      Application.indexAdmin();
-    }
     Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
     
     render(person);
@@ -277,24 +273,15 @@ public class Competences extends Controller {
   /**
    * Salva la nuova configurazione delle competenze abilitate per la persona.
    *
-   * @param personId   personId
-   * @param competence mappa con i valori per ogni competenza
+   * @param person la persona per cui si intende salvare le competenze abilitate
    */
-  public static void saveNewCompetenceConfiguration(Long personId,
-      Map<String, Boolean> competence) {
-    //TODO: terminare cambiando il controller
-    final Person person = personDao.getPersonById(personId);
+  public static void saveNewCompetenceConfiguration(Person person) {
+    
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
-
-    List<CompetenceCode> competenceCode = competenceCodeDao.getAllCompetenceCode();
-    if (competenceManager
-        .saveNewCompetenceEnabledConfiguration(competence, competenceCode, person)) {
-      flash.success(String.format("Aggiornate con successo le competenze per %s %s",
-          person.name, person.surname));
-    } else {
-      // TODO: ????????????????????
-    }
+    person.save();
+    flash.success(String.format("Aggiornate con successo le competenze per %s",
+      person.fullName()));
     Competences.enabledCompetences(person.office.id);
 
   }
