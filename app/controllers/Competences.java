@@ -687,7 +687,9 @@ public class Competences extends Controller {
   }
 
   /**
-   * Metodo per la persistenza del servizio creato dalla form.
+   * metodo che persiste il servizio per reperibilità o comunque lo modifica se già presente.
+   * @param type il servizio da persistere
+   * @param office la sede di appartenenza del servizio
    */
   public static void saveService(@Valid PersonReperibilityType type, @Valid Office office) {
     
@@ -715,9 +717,9 @@ public class Competences extends Controller {
   }
   
   /**
-   * 
-   * @param reperibilityTypeId
-   * @param confirmed
+   * metodo che controlla e poi persiste la disabilitazione/abilitazione di un servizio.
+   * @param reperibilityTypeId l'id del servizio da disabilitare/abilitare
+   * @param confirmed il booleano per consentire la persistenza di una modifica
    */
   public static void evaluateService(Long reperibilityTypeId, boolean confirmed) {
     PersonReperibilityType type = reperibilityDao.getPersonReperibilityTypeById(reperibilityTypeId);
@@ -745,7 +747,10 @@ public class Competences extends Controller {
     activateServices(type.office.id);
   }
   
-  
+  /**
+   * metodo che ritorna la form di inserimento/modifica di un servizio.
+   * @param reperibilityTypeId l'id del servizio da editare
+   */
   public static void editService(Long reperibilityTypeId) {
     PersonReperibilityType type = reperibilityDao.getPersonReperibilityTypeById(reperibilityTypeId);
     Office office = type.office;
