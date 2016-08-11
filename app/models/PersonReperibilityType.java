@@ -41,7 +41,7 @@ public class PersonReperibilityType extends BaseModel {
   
   public boolean disabled;
   
-  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @ManyToOne(optional = false, fetch = FetchType.EAGER)
   @JoinColumn(name = "office_id")
   public Office office; 
  

@@ -689,33 +689,26 @@ public class Competences extends Controller {
   /**
    * Metodo per la persistenza del servizio creato dalla form.
    */
-  public static void saveService(PersonReperibilityType type, Office office) {
+  public static void saveService(@Valid PersonReperibilityType type, @Valid Office office) {
     
     rules.checkIfPermitted(office);
-    type.office = office;
+    
     if (!validation.hasErrors()) {
-      if (type.office == null) {
-        validation.addError("type.office",
-            "non può essere null");
-      }
       if (type.supervisor == null) {
         validation.addError("type.supervisor", "non può essere null");
       }
       if (type.description == null || type.description.isEmpty()) {
         validation.addError("type.description", "non può essere null");
-      } else {
-        if (reperibilityDao
-            .getReperibilityTypeByDescription(type.description, office).isPresent()) {
-          validation.addError("type.description", "Servizio già presente nella sede");
-        }
       }
+
     }
     if (validation.hasErrors()) {      
       response.status = 400;
       List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office), 
           new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
-      render("@addService", type, officePeople, office);
+      render("@editService", type, officePeople, office);
     }
+    type.office = office;
     type.save();
     flash.success("Nuovo servizio %s inserito correttamente per la sede %s", 
         type.description, type.office);
