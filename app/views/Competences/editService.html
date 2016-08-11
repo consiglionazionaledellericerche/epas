@@ -1,5 +1,9 @@
-#{modalAsync id:'modalActivateService', button:'Salva', 
-title:('Attiva nuovo servizio per reperibilità ' )}
+%{
+Action = (type != null && type.persistent) ? 'Modifica ' : 'Nuovo '
+}%
+#{modalAsync id:'modalActivateService',button:'Salva', 
+title:(Action + ' servizio per reperibilità')}
+
 <div id="absenceCodeData">
   #{form action:@Competences.saveService(), method:'POST', autocomplete:false,
   class:'form form-horizontal', 'data-async':'#page_content',

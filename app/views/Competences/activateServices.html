@@ -2,8 +2,6 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Attiva servizi'  /}
 
-#{competences.manageCompetencesTabs activeAction:'activateServices' /}
-
 <div class="container">
 #{title title:'Attiva servizi per reperibilità', administration:true /}
 
@@ -26,7 +24,7 @@
 	#{/alert}
 #{/if}
 #{else}
-<table class="table">
+		<table class="table">
       		<thead>
       		<tr>
         		<th>Servizio</th>
@@ -36,16 +34,24 @@
       		</thead>
       		<tbody>
       		#{list items:prtList, as:'prt'}
-      		<tr>
+      		<tr #{if prt.disabled}class="danger" webui-popover-hover data-content="&{'serviceDisabled'}"#{/if}>
 				<td><a href="@{Competences.editService(prt.id)}"
            			data-async-modal="#defaultModal">${prt.description}</a></td>
 				<td>${prt.supervisor}</td>
-				<td><a class="btn btn-danger btn-xs" href="@{Competences.deleteService(prt.id)}"
-           			data-async-modal="#defaultModal">Rimuovi</a></td>
+				<td>
+				#{if prt.disabled}
+					<a class="btn btn-primary btn-xs" href="@{Competences.evaluateService(prt.id)}"
+           				data-async-modal="#defaultModal">Riabilita</a>
+				#{/if}
+				#{else}
+					<a class="btn btn-danger btn-xs" href="@{Competences.evaluateService(prt.id)}"
+           				data-async-modal="#defaultModal">Rimuovi</a>
+				#{/else}				
+           		</td>
 			</tr>
       		#{/list}
       		</tbody>
-</table>
+		</table>
 #{/else}
 </div>
 

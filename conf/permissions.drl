@@ -680,6 +680,7 @@ when
         "Competences.addService",
         "Competences.activateServices",
         "Competences.saveService",
+        "Competences.evaluateService",
         
         /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
@@ -824,6 +825,7 @@ when
         "Competences.addService",
         "Competences.activateServices",
         "Competences.saveService",
+        "Competences.evaluateService",
         
          /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
