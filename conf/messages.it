@@ -317,6 +317,8 @@ roleIds= Ruoli attribuibili
 secure.error=Oops! Username o password sconosciuti
 secure.logout=Utente correttamente disconnesso
 
+serviceDisabled =Servizio disabilitato
+
 sourceDateMealTicket=Data Inizializzazione
 sourceDateResidual=Data inizializzazione
 

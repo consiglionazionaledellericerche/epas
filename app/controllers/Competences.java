@@ -677,13 +677,13 @@ public class Competences extends Controller {
    * @param officeId l'id dell'ufficio a cui associare il servizio
    */
   public static void addService(Long officeId) {
-    PersonReperibilityType type = new PersonReperibilityType();
+    //PersonReperibilityType type = new PersonReperibilityType();
     Office office = officeDao.getOfficeById(officeId);
     rules.checkIfPermitted(office);
     List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office), 
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
 
-    render(type, officePeople, office);
+    render("@editService", officePeople, office);
   }
 
   /**
@@ -722,13 +722,46 @@ public class Competences extends Controller {
     activateServices(type.office.id);
   }
   
-  public static void deleteService(Long reperibilityTypeId) {
-    
+  /**
+   * 
+   * @param reperibilityTypeId
+   * @param confirmed
+   */
+  public static void evaluateService(Long reperibilityTypeId, boolean confirmed) {
+    PersonReperibilityType type = reperibilityDao.getPersonReperibilityTypeById(reperibilityTypeId);
+    notFoundIfNull(type);
+    if (!confirmed) {
+      confirmed = true;
+      render(type, confirmed);
+    }
+    if (type.disabled) {
+      type.disabled = false;
+      type.save();
+      flash.success("Riabilitato servizio %s", type.description);
+      activateServices(type.office.id);
+    }
+    if (!type.personReperibilities.isEmpty()) {
+      type.disabled = true;
+      type.save();
+      flash.success("Il servizio è stato disabilitato e non rimosso perchè legato con informazioni "
+          + "importanti presenti in altre tabelle");
+      
+    } else {
+      type.delete();
+      flash.success("Servizio rimosso con successo");
+    }    
+    activateServices(type.office.id);
   }
   
   
   public static void editService(Long reperibilityTypeId) {
-    
+    PersonReperibilityType type = reperibilityDao.getPersonReperibilityTypeById(reperibilityTypeId);
+    Office office = type.office;
+    rules.checkIfPermitted(office);
+    List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office), 
+        new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
+
+    render(type, officePeople, office);
   }
   
 }
