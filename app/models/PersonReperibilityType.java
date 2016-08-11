@@ -15,6 +15,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 
 /**
@@ -37,12 +38,14 @@ public class PersonReperibilityType extends BaseModel {
   /* responsabile della reperibilità */
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "supervisor")
+  @Required
   public Person supervisor;
   
   public boolean disabled;
   
   @ManyToOne(optional = false, fetch = FetchType.EAGER)
   @JoinColumn(name = "office_id")
+  @NotNull
   public Office office; 
  
 

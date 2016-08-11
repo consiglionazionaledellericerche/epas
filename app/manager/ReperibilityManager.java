@@ -984,11 +984,15 @@ public class ReperibilityManager {
     } else {
       Office office = null;
       for (PersonReperibilityType prt : repList) {
-        for (PersonReperibility person : prt.personReperibilities){
-          if (!person.person.office.equals(office)) {
-            office = person.person.office;
+        if (prt.personReperibilities.isEmpty()) {
+          continue;
+        } else {
+          for (PersonReperibility person : prt.personReperibilities){
+            if (!person.person.office.equals(office)) {
+              office = person.person.office;
+            }
           }
-        }
+        }        
         prt.office = office;
         prt.save();
       }

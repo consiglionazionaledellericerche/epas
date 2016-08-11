@@ -691,8 +691,7 @@ public class Competences extends Controller {
    */
   public static void saveService(@Valid PersonReperibilityType type, @Valid Office office) {
     
-    rules.checkIfPermitted(office);
-    
+    rules.checkIfPermitted(office);    
     if (!validation.hasErrors()) {
       if (type.supervisor == null) {
         validation.addError("type.supervisor", "non può essere null");
