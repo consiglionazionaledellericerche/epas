@@ -1,7 +1,7 @@
 %{
 Action = (type != null && type.persistent) ? 'Modifica ' : 'Nuovo '
 }%
-#{modalAsync id:'modalActivateService',button:'Salva', 
+#{modalAsync id:'modalActivateService', 
 title:(Action + ' servizio per reperibilità')}
 
 <div id="absenceCodeData">
@@ -18,8 +18,15 @@ title:(Action + ' servizio per reperibilità')}
   #{f.selectModel 'type.supervisor', items: officePeople, required:true /}
 
 	#{b.buttons center:true}
-		#{b.submit 'Inserisci'/}
-	#{/b.buttons}
+
+  		#{if type?.persistent}
+    		#{b.submit 'Aggiorna'/}
+  		#{/if}
+  		#{else}
+  	  		#{b.submit 'Inserisci'/}
+  		#{/else}
+
+  	#{/b.buttons}
   #{/form}
 </div>
 #{/modalAsync}
