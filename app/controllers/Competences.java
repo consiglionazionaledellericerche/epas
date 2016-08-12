@@ -150,12 +150,16 @@ public class Competences extends Controller {
    * aggiunge le competenze al gruppo passato come parametro.
    * @param group il gruppo a cui aggiungere competenze
    */
-  public static void addCompetences(CompetenceCodeGroup group) {
+  public static void addCompetences(CompetenceCodeGroup group, CompetenceCode code) {
     notFoundIfNull(group);
+    
+    code.competenceCodeGroup = group;
+    code.save();
+    group.competenceCodes.add(code);
     group.save();
-    flash.success(String.format("Aggiornate con successo le competenze del gruppo %s",
-        group.label));
+    flash.success(String.format("Aggiornate con successo le competenze del gruppo"));
     manageCompetenceCode();
+    
   }
   /**
    * Nuovo gruppo di codici competenza.

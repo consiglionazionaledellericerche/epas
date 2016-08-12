@@ -73,7 +73,8 @@ public class CompetenceCodeDao extends DaoBase {
 
     final QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
 
-    final JPQLQuery query = getQueryFactory().from(competenceCode).where(competenceCode.disabled.eq(false));
+    final JPQLQuery query = getQueryFactory().from(competenceCode)
+        .where(competenceCode.disabled.eq(false));
     return query.orderBy(competenceCode.id.asc()).list(competenceCode);
   }
   
@@ -105,7 +106,8 @@ public class CompetenceCodeDao extends DaoBase {
     final QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
     final JPQLQuery query = getQueryFactory().from(competenceCode)
         .where(competenceCode.competenceCodeGroup.isNull());
-    return query.orderBy(competenceCode.disabled.asc(), competenceCode.code.asc()).list(competenceCode);
+    return query.orderBy(competenceCode.disabled.asc(), 
+        competenceCode.code.asc()).list(competenceCode);
   }
   
   /**
@@ -118,5 +120,19 @@ public class CompetenceCodeDao extends DaoBase {
     final JPQLQuery query = getQueryFactory().from(competenceCode)
         .where(competenceCode.competenceCodeGroup.eq(group));
     return query.orderBy(competenceCode.code.asc()).list(competenceCode);
+  }
+  
+  /**
+   * 
+   * @param group il gruppo che si vuole inserire nella ricerca dei codici di competenza
+   * @return la lista dei codici di competenza senza gruppo più quelli che appartengono
+   *     al gruppo passato come parametro.
+   */
+  public List<CompetenceCode> allCodesContainingGroupCodes(CompetenceCodeGroup group) {
+    final QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
+    final JPQLQuery query = getQueryFactory().from(competenceCode)
+        .where(competenceCode.competenceCodeGroup.isNull()
+            .or(competenceCode.competenceCodeGroup.eq(group)));
+    return query.list(competenceCode);
   }
 }
