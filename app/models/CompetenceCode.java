@@ -1,7 +1,6 @@
 package models;
 
 import models.base.BaseModel;
-import models.enumerate.LimitDescription;
 import models.enumerate.LimitType;
 import models.enumerate.LimitUnit;
 
@@ -72,10 +71,6 @@ public class CompetenceCode extends BaseModel {
   @Enumerated(EnumType.STRING)
   @Column(name = "limit_unit")
   public LimitUnit limitUnit;
-  
-  @Enumerated(EnumType.STRING)
-  @Column(name = "limit_description")
-  public LimitDescription limitDescription;
   
 
   @Override

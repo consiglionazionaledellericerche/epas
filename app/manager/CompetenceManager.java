@@ -6,6 +6,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
 
+import play.i18n.Messages;
+
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
@@ -17,9 +19,12 @@ import dao.wrapper.IWrapperFactory;
 import helpers.jpa.ModelQuery.SimpleResults;
 
 import manager.AbsenceManager.AbsenceToDate;
+import manager.recaps.personstamping.PersonStampingRecap;
+import manager.recaps.personstamping.PersonStampingRecapFactory;
 
 import models.Competence;
 import models.CompetenceCode;
+import models.CompetenceCodeGroup;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
@@ -48,11 +53,11 @@ public class CompetenceManager {
   private static final Logger log = LoggerFactory.getLogger(CompetenceManager.class);
   private final CompetenceCodeDao competenceCodeDao;
   private final OfficeDao officeDao;
-  private final PersonDao personDao;
   private final PersonDayDao personDayDao;
   private final CompetenceDao competenceDao;
   private final IWrapperFactory wrapperFactory;
   private final PersonDayManager personDayManager;
+  private static PersonStampingRecapFactory stampingsRecapFactory;
 
   /**
    * Costruttore.
@@ -66,16 +71,16 @@ public class CompetenceManager {
    */
   @Inject
   public CompetenceManager(CompetenceCodeDao competenceCodeDao,
-      OfficeDao officeDao, PersonDao personDao,CompetenceDao competenceDao,
+      OfficeDao officeDao, CompetenceDao competenceDao,
       PersonDayDao personDayDao, IWrapperFactory wrapperFactory,
-      PersonDayManager personDayManager) {
+      PersonDayManager personDayManager, PersonStampingRecapFactory stampingsRecapFactory) {
     this.competenceCodeDao = competenceCodeDao;
     this.officeDao = officeDao;
-    this.personDao = personDao;
     this.competenceDao = competenceDao;
     this.personDayDao = personDayDao;
     this.wrapperFactory = wrapperFactory;
     this.personDayManager = personDayManager;
+    this.stampingsRecapFactory = stampingsRecapFactory;    
   }
 
   /**
@@ -329,40 +334,54 @@ public class CompetenceManager {
     }
     return competenceCodeList;
   }
-  
+
   /**
    * 
    * @param comp la competenza da aggiornare
    * @param value il quantitativo per quella competenza da aggiornare
-   * @return true se è possibile assegnare la quantità value alla competenza comp.
+   * @return La stringa contenente il messaggio da far visualizzare come errore, se riscontrato.
+   *     Stringa vuota altrimenti.
    */
-  public boolean canAddCompetence(Competence comp, Integer value) {
-
-    if (comp.competenceCode.limitType.equals(LimitType.monthly)) {
-      if (comp.valueApproved + value > comp.competenceCode.limitValue) {
-        List<CompetenceCode> group = competenceCodeDao
-            .getCodeWithGroup(comp.competenceCode.competenceCodeGroup);
-        List<Competence> compList = competenceDao.getCompetences(comp.person, comp.year, 
-            Optional.fromNullable(comp.month), group);
-        int sum = compList.stream().mapToInt(i -> i.valueApproved).sum();
-        if (sum + value > comp.competenceCode.competenceCodeGroup.limitValue) {
-          return false;
+  public String canAddCompetence(Competence comp, Integer value) {
+    String result = "";
+    switch(comp.competenceCode.limitType) {
+      case monthly:
+        if (comp.valueApproved + value > comp.competenceCode.limitValue) {
+          List<CompetenceCode> group = competenceCodeDao
+              .getCodeWithGroup(comp.competenceCode.competenceCodeGroup);
+          List<Competence> compList = competenceDao.getCompetences(comp.person, comp.year, 
+              Optional.fromNullable(comp.month), group);
+          int sum = compList.stream().mapToInt(i -> i.valueApproved).sum();
+          if (sum + value > comp.competenceCode.competenceCodeGroup.limitValue) {
+            result = Messages.get("CompManager.overGroupLimit");          
+          }
         }        
-      } 
-    } 
-    if (comp.competenceCode.limitType.equals(LimitType.yearly)) {
-      List<Competence> compList = competenceDao.getCompetences(comp.person, comp.year, 
-          Optional.<Integer>absent(), Lists.newArrayList(comp.competenceCode));
-      int sum = compList.stream().mapToInt(i -> i.valueApproved).sum();      
-      if (sum + value > comp.competenceCode.limitValue) {
-        return false;
-      } 
+        break;
+      case yearly:
+        List<Competence> compList = competenceDao.getCompetences(comp.person, comp.year, 
+            Optional.<Integer>absent(), Lists.newArrayList(comp.competenceCode));
+        int sum = compList.stream().mapToInt(i -> i.valueApproved).sum();      
+        if (sum + value > comp.competenceCode.limitValue) {
+          result = Messages.get("CompManager.overYearLimit");
+        } 
+        break;
+      case onMonthlyPresence:
+        PersonStampingRecap psDto = stampingsRecapFactory
+        .create(comp.person, comp.year, comp.month, true);
+        if (psDto.basedWorkingDays != value) {
+          result = Messages.get("CompManager.diffBasedWorkingDay");
+        }
+        break;
+      case noLimit:
+        break;
+      default:
+        throw new IllegalArgumentException();
     }
-    return true;
+    return result;
   }
 
 
-  
+
   /**
    * persiste la competenza aggiornando il valore approvato per essa.
    * @param competence la competenza da aggiornare

@@ -197,12 +197,7 @@ public class Competences extends Controller {
    * @param competenceCode codice
    */
   public static void save(@Valid final CompetenceCode competenceCode) {
-    if (!Validation.hasErrors()) {
-      if (competenceCode.limitValue != null && competenceCode.limitDescription != null) {
-        validation.addError("competenceCode.limitValue", 
-            "Non valorizzare se valorizzato il campo descrizione limite");        
-      }
-    }
+
     if (Validation.hasErrors()) {
       response.status = 400;
       flash.error(Web.msgHasErrors());
@@ -221,12 +216,7 @@ public class Competences extends Controller {
    * @param group il gruppo di codici competenza
    */
   public static void saveGroup(@Valid final CompetenceCodeGroup group) {
-    if (!Validation.hasErrors()) {
-      if (group.limitValue != null && group.limitDescription != null) {
-        validation.addError("group.limitValue", 
-            "Non valorizzare se valorizzato il campo descrizione limite");        
-      }
-    }
+    
     if (Validation.hasErrors()) {
       response.status = 400;
       flash.error(Web.msgHasErrors());
@@ -442,10 +432,11 @@ public class Competences extends Controller {
     Office office = competence.person.office;
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
+    String result = "";
     if (!validation.hasErrors()) {
-
-      if (!competenceManager.canAddCompetence(competence, valueApproved)) {
-        validation.addError("valueApproved", "Non può superare il limite previsto per il codice");
+      result = competenceManager.canAddCompetence(competence, valueApproved);
+      if (!result.isEmpty()) {
+        validation.addError("valueApproved", result);
       }
     }
     if (validation.hasErrors()) {

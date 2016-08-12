@@ -80,6 +80,12 @@ competenceCode.limitValue= Quantità massima
 competenceCode.limitUnit =Unità di misura
 competenceCode.limitDescription =Descrizione limite
 
+CompManager.overGroupLimit= Superato il quantitativo massimo usabile per l'intero gruppo
+CompManager.overYearLimit= Superato il quantitativo annuale usabile
+CompManager.overMonthLimit= Superato il quantitativo mensile usabile
+CompManager.diffBasedWorkingDay= Differenza con i giorni di lavoro effettuati nel mese
+
+
 configuration.entry= Parametro
 configuration.entry.value= Valore parametro
 configurations= Configurazione
@@ -470,7 +476,7 @@ JustifiedTimeAtWork.AssignAllDay= Assegna intera giornata
 LimitType.monthly= Mensile
 LimitType.yearly= Annuale
 LimitType.noLimit= Senza limite
-LimitType.onMonthlyPresence= Su base mensile
+LimitType.onMonthlyPresence= In base a presenza mensile
 
 LimitUnit.minutes =Minuti
 LimitUnit.hours =Ore
