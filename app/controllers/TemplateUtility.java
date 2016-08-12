@@ -35,6 +35,7 @@ import models.AbsenceType;
 import models.BadgeReader;
 import models.BadgeSystem;
 import models.CompetenceCode;
+import models.CompetenceCodeGroup;
 import models.Institute;
 import models.Notification;
 import models.Office;
@@ -223,6 +224,10 @@ public class TemplateUtility {
   
   public List<CompetenceCode> allCodesWithoutGroup() {    
     return competenceCodeDao.getCodeWithoutGroup();
+  }
+  
+  public List<CompetenceCode> allCodesContainingGroupCodes(CompetenceCodeGroup group) {
+    return competenceCodeDao.allCodesContainingGroupCodes(group);
   }
   
   /**
