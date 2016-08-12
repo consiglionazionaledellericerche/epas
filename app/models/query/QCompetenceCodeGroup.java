@@ -34,8 +34,6 @@ public class QCompetenceCodeGroup extends EntityPathBase<CompetenceCodeGroup> {
 
     public final StringPath label = createString("label");
 
-    public final EnumPath<models.enumerate.LimitDescription> limitDescription = createEnum("limitDescription", models.enumerate.LimitDescription.class);
-
     public final EnumPath<models.enumerate.LimitType> limitType = createEnum("limitType", models.enumerate.LimitType.class);
 
     public final EnumPath<models.enumerate.LimitUnit> limitUnit = createEnum("limitUnit", models.enumerate.LimitUnit.class);

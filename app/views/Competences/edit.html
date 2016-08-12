@@ -20,8 +20,7 @@ title:(competenceCode?.persistent ? 'Modifica codice competenza' : 'Nuovo codice
 	  #{f.selectEnum 'competenceCode.limitUnit',items:models.enumerate.LimitUnit,select2:'off'/}
 	  </div>	  
 	  </div>
-	  
-	  #{f.selectEnum 'competenceCode.limitDescription',items:models.enumerate.LimitDescription,select2:'off'/}
+	  	  
 	  #{f.selectEnum 'competenceCode.limitType',items:models.enumerate.LimitType,select2:'off'/}  	
 	#{secure.check 'Competences.insertCompetenceCode'}
 	  #{if competenceCode != null}
