@@ -18,7 +18,7 @@ title:(group?.persistent ? 'Modifica codice competenza' : 'Nuovo gruppo di codic
 	 #{f.selectEnum 'group.limitUnit',items:models.enumerate.LimitUnit,select2:'off'/}
 	  </div>	  
 	  </div>
-	  #{f.selectEnum 'group.limitDescription',items:models.enumerate.LimitDescription,select2:'off'/}	  
+	  	  
 	  #{f.selectMultipleModel 'group.competenceCodes',
   		values:templateUtility.allCodesWithoutGroup(), placeholder:'I codici di competenza' /}
 	  #{f.selectEnum 'group.limitType',items:models.enumerate.LimitType,select2:'off'/}  	
