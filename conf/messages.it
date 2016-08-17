@@ -84,6 +84,7 @@ CompManager.overGroupLimit= Superato il quantitativo massimo usabile per l'inter
 CompManager.overYearLimit= Superato il quantitativo annuale usabile
 CompManager.overMonthLimit= Superato il quantitativo mensile usabile
 CompManager.diffBasedWorkingDay= Differenza con i giorni di lavoro effettuati nel mese
+CompManager.overServiceLimit= Superato il limite per i servizi reper.tà disponibili
 
 
 configuration.entry= Parametro

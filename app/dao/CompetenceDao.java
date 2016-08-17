@@ -77,15 +77,17 @@ public class CompetenceDao extends DaoBase {
    *     e al mese month per la persona person.
    */
   public List<Competence> getCompetences(
-      Person person, Integer year, Optional<Integer> month, List<CompetenceCode> codes) {
+      Optional<Person> person, Integer year, Optional<Integer> month, List<CompetenceCode> codes) {
 
     final QCompetence competence = QCompetence.competence;
     final BooleanBuilder condition = new BooleanBuilder();
-    condition.and(competence.person.eq(person))
-    .and(competence.year.eq(year)
+    condition.and(competence.year.eq(year)
         .and(competence.competenceCode.in(codes)));
     if (month.isPresent()) {
       condition.and(competence.month.eq(month.get()));
+    }
+    if (person.isPresent()) {
+      condition.and(competence.person.eq(person.get()));
     }
     final JPQLQuery query = getQueryFactory().from(competence)
             .leftJoin(competence.competenceCode).fetch()

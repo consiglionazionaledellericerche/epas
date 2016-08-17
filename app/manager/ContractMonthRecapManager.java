@@ -465,7 +465,7 @@ public class ContractMonthRecapManager {
       cmr.straordinariMinutiS3Print = 0;
 
       List<Competence> competences = competenceDao
-          .getCompetences(cmr.person, cmr.year, Optional.fromNullable(cmr.month), codes);
+          .getCompetences(Optional.fromNullable(cmr.person), cmr.year, Optional.fromNullable(cmr.month), codes);
 
       for (Competence competence : competences) {
 
