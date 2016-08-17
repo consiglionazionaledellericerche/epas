@@ -6,6 +6,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
 
+import com.beust.jcommander.internal.Maps;
+
 import play.i18n.Messages;
 
 import dao.CompetenceCodeDao;
@@ -343,9 +345,14 @@ public class CompetenceManager {
    *     Stringa vuota altrimenti.
    */
   public String canAddCompetence(Competence comp, Integer value) {
+    
     String result = "";
     switch(comp.competenceCode.limitType) {
       case monthly:
+        if (comp.competenceCode.codeToPresence.equals("207") 
+            || comp.competenceCode.codeToPresence.equals("208")) {
+          //TODO: gestione del gruppo reperibilità 
+        }
         if (comp.valueApproved + value > comp.competenceCode.limitValue) {
           List<CompetenceCode> group = competenceCodeDao
               .getCodeWithGroup(comp.competenceCode.competenceCodeGroup);
@@ -361,7 +368,7 @@ public class CompetenceManager {
         List<Competence> compList = competenceDao.getCompetences(comp.person, comp.year, 
             Optional.<Integer>absent(), Lists.newArrayList(comp.competenceCode));
         int sum = compList.stream().mapToInt(i -> i.valueApproved).sum();      
-        if (sum + value > comp.competenceCode.limitValue) {
+        if (sum + value > comp.competenceCode.competenceCodeGroup.limitValue) {
           result = Messages.get("CompManager.overYearLimit");
         } 
         break;
@@ -394,4 +401,8 @@ public class CompetenceManager {
   }
 
 
+//  private String handlerReperibility() {
+//    
+//  }
+  
 }

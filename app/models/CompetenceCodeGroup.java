@@ -5,6 +5,7 @@ import models.enumerate.LimitType;
 import models.enumerate.LimitUnit;
 
 import play.data.validation.Required;
+import play.data.validation.Unique;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.envers.Audited;
 
@@ -28,7 +30,7 @@ import com.beust.jcommander.internal.Lists;
  */
 @Audited
 @Entity
-@Table(name = "competence_code_groups")
+@Table(name = "competence_code_groups", uniqueConstraints = {@UniqueConstraint(columnNames = {"label"})})
 public class CompetenceCodeGroup extends BaseModel {
 
   private static final long serialVersionUID = 6486248571013912369L;
@@ -37,6 +39,7 @@ public class CompetenceCodeGroup extends BaseModel {
   public List<CompetenceCode> competenceCodes = Lists.newArrayList();
   
   @Required
+  @Unique
   public String label;
   
   @Required
