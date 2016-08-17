@@ -15,10 +15,13 @@ import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
+import dao.PersonReperibilityDayDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
 import helpers.jpa.ModelQuery.SimpleResults;
+
+import it.cnr.iit.epas.DateUtility;
 
 import manager.AbsenceManager.AbsenceToDate;
 import manager.recaps.personstamping.PersonStampingRecap;
@@ -35,6 +38,12 @@ import models.PersonDay;
 import models.TotalOvertime;
 import models.enumerate.LimitType;
 
+import org.apache.commons.lang.StringUtils;
+import org.assertj.core.api.AssertionInfo;
+import org.assertj.core.description.Description;
+import org.assertj.core.internal.Strings;
+import org.assertj.core.presentation.Representation;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import org.slf4j.Logger;
@@ -45,6 +54,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
@@ -59,6 +69,7 @@ public class CompetenceManager {
   private final CompetenceDao competenceDao;
   private final IWrapperFactory wrapperFactory;
   private final PersonDayManager personDayManager;
+  private final PersonReperibilityDayDao reperibilityDao;
   private static PersonStampingRecapFactory stampingsRecapFactory;
 
   /**
@@ -75,13 +86,15 @@ public class CompetenceManager {
   public CompetenceManager(CompetenceCodeDao competenceCodeDao,
       OfficeDao officeDao, CompetenceDao competenceDao,
       PersonDayDao personDayDao, IWrapperFactory wrapperFactory,
-      PersonDayManager personDayManager, PersonStampingRecapFactory stampingsRecapFactory) {
+      PersonDayManager personDayManager, PersonReperibilityDayDao reperibilityDao,
+      PersonStampingRecapFactory stampingsRecapFactory) {
     this.competenceCodeDao = competenceCodeDao;
     this.officeDao = officeDao;
     this.competenceDao = competenceDao;
     this.personDayDao = personDayDao;
     this.wrapperFactory = wrapperFactory;
     this.personDayManager = personDayManager;
+    this.reperibilityDao = reperibilityDao;
     this.stampingsRecapFactory = stampingsRecapFactory;    
   }
 
@@ -348,24 +361,27 @@ public class CompetenceManager {
     
     String result = "";
     switch(comp.competenceCode.limitType) {
-      case monthly:
-        if (comp.competenceCode.codeToPresence.equals("207") 
-            || comp.competenceCode.codeToPresence.equals("208")) {
-          //TODO: gestione del gruppo reperibilità 
-        }
+      case monthly:        
+        
         if (comp.valueApproved + value > comp.competenceCode.limitValue) {
           List<CompetenceCode> group = competenceCodeDao
               .getCodeWithGroup(comp.competenceCode.competenceCodeGroup);
-          List<Competence> compList = competenceDao.getCompetences(comp.person, comp.year, 
+          List<Competence> compList = competenceDao.getCompetences(Optional.fromNullable(comp.person), comp.year, 
               Optional.fromNullable(comp.month), group);
           int sum = compList.stream().mapToInt(i -> i.valueApproved).sum();
           if (sum + value > comp.competenceCode.competenceCodeGroup.limitValue) {
             result = Messages.get("CompManager.overGroupLimit");          
           }
+          //Caso Reperibilità:
+          if (StringUtils.containsIgnoreCase(comp.competenceCode.competenceCodeGroup.label, "reperibili")) {
+            if (!handlerReperibility(comp, value, group)) {
+              result = Messages.get("CompManager.overServiceLimit");
+            }
+          }
         }        
         break;
       case yearly:
-        List<Competence> compList = competenceDao.getCompetences(comp.person, comp.year, 
+        List<Competence> compList = competenceDao.getCompetences(Optional.fromNullable(comp.person), comp.year, 
             Optional.<Integer>absent(), Lists.newArrayList(comp.competenceCode));
         int sum = compList.stream().mapToInt(i -> i.valueApproved).sum();      
         if (sum + value > comp.competenceCode.competenceCodeGroup.limitValue) {
@@ -401,8 +417,38 @@ public class CompetenceManager {
   }
 
 
-//  private String handlerReperibility() {
-//    
-//  }
+ /**
+  * 
+  * @param yearMonth l'anno/mese di riferimento
+  * @param office la sede per cui si cercano i servizi per reperibilità abilitati
+  * @return il numero di giorni di reperibilità disponibili sulla base di quanti servizi per reperibilità
+  *     sono stati abilitati sulla sede.
+  */
+  private Integer countDaysForReperibility(YearMonth yearMonth, Office office) {
+    int numbers = reperibilityDao.getReperibilityTypeByOffice(office) != null ? 
+        reperibilityDao.getReperibilityTypeByOffice(office).size() : 0;
+    return numbers * (new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(),1)
+        .monthOfYear().getMaximumValue());
+  }
+  
+  /**
+   * 
+   * @param comp
+   * @param value
+   * @param group
+   * @return false se si supera il limite previsto per i servizi di reperibilità attivi.
+   *     true altrimenti.
+   */
+  private boolean handlerReperibility(Competence comp, Integer value, List<CompetenceCode> group) {
+    
+    int maxDays = countDaysForReperibility(new YearMonth(comp.year, comp.month), comp.person.office);
+    List<Competence> peopleMonthList = competenceDao
+        .getCompetences(Optional.<Person>absent(), comp.year, Optional.fromNullable(comp.month), group);
+    int peopleSum = peopleMonthList.stream().mapToInt(i -> i.valueApproved).sum();
+    if (peopleSum + value > maxDays) {
+      return false;
+    }
+    return true;
+  }
   
 }

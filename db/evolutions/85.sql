@@ -29,7 +29,7 @@ UPDATE competence_codes SET limit_type = 'monthly' WHERE code in ('207', '208', 
 UPDATE competence_codes SET limit_type = 'yearly' WHERE code in ('S1', 'S2', 'S3');
 UPDATE competence_codes SET limit_type = 'noLimit' WHERE code not in ('207', '208', 'S1', 'S2', 'S3', 'T1', 'T2', 'T3', '351', '352', '353', '354', '355');
 UPDATE competence_codes SET limit_type = 'onMonthlyPresence' where code in ('351', '352', '353', '354', '355');
-UPDATE competence_codes SET limit_value = 16 where code = '207';
+UPDATE competence_codes SET limit_value = 12 where code = '207';
 UPDATE competence_codes SET limit_value = 4 where code = '208';
 UPDATE competence_codes SET limit_value = 150 where code = 'T1';
 UPDATE competence_codes SET limit_value = 15 where code = 'T2';
