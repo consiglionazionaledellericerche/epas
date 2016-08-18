@@ -53,7 +53,7 @@ public class QCompetenceCode extends EntityPathBase<CompetenceCode> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
-    public final ListPath<models.Person, QPerson> persons = this.<models.Person, QPerson>createList("persons", models.Person.class, QPerson.class, PathInits.DIRECT2);
+    public final ListPath<models.PersonCompetenceCodes, QPersonCompetenceCodes> personCompetenceCodes = this.<models.PersonCompetenceCodes, QPersonCompetenceCodes>createList("personCompetenceCodes", models.PersonCompetenceCodes.class, QPersonCompetenceCodes.class, PathInits.DIRECT2);
 
     public QCompetenceCode(String variable) {
         this(CompetenceCode.class, forVariable(variable), INITS);

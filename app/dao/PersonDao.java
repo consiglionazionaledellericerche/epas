@@ -31,6 +31,7 @@ import models.query.QContract;
 import models.query.QContractStampProfile;
 import models.query.QContractWorkingTimeType;
 import models.query.QPerson;
+import models.query.QPersonCompetenceCodes;
 import models.query.QPersonDay;
 import models.query.QPersonHourForOvertime;
 import models.query.QPersonReperibility;
@@ -593,11 +594,11 @@ public final class PersonDao extends DaoBase {
    * @param code il competence_code da cercare
    * @return la lista delle persone che hanno il codice di competenza code abilitato.
    */
-  public List<Person> peopleWithCompetenceCodeActive(CompetenceCode code) {
-    final QPerson person = QPerson.person;
-    JPQLQuery query = getQueryFactory().from(person).where(person.competenceCode.contains(code));
-    return query.list(person);
-  }
+//  public List<Person> peopleWithCompetenceCodeActive(CompetenceCode code) {
+//    final QPerson person = QPerson.person;
+//    JPQLQuery query = getQueryFactory().from(person).where(person.competenceCode.contains(code));
+//    return query.list(person);
+//  }
 
 
   /**
@@ -746,7 +747,9 @@ public final class PersonDao extends DaoBase {
 
     if (compCode.isPresent()) {
       final QPerson person = QPerson.person;
-      condition.and(person.competenceCode.contains(compCode.get()));
+      final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
+      
+      condition.and(pcc.competenceCode.eq(compCode.get()).and(pcc.person.eq(person)));
     }
   }
 
@@ -860,14 +863,14 @@ public final class PersonDao extends DaoBase {
    * @param code
    * @return
    */
-  public List<Person> getPeopleWithOvertimeEnabled(Set<Office> offices, CompetenceCode code, List<Person> list) {
-
-    final QPerson person = QPerson.person;
-    JPQLQuery query = getQueryFactory().from(person)
-        .where(person.in(list).and(person.office.in(offices)
-            .and(person.competenceCode.contains(code)))).orderBy(person.surname.asc());
-    return query.list(person);
-  }
+//  public List<Person> getPeopleWithOvertimeEnabled(Set<Office> offices, CompetenceCode code, List<Person> list) {
+//
+//    final QPerson person = QPerson.person;
+//    JPQLQuery query = getQueryFactory().from(person)
+//        .where(person.in(list).and(person.office.in(offices)
+//            .and(person.competenceCode.contains(code)))).orderBy(person.surname.asc());
+//    return query.list(person);
+//  }
 
   /**
    * Dto contenente le sole informazioni della persona richieste dalla select nel template menu.

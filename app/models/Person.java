@@ -188,9 +188,13 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
    * relazione con la tabella dei codici competenza per stabilire se una persona ha diritto o meno a
    * una certa competenza.
    */
+//  @NotAudited
+//  @ManyToMany(cascade = {CascadeType.REFRESH})
+//  public List<CompetenceCode> competenceCode = Lists.newArrayList();
+  
   @NotAudited
-  @ManyToMany(cascade = {CascadeType.REFRESH})
-  public List<CompetenceCode> competenceCode = Lists.newArrayList();
+  @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
+  public Set<PersonCompetenceCodes> personCompetenceCodes = Sets.newHashSet();
 
   @OneToOne(mappedBy = "person")
   public PersonHourForOvertime personHourForOvertime;
@@ -250,9 +254,9 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     return this.surname;
   }
 
-  public void setCompetenceCodes(List<CompetenceCode> competenceCode) {
-    this.competenceCode = competenceCode;
-  }
+//  public void setCompetenceCodes(List<CompetenceCode> competenceCode) {
+//    this.competenceCode = competenceCode;
+//  }
 
   /**
    * @return il nome completo.
