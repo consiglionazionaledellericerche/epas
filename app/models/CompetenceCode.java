@@ -41,8 +41,12 @@ public class CompetenceCode extends BaseModel {
   @OneToMany(mappedBy = "competenceCode")
   public List<Competence> competence = Lists.newArrayList();
 
-  @ManyToMany(mappedBy = "competenceCode")
-  public List<Person> persons = Lists.newArrayList();
+//  @ManyToMany(mappedBy = "competenceCode")
+//  public List<Person> persons = Lists.newArrayList();
+  
+  @NotAudited
+  @OneToMany(mappedBy = "competenceCode")
+  public List<PersonCompetenceCodes> personCompetenceCodes = Lists.newArrayList();
   
   @ManyToOne
   @JoinColumn(name = "competence_code_group_id")

@@ -1,4 +1,17 @@
 # ---!Ups
+ALTER TABLE persons_competence_codes ADD COLUMN enabling_date DATE;
+
+UPDATE persons_competence_codes 
+SET enabling_date = o.begin_date FROM office o LEFT JOIN persons p ON (o.id = p.office_id) 
+WHERE p.id = persons_id;
+
+CREATE TABLE persons_competence_codes_temp AS
+  SELECT * FROM persons_competence_codes;
+
+DROP TABLE persons_competence_codes;
+ALTER TABLE persons_competence_codes_temp RENAME TO persons_competence_codes;
+  
+ALTER TABLE persons_competence_codes ALTER COLUMN enabling_date SET NOT NULL;
 
 CREATE TABLE competence_code_groups (
   id BIGSERIAL PRIMARY KEY,
@@ -7,6 +20,7 @@ CREATE TABLE competence_code_groups (
   limit_value INTEGER,
   limit_unit TEXT NOT NULL
 );
+
 ALTER TABLE competence_code_groups ADD CONSTRAINT competence_code_groups_label_key UNIQUE (label);
 INSERT INTO competence_code_groups (label, limit_type, limit_value, limit_unit) values('Gruppo reperibilità', 'monthly', 16, 'days');
 INSERT INTO competence_code_groups (label, limit_type, limit_value, limit_unit) values('Gruppo straordinari', 'yearly', 200, 'hours');
@@ -29,7 +43,7 @@ UPDATE competence_codes SET limit_type = 'monthly' WHERE code in ('207', '208', 
 UPDATE competence_codes SET limit_type = 'yearly' WHERE code in ('S1', 'S2', 'S3');
 UPDATE competence_codes SET limit_type = 'noLimit' WHERE code not in ('207', '208', 'S1', 'S2', 'S3', 'T1', 'T2', 'T3', '351', '352', '353', '354', '355');
 UPDATE competence_codes SET limit_type = 'onMonthlyPresence' where code in ('351', '352', '353', '354', '355');
-UPDATE competence_codes SET limit_value = 12 where code = '207';
+UPDATE competence_codes SET limit_value = 16 where code = '207';
 UPDATE competence_codes SET limit_value = 4 where code = '208';
 UPDATE competence_codes SET limit_value = 150 where code = 'T1';
 UPDATE competence_codes SET limit_value = 15 where code = 'T2';
@@ -92,6 +106,7 @@ INSERT INTO competence_code_groups_history
 
 # ---!Downs
 
+ALTER TABLE persons_competences_codes DROP COLUMN enabling_date;
 ALTER TABLE competence_codes DROP COLUMN limit_value;
 ALTER TABLE competence_codes DROP COLUMN limit_type;
 ALTER TABLE competence_codes DROP COLUMN limit_unit;

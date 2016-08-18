@@ -20,8 +20,11 @@ import models.TotalOvertime;
 import models.query.QCompetence;
 import models.query.QCompetenceCode;
 import models.query.QPerson;
+import models.query.QPersonCompetenceCodes;
 import models.query.QPersonHourForOvertime;
+import models.query.QPersonReperibility;
 import models.query.QPersonReperibilityType;
+import models.query.QPersonShiftShiftType;
 import models.query.QTotalOvertime;
 
 import org.slf4j.Logger;
@@ -61,9 +64,10 @@ public class CompetenceDao extends DaoBase {
   public List<CompetenceCode> activeCompetenceCode(Office office) {
 
     final QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
-
+    final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
     return getQueryFactory().from(competenceCode)
-            .where(competenceCode.persons.any().office.eq(office)).orderBy(competenceCode.code.asc())
+        .leftJoin(competenceCode.personCompetenceCodes, pcc).fetch()
+            .where(pcc.person.office.eq(office)).orderBy(competenceCode.code.asc())
             .distinct().list(competenceCode);
   }
 

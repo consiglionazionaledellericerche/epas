@@ -239,19 +239,19 @@ public class CompetenceManager {
         value = competence.get(code.code);
         log.info("competence {} is {}", code.code, value);
       }
-      if (!value) {
-        if (person.competenceCode.contains(competenceCodeDao.getCompetenceCodeById(code.id))) {
-          person.competenceCode.remove(competenceCodeDao.getCompetenceCodeById(code.id));
-        } else {
-          continue;
-        }
-      } else {
-        if (person.competenceCode.contains(competenceCodeDao.getCompetenceCodeById(code.id))) {
-          continue;
-        } else {
-          person.competenceCode.add(competenceCodeDao.getCompetenceCodeById(code.id));
-        }
-      }
+//      if (!value) {
+//        if (person.competenceCode.contains(competenceCodeDao.getCompetenceCodeById(code.id))) {
+//          person.competenceCode.remove(competenceCodeDao.getCompetenceCodeById(code.id));
+//        } else {
+//          continue;
+//        }
+//      } else {
+//        if (person.competenceCode.contains(competenceCodeDao.getCompetenceCodeById(code.id))) {
+//          continue;
+//        } else {
+//          person.competenceCode.add(competenceCodeDao.getCompetenceCodeById(code.id));
+//        }
+//      }
 
     }
     person.save();
