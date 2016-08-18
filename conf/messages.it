@@ -482,6 +482,7 @@ LimitType.onMonthlyPresence= In base a presenza mensile
 LimitUnit.minutes =Minuti
 LimitUnit.hours =Ore
 LimitUnit.days =Giorni
+LimitUnit.months =Giorni
 
 LimitDescription.daysOfMonth =Giorni del mese
 LimitDescription.daysOfYear =Giorni dell'anno

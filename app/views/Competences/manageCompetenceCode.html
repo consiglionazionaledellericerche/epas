@@ -63,11 +63,9 @@
 	 	#{alert color: 'info'}
 	 	<form class="form-horizontal">
 	 		#{if group.limitValue != null}
-	    		#{f.view 'Limite', value:group.limitValue /}
-	    	#{/if}
-	    	
-	    	#{f.view 'Unità di misura', value:group.limitUnit /}
-	    	
+				#{f.view 'Limite', value:group.limitValue /}
+			#{/if}
+	    #{f.view 'Unità di misura', value:group.limitUnit /}
 	 		#{f.view 'Tipo Limite', value:group.limitType /}
 	 	</form> 
 	 	#{/alert}
