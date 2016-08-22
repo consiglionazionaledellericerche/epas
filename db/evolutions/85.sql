@@ -9,7 +9,7 @@ CREATE TABLE takable_absence_behaviours (
   --- takaen_count_behaviour TEXT NOT NULL,   sempre period)
   fixed_limit INT NOT NULL,
   takable_amount_adjust TEXT
-);
+);;
 
 CREATE TABLE takable_absence_behaviours_history (
   id BIGINT NOT NULL,
@@ -157,7 +157,7 @@ CREATE TABLE group_absence_types_history (
   next_group_to_check_id BIGINT
 );
 
---- Assenze / Tipi Assenze
+--- 8) Assenze / Tipi Assenze
 
 CREATE TABLE justified_types (
   id BIGSERIAL PRIMARY KEY,
@@ -183,6 +183,22 @@ CREATE TABLE absence_types_justified_types_history (
   _revision_type SMALLINT,
   absence_types_id BIGINT,
   justified_types_id BIGINT
+);
+
+--- 9) Assenze / Tipi Assenze Errori
+
+CREATE TABLE absence_troubles (
+  id BIGSERIAL PRIMARY KEY,
+  trouble TEXT NOT NULL,  
+  absence_id BIGINT NOT NULL REFERENCES absences (id)
+);
+
+CREATE TABLE absence_troubles_history (
+  id BIGINT NOT NULL,
+  _revision INTEGER NOT NULL REFERENCES revinfo(rev),
+  _revision_type SMALLINT,
+  trouble TEXT,  
+  absence_id BIGINT
 );
 
 ALTER TABLE absence_types ADD COLUMN time_for_mealticket BOOLEAN default false;
@@ -237,6 +253,9 @@ CREATE TABLE initialization_groups_history (
 
 
 # ---!Downs
+
+DROP TABLE absence_troubles;
+DROP TABLE absence_troubles_history;
 
 DROP TABLE initialization_groups;
 DROP TABLE initialization_groups_history;

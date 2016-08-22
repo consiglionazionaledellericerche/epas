@@ -2,6 +2,7 @@ package manager.services.absences;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
 import dao.absences.AbsenceComponentDao;
@@ -9,18 +10,22 @@ import dao.absences.AbsenceComponentDao;
 import manager.services.absences.model.AbsenceEngine;
 import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.AbsencePeriod.ComplationComponent;
+import manager.services.absences.model.AbsencePeriod.EnhancedAbsence;
 
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
+import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.TakableAbsenceBehaviour;
 
 import org.testng.collections.Lists;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 public class AbsenceEngineUtility {
@@ -31,7 +36,7 @@ public class AbsenceEngineUtility {
   public AbsenceEngineUtility(AbsenceComponentDao absenceComponentDao) {
     this.absenceComponentDao = absenceComponentDao;
   }
- 
+  
   /**
    * Le operazioni univocamente identificabili dal justifiedType. Devo riuscire a derivare
    * l'assenza da inserire attraverso il justifiedType.
@@ -132,10 +137,10 @@ public class AbsenceEngineUtility {
       amount = 0;
     } 
     else if (absence.justifiedType.name.equals(JustifiedTypeName.all_day)) {
-      amount = absenceEngine.workingTime(absenceEngine.date);
+      amount = absenceEngine.workingTime(absenceEngine.currentDate());
     } 
     else if (absence.justifiedType.name.equals(JustifiedTypeName.half_day)) {
-      amount = absenceEngine.workingTime(absenceEngine.date) / 2;
+      amount = absenceEngine.workingTime(absenceEngine.currentDate()) / 2;
     }
     else if (absence.justifiedType.name.equals(JustifiedTypeName.missing_time) ||
         absence.justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
@@ -155,7 +160,7 @@ public class AbsenceEngineUtility {
     }
     
     if (amountType.equals(AmountType.units)) {
-      int work = absenceEngine.workingTime(absenceEngine.date);
+      int work = absenceEngine.workingTime(absenceEngine.currentDate());
       if (work == 0) {
         return 0;
       }
@@ -207,27 +212,39 @@ public class AbsenceEngineUtility {
    * @param absence
    * @return
    */
-  public Absence inferAbsenceType(AbsencePeriod absencePeriod, Absence absence) {
+  public EnhancedAbsence inferAbsenceType(AbsencePeriod absencePeriod, EnhancedAbsence enhancedAbsence) {
 
-    if (absence.justifiedType == null || !absencePeriod.takableComponent.isPresent()) {
-      return absence;
+    if (!enhancedAbsence.isAbsenceTypeToInfer()) {
+      return enhancedAbsence;
+    }
+    
+    //Reset
+    enhancedAbsence.setAbsenceTypeInfered(false);
+    
+    //Scorciatoie
+    Absence absence = enhancedAbsence.getAbsence();
+    JustifiedType requestedJustifiedType = enhancedAbsence.getRequestedJustifiedType();
+    
+    if (requestedJustifiedType == null || !absencePeriod.takableComponent.isPresent()) {
+      return enhancedAbsence;
     }
     
     // Controllo che il tipo sia inferibile
-    if (!automaticJustifiedType(absencePeriod.groupAbsenceType).contains(absence.justifiedType)) {
-      return absence;
+    if (!automaticJustifiedType(absencePeriod.groupAbsenceType).contains(requestedJustifiedType)) {
+      return enhancedAbsence;
     }
 
     //Cerco il codice
-    if (absence.justifiedType.name.equals(JustifiedTypeName.all_day)) {
+    if (requestedJustifiedType.name.equals(JustifiedTypeName.all_day)) {
       for (AbsenceType absenceType : absencePeriod.takableComponent.get().takableCodes) { 
-        if (absenceType.justifiedTypesPermitted.contains(absence.justifiedType)) {
+        if (absenceType.justifiedTypesPermitted.contains(requestedJustifiedType)) {
           absence.absenceType = absenceType;
-          return absence;
+          enhancedAbsence.setAbsenceTypeInfered(true);
+          return enhancedAbsence;
         }
       }
     }
-    if (absence.justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
+    if (requestedJustifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
       
       AbsenceType specifiedMinutes = null;
       for (AbsenceType absenceType : absencePeriod.takableComponent.get().takableCodes) {
@@ -235,7 +252,8 @@ public class AbsenceEngineUtility {
           if (absenceTypeJustifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
             if (absence.justifiedMinutes != null) {
               absence.absenceType = absenceType;
-              return absence; 
+              enhancedAbsence.setAbsenceTypeInfered(true);
+              return enhancedAbsence; 
             }
             specifiedMinutes = absenceType;
           }
@@ -243,16 +261,18 @@ public class AbsenceEngineUtility {
             if (absenceType.justifiedTime.equals(absence.justifiedMinutes)) { 
               absence.absenceType = absenceType;
               absence.justifiedType = absenceTypeJustifiedType;
-              return absence;
+              enhancedAbsence.setAbsenceTypeInfered(true);
+              return enhancedAbsence;
             }
           }
         }
       }
       absence.absenceType = specifiedMinutes;
-      return absence; 
+      enhancedAbsence.setAbsenceTypeInfered(true);
+      return enhancedAbsence; 
     }
     // TODO: quanto manca?
-    return absence;
+    return enhancedAbsence;
   }
  
   /**
@@ -263,9 +283,14 @@ public class AbsenceEngineUtility {
    */
   public Integer getMinutes(Integer hours, Integer minutes) {
     Integer selectedSpecifiedMinutes = null;
-    if (hours != null && minutes != null) {
-      selectedSpecifiedMinutes = (hours * 60) + minutes; 
+    if (hours == null) {
+      hours = 0;
     }
+    if (minutes == null) {
+      minutes = 0;
+    }
+    selectedSpecifiedMinutes = (hours * 60) + minutes; 
+    
     return selectedSpecifiedMinutes;
   }
   
@@ -284,5 +309,29 @@ public class AbsenceEngineUtility {
     }
     return Optional.absent();
   }
+  
+  /**
+   * I gruppi coinvolti nel tipo di assenza.
+   * @param absenceType
+   * @return
+   */
+  public Set<GroupAbsenceType> involvedGroup(AbsenceType absenceType) {
+    Set<GroupAbsenceType> involvedGroup = Sets.newHashSet();
+    for (TakableAbsenceBehaviour takableAbsenceBehaviour : absenceType.takableGroup) {
+      involvedGroup.addAll(takableAbsenceBehaviour.groupAbsenceTypes);
+    }
+    for (TakableAbsenceBehaviour takableAbsenceBehaviour : absenceType.takenGroup) {
+      involvedGroup.addAll(takableAbsenceBehaviour.groupAbsenceTypes);
+    }
+    for (ComplationAbsenceBehaviour complationAbsenceBehaviour : absenceType.complationGroup) {
+      involvedGroup.addAll(complationAbsenceBehaviour.groupAbsenceTypes);
+    }
+    for (ComplationAbsenceBehaviour complationAbsenceBehaviour : absenceType.replacingGroup) {
+      involvedGroup.addAll(complationAbsenceBehaviour.groupAbsenceTypes);
+    }
+    return involvedGroup;
+  }
+  
+  
       
 }

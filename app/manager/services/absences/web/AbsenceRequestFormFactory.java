@@ -57,7 +57,11 @@ public class AbsenceRequestFormFactory {
     AbsenceRequestForm absenceRequestForm = new AbsenceRequestForm();
     absenceRequestForm.person = person;      
     absenceRequestForm.from = from;
-    absenceRequestForm.to = to;
+    if (to != null) {
+      absenceRequestForm.to = to;
+    } else {
+      absenceRequestForm.to = from;
+    }
     
     //TODO: filtrare i gruppi sulla base della persona e della sede.
     List<GroupAbsenceType> allAbsenceTypeGroupPersonEnabled = 

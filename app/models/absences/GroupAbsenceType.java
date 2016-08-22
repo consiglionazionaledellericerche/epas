@@ -64,7 +64,9 @@ public class GroupAbsenceType extends BaseModel {
   @OneToMany(mappedBy = "nextGroupToCheck", fetch = FetchType.LAZY)
   public Set<GroupAbsenceType> previousGroupChecked;
 
-
+  public String getLabel() {
+    return this.description;
+  }
   
   public enum PeriodType {
     
@@ -84,7 +86,7 @@ public class GroupAbsenceType extends BaseModel {
     }
     
     public boolean isChildPeriod() {
-      return childNumber != null;
+      return childNumber > 0;
     }
     
     public Integer getChildNumber() {

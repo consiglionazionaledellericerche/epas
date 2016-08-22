@@ -176,8 +176,10 @@ public class PersonStampingRecap {
       }
     }
 
-    this.positiveResidualInMonth = wrapperFactory.create(person)
-        .getPositiveResidualInMonth(this.year, this.month);
+    //Riattivarlo... 
+    this.positiveResidualInMonth = 0;
+    //    this.positiveResidualInMonth = wrapperFactory.create(person)
+    //        .getPositiveResidualInMonth(this.year, this.month);
 
     this.numberOfCompensatoryRestUntilToday = personManager
         .numberOfCompensatoryRestUntilToday(person, year, month);

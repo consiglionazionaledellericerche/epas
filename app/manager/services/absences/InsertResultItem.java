@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import models.absences.Absence;
+import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceType;
 
 import org.joda.time.LocalDate;
@@ -13,29 +14,19 @@ import org.testng.collections.Lists;
 
 import java.util.List;
 
-/**
- * Record di esito inserimento assenza.
- * 
- * @author alessandro
- *
- */
 @Builder @Getter @Setter(AccessLevel.PACKAGE)
-public class ResponseItem {
+public class InsertResultItem {
 
   private LocalDate date;
   private Absence absence;
   private AbsenceType absenceType;
-  private AbsenceOperation operation;
-  private List<ConsumedResidualAmount> consumedResidualAmount = Lists.newArrayList();
+  private Operation operation;
   private AbsenceProblem absenceProblem;
   
-  public enum AbsenceOperation {
-    insert, insertReplacing, remainingBefore, remainingAfter, cancel;
+  private List<ConsumedResidualAmount> consumedResidualAmount = Lists.newArrayList();
+  
+  public enum Operation {
+    check, insert, insertReplacing, remainingBefore, remainingAfter, cancel;
   }
 
-  public enum AbsenceProblem {
-    notOnHoliday,
-    twoComplationSameDay,
-    limitExceeded;
-  }
 }

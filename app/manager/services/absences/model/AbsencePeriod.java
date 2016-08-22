@@ -1,11 +1,12 @@
 package manager.services.absences.model;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import it.cnr.iit.epas.DateInterval;
 
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,10 +15,10 @@ import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.GroupAbsenceType;
+import models.absences.JustifiedType;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 
 import org.joda.time.LocalDate;
-import org.testng.collections.Lists;
 
 import java.util.Collections;
 import java.util.List;
@@ -47,23 +48,32 @@ public class AbsencePeriod {
   public DateInterval periodInterval() {
     return new DateInterval(from, to);
   }
-
+    
   public static class TakableComponent {
 
     public AmountType takeAmountType;                // Il tipo di ammontare del periodo
 
     public TakeCountBehaviour takableCountBehaviour; // Come contare il tetto totale
-    public int fixedPeriodTakableAmount = 0;         // Il tetto massimo
+    private int fixedPeriodTakableAmount = 0;         // Il tetto massimo
 
     public TakeCountBehaviour takenCountBehaviour;   // Come contare il tetto consumato
-    public int periodTakenAmount = 0;                // Il tetto consumato
+    private int periodTakenAmount = 0;                // Il tetto consumato
 
     public Set<AbsenceType> takableCodes;            // I tipi assenza prendibili del periodo
     public Set<AbsenceType> takenCodes;              // I tipi di assenza consumati del periodo
 
     // Le assenze consumate potenziate con informazioni aggiuntive
-    public List<SuperAbsence> takenSuperAbsence = Lists.newArrayList(); 
+    public List<EnhancedAbsence> takenEnhancedAbsence = Lists.newArrayList(); 
 
+    public void setFixedPeriodTakableAmount(int amount) {
+      if (this.takeAmountType.equals(AmountType.units)) {
+        // Per non fare operazioni in virgola mobile...
+        this.fixedPeriodTakableAmount = amount * 100;
+      } else {
+        this.fixedPeriodTakableAmount = amount;  
+      }
+    }
+    
     public int getPeriodTakableAmount() {
       if (!takableCountBehaviour.equals(TakeCountBehaviour.period)) {
         // TODO: sumAllPeriod, sumUntilPeriod;
@@ -79,6 +89,31 @@ public class AbsencePeriod {
       } 
       return periodTakenAmount;
     }
+    
+    /**
+     * Se è possibile quell'ulteriore amount.
+     * @param amount
+     * @return
+     */
+    public boolean canAddTakenAmount(int amount) {
+      //TODO: se non c'è limite programmarlo in un booleano
+      if (this.getPeriodTakableAmount() < 0) {
+        return true;
+      }
+      if (this.getPeriodTakableAmount() - this.getPeriodTakenAmount() - amount >= 0) {
+        return true;
+      }
+      return false;
+    }
+    
+    /**
+     * Aggiunge l'enhancedAbsene al period e aggiorna il limite consumato.
+     * @param enhancedAbsence
+     */
+    public void addAbsenceTaken(EnhancedAbsence enhancedAbsence) {
+      this.takenEnhancedAbsence.add(enhancedAbsence);
+      this.periodTakenAmount += enhancedAbsence.getJustifiedTime();
+    }
   }
 
   public static class ComplationComponent {
@@ -90,6 +125,7 @@ public class AbsencePeriod {
     // I codici di rimpiazzamento ordinati per il loro tempo di completamento (decrescente)
     public SortedMap<Integer, AbsenceType> replacingCodesDesc = 
         Maps.newTreeMap(Collections.reverseOrder());
+    
     //I tempi di rimpiazzamento per ogni assenza
     public Map<AbsenceType, Integer> replacingTimes = Maps.newHashMap();
     
@@ -99,68 +135,84 @@ public class AbsencePeriod {
     // Le assenze di rimpiazzamento
     public List<Absence> replacingAbsences = Lists.newArrayList();
     // Le assenze di rimpiazzamento potenziate con informazioni aggiuntive
-    public SortedMap<LocalDate, SuperAbsence> replacingAbsencesByDay = Maps.newTreeMap();
+    public SortedMap<LocalDate, EnhancedAbsence> replacingAbsencesByDay = Maps.newTreeMap();
     
     
     // Le assenze di completamento
     public List<Absence> complationAbsences = Lists.newArrayList();
     // Le assenze di completamento potenziate con informazioni aggiuntive
-    public SortedMap<LocalDate, SuperAbsence> complationAbsencesByDay = Maps.newTreeMap(); 
+    public SortedMap<LocalDate, EnhancedAbsence> complationAbsencesByDay = Maps.newTreeMap();
+    
+    public LocalDate compromisedReplacingDate = null;
+    
+    //I replacing days per ogni data raccolgo i replacing effettivi e quelli corretti
+    public SortedMap<LocalDate, ReplacingDay> replacingDays = Maps.newTreeMap();
+    
+    /**
+     * Lo stato dei rimpiazzamenti, data per data, quelli corretti e quelli esistenti.
+     * @author alessandro
+     *
+     */
+    @Builder @Getter @Setter
+    public static class ReplacingDay {
+      private LocalDate date;
+      private Absence existentReplacing;
+      private AbsenceType correctReplacing;
+      
+      public boolean wrongType() {
+        return correctReplacing != null && existentReplacing != null 
+            && !existentReplacing.getAbsenceType().equals(correctReplacing);
+      }
+      
+      public boolean onlyCorrect() {
+        return correctReplacing != null && existentReplacing == null;
+      }
+
+      public boolean onlyExisting() {
+        return correctReplacing == null && existentReplacing != null;
+      }
+
+    }
 
   }
   
   /**
-   * Le assenze preesistenti. Con informazioni aggiuntive.
+   * Le assenze preesistenti. Potenziate con informazioni di controllo.
    * @author alessandro
    *
    */
-  @Builder @Getter @Setter(AccessLevel.PACKAGE)
-  public static class SuperAbsence {
-    private final Absence absence;                           //assenza  
-    private Integer justifiedTime = null;                    //tempo giustificato
-    private boolean isAlreadyAssigned = false;        //ogni assenza deve appartenere 
-                                                      //ad uno e uno solo period
-  }
-
-  public enum ProblemType {
-    
-    //Errori della richiesta
-    wrongJustifiedType,   // quando il tipo giustificativo non è supportato o identificabile
-    dateOutOfContract,    // quando provo assegnare esempio ferie fuori contratto
-    absenceCodeNotAllowed,// se passo un codice di assenza da inserire non prendibile
-    cantInferAbsenceCode, // se non posso inferire il codice d'assenza
-    unsupportedOperation, // ancora non implementato
-    
-    //Errori di modellazione (sono i più gravi)
-    modelErrorTwoPeriods,          //quando una assenza è assegnata a più di un periodo
-    modelErrorComplationCode,      //quando un codice è di completamento ma anche t o r. (bootstrap)
-    modelErrorReplacingCode,       //quando ex. due codici di rimpiazzamento hanno lo stesso tempo  
-    modelErrorAmountType,          //quando provo a calcolare il tempo giustificato / completamento
-    
-    //Errori di stato
-    noChildExist,         // quando provo a assegnare una tutela per figlio non inserito
-    notOnHoliday,
-    
-    stateErrorTwoReplacingSameDay,
-    stateErrorTwoComplationSameDay,
-    stateErrorLimitlimitExceeded,
-    stateErrorMissingReplacing,
-    stateErrorWrongReplacing,
-    stateErrorTooEarlyReplacing;
-  }
-  
   @Builder @Getter @Setter
-  public static class AbsenceEngineProblem {
+  public static class EnhancedAbsence {
     
-    private ProblemType problemType;
+    private final Absence absence;                      //assenza
     
-    private LocalDate date;
-    private List<AbsenceType> existentReplacing;
-    private List<AbsenceType> expectedReplacing;
+    //infer component
+    private boolean absenceTypeToInfer = false;
+    private final JustifiedType requestedJustifiedType;
+    private boolean absenceTypeInfered = false;
+    
+    private Integer justifiedTime = null;               //tempo giustificato lazy
+    private boolean isAlreadyAssigned = false;          //deve appartenere ad un solo period
+    
+    private Set<GroupAbsenceType> notScannedGroups = Sets.newHashSet();
+    
+    public boolean hasNextGroupToScan() {
+      return !notScannedGroups.isEmpty();
+    }
+    public GroupAbsenceType getNextGroupToScan() {
+      if (this.notScannedGroups.isEmpty()) { 
+        return null;
+      }
+      GroupAbsenceType group = this.notScannedGroups.iterator().next();
+      setGroupScanned(group);
+      return group;
+    }
+    
+    public void setGroupScanned(GroupAbsenceType groupAbsenceType) {
+      this.notScannedGroups.remove(groupAbsenceType);
+    }
     
   }
-
-  
 
 }
 

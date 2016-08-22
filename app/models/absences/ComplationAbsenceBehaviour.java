@@ -12,9 +12,11 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
@@ -25,6 +27,9 @@ public class ComplationAbsenceBehaviour extends BaseModel {
 
   @Column(name = "name")
   public String name;
+  
+  @OneToMany(mappedBy = "complationAbsenceBehaviour", fetch = FetchType.LAZY)
+  public Set<GroupAbsenceType> groupAbsenceTypes = Sets.newHashSet();
   
   @Column(name = "amount_type")
   @Enumerated(EnumType.STRING)
