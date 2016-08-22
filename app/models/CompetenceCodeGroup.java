@@ -49,12 +49,9 @@ public class CompetenceCodeGroup extends BaseModel {
   
   @Column(name = "limit_value")
   public Integer limitValue;
-  
- 
+
   @Required
   @Enumerated(EnumType.STRING)
   @Column(name = "limit_unit")
   public LimitUnit limitUnit;
-  
-
 }
