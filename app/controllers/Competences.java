@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.SecureManager;
-
+import manager.competences.CompetenceCodeDTO;
 import manager.recaps.competence.PersonMonthCompetenceRecap;
 import manager.recaps.competence.PersonMonthCompetenceRecapFactory;
 import manager.recaps.personstamping.PersonStampingRecap;
@@ -43,6 +43,7 @@ import models.CompetenceCodeGroup;
 import models.Contract;
 import models.Office;
 import models.Person;
+import models.PersonCompetenceCodes;
 import models.PersonMonthRecap;
 import models.PersonReperibilityType;
 import models.TotalOvertime;
@@ -265,8 +266,11 @@ public class Competences extends Controller {
     LocalDate date = new LocalDate();
     List<Person> personList = personDao.list(Optional.<String>absent(), Sets.newHashSet(office),
         false, date, date.dayOfMonth().withMaximumValue(), true).list();
+    List<PersonCompetenceCodes> pccList = competenceCodeDao.list(personList);
+    Map<Person, List<CompetenceCodeDTO>> map = competenceManager
+        .createMap(personList, date.getYear(), date.getMonthOfYear());
 
-    render(personList, office);
+    render(personList, office, pccList, map, date);
   }
 
   /**
@@ -280,7 +284,12 @@ public class Competences extends Controller {
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
 
-    render(person);
+    List<PersonCompetenceCodes> pccList = competenceCodeDao.listByPerson(person);
+    List<CompetenceCode> codeListIds = Lists.newArrayList();
+    for (PersonCompetenceCodes pcc : pccList) {
+      codeListIds.add(pcc.competenceCode);
+    }
+    render(person, codeListIds);
   }
 
   /**
@@ -288,17 +297,48 @@ public class Competences extends Controller {
    *
    * @param person la persona per cui si intende salvare le competenze abilitate
    */
-  public static void saveNewCompetenceConfiguration(Person person) {
-
+  public static void saveNewCompetenceConfiguration(List<Long> codeListIds, Long personId) {
+    Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
-    person.save();
+    List<PersonCompetenceCodes> pccList = competenceCodeDao.listByPerson(person);
+    List<CompetenceCode> codeToAdd = competenceManager.codeToSave(pccList, codeListIds);
+    List<CompetenceCode> codeToRemove = competenceManager.codeToDelete(pccList, codeListIds);
+    
+    codeToAdd.forEach(item -> {
+      Optional<PersonCompetenceCodes> pcc = competenceCodeDao.getByPersonAndCode(person, item);
+      if (pcc.isPresent()) {
+        pcc.get().beginDate = LocalDate.now();
+        pcc.get().endDate = null;
+        pcc.get().save();
+      } else {
+        PersonCompetenceCodes newPcc = new PersonCompetenceCodes();
+        newPcc.competenceCode = item;
+        newPcc.person = person;
+        newPcc.beginDate = LocalDate.now();
+        newPcc.save();
+      }
+      
+    });
+    codeToRemove.forEach(item -> {
+      Optional<PersonCompetenceCodes> pcc = competenceCodeDao.getByPersonAndCode(person, item);
+      if (pcc.isPresent()) {
+        pcc.get().endDate = LocalDate.now();
+        pcc.get().save();
+      } else {
+        flash.error("Si è cercato di rimuovere la competenza %s che non presente per la persona %s", 
+            item.description, person.fullName());
+        Competences.enabledCompetences(person.office.id);
+      }
+    });
+    
     flash.success(String.format("Aggiornate con successo le competenze per %s",
         person.fullName()));
     Competences.enabledCompetences(person.office.id);
 
   }
 
+  
 
   /**
    * Riepilgo competenze del dipendente.

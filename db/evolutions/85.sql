@@ -1,17 +1,27 @@
 # ---!Ups
+
 ALTER TABLE persons_competence_codes ADD COLUMN enabling_date DATE;
 
 UPDATE persons_competence_codes 
 SET enabling_date = o.begin_date FROM office o LEFT JOIN persons p ON (o.id = p.office_id) 
 WHERE p.id = persons_id;
 
-CREATE TABLE persons_competence_codes_temp AS
-  SELECT * FROM persons_competence_codes;
+CREATE TABLE persons_competence_codes_temp (
+  id BIGSERIAL PRIMARY KEY,
+  person_id BIGINT,
+  competence_code_id BIGINT,
+  begin_date DATE NOT NULL,
+  end_date DATE
+);
+INSERT INTO persons_competence_codes_temp(person_id, competence_code_id, begin_date)
+SELECT persons_id, competencecode_id, enabling_date
+FROM persons_competence_codes;
 
 DROP TABLE persons_competence_codes;
 ALTER TABLE persons_competence_codes_temp RENAME TO persons_competence_codes;
-  
-ALTER TABLE persons_competence_codes ALTER COLUMN enabling_date SET NOT NULL;
+ALTER TABLE persons_competence_codes ADD FOREIGN KEY (competence_code_id) REFERENCES competence_codes (id);
+ALTER TABLE persons_competence_codes ADD FOREIGN KEY (person_id) REFERENCES persons (id);
+
 
 CREATE TABLE competence_code_groups (
   id BIGSERIAL PRIMARY KEY,
@@ -106,7 +116,8 @@ INSERT INTO competence_code_groups_history
 
 # ---!Downs
 
-ALTER TABLE persons_competences_codes DROP COLUMN enabling_date;
+ALTER TABLE persons_competences_codes DROP COLUMN begin_date;
+ALTER TABLE persons_competences_codes DROP COLUMN end_date;
 ALTER TABLE competence_codes DROP COLUMN limit_value;
 ALTER TABLE competence_codes DROP COLUMN limit_type;
 ALTER TABLE competence_codes DROP COLUMN limit_unit;

@@ -24,11 +24,15 @@ public class QPersonCompetenceCodes extends EntityPathBase<PersonCompetenceCodes
 
     public static final QPersonCompetenceCodes personCompetenceCodes = new QPersonCompetenceCodes("personCompetenceCodes");
 
-    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
+    public final models.base.query.QPeriodModel _super = new models.base.query.QPeriodModel(this);
+
+    //inherited
+    public final DatePath<org.joda.time.LocalDate> beginDate = _super.beginDate;
 
     public final QCompetenceCode competenceCode;
 
-    public final DatePath<org.joda.time.LocalDate> enablingDate = createDate("enablingDate", org.joda.time.LocalDate.class);
+    //inherited
+    public final DatePath<org.joda.time.LocalDate> endDate = _super.endDate;
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
