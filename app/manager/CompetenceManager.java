@@ -24,6 +24,7 @@ import helpers.jpa.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateUtility;
 
 import manager.AbsenceManager.AbsenceToDate;
+import manager.competences.CompetenceCodeDTO;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 
@@ -34,7 +35,9 @@ import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
+import models.PersonCompetenceCodes;
 import models.PersonDay;
+import models.PersonMonthRecap;
 import models.TotalOvertime;
 import models.enumerate.LimitType;
 
@@ -449,6 +452,72 @@ public class CompetenceManager {
       return false;
     }
     return true;
+  }
+  
+  /**
+   * 
+   * @param personList la lista di persone
+   * @param year l'anno
+   * @param month il mese
+   * @return la mappa contenente per ogni persona la propria situazione in termini di codici di competenza
+   *     abilitati.
+   */
+  public Map<Person, List<CompetenceCodeDTO>> createMap(
+      List<Person> personList, int year, int month) {
+
+    Map<Person, List<CompetenceCodeDTO>> map = Maps.newHashMap();
+    for (Person person : personList) {
+      List<CompetenceCodeDTO> codeList = Lists.newArrayList();
+      List<PersonCompetenceCodes> pmrList = competenceCodeDao.listByPerson(person);
+      if (!pmrList.isEmpty()) {
+        for (PersonCompetenceCodes pcc : pmrList) {
+          CompetenceCodeDTO dto = new CompetenceCodeDTO();
+          dto.code = pcc.competenceCode;
+          dto.beginDate = pcc.beginDate;
+          dto.endDate = pcc.endDate;
+          codeList.add(dto);
+        } 
+      }
+      map.put(person, codeList);
+    }
+    return map;
+  }
+  
+  /**
+   * 
+   * @param pccList la lista di PersonCompetenceCodes di partenza
+   * @param codeListIds la lista di id di codici competenza da confrontare
+   * @return la lista dei codici di assenza da aggiungere alla configurazione dei PersonCompetenceCodes.
+   */
+  public List<CompetenceCode> codeToSave(List<PersonCompetenceCodes> pccList, List<Long> codeListIds) {
+    List<CompetenceCode> codeToAdd = Lists.newArrayList();
+    for(Long id : codeListIds) {
+      CompetenceCode code = competenceCodeDao.getCompetenceCodeById(id);
+      for (PersonCompetenceCodes pcc : pccList) {
+        if (!pcc.competenceCode.code.equals(code.code)) {
+          codeToAdd.add(code);
+        }
+      }
+    }
+    return codeToAdd;
+  }
+  
+  /**
+   * 
+   * @param pccList la lista di personcompetencecode
+   * @param codeListIds la lista di id che rappresentano i codici di assenza
+   * @return la lista dei codici di competenza da rimuovere da quelli associati alla persona a cui fanno 
+   *     riferimento i personcompetencecode passati come parametro.
+   */
+  public List<CompetenceCode> codeToDelete(List<PersonCompetenceCodes> pccList, List<Long> codeListIds) {
+    List<CompetenceCode> codeToRemove = Lists.newArrayList();
+    
+    pccList.forEach(item -> {
+      if (!codeListIds.contains(item.competenceCode.id)) {
+        codeToRemove.add(item.competenceCode);
+      }
+    });
+    return codeToRemove;
   }
   
 }

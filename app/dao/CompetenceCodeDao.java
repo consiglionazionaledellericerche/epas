@@ -1,5 +1,6 @@
 package dao;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -8,8 +9,13 @@ import com.mysema.query.jpa.JPQLQueryFactory;
 
 import models.CompetenceCode;
 import models.CompetenceCodeGroup;
+import models.Person;
+import models.PersonCompetenceCodes;
 import models.query.QCompetenceCode;
 import models.query.QCompetenceCodeGroup;
+import models.query.QPersonCompetenceCodes;
+
+import org.joda.time.LocalDate;
 
 import java.util.List;
 
@@ -134,5 +140,42 @@ public class CompetenceCodeDao extends DaoBase {
         .where(competenceCode.competenceCodeGroup.isNull()
             .or(competenceCode.competenceCodeGroup.eq(group)));
     return query.list(competenceCode);
+  }
+  
+  /**
+   * 
+   * @param personlist la lista di persone di cui ritornare i codici di competenza abilitati
+   * @return la lista di oggetti PersonCompetenceCodes. 
+   */
+  public List<PersonCompetenceCodes> list(List<Person> personlist) {
+    final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
+    final JPQLQuery query = getQueryFactory().from(pcc)
+        .where(pcc.person.in(personlist)
+        .and(pcc.beginDate.before(LocalDate.now())
+            .and(pcc.endDate.isNull().or(pcc.endDate.after(LocalDate.now())))));
+    return query.list(pcc);
+  }
+  
+  /**
+   * 
+   * @param person la person
+   * @return la lista di PersonCompetenceCodes associata alla persona passata come parametro.
+   */
+  public List<PersonCompetenceCodes> listByPerson(Person person) {
+    final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
+    final JPQLQuery query = getQueryFactory().from(pcc).where(pcc.person.eq(person));
+    return query.list(pcc);
+  }
+  
+  /**
+   * 
+   * @param person
+   * @param code
+   * @return il PersonCompetenceCode relativo ai parametri passati, se presente.
+   */
+  public Optional<PersonCompetenceCodes> getByPersonAndCode(Person person, CompetenceCode code) {
+    final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
+    final JPQLQuery query = getQueryFactory().from(pcc).where(pcc.person.eq(person).and(pcc.competenceCode.eq(code)));
+    return Optional.fromNullable(query.singleResult(pcc));
   }
 }

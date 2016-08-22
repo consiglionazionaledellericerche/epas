@@ -8,11 +8,11 @@
   class:'form form-horizontal', 'data-async':'#page_content',
   'data-async-error':'#updateCompetenceModal'}
 
-  #{f.selectMultipleModel 'person.competenceCode',
-  values:templateUtility.allCodeList(), placeholder:'I codici di competenza' /}
+  #{f.selectModels 'codeListIds',
+  items:templateUtility.allCodeList(), placeholder:'I codici di competenza' /}
 
   #{if person?.persistent}
-    	#{f.hidden 'person.id', value:person.id /}
+    	#{f.hidden 'personId', value:person.id /}
   #{/if}  
   #{b.buttons center:true}
   		#{b.submit 'Ok'/}

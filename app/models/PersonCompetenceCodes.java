@@ -1,6 +1,8 @@
 package models;
 
 import models.base.BaseModel;
+import models.base.IPropertiesInPeriodOwner;
+import models.base.PeriodModel;
 
 import org.joda.time.LocalDate;
 
@@ -21,7 +23,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "persons_competence_codes")
-public class PersonCompetenceCodes extends BaseModel{
+public class PersonCompetenceCodes extends PeriodModel{
 
   @Required
   @ManyToOne
@@ -32,7 +34,5 @@ public class PersonCompetenceCodes extends BaseModel{
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "competence_code_id")
   public CompetenceCode competenceCode;
-  
-  @Column(name = "enabling_date", nullable = false)
-  public LocalDate enablingDate;
+
 }
