@@ -1,15 +1,15 @@
 package manager.services.absences;
 
-import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 
 import manager.services.absences.model.AbsenceEngine;
-import manager.services.absences.model.AbsenceEngineFactory;
-import manager.services.absences.model.AbsencePeriod.ProblemType;
+import manager.services.absences.model.AbsencePeriod.EnhancedAbsence;
 import manager.services.absences.web.AbsenceRequestForm;
 import manager.services.absences.web.AbsenceRequestFormFactory;
 
 import models.Person;
+import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
@@ -25,16 +25,14 @@ import org.joda.time.LocalDate;
 public class AbsenceService {
 
   private final AbsenceRequestFormFactory absenceRequestFormFactory;
-  private final AbsenceEngineFactory absenceEngineFactory;
   private final AbsenceEngineCore absenceEngineCore;
   private final AbsenceEngineUtility absenceEngineUtility;
   
   @Inject
   public AbsenceService(AbsenceRequestFormFactory absenceRequestFormFactory, 
-      AbsenceEngineFactory absenceEngineFactory, AbsenceEngineCore absenceEngineCore,
+      AbsenceEngineCore absenceEngineCore,
       AbsenceEngineUtility absenceEngineUtility) {
     this.absenceRequestFormFactory = absenceRequestFormFactory;
-    this.absenceEngineFactory = absenceEngineFactory;
     this.absenceEngineCore = absenceEngineCore;
     this.absenceEngineUtility = absenceEngineUtility;
   }
@@ -77,6 +75,10 @@ public class AbsenceService {
   }
 
 
+  public enum AbsenceRequestType {
+    insert, cancel; // insertSimulated, cancelSimulated;
+  }
+  
   /**
    * Esegue la richiesta
    * @param person
@@ -89,30 +91,84 @@ public class AbsenceService {
    * @param specifiedMinutes
    * @return
    */
-  public AbsenceEngine doRequest(Person person, GroupAbsenceType groupAbsenceType, LocalDate from,
+  public AbsenceEngine insert(Person person, GroupAbsenceType groupAbsenceType, LocalDate from,
       LocalDate to, AbsenceRequestType absenceTypeRequest, AbsenceType absenceType, 
       JustifiedType justifiedType, Integer hours, Integer minutes) {
 
-    AbsenceEngine absenceEngine = absenceEngineFactory
-        .buildAbsenceEngineInstance(person, groupAbsenceType, from);
+    Preconditions.checkArgument(absenceTypeRequest.equals(absenceTypeRequest.insert));
     
-    if (absenceEngine.absenceEngineProblem.isPresent()) {
+    AbsenceEngine absenceEngine = absenceEngineCore
+        .buildInsertAbsenceEngine(person, groupAbsenceType, from, to);
+    if (absenceEngine.report.containsProblems()) {
       return absenceEngine;
     }
+  
+    Integer specifiedMinutes = absenceEngineUtility.getMinutes(hours, minutes);
     
-    if (!absenceTypeRequest.equals(absenceTypeRequest.insert)) {
-      absenceEngine.setProblem(ProblemType.unsupportedOperation);
-      return absenceEngine;
+    while (absenceEngine.currentDate() != null) {
+
+      //Preparare l'assenza da inserire
+      Absence absence = new Absence();
+      absence.date = absenceEngine.currentDate();
+      absence.absenceType = absenceType;
+      absence.justifiedType = justifiedType;
+      if (specifiedMinutes != null) {
+        absence.justifiedMinutes = specifiedMinutes;
+      }
+  
+      absenceEngineCore.absenceInsertRequest(absenceEngine, AbsenceRequestType.insert, 
+          EnhancedAbsence.builder().absence(absence)
+          .requestedJustifiedType(justifiedType)
+          .absenceTypeToInfer(absenceType == null)
+          .build());
+      
+      if (absenceEngine.report.containsProblems()) {
+        return absenceEngine;
+      }
+      
+      absenceEngineCore.configureNextInsertDate(absenceEngine);
     }
-    
-    absenceEngineCore.doRequest(absenceEngine, AbsenceRequestType.insert, absenceType, 
-        justifiedType, Optional.fromNullable(absenceEngineUtility.getMinutes(hours, minutes)));
     
     return absenceEngine;
   }
   
-  public enum AbsenceRequestType {
-    insert, cancel; // insertSimulated, cancelSimulated;
+
+  /**
+   * Esegue lo scanning delle assenze della persona a partire dalla data
+   * passata come parametro per verificarne la correttezza.
+   * Gli errori riscontrati vengono persistiti all'assenza.
+   * 
+   * Microservices
+   * Questo metodo dovrebbe avere una person dove sono fetchate tutte le 
+   * informazioni per i calcoli non mantenute del componente assenze:
+   * 
+   * I Contratti / Tempi a lavoro / Piani ferie
+   * I Figli
+   * Le Altre Tutele
+   * 
+   * @param person
+   * @param from
+   */
+  public AbsenceEngine scanner(Person person, LocalDate from) {
+    
+    AbsenceEngine absenceEngine = absenceEngineCore.scannerAbsenceEngine(person, from);
+    
+    return absenceEngine;
+    
+  }
+  
+  public AbsenceEngine residual(Person person, GroupAbsenceType groupAbsenceType, LocalDate date) {
+    
+    if (date == null) {
+      date = LocalDate.now();
+    }
+    if (groupAbsenceType == null) {
+      //TODO: scegliere il primo GroupAbsenceType che ha senso inizializzare
+      groupAbsenceType = (GroupAbsenceType)GroupAbsenceType.findAll().get(0);
+    }
+    
+    AbsenceEngine absenceEngine = absenceEngineCore.residualAbsenceEngine(person, groupAbsenceType, date);
+    return absenceEngine;
   }
   
   

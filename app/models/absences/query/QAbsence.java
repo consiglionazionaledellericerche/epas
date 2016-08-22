@@ -45,6 +45,8 @@ public class QAbsence extends EntityPathBase<Absence> {
 
     public final models.query.QPersonDay personDay;
 
+    public final SetPath<models.absences.AbsenceTrouble, QAbsenceTrouble> troubles = this.<models.absences.AbsenceTrouble, QAbsenceTrouble>createSet("troubles", models.absences.AbsenceTrouble.class, QAbsenceTrouble.class, PathInits.DIRECT2);
+
     public QAbsence(String variable) {
         this(Absence.class, forVariable(variable), INITS);
     }

@@ -140,10 +140,13 @@ public class AbsenceComponentDao extends DaoBase {
   public List<GroupAbsenceType> allGroupAbsenceType() {
     
     QGroupAbsenceType groupAbsenceType = QGroupAbsenceType.groupAbsenceType;
-    
-    return getQueryFactory().from(groupAbsenceType).list(groupAbsenceType);
-  }
+    QAbsenceType absenceType = QAbsenceType.absenceType;
 
+    return getQueryFactory().from(groupAbsenceType)
+        .leftJoin(groupAbsenceType.category).fetch()
+        .leftJoin(groupAbsenceType.previousGroupChecked).fetch()
+        .list(groupAbsenceType);
+  }
   
   public AbsenceType buildOrEditAbsenceType(String code, String description, int minutes, 
       Set<JustifiedType> justifiedTypePermitted, JustifiedType complationType, int complationTime, 
@@ -188,6 +191,8 @@ public class AbsenceComponentDao extends DaoBase {
       List<AbsenceType> codeList) {
 
     final QAbsence absence = QAbsence.absence;
+   
+    
     BooleanBuilder conditions = new BooleanBuilder();
     if (begin != null) {
       conditions.and(absence.personDay.date.goe(begin));
@@ -195,11 +200,50 @@ public class AbsenceComponentDao extends DaoBase {
     if (end!= null) {
       conditions.and(absence.personDay.date.loe(end));
     }
+    if (!codeList.isEmpty()) {
+      conditions.and(absence.absenceType.in(codeList));
+    }
     return getQueryFactory().from(absence)
+        .leftJoin(absence.justifiedType).fetch()
+        .leftJoin(absence.absenceType).fetch()
+        .leftJoin(absence.absenceType.complationGroup).fetch()
+        .leftJoin(absence.absenceType.replacingGroup).fetch()
+        .leftJoin(absence.absenceType.takableGroup).fetch()
+        .leftJoin(absence.absenceType.takenGroup).fetch()
+        .leftJoin(absence.troubles).fetch()
         .leftJoin(absence.personDay).fetch()
         .where(absence.personDay.person.eq(person)
-            .and(conditions)
-            .and(absence.absenceType.in(codeList)))
-        .orderBy(absence.personDay.date.asc()).list(absence);
+        .and(conditions))
+        .orderBy(absence.personDay.date.asc()).distinct().list(absence);
+  }
+  
+  public void fetchAbsenceTypes() {
+    
+    QGroupAbsenceType groupAbsenceType = QGroupAbsenceType.groupAbsenceType;
+    QAbsenceType absenceType = QAbsenceType.absenceType;
+    
+    //fetch all absenceTypes
+    getQueryFactory()
+        .from(absenceType)
+        .leftJoin(absenceType.justifiedTypesPermitted).fetch()
+        .leftJoin(absenceType.complationGroup).fetch()
+        .leftJoin(absenceType.replacingGroup).fetch()
+        .leftJoin(absenceType.takableGroup).fetch()
+        .leftJoin(absenceType.takenGroup).fetch()
+        .list(absenceType);
+    
+    //fetch all absenceTypeGroups
+    getQueryFactory().from(groupAbsenceType)
+        .leftJoin(groupAbsenceType.category).fetch()
+        .leftJoin(groupAbsenceType.complationAbsenceBehaviour).fetch()
+        .leftJoin(groupAbsenceType.complationAbsenceBehaviour.complationCodes).fetch()
+        .leftJoin(groupAbsenceType.complationAbsenceBehaviour.replacingCodes).fetch()
+        .leftJoin(groupAbsenceType.takableAbsenceBehaviour).fetch()
+        .leftJoin(groupAbsenceType.takableAbsenceBehaviour.takableCodes).fetch()
+        .leftJoin(groupAbsenceType.takableAbsenceBehaviour.takenCodes).fetch()
+        .leftJoin(groupAbsenceType.nextGroupToCheck).fetch()
+        .leftJoin(groupAbsenceType.previousGroupChecked).fetch()
+        .list(groupAbsenceType);
+    
   }
 }

@@ -61,6 +61,10 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
     public final SetPath<models.absences.ComplationAbsenceBehaviour, QComplationAbsenceBehaviour> replacingGroup = this.<models.absences.ComplationAbsenceBehaviour, QComplationAbsenceBehaviour>createSet("replacingGroup", models.absences.ComplationAbsenceBehaviour.class, QComplationAbsenceBehaviour.class, PathInits.DIRECT2);
 
+    public final NumberPath<Integer> replacingTime = createNumber("replacingTime", Integer.class);
+
+    public final QJustifiedType replacingType;
+
     public final SetPath<models.absences.TakableAbsenceBehaviour, QTakableAbsenceBehaviour> takableGroup = this.<models.absences.TakableAbsenceBehaviour, QTakableAbsenceBehaviour>createSet("takableGroup", models.absences.TakableAbsenceBehaviour.class, QTakableAbsenceBehaviour.class, PathInits.DIRECT2);
 
     public final SetPath<models.absences.TakableAbsenceBehaviour, QTakableAbsenceBehaviour> takenGroup = this.<models.absences.TakableAbsenceBehaviour, QTakableAbsenceBehaviour>createSet("takenGroup", models.absences.TakableAbsenceBehaviour.class, QTakableAbsenceBehaviour.class, PathInits.DIRECT2);
@@ -90,6 +94,7 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
     public QAbsenceType(Class<? extends AbsenceType> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
         this.absenceTypeGroup = inits.isInitialized("absenceTypeGroup") ? new models.query.QAbsenceTypeGroup(forProperty("absenceTypeGroup"), inits.get("absenceTypeGroup")) : null;
+        this.replacingType = inits.isInitialized("replacingType") ? new QJustifiedType(forProperty("replacingType")) : null;
     }
 
 }
