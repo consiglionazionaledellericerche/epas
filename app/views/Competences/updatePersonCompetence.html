@@ -14,6 +14,8 @@
   #{if person?.persistent}
     	#{f.hidden 'personId', value:person.id /}
   #{/if}  
+  #{f.hidden 'year', value:year /}
+  #{f.hidden 'month', value:month /}
   #{b.buttons center:true}
   		#{b.submit 'Ok'/}
   #{/b.buttons}

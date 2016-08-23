@@ -170,6 +170,7 @@ public class RequestInit extends Controller {
         "Stampings.insertWorkingOffSitePresence",
         "Absences.absences",
         "Competences.competences",
+        "Competences.enabledCompetences",
         "Stampings.personStamping",
         "Absences.manageAttachmentsPerPerson",
         "Stampings.missingStamping", "Stampings.dailyPresence",

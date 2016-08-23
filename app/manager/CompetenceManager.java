@@ -8,6 +8,8 @@ import com.google.inject.Inject;
 
 import com.beust.jcommander.internal.Maps;
 
+import controllers.Competences;
+
 import play.i18n.Messages;
 
 import dao.CompetenceCodeDao;
@@ -363,20 +365,22 @@ public class CompetenceManager {
   public String canAddCompetence(Competence comp, Integer value) {
     
     String result = "";
-    switch(comp.competenceCode.limitType) {
+    switch (comp.competenceCode.limitType) {
       case monthly:        
         
         if (comp.valueApproved + value > comp.competenceCode.limitValue) {
           List<CompetenceCode> group = competenceCodeDao
               .getCodeWithGroup(comp.competenceCode.competenceCodeGroup);
-          List<Competence> compList = competenceDao.getCompetences(Optional.fromNullable(comp.person), comp.year, 
+          List<Competence> compList = competenceDao
+              .getCompetences(Optional.fromNullable(comp.person), comp.year, 
               Optional.fromNullable(comp.month), group);
           int sum = compList.stream().mapToInt(i -> i.valueApproved).sum();
           if (sum + value > comp.competenceCode.competenceCodeGroup.limitValue) {
             result = Messages.get("CompManager.overGroupLimit");          
           }
           //Caso Reperibilità:
-          if (StringUtils.containsIgnoreCase(comp.competenceCode.competenceCodeGroup.label, "reperibili")) {
+          if (StringUtils.containsIgnoreCase(comp.competenceCode.competenceCodeGroup.label, 
+              "reperibili")) {
             if (!handlerReperibility(comp, value, group)) {
               result = Messages.get("CompManager.overServiceLimit");
             }
@@ -384,7 +388,8 @@ public class CompetenceManager {
         }        
         break;
       case yearly:
-        List<Competence> compList = competenceDao.getCompetences(Optional.fromNullable(comp.person), comp.year, 
+        List<Competence> compList = competenceDao
+            .getCompetences(Optional.fromNullable(comp.person), comp.year, 
             Optional.<Integer>absent(), Lists.newArrayList(comp.competenceCode));
         int sum = compList.stream().mapToInt(i -> i.valueApproved).sum();      
         if (sum + value > comp.competenceCode.competenceCodeGroup.limitValue) {
@@ -393,7 +398,7 @@ public class CompetenceManager {
         break;
       case onMonthlyPresence:
         PersonStampingRecap psDto = stampingsRecapFactory
-        .create(comp.person, comp.year, comp.month, true);
+            .create(comp.person, comp.year, comp.month, true);
         if (psDto.basedWorkingDays != value) {
           result = Messages.get("CompManager.diffBasedWorkingDay");
         }
@@ -424,12 +429,12 @@ public class CompetenceManager {
   * 
   * @param yearMonth l'anno/mese di riferimento
   * @param office la sede per cui si cercano i servizi per reperibilità abilitati
-  * @return il numero di giorni di reperibilità disponibili sulla base di quanti servizi per reperibilità
-  *     sono stati abilitati sulla sede.
+  * @return il numero di giorni di reperibilità disponibili sulla base di quanti 
+  *     servizi per reperibilità sono stati abilitati sulla sede.
   */
   private Integer countDaysForReperibility(YearMonth yearMonth, Office office) {
-    int numbers = reperibilityDao.getReperibilityTypeByOffice(office) != null ? 
-        reperibilityDao.getReperibilityTypeByOffice(office).size() : 0;
+    int numbers = reperibilityDao.getReperibilityTypeByOffice(office) != null 
+        ? reperibilityDao.getReperibilityTypeByOffice(office).size() : 0;
     return numbers * (new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(),1)
         .monthOfYear().getMaximumValue());
   }
@@ -444,9 +449,11 @@ public class CompetenceManager {
    */
   private boolean handlerReperibility(Competence comp, Integer value, List<CompetenceCode> group) {
     
-    int maxDays = countDaysForReperibility(new YearMonth(comp.year, comp.month), comp.person.office);
+    int maxDays = countDaysForReperibility(new YearMonth(comp.year, comp.month), 
+        comp.person.office);
     List<Competence> peopleMonthList = competenceDao
-        .getCompetences(Optional.<Person>absent(), comp.year, Optional.fromNullable(comp.month), group);
+        .getCompetences(Optional.<Person>absent(), comp.year, 
+            Optional.fromNullable(comp.month), group);
     int peopleSum = peopleMonthList.stream().mapToInt(i -> i.valueApproved).sum();
     if (peopleSum + value > maxDays) {
       return false;
@@ -459,16 +466,17 @@ public class CompetenceManager {
    * @param personList la lista di persone
    * @param year l'anno
    * @param month il mese
-   * @return la mappa contenente per ogni persona la propria situazione in termini di codici di competenza
-   *     abilitati.
+   * @return la mappa contenente per ogni persona la propria situazione in termini di 
+   *     codici di competenza abilitati.
    */
   public Map<Person, List<CompetenceCodeDTO>> createMap(
       List<Person> personList, int year, int month) {
-
+    LocalDate date = new LocalDate(year, month, 1);
     Map<Person, List<CompetenceCodeDTO>> map = Maps.newHashMap();
     for (Person person : personList) {
       List<CompetenceCodeDTO> codeList = Lists.newArrayList();
-      List<PersonCompetenceCodes> pmrList = competenceCodeDao.listByPerson(person);
+      List<PersonCompetenceCodes> pmrList = competenceCodeDao
+          .listByPerson(person, Optional.fromNullable(date));
       if (!pmrList.isEmpty()) {
         for (PersonCompetenceCodes pcc : pmrList) {
           CompetenceCodeDTO dto = new CompetenceCodeDTO();
@@ -487,17 +495,30 @@ public class CompetenceManager {
    * 
    * @param pccList la lista di PersonCompetenceCodes di partenza
    * @param codeListIds la lista di id di codici competenza da confrontare
-   * @return la lista dei codici di assenza da aggiungere alla configurazione dei PersonCompetenceCodes.
+   * @return la lista dei codici di assenza da aggiungere alla configurazione 
+   *     dei PersonCompetenceCodes.
    */
-  public List<CompetenceCode> codeToSave(List<PersonCompetenceCodes> pccList, List<Long> codeListIds) {
+  public List<CompetenceCode> codeToSave(List<PersonCompetenceCodes> pccList, 
+      List<Long> codeListIds) {
     List<CompetenceCode> codeToAdd = Lists.newArrayList();
-    for(Long id : codeListIds) {
+    if (codeListIds == null || codeListIds.isEmpty()) {
+      return codeToAdd;
+    }
+    for (Long id : codeListIds) {
       CompetenceCode code = competenceCodeDao.getCompetenceCodeById(id);
-      for (PersonCompetenceCodes pcc : pccList) {
-        if (!pcc.competenceCode.code.equals(code.code)) {
+      if (pccList.isEmpty()) {
+        codeToAdd.add(code);
+      } else {
+        boolean found = false;
+        for (PersonCompetenceCodes pcc : pccList) {
+          if (pcc.competenceCode.code.equals(code.code)) {
+            found = true;
+          }
+        }
+        if (!found) {
           codeToAdd.add(code);
         }
-      }
+      }      
     }
     return codeToAdd;
   }
@@ -506,18 +527,52 @@ public class CompetenceManager {
    * 
    * @param pccList la lista di personcompetencecode
    * @param codeListIds la lista di id che rappresentano i codici di assenza
-   * @return la lista dei codici di competenza da rimuovere da quelli associati alla persona a cui fanno 
-   *     riferimento i personcompetencecode passati come parametro.
+   * @return la lista dei codici di competenza da rimuovere da quelli associati alla persona 
+   *     a cui fanno riferimento i personcompetencecode passati come parametro.
    */
-  public List<CompetenceCode> codeToDelete(List<PersonCompetenceCodes> pccList, List<Long> codeListIds) {
+  public List<CompetenceCode> codeToDelete(List<PersonCompetenceCodes> pccList, 
+      List<Long> codeListIds) {
     List<CompetenceCode> codeToRemove = Lists.newArrayList();
-    
-    pccList.forEach(item -> {
-      if (!codeListIds.contains(item.competenceCode.id)) {
+    if (codeListIds == null || codeListIds.isEmpty()) {
+      pccList.forEach(item -> {
         codeToRemove.add(item.competenceCode);
-      }
-    });
+      });
+    } else {
+      pccList.forEach(item -> {
+        if (!codeListIds.contains(item.competenceCode.id)) {
+          codeToRemove.add(item.competenceCode);
+        }
+      });
+    }
+    
     return codeToRemove;
   }
   
+  /**
+   * il metodo che persiste la situazione di codici di competenza per la persona.
+   * @param person la persona per cui persistere la situazione delle competenze
+   * @param codeToAdd la lista dei codici di competenza da aggiungere
+   * @param codeToRemove la lista dei codici di competenza da rimuovere
+   * @param date la data della fine dei codici da rimuovere o dell'inizio dei codici da aggiungere
+   */
+  public void persistChanges(Person person, List<CompetenceCode> codeToAdd, 
+      List<CompetenceCode> codeToRemove, LocalDate date) {
+    
+    codeToAdd.forEach(item -> {
+      PersonCompetenceCodes newPcc = new PersonCompetenceCodes();
+      newPcc.competenceCode = item;
+      newPcc.person = person;
+      newPcc.beginDate = date;
+      newPcc.save();
+    });
+    codeToRemove.forEach(item -> {
+      Optional<PersonCompetenceCodes> pcc = competenceCodeDao.getByPersonAndCode(person, item);
+      if (pcc.isPresent()) {
+        pcc.get().endDate = date;
+        pcc.get().save();
+      } else {
+        throw new RuntimeException(Messages.get("errorCompetenceCodeException"));
+      }
+    });
+  }
 }

@@ -257,20 +257,19 @@ public class Competences extends Controller {
   /**
    * Riepilogo competenze abilitate per la sede.
    */
-  public static void enabledCompetences(Long officeId) {
+  public static void enabledCompetences(Integer year, Integer month, Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
 
     rules.checkIfPermitted(office);
-    LocalDate date = new LocalDate();
+    LocalDate date = new LocalDate(year, month, 1);
     List<Person> personList = personDao.list(Optional.<String>absent(), Sets.newHashSet(office),
         false, date, date.dayOfMonth().withMaximumValue(), true).list();
-    List<PersonCompetenceCodes> pccList = competenceCodeDao.list(personList);
     Map<Person, List<CompetenceCodeDTO>> map = competenceManager
         .createMap(personList, date.getYear(), date.getMonthOfYear());
 
-    render(personList, office, pccList, map, date);
+    render(office, map, date, year, month);
   }
 
   /**
@@ -278,63 +277,45 @@ public class Competences extends Controller {
    *
    * @param personId persona
    */
-  public static void updatePersonCompetence(Long personId) {
+  public static void updatePersonCompetence(Long personId, int year, int month) {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
-
-    List<PersonCompetenceCodes> pccList = competenceCodeDao.listByPerson(person);
+    LocalDate date = new LocalDate(year, month, 1);
+    List<PersonCompetenceCodes> pccList = competenceCodeDao
+        .listByPerson(person, Optional.fromNullable(date));
     List<CompetenceCode> codeListIds = Lists.newArrayList();
     for (PersonCompetenceCodes pcc : pccList) {
       codeListIds.add(pcc.competenceCode);
     }
-    render(person, codeListIds);
+    render(person, codeListIds, year, month);
   }
 
   /**
-   * Salva la nuova configurazione delle competenze abilitate per la persona.
-   *
-   * @param person la persona per cui si intende salvare le competenze abilitate
+   * salva la nuova configurazione dei codici di competenza abilitati per la persona.
+   * @param codeListIds la lista degli id dei codici di competenza per la nuova configurazione
+   * @param personId l'id della persona di cui modificare le competenze abilitate
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
    */
-  public static void saveNewCompetenceConfiguration(List<Long> codeListIds, Long personId) {
+  public static void saveNewCompetenceConfiguration(List<Long> codeListIds, 
+      Long personId, int year, int month) {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
-    List<PersonCompetenceCodes> pccList = competenceCodeDao.listByPerson(person);
+    LocalDate date = new LocalDate(year, month, 1);
+    List<PersonCompetenceCodes> pccList = competenceCodeDao
+        .listByPerson(person, Optional.fromNullable(date));
     List<CompetenceCode> codeToAdd = competenceManager.codeToSave(pccList, codeListIds);
     List<CompetenceCode> codeToRemove = competenceManager.codeToDelete(pccList, codeListIds);
     
-    codeToAdd.forEach(item -> {
-      Optional<PersonCompetenceCodes> pcc = competenceCodeDao.getByPersonAndCode(person, item);
-      if (pcc.isPresent()) {
-        pcc.get().beginDate = LocalDate.now();
-        pcc.get().endDate = null;
-        pcc.get().save();
-      } else {
-        PersonCompetenceCodes newPcc = new PersonCompetenceCodes();
-        newPcc.competenceCode = item;
-        newPcc.person = person;
-        newPcc.beginDate = LocalDate.now();
-        newPcc.save();
-      }
-      
-    });
-    codeToRemove.forEach(item -> {
-      Optional<PersonCompetenceCodes> pcc = competenceCodeDao.getByPersonAndCode(person, item);
-      if (pcc.isPresent()) {
-        pcc.get().endDate = LocalDate.now();
-        pcc.get().save();
-      } else {
-        flash.error("Si è cercato di rimuovere la competenza %s che non presente per la persona %s", 
-            item.description, person.fullName());
-        Competences.enabledCompetences(person.office.id);
-      }
-    });
+    competenceManager.persistChanges(person, codeToAdd, codeToRemove, date);
     
     flash.success(String.format("Aggiornate con successo le competenze per %s",
         person.fullName()));
-    Competences.enabledCompetences(person.office.id);
+    Competences.enabledCompetences(date.getYear(), 
+        date.getMonthOfYear(),person.office.id);
 
   }
 
@@ -409,7 +390,7 @@ public class Competences extends Controller {
     if (competenceCodeList.size() == 0) {
       flash.error("Per visualizzare la sezione Competenze è necessario "
           + "abilitare almeno un codice competenza ad un dipendente.");
-      Competences.enabledCompetences(officeId);
+      Competences.enabledCompetences(year, month, officeId);
     }
 
     if (competenceCode == null || !competenceCode.isPersistent()) {

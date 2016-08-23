@@ -35,4 +35,10 @@ public class PersonCompetenceCodes extends PeriodModel{
   @JoinColumn(name = "competence_code_id")
   public CompetenceCode competenceCode;
 
+  @Override
+  public String toString() {
+    return String.format(
+        "PersonCompetenceCodes[%d] - person.name = %s, competenceCode = %s, beginDate = %s, endDate = %s",
+         id, person.fullName(), competenceCode.code, beginDate, endDate);
+  }
 }

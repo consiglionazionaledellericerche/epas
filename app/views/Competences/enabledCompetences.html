@@ -24,19 +24,22 @@
     #{list items:map.entrySet(), as:'key'}	
     <tr>
       <td>
-		  <a href="@{Competences.updatePersonCompetence(key.getKey().id)}" data-async-modal="#updateCompetenceModal">
+		  <a href="@{Competences.updatePersonCompetence(key.getKey().id, year, month)}" data-async-modal="#updateCompetenceModal">
 		    ${key.getKey().fullName()}
 		  </a>
  	  </td>
  	  <td>
  	   #{list items:key.getValue(), as:'dto'}
- 	     
- 	     	#{if dto.endDate == null}
- 	       		<span class="label label-primary">${dto.code.code} - ${dto.code.description}</span>
- 	       	#{/if}
- 	       	#{if dto.endDate != null && dto.endDate.getMonthOfYear() == date.getMonthOfYear()}
+ 	      	     	
+ 	       	#{if dto.endDate != null && dto.endDate.getMonthOfYear() == date.getMonthOfYear() && dto.endDate.getYear() == date.getYear()}
  	       		<span class="label label-warning" webui-popover-hover data-content="&{'endCompetenceCode'}">${dto.code.code} - ${dto.code.description}</span>
  	       	#{/if}
+ 	       	#{elseif dto.beginDate.getMonthOfYear() == date.getMonthOfYear() && dto.beginDate.getYear() == date.getYear()}
+ 	       		<span class="label label-success" webui-popover-hover data-content="&{'beginCompetenceCode'}">${dto.code.code} - ${dto.code.description}</span>
+ 	       	#{/elseif}
+ 	       	#{else}
+ 	       		<span class="label label-primary">${dto.code.code} - ${dto.code.description}</span>
+ 	       	#{/else}
 	     	
        #{/list}
        </td>
