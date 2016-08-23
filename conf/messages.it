@@ -70,7 +70,7 @@ codeBlock=Codice Blocco
 code=Codice
 
 valueApproved= Valore per competenza
-
+codeListIds =Codici di competenza abilitati
 competenceCode.code= Codice Competenza
 competenceCode.codeToPresence= Codice per attestato di presenza
 competenceCode.description= Descrizione
@@ -180,6 +180,7 @@ file =File schedone da analizzare
 
 disabled= Codice di competenza disabilitato
 enabled= Abilita Codice di competenza
+beginCompetenceCode= In questo mese inizia l'utilizzo del codice di competenza.
 endCompetenceCode= In questo mese termina l'utilizzo del codice di competenza. Dal prossimo mese non sarà più usabile e visibile in questa lista.
 firstDay= Giorno inizio contratto
 
@@ -295,8 +296,6 @@ PDFReport.thWarnStampings=Orario incompleto fuori tolleranza
 person.badgeNumber=Numero Badge
 person.badge= Numero badge
 person.birthday=Data di nascita
-person.competenceCode =Codici di competenza abilitati
-codeList =Codici di competenza abilitati
 person.currentVacationPeriod= Ferie
 person.currentWorkingTimeType= Tipo Orario
 person.email=Email
@@ -436,6 +435,12 @@ validation.range=Non può essere minore di %2$d o maggiore di %3$d
 validation.required=Obbligatorio
 validation.unique =Deve essere unico
 validation.url=Non è un URL valido
+
+##########################
+# Messaggi di eccezioni
+##########################
+
+errorCompetenceCodeException= Codice di competenza non presente tra quelli abilitati per la persona
 
 ########################
 # Enumerati

@@ -14,7 +14,7 @@
       <a href="@{Competences.showCompetences(session.get("yearSelected"), session.get("monthSelected"), officeId)}">Assegna Competenze</a>
     </li>
     <li #{if _activeAction.equals("enabledCompetences")} class="active" #{/if}>
-      <a href="@{Competences.enabledCompetences(session.get("officeSelected"))}">Abilita Competenze</a>
+      <a href="@{Competences.enabledCompetences(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected"))}">Abilita Competenze</a>
     </li>
     <li #{if _activeAction.equals("totalOvertimeHours")} class="active" #{/if}>
       <a href="@{Competences.totalOvertimeHours(session.get("yearSelected"), session.get("officeSelected"))}">Monte ore</a>
