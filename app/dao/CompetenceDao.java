@@ -27,6 +27,7 @@ import models.query.QPersonReperibilityType;
 import models.query.QPersonShiftShiftType;
 import models.query.QTotalOvertime;
 
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,13 +62,17 @@ public class CompetenceDao extends DaoBase {
   /**
    * La lista dei CompetenceCode abilitati ad almeno una persona appartenente all'office.
    */
-  public List<CompetenceCode> activeCompetenceCode(Office office) {
+  public List<CompetenceCode> activeCompetenceCode(Office office, LocalDate date) {
 
     final QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
     final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
+    
     return getQueryFactory().from(competenceCode)
         .leftJoin(competenceCode.personCompetenceCodes, pcc).fetch()
-            .where(pcc.person.office.eq(office)).orderBy(competenceCode.code.asc())
+            .where(pcc.person.office.eq(office)
+                .and(pcc.beginDate.loe(date)
+                    .andAnyOf(pcc.endDate.isNull(), pcc.endDate.goe(date))))
+            .orderBy(competenceCode.code.asc())
             .distinct().list(competenceCode);
   }
 

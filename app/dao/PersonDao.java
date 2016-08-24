@@ -221,6 +221,19 @@ public final class PersonDao extends DaoBase {
         Optional.fromNullable(competenceCode), personInCharge, false), person);
 
   }
+  
+  public List<Person> listForCompetence(Set<Office> offices, YearMonth yearMonth, CompetenceCode code) {
+    final QPerson person = QPerson.person;
+    int year = yearMonth.getYear();
+    int month = yearMonth.getMonthOfYear();
+
+    Optional<LocalDate> beginMonth = Optional.fromNullable(new LocalDate(year, month, 1));
+    Optional<LocalDate> endMonth =
+        Optional.fromNullable(beginMonth.get().dayOfMonth().withMaximumValue());
+    JPQLQuery query = personQuery(Optional.<String>absent(), offices, false, beginMonth, endMonth,
+        true, Optional.fromNullable(code), Optional.<Person>absent(), false);
+    return query.list(person);
+  }
 
   /**
    * Una mappa contenente le persone con perseoId valorizzato. La chiave è il perseoId.
@@ -649,6 +662,7 @@ public final class PersonDao extends DaoBase {
 
     final JPQLQuery query = getQueryFactory().from(person).leftJoin(person.contracts, contract)
         .fetch().leftJoin(person.user, QUser.user)
+        .leftJoin(person.personCompetenceCodes, QPersonCompetenceCodes.personCompetenceCodes).fetch()
         .leftJoin(person.reperibility, QPersonReperibility.personReperibility).fetch()
         .leftJoin(person.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime)
         .fetch().leftJoin(person.personShift, QPersonShift.personShift).fetch()
