@@ -10,6 +10,7 @@ import com.mysema.query.jpa.JPQLQueryFactory;
 
 import models.CompetenceCode;
 import models.CompetenceCodeGroup;
+import models.Office;
 import models.Person;
 import models.PersonCompetenceCodes;
 import models.query.QCompetenceCode;
@@ -167,7 +168,7 @@ public class CompetenceCodeDao extends DaoBase {
     final BooleanBuilder condition = new BooleanBuilder();
     if (date.isPresent()) {
       condition.and(pcc.beginDate.loe(date.get().dayOfMonth().withMaximumValue())
-          .andAnyOf(pcc.endDate.isNull(), pcc.endDate.goe(date.get())));
+          .andAnyOf(pcc.endDate.isNull(), pcc.endDate.goe(date.get().dayOfMonth().withMaximumValue())));
     }
     final JPQLQuery query = getQueryFactory().from(pcc).where(pcc.person.eq(person).and(condition));
     return query.list(pcc);
@@ -181,7 +182,29 @@ public class CompetenceCodeDao extends DaoBase {
    */
   public Optional<PersonCompetenceCodes> getByPersonAndCode(Person person, CompetenceCode code) {
     final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
-    final JPQLQuery query = getQueryFactory().from(pcc).where(pcc.person.eq(person).and(pcc.competenceCode.eq(code)));
+    final JPQLQuery query = getQueryFactory().from(pcc)
+        .where(pcc.person.eq(person).and(pcc.competenceCode.eq(code)));
     return Optional.fromNullable(query.singleResult(pcc));
+  }
+  
+  /**
+   * 
+   * @param code
+   * @param date
+   * @param office
+   * @return
+   */
+  public List<PersonCompetenceCodes> listByCompetenceCode(CompetenceCode code, 
+      Optional<LocalDate> date, Office office) {
+    final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
+    final BooleanBuilder condition = new BooleanBuilder();
+    if (date.isPresent()) {
+      condition.and(pcc.beginDate.loe(date.get().dayOfMonth().withMaximumValue())
+          .andAnyOf(pcc.endDate.isNull(), pcc.endDate.goe(date.get().dayOfMonth().withMaximumValue())));
+    }
+    final JPQLQuery query = getQueryFactory().from(pcc)
+        .where(pcc.competenceCode.eq(code)
+            .and(pcc.person.office.eq(office)).and(condition));
+    return query.list(pcc);
   }
 }

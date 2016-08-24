@@ -575,4 +575,30 @@ public class CompetenceManager {
       }
     });
   }
+  
+  /**
+   * 
+   * @param pccList
+   * @param date
+   * @return la creazione della lista di competenze per il mese/anno.
+   */
+  public List<Competence> createCompetenceList(List<Person> pccList, LocalDate date, CompetenceCode code) {
+    List<Competence> compList = Lists.newArrayList();
+    for(Person person : pccList) {
+      Optional<Competence> comp = competenceDao.getCompetence(person, date.getYear(), 
+          date.getMonthOfYear(), code);
+      if (comp.isPresent()) {
+        compList.add(comp.get());
+      } else {
+        Competence competence = new Competence();
+        competence.person = person;
+        competence.competenceCode = code;
+        competence.month = date.getMonthOfYear();
+        competence.year = date.getYear();
+        compList.add(competence);
+      }
+          
+    }
+    return compList;
+  }
 }
