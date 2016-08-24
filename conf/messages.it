@@ -486,11 +486,12 @@ LimitType.monthly= Mensile
 LimitType.yearly= Annuale
 LimitType.noLimit= Senza limite
 LimitType.onMonthlyPresence= In base a presenza mensile
+LimitType.entireMonth= Intero mese
 
 LimitUnit.minutes =Minuti
 LimitUnit.hours =Ore
 LimitUnit.days =Giorni
-LimitUnit.months =Giorni
+LimitUnit.month =Mese
 
 LimitDescription.daysOfMonth =Giorni del mese
 LimitDescription.daysOfYear =Giorni dell'anno

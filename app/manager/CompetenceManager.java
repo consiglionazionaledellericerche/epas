@@ -363,7 +363,7 @@ public class CompetenceManager {
    *     Stringa vuota altrimenti.
    */
   public String canAddCompetence(Competence comp, Integer value) {
-    
+    //TODO: aggiungere un controllo sull'abilitazione nel mese della competenza per la persona
     String result = "";
     switch (comp.competenceCode.limitType) {
       case monthly:        
@@ -578,13 +578,13 @@ public class CompetenceManager {
   
   /**
    * 
-   * @param pccList
-   * @param date
+   * @param personList la lista di persone attive 
+   * @param date la data in cui si richiedono le competenze
    * @return la creazione della lista di competenze per il mese/anno.
    */
-  public List<Competence> createCompetenceList(List<Person> pccList, LocalDate date, CompetenceCode code) {
+  public List<Competence> createCompetenceList(List<Person> personList, LocalDate date, CompetenceCode code) {
     List<Competence> compList = Lists.newArrayList();
-    for(Person person : pccList) {
+    for(Person person : personList) {
       Optional<Competence> comp = competenceDao.getCompetence(person, date.getYear(), 
           date.getMonthOfYear(), code);
       if (comp.isPresent()) {
