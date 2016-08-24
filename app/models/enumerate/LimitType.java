@@ -5,5 +5,6 @@ public enum LimitType {
   monthly,
   yearly,
   onMonthlyPresence,
+  entireMonth,
   noLimit
 }
