@@ -7,13 +7,17 @@ import lombok.Setter;
 
 import org.joda.time.LocalDate;
 
+import java.util.Comparator;
+
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
 
 @MappedSuperclass
-public abstract class PeriodModel extends BaseModel
+public abstract class PeriodModel extends BaseModel 
     implements IPeriodModel, Comparable<PeriodModel> {
+
+  private static final long serialVersionUID = 701063571599514955L;
 
   @Getter
   @Setter
@@ -26,12 +30,14 @@ public abstract class PeriodModel extends BaseModel
   @Column(name = "end_date")
   public LocalDate endDate;
 
+  private Comparator<PeriodModel> comparator() {
+    return Comparator.comparing(PeriodModel::getBeginDate, Comparator.nullsFirst(LocalDate::compareTo))
+        .thenComparing(PeriodModel::getId, Comparator.nullsFirst(Long::compareTo));
+  }
+  
   @Override
   public int compareTo(PeriodModel other) {
-    if (other == null || beginDate == null) {
-      return 0;
-    }
-    return beginDate.compareTo(other.beginDate);
+    return comparator().compare(this, other);
   }
 
   @Override
