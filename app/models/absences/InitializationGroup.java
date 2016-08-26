@@ -62,6 +62,8 @@ public class InitializationGroup extends BaseModel {
   @Column(name = "vacation_year")
   public Integer vacationYear;
   
+  //TODO: enum ferie o permessi
+  
   //if (groupAbsenceType.pattern == compensatoryRestCnr)
   
   @Column(name = "residual_minutes_last_year")

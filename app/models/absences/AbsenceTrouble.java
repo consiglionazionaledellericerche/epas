@@ -20,7 +20,7 @@ public class AbsenceTrouble extends BaseModel {
   @Enumerated(EnumType.STRING)
   public AbsenceProblem trouble;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne//(fetch = FetchType.LAZY)
   @JoinColumn(name = "absence_id", nullable = false, updatable = false)
   public Absence absence;
 

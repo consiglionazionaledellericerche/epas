@@ -47,7 +47,7 @@ public class ComplationAbsenceBehaviour extends BaseModel {
   joinColumns = { @JoinColumn(name = "complation_behaviour_id") }, 
   inverseJoinColumns = { @JoinColumn(name = "absence_types_id") })
   @OrderBy("code")
-  public Set<AbsenceType> replacingCodes = Sets.newHashSet();;
+  public Set<AbsenceType> replacingCodes = Sets.newHashSet();
   
 
 
