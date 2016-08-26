@@ -1,19 +1,23 @@
 package models.enumerate;
 
 public enum VacationCode {
-  
+
   CODE_28_4("28+4", 28, 4),
   CODE_26_4("26+4", 26, 4),
   CODE_25_4("25+4", 25, 4),
   CODE_21_4("21+4", 21, 4),
-  
+
+  // Relativi ai part-time verticali su 3 giorni
+  CODE_16_2("16+2", 16, 2),
+  CODE_17_2("17+2", 17, 2),
+
   CODE_22_3("22+3", 22, 3),
   CODE_21_3("21+3", 21, 3),
-  
+
   /* Vecchie progressioni obsolete (ma attuate in qualche caso) */
   CODE_30_4("30+4", 30, 4),
   CODE_32_4("32+4", 32, 4);
-    
+
   public final String name;
   public final int vacations;
   public final int permissions;
@@ -23,13 +27,21 @@ public enum VacationCode {
     this.vacations = vacations;
     this.permissions = permissions;
   }
-  
+
   /**
    * Conversione giorni passati / ferie maturate.
+   *
    * @param days giorni passati
    * @return ferie maturate.
    */
   public int accruedVacations(int days) {
+
+    if (this.vacations == 16) {
+      return accruedProgression16(days);
+    }
+    if (this.vacations == 17) {
+      return accruedProgression17(days);
+    }
     if (this.vacations == 28) {
       return accruedProgression28(days);
     }
@@ -50,9 +62,10 @@ public enum VacationCode {
     }
     return 0;
   }
-  
+
   /**
    * Conversione giorni passati / permessi maturati.
+   *
    * @param days giorni passati
    * @return permessi maturati.
    */
@@ -63,12 +76,16 @@ public enum VacationCode {
     if (this.permissions == 3) {
       return accruedProgression3(days);
     }
+    if (this.permissions == 2) {
+      return accruedProgression2(days);
+    }
     return 0;
   }
-  
+
 
   /**
    * Progressione su 26 giorni.
+   *
    * @param days giorni passati
    * @return giorni maturati
    */
@@ -116,9 +133,10 @@ public enum VacationCode {
       return 26;
     }
   }
-  
+
   /**
    * Progressione su 28 giorni.
+   *
    * @param days giorni passati
    * @return giorni maturati
    */
@@ -166,9 +184,10 @@ public enum VacationCode {
       return 28;
     }
   }
-  
+
   /**
    * Progressione su 30 giorni.
+   *
    * @param days giorni passati
    * @return giorni maturati
    */
@@ -216,9 +235,10 @@ public enum VacationCode {
       return 30;
     }
   }
-  
+
   /**
    * Progressione su 32 giorni.
+   *
    * @param days giorni passati
    * @return giorni maturati
    */
@@ -266,9 +286,10 @@ public enum VacationCode {
       return 32;
     }
   }
-  
+
   /**
    * Progressione su 21 giorni.
+   *
    * @param days giorni passati
    * @return giorni maturati
    */
@@ -317,9 +338,10 @@ public enum VacationCode {
       return 21;
     }
   }
-  
+
   /**
    * Progressione su 22 giorni.
+   *
    * @param days giorni passati
    * @return giorni maturati
    */
@@ -366,9 +388,104 @@ public enum VacationCode {
       return 22;
     }
   }
-  
+
+  /**
+   * Progressione su 16 giorni.
+   *
+   * @param days giorni passati
+   * @return giorni maturati
+   */
+  private int accruedProgression16(int days) {
+
+    if (days <= 15) {
+      return 0;
+    }
+    if (days >= 16 && days <= 45) {
+      return 1;
+    }
+    if (days >= 46 && days <= 75) {
+      return 2;
+    }
+    if (days >= 76 && days <= 106) {
+      return 4;
+    }
+    if (days >= 107 && days <= 136) {
+      return 5;
+    }
+    if (days >= 137 && days <= 167) {
+      return 6;
+    }
+    if (days >= 168 && days <= 197) {
+      return 8;
+    }
+    if (days >= 198 && days <= 227) {
+      return 9;
+    }
+    if (days >= 228 && days <= 258) {
+      return 10;
+    }
+    if (days >= 259 && days <= 288) {
+      return 11;
+    }
+    if (days >= 289 && days <= 319) {
+      return 13;
+    }
+    if (days >= 320 && days <= 349) {
+      return 14;
+    }
+    return 16;
+  }
+
+  /**
+   * Progressione su 17 giorni.
+   *
+   * @param days giorni passati
+   * @return giorni maturati
+   */
+  private int accruedProgression17(int days) {
+
+    if (days <= 15) {
+      return 0;
+    }
+    if (days >= 16 && days <= 45) {
+      return 1;
+    }
+    if (days >= 46 && days <= 75) {
+      return 2;
+    }
+    if (days >= 76 && days <= 106) {
+      return 4;
+    }
+    if (days >= 107 && days <= 136) {
+      return 5;
+    }
+    if (days >= 137 && days <= 167) {
+      return 7;
+    }
+    if (days >= 168 && days <= 197) {
+      return 8;
+    }
+    if (days >= 198 && days <= 227) {
+      return 10;
+    }
+    if (days >= 228 && days <= 258) {
+      return 11;
+    }
+    if (days >= 259 && days <= 288) {
+      return 13;
+    }
+    if (days >= 289 && days <= 319) {
+      return 14;
+    }
+    if (days >= 320 && days <= 349) {
+      return 15;
+    }
+    return 17;
+  }
+
   /**
    * Progressione su 4 giorni.
+   *
    * @param days giorni passati
    * @return giorni maturati
    */
@@ -391,6 +508,7 @@ public enum VacationCode {
 
   /**
    * Progressione su 3 giorni.
+   *
    * @param days giorni passati
    * @return giorni maturati
    */
@@ -404,9 +522,25 @@ public enum VacationCode {
     }
     if (days >= 316 && days <= 366) {
       permissionDays = 3;
-    } 
+    }
     return permissionDays;
   }
-  
-  
+
+  /**
+   * Progressione su 3 giorni.
+   *
+   * @param days giorni passati
+   * @return giorni maturati
+   */
+  private int accruedProgression2(int days) {
+
+    if (days >= 45 && days <= 225) {
+      return 1;
+    }
+    if (days >= 226) {
+      return 2;
+    }
+    return 0;
+  }
+
 }
