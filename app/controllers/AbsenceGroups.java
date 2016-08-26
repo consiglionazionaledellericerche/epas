@@ -64,29 +64,6 @@ public class AbsenceGroups extends Controller {
     
   }
   
-  public static void index(Office office) {
-    
-    
-    List<AbsenceTypeGroup> groups = AbsenceTypeGroup.findAll();
-    
-    List<AbsenceTypeGroup> noMoreAbsencesAccepted = Lists.newArrayList();
-    List<AbsenceTypeGroup> replaceCodeAndDecreaseAccumulation = Lists.newArrayList();
-    List<AbsenceTypeGroup> otherGroups = Lists.newArrayList();
-    
-    for (AbsenceTypeGroup group : groups) {
-      if (group.accumulationBehaviour.equals(AccumulationBehaviour.noMoreAbsencesAccepted)) {
-        noMoreAbsencesAccepted.add(group);
-      } else if (group.accumulationBehaviour
-          .equals(AccumulationBehaviour.replaceCodeAndDecreaseAccumulation)) {
-        replaceCodeAndDecreaseAccumulation.add(group);
-      } else {
-        otherGroups.add(group);
-      }
-    }
-    
-    render(noMoreAbsencesAccepted, replaceCodeAndDecreaseAccumulation, otherGroups);
-  }
-  
   public static void insert(Long personId, LocalDate from, LocalDate to, 
       GroupAbsenceType groupAbsenceType) {
     

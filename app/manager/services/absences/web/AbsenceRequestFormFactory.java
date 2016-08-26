@@ -36,7 +36,6 @@ public class AbsenceRequestFormFactory {
       AbsenceEngineUtility absenceEngineUtility) {
     this.absenceComponentDao = absenceComponentDao;
     this.absenceEngineUtility = absenceEngineUtility;
-    
   }
   
   /**

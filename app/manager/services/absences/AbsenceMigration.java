@@ -861,22 +861,22 @@ public class AbsenceMigration {
             "Missione 1 ora", 60, Sets.newHashSet(absenceTypeMinutes), null, 0, false, true, false, "92H1");
         
         AbsenceType h292 = absenceComponentDao.buildOrEditAbsenceType("92H2", 
-            "Missione 2 ore", 60, Sets.newHashSet(absenceTypeMinutes), null, 0, false, true, false, "92H2");
+            "Missione 2 ore", 120, Sets.newHashSet(absenceTypeMinutes), null, 0, false, true, false, "92H2");
         
         AbsenceType h392 = absenceComponentDao.buildOrEditAbsenceType("92H3", 
-            "Missione 3 ore", 60, Sets.newHashSet(absenceTypeMinutes), null, 0, false, true, false, "92H3");
+            "Missione 3 ore", 180, Sets.newHashSet(absenceTypeMinutes), null, 0, false, true, false, "92H3");
         
         AbsenceType h492 = absenceComponentDao.buildOrEditAbsenceType("92H4", 
-            "Missione 4 ore", 60, Sets.newHashSet(absenceTypeMinutes), null, 0, false, true, false, "92H4");
+            "Missione 4 ore", 240, Sets.newHashSet(absenceTypeMinutes), null, 0, false, true, false, "92H4");
         
         AbsenceType h592 = absenceComponentDao.buildOrEditAbsenceType("92H5", 
-            "Missione 5 ore", 60, Sets.newHashSet(absenceTypeMinutes), null, 0, false, true, false, "92H5");
+            "Missione 5 ore", 300, Sets.newHashSet(absenceTypeMinutes), null, 0, false, true, false, "92H5");
         
         AbsenceType h692 = absenceComponentDao.buildOrEditAbsenceType("92H6", 
-            "Missione 6 ore", 60, Sets.newHashSet(absenceTypeMinutes), null, 0, false, true, false, "92H6");
+            "Missione 6 ore", 360, Sets.newHashSet(absenceTypeMinutes), null, 0, false, true, false, "92H6");
         
         AbsenceType h792 = absenceComponentDao.buildOrEditAbsenceType("92H7", 
-            "Missione 7 ore", 60, Sets.newHashSet(absenceTypeMinutes), null, 0, false, true, false, "92H7");
+            "Missione 7 ore", 420, Sets.newHashSet(absenceTypeMinutes), null, 0, false, true, false, "92H7");
         
         tMissione.get().takableCodes = Sets
             .newHashSet(missione92, h192, h292, h392, h492, h592, h692, h792);

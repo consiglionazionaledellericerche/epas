@@ -43,10 +43,10 @@
     
       <span class="label label-primary">Completamento</span> &{group.complationAbsenceBehaviour.amountType}<br>
       *{ <span class="label label-primary">Codice</span> ${group.complationAbsenceBehaviour.name}<br> }*
-      <span class="label label-primary">Codici considerati</span> 
+      <span class="label label-primary">Codici completamento</span> 
       #{absences.absenceType codes:group.complationAbsenceBehaviour.complationCodes /}<br>
       
-      <span class="label label-primary">Codici completamento</span> 
+      <span class="label label-primary">Codici rimpiazzamento</span> 
       #{absences.absenceType codes:group.complationAbsenceBehaviour.replacingCodes /}
       
     </li>
