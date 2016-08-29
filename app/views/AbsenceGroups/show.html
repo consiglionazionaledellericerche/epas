@@ -9,7 +9,7 @@
   #{list items:groups, as:'group'}
 
   <ul class="list-group">
-    <li class="list-group-item list-group-item-info"">
+    <li class="list-group-item list-group-item-info">
       <strong>${group.description.label()}</strong>
       <span class="label label-info">${group.name}</span> 
     </li>
@@ -39,7 +39,7 @@
     </li>
     #{/if}
     #{if group.complationAbsenceBehaviour}  
-    <li class="list-group-item">
+    <li class="list-group-item list-group-item-warning">
     
       <span class="label label-primary">Completamento</span> &{group.complationAbsenceBehaviour.amountType}<br>
       *{ <span class="label label-primary">Codice</span> ${group.complationAbsenceBehaviour.name}<br> }*
