@@ -248,7 +248,7 @@ public class TemplateUtility {
     // e vanno spostati nel secureManager.
     Optional<User> user = Security.getUser();
     if (user.isPresent()) {
-      roles.add(roleDao.getRoleByName(Role.TECNICAL_ADMIN));
+      roles.add(roleDao.getRoleByName(Role.TECHNICAL_ADMIN));
       roles.add(roleDao.getRoleByName(Role.PERSONNEL_ADMIN));
       roles.add(roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI));
       return roles;
@@ -289,7 +289,7 @@ public class TemplateUtility {
 
     Optional<User> user = Security.getUser();
 
-    // se admin tutti, altrimenti gli office di cui si ha tecnicalAdmin
+    // se admin tutti, altrimenti gli office di cui si ha technicalAdmin
     // TODO: spostare nel sucureManager
     if (!user.isPresent()) {
       return offices;
@@ -300,7 +300,7 @@ public class TemplateUtility {
     }
 
     for (UsersRolesOffices uro : user.get().usersRolesOffices) {
-      if (uro.role.name.equals(Role.TECNICAL_ADMIN)) {
+      if (uro.role.name.equals(Role.TECHNICAL_ADMIN)) {
         offices.add(uro.office);
       }
     }

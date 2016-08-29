@@ -22,7 +22,7 @@ edit: link della modifica
 <div class="list-group-item-text">
   <strong><i class="fa fa-shield"></i> Amministratore Tecnico </strong>
   #{list items:_item.usersRolesOffices, as:'uro'}
-  #{if uro.role.name.equals('tecnicalAdmin') && uro.user.person }
+  #{if uro.role.name.equals('technicalAdmin') && uro.user.person }
   <span class="label label-info">${uro.user.person.fullname}</span>
   #{/if}
   #{/list}

@@ -63,11 +63,11 @@ public class Offices extends Controller {
    */
   public static void list(String name) {
 
-    //la lista di institutes su cui si ha tecnical admin in almeno un office
+    //la lista di institutes su cui si ha technical admin in almeno un office
 
     SearchResults<?> results = officeDao.institutes(
         Optional.<String>fromNullable(name),
-        Security.getUser().get(), roleDao.getRoleByName(Role.TECNICAL_ADMIN))
+        Security.getUser().get(), roleDao.getRoleByName(Role.TECHNICAL_ADMIN))
         .listResults();
 
     render(results, name);

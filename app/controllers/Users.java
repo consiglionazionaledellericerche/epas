@@ -73,7 +73,7 @@ public class Users extends Controller {
   public static void list(String name) {
 
     User user = Security.getUser().get();
-    Set<Office> offices = secureManager.officesTecnicalAdminAllowed(user);
+    Set<Office> offices = secureManager.officesTechnicalAdminAllowed(user);
     SearchResults<?> results = userDao.listUsersByOffice(Optional.<String>fromNullable(name),
         offices, EnabledType.ONLY_ENABLED, Lists.newArrayList(UserType.PERSON)).listResults();
 
@@ -88,7 +88,7 @@ public class Users extends Controller {
   public static void systemList(String name) {
 
     User user = Security.getUser().get();
-    Set<Office> offices = secureManager.officesTecnicalAdminAllowed(user);
+    Set<Office> offices = secureManager.officesTechnicalAdminAllowed(user);
 
     List<UserType> userTypes = Lists.newArrayList(UserType.SYSTEM_WITH_OWNER);
     if (userDao.isAdmin(user) || userDao.isDeveloper(user)) {
@@ -107,7 +107,7 @@ public class Users extends Controller {
   public static void disabledList(String name) {
 
     User user = Security.getUser().get();
-    Set<Office> offices = secureManager.officesTecnicalAdminAllowed(user);
+    Set<Office> offices = secureManager.officesTechnicalAdminAllowed(user);
 
     List<UserType> userTypes = Lists.newArrayList(UserType.SYSTEM_WITH_OWNER);
     if (userDao.isAdmin(user) || userDao.isDeveloper(user)) {
