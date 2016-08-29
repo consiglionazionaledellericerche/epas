@@ -19,6 +19,7 @@ absenceTypeGroup.limitInMinute= Limite accumulo
 absenceTypeGroup.minutesExcess= Minuti in eccesso
 absenceTypeGroup.replacingAbsenceType= Codice per sotituzione
 groupAbsenceType=Gruppo di Codici
+TooEarlyReplacing=Codice di completamento anticipato
 
 justifiedType=Tempo giustificato
 

@@ -209,6 +209,10 @@ public class AbsencePeriod {
     }
     
     public void setGroupScanned(GroupAbsenceType groupAbsenceType) {
+      //FIXME il builder non inizializza...
+      if (this.notScannedGroups == null) {
+        this.notScannedGroups = Sets.newHashSet();
+      }
       this.notScannedGroups.remove(groupAbsenceType);
     }
     

@@ -556,8 +556,10 @@ public class AbsenceEngineCore {
 
     // analisi dei requisiti generici (risultati in absenceEngine.report)
     for (EnhancedAbsence enhancedAbsence : absenceEngine.scanEnhancedAbsences) {
+      absenceEngine.scanCurrentAbsence = enhancedAbsence;
       genericConstraints(absenceEngine, enhancedAbsence.getAbsence());
     }
+    absenceEngine.scanCurrentAbsence = null;
     
     // analisi dei requisiti all'interno di ogni gruppo (risultati in absenceEngine.report)
     while (configureNextGroupToScan(absenceEngine).isConfiguredForNextScan()) {

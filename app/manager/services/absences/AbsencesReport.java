@@ -49,6 +49,7 @@ public class AbsencesReport {
       List<AbsenceProblem> remainingProblems = remainingProblemsMap.get(absenceProblem.absence);
       if (remainingProblems == null) {
         remainingProblems = Lists.newArrayList();
+        remainingProblemsMap.put(absenceProblem.absence, remainingProblems);
       }
       remainingProblems.add(absenceProblem.absenceProblem);
     }

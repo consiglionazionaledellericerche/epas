@@ -16,6 +16,7 @@ import play.db.jpa.Blob;
 
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -61,7 +62,7 @@ public class Absence extends BaseModel {
   public JustifiedType justifiedType;
   
   @NotAudited
-  @OneToMany(mappedBy = "absence")
+  @OneToMany(mappedBy = "absence", cascade = {CascadeType.REMOVE})
   public Set<AbsenceTrouble> troubles = Sets.newHashSet();
   
   // TODO: spostare la relazione dal person day alla person e persistere il campo date.
