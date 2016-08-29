@@ -8,11 +8,20 @@
 
 
   #{secure.link @Absences.edit('absence.id':absence.id), target: absence, 'data-async-modal':'#modalAbsence'}
-    <span 
-        #{if absence.nothingJustified()} class="text-muted" #{/if} 
-        #{if !absence.troubles.empty} <i class="fa fa-bomb" aria-hidden="true"></i>#{/if}
-        webui-popover-hover data-url="#${absence.id}">
-	    ${absence.absenceType.code}<br>
+    
+    <span webui-popover-hover data-url="#${absence.id}"
+        *{ colore codice assenza }*
+        #{if !absence.troubles.empty} 
+          class="text-danger" 
+        #{/if}
+        #{else} 
+          #{if absence.nothingJustified()} class="text-muted" #{/if}
+        #{/else}
+     >
+
+	    #{if !absence.troubles.empty} <strong>${absence.absenceType.code}</strong> #{/if}
+	    #{else} ${absence.absenceType.code} #{/else}
+	    
 	  </span>
   #{/secure.link}
 
@@ -32,6 +41,16 @@
 	      <br><strong>Tempo giustificato</strong> ${absence.justifiedTime().printHourMinute()}
 	    #{/if}
     #{/if}
+    
+    #{if !absence.troubles.empty}
+         <br><br>  
+         <p class="text-danger">Questa assenza contiene errori:</p>
+         <ul>
+         #{list items:absence.troubles, as:'trouble'}
+           <li>&{trouble.trouble}</li>
+         #{/list}
+         </ul>
+     #{/if}
   </div>
 
   #{/list}
