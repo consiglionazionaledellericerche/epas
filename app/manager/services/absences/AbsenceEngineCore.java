@@ -31,6 +31,7 @@ import models.absences.AbsenceTrouble.AbsenceTypeProblem;
 import models.absences.AbsenceTrouble.ImplementationProblem;
 import models.absences.AbsenceTrouble.RequestProblem;
 import models.absences.AbsenceType;
+import models.absences.AmountType;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
@@ -420,7 +421,8 @@ public class AbsenceEngineCore {
         .complationAbsencesByDay.values()) {
       complationAmount += complationAbsence.getJustifiedTime();
       Optional<AbsenceType> replacingCode = absenceEngineUtility
-          .whichReplacingCode(complationComponent, complationAmount);
+          .whichReplacingCode(absenceEngine, complationComponent, 
+              complationAbsence.getAbsence().getAbsenceDate(), complationAmount);
       if (replacingCode.isPresent()) {
         LocalDate replacingDate = complationAbsence.getAbsence().getAbsenceDate();
         ReplacingDay replacingDay = complationComponent.replacingDays.get(replacingDate);
@@ -773,11 +775,11 @@ public class AbsenceEngineCore {
       if (complationComponent.complationCodes.contains(absence.absenceType)) {
         
         int complationAmount = complationComponent.complationConsumedAmount + absenceEngineUtility
-            .absenceJustifiedAmount(absenceEngine, absence, 
-                complationComponent.complationAmountType);
+            .absenceJustifiedAmount(absenceEngine, absence, AmountType.minutes);
         
         Optional<AbsenceType> replacingCode = absenceEngineUtility
-            .whichReplacingCode(complationComponent, complationAmount);
+            .whichReplacingCode(absenceEngine, complationComponent, absence.getAbsenceDate(), 
+                complationAmount);
         if (replacingCode.isPresent()) {
           
           Absence replacingAbsence = new Absence();

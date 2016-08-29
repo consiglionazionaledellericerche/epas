@@ -21,6 +21,7 @@ import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 
+import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
 
 import java.util.List;
@@ -31,6 +32,8 @@ import java.util.Set;
 public class AbsenceEngineUtility {
   
   private final AbsenceComponentDao absenceComponentDao;
+  
+  private final Integer UNIT_REPLACING_AMOUNT = 1 * 100;
 
   @Inject
   public AbsenceEngineUtility(AbsenceComponentDao absenceComponentDao) {
@@ -195,7 +198,7 @@ public class AbsenceEngineUtility {
     }
     if (amountType.equals(AmountType.units) 
         && absenceType.replacingType.name.equals(JustifiedTypeName.all_day)) {
-        return 1 * 100; //una unità
+        return UNIT_REPLACING_AMOUNT; //una unità
     } 
     if (amountType.equals(AmountType.minutes) 
         && absenceType.replacingType.name.equals(JustifiedTypeName.absence_type_minutes)) {
@@ -300,13 +303,19 @@ public class AbsenceEngineUtility {
    * @param complationAmount
    * @return
    */
-  public Optional<AbsenceType> whichReplacingCode(ComplationComponent complationComponent, 
-      int complationAmount) {
+  public Optional<AbsenceType> whichReplacingCode(AbsenceEngine absenceEngine, 
+      ComplationComponent complationComponent, LocalDate date, int complationAmount) {
+    
     for (Integer replacingTime : complationComponent.replacingCodesDesc.keySet()) {
-      if (replacingTime <= complationAmount) {
+      int amountToCompare = replacingTime;
+      if (complationComponent.complationAmountType.equals(AmountType.units)) {
+        amountToCompare = absenceEngine.workingTime(LocalDate.now());  
+      }
+      if (amountToCompare < complationAmount) {
         return Optional.of(complationComponent.replacingCodesDesc.get(replacingTime));
       }
     }
+    
     return Optional.absent();
   }
   
