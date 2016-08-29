@@ -268,12 +268,12 @@ end
 
 
 /*******************************************************************************
- * Azioni utente con ruolo TECNICAL_ADMIN
+ * Azioni utente con ruolo TECHNICAL_ADMIN
  ******************************************************************************/
-rule TecnicalAdmin_Generic
+rule TechnicalAdmin_Generic
 when 
  $uro: UsersRolesOffices()
- Role(name == Role.TECNICAL_ADMIN) from $uro.role
+ Role(name == Role.TECHNICAL_ADMIN) from $uro.role
  $c: PermissionCheck(action in (
 
         "Institutes.list",
@@ -335,11 +335,11 @@ then
  $c.grant();
 end
 
-rule TecnicalAdmin_InOffice
+rule TechnicalAdmin_InOffice
 when
  $uro: UsersRolesOffices()
  $o: Office( usersRolesOffices contains $uro)
- Role(name == Role.TECNICAL_ADMIN) from $uro.role
+ Role(name == Role.TECHNICAL_ADMIN) from $uro.role
  $c: PermissionCheck(action in (
  
  	   "Institutes.edit",

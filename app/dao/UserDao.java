@@ -196,7 +196,7 @@ public class UserDao extends DaoBase {
 
     return user.usersRolesOffices.stream().filter(uro ->
         ImmutableList.of(Role.DEVELOPER, Role.ADMIN, Role.PERSONNEL_ADMIN,
-            Role.PERSONNEL_ADMIN_MINI, Role.TECNICAL_ADMIN)
+            Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN)
             .contains(uro.role.name)).findAny().isPresent();
   }
 }

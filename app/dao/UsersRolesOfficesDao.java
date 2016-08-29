@@ -97,7 +97,7 @@ public class UsersRolesOfficesDao extends DaoBase {
     final QPerson person = QPerson.person;
 
     ImmutableList<String> rolesName = ImmutableList.of(
-        Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.TECNICAL_ADMIN);
+        Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN);
 
     final QRole role = QRole.role;
     List<Role> roles = getQueryFactory().from(role).where(role.name.in(rolesName)).list(role);
