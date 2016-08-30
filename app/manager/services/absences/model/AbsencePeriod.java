@@ -145,9 +145,6 @@ public class AbsencePeriod {
     
     public LocalDate compromisedReplacingDate = null;
     
-    //I replacing days per ogni data raccolgo i replacing effettivi e quelli corretti
-    public SortedMap<LocalDate, ReplacingDay> replacingDays = Maps.newTreeMap();
-    
     /**
      * Lo stato dei rimpiazzamenti, data per data, quelli corretti e quelli esistenti.
      * @author alessandro

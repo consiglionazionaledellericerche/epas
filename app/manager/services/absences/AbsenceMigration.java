@@ -1021,6 +1021,8 @@ public class AbsenceMigration {
       
     }
     
+    JPA.em().flush();
+    
     if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.ALTRI.name()).isPresent()) {
       
       //Takable Creation
@@ -1043,6 +1045,9 @@ public class AbsenceMigration {
       // Set boolean independente
       absenceTypes = AbsenceType.findAll();
       for (AbsenceType absenceType : absenceTypes) {
+        
+        absenceType.refresh();
+        
         if (absenceType.takableGroup.isEmpty() && absenceType.takenGroup.isEmpty() 
             && absenceType.complationGroup.isEmpty() && absenceType.replacingGroup.isEmpty()) {
           log.info("AbsenceCode {}", absenceType.code );
