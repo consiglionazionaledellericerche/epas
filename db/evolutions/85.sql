@@ -15,7 +15,7 @@ CREATE TABLE user_roles_history (
     roles text,
     _revision_type smallint,
 
-    PRIMARY KEY (_revision, user_id, roles)
+    PRIMARY KEY (_revision, user_id, roles),
     FOREIGN KEY (_revision) REFERENCES revinfo(rev)
 );
 
