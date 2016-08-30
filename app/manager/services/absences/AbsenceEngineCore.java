@@ -9,6 +9,8 @@ import dao.absences.AbsenceComponentDao;
 
 import it.cnr.iit.epas.DateUtility;
 
+import lombok.extern.slf4j.Slf4j;
+
 import manager.PersonDayManager;
 import manager.services.absences.AbsenceService.AbsenceRequestType;
 import manager.services.absences.AbsencesReport.ReportAbsenceProblem;
@@ -36,6 +38,7 @@ import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.GroupAbsenceType.PeriodType;
+import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
@@ -45,6 +48,7 @@ import org.joda.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public class AbsenceEngineCore {
   
   private final AbsenceEngineUtility absenceEngineUtility;
@@ -250,6 +254,9 @@ public class AbsenceEngineCore {
     AbsencePeriod absencePeriod = absenceEngine.periodChain;
     while (absencePeriod != null) {
       
+      TakableComponent takableComponent = null;
+      ComplationComponent complationComponent = null;
+      
       for (EnhancedAbsence enhancedAbsence : absenceEngine.periodChainAbsencesAsc()) {
         if (!DateUtility.isDateIntoInterval(enhancedAbsence.getAbsence().getAbsenceDate(), 
             absencePeriod.periodInterval())) {
@@ -269,8 +276,6 @@ public class AbsenceEngineCore {
               .build());
         }
         
-        TakableComponent takableComponent = null;
-        ComplationComponent complationComponent = null;
         LocalDate date = null;
         
         //Computo il ruolo dell'assenza nel period
@@ -364,8 +369,9 @@ public class AbsenceEngineCore {
           complationComponent.replacingAbsencesByDay.put(date, enhancedAbsence);
         }
         
-        complationSoundness(absenceEngine, complationComponent);
       }
+      
+      complationSoundness(absenceEngine, complationComponent);
       
       absencePeriod = absencePeriod.nextAbsencePeriod;
     }
@@ -417,6 +423,7 @@ public class AbsenceEngineCore {
 
     //Le assenze di completamento ordinate per data. Genero i replacing ipotetici
     int complationAmount = 0;
+    List<EnhancedAbsence> complationAbsences = Lists.newArrayList(complationComponent.complationAbsencesByDay.values());
     for (EnhancedAbsence complationAbsence : complationComponent
         .complationAbsencesByDay.values()) {
       complationAmount += complationAbsence.getJustifiedTime();
@@ -550,6 +557,8 @@ public class AbsenceEngineCore {
           .absence(absence)
           .notScannedGroups(absenceEngineUtility.involvedGroup(absence.absenceType))
           .build());
+      log.debug("L'assenza data={}, codice={} è stata aggiunta a quelle da analizzare", 
+          absence.getAbsenceDate(), absence.getAbsenceType().code);
     }
     AbsenceEngine absenceEngine = new AbsenceEngine(absenceComponentDao, personChildrenDao, 
         person, scanFrom, enhancedAbsencesToScan);
@@ -732,12 +741,12 @@ public class AbsenceEngineCore {
     
     //simple grouping
     if (absencePeriod.groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.simpleGrouping)) {
-      InsertResultItem responseItem = InsertResultItem.builder()
+      InsertResultItem insertResultItem = InsertResultItem.builder()
           .absence(absence)
           .absenceType(absence.getAbsenceType())
           .operation(Operation.insert)
           .date(absenceEngine.currentDate()).build();
-      absenceEngine.report.insertResultItems.add(responseItem);
+      absenceEngine.report.addInsertResultItem(insertResultItem);
       absenceEngine.requestInserts.add(absence);
       absenceEngine.periodChainSuccess = true;
       return absenceEngine;
@@ -749,7 +758,7 @@ public class AbsenceEngineCore {
         .operation(Operation.insert)
         .consumedResidualAmount(Lists.newArrayList())
         .date(absenceEngine.currentDate()).build();
-    absenceEngine.report.insertResultItems.add(absenceResultItem);
+    absenceEngine.report.addInsertResultItem(absenceResultItem);
     
     //Takable component
     if (absencePeriod.takableComponent.isPresent()) {
@@ -787,7 +796,9 @@ public class AbsenceEngineCore {
           Absence replacingAbsence = new Absence();
           replacingAbsence.absenceType = replacingCode.get();
           replacingAbsence.date = absence.getAbsenceDate();
-          replacingAbsence.justifiedType = replacingCode.get().replacingType; //capire
+          replacingAbsence.justifiedType = absenceComponentDao
+              .getOrBuildJustifiedType(JustifiedTypeName.nothing);
+          //todo cercarlo fra quelli permit e se non c'è nothing errore
           
           InsertResultItem replacingResultItem = InsertResultItem.builder()
               .absence(replacingAbsence)
@@ -795,7 +806,7 @@ public class AbsenceEngineCore {
               .operation(Operation.insertReplacing)
               .date(absenceEngine.requestCurrentDate).build();
           
-          absenceEngine.report.insertResultItems.add(replacingResultItem);
+          absenceEngine.report.addInsertResultItem(replacingResultItem);
           absenceEngine.requestInserts.add(absence);
         }
       }
@@ -817,26 +828,39 @@ public class AbsenceEngineCore {
           .absence(absence).build());
     }
     
-    //Un codice giornaliero già presente
-    //TODO: requestIntervalAbsences si può fare meglio..
-    for (Absence oldAbsence : absenceEngine.requestIntervalAbsences()) {
-      if (oldAbsence.isPersistent() && absence.isPersistent() && oldAbsence.equals(absence)) {
+    //Un codice giornaliero già presente 
+    for (Absence oldAbsence : absenceEngine.periodOldAbsences()) {
+      //altra data
+      if (!oldAbsence.getAbsenceDate().isEqual(absenceEngine.currentDate())) {
         continue;
       }
-      if (oldAbsence.getAbsenceDate().isEqual(absenceEngine.currentDate())) {
-        if (oldAbsence.justifiedType.name.equals(JustifiedTypeName.all_day) 
-            || oldAbsence.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) {
-          InsertResultItem responseItem = InsertResultItem.builder()
-              .absence(absence)
-              .absenceType(absence.getAbsenceType())
-              .operation(Operation.insert)
-              .date(absenceEngine.currentDate())
-              .absenceProblem(AbsenceProblem.AllDayAlreadyExists).build();
-          absenceEngine.report.insertResultItems.add(responseItem);
-        }
+      //tempo giustificato non giornaliero
+      if ((oldAbsence.justifiedType.name.equals(JustifiedTypeName.all_day) 
+          || oldAbsence.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) == false) {
+        continue;
       }
+
+      if (absenceEngine.isRequestEngine()) {
+        InsertResultItem insertResuItem = InsertResultItem.builder()
+            .absence(absence)
+            .absenceType(absence.getAbsenceType())
+            .operation(Operation.insert)
+            .date(absenceEngine.currentDate())
+            .absenceProblem(AbsenceProblem.AllDayAlreadyExists).build();
+        absenceEngine.report.addInsertResultItem(insertResuItem);
+      }
+      else if (absenceEngine.isScanEngine()) {
+        if (oldAbsence.isPersistent() && absence.isPersistent() && oldAbsence.equals(absence)) {
+          continue;
+        }
+        absenceEngine.report.addAbsenceProblem(ReportAbsenceProblem.builder()
+            .absenceProblem(AbsenceProblem.AllDayAlreadyExists)
+            .absence(absence).build());
+      }
+
     }
-    
+
+     
     return absenceEngine;
   }
   

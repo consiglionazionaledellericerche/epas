@@ -3,6 +3,8 @@ package manager.services.absences;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 
+import lombok.extern.slf4j.Slf4j;
+
 import manager.services.absences.model.AbsenceEngine;
 import manager.services.absences.model.AbsencePeriod.EnhancedAbsence;
 import manager.services.absences.web.AbsenceRequestForm;
@@ -22,6 +24,7 @@ import org.joda.time.LocalDate;
  * @author alessandro
  *
  */
+@Slf4j
 public class AbsenceService {
 
   private final AbsenceRequestFormFactory absenceRequestFormFactory;
@@ -151,7 +154,18 @@ public class AbsenceService {
    */
   public AbsenceEngine scanner(Person person, LocalDate from) {
     
+    log.debug("");
+    log.debug("");
+    log.debug("");
+    log.debug("");
+    log.debug("Lanciata procedura scan assenze person={}, from={}", person.fullName(), from);
+    
     AbsenceEngine absenceEngine = absenceEngineCore.scannerAbsenceEngine(person, from);
+    
+    log.debug("");
+    log.debug("");
+    log.debug("");
+    log.debug("");
     
     return absenceEngine;
     

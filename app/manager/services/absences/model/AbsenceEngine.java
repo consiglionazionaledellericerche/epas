@@ -46,7 +46,6 @@ public class AbsenceEngine {
   public Person requestPerson;
   public DateInterval childInterval;                      
   private List<PersonChildren> requestChildrenAsc = null; //all children         
-  private List<Absence> requestOldAbsences = null;        //old requestFrom -> requestTo
   public List<Absence> requestInserts = Lists.newArrayList();
 
   // --------------------------------------------------------------------------------------
@@ -65,6 +64,7 @@ public class AbsenceEngine {
   private LocalDate periodChainFrom = null;                    //to reset nextDate
   private LocalDate periodChainTo = null;                      //to reset nextDate
   public boolean periodChainSuccess = false;                   //to reset nextDate
+  private List<Absence> periodOldAbsences = null;              //to reset nextDate
 
   // --------------------------------------------------------------------------------------
   // Risultato richiesta
@@ -160,19 +160,19 @@ public class AbsenceEngine {
     return 0;
   }
   
-  public List<Absence> requestIntervalAbsences() {
-    if (this.requestOldAbsences == null) {
+  public List<Absence> periodOldAbsences() {
+    if (this.periodOldAbsences == null) {
       if (this.isRequestEngine()) {
-        this.requestOldAbsences = this.absenceComponentDao.orderedAbsences(this.requestPerson, 
+        this.periodOldAbsences = this.absenceComponentDao.orderedAbsences(this.requestPerson, 
             this.requestFrom, this.requestTo, Lists.newArrayList());
       }
       if (this.isScanEngine()) {
         //TODO: prelevarle dal scanEnhancedAbsences
-        this.requestOldAbsences = this.absenceComponentDao.orderedAbsences(this.requestPerson, 
+        this.periodOldAbsences = this.absenceComponentDao.orderedAbsences(this.requestPerson, 
             this.scanFrom, null, Lists.newArrayList());
       }
     }
-    return this.requestOldAbsences;
+    return this.periodOldAbsences;
   }
   
   public boolean isConfiguredForNextScan() {
@@ -201,6 +201,7 @@ public class AbsenceEngine {
       }
     }
     this.periodChainAbsencesAsc = null;
+    this.periodOldAbsences = null;
   }
 
 
