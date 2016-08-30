@@ -3,6 +3,7 @@ package security;
 import manager.configurations.EpasParam;
 import models.enumerate.CodesForEmployee;
 import models.enumerate.StampTypes;
+import models.enumerate.AccountRole;
 import models.Absence;
 import models.AbsenceType;
 import models.Configuration;
@@ -233,8 +234,7 @@ rule systemUsers
 salience 1
 activation-group 'admin'
 when
- $uro: UsersRolesOffices()
- Role(name in (Role.DEVELOPER,Role.ADMIN)) from $uro.role
+ AccountRole(this in (AccountRole.DEVELOPER,AccountRole.ADMIN))
  $c: PermissionCheck( granted == false)
 then
  $c.grant();
