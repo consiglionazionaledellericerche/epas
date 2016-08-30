@@ -1,10 +1,12 @@
 package manager.services.absences;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
@@ -19,6 +21,7 @@ import org.testng.collections.Maps;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Setter @Getter
 public class AbsencesReport {
 
@@ -68,6 +71,7 @@ public class AbsencesReport {
   
   public void addAbsenceProblem(ReportAbsenceProblem reportAbsenceProblem) {
     this.absenceProblems.add(reportAbsenceProblem );
+    log.debug("Aggiunto a report.absenceProblems: " + reportAbsenceProblem.toString());
   }
   
   public void addAbsenceTypeProblem(ReportAbsenceTypeProblem reportAbsenceTypeProblem) {
@@ -81,6 +85,11 @@ public class AbsencesReport {
   public void addImplementationProblem(ReportImplementationProblem implementationProblem) {
     this.implementationProblems.add(implementationProblem);
   }
+  
+  public void addInsertResultItem(InsertResultItem insertResultItem) {
+    log.debug("Aggiunto a report.insertResultItems: " + insertResultItem.toString());
+    this.insertResultItems.add(insertResultItem);
+  }
 
   @Builder
   public static class ReportAbsenceProblem {
@@ -88,6 +97,14 @@ public class AbsencesReport {
     public Absence absence;
     public Absence conflictingAbsence;
     public AbsenceType correctType;
+    
+    public String toString() {
+      return MoreObjects.toStringHelper(ReportAbsenceProblem.class)
+      .add("date", absence.getAbsenceDate())
+      .add("code", absence.absenceType.code)
+      .add("problem", absenceProblem)
+      .toString();
+    }
   }
   
   @Builder
