@@ -11,6 +11,7 @@ import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
+import models.enumerate.AccountRole;
 
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
@@ -97,6 +98,10 @@ public class Bootstrap extends Job<Void> {
         wtt.save();
       }
     }
+
+    User developer = userDao.byUsername("developer");
+    developer.roles.add(AccountRole.DEVELOPER);
+    developer.save();
 
     //L'utente admin non deve disporre del ruolo di amminstratore del personale. FIX
     User user = userDao.byUsername("admin");
