@@ -19,8 +19,6 @@ import javax.persistence.Table;
 @Table(name = "roles")
 public class Role extends BaseModel {
 
-  public static final String DEVELOPER = "developer";
-  public static final String ADMIN = "admin";
   public static final String PERSONNEL_ADMIN = "personnelAdmin";
   public static final String PERSONNEL_ADMIN_MINI = "personnelAdminMini";
   public static final String EMPLOYEE = "employee";

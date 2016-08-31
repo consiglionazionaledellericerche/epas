@@ -107,20 +107,10 @@ public class User extends BaseModel {
   }
 
   /**
-   * Se l'user è un account di sistema. TODO: definire la logica più dettagliata se necessario.
+   * True se l'user ha un ruolo di sistema.
    */
   public boolean isSystemUser() {
-    if (person == null) {
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Se l'user il super amministratore TODO: definire la logica più dettagliata se necessario.
-   */
-  public boolean isSuperAdmin() {
-    return username.equals("admin") || username.equals("developer");
+    return !roles.isEmpty();
   }
 
 }

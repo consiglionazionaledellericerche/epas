@@ -278,8 +278,6 @@ public class Synchronizations extends Controller {
     seat.beginDate = new LocalDate(LocalDate.now().getYear() - 1, 12, 31);
     periodManager.updatePropertiesInPeriodOwner(seat);
     seat.save();
-    // Per i permessi di developer e admin...
-    officeManager.setSystemUserPermission(seat);
 
     // Configurazione iniziale di default ...
     configurationManager.updateConfigurations(seat);

@@ -5,7 +5,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -19,7 +18,6 @@ import helpers.jpa.ModelQuery.SimpleResults;
 import models.Office;
 import models.Role;
 import models.User;
-import models.UsersRolesOffices;
 import models.query.QPerson;
 import models.query.QUser;
 
@@ -32,9 +30,6 @@ import javax.persistence.EntityManager;
  * @author dario
  */
 public class UserDao extends DaoBase {
-
-  public static final String ADMIN_USERNAME = "admin";
-  public static final String DEVELOPER_USERNAME = "developer";
 
   @Inject
   UserDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
@@ -82,44 +77,7 @@ public class UserDao extends DaoBase {
   }
 
   public User byUsername(String username) {
-
-    final QUser user = QUser.user;
-    final JPQLQuery query = getQueryFactory()
-        .from(user)
-        .where(user.username.eq(username));
-    return query.singleResult(user);
-  }
-
-
-  /**
-   * Se l'utente è admin.
-   */
-  public boolean isAdmin(User user) {
-    return user.username.equals(ADMIN_USERNAME);
-  }
-
-  /**
-   * Se l'utente è developer.
-   */
-  public boolean isDeveloper(User user) {
-    return user.username.equals(DEVELOPER_USERNAME);
-  }
-
-  /**
-   * Ritorna la lista degli utenti che hanno ruolo role nell'ufficio office
-   */
-  public List<User> getUserByOfficeAndRole(Office office, Role role) {
-
-    List<User> userList = Lists.newArrayList();
-
-    for (UsersRolesOffices uro : office.usersRolesOffices) {
-
-      if (uro.role.id.equals(role.id)) {
-
-        userList.add(uro.user);
-      }
-    }
-    return userList;
+    return getUserByUsernameAndPassword(username, Optional.absent());
   }
 
   public List<String> containsUsername(String username) {
@@ -194,9 +152,9 @@ public class UserDao extends DaoBase {
   public boolean hasAdminRoles(User user) {
     Preconditions.checkNotNull(user);
 
-    return user.usersRolesOffices.stream().filter(uro ->
-        ImmutableList.of(Role.DEVELOPER, Role.ADMIN, Role.PERSONNEL_ADMIN,
-            Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN)
-            .contains(uro.role.name)).findAny().isPresent();
+    return user.isSystemUser()
+        || user.usersRolesOffices.stream().filter(uro -> ImmutableList.of(Role.PERSONNEL_ADMIN,
+        Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN)
+        .contains(uro.role.name)).findAny().isPresent();
   }
 }
