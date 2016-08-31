@@ -7,7 +7,7 @@ import com.google.common.collect.Lists;
 
 import dao.OfficeDao;
 import dao.PersonDao;
-import dao.UsersRolesOfficesDao;
+import dao.UserDao;
 
 import helpers.TemplateDataInjector;
 
@@ -16,7 +16,7 @@ import manager.SecureManager;
 import models.Office;
 import models.Role;
 import models.User;
-import models.UsersRolesOffices;
+import models.enumerate.AccountRole;
 
 import org.joda.time.LocalDate;
 
@@ -47,7 +47,7 @@ public class RequestInit extends Controller {
   @Inject
   static PersonDao personDao;
   @Inject
-  static UsersRolesOfficesDao uroDao;
+  static UserDao userDao;
 
   @Before(priority = 1)
   static void injectMenu() {
@@ -310,18 +310,9 @@ public class RequestInit extends Controller {
       renderArgs.put("switchYear", true);
     }
 
-    if (personSwitcher.contains(currentAction)) {
-
-      for (UsersRolesOffices u : user.usersRolesOffices) {
-        if (u.role.name.equals(Role.ADMIN)
-            || u.role.name.equals(Role.DEVELOPER)
-            || u.role.name.equals(Role.PERSONNEL_ADMIN)
-            || u.role.name.equals(Role.PERSONNEL_ADMIN_MINI)) {
-          List<PersonDao.PersonLite> persons = personDao.liteList(offices, year, month);
-          renderArgs.put("navPersons", persons);
-          break;
-        }
-      }
+    if (personSwitcher.contains(currentAction) && userDao.hasAdminRoles(user)) {
+      List<PersonDao.PersonLite> persons = personDao.liteList(offices, year, month);
+      renderArgs.put("navPersons", persons);
       renderArgs.put("switchPerson", true);
     }
     if (officeSwitcher.contains(currentAction)) {
@@ -372,27 +363,40 @@ public class RequestInit extends Controller {
         return;
       }
 
-      List<Role> roles = uroDao.getUserRole(user.get());
+      if (user.get().roles.contains(AccountRole.ADMIN)) {
+        this.viewPerson = true;
+        this.viewOffice = true;
+        this.viewWorkingTimeType = true;
+      } else if (user.get().roles.contains(AccountRole.DEVELOPER)) {
+        this.isDeveloper = true;
+        this.viewPerson = true;
+        this.viewOffice = true;
+        this.viewWorkingTimeType = true;
+
+        this.viewPerson = true;
+        this.viewPersonDay = true;
+        // this.viewOffice = true;
+        this.viewCompetence = true;
+        this.viewWorkingTimeType = true;
+        this.viewCompetenceCode = true;
+        this.viewAbsenceType = true;
+
+        this.editCompetence = true;
+        this.uploadSituation = true;
+        this.editCompetenceCode = true;
+        this.editAbsenceType = true;
+        this.editWorkingTimeType = true;
+      }
+
+      List<Role> roles = user.get().usersRolesOffices.stream()
+          .map(usersRolesOffices -> usersRolesOffices.role).distinct().collect(Collectors.toList());
 
       for (Role role : roles) {
-
-        if (role.name.equals(Role.ADMIN)) {
-          this.viewPerson = true;
-          this.viewOffice = true;
-          this.viewWorkingTimeType = true;
-
-        } else if (role.name.equals(Role.DEVELOPER)) {
-          this.isDeveloper = true;
-          this.viewPerson = true;
-          this.viewOffice = true;
-          this.viewWorkingTimeType = true;
-
-        } else if (role.name.equals(Role.EMPLOYEE)) {
+        if (role.name.equals(Role.EMPLOYEE)) {
           this.isEmployee = true;
         }
 
-        if (this.isDeveloper || role.name.equals(Role.PERSONNEL_ADMIN_MINI)
-            || role.name.equals(Role.PERSONNEL_ADMIN)) {
+        if (role.name.equals(Role.PERSONNEL_ADMIN_MINI) || role.name.equals(Role.PERSONNEL_ADMIN)) {
           this.viewPerson = true;
           this.viewPersonDay = true;
           // this.viewOffice = true;
@@ -406,7 +410,7 @@ public class RequestInit extends Controller {
           this.viewOffice = true;
         }
 
-        if (this.isDeveloper || role.name.equals(Role.PERSONNEL_ADMIN)) {
+        if (role.name.equals(Role.PERSONNEL_ADMIN)) {
           this.editCompetence = true;
           this.uploadSituation = true;
           this.editCompetenceCode = true;

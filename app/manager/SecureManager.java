@@ -2,6 +2,7 @@ package manager;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 
 import models.Office;
 import models.Role;
@@ -20,6 +21,10 @@ public class SecureManager {
     Preconditions.checkNotNull(user);
     Preconditions.checkState(user.isPersistent());
 
+    if (!user.roles.isEmpty()) {
+      return Sets.newHashSet(Office.findAll());
+    }
+
     return user.usersRolesOffices.stream().filter(uro -> rolesNames.contains(uro.role.name))
         .map(uro -> uro.office).distinct().collect(Collectors.toSet());
   }
@@ -30,8 +35,6 @@ public class SecureManager {
   public Set<Office> officesReadAllowed(User user) {
 
     ImmutableList<String> rolesNames = ImmutableList.of(
-        Role.ADMIN,
-        Role.DEVELOPER,
         Role.PERSONNEL_ADMIN,
         Role.PERSONNEL_ADMIN_MINI);
 
@@ -43,10 +46,7 @@ public class SecureManager {
    */
   public Set<Office> officesWriteAllowed(User user) {
 
-    ImmutableList<String> rolesNames = ImmutableList.of(
-        Role.ADMIN,
-        Role.DEVELOPER,
-        Role.PERSONNEL_ADMIN);
+    ImmutableList<String> rolesNames = ImmutableList.of(Role.PERSONNEL_ADMIN);
 
     return getOfficeAllowed(user, rolesNames);
   }
@@ -66,15 +66,14 @@ public class SecureManager {
    */
   public Set<Office> officesSystemAdminAllowed(User user) {
 
-    ImmutableList<String> roles =
-        ImmutableList.of(Role.ADMIN, Role.DEVELOPER, Role.PERSONNEL_ADMIN);
+    ImmutableList<String> roles = ImmutableList.of(Role.PERSONNEL_ADMIN);
 
     return getOfficeAllowed(user, roles);
 
   }
 
   public Set<Office> officesTechnicalAdminAllowed(User user) {
-    ImmutableList<String> roles = ImmutableList.of(Role.TECHNICAL_ADMIN, Role.DEVELOPER);
+    ImmutableList<String> roles = ImmutableList.of(Role.TECHNICAL_ADMIN);
 
     return getOfficeAllowed(user, roles);
   }
@@ -84,8 +83,9 @@ public class SecureManager {
    * @return un Set contenente tutti gli uffici sul quale si ha un ruolo qualsiasi.
    */
   public Set<Office> ownOffices(User user) {
+
     ImmutableList<String> roles = ImmutableList.of(
-        Role.DEVELOPER, Role.ADMIN, Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.EMPLOYEE,
+        Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.EMPLOYEE,
         Role.BADGE_READER, Role.REST_CLIENT, Role.TECHNICAL_ADMIN, Role.SHIFT_MANAGER,
         Role.REPERIBILITY_MANAGER, Role.TECHNICAL_ADMIN);
 

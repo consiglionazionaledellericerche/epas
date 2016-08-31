@@ -91,7 +91,7 @@ public class Users extends Controller {
     Set<Office> offices = secureManager.officesTechnicalAdminAllowed(user);
 
     List<UserType> userTypes = Lists.newArrayList(UserType.SYSTEM_WITH_OWNER);
-    if (userDao.isAdmin(user) || userDao.isDeveloper(user)) {
+    if (user.isSystemUser()) {
       userTypes.add(UserType.SYSTEM_WITHOUT_OWNER); // sistorg, protime etc...
     }
 
@@ -110,7 +110,7 @@ public class Users extends Controller {
     Set<Office> offices = secureManager.officesTechnicalAdminAllowed(user);
 
     List<UserType> userTypes = Lists.newArrayList(UserType.SYSTEM_WITH_OWNER);
-    if (userDao.isAdmin(user) || userDao.isDeveloper(user)) {
+    if (user.isSystemUser()) {
       userTypes.add(UserType.SYSTEM_WITHOUT_OWNER); // sistorg, protime etc...
     }
 
@@ -248,7 +248,7 @@ public class Users extends Controller {
     } else {
       //User di sistema senza owner (sistorg, protime....)
       // TODO: fare una regola drools per questo check
-      if (!(userDao.isAdmin(userLogged) || userDao.isDeveloper(userLogged))) {
+      if (userLogged.isSystemUser()) {
         throw new IllegalStateException();
       }
     }

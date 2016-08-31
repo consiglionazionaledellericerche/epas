@@ -43,6 +43,7 @@ import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
 import models.enumerate.AbsenceTypeMapping;
+import models.enumerate.AccountRole;
 import models.enumerate.CodesForEmployee;
 
 import org.joda.time.LocalDate;
@@ -295,7 +296,7 @@ public class TemplateUtility {
       return offices;
     }
 
-    if (user.get().isSuperAdmin()) {
+    if (user.get().isSystemUser()) {
       return officeDao.getAllOffices();
     }
 

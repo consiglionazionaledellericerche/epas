@@ -53,7 +53,8 @@ import javax.inject.Inject;
 /**
  * Wizard per la configurazione iniziale di ePAS.
  * TODO: il wizard non è più mantenuto nella parte di salvataggio della configurazione iniziale.
- *  Se si vuole riabilitare utilizzare la nuova gestione della configurazione. 
+ * Se si vuole riabilitare utilizzare la nuova gestione della configurazione.
+ *
  * @author daniele
  */
 @Slf4j
@@ -128,11 +129,11 @@ public class Wizard extends Controller {
     }
 
     int stepsCompleted = Collections2.filter(steps, new Predicate<WizardStep>() {
-        @Override
-        public boolean apply(WizardStep step) {
-          return step.completed;
-        }
-      }).size();
+      @Override
+      public boolean apply(WizardStep step) {
+        return step.completed;
+      }
+    }).size();
 
     percent = stepsCompleted * (100 / steps.size());
 
@@ -172,12 +173,11 @@ public class Wizard extends Controller {
 
   /**
    * Step 1 del Wizard, cambio password Admin.
-   *
    */
   public static void changeAdminPsw(
       int stepIndex, @Required String adminPassword,
       @Required @Equals(value = "adminPassword", message = "Le password non corrispondono")
-      String adminPasswordRetype) {
+          String adminPasswordRetype) {
 
     if (validation.hasErrors()) {
       params.flash();
@@ -284,8 +284,8 @@ public class Wizard extends Controller {
   public static void seatManagerRole(int stepIndex, Person person, @Required int qualification,
       @Required LocalDate beginDate, LocalDate endContract,
       @Required String managerPassword,
-      @Required @Equals(value = "managerPassword",  message = "Le password non corrispondono")
-      String managerPasswordRetype) {
+      @Required @Equals(value = "managerPassword", message = "Le password non corrispondono")
+          String managerPasswordRetype) {
 
     validation.required(person.name);
     validation.required(person.surname);
@@ -363,10 +363,11 @@ public class Wizard extends Controller {
     }
 
     //  Creazione admin
-    User adminUser = new User();
-    adminUser.username = Role.ADMIN;
-    adminUser.password = Codec.hexMD5(properties.getProperty("adminPassword"));
-    adminUser.save();
+    // TODO meglio spostare la creazione dell'admin al boot
+//    User adminUser = new User();
+//    adminUser.username = Role.ADMIN;
+//    adminUser.password = Codec.hexMD5(properties.getProperty("adminPassword"));
+//    adminUser.save();
 
     //  Creazione Istituto e Sede
 
@@ -427,8 +428,6 @@ public class Wizard extends Controller {
 //    confGeneralManager.saveConfGeneral(Parameter.EMAIL_TO_CONTACT, office,
 //        Optional.fromNullable(properties.getProperty("emailToContact")));
 
-    officeManager.setSystemUserPermission(office);
-
     //Creazione persona Amministratore
 
     Person person = new Person();
@@ -437,7 +436,7 @@ public class Wizard extends Controller {
     person.email = properties.getProperty("personnelAdminEmail");
 
     person.qualification = qualificationDao.getQualification(Optional
-        .fromNullable(Integer.parseInt(properties.getProperty("personnelAdminQualification"))),
+            .fromNullable(Integer.parseInt(properties.getProperty("personnelAdminQualification"))),
         Optional.<Long>absent(), false).get(0);
 
     if (properties.containsKey("personnelAdminNumber")) {
@@ -477,9 +476,6 @@ public class Wizard extends Controller {
     User manager = userManager.createUser(person);
     manager.password = Codec.hexMD5(properties.getProperty("personnelAdminPassword"));
     manager.save();
-
-    //  Assegnamento dei permessi all'utente creato
-    officeManager.setSystemUserPermission(office);
 
     officeManager.setUro(manager, office, roleDao.getRoleByName(Role.PERSONNEL_ADMIN));
     officeManager.setUro(manager, office, roleDao.getRoleByName(Role.EMPLOYEE));

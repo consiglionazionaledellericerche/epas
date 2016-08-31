@@ -247,8 +247,7 @@ rule revokeToAdmin
 salience 2
 activation-group 'admin'
 when
- $uro: UsersRolesOffices()
- Role(name == Role.ADMIN) from $uro.role
+ AccountRole(this == AccountRole.ADMIN)
  $c: PermissionCheck(
     action.startsWith("Absences.")
     || action.startsWith("Administration.")
