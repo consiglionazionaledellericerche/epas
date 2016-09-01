@@ -10,7 +10,6 @@ import dao.absences.AbsenceComponentDao;
 import manager.services.absences.model.AbsenceEngine;
 import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.AbsencePeriod.ComplationComponent;
-import manager.services.absences.model.AbsencePeriod.EnhancedAbsence;
 
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -140,10 +139,10 @@ public class AbsenceEngineUtility {
       amount = 0;
     } 
     else if (absence.justifiedType.name.equals(JustifiedTypeName.all_day)) {
-      amount = absenceEngine.workingTime(absenceEngine.currentDate());
+      amount = absenceEngine.workingTime(absence.getAbsenceDate());
     } 
     else if (absence.justifiedType.name.equals(JustifiedTypeName.half_day)) {
-      amount = absenceEngine.workingTime(absenceEngine.currentDate()) / 2;
+      amount = absenceEngine.workingTime(absence.getAbsenceDate()) / 2;
     }
     else if (absence.justifiedType.name.equals(JustifiedTypeName.missing_time) ||
         absence.justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
@@ -163,7 +162,7 @@ public class AbsenceEngineUtility {
     }
     
     if (amountType.equals(AmountType.units)) {
-      int work = absenceEngine.workingTime(absenceEngine.currentDate());
+      int work = absenceEngine.workingTime(absence.getAbsenceDate());
       if (work == 0) {
         return 0;
       }
@@ -215,26 +214,16 @@ public class AbsenceEngineUtility {
    * @param absence
    * @return
    */
-  public EnhancedAbsence inferAbsenceType(AbsencePeriod absencePeriod, EnhancedAbsence enhancedAbsence) {
+  public Absence inferAbsenceType(AbsencePeriod absencePeriod, Absence absence, 
+      JustifiedType requestedJustifiedType) {
 
-    if (!enhancedAbsence.isAbsenceTypeToInfer()) {
-      return enhancedAbsence;
-    }
-    
-    //Reset
-    enhancedAbsence.setAbsenceTypeInfered(false);
-    
-    //Scorciatoie
-    Absence absence = enhancedAbsence.getAbsence();
-    JustifiedType requestedJustifiedType = enhancedAbsence.getRequestedJustifiedType();
-    
     if (requestedJustifiedType == null || !absencePeriod.takableComponent.isPresent()) {
-      return enhancedAbsence;
+      return absence;
     }
     
     // Controllo che il tipo sia inferibile
     if (!automaticJustifiedType(absencePeriod.groupAbsenceType).contains(requestedJustifiedType)) {
-      return enhancedAbsence;
+      return absence;
     }
 
     //Cerco il codice
@@ -242,8 +231,7 @@ public class AbsenceEngineUtility {
       for (AbsenceType absenceType : absencePeriod.takableComponent.get().takableCodes) { 
         if (absenceType.justifiedTypesPermitted.contains(requestedJustifiedType)) {
           absence.absenceType = absenceType;
-          enhancedAbsence.setAbsenceTypeInfered(true);
-          return enhancedAbsence;
+          return absence;
         }
       }
     }
@@ -255,8 +243,7 @@ public class AbsenceEngineUtility {
           if (absenceTypeJustifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
             if (absence.justifiedMinutes != null) {
               absence.absenceType = absenceType;
-              enhancedAbsence.setAbsenceTypeInfered(true);
-              return enhancedAbsence; 
+              return absence; 
             }
             specifiedMinutes = absenceType;
           }
@@ -264,18 +251,16 @@ public class AbsenceEngineUtility {
             if (absenceType.justifiedTime.equals(absence.justifiedMinutes)) { 
               absence.absenceType = absenceType;
               absence.justifiedType = absenceTypeJustifiedType;
-              enhancedAbsence.setAbsenceTypeInfered(true);
-              return enhancedAbsence;
+              return absence;
             }
           }
         }
       }
       absence.absenceType = specifiedMinutes;
-      enhancedAbsence.setAbsenceTypeInfered(true);
-      return enhancedAbsence; 
+      return absence; 
     }
     // TODO: quanto manca?
-    return enhancedAbsence;
+    return absence;
   }
  
   /**
@@ -308,10 +293,10 @@ public class AbsenceEngineUtility {
     
     for (Integer replacingTime : complationComponent.replacingCodesDesc.keySet()) {
       int amountToCompare = replacingTime;
-      if (complationComponent.complationAmountType.equals(AmountType.units)) {
-        amountToCompare = absenceEngine.workingTime(LocalDate.now());  
-      }
-      if (amountToCompare < complationAmount) {
+//      if (complationComponent.complationAmountType.equals(AmountType.units)) {
+//        amountToCompare = absenceEngine.workingTime(LocalDate.now());  
+//      }
+      if (amountToCompare <= complationAmount) {
         return Optional.of(complationComponent.replacingCodesDesc.get(replacingTime));
       }
     }

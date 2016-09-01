@@ -115,8 +115,6 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
          #{f.input 'minutes', value:selecteSubItem.minutes /}
        #{/if}
        
-  
-	   
 	   #{b.buttons center:true}
          #{b.submit 'Verifica', color:'warning'/}
        #{/b.buttons}
@@ -127,7 +125,6 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
 	   #{if absenceEngine.report.containsProblems()}
 	    #{alert color:'danger'}
 	      <p>ci sono problemi</p>
-	      <p>
 	      #{if !absenceEngine.report.absenceProblems.empty}
 	        <strong>Errori legati alle assenze</strong>
 	        #{list items:absenceEngine.report.absenceProblems, as:'absenceProblem'}
@@ -147,13 +144,57 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
 	        <th>Operazione</th>
 	        <th>Consumo</th>
 	        <th>Residuo</th>
+	        <th>Scadenza</th>
 	        <th>Problemi</th>
 	      </tr>
 	      #{list items:absenceEngine.report.insertResultItems, as:'insertResultItem'}
+	      
+	      %{
+	        isInsertReplacing = insertResultItem.operation.equals(manager.services.absences.InsertResultItem.Operation.insertReplacing);
+	        isInsert = insertResultItem.operation.equals(manager.services.absences.InsertResultItem.Operation.insert);
+	        absence = insertResultItem.absence;
+	        id = absence.id;
+            if (id == null) {
+              id = absence.absenceType.code + absence.absenceDate;
+            }
+	      }%
+	      
+	      <div class="webui-popover-content" id="${id}">
+            <strong>Codice</strong> ${absence.absenceType.code}<br>
+            <strong>Descrizione</strong> ${absence.absenceType.description}
+		    #{if absence.justifiedType}
+		        #{if absence.justifiedAllDay() }
+		          <br><strong>Tempo giustificato</strong> &{absence.justifiedType}
+		        #{/if}
+			    #{if absence.justifiedTime() }
+			      <br><strong>Tempo giustificato</strong> ${absence.justifiedTime().printHourMinute()}
+			    #{/if}
+		    #{/if}
+		    #{if !absence.troubles.empty}
+		         <br><br>  
+		         <p class="text-danger">Questa assenza contiene errori:</p>
+		         <ul>
+		         #{list items:absence.troubles, as:'trouble'}
+		           <li>&{trouble.trouble}</li>
+		         #{/list}
+		         </ul>
+		     #{/if}
+		  </div>
+	      
 	      <tr>
-	        <td>${insertResultItem.date.format()}</td>
-	        <td>${insertResultItem.absenceType.code}</td>
-	        <td>&{insertResultItem.operation}</td>
+	        <td><strong>${insertResultItem.date.format()}</strong></td>
+	        #{if isInsert}
+	          <td><span webui-popover-hover data-url="#${id}">${absence.absenceType.code}</span></td>
+	          <td><span class="label label-primary">&{insertResultItem.operation}</span></td>
+	        #{/if}
+	        #{elseif isInsertReplacing}
+	          <td><span webui-popover-hover data-url="#${id}" class="text-muted">${absence.absenceType.code}</span></td>
+	          <td><span class="label label-default">&{insertResultItem.operation}</span></td>
+	        #{/elseif}
+	        #{else}
+	          <td></td><td></td> *{ to implement }*
+	        #{/else}
+	        
 	        <td>
 	          #{list items:insertResultItem.consumedResidualAmount, as:'cra'}
 	            ${cra.printAmount(cra.amount)}<br>
@@ -162,6 +203,11 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
 	        <td>
 	          #{list items:insertResultItem.consumedResidualAmount, as:'cra'}
 	            ${cra.printAmount(cra.residualAfter())}<br>
+	          #{/list}
+	        </td>
+	        <td>
+	          #{list items:insertResultItem.consumedResidualAmount, as:'cra'}
+	            ${cra.expireResidual?.format()}<br>
 	          #{/list}
 	        </td>
 	        <td>
