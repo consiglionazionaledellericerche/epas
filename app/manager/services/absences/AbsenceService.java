@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.services.absences.model.AbsenceEngine;
-import manager.services.absences.model.AbsencePeriod.EnhancedAbsence;
 import manager.services.absences.web.AbsenceRequestForm;
 import manager.services.absences.web.AbsenceRequestFormFactory;
 
@@ -108,28 +107,29 @@ public class AbsenceService {
   
     Integer specifiedMinutes = absenceEngineUtility.getMinutes(hours, minutes);
     
-    while (absenceEngine.currentDate() != null) {
+    while (absenceEngine.request.currentDate != null) {
 
       //Preparare l'assenza da inserire
       Absence absence = new Absence();
-      absence.date = absenceEngine.currentDate();
+      absence.date = absenceEngine.request.currentDate;
       absence.absenceType = absenceType;
       absence.justifiedType = justifiedType;
       if (specifiedMinutes != null) {
         absence.justifiedMinutes = specifiedMinutes;
       }
-  
-      absenceEngineCore.absenceInsertRequest(absenceEngine, AbsenceRequestType.insert, 
-          EnhancedAbsence.builder().absence(absence)
-          .requestedJustifiedType(justifiedType)
-          .absenceTypeToInfer(absenceType == null)
-          .build());
+      boolean absenceTypeToInfer = absenceType == null;
+
+      //Esecuzione
+      absenceEngineCore.absenceInsertRequest(absenceEngine, AbsenceRequestType.insert, absence, 
+          justifiedType, absenceTypeToInfer);  
       
+      //Errori
       if (absenceEngine.report.containsProblems()) {
         return absenceEngine;
       }
-      
-      absenceEngineCore.configureNextInsertDate(absenceEngine);
+     
+      //Configura la prossima data
+      absenceEngineCore.configureNext(absenceEngine);
     }
     
     return absenceEngine;

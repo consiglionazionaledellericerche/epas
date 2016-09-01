@@ -3,7 +3,6 @@ package manager.services.absences.model;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 import it.cnr.iit.epas.DateInterval;
 
@@ -15,7 +14,6 @@ import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.GroupAbsenceType;
-import models.absences.JustifiedType;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 
 import org.joda.time.LocalDate;
@@ -36,10 +34,6 @@ public class AbsencePeriod {
 
   public Optional<TakableComponent> takableComponent;
   public Optional<ComplationComponent> complationComponent;
-
-  /*Next Period*/
-  public AbsencePeriod nextAbsencePeriod;     // Puntatore al periodo successivo ->
-  public AbsencePeriod previousAbsencePeriod; // <- puntatore al periodo precedente
 
   public AbsencePeriod(GroupAbsenceType groupAbsenceType) {
     this.groupAbsenceType = groupAbsenceType;
@@ -62,8 +56,8 @@ public class AbsencePeriod {
     public Set<AbsenceType> takableCodes;            // I tipi assenza prendibili del periodo
     public Set<AbsenceType> takenCodes;              // I tipi di assenza consumati del periodo
 
-    // Le assenze consumate potenziate con informazioni aggiuntive
-    public List<EnhancedAbsence> takenEnhancedAbsence = Lists.newArrayList(); 
+    // Le assenze consumate
+    public List<Absence> takenAbsence = Lists.newArrayList(); 
 
     public void setFixedPeriodTakableAmount(int amount) {
       if (this.takeAmountType.equals(AmountType.units)) {
@@ -110,9 +104,9 @@ public class AbsencePeriod {
      * Aggiunge l'enhancedAbsene al period e aggiorna il limite consumato.
      * @param enhancedAbsence
      */
-    public void addAbsenceTaken(EnhancedAbsence enhancedAbsence) {
-      this.takenEnhancedAbsence.add(enhancedAbsence);
-      this.periodTakenAmount += enhancedAbsence.getJustifiedTime();
+    public void addAbsenceTaken(Absence absence, int takenAmount) {
+      this.takenAbsence.add(absence);
+      this.periodTakenAmount += takenAmount;
     }
   }
 
@@ -134,14 +128,14 @@ public class AbsencePeriod {
 
     // Le assenze di rimpiazzamento
     public List<Absence> replacingAbsences = Lists.newArrayList();
-    // Le assenze di rimpiazzamento potenziate con informazioni aggiuntive
-    public SortedMap<LocalDate, EnhancedAbsence> replacingAbsencesByDay = Maps.newTreeMap();
+    // Le assenze di rimpiazzamento per giorno
+    public SortedMap<LocalDate, Absence> replacingAbsencesByDay = Maps.newTreeMap();
     
     
     // Le assenze di completamento
     public List<Absence> complationAbsences = Lists.newArrayList();
-    // Le assenze di completamento potenziate con informazioni aggiuntive
-    public SortedMap<LocalDate, EnhancedAbsence> complationAbsencesByDay = Maps.newTreeMap();
+    // Le assenze di completamento per giorno
+    public SortedMap<LocalDate, Absence> complationAbsencesByDay = Maps.newTreeMap();
     
     public LocalDate compromisedReplacingDate = null;
     
@@ -172,49 +166,6 @@ public class AbsencePeriod {
     }
 
   }
-  
-  /**
-   * Le assenze preesistenti. Potenziate con informazioni di controllo.
-   * @author alessandro
-   *
-   */
-  @Builder @Getter @Setter
-  public static class EnhancedAbsence {
-    
-    private final Absence absence;                      //assenza
-    
-    //infer component
-    private boolean absenceTypeToInfer = false;
-    private final JustifiedType requestedJustifiedType;
-    private boolean absenceTypeInfered = false;
-    
-    private Integer justifiedTime = null;               //tempo giustificato lazy
-    private boolean isAlreadyAssigned = false;          //deve appartenere ad un solo period
-    
-    private Set<GroupAbsenceType> notScannedGroups = Sets.newHashSet();
-    
-    public boolean hasNextGroupToScan() {
-      return !notScannedGroups.isEmpty();
-    }
-    public GroupAbsenceType getNextGroupToScan() {
-      if (this.notScannedGroups.isEmpty()) { 
-        return null;
-      }
-      GroupAbsenceType group = this.notScannedGroups.iterator().next();
-      setGroupScanned(group);
-      return group;
-    }
-    
-    public void setGroupScanned(GroupAbsenceType groupAbsenceType) {
-      //FIXME il builder non inizializza...
-      if (this.notScannedGroups == null) {
-        this.notScannedGroups = Sets.newHashSet();
-      }
-      this.notScannedGroups.remove(groupAbsenceType);
-    }
-    
-  }
-
 }
 
 

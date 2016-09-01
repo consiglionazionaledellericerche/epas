@@ -23,6 +23,9 @@ TooEarlyReplacing=Codice di completamento anticipato
 
 justifiedType=Tempo giustificato
 
+insert=Inserimento
+insertReplacing = Inserimento Rimpiazzamento
+
 absence_type_minutes=Tempo Specificato nel Tipo Assenza
 all_day=Tutto Il Giorno
 specified_minutes=Specifica Ore e Minuti

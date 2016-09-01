@@ -33,14 +33,41 @@ public class ConsumedResidualAmount {
     return residualAfter() >= 0;
   }
   
+  /**
+   * FIXME Versione provvisoria per fare alcune prove...
+   * @param amount
+   * @return
+   */
   public String printAmount(int amount) {
+
+    String format = "";
     if (amountType.equals(AmountType.units)) {
       int units = amount / 100;
       int percent = amount % 100;
-      return units + " + " + percent + "%";
+      String label = " giorni lavorativi";
+      if (units == 1) {
+        label = " giorno lavorativo";
+      }
+      if (units > 0 && percent > 0) {
+        return units + label + " + " + percent + "% di un giorno lavorativo";  
+      } else if (units > 0) {
+        return units + label;
+      } else if (percent > 0) {
+        return percent + "% di un giorno lavorativo";
+      }
     }
-    int hours = amount / 60; //since both are ints, you get an int
-    int minutes = amount % 60;
-    return String.format("%d:%02d", hours, minutes);
+    if (amountType.equals(AmountType.minutes)) {
+      int hours = amount / 60; //since both are ints, you get an int
+      int minutes = amount % 60;
+
+      if (hours > 0 && minutes > 0) {
+        format = hours + " ore " + minutes + " minuti";
+      } else if (hours > 0) {
+        format = hours + " ore";
+      } else if (minutes > 0) {
+        format = minutes + " minuti";
+      }
+    }
+    return format;
   }
 }

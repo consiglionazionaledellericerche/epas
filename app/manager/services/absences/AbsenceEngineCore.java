@@ -8,6 +8,7 @@ import com.google.inject.Inject;
 import dao.PersonChildrenDao;
 import dao.absences.AbsenceComponentDao;
 
+import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +24,10 @@ import manager.services.absences.model.AbsenceEngine;
 import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.AbsencePeriod.ComplationComponent;
 import manager.services.absences.model.AbsencePeriod.ComplationComponent.ReplacingDay;
-import manager.services.absences.model.AbsencePeriod.EnhancedAbsence;
 import manager.services.absences.model.AbsencePeriod.TakableComponent;
+import manager.services.absences.model.PeriodChain;
 
+import models.Contract;
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceTrouble;
@@ -34,11 +36,11 @@ import models.absences.AbsenceTrouble.AbsenceTypeProblem;
 import models.absences.AbsenceTrouble.ImplementationProblem;
 import models.absences.AbsenceTrouble.RequestProblem;
 import models.absences.AbsenceType;
-import models.absences.AmountType;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.GroupAbsenceType.PeriodType;
+import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
@@ -71,7 +73,7 @@ public class AbsenceEngineCore {
       LocalDate from, LocalDate to) {
     
     AbsenceEngine absenceEngine = new AbsenceEngine(absenceComponentDao, personChildrenDao, 
-        person, groupAbsenceType, from, to);
+        absenceEngineUtility, person, groupAbsenceType, from, to);
     
     if (groupAbsenceType.pattern.equals(GroupAbsenceType.GroupAbsenceTypePattern.vacationsCnr) || 
         groupAbsenceType.pattern.equals(GroupAbsenceType.GroupAbsenceTypePattern.compensatoryRestCnr)) {
@@ -82,97 +84,137 @@ public class AbsenceEngineCore {
       return absenceEngine;
     }
     
-    configureNextInsertDate(absenceEngine);
+    configureNext(absenceEngine);
    
     return absenceEngine;
   }
   
-  public AbsenceEngine configureNextInsertDate(AbsenceEngine absenceEngine) {
-    
-    //prima iterata
-    if (absenceEngine.requestCurrentDate == null) {
-      absenceEngine.requestCurrentDate = absenceEngine.requestFrom;
-    } else {
-      //iterata successiva
-      absenceEngine.requestCurrentDate = absenceEngine.requestCurrentDate.plusDays(1);
-      if (absenceEngine.requestTo == null 
-          || absenceEngine.requestCurrentDate.isAfter(absenceEngine.requestTo)) {
-        absenceEngine.requestCurrentDate = null;
-        return absenceEngine;
-      }
-    }
-    
-    buildPeriodChain(absenceEngine, null);
-    
-    return absenceEngine;
-  }
-  
-  
   /**
-   * Costruisce le date dell'AbsencePeriod relativo all'istanza. 
-   * Se il gruppo è ricorsivo costruisce anche le date dei periodi seguenti.
+   * Configura il prossimo inserimento da effettuare.
    * @param absenceEngine
    * @return
    */
-  private AbsencePeriod buildPeriodChain(AbsenceEngine absenceEngine, 
-      AbsencePeriod previousAbsencePeriod) { 
+  public AbsenceEngine configureNext(AbsenceEngine absenceEngine) {
     
-    if (previousAbsencePeriod == null && absenceEngine.periodChain != null) {
+    absenceEngine.request.nextDate(absenceEngine);
+    if (absenceEngine.request.currentDate == null) {
+      return absenceEngine;
+    }
+    buildPeriodChain(absenceEngine, absenceEngine.request.group, absenceEngine.request.currentDate);
+    return absenceEngine;
+  }
+  
+  /**
+   * Costruisce la catena dei periodi per il gruppo e la data passati.
+   * Calcola anche la soundness del periodo e mette nel report eventuali errori.
+   * @param absenceEngine
+   * @param groupAbsenceType
+   * @param date
+   * @return
+   */
+  private PeriodChain buildPeriodChain(AbsenceEngine absenceEngine, 
+      GroupAbsenceType groupAbsenceType, LocalDate date) { 
+    
+    PeriodChain periodChain = absenceEngine.periodChain;
+    
+    if (periodChain != null) {
       // TODO: Implementare logica di verifica data 
-      // richiesta compatibile col precedente absencePeriod
+      // richiesta compatibile col precedente absencePeriod  
+    } 
+      //prima iterata
+    periodChain = new PeriodChain();
+    absenceEngine.periodChain = periodChain;
+    
+    //Primo absencePeriod
+    AbsencePeriod currentPeriod = buildAbsencePeriod(absenceEngine, groupAbsenceType, date);
+    periodChain.periods.add(currentPeriod);
+    while (currentPeriod.groupAbsenceType.nextGroupToCheck != null) {
+      //successivi
+      currentPeriod = buildAbsencePeriod(absenceEngine, currentPeriod.groupAbsenceType.nextGroupToCheck, date);
+      periodChain.periods.add(currentPeriod);
     }
     
-    AbsencePeriod currentAbsencePeriod;
+    //Altre informazioni da calcolare / reinizializzare una volta ottenuti gli absencePeriods.
+    periodChain.success = false;
+    periodChain.absencesAsc = null;
     
-    if (previousAbsencePeriod == null) {
-      //Primo absencePeriod (assegno il gruppo dell'engine)
-      currentAbsencePeriod = new AbsencePeriod(absenceEngine.engineGroup());
-      absenceEngine.periodChain = currentAbsencePeriod;
-    } else {
-      //Seguenti
-      currentAbsencePeriod = new AbsencePeriod(previousAbsencePeriod.groupAbsenceType.nextGroupToCheck);
-      currentAbsencePeriod.previousAbsencePeriod = previousAbsencePeriod; //vedere se serve...
+    //le date
+    periodChain.from = periodChain.firstPeriod().from;
+    periodChain.to = periodChain.firstPeriod().to;
+    for (AbsencePeriod absencePeriod : periodChain.periods) {
+      if (absencePeriod.from == null && absencePeriod.to == null) {
+        //always
+        periodChain.from = null;
+        periodChain.to = null;
+        break;
+      }
+      if (absencePeriod.from.isBefore(periodChain.from)) {
+        periodChain.from = absencePeriod.from;
+      }
+      if (absencePeriod.to.isAfter(periodChain.to)) {
+        periodChain.to = absencePeriod.to;
+      }
     }
+    periodChain.contracts = Lists.newArrayList();
+    for (Contract contract : absenceEngine.person.contracts) {
+      if (DateUtility.intervalIntersection(
+          contract.periodInterval(), new DateInterval(periodChain.from, periodChain.to)) != null) {
+        periodChain.contracts.add(contract);
+      }
+    }
+    
+    //fetch delle assenze
+    periodChain.fetchPeriodChainAbsencesAsc(absenceEngine);
 
+    // Assegnare ad ogni periodo le assenze di competenza (fase da migliorare) e calcoli
+    populatePeriodChain(absenceEngine);
+ 
+    return periodChain;
+  }
+  
+  private AbsencePeriod buildAbsencePeriod(AbsenceEngine absenceEngine, 
+      GroupAbsenceType groupAbsenceType, LocalDate date) {
     // recuperare l'inizializzazione (questo lo posso fare anche fuori) per i fix sulle date.
-
-    if (currentAbsencePeriod.groupAbsenceType.periodType.equals(PeriodType.year)) {
-      currentAbsencePeriod.from = new LocalDate(absenceEngine.currentDate().getYear(), 1, 1);
-      currentAbsencePeriod.to = new LocalDate(absenceEngine.currentDate().getYear(), 12, 31);
-    } else if (currentAbsencePeriod.groupAbsenceType.periodType.equals(PeriodType.month)) {
-      currentAbsencePeriod.from = absenceEngine.currentDate().dayOfMonth().withMinimumValue();
-      currentAbsencePeriod.to = absenceEngine.currentDate().dayOfMonth().withMaximumValue();
-    } else if (currentAbsencePeriod.groupAbsenceType.periodType.equals(PeriodType.always)) {
-      currentAbsencePeriod.from = null;
-      currentAbsencePeriod.to = null;
+    
+    AbsencePeriod absencePeriod = new AbsencePeriod(groupAbsenceType);
+    
+    if (absencePeriod.groupAbsenceType.periodType.equals(PeriodType.year)) {
+      absencePeriod.from = new LocalDate(date.getYear(), 1, 1);
+      absencePeriod.to = new LocalDate(date.getYear(), 12, 31);
+    } else if (absencePeriod.groupAbsenceType.periodType.equals(PeriodType.month)) {
+      absencePeriod.from = date.dayOfMonth().withMinimumValue();
+      absencePeriod.to = date.dayOfMonth().withMaximumValue();
+    } else if (absencePeriod.groupAbsenceType.periodType.equals(PeriodType.always)) {
+      absencePeriod.from = null;
+      absencePeriod.to = null;
     }
 
     // Caso inerente i figli.
-    else if (currentAbsencePeriod.groupAbsenceType.periodType.isChildPeriod()) {
+    else if (absencePeriod.groupAbsenceType.periodType.isChildPeriod()) {
       try {
-        absenceEngine.childInterval = currentAbsencePeriod.groupAbsenceType.periodType
+        absenceEngine.childInterval = absencePeriod.groupAbsenceType.periodType
             .getChildInterval(absenceEngine.orderedChildren()
-                .get(currentAbsencePeriod.groupAbsenceType.periodType.childNumber - 1).bornDate);
-        currentAbsencePeriod.from = absenceEngine.childInterval.getBegin();
-        currentAbsencePeriod.to = absenceEngine.childInterval.getEnd();
+                .get(absencePeriod.groupAbsenceType.periodType.childNumber - 1).bornDate);
+        absencePeriod.from = absenceEngine.childInterval.getBegin();
+        absencePeriod.to = absenceEngine.childInterval.getEnd();
 
       } catch (Exception e) {
         absenceEngine.report.addRequestProblem(ReportRequestProblem.builder()
             .requestProblem(RequestProblem.NoChildExists)
-            .date(absenceEngine.currentDate())
+            .date(date)
             .build());
-        return currentAbsencePeriod;
+        return absencePeriod;
       }
     }
     
-    currentAbsencePeriod.takableComponent = Optional.absent();
-    currentAbsencePeriod.complationComponent = Optional.absent();
+    absencePeriod.takableComponent = Optional.absent();
+    absencePeriod.complationComponent = Optional.absent();
     
     // Parte takable
-    if (currentAbsencePeriod.groupAbsenceType.takableAbsenceBehaviour != null) {
+    if (absencePeriod.groupAbsenceType.takableAbsenceBehaviour != null) {
 
       TakableAbsenceBehaviour takableBehaviour = 
-          currentAbsencePeriod.groupAbsenceType.takableAbsenceBehaviour;
+          absencePeriod.groupAbsenceType.takableAbsenceBehaviour;
 
       TakableComponent takableComponent = new TakableComponent();
       takableComponent.takeAmountType = takableBehaviour.amountType;
@@ -190,13 +232,13 @@ public class AbsenceEngineCore {
       takableComponent.takenCodes = takableBehaviour.takenCodes;
       takableComponent.takableCodes = takableBehaviour.takableCodes;
 
-      currentAbsencePeriod.takableComponent = Optional.of(takableComponent);
+      absencePeriod.takableComponent = Optional.of(takableComponent);
     }
     
-    if (currentAbsencePeriod.groupAbsenceType.complationAbsenceBehaviour != null) {
+    if (absencePeriod.groupAbsenceType.complationAbsenceBehaviour != null) {
       
       ComplationAbsenceBehaviour complationBehaviour = 
-          currentAbsencePeriod.groupAbsenceType.complationAbsenceBehaviour;
+          absencePeriod.groupAbsenceType.complationAbsenceBehaviour;
       
       ComplationComponent complationComponent = new ComplationComponent();
       complationComponent.complationAmountType = complationBehaviour.amountType;
@@ -223,57 +265,37 @@ public class AbsenceEngineCore {
         complationComponent.replacingCodesDesc.put(amount, absenceType);
         complationComponent.replacingTimes.put(absenceType, amount);
       }
-      currentAbsencePeriod.complationComponent = Optional.of(complationComponent);
-    }
-
-    //Chiamata ricorsiva
-    if (currentAbsencePeriod.groupAbsenceType.nextGroupToCheck != null) {
-      currentAbsencePeriod.nextAbsencePeriod = 
-          buildPeriodChain(absenceEngine, currentAbsencePeriod);
+      absencePeriod.complationComponent = Optional.of(complationComponent);
     }
     
-    //Ultimo step del primo absencePeriod
-    if (previousAbsencePeriod == null) {
-      // Assegnare ad ogni periodo le assenze di competenza (fase da migliorare) e calcoli
-      populatePeriodChain(absenceEngine);
-    }
- 
-    return currentAbsencePeriod;
+    return absencePeriod;
   }
   
   /**
    * Aggiunge ai period tutte le assenze prese e ne calcola l'integrità.
    * Popola il report con tutti gli errori riscontrati.
-   * @param periodChain
+   * @param first
    * @param absenceEngine
    * @param absence
    */
   private void populatePeriodChain(AbsenceEngine absenceEngine) {
-
-    absenceEngine.resetPeriodChainSupportStructures();
     
-    AbsencePeriod absencePeriod = absenceEngine.periodChain;
-    while (absencePeriod != null) {
+    for (AbsencePeriod absencePeriod : absenceEngine.periodChain.periods) {
       
       TakableComponent takableComponent = null;
       ComplationComponent complationComponent = null;
       
-      for (EnhancedAbsence enhancedAbsence : absenceEngine.periodChainAbsencesAsc()) {
-        if (!DateUtility.isDateIntoInterval(enhancedAbsence.getAbsence().getAbsenceDate(), 
+      for (Absence absence : absenceEngine.periodChain.absencesAsc) {
+        if (!DateUtility.isDateIntoInterval(absence.getAbsenceDate(), 
             absencePeriod.periodInterval())) {
           continue;
         }
         
-        //Se è una operazione di scan il gruppo lo imposto come scansionato
-        if (absenceEngine.isScanEngine()) {
-          enhancedAbsence.setGroupScanned(absenceEngine.engineGroup());
-        }
-        
         //Se il suo tipo ha un errore 
-        if (absenceEngine.report.absenceTypeHasProblem(enhancedAbsence.getAbsence().absenceType)) {
+        if (absenceEngine.report.absenceTypeHasProblem(absence.absenceType)) {
           absenceEngine.report.addAbsenceProblem(ReportAbsenceProblem.builder()
               .absenceProblem(AbsenceProblem.AbsenceTypeProblem)
-              .absence(enhancedAbsence.getAbsence())
+              .absence(absence)
               .build());
         }
         
@@ -283,29 +305,29 @@ public class AbsenceEngineCore {
         boolean isTaken = false, isComplation = false, isReplacing = false;
         if (absencePeriod.takableComponent.isPresent()) {
           takableComponent = absencePeriod.takableComponent.get();
-          isTaken = takableComponent.takenCodes.contains(enhancedAbsence.getAbsence().absenceType);
+          isTaken = takableComponent.takenCodes.contains(absence.absenceType);
         }
         if (absencePeriod.complationComponent.isPresent()) {
           complationComponent = absencePeriod.complationComponent.get();
           isReplacing = complationComponent.replacingCodesDesc.values()
-              .contains(enhancedAbsence.getAbsence().absenceType);
-          isComplation = complationComponent.complationCodes.contains(enhancedAbsence.getAbsence().absenceType);
+              .contains(absence.absenceType);
+          isComplation = complationComponent.complationCodes.contains(absence.absenceType);
         }
         
         //una assenza deve avere un ruolo
         if (!isTaken && !isComplation && !isReplacing) {
           absenceEngine.report.addAbsenceProblem(ReportAbsenceProblem.builder()
               .absenceProblem(AbsenceProblem.UselessAbsenceInPeriod)
-              .absence(enhancedAbsence.getAbsence())
+              .absence(absence)
               .build());
           continue;
         }
         
         //una assenza può essere assegnata ad un solo period
-        if (enhancedAbsence.isAlreadyAssigned()) {
+        if (absenceEngine.periodChain.absenceAlreadyAssigned.contains(absence)) {
           absenceEngine.report.addAbsenceProblem(ReportAbsenceProblem.builder()
               .absenceProblem(AbsenceProblem.TwoPeriods)
-              .absence(enhancedAbsence.getAbsence())
+              .absence(absence)
               .build());
           continue;
         }
@@ -314,69 +336,72 @@ public class AbsenceEngineCore {
         if (isReplacing && (isComplation || isTaken)) {
           absenceEngine.report.addAbsenceTypeProblem(ReportAbsenceTypeProblem.builder()
               .absenceTypeProblem(AbsenceTypeProblem.OnlyReplacingRuleViolated)
-              .absenceType(enhancedAbsence.getAbsence().getAbsenceType())
+              .absenceType(absence.getAbsenceType())
               .build());
           continue;  
         }
         if (isTaken || isComplation || isReplacing) {
-          enhancedAbsence.setAlreadyAssigned(true);
-          date = enhancedAbsence.getAbsence().getAbsenceDate();
+          absenceEngine.periodChain.absenceAlreadyAssigned.add(absence);
+          date = absence.getAbsenceDate();
         }
         
         //controllo assenza taken
         if (isTaken) {
-          if (!setJustifiedTime(absenceEngine, takableComponent, enhancedAbsence)) {
+          int takenAmount = absenceEngineUtility
+              .absenceJustifiedAmount(absenceEngine, absence, takableComponent.takeAmountType);
+          if (takenAmount <= 0) {
             absenceEngine.report.addAbsenceProblem(ReportAbsenceProblem.builder()
                 .absenceProblem(AbsenceProblem.IncalcolableJustifiedAmount)
-                .absence(enhancedAbsence.getAbsence())
+                .absence(absence)
                 .build());
             continue;
           }
-          takenSoundness(absenceEngine, takableComponent, enhancedAbsence);
-          takableComponent.addAbsenceTaken(enhancedAbsence);
+          takenSoundness(absenceEngine, takableComponent, absence, takenAmount);
+          takableComponent.addAbsenceTaken(absence, takenAmount);
         }
         
         if (isComplation) {
-          EnhancedAbsence previous = complationComponent.complationAbsencesByDay.get(date);
+          Absence previous = complationComponent.complationAbsencesByDay.get(date);
           if (previous != null ) {
             //una sola assenza di completamento per quel giorno
             absenceEngine.report.addAbsenceProblem(ReportAbsenceProblem.builder()
                 .absenceProblem(AbsenceProblem.TwoComplationSameDay)
-                .absence(enhancedAbsence.getAbsence())
-                .conflictingAbsence(previous.getAbsence())
+                .absence(absence)
+                .conflictingAbsence(previous)
                 .build());
             continue;
           }
-          if (!setJustifiedTime(absenceEngine, takableComponent, enhancedAbsence)) {
+          
+          int complationAmount = absenceEngineUtility.absenceJustifiedAmount(absenceEngine, 
+              absence, complationComponent.complationAmountType);
+          
+          if (complationAmount <= 0) {
             absenceEngine.report.addAbsenceProblem(ReportAbsenceProblem.builder()
                 .absenceProblem(AbsenceProblem.IncalcolableJustifiedAmount)
-                .absence(enhancedAbsence.getAbsence())
+                .absence(absence)
                 .build());
             continue;
           }
-          complationComponent.complationAbsencesByDay.put(date, enhancedAbsence);
+          complationComponent.complationAbsencesByDay.put(date, absence);
         }
         if (isReplacing) {
-          EnhancedAbsence previous = complationComponent.replacingAbsencesByDay.get(date);
+          Absence previous = complationComponent.replacingAbsencesByDay.get(date);
           if (previous != null) {
             //una sola assenza di rimpiazzamento per quel giorno
             absenceEngine.report.addAbsenceProblem(ReportAbsenceProblem.builder()
                 .absenceProblem(AbsenceProblem.TwoReplacingSameDay)
-                .absence(enhancedAbsence.getAbsence())
-                .conflictingAbsence(previous.getAbsence())
+                .absence(absence)
+                .conflictingAbsence(previous)
                 .build());
             continue;
           }
-          complationComponent.replacingAbsencesByDay.put(date, enhancedAbsence);
+          complationComponent.replacingAbsencesByDay.put(date, absence);
         }
         
       }
       
       complationSoundness(absenceEngine, complationComponent);
-      
-      absencePeriod = absencePeriod.nextAbsencePeriod;
     }
-
   }
   
   /**
@@ -388,11 +413,11 @@ public class AbsenceEngineCore {
    * @return
    */
   private AbsenceEngine takenSoundness(AbsenceEngine absenceEngine, TakableComponent takableComponent, 
-      EnhancedAbsence enhancedAbsence) {
-    if (!takableComponent.canAddTakenAmount(enhancedAbsence.getJustifiedTime())) {
+      Absence absence, int takenAmount) {
+    if (!takableComponent.canAddTakenAmount(takenAmount)) {
       absenceEngine.report.addAbsenceProblem(ReportAbsenceProblem.builder()
           .absenceProblem(AbsenceProblem.LimitExceeded)
-          .absence(enhancedAbsence.getAbsence())
+          .absence(absence)
           .build());
     }
     return absenceEngine;
@@ -405,25 +430,27 @@ public class AbsenceEngineCore {
     SortedMap<LocalDate, ReplacingDay> replacingDays = Maps.newTreeMap();
     
     //preparo i giorni con i replacing effettivi
-    for (EnhancedAbsence replacingAbsence : complationComponent
-        .replacingAbsencesByDay.values()) {
-      replacingDays.put(replacingAbsence.getAbsence().getAbsenceDate(), 
+    for (Absence replacingAbsence : complationComponent.replacingAbsencesByDay.values()) {
+      replacingDays.put(replacingAbsence.getAbsenceDate(), 
           ReplacingDay.builder()
-          .existentReplacing(replacingAbsence.getAbsence())
-          .date(replacingAbsence.getAbsence().getAbsenceDate())
+          .existentReplacing(replacingAbsence)
+          .date(replacingAbsence.getAbsenceDate())
           .build());
     }
 
     //Le assenze di completamento ordinate per data. Genero i replacing ipotetici
     int complationAmount = 0;
-    for (EnhancedAbsence complationAbsence : complationComponent
-        .complationAbsencesByDay.values()) {
-      complationAmount += complationAbsence.getJustifiedTime();
+    for (Absence complationAbsence : complationComponent.complationAbsencesByDay.values()) {
+      
+      int amount = absenceEngineUtility.absenceJustifiedAmount(absenceEngine, 
+          complationAbsence, complationComponent.complationAmountType);
+      
+      complationAmount = complationAmount + amount;
       Optional<AbsenceType> replacingCode = absenceEngineUtility
           .whichReplacingCode(absenceEngine, complationComponent, 
-              complationAbsence.getAbsence().getAbsenceDate(), complationAmount);
+              complationAbsence.getAbsenceDate(), complationAmount);
       if (replacingCode.isPresent()) {
-        LocalDate replacingDate = complationAbsence.getAbsence().getAbsenceDate();
+        LocalDate replacingDate = complationAbsence.getAbsenceDate();
         ReplacingDay replacingDay = replacingDays.get(replacingDate);
         if (replacingDay == null) {
           replacingDay = ReplacingDay.builder()
@@ -447,7 +474,7 @@ public class AbsenceEngineCore {
    * Aggiunge gli errori al report.
    * TODO: la struttura dati replacingDays potrebbe essere rimossa semplificando
    * di molto il codice.
-   * @param periodChain
+   * @param first
    * @param absenceEngine
    * @param absence
    */
@@ -475,7 +502,7 @@ public class AbsenceEngineCore {
         absenceEngine.report.addAbsenceProblem(ReportAbsenceProblem.builder()
             .absenceProblem(AbsenceProblem.MissingReplacing)
             .absence(complationComponent.complationAbsencesByDay
-                .get(complationComponent.compromisedReplacingDate).getAbsence())
+                .get(complationComponent.compromisedReplacingDate))
             .build());
         break;
       }
@@ -492,23 +519,23 @@ public class AbsenceEngineCore {
     //Se la catena è compromessa tutte le assenza completamento e replacing
     // successive sono taggate con l'errore
     if (complationComponent.compromisedReplacingDate != null) {
-      for (EnhancedAbsence complationAbsence : complationComponent
+      for (Absence complationAbsence : complationComponent
           .complationAbsencesByDay.values()) {
-        if (complationAbsence.getAbsence().getAbsenceDate()
+        if (complationAbsence.getAbsenceDate()
             .isAfter(complationComponent.compromisedReplacingDate)) {
           absenceEngine.report.addAbsenceProblem(ReportAbsenceProblem.builder()
               .absenceProblem(AbsenceProblem.CompromisedReplacing)
-              .absence(complationAbsence.getAbsence())
+              .absence(complationAbsence)
               .build());
         }
       }
-      for (EnhancedAbsence replacingAbsence : complationComponent
+      for (Absence replacingAbsence : complationComponent
           .replacingAbsencesByDay.values()) {
-        if (replacingAbsence.getAbsence().getAbsenceDate()
+        if (replacingAbsence.getAbsenceDate()
             .isAfter(complationComponent.compromisedReplacingDate)) {
           absenceEngine.report.addAbsenceProblem(ReportAbsenceProblem.builder()
               .absenceProblem(AbsenceProblem.CompromisedReplacing)
-              .absence(replacingAbsence.getAbsence())
+              .absence(replacingAbsence)
               .build());
         }
       }
@@ -516,30 +543,6 @@ public class AbsenceEngineCore {
     
     return absenceEngine;
   }
-
-
-  /**
-   * Imposta il justifiedTime della enhancedAbsence se non è già calcolato.
-   * In caso di errore ritorna false.
-   * @param absenceEngine
-   * @param takableComponent
-   * @param enhancedAbsence
-   * @return
-   */
-  private boolean setJustifiedTime(AbsenceEngine absenceEngine, TakableComponent takableComponent,
-      EnhancedAbsence enhancedAbsence) {
-    if (enhancedAbsence.getJustifiedTime() == null) {
-      int amount = absenceEngineUtility.absenceJustifiedAmount(absenceEngine, 
-          enhancedAbsence.getAbsence(), takableComponent.takeAmountType);
-      if (amount < 0) {
-        return false;
-      }
-      enhancedAbsence.setJustifiedTime(amount);
-    }
-    return true;
-  }
-  
-  
 
   /**
    * Effettual lo scan degli errori
@@ -561,29 +564,28 @@ public class AbsenceEngineCore {
     absenceComponentDao.allGroupAbsenceType();
     
     //COSTRUZIONE//
-    List<EnhancedAbsence> enhancedAbsencesToScan = Lists.newArrayList();
-    for (Absence absence : absenceComponentDao.orderedAbsences(person, scanFrom, null, Lists.newArrayList())) {
-      enhancedAbsencesToScan.add(EnhancedAbsence.builder()
-          .absence(absence)
-          .notScannedGroups(absenceEngineUtility.involvedGroup(absence.absenceType))
-          .build());
+    List<Absence> absencesToScan = absenceComponentDao.orderedAbsences(person, scanFrom, 
+        null, Lists.newArrayList());
+    AbsenceEngine absenceEngine = new AbsenceEngine(absenceComponentDao, personChildrenDao, 
+        absenceEngineUtility, person, scanFrom, absencesToScan);
+
+    // analisi dei requisiti generici (risultati in absenceEngine.report)
+    for (Absence absence : absencesToScan) {
+      genericConstraints(absenceEngine, absence, absencesToScan);
       log.debug("L'assenza data={}, codice={} è stata aggiunta a quelle da analizzare", 
           absence.getAbsenceDate(), absence.getAbsenceType().code);
     }
-    AbsenceEngine absenceEngine = new AbsenceEngine(absenceComponentDao, personChildrenDao, 
-        person, scanFrom, enhancedAbsencesToScan);
-
-    // analisi dei requisiti generici (risultati in absenceEngine.report)
-    for (EnhancedAbsence enhancedAbsence : absenceEngine.scanEnhancedAbsences) {
-      absenceEngine.scanCurrentAbsence = enhancedAbsence;
-      genericConstraints(absenceEngine, enhancedAbsence.getAbsence());
-    }
-    absenceEngine.scanCurrentAbsence = null;
     
     // analisi dei requisiti all'interno di ogni gruppo (risultati in absenceEngine.report)
-    while (configureNextGroupToScan(absenceEngine).isConfiguredForNextScan()) {
-      log.debug("Inizio lo scan del prossimo gruppo {}", absenceEngine.scanCurrentGroup.description);
-      buildPeriodChain(absenceEngine, null);
+    while (absenceEngine.scan.configureNextGroupToScan().isConfiguredForNextScan()) {
+      log.debug("Inizio lo scan del prossimo gruppo {}", absenceEngine.scan.currentGroup.description);
+      buildPeriodChain(absenceEngine, 
+          absenceEngine.scan.currentGroup, 
+          absenceEngine.scan.currentAbsence.getAbsenceDate());
+      //taggare come scansionate le assenze coinvolte nella periodChain
+      for (Absence absence : absenceEngine.periodChain.absencesAsc) {
+          absenceEngine.scan.setGroupScanned(absence, absenceEngine.scan.currentGroup);
+      }
     }
     
     //persistenza degli errori riscontrati
@@ -592,47 +594,23 @@ public class AbsenceEngineCore {
     return absenceEngine;
   }
   
-  /**
-   * Configura il prossimo gruppo da analizzare (se esiste).
-   * @param absenceEngine
-   * @return
-   */
-  private AbsenceEngine configureNextGroupToScan(AbsenceEngine absenceEngine) {
-    // stessa assenza prossimo gruppo
-    if (absenceEngine.scanCurrentAbsence != null && absenceEngine.scanCurrentAbsence.hasNextGroupToScan()) {
-      absenceEngine.scanCurrentGroup = absenceEngine.scanCurrentAbsence.getNextGroupToScan();
-      return absenceEngine;
-    }
-    
-    // prossima assenza primo gruppo
-    absenceEngine.scanCurrentGroup = null;
-    while (absenceEngine.scanAbsencesIterator.hasNext()) {
-      absenceEngine.scanCurrentAbsence = absenceEngine.scanAbsencesIterator.next();
-      if (absenceEngine.scanCurrentAbsence.hasNextGroupToScan()) {   
-        absenceEngine.scanCurrentGroup = absenceEngine.scanCurrentAbsence.getNextGroupToScan();
-        return absenceEngine;
-      }
-    }
-    return absenceEngine;
-  }
-  
   private void persistScannerResults(AbsenceEngine absenceEngine) {
     
     Map<Absence, List<AbsenceProblem>> remainingProblemsMap = absenceEngine.report.remainingProblemsMap();
     
-    for (EnhancedAbsence enhancedAbsence : absenceEngine.scanEnhancedAbsences) {
+    for (Absence absence : absenceEngine.scan.scanAbsences) {
  
       List<AbsenceTrouble> toDeleteTroubles = Lists.newArrayList();     //problemi da aggiungere
       List<AbsenceTrouble> toAddTroubles = Lists.newArrayList();        //problemi da rimuovere
       
-      List<AbsenceProblem> remainingProblems = remainingProblemsMap.get(enhancedAbsence.getAbsence());
+      List<AbsenceProblem> remainingProblems = remainingProblemsMap.get(absence);
       if (remainingProblems == null) {
         remainingProblems = Lists.newArrayList();
       }
       
       //decidere quelli da cancellare
       //   per ogni vecchio absenceTroule verifico se non è presente in remaining
-      for (AbsenceTrouble absenceTrouble : enhancedAbsence.getAbsence().troubles) {
+      for (AbsenceTrouble absenceTrouble : absence.troubles) {
         if (!remainingProblems.contains(absenceTrouble.trouble)) {
           toDeleteTroubles.add(absenceTrouble);
         }
@@ -642,14 +620,14 @@ public class AbsenceEngineCore {
       //   per ogni remaining verifico se non è presente in vecchi absencetrouble
       for (AbsenceProblem absenceProblem : remainingProblems) {
         boolean toAdd = true;
-        for (AbsenceTrouble absenceTrouble : enhancedAbsence.getAbsence().troubles) {
+        for (AbsenceTrouble absenceTrouble : absence.troubles) {
           if (absenceTrouble.trouble.equals(absenceProblem)) {
             toAdd = false;
           }
         }
         if (toAdd) {
           AbsenceTrouble toAddTrouble = new AbsenceTrouble();
-          toAddTrouble.absence = enhancedAbsence.getAbsence();
+          toAddTrouble.absence = absence;
           toAddTrouble.trouble = absenceProblem;
           toAddTroubles.add(toAddTrouble);
         }
@@ -675,62 +653,58 @@ public class AbsenceEngineCore {
    * @return
    */
   public AbsenceEngine absenceInsertRequest(AbsenceEngine absenceEngine, 
-      AbsenceRequestType absenceRequestType, EnhancedAbsence enhancedAbsence) {
+      AbsenceRequestType absenceRequestType, Absence absence, JustifiedType requestedJustifiedType,
+      boolean absenceTypeToInfer) {
     
     // Provo a inserire l'assenza in ogni periodo della catena...
-    AbsencePeriod currentAbsencePeriod = absenceEngine.periodChain;
-    while (currentAbsencePeriod != null) {
-      
+    for (AbsencePeriod currentAbsencePeriod : absenceEngine.periodChain.periods) {
+     
       //Se la data non appartiene al period vado al successivo
-      if (!DateUtility.isDateIntoInterval(absenceEngine.currentDate(), 
+      if (!DateUtility.isDateIntoInterval(absenceEngine.request.currentDate, 
           currentAbsencePeriod.periodInterval())) {
-        currentAbsencePeriod = currentAbsencePeriod.nextAbsencePeriod;
         continue;
       }
 
       //Inferire il tipo se necessario
-      absenceEngineUtility.inferAbsenceType(currentAbsencePeriod, enhancedAbsence);
-      if (enhancedAbsence.isAbsenceTypeToInfer() && !enhancedAbsence.isAbsenceTypeInfered()) {
-        currentAbsencePeriod = currentAbsencePeriod.nextAbsencePeriod;
+      if (absenceTypeToInfer) {
+        absence = absenceEngineUtility
+            .inferAbsenceType(currentAbsencePeriod, absence, requestedJustifiedType);
+      }
+      if (absenceTypeToInfer && absence.absenceType == null) {
         continue;
       }
-
-      //Calcolare l'amount
-      if (currentAbsencePeriod.takableComponent.isPresent()) {
-        enhancedAbsence.setJustifiedTime(absenceEngineUtility
-            .absenceJustifiedAmount(absenceEngine, enhancedAbsence.getAbsence(), 
-                currentAbsencePeriod.takableComponent.get().takeAmountType));
-      }
-
-      Absence absence = enhancedAbsence.getAbsence();  //scorciatoia 
 
       //Vincoli
       if (requestConstraints(absenceEngine, currentAbsencePeriod, absence)
           .report.containsProblems()) {
         return absenceEngine;          
       }
-      if (genericConstraints(absenceEngine, absence).report.containsProblems()) {
+      if (genericConstraints(absenceEngine, absence, absenceEngine.periodChain.allCodeAbsencesAsc)
+          .report.containsProblems()) {
         return absenceEngine;          
       }
-      if (groupConstraints(absenceEngine, currentAbsencePeriod, enhancedAbsence)
+      if (groupConstraints(absenceEngine, currentAbsencePeriod, absence)
           .report.containsProblems()) {
         return absenceEngine;     
       }
 
       //Inserimento e riepilogo inserimento
       if (performInsert(absenceEngine, currentAbsencePeriod, absenceRequestType, 
-          enhancedAbsence).periodChainSuccess) {
+          absence).periodChain.success) {
         return absenceEngine;
       }
-
-      currentAbsencePeriod = currentAbsencePeriod.nextAbsencePeriod;
+      
+      //Al periodo successivo se dovevevo inferire il tipo resetto
+      if (absenceTypeToInfer) {
+        absence.absenceType = null;
+      }
     }
 
     //Esco e non sono mai riuscito a inferire il tipo.
-    if (enhancedAbsence.isAbsenceTypeToInfer() && !enhancedAbsence.isAbsenceTypeInfered()) {
+    if (absenceTypeToInfer && absence.absenceType == null) {
       absenceEngine.report.addRequestProblem(ReportRequestProblem.builder()
           .requestProblem(RequestProblem.CantInferAbsenceCode)
-          .date(absenceEngine.currentDate())
+          .date(absenceEngine.request.currentDate)
           .build());
     }
     
@@ -746,9 +720,7 @@ public class AbsenceEngineCore {
    */
   private AbsenceEngine performInsert(AbsenceEngine absenceEngine, 
       AbsencePeriod absencePeriod, AbsenceRequestType absenceRequestType,
-      EnhancedAbsence enhancedAbsence) {
-
-    Absence absence = enhancedAbsence.getAbsence();
+      Absence absence) {
     
     //simple grouping
     if (absencePeriod.groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.simpleGrouping)) {
@@ -756,10 +728,10 @@ public class AbsenceEngineCore {
           .absence(absence)
           .absenceType(absence.getAbsenceType())
           .operation(Operation.insert)
-          .date(absenceEngine.currentDate()).build();
+          .date(absenceEngine.request.currentDate).build();
       absenceEngine.report.addInsertResultItem(insertResultItem);
-      absenceEngine.requestInserts.add(absence);
-      absenceEngine.periodChainSuccess = true;
+      absenceEngine.request.requestInserts.add(absence);
+      absenceEngine.periodChain.success = true;
       return absenceEngine;
     }
     
@@ -768,25 +740,30 @@ public class AbsenceEngineCore {
         .absenceType(absence.getAbsenceType())
         .operation(Operation.insert)
         .consumedResidualAmount(Lists.newArrayList())
-        .date(absenceEngine.currentDate()).build();
+        .date(absenceEngine.request.currentDate).build();
     absenceEngine.report.addInsertResultItem(absenceResultItem);
 
     //Takable component
     if (absencePeriod.takableComponent.isPresent()) {
 
       TakableComponent takableComponent = absencePeriod.takableComponent.get();
+      
+      int takenAmount = absenceEngineUtility.absenceJustifiedAmount(absenceEngine, 
+          absence, takableComponent.takeAmountType);
+      
       ConsumedResidualAmount consumedResidualAmount = ConsumedResidualAmount.builder()
           .amountType(takableComponent.takeAmountType)
+          .expireResidual(absencePeriod.to)
           .totalResidual(takableComponent.getPeriodTakableAmount())
           .usedResidualBefore(takableComponent.getPeriodTakenAmount())
-          .amount(enhancedAbsence.getJustifiedTime())
-          .workingTime(absenceEngine.workingTime(absenceEngine.requestCurrentDate))
+          .amount(takenAmount)
+          .workingTime(absenceEngine.workingTime(absenceEngine.request.currentDate))
           .build();
       absenceResultItem.getConsumedResidualAmount().add(consumedResidualAmount);
 
       //Aggiungo l'assenza alle strutture dati per l'eventuale iterata successiva.
-      takableComponent.addAbsenceTaken(enhancedAbsence);
-      absenceEngine.requestInserts.add(absence);
+      takableComponent.addAbsenceTaken(absence, takenAmount);
+      absenceEngine.request.requestInserts.add(absence);
     }
 
     //Complation replacing
@@ -795,7 +772,7 @@ public class AbsenceEngineCore {
       if (complationComponent.complationCodes.contains(absence.absenceType)) {
 
         //aggiungere l'assenza ai completamenti     
-        complationComponent.complationAbsencesByDay.put(absence.getAbsenceDate(), enhancedAbsence);
+        complationComponent.complationAbsencesByDay.put(absence.getAbsenceDate(), absence);
 
         //creare il missing replacing se c'è.
         for (ReplacingDay replacingDay : complationReplacingDays(absenceEngine, complationComponent).values()) {
@@ -815,22 +792,23 @@ public class AbsenceEngineCore {
                 .date(replacingDay.getDate()).build();
 
             absenceEngine.report.addInsertResultItem(replacingResultItem);
-            absenceEngine.requestInserts.add(absence);
+            absenceEngine.request.requestInserts.add(absence);
           }
         }
       }
     }
 
     //success
-    absenceEngine.periodChainSuccess = true;
+    absenceEngine.periodChain.success = true;
 
     return absenceEngine; 
   }
   
-  private AbsenceEngine genericConstraints(AbsenceEngine absenceEngine, Absence absence) {
+  private AbsenceEngine genericConstraints(AbsenceEngine absenceEngine, Absence absence, 
+      List<Absence> allCodeAbsences) {
     
     //Codice non prendibile nei giorni di festa ed è festa.
-    if (!absence.absenceType.consideredWeekEnd && personDayManager.isHoliday(absenceEngine.requestPerson,
+    if (!absence.absenceType.consideredWeekEnd && personDayManager.isHoliday(absenceEngine.person,
         absence.getAbsenceDate())) {
       absenceEngine.report.addAbsenceProblem(ReportAbsenceProblem.builder()
           .absenceProblem(AbsenceProblem.NotOnHoliday)
@@ -838,9 +816,9 @@ public class AbsenceEngineCore {
     }
     
     //Un codice giornaliero già presente 
-    for (Absence oldAbsence : absenceEngine.periodOldAbsences()) {
+    for (Absence oldAbsence : allCodeAbsences) {
       //altra data
-      if (!oldAbsence.getAbsenceDate().isEqual(absenceEngine.currentDate())) {
+      if (!oldAbsence.getAbsenceDate().isEqual(absence.getAbsenceDate())) {
         continue;
       }
       //tempo giustificato non giornaliero
@@ -854,7 +832,7 @@ public class AbsenceEngineCore {
             .absence(absence)
             .absenceType(absence.getAbsenceType())
             .operation(Operation.insert)
-            .date(absenceEngine.currentDate())
+            .date(absence.getAbsenceDate())
             .absenceProblem(AbsenceProblem.AllDayAlreadyExists).build();
         absenceEngine.report.addInsertResultItem(insertResuItem);
       }
@@ -887,7 +865,7 @@ public class AbsenceEngineCore {
     if (!absence.absenceType.justifiedTypesPermitted.contains(absence.justifiedType)) {
       absenceEngine.report.addRequestProblem(ReportRequestProblem.builder()
           .requestProblem(RequestProblem.WrongJustifiedType)
-          .date(absenceEngine.currentDate())
+          .date(absenceEngine.request.currentDate)
           .build());
       return absenceEngine;
     }
@@ -928,9 +906,7 @@ public class AbsenceEngineCore {
    * @return
    */
   private AbsenceEngine groupConstraints(AbsenceEngine absenceEngine, 
-      AbsencePeriod absencePeriod, EnhancedAbsence enhancedAbsence) {
-    
-    Absence absence = enhancedAbsence.getAbsence();
+      AbsencePeriod absencePeriod, Absence absence) {
     
     //Un codice di completamento e ne esiste già uno
     if (absencePeriod.complationComponent.isPresent()) {
@@ -948,8 +924,11 @@ public class AbsenceEngineCore {
     //Takable limit
     if (absencePeriod.takableComponent.isPresent()) {
       
-      if (!absencePeriod.takableComponent.get()
-          .canAddTakenAmount(enhancedAbsence.getJustifiedTime())) {
+      int takenAmount = absenceEngineUtility
+          .absenceJustifiedAmount(absenceEngine, absence, 
+              absencePeriod.takableComponent.get().takeAmountType);
+      
+      if (!absencePeriod.takableComponent.get().canAddTakenAmount(takenAmount)) {
         absenceEngine.report.addAbsenceProblem(ReportAbsenceProblem.builder()
             .absenceProblem(AbsenceProblem.LimitExceeded)
             .absence(absence)
@@ -970,7 +949,7 @@ public class AbsenceEngineCore {
   public AbsenceEngine residualAbsenceEngine(Person person, GroupAbsenceType groupAbsenceType, LocalDate date) {
 
     AbsenceEngine absenceEngine = new AbsenceEngine(absenceComponentDao, personChildrenDao, 
-        person, groupAbsenceType, date, null);
+        absenceEngineUtility, person, groupAbsenceType, date, null);
 
     if (groupAbsenceType.pattern.equals(GroupAbsenceType.GroupAbsenceTypePattern.vacationsCnr) || 
         groupAbsenceType.pattern.equals(GroupAbsenceType.GroupAbsenceTypePattern.compensatoryRestCnr)) {
@@ -981,7 +960,7 @@ public class AbsenceEngineCore {
       return absenceEngine;
     }
 
-    buildPeriodChain(absenceEngine, null);
+    buildPeriodChain(absenceEngine, groupAbsenceType, date);
 
     return absenceEngine;
   }
