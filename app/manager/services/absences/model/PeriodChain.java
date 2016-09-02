@@ -20,8 +20,7 @@ public class PeriodChain {
   public List<AbsencePeriod> periods = Lists.newArrayList();
   
   public List<Absence> absencesAsc = null;                          //to reset nextDate
-  public List<Absence> allCodeAbsencesAsc = null;                          //to reset nextDate
-  public Set<Absence> absenceAlreadyAssigned = Sets.newHashSet();   //to reset nextDate
+  public List<Absence> allCodeAbsencesAsc = null;                   //to reset nextDate
   
   public List<Contract> contracts = null;           //to reset nextDate
   public LocalDate from = null;                     //to reset nextDate

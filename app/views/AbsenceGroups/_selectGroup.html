@@ -1,0 +1,24 @@
+   #{form action:@AbsenceGroups.insert(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit', 
+    'data-async':'#absenceData', 'data-async-error':'#absenceData'}
+     
+     #{f.hidden 'personId', value:absenceRequestForm.person.id /}
+     #{f.hidden 'from', value:absenceRequestForm.from?.format() /}
+     #{f.hidden 'to', value:absenceRequestForm.to?.format() /}
+     
+     #{f.selectModel 'groupAbsenceType', label:'Tipologia Assenza', personalizeItems:true}
+        <option></option>      
+        *{ same priority }*
+        #{list absenceRequestForm.categoriesWithSamePriority.values(), as:'categoryList'}
+         *{ same category }*
+         #{list categoryList, as:'category'}
+           <optgroup label="${category.categoryType.name}">
+           #{list category.items, as:'groupAbsenceTypeItem'}
+	         <option value="${groupAbsenceTypeItem.groupAbsenceType.id}"
+	          #{if groupAbsenceTypeItem.selected} selected #{/if}> ${groupAbsenceTypeItem.getLabel()} </option>
+  	       #{/list}
+  	       </optgroup>
+  	     #{/list}
+  	    #{/list}
+     #{/f.selectModel}
+   
+   #{/form}

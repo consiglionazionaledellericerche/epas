@@ -7,14 +7,12 @@ import manager.PersonDayManager;
 import manager.services.absences.AbsenceMigration;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.AbsenceRequestType;
+import manager.services.absences.AbsencesReport;
 import manager.services.absences.InsertResultItem;
 import manager.services.absences.InsertResultItem.Operation;
-import manager.services.absences.model.AbsenceEngine;
 import manager.services.absences.web.AbsenceRequestForm;
 import manager.services.absences.web.AbsenceRequestForm.SubAbsenceGroupFormItem;
 
-import models.AbsenceTypeGroup;
-import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.absences.Absence;
@@ -22,7 +20,6 @@ import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.JustifiedType;
-import models.enumerate.AccumulationBehaviour;
 
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
@@ -80,17 +77,17 @@ public class AbsenceGroups extends Controller {
     AbsenceRequestForm absenceRequestForm = absenceService
         .buildInsertForm(person, from, to, groupAbsenceType);
     
-    AbsenceEngine absenceEngine = null;
+    AbsencesReport report = null;
     if (absenceRequestForm.selectedAbsenceGroupFormItem != null) {
       SubAbsenceGroupFormItem selected = absenceRequestForm
           .selectedAbsenceGroupFormItem.selectedSubAbsenceGroupFormItems;
       
-      absenceEngine = absenceService.insert(person, groupAbsenceType, from, to, 
+      report = absenceService.insert(person, groupAbsenceType, from, to, 
           AbsenceRequestType.insert, selected.absenceType, 
           selected.selectedJustified, selected.getHours(), selected.getMinutes());  
     }
     
-    render(absenceRequestForm, absenceEngine);
+    render(absenceRequestForm, report);
   }
   
   public static void configureInsert(Long personId, LocalDate from, LocalDate to, 
@@ -110,23 +107,24 @@ public class AbsenceGroups extends Controller {
     AbsenceRequestForm absenceRequestForm = absenceService.configureInsertForm(person, from, to,
         groupAbsenceType, absenceType, justifiedType, hours, minutes);
     
-    AbsenceEngine absenceEngine = null;
+    AbsencesReport report = null;
     if (absenceRequestForm.selectedAbsenceGroupFormItem != null) {
       SubAbsenceGroupFormItem selected = absenceRequestForm
           .selectedAbsenceGroupFormItem.selectedSubAbsenceGroupFormItems;
+    
       
-      absenceEngine = absenceService.insert(person, groupAbsenceType, from, to, 
+      report = absenceService.insert(person, groupAbsenceType, from, to, 
           AbsenceRequestType.insert, selected.absenceType, 
           selected.selectedJustified, selected.getHours(), selected.getMinutes());  
     }
     
-    render("@insert", absenceRequestForm, absenceEngine);
+    render("@insert", absenceRequestForm, report);
   }
   
   
   public static void save(Long personId, LocalDate from, LocalDate to, 
       GroupAbsenceType groupAbsenceType, AbsenceType absenceType, 
-      JustifiedType justifiedType, Integer hours, Integer minutes) {
+      JustifiedType justifiedType, Integer hours, Integer minutes, boolean forceInsert) {
     
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
@@ -142,18 +140,20 @@ public class AbsenceGroups extends Controller {
     AbsenceRequestForm absenceRequestForm = absenceService.configureInsertForm(person, from, to,
         groupAbsenceType, absenceType, justifiedType, hours, minutes);
     
-    AbsenceEngine absenceEngine = absenceService.insert(person, groupAbsenceType, from, to, 
-        AbsenceRequestType.insert, absenceType, justifiedType, hours, minutes);
-    if (absenceEngine.report.containsProblems()) {
-      render("@insert", absenceRequestForm, absenceEngine);
-    }
-    
-    //Se ci sono degli errori non salvo niente
-    if (absenceEngine.report.containsProblems()) {
-      render("@insert", absenceRequestForm, absenceEngine);
+    AbsencesReport report;
+    if (forceInsert) {
+      report = absenceService.forceInsert(person, groupAbsenceType, from, to, 
+          AbsenceRequestType.insert, absenceType, justifiedType, hours, minutes);
+    } else {
+      report = absenceService.insert(person, groupAbsenceType, from, to, 
+          AbsenceRequestType.insert, absenceType, justifiedType, hours, minutes);
+      //Se ci sono degli errori non salvo niente
+      if (report.containsProblems()) {
+        render("@insert", absenceRequestForm, report);
+      }
     }
 
-    for (InsertResultItem absenceResultItem : absenceEngine.report.insertResultItems) {
+    for (InsertResultItem absenceResultItem : report.insertResultItems) {
       if (absenceResultItem.getOperation().equals(Operation.insert) 
           || absenceResultItem.getOperation().equals(Operation.insertReplacing)) {
         

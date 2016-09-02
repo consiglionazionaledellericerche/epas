@@ -4,262 +4,183 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
 
 <div id="absenceData">
 
-   #{form action:@AbsenceGroups.insert(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit', 
-    'data-async':'#absenceData', 'data-async-error':'#absenceData'}
-     
-     #{f.hidden 'personId', value:absenceRequestForm.person.id /}
-     #{f.hidden 'from', value:absenceRequestForm.from?.format() /}
-     #{f.hidden 'to', value:absenceRequestForm.to?.format() /}
-     
-     #{f.selectModel 'groupAbsenceType', label:'Tipologia Assenza', personalizeItems:true}
-        <option></option>      
-        *{ same priority }*
-        #{list absenceRequestForm.categoriesWithSamePriority.values(), as:'categoryList'}
-         *{ same category }*
-         #{list categoryList, as:'category'}
-           <optgroup label="${category.categoryType.name}">
-           #{list category.items, as:'groupAbsenceTypeItem'}
-	         <option value="${groupAbsenceTypeItem.groupAbsenceType.id}"
-	          #{if groupAbsenceTypeItem.selected} selected #{/if}> ${groupAbsenceTypeItem.getLabel()} </option>
-  	       #{/list}
-  	       </optgroup>
-  	     #{/list}
-  	    #{/list}
-     #{/f.selectModel}
-   
-   #{/form}
-
+   *{ alcune scorciatorie }*
+   	
    %{ selectedFormItem = absenceRequestForm.selectedAbsenceGroupFormItem; }%
    %{ selecteSubItem = selectedFormItem?.selectedSubAbsenceGroupFormItems; }%
    %{ alldaySelected = selecteSubItem?.selectedJustified?.name.equals(models.absences.JustifiedType.JustifiedTypeName.all_day) }%
    %{ specifiedMinuteSelected = selecteSubItem?.selectedJustified?.name.equals(models.absences.JustifiedType.JustifiedTypeName.specified_minutes) }%
-   
-   #{if selectedFormItem}
 
-    #{form action:@AbsenceGroups.configureInsert(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit',
-    'data-async':'#absenceData', 'data-async-error':'#absenceData'}
-   
-     #{f.hidden 'personId', value:absenceRequestForm.person.id /}
-
-     #{f.hidden 'from', value:absenceRequestForm.from?.format() /}
-     #{f.date 'from', value:absenceRequestForm.from?.format(), disabled:true /}     
-     #{if alldaySelected }
-       #{f.date 'to', value:absenceRequestForm.to?.format() /}
-     #{/if}
-     #{else}
-       #{f.date 'to', disabled:true  /} 
-     #{/else}
-     
-   
-     #{f.hidden 'groupAbsenceType.id', value:selectedFormItem.groupAbsenceType.id /}
-
-     *{ seleziona sub item group}*
-     #{if selectedFormItem.subAbsenceGroupFormItems.size() > 1 } 
-	  #{f.selectModel 'absenceType', label:'Modalità inserimento', personalizeItems:true}
-	    #{if selectedFormItem.containsAutomatic}
-	      <optgroup label="Inserimento Automatico">
-	      #{list selectedFormItem.subAbsenceGroupFormItems, as:'subItemm'}
-	        #{if subItemm.isAutomatic()}
-	         <option value="${subItemm.absenceType?.id}"
-	          #{if subItemm.selected} selected #{/if}>Automatico</option>
-		    #{/if}
-          #{/list}
-		  <optgroup/>
-	    #{/if}
-	    <optgroup label="Codice Specifico">
-	    #{list selectedFormItem.subAbsenceGroupFormItems, as:'subItemm'}
-	      #{if !subItemm.isAutomatic()}
-	      <option value="${subItemm.absenceType?.id}"
-	        #{if subItemm.selected} selected #{/if}>${subItemm.getLabel()} </option>
-	      #{/if}  
-		#{/list}
-		<optgroup/>
-
-	  #{/f.selectModel}
-     #{/if}
-     #{else}
-       #{f.hidden 'absenceType.id', value:selecteSubItem.absenceType?.id /}
-       #{f.view 'absenceType', value:selecteSubItem.getLabel() /}
-     #{/else}
-   
-     *{ seleziona tempo giustificato }*
-     #{if selecteSubItem.getJustifiedTypesPermitted().size() > 1 } 			     
-       #{f.selectModel 'justifiedType', items:selecteSubItem.getJustifiedTypesPermitted(), value:selecteSubItem.selectedJustified /}
-     #{/if}
-     #{else}
-       #{f.hidden 'justifiedType.id', value:selecteSubItem.selectedJustified.id /}
-       #{f.view 'justifiedType', value:selecteSubItem.selectedJustified.label() /}
-     #{/else}
-         
-	#{/form}
-	
-    
-    *{ verify request }* 
-	#{form action:@AbsenceGroups.configureInsert(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit',
-	'data-async':'#absenceData', 'data-async-error':'#absenceData' }
-	
-       #{f.hidden 'personId', value:absenceRequestForm.person.id /}
-       
-       #{f.hidden 'from', value:absenceRequestForm.from?.format() /}
-       #{if alldaySelected }
-         #{f.hidden 'to', value:absenceRequestForm.to?.format() /}
-       #{/if}
-	   
-	   #{f.hidden 'groupAbsenceType.id', value:selectedFormItem.groupAbsenceType.id /}
-	   #{f.hidden 'absenceType.id', value:selecteSubItem.absenceType?.id /}
-	   #{f.hidden 'justifiedType.id', value:selecteSubItem.selectedJustified.id /}
-	   
-	   *{ seleziona minuti }*    
-       #{if selecteSubItem.selectedJustified.name.equals(models.absences.JustifiedType.JustifiedTypeName.specified_minutes) }
-         #{f.input 'hours', value:selecteSubItem.hours /}
-         #{f.input 'minutes', value:selecteSubItem.minutes /}
-       #{/if}
-       
-	   #{b.buttons center:true}
-         #{b.submit 'Verifica', color:'warning'/}
-       #{/b.buttons}
-	 #{/form}
+   #{include './_selectGroup.html' /}
+   #{include './_configureSelectedGroup.html' /}
+   #{include './_verifyRequest.html' /}
  
-   #{/if} 
-   #{if absenceEngine}
-	   #{if absenceEngine.report.containsProblems()}
-	    #{alert color:'danger'}
-	      <p>ci sono problemi</p>
-	      #{if !absenceEngine.report.absenceProblems.empty}
-	        <strong>Errori legati alle assenze</strong>
-	        #{list items:absenceEngine.report.absenceProblems, as:'absenceProblem'}
-	          ${absenceProblem.absenceProblem}
-	          ${absenceProblem.absence.absenceType.code}
-	          ${absenceProblem.absence.getAbsenceDate()}
-	        #{/list}
-	      #{/if}
-	      </p>
-	    #{/alert} 
-	  #{/if}
-	  #{else}
-	    <table class="table condensed">
-	      <tr>
-	        <th>Data</th>
-	        <th>Codice</th>
-	        <th>Operazione</th>
-	        <th>Consumo</th>
-	        <th>Residuo</th>
-	        <th>Scadenza</th>
-	        <th>Problemi</th>
-	      </tr>
-	      #{list items:absenceEngine.report.insertResultItems, as:'insertResultItem'}
-	      
-	      %{
-	        isInsertReplacing = insertResultItem.operation.equals(manager.services.absences.InsertResultItem.Operation.insertReplacing);
-	        isInsert = insertResultItem.operation.equals(manager.services.absences.InsertResultItem.Operation.insert);
-	        absence = insertResultItem.absence;
-	        id = absence.id;
-            if (id == null) {
-              id = absence.absenceType.code + absence.absenceDate;
-            }
-	      }%
-	      
-	      <div class="webui-popover-content" id="${id}">
-            <strong>Codice</strong> ${absence.absenceType.code}<br>
-            <strong>Descrizione</strong> ${absence.absenceType.description}
-		    #{if absence.justifiedType}
-		        #{if absence.justifiedAllDay() }
-		          <br><strong>Tempo giustificato</strong> &{absence.justifiedType}
-		        #{/if}
-			    #{if absence.justifiedTime() }
-			      <br><strong>Tempo giustificato</strong> ${absence.justifiedTime().printHourMinute()}
-			    #{/if}
-		    #{/if}
-		    #{if !absence.troubles.empty}
-		         <br><br>  
-		         <p class="text-danger">Questa assenza contiene errori:</p>
-		         <ul>
-		         #{list items:absence.troubles, as:'trouble'}
-		           <li>&{trouble.trouble}</li>
-		         #{/list}
-		         </ul>
-		     #{/if}
-		  </div>
-	      
-	      <tr>
-	        <td><strong>${insertResultItem.date.format()}</strong></td>
-	        #{if isInsert}
-	          <td><span webui-popover-hover data-url="#${id}">${absence.absenceType.code}</span></td>
-	          <td><span class="label label-primary">&{insertResultItem.operation}</span></td>
-	        #{/if}
-	        #{elseif isInsertReplacing}
-	          <td><span webui-popover-hover data-url="#${id}" class="text-muted">${absence.absenceType.code}</span></td>
-	          <td><span class="label label-default">&{insertResultItem.operation}</span></td>
-	        #{/elseif}
-	        #{else}
-	          <td></td><td></td> *{ to implement }*
-	        #{/else}
-	        
-	        <td>
-	          #{list items:insertResultItem.consumedResidualAmount, as:'cra'}
-	            ${cra.printAmount(cra.amount)}<br>
-	          #{/list}
-	        </td>
-	        <td>
-	          #{list items:insertResultItem.consumedResidualAmount, as:'cra'}
-	            ${cra.printAmount(cra.residualAfter())}<br>
-	          #{/list}
-	        </td>
-	        <td>
-	          #{list items:insertResultItem.consumedResidualAmount, as:'cra'}
-	            ${cra.expireResidual?.format()}<br>
-	          #{/list}
-	        </td>
-	        <td>
-	        #{if insertResultItem.absenceProblem}
-	          ${insertResultItem.absenceProblem}
-	        #{/if}
-	        #{else}
-	        <i class="fa fa-check fa-2x text-success" aria-hidden="true"></i>
-	        #{/else}
-	        </td>
-	        
-	      </tr>
-	      #{/list}
-	    </table>
-	    
-	     *{ save request }*
-		 #{form action:@AbsenceGroups.save(), method:'POST', autocomplete:false, class:'form form-horizontal',
-		  'data-async':'#page_content', 'data-async-error':'#absenceData' }
-		  
-		  #{f.hidden 'personId', value:absenceRequestForm.person.id /}
-       
-          #{f.hidden 'from', value:absenceRequestForm.from?.format() /}
-          #{if alldaySelected }
-           #{f.hidden 'to', value:absenceRequestForm.to?.format() /}
-          #{/if}
-	   
-	      #{f.hidden 'groupAbsenceType.id', value:selectedFormItem.groupAbsenceType.id /}
-	      #{f.hidden 'absenceType.id', value:selecteSubItem.absenceType?.id /}
-	      #{f.hidden 'justifiedType.id', value:selecteSubItem.selectedJustified.id /}
-	      
-	      #{f.hidden 'hours', value:selecteSubItem.hours /}
-          #{f.hidden 'minutes', value:selecteSubItem.minutes /}
-	    
-	      #{if absenceEngine.report.containsProblems() }
-	       #{alert color:'danger'}
-	         <p> Per poter completare la richiesta occorre correggere
-	          gli errori riportati. </p>
-	         <p> E' possibile forzare l'inserimentoIn in caso di modalità non automatica (selezionando 
-	         il codice specifico) </p>
-	       #{/alert}
-	       #{if !selecteSubItem.isAutomatic() }
-             #{f.checkbox 'forceInsert', value:forceInsert /}
-           #{/if}
- 	      #{/if}
-		 
-		   #{b.buttons center:true}
-	         #{b.submit 'Salva'/}
-	       #{/b.buttons}
-		 #{/form}	  
-	    
-	  #{/else}
+   #{if report.containsProblems()}
+    #{alert color:'danger'}
+      #{if !report.absenceProblems.empty}
+        <strong>Errori legati alle assenze</strong><br>
+        #{list items:report.absenceProblems, as:'absenceProblem'}
+          <table class="table table-condensed">
+            <tr>
+              <td>${absenceProblem.absence.getAbsenceDate().format()}</td>
+              <td>${absenceProblem.absenceProblem}</td>
+              <td>${absenceProblem.absence.absenceType.code}</td>
+              <td>${absenceProblem.absence.absenceType.description}</td>
+            </tr>
+          </table>  
+        #{/list}
+      #{/if}
+      #{if !report.requestProblems.empty}
+        <strong>Errori legati alla richiesta</strong><br>
+        #{list items:report.requestProblems, as:'requestProblem'}
+          <table class="table table-condensed">
+          <tr>
+            <td>${requestProblem.date.format()}</td>
+            <td>${requestProblem.requestProblem}</td>
+          </tr>
+          </table>
+        #{/list}
+      #{/if}
+      #{if !report.implementationProblems.empty}
+        <strong>Errori legati all'implementazione</strong><br>
+        #{list items:report.implementationProblems, as:'implementationProblem'}
+          <table class="table table-condensed">
+          <tr>
+            <td>${implementationProblem.date.format()}</td>
+            <td>${implementationProblem.implementationProblem}</td>
+          </tr>
+          </table>
+        #{/list}
+      #{/if}
+      </p>
+    #{/alert} 
   #{/if}
+  
+  #{if !report.insertResultItems.empty }
+    <table class="table condensed">
+      <tr>
+        <th>Data</th>
+        <th>Codice</th>
+        <th>Operazione</th>
+        <th>Consumo</th>
+        <th>Residuo</th>
+        <th>Scadenza</th>
+        <th>Problemi</th>
+      </tr>
+      #{list items:report.insertResultItems, as:'insertResultItem'}
+      
+      %{
+        isInsertReplacing = insertResultItem.operation.equals(manager.services.absences.InsertResultItem.Operation.insertReplacing);
+        isInsert = insertResultItem.operation.equals(manager.services.absences.InsertResultItem.Operation.insert);
+        absence = insertResultItem.absence;
+        id = absence.id;
+           if (id == null) {
+             id = absence.absenceType.code + absence.absenceDate;
+           }
+      }%
+      
+      <div class="webui-popover-content" id="${id}">
+           <strong>Codice</strong> ${absence.absenceType.code}<br>
+           <strong>Descrizione</strong> ${absence.absenceType.description}
+	    #{if absence.justifiedType}
+	        #{if absence.justifiedAllDay() }
+	          <br><strong>Tempo giustificato</strong> &{absence.justifiedType}
+	        #{/if}
+		    #{if absence.justifiedTime() }
+		      <br><strong>Tempo giustificato</strong> ${absence.justifiedTime().printHourMinute()}
+		    #{/if}
+	    #{/if}
+	    #{if !absence.troubles.empty}
+	         <br><br>  
+	         <p class="text-danger">Questa assenza contiene errori:</p>
+	         <ul>
+	         #{list items:absence.troubles, as:'trouble'}
+	           <li>&{trouble.trouble}</li>
+	         #{/list}
+	         </ul>
+	     #{/if}
+	  </div>
+      
+      <tr>
+        <td><strong>${insertResultItem.date.format()}</strong></td>
+        #{if isInsert}
+          <td><span webui-popover-hover data-url="#${id}">${absence.absenceType.code}</span></td>
+          <td><span class="label label-primary">&{insertResultItem.operation}</span></td>
+        #{/if}
+        #{elseif isInsertReplacing}
+          <td><span webui-popover-hover data-url="#${id}" class="text-muted">${absence.absenceType.code}</span></td>
+          <td><span class="label label-default">&{insertResultItem.operation}</span></td>
+        #{/elseif}
+        #{else}
+          <td></td><td></td> *{ to implement }*
+        #{/else}
+        
+        <td>
+          #{list items:insertResultItem.consumedResidualAmount, as:'cra'}
+            ${cra.printAmount(cra.amount)}<br>
+          #{/list}
+        </td>
+        <td>
+          #{list items:insertResultItem.consumedResidualAmount, as:'cra'}
+            ${cra.printAmount(cra.residualAfter())}<br>
+          #{/list}
+        </td>
+        <td>
+          #{list items:insertResultItem.consumedResidualAmount, as:'cra'}
+            ${cra.expireResidual?.format()}<br>
+          #{/list}
+        </td>
+        <td>
+        #{if insertResultItem.absenceProblem}
+          ${insertResultItem.absenceProblem}
+        #{/if}
+        #{else}
+        <i class="fa fa-check fa-2x text-success" aria-hidden="true"></i>
+        #{/else}
+        </td>
+        
+      </tr>
+      #{/list}
+    </table>
+   #{/if} 
+      
+     *{ save request }*
+	 #{form action:@AbsenceGroups.save(), method:'POST', autocomplete:false, class:'form form-horizontal',
+	  'data-async':'#page_content', 'data-async-error':'#absenceData' }
+	  
+	  #{f.hidden 'personId', value:absenceRequestForm.person.id /}
+      
+         #{f.hidden 'from', value:absenceRequestForm.from?.format() /}
+         #{if alldaySelected }
+          #{f.hidden 'to', value:absenceRequestForm.to?.format() /}
+         #{/if}
+   
+      #{f.hidden 'groupAbsenceType.id', value:selectedFormItem.groupAbsenceType.id /}
+      #{f.hidden 'absenceType.id', value:selecteSubItem.absenceType?.id /}
+      #{f.hidden 'justifiedType.id', value:selecteSubItem.selectedJustified.id /}
+      
+      #{f.hidden 'hours', value:selecteSubItem.hours /}
+         #{f.hidden 'minutes', value:selecteSubItem.minutes /}
+    
+      #{if report.containsProblems() }
+       #{alert color:'info'}
+         <p> La richiesta contiene errori e non può essere completata. </p>
+         <p> E' comunque possibile forzare l'inserimento <strong>selezionando 
+         il codice specifico</strong> e cliccando su Salva. Non verranno effettuati controlli di integrità dei dati inseriti.
+         </p>
+       #{/alert}
+       #{if !selecteSubItem.isAutomatic() }
+            #{f.checkbox 'forceInsert', value:forceInsert /}
+       #{/if}
+	   #{/if}
+	 
+	   #{b.buttons center:true}
+         #{b.submit 'Salva'/}
+       #{/b.buttons}
+	 #{/form}	  
+    
+  
+  
    
 </div>
 

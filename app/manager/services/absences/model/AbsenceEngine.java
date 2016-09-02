@@ -19,6 +19,7 @@ import models.absences.GroupAbsenceType;
 import org.joda.time.LocalDate;
 
 import java.util.List;
+import java.util.Set;
 
 public class AbsenceEngine {
   
@@ -92,7 +93,10 @@ public class AbsenceEngine {
     this.scan.absenceEngineUtility = absenceEngineUtility;
     this.scan.scanFrom = scanFrom;
     this.scan.scanAbsences = absencesToScan;
-    this.scan.absencesIterator = this.scan.scanAbsences.iterator();
+    for (Absence absence : this.scan.scanAbsences) {
+      Set<GroupAbsenceType> groupsToScan = absenceEngineUtility.involvedGroup(absence.absenceType); 
+      this.scan.absencesGroupsToScan.put(absence, groupsToScan);
+    }
     
     this.report = new AbsencesReport();
   }
@@ -136,26 +140,4 @@ public class AbsenceEngine {
     }
     return 0;
   }
-  
-//  /**
-//   * Le assenze coinvolte nella catena.
-//   * @return
-//   */
-//  public List<Absence> periodChainAbsencesAsc() {
-//    
-//    //Se nella catena sono già state calcolate.
-//    if (this.periodChain.absencesAsc != null) {
-//      return this.periodChain.absencesAsc;
-//    }
-//    
-//    if (isRequestEngine()) {
-//      return this.periodChain.getRequestPeriodChainAbsencesAsc(this);
-//    } 
-//    if (isScanEngine()) {
-//      return this.periodChain.getScanPeriodChainAbsencesAsc(this);
-//    }
-//    
-//    return null;
-//  }
-
 }

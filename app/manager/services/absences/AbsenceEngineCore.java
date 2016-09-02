@@ -3,6 +3,7 @@ package manager.services.absences;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
 import dao.PersonChildrenDao;
@@ -47,8 +48,10 @@ import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 
 import org.joda.time.LocalDate;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 
 @Slf4j
@@ -127,10 +130,16 @@ public class AbsenceEngineCore {
     
     //Primo absencePeriod
     AbsencePeriod currentPeriod = buildAbsencePeriod(absenceEngine, groupAbsenceType, date);
+    if (absenceEngine.report.containsProblems()) {
+      return periodChain;
+    }
     periodChain.periods.add(currentPeriod);
     while (currentPeriod.groupAbsenceType.nextGroupToCheck != null) {
       //successivi
       currentPeriod = buildAbsencePeriod(absenceEngine, currentPeriod.groupAbsenceType.nextGroupToCheck, date);
+      if (absenceEngine.report.containsProblems()) {
+        return periodChain;
+      }
       periodChain.periods.add(currentPeriod);
     }
     
@@ -280,6 +289,8 @@ public class AbsenceEngineCore {
    */
   private void populatePeriodChain(AbsenceEngine absenceEngine) {
     
+    Set<Absence> absencesAlreadyAssigned = Sets.newHashSet();
+    
     for (AbsencePeriod absencePeriod : absenceEngine.periodChain.periods) {
       
       TakableComponent takableComponent = null;
@@ -324,7 +335,7 @@ public class AbsenceEngineCore {
         }
         
         //una assenza può essere assegnata ad un solo period
-        if (absenceEngine.periodChain.absenceAlreadyAssigned.contains(absence)) {
+        if (absencesAlreadyAssigned.contains(absence)) {
           absenceEngine.report.addAbsenceProblem(ReportAbsenceProblem.builder()
               .absenceProblem(AbsenceProblem.TwoPeriods)
               .absence(absence)
@@ -341,7 +352,7 @@ public class AbsenceEngineCore {
           continue;  
         }
         if (isTaken || isComplation || isReplacing) {
-          absenceEngine.periodChain.absenceAlreadyAssigned.add(absence);
+          absencesAlreadyAssigned.add(absence);
           date = absence.getAbsenceDate();
         }
         
@@ -577,7 +588,9 @@ public class AbsenceEngineCore {
     }
     
     // analisi dei requisiti all'interno di ogni gruppo (risultati in absenceEngine.report)
-    while (absenceEngine.scan.configureNextGroupToScan().isConfiguredForNextScan()) {
+    Iterator<Absence> iterator = absenceEngine.scan.scanAbsences.iterator();
+    
+    while (absenceEngine.scan.configureNextGroupToScan(iterator).currentGroup != null) {
       log.debug("Inizio lo scan del prossimo gruppo {}", absenceEngine.scan.currentGroup.description);
       buildPeriodChain(absenceEngine, 
           absenceEngine.scan.currentGroup, 
