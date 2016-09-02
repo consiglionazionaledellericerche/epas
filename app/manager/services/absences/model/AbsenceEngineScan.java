@@ -20,34 +20,11 @@ public class AbsenceEngineScan {
   
   public LocalDate scanFrom;
   public List<Absence> scanAbsences;
-  public Iterator<Absence> absencesIterator;
+  //public Iterator<Absence> absencesIterator;
   public Absence currentAbsence;
   public GroupAbsenceType currentGroup;
   
   Map<Absence, Set<GroupAbsenceType>> absencesGroupsToScan = Maps.newHashMap();
-  
-  public boolean isConfiguredForNextScan() {
-    return this.currentGroup != null;
-  }
-  
-  public boolean hasNextGroupToScan(Absence absence) {
-    Set<GroupAbsenceType> groupsToScan = this.absencesGroupsToScan.get(absence);
-    if (groupsToScan == null) {
-      groupsToScan = absenceEngineUtility.involvedGroup(absence.absenceType); 
-      this.absencesGroupsToScan.put(absence, groupsToScan);
-    }
-    return !absencesGroupsToScan.get(absence).isEmpty();
-  }
-  
-  public GroupAbsenceType getNextGroupToScan(Absence absence) {
-    Set<GroupAbsenceType> absenceGroupsToScan = absencesGroupsToScan.get(absence);
-    if (absenceGroupsToScan.isEmpty()) { 
-      return null;
-    }
-    GroupAbsenceType group = absenceGroupsToScan.iterator().next();
-    setGroupScanned(absence, group);
-    return group;
-  }
   
   public void setGroupScanned(Absence absence, GroupAbsenceType groupAbsenceType) {
     Set<GroupAbsenceType> absenceGroupsToScan = absencesGroupsToScan.get(absence);
@@ -58,23 +35,40 @@ public class AbsenceEngineScan {
   }
   
   /**
+   * Il prossimo gruppo da analizzare per la currentAbsence (se c'è).
+   * @return
+   */
+  private GroupAbsenceType currentAbsenceNextGroup() {
+    if (this.currentAbsence == null) {
+      return null;
+    }
+    Set<GroupAbsenceType> groupsToScan = this.absencesGroupsToScan.get(this.currentAbsence);
+    if (groupsToScan.isEmpty()) {
+      return null;
+    }
+    GroupAbsenceType group = groupsToScan.iterator().next();
+    setGroupScanned(this.currentAbsence, group);
+    return group;
+  }
+  
+  /**
    * Configura il prossimo gruppo da analizzare (se esiste).
    * @param absenceEngine
    * @return
    */
-  public AbsenceEngineScan configureNextGroupToScan() {
+  public AbsenceEngineScan configureNextGroupToScan(Iterator<Absence> iterator) {
+    
     // stessa assenza prossimo gruppo
-    if (this.currentAbsence != null && hasNextGroupToScan(this.currentAbsence)) {
-      this.currentGroup = getNextGroupToScan(this.currentAbsence);
+    this.currentGroup = currentAbsenceNextGroup();
+    if (this.currentGroup != null) {
       return this;
     }
     
     // prossima assenza primo gruppo
-    this.currentGroup = null;
-    while (this.absencesIterator.hasNext()) {
-      this.currentAbsence = this.absencesIterator.next();
-      if (hasNextGroupToScan(this.currentAbsence)) {   
-        this.currentGroup = getNextGroupToScan(this.currentAbsence);
+    while (iterator.hasNext()) {
+      this.currentAbsence = iterator.next();
+      this.currentGroup = currentAbsenceNextGroup();
+      if (this.currentGroup != null) {
         return this;
       }
     }

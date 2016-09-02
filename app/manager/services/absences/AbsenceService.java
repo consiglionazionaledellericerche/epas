@@ -1,10 +1,12 @@
 package manager.services.absences;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import lombok.extern.slf4j.Slf4j;
 
+import manager.services.absences.InsertResultItem.Operation;
 import manager.services.absences.model.AbsenceEngine;
 import manager.services.absences.web.AbsenceRequestForm;
 import manager.services.absences.web.AbsenceRequestFormFactory;
@@ -93,7 +95,7 @@ public class AbsenceService {
    * @param specifiedMinutes
    * @return
    */
-  public AbsenceEngine insert(Person person, GroupAbsenceType groupAbsenceType, LocalDate from,
+  public AbsencesReport insert(Person person, GroupAbsenceType groupAbsenceType, LocalDate from,
       LocalDate to, AbsenceRequestType absenceTypeRequest, AbsenceType absenceType, 
       JustifiedType justifiedType, Integer hours, Integer minutes) {
 
@@ -102,7 +104,7 @@ public class AbsenceService {
     AbsenceEngine absenceEngine = absenceEngineCore
         .buildInsertAbsenceEngine(person, groupAbsenceType, from, to);
     if (absenceEngine.report.containsProblems()) {
-      return absenceEngine;
+      return absenceEngine.report;
     }
   
     Integer specifiedMinutes = absenceEngineUtility.getMinutes(hours, minutes);
@@ -125,14 +127,55 @@ public class AbsenceService {
       
       //Errori
       if (absenceEngine.report.containsProblems()) {
-        return absenceEngine;
+        return absenceEngine.report;
       }
      
       //Configura la prossima data
       absenceEngineCore.configureNext(absenceEngine);
     }
     
-    return absenceEngine;
+    return absenceEngine.report;
+  }
+  
+  public AbsencesReport forceInsert(Person person, GroupAbsenceType groupAbsenceType, LocalDate from,
+      LocalDate to, AbsenceRequestType absenceTypeRequest, AbsenceType absenceType, 
+      JustifiedType justifiedType, Integer hours, Integer minutes) {
+    
+    Preconditions.checkArgument(absenceTypeRequest.equals(absenceTypeRequest.insert));
+    Preconditions.checkArgument(absenceType != null);   //il tipo quando forzo non si inferisce
+    Preconditions.checkArgument(absenceType.justifiedTypesPermitted.contains(justifiedType));
+    
+    Integer specifiedMinutes = absenceEngineUtility.getMinutes(hours, minutes);
+    LocalDate currentDate = from;
+    if (to == null) {
+      to = from;
+    }
+    
+    AbsencesReport report = new AbsencesReport();
+    
+    while (!currentDate.isAfter(to)) {
+      
+      //Preparare l'assenza da inserire
+      Absence absence = new Absence();
+      absence.date = currentDate;
+      absence.absenceType = absenceType;
+      absence.justifiedType = justifiedType;
+      if (specifiedMinutes != null) {
+        absence.justifiedMinutes = specifiedMinutes;
+      }
+      
+      InsertResultItem absenceResultItem = InsertResultItem.builder()
+          .absence(absence)
+          .absenceType(absence.getAbsenceType())
+          .operation(Operation.insert)
+          .consumedResidualAmount(Lists.newArrayList())
+          .date(currentDate).build();
+      report.addInsertResultItem(absenceResultItem);
+      
+      currentDate = currentDate.plusDays(1);
+    }
+    
+    return report;
   }
   
 
