@@ -76,12 +76,17 @@ epas:
 #    - PERSEO_USER=                          # user utilizzato per l'autenticazione con le interfacce rest di perseo
 #### Integrazione OIL ###
 #    - OIL_ENABLED=true                      # default: false. Se impostato abilita l'invio delle segnalazioni ad OIL
-#    - OIL_CATEGORIES                        # default: 4:epas. Specifica le categorie utilizzate in OIL.
+#    - OIL_EMAIL_TO=                         # default: helpdesk.mailbox@cnr.it
+#                                                       Indirizzo email a cui inviare l'apertura delle segnalazioni OIL.
+#    - OIL_APP_NAME=                         # default: siper. Utilizzato nell'oggetto delle email inviate a OIL per l'apertura delle segnalazioni.
+#    - OIL_CATEGORIES=                       # default: 50:Problemi Tecnici - ePAS,51:Problemi Amministrativi - ePAS. 
+#                                                       Specifica le categorie utilizzate in OIL.
 #                                                       La lista delle categorie è suddivisa da ",", il campo ":" è utilizzato invece
 #                                                       come separatore tra l'id della categoria ed il nome visualizzato all'utente, 
 #                                                       es.: 1:Registrazione Timbrature,2:Gestione Assenze,3:Gestione Competenze,4:Altro
-#    - OIL_CATEGORIES_SELECTED               # default: 4. Questo default è dato dall'ambiente di test di OIL. 
-#                                                       Contiene l'id della categoria da mostrare già selezionata all'utente finale. 
+#    - OIL_CATEGORIES_SELECTED=              # default: 0. Contiene l'id della categoria da mostrare già selezionata all'utente finale.
+#                                                       Per non mostrare nessuna categoria pre-selezionata specificare 0 o un qualsiasi altro
+#                                                       numero cnon compreso tra gli id delle categories.                                           
 
   links:
     - postgres
