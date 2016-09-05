@@ -12,6 +12,11 @@
   		possono essere attribuite <strong>200 ore</strong>.
   		</p>
   	#{/if}
+  	#{if competence.competenceCode.code.equals('S2')}
+  		<p>Per assegnare gli straordinari festivi non ci sono limiti di quantità, solo il tutto deve comunque essere subordinato 
+  		al fatto che, al massimo, in un anno di straordinari per persona possono essere attribuite <strong>200 ore</strong>.
+  		</p>
+  	#{/if}
   	#{if competence.competenceCode.code.equals('207')}
   		<p>In questo caso il valore viene espresso in <strong>giorni</strong>:
   		<ul>
@@ -36,4 +41,10 @@
   			Non esistono casi di assegnamento di valori superiori a quel limite.
   		</p>
   	#{/if}
+  	#{else}
+  		<p>Per questo codice non è stata definita una linea di comportamento nella definizione delle quantità usabili singolarmente
+  			o per il proprio gruppo di appartenenza. Rivolgersi all'amministrazione della sede centrale per chiarimenti sui quantitativi
+  			da poter inserire. 
+  		</p>
+  	#{/else}
     #{/alert}

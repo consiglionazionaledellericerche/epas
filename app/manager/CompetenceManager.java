@@ -10,8 +10,6 @@ import com.beust.jcommander.internal.Maps;
 
 import controllers.Competences;
 
-import play.i18n.Messages;
-
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
@@ -53,6 +51,8 @@ import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import play.i18n.Messages;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -363,8 +363,11 @@ public class CompetenceManager {
    *     Stringa vuota altrimenti.
    */
   public String canAddCompetence(Competence comp, Integer value) {
-    //TODO: aggiungere un controllo sull'abilitazione nel mese della competenza per la persona
+    
     String result = "";
+    if (!isCompetenceEnabled(comp)) {
+      result = Messages.get("CompManager.notEnabled");
+    }    
     switch (comp.competenceCode.limitType) {
       case monthly:        
         
@@ -402,6 +405,9 @@ public class CompetenceManager {
         if (psDto.basedWorkingDays != value) {
           result = Messages.get("CompManager.diffBasedWorkingDay");
         }
+        break;
+      case entireMonth:
+        //TODO: implementare la logica (caso cod. 303)
         break;
       case noLimit:
         break;
@@ -461,6 +467,24 @@ public class CompetenceManager {
     return true;
   }
   
+  /**
+   * 
+   * @param year
+   * @param month
+   * @param comp
+   * @return
+   */
+  private boolean isCompetenceEnabled(Competence comp) {
+    Optional<PersonCompetenceCodes> pcc = competenceCodeDao.getByPersonAndCode(comp.person, comp.competenceCode);
+    if (pcc.isPresent()) {
+      LocalDate date = new LocalDate(comp.year, comp.month, 1);
+      if (!pcc.get().beginDate.isAfter(date) && 
+          (pcc.get().endDate == null || !pcc.get().endDate.isBefore(date))) {
+        return true;
+      }
+    } 
+    return false;
+  }
   /**
    * 
    * @param personList la lista di persone
@@ -582,9 +606,10 @@ public class CompetenceManager {
    * @param date la data in cui si richiedono le competenze
    * @return la creazione della lista di competenze per il mese/anno.
    */
-  public List<Competence> createCompetenceList(List<Person> personList, LocalDate date, CompetenceCode code) {
+  public List<Competence> createCompetenceList(List<Person> personList, LocalDate date, 
+      CompetenceCode code) {
     List<Competence> compList = Lists.newArrayList();
-    for(Person person : personList) {
+    for (Person person : personList) {
       Optional<Competence> comp = competenceDao.getCompetence(person, date.getYear(), 
           date.getMonthOfYear(), code);
       if (comp.isPresent()) {
