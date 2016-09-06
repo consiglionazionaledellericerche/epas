@@ -237,7 +237,7 @@ public class RolePerseoConsumer {
     } else if (perseoName.equals("Responsabile Presenze sola lettura")) {
       return roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
     } else if (perseoName.equals("Admin Sede")) {
-      return roleDao.getRoleByName(Role.TECNICAL_ADMIN);
+      return roleDao.getRoleByName(Role.TECHNICAL_ADMIN);
     }
     return null;
   }

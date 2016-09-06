@@ -142,6 +142,18 @@ else
   sed 's#{{OIL_ENABLED}}#'"${OIL_ENABLED}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
+if [ -z "${OIL_APP_NAME}" ]; then
+  sed -n '/OIL_APP_NAME/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{OIL_APP_NAME}}#'"${OIL_APP_NAME}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${OIL_EMAIL_TO}" ]; then
+  sed -n '/OIL_EMAIL_TO/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{OIL_EMAIL_TO}}#'"${OIL_EMAIL_TO}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
 if [ -z "${OIL_CATEGORIES}" ]; then
   sed -n '/OIL_CATEGORIES/!p' -i ${APP_HOME}/conf/prod.conf
 else

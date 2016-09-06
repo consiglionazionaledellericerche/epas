@@ -38,7 +38,7 @@ public class Institutes extends Controller {
   public static void list(String name) {
 
     SearchResults<?> results = officeDao.institutes(Optional.<String>fromNullable(name),
-        Security.getUser().get(), roleDao.getRoleByName(Role.TECNICAL_ADMIN))
+        Security.getUser().get(), roleDao.getRoleByName(Role.TECHNICAL_ADMIN))
         .listResults();
 
     render(results, name);
