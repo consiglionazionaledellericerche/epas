@@ -45,7 +45,7 @@ public class Administrators extends Controller {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
 
-    // deve avere tecnicalAdmin sull'office, oppure super admin
+    // deve avere technicalAdmin sull'office, oppure super admin
     rules.checkIfPermitted(office);
 
     UsersRolesOffices uro = new UsersRolesOffices();
