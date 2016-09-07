@@ -3,50 +3,66 @@
 #{set title: 'ePAS - Gestione utenti'  /}
 
 <div class="container">
-  #{set breadcrumbs:['users':null, 'personUsers':@Users.list()] /}
-  #{breadcrumbs breadcrumbs, noHome:'true' /}
 
-  #{user.usersTabs activeAction:'list' /}
+  #{title title:'Gestione Utenti' /}
 
-  	
-	#{alert color:'info'}
-	<p>Elenco degli utenti associati ad una persona.</p>
-	#{/alert}
+  #{tabs ['manageUsers':@Users.list(),'manageSystemUsers':@Users.listSystem()] /}
+  <br>
+  #{breadcrumbs ['manageUsers':@Users.list()], noHome:'true' /}
 
-	#{form action:@Users.list(), class:'form-inline', method:'GET',
-    'data-reload':'#normalResults', autocomplete:'off'}
+  *{
+  #{alert color:'info'}
+  <p>Elenco degli utenti associati ad una persona.</p>
+  #{/alert}
 
-    <div class="row">
-     <div class="col-sm-3">
-        #{f.input 'name', 'data-autochange':true, value:name, autofocus:true,
-            placeholder:'search'.label(), inline:true /}
-     </div>
-     <div class="col-sm-1">
-        <button type="submit" name="_filter" class="btn btn-primary">
-            <i class="fa fa-search"></i> <span class="sr-only">&{'search'}</span>
-        </button>
-     </div>
+  }*
+
+  #{form action:@Users.list(), class:'form-inline', method:'GET', 'data-reload':'#normalResults', autocomplete:'off'}
+  <div class="row">
+
+    #{f.searchInput 'name' /}
+
+    #{field 'office'}
+    <div class="col-sm-5">
+      <label for="${field.id}" class="control-label">#{if _label}&{_label}#{/if} #{else}&{field.name}#{/else}</label>
+      <div class="input-group">
+        <select class="form-control" name="${field.name}.id" id="${field.id}" select2>
+          <option></option>
+          #{list templateUtility.officesAllowed(), as:'office'}
+          <option value="${office.id}"#{if field.value?.id == office.id} selected#{/if}>
+          ${office.getLabel()}
+          </option>
+          #{/list}
+        </select>
+      </div>
     </div>
-	#{/form}
-	
-    <br>
-	
-	<section id="normalResults">
-    #{paginate results} 
-	   <ul class="list-group">
-	   #{list items:results.results, as:'item'}
-	   
-		 <li class="list-group-item list-group-item-grey">
+    #{/field}
 
-			 #{user.item item:item, edit:'true' /}
-		  
-	     </li>
-	    
-	   #{/list}
-	   </ul>
-    #{/paginate} 
-     </section>
-     </div>
+  </div>
+  #{/form}
+
+  <br>
+
+  <section id="normalResults">
+    #{paginate results}
+    <ul class="list-group">
+      #{list items:results.results, as:'user'}
+      <li class="list-group-item clearfix">
+        <div class="pull-right btn-group">
+          #{b.show 'show' /}
+          #{secure.check 'Accounts.edit'}
+          #{b.edit 'edit' /}
+          #{/secure.check}
+          #{b.delete 'delete'/}
+        </div>
+        <h4><i class="fa fa-user text-primary"></i> ${user.username}</h4>
+      </li>
+      #{/list}
+    </ul>
+    #{/paginate}
+  </section>
+
+</div>
 
 
 <div id="modalInsertUser" class="modal fade container" tabindex="-1"></div>
