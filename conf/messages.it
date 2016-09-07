@@ -184,6 +184,8 @@ logout= Esci
 lunchPauseEnd= Fine pausa pranzo
 lunchPauseStart= Inizio pausa pranzo
 
+manageUsers= Gestione Utenti
+
 mealTicket.aquiredExitingNow= Buono Pasto maturato (uscendo in questo momento).
 mealTicket.aquired= Buono Pasto maturato
 mealTicket.notAquired= Buono Pasto non maturato

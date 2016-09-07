@@ -1,7 +1,7 @@
 package controllers;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
 import com.google.gdata.util.common.base.Preconditions;
 
 import com.mysema.query.SearchResults;
@@ -9,25 +9,24 @@ import com.mysema.query.SearchResults;
 import dao.OfficeDao;
 import dao.RoleDao;
 import dao.UserDao;
-import dao.UserDao.EnabledType;
-import dao.UserDao.UserType;
 import dao.UsersRolesOfficesDao;
 
 import helpers.Web;
+
+import it.cnr.iit.epas.NullStringBinder;
 
 import manager.SecureManager;
 import manager.UserManager;
 
 import models.Office;
-import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.collections.Lists;
 
+import play.data.binding.As;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.libs.Codec;
@@ -46,23 +45,19 @@ public class Users extends Controller {
   private static final Logger log = LoggerFactory.getLogger(BadgeReaders.class);
 
   @Inject
-  private static SecurityRules rules;
+  static SecurityRules rules;
   @Inject
-  private static UserDao userDao;
+  static UserDao userDao;
   @Inject
-  private static RoleDao roleDao;
+  static OfficeDao officeDao;
   @Inject
-  private static OfficeDao officeDao;
+  static UsersRolesOfficesDao uroDao;
   @Inject
-  private static UsersRolesOfficesDao uroDao;
-  @Inject
-  private static UserManager userManager;
-  @Inject
-  private static SecureManager secureManager;
+  static SecureManager secureManager;
 
   public static void index() {
     flash.keep();
-    list(null);
+    list(null, false, null);
   }
 
   /**
@@ -70,55 +65,73 @@ public class Users extends Controller {
    *
    * @param name il nome utente su cui filtrare.
    */
-  public static void list(String name) {
+  public static void list(@As(binder = NullStringBinder.class) String name,
+      boolean onlyEnabled, Office office) {
 
     User user = Security.getUser().get();
-    Set<Office> offices = secureManager.officesTechnicalAdminAllowed(user);
-    SearchResults<?> results = userDao.listUsersByOffice(Optional.<String>fromNullable(name),
-        offices, EnabledType.ONLY_ENABLED, Lists.newArrayList(UserType.PERSON)).listResults();
+
+    Set<Office> offices = office.isPersistent() ? ImmutableSet.of(office) :
+        secureManager.officesTechnicalAdminAllowed(user);
+
+    SearchResults<?> results = userDao.listUsersByOffice(Optional.fromNullable(name),
+        offices, onlyEnabled).listResults();
 
     render(results, name);
   }
 
-  /**
-   * metodo che renderizza la lista di utenti di sistema.
-   *
-   * @param name il nome utente su cui filtrare.
-   */
-  public static void systemList(String name) {
+  public static void listSystem(@As(binder = NullStringBinder.class) String name,
+      boolean onlyEnabled, Office office) {
 
-    User user = Security.getUser().get();
-    Set<Office> offices = secureManager.officesTechnicalAdminAllowed(user);
-
-    List<UserType> userTypes = Lists.newArrayList(UserType.SYSTEM_WITH_OWNER);
-    if (user.isSystemUser()) {
-      userTypes.add(UserType.SYSTEM_WITHOUT_OWNER); // sistorg, protime etc...
-    }
-
-    SearchResults<?> results = userDao.listUsersByOffice(Optional.<String>fromNullable(name),
-        offices, EnabledType.ONLY_ENABLED, userTypes).listResults();
-
-    render(results, name);
+//    User user = Security.getUser().get();
+//
+//    Set<Office> offices = office.isPersistent() ? ImmutableSet.of(office) :
+//        secureManager.officesTechnicalAdminAllowed(user);
+//
+////    SearchResults<?> results = userDao.getOrphanAndSystemUsers(Optional.fromNullable(name),
+////        offices, onlyEnabled).listResults();
+//
+//    render("@list", results, name);
   }
 
-  /**
-   * @param name il nome utente su cui filtrare.
-   */
-  public static void disabledList(String name) {
+//  /**
+//   * metodo che renderizza la lista di utenti di sistema.
+//   *
+//   * @param name il nome utente su cui filtrare.
+//   */
+//  public static void systemList(String name) {
+//
+//    User user = Security.getUser().get();
+//    Set<Office> offices = secureManager.officesTechnicalAdminAllowed(user);
+//
+//    List<UserType> userTypes = Lists.newArrayList(UserType.SYSTEM_WITH_OWNER);
+//    if (user.isSystemUser()) {
+//      userTypes.add(UserType.SYSTEM_WITHOUT_OWNER); // sistorg, protime etc...
+//    }
+//
+//    SearchResults<?> results = userDao.listUsersByOffice(Optional.<String>fromNullable(name),
+//        offices, EnabledType.ONLY_ENABLED, userTypes).listResults();
+//
+//    render(results, name);
+//  }
 
-    User user = Security.getUser().get();
-    Set<Office> offices = secureManager.officesTechnicalAdminAllowed(user);
-
-    List<UserType> userTypes = Lists.newArrayList(UserType.SYSTEM_WITH_OWNER);
-    if (user.isSystemUser()) {
-      userTypes.add(UserType.SYSTEM_WITHOUT_OWNER); // sistorg, protime etc...
-    }
-
-    SearchResults<?> results = userDao.listUsersByOffice(Optional.<String>fromNullable(name),
-        offices, EnabledType.ONLY_DISABLED, userTypes).listResults();
-
-    render(results, name);
-  }
+//  /**
+//   * @param name il nome utente su cui filtrare.
+//   */
+//  public static void disabledList(String name) {
+//
+//    User user = Security.getUser().get();
+//    Set<Office> offices = secureManager.officesTechnicalAdminAllowed(user);
+//
+//    List<UserType> userTypes = Lists.newArrayList(UserType.SYSTEM_WITH_OWNER);
+//    if (user.isSystemUser()) {
+//      userTypes.add(UserType.SYSTEM_WITHOUT_OWNER); // sistorg, protime etc...
+//    }
+//
+//    SearchResults<?> results = userDao.listUsersByOffice(Optional.<String>fromNullable(name),
+//        offices, EnabledType.ONLY_DISABLED, userTypes).listResults();
+//
+//    render(results, name);
+//  }
 
 
   public static void systemBlank() {
@@ -163,71 +176,71 @@ public class Users extends Controller {
   }
 
 
-  /**
-   * metodo che salva l'utente sulla base dei parametri recuperati dalla form.
-   *
-   * @param user    l'utente da salvare
-   * @param roles   la lista di id dei ruoli da assegnare
-   * @param offices la lista di id degli uffici su cui assegnare gli uro
-   */
-  public static void save(@Valid User user, List<Long> roleIds, List<Long> officeIds,
-      boolean systemUser) {
-
-    // Binding dei parametri e check permitted // TODO: implementare un binder più furbo
-    Set<Office> offices = Sets.newHashSet();
-    Set<Role> roles = Sets.newHashSet();
-
-    if (officeIds != null) {
-      for (Long officeId : officeIds) {
-        Office office = officeDao.getOfficeById(officeId);
-        notFoundIfNull(office);
-        rules.checkIfPermitted(office);
-        offices.add(office);
-      }
-    }
-    if (roleIds != null) {
-
-      for (Long roleId : roleIds) {
-        Role role = roleDao.getRoleById(roleId);
-        notFoundIfNull(role);
-        roles.add(role);
-      }
-    }
-
-    //Validazione particolare
-    if (!Validation.hasErrors()) {
-      if (user.password.length() < 5) {
-        validation.addError("user.password", "almeno 5 caratteri");
-      }
-      if (roles.isEmpty()) {
-        validation.addError("roleIds", "Almeno un ruolo");
-      }
-      if (offices.isEmpty()) {
-        validation.addError("officeIds", "Almeno una sede");
-      }
-    }
-
-    if (Validation.hasErrors()) {
-      response.status = 400;
-      log.warn("validation errors for {}: {}", user, validation.errorsMap());
-      flash.error(Web.msgHasErrors());
-      if (systemUser) {
-        render("@systemBlank", user, offices, roles);
-      } else {
-        render("@blank", user, offices, roles);
-      }
-    }
-    rules.checkIfPermitted(user.person);
-    // Save    
-    userManager.saveUser(user, offices, roles, false);
-
-    flash.success(Web.msgSaved(User.class));
-    if (systemUser) {
-      systemList(null);
-    } else {
-      list(null);
-    }
-  }
+//  /**
+//   * metodo che salva l'utente sulla base dei parametri recuperati dalla form.
+//   *
+//   * @param user    l'utente da salvare
+//   * @param roles   la lista di id dei ruoli da assegnare
+//   * @param offices la lista di id degli uffici su cui assegnare gli uro
+//   */
+//  public static void save(@Valid User user, List<Long> roleIds, List<Long> officeIds,
+//      boolean systemUser) {
+//
+//    // Binding dei parametri e check permitted // TODO: implementare un binder più furbo
+//    Set<Office> offices = Sets.newHashSet();
+//    Set<Role> roles = Sets.newHashSet();
+//
+//    if (officeIds != null) {
+//      for (Long officeId : officeIds) {
+//        Office office = officeDao.getOfficeById(officeId);
+//        notFoundIfNull(office);
+//        rules.checkIfPermitted(office);
+//        offices.add(office);
+//      }
+//    }
+//    if (roleIds != null) {
+//
+//      for (Long roleId : roleIds) {
+//        Role role = roleDao.getRoleById(roleId);
+//        notFoundIfNull(role);
+//        roles.add(role);
+//      }
+//    }
+//
+//    //Validazione particolare
+//    if (!Validation.hasErrors()) {
+//      if (user.password.length() < 5) {
+//        validation.addError("user.password", "almeno 5 caratteri");
+//      }
+//      if (roles.isEmpty()) {
+//        validation.addError("roleIds", "Almeno un ruolo");
+//      }
+//      if (offices.isEmpty()) {
+//        validation.addError("officeIds", "Almeno una sede");
+//      }
+//    }
+//
+//    if (Validation.hasErrors()) {
+//      response.status = 400;
+//      log.warn("validation errors for {}: {}", user, validation.errorsMap());
+//      flash.error(Web.msgHasErrors());
+//      if (systemUser) {
+//        render("@systemBlank", user, offices, roles);
+//      } else {
+//        render("@blank", user, offices, roles);
+//      }
+//    }
+//    rules.checkIfPermitted(user.person);
+//    // Save
+//    userManager.saveUser(user, offices, roles, false);
+//
+//    flash.success(Web.msgSaved(User.class));
+//    if (systemUser) {
+//      systemList(null);
+//    } else {
+//      list(null);
+//    }
+//  }
 
 
   /**
@@ -272,66 +285,66 @@ public class Users extends Controller {
     index();
   }
 
-  /**
-   *
-   * @param id
-   */
-  public static void enable(Long id, List<Long> officeIds, List<Long> roleIds,
-      boolean systemUser) {
-    User user = userDao.getUserByIdAndPassword(id, Optional.<String>absent());
-    notFoundIfNull(user);
-
-    Set<Office> offices = Sets.newHashSet();
-    Set<Role> roles = Sets.newHashSet();
-
-    if (officeIds != null) {
-      for (Long officeId : officeIds) {
-        Office office = officeDao.getOfficeById(officeId);
-        notFoundIfNull(office);
-        rules.checkIfPermitted(office);
-        offices.add(office);
-      }
-    }
-    if (roleIds != null) {
-
-      for (Long roleId : roleIds) {
-        Role role = roleDao.getRoleById(roleId);
-        notFoundIfNull(role);
-        roles.add(role);
-      }
-    }
-
-    //Validazione particolare
-    if (!Validation.hasErrors()) {
-      if (user.password.length() < 5) {
-        validation.addError("user.password", "almeno 5 caratteri");
-      }
-      if (roles.isEmpty()) {
-        validation.addError("roleIds", "Almeno un ruolo");
-      }
-      if (offices.isEmpty()) {
-        validation.addError("officeIds", "Almeno una sede");
-      }
-    }
-
-    if (Validation.hasErrors()) {
-      response.status = 400;
-      log.warn("validation errors for {}: {}", user, validation.errorsMap());
-      flash.error(Web.msgHasErrors());
-      if (systemUser) {
-        render("@systemBlank", user, offices, roles);
-      } else {
-        render("@blank", user, offices, roles);
-      }
-    }
-
-    rules.checkIfPermitted(user.person);
-    userManager.saveUser(user, offices, roles, true);
-    flash.success(Web.msgSaved(User.class));
-    if (systemUser) {
-      systemList(null);
-    } else {
-      list(null);
-    }
-  }
+//  /**
+//   *
+//   * @param id
+//   */
+//  public static void enable(Long id, List<Long> officeIds, List<Long> roleIds,
+//      boolean systemUser) {
+//    User user = userDao.getUserByIdAndPassword(id, Optional.<String>absent());
+//    notFoundIfNull(user);
+//
+//    Set<Office> offices = Sets.newHashSet();
+//    Set<Role> roles = Sets.newHashSet();
+//
+//    if (officeIds != null) {
+//      for (Long officeId : officeIds) {
+//        Office office = officeDao.getOfficeById(officeId);
+//        notFoundIfNull(office);
+//        rules.checkIfPermitted(office);
+//        offices.add(office);
+//      }
+//    }
+//    if (roleIds != null) {
+//
+//      for (Long roleId : roleIds) {
+//        Role role = roleDao.getRoleById(roleId);
+//        notFoundIfNull(role);
+//        roles.add(role);
+//      }
+//    }
+//
+//    //Validazione particolare
+//    if (!Validation.hasErrors()) {
+//      if (user.password.length() < 5) {
+//        validation.addError("user.password", "almeno 5 caratteri");
+//      }
+//      if (roles.isEmpty()) {
+//        validation.addError("roleIds", "Almeno un ruolo");
+//      }
+//      if (offices.isEmpty()) {
+//        validation.addError("officeIds", "Almeno una sede");
+//      }
+//    }
+//
+//    if (Validation.hasErrors()) {
+//      response.status = 400;
+//      log.warn("validation errors for {}: {}", user, validation.errorsMap());
+//      flash.error(Web.msgHasErrors());
+//      if (systemUser) {
+//        render("@systemBlank", user, offices, roles);
+//      } else {
+//        render("@blank", user, offices, roles);
+//      }
+//    }
+//
+//    rules.checkIfPermitted(user.person);
+//    userManager.saveUser(user, offices, roles, true);
+//    flash.success(Web.msgSaved(User.class));
+//    if (systemUser) {
+//      systemList(null);
+//    } else {
+//      list(null);
+//    }
+//  }
 }

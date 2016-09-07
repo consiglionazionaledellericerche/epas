@@ -84,7 +84,6 @@ public class User extends BaseModel {
   @JoinColumn(name = "office_owner_id")
   public Office owner;
 
-
   @Override
   public String getLabel() {
     if (this.person != null) {

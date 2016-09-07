@@ -15,10 +15,10 @@
 <div class="container">
   #{title title:'Lista del personale di ' + office /}
 
-  #{tabs}
-  #{tabItem id:'attivo', title:'Personale Attivo', active:true /}
-  #{tabItem id:'nonAttivo', title:'Personale Non Attivo' /}
-  #{/tabs}
+  #{tabList}
+    #{tabItem id:'attivo', title:'Personale Attivo', active:true /}
+    #{tabItem id:'nonAttivo', title:'Personale Non Attivo' /}
+  #{/tabList}
 
   #{tabContent}
 
