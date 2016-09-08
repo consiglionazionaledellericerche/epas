@@ -412,7 +412,13 @@ public class Competences extends Controller {
 
   }
 
-  
+  /**
+   * 
+   * @param personId
+   * @param competenceId
+   * @param month
+   * @param year
+   */
   public static void insertCompetence(Long personId, Long competenceId, int month, int year) {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
@@ -423,9 +429,9 @@ public class Competences extends Controller {
     if (competence.competenceCode.code.equals("S1")) {
       PersonStampingRecap psDto = stampingsRecapFactory.create(competence.person, 
           competence.year, competence.month, true);
-      render("@editCompetence",competence, psDto, office);
+      render("@editCompetence",competence, psDto, office, year, month, person);
     }
-    render("@editCompetence", competence, office);
+    render("@editCompetence", competence, office, year, month, person);
   }
   /**
    * genera la form di inserimento per le competenze.
@@ -449,13 +455,16 @@ public class Competences extends Controller {
    * salva la competenza passata per parametro se è conforme ai limiti eventuali previsti per essa.
    * @param competence la competenza relativa alla persona
    */
-  public static void saveCompetence(Integer valueApproved, Competence competence) {
+  public static void saveCompetence(Integer valueApproved, @Valid Competence competence) {
 
     notFoundIfNull(competence);
     Office office = competence.person.office;
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
+    int month = competence.month;
+    int year = competence.year;
     String result = "";
+    
     if (!validation.hasErrors()) {
       result = competenceManager.canAddCompetence(competence, valueApproved);
       if (!result.isEmpty()) {
@@ -463,24 +472,27 @@ public class Competences extends Controller {
       }
     }
     if (validation.hasErrors()) {
+      
       response.status = 400;
-      render("@insertCompetence", competence, office);
+      render("@editCompetence", competence, office);
     }
 
     competenceManager.saveCompetence(competence, valueApproved);
     consistencyManager.updatePersonSituation(competence.person.id, 
         new LocalDate(competence.year, competence.month, 1));
-    int month = competence.month;
-    int year = competence.year;
+    
     IWrapperCompetenceCode wrCompetenceCode = wrapperFactory.create(competence.competenceCode);
     List<CompetenceCode> competenceCodeList = competenceDao
         .activeCompetenceCode(office, new LocalDate(year, month, 1));
     List<Competence> compList = competenceDao.getCompetencesInOffice(year, month, 
         Lists.newArrayList(competence.competenceCode.code), office, false);
     flash.success("Aggiornato correttamente il valore della competenza");
+    
+    CompetenceRecap compDto = competenceRecapFactory
+        .create(office, competence.competenceCode, year, month);
 
     render("@showCompetences", year, month, office, 
-        wrCompetenceCode, competenceCodeList, compList);
+        wrCompetenceCode, competenceCodeList, compList, compDto);
   }
 
   /**
