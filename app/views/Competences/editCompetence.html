@@ -21,7 +21,13 @@ title:'Inserisci il quantitativo per la competenza ' + competence.competenceCode
 	#{f.input 'valueApproved',type:'number', value:competence?.valueApproved, required:true /}
 	#{if competence?.persistent}
     	#{f.hidden 'competence.id', value:competence.id /}
+    	
   	#{/if}
+  	#{else}
+  		#{f.hidden 'competence.month', value:month /}
+    	#{f.hidden 'competence.year', value:year /}
+    	#{f.hidden 'competence.person', value:person /}    	
+  	#{/else}
 	#{b.buttons center:true}
 		#{b.submit 'Modifica'/}
 	#{/b.buttons}

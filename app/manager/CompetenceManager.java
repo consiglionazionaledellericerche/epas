@@ -244,19 +244,6 @@ public class CompetenceManager {
         value = competence.get(code.code);
         log.info("competence {} is {}", code.code, value);
       }
-//      if (!value) {
-//        if (person.competenceCode.contains(competenceCodeDao.getCompetenceCodeById(code.id))) {
-//          person.competenceCode.remove(competenceCodeDao.getCompetenceCodeById(code.id));
-//        } else {
-//          continue;
-//        }
-//      } else {
-//        if (person.competenceCode.contains(competenceCodeDao.getCompetenceCodeById(code.id))) {
-//          continue;
-//        } else {
-//          person.competenceCode.add(competenceCodeDao.getCompetenceCodeById(code.id));
-//        }
-//      }
 
     }
     person.save();
@@ -363,38 +350,43 @@ public class CompetenceManager {
    *     Stringa vuota altrimenti.
    */
   public String canAddCompetence(Competence comp, Integer value) {
-    
+    //FIXME: controllare meglio l'algoritmo
     String result = "";
     if (!isCompetenceEnabled(comp)) {
       result = Messages.get("CompManager.notEnabled");
     }    
+    List<CompetenceCode> group = Lists.newArrayList();
+    List<Competence> compList = Lists.newArrayList();
+    int sum = 0;
     switch (comp.competenceCode.limitType) {
       case monthly:        
-        
-        if (comp.valueApproved + value > comp.competenceCode.limitValue) {
-          List<CompetenceCode> group = competenceCodeDao
-              .getCodeWithGroup(comp.competenceCode.competenceCodeGroup);
-          List<Competence> compList = competenceDao
-              .getCompetences(Optional.fromNullable(comp.person), comp.year, 
-              Optional.fromNullable(comp.month), group);
-          int sum = compList.stream().mapToInt(i -> i.valueApproved).sum();
-          if (sum + value > comp.competenceCode.competenceCodeGroup.limitValue) {
-            result = Messages.get("CompManager.overGroupLimit");          
+        group = competenceCodeDao
+            .getCodeWithGroup(comp.competenceCode.competenceCodeGroup);
+        compList = competenceDao
+            .getCompetences(Optional.fromNullable(comp.person), comp.year, 
+                Optional.fromNullable(comp.month), group);
+        sum = compList.stream().mapToInt(i -> i.valueApproved).sum();
+        //Caso Reperibilità:
+        if (StringUtils.containsIgnoreCase(comp.competenceCode.competenceCodeGroup.label, 
+            "reperibili")) {
+          if (!handlerReperibility(comp, value, group)) {
+            result = Messages.get("CompManager.overServiceLimit");
           }
-          //Caso Reperibilità:
-          if (StringUtils.containsIgnoreCase(comp.competenceCode.competenceCodeGroup.label, 
-              "reperibili")) {
-            if (!handlerReperibility(comp, value, group)) {
-              result = Messages.get("CompManager.overServiceLimit");
-            }
-          }
+        }
+        if (sum + value > comp.competenceCode.competenceCodeGroup.limitValue) {
+          result = Messages.get("CompManager.overGroupLimit");  
+          return result;
+        }
+        if (comp.valueApproved + value > comp.competenceCode.limitValue) {         
+          result = Messages.get("CompManager.overMonthLimit");
+          return result;
         }        
         break;
       case yearly:
-        List<Competence> compList = competenceDao
+        compList = competenceDao
             .getCompetences(Optional.fromNullable(comp.person), comp.year, 
             Optional.<Integer>absent(), Lists.newArrayList(comp.competenceCode));
-        int sum = compList.stream().mapToInt(i -> i.valueApproved).sum();      
+        sum = compList.stream().mapToInt(i -> i.valueApproved).sum();      
         if (sum + value > comp.competenceCode.competenceCodeGroup.limitValue) {
           result = Messages.get("CompManager.overYearLimit");
         } 
@@ -431,8 +423,7 @@ public class CompetenceManager {
   }
 
 
- /**
-  * 
+  /**
   * @param yearMonth l'anno/mese di riferimento
   * @param office la sede per cui si cercano i servizi per reperibilità abilitati
   * @return il numero di giorni di reperibilità disponibili sulla base di quanti 
@@ -441,15 +432,15 @@ public class CompetenceManager {
   private Integer countDaysForReperibility(YearMonth yearMonth, Office office) {
     int numbers = reperibilityDao.getReperibilityTypeByOffice(office) != null 
         ? reperibilityDao.getReperibilityTypeByOffice(office).size() : 0;
-    return numbers * (new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(),1)
-        .monthOfYear().getMaximumValue());
+    return numbers * (new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1)
+        .dayOfMonth().getMaximumValue());
   }
   
   /**
    * 
-   * @param comp
-   * @param value
-   * @param group
+   * @param comp la competenza 
+   * @param value il quantitativo per la competenza
+   * @param group il gruppo di codici di competenza
    * @return false se si supera il limite previsto per i servizi di reperibilità attivi.
    *     true altrimenti.
    */
@@ -469,13 +460,12 @@ public class CompetenceManager {
   
   /**
    * 
-   * @param year
-   * @param month
-   * @param comp
-   * @return
+   * @param comp la competenza
+   * @return  true se la competenza è abilitata per la persona. False altrimenti.
    */
   private boolean isCompetenceEnabled(Competence comp) {
-    Optional<PersonCompetenceCodes> pcc = competenceCodeDao.getByPersonAndCode(comp.person, comp.competenceCode);
+    Optional<PersonCompetenceCodes> pcc = competenceCodeDao
+        .getByPersonAndCode(comp.person, comp.competenceCode);
     if (pcc.isPresent()) {
       LocalDate date = new LocalDate(comp.year, comp.month, 1);
       if (!pcc.get().beginDate.isAfter(date) && 
@@ -620,6 +610,7 @@ public class CompetenceManager {
         competence.competenceCode = code;
         competence.month = date.getMonthOfYear();
         competence.year = date.getYear();
+        competence.save();
         compList.add(competence);
       }
           
