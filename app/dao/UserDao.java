@@ -122,28 +122,30 @@ public class UserDao extends DaoBase {
   }
 
   /**
-   * @return La lista degli utenti di Sistema e quelli 'orfani'
+   * @return La lista degli utenti senza legami con una sede
    */
-  public SimpleResults<User> getOrphanAndSystemUsers(Optional<String> name) {
+  public SimpleResults<User> noOwnerUsers(Optional<String> name) {
 
     final QUser user = QUser.user;
     final QPerson person = QPerson.person;
     final QBadgeReader badgeReader = QBadgeReader.badgeReader;
 
     final BooleanBuilder condition = new BooleanBuilder()
-        .and(person.isNull().and(badgeReader.isNull().and(user.owner.isNull())))
-        .or(user.roles.isNotEmpty());
+        .and(person.isNull().and(badgeReader.isNull()).and(user.owner.isNull()))
+        .or(user.roles.any().isNotNull());
 
     // Filtro nome
     if (name.isPresent()) {
       condition.and(matchUserName(user, name.get()));
     }
 
-    return ModelQuery.wrap(getQueryFactory().from(user).leftJoin(user.person, person)
+    return ModelQuery.wrap(getQueryFactory().from(user)
+        .leftJoin(user.person, person)
         .leftJoin(user.badgeReader, badgeReader)
         .where(condition)
         .orderBy(user.username.asc()), user);
   }
+
 
   private BooleanBuilder matchUserName(QUser user, String name) {
     final BooleanBuilder nameCondition = new BooleanBuilder();

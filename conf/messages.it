@@ -245,6 +245,7 @@ errorsInSendingToNewAttestati= Ci sono stati dei problemi nell'invio delle infor
 office.address=Indirizzo
 office.code= Codice
 office.codeId= Sede Id
+officeFilter= Filtra per Sede
 office.headQuarter=Sede principale
 office.joiningDate= Data di affiliazione
 office.name=Nome
@@ -252,6 +253,8 @@ Offices.blank=Nuova sede
 office=Sede
 
 officeIds= Sedi su cui associare l'utente
+
+
 
 onCertificate=In attestati
 
