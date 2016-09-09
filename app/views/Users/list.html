@@ -6,16 +6,9 @@
 
   #{title title:'Gestione Utenti' /}
 
-  #{tabs ['manageUsers':@Users.list(),'manageSystemUsers':@Users.listSystem()] /}
+  #{include './_usersTabs.html' /}
   <br>
   #{breadcrumbs ['manageUsers':@Users.list()], noHome:'true' /}
-
-  *{
-  #{alert color:'info'}
-  <p>Elenco degli utenti associati ad una persona.</p>
-  #{/alert}
-
-  }*
 
   #{form action:@Users.list(), class:'form-inline', method:'GET', 'data-reload':'#normalResults', autocomplete:'off'}
   <div class="row">
@@ -24,12 +17,12 @@
 
     #{field 'office'}
     <div class="col-sm-5">
-      <label for="${field.id}" class="control-label">#{if _label}&{_label}#{/if} #{else}&{field.name}#{/else}</label>
+      <label for="${field.id}" class="control-label">&{'officeFilter'}</label>
       <div class="input-group">
         <select class="form-control" name="${field.name}.id" id="${field.id}" select2>
           <option></option>
           #{list templateUtility.officesAllowed(), as:'office'}
-          <option value="${office.id}"#{if field.value?.id == office.id} selected#{/if}>
+          <option value="${office.id}" #{if field.value?.id== office.id} selected#{/if}>
           ${office.getLabel()}
           </option>
           #{/list}
@@ -40,29 +33,8 @@
 
   </div>
   #{/form}
-
   <br>
 
-  <section id="normalResults">
-    #{paginate results}
-    <ul class="list-group">
-      #{list items:results.results, as:'user'}
-      <li class="list-group-item clearfix">
-        <div class="pull-right btn-group">
-          #{b.show 'show' /}
-          #{secure.check 'Accounts.edit'}
-          #{b.edit 'edit' /}
-          #{/secure.check}
-          #{b.delete 'delete'/}
-        </div>
-        <h4><i class="fa fa-user text-primary"></i> ${user.username}</h4>
-      </li>
-      #{/list}
-    </ul>
-    #{/paginate}
-  </section>
+  #{include './_usersList.html' /}
 
 </div>
-
-
-<div id="modalInsertUser" class="modal fade container" tabindex="-1"></div>

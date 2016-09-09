@@ -7,7 +7,6 @@ import com.google.gdata.util.common.base.Preconditions;
 import com.mysema.query.SearchResults;
 
 import dao.OfficeDao;
-import dao.RoleDao;
 import dao.UserDao;
 import dao.UsersRolesOfficesDao;
 
@@ -16,7 +15,6 @@ import helpers.Web;
 import it.cnr.iit.epas.NullStringBinder;
 
 import manager.SecureManager;
-import manager.UserManager;
 
 import models.Office;
 import models.User;
@@ -79,60 +77,21 @@ public class Users extends Controller {
     render(results, name);
   }
 
-  public static void listSystem(@As(binder = NullStringBinder.class) String name,
-      boolean onlyEnabled, Office office) {
+  public static void noOwnerUsers(@As(binder = NullStringBinder.class) String name) {
 
-//    User user = Security.getUser().get();
-//
-//    Set<Office> offices = office.isPersistent() ? ImmutableSet.of(office) :
-//        secureManager.officesTechnicalAdminAllowed(user);
-//
-////    SearchResults<?> results = userDao.getOrphanAndSystemUsers(Optional.fromNullable(name),
-////        offices, onlyEnabled).listResults();
-//
-//    render("@list", results, name);
+    SearchResults<?> results = userDao
+        .noOwnerUsers(Optional.fromNullable(name)).listResults();
+
+    render(results, name);
   }
 
-//  /**
-//   * metodo che renderizza la lista di utenti di sistema.
-//   *
-//   * @param name il nome utente su cui filtrare.
-//   */
-//  public static void systemList(String name) {
-//
-//    User user = Security.getUser().get();
-//    Set<Office> offices = secureManager.officesTechnicalAdminAllowed(user);
-//
-//    List<UserType> userTypes = Lists.newArrayList(UserType.SYSTEM_WITH_OWNER);
-//    if (user.isSystemUser()) {
-//      userTypes.add(UserType.SYSTEM_WITHOUT_OWNER); // sistorg, protime etc...
-//    }
-//
-//    SearchResults<?> results = userDao.listUsersByOffice(Optional.<String>fromNullable(name),
-//        offices, EnabledType.ONLY_ENABLED, userTypes).listResults();
-//
-//    render(results, name);
-//  }
+  public static void show(User user) {
+    render();
+  }
 
-//  /**
-//   * @param name il nome utente su cui filtrare.
-//   */
-//  public static void disabledList(String name) {
-//
-//    User user = Security.getUser().get();
-//    Set<Office> offices = secureManager.officesTechnicalAdminAllowed(user);
-//
-//    List<UserType> userTypes = Lists.newArrayList(UserType.SYSTEM_WITH_OWNER);
-//    if (user.isSystemUser()) {
-//      userTypes.add(UserType.SYSTEM_WITHOUT_OWNER); // sistorg, protime etc...
-//    }
-//
-//    SearchResults<?> results = userDao.listUsersByOffice(Optional.<String>fromNullable(name),
-//        offices, EnabledType.ONLY_DISABLED, userTypes).listResults();
-//
-//    render(results, name);
-//  }
-
+  public static void edit(User user) {
+    render();
+  }
 
   public static void systemBlank() {
     render();
@@ -142,15 +101,15 @@ public class Users extends Controller {
     render();
   }
 
-  /**
-   * metodo che renderizza l'utente e gli userRoleOffice ad esso associati.
-   *
-   * @param id l'identificativo dell'utente da editare
-   */
-  public static void edit(Long id) {
-    User user = userDao.getUserByIdAndPassword(id, Optional.<String>absent());
-    render(user);
-  }
+//  /**
+//   * metodo che renderizza l'utente e gli userRoleOffice ad esso associati.
+//   *
+//   * @param id l'identificativo dell'utente da editare
+//   */
+//  public static void edit(Long id) {
+//    User user = userDao.getUserByIdAndPassword(id, Optional.<String>absent());
+//    render(user);
+//  }
 
   /**
    * metodo che permette il salvataggio delle modifiche di un user.
@@ -172,7 +131,7 @@ public class Users extends Controller {
     user.save();
 
     flash.success(Web.msgSaved(User.class));
-    edit(user.id);
+    edit(user);
   }
 
 
