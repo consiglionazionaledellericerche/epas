@@ -86,6 +86,7 @@ CompManager.overMonthLimit= Superato il quantitativo mensile usabile
 CompManager.diffBasedWorkingDay= Differenza con i giorni di lavoro effettuati nel mese
 CompManager.overServiceLimit= Superato il limite per i servizi reper.tà disponibili
 CompManager.notEnabled= Competenza non abilitata nell'anno e mese selezionati
+CompManager.overEntireMonth= Non si può assegnare un valore superiore a 1 per questa competenza
 
 configuration.entry= Parametro
 configuration.entry.value= Valore parametro

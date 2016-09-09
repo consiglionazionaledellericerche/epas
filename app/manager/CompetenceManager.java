@@ -350,10 +350,11 @@ public class CompetenceManager {
    *     Stringa vuota altrimenti.
    */
   public String canAddCompetence(Competence comp, Integer value) {
-    //FIXME: controllare meglio l'algoritmo
+    
     String result = "";
     if (!isCompetenceEnabled(comp)) {
       result = Messages.get("CompManager.notEnabled");
+      return result;
     }    
     List<CompetenceCode> group = Lists.newArrayList();
     List<Competence> compList = Lists.newArrayList();
@@ -371,6 +372,7 @@ public class CompetenceManager {
             "reperibili")) {
           if (!handlerReperibility(comp, value, group)) {
             result = Messages.get("CompManager.overServiceLimit");
+            return result;
           }
         }
         if (sum + value > comp.competenceCode.competenceCodeGroup.limitValue) {
@@ -383,9 +385,11 @@ public class CompetenceManager {
         }        
         break;
       case yearly:
+        group = competenceCodeDao
+            .getCodeWithGroup(comp.competenceCode.competenceCodeGroup);
         compList = competenceDao
             .getCompetences(Optional.fromNullable(comp.person), comp.year, 
-            Optional.<Integer>absent(), Lists.newArrayList(comp.competenceCode));
+            Optional.<Integer>absent(), group);
         sum = compList.stream().mapToInt(i -> i.valueApproved).sum();      
         if (sum + value > comp.competenceCode.competenceCodeGroup.limitValue) {
           result = Messages.get("CompManager.overYearLimit");
@@ -399,7 +403,13 @@ public class CompetenceManager {
         }
         break;
       case entireMonth:
-        //TODO: implementare la logica (caso cod. 303)
+        /**
+         * in questo caso il valore deve essere per forza = 1 perchè rappresenta l'intero mese 
+         * assegnato come competenza (caso tipico: cod. 303 Ind.ta' Risc. Rad. Ion. Com.1)
+         */
+        if (value != comp.competenceCode.limitValue) {
+          result = Messages.get("CompManager.overEntireMonth");          
+        }
         break;
       case noLimit:
         break;
@@ -468,8 +478,8 @@ public class CompetenceManager {
         .getByPersonAndCode(comp.person, comp.competenceCode);
     if (pcc.isPresent()) {
       LocalDate date = new LocalDate(comp.year, comp.month, 1);
-      if (!pcc.get().beginDate.isAfter(date) && 
-          (pcc.get().endDate == null || !pcc.get().endDate.isBefore(date))) {
+      if (!pcc.get().beginDate.isAfter(date) 
+          && (pcc.get().endDate == null || !pcc.get().endDate.isBefore(date))) {
         return true;
       }
     } 
