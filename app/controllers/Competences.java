@@ -402,9 +402,8 @@ public class Competences extends Controller {
           + "abilitare almeno un codice competenza ad un dipendente.");
       Competences.enabledCompetences(year, month, officeId);
     }
-    //TODO: aggiungere un controllo che, se è presente la reperibilità tra i codici competenza selezionati, 
-    // verifichi la contestuale presenza di servizi per cui si può usare la reperibilità e comunichi questa 
-    //informazione nella form attraverso un alert
+    // genero un controllo sul fatto che esistano servizi attivi per cui la reperibilità
+    // può essere utilizzata
     if (competenceCodeList.stream().anyMatch(isReperibility())) {
       List<PersonReperibilityType> prtList = reperibilityDao
           .getReperibilityTypeByOffice(office, Optional.fromNullable(new Boolean(false)));
