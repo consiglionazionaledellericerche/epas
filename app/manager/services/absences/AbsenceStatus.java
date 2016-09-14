@@ -5,13 +5,37 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import manager.services.absences.AbsencesReport.ReportAbsenceProblem;
+
+import models.absences.Absence;
 import models.absences.AmountType;
 
 import org.joda.time.LocalDate;
 
 @Builder @Getter @Setter(AccessLevel.PACKAGE)
-public class ConsumedResidualAmount {
+public class AbsenceStatus {
 
+  public enum StatusType {
+    takable, complation, simple;
+  }
+  
+  public Absence absence;
+  public StatusType type;
+  
+  public AmountType amountTypeTakable;
+  public int consumedTakable;
+  public int residualBeforeTakable;
+  //public int residualAfterTakable;
+  
+  public AmountType amountTypeComplation;
+  public int consumedComplation;
+  public int residualBeforeComplation;
+  //public int residualBeforeComplation;
+  
+  public ReportAbsenceProblem reportProblem;
+  
+  
+  
   private AmountType amountType;                    // | units | minutes | units |
   private int amount;                               // | 02:00 | 01:00   |   1   |
   private int workingTime;                          // | 07:12 |
@@ -29,10 +53,6 @@ public class ConsumedResidualAmount {
     return this.residualBefore() - this.amount;
   }
 
-  public boolean canTake() {
-    return residualAfter() >= 0;
-  }
-  
   /**
    * FIXME Versione provvisoria per fare alcune prove...
    * @param amount

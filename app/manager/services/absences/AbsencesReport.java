@@ -34,6 +34,10 @@ public class AbsencesReport {
   // Esiti degli inserimenti
   public List<InsertResultItem> insertResultItems = Lists.newArrayList();
   
+  // Situazione Assenze
+  public List<AbsenceStatus> absencesStatus = Lists.newArrayList();
+  
+  
   public boolean containsProblems() {
     //TODO: to implement
     return !absenceProblems.isEmpty() 
@@ -126,6 +130,7 @@ public class AbsencesReport {
     public ImplementationProblem implementationProblem;
     public LocalDate date;
   }
+  
 
   
 }

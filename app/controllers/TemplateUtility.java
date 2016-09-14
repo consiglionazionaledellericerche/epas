@@ -42,6 +42,9 @@ import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
 import models.absences.AbsenceType;
+import models.absences.ComplationAbsenceBehaviour;
+import models.absences.GroupAbsenceType;
+import models.absences.TakableAbsenceBehaviour;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.CodesForEmployee;
 
@@ -367,6 +370,26 @@ public class TemplateUtility {
       return absenceTypeDao.getAbsenceTypeForEmployee(ImmutableList
           .of(CodesForEmployee.BP.getDescription()));
     }
+  }
+  
+  public Set<GroupAbsenceType> involvedGroupAbsenceType(AbsenceType absenceType) {
+
+    //TODO: da fare la fetch perchè è usato in tabellone timbrature per ogni codice assenza.
+    
+    Set<GroupAbsenceType> groups = Sets.newHashSet();
+    for (TakableAbsenceBehaviour behaviour : absenceType.takableGroup) {
+      groups.addAll(behaviour.groupAbsenceTypes);
+    }
+    for (TakableAbsenceBehaviour behaviour : absenceType.takenGroup) {
+      groups.addAll(behaviour.groupAbsenceTypes);
+    }
+    for (ComplationAbsenceBehaviour behaviour : absenceType.complationGroup) {
+      groups.addAll(behaviour.groupAbsenceTypes);
+    }
+    for (ComplationAbsenceBehaviour behaviour : absenceType.replacingGroup) {
+      groups.addAll(behaviour.groupAbsenceTypes);
+    }
+    return groups;
   }
 
   public boolean hasAdminRole() {
