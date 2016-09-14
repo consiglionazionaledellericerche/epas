@@ -14,6 +14,7 @@ title:(Action + ' servizio per reperibilità')}
   #{if office?.persistent}
     	#{f.hidden 'office.id', value:office.id /}
   #{/if}
+  
   #{f.view 'type.office', value:office /}
   #{f.selectModel 'type.supervisor', items: officePeople, required:true /}
 

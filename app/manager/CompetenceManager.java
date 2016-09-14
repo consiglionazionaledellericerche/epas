@@ -440,8 +440,8 @@ public class CompetenceManager {
   *     servizi per reperibilità sono stati abilitati sulla sede.
   */
   private Integer countDaysForReperibility(YearMonth yearMonth, Office office) {
-    int numbers = reperibilityDao.getReperibilityTypeByOffice(office) != null 
-        ? reperibilityDao.getReperibilityTypeByOffice(office).size() : 0;
+    int numbers = reperibilityDao.getReperibilityTypeByOffice(office, Optional.fromNullable(true)) != null 
+        ? reperibilityDao.getReperibilityTypeByOffice(office, Optional.fromNullable(true)).size() : 0;
     return numbers * (new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1)
         .dayOfMonth().getMaximumValue());
   }

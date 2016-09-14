@@ -12,12 +12,12 @@
   		possono essere attribuite <strong>200 ore</strong>.
   		</p>
   	#{/if}
-  	#{if competence.competenceCode.code.equals('S2')}
+  	#{elseif competence.competenceCode.code.equals('S2')}
   		<p>Per assegnare gli straordinari festivi non ci sono limiti di quantità, solo il tutto deve comunque essere subordinato 
   		al fatto che, al massimo, in un anno di straordinari per persona possono essere attribuite <strong>200 ore</strong>.
   		</p>
-  	#{/if}
-  	#{if competence.competenceCode.code.equals('207')}
+  	#{/elseif}
+  	#{elseif competence.competenceCode.code.equals('207')}
   		<p>In questo caso il valore viene espresso in <strong>giorni</strong>:
   		<ul>
   			<li> Il limite massimo assegnabile a un dipendente è di <strong>12 giorni</strong>.
@@ -25,22 +25,22 @@
   				il massimo disponibile in giorni per reperibilità (<strong>16</strong>) può essere raggiunto aumentando i giorni per il codice '207'.
   		</ul>  			
   		</p>
-  	#{/if}
-  	#{if competence.competenceCode.code.equals('208')}
+  	#{/elseif}
+  	#{elseif competence.competenceCode.code.equals('208')}
   		<p>Per la reperibilità festiva il valore massimo assegnabile è <strong>4 giorni</strong>. 
   			Non sono previsti aggiustamenti in caso di riduzione dei giorni di reperibilità feriale.  			
   		</p>
-  	#{/if}
-  	#{if competence.competenceCode.code.equals('T1')}
+  	#{/elseif}
+  	#{elseif competence.competenceCode.code.equals('T1')}
   		<p>Per il turno ordinario feriale il quantitativo massimo assegnabile è di <strong>150 ore</strong>.<br>
   			Non esistono casi di assegnamento di valori superiori a quel limite.
   		</p>
-  	#{/if}
-  	#{if competence.competenceCode.code.equals('T2')}
+  	#{/elseif}
+  	#{elseif competence.competenceCode.code.equals('T2')}
   		<p>Per il turno ordinario festivo il quantitativo massimo assegnabile è di <strong>15 ore</strong>.<br>
   			Non esistono casi di assegnamento di valori superiori a quel limite.
   		</p>
-  	#{/if}
+  	#{/elseif}
   	#{else}
   		<p>Per questo codice non è stata definita una linea di comportamento nella definizione delle quantità usabili singolarmente
   			o per il proprio gruppo di appartenenza. Rivolgersi all'amministrazione della sede centrale per chiarimenti sui quantitativi

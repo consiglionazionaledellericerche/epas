@@ -66,6 +66,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import javax.inject.Inject;
 
@@ -101,6 +102,10 @@ public class Competences extends Controller {
   private static PersonStampingRecapFactory stampingsRecapFactory;
   @Inject
   private static PersonReperibilityDayDao reperibilityDao;
+  
+  public static Predicate<CompetenceCode> isReperibility() {
+    return p -> p.code.equalsIgnoreCase("207") || p.code.equalsIgnoreCase("208");
+  }
 
   /**
    * Crud CompetenceCode.
@@ -380,7 +385,7 @@ public class Competences extends Controller {
     notFoundIfNull(office);
 
     rules.checkIfPermitted(office);
-
+    boolean servicesInitialized = true;
     //Redirect in caso di mese futuro
     LocalDate today = LocalDate.now();
     if (today.getYear() == year && month > today.getMonthOfYear()) {
@@ -397,7 +402,16 @@ public class Competences extends Controller {
           + "abilitare almeno un codice competenza ad un dipendente.");
       Competences.enabledCompetences(year, month, officeId);
     }
-
+    //TODO: aggiungere un controllo che, se è presente la reperibilità tra i codici competenza selezionati, 
+    // verifichi la contestuale presenza di servizi per cui si può usare la reperibilità e comunichi questa 
+    //informazione nella form attraverso un alert
+    if (competenceCodeList.stream().anyMatch(isReperibility())) {
+      List<PersonReperibilityType> prtList = reperibilityDao
+          .getReperibilityTypeByOffice(office, Optional.fromNullable(new Boolean(false)));
+      if (prtList.isEmpty()) {
+        servicesInitialized = false;
+      }
+    }
     if (competenceCode == null || !competenceCode.isPersistent()) {
       competenceCode = competenceCodeList.get(0);
       notFoundIfNull(competenceCode);
@@ -408,7 +422,7 @@ public class Competences extends Controller {
     CompetenceRecap compDto = competenceRecapFactory
         .create(office, competenceCode, year, month);
 
-    render(year, month, office, competenceCodeList, wrCompetenceCode, compDto);
+    render(year, month, office, competenceCodeList, wrCompetenceCode, compDto, servicesInitialized);
 
   }
 
@@ -697,7 +711,8 @@ public class Competences extends Controller {
     notFoundIfNull(office);
 
     rules.checkIfPermitted(office);
-    List<PersonReperibilityType> prtList = reperibilityDao.getReperibilityTypeByOffice(office);
+    List<PersonReperibilityType> prtList = reperibilityDao
+        .getReperibilityTypeByOffice(office, Optional.<Boolean>absent());
 
     render(office, prtList);
   }

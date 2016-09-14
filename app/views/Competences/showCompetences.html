@@ -8,6 +8,7 @@
 <div class="container">
   #{title title:'Assegna competenze ' + templateUtility.monthName(compDto.month) + ' ' + compDto.year, color:'primary' /}
 
+  #{if servicesInitialized}
   #{alert color:'info'}
   <p>Per assengnare la competenza individuare il dipendente ed il tipo di competenza nella
     tabella sottostante e cliccare sul valore attualmente assegnato.
@@ -15,7 +16,14 @@
   <p>I valori per le reperibilità sono espressi in <strong>giorni</strong>,
     quelli per straordinari e turni in <strong>ore</strong>.</p>
   #{/alert}
-
+  #{/if}
+  #{else}
+  #{alert color:'danger'}
+  <p>Nella lista delle competenze attive compare anche la reperibilità. Per permettere al sistema ePAS di effettuare i corretti controlli
+  sui giorni disponibili per tale competenza, è necessario attivare i servizi per cui la reperibilità è stata richiesta cliccando <a href="@{activateServices(office.id)}">qui</a>
+  <p> 
+  #{/alert}
+  #{/else}
     <!-- form paginata --> 
     #{form action:@showCompetences(), class:'form-horizontal', method:'GET',
           'data-reload':'#results', autocomplete:'off'}
