@@ -764,7 +764,7 @@ public class AbsenceEngineCore {
       int takenAmount = absenceEngineUtility.absenceJustifiedAmount(absenceEngine, 
           absence, takableComponent.takeAmountType);
       
-      ConsumedResidualAmount consumedResidualAmount = ConsumedResidualAmount.builder()
+      AbsenceStatus consumedResidualAmount = AbsenceStatus.builder()
           .amountType(takableComponent.takeAmountType)
           .expireResidual(absencePeriod.to)
           .totalResidual(takableComponent.getPeriodTakableAmount())

@@ -1,0 +1,43 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Assenze'  /}
+
+<div class="container">
+
+#{title title:'Situazione assenze' /}
+
+  ${absenceEngine.person.fullname}
+
+  #{list items:absenceEngine.periodChain.periods, as:'absencePeriod' }
+  
+    <p>Data inizio: ${absencePeriod.from.format()}</p>
+    <p>Data fine: ${absencePeriod.to.format()}</p>
+  
+    #{if absencePeriod.takableComponent.present}
+      %{ takableComponent = absencePeriod.takableComponent.get() }%
+      
+      <table class="table table-condensed">
+        <tr>
+          <th>Data</th>
+          <th>Codice</th>
+          <th>Descrizione</th>
+        </tr>
+      #{list items:takableComponent.takenAbsences, as:'takenAbsence'}
+         
+          <tr>
+            <td>${takenAbsence.getAbsenceDate().format()}</td>
+            <td>${takenAbsence.absenceType.code}</td>
+            <td>${takenAbsence.absenceType.description}</td>
+          
+          
+          </tr>
+        
+        
+      #{/list}
+      </table>
+    
+    #{/if}
+  
+  #{/list}
+    
+</div>

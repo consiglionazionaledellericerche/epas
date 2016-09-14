@@ -57,8 +57,8 @@ public class AbsencePeriod {
     public Set<AbsenceType> takenCodes;              // I tipi di assenza consumati del periodo
 
     // Le assenze consumate
-    public List<Absence> takenAbsence = Lists.newArrayList(); 
-
+    public List<Absence> takenAbsences = Lists.newArrayList(); 
+    
     public void setFixedPeriodTakableAmount(int amount) {
       if (this.takeAmountType.equals(AmountType.units)) {
         // Per non fare operazioni in virgola mobile...
@@ -105,7 +105,7 @@ public class AbsencePeriod {
      * @param enhancedAbsence
      */
     public void addAbsenceTaken(Absence absence, int takenAmount) {
-      this.takenAbsence.add(absence);
+      this.takenAbsences.add(absence);
       this.periodTakenAmount += takenAmount;
     }
   }

@@ -137,10 +137,17 @@ public class AbsenceComponentDao extends DaoBase {
         .where(groupAbsenceType.name.eq(name)).singleResult(groupAbsenceType));
   }
   
+  public GroupAbsenceType groupAbsenceTypeById(Long id) {
+    
+    QGroupAbsenceType groupAbsenceType = QGroupAbsenceType.groupAbsenceType;
+    
+    return getQueryFactory().from(groupAbsenceType)
+        .where(groupAbsenceType.id.eq(id)).singleResult(groupAbsenceType);
+  }
+  
   public List<GroupAbsenceType> allGroupAbsenceType() {
     
     QGroupAbsenceType groupAbsenceType = QGroupAbsenceType.groupAbsenceType;
-    QAbsenceType absenceType = QAbsenceType.absenceType;
 
     return getQueryFactory().from(groupAbsenceType)
         .leftJoin(groupAbsenceType.category).fetch()

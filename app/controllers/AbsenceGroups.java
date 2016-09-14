@@ -1,6 +1,7 @@
 package controllers;
 
 import dao.PersonDao;
+import dao.absences.AbsenceComponentDao;
 
 import manager.ConsistencyManager;
 import manager.PersonDayManager;
@@ -10,6 +11,7 @@ import manager.services.absences.AbsenceService.AbsenceRequestType;
 import manager.services.absences.AbsencesReport;
 import manager.services.absences.InsertResultItem;
 import manager.services.absences.InsertResultItem.Operation;
+import manager.services.absences.model.AbsenceEngine;
 import manager.services.absences.web.AbsenceRequestForm;
 import manager.services.absences.web.AbsenceRequestForm.SubAbsenceGroupFormItem;
 
@@ -46,6 +48,8 @@ public class AbsenceGroups extends Controller {
   private static AbsenceMigration absenceMigration;
   @Inject
   private static ConsistencyManager consistencyManager;
+  @Inject
+  private static AbsenceComponentDao absenceComponentDao;
   
   public static void migrate() {
     
@@ -174,6 +178,17 @@ public class AbsenceGroups extends Controller {
     Stampings.personStamping(person.id, from.getYear(), from.getMonthOfYear());
     
     
+  }
+  
+  public static void groupStatus(Person person, GroupAbsenceType groupAbsenceType, LocalDate date) {
+    
+    notFoundIfNull(person);
+    notFoundIfNull(date);
+    notFoundIfNull(groupAbsenceType);
+    
+    AbsenceEngine absenceEngine = absenceService.residual(person, groupAbsenceType, date);
+    
+    render(absenceEngine);
   }
   
   public static void scan(Long personId, LocalDate from) {

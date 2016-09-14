@@ -42,6 +42,16 @@
 	    #{/if}
     #{/if}
     
+    #{if !templateUtility.involvedGroupAbsenceType(absence.absenceType).empty }
+    <p>
+      <br>
+      <strong>Il codice di assenza modella i seguenti gruppi di assenze:</strong>
+      #{list items:templateUtility.involvedGroupAbsenceType(absence.absenceType), as:'group'}
+        <br><a href="@{AbsenceGroups.groupStatus('person.id':person.id, 'groupAbsenceType.id':group.id, 'date':absence.getAbsenceDate().format())}">${group.description}</a>      
+      #{/list}
+    </p>  
+    #{/if}
+    
     #{if !absence.troubles.empty}
          <br><br>  
          <p class="text-danger">Questa assenza contiene errori:</p>

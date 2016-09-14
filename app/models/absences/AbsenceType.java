@@ -178,5 +178,4 @@ public class AbsenceType extends BaseModel {
     }
     return false;
   }
-   
 }

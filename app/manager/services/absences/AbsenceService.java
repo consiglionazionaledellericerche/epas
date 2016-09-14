@@ -219,12 +219,9 @@ public class AbsenceService {
     if (date == null) {
       date = LocalDate.now();
     }
-    if (groupAbsenceType == null) {
-      //TODO: scegliere il primo GroupAbsenceType che ha senso inizializzare
-      groupAbsenceType = (GroupAbsenceType)GroupAbsenceType.findAll().get(0);
-    }
     
-    AbsenceEngine absenceEngine = absenceEngineCore.residualAbsenceEngine(person, groupAbsenceType, date);
+    AbsenceEngine absenceEngine = absenceEngineCore
+        .residualAbsenceEngine(person, groupAbsenceType, date);
     return absenceEngine;
   }
   
