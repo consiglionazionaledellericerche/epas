@@ -38,6 +38,7 @@ import models.Person;
 import models.PersonCompetenceCodes;
 import models.PersonDay;
 import models.PersonMonthRecap;
+import models.PersonReperibilityType;
 import models.TotalOvertime;
 import models.enumerate.LimitType;
 
@@ -370,6 +371,10 @@ public class CompetenceManager {
         //Caso Reperibilità:
         if (StringUtils.containsIgnoreCase(comp.competenceCode.competenceCodeGroup.label, 
             "reperibili")) {
+          if (!servicesActivated(comp.person.office)) {
+            result = Messages.get("CompManager.notConfigured");
+            return result;
+          }
           if (!handlerReperibility(comp, value, group)) {
             result = Messages.get("CompManager.overServiceLimit");
             return result;
@@ -440,11 +445,26 @@ public class CompetenceManager {
   *     servizi per reperibilità sono stati abilitati sulla sede.
   */
   private Integer countDaysForReperibility(YearMonth yearMonth, Office office) {
-    int numbers = reperibilityDao.getReperibilityTypeByOffice(office, Optional.fromNullable(true)) != null 
-        ? reperibilityDao.getReperibilityTypeByOffice(office, Optional.fromNullable(true)).size() : 0;
+    int numbers = reperibilityDao.getReperibilityTypeByOffice(office, Optional.fromNullable(false)) != null 
+        ? reperibilityDao.getReperibilityTypeByOffice(office, Optional.fromNullable(false)).size() : 0;
     return numbers * (new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1)
         .dayOfMonth().getMaximumValue());
   }
+  
+  /**
+   * 
+   * @param office la sede su cui cercare.
+   * @return true se ci sono servizi attivi per la reperibilità. False altrimenti.
+   */
+  private boolean servicesActivated(Office office) {
+    List<PersonReperibilityType> prtList = reperibilityDao
+        .getReperibilityTypeByOffice(office, Optional.fromNullable(false));
+    if (prtList.isEmpty()) {
+      return false;
+    }
+    return true;
+  }
+  
   
   /**
    * 

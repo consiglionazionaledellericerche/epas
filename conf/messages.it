@@ -87,6 +87,7 @@ CompManager.diffBasedWorkingDay= Differenza con i giorni di lavoro effettuati ne
 CompManager.overServiceLimit= Superato il limite per i servizi reper.tà disponibili
 CompManager.notEnabled= Competenza non abilitata nell'anno e mese selezionati
 CompManager.overEntireMonth= Non si può assegnare un valore superiore a 1 per questa competenza
+CompManager.notConfigured= Aggiungere prima il servizio per cui si richiede la reperibilità
 
 configuration.entry= Parametro
 configuration.entry.value= Valore parametro
