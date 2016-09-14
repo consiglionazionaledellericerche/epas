@@ -1,5 +1,5 @@
 # ---!Ups
-
+ALTER TABLE person_reperibility_types ALTER id SET DEFAULT nextval('seq_person_reperibility_types'::regclass);
 ALTER TABLE persons_competence_codes ADD COLUMN enabling_date DATE;
 
 UPDATE persons_competence_codes 
