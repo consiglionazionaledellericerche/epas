@@ -25,9 +25,15 @@ INSERT INTO user_roles select id,'ADMIN' from users where username = 'admin';
 DELETE FROM users_roles_offices WHERE user_id in (SELECT id FROM users WHERE username = 'developer');
 DELETE FROM users_roles_offices WHERE user_id in (SELECT id FROM users WHERE username = 'admin');
 
+DELETE FROM roles WHERE name = 'admin';
+DELETE FROM roles WHERE name = 'developer';
+
 # ---!Downs
 
 UPDATE roles SET name = 'tecnicalAdmin' where name = 'technicalAdmin';
 
 DROP TABLE user_roles;
 DROP TABLE user_roles_history;
+
+INSERT INTO roles (name) values ('admin');
+INSERT INTO roles (name) values ('developer');
