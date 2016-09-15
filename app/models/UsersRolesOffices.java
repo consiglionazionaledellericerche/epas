@@ -53,9 +53,9 @@ public class UsersRolesOffices extends BaseModel {
 
     return MoreObjects.toStringHelper(this).omitNullValues()
             .add("id", id)
-            .add("user", user.username)
-            .add("role", role.name)
-            .add("office", office.name)
+            .add("user", user)
+            .add("role", role)
+            .add("office", office)
             .toString();
   }
 }
