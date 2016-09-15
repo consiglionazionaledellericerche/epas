@@ -8,6 +8,8 @@ import com.mysema.query.jpa.JPQLQueryFactory;
 import models.Role;
 import models.query.QRole;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
@@ -40,6 +42,15 @@ public class RoleDao extends DaoBase {
     final JPQLQuery query = getQueryFactory().from(role)
         .where(role.name.eq(name));
     return query.singleResult(role);
+  }
+
+  /**
+   *
+   * @return Tutti i ruoli disponibili
+   */
+  public List<Role> getAll() {
+    final QRole role = QRole.role;
+    return getQueryFactory().from(role).list(role);
   }
 
 }
