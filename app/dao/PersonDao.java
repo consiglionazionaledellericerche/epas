@@ -26,7 +26,6 @@ import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.query.QBadge;
-import models.query.QCompetenceCode;
 import models.query.QContract;
 import models.query.QContractStampProfile;
 import models.query.QContractWorkingTimeType;
@@ -838,9 +837,34 @@ public final class PersonDao extends DaoBase {
     return lightQuery.list(bean);
 
   }
-  
+
   /**
-   * 
+   * Questo metodo ci è utile per popolare le select delle persone
+   *
+   * @param offices gli uffici di appartenenza delle persone richieste
+   * @return la Lista delle persone appartenenti agli uffici specificati
+   */
+  public List<PersonLite> peopleInOffices(Set<Office> offices) {
+
+    final QPerson person = QPerson.person;
+
+
+    JPQLQuery lightQuery =
+        getQueryFactory().from(person).leftJoin(person.contracts, QContract.contract)
+            .orderBy(person.surname.asc(), person.name.asc()).distinct();
+
+
+    lightQuery = personQuery(lightQuery, Optional.absent(), offices, false, Optional.absent(),
+        Optional.absent(), true, Optional.absent(), Optional.absent(), false);
+
+    QBean<PersonLite> bean =
+        Projections.bean(PersonLite.class, person.id, person.name, person.surname);
+
+    return lightQuery.list(bean);
+  }
+
+  /**
+   *
    * @param offices
    * @param onlyTechnician
    * @param year
@@ -881,6 +905,12 @@ public final class PersonDao extends DaoBase {
       this.name = name;
       this.surname = surname;
     }
+
+    @Override
+    public String toString() {
+      return surname + ' ' + name;
+    }
+
   }
 
 }
