@@ -6,7 +6,7 @@
       <div class="pull-right btn-group">
         #{b.show @show('user.id':user.id) /}
         #{secure.check 'Accounts.edit'}
-          #{b.edit @edit('user.id':user.id) /}
+          #{b.edit @edit(user.id) /}
         #{/secure.check}
         #{b.delete 'delete'/}
       </div>
