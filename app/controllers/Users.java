@@ -1,6 +1,7 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.gdata.util.common.base.Preconditions;
 
@@ -17,6 +18,7 @@ import it.cnr.iit.epas.NullStringBinder;
 import manager.SecureManager;
 
 import models.Office;
+import models.Person;
 import models.User;
 import models.UsersRolesOffices;
 
@@ -25,6 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import play.data.binding.As;
+import play.data.validation.Equals;
+import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.libs.Codec;
@@ -34,6 +38,7 @@ import security.SecurityRules;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -85,12 +90,52 @@ public class Users extends Controller {
     render(results, name);
   }
 
+  public static void addRole(User user) {
+    render(user);
+  }
+
+  public static void saveRole(@Valid UsersRolesOffices userRoleOffice) {
+
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      log.warn("validation errors for {}: {}", userRoleOffice, validation.errorsMap());
+      flash.error(Web.msgHasErrors());
+      final User user = userRoleOffice.user;
+      render("@addRole", user, userRoleOffice);
+    }
+
+    userRoleOffice.save();
+    final User user = userRoleOffice.user;
+    flash.success(Web.msgCreated(UsersRolesOffices.class));
+    edit(user.id);
+  }
+
+  public static void removeRole(@Valid UsersRolesOffices userRoleOffice) {
+
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      log.warn("validation errors for {}: {}", userRoleOffice, validation.errorsMap());
+      flash.error(Web.msgHasErrors());
+      final User user = userRoleOffice.user;
+      render("@addRole", user, userRoleOffice);
+    }
+
+    if (userRoleOffice.isPersistent()) {
+      userRoleOffice.delete();
+      flash.success(Web.msgDeleted(UsersRolesOffices.class));
+    }
+
+    edit(userRoleOffice.user.id);
+  }
+
   public static void show(User user) {
     render();
   }
 
-  public static void edit(User user) {
-    render();
+  public static void edit(Long userId) {
+    final User user = userDao.getUserByIdAndPassword(userId, Optional.absent());
+    notFoundIfNull(user);
+    render(user);
   }
 
   public static void systemBlank() {
@@ -99,6 +144,29 @@ public class Users extends Controller {
 
   public static void blank() {
     render();
+  }
+
+  public static void save(@Required @Valid User user,
+      String password, @Equals("password") String confirmPassword) {
+
+
+    if (Validation.hasErrors()) {
+      log.warn("validation errors for {}: {}", user, validation.errorsMap());
+      flash.error(Web.msgHasErrors());
+      render("@edit", user);
+    }
+
+    if (!Strings.isNullOrEmpty(password)) {
+      user.password = Codec.hexMD5(password);
+    }
+    final Person person = user.person;
+    user.roles = user.roles.stream().filter(accountRole -> accountRole != null)
+        .collect(Collectors.toSet());
+    user.save();
+    person.user = user;
+    person.save();
+    flash.success(Web.msgModified(User.class));
+    edit(user.id);
   }
 
 //  /**
@@ -131,7 +199,7 @@ public class Users extends Controller {
     user.save();
 
     flash.success(Web.msgSaved(User.class));
-    edit(user);
+    edit(user.id);
   }
 
 

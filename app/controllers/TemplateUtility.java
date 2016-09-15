@@ -43,7 +43,6 @@ import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
 import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.AccountRole;
 import models.enumerate.CodesForEmployee;
 
 import org.joda.time.LocalDate;
@@ -241,6 +240,14 @@ public class TemplateUtility {
     return users;
   }
 
+  /**
+   * @return Una lista delle persone assegnabili ad un certo utente dall'operatore corrente
+   */
+  public List<PersonDao.PersonLite> assignablePeople() {
+    return personDao.peopleInOffices(secureManager
+        .officesTechnicalAdminAllowed(Security.getUser().get()));
+  }
+
   public List<Role> rolesAssignable(Office office) {
 
     List<Role> roles = Lists.newArrayList();
@@ -278,6 +285,22 @@ public class TemplateUtility {
       return roles;
     }
     return roles;
+  }
+
+  /**
+   * @return tutti i ruoli presenti
+   */
+  public List<Role> getRoles() {
+    return roleDao.getAll();
+  }
+
+  /**
+   * @return tutti gli uffici sul quale l'utente corrente ha il ruolo di TECHNICAL_ADMIN
+   */
+  public List<Office> getAssignableOffices() {
+    return secureManager.officesTechnicalAdminAllowed(Security.getUser().get())
+        .stream().sorted((o, o1) -> o.name.compareTo(o1.name))
+        .collect(Collectors.toList());
   }
 
   /**

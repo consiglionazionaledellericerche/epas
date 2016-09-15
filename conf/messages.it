@@ -342,6 +342,9 @@ User.blank= Nuovo utente
 User.systemBlank= Nuovo utente di sistema
 user.person= Persona associata
 users= Utenti
+
+usersRolesOffices= Ruolo
+
 personUsers=Utenti Persone
 systemUsers=Utenti Di Sistema
 disabledUsers=Utenti Disabilitati
