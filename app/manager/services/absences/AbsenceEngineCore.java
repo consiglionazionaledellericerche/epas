@@ -50,7 +50,6 @@ import org.joda.time.LocalDate;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
@@ -411,7 +410,11 @@ public class AbsenceEngineCore {
         
       }
       
-      complationSoundness(absenceEngine, complationComponent);
+      if (complationComponent != null) {
+        complationComponent.replacingDaysStatus = 
+            complationReplacingDays(absenceEngine, complationComponent);
+        complationSoundness(absenceEngine, complationComponent);
+      }
     }
   }
   
@@ -436,6 +439,10 @@ public class AbsenceEngineCore {
   
   private SortedMap<LocalDate, ReplacingDay> complationReplacingDays(AbsenceEngine absenceEngine, 
       ComplationComponent complationComponent) {
+    
+    if (complationComponent == null) {
+      return Maps.newTreeMap();
+    }
     
     //I replacing days per ogni data raccolgo i replacing effettivi e quelli corretti
     SortedMap<LocalDate, ReplacingDay> replacingDays = Maps.newTreeMap();
@@ -472,7 +479,15 @@ public class AbsenceEngineCore {
         } else {
           replacingDay.setCorrectReplacing(replacingCode.get());
         }
+        
+        replacingDay.setAmountTypeComplation(complationComponent.complationAmountType);
+        replacingDay.setComplationAbsence(complationAbsence);
+        replacingDay.setResidualBeforeComplation(complationAmount - amount);
+        replacingDay.setConsumedComplation(amount);
+        
         complationAmount -= complationComponent.replacingTimes.get(replacingCode.get());
+        
+        replacingDay.setResidualAfterComplation(complationAmount);
       }
     }
     complationComponent.complationConsumedAmount = complationAmount;
@@ -491,14 +506,10 @@ public class AbsenceEngineCore {
    */
   private AbsenceEngine complationSoundness(AbsenceEngine absenceEngine, ComplationComponent complationComponent) {
 
-    if (complationComponent == null) {
-      return absenceEngine;
-    }
-
     //Controllo che i replacing ipotetici collimino con quelli reali
     complationComponent.compromisedReplacingDate = null;
 
-    for (ReplacingDay replacingDay : complationReplacingDays(absenceEngine, complationComponent).values()) {
+    for (ReplacingDay replacingDay : complationComponent.replacingDaysStatus.values()) {
 
       if (replacingDay.wrongType()) {
         absenceEngine.report.addAbsenceProblem(ReportAbsenceProblem.builder()
@@ -609,14 +620,13 @@ public class AbsenceEngineCore {
   
   private void persistScannerResults(AbsenceEngine absenceEngine) {
     
-    Map<Absence, List<AbsenceProblem>> remainingProblemsMap = absenceEngine.report.remainingProblemsMap();
-    
     for (Absence absence : absenceEngine.scan.scanAbsences) {
  
       List<AbsenceTrouble> toDeleteTroubles = Lists.newArrayList();     //problemi da aggiungere
       List<AbsenceTrouble> toAddTroubles = Lists.newArrayList();        //problemi da rimuovere
       
-      List<AbsenceProblem> remainingProblems = remainingProblemsMap.get(absence);
+      List<ReportAbsenceProblem> remainingProblems = 
+          absenceEngine.report.absenceProblemsMap.get(absence);
       if (remainingProblems == null) {
         remainingProblems = Lists.newArrayList();
       }
@@ -631,17 +641,17 @@ public class AbsenceEngineCore {
       
       //decidere quelli da aggiungere
       //   per ogni remaining verifico se non è presente in vecchi absencetrouble
-      for (AbsenceProblem absenceProblem : remainingProblems) {
+      for (ReportAbsenceProblem reportAbsenceProblem : remainingProblems) {
         boolean toAdd = true;
         for (AbsenceTrouble absenceTrouble : absence.troubles) {
-          if (absenceTrouble.trouble.equals(absenceProblem)) {
+          if (absenceTrouble.trouble.equals(reportAbsenceProblem.absenceProblem)) {
             toAdd = false;
           }
         }
         if (toAdd) {
           AbsenceTrouble toAddTrouble = new AbsenceTrouble();
           toAddTrouble.absence = absence;
-          toAddTrouble.trouble = absenceProblem;
+          toAddTrouble.trouble = reportAbsenceProblem.absenceProblem;
           toAddTroubles.add(toAddTrouble);
         }
       }

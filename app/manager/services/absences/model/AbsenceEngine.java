@@ -14,6 +14,7 @@ import models.ContractWorkingTimeType;
 import models.Person;
 import models.PersonChildren;
 import models.absences.Absence;
+import models.absences.AmountType;
 import models.absences.GroupAbsenceType;
 
 import org.joda.time.LocalDate;
@@ -140,4 +141,5 @@ public class AbsenceEngine {
     }
     return 0;
   }
+
 }

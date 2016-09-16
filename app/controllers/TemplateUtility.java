@@ -42,6 +42,7 @@ import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
 import models.absences.AbsenceType;
+import models.absences.AmountType;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
 import models.absences.TakableAbsenceBehaviour;
@@ -420,5 +421,38 @@ public class TemplateUtility {
 
   public MemoizedCollection<Notification> getArchivedNotifications() {
     return archivedNotifications;
+  }
+  
+  //FIXME metodo provvisorio per fare le prove.
+  public String printAmount(int amount, AmountType amountType) {
+    String format = "";
+    if (amountType.equals(AmountType.units)) {
+      int units = amount / 100;
+      int percent = amount % 100;
+      String label = " giorni lavorativi";
+      if (units == 1) {
+        label = " giorno lavorativo";
+      }
+      if (units > 0 && percent > 0) {
+        return units + label + " + " + percent + "% di un giorno lavorativo";  
+      } else if (units > 0) {
+        return units + label;
+      } else if (percent > 0) {
+        return percent + "% di un giorno lavorativo";
+      }
+    }
+    if (amountType.equals(AmountType.minutes)) {
+      int hours = amount / 60; //since both are ints, you get an int
+      int minutes = amount % 60;
+
+      if (hours > 0 && minutes > 0) {
+        format = hours + " ore " + minutes + " minuti";
+      } else if (hours > 0) {
+        format = hours + " ore";
+      } else if (minutes > 0) {
+        format = minutes + " minuti";
+      }
+    }
+    return format;
   }
 }

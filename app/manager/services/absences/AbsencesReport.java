@@ -4,8 +4,6 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import models.absences.Absence;
@@ -22,11 +20,10 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-@Setter @Getter
 public class AbsencesReport {
 
   //List degli errori
-  public List<ReportAbsenceProblem> absenceProblems = Lists.newArrayList();
+  public Map<Absence, List<ReportAbsenceProblem>> absenceProblemsMap = Maps.newHashMap(); 
   public List<ReportAbsenceTypeProblem> absenceTypeProblems = Lists.newArrayList();
   public List<ReportRequestProblem> requestProblems = Lists.newArrayList();
   public List<ReportImplementationProblem> implementationProblems = Lists.newArrayList();
@@ -34,33 +31,26 @@ public class AbsencesReport {
   // Esiti degli inserimenti
   public List<InsertResultItem> insertResultItems = Lists.newArrayList();
   
-  // Situazione Assenze
-  public List<AbsenceStatus> absencesStatus = Lists.newArrayList();
-  
-  
   public boolean containsProblems() {
     //TODO: to implement
-    return !absenceProblems.isEmpty() 
+    return !absenceProblemsMap.keySet().isEmpty() 
         || !absenceTypeProblems.isEmpty()
         || !requestProblems.isEmpty()
         || !implementationProblems.isEmpty();
   }
 
   /**
-   * La mappa degli errori riportati per assenza.
-   * @return
+   * Aggiunge un nuovo problema sulle assenze alla lista. La generazione della mappa blocca
+   * @param reportAbsenceProblem
    */
-  public Map<Absence, List<AbsenceProblem>> remainingProblemsMap() {
-    Map<Absence, List<AbsenceProblem>> remainingProblemsMap = Maps.newHashMap();
-    for (ReportAbsenceProblem absenceProblem : this.absenceProblems) {
-      List<AbsenceProblem> remainingProblems = remainingProblemsMap.get(absenceProblem.absence);
-      if (remainingProblems == null) {
-        remainingProblems = Lists.newArrayList();
-        remainingProblemsMap.put(absenceProblem.absence, remainingProblems);
-      }
-      remainingProblems.add(absenceProblem.absenceProblem);
+  public void addAbsenceProblem(ReportAbsenceProblem reportAbsenceProblem) {
+    List<ReportAbsenceProblem> problems = absenceProblemsMap.get(reportAbsenceProblem.absence);
+    if (problems == null) {
+      problems = Lists.newArrayList();
+      absenceProblemsMap.put(reportAbsenceProblem.absence, problems);
     }
-    return remainingProblemsMap;
+    problems.add(reportAbsenceProblem);
+    log.debug("Aggiunto a report.absenceProblems: " + reportAbsenceProblem.toString());
   }
   
   public boolean absenceTypeHasProblem(AbsenceType absenceType) {
@@ -71,11 +61,6 @@ public class AbsencesReport {
       }
     }
     return false;
-  }
-  
-  public void addAbsenceProblem(ReportAbsenceProblem reportAbsenceProblem) {
-    this.absenceProblems.add(reportAbsenceProblem );
-    log.debug("Aggiunto a report.absenceProblems: " + reportAbsenceProblem.toString());
   }
   
   public void addAbsenceTypeProblem(ReportAbsenceTypeProblem reportAbsenceTypeProblem) {
@@ -122,7 +107,7 @@ public class AbsencesReport {
   public static class ReportRequestProblem {
     public RequestProblem requestProblem;
     public LocalDate date;
-    public Absence absence;
+    //public Absence absence;
   }
   
   @Builder

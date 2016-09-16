@@ -117,12 +117,12 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
         
         <td>
           #{list items:insertResultItem.consumedResidualAmount, as:'cra'}
-            ${cra.printAmount(cra.amount)}<br>
+            ${templateUtility.printAmount(cra.amount, cra.amountType)}<br>
           #{/list}
         </td>
         <td>
           #{list items:insertResultItem.consumedResidualAmount, as:'cra'}
-            ${cra.printAmount(cra.residualAfter())}<br>
+            ${templateUtility.printAmount(cra.residualAfter(), cra.amountType)}<br>
           #{/list}
         </td>
         <td>

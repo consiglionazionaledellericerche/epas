@@ -4,39 +4,77 @@
 
 <div class="container">
 
-#{title title:'Situazione assenze' /}
-
-  ${absenceEngine.person.fullname}
-
-  #{list items:absenceEngine.periodChain.periods, as:'absencePeriod' }
+#{title title:absenceEngine.person.fullname + ' - ' + absenceEngine.periodChain.chainDescription /}
   
-    <p>Data inizio: ${absencePeriod.from.format()}</p>
-    <p>Data fine: ${absencePeriod.to.format()}</p>
+  #{list items:absenceEngine.periodChain.periods, as:'absencePeriod' }
+
+    <p>  
+      <strong>Periodo validità</strong>
+      <br>Data inizio: ${absencePeriod.from.format()}
+      <br>Data fine: ${absencePeriod.to.format()}
+    </p>  
+    <p>
+      <strong>Gruppo</strong>
+      ${absencePeriod.groupAbsenceType.description}
+    </p>
   
     #{if absencePeriod.takableComponent.present}
+      <p><strong>Riepilogo Limiti</strong></p>
       %{ takableComponent = absencePeriod.takableComponent.get() }%
-      
       <table class="table table-condensed">
         <tr>
           <th>Data</th>
           <th>Codice</th>
           <th>Descrizione</th>
+          <th>Residuo Precedente</th>
+          <th>Ammontare</th>
+          <th class="text-muted">Nuovo Residuo</th>
+          <th class="text-muted">Scadenza Residuo</th>
         </tr>
-      #{list items:takableComponent.takenAbsences, as:'takenAbsence'}
+      #{list items:takableComponent.takenAbsencesStatus, as:'absenceStatus'}
          
           <tr>
-            <td>${takenAbsence.getAbsenceDate().format()}</td>
-            <td>${takenAbsence.absenceType.code}</td>
-            <td>${takenAbsence.absenceType.description}</td>
-          
-          
+            <td>${absenceStatus.absence.getAbsenceDate().format()}</td>
+            <td>${absenceStatus.absence.absenceType.code}</td>
+            <td>${absenceStatus.absence.absenceType.description}</td>
+            <td>${templateUtility.printAmount(absenceStatus.residualBeforeTakable, absenceStatus.amountTypeTakable)}</td>
+            <td>${templateUtility.printAmount(absenceStatus.consumedTakable, absenceStatus.amountTypeTakable)}</td>
+            <td class="text-muted">${templateUtility.printAmount(absenceStatus.residualBeforeTakable - absenceStatus.consumedTakable, absenceStatus.amountTypeTakable)}</td>
+            <td class="text-muted">${absencePeriod.to.format()}</td>
           </tr>
-        
-        
       #{/list}
       </table>
-    
     #{/if}
+
+    #{if absencePeriod.complationComponent.present}
+      <p><strong>Riepilogo Completamenti</strong></p>
+      %{ complationComponent = absencePeriod.complationComponent.get() }%
+      <table class="table table-condensed">
+        <tr>
+          <th>Data</th>
+          <th>Esito</th>
+          <th>Residuo Utilizzato Prima</th>
+          <th>Ammontare Consumato</th>
+          <th>Residuo Utilizzato Dopo</th>
+        </tr>
+      #{list items:complationComponent.replacingDaysStatus.values(), as:'replacingDay'}
+         
+          <tr>
+            <td>${replacingDay.date.format()}</td>
+            <td>
+              #{if replacingDay.correct() } OK #{/if}
+              #{if replacingDay.wrongType() } Tipo sbagliato #{/if}
+              #{if replacingDay.onlyCorrect() } Missing #{/if}
+              #{if replacingDay.onlyExisting() } TooEarly #{/if}
+            </td>
+            <td>${templateUtility.printAmount(replacingDay.residualBeforeComplation, replacingDay.amountTypeComplation)}</td>
+            <td>${templateUtility.printAmount(replacingDay.consumedComplation, replacingDay.amountTypeComplation)}</td>
+            <td>${templateUtility.printAmount(replacingDay.residualAfterComplation, replacingDay.amountTypeComplation)}</td>
+          </tr>
+      #{/list}
+      </table>
+    #{/if}
+
   
   #{/list}
     

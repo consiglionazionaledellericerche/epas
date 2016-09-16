@@ -26,6 +26,13 @@ public class PeriodChain {
   public LocalDate from = null;                     //to reset nextDate
   public LocalDate to = null;                       //to reset nextDate
   public boolean success = false;                   //to reset nextDate
+
+  public String getChainDescription() {
+    if (periods.get(0).groupAbsenceType.chainDescription != null) {
+      return periods.get(0).groupAbsenceType.chainDescription;
+    }
+    return periods.get(0).groupAbsenceType.description;
+  }
   
   public AbsencePeriod firstPeriod() {
     if (periods.isEmpty()) {
@@ -149,8 +156,4 @@ public class PeriodChain {
     return this.absencesAsc;
   }
   
-  public void resetSupportStructures(AbsenceEngine absenceEngine) {
-    
-    
-  }
 }
