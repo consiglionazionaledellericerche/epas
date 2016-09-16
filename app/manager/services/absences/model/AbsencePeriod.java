@@ -10,6 +10,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import manager.services.absences.AbsenceStatus;
+import manager.services.absences.model.AbsencePeriod.ComplationComponent.ReplacingDay;
+
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
@@ -57,7 +60,7 @@ public class AbsencePeriod {
     public Set<AbsenceType> takenCodes;              // I tipi di assenza consumati del periodo
 
     // Le assenze consumate
-    public List<Absence> takenAbsences = Lists.newArrayList(); 
+    public List<AbsenceStatus> takenAbsencesStatus = Lists.newArrayList(); 
     
     public void setFixedPeriodTakableAmount(int amount) {
       if (this.takeAmountType.equals(AmountType.units)) {
@@ -105,7 +108,13 @@ public class AbsencePeriod {
      * @param enhancedAbsence
      */
     public void addAbsenceTaken(Absence absence, int takenAmount) {
-      this.takenAbsences.add(absence);
+      AbsenceStatus absenceStatus = AbsenceStatus.builder()
+          .absence(absence)
+          .amountTypeTakable(this.takeAmountType)
+          .consumedTakable(takenAmount)
+          .residualBeforeTakable(getPeriodTakableAmount() - getPeriodTakenAmount())
+          .build();
+      this.takenAbsencesStatus.add(absenceStatus);
       this.periodTakenAmount += takenAmount;
     }
   }
@@ -126,16 +135,14 @@ public class AbsencePeriod {
     // Codici di completamento
     public Set<AbsenceType> complationCodes;    
 
-    // Le assenze di rimpiazzamento
-    public List<Absence> replacingAbsences = Lists.newArrayList();
     // Le assenze di rimpiazzamento per giorno
     public SortedMap<LocalDate, Absence> replacingAbsencesByDay = Maps.newTreeMap();
     
-    
-    // Le assenze di completamento
-    public List<Absence> complationAbsences = Lists.newArrayList();
     // Le assenze di completamento per giorno
     public SortedMap<LocalDate, Absence> complationAbsencesByDay = Maps.newTreeMap();
+
+    // I giorni analizzati con i completamenti effettivi e quelli ipotetici.
+    public SortedMap<LocalDate, ReplacingDay> replacingDaysStatus = Maps.newTreeMap();
     
     public LocalDate compromisedReplacingDate = null;
     
@@ -146,9 +153,21 @@ public class AbsencePeriod {
      */
     @Builder @Getter @Setter
     public static class ReplacingDay {
+      
       private LocalDate date;
+
+      private Absence complationAbsence;
+      private AmountType amountTypeComplation;
+      private int residualBeforeComplation;
+      private int consumedComplation;
+      private int residualAfterComplation;
+      
       private Absence existentReplacing;
       private AbsenceType correctReplacing;
+      
+      public boolean correct() {
+        return !wrongType() && !onlyCorrect() && !onlyExisting();
+      }
       
       public boolean wrongType() {
         return correctReplacing != null && existentReplacing != null 
