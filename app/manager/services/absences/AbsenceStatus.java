@@ -25,7 +25,7 @@ public class AbsenceStatus {
   public AmountType amountTypeTakable;
   public int consumedTakable;
   public int residualBeforeTakable;
-
+  
   //*********
   
   private AmountType amountType;                    // | units | minutes | units |

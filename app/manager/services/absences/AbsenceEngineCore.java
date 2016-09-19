@@ -440,10 +440,6 @@ public class AbsenceEngineCore {
   private SortedMap<LocalDate, ReplacingDay> complationReplacingDays(AbsenceEngine absenceEngine, 
       ComplationComponent complationComponent) {
     
-    if (complationComponent == null) {
-      return Maps.newTreeMap();
-    }
-    
     //I replacing days per ogni data raccolgo i replacing effettivi e quelli corretti
     SortedMap<LocalDate, ReplacingDay> replacingDays = Maps.newTreeMap();
     
@@ -462,33 +458,30 @@ public class AbsenceEngineCore {
       
       int amount = absenceEngineUtility.absenceJustifiedAmount(absenceEngine, 
           complationAbsence, complationComponent.complationAmountType);
-      
       complationAmount = complationAmount + amount;
+
+      LocalDate replacingDate = complationAbsence.getAbsenceDate();
+      ReplacingDay replacingDay = replacingDays.get(replacingDate);
+      if (replacingDay == null) {
+        replacingDay = ReplacingDay.builder().date(replacingDate).build();
+        replacingDays.put(replacingDate, replacingDay);
+      }
+      replacingDay.setAmountTypeComplation(complationComponent.complationAmountType);
+      replacingDay.setComplationAbsence(complationAbsence);
+      replacingDay.setResidualBeforeComplation(complationAmount - amount);
+      replacingDay.setConsumedComplation(amount);
+      
       Optional<AbsenceType> replacingCode = absenceEngineUtility
           .whichReplacingCode(absenceEngine, complationComponent, 
               complationAbsence.getAbsenceDate(), complationAmount);
+      
       if (replacingCode.isPresent()) {
-        LocalDate replacingDate = complationAbsence.getAbsenceDate();
-        ReplacingDay replacingDay = replacingDays.get(replacingDate);
-        if (replacingDay == null) {
-          replacingDay = ReplacingDay.builder()
-              .correctReplacing(replacingCode.get())
-              .date(replacingDate)
-              .build();
-          replacingDays.put(replacingDate, replacingDay);
-        } else {
-          replacingDay.setCorrectReplacing(replacingCode.get());
-        }
         
-        replacingDay.setAmountTypeComplation(complationComponent.complationAmountType);
-        replacingDay.setComplationAbsence(complationAbsence);
-        replacingDay.setResidualBeforeComplation(complationAmount - amount);
-        replacingDay.setConsumedComplation(amount);
-        
+        replacingDay.setCorrectReplacing(replacingCode.get());
         complationAmount -= complationComponent.replacingTimes.get(replacingCode.get());
-        
-        replacingDay.setResidualAfterComplation(complationAmount);
       }
+      
+      replacingDay.setResidualAfterComplation(complationAmount);
     }
     complationComponent.complationConsumedAmount = complationAmount;
     
