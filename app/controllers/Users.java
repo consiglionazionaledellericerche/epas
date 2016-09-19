@@ -3,6 +3,7 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 
 import com.mysema.query.SearchResults;
@@ -21,6 +22,7 @@ import models.Office;
 import models.Person;
 import models.User;
 import models.UsersRolesOffices;
+import models.enumerate.AccountRole;
 
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -90,6 +92,29 @@ public class Users extends Controller {
     render(results, name);
   }
 
+  public static void editAccountRoles(User user) {
+
+    render(user);
+  }
+
+  public static void saveAccountRoles(Long userId, List<AccountRole> roles){
+
+    log.info("RUOLI {}", roles);
+    final User user = userDao.getUserByIdAndPassword(userId, Optional.absent());
+    notFoundIfNull(user);
+
+    if (roles == null){
+      user.roles.clear();
+    }
+    else {
+      user.roles = Sets.newHashSet(roles);
+    }
+
+    user.save();
+    flash.success(Web.msgCreated(AccountRole.class));
+    edit(user.id);
+  }
+
   public static void addRole(User user) {
     render(user);
   }
@@ -103,6 +128,8 @@ public class Users extends Controller {
       final User user = userRoleOffice.user;
       render("@addRole", user, userRoleOffice);
     }
+
+    rules.checkIfPermitted(userRoleOffice.office);
 
     userRoleOffice.save();
     final User user = userRoleOffice.user;
@@ -149,7 +176,6 @@ public class Users extends Controller {
   public static void save(@Required @Valid User user,
       String password, @Equals("password") String confirmPassword) {
 
-
     if (Validation.hasErrors()) {
       log.warn("validation errors for {}: {}", user, validation.errorsMap());
       flash.error(Web.msgHasErrors());
@@ -159,12 +185,11 @@ public class Users extends Controller {
     if (!Strings.isNullOrEmpty(password)) {
       user.password = Codec.hexMD5(password);
     }
-    final Person person = user.person;
-    user.roles = user.roles.stream().filter(accountRole -> accountRole != null)
-        .collect(Collectors.toSet());
+
+    rules.checkIfPermitted(user);
+
     user.save();
-    person.user = user;
-    person.save();
+
     flash.success(Web.msgModified(User.class));
     edit(user.id);
   }
