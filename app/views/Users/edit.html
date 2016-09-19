@@ -15,12 +15,10 @@
 	#{form @Users.save(), method:'POST', autocomplete:false, class:'form form-horizontal'}
 
 		#{f.hidden 'user.id', value: user.id /}
-		#{f.input 'user.username' /}
+		#{f.input 'user.username', value:username?:user.username /}
 	  #{f.input 'password' , type:'password', value: password?:'' /}
 	  #{f.input 'confirmPassword' , type:'password', value: password?:'' /}
-		#{f.selectEnums 'user.roles' , items:models.enumerate.AccountRole  /}
-		#{f.selectModel 'user.person' , items: templateUtility.assignablePeople()  /}
-		#{f.selectModel 'user.badgeReader' , items: null /}
+
 		#{f.selectModel 'user.owner' , items: templateUtility.officesAllowed() /}
 
 		#{f.checkbox 'user.disabled' /}
@@ -31,9 +29,38 @@
 
 	#{/form}
 
+	#{secure.check 'Users.editAccountRoles'}
+	<div id="accountRolesList">
+		<ul class="list-group col-sm-6 col-sm-offset-3">
+			<a href="@{editAccountRoles('user.id':user.id)}" class="list-group-item active" data-async-modal="#defaultModal">
+				<i class="fa fa-cogs" aria-hidden="true"></i>
+				<strong>Gestisci ruoli di Sistema</strong>
+			</a>
+			#{if user.roles.empty}
+			<div class="alert alert-warning">
+				<strong>Nessun ruolo di sistema.</strong>
+			</div>
+			#{/if}
+			#{list user.roles}
+			<li class="list-group-item clearfix">
+				<strong><em>${_}</em></strong>
+			</li>
+			#{/list}
+		</ul>
+	</div>
+	#{/secure.check}
+
 	<div id="rolesList">
 		<ul class="list-group col-sm-6 col-sm-offset-3">
-			<a href="@{addRole('user.id':user.id)}" class="list-group-item active" data-async-modal="#defaultModal"><i class="fa fa-plus-circle" aria-hidden="true"></i> Nuovo ruolo</a>
+			<a href="@{addRole('user.id':user.id)}" class="list-group-item active" data-async-modal="#defaultModal">
+				<i class="fa fa-plus-circle" aria-hidden="true"></i>
+				<strong>Nuovo ruolo</strong>
+			</a>
+			#{if user.usersRolesOffices.empty}
+				<div class="alert alert-warning">
+					<strong>Nessun ruolo assegnato.</strong>
+				</div>
+			#{/if}
 			#{list user.usersRolesOffices}
 			<li class="list-group-item clearfix">
 				<strong><em>${_.role}</em></strong> della sede di <strong><em>${_.office}</em></strong>
