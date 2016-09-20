@@ -4,11 +4,10 @@
     #{list items:results.results, as:'user'}
     <li class="list-group-item">
       <div class="pull-right btn-group">
-        #{b.show @show('user.id':user.id) /}
+        #{b.show @show('user.id':user.id), 'data-async-modal': '#defaultModal' /}
         #{secure.check 'Accounts.edit'}
           #{b.edit @edit(user.id) /}
         #{/secure.check}
-        #{b.delete 'delete'/}
       </div>
       #{if user.disabled}
         <h4 class=" text-muted"><i class="fa fa-user"></i><em> ${user.username}</em></h4>

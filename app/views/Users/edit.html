@@ -14,10 +14,12 @@
 
 	#{form @Users.save(), method:'POST', autocomplete:false, class:'form form-horizontal'}
 
-		#{f.hidden 'user.id', value: user.id /}
-		#{f.input 'user.username', value:username?:user.username /}
+		#{if user}
+			#{f.hidden 'user.id', value: user.id /}
+		#{/if}
+		#{f.input 'user.username', value:username?:user?.username /}
 	  #{f.input 'password' , type:'password', value: password?:'' /}
-	  #{f.input 'confirmPassword' , type:'password', value: password?:'' /}
+	  #{f.input 'confirmPassword' , type:'password', value: confirmPassword?:'' /}
 
 		#{f.selectModel 'user.owner' , items: templateUtility.officesAllowed() /}
 
@@ -29,6 +31,7 @@
 
 	#{/form}
 
+	#{if user?.persistent}
 	#{secure.check 'Users.editAccountRoles'}
 	<div id="accountRolesList">
 		<ul class="list-group col-sm-6 col-sm-offset-3">
@@ -71,7 +74,7 @@
 			#{/list}
 		</ul>
 	</div>
-
+	#{/if}
 </div>
 
 
