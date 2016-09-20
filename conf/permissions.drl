@@ -31,6 +31,17 @@ global models.User currentOperator;
 *
 */
 
+/*
+ * Gli utenti disabilitati non possono far nulla
+ */
+rule disabledUser
+when
+  eval (currentOperator.disabled)
+  $c: PermissionCheck()
+then
+   $c.revoke();
+end
+
 rule AnyUser
 when
   $c: PermissionCheck(action in (
