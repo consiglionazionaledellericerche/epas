@@ -114,13 +114,16 @@
       </td>
       #{if switchUser}
       <td>
-        <a class="btn btn-warning btn-xs"
-           href="@{Administration.switchUserToPersonUser(person.value.id)}">Assumi identità</a>
+        #{if person?.value?.user?.disabled}
+          <span class="label label-default"><em>&{'disabledUser'}</em></span>
+        #{/if}
+        #{else}
+          <a class="btn btn-warning btn-xs" href="@{Administration.switchUserToPersonUser(person.value.id)}">Assumi identità</a>
+        #{/else}
       </td>
       #{/if}
     </tr>
     #{/if}
-
 
     #{/list}
     </tbody>
@@ -159,8 +162,12 @@
       <td><font color="#808080">${person.value.email}</font></td>
       #{if switchUser}
       <td>
-        <a class="btn btn-warning btn-xs"
-           href="@{Administration.switchUserToPersonUser(person.value.id)}">Assumi identità</a>
+        #{if person.user.disabled}
+          <span class="label label-default">&{'disabledUser'}</span>
+        #{/if}
+        #{else}
+          <a class="btn btn-warning btn-xs" href="@{Administration.switchUserToPersonUser(person.value.id)}">Assumi identità</a>
+        #{/else}
       </td>
       #{/if}
     </tr>
