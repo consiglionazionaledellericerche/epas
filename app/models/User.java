@@ -48,7 +48,6 @@ public class User extends BaseModel {
   public String username;
 
   @MinSize(5)
-  @Required
   public String password;
 
   @NotAudited

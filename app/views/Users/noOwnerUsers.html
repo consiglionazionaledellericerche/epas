@@ -4,7 +4,7 @@
 
 <div class="container">
 
-  #{title title:'Gestione Utenti di sistema' /}
+  #{title title: messages.get('manageNoOwnerUsers') /}
 
   #{include './_usersTabs.html' /}
   <br>
@@ -13,6 +13,10 @@
   #{form action:@Users.noOwnerUsers(), class:'form-inline', method:'GET', 'data-reload':'#normalResults', autocomplete:'off'}
   <div class="row">
     #{f.searchInput 'name' /}
+
+    #{b.link @blank(), color: 'info', fa: 'plus', class: 'pull-right' }
+      &{'newUser'}
+    #{/b.link}
   </div>
   #{/form}
 
