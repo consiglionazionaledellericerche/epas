@@ -4,9 +4,13 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 
 import lombok.Builder;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import manager.services.absences.model.AbsencePeriod;
+
 import models.absences.Absence;
+import models.absences.AbsenceTrouble;
 import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceTrouble.AbsenceTypeProblem;
 import models.absences.AbsenceTrouble.ImplementationProblem;
@@ -22,8 +26,8 @@ import java.util.Map;
 @Slf4j
 public class AbsencesReport {
 
-  //List degli errori
-  public Map<Absence, List<ReportAbsenceProblem>> absenceProblemsMap = Maps.newHashMap(); 
+  // List degli errori
+  public Map<Absence, List<AbsenceTrouble>> absenceTroublesMap = Maps.newHashMap();
   public List<ReportAbsenceTypeProblem> absenceTypeProblems = Lists.newArrayList();
   public List<ReportRequestProblem> requestProblems = Lists.newArrayList();
   public List<ReportImplementationProblem> implementationProblems = Lists.newArrayList();
@@ -31,26 +35,29 @@ public class AbsencesReport {
   // Esiti degli inserimenti
   public List<InsertResultItem> insertResultItems = Lists.newArrayList();
   
+  // Report status
+  public ReportStatus reportStatus = null; 
+ 
+  /**
+   * Errori non dipendenti dall'user (tipi assenza, implementazione, form di richiesta).
+   * @return
+   */
+  public boolean containsCriticalProblems() {
+    return !absenceTypeProblems.isEmpty()
+        || !implementationProblems.isEmpty()
+        || !requestProblems.isEmpty();
+  }
+  
   public boolean containsProblems() {
     //TODO: to implement
-    return !absenceProblemsMap.keySet().isEmpty() 
+    return !absenceTroublesMap.keySet().isEmpty() 
         || !absenceTypeProblems.isEmpty()
         || !requestProblems.isEmpty()
         || !implementationProblems.isEmpty();
   }
-
-  /**
-   * Aggiunge un nuovo problema sulle assenze alla lista. La generazione della mappa blocca
-   * @param reportAbsenceProblem
-   */
-  public void addAbsenceProblem(ReportAbsenceProblem reportAbsenceProblem) {
-    List<ReportAbsenceProblem> problems = absenceProblemsMap.get(reportAbsenceProblem.absence);
-    if (problems == null) {
-      problems = Lists.newArrayList();
-      absenceProblemsMap.put(reportAbsenceProblem.absence, problems);
-    }
-    problems.add(reportAbsenceProblem);
-    log.debug("Aggiunto a report.absenceProblems: " + reportAbsenceProblem.toString());
+  
+  public boolean absenceHasProblems(Absence absence) {
+    return this.absenceTroublesMap.get(absence) != null;
   }
   
   public boolean absenceTypeHasProblem(AbsenceType absenceType) {
@@ -62,10 +69,34 @@ public class AbsencesReport {
     }
     return false;
   }
+
+  /**
+   * Aggiunge un nuovo problema sulle assenze alla lista. La generazione della mappa blocca
+   * @param reportAbsenceProblem
+   */
+  public void addAbsenceTrouble(AbsenceTrouble absenceTrouble) {
+    List<AbsenceTrouble> problems = absenceTroublesMap.get(absenceTrouble.absence);
+    if (problems == null) {
+      problems = Lists.newArrayList();
+      absenceTroublesMap.put(absenceTrouble.absence, problems);
+    }
+    problems.add(absenceTrouble);
+    log.debug("Aggiunto a report.absenceProblems: " + absenceTrouble.toString());
+  }
+  
+  
   
   public void addAbsenceTypeProblem(ReportAbsenceTypeProblem reportAbsenceTypeProblem) {
     this.absenceTypeProblems.add(reportAbsenceTypeProblem );
   }
+  
+  public void addAbsenceAndImplementationProblem(AbsenceTrouble absenceTrouble) {
+    this.addAbsenceTrouble(absenceTrouble);
+    this.addImplementationProblem(ReportImplementationProblem.builder()
+        .date(absenceTrouble.absence.getAbsenceDate())
+        .implementationProblem(ImplementationProblem.UnespectedProblem)
+        .build());
+  };
   
   public void addRequestProblem(ReportRequestProblem reportRequestProblem) {
     this.requestProblems.add(reportRequestProblem);
@@ -84,8 +115,6 @@ public class AbsencesReport {
   public static class ReportAbsenceProblem {
     public AbsenceProblem absenceProblem;
     public Absence absence;
-    public Absence conflictingAbsence;
-    public AbsenceType correctType;
     
     public String toString() {
       return MoreObjects.toStringHelper(ReportAbsenceProblem.class)
@@ -107,7 +136,6 @@ public class AbsencesReport {
   public static class ReportRequestProblem {
     public RequestProblem requestProblem;
     public LocalDate date;
-    //public Absence absence;
   }
   
   @Builder
@@ -116,6 +144,53 @@ public class AbsencesReport {
     public LocalDate date;
   }
   
+  /**
+   * Lo status del gruppo. Strutturazione delle informazioni per la view di facile comprensione.
+   * Combina - per ogni period- le informazioni presenti in:
+   *   - takableComponent.takenAbsencesStatus (per il controllo sui limit)
+   *   - complationComponent.replacingStatus (per il controllo sui completamenti)
+   *   - absenceTroublesMap per gli errori sulle singole assenze (anche conflitti extra gruppo)
+   *   
+   * @author alessandro
+   *
+   */
+  public static class ReportStatus {
+    
+    //puntatore ai period per rendere disponibili gruppo e date
+    public List<AbsencePeriod> periods = Lists.newArrayList();
+    
+    //i report sui giorni. L'ordine all'interno del giorno deve essere
+    // 1) i codici takable (possono essere più di uno)
+    // 2) i codici takable e complation (se sono più di uno conterranno un errore)
+    // 3) i codici fuori dal gruppo (possono andare sempre in conflitto)
+    public Map<LocalDate, List<ReportDayItem>> reportDayItems = Maps.newHashMap();
+    
+    public void addReportDayItem(ReportDayItem reportDayItem, LocalDate date) {
+      List<ReportDayItem> listItems = this.reportDayItems.get(date);
+      if (listItems == null) {
+        listItems = Lists.newArrayList();
+        this.reportDayItems.put(date, listItems);
+      }
+      listItems.add(reportDayItem);
+    }
+    
+    @Builder @Setter
+    public static class ReportDayItem {
+      
+      public LocalDate date;
+      
+      //Una entry per ogni assenza takable conteggiata
+      public AbsenceStatus takableStatus; 
+      public ReplacingStatus takableReplacingStatus;
+      
+      //Oppure un codice di rimpiazzamento rimasto orfano (senza il relativo complation nel giorno)
+      public Absence orphanReplacing;
+      
+      //Oppure una assenza al di fuori del gruppo
+      public Absence outOfGroupAbsence;
+    }
+    
+  }
 
   
 }

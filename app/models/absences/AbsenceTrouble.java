@@ -1,5 +1,7 @@
 package models.absences;
 
+import lombok.Builder;
+
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -7,11 +9,11 @@ import org.hibernate.envers.Audited;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+@Builder
 @Audited
 @Entity
 @Table(name = "absence_troubles")
@@ -87,6 +89,7 @@ public class AbsenceTrouble extends BaseModel {
   }
   
   public enum ImplementationProblem {
+    UnespectedProblem,
     UnsupportedOperation,
     UnimplementedTakableComplationGroup,
   }

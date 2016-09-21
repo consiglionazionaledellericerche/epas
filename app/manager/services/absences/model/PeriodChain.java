@@ -19,13 +19,16 @@ public class PeriodChain {
   
   public List<AbsencePeriod> periods = Lists.newArrayList();
   
+  //Tutte le assenze dei tipi coinvolti nel gruppo nel periodo
   public List<Absence> absencesAsc = null;                          //to reset nextDate
+  
+  //Tutte le assenze presenti nel periodo.
   public List<Absence> allCodeAbsencesAsc = null;                   //to reset nextDate
   
-  public List<Contract> contracts = null;           //to reset nextDate
-  public LocalDate from = null;                     //to reset nextDate
-  public LocalDate to = null;                       //to reset nextDate
-  public boolean success = false;                   //to reset nextDate
+  public List<Contract> contracts = null;                           //to reset nextDate
+  public LocalDate from = null;                                     //to reset nextDate
+  public LocalDate to = null;                                       //to reset nextDate
+  public boolean success = false;                                   //to reset nextDate
 
   public String getChainDescription() {
     if (periods.get(0).groupAbsenceType.chainDescription != null) {
@@ -49,14 +52,13 @@ public class PeriodChain {
 
     Set<AbsenceType> absenceTypes = Sets.newHashSet();
     for (AbsencePeriod absencePeriod : this.periods) {
-      if (absencePeriod.takableComponent.isPresent()) {
-        absenceTypes.addAll(absencePeriod.takableComponent.get().takenCodes);
-        //absenceTypes.addAll(currentAbsencePeriod.takableComponent.get().takableCodes);
+      if (absencePeriod.isTakable()) {
+        absenceTypes.addAll(absencePeriod.takenCodes);
+        //absenceTypes.addAll(currentAbsesncePeriod.takableComponent.get().takableCodes);
       }
-      if (absencePeriod.complationComponent.isPresent()) {
-        absenceTypes.addAll(absencePeriod.complationComponent.get()
-            .replacingCodesDesc.values());
-        absenceTypes.addAll(absencePeriod.complationComponent.get().complationCodes);
+      if (absencePeriod.isComplation()) {
+        absenceTypes.addAll(absencePeriod.replacingCodesDesc.values());
+        absenceTypes.addAll(absencePeriod.complationCodes);
       }
     }
     return absenceTypes;
@@ -105,8 +107,8 @@ public class PeriodChain {
     
     //Popolo la lista definitiva
     this.absencesAsc = Lists.newArrayList();
-    for (List<Absence> enhancedAbsences : sortedAbsenceMap.values()) {
-      this.absencesAsc.addAll(enhancedAbsences);
+    for (List<Absence> absences : sortedAbsenceMap.values()) {
+      this.absencesAsc.addAll(absences);
     }
     
     //Popolo la lista con tutte le assenze coinvolte nel periodo.

@@ -8,7 +8,9 @@ import lombok.Setter;
 import manager.services.absences.AbsencesReport.ReportAbsenceProblem;
 
 import models.absences.Absence;
+import models.absences.AbsenceType;
 import models.absences.AmountType;
+import models.absences.AbsenceTrouble.AbsenceProblem;
 
 import org.joda.time.LocalDate;
 
@@ -25,6 +27,7 @@ public class AbsenceStatus {
   public AmountType amountTypeTakable;
   public int consumedTakable;
   public int residualBeforeTakable;
+  
   
   //*********
   
@@ -44,5 +47,7 @@ public class AbsenceStatus {
   public int residualAfter() {
     return this.residualBefore() - this.amount;
   }
+  
+  
   
 }

@@ -9,7 +9,6 @@ import dao.absences.AbsenceComponentDao;
 
 import manager.services.absences.model.AbsenceEngine;
 import manager.services.absences.model.AbsencePeriod;
-import manager.services.absences.model.AbsencePeriod.ComplationComponent;
 
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -217,7 +216,7 @@ public class AbsenceEngineUtility {
   public Absence inferAbsenceType(AbsencePeriod absencePeriod, Absence absence, 
       JustifiedType requestedJustifiedType) {
 
-    if (requestedJustifiedType == null || !absencePeriod.takableComponent.isPresent()) {
+    if (requestedJustifiedType == null || !absencePeriod.isTakable()) {
       return absence;
     }
     
@@ -228,7 +227,7 @@ public class AbsenceEngineUtility {
 
     //Cerco il codice
     if (requestedJustifiedType.name.equals(JustifiedTypeName.all_day)) {
-      for (AbsenceType absenceType : absencePeriod.takableComponent.get().takableCodes) { 
+      for (AbsenceType absenceType : absencePeriod.takableCodes) { 
         if (absenceType.justifiedTypesPermitted.contains(requestedJustifiedType)) {
           absence.absenceType = absenceType;
           return absence;
@@ -238,7 +237,7 @@ public class AbsenceEngineUtility {
     if (requestedJustifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
       
       AbsenceType specifiedMinutes = null;
-      for (AbsenceType absenceType : absencePeriod.takableComponent.get().takableCodes) {
+      for (AbsenceType absenceType : absencePeriod.takableCodes) {
         for (JustifiedType absenceTypeJustifiedType : absenceType.justifiedTypesPermitted) {
           if (absenceTypeJustifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
             if (absence.justifiedMinutes != null) {
@@ -284,20 +283,15 @@ public class AbsenceEngineUtility {
   
   /**
    * 
-   * @param complationComponent
-   * @param complationAmount
    * @return
    */
   public Optional<AbsenceType> whichReplacingCode(AbsenceEngine absenceEngine, 
-      ComplationComponent complationComponent, LocalDate date, int complationAmount) {
+      AbsencePeriod absencePeriod, LocalDate date, int complationAmount) {
     
-    for (Integer replacingTime : complationComponent.replacingCodesDesc.keySet()) {
+    for (Integer replacingTime : absencePeriod.replacingCodesDesc.keySet()) {
       int amountToCompare = replacingTime;
-//      if (complationComponent.complationAmountType.equals(AmountType.units)) {
-//        amountToCompare = absenceEngine.workingTime(LocalDate.now());  
-//      }
       if (amountToCompare <= complationAmount) {
-        return Optional.of(complationComponent.replacingCodesDesc.get(replacingTime));
+        return Optional.of(absencePeriod.replacingCodesDesc.get(replacingTime));
       }
     }
     
