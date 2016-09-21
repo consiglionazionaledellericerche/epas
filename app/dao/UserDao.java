@@ -45,6 +45,7 @@ public class UserDao extends DaoBase {
   public User getUserByIdAndPassword(Long id, Optional<String> password) {
     final QUser user = QUser.user;
     final BooleanBuilder condition = new BooleanBuilder();
+
     if (password.isPresent()) {
       condition.and(user.password.eq(password.get()));
     }
@@ -68,7 +69,10 @@ public class UserDao extends DaoBase {
    */
   public User getUserByUsernameAndPassword(String username, Optional<String> password) {
     final QUser user = QUser.user;
-    final BooleanBuilder condition = new BooleanBuilder();
+    final BooleanBuilder condition = new BooleanBuilder()
+        // Solo gli utenti attivi
+        .and(user.disabled.isFalse());
+
     if (password.isPresent()) {
       condition.and(user.password.eq(password.get()));
     }
