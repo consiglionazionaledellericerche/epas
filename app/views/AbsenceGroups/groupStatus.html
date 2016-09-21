@@ -18,9 +18,8 @@
       ${absencePeriod.groupAbsenceType.description}
     </p>
   
-    #{if absencePeriod.takableComponent.present}
+    #{if absencePeriod.isTakable()}
       <p><strong>Riepilogo Limiti</strong></p>
-      %{ takableComponent = absencePeriod.takableComponent.get() }%
       <table class="table table-condensed">
         <tr>
           <th>Data</th>
@@ -31,7 +30,7 @@
           <th class="text-muted">Nuovo Residuo</th>
           <th class="text-muted">Scadenza Residuo</th>
         </tr>
-      #{list items:takableComponent.takenAbsencesStatus, as:'absenceStatus'}
+      #{list items:absencePeriod.takenAbsencesStatus, as:'absenceStatus'}
          
           <tr>
             <td>${absenceStatus.absence.getAbsenceDate().format()}</td>
@@ -46,18 +45,17 @@
       </table>
     #{/if}
 
-    #{if absencePeriod.complationComponent.present}
+    #{if absencePeriod.isComplation()}
       <p><strong>Riepilogo Completamenti</strong></p>
-      %{ complationComponent = absencePeriod.complationComponent.get() }%
       <table class="table table-condensed">
         <tr>
           <th>Data</th>
           <th>Esito</th>
-          <th>Residuo Utilizzato Prima</th>
+          <th>Da Completare</th>
           <th>Ammontare Consumato</th>
-          <th>Residuo Utilizzato Dopo</th>
+          <th class="text-muted">Nuovo Da Completare</th>
         </tr>
-      #{list items:complationComponent.replacingDaysStatus.values(), as:'replacingDay'}
+      #{list items:absencePeriod.replacingDaysStatus.values(), as:'replacingDay'}
          
           <tr>
             <td>${replacingDay.date.format()}</td>
@@ -69,7 +67,7 @@
             </td>
             <td>${templateUtility.printAmount(replacingDay.residualBeforeComplation, replacingDay.amountTypeComplation)}</td>
             <td>${templateUtility.printAmount(replacingDay.consumedComplation, replacingDay.amountTypeComplation)}</td>
-            <td>${templateUtility.printAmount(replacingDay.residualAfterComplation, replacingDay.amountTypeComplation)}</td>
+            <td class="text-muted">${templateUtility.printAmount(replacingDay.residualAfterComplation, replacingDay.amountTypeComplation)}</td>
           </tr>
       #{/list}
       </table>
