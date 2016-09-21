@@ -411,7 +411,10 @@ public class Administration extends Controller {
   public static void switchUserTo(long id) {
 
     final User user = Administrators.userDao.getUserByIdAndPassword(id, Optional.<String>absent());
-    notFoundIfNull(user);
+
+    if( user == null || user.disabled) {
+      notFound();
+    }
 
     // salva il precedente
     session.put(SUDO_USERNAME, session.get(USERNAME));
