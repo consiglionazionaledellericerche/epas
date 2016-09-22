@@ -358,11 +358,33 @@ public class PersonMonths extends Controller {
    * @param person la persona che ha fatto la formazione
    */
   public static void save(@Valid @Min(0) Integer begin, @Min(0) @Valid Integer end,
-      @Required @Valid @Min(0) Integer value, Integer month, Integer year, Person person) {
+      @Required @Valid @Min(0) Integer value, Integer month, Integer year, Person person,
+      Long personMonthSituationId) {
 
     rules.checkIfPermitted(person.office);
     checkErrors(begin, end, year, month, value);
-    checkPerson(person);
+    if (personMonthSituationId != null) {
+      PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);
+
+      Verify.verify(pm.isEditable());
+      checkErrorsInUpdate(value, pm);
+
+      if (validation.hasErrors()) {
+        LocalDate dateFrom = new LocalDate(year, month, begin);
+        LocalDate dateTo = new LocalDate(year, month, end); 
+        response.status = 400;
+        render("@insertPeopleTrainingHours",
+            person, month, year, begin, end, value, personMonthSituationId, dateFrom, dateTo);
+      }
+      pm.trainingHours = value;
+      pm.save();
+      flash.success("Ore di formazione aggiornate.", value);
+      visualizePeopleTrainingHours(year, month, pm.person.office.id);
+      
+    } else {
+      checkPerson(person);
+    }
+    
     if (validation.hasErrors()) {
       List<Person> simplePersonList = personDao.listFetched(Optional.<String>absent(),
           ImmutableSet.of(person.office), false, null, null, false).list();
