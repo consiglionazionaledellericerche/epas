@@ -1,5 +1,5 @@
 package security;
- 
+
 import manager.configurations.EpasParam;
 import models.enumerate.CodesForEmployee;
 import models.enumerate.StampTypes;
@@ -56,12 +56,12 @@ then
  $c.grant();
 end
 
-/*  
+/*
  *	Azioni eseguibili dagli impiegati per visualizzare la propria situazione.
- *  (Ricalca il più possibile la struttura del dropdown menu della persona 
+ *  (Ricalca il più possibile la struttura del dropdown menu della persona
  *  oltre i calendari iCal e le azioni REST)
  */
- 
+
 rule isEmployeeAbsencesVisible
 when
   $uro: UsersRolesOffices()
@@ -74,8 +74,8 @@ when
 then
  $c.grant();
 end
-  
-  
+
+
 rule IsEmployee
 when
   $uro: UsersRolesOffices()
@@ -83,36 +83,36 @@ when
   $c: PermissionCheck(action in (
   		/* Ritorna allo user developer */
      	"Administration.restoreUser",
-     	
+
      	/* Situazione Mensile */
      	"Stampings.stampings",
      	"Stampings.dailyPresenceForPersonInCharge",
-     	/* "Stampings.editEmployee", 
+     	/* "Stampings.editEmployee",
      	"Stampings.updateEmployee", */
-     	
+
      	/* Assenze mensili */
      	"Absences.absences",
      	"Absences.absenceInMonth",
-     	
+
      	/* Assenze annuali */
      	"Absences.absencesPerPerson",
-     	
+
      	/* Ferie */
      	"Vacations.show",
      	"Vacations.permissionCurrentYear",
      	"Vacations.vacationsCurrentYear",
        	"Vacations.vacationsLastYear",
-       	
+
        	/* Competenze */
      	"Competences.competences",
      	"Competences.monthlyOvertime",
-       	
+
        	/* Riepilogo orario*/
      	"PersonMonths.hourRecap",
-     	
+
      	/*Riepilogo buoni pasto */
      	"MealTickets.mealTickets",
-     	
+
      	/* Ore di formazione */
      	"PersonMonths.trainingHours",
      	"PersonMonths.deleteTrainingHours",
@@ -122,37 +122,37 @@ when
      	"PersonMonths.modifyTrainingHours",
      	"PersonMonths.saveTrainingHours",
      	"PersonMonths.updateTrainingHours",
-     	
+
      	/* Modifica password */
      	"Persons.changePassword",
      	"Persons.savePassword",
      	"Persons.resetPassword",
-     	
+
      	/* Stampa cartellino */
      	"PrintTags.showTag",
-     	
-     	/* 
+
+     	/*
      	 * Visualizzazione eventuali turni via iCal
      	 * dentro il metodo controllare il permesso di
      	 * visualizzare il calendario specifico richiesto
      	 */
      	"Shift.iCal",
-     	"Reperibility.iCal", 
-     	
+     	"Reperibility.iCal",
+
      	/* Metodi rest */
      	"rest.PersonDays.getDaySituation",
      	"rest.PersonDays.getMonthSituation",
-     	
+
      	/* Timbrature web */
      	"Clocks.daySituation",
      	"Clocks.webStamping",
      	"Clocks.insertWebStamping",
-     	
+
      	/*Possibilità di inviare report*/
      	"ReportCentre.generateReport",
      	"ReportCentre.sendProblem"
-	
-     	
+
+
        ), target == null, granted == false)
 then
  $c.grant();
@@ -186,10 +186,10 @@ then
  $c.grant();
 end
 
-/* Azioni eseguibili da qualsiasi utente che abbiano come destinatario 
+/* Azioni eseguibili da qualsiasi utente che abbiano come destinatario
  * dell'azione se stesso
  */
- 
+
 rule HasRightOnHimself
 when
   $p: Person(this == currentOperator.person)
@@ -236,7 +236,7 @@ when
 then
  $c.grant();
 end
-  
+
 
 /*******************************************************************************
  * Azioni ruolo DEVELOPER e ADMIN
@@ -276,12 +276,11 @@ then
  $c.revoke();
 end
 
-
 /*******************************************************************************
  * Azioni utente con ruolo TECHNICAL_ADMIN
  ******************************************************************************/
 rule TechnicalAdmin_Generic
-when 
+when
  $uro: UsersRolesOffices()
  Role(name == Role.TECHNICAL_ADMIN) from $uro.role
  $c: PermissionCheck(action in (
@@ -298,11 +297,11 @@ when
 	    "BadgeReaders.index",
 	    "BadgeReaders.list",
 	    "BadgeReaders.blank",
-		
+
 	    "BadgeSystems.index",
 	    "BadgeSystems.list",
 	    "BadgeSystems.blank",
-        
+
         /* duplicate prima di avere il contesto office */
 		"Institutes.edit",
 		"Institutes.save",
@@ -312,14 +311,14 @@ when
 		"Offices.edit",
 		"Offices.save",
 
-		"BadgeReaders.save",	
-		"BadgeReaders.edit",		
+		"BadgeReaders.save",
+		"BadgeReaders.edit",
 	    "BadgeReaders.updateInfo",
 	    "BadgeReaders.changePassword",
 		"BadgeReaders.joinBadgeSystems",
 		"BadgeReaders.saveBadgeSystems",
 		"BadgeReaders.delete",
-		
+
 		"BadgeSystems.save",
 		"BadgeSystems.edit",
 		"BadgeSystems.updateInfo",
@@ -341,11 +340,11 @@ when
   		"Users.disable",
   		"Users.disabledList",
   		"Users.enable",
-	
+
 		"Administrators.blank",
 		"Administrators.save",
 		"Administrators.delete"
-		
+
         ), target == null, granted == false)
 then
  $c.grant();
@@ -357,18 +356,19 @@ when
  $u: User(owner == $uro.office || (person != null && person.office == $uro.office))
  $c: PermissionCheck( target == $u, granted == false)
 then
+ // questa è sballata!
  $c.grant();
 end
 
-rule Debug
+rule TechnicalAdmin_targetUro
 when
-  $u: User()
-  $uro: UsersRolesOffices(role.name == Role.TECHNICAL_ADMIN)
-  $c: PermissionCheck( target == $u, granted == false)
+ $uro: UsersRolesOffices(role.name == Role.TECHNICAL_ADMIN)
+ $target: UsersRolesOffices(this.hasRelationWith($uro.office))
+ $c: PermissionCheck(target == $target, granted == false, action in ("Users.edit", "Users.addRole", "Users.saveRole", "Users.removeRole"))
 then
-  System.out.println($u);
-  System.out.println($uro);
+ $c.grant();
 end
+
 
 rule TechnicalAdmin_InOffice
 when
@@ -376,7 +376,7 @@ when
  $o: Office( usersRolesOffices contains $uro)
  Role(name == Role.TECHNICAL_ADMIN) from $uro.role
  $c: PermissionCheck(action in (
- 
+
  	   "Institutes.edit",
  	   "Institutes.save",
 	   "Institutes.delete",
@@ -385,7 +385,7 @@ when
 	   "Administrators.blank",
 	   "Administrators.delete",
 	   "Administrators.save",
-	   
+
 	   "Users.list",
 	   "Users.systemList",
 	   "Users.blank",
@@ -399,16 +399,16 @@ when
   	   "Users.disabledList",
 	   "Users.enable",
 	   "Users.saveRole",
-	   
-	   "BadgeReaders.save",	
+
+	   "BadgeReaders.save",
 	   "BadgeReaders.edit",
-	   "BadgeReaders.updateInfo",	
+	   "BadgeReaders.updateInfo",
 	   "BadgeReaders.changePassword",
 	   "BadgeReaders.joinBadgeSystems",
 	   "BadgeReaders.saveBadgeSystems",
 	   "BadgeReaders.delete",
-		
-	   "BadgeSystems.save",	   
+
+	   "BadgeSystems.save",
 	   "BadgeSystems.edit",
 	   "BadgeSystems.updateInfo",
 	   "BadgeSystems.joinBadges",
@@ -417,7 +417,7 @@ when
 	   "BadgeSystems.joinPersonNumbers",
   	   "BadgeSystems.joinOldBadgeNumbers",
   	   "BadgeSystems.delete"
-	   
+
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -429,29 +429,29 @@ end
  ******************************************************************************/
 
 rule AtLeastPersonnelAdminMini_Generic
-when 
+when
  $uro: UsersRolesOffices()
  Role(name in (Role.PERSONNEL_ADMIN,Role.PERSONNEL_ADMIN_MINI)) from $uro.role
  $c: PermissionCheck(action in (
-        
+
         /* Vecchio permesso viewPerson */
         "Persons.list",
         "MonthRecaps.showRecaps",
         "MonthRecaps.customRecap",
-        
+
         /* Vecchio permesso viewPersonDay */
  		"MonthRecaps.show",
- 		
+
  		"Stampings.missingStamping",
         "Stampings.dailyPresence",
         "Stampings.mealTicketSituation",
-        
+
         /* Vecchio permesso viewCompetence */
         "Competences.exportCompetences",
         "Competences.getOvertimeInYear",
         "Competences.approvedCompetenceInYear",
-        
-        /* Vecchio permesso viewOffice 
+
+        /* Vecchio permesso viewOffice
          *  In questo caso le action non sono inserite all'interno della regola
          *  InOffice poichè i filtri sono all'interno delle stesse action.
          *  TODO rifattorizzare tutte le action di Institutes e Offices
@@ -461,18 +461,18 @@ when
 
         /* Vecchio permesso viewCompetenceCode */
         "Competences.manageCompetenceCode",
-       
+
         /*********** duplicate prima di avere il contesto office  *************/
-        
+
         /* Vecchio permesso viewPerson */
         "Persons.showCurrentVacation",
         "Persons.showCurrentContractWorkingTimeType",
 
         "PersonDayHistory.personDayHistory",
-        
+
         "Stampings.holidaySituation",
         "Stampings.personHolidaySituation",
-        
+
         /* Vecchio permesso viewPersonDay */
         "Absences.manageAttachmentsPerPerson",
         "Absences.downloadAttachment",
@@ -482,9 +482,9 @@ when
 		"Absences.showGeneralMonthlyAbsences",
 		"Absences.manageAttachmentsPerCode",
         "Absences.yearlyAbsences",
-        
+
         "BadgeSystems.personBadges",
-		 
+
 		"Charts.indexCharts",
         "Charts.checkLastYearAbsences",
         "Charts.whichAbsenceInYear",
@@ -495,41 +495,41 @@ when
      	"Charts.processLastYearAbsences",
      	"Charts.exportDataSituation",
      	"Charts.exportFinalSituation",
-     	
+
         "Configurations.show",
         "Configurations.edit",
-     	
+
      	"MealTickets.recapMealTickets",
      	"MealTickets.personMealTickets",
      	"MealTickets.recapPersonMealTickets",
         "MealTickets.editPersonMealTickets",
      	"MealTickets.returnedMealTickets",
         "MealTickets.findCodeBlock",
-		
+
 		"PrintTags.listPersonForPrintTags",
         "PrintTags.showTag",
-		        
+
         "Stampings.personStamping",
 
-		"VacationsAdmin.list",        
+		"VacationsAdmin.list",
         "VacationsAdmin.vacationsLastYear",
         "VacationsAdmin.vacationsCurrentYear",
         "VacationsAdmin.permissionCurrentYear",
-        
+
         /* Vecchio permesso viewCompetence */
         "Competences.showCompetences",
         "Competences.overtime",
         "Competences.totalOvertimeHours",
         "Competences.enabledCompetences",
         "Competences.approvedCompetenceInYear",
-        
+
         /* Vecchio permesso viewWorkingTimeType */
         "WorkingTimes.manageWorkingTime",
         "WorkingTimes.manageOfficeWorkingTime",
         "WorkingTimes.showWorkingTimeType",
-        "WorkingTimes.showContractWorkingTimeType",		
+        "WorkingTimes.showContractWorkingTimeType",
         "WorkingTimes.showContract",
-        "WorkingTimes.showHorizontal"      	
+        "WorkingTimes.showHorizontal"
 
         ), target == null, granted == false)
 then
@@ -542,22 +542,22 @@ when
  $o: Office( usersRolesOffices contains $uro)
  Role(name in (Role.PERSONNEL_ADMIN,Role.PERSONNEL_ADMIN_MINI)) from $uro.role
  $c: PermissionCheck(action in (
- 	
+
  	   /* Vecchio permesso viewPerson */
  	   "Persons.list",
  	   "Persons.showCurrentVacation",
        "Persons.showCurrentContractWorkingTimeType",
-       
+
        "MealTickets.recapMealTickets",
        "MealTickets.personMealTickets",
        "MealTickets.recapPersonMealTickets",
        "MealTickets.editPersonMealTickets",
        "MealTickets.returnedMealTickets",
        "MealTickets.findCodeBlock",
-       
+
        "Stampings.holidaySituation",
-       "Stampings.personHolidaySituation",	
-       
+       "Stampings.personHolidaySituation",
+
        /* Vecchio permesso viewPersonDay */
    	    "Absences.absenceInPeriod",
 	    "Absences.showPersonMonthlyAbsences",
@@ -567,9 +567,9 @@ when
         "Absences.manageAttachmentsPerCode",
         "Absences.downloadAttachment",
         "Absences.zipAttachment",
-		
+
 		"BadgeSystems.personBadges",
-		
+
 		"Charts.indexCharts",
         "Charts.checkLastYearAbsences",
         "Charts.whichAbsenceInYear",
@@ -580,40 +580,40 @@ when
      	"Charts.processLastYearAbsences",
      	"Charts.exportDataSituation",
      	"Charts.exportFinalSituation",
-     	
+
      	"Configurations.show",
         "Configurations.edit",
-		
+
         "MonthRecaps.showRecaps",
         "MonthRecaps.customRecap",
         "PrintTags.listPersonForPrintTags",
         "PrintTags.showTag",
-		
+
         "Stampings.personStamping",
         "Stampings.dailyPresence",
         "Stampings.missingStamping",
-        
+
         "VacationsAdmin.list",
         "VacationsAdmin.vacationsLastYear",
         "VacationsAdmin.vacationsCurrentYear",
         "VacationsAdmin.permissionCurrentYear",
-        
+
         /* Vecchio permesso viewCompetence */
         "Competences.showCompetences",
         "Competences.overtime",
         "Competences.totalOvertimeHours",
         "Competences.enabledCompetences",
         "Competences.approvedCompetenceInYear",
-        
+
         /* Vecchio permesso viewWorkingTimeType */
         "WorkingTimes.manageWorkingTime",
         "WorkingTimes.manageOfficeWorkingTime",
         "WorkingTimes.showWorkingTimeType",
-        "WorkingTimes.showContractWorkingTimeType",		
+        "WorkingTimes.showContractWorkingTimeType",
         "WorkingTimes.showContract",
         "WorkingTimes.showHorizontal",
         "WorkingTimes.insertVerticalWorkingTime"
-                       
+
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -624,7 +624,7 @@ end
  ******************************************************************************/
 
 rule OnlyForPersonnelAdmin_Generic
-when 
+when
  $uro: UsersRolesOffices()
  Role(name == Role.PERSONNEL_ADMIN) from $uro.role
  $c: PermissionCheck(action in (
@@ -636,12 +636,12 @@ when
 
  		/* Vecchio permesso editPerson */
         "Persons.insertPerson",
-		
+
 		/* Vecchio permesso editAbsenceCode */
 		/* FIXME: stesso ragionamento del editCompetenceCode vedi sotto */
 		"Absences.manageAbsenceCode",
-        
-		/*********** duplicate prima di avere il contesto office  *************/   
+
+		/*********** duplicate prima di avere il contesto office  *************/
 
 		/* Vecchio permesso editPerson */
         "Persons.edit",
@@ -654,14 +654,14 @@ when
      	"Configurations.personShow",
      	"Configurations.personEdit",
      	"Configurations.personUpdate",
-        
+
         "Contracts.personContracts",
         "Contracts.insert",
         "Contracts.save",
         "Contracts.edit",
         "Contracts.update",
         "Contracts.delete",
-        
+
         "Contracts.updateSourceContract",
      	"Contracts.saveResidualSourceContract",
      	"Contracts.saveMealTicketSourceContract",
@@ -671,27 +671,27 @@ when
         "Contracts.saveContractWorkingTimeType",
         "Contracts.updateContractVacationPeriod",
         "Contracts.saveContractVacationPeriod",
-     	
+
      	"Persons.children",
      	"Persons.editChild",
      	"Persons.saveChild",
      	"Persons.insertChild",
      	"Persons.deleteChild",
-     	
+
      	"Persons.workGroup",
      	"Persons.confirmGroup",
      	"Persons.removePersonFromGroup",
-     	
+
      	"Persons.modifySendEmail",
      	"Persons.updateSendEmail",
-     	
+
      	"MealTickets.submitPersonMealTicket",
      	"MealTickets.returnPersonCodeBlock",
      	"MealTickets.performReturnPersonCodeBlock",
         "MealTickets.deletePersonCodeBlock",
         "MealTickets.performDeletePersonCodeBlock",
         "MealTickets.mealTicketsLegacy",
-        
+
         /* Vecchio permesso editPersonDay */
 		"Absences.blank",
      	"Absences.save",
@@ -699,20 +699,20 @@ when
      	"Absences.delete",
      	"Absences.addAttach",
      	"Absences.removeAttach",
-        
+
         "Stampings.blank",
        	"Stampings.edit",
      	"Stampings.save",
      	"Stampings.delete",
      	"Stampings.toggleWorkingHoliday",
      	"Stampings.forceMealTicket",
-     	
+
      	/* Vecchio permesso editCompetence */
         "Competences.updateCompetence",
         "Competences.saveOvertime",
         "Competences.updatePersonCompetence",
         "Competences.saveNewCompetenceConfiguration",
-        
+
         /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
         "UploadSituation.updateSession",
@@ -726,11 +726,11 @@ when
         "UploadSituation.showCertificatedData",
         "UploadSituation.checkData",
         "UploadSituation.performCheckData",
-        
+
         "Certifications.certifications",
         "Certifications.processAll",
         "Certifications.emptyCertifications",
-        
+
          /* Vecchio permesso editWorkingTimeType */
         "WorkingTimes.insertWorkingTime",
         "WorkingTimes.save",
@@ -741,21 +741,21 @@ when
         "WorkingTimes.saveHorizontal",
         "WorkingTimes.insertWorkingTimeBaseInformation",
         "WorkingTimes.insertVerticalWorkingTime",
-        
+
         /* Vecchio permesso editCompetenceCode */
         /* FIXME vedi in regola onlyForPersonnelAdmin_InOffice */
         "Competences.insertCompetenceCode",
         "Competences.edit",
-        "Competences.save",      
-        
+        "Competences.save",
+
         /* Vecchio permesso editAbsenceCode */
 		/* FIXME: stesso ragionamento del editCompetenceCode vedi sotto */
         "Absences.editCode",
-     	
+
      	"Configurations.show",
      	"Configurations.edit",
         "Configurations.update",
-		
+
 		"BadgeSystems.joinBadgesPerson",
 		"BadgeSystems.saveBadges",
 		"BadgeSystems.deleteBadgePerson",
@@ -769,8 +769,8 @@ when
         "PersonMonths.save",
         "PersonMonths.saveTrainingHours",
         "Charts.listForExcelFile",
-        "Charts.test"	
-        
+        "Charts.test"
+
         ), target == null, granted == false)
 then
  $c.grant();
@@ -782,7 +782,7 @@ when
  $o: Office( usersRolesOffices contains $uro)
  Role(name == Role.PERSONNEL_ADMIN) from $uro.role
  $c: PermissionCheck(action in (
- 		
+
  		/* Vecchio permesso editPerson */
         "Persons.edit",
         "Persons.update",
@@ -791,18 +791,18 @@ when
      	"Persons.updateUsername",
         "Persons.deletePerson",
      	"Persons.deletePersonConfirmed",
-     	
+
      	"Configurations.personShow",
      	"Configurations.personEdit",
      	"Configurations.personUpdate",
-     	     	
+
         "Contracts.personContracts",
         "Contracts.insert",
         "Contracts.save",
         "Contracts.edit",
         "Contracts.update",
         "Contracts.delete",
-        
+
         "Contracts.updateSourceContract",
      	"Contracts.saveResidualSourceContract",
      	"Contracts.saveMealTicketSourceContract",
@@ -812,27 +812,27 @@ when
         "Contracts.saveContractWorkingTimeType",
         "Contracts.updateContractVacationPeriod",
         "Contracts.saveContractVacationPeriod",
-     	
+
      	"Persons.children",
      	"Persons.editChild",
      	"Persons.saveChild",
      	"Persons.insertChild",
      	"Persons.deleteChild",
-     	
+
      	"Persons.workGroup",
      	"Persons.confirmGroup",
      	"Persons.removePersonFromGroup",
-     	
+
      	"Persons.modifySendEmail",
      	"Persons.updateSendEmail",
-     	
+
      	"MealTickets.submitPersonMealTicket",
      	"MealTickets.returnPersonCodeBlock",
      	"MealTickets.performReturnPersonCodeBlock",
         "MealTickets.deletePersonCodeBlock",
         "MealTickets.performDeletePersonCodeBlock",
         "MealTickets.mealTicketsLegacy",
-        
+
         /* Vecchio permesso editPersonDay */
  		"Absences.blank",
      	"Absences.save",
@@ -840,20 +840,20 @@ when
      	"Absences.delete",
      	"Absences.addAttach",
      	"Absences.removeAttach",
-     	
+
        	"Stampings.blank",
        	"Stampings.edit",
      	"Stampings.save",
      	"Stampings.delete",
      	"Stampings.toggleWorkingHoliday",
      	"Stampings.forceMealTicket",
-     	
+
      	/* Vecchio permesso editCompetence */
         "Competences.updateCompetence",
         "Competences.saveOvertime",
         "Competences.updatePersonCompetence",
         "Competences.saveNewCompetenceConfiguration",
-        
+
          /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
         "UploadSituation.updateSession",
@@ -867,11 +867,11 @@ when
         "UploadSituation.showCertificatedData",
         "UploadSituation.checkData",
         "UploadSituation.performCheckData",
-        
+
         "Certifications.certifications",
         "Certifications.processAll",
         "Certifications.emptyCertifications",
-        
+
         /* Vecchio permesso editWorkingTypeType */
         "WorkingTimes.insertWorkingTime",
         "WorkingTimes.save",
@@ -883,7 +883,7 @@ when
         "WorkingTimes.saveHorizontal",
         "WorkingTimes.insertWorkingTimeBaseInformation",
         "WorkingTimes.insertVerticalWorkingTime",
-        
+
         /* Vecchio permesso editCompetenceCode
          *  FIXME: i codici competenza non sono associati all'office. Quindi non ha senso
  	     *  impostare la regola editCompetenceCode_InOffice. O si associano all'office in modo
@@ -895,20 +895,20 @@ when
         "Competences.insertCompetenceCode",
         "Competences.edit",
         "Competences.save",
-        
+
         /* Vecchio permesso editAbsenceCode */
 		/* FIXME: stesso ragionamento del editCompetenceCode*/
         "Absences.editCode",
-     	
+
      	"Configurations.show",
      	"Configurations.edit",
         "Configurations.update",
-		
+
 		"BadgeSystems.joinBadgesPerson",
 		"BadgeSystems.saveBadges",
 		"BadgeSystems.deleteBadgePerson",
 		"BadgeSystems.deleteBadge",
-		
+
 		/*Ore di formazione*/
 		"PersonMonths.visualizePeopleTrainingHours",
         "PersonMonths.insertPeopleTrainingHours",
@@ -918,8 +918,8 @@ when
         "PersonMonths.save",
         "PersonMonths.saveTrainingHours",
         "Charts.listForExcelFile",
-        "Charts.test"	
-               
+        "Charts.test"
+
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -1011,13 +1011,13 @@ when
  $uro: UsersRolesOffices()
  Role(name == Role.BADGE_READER) from $uro.role
  $c: PermissionCheck(action in (
- 
+
  		/* duplicate */
  		"StampingsFromClient.create",
  		"StampingsFromClient.createNotRecompute",
  		"StampingsFromClient.absence",
  		"StampingsFromClient.absenceNotRecompute"
- 		
+
  		), target == null, granted == false)
  then
  $c.grant();
@@ -1029,12 +1029,12 @@ when
  $o: Office( usersRolesOffices contains $uro)
  Role(name == Role.BADGE_READER) from $uro.role
  $c: PermissionCheck(action in (
- 
+
  		"StampingsFromClient.create",
  		"StampingsFromClient.createNotRecompute",
  		"StampingsFromClient.absence",
  		"StampingsFromClient.absenceNotRecompute"
- 	
+
  		), target == $o, granted == false)
 then
  $c.grant();
@@ -1048,17 +1048,17 @@ when
  $uro: UsersRolesOffices()
  $p: Role(name == "restClient") from $uro.role
  $c: PermissionCheck(action in (
-        
+
         "rest.Persons.days",
         "rest.Persons.missions",
         "rest.Persons.competences",
         "rest.Absences.absencesInPeriod",
         "rest.Absences.insertAbsence",
         "rest.Absences.checkAbsence",
-        
+
         "rest.Absences.checkAbsenceByPerseoId",
         "rest.Absences.insertAbsenceByPerseoId"
-        
+
        ), target == null, granted == false)
 then
  $c.grant();
@@ -1074,10 +1074,10 @@ when
         "rest.Absences.absencesInPeriod",
         "rest.Absences.insertAbsence",
         "rest.Absences.checkAbsence",
-        
+
         "rest.Absences.checkAbsenceByPerseoId",
         "rest.Absences.insertAbsenceByPerseoId"
-        
+
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -1105,14 +1105,14 @@ when
  $uro: UsersRolesOffices()
  $p: Role(name == "shiftManager") from $uro.role
  $c: PermissionCheck(action in (
-        
+
         "Shift.personList",
         "Shift.timeTable",
         "Shift.find",
         "Shift.update",
         "Shift.exportMonthAsPDF",
         "Shift.exportMonthCalAsPDF",
-        "Shift.absence",  
+        "Shift.absence",
         "Shift.iCal"
        ), target == null, granted == false)
 then
@@ -1124,18 +1124,18 @@ when
  $uro: UsersRolesOffices()
  $p: Role(name == "reperibilityManager") from $uro.role
  $c: PermissionCheck(action in (
-        
+
         "Reperibility.personList",
         "Reperibility.find",
         "Reperibility.who",
         "Reperibility.absence",
         "Reperibility.whoIsAbsent",
         "Reperibility.update",
-        "Reperibility.changePeriods",  
-        "Reperibility.exportYearAsPDF", 
+        "Reperibility.changePeriods",
+        "Reperibility.exportYearAsPDF",
         "Reperibility.exportMonthAsPDF",
         "Reperibility.iCal"
-        
+
        ), target == null, granted == false)
 then
  $c.grant();
