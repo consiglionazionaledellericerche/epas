@@ -1,19 +1,36 @@
 #{modalAsync id:'defaultModal', title:'Inserisci ore di formazione per anno ' +year }
 
-#{alert color:'info'}
-	Inserisci le ore di formazione scegliendo la persona per cui inserirle, specificando il giorno di inizio, 
-	il giorno di fine e il quantitativo.
-#{/alert}
+#{if personMonthSituationId != null}
+	#{alert color:'info'}
+		Modifica le ore di formazione per <strong>${person.fullName()}</strong> specificando il quantitativo.
+	#{/alert}
+#{/if}
+#{else}
+	#{alert color:'info'}
+		Inserisci le ore di formazione scegliendo la persona per cui inserirle, specificando il giorno di inizio, 
+		il giorno di fine e il quantitativo.
+	#{/alert}
+#{/else}
 
 <div id="insertHour">
 	#{form @PersonMonths.save(), class:'form-horizontal', 'data-async':'#page_content',
 			    'data-async-error':'#insertHour', 'data-spinner':'#defaultSpinner'}
-
-  	  #{f.hidden 'month', value:month /}
+	  #{f.hidden 'month', value:month /}
   	  #{f.hidden 'year', value:year /}
-  	  #{f.selectModel 'person', items: simplePersonList, required:true /}
-	  #{f.input 'begin', label:'Giorno Iniziale', type:'number', required:'true' /}
-	  #{f.input 'end', label:'Giorno Finale', type:'number', required:'true' /}	
+	  #{if personMonthSituationId != null}
+	  		<input name="personMonthSituationId" type="hidden" value="${personMonthSituationId}"/>
+	  		<input name="begin" type="hidden" value="${begin}"/>
+			<input name="end" type="hidden" value="${end}"/>		
+			#{f.simpleView 'Dal', value:dateFrom.format() /}
+			#{f.simpleView 'Al', value:dateTo.format() /}  
+			#{f.hidden 'person', value:person /}
+	  #{/if}
+	  #{else}
+	  	 #{f.selectModel 'person', items: simplePersonList, required:true /}
+	     #{f.input 'begin', label:'Giorno Iniziale', type:'number', required:'true' /}
+	     #{f.input 'end', label:'Giorno Finale', type:'number', required:'true' /}
+	  #{/else}
+	  
 	  #{f.input 'value', label:'Quantità', type:'number', required:'true' /}
 	  	  
 
