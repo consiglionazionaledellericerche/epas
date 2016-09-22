@@ -35,7 +35,7 @@
       <br>
       <strong>Il codice di assenza modella i seguenti gruppi di assenze:</strong>
       #{list items:templateUtility.involvedGroupAbsenceType(_absence.absenceType), as:'group'}
-        <br><a href="@{AbsenceGroups.groupStatus('person.id':_person.id, 'groupAbsenceType.id':_group.id, 'date':_absence.getAbsenceDate().format())}">${group.description}</a>      
+        <br><a href="@{AbsenceGroups.groupStatus('person.id':_person.id, 'groupAbsenceType.id':group.id, 'date':_absence.getAbsenceDate().format())}">${group.description}</a>      
       #{/list}
     </p>  
     #{/if}

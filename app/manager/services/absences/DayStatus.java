@@ -72,10 +72,6 @@ public class DayStatus {
     return correctReplacing == null && existentReplacing != null;
   }
   
-  public boolean isComplationAbsence(Absence absence) {
-    return this.complationAbsence != null 
-        && this.complationAbsence.equals(absence);
-  }
   
   
 
@@ -84,28 +80,63 @@ public class DayStatus {
     List<RowRecap> rowsRecap = Lists.newArrayList();
     boolean datePrinted = false;
     
-    //Una riga per ogni assenza taken
+    List<TakenAbsence> takenNotComplations = Lists.newArrayList();
+    TakenAbsence takenComplation = null;
+    for (TakenAbsence takenAbsence : takenAbsences) {
+      if (!this.complationSameDay.contains(takenAbsence.absence)) {
+        if (this.complationAbsence != null && this.complationAbsence.equals(takenAbsence.absence)) {
+          takenComplation = takenAbsence;  
+        } else {
+          takenNotComplations.add(takenAbsence);
+        }
+      } 
+    }
     
-    for (TakenAbsence takenAbsence : this.takenAbsences) {
-    
+    //1) 
+    for (TakenAbsence takenNotComplation : takenNotComplations) {
       RowRecap rowRecap = new RowRecap();
       if (!datePrinted) {
         rowRecap.date = this.date;
         datePrinted = true;
       }
-      rowRecap.absence = takenAbsence.absence;
-      rowRecap.usableLimit = printAmount(takenAbsence.residualBeforeTakable, takenAbsence.amountTypeTakable);
-      rowRecap.usableTaken = printAmount(takenAbsence.consumedTakable, takenAbsence.amountTypeTakable);
-      
-      //Assenza taken è l'assenza complation, salvo quanto completa
-      if (isComplationAbsence(takenAbsence.absence)) {
-        
-        rowRecap.consumedComplationAbsence = printAmount(this.consumedComplation, 
-            this.amountTypeComplation);
+      rowRecap.absence = takenNotComplation.absence;
+      rowRecap.usableLimit = printAmount(takenNotComplation.residualBeforeTakable, takenNotComplation.amountTypeTakable);
+      rowRecap.usableTaken = printAmount(takenNotComplation.consumedTakable, takenNotComplation.amountTypeTakable);
+      rowsRecap.add(rowRecap);
+    }
+    //2)
+    if (takenComplation != null) {
+      RowRecap rowRecap = new RowRecap();
+      if (!datePrinted) {
+        rowRecap.date = this.date;
+        datePrinted = true;
       }
-      
+      rowRecap.absence = takenComplation.absence;
+      rowRecap.usableLimit = printAmount(takenComplation.residualBeforeTakable, takenComplation.amountTypeTakable);
+      rowRecap.usableTaken = printAmount(takenComplation.consumedTakable, takenComplation.amountTypeTakable);
+      rowRecap.consumedComplationAbsence = printAmount(this.consumedComplation, this.amountTypeComplation);
+      if (!complationCompromised() && !complationCompromisedInThisDay()) {
+        rowRecap.consumedComplationBefore = printAmount(this.residualBeforeComplation, this.amountTypeComplation);
+      }
+      rowsRecap.add(rowRecap);
+    }
+    
+    
+    Absence replacing = null;
+    AbsenceType missingReplacing = null;
+    if (this.replacingSameDay.isEmpty()) {
+      replacing = this.existentReplacing;
+      if (this.existentReplacing == null && this.missingReplacing()) {
+        missingReplacing = this.correctReplacing;
+      }
+    }
+    
+    if (replacing != null) {
       
     }
+    
+
+    
     
     return null;
   }
