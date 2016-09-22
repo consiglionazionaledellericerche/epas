@@ -1,7 +1,9 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
@@ -28,6 +30,7 @@ import play.data.validation.Equals;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
+import play.db.jpa.JPA;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -137,8 +140,7 @@ public class Users extends Controller {
       final User user = userRoleOffice.user;
       render("@addRole", user, userRoleOffice);
     }
-
-    rules.checkIfPermitted(userRoleOffice.user);
+    rules.checkIfPermitted(userRoleOffice);
 
     if (userRoleOffice.isPersistent()) {
       userRoleOffice.delete();

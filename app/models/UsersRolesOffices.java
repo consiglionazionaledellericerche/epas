@@ -58,4 +58,13 @@ public class UsersRolesOffices extends BaseModel {
             .add("office", office)
             .toString();
   }
+
+  /**
+   * L'office fornito ha un legame con questo uro.
+   *
+   * @return true se ce l'ha, false altrimenti.
+   */
+  public boolean hasRelationWith(Office office) {
+    return user.owner == office || (user.person != null && user.person.office == office);
+  }
 }
