@@ -103,9 +103,7 @@ public class Competences extends Controller {
   @Inject
   private static PersonReperibilityDayDao reperibilityDao;
   
-  public static Predicate<CompetenceCode> isReperibility() {
-    return p -> p.code.equalsIgnoreCase("207") || p.code.equalsIgnoreCase("208");
-  }
+  
 
   /**
    * Crud CompetenceCode.
@@ -404,13 +402,8 @@ public class Competences extends Controller {
     }
     // genero un controllo sul fatto che esistano servizi attivi per cui la reperibilità
     // può essere utilizzata
-    if (competenceCodeList.stream().anyMatch(isReperibility())) {
-      List<PersonReperibilityType> prtList = reperibilityDao
-          .getReperibilityTypeByOffice(office, Optional.fromNullable(new Boolean(false)));
-      if (prtList.isEmpty()) {
-        servicesInitialized = false;
-      }
-    }
+    servicesInitialized = competenceManager
+        .isServiceForReperibilityInitialized(office, competenceCodeList);
     if (competenceCode == null || !competenceCode.isPersistent()) {
       competenceCode = competenceCodeList.get(0);
       notFoundIfNull(competenceCode);
@@ -503,9 +496,12 @@ public class Competences extends Controller {
     
     CompetenceRecap compDto = competenceRecapFactory
         .create(office, competence.competenceCode, year, month);
+    boolean servicesInitialized = competenceManager
+        .isServiceForReperibilityInitialized(office, competenceCodeList);
+    
 
     render("@showCompetences", year, month, office, 
-        wrCompetenceCode, competenceCodeList, compList, compDto);
+        wrCompetenceCode, competenceCodeList, compList, compDto, servicesInitialized);
   }
 
   /**

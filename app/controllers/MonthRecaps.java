@@ -131,7 +131,7 @@ public class MonthRecaps extends Controller {
 
       IWrapperPerson wrPerson = wrapperFactory.create(person);
 
-      for (Contract contract : wrPerson.getMonthContracts(year, month)) {
+      for (Contract contract : wrPerson.orderedMonthContracts(year, month)) {
 
         Optional<VacationsRecap> vr = vacationsService.createEndMonth(year, month, contract);
 

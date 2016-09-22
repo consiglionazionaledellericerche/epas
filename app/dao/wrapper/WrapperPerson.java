@@ -2,6 +2,7 @@ package dao.wrapper;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -33,6 +34,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 import java.util.List;
+import java.util.SortedMap;
 
 /**
  * @author marco
@@ -49,6 +51,7 @@ public class WrapperPerson implements IWrapperPerson {
   private final IWrapperFactory wrapperFactory;
   private final CompetenceDao competenceDao;
 
+  private List<Contract> sortedContracts = null;
   private Optional<Contract> currentContract = null;
   private Optional<WorkingTimeType> currentWorkingTimeType = null;
   private Optional<VacationPeriod> currentVacationPeriod = null;
@@ -56,7 +59,6 @@ public class WrapperPerson implements IWrapperPerson {
   private Optional<ContractWorkingTimeType> currentContractWorkingTimeType = null;
   
   private Optional<Boolean> properSynchronized = Optional.<Boolean>absent(); 
-
 
   @Inject
   WrapperPerson(@Assisted Person person, ContractDao contractDao,
@@ -82,12 +84,17 @@ public class WrapperPerson implements IWrapperPerson {
 
   @Override
   public boolean isActiveInDay(LocalDate date) {
-    return true;
+    for (Contract contract : orderedMonthContracts(date.getYear(), date.getMonthOfYear())) {
+      if (DateUtility.isDateIntoInterval(date, contract.periodInterval())) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @Override
   public boolean isActiveInMonth(YearMonth yearMonth) {
-    return true;
+    return getFirstContractInMonth(yearMonth.getYear(), yearMonth.getMonthOfYear()) != null;
   }
 
   /**
@@ -110,7 +117,7 @@ public class WrapperPerson implements IWrapperPerson {
   }
 
   @Override
-  public List<Contract> getMonthContracts(int year, int month) {
+  public List<Contract> orderedMonthContracts(int year, int month) {
 
     List<Contract> contracts = Lists.newArrayList();
 
@@ -118,7 +125,7 @@ public class WrapperPerson implements IWrapperPerson {
     DateInterval monthInterval = new DateInterval(monthBegin,
             monthBegin.dayOfMonth().withMaximumValue());
 
-    for (Contract contract : value.contracts) {
+    for (Contract contract : orderedContracts()) {
       if (DateUtility.intervalIntersection(monthInterval, wrapperFactory
               .create(contract).getContractDateInterval()) != null) {
         contracts.add(contract);
@@ -128,20 +135,32 @@ public class WrapperPerson implements IWrapperPerson {
   }
 
   @Override
-  public List<Contract> getYearContracts(int year) {
+  public List<Contract> orderedYearContracts(int year) {
 
     List<Contract> contracts = Lists.newArrayList();
-
     DateInterval yearInterval = new DateInterval(new LocalDate(year, 1, 1),
             new LocalDate(year, 12, 31));
 
-    for (Contract contract : value.contracts) {
+    for (Contract contract : orderedContracts()) {
       if (DateUtility.intervalIntersection(yearInterval, wrapperFactory
               .create(contract).getContractDateInterval()) != null) {
         contracts.add(contract);
       }
     }
     return contracts;
+  }
+  
+  @Override
+  public List<Contract> orderedContracts() {
+    if (sortedContracts != null) {
+      return sortedContracts;
+    }
+    SortedMap<LocalDate, Contract> contracts = Maps.newTreeMap();
+    for (Contract contract : value.contracts) { 
+      contracts.put(contract.beginDate, contract);
+    }
+    sortedContracts = Lists.newArrayList(contracts.values());
+    return sortedContracts;
   }
 
   /**
@@ -150,7 +169,7 @@ public class WrapperPerson implements IWrapperPerson {
   @Override
   public Optional<Contract> getLastContractInMonth(int year, int month) {
 
-    List<Contract> contractInMonth = this.getMonthContracts(year, month);
+    List<Contract> contractInMonth = this.orderedMonthContracts(year, month);
 
     if (contractInMonth.size() == 0) {
       return Optional.absent();
@@ -164,7 +183,7 @@ public class WrapperPerson implements IWrapperPerson {
    */
   public Optional<Contract> getFirstContractInMonth(int year, int month) {
 
-    List<Contract> contractInMonth = this.getMonthContracts(year, month);
+    List<Contract> contractInMonth = this.orderedMonthContracts(year, month);
 
     if (contractInMonth.size() == 0) {
       return Optional.absent();

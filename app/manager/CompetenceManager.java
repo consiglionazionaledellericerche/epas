@@ -63,6 +63,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 
 public class CompetenceManager {
@@ -104,6 +105,11 @@ public class CompetenceManager {
     this.stampingsRecapFactory = stampingsRecapFactory;    
   }
 
+  public static Predicate<CompetenceCode> isReperibility() {
+    return p -> p.code.equalsIgnoreCase("207") || p.code.equalsIgnoreCase("208");
+  }
+  
+  
   /**
    * @return la lista di stringhe popolata con i codici dei vari tipi di straordinario prendibili.
    */
@@ -296,7 +302,7 @@ public class CompetenceManager {
   public Integer positiveResidualInMonth(Person person, int year, int month) {
 
     List<Contract> monthContracts = wrapperFactory
-        .create(person).getMonthContracts(year, month);
+        .create(person).orderedMonthContracts(year, month);
     int differenceForShift = 0;
     List<PersonDay> pdList = personDayDao.getPersonDayInMonth(person, new YearMonth(year, month));
     for (Contract contract : monthContracts) {
@@ -504,6 +510,25 @@ public class CompetenceManager {
       }
     } 
     return false;
+  }
+  
+  /**
+   * 
+   * @param office
+   * @param competenceCodeList
+   * @return true se esiste almeno un servizio per reperibilità inizializzato, false altrimenti.
+   */
+  public boolean isServiceForReperibilityInitialized(Office office, 
+      List<CompetenceCode> competenceCodeList) {
+    boolean servicesInitialized = true;
+    if (competenceCodeList.stream().anyMatch(isReperibility())) {
+      List<PersonReperibilityType> prtList = reperibilityDao
+          .getReperibilityTypeByOffice(office, Optional.fromNullable(new Boolean(false)));
+      if (prtList.isEmpty()) {
+        servicesInitialized = false;
+      }
+    }
+    return servicesInitialized;
   }
   /**
    * 

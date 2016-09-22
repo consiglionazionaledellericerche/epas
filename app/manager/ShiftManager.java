@@ -1,6 +1,7 @@
 package manager;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
@@ -57,6 +58,7 @@ import play.i18n.Messages;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -122,15 +124,13 @@ public class ShiftManager {
    *                                 della tabella tra: - List di String
    */
   public void getShiftInconsistencyTimestampTable(
-      List<PersonShiftDay> personShiftDays, Table<Person, String,
-      List<String>> inconsistentAbsenceTable) {
+      List<PersonShiftDay> personShiftDays, Table<Person, String, List<String>> inconsistentAbsenceTable) {
 
     // lista dei giorni di assenza nel mese, mancata timbratura e timbratura inconsistente
     List<String> noStampingDays = new ArrayList<String>();        // mancata timbratura
     List<String> badStampingDays = new ArrayList<String>();        // timbrature errate
     List<String> absenceDays = new ArrayList<String>();            // giorni di assenza
     List<String> lackOfTimes = new ArrayList<String>();            // tempo mancante
-
 
     for (PersonShiftDay personShiftDay : personShiftDays) {
       Person person = personShiftDay.personShift.person;
@@ -154,7 +154,7 @@ public class ShiftManager {
       // Add flexibility (15 min.) due to the new rules (PROT. N. 0008692 del 2/12/2014)
       LocalTime roundedStartShift = startShift.plusMinutes(15);
 
-      log.debug("Turno: {}-{}  {}-{}", startShift, startLunchTime, endLunchTime, endShift);
+      //log.debug("Turno: {}-{}  {}-{}", startShift, startLunchTime, endLunchTime, endShift);
 
       //check for the absence inconsistencies
       //------------------------------------------
@@ -178,8 +178,7 @@ public class ShiftManager {
           noStampingDays.add(personShiftDay.date.toString("dd MMM"));
           inconsistentAbsenceTable.put(person, thNoStampings, noStampingDays);
 
-          log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}",
-              person, thNoStampings, inconsistentAbsenceTable.get(person, thNoStampings));
+          log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thNoStampings, inconsistentAbsenceTable.get(person, thNoStampings));
         }
       } else {
 
@@ -199,8 +198,7 @@ public class ShiftManager {
             noStampingDays.add(personShiftDay.date.toString("dd MMM"));
             inconsistentAbsenceTable.put(person, thNoStampings, noStampingDays);
 
-            log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}",
-                person, thNoStampings, inconsistentAbsenceTable.get(person, thNoStampings));
+            //log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thNoStampings, inconsistentAbsenceTable.get(person, thNoStampings));
           } else {
             // check consistent stampings
             //-----------------------------
@@ -268,7 +266,7 @@ public class ShiftManager {
                 strStamp =
                     strStamp.concat(pairStamping.first.date.toString("HH:mm")).concat(" - ")
                         .concat(pairStamping.second.date.toString("HH:mm")).concat("  ");
-                log.debug("Controllo la coppia {}", strStamp);
+                //log.debug("Controllo la coppia {}", strStamp);
 
                 // controlla se la coppia di timbrature interseca l'intervallo prima e dopo
                 // pranzo del turno
@@ -306,7 +304,7 @@ public class ShiftManager {
                     "Il turno di {} nel giorno {} non e' stato completato o c'e' stata una "
                         + "uscita fuori pausa pranzo - orario {}",
                     person, personDay.get().date, strStamp);
-                log.debug("Esamino le coppie di timbrature");
+                //log.debug("Esamino le coppie di timbrature");
 
                 // per ogni coppia di timbrature
                 for (PairStamping pairStamping : pairStampings) {
@@ -325,8 +323,7 @@ public class ShiftManager {
                         (pairStamping.second.date.toLocalTime().isBefore(startLunchTime))
                             ? pairStamping.second.date.toLocalTime() : startLunchTime;
                     workingMinutes += DateUtility.getDifferenceBetweenLocalTime(lowLimit, upLimit);
-                    log.debug("N.1 - ss={} -- slt={} lowLimit={} upLimit={} workingMinutes={}",
-                        startShift, startLunchTime, lowLimit, upLimit, workingMinutes);
+                    //log.debug("N.1 - ss={} -- slt={} lowLimit={} upLimit={} workingMinutes={}", startShift, startLunchTime, lowLimit, upLimit, workingMinutes);
 
                     // calcola gli scostamenti dalla prima fascia del turno tenendo conto dei 15
                     // min di comporto se il turnista è entrato prima
@@ -350,12 +347,12 @@ public class ShiftManager {
                     }
                     diffStartShift =
                         DateUtility.getDifferenceBetweenLocalTime(newLimit, startShift);
-                    log.debug("diffStartShift={}", diffStartShift);
+                    //log.debug("diffStartShift={}", diffStartShift);
 
                     // calcola gli scostamenti dell'ingresso in pausa pranzo tenendo conto dei
                     // 15 min di comporto se il turnista è andato a  pranzo prima
                     if (pairStamping.second.date.toLocalTime().isBefore(startLunchTime)) {
-                      log.debug("vedo uscita per pranzo prima");
+                      //log.debug("vedo uscita per pranzo prima");
                       newLimit =
                           (startLunchTime.minusMinutes(15)
                               .isAfter(pairStamping.second.date.toLocalTime()))
@@ -368,7 +365,7 @@ public class ShiftManager {
                       }
                     } else if (pairStamping.second.date.toLocalTime().isBefore(endLunchTime)) {
                       // è andato a pranzo dopo
-                      log.debug("vedo uscita per pranzo dopo");
+                      //log.debug("vedo uscita per pranzo dopo");
                       newLimit =
                           (startLunchTime.plusMinutes(15)
                               .isAfter(pairStamping.second.date.toLocalTime()))
@@ -382,8 +379,7 @@ public class ShiftManager {
                           DateUtility.getDifferenceBetweenLocalTime(startLunchTime, newLimit);
                     }
 
-                    log.debug("diffStartLunchTime=getDifferenceBetweenLocalTime({}, {})={}",
-                        startLunchTime, newLimit, diffStartLunchTime);
+                    //log.debug("diffStartLunchTime=getDifferenceBetweenLocalTime({}, {})={}", startLunchTime, newLimit, diffStartLunchTime);
                   }
 
                   // l'intervallo di tempo lavorato interseca la parte del turno dopo pranzo
@@ -400,26 +396,24 @@ public class ShiftManager {
                         (pairStamping.second.date.toLocalTime().isBefore(endShift))
                             ? pairStamping.second.date.toLocalTime() : endShift;
                     workingMinutes += DateUtility.getDifferenceBetweenLocalTime(lowLimit, upLimit);
-                    log.debug("N.2 - elt={} --- es={}  slowLimit={} upLimit={} workingMinutes={}",
-                        endLunchTime, endShift, lowLimit, upLimit, workingMinutes);
+                    //log.debug("N.2 - elt={} --- es={}  slowLimit={} upLimit={} workingMinutes={}", endLunchTime, endShift, lowLimit, upLimit, workingMinutes);
 
                     // calcola gli scostamenti dalla seconda fascia del turno tenendo conto dei
                     // 15 min di comporto se il turnista è rientrato prima dalla pausa pranzo
                     if (pairStamping.first.date.toLocalTime().isBefore(endLunchTime)
                         && pairStamping.first.date.toLocalTime().isAfter(startLunchTime)) {
-                      log.debug("vedo rientro da pranzo prima");
+                      //log.debug("vedo rientro da pranzo prima");
                       newLimit =
                           (endLunchTime.minusMinutes(15)
                               .isAfter(pairStamping.first.date.toLocalTime()))
                               ? endLunchTime.minusMinutes(15) : pairStamping.first.date.toLocalTime();
                       diffEndLunchTime =
                           DateUtility.getDifferenceBetweenLocalTime(newLimit, endLunchTime);
-                      log.debug("diffEndLunchTime=getDifferenceBetweenLocalTime({}, {})={}",
-                          newLimit, endLunchTime, diffEndLunchTime);
+                      //log.debug("diffEndLunchTime=getDifferenceBetweenLocalTime({}, {})={}", newLimit, endLunchTime, diffEndLunchTime);
                     } else if (pairStamping.first.date.toLocalTime().isBefore(endShift)
                         && pairStamping.first.date.toLocalTime().isAfter(endLunchTime)) {
                       // è rientrato dopo
-                      log.debug("vedo rientro da pranzo dopo");
+                      //log.debug("vedo rientro da pranzo dopo");
                       newLimit =
                           (pairStamping.first.date.toLocalTime()
                               .isAfter(endLunchTime.plusMinutes(15)))
@@ -430,14 +424,13 @@ public class ShiftManager {
                       }
                       diffEndLunchTime =
                           DateUtility.getDifferenceBetweenLocalTime(newLimit, endLunchTime);
-                      log.debug("diffEndLunchTime=getDifferenceBetweenLocalTime({}, {})={}",
-                          endLunchTime, newLimit, diffEndLunchTime);
+                      //log.debug("diffEndLunchTime=getDifferenceBetweenLocalTime({}, {})={}", endLunchTime, newLimit, diffEndLunchTime);
                     }
 
 
                     // se il turnista è uscito prima del turno
                     if (pairStamping.second.date.toLocalTime().isBefore(endShift)) {
-                      log.debug("vedo uscita prima della fine turno");
+                      //log.debug("vedo uscita prima della fine turno");
                       newLimit =
                           (endShift.minusMinutes(15).isAfter(pairStamping.second.date.toLocalTime()))
                               ? endShift.minusMinutes(15) : pairStamping.second.date.toLocalTime();
@@ -445,14 +438,14 @@ public class ShiftManager {
                         inTolleranceLimit = false;
                       }
                     } else {
-                      log.debug("vedo uscita dopo la fine turno");
+                      //log.debug("vedo uscita dopo la fine turno");
                       // il turnista è uscito dopo la fine del turno
                       newLimit = (pairStamping.second.date.toLocalTime()
                           .isAfter(endShift.plusMinutes(15)))
                           ? endShift.plusMinutes(15) : pairStamping.second.date.toLocalTime();
                     }
                     diffEndShift = DateUtility.getDifferenceBetweenLocalTime(endShift, newLimit);
-                    log.debug("diffEndShift={}", diffEndShift);
+                    //log.debug("diffEndShift={}", diffEndShift);
                   }
 
                   // write the pair stamping
@@ -471,17 +464,16 @@ public class ShiftManager {
                 // controlla pausa pranzo:
                 // - se è uscito prima dell'inizio PP (è andato a pranzo prima)
                 if (diffStartLunchTime < 0) {
-                  log.debug("sono entrata in pausa pranzo prima! diffStartLunchTime={}",
-                      diffStartLunchTime);
+                  //log.debug("sono entrata in pausa pranzo prima! diffStartLunchTime={}", diffStartLunchTime);
+                	
                   // controlla se è anche rientrato prima dalla PP e compensa
                   if (diffEndLunchTime > 0) {
-                    log.debug("E rientrato prima dalla pausa pranzo! diffEndLunchTime={}",
-                        diffEndLunchTime);
+                    //log.debug("E rientrato prima dalla pausa pranzo! diffEndLunchTime={}", diffEndLunchTime);
                     restoredMin +=
                         Math.min(Math.abs(diffStartLunchTime), Math.abs(diffEndLunchTime));
-                    log.debug("restoredMin={} Math.abs(diffStartLunchTime)={} "
-                            + "Math.abs(diffEndLunchTime)={}",
-                        restoredMin, Math.abs(diffStartLunchTime), Math.abs(diffEndLunchTime));
+                    
+                    //log.debug("restoredMin={} Math.abs(diffStartLunchTime)={} "
+                    //        + "Math.abs(diffEndLunchTime)={}", restoredMin, Math.abs(diffStartLunchTime), Math.abs(diffEndLunchTime));
 
                     diffStartLunchTime =
                         ((diffStartLunchTime + diffEndLunchTime) > 0)
@@ -511,8 +503,8 @@ public class ShiftManager {
 
                 // - se è entrato dopo la fine della pausa pranzo
                 if (diffEndLunchTime < 0) {
-                  log.debug("E entrato in ritardo dalla pausa pranzo! diffEndLunchTime={}",
-                      diffEndLunchTime);
+                  log.debug("E entrato in ritardo dalla pausa pranzo! diffEndLunchTime={}", diffEndLunchTime);
+                  
                   // controlla che sia entrata dopo in pausa pranzo
                   if (diffStartLunchTime > 0) {
                     log.debug("e andata anche dopo in pausa pranzo! diffStartLunchTime={}",
@@ -533,12 +525,12 @@ public class ShiftManager {
                   }
                   // se necessario e se è uscito dopo, compensa con l'uscita
                   if ((diffEndLunchTime < 0) && (diffEndShift > 0)) {
-                    log.debug("e' uscito dopo! diffEndShift={}", diffEndShift);
+                    //log.debug("e' uscito dopo! diffEndShift={}", diffEndShift);
                     // cerca di conpensare con l'uscita (è uscito anche dopo)
                     restoredMin += Math.min(Math.abs(diffEndLunchTime), Math.abs(diffEndShift));
-                    log.debug("restoredMin={} Math.abs(diffEndLunchTime)={} "
-                            + "Math.abs(diffEndShift)={}",
-                        restoredMin, Math.abs(diffEndLunchTime), Math.abs(diffEndShift));
+                    
+                    //log.debug("restoredMin={} Math.abs(diffEndLunchTime)={} Math.abs(diffEndShift)={}",
+                    //    restoredMin, Math.abs(diffEndLunchTime), Math.abs(diffEndShift));
 
                     diffEndLunchTime =
                         ((diffEndLunchTime + diffEndShift) > 0)
@@ -552,11 +544,11 @@ public class ShiftManager {
                 // controlla eventuali compensazioni di ingresso e uscita
                 // controlla se è uscito dopo
                 if ((diffStartShift < 0) && (diffEndShift > 0)) {
-                  log.debug("e entrato dopo ed è uscito dopo! diffStartShift={} diffEndShift={}",
-                      diffStartShift, diffEndShift);
-                  restoredMin += Math.min(Math.abs(diffEndShift), Math.abs(diffStartShift));
-                  log.debug("restoredMin={} Math.abs(diffEndShift)={} "
-                          + "Math.abs(diffStartShift)={}",
+                  // log.debug("e entrato dopo ed è uscito dopo! diffStartShift={} diffEndShift={}", diffStartShift, diffEndShift);
+                  
+                	restoredMin += Math.min(Math.abs(diffEndShift), Math.abs(diffStartShift));
+                  
+                	log.debug("restoredMin={} Math.abs(diffEndShift)={} Math.abs(diffStartShift)={}",
                       restoredMin, Math.abs(diffEndShift), Math.abs(diffStartShift));
 
                   diffStartShift =
@@ -566,14 +558,11 @@ public class ShiftManager {
 
                 } else if ((diffEndShift < 0) && (diffStartShift > 0)) {
 
-                  log.debug("e uscito prima ed è entrato dopo! diffStartShift=%s diffEndShift={}",
-                      diffStartShift, diffEndShift);
+                  //log.debug("e uscito prima ed è entrato dopo! diffStartShift=%s diffEndShift={}", diffStartShift, diffEndShift);
 
                   restoredMin += Math.min(Math.abs(diffEndShift), Math.abs(diffStartShift));
 
-                  log.debug("restoredMin={} Math.abs(diffEndShift)={} "
-                          + "Math.abs(diffStartShift)={}",
-                      restoredMin, Math.abs(diffEndShift), Math.abs(diffStartShift));
+                  //log.debug("restoredMin={} Math.abs(diffEndShift)={} Math.abs(diffStartShift)={}", restoredMin, Math.abs(diffEndShift), Math.abs(diffStartShift));
 
                   diffEndShift =
                       ((diffEndShift + diffStartShift) > 0) ? 0 : diffEndShift + diffStartShift;
@@ -582,7 +571,7 @@ public class ShiftManager {
 
                 }
 
-                log.debug("Minuti recuperati: {}", restoredMin);
+                //log.debug("Minuti recuperati: {}", restoredMin);
 
                 // check if the difference between the worked hours in the shift periods are less
                 // than 2 hours (new rules for shift)
@@ -592,8 +581,7 @@ public class ShiftManager {
                         + DateUtility.getDifferenceBetweenLocalTime(endLunchTime, endShift);
                 int lackOfMinutes = teoreticShiftMinutes - workingMinutes;
 
-                log.debug("teoreticShiftMinutes = {} workingMinutes = {} lackOfMinutes = {}",
-                    teoreticShiftMinutes, workingMinutes, lackOfMinutes);
+                //log.debug("teoreticShiftMinutes = {} workingMinutes = {} lackOfMinutes = {}", teoreticShiftMinutes, workingMinutes, lackOfMinutes);
                 lackOfMinutes -= restoredMin;
                 workingMinutes += restoredMin;
 
@@ -649,8 +637,7 @@ public class ShiftManager {
                   inconsistentAbsenceTable.put(person, label, badStampingDays);
                   inconsistentAbsenceTable.put(person, thLackTime, lackOfTimes);
 
-                  log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}",
-                      person, thLackTime, inconsistentAbsenceTable.get(person, thLackTime));
+                  //log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thLackTime, inconsistentAbsenceTable.get(person, thLackTime));
                 }
               }
             } // fine controllo coppie timbrature
@@ -659,7 +646,7 @@ public class ShiftManager {
 
         // check for absences
         if (!personDay.get().absences.isEmpty()) {
-          log.debug("E assente!!!! Esamino le assenze({})", personDay.get().absences.size());
+          //log.debug("E assente!!!! Esamino le assenze({})", personDay.get().absences.size());
           for (Absence absence : personDay.get().absences) {
             if (absence.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay) {
 
@@ -691,8 +678,11 @@ public class ShiftManager {
       } // fine personDay != null
     }
     //return inconsistentAbsenceTable;
+    
+    log.debug("*** La funzione che calcola le inconsistenze rende una tabella con {} persone", inconsistentAbsenceTable.rowKeySet().size());
   }
 
+  
   /**
    * @param personShiftDays lista dei giorni di turno di un certo tipo.
    * @return la lista dei periodi di turno lavorati.
@@ -1131,47 +1121,51 @@ public class ShiftManager {
    * @param competenceList             lista di competenze relative ai turni di lavoro di un mese
    * @return totalShiftInfotabella testuale contenete tutte le informazioni
    */
-  public Table<Person, String, String> getPersonsReportShiftInfo(
+  public Table<Person, String, String> getPersonsReportShiftInfo (
       Table<Person, String, Integer> totalPersonShiftWorkedTime, List<Competence> competenceList) {
 
-    Table<Person, String, String> totalShiftInfo = TreeBasedTable.<Person, String, String>create();
+	  Comparator<String> nullSafeStringComparator = Comparator
+	            .nullsFirst(String::compareToIgnoreCase); 
+	        
+    
+	  Table<Person, String, String> totalShiftInfo = TreeBasedTable.<Person, String, String>create(Person.personComparator(), nullSafeStringComparator);
 
-    for (Competence competence : competenceList) {
+	  for (Competence competence : competenceList) {
 
-      // Prende i giorni di turno lavorati e le eventuali ora mancanti
-      int numOfDays =
-          totalPersonShiftWorkedTime.get(competence.getPerson(), Messages.get("PDFReport.thDays"));
-      int lackOfMin =
-          (totalPersonShiftWorkedTime.contains(
-              competence.getPerson(), Messages.get("PDFReport.thLackTime")))
-              ? totalPersonShiftWorkedTime.get(
-              competence.getPerson(),
-              Messages.get("PDFReport.thLackTime"))
-              : 0;
-
-      // prende le ore richieste, quelle approvate e i minuti in eccesso
-      // che dovranno far parte del calcolo delle ore del mese successivo
-      BigDecimal reqHours = competence.getValueRequested();
-      int numOfApprovedHours = competence.getValueApproved();
-      int exceededMins = competence.getExceededMin();
-
-      log.debug("In totalShiftInfo memorizzo (person {}) giorni={}, ore richieste={}, "
-              + "ore approvate={}, min accumulati={}",
-          competence.person, numOfDays, reqHours, numOfApprovedHours, exceededMins);
-      totalShiftInfo.put(
-          competence.person, Messages.get("PDFReport.thDays"), Integer.toString(numOfDays));
-      totalShiftInfo.put(
-          competence.person, Messages.get("PDFReport.thLackTime"),
-          competenceUtility.calcStringShiftHoursFromMinutes(lackOfMin));
-
-      totalShiftInfo.put(
-          competence.person, Messages.get("PDFReport.thReqHour"), reqHours.toString());
-      totalShiftInfo.put(
-          competence.person, Messages.get("PDFReport.thAppHour"),
-          Integer.toString(numOfApprovedHours));
-      totalShiftInfo.put(
-          competence.person, Messages.get("PDFReport.thExceededMin"),
-          Integer.toString(exceededMins));
+	      // Prende i giorni di turno lavorati e le eventuali ora mancanti
+	      int numOfDays =
+	          totalPersonShiftWorkedTime.get(competence.getPerson(), Messages.get("PDFReport.thDays"));
+	      int lackOfMin =
+	          (totalPersonShiftWorkedTime.contains(
+	              competence.getPerson(), Messages.get("PDFReport.thLackTime")))
+	              ? totalPersonShiftWorkedTime.get(
+	              competence.getPerson(),
+	              Messages.get("PDFReport.thLackTime"))
+	              : 0;
+	
+	      // prende le ore richieste, quelle approvate e i minuti in eccesso
+	      // che dovranno far parte del calcolo delle ore del mese successivo
+	      BigDecimal reqHours = competence.getValueRequested();
+	      int numOfApprovedHours = competence.getValueApproved();
+	      int exceededMins = competence.getExceededMin();
+	
+	      log.debug("In totalShiftInfo memorizzo (person {}) giorni={}, ore richieste={}, "
+	              + "ore approvate={}, min accumulati={}",
+	          competence.person, numOfDays, reqHours, numOfApprovedHours, exceededMins);
+	      totalShiftInfo.put(
+	          competence.person, Messages.get("PDFReport.thDays"), Integer.toString(numOfDays));
+	      totalShiftInfo.put(
+	          competence.person, Messages.get("PDFReport.thLackTime"),
+	          competenceUtility.calcStringShiftHoursFromMinutes(lackOfMin));
+	
+	      totalShiftInfo.put(
+	          competence.person, Messages.get("PDFReport.thReqHour"), reqHours.toString());
+	      totalShiftInfo.put(
+	          competence.person, Messages.get("PDFReport.thAppHour"),
+	          Integer.toString(numOfApprovedHours));
+	      totalShiftInfo.put(
+	          competence.person, Messages.get("PDFReport.thExceededMin"),
+	          Integer.toString(exceededMins));
 
     }
 
@@ -1198,7 +1192,8 @@ public class ShiftManager {
 
     // Contains the number of the effective hours of worked shifts
     Table<Person, String, Integer> totalPersonShiftWorkedTime =
-        TreeBasedTable.<Person, String, Integer>create();
+        TreeBasedTable.<Person, String, Integer>create(Person.personComparator(), Comparator
+                .nullsFirst(String::compareToIgnoreCase));
 
     String thLackTime = Messages.get("PDFReport.thLackTime");
 

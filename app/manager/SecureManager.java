@@ -73,8 +73,8 @@ public class SecureManager {
 
   }
 
-  public Set<Office> officesTecnicalAdminAllowed(User user) {
-    ImmutableList<String> roles = ImmutableList.of(Role.TECNICAL_ADMIN, Role.DEVELOPER);
+  public Set<Office> officesTechnicalAdminAllowed(User user) {
+    ImmutableList<String> roles = ImmutableList.of(Role.TECHNICAL_ADMIN, Role.DEVELOPER);
 
     return getOfficeAllowed(user, roles);
   }
@@ -86,8 +86,8 @@ public class SecureManager {
   public Set<Office> ownOffices(User user) {
     ImmutableList<String> roles = ImmutableList.of(
         Role.DEVELOPER, Role.ADMIN, Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.EMPLOYEE,
-        Role.BADGE_READER, Role.REST_CLIENT, Role.TECNICAL_ADMIN, Role.SHIFT_MANAGER,
-        Role.REPERIBILITY_MANAGER, Role.TECNICAL_ADMIN);
+        Role.BADGE_READER, Role.REST_CLIENT, Role.TECHNICAL_ADMIN, Role.SHIFT_MANAGER,
+        Role.REPERIBILITY_MANAGER, Role.TECHNICAL_ADMIN);
 
     return getOfficeAllowed(user, roles);
   }

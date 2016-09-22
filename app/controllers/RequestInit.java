@@ -404,7 +404,7 @@ public class RequestInit extends Controller {
           this.viewAbsenceType = true;
         }
 
-        if (role.name.equals(Role.TECNICAL_ADMIN)) {
+        if (role.name.equals(Role.TECHNICAL_ADMIN)) {
           this.viewOffice = true;
         }
 
