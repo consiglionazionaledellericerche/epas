@@ -5,7 +5,7 @@
     <li class="list-group-item">
       <div class="pull-right btn-group">
         #{b.show @show('user.id':user.id), 'data-async-modal': '#defaultModal' /}
-        #{secure.check 'Accounts.edit'}
+        #{secure.check 'Users.edit'}
           #{b.edit @edit(user.id) /}
         #{/secure.check}
       </div>

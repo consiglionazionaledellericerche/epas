@@ -9,7 +9,7 @@
 
   #{f.hidden 'userRoleOffice.user.id', value: user.id /}
   #{f.selectModel 'userRoleOffice.role' , items: templateUtility.roles/}
-  #{f.selectModel 'userRoleOffice.office' , items: templateUtility.assignableOffices/}
+  #{f.selectModel 'userRoleOffice.office' , items: templateUtility.technicalAdminOffices/}
 
   #{b.buttons center:true}
     #{b.submit 'Salva'/}

@@ -21,6 +21,7 @@ public class SecureManager {
     Preconditions.checkNotNull(user);
     Preconditions.checkState(user.isPersistent());
 
+    // Utente con ruoli di sistema
     if (!user.roles.isEmpty()) {
       return Sets.newHashSet(Office.findAll());
     }

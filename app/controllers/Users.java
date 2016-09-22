@@ -1,9 +1,7 @@
 package controllers;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
@@ -16,15 +14,14 @@ import helpers.Web;
 
 import it.cnr.iit.epas.NullStringBinder;
 
+import lombok.extern.slf4j.Slf4j;
+
 import manager.SecureManager;
 
 import models.Office;
 import models.User;
 import models.UsersRolesOffices;
 import models.enumerate.AccountRole;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import play.data.binding.As;
 import play.data.validation.Equals;
@@ -41,10 +38,9 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+@Slf4j
 @With({Resecure.class})
 public class Users extends Controller {
-
-  private static final Logger log = LoggerFactory.getLogger(BadgeReaders.class);
 
   @Inject
   static SecurityRules rules;
@@ -108,6 +104,8 @@ public class Users extends Controller {
   }
 
   public static void addRole(User user) {
+    notFoundIfNull(user);
+    rules.checkIfPermitted(user);
     render(user);
   }
 
@@ -120,10 +118,8 @@ public class Users extends Controller {
       final User user = userRoleOffice.user;
       render("@addRole", user, userRoleOffice);
     }
-    // TODO l'amministratore tecnico può creare nuovi ruoli per gli utenti delle sue sedi
-    // solamente per le sue sedi.....bisognerà controllare che abbia i
-    // diritti sia sull'utente specificato che sull'ufficio specificato
 
+    rules.checkIfPermitted(userRoleOffice.user);
     rules.checkIfPermitted(userRoleOffice.office);
 
     userRoleOffice.save();
@@ -153,12 +149,16 @@ public class Users extends Controller {
   }
 
   public static void show(User user) {
+    notFoundIfNull(user);
+    rules.checkIfPermitted(user);
     render(user);
   }
 
   public static void edit(Long userId) {
     final User user = userDao.getUserByIdAndPassword(userId, Optional.absent());
     notFoundIfNull(user);
+
+    rules.checkIfPermitted(user);
     render(user);
   }
 
@@ -171,7 +171,8 @@ public class Users extends Controller {
 
     notFoundIfNull(user);
     // Nuovo utente, nessun ruolo di sistema e nessun owner specificato
-    if (!Security.getUser().get().isSystemUser() && user.roles.isEmpty() && user.owner == null) {
+    if (!user.isPersistent() && !Security.getUser().get().isSystemUser()
+        && user.roles.isEmpty() && user.owner == null) {
       validation.addError("user.owner", "Specificare una sede proprietaria");
     }
     if (Validation.hasErrors()) {

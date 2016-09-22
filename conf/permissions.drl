@@ -286,6 +286,12 @@ when
  Role(name == Role.TECHNICAL_ADMIN) from $uro.role
  $c: PermissionCheck(action in (
 
+        "Users.edit",
+        "Users.show",
+        "Users.addRole",
+        "Users.saveRole",
+        "Users.removeRole",
+
         "Institutes.list",
         "Institutes.index",
 
@@ -345,6 +351,25 @@ then
  $c.grant();
 end
 
+rule TechnicalAdmin_targetUser
+when
+ $uro: UsersRolesOffices(role.name == Role.TECHNICAL_ADMIN)
+ $u: User(owner == $uro.office || (person != null && person.office == $uro.office))
+ $c: PermissionCheck( target == $u, granted == false)
+then
+ $c.grant();
+end
+
+rule Debug
+when
+  $u: User()
+  $uro: UsersRolesOffices(role.name == Role.TECHNICAL_ADMIN)
+  $c: PermissionCheck( target == $u, granted == false)
+then
+  System.out.println($u);
+  System.out.println($uro);
+end
+
 rule TechnicalAdmin_InOffice
 when
  $uro: UsersRolesOffices()
@@ -373,6 +398,7 @@ when
   	   "Users.disable",
   	   "Users.disabledList",
 	   "Users.enable",
+	   "Users.saveRole",
 	   
 	   "BadgeReaders.save",	
 	   "BadgeReaders.edit",
