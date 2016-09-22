@@ -29,39 +29,7 @@
     #{secure.link @Absences.downloadAttachment(absence.id), fa:'paperclip'}#{/secure.link}
   #{/if}
 
-  <div class="webui-popover-content" id="${absence.id}">
-    <strong>Codice</strong> ${absence.absenceType.code}<br>
-    <strong>Descrizione</strong> ${absence.absenceType.description}
-    
-    #{if absence.justifiedType}
-        #{if absence.justifiedAllDay() }
-          <br><strong>Tempo giustificato</strong> &{absence.justifiedType}
-        #{/if}
-	    #{if absence.justifiedTime() }
-	      <br><strong>Tempo giustificato</strong> ${absence.justifiedTime().printHourMinute()}
-	    #{/if}
-    #{/if}
-    
-    #{if !templateUtility.involvedGroupAbsenceType(absence.absenceType).empty }
-    <p>
-      <br>
-      <strong>Il codice di assenza modella i seguenti gruppi di assenze:</strong>
-      #{list items:templateUtility.involvedGroupAbsenceType(absence.absenceType), as:'group'}
-        <br><a href="@{AbsenceGroups.groupStatus('person.id':person.id, 'groupAbsenceType.id':group.id, 'date':absence.getAbsenceDate().format())}">${group.description}</a>      
-      #{/list}
-    </p>  
-    #{/if}
-    
-    #{if !absence.troubles.empty}
-         <br><br>  
-         <p class="text-danger">Questa assenza contiene errori:</p>
-         <ul>
-         #{list items:absence.troubles, as:'trouble'}
-           <li>&{trouble.trouble}</li>
-         #{/list}
-         </ul>
-     #{/if}
-  </div>
+  #{absences.absence-popover absence:absence, person:person /}
 
   #{/list}
 </td>

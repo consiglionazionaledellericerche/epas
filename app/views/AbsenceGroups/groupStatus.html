@@ -25,111 +25,189 @@
       ${absencePeriod.groupAbsenceType.description}
     </p>
     
-    <ul class="list-group">
+    <table class="table table-condensed table-bordered">
+      <tr>
+        <th>Data</th>
+        <th>Assenze</th>
+      </tr>
+      
     #{list items:absencePeriod.daysStatus.values(), as:'dayStatus'}
     
-    
-    <li class="list-group-item">
-    <strong>Giorno ${dayStatus.date.format()}</strong><br>
-    
-    
-    #{list items:dayStatus.takenAbsences, as:'takenAbsence'}
-       <p>
-          <span class="label label-danger">${takenAbsence.absence.absenceType.code}</span>
-          <span class="label label-primary">Tetto residuo</span><span class="label label-default">${templateUtility.printAmount(takenAbsence.residualBeforeTakable, takenAbsence.amountTypeTakable)}</span>
-          <span class="label label-primary">Tetto consumato</span><span class="label label-default">${templateUtility.printAmount(takenAbsence.consumedTakable, takenAbsence.amountTypeTakable)}</span>
-          #{list items:takenAbsence.absence.troubles, as:'trouble'}
-            ${trouble.trouble}
-          #{/list}
-       </p>
+	    
+	  <tr>
+	    <td>
+	      <strong>Giorno ${dayStatus.date.format()}</strong>
+	    </td>
+	  
+	    <td>
+		  #{list items:dayStatus.takenAbsences, as:'takenAbsence'}
+		    #{if dayStatus.complationAbsence && dayStatus.complationAbsence.equals(takenAbsence.absence)}
+		      #{absences.absence-popover 
+		        absence:takenAbsence.absence, 
+		        usableLimit:templateUtility.printAmount(takenAbsence.residualBeforeTakable, takenAbsence.amountTypeTakable),
+		        consumedComplation:templateUtility.printAmount(dayStatus.consumedComplation, dayStatus.amountTypeComplation),
+		        consumedBefore:templateUtility.printAmount(dayStatus.residualBeforeComplation, dayStatus.amountTypeComplation) /} 
+		    #{/if}
+			#{else}
+			  #{absences.absence-popover absence:takenAbsence.absence, 
+		        usableLimit:templateUtility.printAmount(takenAbsence.residualBeforeTakable, takenAbsence.amountTypeTakable) /}
+			#{/else}		    
+		       <p>
+		          <span class="label label-success" webui-popover-hover data-url="#${takenAbsence.absence.id}">${takenAbsence.absence.absenceType.code}</span>
+		       </p>
+		  #{/list}
+		  #{if dayStatus.correct() && dayStatus.existentReplacing }
+		    <span class="label label-default" webui-popover-hover data-url="#${dayStatus.existentReplacing.id}">${dayStatus.existentReplacing.absenceType.code}</span>
+		    #{absences.absence-popover absence:dayStatus.existentReplacing /}
+		    <span class="label label-primary">Al prossimo completamento</span><span class="label label-default">${templateUtility.printAmount(dayStatus.residualAfterComplation, dayStatus.amountTypeComplation)}</span>
+		    <br> 	      
+		  #{/if}
+		</td>
+		
+	  </tr>
     #{/list}
-
-          <!-- TODO: render complationSameDay e replacingSameDay -->
-          
-          <!-- TODO: render compromisedComplation -->
-          <!-- TODO: render compromisedReplacing -->
+    </table>
     
-    #{if dayStatus.complationAbsence}
-      <p>
-        <span class="label label-success">${dayStatus.complationAbsence.absenceType.code}</span>
-        <span class="label label-primary">Da completare</span><span class="label label-default">${templateUtility.printAmount(dayStatus.residualBeforeComplation, dayStatus.amountTypeComplation)}</span>
-        <span class="label label-primary">Quantità</span><span class="label label-default">${templateUtility.printAmount(dayStatus.consumedComplation, dayStatus.amountTypeComplation)}</span>
-      </p>
-      <p>
-        #{if dayStatus.correct() && dayStatus.existentReplacing }
-          <span class="label label-primary">Codice completamento</span><span class="label label-warning">${dayStatus.existentReplacing.absenceType.code}</span>
-        #{/if}
-      </p>    
-      <p>
-        <span class="label label-primary">Al prossimo completamento</span><span class="label label-default">${templateUtility.printAmount(dayStatus.residualAfterComplation, dayStatus.amountTypeComplation)}</span>
-      </p>  
-    #{/if}
-    
-    
-    </li>
+     <table class="table table-condensed table-bordered">
+      <tr>
+        <th>Data</th>
+        <th>Assenza</th>
+        <th>Limite<br>Utilizzabile</th>
+        <th>Limite<br>Consumato</th>
+        <th>Completamento<br>Precedente<br></th>
+        <th>Completamento<br>Assenza</th>
+        <th>Completamento<br>Residuo<br></th>
+        
+      </tr>
+      
+    #{list items:absencePeriod.daysStatus.values(), as:'dayStatus'}
+      %{ datePrinted = false; }%
+		  #{list items:dayStatus.takenAbsences, as:'takenAbsence'}
+		  <tr>
+		    %{
+		      alsoComplation = false;			//resets
+		      consumedComplation = null;
+		      consumedBefore = null;
+		      correctReplacingExist = false;
+		      missingReplacing = false;
+		      
+		      usableLimit = templateUtility.printAmount(takenAbsence.residualBeforeTakable, takenAbsence.amountTypeTakable);
+		      usableTaken = templateUtility.printAmount(takenAbsence.consumedTakable, takenAbsence.amountTypeTakable);
+		      if (dayStatus.complationAbsence && dayStatus.complationAbsence.equals(takenAbsence.absence)) {
+		        alsoComplation = true;
+		        consumedComplation = templateUtility.printAmount(dayStatus.consumedComplation, dayStatus.amountTypeComplation);
+		        consumedBefore = templateUtility.printAmount(dayStatus.residualBeforeComplation, dayStatus.amountTypeComplation);
+		        nextComplation = templateUtility.printAmount(dayStatus.residualAfterComplation, dayStatus.amountTypeComplation);
+		      }
+		      if (dayStatus.correct() && dayStatus.existentReplacing) {
+		        correctReplacingExist = true;
+		      }
+		      if (dayStatus.onlyCorrect()) {
+		        missingReplacing = true;
+		      }
+		    }%
+		  
+		  
+		    <td>
+		     #{if !datePrinted}
+		       ${dayStatus.date.format()}
+		       %{ datePrinted = true; }%
+		     #{/if}
+	        </td>
+	        <td>
+	          <span class="label label-primary" webui-popover-hover data-url="#${takenAbsence.absence.id}">${takenAbsence.absence.absenceType.code}</span>
+		      #{absences.absence-popover absence:takenAbsence.absence, usableLimit:usableLimit,
+		        consumedComplation:consumedComplation, consumedBefore:consumedBefore /} 
+		      #{if !takenAbsence.absence.troubles.empty }
+		        <i class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i>
+		      #{/if}  
+			</td>
+					    
+		    <!-- Limite Utilizzabile -->
+		    <!-- Limite Consumato -->
+		    <td>${usableLimit}</td>
+		    <td>${usableTaken}</td>
+		    
+		    <!-- Completamento Precendente-->
+		    <!-- Completamento -->
+		    #{if alsoComplation}
+		    
+		        <!-- Caso corretto -->
+		        #{if dayStatus.compromisedComplationReplacing()}
+		        
+		        
+		        #{/if}
+				<td>${consumedBefore}</td>
+				<td>${consumedComplation}</td>
+					    
+					    
+					    <!-- Complatamento residuo -->
+					    #{if alsoComplation && !correctReplacingExist}
+					      <td>${nextComplation}</td>
+					    #{/if}#{else}
+					      <td></td>
+					    #{/else}
+					  <tr>
+					  
+					  #{if correctReplacingExist }
+					    <tr>
+						  <td>
+						  #{if !datePrinted}
+					       ${dayStatus.date.format()}
+					       %{ datePrinted = true; }%
+					      #{/if}
+			              </td>
+						  <td>
+						    <span class="label label-default" webui-popover-hover data-url="#${dayStatus.existentReplacing.id}">
+						      ${dayStatus.existentReplacing.absenceType.code}</span>
+						    #{absences.absence-popover absence:dayStatus.existentReplacing /}
+						  </td>
+						  <td></td>
+						  <td></td>
+						  <td></td>
+						  <td></td>
+						  <td>${nextComplation}</td>
+						</tr>  
+					  #{/if}
+					  
+					  #{if missingReplacing}
+					    <tr>
+					      <td>
+						  #{if !datePrinted}
+					       ${dayStatus.date.format()}
+					       %{ datePrinted = true; }%
+					      #{/if}
+			              </td>
+						  <td>
+						    #{absences.absenceType absenceType:dayStatus.correctReplacing /}
+						  </td>
+						  <td></td>
+						  <td></td>
+						  <td></td>
+						  <td></td>
+						  <td>${nextComplation}</td>
+					    <tr>
+					  #{/if}
+ 
+		    #{/if}#{else}  
+		      <td></td>
+		      <td></td>
+		    #{/else}
+		  #{/list}
+		  
+		  <!-- TODO: Too early replacing -->
+		  
+		  <!-- TODO: Two Replacing -->
+		  
+		</td>
+		
+	  </tr>
     #{/list}
-    </ul>
-    
-    
+    </table>
     
     
   
-    *{
-    #{if absencePeriod.isTakable()}
-      <p><strong>Riepilogo Limiti</strong></p>
-      <table class="table table-condensed">
-        <tr>
-          <th>Data</th>
-          <th>Codice</th>
-          <th>Descrizione</th>
-          <th>Residuo Precedente</th>
-          <th>Ammontare</th>
-          <th class="text-muted">Nuovo Residuo</th>
-          <th class="text-muted">Scadenza Residuo</th>
-        </tr>
-      #{list items:absencePeriod.takenAbsencesStatus, as:'absenceStatus'}
-         
-          <tr>
-            <td>${absenceStatus.absence.getAbsenceDate().format()}</td>
-            <td>${absenceStatus.absence.absenceType.code}</td>
-            <td>${absenceStatus.absence.absenceType.description}</td>
-            <td>${templateUtility.printAmount(absenceStatus.residualBeforeTakable, absenceStatus.amountTypeTakable)}</td>
-            <td>${templateUtility.printAmount(absenceStatus.consumedTakable, absenceStatus.amountTypeTakable)}</td>
-            <td class="text-muted">${templateUtility.printAmount(absenceStatus.residualBeforeTakable - absenceStatus.consumedTakable, absenceStatus.amountTypeTakable)}</td>
-            <td class="text-muted">${absencePeriod.to.format()}</td>
-          </tr>
-      #{/list}
-      </table>
-    #{/if}
 
-    #{if absencePeriod.isComplation()}
-      <p><strong>Riepilogo Completamenti</strong></p>
-      <table class="table table-condensed">
-        <tr>
-          <th>Data</th>
-          <th>Esito</th>
-          <th>Da Completare</th>
-          <th>Ammontare Consumato</th>
-          <th class="text-muted">Nuovo Da Completare</th>
-        </tr>
-      #{list items:absencePeriod.replacingDaysStatus.values(), as:'replacingDay'}
-         
-          <tr>
-            <td>${replacingDay.date.format()}</td>
-            <td>
-              #{if replacingDay.correct() } OK #{/if}
-              #{if replacingDay.wrongType() } Tipo sbagliato #{/if}
-              #{if replacingDay.onlyCorrect() } Missing #{/if}
-              #{if replacingDay.onlyExisting() } TooEarly #{/if}
-            </td>
-            <td>${templateUtility.printAmount(replacingDay.residualBeforeComplation, replacingDay.amountTypeComplation)}</td>
-            <td>${templateUtility.printAmount(replacingDay.consumedComplation, replacingDay.amountTypeComplation)}</td>
-            <td class="text-muted">${templateUtility.printAmount(replacingDay.residualAfterComplation, replacingDay.amountTypeComplation)}</td>
-          </tr>
-      #{/list}
-      </table>
-    #{/if}
-    }*
   
   #{/list}
     

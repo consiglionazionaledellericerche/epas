@@ -33,8 +33,9 @@
       
       *{ <span class="label label-primary">Codice</span> ${group.takableAbsenceBehaviour.name}<br> }*
       <span class="label label-primary">Codici considerati</span> 
-     
-      #{absences.absenceType codes:group.takableAbsenceBehaviour.takableCodes /}
+      #{list items:group.takableAbsenceBehaviour.takableCodes, as:'absenceType'}
+        #{absences.absenceType absenceType:absenceType /}
+      #{/list}  
       
     </li>
     #{/if}
@@ -44,10 +45,15 @@
       <span class="label label-primary">Completamento</span> &{group.complationAbsenceBehaviour.amountType}<br>
       *{ <span class="label label-primary">Codice</span> ${group.complationAbsenceBehaviour.name}<br> }*
       <span class="label label-primary">Codici completamento</span> 
-      #{absences.absenceType codes:group.complationAbsenceBehaviour.complationCodes /}<br>
+      #{list items:group.complationAbsenceBehaviour.complationCodes, as:'absenceType'}
+        #{absences.absenceType absenceType:absenceType /}
+      #{/list} 
+      <br>
       
       <span class="label label-primary">Codici rimpiazzamento</span> 
-      #{absences.absenceType codes:group.complationAbsenceBehaviour.replacingCodes /}
+      #{list items:group.complationAbsenceBehaviour.replacingCodes, as:'absenceType'}
+        #{absences.absenceType absenceType:absenceType /}
+      #{/list} 
       
     </li>
     #{/if}

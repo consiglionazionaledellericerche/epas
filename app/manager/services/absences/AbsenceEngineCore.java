@@ -279,6 +279,8 @@ public class AbsenceEngineCore {
     
     for (AbsencePeriod absencePeriod : absenceEngine.periodChain.periods) {
       
+      boolean firstComplationError;
+      
       for (Absence absence : absenceEngine.periodChain.absencesAsc) {
         if (!DateUtility.isDateIntoInterval(absence.getAbsenceDate(), 
             absencePeriod.periodInterval())) {
@@ -379,9 +381,9 @@ public class AbsenceEngineCore {
                 .trouble(AbsenceProblem.TwoComplationSameDay)
                 .absence(previous)
                 .build());
+            absencePeriod.setCompromisedReplacingDate(absence.getAbsenceDate());
             absencePeriod.addComplationSameDay(previous);
             absencePeriod.addComplationSameDay(absence);
-            absencePeriod.setCompromisedReplacingDate(absence.getAbsenceDate());
             continue;
           }
           
@@ -409,9 +411,9 @@ public class AbsenceEngineCore {
                 .trouble(AbsenceProblem.TwoReplacingSameDay)
                 .absence(previous)
                 .build());
+            absencePeriod.setCompromisedReplacingDate(absence.getAbsenceDate());
             absencePeriod.addReplacingSameDay(previous);
             absencePeriod.addReplacingSameDay(absence);
-            absencePeriod.setCompromisedReplacingDate(absence.getAbsenceDate());
             continue;
           }
           absencePeriod.replacingAbsencesByDay.put(date, absence);
@@ -423,7 +425,7 @@ public class AbsenceEngineCore {
       //Una volta calcolati i rimpiazzamenti esistenti e ipotetici aggiungo i report
       for (DayStatus dayStatus : absencePeriod.daysStatus.values()) {
         //Errore nel rimpiazzo
-        if (dayStatus.wrongType()) {
+        if (dayStatus.wrongTypeOfReplacing()) {
           absenceEngine.report.addAbsenceTrouble(AbsenceTrouble.builder()
               .trouble(AbsenceProblem.WrongReplacing)
               .absence(dayStatus.getExistentReplacing())
@@ -431,7 +433,7 @@ public class AbsenceEngineCore {
           absencePeriod.setCompromisedReplacingDate(dayStatus.getDate());
           break;
         }
-        if (dayStatus.onlyExisting()) {
+        if (dayStatus.tooEarlyReplacing()) {
           absenceEngine.report.addAbsenceTrouble(AbsenceTrouble.builder()
               .trouble(AbsenceProblem.TooEarlyReplacing)
               .absence(dayStatus.getExistentReplacing())
@@ -440,7 +442,7 @@ public class AbsenceEngineCore {
           break;
         }
         //Errore nel completamento
-        if (dayStatus.onlyCorrect()) {
+        if (dayStatus.missingReplacing()) {
           absencePeriod.setCompromisedReplacingDate(dayStatus.getDate());
           absenceEngine.report.addAbsenceTrouble(AbsenceTrouble.builder()
               .trouble(AbsenceProblem.MissingReplacing)
@@ -499,7 +501,7 @@ public class AbsenceEngineCore {
 
       DayStatus dayStatus = absencePeriod.getDayStatus(complationAbsence.getAbsenceDate());
       if (absencePeriod.isAbsenceCompromisedReplacing(complationAbsence)) {
-        dayStatus.setCompromisedReplacing(complationAbsence);
+        dayStatus.setCompromisedComplation(complationAbsence);
         continue;
       }
 
@@ -760,7 +762,7 @@ public class AbsenceEngineCore {
         //aggiungere il rimpiazzamento se c'è
         computeReplacingStatus(absenceEngine, absencePeriod);
         DayStatus dayStatus = absencePeriod.getDayStatus(absence.getAbsenceDate());
-        if (dayStatus != null && dayStatus.onlyCorrect()) {
+        if (dayStatus != null && dayStatus.missingReplacing()) {
           Absence replacingAbsence = new Absence();
           replacingAbsence.absenceType = dayStatus.getCorrectReplacing();
           replacingAbsence.date = dayStatus.getDate();
