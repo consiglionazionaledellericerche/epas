@@ -297,7 +297,7 @@ public class TemplateUtility {
   /**
    * @return tutti gli uffici sul quale l'utente corrente ha il ruolo di TECHNICAL_ADMIN
    */
-  public List<Office> getAssignableOffices() {
+  public List<Office> getTechnicalAdminOffices() {
     return secureManager.officesTechnicalAdminAllowed(Security.getUser().get())
         .stream().sorted((o, o1) -> o.name.compareTo(o1.name))
         .collect(Collectors.toList());

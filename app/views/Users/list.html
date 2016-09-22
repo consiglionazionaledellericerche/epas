@@ -21,7 +21,7 @@
       <div class="input-group">
         <select class="form-control" name="${field.name}.id" id="${field.id}" select2>
           <option></option>
-          #{list templateUtility.officesAllowed(), as:'office'}
+          #{list templateUtility.technicalAdminOffices, as:'office'}
           <option value="${office.id}" #{if field.value?.id== office.id} selected#{/if}>
           ${office.getLabel()}
           </option>
