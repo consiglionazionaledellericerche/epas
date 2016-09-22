@@ -68,6 +68,7 @@ rule IsEmployee
 when
   $uro: UsersRolesOffices()
   Role(name == Role.EMPLOYEE) from $uro.role
+  
   $c: PermissionCheck(action in (
   		/* Ritorna allo user developer */
      	"Administration.restoreUser",
@@ -106,6 +107,7 @@ when
      	"PersonMonths.deleteTrainingHours",
      	"PersonMonths.deleteTrainingHoursConfirmed",
      	"PersonMonths.insertTrainingHours",
+     	
      	"PersonMonths.insertTrainingHoursPreviousMonth",
      	"PersonMonths.modifyTrainingHours",
      	"PersonMonths.saveTrainingHours",
@@ -268,12 +270,12 @@ end
 
 
 /*******************************************************************************
- * Azioni utente con ruolo TECNICAL_ADMIN
+ * Azioni utente con ruolo TECHNICAL_ADMIN
  ******************************************************************************/
-rule TecnicalAdmin_Generic
+rule TechnicalAdmin_Generic
 when 
  $uro: UsersRolesOffices()
- Role(name == Role.TECNICAL_ADMIN) from $uro.role
+ Role(name == Role.TECHNICAL_ADMIN) from $uro.role
  $c: PermissionCheck(action in (
 
         "Institutes.list",
@@ -335,11 +337,11 @@ then
  $c.grant();
 end
 
-rule TecnicalAdmin_InOffice
+rule TechnicalAdmin_InOffice
 when
  $uro: UsersRolesOffices()
  $o: Office( usersRolesOffices contains $uro)
- Role(name == Role.TECNICAL_ADMIN) from $uro.role
+ Role(name == Role.TECHNICAL_ADMIN) from $uro.role
  $c: PermissionCheck(action in (
  
  	   "Institutes.edit",
@@ -676,6 +678,7 @@ when
         "Competences.updatePersonCompetence",
         "Competences.saveNewCompetenceConfiguration",
         "Competences.insertCompetence",
+        "Competences.editCompetence",
         "Competences.saveCompetence",
         "Competences.addService",
         "Competences.editService",
@@ -732,8 +735,9 @@ when
 		/*ore di formazione*/
 		"PersonMonths.visualizePeopleTrainingHours",
         "PersonMonths.insertPeopleTrainingHours",
-        "PersonMonths.deleteTrainingHours",
-        "PersonMonths.deleteTrainingHoursConfirmed",
+        "PersonMonths.modifyPeopleTrainingHours",
+        "PersonMonths.deletePeopleTrainingHours",
+        "PersonMonths.deletePeopleTrainingHoursConfirmed",
         "PersonMonths.modifyTrainingHours",
         "PersonMonths.save",
         "PersonMonths.saveTrainingHours",
@@ -822,6 +826,7 @@ when
         "Competences.updatePersonCompetence",
         "Competences.saveNewCompetenceConfiguration",
         "Competences.insertCompetence",
+        "Competences.editCompetence",
         "Competences.saveCompetence",
         "Competences.addService",
         "Competences.editService",
@@ -886,9 +891,10 @@ when
 		/*Ore di formazione*/
 		"PersonMonths.visualizePeopleTrainingHours",
         "PersonMonths.insertPeopleTrainingHours",
-        "PersonMonths.deleteTrainingHours",
-        "PersonMonths.deleteTrainingHoursConfirmed",
+        "PersonMonths.deletePeopleTrainingHours",
+        "PersonMonths.deletePeopleTrainingHoursConfirmed",
         "PersonMonths.modifyTrainingHours",
+        "PersonMonths.modifyPeopleTrainingHours",
         "PersonMonths.save",
         "PersonMonths.saveTrainingHours",
         "Charts.listForExcelFile",

@@ -1,0 +1,16 @@
+#{modalAsync title:'Elimina ore di formazione'}
+
+<div class="text-center">
+
+#{alert color:'danger'}
+Attenzione!!! Questa operazione non potrà essere annullata.
+
+
+<a href="@{PersonMonths.deletePeopleTrainingHoursConfirmed(pm.id, session.get("officeSelected"))}">
+  <input value="Conferma Elimina" class="btn btn-danger btn-sm" type="button">
+</a>
+
+#{/alert}
+
+</div> 
+#{/modalAsync}

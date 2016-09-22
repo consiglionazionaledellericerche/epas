@@ -42,7 +42,7 @@ public class OilMailer extends Mailer {
       "[%s]~~%s~~%s~~%s~~%s~~%s~~%s";
   
   //[adp]~~azione~~Id
-  private static final String OIL_EMAIL_REPLAY_SUBJECT_PATTER = 
+  private static final String OIL_EMAIL_REPLAY_SUBJECT_PATTERN = 
       "[%s]~~%s~~%s";
   
   /**
@@ -159,7 +159,7 @@ public class OilMailer extends Mailer {
     
   //[adp]~~azione~~Id
     String subject = 
-        String.format(OIL_EMAIL_REPLAY_SUBJECT_PATTER,
+        String.format(OIL_EMAIL_REPLAY_SUBJECT_PATTERN,
             OilConfig.appName(), action, oilId);
     setSubject(subject);
     log.info("Invio risposta utente ad OIL, subject = {}", subject);

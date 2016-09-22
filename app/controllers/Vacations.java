@@ -49,7 +49,7 @@ public class Vacations extends Controller {
       year = LocalDate.now().getYear();
     }
 
-    List<Contract> contractList = person.getYearContracts(year);
+    List<Contract> contractList = person.orderedYearContracts(year);
 
     if (contractList.isEmpty()) {
       flash.error("Non ci sono contratti attivi nel %s", year);
