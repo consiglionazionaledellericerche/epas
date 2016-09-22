@@ -2,7 +2,6 @@ package manager.services.absences;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
@@ -19,7 +18,6 @@ import manager.services.absences.AbsenceService.AbsenceRequestType;
 import manager.services.absences.AbsencesReport.ReportAbsenceTypeProblem;
 import manager.services.absences.AbsencesReport.ReportImplementationProblem;
 import manager.services.absences.AbsencesReport.ReportRequestProblem;
-import manager.services.absences.AbsencesReport.ReportStatus;
 import manager.services.absences.InsertResultItem.Operation;
 import manager.services.absences.model.AbsenceEngine;
 import manager.services.absences.model.AbsencePeriod;
@@ -48,7 +46,6 @@ import org.joda.time.LocalDate;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.SortedMap;
 
 @Slf4j
 public class AbsenceEngineCore {
@@ -366,7 +363,6 @@ public class AbsenceEngineCore {
                 .trouble(AbsenceProblem.LimitExceeded)
                 .absence(absence)
                 .build());
-            absencePeriod.setOvertakenLimitAbsence(absence);
           }
           absencePeriod.addAbsenceTaken(absence, takenAmount);
         }
@@ -383,8 +379,8 @@ public class AbsenceEngineCore {
                 .trouble(AbsenceProblem.TwoComplationSameDay)
                 .absence(previous)
                 .build());
-            absencePeriod.twoComplationSameDay.add(previous);
-            absencePeriod.twoComplationSameDay.add(absence);
+            absencePeriod.addComplationSameDay(previous);
+            absencePeriod.addComplationSameDay(absence);
             absencePeriod.setCompromisedReplacingDate(absence.getAbsenceDate());
             continue;
           }
@@ -413,8 +409,8 @@ public class AbsenceEngineCore {
                 .trouble(AbsenceProblem.TwoReplacingSameDay)
                 .absence(previous)
                 .build());
-            absencePeriod.twoReplacingSameDay.add(previous);
-            absencePeriod.twoReplacingSameDay.add(absence);
+            absencePeriod.addReplacingSameDay(previous);
+            absencePeriod.addReplacingSameDay(absence);
             absencePeriod.setCompromisedReplacingDate(absence.getAbsenceDate());
             continue;
           }
@@ -422,126 +418,44 @@ public class AbsenceEngineCore {
         }
       }
       
-      //Il controllo sui completamenti/rimpiazzamenti lo eseguo quando ho processato tutte le 
-      // assenze del periodo (quindi ora) e se non ci sono stati errori precedenti.
-      if (absencePeriod.isComplation() && !absenceEngine.report.containsCriticalProblems()) {
-        absencePeriod.replacingStatus = complationReplacingStatus(absenceEngine, absencePeriod);
-        complationSoundness(absenceEngine, absencePeriod);
-      }
-    }
-  }
-  
-  private SortedMap<LocalDate, ReplacingStatus> complationReplacingStatus(
-      AbsenceEngine absenceEngine, AbsencePeriod absencePeriod) {
-    
-    //I replacing days per ogni data raccolgo i replacing effettivi e quelli corretti
-    SortedMap<LocalDate, ReplacingStatus> replacingStatuss = Maps.newTreeMap();
-    
-    //preparo i giorni con i replacing effettivi (
-    for (Absence replacingAbsence : absencePeriod.replacingAbsencesByDay.values()) {
-      if (absencePeriod.isAbsenceCompromisedReplacing(replacingAbsence)) {
-        continue;
-      }
-      replacingStatuss.put(replacingAbsence.getAbsenceDate(), 
-          ReplacingStatus.builder()
-          .existentReplacing(replacingAbsence)
-          .date(replacingAbsence.getAbsenceDate())
-          .build());
-    }
+      computeReplacingStatus(absenceEngine, absencePeriod);
 
-    //Le assenze di completamento ordinate per data. Genero i replacing ipotetici
-    int complationAmount = 0;
-    for (Absence complationAbsence : absencePeriod.complationAbsencesByDay.values()) {
-      
-      if (absencePeriod.isAbsenceCompromisedReplacing(complationAbsence)) {
-        continue;
-      }
-      
-      int amount = absenceEngineUtility.absenceJustifiedAmount(absenceEngine, 
-          complationAbsence, absencePeriod.complationAmountType);
-      complationAmount = complationAmount + amount;
+      //Una volta calcolati i rimpiazzamenti esistenti e ipotetici aggiungo i report
+      for (DayStatus dayStatus : absencePeriod.daysStatus.values()) {
+        //Errore nel rimpiazzo
+        if (dayStatus.wrongType()) {
+          absenceEngine.report.addAbsenceTrouble(AbsenceTrouble.builder()
+              .trouble(AbsenceProblem.WrongReplacing)
+              .absence(dayStatus.getExistentReplacing())
+              .build());
+          absencePeriod.setCompromisedReplacingDate(dayStatus.getDate());
+          break;
+        }
+        if (dayStatus.onlyExisting()) {
+          absenceEngine.report.addAbsenceTrouble(AbsenceTrouble.builder()
+              .trouble(AbsenceProblem.TooEarlyReplacing)
+              .absence(dayStatus.getExistentReplacing())
+              .build());
+          absencePeriod.setCompromisedReplacingDate(dayStatus.getDate());
+          break;
+        }
+        //Errore nel completamento
+        if (dayStatus.onlyCorrect()) {
+          absencePeriod.setCompromisedReplacingDate(dayStatus.getDate());
+          absenceEngine.report.addAbsenceTrouble(AbsenceTrouble.builder()
+              .trouble(AbsenceProblem.MissingReplacing)
+              .absence(absencePeriod.complationAbsencesByDay
+                  .get(dayStatus.getDate()))
+              .build());
+          break;
+        }
 
-      LocalDate replacingDate = complationAbsence.getAbsenceDate();
-      ReplacingStatus replacingStatus = replacingStatuss.get(replacingDate);
-      if (replacingStatus == null) {
-        replacingStatus = ReplacingStatus.builder().date(replacingDate).build();
-        replacingStatuss.put(replacingDate, replacingStatus);
       }
-      replacingStatus.setAmountTypeComplation(absencePeriod.complationAmountType);
-      replacingStatus.setComplationAbsence(complationAbsence);
-      replacingStatus.setResidualBeforeComplation(complationAmount - amount);
-      replacingStatus.setConsumedComplation(amount);
-      
-      Optional<AbsenceType> replacingCode = absenceEngineUtility
-          .whichReplacingCode(absenceEngine, absencePeriod, 
-              complationAbsence.getAbsenceDate(), complationAmount);
-      
-      if (replacingCode.isPresent()) {
-        
-        replacingStatus.setCorrectReplacing(replacingCode.get());
-        complationAmount -= absencePeriod.replacingTimes.get(replacingCode.get());
-      }
-      
-      replacingStatus.setResidualAfterComplation(complationAmount);
-    }
-    absencePeriod.complationConsumedAmount = complationAmount;
-    
-    return replacingStatuss;
-  }
-  
-  /**
-   * Controlla che tutti i rimpiazzamenti siano nella posizione corretta.
-   * Aggiunge gli errori al report.
-   * TODO: la struttura dati replacingStatuss potrebbe essere rimossa semplificando
-   * di molto il codice.
-   * @param first
-   * @param absenceEngine
-   * @param absence
-   */
-  private AbsenceEngine complationSoundness(
-      AbsenceEngine absenceEngine, AbsencePeriod absencePeriod) {
 
-    //Controllo che i replacing ipotetici collimino con quelli reali
-    
-    for (ReplacingStatus replacingStatus : absencePeriod.replacingStatus.values()) {
-
-      //Errore nel rimpiazzo
-      if (replacingStatus.wrongType()) {
-        absenceEngine.report.addAbsenceTrouble(AbsenceTrouble.builder()
-            .trouble(AbsenceProblem.WrongReplacing)
-            .absence(replacingStatus.getExistentReplacing())
-            .build());
-        absencePeriod.setCompromisedReplacingDate(replacingStatus.getDate());
-        break;
-      }
-      if (replacingStatus.onlyExisting()) {
-        absenceEngine.report.addAbsenceTrouble(AbsenceTrouble.builder()
-            .trouble(AbsenceProblem.TooEarlyReplacing)
-            .absence(replacingStatus.getExistentReplacing())
-            .build());
-        absencePeriod.setCompromisedReplacingDate(replacingStatus.getDate());
-        break;
-      }
-      
-      //Errore nel completamento
-      if (replacingStatus.onlyCorrect()) {
-        absencePeriod.setCompromisedReplacingDate(replacingStatus.getDate());
-        absenceEngine.report.addAbsenceTrouble(AbsenceTrouble.builder()
-            .trouble(AbsenceProblem.MissingReplacing)
-            .absence(absencePeriod.complationAbsencesByDay
-                .get(replacingStatus.getDate()))
-            .build());
-        break;
-      }
-      
-    }
-
-    //Se la catena è compromessa tutte le assenza completamento e replacing
-    // successive sono taggate con l'errore
-    if (absencePeriod.compromisedReplacingDate != null) {
+      //Se la catena è compromessa tutte le assenza completamento e replacing
+      // successive sono taggate con l'errore
       for (Absence complationAbsence : absencePeriod.complationAbsencesByDay.values()) {
-        if (complationAbsence.getAbsenceDate()
-            .isAfter(absencePeriod.compromisedReplacingDate)) {
+        if (absencePeriod.isAbsenceCompromisedReplacing(complationAbsence)) {
           absenceEngine.report.addAbsenceTrouble(AbsenceTrouble.builder()
               .trouble(AbsenceProblem.CompromisedReplacing)
               .absence(complationAbsence)
@@ -549,18 +463,72 @@ public class AbsenceEngineCore {
         }
       }
       for (Absence replacingAbsence : absencePeriod.replacingAbsencesByDay.values()) {
-        if (replacingAbsence.getAbsenceDate().isAfter(absencePeriod.compromisedReplacingDate)) {
+        if (absencePeriod.isAbsenceCompromisedReplacing(replacingAbsence)) {
           absenceEngine.report.addAbsenceTrouble(AbsenceTrouble.builder()
               .trouble(AbsenceProblem.CompromisedReplacing)
               .absence(replacingAbsence)
               .build());
         }
       }
-    }
-    
-    return absenceEngine;
+      
+    } //ends absencePeriod
   }
 
+  private void computeReplacingStatus(AbsenceEngine absenceEngine, AbsencePeriod absencePeriod) {
+
+    if (absenceEngine.report.containsCriticalProblems()) {
+      return;
+    }
+    if (!absencePeriod.isComplation()) {
+      return;
+    }
+
+    //preparo i giorni con i replacing effettivi (
+    for (Absence replacingAbsence : absencePeriod.replacingAbsencesByDay.values()) {
+      DayStatus dayStatus = absencePeriod.getDayStatus(replacingAbsence.getAbsenceDate());
+      if (absencePeriod.isAbsenceCompromisedReplacing(replacingAbsence)) {
+        dayStatus.setCompromisedReplacing(replacingAbsence);
+      } else {
+        dayStatus.setExistentReplacing(replacingAbsence);
+      }
+    }
+
+    //Le assenze di completamento ordinate per data. Genero i replacing ipotetici
+    int complationAmount = 0;
+    for (Absence complationAbsence : absencePeriod.complationAbsencesByDay.values()) {
+
+      DayStatus dayStatus = absencePeriod.getDayStatus(complationAbsence.getAbsenceDate());
+      if (absencePeriod.isAbsenceCompromisedReplacing(complationAbsence)) {
+        dayStatus.setCompromisedReplacing(complationAbsence);
+        continue;
+      }
+
+      int amount = absenceEngineUtility.absenceJustifiedAmount(absenceEngine, 
+          complationAbsence, absencePeriod.complationAmountType);
+      complationAmount = complationAmount + amount;
+
+      dayStatus.setAmountTypeComplation(absencePeriod.complationAmountType);
+      dayStatus.setComplationAbsence(complationAbsence);
+      dayStatus.setResidualBeforeComplation(complationAmount - amount);
+      dayStatus.setConsumedComplation(amount);
+
+      Optional<AbsenceType> replacingCode = absenceEngineUtility
+          .whichReplacingCode(absenceEngine, absencePeriod, 
+              complationAbsence.getAbsenceDate(), complationAmount);
+
+      if (replacingCode.isPresent()) {
+
+        dayStatus.setCorrectReplacing(replacingCode.get());
+        complationAmount -= absencePeriod.replacingTimes.get(replacingCode.get());
+      }
+
+      dayStatus.setResidualAfterComplation(complationAmount);
+    }
+    absencePeriod.complationConsumedAmount = complationAmount;
+
+    return;
+  }
+  
   /**
    * Effettual lo scan degli errori
    * di tutte le assenze della persona a partire dalla data scanFrom.
@@ -767,7 +735,7 @@ public class AbsenceEngineCore {
       int takenAmount = absenceEngineUtility.absenceJustifiedAmount(absenceEngine, 
           absence, absencePeriod.takeAmountType);
       
-      AbsenceStatus consumedResidualAmount = AbsenceStatus.builder()
+      TakenAbsence consumedResidualAmount = TakenAbsence.builder()
           .amountType(absencePeriod.takeAmountType)
           .expireResidual(absencePeriod.to)
           .totalResidual(absencePeriod.getPeriodTakableAmount())
@@ -788,28 +756,27 @@ public class AbsenceEngineCore {
 
         //aggiungere l'assenza ai completamenti     
         absencePeriod.complationAbsencesByDay.put(absence.getAbsenceDate(), absence);
+        
+        //aggiungere il rimpiazzamento se c'è
+        computeReplacingStatus(absenceEngine, absencePeriod);
+        DayStatus dayStatus = absencePeriod.getDayStatus(absence.getAbsenceDate());
+        if (dayStatus != null && dayStatus.onlyCorrect()) {
+          Absence replacingAbsence = new Absence();
+          replacingAbsence.absenceType = dayStatus.getCorrectReplacing();
+          replacingAbsence.date = dayStatus.getDate();
+          replacingAbsence.justifiedType = absenceComponentDao
+              .getOrBuildJustifiedType(JustifiedTypeName.nothing);
+          //todo cercarlo fra quelli permit e se non c'è nothing errore
 
-        //creare il missing replacing se c'è.
-        for (ReplacingStatus replacingStatus : 
-          complationReplacingStatus(absenceEngine, absencePeriod).values()) {
-          if (replacingStatus.onlyCorrect()) {
+          InsertResultItem replacingResultItem = InsertResultItem.builder()
+              .absence(replacingAbsence)
+              .absenceType(replacingAbsence.absenceType)
+              .operation(Operation.insertReplacing)
+              .date(dayStatus.getDate()).build();
 
-            Absence replacingAbsence = new Absence();
-            replacingAbsence.absenceType = replacingStatus.getCorrectReplacing();
-            replacingAbsence.date = replacingStatus.getDate();
-            replacingAbsence.justifiedType = absenceComponentDao
-                .getOrBuildJustifiedType(JustifiedTypeName.nothing);
-            //todo cercarlo fra quelli permit e se non c'è nothing errore
+          absenceEngine.report.addInsertResultItem(replacingResultItem);
+          absenceEngine.request.requestInserts.add(absence);
 
-            InsertResultItem replacingResultItem = InsertResultItem.builder()
-                .absence(replacingAbsence)
-                .absenceType(replacingAbsence.absenceType)
-                .operation(Operation.insertReplacing)
-                .date(replacingStatus.getDate()).build();
-
-            absenceEngine.report.addInsertResultItem(replacingResultItem);
-            absenceEngine.request.requestInserts.add(absence);
-          }
         }
       }
     }
@@ -975,64 +942,6 @@ public class AbsenceEngineCore {
     }
 
     buildPeriodChain(absenceEngine, groupAbsenceType, date);
-    
-    ReportStatus reportStatus = new ReportStatus();
-    reportStatus.periods = absenceEngine.periodChain.periods;
-    
-    for (AbsencePeriod absencePeriod : absenceEngine.periodChain.periods) {
-
-      
-      //Obbiettivi:
-      
-      
-      
-      
-      
-      
-      
-
-
-//      for (AbsenceStatus absenceStatus : absencePeriod.takableComponent.get().takenAbsencesStatus) {
-//
-//        List<ReportDayItem> takableItems = Lists.newArrayList();
-//        List<ReportDayItem> takableAndComplationItems = Lists.newArrayList();
-//        List<ReportDayItem> orphanReplacingItems = Lists.newArrayList();
-//
-//
-//
-//
-//
-//        if (!absencePeriod.complationComponent.isPresent() 
-//            || !absencePeriod.complationComponent.get().complationAbsencesByDay.values()
-//            .contains(absenceStatus.absence)) {
-//
-//          //1) le assenze solo takable
-//          ReportDayItem dayItem = ReportDayItem.builder()
-//              .takableStatus(absenceStatus)
-//              .build();
-//          takableItems.add(dayItem);
-//        } else {
-//
-//          //1) le assenze takable e di completamento
-//          ReplacingStatus replacingStatus = null;
-//          if (absencePeriod.complationComponent.isPresent()) {
-//            replacingStatus = absencePeriod.complationComponent.get()
-//                .replacingStatus.get(absenceStatus.absence.getAbsenceDate());
-//          }
-//          ReportDayItem dayItem = ReportDayItem.builder()
-//              .takableStatus(absenceStatus)
-//              .takableReplacingStatus(replacingStatus)
-//              .build();
-//          takableAndComplationItems.add(dayItem);
-//        }
-//      }
-
-
-      //reportStatus.addReportDayItem(dayItem, absenceStatus.absence.getAbsenceDate());
-    }
-
-
-
 
     return absenceEngine;
   }

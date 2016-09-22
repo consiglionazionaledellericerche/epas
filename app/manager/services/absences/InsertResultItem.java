@@ -27,7 +27,7 @@ public class InsertResultItem {
   private Operation operation;
   private AbsenceProblem absenceProblem;
   
-  private List<AbsenceStatus> consumedResidualAmount = Lists.newArrayList();
+  private List<TakenAbsence> consumedResidualAmount = Lists.newArrayList();
   
   public enum Operation {
     check, insert, insertReplacing, remainingBefore, remainingAfter, cancel;

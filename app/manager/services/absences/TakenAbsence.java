@@ -5,29 +5,19 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import manager.services.absences.AbsencesReport.ReportAbsenceProblem;
-
 import models.absences.Absence;
-import models.absences.AbsenceType;
 import models.absences.AmountType;
-import models.absences.AbsenceTrouble.AbsenceProblem;
 
 import org.joda.time.LocalDate;
 
 @Builder @Getter @Setter(AccessLevel.PACKAGE)
-public class AbsenceStatus {
+public class TakenAbsence {
 
-  public enum StatusType {
-    takable, complation, simple;
-  }
-  
   public Absence absence;
-  public StatusType type;
   
   public AmountType amountTypeTakable;
   public int consumedTakable;
   public int residualBeforeTakable;
-  
   
   //*********
   
