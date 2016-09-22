@@ -53,7 +53,7 @@
     <tr>
       <td class="alignLeft success">
         <a href="@{edit(person.value.id)}"><font color="#0000FF">${person.value.fullname}</font></a>
-        
+
         #{if person.currentContractInitializationMissing()}
           <a href="#" popover-hover
             data-html="true"
@@ -66,7 +66,7 @@
             data-content="${('Il database non è sincronizzato. Possibile causa, malfunzionamento durante la procedura notturna di chiusura giorno. Questo problema si risolverà automaticamente non appena perverranno nuove timbrature.').escape()}"
             *{ title="Configurazione ${person.value.fullname}" }*><i class="fa fa-exclamation-triangle text-muted"></i></a>
         #{/elseif}
-        
+
       <td><font color="#000000">${person.value.number}</font></td>
       <td data-order="${person.currentContract.get().beginDate}">
         <font color="#000000">${person.currentContract.get().beginDate?.format()}</font>
@@ -80,7 +80,7 @@
             <em class="text-danger">Data da inserire</em>
           #{/if}
         #{/else}
-        
+
       </td>
 
       <td>
@@ -162,7 +162,7 @@
       <td><font color="#808080">${person.value.email}</font></td>
       #{if switchUser}
       <td>
-        #{if person.user.disabled}
+        #{if person.value.user.disabled}
           <span class="label label-default">&{'disabledUser'}</span>
         #{/if}
         #{else}
