@@ -428,21 +428,22 @@ public class TemplateUtility {
     String format = "";
     if (amountType.equals(AmountType.units)) {
       if (amount == 0) {
-        return "0% giorno lavorativo";
+        return "0%";// giorno lavorativo";
       }
-      int units = amount / 100;
-      int percent = amount % 100;
-      String label = " giorni lavorativi";
-      if (units == 1) {
-        label = " giorno lavorativo";
-      }
-      if (units > 0 && percent > 0) {
-        return units + label + " + " + percent + "% di un giorno lavorativo";  
-      } else if (units > 0) {
-        return units + label;
-      } else if (percent > 0) {
-        return percent + "% di un giorno lavorativo";
-      }
+//      int units = amount / 100;
+//      int percent = amount % 100;
+//      String label = " giorni lavorativi";
+//      if (units == 1) {
+//        label = " giorno lavorativo";
+//      }
+//      if (units > 0 && percent > 0) {
+//        return units + label + " + " + percent + "% di un giorno lavorativo";  
+//      } else if (units > 0) {
+//        return units + label;
+//      } else if (percent > 0) {
+//        return percent + "% di un giorno lavorativo";
+//      }
+      return amount + "%";
     }
     if (amountType.equals(AmountType.minutes)) {
       if (amount == 0) {

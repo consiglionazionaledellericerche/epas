@@ -1,0 +1,54 @@
+*{
+  absence l'assenza da visionare
+  id (optional) per specificare un id custom (default absence.id)
+}*
+
+
+ <div class="webui-popover-content" id="#{if _id}${_if}#{/if}#{else}${_absence.id}#{/else}">
+    <strong>Data</strong> ${_absence.absenceDate.format()}<br>
+    <strong>Codice</strong> ${_absence.absenceType.code}<br>
+    <strong>Descrizione</strong> ${_absence.absenceType.description}
+
+    #{if _usableLimit}
+    <br><strong>Tetto utilizzabile </strong>${_usableLimit}
+    #{/if}
+    
+    #{if _absence.justifiedType}
+        #{if _absence.justifiedAllDay() }
+          <br><strong>Tempo giustificato</strong> &{_absence.justifiedType}
+        #{/if}
+	    #{if _absence.justifiedTime() }
+	      <br><strong>Tempo giustificato</strong> ${_absence.justifiedTime().printHourMinute()}
+	    #{/if}
+    #{/if}
+    
+    #{if _consumedComplation}
+      <br><br><strong>Completamento </strong>${_consumedComplation}
+    #{/if}
+    #{if _consumedBefore}
+      <br><strong>Completamento precedente </strong>${_consumedBefore}
+    #{/if}
+    
+    
+    #{if _person && !templateUtility.involvedGroupAbsenceType(_absence.absenceType).empty }
+    <p>
+      <br>
+      <strong>Il codice di assenza modella i seguenti gruppi di assenze:</strong>
+      #{list items:templateUtility.involvedGroupAbsenceType(_absence.absenceType), as:'group'}
+        <br><a href="@{AbsenceGroups.groupStatus('person.id':_person.id, 'groupAbsenceType.id':_group.id, 'date':_absence.getAbsenceDate().format())}">${group.description}</a>      
+      #{/list}
+    </p>  
+    #{/if}
+    
+    #{if !_absence.troubles.empty}
+         <br><br>  
+         <p class="text-danger">Questa assenza contiene errori:</p>
+         <ul>
+         #{list items:_absence.troubles, as:'trouble'}
+           <li>&{trouble.trouble}</li>
+         #{/list}
+         </ul>
+     #{/if}
+  </div>
+
+   

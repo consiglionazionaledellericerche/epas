@@ -181,6 +181,7 @@ public class AbsencePeriod {
     DayStatus dayStatus = this.daysStatus.get(date);
     if (dayStatus == null) {
       dayStatus = DayStatus.builder().date(date)
+          .absencePeriod(this)
           .takenAbsences(Lists.newArrayList())
           .complationSameDay(Sets.newHashSet())
           .replacingSameDay(Sets.newHashSet()).build();

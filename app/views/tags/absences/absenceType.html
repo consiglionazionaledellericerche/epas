@@ -1,49 +1,44 @@
 
-
-#{list items:_codes, as:'code'}
-  
   <span class="label  
-  #{if code.isAllDayPermitted() }
+  #{if _absenceType.isAllDayPermitted() }
     label-info 
   #{/if}
-  #{elseif code.isAbsenceTypeMinutesPermitted()}
+  #{elseif _absenceType.isAbsenceTypeMinutesPermitted()}
     label-warning 
   #{/elseif}
-  #{elseif code.isSpecifiedMinutesPermitted()}
+  #{elseif _absenceType.isSpecifiedMinutesPermitted()}
     label-success 
   #{/elseif}
-  #{elseif code.replacingType}
+  #{elseif _absenceType.replacingType}
     label-default 
   #{/elseif}
-  " webui-popover-hover data-url="#${code.id}">${code.code}</span>
+  " webui-popover-hover data-url="#${_absenceType.id}">${_absenceType.code}</span>
   
-  *{ <strong webui-popover-hover data-url="#${code.id}">${code.code}</strong> }*
+  *{ <strong webui-popover-hover data-url="#${_absenceType.id}">${_absenceType.code}</strong> }*
 
-  <div class="webui-popover-content" id="${code.id}">
-    <strong>Tipo Assenza ${code.code}</strong><br><br>
-    <strong>Descrizione:</strong> ${code.description.label()}<br>  
+  <div class="webui-popover-content" id="${_absenceType.id}">
+    <strong>Tipo Assenza ${_absenceType.code}</strong><br><br>
+    <strong>Descrizione:</strong> ${_absenceType.description.label()}<br>  
      
     
     *{ tempo giustificato }*
     <strong>Come giustifica:</strong>
-    #{list items:code.justifiedTypesPermitted, as:'justifiedType'}
+    #{list items:_absenceType.justifiedTypesPermitted, as:'justifiedType'}
       &{justifiedType.name}
     #{/list}<br> 
-    #{if code.justifiedTime > 0}
-      <strong>Tempo Giustificato:</strong> ${code.justifiedTime.printHourMinute()} 
+    #{if _absenceType.justifiedTime > 0}
+      <strong>Tempo Giustificato:</strong> ${_absenceType.justifiedTime.printHourMinute()} 
     #{/if}
     
     
     *{ tempo completamento }*
-    #{if code.replacingType}
-      <strong>Come completa:</strong> &{code.replacingType} <br>
-      #{if code.replacingTime > 0}
-      <strong>Tempo Completamento:</strong> ${code.replacingTime.printHourMinute()}
+    #{if _absenceType.replacingType}
+      <strong>Come completa:</strong> &{_absenceType.replacingType} <br>
+      #{if _absenceType.replacingTime > 0}
+      <strong>Tempo Completamento:</strong> ${_absenceType.replacingTime.printHourMinute()}
       #{/if}
     #{/if}
 
   </div>
-
-#{/list}
 
    
