@@ -17,7 +17,7 @@ import java.util.SortedMap;
 
 public class PeriodChain {
   
-  public List<AbsencePeriod> periods = Lists.newArrayList();
+  public List<AbsencePeriod> periods = Lists.newArrayList();        
   
   //Tutte le assenze dei tipi coinvolti nel gruppo nel periodo
   public List<Absence> absencesAsc = null;                          //to reset nextDate

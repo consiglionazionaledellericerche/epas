@@ -4,10 +4,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 
 import lombok.Builder;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-
-import manager.services.absences.model.AbsencePeriod;
 
 import models.absences.Absence;
 import models.absences.AbsenceTrouble;
@@ -34,10 +31,7 @@ public class AbsencesReport {
   
   // Esiti degli inserimenti
   public List<InsertResultItem> insertResultItems = Lists.newArrayList();
-  
-  // Report status
-  public ReportStatus reportStatus = null; 
- 
+
   /**
    * Errori non dipendenti dall'user (tipi assenza, implementazione, form di richiesta).
    * @return
@@ -143,54 +137,5 @@ public class AbsencesReport {
     public ImplementationProblem implementationProblem;
     public LocalDate date;
   }
-  
-  /**
-   * Lo status del gruppo. Strutturazione delle informazioni per la view di facile comprensione.
-   * Combina - per ogni period- le informazioni presenti in:
-   *   - takableComponent.takenAbsencesStatus (per il controllo sui limit)
-   *   - complationComponent.replacingStatus (per il controllo sui completamenti)
-   *   - absenceTroublesMap per gli errori sulle singole assenze (anche conflitti extra gruppo)
-   *   
-   * @author alessandro
-   *
-   */
-  public static class ReportStatus {
-    
-    //puntatore ai period per rendere disponibili gruppo e date
-    public List<AbsencePeriod> periods = Lists.newArrayList();
-    
-    //i report sui giorni. L'ordine all'interno del giorno deve essere
-    // 1) i codici takable (possono essere più di uno)
-    // 2) i codici takable e complation (se sono più di uno conterranno un errore)
-    // 3) i codici fuori dal gruppo (possono andare sempre in conflitto)
-    public Map<LocalDate, List<ReportDayItem>> reportDayItems = Maps.newHashMap();
-    
-    public void addReportDayItem(ReportDayItem reportDayItem, LocalDate date) {
-      List<ReportDayItem> listItems = this.reportDayItems.get(date);
-      if (listItems == null) {
-        listItems = Lists.newArrayList();
-        this.reportDayItems.put(date, listItems);
-      }
-      listItems.add(reportDayItem);
-    }
-    
-    @Builder @Setter
-    public static class ReportDayItem {
-      
-      public LocalDate date;
-      
-      //Una entry per ogni assenza takable conteggiata
-      public AbsenceStatus takableStatus; 
-      public ReplacingStatus takableReplacingStatus;
-      
-      //Oppure un codice di rimpiazzamento rimasto orfano (senza il relativo complation nel giorno)
-      public Absence orphanReplacing;
-      
-      //Oppure una assenza al di fuori del gruppo
-      public Absence outOfGroupAbsence;
-    }
-    
-  }
-
   
 }

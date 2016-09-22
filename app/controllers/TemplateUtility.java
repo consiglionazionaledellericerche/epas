@@ -427,6 +427,9 @@ public class TemplateUtility {
   public String printAmount(int amount, AmountType amountType) {
     String format = "";
     if (amountType.equals(AmountType.units)) {
+      if (amount == 0) {
+        return "0% giorno lavorativo";
+      }
       int units = amount / 100;
       int percent = amount % 100;
       String label = " giorni lavorativi";
@@ -442,6 +445,9 @@ public class TemplateUtility {
       }
     }
     if (amountType.equals(AmountType.minutes)) {
+      if (amount == 0) {
+        return "0 minuti";
+      }
       int hours = amount / 60; //since both are ints, you get an int
       int minutes = amount % 60;
 

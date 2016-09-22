@@ -6,6 +6,13 @@
 
 #{title title:absenceEngine.person.fullname + ' - ' + absenceEngine.periodChain.chainDescription /}
   
+  #{if absenceEngine.report.containsCriticalProblems() }
+  #{alert color:'danger'}
+    <p>Impossibile visualizzare la situazione. Effettuare una segnalazione.</p>
+  #{/alert}
+  #{/if}
+  
+  
   #{list items:absenceEngine.periodChain.periods, as:'absencePeriod' }
 
     <p>  
@@ -17,7 +24,57 @@
       <strong>Gruppo</strong>
       ${absencePeriod.groupAbsenceType.description}
     </p>
+    
+    <ul class="list-group">
+    #{list items:absencePeriod.daysStatus.values(), as:'dayStatus'}
+    
+    
+    <li class="list-group-item">
+    <strong>Giorno ${dayStatus.date.format()}</strong><br>
+    
+    
+    #{list items:dayStatus.takenAbsences, as:'takenAbsence'}
+       <p>
+          <span class="label label-danger">${takenAbsence.absence.absenceType.code}</span>
+          <span class="label label-primary">Tetto residuo</span><span class="label label-default">${templateUtility.printAmount(takenAbsence.residualBeforeTakable, takenAbsence.amountTypeTakable)}</span>
+          <span class="label label-primary">Tetto consumato</span><span class="label label-default">${templateUtility.printAmount(takenAbsence.consumedTakable, takenAbsence.amountTypeTakable)}</span>
+          #{list items:takenAbsence.absence.troubles, as:'trouble'}
+            ${trouble.trouble}
+          #{/list}
+       </p>
+    #{/list}
+
+          <!-- TODO: render complationSameDay e replacingSameDay -->
+          
+          <!-- TODO: render compromisedComplation -->
+          <!-- TODO: render compromisedReplacing -->
+    
+    #{if dayStatus.complationAbsence}
+      <p>
+        <span class="label label-success">${dayStatus.complationAbsence.absenceType.code}</span>
+        <span class="label label-primary">Da completare</span><span class="label label-default">${templateUtility.printAmount(dayStatus.residualBeforeComplation, dayStatus.amountTypeComplation)}</span>
+        <span class="label label-primary">Quantità</span><span class="label label-default">${templateUtility.printAmount(dayStatus.consumedComplation, dayStatus.amountTypeComplation)}</span>
+      </p>
+      <p>
+        #{if dayStatus.correct() && dayStatus.existentReplacing }
+          <span class="label label-primary">Codice completamento</span><span class="label label-warning">${dayStatus.existentReplacing.absenceType.code}</span>
+        #{/if}
+      </p>    
+      <p>
+        <span class="label label-primary">Al prossimo completamento</span><span class="label label-default">${templateUtility.printAmount(dayStatus.residualAfterComplation, dayStatus.amountTypeComplation)}</span>
+      </p>  
+    #{/if}
+    
+    
+    </li>
+    #{/list}
+    </ul>
+    
+    
+    
+    
   
+    *{
     #{if absencePeriod.isTakable()}
       <p><strong>Riepilogo Limiti</strong></p>
       <table class="table table-condensed">
@@ -72,7 +129,7 @@
       #{/list}
       </table>
     #{/if}
-
+    }*
   
   #{/list}
     

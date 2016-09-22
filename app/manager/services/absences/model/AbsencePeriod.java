@@ -2,11 +2,12 @@ package manager.services.absences.model;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import it.cnr.iit.epas.DateInterval;
 
-import manager.services.absences.AbsenceStatus;
-import manager.services.absences.ReplacingStatus;
+import manager.services.absences.DayStatus;
+import manager.services.absences.TakenAbsence;
 
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -32,6 +33,8 @@ public class AbsencePeriod {
   
   public LocalDate from;                      // Data inizio
   public LocalDate to;                        // Data fine
+  
+  public SortedMap<LocalDate, DayStatus> daysStatus = Maps.newTreeMap();
 
   public AbsencePeriod(GroupAbsenceType groupAbsenceType) {
     this.groupAbsenceType = groupAbsenceType;
@@ -55,23 +58,11 @@ public class AbsencePeriod {
 
   public Set<AbsenceType> takableCodes;            // I tipi assenza prendibili del periodo
   public Set<AbsenceType> takenCodes;              // I tipi di assenza consumati del periodo
-
-  // Le assenze consumate
-  public List<AbsenceStatus> takenAbsencesStatus = Lists.newArrayList(); 
-  
-  // L'errore
-  public Absence overtakenLimitAbsence = null;
   
   public boolean isTakable() {
     return takeAmountType != null; 
   }
 
-  public void setOvertakenLimitAbsence(Absence absence) {
-    if (this.overtakenLimitAbsence == null) {
-      this.overtakenLimitAbsence = absence;
-    }
-  }
-  
   public void setFixedPeriodTakableAmount(int amount) {
     if (this.takeAmountType.equals(AmountType.units)) {
       // Per non fare operazioni in virgola mobile...
@@ -118,13 +109,14 @@ public class AbsencePeriod {
    * @param enhancedAbsence
    */
   public void addAbsenceTaken(Absence absence, int takenAmount) {
-    AbsenceStatus absenceStatus = AbsenceStatus.builder()
+    TakenAbsence takenAbsence = TakenAbsence.builder()
         .absence(absence)
         .amountTypeTakable(this.takeAmountType)
         .consumedTakable(takenAmount)
         .residualBeforeTakable(getPeriodTakableAmount() - getPeriodTakenAmount())
         .build();
-    this.takenAbsencesStatus.add(absenceStatus);
+    getDayStatus(absence.getAbsenceDate()).takenAbsences.add(takenAbsence);
+    
     this.periodTakenAmount += takenAmount;
   }
   
@@ -151,20 +143,20 @@ public class AbsencePeriod {
   
   // Le assenze di completamento per giorno
   public SortedMap<LocalDate, Absence> complationAbsencesByDay = Maps.newTreeMap();
-
-  // I giorni analizzati con i completamenti effettivi e quelli ipotetici.
-  public SortedMap<LocalDate, ReplacingStatus> replacingStatus = Maps.newTreeMap();
   
-  // Gli errori
-  public LocalDate compromisedReplacingDate = null;
-  public List<Absence> twoComplationSameDay = Lists.newArrayList();
-  public List<Absence> twoReplacingSameDay = Lists.newArrayList();
-  public Absence wrongReplacing = null;
-  public Absence tooEarlyReplcing = null;
-  public Absence missingReplacing = null;
-    
+  // Data di errore complation (non si possono più fare i calcoli sui completamenti).
+  public LocalDate compromisedReplacingDate = null; 
+  
   public boolean isComplation() {
     return complationAmountType != null; 
+  }
+  
+  public void addComplationSameDay(Absence absence) {
+    getDayStatus(absence.getAbsenceDate()).complationSameDay.add(absence);
+  }
+  
+  public void addReplacingSameDay(Absence absence) {
+    getDayStatus(absence.getAbsenceDate()).replacingSameDay.add(absence);
   }
   
   public void setCompromisedReplacingDate(LocalDate date) {
@@ -183,6 +175,19 @@ public class AbsencePeriod {
       return false;
     }
     return true;
+  }
+  
+  public DayStatus getDayStatus(LocalDate date) {
+    DayStatus dayStatus = this.daysStatus.get(date);
+    if (dayStatus == null) {
+      dayStatus = DayStatus.builder().date(date)
+          .takenAbsences(Lists.newArrayList())
+          .complationSameDay(Sets.newHashSet())
+          .replacingSameDay(Sets.newHashSet()).build();
+      this.daysStatus.put(date, dayStatus);
+    }
+    
+    return dayStatus;
   }
   
 }
