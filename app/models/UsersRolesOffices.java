@@ -7,6 +7,7 @@ import models.base.BaseModel;
 import org.hibernate.envers.NotAudited;
 
 import play.data.validation.Required;
+import play.data.validation.Unique;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -39,6 +40,7 @@ public class UsersRolesOffices extends BaseModel {
   @JoinColumn(name = "office_id")
   @Required
   @NotNull
+  @Unique("user office role")
   public Office office;
 
   @NotAudited
