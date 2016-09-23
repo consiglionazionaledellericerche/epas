@@ -4,7 +4,7 @@
     #{list items:results.results, as:'user'}
     <li class="list-group-item">
       <div class="pull-right btn-group">
-        #{b.show @show('user.id':user.id), 'data-async-modal': '#defaultModal' /}
+        #{b.show @show(user.id), 'data-async-modal': '#defaultModal' /}
         #{secure.check 'Users.edit'}
           #{b.edit @edit(user.id) /}
         #{/secure.check}
