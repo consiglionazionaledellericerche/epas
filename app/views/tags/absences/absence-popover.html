@@ -42,12 +42,9 @@
     
     #{if !_absence.troubles.empty}
          <br><br>  
-         <p class="text-danger">Questa assenza contiene errori:</p>
-         <ul>
          #{list items:_absence.troubles, as:'trouble'}
-           <li>&{trouble.trouble}</li>
+           <strong class="text-danger">&{trouble.trouble}</strong>
          #{/list}
-         </ul>
      #{/if}
   </div>
 
