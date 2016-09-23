@@ -1,9 +1,7 @@
 package controllers;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
@@ -11,6 +9,7 @@ import com.mysema.query.SearchResults;
 
 import dao.OfficeDao;
 import dao.UserDao;
+import dao.UsersRolesOfficesDao;
 
 import helpers.Web;
 
@@ -30,7 +29,6 @@ import play.data.validation.Equals;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
-import play.db.jpa.JPA;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -51,6 +49,8 @@ public class Users extends Controller {
   static UserDao userDao;
   @Inject
   static OfficeDao officeDao;
+  @Inject
+  static UsersRolesOfficesDao uroDao;
   @Inject
   static SecureManager secureManager;
 
@@ -86,7 +86,10 @@ public class Users extends Controller {
     render(results, name);
   }
 
-  public static void editAccountRoles(User user) {
+  public static void editAccountRoles(Long userId) {
+    final User user = userDao.getUserByIdAndPassword(userId, Optional.absent());
+    notFoundIfNull(user);
+    rules.checkIfPermitted(user);
     render(user);
   }
 
@@ -106,7 +109,8 @@ public class Users extends Controller {
     edit(user.id);
   }
 
-  public static void addRole(User user) {
+  public static void addRole(Long userId) {
+    final User user = userDao.getUserByIdAndPassword(userId, Optional.absent());
     notFoundIfNull(user);
     rules.checkIfPermitted(user);
     render(user);
@@ -114,6 +118,7 @@ public class Users extends Controller {
 
   public static void saveRole(@Valid UsersRolesOffices userRoleOffice) {
 
+
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors for {}: {}", userRoleOffice, validation.errorsMap());
@@ -122,8 +127,7 @@ public class Users extends Controller {
       render("@addRole", user, userRoleOffice);
     }
 
-    rules.checkIfPermitted(userRoleOffice.user);
-    rules.checkIfPermitted(userRoleOffice.office);
+    rules.checkIfPermitted(userRoleOffice);
 
     userRoleOffice.save();
     final User user = userRoleOffice.user;
@@ -131,26 +135,24 @@ public class Users extends Controller {
     edit(user.id);
   }
 
-  public static void removeRole(@Valid UsersRolesOffices userRoleOffice) {
+  public static void removeRole(Long uroId) {
 
-    if (Validation.hasErrors()) {
-      response.status = 400;
-      log.warn("validation errors for {}: {}", userRoleOffice, validation.errorsMap());
-      flash.error(Web.msgHasErrors());
-      final User user = userRoleOffice.user;
-      render("@addRole", user, userRoleOffice);
-    }
-    rules.checkIfPermitted(userRoleOffice);
+    final UsersRolesOffices uro = uroDao.getById(uroId);
 
-    if (userRoleOffice.isPersistent()) {
-      userRoleOffice.delete();
+    notFoundIfNull(uro);
+
+    rules.checkIfPermitted(uro);
+
+    if (uro.isPersistent()) {
+      uro.delete();
       flash.success(Web.msgDeleted(UsersRolesOffices.class));
     }
 
-    edit(userRoleOffice.user.id);
+    edit(uro.user.id);
   }
 
-  public static void show(User user) {
+  public static void show(Long userId) {
+    final User user = userDao.getUserByIdAndPassword(userId, Optional.absent());
     notFoundIfNull(user);
     rules.checkIfPermitted(user);
     render(user);

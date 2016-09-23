@@ -353,18 +353,18 @@ end
 rule TechnicalAdmin_targetUser
 when
  $uro: UsersRolesOffices(role.name == Role.TECHNICAL_ADMIN)
- $u: User(owner == $uro.office || (person != null && person.office == $uro.office))
+ $u: User(this.hasRelationWith($uro.office))
  $c: PermissionCheck( target == $u, granted == false)
 then
- // questa è sballata!
  $c.grant();
 end
 
 rule TechnicalAdmin_targetUro
 when
- $uro: UsersRolesOffices(role.name == Role.TECHNICAL_ADMIN)
- $target: UsersRolesOffices(this.hasRelationWith($uro.office))
- $c: PermissionCheck(target == $target, granted == false, action in ("Users.edit", "Users.addRole", "Users.saveRole", "Users.removeRole"))
+ $target: UsersRolesOffices()
+ $c: PermissionCheck(target == $target, granted == false, action in ("Users.saveRole", "Users.removeRole"))
+ UsersRolesOffices(role.name == Role.TECHNICAL_ADMIN, $target.user.hasRelationWith(this.office)) from currentOperator.usersRolesOffices
+ UsersRolesOffices(role.name == Role.TECHNICAL_ADMIN, office == $target.office) from currentOperator.usersRolesOffices
 then
  $c.grant();
 end

@@ -13,7 +13,7 @@
       <div class="col-sm-6">
         <p class="form-control-static">
           #{list user.roles}
-            ${_}#{ifnot _isLast}, #{/ifnot}
+            <span class="text-primary">${_}</span>#{ifnot _isLast}, #{/ifnot}
           #{/list}
         </p>
       </div>

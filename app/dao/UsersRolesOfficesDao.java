@@ -35,10 +35,8 @@ public class UsersRolesOfficesDao extends DaoBase {
   }
 
   public UsersRolesOffices getById(Long id) {
-    QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
-    final JPQLQuery query = getQueryFactory().from(uro)
-        .where(uro.id.eq(id));
-    return query.singleResult(uro);
+    final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
+    return getQueryFactory().from(uro).where(uro.id.eq(id)).singleResult(uro);
   }
 
   /**

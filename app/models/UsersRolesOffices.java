@@ -52,19 +52,11 @@ public class UsersRolesOffices extends BaseModel {
   public String toString() {
 
     return MoreObjects.toStringHelper(this).omitNullValues()
-            .add("id", id)
-            .add("user", user)
-            .add("role", role)
-            .add("office", office)
-            .toString();
+        .add("id", id)
+        .add("user", user)
+        .add("role", role)
+        .add("office", office)
+        .toString();
   }
 
-  /**
-   * L'office fornito ha un legame con questo uro.
-   *
-   * @return true se ce l'ha, false altrimenti.
-   */
-  public boolean hasRelationWith(Office office) {
-    return user.owner == office || (user.person != null && user.person.office == office);
-  }
 }
