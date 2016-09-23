@@ -522,6 +522,10 @@ configurationDto.localdateNewValue=Nuovo Valore
 WayType.in= Ingresso
 WayType.out= Uscita
 
+MissingReplacing=Manca il codice di rimpiazzamento.
+CompromisedReplacing=La sequenza dei rimpiazzamenti è compromessa.
+
+
 ###########################################################################
 #	Descrizioni campi (usati nei popovers e nelle descrizioni dei campi)
 ###########################################################################

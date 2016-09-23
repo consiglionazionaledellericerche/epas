@@ -33,7 +33,6 @@ public class DayStatus {
   public Set<Absence> replacingSameDay;         //due o più rimpiazzamenti
   public Absence compromisedComplation;         //sequenza compromessa
   public Absence compromisedReplacing;          //sequenza compromessa
-  public boolean firstComplationErrorThisDay;
   
   private Absence complationAbsence;
   private AmountType amountTypeComplation;
@@ -44,12 +43,12 @@ public class DayStatus {
   private Absence existentReplacing;
   private AbsenceType correctReplacing;
   
-//  public boolean correct() {
-//    return !wrongTypeOfReplacing() && !missingReplacing() && !tooEarlyReplacing();
-//  }
-
   public boolean complationCompromised() {
-    return compromisedComplation != null || compromisedReplacing != null;
+    if (this.absencePeriod.compromisedReplacingDate != null 
+        && !this.absencePeriod.compromisedReplacingDate.isAfter(this.date)) {
+      return true;
+    }
+    return false;
   }
   
   public boolean complationCompromisedInThisDay() {
@@ -80,8 +79,8 @@ public class DayStatus {
     List<RowRecap> rowsRecap = Lists.newArrayList();
     boolean datePrinted = false;
     
-    List<TakenAbsence> takenNotComplations = Lists.newArrayList();
-    TakenAbsence takenComplation = null;
+    List<TakenAbsence> takenNotComplations = Lists.newArrayList();  
+    TakenAbsence takenComplation = null;                            
     for (TakenAbsence takenAbsence : takenAbsences) {
       if (!this.complationSameDay.contains(takenAbsence.absence)) {
         if (this.complationAbsence != null && this.complationAbsence.equals(takenAbsence.absence)) {
@@ -91,8 +90,16 @@ public class DayStatus {
         }
       } 
     }
+    Absence replacing = null;                                       
+    AbsenceType missingReplacing = null;
+    if (this.replacingSameDay.isEmpty()) {
+      replacing = this.existentReplacing;
+      if (this.existentReplacing == null && this.missingReplacing()) {
+        missingReplacing = this.correctReplacing;
+      }
+    }
     
-    //1) 
+    //1) Le assenze takable non completamento
     for (TakenAbsence takenNotComplation : takenNotComplations) {
       RowRecap rowRecap = new RowRecap();
       if (!datePrinted) {
@@ -104,7 +111,7 @@ public class DayStatus {
       rowRecap.usableTaken = printAmount(takenNotComplation.consumedTakable, takenNotComplation.amountTypeTakable);
       rowsRecap.add(rowRecap);
     }
-    //2)
+    //2) La assenza takable completamento (quando è solo una)
     if (takenComplation != null) {
       RowRecap rowRecap = new RowRecap();
       if (!datePrinted) {
@@ -118,34 +125,51 @@ public class DayStatus {
       if (!complationCompromised() && !complationCompromisedInThisDay()) {
         rowRecap.consumedComplationBefore = printAmount(this.residualBeforeComplation, this.amountTypeComplation);
       }
+      if (missingReplacing != null) {
+        rowRecap.missingReplacing = missingReplacing;
+      }
       rowsRecap.add(rowRecap);
     }
     
-    
-    Absence replacing = null;
-    AbsenceType missingReplacing = null;
-    if (this.replacingSameDay.isEmpty()) {
-      replacing = this.existentReplacing;
-      if (this.existentReplacing == null && this.missingReplacing()) {
-        missingReplacing = this.correctReplacing;
-      }
-    }
-    
+    //3) L'assenza di rimpiazzamento (quando è solo una)
     if (replacing != null) {
-      
+      RowRecap rowRecap = new RowRecap();
+      if (!datePrinted) {
+        rowRecap.date = this.date;
+        datePrinted = true;
+      }
+      rowRecap.absence = replacing;      
+      if (!complationCompromised()) {
+        rowRecap.consumedComplationNext = 
+            printAmount(this.residualAfterComplation, this.amountTypeComplation);
+      }
+      rowsRecap.add(rowRecap);
     }
     
-
+    //4) Le assenze takable completamento (quando sono più di una)
+    for (Absence absence : complationSameDay) {
+      RowRecap rowRecap = new RowRecap();
+      if (!datePrinted) {
+        rowRecap.date = this.date;
+        datePrinted = true;
+      }
+      rowRecap.absence = absence;
+      rowsRecap.add(rowRecap);
+    }
     
+    //4) Le assenze di rimpiazzamento (quando sono più di una)
+    for (Absence absence : replacingSameDay) {
+      RowRecap rowRecap = new RowRecap();
+      if (!datePrinted) {
+        rowRecap.date = this.date;
+        datePrinted = true;
+      }
+      rowRecap.absence = absence;
+      rowsRecap.add(rowRecap);
+    }
     
-    return null;
+    return rowsRecap;
   }
-  
-//if (isComplationAbsence) {
-//rowRecap.consumedComplationBefore = printAmount(this.residualBeforeComplation, 
-//    this.amountTypeComplation);
-//}
-
   
   public static class RowRecap {
     

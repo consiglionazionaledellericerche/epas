@@ -25,48 +25,8 @@
       ${absencePeriod.groupAbsenceType.description}
     </p>
     
-    <table class="table table-condensed table-bordered">
-      <tr>
-        <th>Data</th>
-        <th>Assenze</th>
-      </tr>
-      
-    #{list items:absencePeriod.daysStatus.values(), as:'dayStatus'}
-    
-	    
-	  <tr>
-	    <td>
-	      <strong>Giorno ${dayStatus.date.format()}</strong>
-	    </td>
-	  
-	    <td>
-		  #{list items:dayStatus.takenAbsences, as:'takenAbsence'}
-		    #{if dayStatus.complationAbsence && dayStatus.complationAbsence.equals(takenAbsence.absence)}
-		      #{absences.absence-popover 
-		        absence:takenAbsence.absence, 
-		        usableLimit:templateUtility.printAmount(takenAbsence.residualBeforeTakable, takenAbsence.amountTypeTakable),
-		        consumedComplation:templateUtility.printAmount(dayStatus.consumedComplation, dayStatus.amountTypeComplation),
-		        consumedBefore:templateUtility.printAmount(dayStatus.residualBeforeComplation, dayStatus.amountTypeComplation) /} 
-		    #{/if}
-			#{else}
-			  #{absences.absence-popover absence:takenAbsence.absence, 
-		        usableLimit:templateUtility.printAmount(takenAbsence.residualBeforeTakable, takenAbsence.amountTypeTakable) /}
-			#{/else}		    
-		       <p>
-		          <span class="label label-success" webui-popover-hover data-url="#${takenAbsence.absence.id}">${takenAbsence.absence.absenceType.code}</span>
-		       </p>
-		  #{/list}
-		  #{if dayStatus.correct() && dayStatus.existentReplacing }
-		    <span class="label label-default" webui-popover-hover data-url="#${dayStatus.existentReplacing.id}">${dayStatus.existentReplacing.absenceType.code}</span>
-		    #{absences.absence-popover absence:dayStatus.existentReplacing /}
-		    <span class="label label-primary">Al prossimo completamento</span><span class="label label-default">${templateUtility.printAmount(dayStatus.residualAfterComplation, dayStatus.amountTypeComplation)}</span>
-		    <br> 	      
-		  #{/if}
-		</td>
-		
-	  </tr>
-    #{/list}
-    </table>
+  
+	 
     
      <table class="table table-condensed table-bordered">
       <tr>
@@ -77,138 +37,53 @@
         <th>Completamento<br>Precedente<br></th>
         <th>Completamento<br>Assenza</th>
         <th>Completamento<br>Residuo<br></th>
-        
       </tr>
+      #{list items:absencePeriod.daysStatus.values(), as:'dayStatus'}
+      #{list items:dayStatus.buildDayRows(), as:'rowRecap' }
+        <tr #{if dayStatus.complationCompromisedInThisDay()} class="bg-danger" #{/if}
+            #{elseif dayStatus.complationCompromised()} class="bg-info" #{/elseif}>
+          <td>
+            #{if rowRecap.date}
+              ${rowRecap.date.format()}
+              #{if dayStatus.complationCompromisedInThisDay()}
+                <i class="fa fa-fire-extinguisher" aria-hidden="true"></i> 
+              #{/if}
+            #{/if}  
+          </td>
+          <td>
+              #{if !rowRecap.absence.troubles.empty }
+		        <i class="fa fa-exclamation-triangle text-danger" webui-popover-hover data-url="#containError${rowRecap.absence.id}"></i>
+		      #{/if}
+		      <div class="webui-popover-content" id="containError${rowRecap.absence.id}">
+                #{list items:rowRecap.absence.troubles, as:'trouble'}
+                  <strong>&{trouble.trouble}</strong><br>
+                #{/list}
+                #{if rowRecap.missingReplacing }
+                <p> 
+                  Il codice di rimpiazzamento da inserire è
+                  <span class="label label-default">${rowRecap.missingReplacing.code}</span>
+                </p>
+                #{/if}
+              </div>
+              #{absences.absence-popover absence:rowRecap.absence /}
+              <span class="label label-success" webui-popover-hover data-url="#${rowRecap.absence.id}">${rowRecap.absence.absenceType.code}</span>
+			  	                
+          </td>
+          <td>${rowRecap.usableLimit}</td>
+          <td>${rowRecap.usableTaken}</td>
+          <td>${rowRecap.consumedComplationBefore}</td>
+          <td>${rowRecap.consumedComplationAbsence}</td>
+          <td>${rowRecap.consumedComplationNext}</td>
+        </tr>
+      #{/list}
+      #{/list}
+      </table>
       
-    #{list items:absencePeriod.daysStatus.values(), as:'dayStatus'}
-      %{ datePrinted = false; }%
-		  #{list items:dayStatus.takenAbsences, as:'takenAbsence'}
-		  <tr>
-		    %{
-		      alsoComplation = false;			//resets
-		      consumedComplation = null;
-		      consumedBefore = null;
-		      correctReplacingExist = false;
-		      missingReplacing = false;
-		      
-		      usableLimit = templateUtility.printAmount(takenAbsence.residualBeforeTakable, takenAbsence.amountTypeTakable);
-		      usableTaken = templateUtility.printAmount(takenAbsence.consumedTakable, takenAbsence.amountTypeTakable);
-		      if (dayStatus.complationAbsence && dayStatus.complationAbsence.equals(takenAbsence.absence)) {
-		        alsoComplation = true;
-		        consumedComplation = templateUtility.printAmount(dayStatus.consumedComplation, dayStatus.amountTypeComplation);
-		        consumedBefore = templateUtility.printAmount(dayStatus.residualBeforeComplation, dayStatus.amountTypeComplation);
-		        nextComplation = templateUtility.printAmount(dayStatus.residualAfterComplation, dayStatus.amountTypeComplation);
-		      }
-		      if (dayStatus.correct() && dayStatus.existentReplacing) {
-		        correctReplacingExist = true;
-		      }
-		      if (dayStatus.onlyCorrect()) {
-		        missingReplacing = true;
-		      }
-		    }%
-		  
-		  
-		    <td>
-		     #{if !datePrinted}
-		       ${dayStatus.date.format()}
-		       %{ datePrinted = true; }%
-		     #{/if}
-	        </td>
-	        <td>
-	          <span class="label label-primary" webui-popover-hover data-url="#${takenAbsence.absence.id}">${takenAbsence.absence.absenceType.code}</span>
-		      #{absences.absence-popover absence:takenAbsence.absence, usableLimit:usableLimit,
-		        consumedComplation:consumedComplation, consumedBefore:consumedBefore /} 
-		      #{if !takenAbsence.absence.troubles.empty }
-		        <i class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i>
-		      #{/if}  
-			</td>
-					    
-		    <!-- Limite Utilizzabile -->
-		    <!-- Limite Consumato -->
-		    <td>${usableLimit}</td>
-		    <td>${usableTaken}</td>
-		    
-		    <!-- Completamento Precendente-->
-		    <!-- Completamento -->
-		    #{if alsoComplation}
-		    
-		        <!-- Caso corretto -->
-		        #{if dayStatus.compromisedComplationReplacing()}
-		        
-		        
-		        #{/if}
-				<td>${consumedBefore}</td>
-				<td>${consumedComplation}</td>
-					    
-					    
-					    <!-- Complatamento residuo -->
-					    #{if alsoComplation && !correctReplacingExist}
-					      <td>${nextComplation}</td>
-					    #{/if}#{else}
-					      <td></td>
-					    #{/else}
-					  <tr>
-					  
-					  #{if correctReplacingExist }
-					    <tr>
-						  <td>
-						  #{if !datePrinted}
-					       ${dayStatus.date.format()}
-					       %{ datePrinted = true; }%
-					      #{/if}
-			              </td>
-						  <td>
-						    <span class="label label-default" webui-popover-hover data-url="#${dayStatus.existentReplacing.id}">
-						      ${dayStatus.existentReplacing.absenceType.code}</span>
-						    #{absences.absence-popover absence:dayStatus.existentReplacing /}
-						  </td>
-						  <td></td>
-						  <td></td>
-						  <td></td>
-						  <td></td>
-						  <td>${nextComplation}</td>
-						</tr>  
-					  #{/if}
-					  
-					  #{if missingReplacing}
-					    <tr>
-					      <td>
-						  #{if !datePrinted}
-					       ${dayStatus.date.format()}
-					       %{ datePrinted = true; }%
-					      #{/if}
-			              </td>
-						  <td>
-						    #{absences.absenceType absenceType:dayStatus.correctReplacing /}
-						  </td>
-						  <td></td>
-						  <td></td>
-						  <td></td>
-						  <td></td>
-						  <td>${nextComplation}</td>
-					    <tr>
-					  #{/if}
- 
-		    #{/if}#{else}  
-		      <td></td>
-		      <td></td>
-		    #{/else}
-		  #{/list}
-		  
-		  <!-- TODO: Too early replacing -->
-		  
-		  <!-- TODO: Two Replacing -->
-		  
-		</td>
-		
-	  </tr>
-    #{/list}
-    </table>
-    
-    
-  
-
-  
   #{/list}
     
+</div>
+
+
+<div class="webui-popover-content" id="missingReplacingError">
+  Codice di assenza da inserire nel giorno.
 </div>
