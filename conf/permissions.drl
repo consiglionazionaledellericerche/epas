@@ -68,6 +68,7 @@ rule IsEmployee
 when
   $uro: UsersRolesOffices()
   Role(name == Role.EMPLOYEE) from $uro.role
+  
   $c: PermissionCheck(action in (
   		/* Ritorna allo user developer */
      	"Administration.restoreUser",
@@ -106,6 +107,7 @@ when
      	"PersonMonths.deleteTrainingHours",
      	"PersonMonths.deleteTrainingHoursConfirmed",
      	"PersonMonths.insertTrainingHours",
+     	
      	"PersonMonths.insertTrainingHoursPreviousMonth",
      	"PersonMonths.modifyTrainingHours",
      	"PersonMonths.saveTrainingHours",
@@ -727,8 +729,9 @@ when
 		/*ore di formazione*/
 		"PersonMonths.visualizePeopleTrainingHours",
         "PersonMonths.insertPeopleTrainingHours",
-        "PersonMonths.deleteTrainingHours",
-        "PersonMonths.deleteTrainingHoursConfirmed",
+        "PersonMonths.modifyPeopleTrainingHours",
+        "PersonMonths.deletePeopleTrainingHours",
+        "PersonMonths.deletePeopleTrainingHoursConfirmed",
         "PersonMonths.modifyTrainingHours",
         "PersonMonths.save",
         "PersonMonths.saveTrainingHours",
@@ -876,9 +879,10 @@ when
 		/*Ore di formazione*/
 		"PersonMonths.visualizePeopleTrainingHours",
         "PersonMonths.insertPeopleTrainingHours",
-        "PersonMonths.deleteTrainingHours",
-        "PersonMonths.deleteTrainingHoursConfirmed",
+        "PersonMonths.deletePeopleTrainingHours",
+        "PersonMonths.deletePeopleTrainingHoursConfirmed",
         "PersonMonths.modifyTrainingHours",
+        "PersonMonths.modifyPeopleTrainingHours",
         "PersonMonths.save",
         "PersonMonths.saveTrainingHours",
         "Charts.listForExcelFile",
