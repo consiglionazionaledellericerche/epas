@@ -118,7 +118,6 @@ public class Users extends Controller {
 
   public static void saveRole(@Valid UsersRolesOffices userRoleOffice) {
 
-
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors for {}: {}", userRoleOffice, validation.errorsMap());
