@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import models.absences.Absence;
+import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AmountType;
 
 import org.joda.time.LocalDate;
@@ -19,25 +20,8 @@ public class TakenAbsence {
   public int consumedTakable;
   public int residualBeforeTakable;
   
-  //*********
   
-  private AmountType amountType;                    // | units | minutes | units |
-  private int amount;                               // | 02:00 | 01:00   |   1   |
-  private int workingTime;                          // | 07:12 |
-
-  private String residualName;       // | res. anno passato | residuo anno corrente | lim. anno |
-  private LocalDate expireResidual;  // |     31/03/2016    |      31/03/2017       | 31/12/2016| 
-  private int totalResidual;         // |     20:00         |      07:00            |    28     |
-  private int usedResidualBefore;    // |     00:00         |      00:00            |    6      |
-
-  public int residualBefore() {
-    return this.totalResidual - this.usedResidualBefore;
-  }
-
-  public int residualAfter() {
-    return this.residualBefore() - this.amount;
-  }
-  
-  
+  public int workingTime;
+  public AbsenceProblem absenceProblem;
   
 }

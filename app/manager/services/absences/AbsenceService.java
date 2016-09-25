@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.services.absences.InsertResultItem.Operation;
 import manager.services.absences.model.AbsenceEngine;
 import manager.services.absences.web.AbsenceRequestForm;
 import manager.services.absences.web.AbsenceRequestFormFactory;
@@ -164,13 +163,9 @@ public class AbsenceService {
         absence.justifiedMinutes = specifiedMinutes;
       }
       
-      InsertResultItem absenceResultItem = InsertResultItem.builder()
-          .absence(absence)
-          .absenceType(absence.getAbsenceType())
-          .operation(Operation.insert)
-          .consumedResidualAmount(Lists.newArrayList())
-          .date(currentDate).build();
-      report.addInsertResultItem(absenceResultItem);
+      DayStatus insertDayStatus = DayStatus.builder().date(currentDate).build();
+      insertDayStatus.takenAbsences = Lists.newArrayList(TakenAbsence.builder().absence(absence).build());
+      report.addInsertDayStatus(insertDayStatus);
       
       currentDate = currentDate.plusDays(1);
     }

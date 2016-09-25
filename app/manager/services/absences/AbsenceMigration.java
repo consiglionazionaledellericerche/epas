@@ -814,6 +814,20 @@ public class AbsenceMigration {
           "Permesso visita medica in ore e minuti", 
           0, Sets.newHashSet(specifiedMinutes), null, 0, true, false, false, null);
 
+      //Takable Creation
+      Optional<TakableAbsenceBehaviour> t09 = absenceComponentDao
+          .takableAbsenceBehaviourByName(DefaultTakable.T_09.name());
+      
+      if (!t09.isPresent()) {
+
+        t09 = Optional.fromNullable(new TakableAbsenceBehaviour());
+        t09.get().name = DefaultTakable.T_09.name();
+        t09.get().amountType = AmountType.units;
+        t09.get().takableCodes = Sets.newHashSet(m09);
+        t09.get().takenCodes = Sets.newHashSet(m09);
+        t09.get().fixedLimit = -1;
+        t09.get().save();
+      }
 
       //Complation Creation
       Optional<ComplationAbsenceBehaviour> c09 = absenceComponentDao
@@ -838,6 +852,7 @@ public class AbsenceMigration {
       group09.pattern = GroupAbsenceTypePattern.programmed;
       group09.periodType = PeriodType.always;
       group09.complationAbsenceBehaviour = c09.get();
+      group09.takableAbsenceBehaviour = t09.get();
       group09.save();
 
     }

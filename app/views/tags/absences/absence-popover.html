@@ -1,18 +1,25 @@
 *{
   absence l'assenza da visionare
   id (optional) per specificare un id custom (default absence.id)
+  
+  groupSelected Se voglio stampare la situazione relativa ad un gruppo. In quel caso oltre al popover stampo
+                la lable. Se null siamo nel tabellone timbrature.
 }*
-
-
+ 
+ #{if _groupSelected}
+   <span class="label
+   #{if templateUtility.isTakableOnly(_absence.absenceType, _groupSelected)} label-warning #{/if}
+   #{elseif templateUtility.isReplacingCode(_absence.absenceType, _groupSelected)} label-default  #{/elseif}
+   #{elseif templateUtility.isComplationCode(_absence.absenceType, _groupSelected)} label-success #{/elseif}
+   #{else} label-info #{/else} 
+   " webui-popover-hover data-url="#${_absence.id}">${_absence.absenceType.code}</span>
+ #{/if}
+ 
  <div class="webui-popover-content" id="#{if _id}${_if}#{/if}#{else}${_absence.id}#{/else}">
     <strong>Data</strong> ${_absence.absenceDate.format()}<br>
     <strong>Codice</strong> ${_absence.absenceType.code}<br>
     <strong>Descrizione</strong> ${_absence.absenceType.description}
 
-    #{if _usableLimit}
-    <br><strong>Tetto utilizzabile </strong>${_usableLimit}
-    #{/if}
-    
     #{if _absence.justifiedType}
         #{if _absence.justifiedAllDay() }
           <br><strong>Tempo giustificato</strong> &{_absence.justifiedType}
@@ -22,20 +29,12 @@
 	    #{/if}
     #{/if}
     
-    #{if _consumedComplation}
-      <br><br><strong>Completamento </strong>${_consumedComplation}
-    #{/if}
-    #{if _consumedBefore}
-      <br><strong>Completamento precedente </strong>${_consumedBefore}
-    #{/if}
-    
-    
     #{if _person && !templateUtility.involvedGroupAbsenceType(_absence.absenceType).empty }
     <p>
       <br>
-      <strong>Il codice di assenza modella i seguenti gruppi di assenze:</strong>
+      <strong>Esplora i gruppi di questa assenza</strong>
       #{list items:templateUtility.involvedGroupAbsenceType(_absence.absenceType), as:'group'}
-        <br><a href="@{AbsenceGroups.groupStatus('person.id':_person.id, 'groupAbsenceType.id':group.id, 'date':_absence.getAbsenceDate().format())}">${group.description}</a>      
+        <br><a href="@{AbsenceGroups.groupStatus(_person.id, group.id, _absence.getAbsenceDate().format())}">${group.description}</a>      
       #{/list}
     </p>  
     #{/if}
@@ -43,7 +42,7 @@
     #{if !_absence.troubles.empty}
          <br><br>  
          #{list items:_absence.troubles, as:'trouble'}
-           <strong class="text-danger">&{trouble.trouble}</strong>
+           <strong class="text-danger">&{trouble.trouble}</strong><br>
          #{/list}
      #{/if}
   </div>

@@ -9,8 +9,8 @@ import manager.services.absences.AbsenceMigration;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.AbsenceRequestType;
 import manager.services.absences.AbsencesReport;
-import manager.services.absences.InsertResultItem;
-import manager.services.absences.InsertResultItem.Operation;
+import manager.services.absences.DayStatus;
+import manager.services.absences.TakenAbsence;
 import manager.services.absences.model.AbsenceEngine;
 import manager.services.absences.web.AbsenceRequestForm;
 import manager.services.absences.web.AbsenceRequestForm.SubAbsenceGroupFormItem;
@@ -22,6 +22,7 @@ import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.JustifiedType;
+import models.absences.JustifiedType.JustifiedTypeName;
 
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
@@ -157,19 +158,34 @@ public class AbsenceGroups extends Controller {
       }
     }
 
-    for (InsertResultItem absenceResultItem : report.insertResultItems) {
-      if (absenceResultItem.getOperation().equals(Operation.insert) 
-          || absenceResultItem.getOperation().equals(Operation.insertReplacing)) {
-        
-        PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(person, 
-            absenceResultItem.getAbsence().getAbsenceDate());
-        Absence absence = absenceResultItem.getAbsence();
+    
+    
+    for (DayStatus insertDayStatus : report.insertDaysStatus) {
+    
+      PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(person, 
+          insertDayStatus.getDate());
+      
+      for (TakenAbsence takenAbsence : insertDayStatus.takenAbsences) {
+        if (takenAbsence.absenceProblem == null && !takenAbsence.absence.isPersistent() ) {
+
+          Absence absence = takenAbsence.getAbsence();
+          personDay.absences.add(absence);
+          absence.personDay = personDay;
+          absence.save(); 
+          personDay.save();
+          JPA.em().flush();
+        }
+      }
+      if (insertDayStatus.getExistentReplacing() != null 
+          && !insertDayStatus.getExistentReplacing().isPersistent()) {
+        Absence absence = insertDayStatus.getExistentReplacing();
         personDay.absences.add(absence);
         absence.personDay = personDay;
         absence.save(); 
         personDay.save();
         JPA.em().flush();
       }
+        
     }
     
     consistencyManager.updatePersonSituation(person.id, from);
@@ -180,15 +196,68 @@ public class AbsenceGroups extends Controller {
     
   }
   
-  public static void groupStatus(Person person, GroupAbsenceType groupAbsenceType, LocalDate date) {
+  
+  /**
+   * Aggiunge il replacing (procedura di fix puntuale).
+   * @param person
+   * @param date
+   * @param absenceType
+   * @param groupAbsenceType
+   */
+  public static void addReplacing(Person person, LocalDate date, AbsenceType absenceType, 
+      GroupAbsenceType groupAbsenceType) {
     
+    notFoundIfNull(person);
+    notFoundIfNull(date);
+    notFoundIfNull(absenceType);
+    
+    AbsencesReport report = absenceService.forceInsert(person, null, date, null, 
+          AbsenceRequestType.insert, absenceType, 
+          absenceComponentDao.getOrBuildJustifiedType(JustifiedTypeName.nothing), 
+          null, null);
+    
+    for (DayStatus insertDayStatus : report.insertDaysStatus) {
+      PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(person, 
+          insertDayStatus.getDate());
+      
+      if (insertDayStatus.getExistentReplacing() != null 
+          && !insertDayStatus.getExistentReplacing().isPersistent()) {
+        Absence absence = insertDayStatus.getExistentReplacing();
+        personDay.absences.add(absence);
+        absence.personDay = personDay;
+        absence.save(); 
+        personDay.save();
+        JPA.em().flush();
+      }
+    }
+    
+    consistencyManager.updatePersonSituation(person.id, date);
+      
+    flash.success("Inserito codice di rimpiazzamento.");
+    groupStatus(person.id, groupAbsenceType.id, date);
+    
+  }
+  
+  public static void groupStatus(Long personId, Long groupAbsenceTypeId, LocalDate date) {
+    
+    Person person = personDao.getPersonById(personId);
+    GroupAbsenceType groupAbsenceType = absenceComponentDao.groupAbsenceTypeById(groupAbsenceTypeId);
+
     notFoundIfNull(person);
     notFoundIfNull(date);
     notFoundIfNull(groupAbsenceType);
     
     AbsenceEngine absenceEngine = absenceService.residual(person, groupAbsenceType, date);
     
-    render(absenceEngine);
+    List<GroupAbsenceType> groups = absenceComponentDao
+        .groupAbsenceTypeOfPattern(GroupAbsenceTypePattern.programmed);
+    
+    render(absenceEngine, date, groups, groupAbsenceType);
+  }
+  
+  public static void changeGroupStatus(Person person, GroupAbsenceType groupAbsenceType, LocalDate date) {
+
+    groupStatus(person.id, groupAbsenceType.id, date);
   }
   
   public static void scan(Long personId, LocalDate from) {

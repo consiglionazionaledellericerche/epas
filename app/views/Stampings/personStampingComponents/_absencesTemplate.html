@@ -5,31 +5,26 @@
   #{/secure.link}
 
   #{list items:dayRecap.personDay.absences, as:'absence'}
-
-
-  #{secure.link @Absences.edit('absence.id':absence.id), target: absence, 'data-async-modal':'#modalAbsence'}
     
-    <span webui-popover-hover data-url="#${absence.id}"
+    #{absences.absence-popover absence:absence, person:person /}  
+    
+    #{secure.link @Absences.edit('absence.id':absence.id), target: absence, 'data-async-modal':'#modalAbsence'}
+      <span webui-popover-hover data-url="#${absence.id}"
         *{ colore codice assenza }*
         #{if !absence.troubles.empty} 
           class="text-danger" 
         #{/if}
         #{else} 
           #{if absence.nothingJustified()} class="text-muted" #{/if}
-        #{/else}
-     >
-
+        #{/else}>
+        
 	    #{if !absence.troubles.empty} <strong>${absence.absenceType.code}</strong> #{/if}
 	    #{else} ${absence.absenceType.code} #{/else}
-	    
 	  </span>
-  #{/secure.link}
-
-  #{if absence.absenceFile.exists()}
-    #{secure.link @Absences.downloadAttachment(absence.id), fa:'paperclip'}#{/secure.link}
-  #{/if}
-
-  #{absences.absence-popover absence:absence, person:person /}
-
+    #{/secure.link}
+    
+    #{if absence.absenceFile.exists()}
+      #{secure.link @Absences.downloadAttachment(absence.id), fa:'paperclip'}#{/secure.link}
+    #{/if}
   #{/list}
 </td>

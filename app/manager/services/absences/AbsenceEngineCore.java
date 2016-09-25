@@ -18,7 +18,6 @@ import manager.services.absences.AbsenceService.AbsenceRequestType;
 import manager.services.absences.AbsencesReport.ReportAbsenceTypeProblem;
 import manager.services.absences.AbsencesReport.ReportImplementationProblem;
 import manager.services.absences.AbsencesReport.ReportRequestProblem;
-import manager.services.absences.InsertResultItem.Operation;
 import manager.services.absences.model.AbsenceEngine;
 import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.PeriodChain;
@@ -278,8 +277,6 @@ public class AbsenceEngineCore {
     Set<Absence> absencesAlreadyAssigned = Sets.newHashSet();
     
     for (AbsencePeriod absencePeriod : absenceEngine.periodChain.periods) {
-      
-      boolean firstComplationError;
       
       for (Absence absence : absenceEngine.periodChain.absencesAsc) {
         if (!DateUtility.isDateIntoInterval(absence.getAbsenceDate(), 
@@ -712,40 +709,33 @@ public class AbsenceEngineCore {
     
     //simple grouping
     if (absencePeriod.groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.simpleGrouping)) {
-      InsertResultItem insertResultItem = InsertResultItem.builder()
-          .absence(absence)
-          .absenceType(absence.getAbsenceType())
-          .operation(Operation.insert)
-          .date(absenceEngine.request.currentDate).build();
-      absenceEngine.report.addInsertResultItem(insertResultItem);
+      DayStatus insertDayStatus = DayStatus.builder()
+          .date(absence.getAbsenceDate()).absencePeriod(absencePeriod).build();
+      insertDayStatus.takenAbsences = Lists.newArrayList(TakenAbsence.builder().absence(absence).build());
+      absenceEngine.report.addInsertDayStatus(insertDayStatus);
       absenceEngine.request.requestInserts.add(absence);
       absenceEngine.periodChain.success = true;
       return absenceEngine;
     }
     
-    InsertResultItem absenceResultItem = InsertResultItem.builder()
-        .absence(absence)
-        .absenceType(absence.getAbsenceType())
-        .operation(Operation.insert)
-        .consumedResidualAmount(Lists.newArrayList())
-        .date(absenceEngine.request.currentDate).build();
-    absenceEngine.report.addInsertResultItem(absenceResultItem);
-
+    DayStatus insertDayStatus = DayStatus.builder()
+        .date(absence.getAbsenceDate()).absencePeriod(absencePeriod).build();
+    absenceEngine.report.addInsertDayStatus(insertDayStatus);
+    
     //Takable component
     if (absencePeriod.isTakable()) {
       
       int takenAmount = absenceEngineUtility.absenceJustifiedAmount(absenceEngine, 
           absence, absencePeriod.takeAmountType);
-      
-      TakenAbsence consumedResidualAmount = TakenAbsence.builder()
-          .amountType(absencePeriod.takeAmountType)
-          .expireResidual(absencePeriod.to)
-          .totalResidual(absencePeriod.getPeriodTakableAmount())
-          .usedResidualBefore(absencePeriod.getPeriodTakenAmount())
-          .amount(takenAmount)
+
+      insertDayStatus.takenAbsences = Lists.newArrayList(TakenAbsence.builder()
+          .absence(absence)
+          .consumedTakable(takenAmount)
+          .amountTypeTakable(absencePeriod.takeAmountType)
+          .residualBeforeTakable(absencePeriod.getRemainingAmount())
           .workingTime(absenceEngine.workingTime(absenceEngine.request.currentDate))
-          .build();
-      absenceResultItem.getConsumedResidualAmount().add(consumedResidualAmount);
+          .build());
+
 
       //Aggiungo l'assenza alle strutture dati per l'eventuale iterata successiva.
       absencePeriod.addAbsenceTaken(absence, takenAmount);
@@ -758,29 +748,30 @@ public class AbsenceEngineCore {
 
         //aggiungere l'assenza ai completamenti     
         absencePeriod.complationAbsencesByDay.put(absence.getAbsenceDate(), absence);
-        
+
         //aggiungere il rimpiazzamento se c'è
         computeReplacingStatus(absenceEngine, absencePeriod);
         DayStatus dayStatus = absencePeriod.getDayStatus(absence.getAbsenceDate());
-        if (dayStatus != null && dayStatus.missingReplacing()) {
+
+        insertDayStatus.setComplationAbsence(absence);
+        insertDayStatus.setConsumedComplation(dayStatus.getConsumedComplation());
+        insertDayStatus.setResidualBeforeComplation(dayStatus.getResidualBeforeComplation());
+        insertDayStatus.setResidualAfterComplation(dayStatus.getResidualAfterComplation());
+        insertDayStatus.setAmountTypeComplation(absencePeriod.complationAmountType);
+        
+        if (dayStatus.missingReplacing()) {
           Absence replacingAbsence = new Absence();
           replacingAbsence.absenceType = dayStatus.getCorrectReplacing();
           replacingAbsence.date = dayStatus.getDate();
           replacingAbsence.justifiedType = absenceComponentDao
               .getOrBuildJustifiedType(JustifiedTypeName.nothing);
+
           //todo cercarlo fra quelli permit e se non c'è nothing errore
-
-          InsertResultItem replacingResultItem = InsertResultItem.builder()
-              .absence(replacingAbsence)
-              .absenceType(replacingAbsence.absenceType)
-              .operation(Operation.insertReplacing)
-              .date(dayStatus.getDate()).build();
-
-          absenceEngine.report.addInsertResultItem(replacingResultItem);
+          insertDayStatus.setExistentReplacing(replacingAbsence);
           absenceEngine.request.requestInserts.add(absence);
-
         }
       }
+
     }
 
     //success
@@ -813,13 +804,11 @@ public class AbsenceEngineCore {
       }
 
       if (absenceEngine.isRequestEngine()) {
-        InsertResultItem insertResuItem = InsertResultItem.builder()
+        DayStatus insertDayStatus = DayStatus.builder().date(absence.getAbsenceDate()).build();
+        insertDayStatus.takenAbsences = Lists.newArrayList(TakenAbsence.builder()
             .absence(absence)
-            .absenceType(absence.getAbsenceType())
-            .operation(Operation.insert)
-            .date(absence.getAbsenceDate())
-            .absenceProblem(AbsenceProblem.AllDayAlreadyExists).build();
-        absenceEngine.report.addInsertResultItem(insertResuItem);
+            .absenceProblem(AbsenceProblem.AllDayAlreadyExists).build());
+        absenceEngine.report.addInsertDayStatus(insertDayStatus);
       }
       else if (absenceEngine.isScanEngine()) {
         if (oldAbsence.isPersistent() && absence.isPersistent() && oldAbsence.equals(absence)) {
@@ -944,9 +933,8 @@ public class AbsenceEngineCore {
     }
 
     buildPeriodChain(absenceEngine, groupAbsenceType, date);
-
+    
     return absenceEngine;
   }
-
 
 }
