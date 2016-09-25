@@ -30,8 +30,11 @@ public class AbsencesReport {
   public List<ReportImplementationProblem> implementationProblems = Lists.newArrayList();
   
   // Esiti degli inserimenti
-  public List<InsertResultItem> insertResultItems = Lists.newArrayList();
+  public List<DayStatus> insertDaysStatus = Lists.newArrayList();
+  
+  public List<Absence> requestInserts = Lists.newArrayList();
 
+  
   /**
    * Errori non dipendenti dall'user (tipi assenza, implementazione, form di richiesta).
    * @return
@@ -62,6 +65,14 @@ public class AbsencesReport {
       }
     }
     return false;
+  }
+   
+  public List<AbsenceTrouble> absenceTroubleProblems() {
+    List<AbsenceTrouble> absenceTroubleProblems = Lists.newArrayList();
+    for (List<AbsenceTrouble> absenceTroubleList : this.absenceTroublesMap.values()) {
+      absenceTroubleProblems.addAll(absenceTroubleList);
+    }
+    return absenceTroubleProblems;
   }
 
   /**
@@ -100,9 +111,9 @@ public class AbsencesReport {
     this.implementationProblems.add(implementationProblem);
   }
   
-  public void addInsertResultItem(InsertResultItem insertResultItem) {
-    log.debug("Aggiunto a report.insertResultItems: " + insertResultItem.toString());
-    this.insertResultItems.add(insertResultItem);
+  public void addInsertDayStatus(DayStatus dayStatus) {
+    log.debug("Aggiunto a report.insertDayStatus: " + insertDaysStatus.toString());
+    this.insertDaysStatus.add(dayStatus);
   }
 
   @Builder

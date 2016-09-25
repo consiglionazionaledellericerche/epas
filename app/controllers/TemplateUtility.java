@@ -462,4 +462,30 @@ public class TemplateUtility {
     }
     return format;
   }
+  
+  public boolean isReplacingCode(AbsenceType absenceType, GroupAbsenceType group) {
+    if (group.complationAbsenceBehaviour != null 
+        && group.complationAbsenceBehaviour.replacingCodes.contains(absenceType)) {
+      return true;
+    }
+    return false;
+  }
+
+  
+  public boolean isComplationCode(AbsenceType absenceType, GroupAbsenceType group) {
+    if (group.complationAbsenceBehaviour != null 
+        && group.complationAbsenceBehaviour.complationCodes.contains(absenceType)) {
+      return true;
+    }
+    return false;
+  }
+  
+  public boolean isTakableOnly(AbsenceType absenceType, GroupAbsenceType group) {
+    if (group.takableAbsenceBehaviour != null 
+        && group.takableAbsenceBehaviour.takableCodes.contains(absenceType) 
+        && !isComplationCode(absenceType, group)) {
+      return true;
+    }
+    return false;
+  }
 }

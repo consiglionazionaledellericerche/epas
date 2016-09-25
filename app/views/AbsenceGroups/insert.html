@@ -17,9 +17,9 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
  
    #{if report.containsProblems()}
     #{alert color:'danger'}
-      #{if !report.absenceProblems.empty}
+      #{if !report.absenceTroublesMap.keySet().empty}
         <strong>Errori legati alle assenze</strong><br>
-        #{list items:report.absenceProblems, as:'absenceProblem'}
+        #{list items:report.absenceTroubleProblems(), as:'absenceProblem'}
           <table class="table table-condensed">
             <tr>
               <td>${absenceProblem.absence.getAbsenceDate().format()}</td>
@@ -56,92 +56,37 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
     #{/alert} 
   #{/if}
   
-  #{if !report.insertResultItems.empty }
-    <table class="table condensed">
+  #{if !report.insertDaysStatus.empty }
+    <table class="table table-condensed table-bordered">
       <tr>
         <th>Data</th>
-        <th>Codice</th>
-        <th>Operazione</th>
-        <th>Consumo</th>
-        <th>Residuo</th>
-        <th>Scadenza</th>
-        <th>Problemi</th>
+        <th>Assenza</th>
+        <th>Limite<br>Utilizzabile</th>
+        <th>Limite<br>Consumato</th>
+        <th>Completamento<br>Precedente<br></th>
+        <th>Completamento<br>Assenza</th>
+        <th>Completamento<br>Residuo<br></th>
       </tr>
-      #{list items:report.insertResultItems, as:'insertResultItem'}
-      
-      %{
-        isInsertReplacing = insertResultItem.operation.equals(manager.services.absences.InsertResultItem.Operation.insertReplacing);
-        isInsert = insertResultItem.operation.equals(manager.services.absences.InsertResultItem.Operation.insert);
-        absence = insertResultItem.absence;
-        id = absence.id;
-           if (id == null) {
-             id = absence.absenceType.code + absence.absenceDate;
-           }
-      }%
-      
-      <div class="webui-popover-content" id="${id}">
-           <strong>Codice</strong> ${absence.absenceType.code}<br>
-           <strong>Descrizione</strong> ${absence.absenceType.description}
-	    #{if absence.justifiedType}
-	        #{if absence.justifiedAllDay() }
-	          <br><strong>Tempo giustificato</strong> &{absence.justifiedType}
-	        #{/if}
-		    #{if absence.justifiedTime() }
-		      <br><strong>Tempo giustificato</strong> ${absence.justifiedTime().printHourMinute()}
-		    #{/if}
-	    #{/if}
-	    #{if !absence.troubles.empty}
-	         <br><br>  
-	         <p class="text-danger">Questa assenza contiene errori:</p>
-	         <ul>
-	         #{list items:absence.troubles, as:'trouble'}
-	           <li>&{trouble.trouble}</li>
-	         #{/list}
-	         </ul>
-	     #{/if}
-	  </div>
-      
-      <tr>
-        <td><strong>${insertResultItem.date.format()}</strong></td>
-        #{if isInsert}
-          <td><span webui-popover-hover data-url="#${id}">${absence.absenceType.code}</span></td>
-          <td><span class="label label-primary">&{insertResultItem.operation}</span></td>
-        #{/if}
-        #{elseif isInsertReplacing}
-          <td><span webui-popover-hover data-url="#${id}" class="text-muted">${absence.absenceType.code}</span></td>
-          <td><span class="label label-default">&{insertResultItem.operation}</span></td>
-        #{/elseif}
-        #{else}
-          <td></td><td></td> *{ to implement }*
-        #{/else}
-        
-        <td>
-          #{list items:insertResultItem.consumedResidualAmount, as:'cra'}
-            ${templateUtility.printAmount(cra.amount, cra.amountType)}<br>
-          #{/list}
-        </td>
-        <td>
-          #{list items:insertResultItem.consumedResidualAmount, as:'cra'}
-            ${templateUtility.printAmount(cra.residualAfter(), cra.amountType)}<br>
-          #{/list}
-        </td>
-        <td>
-          #{list items:insertResultItem.consumedResidualAmount, as:'cra'}
-            ${cra.expireResidual?.format()}<br>
-          #{/list}
-        </td>
-        <td>
-        #{if insertResultItem.absenceProblem}
-          ${insertResultItem.absenceProblem}
-        #{/if}
-        #{else}
-        <i class="fa fa-check fa-2x text-success" aria-hidden="true"></i>
-        #{/else}
-        </td>
-        
-      </tr>
+      #{list items:report.insertDaysStatus, as:'dayStatus'}
+      #{list items:dayStatus.buildDayRows(), as:'rowRecap' }
+        <tr>
+          <td>
+            #{if rowRecap.date}
+              ${rowRecap.date.format()}
+            #{/if}  
+          </td>
+          <td>
+              ${rowRecap.absence.absenceType.code} #{absences.absence-popover absence:rowRecap.absence /}
+          </td>
+          <td>${rowRecap.usableLimit}</td>
+          <td>${rowRecap.usableTaken}</td>
+          <td>${rowRecap.consumedComplationBefore}</td>
+          <td>${rowRecap.consumedComplationAbsence}</td>
+          <td>${rowRecap.consumedComplationNext}</td>
+        </tr>
       #{/list}
-    </table>
+      #{/list}
+      </table>
    #{/if} 
       
      *{ save request }*

@@ -19,6 +19,7 @@ import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
+import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
 import models.absences.query.QCategoryGroupAbsenceType;
@@ -152,6 +153,16 @@ public class AbsenceComponentDao extends DaoBase {
     return getQueryFactory().from(groupAbsenceType)
         .leftJoin(groupAbsenceType.category).fetch()
         .leftJoin(groupAbsenceType.previousGroupChecked).fetch()
+        .list(groupAbsenceType);
+  }
+  
+  public List<GroupAbsenceType> groupAbsenceTypeOfPattern(GroupAbsenceTypePattern pattern) {
+    QGroupAbsenceType groupAbsenceType = QGroupAbsenceType.groupAbsenceType;
+
+    return getQueryFactory().from(groupAbsenceType)
+        .leftJoin(groupAbsenceType.category).fetch()
+        .leftJoin(groupAbsenceType.previousGroupChecked).fetch()
+        .where(groupAbsenceType.pattern.eq(pattern))
         .list(groupAbsenceType);
   }
   

@@ -1,6 +1,7 @@
 package manager.services.absences;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -70,11 +71,15 @@ public class DayStatus {
   public boolean tooEarlyReplacing() {
     return correctReplacing == null && existentReplacing != null;
   }
-  
-  
-  
 
   public List<RowRecap> buildDayRows() {
+    
+    if (this.complationSameDay == null) {
+      this.complationSameDay = Sets.newHashSet();
+    }
+    if (this.replacingSameDay == null) {
+      this.replacingSameDay = Sets.newHashSet();
+    }
     
     List<RowRecap> rowsRecap = Lists.newArrayList();
     boolean datePrinted = false;
@@ -191,10 +196,13 @@ public class DayStatus {
   
   //FIXME metodo provvisorio per fare le prove.
   private String printAmount(int amount, AmountType amountType) {
+    if (amountType == null) {
+      return "";
+    }
     String format = "";
     if (amountType.equals(AmountType.units)) {
       if (amount == 0) {
-        return "0%";// giorno lavorativo";
+        return "0";// giorno lavorativo";
       }
 //      int units = amount / 100;
 //      int percent = amount % 100;
@@ -209,7 +217,7 @@ public class DayStatus {
 //      } else if (percent > 0) {
 //        return percent + "% di un giorno lavorativo";
 //      }
-      return amount + "%";
+      return ((double)amount / 100 )+ "";
     }
     if (amountType.equals(AmountType.minutes)) {
       if (amount == 0) {

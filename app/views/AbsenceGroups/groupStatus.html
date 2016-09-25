@@ -4,8 +4,17 @@
 
 <div class="container">
 
-#{title title:absenceEngine.person.fullname + ' - ' + absenceEngine.periodChain.chainDescription /}
+#{title title:absenceEngine.person.fullname + ' - Controllo assenze con limiti e completamenti' /}
   
+     #{form action:@AbsenceGroups.changeGroupStatus(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit'}
+       #{f.hidden 'person.id', value:absenceEngine.person.id /}
+       #{f.date 'date', value:date.format() /}     
+       #{f.selectModel 'groupAbsenceType', items:groups, value:groupAbsenceType /}
+     #{/form} 
+    
+    
+  <a class="btn btn-primary" href="@{Stampings.personStamping(absenceEngine.person.id, date.year, date.monthOfYear)}">Torna alle timbrature</a>
+    
   #{if absenceEngine.report.containsCriticalProblems() }
   #{alert color:'danger'}
     <p>Impossibile visualizzare la situazione. Effettuare una segnalazione.</p>
@@ -15,19 +24,13 @@
   
   #{list items:absenceEngine.periodChain.periods, as:'absencePeriod' }
 
-    <p>  
-      <strong>Periodo validità</strong>
-      <br>Data inizio: ${absencePeriod.from.format()}
-      <br>Data fine: ${absencePeriod.to.format()}
-    </p>  
-    <p>
-      <strong>Gruppo</strong>
-      ${absencePeriod.groupAbsenceType.description}
-    </p>
-    
-  
-	 
-    
+    #{alert color:'info'}
+      <strong>Gruppo</strong> ${absencePeriod.groupAbsenceType.description}<br>
+      <strong>Tipo periodo</strong> &{absencePeriod.groupAbsenceType.periodType} <br>
+      <strong>Validità periodo</strong> ${absencePeriod.from.format()} - ${absencePeriod.to.format()}
+    #{/alert}
+
+
      <table class="table table-condensed table-bordered">
       <tr>
         <th>Data</th>
@@ -62,11 +65,20 @@
                 <p> 
                   Il codice di rimpiazzamento da inserire è
                   <span class="label label-default">${rowRecap.missingReplacing.code}</span>
+                  #{form action:@AbsenceGroups.addReplacing(), method:'POST', autocomplete:false, class:'form form-horizontal'}
+                    #{f.hidden 'date', value:dayStatus.date.format() /}
+                    #{f.hidden 'person.id', value:absenceEngine.person.id /}
+                    #{f.hidden 'groupAbsenceType.id', value:absencePeriod.groupAbsenceType.id /}
+                    #{f.hidden 'absenceType.id', value:rowRecap.missingReplacing.id /}
+                    #{b.buttons center:true}
+                      #{b.submit 'Aggiungi'/}
+                    #{/b.buttons}
+                  #{/form}
+	                
                 </p>
                 #{/if}
               </div>
-              #{absences.absence-popover absence:rowRecap.absence /}
-              <span class="label label-success" webui-popover-hover data-url="#${rowRecap.absence.id}">${rowRecap.absence.absenceType.code}</span>
+              #{absences.absence-popover absence:rowRecap.absence, groupSelected:absencePeriod.groupAbsenceType /}
 			  	                
           </td>
           <td>${rowRecap.usableLimit}</td>
@@ -81,9 +93,4 @@
       
   #{/list}
     
-</div>
-
-
-<div class="webui-popover-content" id="missingReplacingError">
-  Codice di assenza da inserire nel giorno.
 </div>

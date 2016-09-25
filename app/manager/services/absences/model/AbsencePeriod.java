@@ -88,6 +88,10 @@ public class AbsencePeriod {
     return periodTakenAmount;
   }
   
+  public int getRemainingAmount() {
+    return this.getPeriodTakableAmount() - this.getPeriodTakenAmount();
+  }
+  
   /**
    * Se è possibile quell'ulteriore amount.
    * @param amount

@@ -18,6 +18,7 @@ public class AbsenceEngineRequest {
   public LocalDate to;
   public LocalDate currentDate;
   public GroupAbsenceType group;
+  
   public List<Absence> requestInserts = Lists.newArrayList();
 
   public AbsenceEngine nextDate(AbsenceEngine absenceEngine) {
