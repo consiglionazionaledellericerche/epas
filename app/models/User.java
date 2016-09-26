@@ -1,6 +1,7 @@
 package models;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 
 import models.base.BaseModel;
@@ -10,11 +11,13 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
+import play.Logger;
 import play.data.validation.MinSize;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -118,5 +121,10 @@ public class User extends BaseModel {
    */
   public boolean hasRelationWith(Office office) {
     return owner == office || (person != null && person.office == office);
+  }
+
+  public boolean hasRoles(String... args) {
+    return usersRolesOffices.stream()
+        .filter(uro -> Arrays.asList(args).contains(uro.role.name)).findAny().isPresent();
   }
 }
