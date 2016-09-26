@@ -45,7 +45,7 @@
 				      #{if pm.editable }
 						<a href="@{PersonMonths.modifyTrainingHours(pm.id)}" data-async-modal="#defaultModal">
 						<i class="fa fa-pencil"></i></a>						
-						<a href="@{PersonMonths.deleteTrainingHours(pm.person.id, pm.id)}" 
+						<a href="@{PersonMonths.deleteTrainingHours(pm.id)}" 
 						   data-async-modal="#defaultModal"><span class="glyphicon glyphicon-trash"></span></a>
 					  #{/if}
 					</p>   
