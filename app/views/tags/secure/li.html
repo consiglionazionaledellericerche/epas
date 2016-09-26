@@ -1,0 +1,12 @@
+*{ arg: (href) required
+target: optional target for security check
+class: optional classes for a element
+hide: optional set true if the link must be hidden
+}*
+#{if request.path == _arg.toString()}#{set active='active' /}#{/if}
+#{if controllers.Resecure.check(_arg.action, _target)}
+  <li class="${active} ${_class}" ${helpers.Web.serialize(_attrs, "arg", "class", "target", "hide").raw()}><a href="${_arg}">#{doBody /} &{_arg.action}</a></li>
+#{/if}
+#{elseif !_hide}
+  <li class="${active} ${_class} disabled" ${helpers.Web.serialize(_attrs, "arg", "class", "target", "hide").raw()}><a href="${_arg}">#{doBody /} &{_arg.action}</a></li>
+#{/elseif}
