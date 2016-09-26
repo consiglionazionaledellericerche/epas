@@ -21,6 +21,7 @@ import manager.services.absences.web.AbsenceRequestForm.SubAbsenceGroupFormItem;
 
 import models.Person;
 import models.PersonDay;
+import models.User;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
@@ -31,6 +32,8 @@ import models.absences.JustifiedType.JustifiedTypeName;
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
 
+import play.data.validation.Required;
+import play.data.validation.Valid;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -169,6 +172,33 @@ public class AbsenceGroups extends Controller {
     flash.success("Inserito codice di rimpiazzamento.");
     groupStatus(person.id, groupAbsenceType.id, date);
     
+  }
+  
+  /**
+   * metodo che cancella una certa assenza fino ad un certo periodo.
+   *
+   * @param absence l'assenza
+   * @param dateTo  la data di fine periodo
+   */
+  public static void delete(Absence absence, GroupAbsenceType groupAbsenceType) {
+
+    notFoundIfNull(absence);
+    Person person = absence.personDay.person;
+    LocalDate dateFrom = absence.personDay.date;
+
+    if (absence.absenceFile.exists()) {
+      absence.absenceFile.getFile().delete();
+    }
+    absence.personDay.absences.remove(absence);
+    absence.delete();
+    consistencyManager.updatePersonSituation(person.id, absence.getAbsenceDate());
+    
+    flash.success("Assenza rimossa correttamente.");
+    if (groupAbsenceType != null) {
+      groupStatus(person.id, groupAbsenceType.id, absence.getAbsenceDate());
+    } else {
+      Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());  
+    }
   }
   
   public static void groupStatus(Long personId, Long groupAbsenceTypeId, LocalDate date) {
