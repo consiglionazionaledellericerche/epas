@@ -436,6 +436,24 @@ validation.unique =Deve essere unico
 validation.url=Non è un URL valido
 
 ########################
+# Actions
+########################
+
+Absences.showGeneralMonthlyAbsences= Assenze
+Certifications.certifications= Invio Attestati
+Charts.checkLastYearAbsences= Controlli ed Esportazioni
+Competences.showCompetences= Competenze
+MealTickets.recapMealTickets= Buoni Pasto
+MonthRecaps.showRecaps= Riepilogo Mensile
+PersonMonths.visualizePeopleTrainingHours= Ore di Formazione
+Persons.list= Lista Persone
+PrintTags.listPersonForPrintTags= Stampa Cartellino
+Stampings.dailyPresence= Presenza Giornaliera
+Stampings.missingStamping= Timbrature Mancanti
+Stampings.personStamping= Timbrature
+VacationsAdmin.list= Ferie e Permessi
+
+########################
 # Enumerati
 ########################
 

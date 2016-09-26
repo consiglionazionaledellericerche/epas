@@ -1,14 +1,24 @@
-#{if ip.isAdministrationVisible() }
+*{RUOLI DI SISTEMA, AMMINISTRATORE DEL PERSONALE, AMMINISTRATORE DEL PERSONALE IN SOLA LETTURA}*
+#{if !currentUser.roles.empty || currentUser.hasRoles(models.Role.PERSONNEL_ADMIN,models.Role.PERSONNEL_ADMIN_MINI) }
   <ul class="nav navbar-nav">
-    
-   *{ Drop down corrente }*
-   #{if dropDown.equals("dropDownAdministration") }
-     <li class="dropdown active">
-   #{/if}
-   #{else}
-     <li class="dropdown">
-   #{/else}
-    
+
+     #{set actions:[
+      'Persons.list',
+      'Stampings.personStamping',
+      'Absences.showGeneralMonthlyAbsences',
+      'VacationsAdmin.list',
+      'Competences.showCompetences',
+      'MealTickets.recapMealTickets',
+      'PersonMonths.visualizePeopleTrainingHours',
+      'Stampings.missingStamping',
+      'Stampings.dailyPresence',
+      'MonthRecaps.showrecaps',
+      'Charts.checkLastYearAbsences',
+      'PrintTags.listPersonForPrintTags',
+      'Certifications.certifications'] /}
+
+     <li class="dropdown #{if request.action in actions}active#{/if}">
+
     *{ responsività dropDown }*
      <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bar-chart-o"></i>
        <div class="visible-xs-inline visible-md-inline visible-lg-inline"> &{'administrations'}<span class="caret"></span></div>
@@ -19,72 +29,78 @@
      
 	   *{ Lista Persone }*	
      
-       #{if ip.viewPerson }
-       <li><a href="@{Persons.list()}">Lista Persone</a></li>
-       <li class="divider"></li>
-       #{/if}
+       #{secure.li @Persons.list() }
+        <i class="fa fa-users" aria-hidden="true"></i>
+       #{/secure.li}
+       #{secure.check 'Stampings.personStamping'}
+        <li role="separator" class="divider"></li>
+       #{/secure.check}
 
        *{ Gestione Presenze Timbrature / Assenze / Competenze / Ferie e Permessi / Buoni Pasto / Ore di formazione }*
-       
-       #{if ip.viewPersonDay }
-       <li><a href="@{Stampings.personStamping(session.get("personSelected"),
-         session.get("yearSelected"),
-         session.get("monthSelected"))}">Timbrature</a></li>
-       <li><a href="@{Absences.showGeneralMonthlyAbsences(session.get("yearSelected"),
-         session.get("monthSelected"), session.get("officeSelected"))}">Assenze</a></li>
-       <li><a href="@{VacationsAdmin.list(session.get("yearSelected"), session.get("officeSelected"))}">Ferie e Permessi</a></li>
-       #{/if}
-       #{if ip.viewCompetence }
-       <li><a href="@{Competences.showCompetences(session.get("yearSelected"),
-         session.get("monthSelected"), session.get("officeSelected"))}">Competenze</a></li>
-       #{/if}
-       #{if ip.viewPersonDay }
-       <li><a href="@{MealTickets.recapMealTickets(session.get("yearSelected"),
-         session.get("monthSelected"), session.get("officeSelected") )}">Buoni Pasto</a></li>
-       <li><a href="@{PersonMonths.visualizePeopleTrainingHours(session.get("yearSelected"),
-         session.get("monthSelected"), session.get("officeSelected") )}">Ore di formazione</a></li>
-       #{/if}
-       #{if ip.viewPersonDay || ip.viewCompetence}
-       <li class="divider"></li>
-       #{/if}
+
+       #{secure.li @Stampings.personStamping(session.get("personSelected"),session.get("yearSelected"), session.get("monthSelected")) }
+        <i class="fa fa-clock-o" aria-hidden="true"></i>
+       #{/secure.li}
+
+       #{secure.li @Absences.showGeneralMonthlyAbsences(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected")) }
+        <i class="fa fa-user-times" aria-hidden="true"></i>
+       #{/secure.li}
+
+       #{secure.li @VacationsAdmin.list(session.get("yearSelected"), session.get("officeSelected")) }
+        <i class="fa fa-plane" aria-hidden="true"></i>
+       #{/secure.li}
+
+       #{secure.li @Competences.showCompetences(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected")) }
+        <i class="fa fa-money" aria-hidden="true"></i>
+       #{/secure.li}
+
+       #{secure.li @MealTickets.recapMealTickets(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected")) }
+        <i class="fa fa-cutlery" aria-hidden="true"></i>
+       #{/secure.li}
+
+       #{secure.li @PersonMonths.visualizePeopleTrainingHours(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected")) }
+        <i class="fa fa-graduation-cap" aria-hidden="true"></i>
+       #{/secure.li}
+
+       #{secure.check 'Stampings.missingStamping'}
+        <li class="divider"></li>
+       #{/secure.check}
        
        *{ Controllo Presenze Timbrature Mancanti / Presenza giornaliera / Riepilogo Mensile }*
+
+       #{secure.li @Stampings.missingStamping(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected")) }
+        <i class="fa fa-clock-o" aria-hidden="true"></i>
+       #{/secure.li}
+
+       #{secure.li @Stampings.dailyPresence(session.get("yearSelected"), session.get("monthSelected"), session.get("daySelected"), session.get("officeSelected")) }
+        <i class="fa fa-calendar-check-o" aria-hidden="true"></i>
+       #{/secure.li}
+
+       #{secure.li @MonthRecaps.showRecaps(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected")) }
+        <i class="fa fa-calendar" aria-hidden="true"></i>
+       #{/secure.li}
        
-       #{if ip.viewPersonDay }
-       <li><a href="@{Stampings.missingStamping(session.get("yearSelected"),
-         session.get("monthSelected"), session.get("officeSelected") )}">Timbrature Mancanti</a></li>
-       <li><a href="@{Stampings.dailyPresence(session.get("yearSelected"),
-         session.get("monthSelected"), session.get("daySelected"), session.get("officeSelected") )}">Presenza Giornaliera</a></li>
-       *{
-       <li><a href="@{Stampings.holidaySituation(session.get(" yearSelected"))}">Presenza Festiva Annuale</a></li>
-       }*
-       <li><a href="@{MonthRecaps.showrecaps(session.get("yearSelected"),
-         session.get("monthSelected"), session.get("officeSelected") )}">Riepilogo Mensile</a></li>
-       #{/if}
-       
-       #{if ip.viewPersonDay}
-       <li class="divider"></li>
-       #{/if}
-       
-       *{ Utility Stampa Cartellino / Utility }*
-       <li><a href="@{Charts.checkLastYearAbsences(null,session.get("officeSelected"))}">Controlli ed esportazioni</a></li>
-       
-       
-       #{if ip.viewPersonDay }
-       <li><a href="@{PrintTags.listPersonForPrintTags(session.get("yearSelected"),
-         session.get("monthSelected"))}">Stampa Cartellino</a></li>
-       #{/if}
-       
-       #{if ip.viewPersonDay}
-       <li class="divider"></li>
-       #{/if}
-       
+       #{secure.check 'Charts.checkLastYearAbsences'}
+        <li class="divider"></li>
+       #{/secure.check}
+
+       #{secure.li @Charts.checkLastYearAbsences(null,session.get("officeSelected")) }
+        <i class="fa fa-pie-chart" aria-hidden="true"></i>
+       #{/secure.li}
+
+       #{secure.li @PrintTags.listPersonForPrintTags(session.get("yearSelected"), session.get("monthSelected")) }
+        <i class="fa fa-print" aria-hidden="true"></i>
+       #{/secure.li}
+
+       #{secure.check 'Certifications.certifications'}
+        <li class="divider"></li>
+       #{/secure.check}
+
        *{ Invio Attestati }*
-       
-       #{if ip.uploadSituation }
-       *{ <li><a href="@{UploadSituation.uploadData(session.get("officeSelected"))}">Invio Attestati</a></li> }*
-       <li><a href="@{Certifications.certifications(session.get("officeSelected"))}">Invio Attestati</a></li>
-       #{/if}
+
+       #{secure.li @Certifications.certifications(session.get("officeSelected")) }
+        <i class="fa fa-share-alt" aria-hidden="true"></i>
+       #{/secure.li}
 
       </ul> *{ end items }*
     </li>
