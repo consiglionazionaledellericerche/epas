@@ -1,6 +1,7 @@
 package dao.absences;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -29,6 +30,7 @@ import models.absences.query.QJustifiedType;
 import models.absences.query.QTakableAbsenceBehaviour;
 
 import org.joda.time.LocalDate;
+import org.testng.collections.Lists;
 
 import java.util.List;
 import java.util.Set;
@@ -172,6 +174,36 @@ public class AbsenceComponentDao extends DaoBase {
         .leftJoin(groupAbsenceType.previousGroupChecked).fetch()
         .where(groupAbsenceType.pattern.eq(pattern))
         .list(groupAbsenceType);
+  }
+  
+  public Set<GroupAbsenceType> involvedGroupAbsenceType(AbsenceType absenceType, 
+      boolean filterNotProgrammed) {
+
+    //TODO: da fare la fetch perchè è usato in tabellone timbrature per ogni codice assenza.
+    
+    Set<GroupAbsenceType> groups = Sets.newHashSet();
+    for (TakableAbsenceBehaviour behaviour : absenceType.takableGroup) {
+      groups.addAll(behaviour.groupAbsenceTypes);
+    }
+    for (TakableAbsenceBehaviour behaviour : absenceType.takenGroup) {
+      groups.addAll(behaviour.groupAbsenceTypes);
+    }
+    for (ComplationAbsenceBehaviour behaviour : absenceType.complationGroup) {
+      groups.addAll(behaviour.groupAbsenceTypes);
+    }
+    for (ComplationAbsenceBehaviour behaviour : absenceType.replacingGroup) {
+      groups.addAll(behaviour.groupAbsenceTypes);
+    }
+    if (!filterNotProgrammed) {
+      return groups;
+    }
+    Set<GroupAbsenceType> filteredGroup = Sets.newHashSet();
+    for (GroupAbsenceType groupAbsenceType : groups) {
+      if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.programmed)) {
+        filteredGroup.add(groupAbsenceType);
+      }
+    }
+    return filteredGroup;
   }
   
   public AbsenceType buildOrEditAbsenceType(String code, String description, int minutes, 
