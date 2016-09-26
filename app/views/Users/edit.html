@@ -64,11 +64,11 @@
 					<strong>Nessun ruolo assegnato.</strong>
 				</div>
 			#{/if}
-			#{list user.usersRolesOffices}
+			#{list user.usersRolesOffices, as: 'uro'}
 			<li class="list-group-item clearfix">
-				<strong><em>${_.role}</em></strong> della sede di <strong><em>${_.office}</em></strong>
-				#{secure.check 'Users.removeRole', target: _ }
-        <a href="@{removeRole(_.id)}" class="badge" style="color:white;">
+				<strong><em>${uro.role}</em></strong> della sede di <strong><em>${uro.office}</em></strong>
+				#{secure.check 'Users.removeRole', target: uro }
+        <a href="@{removeRole(uro.id)}" class="badge" style="color:white;">
           &{'crud.delete'} <i class="fa fa-trash" aria-hidden="true"></i>
         </a>
 				#{/secure.check}
