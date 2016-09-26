@@ -244,7 +244,7 @@ public class PersonMonths extends Controller {
    * @param personId           l'id della persona
    * @param personMonthRecapId l'id del personMonthRecap
    */
-  public static void deleteTrainingHours(Long personId, Long personMonthRecapId) {
+  public static void deleteTrainingHours(Long personMonthRecapId) {
         
     PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthRecapId);
     if (pm == null) {
