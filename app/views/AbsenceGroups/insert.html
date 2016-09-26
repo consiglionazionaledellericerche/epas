@@ -90,7 +90,7 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
       
      *{ save request }*
 	 #{form action:@AbsenceGroups.save(), method:'POST', autocomplete:false, class:'form form-horizontal',
-	  'data-async':'#page_content', 'data-async-error':'#absenceData' }
+	  'data-async':'#page_content', 'data-async-error':'#absenceData', 'data-spinner':'#defaultSpinner'}
 	  
 	     #{f.hidden 'personId', value:absenceRequestForm.person.id /}
       
@@ -136,7 +136,7 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
 	
 	  #{form action:action, method:'POST', autocomplete:false,
 	  class:'form form-horizontal', 'data-async':'#page_content',
-	  'data-async-error':'#absenceData'}
+	  'data-async-error':'#absenceData', 'data-spinner':'#defaultSpinner'}
 	  
       #{f.hidden 'personId', value:absenceRequestForm.person.id /}
 	  #{f.hidden 'dateFrom', value:absenceRequestForm.from?.format() /}

@@ -103,8 +103,6 @@ public class AbsenceGroups extends Controller {
         render("@insert", absenceRequestForm, report);
       }
     }
-
-    
     
     for (DayStatus insertDayStatus : report.insertDaysStatus) {
     
