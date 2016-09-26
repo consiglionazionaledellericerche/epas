@@ -4,6 +4,8 @@ import com.google.common.collect.Maps;
 
 import lombok.Getter;
 
+import manager.services.absences.AbsenceMigration.DefaultGroup;
+
 import models.Person;
 import models.absences.AbsenceType;
 import models.absences.CategoryGroupAbsenceType;
@@ -14,6 +16,7 @@ import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
 
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 
 /**
@@ -26,9 +29,41 @@ import java.util.SortedMap;
 
 public class AbsenceRequestForm {
 
+  public static enum AbsenceInsertTab {
+    
+    mission(Lists.newArrayList(DefaultGroup.MISSIONE.name())),
+    vacation(Lists.newArrayList(DefaultGroup.FERIE_CNR.name())),
+    compensatory(Lists.newArrayList(DefaultGroup.RIPOSI_CNR.name())),
+    group(Lists.newArrayList(DefaultGroup.G_661.name(), 
+        DefaultGroup.G_18.name(), DefaultGroup.G_19.name(), 
+        DefaultGroup.G_23.name(), DefaultGroup.G_25.name(), 
+        DefaultGroup.G_89.name(), DefaultGroup.G_09.name())),
+    other(Lists.newArrayList(DefaultGroup.ALTRI.name(), DefaultGroup.G_95.name()));
+    
+    public List<String> groupNames;
+    
+    private AbsenceInsertTab(List<String> groupNames) {
+      this.groupNames = groupNames;
+    }
+    
+    public static AbsenceInsertTab fromGroup(GroupAbsenceType groupAbsenceType) {
+      for (AbsenceInsertTab absenceInsertTab : AbsenceInsertTab.values()) {
+        if (absenceInsertTab.groupNames.contains(groupAbsenceType.name)) {
+          return absenceInsertTab;
+        }
+      }
+      return null;
+    }
+    
+    public boolean newImplementation() {
+      return !this.equals(AbsenceInsertTab.compensatory) && !this.equals(AbsenceInsertTab.vacation);
+    }
+  }
+  
   public Person person;
   public LocalDate from;
   public LocalDate to;
+  public AbsenceInsertTab absenceInsertTab;
 
   public SortedMap<Integer, List<AbsenceRequestCategory>> categoriesWithSamePriority = Maps.newTreeMap();
   // Note: keySet() which returns a set of the keys in ascending order

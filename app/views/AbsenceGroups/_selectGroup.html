@@ -1,3 +1,4 @@
+#{if absenceRequestForm.categoriesWithSamePriority.values().size() > 1 }
    #{form action:@AbsenceGroups.insert(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit', 
     'data-async':'#absenceData', 'data-async-error':'#absenceData'}
      
@@ -22,3 +23,4 @@
      #{/f.selectModel}
    
    #{/form}
+#{/if}   

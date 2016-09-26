@@ -4,12 +4,15 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
 
 <div id="absenceData">
 
-   *{ alcune scorciatorie }*
-   	
-   %{ selectedFormItem = absenceRequestForm.selectedAbsenceGroupFormItem; }%
-   %{ selecteSubItem = selectedFormItem?.selectedSubAbsenceGroupFormItems; }%
-   %{ alldaySelected = selecteSubItem?.selectedJustified?.name.equals(models.absences.JustifiedType.JustifiedTypeName.all_day) }%
-   %{ specifiedMinuteSelected = selecteSubItem?.selectedJustified?.name.equals(models.absences.JustifiedType.JustifiedTypeName.specified_minutes) }%
+ #{absences.insertAbsencesTabs absenceRequestForm:absenceRequestForm /}
+
+ *{ alcune scorciatorie }*
+ %{ selectedFormItem = absenceRequestForm.selectedAbsenceGroupFormItem; }%
+ %{ selecteSubItem = selectedFormItem?.selectedSubAbsenceGroupFormItems; }%
+ %{ alldaySelected = selecteSubItem?.selectedJustified?.name.equals(models.absences.JustifiedType.JustifiedTypeName.all_day) }%
+ %{ specifiedMinuteSelected = selecteSubItem?.selectedJustified?.name.equals(models.absences.JustifiedType.JustifiedTypeName.specified_minutes) }%
+
+ #{if absenceRequestForm.absenceInsertTab.newImplementation() }
 
    #{include './_selectGroup.html' /}
    #{include './_configureSelectedGroup.html' /}
@@ -18,16 +21,10 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
    #{if report.containsProblems()}
     #{alert color:'danger'}
       #{if !report.absenceTroublesMap.keySet().empty}
-        <strong>Errori legati alle assenze</strong><br>
-        #{list items:report.absenceTroubleProblems(), as:'absenceProblem'}
-          <table class="table table-condensed">
-            <tr>
-              <td>${absenceProblem.absence.getAbsenceDate().format()}</td>
-              <td>${absenceProblem.absenceProblem}</td>
-              <td>${absenceProblem.absence.absenceType.code}</td>
-              <td>${absenceProblem.absence.absenceType.description}</td>
-            </tr>
-          </table>  
+        <strong>La richiesta ha riscontrato la presenza di assenze contenenti errori.</strong>
+        #{list items:report.absencesInTrouble(), as:'absence'}
+          <br>${absence.getAbsenceDate().format()}
+          #{absences.absence-popover absence:absence, person:absenceRequestForm.person, groupSelected:selectedFormItem.groupAbsenceType /}
         #{/list}
       #{/if}
       #{if !report.requestProblems.empty}
@@ -93,7 +90,7 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
 	 #{form action:@AbsenceGroups.save(), method:'POST', autocomplete:false, class:'form form-horizontal',
 	  'data-async':'#page_content', 'data-async-error':'#absenceData' }
 	  
-	  #{f.hidden 'personId', value:absenceRequestForm.person.id /}
+	     #{f.hidden 'personId', value:absenceRequestForm.person.id /}
       
          #{f.hidden 'from', value:absenceRequestForm.from?.format() /}
          #{if alldaySelected }
@@ -124,7 +121,52 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
        #{/b.buttons}
 	 #{/form}	  
     
-  
+   #{/if}#{else}
+   
+   *{ old implementations }*
+	  
+	  #{if forceInsert}
+	    #{set action:@Absences.forceInsert() /}
+	  #{/if}
+	  #{else}
+	    #{set action:@Absences.save() /}
+	  #{/else}
+	
+	  #{form action:action, method:'POST', autocomplete:false,
+	  class:'form form-horizontal', 'data-async':'#page_content',
+	  'data-async-error':'#absenceData'}
+	  
+      #{f.hidden 'personId', value:absenceRequestForm.person.id /}
+	  #{f.hidden 'dateFrom', value:absenceRequestForm.from?.format() /}
+      #{f.date 'dateFrom', value:absenceRequestForm.from?.format(), disabled:true /}     
+      #{f.date 'dateTo', value:absenceRequestForm.to?.format() /}
+      #{f.selectModel 'absenceType', items: templateUtility.getAbsenceTypes(absenceRequestForm.absenceInsertTab), required:true /}
+	  
+	  *{ #{f.input 'absenceFile', type:'file' /} }*
+	
+	  #{b.buttons center:true}
+	  #{b.submit 'Inserisci'/}
+	  #{/b.buttons}
+	
+	  #{/form}
+	
+	  #{accordionItem 'nuovaAssenza', parent:'info', title:'Informazioni utili', open:true }
+	  <p>Se si vuole inserire un'assenza per più giorni, inserire nel campo <strong>Fino a</strong>
+	    il giorno fino al quale si vuole inserire tale codice d'assenza.</p>
+	  <p>Di default, in tale campo, viene visualizzato il giorno di partenza per cui si vuole inserire l'assenza</p>
+	  <p class="text-info" style="margin-top: 5px;"><em>N.B. Non e' possibile inserire in uno stesso giorno
+	    due codici di assenza che giustificano tutto il giorno</em></p>
+	  <p>Utilizzando il codice <em>FER</em> il software provvederà ad assegnare ferie e permessi
+	    fin quando disponibili nel seguente ordine di priorità:
+	  <ul>
+	    <li>31 (recupero ferie anno precedente)</li>
+	    <li>94 (permesso)</li>
+	    <li>32 (ferie anno corrente)</li>
+	  </ul>
+	  </p>
+	  #{/accordionItem}
+   
+   #{/else}   
   
    
 </div>

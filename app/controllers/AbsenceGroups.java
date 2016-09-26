@@ -1,5 +1,8 @@
 package controllers;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Verify;
+
 import dao.PersonDao;
 import dao.absences.AbsenceComponentDao;
 
@@ -8,11 +11,12 @@ import manager.PersonDayManager;
 import manager.services.absences.AbsenceMigration;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.AbsenceRequestType;
-import manager.services.absences.AbsencesReport;
-import manager.services.absences.DayStatus;
-import manager.services.absences.TakenAbsence;
 import manager.services.absences.model.AbsenceEngine;
+import manager.services.absences.model.AbsencesReport;
+import manager.services.absences.model.DayStatus;
+import manager.services.absences.model.TakenAbsence;
 import manager.services.absences.web.AbsenceRequestForm;
+import manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab;
 import manager.services.absences.web.AbsenceRequestForm.SubAbsenceGroupFormItem;
 
 import models.Person;
@@ -66,65 +70,7 @@ public class AbsenceGroups extends Controller {
     
   }
   
-  public static void insert(Long personId, LocalDate from, LocalDate to, 
-      GroupAbsenceType groupAbsenceType) {
-    
-    Person person = personDao.getPersonById(personId);
-    notFoundIfNull(person);
-    notFoundIfNull(from);
-   
-    //Fix entity not null
-    if (!groupAbsenceType.isPersistent()) {
-      groupAbsenceType = GroupAbsenceType.find("byName", "MISSIONE").first();
-    } 
-      
-        
-    AbsenceRequestForm absenceRequestForm = absenceService
-        .buildInsertForm(person, from, to, groupAbsenceType);
-    
-    AbsencesReport report = null;
-    if (absenceRequestForm.selectedAbsenceGroupFormItem != null) {
-      SubAbsenceGroupFormItem selected = absenceRequestForm
-          .selectedAbsenceGroupFormItem.selectedSubAbsenceGroupFormItems;
-      
-      report = absenceService.insert(person, groupAbsenceType, from, to, 
-          AbsenceRequestType.insert, selected.absenceType, 
-          selected.selectedJustified, selected.getHours(), selected.getMinutes());  
-    }
-    
-    render(absenceRequestForm, report);
-  }
   
-  public static void configureInsert(Long personId, LocalDate from, LocalDate to, 
-      GroupAbsenceType groupAbsenceType, AbsenceType absenceType, 
-      JustifiedType justifiedType, Integer hours, Integer minutes) {
-  
-    Person person = personDao.getPersonById(personId);
-    notFoundIfNull(person);
-    notFoundIfNull(from);
-    notFoundIfNull(groupAbsenceType);
-    notFoundIfNull(justifiedType);
-    
-    if (!absenceType.isPersistent()) {
-      absenceType = null;
-    }
-    
-    AbsenceRequestForm absenceRequestForm = absenceService.configureInsertForm(person, from, to,
-        groupAbsenceType, absenceType, justifiedType, hours, minutes);
-    
-    AbsencesReport report = null;
-    if (absenceRequestForm.selectedAbsenceGroupFormItem != null) {
-      SubAbsenceGroupFormItem selected = absenceRequestForm
-          .selectedAbsenceGroupFormItem.selectedSubAbsenceGroupFormItems;
-    
-      
-      report = absenceService.insert(person, groupAbsenceType, from, to, 
-          AbsenceRequestType.insert, selected.absenceType, 
-          selected.selectedJustified, selected.getHours(), selected.getMinutes());  
-    }
-    
-    render("@insert", absenceRequestForm, report);
-  }
   
   
   public static void save(Long personId, LocalDate from, LocalDate to, 
@@ -293,6 +239,91 @@ public class AbsenceGroups extends Controller {
     }
     return initializables;
     
+  }
+  
+  public static void switchAbsenceInsertTab(Long personId, LocalDate from, AbsenceInsertTab absenceInsertTab) {
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    notFoundIfNull(from);
+    
+    if (absenceInsertTab == null) {
+      absenceInsertTab = absenceInsertTab.mission;
+    }
+    
+    Optional<GroupAbsenceType> groupAbsenceType = absenceComponentDao
+        .groupAbsenceTypeByName(absenceInsertTab.groupNames.get(0));
+    Verify.verify(groupAbsenceType.isPresent());
+    
+    AbsenceRequestForm absenceRequestForm = absenceService
+        .buildInsertForm(person, from, null, groupAbsenceType.get());
+    
+    AbsencesReport report = null;
+    if (absenceRequestForm.selectedAbsenceGroupFormItem != null) {
+      SubAbsenceGroupFormItem selected = absenceRequestForm
+          .selectedAbsenceGroupFormItem.selectedSubAbsenceGroupFormItems;
+      
+      report = absenceService.insert(person, groupAbsenceType.get(), from, null, 
+          AbsenceRequestType.insert, selected.absenceType, 
+          selected.selectedJustified, selected.getHours(), selected.getMinutes());  
+    }
+    
+    render("@insert", absenceRequestForm, report);
+    
+  }
+  
+  public static void insert(Long personId, LocalDate from, LocalDate to, 
+      GroupAbsenceType groupAbsenceType) {
+    
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    notFoundIfNull(from);
+    notFoundIfNull(groupAbsenceType);
+    
+    AbsenceRequestForm absenceRequestForm = absenceService
+        .buildInsertForm(person, from, to, groupAbsenceType);
+    
+    AbsencesReport report = null;
+    if (absenceRequestForm.selectedAbsenceGroupFormItem != null) {
+      SubAbsenceGroupFormItem selected = absenceRequestForm
+          .selectedAbsenceGroupFormItem.selectedSubAbsenceGroupFormItems;
+      
+      report = absenceService.insert(person, groupAbsenceType, from, to, 
+          AbsenceRequestType.insert, selected.absenceType, 
+          selected.selectedJustified, selected.getHours(), selected.getMinutes());  
+    }
+    
+    render(absenceRequestForm, report);
+  }
+  
+  public static void configureInsert(Long personId, LocalDate from, LocalDate to, 
+      GroupAbsenceType groupAbsenceType, AbsenceType absenceType, 
+      JustifiedType justifiedType, Integer hours, Integer minutes) {
+  
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    notFoundIfNull(from);
+    notFoundIfNull(groupAbsenceType);
+    notFoundIfNull(justifiedType);
+    
+    if (!absenceType.isPersistent()) {
+      absenceType = null;
+    }
+    
+    AbsenceRequestForm absenceRequestForm = absenceService.configureInsertForm(person, from, to,
+        groupAbsenceType, absenceType, justifiedType, hours, minutes);
+    
+    AbsencesReport report = null;
+    if (absenceRequestForm.selectedAbsenceGroupFormItem != null) {
+      SubAbsenceGroupFormItem selected = absenceRequestForm
+          .selectedAbsenceGroupFormItem.selectedSubAbsenceGroupFormItems;
+    
+      
+      report = absenceService.insert(person, groupAbsenceType, from, to, 
+          AbsenceRequestType.insert, selected.absenceType, 
+          selected.selectedJustified, selected.getHours(), selected.getMinutes());  
+    }
+    
+    render("@insert", absenceRequestForm, report);
   }
   
 }

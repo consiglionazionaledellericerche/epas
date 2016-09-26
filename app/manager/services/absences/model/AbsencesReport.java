@@ -1,4 +1,4 @@
-package manager.services.absences;
+package manager.services.absences.model;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
@@ -32,9 +32,6 @@ public class AbsencesReport {
   // Esiti degli inserimenti
   public List<DayStatus> insertDaysStatus = Lists.newArrayList();
   
-  public List<Absence> requestInserts = Lists.newArrayList();
-
-  
   /**
    * Errori non dipendenti dall'user (tipi assenza, implementazione, form di richiesta).
    * @return
@@ -67,12 +64,8 @@ public class AbsencesReport {
     return false;
   }
    
-  public List<AbsenceTrouble> absenceTroubleProblems() {
-    List<AbsenceTrouble> absenceTroubleProblems = Lists.newArrayList();
-    for (List<AbsenceTrouble> absenceTroubleList : this.absenceTroublesMap.values()) {
-      absenceTroubleProblems.addAll(absenceTroubleList);
-    }
-    return absenceTroubleProblems;
+  public List<Absence> absencesInTrouble() {
+    return Lists.newArrayList(absenceTroublesMap.keySet());
   }
 
   /**

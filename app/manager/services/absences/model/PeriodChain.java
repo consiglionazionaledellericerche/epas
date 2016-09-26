@@ -17,6 +17,8 @@ import java.util.SortedMap;
 
 public class PeriodChain {
   
+  public final AbsenceEngine absenceEngine;
+  
   public List<AbsencePeriod> periods = Lists.newArrayList();        
   
   //Tutte le assenze dei tipi coinvolti nel gruppo nel periodo
@@ -30,6 +32,10 @@ public class PeriodChain {
   public LocalDate to = null;                                       //to reset nextDate
   public boolean success = false;                                   //to reset nextDate
 
+  public PeriodChain(AbsenceEngine absenceEngine) {
+    this.absenceEngine = absenceEngine;
+  }
+  
   public String getChainDescription() {
     if (periods.get(0).groupAbsenceType.chainDescription != null) {
       return periods.get(0).groupAbsenceType.chainDescription;
@@ -70,7 +76,7 @@ public class PeriodChain {
    * precedente).
    * @return
    */
-  public void fetchPeriodChainAbsencesAsc(AbsenceEngine absenceEngine) {
+  public void fetchPeriodChainAbsencesAsc() {
     
     //TODO: quando avremo il mantenimento dei period riattivare 
     //la funzionalità lazy
@@ -86,9 +92,10 @@ public class PeriodChain {
       return;
     }
 
-    //Le assenze precedenti e quelle precedentemente inserite
+    //Le assenze preesistenti 
     List<Absence> periodAbsences = absenceEngine.absenceComponentDao.orderedAbsences(
         absenceEngine.person, this.from, this.to, Lists.newArrayList(absenceTypes));
+    // e quelle precedentemente inserite
     if (absenceEngine.request != null) {
       periodAbsences.addAll(absenceEngine.request.requestInserts);
     }
@@ -121,41 +128,4 @@ public class PeriodChain {
     return;
 
   }
-  
-  /**
-   * Le assenze della catena in caso di scan. Vengono processate una sola volta, 
-   * la dimensione è statica ma si devono usare quelle già caricate per potervi
-   * memorizzare l'effettuato scan, ed eventualmente inserire quelleappartenenti al period 
-   * precedente a scanFrom.
-   * @return
-   */
-  public List<Absence> getScanPeriodChainAbsencesAsc(AbsenceEngine absenceEngine) {
-
-    this.absencesAsc = Lists.newArrayList();
-
-    Set<AbsenceType> absenceTypes = periodChainInvolvedCodes();
-    if (absenceTypes.isEmpty()) {
-      return this.absencesAsc;
-    }
-
-    //le assenze del periodo precedenti allo scan le scarico 
-    List<Absence> previousAbsences = Lists.newArrayList();
-    if (this.from == null || this.from.isBefore(absenceEngine.scan.scanFrom)) {
-      previousAbsences = absenceEngine.absenceComponentDao.orderedAbsences(absenceEngine.person, 
-          this.from, absenceEngine.scan.scanFrom.minusDays(1), Lists.newArrayList(absenceTypes));
-      for (Absence absence : previousAbsences) {
-        this.absencesAsc.add(absence);
-      }
-    }
-
-    //le assenze del periodo appartenenti allo scan le recupero
-    for (Absence absence: absenceEngine.scan.scanAbsences) {
-      if (absenceTypes.contains(absence.getAbsenceType())) {
-        this.absencesAsc.add(absence);
-      }
-    }
-    
-    return this.absencesAsc;
-  }
-  
 }

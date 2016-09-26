@@ -9,6 +9,7 @@ import dao.absences.AbsenceComponentDao;
 
 import manager.services.absences.AbsenceEngineUtility;
 import manager.services.absences.web.AbsenceRequestForm.AbsenceGroupFormItem;
+import manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab;
 import manager.services.absences.web.AbsenceRequestForm.AbsenceRequestCategory;
 import manager.services.absences.web.AbsenceRequestForm.SubAbsenceGroupFormItem;
 
@@ -50,8 +51,9 @@ public class AbsenceRequestFormFactory {
    * @param selectedSpecifiedMinutes
    */
   public AbsenceRequestForm buildAbsenceRequestForm(Person person, LocalDate from, LocalDate to, 
-      GroupAbsenceType selectedGroupAbsenceType, AbsenceType selectedAbsenceType, 
-      JustifiedType selectedJustifiedType, Integer selectedSpecifiedMinutes) {   
+      GroupAbsenceType selectedGroupAbsenceType, 
+      AbsenceType selectedAbsenceType, JustifiedType selectedJustifiedType, 
+      Integer selectedSpecifiedMinutes) {   
 
     AbsenceRequestForm absenceRequestForm = new AbsenceRequestForm();
     absenceRequestForm.person = person;      
@@ -61,10 +63,11 @@ public class AbsenceRequestFormFactory {
     } else {
       absenceRequestForm.to = from;
     }
+    absenceRequestForm.absenceInsertTab = AbsenceInsertTab.fromGroup(selectedGroupAbsenceType);
     
     //TODO: filtrare i gruppi sulla base della persona e della sede.
-    List<GroupAbsenceType> allAbsenceTypeGroupPersonEnabled = 
-        absenceComponentDao.allGroupAbsenceType();
+    List<GroupAbsenceType> allAbsenceTypeGroupPersonEnabled = absenceComponentDao
+        .groupsAbsenceTypeByName(absenceRequestForm.absenceInsertTab.groupNames);
     
     for (GroupAbsenceType groupAbsenceType : allAbsenceTypeGroupPersonEnabled) {
 
@@ -171,7 +174,12 @@ public class AbsenceRequestFormFactory {
           } else {
             automaticSubFormItem.selectedJustified = automaticJustifiedTypes.iterator().next();
           }
-          automaticSubFormItem.specifiedMinutes = selectedSpecifiedMinutes;
+          if (selectedSpecifiedMinutes != null && selectedSpecifiedMinutes != 0) {
+            automaticSubFormItem.specifiedMinutes = selectedSpecifiedMinutes;
+          } else {
+            automaticSubFormItem.specifiedMinutes = 60;
+          }
+          
 
           absenceGroupFormItem.subAbsenceGroupFormItems.add(automaticSubFormItem);
           absenceGroupFormItem.containsAutomatic = true;

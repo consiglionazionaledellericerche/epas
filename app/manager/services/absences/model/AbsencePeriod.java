@@ -1,13 +1,13 @@
 package manager.services.absences.model;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import it.cnr.iit.epas.DateInterval;
 
-import manager.services.absences.DayStatus;
-import manager.services.absences.TakenAbsence;
+import manager.services.absences.AbsenceEngineUtility;
 
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -18,15 +18,15 @@ import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 import org.joda.time.LocalDate;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
 public class AbsencePeriod {
 
+  public PeriodChain periodChain;
   public GroupAbsenceType groupAbsenceType;
-
+  
   //
   // Period
   //
@@ -36,7 +36,8 @@ public class AbsencePeriod {
   
   public SortedMap<LocalDate, DayStatus> daysStatus = Maps.newTreeMap();
 
-  public AbsencePeriod(GroupAbsenceType groupAbsenceType) {
+  public AbsencePeriod(PeriodChain periodChain, GroupAbsenceType groupAbsenceType) {
+    this.periodChain = periodChain;
     this.groupAbsenceType = groupAbsenceType;
   }
 
@@ -153,6 +154,63 @@ public class AbsencePeriod {
   
   public boolean isComplation() {
     return complationAmountType != null; 
+  }
+  
+  public void computeReplacingStatusInPeriod() {
+
+    if (periodChain.absenceEngine.report.containsCriticalProblems()) {
+      return;
+    }
+    if (!this.isComplation()) {
+      return;
+    }
+
+    //preparo i giorni con i replacing effettivi (
+    for (Absence replacingAbsence : this.replacingAbsencesByDay.values()) {
+      DayStatus dayStatus = this.getDayStatus(replacingAbsence.getAbsenceDate());
+      if (this.isAbsenceCompromisedReplacing(replacingAbsence)) {
+        dayStatus.setCompromisedReplacing(replacingAbsence);
+      } else {
+        dayStatus.setExistentReplacing(replacingAbsence);
+      }
+    }
+
+    //Le assenze di completamento ordinate per data. Genero i replacing ipotetici
+    int complationAmount = 0;
+    for (Absence complationAbsence : this.complationAbsencesByDay.values()) {
+
+      DayStatus dayStatus = this.getDayStatus(complationAbsence.getAbsenceDate());
+      if (this.isAbsenceCompromisedReplacing(complationAbsence)) {
+        dayStatus.setCompromisedComplation(complationAbsence);
+        continue;
+      }
+
+      AbsenceEngineUtility absenceEngineUtility = periodChain.absenceEngine.absenceEngineUtility; 
+      
+      int amount = absenceEngineUtility.absenceJustifiedAmount(periodChain.absenceEngine, 
+          complationAbsence, this.complationAmountType);
+      complationAmount = complationAmount + amount;
+
+      dayStatus.setAmountTypeComplation(this.complationAmountType);
+      dayStatus.setComplationAbsence(complationAbsence);
+      dayStatus.setResidualBeforeComplation(complationAmount - amount);
+      dayStatus.setConsumedComplation(amount);
+
+      Optional<AbsenceType> replacingCode = absenceEngineUtility
+          .whichReplacingCode(periodChain.absenceEngine, this, 
+              complationAbsence.getAbsenceDate(), complationAmount);
+
+      if (replacingCode.isPresent()) {
+
+        dayStatus.setCorrectReplacing(replacingCode.get());
+        complationAmount -= this.replacingTimes.get(replacingCode.get());
+      }
+
+      dayStatus.setResidualAfterComplation(complationAmount);
+    }
+    this.complationConsumedAmount = complationAmount;
+
+    return;
   }
   
   public void addComplationSameDay(Absence absence) {

@@ -1,4 +1,4 @@
-package manager.services.absences;
+package manager.services.absences.model;
 
 import lombok.AccessLevel;
 import lombok.Builder;

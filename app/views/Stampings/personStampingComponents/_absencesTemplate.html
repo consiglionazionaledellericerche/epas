@@ -1,5 +1,5 @@
 <td class="assenza default-single">
-  #{secure.link @AbsenceGroups.insert(dayRecap.personDay.person.id, dayRecap.personDay.date?.format()),
+  #{secure.link @AbsenceGroups.switchAbsenceInsertTab(dayRecap.personDay.person.id, dayRecap.personDay.date?.format()),
       target:person, display:'hidden', 'data-async-modal':'#modalGroupAbsence'}
       ___
   #{/secure.link}

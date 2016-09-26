@@ -4,9 +4,15 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
+import dao.PersonChildrenDao;
+import dao.absences.AbsenceComponentDao;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.services.absences.model.AbsenceEngine;
+import manager.services.absences.model.AbsencesReport;
+import manager.services.absences.model.DayStatus;
+import manager.services.absences.model.TakenAbsence;
 import manager.services.absences.web.AbsenceRequestForm;
 import manager.services.absences.web.AbsenceRequestFormFactory;
 
@@ -18,6 +24,8 @@ import models.absences.JustifiedType;
 
 import org.joda.time.LocalDate;
 
+import java.util.List;
+
 /**
  * Interfaccia epas per il componente assenze.
  * le richieste via form.
@@ -28,16 +36,19 @@ import org.joda.time.LocalDate;
 public class AbsenceService {
 
   private final AbsenceRequestFormFactory absenceRequestFormFactory;
-  private final AbsenceEngineCore absenceEngineCore;
   private final AbsenceEngineUtility absenceEngineUtility;
+  private final AbsenceComponentDao absenceComponentDao;
+  private final PersonChildrenDao personChildrenDao;
   
   @Inject
   public AbsenceService(AbsenceRequestFormFactory absenceRequestFormFactory, 
-      AbsenceEngineCore absenceEngineCore,
-      AbsenceEngineUtility absenceEngineUtility) {
+      AbsenceEngineUtility absenceEngineUtility,
+      AbsenceComponentDao absenceComponentDao,
+      PersonChildrenDao personChildrenDao) {
     this.absenceRequestFormFactory = absenceRequestFormFactory;
-    this.absenceEngineCore = absenceEngineCore;
     this.absenceEngineUtility = absenceEngineUtility;
+    this.absenceComponentDao = absenceComponentDao;
+    this.personChildrenDao = personChildrenDao;
   }
   
   /**
@@ -100,7 +111,7 @@ public class AbsenceService {
 
     Preconditions.checkArgument(absenceTypeRequest.equals(absenceTypeRequest.insert));
     
-    AbsenceEngine absenceEngine = absenceEngineCore
+    AbsenceEngine absenceEngine = absenceEngineUtility
         .buildInsertAbsenceEngine(person, groupAbsenceType, from, to);
     if (absenceEngine.report.containsProblems()) {
       return absenceEngine.report;
@@ -121,8 +132,8 @@ public class AbsenceService {
       boolean absenceTypeToInfer = absenceType == null;
 
       //Esecuzione
-      absenceEngineCore.absenceInsertRequest(absenceEngine, AbsenceRequestType.insert, absence, 
-          justifiedType, absenceTypeToInfer);  
+      absenceEngine.request.doInsertRequest(absenceEngine, AbsenceRequestType.insert, 
+          absence, justifiedType, absenceTypeToInfer);  
       
       //Errori
       if (absenceEngine.report.containsProblems()) {
@@ -130,7 +141,7 @@ public class AbsenceService {
       }
      
       //Configura la prossima data
-      absenceEngineCore.configureNext(absenceEngine);
+      absenceEngine.request.configureNextInsert();
     }
     
     return absenceEngine.report;
@@ -197,26 +208,47 @@ public class AbsenceService {
     log.debug("");
     log.debug("");
     log.debug("Lanciata procedura scan assenze person={}, from={}", person.fullName(), from);
+
+    //OTTIMIZZAZIONI//
+
+    //fetch all absenceType
+    absenceComponentDao.fetchAbsenceTypes();
+
+    //fetch all groupAbsenceType
+    //List<GroupAbsenceType> absenceGroupTypes = absenceComponentDao.allGroupAbsenceType();
+    absenceComponentDao.allGroupAbsenceType();
+
+    //COSTRUZIONE//
+    List<Absence> absencesToScan = absenceComponentDao.orderedAbsences(person, from, 
+        null, Lists.newArrayList());
     
-    AbsenceEngine absenceEngine = absenceEngineCore.scannerAbsenceEngine(person, from);
+    AbsenceEngine absenceEngine = absenceEngineUtility.buildScanAbsenceEngine(absenceComponentDao, 
+        personChildrenDao, absenceEngineUtility, person, from, absencesToScan);
+
+    // scan dei gruppi
+    absenceEngine.scan.scan();
+
+    //persistenza degli errori riscontrati
+    absenceEngine.scan.persistScannerTroubles(absenceEngine);
     
+
     log.debug("");
     log.debug("");
     log.debug("");
     log.debug("");
-    
+
     return absenceEngine;
-    
+
   }
-  
+
   public AbsenceEngine residual(Person person, GroupAbsenceType groupAbsenceType, LocalDate date) {
-    
+
     if (date == null) {
       date = LocalDate.now();
     }
-    
-    AbsenceEngine absenceEngine = absenceEngineCore
-        .residualAbsenceEngine(person, groupAbsenceType, date);
+
+    AbsenceEngine absenceEngine = absenceEngineUtility.buildResidualAbsenceEngine(person, groupAbsenceType, date);
+
     return absenceEngine;
   }
   

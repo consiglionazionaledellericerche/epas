@@ -51,7 +51,7 @@ $(function($) {
 			contentType: contentType
 		}).done(function(data, status) {
 			$target.replaceWith($(target, data));
-			$target.initepas();
+			$('body').initepas();
 		}).fail(function(xhr, status, error) {
 			if (xhr.status == 400) {
 				var $res = $(errorTarget, xhr.responseText);
