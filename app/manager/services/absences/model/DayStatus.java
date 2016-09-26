@@ -70,6 +70,20 @@ public class DayStatus {
   public boolean tooEarlyReplacing() {
     return correctReplacing == null && existentReplacing != null;
   }
+  
+  public List<Absence> absencesNotPersisted() {
+    List<Absence> absences = Lists.newArrayList();
+    for (TakenAbsence takenAbsence : this.takenAbsences) {
+      if (!takenAbsence.absence.isPersistent()) {
+        absences.add(takenAbsence.absence);
+      }
+    }
+    if (this.existentReplacing != null && !this.existentReplacing.isPersistent()) {
+      absences.add(this.existentReplacing);
+    }
+    return absences;
+    
+  }
 
   public List<RowRecap> buildDayRows() {
     
@@ -78,6 +92,9 @@ public class DayStatus {
     }
     if (this.replacingSameDay == null) {
       this.replacingSameDay = Sets.newHashSet();
+    }
+    if (this.takenAbsences == null) {
+      this.takenAbsences = Lists.newArrayList();
     }
     
     List<RowRecap> rowsRecap = Lists.newArrayList();

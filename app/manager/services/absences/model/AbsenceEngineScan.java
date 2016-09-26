@@ -72,7 +72,7 @@ public class AbsenceEngineScan {
       List<AbsenceTrouble> toAddTroubles = Lists.newArrayList();        //problemi da rimuovere
 
       List<AbsenceTrouble> remainingTroubles = 
-          absenceEngine.report.absenceTroublesMap.get(absence);
+          absenceEngine.report.absencesRemainingTroubles.get(absence);
       if (remainingTroubles == null) {
         remainingTroubles = Lists.newArrayList();
       }

@@ -19,6 +19,7 @@ import models.absences.CategoryGroupAbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.JustifiedType;
+import models.absences.JustifiedType.JustifiedTypeName;
 
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
@@ -65,6 +66,7 @@ public class AbsenceRequestFormFactory {
     }
     absenceRequestForm.absenceInsertTab = AbsenceInsertTab.fromGroup(selectedGroupAbsenceType);
     
+    
     //TODO: filtrare i gruppi sulla base della persona e della sede.
     List<GroupAbsenceType> allAbsenceTypeGroupPersonEnabled = absenceComponentDao
         .groupsAbsenceTypeByName(absenceRequestForm.absenceInsertTab.groupNames);
@@ -79,8 +81,15 @@ public class AbsenceRequestFormFactory {
       AbsenceGroupFormItem absenceGroupFormItem = buildAbsenceGroupItemForm(groupAbsenceType, 
           selectedGroupAbsenceType, selectedAbsenceType, selectedJustifiedType, 
           selectedSpecifiedMinutes);
-      if (absenceGroupFormItem.selected) {
+      if (absenceGroupFormItem.selected) { 
         absenceRequestForm.selectedAbsenceGroupFormItem = absenceGroupFormItem;
+        if (!absenceGroupFormItem.selectedSubAbsenceGroupFormItems.selectedJustified.name
+            .equals(JustifiedTypeName.all_day) 
+            && !absenceGroupFormItem.selectedSubAbsenceGroupFormItems.selectedJustified.name
+            .equals(JustifiedTypeName.assign_all_day)) {
+          // FIXME: fare un metodo e richiamarlo anche nella view (cercare %{ alldaySelected =)
+          absenceRequestForm.to = null;
+        }
       }
       addFormItemInCategory(absenceRequestForm, absenceGroupFormItem);
     }
@@ -209,6 +218,9 @@ public class AbsenceRequestFormFactory {
         }
         if (currentGroupAbsenceType.complationAbsenceBehaviour != null) {
           for (AbsenceType complation : currentGroupAbsenceType.complationAbsenceBehaviour.complationCodes) {
+            typeConsidered.put(complation.code, complation);
+          }
+          for (AbsenceType complation : currentGroupAbsenceType.complationAbsenceBehaviour.replacingCodes) {
             typeConsidered.put(complation.code, complation);
           }
         }

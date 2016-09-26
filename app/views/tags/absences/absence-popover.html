@@ -1,21 +1,40 @@
 *{
   absence l'assenza da visionare
-  id (optional) per specificare un id custom (default absence.id)
-  
   groupSelected Se voglio stampare la situazione relativa ad un gruppo. In quel caso oltre al popover stampo
                 la lable. Se null siamo nel tabellone timbrature.
+  remainingTroubles: copia runtime degli errori calcolati
 }*
+
+ %{
+   if (_absence.id == null) {
+     id = _absence.absenceDate.year + _absence.absenceDate.monthOfYear + _absence.absenceType.id; 
+   } else {
+     id = _absence.id;
+   }
+ 
+ }%
+ 
  
  #{if _groupSelected}
+   *{
    <span class="label
    #{if templateUtility.isTakableOnly(_absence.absenceType, _groupSelected)} label-warning #{/if}
    #{elseif templateUtility.isReplacingCode(_absence.absenceType, _groupSelected)} label-default  #{/elseif}
    #{elseif templateUtility.isComplationCode(_absence.absenceType, _groupSelected)} label-success #{/elseif}
    #{else} label-info #{/else} 
-   " webui-popover-hover data-url="#${_absence.id}">${_absence.absenceType.code}</span>
+   " webui-popover-hover data-url="#${id}">${_absence.absenceType.code}</span>
+   }*
+   <span class="
+   #{if templateUtility.isTakableOnly(_absence.absenceType, _groupSelected)} text-warning #{/if}
+   #{elseif templateUtility.isReplacingCode(_absence.absenceType, _groupSelected)} text-default  #{/elseif}
+   #{elseif templateUtility.isComplationCode(_absence.absenceType, _groupSelected)} text-success #{/elseif}
+   #{else} text-info #{/else} 
+   " webui-popover-hover data-url="#${id}"><strong>${_absence.absenceType.code}</strong></span>   
+    
+   
  #{/if}
  
- <div class="webui-popover-content" id="#{if _id}${_if}#{/if}#{else}${_absence.id}#{/else}">
+ <div class="webui-popover-content" id="${id}">
     <strong>Data</strong> ${_absence.absenceDate.format()}<br>
     <strong>Codice</strong> ${_absence.absenceType.code}<br>
     <strong>Descrizione</strong> ${_absence.absenceType.description}
@@ -39,12 +58,19 @@
     </p>  
     #{/if}
     
-    #{if !_absence.troubles.empty}
-         <br><br>  
+    #{if _remainingTroubles }
+         #{list items:_remainingTroubles, as:'trouble'}
+           <strong class="text-danger">&{trouble.trouble}</strong><br>
+         #{/list}
+    #{/if}
+    #{elseif !_absence.troubles.empty}
          #{list items:_absence.troubles, as:'trouble'}
            <strong class="text-danger">&{trouble.trouble}</strong><br>
          #{/list}
-     #{/if}
+     #{/elseif}
+     #{else}
+       <br>Non ci sono errori.
+     #{/else}
   </div>
 
    

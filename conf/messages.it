@@ -26,9 +26,11 @@ justifiedType=Tempo giustificato
 insert=Inserimento
 insertReplacing = Inserimento Rimpiazzamento
 
-absence_type_minutes=Tempo Specificato nel Tipo Assenza
-all_day=Tutto Il Giorno
-specified_minutes=Specifica Ore e Minuti
+absence_type_minutes=Tempo specificato nel tipo assenza
+all_day=Tutto il giorno
+assign_all_day=Assegna l'intera giornata lavorativa
+specified_minutes=Specificare ore e minuti
+
 nothing=Niente
 minutes=Minuti
 hours=Ore
