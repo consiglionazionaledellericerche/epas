@@ -439,19 +439,30 @@ validation.url=Non è un URL valido
 # Actions
 ########################
 
+Absences.absences= Assenze Mensili
+Absences.absencesPerPerson= Assenze Annuali
+Absences.absencesVisibleForEmployee= Presenze Giornaliere
 Absences.showGeneralMonthlyAbsences= Assenze
 Certifications.certifications= Invio Attestati
 Charts.checkLastYearAbsences= Controlli ed Esportazioni
+Competences.competences= Competenze
 Competences.showCompetences= Competenze
+MealTickets.mealTickets= Riepilogo Buoni Pasto
 MealTickets.recapMealTickets= Buoni Pasto
 MonthRecaps.showRecaps= Riepilogo Mensile
+PersonMonths.hourRecap= Riepilogo Orario
+PersonMonths.trainingHours= Ore di Formazione
 PersonMonths.visualizePeopleTrainingHours= Ore di Formazione
+Persons.changePassword= Cambio Password
 Persons.list= Lista Persone
+PrintTags.showTag= Stampa Cartellino Presenze
 PrintTags.listPersonForPrintTags= Stampa Cartellino
 Stampings.dailyPresence= Presenza Giornaliera
 Stampings.missingStamping= Timbrature Mancanti
 Stampings.personStamping= Timbrature
+Stampings.stampings= Situazione Mensile
 VacationsAdmin.list= Ferie e Permessi
+Vacations.show= Ferie
 
 ########################
 # Enumerati
