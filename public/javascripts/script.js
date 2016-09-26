@@ -28,6 +28,11 @@ $(function($) {
 	 * TODO: implementare async-error
 	 */
 	$(document.body).on('click', 'a[data-async]', function(e) {
+		var $body = $('body');
+		var $flashDiv = $body.find('#flashDiv');
+		if ($flashDiv) {
+		  $flashDiv.remove();
+		}
 		var $a = $(this);
 		var target = $a.data('async');
 		var $target = $(target);
@@ -133,15 +138,20 @@ $(function($) {
   });
   
   PNotify.prototype.options.styling = "fontawesome";
-  
+
   /**
    * Author: Marco
    */
   $(document.body).on('click', 'a[data-async-modal]', function(e) {
-    var $this = $(this);
+	var $body = $('body');
+	var $flashDiv = $body.find('#flashDiv');
+	if ($flashDiv) {
+	  $flashDiv.remove();
+	}
+	var $this = $(this);
     var $modal = $($this.data('async-modal'));
     var url = $this.attr('href');
-    $('body').modalmanager('loading');
+    $body.modalmanager('loading');
     $modal.load(url, '', function() {
       $modal.modal().initepas();
     });
