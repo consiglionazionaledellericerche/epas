@@ -79,6 +79,7 @@ configuration.entry.value= Valore parametro
 configurations= Configurazione
 configurations.entries= Parametri di Configurazione Play
 
+confirmPassword= Conferma Password
 
 contract.beginDate= Inizio Contratto
 contract= Contratto
@@ -265,6 +266,7 @@ orphanUser= Utente Orfano
 
 pagedResults =Sono state trovate <strong>%d</strong> corrispondenze, mostrate dalla %d alla %d.
 passwordSuccessfullyChanged = Password modificata con successo
+password= Password
 
 PDFReport.thAbsences=Assenza
 PDFReport.thAppHour =Num. di ore approvate
@@ -357,7 +359,12 @@ User.systemBlank= Nuovo utente di sistema
 user.person= Persona associata
 users= Utenti
 
+Users.editAccountRoles= Gestione Ruoli di sistema
+Users.addRole= Nuovo Ruolo
+
 usersRolesOffices= Ruolo
+userRoleOffice.role= Ruolo
+userRoleOffice.office= Sede
 
 personUsers=Utenti Persone
 systemUsers=Utenti Di Sistema
@@ -431,6 +438,10 @@ validation.url=Non è un URL valido
 ########################
 # Enumerati
 ########################
+
+AccountRole.DEVELOPER= developer
+AccountRole.ADMIN= Admin
+AccountRole.RO_ADMIN= Admin in sola lettura
 
 AccumulationType.no= No
 AccumulationType.yearly= Annuale
