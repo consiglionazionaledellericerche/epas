@@ -1,4 +1,4 @@
-package manager.services.absences;
+package manager.services.absences.model;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -6,8 +6,6 @@ import com.google.common.collect.Sets;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-
-import manager.services.absences.model.AbsencePeriod;
 
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -21,26 +19,27 @@ import java.util.Set;
 @Builder @Getter @Setter
 public class DayStatus {
   
-  
   private LocalDate date;
   private AbsencePeriod absencePeriod;
-  
-  public List<TakenAbsence> takenAbsences;
-  // L'errore
-  public Absence overtakenLimitAbsence = null;
   
   //Errori gravi
   public Set<Absence> complationSameDay;        //due o più completamenti  
   public Set<Absence> replacingSameDay;         //due o più rimpiazzamenti
   public Absence compromisedComplation;         //sequenza compromessa
   public Absence compromisedReplacing;          //sequenza compromessa
+
+  //Lo stato limiti
+  public List<TakenAbsence> takenAbsences;
+  public Absence overtakenLimitAbsence = null;
   
+  //Lo stato di completamento
   private Absence complationAbsence;
   private AmountType amountTypeComplation;
   private int residualBeforeComplation = 0;
   private int consumedComplation = 0;
   private int residualAfterComplation = 0;
   
+  //Il rimpiazzamento
   private Absence existentReplacing;
   private AbsenceType correctReplacing;
   

@@ -14,6 +14,7 @@ import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
 import dao.PersonShiftDayDao;
 import dao.WorkingTimeTypeDao;
+import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 
 import it.cnr.iit.epas.CheckMessage;
@@ -36,6 +37,8 @@ import models.PersonShiftDay;
 import models.Qualification;
 import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.JustifiedType;
+import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.QualificationMapping;
@@ -78,6 +81,7 @@ public class AbsenceManager {
   private final ConfigurationManager configurationManager;
   private final IWrapperFactory wrapperFactory;
   private final PersonDayManager personDayManager;
+  private final AbsenceComponentDao absenceComponentDao;
 
   /**
    * Costruttore.
@@ -103,6 +107,7 @@ public class AbsenceManager {
       WorkingTimeTypeDao workingTimeTypeDao,
       ContractDao contractDao,
       AbsenceDao absenceDao,
+      AbsenceComponentDao absenceComponentDao,
       PersonReperibilityDayDao personReperibilityDayDao,
       PersonShiftDayDao personShiftDayDao,
       PersonChildrenDao personChildrenDao,
@@ -117,6 +122,7 @@ public class AbsenceManager {
       IWrapperFactory wrapperFactory,
       IVacationsService vacationsService) {
 
+    this.absenceComponentDao = absenceComponentDao;
     this.contractMonthRecapManager = contractMonthRecapManager;
     this.workingTimeTypeDao = workingTimeTypeDao;
     this.personManager = personManager;
@@ -410,8 +416,16 @@ public class AbsenceManager {
 
       Absence absence = new Absence();
       absence.absenceType = absenceType;
-      if (justifiedMinutes.isPresent()) {
+      if (absence.absenceType.justifiedTypesPermitted.size() == 1) {
+        absence.justifiedType = absence.absenceType.justifiedTypesPermitted.iterator().next();
+      }
+      else if (justifiedMinutes.isPresent()) {
         absence.justifiedMinutes = justifiedMinutes.get();
+        absence.justifiedType = absenceComponentDao
+            .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
+      } else {
+        absence.justifiedType = absenceComponentDao
+            .getOrBuildJustifiedType(JustifiedTypeName.all_day);
       }
 
       if (persist) {
