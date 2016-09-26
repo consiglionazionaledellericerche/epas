@@ -63,6 +63,8 @@ public class RequestInit extends Controller {
 
     final User currentUser = user.get();
 
+    renderArgs.put("currentUser", currentUser);
+
     if (currentUser.person != null) {
       renderArgs.put("isPersonInCharge", currentUser.person.isPersonInCharge);
     }
@@ -363,7 +365,8 @@ public class RequestInit extends Controller {
         return;
       }
 
-      if (user.get().roles.contains(AccountRole.ADMIN)) {
+      if (user.get().roles.contains(AccountRole.ADMIN) ||
+          user.get().roles.contains(AccountRole.RO_ADMIN)) {
         this.viewPerson = true;
         this.viewOffice = true;
         this.viewWorkingTimeType = true;
