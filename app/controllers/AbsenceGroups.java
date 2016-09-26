@@ -111,10 +111,9 @@ public class AbsenceGroups extends Controller {
       PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(person, 
           insertDayStatus.getDate());
       
-      for (TakenAbsence takenAbsence : insertDayStatus.takenAbsences) {
-        if (takenAbsence.absenceProblem == null && !takenAbsence.absence.isPersistent() ) {
+      for (Absence absence : insertDayStatus.absencesNotPersisted()) {
+        if (absence.troubles.isEmpty()) {
 
-          Absence absence = takenAbsence.getAbsence();
           personDay.absences.add(absence);
           absence.personDay = personDay;
           absence.save(); 
@@ -122,16 +121,6 @@ public class AbsenceGroups extends Controller {
           JPA.em().flush();
         }
       }
-      if (insertDayStatus.getExistentReplacing() != null 
-          && !insertDayStatus.getExistentReplacing().isPersistent()) {
-        Absence absence = insertDayStatus.getExistentReplacing();
-        personDay.absences.add(absence);
-        absence.personDay = personDay;
-        absence.save(); 
-        personDay.save();
-        JPA.em().flush();
-      }
-        
     }
     
     consistencyManager.updatePersonSituation(person.id, from);
@@ -165,15 +154,15 @@ public class AbsenceGroups extends Controller {
     for (DayStatus insertDayStatus : report.insertDaysStatus) {
       PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(person, 
           insertDayStatus.getDate());
-      
-      if (insertDayStatus.getExistentReplacing() != null 
-          && !insertDayStatus.getExistentReplacing().isPersistent()) {
-        Absence absence = insertDayStatus.getExistentReplacing();
-        personDay.absences.add(absence);
-        absence.personDay = personDay;
-        absence.save(); 
-        personDay.save();
-        JPA.em().flush();
+      for (Absence absence : insertDayStatus.absencesNotPersisted()) {
+        if (absence.troubles.isEmpty()) {
+
+          personDay.absences.add(absence);
+          absence.personDay = personDay;
+          absence.save(); 
+          personDay.save();
+          JPA.em().flush();
+        }
       }
     }
     
@@ -262,7 +251,8 @@ public class AbsenceGroups extends Controller {
       SubAbsenceGroupFormItem selected = absenceRequestForm
           .selectedAbsenceGroupFormItem.selectedSubAbsenceGroupFormItems;
       
-      report = absenceService.insert(person, groupAbsenceType.get(), from, null, 
+      report = absenceService.insert(person, groupAbsenceType.get(), 
+          absenceRequestForm.from, absenceRequestForm.to, 
           AbsenceRequestType.insert, selected.absenceType, 
           selected.selectedJustified, selected.getHours(), selected.getMinutes());  
     }
@@ -287,7 +277,8 @@ public class AbsenceGroups extends Controller {
       SubAbsenceGroupFormItem selected = absenceRequestForm
           .selectedAbsenceGroupFormItem.selectedSubAbsenceGroupFormItems;
       
-      report = absenceService.insert(person, groupAbsenceType, from, to, 
+      report = absenceService.insert(person, groupAbsenceType, 
+          absenceRequestForm.from, absenceRequestForm.to, 
           AbsenceRequestType.insert, selected.absenceType, 
           selected.selectedJustified, selected.getHours(), selected.getMinutes());  
     }
@@ -317,8 +308,8 @@ public class AbsenceGroups extends Controller {
       SubAbsenceGroupFormItem selected = absenceRequestForm
           .selectedAbsenceGroupFormItem.selectedSubAbsenceGroupFormItems;
     
-      
-      report = absenceService.insert(person, groupAbsenceType, from, to, 
+      report = absenceService.insert(person, groupAbsenceType, 
+          absenceRequestForm.from, absenceRequestForm.to, 
           AbsenceRequestType.insert, selected.absenceType, 
           selected.selectedJustified, selected.getHours(), selected.getMinutes());  
     }

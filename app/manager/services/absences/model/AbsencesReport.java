@@ -24,7 +24,7 @@ import java.util.Map;
 public class AbsencesReport {
 
   // List degli errori
-  public Map<Absence, List<AbsenceTrouble>> absenceTroublesMap = Maps.newHashMap();
+  public Map<Absence, List<AbsenceTrouble>> absencesRemainingTroubles = Maps.newHashMap();
   public List<ReportAbsenceTypeProblem> absenceTypeProblems = Lists.newArrayList();
   public List<ReportRequestProblem> requestProblems = Lists.newArrayList();
   public List<ReportImplementationProblem> implementationProblems = Lists.newArrayList();
@@ -44,14 +44,14 @@ public class AbsencesReport {
   
   public boolean containsProblems() {
     //TODO: to implement
-    return !absenceTroublesMap.keySet().isEmpty() 
+    return !absencesRemainingTroubles.keySet().isEmpty() 
         || !absenceTypeProblems.isEmpty()
         || !requestProblems.isEmpty()
         || !implementationProblems.isEmpty();
   }
   
   public boolean absenceHasProblems(Absence absence) {
-    return this.absenceTroublesMap.get(absence) != null;
+    return this.absencesRemainingTroubles.get(absence) != null;
   }
   
   public boolean absenceTypeHasProblem(AbsenceType absenceType) {
@@ -65,7 +65,7 @@ public class AbsencesReport {
   }
    
   public List<Absence> absencesInTrouble() {
-    return Lists.newArrayList(absenceTroublesMap.keySet());
+    return Lists.newArrayList(absencesRemainingTroubles.keySet());
   }
 
   /**
@@ -73,10 +73,10 @@ public class AbsencesReport {
    * @param reportAbsenceProblem
    */
   public void addAbsenceTrouble(AbsenceTrouble absenceTrouble) {
-    List<AbsenceTrouble> problems = absenceTroublesMap.get(absenceTrouble.absence);
+    List<AbsenceTrouble> problems = absencesRemainingTroubles.get(absenceTrouble.absence);
     if (problems == null) {
       problems = Lists.newArrayList();
-      absenceTroublesMap.put(absenceTrouble.absence, problems);
+      absencesRemainingTroubles.put(absenceTrouble.absence, problems);
     }
     problems.add(absenceTrouble);
     log.debug("Aggiunto a report.absenceProblems: " + absenceTrouble.toString());

@@ -9,7 +9,8 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
  *{ alcune scorciatorie }*
  %{ selectedFormItem = absenceRequestForm.selectedAbsenceGroupFormItem; }%
  %{ selecteSubItem = selectedFormItem?.selectedSubAbsenceGroupFormItems; }%
- %{ alldaySelected = selecteSubItem?.selectedJustified?.name.equals(models.absences.JustifiedType.JustifiedTypeName.all_day) }%
+ %{ alldaySelected = selecteSubItem?.selectedJustified?.name.equals(models.absences.JustifiedType.JustifiedTypeName.all_day) ||
+                     selecteSubItem?.selectedJustified?.name.equals(models.absences.JustifiedType.JustifiedTypeName.assign_all_day) }%
  %{ specifiedMinuteSelected = selecteSubItem?.selectedJustified?.name.equals(models.absences.JustifiedType.JustifiedTypeName.specified_minutes) }%
 
  #{if absenceRequestForm.absenceInsertTab.newImplementation() }
@@ -20,22 +21,21 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
  
    #{if report.containsProblems()}
     #{alert color:'danger'}
-      #{if !report.absenceTroublesMap.keySet().empty}
+      #{if !report.absencesRemainingTroubles.keySet().empty}
         <strong>La richiesta ha riscontrato la presenza di assenze contenenti errori.</strong>
-        #{list items:report.absencesInTrouble(), as:'absence'}
-          <br>${absence.getAbsenceDate().format()}
-          #{absences.absence-popover absence:absence, person:absenceRequestForm.person, groupSelected:selectedFormItem.groupAbsenceType /}
+        #{list items:report.absencesRemainingTroubles.keySet(), as:'absence'}
+          <br><strong>${absence.absenceDate.format()}</strong>
+          #{absences.absence-popover absence:absence, 
+            person:absenceRequestForm.person, 
+            groupSelected:selectedFormItem.groupAbsenceType,
+            remainingTroubles:report.absencesRemainingTroubles.get(absence) /}
         #{/list}
       #{/if}
       #{if !report.requestProblems.empty}
-        <strong>Errori legati alla richiesta</strong><br>
+        <strong>La richiesta effettuata contiene errori.</strong>
         #{list items:report.requestProblems, as:'requestProblem'}
-          <table class="table table-condensed">
-          <tr>
-            <td>${requestProblem.date.format()}</td>
-            <td>${requestProblem.requestProblem}</td>
-          </tr>
-          </table>
+            <br>${requestProblem.date.format()}
+            ${requestProblem.requestProblem}
         #{/list}
       #{/if}
       #{if !report.implementationProblems.empty}
@@ -73,7 +73,9 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
             #{/if}  
           </td>
           <td>
-              ${rowRecap.absence.absenceType.code} #{absences.absence-popover absence:rowRecap.absence /}
+              #{absences.absence-popover absence:rowRecap.absence, 
+              groupSelected:selectedFormItem.groupAbsenceType,
+              person:absenceRequestForm.person /}
           </td>
           <td>${rowRecap.usableLimit}</td>
           <td>${rowRecap.usableTaken}</td>
