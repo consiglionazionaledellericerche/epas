@@ -57,7 +57,7 @@
       #{/list}
     </p>  
     #{/if}
-    
+    <br>
     #{if _remainingTroubles }
          #{list items:_remainingTroubles, as:'trouble'}
            <strong class="text-danger">&{trouble.trouble}</strong><br>
@@ -71,6 +71,7 @@
      #{else}
        <br>Non ci sono errori.
      #{/else}
+
   </div>
 
    

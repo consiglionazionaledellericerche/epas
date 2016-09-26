@@ -63,6 +63,7 @@
                 #{/list}
                 #{if rowRecap.missingReplacing }
                 <p> 
+                  #{alert color:'info'}
                   Il codice di rimpiazzamento da inserire è
                   <span class="label label-default">${rowRecap.missingReplacing.code}</span>
                   #{form action:@AbsenceGroups.addReplacing(), method:'POST', autocomplete:false, class:'form form-horizontal'}
@@ -70,13 +71,21 @@
                     #{f.hidden 'person.id', value:absenceEngine.person.id /}
                     #{f.hidden 'groupAbsenceType.id', value:absencePeriod.groupAbsenceType.id /}
                     #{f.hidden 'absenceType.id', value:rowRecap.missingReplacing.id /}
-                    #{b.buttons center:true}
-                      #{b.submit 'Aggiungi'/}
-                    #{/b.buttons}
+                    #{b.submit 'Aggiungi'/}
                   #{/form}
-	                
+	              #{/alert}  
                 </p>
                 #{/if}
+                
+                #{alert color:'danger'}
+                #{form action:@AbsenceGroups.delete(), method:'POST', autocomplete:false,
+		          class:'form form-horizontal' }
+		          #{f.hidden 'absence.id', value:rowRecap.absence.id /}
+		          #{f.hidden 'groupAbsenceType.id', value:absencePeriod.groupAbsenceType.id /}
+	    		  #{b.submit 'Elimina', color:'danger', fa:'trash' /}
+	            #{/form}
+	            #{/alert}
+	            
               </div>
               #{absences.absence-popover absence:rowRecap.absence, groupSelected:absencePeriod.groupAbsenceType /}
 			  	                
