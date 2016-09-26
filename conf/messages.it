@@ -528,6 +528,7 @@ MissingReplacing=Manca il codice di rimpiazzamento.
 WrongReplacing=Il codice di rimpiazzamento presente non è quello corretto.
 CompromisedReplacing=La sequenza dei rimpiazzamenti è compromessa.
 LimitExceeded=Il tetto massimo utilizzabile per il periodo è stato superato.
+NoChildExists=Figlio non presente in anagrafica o fuori età.
 
 child1_0_3=Primo figlio 0-3 anni
 child1_0_6=Primo figlio 0-6 anni

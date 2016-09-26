@@ -20,6 +20,7 @@ import dao.QualificationDao;
 import dao.RoleDao;
 import dao.UserDao;
 import dao.WorkingTimeTypeDao;
+import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 
 import helpers.jpa.ModelQuery;
@@ -83,6 +84,7 @@ public class TemplateUtility {
 
   private final MemoizedCollection<Notification> notifications;
   private final MemoizedCollection<Notification> archivedNotifications;
+  private final AbsenceComponentDao absenceComponentDao;
 
   @Inject
   public TemplateUtility(
@@ -91,7 +93,7 @@ public class TemplateUtility {
       RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao,
       IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao,
       SynchDiagnostic synchDiagnostic, ConfigurationManager configurationManager,
-      NotificationDao notificationDao, UserDao userDao) {
+      NotificationDao notificationDao, UserDao userDao, AbsenceComponentDao absenceComponentDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -106,6 +108,7 @@ public class TemplateUtility {
     this.synchDiagnostic = synchDiagnostic;
     this.configurationManager = configurationManager;
     this.userDao = userDao;
+    this.absenceComponentDao = absenceComponentDao;
 
     notifications = MemoizedResults
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
@@ -390,23 +393,7 @@ public class TemplateUtility {
   }
   
   public Set<GroupAbsenceType> involvedGroupAbsenceType(AbsenceType absenceType) {
-
-    //TODO: da fare la fetch perchè è usato in tabellone timbrature per ogni codice assenza.
-    
-    Set<GroupAbsenceType> groups = Sets.newHashSet();
-    for (TakableAbsenceBehaviour behaviour : absenceType.takableGroup) {
-      groups.addAll(behaviour.groupAbsenceTypes);
-    }
-    for (TakableAbsenceBehaviour behaviour : absenceType.takenGroup) {
-      groups.addAll(behaviour.groupAbsenceTypes);
-    }
-    for (ComplationAbsenceBehaviour behaviour : absenceType.complationGroup) {
-      groups.addAll(behaviour.groupAbsenceTypes);
-    }
-    for (ComplationAbsenceBehaviour behaviour : absenceType.replacingGroup) {
-      groups.addAll(behaviour.groupAbsenceTypes);
-    }
-    return groups;
+    return absenceComponentDao.involvedGroupAbsenceType(absenceType, true);
   }
 
   public boolean hasAdminRole() {

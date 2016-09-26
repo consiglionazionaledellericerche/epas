@@ -35,7 +35,7 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
         <strong>La richiesta effettuata contiene errori.</strong>
         #{list items:report.requestProblems, as:'requestProblem'}
             <br>${requestProblem.date.format()}
-            ${requestProblem.requestProblem}
+            &{requestProblem.requestProblem}
         #{/list}
       #{/if}
       #{if !report.implementationProblems.empty}
