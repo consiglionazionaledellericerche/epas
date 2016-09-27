@@ -520,11 +520,7 @@ public class Competences extends Controller {
    */
   public static void monthlyOvertime(Integer year, Integer month, String name, Integer page) {
 
-    if (!Security.getUser().get().person.isPersonInCharge) {
-      forbidden();
-    }
-
-    User user = Security.getUser().get();
+    final User user = Security.getUser().get();
     if (page == null) {
       page = 0;
     }

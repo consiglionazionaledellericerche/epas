@@ -54,8 +54,8 @@ public class RequestInit extends Controller {
 
     Optional<User> user = Security.getUser();
 
-    ItemsPermitted ip = new ItemsPermitted(user);
-    renderArgs.put("ip", ip);
+//    ItemsPermitted ip = new ItemsPermitted(user);
+//    renderArgs.put("ip", ip);
 
     if (!user.isPresent()) {
       return;

@@ -86,7 +86,6 @@ when
 
      	/* Situazione Mensile */
      	"Stampings.stampings",
-     	"Stampings.dailyPresenceForPersonInCharge",
      	/* "Stampings.editEmployee",
      	"Stampings.updateEmployee", */
 
@@ -105,7 +104,6 @@ when
 
        	/* Competenze */
      	"Competences.competences",
-     	"Competences.monthlyOvertime",
 
        	/* Riepilogo orario*/
      	"PersonMonths.hourRecap",
@@ -156,6 +154,16 @@ when
        ), target == null, granted == false)
 then
  $c.grant();
+end
+
+rule personInCharge
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  Person (isPersonInCharge == true) from currentOperator.person
+  $c: PermissionCheck( action in ("Stampings.dailyPresenceForPersonInCharge" ,
+    "Competences.monthlyOvertime" ), granted == false)
+then
+  $c.grant();
 end
 
 /*
@@ -274,6 +282,27 @@ when
     || action.startsWith("VacationsAdmin."))
 then
  $c.revoke();
+end
+
+/*******************************************************************************
+ * Azioni ruolo RO_ADMIN (Admin in sola lettura)
+ ******************************************************************************/
+rule ro_admin
+when
+  AccountRole(this == AccountRole.RO_ADMIN)
+  $c: PermissionCheck(
+//  (
+//    action not contains "edit" &&
+//    action not contains "save" &&
+//    action not contains "remove" &&
+//    action not contains "delete" &&
+//    action not contains "insert" &&
+//    action not contains "add" &&
+//    action not contains "Administration."
+//  ),
+  granted == false)
+then
+  $c.grant();
 end
 
 /*******************************************************************************
