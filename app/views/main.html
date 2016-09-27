@@ -83,44 +83,9 @@
           #{include './_adminMenu.html' /}
         #{/if}
 
-        #{if ip.isConfigurationVisible() }
-        <ul class="nav navbar-nav">
-          #{if dropDown.equals("dropDownConfiguration") }
-          <li class="dropdown active">
-            #{/if}
-            #{else}
-          <li class="dropdown">
-            #{/else}
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-cog"></i>
-              <div class="visible-xs-inline visible-md-inline visible-lg-inline">&{'configurations'}<span class="caret"></span></div>
-            </a>
-            <ul class="dropdown-menu">
-              #{if ip.viewOffice }
-              <li><a href="@{Institutes.list()}">Sedi e Amministratori</a></li>
-              <li><a href="@{BadgeReaders.list()}">&{'badgeReaders'}</a></li>
-              <li><a href="@{BadgeSystems.list()}">&{'badgeSystems'}</a></li>
-        <li><a href="@{Users.list()}">Gestione utenti</a></li>
-              #{/if}
-              #{if ip.viewWorkingTimeType}
-
-              <li><a href="@{Configurations.show(session.get("officeSelected"))}">Parametri</a></li>
-
-              <li><a href="@{WorkingTimes.manageWorkingTime(session.get("officeSelected"))}">Orari Lavoro</a></li>
-
-              #{/if}
-              #{if ip.viewCompetenceCode}
-              <li><a href="@{Competences.manageCompetenceCode()}">Codici Competenze</a></li>
-              #{/if}
-              #{if ip.viewAbsenceType}
-              <li><a href="@{Absences.manageAbsenceCode()}">Codici Assenze</a></li>
-              #{/if}
-              <!--<li><a href="#">Codici Assenze</a></li>
-              <li><a href="#">Codici Competenze</a></li>
-              <li><a href="#">Parametri</a></li>
-              -->
-            </ul>
-          </li>
-        </ul>
+        *{ Ruoli di sistema e amministratori delle sedi }*
+        #{if !currentUser.roles.empty || currentUser.hasRoles(models.Role.PERSONNEL_ADMIN,models.Role.PERSONNEL_ADMIN_MINI,models.Role.TECHNICAL_ADMIN) }
+          #{include './_configMenu.html' /}
         #{/if}
 
         #{if isPersonInCharge}

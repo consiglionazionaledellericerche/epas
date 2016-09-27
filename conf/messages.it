@@ -442,11 +442,17 @@ validation.url=Non è un URL valido
 Absences.absences= Assenze Mensili
 Absences.absencesPerPerson= Assenze Annuali
 Absences.absencesVisibleForEmployee= Presenze Giornaliere
+Absences.manageAbsenceCode= Gestione Codici d'assenza
 Absences.showGeneralMonthlyAbsences= Assenze
+BadgeReaders.list= Sorgenti Timbrature
+BadgeSystems.list= Gruppi Badge
 Certifications.certifications= Invio Attestati
 Charts.checkLastYearAbsences= Controlli ed Esportazioni
 Competences.competences= Competenze
+Competences.manageCompetenceCode= Codici Competenze
 Competences.showCompetences= Competenze
+Configurations.show= Configurazione Sedi
+Institutes.list= Sedi e Amministratori
 MealTickets.mealTickets= Riepilogo Buoni Pasto
 MealTickets.recapMealTickets= Buoni Pasto
 MonthRecaps.showRecaps= Riepilogo Mensile
@@ -461,8 +467,10 @@ Stampings.dailyPresence= Presenza Giornaliera
 Stampings.missingStamping= Timbrature Mancanti
 Stampings.personStamping= Timbrature
 Stampings.stampings= Situazione Mensile
+Users.list= Gestione Utenti
 VacationsAdmin.list= Ferie e Permessi
 Vacations.show= Ferie
+WorkingTimes.manageWorkingTime= Gestione Orari di Lavoro
 
 ########################
 # Enumerati
