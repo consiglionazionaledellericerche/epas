@@ -78,7 +78,19 @@
       #{/secure.check}
 
       #{secure.li @Absences.absencesVisibleForEmployee(session.get("yearSelected"), session.get("monthSelected"), session.get("daySelected")) }
-      <i class="fa fa-user-plus" aria-hidden="true"></i>
+      <i class="fa fa-calendar-check-o" aria-hidden="true"></i>
+      #{/secure.li}
+
+      #{secure.check 'Stampings.dailyPresenceForPersonInCharge'}
+        <li class="divider"></li>
+      #{/secure.check}
+
+      #{secure.li @Stampings.dailyPresenceForPersonInCharge(session.get("yearSelected"), session.get("monthSelected"), session.get("daySelected")) }
+        <i class="fa fa-calendar-check-o" aria-hidden="true"></i>
+      #{/secure.li}
+
+      #{secure.li @Competences.monthlyOvertime(session.get("yearSelected"), session.get("monthSelected")) }
+        <i class="fa fa-user-plus" aria-hidden="true"></i>
       #{/secure.li}
 
     </ul>
