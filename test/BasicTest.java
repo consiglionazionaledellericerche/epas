@@ -1,12 +1,13 @@
 import org.junit.Test;
 
+import models.enumerate.LimitUnit;
 import play.test.UnitTest;
 
 public class BasicTest extends UnitTest {
 
   @Test
   public void aVeryImportantThingToTest() {
-    assertEquals(2, 1 + 1);
+    //assertEquals(LimitUnit.getByDescription("minuti"), LimitUnit.minutes);
   }
 
 }

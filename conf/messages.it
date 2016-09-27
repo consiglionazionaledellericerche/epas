@@ -68,10 +68,26 @@ child.surname= Cognome
 codeBlock=Codice Blocco
 
 code=Codice
+
+valueApproved= Valore per competenza
+codeListIds =Codici di competenza abilitati
 competenceCode.code= Codice Competenza
 competenceCode.codeToPresence= Codice per attestato di presenza
 competenceCode.description= Descrizione
 competenceCode.new= Nuovo codice di competenza
+competenceCode.limitType=Limite di utilizzo
+competenceCode.limitValue= Quantità massima
+competenceCode.limitUnit =Unità di misura
+competenceCode.limitDescription =Descrizione limite
+
+CompManager.overGroupLimit= Superato il quantitativo massimo usabile per l'intero gruppo
+CompManager.overYearLimit= Superato il quantitativo annuale usabile
+CompManager.overMonthLimit= Superato il quantitativo mensile usabile
+CompManager.diffBasedWorkingDay= Differenza con i giorni di lavoro effettuati nel mese
+CompManager.overServiceLimit= Superato il limite per i servizi reper.tà disponibili
+CompManager.notEnabled= Competenza non abilitata nell'anno e mese selezionati
+CompManager.overEntireMonth= Non si può assegnare un valore superiore a 1 per questa competenza
+CompManager.notConfigured= Aggiungere prima il servizio per cui si richiede la reperibilità
 
 configuration.entry= Parametro
 configuration.entry.value= Valore parametro
@@ -166,7 +182,19 @@ feedback.staff =Lo staff di EPAS
 
 file =File schedone da analizzare
 
+disabled= Codice di competenza disabilitato
+enabled= Abilita Codice di competenza
+beginCompetenceCode= In questo mese inizia l'utilizzo del codice di competenza.
+endCompetenceCode= In questo mese termina l'utilizzo del codice di competenza. Dal prossimo mese non sarà più usabile e visibile in questa lista.
 firstDay= Giorno inizio contratto
+
+
+group.label =Nome gruppo
+group.limitType =Periodo di utililzzo limite
+group.limitValue =Quantità massima
+group.competenceCodes =Codici competenza da associare
+group.limitUnit =Unità di misura
+group.limitDescription =Descrizione limite
 
 history.back= Indietro
 history.type= Operazione
@@ -302,6 +330,8 @@ roleIds= Ruoli attribuibili
 secure.error=Oops! Username o password sconosciuti
 secure.logout=Utente correttamente disconnesso
 
+serviceDisabled =Servizio disabilitato
+
 sourceDateMealTicket=Data Inizializzazione
 sourceDateResidual=Data inizializzazione
 
@@ -323,6 +353,10 @@ synch.contracts=Sincronizza contratti
 ticketNumberFrom=Dal Numero
 ticketNumberTo=Al Numero
 time= Orario
+
+type.description =Descrizione
+type.office =Sede
+type.supervisor =Supervisore servizio
 
 uro.office=Sede
 uro.role= Ruolo
@@ -406,6 +440,12 @@ validation.required=Obbligatorio
 validation.unique =Deve essere unico
 validation.url=Non è un URL valido
 
+##########################
+# Messaggi di eccezioni
+##########################
+
+errorCompetenceCodeException= Codice di competenza non presente tra quelli abilitati per la persona
+
 ########################
 # Enumerati
 ########################
@@ -445,6 +485,20 @@ JustifiedTimeAtWork.Nothing= Niente
 JustifiedTimeAtWork.TimeToComplete= Quello che manca
 JustifiedTimeAtWork.ReduceWorkingTimeOfTwoHours= Riduce orario di lavoro di 2 ore
 JustifiedTimeAtWork.AssignAllDay= Assegna intera giornata
+
+LimitType.monthly= Mensile
+LimitType.yearly= Annuale
+LimitType.noLimit= Senza limite
+LimitType.onMonthlyPresence= In base a presenza mensile
+LimitType.entireMonth= Intero mese
+
+LimitUnit.minutes =Minuti
+LimitUnit.hours =Ore
+LimitUnit.days =Giorni
+LimitUnit.month =Mese
+
+LimitDescription.daysOfMonth =Giorni del mese
+LimitDescription.daysOfYear =Giorni dell'anno
 
 StampTypes.MOTIVI_DI_SERVIZIO= Motivi di Servizio
 StampTypes.VISITA_MEDICA= Visita Medica

@@ -22,6 +22,8 @@ import javax.persistence.Table;
 @Table(name = "configurations")
 public class Configuration extends PropertyInPeriod {
 
+  private static final long serialVersionUID = 4900920264710451442L;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "office_id")
   public Office office;

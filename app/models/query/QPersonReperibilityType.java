@@ -28,11 +28,15 @@ public class QPersonReperibilityType extends EntityPathBase<PersonReperibilityTy
 
     public final StringPath description = createString("description");
 
+    public final BooleanPath disabled = createBoolean("disabled");
+
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
     //inherited
     public final NumberPath<Long> id = _super.id;
+
+    public final QOffice office;
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
@@ -59,6 +63,7 @@ public class QPersonReperibilityType extends EntityPathBase<PersonReperibilityTy
 
     public QPersonReperibilityType(Class<? extends PersonReperibilityType> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
         this.supervisor = inits.isInitialized("supervisor") ? new QPerson(forProperty("supervisor"), inits.get("supervisor")) : null;
     }
 

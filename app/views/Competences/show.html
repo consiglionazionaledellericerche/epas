@@ -1,0 +1,27 @@
+#{modalAsync id:'modalCompetenceCode', button:'Salva', 
+title:('Dettaglio codice competenza ' + competenceCode.code )}
+<div id="absenceCodeData">
+ 	  <form class="form-horizontal">
+ 	  #{if competenceCode.disabled}
+ 	  	#{alert color:'danger'}
+ 	  		<p>Il codice di competenza risulta disabilitato. Contattare l'amministrazione centrale del personale o
+ 	  		gli amministratori di ePAS per chiedere la riabilitazione.</p>
+ 	  	#{/alert}
+ 	  #{/if}
+	  #{f.view 'Codice', value:competenceCode.code /}
+	  #{f.view 'Codice per attestati', value:competenceCode.codeToPresence /}
+	  #{f.view 'Descrizione', value:competenceCode.description /}
+	  <div class="row">
+	  <div class="col-sm-2"></div>
+	  <div class="col-sm-4">
+	  #{f.view 'Quantità massima', value:competenceCode.limitValue /}
+	  </div>
+	  <div class="col-sm-4">
+	  #{f.view 'Unità di misura', value:competenceCode.limitUnit /}
+	  </div>	  
+	  </div>
+	  	  
+	  #{f.view 'Tipo limite', value:competenceCode.limitType /}	  </form>
+
+</div>
+#{/modalAsync}
