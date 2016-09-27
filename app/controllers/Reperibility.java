@@ -180,8 +180,8 @@ public class Reperibility extends Controller {
     final LocalDate to = new LocalDate(yearTo, monthTo, dayTo);
 
     List<PersonReperibilityDay> reperibilityDays =
-            personReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(
-                    from, to, reperibilityType, Optional.<PersonReperibility>absent());
+        personReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(
+            from, to, reperibilityType, Optional.<PersonReperibility>absent());
 
     log.debug("Reperibility who called from {} to {}, found {} reperibility days",
         from, to, reperibilityDays.size());
@@ -331,7 +331,7 @@ public class Reperibility extends Controller {
         reperibilityManager.deleteReperibilityDaysFromMonth(
             reperibilityType, year, month, repDaysOfMonthToRemove);
     log.info("Deleted {} days, reperibilityType={}, {}/{}, repDaysOfMonthToRemove={}",
-            deletedRep, reperibilityType, year, month, repDaysOfMonthToRemove);
+        deletedRep, reperibilityType, year, month, repDaysOfMonthToRemove);
   }
 
 
@@ -383,7 +383,7 @@ public class Reperibility extends Controller {
   @BasicAuth
   public static void exportYearAsPDF(int year, Long type) {
 
-	  log.debug("Chiamata alla exportYearAsPDF con year=%s e type=%s", year, type);
+    log.debug("Chiamata alla exportYearAsPDF con year=%s e type=%s", year, type);
     PersonReperibilityType reperibilityType =
         personReperibilityDayDao.getPersonReperibilityTypeById(type);
     notFoundIfNull(
@@ -398,7 +398,8 @@ public class Reperibility extends Controller {
     Table<Person, String, Integer> reperibilitySumDays =
         HashBasedTable.<Person, String, Integer>create();
     reperibilitySumDays = reperibilityManager.buildYearlyReperibilityReport(reperibilityMonths);
-    log.info("Creazione del documento PDF con il calendario annuale delle reperibilità per l'anno %s", year);
+    log.info("Creazione del documento PDF con il calendario annuale delle reperibilità "
+        + "per l'anno %s", year);
 
 
     LocalDate firstOfYear = new LocalDate(year, 1, 1);
@@ -406,9 +407,10 @@ public class Reperibility extends Controller {
     options.pageSize = IHtmlToPdfTransformer.A4L;
     final String description = reperibilityType.description;
     String supervisor =
-            reperibilityType.supervisor.name.concat(" ").concat(reperibilityType.supervisor.surname);
-    
-    renderPDF(options, year, firstOfYear, reperibilityMonths, reperibilitySumDays, description, supervisor);
+        reperibilityType.supervisor.name.concat(" ").concat(reperibilityType.supervisor.surname);
+
+    renderPDF(options, year, firstOfYear, reperibilityMonths, reperibilitySumDays, 
+        description, supervisor);
   }
 
 
@@ -487,9 +489,9 @@ public class Reperibility extends Controller {
     LocalDate firstOfMonth = new LocalDate(year, month, 1);
 
     List<PersonReperibilityDay> personReperibilityDays =
-            personReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(
-                firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(),
-                reperibilityType, Optional.<PersonReperibility>absent());
+        personReperibilityDayDao.getPersonReperibilityDayFromPeriodAndType(
+            firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(),
+            reperibilityType, Optional.<PersonReperibility>absent());
 
     log.debug("dimensione personReperibilityDays = {}", personReperibilityDays.size());
 
@@ -544,7 +546,7 @@ public class Reperibility extends Controller {
     final String thAbs = Messages.get("PDFReport.thAbsences");
     final String description = reperibilityType.description;
     final String supervisor =
-            reperibilityType.supervisor.name.concat(" ").concat(reperibilityType.supervisor.surname);
+        reperibilityType.supervisor.name.concat(" ").concat(reperibilityType.supervisor.surname);
 
     renderPDF(today, firstOfMonth, reperibilitySumDays, reperibilityDateDays,
         inconsistentAbsence, cFs, cFr, thNoStamp, thAbs, description, supervisor);
@@ -573,16 +575,16 @@ public class Reperibility extends Controller {
     }
 
     ImmutableList<Person> canAccess =
-            ImmutableList.<Person>builder()
-                    .addAll(personDao.getPersonForReperibility(type))
-                    .add(reperibilityType.supervisor).build();
+        ImmutableList.<Person>builder()
+        .addAll(personDao.getPersonForReperibility(type))
+        .add(reperibilityType.supervisor).build();
 
 
     if (!currentUser.isPresent() || currentUser.get().person == null
-            || !canAccess.contains(currentUser.get().person)) {
+        || !canAccess.contains(currentUser.get().person)) {
       log.debug(
           "Accesso all'iCal delle reperibilità non autorizzato: Type = {}, Current User = {}, "
-          + "canAccess = {}",
+              + "canAccess = {}",
               type, currentUser.get(), canAccess, currentUser.get());
       unauthorized();
     }

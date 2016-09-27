@@ -674,10 +674,17 @@ when
      	"Stampings.forceMealTicket",
      	
      	/* Vecchio permesso editCompetence */
-        "Competences.updateCompetence",
         "Competences.saveOvertime",
         "Competences.updatePersonCompetence",
         "Competences.saveNewCompetenceConfiguration",
+        "Competences.insertCompetence",
+        "Competences.editCompetence",
+        "Competences.saveCompetence",
+        "Competences.addService",
+        "Competences.editService",
+        "Competences.activateServices",
+        "Competences.saveService",
+        "Competences.evaluateService",
         
         /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
@@ -710,7 +717,6 @@ when
         
         /* Vecchio permesso editCompetenceCode */
         /* FIXME vedi in regola onlyForPersonnelAdmin_InOffice */
-        "Competences.insertCompetenceCode",
         "Competences.edit",
         "Competences.save",      
         
@@ -816,10 +822,17 @@ when
      	"Stampings.forceMealTicket",
      	
      	/* Vecchio permesso editCompetence */
-        "Competences.updateCompetence",
         "Competences.saveOvertime",
         "Competences.updatePersonCompetence",
         "Competences.saveNewCompetenceConfiguration",
+        "Competences.insertCompetence",
+        "Competences.editCompetence",
+        "Competences.saveCompetence",
+        "Competences.addService",
+        "Competences.editService",
+        "Competences.activateServices",
+        "Competences.saveService",
+        "Competences.evaluateService",
         
          /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
@@ -859,7 +872,6 @@ when
  	     *  Quest'ultima soluzione potrebbe essere la più opportuna e meno dispendiosa in ottica
  	     *  centralizzazione.
  	     */
-        "Competences.insertCompetenceCode",
         "Competences.edit",
         "Competences.save",
         

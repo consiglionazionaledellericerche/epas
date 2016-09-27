@@ -1,12 +1,10 @@
 package models.enumerate;
 
-import lombok.Getter;
-
-import org.testng.collections.Lists;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import lombok.Getter;
 
 /**
  * @author cristian.

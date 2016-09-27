@@ -10,6 +10,7 @@ import com.google.common.collect.TreeBasedTable;
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
@@ -21,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.PersonReperibility;
@@ -51,6 +53,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import javax.inject.Inject;
 
@@ -80,12 +83,13 @@ public class ReperibilityManager {
   private final PersonDayDao personDayDao;
   private final CompetenceCodeDao competenceCodeDao;
   private final PersonDayManager personDayManager;
+  private final OfficeDao officeDao;
 
   @Inject
   public ReperibilityManager(
       CompetenceDao competenceDao, AbsenceDao absenceDao, PersonDao personDao,
       PersonReperibilityDayDao personReperibilityDayDao, PersonDayManager personDayManager,
-      PersonDayDao personDayDao, CompetenceCodeDao competenceCodeDao) {
+      PersonDayDao personDayDao, CompetenceCodeDao competenceCodeDao, OfficeDao officeDao) {
     this.competenceDao = competenceDao;
     this.absenceDao = absenceDao;
     this.personDao = personDao;
@@ -93,6 +97,7 @@ public class ReperibilityManager {
     this.personDayDao = personDayDao;
     this.competenceCodeDao = competenceCodeDao;
     this.personDayManager = personDayManager;
+    this.officeDao = officeDao;
   }
 
   /**
@@ -965,6 +970,34 @@ public class ReperibilityManager {
     reperibilityPeriod.getProperties().add(new Uid(UUID.randomUUID().toString()));
 
     return reperibilityPeriod;
+  }
+  
+  /**
+   * questo metodo di utilità viene chiamato al bootstrap per associare il giusto ufficio ai tipi
+   * di reperibilità eventualmente presenti nel db in virtù del nuovo legame tra office e 
+   * personReperibilityType.
+   */
+  public void associateOfficeToReperibilityService() {
+    List<PersonReperibilityType> repList = personReperibilityDayDao.getAllReperibilityType();
+    
+    if (repList.isEmpty()) {
+      return;
+    } else {
+      Office office = null;
+      for (PersonReperibilityType prt : repList) {
+        if (prt.personReperibilities.isEmpty()) {
+          continue;
+        } else {
+          for (PersonReperibility person : prt.personReperibilities){
+            if (!person.person.office.equals(office)) {
+              office = person.person.office;
+            }
+          }
+        }        
+        prt.office = office;
+        prt.save();
+      }
+    }
   }
 
 }

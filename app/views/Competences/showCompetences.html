@@ -6,110 +6,102 @@
 #{competences.competencesTabs activeAction:'showCompetences' /}
 
 <div class="container">
-  #{title title:'Assegna competenze ' + templateUtility.monthName(month) + ' ' + year, color:'primary' /}
+  #{title title:'Assegna competenze ' + templateUtility.monthName(compDto.month) + ' ' + compDto.year, color:'primary' /}
 
+  #{if servicesInitialized}
   #{alert color:'info'}
   <p>Per assengnare la competenza individuare il dipendente ed il tipo di competenza nella
     tabella sottostante e cliccare sul valore attualmente assegnato.
-
   <p>
-
   <p>I valori per le reperibilità sono espressi in <strong>giorni</strong>,
     quelli per straordinari e turni in <strong>ore</strong>.</p>
   #{/alert}
-
+  #{/if}
+  #{else}
+  #{alert color:'danger'}
+  <p>Nella lista delle competenze attive compare anche la reperibilità. Per permettere al sistema ePAS di effettuare i corretti controlli
+  sui giorni disponibili per tale competenza, è necessario attivare i servizi per cui la reperibilità è stata richiesta cliccando <a href="@{activateServices(office.id)}">qui</a>
+  <p> 
+  #{/alert}
+  #{/else}
     <!-- form paginata --> 
     #{form action:@showCompetences(), class:'form-horizontal', method:'GET',
           'data-reload':'#results', autocomplete:'off'}
-	<input type="hidden" name="year" value="${year}"/>
-    <input type="hidden" name="month" value="${month}"/>
-    <input type="hidden" name="officeId" value="${office.id}"/>
-	
-	<div class="row">
-	  <div class="col-md-6">
-	    #{f.selectModel 'competenceCode', label:'Codice', items:competenceCodeList,
-    		value:wrCompetenceCode.value /}
-	  </div>
-	   <div class="col-md-6">
-	    #{f.input 'name', label:'Nome', 'data-autochange':true, value:name, autofocus:true,
-            placeholder:'nome'.label() /}
-	  </div>
-	</div>    
+	<input type="hidden" name="year" value="${compDto.year}"/>
+    <input type="hidden" name="month" value="${compDto.month}"/>
+    <input type="hidden" name="officeId" value="${compDto.office.id}"/>
+  
+	#{f.selectModel 'competenceCode', label:'Codice', items:competenceCodeList,
+    	value:wrCompetenceCode.value /}
     
     #{/form}
 
     <section id="results">
-   	#{paginate results} 
-	   
-	   <table class="table table-hover table-bordered">
-	     <tr class="warning">
-	       <th>Nome e cognome</th>
-	       <th>${wrCompetenceCode.value.description} ${wrCompetenceCode.value.code}</th>
-	     </tr>
-		
-		
-	   #{list items:results.results, as:'person'}
-	    <tr>
-	       %{ wrPerson = person.getWrapper(templateUtility.wrapperFactory); }%
    
-           <td class="person">${person.fullname}</td>
-           <td>
-           
-    	      #{if wrCompetenceCode.value.code.equals('S1')}
-    	        (${wrPerson.getPositiveResidualInMonth(year,month)})
-             #{/if}
-           
-             <a 
-             #{if editCompetence} data-x-editable href="#" data-type="number" 
-             data-pk="${wrPerson.competence(wrCompetenceCode.value,year,month).id}" data-name="value"
-     	     data-url="@{updateCompetence()}" 
-     	     data-title="Modifica ${wrCompetenceCode.value.description} per ${person.fullname}"
-     	  	 #{/if}
-     	     >
-   	 	     ${wrPerson.competence(wrCompetenceCode.value,year,month).valueApproved}
-    	    </a>
-
-           </td>
-         </tr>
-	    #{/list}
-	    </table>      
-	    #{/paginate}
-
-
-
+	   <table class="table" datatable>
+      		<thead>
+      		<tr>
+        		<th>Nome e cognome</th>
+        		<th>${wrCompetenceCode.value.description} ${wrCompetenceCode.value.code}</th>
+      		</tr>
+      		</thead>
+      		<tbody>
+      		#{list items:compDto.compList, as:'competence'}
+      		<tr>      		 
+				<td>${competence.person.fullname}</td>
+				<td>
+				#{if competence.id == null}
+					<a href="@{Competences.insertCompetence(competence.person.id, competence.competenceCode.id, competence.month, competence.year)}" data-async-modal="#modalCompetence" >
+					<em>Inserisci</em>
+					</a>
+				#{/if}
+				#{else}
+					<a href="@{Competences.editCompetence(competence.id)}" data-async-modal="#modalCompetence" >				
+					${competence.valueApproved}									        		
+      				</a>
+				#{/else}
+				
+				</td>				
+			</tr>
+      		#{/list}
+      		</tbody>
+       </table>     
+	
   <br>
   <br>
   #{alert color:'warning'}
   Totale competenze <strong>${wrCompetenceCode.value.description} ${wrCompetenceCode.value.code}</strong>
-    assegnate nel mese per <strong>${office.name}</strong>
+    assegnate nel mese per <strong>${compDto.office.name}</strong>
   <a data-tooltip data-toggle="tooltip" data-placement="right"
      title="Per aggiornare questo valore ricaricare la pagina">
-    <strong>${wrCompetenceCode.totalFromCompetenceCode(month, year, office.id)}</strong>
+    <strong>${wrCompetenceCode.totalFromCompetenceCode(compDto.month, compDto.year, compDto.office.id)}</strong>
   </a>
   #{/alert}
   </section>
   
-  #{title title:'Riepilogo Straordinari assegnati ' + year, color:'primary' /}
+  #{title title:'Riepilogo Straordinari assegnati ' + compDto.year, color:'primary' /}
 
   #{alert color:'info'}
-  <h4><strong>Riepilogo straordinari ${office.name}</strong></h4>
+  <h4><strong>Riepilogo straordinari ${compDto.office.name}</strong></h4>
 
   <table class="table table-condensed">
 
     <tr>
           <td>
-            Totale ore di straordinario pagate a ${templateUtility.monthName(month)} (S1+S2+S3) 
+            Totale ore di straordinario pagate a ${templateUtility.monthName(compDto.month)} (S1+S2+S3) 
           </td>
-      <td><strong>${totaleOreStraordinarioMensile}</strong></td>
+      <td><strong>${compDto.totaleOreStraordinarioMensile}</strong></td>
         </tr>
         <tr>
           <td>Totale ore di straordinario pagate nell'anno</td>
-          <td><strong>${totaleOreStraordinarioAnnuale}</strong></td>
+          <td><strong>${compDto.totaleOreStraordinarioAnnuale}</strong></td>
         </tr>
         <tr>
-          <td>Totale monte ore nell'anno ${year}</td>
-          <td><strong>${totaleMonteOre}</strong></td>
+          <td>Totale monte ore nell'anno ${compDto.year}</td>
+          <td><strong>${compDto.totaleMonteOre}</strong></td>
         </tr>
       </table>
   #{/alert}
 </div> <!-- end container-fluid -->
+
+<div id="modalCompetence" class="modal fade container" tabindex="-1"></div>

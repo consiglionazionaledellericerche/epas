@@ -11,6 +11,7 @@ import com.google.common.collect.Sets;
 import dao.AbsenceTypeDao;
 import dao.BadgeReaderDao;
 import dao.BadgeSystemDao;
+import dao.CompetenceCodeDao;
 import dao.MemoizedCollection;
 import dao.MemoizedResults;
 import dao.NotificationDao;
@@ -33,6 +34,8 @@ import manager.configurations.EpasParam;
 import models.AbsenceType;
 import models.BadgeReader;
 import models.BadgeSystem;
+import models.CompetenceCode;
+import models.CompetenceCodeGroup;
 import models.Institute;
 import models.Notification;
 import models.Office;
@@ -75,6 +78,7 @@ public class TemplateUtility {
   private final BadgeSystemDao badgeSystemDao;
   private final SynchDiagnostic synchDiagnostic;
   private final ConfigurationManager configurationManager;
+  private final CompetenceCodeDao competenceCodeDao;
 
   private final MemoizedCollection<Notification> notifications;
   private final MemoizedCollection<Notification> archivedNotifications;
@@ -86,7 +90,7 @@ public class TemplateUtility {
       RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao,
       IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao,
       SynchDiagnostic synchDiagnostic, ConfigurationManager configurationManager,
-      NotificationDao notificationDao, UserDao userDao) {
+      CompetenceCodeDao competenceCodeDao, NotificationDao notificationDao, UserDao userDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -100,6 +104,7 @@ public class TemplateUtility {
     this.badgeSystemDao = badgeSystemDao;
     this.synchDiagnostic = synchDiagnostic;
     this.configurationManager = configurationManager;
+    this.competenceCodeDao = competenceCodeDao;
     this.userDao = userDao;
 
     notifications = MemoizedResults
@@ -213,6 +218,18 @@ public class TemplateUtility {
     return badgeReaderDao.getBadgeReaderByOffice(person.office);
   }
 
+  public List<CompetenceCode> allCodeList() {
+    return competenceCodeDao.getAllCompetenceCode();
+  }
+  
+  public List<CompetenceCode> allCodesWithoutGroup() {    
+    return competenceCodeDao.getCodeWithoutGroup();
+  }
+  
+  public List<CompetenceCode> allCodesContainingGroupCodes(CompetenceCodeGroup group) {
+    return competenceCodeDao.allCodesContainingGroupCodes(group);
+  }
+  
   /**
    * Gli user associati a tutte le persone appartenenti all'istituto.
    */
@@ -338,6 +355,8 @@ public class TemplateUtility {
     return badgeSystemDao.badgeSystems(Optional.<String>absent(),
         Optional.<BadgeReader>absent()).list();
   }
+  
+
 
   public List<BadgeSystem> getConfiguredBadgeSystems(Office office) {
     List<BadgeSystem> configuredBadgeSystem = Lists.newArrayList();
