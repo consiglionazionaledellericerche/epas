@@ -142,6 +142,10 @@ public class DayStatus {
       rowRecap.absence = takenComplation.absence;
       rowRecap.usableLimit = printAmount(takenComplation.residualBeforeTakable, takenComplation.amountTypeTakable);
       rowRecap.usableTaken = printAmount(takenComplation.consumedTakable, takenComplation.amountTypeTakable);
+      if (rowRecap.usableLimit.equals("-1.0")) {
+        rowRecap.usableLimit = "";
+        rowRecap.usableTaken = "";
+      }
       rowRecap.consumedComplationAbsence = printAmount(this.consumedComplation, this.amountTypeComplation);
       if (!complationCompromised() && !complationCompromisedInThisDay()) {
         rowRecap.consumedComplationBefore = printAmount(this.residualBeforeComplation, this.amountTypeComplation);

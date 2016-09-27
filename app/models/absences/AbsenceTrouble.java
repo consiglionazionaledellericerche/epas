@@ -60,7 +60,6 @@ public class AbsenceTrouble extends BaseModel {
     WeekEndContinuityBroken,
 
     //Errore di implementazione / configurazione
-    UselessAbsenceInPeriod,
     TwoPeriods, 
     IncalcolableJustifiedAmount,
     IncalcolableComplationAmount,

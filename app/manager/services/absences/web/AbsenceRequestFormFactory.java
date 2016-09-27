@@ -216,14 +216,14 @@ public class AbsenceRequestFormFactory {
             typeConsidered.put(takable.code, takable);
           }
         }
-        if (currentGroupAbsenceType.complationAbsenceBehaviour != null) {
-          for (AbsenceType complation : currentGroupAbsenceType.complationAbsenceBehaviour.complationCodes) {
-            typeConsidered.put(complation.code, complation);
-          }
-          for (AbsenceType complation : currentGroupAbsenceType.complationAbsenceBehaviour.replacingCodes) {
-            typeConsidered.put(complation.code, complation);
-          }
-        }
+//        if (currentGroupAbsenceType.complationAbsenceBehaviour != null) {
+//          for (AbsenceType complation : currentGroupAbsenceType.complationAbsenceBehaviour.complationCodes) {
+//            typeConsidered.put(complation.code, complation);
+//          }
+//          for (AbsenceType complation : currentGroupAbsenceType.complationAbsenceBehaviour.replacingCodes) {
+//            typeConsidered.put(complation.code, complation);
+//          }
+//        }
         for (AbsenceType absenceType : typeConsidered.values()) {
           if (absenceType.justifiedTypesPermitted.isEmpty()) {
             // TODO: questo evento andrebbe segnalato.

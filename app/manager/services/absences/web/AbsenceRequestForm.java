@@ -36,7 +36,9 @@ public class AbsenceRequestForm {
     compensatory(Lists.newArrayList(DefaultGroup.RIPOSI_CNR.name())),
     group(Lists.newArrayList(DefaultGroup.G_661.name(), 
         DefaultGroup.G_18.name(), DefaultGroup.G_19.name(), 
-        DefaultGroup.G_23.name(), DefaultGroup.G_25.name(), 
+        DefaultGroup.G_23.name(), DefaultGroup.G_25.name(),
+        DefaultGroup.G_232.name(), DefaultGroup.G_252.name(),
+        DefaultGroup.G_233.name(), DefaultGroup.G_253.name(),
         DefaultGroup.G_89.name(), DefaultGroup.G_09.name())),
     other(Lists.newArrayList(DefaultGroup.ALTRI.name(), DefaultGroup.G_95.name()));
     

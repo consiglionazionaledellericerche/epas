@@ -43,7 +43,7 @@ public class TakableAbsenceBehaviour extends BaseModel {
   joinColumns = { @JoinColumn(name = "takable_behaviour_id") }, 
   inverseJoinColumns = { @JoinColumn(name = "absence_types_id") })
   @OrderBy("code")
-  public Set<AbsenceType> takenCodes;
+  public Set<AbsenceType> takenCodes = Sets.newHashSet();
   
 //  @Column(name = "takable_count_behaviour")
 //  @Enumerated(EnumType.STRING)
@@ -54,7 +54,7 @@ public class TakableAbsenceBehaviour extends BaseModel {
   joinColumns = { @JoinColumn(name = "takable_behaviour_id") }, 
   inverseJoinColumns = { @JoinColumn(name = "absence_types_id") })
   @OrderBy("code")
-  public Set<AbsenceType> takableCodes;
+  public Set<AbsenceType> takableCodes = Sets.newHashSet();;
   
   @Column(name = "fixed_limit")
   public Integer fixedLimit;

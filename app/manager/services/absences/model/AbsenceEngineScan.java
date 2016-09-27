@@ -56,9 +56,15 @@ public class AbsenceEngineScan {
       log.debug("Inizio lo scan del prossimo gruppo {}", absenceEngine.scan.currentGroup.description);
       absenceEngine.buildPeriodChain(absenceEngine.scan.currentGroup, 
           absenceEngine.scan.currentAbsence.getAbsenceDate());
-      //taggare come scansionate le assenze coinvolte nella periodChain
-      for (Absence absence : absenceEngine.periodChain.absencesAsc) {
-        absenceEngine.scan.setGroupScanned(absence, absenceEngine.scan.currentGroup);
+      if (absenceEngine.report.containsCriticalProblems()) {
+        //ex. manca il figlio
+        absenceEngine.scan.setGroupScanned(absenceEngine.scan.currentAbsence, 
+            absenceEngine.scan.currentGroup);
+      } else {
+        //taggare come scansionate le assenze coinvolte nella periodChain
+        for (Absence absence : absenceEngine.periodChain.absencesAsc) {
+          absenceEngine.scan.setGroupScanned(absence, absenceEngine.scan.currentGroup);
+        }
       }
       this.configureNextGroupToScan(iterator);
     }
