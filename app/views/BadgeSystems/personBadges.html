@@ -37,8 +37,10 @@
       <td>${badge.badgeSystem.name}</td>
       <td>${badge.code}</td>
       <td>
+        #{secure.check 'BadgeSystems.deleteBadgePerson'}
         <a class="btn btn-danger btn-xs" href="@{BadgeSystems.deleteBadgePerson(badge.id)}"
            data-async-modal="#defaultModal">Rimuovi</a>
+        #{/secure.check}
       </td>
     </tr>
     #{/list}

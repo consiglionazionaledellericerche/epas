@@ -53,10 +53,12 @@
 
 
 	#{/panel}
-		
+
+		#{secure.check 'Persons.update'}
 		<div class="container-fluid center">
 		   <input class="btn btn-primary" type="submit" value="Salva" />
 		</div>
+		#{/secure.check}
 	#{/form}
 		
 </div>

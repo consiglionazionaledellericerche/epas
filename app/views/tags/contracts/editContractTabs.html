@@ -12,24 +12,12 @@
 
 <div id="container-nav-tabs" class="container">
   <ul class="nav nav-tabs">
-    <li #{if _activeAction.equals("edit")} class="active" #{/if}>
-      <a href="@{Contracts.edit(contract.id)}">Date</a>
-    </li>
-    <li #{if _activeAction.equals("updateSourceContract")} class="active" #{/if}>
-      <a href="@{Contracts.updateSourceContract(contract.id)}">Inizializzazione</a>
-    </li>
-    <li #{if _activeAction.equals("updateContractWorkingTimeType")} class="active" #{/if}>
-      <a href="@{Contracts.updateContractWorkingTimeType(contract.id)}">Tipo Orario</a>
-    </li>
-    <li #{if _activeAction.equals("updateContractVacationPeriod")} class="active" #{/if}>
-      <a href="@{Contracts.updateContractVacationPeriod(contract.id)}">Piani Ferie</a>
-    </li>
-    <li #{if _activeAction.equals("updateContractStampProfile")} class="active" #{/if}>
-      <a href="@{Contracts.updateContractStampProfile(contract.id)}">Presenza Automatica</a>
-    </li>
-    <li #{if _activeAction.equals("delete")} class="active" #{/if}>
-      <a href="@{Contracts.delete(contract.id)}">Elimina</a>
-    </li>
+    #{secure.li @Contracts.edit(contract.id) /}
+    #{secure.li @Contracts.updateSourceContract(contract.id) /}
+    #{secure.li @Contracts.updateContractWorkingTimeType(contract.id) /}
+    #{secure.li @Contracts.updateContractVacationPeriod(contract.id) /}
+    #{secure.li @Contracts.updateContractStampProfile(contract.id) /}
+    #{secure.li @Contracts.delete(contract.id) /}
   </ul>
 </div>
 <br>

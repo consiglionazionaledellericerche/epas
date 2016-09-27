@@ -80,6 +80,7 @@
 	#{/panel} 
 
 	#{panel title:'Gestisci Contratti', color:'primary'}
+     #{secure.check 'Contracts.insert'}
 	   <div class="text-center">
         <p>
           <a class="btn btn-success" href="@{Contracts.insert('person.id':person.id)}" data-async-modal="#defaultModal">
@@ -87,6 +88,7 @@
           </a>
         </p>
       </div>
+      #{/secure.check}
   	  <table class="table table-hover">
 		<tr class="warning">
 			<th>Data inizio contratto</th>
