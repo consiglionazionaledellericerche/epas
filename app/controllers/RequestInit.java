@@ -54,9 +54,6 @@ public class RequestInit extends Controller {
 
     Optional<User> user = Security.getUser();
 
-//    ItemsPermitted ip = new ItemsPermitted(user);
-//    renderArgs.put("ip", ip);
-
     if (!user.isPresent()) {
       return;
     }
@@ -331,126 +328,6 @@ public class RequestInit extends Controller {
     }
     if (dropDownConfigurationActions.contains(currentAction)) {
       renderArgs.put("dropDown", "dropDownConfiguration");
-    }
-
-  }
-
-  /**
-   * Oggetto che modella i permessi abilitati per l'user TODO: esportare questa classe in un nuovo
-   * file che modella la view.
-   */
-  public static class ItemsPermitted {
-
-    public boolean isEmployee = false;
-
-    public boolean isDeveloper = false;
-
-    public boolean viewPerson = false;
-    public boolean viewPersonDay = false;
-    public boolean viewOffice = false;
-    public boolean viewCompetence = false;
-    public boolean editCompetence = false;
-    public boolean uploadSituation = false;
-    public boolean viewWorkingTimeType = false;
-    public boolean editWorkingTimeType = false;
-    public boolean viewAbsenceType = false;
-    public boolean editAbsenceType = false;
-    public boolean viewCompetenceCode = false;
-    public boolean editCompetenceCode = false;
-
-
-    public ItemsPermitted(Optional<User> user) {
-
-      if (!user.isPresent()) {
-        return;
-      }
-
-      if (user.get().roles.contains(AccountRole.ADMIN) ||
-          user.get().roles.contains(AccountRole.RO_ADMIN)) {
-        this.viewPerson = true;
-        this.viewOffice = true;
-        this.viewWorkingTimeType = true;
-      } else if (user.get().roles.contains(AccountRole.DEVELOPER)) {
-        this.isDeveloper = true;
-        this.viewPerson = true;
-        this.viewOffice = true;
-        this.viewWorkingTimeType = true;
-
-        this.viewPerson = true;
-        this.viewPersonDay = true;
-        // this.viewOffice = true;
-        this.viewCompetence = true;
-        this.viewWorkingTimeType = true;
-        this.viewCompetenceCode = true;
-        this.viewAbsenceType = true;
-
-        this.editCompetence = true;
-        this.uploadSituation = true;
-        this.editCompetenceCode = true;
-        this.editAbsenceType = true;
-        this.editWorkingTimeType = true;
-      }
-
-      List<Role> roles = user.get().usersRolesOffices.stream()
-          .map(usersRolesOffices -> usersRolesOffices.role).distinct().collect(Collectors.toList());
-
-      for (Role role : roles) {
-        if (role.name.equals(Role.EMPLOYEE)) {
-          this.isEmployee = true;
-        }
-
-        if (role.name.equals(Role.PERSONNEL_ADMIN_MINI) || role.name.equals(Role.PERSONNEL_ADMIN)) {
-          this.viewPerson = true;
-          this.viewPersonDay = true;
-          // this.viewOffice = true;
-          this.viewCompetence = true;
-          this.viewWorkingTimeType = true;
-          this.viewCompetenceCode = true;
-          this.viewAbsenceType = true;
-        }
-
-        if (role.name.equals(Role.TECHNICAL_ADMIN)) {
-          this.viewOffice = true;
-        }
-
-        if (role.name.equals(Role.PERSONNEL_ADMIN)) {
-          this.editCompetence = true;
-          this.uploadSituation = true;
-          this.editCompetenceCode = true;
-          this.editAbsenceType = true;
-          this.editWorkingTimeType = true;
-        }
-      }
-    }
-
-    /**
-     * Se l'user può vedere il menu del Employee.
-     */
-    public boolean isEmployeeVisible() {
-      return isEmployee;
-    }
-
-    /**
-     * Se l'user ha i permessi per vedere Amministrazione.
-     */
-    public boolean isAdministrationVisible() {
-
-      return viewPerson || viewPersonDay || viewCompetence || uploadSituation;
-    }
-
-    /**
-     * Se l'user ha i permessi per vedere Configurazione.
-     */
-    public boolean isConfigurationVisible() {
-
-      return viewOffice || viewWorkingTimeType || viewAbsenceType;
-    }
-
-    /**
-     * Se l'user ha i permessi per vedere Tools.
-     */
-    public boolean isToolsVisible() {
-      return isDeveloper;
     }
 
   }
