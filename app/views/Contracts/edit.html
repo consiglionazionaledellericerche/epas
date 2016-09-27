@@ -61,10 +61,12 @@
 	    	  #{error 'contract.crossValidationFailed' /}
 	    	</div>
 	    	#{/ifError}
-	    	
+
+				#{secure.check 'Contracts.update'}
 	    	<div class="text-center">
 	  			<input class="btn btn-primary" type="submit" value="Modifica"/>
-			</div>
+				</div>
+				#{/secure.check}
 		#{/if}
 		<!-- Form di conferma -->
 		#{else}

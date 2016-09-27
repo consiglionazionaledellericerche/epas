@@ -89,7 +89,7 @@
         #{/if}
 
         *{ Ruoli di Sistema }*
-        #{if !currentUser.roles.empty}
+        #{if currentUser.roles.contains(models.enumerate.AccountRole.DEVELOPER) || currentUser.roles.contains(models.enumerate.AccountRole.ADMIN)}
           #{include '/_toolsMenu.html' /}
         #{/if}
 

@@ -290,17 +290,19 @@ end
 rule ro_admin
 when
   AccountRole(this == AccountRole.RO_ADMIN)
-  $c: PermissionCheck(
-//  (
-//    action not contains "edit" &&
-//    action not contains "save" &&
-//    action not contains "remove" &&
-//    action not contains "delete" &&
-//    action not contains "insert" &&
-//    action not contains "add" &&
-//    action not contains "Administration."
-//  ),
-  granted == false)
+  $c: PermissionCheck(action in (
+    "Persons.list",
+    "Persons.showCurrentContractWorkingTimeType",
+    "Persons.showCurrentVacation",
+    "Persons.edit",
+    "Contracts.personContracts",
+    "Configurations.personShow",
+    "BadgeSystems.personBadges",
+    "Persons.children",
+    "Contracts.edit",
+    "Contracts.updateSourceContract",
+    "Contracts.updateContractWorkingTimeType",
+    "Contracts.updateContractVacationPeriod"),  granted == false)
 then
   $c.grant();
 end
