@@ -110,6 +110,10 @@ public class GroupAbsenceType extends BaseModel {
     compensatoryRestCnr;         // custom riposi compensativi cnr
     
   }
+  
+  public String toString() {
+    return description;
+  }
 
   
 }

@@ -325,12 +325,12 @@ public class AbsenceEngine {
           isComplation = absencePeriod.complationCodes.contains(absence.absenceType);
         }
         
-        //una assenza deve avere un ruolo
+        //una assenza senza ruolo nel gruppo la ignoro
         if (!isTaken && !isComplation && !isReplacing) {
-          this.report.addAbsenceAndImplementationProblem(AbsenceTrouble.builder()
-              .trouble(AbsenceProblem.UselessAbsenceInPeriod)
-              .absence(absence)
-              .build());
+//          this.report.addAbsenceAndImplementationProblem(AbsenceTrouble.builder()
+//              .trouble(AbsenceProblem.UselessAbsenceInPeriod)
+//              .absence(absence)
+//              .build());
           continue;
         }
         

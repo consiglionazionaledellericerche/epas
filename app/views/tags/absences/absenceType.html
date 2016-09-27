@@ -12,6 +12,9 @@
   #{elseif _absenceType.replacingType}
     label-default 
   #{/elseif}
+  #{else}
+    label-danger
+  #{/else}
   " webui-popover-hover data-url="#${_absenceType.id}">${_absenceType.code}</span>
   
   *{ <strong webui-popover-hover data-url="#${_absenceType.id}">${_absenceType.code}</strong> }*
