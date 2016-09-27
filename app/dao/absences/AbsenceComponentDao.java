@@ -209,7 +209,7 @@ public class AbsenceComponentDao extends DaoBase {
   public AbsenceType buildOrEditAbsenceType(String code, String description, int minutes, 
       Set<JustifiedType> justifiedTypePermitted, JustifiedType complationType, int complationTime, 
       boolean internalUse, boolean consideredWeekEnd, 
-      boolean timeForMealticket, String certificateCode) {
+      boolean timeForMealticket, String certificateCode, LocalDate expire) {
     
     QAbsenceType absenceType = QAbsenceType.absenceType;
     AbsenceType obj = getQueryFactory()
@@ -228,6 +228,9 @@ public class AbsenceComponentDao extends DaoBase {
     obj.timeForMealTicket = timeForMealticket;
     obj.consideredWeekEnd = consideredWeekEnd;
     obj.certificateCode = code;
+    if (expire != null) {
+      obj.validTo = expire;
+    }
     
     
     obj.save();
