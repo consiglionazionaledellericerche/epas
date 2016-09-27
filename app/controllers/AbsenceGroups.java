@@ -273,20 +273,15 @@ public class AbsenceGroups extends Controller {
     
     AbsenceRequestForm absenceRequestForm = absenceService
         .buildInsertForm(person, from, null, groupAbsenceType.get());
-    
-    AbsencesReport report = null;
-    if (absenceRequestForm.selectedAbsenceGroupFormItem != null) {
-      SubAbsenceGroupFormItem selected = absenceRequestForm
-          .selectedAbsenceGroupFormItem.selectedSubAbsenceGroupFormItems;
-      
-      report = absenceService.insert(person, groupAbsenceType.get(), 
-          absenceRequestForm.from, absenceRequestForm.to, 
-          AbsenceRequestType.insert, selected.absenceType, 
-          selected.selectedJustified, selected.getHours(), selected.getMinutes());  
-    }
-    
+    SubAbsenceGroupFormItem selected = absenceRequestForm
+        .selectedAbsenceGroupFormItem.selectedSubAbsenceGroupFormItems;
+
+    AbsencesReport report = absenceService.insert(person, groupAbsenceType.get(), 
+        absenceRequestForm.from, absenceRequestForm.to, 
+        AbsenceRequestType.insert, selected.absenceType, 
+        selected.selectedJustified, selected.getHours(), selected.getMinutes());
     render("@insert", absenceRequestForm, report);
-    
+
   }
   
   public static void insert(Long personId, LocalDate from, LocalDate to, 

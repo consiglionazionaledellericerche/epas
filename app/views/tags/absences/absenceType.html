@@ -1,5 +1,6 @@
-
-  <span class="label  
+#{if (_onlyUsed && !_absenceType.absences.empty) 
+      || (_onlyNotUsed && _absenceType.absences.empty) }
+  <span class="label
   #{if _absenceType.isAllDayPermitted() }
     label-info 
   #{/if}
@@ -41,7 +42,11 @@
       <strong>Tempo Completamento:</strong> ${_absenceType.replacingTime.printHourMinute()}
       #{/if}
     #{/if}
+    
+    #{if _absenceType.expired}
+    Il codice è scaduto il ${_absenceType.validTo.format()}
+    #{/if}
 
   </div>
-
+#{/if}
    

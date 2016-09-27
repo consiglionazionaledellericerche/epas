@@ -205,15 +205,19 @@ public class AbsenceRequestFormFactory {
         //TODO: Gruppo automatico per ferie.
       }
 
-      // Sub Group Each Code takable e complation (anche dei gruppi annidati)
-      SortedMap<String, AbsenceType> typeConsidered = Maps.newTreeMap();
+      
       
       GroupAbsenceType currentGroupAbsenceType = groupAbsenceType; 
       while (currentGroupAbsenceType != null) {
         
+        // Sub Group Each Code takable e complation (anche dei gruppi annidati)
+        SortedMap<String, AbsenceType> typeConsidered = Maps.newTreeMap();   
+        
         if (currentGroupAbsenceType.takableAbsenceBehaviour != null) {
           for (AbsenceType takable : currentGroupAbsenceType.takableAbsenceBehaviour.takableCodes) {
-            typeConsidered.put(takable.code, takable);
+            if (!takable.isExpired()) { //TODO: deve essere function di from e (to)
+              typeConsidered.put(takable.code, takable);
+            }
           }
         }
 //        if (currentGroupAbsenceType.complationAbsenceBehaviour != null) {
