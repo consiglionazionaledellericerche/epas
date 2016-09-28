@@ -302,7 +302,22 @@ when
     "Contracts.edit",
     "Contracts.updateSourceContract",
     "Contracts.updateContractWorkingTimeType",
-    "Contracts.updateContractVacationPeriod"),  granted == false)
+    "Contracts.updateContractVacationPeriod",
+    "Stampings.personStamping",
+    "Absences.showGeneralMonthlyAbsences",
+    "Absences.showPersonMonthlyAbsences",
+    "Absences.yearlyAbsences",
+    "Absences.manageAttachmentsPerCode",
+    "Absences.manageAttachmentsPerPerson",
+    "Absences.absenceInPeriod",
+    "VacationsAdmin.list",
+    "VacationsAdmin.vacationsLastYear",
+    "VacationsAdmin.vacationsCurrentYear",
+    "VacationsAdmin.permissionCurrentYear",
+    "Competences.showCompetences",
+    "Competences.enabledCompetences",
+    "Competences.totalOvertimeHours",
+    "Competences.approvedCompetenceInYear"),  granted == false)
 then
   $c.grant();
 end

@@ -490,6 +490,11 @@ Users.list= Gestione Utenti
 Vacations.show= Ferie
 VacationsAdmin.list= Ferie e Permessi
 WorkingTimes.manageWorkingTime= Gestione Orari di Lavoro
+Competences.showCompetences= Assegna Competenze
+Competences.enabledCompetences= Abilita Competenze
+Competences.totalOvertimeHours= Monte ore
+Competences.approvedCompetenceInYear= Competenza Assegnate nell'anno
+Competences.exportCompetences= Esporta competenze
 
 ########################
 # Enumerati
