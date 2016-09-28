@@ -24,9 +24,9 @@
     #{list items:personList, as:'person'}
     <tr>
       <td>
-		  <a href="@{Competences.updatePersonCompetence(person.id)}" data-async-modal="#updateCompetenceModal">
-		    ${person.fullname}
-		  </a>
+			#{secure.link @Competences.updatePersonCompetence(person.id), 'data-async-modal':'#updateCompetenceModal' }
+				${person.fullname}
+			#{/secure.link}
  	  </td>
  	  <td>
  	   #{list items:allCodeList, as:'code'}
