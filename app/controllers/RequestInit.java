@@ -14,9 +14,7 @@ import helpers.TemplateDataInjector;
 import manager.SecureManager;
 
 import models.Office;
-import models.Role;
 import models.User;
-import models.enumerate.AccountRole;
 
 import org.joda.time.LocalDate;
 
@@ -61,10 +59,6 @@ public class RequestInit extends Controller {
     final User currentUser = user.get();
 
     renderArgs.put("currentUser", currentUser);
-
-    if (currentUser.person != null) {
-      renderArgs.put("isPersonInCharge", currentUser.person.isPersonInCharge);
-    }
 
     // year init /////////////////////////////////////////////////////////////////
     Integer year;

@@ -2,17 +2,14 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Assegna competenze'  /}
 
-
-#{competences.competencesTabs activeAction:'showCompetences' /}
+#{include './_tabs.html' /}
 
 <div class="container">
   #{title title:'Assegna competenze ' + templateUtility.monthName(month) + ' ' + year, color:'primary' /}
 
   #{alert color:'info'}
   <p>Per assengnare la competenza individuare il dipendente ed il tipo di competenza nella
-    tabella sottostante e cliccare sul valore attualmente assegnato.
-
-  <p>
+    tabella sottostante e cliccare sul valore attualmente assegnato.</p>
 
   <p>I valori per le reperibilità sono espressi in <strong>giorni</strong>,
     quelli per straordinari e turni in <strong>ore</strong>.</p>
