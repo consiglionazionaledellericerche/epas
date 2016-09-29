@@ -383,7 +383,8 @@ public class TemplateUtility {
           AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode(), 
           AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode(), 
           AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode(), 
-          AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode()));
+          AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode(),
+          AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()));
     }
     if (absenceInsertTab.equals(AbsenceInsertTab.compensatory)) {
       return absenceTypeDao.absenceTypeCodeSet((Set)Sets.newHashSet(

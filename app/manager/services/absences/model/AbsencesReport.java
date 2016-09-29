@@ -6,6 +6,8 @@ import com.google.common.collect.Lists;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
+import manager.services.absences.model.DayStatus.RowRecap;
+
 import models.absences.Absence;
 import models.absences.AbsenceTrouble;
 import models.absences.AbsenceTrouble.AbsenceProblem;
@@ -31,6 +33,29 @@ public class AbsencesReport {
   
   // Esiti degli inserimenti
   public List<DayStatus> insertDaysStatus = Lists.newArrayList();
+  
+  public boolean hasTakableStatus() {
+    for (DayStatus dayStatus : insertDaysStatus) {
+      for (RowRecap rowRecap : dayStatus.buildDayRows()) {
+        if (!rowRecap.usableLimit.equals("")) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  
+  public boolean hasComplationStatus() {
+    for (DayStatus dayStatus : insertDaysStatus) {
+      for (RowRecap rowRecap : dayStatus.buildDayRows()) {
+        if (!rowRecap.consumedComplationBefore.equals("")) {
+          return true;
+        }
+      }
+    }
+    return false;
+
+  }
   
   /**
    * Errori non dipendenti dall'user (tipi assenza, implementazione, form di richiesta).
@@ -79,7 +104,7 @@ public class AbsencesReport {
       absencesRemainingTroubles.put(absenceTrouble.absence, problems);
     }
     problems.add(absenceTrouble);
-    log.debug("Aggiunto a report.absenceProblems: " + absenceTrouble.toString());
+    log.debug("Aggiunto a report.absenceProblems: " + absenceTrouble.toString() + " trouble: " + absenceTrouble.trouble);
   }
   
   
@@ -141,5 +166,7 @@ public class AbsencesReport {
     public ImplementationProblem implementationProblem;
     public LocalDate date;
   }
+  
+  
   
 }

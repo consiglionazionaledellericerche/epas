@@ -71,9 +71,9 @@ public class GroupAbsenceType extends BaseModel {
   public enum PeriodType {
     
     always(0, null, null), year(0, null, null), month(0, null, null),
-    child1_0_3(1, 0, 3), child1_0_6(1, 0, 6), child1_0_12(1, 0, 12), child1_6_12(1, 6, 12),
-    child2_0_3(2, 0, 3), child2_0_6(2, 0, 6), child2_0_12(2, 0, 12), child2_6_12(2, 6, 12),
-    child3_0_3(3, 0, 3), child3_0_6(3, 0, 6), child3_0_12(3, 0, 12), child3_6_12(3, 6, 12);
+    child1_0_3(1, 0, 3), child1_0_6(1, 0, 6), child1_0_12(1, 0, 12), child1_6_12(1, 6, 12), child1_3_12(1, 3, 12),
+    child2_0_3(2, 0, 3), child2_0_6(2, 0, 6), child2_0_12(2, 0, 12), child2_6_12(2, 6, 12), child2_3_12(2, 3, 12),
+    child3_0_3(3, 0, 3), child3_0_6(3, 0, 6), child3_0_12(3, 0, 12), child3_6_12(3, 6, 12), child3_3_12(3, 3, 12);
     
     public Integer childNumber;
     public Integer fromYear;

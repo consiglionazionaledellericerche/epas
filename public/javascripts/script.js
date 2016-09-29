@@ -190,15 +190,18 @@ $(function($) {
     $(':input[data-switcher]', this).select2({
       width: 'resolve',
       containerCssClass: "switcher",
-      dropdownCssClass: "switcher"});
+      dropdownCssClass: "switcher",
+    });
     $(':input[select2]', this).select2({
       allowClear: true,
       theme: "bootstrap",
-      placeholder: "Seleziona un valore"
+      placeholder: "Seleziona un valore",
     });
     $(':input[select2Table]', this).select2({
       minimumResultsForSearch: 25
     });
+    
+    
     $('[popover]').popover({
       trigger: "focus",
       placement: 'right auto',

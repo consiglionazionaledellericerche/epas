@@ -85,12 +85,13 @@ public class AbsenceEngineRequest {
           currentAbsencePeriod.periodInterval())) {
         continue;
       }
-
+      
       //Inferire il tipo se necessario
       if (absenceTypeToInfer) {
         absence = absenceEngineUtility.inferAbsenceType(
             currentAbsencePeriod, absence, requestedJustifiedType);
       }
+
       if (absenceTypeToInfer && absence.absenceType == null) {
         continue;
       }
