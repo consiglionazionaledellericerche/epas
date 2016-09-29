@@ -1,4 +1,5 @@
 /* Browser reset
+/* Browser reset
 ------------------------------------------------------------------------- */
 
 h1,h2,h3,h4,h5 {
@@ -383,7 +384,6 @@ body.modal-open #wrapper{
 
 .select2-container.switcher {
   height: 1em;
-
 }
 
 .select2-container.switcher .select2-choice {
@@ -404,4 +404,12 @@ body.modal-open #wrapper{
 
 .select2-drop.switcher input {
    padding: 0;
+}
+
+.switcher .select2-results {
+  max-height: 600px;
+}
+
+.select2-results {
+  max-height: 350px;
 }
