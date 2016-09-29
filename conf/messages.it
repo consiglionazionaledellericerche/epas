@@ -498,6 +498,9 @@ Competences.exportCompetences= Esporta competenze
 MealTickets.recapMealTickets= Riepilogo Buoni Pasto
 MealTickets.findCodeBlock= Ricerca Buoni Pasto
 MealTickets.returnedMealTickets= Buoni Pasto Riconsegnati
+MealTickets.personMealTickets= Nuovo Inserimento
+MealTickets.editPersonMealTickets= Modifica Buoni Consegnati
+MealTickets.recapPersonMealTickets= Riepilogo Buoni Pasto Consegnati
 
 ########################
 # Enumerati
