@@ -19,6 +19,7 @@ title:'Nuovo codice assenza in data ' + dateFrom.format()
 
   #{f.hidden 'dateFrom', value:dateFrom.format() /}
   #{f.hidden 'personId', value:person.id /}
+
   #{f.selectModel 'absenceType', items: templateUtility.absenceTypes, required:true /}
   #{f.view 'dateFrom', value:dateFrom.format()/}
   #{f.date 'dateTo', value:dateTo?.format()/}

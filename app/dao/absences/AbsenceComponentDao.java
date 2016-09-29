@@ -30,7 +30,8 @@ import models.absences.query.QJustifiedType;
 import models.absences.query.QTakableAbsenceBehaviour;
 
 import org.joda.time.LocalDate;
-import org.testng.collections.Lists;
+
+import play.db.jpa.JPA;
 
 import java.util.List;
 import java.util.Set;
@@ -221,7 +222,12 @@ public class AbsenceComponentDao extends DaoBase {
     obj.code = code;
     obj.description = description;
     obj.justifiedTime = minutes;
-    obj.justifiedTypesPermitted = justifiedTypePermitted;
+    obj.justifiedTypesPermitted = Sets.newHashSet();
+    obj.save();
+    JPA.em().flush();
+    for (JustifiedType justified : justifiedTypePermitted) {
+      obj.justifiedTypesPermitted.add(justified);  
+    }
     obj.replacingType = complationType;
     obj.replacingTime = complationTime;
     obj.internalUse = internalUse;
@@ -230,12 +236,36 @@ public class AbsenceComponentDao extends DaoBase {
     obj.certificateCode = code;
     if (expire != null) {
       obj.validTo = expire;
+    } else {
+      obj.validTo = new LocalDate(2099, 12, 31);
     }
-    
     
     obj.save();
     return obj;
 
+  }
+  
+  public void renameCode(String code, String newCode) {
+    QAbsenceType absenceType = QAbsenceType.absenceType;
+
+    AbsenceType obj = getQueryFactory()
+        .from(absenceType)
+        .where(absenceType.code.equalsIgnoreCase(code)).singleResult(absenceType);
+    if (obj == null) {
+      return;
+    }
+    
+    AbsenceType exObj = getQueryFactory()
+        .from(absenceType)
+        .where(absenceType.code.equalsIgnoreCase(newCode)).singleResult(absenceType);
+    if (exObj != null) {
+      exObj.code = exObj.code + "ex";
+      exObj.save();
+      JPA.em().flush();
+    }
+
+    obj.code = newCode;
+    obj.save();
   }
   
   /**

@@ -40,10 +40,13 @@ public class AbsenceMigration {
     GENERAL("Assenze generali cnr", 1),
     PERMISSION("Permessi vari", 2),
     POST_PARTUM("Congedi parentali", 3),
-    LAW_104_92("Disabilità legge 104/92", 4), 
-    OTHER("Altre tipologie", 5),
-    MALATTIA("Malattia", 6),
-    MALATTIA_FIGLI("Malattia", 7);
+    LAW_104_92("Disabilità legge 104/92", 5), 
+    MALATTIA("Malattia Dipendente", 6),
+    MALATTIA_FIGLIO_1("Malattia primo figlio", 7),
+    MALATTIA_FIGLIO_2("Malattia secondo figlio", 8),
+    MALATTIA_FIGLIO_3("Malattia terzo figlio", 9),
+    
+    OTHER("Altre tipologie", 10);
     
     public String name;
     public int priority;
@@ -64,7 +67,18 @@ public class AbsenceMigration {
   public enum DefaultTakable {
     T_18, T_19, T_661, 
     T_23, T_25, T_232, T_252, T_233, T_253, 
-    T_89, T_09, T_FERIE_CNR, T_RIPOSI_CNR, T_MISSIONE, T_95, T_ALTRI;
+    T_89, T_09, T_FERIE_CNR, T_RIPOSI_CNR, T_MISSIONE, T_95, T_ALTRI,
+    T_MALATTIA,
+    T_MALATTIA_FIGLIO_1_12,
+    T_MALATTIA_FIGLIO_1_13,
+    T_MALATTIA_FIGLIO_1_14,
+    T_MALATTIA_FIGLIO_2_12,
+    T_MALATTIA_FIGLIO_2_13,
+    T_MALATTIA_FIGLIO_2_14,
+    T_MALATTIA_FIGLIO_3_12,
+    T_MALATTIA_FIGLIO_3_13,
+    T_MALATTIA_FIGLIO_3_14,
+    ;
   }
   
   public enum DefaultGroup {
@@ -72,7 +86,17 @@ public class AbsenceMigration {
     G_23, G_25, G_232, G_252, G_233, G_253,
     
     G_89, G_09, MISSIONE, ALTRI, FERIE_CNR, RIPOSI_CNR, G_95,
-    MALATTIA, MALATTIA_FIGLI;
+    MALATTIA, 
+    MALATTIA_FIGLIO_1_12,
+    MALATTIA_FIGLIO_1_13,
+    MALATTIA_FIGLIO_1_14,
+    MALATTIA_FIGLIO_2_12,
+    MALATTIA_FIGLIO_2_13,
+    MALATTIA_FIGLIO_2_14,
+    MALATTIA_FIGLIO_3_12,
+    MALATTIA_FIGLIO_3_13,
+    MALATTIA_FIGLIO_3_14,
+    ;
   }
   
   @Inject
@@ -120,6 +144,7 @@ public class AbsenceMigration {
         for (Absence absence : absenceType.absences) {
           absence = Absence.findById(absence.id);
           log.info("{} {}", absence.absenceType.code, absence.personDay.person.fullName());
+          
           migrateAbsence(absence, 
               nothing, specifiedMinutes, absenceTypeMinutes, allDay, halfDay, assignAllDay);
           
@@ -230,6 +255,7 @@ public class AbsenceMigration {
     // Fix 661H*
     if (absence.absenceType.code.equals("661H7") 
         && absence.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)) {
+      absence.absenceType = absenceComponentDao.absenceTypeByCode("661M").get();
       absence.justifiedMinutes = 60 * 7;
       absence.justifiedType = absenceTypeMinutes;
       absence.save();
@@ -357,6 +383,22 @@ public class AbsenceMigration {
         .getOrBuildCategoryType(DefaultCategoryType.OTHER.name, 
             DefaultCategoryType.OTHER.priority);
     
+    final CategoryGroupAbsenceType malattiaCategory = absenceComponentDao
+        .getOrBuildCategoryType(DefaultCategoryType.MALATTIA.name, 
+            DefaultCategoryType.MALATTIA.priority);
+    
+    final CategoryGroupAbsenceType malattiaFiglio1Category = absenceComponentDao
+        .getOrBuildCategoryType(DefaultCategoryType.MALATTIA_FIGLIO_1.name, 
+            DefaultCategoryType.MALATTIA_FIGLIO_1.priority);
+    
+    final CategoryGroupAbsenceType malattiaFiglio2Category = absenceComponentDao
+        .getOrBuildCategoryType(DefaultCategoryType.MALATTIA_FIGLIO_2.name, 
+            DefaultCategoryType.MALATTIA_FIGLIO_2.priority);
+    
+    final CategoryGroupAbsenceType malattiaFiglio3Category = absenceComponentDao
+        .getOrBuildCategoryType(DefaultCategoryType.MALATTIA_FIGLIO_3.name, 
+            DefaultCategoryType.MALATTIA_FIGLIO_3.priority);
+    
     List<AbsenceType> absenceTypes = AbsenceType.findAll();
     for (AbsenceType absenceType : absenceTypes) {
       absenceType.code = absenceType.code.toUpperCase();
@@ -476,28 +518,31 @@ public class AbsenceMigration {
           0, Sets.newHashSet(specifiedMinutes), null, 0, true, false, false, null, null);
       AbsenceType h1c18 = absenceComponentDao.buildOrEditAbsenceType("18H1C", 
           "Permesso assistenza parenti/affini disabili L. 104/92 completamento 1 ora", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 60, true, false, false, null, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 60, false, false, false, null, null);
       AbsenceType h2c18 = absenceComponentDao.buildOrEditAbsenceType("18H2C", 
           "Permesso assistenza parenti/affini disabili L. 104/92 completamento 2 ore", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 120, true, false, false, null, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 120, false, false, false, null, null);
       AbsenceType h3c18 = absenceComponentDao.buildOrEditAbsenceType("18H3C", 
           "Permesso assistenza parenti/affini disabili L. 104/92 completamento 3 ore", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 180, true, false, false, null, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 180, false, false, false, null, null);
       AbsenceType h4c18 = absenceComponentDao.buildOrEditAbsenceType("18H4C", 
           "Permesso assistenza parenti/affini disabili L. 104/92 completamento 4 ore", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 240, true, false, false, null, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 240, false, false, false, null, null);
       AbsenceType h5c18 = absenceComponentDao.buildOrEditAbsenceType("18H5C", 
           "Permesso assistenza parenti/affini disabili L. 104/92 completamento 5 ore", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 300, true, false, false, null, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 300, false, false, false, null, null);
       AbsenceType h6c18 = absenceComponentDao.buildOrEditAbsenceType("18H6C", 
           "Permesso assistenza parenti/affini disabili L. 104/92 completamento 6 ore", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 360, true, false, false, null, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 360, false, false, false, null, null);
       AbsenceType h7c18 = absenceComponentDao.buildOrEditAbsenceType("18H7C", 
           "Permesso assistenza parenti/affini disabili L. 104/92 completamento 7 ore", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 420, true, false, false, null, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 420, false, false, false, null, null);
       AbsenceType h8c18 = absenceComponentDao.buildOrEditAbsenceType("18H8C", 
           "Permesso assistenza parenti/affini disabili L. 104/92 completamento 8 ore", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 480, true, false, false, null, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 480, false, false, false, null, null);
+      AbsenceType h9c18 = absenceComponentDao.buildOrEditAbsenceType("18H9C", 
+          "Permesso assistenza parenti/affini disabili L. 104/92 completamento 9 ore", 
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 540, false, false, false, null, null);
 
 
       //Complation Creation
@@ -511,7 +556,7 @@ public class AbsenceMigration {
         c18.get().amountType = AmountType.minutes;
         c18.get().complationCodes.add(m18);
         c18.get().replacingCodes = 
-            Sets.newHashSet(h1c18, h2c18, h3c18, h4c18, h5c18, h6c18, h7c18, h8c18);
+            Sets.newHashSet(h1c18, h2c18, h3c18, h4c18, h5c18, h6c18, h7c18, h8c18, h9c18);
         c18.get().save();
 
       }
@@ -535,7 +580,7 @@ public class AbsenceMigration {
       GroupAbsenceType group18 = new GroupAbsenceType();
       group18.category = lawCategory;
       group18.name = DefaultGroup.G_18.name();
-      group18.description = "Permesso assistenza parenti/affini disabili L. 104/92 tre giorni mese";
+      group18.description = "18 - Permesso assistenza parenti/affini disabili L. 104/92 tre giorni mese";
       group18.pattern = GroupAbsenceTypePattern.programmed;
       group18.periodType = PeriodType.month;
       group18.complationAbsenceBehaviour = c18.get();
@@ -581,30 +626,32 @@ public class AbsenceMigration {
           0, Sets.newHashSet(specifiedMinutes), null, 0, true, false, false, null, null);
       AbsenceType h1c19 = absenceComponentDao.buildOrEditAbsenceType("19H1C", 
           "Permesso per dipendente disabile L. 104/92 completamento 1 ora", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 60, true, false, false, null, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 60, false, false, false, null, null);
       AbsenceType h2c19 = absenceComponentDao.buildOrEditAbsenceType("19H2C", 
           "Permesso per dipendente disabile L. 104/92 completamento 2 ore", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 120, true, false, false, null, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 120, false, false, false, null, null);
       AbsenceType h3c19 = absenceComponentDao.buildOrEditAbsenceType("19H3C", 
           "Permesso per dipendente disabile L. 104/92 completamento 3 ore", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 180, true, false, false, null, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 180, false, false, false, null, null);
       AbsenceType h4c19 = absenceComponentDao.buildOrEditAbsenceType("19H4C", 
           "Permesso per dipendente disabile L. 104/92 completamento 4 ore", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 240, true, false, false, null, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 240, false, false, false, null, null);
       AbsenceType h5c19 = absenceComponentDao.buildOrEditAbsenceType("19H5C", 
           "Permesso per dipendente disabile L. 104/92 completamento 5 ore", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 300, true, false, false, null, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 300, false, false, false, null, null);
       AbsenceType h6c19 = absenceComponentDao.buildOrEditAbsenceType("19H6C", 
           "Permesso per dipendente disabile L. 104/92 completamento 6 ore", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 360, true, false, false, null, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 360, false, false, false, null, null);
       AbsenceType h7c19 = absenceComponentDao.buildOrEditAbsenceType("19H7C", 
           "Permesso per dipendente disabile L. 104/92 completamento 7 ore", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 420, true, false, false, null, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 420, false, false, false, null, null);
       AbsenceType h8c19 = absenceComponentDao.buildOrEditAbsenceType("19H8C", 
           "Permesso per dipendente disabile L. 104/92 completamento 8 ore", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 480, true, false, false, null, null);
-
-
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 480, false, false, false, null, null);
+      AbsenceType h9c19 = absenceComponentDao.buildOrEditAbsenceType("19H9C", 
+          "Permesso per dipendente disabile L. 104/92 completamento 9 ore", 
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 540, false, false, false, null, null);
+      
       //Complation Creation
       Optional<ComplationAbsenceBehaviour> c19 = absenceComponentDao
           .complationAbsenceBehaviourByName(DefaultComplation.C_19.name());
@@ -616,7 +663,7 @@ public class AbsenceMigration {
         c19.get().amountType = AmountType.minutes;
         c19.get().complationCodes.add(m19);
         c19.get().replacingCodes = 
-            Sets.newHashSet(h1c19, h2c19, h3c19, h4c19, h5c19, h6c19, h7c19, h8c19);
+            Sets.newHashSet(h1c19, h2c19, h3c19, h4c19, h5c19, h6c19, h7c19, h8c19, h9c19);
         c19.get().save();
 
       }
@@ -640,7 +687,7 @@ public class AbsenceMigration {
       GroupAbsenceType group19 = new GroupAbsenceType();
       group19.category = lawCategory;
       group19.name = DefaultGroup.G_19.name();
-      group19.description = "Permesso per dipendente disabile L. 104/92 tre giorni mese";
+      group19.description = "19 - Permesso per dipendente disabile L. 104/92 tre giorni mese";
       group19.pattern = GroupAbsenceTypePattern.programmed;
       group19.periodType = PeriodType.month;
       group19.complationAbsenceBehaviour = c19.get();
@@ -686,29 +733,31 @@ public class AbsenceMigration {
           0, Sets.newHashSet(specifiedMinutes), null, 0, true, false, false, null, null);
       AbsenceType h1c661 = absenceComponentDao.buildOrEditAbsenceType("661H1C", 
           "Permesso orario per motivi personali completamento 1 ora", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 60, true, false, false, null, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 60, false, false, false, null, null);
       AbsenceType h2c661 = absenceComponentDao.buildOrEditAbsenceType("661H2C", 
           "Permesso orario per motivi personali completamento 2 ore", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 120, true, false, false, null, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 120, false, false, false, null, null);
       AbsenceType h3c661 = absenceComponentDao.buildOrEditAbsenceType("661H3C", 
           "Permesso orario per motivi personali completamento 3 ore", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 180, true, false, false, null, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 180, false, false, false, null, null);
       AbsenceType h4c661 = absenceComponentDao.buildOrEditAbsenceType("661H4C", 
           "Permesso orario per motivi personali completamento 4 ore", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 240, true, false, false, null, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 240, false, false, false, null, null);
       AbsenceType h5c661 = absenceComponentDao.buildOrEditAbsenceType("661H5C", 
           "Permesso orario per motivi personali completamento 5 ore", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 300, true, false, false, null, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 300, false, false, false, null, null);
       AbsenceType h6c661 = absenceComponentDao.buildOrEditAbsenceType("661H6C", 
           "Permesso orario per motivi personali completamento 6 ore", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 360, true, false, false, null, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 360, false, false, false, null, null);
       AbsenceType h7c661 = absenceComponentDao.buildOrEditAbsenceType("661H7C", 
           "Permesso orario per motivi personali completamento 7 ore", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 420, true, false, false, null, null);
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 420, false, false, false, null, null);
       AbsenceType h8c661 = absenceComponentDao.buildOrEditAbsenceType("661H8C", 
           "Permesso orario per motivi personali completamento 8 ore", 
-          0, Sets.newHashSet(nothing), absenceTypeMinutes, 480, true, false, false, null, null);
-
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 480, false, false, false, null, null);
+      AbsenceType h9c661 = absenceComponentDao.buildOrEditAbsenceType("661H9C", 
+          "Permesso orario per motivi personali completamento 9 ore", 
+          0, Sets.newHashSet(nothing), absenceTypeMinutes, 540, false, false, false, null, null);
 
       //Complation Creation
       Optional<ComplationAbsenceBehaviour> c661 = absenceComponentDao
@@ -721,7 +770,7 @@ public class AbsenceMigration {
         c661.get().amountType = AmountType.minutes;
         c661.get().complationCodes.add(m661);
         c661.get().replacingCodes = 
-            Sets.newHashSet(h1c661, h2c661, h3c661, h4c661, h5c661, h6c661, h7c661, h8c661);
+            Sets.newHashSet(h1c661, h2c661, h3c661, h4c661, h5c661, h6c661, h7c661, h8c661, h9c661);
         c661.get().save();
 
       }
@@ -746,7 +795,7 @@ public class AbsenceMigration {
       GroupAbsenceType group661 = new GroupAbsenceType();
       group661.category = permissionCategory;
       group661.name = DefaultGroup.G_661.name();
-      group661.description = "Permesso orario per motivi personali 18 ore anno";
+      group661.description = "661 - Permesso orario per motivi personali 18 ore anno";
       group661.pattern = GroupAbsenceTypePattern.programmed;
       group661.periodType = PeriodType.year;
       group661.complationAbsenceBehaviour = c661.get();
@@ -874,7 +923,7 @@ public class AbsenceMigration {
       group23.category = postpartumCategory;
       group23.name = DefaultGroup.G_23.name();
       group23.description = "Astensione facoltativa post partum 100% primo figlio 0-12 anni 30 giorni";
-      group23.chainDescription = "Astensione facoltativa post partum primo figlio";
+      group23.chainDescription = "23 - Astensione facoltativa post partum primo figlio";
       group23.pattern = GroupAbsenceTypePattern.programmed;
       group23.periodType = PeriodType.child1_0_12;
       group23.complationAbsenceBehaviour = c23.get();
@@ -1005,7 +1054,7 @@ public class AbsenceMigration {
       group232.category = postpartumCategory;
       group232.name = DefaultGroup.G_232.name();
       group232.description = "Astensione facoltativa post partum 100% secondo figlio 0-12 anni 30 giorni";
-      group232.chainDescription = "Astensione facoltativa post partum secondo figlio";
+      group232.chainDescription = "232 - Astensione facoltativa post partum secondo figlio";
       group232.pattern = GroupAbsenceTypePattern.programmed;
       group232.periodType = PeriodType.child2_0_12;
       group232.complationAbsenceBehaviour = c232.get();
@@ -1136,7 +1185,7 @@ public class AbsenceMigration {
       group233.category = postpartumCategory;
       group233.name = DefaultGroup.G_233.name();
       group233.description = "Astensione facoltativa post partum 100% terzo figlio 0-12 anni 30 giorni";
-      group233.chainDescription = "Astensione facoltativa post partum terzo figlio";
+      group233.chainDescription = "233 - Astensione facoltativa post partum terzo figlio";
       group233.pattern = GroupAbsenceTypePattern.programmed;
       group233.periodType = PeriodType.child3_0_12;
       group233.complationAbsenceBehaviour = c233.get();
@@ -1219,7 +1268,7 @@ public class AbsenceMigration {
       GroupAbsenceType group89 = new GroupAbsenceType();
       group89.category = permissionCategory;
       group89.name = DefaultGroup.G_89.name();
-      group89.description = "Permesso diritto allo studio 150 ore anno";
+      group89.description = "89 - Permesso diritto allo studio 150 ore anno";
       group89.pattern = GroupAbsenceTypePattern.programmed;
       group89.periodType = PeriodType.year;
       group89.complationAbsenceBehaviour = c89.get();
@@ -1298,7 +1347,7 @@ public class AbsenceMigration {
       GroupAbsenceType group09 = new GroupAbsenceType();
       group09.category = permissionCategory;
       group09.name = DefaultGroup.G_09.name();
-      group09.description = "Permesso visita medica";
+      group09.description = "09 - Permesso visita medica";
       group09.pattern = GroupAbsenceTypePattern.programmed;
       group09.periodType = PeriodType.always;
       group09.complationAbsenceBehaviour = c09.get();
@@ -1543,14 +1592,362 @@ public class AbsenceMigration {
       
       // Group Creation
       GroupAbsenceType groupMalattia = new GroupAbsenceType();
-      groupMalattia.category = otherCategory;
-      groupMalattia.name = DefaultGroup.ALTRI.name();
-      groupMalattia.description = "Malattia";
+      groupMalattia.category = malattiaCategory;
+      groupMalattia.name = DefaultGroup.MALATTIA.name();
+      groupMalattia.description = "111 - Malattia";
       groupMalattia.pattern = GroupAbsenceTypePattern.simpleGrouping;
       groupMalattia.periodType = PeriodType.always;
       groupMalattia.takableAbsenceBehaviour = tMalattia.get();
       groupMalattia.save();
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_1_12.name()).isPresent()) {
+      
+      //Takable Creation
+      Optional<TakableAbsenceBehaviour> tMalattia12 = absenceComponentDao
+          .takableAbsenceBehaviourByName(DefaultTakable.T_MALATTIA_FIGLIO_1_12.name());
+      
+      if (!tMalattia12.isPresent()) {
+
+        tMalattia12 = Optional.fromNullable(new TakableAbsenceBehaviour());
+        tMalattia12.get().name = DefaultTakable.T_MALATTIA_FIGLIO_1_12.name();
+        tMalattia12.get().amountType = AmountType.units;
+        tMalattia12.get().takableCodes = Sets.newHashSet();
+        tMalattia12.get().takenCodes = Sets.newHashSet();
+        tMalattia12.get().fixedLimit = -1;
+        tMalattia12.get().save();
+        
+        if (absenceComponentDao.absenceTypeByCode("12").isPresent()) {
+          tMalattia12.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("12").get());
+        }
+       
+        tMalattia12.get().save();
+      }
+      
+      // Group Creation
+      GroupAbsenceType groupMalattia = new GroupAbsenceType();
+      groupMalattia.category = malattiaFiglio1Category;
+      groupMalattia.name = DefaultGroup.MALATTIA_FIGLIO_1_12.name();
+      groupMalattia.description = "12 - Malattia primo figlio <= 3 anni retribuita 100%";
+      groupMalattia.pattern = GroupAbsenceTypePattern.programmed;
+      groupMalattia.periodType = PeriodType.child1_0_3;
+      groupMalattia.takableAbsenceBehaviour = tMalattia12.get();
+      groupMalattia.save();
+    }
+    
+    
+    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_1_13.name()).isPresent()) {
+      
+      //Takable Creation
+      Optional<TakableAbsenceBehaviour> tMalattia13 = absenceComponentDao
+          .takableAbsenceBehaviourByName(DefaultTakable.T_MALATTIA_FIGLIO_1_13.name());
+      
+      if (!tMalattia13.isPresent()) {
+
+        tMalattia13 = Optional.fromNullable(new TakableAbsenceBehaviour());
+        tMalattia13.get().name = DefaultTakable.T_MALATTIA_FIGLIO_1_13.name();
+        tMalattia13.get().amountType = AmountType.units;
+        tMalattia13.get().takableCodes = Sets.newHashSet();
+        tMalattia13.get().takenCodes = Sets.newHashSet();
+        tMalattia13.get().fixedLimit = -1;
+        tMalattia13.get().save();
+        
+        if (absenceComponentDao.absenceTypeByCode("13").isPresent()) {
+          tMalattia13.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("13").get());
+        }
+       
+        tMalattia13.get().save();
+      }
+      
+      // Group Creation
+      GroupAbsenceType groupMalattia = new GroupAbsenceType();
+      groupMalattia.category = malattiaFiglio1Category;
+      groupMalattia.name = DefaultGroup.MALATTIA_FIGLIO_1_13.name();
+      groupMalattia.description = "13 - Malattia primo figlio oltre 3 anni non retribuita";
+      groupMalattia.pattern = GroupAbsenceTypePattern.programmed;
+      groupMalattia.periodType = PeriodType.child1_3_12;
+      groupMalattia.takableAbsenceBehaviour = tMalattia13.get();
+      groupMalattia.save();
+    }
+    
+
+    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_1_14.name()).isPresent()) {
+      
+      //Takable Creation
+      Optional<TakableAbsenceBehaviour> tMalattia14 = absenceComponentDao
+          .takableAbsenceBehaviourByName(DefaultTakable.T_MALATTIA_FIGLIO_1_14.name());
+      
+      if (!tMalattia14.isPresent()) {
+
+        tMalattia14 = Optional.fromNullable(new TakableAbsenceBehaviour());
+        tMalattia14.get().name = DefaultTakable.T_MALATTIA_FIGLIO_1_14.name();
+        tMalattia14.get().amountType = AmountType.units;
+        tMalattia14.get().takableCodes = Sets.newHashSet();
+        tMalattia14.get().takenCodes = Sets.newHashSet();
+        tMalattia14.get().fixedLimit = -1;
+        tMalattia14.get().save();
+        
+        if (absenceComponentDao.absenceTypeByCode("14").isPresent()) {
+          tMalattia14.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("14").get());
+        }
+       
+        tMalattia14.get().save();
+      }
+      
+      // Group Creation
+      GroupAbsenceType groupMalattia = new GroupAbsenceType();
+      groupMalattia.category = malattiaFiglio1Category;
+      groupMalattia.name = DefaultGroup.MALATTIA_FIGLIO_1_14.name();
+      groupMalattia.description = "14 - Malattia primo figlio <= 3 anni non retribuita";
+      groupMalattia.pattern = GroupAbsenceTypePattern.programmed;
+      groupMalattia.periodType = PeriodType.child1_0_3;
+      groupMalattia.takableAbsenceBehaviour = tMalattia14.get();
+      groupMalattia.save();
+    }
+    
+
+    
+    
+    
+    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_2_12.name()).isPresent()) {
+      
+      //Takable Creation
+      Optional<TakableAbsenceBehaviour> tMalattia12 = absenceComponentDao
+          .takableAbsenceBehaviourByName(DefaultTakable.T_MALATTIA_FIGLIO_2_12.name());
+      
+      if (!tMalattia12.isPresent()) {
+
+        tMalattia12 = Optional.fromNullable(new TakableAbsenceBehaviour());
+        tMalattia12.get().name = DefaultTakable.T_MALATTIA_FIGLIO_2_12.name();
+        tMalattia12.get().amountType = AmountType.units;
+        tMalattia12.get().takableCodes = Sets.newHashSet();
+        tMalattia12.get().takenCodes = Sets.newHashSet();
+        tMalattia12.get().fixedLimit = -1;
+        tMalattia12.get().save();
+        
+        if (absenceComponentDao.absenceTypeByCode("122").isPresent()) {
+          tMalattia12.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("122").get());
+        }
+       
+        tMalattia12.get().save();
+      }
+      
+      // Group Creation
+      GroupAbsenceType groupMalattia = new GroupAbsenceType();
+      groupMalattia.category = malattiaFiglio2Category;
+      groupMalattia.name = DefaultGroup.MALATTIA_FIGLIO_2_12.name();
+      groupMalattia.description = "122 - Malattia secondo figlio <= 3 anni retribuita 100%";
+      groupMalattia.pattern = GroupAbsenceTypePattern.programmed;
+      groupMalattia.periodType = PeriodType.child2_0_3;
+      groupMalattia.takableAbsenceBehaviour = tMalattia12.get();
+      groupMalattia.save();
+    }
+    
+    
+    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_2_13.name()).isPresent()) {
+      
+      //Takable Creation
+      Optional<TakableAbsenceBehaviour> tMalattia13 = absenceComponentDao
+          .takableAbsenceBehaviourByName(DefaultTakable.T_MALATTIA_FIGLIO_2_13.name());
+      
+      if (!tMalattia13.isPresent()) {
+
+        tMalattia13 = Optional.fromNullable(new TakableAbsenceBehaviour());
+        tMalattia13.get().name = DefaultTakable.T_MALATTIA_FIGLIO_2_13.name();
+        tMalattia13.get().amountType = AmountType.units;
+        tMalattia13.get().takableCodes = Sets.newHashSet();
+        tMalattia13.get().takenCodes = Sets.newHashSet();
+        tMalattia13.get().fixedLimit = -1;
+        tMalattia13.get().save();
+        
+        if (absenceComponentDao.absenceTypeByCode("132").isPresent()) {
+          tMalattia13.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("132").get());
+        }
+       
+        tMalattia13.get().save();
+      }
+      
+      // Group Creation
+      GroupAbsenceType groupMalattia = new GroupAbsenceType();
+      groupMalattia.category = malattiaFiglio2Category;
+      groupMalattia.name = DefaultGroup.MALATTIA_FIGLIO_2_13.name();
+      groupMalattia.description = "132 - Malattia secondo figlio oltre 3 anni non retribuita";
+      groupMalattia.pattern = GroupAbsenceTypePattern.programmed;
+      groupMalattia.periodType = PeriodType.child2_3_12;
+      groupMalattia.takableAbsenceBehaviour = tMalattia13.get();
+      groupMalattia.save();
+    }
+    
+
+    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_2_14.name()).isPresent()) {
+      
+      //Takable Creation
+      Optional<TakableAbsenceBehaviour> tMalattia14 = absenceComponentDao
+          .takableAbsenceBehaviourByName(DefaultTakable.T_MALATTIA_FIGLIO_2_14.name());
+      
+      if (!tMalattia14.isPresent()) {
+
+        tMalattia14 = Optional.fromNullable(new TakableAbsenceBehaviour());
+        tMalattia14.get().name = DefaultTakable.T_MALATTIA_FIGLIO_2_14.name();
+        tMalattia14.get().amountType = AmountType.units;
+        tMalattia14.get().takableCodes = Sets.newHashSet();
+        tMalattia14.get().takenCodes = Sets.newHashSet();
+        tMalattia14.get().fixedLimit = -1;
+        tMalattia14.get().save();
+        
+        if (absenceComponentDao.absenceTypeByCode("142").isPresent()) {
+          tMalattia14.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("142").get());
+        }
+       
+        tMalattia14.get().save();
+      }
+      
+      // Group Creation
+      GroupAbsenceType groupMalattia = new GroupAbsenceType();
+      groupMalattia.category = malattiaFiglio2Category;
+      groupMalattia.name = DefaultGroup.MALATTIA_FIGLIO_2_14.name();
+      groupMalattia.description = "142 - Malattia secondo figlio <= 3 anni non retribuita";
+      groupMalattia.pattern = GroupAbsenceTypePattern.programmed;
+      groupMalattia.periodType = PeriodType.child2_0_3;
+      groupMalattia.takableAbsenceBehaviour = tMalattia14.get();
+      groupMalattia.save();
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_3_12.name()).isPresent()) {
+      
+      //Takable Creation
+      Optional<TakableAbsenceBehaviour> tMalattia12 = absenceComponentDao
+          .takableAbsenceBehaviourByName(DefaultTakable.T_MALATTIA_FIGLIO_3_12.name());
+      
+      if (!tMalattia12.isPresent()) {
+
+        tMalattia12 = Optional.fromNullable(new TakableAbsenceBehaviour());
+        tMalattia12.get().name = DefaultTakable.T_MALATTIA_FIGLIO_3_12.name();
+        tMalattia12.get().amountType = AmountType.units;
+        tMalattia12.get().takableCodes = Sets.newHashSet();
+        tMalattia12.get().takenCodes = Sets.newHashSet();
+        tMalattia12.get().fixedLimit = -1;
+        tMalattia12.get().save();
+        
+        if (absenceComponentDao.absenceTypeByCode("123").isPresent()) {
+          tMalattia12.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("123").get());
+        }
+       
+        tMalattia12.get().save();
+      }
+      
+      // Group Creation
+      GroupAbsenceType groupMalattia = new GroupAbsenceType();
+      groupMalattia.category = malattiaFiglio3Category;
+      groupMalattia.name = DefaultGroup.MALATTIA_FIGLIO_3_12.name();
+      groupMalattia.description = "123 - Malattia terzo figlio <= 3 anni retribuita 100%";
+      groupMalattia.pattern = GroupAbsenceTypePattern.programmed;
+      groupMalattia.periodType = PeriodType.child3_0_3;
+      groupMalattia.takableAbsenceBehaviour = tMalattia12.get();
+      groupMalattia.save();
+    }
+    
+    
+    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_3_13.name()).isPresent()) {
+      
+      //Takable Creation
+      Optional<TakableAbsenceBehaviour> tMalattia13 = absenceComponentDao
+          .takableAbsenceBehaviourByName(DefaultTakable.T_MALATTIA_FIGLIO_3_13.name());
+      
+      if (!tMalattia13.isPresent()) {
+
+        tMalattia13 = Optional.fromNullable(new TakableAbsenceBehaviour());
+        tMalattia13.get().name = DefaultTakable.T_MALATTIA_FIGLIO_3_13.name();
+        tMalattia13.get().amountType = AmountType.units;
+        tMalattia13.get().takableCodes = Sets.newHashSet();
+        tMalattia13.get().takenCodes = Sets.newHashSet();
+        tMalattia13.get().fixedLimit = -1;
+        tMalattia13.get().save();
+        
+        if (absenceComponentDao.absenceTypeByCode("133").isPresent()) {
+          tMalattia13.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("133").get());
+        }
+       
+        tMalattia13.get().save();
+      }
+      
+      // Group Creation
+      GroupAbsenceType groupMalattia = new GroupAbsenceType();
+      groupMalattia.category = malattiaFiglio3Category;
+      groupMalattia.name = DefaultGroup.MALATTIA_FIGLIO_3_13.name();
+      groupMalattia.description = "133 - Malattia terzo figlio oltre 3 anni non retribuita";
+      groupMalattia.pattern = GroupAbsenceTypePattern.programmed;
+      groupMalattia.periodType = PeriodType.child3_3_12;
+      groupMalattia.takableAbsenceBehaviour = tMalattia13.get();
+      groupMalattia.save();
+    }
+    
+
+    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_3_14.name()).isPresent()) {
+      
+      //Takable Creation
+      Optional<TakableAbsenceBehaviour> tMalattia14 = absenceComponentDao
+          .takableAbsenceBehaviourByName(DefaultTakable.T_MALATTIA_FIGLIO_3_14.name());
+      
+      if (!tMalattia14.isPresent()) {
+
+        tMalattia14 = Optional.fromNullable(new TakableAbsenceBehaviour());
+        tMalattia14.get().name = DefaultTakable.T_MALATTIA_FIGLIO_3_14.name();
+        tMalattia14.get().amountType = AmountType.units;
+        tMalattia14.get().takableCodes = Sets.newHashSet();
+        tMalattia14.get().takenCodes = Sets.newHashSet();
+        tMalattia14.get().fixedLimit = -1;
+        tMalattia14.get().save();
+        
+        if (absenceComponentDao.absenceTypeByCode("143").isPresent()) {
+          tMalattia14.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("143").get());
+        }
+       
+        tMalattia14.get().save();
+      }
+      
+      // Group Creation
+      GroupAbsenceType groupMalattia = new GroupAbsenceType();
+      groupMalattia.category = malattiaFiglio3Category;
+      groupMalattia.name = DefaultGroup.MALATTIA_FIGLIO_3_14.name();
+      groupMalattia.description = "143 - Malattia terzo figlio <= 3 anni non retribuita";
+      groupMalattia.pattern = GroupAbsenceTypePattern.programmed;
+      groupMalattia.periodType = PeriodType.child3_0_3;
+      groupMalattia.takableAbsenceBehaviour = tMalattia14.get();
+      groupMalattia.save();
+    }
+    
+    
+    
     
     if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.ALTRI.name()).isPresent()) {
       
@@ -1570,24 +1967,6 @@ public class AbsenceMigration {
       }
       
       JPA.em().flush();
-      
-      // Set boolean independente
-      absenceTypes = AbsenceType.findAll();
-      for (AbsenceType absenceType : absenceTypes) {
-        
-        if (absenceType.code.equals("90")) {
-          log.info("trovato");
-        }
-        
-        absenceType.refresh();
-        
-        if (absenceType.takableGroup.isEmpty() && absenceType.takenGroup.isEmpty() 
-            && absenceType.complationGroup.isEmpty() && absenceType.replacingGroup.isEmpty()) {
-          log.info("AbsenceCode {}", absenceType.code );
-          tAltri.get().takableCodes.add(absenceType);
-          tAltri.get().save();
-        }
-      }
 
       // Group Creation
       GroupAbsenceType groupAltri = new GroupAbsenceType();
@@ -1602,10 +1981,68 @@ public class AbsenceMigration {
     
     JPA.em().flush();
     
+    Optional<TakableAbsenceBehaviour> tAltri = absenceComponentDao
+        .takableAbsenceBehaviourByName(DefaultTakable.T_ALTRI.name());
+    tAltri.get().takableCodes = Sets.newHashSet();
+    tAltri.get().takenCodes = Sets.newHashSet();
+    tAltri.get().save();
+    
+    JPA.em().flush();
+    
+    // Set boolean independente
+    absenceTypes = AbsenceType.findAll();
+    for (AbsenceType absenceType : absenceTypes) {
+      
+      if (absenceType.code.equals("90")) {
+        log.info("trovato");
+      }
+      
+      absenceType.refresh();
+      
+      if (absenceType.takableGroup.isEmpty() && absenceType.takenGroup.isEmpty() 
+          && absenceType.complationGroup.isEmpty() && absenceType.replacingGroup.isEmpty()) {
+        log.info("AbsenceCode {}", absenceType.code );
+        tAltri.get().takableCodes.add(absenceType);
+        tAltri.get().save();
+      }
+    }
+    
     migrateAllAbsences();
     
+    absenceComponentDao.renameCode("661H1C", "661H1");
+    absenceComponentDao.renameCode("661H2C", "661H2");
+    absenceComponentDao.renameCode("661H3C", "661H3");
+    absenceComponentDao.renameCode("661H4C", "661H4");
+    absenceComponentDao.renameCode("661H5C", "661H5");
+    absenceComponentDao.renameCode("661H6C", "661H6");
+    absenceComponentDao.renameCode("661H7C", "661H7");
+    absenceComponentDao.renameCode("661H8C", "661H8");
+    absenceComponentDao.renameCode("661H9C", "661H9");
     
+    absenceComponentDao.renameCode("18H1C", "18H1");
+    absenceComponentDao.renameCode("18H2C", "18H2");
+    absenceComponentDao.renameCode("18H3C", "18H3");
+    absenceComponentDao.renameCode("18H4C", "18H4");
+    absenceComponentDao.renameCode("18H5C", "18H5");
+    absenceComponentDao.renameCode("18H6C", "18H6");
+    absenceComponentDao.renameCode("18H7C", "18H7");
+    absenceComponentDao.renameCode("18H8C", "18H8");
+    absenceComponentDao.renameCode("18H9C", "18H9");
+    
+    absenceComponentDao.renameCode("19H1C", "19H1");
+    absenceComponentDao.renameCode("19H2C", "19H2");
+    absenceComponentDao.renameCode("19H3C", "19H3");
+    absenceComponentDao.renameCode("19H4C", "19H4");
+    absenceComponentDao.renameCode("19H5C", "19H5");
+    absenceComponentDao.renameCode("19H6C", "19H6");
+    absenceComponentDao.renameCode("19H7C", "19H7");
+    absenceComponentDao.renameCode("19H8C", "19H8");
+    absenceComponentDao.renameCode("19H9C", "19H9");
     
   }
+  
+  
+  
+
 
 }

@@ -167,6 +167,16 @@ public class AbsenceEngine {
         periodChain.to = absencePeriod.to;
       }
     }
+    // Fix caso in cui l'intervallo dipende da un figlio e passo una data fuori intervallo.
+    if (!DateUtility.isDateIntoInterval(date, new DateInterval(periodChain.from, periodChain.to))) {
+      if (groupAbsenceType.periodType.isChildPeriod()) { 
+        this.report.addRequestProblem(ReportRequestProblem.builder()
+            .requestProblem(RequestProblem.NoChildExists)
+            .date(date)
+            .build());
+        return;
+      }
+    }
     periodChain.contracts = Lists.newArrayList();
     for (Contract contract : this.person.contracts) {
       if (DateUtility.intervalIntersection(
@@ -360,7 +370,7 @@ public class AbsenceEngine {
         if (isTaken) {
           int takenAmount = absenceEngineUtility
               .absenceJustifiedAmount(this, absence, absencePeriod.takeAmountType);
-          if (takenAmount <= 0) {
+          if (takenAmount < 0) {
             this.report.addAbsenceTrouble(AbsenceTrouble.builder()
                 .trouble(AbsenceProblem.IncalcolableJustifiedAmount)
                 .absence(absence)

@@ -30,47 +30,72 @@
    #{elseif templateUtility.isComplationCode(_absence.absenceType, _groupSelected)} text-success #{/elseif}
    #{else} text-info #{/else} 
    " webui-popover-hover data-url="#${id}"><strong>${_absence.absenceType.code}</strong></span>   
-    
-   
  #{/if}
  
  <div class="webui-popover-content" id="${id}">
-    <strong>Data</strong> ${_absence.absenceDate.format()}<br>
-    <strong>Codice</strong> ${_absence.absenceType.code}<br>
-    <strong>Descrizione</strong> ${_absence.absenceType.description}
-
-    #{if _absence.justifiedType}
-        #{if _absence.justifiedAllDay() }
-          <br><strong>Tempo giustificato</strong> &{_absence.justifiedType}
-        #{/if}
-	    #{if _absence.justifiedTime() }
-	      <br><strong>Tempo giustificato</strong> ${_absence.justifiedTime().printHourMinute()}
-	    #{/if}
-    #{/if}
     
+    #{if _absence.absenceType.internalUse }
+      <p>
+        <span class="fa-stack fa-lg">
+          <i class="fa fa-paper-plane-o fa-stack-1x"></i>
+          <i class="fa fa-ban fa-stack-2x text-danger"></i>
+        </span>
+        <strong class="text-success">Il codice ${_absence.absenceType.code} è ad uso interno ePAS e non verrà inviato ad attestati.</strong>
+
+      </p>
+    #{/if}
+    #{else}
+      <p>
+        <span class="fa-stack fa-lg">
+          <i class="fa fa-paper-plane-o fa-stack-1x"></i>
+        </span>
+        <strong class="text-success">Il codice ${_absence.absenceType.code} verrà inviato ad attestati.</strong>
+
+      </p>
+           
+    #{/else}
+   
     #{if _person && !templateUtility.involvedGroupAbsenceType(_absence.absenceType).empty }
     <p>
-      <br>
-      <strong>Esplora i gruppi di questa assenza</strong>
       #{list items:templateUtility.involvedGroupAbsenceType(_absence.absenceType), as:'group'}
-        <br><a href="@{AbsenceGroups.groupStatus(_person.id, group.id, _absence.getAbsenceDate().format())}">${group.description}</a>      
+        #{if _absence.personDay}
+        #{list items:_absence.personDay.absences, as:'otherAbsence' }
+          #{if !otherAbsence.equals(_absence)}
+            #{if group.complationAbsenceBehaviour && group.complationAbsenceBehaviour.replacingCodes.contains(otherAbsence.absenceType)}
+               <p>
+                 <span class="fa-stack fa-lg">
+                   <i class="fa fa-paper-plane-o fa-stack-1x"></i>
+                 </span>
+                 <strong class="text-success">Il codice ${otherAbsence.absenceType.code} verrà inviato ad attestati.</strong>
+                 <a href="@{AbsenceGroups.groupStatus(_person.id, group.id, _absence.getAbsenceDate().format())}">Verifica</a>
+               </p>
+            #{/if}
+          #{/if}
+        #{/list}
+        #{/if}
+           
       #{/list}
     </p>  
     #{/if}
-    <br>
+    
+    
+    <strong class="text-primary">${_absence.absenceType.code}</strong><br>
+    <strong>Data</strong> ${_absence.absenceDate.format()}<br>
+    <strong>Descrizione</strong> ${_absence.absenceType.description}<br>
+    #{absences.justifiedTime absence:_absence /}
+    
     #{if _remainingTroubles }
+    <br>
          #{list items:_remainingTroubles, as:'trouble'}
            <strong class="text-danger">&{trouble.trouble}</strong><br>
          #{/list}
     #{/if}
     #{elseif !_absence.troubles.empty}
+    <br>
          #{list items:_absence.troubles, as:'trouble'}
            <strong class="text-danger">&{trouble.trouble}</strong><br>
          #{/list}
      #{/elseif}
-     #{else}
-       <br>Non ci sono errori.
-     #{/else}
 
   </div>
 

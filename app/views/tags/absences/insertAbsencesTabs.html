@@ -6,17 +6,40 @@
       <a data-async="#absenceData" href="@{AbsenceGroups.switchAbsenceInsertTab(_absenceRequestForm.person.id, _absenceRequestForm.from.format(), manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.mission)}">Missione</a>
     </li>
     <li #{if _absenceRequestForm.absenceInsertTab.equals(manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.vacation)} class="active" #{/if}>
-      <a data-async="#absenceData" href="@{AbsenceGroups.switchAbsenceInsertTab(_absenceRequestForm.person.id, _absenceRequestForm.from.format(), manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.vacation)}">Ferie/Permessi</a>
+      <a data-async="#absenceData" href="@{AbsenceGroups.switchAbsenceInsertTab(_absenceRequestForm.person.id, _absenceRequestForm.from.format(), manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.vacation)}">Ferie e Festività Soppr.</a>
     </li>
     <li #{if _absenceRequestForm.absenceInsertTab.equals(manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.compensatory)} class="active" #{/if}>
-      <a data-async="#absenceData" href="@{AbsenceGroups.switchAbsenceInsertTab(_absenceRequestForm.person.id, _absenceRequestForm.from.format(), manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.compensatory)}">Rip. Compensativo</a>
+      <a data-async="#absenceData" href="@{AbsenceGroups.switchAbsenceInsertTab(_absenceRequestForm.person.id, _absenceRequestForm.from.format(), manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.compensatory)}">Riposo Compensativo</a>
     </li>
-    <li #{if _absenceRequestForm.absenceInsertTab.equals(manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.group)} class="active" #{/if}>
-      <a data-async="#absenceData" href="@{AbsenceGroups.switchAbsenceInsertTab(_absenceRequestForm.person.id, _absenceRequestForm.from.format(), manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.group)}">Gruppi</a>
+    
+    *{
+    
+    <li #{if _absenceRequestForm.absenceInsertTab.equals(manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.permission)} class="active" #{/if}>
+      <a data-async="#absenceData" href="@{AbsenceGroups.switchAbsenceInsertTab(_absenceRequestForm.person.id, _absenceRequestForm.from.format(), manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.permission)}">Permessi</a>
+    </li>
+    <li #{if _absenceRequestForm.absenceInsertTab.equals(manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.law104)} class="active" #{/if}>
+      <a data-async="#absenceData" href="@{AbsenceGroups.switchAbsenceInsertTab(_absenceRequestForm.person.id, _absenceRequestForm.from.format(), manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.law104)}">Legge 104/92</a>
+    </li>
+    <li #{if _absenceRequestForm.absenceInsertTab.equals(manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.postpartum)} class="active" #{/if}>
+      <a data-async="#absenceData" href="@{AbsenceGroups.switchAbsenceInsertTab(_absenceRequestForm.person.id, _absenceRequestForm.from.format(), manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.postpartum)}">Congedi Parentali</a>
+    </li>
+    <li #{if _absenceRequestForm.absenceInsertTab.equals(manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.illness)} class="active" #{/if}>
+      <a data-async="#absenceData" href="@{AbsenceGroups.switchAbsenceInsertTab(_absenceRequestForm.person.id, _absenceRequestForm.from.format(), manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.illness)}">Malattia Dipendente</a>
+    </li>
+    
+    <li #{if _absenceRequestForm.absenceInsertTab.equals(manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.illnessChild)} class="active" #{/if}>
+      <a data-async="#absenceData" href="@{AbsenceGroups.switchAbsenceInsertTab(_absenceRequestForm.person.id, _absenceRequestForm.from.format(), manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.illnessChild)}">Malattia Figli</a>
     </li>
     <li #{if _absenceRequestForm.absenceInsertTab.equals(manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.other)} class="active" #{/if}>
-      <a data-async="#absenceData" href="@{AbsenceGroups.switchAbsenceInsertTab(_absenceRequestForm.person.id, _absenceRequestForm.from.format(), manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.other)}">Altri</a>
+      <a data-async="#absenceData" href="@{AbsenceGroups.switchAbsenceInsertTab(_absenceRequestForm.person.id, _absenceRequestForm.from.format(), manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.other)}">Altre Tipologie</a>
     </li>
+    
+    }*
+    
+    <li #{if _absenceRequestForm.absenceInsertTab.equals(manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.other)} class="active" #{/if}>
+      <a data-async="#absenceData" href="@{AbsenceGroups.switchAbsenceInsertTab(_absenceRequestForm.person.id, _absenceRequestForm.from.format(), manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.other)}">Altre Tipologie</a>
+    </li>
+    
   </ul>
 </div>
 <br>

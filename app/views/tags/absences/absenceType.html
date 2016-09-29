@@ -1,21 +1,22 @@
-#{if (_onlyUsed && !_absenceType.absences.empty) 
-      || (_onlyNotUsed && _absenceType.absences.empty) }
   <span class="label
-  #{if _absenceType.isAllDayPermitted() }
-    label-info 
+  
+  #{if _absenceType.expired }
+    label-default
   #{/if}
-  #{elseif _absenceType.isAbsenceTypeMinutesPermitted()}
-    label-warning 
-  #{/elseif}
-  #{elseif _absenceType.isSpecifiedMinutesPermitted()}
-    label-success 
-  #{/elseif}
-  #{elseif _absenceType.replacingType}
-    label-default 
-  #{/elseif}
   #{else}
-    label-danger
+    #{if _absenceType.replacingType}
+      label-info 
+    #{/if}
+    #{elseif _absenceType.isAllDayPermitted() || _absenceType.isAbsenceTypeMinutesPermitted() 
+      || _absenceType.isSpecifiedMinutesPermitted() }
+    label-primary
+    #{/elseif}
+    #{else}
+      label-primary
+    #{/else}
   #{/else}
+ 
+  
   " webui-popover-hover data-url="#${_absenceType.id}">${_absenceType.code}</span>
   
   *{ <strong webui-popover-hover data-url="#${_absenceType.id}">${_absenceType.code}</strong> }*
@@ -48,5 +49,4 @@
     #{/if}
 
   </div>
-#{/if}
    

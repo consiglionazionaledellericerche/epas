@@ -19,12 +19,63 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
    #{include './_configureSelectedGroup.html' /}
    #{include './_verifyRequest.html' /}
  
+   
+  
+  #{if !report.insertDaysStatus.empty }
+  <p><strong><em>Riepilogo dei codici che verrebbero inseriti.</em></strong></p>
+    <table class="table table-condensed table-bordered">
+      <tr>
+        <th class="bg-info">Data</th>
+        <th class="bg-info">Codice</th>
+        <th class="bg-info">Descrizione</th>
+        <th class="bg-info">Tempo giustificato</th>
+        #{if report.hasTakableStatus() }
+        <th class="bg-success">Residuo<br>Utilizzabile</th>
+        <th class="bg-success">Residuo<br>Consumato</th>
+        #{/if}
+        #{if report.hasComplationStatus() }
+        <th class="bg-warning">Completamento<br>Precedente<br></th>
+        <th class="bg-warning">Completamento<br>Assenza</th>
+        <th class="bg-warning">Completamento<br>Residuo<br></th>
+        #{/if}
+      </tr>
+      #{list items:report.insertDaysStatus, as:'dayStatus'}
+      #{list items:dayStatus.buildDayRows(), as:'rowRecap' }
+        <tr>
+          <td>
+            #{if rowRecap.date}
+              ${rowRecap.date.format()}
+            #{/if}  
+          </td>
+          <td>
+              #{absences.absence-popover absence:rowRecap.absence, 
+              groupSelected:selectedFormItem.groupAbsenceType,
+              person:absenceRequestForm.person /}
+          </td>
+          <td>${rowRecap.absence.absenceType.description}</td>
+          <td>#{absences.justifiedTime absence:rowRecap.absence, noLabel:true /}</td>
+          #{if report.hasTakableStatus() }
+          <td>${rowRecap.usableLimit}</td>
+          <td>${rowRecap.usableTaken}</td>
+          #{/if}
+          #{if report.hasComplationStatus() }
+          <td>${rowRecap.consumedComplationBefore}</td>
+          <td>${rowRecap.consumedComplationAbsence}</td>
+          <td>${rowRecap.consumedComplationNext}</td>
+          #{/if}
+        </tr>
+      #{/list}
+      #{/list}
+      </table>
+   #{/if}
+   
    #{if report.containsProblems()}
     #{alert color:'danger'}
       #{if !report.absencesRemainingTroubles.keySet().empty}
         <strong>La richiesta ha riscontrato la presenza di assenze contenenti errori.</strong>
         #{list items:report.absencesRemainingTroubles.keySet(), as:'absence'}
           <br><strong>${absence.absenceDate.format()}</strong>
+          
           #{absences.absence-popover absence:absence, 
             person:absenceRequestForm.person, 
             groupSelected:selectedFormItem.groupAbsenceType,
@@ -51,42 +102,7 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
       #{/if}
       </p>
     #{/alert} 
-  #{/if}
-  
-  #{if !report.insertDaysStatus.empty }
-    <table class="table table-condensed table-bordered">
-      <tr>
-        <th>Data</th>
-        <th>Assenza</th>
-        <th>Limite<br>Utilizzabile</th>
-        <th>Limite<br>Consumato</th>
-        <th>Completamento<br>Precedente<br></th>
-        <th>Completamento<br>Assenza</th>
-        <th>Completamento<br>Residuo<br></th>
-      </tr>
-      #{list items:report.insertDaysStatus, as:'dayStatus'}
-      #{list items:dayStatus.buildDayRows(), as:'rowRecap' }
-        <tr>
-          <td>
-            #{if rowRecap.date}
-              ${rowRecap.date.format()}
-            #{/if}  
-          </td>
-          <td>
-              #{absences.absence-popover absence:rowRecap.absence, 
-              groupSelected:selectedFormItem.groupAbsenceType,
-              person:absenceRequestForm.person /}
-          </td>
-          <td>${rowRecap.usableLimit}</td>
-          <td>${rowRecap.usableTaken}</td>
-          <td>${rowRecap.consumedComplationBefore}</td>
-          <td>${rowRecap.consumedComplationAbsence}</td>
-          <td>${rowRecap.consumedComplationNext}</td>
-        </tr>
-      #{/list}
-      #{/list}
-      </table>
-   #{/if} 
+  #{/if} 
       
      *{ save request }*
 	 #{form action:@AbsenceGroups.save(), method:'POST', autocomplete:false, class:'form form-horizontal',
@@ -119,7 +135,7 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
 	   #{/if}
 	 
 	   #{b.buttons center:true}
-         #{b.submit 'Salva'/}
+         #{b.submit 'Inserisci'/}
        #{/b.buttons}
 	 #{/form}	  
     
@@ -142,7 +158,14 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
 	  #{f.hidden 'dateFrom', value:absenceRequestForm.from?.format() /}
       #{f.date 'dateFrom', value:absenceRequestForm.from?.format(), disabled:true /}     
       #{f.date 'dateTo', value:absenceRequestForm.to?.format() /}
-      #{f.selectModel 'absenceType', items: templateUtility.getAbsenceTypes(absenceRequestForm.absenceInsertTab), required:true /}
+      
+      %{ if (absenceType == null) {
+           absenceType = templateUtility.getAbsenceTypes(absenceRequestForm.absenceInsertTab).get(0);
+         }
+      }%
+  
+      
+      #{f.selectModel 'absenceType', items: templateUtility.getAbsenceTypes(absenceRequestForm.absenceInsertTab), value:absenceType, required:true /}
 	  
 	  *{ #{f.input 'absenceFile', type:'file' /} }*
 	
@@ -151,13 +174,9 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
 	  #{/b.buttons}
 	
 	  #{/form}
-	
-	  #{accordionItem 'nuovaAssenza', parent:'info', title:'Informazioni utili', open:true }
-	  <p>Se si vuole inserire un'assenza per più giorni, inserire nel campo <strong>Fino a</strong>
-	    il giorno fino al quale si vuole inserire tale codice d'assenza.</p>
-	  <p>Di default, in tale campo, viene visualizzato il giorno di partenza per cui si vuole inserire l'assenza</p>
-	  <p class="text-info" style="margin-top: 5px;"><em>N.B. Non e' possibile inserire in uno stesso giorno
-	    due codici di assenza che giustificano tutto il giorno</em></p>
+	  	
+	  #{if absenceRequestForm.absenceInsertTab.equals(manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.vacation)}
+	  #{alert color:'info'}
 	  <p>Utilizzando il codice <em>FER</em> il software provvederà ad assegnare ferie e permessi
 	    fin quando disponibili nel seguente ordine di priorità:
 	  <ul>
@@ -166,7 +185,8 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
 	    <li>32 (ferie anno corrente)</li>
 	  </ul>
 	  </p>
-	  #{/accordionItem}
+	  #{/alert}
+	  #{/if}
    
    #{/else}   
   

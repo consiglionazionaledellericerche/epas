@@ -142,7 +142,7 @@ public class DayStatus {
       rowRecap.absence = takenComplation.absence;
       rowRecap.usableLimit = printAmount(takenComplation.residualBeforeTakable, takenComplation.amountTypeTakable);
       rowRecap.usableTaken = printAmount(takenComplation.consumedTakable, takenComplation.amountTypeTakable);
-      if (rowRecap.usableLimit.equals("-1.0")) {
+      if (rowRecap.usableLimit.equals("-1.0 giorni")) {
         rowRecap.usableLimit = "";
         rowRecap.usableTaken = "";
       }
@@ -222,7 +222,7 @@ public class DayStatus {
     String format = "";
     if (amountType.equals(AmountType.units)) {
       if (amount == 0) {
-        return "0";// giorno lavorativo";
+        return "0 giorni";// giorno lavorativo";
       }
 //      int units = amount / 100;
 //      int percent = amount % 100;
@@ -237,7 +237,7 @@ public class DayStatus {
 //      } else if (percent > 0) {
 //        return percent + "% di un giorno lavorativo";
 //      }
-      return ((double)amount / 100 )+ "";
+      return ((double)amount / 100 )+ " giorni";
     }
     if (amountType.equals(AmountType.minutes)) {
       if (amount == 0) {

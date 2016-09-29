@@ -34,10 +34,14 @@
       *{ <span class="label label-primary">Codice</span> ${group.takableAbsenceBehaviour.name}<br> }*
       <span class="label label-primary">Codici considerati</span> 
       #{list items:group.takableAbsenceBehaviour.takableCodes, as:'absenceType'}
-          #{absences.absenceType absenceType:absenceType, onlyUsed:true /}
-      #{/list}  
-      non utilizzati #{list items:group.takableAbsenceBehaviour.takableCodes, as:'absenceType'}
-          #{absences.absenceType absenceType:absenceType, onlyNotUsed:true /}
+        #{if !absenceType.expired }
+          #{absences.absenceType absenceType:absenceType /}
+        #{/if}  
+      #{/list}
+      #{list items:group.takableAbsenceBehaviour.takableCodes, as:'absenceType'}
+        #{if absenceType.expired }
+          #{absences.absenceType absenceType:absenceType /}
+        #{/if}    
       #{/list}  
       
     </li>
@@ -49,19 +53,27 @@
       *{ <span class="label label-primary">Codice</span> ${group.complationAbsenceBehaviour.name}<br> }*
       <span class="label label-primary">Codici completamento</span> 
       #{list items:group.complationAbsenceBehaviour.complationCodes, as:'absenceType'}
-          #{absences.absenceType absenceType:absenceType, onlyUsed:true /}
+        #{if !absenceType.expired }
+          #{absences.absenceType absenceType:absenceType /}
+        #{/if}    
       #{/list} 
-      non utilizzati #{list items:group.complationAbsenceBehaviour.complationCodes, as:'absenceType'}
-          #{absences.absenceType absenceType:absenceType, onlyNotUsed:true /}
+      #{list items:group.complationAbsenceBehaviour.complationCodes, as:'absenceType'}
+        #{if absenceType.expired }
+          #{absences.absenceType absenceType:absenceType /}
+        #{/if}    
       #{/list} 
       <br>
       
       <span class="label label-primary">Codici rimpiazzamento</span> 
       #{list items:group.complationAbsenceBehaviour.replacingCodes, as:'absenceType'}
-          #{absences.absenceType absenceType:absenceType, onlyUsed:true /}
+        #{if !absenceType.expired }
+          #{absences.absenceType absenceType:absenceType /}
+        #{/if}    
       #{/list} 
-      non utilizzati #{list items:group.complationAbsenceBehaviour.replacingCodes, as:'absenceType'}
-          #{absences.absenceType absenceType:absenceType, onlyNotUsed:true /}
+      #{list items:group.complationAbsenceBehaviour.replacingCodes, as:'absenceType'}
+        #{if absenceType.expired }
+          #{absences.absenceType absenceType:absenceType /}
+        #{/if}    
       #{/list} 
       
     </li>
