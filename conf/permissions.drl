@@ -323,7 +323,8 @@ when
     "VacationsAdmin.vacationsCurrentYear",
     "VacationsAdmin.vacationsLastYear",
     "MealTickets.editPersonMealTickets",
-    "MealTickets.recapPersonMealTickets"),  granted == false)
+    "MealTickets.recapPersonMealTickets",
+    "PersonMonths.visualizePeopleTrainingHours"),  granted == false)
 then
   $c.grant();
 end
