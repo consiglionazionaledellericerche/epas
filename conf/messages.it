@@ -495,6 +495,9 @@ Competences.enabledCompetences= Abilita Competenze
 Competences.totalOvertimeHours= Monte ore
 Competences.approvedCompetenceInYear= Competenza Assegnate nell'anno
 Competences.exportCompetences= Esporta competenze
+MealTickets.recapMealTickets= Riepilogo Buoni Pasto
+MealTickets.findCodeBlock= Ricerca Buoni Pasto
+MealTickets.returnedMealTickets= Buoni Pasto Riconsegnati
 
 ########################
 # Enumerati
