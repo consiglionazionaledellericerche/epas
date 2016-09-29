@@ -324,7 +324,18 @@ when
     "VacationsAdmin.vacationsLastYear",
     "MealTickets.editPersonMealTickets",
     "MealTickets.recapPersonMealTickets",
-    "PersonMonths.visualizePeopleTrainingHours"),  granted == false)
+    "PersonMonths.visualizePeopleTrainingHours",
+    "PersonDayHistory.personDayHistory",
+    "Stampings.missingStamping",
+    "Stampings.dailyPresence",
+    "MonthRecaps.showRecaps",
+    "MonthRecaps.customRecap",
+    "PrintTags.listPersonForPrintTags",
+    "Charts.checkLastYearAbsences",
+    "Charts.overtimeOnPositiveResidual",
+    "Charts.overtimeOnPositiveResidualInYear",
+    "PrintTags.showTag",
+    "Certifications.certifications"),  granted == false)
 then
   $c.grant();
 end
