@@ -4,10 +4,12 @@
 
 <div class="container col-lg-6 col-lg-offset-3">
 
+	#{secure.check 'Competences.insertCompetenceCode'}
   #{b.buttons center:true}
     #{b.link @Competences.insertCompetenceCode(), color:'primary'
   , title:messages.get('competenceCode.new'),fa:'plus', modal:'#modalCompetenceCode' /}
   #{/b.buttons}
+	#{/secure.check}
 
 <div class="span10">
 <table class="table table-striped" id="tabellaCodiciCompetenza">
@@ -20,7 +22,11 @@
 	#{list items:compCodeList, as:'compCode'}
 	
 	<tr>
-		<td><a href="@{Competences.edit(compCode.id)}" data-async-modal="#modalCompetenceCode">${compCode.code}</a></td>
+		<td>
+			#{secure.link @Competences.edit(compCode.id), 'data-async-modal':'#modalCompetenceCode'}
+				${compCode.code}
+			#{/secure.link}
+		</td>
 		<td>${compCode.codeToPresence}</td>
 		<td>${compCode.description}</td>
 		
