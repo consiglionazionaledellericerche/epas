@@ -1,34 +1,30 @@
-*{ item: la sede
-edit: link della modifica
-}*
-
 <h4>
-  #{secure.link @Offices.edit(_item.id),target:_item,fa:'cogs',class:'list-group-item-heading'}
-    ${_item.name}
+  #{secure.link @Offices.edit(seat.id),target:seat,fa:'cogs',class:'list-group-item-heading'}
+    ${seat.name}
   #{/secure.link}
 </h4>
 
 <div class="list-group-item-text">
   <strong><i class="fa fa-barcode"></i> Codici </strong>
-  <span class="label label-danger">${_item.codeId}</span> <span class="label label-danger">${_item.code}</span>
+  <span class="label label-danger">${seat.codeId}</span> <span class="label label-danger">${seat.code}</span>
 </div>
 <div class="list-group-item-text">
   <strong><i class="fa fa-map-marker"></i> Indirizzo </strong>
-  <span class="label label-warning">${_item.address}</span>
+  <span class="label label-warning">${seat.address}</span>
 </div>
 
 <br>
 
 <div class="list-group-item-text">
   <strong><i class="fa fa-shield"></i> Amministratore Tecnico </strong>
-  #{list items:_item.usersRolesOffices, as:'uro'}
+  #{list items:seat.usersRolesOffices, as:'uro'}
   #{if uro.role.name.equals('technicalAdmin') && uro.user.person }
   <span class="label label-info">${uro.user.person.fullname}</span>
   #{/if}
   #{/list}
   <br>
   <strong><i class="fa fa-users"></i> Amministratori Personale </strong>
-  #{list items:_item.usersRolesOffices, as:'uro'}
+  #{list items:seat.usersRolesOffices, as:'uro'}
   #{if uro.role.name.equals('personnelAdmin') && uro.user.person }
   <span class="label label-success">${uro.user.person.fullname}</span>
   #{/if}
@@ -39,7 +35,7 @@ edit: link della modifica
   <br>
   <br>
   <strong><i class="fa fa-database"></i> &{'badgeReaders'} </strong>
-  #{list items:_item.usersRolesOffices, as:'uro'}
+  #{list items:seat.usersRolesOffices, as:'uro'}
   #{if uro.role.name.equals('badgeReader') && uro.user.badgeReader != null }
   <span class="label label-primary">${uro.user.badgeReader.code}</span>
   #{/if}

@@ -335,7 +335,9 @@ when
     "Charts.overtimeOnPositiveResidual",
     "Charts.overtimeOnPositiveResidualInYear",
     "PrintTags.showTag",
-    "Certifications.certifications"),  granted == false)
+    "Certifications.certifications",
+    "Institutes.list",
+    "BadgeReaders.list"),  granted == false)
 then
   $c.grant();
 end
