@@ -2,10 +2,10 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Assegna competenze'  /}
 
-#{include './_tabs.html' /}
-
 <div class="container">
   #{title title:'Assegna competenze ' + templateUtility.monthName(compDto.month) + ' ' + compDto.year, color:'primary' /}
+
+  #{include './_tabs.html' /}
 
   #{if servicesInitialized}
   #{alert color:'info'}
@@ -50,16 +50,15 @@
 				<td>${competence.person.fullname}</td>
 				<td>
 				#{if competence.id == null}
-					<a href="@{Competences.insertCompetence(competence.person.id, competence.competenceCode.id, competence.month, competence.year)}" data-async-modal="#modalCompetence" >
-					<em>Inserisci</em>
-					</a>
+          #{secure.link @Competences.insertCompetence(competence.person.id, competence.competenceCode.id, competence.month, competence.year), 'data-async-modal':'#modalCompetence'}
+          <em>Inserisci</em>
+          #{/secure.link}
 				#{/if}
 				#{else}
-					<a href="@{Competences.editCompetence(competence.id)}" data-async-modal="#modalCompetence" >
-					${competence.valueApproved}
-      				</a>
+          #{secure.link @Competences.editCompetence(competence.id), 'data-async-modal':'#modalCompetence'}
+            ${competence.valueApproved}
+          #{/secure.link}
 				#{/else}
-
 				</td>
 			</tr>
       		#{/list}

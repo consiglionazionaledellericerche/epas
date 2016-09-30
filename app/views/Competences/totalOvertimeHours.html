@@ -2,12 +2,11 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Monte ore straordinario'  /}
 
-#{include './_tabs.html' /}
-
 <div class="container">
 
   #{title title:'Monte Ore ' + year + ' per Straordinari ' + office.name, color:'primary' /}
 
+  #{include './_tabs.html' /}
 
   #{alert color:'info'}
   <p>Gestione del monte ore per straordinari per la sede <strong>${office.name}</strong></p>
