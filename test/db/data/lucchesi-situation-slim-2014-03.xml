@@ -596,9 +596,9 @@
 
   <persons_working_time_types id="228" begin_date="2013-01-01" person_id="146" working_time_type_id="1"/>
 
-  <persons_competence_codes persons_id="146" competencecode_id="2"/>
-  <persons_competence_codes persons_id="146" competencecode_id="3"/>
-  <persons_competence_codes persons_id="146" competencecode_id="8"/>
+  <persons_competence_codes person_id="146" competence_code_id="2"/>
+  <persons_competence_codes person_id="146" competence_code_id="3"/>
+  <persons_competence_codes person_id="146" competence_code_id="8"/>
 
   <person_years id="93" remaining_minutes="1960" year="2011" person_id="146"/>
 
