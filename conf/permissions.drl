@@ -307,6 +307,7 @@ when
     "Charts.checkLastYearAbsences",
     "Charts.overtimeOnPositiveResidual",
     "Charts.overtimeOnPositiveResidualInYear",
+    "Competences.activateServices",
     "Competences.approvedCompetenceInYear",
     "Competences.enabledCompetences",
     "Competences.manageCompetenceCode",

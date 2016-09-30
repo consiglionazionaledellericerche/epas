@@ -543,6 +543,7 @@ Users.list= Gestione Utenti
 Vacations.show= Ferie
 VacationsAdmin.list= Ferie e Permessi
 WorkingTimes.manageWorkingTime= Gestione Orari di Lavoro
+Competences.activateServices= Gestione Servizi Reperibilità
 
 ########################
 # Enumerati

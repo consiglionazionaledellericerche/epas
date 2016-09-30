@@ -3,112 +3,116 @@
 #{set title: 'ePAS - Gestione Codici competenze' /}
 
 <div class="container">
-#{title title:'Codici e gruppi di competenza', administration:true /}
-#{secure.check 'Competences.insertCompetenceCode' }
-	#{b.buttons center:true}
-	  		#{secure.link @Competences.insertCompetenceCode(), 'data-async-modal':'#modalCompetenceCode', class:'btn btn-primary',fa:'plus' }
-				<em>Definisci nuovo codice di competenza</em>
-			#{/secure.link}
-	      	#{secure.link @Competences.insertCompetenceCodeGroup(), 'data-async-modal':'#modalCompetenceCode', class:'btn btn-info',fa:'cubes' }
-				<em>Definisci nuovo gruppo di codici di competenza</em>
-			#{/secure.link}
-	#{/b.buttons}
-#{/secure.check}
-	<br>
-	#{accordionGroup 'codici'}
-	 	#{accordionItem 'CodiciSenzaGruppo', parent:'codici', title:'Codici senza gruppo', open:true, color:'warning'}
-	 	<div class="col-md-8 col-md-offset-2">
-    		<table class="table">
-      		<thead>
-      		<tr>
-        		<th>Codice</th>
-        		<th>Codice per Attestati</th>
-        		<th>Descrizione</th>
-        		#{secure.check 'Competences.insertCompetenceCode' }
-        		<th>Disabilitato</th>
-        		#{/secure.check}
-      		</tr>
-      		</thead>
-      		<tbody>
-      		#{list items:templateUtility.allCodesWithoutGroup(), as:'compCode'}
+  #{title title:'Codici e gruppi di competenza', administration:true /}
+  #{secure.check 'Competences.insertCompetenceCode' }
+  #{b.buttons center:true}
+  #{secure.link @Competences.insertCompetenceCode(), 'data-async-modal':'#modalCompetenceCode', class:'btn btn-primary',fa:'plus' }
+  <em>Definisci nuovo codice di competenza</em>
+  #{/secure.link}
+  #{secure.link @Competences.insertCompetenceCodeGroup(), 'data-async-modal':'#modalCompetenceCode', class:'btn btn-info',fa:'cubes' }
+  <em>Definisci nuovo gruppo di codici di competenza</em>
+  #{/secure.link}
+  #{/b.buttons}
+  #{/secure.check}
+  <br>
+  #{accordionGroup 'codici'}
+  #{accordionItem 'CodiciSenzaGruppo', parent:'codici', title:'Codici senza gruppo', open:true, color:'warning'}
+  <div class="col-md-8 col-md-offset-2">
+    <table class="table">
+      <thead>
+      <tr>
+        <th>Codice</th>
+        <th>Codice per Attestati</th>
+        <th>Descrizione</th>
+        #{secure.check 'Competences.insertCompetenceCode' }
+        <th>Disabilitato</th>
+        #{/secure.check}
+      </tr>
+      </thead>
+      <tbody>
+      #{list items:templateUtility.allCodesWithoutGroup(), as:'compCode'}
 
-      		<tr #{if compCode.disabled}class="danger" webui-popover-hover data-content="&{'disabled'}"#{/if}>
-          <td>
-            #{secure.link @Competences.edit(compCode.id), 'data-async-modal':'#modalCompetenceCode'}
+      <tr #{if compCode.disabled}class="danger" webui-popover-hover data-content="&{'disabled'}" #{/if}>
+      <td>
+        #{secure.link @Competences.edit(compCode.id), 'data-async-modal':'#modalCompetenceCode'}
+        ${compCode.code}
+        #{/secure.link}
+      </td>
+      <td>${compCode.codeToPresence}</td>
+      <td>${compCode.description}</td>
+      #{secure.check 'Competences.insertCompetenceCode' }
+      <td>#{if compCode.disabled}
+        #{secure.link @Competences.evaluateCompetenceCode(compCode.id), 'data-async-modal':'#modalCompetenceCode'}
+        <i class="fa fa-check" aria-hidden="true"></i>
+        #{/secure.link}
+        #{/if}
+        #{else}
+        #{secure.link @Competences.evaluateCompetenceCode(compCode.id), 'data-async-modal':'#modalCompetenceCode'}
+        <i class="fa fa-times" aria-hidden="true"></i>
+        #{/secure.link}
+        #{/else}
+      </td>
+      #{/secure.check}
+      </tr>
+
+      #{/list}
+      </tbody>
+    </table>
+  </div>
+  #{/accordionItem}
+  #{/accordionGroup}
+  #{accordionGroup 'codiciGruppo'}
+  #{list items:groupList, as:'group'}
+  #{accordionItem group.id, parent:'codiciGruppo', title:group.label, open:false, color:'info'}
+  #{alert color: 'info'}
+  <form class="form-horizontal">
+    #{if group.limitValue != null}
+    #{f.view 'Limite', value:group.limitValue /}
+    #{/if}
+    #{f.view 'Unità di misura', value:group.limitUnit /}
+    #{f.view 'Tipo Limite', value:group.limitType /}
+  </form>
+  #{/alert}
+  <div class="col-md-8 col-md-offset-2">
+    <table class="table">
+      <thead>
+      <tr>
+        <th>Codice</th>
+        <th>Codice per Attestati</th>
+        <th>Descrizione</th>
+        #{secure.check 'Competences.insertCompetenceCode'}
+        <th>Elimina</th>
+        #{/secure.check}
+      </tr>
+      </thead>
+      <tbody>
+      #{list items:group.competenceCodes, as:'compCode'}
+      <tr>
+        <td>
+          #{secure.link @Competences.edit(compCode.id), 'data-async-modal':'#modalCompetenceCode'}
             ${compCode.code}
-            #{/secure.link}
-          </td>
-				<td>${compCode.codeToPresence}</td>
-				<td>${compCode.description}</td>
-				#{secure.check 'Competences.insertCompetenceCode' }
-				<td>#{if compCode.disabled}
-						#{secure.link @Competences.evaluateCompetenceCode(compCode.id), 'data-async-modal':'#modalCompetenceCode'}
-							<i class="fa fa-check" aria-hidden="true"></i>
-           				#{/secure.link}
-					#{/if}
-					#{else}
-						#{secure.link @Competences.evaluateCompetenceCode(compCode.id), 'data-async-modal':'#modalCompetenceCode'}
-							<i class="fa fa-times" aria-hidden="true"></i>
-           				#{/secure.link}
-					#{/else}
-				</td>
-				#{/secure.check}
-			</tr>
-
-      		#{/list}
-      		</tbody>
-    		</table>
-  		</div>
-	 	#{/accordionItem}
-	#{/accordionGroup}
-	#{accordionGroup 'codiciGruppo'}
-	 #{list items:groupList, as:'group'}
-	 	#{accordionItem group.id, parent:'codiciGruppo', title:group.label, open:false, color:'info'}
-	 	#{alert color: 'info'}
-	 	<form class="form-horizontal">
-	 		#{if group.limitValue != null}
-				#{f.view 'Limite', value:group.limitValue /}
-			#{/if}
-	    #{f.view 'Unità di misura', value:group.limitUnit /}
-	 		#{f.view 'Tipo Limite', value:group.limitType /}
-	 	</form>
-	 	#{/alert}
-	 	<div class="col-md-8 col-md-offset-2">
-    		<table class="table">
-      		<thead>
-      		<tr>
-        		<th>Codice</th>
-        		<th>Codice per Attestati</th>
-        		<th>Descrizione</th>
-        		 #{secure.check 'Competences.insertCompetenceCode'}
-        		<th>Elimina</th>
-        		#{/secure.check}
-      		</tr>
-      		</thead>
-      		<tbody>
-      		#{list items:group.competenceCodes, as:'compCode'}
-      		<tr>
-				<td><a href="@{Competences.edit(compCode.id)}" data-async-modal="#modalCompetenceCode">${compCode.code}</a></td>
-				<td>${compCode.codeToPresence}</td>
-				<td>${compCode.description}</td>
-				#{secure.check 'Competences.insertCompetenceCode'}
-				<td><a class="btn btn-danger btn-xs" href="@{Competences.deleteCompetenceFromGroup(compCode.id)}"
-           			data-async-modal="#modalCompetenceCode">Rimuovi</a></td>
-           		#{/secure.check}
-			</tr>
-      		#{/list}
-      		</tbody>
-    		</table>
-    		#{secure.check 'Competences.insertCompetenceCode'}
-    		#{b.buttons center:true}
-				<a class="btn btn-success" href="@{addCompetenceCodeToGroup(group.id)}" data-async-modal="#modalAddCompetenceCodeToGroup">
-    			<i class="fa fa-plus"></i> Aggiungi codice al gruppo</a>
-			#{/b.buttons}
-			#{/secure.check}
-  		</div>
-	 	#{/accordionItem}
-	 #{/list}
-	#{/accordionGroup}
+          #{/secure.link}
+        </td>
+        <td>${compCode.codeToPresence}</td>
+        <td>${compCode.description}</td>
+        #{secure.check 'Competences.insertCompetenceCode'}
+        <td><a class="btn btn-danger btn-xs" href="@{Competences.deleteCompetenceFromGroup(compCode.id)}"
+               data-async-modal="#modalCompetenceCode">Rimuovi</a></td>
+        #{/secure.check}
+      </tr>
+      #{/list}
+      </tbody>
+    </table>
+    #{secure.check 'Competences.insertCompetenceCode'}
+    #{b.buttons center:true}
+    <a class="btn btn-success" href="@{addCompetenceCodeToGroup(group.id)}" data-async-modal="#modalAddCompetenceCodeToGroup">
+      <i class="fa fa-plus"></i> Aggiungi codice al gruppo</a>
+    #{/b.buttons}
+    #{/secure.check}
+  </div>
+  #{/accordionItem}
+  #{/list}
+  #{/accordionGroup}
 
 </div>
 
