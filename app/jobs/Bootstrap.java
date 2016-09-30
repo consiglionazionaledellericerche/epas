@@ -53,10 +53,14 @@ public class Bootstrap extends Job<Void> {
   @Inject
   static UserDao userDao;
 
+  //Aggiunto qui perché non più presente nella classe Play dalla versione >= 1.4.3
+  public static boolean runingInTestMode(){
+    return Play.id.matches("test|test-?.*");
+}
 
   public void doJob() throws IOException {
 
-    if (Play.runingInTestMode()) {
+    if (runingInTestMode()) {
       log.info("Application in test mode, default boostrap job not started");
       return;
     }
