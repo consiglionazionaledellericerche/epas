@@ -337,7 +337,15 @@ when
     "PrintTags.showTag",
     "Certifications.certifications",
     "Institutes.list",
-    "BadgeReaders.list"),  granted == false)
+    "BadgeReaders.list",
+    "Configurations.show",
+    "BadgeSystems.list",
+    "WorkingTimes.manageWorkingTime",
+    "WorkingTimes.manageOfficeWorkingTime",
+    "WorkingTimes.showHorizontal",
+    "WorkingTimes.showWorkingTimeType",
+    "WorkingTimes.showContractWorkingTimeType",
+    "WorkingTimes.showContract"),  granted == false)
 then
   $c.grant();
 end
