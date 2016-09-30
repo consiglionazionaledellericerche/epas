@@ -15,20 +15,22 @@
 <div class="container">
   #{title title:'Lista del personale di ' + office /}
 
-  #{tabs}
-  #{tabItem id:'attivo', title:'Personale Attivo', active:true /}
-  #{tabItem id:'nonAttivo', title:'Personale Non Attivo' /}
-  #{/tabs}
+  #{tabList}
+    #{tabItem id:'attivo', title:'Personale Attivo', active:true /}
+    #{tabItem id:'nonAttivo', title:'Personale Non Attivo' /}
+  #{/tabList}
 
   #{tabContent}
 
   #{tabContentItem id:'attivo', active:true}
-  <p>
+
+  <p>#{secure.check 'Persons.insertPerson'}
   <div class="text-center">
     <a class="btn btn-success" href="@{Persons.insertPerson}"><i class="fa fa-user-plus"></i>
       Inserisci una nuova persona </a>
   </div>
-  </p>
+  #{/secure.check}</p>
+
   <table class="table table-striped table-hover table-condensed center" datatable>
     <thead>
     <tr>
@@ -53,7 +55,7 @@
     <tr>
       <td class="alignLeft success">
         <a href="@{edit(person.value.id)}"><font color="#0000FF">${person.value.fullname}</font></a>
-        
+
         #{if person.currentContractInitializationMissing()}
           <a href="#" popover-hover
             data-html="true"
@@ -66,7 +68,7 @@
             data-content="${('Il database non è sincronizzato. Possibile causa, malfunzionamento durante la procedura notturna di chiusura giorno. Questo problema si risolverà automaticamente non appena perverranno nuove timbrature.').escape()}"
             *{ title="Configurazione ${person.value.fullname}" }*><i class="fa fa-exclamation-triangle text-muted"></i></a>
         #{/elseif}
-        
+
       <td><font color="#000000">${person.value.number}</font></td>
       <td data-order="${person.currentContract.get().beginDate}">
         <font color="#000000">${person.currentContract.get().beginDate?.format()}</font>
@@ -80,7 +82,7 @@
             <em class="text-danger">Data da inserire</em>
           #{/if}
         #{/else}
-        
+
       </td>
 
       <td>
@@ -114,13 +116,16 @@
       </td>
       #{if switchUser}
       <td>
-        <a class="btn btn-warning btn-xs"
-           href="@{Administration.switchUserToPersonUser(person.value.id)}">Assumi identità</a>
+        #{if person?.value?.user?.disabled}
+          <span class="label label-default"><em>&{'disabledUser'}</em></span>
+        #{/if}
+        #{else}
+          <a class="btn btn-warning btn-xs" href="@{Administration.switchUserToPersonUser(person.value.id)}">Assumi identità</a>
+        #{/else}
       </td>
       #{/if}
     </tr>
     #{/if}
-
 
     #{/list}
     </tbody>
@@ -159,8 +164,12 @@
       <td><font color="#808080">${person.value.email}</font></td>
       #{if switchUser}
       <td>
-        <a class="btn btn-warning btn-xs"
-           href="@{Administration.switchUserToPersonUser(person.value.id)}">Assumi identità</a>
+        #{if person.value.user.disabled}
+          <span class="label label-default">&{'disabledUser'}</span>
+        #{/if}
+        #{else}
+          <a class="btn btn-warning btn-xs" href="@{Administration.switchUserToPersonUser(person.value.id)}">Assumi identità</a>
+        #{/else}
       </td>
       #{/if}
     </tr>

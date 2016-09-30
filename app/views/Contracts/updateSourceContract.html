@@ -7,7 +7,7 @@
   'Gestisci Contratto':null] /}
 #{breadcrumbs breadcrumbs, noHome:true, container:true /}
 
-#{contracts.editContractTabs activeAction:'updateSourceContract' /}
+#{include './_tabs.html' /}
 
 <div class="container" id="updateSource">
 
@@ -61,10 +61,13 @@
 		    #{f.input 'contract.sourceVacationLastYearUsed', biglabel:true  /}
 		    #{f.input 'contract.sourceVacationCurrentYearUsed', biglabel:true  /}
 		    #{f.input 'contract.sourcePermissionUsed', biglabel:true  /}
-			#{f.input 'contract.sourceRecoveryDayUsed', biglabel:true  /}
+			  #{f.input 'contract.sourceRecoveryDayUsed', biglabel:true  /}
+
+				#{secure.check 'Contracts.saveResidualSourceContract'}
 		    #{b.buttons center:true}
-              #{b.submit 'Salva'/}
-            #{/b.buttons}
+          #{b.submit 'Salva'/}
+        #{/b.buttons}
+				#{/secure.check}
 		#{/if}
 		#{else}
 			<!-- Form di conferma -->			
@@ -143,9 +146,12 @@
 	    #{if !confirmedMeal}
 		    #{f.date 'sourceDateMealTicket', value:contract.sourceDateMealTicket?.format(), biglabel:true  /}
 		    #{f.input 'contract.sourceRemainingMealTicket', biglabel:true  /}
-		    #{b.buttons center:true}
+
+				#{secure.check 'Contracts.saveMealTicketSourceContract'}
+				#{b.buttons center:true}
               #{b.submit 'Salva'/}
-            #{/b.buttons}
+				#{/b.buttons}
+				#{/secure.check}
 		#{/if}
 		#{else}
 			

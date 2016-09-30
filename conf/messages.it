@@ -37,6 +37,7 @@ badge.delete= Elimina Badge
 badge.edit= Modifica
 badge.end= Fine
 
+badgeReaderUser= Utente associato a un Client Timbrature
 badgeReader.badgeSystems=Gruppi Badge
 BadgeReader.blank= Nuova Sorgente Timbrature
 badgeReader.code=Nome
@@ -94,6 +95,7 @@ configuration.entry.value= Valore parametro
 configurations= Configurazione
 configurations.entries= Parametri di Configurazione Play
 
+confirmPassword= Conferma Password
 
 contract.beginDate= Inizio Contratto
 contract= Contratto
@@ -212,6 +214,9 @@ logout= Esci
 lunchPauseEnd= Fine pausa pranzo
 lunchPauseStart= Inizio pausa pranzo
 
+manageNoOwnerUsers= Gestione Utenti di Sistema/Orfani
+manageUsers= Gestione Utenti
+
 mealTicket.aquiredExitingNow= Buono Pasto maturato (uscendo in questo momento).
 mealTicket.aquired= Buono Pasto maturato
 mealTicket.notAquired= Buono Pasto non maturato
@@ -252,6 +257,8 @@ name=Nome
 noResultFound=Nessuna corrispondenza trovata.
 note= Note
 
+newUser= Nuovo Utente
+
 notify.error =Attenzione
 notify.success =Ok
 
@@ -271,6 +278,7 @@ errorsInSendingToNewAttestati= Ci sono stati dei problemi nell'invio delle infor
 office.address=Indirizzo
 office.code= Codice
 office.codeId= Sede Id
+officeFilter= Filtra per Sede
 office.headQuarter=Sede principale
 office.joiningDate= Data di affiliazione
 office.name=Nome
@@ -281,8 +289,12 @@ officeIds= Sedi su cui associare l'utente
 
 onCertificate=In attestati
 
+disabledUser= Utente disabilitato
+orphanUser= Utente Orfano
+
 pagedResults =Sono state trovate <strong>%d</strong> corrispondenze, mostrate dalla %d alla %d.
 passwordSuccessfullyChanged = Password modificata con successo
+password= Password
 
 PDFReport.thAbsences=Assenza
 PDFReport.thAppHour =Num. di ore approvate
@@ -316,6 +328,8 @@ person.telephone=Telefono
 person.user.username= Username in ePAS
 person.wantEmail=Invio Email
 
+personUser= Utente associato ad una persona
+
 PersonMonths.insertPeopleTrainingHours= Inserisci ore di formazione
 
 peopleGroupId= Persone del gruppo di Lavoro
@@ -331,6 +345,9 @@ secure.error=Oops! Username o password sconosciuti
 secure.logout=Utente correttamente disconnesso
 
 serviceDisabled =Servizio disabilitato
+
+show= Visualizza
+edit= Modifica
 
 sourceDateMealTicket=Data Inizializzazione
 sourceDateResidual=Data inizializzazione
@@ -350,6 +367,7 @@ synch.offices=Sincronizza sedi
 synch.people=Sincronizza persone
 synch.contracts=Sincronizza contratti
 
+systemUser= Utente con ruoli di Sistema
 ticketNumberFrom=Dal Numero
 ticketNumberTo=Al Numero
 time= Orario
@@ -365,12 +383,23 @@ user= Utente
 user.password= Password
 user.username= Username
 user.owner= Sede proprietaria
+user.usersRolesOffices= Ruoli abilitati
+user.disabled= Utente disabilitato
+user.roles= Ruoli di sistema
 
 Users.blank= Inserisci utente
 User.blank= Nuovo utente
 User.systemBlank= Nuovo utente di sistema
 user.person= Persona associata
 users= Utenti
+
+Users.editAccountRoles= Gestione Ruoli di sistema
+Users.addRole= Nuovo Ruolo
+
+usersRolesOffices= Ruolo
+userRoleOffice.role= Ruolo
+userRoleOffice.office= Sede
+
 personUsers=Utenti Persone
 systemUsers=Utenti Di Sistema
 disabledUsers=Utenti Disabilitati
@@ -440,15 +469,88 @@ validation.required=Obbligatorio
 validation.unique =Deve essere unico
 validation.url=Non è un URL valido
 
+
 ##########################
 # Messaggi di eccezioni
 ##########################
 
 errorCompetenceCodeException= Codice di competenza non presente tra quelli abilitati per la persona
 
+
+########################
+# Actions
+########################
+
+Absences.absences= Assenze Mensili
+Absences.absencesPerPerson= Assenze Annuali
+Absences.absencesVisibleForEmployee= Presenze Giornaliere
+Absences.manageAbsenceCode= Gestione Codici d'assenza
+Absences.showGeneralMonthlyAbsences= Assenze
+Administration.playConfiguration= Informazioni Applicazione
+Administration.utilities= Utilities
+BadgeReaders.list= Sorgenti Timbrature
+BadgeSystems.list= Gruppi Badge
+BadgeSystems.personBadges= Badge
+Certifications.certifications= Invio Attestati
+Charts.checkLastYearAbsences= Controlli ed Esportazioni
+Competences.approvedCompetenceInYear= Competenza Assegnate nell'anno
+Competences.competences= Competenze
+Competences.enabledCompetences= Abilita Competenze
+Competences.exportCompetences= Esporta competenze
+Competences.manageCompetenceCode= Codici Competenze
+Competences.monthlyOvertime= Straordinari mensili gruppo
+Competences.showCompetences= Assegna Competenze
+Competences.showCompetences= Competenze
+Competences.totalOvertimeHours= Monte ore
+Configurations.personShow= Configurazione personale
+Configurations.show= Configurazione Sedi
+Contracts.delete= Elimina Contratto
+Contracts.edit= Dati Contrattuali
+Contracts.personContracts= Dati Contrattuali
+Contracts.updateContractStampProfile= Presenza Automatica
+Contracts.updateContractVacationPeriod= Piani Ferie
+Contracts.updateContractWorkingTimeType= Tipo Orario
+Contracts.updateSourceContract= Inizializzazione
+Institutes.list= Sedi e Amministratori
+MealTickets.editPersonMealTickets= Modifica Buoni Consegnati
+MealTickets.findCodeBlock= Ricerca Buoni Pasto
+MealTickets.mealTickets= Riepilogo Buoni Pasto
+MealTickets.personMealTickets= Nuovo Inserimento
+MealTickets.recapMealTickets= Buoni Pasto
+MealTickets.recapMealTickets= Riepilogo Buoni Pasto
+MealTickets.recapPersonMealTickets= Riepilogo Buoni Pasto Consegnati
+MealTickets.returnedMealTickets= Buoni Pasto Riconsegnati
+MonthRecaps.showRecaps= Riepilogo Mensile
+PersonMonths.hourRecap= Riepilogo Orario
+PersonMonths.trainingHours= Ore di Formazione
+PersonMonths.visualizePeopleTrainingHours= Ore di Formazione
+Persons.changePassword= Cambio Password
+Persons.children= Figli
+Persons.deletePerson= Elimina
+Persons.edit= Dati Anagrafici
+Persons.list= Lista Persone
+Persons.workGroup= Gruppo Di Lavoro
+PrintTags.listPersonForPrintTags= Stampa Cartellino
+PrintTags.showTag= Stampa Cartellino Presenze
+Stampings.dailyPresence= Presenza Giornaliera
+Stampings.dailyPresenceForPersonInCharge= Presenza giornaliera gruppo
+Stampings.missingStamping= Timbrature Mancanti
+Stampings.personStamping= Timbrature
+Stampings.stampings= Situazione Mensile
+Synchronizations.institutes= Sincronizza Sedi
+Synchronizations.people= Sincronizza Personale
+Users.list= Gestione Utenti
+Vacations.show= Ferie
+VacationsAdmin.list= Ferie e Permessi
+WorkingTimes.manageWorkingTime= Gestione Orari di Lavoro
+
 ########################
 # Enumerati
 ########################
+
+AccountRole.DEVELOPER= developer
+AccountRole.ADMIN= Admin
+AccountRole.RO_ADMIN= Admin in sola lettura
 
 AccumulationType.no= No
 AccumulationType.yearly= Annuale

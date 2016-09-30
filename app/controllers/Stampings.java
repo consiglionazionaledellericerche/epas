@@ -441,13 +441,9 @@ public class Stampings extends Controller {
    */
   public static void dailyPresenceForPersonInCharge(Integer year, Integer month, Integer day) {
 
-    if (!Security.getUser().get().person.isPersonInCharge) {
-      forbidden();
-    }
-
     LocalDate date = new LocalDate(year, month, day);
 
-    User user = Security.getUser().get();
+    final User user = Security.getUser().get();
 
     List<Person> people = user.person.people;
     int numberOfInOut = stampingManager.maxNumberOfStampingsInMonth(date, people);
@@ -461,8 +457,6 @@ public class Stampings extends Controller {
     boolean groupView = true;
 
     render("@dailyPresence", date, numberOfInOut, showLink, daysRecap, groupView);
-
-
   }
 
   /**

@@ -15,7 +15,7 @@
 	#{/b.buttons}
 #{/secure.check}
 	<br>
-	#{accordionGroup 'codici'}	 
+	#{accordionGroup 'codici'}
 	 	#{accordionItem 'CodiciSenzaGruppo', parent:'codici', title:'Codici senza gruppo', open:true, color:'warning'}
 	 	<div class="col-md-8 col-md-offset-2">
     		<table class="table">
@@ -25,15 +25,19 @@
         		<th>Codice per Attestati</th>
         		<th>Descrizione</th>
         		#{secure.check 'Competences.insertCompetenceCode' }
-        		<th>Disabilitato</th>    
-        		#{/secure.check}    		
+        		<th>Disabilitato</th>
+        		#{/secure.check}
       		</tr>
       		</thead>
       		<tbody>
       		#{list items:templateUtility.allCodesWithoutGroup(), as:'compCode'}
-      			
+
       		<tr #{if compCode.disabled}class="danger" webui-popover-hover data-content="&{'disabled'}"#{/if}>
-				<td><a href="@{Competences.edit(compCode.id)}" data-async-modal="#modalCompetenceCode">${compCode.code}</a></td>
+          <td>
+            #{secure.link @Competences.edit(compCode.id), 'data-async-modal':'#modalCompetenceCode'}
+            ${compCode.code}
+            #{/secure.link}
+          </td>
 				<td>${compCode.codeToPresence}</td>
 				<td>${compCode.description}</td>
 				#{secure.check 'Competences.insertCompetenceCode' }
@@ -47,16 +51,16 @@
 							<i class="fa fa-times" aria-hidden="true"></i>
            				#{/secure.link}
 					#{/else}
-				</td>	
-				#{/secure.check}					
+				</td>
+				#{/secure.check}
 			</tr>
-			
+
       		#{/list}
       		</tbody>
     		</table>
-  		</div>	 	
-	 	#{/accordionItem}	 
-	#{/accordionGroup}	
+  		</div>
+	 	#{/accordionItem}
+	#{/accordionGroup}
 	#{accordionGroup 'codiciGruppo'}
 	 #{list items:groupList, as:'group'}
 	 	#{accordionItem group.id, parent:'codiciGruppo', title:group.label, open:false, color:'info'}
@@ -67,7 +71,7 @@
 			#{/if}
 	    #{f.view 'Unità di misura', value:group.limitUnit /}
 	 		#{f.view 'Tipo Limite', value:group.limitType /}
-	 	</form> 
+	 	</form>
 	 	#{/alert}
 	 	<div class="col-md-8 col-md-offset-2">
     		<table class="table">
@@ -89,8 +93,8 @@
 				<td>${compCode.description}</td>
 				#{secure.check 'Competences.insertCompetenceCode'}
 				<td><a class="btn btn-danger btn-xs" href="@{Competences.deleteCompetenceFromGroup(compCode.id)}"
-           			data-async-modal="#modalCompetenceCode">Rimuovi</a></td>	
-           		#{/secure.check}	
+           			data-async-modal="#modalCompetenceCode">Rimuovi</a></td>
+           		#{/secure.check}
 			</tr>
       		#{/list}
       		</tbody>
@@ -101,7 +105,7 @@
     			<i class="fa fa-plus"></i> Aggiungi codice al gruppo</a>
 			#{/b.buttons}
 			#{/secure.check}
-  		</div>	 	
+  		</div>
 	 	#{/accordionItem}
 	 #{/list}
 	#{/accordionGroup}

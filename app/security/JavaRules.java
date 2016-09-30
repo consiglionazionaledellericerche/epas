@@ -13,6 +13,7 @@ import models.Person;
 import models.Role;
 import models.Stamping;
 import models.User;
+import models.enumerate.AccountRole;
 import models.enumerate.CodesForEmployee;
 import models.enumerate.StampTypes;
 
@@ -36,8 +37,7 @@ public class JavaRules {
   public void checkForAbsences(AbsenceType at, Person person) {
     final Optional<User> user = currentUser.get();
     if (user.isPresent()) {
-      if (user.get().usersRolesOffices.stream().filter(uro -> uro.role.name.equals(Role.DEVELOPER)
-          && uro.office.persons.contains(person)).findFirst().isPresent()) {
+      if (user.get().roles.contains(AccountRole.DEVELOPER)) {
         return;
       }
       // L'utente ha il ruolo di amministratore sull'ufficio d'appartenenza della persona
@@ -70,8 +70,7 @@ public class JavaRules {
     final Optional<User> user = currentUser.get();
 
     if (user.isPresent()) {
-      if (user.get().usersRolesOffices.stream().filter(uro -> uro.role.name.equals(Role.DEVELOPER)
-          && uro.office.persons.contains(absence.personDay.person)).findFirst().isPresent()) {
+      if (user.get().roles.contains(AccountRole.DEVELOPER)) {
         return;
       }
       // L'utente ha il ruolo di amministratore sull'ufficio d'appartenenza della persona
@@ -105,8 +104,7 @@ public class JavaRules {
     final Optional<User> user = currentUser.get();
 
     if (user.isPresent()) {
-      if (user.get().usersRolesOffices.stream().filter(uro -> uro.role.name.equals(Role.DEVELOPER)
-          && uro.office.persons.contains(stamping.personDay.person)).findFirst().isPresent()) {
+      if (user.get().roles.contains(AccountRole.DEVELOPER)) {
         return;
       }
       // L'utente ha il ruolo di amministratore sull'ufficio d'appartenenza della persona

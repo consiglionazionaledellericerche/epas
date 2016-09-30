@@ -1,0 +1,38 @@
+#{modalAsync id:'defaultModal', title: 'Utente ' + user?.username }
+  <form class="form-horizontal">
+    #{f.view 'user.username' /}
+    #{if user?.person}
+      #{f.view 'user.person' /}
+    #{/if}
+    #{if user?.badgeReader}
+      #{f.view 'user.badgeReader' /}
+    #{/if}
+    #{ifnot user.roles.empty}
+    <div class="form-group">
+      <label class="col-sm-3 control-label">&{'user.roles'}</label>
+      <div class="col-sm-6">
+        <p class="form-control-static">
+          #{list user.roles}
+            <span class="text-primary">${_}</span>#{ifnot _isLast}, #{/ifnot}
+          #{/list}
+        </p>
+      </div>
+    </div>
+    #{/ifnot}
+    #{ifnot user.usersRolesOffices.empty}
+    <div class="form-group">
+      <label class="col-sm-3 control-label">&{'user.usersRolesOffices'}</label>
+      <div class="col-sm-6">
+        #{list user.usersRolesOffices}
+        <p class="form-control-static">
+            <strong class="text-primary">${_.role}</strong> della sede <strong><em>${_.office}</em></strong>
+        </p>
+        #{/list}
+      </div>
+    </div>
+    #{/ifnot}
+    #{f.view 'user.disabled' /}
+    #{f.view 'user.owner' /}
+  </form>
+
+#{/modalAsync}

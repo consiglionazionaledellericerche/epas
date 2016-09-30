@@ -2,7 +2,7 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Abilita competenze'  /}
 
-#{competences.competencesTabs activeAction:'enabledCompetences' /}
+#{include './_tabs.html' /}
 
 <div class="container">
 
@@ -16,21 +16,21 @@
 		<thead>
 		<tr>
 			<th>Nome</th>
-			<th>Competenze Abilitate</th>			
+			<th>Competenze Abilitate</th>
 		</tr>
 		</thead>
 		<tbody>
 
-    #{list items:map.entrySet(), as:'key'}	
+    #{list items:map.entrySet(), as:'key'}
     <tr>
       <td>
-		  <a href="@{Competences.updatePersonCompetence(key.getKey().id, year, month)}" data-async-modal="#updateCompetenceModal">
-		    ${key.getKey().fullName()}
-		  </a>
+			#{secure.link @Competences.updatePersonCompetence(key.getKey().id, year, month), 'data-async-modal':'#updateCompetenceModal' }
+        ${key.getKey().fullName()}
+			#{/secure.link}
  	  </td>
  	  <td>
  	   #{list items:key.getValue(), as:'dto'}
- 	      	     	
+
  	       	#{if dto.endDate != null && dto.endDate.getMonthOfYear() == date.getMonthOfYear() && dto.endDate.getYear() == date.getYear()}
  	       		<span class="label label-warning" webui-popover-hover data-content="&{'endCompetenceCode'}">${dto.code.code} - ${dto.code.description}</span>
  	       	#{/if}
@@ -40,10 +40,10 @@
  	       	#{else}
  	       		<span class="label label-primary">${dto.code.code} - ${dto.code.description}</span>
  	       	#{/else}
-	     	
+
        #{/list}
        </td>
-      
+
     #{/list}
     </tr>
   </tbody>

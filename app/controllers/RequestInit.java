@@ -7,16 +7,14 @@ import com.google.common.collect.Lists;
 
 import dao.OfficeDao;
 import dao.PersonDao;
-import dao.UsersRolesOfficesDao;
+import dao.UserDao;
 
 import helpers.TemplateDataInjector;
 
 import manager.SecureManager;
 
 import models.Office;
-import models.Role;
 import models.User;
-import models.UsersRolesOffices;
 
 import org.joda.time.LocalDate;
 
@@ -47,15 +45,12 @@ public class RequestInit extends Controller {
   @Inject
   static PersonDao personDao;
   @Inject
-  static UsersRolesOfficesDao uroDao;
+  static UserDao userDao;
 
   @Before(priority = 1)
   static void injectMenu() {
 
     Optional<User> user = Security.getUser();
-
-    ItemsPermitted ip = new ItemsPermitted(user);
-    renderArgs.put("ip", ip);
 
     if (!user.isPresent()) {
       return;
@@ -63,9 +58,7 @@ public class RequestInit extends Controller {
 
     final User currentUser = user.get();
 
-    if (currentUser.person != null) {
-      renderArgs.put("isPersonInCharge", currentUser.person.isPersonInCharge);
-    }
+    renderArgs.put("currentUser", currentUser);
 
     // year init /////////////////////////////////////////////////////////////////
     Integer year;
@@ -312,18 +305,9 @@ public class RequestInit extends Controller {
       renderArgs.put("switchYear", true);
     }
 
-    if (personSwitcher.contains(currentAction)) {
-
-      for (UsersRolesOffices u : user.usersRolesOffices) {
-        if (u.role.name.equals(Role.ADMIN)
-            || u.role.name.equals(Role.DEVELOPER)
-            || u.role.name.equals(Role.PERSONNEL_ADMIN)
-            || u.role.name.equals(Role.PERSONNEL_ADMIN_MINI)) {
-          List<PersonDao.PersonLite> persons = personDao.liteList(offices, year, month);
-          renderArgs.put("navPersons", persons);
-          break;
-        }
-      }
+    if (personSwitcher.contains(currentAction) && userDao.hasAdminRoles(user)) {
+      List<PersonDao.PersonLite> persons = personDao.liteList(offices, year, month);
+      renderArgs.put("navPersons", persons);
       renderArgs.put("switchPerson", true);
     }
     if (officeSwitcher.contains(currentAction)) {
@@ -340,112 +324,6 @@ public class RequestInit extends Controller {
     }
     if (dropDownConfigurationActions.contains(currentAction)) {
       renderArgs.put("dropDown", "dropDownConfiguration");
-    }
-
-  }
-
-  /**
-   * Oggetto che modella i permessi abilitati per l'user TODO: esportare questa classe in un nuovo
-   * file che modella la view.
-   */
-  public static class ItemsPermitted {
-
-    public boolean isEmployee = false;
-
-    public boolean isDeveloper = false;
-
-    public boolean viewPerson = false;
-    public boolean viewPersonDay = false;
-    public boolean viewOffice = false;
-    public boolean viewCompetence = false;
-    public boolean editCompetence = false;
-    public boolean uploadSituation = false;
-    public boolean viewWorkingTimeType = false;
-    public boolean editWorkingTimeType = false;
-    public boolean viewAbsenceType = false;
-    public boolean editAbsenceType = false;
-    public boolean viewCompetenceCode = false;
-    public boolean editCompetenceCode = false;
-
-
-    public ItemsPermitted(Optional<User> user) {
-
-      if (!user.isPresent()) {
-        return;
-      }
-
-      List<Role> roles = uroDao.getUserRole(user.get());
-
-      for (Role role : roles) {
-
-        if (role.name.equals(Role.ADMIN)) {
-          this.viewPerson = true;
-          this.viewOffice = true;
-          this.viewWorkingTimeType = true;
-
-        } else if (role.name.equals(Role.DEVELOPER)) {
-          this.isDeveloper = true;
-          this.viewPerson = true;
-          this.viewOffice = true;
-          this.viewWorkingTimeType = true;
-
-        } else if (role.name.equals(Role.EMPLOYEE)) {
-          this.isEmployee = true;
-        }
-
-        if (this.isDeveloper || role.name.equals(Role.PERSONNEL_ADMIN_MINI)
-            || role.name.equals(Role.PERSONNEL_ADMIN)) {
-          this.viewPerson = true;
-          this.viewPersonDay = true;
-          // this.viewOffice = true;
-          this.viewCompetence = true;
-          this.viewWorkingTimeType = true;
-          this.viewCompetenceCode = true;
-          this.viewAbsenceType = true;
-        }
-
-        if (role.name.equals(Role.TECHNICAL_ADMIN)) {
-          this.viewOffice = true;
-        }
-
-        if (this.isDeveloper || role.name.equals(Role.PERSONNEL_ADMIN)) {
-          this.editCompetence = true;
-          this.uploadSituation = true;
-          this.editCompetenceCode = true;
-          this.editAbsenceType = true;
-          this.editWorkingTimeType = true;
-        }
-      }
-    }
-
-    /**
-     * Se l'user può vedere il menu del Employee.
-     */
-    public boolean isEmployeeVisible() {
-      return isEmployee;
-    }
-
-    /**
-     * Se l'user ha i permessi per vedere Amministrazione.
-     */
-    public boolean isAdministrationVisible() {
-
-      return viewPerson || viewPersonDay || viewCompetence || uploadSituation;
-    }
-
-    /**
-     * Se l'user ha i permessi per vedere Configurazione.
-     */
-    public boolean isConfigurationVisible() {
-
-      return viewOffice || viewWorkingTimeType || viewAbsenceType;
-    }
-
-    /**
-     * Se l'user ha i permessi per vedere Tools.
-     */
-    public boolean isToolsVisible() {
-      return isDeveloper;
     }
 
   }
