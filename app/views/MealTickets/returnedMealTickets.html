@@ -2,11 +2,11 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione buoni pasto'  /}
 
-#{mealTickets.mealTicketsTabs activeAction:'returnedMealTickets' /}
-
 <div class="container">
   
   #{title title:'Buoni Pasto Riconsegnati ' + office.name, administration:true /}
+
+  #{include './_tabs.html' /}
 
   #{alert color:'warning'}
     <p>Elenco dei buoni pasto da restituire alla sede centrale per <strong>${office.name}</strong>.</p>

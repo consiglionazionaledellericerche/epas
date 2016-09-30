@@ -44,14 +44,18 @@ showType: delivered / returned /
 
   #{if _showType.equals('delivered') }
   <td>
+    #{secure.check 'MealTickets.returnPersonCodeBlock'}
     <a class="btn btn-primary btn-xs"
        href="@{MealTickets.returnPersonCodeBlock(recap.contract.id, block.codeBlock, block.first, block.last, false)}"
        data-async-modal="#defaultModal">Riconsegna</a>
+    #{/secure.check}
   </td>
   <td>
+    #{secure.check 'MealTickets.deletePersonCodeBlock'}
     <a class="btn btn-danger btn-xs"
        href="@{MealTickets.deletePersonCodeBlock(recap.contract.id, block.codeBlock, block.first, block.last)}"
        data-async-modal="#defaultModal">Rimuovi</a>
+    #{/secure.check}
   </td>
   #{/if}
 

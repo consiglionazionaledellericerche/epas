@@ -2,8 +2,7 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Assegna competenze'  /}
 
-
-#{competences.competencesTabs activeAction:'showCompetences' /}
+#{include './_tabs.html' /}
 
 <div class="container">
   #{title title:'Assegna competenze ' + templateUtility.monthName(compDto.month) + ' ' + compDto.year, color:'primary' /}
@@ -21,7 +20,7 @@
   #{alert color:'danger'}
   <p>Nella lista delle competenze attive compare anche la reperibilità. Per permettere al sistema ePAS di effettuare i corretti controlli
   sui giorni disponibili per tale competenza, è necessario attivare i servizi per cui la reperibilità è stata richiesta cliccando <a href="@{activateServices(office.id)}">qui</a>
-  <p> 
+  <p>
   #{/alert}
   #{/else}
     <!-- form paginata --> 
@@ -30,14 +29,14 @@
 	<input type="hidden" name="year" value="${compDto.year}"/>
     <input type="hidden" name="month" value="${compDto.month}"/>
     <input type="hidden" name="officeId" value="${compDto.office.id}"/>
-  
+
 	#{f.selectModel 'competenceCode', label:'Codice', items:competenceCodeList,
     	value:wrCompetenceCode.value /}
     
     #{/form}
 
     <section id="results">
-   
+
 	   <table class="table" datatable>
       		<thead>
       		<tr>
@@ -47,7 +46,7 @@
       		</thead>
       		<tbody>
       		#{list items:compDto.compList, as:'competence'}
-      		<tr>      		 
+      		<tr>
 				<td>${competence.person.fullname}</td>
 				<td>
 				#{if competence.id == null}
@@ -56,17 +55,17 @@
 					</a>
 				#{/if}
 				#{else}
-					<a href="@{Competences.editCompetence(competence.id)}" data-async-modal="#modalCompetence" >				
-					${competence.valueApproved}									        		
+					<a href="@{Competences.editCompetence(competence.id)}" data-async-modal="#modalCompetence" >
+					${competence.valueApproved}
       				</a>
 				#{/else}
-				
-				</td>				
+
+				</td>
 			</tr>
       		#{/list}
       		</tbody>
-       </table>     
-	
+       </table>
+
   <br>
   <br>
   #{alert color:'warning'}
@@ -88,7 +87,7 @@
 
     <tr>
           <td>
-            Totale ore di straordinario pagate a ${templateUtility.monthName(compDto.month)} (S1+S2+S3) 
+            Totale ore di straordinario pagate a ${templateUtility.monthName(compDto.month)} (S1+S2+S3)
           </td>
       <td><strong>${compDto.totaleOreStraordinarioMensile}</strong></td>
         </tr>

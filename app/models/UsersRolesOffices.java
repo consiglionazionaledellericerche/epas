@@ -7,6 +7,7 @@ import models.base.BaseModel;
 import org.hibernate.envers.NotAudited;
 
 import play.data.validation.Required;
+import play.data.validation.Unique;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -39,6 +40,7 @@ public class UsersRolesOffices extends BaseModel {
   @JoinColumn(name = "office_id")
   @Required
   @NotNull
+  @Unique("user office role")
   public Office office;
 
   @NotAudited
@@ -52,10 +54,11 @@ public class UsersRolesOffices extends BaseModel {
   public String toString() {
 
     return MoreObjects.toStringHelper(this).omitNullValues()
-            .add("id", id)
-            .add("user", user.username)
-            .add("role", role.name)
-            .add("office", office.name)
-            .toString();
+        .add("id", id)
+        .add("user", user)
+        .add("role", role)
+        .add("office", office)
+        .toString();
   }
+
 }

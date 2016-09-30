@@ -8,18 +8,10 @@
   'data-reload':'#results', autocomplete:'off'}
 
   <div class="row">
-    <div class="col-sm-3">
-      #{f.input 'name', 'data-autochange':true, value:name, autofocus:true,
-      placeholder:'search'.label(), inline:true /}
-    </div>
-    <div class="col-sm-1">
-      <button type="submit" name="_filter" class="btn btn-primary">
-        <i class="fa fa-search"></i> <span class="sr-only">&{'search'}</span>
-      </button>
-    </div>
+    #{f.searchInput 'name' /}
   </div>
   #{/form}
-
+  <br>
   #{secure.check 'Institutes.blank'}
   #{b.actions}
   <a class="btn btn-success" href="@{blank()}" data-async-modal="#modalEditInstitute">
@@ -33,25 +25,29 @@
     <section id="results">
       #{paginate results}
 
-      #{list items:results.results, as:'item'}
+      #{list results.results, as:'institute'}
       <ul class="list-group">
         <li class="list-group-item list-group-item-grey">
           <div class="pull-right btn-group">
             #{secure.check 'Offices.blank'}
-            <a class="btn btn-sm btn-default" href="@{Offices.blank(item.id)}" data-async-modal="#modalInsertOffice">
+            <a class="btn btn-sm btn-default" href="@{Offices.blank(institute.id)}" data-async-modal="#modalInsertOffice">
               <i class="fa fa-plus"></i> Aggiungi sede</a>
             #{/secure.check}
           </div>
-          <h4 style="color: black">
-            #{secure.link @edit(item.id), 'data-async-modal':'#modalEditInstitute',fa:'university'}
-              ${item.name}
+          <h4>
+            #{secure.link @edit(institute.id), 'data-async-modal':'#modalEditInstitute',fa:'university'}
+              <span webui-popover-hover data-placement="vertical">${institute.name}</span>
+              <div class="webui-popover-content">
+                #{if institute.cds}<em>cds: ${institute.cds}</em>#{/if}
+                #{else}<small><em>cds non impostato</em></small>#{/else}
+              </div>
             #{/secure.link}
           </h4>
 
         </li>
-        #{list items:item.seats, as:'seat'}
+        #{list institute.seats, as:'seat'}
         <li class="list-group-item  list-group-item-bianco">
-          #{office.item item:seat /}
+          #{include './_office.html' /}
         </li>
         #{/list}
       </ul>

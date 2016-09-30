@@ -257,6 +257,14 @@ public class TemplateUtility {
     return users;
   }
 
+  /**
+   * @return Una lista delle persone assegnabili ad un certo utente dall'operatore corrente
+   */
+  public List<PersonDao.PersonLite> assignablePeople() {
+    return personDao.peopleInOffices(secureManager
+        .officesTechnicalAdminAllowed(Security.getUser().get()));
+  }
+
   public List<Role> rolesAssignable(Office office) {
 
     List<Role> roles = Lists.newArrayList();
@@ -297,6 +305,22 @@ public class TemplateUtility {
   }
 
   /**
+   * @return tutti i ruoli presenti
+   */
+  public List<Role> getRoles() {
+    return roleDao.getAll();
+  }
+
+  /**
+   * @return tutti gli uffici sul quale l'utente corrente ha il ruolo di TECHNICAL_ADMIN
+   */
+  public List<Office> getTechnicalAdminOffices() {
+    return secureManager.officesTechnicalAdminAllowed(Security.getUser().get())
+        .stream().sorted((o, o1) -> o.name.compareTo(o1.name))
+        .collect(Collectors.toList());
+  }
+
+  /**
    * Gli uffici che l'user può assegnare come owner ai BadgeReader. Il super admin può assegnarlo ad
    * ogni ufficio.
    */
@@ -312,7 +336,7 @@ public class TemplateUtility {
       return offices;
     }
 
-    if (user.get().isSuperAdmin()) {
+    if (user.get().isSystemUser()) {
       return officeDao.getAllOffices();
     }
 

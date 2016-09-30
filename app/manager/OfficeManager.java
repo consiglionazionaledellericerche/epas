@@ -7,7 +7,6 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
 import dao.OfficeDao;
-import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
 
 import manager.configurations.ConfigurationManager;
@@ -31,36 +30,17 @@ public class OfficeManager {
   public static final String SKIP_IP_CHECK = "skip.ip.check";
 
   private final UsersRolesOfficesDao usersRolesOfficesDao;
-  private final RoleDao roleDao;
   private final ConfigurationManager configurationManager;
   private final OfficeDao officeDao;
 
   @Inject
   public OfficeManager(
       UsersRolesOfficesDao usersRolesOfficesDao,
-      RoleDao roleDao,
       ConfigurationManager configurationManager,
       OfficeDao officeDao) {
     this.usersRolesOfficesDao = usersRolesOfficesDao;
-    this.roleDao = roleDao;
     this.configurationManager = configurationManager;
     this.officeDao = officeDao;
-  }
-
-  /**
-   * Assegna i diritti agli amministratori. Da chiamare successivamente alla creazione.
-   */
-  public void setSystemUserPermission(Office office) {
-
-    User admin = User.find("byUsername", Role.ADMIN).first();
-    User developer = User.find("byUsername", Role.DEVELOPER).first();
-
-    Role roleAdmin = roleDao.getRoleByName(Role.ADMIN);
-    Role roleDeveloper = roleDao.getRoleByName(Role.DEVELOPER);
-
-    setUro(admin, office, roleAdmin);
-    setUro(developer, office, roleDeveloper);
-
   }
 
   /**

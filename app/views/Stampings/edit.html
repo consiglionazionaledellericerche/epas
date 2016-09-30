@@ -5,10 +5,10 @@ Action = (stamping != null && stamping.persistent) ? 'Modifica' : 'Nuova'
 title:(Action + ' timbratura del ' + date.format() + ' per ' + person.fullname)}
 
 #{if stamping}
-#{tabs}
+#{tabList}
 #{tabItem id:'edit', title:'Modifica', active:true /}
 #{tabItem id:'delete', title:'Elimina' /}
-#{/tabs}
+#{/tabList}
 <br>
 #{/if}
 

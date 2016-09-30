@@ -1,0 +1,10 @@
+<div id="container-nav-tabs" class="container">
+  <ul class="nav nav-tabs">
+    #{secure.li @Competences.showCompetences(currentData.year, currentData.month, currentData.officeId) /}
+    #{secure.li @Competences.enabledCompetences(currentData.year, currentData.month, currentData.officeId) /}
+    #{secure.li @Competences.totalOvertimeHours(currentData.year, currentData.officeId) /}
+    #{secure.li @Competences.approvedCompetenceInYear(currentData.year, false, currentData.officeId) /}
+    #{secure.li @Competences.exportCompetences() /}
+  </ul>
+</div>
+<br>

@@ -35,7 +35,7 @@
 	<tbody>
 		#{list absenceTypes}
 		<tr>
-			<td class="caratteristica"><a href="@{Absences.editCode(_.id)}">${_.code}</a></td>
+			<td>#{secure.link @Absences.editCode(_.id)}${_.code}#{/secure.link}</td>
 			<td>${_.certificateCode}</td>
 			<td>${_.description}</td>
 			<td>${_.internalUse ? 'Sì' : 'No'}</td>
