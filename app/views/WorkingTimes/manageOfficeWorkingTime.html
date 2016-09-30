@@ -15,14 +15,14 @@
 	  #{panel title:'Tipi Orario Particolari per ' + office.name}
 	  
 	   <!-- Nuovo -->
+		 #{secure.check 'WorkingTimes.insertWorkingTimeBaseInformation'}
 	   <div class="text-center">
-        <p>
-          <a class="btn btn-success" href="@{WorkingTimes.insertWorkingTimeBaseInformation(office.id, false)}">
-            <span class="glyphicon glyphicon-plus"></span> Crea nuovo orario di lavoro per ${office.name}
-          </a>
-        </p>
-        </div>
-        
+     	<a class="btn btn-success" href="@{WorkingTimes.insertWorkingTimeBaseInformation(office.id, false)}">
+     		<span class="glyphicon glyphicon-plus"></span> Crea nuovo orario di lavoro per ${office.name}
+		 	</a>
+		 </div>
+     #{/secure.check}
+
         #{tabList}
   				#{tabItem id:'attivi', title:'Attivi', active:true /}
   				#{tabItem id:'inattivi', title:'Disattivati' /}
