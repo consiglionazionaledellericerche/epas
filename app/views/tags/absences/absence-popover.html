@@ -58,6 +58,7 @@
     #{if _person && !templateUtility.involvedGroupAbsenceType(_absence.absenceType).empty }
     <p>
       #{list items:templateUtility.involvedGroupAbsenceType(_absence.absenceType), as:'group'}
+        %{ groupVerified = false; }%
         #{if _absence.personDay}
         #{list items:_absence.personDay.absences, as:'otherAbsence' }
           #{if !otherAbsence.equals(_absence)}
@@ -67,13 +68,17 @@
                    <i class="fa fa-paper-plane-o fa-stack-1x"></i>
                  </span>
                  <strong class="text-success">Il codice ${otherAbsence.absenceType.code} verrà inviato ad attestati.</strong>
+                 %{ groupVerified = true; }%
                  <a href="@{AbsenceGroups.groupStatus(_person.id, group.id, _absence.getAbsenceDate().format())}">Verifica</a>
                </p>
             #{/if}
           #{/if}
         #{/list}
         #{/if}
-           
+        
+        #{if !groupVerified }
+          <a href="@{AbsenceGroups.groupStatus(_person.id, group.id, _absence.getAbsenceDate().format())}">${group.description} </a>
+        #{/if}   
       #{/list}
     </p>  
     #{/if}

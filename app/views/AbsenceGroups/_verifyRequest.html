@@ -16,7 +16,7 @@
 	   *{ seleziona minuti }*    
        #{if selecteSubItem.selectedJustified.name.equals(models.absences.JustifiedType.JustifiedTypeName.specified_minutes) }
          #{f.input 'hours', value:selecteSubItem.hours /}
-         *{ #{f.input 'minutes', value:selecteSubItem.minutes /} }*
+         #{f.input 'minutes', value:selecteSubItem.minutes /}
        #{/if}
        
 	   *{ #{b.buttons center:true}
