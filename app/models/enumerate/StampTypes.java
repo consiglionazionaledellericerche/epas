@@ -27,7 +27,7 @@ public enum StampTypes {
    */
 
   MOTIVI_DI_SERVIZIO("s", "motiviDiServizio", "Motivi di servizio", true),
-  MOTIVI_DI_SERVIZIO_FUORI_SEDE("sfs", "servizioFuoriSede", "Motivi di Servizio Fuori Sede", true),
+  MOTIVI_DI_SERVIZIO_FUORI_SEDE("sf", "servizioFuoriSede", "Motivi di Servizio Fuori Sede", true),
   VISITA_MEDICA("vm", "visitaMedica", "Visita Medica", false),
   PERMESSO_SINDACALE("ps", "permessoSindacale", "Permesso sindacale", false),
   INCARICO_DI_INSEGNAMENTO("is", "incaricoDiInsegnamento", "Incarico di insegnamento", false),
