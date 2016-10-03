@@ -2,8 +2,6 @@ package models.enumerate;
 
 import lombok.Getter;
 
-import org.testng.collections.Lists;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,17 +26,18 @@ public enum StampTypes {
     9 | guardiaMedica          | Guardia Medica           | gm
    */
 
-  MOTIVI_DI_SERVIZIO("s", "motiviDiServizio","Motivi di servizio", true),
-  VISITA_MEDICA("vm", "visitaMedica","Visita Medica", false),
-  PERMESSO_SINDACALE("ps", "permessoSindacale","Permesso sindacale", false),
-  INCARICO_DI_INSEGNAMENTO("is", "incaricoDiInsegnamento","Incarico di insegnamento", false),
-  DIRITTO_ALLO_STUDIO("das", "dirittoAlloStudio","Diritto allo studio", false),
-  MOTIVI_PERSONALI("mp", "motiviPersonali","Motivi personali", false),
-  REPERIBILITA("r", "reperibilita","Reperibilità ", false),
-  INTRAMOENIA("i", "intramoenia","Intramoenia", false),
-  GUARDIA_MEDICA("gm", "guardiaMedica","Guardia Medica", false),
+  MOTIVI_DI_SERVIZIO("s", "motiviDiServizio", "Motivi di servizio", true),
+  MOTIVI_DI_SERVIZIO_FUORI_SEDE("sfs", "servizioFuoriSede", "Motivi di Servizio Fuori Sede", true),
+  VISITA_MEDICA("vm", "visitaMedica", "Visita Medica", false),
+  PERMESSO_SINDACALE("ps", "permessoSindacale", "Permesso sindacale", false),
+  INCARICO_DI_INSEGNAMENTO("is", "incaricoDiInsegnamento", "Incarico di insegnamento", false),
+  DIRITTO_ALLO_STUDIO("das", "dirittoAlloStudio", "Diritto allo studio", false),
+  MOTIVI_PERSONALI("mp", "motiviPersonali", "Motivi personali", false),
+  REPERIBILITA("r", "reperibilita", "Reperibilità ", false),
+  INTRAMOENIA("i", "intramoenia", "Intramoenia", false),
+  GUARDIA_MEDICA("gm", "guardiaMedica", "Guardia Medica", false),
   LAVORO_FUORI_SEDE("lfs", "lavoroFuoriSede", "Lavoro fuori sede", true),
-  PAUSA_PRANZO("pr", "pausaPranzo","Pausa Pranzo", true);
+  PAUSA_PRANZO("pr", "pausaPranzo", "Pausa Pranzo", true);
 
   private String identifier;
   private String code;
@@ -53,7 +52,6 @@ public enum StampTypes {
   }
 
   /**
-   *
    * @param code il codice proveniente dal json delle timbrature.
    * @return Lo stampType corrispondente se esiste.
    */
@@ -67,7 +65,6 @@ public enum StampTypes {
   }
 
   /**
-   *
    * @param identifier La Stringa identificativa dello Stamptype.
    * @return Lo stampType corrispondente se esiste.
    */
@@ -81,10 +78,9 @@ public enum StampTypes {
   }
 
   /**
-   * 
    * @return la lista degli stamptypes attivi.
    */
-  public static List<StampTypes> onlyActive(){
+  public static List<StampTypes> onlyActive() {
 
     return Arrays.stream(values()).filter(StampTypes::isActive).collect(Collectors.toList());
 
@@ -96,10 +92,8 @@ public enum StampTypes {
 //    }
 //    return list;
   }
-  
+
   /**
-   * 
-   * @param code
    * @return true se la causale passata come parametro è attiva. False altrimenti
    */
   public static boolean isActive(final String code) {
@@ -108,7 +102,7 @@ public enum StampTypes {
     }
     return false;
   }
-  
+
   public static StampTypes offSiteWorkingForEmployee() {
     return StampTypes.LAVORO_FUORI_SEDE;
   }
