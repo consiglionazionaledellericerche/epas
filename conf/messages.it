@@ -447,6 +447,7 @@ JustifiedTimeAtWork.ReduceWorkingTimeOfTwoHours= Riduce orario di lavoro di 2 or
 JustifiedTimeAtWork.AssignAllDay= Assegna intera giornata
 
 StampTypes.MOTIVI_DI_SERVIZIO= Motivi di Servizio
+StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE= Motivi di Servizio Fuori Sede
 StampTypes.VISITA_MEDICA= Visita Medica
 StampTypes.PERMESSO_SINDACALE= Permesso Sindacale
 StampTypes.INCARICO_DI_INSEGNAMENTO= Incarico di Insegnamento
