@@ -390,7 +390,7 @@ public class CompetenceManager {
           result = Messages.get("CompManager.overGroupLimit");  
           return result;
         }
-        if (comp.valueApproved + value > comp.competenceCode.limitValue) {         
+        if (value > comp.competenceCode.limitValue) {         
           result = Messages.get("CompManager.overMonthLimit");
           return result;
         }        
