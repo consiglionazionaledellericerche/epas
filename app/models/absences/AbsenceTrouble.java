@@ -60,7 +60,6 @@ public class AbsenceTrouble extends BaseModel {
     //Implementazione
     ImplementationProblem(true);
 
-    
     public boolean isImplementationProblem;
     
     private AbsenceProblem(boolean isImplementationProblem) {

@@ -7,10 +7,10 @@ import it.cnr.iit.epas.DateUtility;
 import manager.services.absences.AbsenceEngineUtility;
 import manager.services.absences.AbsenceService.AbsenceRequestType;
 import manager.services.absences.errors.CriticalError;
+import manager.services.absences.errors.CriticalError.CriticalProblem;
 import manager.services.absences.web.AbsenceRequestForm;
 
 import models.absences.Absence;
-import models.absences.AbsenceTrouble.RequestProblem;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.JustifiedType;
@@ -58,7 +58,7 @@ public class AbsenceEngineRequest {
       return absenceEngine;
     }
     
-    absenceEngine.analyzePeriodChain(absenceEngine.request.group, 
+    absenceEngine.buildPeriodChain(absenceEngine.request.group, 
         absenceEngine.request.currentDate);
     return absenceEngine;
   }

@@ -11,17 +11,14 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import manager.services.absences.AbsenceEngineUtility;
-import manager.services.absences.errors.AbsenceTypeError;
-import manager.services.absences.errors.CriticalError;
+import manager.services.absences.errors.CriticalError.CriticalProblem;
+import manager.services.absences.errors.ErrorsBox;
 
 import models.Contract;
 import models.Person;
 import models.PersonChildren;
 import models.absences.Absence;
-import models.absences.AbsenceTrouble;
 import models.absences.AbsenceTrouble.AbsenceProblem;
-import models.absences.AbsenceTrouble.AbsenceTypeProblem;
-import models.absences.AbsenceTrouble.RequestProblem;
 import models.absences.AbsenceType;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
@@ -142,21 +139,20 @@ public class PeriodChainFactory {
     
     PeriodChain periodChain = new PeriodChain(person, date);
     
-    //Primo absencePeriod
-    AbsencePeriod currentPeriod = buildAbsencePeriod(person, groupAbsenceType, date, 
-        orderedChildren, fetchedContracts);
-    if (this.report.containsCriticalProblems()) {
-      return periodChain;
-    }
-    periodChain.periods.add(currentPeriod);
-    while (currentPeriod.groupAbsenceType.nextGroupToCheck != null) {
-      //successivi
-      currentPeriod = buildAbsencePeriod(person, currentPeriod.groupAbsenceType.nextGroupToCheck, date, 
+    GroupAbsenceType currentGroup = groupAbsenceType;
+    while (currentGroup != null) {
+      AbsencePeriod currentPeriod = buildAbsencePeriod(person, currentGroup, date, 
           orderedChildren, fetchedContracts);
-      if (this.report.containsCriticalProblems()) {
+      if (!currentPeriod.ignorePeriod) { 
+        periodChain.periods.add(currentPeriod);  
+      }
+      if (currentPeriod.errorsBox.containsCriticalErrors()) {
         return periodChain;
       }
-      periodChain.periods.add(currentPeriod);
+      currentGroup = currentGroup.nextGroupToCheck;
+    }
+    if (periodChain.periods.isEmpty()) {
+      return periodChain;
     }
     
     //le date
@@ -176,21 +172,11 @@ public class PeriodChainFactory {
         periodChain.to = absencePeriod.to;
       }
     }
-    // Fix caso in cui l'intervallo dipende da un figlio e passo una data fuori intervallo.
-    if (!DateUtility.isDateIntoInterval(date, new DateInterval(periodChain.from, periodChain.to))) {
-      if (groupAbsenceType.periodType.isChildPeriod()) { 
-        this.report.addRequestProblem(CriticalError.builder()
-            .requestProblem(CriticalProblem.NoChildExists)
-            .date(date)
-            .build());
-        return periodChain;
-      }
-    }
     
-    //fetch delle assenze
+    // fetch delle assenze
     fetchPeriodChainAbsencesAsc(periodChain, previousInserts);
 
-    // Assegnare ad ogni periodo le assenze di competenza e calcoli
+    // assegnare ad ogni periodo le assenze di competenza e calcoli
     populatePeriodChain(periodChain);
  
     return periodChain;
@@ -202,7 +188,8 @@ public class PeriodChainFactory {
    * precedente).
    * @return
    */
-  private PeriodChain fetchPeriodChainAbsencesAsc(PeriodChain periodChain, List<Absence> previousInserts) {
+  private PeriodChain fetchPeriodChainAbsencesAsc(PeriodChain periodChain, 
+      List<Absence> previousInserts) {
     
     //I tipi coinvolti...
     Set<AbsenceType> absenceTypes = periodChain.periodChainInvolvedCodes();
@@ -266,21 +253,17 @@ public class PeriodChainFactory {
     } else if (absencePeriod.groupAbsenceType.periodType.equals(PeriodType.always)) {
       absencePeriod.from = null;
       absencePeriod.to = null;
-    }
-
-    // Caso inerente i figli.
-    else if (absencePeriod.groupAbsenceType.periodType.isChildPeriod()) {
+    } else if (absencePeriod.groupAbsenceType.periodType.isChildPeriod()) {
+      // Caso inerente i figli.
       try {
         DateInterval childInterval = absencePeriod.groupAbsenceType.periodType
-            .getChildInterval(orderedChildren.get(absencePeriod.groupAbsenceType.periodType.childNumber - 1).bornDate);
+            .getChildInterval(orderedChildren
+                .get(absencePeriod.groupAbsenceType.periodType.childNumber - 1).bornDate);
         absencePeriod.from = childInterval.getBegin();
         absencePeriod.to = childInterval.getEnd();
 
       } catch (Exception e) {
-        this.report.addRequestProblem(CriticalError.builder()
-            .requestProblem(CriticalProblem.NoChildExists)
-            .date(date)
-            .build());
+        absencePeriod.ignorePeriod = true;
         return absencePeriod;
       }
     }
@@ -320,18 +303,14 @@ public class PeriodChainFactory {
         int amount = absenceEngineUtility.replacingAmount(absenceType, 
             absencePeriod.complationAmountType);
         if (amount < 1) {
-          this.report.addAbsenceTypeProblem(AbsenceTypeError.builder()
-              .absenceTypeProblem(AbsenceTypeProblem.IncalcolableReplacingAmount)
-              .absenceType(absenceType)
-              .build());
+          absencePeriod.errorsBox.addCriticalError(date, absenceType, 
+              CriticalProblem.IncalcolableReplacingAmount);
           continue;
         }
         if (absencePeriod.replacingCodesDesc.get(amount) != null) {
-          this.report.addAbsenceTypeProblem(AbsenceTypeError.builder()
-              .absenceTypeProblem(AbsenceTypeProblem.ConflictingReplacingAmount)
-              .absenceType(absenceType)
-              .conflictingAbsenceType(absencePeriod.replacingCodesDesc.get(amount))
-              .build());
+          AbsenceType conflictingType = absencePeriod.replacingCodesDesc.get(amount);
+          absencePeriod.errorsBox.addCriticalError(date, absenceType, conflictingType, 
+              CriticalProblem.ConflictingReplacingAmount);
           continue;
         }
         absencePeriod.replacingCodesDesc.put(amount, absenceType);
@@ -361,22 +340,16 @@ public class PeriodChainFactory {
           continue;
         }
         
-        //Se il gruppo ha una assenza precedente compromessa (con errori) allora
-        // tutte le successive sono compromesse.
-        if (this.report.containsCriticalProblems()) {
-          this.report.addAbsenceTrouble(AbsenceTrouble.builder()
-              .trouble(AbsenceProblem.CompromisedTakableComplationGroup)
-              .absence(absence)
-              .build());
+        // Se il gruppo è compromesso tutte le assenze successive sono compromesse
+        if (ErrorsBox.containsCriticalErrors(periodChain.allErrorsInPeriods())) {
+          absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.ImplementationProblem);
           continue;
         }
         
         //Se il suo tipo ha un errore 
-        if (this.report.absenceTypeHasProblem(absence.absenceType)) {
-          this.report.addAbsenceTrouble(AbsenceTrouble.builder()
-              .trouble(AbsenceProblem.AbsenceTypeProblem)
-              .absence(absence)
-              .build());
+        if (ErrorsBox.absenceTypeHasErrors(periodChain.allErrorsInPeriods(), absence.absenceType)) {
+          absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.ImplementationProblem);
+          continue;
         }
         
         LocalDate date = null;
@@ -392,30 +365,17 @@ public class PeriodChainFactory {
           isComplation = absencePeriod.complationCodes.contains(absence.absenceType);
         }
         
-        //una assenza senza ruolo nel gruppo la ignoro
-        if (!isTaken && !isComplation && !isReplacing) {
-//          this.report.addAbsenceAndImplementationProblem(AbsenceTrouble.builder()
-//              .trouble(AbsenceProblem.UselessAbsenceInPeriod)
-//              .absence(absence)
-//              .build());
-          continue;
-        }
-        
         //una assenza può essere assegnata ad un solo period
         if (absencesAlreadyAssigned.contains(absence)) {
-          this.report.addAbsenceAndImplementationProblem(AbsenceTrouble.builder()
-              .trouble(AbsenceProblem.TwoPeriods)
-              .absence(absence)
-              .build());
+          absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.ImplementationProblem);
+          absencePeriod.errorsBox.addCriticalError(absence, CriticalProblem.TwoPeriods);
           continue;
         }
         
         //una tipo di assenza può essere di rimpiazzamento e nient'altro
         if (isReplacing && (isComplation || isTaken)) {
-          this.report.addAbsenceTypeProblem(AbsenceTypeError.builder()
-              .absenceTypeProblem(AbsenceTypeProblem.OnlyReplacingRuleViolated)
-              .absenceType(absence.getAbsenceType())
-              .build());
+          absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.ImplementationProblem);
+          absencePeriod.errorsBox.addCriticalError(absence, CriticalProblem.OnlyReplacingRuleViolated);
           continue;  
         }
         if (isTaken || isComplation || isReplacing) {
@@ -428,17 +388,12 @@ public class PeriodChainFactory {
           int takenAmount = absenceEngineUtility
               .absenceJustifiedAmount(absencePeriod.person, absence, absencePeriod.takeAmountType);
           if (takenAmount < 0) {
-            this.report.addAbsenceAndImplementationProblem(AbsenceTrouble.builder()
-                .trouble(AbsenceProblem.IncalcolableJustifiedAmount)
-                .absence(absence)
-                .build());
+            absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.ImplementationProblem);
+            absencePeriod.errorsBox.addCriticalError(absence, CriticalProblem.IncalcolableJustifiedAmount);
             continue;
           }
           if (!absencePeriod.canAddTakenAmount(takenAmount)) {
-            this.report.addAbsenceTrouble(AbsenceTrouble.builder()
-                .trouble(AbsenceProblem.LimitExceeded)
-                .absence(absence)
-                .build());
+            absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.LimitExceeded);
           }
           absencePeriod.addAbsenceTaken(absence, takenAmount);
         }
@@ -447,14 +402,7 @@ public class PeriodChainFactory {
           Absence previous = absencePeriod.complationAbsencesByDay.get(date);
           if (previous != null ) {
             //una sola assenza di completamento per quel giorno
-            this.report.addAbsenceTrouble(AbsenceTrouble.builder()
-                .trouble(AbsenceProblem.TwoComplationSameDay)
-                .absence(absence)
-                .build());
-            this.report.addAbsenceTrouble(AbsenceTrouble.builder()
-                .trouble(AbsenceProblem.TwoComplationSameDay)
-                .absence(previous)
-                .build());
+            absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.TwoComplationSameDay, previous);
             absencePeriod.setCompromisedReplacingDate(absence.getAbsenceDate());
             absencePeriod.addComplationSameDay(previous);
             absencePeriod.addComplationSameDay(absence);
@@ -465,10 +413,8 @@ public class PeriodChainFactory {
               absence, absencePeriod.complationAmountType);
           
           if (complationAmount <= 0) {
-            this.report.addAbsenceAndImplementationProblem(AbsenceTrouble.builder()
-                .trouble(AbsenceProblem.IncalcolableJustifiedAmount)
-                .absence(absence)
-                .build());
+            absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.ImplementationProblem);
+            absencePeriod.errorsBox.addCriticalError(absence, CriticalProblem.IncalcolableJustifiedAmount);
             continue;
           }
           absencePeriod.complationAbsencesByDay.put(date, absence);
@@ -477,14 +423,7 @@ public class PeriodChainFactory {
           Absence previous = absencePeriod.replacingAbsencesByDay.get(date);
           if (previous != null) {
             //una sola assenza di rimpiazzamento per quel giorno
-            this.report.addAbsenceTrouble(AbsenceTrouble.builder()
-                .trouble(AbsenceProblem.TwoReplacingSameDay)
-                .absence(absence)
-                .build());
-            this.report.addAbsenceTrouble(AbsenceTrouble.builder()
-                .trouble(AbsenceProblem.TwoReplacingSameDay)
-                .absence(previous)
-                .build());
+            absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.TwoReplacingSameDay, previous);
             absencePeriod.setCompromisedReplacingDate(absence.getAbsenceDate());
             absencePeriod.addReplacingSameDay(previous);
             absencePeriod.addReplacingSameDay(absence);
@@ -500,29 +439,22 @@ public class PeriodChainFactory {
       for (DayStatus dayStatus : absencePeriod.daysStatus.values()) {
         //Errore nel rimpiazzo
         if (dayStatus.wrongTypeOfReplacing()) {
-          this.report.addAbsenceTrouble(AbsenceTrouble.builder()
-              .trouble(AbsenceProblem.WrongReplacing)
-              .absence(dayStatus.getExistentReplacing())
-              .build());
+          absencePeriod.errorsBox.addAbsenceError(dayStatus.getExistentReplacing(), 
+              AbsenceProblem.WrongReplacing);
           absencePeriod.setCompromisedReplacingDate(dayStatus.getDate());
           break;
         }
         if (dayStatus.tooEarlyReplacing()) {
-          this.report.addAbsenceTrouble(AbsenceTrouble.builder()
-              .trouble(AbsenceProblem.TooEarlyReplacing)
-              .absence(dayStatus.getExistentReplacing())
-              .build());
+          absencePeriod.errorsBox.addAbsenceError(dayStatus.getExistentReplacing(), 
+              AbsenceProblem.TooEarlyReplacing);
           absencePeriod.setCompromisedReplacingDate(dayStatus.getDate());
           break;
         }
         //Errore nel completamento
         if (dayStatus.missingReplacing()) {
           absencePeriod.setCompromisedReplacingDate(dayStatus.getDate());
-          this.report.addAbsenceTrouble(AbsenceTrouble.builder()
-              .trouble(AbsenceProblem.MissingReplacing)
-              .absence(absencePeriod.complationAbsencesByDay
-                  .get(dayStatus.getDate()))
-              .build());
+          absencePeriod.errorsBox.addAbsenceError(absencePeriod.complationAbsencesByDay
+              .get(dayStatus.getDate()), AbsenceProblem.MissingReplacing);
           break;
         }
 
@@ -532,18 +464,12 @@ public class PeriodChainFactory {
       // successive sono taggate con l'errore
       for (Absence complationAbsence : absencePeriod.complationAbsencesByDay.values()) {
         if (absencePeriod.isAbsenceCompromisedReplacing(complationAbsence)) {
-          this.report.addAbsenceTrouble(AbsenceTrouble.builder()
-              .trouble(AbsenceProblem.CompromisedReplacing)
-              .absence(complationAbsence)
-              .build());
+          absencePeriod.errorsBox.addAbsenceError(complationAbsence, AbsenceProblem.CompromisedReplacing);
         }
       }
       for (Absence replacingAbsence : absencePeriod.replacingAbsencesByDay.values()) {
         if (absencePeriod.isAbsenceCompromisedReplacing(replacingAbsence)) {
-          this.report.addAbsenceTrouble(AbsenceTrouble.builder()
-              .trouble(AbsenceProblem.CompromisedReplacing)
-              .absence(replacingAbsence)
-              .build());
+          absencePeriod.errorsBox.addAbsenceError(replacingAbsence, AbsenceProblem.CompromisedReplacing);
         }
       }
       

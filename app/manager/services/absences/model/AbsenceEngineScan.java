@@ -70,7 +70,7 @@ public class AbsenceEngineScan {
           .genericConstraints(genericErrors, person, absence, absencesToScan);
     }
     
-    // analisi dei requisiti all'interno di ogni gruppo (risultati in absenceEngine.report)
+    // analisi dei requisiti all'interno di ogni gruppo
     Iterator<Absence> iterator = this.absencesToScan.iterator();
     this.configureNextGroupToScan(iterator);
     while (this.nextGroupToScan != null) {
@@ -78,7 +78,10 @@ public class AbsenceEngineScan {
       log.debug("Inizio lo scan del prossimo gruppo {}", this.nextGroupToScan.description);
       
       periodChainFactory.buildPeriodChain(person, this.nextGroupToScan, 
-          this.currentAbsence.getAbsenceDate(), orderedChildren, fetchedContracts);
+          this.currentAbsence.getAbsenceDate(), null, orderedChildren, fetchedContracts);
+      
+      
+      
       if (absenceEngine.report.containsCriticalProblems()) {
         //ex. manca il figlio
         this.setGroupScanned(this.currentAbsence, this.nextGroupToScan);

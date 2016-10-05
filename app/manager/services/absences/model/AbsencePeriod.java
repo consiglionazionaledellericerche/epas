@@ -8,6 +8,7 @@ import com.google.common.collect.Sets;
 import it.cnr.iit.epas.DateInterval;
 
 import manager.services.absences.AbsenceEngineUtility;
+import manager.services.absences.errors.ErrorsBox;
 
 import models.Person;
 import models.absences.Absence;
@@ -42,7 +43,6 @@ public class AbsencePeriod {
   public Set<AbsenceType> takenCodes;              // I tipi di assenza consumati del periodo
   
   // Complation
-  
   public AmountType complationAmountType;                                           // Tipo di ammontare completamento
   public int complationConsumedAmount;                                              // Ammontare completamento attualmente consumato
   public SortedMap<Integer, AbsenceType> replacingCodesDesc =                       // I codici di rimpiazzamento ordinati per il loro
@@ -54,6 +54,9 @@ public class AbsencePeriod {
   public SortedMap<LocalDate, Absence> complationAbsencesByDay = Maps.newTreeMap(); // Le assenze di completamento per giorno
   public LocalDate compromisedReplacingDate = null;                                 // Data di errore complation 
                                                                                     // (non si possono più fare i calcoli sui completamenti). 
+  //Errori del periodo
+  public ErrorsBox errorsBox = new ErrorsBox();
+  public boolean ignorePeriod = false;
   
   AbsencePeriod(Person person, GroupAbsenceType groupAbsenceType) {
     this.person = person;
@@ -61,6 +64,9 @@ public class AbsencePeriod {
   }
 
   public DateInterval periodInterval() {
+    if (from == null) {
+      return null;
+    }
     return new DateInterval(from, to);
   }
   
