@@ -6,7 +6,7 @@ import it.cnr.iit.epas.DateUtility;
 
 import manager.services.absences.AbsenceEngineUtility;
 import manager.services.absences.AbsenceService.AbsenceRequestType;
-import manager.services.absences.model.AbsencesReport.ReportRequestProblem;
+import manager.services.absences.errors.CriticalError;
 import manager.services.absences.web.AbsenceRequestForm;
 
 import models.absences.Absence;
@@ -58,7 +58,7 @@ public class AbsenceEngineRequest {
       return absenceEngine;
     }
     
-    absenceEngine.buildPeriodChain(absenceEngine.request.group, 
+    absenceEngine.analyzePeriodChain(absenceEngine.request.group, 
         absenceEngine.request.currentDate);
     return absenceEngine;
   }
@@ -124,8 +124,8 @@ public class AbsenceEngineRequest {
 
     //Esco e non sono mai riuscito a inferire il tipo.
     if (absenceTypeToInfer && absence.absenceType == null) {
-      absenceEngine.report.addRequestProblem(ReportRequestProblem.builder()
-          .requestProblem(RequestProblem.CantInferAbsenceCode)
+      absenceEngine.report.addRequestProblem(CriticalError.builder()
+          .requestProblem(CriticalProblem.CantInferAbsenceCode)
           .date(absenceEngine.request.currentDate)
           .build());
     }

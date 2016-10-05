@@ -9,6 +9,7 @@ import it.cnr.iit.epas.DateInterval;
 
 import manager.services.absences.AbsenceEngineUtility;
 
+import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
@@ -23,42 +24,45 @@ import java.util.Set;
 import java.util.SortedMap;
 
 public class AbsencePeriod {
-
-  public PeriodChain periodChain;
-  public GroupAbsenceType groupAbsenceType;
   
-  //
   // Period
-  //
-  
+  public Person person;
+  public GroupAbsenceType groupAbsenceType;
   public LocalDate from;                      // Data inizio
   public LocalDate to;                        // Data fine
-  
   public SortedMap<LocalDate, DayStatus> daysStatus = Maps.newTreeMap();
-
-  public AbsencePeriod(PeriodChain periodChain, GroupAbsenceType groupAbsenceType) {
-    this.periodChain = periodChain;
+  
+  // Takable
+  public AmountType takeAmountType;                // Il tipo di ammontare del periodo
+  public TakeCountBehaviour takableCountBehaviour; // Come contare il tetto totale
+  private int fixedPeriodTakableAmount = 0;         // Il tetto massimo
+  public TakeCountBehaviour takenCountBehaviour;   // Come contare il tetto consumato
+  private int periodTakenAmount = 0;                // Il tetto consumato
+  public Set<AbsenceType> takableCodes;            // I tipi assenza prendibili del periodo
+  public Set<AbsenceType> takenCodes;              // I tipi di assenza consumati del periodo
+  
+  // Complation
+  
+  public AmountType complationAmountType;                                           // Tipo di ammontare completamento
+  public int complationConsumedAmount;                                              // Ammontare completamento attualmente consumato
+  public SortedMap<Integer, AbsenceType> replacingCodesDesc =                       // I codici di rimpiazzamento ordinati per il loro
+      Maps.newTreeMap(Collections.reverseOrder());                                  // tempo di completamento (decrescente) 
+                                                                                     
+  public Map<AbsenceType, Integer> replacingTimes = Maps.newHashMap();              //I tempi di rimpiazzamento per ogni assenza
+  public Set<AbsenceType> complationCodes;                                          // Codici di completamento     
+  public SortedMap<LocalDate, Absence> replacingAbsencesByDay = Maps.newTreeMap();  // Le assenze di rimpiazzamento per giorno
+  public SortedMap<LocalDate, Absence> complationAbsencesByDay = Maps.newTreeMap(); // Le assenze di completamento per giorno
+  public LocalDate compromisedReplacingDate = null;                                 // Data di errore complation 
+                                                                                    // (non si possono più fare i calcoli sui completamenti). 
+  
+  AbsencePeriod(Person person, GroupAbsenceType groupAbsenceType) {
+    this.person = person;
     this.groupAbsenceType = groupAbsenceType;
   }
 
   public DateInterval periodInterval() {
     return new DateInterval(from, to);
   }
-  
-  //
-  // Takable
-  //
-  
-  public AmountType takeAmountType;                // Il tipo di ammontare del periodo
-
-  public TakeCountBehaviour takableCountBehaviour; // Come contare il tetto totale
-  private int fixedPeriodTakableAmount = 0;         // Il tetto massimo
-
-  public TakeCountBehaviour takenCountBehaviour;   // Come contare il tetto consumato
-  private int periodTakenAmount = 0;                // Il tetto consumato
-
-  public Set<AbsenceType> takableCodes;            // I tipi assenza prendibili del periodo
-  public Set<AbsenceType> takenCodes;              // I tipi di assenza consumati del periodo
   
   public boolean isTakable() {
     return takeAmountType != null; 
@@ -125,39 +129,15 @@ public class AbsencePeriod {
     this.periodTakenAmount += takenAmount;
   }
   
-  //
-  // Complation
-  //
-  
-  public AmountType complationAmountType;     // Tipo di ammontare completamento
-
-  public int complationConsumedAmount;        // Ammontare completamento attualmente consumato
-
-  // I codici di rimpiazzamento ordinati per il loro tempo di completamento (decrescente)
-  public SortedMap<Integer, AbsenceType> replacingCodesDesc = 
-      Maps.newTreeMap(Collections.reverseOrder());
-  
-  //I tempi di rimpiazzamento per ogni assenza
-  public Map<AbsenceType, Integer> replacingTimes = Maps.newHashMap();
-  
-  // Codici di completamento
-  public Set<AbsenceType> complationCodes;    
-
-  // Le assenze di rimpiazzamento per giorno
-  public SortedMap<LocalDate, Absence> replacingAbsencesByDay = Maps.newTreeMap();
-  
-  // Le assenze di completamento per giorno
-  public SortedMap<LocalDate, Absence> complationAbsencesByDay = Maps.newTreeMap();
-  
-  // Data di errore complation (non si possono più fare i calcoli sui completamenti).
-  public LocalDate compromisedReplacingDate = null; 
+ 
   
   public boolean isComplation() {
     return complationAmountType != null; 
   }
   
-  public void computeReplacingStatusInPeriod() {
+  public void computeReplacingStatusInPeriod(AbsenceEngineUtility absenceEngineUtility) {
 
+    //TODO: questi errori devono essere messi nel period!!!
     if (periodChain.absenceEngine.report.containsCriticalProblems()) {
       return;
     }
@@ -185,9 +165,7 @@ public class AbsencePeriod {
         continue;
       }
 
-      AbsenceEngineUtility absenceEngineUtility = periodChain.absenceEngine.absenceEngineUtility; 
-      
-      int amount = absenceEngineUtility.absenceJustifiedAmount(periodChain.absenceEngine, 
+      int amount = absenceEngineUtility.absenceJustifiedAmount(person, 
           complationAbsence, this.complationAmountType);
       complationAmount = complationAmount + amount;
 
@@ -197,8 +175,7 @@ public class AbsencePeriod {
       dayStatus.setConsumedComplation(amount);
 
       Optional<AbsenceType> replacingCode = absenceEngineUtility
-          .whichReplacingCode(periodChain.absenceEngine, this, 
-              complationAbsence.getAbsenceDate(), complationAmount);
+          .whichReplacingCode(this, complationAbsence.getAbsenceDate(), complationAmount);
 
       if (replacingCode.isPresent()) {
 

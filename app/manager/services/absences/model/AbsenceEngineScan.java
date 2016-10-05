@@ -6,7 +6,11 @@ import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.services.absences.AbsenceEngineUtility;
+import manager.services.absences.errors.ErrorsBox;
 
+import models.Contract;
+import models.Person;
+import models.PersonChildren;
 import models.absences.Absence;
 import models.absences.AbsenceTrouble;
 import models.absences.GroupAbsenceType;
@@ -21,17 +25,35 @@ import java.util.Set;
 @Slf4j
 public class AbsenceEngineScan {
   
+  public PeriodChainFactory periodChainFactory;
   public AbsenceEngineUtility absenceEngineUtility;
-  public AbsenceEngine absenceEngine;
   
+  public Person person;
+  public List<PersonChildren> orderedChildren;
+  public List<Contract> fetchedContracts;
+  
+  //Puntatori scan
   public LocalDate scanFrom;
   public List<Absence> absencesToScan;
   public Absence currentAbsence;
-  public GroupAbsenceType currentGroup;
+  public GroupAbsenceType nextGroupToScan;
   public Map<Absence, Set<GroupAbsenceType>> absencesGroupsToScan = Maps.newHashMap();
-
-  /// Metodi
   
+  //Report scan
+  ErrorsBox genericErrors = new ErrorsBox(); 
+  List<PeriodChain> chainScanned = Lists.newArrayList();
+  
+  public AbsenceEngineScan(Person person, LocalDate scanFrom, 
+      List<PersonChildren> orderedChildren, List<Contract> fetchedContracts, 
+      PeriodChainFactory periodChainFactory, AbsenceEngineUtility absenceEngineUtility) {
+   this.person = person;
+   this.scanFrom = scanFrom;
+   this.orderedChildren = orderedChildren;
+   this.fetchedContracts = fetchedContracts;
+   this.periodChainFactory = periodChainFactory;
+   this.absenceEngineUtility = absenceEngineUtility;
+  }
+
   private void setGroupScanned(Absence absence, GroupAbsenceType groupAbsenceType) {
     Set<GroupAbsenceType> absenceGroupsToScan = absencesGroupsToScan.get(absence);
     if (absenceGroupsToScan == null) {
@@ -42,37 +64,37 @@ public class AbsenceEngineScan {
   
   public void scan() {
     
-    // analisi dei requisiti generici (risultati in absenceEngine.report)
+    // analisi dei requisiti generici
     for (Absence absence : this.absencesToScan) {
-      absenceEngineUtility.genericConstraints(absenceEngine, absence, absencesToScan);
-      log.debug("L'assenza data={}, codice={} è stata aggiunta a quelle da analizzare", 
-          absence.getAbsenceDate(), absence.getAbsenceType().code);
+      this.genericErrors = absenceEngineUtility
+          .genericConstraints(genericErrors, person, absence, absencesToScan);
     }
     
     // analisi dei requisiti all'interno di ogni gruppo (risultati in absenceEngine.report)
-    Iterator<Absence> iterator = absenceEngine.scan.absencesToScan.iterator();
+    Iterator<Absence> iterator = this.absencesToScan.iterator();
     this.configureNextGroupToScan(iterator);
-    while (this.currentGroup != null) {
-      log.debug("Inizio lo scan del prossimo gruppo {}", absenceEngine.scan.currentGroup.description);
-      absenceEngine.buildPeriodChain(absenceEngine.scan.currentGroup, 
-          absenceEngine.scan.currentAbsence.getAbsenceDate());
+    while (this.nextGroupToScan != null) {
+     
+      log.debug("Inizio lo scan del prossimo gruppo {}", this.nextGroupToScan.description);
+      
+      periodChainFactory.buildPeriodChain(person, this.nextGroupToScan, 
+          this.currentAbsence.getAbsenceDate(), orderedChildren, fetchedContracts);
       if (absenceEngine.report.containsCriticalProblems()) {
         //ex. manca il figlio
-        absenceEngine.scan.setGroupScanned(absenceEngine.scan.currentAbsence, 
-            absenceEngine.scan.currentGroup);
+        this.setGroupScanned(this.currentAbsence, this.nextGroupToScan);
       } else {
         //taggare come scansionate le assenze coinvolte nella periodChain
         for (Absence absence : absenceEngine.periodChain.absencesAsc) {
-          absenceEngine.scan.setGroupScanned(absence, absenceEngine.scan.currentGroup);
+          this.setGroupScanned(absence, this.nextGroupToScan);
         }
       }
       this.configureNextGroupToScan(iterator);
     }
   }
 
-  public void persistScannerTroubles(AbsenceEngine absenceEngine) {
+  public void persistScannerTroubles() {
 
-    for (Absence absence : absenceEngine.scan.absencesToScan) {
+    for (Absence absence : this.absencesToScan) {
 
       List<AbsenceTrouble> toDeleteTroubles = Lists.newArrayList();     //problemi da aggiungere
       List<AbsenceTrouble> toAddTroubles = Lists.newArrayList();        //problemi da rimuovere
@@ -143,16 +165,16 @@ public class AbsenceEngineScan {
   private void configureNextGroupToScan(Iterator<Absence> iterator) {
     
     // stessa assenza prossimo gruppo
-    this.currentGroup = currentAbsenceNextGroup();
-    if (this.currentGroup != null) {
+    this.nextGroupToScan = currentAbsenceNextGroup();
+    if (this.nextGroupToScan != null) {
       return;
     }
     
     // prossima assenza primo gruppo
     while (iterator.hasNext()) {
       this.currentAbsence = iterator.next();
-      this.currentGroup = currentAbsenceNextGroup();
-      if (this.currentGroup != null) {
+      this.nextGroupToScan = currentAbsenceNextGroup();
+      if (this.nextGroupToScan != null) {
         return;
       }
     }
