@@ -8,17 +8,21 @@ import com.google.inject.Inject;
 import dao.PersonChildrenDao;
 import dao.absences.AbsenceComponentDao;
 
+import it.cnr.iit.epas.DateUtility;
+
+import lombok.extern.slf4j.Slf4j;
+
 import manager.PersonDayManager;
+import manager.services.absences.errors.ErrorsBox;
+import manager.services.absences.errors.ImplementationError;
+import manager.services.absences.errors.CriticalError;
 import manager.services.absences.model.AbsenceEngine;
 import manager.services.absences.model.AbsenceEngineRequest;
-import manager.services.absences.model.AbsenceEngineScan;
 import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.AbsencesReport;
-import manager.services.absences.model.AbsencesReport.ReportImplementationProblem;
-import manager.services.absences.model.AbsencesReport.ReportRequestProblem;
-import manager.services.absences.model.DayStatus;
-import manager.services.absences.model.TakenAbsence;
 
+import models.Contract;
+import models.ContractWorkingTimeType;
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceTrouble;
@@ -40,7 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
+@Slf4j
 public class AbsenceEngineUtility {
   
   private final AbsenceComponentDao absenceComponentDao;
@@ -57,89 +61,10 @@ public class AbsenceEngineUtility {
     this.personDayManager = personDayManager;
   }
   
-  public AbsenceEngine buildInsertAbsenceEngine(Person person, GroupAbsenceType groupAbsenceType,
-      LocalDate from, LocalDate to) {
-    
-    AbsenceEngine absenceEngine = new AbsenceEngine(person, absenceComponentDao, this, personChildrenDao);
-
-    AbsenceEngineRequest request = new AbsenceEngineRequest();
-    request.absenceEngine = absenceEngine;
-    request.absenceEngineUtility = this;
-    request.group = groupAbsenceType;
-    request.from = from;
-    request.to = to;
-    absenceEngine.request = request;
-    
-    absenceEngine.report = new AbsencesReport();
-    
-    if (groupAbsenceType.pattern.equals(GroupAbsenceType.GroupAbsenceTypePattern.vacationsCnr) || 
-        groupAbsenceType.pattern.equals(GroupAbsenceType.GroupAbsenceTypePattern.compensatoryRestCnr)) {
-      
-      absenceEngine.report.addImplementationProblem(ReportImplementationProblem.builder()
-          .implementationProblem(ImplementationProblem.UnimplementedTakableComplationGroup)
-          .build());
-      return absenceEngine;
-    }
-    
-    absenceEngine.request.configureNextInsert();
-   
-    return absenceEngine;
-  }
   
-  /**
-   * 
-   * @param person
-   * @param groupAbsenceType
-   * @param from
-   * @return
-   */
-  public AbsenceEngine buildResidualAbsenceEngine(Person person, GroupAbsenceType groupAbsenceType, LocalDate date) {
-    
-    AbsenceEngine absenceEngine = buildInsertAbsenceEngine(person, groupAbsenceType, date, null);
-    
-    if (groupAbsenceType.pattern.equals(GroupAbsenceType.GroupAbsenceTypePattern.vacationsCnr) || 
-        groupAbsenceType.pattern.equals(GroupAbsenceType.GroupAbsenceTypePattern.compensatoryRestCnr)) {
 
-      absenceEngine.report.addImplementationProblem(ReportImplementationProblem.builder()
-          .implementationProblem(ImplementationProblem.UnimplementedTakableComplationGroup)
-          .build());
-      return absenceEngine;
-    }
 
-    absenceEngine.buildPeriodChain(groupAbsenceType, date);
-    
-    return absenceEngine;
-    
-  }
-
-  /**
-   * Costruttore per richiesta di scan.
-   * @param absenceComponentDao
-   * @param personChildrenDao
-   * @param absenceEngineUtility
-   * @param person
-   * @param scanFrom
-   * @param absencesToScan
-   */
-  public AbsenceEngine buildScanAbsenceEngine(AbsenceComponentDao absenceComponentDao, PersonChildrenDao personChildrenDao,
-      AbsenceEngineUtility absenceEngineUtility, Person person, LocalDate scanFrom, List<Absence> absencesToScan) {
-    
-    AbsenceEngine absenceEngine = new AbsenceEngine(person, absenceComponentDao, this, personChildrenDao);
-    
-    absenceEngine.scan = new AbsenceEngineScan();
-    absenceEngine.scan.absenceEngine = absenceEngine;
-    absenceEngine.scan.absenceEngineUtility = absenceEngineUtility;
-    absenceEngine.scan.scanFrom = scanFrom;
-    absenceEngine.scan.absencesToScan = absencesToScan;
-    for (Absence absence : absenceEngine.scan.absencesToScan) {
-      Set<GroupAbsenceType> groupsToScan = absenceEngineUtility.involvedGroup(absence.absenceType); 
-      absenceEngine.scan.absencesGroupsToScan.put(absence, groupsToScan);
-    }
-    
-    absenceEngine.report = new AbsencesReport();
-    
-    return absenceEngine;
-  }
+  
   
   /**
    * Le operazioni univocamente identificabili dal justifiedType. Devo riuscire a derivare
@@ -232,8 +157,7 @@ public class AbsenceEngineUtility {
    * @param amountType
    * @return
    */
-  public int absenceJustifiedAmount(AbsenceEngine absenceEngine, Absence absence, 
-      AmountType amountType) {
+  public int absenceJustifiedAmount(Person person, Absence absence, AmountType amountType) {
     
     int amount = 0;
 
@@ -241,10 +165,10 @@ public class AbsenceEngineUtility {
       amount = 0;
     } 
     else if (absence.justifiedType.name.equals(JustifiedTypeName.all_day)) {
-      amount = absenceEngine.workingTime(absence.getAbsenceDate());
+      amount = absenceWorkingTime(person, absence);
     } 
     else if (absence.justifiedType.name.equals(JustifiedTypeName.half_day)) {
-      amount = absenceEngine.workingTime(absence.getAbsenceDate()) / 2;
+      amount = absenceWorkingTime(person, absence) / 2;
     }
     else if (absence.justifiedType.name.equals(JustifiedTypeName.missing_time) ||
         absence.justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
@@ -264,7 +188,7 @@ public class AbsenceEngineUtility {
     }
     
     if (amountType.equals(AmountType.units)) {
-      int work = absenceEngine.workingTime(absence.getAbsenceDate());
+      int work = absenceWorkingTime(person, absence);
       if (work == 0) {
         return 0;
       }
@@ -274,6 +198,23 @@ public class AbsenceEngineUtility {
       return amount;
     }
   }
+  
+  public int absenceWorkingTime(Person person, Absence absence) {
+    LocalDate date = absence.getAbsenceDate();
+    for (Contract contract : person.contracts) {
+      for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
+        if (DateUtility.isDateIntoInterval(date, cwtt.periodInterval())) {
+          if (cwtt.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek() - 1).holiday) {
+            return 0;
+          }
+          return cwtt.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek() - 1)
+              .workingTime;
+        }
+      }
+    }
+    return 0;
+  }
+  
   
   /**
    * Quanto completa l'assenza passata.
@@ -387,8 +328,8 @@ public class AbsenceEngineUtility {
    * 
    * @return
    */
-  public Optional<AbsenceType> whichReplacingCode(AbsenceEngine absenceEngine, 
-      AbsencePeriod absencePeriod, LocalDate date, int complationAmount) {
+  public Optional<AbsenceType> whichReplacingCode(AbsencePeriod absencePeriod, 
+      LocalDate date, int complationAmount) {
     
     for (Integer replacingTime : absencePeriod.replacingCodesDesc.keySet()) {
       int amountToCompare = replacingTime;
@@ -429,19 +370,24 @@ public class AbsenceEngineUtility {
    * @param allCodeAbsences
    * @return
    */
-  public AbsenceEngine genericConstraints(AbsenceEngine absenceEngine, Absence absence, 
-      List<Absence> allCodeAbsences) {
+  public ErrorsBox genericConstraints(ErrorsBox genericErrors, 
+      Person person, Absence absence, List<Absence> allCodeAbsences) {
+    
+    log.debug("L'assenza data={}, codice={} viene processata per i vincoli generici", 
+        absence.getAbsenceDate(), absence.getAbsenceType().code);
     
     //Codice non prendibile nei giorni di festa ed è festa.
-    if (!absence.absenceType.consideredWeekEnd && personDayManager.isHoliday(absenceEngine.person,
+    if (!absence.absenceType.consideredWeekEnd && personDayManager.isHoliday(person,
         absence.getAbsenceDate())) {
-      absenceEngine.report.addAbsenceTrouble(AbsenceTrouble.builder()
-          .trouble(AbsenceProblem.NotOnHoliday)
-          .absence(absence).build());
+      genericErrors.addAbsenceError(absence, AbsenceProblem.NotOnHoliday);
     }
     
     //Un codice giornaliero già presente 
     for (Absence oldAbsence : allCodeAbsences) {
+      //stessa entità
+      if (oldAbsence.isPersistent() && absence.isPersistent() && oldAbsence.equals(absence)) {
+        continue;
+      }
       //altra data
       if (!oldAbsence.getAbsenceDate().isEqual(absence.getAbsenceDate())) {
         continue;
@@ -451,27 +397,18 @@ public class AbsenceEngineUtility {
           || oldAbsence.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) == false) {
         continue;
       }
-
-      if (absenceEngine.isRequestEngine()) {
-        DayStatus insertDayStatus = DayStatus.builder().date(absence.getAbsenceDate()).build();
-        insertDayStatus.takenAbsences = Lists.newArrayList(TakenAbsence.builder()
-            .absence(absence)
-            .absenceProblem(AbsenceProblem.AllDayAlreadyExists).build());
-        absenceEngine.report.addInsertDayStatus(insertDayStatus);
-      }
-      else if (absenceEngine.isScanEngine()) {
-        if (oldAbsence.isPersistent() && absence.isPersistent() && oldAbsence.equals(absence)) {
-          continue;
-        }
-        absenceEngine.report.addAbsenceTrouble(AbsenceTrouble.builder()
-            .trouble(AbsenceProblem.AllDayAlreadyExists)
-            .absence(absence).build());
-      }
-
+      genericErrors.addAbsenceError(absence, AbsenceProblem.AllDayAlreadyExists, oldAbsence);
     }
+    
+    //TODO:
+    // Strange weekend
+    
+    // Configuration qualification grant
+    
+    // DayLimitGroupCode
 
      
-    return absenceEngine;
+    return genericErrors;
   }
   
   /**
@@ -486,8 +423,8 @@ public class AbsenceEngineUtility {
     
     //Controllo integrità absenceType - justifiedType
     if (!absence.absenceType.justifiedTypesPermitted.contains(absence.justifiedType)) {
-      absenceEngine.report.addRequestProblem(ReportRequestProblem.builder()
-          .requestProblem(RequestProblem.WrongJustifiedType)
+      absenceEngine.report.addRequestProblem(CriticalError.builder()
+          .requestProblem(CriticalProblem.WrongJustifiedType)
           .date(absenceEngine.request.currentDate)
           .build());
       return absenceEngine;
@@ -496,8 +433,8 @@ public class AbsenceEngineUtility {
     //Se è presente takableComponent allora deve essere un codice takable
     if (absencePeriod.isTakable()) {
       if (!absencePeriod.takableCodes.contains(absence.absenceType)) {
-        absenceEngine.report.addRequestProblem(ReportRequestProblem.builder()
-            .requestProblem(RequestProblem.CodeNotAllowedInGroup)
+        absenceEngine.report.addRequestProblem(CriticalError.builder()
+            .requestProblem(CriticalProblem.CodeNotAllowedInGroup)
             .date(absence.getAbsenceDate()).build());
         return absenceEngine;
       }
@@ -507,8 +444,8 @@ public class AbsenceEngineUtility {
     if (!absencePeriod.isTakable() && absencePeriod.isComplation()) {
       
       if (!absencePeriod.complationCodes.contains(absence.absenceType)) { 
-        absenceEngine.report.addRequestProblem(ReportRequestProblem.builder()
-            .requestProblem(RequestProblem.CodeNotAllowedInGroup)
+        absenceEngine.report.addRequestProblem(CriticalError.builder()
+            .requestProblem(CriticalProblem.CodeNotAllowedInGroup)
             .date(absence.getAbsenceDate())
             .build());
         return absenceEngine;
@@ -528,8 +465,7 @@ public class AbsenceEngineUtility {
    * @param absence
    * @return
    */
-  public AbsenceEngine groupConstraints(AbsenceEngine absenceEngine, 
-      AbsencePeriod absencePeriod, Absence absence) {
+  public AbsenceEngine groupConstraints(Person person, Absence absence, AbsencePeriod absencePeriod) {
     
     //Un codice di completamento e ne esiste già uno
     if (absencePeriod.isComplation()) {
@@ -546,7 +482,7 @@ public class AbsenceEngineUtility {
     //Takable limit
     if (absencePeriod.isTakable()) {
       
-      int takenAmount = absenceJustifiedAmount(absenceEngine, absence, 
+      int takenAmount = absenceJustifiedAmount(person, absence, 
           absencePeriod.takeAmountType);
       
       if (!absencePeriod.canAddTakenAmount(takenAmount)) {

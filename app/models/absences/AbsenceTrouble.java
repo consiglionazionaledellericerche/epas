@@ -30,67 +30,46 @@ public class AbsenceTrouble extends BaseModel {
   public enum AbsenceProblem {
     
     //Ignorata dal controllo
-    IgnoredOutOfContract,
-    IgnoredBeforeInitialization,
+    IgnoredOutOfContract(false),
+    IgnoredBeforeInitialization(false),
     
-    //Incompatibilità all'interno di un giorno
-    TwoSameCodeSameDay,
-    TwoReplacingSameDay,
-    TwoComplationSameDay,
-    IncompatibilyTypeSameDay,
-    AllDayAlreadyExists,
-    NotOnHoliday,
-    DailyAmountExceeded,
+    //Generici
+    TwoSameCodeSameDay(false),
+    AllDayAlreadyExists(false),
+    NotOnHoliday(false),
+    DailyAmountExceeded(false),
+    IncompatibilyTypeSameDay(false),
+    WeekEndContinuityBroken(false),
+    UngrantedAbsence(false),
     
-    //Limiti
-    LimitExceeded,
-    CompromisedLimitExceeded,
+    //Gruppo
+    LimitExceeded(false),
+    CompromisedLimitExceeded(false),
     
-    //Completamenti
-    MissingReplacing,
-    WrongReplacing,
-    TooEarlyReplacing,
-    CompromisedReplacing,
+    TwoReplacingSameDay(false),
+    TwoComplationSameDay(false),
+    MissingReplacing(false),
+    WrongReplacing(false),
+    TooEarlyReplacing(false),
+    CompromisedReplacing(false),               //data compromessa
+    CompromisedTakableComplationGroup(false),  //assenze successive
     
-    //No diritto
-    NoChildExist,
-    UngrantedAbsence,
+    //Figli
+    NoChildExist(false),
     
-    //Continuità fine settimana
-    WeekEndContinuityBroken,
+    //Implementazione
+    ImplementationProblem(true);
 
-    //Errore di implementazione / configurazione
-    TwoPeriods, 
-    IncalcolableJustifiedAmount,
-    IncalcolableComplationAmount,
     
-    //Il suo tipo ha un problema
-    AbsenceTypeProblem,
+    public boolean isImplementationProblem;
     
-    //Il suo gruppo ha un problema
-    CompromisedTakableComplationGroup,
+    private AbsenceProblem(boolean isImplementationProblem) {
+      this.isImplementationProblem = isImplementationProblem;
+    }
+
   }
   
-  public enum AbsenceTypeProblem {
-    OnlyReplacingRuleViolated,
-    IncalcolableReplacingAmount,
-    ConflictingReplacingAmount,
-  }
-
-  public enum RequestProblem {
-    //Errori nel gestore della form... 
-    //sono gravi e non hanno bisogno di grossi dettagli
-    CantInferAbsenceCode,
-    WrongJustifiedType,
-    CodeNotAllowedInGroup,
-    
-    NoChildExists,  //risolvere la duplicazione con absenceProblem...
-  }
   
-  public enum ImplementationProblem {
-    UnespectedProblem,
-    UnsupportedOperation,
-    UnimplementedTakableComplationGroup,
-  }
+
   
 }

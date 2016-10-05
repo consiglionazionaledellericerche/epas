@@ -1,22 +1,19 @@
 package manager.services.absences.model;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 
-import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
+import manager.services.absences.errors.ImplementationError;
+import manager.services.absences.errors.AbsenceTypeError;
+import manager.services.absences.errors.CriticalError;
 import manager.services.absences.model.DayStatus.RowRecap;
 
 import models.absences.Absence;
 import models.absences.AbsenceTrouble;
-import models.absences.AbsenceTrouble.AbsenceProblem;
-import models.absences.AbsenceTrouble.AbsenceTypeProblem;
 import models.absences.AbsenceTrouble.ImplementationProblem;
-import models.absences.AbsenceTrouble.RequestProblem;
 import models.absences.AbsenceType;
 
-import org.joda.time.LocalDate;
 import org.testng.collections.Maps;
 
 import java.util.List;
@@ -27,9 +24,10 @@ public class AbsencesReport {
 
   // List degli errori
   public Map<Absence, List<AbsenceTrouble>> absencesRemainingTroubles = Maps.newHashMap();
-  public List<ReportAbsenceTypeProblem> absenceTypeProblems = Lists.newArrayList();
-  public List<ReportRequestProblem> requestProblems = Lists.newArrayList();
-  public List<ReportImplementationProblem> implementationProblems = Lists.newArrayList();
+  public List<AbsenceTypeError> absenceTypeProblems = Lists.newArrayList();
+  public List<CriticalError> requestProblems = Lists.newArrayList();
+  public List<ImplementationError> implementationProblems = Lists.newArrayList();
+  
   
   // Esiti degli inserimenti
   public List<DayStatus> insertDaysStatus = Lists.newArrayList();
@@ -81,7 +79,7 @@ public class AbsencesReport {
   
   public boolean absenceTypeHasProblem(AbsenceType absenceType) {
     //TODO: map
-    for (ReportAbsenceTypeProblem reportAbsenceTypeProblem : this.absenceTypeProblems) {
+    for (AbsenceTypeError reportAbsenceTypeProblem : this.absenceTypeProblems) {
       if (reportAbsenceTypeProblem.absenceType.equals(absenceType)) {
         return true;
       }
@@ -109,62 +107,29 @@ public class AbsencesReport {
   
   
   
-  public void addAbsenceTypeProblem(ReportAbsenceTypeProblem reportAbsenceTypeProblem) {
+  public void addAbsenceTypeProblem(AbsenceTypeError reportAbsenceTypeProblem) {
     this.absenceTypeProblems.add(reportAbsenceTypeProblem );
   }
   
   public void addAbsenceAndImplementationProblem(AbsenceTrouble absenceTrouble) {
     this.addAbsenceTrouble(absenceTrouble);
-    this.addImplementationProblem(ReportImplementationProblem.builder()
+    this.addImplementationProblem(ImplementationError.builder()
         .date(absenceTrouble.absence.getAbsenceDate())
         .implementationProblem(ImplementationProblem.UnespectedProblem)
         .build());
   };
   
-  public void addRequestProblem(ReportRequestProblem reportRequestProblem) {
+  public void addRequestProblem(CriticalError reportRequestProblem) {
     this.requestProblems.add(reportRequestProblem);
   }
   
-  public void addImplementationProblem(ReportImplementationProblem implementationProblem) {
+  public void addImplementationProblem(ImplementationError implementationProblem) {
     this.implementationProblems.add(implementationProblem);
   }
   
   public void addInsertDayStatus(DayStatus dayStatus) {
     log.debug("Aggiunto a report.insertDayStatus: " + insertDaysStatus.toString());
     this.insertDaysStatus.add(dayStatus);
-  }
-
-  @Builder
-  public static class ReportAbsenceProblem {
-    public AbsenceProblem absenceProblem;
-    public Absence absence;
-    
-    public String toString() {
-      return MoreObjects.toStringHelper(ReportAbsenceProblem.class)
-      .add("date", absence.getAbsenceDate())
-      .add("code", absence.absenceType.code)
-      .add("problem", absenceProblem)
-      .toString();
-    }
-  }
-  
-  @Builder
-  public static class ReportAbsenceTypeProblem {
-    public AbsenceTypeProblem absenceTypeProblem;
-    public AbsenceType absenceType;
-    public AbsenceType conflictingAbsenceType;
-  }
-  
-  @Builder
-  public static class ReportRequestProblem {
-    public RequestProblem requestProblem;
-    public LocalDate date;
-  }
-  
-  @Builder
-  public static class ReportImplementationProblem {
-    public ImplementationProblem implementationProblem;
-    public LocalDate date;
   }
   
   
