@@ -3,6 +3,8 @@ package manager.services.absences.model;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import manager.services.absences.errors.ErrorsBox;
+
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -18,7 +20,8 @@ public class PeriodChain {
   public LocalDate date;
   public LocalDate from = null;                                     
   public LocalDate to = null;                                       
-  public List<AbsencePeriod> periods = Lists.newArrayList();        
+  public List<AbsencePeriod> periods = Lists.newArrayList();  
+  private List<ErrorsBox> periodsErrorsBoxes = null;
 
   //Supporto
   public List<Absence> absencesAsc = null;         //Tutte le assenze dei tipi coinvolti nel gruppo nel periodo                          
@@ -27,6 +30,9 @@ public class PeriodChain {
   //In caso di inserimenti
   public boolean success = false;
   // ...le assenze inserite fino a quel punto
+  
+  //Errori
+  ErrorsBox childErrors = new ErrorsBox();
   
   public PeriodChain(Person person, LocalDate date) {
     this.person = person;
@@ -68,5 +74,15 @@ public class PeriodChain {
     return absenceTypes;
   }
   
+  public List<ErrorsBox> allErrorsInPeriods() {
+    if (this.periodsErrorsBoxes != null) {
+      return this.periodsErrorsBoxes;
+    }
+    this.periodsErrorsBoxes = Lists.newArrayList();
+    for (AbsencePeriod absencePeriod : this.periods) {
+      this.periodsErrorsBoxes.add(absencePeriod.errorsBox);
+    }
+    return this.periodsErrorsBoxes;
+  }
  
 }
