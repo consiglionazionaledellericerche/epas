@@ -2,6 +2,7 @@ package controllers;
 
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 
 import dao.OfficeDao;
@@ -19,21 +20,25 @@ import manager.configurations.EpasParam.EpasParamValueType.IpList;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import manager.recaps.recomputation.RecomputeRecap;
 
+import models.Attachment;
 import models.Configuration;
 import models.Office;
 import models.Person;
 import models.PersonConfiguration;
 import models.base.IPropertyInPeriod;
+import models.enumerate.AttachmentType;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
 
+import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -196,15 +201,36 @@ public class Configurations extends Controller {
    */
   public static void show(Long officeId) {
 
-    Office office = officeDao.getOfficeById(officeId);
+    final Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
 
     rules.checkIfPermitted(office);
 
-    List<Configuration> currentConfiguration = configurationManager
+    final List<Configuration> configurations = configurationManager
         .getOfficeConfigurationsByDate(office, LocalDate.now());
 
-    render(office, currentConfiguration);
+    final List<Configuration> generals = configurations.stream()
+        .filter(conf -> conf.epasParam.epasParamTimeType == EpasParam.EpasParamTimeType.GENERAL &&
+            conf.epasParam != EpasParam.TR_AUTOCERTIFICATION).collect(Collectors.toList());
+
+    final List<Configuration> yearlies = configurations.stream()
+        .filter(conf -> conf.epasParam.epasParamTimeType == EpasParam.EpasParamTimeType.YEARLY)
+        .collect(Collectors.toList());
+
+    final List<Configuration> periodics = configurations.stream()
+        .filter(conf -> conf.epasParam.epasParamTimeType == EpasParam.EpasParamTimeType.PERIODIC)
+        .collect(Collectors.toList());
+
+    final List<Configuration> autocertifications = configurations.stream()
+        .filter(conf -> conf.epasParam == EpasParam.TR_AUTOCERTIFICATION)
+        .collect(Collectors.toList());
+
+    // id relativo all'allegato di autorizzazione per l'attivazione dell'autocertificazione
+    final Attachment autocert = office.attachments.stream()
+        .filter(attachment -> attachment.type == AttachmentType.TR_AUTOCERTIFICATION).findFirst()
+        .orElse(null);
+
+    render(office, generals, yearlies, periodics, autocertifications, autocert);
   }
 
   /**
@@ -216,7 +242,7 @@ public class Configurations extends Controller {
 
     Configuration configuration = Configuration.findById(configurationId);
     notFoundIfNull(configuration);
-    rules.checkIfPermitted(configuration.office);
+    rules.checkIfPermitted(configuration);
 
     ConfigurationDto configurationDto = new ConfigurationDto(configuration.epasParam,
         configuration.beginDate, configuration.calculatedEnd(),
@@ -236,7 +262,7 @@ public class Configurations extends Controller {
     notFoundIfNull(configuration);
     notFoundIfNull(configuration.office);
 
-    rules.checkIfPermitted(configuration.office);
+    rules.checkIfPermitted(configuration);
 
     Configuration newConfiguration = (Configuration) compute(configuration,
         configuration.epasParam, configurationDto);
@@ -368,5 +394,49 @@ public class Configurations extends Controller {
     personShow(configuration.person.id);
   }
 
+  public static void uploadAttachment(Long officeId, Blob file) {
+
+    final Office office = officeDao.getOfficeById(officeId);
+
+    Preconditions.checkState(office.isPersistent());
+    Preconditions.checkNotNull(file);
+
+    final Attachment attachment = new Attachment();
+
+    attachment.filename = String
+        .format("Autorizzazione autocertificazione sede %s", office.getName());
+    attachment.type = AttachmentType.TR_AUTOCERTIFICATION;
+    attachment.file = file;
+    attachment.office = office;
+    attachment.save();
+
+    show(officeId);
+  }
+
+  public static void removeAttachment(Long attachmentId) {
+
+    final Attachment attachment = Attachment.findById(attachmentId);
+
+    notFoundIfNull(attachment);
+
+    rules.checkIfPermitted(attachment);
+
+    final Long officeId = attachment.office.id;
+
+    attachment.delete();
+
+    show(officeId);
+  }
+
+  public static void getAttachment(Long attachmentId) {
+
+    final Attachment attachment = Attachment.findById(attachmentId);
+
+    notFoundIfNull(attachment);
+
+    rules.checkIfPermitted(attachment);
+
+    renderBinary(attachment.file.get(), attachment.filename, false);
+  }
 
 }

@@ -14,6 +14,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.PreRemove;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
@@ -49,5 +50,10 @@ public class Attachment extends MutableModel {
   @Transient
   public long getLength() {
     return file == null ? 0 : file.length();
+  }
+
+  @PreRemove
+  private void onDelete() {
+    this.file.getFile().delete();
   }
 }
