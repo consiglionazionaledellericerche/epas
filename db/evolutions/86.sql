@@ -115,8 +115,6 @@ INSERT INTO competence_code_groups_history
   SELECT id, (SELECT MIN(rev) FROM revinfo), 0, label, limit_type, limit_value, 
     limit_unit FROM competence_code_groups;
 
-UPDATE roles SET name = 'technicalAdmin' where name = 'tecnicalAdmin';
-
 CREATE TABLE user_roles (
     user_id BIGINT NOT NULL,
     roles text NOT NULL,
@@ -143,10 +141,37 @@ DELETE FROM users_roles_offices WHERE user_id in (SELECT id FROM users WHERE use
 DELETE FROM roles WHERE name = 'admin';
 DELETE FROM roles WHERE name = 'developer';
 
+CREATE TABLE attachments (
+  id BIGSERIAL PRIMARY KEY,
+  filename TEXT NOT NULL,
+  description TEXT,
+  type TEXT NOT NULL,
+  file TEXT NOT NULL,
+  office_id BIGINT,
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+
+  FOREIGN KEY (office_id) REFERENCES office(id)
+);
+
+CREATE TABLE attachments_history (
+    _revision INTEGER NOT NULL,
+    _revision_type smallint,
+    id BIGINT NOT NULL,
+    filename TEXT NOT NULL,
+    description TEXT,
+    type TEXT,
+    file TEXT,
+    office_id BIGINT,
+
+    PRIMARY KEY (id, _revision),
+    FOREIGN KEY (_revision) REFERENCES revinfo(rev)
+);
+
 # ---!Downs
 
-ALTER TABLE persons_competences_codes DROP COLUMN begin_date;
-ALTER TABLE persons_competences_codes DROP COLUMN end_date;
+ALTER TABLE persons_competence_codes DROP COLUMN begin_date;
+ALTER TABLE persons_competence_codes DROP COLUMN end_date;
 ALTER TABLE competence_codes DROP COLUMN limit_value;
 ALTER TABLE competence_codes DROP COLUMN limit_type;
 ALTER TABLE competence_codes DROP COLUMN limit_unit;
@@ -160,10 +185,11 @@ DROP TABLE competence_code_groups;
 DROP TABLE competence_code_groups_history;
 DROP TABLE competence_codes_history;
 
-UPDATE roles SET name = 'tecnicalAdmin' where name = 'technicalAdmin';
-
 DROP TABLE user_roles;
 DROP TABLE user_roles_history;
 
 INSERT INTO roles (name) values ('admin');
 INSERT INTO roles (name) values ('developer');
+
+DROP TABLE attachments;
+DROP TABLE attachments_history;
