@@ -108,8 +108,8 @@ public enum EpasParam {
       Office.class),
 
   /**
-   * Nuovo parametro per consentire/inibire la possibilità del dipendente di gestirsi
-   * l'orario di lavoro fuori sede.
+   * Permette di abilitare/disabilitare la funzione di autocertificazione per i livelli 1-3 del
+   * proprio orario di lavoro
    */
   TR_AUTOCERTIFICATION("researchers_technologists_autocertification",
       EpasParamTimeType.GENERAL,

@@ -10,6 +10,7 @@
     #{tabItem id:'general', title:'Generali', active:true /}
     #{tabItem id:'yearly', title:'Annuali' /}
     #{tabItem id:'periodic', title:'Periodici' /}
+		#{tabItem id:'autocertifications', title:'Autocertificazioni' /}
   #{/tabList}
 
 <br>
@@ -28,14 +29,12 @@
 	      <th>Parametro</th>
 	      <th>Valore</th>
 	    </tr>
-	  #{list items:currentConfiguration, as:'conf'}
-	    #{if conf.epasParam.general}
+	  #{list generals, as:'conf'}
 	  	<tr>
 	  	  <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
 	  	  &{conf.epasParam}#{/secure.link}</td>
 	  	  <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
 	  	</tr>
-	  	#{/if}
 	  #{/list}
 	  </table>
 	</div>
@@ -53,14 +52,12 @@
 	      <th>Parametro</th>
 	      <th>Valore</th>
 	    </tr>
-	  #{list items:currentConfiguration, as:'conf'}
-	  	#{if conf.epasParam.yearly}
+	  #{list yearlies , as:'conf'}
 	  	<tr>
 	  	  <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
 	  	  &{conf.epasParam}#{/secure.link}</td>
 	  	  <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
 	  	</tr>
-	  	#{/if}
 	  #{/list}
 	  </table>
 	</div>  
@@ -80,8 +77,7 @@
 	      <th>Dal</th>
 	      <th>Al</th>
 	    </tr>
-	  #{list items:currentConfiguration, as:'conf'}
-	  	#{if conf.epasParam.periodic}
+	  #{list periodics, as:'conf'}
 	  	<tr>
 	  	  <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
 	  	  &{conf.epasParam}#{/secure.link}</td>
@@ -89,11 +85,68 @@
 	  	  <td>${conf.beginDate.format()}</td>
 	  	  <td>${conf.calculatedEnd()?.format()}</td>
 	  	</tr>
-	  	#{/if}
 	  #{/list}
 	  </table>
 	</div>
   #{/tabContentItem}
+
+	#{tabContentItem id:'autocertifications'}
+	<div id="editAutocertifications">
+		#{alert color:'info'}
+		<p>Elenco dei parametri generali di configurazione per la sede
+			<strong>${office.name}</strong> ed il loro valore.</p>
+		#{/alert}
+
+		<table class="table">
+			<tr>
+				<th>Parametro</th>
+				<th>Valore</th>
+			</tr>
+			#{list autocertifications, as:'conf'}
+			<tr>
+				<td>
+					#{if autocert}
+						#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
+							&{conf.epasParam}
+						#{/secure.link}
+					#{/if}
+					#{else}
+						<span webui-popover-hover><em>&{conf.epasParam}</em></span>
+						<div class="webui-popover-content">
+							<span class="text-danger">
+								<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+								Per poter abilitare questa opzione è necessario effettuare l'upload del documento di autorizzazione
+							</span>
+						</div>
+					#{/else}
+				</td>
+				<td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
+			</tr>
+			#{/list}
+		</table>
+
+		<div class="jumbotron col-sm-8">
+			#{if autocert}
+				#{secure.link @getAttachment(autocert.id)}
+					<i class="fa fa-file-o" aria-hidden="true"></i> ${autocert.filename}
+				#{/secure.link}
+				#{secure.link @removeAttachment(autocert.id)}
+					<i class="fa fa-trash" aria-hidden="true" webui-popover-hover data-content="Rimuovi allegato"></i>
+			 	#{/secure.link}
+			#{/if}
+			#{else}
+			#{form action:@uploadAttachment(), method:'POST', enctype:'multipart/form-data'}
+			#{f.hidden 'officeId', value:office.id /}
+			<div>
+				<input name="file" type="file" onChange="javascript:this.form.submit()"/>
+				<strong><i class="fa fa-upload fa-2x"></i> Carica documento di autorizzazione</strong>
+			</div>
+			#{/form}
+			#{/else}
+		</div>
+	</div>
+	#{/tabContentItem}
+
 #{/tabContent}
   
 </div>

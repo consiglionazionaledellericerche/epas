@@ -158,7 +158,7 @@ CREATE TABLE attachments_history (
     _revision INTEGER NOT NULL,
     _revision_type smallint,
     id BIGINT NOT NULL,
-    filename TEXT NOT NULL,
+    filename TEXT,
     description TEXT,
     type TEXT,
     file TEXT,

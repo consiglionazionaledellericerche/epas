@@ -4,8 +4,10 @@ import manager.configurations.EpasParam;
 import models.enumerate.CodesForEmployee;
 import models.enumerate.StampTypes;
 import models.enumerate.AccountRole;
+import models.enumerate.AttachmentType;
 import models.Absence;
 import models.AbsenceType;
+import models.Attachment;
 import models.Configuration;
 import models.Notification;
 import models.Office;
@@ -993,8 +995,6 @@ when
         "Absences.editCode",
 
      	"Configurations.show",
-     	"Configurations.edit",
-        "Configurations.update",
 
 		"BadgeSystems.joinBadgesPerson",
 		"BadgeSystems.saveBadges",
@@ -1014,6 +1014,32 @@ when
         "Charts.test"
 
        ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Una configurazione può essere modificata se....
+ ******************************************************************************/
+rule canEditConfiguration
+when
+  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
+  $target: Configuration(office == $uro.office, epasParam != EpasParam.TR_AUTOCERTIFICATION)
+  $c: PermissionCheck(action in ("Configurations.edit", "Configurations.update") , target == $target, granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * La Configurazione per abilitare l'autocertificazione può essere abilitata se...
+ ******************************************************************************/
+rule canEditAutocertificationConf
+when
+  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
+  $target: Configuration(office == $uro.office, epasParam == EpasParam.TR_AUTOCERTIFICATION)
+  $o: Office() from $uro.office
+  Attachment(type == AttachmentType.TR_AUTOCERTIFICATION) from $o.attachments
+  $c: PermissionCheck(action in ("Configurations.edit", "Configurations.update") , target == $target, granted == false)
 then
  $c.grant();
 end
