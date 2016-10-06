@@ -18,10 +18,10 @@ import org.testng.collections.Lists;
 import java.util.List;
 
 public enum EpasParam {
-  
+
   //#######################################
   // GENERAL PARAMS
-  
+
   ABSENCES_FOR_EMPLOYEE("absences_for_employee",
       EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
@@ -36,11 +36,11 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Person.class),
 
-  DAY_OF_PATRON("dayOfPatron", 
+  DAY_OF_PATRON("dayOfPatron",
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.DAY_MONTH,
-      EpasParamValueType.formatValue(new MonthDay(1,1)),
-      Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS, 
+      EpasParamValueType.formatValue(new MonthDay(1, 1)),
+      Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS,
           RecomputationType.RESIDUAL_MEALTICKETS),
       Office.class),
 
@@ -87,7 +87,7 @@ public enum EpasParam {
       Office.class),
 
   /**
-   * Viene utilizzato per popolare il campo replyTo delle mail inviate dal sistema. 
+   * Viene utilizzato per popolare il campo replyTo delle mail inviate dal sistema.
    */
   EMAIL_TO_CONTACT("email_to_contact",
       EpasParamTimeType.GENERAL,
@@ -95,18 +95,28 @@ public enum EpasParam {
       EpasParamValueType.formatValue(""),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
-  
+
   /**
-   * Nuovo parametro per consentire/inibire la possibilità del dipendente di gestirsi 
+   * Nuovo parametro per consentire/inibire la possibilità del dipendente di gestirsi
    * l'orario di lavoro fuori sede.
    */
   WORKING_OFF_SITE("working_off_site",
       EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(false),
-      Lists.<RecomputationType>newArrayList(),  
+      Lists.<RecomputationType>newArrayList(),
       Office.class),
 
+  /**
+   * Nuovo parametro per consentire/inibire la possibilità del dipendente di gestirsi
+   * l'orario di lavoro fuori sede.
+   */
+  TR_AUTOCERTIFICATION("researchers_technologists_autocertification",
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
 
   //#######################################
   // YEARLY PARAMS
@@ -114,7 +124,7 @@ public enum EpasParam {
   EXPIRY_VACATION_PAST_YEAR("expiry_vacation_past_year",
       EpasParamTimeType.YEARLY,
       EpasParamValueType.DAY_MONTH,
-      EpasParamValueType.formatValue(new MonthDay(8,31)),
+      EpasParamValueType.formatValue(new MonthDay(8, 31)),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
 
@@ -149,12 +159,12 @@ public enum EpasParam {
 
   //#######################################
   // PERIODIC PARAMS
-  
+
   MATERNITY_PERIOD("maternity_period",
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(false),
-      Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS, 
+      Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS,
           RecomputationType.RESIDUAL_MEALTICKETS),
       Person.class),
 
@@ -162,7 +172,7 @@ public enum EpasParam {
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.LOCALTIME,
       EpasParamValueType.formatValue(new LocalTime(5, 0)),
-      Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS, 
+      Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS,
           RecomputationType.RESIDUAL_MEALTICKETS),
       Office.class),
 
@@ -170,8 +180,8 @@ public enum EpasParam {
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.LOCALTIME_INTERVAL,
       EpasParamValueType
-      .formatValue(new LocalTimeInterval(new LocalTime(12,0), new LocalTime(15,0))),
-      Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS, 
+          .formatValue(new LocalTimeInterval(new LocalTime(12, 0), new LocalTime(15, 0))),
+      Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS,
           RecomputationType.RESIDUAL_MEALTICKETS),
       Office.class),
 
@@ -179,8 +189,8 @@ public enum EpasParam {
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.LOCALTIME_INTERVAL,
       EpasParamValueType
-      .formatValue(new LocalTimeInterval(new LocalTime(0,0), new LocalTime(23,59))),
-      Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS, 
+          .formatValue(new LocalTimeInterval(new LocalTime(0, 0), new LocalTime(23, 59))),
+      Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS,
           RecomputationType.RESIDUAL_MEALTICKETS),
       Office.class);
 
@@ -215,59 +225,60 @@ public enum EpasParam {
   }
 
   public enum EpasParamTimeType {
-    GENERAL, YEARLY, PERIODIC;
+    GENERAL, YEARLY, PERIODIC
   }
-  
+
   public enum RecomputationType {
-    DAYS, RESIDUAL_HOURS, RESIDUAL_MEALTICKETS;
+    DAYS, RESIDUAL_HOURS, RESIDUAL_MEALTICKETS
   }
-  
+
   /**
    * Enumerato con i tipi di valori che può assumere un parametro di configurazione.
-   * @author alessandro
    *
+   * @author alessandro
    */
   public enum EpasParamValueType {
 
-    LOCALTIME, LOCALTIME_INTERVAL, LOCALDATE,  DAY_MONTH, MONTH,  
+    LOCALTIME, LOCALTIME_INTERVAL, LOCALDATE, DAY_MONTH, MONTH,
     EMAIL, IP_LIST, INTEGER, BOOLEAN;
-    
+
     public static class LocalTimeInterval {
       public LocalTime from;
       public LocalTime to;
+
       // TODO: validation
       public LocalTimeInterval(LocalTime from, LocalTime to) {
         this.from = from;
         this.to = to;
       }
+
       @Override
       public String toString() {
         return formatValue(this);
       }
     }
-    
+
     public static class IpList {
       public List<String> ipList;
+
       // TODO: validation
-      public IpList(List<String> ipList) { 
+      public IpList(List<String> ipList) {
         this.ipList = ipList;
       }
+
       @Override
       public String toString() {
         return formatValue(this);
       }
     }
-    
+
     public final static String DAY_MONTH_SEPARATOR = "/";
     public final static String LOCALTIME_INTERVAL_SEPARATOR = "-";
     public final static String LOCALTIME_FORMATTER = "HH:mm";
     public final static String IP_LIST_SEPARATOR = ", ";
-    
+
     /**
      * Converte il tipo primitivo nella formattazione string.
-     * @param valueType
-     * @param value
-     * @return
      */
     public static String formatValue(final Object value) {
       if (value instanceof String) {
@@ -277,82 +288,77 @@ public enum EpasParam {
       if (value instanceof Boolean) {
         return value.toString();
       }
-      
+
       if (value instanceof Integer) {
         return value.toString();
       }
-      
+
       if (value instanceof LocalTime) {
-        return ((LocalTime)value).toString(LOCALTIME_FORMATTER);
+        return ((LocalTime) value).toString(LOCALTIME_FORMATTER);
       }
-      
+
       if (value instanceof LocalDate) {
-        return ((LocalDate)value).toString();
+        return ((LocalDate) value).toString();
       }
-      
+
       if (value instanceof LocalTimeInterval) {
-        return formatValue(((LocalTimeInterval)value).from) 
-            + LOCALTIME_INTERVAL_SEPARATOR 
-            + formatValue(((LocalTimeInterval)value).to);  
+        return formatValue(((LocalTimeInterval) value).from)
+            + LOCALTIME_INTERVAL_SEPARATOR
+            + formatValue(((LocalTimeInterval) value).to);
       }
-      
+
       if (value instanceof MonthDay) {
-        return ((MonthDay)value).getDayOfMonth() + DAY_MONTH_SEPARATOR 
-            + ((MonthDay)value).getMonthOfYear();  
+        return ((MonthDay) value).getDayOfMonth() + DAY_MONTH_SEPARATOR
+            + ((MonthDay) value).getMonthOfYear();
       }
-      
+
       if (value instanceof IpList) {
-        return Joiner.on(IP_LIST_SEPARATOR).join(((IpList)value).ipList);
+        return Joiner.on(IP_LIST_SEPARATOR).join(((IpList) value).ipList);
       }
-      
+
       return null;
     }
-    
+
     /**
      * Converte il valore in oggetto.
-     * @param type
-     * @param value
-     * @return
      */
     public static Object parseValue(final EpasParamValueType type, final String value) {
       try {
-      switch (type) {
-        case LOCALDATE:
-          return new LocalDate(value);
-        case LOCALTIME:
-          return LocalTime.parse(value, DateTimeFormat.forPattern(LOCALTIME_FORMATTER));
-        case LOCALTIME_INTERVAL:
-              LocalTimeInterval interval = new LocalTimeInterval(
-              (LocalTime)parseValue(LOCALTIME, value.trim().split(LOCALTIME_INTERVAL_SEPARATOR)[0]),
-              (LocalTime)parseValue(LOCALTIME, value.trim().split(LOCALTIME_INTERVAL_SEPARATOR)[1]));
-              if (interval.to.isBefore(interval.from)) {
-                return null;
-              } else {
-                return interval;
-              }
-        case DAY_MONTH:
-          return new MonthDay(
-              new Integer(value.split(DAY_MONTH_SEPARATOR)[1]), 
-              new Integer(value.split(DAY_MONTH_SEPARATOR)[0]));
-        case MONTH:
-          return new Integer(value);
-        case EMAIL:
-          return value;
-        case IP_LIST:
-          return new IpList(Splitter.on(IP_LIST_SEPARATOR).splitToList(value));
-        case INTEGER:
-          return new Integer(value);
-        case BOOLEAN:
-          return new Boolean(value);
-      }
-      } catch(Exception e) {
+        switch (type) {
+          case LOCALDATE:
+            return new LocalDate(value);
+          case LOCALTIME:
+            return LocalTime.parse(value, DateTimeFormat.forPattern(LOCALTIME_FORMATTER));
+          case LOCALTIME_INTERVAL:
+            LocalTimeInterval interval = new LocalTimeInterval(
+                (LocalTime) parseValue(LOCALTIME, value.trim().split(LOCALTIME_INTERVAL_SEPARATOR)[0]),
+                (LocalTime) parseValue(LOCALTIME, value.trim().split(LOCALTIME_INTERVAL_SEPARATOR)[1]));
+            if (interval.to.isBefore(interval.from)) {
+              return null;
+            } else {
+              return interval;
+            }
+          case DAY_MONTH:
+            return new MonthDay(
+                new Integer(value.split(DAY_MONTH_SEPARATOR)[1]),
+                new Integer(value.split(DAY_MONTH_SEPARATOR)[0]));
+          case MONTH:
+            return new Integer(value);
+          case EMAIL:
+            return value;
+          case IP_LIST:
+            return new IpList(Splitter.on(IP_LIST_SEPARATOR).splitToList(value));
+          case INTEGER:
+            return new Integer(value);
+          case BOOLEAN:
+            return new Boolean(value);
+        }
+      } catch (Exception e) {
         return null;
       }
       return null;
     }
   }
-  
-
 
 
 }
