@@ -14,7 +14,7 @@
     >
 
       #{if stampingTemplate.date}
-		    #{secure.link @Stampings.edit('stamping.id':stampingTemplate.stampingId), target:stampingTemplate.stamping , 'data-async-modal':'#modalStamping'}
+		    #{secure.link @Stampings.edit(stampingTemplate.stampingId), target:stampingTemplate.stamping , 'data-async-modal':'#modalStamping'}
           ${stampingTemplate.hour}
 		    #{/secure.link}
       #{/if}

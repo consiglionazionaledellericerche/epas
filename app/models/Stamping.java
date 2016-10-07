@@ -168,6 +168,14 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
     return output;
   }
 
+  /**
+   * Fondamentale per far funzionare alcune drools
+   * @return Restituisce il proprietario della timbratura
+   */
+  public Person getOwner() {
+    return personDay.person;
+  }
+
   public enum WayType {
     in("in"),
     out("out");
