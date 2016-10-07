@@ -83,16 +83,7 @@ public enum StampTypes {
    * @return la lista degli stamptypes attivi.
    */
   public static List<StampTypes> onlyActive(){
-
     return Arrays.stream(values()).filter(StampTypes::isActive).collect(Collectors.toList());
-
-//    List<StampTypes> list = Lists.newArrayList();
-//    for (StampTypes value : values()) {
-//      if (value.isActive) {
-//        list.add(value);
-//      }
-//    }
-//    return list;
   }
   
   /**
@@ -107,7 +98,4 @@ public enum StampTypes {
     return false;
   }
   
-  public static StampTypes offSiteWorkingForEmployee() {
-    return StampTypes.LAVORO_FUORI_SEDE;
-  }
 }

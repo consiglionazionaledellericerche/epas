@@ -46,7 +46,7 @@
     #{secure.check 'Stampings.blank', target: person}
       <td class="inserisciTimbratura default-single">
         #{if !dayRecap.personDay.future}
-          <a href="@{Stampings.blank('id':dayRecap.personDay.person.id, dayRecap.personDay.date.format())}" data-async-modal="#modalStamping">
+          <a href="@{Stampings.blank(dayRecap.personDay.person.id, dayRecap.personDay.date.format())}" data-async-modal="#modalStamping">
         		+++
       		</a>
       	#{/if}
