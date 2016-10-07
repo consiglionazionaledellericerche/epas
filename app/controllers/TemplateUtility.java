@@ -47,6 +47,7 @@ import models.UsersRolesOffices;
 import models.WorkingTimeType;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.CodesForEmployee;
+import models.enumerate.StampTypes;
 
 import org.joda.time.LocalDate;
 
@@ -221,15 +222,15 @@ public class TemplateUtility {
   public List<CompetenceCode> allCodeList() {
     return competenceCodeDao.getAllCompetenceCode();
   }
-  
-  public List<CompetenceCode> allCodesWithoutGroup() {    
+
+  public List<CompetenceCode> allCodesWithoutGroup() {
     return competenceCodeDao.getCodeWithoutGroup();
   }
-  
+
   public List<CompetenceCode> allCodesContainingGroupCodes(CompetenceCodeGroup group) {
     return competenceCodeDao.allCodesContainingGroupCodes(group);
   }
-  
+
   /**
    * Gli user associati a tutte le persone appartenenti all'istituto.
    */
@@ -379,7 +380,6 @@ public class TemplateUtility {
     return badgeSystemDao.badgeSystems(Optional.<String>absent(),
         Optional.<BadgeReader>absent()).list();
   }
-  
 
 
   public List<BadgeSystem> getConfiguredBadgeSystems(Office office) {
@@ -416,6 +416,27 @@ public class TemplateUtility {
     return userDao.hasAdminRoles(Security.getUser().get());
   }
 
+  public List<StampTypes> getStampTypes() {
+    final User user = Security.getUser().get();
+
+    if (userDao.hasAdminRoles(user) || (user.person.qualification.qualification < 4 &&
+        user.person.office.configurations.stream()
+            .filter(conf -> conf.epasParam == EpasParam.TR_AUTOCERTIFICATION
+                && conf.fieldValue.equals("true")).findFirst().isPresent())) {
+
+      return StampTypes.onlyActive();
+    } else if (user.person.office.configurations.stream()
+        .filter(c -> c.epasParam == EpasParam.WORKING_OFF_SITE
+            && c.fieldValue.equals("true")).findFirst().isPresent() &&
+        // La persona è abilitata in configurazione all'inserimento autonomo di quell'assenza
+        user.person.personConfigurations.stream()
+            .filter(pc -> pc.epasParam == EpasParam.OFF_SITE_STAMPING
+                && pc.fieldValue.equals("true")).findFirst().isPresent()) {
+      return ImmutableList.of(StampTypes.LAVORO_FUORI_SEDE);
+    }
+
+    return Lists.newArrayList();
+  }
 
   /**
    * L'istanza del wrapperFactory disponibile nei template.

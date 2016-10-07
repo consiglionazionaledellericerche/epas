@@ -1120,6 +1120,33 @@ then
  $c.grant();
 end
 
+/*******************************************************************************
+ * Un dipendente può autocertificare le proprie timbrature se...
+ ******************************************************************************/
+rule employeeAutocertificationStampings
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person(qualification.qualification < 4) from currentOperator.person
+ $o: Office() from $p.office
+ Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
+ $c: PermissionCheck(action in ("Stampings.blank", "Stampings.save" ), granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Un dipendente può autocertificare le proprie timbrature se...
+ ******************************************************************************/
+rule employeeAutocertificationStampings_withTarget
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person(qualification.qualification < 4)
+ $o: Office() from $p.office
+ Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
+ $c: PermissionCheck(action in ("Stampings.blank", "Stampings.save" ), granted == false, target == $p)
+then
+ $c.grant();
+end
 
 /*******************************************************************************
  * Azioni utente con ruolo BADGE_READER

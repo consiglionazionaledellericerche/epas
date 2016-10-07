@@ -165,16 +165,14 @@ public class Stampings extends Controller {
   /**
    * Nuova timbratura inserita dall'amministratore.
    *
-   * @param person persona
+   * @param personId id della persona
    * @param date   data
    */
-  // FIXME sono stati rimossi i validatori perchè impedivano alle drools di funzionare correttamente
-  // da ripristinare appena si risolve il problema .
-  public static void blank(Person person, LocalDate date) {
+  public static void blank(Long personId, LocalDate date) {
 
-    if (!person.isPersistent()) {
-      notFound();
-    }
+    final Person person = personDao.getPersonById(personId);
+
+    notFoundIfNull(person);
 
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
 
@@ -204,6 +202,7 @@ public class Stampings extends Controller {
     if (user != null && (user.person == null || userDao.hasAdminRoles(user))) {
       rules.checkIfPermitted(person);
     } else {
+
       // FIXME questa è una porcheria fatta perchè le drools in alcuni casi non funzionano come dovrebbero
       // da rimuovere non appena si riesce a risolvere il problema sulle drools
       jRules.checkForStamping(stamping);
