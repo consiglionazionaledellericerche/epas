@@ -44,7 +44,7 @@ title:(Action + ' timbratura del ' + date.format() + ' per ' + person.fullname)}
 
   #{set stampTypes: templateUtility.stampTypes /}
   #{if stampTypes.size() == 1}
-    #{f.view 'Causale', value: stampTypes[0]/}
+    #{f.view messages.get('stamping.stampType'), value: stampTypes[0]/}
     #{f.hidden 'stamping.stampType', value:stampTypes[0] /}
   #{/if}
   #{else}
