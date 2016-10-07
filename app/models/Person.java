@@ -33,7 +33,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -192,7 +191,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 //  @NotAudited
 //  @ManyToMany(cascade = {CascadeType.REFRESH})
 //  public List<CompetenceCode> competenceCode = Lists.newArrayList();
-  
+
   @NotAudited
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public Set<PersonCompetenceCodes> personCompetenceCodes = Sets.newHashSet();
@@ -238,13 +237,12 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
    */
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public Set<Badge> badges = Sets.newHashSet();
-  
+
   /**
    * Le configurazioni della persona.
    */
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public List<PersonConfiguration> personConfigurations = Lists.newArrayList();
-
 
 
   public String getName() {
@@ -278,20 +276,21 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   @Override
   public Collection<IPropertyInPeriod> periods(Object type) {
-    
+
     if (type.getClass().equals(EpasParam.class)) {
-      return (Collection<IPropertyInPeriod>)filterConfigurations((EpasParam)type);
+      return (Collection<IPropertyInPeriod>) filterConfigurations((EpasParam) type);
     }
     return null;
   }
-  
+
   @Override
   public Collection<Object> types() {
     return Sets.newHashSet(Arrays.asList(EpasParam.values()));
   }
-  
+
   /**
    * Filtra dalla lista di configurations le occorrenze del tipo epasParam.
+   *
    * @param epasPersonParam filtro
    * @return insieme filtrato
    */
@@ -306,7 +305,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   }
 
   @PrePersist
-  private void onCreation(){
+  private void onCreation() {
     this.beginDate = LocalDate.now().minusYears(1).withMonthOfYear(12).withDayOfMonth(31);
   }
 
@@ -316,11 +315,22 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   public static Comparator<Person> personComparator() {
     return Comparator
         .comparing(
-            Person::getFullname, 
+            Person::getFullname,
             Comparator.nullsFirst(String::compareTo))
         .thenComparing(
-            Person::getId, 
+            Person::getId,
             Comparator.nullsFirst(Long::compareTo));
   }
-  
+
+  /**
+   * @param param Parametro di configurazione da controllare
+   * @param value valore atteso
+   * @return true se la persona contiene il parametro di configurazione specificato con il valore
+   * indicato
+   */
+  public boolean checkConf(EpasParam param, String value) {
+    return personConfigurations.stream().filter(conf -> conf.epasParam == param
+        && conf.fieldValue.equals(value)).findFirst().isPresent();
+  }
+
 }

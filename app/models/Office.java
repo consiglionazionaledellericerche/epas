@@ -43,9 +43,9 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -8689432709728656660L;
 
-  @Column(name="perseo_id")
+  @Column(name = "perseo_id")
   public Long perseoId;
-  
+
   @Required
   @NotNull
   @Column(nullable = false)
@@ -80,7 +80,7 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
 
   @OneToMany(mappedBy = "owner", cascade = {CascadeType.REMOVE})
   public List<User> users = Lists.newArrayList();
-  
+
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   public List<BadgeSystem> badgeSystems = Lists.newArrayList();
 
@@ -92,10 +92,10 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
 
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   public List<ConfYear> confYear = Lists.newArrayList();
-  
+
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   public List<Configuration> configurations = Lists.newArrayList();
-    
+
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   public List<PersonReperibilityType> personReperibilityTypes = Lists.newArrayList();
 
@@ -134,20 +134,21 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
 
   @Override
   public Collection<IPropertyInPeriod> periods(Object type) {
-    
+
     if (type.getClass().equals(EpasParam.class)) {
-      return (Collection<IPropertyInPeriod>)filterConfigurations((EpasParam)type);
+      return (Collection<IPropertyInPeriod>) filterConfigurations((EpasParam) type);
     }
     return null;
   }
-  
+
   @Override
   public Collection<Object> types() {
     return Sets.newHashSet(Arrays.asList(EpasParam.values()));
   }
-  
+
   /**
    * Filtra dalla lista di configurations le occorrenze del tipo epasParam.
+   *
    * @param epasParam filtro
    * @return insieme filtrato
    */
@@ -161,6 +162,15 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
     return configurations;
   }
 
-
+  /**
+   * @param param Parametro di configurazione da controllare
+   * @param value valore atteso
+   * @return true se l'ufficio contiene il parametro di configurazione specificato con il valore
+   * indicato
+   */
+  public boolean checkConf(EpasParam param, String value) {
+    return configurations.stream().filter(conf -> conf.epasParam == param
+        && conf.fieldValue.equals(value)).findFirst().isPresent();
+  }
 
 }
