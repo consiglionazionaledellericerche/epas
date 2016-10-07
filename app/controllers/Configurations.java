@@ -407,7 +407,6 @@ public class Configurations extends Controller {
 
     final Attachment attachment = new Attachment();
 
-
     attachment.filename = file.getName();
     attachment.type = AttachmentType.TR_AUTOCERTIFICATION;
     Blob blob = new Blob();

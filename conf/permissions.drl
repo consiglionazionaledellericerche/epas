@@ -188,10 +188,9 @@ end
 rule AdminCanEditStamping
 when
  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
- $s: Stamping()
- $pd: PersonDay() from $s.personDay
- Office(persons.contains($pd.person)) from $uro.office
- $c: PermissionCheck(target == $s, granted == false )
+ $target: Stamping()
+ Office(persons.contains($target.getOwner())) from $uro.office
+ $c: PermissionCheck(target == $target, granted == false )
 then
  $c.grant();
 end
@@ -199,7 +198,6 @@ end
 /* Azioni eseguibili da qualsiasi utente che abbiano come destinatario
  * dell'azione se stesso
  */
-
 rule HasRightOnHimself
 when
   $p: Person(this == currentOperator.person)

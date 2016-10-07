@@ -184,13 +184,15 @@ public class Stampings extends Controller {
   /**
    * Modifica timbratura dall'amministratore.
    *
-   * @param stamping timbratura
+   * @param stampingId ID timbratura
    */
-  public static void edit(Stamping stamping) {
+  public static void edit(Long stampingId) {
 
-    if (!stamping.isPersistent()) {
-      notFound();
-    }
+    final Stamping stamping = stampingDao.getStampingById(stampingId);
+
+    notFoundIfNull(stamping);
+
+    rules.checkIfPermitted(stamping);
 
     final List<HistoryValue<Stamping>> historyStamping = stampingsHistoryDao
         .stampings(stamping.id);
@@ -198,15 +200,15 @@ public class Stampings extends Controller {
     final Person person = stamping.personDay.person;
     final LocalDate date = stamping.personDay.date;
 
-    final User user = Security.getUser().orNull();
-    if (user != null && (user.person == null || userDao.hasAdminRoles(user))) {
-      rules.checkIfPermitted(person);
-    } else {
-
-      // FIXME questa è una porcheria fatta perchè le drools in alcuni casi non funzionano come dovrebbero
-      // da rimuovere non appena si riesce a risolvere il problema sulle drools
-      jRules.checkForStamping(stamping);
-    }
+//    final User user = Security.getUser().orNull();
+//    if (user != null && (user.person == null || userDao.hasAdminRoles(user))) {
+//      rules.checkIfPermitted(person);
+//    } else {
+//
+//      // FIXME questa è una porcheria fatta perchè le drools in alcuni casi non funzionano come dovrebbero
+//      // da rimuovere non appena si riesce a risolvere il problema sulle drools
+//      jRules.checkForStamping(stamping);
+//    }
 
     render(stamping, person, date, historyStamping);
   }
