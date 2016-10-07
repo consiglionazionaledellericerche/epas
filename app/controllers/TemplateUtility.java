@@ -417,25 +417,7 @@ public class TemplateUtility {
   }
 
   public List<StampTypes> getStampTypes() {
-    final User user = Security.getUser().get();
-
-    if (userDao.hasAdminRoles(user) || (user.person.qualification.qualification < 4 &&
-        user.person.office.configurations.stream()
-            .filter(conf -> conf.epasParam == EpasParam.TR_AUTOCERTIFICATION
-                && conf.fieldValue.equals("true")).findFirst().isPresent())) {
-
-      return StampTypes.onlyActive();
-    } else if (user.person.office.configurations.stream()
-        .filter(c -> c.epasParam == EpasParam.WORKING_OFF_SITE
-            && c.fieldValue.equals("true")).findFirst().isPresent() &&
-        // La persona è abilitata in configurazione all'inserimento autonomo di quell'assenza
-        user.person.personConfigurations.stream()
-            .filter(pc -> pc.epasParam == EpasParam.OFF_SITE_STAMPING
-                && pc.fieldValue.equals("true")).findFirst().isPresent()) {
-      return ImmutableList.of(StampTypes.LAVORO_FUORI_SEDE);
-    }
-
-    return Lists.newArrayList();
+    return UserDao.getAllowedStampTypes(Security.getUser().get());
   }
 
   /**

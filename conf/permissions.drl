@@ -89,8 +89,6 @@ when
 
      	/* Situazione Mensile */
      	"Stampings.stampings",
-     	/* "Stampings.editEmployee",
-     	"Stampings.updateEmployee", */
 
      	/* Assenze mensili */
      	"Absences.absences",
