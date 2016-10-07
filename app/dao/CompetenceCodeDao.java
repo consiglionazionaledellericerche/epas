@@ -121,12 +121,19 @@ public class CompetenceCodeDao extends DaoBase {
   /**
    * 
    * @param group il gruppo di codici di competenza
+   * @param except opzionale: se presente serve per tralasciare quel competenceCode nella ricerca
+   * dei codici appartenenti al gruppo group
    * @return la lista dei codici di competenza che appartengono al gruppo passato come parametro.
    */
-  public List<CompetenceCode> getCodeWithGroup(CompetenceCodeGroup group) {
+  public List<CompetenceCode> getCodeWithGroup(CompetenceCodeGroup group, 
+      Optional<CompetenceCode> except) {
     final QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
+    BooleanBuilder condition = new BooleanBuilder();
+    if (except.isPresent()) {
+      condition.and(competenceCode.ne(except.get()));
+    }
     final JPQLQuery query = getQueryFactory().from(competenceCode)
-        .where(competenceCode.competenceCodeGroup.eq(group));
+        .where(competenceCode.competenceCodeGroup.eq(group).and(condition));
     return query.orderBy(competenceCode.code.asc()).list(competenceCode);
   }
   
