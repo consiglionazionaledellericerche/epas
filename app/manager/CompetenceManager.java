@@ -369,7 +369,8 @@ public class CompetenceManager {
     switch (comp.competenceCode.limitType) {
       case monthly:        
         group = competenceCodeDao
-            .getCodeWithGroup(comp.competenceCode.competenceCodeGroup);
+            .getCodeWithGroup(comp.competenceCode.competenceCodeGroup, 
+                Optional.fromNullable(comp.competenceCode));
         compList = competenceDao
             .getCompetences(Optional.fromNullable(comp.person), comp.year, 
                 Optional.fromNullable(comp.month), group);
@@ -381,6 +382,8 @@ public class CompetenceManager {
             result = Messages.get("CompManager.notConfigured");
             return result;
           }
+          group = competenceCodeDao.getCodeWithGroup(comp.competenceCode.competenceCodeGroup, 
+              Optional.<CompetenceCode>absent());
           if (!handlerReperibility(comp, value, group)) {
             result = Messages.get("CompManager.overServiceLimit");
             return result;
@@ -397,7 +400,8 @@ public class CompetenceManager {
         break;
       case yearly:
         group = competenceCodeDao
-            .getCodeWithGroup(comp.competenceCode.competenceCodeGroup);
+            .getCodeWithGroup(comp.competenceCode.competenceCodeGroup, 
+                Optional.fromNullable(comp.competenceCode));
         compList = competenceDao
             .getCompetences(Optional.fromNullable(comp.person), comp.year, 
             Optional.<Integer>absent(), group);
