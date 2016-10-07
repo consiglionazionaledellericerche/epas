@@ -33,10 +33,14 @@ import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
 
 import play.db.jpa.Blob;
+import play.libs.MimeTypes;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -394,7 +398,7 @@ public class Configurations extends Controller {
     personShow(configuration.person.id);
   }
 
-  public static void uploadAttachment(Long officeId, Blob file) {
+  public static void uploadAttachment(Long officeId, File file) throws FileNotFoundException {
 
     final Office office = officeDao.getOfficeById(officeId);
 
@@ -403,10 +407,12 @@ public class Configurations extends Controller {
 
     final Attachment attachment = new Attachment();
 
-    attachment.filename = String
-        .format("Autorizzazione autocertificazione sede %s", office.getName());
+
+    attachment.filename = file.getName();
     attachment.type = AttachmentType.TR_AUTOCERTIFICATION;
-    attachment.file = file;
+    Blob blob = new Blob();
+    blob.set(new FileInputStream(file), MimeTypes.getContentType(file.getName()));
+    attachment.file = blob;
     attachment.office = office;
     attachment.save();
 
