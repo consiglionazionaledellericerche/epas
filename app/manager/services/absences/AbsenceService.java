@@ -186,6 +186,7 @@ public class AbsenceService {
           TemplateRow templateRow = new TemplateRow();
           templateRow.date = periodChain.date;
           templateRow.absenceErrors.add(AbsenceError.builder().absenceProblem(AbsenceProblem.NoChildExist).build());
+          insertTemplateRows.add(templateRow);
         }
         for (AbsencePeriod absencePeriod : periodChain.periods) {
           for (DayInPeriod dayInPeriod : absencePeriod.daysInPeriod.values()) {

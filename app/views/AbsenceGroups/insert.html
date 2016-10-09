@@ -21,15 +21,24 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
  
    #{if insertReport }
    
-   #{if !insertReport.warningsPreviousVersion.empty}
-     #{alert color:'danger'}
+     #{if !insertReport.warningsPreviousVersion.empty}
+      #{alert color:'danger'}
        <p><strong>Elenco degli errori riscontrati</strong></p>
        #{list items:insertReport.warningsPreviousVersion, as:'warning'}
          <br>${warning}
        
        #{/list}
-     #{/alert}
-   #{/if}
+      #{/alert}
+     #{/if}
+     #{if !insertReport.criticalErrors.empty}
+      #{alert color:'danger'}
+       <p><strong>Elenco degli errori riscontrati</strong></p>
+       #{list items:insertReport.criticalErrors, as:'criticalError'}
+         <br>${criticalError.criticalProblem}
+       
+       #{/list}
+      #{/alert}
+     #{/if}
    
      <table class="table table-condensed table-bordered">
       <tr>
