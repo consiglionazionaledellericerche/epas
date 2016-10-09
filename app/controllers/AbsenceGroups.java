@@ -6,34 +6,33 @@ import com.google.common.base.Verify;
 import dao.PersonDao;
 import dao.absences.AbsenceComponentDao;
 
+import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.PersonDayManager;
+import manager.response.AbsenceInsertReport;
+import manager.response.AbsencesResponse;
 import manager.services.absences.AbsenceMigration;
 import manager.services.absences.AbsenceService;
-import manager.services.absences.AbsenceService.AbsenceRequestType;
-import manager.services.absences.model.AbsenceEngine;
-import manager.services.absences.model.AbsencesReport;
-import manager.services.absences.model.DayStatus;
-import manager.services.absences.model.TakenAbsence;
+import manager.services.absences.AbsenceService.InsertReport;
+import manager.services.absences.errors.AbsenceError;
+import manager.services.absences.model.DayInPeriod.TemplateRow;
+import manager.services.absences.model.PeriodChain;
 import manager.services.absences.web.AbsenceRequestForm;
 import manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab;
 import manager.services.absences.web.AbsenceRequestForm.SubAbsenceGroupFormItem;
 
 import models.Person;
 import models.PersonDay;
-import models.User;
 import models.absences.Absence;
+import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.JustifiedType;
-import models.absences.JustifiedType.JustifiedTypeName;
 
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
 
-import play.data.validation.Required;
-import play.data.validation.Valid;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -58,6 +57,8 @@ public class AbsenceGroups extends Controller {
   private static ConsistencyManager consistencyManager;
   @Inject
   private static AbsenceComponentDao absenceComponentDao;
+  @Inject
+  private static AbsenceManager absenceManager;
   
   public static void migrate() {
     
@@ -91,88 +92,45 @@ public class AbsenceGroups extends Controller {
       absenceType = null;
     }
     
-    AbsenceRequestForm absenceRequestForm = absenceService.configureInsertForm(person, from, to,
-        groupAbsenceType, absenceType, justifiedType, hours, minutes);
-    
-    AbsencesReport report;
     if (forceInsert) {
-      report = absenceService.forceInsert(person, groupAbsenceType, from, to, 
-          AbsenceRequestType.insert, absenceType, justifiedType, hours, minutes);
+      //report = absenceService.forceInsert(person, groupAbsenceType, from, to, 
+      //    AbsenceRequestType.insert, absenceType, justifiedType, hours, minutes);
+      flash.error("L'inserimento forzato è in fase di implementazione ...");
     } else {
-      report = absenceService.insert(person, groupAbsenceType, from, to, 
-          AbsenceRequestType.insert, absenceType, justifiedType, hours, minutes);
-      //Se ci sono degli errori non salvo niente
-      if (report.containsProblems()) {
-        render("@insert", absenceRequestForm, report);
-      }
-    }
-    
-    for (DayStatus insertDayStatus : report.insertDaysStatus) {
-    
-      PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(person, 
-          insertDayStatus.getDate());
-      
-      for (Absence absence : insertDayStatus.absencesNotPersisted()) {
-        if (absence.troubles.isEmpty()) {
+      InsertReport insertReport = new InsertReport();
 
-          personDay.absences.add(absence);
-          absence.personDay = personDay;
-          absence.save(); 
-          personDay.save();
-          JPA.em().flush();
+      if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.vacationsCnr)) {
+        insertReport = temporaryVacation(person, groupAbsenceType, from, to, 
+            absenceType, false);
+      } else if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.compensatoryRestCnr)) {
+        throw new IllegalStateException();
+      } else {
+
+        insertReport = absenceService.insert(person, groupAbsenceType, from, to, 
+            absenceType, justifiedType, hours, minutes, true);
+        if (!insertReport.criticalErrors.isEmpty()) {
+          flash.error("L'operazione è stata interrotta a causa di errori...");
+        } else {
+          for (Absence absence : insertReport.absencesToPersist) {
+            PersonDay personDay = personDayManager
+                .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
+            absence.personDay = personDay;
+            personDay.absences.add(absence);
+            absence.save(); 
+            personDay.save();
+
+          }
         }
       }
+      JPA.em().flush();
+      consistencyManager.updatePersonSituation(person.id, from);
+      flash.success("Codici di assenza inseriti.");
     }
-    
-    consistencyManager.updatePersonSituation(person.id, from);
-    
-    flash.success("Codici di assenza inseriti.");
+
     Stampings.personStamping(person.id, from.getYear(), from.getMonthOfYear());
-    
-    
-  }
-  
-  
-  /**
-   * Aggiunge il replacing (procedura di fix puntuale).
-   * @param person
-   * @param date
-   * @param absenceType
-   * @param groupAbsenceType
-   */
-  public static void addReplacing(Person person, LocalDate date, AbsenceType absenceType, 
-      GroupAbsenceType groupAbsenceType) {
-    
-    notFoundIfNull(person);
-    notFoundIfNull(date);
-    notFoundIfNull(absenceType);
-    
-    AbsencesReport report = absenceService.forceInsert(person, null, date, null, 
-          AbsenceRequestType.insert, absenceType, 
-          absenceComponentDao.getOrBuildJustifiedType(JustifiedTypeName.nothing), 
-          null, null);
-    
-    for (DayStatus insertDayStatus : report.insertDaysStatus) {
-      PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(person, 
-          insertDayStatus.getDate());
-      for (Absence absence : insertDayStatus.absencesNotPersisted()) {
-        if (absence.troubles.isEmpty()) {
 
-          personDay.absences.add(absence);
-          absence.personDay = personDay;
-          absence.save(); 
-          personDay.save();
-          JPA.em().flush();
-        }
-      }
-    }
-    
-    consistencyManager.updatePersonSituation(person.id, date);
-      
-    flash.success("Inserito codice di rimpiazzamento.");
-    groupStatus(person.id, groupAbsenceType.id, date);
-    
   }
+
   
   /**
    * metodo che cancella una certa assenza fino ad un certo periodo.
@@ -210,17 +168,31 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(date);
     notFoundIfNull(groupAbsenceType);
     
-    AbsenceEngine absenceEngine = absenceService.residual(person, groupAbsenceType, date);
+    groupAbsenceType = absenceComponentDao.firstGroupOfChain(groupAbsenceType);
     
-    List<GroupAbsenceType> groups = absenceComponentDao
-        .groupAbsenceTypeOfPattern(GroupAbsenceTypePattern.programmed);
+    AbsenceRequestForm absenceRequestForm = absenceService
+        .buildInsertForm(person, date, null, groupAbsenceType);
     
-    render(absenceEngine, date, groups, groupAbsenceType);
+    PeriodChain periodChain = absenceService.residual(person, groupAbsenceType, date);
+    
+    render(date, absenceRequestForm, groupAbsenceType, periodChain);
   }
   
   public static void changeGroupStatus(Person person, GroupAbsenceType groupAbsenceType, LocalDate date) {
 
-    groupStatus(person.id, groupAbsenceType.id, date);
+    notFoundIfNull(person);
+    notFoundIfNull(date);
+    notFoundIfNull(groupAbsenceType);
+    
+    groupAbsenceType = absenceComponentDao.firstGroupOfChain(groupAbsenceType);
+    
+    AbsenceRequestForm absenceRequestForm = absenceService
+        .buildInsertForm(person, date, null, groupAbsenceType);
+    
+    PeriodChain periodChain = absenceService.residual(person, groupAbsenceType, date);
+    
+    render("@groupStatus", date, absenceRequestForm, groupAbsenceType, periodChain);
+    
   }
   
   public static void scan(Long personId, LocalDate from) {
@@ -276,11 +248,21 @@ public class AbsenceGroups extends Controller {
     SubAbsenceGroupFormItem selected = absenceRequestForm
         .selectedAbsenceGroupFormItem.selectedSubAbsenceGroupFormItems;
 
-    AbsencesReport report = absenceService.insert(person, groupAbsenceType.get(), 
-        absenceRequestForm.from, absenceRequestForm.to, 
-        AbsenceRequestType.insert, selected.absenceType, 
-        selected.selectedJustified, selected.getHours(), selected.getMinutes());
-    render("@insert", absenceRequestForm, report);
+    if (groupAbsenceType.get().pattern.equals(GroupAbsenceTypePattern.vacationsCnr)) {
+      InsertReport insertReport = temporaryVacation(person, groupAbsenceType.get(), from, null, 
+          null, false);
+      render("@insert", absenceRequestForm, insertReport);
+    } else if (groupAbsenceType.get().pattern.equals(GroupAbsenceTypePattern.compensatoryRestCnr)) {
+      throw new IllegalStateException();
+    } else {
+
+      InsertReport insertReport = absenceService.insert(person, groupAbsenceType.get(), 
+          absenceRequestForm.from, absenceRequestForm.to, 
+          selected.absenceType, selected.selectedJustified, 
+          selected.getHours(), selected.getMinutes(), false);
+
+      render("@insert", absenceRequestForm, insertReport);
+    }
 
   }
   
@@ -294,19 +276,28 @@ public class AbsenceGroups extends Controller {
     
     AbsenceRequestForm absenceRequestForm = absenceService
         .buildInsertForm(person, from, to, groupAbsenceType);
-    
-    AbsencesReport report = null;
+
     if (absenceRequestForm.selectedAbsenceGroupFormItem != null) {
       SubAbsenceGroupFormItem selected = absenceRequestForm
           .selectedAbsenceGroupFormItem.selectedSubAbsenceGroupFormItems;
-      
-      report = absenceService.insert(person, groupAbsenceType, 
-          absenceRequestForm.from, absenceRequestForm.to, 
-          AbsenceRequestType.insert, selected.absenceType, 
-          selected.selectedJustified, selected.getHours(), selected.getMinutes());  
+
+      if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.vacationsCnr)) {
+        InsertReport insertReport = temporaryVacation(person, groupAbsenceType, from, to, 
+            absenceComponentDao.absenceTypeByCode("FER").get(), false);
+        render(absenceRequestForm, insertReport);
+      } else if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.compensatoryRestCnr)) {
+        throw new IllegalStateException();
+      } else {
+
+        InsertReport insertReport  = absenceService.insert(person, groupAbsenceType, 
+            absenceRequestForm.from, absenceRequestForm.to, 
+            selected.absenceType, selected.selectedJustified, 
+            selected.getHours(), selected.getMinutes(), false);
+        render(absenceRequestForm, insertReport);
+      }
     }
     
-    render(absenceRequestForm, report);
+    render(absenceRequestForm);
   }
   
   public static void configureInsert(Long personId, LocalDate from, LocalDate to, 
@@ -326,18 +317,83 @@ public class AbsenceGroups extends Controller {
     AbsenceRequestForm absenceRequestForm = absenceService.configureInsertForm(person, from, to,
         groupAbsenceType, absenceType, justifiedType, hours, minutes);
     
-    AbsencesReport report = null;
     if (absenceRequestForm.selectedAbsenceGroupFormItem != null) {
       SubAbsenceGroupFormItem selected = absenceRequestForm
           .selectedAbsenceGroupFormItem.selectedSubAbsenceGroupFormItems;
-    
-      report = absenceService.insert(person, groupAbsenceType, 
-          absenceRequestForm.from, absenceRequestForm.to, 
-          AbsenceRequestType.insert, selected.absenceType, 
-          selected.selectedJustified, selected.getHours(), selected.getMinutes());  
+      
+      if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.vacationsCnr)) {
+        InsertReport insertReport = temporaryVacation(person, groupAbsenceType, from, to, 
+            absenceType, false);
+        render("@insert", absenceRequestForm, insertReport);
+      } else if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.compensatoryRestCnr)) {
+        throw new IllegalStateException();
+      } else {
+
+        InsertReport insertReport  = absenceService.insert(person, groupAbsenceType, 
+            absenceRequestForm.from, absenceRequestForm.to, 
+            selected.absenceType, selected.selectedJustified, 
+            selected.getHours(), selected.getMinutes(), false);
+        render("@insert", absenceRequestForm, insertReport);
+      }
     }
     
-    render("@insert", absenceRequestForm, report);
+    render("@insert", absenceRequestForm);
+  }
+  
+  
+  
+  private static InsertReport temporaryVacation(Person person, GroupAbsenceType groupAbsenceType, 
+      LocalDate from, LocalDate to, AbsenceType absenceType, boolean persist) {
+    
+    if (absenceType == null || !absenceType.isPersistent()) {
+      absenceType = absenceComponentDao.absenceTypeByCode("FER").get();
+    }
+    InsertReport insertReport = new InsertReport();
+    
+    if (!persist) {
+
+      AbsenceInsertReport absenceInsertReport = absenceManager.insertAbsenceSimulation(person, from, 
+          Optional.fromNullable(to), absenceType, Optional.absent(), Optional.absent(), Optional.absent());
+
+      //TODO: analisi degli inserimenti
+      for (AbsencesResponse absenceResponse : absenceInsertReport.getAbsences()) {
+
+        if (absenceResponse.isInsertSucceeded()) {
+          TemplateRow templateRow = new TemplateRow();
+          templateRow.date = absenceResponse.getDate();
+          templateRow.absence = absenceResponse.getAbsenceAdded();
+          templateRow.groupAbsenceType = groupAbsenceType;
+          insertReport.insertTemplateRows.add(templateRow);
+          continue;
+        }
+        TemplateRow templateRow = new TemplateRow();
+        templateRow.date = absenceResponse.getDate();
+        templateRow.absence = absenceResponse.getAbsenceInError();
+        if (absenceResponse.isHoliday()) {
+          templateRow.absenceErrors.add(AbsenceError.builder()
+              .absence(absenceResponse.getAbsenceAdded())
+              .absenceProblem(AbsenceProblem.NotOnHoliday)
+              .build());
+        } else {
+          templateRow.absenceErrors.add(AbsenceError.builder()
+              .absence(absenceResponse.getAbsenceAdded())
+              .absenceProblem(AbsenceProblem.LimitExceeded)
+              .build());
+        }
+        insertReport.insertTemplateRows.add(templateRow);
+      }
+      
+      if (absenceInsertReport.getAbsences().isEmpty()) {
+        insertReport.warningsPreviousVersion = absenceInsertReport.getWarnings();
+      }
+
+    } else {
+//      AbsenceInsertReport absenceInsertReport = absenceManager.insertAbsenceRecompute(person, from, 
+//          Optional.fromNullable(to), absenceType, null, Optional.absent(), Optional.absent());
+     
+    }
+    
+    return insertReport;
   }
   
 }

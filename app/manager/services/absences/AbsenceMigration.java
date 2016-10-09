@@ -1432,16 +1432,16 @@ public class AbsenceMigration {
         tFerie.get().fixedLimit = -1;
         
         AbsenceType ferie32 = absenceComponentDao.buildOrEditAbsenceType("32", 
-            "Ferie anno corrente", 0, Sets.newHashSet(allDay), null, 0, false, true, false, "32", null);
+            "Ferie anno corrente", 0, Sets.newHashSet(allDay), null, 0, false, false, false, "32", null);
         
         AbsenceType ferie31 = absenceComponentDao.buildOrEditAbsenceType("31", 
-            "Ferie anno precedente", 0, Sets.newHashSet(allDay), null, 0, false, true, false, "31", null);
+            "Ferie anno precedente", 0, Sets.newHashSet(allDay), null, 0, false, false, false, "31", null);
         
         AbsenceType ferie37 = absenceComponentDao.buildOrEditAbsenceType("37", 
-            "ferie anno precedente (dopo il 31/8)", 0, Sets.newHashSet(allDay), null, 0, false, true, false, "37", null);
+            "ferie anno precedente (dopo il 31/8)", 0, Sets.newHashSet(allDay), null, 0, false, false, false, "37", null);
         
         AbsenceType permesso94 = absenceComponentDao.buildOrEditAbsenceType("94", 
-            "festività soppresse (ex legge 937/77)", 0, Sets.newHashSet(allDay), null, 0, false, true, false, "94", null);
+            "festività soppresse (ex legge 937/77)", 0, Sets.newHashSet(allDay), null, 0, false, false, false, "94", null);
         
         tFerie.get().takableCodes = Sets.newHashSet(ferie31, ferie32, ferie37, permesso94);
         

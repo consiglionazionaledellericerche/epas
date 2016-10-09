@@ -1,11 +1,13 @@
 package manager.services.absences.model;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+
+import dao.absences.AbsenceComponentDao;
 
 import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 
 import manager.services.absences.AbsenceEngineUtility;
 import manager.services.absences.errors.ErrorsBox;
@@ -18,8 +20,10 @@ import models.absences.GroupAbsenceType;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 
 import org.joda.time.LocalDate;
+import org.testng.collections.Lists;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -31,32 +35,32 @@ public class AbsencePeriod {
   public GroupAbsenceType groupAbsenceType;
   public LocalDate from;                      // Data inizio
   public LocalDate to;                        // Data fine
-  public SortedMap<LocalDate, DayStatus> daysStatus = Maps.newTreeMap();
+  public SortedMap<LocalDate, DayInPeriod> daysInPeriod = Maps.newTreeMap();
   
   // Takable
   public AmountType takeAmountType;                // Il tipo di ammontare del periodo
   public TakeCountBehaviour takableCountBehaviour; // Come contare il tetto totale
-  private int fixedPeriodTakableAmount = 0;         // Il tetto massimo
+  private int fixedPeriodTakableAmount = 0;        // Il tetto massimo
   public TakeCountBehaviour takenCountBehaviour;   // Come contare il tetto consumato
-  private int periodTakenAmount = 0;                // Il tetto consumato
   public Set<AbsenceType> takableCodes;            // I tipi assenza prendibili del periodo
   public Set<AbsenceType> takenCodes;              // I tipi di assenza consumati del periodo
+  public LocalDate limitExceedDate;
   
   // Complation
   public AmountType complationAmountType;                                           // Tipo di ammontare completamento
-  public int complationConsumedAmount;                                              // Ammontare completamento attualmente consumato
   public SortedMap<Integer, AbsenceType> replacingCodesDesc =                       // I codici di rimpiazzamento ordinati per il loro
       Maps.newTreeMap(Collections.reverseOrder());                                  // tempo di completamento (decrescente) 
                                                                                      
   public Map<AbsenceType, Integer> replacingTimes = Maps.newHashMap();              //I tempi di rimpiazzamento per ogni assenza
   public Set<AbsenceType> complationCodes;                                          // Codici di completamento     
-  public SortedMap<LocalDate, Absence> replacingAbsencesByDay = Maps.newTreeMap();  // Le assenze di rimpiazzamento per giorno
-  public SortedMap<LocalDate, Absence> complationAbsencesByDay = Maps.newTreeMap(); // Le assenze di completamento per giorno
-  public LocalDate compromisedReplacingDate = null;                                 // Data di errore complation 
-                                                                                    // (non si possono più fare i calcoli sui completamenti). 
+  public boolean compromisedTwoComplation = false;
+  
   //Errori del periodo
   public ErrorsBox errorsBox = new ErrorsBox();
   public boolean ignorePeriod = false;
+  
+  //Tentativo di inserimento assenza nel periodo
+  public Absence attemptedInsertAbsence;
   
   AbsencePeriod(Person person, GroupAbsenceType groupAbsenceType) {
     this.person = person;
@@ -64,14 +68,15 @@ public class AbsencePeriod {
   }
 
   public DateInterval periodInterval() {
-    if (from == null) {
-      return null;
-    }
     return new DateInterval(from, to);
   }
   
   public boolean isTakable() {
     return takeAmountType != null; 
+  }
+  
+  public boolean isTakableNoLimit() {
+    return takeAmountType != null && getPeriodTakableAmount() < 0;
   }
 
   public void setFixedPeriodTakableAmount(int amount) {
@@ -81,6 +86,14 @@ public class AbsencePeriod {
     } else {
       this.fixedPeriodTakableAmount = amount;  
     }
+  }
+
+  private List<TakenAbsence> takenAbsences() {
+    List<TakenAbsence> takenAbsences = Lists.newArrayList();
+    for (DayInPeriod daysInPeriod : this.daysInPeriod.values()) {
+      takenAbsences.addAll(daysInPeriod.getTakenAbsences());
+    }
+    return takenAbsences;
   }
   
   public int getPeriodTakableAmount() {
@@ -92,11 +105,15 @@ public class AbsencePeriod {
   }
   
   public int getPeriodTakenAmount() {
+    int takenInPeriod = 0;
+    for (TakenAbsence takenAbsence : takenAbsences()) {
+      takenInPeriod += takenAbsence.getTakenAmount();
+    }
     if (!takenCountBehaviour.equals(TakeCountBehaviour.period)) {
       // TODO: sumAllPeriod, sumUntilPeriod;
       return 0;
     } 
-    return periodTakenAmount;
+    return takenInPeriod;
   }
   
   public int getRemainingAmount() {
@@ -106,134 +123,111 @@ public class AbsencePeriod {
   /**
    * Se è possibile quell'ulteriore amount.
    * @param amount
-   * @return
+   * @return se ho superato il limite
    */
-  public boolean canAddTakenAmount(int amount) {
-    //TODO: se non c'è limite programmarlo in un booleano
-    if (this.getPeriodTakableAmount() < 0) {
-      return true;
-    }
-    if (this.getPeriodTakableAmount() - this.getPeriodTakenAmount() - amount >= 0) {
-      return true;
-    }
-    return false;
-  }
-  
-  /**
-   * Aggiunge l'enhancedAbsene al period e aggiorna il limite consumato.
-   * @param enhancedAbsence
-   */
-  public void addAbsenceTaken(Absence absence, int takenAmount) {
+  public TakenAbsence buildTakenAbsence(Absence absence, int takenAmount) {
+    int periodTakableAmount = this.getPeriodTakableAmount();
+    int periodTakenAmount = this.getPeriodTakenAmount();
     TakenAbsence takenAbsence = TakenAbsence.builder()
         .absence(absence)
-        .amountTypeTakable(this.takeAmountType)
-        .consumedTakable(takenAmount)
-        .residualBeforeTakable(getPeriodTakableAmount() - getPeriodTakenAmount())
+        .amountType(this.takeAmountType)
+        .periodTakableTotal(periodTakableAmount)
+        .periodTakenBefore(periodTakenAmount)
+        .takenAmount(takenAmount)
         .build();
-    getDayStatus(absence.getAbsenceDate()).takenAbsences.add(takenAbsence);
-    
-    this.periodTakenAmount += takenAmount;
+    return takenAbsence;
   }
   
- 
+  public void addTakenAbsence(TakenAbsence takenAbsence) {
+    DayInPeriod dayInPeriod = getDayInPeriod(takenAbsence.absence.getAbsenceDate());
+    dayInPeriod.getTakenAbsences().add(takenAbsence);
+  }
+  
+  
+  public void addComplationAbsence(Absence absence) {
+    DayInPeriod dayInPeriod = getDayInPeriod(absence.getAbsenceDate());
+    if (!dayInPeriod.getExistentComplations().isEmpty()) {
+      this.compromisedTwoComplation = true;
+    }
+    dayInPeriod.getExistentComplations().add(absence);
+  }
+  
+  public void addReplacingAbsence(Absence absence) {
+    DayInPeriod dayInPeriod = getDayInPeriod(absence.getAbsenceDate());
+    dayInPeriod.getExistentReplacings().add(absence);
+  }
+   
+  public void setLimitExceededDate(LocalDate date) {
+    if (this.limitExceedDate == null || this.limitExceedDate.isAfter(date)) {
+      this.limitExceedDate = date;
+    }
+  }
   
   public boolean isComplation() {
     return complationAmountType != null; 
   }
   
-  public void computeReplacingStatusInPeriod(AbsenceEngineUtility absenceEngineUtility) {
+  /**
+   * Requires: no criticalErrors and no twoComplationSameDate
+   * @param absenceEngineUtility
+   */
+  public void computeCorrectReplacingInPeriod(AbsenceEngineUtility absenceEngineUtility, 
+      AbsenceComponentDao absenceComponentDao) {
 
-    //TODO: questi errori devono essere messi nel period!!!
-    if (periodChain.absenceEngine.report.containsCriticalProblems()) {
-      return;
-    }
     if (!this.isComplation()) {
       return;
     }
 
-    //preparo i giorni con i replacing effettivi (
-    for (Absence replacingAbsence : this.replacingAbsencesByDay.values()) {
-      DayStatus dayStatus = this.getDayStatus(replacingAbsence.getAbsenceDate());
-      if (this.isAbsenceCompromisedReplacing(replacingAbsence)) {
-        dayStatus.setCompromisedReplacing(replacingAbsence);
-      } else {
-        dayStatus.setExistentReplacing(replacingAbsence);
-      }
-    }
-
-    //Le assenze di completamento ordinate per data. Genero i replacing ipotetici
     int complationAmount = 0;
-    for (Absence complationAbsence : this.complationAbsencesByDay.values()) {
-
-      DayStatus dayStatus = this.getDayStatus(complationAbsence.getAbsenceDate());
-      if (this.isAbsenceCompromisedReplacing(complationAbsence)) {
-        dayStatus.setCompromisedComplation(complationAbsence);
+    for (DayInPeriod dayInPeriod : this.daysInPeriod.values()) {
+      if (dayInPeriod.getExistentComplations().isEmpty()) {
         continue;
       }
-
+      Preconditions.checkState(dayInPeriod.getExistentComplations().size() == 1);
+      Absence absence = dayInPeriod.getExistentComplations().iterator().next();
       int amount = absenceEngineUtility.absenceJustifiedAmount(person, 
-          complationAbsence, this.complationAmountType);
+          absence, this.complationAmountType);
+      
       complationAmount = complationAmount + amount;
-
-      dayStatus.setAmountTypeComplation(this.complationAmountType);
-      dayStatus.setComplationAbsence(complationAbsence);
-      dayStatus.setResidualBeforeComplation(complationAmount - amount);
-      dayStatus.setConsumedComplation(amount);
-
+      ComplationAbsence complationAbsence = ComplationAbsence.builder()
+          .absence(absence)
+          .amountType(this.complationAmountType)
+          .residualComplationBefore(complationAmount - amount)
+          .consumedComplation(amount).build();
       Optional<AbsenceType> replacingCode = absenceEngineUtility
-          .whichReplacingCode(this, complationAbsence.getAbsenceDate(), complationAmount);
-
+          .whichReplacingCode(this, absence.getAbsenceDate(), complationAmount);
       if (replacingCode.isPresent()) {
-
-        dayStatus.setCorrectReplacing(replacingCode.get());
+        dayInPeriod.setCorrectReplacing(replacingCode.get());
         complationAmount -= this.replacingTimes.get(replacingCode.get());
       }
-
-      dayStatus.setResidualAfterComplation(complationAmount);
+      complationAbsence.residualComplationAfter = complationAmount;
+      dayInPeriod.setComplationAbsence(complationAbsence);
     }
-    this.complationConsumedAmount = complationAmount;
-
     return;
   }
   
-  public void addComplationSameDay(Absence absence) {
-    getDayStatus(absence.getAbsenceDate()).complationSameDay.add(absence);
+  public List<Absence> filterAbsencesInPeriod(List<Absence> absences) {
+    DateInterval interval = this.periodInterval();
+    List<Absence> filtered = Lists.newArrayList();
+    for (Absence absence : absences) {
+      if (DateUtility.isDateIntoInterval(absence.getAbsenceDate(), interval)) {
+        filtered.add(absence);
+      }
+    }
+    return filtered;
   }
   
-  public void addReplacingSameDay(Absence absence) {
-    getDayStatus(absence.getAbsenceDate()).replacingSameDay.add(absence);
+  public DayInPeriod getDayInPeriod(LocalDate date) {
+    DayInPeriod dayInPeriod = this.daysInPeriod.get(date);
+    if (dayInPeriod == null) {
+      dayInPeriod = new DayInPeriod(date, this);
+      daysInPeriod.put(date, dayInPeriod);
+    }
+    return dayInPeriod;
   }
   
-  public void setCompromisedReplacingDate(LocalDate date) {
-    if (this.compromisedReplacingDate == null) {
-      this.compromisedReplacingDate = date;
-    } else if (this.compromisedReplacingDate.isAfter(date)) {
-      this.compromisedReplacingDate = date;
-    }
-  }
-  
-  public boolean isAbsenceCompromisedReplacing(Absence absence) {
-    if (this.compromisedReplacingDate == null) {
-      return false;
-    }
-    if (this.compromisedReplacingDate.isAfter(absence.getAbsenceDate())) {
-      return false;
-    }
-    return true;
-  }
-  
-  public DayStatus getDayStatus(LocalDate date) {
-    DayStatus dayStatus = this.daysStatus.get(date);
-    if (dayStatus == null) {
-      dayStatus = DayStatus.builder().date(date)
-          .absencePeriod(this)
-          .takenAbsences(Lists.newArrayList())
-          .complationSameDay(Sets.newHashSet())
-          .replacingSameDay(Sets.newHashSet()).build();
-      this.daysStatus.put(date, dayStatus);
-    }
-    
-    return dayStatus;
+  public boolean containsCriticalErrors() {
+    return ErrorsBox.containsCriticalErrors(Lists.newArrayList(this.errorsBox));
   }
   
 }

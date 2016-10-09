@@ -2,7 +2,6 @@ package manager.services.absences.web;
 
 import com.google.common.base.Verify;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
 import dao.absences.AbsenceComponentDao;
@@ -25,7 +24,6 @@ import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
 
 import java.util.List;
-import java.util.Set;
 import java.util.SortedMap;
 
 public class AbsenceRequestFormFactory {
@@ -168,7 +166,8 @@ public class AbsenceRequestFormFactory {
       // (automatica se esiste o il primo codice della lista)
       boolean selectNextSubGroup = selectedAbsenceType == null ? true : false;
 
-      if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.programmed)) {
+      if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.programmed) || 
+          groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.vacationsCnr) ) {
         
         List<JustifiedType> automaticJustifiedTypes = 
             absenceEngineUtility.automaticJustifiedType(groupAbsenceType);
@@ -298,4 +297,5 @@ public class AbsenceRequestFormFactory {
     }
     return subAbsenceGroupFormItem;
   }
+
 }

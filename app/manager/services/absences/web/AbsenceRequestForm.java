@@ -34,25 +34,6 @@ public class AbsenceRequestForm {
     mission(Lists.newArrayList(DefaultGroup.MISSIONE.name())),
     vacation(Lists.newArrayList(DefaultGroup.FERIE_CNR.name())),
     compensatory(Lists.newArrayList(DefaultGroup.RIPOSI_CNR.name())),
-//    permission(Lists.newArrayList(DefaultGroup.G_661.name(), 
-//        DefaultGroup.G_89.name(), DefaultGroup.G_09.name())),
-//    law104(Lists.newArrayList(DefaultGroup.G_18.name(), DefaultGroup.G_19.name())),
-//    postpartum(Lists.newArrayList(DefaultGroup.G_23.name(), DefaultGroup.G_25.name(),
-//        DefaultGroup.G_232.name(), DefaultGroup.G_252.name(),
-//        DefaultGroup.G_233.name(), DefaultGroup.G_253.name())),
-//    illness(Lists.newArrayList(DefaultGroup.MALATTIA.name())),
-//    illnessChild(Lists.newArrayList(
-//        DefaultGroup.MALATTIA_FIGLIO_1_12.name(),
-//        DefaultGroup.MALATTIA_FIGLIO_1_13.name(),
-//        DefaultGroup.MALATTIA_FIGLIO_1_14.name(),
-//        DefaultGroup.MALATTIA_FIGLIO_2_12.name(),
-//        DefaultGroup.MALATTIA_FIGLIO_2_13.name(),
-//        DefaultGroup.MALATTIA_FIGLIO_2_14.name(),
-//        DefaultGroup.MALATTIA_FIGLIO_3_12.name(),
-//        DefaultGroup.MALATTIA_FIGLIO_3_13.name(),
-//        DefaultGroup.MALATTIA_FIGLIO_3_14.name()
-//        )),
-    
     other(Lists.newArrayList(
         DefaultGroup.G_661.name(), 
         DefaultGroup.G_89.name(), DefaultGroup.G_09.name(),
@@ -89,7 +70,7 @@ public class AbsenceRequestForm {
     }
     
     public boolean newImplementation() {
-      return !this.equals(AbsenceInsertTab.compensatory) && !this.equals(AbsenceInsertTab.vacation);
+      return true; //!this.equals(AbsenceInsertTab.compensatory) && !this.equals(AbsenceInsertTab.vacation);
     }
   }
   
