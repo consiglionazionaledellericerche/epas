@@ -133,7 +133,11 @@ public class Absence extends BaseModel {
 
   @Override
   public String toString() {
-    return String.format("Absence[%d] - personDay.id = %d, absenceType.id = %s",
-            id, personDay.id, absenceType.id);
+    if (personDay == null) {
+      return this.getAbsenceDate() + " - " + this.getAbsenceType().code;
+    }
+    return this.getPersonDay().person.fullName() 
+        + " - " + this.getAbsenceDate() 
+        + " - " + this.getAbsenceType().code;
   }
 }

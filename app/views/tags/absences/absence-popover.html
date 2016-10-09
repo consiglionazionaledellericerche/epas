@@ -14,7 +14,7 @@
  
  }%
  
- 
+ #{if !_noLabel}
  #{if _groupSelected}
    *{
    <span class="label
@@ -30,6 +30,10 @@
    #{elseif templateUtility.isComplationCode(_absence.absenceType, _groupSelected)} text-success #{/elseif}
    #{else} text-info #{/else} 
    " webui-popover-hover data-url="#${id}"><strong>${_absence.absenceType.code}</strong></span>   
+ #{/if}
+ #{else}
+   <span class="text-default" webui-popover-hover data-url="#${id}"><strong>${_absence.absenceType.code}</strong></span>
+ #{/else}
  #{/if}
  
  <div class="webui-popover-content" id="${id}">

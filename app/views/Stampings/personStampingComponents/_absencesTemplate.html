@@ -16,7 +16,7 @@
     #{/if}
     #{else}
     
-	      #{absences.absence-popover absence:absence, person:person /}
+	      #{absences.absence-popover absence:absence, person:person, noLabel:true /}
 	      
 	      #{secure.link @Absences.edit('absence.id':absence.id), target: absence, 'data-async-modal':'#modalAbsence'}
 	      

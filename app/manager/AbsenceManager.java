@@ -388,11 +388,27 @@ public class AbsenceManager {
     Preconditions.checkNotNull(file);
 
     AbsencesResponse ar = new AbsencesResponse(date, absenceType.code);
+    
+    Absence absence = new Absence();
+    absence.date = date;
+    absence.absenceType = absenceType;
+    if (absence.absenceType.justifiedTypesPermitted.size() == 1) {
+      absence.justifiedType = absence.absenceType.justifiedTypesPermitted.iterator().next();
+    }
+    else if (justifiedMinutes.isPresent()) {
+      absence.justifiedMinutes = justifiedMinutes.get();
+      absence.justifiedType = absenceComponentDao
+          .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
+    } else {
+      absence.justifiedType = absenceComponentDao
+          .getOrBuildJustifiedType(JustifiedTypeName.all_day);
+    }
 
     //se non devo considerare festa ed è festa non inserisco l'assenza
     if (!absenceType.consideredWeekEnd && personDayManager.isHoliday(person, date)) {
       ar.setHoliday(true);
       ar.setWarning(AbsencesResponse.NON_UTILIZZABILE_NEI_FESTIVI);
+      ar.setAbsenceInError(absence);
 
     } else {
       // check sulla reperibilità
@@ -411,21 +427,6 @@ public class AbsenceManager {
         }
       } else {
         startAbsence = date;
-      }
-
-
-      Absence absence = new Absence();
-      absence.absenceType = absenceType;
-      if (absence.absenceType.justifiedTypesPermitted.size() == 1) {
-        absence.justifiedType = absence.absenceType.justifiedTypesPermitted.iterator().next();
-      }
-      else if (justifiedMinutes.isPresent()) {
-        absence.justifiedMinutes = justifiedMinutes.get();
-        absence.justifiedType = absenceComponentDao
-            .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
-      } else {
-        absence.justifiedType = absenceComponentDao
-            .getOrBuildJustifiedType(JustifiedTypeName.all_day);
       }
 
       if (persist) {

@@ -19,90 +19,71 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
    #{include './_configureSelectedGroup.html' /}
    #{include './_verifyRequest.html' /}
  
+   #{if insertReport }
    
-  
-  #{if !report.insertDaysStatus.empty }
-  <p><strong><em>Riepilogo dei codici che verrebbero inseriti.</em></strong></p>
-    <table class="table table-condensed table-bordered">
-      <tr>
-        <th class="bg-info">Data</th>
-        <th class="bg-info">Codice</th>
-        <th class="bg-info">Descrizione</th>
-        <th class="bg-info">Tempo giustificato</th>
-        #{if report.hasTakableStatus() }
-        <th class="bg-success">Residuo<br>Utilizzabile</th>
-        <th class="bg-success">Residuo<br>Consumato</th>
-        #{/if}
-        #{if report.hasComplationStatus() }
-        <th class="bg-warning">Completamento<br>Precedente<br></th>
-        <th class="bg-warning">Completamento<br>Assenza</th>
-        <th class="bg-warning">Completamento<br>Residuo<br></th>
-        #{/if}
-      </tr>
-      #{list items:report.insertDaysStatus, as:'dayStatus'}
-      #{list items:dayStatus.buildDayRows(), as:'rowRecap' }
-        <tr>
-          <td>
-            #{if rowRecap.date}
-              ${rowRecap.date.format()}
-            #{/if}  
-          </td>
-          <td>
-              #{absences.absence-popover absence:rowRecap.absence, 
-              groupSelected:selectedFormItem.groupAbsenceType,
-              person:absenceRequestForm.person /}
-          </td>
-          <td>${rowRecap.absence.absenceType.description}</td>
-          <td>#{absences.justifiedTime absence:rowRecap.absence, noLabel:true /}</td>
-          #{if report.hasTakableStatus() }
-          <td>${rowRecap.usableLimit}</td>
-          <td>${rowRecap.usableTaken}</td>
-          #{/if}
-          #{if report.hasComplationStatus() }
-          <td>${rowRecap.consumedComplationBefore}</td>
-          <td>${rowRecap.consumedComplationAbsence}</td>
-          <td>${rowRecap.consumedComplationNext}</td>
-          #{/if}
-        </tr>
-      #{/list}
-      #{/list}
-      </table>
+   #{if !insertReport.warningsPreviousVersion.empty}
+     #{alert color:'danger'}
+       <p><strong>Elenco degli errori riscontrati</strong></p>
+       #{list items:insertReport.warningsPreviousVersion, as:'warning'}
+         <br>${warning}
+       
+       #{/list}
+     #{/alert}
    #{/if}
    
-   #{if report.containsProblems()}
-    #{alert color:'danger'}
-      #{if !report.absencesRemainingTroubles.keySet().empty}
-        <strong>La richiesta ha riscontrato la presenza di assenze contenenti errori.</strong>
-        #{list items:report.absencesRemainingTroubles.keySet(), as:'absence'}
-          <br><strong>${absence.absenceDate.format()}</strong>
-          
-          #{absences.absence-popover absence:absence, 
-            person:absenceRequestForm.person, 
-            groupSelected:selectedFormItem.groupAbsenceType,
-            remainingTroubles:report.absencesRemainingTroubles.get(absence) /}
-        #{/list}
-      #{/if}
-      #{if !report.requestProblems.empty}
-        <strong>La richiesta effettuata contiene errori.</strong>
-        #{list items:report.requestProblems, as:'requestProblem'}
-            <br>${requestProblem.date.format()}
-            &{requestProblem.requestProblem}
-        #{/list}
-      #{/if}
-      #{if !report.implementationProblems.empty}
-        <strong>Errori legati all'implementazione</strong><br>
-        #{list items:report.implementationProblems, as:'implementationProblem'}
-          <table class="table table-condensed">
-          <tr>
-            <td>${implementationProblem.date.format()}</td>
-            <td>${implementationProblem.implementationProblem}</td>
-          </tr>
-          </table>
-        #{/list}
-      #{/if}
-      </p>
-    #{/alert} 
-  #{/if} 
+     <table class="table table-condensed table-bordered">
+      <tr>
+        <th>Data</th>
+        <th>Assenza</th>
+        #{if insertReport.usableColumn}
+          <th>Limite<br>Utilizzabile</th>
+          <th>Limite<br>Consumato</th>
+        #{/if}
+        #{if insertReport.complationColumn}
+          <th>Completamento<br>Precedente<br></th>
+          <th>Completamento<br>Assenza</th>
+          <th>Completamento<br>Residuo<br></th>
+        #{/if}
+        <th>Errori</th>
+      </tr>
+     
+     #{list items:insertReport.insertTemplateRows, as:'templateRow' }
+        <tr  #{if templateRow.absenceErrors} class="bg-danger"#{/if}
+             #{if templateRow.absenceErrors.empty} class="bg-success" #{/if}>
+          <td> 
+            #{if templateRow.date} ${templateRow.date.format()} #{/if}
+          </td>
+          <td>
+            #{if templateRow.absence}
+	          #{absences.absence-popover absence:templateRow.absence, groupSelected:templateRow.groupAbsenceType /}
+	        #{/if}
+          </td>
+          #{if insertReport.usableColumn}
+            <td>${templateRow.usableLimit}</td>
+            <td>${templateRow.usableTaken}</td>
+          #{/if}
+           #{if insertReport.complationColumn}
+            <td>${templateRow.consumedComplationBefore}</td>
+            <td>${templateRow.consumedComplationAbsence}</td>
+            <td>${templateRow.consumedComplationNext}</td>
+          #{/if}
+          <td>
+            #{list items:templateRow.absenceErrors, as:'absenceError'}
+              <i class="fa fa-times text-danger" aria-hidden="true"></i>
+              ${absenceError.absenceProblem} 
+              #{list items:absenceError.conflictingAbsences, as:'conflictingAbsence'} 
+                #{absences.absence-popover absence:conflictingAbsence /}
+              #{/list}
+            #{/list}
+          </td>
+        </tr>
+     #{/list}
+
+      </table>
+   
+   #{/if}   
+  
+
       
      *{ save request }*
 	 #{form action:@AbsenceGroups.save(), method:'POST', autocomplete:false, class:'form form-horizontal',
@@ -122,17 +103,19 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
       #{f.hidden 'hours', value:selecteSubItem.hours /}
          #{f.hidden 'minutes', value:selecteSubItem.minutes /}
     
+      *{
       #{if report.containsProblems() }
-       #{alert color:'info'}
-         <p> La richiesta contiene errori e non può essere completata. </p>
-         <p> E' comunque possibile forzare l'inserimento <strong>selezionando 
-         il codice specifico</strong> e cliccando su Salva. Non verranno effettuati controlli di integrità dei dati inseriti.
-         </p>
-       #{/alert}
-       #{if !selecteSubItem.isAutomatic() }
-            #{f.checkbox 'forceInsert', value:forceInsert /}
-       #{/if}
-	   #{/if}
+	       #{alert color:'info'}
+	         <p> La richiesta contiene errori e non può essere completata. </p>
+	         <p> E' comunque possibile forzare l'inserimento <strong>selezionando 
+	         il codice specifico</strong> e cliccando su Salva. Non verranno effettuati controlli di integrità dei dati inseriti.
+	         </p>
+	       #{/alert}
+	       #{if !selecteSubItem.isAutomatic() }
+	            #{f.checkbox 'forceInsert', value:forceInsert /}
+	       #{/if}
+	  #{/if}
+	  }*
 	 
 	   #{b.buttons center:true}
          #{b.submit 'Inserisci'/}

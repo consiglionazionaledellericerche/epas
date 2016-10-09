@@ -17,11 +17,11 @@ public class AbsenceError {
   public AbsenceProblem absenceProblem;
   public Set<Absence> conflictingAbsences;     //le assenze che conflittano per lo stesso problem
   
-  public String toString() {
-    return MoreObjects.toStringHelper(AbsenceError.class)
-    .add("date", absence.getAbsenceDate())
-    .add("code", absence.absenceType.code)
-    .add("problem", absenceProblem)
-    .toString();
-  }
+//  public String toString() {
+//    return MoreObjects.toStringHelper(AbsenceError.class)
+//    .add("date", absence.getAbsenceDate())
+//    .add("code", absence.absenceType.code)
+//    .add("problem", absenceProblem)
+//    .toString();
+//  }
 }

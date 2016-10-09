@@ -1,6 +1,8 @@
 package dao.absences;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -34,7 +36,9 @@ import org.joda.time.LocalDate;
 import play.db.jpa.JPA;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 
 import javax.persistence.EntityManager;
 
@@ -166,6 +170,24 @@ public class AbsenceComponentDao extends DaoBase {
         .leftJoin(groupAbsenceType.previousGroupChecked).fetch()
         .list(groupAbsenceType);
   }
+  
+  public GroupAbsenceType firstGroupOfChain(GroupAbsenceType groupAbsenceType) {
+    GroupAbsenceType group = groupAbsenceType;
+    List<GroupAbsenceType> all = allGroupAbsenceType();
+    boolean changed = true;
+    while (changed) {
+      changed = false;
+      for (GroupAbsenceType previous : all) {
+        if (previous.nextGroupToCheck != null 
+            && previous.nextGroupToCheck.equals(group)) {
+          group= previous;
+          changed = true;
+        }
+      }
+    }
+    return group;
+  }
+  
   
   public List<GroupAbsenceType> groupAbsenceTypeOfPattern(GroupAbsenceTypePattern pattern) {
     QGroupAbsenceType groupAbsenceType = QGroupAbsenceType.groupAbsenceType;
@@ -337,5 +359,43 @@ public class AbsenceComponentDao extends DaoBase {
         .list(groupAbsenceType);
     
   }
-
+  
+  /**
+   * Ordina per data tutte le liste di assenze in una unica lista.
+   * @param absences
+   * @return
+   */
+  public List<Absence> orderAbsences(List<Absence>... absences) {
+    SortedMap<LocalDate, Set<Absence>> map = Maps.newTreeMap();
+    for (List<Absence> list : absences) {
+      for (Absence absence : list) {
+        Set<Absence> set = map.get(absence.getAbsenceDate());
+        if (set == null) {
+          set = Sets.newHashSet();
+          map.put(absence.getAbsenceDate(), set);
+        }
+        set.add(absence);
+      }
+    }
+    List<Absence> result = Lists.newArrayList();
+    for (Set<Absence> set : map.values()) {
+      result.addAll(set);
+    }
+    return result;
+  }
+  
+  public Map<LocalDate, Set<Absence>> mapAbsences(List<Absence> absences, Map<LocalDate, Set<Absence>> map) {
+    if (map == null) {
+      map = Maps.newHashMap();
+    }
+    for (Absence absence : absences) {
+      Set<Absence> set = map.get(absence);
+      if (set == null) {
+        set = Sets.newHashSet();
+        map.put(absence.getAbsenceDate(), set);
+      }
+      set.add(absence);
+    }
+    return map;
+  }
 }

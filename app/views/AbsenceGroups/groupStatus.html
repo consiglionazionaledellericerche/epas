@@ -4,32 +4,62 @@
 
 <div class="container">
 
-#{title title:absenceEngine.person.fullname + ' - Controllo assenze con limiti e completamenti' /}
+#{title title:periodChain.person.fullname + ' - Controllo assenze con limiti e completamenti' /}
   
      #{form action:@AbsenceGroups.changeGroupStatus(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit'}
-       #{f.hidden 'person.id', value:absenceEngine.person.id /}
+       #{f.hidden 'person.id', value:periodChain.person.id /}
        #{f.date 'date', value:date.format() /}     
-       #{f.selectModel 'groupAbsenceType', items:groups, value:groupAbsenceType /}
-     #{/form} 
+
+       *{ TODO: questa select mode fa fattorizzata ora è una copia di _selectGroup }*
+       
+       #{f.selectModel 'groupAbsenceType', label:'Tipologia Assenza', personalizeItems:true}
+        <option></option>      
+        *{ same priority }*
+        #{list absenceRequestForm.categoriesWithSamePriority.values(), as:'categoryList'}
+         *{ same category }*
+         #{list categoryList, as:'category'}
+           <optgroup label="${category.categoryType.name}">
+           #{list category.items, as:'groupAbsenceTypeItem'}
+	         <option value="${groupAbsenceTypeItem.groupAbsenceType.id}"
+	          #{if groupAbsenceTypeItem.selected} selected #{/if}> ${groupAbsenceTypeItem.getLabel()} </option>
+  	       #{/list}
+  	       </optgroup>
+  	     #{/list}
+  	    #{/list}
+       #{/f.selectModel}
+   
+   #{/form}
     
     
-  <a class="btn btn-primary" href="@{Stampings.personStamping(absenceEngine.person.id, date.year, date.monthOfYear)}">Torna alle timbrature</a>
+  <a class="btn btn-primary" href="@{Stampings.personStamping(periodChain.person.id, date.year, date.monthOfYear)}">Torna alle timbrature</a>
     
-  #{if absenceEngine.report.containsCriticalProblems() }
-  #{alert color:'danger'}
-    <p>Impossibile visualizzare la situazione. Effettuare una segnalazione.</p>
-  #{/alert}
+  #{if periodChain.containsCriticalErrors()}
+    #{alert color:'danger'}
+      <p>Impossibile visualizzare la situazione. Effettuare una segnalazione.</p>
+    #{/alert}
+  #{/if}
+  #{if periodChain.childIsMissing()}
+    #{alert color:'danger'}
+      <p>Impossibile visualizzare la situazione. Figlio non presente in anagrafica o fuori età.</p>
+    #{/alert}
   #{/if}
   
-  
-  #{list items:absenceEngine.periodChain.periods, as:'absencePeriod' }
+  #{list items:periodChain.periods, as:'absencePeriod' }
+
+    
 
     #{alert color:'info'}
       <strong>Gruppo</strong> ${absencePeriod.groupAbsenceType.description}<br>
       <strong>Tipo periodo</strong> &{absencePeriod.groupAbsenceType.periodType} <br>
       <strong>Validità periodo</strong> ${absencePeriod.from.format()} - ${absencePeriod.to.format()}
     #{/alert}
-
+    
+    #{if absencePeriod.errorsBox.containsCriticalErrors() }
+      <p>ci sono errori critici. TODO: elencarli</p>
+    #{/if}
+    #{if absencePeriod.errorsBox.containsAbsencesErrors() }
+      <p>ci sono errori legati alle assenze. TODO: elencarli</p>
+    #{/if}
 
      <table class="table table-condensed table-bordered">
       <tr>
@@ -41,54 +71,17 @@
         <th>Completamento<br>Assenza</th>
         <th>Completamento<br>Residuo<br></th>
       </tr>
-      #{list items:absencePeriod.daysStatus.values(), as:'dayStatus'}
-      #{list items:dayStatus.buildDayRows(), as:'rowRecap' }
-        <tr #{if dayStatus.complationCompromisedInThisDay()} class="bg-danger" #{/if}
-            #{elseif dayStatus.complationCompromised()} class="bg-info" #{/elseif}>
+      
+      #{list items:absencePeriod.daysInPeriod.values(), as:'dayInPeriod'}
+      #{list items:dayInPeriod.allTemplateRows(), as:'rowRecap' }
+        <tr>
           <td>
             #{if rowRecap.date}
               ${rowRecap.date.format()}
-              #{if dayStatus.complationCompromisedInThisDay()}
-                <i class="fa fa-fire-extinguisher" aria-hidden="true"></i> 
-              #{/if}
             #{/if}  
           </td>
           <td>
-              #{if !rowRecap.absence.troubles.empty }
-		        <i class="fa fa-exclamation-triangle text-danger" webui-popover-hover data-url="#containError${rowRecap.absence.id}"></i>
-		      #{/if}
-		      <div class="webui-popover-content" id="containError${rowRecap.absence.id}">
-                #{list items:rowRecap.absence.troubles, as:'trouble'}
-                  <strong>&{trouble.trouble}</strong><br>
-                #{/list}
-                #{if rowRecap.missingReplacing }
-                <p> 
-                  #{alert color:'info'}
-                  Il codice di rimpiazzamento da inserire è
-                  <span class="label label-default">${rowRecap.missingReplacing.code}</span>
-                  #{form action:@AbsenceGroups.addReplacing(), method:'POST', autocomplete:false, class:'form form-horizontal'}
-                    #{f.hidden 'date', value:dayStatus.date.format() /}
-                    #{f.hidden 'person.id', value:absenceEngine.person.id /}
-                    #{f.hidden 'groupAbsenceType.id', value:absencePeriod.groupAbsenceType.id /}
-                    #{f.hidden 'absenceType.id', value:rowRecap.missingReplacing.id /}
-                    #{b.submit 'Aggiungi'/}
-                  #{/form}
-	              #{/alert}  
-                </p>
-                #{/if}
-                
-                #{alert color:'danger'}
-                #{form action:@AbsenceGroups.delete(), method:'POST', autocomplete:false,
-		          class:'form form-horizontal' }
-		          #{f.hidden 'absence.id', value:rowRecap.absence.id /}
-		          #{f.hidden 'groupAbsenceType.id', value:absencePeriod.groupAbsenceType.id /}
-	    		  #{b.submit 'Elimina', color:'danger', fa:'trash' /}
-	            #{/form}
-	            #{/alert}
-	            
-              </div>
-              #{absences.absence-popover absence:rowRecap.absence, groupSelected:absencePeriod.groupAbsenceType /}
-			  	                
+	        #{absences.absence-popover absence:rowRecap.absence, groupSelected:absencePeriod.groupAbsenceType /}
           </td>
           <td>${rowRecap.usableLimit}</td>
           <td>${rowRecap.usableTaken}</td>
@@ -98,8 +91,13 @@
         </tr>
       #{/list}
       #{/list}
+
       </table>
       
+      
+      
   #{/list}
+  
+
     
 </div>
