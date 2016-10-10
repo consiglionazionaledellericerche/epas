@@ -18,10 +18,10 @@ import org.testng.collections.Lists;
 import java.util.List;
 
 public enum EpasParam {
-  
+
   //#######################################
   // GENERAL PARAMS
-  
+
   ABSENCES_FOR_EMPLOYEE("absences_for_employee",
       EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
@@ -95,7 +95,7 @@ public enum EpasParam {
       EpasParamValueType.formatValue(""),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
-  
+
   /**
    * Nuovo parametro per consentire/inibire la possibilità del dipendente di gestirsi 
    * l'orario di lavoro fuori sede.
@@ -149,7 +149,7 @@ public enum EpasParam {
 
   //#######################################
   // PERIODIC PARAMS
-  
+
   MATERNITY_PERIOD("maternity_period",
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.BOOLEAN,
@@ -217,11 +217,11 @@ public enum EpasParam {
   public enum EpasParamTimeType {
     GENERAL, YEARLY, PERIODIC;
   }
-  
+
   public enum RecomputationType {
     DAYS, RESIDUAL_HOURS, RESIDUAL_MEALTICKETS;
   }
-  
+
   /**
    * Enumerato con i tipi di valori che può assumere un parametro di configurazione.
    * @author alessandro
@@ -231,38 +231,42 @@ public enum EpasParam {
 
     LOCALTIME, LOCALTIME_INTERVAL, LOCALDATE,  DAY_MONTH, MONTH,  
     EMAIL, IP_LIST, INTEGER, BOOLEAN;
-    
+
     public static class LocalTimeInterval {
       public LocalTime from;
       public LocalTime to;
+      
       // TODO: validation
       public LocalTimeInterval(LocalTime from, LocalTime to) {
         this.from = from;
         this.to = to;
       }
+      
       @Override
       public String toString() {
         return formatValue(this);
       }
     }
-    
+
     public static class IpList {
       public List<String> ipList;
       // TODO: validation
+      
       public IpList(List<String> ipList) { 
         this.ipList = ipList;
       }
+      
       @Override
       public String toString() {
         return formatValue(this);
       }
     }
-    
-    public final static String DAY_MONTH_SEPARATOR = "/";
-    public final static String LOCALTIME_INTERVAL_SEPARATOR = "-";
-    public final static String LOCALTIME_FORMATTER = "HH:mm";
-    public final static String IP_LIST_SEPARATOR = ", ";
-    
+
+    public static final String DAY_MONTH_SEPARATOR = "/";
+    public static final String LOCALTIME_INTERVAL_SEPARATOR = "-";
+    public static final String LOCALTIME_FORMATTER = "HH:mm";
+    public static final String IP_LIST_SEPARATOR = ", ";
+
     /**
      * Converte il tipo primitivo nella formattazione string.
      * @param valueType
@@ -277,37 +281,37 @@ public enum EpasParam {
       if (value instanceof Boolean) {
         return value.toString();
       }
-      
+
       if (value instanceof Integer) {
         return value.toString();
       }
-      
+
       if (value instanceof LocalTime) {
         return ((LocalTime)value).toString(LOCALTIME_FORMATTER);
       }
-      
+
       if (value instanceof LocalDate) {
         return ((LocalDate)value).toString();
       }
-      
+
       if (value instanceof LocalTimeInterval) {
         return formatValue(((LocalTimeInterval)value).from) 
             + LOCALTIME_INTERVAL_SEPARATOR 
             + formatValue(((LocalTimeInterval)value).to);  
       }
-      
+
       if (value instanceof MonthDay) {
         return ((MonthDay)value).getDayOfMonth() + DAY_MONTH_SEPARATOR 
             + ((MonthDay)value).getMonthOfYear();  
       }
-      
+
       if (value instanceof IpList) {
         return Joiner.on(IP_LIST_SEPARATOR).join(((IpList)value).ipList);
       }
-      
+
       return null;
     }
-    
+
     /**
      * Converte il valore in oggetto.
      * @param type
@@ -316,42 +320,42 @@ public enum EpasParam {
      */
     public static Object parseValue(final EpasParamValueType type, final String value) {
       try {
-      switch (type) {
-        case LOCALDATE:
-          return new LocalDate(value);
-        case LOCALTIME:
-          return LocalTime.parse(value, DateTimeFormat.forPattern(LOCALTIME_FORMATTER));
-        case LOCALTIME_INTERVAL:
-              LocalTimeInterval interval = new LocalTimeInterval(
-              (LocalTime)parseValue(LOCALTIME, value.trim().split(LOCALTIME_INTERVAL_SEPARATOR)[0]),
-              (LocalTime)parseValue(LOCALTIME, value.trim().split(LOCALTIME_INTERVAL_SEPARATOR)[1]));
-              if (interval.to.isBefore(interval.from)) {
-                return null;
-              } else {
-                return interval;
-              }
-        case DAY_MONTH:
-          return new MonthDay(
-              new Integer(value.split(DAY_MONTH_SEPARATOR)[1]), 
-              new Integer(value.split(DAY_MONTH_SEPARATOR)[0]));
-        case MONTH:
-          return new Integer(value);
-        case EMAIL:
-          return value;
-        case IP_LIST:
-          return new IpList(Splitter.on(IP_LIST_SEPARATOR).splitToList(value));
-        case INTEGER:
-          return new Integer(value);
-        case BOOLEAN:
-          return new Boolean(value);
-      }
+        switch (type) {
+          case LOCALDATE:
+            return new LocalDate(value);
+          case LOCALTIME:
+            return LocalTime.parse(value, DateTimeFormat.forPattern(LOCALTIME_FORMATTER));
+          case LOCALTIME_INTERVAL:
+            LocalTimeInterval interval = new LocalTimeInterval(
+                (LocalTime)parseValue(LOCALTIME, value.trim().split(LOCALTIME_INTERVAL_SEPARATOR)[0]),
+                (LocalTime)parseValue(LOCALTIME, value.trim().split(LOCALTIME_INTERVAL_SEPARATOR)[1]));
+            if (interval.to.isBefore(interval.from)) {
+              return null;
+            } else {
+              return interval;
+            }
+          case DAY_MONTH:
+            return new MonthDay(
+                new Integer(value.split(DAY_MONTH_SEPARATOR)[1]), 
+                new Integer(value.split(DAY_MONTH_SEPARATOR)[0]));
+          case MONTH:
+            return new Integer(value);
+          case EMAIL:
+            return value;
+          case IP_LIST:
+            return new IpList(Splitter.on(IP_LIST_SEPARATOR).splitToList(value));
+          case INTEGER:
+            return new Integer(value);
+          case BOOLEAN:
+            return new Boolean(value);
+        }
       } catch(Exception e) {
         return null;
       }
       return null;
     }
   }
-  
+
 
 
 

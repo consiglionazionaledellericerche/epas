@@ -23,6 +23,7 @@ public class CancellazioneRigaFormazione {
   public static class DropItem {
     public int id;
   }
+  
   /**
    * Constructor.
    * @param certification

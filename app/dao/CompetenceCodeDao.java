@@ -106,6 +106,7 @@ public class CompetenceCodeDao extends DaoBase {
     final JPQLQuery query = getQueryFactory().from(group).where(group.id.eq(competenceCodeGroupId));
     return query.singleResult(group);
   }
+  
   /**
    * 
    * @return la lista di tutti i codici di competenza che non appartengono ad alcun gruppo.

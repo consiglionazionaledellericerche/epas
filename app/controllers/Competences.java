@@ -169,6 +169,7 @@ public class Competences extends Controller {
     manageCompetenceCode();
 
   }
+  
   /**
    * Nuovo gruppo di codici competenza.
    */
@@ -439,6 +440,7 @@ public class Competences extends Controller {
     }
     render("@editCompetence", competence, office, year, month, person);
   }
+  
   /**
    * genera la form di inserimento per le competenze.
    * @param competenceId l'id della competenza da aggiornare.

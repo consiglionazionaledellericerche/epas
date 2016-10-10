@@ -32,14 +32,24 @@ public class HistoricalDao {
   @Inject
   private static Provider<EntityManager> emp;
 
+  /**
+   * @param id the id to search
+   * @return the Revision object
+   */
   public static Revision getRevision(int id) {
     return Verify.verifyNotNull(queryFactory.from(QRevision.revision)
         .where(QRevision.revision.id.eq(id))
         .singleResult(QRevision.revision));
   }
 
-  public static <T extends BaseModel> T valueAtRevision(Class<T> cls, long id,
-                                                 int revisionId) {
+  
+  /**
+   * @param cls Entity Class to search
+   * @param id the entity primary key
+   * @param revisionId the revision id
+   * @return the entity instance at the specified revision.
+   */
+  public static <T extends BaseModel> T valueAtRevision(Class<T> cls, long id, int revisionId) {
 
     final T current = Verify.verifyNotNull(emp.get().find(cls, id));
     final T history = cls.cast(auditReader.get().createQuery()
@@ -58,6 +68,11 @@ public class HistoricalDao {
     return lastRevisions.get(0);
   }
 
+  /**
+   * @param cls Entity Class to search
+   * @param id the entity primary key
+   * @return List of revisions for the specified entity instance.
+   */
   @SuppressWarnings("unchecked")
   public static List<HistoryValue> lastRevisionsOf(Class<? extends BaseModel> cls, long id) {
     return FluentIterable.from(auditReader.get().createQuery()
@@ -68,8 +83,10 @@ public class HistoricalDao {
         .getResultList()).transform(HistoryValue.fromTuple(cls)).toList();
   }
 
-  
+
   /**
+   * @param cls Entity Class to search
+   * @param id the entity primary key
    * @return la versione precedente del istanza individuata da cls e id.
    */
   public static <T extends BaseModel> T previousRevisionOf(Class<T> cls, long id) {

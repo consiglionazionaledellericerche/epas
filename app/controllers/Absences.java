@@ -907,8 +907,8 @@ public class Absences extends Controller {
         .getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode());
 
     if (ferCode.isPresent() && ferCode.get() == absenceType) {
-      flash.error("Utilizzare i codici specifici d'assenza " +
-          "per l'inserimento delle ferie (31, 32, 94)");
+      flash.error("Utilizzare i codici specifici d'assenza "
+          + "per l'inserimento delle ferie (31, 32, 94)");
       int year = Integer.parseInt(session.get("yearSelected"));
       int month = Integer.parseInt(session.get("monthSelected"));
       forceAbsences(year, month, null);

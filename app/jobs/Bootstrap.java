@@ -48,9 +48,9 @@ public class Bootstrap extends Job<Void> {
   static FixEmployeesPermission fixEmployeesPermission;
 
   //Aggiunto qui perché non più presente nella classe Play dalla versione >= 1.4.3
-  public static boolean runingInTestMode(){
+  public static boolean runingInTestMode() {
     return Play.id.matches("test|test-?.*");
-}
+  }
 
   public void doJob() throws IOException {
 
