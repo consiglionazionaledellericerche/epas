@@ -108,20 +108,18 @@ public class AbsenceGroups extends Controller {
 
         insertReport = absenceService.insert(person, groupAbsenceType, from, to, 
             absenceType, justifiedType, hours, minutes, true);
-        if (!insertReport.criticalErrors.isEmpty()) {
-          flash.error("L'operazione è stata interrotta a causa di errori...");
-        } else {
-          for (Absence absence : insertReport.absencesToPersist) {
-            PersonDay personDay = personDayManager
-                .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
-            absence.personDay = personDay;
-            personDay.absences.add(absence);
-            absence.save(); 
-            personDay.save();
-
-          }
-        }
       }
+      for (Absence absence : insertReport.absencesToPersist) {
+        PersonDay personDay = personDayManager
+            .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
+        absence.personDay = personDay;
+        personDay.absences.add(absence);
+        absence.save(); 
+        personDay.save();
+
+      }
+
+      
       JPA.em().flush();
       consistencyManager.updatePersonSituation(person.id, from);
       flash.success("Codici di assenza inseriti.");
@@ -364,6 +362,7 @@ public class AbsenceGroups extends Controller {
           templateRow.absence = absenceResponse.getAbsenceAdded();
           templateRow.groupAbsenceType = groupAbsenceType;
           insertReport.insertTemplateRows.add(templateRow);
+          insertReport.absencesToPersist.add(templateRow.absence);
           continue;
         }
         TemplateRow templateRow = new TemplateRow();

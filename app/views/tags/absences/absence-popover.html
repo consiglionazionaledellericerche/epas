@@ -25,7 +25,7 @@
    " webui-popover-hover data-url="#${id}">${_absence.absenceType.code}</span>
    }*
    <span class="
-   #{if templateUtility.isTakableOnly(_absence.absenceType, _groupSelected)} text-warning #{/if}
+   #{if templateUtility.isTakableOnly(_absence.absenceType, _groupSelected)} text-success #{/if}
    #{elseif templateUtility.isReplacingCode(_absence.absenceType, _groupSelected)} text-default  #{/elseif}
    #{elseif templateUtility.isComplationCode(_absence.absenceType, _groupSelected)} text-success #{/elseif}
    #{else} text-info #{/else} 

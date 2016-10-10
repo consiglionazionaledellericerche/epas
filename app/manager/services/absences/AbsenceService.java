@@ -219,6 +219,41 @@ public class AbsenceService {
     public List<Absence> absencesToPersist = Lists.newArrayList();
     
     public List<String> warningsPreviousVersion = Lists.newArrayList();
+    
+    public int howManySuccess() {
+      return insertTemplateRows.size() - howManyReplacing() - howManyError() - howManyIgnored();
+    }
+    
+    public int howManyReplacing() {
+      int result = 0;
+      for (TemplateRow templateRow : insertTemplateRows) {
+        if (templateRow.isReplacingRow) {
+          result++;
+        }
+      }
+      return result;
+    }
+    
+    public int howManyIgnored() {
+      int result = 0;
+      for (TemplateRow templateRow : insertTemplateRows) {
+        if (templateRow.onlyNotOnHoliday()) {
+          result++;
+        }
+      }
+      return result;
+    }
+    
+    public int howManyError() {
+      int result = 0;
+      for (TemplateRow templateRow : insertTemplateRows) {
+        if (!templateRow.absenceErrors.isEmpty() && !templateRow.onlyNotOnHoliday()) {
+          result++;
+        }
+      }
+      return result;
+    }
+    
   }
 //  
 //  public AbsencesReport forceInsert(Person person, GroupAbsenceType groupAbsenceType, LocalDate from,

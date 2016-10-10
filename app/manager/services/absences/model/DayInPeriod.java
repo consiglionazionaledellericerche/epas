@@ -11,6 +11,7 @@ import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.GroupAbsenceType;
+import models.absences.AbsenceTrouble.AbsenceProblem;
 
 import org.joda.time.LocalDate;
 
@@ -91,6 +92,7 @@ public class DayInPeriod {
     public Absence absence;
     public GroupAbsenceType groupAbsenceType;
     public List<AbsenceError> absenceErrors = Lists.newArrayList();
+    public List<AbsenceError> absenceWarnings = Lists.newArrayList();
 
     public boolean usableColumn = false;
     public String usableLimit;
@@ -100,6 +102,14 @@ public class DayInPeriod {
     public String consumedComplationBefore;
     public String consumedComplationAbsence;
     public String consumedComplationNext;
+    
+    public boolean isReplacingRow = false;
+    
+    public boolean onlyNotOnHoliday() {
+      return absenceErrors.size() == 1 
+          && absenceErrors.iterator().next().absenceProblem.equals(AbsenceProblem.NotOnHoliday);
+    }
+    
   }
   
   
@@ -165,12 +175,15 @@ public class DayInPeriod {
     takenRow.date = takenAbsence.absence.getAbsenceDate();
     takenRow.absence = takenAbsence.absence;
     takenRow.groupAbsenceType = absencePeriod.groupAbsenceType;
+    takenRow.absenceErrors = absencePeriod.errorsBox.absenceErrors(takenRow.absence);
     if (absencePeriod.isTakable() && !absencePeriod.isTakableNoLimit()) {
       takenRow.usableColumn = true;
-      takenRow.usableLimit = formatAmount(takenAbsence.periodResidualBefore(), takenAbsence.amountType);
-      takenRow.usableTaken = formatAmount(takenAbsence.takenAmount, takenAbsence.amountType);
+      if (!takenRow.onlyNotOnHoliday()) {
+        takenRow.usableLimit = formatAmount(takenAbsence.periodResidualBefore(), takenAbsence.amountType);
+        takenRow.usableTaken = formatAmount(takenAbsence.takenAmount, takenAbsence.amountType);
+      }
     }
-    takenRow.absenceErrors = absencePeriod.errorsBox.absenceErrors(takenRow.absence);
+    
     return takenRow;
   }
   
@@ -179,19 +192,23 @@ public class DayInPeriod {
     complationRow.date = complationAbsence.absence.getAbsenceDate();
     complationRow.absence = complationAbsence.absence;
     complationRow.groupAbsenceType = absencePeriod.groupAbsenceType;
+    complationRow.absenceErrors = absencePeriod.errorsBox.absenceErrors(complationRow.absence);
     complationRow.usableColumn = true;
     complationRow.complationColumn = true;
-    complationRow.usableLimit = formatAmount(takenComplation.periodResidualBefore(), takenComplation.amountType);
-    complationRow.usableTaken = formatAmount(takenComplation.takenAmount, takenComplation.amountType);
+    if (!complationRow.onlyNotOnHoliday()) {
+      complationRow.usableLimit = formatAmount(takenComplation.periodResidualBefore(), takenComplation.amountType);
+      complationRow.usableTaken = formatAmount(takenComplation.takenAmount, takenComplation.amountType);
+    }
     complationRow.consumedComplationAbsence = formatAmount(complationAbsence.consumedComplation, complationAbsence.amountType);
     complationRow.consumedComplationBefore = formatAmount(complationAbsence.residualComplationBefore, complationAbsence.amountType);
-    complationRow.absenceErrors = absencePeriod.errorsBox.absenceErrors(complationRow.absence);
+    
     return complationRow;
   }
   
   private TemplateRow buildReplacing(TakenAbsence takenComplation) {
     TemplateRow replacingRow = new TemplateRow();
     replacingRow.date = date;
+    replacingRow.isReplacingRow = true;
     replacingRow.usableColumn = true;
     replacingRow.complationColumn = true;
     Absence absence = new Absence();
