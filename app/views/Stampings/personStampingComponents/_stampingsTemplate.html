@@ -39,6 +39,7 @@
       #{list items:stampingTemplate.stampModificationTypes, as:'smt'}
         <p><strong>${smt.code}</strong> ${smt.description}</p>
       #{/list}
+      #{if stampingTemplate.stamping.note}<strong>note: </strong><em>${stampingTemplate.stamping.note}</em></p>#{/if}
       </div>
     #{/if}
     #{/list}
