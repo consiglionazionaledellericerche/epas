@@ -55,12 +55,18 @@ public enum NotificationSubject {
         return toUrl("Messages.show", params);
       case STAMPING:
         final Stamping stamping = Stamping.findById(referenceId);
+        if (stamping == null) {
+          return null;
+        }
         params.put("month", stamping.date.getMonthOfYear());
         params.put("year", stamping.date.getYear());
         params.put("personId", stamping.personDay.person.id);
         return toUrl("Stampings.personStamping", params);
       case ABSENCE:
         final Absence absence = Absence.findById(referenceId);
+        if (absence == null) {
+          return null;
+        }
         params.put("month", absence.personDay.date.getMonthOfYear());
         params.put("year", absence.personDay.date.getYear());
         params.put("personId", absence.personDay.person.id);

@@ -47,7 +47,7 @@ public class Notification extends MutableModel {
 
   @Transient
   public boolean isRedirect() {
-    return subject.isRedirect();
+    return subjectId != null && getUrl() != null && subject.isRedirect();
   }
 
   @Transient
