@@ -52,7 +52,10 @@ public class AbsenceTrouble extends BaseModel {
     NoChildExist(false),
     
     //Implementazione
-    ImplementationProblem(true);
+    ImplementationProblem(true),
+    
+    //Warnings
+    AllDayInReperibility(false);
 
     public boolean isImplementationProblem;
     

@@ -34,16 +34,18 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
       #{alert color:'danger'}
        <p><strong>Elenco degli errori riscontrati</strong></p>
        #{list items:insertReport.criticalErrors, as:'criticalError'}
-         <br>${criticalError.criticalProblem}
+         <br>&{criticalError.criticalProblem}
        
        #{/list}
       #{/alert}
      #{/if}
    
-     <table class="table table-condensed table-bordered">
+     <table class="table table-condensed table-bordered" #{if insertReport.insertTemplateRows.size() > 10} datatable-small #{/if}>
+      <thead>
       <tr>
         <th>Data</th>
         <th>Assenza</th>
+        <th>Esito</th>
         #{if insertReport.usableColumn}
           <th>Limite<br>Utilizzabile</th>
           <th>Limite<br>Consumato</th>
@@ -53,20 +55,47 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
           <th>Completamento<br>Assenza</th>
           <th>Completamento<br>Residuo<br></th>
         #{/if}
-        <th>Errori</th>
+        
       </tr>
-     
-     #{list items:insertReport.insertTemplateRows, as:'templateRow' }
-        <tr  #{if templateRow.absenceErrors} class="bg-danger"#{/if}
-             #{if templateRow.absenceErrors.empty} class="bg-success" #{/if}>
-          <td> 
-            #{if templateRow.date} ${templateRow.date.format()} #{/if}
+      </thead>
+      <tbody>
+      #{list items:insertReport.insertTemplateRows, as:'templateRow' }
+        <tr  
+             #{if templateRow.onlyNotOnHoliday()} class="text-muted" #{/if}
+             #{elseif templateRow.absenceErrors} class="bg-danger"#{/elseif}
+             #{elseif templateRow.absenceErrors.empty} *{ class="bg-success" }* #{/elseif}>
+          <td data-order="${templateRow.date}"> 
+            ${templateRow.date.format()}
           </td>
           <td>
             #{if templateRow.absence}
 	          #{absences.absence-popover absence:templateRow.absence, groupSelected:templateRow.groupAbsenceType /}
 	        #{/if}
           </td>
+          
+          <td>
+            #{if templateRow.onlyNotOnHoliday()} Giorno festivo ignorato #{/if}
+            #{elseif templateRow.absenceErrors}
+
+              *{ popover degli errori dell'assenza }*
+              %{id = insertReport.insertTemplateRows.indexOf(templateRow); }%
+              <span webui-popover-hover data-url="#${id}">
+                <i class="fa fa-times text-danger" aria-hidden="true"></i>
+              </span>
+              <div class="webui-popover-content" id="${id}"> 
+              #{list items:templateRow.absenceErrors, as:'absenceError'}
+                &{absenceError.absenceProblem} 
+                #{list items:absenceError.conflictingAbsences, as:'conflictingAbsence'} 
+                  #{absences.absence-popover absence:conflictingAbsence /}
+                #{/list}
+              #{/list}
+              </div>
+              
+            #{/elseif}
+            #{else} <i class="fa fa-check text-success" aria-hidden="true"></i> #{/else}
+            
+          </td>
+          
           #{if insertReport.usableColumn}
             <td>${templateRow.usableLimit}</td>
             <td>${templateRow.usableTaken}</td>
@@ -76,19 +105,47 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
             <td>${templateRow.consumedComplationAbsence}</td>
             <td>${templateRow.consumedComplationNext}</td>
           #{/if}
-          <td>
-            #{list items:templateRow.absenceErrors, as:'absenceError'}
-              <i class="fa fa-times text-danger" aria-hidden="true"></i>
-              ${absenceError.absenceProblem} 
-              #{list items:absenceError.conflictingAbsences, as:'conflictingAbsence'} 
-                #{absences.absence-popover absence:conflictingAbsence /}
-              #{/list}
-            #{/list}
-          </td>
+          
         </tr>
-     #{/list}
-
+      #{/list}
+      </tbody>
       </table>
+      
+      <p>
+        #{if insertReport.howManySuccess() == 1}
+          Verrà inserito <strong>1</strong> codice di assenza.
+        #{/if}
+        #{elseif insertReport.howManySuccess() > 1}
+          Verranno inseriti <strong>${insertReport.howManySuccess()}</strong> codici di assenza.
+        #{/elseif}
+        #{else}
+          Non verrà inserito alcun codice di assenza.
+        #{/else}
+        
+        #{if insertReport.howManyReplacing() == 1}
+          Verrà inserito <strong>1</strong> codice di rimpiazzamento.
+        #{/if}
+        #{elseif insertReport.howManyReplacing() > 1 }
+          Verranno inseriti <strong>${insertReport.howManyReplacing()}</strong> codici di rimpiazzamento.
+        #{/elseif}
+       </p> 
+       <p>
+         #{if insertReport.howManyIgnored() == 1}
+          Verrà ignorato <strong>1</strong> giorno per festività. 
+         #{/if}
+         #{elseif insertReport.howManyIgnored() > 1}
+          Verranno ignorati <strong>${insertReport.howManyIgnored()}</strong> giorni per festività. 
+         #{/elseif}
+       </p>
+       <p>
+       #{if insertReport.howManyError() == 1}
+         <strong>1</strong> giorno verrà escluso dall'inserimento a causa di errori.
+       #{/if}
+       #{if insertReport.howManyError() > 1}
+         <strong>${insertReport.howManyError()}</strong> verranno esclusi dall'inserimento a causa di errori.
+       #{/if}
+       </p>
+      
    
    #{/if}   
   

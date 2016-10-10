@@ -23,14 +23,17 @@ import java.util.Set;
 public class ErrorsBox {
   
   private Map<Absence, Map<AbsenceProblem, AbsenceError>> absenceErrorsSuperMap = Maps.newHashMap();
+  
   private Map<CriticalProblem, List<CriticalError>> criticalErrorsMap = Maps.newHashMap();
   
+  private Map<Absence, Map<AbsenceProblem, AbsenceError>> absenceWarningsSuperMap = Maps.newHashMap();
+  
   private void addAbsenceErrorIntoMap(Absence absence, AbsenceProblem absenceProblem, 
-      Absence conflictingAsbence) {
-    Map<AbsenceProblem, AbsenceError> absenceErrors = absenceErrorsSuperMap.get(absence);
+      Absence conflictingAsbence, Map<Absence, Map<AbsenceProblem, AbsenceError>> map) {
+    Map<AbsenceProblem, AbsenceError> absenceErrors = map.get(absence);
     if (absenceErrors == null) {
       absenceErrors = Maps.newHashMap();
-      absenceErrorsSuperMap.put(absence, absenceErrors);
+      map.put(absence, absenceErrors);
     }
     AbsenceError absenceError = absenceErrors.get(absenceProblem);
     if (absenceError == null) {
@@ -44,16 +47,22 @@ public class ErrorsBox {
     if (conflictingAsbence != null) {
       absenceError.conflictingAbsences.add(conflictingAsbence);
     }
-    log.info("Aggiunto errore alla mappa {} {}", absence.toString(), absenceProblem);
+    if (map.equals(absenceErrorsSuperMap)) {
+      log.info("Aggiunto errore alla mappa {} {}", absence.toString(), absenceProblem);  
+    }
+    if (map.equals(absenceWarningsSuperMap)) {
+      log.info("Aggiunto warning alla mappa {} {}", absence.toString(), absenceProblem);
+    }
+    
   }
   
   public void addAbsenceError(Absence absence, AbsenceProblem absenceProblem) {
-    addAbsenceErrorIntoMap(absence, absenceProblem, null);
+    addAbsenceErrorIntoMap(absence, absenceProblem, null, absenceErrorsSuperMap);
   }
   
   public void addAbsenceError(Absence absence, AbsenceProblem absenceProblem, Absence conflictingAbsence) {
-    addAbsenceErrorIntoMap(absence, absenceProblem, conflictingAbsence);
-    addAbsenceErrorIntoMap(conflictingAbsence, absenceProblem, absence);
+    addAbsenceErrorIntoMap(absence, absenceProblem, conflictingAbsence, absenceErrorsSuperMap);
+    addAbsenceErrorIntoMap(conflictingAbsence, absenceProblem, absence, absenceErrorsSuperMap);
   }
   
   public void addAbsenceError(Absence absence, AbsenceProblem absenceProblem, List<Absence> conflictingAbsences) {
@@ -94,6 +103,10 @@ public class ErrorsBox {
   public void addCriticalError(LocalDate date, AbsenceType absenceType, 
       AbsenceType conflictingAbsenceType, CriticalProblem criticalProblem) {
     addCriticalErrorIntoMap(date, null, absenceType, conflictingAbsenceType, criticalProblem);
+  }
+  
+  public void addAbsenceWarning(Absence absence, AbsenceProblem absenceProblem) {
+    addAbsenceErrorIntoMap(absence, absenceProblem, null, absenceWarningsSuperMap);
   }
   
   public boolean containsCriticalErrors() {
