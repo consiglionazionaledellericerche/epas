@@ -604,6 +604,7 @@ LimitDescription.daysOfMonth =Giorni del mese
 LimitDescription.daysOfYear =Giorni dell'anno
 
 StampTypes.MOTIVI_DI_SERVIZIO= Motivi di Servizio
+StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE= Motivi di Servizio Fuori Sede
 StampTypes.VISITA_MEDICA= Visita Medica
 StampTypes.PERMESSO_SINDACALE= Permesso Sindacale
 StampTypes.INCARICO_DI_INSEGNAMENTO= Incarico di Insegnamento
