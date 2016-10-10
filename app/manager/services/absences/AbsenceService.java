@@ -8,7 +8,6 @@ import dao.absences.AbsenceComponentDao;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.AbsenceManager;
 import manager.services.absences.errors.AbsenceError;
 import manager.services.absences.errors.CriticalError;
 import manager.services.absences.model.AbsencePeriod;
@@ -170,41 +169,43 @@ public class AbsenceService {
       insertReport.criticalErrors = criticalErrors;
       return insertReport;
     }
-    
-    if (persist) {
-      // la persistenza
-      for (PeriodChain periodChain : chains) {
-        if (periodChain.successPeriodInsert != null) {
-          insertReport.absencesToPersist.add(periodChain.successPeriodInsert.attemptedInsertAbsence);
-        }
+
+    //Gli esiti sotto forma di template rows
+    List<TemplateRow> insertTemplateRows = Lists.newArrayList();
+    for (PeriodChain periodChain : chains) {
+      if (periodChain.childIsMissing()) {
+        TemplateRow templateRow = new TemplateRow();
+        templateRow.date = periodChain.date;
+        templateRow.absenceErrors.add(AbsenceError.builder().absenceProblem(AbsenceProblem.NoChildExist).build());
+        insertTemplateRows.add(templateRow);
       }
-    } else {
-      //Gli esiti sotto forma di template rows
-      List<TemplateRow> insertTemplateRows = Lists.newArrayList();
-      for (PeriodChain periodChain : chains) {
-        if (periodChain.childIsMissing()) {
-          TemplateRow templateRow = new TemplateRow();
-          templateRow.date = periodChain.date;
-          templateRow.absenceErrors.add(AbsenceError.builder().absenceProblem(AbsenceProblem.NoChildExist).build());
-          insertTemplateRows.add(templateRow);
-        }
-        for (AbsencePeriod absencePeriod : periodChain.periods) {
-          for (DayInPeriod dayInPeriod : absencePeriod.daysInPeriod.values()) {
-            insertTemplateRows.addAll(dayInPeriod.templateRowsForInsert());
-          }
-        }
-      }
-      insertReport.insertTemplateRows = insertTemplateRows;
-      
-      for (TemplateRow templateRow : insertReport.insertTemplateRows) {
-        if (templateRow.usableColumn) {
-          insertReport.usableColumn = true;
-        }
-        if (templateRow.complationColumn) {
-          insertReport.complationColumn = true;
+      for (AbsencePeriod absencePeriod : periodChain.periods) {
+        for (DayInPeriod dayInPeriod : absencePeriod.daysInPeriod.values()) {
+          insertTemplateRows.addAll(dayInPeriod.templateRowsForInsert());
         }
       }
     }
+    insertReport.insertTemplateRows = insertTemplateRows;
+
+    for (TemplateRow templateRow : insertReport.insertTemplateRows) {
+      if (templateRow.usableColumn) {
+        insertReport.usableColumn = true;
+      }
+      if (templateRow.complationColumn) {
+        insertReport.complationColumn = true;
+      }
+    }
+
+    // le assenze da persistere
+    if (persist) {
+      for (PeriodChain periodChain : chains) {
+        if (periodChain.successPeriodInsert != null) {
+          insertReport.absencesToPersist.add(periodChain
+              .successPeriodInsert.attemptedInsertAbsence);
+        }
+      }
+    }
+
     
     return insertReport;
   }
@@ -254,6 +255,38 @@ public class AbsenceService {
       return result;
     }
     
+    public int howManyWarning() {
+      int result = 0;
+      for (TemplateRow templateRow : insertTemplateRows) {
+        if (!templateRow.absenceWarnings.isEmpty()) {
+          result++;
+        }
+      }
+      return result;
+    }
+
+    public List<LocalDate> reperibilityShiftDate() {
+      List<LocalDate> dates = Lists.newArrayList(); 
+      for (TemplateRow templateRow : insertTemplateRows) {
+        if (templateRow.absence == null) {
+          continue;
+        }
+        if (!absencesToPersist.contains(templateRow.absence)) {
+          continue;
+        }
+        if (templateRow.absenceWarnings.isEmpty()) {
+          continue;
+        }
+        for (AbsenceError absenceWarning : templateRow.absenceWarnings) {
+          if (absenceWarning.absenceProblem.equals(AbsenceProblem.InReperibility) 
+              || absenceWarning.absenceProblem.equals(AbsenceProblem.InShift)
+              || absenceWarning.absenceProblem.equals(AbsenceProblem.InReperibilityOrShift)) {
+            dates.add(templateRow.absence.getAbsenceDate());
+          }
+        }
+      }
+      return dates;
+    }
   }
 //  
 //  public AbsencesReport forceInsert(Person person, GroupAbsenceType groupAbsenceType, LocalDate from,

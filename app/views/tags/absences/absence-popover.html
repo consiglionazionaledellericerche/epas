@@ -38,26 +38,26 @@
  
  <div class="webui-popover-content" id="${id}">
     
-    #{if _absence.absenceType.internalUse }
-      <p>
-        <span class="fa-stack fa-lg">
-          <i class="fa fa-paper-plane-o fa-stack-1x"></i>
-          <i class="fa fa-ban fa-stack-2x text-danger"></i>
-        </span>
-        <strong class="text-success">Il codice ${_absence.absenceType.code} è ad uso interno ePAS e non verrà inviato ad attestati.</strong>
-
-      </p>
-    #{/if}
-    #{else}
-      <p>
-        <span class="fa-stack fa-lg">
-          <i class="fa fa-paper-plane-o fa-stack-1x"></i>
-        </span>
-        <strong class="text-success">Il codice ${_absence.absenceType.code} verrà inviato ad attestati.</strong>
-
-      </p>
-           
-    #{/else}
+    #{secure.check 'Absences.edit'}    
+	    #{if _absence.absenceType.internalUse }
+	      <p>
+	        <span class="fa-stack fa-lg">
+	          <i class="fa fa-paper-plane-o fa-stack-1x"></i>
+	          <i class="fa fa-ban fa-stack-2x text-danger"></i>
+	        </span>
+	        <strong class="text-success">Il codice ${_absence.absenceType.code} è ad 
+	        uso interno ePAS e non verrà inviato ad attestati.</strong>
+	      </p>
+	    #{/if}
+	    #{else}
+	      <p>
+	        <span class="fa-stack fa-lg">
+	          <i class="fa fa-paper-plane-o fa-stack-1x"></i>
+	        </span>
+	        <strong class="text-success">Il codice ${_absence.absenceType.code} verrà inviato ad attestati.</strong>
+	      </p>
+	    #{/else}
+    #{/secure.check}
    
     #{if _person && !templateUtility.involvedGroupAbsenceType(_absence.absenceType).empty }
     <p>

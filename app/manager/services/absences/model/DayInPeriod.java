@@ -8,10 +8,10 @@ import lombok.Setter;
 import manager.services.absences.errors.AbsenceError;
 
 import models.absences.Absence;
+import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.GroupAbsenceType;
-import models.absences.AbsenceTrouble.AbsenceProblem;
 
 import org.joda.time.LocalDate;
 
@@ -176,6 +176,7 @@ public class DayInPeriod {
     takenRow.absence = takenAbsence.absence;
     takenRow.groupAbsenceType = absencePeriod.groupAbsenceType;
     takenRow.absenceErrors = absencePeriod.errorsBox.absenceErrors(takenRow.absence);
+    takenRow.absenceWarnings = absencePeriod.errorsBox.absenceWarnings(takenRow.absence);
     if (absencePeriod.isTakable() && !absencePeriod.isTakableNoLimit()) {
       takenRow.usableColumn = true;
       if (!takenRow.onlyNotOnHoliday()) {
@@ -193,6 +194,7 @@ public class DayInPeriod {
     complationRow.absence = complationAbsence.absence;
     complationRow.groupAbsenceType = absencePeriod.groupAbsenceType;
     complationRow.absenceErrors = absencePeriod.errorsBox.absenceErrors(complationRow.absence);
+    complationRow.absenceWarnings = absencePeriod.errorsBox.absenceWarnings(complationRow.absence);
     complationRow.usableColumn = true;
     complationRow.complationColumn = true;
     if (!complationRow.onlyNotOnHoliday()) {
@@ -218,7 +220,6 @@ public class DayInPeriod {
     replacingRow.groupAbsenceType = absencePeriod.groupAbsenceType;
     replacingRow.consumedComplationNext = formatAmount(complationAbsence.residualComplationAfter, 
         complationAbsence.amountType);
-    //replacingRow.absenceErrors = absencePeriod.errorsBox.absenceErrors(replacingRow.absence);
     return replacingRow;
   }
   

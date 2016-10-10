@@ -79,21 +79,27 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
 
               *{ popover degli errori dell'assenza }*
               %{id = insertReport.insertTemplateRows.indexOf(templateRow); }%
-              <span webui-popover-hover data-url="#${id}">
-                <i class="fa fa-times text-danger" aria-hidden="true"></i>
+              <span webui-popover-hover data-url="#pop${id}">
+                <em class="text-danger">Mostra i dettagli</em> <i class="fa fa-times text-danger" aria-hidden="true"></i>
               </span>
-              <div class="webui-popover-content" id="${id}"> 
+              <div class="webui-popover-content" id="pop${id}"> 
               #{list items:templateRow.absenceErrors, as:'absenceError'}
-                &{absenceError.absenceProblem} 
+                &{absenceError.absenceProblem}
                 #{list items:absenceError.conflictingAbsences, as:'conflictingAbsence'} 
-                  #{absences.absence-popover absence:conflictingAbsence /}
-                #{/list}
+                  <strong>${conflictingAbsence.absenceType.code}</strong>
+                #{/list} 
               #{/list}
               </div>
+ 
               
             #{/elseif}
             #{else} <i class="fa fa-check text-success" aria-hidden="true"></i> #{/else}
             
+            #{if templateRow.absenceWarnings, as:'absenceWarning'}
+              #{list items:templateRow.absenceWarnings, as:'absenceWarning'}
+                <span class="label label-warning">&{absenceWarning.absenceProblem}</span> 
+              #{/list}
+            #{/if}
           </td>
           
           #{if insertReport.usableColumn}
@@ -142,7 +148,7 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
          <strong>1</strong> giorno verrà escluso dall'inserimento a causa di errori.
        #{/if}
        #{if insertReport.howManyError() > 1}
-         <strong>${insertReport.howManyError()}</strong> verranno esclusi dall'inserimento a causa di errori.
+         <strong>${insertReport.howManyError()}</strong> giorni verranno esclusi dall'inserimento a causa di errori.
        #{/if}
        </p>
       

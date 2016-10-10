@@ -55,7 +55,9 @@ public class AbsenceTrouble extends BaseModel {
     ImplementationProblem(true),
     
     //Warnings
-    AllDayInReperibility(false);
+    InReperibility(false),
+    InShift(false),
+    InReperibilityOrShift(false);
 
     public boolean isImplementationProblem;
     

@@ -78,6 +78,7 @@ public class PeriodChain {
     for (AbsencePeriod absencePeriod : this.periods) {
       if (absencePeriod.isTakable()) {
         absenceTypes.addAll(absencePeriod.takenCodes);
+        absenceTypes.addAll(absencePeriod.takableCodes);
         //absenceTypes.addAll(currentAbsesncePeriod.takableComponent.get().takableCodes);
       }
       if (absencePeriod.isComplation()) {

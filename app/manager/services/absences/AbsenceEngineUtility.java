@@ -5,6 +5,8 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
+import dao.PersonReperibilityDayDao;
+import dao.PersonShiftDayDao;
 import dao.absences.AbsenceComponentDao;
 
 import it.cnr.iit.epas.DateUtility;
@@ -20,11 +22,11 @@ import models.ContractWorkingTimeType;
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
-import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
+import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
@@ -43,12 +45,18 @@ public class AbsenceEngineUtility {
   private final PersonDayManager personDayManager;
   
   private final Integer UNIT_REPLACING_AMOUNT = 1 * 100;
+  private final PersonReperibilityDayDao personReperibilityDayDao;
+  private final PersonShiftDayDao personShiftDayDao;
 
   @Inject
   public AbsenceEngineUtility(AbsenceComponentDao absenceComponentDao, 
-      PersonDayManager personDayManager) {
+      PersonDayManager personDayManager, 
+      PersonReperibilityDayDao personReperibilityDayDao,
+      PersonShiftDayDao personShiftDayDao ) {
     this.absenceComponentDao = absenceComponentDao;
     this.personDayManager = personDayManager;
+    this.personReperibilityDayDao = personReperibilityDayDao;
+    this.personShiftDayDao = personShiftDayDao;
   }
 
   
@@ -365,10 +373,20 @@ public class AbsenceEngineUtility {
     log.debug("L'assenza data={}, codice={} viene processata per i vincoli generici", 
         absence.getAbsenceDate(), absence.getAbsenceType().code);
     
+    final boolean isHoliday = personDayManager.isHoliday(person, absence.getAbsenceDate());
+    
     //Codice non prendibile nei giorni di festa ed è festa.
-    if (!absence.absenceType.consideredWeekEnd && personDayManager.isHoliday(person,
-        absence.getAbsenceDate())) {
+    if (!absence.absenceType.consideredWeekEnd && isHoliday) {
       genericErrors.addAbsenceError(absence, AbsenceProblem.NotOnHoliday);
+    } else {
+      //check sulla reperibilità
+      if (personReperibilityDayDao
+          .getPersonReperibilityDay(person, absence.getAbsenceDate()).isPresent()) {
+        genericErrors.addAbsenceWarning(absence, AbsenceProblem.InReperibility); 
+      }
+      if (personShiftDayDao.getPersonShiftDay(person, absence.getAbsenceDate()).isPresent()) {
+        genericErrors.addAbsenceWarning(absence, AbsenceProblem.InShift); 
+      }
     }
     
     //Un codice giornaliero già presente 
@@ -392,7 +410,8 @@ public class AbsenceEngineUtility {
       }
       genericErrors.addAbsenceError(absence, AbsenceProblem.AllDayAlreadyExists, oldAbsence);
     }
-    
+
+  
     //TODO:
     // Strange weekend
     

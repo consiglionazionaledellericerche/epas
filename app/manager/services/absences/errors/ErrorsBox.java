@@ -144,6 +144,14 @@ public class ErrorsBox {
     return Lists.newArrayList(absenceErrors.values());
   }
   
+  public List<AbsenceError> absenceWarnings(Absence absence) {
+    Map<AbsenceProblem, AbsenceError> absenceWarnings = absenceWarningsSuperMap.get(absence);
+    if (absenceWarnings == null) {
+      return Lists.newArrayList();
+    }
+    return Lists.newArrayList(absenceWarnings.values());
+  }
+  
   public Set<CriticalError> criticalErrors() {
     Set<CriticalError> list = Sets.newHashSet();
     for (List<CriticalError> errors : criticalErrorsMap.values()) {
