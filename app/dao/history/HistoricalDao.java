@@ -1,25 +1,30 @@
 package dao.history;
 
-import java.util.List;
+import com.google.common.base.Verify;
+import com.google.common.collect.FluentIterable;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.persistence.EntityManager;
+import com.mysema.query.jpa.JPQLQueryFactory;
+
+import helpers.jpa.HistoryViews;
+
+import lombok.extern.slf4j.Slf4j;
+
+import models.User;
+import models.base.BaseModel;
+import models.base.Revision;
+import models.base.query.QRevision;
 
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.query.AuditEntity;
 import org.joda.time.LocalDateTime;
 
-import com.google.common.base.Verify;
-import com.google.common.collect.FluentIterable;
-import com.mysema.query.jpa.JPQLQueryFactory;
-
-import helpers.jpa.HistoryViews;
 import injection.StaticInject;
-import lombok.extern.slf4j.Slf4j;
-import models.base.BaseModel;
-import models.base.Revision;
-import models.base.query.QRevision;
+
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.persistence.EntityManager;
 
 @StaticInject
 @Slf4j
@@ -39,7 +44,7 @@ public class HistoricalDao {
   }
 
   public static <T extends BaseModel> T valueAtRevision(Class<T> cls, long id,
-                                                 int revisionId) {
+      int revisionId) {
 
     final T current = Verify.verifyNotNull(emp.get().find(cls, id));
     final T history = cls.cast(auditReader.get().createQuery()
@@ -50,7 +55,7 @@ public class HistoricalDao {
     return HistoryViews.historicalViewOf(cls, current, history, date);
   }
 
-  public static HistoryValue lastRevisionOf(Class<? extends BaseModel> cls, int id) {
+  public static HistoryValue lastRevisionOf(Class<? extends BaseModel> cls, long id) {
     List<HistoryValue> lastRevisions = lastRevisionsOf(cls, id);
     if (lastRevisions.isEmpty()) {
       return null;
@@ -68,7 +73,7 @@ public class HistoricalDao {
         .getResultList()).transform(HistoryValue.fromTuple(cls)).toList();
   }
 
-  
+
   /**
    * @return la versione precedente del istanza individuata da cls e id.
    */
@@ -87,6 +92,10 @@ public class HistoricalDao {
     log.debug("current-revision {} of ({}:{}), previous-revision: {}",
         currentRevision, cls, id, previousRevision);
     return valueAtRevision(cls, id, previousRevision);
+  }
+
+  public static User lastRevisionOperator(BaseModel entity) {
+    return lastRevisionOf(entity.getClass(), entity.id).revision.owner;
   }
 
 }
