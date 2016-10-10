@@ -40,6 +40,6 @@ public class PermissionCheck {
     return MoreObjects.toStringHelper(this).omitNullValues()
         .add("action", getAction())
         .add("target", getTarget())
-            .addValue(granted ? "GRANTED" : "DENIED").toString();
+        .addValue(granted ? "GRANTED" : "DENIED").toString();
   }
 }

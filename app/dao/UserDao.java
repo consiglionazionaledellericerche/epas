@@ -174,7 +174,7 @@ public class UserDao extends DaoBase {
 
     if ((user.isSystemUser()
         || user.hasRoles(Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN))
-        || (user.person.qualification.qualification < 4 &&
+        || (user.person.qualification.qualification <= 3 &&
         user.person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true"))) {
 
       return StampTypes.onlyActive();
