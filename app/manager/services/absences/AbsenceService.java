@@ -1,5 +1,6 @@
 package manager.services.absences;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
@@ -8,6 +9,9 @@ import dao.absences.AbsenceComponentDao;
 
 import lombok.extern.slf4j.Slf4j;
 
+import manager.AbsenceManager;
+import manager.response.AbsenceInsertReport;
+import manager.response.AbsencesResponse;
 import manager.services.absences.errors.AbsenceError;
 import manager.services.absences.errors.CriticalError;
 import manager.services.absences.model.AbsencePeriod;
@@ -115,7 +119,7 @@ public class AbsenceService {
   public InsertReport insert(Person person, GroupAbsenceType groupAbsenceType, 
       LocalDate from, LocalDate to, 
       AbsenceType absenceType, JustifiedType justifiedType, 
-      Integer hours, Integer minutes, boolean persist) {
+      Integer hours, Integer minutes) {
     
     if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.vacationsCnr)) {
       throw new IllegalStateException();
@@ -197,19 +201,169 @@ public class AbsenceService {
     }
 
     // le assenze da persistere
-    if (persist) {
-      for (PeriodChain periodChain : chains) {
-        if (periodChain.successPeriodInsert != null) {
-          insertReport.absencesToPersist.add(periodChain
-              .successPeriodInsert.attemptedInsertAbsence);
-        }
+    for (PeriodChain periodChain : chains) {
+      if (periodChain.successPeriodInsert != null) {
+        insertReport.absencesToPersist.add(periodChain
+            .successPeriodInsert.attemptedInsertAbsence);
       }
     }
-
     
     return insertReport;
   }
   
+  
+  
+  
+
+  /**
+   * Esegue lo scanning delle assenze della persona a partire dalla data
+   * passata come parametro per verificarne la correttezza.
+   * Gli errori riscontrati vengono persistiti all'assenza.
+   * 
+   * Microservices
+   * Questo metodo dovrebbe avere una person dove sono fetchate tutte le 
+   * informazioni per i calcoli non mantenute del componente assenze:
+   * 
+   * I Contratti / Tempi a lavoro / Piani ferie
+   * I Figli
+   * Le Altre Tutele
+   * 
+   * @param person
+   * @param from
+   */
+  public Scanner scanner(Person person, LocalDate from) {
+    
+    log.debug("");
+    log.debug("Lanciata procedura scan assenze person={}, from={}", person.fullName(), from);
+
+    //OTTIMIZZAZIONI//
+
+    //fetch all absenceType
+    absenceComponentDao.fetchAbsenceTypes();
+
+    //fetch all groupAbsenceType
+    absenceComponentDao.allGroupAbsenceType();
+
+    //COSTRUZIONE//
+    List<Absence> absencesToScan = absenceComponentDao.orderedAbsences(person, from, 
+        null, Lists.newArrayList());
+    List<PersonChildren> orderedChildren = personChildrenDao.getAllPersonChildren(person);    
+    List<Contract> fetchedContracts = person.contracts; //TODO: fetch
+    
+    Scanner absenceScan = serviceFactories.buildScanInstance(person, from, absencesToScan, 
+        orderedChildren, fetchedContracts);
+        
+    // scan dei gruppi
+    absenceScan.scan();
+
+    log.debug("");
+
+    return absenceScan;
+
+  }
+
+  public PeriodChain residual(Person person, GroupAbsenceType groupAbsenceType, LocalDate date) {
+
+    if (date == null) {
+      date = LocalDate.now();
+    }
+    
+    List<PersonChildren> orderedChildren = personChildrenDao.getAllPersonChildren(person);   
+    List<Contract> fetchedContracts = person.contracts; //TODO: fetch
+    
+    PeriodChain periodChain = serviceFactories.buildPeriodChain(person, groupAbsenceType, date, 
+        Lists.newArrayList(), null,
+        orderedChildren, fetchedContracts);
+
+    return periodChain;
+
+  }
+  
+  public SortedMap<Integer, List<AbsenceRequestCategory>> formCategories(Person person, LocalDate date, 
+      GroupAbsenceType groupAbsenceType) {
+    return absenceRequestFormFactory
+        .buildAbsenceRequestForm(person, date, date, groupAbsenceType, null, null, null)
+        .categoriesWithSamePriority;
+  }
+  
+  @Deprecated
+  public InsertReport temporaryInsertCompensatoryRest(Person person, 
+      GroupAbsenceType groupAbsenceType, LocalDate from, LocalDate to, AbsenceType absenceType, 
+      AbsenceManager absenceManager) {
+    
+    if (absenceType == null || !absenceType.isPersistent()) {
+      absenceType = absenceComponentDao.absenceTypeByCode("91").get();
+    }
+
+    return insertReportFromOldReport(
+        absenceManager.insertAbsenceSimulation(person, from, Optional.fromNullable(to), 
+            absenceType, Optional.absent(), Optional.absent(), Optional.absent())
+        , groupAbsenceType);
+    
+  }
+  
+  @Deprecated
+  public InsertReport temporaryInsertVacation(Person person, GroupAbsenceType groupAbsenceType, 
+      LocalDate from, LocalDate to, AbsenceType absenceType, 
+      AbsenceManager absenceManager) {
+
+    if (absenceType == null || !absenceType.isPersistent()) {
+      absenceType = absenceComponentDao.absenceTypeByCode("FER").get();
+    }
+
+    return insertReportFromOldReport(
+        absenceManager.insertAbsenceSimulation(person, from, Optional.fromNullable(to), 
+            absenceType, Optional.absent(), Optional.absent(), Optional.absent())
+        , groupAbsenceType);
+
+  }
+  
+  @Deprecated
+  private InsertReport insertReportFromOldReport(AbsenceInsertReport absenceInsertReport, 
+      GroupAbsenceType groupAbsenceType) {
+    
+    InsertReport insertReport = new InsertReport();
+    
+    for (AbsencesResponse absenceResponse : absenceInsertReport.getAbsences()) {
+
+      if (absenceResponse.isInsertSucceeded()) {
+        TemplateRow templateRow = new TemplateRow();
+        templateRow.date = absenceResponse.getDate();
+        templateRow.absence = absenceResponse.getAbsenceAdded();
+        templateRow.groupAbsenceType = groupAbsenceType;
+        insertReport.insertTemplateRows.add(templateRow);
+        insertReport.absencesToPersist.add(templateRow.absence);
+        if (absenceResponse.isDayInReperibilityOrShift()) {
+          templateRow.absenceWarnings.add(AbsenceError.builder()
+              .absence(templateRow.absence)
+              .absenceProblem(AbsenceProblem.InReperibilityOrShift).build());
+        }
+        continue;
+      }
+      TemplateRow templateRow = new TemplateRow();
+      templateRow.date = absenceResponse.getDate();
+      templateRow.absence = absenceResponse.getAbsenceInError();
+      if (absenceResponse.isHoliday()) {
+        templateRow.absenceErrors.add(AbsenceError.builder()
+            .absence(absenceResponse.getAbsenceAdded())
+            .absenceProblem(AbsenceProblem.NotOnHoliday)
+            .build());
+      } else {
+        templateRow.absenceErrors.add(AbsenceError.builder()
+            .absence(absenceResponse.getAbsenceAdded())
+            .absenceProblem(AbsenceProblem.LimitExceeded)
+            .build());
+      }
+      insertReport.insertTemplateRows.add(templateRow);
+    }
+
+    if (absenceInsertReport.getAbsences().isEmpty()) {
+      insertReport.warningsPreviousVersion = absenceInsertReport.getWarnings();
+    }
+    
+    return insertReport;
+  }
+
   public static class InsertReport {
      
     public List<CriticalError> criticalErrors = Lists.newArrayList();
@@ -287,115 +441,6 @@ public class AbsenceService {
       }
       return dates;
     }
-  }
-//  
-//  public AbsencesReport forceInsert(Person person, GroupAbsenceType groupAbsenceType, LocalDate from,
-//      LocalDate to, AbsenceRequestType absenceTypeRequest, AbsenceType absenceType, 
-//      JustifiedType justifiedType, Integer hours, Integer minutes) {
-//    
-//    Preconditions.checkArgument(absenceTypeRequest.equals(absenceTypeRequest.insert));
-//    Preconditions.checkArgument(absenceType != null);   //il tipo quando forzo non si inferisce
-//    Preconditions.checkArgument(absenceType.justifiedTypesPermitted.contains(justifiedType));
-//    
-//    Integer specifiedMinutes = absenceEngineUtility.getMinutes(hours, minutes);
-//    LocalDate currentDate = from;
-//    if (to == null) {
-//      to = from;
-//    }
-//    
-//    AbsencesReport report = new AbsencesReport();
-//    
-//    while (!currentDate.isAfter(to)) {
-//      
-//      //Preparare l'assenza da inserire
-//      Absence absence = new Absence();
-//      absence.date = currentDate;
-//      absence.absenceType = absenceType;
-//      absence.justifiedType = justifiedType;
-//      if (specifiedMinutes != null) {
-//        absence.justifiedMinutes = specifiedMinutes;
-//      }
-//      
-//      DayStatus insertDayStatus = DayStatus.builder().date(currentDate).build();
-//      insertDayStatus.takenAbsences = Lists.newArrayList(TakenAbsence.builder().absence(absence).build());
-//      report.addInsertDayStatus(insertDayStatus);
-//      
-//      currentDate = currentDate.plusDays(1);
-//    }
-//    
-//    return report;
-//  }
-  
-
-  /**
-   * Esegue lo scanning delle assenze della persona a partire dalla data
-   * passata come parametro per verificarne la correttezza.
-   * Gli errori riscontrati vengono persistiti all'assenza.
-   * 
-   * Microservices
-   * Questo metodo dovrebbe avere una person dove sono fetchate tutte le 
-   * informazioni per i calcoli non mantenute del componente assenze:
-   * 
-   * I Contratti / Tempi a lavoro / Piani ferie
-   * I Figli
-   * Le Altre Tutele
-   * 
-   * @param person
-   * @param from
-   */
-  public Scanner scanner(Person person, LocalDate from) {
-    
-    log.debug("");
-    log.debug("Lanciata procedura scan assenze person={}, from={}", person.fullName(), from);
-
-    //OTTIMIZZAZIONI//
-
-    //fetch all absenceType
-    absenceComponentDao.fetchAbsenceTypes();
-
-    //fetch all groupAbsenceType
-    absenceComponentDao.allGroupAbsenceType();
-
-    //COSTRUZIONE//
-    List<Absence> absencesToScan = absenceComponentDao.orderedAbsences(person, from, 
-        null, Lists.newArrayList());
-    List<PersonChildren> orderedChildren = personChildrenDao.getAllPersonChildren(person);    
-    List<Contract> fetchedContracts = person.contracts; //TODO: fetch
-    
-    Scanner absenceScan = serviceFactories.buildScanInstance(person, from, absencesToScan, 
-        orderedChildren, fetchedContracts);
-        
-    // scan dei gruppi
-    absenceScan.scan();
-
-    log.debug("");
-
-    return absenceScan;
-
-  }
-
-  public PeriodChain residual(Person person, GroupAbsenceType groupAbsenceType, LocalDate date) {
-
-    if (date == null) {
-      date = LocalDate.now();
-    }
-    
-    List<PersonChildren> orderedChildren = personChildrenDao.getAllPersonChildren(person);   
-    List<Contract> fetchedContracts = person.contracts; //TODO: fetch
-    
-    PeriodChain periodChain = serviceFactories.buildPeriodChain(person, groupAbsenceType, date, 
-        Lists.newArrayList(), null,
-        orderedChildren, fetchedContracts);
-
-    return periodChain;
-
-  }
-  
-  public SortedMap<Integer, List<AbsenceRequestCategory>> formCategories(Person person, LocalDate date, 
-      GroupAbsenceType groupAbsenceType) {
-    return absenceRequestFormFactory
-        .buildAbsenceRequestForm(person, date, date, groupAbsenceType, null, null, null)
-        .categoriesWithSamePriority;
   }
   
 }

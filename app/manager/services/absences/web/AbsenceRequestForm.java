@@ -85,6 +85,17 @@ public class AbsenceRequestForm {
   //                order of the corresponding keys
 
   public AbsenceGroupFormItem selectedAbsenceGroupFormItem = null;
+  
+  public boolean formHasNoGroupChoice() {
+    List<AbsenceGroupFormItem> items = Lists.newArrayList();
+    for (List<AbsenceRequestCategory> categoryList : categoriesWithSamePriority.values()) {
+      for (AbsenceRequestCategory category : categoryList) {
+        items.addAll(category.items);  
+      }
+    }
+    return items.size() == 0 || items.size() == 1;
+    
+  }
 
   /**
    * AbsenceRequestCategory: Raccoglie i GroupAbsenceTypeItem che hanno groupAbsenceType 

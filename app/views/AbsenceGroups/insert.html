@@ -14,8 +14,10 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
  %{ specifiedMinuteSelected = selecteSubItem?.selectedJustified?.name.equals(models.absences.JustifiedType.JustifiedTypeName.specified_minutes) }%
 
  #{if absenceRequestForm.absenceInsertTab.newImplementation() }
-
-   #{include './_selectGroup.html' /}
+   
+   #{if !absenceRequestForm.formHasNoGroupChoice() }
+     #{include './_selectGroup.html' /}
+   #{/if}
    #{include './_configureSelectedGroup.html' /}
    #{include './_verifyRequest.html' /}
  
