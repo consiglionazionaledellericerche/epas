@@ -94,6 +94,8 @@ public class PersonManager {
   }
 
   /**
+   * Conta i codici di assenza.
+   * 
    * @param personDays lista di PersonDay
    * @return La mappa dei codici di assenza utilizzati nei persondays specificati
    */
@@ -103,9 +105,9 @@ public class PersonManager {
 
     personDays.stream().flatMap(personDay -> personDay.absences.stream()
         .<AbsenceType>map(absence -> absence.absenceType)).forEach(absenceType -> {
-      Integer count = absenceCodeMap.get(absenceType);
-      absenceCodeMap.put(absenceType, (count == null) ? 1 : count + 1);
-    });
+          Integer count = absenceCodeMap.get(absenceType);
+          absenceCodeMap.put(absenceType, (count == null) ? 1 : count + 1);
+        });
 
     return absenceCodeMap;
   }
@@ -151,7 +153,7 @@ public class PersonManager {
 
   /**
    * Il numero di riposi compensativi utilizzati tra 2 date (in linea di massima ha senso
-   * dall'inizio dell'anno a una certa data)
+   * dall'inizio dell'anno a una certa data).
    */
   public int numberOfCompensatoryRestUntilToday(Person person, LocalDate begin, LocalDate end) {
 
@@ -162,8 +164,8 @@ public class PersonManager {
         contract.sourceDateResidual != null).max(Comparator
         .comparing(Contract::getSourceDateResidual)).orElse(null);
 
-    if (newerContract != null && newerContract.sourceDateResidual != null &&
-        !newerContract.sourceDateResidual.isBefore(begin)
+    if (newerContract != null && newerContract.sourceDateResidual != null 
+        && !newerContract.sourceDateResidual.isBefore(begin)
         && !newerContract.sourceDateResidual.isAfter(end)) {
       return newerContract.sourceRecoveryDayUsed + absenceDao
           .absenceInPeriod(person, newerContract.sourceDateResidual, end, "91").size();

@@ -530,6 +530,7 @@ public class CompetenceManager {
     }
     return servicesInitialized;
   }
+  
   /**
    * 
    * @param personList la lista di persone

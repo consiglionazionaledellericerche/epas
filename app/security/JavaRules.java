@@ -41,25 +41,26 @@ public class JavaRules {
         return;
       }
       // L'utente ha il ruolo di amministratore sull'ufficio d'appartenenza della persona
-      if (user.get().usersRolesOffices.stream().filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)
+      if (user.get().usersRolesOffices.stream()
+          .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)
           && uro.office.persons.contains(person)).findFirst().isPresent()) {
         return;
       }
       if ( // L'assenza è tra i codici abilitati per i dipendenti
-          CodesForEmployee.getCodes().contains(at.code) &&
-              // L'ufficio e' abilitato per l'inserimento di assenze fuori sede
-              person.office.configurations.stream()
-                  .filter(c -> c.epasParam == EpasParam.WORKING_OFF_SITE
-                      && c.fieldValue.equals("true")).findFirst().isPresent() &&
-              // La persona è abilitata in configurazione all'inserimento autonomo di quell'assenza
-              person.personConfigurations.stream()
-                  .filter(pc -> pc.epasParam == EpasParam.OFF_SITE_STAMPING
-                      && pc.fieldValue.equals("true")).findFirst().isPresent() &&
-              // L'assenza appartiene alla persona specificata
-              user.get().usersRolesOffices.stream()
-                  .filter(uro -> uro.role.name.equals(Role.EMPLOYEE)
-                      && uro.office.persons.contains(person))
-                  .findFirst().isPresent()) {
+          CodesForEmployee.getCodes().contains(at.code) 
+          // L'ufficio e' abilitato per l'inserimento di assenze fuori sede
+          && person.office.configurations.stream()
+          .filter(c -> c.epasParam == EpasParam.WORKING_OFF_SITE
+          && c.fieldValue.equals("true")).findFirst().isPresent() 
+          // La persona è abilitata in configurazione all'inserimento autonomo di quell'assenza
+          && person.personConfigurations.stream()
+          .filter(pc -> pc.epasParam == EpasParam.OFF_SITE_STAMPING
+          && pc.fieldValue.equals("true")).findFirst().isPresent() 
+          // L'assenza appartiene alla persona specificata
+          && user.get().usersRolesOffices.stream()
+          .filter(uro -> uro.role.name.equals(Role.EMPLOYEE)
+              && uro.office.persons.contains(person))
+          .findFirst().isPresent()) {
         return;
       }
     }
@@ -74,26 +75,27 @@ public class JavaRules {
         return;
       }
       // L'utente ha il ruolo di amministratore sull'ufficio d'appartenenza della persona
-      if (user.get().usersRolesOffices.stream().filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)
+      if (user.get().usersRolesOffices.stream()
+          .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)
           && uro.office.persons.contains(absence.personDay.person)).findFirst().isPresent()) {
         return;
       }
 
       if ( // L'assenza è tra i codici abilitati per i dipendenti
-          CodesForEmployee.getCodes().contains(absence.absenceType.code) &&
-              // L'ufficio e' abilitato per l'inserimento di assenze fuori sede
-              absence.personDay.person.office.configurations.stream()
-                  .filter(c -> c.epasParam == EpasParam.WORKING_OFF_SITE
-                      && c.fieldValue.equals("true")).findFirst().isPresent() &&
-              // La persona è abilitata in configurazione all'inserimento autonomo di quell'assenza
-              absence.personDay.person.personConfigurations.stream()
-                  .filter(pc -> pc.epasParam == EpasParam.OFF_SITE_STAMPING
-                      && pc.fieldValue.equals("true")).findFirst().isPresent() &&
-              // L'assenza appartiene alla persona specificata
-              user.get().usersRolesOffices.stream()
-                  .filter(uro -> uro.role.name.equals(Role.EMPLOYEE)
-                      && uro.office.persons.contains(absence.personDay.person))
-                  .findFirst().isPresent()) {
+          CodesForEmployee.getCodes().contains(absence.absenceType.code) 
+          // L'ufficio e' abilitato per l'inserimento di assenze fuori sede
+          && absence.personDay.person.office.configurations.stream()
+          .filter(c -> c.epasParam == EpasParam.WORKING_OFF_SITE
+          && c.fieldValue.equals("true")).findFirst().isPresent() 
+          // La persona è abilitata in configurazione all'inserimento autonomo di quell'assenza
+          && absence.personDay.person.personConfigurations.stream()
+          .filter(pc -> pc.epasParam == EpasParam.OFF_SITE_STAMPING
+          && pc.fieldValue.equals("true")).findFirst().isPresent() 
+          // L'assenza appartiene alla persona specificata
+          && user.get().usersRolesOffices.stream()
+          .filter(uro -> uro.role.name.equals(Role.EMPLOYEE)
+              && uro.office.persons.contains(absence.personDay.person))
+          .findFirst().isPresent()) {
         return;
       }
     }
@@ -108,26 +110,27 @@ public class JavaRules {
         return;
       }
       // L'utente ha il ruolo di amministratore sull'ufficio d'appartenenza della persona
-      if (user.get().usersRolesOffices.stream().filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)
+      if (user.get().usersRolesOffices.stream()
+            .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)
           && uro.office.persons.contains(stamping.personDay.person)).findFirst().isPresent()) {
         return;
       }
 
       if ( // L'assenza è tra i codici abilitati per i dipendenti
-          StampTypes.LAVORO_FUORI_SEDE == stamping.stampType &&
-              // L'ufficio e' abilitato per l'inserimento di assenze fuori sede
-              stamping.personDay.person.office.configurations.stream()
-                  .filter(c -> c.epasParam == EpasParam.WORKING_OFF_SITE
-                      && c.fieldValue.equals("true")).findFirst().isPresent() &&
-              // La persona è abilitata in configurazione all'inserimento autonomo di quell'assenza
-              stamping.personDay.person.personConfigurations.stream()
-                  .filter(pc -> pc.epasParam == EpasParam.OFF_SITE_STAMPING
-                      && pc.fieldValue.equals("true")).findFirst().isPresent() &&
-              // L'assenza appartiene alla persona specificata
-              user.get().usersRolesOffices.stream()
-                  .filter(uro -> uro.role.name.equals(Role.EMPLOYEE)
-                      && uro.office.persons.contains(stamping.personDay.person))
-                  .findFirst().isPresent()) {
+          StampTypes.LAVORO_FUORI_SEDE == stamping.stampType 
+          // L'ufficio e' abilitato per l'inserimento di assenze fuori sede
+          && stamping.personDay.person.office.configurations.stream()
+          .filter(c -> c.epasParam == EpasParam.WORKING_OFF_SITE
+          && c.fieldValue.equals("true")).findFirst().isPresent()
+          // La persona è abilitata in configurazione all'inserimento autonomo di quell'assenza
+          && stamping.personDay.person.personConfigurations.stream()
+          .filter(pc -> pc.epasParam == EpasParam.OFF_SITE_STAMPING
+          && pc.fieldValue.equals("true")).findFirst().isPresent() 
+          // L'assenza appartiene alla persona specificata
+          && user.get().usersRolesOffices.stream()
+          .filter(uro -> uro.role.name.equals(Role.EMPLOYEE)
+              && uro.office.persons.contains(stamping.personDay.person))
+          .findFirst().isPresent()) {
         return;
       }
     }

@@ -49,13 +49,14 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
     try {
       Optional<User> user = Security.getUser();
       if (!user.isPresent()) {
-        log.info("StampingFromClient: {}, {}, {}, {}, {}", name, annotations, value, actualClass, genericType);
+        log.info("StampingFromClient: {}, {}, {}, {}, {}", 
+            name, annotations, value, actualClass, genericType);
         log.info("StampingFromClient: l'user non presente");
         return null;
       }
       if (user.get().badgeReader == null) {
-        log.error("L'utente {} utilizzato per l'invio della timbratura" +
-            " non ha una istanza badgeReader valida associata.");
+        log.error("L'utente {} utilizzato per l'invio della timbratura" 
+            + " non ha una istanza badgeReader valida associata.");
         return null;
       }
 

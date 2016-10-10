@@ -41,7 +41,7 @@ public class HistoryViews {
 
   private static final Logger log = LoggerFactory.getLogger(HistoryViews.class);
   private static final CtClass[] NO_ARGS = {};
-  private final static Map<String, Class<?>> map = Maps.newHashMap();
+  private static final Map<String, Class<?>> map = Maps.newHashMap();
 
   static <T> Class<? extends T> compose(Class<T> orig) throws Exception {
 
@@ -65,8 +65,8 @@ public class HistoryViews {
 
     for (CtField origField : ctOriginal.getFields()) {
       // in play1.x jpa models: attributes are public.
-      if (Modifier.isFinal(origField.getModifiers()) ||
-          !Modifier.isPublic(origField.getModifiers())) {
+      if (Modifier.isFinal(origField.getModifiers()) 
+          || !Modifier.isPublic(origField.getModifiers())) {
         continue;
       }
       final String fieldName = origField.getName();
@@ -75,19 +75,19 @@ public class HistoryViews {
       CtMethod ctMethod = new CtMethod(returnType, getterName, NO_ARGS, cls);
 
       try {
-                /*
-				 * Only fields are checked.
-				 */
+        /*
+         * Only fields are checked.
+         */
         final CtField ctField = ctOriginal.getField(fieldName);
         final FluentIterable<Object> annotations =
-            FluentIterable.from(ImmutableList.
-                copyOf(ctField.getAnnotations()));
+            FluentIterable.from(ImmutableList
+                .copyOf(ctField.getAnnotations()));
 
         if (annotations.anyMatch(Predicates.instanceOf(NotAudited.class))) {
           // not audited:
 
-          if (ctMethod.getReturnType().equals(ctLocalDateTime) &&
-              annotations.anyMatch(Predicates
+          if (ctMethod.getReturnType().equals(ctLocalDateTime)
+              && annotations.anyMatch(Predicates
                   .instanceOf(HistoryValueFrom.class))) {
             // choosing by annoation:
             final HistoryValueFrom annotation = (HistoryValueFrom)
@@ -99,21 +99,21 @@ public class HistoryViews {
               ctMethod.setBody("{return _datetime;}");
             }
           } else {
-						/*
-						 * default by current object.
-						 */
+            /*
+             * default by current object.
+             */
             ctMethod.setBody("{return _current." + fieldName + ";}");
           }
         } else {
-					/*
-					 * audited are in _history.
-					 */
+          /*
+           * audited are in _history.
+           */
           ctMethod.setBody("{ return _history." + fieldName + ";}");
         }
-      } catch (NotFoundException e) {
-				/*
-				 * XXX: if not found, try in _history (is transient?)
-				 */
+      } catch (NotFoundException ex) {
+        /*
+         * XXX: if not found, try in _history (is transient?)
+         */
         ctMethod.setBody("{return _history." + fieldName + ";}");
       }
       cls.addMethod(ctMethod);
@@ -131,8 +131,8 @@ public class HistoryViews {
     if (result == null) {
       try {
         result = compose(cls);
-      } catch (Exception e) {
-        throw new RuntimeException(e);
+      } catch (Exception ex) {
+        throw new RuntimeException(ex);
       }
       map.put(cls.getName(), result);
     }
@@ -140,21 +140,21 @@ public class HistoryViews {
   }
 
   public static <T> T historicalViewOf(Class<T> cls, T current, T history,
-                                       LocalDateTime revisionDateTime) {
+      LocalDateTime revisionDateTime) {
     final Class<? extends T> model = historicalModel(cls);
     Constructor<? extends T> cons;
     try {
       cons = model.getDeclaredConstructor(new Class<?>[]{cls, cls,
-          LocalDateTime.class});
-    } catch (SecurityException e) {
-      throw Throwables.propagate(e);
-    } catch (NoSuchMethodException e) {
-      throw Throwables.propagate(e);
+        LocalDateTime.class});
+    } catch (SecurityException se) {
+      throw Throwables.propagate(se);
+    } catch (NoSuchMethodException ex) {
+      throw Throwables.propagate(ex);
     }
     try {
       return cons.newInstance(current, history, revisionDateTime);
-    } catch (Exception e) {
-      throw Throwables.propagate(e);
+    } catch (Exception ex) {
+      throw Throwables.propagate(ex);
     }
   }
 
@@ -165,10 +165,10 @@ public class HistoryViews {
 
       if (Play.usePrecompiled) {
         try {
-          final File file = Play.getFile("precompiled/java/" +
-              className.replace(".", "/") + ".class");
+          final File file = Play.getFile("precompiled/java/"
+               + className.replace(".", "/") + ".class");
           return new FileInputStream(file);
-        } catch (Exception e) {
+        } catch (Exception ex) {
           log.error("missing class {}", className);
         }
       }
@@ -185,7 +185,7 @@ public class HistoryViews {
         try {
           // return new File(cname).toURL();
           return new URL("file:/ApplicationClassesClasspath/" + cname);
-        } catch (MalformedURLException e) {
+        } catch (MalformedURLException ex) {
         }
       }
       return null;

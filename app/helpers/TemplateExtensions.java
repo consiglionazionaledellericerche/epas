@@ -216,6 +216,7 @@ public class TemplateExtensions extends JavaExtensions {
   public static String value(LocalDate date) {
     return date.toString("dd/MM/yyyy");
   }
+  
   public static String value(String string) {
     return string;
   }
@@ -229,9 +230,9 @@ public class TemplateExtensions extends JavaExtensions {
     try {
       final Object obj = model.getClass().getField(fieldName).get(model);
       return obj != null ? obj.toString() : null;
-    } catch (Throwable t) {
+    } catch (Throwable throwable) {
       // TODO logging
-      throw Throwables.propagate(t);
+      throw Throwables.propagate(throwable);
     }
   }
   

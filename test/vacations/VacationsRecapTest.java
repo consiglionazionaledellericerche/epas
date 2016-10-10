@@ -1,31 +1,27 @@
 package vacations;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+
+import java.util.List;
+
+import org.joda.time.LocalDate;
+import org.testng.annotations.Test;
+import org.testng.collections.Lists;
 
 import com.google.common.collect.ImmutableList;
 
 import manager.ContractManager;
 import manager.services.vacations.VacationsRecap;
 import manager.services.vacations.VacationsRecapBuilder;
-
+import mocker.MockAbsence;
+import mocker.MockAbsenceType;
+import mocker.MockContract;
+import mocker.MockPersonDay;
 import models.Absence;
 import models.AbsenceType;
 import models.Contract;
 import models.PersonDay;
 import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.VacationCode;
-
-import org.joda.time.LocalDate;
-import org.testng.annotations.Test;
-import org.testng.collections.Lists;
-
-import java.util.List;
-
-import mocker.MockAbsence;
-import mocker.MockAbsenceType;
-import mocker.MockContract;
-import mocker.MockPersonDay;
 
 /**
  * Verifica di base degli algoritmi relativi ai resoconti ferie.

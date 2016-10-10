@@ -31,7 +31,8 @@ public abstract class PeriodModel extends BaseModel
   public LocalDate endDate;
 
   private Comparator<PeriodModel> comparator() {
-    return Comparator.comparing(PeriodModel::getBeginDate, Comparator.nullsFirst(LocalDate::compareTo))
+    return Comparator.comparing(
+        PeriodModel::getBeginDate, Comparator.nullsFirst(LocalDate::compareTo))
         .thenComparing(PeriodModel::getId, Comparator.nullsFirst(Long::compareTo));
   }
   
@@ -47,7 +48,7 @@ public abstract class PeriodModel extends BaseModel
   
   @Override
   public DateInterval periodInterval() {
-   return new DateInterval(this.getBeginDate(), this.calculatedEnd()); 
+    return new DateInterval(this.getBeginDate(), this.calculatedEnd()); 
   }
 
 }
