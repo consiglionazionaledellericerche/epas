@@ -1,5 +1,7 @@
 package models;
 
+import com.google.common.base.MoreObjects;
+
 import it.cnr.iit.epas.NullStringBinder;
 
 import models.base.BaseModel;
@@ -110,7 +112,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
     this.personDay = personDay;
     this.date = time;
   }
-  
+
   /**
    * Costruttore.
    *
@@ -125,11 +127,15 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 
   @Override
   public String toString() {
-    return String.format(
-        "Stamping[%d] - personDay.id = %d, way = %s, date = %s, stampType.id = %s, "
-            + "stampModificationType.id = %s",
-        id, personDay.id, way, date, stampType != null ? stampType : "null",
-        stampModificationType != null ? stampModificationType.id : "null");
+    return MoreObjects.toStringHelper(this).omitNullValues()
+        .add("id", id)
+        .add("personDay.id", personDay.id)
+        .add("way", way)
+        .add("date", date)
+        .add("stampType", stampType)
+        .add("stampModificationType", stampModificationType)
+        .toString();
+
   }
 
   /**
