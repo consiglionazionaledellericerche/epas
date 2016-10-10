@@ -37,7 +37,6 @@ import models.PersonShiftDay;
 import models.Qualification;
 import models.absences.Absence;
 import models.absences.AbsenceType;
-import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;
@@ -363,7 +362,7 @@ public class AbsenceManager {
       consistencyManager.updatePersonSituation(person.id, dateFrom);
 
       if (air.getAbsenceInReperibilityOrShift() > 0) {
-        sendEmail(person, air);
+        sendReperibilityShiftEmail(person, air.datesInReperibilityOrShift());
       }
     }
 
@@ -479,7 +478,7 @@ public class AbsenceManager {
    * Metodo che invia la mail contenente i giorni in cui ci sono inserimenti di assenza in turno o
    * reperibilità.
    */
-  private void sendEmail(Person person, AbsenceInsertReport airl) {
+  public void sendReperibilityShiftEmail(Person person, List<LocalDate> dates) {
     MultiPartEmail email = new MultiPartEmail();
 
     try {
@@ -490,7 +489,7 @@ public class AbsenceManager {
       email.addReplyTo(replayTo);
       email.setSubject("Segnalazione inserimento assenza in giorno con reperibilità/turno");
       String date = "";
-      for (LocalDate data : airl.datesInReperibilityOrShift()) {
+      for (LocalDate data : dates) {
         date = date + data + ' ';
       }
       email.setMsg("E' stato richiesto l'inserimento di una assenza per il giorno " + date

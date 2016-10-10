@@ -6,6 +6,8 @@ import com.google.common.base.Verify;
 import dao.PersonDao;
 import dao.absences.AbsenceComponentDao;
 
+import lombok.extern.slf4j.Slf4j;
+
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.PersonDayManager;
@@ -41,7 +43,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-//@Slf4j
+@Slf4j
 @With({Resecure.class, RequestInit.class})
 public class AbsenceGroups extends Controller {
   
@@ -98,31 +100,35 @@ public class AbsenceGroups extends Controller {
       flash.error("L'inserimento forzato è in fase di implementazione ...");
     } else {
       InsertReport insertReport = new InsertReport();
-
       if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.vacationsCnr)) {
         insertReport = temporaryVacation(person, groupAbsenceType, from, to, 
             absenceType, false);
       } else if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.compensatoryRestCnr)) {
         throw new IllegalStateException();
       } else {
-
         insertReport = absenceService.insert(person, groupAbsenceType, from, to, 
             absenceType, justifiedType, hours, minutes, true);
       }
-      for (Absence absence : insertReport.absencesToPersist) {
-        PersonDay personDay = personDayManager
-            .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
-        absence.personDay = personDay;
-        personDay.absences.add(absence);
-        absence.save(); 
-        personDay.save();
-
-      }
-
       
-      JPA.em().flush();
-      consistencyManager.updatePersonSituation(person.id, from);
-      flash.success("Codici di assenza inseriti.");
+      //Persistenza
+      if (!insertReport.absencesToPersist.isEmpty()) {
+        for (Absence absence : insertReport.absencesToPersist) {
+          PersonDay personDay = personDayManager
+              .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
+          absence.personDay = personDay;
+          personDay.absences.add(absence);
+          absence.save(); 
+          personDay.save();
+        }
+        if (!insertReport.reperibilityShiftDate().isEmpty()) {
+          //absenceManager.sendReperibilityShiftEmail(person, insertReport.reperibilityShiftDate());
+          log.info("Inserite assenze con reperibilità e turni {} {}. Le email sono disabilitate.", 
+              person.fullName(), insertReport.reperibilityShiftDate() );
+        }
+        JPA.em().flush();
+        consistencyManager.updatePersonSituation(person.id, from);
+        flash.success("Codici di assenza inseriti.");
+      }
     }
 
     Stampings.personStamping(person.id, from.getYear(), from.getMonthOfYear());
@@ -363,6 +369,11 @@ public class AbsenceGroups extends Controller {
           templateRow.groupAbsenceType = groupAbsenceType;
           insertReport.insertTemplateRows.add(templateRow);
           insertReport.absencesToPersist.add(templateRow.absence);
+          if (absenceResponse.isDayInReperibilityOrShift()) {
+            templateRow.absenceWarnings.add(AbsenceError.builder()
+                .absence(templateRow.absence)
+                .absenceProblem(AbsenceProblem.InReperibilityOrShift).build());
+          }
           continue;
         }
         TemplateRow templateRow = new TemplateRow();
