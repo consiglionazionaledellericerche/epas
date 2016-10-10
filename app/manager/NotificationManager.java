@@ -22,7 +22,7 @@ public class NotificationManager {
     CREATE,
     READ,
     UPDATE,
-    DELETE;
+    DELETE
   }
 
   public void notifyStamping(Stamping stamping, CRUD operation) {
