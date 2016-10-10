@@ -45,8 +45,8 @@ public class AbsenceMigration {
     MALATTIA_FIGLIO_1("Malattia primo figlio", 7),
     MALATTIA_FIGLIO_2("Malattia secondo figlio", 8),
     MALATTIA_FIGLIO_3("Malattia terzo figlio", 9),
-    
-    OTHER("Altre tipologie", 10);
+    PUBLIC_FUNCTION("Pubblica Funzione", 10),
+    OTHER_CODES("Altri Codici", 11);
     
     public String name;
     public int priority;
@@ -379,9 +379,13 @@ public class AbsenceMigration {
         .getOrBuildCategoryType(DefaultCategoryType.LAW_104_92.name, 
             DefaultCategoryType.LAW_104_92.priority);
     
-    final CategoryGroupAbsenceType otherCategory = absenceComponentDao
-        .getOrBuildCategoryType(DefaultCategoryType.OTHER.name, 
-            DefaultCategoryType.OTHER.priority);
+    final CategoryGroupAbsenceType publicFunctionCategory = absenceComponentDao
+        .getOrBuildCategoryType(DefaultCategoryType.PUBLIC_FUNCTION.name, 
+            DefaultCategoryType.PUBLIC_FUNCTION.priority);
+    
+    final CategoryGroupAbsenceType otherCodesCategory = absenceComponentDao
+        .getOrBuildCategoryType(DefaultCategoryType.OTHER_CODES.name, 
+            DefaultCategoryType.OTHER_CODES.priority);
     
     final CategoryGroupAbsenceType malattiaCategory = absenceComponentDao
         .getOrBuildCategoryType(DefaultCategoryType.MALATTIA.name, 
@@ -1394,6 +1398,8 @@ public class AbsenceMigration {
         
         tMissione.get().takableCodes = Sets
             .newHashSet(missione92, h192, h292, h392, h492, h592, h692, h792);
+        tMissione.get().takenCodes = Sets
+            .newHashSet(missione92, h192, h292, h392, h492, h592, h692, h792);
         
         //tMissione.get().takenCodes = Sets
         //    .newHashSet(missione92, h192, h292, h392, h492, h592, h692, h792);
@@ -1444,6 +1450,7 @@ public class AbsenceMigration {
             "festività soppresse (ex legge 937/77)", 0, Sets.newHashSet(allDay), null, 0, false, false, false, "94", null);
         
         tFerie.get().takableCodes = Sets.newHashSet(ferie31, ferie32, ferie37, permesso94);
+        tFerie.get().takenCodes = Sets.newHashSet(ferie31, ferie32, ferie37, permesso94);
         
         tFerie.get().save();
       }
@@ -1478,6 +1485,7 @@ public class AbsenceMigration {
             "Riposo compensativo", 0, Sets.newHashSet(allDay), null, 0, false, true, false, "91", null);
         
         tRiposi.get().takableCodes = Sets.newHashSet(riposo91);
+        tRiposi.get().takenCodes = Sets.newHashSet(riposo91);
         
         tRiposi.get().save();
       }
@@ -1519,13 +1527,14 @@ public class AbsenceMigration {
             continue;
           }
           t95.get().takableCodes.add(absenceType);
+          t95.get().takenCodes.add(absenceType);
           t95.get().save();
         }
       }
 
       // Group Creation
       GroupAbsenceType group95 = new GroupAbsenceType();
-      group95.category = otherCategory;
+      group95.category = publicFunctionCategory;
       group95.name = DefaultGroup.G_95.name();
       group95.description = "Permessi pubblica funzione";
       group95.pattern = GroupAbsenceTypePattern.simpleGrouping;
@@ -1555,36 +1564,47 @@ public class AbsenceMigration {
         
         if (absenceComponentDao.absenceTypeByCode("11C").isPresent()) {
           tMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("11C").get());
+          tMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("11C").get());
         }
         if (absenceComponentDao.absenceTypeByCode("11R").isPresent()) {
           tMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("11R").get());
+          tMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("11R").get());
         }
         if (absenceComponentDao.absenceTypeByCode("11R5").isPresent()) {
           tMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("11R").get());
+          tMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("11R").get());
         }
         if (absenceComponentDao.absenceTypeByCode("11R9").isPresent()) {
           tMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("11R").get());
+          tMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("11R").get());
         }
         if (absenceComponentDao.absenceTypeByCode("11S").isPresent()) {
           tMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("11S").get());
+          tMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("11S").get());
         }
         if (absenceComponentDao.absenceTypeByCode("111").isPresent()) {
           tMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("111").get());
+          tMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("111").get());
         }
         if (absenceComponentDao.absenceTypeByCode("115").isPresent()) {
           tMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("115").get());
+          tMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("115").get());
         }
         if (absenceComponentDao.absenceTypeByCode("116").isPresent()) {
           tMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("116").get());
+          tMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("116").get());
         }
         if (absenceComponentDao.absenceTypeByCode("117").isPresent()) {
           tMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("117").get());
+          tMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("117").get());
         }
         if (absenceComponentDao.absenceTypeByCode("118").isPresent()) {
           tMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("118").get());
+          tMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("118").get());
         }
         if (absenceComponentDao.absenceTypeByCode("119").isPresent()) {
           tMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("119").get());
+          tMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("119").get());
         }
         
         tMalattia.get().save();
@@ -1640,6 +1660,7 @@ public class AbsenceMigration {
         
         if (absenceComponentDao.absenceTypeByCode("12").isPresent()) {
           tMalattia12.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("12").get());
+          tMalattia12.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("12").get());
         }
        
         tMalattia12.get().save();
@@ -1675,6 +1696,7 @@ public class AbsenceMigration {
         
         if (absenceComponentDao.absenceTypeByCode("13").isPresent()) {
           tMalattia13.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("13").get());
+          tMalattia13.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("13").get());
         }
        
         tMalattia13.get().save();
@@ -1710,6 +1732,7 @@ public class AbsenceMigration {
         
         if (absenceComponentDao.absenceTypeByCode("14").isPresent()) {
           tMalattia14.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("14").get());
+          tMalattia14.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("14").get());
         }
        
         tMalattia14.get().save();
@@ -1748,6 +1771,7 @@ public class AbsenceMigration {
         
         if (absenceComponentDao.absenceTypeByCode("122").isPresent()) {
           tMalattia12.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("122").get());
+          tMalattia12.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("122").get());
         }
        
         tMalattia12.get().save();
@@ -1783,6 +1807,7 @@ public class AbsenceMigration {
         
         if (absenceComponentDao.absenceTypeByCode("132").isPresent()) {
           tMalattia13.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("132").get());
+          tMalattia13.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("132").get());
         }
        
         tMalattia13.get().save();
@@ -1818,6 +1843,7 @@ public class AbsenceMigration {
         
         if (absenceComponentDao.absenceTypeByCode("142").isPresent()) {
           tMalattia14.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("142").get());
+          tMalattia14.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("142").get());
         }
        
         tMalattia14.get().save();
@@ -1860,6 +1886,7 @@ public class AbsenceMigration {
         
         if (absenceComponentDao.absenceTypeByCode("123").isPresent()) {
           tMalattia12.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("123").get());
+          tMalattia12.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("123").get());
         }
        
         tMalattia12.get().save();
@@ -1895,6 +1922,7 @@ public class AbsenceMigration {
         
         if (absenceComponentDao.absenceTypeByCode("133").isPresent()) {
           tMalattia13.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("133").get());
+          tMalattia13.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("133").get());
         }
        
         tMalattia13.get().save();
@@ -1930,6 +1958,7 @@ public class AbsenceMigration {
         
         if (absenceComponentDao.absenceTypeByCode("143").isPresent()) {
           tMalattia14.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("143").get());
+          tMalattia14.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("143").get());
         }
        
         tMalattia14.get().save();
@@ -1970,7 +1999,7 @@ public class AbsenceMigration {
 
       // Group Creation
       GroupAbsenceType groupAltri = new GroupAbsenceType();
-      groupAltri.category = otherCategory;
+      groupAltri.category = otherCodesCategory;;
       groupAltri.name = DefaultGroup.ALTRI.name();
       groupAltri.description = "Altri Codici";
       groupAltri.pattern = GroupAbsenceTypePattern.simpleGrouping;
@@ -2003,6 +2032,7 @@ public class AbsenceMigration {
           && absenceType.complationGroup.isEmpty() && absenceType.replacingGroup.isEmpty()) {
         log.info("AbsenceCode {}", absenceType.code );
         tAltri.get().takableCodes.add(absenceType);
+        tAltri.get().takenCodes.add(absenceType);
         tAltri.get().save();
       }
     }

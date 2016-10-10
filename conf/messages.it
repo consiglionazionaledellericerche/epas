@@ -492,6 +492,8 @@ NEW_ATTESTATI=Nuovo Attestati
 EMAIL_TO_CONTACT=Indirizzo email segreteria
 WORKING_OFF_SITE=Lavoro fuori sede
 ABSENCES_FOR_EMPLOYEE=Assenze visibili ai dipendenti 
+RECOMPUTATION_LIMIT=Limite temporale dei ricalcoli (in mesi)
+
 
 EXPIRY_VACATION_PAST_YEAR=Giorno massimo utilizzo ferie dell'anno precedente
 MONTH_EXPIRY_RECOVERY_DAYS_13=Mese massimo per utilizzo residui dell'anno precedente per i livelli da 1 a 3
@@ -534,6 +536,7 @@ AllDayAlreadyExists=Codice che giustifica l'intera giornata già presente.
 NoChildExist=Figlio non presente in anagrafica o fuori età.
 NotOnHoliday=Non di festa
 InReperibility=In Reperibilità
+InReperibilityOrShift=In Turno o Reperibilità
 InShift=In Turno
 
 child1_0_3=Primo figlio 0-3 anni

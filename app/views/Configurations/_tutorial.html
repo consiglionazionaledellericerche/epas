@@ -38,6 +38,30 @@
       <p><i class="fa fa-info-circle"></i> Inserire per esempio un indirizzo di segreteria amministrativa.</p>
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.RECOMPUTATION_LIMIT) }
+
+      <p>   
+         L'inserimento o la modifica da parte dell'amministratore di assenze o timbrature per un dipendente 
+         impone ad epas la riesecuzione dell'algoritmo di calcolo per ottenere il nuovo stato del giorno interessato e di 
+         conseguenza di tutte le entità residuali coinvolte fino a oggi.<br><br>
+         *{ solo per cnr ... }*
+         <u>Esempio:</u> Effettuare modifiche pregresse è spesso necessario per riallineare la situazione centrale con quella
+         epas successivamente all'analisi dello schedone riepilogativo.<br><br>
+         Poichè l'algoritmo di calcolo epas è in continua evoluzione esiste la possibilità seppur remota 
+         che decisioni passate differiscano da quelle della versione attuale dell'algoritmo. 
+         <em>Questa differenza potrebbe modificare lo stato consolidato del dipendente.</em><br>
+      </p>
+      <p>
+        <br>
+        <i class="fa fa-info-circle"></i> Impostando ad esempio il valore 6, nei giorni oltre i sei mesi precedenti le decisioni inerenti <br>
+           <ul>
+             <li>le ore lavorate nel giorno</li>
+             <li>il diritto al buono pasto nel giorno</li>
+           </ul>
+           saranno non più modificabili.
+      </p>
+    #{/if}
+    
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.WORKING_OFF_SITE) }
       <p>Tramite questo parametro è possibile permettere ai dipendenti che lavorano fuori sede di giustificare l'intera giornata
       lavorativa o inserire le proprie timbrature con causale "Lavoro fuori sede".</p>
