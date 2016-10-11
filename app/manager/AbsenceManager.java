@@ -483,9 +483,9 @@ public class AbsenceManager {
           + "Controllare tramite la segreteria del personale.\n"
           + "\n Servizio ePas");
 
-    } catch (EmailException e) {
+    } catch (EmailException ex) {
       // TODO GESTIRE L'Eccezione nella generazione dell'email
-      e.printStackTrace();
+      ex.printStackTrace();
     }
 
     Mail.send(email);
@@ -841,8 +841,8 @@ public class AbsenceManager {
 
   /**
    * @return la data iniziale da cui parte l'inserimento di un certo codice di assenza di modo da
-   * poter verificare se in quella data è stato inserito anche il file associato al codice di
-   * assenza ed evitare quindi di inserire un file per ogni giorno del periodo.
+   *        poter verificare se in quella data è stato inserito anche il file associato al codice 
+   *        di assenza ed evitare quindi di inserire un file per ogni giorno del periodo.
    */
   private LocalDate beginDateToInsertAbsenceFile(
       LocalDate date, Person person, AbsenceType absenceType) {

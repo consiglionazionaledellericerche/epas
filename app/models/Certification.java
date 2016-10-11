@@ -71,7 +71,6 @@ public class Certification extends BaseModel {
   /**
    * Una chiave che identifica in modo univoco la certificazione di una persona.
    * es. ABSENCE 92;14;15 
-   * @return
    */
   @Transient
   public String aMapKey() {

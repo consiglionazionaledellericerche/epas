@@ -17,7 +17,7 @@ public class PersonHourForOvertime extends BaseModel {
 
   /**
    * numero di ore assegnato (viene modificato mese per mese) di straordinari per quella persona che
-   * è responsabile di gruppo
+   * è responsabile di gruppo.
    */
   public Integer numberOfHourForOvertime;
 

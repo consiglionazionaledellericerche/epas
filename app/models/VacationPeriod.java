@@ -43,7 +43,7 @@ public class VacationPeriod extends PropertyInPeriod implements IPropertyInPerio
   
   @Transient
   @Deprecated
-  public DateInterval getDateInterval(){
+  public DateInterval getDateInterval() {
     return new DateInterval(this.beginDate, this.endDate);
   }
 

@@ -1,5 +1,8 @@
 package models.exports;
 
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+
 import models.Person;
 import models.ShiftType;
 
@@ -11,23 +14,13 @@ import org.joda.time.LocalDate;
  *
  * @author arianna
  */
+@RequiredArgsConstructor
+@AllArgsConstructor
 public class AbsenceShiftPeriod {
 
   public final Person person;
   public final LocalDate start;
-  public final ShiftType shiftType;
   public LocalDate end;
+  public final ShiftType shiftType;
 
-  public AbsenceShiftPeriod(Person person, LocalDate start, ShiftType type) {
-    this.person = person;
-    this.start = start;
-    this.shiftType = type;
-  }
-
-  public AbsenceShiftPeriod(Person person, LocalDate start, LocalDate end, ShiftType type) {
-    this.person = person;
-    this.start = start;
-    this.end = end;
-    this.shiftType = type;
-  }
 }

@@ -50,8 +50,8 @@ public class PersonCertificationStatus {
   public Certification attestatiMealToOverwrite;
   
   /**
-   * La matricola è presente sia in attestati che in epas.
-   * @return
+   * @return true se La matricola è presente sia in attestati che in epas,
+   *        false altrimenti. 
    */
   public boolean match() {
     if (this.notInAttestati || this.notInEpas) {

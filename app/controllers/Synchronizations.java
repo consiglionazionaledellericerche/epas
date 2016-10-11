@@ -96,8 +96,8 @@ public class Synchronizations extends Controller {
     List<Institute> perseoInstitutes = null;
     try {
       perseoInstitutes = officePerseoConsumer.perseoInstitutes();
-    } catch (ApiRequestException e) {
-      flash.error("%s", e);
+    } catch (ApiRequestException ex) {
+      flash.error("%s", ex);
     }
 
     List<Institute> institutes = officeDao.institutes(Optional.<String>absent(),
@@ -130,8 +130,8 @@ public class Synchronizations extends Controller {
     Map<String, Institute> perseoInstitutesByCds = null;
     try {
       perseoInstitutesByCds = officePerseoConsumer.perseoInstitutesByCds();
-    } catch (ApiRequestException e) {
-      flash.error("%s", e);
+    } catch (ApiRequestException ex) {
+      flash.error("%s", ex);
     }
 
     Map<String, Office> perseoOfficeByCodeId = Maps.newHashMap();
@@ -164,8 +164,8 @@ public class Synchronizations extends Controller {
     try {
       instituteInPerseo = officePerseoConsumer
           .perseoInstituteByInstitutePerseoId(perseoId);
-    } catch (ApiRequestException e) {
-      flash.error("%s", e);
+    } catch (ApiRequestException ex) {
+      flash.error("%s", ex);
     }
 
     if (instituteInPerseo.isPresent()) {
@@ -194,8 +194,8 @@ public class Synchronizations extends Controller {
     Optional<Institute> instituteWithThatSeat = Optional.absent();
     try {
       instituteWithThatSeat = officePerseoConsumer.perseoInstituteByOfficePerseoId(perseoId);
-    } catch (ApiRequestException e) {
-      flash.error("%s", e);
+    } catch (ApiRequestException ex) {
+      flash.error("%s", ex);
       oldInstitutes();
     }
 
@@ -228,8 +228,8 @@ public class Synchronizations extends Controller {
     Optional<Institute> instituteWithThatSeat = Optional.absent();
     try {
       instituteWithThatSeat = officePerseoConsumer.perseoInstituteByOfficePerseoId(seatPerseoId);
-    } catch (ApiRequestException e) {
-      flash.error("%s", e);
+    } catch (ApiRequestException ex) {
+      flash.error("%s", ex);
     }
 
     if (!instituteWithThatSeat.isPresent()) {
@@ -364,9 +364,10 @@ public class Synchronizations extends Controller {
 
     Map<Integer, Person> perseoPeopleByNumber = null;
     try {
-      perseoPeopleByNumber = peoplePerseoConsumer.perseoPeopleByNumber(Optional.of(office.perseoId));
-    } catch (ApiRequestException e) {
-      flash.error("%s", e);
+      perseoPeopleByNumber = 
+          peoplePerseoConsumer.perseoPeopleByNumber(Optional.of(office.perseoId));
+    } catch (ApiRequestException ex) {
+      flash.error("%s", ex);
     }
 
     render(wrapperedPeople, perseoPeopleByNumber, office);
@@ -387,8 +388,8 @@ public class Synchronizations extends Controller {
     Optional<Person> personInPerseo = Optional.absent();
     try {
       personInPerseo = peoplePerseoConsumer.perseoPersonByPerseoId(perseoId);
-    } catch (ApiRequestException e) {
-      flash.error("%s", e);
+    } catch (ApiRequestException ex) {
+      flash.error("%s", ex);
     }
 
     if (personInPerseo.isPresent()) {
@@ -417,7 +418,8 @@ public class Synchronizations extends Controller {
     epasPerson.name = perseoPerson.name;
     epasPerson.surname = perseoPerson.surname;
     epasPerson.number = perseoPerson.number;
-    epasPerson.email = perseoPerson.email; // per adesso le email non combaciano @iit.cnr.it vs @cnr.it
+    // per adesso le email non combaciano @iit.cnr.it vs @cnr.it
+    epasPerson.email = perseoPerson.email; 
     epasPerson.eppn = perseoPerson.email;
     epasPerson.qualification = perseoPerson.qualification;
     epasPerson.perseoId = perseoPerson.perseoId;
@@ -443,8 +445,8 @@ public class Synchronizations extends Controller {
     try {
       perseoPeopleByNumber = peoplePerseoConsumer
           .perseoPeopleByNumber(Optional.fromNullable(office.perseoId));
-    } catch (ApiRequestException e) {
-      flash.error("%s", e);
+    } catch (ApiRequestException ex) {
+      flash.error("%s", ex);
     }
 
     if (!people.isEmpty() && perseoPeopleByNumber != null) {
@@ -473,14 +475,14 @@ public class Synchronizations extends Controller {
     Optional<Person> personInPerseo = Optional.absent();
     try {
       personInPerseo = peoplePerseoConsumer.perseoPersonByPerseoId(perseoId);
-    } catch (ApiRequestException e) {
-      flash.error("%s", e);
+    } catch (ApiRequestException ex) {
+      flash.error("%s", ex);
     }
 
     Optional<Office> office = Optional.absent();
 
     if (personInPerseo.isPresent()) {
-////      Caricare dalla persona l'office.
+      // Caricare dalla persona l'office.
       office = officeDao.byPerseoId(personInPerseo.get().perseoOfficeId);
       if (!office.isPresent()) {
         flash.error("L'ufficio di appartenenza della persona selezionata non è "
@@ -524,7 +526,7 @@ public class Synchronizations extends Controller {
       Role employee = Role.find("byName", Role.EMPLOYEE).first();
       officeManager.setUro(person.user, person.office, employee);
       person.save();
-    } catch (Exception e) {
+    } catch (Exception ex) {
       return Optional.<Person>absent();
     }
 
@@ -540,8 +542,8 @@ public class Synchronizations extends Controller {
     try {
       perseoPeopleByPerseoId = peoplePerseoConsumer
           .perseoPeopleByPerseoId(Optional.fromNullable(office.perseoId));
-    } catch (ApiRequestException e) {
-      e.printStackTrace();
+    } catch (ApiRequestException ex) {
+      ex.printStackTrace();
     }
 
     List<Person> people = personDao.listFetched(Optional.<String>absent(),
@@ -562,7 +564,8 @@ public class Synchronizations extends Controller {
     for (Person perseoPerson : perseoPeopleByPerseoId.values()) {
       if (epasPeopleByPerseoId.get(perseoPerson.perseoId) == null) {
 
-        log.info("Provo name:{} matricola:{} qualifica:{} perseoId:{}", perseoPerson.fullName(), perseoPerson.number,
+        log.info("Provo name:{} matricola:{} qualifica:{} perseoId:{}", 
+            perseoPerson.fullName(), perseoPerson.number,
             perseoPerson.qualification, perseoPerson.perseoId);
 
         // join dell'office (in automatico ancora non c'è...)
@@ -571,8 +574,9 @@ public class Synchronizations extends Controller {
         validation.valid(perseoPerson);
         if (validation.hasErrors()) {
           // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
-          log.info("L'importazione della persone con perseoId={} ha comportato errori di validazione "
-              + "nella persona. errors={}.", perseoPerson.perseoId, validation.errorsMap());
+          log.info("L'importazione della persone con perseoId={} ha comportato errori di "
+              + "validazione nella persona. errors={}.", 
+              perseoPerson.perseoId, validation.errorsMap());
           validation.clear();
           continue;
         }
@@ -580,8 +584,9 @@ public class Synchronizations extends Controller {
         // Creazione!
         if (!personCreator(perseoPerson).isPresent()) {
           // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
-          log.info("L'importazione della persone con perseoId={} ha comportato errori di validazione "
-              + "nella persona. errors={}.", perseoPerson.perseoId, validation.errorsMap());
+          log.info("L'importazione della persone con perseoId={} ha comportato errori di "
+              + "validazione nella persona. errors={}.", 
+              perseoPerson.perseoId, validation.errorsMap());
           validation.clear();
           continue;
         }
@@ -635,11 +640,12 @@ public class Synchronizations extends Controller {
       try {
         perseoDepartmentActiveContractsByPersonPerseoId = contractPerseoConsumer
             .perseoDepartmentActiveContractsByPersonPerseoId(office.perseoId, office);
-      } catch (ApiRequestException e) {
-        flash.error("%s", e);
+      } catch (ApiRequestException ex) {
+        flash.error("%s", ex);
       }
     }
-    render(activeContractsEpasByPersonPerseoId, perseoDepartmentActiveContractsByPersonPerseoId, office);
+    render(activeContractsEpasByPersonPerseoId, perseoDepartmentActiveContractsByPersonPerseoId, 
+        office);
   }
 
   /**

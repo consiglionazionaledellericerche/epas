@@ -223,10 +223,10 @@ public class Absences extends Controller {
 
   /**
    * TODO: o tutte o nessuna ?...
-   * @param personPerseoId
-   * @param absenceCode
-   * @param begin
-   * @param end
+   * @param personPerseoId il perseoId della persona
+   * @param absenceCode l'absenceCode da inserire
+   * @param begin la data di inizio dell'assenza
+   * @param end la data di fine dell'assenza
    * @throws JsonProcessingException
    */
   @BasicAuth
@@ -286,7 +286,7 @@ public class Absences extends Controller {
       renderJSON(mapper.writer(JacksonModule.filterProviderFor(SimpleBeanPropertyFilter
           .serializeAllExcept("absenceAdded"))).writeValueAsString(air.getAbsences()));
       
-    } catch (Exception e) {
+    } catch (Exception ex) {
       JsonResponse.badRequest("Errore nei parametri passati al server");
     }
 

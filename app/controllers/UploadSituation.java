@@ -60,7 +60,8 @@ public class UploadSituation extends Controller {
   public static final String FILE_SUFFIX = ".txt";
 
   public static final String DEFAULT_URL_TO_PRESENCE = "https://attestati.rm.cnr.it/attestati/";
-  public static final String URL_TO_PRESENCE = Play.configuration.getProperty("url_to_presence", DEFAULT_URL_TO_PRESENCE);
+  public static final String URL_TO_PRESENCE = 
+      Play.configuration.getProperty("url_to_presence", DEFAULT_URL_TO_PRESENCE);
 
 
   @Inject
@@ -262,9 +263,9 @@ public class UploadSituation extends Controller {
 
         memAttestatiIntoCache(sessionAttestati, null);
 
-      } catch (AttestatiException e) {
+      } catch (AttestatiException ex) {
         flash.error(String.format("Errore durante il login e/o prelevamento della lista "
-            + "dei dipendenti dal sistema degli attestati. Eccezione: {}", e));
+            + "dei dipendenti dal sistema degli attestati. Eccezione: {}", ex));
         UploadSituation.uploadData(office.id);
       }
     } else {

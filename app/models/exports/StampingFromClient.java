@@ -6,6 +6,8 @@ import models.enumerate.StampTypes;
 import org.joda.time.LocalDateTime;
 
 /**
+ * Esportazione delle informazioni relative ad una timbratura.
+ * 
  * @author cristian
  */
 public class StampingFromClient {
