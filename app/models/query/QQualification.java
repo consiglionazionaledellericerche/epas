@@ -24,7 +24,7 @@ public class QQualification extends EntityPathBase<Qualification> {
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
-    public final ListPath<models.AbsenceType, QAbsenceType> absenceTypes = this.<models.AbsenceType, QAbsenceType>createList("absenceTypes", models.AbsenceType.class, QAbsenceType.class, PathInits.DIRECT2);
+    public final ListPath<models.absences.AbsenceType, models.absences.query.QAbsenceType> absenceTypes = this.<models.absences.AbsenceType, models.absences.query.QAbsenceType>createList("absenceTypes", models.absences.AbsenceType.class, models.absences.query.QAbsenceType.class, PathInits.DIRECT2);
 
     public final StringPath description = createString("description");
 

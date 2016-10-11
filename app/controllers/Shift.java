@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import manager.ShiftManager;
 
-import models.Absence;
 import models.Competence;
 import models.Person;
 import models.PersonShiftDay;
@@ -30,6 +29,7 @@ import models.ShiftCategories;
 import models.ShiftTimeTable;
 import models.ShiftType;
 import models.User;
+import models.absences.Absence;
 import models.exports.AbsenceShiftPeriod;
 import models.exports.ShiftPeriod;
 import models.exports.ShiftPeriods;

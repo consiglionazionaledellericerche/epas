@@ -12,13 +12,13 @@ import dao.wrapper.IWrapperPersonDay;
 
 import it.cnr.iit.epas.DateUtility;
 
-import models.AbsenceType;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
+import models.absences.AbsenceType;
 
 import org.joda.time.LocalDate;
 

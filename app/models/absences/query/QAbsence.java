@@ -1,7 +1,7 @@
-package models.query;
+package models.absences.query;
 
 import static com.mysema.query.types.PathMetadataFactory.*;
-import models.Absence;
+import models.absences.Absence;
 
 
 import com.mysema.query.types.path.*;
@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QAbsence extends EntityPathBase<Absence> {
 
-    private static final long serialVersionUID = -968783207L;
+    private static final long serialVersionUID = -580774647L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
@@ -38,10 +38,14 @@ public class QAbsence extends EntityPathBase<Absence> {
 
     public final NumberPath<Integer> justifiedMinutes = createNumber("justifiedMinutes", Integer.class);
 
+    public final QJustifiedType justifiedType;
+
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
-    public final QPersonDay personDay;
+    public final models.query.QPersonDay personDay;
+
+    public final SetPath<models.absences.AbsenceTrouble, QAbsenceTrouble> troubles = this.<models.absences.AbsenceTrouble, QAbsenceTrouble>createSet("troubles", models.absences.AbsenceTrouble.class, QAbsenceTrouble.class, PathInits.DIRECT2);
 
     public QAbsence(String variable) {
         this(Absence.class, forVariable(variable), INITS);
@@ -62,7 +66,8 @@ public class QAbsence extends EntityPathBase<Absence> {
     public QAbsence(Class<? extends Absence> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
         this.absenceType = inits.isInitialized("absenceType") ? new QAbsenceType(forProperty("absenceType"), inits.get("absenceType")) : null;
-        this.personDay = inits.isInitialized("personDay") ? new QPersonDay(forProperty("personDay"), inits.get("personDay")) : null;
+        this.justifiedType = inits.isInitialized("justifiedType") ? new QJustifiedType(forProperty("justifiedType")) : null;
+        this.personDay = inits.isInitialized("personDay") ? new models.query.QPersonDay(forProperty("personDay"), inits.get("personDay")) : null;
     }
 
 }

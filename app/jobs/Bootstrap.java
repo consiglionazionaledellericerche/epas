@@ -2,11 +2,18 @@ package jobs;
 
 import com.google.common.io.Resources;
 
+import dao.UserDao;
+
 import lombok.extern.slf4j.Slf4j;
 
+import manager.services.absences.AbsenceMigration;
+
 import models.Qualification;
+import models.Role;
 import models.User;
+import models.UsersRolesOffices;
 import models.WorkingTimeType;
+import models.absences.GroupAbsenceType;
 
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
@@ -46,6 +53,9 @@ public class Bootstrap extends Job<Void> {
 
   @Inject
   static FixEmployeesPermission fixEmployeesPermission;
+  @Inject
+  static AbsenceMigration absenceMigration;
+
 
   //Aggiunto qui perché non più presente nella classe Play dalla versione >= 1.4.3
   public static boolean runingInTestMode() {
@@ -75,6 +85,12 @@ public class Bootstrap extends Job<Void> {
 
       session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
           .getResource("../db/import/absence-type-and-qualification-phase2.xml")));
+    }
+
+    if (GroupAbsenceType.count() == 0) {
+      log.info("Iniziata migrazione assenze!");
+      absenceMigration.buildDefaultGroups();
+      log.info("Conclusa migrazione assenze!");
     }
 
     if (User.find("byUsername", "developer").fetch().isEmpty()) {

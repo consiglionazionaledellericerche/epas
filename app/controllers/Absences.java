@@ -42,14 +42,14 @@ import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
 
-import models.Absence;
-import models.AbsenceType;
 import models.AbsenceTypeGroup;
 import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.Qualification;
 import models.User;
+import models.absences.Absence;
+import models.absences.AbsenceType;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.QualificationMapping;
@@ -246,7 +246,7 @@ public class Absences extends Controller {
       absenceType.qualifications.add(qual);
     }
 
-    if (!Strings.isNullOrEmpty(absenceTypeGroup.label) && !absenceType.isPersistent()) {
+    if (!Strings.isNullOrEmpty(absenceTypeGroup.label)) {
       absenceType.absenceTypeGroup = absenceTypeGroup;
       absenceTypeGroup.save();
     }

@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 
 import it.cnr.iit.epas.DateUtility;
 
+import models.absences.JustifiedType;
 import models.base.BaseModel;
 
 import org.apache.commons.lang.WordUtils;
@@ -139,6 +140,9 @@ public class TemplateExtensions extends JavaExtensions {
   }
 
   public static String label(Object obj) {
+    if (obj instanceof JustifiedType) {
+      return Messages.get(obj.toString());
+    }
     if (obj instanceof BaseModel) {
       return ((BaseModel)obj).getLabel();
     }

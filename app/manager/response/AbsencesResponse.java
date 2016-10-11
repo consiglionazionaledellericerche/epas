@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFilter;
 
 import helpers.rest.JacksonModule;
 
-import models.Absence;
+import models.absences.Absence;
 
 import org.joda.time.LocalDate;
 
@@ -45,6 +45,7 @@ public class AbsencesResponse {
   private boolean isHoliday = false;
   private boolean isDayInReperibilityOrShift = false;
   private Absence absenceAdded;
+  private Absence absenceInError;
 
   public AbsencesResponse(LocalDate date, String absenceCode) {
     this.date = date;
@@ -112,6 +113,14 @@ public class AbsencesResponse {
 
   public void setAbsenceAdded(Absence absenceAdded) {
     this.absenceAdded = absenceAdded;
+  }
+  
+  public Absence getAbsenceInError() {
+    return absenceInError;
+  }
+
+  public void setAbsenceInError(Absence absenceInError) {
+    this.absenceInError = absenceInError;
   }
 
   public enum toDate implements Function<AbsencesResponse, LocalDate> {

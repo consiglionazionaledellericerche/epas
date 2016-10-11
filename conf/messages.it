@@ -18,6 +18,29 @@ absenceTypeGroup.label= Etichetta gruppo
 absenceTypeGroup.limitInMinute= Limite accumulo
 absenceTypeGroup.minutesExcess= Minuti in eccesso
 absenceTypeGroup.replacingAbsenceType= Codice per sotituzione
+groupAbsenceType=Gruppo di Codici
+TooEarlyReplacing=Codice di completamento anticipato
+
+justifiedType=Tempo giustificato
+
+insert=Inserimento
+insertReplacing = Inserimento Rimpiazzamento
+
+absence_type_minutes=Tempo specificato nel tipo assenza
+all_day=Tutto il giorno
+assign_all_day=Assegna l'intera giornata lavorativa
+specified_minutes=Specificare ore e minuti
+
+nothing=Niente
+minutes=Minuti
+hours=Ore
+units=Giorni
+month=Mese
+year=Anno
+programmed=Programmato
+child0_12=Figlio 0-12 anni
+child0_6=Figlio 0-6 anni
+workingTimeAndWorkingPeriodPercent=Percentuale Tempo Lavoro e Orario Lavoro
 
 administrations= Amministrazione
 administrator= Amministratore
@@ -61,6 +84,9 @@ badgeSystems= Gruppi Badge
 BadgeSystems.joinBadges= Associa Badge
 
 beginDate=Data Inizio
+endDate=Data Fine
+from=Da
+to=A
 
 child.bornDate= Data di Nascita
 child.name= Nome
@@ -175,8 +201,7 @@ domain= Dominio
 done.by= Effettuata da
 
 emailToContact= Indirizzo email dell&#39;amministrazione
-endContract=Data Risoluzione 
-endDate=Data Fine
+endContract=Data Risoluzione
 expireDate=Data Scadenza
 
 feedback.subject =EPAS - Segnalazione utente
@@ -190,6 +215,7 @@ beginCompetenceCode= In questo mese inizia l'utilizzo del codice di competenza.
 endCompetenceCode= In questo mese termina l'utilizzo del codice di competenza. Dal prossimo mese non sarà più usabile e visibile in questa lista.
 firstDay= Giorno inizio contratto
 
+forceInsert= Forza Inserimento
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite
@@ -251,7 +277,6 @@ Month.6=Giugno
 Month.7=Luglio
 Month.8=Agosto
 Month.9=Settembre
-month= Mese (se presente)
 
 name=Nome
 noResultFound=Nessuna corrispondenza trovata.
@@ -441,7 +466,6 @@ wtt= Tipo Orario
 WorkingTimeTypePattern.HORIZONTAL = Orario Orizzontale
 WorkingTimeTypePattern.VERTICAL = Orario Verticale
 workingTimeTypePattern=Tipo Orario
-year= Anno (se presente)
 
 vwt.name= Nome orario
 
@@ -627,6 +651,8 @@ NEW_ATTESTATI=Nuovo Attestati
 EMAIL_TO_CONTACT=Indirizzo email segreteria
 WORKING_OFF_SITE=Lavoro fuori sede
 ABSENCES_FOR_EMPLOYEE=Assenze visibili ai dipendenti 
+RECOMPUTATION_LIMIT=Limite temporale dei ricalcoli (in mesi)
+
 
 EXPIRY_VACATION_PAST_YEAR=Giorno massimo utilizzo ferie dell'anno precedente
 MONTH_EXPIRY_RECOVERY_DAYS_13=Mese massimo per utilizzo residui dell'anno precedente per i livelli da 1 a 3
@@ -658,6 +684,25 @@ configurationDto.localdateNewValue=Nuovo Valore
 
 WayType.in= Ingresso
 WayType.out= Uscita
+
+# Enumerati Assenze
+
+MissingReplacing=Manca il codice di rimpiazzamento.
+WrongReplacing=Il codice di rimpiazzamento presente non è quello corretto.
+CompromisedReplacing=La sequenza dei rimpiazzamenti è compromessa.
+LimitExceeded=Il tetto massimo utilizzabile per il periodo è stato superato.
+AllDayAlreadyExists=Codice che giustifica l'intera giornata già presente.
+NoChildExist=Figlio non presente in anagrafica o fuori età.
+NotOnHoliday=Non di festa
+InReperibility=In Reperibilità
+InReperibilityOrShift=In Turno o Reperibilità
+InShift=In Turno
+
+child1_0_3=Primo figlio 0-3 anni
+child1_0_6=Primo figlio 0-6 anni
+child1_0_12=Primo figlio 0-12 anni
+
+
 
 ###########################################################################
 #	Descrizioni campi (usati nei popovers e nelle descrizioni dei campi)

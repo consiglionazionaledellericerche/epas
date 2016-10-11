@@ -14,6 +14,7 @@ import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
 import dao.PersonShiftDayDao;
 import dao.WorkingTimeTypeDao;
+import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 
 import it.cnr.iit.epas.CheckMessage;
@@ -26,8 +27,6 @@ import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
 import manager.services.vacations.IVacationsService;
 
-import models.Absence;
-import models.AbsenceType;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
@@ -36,6 +35,9 @@ import models.PersonDay;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
 import models.Qualification;
+import models.absences.Absence;
+import models.absences.AbsenceType;
+import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.QualificationMapping;
@@ -78,6 +80,7 @@ public class AbsenceManager {
   private final ConfigurationManager configurationManager;
   private final IWrapperFactory wrapperFactory;
   private final PersonDayManager personDayManager;
+  private final AbsenceComponentDao absenceComponentDao;
 
   /**
    * Costruttore.
@@ -103,6 +106,7 @@ public class AbsenceManager {
       WorkingTimeTypeDao workingTimeTypeDao,
       ContractDao contractDao,
       AbsenceDao absenceDao,
+      AbsenceComponentDao absenceComponentDao,
       PersonReperibilityDayDao personReperibilityDayDao,
       PersonShiftDayDao personShiftDayDao,
       PersonChildrenDao personChildrenDao,
@@ -117,6 +121,7 @@ public class AbsenceManager {
       IWrapperFactory wrapperFactory,
       IVacationsService vacationsService) {
 
+    this.absenceComponentDao = absenceComponentDao;
     this.contractMonthRecapManager = contractMonthRecapManager;
     this.workingTimeTypeDao = workingTimeTypeDao;
     this.personManager = personManager;
@@ -357,7 +362,7 @@ public class AbsenceManager {
       consistencyManager.updatePersonSituation(person.id, dateFrom);
 
       if (air.getAbsenceInReperibilityOrShift() > 0) {
-        sendEmail(person, air);
+        sendReperibilityShiftEmail(person, air.datesInReperibilityOrShift());
       }
     }
 
@@ -382,11 +387,27 @@ public class AbsenceManager {
     Preconditions.checkNotNull(file);
 
     AbsencesResponse ar = new AbsencesResponse(date, absenceType.code);
+    
+    Absence absence = new Absence();
+    absence.date = date;
+    absence.absenceType = absenceType;
+    if (absence.absenceType.justifiedTypesPermitted.size() == 1) {
+      absence.justifiedType = absence.absenceType.justifiedTypesPermitted.iterator().next();
+    }
+    else if (justifiedMinutes.isPresent()) {
+      absence.justifiedMinutes = justifiedMinutes.get();
+      absence.justifiedType = absenceComponentDao
+          .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
+    } else {
+      absence.justifiedType = absenceComponentDao
+          .getOrBuildJustifiedType(JustifiedTypeName.all_day);
+    }
 
     //se non devo considerare festa ed è festa non inserisco l'assenza
     if (!absenceType.consideredWeekEnd && personDayManager.isHoliday(person, date)) {
       ar.setHoliday(true);
       ar.setWarning(AbsencesResponse.NON_UTILIZZABILE_NEI_FESTIVI);
+      ar.setAbsenceInError(absence);
 
     } else {
       // check sulla reperibilità
@@ -405,13 +426,6 @@ public class AbsenceManager {
         }
       } else {
         startAbsence = date;
-      }
-
-
-      Absence absence = new Absence();
-      absence.absenceType = absenceType;
-      if (justifiedMinutes.isPresent()) {
-        absence.justifiedMinutes = justifiedMinutes.get();
       }
 
       if (persist) {
@@ -464,7 +478,7 @@ public class AbsenceManager {
    * Metodo che invia la mail contenente i giorni in cui ci sono inserimenti di assenza in turno o
    * reperibilità.
    */
-  private void sendEmail(Person person, AbsenceInsertReport airl) {
+  public void sendReperibilityShiftEmail(Person person, List<LocalDate> dates) {
     MultiPartEmail email = new MultiPartEmail();
 
     try {
@@ -475,7 +489,7 @@ public class AbsenceManager {
       email.addReplyTo(replayTo);
       email.setSubject("Segnalazione inserimento assenza in giorno con reperibilità/turno");
       String date = "";
-      for (LocalDate data : airl.datesInReperibilityOrShift()) {
+      for (LocalDate data : dates) {
         date = date + data + ' ';
       }
       email.setMsg("E' stato richiesto l'inserimento di una assenza per il giorno " + date

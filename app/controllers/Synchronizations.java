@@ -863,4 +863,5 @@ public class Synchronizations extends Controller {
     flash.success("Istituto %s desincronizzato.", institute.name);
     oldInstitutes();
   }
+  
 }

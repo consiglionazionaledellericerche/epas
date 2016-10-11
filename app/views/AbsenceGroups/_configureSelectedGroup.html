@@ -1,0 +1,56 @@
+#{form action:@AbsenceGroups.configureInsert(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit',
+    'data-async':'#absenceData', 'data-async-error':'#absenceData'}
+   
+     #{f.hidden 'personId', value:absenceRequestForm.person.id /}
+
+     #{f.hidden 'from', value:absenceRequestForm.from?.format() /}
+     #{f.date 'from', value:absenceRequestForm.from?.format(), disabled:true /}     
+     #{if alldaySelected }
+       #{f.date 'to', value:absenceRequestForm.to?.format() /}
+     #{/if}
+     #{else}
+       #{f.date 'to', disabled:true  /} 
+     #{/else}
+     
+   
+     #{f.hidden 'groupAbsenceType.id', value:selectedFormItem.groupAbsenceType.id /}
+
+     *{ seleziona sub item group}*
+     #{if selectedFormItem.subAbsenceGroupFormItems.size() > 1 } 
+	  #{f.selectModel 'absenceType', personalizeItems:true}
+	    #{if selectedFormItem.containsAutomatic}
+	      <optgroup label="Inserimento Automatico">
+	      #{list selectedFormItem.subAbsenceGroupFormItems, as:'subItemm'}
+	        #{if subItemm.isAutomatic()}
+	         <option value="${subItemm.absenceType?.id}"
+	          #{if subItemm.selected} selected #{/if}>Automatico</option>
+		    #{/if}
+          #{/list}
+		  <optgroup/>
+	    #{/if}
+	    <optgroup label="Codice Specifico">
+	    #{list selectedFormItem.subAbsenceGroupFormItems, as:'subItemm'}
+	      #{if !subItemm.isAutomatic()}
+	      <option value="${subItemm.absenceType?.id}"
+	        #{if subItemm.selected} selected #{/if}>${subItemm.getLabel()} </option>
+	      #{/if}  
+		#{/list}
+		<optgroup/>
+
+	  #{/f.selectModel}
+     #{/if}
+     #{else}
+       #{f.hidden 'absenceType.id', value:selecteSubItem.absenceType?.id /}
+       #{f.view 'absenceType', value:selecteSubItem.getLabel() /}
+     #{/else}
+   
+     *{ seleziona tempo giustificato }*
+     #{if selecteSubItem.getJustifiedTypesPermitted().size() > 1 } 			     
+       #{f.selectModel 'justifiedType', items:selecteSubItem.getJustifiedTypesPermitted(), value:selecteSubItem.selectedJustified /}
+     #{/if}
+     #{else}
+       #{f.hidden 'justifiedType.id', value:selecteSubItem.selectedJustified.id /}
+       #{f.view 'justifiedType', value:selecteSubItem.selectedJustified.label() /}
+     #{/else}
+         
+	#{/form}

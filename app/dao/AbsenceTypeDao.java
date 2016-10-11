@@ -12,16 +12,17 @@ import com.mysema.query.types.Projections;
 
 import helpers.jpa.ModelQuery;
 
-import models.AbsenceType;
 import models.Person;
-import models.query.QAbsence;
-import models.query.QAbsenceType;
+import models.absences.AbsenceType;
+import models.absences.query.QAbsence;
+import models.absences.query.QAbsenceType;
 
 import org.bouncycastle.util.Strings;
 import org.joda.time.LocalDate;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -157,6 +158,20 @@ public class AbsenceTypeDao extends DaoBase {
 
   }
 
+  /**
+   * Le absenceType con quei codici di assenza.
+   * @param codes
+   * @return
+   */
+  public List<AbsenceType> absenceTypeCodeSet(Set<String> codes) {
+    
+    QAbsenceType absenceType = QAbsenceType.absenceType;
+
+    final JPQLQuery query = getQueryFactory().from(absenceType)
+        .where(absenceType.code.in(codes));
+    return query.list(absenceType);
+  }
+  
   /**
    * Una mappa contenente gli AbsenceType fatte dalle persona nel mese e numero di assenze fatte per
    * ogni tipo.

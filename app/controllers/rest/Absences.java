@@ -28,11 +28,11 @@ import manager.cache.AbsenceTypeManager;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
 
-import models.Absence;
-import models.AbsenceType;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
+import models.absences.Absence;
+import models.absences.AbsenceType;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
