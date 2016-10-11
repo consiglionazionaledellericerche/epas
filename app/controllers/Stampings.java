@@ -130,7 +130,12 @@ public class Stampings extends Controller {
         .create(wrperson.getValue(), year, month, true);
 
     Person person = wrperson.getValue();
-    render("@personStamping", psDto, person);
+
+    // Questo mi serve per poter fare le verifiche tramite le drools per l'inserimento timbrature in
+    // un determinato mese
+    final YearMonth yearMonth = new YearMonth(year, month);
+
+    render("@personStamping", psDto, person, yearMonth);
   }
 
 
@@ -161,7 +166,11 @@ public class Stampings extends Controller {
 
     PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, true);
 
-    render(psDto, person);
+    // Questo mi serve per poter fare le verifiche tramite le drools per l'inserimento timbrature in
+    // un determinato mese
+    final YearMonth yearMonth = new YearMonth(year, month);
+
+    render(psDto, person, yearMonth);
   }
 
   /**

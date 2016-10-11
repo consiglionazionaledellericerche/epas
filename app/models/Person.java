@@ -169,7 +169,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   /**
    * Dati derivanti dall'invio col nuovo sistema degli attestati
    */
-  @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
+  @OneToMany(mappedBy = "person")
   public List<Certification> certifications = Lists.newArrayList();
 
   @OneToMany(mappedBy = "admin")
@@ -343,12 +343,13 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
    * Verifica se per la persona sono già stati inviati gli attestati relativi ad una determinata
    * data
    *
-   * @param date La data sulla quale verificare la presenza dei riepiloghi degli attestati
+   * @param year  Anno sul quale verificare la presenza dei riepiloghi degli attestati
+   * @param month Mese sul quale verificare la presenza dei riepiloghi degli attestati
    * @return true se
    */
-  public boolean alreadyCertificated(final LocalDate date) {
-    return certifications.stream().filter(certification -> certification.year == date.getYear()
-        && certification.month == date.getMonthOfYear()).findFirst().isPresent();
+  public boolean alreadyCertificated(int year, int month) {
+    return certifications.stream().filter(certification -> certification.year == year
+        && certification.month == month).findFirst().isPresent();
   }
 
 }

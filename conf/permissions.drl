@@ -1,5 +1,7 @@
 package security;
 
+import org.joda.time.YearMonth;
+
 import dao.history.HistoricalDao;
 import dao.UserDao;
 import manager.configurations.EpasParam;
@@ -192,7 +194,7 @@ when
  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
  $target: Stamping()
  Office(persons.contains($target.getOwner())) from $uro.office
- $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save"), target == $target, granted == false )
+ $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), target == $target, granted == false )
 then
  $c.grant();
 end
@@ -204,7 +206,6 @@ rule HasRightOnHimself
 when
   $p: Person(this == currentOperator.person)
   $c: PermissionCheck(action not in (
-      "Stampings.blank",
       "Absences.blank",
       "Absences.edit",
       "Absences.delete",
@@ -1012,6 +1013,19 @@ then
  $c.grant();
 end
 
+/************************************************************************************
+ * L'amministratore può inserire le timbrature nel passato senza limiti (per ora)
+ * il controllo che non sia una data futura viene fatta nell'action
+ ************************************************************************************/
+rule adminCanInsertStampings_inDate
+when
+ $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
+ $target: YearMonth()
+ $c: PermissionCheck(action == "Stampings.blank", target == $target, granted == false)
+then
+ $c.grant();
+end
+
 /*******************************************************************************
  * Una configurazione può essere modificata se....
  ******************************************************************************/
@@ -1063,9 +1077,9 @@ then
 end
 
 
-/*******************************************************************************
+/************************************************************************************
  * Un dipendente può autocertificare le proprie timbrature per il lavoro fuori Sede se...
- ******************************************************************************/
+ ***********************************************************************************/
 rule employeeCanInsertStampingsOffsite
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
@@ -1073,7 +1087,7 @@ when
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
  PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
- $c: PermissionCheck(action in ("Stampings.blank"), target == $p, granted == false)
+ $c: PermissionCheck(action == "Stampings.blank", target == $p, granted == false)
 then
  $c.grant();
 end
@@ -1091,7 +1105,7 @@ when
  PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
  $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), target == $target, granted == false)
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
- eval (!$p.alreadyCertificated($target.date.toLocalDate()))
+ eval (!$p.alreadyCertificated($target.date.getYear(), $target.date.getMonthOfYear()))
 then
  $c.grant();
 end
@@ -1131,13 +1145,30 @@ end
 /*******************************************************************************
  * Un dipendente può autocertificare le proprie timbrature se...
  ******************************************************************************/
-rule employeeCanInsertStampings
+rule employeeCanInsertStampings_OnPerson
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person(qualification.qualification <= 3) from currentOperator.person
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
- $c: PermissionCheck(action in ("Stampings.blank"), target == $p, granted == false)
+ $c: PermissionCheck(action == "Stampings.blank", target == $p, granted == false)
+then
+ $c.grant();
+end
+
+/************************************************************************************
+ * Un dipendente può autocertificare le proprie timbrature entro una certa data se...
+ *
+ * Non vengono fatti i controlli sulle configurazioni che vengono già fatti nelle altre drools
+ * in modo che questa regola valga sia nel caso di R&T che del lavoro fuori sede
+ ************************************************************************************/
+rule employeeCanInsertStampings_inDate
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ $target: YearMonth()
+ $c: PermissionCheck(action == "Stampings.blank", target == $target, granted == false)
+ eval(!$p.alreadyCertificated($target.getYear(), $target.getMonthOfYear()))
 then
  $c.grant();
 end
@@ -1154,7 +1185,7 @@ when
  Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
  $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save" , "Stampings.delete"), granted == false, target == $target)
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
- eval (!$p.alreadyCertificated($target.date.toLocalDate()))
+ eval (!$p.alreadyCertificated($target.date.getYear(), $target.date.getMonthOfYear()))
 then
  $c.grant();
 end
