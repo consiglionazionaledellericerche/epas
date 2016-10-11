@@ -1091,7 +1091,7 @@ when
  PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
  $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), target == $target, granted == false)
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
- /* AGGIUNGERE IL CONTROLLO SULL'INVIO DEGLI ATTESTATI!!! */
+ eval (!$p.alreadyCertificated($target.date.toLocalDate()))
 then
  $c.grant();
 end
@@ -1154,7 +1154,7 @@ when
  Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
  $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save" , "Stampings.delete"), granted == false, target == $target)
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
-  /* AGGIUNGERE IL CONTROLLO SULL'INVIO DEGLI ATTESTATI!!! */
+ eval (!$p.alreadyCertificated($target.date.toLocalDate()))
 then
  $c.grant();
 end
