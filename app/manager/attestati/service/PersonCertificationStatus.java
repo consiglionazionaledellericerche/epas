@@ -125,14 +125,10 @@ public class PersonCertificationStatus {
         if (actualCertification == null && epasCertification != null) {
           // Nelle toDelete inserisco quelle epas non in attuali
           toDeleteCertifications.put(key, epasCertification);
-        }
-        
-        else if (actualCertification != null && epasCertification == null) {
+        } else if (actualCertification != null && epasCertification == null) {
           // Nelle da inviare inserisco le attuali non in epas
           toSendCertifications.put(key, actualCertification);
-        }
-        
-        else if (actualCertification != null && epasCertification != null) {
+        } else if (actualCertification != null && epasCertification != null) {
           if (epasCertification.containProblems()) {
             // Nelle corrette inserisco quelle epas in attuali senza problemi
             problemCertifications.put(key, epasCertification);
@@ -150,8 +146,8 @@ public class PersonCertificationStatus {
   public PersonCertificationStatus computeProcessStatus() {
     
     if (incompleteProcessable) {
-      if (toDeleteCertifications.values().isEmpty() && problemCertifications.values().isEmpty() &&
-          toSendCertifications.values().isEmpty() ) {
+      if (toDeleteCertifications.values().isEmpty() && problemCertifications.values().isEmpty() 
+          && toSendCertifications.values().isEmpty() ) {
         this.incompleteProcessable = false;
         this.okProcessable = true;
       }

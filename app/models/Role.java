@@ -19,14 +19,12 @@ import javax.persistence.Table;
 @Table(name = "roles")
 public class Role extends BaseModel {
 
-  public static final String DEVELOPER = "developer";
-  public static final String ADMIN = "admin";
   public static final String PERSONNEL_ADMIN = "personnelAdmin";
   public static final String PERSONNEL_ADMIN_MINI = "personnelAdminMini";
   public static final String EMPLOYEE = "employee";
   public static final String BADGE_READER = "badgeReader";
   public static final String REST_CLIENT = "restClient";
-  public static final String TECNICAL_ADMIN = "tecnicalAdmin";
+  public static final String TECHNICAL_ADMIN = "technicalAdmin";
   public static final String SHIFT_MANAGER = "shiftManager";
   public static final String REPERIBILITY_MANAGER = "reperibilityManager";
   private static final long serialVersionUID = 6717202212924325368L;
@@ -44,7 +42,7 @@ public class Role extends BaseModel {
     if (name.equals(Role.PERSONNEL_ADMIN_MINI)) {
       return "Amministratore Personale Sola lettura";
     }
-    if (name.equals(Role.TECNICAL_ADMIN)) {
+    if (name.equals(Role.TECHNICAL_ADMIN)) {
       return "Amministratore Tecnico";
     }
     if (name.equals(Role.EMPLOYEE)) {

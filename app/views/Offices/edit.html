@@ -44,14 +44,14 @@
 	<div class="col-sm-offset-2 col-sm-8" id="uroList">
 
 	<h4>Amministratore tecnico</h4>    
-    #{if wrOffice.tecnicalAdmins.empty }
+    #{if wrOffice.technicalAdmins.empty }
       <div class="alert alert-danger">
         Non è stato ancora impostato alcun amministratore tecnico!
       </div>
     #{/if}
     #{else}
 	    <ul class="list-group">
-	       #{list items:wrOffice.tecnicalAdmins, as:'userRole'}
+	       #{list items:wrOffice.technicalAdmins, as:'userRole'}
 	         <li class="list-group-item clearfix">
 						 <span class="label label-info"> ${userRole.user.person.fullname}</span>
              <a class="label label-badge label-danger pull-right" href="@{Administrators.delete(userRole.id)}" webui-popover-hover data-content="Revoca Ruolo" >

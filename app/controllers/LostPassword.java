@@ -80,8 +80,8 @@ public class LostPassword extends Controller {
       Secure.login();
     }
     if (!user.expireRecoveryToken.equals(LocalDate.now())) {
-      flash.error("Il token per effettuare il recupero password è scaduto. " +
-          "Effettuare una nuova richiesta.");
+      flash.error("Il token per effettuare il recupero password è scaduto. " 
+          + "Effettuare una nuova richiesta.");
       Secure.login();
     }
 
@@ -115,8 +115,8 @@ public class LostPassword extends Controller {
     }
 
     if (user.expireRecoveryToken == null || !user.expireRecoveryToken.equals(LocalDate.now())) {
-      flash.error("Il token per effettuare il recupero password è scaduto. " +
-          "Effettuare una nuova richiesta.");
+      flash.error("Il token per effettuare il recupero password è scaduto. " 
+          + "Effettuare una nuova richiesta.");
       Secure.login();
     }
 

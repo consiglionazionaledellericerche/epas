@@ -1,0 +1,19 @@
+#{modalAsync id:'defaultModal', title:'Users.editAccountRoles' }
+<div class="alert alert-info" role="alert">
+  Gestione ruoli di sistema per l'utente <strong>${user.username}</strong>
+</div>
+<div id="accountRolesData">
+  #{form action:@saveAccountRoles(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#accountRolesData'}
+
+  #{f.hidden 'userId', value: user.id /}
+  #{f.selectEnums 'roles' , items:models.enumerate.AccountRole, value: user.roles  /}
+
+  #{b.buttons center:true}
+    #{b.submit 'Salva'/}
+  #{/b.buttons}
+
+  #{/form}
+</div>
+#{/modalAsync}

@@ -20,10 +20,14 @@ import models.TotalOvertime;
 import models.query.QCompetence;
 import models.query.QCompetenceCode;
 import models.query.QPerson;
+import models.query.QPersonCompetenceCodes;
 import models.query.QPersonHourForOvertime;
+import models.query.QPersonReperibility;
 import models.query.QPersonReperibilityType;
+import models.query.QPersonShiftShiftType;
 import models.query.QTotalOvertime;
 
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,30 +62,58 @@ public class CompetenceDao extends DaoBase {
   /**
    * La lista dei CompetenceCode abilitati ad almeno una persona appartenente all'office.
    */
-  public List<CompetenceCode> activeCompetenceCode(Office office) {
+  public List<CompetenceCode> activeCompetenceCode(Office office, LocalDate date) {
 
     final QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
-
+    final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
+    
     return getQueryFactory().from(competenceCode)
-            .where(competenceCode.persons.any().office.eq(office))
+        .leftJoin(competenceCode.personCompetenceCodes, pcc).fetch()
+            .where(pcc.person.office.eq(office)
+                .and(pcc.beginDate.loe(date)
+                    .andAnyOf(pcc.endDate.isNull(), pcc.endDate.goe(date))))
+            .orderBy(competenceCode.code.asc())
             .distinct().list(competenceCode);
   }
 
+  /**
+   * 
+   * @param person
+   * @param year
+   * @param month
+   * @param codes
+   * @return la lista di competenze appartenenti alla lista di codici codes relative all'anno year 
+   *     e al mese month per la persona person.
+   */
   public List<Competence> getCompetences(
-      Person person, Integer year, Integer month, List<CompetenceCode> codes) {
+      Optional<Person> person, Integer year, Optional<Integer> month, List<CompetenceCode> codes) {
 
     final QCompetence competence = QCompetence.competence;
-
+    final BooleanBuilder condition = new BooleanBuilder();
+    condition.and(competence.year.eq(year)
+        .and(competence.competenceCode.in(codes)));
+    if (month.isPresent()) {
+      condition.and(competence.month.eq(month.get()));
+    }
+    if (person.isPresent()) {
+      condition.and(competence.person.eq(person.get()));
+    }
     final JPQLQuery query = getQueryFactory().from(competence)
             .leftJoin(competence.competenceCode).fetch()
-            .where(competence.person.eq(person)
-                    .and(competence.year.eq(year)
-                            .and(competence.month.eq(month)
-                                    .and(competence.competenceCode.in(codes)))));
+            .where(condition);
 
     return query.list(competence);
   }
 
+  /**
+   * 
+   * @param person
+   * @param year
+   * @param month
+   * @param code
+   * @return la competenza se esiste relativa all'anno year e al mese month con codice code per la 
+   * persona person.
+   */
   public Optional<Competence> getCompetence(
       Person person, Integer year, Integer month, CompetenceCode code) {
 
@@ -261,6 +293,17 @@ public class CompetenceDao extends DaoBase {
             .uniqueResult(com);
 
     return myCompetence;
+  }
+  
+  /**
+   * 
+   * @param code il codice competenza da cercare
+   * @return la lista di tutte le competenze che contengono quel codice competenza.
+   */
+  public List<Competence> findCompetence(CompetenceCode code) {
+    final QCompetence comp = QCompetence.competence;
+    final JPQLQuery query = getQueryFactory().from(comp).where(comp.competenceCode.eq(code));
+    return query.list(comp);
   }
 
 

@@ -6,7 +6,7 @@
   (person.fullname):null] /}
 #{breadcrumbs breadcrumbs, noHome:true, container:true /}
 
-#{persons.personsTabs activeAction:'children' /}
+#{include './_tabs.html' /}
 
 <div class="container">	
 #{panel title:'Figli di ' + person.getFullname(), color:'primary'}
@@ -41,7 +41,8 @@
 	    </tbody>
 	    </table>
 	#{/else}
-	
+
+	#{secure.check 'Persons.insertChild'}
 	<div class="text-center">
 	  <p>
 	    <a class="btn btn-success" href="@{Persons.insertChild(person.id)}" data-async-modal="#defaultModal">
@@ -49,7 +50,7 @@
 	    </a>
 	  </p>
 	</div>
-
+	#{/secure.check}
 #{/panel}
 
 </div>

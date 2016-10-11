@@ -43,8 +43,7 @@ public class WrapperContractMonthRecap implements IWrapperContractMonthRecap {
    */
   @Override
   public Optional<ContractMonthRecap> getPreviousRecap() {
-
-      return wrapperFactory.create(value.contract)
+    return wrapperFactory.create(value.contract)
               .getContractMonthRecap(new YearMonth(value.year, value.month)
                       .minusMonths(1));
   }

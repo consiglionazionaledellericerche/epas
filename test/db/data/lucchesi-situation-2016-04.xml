@@ -1270,9 +1270,9 @@
   <person_days id="132464" date="2016-04-07" difference="-53" is_ticket_available="true" is_ticket_forced_by_admin="false" is_working_in_another_place="false" progressive="258" time_at_work="379" person_id="146" accepted_holiday_working_time="false" is_holiday="false" stamping_time="379" justified_time_no_meal="0" justified_time_meal="0"/>
   <person_days id="132622" date="2016-04-08" difference="-432" is_ticket_available="false" is_ticket_forced_by_admin="false" is_working_in_another_place="false" progressive="-174" time_at_work="0" person_id="146" accepted_holiday_working_time="false" is_holiday="false" decurted="0" stamping_time="0" justified_time_no_meal="0" justified_time_meal="0"/>
 
-  <persons_competence_codes persons_id="146" competencecode_id="2"/>
-  <persons_competence_codes persons_id="146" competencecode_id="3"/>
-  <persons_competence_codes persons_id="146" competencecode_id="8"/>
+  <persons_competence_codes person_id="146" competence_code_id="2" begin_date="2011-02-01"/>
+  <persons_competence_codes person_id="146" competence_code_id="3" begin_date="2011-02-01"/>
+  <persons_competence_codes person_id="146" competence_code_id="8" begin_date="2011-02-01"/>
 
   <contract_month_recap id="46847" year="2012" month="12"  abs_rc_usati="0" s_r_bp="0" s_bp_consegnati="0" s_bd_usati="0" s_r_ac_initmese="0" s_r_ap="0" s_r_ac="0" s_pf="0" s_pfp="0" s_r_ap_usabile="true" s_s1="0" s_s2="0" s_s3="0" s_rc_min="0" s_ol="0" d_pfn_ap="0" d_pfn_ac="0" d_pfn_pfp="0" d_rc_ap="0" d_rc_ac="0" d_rc_pfp="0" d_r_ap="0" d_r_ac="264" d_r_bp="0" contract_id="259" s_r_bp_init="0"/>
   <contract_month_recap id="46848" year="2013" month="1"  abs_rc_usati="0" s_r_bp="0" s_bp_consegnati="0" s_bd_usati="0" s_r_ac_initmese="0" s_r_ap="264" s_r_ac="0" s_pf="579" s_pfp="693" s_r_ap_usabile="true" s_s1="360" s_s2="0" s_s3="0" s_rc_min="0" s_ol="6627" d_pfn_ap="114" d_pfn_ac="0" d_pfn_pfp="0" d_rc_ap="0" d_rc_ac="0" d_rc_pfp="0" d_r_ap="150" d_r_ac="333" d_r_bp="0" contract_id="259" s_r_bp_init="0"/>

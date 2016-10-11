@@ -5,7 +5,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -19,7 +18,7 @@ import helpers.jpa.ModelQuery.SimpleResults;
 import models.Office;
 import models.Role;
 import models.User;
-import models.UsersRolesOffices;
+import models.query.QBadgeReader;
 import models.query.QPerson;
 import models.query.QUser;
 
@@ -32,9 +31,6 @@ import javax.persistence.EntityManager;
  * @author dario
  */
 public class UserDao extends DaoBase {
-
-  public static final String ADMIN_USERNAME = "admin";
-  public static final String DEVELOPER_USERNAME = "developer";
 
   @Inject
   UserDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
@@ -49,6 +45,7 @@ public class UserDao extends DaoBase {
   public User getUserByIdAndPassword(Long id, Optional<String> password) {
     final QUser user = QUser.user;
     final BooleanBuilder condition = new BooleanBuilder();
+
     if (password.isPresent()) {
       condition.and(user.password.eq(password.get()));
     }
@@ -72,7 +69,10 @@ public class UserDao extends DaoBase {
    */
   public User getUserByUsernameAndPassword(String username, Optional<String> password) {
     final QUser user = QUser.user;
-    final BooleanBuilder condition = new BooleanBuilder();
+    final BooleanBuilder condition = new BooleanBuilder()
+        // Solo gli utenti attivi
+        .and(user.disabled.isFalse());
+
     if (password.isPresent()) {
       condition.and(user.password.eq(password.get()));
     }
@@ -82,44 +82,7 @@ public class UserDao extends DaoBase {
   }
 
   public User byUsername(String username) {
-
-    final QUser user = QUser.user;
-    final JPQLQuery query = getQueryFactory()
-        .from(user)
-        .where(user.username.eq(username));
-    return query.singleResult(user);
-  }
-
-
-  /**
-   * Se l'utente è admin.
-   */
-  public boolean isAdmin(User user) {
-    return user.username.equals(ADMIN_USERNAME);
-  }
-
-  /**
-   * Se l'utente è developer.
-   */
-  public boolean isDeveloper(User user) {
-    return user.username.equals(DEVELOPER_USERNAME);
-  }
-
-  /**
-   * Ritorna la lista degli utenti che hanno ruolo role nell'ufficio office
-   */
-  public List<User> getUserByOfficeAndRole(Office office, Role role) {
-
-    List<User> userList = Lists.newArrayList();
-
-    for (UsersRolesOffices uro : office.usersRolesOffices) {
-
-      if (uro.role.id.equals(role.id)) {
-
-        userList.add(uro.user);
-      }
-    }
-    return userList;
+    return getUserByUsernameAndPassword(username, Optional.absent());
   }
 
   public List<String> containsUsername(String username) {
@@ -129,59 +92,64 @@ public class UserDao extends DaoBase {
     return getQueryFactory().from(user).where(user.username.contains(username)).list(user.username);
   }
 
-  public static enum UserType {
-    PERSON, SYSTEM_WITH_OWNER, SYSTEM_WITHOUT_OWNER;
-  }
-
-  public static enum EnabledType {
-    ONLY_ENABLED, ONLY_DISABLED, BOTH;
-  }
-
   /**
-   * @param name       opzionale il nome su cui filtrare
-   * @param office     l'ufficio per cui si vogliono gli utenti
-   * @param associated se si vogliono solo gli utenti con persona associata o anche quelli di
-   *                   sistema
-   * @return la lista di utenti che soddisfano i parametri passati.
+   * @param name       Filtro sul nome
+   * @param offices    Gli uffici che hanno qualche tipo di relazione con gli user restituiti
+   * @param onlyEnable filtra solo sugli utenti abilitati
+   * @return una lista di utenti.
    */
   public SimpleResults<User> listUsersByOffice(Optional<String> name, Set<Office> offices,
-      EnabledType enableType, List<UserType> types) {
+      boolean onlyEnable) {
 
     final QUser user = QUser.user;
     final QPerson person = QPerson.person;
-    JPQLQuery query = getQueryFactory().from(user)
-        .leftJoin(user.person, person);
+    final QBadgeReader badgeReader = QBadgeReader.badgeReader;
 
-    BooleanBuilder condition = new BooleanBuilder();
+    BooleanBuilder condition = new BooleanBuilder()
+        // La persona associata all'utente fa parte di uno degli uffici specificati
+        .andAnyOf(person.office.in(offices),
+            // oppure il proprietario dell'utente è tra gli uffici specificati
+            user.owner.in(offices));
+    // Filtro nome
+    if (name.isPresent()) {
+      condition.and(matchUserName(user, name.get()));
+    }
 
-    // Tipi
-
-    if (types.contains(UserType.PERSON)) {
-      condition.or(person.office.in(offices));
-    }
-    if (types.contains(UserType.SYSTEM_WITH_OWNER)) {
-      condition.or(person.office.isNull().and(user.owner.in(offices)));
-    }
-    if (types.contains(UserType.SYSTEM_WITHOUT_OWNER)) {
-      condition.or(person.office.isNull().and(user.owner.isNull()));
-    }
     // Abilitato / Disabilitato
-
-    if (enableType.equals(EnabledType.ONLY_ENABLED)) {
+    if (onlyEnable) {
       condition.and(user.disabled.isFalse());
-    } else if (enableType.equals(EnabledType.ONLY_DISABLED)) {
-      condition.and(user.disabled.isTrue());
     }
+
+    return ModelQuery.wrap(getQueryFactory().from(user).leftJoin(user.person, person)
+        .leftJoin(user.badgeReader, badgeReader)
+        .where(condition).orderBy(user.username.asc()), user);
+  }
+
+  /**
+   * @return La lista degli utenti senza legami con una sede
+   */
+  public SimpleResults<User> noOwnerUsers(Optional<String> name) {
+
+    final QUser user = QUser.user;
+    final QPerson person = QPerson.person;
+    final QBadgeReader badgeReader = QBadgeReader.badgeReader;
+
+    final BooleanBuilder condition = new BooleanBuilder()
+        .and(person.isNull().and(badgeReader.isNull()).and(user.owner.isNull()))
+        .or(user.roles.any().isNotNull());
 
     // Filtro nome
     if (name.isPresent()) {
       condition.and(matchUserName(user, name.get()));
     }
 
-    query.where(condition).distinct().orderBy(user.username.asc());
-
-    return ModelQuery.wrap(query, user);
+    return ModelQuery.wrap(getQueryFactory().from(user)
+        .leftJoin(user.person, person)
+        .leftJoin(user.badgeReader, badgeReader)
+        .where(condition)
+        .orderBy(user.username.asc()), user);
   }
+
 
   private BooleanBuilder matchUserName(QUser user, String name) {
     final BooleanBuilder nameCondition = new BooleanBuilder();
@@ -194,9 +162,9 @@ public class UserDao extends DaoBase {
   public boolean hasAdminRoles(User user) {
     Preconditions.checkNotNull(user);
 
-    return user.usersRolesOffices.stream().filter(uro ->
-        ImmutableList.of(Role.DEVELOPER, Role.ADMIN, Role.PERSONNEL_ADMIN,
-            Role.PERSONNEL_ADMIN_MINI, Role.TECNICAL_ADMIN)
-            .contains(uro.role.name)).findAny().isPresent();
+    return user.isSystemUser()
+        || user.usersRolesOffices.stream().filter(uro -> ImmutableList.of(Role.PERSONNEL_ADMIN,
+        Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN)
+        .contains(uro.role.name)).findAny().isPresent();
   }
 }

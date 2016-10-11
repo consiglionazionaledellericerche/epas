@@ -1,24 +1,33 @@
 package models;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 
 import models.base.BaseModel;
+import models.enumerate.AccountRole;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
+import play.Logger;
 import play.data.validation.MinSize;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -42,7 +51,6 @@ public class User extends BaseModel {
   public String username;
 
   @MinSize(5)
-  @Required
   public String password;
 
   @NotAudited
@@ -53,28 +61,30 @@ public class User extends BaseModel {
   @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
   public BadgeReader badgeReader;
 
+  @ElementCollection
+  @Enumerated(EnumType.STRING)
+  public Set<AccountRole> roles = Sets.newHashSet();
+
   @NotAudited
   @OneToMany(mappedBy = "user", cascade = {CascadeType.REMOVE})
   public List<UsersRolesOffices> usersRolesOffices = new ArrayList<UsersRolesOffices>();
-
 
   @Column(name = "expire_recovery_token")
   public LocalDate expireRecoveryToken;
 
   @Column(name = "recovery_token")
   public String recoveryToken;
-  
+
   @Column(name = "disabled")
   public boolean disabled;
-  
+
   @Column(name = "expire_date")
   public LocalDate expireDate;
-  
+
   @Nullable
   @ManyToOne
   @JoinColumn(name = "office_owner_id")
   public Office owner;
-
 
   @Override
   public String getLabel() {
@@ -92,26 +102,34 @@ public class User extends BaseModel {
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
-            .add("id", this.id)
-            .add("user", this.username)
-            .toString();
+        .add("id", this.id)
+        .add("user", this.username)
+        .toString();
   }
 
   /**
-   * Se l'user è un account di sistema. TODO: definire la logica più dettagliata se necessario.
+   * True se l'user ha un ruolo di sistema.
    */
   public boolean isSystemUser() {
-    if (person == null) {
-      return true;
-    }
-    return false;
+    return !roles.isEmpty();
   }
 
   /**
-   * Se l'user il super amministratore TODO: definire la logica più dettagliata se necessario.
+   * L'office fornito ha un legame con questo uro.
+   *
+   * @return true se ce l'ha, false altrimenti.
    */
-  public boolean isSuperAdmin() {
-    return username.equals("admin") || username.equals("developer");
+  public boolean hasRelationWith(Office office) {
+    return owner == office || (person != null && person.office == office);
   }
 
+  /**
+   *
+   * @param args Stringhe corrispondenti ai ruoli da verificare
+   * @return true se contiene almeno uno dei ruoli specificati
+   */
+  public boolean hasRoles(String... args) {
+    return usersRolesOffices.stream()
+        .filter(uro -> Arrays.asList(args).contains(uro.role.name)).findAny().isPresent();
+  }
 }

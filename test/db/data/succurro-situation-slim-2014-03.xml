@@ -418,7 +418,7 @@
   <contracts id="412" begin_contract="2008-07-04" expire_contract="2008-11-30" oncertificate="false" person_id="224"/>
   <contracts id="413" begin_contract="2010-01-07" expire_contract="2016-12-31" oncertificate="true" person_id="224" source_date="2012-12-31" source_permission_used="0" source_recovery_day_used="0" source_remaining_minutes_current_year="26773" source_remaining_minutes_last_year="0" source_vacation_current_year_used="2" source_vacation_last_year_used="0"/>
 
-  <persons_competence_codes persons_id="224" competencecode_id="8"/>
+  <persons_competence_codes person_id="224" competence_code_id="8"/>
 
   <persons_working_time_types id="165" begin_date="2013-01-01" person_id="224" working_time_type_id="1"/>
 

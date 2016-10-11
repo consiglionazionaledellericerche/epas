@@ -1,0 +1,33 @@
+%{
+Action = (type != null && type.persistent) ? 'Modifica ' : 'Nuovo '
+}%
+#{modalAsync id:'modalActivateService', 
+title:(Action + ' servizio per reperibilità')}
+
+<div id="absenceCodeData">
+  #{form action:@Competences.saveService(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#absenceCodeData'}
+  
+  #{f.hidden 'type.id' /}
+  #{f.input 'type.description'/}
+  #{if office?.persistent}
+    	#{f.hidden 'office.id', value:office.id /}
+  #{/if}
+  
+  #{f.view 'type.office', value:office /}
+  #{f.selectModel 'type.supervisor', items: officePeople, required:true /}
+
+	#{b.buttons center:true}
+
+  		#{if type?.persistent}
+    		#{b.submit 'Aggiorna'/}
+  		#{/if}
+  		#{else}
+  	  		#{b.submit 'Inserisci'/}
+  		#{/else}
+
+  	#{/b.buttons}
+  #{/form}
+</div>
+#{/modalAsync}

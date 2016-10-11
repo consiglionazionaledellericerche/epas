@@ -1,0 +1,27 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione utenti di sistema'  /}
+
+<div class="container">
+
+  #{title title: messages.get('manageNoOwnerUsers') /}
+
+  #{include './_usersTabs.html' /}
+  <br>
+  #{breadcrumbs ['manageNoOwnerUsers':@Users.noOwnerUsers()], noHome:'true' /}
+
+  #{form action:@Users.noOwnerUsers(), class:'form-inline', method:'GET', 'data-reload':'#normalResults', autocomplete:'off'}
+  <div class="row">
+    #{f.searchInput 'name' /}
+
+    #{b.link @blank(), color: 'info', fa: 'plus', class: 'pull-right' }
+      &{'newUser'}
+    #{/b.link}
+  </div>
+  #{/form}
+
+  <br>
+
+  #{include './_usersList.html' /}
+
+</div>

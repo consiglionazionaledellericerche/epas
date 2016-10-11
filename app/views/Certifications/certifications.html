@@ -63,8 +63,10 @@
 	
 	 
 	#{if peopleCertificationStatus} *{ se è injettato è stato fatto lo stralcio }*  
-	
+
+	#{secure.check 'Certifications.processAll'}
 	<a class="btn btn-warning" href="@{Certifications.processAll(office.id, year, month)}">Processa <i class="fa fa-cloud-upload" aria-hidden="true"></i></a>
+	#{/secure.check}
 	<a class="btn btn-primary" href="@{Certifications.certifications(office.id, year, month)}">Aggiorna <i class="fa fa-refresh" aria-hidden="true"></i></a>
 	
 	*{

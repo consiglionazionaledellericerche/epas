@@ -2,12 +2,14 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Competenze pagate'  /}
 
-#{competences.competencesTabs activeAction:'approvedCompetenceInYear' /}
+
 
 <div class="container">
 
   #{title title:'Competenze assegnate ' + year + ' per ' + office.name, color:'primary' /}
- 
+
+  #{include './_tabs.html' /}
+  
  #{alert color:'info'}
  <p> Visualizza le competenze assegnate nell'anno da tutti i dipendenti. E' possibile filtrare
  il risultato per i soli contratti a tempo determinato.
