@@ -17,8 +17,6 @@ import dao.WorkingTimeTypeDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 
-import it.cnr.iit.epas.CheckMessage;
-
 import lombok.extern.slf4j.Slf4j;
 
 import manager.configurations.ConfigurationManager;
@@ -70,7 +68,6 @@ public class AbsenceManager {
   private final PersonManager personManager;
   private final PersonDayDao personDayDao;
   private final IVacationsService vacationsService;
-  private final AbsenceGroupManager absenceGroupManager;
   private final ContractDao contractDao;
   private final AbsenceDao absenceDao;
   private final PersonReperibilityDayDao personReperibilityDayDao;
@@ -94,7 +91,6 @@ public class AbsenceManager {
    * @param personChildrenDao         personChildrenDao
    * @param contractMonthRecapManager contractMonthRecapManager
    * @param personManager             personManager
-   * @param absenceGroupManager       absenceGroupManager
    * @param consistencyManager        consistencyManager
    * @param configurationManager      configurationManager
    * @param wrapperFactory            wrapperFactory
@@ -113,7 +109,6 @@ public class AbsenceManager {
 
       ContractMonthRecapManager contractMonthRecapManager,
       PersonManager personManager,
-      AbsenceGroupManager absenceGroupManager,
       ConsistencyManager consistencyManager,
       ConfigurationManager configurationManager,
       PersonDayManager personDayManager,
@@ -128,7 +123,6 @@ public class AbsenceManager {
     this.personDayDao = personDayDao;
     this.configurationManager = configurationManager;
     this.vacationsService = vacationsService;
-    this.absenceGroupManager = absenceGroupManager;
     this.contractDao = contractDao;
     this.absenceDao = absenceDao;
     this.personReperibilityDayDao = personReperibilityDayDao;
@@ -331,8 +325,6 @@ public class AbsenceManager {
         aiList.add(
             handlerChildIllness(
                 person, actualDate, absenceType, file, otherAbsences, !onlySimulation));
-      } else if (absenceType.absenceTypeGroup != null) {
-        aiList = handlerAbsenceTypeGroup(person, actualDate, absenceType, file, !onlySimulation);
       } else {
         aiList.add(handlerGenericAbsenceType(person, actualDate, absenceType, file,
             mealTicket, justifiedMinutes, !onlySimulation));
@@ -387,14 +379,13 @@ public class AbsenceManager {
     Preconditions.checkNotNull(file);
 
     AbsencesResponse ar = new AbsencesResponse(date, absenceType.code);
-    
+
     Absence absence = new Absence();
     absence.date = date;
     absence.absenceType = absenceType;
     if (absence.absenceType.justifiedTypesPermitted.size() == 1) {
       absence.justifiedType = absence.absenceType.justifiedTypesPermitted.iterator().next();
-    }
-    else if (justifiedMinutes.isPresent()) {
+    } else if (justifiedMinutes.isPresent()) {
       absence.justifiedMinutes = justifiedMinutes.get();
       absence.justifiedType = absenceComponentDao
           .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
@@ -599,29 +590,6 @@ public class AbsenceManager {
     //37 non disponibile
     return new AbsencesResponse(date, absenceType.code,
         AbsencesResponse.NESSUN_CODICE_FERIE_ANNO_PRECEDENTE_37);
-  }
-
-  private List<AbsencesResponse> handlerAbsenceTypeGroup(
-      Person person, LocalDate date, AbsenceType absenceType, Optional<Blob> file,
-      boolean persist) {
-
-    CheckMessage checkMessage = absenceGroupManager.checkAbsenceGroup(absenceType, person, date);
-    List<AbsencesResponse> result = Lists.newArrayList();
-
-    if (checkMessage.check == false) {
-      result.add(new AbsencesResponse(date, absenceType.code, AbsencesResponse.ERRORE_GENERICO));
-      return result;
-    }
-
-    result.add(insert(person, date, absenceType, file, Optional.<Integer>absent(), persist));
-
-    if (checkMessage.absenceType != null) {
-      result.add(
-          insert(
-              person, date, checkMessage.absenceType,
-              file, Optional.<Integer>absent(), persist));
-    }
-    return result;
   }
 
   /**
@@ -855,8 +823,8 @@ public class AbsenceManager {
 
   /**
    * @return la data iniziale da cui parte l'inserimento di un certo codice di assenza di modo da
-   *        poter verificare se in quella data è stato inserito anche il file associato al codice 
-   *        di assenza ed evitare quindi di inserire un file per ogni giorno del periodo.
+   * poter verificare se in quella data è stato inserito anche il file associato al codice di
+   * assenza ed evitare quindi di inserire un file per ogni giorno del periodo.
    */
   private LocalDate beginDateToInsertAbsenceFile(
       LocalDate date, Person person, AbsenceType absenceType) {

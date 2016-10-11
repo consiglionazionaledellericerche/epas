@@ -79,7 +79,6 @@ public class Bootstrap extends Job<Void> {
 
     if (Qualification.count() == 0) {
 
-      //qualification absenceType absenceTypeQualification absenceTypeGroup
       session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
           .getResource("../db/import/absence-type-and-qualification-phase1.xml")));
 

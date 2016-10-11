@@ -80,12 +80,9 @@
       %{
           epasAbsenceType = epasAbsenceTypes.get(epasCode.trim().toUpperCase());
           
-          problems = !epasAbsences.get(epasCode).empty &&               
-                (epasAbsenceType.expired || epasAbsenceType.absenceTypeGroup == null 
-                || epasAbsenceType.absenceTypeGroup.replacingAbsenceType == null);
+          problems = !epasAbsences.get(epasCode).empty && epasAbsenceType.expired;
           
-          erasable = epasAbsences.get(epasCode).empty && 
-             (epasAbsenceType.absenceTypeGroup == null || epasAbsenceType.absenceTypeGroup.replacingAbsenceType == null);      
+          erasable = epasAbsences.get(epasCode).empty;
       }%
     
       <tr class="#{if problems}bg-danger#{/if}
@@ -104,19 +101,9 @@
             si
           #{/if}
         </td>
-        #{if epasAbsenceType.absenceTypeGroup }
-          <td>${epasAbsenceType.absenceTypeGroup.label}</td>
-          <td>
-          #{if epasAbsenceType.absenceTypeGroup.replacingAbsenceType }
-            ${epasAbsenceType.absenceTypeGroup.replacingAbsenceType.code}
-          #{/if} 
-          </td>
-        #{/if}
-        #{else}
-          <td></td>
-          <td></td>
-        #{/else}
-        
+        <td></td>
+        <td></td>
+
         <!-- Problemi -->
         <td>
           #{if problems }

@@ -394,6 +394,13 @@ DELETE FROM users_roles_offices WHERE user_id in (SELECT id FROM users WHERE use
 DELETE FROM roles WHERE name = 'admin';
 DELETE FROM roles WHERE name = 'developer';
 
+ALTER TABLE absence_types DROP CONSTRAINT if EXISTS fkfe65dbf7ca0a1c8a;
+
+DROP TABLE if EXISTS absence_type_groups;
+
+DROP TABLE if EXISTS absence_type_groups_history;
+
+
 # ---!Downs
 
 DROP TABLE absence_troubles;

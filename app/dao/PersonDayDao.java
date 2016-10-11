@@ -12,7 +12,6 @@ import models.Person;
 import models.PersonDay;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
-import models.query.QAbsenceTypeGroup;
 import models.query.QPersonDay;
 import models.query.QPersonDayInTrouble;
 import models.query.QStamping;
@@ -133,13 +132,10 @@ public class PersonDayDao extends DaoBase {
 
     final QAbsence absence = QAbsence.absence;
     final QAbsenceType absenceType = QAbsenceType.absenceType;
-    final QAbsenceTypeGroup absenceTypeGroup = QAbsenceTypeGroup.absenceTypeGroup;
-
 
     return build(person, begin, end, orderedDesc, onlyIsTicketAvailable)
             .leftJoin(personDay.absences, absence).fetch()
             .leftJoin(absence.absenceType, absenceType).fetch()
-            .leftJoin(absenceType.absenceTypeGroup, absenceTypeGroup).fetch()
             .orderBy(personDay.date.asc())
             .list(personDay);
 

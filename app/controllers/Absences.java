@@ -2,7 +2,6 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.common.base.Verify;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.FluentIterable;
@@ -42,7 +41,6 @@ import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
 
-import models.AbsenceTypeGroup;
 import models.Office;
 import models.Person;
 import models.PersonDay;
@@ -192,7 +190,6 @@ public class Absences extends Controller {
   public static void editCode(@Required Long absenceCodeId) {
 
     AbsenceType absenceType = absenceTypeDao.getAbsenceTypeById(absenceCodeId);
-    AbsenceTypeGroup absenceTypeGroup = absenceType.absenceTypeGroup;
 
     boolean tecnologi = false;
     boolean tecnici = false;
@@ -202,32 +199,30 @@ public class Absences extends Controller {
       tecnici = !tecnici ? QualificationMapping.TECNICI.contains(q) : tecnici;
     }
 
-    render(absenceType, absenceTypeGroup, tecnologi, tecnici);
+    render(absenceType, tecnologi, tecnici);
   }
 
   /**
    * metodo che salva il nuovo/modificato codice di assenza.
    *
    * @param absenceType      il tipo di assenza
-   * @param absenceTypeGroup il gruppo a cui fa riferimento un codice di assenza
    * @param tecnologi        se il codice di assenza è valido per i tecnologi
    * @param tecnici          se il codice di assenza è valido per i tecnici
    */
   public static void saveCode(@Valid AbsenceType absenceType,
-      AbsenceTypeGroup absenceTypeGroup,
       boolean tecnologi, boolean tecnici) {
 
     //FIXME capire come mai senza il flash.clear si sovrappongono i messaggi
     flash.clear();
     if (validation.hasErrors()) {
       flash.error("Correggere gli errori indicati");
-      render("@editCode", absenceType, absenceTypeGroup, tecnologi, tecnici);
+      render("@editCode", absenceType, tecnologi, tecnici);
     }
     Logger.info("tecnologi  %s - tecnici %s", tecnologi, tecnici);
 
     if (!(tecnologi || tecnici)) {
       flash.error("Selezionare almeno una categoria tra Tecnologi e Tecnici");
-      render("@editCode", absenceType, absenceTypeGroup, tecnologi, tecnici);
+      render("@editCode", absenceType, tecnologi, tecnici);
     }
 
     absenceType.qualifications.clear();
@@ -244,11 +239,6 @@ public class Absences extends Controller {
     for (int i = qualifiche.lowerEndpoint(); i <= qualifiche.upperEndpoint(); i++) {
       Qualification qual = qualificationDao.byQualification(i).orNull();
       absenceType.qualifications.add(qual);
-    }
-
-    if (!Strings.isNullOrEmpty(absenceTypeGroup.label)) {
-      absenceType.absenceTypeGroup = absenceTypeGroup;
-      absenceTypeGroup.save();
     }
 
     absenceType.save();

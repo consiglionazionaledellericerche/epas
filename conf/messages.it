@@ -12,12 +12,6 @@ absenceType.qualifications= Utilizzabile per i livelli
 absenceType.validFrom= Inizio validita'
 absenceType.validTo= Fine validita'
 
-absenceTypeGroup.accumulationBehaviour= Cosa fare raggiunto il limite
-absenceTypeGroup.accumulationType= Accumulo valori
-absenceTypeGroup.label= Etichetta gruppo
-absenceTypeGroup.limitInMinute= Limite accumulo
-absenceTypeGroup.minutesExcess= Minuti in eccesso
-absenceTypeGroup.replacingAbsenceType= Codice per sotituzione
 groupAbsenceType=Gruppo di Codici
 TooEarlyReplacing=Codice di completamento anticipato
 
@@ -725,19 +719,6 @@ modifierType.popover= Scegliere "Giustifica" se si desidera che il codice giusti
 absenceType.justifiedTimeAtWork.popover= Il valore scelto influenzerà il calcolo nel tempo del lavoro della giornata nel quale verrà utilizzato questo codice di assenza
 
 absenceType.consideredWeekEnd.popover= Seleziona Si se il codice può essere inserito anche nel week end e nei festivi
-
-absenceTypeGroup.label.popover= Nome che raggruppa più codici che devono essere gestiti insieme per gli accumuli 
-(Es. i codici 661h1,661h2,661h3,.. possono essere assegnati a un gruppo 661hx in modo da poter accumulare i valori e controllare il tetto)
-
-absenceTypeGroup.accumulationType.popover= Se i valori devono essere sommati per ogni utilizzo. Alla fine del periodo (mese o anno) l'accumulo riparte da zero. (Es. codice 661h2 indicare "Annuale")
-
-absenceTypeGroup.limitInMinute.popover= Valore massimo accumulo, raggiunto il quale deve comportarsi come specificato nella definizione successiva (Es. codice 661h2 indicare 18)
-
-absenceTypeGroup.minutesExcess.popover= Se impostato su "Si", consente di giustificare anche gli eventuali minuti in eccesso mancanti al totale dell orario di lavoro giornaliero: es.: se il mio orario di lavoro prevede un orario giornaliero di 7 ore e 12 e prendo un codice di assenza che giustifica 7 ore e quel codice ha il campo minuti in eccesso = si, allora il sistema calcolerà 7 ore e 12 di giustificazione invece di 7
-
-absenceTypeGroup.accumulationBehaviour.popover= Comportamento da tenere al raggiungimento del limite (Es. codice 661h2 selezionere "Non accetta ...")
-
-absenceTypeGroup.replacingAbsenceType.description= Codice di assenza da sostituire quando nella definizione precedente si è selezionato "sostituisci ..." (Es. si potrebbe definire un codice ad uso interno per mezza giornata di ferie usando: valore=1, quantità giustificata= mezza giornata, accumulare i valori=sempre,limite=2, cosa fare=sostituisci questo campo=32)
 
 emailToContact.popover= L&#39;indirizzo email qui specificato sarà utilizzato come campo per i reply alle mail inviate dal sistema
 

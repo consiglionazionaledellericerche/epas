@@ -4,7 +4,6 @@
  		
  #{form @Absences.saveCode(),class:'form-horizontal col-sm-8 col-sm-offset-2'}
  <input type="hidden" name="absenceType.id" value="${absenceType?.id}">
- <input type="hidden" name="absenceTypeGroup.id" value="${absenceType?.absenceTypeGroup?.id}">
 
  <div class="panel panel-primary">
  	<div class="panel-heading">
@@ -38,23 +37,6 @@
 		</div>
 
  		#{f.booleanRadio 'absenceType.consideredWeekEnd',popover:'true' /}
- 		#{f.input 'absenceTypeGroup.label',popover:'true' /}
- 	</div>
- </div> 
-
-	<div class="panel panel-primary">
-		  <div class="panel-heading">
-		    <h3 class="panel-title">Da riempire in caso di gruppo valorizzato</h3>
-		  </div>
-		<div class="panel-body">
-
-		 #{f.selectEnum 'absenceTypeGroup.accumulationType',items:models.enumerate.AccumulationType,popover:'true',select2:'off' /}
-		 #{f.input 'absenceTypeGroup.description' /}
-		 #{f.input 'absenceTypeGroup.limitInMinute',type:'number',popover:'true' /}
-		 #{f.booleanRadio 'absenceTypeGroup.minutesExcess',popover:'true' /}
-		 #{f.selectEnum 'absenceTypeGroup.accumulationBehaviour',items:models.enumerate.AccumulationBehaviour,popover:'true',select2:'off' /}
-		 #{f.selectModel 'absenceTypeGroup.replacingAbsenceType',items:templateUtility.certificateAbsenceTypes,description:'true' /}
-
  	</div>
  </div> 
 
