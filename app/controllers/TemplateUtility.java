@@ -11,6 +11,7 @@ import com.google.common.collect.Sets;
 import dao.AbsenceTypeDao;
 import dao.BadgeReaderDao;
 import dao.BadgeSystemDao;
+import dao.CompetenceCodeDao;
 import dao.MemoizedCollection;
 import dao.MemoizedResults;
 import dao.NotificationDao;
@@ -34,6 +35,8 @@ import manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab;
 
 import models.BadgeReader;
 import models.BadgeSystem;
+import models.CompetenceCode;
+import models.CompetenceCodeGroup;
 import models.Institute;
 import models.Notification;
 import models.Office;
@@ -81,6 +84,7 @@ public class TemplateUtility {
   private final BadgeSystemDao badgeSystemDao;
   private final SynchDiagnostic synchDiagnostic;
   private final ConfigurationManager configurationManager;
+  private final CompetenceCodeDao competenceCodeDao;
 
   private final MemoizedCollection<Notification> notifications;
   private final MemoizedCollection<Notification> archivedNotifications;
@@ -93,7 +97,7 @@ public class TemplateUtility {
       RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao,
       IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao,
       SynchDiagnostic synchDiagnostic, ConfigurationManager configurationManager,
-      NotificationDao notificationDao, UserDao userDao, AbsenceComponentDao absenceComponentDao) {
+      CompetenceCodeDao competenceCodeDao, AbsenceComponentDao absenceComponentDao, NotificationDao notificationDao, UserDao userDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -107,6 +111,7 @@ public class TemplateUtility {
     this.badgeSystemDao = badgeSystemDao;
     this.synchDiagnostic = synchDiagnostic;
     this.configurationManager = configurationManager;
+    this.competenceCodeDao = competenceCodeDao;
     this.userDao = userDao;
     this.absenceComponentDao = absenceComponentDao;
 
@@ -221,6 +226,18 @@ public class TemplateUtility {
     return badgeReaderDao.getBadgeReaderByOffice(person.office);
   }
 
+  public List<CompetenceCode> allCodeList() {
+    return competenceCodeDao.getAllCompetenceCode();
+  }
+
+  public List<CompetenceCode> allCodesWithoutGroup() {
+    return competenceCodeDao.getCodeWithoutGroup();
+  }
+
+  public List<CompetenceCode> allCodesContainingGroupCodes(CompetenceCodeGroup group) {
+    return competenceCodeDao.allCodesContainingGroupCodes(group);
+  }
+
   /**
    * Gli user associati a tutte le persone appartenenti all'istituto.
    */
@@ -248,6 +265,14 @@ public class TemplateUtility {
     return users;
   }
 
+  /**
+   * @return Una lista delle persone assegnabili ad un certo utente dall'operatore corrente
+   */
+  public List<PersonDao.PersonLite> assignablePeople() {
+    return personDao.peopleInOffices(secureManager
+        .officesTechnicalAdminAllowed(Security.getUser().get()));
+  }
+
   public List<Role> rolesAssignable(Office office) {
 
     List<Role> roles = Lists.newArrayList();
@@ -256,7 +281,7 @@ public class TemplateUtility {
     // e vanno spostati nel secureManager.
     Optional<User> user = Security.getUser();
     if (user.isPresent()) {
-      roles.add(roleDao.getRoleByName(Role.TECNICAL_ADMIN));
+      roles.add(roleDao.getRoleByName(Role.TECHNICAL_ADMIN));
       roles.add(roleDao.getRoleByName(Role.PERSONNEL_ADMIN));
       roles.add(roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI));
       return roles;
@@ -288,6 +313,22 @@ public class TemplateUtility {
   }
 
   /**
+   * @return tutti i ruoli presenti
+   */
+  public List<Role> getRoles() {
+    return roleDao.getAll();
+  }
+
+  /**
+   * @return tutti gli uffici sul quale l'utente corrente ha il ruolo di TECHNICAL_ADMIN
+   */
+  public List<Office> getTechnicalAdminOffices() {
+    return secureManager.officesTechnicalAdminAllowed(Security.getUser().get())
+        .stream().sorted((o, o1) -> o.name.compareTo(o1.name))
+        .collect(Collectors.toList());
+  }
+
+  /**
    * Gli uffici che l'user può assegnare come owner ai BadgeReader. Il super admin può assegnarlo ad
    * ogni ufficio.
    */
@@ -297,18 +338,18 @@ public class TemplateUtility {
 
     Optional<User> user = Security.getUser();
 
-    // se admin tutti, altrimenti gli office di cui si ha tecnicalAdmin
+    // se admin tutti, altrimenti gli office di cui si ha technicalAdmin
     // TODO: spostare nel sucureManager
     if (!user.isPresent()) {
       return offices;
     }
 
-    if (user.get().isSuperAdmin()) {
+    if (user.get().isSystemUser()) {
       return officeDao.getAllOffices();
     }
 
     for (UsersRolesOffices uro : user.get().usersRolesOffices) {
-      if (uro.role.name.equals(Role.TECNICAL_ADMIN)) {
+      if (uro.role.name.equals(Role.TECHNICAL_ADMIN)) {
         offices.add(uro.office);
       }
     }
@@ -347,6 +388,8 @@ public class TemplateUtility {
         Optional.<BadgeReader>absent()).list();
   }
 
+
+
   public List<BadgeSystem> getConfiguredBadgeSystems(Office office) {
     List<BadgeSystem> configuredBadgeSystem = Lists.newArrayList();
     for (BadgeSystem badgeSystem : office.badgeSystems) {
@@ -376,13 +419,13 @@ public class TemplateUtility {
           .of(CodesForEmployee.BP.getDescription()));
     }
   }
-  
+
   public List<AbsenceType> getAbsenceTypes(AbsenceInsertTab absenceInsertTab) {
     if (absenceInsertTab.equals(AbsenceInsertTab.vacation)) {
       return absenceTypeDao.absenceTypeCodeSet((Set)Sets.newHashSet(
-          AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode(), 
-          AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode(), 
-          AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode(), 
+          AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode(),
+          AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode(),
+          AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode(),
           AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode(),
           AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()));
     }
@@ -392,7 +435,7 @@ public class TemplateUtility {
     }
     return Lists.newArrayList();
   }
-  
+
   public Set<GroupAbsenceType> involvedGroupAbsenceType(AbsenceType absenceType) {
     return absenceComponentDao.involvedGroupAbsenceType(absenceType, true);
   }
@@ -426,7 +469,7 @@ public class TemplateUtility {
   public MemoizedCollection<Notification> getArchivedNotifications() {
     return archivedNotifications;
   }
-  
+
   //FIXME metodo provvisorio per fare le prove.
   public String printAmount(int amount, AmountType amountType) {
     String format = "";
@@ -441,7 +484,7 @@ public class TemplateUtility {
 //        label = " giorno lavorativo";
 //      }
 //      if (units > 0 && percent > 0) {
-//        return units + label + " + " + percent + "% di un giorno lavorativo";  
+//        return units + label + " + " + percent + "% di un giorno lavorativo";
 //      } else if (units > 0) {
 //        return units + label;
 //      } else if (percent > 0) {
@@ -466,27 +509,27 @@ public class TemplateUtility {
     }
     return format;
   }
-  
+
   public boolean isReplacingCode(AbsenceType absenceType, GroupAbsenceType group) {
-    if (group.complationAbsenceBehaviour != null 
+    if (group.complationAbsenceBehaviour != null
         && group.complationAbsenceBehaviour.replacingCodes.contains(absenceType)) {
       return true;
     }
     return false;
   }
 
-  
+
   public boolean isComplationCode(AbsenceType absenceType, GroupAbsenceType group) {
-    if (group.complationAbsenceBehaviour != null 
+    if (group.complationAbsenceBehaviour != null
         && group.complationAbsenceBehaviour.complationCodes.contains(absenceType)) {
       return true;
     }
     return false;
   }
-  
+
   public boolean isTakableOnly(AbsenceType absenceType, GroupAbsenceType group) {
-    if (group.takableAbsenceBehaviour != null 
-        && group.takableAbsenceBehaviour.takableCodes.contains(absenceType) 
+    if (group.takableAbsenceBehaviour != null
+        && group.takableAbsenceBehaviour.takableCodes.contains(absenceType)
         && !isComplationCode(absenceType, group)) {
       return true;
     }

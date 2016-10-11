@@ -1,0 +1,8 @@
+<div id="container-nav-tabs" class="container">
+  <ul class="nav nav-tabs">
+    #{secure.li @MealTickets.recapMealTickets(currentData.year, currentData.month, currentData.officeId) /}
+    #{secure.li @MealTickets.findCodeBlock() /}
+    #{secure.li @MealTickets.returnedMealTickets(currentData.officeId) /}
+  </ul>
+</div>
+<br>

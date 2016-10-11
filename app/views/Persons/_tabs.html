@@ -1,0 +1,16 @@
+<div class="container">
+  #{title title:'Configura Dati ' + person.fullname /}
+</div>
+
+<div id="container-nav-tabs" class="container">
+  <ul class="nav nav-tabs">
+    #{secure.li @Persons.edit(person.id) /}
+    #{secure.li @Contracts.personContracts(person.id) /}
+    #{secure.li @Configurations.personShow(person.id) /}
+    #{secure.li @Persons.workGroup(person.id) /}
+    #{secure.li @BadgeSystems.personBadges(person.id) /}
+    #{secure.li @Persons.children(person.id) /}
+    #{secure.li @Persons.deletePerson(person.id) /}
+  </ul>
+</div>
+<br>

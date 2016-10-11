@@ -263,4 +263,14 @@ public class PersonDayDao extends DaoBase {
     final JPQLQuery query = getQueryFactory().from(personDay).where(personDay.date.eq(date).and(personDay.person.in(personList)));
     return query.orderBy(personDay.person.surname.asc()).list(personDay);
   }
+  
+  /**
+   * 
+   * @return il personday facente riferimento al giorno più vecchio presente sul db.
+   */
+  public PersonDay getOldestPersonDay() {
+    QPersonDay personDay = QPersonDay.personDay;
+    final JPQLQuery query = getQueryFactory().from(personDay).orderBy(personDay.date.asc()).limit(1);
+    return query.singleResult(personDay);
+  }
 }

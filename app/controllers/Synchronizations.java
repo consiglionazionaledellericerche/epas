@@ -101,7 +101,7 @@ public class Synchronizations extends Controller {
     }
 
     List<Institute> institutes = officeDao.institutes(Optional.<String>absent(),
-        Security.getUser().get(), roleDao.getRoleByName(Role.TECNICAL_ADMIN)).list();
+        Security.getUser().get(), roleDao.getRoleByName(Role.TECHNICAL_ADMIN)).list();
 
     Map<Long, Institute> epasInstituteByPerseoId = Maps.newHashMap();
     Map<Long, Office> epasOfficesByPerseoId = Maps.newHashMap();
@@ -125,7 +125,7 @@ public class Synchronizations extends Controller {
   public static void oldInstitutes() {
 
     List<Institute> institutes = officeDao.institutes(Optional.<String>absent(),
-        Security.getUser().get(), roleDao.getRoleByName(Role.TECNICAL_ADMIN)).list();
+        Security.getUser().get(), roleDao.getRoleByName(Role.TECHNICAL_ADMIN)).list();
 
     Map<String, Institute> perseoInstitutesByCds = null;
     try {
@@ -278,8 +278,6 @@ public class Synchronizations extends Controller {
     seat.beginDate = new LocalDate(LocalDate.now().getYear() - 1, 12, 31);
     periodManager.updatePropertiesInPeriodOwner(seat);
     seat.save();
-    // Per i permessi di developer e admin...
-    officeManager.setSystemUserPermission(seat);
 
     // Configurazione iniziale di default ...
     configurationManager.updateConfigurations(seat);

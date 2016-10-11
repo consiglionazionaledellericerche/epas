@@ -383,11 +383,11 @@ public class AttestatiClient {
     if (performSent) {
       connection.cookies(cookies);
       connection.userAgent(CLIENT_USER_AGENT)
-      .data("matr", dipendente.getMatricola())
-      .data("anno", year.toString())
-      .data("mese", month.toString())
-      .data("sede_id", office.codeId)
-      .method(Method.POST);
+        .data("matr", dipendente.getMatricola())
+        .data("anno", year.toString())
+        .data("mese", month.toString())
+        .data("sede_id", office.codeId)
+        .method(Method.POST);
     }
 
     // Invio le Assenze

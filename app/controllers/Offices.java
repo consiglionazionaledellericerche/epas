@@ -63,11 +63,11 @@ public class Offices extends Controller {
    */
   public static void list(String name) {
 
-    //la lista di institutes su cui si ha tecnical admin in almeno un office
+    //la lista di institutes su cui si ha technical admin in almeno un office
 
     SearchResults<?> results = officeDao.institutes(
         Optional.<String>fromNullable(name),
-        Security.getUser().get(), roleDao.getRoleByName(Role.TECNICAL_ADMIN))
+        Security.getUser().get(), roleDao.getRoleByName(Role.TECHNICAL_ADMIN))
         .listResults();
 
     render(results, name);
@@ -136,9 +136,6 @@ public class Offices extends Controller {
     } else {
       office.beginDate = new LocalDate(LocalDate.now().getYear() - 1, 12, 31);
       office.save();
-
-      // Per i permessi di developer e admin...
-      officeManager.setSystemUserPermission(office);
 
       // Configurazione iniziale di default ...
       configurationManager.updateConfigurations(office);

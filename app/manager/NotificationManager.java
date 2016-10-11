@@ -15,8 +15,8 @@ import models.enumerate.NotificationSubject;
  */
 public class NotificationManager {
 
-  private final static String DTF = "dd/MM/YYYY - HH:mm";
-  private final static String DF = "dd/MM/YYYY";
+  private static final String DTF = "dd/MM/YYYY - HH:mm";
+  private static final String DF = "dd/MM/YYYY";
 
   public enum CRUD {
     CREATE,
@@ -50,9 +50,9 @@ public class NotificationManager {
             // per la notifica delle delete niente redirect altrimenti tocca
             // andare a prelevare l'entity dallo storico
             Notification.builder().destination(user).message(message)
-                .subject(NotificationSubject.STAMPING).create();
+            .subject(NotificationSubject.STAMPING).create();
           }
-    });
+        });
   }
 
   public void notifyAbsence(Absence absence, CRUD operation) {
@@ -74,9 +74,9 @@ public class NotificationManager {
     person.office.usersRolesOffices.stream()
         .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN))
         .map(uro -> uro.user).forEach(user -> {
-      Notification.builder().destination(user).message(message)
+          Notification.builder().destination(user).message(message)
           .subject(NotificationSubject.ABSENCE, absence.id).create();
-    });
+        });
   }
 
 }

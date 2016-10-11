@@ -1,114 +1,82 @@
 #{extends 'main.html' /}
 #{set header:'navbar' /}
-#{set title: 'ePAS - Gestione utenti'  /}
-
-
-#{if user.person}
-  #{set breadcrumbs:['users':null, 'personUsers':@Users.list(), ('Gestisci '+ user.username):null] /}
-#{/if}  
+#{if user}
+	#{set title: 'Modifica utente ' + user.username /}
+#{/if}
 #{else}
-  #{set breadcrumbs:['users':null, 'personUsers':@Users.systemList(), ('Gestisci '+ user.username):null] /}
-#{/else}  
+	#{set title: 'Nuovo utente' /}
+#{/else}
 
 <div class="container">
+	#{title title: title /}
 
-#{breadcrumbs breadcrumbs, noHome:'true' /}
+	#{breadcrumbs ['manageUsers':@Users.list(), (title):null ], noHome:'true' /}
 
-#{title title:'Gestione ' + user.username /}
+	#{form @Users.save(), method:'POST', autocomplete:false, class:'form form-horizontal'}
 
-#{panel title:'Informazioni', color:'primary'}
-  #{alert color:'info'}
-    <p>Informazioni relative all'utente #{if user.person} personale #{/if} #{else} di sistema #{/else}
-    <strong>${user.username}</strong>. </p>
-  #{/alert}
-		#{form action:@updateInfo(), method:'POST', autocomplete:false,
-		    class:'form form-horizontal' }			
+		#{if user}
+			#{f.hidden 'user.id', value: user.id /}
+		#{/if}
+		#{f.input 'user.username', value:username?:user?.username /}
+	  #{f.input 'password' , type:'password', value: password?:'' /}
+	  #{f.input 'confirmPassword' , type:'password', value: confirmPassword?:'' /}
 
-		  #{f.hidden 'user.id' /}
-		  #{if user.person}			
-		    #{f.view 'user.person' /}
-		  #{/if}	
-		  #{f.input 'user.username', required:true /}
-		  #{f.input 'user.password', value:'', type:'password', required:true /}
-		  #{if user.owner != null}
-		    #{f.input 'user.owner', readonly:true /}
-		  #{/if}
-		  <div class="col-sm-3">
-		  </div>
-		  <div class="col-sm-6">
-		  <table class="table table-condended table-bordered">	
-		  <tr>
-		  	<th class="alert alert-info">Ruolo</th>
-    		<th class="alert alert-info">Ufficio</th>
-		  </tr>    
-	      #{list items:user.usersRolesOffices, as:'uro'}
-	      <tr>
-	      	<td>${uro.role}</td>
-	      	<td>${uro.office}</td>
-	      </tr>
-	      #{/list}
- 	  	  </table>
- 	  	  #{b.buttons center:true}
-    		
-    		#{b.save /}
-    		
-    		*{ permetto di disabilitare/abilitare solo gli utenti di sistema }*
-    		#{if user.person == null }
-    		 #{if !user.disabled}
-    		 	#{b.disable @disable(user.id) /}
-    		 #{/if}
-    		 #{else}    		 		
-    		    #{b.enable /}
-    		 #{/else}
-    		#{/if}    		 
-    			
-  		  #{/b.buttons}
- 	  	  </div>
- 	  	  <div class="col-sm-3">
- 	  	  </div>
- 	  #{/form}
-#{/panel}
+		#{f.selectModel 'user.owner' , items: templateUtility.technicalAdminOffices /}
 
-	<div id="enable" style="display: none">
-	#{panel title:'Riabilita utente', color:'primary'}
-      #{form @Users.enable(), class:'form-horizontal'}
-  		<input type="hidden" name="id" value="${user.id}" />
-  		#{f.hidden 'systemUser', value:'true' /}
-	    <div class="alert alert-success">
-			E' possibile ripristinare l'utente selezionato assegnandogli il/i ruolo/i sulla/e sede/i di interesse.
-        </div>	 
-        #{f.selectModels 'officeIds', items:templateUtility.officesAllowed(), 
-  		    value:offices, placeholder:'Tutti gli uffici' /}
+		#{f.checkbox 'user.disabled' /}
 
-		#{f.selectModels 'roleIds', items:templateUtility.allSystemRoles(), 
-		    value:roles , placeholder:'Tutti i ruoli di sistema' /}
-		<div class="center">
-	    	<input class="btn btn-primary" type="submit" value="Riabilita"/>
-	  	</div>
-      #{/form}
-    #{/panel}
-    </div> <!-- end form vertical -->
+		#{b.buttons center:true}
+			#{b.submit 'Salva'/}
+		#{/b.buttons}
 
+	#{/form}
 
+	#{if user?.persistent}
+	#{secure.check 'Users.editAccountRoles'}
+	<div id="accountRolesList">
+		<ul class="list-group col-sm-6 col-sm-offset-3">
+			<a href="@{editAccountRoles(user.id)}" class="list-group-item active" data-async-modal="#defaultModal">
+				<i class="fa fa-cogs" aria-hidden="true"></i>
+				<strong>Gestisci ruoli di Sistema</strong>
+			</a>
+			#{if user.roles.empty}
+			<div class="alert alert-warning">
+				<strong>Nessun ruolo di sistema.</strong>
+			</div>
+			#{/if}
+			#{list user.roles}
+			<li class="list-group-item clearfix">
+				<strong><em>${_}</em></strong>
+			</li>
+			#{/list}
+		</ul>
+	</div>
+	#{/secure.check}
+
+	<div id="rolesList">
+		<ul class="list-group col-sm-6 col-sm-offset-3">
+			<a href="@{addRole(user.id)}" class="list-group-item active" data-async-modal="#defaultModal">
+				<i class="fa fa-plus-circle" aria-hidden="true"></i>
+				<strong>Nuovo ruolo</strong>
+			</a>
+			#{if user.usersRolesOffices.empty}
+				<div class="alert alert-warning">
+					<strong>Nessun ruolo assegnato.</strong>
+				</div>
+			#{/if}
+			#{list user.usersRolesOffices, as: 'uro'}
+			<li class="list-group-item clearfix">
+				<strong><em>${uro.role}</em></strong> della sede di <strong><em>${uro.office}</em></strong>
+				#{secure.check 'Users.removeRole', target: uro }
+        <a href="@{removeRole(uro.id)}" class="badge" style="color:white;">
+          &{'crud.delete'} <i class="fa fa-trash" aria-hidden="true"></i>
+        </a>
+				#{/secure.check}
+			</li>
+			#{/list}
+		</ul>
+	</div>
+	#{/if}
 </div>
 
-<div id="modalUpdateRole" class="modal fade container" tabindex="-1"></div>
-
-#{set 'moreScripts'}
-  <script type="text/javascript">
-	$(document).ready(function() {
-		
-		jQuery(document).ready(function(){
-	        jQuery('#hideshow').on('click', function(event) {    
-	        	$(this).toggleClass('btn-info');
-	        	$(this).toggleClass('btn-warning');
-	        	jQuery('#enable').toggle('show');	             
-	        });
-	    });
-
-		
-
-	 });
-	</script>
-#{/set}
 

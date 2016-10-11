@@ -64,15 +64,15 @@ public class YearlyAbsencesManager {
       tableMonthlyAbsences.put(p, abt, absenceInMonth.size());
       for (Absence abs : absenceInMonth) {
         Integer value = tableMonthlyAbsences.row(p).get(abs.absenceType);
-        log.debug("Per la persona {} il codice {} vale: {}",
+        log.trace("Per la persona {} il codice {} vale: {}",
             new Object[]{p, abs.absenceType.code, value});
         if (value == null) {
-          log.debug("Inserisco in tabella nuova assenza per {} con codice {}",
+          log.trace("Inserisco in tabella nuova assenza per {} con codice {}",
               p, abs.absenceType.code);
           tableMonthlyAbsences.row(p).put(abs.absenceType, 1);
         } else {
           tableMonthlyAbsences.row(p).put(abs.absenceType, value + 1);
-          log.debug("Incremento il numero di giorni per l'assenza {} di {} al valore {}",
+          log.trace("Incremento il numero di giorni per l'assenza {} di {} al valore {}",
               new Object[]{abs.absenceType.code, p, value + 1});
 
         }

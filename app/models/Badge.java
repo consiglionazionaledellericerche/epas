@@ -21,7 +21,7 @@ import javax.validation.constraints.NotNull;
 /**
  * Sono stati implementati i metodi Equals e HashCode in modo che Se sono presenti più badge per la
  * persona che differiscono solo per il campo badgeReader venga restituito un solo elemento
- * (effettivamente per noi è lo stesso badge) Quindi person.badges non restituisce i duplicati
+ * (effettivamente per noi è lo stesso badge) Quindi person.badges non restituisce i duplicati.
  */
 @Entity
 @Audited
@@ -29,6 +29,8 @@ import javax.validation.constraints.NotNull;
 @Table(name = "badges", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"badge_reader_id", "code"})})
 public class Badge extends BaseModel {
+
+  private static final long serialVersionUID = -4397151725225276985L;
 
   @Required
   @As(binder = NullStringBinder.class)

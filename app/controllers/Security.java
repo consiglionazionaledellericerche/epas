@@ -69,7 +69,7 @@ public class Security extends Secure.Security {
     Logger.trace("Richiesta getUser(), username=%s", username);
 
     //db
-    User user = userDao.getUserByUsernameAndPassword(username, Optional.<String>absent());
+    User user = userDao.byUsername(username);
 
     Logger.trace("User.find('byUsername'), username=%s, e' %s", username, user);
     if (user == null) {

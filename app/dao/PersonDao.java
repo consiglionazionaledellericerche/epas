@@ -26,11 +26,11 @@ import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.query.QBadge;
-import models.query.QCompetenceCode;
 import models.query.QContract;
 import models.query.QContractStampProfile;
 import models.query.QContractWorkingTimeType;
 import models.query.QPerson;
+import models.query.QPersonCompetenceCodes;
 import models.query.QPersonDay;
 import models.query.QPersonHourForOvertime;
 import models.query.QPersonReperibility;
@@ -219,6 +219,19 @@ public final class PersonDao extends DaoBase {
         Optional.fromNullable(start), Optional.fromNullable(end), true,
         Optional.fromNullable(competenceCode), personInCharge, false), person);
 
+  }
+  
+  public List<Person> listForCompetence(Set<Office> offices, YearMonth yearMonth, CompetenceCode code) {
+    final QPerson person = QPerson.person;
+    int year = yearMonth.getYear();
+    int month = yearMonth.getMonthOfYear();
+
+    Optional<LocalDate> beginMonth = Optional.fromNullable(new LocalDate(year, month, 1));
+    Optional<LocalDate> endMonth =
+        Optional.fromNullable(beginMonth.get().dayOfMonth().withMaximumValue());
+    JPQLQuery query = personQuery(Optional.<String>absent(), offices, false, beginMonth, endMonth,
+        true, Optional.fromNullable(code), Optional.<Person>absent(), false);
+    return query.list(person);
   }
 
   /**
@@ -587,6 +600,17 @@ public final class PersonDao extends DaoBase {
     return query.list(person);
 
   }
+  
+  /**
+   * 
+   * @param code il competence_code da cercare
+   * @return la lista delle persone che hanno il codice di competenza code abilitato.
+   */
+//  public List<Person> peopleWithCompetenceCodeActive(CompetenceCode code) {
+//    final QPerson person = QPerson.person;
+//    JPQLQuery query = getQueryFactory().from(person).where(person.competenceCode.contains(code));
+//    return query.list(person);
+//  }
 
 
   /**
@@ -637,6 +661,7 @@ public final class PersonDao extends DaoBase {
 
     final JPQLQuery query = getQueryFactory().from(person).leftJoin(person.contracts, contract)
         .fetch().leftJoin(person.user, QUser.user)
+        .leftJoin(person.personCompetenceCodes, QPersonCompetenceCodes.personCompetenceCodes).fetch()
         .leftJoin(person.reperibility, QPersonReperibility.personReperibility).fetch()
         .leftJoin(person.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime)
         .fetch().leftJoin(person.personShift, QPersonShift.personShift).fetch()
@@ -735,7 +760,9 @@ public final class PersonDao extends DaoBase {
 
     if (compCode.isPresent()) {
       final QPerson person = QPerson.person;
-      condition.and(person.competenceCode.contains(compCode.get()));
+      final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
+      
+      condition.and(pcc.competenceCode.eq(compCode.get()).and(pcc.person.eq(person)));
     }
   }
 
@@ -838,9 +865,34 @@ public final class PersonDao extends DaoBase {
     return lightQuery.list(bean);
 
   }
-  
+
   /**
-   * 
+   * Questo metodo ci è utile per popolare le select delle persone
+   *
+   * @param offices gli uffici di appartenenza delle persone richieste
+   * @return la Lista delle persone appartenenti agli uffici specificati
+   */
+  public List<PersonLite> peopleInOffices(Set<Office> offices) {
+
+    final QPerson person = QPerson.person;
+
+
+    JPQLQuery lightQuery =
+        getQueryFactory().from(person).leftJoin(person.contracts, QContract.contract)
+            .orderBy(person.surname.asc(), person.name.asc()).distinct();
+
+
+    lightQuery = personQuery(lightQuery, Optional.absent(), offices, false, Optional.absent(),
+        Optional.absent(), true, Optional.absent(), Optional.absent(), false);
+
+    QBean<PersonLite> bean =
+        Projections.bean(PersonLite.class, person.id, person.name, person.surname);
+
+    return lightQuery.list(bean);
+  }
+
+  /**
+   *
    * @param offices
    * @param onlyTechnician
    * @param year
@@ -849,14 +901,14 @@ public final class PersonDao extends DaoBase {
    * @param code
    * @return
    */
-  public List<Person> getPeopleWithOvertimeEnabled(Set<Office> offices, CompetenceCode code, List<Person> list) {
-
-    final QPerson person = QPerson.person;
-    JPQLQuery query = getQueryFactory().from(person)
-        .where(person.in(list).and(person.office.in(offices)
-            .and(person.competenceCode.contains(code)))).orderBy(person.surname.asc());
-    return query.list(person);
-  }
+//  public List<Person> getPeopleWithOvertimeEnabled(Set<Office> offices, CompetenceCode code, List<Person> list) {
+//
+//    final QPerson person = QPerson.person;
+//    JPQLQuery query = getQueryFactory().from(person)
+//        .where(person.in(list).and(person.office.in(offices)
+//            .and(person.competenceCode.contains(code)))).orderBy(person.surname.asc());
+//    return query.list(person);
+//  }
 
   /**
    * Dto contenente le sole informazioni della persona richieste dalla select nel template menu.
@@ -881,6 +933,12 @@ public final class PersonDao extends DaoBase {
       this.name = name;
       this.surname = surname;
     }
+
+    @Override
+    public String toString() {
+      return surname + ' ' + name;
+    }
+
   }
 
 }

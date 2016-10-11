@@ -35,6 +35,7 @@ public class UploadSituationManager {
   private static PersonStampingRecapFactory stampingsRecapFactory;
   
   /**
+   * Generatore del file da carica su attestati con le assenze/compentenze del personale.
    */
   @Inject
   public UploadSituationManager(PersonDao personDao, AbsenceDao absenceDao, 
@@ -77,14 +78,15 @@ public class UploadSituationManager {
         body = body + person.number + " C " + comp.competenceCode.code + " " 
             + comp.valueApproved + " \r\n";
       }
-      List<PersonMonthRecap> pmrList = personMonthRecapDao.getPersonMonthRecapInYearOrWithMoreDetails
-          (person, year, Optional.fromNullable(month),Optional.<Boolean>absent());
-      for(PersonMonthRecap pmr : pmrList){
+      List<PersonMonthRecap> pmrList = 
+          personMonthRecapDao.getPersonMonthRecapInYearOrWithMoreDetails(
+              person, year, Optional.fromNullable(month),Optional.<Boolean>absent());
+      for (PersonMonthRecap pmr : pmrList) {
         body = body + person.number + " F " + pmr.fromDate.getDayOfMonth() + " " 
             + pmr.toDate.getDayOfMonth() + " " + pmr.trainingHours + " \r\n";
       }
       PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
-      for(IWrapperContractMonthRecap cmr : psDto.contractMonths){
+      for (IWrapperContractMonthRecap cmr : psDto.contractMonths) {
         body = body + person.number + " B " + cmr.getValue().buoniPastoUsatiNelMese + " " 
             + cmr.getValue().buoniPastoUsatiNelMese + " \r\n";
       }

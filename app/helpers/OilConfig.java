@@ -33,11 +33,11 @@ public class OilConfig {
   private static final String OIL_DEFAULT_EMAIL_FROM_FOR_USER_REPLY = "mail.smtp.from";
   
   // default per parametri integrazione OIL
-  private static final String OIL_DEFAULT_APP_NAME = "adp";
-  private static final String OIL_DEFAULT_EMAIL_TO = "oil.cert@cnr.it";
-  private static final String OIL_DEFAULT_EMAIL_SUBJECT = "Segnalazione tecnica ePAS";
-  private static final String OIL_DEFAULT_CATEGORIES = "4:epas";
-  private static final String OIL_DEFAULT_SELECTED_CATEGORY = "4";
+  private static final String OIL_DEFAULT_APP_NAME = "siper";
+  private static final String OIL_DEFAULT_EMAIL_TO = "helpdesk.mailbox@cnr.it";
+  private static final String OIL_DEFAULT_EMAIL_SUBJECT = "Segnalazione ePAS";
+  private static final String OIL_DEFAULT_CATEGORIES = "50:Problemi Tecnici - ePAS,51:Problemi Amministrativi - ePAS";
+  private static final String OIL_DEFAULT_SELECTED_CATEGORY = "0";
   
   /**
    * Le categorie vengono lette dalla configurazione dal parametro

@@ -194,9 +194,9 @@ public class AbsenceTypeDao extends DaoBase {
   
   /**
    * 
-   * @param codesForEmployees
+   * @param codesForEmployees lista dei codici di assenza
    * @return la lista dei codici di assenza usabili dagli impiegati di livello I-III
-   * per giustificare il proprio orario di lavoro.
+   *        per giustificare il proprio orario di lavoro.
    */
   public List<AbsenceType> getAbsenceTypeForEmployee(List<String> codesForEmployees) {
     QAbsenceType absenceType = QAbsenceType.absenceType;

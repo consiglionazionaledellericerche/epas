@@ -47,7 +47,7 @@ import java.util.Set;
  */
 @Slf4j
 public class CertificationService {
-  
+
   private final CertificationsComunication certificationsComunication;
 
   private final PersonMonthRecapDao personMonthRecapDao;
@@ -56,8 +56,8 @@ public class CertificationService {
   private final CompetenceDao competenceDao;
   private final AbsenceDao absenceDao;
   private final CertificationDao certificationDao;
-  
-  
+
+
   @Inject
   public CertificationService(CertificationsComunication certificationsComunication,
       AbsenceDao absenceDao, CompetenceDao competenceDao, PersonMonthRecapDao personMonthRecapDao, 
@@ -71,7 +71,7 @@ public class CertificationService {
     this.personMonthRecapDao = personMonthRecapDao;
     this.certificationDao = certificationDao;
   }
-  
+
   /**
    * Ritorna il token di comunicazione.
    * @return token
@@ -79,7 +79,7 @@ public class CertificationService {
   public Optional<String> buildToken() {
     return certificationsComunication.getToken();
   }
-  
+
   /**
    * Se il token è abilitato alla sede.
    * @param office sede
@@ -88,12 +88,12 @@ public class CertificationService {
    * @return esito
    */
   public boolean authentication(Office office, Optional<String> token, boolean result) {
-    
+
     // TODO: chiedere a Pagano come discriminare il caso.
-    
+
     return result;
   }
-  
+
   /**
    * Le matricole abilitate all'invio attestati per la sede nel mese.
    * Nota bene: se la lista è vuota significa che non è stato effettuato lo stralcio oppure
@@ -106,9 +106,9 @@ public class CertificationService {
    * @return insieme di number
    */
   public Set<Integer> peopleList(Office office, int year, int month, Optional<String> token) {
-    
+
     return certificationsComunication.getPeopleList(office, year, month, token);
-    
+
   }
 
   /**
@@ -121,12 +121,12 @@ public class CertificationService {
    */
   private Map<String, Certification> personAttestatiCertifications(Person person, 
       int year, int month, PersonCertification personCertification) {
-    
+
     Map<String, Certification> certifications = Maps.newHashMap();
-    
+
     // Assenze accettate
     for (RigaAssenza rigaAssenza : personCertification.righeAssenza) {
-      
+
       Certification certification = new Certification();
       certification.person = person;
       certification.year = year;
@@ -134,13 +134,13 @@ public class CertificationService {
       certification.certificationType = CertificationType.ABSENCE;
       certification.content = rigaAssenza.serializeContent();
       certification.attestatiId = rigaAssenza.id;
-    
+
       certifications.put(certification.aMapKey(), certification);
     }
-    
+
     // Competenze accettate
     for (RigaCompetenza rigaCompetenza : personCertification.righeCompetenza) {
-      
+
       Certification certification = new Certification();
       certification.person = person;
       certification.year = year;
@@ -148,13 +148,13 @@ public class CertificationService {
       certification.certificationType = CertificationType.COMPETENCE;
       certification.content = rigaCompetenza.serializeContent();
       certification.attestatiId = rigaCompetenza.id;
-      
+
       certifications.put(certification.aMapKey(), certification);
     }
-    
+
     // Formazioni accettate
     for (RigaFormazione rigaFormazione : personCertification.righeFormazione) {
-      
+
       Certification certification = new Certification();
       certification.person = person;
       certification.year = year;
@@ -162,10 +162,10 @@ public class CertificationService {
       certification.certificationType = CertificationType.FORMATION;
       certification.content = rigaFormazione.serializeContent();
       certification.attestatiId = rigaFormazione.id;
-          
+
       certifications.put(certification.aMapKey(), certification);
     }
-   
+
     // Buoni pasto
     Certification certification = new Certification();
     certification.person = person;
@@ -173,12 +173,12 @@ public class CertificationService {
     certification.month = month;
     certification.certificationType = CertificationType.MEAL;
     certification.content = personCertification.numBuoniPasto + "";
-  
+
     certifications.put(certification.aMapKey(), certification);
-    
+
     return certifications;
   }
-  
+
   /**
    * Costruisce la situazione attestati di una persona.
    * @param person persona
@@ -190,7 +190,7 @@ public class CertificationService {
    */
   public PersonCertificationStatus buildPersonStaticStatus(Person person, int year, int month,
       Set<Integer> numbers, Optional<String> token) {
-    
+
     PersonCertificationStatus personCertificationStatus = new PersonCertificationStatus();
     personCertificationStatus.person = person;
     personCertificationStatus.year = year;
@@ -209,7 +209,7 @@ public class CertificationService {
 
     // Le certificazioni in attestati e lo stato di validazione ...
     Map<String, Certification> attestatiCertifications = Maps.newHashMap();
-    
+
     Optional<SeatCertification> seatCertification = certificationsComunication
         .getPersonSeatCertification(person, month, year, token);
     if (seatCertification.isPresent()) {
@@ -228,7 +228,7 @@ public class CertificationService {
     for (Certification certification : certificationDao.personCertifications(person, year, month)) {
       epasCertifications.put(certification.aMapKey(), certification);
     }
-    
+
     // Lo stato attuale epas
     Map<String, Certification> actualCertifications = Maps.newHashMap();
     actualCertifications = trainingHours(person, year, month, actualCertifications); 
@@ -263,39 +263,39 @@ public class CertificationService {
         personCertificationStatus.epasCertifications = epasCertifications;
       }
     }
-    
+
     personCertificationStatus.computeStaticStatus();
     return personCertificationStatus;
   }
-  
+
   private Map<String, Certification> updateEpasCertifications(
       Map<String, Certification> epasCertifications, 
       Map<String, Certification> attestatiCertifications) {
-    
+
     Set<String> allKey = Sets.newHashSet(); 
     allKey.addAll(epasCertifications.keySet());
     allKey.addAll(attestatiCertifications.keySet());
-    
-    
+
+
     for (String key : allKey) {
-      
+
       Certification epasCertification = epasCertifications.get(key);
       Certification attestatiCertification = attestatiCertifications.get(key);
-      
+
       if (epasCertification == null) {
         attestatiCertification.warnings = "Master Attestati";
         attestatiCertification.save();
         epasCertifications.put(key, attestatiCertification);
         continue;
       }
-      
+
       if (attestatiCertification == null) {
         log.info("Rimossa certifications obsoleta. {}", epasCertification.toString());
         epasCertification.delete();
         epasCertifications.remove(key);
         continue;
       }
-      
+
       if (epasCertification.containProblems()) {
         epasCertification.problems = null;
         epasCertification.warnings = "Problems fixed by Attestati";
@@ -309,9 +309,9 @@ public class CertificationService {
       }
 
     }
-    
+
     return epasCertifications;
-    
+
   }
 
   /**
@@ -322,13 +322,13 @@ public class CertificationService {
    */
   public boolean certificationsEquivalent(Map<String, Certification> map1, 
       Map<String, Certification> map2) {
-    
+
     Set<String> allKey = Sets.newHashSet(); 
     allKey.addAll(map1.keySet());
     allKey.addAll(map2.keySet());
-    
+
     for (String key : allKey) {
-      
+
       Certification certification1 = map1.get(key);
       Certification certification2 = map2.get(key);
       if (certification1 == null || certification2 == null) {
@@ -343,7 +343,7 @@ public class CertificationService {
     }
     return true;
   }
-  
+
   /**
    * Elaborazione persona.
    * @param personCertificationStatus il suo stato
@@ -352,9 +352,9 @@ public class CertificationService {
    */
   public PersonCertificationStatus process(PersonCertificationStatus personCertificationStatus, 
       Optional<String> token) {
-    
+
     personCertificationStatus.staticView = false;
-    
+
     // Da cancellare
     Map<String, Certification> notErasable = Maps.newHashMap();
     for (Certification certification : personCertificationStatus.toDeleteCertifications.values()) {
@@ -363,7 +363,7 @@ public class CertificationService {
       }
     }
     personCertificationStatus.toDeleteCertifications = notErasable;
-    
+
     // Le certificaioni che avevano problemi provo a reinviarle.
     List<Certification> sended = Lists.newArrayList();
     Map<String, Certification> containProblemCertifications = Maps.newHashMap();
@@ -381,7 +381,7 @@ public class CertificationService {
         }
       }
     }
-    
+
     // Da inviare
     Map<String, Certification> notSended = Maps.newHashMap();
     for (Certification certification : personCertificationStatus.toSendCertifications.values()) {
@@ -397,18 +397,18 @@ public class CertificationService {
         certification.save();
       }
     }
-    
+
     personCertificationStatus.problemCertifications = containProblemCertifications;
     personCertificationStatus.toSendCertifications = notSended;
-    
+
     for (Certification certification : sended) {
       personCertificationStatus.correctCertifications.put(certification.aMapKey(), certification);
     }
-    
+
     personCertificationStatus.computeProcessStatus();
-    
+
     return personCertificationStatus;
-    
+
   }
 
 
@@ -484,18 +484,18 @@ public class CertificationService {
    * @return
    */
   public boolean removeAttestati(Certification certification, Optional<String> token) {
-    
+
     HttpResponse httpResponse;
     Optional<RispostaAttestati> rispostaAttestati;
 
     if (certification.certificationType.equals(CertificationType.ABSENCE)) {
       httpResponse = certificationsComunication.deleteRigaAssenza(token, certification);
       rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
-      
+
     } else if (certification.certificationType.equals(CertificationType.FORMATION)) {
       httpResponse = certificationsComunication.deleteRigaFormazione(token, certification);
       rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
-      
+
     } else if (certification.certificationType.equals(CertificationType.COMPETENCE)) {
       httpResponse = certificationsComunication.deleteRigaCompetenza(token, certification);
       rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
@@ -520,7 +520,7 @@ public class CertificationService {
 
     return false;
   }
-  
+
   /**
    * Produce le certification delle ore di formazione per la persona.
    * @param person persona
@@ -530,12 +530,12 @@ public class CertificationService {
    */
   private Map<String, Certification> trainingHours(Person person, int year, int month, 
       Map<String, Certification> certifications) {
- 
+
     List<PersonMonthRecap> trainingHoursList = personMonthRecapDao
         .getPersonMonthRecapInYearOrWithMoreDetails(person, year, 
             Optional.fromNullable(month), Optional.<Boolean>absent());
     for (PersonMonthRecap personMonthRecap : trainingHoursList) {
-      
+
       // Nuova certificazione
       Certification certification = new Certification();
       certification.person = person;
@@ -544,16 +544,16 @@ public class CertificationService {
       certification.certificationType = CertificationType.FORMATION;
       certification.content = Certification
           .serializeTrainingHours(personMonthRecap.fromDate.getDayOfMonth(),
-          personMonthRecap.toDate.getDayOfMonth(), personMonthRecap.trainingHours);
-      
+              personMonthRecap.toDate.getDayOfMonth(), personMonthRecap.trainingHours);
+
       certifications.put(certification.aMapKey(), certification);
     }
-    
+
     return certifications;
   }
-  
- 
-  
+
+
+
   /**
    * Produce le certification delle assenze per la persona.
    * @param person persona
@@ -563,7 +563,7 @@ public class CertificationService {
    */
   private Map<String, Certification> absences(Person person, int year, int month,
       Map<String, Certification> certifications) {
-    
+
     log.info("Persona {}", person);
 
     List<Absence> absences = absenceDao
@@ -579,19 +579,19 @@ public class CertificationService {
     Integer dayEnd = null;
 
     for (Absence absence : absences) {
-      
+
       //codici a uso interno li salto
       if (absence.absenceType.internalUse) {
         continue;
       }
-      
+
       //Codice per attestati
       String absenceCodeToSend = absence.absenceType.code.toUpperCase();
       if (absence.absenceType.certificateCode != null 
           && !absence.absenceType.certificateCode.trim().isEmpty()) { 
         absenceCodeToSend = absence.absenceType.certificateCode.toUpperCase();
       }
-      
+
       // 1) Continua Assenza più giorni
       if (previousDate != null && previousDate.plusDays(1).equals(absence.personDay.date)
           && previousAbsenceCode.equals(absenceCodeToSend)) {
@@ -600,10 +600,10 @@ public class CertificationService {
         certification.content = absenceCodeToSend + ";" + dayBegin + ";" + dayEnd;
         continue;
       } 
-      
+
       // 2) Fine Assenza più giorni
       if (previousDate != null) {
-      
+
         certifications.put(certification.aMapKey(), certification);
         previousDate = null;
       }
@@ -627,13 +627,13 @@ public class CertificationService {
 
     return certifications;
   }
-  
+
   private Map<String, Certification> competences(Person person, int year, int month, 
       Map<String, Certification> certifications) {
-    
+
     List<Competence> competences = competenceDao
         .getCompetenceInMonthForUploadSituation(person, year, month);
-    
+
     for (Competence competence : competences) {
       Certification certification = new Certification();
       certification.person = person;
@@ -642,13 +642,13 @@ public class CertificationService {
       certification.certificationType = CertificationType.COMPETENCE;
       certification.content = Certification.serializeCompetences(competence.competenceCode.code,
           competence.valueApproved);
-      
+
       certifications.put(certification.aMapKey(), certification);
     }
-    
+
     return certifications;
   }
-  
+
   /**
    * Produce la certificazione buoni pasto della persona.
    * @param person persona
@@ -664,14 +664,14 @@ public class CertificationService {
     certification.year = year;
     certification.month = month;
     certification.certificationType = CertificationType.MEAL;
-    
+
     Integer mealTicket = personDayManager.numberOfMealTicketToUse(personDayDao
         .getPersonDayInMonth(person, new YearMonth(year, month)));
-    
+
     certification.content = mealTicket + "";
- 
+
     certifications.put(certification.aMapKey(), certification);
-    
+
     return certifications;
   }
 
@@ -686,14 +686,14 @@ public class CertificationService {
 
     if (personCertificationStatus.attestatiCertifications != null) {
       for (Certification certification : 
-        personCertificationStatus.attestatiCertifications.values()) {
+          personCertificationStatus.attestatiCertifications.values()) {
         if (certification.attestatiId != null 
             || certification.certificationType.equals(CertificationType.MEAL)) {
           removeAttestati(certification, token);
         }
       }
     }
-    
+
     if (personCertificationStatus.epasCertifications != null) {
       for (Certification certification : personCertificationStatus.epasCertifications.values()) {
         if (certification.attestatiId != null 
@@ -702,7 +702,7 @@ public class CertificationService {
         }
       }
     }
-    
+
     if (personCertificationStatus.actualCertifications != null) {
       for (Certification certification : personCertificationStatus.actualCertifications.values()) {
         if (certification.attestatiId != null 
@@ -711,7 +711,7 @@ public class CertificationService {
         }
       }
     }
-     
+
     return personCertificationStatus;
   }
   

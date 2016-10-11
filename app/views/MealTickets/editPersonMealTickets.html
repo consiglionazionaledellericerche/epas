@@ -9,7 +9,7 @@ session.get('monthSelected'), session.get('officeSelected')), (person.fullname):
 
 <div class="container">
 
-  #{mealTickets.personMealTicketsTabs person:recap.contract.person, activeAction:'editPersonMealTickets' /}
+  #{include './_personTabs.html' /}
 
   <!-- Consegnati -->
   #{alert color:'info'}

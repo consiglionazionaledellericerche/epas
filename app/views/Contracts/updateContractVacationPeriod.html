@@ -7,7 +7,7 @@
   'Gestisci Contratto':null] /}
 #{breadcrumbs breadcrumbs, noHome:true, container:true /}
 
-#{contracts.editContractTabs activeAction:'updateContractVacationPeriod' /}
+#{include './_tabs.html' /}
 
 <div class="container" id="updateVp">
 
@@ -28,6 +28,8 @@
 </table>
 #{/panel}
 
+
+#{secure.check 'Contracts.saveContractVacationPeriod'}
 <div class="alert alert-info">
   <p>Utilizzare questa form per definire il nuovo periodo di piano ferie selezionando la data di inizio e la data di fine periodo.</p>
   <p>Lasciando vuoto il campo <strong>&{'vp.endDate'}</strong> il nuovo piano ferie verrà applicato fino alla fine del contratto.<p>
@@ -62,5 +64,5 @@
 	#{/else}
 	 
 #{/form}
-
+#{/secure.check}
 </div>

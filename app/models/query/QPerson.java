@@ -37,8 +37,6 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final ListPath<models.CertificatedData, QCertificatedData> certificatedData = this.<models.CertificatedData, QCertificatedData>createList("certificatedData", models.CertificatedData.class, QCertificatedData.class, PathInits.DIRECT2);
 
-    public final ListPath<models.CompetenceCode, QCompetenceCode> competenceCode = this.<models.CompetenceCode, QCompetenceCode>createList("competenceCode", models.CompetenceCode.class, QCompetenceCode.class, PathInits.DIRECT2);
-
     public final ListPath<models.Competence, QCompetence> competences = this.<models.Competence, QCompetence>createList("competences", models.Competence.class, QCompetence.class, PathInits.DIRECT2);
 
     public final ListPath<models.Contract, QContract> contracts = this.<models.Contract, QContract>createList("contracts", models.Contract.class, QContract.class, PathInits.DIRECT2);
@@ -84,6 +82,8 @@ public class QPerson extends EntityPathBase<Person> {
     public final BooleanPath persistent = _super.persistent;
 
     public final SetPath<models.PersonChildren, QPersonChildren> personChildren = this.<models.PersonChildren, QPersonChildren>createSet("personChildren", models.PersonChildren.class, QPersonChildren.class, PathInits.DIRECT2);
+
+    public final SetPath<models.PersonCompetenceCodes, QPersonCompetenceCodes> personCompetenceCodes = this.<models.PersonCompetenceCodes, QPersonCompetenceCodes>createSet("personCompetenceCodes", models.PersonCompetenceCodes.class, QPersonCompetenceCodes.class, PathInits.DIRECT2);
 
     public final ListPath<models.PersonConfiguration, QPersonConfiguration> personConfigurations = this.<models.PersonConfiguration, QPersonConfiguration>createList("personConfigurations", models.PersonConfiguration.class, QPersonConfiguration.class, PathInits.DIRECT2);
 

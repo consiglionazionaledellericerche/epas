@@ -13,7 +13,6 @@ import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.query.QBadgeReader;
-import models.query.QPerson;
 import models.query.QRole;
 import models.query.QUser;
 import models.query.QUsersRolesOffices;
@@ -31,15 +30,13 @@ public class UsersRolesOfficesDao extends DaoBase {
 
   @Inject
   UsersRolesOfficesDao(JPQLQueryFactory queryFactory,
-                       Provider<EntityManager> emp) {
+      Provider<EntityManager> emp) {
     super(queryFactory, emp);
   }
 
   public UsersRolesOffices getById(Long id) {
-    QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
-    final JPQLQuery query = getQueryFactory().from(uro)
-        .where(uro.id.eq(id));
-    return query.singleResult(uro);
+    final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
+    return getQueryFactory().from(uro).where(uro.id.eq(id)).singleResult(uro);
   }
 
   /**
@@ -55,19 +52,6 @@ public class UsersRolesOfficesDao extends DaoBase {
     return Optional.fromNullable(query.singleResult(uro));
   }
 
-
-  /**
-   * @return l'usersRolesOffice associato ai parametri passati.
-   */
-  public Optional<UsersRolesOffices> getUsersRolesOfficesByUserAndOffice(User user, Office office) {
-    final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
-    final JPQLQuery query = getQueryFactory().from(uro)
-        .where(uro.user.eq(user)
-            .and(uro.office.eq(office)));
-
-    return Optional.fromNullable(query.singleResult(uro));
-  }
-
   /**
    * @return la lista di tutti gli usersRolesOffices associati al parametro passato.
    */
@@ -78,26 +62,15 @@ public class UsersRolesOfficesDao extends DaoBase {
   }
 
   /**
-   * La lista di tutti i ruoli per l'user. Utilizzato per visualizzare gli elementi della navbar.
-   */
-  public List<Role> getUserRole(User user) {
-
-    final QUsersRolesOffices quro = QUsersRolesOffices.usersRolesOffices;
-
-    return getQueryFactory().from(quro).where(quro.user.eq(user)).distinct().list(quro.role);
-  }
-
-  /**
    * Metodo per effettuare check dello stato ruoli epas <-> perseo.
    */
   public Map<Long, Set<String>> getEpasRoles(Optional<Office> office) {
 
     final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
     final QUser user = QUser.user;
-    final QPerson person = QPerson.person;
 
     ImmutableList<String> rolesName = ImmutableList.of(
-        Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.TECNICAL_ADMIN);
+        Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN);
 
     final QRole role = QRole.role;
     List<Role> roles = getQueryFactory().from(role).where(role.name.in(rolesName)).list(role);

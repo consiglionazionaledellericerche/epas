@@ -1,6 +1,7 @@
 package it.cnr.iit.epas;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
@@ -153,7 +154,7 @@ public class CompetenceUtility {
       mins = minutes % 60;
     }
 
-    log.debug("hours = {} mins = {}", hours, mins);
+    //log.debug("hours = {} mins = {}", hours, mins);
 
     return Integer.toString(hours).concat(".").concat(Integer.toString(mins));
   }
@@ -329,7 +330,7 @@ public class CompetenceUtility {
       LocalDate startDate, LocalDate endDate) {
     // for each person contains days with absences and no-stamping  matching the reperibility days
     final Table<Person, String, List<String>> inconsistentAbsenceTable =
-        TreeBasedTable.<Person, String, List<String>>create();
+        HashBasedTable.<Person, String, List<String>>create();
 
     // lista dei giorni di assenza e mancata timbratura
     List<String> noStampingDays = new ArrayList<String>();

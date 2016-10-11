@@ -7,12 +7,9 @@
   (person.fullname):null] /}
 #{breadcrumbs breadcrumbs, noHome:true, container:true /}
 
-#{persons.personsTabs activeAction:'personShow' /}
-
+#{include 'Persons/_tabs.html' /}
 
 <div class="container">
-
-  
 
 <br>
 
@@ -61,7 +58,7 @@
 	</div>  
 -->
 
-
+*{
     <div id="editPeriodic">
 	  #{alert color:'info'}
 	   <p>Elenco dei parametri di configurazione a <em><strong>cadenza periodica </strong></em>, il loro valore attuale ed il periodo di riferimento.</p>
@@ -87,6 +84,6 @@
 	  #{/list}
 	  </table>
 	</div>
-
+}*
   
 </div>

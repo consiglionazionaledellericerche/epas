@@ -23,6 +23,7 @@ import play.data.validation.Unique;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -188,9 +189,13 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
    * relazione con la tabella dei codici competenza per stabilire se una persona ha diritto o meno a
    * una certa competenza.
    */
+//  @NotAudited
+//  @ManyToMany(cascade = {CascadeType.REFRESH})
+//  public List<CompetenceCode> competenceCode = Lists.newArrayList();
+  
   @NotAudited
-  @ManyToMany(cascade = {CascadeType.REFRESH})
-  public List<CompetenceCode> competenceCode = Lists.newArrayList();
+  @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
+  public Set<PersonCompetenceCodes> personCompetenceCodes = Sets.newHashSet();
 
   @OneToOne(mappedBy = "person")
   public PersonHourForOvertime personHourForOvertime;
@@ -250,9 +255,9 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     return this.surname;
   }
 
-  public void setCompetenceCodes(List<CompetenceCode> competenceCode) {
-    this.competenceCode = competenceCode;
-  }
+//  public void setCompetenceCodes(List<CompetenceCode> competenceCode) {
+//    this.competenceCode = competenceCode;
+//  }
 
   /**
    * @return il nome completo.
@@ -305,4 +310,17 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     this.beginDate = LocalDate.now().minusYears(1).withMonthOfYear(12).withDayOfMonth(31);
   }
 
+  /**
+   * @return un Comparator che compara per fullname poi id.
+   */
+  public static Comparator<Person> personComparator() {
+    return Comparator
+        .comparing(
+            Person::getFullname, 
+            Comparator.nullsFirst(String::compareTo))
+        .thenComparing(
+            Person::getId, 
+            Comparator.nullsFirst(Long::compareTo));
+  }
+  
 }

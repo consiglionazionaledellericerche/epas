@@ -1,0 +1,15 @@
+*{ATTENZIONE! i popover bootstrap non sono compatibili con la select2, non usarli contemporaneamente!!}*
+#{f.edit _arg, label:_label}
+
+%{
+  value = _attrs.containsKey('value') ? _value : field.value
+}%
+
+<select class="form-control ${_class}" name="${field.name}" id="${field.id}" multiple select2
+        ${helpers.Web.serialize(_attrs, "arg", "value", "label", "items").raw()}>
+<option></option>
+#{list _items}
+    <option value="${_}"#{if value.contains(_)} selected#{/if}>${_.label()}</option>
+#{/list}
+</select>
+#{/f.edit}

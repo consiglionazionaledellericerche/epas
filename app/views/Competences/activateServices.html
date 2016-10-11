@@ -1,0 +1,67 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Attiva servizi'  /}
+
+<div class="container">
+  #{title title:'Attiva servizi per reperibilità', administration:true /}
+
+  #{alert color:'info'}
+  In questa pagina è possibile abilitare i servizi che la sede <strong>${office.code} - ${office.name}</strong> mette a disposizione e sui quali è stata
+  richiesta (e ottenuta) l'autorizzazione a fornire <strong>Reperibilità</strong> ai propri dipendenti.<br>
+  Per ciascun servizio che la sede si vede abilitare per reperibilità, la sede centrale eroga giorni di reperibilità in numero
+  uguale ai giorni del mese in cui la reperibilità è attiva. <br><strong>Es.:</strong> Giugno <i class="fa fa-long-arrow-right" aria-hidden="true"></i> 30 gg
+  <i class="fa fa-long-arrow-right" aria-hidden="true"></i> 30gg di reperibilità per ciascun servizio
+  #{/alert}
+
+  #{secure.check 'Competences.addService'}
+  #{b.buttons center:true}
+    <a class="btn btn-success" href="@{addService(currentData.officeId)}" data-async-modal="#modalActivateService">
+      <i class="fa fa-plus"></i> Nuovo servizio per reperibilità
+    </a>
+  #{/b.buttons}
+  #{/secure.check}
+  #{if prtList.isEmpty()}
+  #{alert color:'warning'}
+  <p>Al momento per la sede selezionata non sono state assegnate reperibilità per alcun servizio</p>
+  #{/alert}
+  #{/if}
+  #{else}
+  <table class="table">
+    <thead>
+    <tr>
+      <th>Servizio</th>
+      <th>Eventuale supervisore</th>
+      <th>Elimina</th>
+    </tr>
+    </thead>
+    <tbody>
+    #{list items:prtList, as:'prt'}
+    <tr #{if prt.disabled}class="danger" webui-popover-hover data-content="&{'serviceDisabled'}" #{/if}>
+    <td>
+      #{secure.link @Competences.editService(prt.id), 'data-async-modal':'#defaultModal'}
+        ${prt.description}
+      #{/secure.link}
+    <td>${prt.supervisor}</td>
+    <td>
+      #{secure.check 'Competences.evaluateService'}
+      #{if prt.disabled}
+      <a class="btn btn-primary btn-xs" href="@{Competences.evaluateService(prt.id)}" data-async-modal="#defaultModal">
+        Riabilita
+      </a>
+      #{/if}
+      #{else}
+      <a class="btn btn-danger btn-xs" href="@{Competences.evaluateService(prt.id)}" data-async-modal="#defaultModal">
+        Disabilita
+      </a>
+      #{/else}
+      #{/secure.check}
+    </td>
+    </tr>
+    #{/list}
+    </tbody>
+  </table>
+  #{/else}
+</div>
+
+<div id="modalActivateService" class="modal fade container" tabindex="-1"></div>
+<div id="defaultModal" class="modal fade container" tabindex="-1"></div>
