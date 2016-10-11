@@ -65,14 +65,14 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
    * true).
    */
   @Column(name = "marked_by_admin")
-  public Boolean markedByAdmin = false;
+  public boolean markedByAdmin = false;
 
   /**
    * con la nuova interpretazione delle possibilità del dipendente, questo campo viene settato a
    * true quando è il dipendente a modificare la propria timbratura.
    */
   @Column(name = "marked_by_employee")
-  public Boolean markedByEmployee = false;
+  public boolean markedByEmployee = false;
   /**
    * true, cella bianca; false, cella gialla.
    */
