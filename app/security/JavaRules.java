@@ -11,11 +11,9 @@ import models.Absence;
 import models.AbsenceType;
 import models.Person;
 import models.Role;
-import models.Stamping;
 import models.User;
 import models.enumerate.AccountRole;
 import models.enumerate.CodesForEmployee;
-import models.enumerate.StampTypes;
 
 import play.mvc.results.Forbidden;
 
@@ -34,6 +32,7 @@ public class JavaRules {
     currentAction = action;
   }
 
+  @Deprecated
   public void checkForAbsences(AbsenceType at, Person person) {
     final Optional<User> user = currentUser.get();
     if (user.isPresent()) {
@@ -66,6 +65,7 @@ public class JavaRules {
     throw new Forbidden("Access forbidden");
   }
 
+  @Deprecated
   public void checkForAbsences(Absence absence) {
     final Optional<User> user = currentUser.get();
 

@@ -1062,6 +1062,40 @@ then
  $c.grant();
 end
 
+
+/*******************************************************************************
+ * Un dipendente può autocertificare le proprie timbrature per il lavoro fuori Sede se...
+ ******************************************************************************/
+rule employeeCanInsertStampingsOffsite
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ $o: Office() from $p.office
+ Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
+ PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
+ $c: PermissionCheck(action in ("Stampings.blank"), target == $p, granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Un dipendente può modificare le sue timbrature per il lavoro fuori Sede se...
+ ******************************************************************************/
+rule employeeCanEditStampingsOffsite
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ $o: Office() from $p.office
+ $target: Stamping(UserDao.getAllowedStampTypes(currentOperator).contains(stampType), this.getOwner() == $p)
+ Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
+ PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
+ $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), target == $target, granted == false)
+ eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
+ /* AGGIUNGERE IL CONTROLLO SULL'INVIO DEGLI ATTESTATI!!! */
+then
+ $c.grant();
+end
+
 /*
  * L'impiegato può modificare/salvare una determinata assenza se:
  */
@@ -1104,39 +1138,6 @@ when
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
  $c: PermissionCheck(action in ("Stampings.blank"), target == $p, granted == false)
-then
- $c.grant();
-end
-
-/*******************************************************************************
- * Un dipendente può autocertificare le proprie timbrature se...
- ******************************************************************************/
-rule employeeCanInsertStampingsOffsite
-when
- $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
- $p: Person() from currentOperator.person
- $o: Office() from $p.office
- Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
- PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
- $c: PermissionCheck(action in ("Stampings.blank"), target == $p, granted == false)
-then
- $c.grant();
-end
-
-/*******************************************************************************
- * Un dipendente può modificare le sue timbrature se...
- ******************************************************************************/
-rule employeeCanEditStampingsOffsite
-when
- $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
- $p: Person() from currentOperator.person
- $o: Office() from $p.office
- $target: Stamping(UserDao.getAllowedStampTypes(currentOperator).contains(stampType), this.getOwner() == $p)
- Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
- PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
- $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), target == $target, granted == false)
- eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
- /* AGGIUNGERE IL CONTROLLO SULL'INVIO DEGLI ATTESTATI!!! */
 then
  $c.grant();
 end
