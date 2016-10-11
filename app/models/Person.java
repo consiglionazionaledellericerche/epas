@@ -166,6 +166,11 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public List<CertificatedData> certificatedData = Lists.newArrayList();
 
+  /**
+   * Dati derivanti dall'invio col nuovo sistema degli attestati
+   */
+  @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
+  public List<Certification> certifications = Lists.newArrayList();
 
   @OneToMany(mappedBy = "admin")
   public List<MealTicket> mealTicketsAdmin = Lists.newArrayList();
@@ -306,6 +311,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   @PrePersist
   private void onCreation() {
+    // TODO meglio rendere non necessario questo barbatrucco...
     this.beginDate = LocalDate.now().minusYears(1).withMonthOfYear(12).withDayOfMonth(31);
   }
 
@@ -331,6 +337,18 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   public boolean checkConf(EpasParam param, String value) {
     return personConfigurations.stream().filter(conf -> conf.epasParam == param
         && conf.fieldValue.equals(value)).findFirst().isPresent();
+  }
+
+  /**
+   * Verifica se per la persona sono già stati inviati gli attestati relativi ad una determinata
+   * data
+   *
+   * @param date La data sulla quale verificare la presenza dei riepiloghi degli attestati
+   * @return true se
+   */
+  public boolean alreadyCertificated(final LocalDate date) {
+    return certifications.stream().filter(certification -> certification.year == date.getYear()
+        && certification.month == date.getMonthOfYear()).findFirst().isPresent();
   }
 
 }
