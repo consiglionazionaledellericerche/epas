@@ -43,7 +43,7 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -8689432709728656660L;
 
-  @Column(name="perseo_id")
+  @Column(name = "perseo_id")
   public Long perseoId;
   
   @Required
@@ -74,9 +74,6 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
   public Institute institute;
 
   public boolean headQuarter = false;
-
-//  @OneToMany(mappedBy = "owner", cascade = {CascadeType.REMOVE})
-//  public List<BadgeReader> badgeReaders = Lists.newArrayList();
 
   @OneToMany(mappedBy = "owner", cascade = {CascadeType.REMOVE})
   public List<User> users = Lists.newArrayList();

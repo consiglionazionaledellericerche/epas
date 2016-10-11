@@ -358,6 +358,9 @@ public class Administration extends Controller {
     render("@data", entries);
   }
 
+  /**
+   * Mostra le proprietà della jvm.
+   */
   public static void jvmConfiguration() {
     final Collection<Entry<Object, Object>> entries = Collections2.filter(
         System.getProperties().entrySet(), new Predicate<Entry<Object, Object>>() {
@@ -369,6 +372,9 @@ public class Administration extends Controller {
     render("@data", entries);
   }
 
+  /**
+   * Mostra i valori di Runtime del processo play (Memoria usata, memoria libera, etc).
+   */
   public static void runtimeData() {
 
     final int mb = 1024 * 1024;
@@ -388,7 +394,8 @@ public class Administration extends Controller {
     render();
   }
 
-  public static void saveConfiguration(@Required String name, @Required String value, boolean newParam) {
+  public static void saveConfiguration(@Required String name, @Required String value, 
+      boolean newParam) {
     if (Validation.hasErrors()) {
       response.status = 400;
       if (newParam) {
@@ -412,7 +419,7 @@ public class Administration extends Controller {
 
     final User user = Administrators.userDao.getUserByIdAndPassword(id, Optional.<String>absent());
 
-    if( user == null || user.disabled) {
+    if (user == null || user.disabled) {
       notFound();
     }
 
@@ -451,7 +458,8 @@ public class Administration extends Controller {
   public static void changePeopleEmailDomain(@Required Office office, @Required String domain,
       boolean sendMail) {
 
-    final Pattern domainPattern = Pattern.compile("(?:[\\w](?:[\\w-]*[\\w])?\\.)+[a-zA-Z0-9](?:[\\w-]*[\\w])?");
+    final Pattern domainPattern = 
+        Pattern.compile("(?:[\\w](?:[\\w-]*[\\w])?\\.)+[a-zA-Z0-9](?:[\\w-]*[\\w])?");
 
     if (!Strings.isNullOrEmpty(domain) && domain.contains("@")) {
       Validation.addError("domain", "Specificare il dominio senza il carattere @");

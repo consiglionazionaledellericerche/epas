@@ -10,6 +10,8 @@ import play.data.binding.As;
 import play.mvc.Controller;
 
 /**
+ * Autenticazione DIY via json.
+ * 
  * @author cristian
  */
 public class SecureJson extends Controller {

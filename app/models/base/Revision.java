@@ -20,6 +20,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 /**
+ * Definisce il mapping con le revisioni envers.
  * @author marco
  */
 @Entity
@@ -47,10 +48,10 @@ public class Revision {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(Object obj) {
 
-    if (o instanceof Revision) {
-      final Revision other = (Revision) o;
+    if (obj instanceof Revision) {
+      final Revision other = (Revision) obj;
       return id == other.id;
     } else {
       return false;

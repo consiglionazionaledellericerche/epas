@@ -1,8 +1,12 @@
 package models;
 
+import com.beust.jcommander.internal.Lists;
+
 import models.base.BaseModel;
 import models.enumerate.LimitType;
 import models.enumerate.LimitUnit;
+
+import org.hibernate.envers.Audited;
 
 import play.data.validation.Required;
 import play.data.validation.Unique;
@@ -17,9 +21,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.hibernate.envers.Audited;
 
-import com.beust.jcommander.internal.Lists;
 
 /**
  * I gruppi servono per descrivere comportamenti e limiti comuni a più
@@ -30,7 +32,8 @@ import com.beust.jcommander.internal.Lists;
  */
 @Audited
 @Entity
-@Table(name = "competence_code_groups", uniqueConstraints = {@UniqueConstraint(columnNames = {"label"})})
+@Table(name = "competence_code_groups", 
+    uniqueConstraints = {@UniqueConstraint(columnNames = {"label"})})
 public class CompetenceCodeGroup extends BaseModel {
 
   private static final long serialVersionUID = 6486248571013912369L;

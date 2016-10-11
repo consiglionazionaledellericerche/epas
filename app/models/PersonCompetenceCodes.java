@@ -23,7 +23,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "persons_competence_codes")
-public class PersonCompetenceCodes extends PeriodModel{
+public class PersonCompetenceCodes extends PeriodModel {
 
   @Required
   @ManyToOne
@@ -38,7 +38,8 @@ public class PersonCompetenceCodes extends PeriodModel{
   @Override
   public String toString() {
     return String.format(
-        "PersonCompetenceCodes[%d] - person.name = %s, competenceCode = %s, beginDate = %s, endDate = %s",
+        "PersonCompetenceCodes[%d] - person.name = %s, competenceCode = %s, "
+        + "beginDate = %s, endDate = %s",
          id, person.fullName(), competenceCode.code, beginDate, endDate);
   }
 }

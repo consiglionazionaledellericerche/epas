@@ -311,8 +311,8 @@ public class Absences extends Controller {
     if (user != null && (user.person == null || userDao.hasAdminRoles(user))) {
       rules.checkIfPermitted(person);
     } else {
-      // FIXME questa è una porcheria fatta perchè le drools in alcuni casi non funzionano come dovrebbero
-      // da rimuovere non appena si riesce a risolvere il problema sulle drools
+      // FIXME questa è una porcheria fatta perchè le drools in alcuni casi non funzionano come 
+      // dovrebbero da rimuovere non appena si riesce a risolvere il problema sulle drools.
       jRules.checkForAbsences(absenceType, person);
     }
 
@@ -378,8 +378,8 @@ public class Absences extends Controller {
     if (user != null && (user.person == null || userDao.hasAdminRoles(user))) {
       rules.checkIfPermitted(absence.personDay.person);
     } else {
-      // FIXME questa è una porcheria fatta perchè le drools in alcuni casi non funzionano come dovrebbero
-      // da rimuovere non appena si riesce a risolvere il problema sulle drools
+      // FIXME questa è una porcheria fatta perchè le drools in alcuni casi non funzionano come
+      // dovrebbero da rimuovere non appena si riesce a risolvere il problema sulle drools
       jRules.checkForAbsences(absence);
     }
 
@@ -406,8 +406,8 @@ public class Absences extends Controller {
     if (user != null && (user.person == null || userDao.hasAdminRoles(user))) {
       rules.checkIfPermitted(absence.personDay.person);
     } else {
-      // FIXME questa è una porcheria fatta perchè le drools in alcuni casi non funzionano come dovrebbero
-      // da rimuovere non appena si riesce a risolvere il problema sulle drools
+      // FIXME questa è una porcheria fatta perchè le drools in alcuni casi non funzionano
+      // come dovrebbero da rimuovere non appena si riesce a risolvere il problema sulle drools
       jRules.checkForAbsences(absence);
     }
 
@@ -602,9 +602,8 @@ public class Absences extends Controller {
         zos.closeEntry();
 
         fis.close();
-      } catch (IOException e) {
-
-        e.printStackTrace();
+      } catch (IOException ex) {
+        ex.printStackTrace();
       }
     }
 

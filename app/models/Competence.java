@@ -16,9 +16,9 @@ import javax.persistence.Table;
 
 
 /**
- * tabella delle competenze relative alla persona in cui sono memorizzate le competenze in
+ * Tabella delle competenze relative alla persona in cui sono memorizzate le competenze in
  * determinate date (espresse attraverso due interi, uno relativo all'anno e uno relativo al mese
- * con relative descrizioni e valori
+ * con relative descrizioni e valori.
  *
  * @author dario
  * @author arianna

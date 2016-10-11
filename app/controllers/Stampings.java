@@ -246,8 +246,8 @@ public class Stampings extends Controller {
     if (user != null && (user.person == null || userDao.hasAdminRoles(user))) {
       rules.checkIfPermitted(person);
     } else {
-      // FIXME questa è una porcheria fatta perchè le drools in alcuni casi non funzionano come dovrebbero
-      // da rimuovere non appena si riesce a risolvere il problema sulle drools
+      // FIXME questa è una porcheria fatta perchè le drools in alcuni casi non funzionano come
+      // dovrebbero da rimuovere non appena si riesce a risolvere il problema sulle drools
       jRules.checkForStamping(stamping);
     }
 
@@ -310,8 +310,8 @@ public class Stampings extends Controller {
     if (user != null && (user.person == null || userDao.hasAdminRoles(user))) {
       rules.checkIfPermitted(stamping.personDay.person);
     } else {
-      // FIXME questa è una porcheria fatta perchè le drools in alcuni casi non funzionano come dovrebbero
-      // da rimuovere non appena si riesce a risolvere il problema sulle drools
+      // FIXME questa è una porcheria fatta perchè le drools in alcuni casi non funzionano
+      // come dovrebbero da rimuovere non appena si riesce a risolvere il problema sulle drools
       jRules.checkForStamping(stamping);
       notificationManager.notifyStamping(stamping, NotificationManager.CRUD.DELETE);
     }

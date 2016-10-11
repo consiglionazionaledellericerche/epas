@@ -32,7 +32,7 @@ public class OfficePerseoConsumer {
 
 
   /**
-   * Preleva la lista di tutte le sedi presenti su Perseo
+   * Preleva la lista di tutte le sedi presenti su Perseo.
    */
   private ListenableFuture<List<PerseoOffice>> perseoOffices() {
 
@@ -44,8 +44,8 @@ public class OfficePerseoConsumer {
       url = PerseoApis.getOfficesEndpoint() + "list";
       user = PerseoApis.getPerseoUser();
       pass = PerseoApis.getPerseoPass();
-    } catch (NoSuchFieldException e) {
-      final String error = String.format("Parametro necessario non trovato: %s", e.getMessage());
+    } catch (NoSuchFieldException ex) {
+      final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
       log.error(error);
       throw new ApiRequestException(error);
     }
@@ -71,8 +71,8 @@ public class OfficePerseoConsumer {
         try {
           return new Gson().fromJson(response.getJson(), new TypeToken<List<PerseoOffice>>() {
           }.getType());
-        } catch (JsonSyntaxException e) {
-          final String error = String.format("Errore nel parsing del json: %s", e.getMessage());
+        } catch (JsonSyntaxException ex) {
+          final String error = String.format("Errore nel parsing del json: %s", ex.getMessage());
           log.warn(error);
           throw new ApiRequestException(error);
         }
@@ -93,8 +93,8 @@ public class OfficePerseoConsumer {
       url = PerseoApis.getOfficeEndpoint() + perseoId;
       user = PerseoApis.getPerseoUser();
       pass = PerseoApis.getPerseoPass();
-    } catch (NoSuchFieldException e) {
-      final String error = String.format("Parametro necessario non trovato: %s", e.getMessage());
+    } catch (NoSuchFieldException ex) {
+      final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
       log.error(error);
       throw new ApiRequestException(error);
     }
@@ -118,8 +118,8 @@ public class OfficePerseoConsumer {
         log.info("Recuperato Json contenente la Sede con id {} da Perseo.", perseoId);
         try {
           return new Gson().fromJson(response.getJson(), PerseoOffice.class);
-        } catch (JsonSyntaxException e) {
-          final String error = String.format("Errore nel parsing del json: %s", e.getMessage());
+        } catch (JsonSyntaxException ex) {
+          final String error = String.format("Errore nel parsing del json: %s", ex.getMessage());
           log.warn(error);
           throw new ApiRequestException(error);
         }
@@ -140,8 +140,8 @@ public class OfficePerseoConsumer {
       url = PerseoApis.getInstituteEndpoint() + perseoId;
       user = PerseoApis.getPerseoUser();
       pass = PerseoApis.getPerseoPass();
-    } catch (NoSuchFieldException e) {
-      final String error = String.format("Parametro necessario non trovato: %s", e.getMessage());
+    } catch (NoSuchFieldException ex) {
+      final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
       log.error(error);
       throw new ApiRequestException(error);
     }
@@ -165,8 +165,8 @@ public class OfficePerseoConsumer {
         log.info("Recuperato Json contenente l'istituto con id {} da Perseo", perseoId);
         try {
           return new Gson().fromJson(response.getJson(), PerseoInstitute.class);
-        } catch (JsonSyntaxException e) {
-          final String error = String.format("Errore nel parsing del json: %s", e.getMessage());
+        } catch (JsonSyntaxException ex) {
+          final String error = String.format("Errore nel parsing del json: %s", ex.getMessage());
           log.warn(error);
           throw new ApiRequestException(error);
         }
@@ -221,9 +221,9 @@ public class OfficePerseoConsumer {
 
     try {
       perseoOffices = perseoOffices().get();
-    } catch (InterruptedException | ExecutionException e) {
+    } catch (InterruptedException | ExecutionException ex) {
       String error = String.format("Impossibile recuperare la lista degli istituti - %s",
-          e.getMessage());
+          ex.getMessage());
       log.error(error);
       throw new ApiRequestException(error);
     }
@@ -261,9 +261,9 @@ public class OfficePerseoConsumer {
 
     try {
       perseoOffice = perseoOfficeByPerseoId(officePerseoId).get();
-    } catch (InterruptedException | ExecutionException e) {
+    } catch (InterruptedException | ExecutionException ex) {
       String error = String.format("Impossibile recuperare la sede da %d Perseo - %s",
-          officePerseoId, e.getMessage());
+          officePerseoId, ex.getMessage());
       log.error(error);
       throw new ApiRequestException(error);
     }
@@ -290,9 +290,9 @@ public class OfficePerseoConsumer {
 
     try {
       perseoInstitute = perseoInstituteByPerseoId(institutePerseoId).get();
-    } catch (InterruptedException | ExecutionException e) {
+    } catch (InterruptedException | ExecutionException ex) {
       String error = String.format("Impossibile l'istituto da %d Perseo - %s",
-          institutePerseoId, e.getMessage());
+          institutePerseoId, ex.getMessage());
       log.error(error);
       throw new ApiRequestException(error);
     }

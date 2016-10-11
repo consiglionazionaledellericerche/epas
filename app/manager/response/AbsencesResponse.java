@@ -34,8 +34,9 @@ public class AbsencesResponse {
   public static final String PERSONDAY_PRECEDENTE_NON_PRESENTE =
       "Nessun personday per il giorno precedente a quando si intende inserire il codice con "
       + "allegato. Verificare";
-  public static final String CODICE_NON_UTILIZZABILE = "Il codice di assenza non è utilizzabile poichè "
-      + "la qualifica della persona non è presente tra quelle che possono utilizzare il codice";
+  public static final String CODICE_NON_UTILIZZABILE = "Il codice di assenza non è utilizzabile "
+      + "poichè la qualifica della persona non è presente tra quelle che possono utilizzare il "
+      + "codice";
 
   private LocalDate date;
   private String absenceCode;

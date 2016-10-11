@@ -15,6 +15,8 @@ import javax.persistence.Table;
 
 
 /**
+ * Qualifiche CNR (livello 1, 2, 3, 4, ...).
+ * 
  * @author dario
  */
 @Entity

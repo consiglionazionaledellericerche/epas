@@ -124,9 +124,8 @@ public class User extends BaseModel {
   }
 
   /**
-   *
-   * @param args Stringhe corrispondenti ai ruoli da verificare
-   * @return true se contiene almeno uno dei ruoli specificati
+   * @param args Stringhe corrispondenti ai ruoli da verificare.
+   * @return true se contiene almeno uno dei ruoli specificati.
    */
   public boolean hasRoles(String... args) {
     return usersRolesOffices.stream()

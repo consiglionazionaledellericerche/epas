@@ -19,6 +19,8 @@ import javax.validation.constraints.NotNull;
 
 
 /**
+ * Tipo di reperibilità.
+ * 
  * @author cristian
  */
 @Audited

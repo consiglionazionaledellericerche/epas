@@ -84,8 +84,8 @@ public class CertificationsComunication {
       url = AttestatiApis.getAttestatiBaseUrl();
       user = AttestatiApis.getAttestatiUser();
       pass = AttestatiApis.getAttestatiPass();
-    } catch (NoSuchFieldException e) {
-      final String error = String.format("Parametro necessario non trovato: %s", e.getMessage());
+    } catch (NoSuchFieldException ex) {
+      final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
       log.error(error);
       throw new ApiRequestException(error);
     }
@@ -133,8 +133,8 @@ public class CertificationsComunication {
     
     try {
       baseUrl = AttestatiApis.getAttestatiBaseUrl();
-    } catch (NoSuchFieldException e) {
-      final String error = String.format("Parametro necessario non trovato: %s", e.getMessage());
+    } catch (NoSuchFieldException ex) {
+      final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
       log.error(error);
       throw new ApiRequestException(error);
     }
@@ -259,7 +259,8 @@ public class CertificationsComunication {
    * @param certification attestato
    * @return risposta
    */
-  public HttpResponse sendRigaBuoniPasto(Optional<String> token, Certification certification, boolean update) {
+  public HttpResponse sendRigaBuoniPasto(Optional<String> token, Certification certification, 
+      boolean update) {
     if (!reloadToken(token).isPresent()) {
       return null;
     }

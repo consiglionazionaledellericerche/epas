@@ -157,16 +157,14 @@ public class PersonDay extends BaseModel {
   }
   
   /**
-   * 
-   * @return
+   * @return true se la data del personDay è passata, false altrimenti.
    */
   public boolean isPast() {
     return this.date.isBefore(LocalDate.now());
   }
   
-  /**
-   * 
-   * @return
+  /** 
+   * @return true se la data del personDay è futura, false altrimenti.
    */
   public boolean isFuture() {
     return this.date.isAfter(LocalDate.now());
@@ -174,16 +172,15 @@ public class PersonDay extends BaseModel {
 
   /**
    * Nel caso di orario effettuato fuori dalla finestra dell'orario sede.
-   *
+   * <p>
    * TODO: vedere se aggiungere una colonna invece di calcolare questo invariante.
-   *
+
    * timeAtWork = StampingTime - decurtedWork - decurtedMeal + justifiedTimeMeal +
    * justifiedTimeNoMeal
    *
-   * -->
-   *
    * decurtedWork = StampingTime - timeAtWork - decurtedMeal + justifiedTimeMeal +
    * justifiedTimeNoMeal
+   * </p>
    */
   @Transient
   public int getDecurtedWork() {
@@ -210,7 +207,6 @@ public class PersonDay extends BaseModel {
   /**
    * Il tempo assegnabile è quello a lavoro meno i giustificativi.
    * assignableTime = timeAtWork - justifiedTimeMeal - justifiedTimeNoMeal
-   * @return
    */
   @Transient
   public int getAssignableTime() {
@@ -222,15 +218,15 @@ public class PersonDay extends BaseModel {
    * metodo che resetta un personday azzerando i valori in esso contenuti.
    */
   @Transient
-  public void reset(){
+  public void reset() {
     long id = this.id;
     try {
       BeanUtils.copyProperties(this, new PersonDay(this.person, this.date));
       this.id = id;
       this.save();
-    } catch (IllegalAccessException e) {
+    } catch (IllegalAccessException iae) {
       log.error("Impossibile accedere all'istanza dell'oggetto {}", this.getClass());      
-    } catch (InvocationTargetException e) {      
+    } catch (InvocationTargetException ite) {      
       log.error("Errore sulla chiamata del metodo");
     }
   }

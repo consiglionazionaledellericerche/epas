@@ -48,8 +48,10 @@ public class RolePerseoConsumer {
   /**
    * Costruttore.
    *
-   * @param personDao              inject
-   * @param wrapperFunctionFactory inject
+   * @param personDao injected PersonDao
+   * @param officeDao injected OfficeDao
+   * @param roleDao injected RoleDao
+   * @param uroDao injected UsersRolesOfficesDao 
    */
   @Inject
   public RolePerseoConsumer(PersonDao personDao, OfficeDao officeDao, RoleDao roleDao,
@@ -74,8 +76,8 @@ public class RolePerseoConsumer {
       url = PerseoApis.getAllRolesEpasEndpoint();
       user = PerseoApis.getPerseoUser();
       pass = PerseoApis.getPerseoPass();
-    } catch (NoSuchFieldException e) {
-      final String error = String.format("Parametro necessario non trovato: %s", e.getMessage());
+    } catch (NoSuchFieldException ex) {
+      final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
       log.error(error);
       throw new ApiRequestException(error);
     }
@@ -101,8 +103,8 @@ public class RolePerseoConsumer {
         try {
           return new Gson().fromJson(response.getJson(), new TypeToken<List<PerseoRole>>() {
           }.getType());
-        } catch (JsonSyntaxException e) {
-          final String error = String.format("Errore nel parsing del json: %s", e.getMessage());
+        } catch (JsonSyntaxException ex) {
+          final String error = String.format("Errore nel parsing del json: %s", ex.getMessage());
           log.warn(error);
           throw new ApiRequestException(error);
         }
@@ -113,7 +115,6 @@ public class RolePerseoConsumer {
   /**
    * Serve per sincronizzare i ruoli epas.
    *
-   * @param perseoDepartmentId department perseo id
    * @param office             ?
    * @return mappa
    */
@@ -123,9 +124,9 @@ public class RolePerseoConsumer {
 
     try {
       perseoRoles = perseoRoles().get();
-    } catch (InterruptedException | ExecutionException e) {
+    } catch (InterruptedException | ExecutionException ex) {
       String error = String
-          .format("Impossibile recuperare i ruoli da Perseo - %s", e.getMessage());
+          .format("Impossibile recuperare i ruoli da Perseo - %s", ex.getMessage());
       log.error(error);
       throw new ApiRequestException(error);
     }
@@ -167,7 +168,7 @@ public class RolePerseoConsumer {
 
 
   /**
-   * La lista dei ruoli in perseo per l'office, sotto forma di usersRolesOffices
+   * La lista dei ruoli in perseo per l'office, sotto forma di usersRolesOffices.
    *
    * @return la lista
    */
@@ -177,9 +178,9 @@ public class RolePerseoConsumer {
     List<PerseoRole> perseoRoles = Lists.newArrayList();
     try {
       perseoRoles = perseoRoles().get();
-    } catch (InterruptedException | ExecutionException e) {
+    } catch (InterruptedException | ExecutionException ex) {
       String error = String
-          .format("Impossibile recuperare i ruoli da Perseo - %s", e.getMessage());
+          .format("Impossibile recuperare i ruoli da Perseo - %s", ex.getMessage());
       log.error(error);
       throw new ApiRequestException(error);
     }

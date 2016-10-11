@@ -354,7 +354,7 @@ public class RequestInit extends Controller {
     public Integer getDayOfMonth(Integer month) {
       try {
         new LocalDate(year, month, day);
-      } catch (Exception e) {
+      } catch (Exception ex) {
         return new LocalDate(year, month, 1).dayOfMonth().withMaximumValue().getDayOfMonth();
       }
       return day;

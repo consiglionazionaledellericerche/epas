@@ -269,9 +269,8 @@ public enum EpasParam {
 
     /**
      * Converte il tipo primitivo nella formattazione string.
-     * @param valueType
-     * @param value
-     * @return
+     * @param value l'oggetto da convertire in stringa
+     * @return la stringa rappresentante il valore passato
      */
     public static String formatValue(final Object value) {
       if (value instanceof String) {
@@ -327,8 +326,10 @@ public enum EpasParam {
             return LocalTime.parse(value, DateTimeFormat.forPattern(LOCALTIME_FORMATTER));
           case LOCALTIME_INTERVAL:
             LocalTimeInterval interval = new LocalTimeInterval(
-                (LocalTime)parseValue(LOCALTIME, value.trim().split(LOCALTIME_INTERVAL_SEPARATOR)[0]),
-                (LocalTime)parseValue(LOCALTIME, value.trim().split(LOCALTIME_INTERVAL_SEPARATOR)[1]));
+                (LocalTime)parseValue(
+                    LOCALTIME, value.trim().split(LOCALTIME_INTERVAL_SEPARATOR)[0]),
+                (LocalTime)parseValue(
+                    LOCALTIME, value.trim().split(LOCALTIME_INTERVAL_SEPARATOR)[1]));
             if (interval.to.isBefore(interval.from)) {
               return null;
             } else {
@@ -349,7 +350,7 @@ public enum EpasParam {
           case BOOLEAN:
             return new Boolean(value);
         }
-      } catch(Exception e) {
+      } catch (Exception ex) {
         return null;
       }
       return null;

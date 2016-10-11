@@ -99,18 +99,17 @@ public class Security extends Secure.Security {
     }
   }
 
-  static Object invoke(String m, Object... args) throws Throwable {
-
+  static Object invoke(String method, Object... args) throws Throwable {
     try {
-      return Java.invokeChildOrStatic(Security.class, m, args);
-    } catch (InvocationTargetException e) {
-      throw e.getTargetException();
+      return Java.invokeChildOrStatic(Security.class, method, args);
+    } catch (InvocationTargetException ex) {
+      throw ex.getTargetException();
     }
   }
 
   /**
    * @return Vero se c'è almeno un istituto abilitato dall'ip contenuto nella richiesta HTTP
-   * ricevuta, false altrimenti.
+   *        ricevuta, false altrimenti.
    */
   public static boolean checkForWebstamping() {
 

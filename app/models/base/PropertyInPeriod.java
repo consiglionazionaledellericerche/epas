@@ -41,8 +41,8 @@ public abstract class PropertyInPeriod extends PeriodModel implements IPropertyI
       obj.setValue(this.getValue());
       obj.setType(this.getType());
       return (PropertyInPeriod)obj;
-    } catch (InstantiationException | IllegalAccessException e) {
-      e.printStackTrace();
+    } catch (InstantiationException | IllegalAccessException ex) {
+      ex.printStackTrace();
       log.error("Impossibile creare una nuova istanza di {}", this.toString());
     }
     return null;
