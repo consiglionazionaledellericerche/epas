@@ -398,6 +398,12 @@ public class ServiceFactories {
     absencePeriod.attemptedInsertAbsence = absenceToInsert;
     dispatchAbsenceInPeriod(periodChain, absencePeriod, absenceToInsert);
     
+    // sono riuscito a inserirla
+    if (!absencePeriod.getDayInPeriod(absenceToInsert.getAbsenceDate())
+        .containTakenAbsence(absenceToInsert)) {
+      return false;
+    }
+    
     // gli esiti
     if (absencePeriod.errorsBox.containsCriticalErrors()) {
       return false;

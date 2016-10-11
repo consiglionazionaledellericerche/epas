@@ -257,7 +257,7 @@ public class AbsenceMigration {
         && absence.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)) {
       absence.absenceType = absenceComponentDao.absenceTypeByCode("661M").get();
       absence.justifiedMinutes = 60 * 7;
-      absence.justifiedType = absenceTypeMinutes;
+      absence.justifiedType = specifiedMinutes;
       absence.save();
       expireCode(absence.absenceType);
       return;

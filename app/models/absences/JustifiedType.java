@@ -29,7 +29,8 @@ public class JustifiedType extends BaseModel {
     missing_time, 
     half_day, 
     all_day, 
-    assign_all_day;
+    assign_all_day,
+    
   }
   
   @Column

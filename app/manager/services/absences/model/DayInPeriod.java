@@ -38,6 +38,15 @@ public class DayInPeriod {
     this.absencePeriod = absencePeriod;
   }
   
+  public boolean containTakenAbsence(Absence absence) {
+    for (TakenAbsence takenAbsence : takenAbsences) {
+      if (takenAbsence.absence.equals(absence)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
   public List<Absence> existentWrongReplacing() {
     if (correctReplacing == null) {
       return existentReplacings;

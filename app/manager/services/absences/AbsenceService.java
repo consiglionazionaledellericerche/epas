@@ -236,15 +236,6 @@ public class AbsenceService {
     log.debug("");
     log.debug("Lanciata procedura scan assenze person={}, from={}", person.fullName(), from);
 
-    //OTTIMIZZAZIONI//
-
-    //fetch all absenceType
-    absenceComponentDao.fetchAbsenceTypes();
-
-    //fetch all groupAbsenceType
-    absenceComponentDao.allGroupAbsenceType();
-
-    //COSTRUZIONE//
     List<Absence> absencesToScan = absenceComponentDao.orderedAbsences(person, from, 
         null, Lists.newArrayList());
     List<PersonChildren> orderedChildren = personChildrenDao.getAllPersonChildren(person);    

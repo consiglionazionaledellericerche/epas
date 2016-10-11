@@ -15,25 +15,17 @@
  }%
  
  #{if !_noLabel}
- #{if _groupSelected}
-   *{
-   <span class="label
-   #{if templateUtility.isTakableOnly(_absence.absenceType, _groupSelected)} label-warning #{/if}
-   #{elseif templateUtility.isReplacingCode(_absence.absenceType, _groupSelected)} label-default  #{/elseif}
-   #{elseif templateUtility.isComplationCode(_absence.absenceType, _groupSelected)} label-success #{/elseif}
-   #{else} label-info #{/else} 
-   " webui-popover-hover data-url="#${id}">${_absence.absenceType.code}</span>
-   }*
-   <span class="
-   #{if templateUtility.isTakableOnly(_absence.absenceType, _groupSelected)} text-success #{/if}
-   #{elseif templateUtility.isReplacingCode(_absence.absenceType, _groupSelected)} text-default  #{/elseif}
-   #{elseif templateUtility.isComplationCode(_absence.absenceType, _groupSelected)} text-success #{/elseif}
-   #{else} text-info #{/else} 
-   " webui-popover-hover data-url="#${id}"><strong>${_absence.absenceType.code}</strong></span>   
- #{/if}
- #{else}
-   <span class="text-default" webui-popover-hover data-url="#${id}"><strong>${_absence.absenceType.code}</strong></span>
- #{/else}
+	 #{if _groupSelected}
+	   <span class="
+	   #{if templateUtility.isTakableOnly(_absence.absenceType, _groupSelected)} text-success #{/if}
+	   #{elseif templateUtility.isReplacingCode(_absence.absenceType, _groupSelected)} text-default  #{/elseif}
+	   #{elseif templateUtility.isComplationCode(_absence.absenceType, _groupSelected)} text-success #{/elseif}
+	   #{else} text-info #{/else} 
+	   " webui-popover-hover data-url="#${id}"><strong>${_absence.absenceType.code}</strong></span>   
+	 #{/if}
+	 #{else}
+	   <span class="text-default" webui-popover-hover data-url="#${id}"><strong>${_absence.absenceType.code}</strong></span>
+	 #{/else}
  #{/if}
  
  <div class="webui-popover-content" id="${id}">
@@ -59,32 +51,26 @@
 	    #{/else}
     #{/secure.check}
    
-    #{if _person && !templateUtility.involvedGroupAbsenceType(_absence.absenceType).empty }
-    <p>
+    #{if _person}
       #{list items:templateUtility.involvedGroupAbsenceType(_absence.absenceType), as:'group'}
-        %{ groupVerified = false; }%
-        #{if _absence.personDay}
-        #{list items:_absence.personDay.absences, as:'otherAbsence' }
-          #{if !otherAbsence.equals(_absence)}
-            #{if group.complationAbsenceBehaviour && group.complationAbsenceBehaviour.replacingCodes.contains(otherAbsence.absenceType)}
-               <p>
-                 <span class="fa-stack fa-lg">
-                   <i class="fa fa-paper-plane-o fa-stack-1x"></i>
-                 </span>
-                 <strong class="text-success">Il codice ${otherAbsence.absenceType.code} verrà inviato ad attestati.</strong>
-                 %{ groupVerified = true; }%
-                 <a href="@{AbsenceGroups.groupStatus(_person.id, group.id, _absence.getAbsenceDate().format())}">Verifica</a>
-               </p>
-            #{/if}
-          #{/if}
-        #{/list}
-        #{/if}
-        
-        #{if !groupVerified }
-          <a href="@{AbsenceGroups.groupStatus(_person.id, group.id, _absence.getAbsenceDate().format())}">${group.description} </a>
-        #{/if}   
+	        %{ groupVerified = false; }%
+	        #{list items:_absence.replacingAbsences(group), as:'replacing' }
+	          %{ groupVerified = true; }%
+	          #{if replacing.absenceType.internalUse }
+	            TODO: codice di completamento interno. Definire la visualizzazione.
+	          #{/if}
+	          #{else}
+	          <p>
+	            <span class="fa-stack fa-lg"><i class="fa fa-paper-plane-o fa-stack-1x"></i></span>
+	            <strong class="text-success">Il codice ${replacing.absenceType.code} verrà inviato ad attestati.</strong>
+	            <a href="@{AbsenceGroups.groupStatus(_person.id, group.id, _absence.getAbsenceDate().format())}">Verifica</a>
+	          </p>
+	          #{/else}
+	        #{/list}
+	        #{if !groupVerified }
+	          <a href="@{AbsenceGroups.groupStatus(_person.id, group.id, _absence.getAbsenceDate().format())}">${group.description} </a>
+	        #{/if}   
       #{/list}
-    </p>  
     #{/if}
     
     
