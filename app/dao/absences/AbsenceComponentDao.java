@@ -330,36 +330,6 @@ public class AbsenceComponentDao extends DaoBase {
         .orderBy(absence.personDay.date.asc()).distinct().list(absence);
   }
   
-  public void fetchAbsenceTypes() {
-    
-    QGroupAbsenceType groupAbsenceType = QGroupAbsenceType.groupAbsenceType;
-    QAbsenceType absenceType = QAbsenceType.absenceType;
-    
-    //fetch all absenceTypes
-    getQueryFactory()
-        .from(absenceType)
-        .leftJoin(absenceType.justifiedTypesPermitted).fetch()
-        .leftJoin(absenceType.complationGroup).fetch()
-        .leftJoin(absenceType.replacingGroup).fetch()
-        .leftJoin(absenceType.takableGroup).fetch()
-        .leftJoin(absenceType.takenGroup).fetch()
-        .list(absenceType);
-    
-    //fetch all absenceTypeGroups
-    getQueryFactory().from(groupAbsenceType)
-        .leftJoin(groupAbsenceType.category).fetch()
-        .leftJoin(groupAbsenceType.complationAbsenceBehaviour).fetch()
-        .leftJoin(groupAbsenceType.complationAbsenceBehaviour.complationCodes).fetch()
-        .leftJoin(groupAbsenceType.complationAbsenceBehaviour.replacingCodes).fetch()
-        .leftJoin(groupAbsenceType.takableAbsenceBehaviour).fetch()
-        .leftJoin(groupAbsenceType.takableAbsenceBehaviour.takableCodes).fetch()
-        .leftJoin(groupAbsenceType.takableAbsenceBehaviour.takenCodes).fetch()
-        .leftJoin(groupAbsenceType.nextGroupToCheck).fetch()
-        .leftJoin(groupAbsenceType.previousGroupChecked).fetch()
-        .list(groupAbsenceType);
-    
-  }
-  
   /**
    * Ordina per data tutte le liste di assenze in una unica lista.
    * @param absences

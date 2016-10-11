@@ -1,5 +1,6 @@
 package models.absences;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import lombok.Getter;
@@ -14,6 +15,7 @@ import org.joda.time.LocalDate;
 
 import play.db.jpa.Blob;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -65,6 +67,16 @@ public class Absence extends BaseModel {
   @OneToMany(mappedBy = "absence", cascade = {CascadeType.REMOVE})
   public Set<AbsenceTrouble> troubles = Sets.newHashSet();
   
+  @Override
+  public String toString() {
+    if (personDay == null) {
+      return this.getAbsenceDate() + " - " + this.getAbsenceType().code;
+    }
+    return this.getPersonDay().person.fullName() 
+        + " - " + this.getAbsenceDate() 
+        + " - " + this.getAbsenceType().code;
+  }
+  
   // TODO: spostare la relazione dal person day alla person e persistere il campo date.
 
   /** Data da valorizzare in caso di assenza non persistita per simulazione */
@@ -85,59 +97,93 @@ public class Absence extends BaseModel {
   
   @Transient
   public int justifiedTime() {
-    if (this.justifiedType != null) {
-      if (this.justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
-        return this.absenceType.justifiedTime;
+    if (this.justifiedType == null) {
+      throw new IllegalStateException();
+    }
+    if (this.justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
+      return this.absenceType.justifiedTime;
+    }
+    if (this.justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
+      if (this.justifiedMinutes == null) {
+        throw new IllegalStateException();
       }
-      if (this.justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
-        if (this.justifiedMinutes == null) {
-          this.justifiedMinutes = -1;
-          this.save();
-        }
-        return this.justifiedMinutes;
-      }
-    } else {
-      //TODO: la vecchia implementazione..
+      return this.justifiedMinutes;
     }
     return 0;
   }
   
   @Transient
   public boolean nothingJustified() {
-    if (this.justifiedType != null) {
-      if (this.justifiedType.name.equals(JustifiedTypeName.absence_type_minutes) 
-          && this.absenceType.justifiedTime == 0) {
-        return true;
-      }
-      if (this.justifiedType.name.equals(JustifiedTypeName.nothing)) {
-        return true;
-      }
-    } else {
-      //TODO: la vecchia implementazione..
+    if (this.justifiedType == null) {
+      throw new IllegalStateException();
+    }
+    if (this.justifiedType.name.equals(JustifiedTypeName.absence_type_minutes) 
+        && this.absenceType.justifiedTime == 0) {
+      return true;
+    }
+    if (this.justifiedType.name.equals(JustifiedTypeName.nothing)) {
+      return true;
     }
     return false;
   }
 
   @Transient 
   public boolean justifiedAllDay() {
-    if (this.justifiedType != null) {
-      if (this.justifiedType.name.equals(JustifiedTypeName.all_day)) {
-        return true;
-      }
-    }else {
-      //TODO: la vecchia implementazione..
+    if (this.justifiedType == null) {
+      throw new IllegalStateException();
+    }
+    if (this.justifiedType.name.equals(JustifiedTypeName.all_day)) {
+      return true;
     }
     return false;
-
   }
-
-  @Override
-  public String toString() {
-    if (personDay == null) {
-      return this.getAbsenceDate() + " - " + this.getAbsenceType().code;
+  
+  @Transient
+  public List<Absence> replacingAbsences(GroupAbsenceType groupAbsenceType) {
+    if (this.personDay == null || !this.personDay.isPersistent()) {
+      return Lists.newArrayList();
     }
-    return this.getPersonDay().person.fullName() 
-        + " - " + this.getAbsenceDate() 
-        + " - " + this.getAbsenceType().code;
+    List<Absence> replacings = Lists.newArrayList();
+    for (Absence absence : this.personDay.absences) {
+      if (absence.equals(this)) {
+        continue;
+      }
+      if (groupAbsenceType.complationAbsenceBehaviour != null 
+          && groupAbsenceType.complationAbsenceBehaviour.replacingCodes
+          .contains(absence.absenceType)) {
+        replacings.add(absence);
+      }
+    }
+    return replacings;
+  }
+  
+  @Transient
+  public boolean isOrphanReplacing(Set<GroupAbsenceType> involvedGroups) {
+    for (GroupAbsenceType groupAbsenceType : involvedGroups) {
+      if (groupAbsenceType.complationAbsenceBehaviour == null) {
+        continue;
+      }
+      if (groupAbsenceType.complationAbsenceBehaviour.replacingCodes.contains(this.absenceType)) {
+        for (Absence absence : this.personDay.absences) {
+          if (absence.replacingAbsences(groupAbsenceType).contains(this)) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  }
+  
+  @Transient
+  public boolean isReplacing(Set<GroupAbsenceType> involvedGroups) {
+    for (GroupAbsenceType groupAbsenceType : involvedGroups) {
+      if (groupAbsenceType.complationAbsenceBehaviour == null) {
+        continue;
+      }
+      if (groupAbsenceType.complationAbsenceBehaviour.replacingCodes.contains(this.absenceType)) {
+        return true;
+      }
+    }
+    return true;
   }
 }

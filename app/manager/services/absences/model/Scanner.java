@@ -84,7 +84,7 @@ public class Scanner {
           .genericConstraints(genericErrors, person, absence, absencesToScanMap);
     }
     
-    // analisi dei requisiti all'interno di ogni gruppo (risultati in absenceEngine.report)
+    // analisi dei requisiti all'interno di ogni gruppo
     Iterator<Absence> iterator = this.absencesToScan.iterator();
     this.configureNextGroupToScan(iterator);
     while (this.nextGroupToScan != null) {

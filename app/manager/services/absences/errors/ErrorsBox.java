@@ -162,10 +162,6 @@ public class ErrorsBox {
   
   /// STATIC
   
-  public static boolean absenceTypeHasErrors(List<ErrorsBox> errorsBoxes, AbsenceType absenceType) {
-    return false;
-  }
-  
   public static boolean containsCriticalErrors(List<ErrorsBox> errorsBoxes) {
     for (ErrorsBox errorsBox : errorsBoxes) {
       if (errorsBox.containsCriticalErrors()) {
@@ -174,38 +170,6 @@ public class ErrorsBox {
     }
     return false;
   }
-  
- 
-  
-//  public static List<AbsenceError> instancesOfProblem(ErrorsBox errorsBox, AbsenceProblem absenceProblem) {
-//    List<AbsenceError> absencesErrors = Lists.newArrayList();
-//    for (Map<AbsenceProblem, AbsenceError> map : errorsBox.absenceErrorsSuperMap.values()) {
-//      absencesErrors.addAll(map.values());
-//    }
-//    return absencesErrors;
-//  }
-//  
-//  public static List<AbsenceError> orderedInstancesOfProblem(ErrorsBox errorsBox, AbsenceProblem absenceProblem) {
-//    SortedMap<LocalDate, List<AbsenceError>> sortedErrors = Maps.newTreeMap();
-//    List<AbsenceError> instancesOfProblem = instancesOfProblem(errorsBox, absenceProblem); 
-//    for (AbsenceError absenceError : instancesOfProblem) {
-//      List<AbsenceError> dateErrors = sortedErrors.get(absenceError.absence.getAbsenceDate());
-//      if (dateErrors == null) {
-//        dateErrors = Lists.newArrayList();
-//        sortedErrors.put(absenceError.absence.getAbsenceDate(), dateErrors);
-//      }
-//      sortedErrors.put(absenceError.absence.getAbsenceDate(), dateErrors);
-//    }
-//    return sortedErrors.values().iterator().next();     
-//  }
-//  
-//  public static AbsenceError firstInstanceOfProblem(ErrorsBox errorsBox, AbsenceProblem absenceProblem) {
-//    List<AbsenceError> absencesErrors = orderedInstancesOfProblem(errorsBox, absenceProblem);
-//    if (absencesErrors.isEmpty()) {
-//      return null;
-//    }
-//    return absencesErrors.iterator().next();
-//  }
   
   public static Set<CriticalError> allCriticalErrors(List<ErrorsBox> errorsBoxes) {
     Set<CriticalError> errors = Sets.newHashSet();
