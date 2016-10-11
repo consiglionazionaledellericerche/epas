@@ -4,16 +4,9 @@
   absence-type-and-qualification-phase1.xml
   
   <revinfo rev="1" revtstmp="1385319308130">
-  
- 
-  <absence_type_groups_history _revision="1" _revision_type="0" id="1" accumulationbehaviour="noMoreAbsencesAccepted" accumulation_type="monthly" label="18hx" limit_in_minute="1080" minutes_excess="true"/>
-  <absence_type_groups_history _revision="1" _revision_type="0" id="2" accumulationbehaviour="noMoreAbsencesAccepted" accumulation_type="monthly" label="19hx" limit_in_minute="1080" minutes_excess="true"/>
-  <absence_type_groups_history _revision="1" _revision_type="0" id="3" accumulationbehaviour="noMoreAbsencesAccepted" accumulation_type="yearly" label="661hx" limit_in_minute="1080" minutes_excess="true"/>
-  <absence_type_groups_history _revision="1" _revision_type="0" id="4" accumulationbehaviour="noMoreAbsencesAccepted" accumulation_type="yearly" label="150ore" limit_in_minute="9000" minutes_excess="true"/>
-  <absence_type_groups_history _revision="1" _revision_type="0" id="5" accumulationbehaviour="nothing" accumulation_type="no" label="" limit_in_minute="0" minutes_excess="false"/>
-  
+
   <absence_types_history _revision="1" _revision_type="0" id="127" certification_code="09B" code="09B" considered_week_end="false" description="Completamento giornata permessi orari per malattia/visita medica" internal_use="false" justified_time_at_work="Nothing" valid_from="2008-06-26" valid_to="2099-12-31"/>
   <absence_types_history _revision="1" _revision_type="0" id="296" certification_code="32" code="32" considered_week_end="false" description="ferie anno corrente" internal_use="false" justified_time_at_work="AllDay" valid_from="1990-01-01" valid_to="2099-12-31"/>
-  <absence_types_history _revision="1" _revision_type="0" id="243" certification_code="89" code="89" considered_week_end="false" description="completamento g. permesso diritto allo studio" internal_use="false" justified_time_at_work="TimeToComplete" valid_from="1990-01-01" valid_to="2099-12-31" absence_type_group_id="4"/>
+  <absence_types_history _revision="1" _revision_type="0" id="243" certification_code="89" code="89" considered_week_end="false" description="completamento g. permesso diritto allo studio" internal_use="false" justified_time_at_work="TimeToComplete" valid_from="1990-01-01" valid_to="2099-12-31"/>
  </revinfo>
 </dataset>

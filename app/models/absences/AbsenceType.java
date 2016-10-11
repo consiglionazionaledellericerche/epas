@@ -6,7 +6,6 @@ import com.google.common.collect.Sets;
 
 import lombok.Getter;
 
-import models.AbsenceTypeGroup;
 import models.Qualification;
 import models.base.BaseModel;
 import models.enumerate.JustifiedTimeAtWork;
@@ -25,7 +24,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
@@ -46,10 +44,6 @@ public class AbsenceType extends BaseModel {
 
   // Vecchia Modellazione (Da rimuovere)
   
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "absence_type_group_id")
-  public AbsenceTypeGroup absenceTypeGroup;
-
   @Required
   @Enumerated(EnumType.STRING)
   @Column(name = "justified_time_at_work")

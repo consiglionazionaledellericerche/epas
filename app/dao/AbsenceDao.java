@@ -73,8 +73,7 @@ public class AbsenceDao extends DaoBase {
       condition.and(absence.personDay.person.eq(person.get()));
     }
     if (forAttachment) {
-      condition.and(
-          absence.absenceFile.isNotNull().and(absence.absenceType.absenceTypeGroup.isNull()));
+      condition.and(absence.absenceFile.isNotNull());
     }
     if (dateTo.isPresent()) {
       condition.and(absence.personDay.date.between(dateFrom, dateTo.get()));
@@ -173,47 +172,6 @@ public class AbsenceDao extends DaoBase {
 
     return ModelQuery.wrap(getQueryFactory().from(absence).where(conditions), absence);
   }
-
-  /**
-   * @return nella storia dei personDay, l'ultima occorrenza in ordine temporale del codice di
-   *        rimpiazzamento (abt.absenceTypeGroup.replacingAbsenceType) relativo al codice di
-   *        assenza che intendo inserire.
-   */
-  public Absence getLastOccurenceAbsenceInPeriod(
-      AbsenceType abt, Person person, Optional<LocalDate> begin, LocalDate end) {
-
-    final QAbsence absence = QAbsence.absence;
-
-    final BooleanBuilder condition = new BooleanBuilder();
-    final JPQLQuery query = getQueryFactory().from(absence);
-    if (begin.isPresent()) {
-      condition.and(absence.personDay.date.between(begin.get(), end));
-    } else {
-      condition.and(absence.personDay.date.loe(end));
-    }
-    query.where(condition.and(absence.absenceType.eq(abt.absenceTypeGroup.replacingAbsenceType)
-        .and(absence.personDay.person.eq(person))));
-    query.orderBy(absence.personDay.date.desc());
-    return query.singleResult(absence);
-  }
-
-
-  /**
-   * @return la lista dei codici di assenza accomunati dallo stesso label relativo al codice di
-   *        gruppo nel periodo begin-end per la persona person.
-   */
-  public List<Absence> getAllAbsencesWithSameLabel(
-      AbsenceType abt, Person person, LocalDate begin, LocalDate end) {
-
-    final QAbsence absence = QAbsence.absence;
-
-    final JPQLQuery query = getQueryFactory().from(absence)
-        .where(absence.absenceType.absenceTypeGroup.label.eq(abt.absenceTypeGroup.label)
-            .and(absence.personDay.person.eq(person))
-            .and(absence.personDay.date.between(begin, end)));
-    return query.list(absence);
-  }
-
 
   /**
    * @return la lista delle assenze contenenti un tipo di assenza con uso interno = false relative a

@@ -31,6 +31,8 @@ public class QComplationAbsenceBehaviour extends EntityPathBase<ComplationAbsenc
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final SetPath<models.absences.GroupAbsenceType, QGroupAbsenceType> groupAbsenceTypes = this.<models.absences.GroupAbsenceType, QGroupAbsenceType>createSet("groupAbsenceTypes", models.absences.GroupAbsenceType.class, QGroupAbsenceType.class, PathInits.DIRECT2);
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 

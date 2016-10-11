@@ -63,7 +63,6 @@ public class Startup extends Job<Void> {
     }
     Session session = (Session) JPA.em().getDelegate();
 
-    //qualification absenceType absenceTypeQualification absenceTypeGroup
     session.doWork(
         new DatasetImport(
             DatabaseOperation.INSERT,

@@ -28,8 +28,6 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
     public final SetPath<models.absences.Absence, QAbsence> absences = this.<models.absences.Absence, QAbsence>createSet("absences", models.absences.Absence.class, QAbsence.class, PathInits.DIRECT2);
 
-    public final models.query.QAbsenceTypeGroup absenceTypeGroup;
-
     public final StringPath certificateCode = createString("certificateCode");
 
     public final StringPath code = createString("code");
@@ -93,7 +91,6 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
     public QAbsenceType(Class<? extends AbsenceType> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.absenceTypeGroup = inits.isInitialized("absenceTypeGroup") ? new models.query.QAbsenceTypeGroup(forProperty("absenceTypeGroup"), inits.get("absenceTypeGroup")) : null;
         this.replacingType = inits.isInitialized("replacingType") ? new QJustifiedType(forProperty("replacingType")) : null;
     }
 
