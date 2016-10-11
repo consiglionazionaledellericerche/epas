@@ -9,9 +9,9 @@ import dao.history.HistoryValue;
 import dao.history.PersonDayHistoryDao;
 import dao.history.StampingHistoryDao;
 
-import models.Absence;
 import models.PersonDay;
 import models.Stamping;
+import models.absences.Absence;
 
 import play.mvc.Controller;
 import play.mvc.With;

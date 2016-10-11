@@ -1,0 +1,23 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Assenze'  /}
+
+<div class="container">
+
+  #{title title:'Inizializzazione Gruppi di Assenze' /}
+
+  #{form action:@AbsenceGroups.save(), method:'POST', autocomplete:false, class:'form form-horizontal'}
+
+  #{f.selectModel 'groupAbsenceType', label:'Tipologia Assenza', items:initializableGroups /}
+  #{f.date 'date'/}
+
+  #{f.date 'forceBegin', disabled:'true' /}
+  #{f.date 'forceEnd', disabled:'true' /}
+
+  #{f.input 'takableTotal', type:'number' /}
+  #{f.input 'takableUsed', type:'number' /}
+  #{f.input 'complationUsed', type:'number' /}
+
+  #{/form}
+
+</div>

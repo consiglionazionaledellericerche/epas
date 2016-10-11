@@ -1,6 +1,6 @@
 package models.enumerate;
 
-import models.AbsenceType;
+import models.absences.AbsenceType;
 
 /**
  * @author cristian

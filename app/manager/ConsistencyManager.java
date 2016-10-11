@@ -20,9 +20,9 @@ import manager.cache.StampTypeManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
+import manager.services.absences.AbsenceService;
 import manager.configurations.EpasParam.RecomputationType;
 
-import models.Absence;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
@@ -32,6 +32,7 @@ import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
 import models.Stamping.WayType;
+import models.absences.Absence;
 import models.User;
 import models.base.IPropertiesInPeriodOwner;
 import models.enumerate.Troubles;
@@ -66,6 +67,7 @@ public class ConsistencyManager {
   private final PersonDayDao personDayDao;
   private final StampTypeManager stampTypeManager;
   private final ConfigurationManager configurationManager;
+  private final AbsenceService absenceService;
 
 
   /**
@@ -80,6 +82,7 @@ public class ConsistencyManager {
    * @param personDayInTroubleManager personDayInTroubleManager
    * @param configurationManager      configurationManager
    * @param stampTypeManager          stampTypeManager
+   * @param absenceService            absenceService
    * @param wrapperFactory            wrapperFactory
    */
   @Inject
@@ -93,6 +96,8 @@ public class ConsistencyManager {
       PersonDayInTroubleManager personDayInTroubleManager,
       ConfigurationManager configurationManager,
       StampTypeManager stampTypeManager,
+      
+      AbsenceService absenceService,
 
       IWrapperFactory wrapperFactory) {
 
@@ -103,6 +108,7 @@ public class ConsistencyManager {
     this.contractMonthRecapManager = contractMonthRecapManager;
     this.personDayInTroubleManager = personDayInTroubleManager;
     this.configurationManager = configurationManager;
+    this.absenceService = absenceService;
     this.wrapperFactory = wrapperFactory;
     this.personDayDao = personDayDao;
     this.stampTypeManager = stampTypeManager;
@@ -336,6 +342,9 @@ public class ConsistencyManager {
     }
     // (3) Ricalcolo dei residui per mese
     populateContractMonthRecapByPerson(person, new YearMonth(from));
+    
+    // (4) Scan degli errori sulle assenze
+    absenceService.scanner(person, from);
 
     log.info("... ricalcolo dei riepiloghi conclusa.");
   }

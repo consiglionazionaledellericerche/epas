@@ -7,8 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import models.Absence;
 import models.Contract;
+import models.absences.Absence;
 import models.enumerate.AbsenceTypeMapping;
 
 import java.util.List;

@@ -2,11 +2,11 @@ package manager;
 
 import com.google.common.base.Verify;
 
-import models.Absence;
 import models.Notification;
 import models.Person;
 import models.Role;
 import models.Stamping;
+import models.absences.Absence;
 import models.enumerate.NotificationSubject;
 
 /**

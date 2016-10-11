@@ -1,0 +1,253 @@
+#{modalAsync id:'modalAbsence', button:'Salva',
+title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
++ ' per ' + absenceRequestForm.person.fullname }
+
+<div id="absenceData">
+
+ #{absences.insertAbsencesTabs absenceRequestForm:absenceRequestForm /}
+
+ *{ alcune scorciatorie }*
+ %{ selectedFormItem = absenceRequestForm.selectedAbsenceGroupFormItem; }%
+ %{ selecteSubItem = selectedFormItem?.selectedSubAbsenceGroupFormItems; }%
+ %{ alldaySelected = selecteSubItem?.selectedJustified?.name.equals(models.absences.JustifiedType.JustifiedTypeName.all_day) ||
+                     selecteSubItem?.selectedJustified?.name.equals(models.absences.JustifiedType.JustifiedTypeName.assign_all_day) }%
+ %{ specifiedMinuteSelected = selecteSubItem?.selectedJustified?.name.equals(models.absences.JustifiedType.JustifiedTypeName.specified_minutes) }%
+
+ #{if absenceRequestForm.absenceInsertTab.newImplementation() }
+   
+   #{if !absenceRequestForm.formHasNoGroupChoice() }
+     #{include './_selectGroup.html' /}
+   #{/if}
+   #{include './_configureSelectedGroup.html' /}
+   #{include './_verifyRequest.html' /}
+ 
+   #{if insertReport }
+   
+     #{if !insertReport.warningsPreviousVersion.empty}
+      #{alert color:'danger'}
+       <p><strong>Elenco degli errori riscontrati</strong></p>
+       #{list items:insertReport.warningsPreviousVersion, as:'warning'}
+         <br>${warning}
+       
+       #{/list}
+      #{/alert}
+     #{/if}
+     #{if !insertReport.criticalErrors.empty}
+      #{alert color:'danger'}
+       <p><strong>Elenco degli errori riscontrati</strong></p>
+       #{list items:insertReport.criticalErrors, as:'criticalError'}
+         <br>&{criticalError.criticalProblem}
+       
+       #{/list}
+      #{/alert}
+     #{/if}
+   
+     <table class="table table-condensed table-bordered" #{if insertReport.insertTemplateRows.size() > 10} datatable-small #{/if}>
+      <thead>
+      <tr>
+        <th>Data</th>
+        <th>Assenza</th>
+        <th>Esito</th>
+        #{if insertReport.usableColumn}
+          <th>Limite<br>Utilizzabile</th>
+          <th>Limite<br>Consumato</th>
+        #{/if}
+        #{if insertReport.complationColumn}
+          <th>Completamento<br>Precedente<br></th>
+          <th>Completamento<br>Assenza</th>
+          <th>Completamento<br>Residuo<br></th>
+        #{/if}
+        
+      </tr>
+      </thead>
+      <tbody>
+      #{list items:insertReport.insertTemplateRows, as:'templateRow' }
+        <tr  
+             #{if templateRow.onlyNotOnHoliday()} class="text-muted" #{/if}
+             #{elseif templateRow.absenceErrors} class="bg-danger"#{/elseif}
+             #{elseif templateRow.absenceErrors.empty} *{ class="bg-success" }* #{/elseif}>
+          <td data-order="${templateRow.date}"> 
+            ${templateRow.date.format()}
+          </td>
+          <td>
+            #{if templateRow.absence}
+	          #{absences.absence-popover absence:templateRow.absence, groupSelected:templateRow.groupAbsenceType /}
+	        #{/if}
+          </td>
+          
+          <td>
+            #{if templateRow.onlyNotOnHoliday()} Giorno festivo ignorato #{/if}
+            #{elseif templateRow.absenceErrors}
+
+              *{ popover degli errori dell'assenza }*
+              %{id = insertReport.insertTemplateRows.indexOf(templateRow); }%
+              <span webui-popover-hover data-url="#pop${id}">
+                <em class="text-danger">Mostra i dettagli</em> <i class="fa fa-times text-danger" aria-hidden="true"></i>
+              </span>
+              <div class="webui-popover-content" id="pop${id}"> 
+              #{list items:templateRow.absenceErrors, as:'absenceError'}
+                &{absenceError.absenceProblem}
+                #{list items:absenceError.conflictingAbsences, as:'conflictingAbsence'} 
+                  <strong>${conflictingAbsence.absenceType.code}</strong>
+                #{/list} 
+              #{/list}
+              </div>
+ 
+              
+            #{/elseif}
+            #{else} <i class="fa fa-check text-success" aria-hidden="true"></i> #{/else}
+            
+            #{if templateRow.absenceWarnings, as:'absenceWarning'}
+              #{list items:templateRow.absenceWarnings, as:'absenceWarning'}
+                <span class="label label-warning">&{absenceWarning.absenceProblem}</span> 
+              #{/list}
+            #{/if}
+          </td>
+          
+          #{if insertReport.usableColumn}
+            <td>${templateRow.usableLimit}</td>
+            <td>${templateRow.usableTaken}</td>
+          #{/if}
+           #{if insertReport.complationColumn}
+            <td>${templateRow.consumedComplationBefore}</td>
+            <td>${templateRow.consumedComplationAbsence}</td>
+            <td>${templateRow.consumedComplationNext}</td>
+          #{/if}
+          
+        </tr>
+      #{/list}
+      </tbody>
+      </table>
+      
+      <p>
+        #{if insertReport.howManySuccess() == 1}
+          Verrà inserito <strong>1</strong> codice di assenza.
+        #{/if}
+        #{elseif insertReport.howManySuccess() > 1}
+          Verranno inseriti <strong>${insertReport.howManySuccess()}</strong> codici di assenza.
+        #{/elseif}
+        #{else}
+          Non verrà inserito alcun codice di assenza.
+        #{/else}
+        
+        #{if insertReport.howManyReplacing() == 1}
+          Verrà inserito <strong>1</strong> codice di rimpiazzamento.
+        #{/if}
+        #{elseif insertReport.howManyReplacing() > 1 }
+          Verranno inseriti <strong>${insertReport.howManyReplacing()}</strong> codici di rimpiazzamento.
+        #{/elseif}
+       </p> 
+       <p>
+         #{if insertReport.howManyIgnored() == 1}
+          Verrà ignorato <strong>1</strong> giorno per festività. 
+         #{/if}
+         #{elseif insertReport.howManyIgnored() > 1}
+          Verranno ignorati <strong>${insertReport.howManyIgnored()}</strong> giorni per festività. 
+         #{/elseif}
+       </p>
+       <p>
+       #{if insertReport.howManyError() == 1}
+         <strong>1</strong> giorno verrà escluso dall'inserimento a causa di errori.
+       #{/if}
+       #{if insertReport.howManyError() > 1}
+         <strong>${insertReport.howManyError()}</strong> giorni verranno esclusi dall'inserimento a causa di errori.
+       #{/if}
+       </p>
+      
+   
+   #{/if}   
+  
+
+      
+     *{ save request }*
+	 #{form action:@AbsenceGroups.save(), method:'POST', autocomplete:false, class:'form form-horizontal',
+	  'data-async':'#page_content', 'data-async-error':'#absenceData', 'data-spinner':'#defaultSpinner'}
+	  
+	     #{f.hidden 'personId', value:absenceRequestForm.person.id /}
+      
+         #{f.hidden 'from', value:absenceRequestForm.from?.format() /}
+         #{if alldaySelected }
+          #{f.hidden 'to', value:absenceRequestForm.to?.format() /}
+         #{/if}
+   
+      #{f.hidden 'groupAbsenceType.id', value:selectedFormItem.groupAbsenceType.id /}
+      #{f.hidden 'absenceType.id', value:selecteSubItem.absenceType?.id /}
+      #{f.hidden 'justifiedType.id', value:selecteSubItem.selectedJustified.id /}
+      
+      #{f.hidden 'hours', value:selecteSubItem.hours /}
+         #{f.hidden 'minutes', value:selecteSubItem.minutes /}
+    
+      *{
+      #{if report.containsProblems() }
+	       #{alert color:'info'}
+	         <p> La richiesta contiene errori e non può essere completata. </p>
+	         <p> E' comunque possibile forzare l'inserimento <strong>selezionando 
+	         il codice specifico</strong> e cliccando su Salva. Non verranno effettuati controlli di integrità dei dati inseriti.
+	         </p>
+	       #{/alert}
+	       #{if !selecteSubItem.isAutomatic() }
+	            #{f.checkbox 'forceInsert', value:forceInsert /}
+	       #{/if}
+	  #{/if}
+	  }*
+	 
+	   #{b.buttons center:true}
+         #{b.submit 'Inserisci'/}
+       #{/b.buttons}
+	 #{/form}	  
+    
+   #{/if}#{else}
+   
+   *{ old implementations }*
+	  
+	  #{if forceInsert}
+	    #{set action:@Absences.forceInsert() /}
+	  #{/if}
+	  #{else}
+	    #{set action:@Absences.save() /}
+	  #{/else}
+	
+	  #{form action:action, method:'POST', autocomplete:false,
+	  class:'form form-horizontal', 'data-async':'#page_content',
+	  'data-async-error':'#absenceData', 'data-spinner':'#defaultSpinner'}
+	  
+      #{f.hidden 'personId', value:absenceRequestForm.person.id /}
+	  #{f.hidden 'dateFrom', value:absenceRequestForm.from?.format() /}
+      #{f.date 'dateFrom', value:absenceRequestForm.from?.format(), disabled:true /}     
+      #{f.date 'dateTo', value:absenceRequestForm.to?.format() /}
+      
+      %{ if (absenceType == null) {
+           absenceType = templateUtility.getAbsenceTypes(absenceRequestForm.absenceInsertTab).get(0);
+         }
+      }%
+  
+      
+      #{f.selectModel 'absenceType', items: templateUtility.getAbsenceTypes(absenceRequestForm.absenceInsertTab), value:absenceType, required:true /}
+	  
+	  *{ #{f.input 'absenceFile', type:'file' /} }*
+	
+	  #{b.buttons center:true}
+	  #{b.submit 'Inserisci'/}
+	  #{/b.buttons}
+	
+	  #{/form}
+	  	
+	  #{if absenceRequestForm.absenceInsertTab.equals(manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.vacation)}
+	  #{alert color:'info'}
+	  <p>Utilizzando il codice <em>FER</em> il software provvederà ad assegnare ferie e permessi
+	    fin quando disponibili nel seguente ordine di priorità:
+	  <ul>
+	    <li>31 (recupero ferie anno precedente)</li>
+	    <li>94 (permesso)</li>
+	    <li>32 (ferie anno corrente)</li>
+	  </ul>
+	  </p>
+	  #{/alert}
+	  #{/if}
+   
+   #{/else}   
+  
+   
+</div>
+
+#{/modalAsync}

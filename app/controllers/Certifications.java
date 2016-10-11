@@ -3,6 +3,7 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import controllers.RequestInit.CurrentData;
@@ -11,6 +12,9 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
 
+import lombok.extern.slf4j.Slf4j;
+
+import manager.attestati.dto.show.CodiceAssenza;
 import manager.attestati.service.CertificationService;
 import manager.attestati.service.PersonCertificationStatus;
 import manager.configurations.ConfigurationManager;
@@ -18,15 +22,19 @@ import manager.configurations.EpasParam;
 
 import models.Office;
 import models.Person;
+import models.absences.Absence;
+import models.absences.AbsenceType;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -36,6 +44,7 @@ import javax.inject.Inject;
  *
  * @author alessandro
  */
+@Slf4j
 @With({Resecure.class})
 public class Certifications extends Controller {
 
@@ -298,6 +307,40 @@ public class Certifications extends Controller {
     renderTemplate("@certifications", office, year, month, numbers, peopleNotInAttestati,
         peopleCertificationStatus);
 
+  }
+  
+  /**
+   * I codici assenza in attestati.
+   */
+  public static void certificationsAbsenceCodes() {
+    Optional<String> token = certificationService.buildToken();
+
+    // Mappa dei codici di assenza in attestati
+    Map<String, CodiceAssenza> attestatiAbsenceCodes = certificationService.absenceCodes(token);
+    if (attestatiAbsenceCodes.isEmpty()) {
+      flash.error("L'utente app.epas non è in grado di ottenere le informazioni richieste.");
+    }
+
+    // Mappa dei codici assenza in epas e loro utilizzo
+    Map<String, List<Absence>> epasAbsences = Maps.newHashMap();
+    List<AbsenceType> absenceTypes = AbsenceType.findAll();
+    List<Absence> absences = Absence.findAll();
+    for (AbsenceType absenceType : absenceTypes) {
+      log.info(absenceType.code.trim().toUpperCase());
+      epasAbsences.put(absenceType.code.trim().toUpperCase(), Lists.newArrayList());
+    }
+    for (Absence absence : absences) {
+      epasAbsences.get(absence.absenceType.code.trim().toUpperCase()).add(absence);
+    }
+
+    // Mappa dei codici epas
+    Map<String, AbsenceType> epasAbsenceTypes = Maps.newHashMap();
+    for (AbsenceType absenceType : absenceTypes) {
+      epasAbsenceTypes.put(absenceType.code.trim().toUpperCase(), absenceType);
+    }
+
+
+    render(attestatiAbsenceCodes, epasAbsences, epasAbsenceTypes);
   }
 
 

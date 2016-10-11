@@ -1,0 +1,152 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Invio Attestati'  /}
+
+
+<div class="container">
+
+<!-- In entrambi -->
+
+#{alert color:'info'}
+ <p>Codici assenza presenti in attestati.</p>
+#{/alert}
+
+<table class="table" datatable> 
+  <thead>
+  <tr>
+    <th>Codice</th>
+    <th>Descrizione</th>
+    <th>qtFrequenza</th>
+    <th>tipoFrequenza</th>
+    <th>tipologia</th>
+    <th>In Epas</th>
+    <th>Usata in Epas</th>
+  </tr>
+  </thead>
+  <tbody>
+  #{list items:attestatiAbsenceCodes.values(), as:'attestatiCode'}
+    
+    <tr>
+      <td>${attestatiCode.codice}</td>
+      <td>${attestatiCode.descrizione}</td>
+      <td>${attestatiCode.qtFrequenza}</td>
+      <td>${attestatiCode.tipoFrequenza}</td>
+      <td>${attestatiCode.tipologia}</td>
+      
+      %{
+        epasAbsencesForCode = epasAbsences.get(attestatiCode.codice.trim().toUpperCase());
+      }%
+      <td>
+        #{if epasAbsencesForCode != null}
+          inepas
+        #{/if}
+      </td>
+      <td>
+        #{if epasAbsencesForCode && !epasAbsencesForCode.empty}
+          ${epasAbsencesForCode.size()}
+        #{/if}
+      </td>      
+    </tr>
+  #{/list}
+  </tbody>
+</table>
+
+#{alert color:'danger'}
+ <p>Codici assenza presenti in epas non in attestati.</p>
+#{/alert}
+
+<table class="table" datatable> 
+  <thead>
+  <tr>
+    <th>Codice</th>
+    <th>Usata</th>
+    <th>Descrizione</th>
+    <th>Interno</th>
+    <th>Scaduta</th>
+    <th>Label</th>
+    <th>Rimpiazzo</th>
+    
+    <th>Problema</th>
+    <th>Cancellabile</th>
+    <th>Da Tenere</th>    
+    
+  </tr>
+  </thead>
+  <tbody>
+  #{list items:epasAbsences.keySet(), as:'epasCode'}
+    
+    #{if attestatiAbsenceCodes.get(epasCode.trim().toUpperCase()) == null}
+    
+      %{
+          epasAbsenceType = epasAbsenceTypes.get(epasCode.trim().toUpperCase());
+          
+          problems = !epasAbsences.get(epasCode).empty &&               
+                (epasAbsenceType.expired || epasAbsenceType.absenceTypeGroup == null 
+                || epasAbsenceType.absenceTypeGroup.replacingAbsenceType == null);
+          
+          erasable = epasAbsences.get(epasCode).empty && 
+             (epasAbsenceType.absenceTypeGroup == null || epasAbsenceType.absenceTypeGroup.replacingAbsenceType == null);      
+      }%
+    
+      <tr class="#{if problems}bg-danger#{/if}
+                 #{if erasable}bg-warning#{/if}
+                 #{if !problems && !erasable}bg-success#{/if}">
+        <td>${epasCode}</td>
+        <td>${epasAbsences.get(epasCode).size()}</td>
+        <td>${epasAbsenceType.description}</td>
+        <td>
+          #{if epasAbsenceType.internalUse}
+            si
+          #{/if}
+        </td>
+        <td>
+          #{if epasAbsenceType.expired}
+            si
+          #{/if}
+        </td>
+        #{if epasAbsenceType.absenceTypeGroup }
+          <td>${epasAbsenceType.absenceTypeGroup.label}</td>
+          <td>
+          #{if epasAbsenceType.absenceTypeGroup.replacingAbsenceType }
+            ${epasAbsenceType.absenceTypeGroup.replacingAbsenceType.code}
+          #{/if} 
+          </td>
+        #{/if}
+        #{else}
+          <td></td>
+          <td></td>
+        #{/else}
+        
+        <!-- Problemi -->
+        <td>
+          #{if problems }
+                
+           si     
+          #{/if}       
+        </td>
+        
+        <!-- Cancellabile -->
+        <td>
+        #{if erasable }
+           si  
+        #{/if}
+        </td>
+        
+        <!-- Da tenere -->
+        <td>
+        #{if !problems && !erasable}
+          si
+        #{/if}
+        </td>
+        
+      </tr>
+    #{/if}
+    
+    
+  #{/list}
+  </tbody>
+</table>
+
+
+
+</div>

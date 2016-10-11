@@ -32,8 +32,6 @@ import manager.recaps.personstamping.PersonStampingRecap;
 import manager.services.vacations.IVacationsService;
 import manager.services.vacations.VacationsRecap;
 
-import models.Absence;
-import models.AbsenceType;
 import models.CompetenceCode;
 import models.Contract;
 import models.ContractMonthRecap;
@@ -41,6 +39,8 @@ import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.WorkingTimeType;
+import models.absences.Absence;
+import models.absences.AbsenceType;
 import models.enumerate.CheckType;
 import models.enumerate.JustifiedTimeAtWork;
 import models.exports.PersonOvertime;

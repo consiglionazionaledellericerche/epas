@@ -4,8 +4,8 @@ import com.google.common.base.Optional;
 
 import dao.AbsenceDao;
 
-import models.Absence;
 import models.Person;
+import models.absences.Absence;
 import models.exports.PersonEmailFromJson;
 import models.exports.PersonPeriodAbsenceCode;
 

@@ -1,0 +1,24 @@
+*{ noLabel }*
+
+#{if _absence.justifiedType}
+        #{if _absence.justifiedAllDay() }
+          #{if _noLabel}#{/if}
+          #{else}<strong>Tempo giustificato</strong>#{/else}
+          
+          &{_absence.justifiedType}
+        #{/if}
+        #{if _absence.nothingJustified() }
+           
+           #{if _noLabel}#{/if}
+           #{else}<strong>Tempo giustificato</strong>
+             Questo codice non giustifica alcun orario.
+           #{/else}
+        #{/if}
+	    #{if _absence.justifiedTime() }
+	       
+	       #{if _noLabel}#{/if}
+           #{else}<strong>Tempo giustificato</strong>#{/else}
+	    
+	       ${_absence.justifiedTime().printHourMinute()}
+	    #{/if}
+#{/if}

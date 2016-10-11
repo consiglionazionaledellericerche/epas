@@ -21,3 +21,23 @@ Role(shiftManager):
 # Ruolo per la gestione delle reperibilità
 Role(reperibilityManager):
   name: reperibilityManager
+
+
+###############################################################
+                JustifiedType Predefiniti
+###############################################################
+
+JustifiedType(absence_type):
+  name: absence_type
+
+JustifiedType(specified_minutes):
+  name: specified_minutes
+
+JustifiedType(half_day):
+  name: half_day
+
+JustifiedType(missing_time):
+  name: missing_time
+
+
+
