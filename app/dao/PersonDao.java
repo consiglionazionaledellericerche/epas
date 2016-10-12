@@ -659,13 +659,19 @@ public final class PersonDao extends DaoBase {
     final QPerson person = QPerson.person;
     final QContract contract = QContract.contract;
 
-    final JPQLQuery query = getQueryFactory().from(person).leftJoin(person.contracts, contract)
-        .fetch().leftJoin(person.user, QUser.user)
-        .leftJoin(person.personCompetenceCodes, QPersonCompetenceCodes.personCompetenceCodes).fetch()
+    final JPQLQuery query = getQueryFactory().from(person)
+        
+        // join one to many or many to many (only one bag fetchable!!!)
+        .leftJoin(person.contracts, contract).fetch()
+        .leftJoin(person.personCompetenceCodes, QPersonCompetenceCodes.personCompetenceCodes)
+        .leftJoin(person.user, QUser.user)
+        // join one to one
         .leftJoin(person.reperibility, QPersonReperibility.personReperibility).fetch()
-        .leftJoin(person.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime)
-        .fetch().leftJoin(person.personShift, QPersonShift.personShift).fetch()
-        .leftJoin(person.qualification).fetch().orderBy(person.surname.asc(), person.name.asc())
+        .leftJoin(person.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime).fetch()
+        .leftJoin(person.personShift, QPersonShift.personShift).fetch()
+        .leftJoin(person.qualification).fetch()
+        // order by
+        .orderBy(person.surname.asc(), person.name.asc())
         .distinct();
 
     final BooleanBuilder condition = new BooleanBuilder();
@@ -759,10 +765,8 @@ public final class PersonDao extends DaoBase {
       Optional<CompetenceCode> compCode) {
 
     if (compCode.isPresent()) {
-      final QPerson person = QPerson.person;
       final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
-      
-      condition.and(pcc.competenceCode.eq(compCode.get()).and(pcc.person.eq(person)));
+      condition.and(pcc.competenceCode.eq(compCode.get()));
     }
   }
 

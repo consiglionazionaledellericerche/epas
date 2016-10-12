@@ -25,36 +25,34 @@ CREATE TABLE takable_absence_behaviours_history (
 
 --- 2) taken_codes_group
 CREATE TABLE taken_codes_group (
-  id BIGSERIAL PRIMARY KEY,
   absence_types_id BIGINT NOT NULL,
   takable_behaviour_id BIGINT NOT NULL,
   FOREIGN KEY (absence_types_id) REFERENCES absence_types (id),
-  FOREIGN KEY (takable_behaviour_id) REFERENCES takable_absence_behaviours (id)
+  FOREIGN KEY (takable_behaviour_id) REFERENCES takable_absence_behaviours (id),
+  CONSTRAINT taken_codes_group_pk PRIMARY KEY(absence_types_id, takable_behaviour_id)
 );
 
 CREATE TABLE taken_codes_group_history (
-  id BIGINT NOT NULL,
   _revision INTEGER NOT NULL REFERENCES revinfo(rev),
   _revision_type SMALLINT,
-  absence_types_id BIGINT,
-  takable_behaviour_id BIGINT
+  absence_types_id BIGINT NOT NULL,
+  takable_behaviour_id BIGINT NOT NULL
 );
 
 --- 3) takable_codes_group
 CREATE TABLE takable_codes_group (
-  id BIGSERIAL PRIMARY KEY,
   absence_types_id BIGINT NOT NULL,
   takable_behaviour_id BIGINT NOT NULL,
   FOREIGN KEY (absence_types_id) REFERENCES absence_types (id),
-  FOREIGN KEY (takable_behaviour_id) REFERENCES takable_absence_behaviours (id)
+  FOREIGN KEY (takable_behaviour_id) REFERENCES takable_absence_behaviours (id),
+  CONSTRAINT takable_codes_group_pk PRIMARY KEY(absence_types_id, takable_behaviour_id)
 );
 
 CREATE TABLE takable_codes_group_history (
-  id BIGINT NOT NULL,
   _revision INTEGER NOT NULL REFERENCES revinfo(rev),
   _revision_type SMALLINT,
-  absence_types_id BIGINT,
-  takable_behaviour_id BIGINT
+  absence_types_id BIGINT NOT NULL,
+  takable_behaviour_id BIGINT NOT NULL
 );
 
 --- 4) complation_absence_behaviours
@@ -74,37 +72,35 @@ CREATE TABLE complation_absence_behaviours_history (
 
 --- 5) complation_codes_group
 CREATE TABLE complation_codes_group (
-  id BIGSERIAL PRIMARY KEY,
   absence_types_id BIGINT NOT NULL,
   complation_behaviour_id BIGINT NOT NULL,
   FOREIGN KEY (absence_types_id) REFERENCES absence_types (id),
-  FOREIGN KEY (complation_behaviour_id) REFERENCES complation_absence_behaviours (id)
+  FOREIGN KEY (complation_behaviour_id) REFERENCES complation_absence_behaviours (id),
+  CONSTRAINT complation_codes_group_pk PRIMARY KEY(absence_types_id, complation_behaviour_id)
 );
 
 CREATE TABLE complation_codes_group_history (
-  id BIGINT NOT NULL,
   _revision INTEGER NOT NULL REFERENCES revinfo(rev),
   _revision_type SMALLINT,
-  absence_types_id BIGINT,
-  complation_behaviour_id BIGINT
+  absence_types_id BIGINT NOT NULL,
+  complation_behaviour_id BIGINT NOT NULL
 );
 
 
 --- 6) replacing_codes_group
 CREATE TABLE replacing_codes_group (
-  id BIGSERIAL PRIMARY KEY,
   absence_types_id BIGINT NOT NULL,
   complation_behaviour_id BIGINT NOT NULL,
   FOREIGN KEY (absence_types_id) REFERENCES absence_types (id),
-  FOREIGN KEY (complation_behaviour_id) REFERENCES complation_absence_behaviours (id)
+  FOREIGN KEY (complation_behaviour_id) REFERENCES complation_absence_behaviours (id),
+  CONSTRAINT replacing_codes_group_pk PRIMARY KEY(absence_types_id, complation_behaviour_id)
 );
 
 CREATE TABLE replacing_codes_group_history (
-  id BIGINT NOT NULL,
   _revision INTEGER NOT NULL REFERENCES revinfo(rev),
   _revision_type SMALLINT,
-  absence_types_id BIGINT,
-  complation_behaviour_id BIGINT
+  absence_types_id BIGINT NOT NULL,
+  complation_behaviour_id BIGINT NOT NULL
 );
 
 --- 7) group_absence_types
@@ -172,17 +168,16 @@ CREATE TABLE justified_types_history (
 );
 
 CREATE TABLE absence_types_justified_types (
-  id BIGSERIAL PRIMARY KEY,
   absence_types_id BIGINT NOT NULL REFERENCES absence_types (id),
-  justified_types_id BIGINT NOT NULL REFERENCES justified_types (id)
+  justified_types_id BIGINT NOT NULL REFERENCES justified_types (id),
+  CONSTRAINT absence_type_justified_type_pk PRIMARY KEY(absence_types_id,justified_types_id)
 );
 
 CREATE TABLE absence_types_justified_types_history (
-  id BIGINT NOT NULL,
   _revision INTEGER NOT NULL REFERENCES revinfo(rev),
   _revision_type SMALLINT,
-  absence_types_id BIGINT,
-  justified_types_id BIGINT
+  absence_types_id BIGINT NOT NULL,
+  justified_types_id BIGINT NOT NULL
 );
 
 --- 9) Assenze / Tipi Assenze Errori
@@ -395,10 +390,12 @@ DELETE FROM roles WHERE name = 'admin';
 DELETE FROM roles WHERE name = 'developer';
 
 ALTER TABLE absence_types DROP CONSTRAINT if EXISTS fkfe65dbf7ca0a1c8a;
-
 DROP TABLE if EXISTS absence_type_groups;
-
 DROP TABLE if EXISTS absence_type_groups_history;
+ALTER TABLE absence_types_history DROP COLUMN absence_type_group_id;
+ALTER TABLE absence_types DROP COLUMN absence_type_group_id;
+
+
 
 
 # ---!Downs
