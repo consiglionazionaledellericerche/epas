@@ -231,10 +231,15 @@ public class Scanner {
       for (DayInPeriod dayInPeriod : absencePeriod.daysInPeriod.values()) {
         
         //eliminare i rimpiazzamenti sbagliati
-        for (Absence wrongReplacing : dayInPeriod.existentWrongReplacing()) {
-          wrongReplacing.delete();
-          dayInPeriod.getExistentReplacings().remove(wrongReplacing);
+        List<Absence> existentWrongReplacing = dayInPeriod.existentWrongReplacing();
+        List<Absence> toDelete = Lists.newArrayList();
+        for (Absence wrongReplacing : existentWrongReplacing) {
+          toDelete.add(wrongReplacing);
           log.info("Rimosso il rimpiazzamento errato {}", wrongReplacing.toString());
+        }
+        for (Absence absence : toDelete) {
+          dayInPeriod.getExistentReplacings().remove(absence);
+          absence.delete();
         }
         
         //creare il rimpiazzamento corretto

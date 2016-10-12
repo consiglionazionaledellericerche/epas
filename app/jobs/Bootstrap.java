@@ -88,7 +88,7 @@ public class Bootstrap extends Job<Void> {
 
     if (GroupAbsenceType.count() == 0) {
       log.info("Iniziata migrazione assenze!");
-      absenceMigration.buildDefaultGroups();
+      //absenceMigration.buildDefaultGroups();
       log.info("Conclusa migrazione assenze!");
     }
 
