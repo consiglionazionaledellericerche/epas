@@ -1,11 +1,9 @@
-<div id="container-nav-tabs" class="container">
-  <ul class="nav nav-tabs">
-    #{list _arg, as: 'tab'}
-      #{secure.check tab.value.action}
-        <li #{if request.path == tab.value.toString()}class="active"#{/if}>
-          <a href="${tab.value}">${tab.key.label()}</a>
-        </li>
-      #{/secure.check}
-    #{/list}
-  </ul>
-</div>
+<ul class="nav nav-tabs" role="tablist">
+  #{list _arg, as: 'tab'}
+  #{secure.check tab.value.action}
+  <li #{if request.path== tab.value.toString()}class="active" #{/if}>
+  <a href="${tab.value}">${tab.key.label()}</a>
+  </li>
+  #{/secure.check}
+  #{/list}
+</ul>
