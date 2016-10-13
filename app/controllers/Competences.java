@@ -160,7 +160,18 @@ public class Competences extends Controller {
    */
   public static void addCompetences(CompetenceCodeGroup group, CompetenceCode code) {
     notFoundIfNull(group);
+    if (!code.limitUnit.name().equals(group.limitUnit.name())) {
+      validation.addError("code", "L'unità di misura del limite del codice è diversa "
+          + "da quella del gruppo");          
+    }
+    if (!code.limitType.name().equals(group.limitType.name())) {
+      validation.addError("code", "Il tipo di limite del codice è diverso da quello del gruppo");
+    }
+    if (validation.hasErrors()) {
 
+      response.status = 400;
+      render("@addCompetenceCodeToGroup", group);
+    }
     code.competenceCodeGroup = group;
     code.save();
     group.competenceCodes.add(code);
@@ -448,7 +459,6 @@ public class Competences extends Controller {
   public static void editCompetence(Long competenceId) {
     Competence competence = competenceDao.getCompetenceById(competenceId);
     notFoundIfNull(competence);
-
     Office office = competence.person.office;
     if (competence.competenceCode.code.equals("S1")) {
       PersonStampingRecap psDto = stampingsRecapFactory.create(competence.person,
@@ -469,26 +479,27 @@ public class Competences extends Controller {
     Office office = competence.person.office;
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-    int month = competence.month;
-    int year = competence.year;
+    
     String result = "";
 
     if (!validation.hasErrors()) {
       result = competenceManager.canAddCompetence(competence, valueApproved);
       if (!result.isEmpty()) {
         validation.addError("valueApproved", result);
-      }
+      }      
     }
     if (validation.hasErrors()) {
 
       response.status = 400;
       render("@editCompetence", competence, office);
     }
+    
 
     competenceManager.saveCompetence(competence, valueApproved);
     consistencyManager.updatePersonSituation(competence.person.id,
         new LocalDate(competence.year, competence.month, 1));
-
+    int month = competence.month;
+    int year = competence.year;
     IWrapperCompetenceCode wrCompetenceCode = wrapperFactory.create(competence.competenceCode);
     List<CompetenceCode> competenceCodeList = competenceDao
         .activeCompetenceCode(office, new LocalDate(year, month, 1));
