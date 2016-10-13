@@ -96,8 +96,8 @@
   #{tabContentItem id:'autocertifications'}
   <div id="editAutocertifications">
     #{alert color:'info'}
-    <p>Elenco dei parametri generali di configurazione per la sede
-      <strong>${office.name}</strong> ed il loro valore.</p>
+    Elenco dei parametri di configurazione per l'abilitazione delle Autocertificazioni per la sede
+    <strong>${office.name}</strong> ed il loro valore.
     #{/alert}
 
     <table class="table">
@@ -108,22 +108,19 @@
       #{list autocertifications, as:'conf'}
       <tr>
         <td>
-          #{if autocert}
-          #{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
-          &{conf.epasParam}
+          #{secure.link @Configurations.edit(conf.id), target: conf, display:'denied', 'data-async-modal':'#defaultModal'}
+            &{conf.epasParam}
           #{/secure.link}
-          #{/if}
-          #{else}
-          <span webui-popover-hover><em>&{conf.epasParam}</em></span>
-          <div class="webui-popover-content">
-							<span class="text-danger">
-								<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-								Per poter abilitare questa opzione è necessario effettuare l'upload del documento di autorizzazione
-							</span>
-          </div>
-          #{/else}
+          <br>
         </td>
         <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
+      </tr>
+      <tr>
+        <td colspan="2" class="text-warning">
+          #{alert color:'warning'}
+          qui la spiegazione
+          #{/alert}
+        </td>
       </tr>
       #{/list}
     </table>
@@ -131,22 +128,31 @@
     <div class="panel panel-default">
       <div class="panel-body">
         #{if autocert}
+
+        <p><strong><em>&{'tr_autocertification.file'}</em></strong></p>
         #{secure.link @getAttachment(autocert.id)}
-        <i class="fa fa-file-o" aria-hidden="true"></i> ${autocert.filename}
+          <i class="fa fa-file-o" aria-hidden="true"></i> ${autocert.filename}
         #{/secure.link}
-        #{secure.check 'Configurations.removeAttachment'}
-        <a href="@{removeAttachment(autocert.id)}">
-          <i class="fa fa-trash" aria-hidden="true" webui-popover-hover data-content="Rimuovi allegato"></i>
+
+        #{secure.check 'Configurations.removeAttachment', target: autocert}
+        <a class="label label-badge label-danger" href="@{removeAttachment(autocert.id)}" webui-popover-hover data-content="Rimuovi File">
+          <i class="fa fa-trash"></i> &{'crud.delete'}
         </a>
         #{/secure.check}
+
         #{/if}
+
         #{else}
-        #{form action:@uploadAttachment(), method:'POST', enctype:'multipart/form-data'}
+        #{alert color:'danger'}
+        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+        &{'tr_autocertification.alert'}
+        #{/alert}
+
+        #{form action:@uploadAttachment(), method:'POST', class:'form-horizontal', enctype:'multipart/form-data'}
         #{f.hidden 'officeId', value:office.id /}
-        <div>
-          <input name="file" type="file" onChange="javascript:this.form.submit()"/>
-          <strong><i class="fa fa-upload fa-2x"></i> Carica documento di autorizzazione</strong>
-        </div>
+
+        #{f.input 'file', type: 'file', onChange:'javascript:this.form.submit()' /}
+
         #{/form}
         #{/else}
       </div>
