@@ -23,13 +23,20 @@ import javax.persistence.Table;
 public class JustifiedType extends BaseModel {
 
   public enum JustifiedTypeName {
+
     nothing, 
+    
     absence_type_minutes, 
     specified_minutes, 
     missing_time, 
     half_day, 
     all_day, 
+    
     assign_all_day,
+    
+    all_day_limit,
+    absence_type_limit,
+    specified_minutes_limit;
     
   }
   

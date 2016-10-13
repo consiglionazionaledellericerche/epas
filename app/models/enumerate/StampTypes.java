@@ -37,7 +37,8 @@ public enum StampTypes {
   INTRAMOENIA("i", "intramoenia", "Intramoenia", false),
   GUARDIA_MEDICA("gm", "guardiaMedica", "Guardia Medica", false),
   LAVORO_FUORI_SEDE("lfs", "lavoroFuoriSede", "Lavoro fuori sede", true),
-  PAUSA_PRANZO("pr", "pausaPranzo", "Pausa Pranzo", true);
+  PAUSA_PRANZO("pr", "pausaPranzo", "Pausa Pranzo", true),
+  PERMESSO_BREVE("pb", "permessoBreve", "Permesso Breve", false);
 
   private String identifier;
   private String code;

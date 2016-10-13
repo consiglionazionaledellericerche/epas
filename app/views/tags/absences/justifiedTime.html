@@ -16,8 +16,8 @@
         #{/if}
 	    #{if _absence.justifiedTime() }
 	       
-	       #{if _noLabel}#{/if}
-           #{else}<strong>Tempo giustificato</strong>#{/else}
+	       #{if _noLabel}<strong>Tempo</strong>#{/if}
+           #{else}<strong>Tempo</strong>#{/else}
 	    
 	       ${_absence.justifiedTime().printHourMinute()}
 	    #{/if}

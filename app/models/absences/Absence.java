@@ -103,7 +103,8 @@ public class Absence extends BaseModel {
     if (this.justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
       return this.absenceType.justifiedTime;
     }
-    if (this.justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
+    if (this.justifiedType.name.equals(JustifiedTypeName.specified_minutes) 
+        || this.justifiedType.name.equals(JustifiedTypeName.specified_minutes_limit)) {
       if (this.justifiedMinutes == null) {
         throw new IllegalStateException();
       }

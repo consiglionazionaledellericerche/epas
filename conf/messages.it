@@ -633,6 +633,8 @@ StampTypes.INTRAMOENIA= Intramoenia
 StampTypes.GUARDIA_MEDICA= Guardia Medica
 StampTypes.PAUSA_PRANZO= Pausa Pranzo
 StampTypes.LAVORO_FUORI_SEDE= Lavoro fuori sede
+StampTypes.PERMESSO_BREVE= Permesso breve (36 ore anno)
+
 
 # Parametri di configurazione
 

@@ -161,14 +161,16 @@ public class AbsenceEngineUtility {
     if (absence.justifiedType.name.equals(JustifiedTypeName.nothing)) {
       amount = 0;
     } 
-    else if (absence.justifiedType.name.equals(JustifiedTypeName.all_day)) {
+    else if (absence.justifiedType.name.equals(JustifiedTypeName.all_day) 
+        || absence.justifiedType.name.equals(JustifiedTypeName.all_day_limit)) {
       amount = absenceWorkingTime(person, absence);
     } 
     else if (absence.justifiedType.name.equals(JustifiedTypeName.half_day)) {
       amount = absenceWorkingTime(person, absence) / 2;
     }
-    else if (absence.justifiedType.name.equals(JustifiedTypeName.missing_time) ||
-        absence.justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
+    else if (absence.justifiedType.name.equals(JustifiedTypeName.missing_time) 
+        || absence.justifiedType.name.equals(JustifiedTypeName.specified_minutes)
+        || absence.justifiedType.name.equals(JustifiedTypeName.specified_minutes_limit)) {
       // TODO: quello che manca va implementato. Occorre persistere la dacisione di quanto manca
       // se non si vogliono fare troppi calcoli.
       if (absence.justifiedMinutes == null) {
