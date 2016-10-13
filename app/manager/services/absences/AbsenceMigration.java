@@ -1984,8 +1984,6 @@ public class AbsenceMigration {
       groupMalattia.save();
     }
     
-    
-    
     if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.PB.name()).isPresent()) {
       
       //Takable Creation
@@ -2014,7 +2012,7 @@ public class AbsenceMigration {
       
       // Group Creation
       GroupAbsenceType groupPb = new GroupAbsenceType();
-      groupPb.category = malattiaFiglio3Category;
+      groupPb.category = automaticCodes;
       groupPb.name = DefaultGroup.PB.name();
       groupPb.description = "PB - Permesso breve 36 ore anno";
       groupPb.pattern = GroupAbsenceTypePattern.programmed;
