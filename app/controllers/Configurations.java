@@ -51,17 +51,17 @@ import javax.inject.Inject;
 public class Configurations extends Controller {
 
   @Inject
-  private static PersonDao personDao;
+  static PersonDao personDao;
   @Inject
-  private static OfficeDao officeDao;
+  static OfficeDao officeDao;
   @Inject
-  private static ConsistencyManager consistencyManager;
+  static ConsistencyManager consistencyManager;
   @Inject
-  private static ConfigurationManager configurationManager;
+  static ConfigurationManager configurationManager;
   @Inject
-  private static PeriodManager periodManager;
+  static PeriodManager periodManager;
   @Inject
-  private static SecurityRules rules;
+  static SecurityRules rules;
 
 
   private static IPropertyInPeriod compute(IPropertyInPeriod configuration, EpasParam epasParam,
@@ -214,19 +214,19 @@ public class Configurations extends Controller {
         .getOfficeConfigurationsByDate(office, LocalDate.now());
 
     final List<Configuration> generals = configurations.stream()
-        .filter(conf -> conf.epasParam.epasParamTimeType == EpasParam.EpasParamTimeType.GENERAL &&
-            conf.epasParam != EpasParam.TR_AUTOCERTIFICATION).collect(Collectors.toList());
+        .filter(conf -> conf.epasParam.category == EpasParam.EpasParamCategory.GENERAL)
+        .collect(Collectors.toList());
 
     final List<Configuration> yearlies = configurations.stream()
-        .filter(conf -> conf.epasParam.epasParamTimeType == EpasParam.EpasParamTimeType.YEARLY)
+        .filter(conf -> conf.epasParam.category == EpasParam.EpasParamCategory.YEARLY)
         .collect(Collectors.toList());
 
     final List<Configuration> periodics = configurations.stream()
-        .filter(conf -> conf.epasParam.epasParamTimeType == EpasParam.EpasParamTimeType.PERIODIC)
+        .filter(conf -> conf.epasParam.category == EpasParam.EpasParamCategory.PERIODIC)
         .collect(Collectors.toList());
 
     final List<Configuration> autocertifications = configurations.stream()
-        .filter(conf -> conf.epasParam == EpasParam.TR_AUTOCERTIFICATION)
+        .filter(conf -> conf.epasParam.category == EpasParam.EpasParamCategory.AUTOCERTIFICATION)
         .collect(Collectors.toList());
 
     // id relativo all'allegato di autorizzazione per l'attivazione dell'autocertificazione
@@ -404,6 +404,8 @@ public class Configurations extends Controller {
 
     Preconditions.checkState(office.isPersistent());
     Preconditions.checkNotNull(file);
+
+    rules.checkIfPermitted(office);
 
     final Attachment attachment = new Attachment();
 

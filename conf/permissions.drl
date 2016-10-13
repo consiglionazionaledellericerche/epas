@@ -194,7 +194,7 @@ when
  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
  $target: Stamping()
  Office(persons.contains($target.getOwner())) from $uro.office
- $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), target == $target, granted == false )
+ $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save"), target == $target, granted == false )
 then
  $c.grant();
 end
@@ -574,6 +574,7 @@ when
 
         "Configurations.show",
         "Configurations.edit",
+        "Configurations.removeAttachment",
 
      	"MealTickets.recapMealTickets",
      	"MealTickets.personMealTickets",
@@ -701,8 +702,7 @@ end
 
 rule OnlyForPersonnelAdmin_Generic
 when
- $uro: UsersRolesOffices()
- Role(name == Role.PERSONNEL_ADMIN) from $uro.role
+ $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
  $c: PermissionCheck(action in (
 
  		/*Metodi per la gestione delle assenze bypassando i controlli*/
@@ -730,6 +730,8 @@ when
      	"Configurations.personShow",
      	"Configurations.personEdit",
      	"Configurations.personUpdate",
+     	"Configurations.getAttachment",
+        "Configurations.removeAttachment",
 
         "Contracts.personContracts",
         "Contracts.insert",
@@ -837,6 +839,7 @@ when
      	"Configurations.show",
      	"Configurations.edit",
         "Configurations.update",
+        "Configurations.uploadAttachment",
 
 		"BadgeSystems.joinBadgesPerson",
 		"BadgeSystems.saveBadges",
@@ -861,9 +864,8 @@ end
 
 rule OnlyForPersonnelAdmin_InOffice
 when
- $uro: UsersRolesOffices()
+ $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
  $o: Office( usersRolesOffices contains $uro)
- Role(name == Role.PERSONNEL_ADMIN) from $uro.role
  $c: PermissionCheck(action in (
 
  		/* Vecchio permesso editPerson */
@@ -878,6 +880,7 @@ when
      	"Configurations.personShow",
      	"Configurations.personEdit",
      	"Configurations.personUpdate",
+     	"Configurations.uploadAttachment",
 
         "Contracts.personContracts",
         "Contracts.insert",
@@ -1039,6 +1042,34 @@ then
 end
 
 /*******************************************************************************
+ * Non è possibile eliminare il file relativo all'autorizzazione per
+ * l'autocertificazione dei tecnologi e ricercatori se il parametro è abilitato
+ ******************************************************************************/
+rule cannotRemoveAttachment
+when
+  $target: Attachment(type == AttachmentType.TR_AUTOCERTIFICATION)
+  $o: Office() from $target.office
+  Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action == "Configurations.removeAttachment", target == $target)
+then
+ $c.revoke();
+end
+
+/*******************************************************************************
+ * L'amministratore del personale può gestire gli allegati per la propria sede
+ ******************************************************************************/
+rule canEditAttachment
+when
+  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
+  $target: Attachment(office == $uro.office)
+  $c: PermissionCheck(action in (
+  "Configurations.getAttachment",
+  "Configurations.removeAttachment"), target == $target, granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
  * La Configurazione per abilitare l'autocertificazione può essere abilitata se...
  ******************************************************************************/
 rule canEditAutocertificationConf
@@ -1158,9 +1189,8 @@ end
 
 /************************************************************************************
  * Un dipendente può autocertificare le proprie timbrature entro una certa data se...
- *
  * Non vengono fatti i controlli sulle configurazioni che vengono già fatti nelle altre drools
- * in modo che questa regola valga sia nel caso di R&T che del lavoro fuori sede
+ * in modo che questa regola valga sia nel caso di
  ************************************************************************************/
 rule employeeCanInsertStampings_inDate
 when
