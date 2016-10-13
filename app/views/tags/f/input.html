@@ -5,5 +5,6 @@
        #{if _placeholder} placeholder="${_placeholder}"#{/if}
 #{if _popover} popover data-content='&{field.name+'.popover'}'#{/if}
 #{if _disabled} disabled #{/if}
-#{if _readonly} readonly="readonly" #{/if}>
+#{if _readonly} readonly="readonly" #{/if}
+${helpers.Web.serialize(_attrs, "arg", "value", "label", "type","placeholder", "disabled", "readonly").raw()}>
 #{/f.edit}
