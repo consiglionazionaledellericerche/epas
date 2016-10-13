@@ -271,6 +271,39 @@ public class PersonDayManager {
 
     return gapPairs;
   }
+  
+  public int shortPermissionTime(PersonDay personDay) {
+    
+    if (!StampTypes.PERMESSO_BREVE.isActive()) {
+      return 0;
+    }
+    
+    List<PairStamping> validPairs = computeValidPairStampings(personDay);
+    
+    List<PairStamping> allGapPairs = Lists.newArrayList();
+    
+    //1) Calcolare tutte le gapPair (fattorizzare col metodo del pranzo)
+    PairStamping previous = null;
+    for (PairStamping validPair : validPairs) {
+      if (previous != null) {
+        if ((previous.second.stampType == null
+            || StampTypes.PERMESSO_BREVE.equals(previous.second.stampType))
+            && (validPair.first.stampType == null
+            || StampTypes.PERMESSO_BREVE.equals(validPair.first.stampType))) {
+
+          allGapPairs.add(new PairStamping(previous.second, validPair.first));
+        }
+      }
+      previous = validPair;
+    }
+    
+    int gapTime = 0;
+    for (PairStamping gapPair : allGapPairs) {
+      gapTime+= gapPair.timeInPair;
+    }
+    
+    return gapTime;
+  }
 
   /**
    * Calcolo del tempo a lavoro e del buono pasto.

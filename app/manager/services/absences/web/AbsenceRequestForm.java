@@ -16,7 +16,6 @@ import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
 
 import java.util.List;
-import java.util.Map;
 import java.util.SortedMap;
 
 /**
@@ -34,6 +33,7 @@ public class AbsenceRequestForm {
     mission(Lists.newArrayList(DefaultGroup.MISSIONE.name())),
     vacation(Lists.newArrayList(DefaultGroup.FERIE_CNR.name())),
     compensatory(Lists.newArrayList(DefaultGroup.RIPOSI_CNR.name())),
+    automatic(Lists.newArrayList(DefaultGroup.PB.name())),
     other(Lists.newArrayList(
         DefaultGroup.G_661.name(), 
         DefaultGroup.G_89.name(), DefaultGroup.G_09.name(),
