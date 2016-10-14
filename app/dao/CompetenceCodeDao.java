@@ -24,6 +24,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 /**
+ * Dao per l'accesso alle informazioni dei CompetenceCode.
+ *
  * @author dario
  */
 public class CompetenceCodeDao extends DaoBase {
@@ -123,7 +125,7 @@ public class CompetenceCodeDao extends DaoBase {
    * 
    * @param group il gruppo di codici di competenza
    * @param except opzionale: se presente serve per tralasciare quel competenceCode nella ricerca
-   * dei codici appartenenti al gruppo group
+   *        dei codici appartenenti al gruppo group
    * @return la lista dei codici di competenza che appartengono al gruppo passato come parametro.
    */
   public List<CompetenceCode> getCodeWithGroup(CompetenceCodeGroup group, 
@@ -152,19 +154,6 @@ public class CompetenceCodeDao extends DaoBase {
     return query.list(competenceCode);
   }
   
-  /**
-   * 
-   * @param personlist la lista di persone di cui ritornare i codici di competenza abilitati
-   * @return la lista di oggetti PersonCompetenceCodes. 
-   */
-//  public List<PersonCompetenceCodes> list(List<Person> personlist, LocalDate date) {
-//    final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
-//    final JPQLQuery query = getQueryFactory().from(pcc)
-//        .where(pcc.person.in(personlist)
-//        .and(pcc.beginDate.before(date)
-//            .andAnyOf(pcc.endDate.isNull(), pcc.endDate.after(date)))).orderBy(pcc.person.surname.asc());
-//    return query.list(pcc);
-//  }
   
   /**
    * 
@@ -176,7 +165,8 @@ public class CompetenceCodeDao extends DaoBase {
     final BooleanBuilder condition = new BooleanBuilder();
     if (date.isPresent()) {
       condition.and(pcc.beginDate.loe(date.get().dayOfMonth().withMaximumValue())
-          .andAnyOf(pcc.endDate.isNull(), pcc.endDate.goe(date.get().dayOfMonth().withMaximumValue())));
+          .andAnyOf(
+              pcc.endDate.isNull(), pcc.endDate.goe(date.get().dayOfMonth().withMaximumValue())));
     }
     final JPQLQuery query = getQueryFactory().from(pcc).where(pcc.person.eq(person).and(condition));
     return query.list(pcc);
@@ -208,7 +198,8 @@ public class CompetenceCodeDao extends DaoBase {
     final BooleanBuilder condition = new BooleanBuilder();
     if (date.isPresent()) {
       condition.and(pcc.beginDate.loe(date.get().dayOfMonth().withMaximumValue())
-          .andAnyOf(pcc.endDate.isNull(), pcc.endDate.goe(date.get().dayOfMonth().withMaximumValue())));
+          .andAnyOf(
+              pcc.endDate.isNull(), pcc.endDate.goe(date.get().dayOfMonth().withMaximumValue())));
     }
     final JPQLQuery query = getQueryFactory().from(pcc)
         .where(pcc.competenceCode.eq(code)

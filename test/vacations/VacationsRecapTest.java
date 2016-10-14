@@ -1,10 +1,17 @@
 package vacations;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.google.common.collect.ImmutableList;
 
 import manager.ContractManager;
 import manager.services.vacations.VacationsRecap;
 import manager.services.vacations.VacationsRecapBuilder;
+
+import mocker.MockAbsence;
+import mocker.MockAbsenceType;
+import mocker.MockContract;
+import mocker.MockPersonDay;
 
 import models.Contract;
 import models.PersonDay;
@@ -15,12 +22,6 @@ import models.enumerate.AbsenceTypeMapping;
 import org.joda.time.LocalDate;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
-
-import mocker.MockAbsence;
-import mocker.MockAbsenceType;
-import mocker.MockContract;
-import mocker.MockPersonDay;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
