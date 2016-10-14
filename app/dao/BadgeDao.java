@@ -50,7 +50,7 @@ public class BadgeDao extends DaoBase {
   }
 
   /**
-   * @param code   il numero badge
+   * @param code   il numero badge.
    * @param person la persona proprietaria dei badge
    * @return la lista di tutti i record di badge con lo stesso code per la persona specificata
    */

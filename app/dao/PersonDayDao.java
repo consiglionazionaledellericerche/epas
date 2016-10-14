@@ -247,11 +247,13 @@ public class PersonDayDao extends DaoBase {
 
   /**
    * @return la lista dei personDay relativi a un singolo giorno di tutte le persone presenti nella
-   * lista.
+   *        lista.
    */
   public List<PersonDay> getPersonDayForPeopleInDay(List<Person> personList, LocalDate date) {
     QPersonDay personDay = QPersonDay.personDay;
-    final JPQLQuery query = getQueryFactory().from(personDay).where(personDay.date.eq(date).and(personDay.person.in(personList)));
+    final JPQLQuery query = 
+        getQueryFactory().from(personDay)
+          .where(personDay.date.eq(date).and(personDay.person.in(personList)));
     return query.orderBy(personDay.person.surname.asc()).list(personDay);
   }
 
@@ -260,7 +262,8 @@ public class PersonDayDao extends DaoBase {
    */
   public PersonDay getOldestPersonDay() {
     QPersonDay personDay = QPersonDay.personDay;
-    final JPQLQuery query = getQueryFactory().from(personDay).orderBy(personDay.date.asc()).limit(1);
+    final JPQLQuery query = 
+        getQueryFactory().from(personDay).orderBy(personDay.date.asc()).limit(1);
     return query.singleResult(personDay);
   }
 }

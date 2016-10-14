@@ -34,6 +34,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 /**
+ * Dao per l'accesso alle informazioni delle Absence.
+ *
  * @author dario
  */
 public class AbsenceDao extends DaoBase {
@@ -47,6 +49,10 @@ public class AbsenceDao extends DaoBase {
     this.factory = factory;
   }
 
+  /**
+   * @param id id dell'Absence.
+   * @return la Absence corrispondente all'id passato.
+   */
   public Absence getAbsenceById(Long id) {
 
     final QAbsence absence = QAbsence.absence;
@@ -119,6 +125,13 @@ public class AbsenceDao extends DaoBase {
 
   }
 
+  /**
+   * @param person la persona di cui cercare le assenze.
+   * @param begin la data di inizio da cui cercare le assenze (compresa)
+   * @param end la data di fine fino a cui cercare le assenze (compresa
+   * @param code il codice dell'assenza da cercare
+   * @return la lista delle assenze corrispondenti ai parametri passati
+   */
   public List<Absence> absenceInPeriod(
       Person person, LocalDate begin, LocalDate end, String code) {
 

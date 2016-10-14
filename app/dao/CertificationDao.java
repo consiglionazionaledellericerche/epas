@@ -15,6 +15,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 /**
+ * Dao per l'accesso alle informazioni delle Certification.
+ *
  * @author alessandro
  */
 public class CertificationDao extends DaoBase {
@@ -26,11 +28,10 @@ public class CertificationDao extends DaoBase {
   }
 
   /**
-   * Le certificazioni epas della persona nel mese e nell'anno.
-   * @param person
-   * @param year
-   * @param month
-   * @return
+   * @param person la persona di cui cercare le certificazioni.
+   * @param year l'anno delle certificazioni.
+   * @param month il mese delle certificazioni.
+   * @return le certificazioni epas della persona nel mese e nell'anno.
    */
   public List<Certification> personCertifications(Person person, int year, int month) {
     
@@ -45,14 +46,14 @@ public class CertificationDao extends DaoBase {
   }
   
   /**
-   * Le certificationi epas della persona nel mese e nell'anno per il tipo type.
-   * @param person
-   * @param year
-   * @param month
-   * @param type
-   * @return
+   * @param person la persona di cui cercare le certificazioni.
+   * @param year l'anno delle certificazioni.
+   * @param month il mese delle certificazioni.
+   * @param type il tipo delle certificazioni da cercare.
+   * @return le certificationi epas della persona nel mese e nell'anno per il tipo type.
    */
-  public List<Certification> personCertificationsByType(Person person, int year, int month, CertificationType type) {
+  public List<Certification> personCertificationsByType(
+      Person person, int year, int month, CertificationType type) {
     
     QCertification certification = QCertification.certification;
     return getQueryFactory()
