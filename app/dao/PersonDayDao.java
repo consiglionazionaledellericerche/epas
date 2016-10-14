@@ -43,15 +43,14 @@ public class PersonDayDao extends DaoBase {
     final QPersonDay personDay = QPersonDay.personDay;
 
     return getQueryFactory()
-            .from(personDay)
-            .where(personDay.id.eq(personDayId))
-            .singleResult(personDay);
+        .from(personDay)
+        .where(personDay.id.eq(personDayId))
+        .singleResult(personDay);
   }
 
   /**
-   *  
-   * @param person la persona 
-   * @param date la data
+   * @param person la persona
+   * @param date   la data
    * @return un personday se esiste per quella persona in quella data.
    */
   public Optional<PersonDay> getPersonDay(Person person, LocalDate date) {
@@ -59,8 +58,8 @@ public class PersonDayDao extends DaoBase {
     final QPersonDay personDay = QPersonDay.personDay;
 
     final JPQLQuery query = getQueryFactory()
-            .from(personDay)
-            .where(personDay.person.eq(person).and(personDay.date.eq(date)));
+        .from(personDay)
+        .where(personDay.person.eq(person).and(personDay.date.eq(date)));
 
     return Optional.fromNullable(query.singleResult(personDay));
   }
@@ -86,9 +85,9 @@ public class PersonDayDao extends DaoBase {
     final QPersonDay personDay = QPersonDay.personDay;
 
     final JPQLQuery query = getQueryFactory()
-            .from(personDay)
-            .where(personDay.person.eq(person).and(personDay.date.lt(date)))
-            .orderBy(personDay.date.desc());
+        .from(personDay)
+        .where(personDay.person.eq(person).and(personDay.date.lt(date)))
+        .orderBy(personDay.date.desc());
 
     return query.singleResult(personDay);
   }
@@ -100,7 +99,7 @@ public class PersonDayDao extends DaoBase {
 
     final QPersonDay personDay = QPersonDay.personDay;
     final JPQLQuery query = getQueryFactory().from(personDay)
-            .where(personDay.person.eq(person));
+        .where(personDay.person.eq(person));
 
     return query.list(personDay);
   }
@@ -113,22 +112,21 @@ public class PersonDayDao extends DaoBase {
    * @param orderedDesc   true se si vuole ordinamento decrescente
    */
   private List<PersonDay> getPersonDaysFetched(Person person,
-           LocalDate begin, Optional<LocalDate> end, boolean fetchAbsences,
-           boolean orderedDesc, boolean onlyIsTicketAvailable) {
+      LocalDate begin, Optional<LocalDate> end, boolean fetchAbsences,
+      boolean orderedDesc, boolean onlyIsTicketAvailable) {
 
     final QPersonDay personDay = QPersonDay.personDay;
     final QStamping stamping = QStamping.stamping;
 
-
     build(person, begin, end, orderedDesc, onlyIsTicketAvailable)
-            .leftJoin(personDay.stampings, stamping).fetch()
-            .list(personDay);
+        .leftJoin(personDay.stampings, stamping).fetch()
+        .list(personDay);
 
     final QPersonDayInTrouble troubles = QPersonDayInTrouble.personDayInTrouble;
 
     build(person, begin, end, orderedDesc, onlyIsTicketAvailable)
-            .leftJoin(personDay.troubles, troubles).fetch()
-            .list(personDay);
+        .leftJoin(personDay.troubles, troubles).fetch()
+        .list(personDay);
 
     final QAbsence absence = QAbsence.absence;
     final QAbsenceType absenceType = QAbsenceType.absenceType;
@@ -142,8 +140,8 @@ public class PersonDayDao extends DaoBase {
   }
 
   private JPQLQuery build(Person person,
-                          LocalDate begin, Optional<LocalDate> end,
-                          boolean orderedDesc, boolean onlyIsTicketAvailable) {
+      LocalDate begin, Optional<LocalDate> end,
+      boolean orderedDesc, boolean onlyIsTicketAvailable) {
 
     final QPersonDay personDay = QPersonDay.personDay;
 
@@ -176,28 +174,27 @@ public class PersonDayDao extends DaoBase {
 
   /**
    * @param person la persona
-   * @param begin la data inizio da cui cercare
-   * @param end la data fino a cui cercare
+   * @param begin  la data inizio da cui cercare
+   * @param end    la data fino a cui cercare
    * @return la lista dei personday presenti in un intervallo temporale.
    */
   public List<PersonDay> getPersonDayInPeriod(Person person, LocalDate begin,
-                                              Optional<LocalDate> end) {
+      Optional<LocalDate> end) {
 
-    return getPersonDaysFetched(person, begin, end,
-            false, false, false);
+    return getPersonDaysFetched(person, begin, end, false, false, false);
   }
 
   /**
    * @param person la persona di cui si vogliono i personday
-   * @param begin la data di inizio da cui cercare i personday
-   * @param end la data di fine (opzionale)
+   * @param begin  la data di inizio da cui cercare i personday
+   * @param end    la data di fine (opzionale)
    * @return la lista dei personday ordinati decrescenti.
    */
   public List<PersonDay> getPersonDayInPeriodDesc(Person person, LocalDate begin,
-                                                  Optional<LocalDate> end) {
+      Optional<LocalDate> end) {
 
     return getPersonDaysFetched(person, begin, end,
-            false, true, false);
+        false, true, false);
   }
 
 
@@ -210,7 +207,7 @@ public class PersonDayDao extends DaoBase {
     LocalDate end = begin.dayOfMonth().withMaximumValue();
 
     return getPersonDaysFetched(person, begin, Optional.fromNullable(end),
-            false, false, false);
+        false, false, false);
   }
 
   /**
@@ -218,7 +215,7 @@ public class PersonDayDao extends DaoBase {
    * month.present Nell'anno year.present e month.absent Sempre year.absent e month.absent
    */
   public List<PersonDay> getHolidayWorkingTime(Person person, Optional<Integer> year,
-                                               Optional<Integer> month) {
+      Optional<Integer> month) {
 
     QPersonDay personDay = QPersonDay.personDay;
 
@@ -244,24 +241,21 @@ public class PersonDayDao extends DaoBase {
     query.where(condition);
 
     return query.orderBy(personDay.person.surname.asc())
-            .orderBy(personDay.date.asc()).list(personDay);
+        .orderBy(personDay.date.asc()).list(personDay);
   }
-  
-  
+
+
   /**
-   * 
-   * @param personList
-   * @param date
-   * @return la lista dei personDay relativi a un singolo giorno di tutte le persone presenti nella lista.
+   * @return la lista dei personDay relativi a un singolo giorno di tutte le persone presenti nella
+   * lista.
    */
   public List<PersonDay> getPersonDayForPeopleInDay(List<Person> personList, LocalDate date) {
     QPersonDay personDay = QPersonDay.personDay;
     final JPQLQuery query = getQueryFactory().from(personDay).where(personDay.date.eq(date).and(personDay.person.in(personList)));
     return query.orderBy(personDay.person.surname.asc()).list(personDay);
   }
-  
+
   /**
-   * 
    * @return il personday facente riferimento al giorno più vecchio presente sul db.
    */
   public PersonDay getOldestPersonDay() {

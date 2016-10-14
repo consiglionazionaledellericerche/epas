@@ -11,30 +11,31 @@
   #{breadcrumbs ['manageUsers':@Users.list()], noHome:'true' /}
 
   #{form action:@Users.list(), class:'form-inline', method:'GET', 'data-reload':'#normalResults', autocomplete:'off'}
-  <div class="row">
 
-    #{f.searchInput 'name' /}
+  #{f.searchInput 'name' /}
 
-    #{field 'office'}
-    <div class="col-sm-5">
-      <label for="${field.id}" class="control-label">&{'officeFilter'}</label>
-      <div class="input-group">
-        <select class="form-control" name="${field.name}.id" id="${field.id}" select2>
-          <option></option>
-          #{list templateUtility.technicalAdminOffices, as:'office'}
-          <option value="${office.id}" #{if field.value?.id== office.id} selected#{/if}>
-          ${office.getLabel()}
-          </option>
-          #{/list}
-        </select>
-      </div>
+  #{field 'office'}
+  <div class="col-sm-5">
+    <label for="${field.id}" class="control-label">&{'officeFilter'}</label>
+    <div class="input-group">
+      <select class="form-control" name="${field.name}.id" id="${field.id}" select2>
+        <option></option>
+        #{list templateUtility.technicalAdminOffices, as:'office'}
+        <option value="${office.id}" #{if field.value?.id== office.id} selected#{/if}>
+        ${office.getLabel()}
+        </option>
+        #{/list}
+      </select>
     </div>
-    #{/field}
+  </div>
+  #{/field}
 
-    #{b.link @blank(), color: 'info', fa: 'plus', class: 'pull-right' }
-      &{'newUser'}
+  <div class="text-right">
+    #{b.link @blank(), color: 'info', fa: 'plus'}
+    &{'newUser'}
     #{/b.link}
   </div>
+
   #{/form}
   <br>
 

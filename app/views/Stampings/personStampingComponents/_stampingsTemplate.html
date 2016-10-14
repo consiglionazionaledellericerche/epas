@@ -14,7 +14,7 @@
     >
 
       #{if stampingTemplate.date}
-		    #{secure.link @Stampings.edit('stamping.id':stampingTemplate.stampingId), target:stampingTemplate.stamping , 'data-async-modal':'#modalStamping'}
+		    #{secure.link @Stampings.edit(stampingTemplate.stampingId), target:stampingTemplate.stamping , 'data-async-modal':'#modalStamping'}
           ${stampingTemplate.hour}
 		    #{/secure.link}
       #{/if}
@@ -45,12 +45,14 @@
     #{/list}
 
     #{secure.check 'Stampings.blank', target: person}
+      #{secure.check 'Stampings.blank', target: yearMonth }
       <td class="inserisciTimbratura default-single">
         #{if !dayRecap.personDay.future}
-          <a href="@{Stampings.blank('id':dayRecap.personDay.person.id, dayRecap.personDay.date.format())}" data-async-modal="#modalStamping">
+          <a href="@{Stampings.blank(dayRecap.personDay.person.id, dayRecap.personDay.date.format())}" data-async-modal="#modalStamping">
         		+++
       		</a>
       	#{/if}
       </td>
+      #{/secure.check}
     #{/secure.check}
     
