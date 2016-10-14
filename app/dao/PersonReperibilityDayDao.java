@@ -124,10 +124,11 @@ public class PersonReperibilityDayDao extends DaoBase {
    *     reperibilità.
    * @return la lista dei servizi per cui si vuole la reperibilità
    */
-  public List<PersonReperibilityType> getReperibilityTypeByOffice(Office office, Optional<Boolean> isActive) {
+  public List<PersonReperibilityType> getReperibilityTypeByOffice(
+      Office office, Optional<Boolean> isActive) {
     QPersonReperibilityType prt = QPersonReperibilityType.personReperibilityType;
     BooleanBuilder condition = new BooleanBuilder();
-    if(isActive.isPresent()) {
+    if (isActive.isPresent()) {
       condition.and(prt.disabled.eq(isActive.get()));
     }
     JPQLQuery query = getQueryFactory().from(prt).where(prt.office.eq(office).and(condition));

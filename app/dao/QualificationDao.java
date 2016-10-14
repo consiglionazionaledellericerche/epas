@@ -19,6 +19,8 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 /**
+ * Dao per l'accesso alle informazioni delle Qualification.
+ * 
  * @author dario
  */
 public class QualificationDao extends DaoBase {
@@ -60,6 +62,10 @@ public class QualificationDao extends DaoBase {
 
   }
 
+  /**
+   * @param qualification il livello della qualifica da cercare.
+   * @return la qualificica corrispondente al livello indicato.
+   */
   public Optional<Qualification> byQualification(Integer qualification) {
 
     Preconditions.checkNotNull(qualification);
@@ -72,6 +78,9 @@ public class QualificationDao extends DaoBase {
 
   }
 
+  /**
+   * @return tutte le qualifiche presenti nel sistema.
+   */
   public List<Qualification> findAll() {
 
     QQualification qual = QQualification.qualification1;
@@ -80,8 +89,7 @@ public class QualificationDao extends DaoBase {
   }
   
   /**
-   * Tutte le qualifiche epas come mappa qualification.qualification -> qualification
-   * @return
+   * @return Tutte le qualifiche epas come mappa qualification.qualification -> qualification.
    */
   public Map<Integer, Qualification> allQualificationMap() {
     QQualification qualification = QQualification.qualification1;

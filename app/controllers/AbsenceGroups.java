@@ -47,23 +47,11 @@ public class AbsenceGroups extends Controller {
   @Inject
   private static AbsenceService absenceService;
   @Inject
-  private static AbsenceMigration absenceMigration;
-  @Inject
   private static ConsistencyManager consistencyManager;
   @Inject
   private static AbsenceComponentDao absenceComponentDao;
   @Inject
   private static AbsenceManager absenceManager;
-  
-  /**
-   * End point per la migrazione esplicita alla nuova gestione assenze.
-   */
-  public static void migrate() {
-    
-    absenceMigration.buildDefaultGroups();
-    renderText("ok");
-    
-  }
   
   /**
    * End point per la visualizzazione dei gruppi assenze definiti.

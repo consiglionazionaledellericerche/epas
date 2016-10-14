@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import lombok.Getter;
 
 import manager.services.absences.AbsenceMigration.DefaultGroup;
-import manager.services.absences.web.AbsenceRequestForm.AbsenceRequestCategory;
 
 import models.Person;
 import models.absences.AbsenceType;
@@ -34,13 +33,19 @@ public class AbsenceRequestForm {
   public LocalDate to;
   public AbsenceInsertTab absenceInsertTab;
 
-  public SortedMap<Integer, List<AbsenceRequestCategory>> categoriesWithSamePriority = Maps.newTreeMap();
+  public SortedMap<Integer, List<AbsenceRequestCategory>> categoriesWithSamePriority = 
+      Maps.newTreeMap();
   // Note: keySet() which returns a set of the keys in ascending order
   //       values() which returns a collection of all values in the ascending 
   //                order of the corresponding keys
 
   public AbsenceGroupFormItem selectedAbsenceGroupFormItem = null;
   
+  
+  /**
+   * Se nella form esiste una scelta sola.
+   * @return esito
+   */
   public boolean formHasNoGroupChoice() {
     List<AbsenceGroupFormItem> items = Lists.newArrayList();
     for (List<AbsenceRequestCategory> categoryList : categoriesWithSamePriority.values()) {
@@ -51,10 +56,14 @@ public class AbsenceRequestForm {
     return items.size() == 0 || items.size() == 1;
   }
   
+  /**
+   * Le categorie della form ordinate per priorità.
+   * @return caterorie list
+   */
   public List<AbsenceRequestCategory> orderedCategories() {
     List<AbsenceRequestCategory> categories = Lists.newArrayList();
-    for (List<AbsenceRequestCategory> categoriesSamePriority : 
-      this.categoriesWithSamePriority.values()) {
+    for (List<AbsenceRequestCategory> categoriesSamePriority : this.categoriesWithSamePriority
+        .values()) {
       categories.addAll(categoriesSamePriority);
     }
     return categories;
@@ -65,7 +74,7 @@ public class AbsenceRequestForm {
 
   /**
    * AbsenceRequestCategory: Raccoglie i GroupAbsenceTypeItem che hanno groupAbsenceType 
-   * con la stessa categoria
+   * con la stessa categoria.
    * Esempio AbsenceRequestCategory: Permessi Vari
    *          GroupAbsenceTypeItem: Permesso visita medica
    *          GroupAbsenceTypeItem: Permesso diritto studio
@@ -103,6 +112,10 @@ public class AbsenceRequestForm {
       this.groupAbsenceType = groupAbsenceType;
     }
 
+    /**
+     * Label per l'item.
+     * @return label
+     */
     public String getLabel() {
       if (groupAbsenceType.chainDescription != null) {
         return groupAbsenceType.chainDescription;
@@ -150,6 +163,10 @@ public class AbsenceRequestForm {
       return this.absenceType == null;
     }
 
+    /**
+     * Label per l'assenza.
+     * @return label
+     */
     public String getLabel() {
       if (absenceType != null) {
         return absenceType.code + " - " + absenceType.description;
@@ -157,6 +174,10 @@ public class AbsenceRequestForm {
       return name;
     }
 
+    /**
+     * Tipi permessi dall'assenza.
+     * @return tipi
+     */
     public List<JustifiedType> getJustifiedTypesPermitted() {
       if (absenceType != null) {
         return Lists.newArrayList(absenceType.justifiedTypesPermitted);
@@ -164,6 +185,10 @@ public class AbsenceRequestForm {
       return justifiedTypes;
     }
     
+    /**
+     * Ore.
+     * @return ore
+     */
     public int getHours() {
       if (this.specifiedMinutes == null || this.getSpecifiedMinutes() < 0) {
         return 0;
@@ -172,6 +197,10 @@ public class AbsenceRequestForm {
       }
     }
     
+    /**
+     * Minuti.
+     * @return minuti
+     */
     public int getMinutes() {
       if (this.specifiedMinutes == null || this.getSpecifiedMinutes() < 0) {
         return 0;
@@ -181,7 +210,7 @@ public class AbsenceRequestForm {
     }
   }
   
- public static enum AbsenceInsertTab {
+  public static enum AbsenceInsertTab {
     
     mission(Lists.newArrayList(DefaultGroup.MISSIONE.name())),
     vacation(Lists.newArrayList(DefaultGroup.FERIE_CNR.name())),
@@ -204,15 +233,21 @@ public class AbsenceRequestForm {
         DefaultGroup.MALATTIA_FIGLIO_3_12.name(),
         DefaultGroup.MALATTIA_FIGLIO_3_13.name(),
         DefaultGroup.MALATTIA_FIGLIO_3_14.name(),
+        DefaultGroup.EMPLOYEE.name(),
         DefaultGroup.ALTRI.name(), DefaultGroup.G_95.name()
         ));
 
-        public List<String> groupNames;
+    public List<String> groupNames;
     
     private AbsenceInsertTab(List<String> groupNames) {
       this.groupNames = groupNames;
     }
     
+    /**
+     * La tab del gruppo.
+     * @param groupAbsenceType gruppo
+     * @return tab
+     */
     public static AbsenceInsertTab fromGroup(GroupAbsenceType groupAbsenceType) {
       for (AbsenceInsertTab absenceInsertTab : AbsenceInsertTab.values()) {
         if (absenceInsertTab.groupNames.contains(groupAbsenceType.name)) {
@@ -227,7 +262,8 @@ public class AbsenceRequestForm {
     }
     
     public boolean newImplementation() {
-      return true; //!this.equals(AbsenceInsertTab.compensatory) && !this.equals(AbsenceInsertTab.vacation);
+      return true; 
+      //!this.equals(AbsenceInsertTab.compensatory) && !this.equals(AbsenceInsertTab.vacation);
     }
   }
 }

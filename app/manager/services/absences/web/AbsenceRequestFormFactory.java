@@ -41,13 +41,13 @@ public class AbsenceRequestFormFactory {
   /**
    * Costruisce la richiesta. 
    * Operazioni critiche: selezionare la prima opzione quando non è specificato niente.
-   * @param person
-   * @param from
-   * @param to
-   * @param selectedGroupAbsenceType
-   * @param selectedAbsenceType
-   * @param selectedJustifiedType
-   * @param selectedSpecifiedMinutes
+   * @param person persona
+   * @param from data inizio
+   * @param to data fine
+   * @param selectedGroupAbsenceType gruppo selezionato
+   * @param selectedAbsenceType tipo assenza selezionato
+   * @param selectedJustifiedType tipo giustificativo selezionato
+   * @param selectedSpecifiedMinutes minuti selezionati
    */
   public AbsenceRequestForm buildAbsenceRequestForm(Person person, LocalDate from, LocalDate to, 
       GroupAbsenceType selectedGroupAbsenceType, 
@@ -97,8 +97,8 @@ public class AbsenceRequestFormFactory {
   /**
    * Inserisce l'AbsenceGroupFormItem nell'AbsenceRequestForm posizionandolo nella categoria giusta.
    * Le categorie sono inoltre ordinate per priorità.
-   * @param absenceRequestForm
-   * @param absenceGroupFormItem
+   * @param absenceRequestForm form
+   * @param absenceGroupFormItem group item
    */
   private void addFormItemInCategory(AbsenceRequestForm absenceRequestForm, 
       AbsenceGroupFormItem absenceGroupFormItem) {
@@ -124,7 +124,8 @@ public class AbsenceRequestFormFactory {
       }
     }
     
-    // 4) se non esiste creo la AbsenceRequestCategory con quella categoria e la inserirsco alla lista
+    // 4) se non esiste creo la AbsenceRequestCategory 
+    //con quella categoria e la inserirsco alla lista
     if (absenceRequestCategory == null) {
       absenceRequestCategory = new AbsenceRequestCategory();
       absenceRequestCategory.categoryType = categoryToInsert;
@@ -142,12 +143,12 @@ public class AbsenceRequestFormFactory {
    *           - Ferie e Permessi
    *           - Permesso visita medica
    * Il loro ordine è stabilito dal chiamante.          
-   * @param groupAbsenceType
-   * @param selectedGroupAbsenceType
-   * @param selectedAbsenceType
-   * @param selectedJustifiedType
-   * @param selectedSpecifiedMinutes
-   * @return
+   * @param groupAbsenceType gruppo 
+   * @param selectedGroupAbsenceType gruppo selezionato
+   * @param selectedAbsenceType tipo assenza selezionato
+   * @param selectedJustifiedType tipo giustificato selezionato
+   * @param selectedSpecifiedMinutes minuti selezionati
+   * @return group form item
    */
   private AbsenceGroupFormItem buildAbsenceGroupItemForm(GroupAbsenceType groupAbsenceType, 
       GroupAbsenceType selectedGroupAbsenceType, AbsenceType selectedAbsenceType, 
@@ -166,8 +167,8 @@ public class AbsenceRequestFormFactory {
       // (automatica se esiste o il primo codice della lista)
       boolean selectNextSubGroup = selectedAbsenceType == null ? true : false;
 
-      if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.programmed) || 
-          groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.vacationsCnr) ) {
+      if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.programmed) 
+          || groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.vacationsCnr) ) {
         
         List<JustifiedType> automaticJustifiedTypes = 
             absenceEngineUtility.automaticJustifiedType(groupAbsenceType);
@@ -219,21 +220,15 @@ public class AbsenceRequestFormFactory {
             }
           }
         }
-//        if (currentGroupAbsenceType.complationAbsenceBehaviour != null) {
-//          for (AbsenceType complation : currentGroupAbsenceType.complationAbsenceBehaviour.complationCodes) {
-//            typeConsidered.put(complation.code, complation);
-//          }
-//          for (AbsenceType complation : currentGroupAbsenceType.complationAbsenceBehaviour.replacingCodes) {
-//            typeConsidered.put(complation.code, complation);
-//          }
-//        }
+        
         for (AbsenceType absenceType : typeConsidered.values()) {
           if (absenceType.justifiedTypesPermitted.isEmpty()) {
             // TODO: questo evento andrebbe segnalato.
             continue;
           }
-          SubAbsenceGroupFormItem  subAbsenceGroupFormItem = buildSubAbsenceGroupItemForm(absenceType, 
-              selectedAbsenceType, selectedJustifiedType, selectedSpecifiedMinutes, selectNextSubGroup);
+          SubAbsenceGroupFormItem  subAbsenceGroupFormItem = 
+              buildSubAbsenceGroupItemForm(absenceType, selectedAbsenceType, selectedJustifiedType, 
+                  selectedSpecifiedMinutes, selectNextSubGroup);
           selectNextSubGroup = false; // è true solo la prima volta
           absenceGroupFormItem.subAbsenceGroupFormItems.add(subAbsenceGroupFormItem);
           if (subAbsenceGroupFormItem.selected) {
@@ -251,20 +246,18 @@ public class AbsenceRequestFormFactory {
   /**
    * SubAbsenceGroupItemForm: la scelta all'interno di un AbsenceGroupItemForm.
    * E' quasi sempre assiciato ad un absenceType (tranne che nella modalità automatica).
-   * 
    * Esempio: AbsenceGroupItemForm: Congedo Ordinario Primo figlio
-   *          
    *          - Congedo Ordinario Primo Figlio (Automatico)
    *          - 23
    *          - 23M
    *          - 23U
    *          - 23H7
-   * @param absenceType
-   * @param selectedAbsenceType
-   * @param selectedJustifiedType
-   * @param selectedSpecifiedMinutes
-   * @param toSelect
-   * @return
+   * @param absenceType tipo
+   * @param selectedAbsenceType tipo selezionato
+   * @param selectedJustifiedType giustitificativo selezionato
+   * @param selectedSpecifiedMinutes minuti selezionati
+   * @param toSelect se il tipo è selezionato
+   * @return absence type form
    */
   private SubAbsenceGroupFormItem buildSubAbsenceGroupItemForm(AbsenceType absenceType, 
       AbsenceType selectedAbsenceType, JustifiedType selectedJustifiedType, 
@@ -280,16 +273,19 @@ public class AbsenceRequestFormFactory {
     }
 
     // 2) Decido il justifiedType selezionato
-    if (selectedJustifiedType != null && absenceType.justifiedTypesPermitted.contains(selectedJustifiedType)) {
+    if (selectedJustifiedType != null 
+        && absenceType.justifiedTypesPermitted.contains(selectedJustifiedType)) {
       // Se il justifiedType è popolato e compatibile con l'absenceType lo imposto a selected
       subAbsenceGroupFormItem.selectedJustified = selectedJustifiedType;
     } else {
       // Altrimenti imposto come selezionato il primo della lista (che deve esistere)
       Verify.verify(!absenceType.justifiedTypesPermitted.isEmpty());
-      subAbsenceGroupFormItem.selectedJustified = absenceType.justifiedTypesPermitted.iterator().next();
+      subAbsenceGroupFormItem.selectedJustified = 
+          absenceType.justifiedTypesPermitted.iterator().next();
 
     }
-    if (subAbsenceGroupFormItem.selectedJustified.name.equals(JustifiedType.JustifiedTypeName.specified_minutes)) {
+    if (subAbsenceGroupFormItem.selectedJustified.name
+        .equals(JustifiedType.JustifiedTypeName.specified_minutes)) {
       subAbsenceGroupFormItem.specifiedMinutes = selectedSpecifiedMinutes;  
       if (selectedSpecifiedMinutes == null) {
         subAbsenceGroupFormItem.specifiedMinutes = 0;

@@ -28,10 +28,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-
-/**
- * @author dario
- */
 @Audited
 @Entity
 @Table(name = "absences")
@@ -79,11 +75,15 @@ public class Absence extends BaseModel {
   
   // TODO: spostare la relazione dal person day alla person e persistere il campo date.
 
-  /** Data da valorizzare in caso di assenza non persistita per simulazione */
+  //Data da valorizzare in caso di assenza non persistit per simulazione
   @Getter
   @Transient
   public LocalDate date;
   
+  /**
+   * Getter per la data assenza.
+   * @return data
+   */
   @Transient
   public LocalDate getAbsenceDate() {
     if (this.personDay != null && this.personDay.date != null) { 
@@ -95,6 +95,10 @@ public class Absence extends BaseModel {
     throw new IllegalStateException();
   }
   
+  /**
+   * Il tempo giustificato dall'assenza.
+   * @return minuti
+   */
   @Transient
   public int justifiedTime() {
     if (this.justifiedType == null) {
@@ -113,6 +117,10 @@ public class Absence extends BaseModel {
     return 0;
   }
   
+  /**
+   * Se l'assenza non giustifica niente.
+   * @return esito
+   */
   @Transient
   public boolean nothingJustified() {
     if (this.justifiedType == null) {
@@ -128,6 +136,10 @@ public class Absence extends BaseModel {
     return false;
   }
 
+  /**
+   * Se l'assenza giustifica tutto il giorno.
+   * @return esito
+   */
   @Transient 
   public boolean justifiedAllDay() {
     if (this.justifiedType == null) {
@@ -139,6 +151,11 @@ public class Absence extends BaseModel {
     return false;
   }
   
+  /**
+   * Le altre assenze con ruolo di rimpiazzamento nel giorno per quel gruppo.
+   * @param groupAbsenceType gruppo
+   * @return lista di assenze.
+   */
   @Transient
   public List<Absence> replacingAbsences(GroupAbsenceType groupAbsenceType) {
     if (this.personDay == null || !this.personDay.isPersistent()) {
@@ -158,6 +175,12 @@ public class Absence extends BaseModel {
     return replacings;
   }
   
+  /**
+   * Se l'assenza ha un ruolo di rimpiazzamento ma nel giorno non esiste il completamento
+   * che l'ha generata.
+   * @param involvedGroups i gruppi da controllare 
+   * @return esito
+   */
   @Transient
   public boolean isOrphanReplacing(Set<GroupAbsenceType> involvedGroups) {
     for (GroupAbsenceType groupAbsenceType : involvedGroups) {
@@ -175,6 +198,11 @@ public class Absence extends BaseModel {
     return true;
   }
   
+  /**
+   * Se l'assenza ha il ruolo di rimpiazzamento per quei gruppi.
+   * @param involvedGroups gruppi
+   * @return esito
+   */
   @Transient
   public boolean isReplacing(Set<GroupAbsenceType> involvedGroups) {
     for (GroupAbsenceType groupAbsenceType : involvedGroups) {

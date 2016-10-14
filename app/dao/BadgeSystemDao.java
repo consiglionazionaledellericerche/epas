@@ -25,6 +25,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 /**
+ * Dao per l'accesso alle informazioni dei BadgeSystem.
+ *
  * @author alessandro
  */
 public class BadgeSystemDao extends DaoBase {
@@ -38,7 +40,7 @@ public class BadgeSystemDao extends DaoBase {
   }
 
   /**
-   * @return il badge system associato al codice passato come parametro
+   * @return il badge system associato al codice passato come parametro.
    */
   public BadgeSystem byId(Long id) {
 
@@ -50,7 +52,7 @@ public class BadgeSystemDao extends DaoBase {
   }
 
   /**
-   * @return il badge system con quel nome
+   * @return il badge system con quel nome.
    */
   public BadgeSystem byName(String name) {
 
