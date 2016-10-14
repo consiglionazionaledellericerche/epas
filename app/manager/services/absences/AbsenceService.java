@@ -209,7 +209,8 @@ public class AbsenceService {
       if (periodChain.childIsMissing()) {
         TemplateRow templateRow = new TemplateRow();
         templateRow.date = periodChain.date;
-        templateRow.absenceErrors.add(AbsenceError.builder().absenceProblem(AbsenceProblem.NoChildExist).build());
+        templateRow.absenceErrors.add(AbsenceError.builder()
+            .absenceProblem(AbsenceProblem.NoChildExist).build());
         insertTemplateRows.add(templateRow);
       }
       for (AbsencePeriod absencePeriod : periodChain.periods) {
@@ -249,10 +250,11 @@ public class AbsenceService {
    * passata come parametro per verificarne la correttezza.
    * Gli errori riscontrati vengono persistiti all'assenza.
    * 
+   * <p>
    * Microservices
    * Questo metodo dovrebbe avere una person dove sono fetchate tutte le 
    * informazioni per i calcoli non mantenute del componente assenze:
-   * 
+   * </p>
    * I Contratti / Tempi a lavoro / Piani ferie
    * I Figli
    * Le Altre Tutele
@@ -317,8 +319,8 @@ public class AbsenceService {
 
     return insertReportFromOldReport(
         absenceManager.insertAbsenceSimulation(person, from, Optional.fromNullable(to), 
-            absenceType, Optional.absent(), Optional.absent(), Optional.absent())
-        , groupAbsenceType);
+            absenceType, Optional.absent(), Optional.absent(), Optional.absent()), 
+        groupAbsenceType);
     
   }
   
@@ -333,8 +335,8 @@ public class AbsenceService {
 
     return insertReportFromOldReport(
         absenceManager.insertAbsenceSimulation(person, from, Optional.fromNullable(to), 
-            absenceType, Optional.absent(), Optional.absent(), Optional.absent())
-        , groupAbsenceType);
+            absenceType, Optional.absent(), Optional.absent(), Optional.absent()), 
+        groupAbsenceType);
 
   }
   
