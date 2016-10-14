@@ -349,6 +349,9 @@ public class AbsenceMigration {
 
   }
 
+  /**
+   * Costruisce i gruppi di default.
+   */
   public void buildDefaultGroups() { 
 
     LocalDate expireDate = new LocalDate(2015, 12, 31);
@@ -1423,14 +1426,14 @@ public class AbsenceMigration {
     if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MISSIONE.name()).isPresent()) {
 
       //Takable Creation
-      Optional<TakableAbsenceBehaviour> tMissione = absenceComponentDao
+      Optional<TakableAbsenceBehaviour> takeMissione = absenceComponentDao
           .takableAbsenceBehaviourByName(DefaultTakable.T_MISSIONE.name());
 
-      if (!tMissione.isPresent()) {
+      if (!takeMissione.isPresent()) {
 
-        tMissione = Optional.fromNullable(new TakableAbsenceBehaviour());
-        tMissione.get().name = DefaultTakable.T_MISSIONE.name();
-        tMissione.get().amountType = AmountType.units;
+        takeMissione = Optional.fromNullable(new TakableAbsenceBehaviour());
+        takeMissione.get().name = DefaultTakable.T_MISSIONE.name();
+        takeMissione.get().amountType = AmountType.units;
 
         AbsenceType missione92 = absenceComponentDao.buildOrEditAbsenceType("92", 
             "Missione", 0, Sets.newHashSet(allDay), null, 0, false, true, false, "92", null);
@@ -1463,15 +1466,15 @@ public class AbsenceMigration {
             "Missione 7 ore", 420, Sets.newHashSet(absenceTypeMinutes), 
             null, 0, false, true, false, "92H7", null);
 
-        tMissione.get().takableCodes = Sets
+        takeMissione.get().takableCodes = Sets
             .newHashSet(missione92, h192, h292, h392, h492, h592, h692, h792);
-        tMissione.get().takenCodes = Sets
+        takeMissione.get().takenCodes = Sets
             .newHashSet(missione92, h192, h292, h392, h492, h592, h692, h792);
 
         //tMissione.get().takenCodes = Sets
         //    .newHashSet(missione92, h192, h292, h392, h492, h592, h692, h792);
-        tMissione.get().fixedLimit = -1;
-        tMissione.get().save();
+        takeMissione.get().fixedLimit = -1;
+        takeMissione.get().save();
 
       }
 
@@ -1482,7 +1485,7 @@ public class AbsenceMigration {
       groupMission.description = "Missione";
       groupMission.pattern = GroupAbsenceTypePattern.simpleGrouping;
       groupMission.periodType = PeriodType.always;
-      groupMission.takableAbsenceBehaviour = tMissione.get();
+      groupMission.takableAbsenceBehaviour = takeMissione.get();
       groupMission.save();
     }
 
@@ -1492,17 +1495,17 @@ public class AbsenceMigration {
     if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).isPresent()) {
 
       //Takable Creation
-      Optional<TakableAbsenceBehaviour> tFerie = absenceComponentDao
+      Optional<TakableAbsenceBehaviour> takeFerie = absenceComponentDao
           .takableAbsenceBehaviourByName(DefaultTakable.T_FERIE_CNR.name());
 
-      if (!tFerie.isPresent()) {
+      if (!takeFerie.isPresent()) {
 
-        tFerie = Optional.fromNullable(new TakableAbsenceBehaviour());
-        tFerie.get().name = DefaultTakable.T_FERIE_CNR.name();
-        tFerie.get().amountType = AmountType.units;
-        tFerie.get().takableCodes = Sets.newHashSet();
-        tFerie.get().takenCodes = Sets.newHashSet();
-        tFerie.get().fixedLimit = -1;
+        takeFerie = Optional.fromNullable(new TakableAbsenceBehaviour());
+        takeFerie.get().name = DefaultTakable.T_FERIE_CNR.name();
+        takeFerie.get().amountType = AmountType.units;
+        takeFerie.get().takableCodes = Sets.newHashSet();
+        takeFerie.get().takenCodes = Sets.newHashSet();
+        takeFerie.get().fixedLimit = -1;
 
         AbsenceType ferie32 = absenceComponentDao.buildOrEditAbsenceType("32", 
             "Ferie anno corrente", 0, Sets.newHashSet(allDay), 
@@ -1520,10 +1523,10 @@ public class AbsenceMigration {
             "festività soppresse (ex legge 937/77)", 0, Sets.newHashSet(allDay), 
             null, 0, false, false, false, "94", null);
 
-        tFerie.get().takableCodes = Sets.newHashSet(ferie31, ferie32, ferie37, permesso94);
-        tFerie.get().takenCodes = Sets.newHashSet(ferie31, ferie32, ferie37, permesso94);
+        takeFerie.get().takableCodes = Sets.newHashSet(ferie31, ferie32, ferie37, permesso94);
+        takeFerie.get().takenCodes = Sets.newHashSet(ferie31, ferie32, ferie37, permesso94);
 
-        tFerie.get().save();
+        takeFerie.get().save();
       }
 
       // Group Creation
@@ -1533,33 +1536,33 @@ public class AbsenceMigration {
       groupFerieCnr.description = "Ferie e permessi legge CNR";
       groupFerieCnr.pattern = GroupAbsenceTypePattern.vacationsCnr;
       groupFerieCnr.periodType = PeriodType.always;
-      groupFerieCnr.takableAbsenceBehaviour = tFerie.get();
+      groupFerieCnr.takableAbsenceBehaviour = takeFerie.get();
       groupFerieCnr.save();
     }
 
     if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.RIPOSI_CNR.name()).isPresent()) {
 
       //Takable Creation
-      Optional<TakableAbsenceBehaviour> tRiposi = absenceComponentDao
+      Optional<TakableAbsenceBehaviour> takeRiposi = absenceComponentDao
           .takableAbsenceBehaviourByName(DefaultTakable.T_RIPOSI_CNR.name());
 
-      if (!tRiposi.isPresent()) {
+      if (!takeRiposi.isPresent()) {
 
-        tRiposi = Optional.fromNullable(new TakableAbsenceBehaviour());
-        tRiposi.get().name = DefaultTakable.T_RIPOSI_CNR.name();
-        tRiposi.get().amountType = AmountType.units;
-        tRiposi.get().takableCodes = Sets.newHashSet();
-        tRiposi.get().takenCodes = Sets.newHashSet();
-        tRiposi.get().fixedLimit = -1;
+        takeRiposi = Optional.fromNullable(new TakableAbsenceBehaviour());
+        takeRiposi.get().name = DefaultTakable.T_RIPOSI_CNR.name();
+        takeRiposi.get().amountType = AmountType.units;
+        takeRiposi.get().takableCodes = Sets.newHashSet();
+        takeRiposi.get().takenCodes = Sets.newHashSet();
+        takeRiposi.get().fixedLimit = -1;
 
         AbsenceType riposo91 = absenceComponentDao.buildOrEditAbsenceType("91", 
             "Riposo compensativo", 0, Sets.newHashSet(allDay), 
             null, 0, false, true, false, "91", null);
 
-        tRiposi.get().takableCodes = Sets.newHashSet(riposo91);
-        tRiposi.get().takenCodes = Sets.newHashSet(riposo91);
+        takeRiposi.get().takableCodes = Sets.newHashSet(riposo91);
+        takeRiposi.get().takenCodes = Sets.newHashSet(riposo91);
 
-        tRiposi.get().save();
+        takeRiposi.get().save();
       }
 
       // Group Creation
@@ -1569,7 +1572,7 @@ public class AbsenceMigration {
       groupRiposi.description = "Riposi compensativi CNR";
       groupRiposi.pattern = GroupAbsenceTypePattern.compensatoryRestCnr;
       groupRiposi.periodType = PeriodType.always;
-      groupRiposi.takableAbsenceBehaviour = tRiposi.get();
+      groupRiposi.takableAbsenceBehaviour = takeRiposi.get();
       groupRiposi.save();
     }
 
@@ -1621,65 +1624,65 @@ public class AbsenceMigration {
     if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MALATTIA.name()).isPresent()) {
 
       //Takable Creation
-      Optional<TakableAbsenceBehaviour> tMalattia = absenceComponentDao
+      Optional<TakableAbsenceBehaviour> takeMalattia = absenceComponentDao
           .takableAbsenceBehaviourByName(DefaultTakable.T_MALATTIA.name());
 
-      if (!tMalattia.isPresent()) {
+      if (!takeMalattia.isPresent()) {
 
-        tMalattia = Optional.fromNullable(new TakableAbsenceBehaviour());
-        tMalattia.get().name = DefaultTakable.T_MALATTIA.name();
-        tMalattia.get().amountType = AmountType.units;
-        tMalattia.get().takableCodes = Sets.newHashSet();
-        tMalattia.get().takenCodes = Sets.newHashSet();
-        tMalattia.get().fixedLimit = -1;
-        tMalattia.get().save();
+        takeMalattia = Optional.fromNullable(new TakableAbsenceBehaviour());
+        takeMalattia.get().name = DefaultTakable.T_MALATTIA.name();
+        takeMalattia.get().amountType = AmountType.units;
+        takeMalattia.get().takableCodes = Sets.newHashSet();
+        takeMalattia.get().takenCodes = Sets.newHashSet();
+        takeMalattia.get().fixedLimit = -1;
+        takeMalattia.get().save();
 
         if (absenceComponentDao.absenceTypeByCode("11C").isPresent()) {
-          tMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("11C").get());
-          tMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("11C").get());
+          takeMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("11C").get());
+          takeMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("11C").get());
         }
         if (absenceComponentDao.absenceTypeByCode("11R").isPresent()) {
-          tMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("11R").get());
-          tMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("11R").get());
+          takeMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("11R").get());
+          takeMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("11R").get());
         }
         if (absenceComponentDao.absenceTypeByCode("11R5").isPresent()) {
-          tMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("11R").get());
-          tMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("11R").get());
+          takeMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("11R").get());
+          takeMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("11R").get());
         }
         if (absenceComponentDao.absenceTypeByCode("11R9").isPresent()) {
-          tMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("11R").get());
-          tMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("11R").get());
+          takeMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("11R").get());
+          takeMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("11R").get());
         }
         if (absenceComponentDao.absenceTypeByCode("11S").isPresent()) {
-          tMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("11S").get());
-          tMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("11S").get());
+          takeMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("11S").get());
+          takeMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("11S").get());
         }
         if (absenceComponentDao.absenceTypeByCode("111").isPresent()) {
-          tMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("111").get());
-          tMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("111").get());
+          takeMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("111").get());
+          takeMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("111").get());
         }
         if (absenceComponentDao.absenceTypeByCode("115").isPresent()) {
-          tMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("115").get());
-          tMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("115").get());
+          takeMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("115").get());
+          takeMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("115").get());
         }
         if (absenceComponentDao.absenceTypeByCode("116").isPresent()) {
-          tMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("116").get());
-          tMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("116").get());
+          takeMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("116").get());
+          takeMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("116").get());
         }
         if (absenceComponentDao.absenceTypeByCode("117").isPresent()) {
-          tMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("117").get());
-          tMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("117").get());
+          takeMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("117").get());
+          takeMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("117").get());
         }
         if (absenceComponentDao.absenceTypeByCode("118").isPresent()) {
-          tMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("118").get());
-          tMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("118").get());
+          takeMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("118").get());
+          takeMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("118").get());
         }
         if (absenceComponentDao.absenceTypeByCode("119").isPresent()) {
-          tMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("119").get());
-          tMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("119").get());
+          takeMalattia.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("119").get());
+          takeMalattia.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("119").get());
         }
 
-        tMalattia.get().save();
+        takeMalattia.get().save();
       }
 
       // Group Creation
@@ -1689,7 +1692,7 @@ public class AbsenceMigration {
       groupMalattia.description = "111 - Malattia";
       groupMalattia.pattern = GroupAbsenceTypePattern.simpleGrouping;
       groupMalattia.periodType = PeriodType.always;
-      groupMalattia.takableAbsenceBehaviour = tMalattia.get();
+      groupMalattia.takableAbsenceBehaviour = takeMalattia.get();
       groupMalattia.save();
     }
 
@@ -1714,28 +1717,29 @@ public class AbsenceMigration {
 
 
 
-    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_1_12.name()).isPresent()) {
+    if (!absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_1_12.name()).isPresent()) {
 
       //Takable Creation
-      Optional<TakableAbsenceBehaviour> tMalattia12 = absenceComponentDao
+      Optional<TakableAbsenceBehaviour> takeMalattia12 = absenceComponentDao
           .takableAbsenceBehaviourByName(DefaultTakable.T_MALATTIA_FIGLIO_1_12.name());
 
-      if (!tMalattia12.isPresent()) {
+      if (!takeMalattia12.isPresent()) {
 
-        tMalattia12 = Optional.fromNullable(new TakableAbsenceBehaviour());
-        tMalattia12.get().name = DefaultTakable.T_MALATTIA_FIGLIO_1_12.name();
-        tMalattia12.get().amountType = AmountType.units;
-        tMalattia12.get().takableCodes = Sets.newHashSet();
-        tMalattia12.get().takenCodes = Sets.newHashSet();
-        tMalattia12.get().fixedLimit = -1;
-        tMalattia12.get().save();
+        takeMalattia12 = Optional.fromNullable(new TakableAbsenceBehaviour());
+        takeMalattia12.get().name = DefaultTakable.T_MALATTIA_FIGLIO_1_12.name();
+        takeMalattia12.get().amountType = AmountType.units;
+        takeMalattia12.get().takableCodes = Sets.newHashSet();
+        takeMalattia12.get().takenCodes = Sets.newHashSet();
+        takeMalattia12.get().fixedLimit = -1;
+        takeMalattia12.get().save();
 
         if (absenceComponentDao.absenceTypeByCode("12").isPresent()) {
-          tMalattia12.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("12").get());
-          tMalattia12.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("12").get());
+          takeMalattia12.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("12").get());
+          takeMalattia12.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("12").get());
         }
 
-        tMalattia12.get().save();
+        takeMalattia12.get().save();
       }
 
       // Group Creation
@@ -1745,33 +1749,34 @@ public class AbsenceMigration {
       groupMalattia.description = "12 - Malattia primo figlio <= 3 anni retribuita 100%";
       groupMalattia.pattern = GroupAbsenceTypePattern.programmed;
       groupMalattia.periodType = PeriodType.child1_0_3;
-      groupMalattia.takableAbsenceBehaviour = tMalattia12.get();
+      groupMalattia.takableAbsenceBehaviour = takeMalattia12.get();
       groupMalattia.save();
     }
 
 
-    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_1_13.name()).isPresent()) {
+    if (!absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_1_13.name()).isPresent()) {
 
       //Takable Creation
-      Optional<TakableAbsenceBehaviour> tMalattia13 = absenceComponentDao
+      Optional<TakableAbsenceBehaviour> takeMalattia13 = absenceComponentDao
           .takableAbsenceBehaviourByName(DefaultTakable.T_MALATTIA_FIGLIO_1_13.name());
 
-      if (!tMalattia13.isPresent()) {
+      if (!takeMalattia13.isPresent()) {
 
-        tMalattia13 = Optional.fromNullable(new TakableAbsenceBehaviour());
-        tMalattia13.get().name = DefaultTakable.T_MALATTIA_FIGLIO_1_13.name();
-        tMalattia13.get().amountType = AmountType.units;
-        tMalattia13.get().takableCodes = Sets.newHashSet();
-        tMalattia13.get().takenCodes = Sets.newHashSet();
-        tMalattia13.get().fixedLimit = -1;
-        tMalattia13.get().save();
+        takeMalattia13 = Optional.fromNullable(new TakableAbsenceBehaviour());
+        takeMalattia13.get().name = DefaultTakable.T_MALATTIA_FIGLIO_1_13.name();
+        takeMalattia13.get().amountType = AmountType.units;
+        takeMalattia13.get().takableCodes = Sets.newHashSet();
+        takeMalattia13.get().takenCodes = Sets.newHashSet();
+        takeMalattia13.get().fixedLimit = -1;
+        takeMalattia13.get().save();
 
         if (absenceComponentDao.absenceTypeByCode("13").isPresent()) {
-          tMalattia13.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("13").get());
-          tMalattia13.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("13").get());
+          takeMalattia13.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("13").get());
+          takeMalattia13.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("13").get());
         }
 
-        tMalattia13.get().save();
+        takeMalattia13.get().save();
       }
 
       // Group Creation
@@ -1781,33 +1786,34 @@ public class AbsenceMigration {
       groupMalattia.description = "13 - Malattia primo figlio oltre 3 anni non retribuita";
       groupMalattia.pattern = GroupAbsenceTypePattern.programmed;
       groupMalattia.periodType = PeriodType.child1_3_12;
-      groupMalattia.takableAbsenceBehaviour = tMalattia13.get();
+      groupMalattia.takableAbsenceBehaviour = takeMalattia13.get();
       groupMalattia.save();
     }
 
 
-    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_1_14.name()).isPresent()) {
+    if (!absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_1_14.name()).isPresent()) {
 
       //Takable Creation
-      Optional<TakableAbsenceBehaviour> tMalattia14 = absenceComponentDao
+      Optional<TakableAbsenceBehaviour> takeMalattia14 = absenceComponentDao
           .takableAbsenceBehaviourByName(DefaultTakable.T_MALATTIA_FIGLIO_1_14.name());
 
-      if (!tMalattia14.isPresent()) {
+      if (!takeMalattia14.isPresent()) {
 
-        tMalattia14 = Optional.fromNullable(new TakableAbsenceBehaviour());
-        tMalattia14.get().name = DefaultTakable.T_MALATTIA_FIGLIO_1_14.name();
-        tMalattia14.get().amountType = AmountType.units;
-        tMalattia14.get().takableCodes = Sets.newHashSet();
-        tMalattia14.get().takenCodes = Sets.newHashSet();
-        tMalattia14.get().fixedLimit = -1;
-        tMalattia14.get().save();
+        takeMalattia14 = Optional.fromNullable(new TakableAbsenceBehaviour());
+        takeMalattia14.get().name = DefaultTakable.T_MALATTIA_FIGLIO_1_14.name();
+        takeMalattia14.get().amountType = AmountType.units;
+        takeMalattia14.get().takableCodes = Sets.newHashSet();
+        takeMalattia14.get().takenCodes = Sets.newHashSet();
+        takeMalattia14.get().fixedLimit = -1;
+        takeMalattia14.get().save();
 
         if (absenceComponentDao.absenceTypeByCode("14").isPresent()) {
-          tMalattia14.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("14").get());
-          tMalattia14.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("14").get());
+          takeMalattia14.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("14").get());
+          takeMalattia14.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("14").get());
         }
 
-        tMalattia14.get().save();
+        takeMalattia14.get().save();
       }
 
       // Group Creation
@@ -1817,7 +1823,7 @@ public class AbsenceMigration {
       groupMalattia.description = "14 - Malattia primo figlio <= 3 anni non retribuita";
       groupMalattia.pattern = GroupAbsenceTypePattern.programmed;
       groupMalattia.periodType = PeriodType.child1_0_3;
-      groupMalattia.takableAbsenceBehaviour = tMalattia14.get();
+      groupMalattia.takableAbsenceBehaviour = takeMalattia14.get();
       groupMalattia.save();
     }
 
@@ -1825,28 +1831,29 @@ public class AbsenceMigration {
 
 
 
-    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_2_12.name()).isPresent()) {
+    if (!absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_2_12.name()).isPresent()) {
 
       //Takable Creation
-      Optional<TakableAbsenceBehaviour> tMalattia12 = absenceComponentDao
+      Optional<TakableAbsenceBehaviour> takeMalattia12 = absenceComponentDao
           .takableAbsenceBehaviourByName(DefaultTakable.T_MALATTIA_FIGLIO_2_12.name());
 
-      if (!tMalattia12.isPresent()) {
+      if (!takeMalattia12.isPresent()) {
 
-        tMalattia12 = Optional.fromNullable(new TakableAbsenceBehaviour());
-        tMalattia12.get().name = DefaultTakable.T_MALATTIA_FIGLIO_2_12.name();
-        tMalattia12.get().amountType = AmountType.units;
-        tMalattia12.get().takableCodes = Sets.newHashSet();
-        tMalattia12.get().takenCodes = Sets.newHashSet();
-        tMalattia12.get().fixedLimit = -1;
-        tMalattia12.get().save();
+        takeMalattia12 = Optional.fromNullable(new TakableAbsenceBehaviour());
+        takeMalattia12.get().name = DefaultTakable.T_MALATTIA_FIGLIO_2_12.name();
+        takeMalattia12.get().amountType = AmountType.units;
+        takeMalattia12.get().takableCodes = Sets.newHashSet();
+        takeMalattia12.get().takenCodes = Sets.newHashSet();
+        takeMalattia12.get().fixedLimit = -1;
+        takeMalattia12.get().save();
 
         if (absenceComponentDao.absenceTypeByCode("122").isPresent()) {
-          tMalattia12.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("122").get());
-          tMalattia12.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("122").get());
+          takeMalattia12.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("122").get());
+          takeMalattia12.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("122").get());
         }
 
-        tMalattia12.get().save();
+        takeMalattia12.get().save();
       }
 
       // Group Creation
@@ -1856,33 +1863,34 @@ public class AbsenceMigration {
       groupMalattia.description = "122 - Malattia secondo figlio <= 3 anni retribuita 100%";
       groupMalattia.pattern = GroupAbsenceTypePattern.programmed;
       groupMalattia.periodType = PeriodType.child2_0_3;
-      groupMalattia.takableAbsenceBehaviour = tMalattia12.get();
+      groupMalattia.takableAbsenceBehaviour = takeMalattia12.get();
       groupMalattia.save();
     }
 
 
-    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_2_13.name()).isPresent()) {
+    if (!absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_2_13.name()).isPresent()) {
 
       //Takable Creation
-      Optional<TakableAbsenceBehaviour> tMalattia13 = absenceComponentDao
+      Optional<TakableAbsenceBehaviour> takeMalattia13 = absenceComponentDao
           .takableAbsenceBehaviourByName(DefaultTakable.T_MALATTIA_FIGLIO_2_13.name());
 
-      if (!tMalattia13.isPresent()) {
+      if (!takeMalattia13.isPresent()) {
 
-        tMalattia13 = Optional.fromNullable(new TakableAbsenceBehaviour());
-        tMalattia13.get().name = DefaultTakable.T_MALATTIA_FIGLIO_2_13.name();
-        tMalattia13.get().amountType = AmountType.units;
-        tMalattia13.get().takableCodes = Sets.newHashSet();
-        tMalattia13.get().takenCodes = Sets.newHashSet();
-        tMalattia13.get().fixedLimit = -1;
-        tMalattia13.get().save();
+        takeMalattia13 = Optional.fromNullable(new TakableAbsenceBehaviour());
+        takeMalattia13.get().name = DefaultTakable.T_MALATTIA_FIGLIO_2_13.name();
+        takeMalattia13.get().amountType = AmountType.units;
+        takeMalattia13.get().takableCodes = Sets.newHashSet();
+        takeMalattia13.get().takenCodes = Sets.newHashSet();
+        takeMalattia13.get().fixedLimit = -1;
+        takeMalattia13.get().save();
 
         if (absenceComponentDao.absenceTypeByCode("132").isPresent()) {
-          tMalattia13.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("132").get());
-          tMalattia13.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("132").get());
+          takeMalattia13.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("132").get());
+          takeMalattia13.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("132").get());
         }
 
-        tMalattia13.get().save();
+        takeMalattia13.get().save();
       }
 
       // Group Creation
@@ -1892,33 +1900,34 @@ public class AbsenceMigration {
       groupMalattia.description = "132 - Malattia secondo figlio oltre 3 anni non retribuita";
       groupMalattia.pattern = GroupAbsenceTypePattern.programmed;
       groupMalattia.periodType = PeriodType.child2_3_12;
-      groupMalattia.takableAbsenceBehaviour = tMalattia13.get();
+      groupMalattia.takableAbsenceBehaviour = takeMalattia13.get();
       groupMalattia.save();
     }
 
 
-    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_2_14.name()).isPresent()) {
+    if (!absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_2_14.name()).isPresent()) {
 
       //Takable Creation
-      Optional<TakableAbsenceBehaviour> tMalattia14 = absenceComponentDao
+      Optional<TakableAbsenceBehaviour> takeMalattia14 = absenceComponentDao
           .takableAbsenceBehaviourByName(DefaultTakable.T_MALATTIA_FIGLIO_2_14.name());
 
-      if (!tMalattia14.isPresent()) {
+      if (!takeMalattia14.isPresent()) {
 
-        tMalattia14 = Optional.fromNullable(new TakableAbsenceBehaviour());
-        tMalattia14.get().name = DefaultTakable.T_MALATTIA_FIGLIO_2_14.name();
-        tMalattia14.get().amountType = AmountType.units;
-        tMalattia14.get().takableCodes = Sets.newHashSet();
-        tMalattia14.get().takenCodes = Sets.newHashSet();
-        tMalattia14.get().fixedLimit = -1;
-        tMalattia14.get().save();
+        takeMalattia14 = Optional.fromNullable(new TakableAbsenceBehaviour());
+        takeMalattia14.get().name = DefaultTakable.T_MALATTIA_FIGLIO_2_14.name();
+        takeMalattia14.get().amountType = AmountType.units;
+        takeMalattia14.get().takableCodes = Sets.newHashSet();
+        takeMalattia14.get().takenCodes = Sets.newHashSet();
+        takeMalattia14.get().fixedLimit = -1;
+        takeMalattia14.get().save();
 
         if (absenceComponentDao.absenceTypeByCode("142").isPresent()) {
-          tMalattia14.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("142").get());
-          tMalattia14.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("142").get());
+          takeMalattia14.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("142").get());
+          takeMalattia14.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("142").get());
         }
 
-        tMalattia14.get().save();
+        takeMalattia14.get().save();
       }
 
       // Group Creation
@@ -1928,7 +1937,7 @@ public class AbsenceMigration {
       groupMalattia.description = "142 - Malattia secondo figlio <= 3 anni non retribuita";
       groupMalattia.pattern = GroupAbsenceTypePattern.programmed;
       groupMalattia.periodType = PeriodType.child2_0_3;
-      groupMalattia.takableAbsenceBehaviour = tMalattia14.get();
+      groupMalattia.takableAbsenceBehaviour = takeMalattia14.get();
       groupMalattia.save();
     }
 
@@ -1940,28 +1949,29 @@ public class AbsenceMigration {
 
 
 
-    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_3_12.name()).isPresent()) {
+    if (!absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_3_12.name()).isPresent()) {
 
       //Takable Creation
-      Optional<TakableAbsenceBehaviour> tMalattia12 = absenceComponentDao
+      Optional<TakableAbsenceBehaviour> takeMalattia12 = absenceComponentDao
           .takableAbsenceBehaviourByName(DefaultTakable.T_MALATTIA_FIGLIO_3_12.name());
 
-      if (!tMalattia12.isPresent()) {
+      if (!takeMalattia12.isPresent()) {
 
-        tMalattia12 = Optional.fromNullable(new TakableAbsenceBehaviour());
-        tMalattia12.get().name = DefaultTakable.T_MALATTIA_FIGLIO_3_12.name();
-        tMalattia12.get().amountType = AmountType.units;
-        tMalattia12.get().takableCodes = Sets.newHashSet();
-        tMalattia12.get().takenCodes = Sets.newHashSet();
-        tMalattia12.get().fixedLimit = -1;
-        tMalattia12.get().save();
+        takeMalattia12 = Optional.fromNullable(new TakableAbsenceBehaviour());
+        takeMalattia12.get().name = DefaultTakable.T_MALATTIA_FIGLIO_3_12.name();
+        takeMalattia12.get().amountType = AmountType.units;
+        takeMalattia12.get().takableCodes = Sets.newHashSet();
+        takeMalattia12.get().takenCodes = Sets.newHashSet();
+        takeMalattia12.get().fixedLimit = -1;
+        takeMalattia12.get().save();
 
         if (absenceComponentDao.absenceTypeByCode("123").isPresent()) {
-          tMalattia12.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("123").get());
-          tMalattia12.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("123").get());
+          takeMalattia12.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("123").get());
+          takeMalattia12.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("123").get());
         }
 
-        tMalattia12.get().save();
+        takeMalattia12.get().save();
       }
 
       // Group Creation
@@ -1971,33 +1981,34 @@ public class AbsenceMigration {
       groupMalattia.description = "123 - Malattia terzo figlio <= 3 anni retribuita 100%";
       groupMalattia.pattern = GroupAbsenceTypePattern.programmed;
       groupMalattia.periodType = PeriodType.child3_0_3;
-      groupMalattia.takableAbsenceBehaviour = tMalattia12.get();
+      groupMalattia.takableAbsenceBehaviour = takeMalattia12.get();
       groupMalattia.save();
     }
 
 
-    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_3_13.name()).isPresent()) {
+    if (!absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_3_13.name()).isPresent()) {
 
       //Takable Creation
-      Optional<TakableAbsenceBehaviour> tMalattia13 = absenceComponentDao
+      Optional<TakableAbsenceBehaviour> takeMalattia13 = absenceComponentDao
           .takableAbsenceBehaviourByName(DefaultTakable.T_MALATTIA_FIGLIO_3_13.name());
 
-      if (!tMalattia13.isPresent()) {
+      if (!takeMalattia13.isPresent()) {
 
-        tMalattia13 = Optional.fromNullable(new TakableAbsenceBehaviour());
-        tMalattia13.get().name = DefaultTakable.T_MALATTIA_FIGLIO_3_13.name();
-        tMalattia13.get().amountType = AmountType.units;
-        tMalattia13.get().takableCodes = Sets.newHashSet();
-        tMalattia13.get().takenCodes = Sets.newHashSet();
-        tMalattia13.get().fixedLimit = -1;
-        tMalattia13.get().save();
+        takeMalattia13 = Optional.fromNullable(new TakableAbsenceBehaviour());
+        takeMalattia13.get().name = DefaultTakable.T_MALATTIA_FIGLIO_3_13.name();
+        takeMalattia13.get().amountType = AmountType.units;
+        takeMalattia13.get().takableCodes = Sets.newHashSet();
+        takeMalattia13.get().takenCodes = Sets.newHashSet();
+        takeMalattia13.get().fixedLimit = -1;
+        takeMalattia13.get().save();
 
         if (absenceComponentDao.absenceTypeByCode("133").isPresent()) {
-          tMalattia13.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("133").get());
-          tMalattia13.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("133").get());
+          takeMalattia13.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("133").get());
+          takeMalattia13.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("133").get());
         }
 
-        tMalattia13.get().save();
+        takeMalattia13.get().save();
       }
 
       // Group Creation
@@ -2007,33 +2018,34 @@ public class AbsenceMigration {
       groupMalattia.description = "133 - Malattia terzo figlio oltre 3 anni non retribuita";
       groupMalattia.pattern = GroupAbsenceTypePattern.programmed;
       groupMalattia.periodType = PeriodType.child3_3_12;
-      groupMalattia.takableAbsenceBehaviour = tMalattia13.get();
+      groupMalattia.takableAbsenceBehaviour = takeMalattia13.get();
       groupMalattia.save();
     }
 
 
-    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_3_14.name()).isPresent()) {
+    if (!absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_3_14.name()).isPresent()) {
 
       //Takable Creation
-      Optional<TakableAbsenceBehaviour> tMalattia14 = absenceComponentDao
+      Optional<TakableAbsenceBehaviour> takeMalattia14 = absenceComponentDao
           .takableAbsenceBehaviourByName(DefaultTakable.T_MALATTIA_FIGLIO_3_14.name());
 
-      if (!tMalattia14.isPresent()) {
+      if (!takeMalattia14.isPresent()) {
 
-        tMalattia14 = Optional.fromNullable(new TakableAbsenceBehaviour());
-        tMalattia14.get().name = DefaultTakable.T_MALATTIA_FIGLIO_3_14.name();
-        tMalattia14.get().amountType = AmountType.units;
-        tMalattia14.get().takableCodes = Sets.newHashSet();
-        tMalattia14.get().takenCodes = Sets.newHashSet();
-        tMalattia14.get().fixedLimit = -1;
-        tMalattia14.get().save();
+        takeMalattia14 = Optional.fromNullable(new TakableAbsenceBehaviour());
+        takeMalattia14.get().name = DefaultTakable.T_MALATTIA_FIGLIO_3_14.name();
+        takeMalattia14.get().amountType = AmountType.units;
+        takeMalattia14.get().takableCodes = Sets.newHashSet();
+        takeMalattia14.get().takenCodes = Sets.newHashSet();
+        takeMalattia14.get().fixedLimit = -1;
+        takeMalattia14.get().save();
 
         if (absenceComponentDao.absenceTypeByCode("143").isPresent()) {
-          tMalattia14.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("143").get());
-          tMalattia14.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("143").get());
+          takeMalattia14.get().takableCodes.add(absenceComponentDao.absenceTypeByCode("143").get());
+          takeMalattia14.get().takenCodes.add(absenceComponentDao.absenceTypeByCode("143").get());
         }
 
-        tMalattia14.get().save();
+        takeMalattia14.get().save();
       }
 
       // Group Creation
@@ -2043,34 +2055,34 @@ public class AbsenceMigration {
       groupMalattia.description = "143 - Malattia terzo figlio <= 3 anni non retribuita";
       groupMalattia.pattern = GroupAbsenceTypePattern.programmed;
       groupMalattia.periodType = PeriodType.child3_0_3;
-      groupMalattia.takableAbsenceBehaviour = tMalattia14.get();
+      groupMalattia.takableAbsenceBehaviour = takeMalattia14.get();
       groupMalattia.save();
     }
 
     if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.PB.name()).isPresent()) {
 
       //Takable Creation
-      Optional<TakableAbsenceBehaviour> tPb = absenceComponentDao
+      Optional<TakableAbsenceBehaviour> takePb = absenceComponentDao
           .takableAbsenceBehaviourByName(DefaultTakable.T_PB.name());
 
-      if (!tPb.isPresent()) {
+      if (!takePb.isPresent()) {
 
-        tPb = Optional.fromNullable(new TakableAbsenceBehaviour());
-        tPb.get().name = DefaultTakable.T_PB.name();
-        tPb.get().amountType = AmountType.minutes;
-        tPb.get().takableCodes = Sets.newHashSet();
-        tPb.get().takenCodes = Sets.newHashSet();
-        tPb.get().fixedLimit = 2160;
-        tPb.get().save();
+        takePb = Optional.fromNullable(new TakableAbsenceBehaviour());
+        takePb.get().name = DefaultTakable.T_PB.name();
+        takePb.get().amountType = AmountType.minutes;
+        takePb.get().takableCodes = Sets.newHashSet();
+        takePb.get().takenCodes = Sets.newHashSet();
+        takePb.get().fixedLimit = 2160;
+        takePb.get().save();
 
         //Update AbsenceType
         AbsenceType cnrPb = absenceComponentDao.buildOrEditAbsenceType("PB", 
             "Permesso breve 36 ore anno", 
             0, Sets.newHashSet(specifiedMinutesLimit), null, 0, true, false, false, null, null);
 
-        tPb.get().takableCodes.add(cnrPb);
-        tPb.get().takenCodes.add(cnrPb);
-        tPb.get().save();
+        takePb.get().takableCodes.add(cnrPb);
+        takePb.get().takenCodes.add(cnrPb);
+        takePb.get().save();
       }
 
       // Group Creation
@@ -2080,7 +2092,7 @@ public class AbsenceMigration {
       groupPb.description = "PB - Permesso breve 36 ore anno";
       groupPb.pattern = GroupAbsenceTypePattern.programmed;
       groupPb.periodType = PeriodType.year;
-      groupPb.takableAbsenceBehaviour = tPb.get();
+      groupPb.takableAbsenceBehaviour = takePb.get();
       groupPb.save();
     }
 
@@ -2092,18 +2104,18 @@ public class AbsenceMigration {
     if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.ALTRI.name()).isPresent()) {
 
       //Takable Creation
-      Optional<TakableAbsenceBehaviour> tAltri = absenceComponentDao
+      Optional<TakableAbsenceBehaviour> takeAltri = absenceComponentDao
           .takableAbsenceBehaviourByName(DefaultTakable.T_ALTRI.name());
 
-      if (!tAltri.isPresent()) {
+      if (!takeAltri.isPresent()) {
 
-        tAltri = Optional.fromNullable(new TakableAbsenceBehaviour());
-        tAltri.get().name = DefaultTakable.T_ALTRI.name();
-        tAltri.get().amountType = AmountType.units;
-        tAltri.get().takableCodes = Sets.newHashSet();
-        tAltri.get().takenCodes = Sets.newHashSet();
-        tAltri.get().fixedLimit = -1;
-        tAltri.get().save();
+        takeAltri = Optional.fromNullable(new TakableAbsenceBehaviour());
+        takeAltri.get().name = DefaultTakable.T_ALTRI.name();
+        takeAltri.get().amountType = AmountType.units;
+        takeAltri.get().takableCodes = Sets.newHashSet();
+        takeAltri.get().takenCodes = Sets.newHashSet();
+        takeAltri.get().fixedLimit = -1;
+        takeAltri.get().save();
       }
 
       JPA.em().flush();
@@ -2115,17 +2127,17 @@ public class AbsenceMigration {
       groupAltri.description = "Altri Codici";
       groupAltri.pattern = GroupAbsenceTypePattern.simpleGrouping;
       groupAltri.periodType = PeriodType.always;
-      groupAltri.takableAbsenceBehaviour = tAltri.get();
+      groupAltri.takableAbsenceBehaviour = takeAltri.get();
       groupAltri.save();
     }
 
     JPA.em().flush();
 
-    Optional<TakableAbsenceBehaviour> tAltri = absenceComponentDao
+    Optional<TakableAbsenceBehaviour> takeAltri = absenceComponentDao
         .takableAbsenceBehaviourByName(DefaultTakable.T_ALTRI.name());
-    tAltri.get().takableCodes = Sets.newHashSet();
-    tAltri.get().takenCodes = Sets.newHashSet();
-    tAltri.get().save();
+    takeAltri.get().takableCodes = Sets.newHashSet();
+    takeAltri.get().takenCodes = Sets.newHashSet();
+    takeAltri.get().save();
 
     JPA.em().flush();
 
@@ -2142,9 +2154,9 @@ public class AbsenceMigration {
       if (absenceType.takableGroup.isEmpty() && absenceType.takenGroup.isEmpty() 
           && absenceType.complationGroup.isEmpty() && absenceType.replacingGroup.isEmpty()) {
         log.info("AbsenceCode {}", absenceType.code );
-        tAltri.get().takableCodes.add(absenceType);
-        tAltri.get().takenCodes.add(absenceType);
-        tAltri.get().save();
+        takeAltri.get().takableCodes.add(absenceType);
+        takeAltri.get().takenCodes.add(absenceType);
+        takeAltri.get().save();
       }
     }
 

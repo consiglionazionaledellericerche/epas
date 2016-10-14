@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
-import manager.services.absences.AbsenceService.InsertReport;
 import manager.services.absences.errors.AbsenceError;
 import manager.services.absences.errors.CriticalError;
 import manager.services.absences.model.AbsencePeriod;
@@ -57,6 +56,14 @@ public class AbsenceService {
   private final PersonChildrenDao personChildrenDao;
   private final ServiceFactories serviceFactories;
   
+  /**
+   * Costruttore injection.
+   * @param absenceRequestFormFactory injected
+   * @param absenceEngineUtility injected
+   * @param serviceFactories injected
+   * @param absenceComponentDao injected
+   * @param personChildrenDao injected
+   */
   @Inject
   public AbsenceService(AbsenceRequestFormFactory absenceRequestFormFactory, 
       AbsenceEngineUtility absenceEngineUtility,
@@ -70,6 +77,14 @@ public class AbsenceService {
     this.personChildrenDao = personChildrenDao;
   }
   
+  /**
+   * La lista delle categorie abilitate per la persona alla data, ordinate per priorità.
+   * Se groupAbsenceType è presente imposta il gruppo come selezionato.
+   * @param person persona
+   * @param date data
+   * @param groupAbsenceType gruppo selezionato
+   * @return lista di cateogire.
+   */
   public List<AbsenceRequestCategory> orderedCategories(Person person, LocalDate date, 
       GroupAbsenceType groupAbsenceType) {
     
@@ -84,15 +99,27 @@ public class AbsenceService {
     
     return categories;
   }
+
   
   /**
    * Genera la form di inserimento assenza.
-   * @return
+   * @param person person
+   * @param from data inizio
+   * @param absenceInsertTab web tab
+   * @param to data fine
+   * @param groupAbsenceType gruppo
+   * @param switchGroup se passa a nuovo gruppo
+   * @param absenceType tipo assenza
+   * @param justifiedType giustificativo
+   * @param hours ore
+   * @param minutes minuti
+   * @return form
    */
-  public AbsenceRequestForm buildInsertForm(Person person, LocalDate from, 
-      AbsenceInsertTab absenceInsertTab,                                                      //tab 
-      LocalDate to, GroupAbsenceType groupAbsenceType,  boolean switchGroup,                  //group
-      AbsenceType absenceType, JustifiedType justifiedType, Integer hours, Integer minutes) { //reconf
+  public AbsenceRequestForm buildInsertForm(
+      Person person, LocalDate from, AbsenceInsertTab absenceInsertTab,                  //tab 
+      LocalDate to, GroupAbsenceType groupAbsenceType,  boolean switchGroup,             //group
+      AbsenceType absenceType, JustifiedType justifiedType,                              //reconf 
+      Integer hours, Integer minutes) {
     
     //clean entities
     if (groupAbsenceType == null || !groupAbsenceType.isPersistent()) {
@@ -124,23 +151,24 @@ public class AbsenceService {
     //Errore grave
     Verify.verifyNotNull(groupAbsenceType);
     
-     //TODO: Preconditions se groupAbsenceType presente verificare che permesso per la persona
+    //TODO: Preconditions se groupAbsenceType presente verificare che permesso per la persona
     
     return absenceRequestFormFactory.buildAbsenceRequestForm(person, from, to, 
         groupAbsenceType, null, null, null);
   }
   
   /**
-   * Esegue la richiesta
-   * @param person
-   * @param groupAbsenceType
-   * @param from
-   * @param to
-   * @param insert
-   * @param absenceTypeRequest
-   * @param justifiedType
-   * @param specifiedMinutes
-   * @return
+   * Effettua la simuzione dell'inserimento. Genera il report di inserimento.
+   * @param person person
+   * @param groupAbsenceType gruppo
+   * @param from data inizio
+   * @param to data fine
+   * @param absenceType tipo assenza
+   * @param justifiedType giustificativo
+   * @param hours ore
+   * @param minutes minuti
+   * @param absenceManager absenceManager inject (circular dependency)
+   * @return insert report
    */
   public InsertReport insert(Person person, GroupAbsenceType groupAbsenceType, 
       LocalDate from, LocalDate to, 
@@ -259,8 +287,8 @@ public class AbsenceService {
    * I Figli
    * Le Altre Tutele
    * 
-   * @param person
-   * @param from
+   * @param person persona 
+   * @param from data inizio
    */
   public Scanner scanner(Person person, LocalDate from) {
     
@@ -284,6 +312,13 @@ public class AbsenceService {
 
   }
 
+  /**
+   * Calcola la situazione residuale per la persona per quel gruppo alla data.
+   * @param person persona
+   * @param groupAbsenceType gruppo
+   * @param date data
+   * @return situazione (sotto forma di periodChain)
+   */
   public PeriodChain residual(Person person, GroupAbsenceType groupAbsenceType, LocalDate date) {
 
     if (date == null) {
@@ -300,16 +335,10 @@ public class AbsenceService {
     return periodChain;
 
   }
-  
-  public SortedMap<Integer, List<AbsenceRequestCategory>> formCategories(Person person, LocalDate date, 
-      GroupAbsenceType groupAbsenceType) {
-    return absenceRequestFormFactory
-        .buildAbsenceRequestForm(person, date, date, groupAbsenceType, null, null, null)
-        .categoriesWithSamePriority;
-  }
+
   
   @Deprecated
-  public InsertReport temporaryInsertCompensatoryRest(Person person, 
+  private InsertReport temporaryInsertCompensatoryRest(Person person, 
       GroupAbsenceType groupAbsenceType, LocalDate from, LocalDate to, AbsenceType absenceType, 
       AbsenceManager absenceManager) {
     
@@ -325,7 +354,7 @@ public class AbsenceService {
   }
   
   @Deprecated
-  public InsertReport temporaryInsertVacation(Person person, GroupAbsenceType groupAbsenceType, 
+  private InsertReport temporaryInsertVacation(Person person, GroupAbsenceType groupAbsenceType, 
       LocalDate from, LocalDate to, AbsenceType absenceType, 
       AbsenceManager absenceManager) {
 
@@ -401,6 +430,10 @@ public class AbsenceService {
       return insertTemplateRows.size() - howManyReplacing() - howManyError() - howManyIgnored();
     }
     
+    /**
+     * Quanti codici di rimpiazzamento.
+     * @return int
+     */
     public int howManyReplacing() {
       int result = 0;
       for (TemplateRow templateRow : insertTemplateRows) {
@@ -410,7 +443,11 @@ public class AbsenceService {
       }
       return result;
     }
-    
+
+    /**
+     * Quanti inserimenti da ignorare.
+     * @return int
+     */
     public int howManyIgnored() {
       int result = 0;
       for (TemplateRow templateRow : insertTemplateRows) {
@@ -421,6 +458,10 @@ public class AbsenceService {
       return result;
     }
     
+    /**
+     * Quanti inserimenti con errori.
+     * @return int
+     */
     public int howManyError() {
       int result = 0;
       for (TemplateRow templateRow : insertTemplateRows) {
@@ -431,6 +472,10 @@ public class AbsenceService {
       return result;
     }
     
+    /**
+     * Quanti inserimenti con warning.
+     * @return int
+     */
     public int howManyWarning() {
       int result = 0;
       for (TemplateRow templateRow : insertTemplateRows) {
@@ -441,6 +486,10 @@ public class AbsenceService {
       return result;
     }
 
+    /**
+     * Le date in repiribilità o in turno.
+     * @return date list
+     */
     public List<LocalDate> reperibilityShiftDate() {
       List<LocalDate> dates = Lists.newArrayList(); 
       for (TemplateRow templateRow : insertTemplateRows) {

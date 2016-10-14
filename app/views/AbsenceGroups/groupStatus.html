@@ -6,7 +6,7 @@
 
 #{title title:periodChain.person.fullname + ' - Controllo assenze con limiti e completamenti' /}
   
-     #{form action:@AbsenceGroups.changeGroupStatus(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit'}
+     #{form action:@AbsenceGroups.groupStatus(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit'}
        #{f.hidden 'person.id', value:periodChain.person.id /}
        #{f.date 'date', value:date.format() /}     
 

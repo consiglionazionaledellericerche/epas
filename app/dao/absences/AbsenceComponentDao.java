@@ -79,8 +79,8 @@ public class AbsenceComponentDao extends DaoBase {
   
   /**
    * Ritorna il JustifiedType con quel nome. Se non esiste lo crea.
-   * @param name
-   * @return
+   * @param name nome
+   * @return entity
    */
   public JustifiedType getOrBuildJustifiedType(JustifiedTypeName name) {
     
@@ -96,9 +96,10 @@ public class AbsenceComponentDao extends DaoBase {
   }
   
   /**
-   * Ritorna il JustifiedType con quel nome. Se non esiste lo crea.
-   * @param name
-   * @return
+   * Ritorna la categoria con quel nome. Se non esiste la crea.
+   * @param name name
+   * @param priority priorità
+   * @return la categoria
    */
   public CategoryGroupAbsenceType getOrBuildCategoryType(String name, int priority) {
     
@@ -119,6 +120,11 @@ public class AbsenceComponentDao extends DaoBase {
     return obj;
   }
   
+  /**
+   * Il comportamento completamento con quel nome.
+   * @param name nome
+   * @return entity
+   */
   public Optional<ComplationAbsenceBehaviour> complationAbsenceBehaviourByName(String name) {
     
     QComplationAbsenceBehaviour complationAbsenceBehaviour = 
@@ -128,6 +134,11 @@ public class AbsenceComponentDao extends DaoBase {
         .where(complationAbsenceBehaviour.name.eq(name)).singleResult(complationAbsenceBehaviour));
   }
   
+  /**
+   * Il comportamento limiti con quel nome.
+   * @param name nome
+   * @return entity
+   */
   public Optional<TakableAbsenceBehaviour> takableAbsenceBehaviourByName(String name) {
     
     QTakableAbsenceBehaviour takableAbsenceBehaviour = 
@@ -137,6 +148,12 @@ public class AbsenceComponentDao extends DaoBase {
         .where(takableAbsenceBehaviour.name.eq(name)).singleResult(takableAbsenceBehaviour));
   }
   
+  
+  /**
+   * Il gruppo con quel nome.
+   * @param name nome
+   * @return entity
+   */
   public Optional<GroupAbsenceType> groupAbsenceTypeByName(String name) {
     
     QGroupAbsenceType groupAbsenceType = QGroupAbsenceType.groupAbsenceType;
@@ -145,6 +162,11 @@ public class AbsenceComponentDao extends DaoBase {
         .where(groupAbsenceType.name.eq(name)).singleResult(groupAbsenceType));
   }
   
+  /**
+   * I gruppi con quei nomi.
+   * @param names nomi
+   * @return entity list
+   */
   public List<GroupAbsenceType> groupsAbsenceTypeByName(List<String> names) {
     
     QGroupAbsenceType groupAbsenceType = QGroupAbsenceType.groupAbsenceType;
@@ -153,6 +175,11 @@ public class AbsenceComponentDao extends DaoBase {
         .where(groupAbsenceType.name.in(names)).list(groupAbsenceType);
   }
   
+  /**
+   * GroupAbsenceType by id.
+   * @param id id
+   * @return entity
+   */
   public GroupAbsenceType groupAbsenceTypeById(Long id) {
     
     QGroupAbsenceType groupAbsenceType = QGroupAbsenceType.groupAbsenceType;
@@ -161,6 +188,10 @@ public class AbsenceComponentDao extends DaoBase {
         .where(groupAbsenceType.id.eq(id)).singleResult(groupAbsenceType);
   }
   
+  /**
+   * Tutti i gruppi.
+   * @return entity list
+   */
   public List<GroupAbsenceType> allGroupAbsenceType() {
     
     QGroupAbsenceType groupAbsenceType = QGroupAbsenceType.groupAbsenceType;
@@ -171,6 +202,11 @@ public class AbsenceComponentDao extends DaoBase {
         .list(groupAbsenceType);
   }
   
+  /**
+   * Il primo gruppo della catena cui appartiene groupAbsenceType.
+   * @param groupAbsenceType gruppo indagato
+   * @return entity
+   */
   public GroupAbsenceType firstGroupOfChain(GroupAbsenceType groupAbsenceType) {
     GroupAbsenceType group = groupAbsenceType;
     List<GroupAbsenceType> all = allGroupAbsenceType();
@@ -180,7 +216,7 @@ public class AbsenceComponentDao extends DaoBase {
       for (GroupAbsenceType previous : all) {
         if (previous.nextGroupToCheck != null 
             && previous.nextGroupToCheck.equals(group)) {
-          group= previous;
+          group = previous;
           changed = true;
         }
       }
@@ -188,7 +224,11 @@ public class AbsenceComponentDao extends DaoBase {
     return group;
   }
   
-  
+  /**
+   * I gruppi con quel pattern.
+   * @param pattern pattern
+   * @return entity list
+   */
   public List<GroupAbsenceType> groupAbsenceTypeOfPattern(GroupAbsenceTypePattern pattern) {
     QGroupAbsenceType groupAbsenceType = QGroupAbsenceType.groupAbsenceType;
 
@@ -199,6 +239,13 @@ public class AbsenceComponentDao extends DaoBase {
         .list(groupAbsenceType);
   }
   
+  /**
+   * I gruppi coinvolti dal tipo assenza.
+   * 
+   * @param absenceType tipo assenza
+   * @param filterNotProgrammed non filtrare i soli programmati
+   * @return entity set
+   */
   public Set<GroupAbsenceType> involvedGroupAbsenceType(AbsenceType absenceType, 
       boolean filterNotProgrammed) {
 
@@ -229,6 +276,22 @@ public class AbsenceComponentDao extends DaoBase {
     return filteredGroup;
   }
   
+  /**
+   * Crea l'assenza con queste caratteristiche. Se esiste già una entity con quel codice la 
+   * aggiorna.
+   * @param code codice
+   * @param description descrizione
+   * @param minutes minuti giustificati
+   * @param justifiedTypePermitted tipi giustificativi permessi
+   * @param complationType tipo del completamento
+   * @param complationTime tempo di completamento
+   * @param internalUse se uso interno
+   * @param consideredWeekEnd se considerare week end
+   * @param timeForMealticket se il tempo contribuisce al buono pasto
+   * @param certificateCode codice per attestati
+   * @param expire data scadenza
+   * @return entity creata o modificata
+   */
   public AbsenceType buildOrEditAbsenceType(String code, String description, int minutes, 
       Set<JustifiedType> justifiedTypePermitted, JustifiedType complationType, int complationTime, 
       boolean internalUse, boolean consideredWeekEnd, 
@@ -267,6 +330,12 @@ public class AbsenceComponentDao extends DaoBase {
 
   }
   
+  /**
+   * Rinomina l'assenza code con il nuovo codice newCode. Se newCode era già presente appende
+   * al suo codice il postfisso ex.
+   * @param code codice 
+   * @param newCode nuovo codice
+   */
   public void renameCode(String code, String newCode) {
     QAbsenceType absenceType = QAbsenceType.absenceType;
 
@@ -293,12 +362,11 @@ public class AbsenceComponentDao extends DaoBase {
   /**
    * Le assenze effettuate dalla persona nel periodo specificato e con i codici riportati.
    * Ordinamento per data in ordine crescente.
-   * @param person
-   * @param begin
-   * @param end
-   * @param codeList
-   * @param ordered
-   * @return
+   * @param person person
+   * @param begin data inizio
+   * @param end data fine
+   * @param codeList lista dei codici
+   * @return entity list
    */
   public List<Absence> orderedAbsences(Person person, LocalDate begin, LocalDate end, 
       List<AbsenceType> codeList) {
@@ -310,7 +378,7 @@ public class AbsenceComponentDao extends DaoBase {
     if (begin != null) {
       conditions.and(absence.personDay.date.goe(begin));
     }
-    if (end!= null) {
+    if (end != null) {
       conditions.and(absence.personDay.date.loe(end));
     }
     if (!codeList.isEmpty()) {
@@ -332,8 +400,8 @@ public class AbsenceComponentDao extends DaoBase {
   
   /**
    * Ordina per data tutte le liste di assenze in una unica lista.
-   * @param absences
-   * @return
+   * @param absences liste di assenze
+   * @return entity list
    */
   public List<Absence> orderAbsences(List<Absence>... absences) {
     SortedMap<LocalDate, Set<Absence>> map = Maps.newTreeMap();
@@ -354,7 +422,14 @@ public class AbsenceComponentDao extends DaoBase {
     return result;
   }
   
-  public Map<LocalDate, Set<Absence>> mapAbsences(List<Absence> absences, Map<LocalDate, Set<Absence>> map) {
+  /**
+   * Aggiunge alla mappa le assenze presenti in absences.
+   * @param absences le assenze da aggiungere alla mappa
+   * @param map mappa
+   * @return mappa
+   */
+  public Map<LocalDate, Set<Absence>> mapAbsences(List<Absence> absences, 
+      Map<LocalDate, Set<Absence>> map) {
     if (map == null) {
       map = Maps.newHashMap();
     }
