@@ -9,6 +9,7 @@ import models.enumerate.StampTypes;
 
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDateTime;
+import org.joda.time.YearMonth;
 
 import play.data.binding.As;
 import play.data.validation.Required;
@@ -180,6 +181,14 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
    */
   public Person getOwner() {
     return personDay.person;
+  }
+
+  /**
+   * Utile per effettuare i controlli temporali sulle drools
+   * @return il mese relativo alla data della timbratura
+   */
+  public YearMonth getYearMonth() {
+    return new YearMonth(date.getYear(),date.getMonthOfYear());
   }
 
   public enum WayType {
