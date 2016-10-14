@@ -1,6 +1,7 @@
 package manager.services.absences;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
+import manager.services.absences.AbsenceService.InsertReport;
 import manager.services.absences.errors.AbsenceError;
 import manager.services.absences.errors.CriticalError;
 import manager.services.absences.model.AbsencePeriod;
@@ -21,6 +23,7 @@ import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.Scanner;
 import manager.services.absences.model.ServiceFactories;
 import manager.services.absences.web.AbsenceRequestForm;
+import manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab;
 import manager.services.absences.web.AbsenceRequestForm.AbsenceRequestCategory;
 import manager.services.absences.web.AbsenceRequestFormFactory;
 
@@ -67,16 +70,59 @@ public class AbsenceService {
     this.personChildrenDao = personChildrenDao;
   }
   
+  public List<AbsenceRequestCategory> orderedCategories(Person person, LocalDate date, 
+      GroupAbsenceType groupAbsenceType) {
+    
+    if (groupAbsenceType == null || !groupAbsenceType.isPersistent()) {
+      groupAbsenceType = absenceComponentDao
+          .groupAbsenceTypeByName(AbsenceInsertTab.defaultTab().groupNames.get(0)).get();
+    }
+    
+    AbsenceRequestForm form = buildInsertForm(person, date, null, null, 
+        groupAbsenceType, true, null, null, null, null);
+    List<AbsenceRequestCategory> categories = form.orderedCategories();
+    
+    return categories;
+  }
+  
   /**
    * Genera la form di inserimento assenza.
-   * @param person
-   * @param from
-   * @param to
-   * @param groupAbsenceType
    * @return
    */
-  public AbsenceRequestForm buildInsertForm(Person person, LocalDate from, LocalDate to, 
-      GroupAbsenceType groupAbsenceType) {
+  public AbsenceRequestForm buildInsertForm(Person person, LocalDate from, 
+      AbsenceInsertTab absenceInsertTab,                                                      //tab 
+      LocalDate to, GroupAbsenceType groupAbsenceType,  boolean switchGroup,                  //group
+      AbsenceType absenceType, JustifiedType justifiedType, Integer hours, Integer minutes) { //reconf
+    
+    //clean entities
+    if (groupAbsenceType == null || !groupAbsenceType.isPersistent()) {
+      groupAbsenceType = null;
+      switchGroup = true;
+    }
+    if (justifiedType == null || !justifiedType.isPersistent()) {
+      justifiedType = null;
+    }
+    if (absenceType == null || !absenceType.isPersistent()) {
+      absenceType = null;
+    }
+    
+    if (groupAbsenceType == null) {
+      if (absenceInsertTab == null) {
+        absenceInsertTab = AbsenceInsertTab.defaultTab();
+      } 
+      groupAbsenceType = absenceComponentDao
+          .groupAbsenceTypeByName(absenceInsertTab.groupNames.get(0)).get();
+      to = null;
+    }
+    if (switchGroup) {
+      absenceType = null;
+      justifiedType = null;
+      hours = null;
+      minutes = null;
+    }
+    
+    //Errore grave
+    Verify.verifyNotNull(groupAbsenceType);
     
      //TODO: Preconditions se groupAbsenceType presente verificare che permesso per la persona
     
@@ -84,26 +130,6 @@ public class AbsenceService {
         groupAbsenceType, null, null, null);
   }
   
-  /**
-   * Riconfigura la form di inserimento assenza con i nuovi parametri forniti.
-   * @param person
-   * @param from
-   * @param to
-   * @param groupAbsenceType
-   * @param absenceType
-   * @param justifiedType
-   * @param specifiedMinutes
-   * @return
-   */
-  public AbsenceRequestForm configureInsertForm(Person person, LocalDate from, LocalDate to, 
-      GroupAbsenceType groupAbsenceType, AbsenceType absenceType, 
-      JustifiedType justifiedType, Integer hours, Integer minutes) {
-    
-    return absenceRequestFormFactory.buildAbsenceRequestForm(person, from, to, 
-        groupAbsenceType, absenceType, justifiedType, 
-        absenceEngineUtility.getMinutes(hours, minutes));
-  }
-
   /**
    * Esegue la richiesta
    * @param person
@@ -119,14 +145,17 @@ public class AbsenceService {
   public InsertReport insert(Person person, GroupAbsenceType groupAbsenceType, 
       LocalDate from, LocalDate to, 
       AbsenceType absenceType, JustifiedType justifiedType, 
-      Integer hours, Integer minutes) {
+      Integer hours, Integer minutes, AbsenceManager absenceManager) {
     
     if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.vacationsCnr)) {
-      throw new IllegalStateException();
-    }
-    if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.compensatoryRestCnr)) {
-      throw new IllegalStateException();
-    }
+      InsertReport insertReport = temporaryInsertVacation(person, 
+          groupAbsenceType, from, to, null, absenceManager);
+      return insertReport;
+    } else if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.compensatoryRestCnr)) {
+      InsertReport insertReport = temporaryInsertCompensatoryRest(person, 
+          groupAbsenceType, from, to, null, absenceManager);
+      return insertReport;
+    } 
     
     Integer specifiedMinutes = absenceEngineUtility.getMinutes(hours, minutes);
     LocalDate currentDate = from;

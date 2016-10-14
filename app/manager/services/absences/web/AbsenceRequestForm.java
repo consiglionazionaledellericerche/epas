@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import lombok.Getter;
 
 import manager.services.absences.AbsenceMigration.DefaultGroup;
+import manager.services.absences.web.AbsenceRequestForm.AbsenceRequestCategory;
 
 import models.Person;
 import models.absences.AbsenceType;
@@ -28,52 +29,6 @@ import java.util.SortedMap;
 
 public class AbsenceRequestForm {
 
-  public static enum AbsenceInsertTab {
-    
-    mission(Lists.newArrayList(DefaultGroup.MISSIONE.name())),
-    vacation(Lists.newArrayList(DefaultGroup.FERIE_CNR.name())),
-    compensatory(Lists.newArrayList(DefaultGroup.RIPOSI_CNR.name())),
-    automatic(Lists.newArrayList(DefaultGroup.PB.name())),
-    other(Lists.newArrayList(
-        DefaultGroup.G_661.name(), 
-        DefaultGroup.G_89.name(), DefaultGroup.G_09.name(),
-        DefaultGroup.G_18.name(), DefaultGroup.G_19.name(),
-        DefaultGroup.G_23.name(), DefaultGroup.G_25.name(),
-        DefaultGroup.G_232.name(), DefaultGroup.G_252.name(),
-        DefaultGroup.G_233.name(), DefaultGroup.G_253.name(),
-        DefaultGroup.MALATTIA.name(),
-        DefaultGroup.MALATTIA_FIGLIO_1_12.name(),
-        DefaultGroup.MALATTIA_FIGLIO_1_13.name(),
-        DefaultGroup.MALATTIA_FIGLIO_1_14.name(),
-        DefaultGroup.MALATTIA_FIGLIO_2_12.name(),
-        DefaultGroup.MALATTIA_FIGLIO_2_13.name(),
-        DefaultGroup.MALATTIA_FIGLIO_2_14.name(),
-        DefaultGroup.MALATTIA_FIGLIO_3_12.name(),
-        DefaultGroup.MALATTIA_FIGLIO_3_13.name(),
-        DefaultGroup.MALATTIA_FIGLIO_3_14.name(),
-        DefaultGroup.ALTRI.name(), DefaultGroup.G_95.name()
-        ));
-
-        public List<String> groupNames;
-    
-    private AbsenceInsertTab(List<String> groupNames) {
-      this.groupNames = groupNames;
-    }
-    
-    public static AbsenceInsertTab fromGroup(GroupAbsenceType groupAbsenceType) {
-      for (AbsenceInsertTab absenceInsertTab : AbsenceInsertTab.values()) {
-        if (absenceInsertTab.groupNames.contains(groupAbsenceType.name)) {
-          return absenceInsertTab;
-        }
-      }
-      return null;
-    }
-    
-    public boolean newImplementation() {
-      return true; //!this.equals(AbsenceInsertTab.compensatory) && !this.equals(AbsenceInsertTab.vacation);
-    }
-  }
-  
   public Person person;
   public LocalDate from;
   public LocalDate to;
@@ -94,8 +49,19 @@ public class AbsenceRequestForm {
       }
     }
     return items.size() == 0 || items.size() == 1;
-    
   }
+  
+  public List<AbsenceRequestCategory> orderedCategories() {
+    List<AbsenceRequestCategory> categories = Lists.newArrayList();
+    for (List<AbsenceRequestCategory> categoriesSamePriority : 
+      this.categoriesWithSamePriority.values()) {
+      categories.addAll(categoriesSamePriority);
+    }
+    return categories;
+  }
+  
+  
+  /// STATIC CLASS
 
   /**
    * AbsenceRequestCategory: Raccoglie i GroupAbsenceTypeItem che hanno groupAbsenceType 
@@ -212,6 +178,56 @@ public class AbsenceRequestForm {
       } else {
         return this.specifiedMinutes % 60;
       }
+    }
+  }
+  
+ public static enum AbsenceInsertTab {
+    
+    mission(Lists.newArrayList(DefaultGroup.MISSIONE.name())),
+    vacation(Lists.newArrayList(DefaultGroup.FERIE_CNR.name())),
+    compensatory(Lists.newArrayList(DefaultGroup.RIPOSI_CNR.name())),
+    automatic(Lists.newArrayList(DefaultGroup.PB.name())),
+    other(Lists.newArrayList(
+        DefaultGroup.G_661.name(), 
+        DefaultGroup.G_89.name(), DefaultGroup.G_09.name(),
+        DefaultGroup.G_18.name(), DefaultGroup.G_19.name(),
+        DefaultGroup.G_23.name(), DefaultGroup.G_25.name(),
+        DefaultGroup.G_232.name(), DefaultGroup.G_252.name(),
+        DefaultGroup.G_233.name(), DefaultGroup.G_253.name(),
+        DefaultGroup.MALATTIA.name(),
+        DefaultGroup.MALATTIA_FIGLIO_1_12.name(),
+        DefaultGroup.MALATTIA_FIGLIO_1_13.name(),
+        DefaultGroup.MALATTIA_FIGLIO_1_14.name(),
+        DefaultGroup.MALATTIA_FIGLIO_2_12.name(),
+        DefaultGroup.MALATTIA_FIGLIO_2_13.name(),
+        DefaultGroup.MALATTIA_FIGLIO_2_14.name(),
+        DefaultGroup.MALATTIA_FIGLIO_3_12.name(),
+        DefaultGroup.MALATTIA_FIGLIO_3_13.name(),
+        DefaultGroup.MALATTIA_FIGLIO_3_14.name(),
+        DefaultGroup.ALTRI.name(), DefaultGroup.G_95.name()
+        ));
+
+        public List<String> groupNames;
+    
+    private AbsenceInsertTab(List<String> groupNames) {
+      this.groupNames = groupNames;
+    }
+    
+    public static AbsenceInsertTab fromGroup(GroupAbsenceType groupAbsenceType) {
+      for (AbsenceInsertTab absenceInsertTab : AbsenceInsertTab.values()) {
+        if (absenceInsertTab.groupNames.contains(groupAbsenceType.name)) {
+          return absenceInsertTab;
+        }
+      }
+      return null;
+    }
+    
+    public static AbsenceInsertTab defaultTab() {
+      return mission;
+    }
+    
+    public boolean newImplementation() {
+      return true; //!this.equals(AbsenceInsertTab.compensatory) && !this.equals(AbsenceInsertTab.vacation);
     }
   }
 }
