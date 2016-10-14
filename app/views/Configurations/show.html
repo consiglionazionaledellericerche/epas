@@ -115,13 +115,15 @@
         </td>
         <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
       </tr>
+      #{if messages.get('description.' + conf.epasParam)}
       <tr>
         <td colspan="2" class="text-warning">
           #{alert color:'warning'}
-          qui la spiegazione
+            &{'description.' + conf.epasParam}
           #{/alert}
         </td>
       </tr>
+      #{/if}
       #{/list}
     </table>
 
