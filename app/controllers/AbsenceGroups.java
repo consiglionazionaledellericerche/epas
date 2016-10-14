@@ -55,6 +55,9 @@ public class AbsenceGroups extends Controller {
   @Inject
   private static AbsenceManager absenceManager;
   
+  /**
+   * End point per la migrazione esplicita alla nuova gestione assenze.
+   */
   public static void migrate() {
     
     absenceMigration.buildDefaultGroups();
@@ -62,6 +65,9 @@ public class AbsenceGroups extends Controller {
     
   }
   
+  /**
+   * End point per la visualizzazione dei gruppi assenze definiti.
+   */
   public static void show() {
     
     List<GroupAbsenceType> groups = GroupAbsenceType.findAll();
@@ -70,9 +76,24 @@ public class AbsenceGroups extends Controller {
   }
   
   
-  public static void insert(Long personId, LocalDate from, AbsenceInsertTab absenceInsertTab, //tab
-      LocalDate to, GroupAbsenceType groupAbsenceType,  boolean switchGroup,                  //group
-      AbsenceType absenceType, JustifiedType justifiedType, Integer hours, Integer minutes) { //confGroup
+  /**
+   * End point per la simulazione di inserimento assenze.s
+   * @param personId persona
+   * @param from data inizio
+   * @param absenceInsertTab web tab    
+   * @param to data fine
+   * @param groupAbsenceType gruppo assenze
+   * @param switchGroup se cambio gruppo di assenze
+   * @param absenceType tipo assenza
+   * @param justifiedType tipo giustificativo
+   * @param hours ore
+   * @param minutes minuti
+   */
+  public static void insert(
+      Long personId, LocalDate from, AbsenceInsertTab absenceInsertTab,      //tab
+      LocalDate to, GroupAbsenceType groupAbsenceType,  boolean switchGroup, //group
+      AbsenceType absenceType, JustifiedType justifiedType,                  //confGroup 
+      Integer hours, Integer minutes) {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
@@ -98,6 +119,18 @@ public class AbsenceGroups extends Controller {
 
   }
   
+  /**
+   * End Point per il salvataggio di assenze. 
+   * @param personId persona
+   * @param from data inizio
+   * @param to data fine
+   * @param groupAbsenceType gruppo assenze
+   * @param absenceType tipo assenza
+   * @param justifiedType giustificativo
+   * @param hours ore
+   * @param minutes minuti
+   * @param forceInsert forza inserimento
+   */
   public static void save(Long personId, LocalDate from, LocalDate to, 
       GroupAbsenceType groupAbsenceType, AbsenceType absenceType, 
       JustifiedType justifiedType, Integer hours, Integer minutes, boolean forceInsert) {
@@ -147,41 +180,20 @@ public class AbsenceGroups extends Controller {
 
   }
 
-  
-//  /**
-//   * metodo che cancella una certa assenza fino ad un certo periodo.
-//   *
-//   * @param absence l'assenza
-//   * @param dateTo  la data di fine periodo
-//   */
-//  public static void delete(Absence absence, GroupAbsenceType groupAbsenceType) {
-//
-//    notFoundIfNull(absence);
-//    Person person = absence.personDay.person;
-//    LocalDate dateFrom = absence.personDay.date;
-//
-//    if (absence.absenceFile.exists()) {
-//      absence.absenceFile.getFile().delete();
-//    }
-//    absence.personDay.absences.remove(absence);
-//    absence.delete();
-//    consistencyManager.updatePersonSituation(person.id, absence.getAbsenceDate());
-//    
-//    flash.success("Assenza rimossa correttamente.");
-//    if (groupAbsenceType != null) {
-//      groupStatus(person.id, groupAbsenceType.id, absence.getAbsenceDate());
-//    } else {
-//      Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());  
-//    }
-//  }
-  
+  /**
+   * End point per visualizzare lo stato di un gruppo assenze alla data.
+   * 
+   * @param person persona
+   * @param groupAbsenceType gruppo
+   * @param date data
+   */
   public static void groupStatus(Person person, GroupAbsenceType groupAbsenceType, LocalDate date) {
     
     notFoundIfNull(person);
     notFoundIfNull(date);
     
     List<AbsenceRequestCategory> categories = absenceService
-      .orderedCategories(person, date, groupAbsenceType);
+        .orderedCategories(person, date, groupAbsenceType);
     
     groupAbsenceType = absenceComponentDao.firstGroupOfChain(groupAbsenceType);
         
@@ -190,33 +202,13 @@ public class AbsenceGroups extends Controller {
     render(date, categories, groupAbsenceType, periodChain);
   }
   
-  public static void changeGroupStatus(
-      Person person, GroupAbsenceType groupAbsenceType, LocalDate date) {
-
-    notFoundIfNull(person);
-    notFoundIfNull(date);
-    notFoundIfNull(groupAbsenceType);
-    
-    groupAbsenceType = absenceComponentDao.firstGroupOfChain(groupAbsenceType);
-    
-    List<AbsenceRequestCategory> categories = absenceService
-        .orderedCategories(person, date, groupAbsenceType);
-    
-    PeriodChain periodChain = absenceService.residual(person, groupAbsenceType, date);
-    
-    render("@groupStatus", date, categories, groupAbsenceType, periodChain);
-    
-  }
-  
-  public static void scan(Long personId, LocalDate from) {
-    Person person = personDao.getPersonById(personId);
-    notFoundIfNull(person);
-    notFoundIfNull(from);
-    
-    absenceService.scanner(person, from);
-    renderText("ok");
-  }
-  
+  /**
+   * End point per definire l'inizializzazione di un gruppo.
+   * 
+   * @param personId persona
+   * @param groupAbsenceType gruppo
+   * @param date data
+   */
   public static void initialization(
       Long personId, GroupAbsenceType groupAbsenceType, LocalDate date) {
 

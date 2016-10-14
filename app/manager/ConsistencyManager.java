@@ -21,8 +21,8 @@ import manager.cache.StampTypeManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
-import manager.services.absences.AbsenceService;
 import manager.configurations.EpasParam.RecomputationType;
+import manager.services.absences.AbsenceService;
 
 import models.Contract;
 import models.ContractMonthRecap;
@@ -33,9 +33,9 @@ import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
 import models.Stamping.WayType;
+import models.User;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
-import models.User;
 import models.base.IPropertiesInPeriodOwner;
 import models.enumerate.Troubles;
 
@@ -462,7 +462,7 @@ public class ConsistencyManager {
       shortPermission.justifiedMinutes = timeShortPermission;
       shortPermission.save();
       pd.getValue().absences.add(shortPermission);
-    } else if (timeShortPermission > 0 && shortPermission != null){
+    } else if (timeShortPermission > 0 && shortPermission != null) {
       //edit
       shortPermission.justifiedMinutes = timeShortPermission;
       shortPermission.save();
