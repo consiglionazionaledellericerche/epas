@@ -125,7 +125,7 @@ public class Absences extends Controller {
         list.add(aar);
       }
       renderJSON(list);
-    } catch (Exception e) {
+    } catch (Exception ex) {
       JsonResponse.badRequest("Errore nei parametri passati al server");
     }
 

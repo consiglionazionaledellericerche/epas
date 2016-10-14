@@ -44,7 +44,7 @@ public class UserDao extends DaoBase {
   public static final Splitter TOKEN_SPLITTER = Splitter.on(' ').trimResults().omitEmptyStrings();
 
   /**
-   * @return lo user  identificato dall'id passato come parametro
+   * @return lo user  identificato dall'id passato come parametro.
    */
   public User getUserByIdAndPassword(Long id, Optional<String> password) {
     final QUser user = QUser.user;
@@ -59,7 +59,7 @@ public class UserDao extends DaoBase {
   }
 
   /**
-   * @return l'user corrispondente al recoveryToken inviato per il recovery della password
+   * @return l'user corrispondente al recoveryToken inviato per il recovery della password.
    */
   public User getUserByRecoveryToken(String recoveryToken) {
     final QUser user = QUser.user;
@@ -69,7 +69,7 @@ public class UserDao extends DaoBase {
   }
 
   /**
-   * @return l'user corrispondente a username e password passati come parametro
+   * @return l'user corrispondente a username e password passati come parametro.
    */
   public User getUserByUsernameAndPassword(String username, Optional<String> password) {
     final QUser user = QUser.user;
@@ -130,7 +130,7 @@ public class UserDao extends DaoBase {
   }
 
   /**
-   * @return La lista degli utenti senza legami con una sede
+   * @return La lista degli utenti senza legami con una sede.
    */
   public SimpleResults<User> noOwnerUsers(Optional<String> name) {
 
