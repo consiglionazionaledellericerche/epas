@@ -37,15 +37,15 @@ public class ComplationAbsenceBehaviour extends BaseModel {
 
   @ManyToMany
   @JoinTable(name = "complation_codes_group", 
-  joinColumns = { @JoinColumn(name = "complation_behaviour_id") }, 
-  inverseJoinColumns = { @JoinColumn(name = "absence_types_id") })
+        joinColumns = { @JoinColumn(name = "complation_behaviour_id") }, 
+        inverseJoinColumns = { @JoinColumn(name = "absence_types_id") })
   @OrderBy("code")
   public Set<AbsenceType> complationCodes = Sets.newHashSet();
 
   @ManyToMany
   @JoinTable(name = "replacing_codes_group", 
-  joinColumns = { @JoinColumn(name = "complation_behaviour_id") }, 
-  inverseJoinColumns = { @JoinColumn(name = "absence_types_id") })
+        joinColumns = { @JoinColumn(name = "complation_behaviour_id") }, 
+        inverseJoinColumns = { @JoinColumn(name = "absence_types_id") })
   @OrderBy("code")
   public Set<AbsenceType> replacingCodes = Sets.newHashSet();
   

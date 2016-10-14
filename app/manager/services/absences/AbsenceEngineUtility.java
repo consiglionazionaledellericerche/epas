@@ -44,10 +44,17 @@ public class AbsenceEngineUtility {
   private final AbsenceComponentDao absenceComponentDao;
   private final PersonDayManager personDayManager;
   
-  private final Integer UNIT_REPLACING_AMOUNT = 1 * 100;
+  private final Integer unitReplacingAmount = 1 * 100;
   private final PersonReperibilityDayDao personReperibilityDayDao;
   private final PersonShiftDayDao personShiftDayDao;
 
+  /**
+   * Constructor for injection.
+   * @param absenceComponentDao injected
+   * @param personDayManager injected
+   * @param personReperibilityDayDao injected
+   * @param personShiftDayDao injected
+   */
   @Inject
   public AbsenceEngineUtility(AbsenceComponentDao absenceComponentDao, 
       PersonDayManager personDayManager, 
@@ -72,17 +79,17 @@ public class AbsenceEngineUtility {
    *               un solo codice absence_type_minutes con Zminute
    *               un solo codice specifiedMinutes 
    *               -> metto specifiedMinutes tra le opzioni
-   *  
    *  TODO: decidere come gestire il quanto manca               
    *                
-   * @param groupAbsenceType
-   * @return
+   * @param groupAbsenceType gruppo
+   * @return entity list
    */
   public List<JustifiedType> automaticJustifiedType(GroupAbsenceType groupAbsenceType) {
     
     // TODO: gruppo ferie, riposi compensativi
     if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.vacationsCnr)) {
-      return Lists.newArrayList(absenceComponentDao.getOrBuildJustifiedType(JustifiedTypeName.all_day));
+      return Lists.newArrayList(absenceComponentDao
+          .getOrBuildJustifiedType(JustifiedTypeName.all_day));
     }
     
     List<JustifiedType> justifiedTypes = Lists.newArrayList();
@@ -144,15 +151,14 @@ public class AbsenceEngineUtility {
     
     return justifiedTypes;
   }
-
+  
   /**
    * Quanto giustifica l'assenza passata.
    * Se non si riesce a stabilire il tempo giustificato si ritorna un numero negativo.
-   * @param person
-   * @param date
-   * @param absence
-   * @param amountType
-   * @return
+   * @param person persona
+   * @param absence assenza
+   * @param amountType tipo di ammontare
+   * @return tempo giustificato
    */
   public int absenceJustifiedAmount(Person person, Absence absence, AmountType amountType) {
     
@@ -193,6 +199,12 @@ public class AbsenceEngineUtility {
     }
   }
   
+  /**
+   * Il tempo di lavoro nel giorno dell'assenza.
+   * @param person persona
+   * @param absence assenza
+   * @return tempo a lavoro assenza
+   */
   public int absenceWorkingTime(Person person, Absence absence) {
     LocalDate date = absence.getAbsenceDate();
     for (Contract contract : person.contracts) {
@@ -209,15 +221,12 @@ public class AbsenceEngineUtility {
     return 0;
   }
   
-  
   /**
-   * Quanto completa l'assenza passata.
+   * Quanto completa il rimpiazzamento.
    * Se non si riesce a stabilire il tempo di completamento si ritorna un numero negativo.
-   * @param person
-   * @param date
-   * @param absence
-   * @param amountType
-   * @return
+   * @param absenceType tipo assenza
+   * @param amountType tipo ammontare
+   * @return ammontare
    */
   public int replacingAmount(AbsenceType absenceType, AmountType amountType) {
 
@@ -227,28 +236,28 @@ public class AbsenceEngineUtility {
     //    ex:  89, 09B, 23H7, 25H7 
     // 2) tipo completamento minuti -> codice completamento minuti specificati assenza
     //    ex:  661H1C, 18H1C, 19H1C 
-    
+
     if (absenceType == null) {
       return -1;
     }
     if (amountType.equals(AmountType.units) 
         && absenceType.replacingType.name.equals(JustifiedTypeName.all_day)) {
-        return UNIT_REPLACING_AMOUNT; //una unità
+      return unitReplacingAmount; //una unità
     } 
     if (amountType.equals(AmountType.minutes) 
         && absenceType.replacingType.name.equals(JustifiedTypeName.absence_type_minutes)) {
       return absenceType.replacingTime;
     }
-    
+
     return -1;
 
   }
   
   /**
-   * Prova a inferire l'absenceType dal gruppo e dal justifiedTime e specifiedMinutes
-   * @param absencePeriod
-   * @param absence
-   * @return
+   * Prova a inferire l'absenceType dell'assenza all'interno del periodo.
+   * @param absencePeriod periodo
+   * @param absence assenza
+   * @return assenza con tipo inferito
    */
   public Absence inferAbsenceType(AbsencePeriod absencePeriod, Absence absence) {
 
@@ -299,10 +308,10 @@ public class AbsenceEngineUtility {
   }
  
   /**
-   * 
-   * @param hours
-   * @param minutes
-   * @return
+   * I minuti... .
+   * @param hours ore
+   * @param minutes minuti
+   * @return minuti
    */
   public Integer getMinutes(Integer hours, Integer minutes) {
     Integer selectedSpecifiedMinutes = null;
@@ -318,8 +327,8 @@ public class AbsenceEngineUtility {
   }
   
   /**
-   * 
-   * @return
+   * Quale rimpiazzamento inserire se aggiungo il complationAmount al period nella data. 
+   * @return tipo del rimpiazzamento
    */
   public Optional<AbsenceType> whichReplacingCode(AbsencePeriod absencePeriod, 
       LocalDate date, int complationAmount) {
@@ -336,8 +345,8 @@ public class AbsenceEngineUtility {
   
   /**
    * I gruppi coinvolti nel tipo di assenza.
-   * @param absenceType
-   * @return
+   * @param absenceType tipo assenza
+   * @return set gruppi
    */
   public Set<GroupAbsenceType> involvedGroup(AbsenceType absenceType) {
     Set<GroupAbsenceType> involvedGroup = Sets.newHashSet();
@@ -357,11 +366,12 @@ public class AbsenceEngineUtility {
   }
   
   /**
-   * I vincoli generici.
-   * @param absenceEngine
-   * @param absence
-   * @param allCodeAbsences
-   * @return
+   * I vincoli generici assenza.
+   * @param genericErrors box errori
+   * @param person persona
+   * @param absence assenza
+   * @param allCodeAbsences tutti i codici che potrebbero conflittuare.
+   * @return error box
    */
   public ErrorsBox genericConstraints(ErrorsBox genericErrors, 
       Person person, Absence absence, 

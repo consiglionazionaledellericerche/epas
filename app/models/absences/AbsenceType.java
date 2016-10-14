@@ -32,9 +32,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-/**
- * @author dario
- */
 @Entity
 @Table(name = "absence_types")
 @Audited
@@ -83,8 +80,8 @@ public class AbsenceType extends BaseModel {
   
   @ManyToMany
   @JoinTable(name = "absence_types_justified_types", 
-  joinColumns = { @JoinColumn(name = "absence_types_id") }, 
-  inverseJoinColumns = { @JoinColumn(name = "justified_types_id") })
+      joinColumns = { @JoinColumn(name = "absence_types_id") }, 
+      inverseJoinColumns = { @JoinColumn(name = "justified_types_id") })
   public Set<JustifiedType> justifiedTypesPermitted = Sets.newHashSet();
   
   @Column(name = "replacing_time")
@@ -112,6 +109,10 @@ public class AbsenceType extends BaseModel {
   
   // Metodi
   
+  /**
+   * Descrizione limitata a 60 caratteri.
+   * @return short description
+   */
   @Transient
   public String getShortDescription() {
     if (description != null && description.length() > 60) {
@@ -120,6 +121,10 @@ public class AbsenceType extends BaseModel {
     return description;
   }
   
+  /**
+   * Se il codice è scaduto.
+   * @return esito
+   */
   @Transient
   public boolean isExpired() {
     if (validTo == null) {
@@ -133,6 +138,10 @@ public class AbsenceType extends BaseModel {
     return Joiner.on(" - ").skipNulls().join(code, description);
   }
   
+  /**
+   * Se fra i tipi giustificativi c'è quello all day.
+   * @return esito
+   */
   @Transient
   public boolean isAllDayPermitted() {
     for (JustifiedType justifiedType: this.justifiedTypesPermitted) {
@@ -143,6 +152,10 @@ public class AbsenceType extends BaseModel {
     return false;
   }
   
+  /**
+   * Se fra i tipi giustificativi c'è quello absence type minutes.
+   * @return esito
+   */  
   @Transient
   public boolean isAbsenceTypeMinutesPermitted() {
     for (JustifiedType justifiedType: this.justifiedTypesPermitted) {
@@ -153,6 +166,10 @@ public class AbsenceType extends BaseModel {
     return false;
   }
   
+  /**
+   * Se fra i tipi giustificativi c'è quello specified minutes.
+   * @return esito
+   */
   @Transient
   public boolean isSpecifiedMinutesPermitted() {
     for (JustifiedType justifiedType: this.justifiedTypesPermitted) {
@@ -163,6 +180,10 @@ public class AbsenceType extends BaseModel {
     return false;
   }
   
+  /**
+   * Se fra i tipi giustificativi c'è quello nothing.
+   * @return esito
+   */
   @Transient
   public boolean isNothingPermitted() {
     for (JustifiedType justifiedType: this.justifiedTypesPermitted) {

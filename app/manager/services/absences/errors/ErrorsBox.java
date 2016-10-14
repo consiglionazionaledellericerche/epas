@@ -26,7 +26,8 @@ public class ErrorsBox {
   
   private Map<CriticalProblem, List<CriticalError>> criticalErrorsMap = Maps.newHashMap();
   
-  private Map<Absence, Map<AbsenceProblem, AbsenceError>> absenceWarningsSuperMap = Maps.newHashMap();
+  private Map<Absence, Map<AbsenceProblem, AbsenceError>> absenceWarningsSuperMap = 
+      Maps.newHashMap();
   
   private void addAbsenceErrorIntoMap(Absence absence, AbsenceProblem absenceProblem, 
       Absence conflictingAsbence, Map<Absence, Map<AbsenceProblem, AbsenceError>> map) {
@@ -60,12 +61,26 @@ public class ErrorsBox {
     addAbsenceErrorIntoMap(absence, absenceProblem, null, absenceErrorsSuperMap);
   }
   
-  public void addAbsenceError(Absence absence, AbsenceProblem absenceProblem, Absence conflictingAbsence) {
+  /**
+   * Aggiunge l'errore alla scatola.
+   * @param absence assenza
+   * @param absenceProblem problema
+   * @param conflictingAbsence assenza in conflitto
+   */
+  public void addAbsenceError(Absence absence, AbsenceProblem absenceProblem, 
+      Absence conflictingAbsence) {
     addAbsenceErrorIntoMap(absence, absenceProblem, conflictingAbsence, absenceErrorsSuperMap);
     addAbsenceErrorIntoMap(conflictingAbsence, absenceProblem, absence, absenceErrorsSuperMap);
   }
   
-  public void addAbsenceError(Absence absence, AbsenceProblem absenceProblem, List<Absence> conflictingAbsences) {
+  /**
+   * Aggiunge l'errore alla scatola.
+   * @param absence assenza
+   * @param absenceProblem problema
+   * @param conflictingAbsences assenze in conflitto
+   */
+  public void addAbsenceError(Absence absence, AbsenceProblem absenceProblem, 
+      List<Absence> conflictingAbsences) {
     for (Absence conflictingAbsence : conflictingAbsences) {
       addAbsenceError(absence, absenceProblem, conflictingAbsence);
     }
@@ -96,7 +111,8 @@ public class ErrorsBox {
     addCriticalErrorIntoMap(absence.getAbsenceDate(), absence, null, null, criticalProblem);
   }
   
-  public void addCriticalError(LocalDate date, AbsenceType absenceType, CriticalProblem criticalProblem) {
+  public void addCriticalError(LocalDate date, AbsenceType absenceType, 
+      CriticalProblem criticalProblem) {
     addCriticalErrorIntoMap(date, null, absenceType, null, criticalProblem);
   }
   
