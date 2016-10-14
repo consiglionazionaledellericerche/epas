@@ -28,6 +28,8 @@ public class QOffice extends EntityPathBase<Office> {
 
     public final StringPath address = createString("address");
 
+    public final ListPath<models.Attachment, QAttachment> attachments = this.<models.Attachment, QAttachment>createList("attachments", models.Attachment.class, QAttachment.class, PathInits.DIRECT2);
+
     public final ListPath<models.BadgeSystem, QBadgeSystem> badgeSystems = this.<models.BadgeSystem, QBadgeSystem>createList("badgeSystems", models.BadgeSystem.class, QBadgeSystem.class, PathInits.DIRECT2);
 
     //inherited
