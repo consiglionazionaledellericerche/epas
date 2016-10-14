@@ -251,6 +251,7 @@ public class PersonManager {
    * @param user l'utente
    * @return true se l'utente è amministratore del personale, false altrimenti.
    */
+  @Deprecated
   public boolean isPersonnelAdmin(User user) {
     List<UsersRolesOffices> uros = uroDao.getUsersRolesOfficesByUser(user);
     long count = uros.stream().filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)).count();

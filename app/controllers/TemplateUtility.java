@@ -53,6 +53,7 @@ import models.absences.GroupAbsenceType;
 import models.absences.TakableAbsenceBehaviour;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.CodesForEmployee;
+import models.enumerate.StampTypes;
 
 import org.joda.time.LocalDate;
 
@@ -97,7 +98,7 @@ public class TemplateUtility {
       RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao,
       IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao,
       SynchDiagnostic synchDiagnostic, ConfigurationManager configurationManager,
-      CompetenceCodeDao competenceCodeDao, AbsenceComponentDao absenceComponentDao, 
+      CompetenceCodeDao competenceCodeDao, AbsenceComponentDao absenceComponentDao,
       NotificationDao notificationDao, UserDao userDao) {
 
     this.secureManager = secureManager;
@@ -390,7 +391,6 @@ public class TemplateUtility {
   }
 
 
-
   public List<BadgeSystem> getConfiguredBadgeSystems(Office office) {
     List<BadgeSystem> configuredBadgeSystem = Lists.newArrayList();
     for (BadgeSystem badgeSystem : office.badgeSystems) {
@@ -445,6 +445,9 @@ public class TemplateUtility {
     return userDao.hasAdminRoles(Security.getUser().get());
   }
 
+  public List<StampTypes> getStampTypes() {
+    return UserDao.getAllowedStampTypes(Security.getUser().get());
+  }
 
   /**
    * L'istanza del wrapperFactory disponibile nei template.

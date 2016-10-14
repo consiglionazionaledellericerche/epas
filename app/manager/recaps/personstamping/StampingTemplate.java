@@ -25,10 +25,10 @@ public class StampingTemplate {
   public int pairId;
   public String pairPosition;            //left center right none
   public LocalDateTime date;
-  
+
   public String way;
   public String hour = "";
-  
+
   List<StampModificationType> stampModificationTypes = Lists.newArrayList();
 
   public boolean valid;
@@ -71,7 +71,7 @@ public class StampingTemplate {
     }
 
     //timbratura modificata dal dipendente
-    if (stamping.markedByEmployee != null && stamping.markedByEmployee) {
+    if (stamping.markedByEmployee) {
       stampModificationTypes.add(stampTypeManager.getStampMofificationType(
           StampModificationTypeCode.MARKED_BY_EMPLOYEE));
     }
@@ -100,10 +100,9 @@ public class StampingTemplate {
       this.colour = "warn";
     }
   }
-  
+
   /**
    * Se stampare il popover sulla stampingTemplate
-   * @return
    */
   public boolean showPopover() {
     if (!stampModificationTypes.isEmpty() || stamping.stampType != null) {
