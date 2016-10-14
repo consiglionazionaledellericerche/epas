@@ -15,6 +15,7 @@ import models.base.PeriodModel;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
+import org.joda.time.ReadablePartial;
 
 import play.data.binding.As;
 import play.data.validation.Email;
@@ -25,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -258,10 +260,6 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     return this.surname;
   }
 
-//  public void setCompetenceCodes(List<CompetenceCode> competenceCode) {
-//    this.competenceCode = competenceCode;
-//  }
-
   /**
    * @return il nome completo.
    */
@@ -340,16 +338,21 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   }
 
   /**
-   * Verifica se per la persona sono già stati inviati gli attestati relativi ad una determinata
-   * data
+   * Verifica se il mese passato come parametro è successivo all'ultimo mese inviato
+   * con gli attestati
    *
-   * @param year  Anno sul quale verificare la presenza dei riepiloghi degli attestati
-   * @param month Mese sul quale verificare la presenza dei riepiloghi degli attestati
-   * @return true se
+   * @param readablePartial La 'data' da verificare
+   * @return true se la data passata come parametro è successiva all'ultimo mese sul quale sono
+   * stati inviati gli attestai per la persona interessata
    */
-  public boolean alreadyCertificated(int year, int month) {
-    return certifications.stream().filter(certification -> certification.year == year
-        && certification.month == month).findFirst().isPresent();
+  public boolean checkLastCertificationDate(final ReadablePartial readablePartial) {
+
+    final Optional<Certification> ultimo = certifications.stream().max(Certification.comparator());
+    if (ultimo.isPresent()) {
+      return ultimo.get().getYearMonth().isBefore(readablePartial);
+    }
+    // Se non c'è nessun mese presente considero che la condizione sia sempre vera
+    return true;
   }
 
 }

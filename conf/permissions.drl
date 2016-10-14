@@ -1,5 +1,6 @@
 package security;
 
+import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 import dao.history.HistoricalDao;
@@ -206,6 +207,7 @@ rule HasRightOnHimself
 when
   $p: Person(this == currentOperator.person)
   $c: PermissionCheck(action not in (
+      "Stampings.blank",
       "Absences.blank",
       "Absences.edit",
       "Absences.delete",
@@ -507,7 +509,7 @@ end
 rule AtLeastPersonnelAdminMini_Generic
 when
  $uro: UsersRolesOffices()
- Role(name in (Role.PERSONNEL_ADMIN,Role.PERSONNEL_ADMIN_MINI)) from $uro.role
+ Role(name in (Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI)) from $uro.role
  $c: PermissionCheck(action in (
 
         /* Vecchio permesso viewPerson */
@@ -533,7 +535,6 @@ when
          *  TODO rifattorizzare tutte le action di Institutes e Offices
          */
         "Offices.showOffices",
-        "Institutes.list",
 
         /* Vecchio permesso viewCompetenceCode */
         "Competences.manageCompetenceCode",
@@ -1132,11 +1133,12 @@ when
  $p: Person() from currentOperator.person
  $o: Office() from $p.office
  $target: Stamping(UserDao.getAllowedStampTypes(currentOperator).contains(stampType), this.getOwner() == $p)
+  $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), target == $target, granted == false)
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
  PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
- $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), target == $target, granted == false)
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
- eval (!$p.alreadyCertificated($target.date.getYear(), $target.date.getMonthOfYear()))
+ /** non più indietro di 2 mesi fa e solo nei mesi non ancora inviati sugli attestati **/
+eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
 then
  $c.grant();
 end
@@ -1198,7 +1200,8 @@ when
  $p: Person() from currentOperator.person
  $target: YearMonth()
  $c: PermissionCheck(action == "Stampings.blank", target == $target, granted == false)
- eval(!$p.alreadyCertificated($target.getYear(), $target.getMonthOfYear()))
+ /** non più indietro di 2 mesi fa e solo nei mesi non ancora inviati sugli attestati **/
+ eval($target.isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target))
 then
  $c.grant();
 end
@@ -1212,10 +1215,11 @@ when
  $p: Person(qualification.qualification <= 3) from currentOperator.person
  $o: Office() from $p.office
  $target: Stamping(this.getOwner() == $p)
- Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
  $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save" , "Stampings.delete"), granted == false, target == $target)
+ Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
- eval (!$p.alreadyCertificated($target.date.getYear(), $target.date.getMonthOfYear()))
+  /** non più indietro di 2 mesi fa e solo nei mesi non ancora inviati sugli attestati **/
+ eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
 then
  $c.grant();
 end
