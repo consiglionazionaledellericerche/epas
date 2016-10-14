@@ -26,6 +26,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 /**
+ * Dao per l'accesso alle informazioni dei BadgeReader.
+ * 
  * @author alessandro
  */
 public class BadgeReaderDao extends DaoBase {
@@ -38,7 +40,7 @@ public class BadgeReaderDao extends DaoBase {
   }
 
   /**
-   * @return il badgereader associato al codice passato come parametro
+   * @return il badgereader associato al codice passato come parametro.
    */
   public BadgeReader byId(Long id) {
 
@@ -49,7 +51,7 @@ public class BadgeReaderDao extends DaoBase {
   }
 
   /**
-   * @return il badgereader associato al codice passato come parametro
+   * @return il badgereader associato al codice passato come parametro.
    */
   public BadgeReader byCode(String code) {
 
@@ -115,7 +117,8 @@ public class BadgeReaderDao extends DaoBase {
    */
   public List<BadgeReader> getBadgeReaderByOffice(Office office) {
     final QBadgeReader badgeReader = QBadgeReader.badgeReader;
-    final JPQLQuery query = getQueryFactory().from(badgeReader).where(badgeReader.user.owner.eq(office));
+    final JPQLQuery query = 
+        getQueryFactory().from(badgeReader).where(badgeReader.user.owner.eq(office));
     return query.list(badgeReader);
   }
 

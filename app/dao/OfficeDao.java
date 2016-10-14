@@ -87,7 +87,7 @@ public class OfficeDao extends DaoBase {
   }
 
   /**
-   * @return l'ufficio associato al perseoId
+   * @return l'ufficio associato al perseoId.
    */
   public Optional<Office> byPerseoId(Long perseoId) {
     final QOffice office = QOffice.office;

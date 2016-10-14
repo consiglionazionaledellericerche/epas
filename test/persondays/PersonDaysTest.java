@@ -73,10 +73,7 @@ public class PersonDaysTest {
    */
   @Test
   public void tagliaferriIsHungry() {
-    
-    LocalTime startLunch = new LocalTime(12, 0, 0);
-    LocalTime endLunch = new LocalTime(15, 0, 0);
-    
+        
     PersonDay personDay = new PersonDay(null, second);
     List<Stamping> stampings = Lists.newArrayList();
     stampings.add(stampings(personDay, 8, 30, WayType.in, null));
@@ -205,11 +202,7 @@ public class PersonDaysTest {
     
     assertThat(validPairs.size()).isEqualTo(2);
     assertThat(gapLunchPair.size()).isEqualTo(0);
-    
-    // # Il test che secondo Daniele fallisce
-    LocalTime startLunch = new LocalTime(12,0,0);
-    LocalTime endLunch = new LocalTime(15,0,0);
-    
+       
     stampings = Lists.newArrayList();
     stampings.add(stampings(personDay, 8, 00, WayType.in, null));
     stampings.add(stampings(personDay, 12, 30, WayType.out, lunchST));
@@ -219,6 +212,10 @@ public class PersonDaysTest {
     stampings.add(stampings(personDay, 17, 00, WayType.out, null));
     personDay.setStampings(stampings);
     
+    // # Il test che secondo Daniele fallisce
+    LocalTime startLunch = new LocalTime(12,0,0);
+    LocalTime endLunch = new LocalTime(15,0,0);
+
     validPairs = personDayManager.computeValidPairStampings(personDay);
     gapLunchPair = personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
     
