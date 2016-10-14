@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import lombok.Getter;
 
 import manager.services.absences.AbsenceMigration.DefaultGroup;
-import manager.services.absences.web.AbsenceRequestForm.AbsenceRequestCategory;
 
 import models.Person;
 import models.absences.AbsenceType;
@@ -234,6 +233,7 @@ public class AbsenceRequestForm {
         DefaultGroup.MALATTIA_FIGLIO_3_12.name(),
         DefaultGroup.MALATTIA_FIGLIO_3_13.name(),
         DefaultGroup.MALATTIA_FIGLIO_3_14.name(),
+        DefaultGroup.EMPLOYEE.name(),
         DefaultGroup.ALTRI.name(), DefaultGroup.G_95.name()
         ));
 
