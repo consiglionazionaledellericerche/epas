@@ -199,8 +199,6 @@ public class AbsenceMigration {
    * Costruisce i gruppi di default.
    */
   public void absenceMigrationProcessor(boolean firstTime) { 
-
-    LocalDate expireDate = new LocalDate(2015, 12, 31);
     
     setStaticVariables();
     
@@ -209,6 +207,8 @@ public class AbsenceMigration {
     convertJustifiedTypes();
     
     log.info("  ... Inizia la migrazione dei gruppi ...");
+    
+    LocalDate expireDate = new LocalDate(2015, 12, 31);
 
     build18Group(expireDate);
     
@@ -369,9 +369,11 @@ public class AbsenceMigration {
     setStaticVariables(); 
 
     int absencesToUpdate = 100;
-
+    int absencesMigrated = 0;
+    
     List<GroupAbsenceType> groupAbsenceTypes = GroupAbsenceType.findAll();
     for (GroupAbsenceType groupAbsenceType : groupAbsenceTypes) {
+      int groupMigrated = 0;
       groupAbsenceType = GroupAbsenceType.findById(groupAbsenceType.id);
       Set<AbsenceType> absenceTypes = Sets.newHashSet();
       if (groupAbsenceType.takableAbsenceBehaviour != null) {
@@ -392,7 +394,8 @@ public class AbsenceMigration {
           }
           migrateAbsence(absence, 
               nothing, specifiedMinutes, absenceTypeMinutes, allDay, halfDay, assignAllDay);
-
+          absencesMigrated++;
+          groupMigrated++;
           absencesToUpdate--;
           if (absencesToUpdate == 0) {
             absencesToUpdate = 100;
@@ -402,6 +405,15 @@ public class AbsenceMigration {
           }
         }
       }
+      if (groupMigrated > 0) {
+        log.info("Sono state correttamente migrate {} assenze del gruppo {}", groupMigrated, 
+            groupAbsenceType.description);
+      }
+    }
+    if (absencesMigrated > 0) {
+      log.info("Sono state correttamente migrate {} assenze.", absencesMigrated);
+    } else {
+      log.info("Nessuna assenza necessitava di conversione.");
     }
 
   }
