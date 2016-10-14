@@ -99,6 +99,7 @@ public enum EpasParam {
    * Di quanto indietro nel tempo effettuare il ricalcolo dei personDays.
    */
   RECOMPUTATION_LIMIT("recomputation_limit",
+      EpasParamCategory.GENERAL,
       EpasParamTimeType.GENERAL,
       EpasParamValueType.INTEGER,
       EpasParamValueType.formatValue(6),
@@ -318,6 +319,7 @@ public enum EpasParam {
 
     /**
      * Converte il tipo primitivo nella formattazione string.
+     *
      * @param value l'oggetto da convertire in stringa
      * @return la stringa rappresentante il valore passato
      */
@@ -372,9 +374,9 @@ public enum EpasParam {
             return LocalTime.parse(value, DateTimeFormat.forPattern(LOCALTIME_FORMATTER));
           case LOCALTIME_INTERVAL:
             LocalTimeInterval interval = new LocalTimeInterval(
-                (LocalTime)parseValue(
+                (LocalTime) parseValue(
                     LOCALTIME, value.trim().split(LOCALTIME_INTERVAL_SEPARATOR)[0]),
-                (LocalTime)parseValue(
+                (LocalTime) parseValue(
                     LOCALTIME, value.trim().split(LOCALTIME_INTERVAL_SEPARATOR)[1]));
             if (interval.to.isBefore(interval.from)) {
               return null;
@@ -402,7 +404,6 @@ public enum EpasParam {
       return null;
     }
   }
-
 
 
 }
