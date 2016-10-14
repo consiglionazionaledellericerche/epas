@@ -27,6 +27,8 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 
 /**
+ * Dao per l'accesso alle informazioni degli AbsenceType.
+ *
  * @author dario
  */
 public class AbsenceTypeDao extends DaoBase {
@@ -91,27 +93,15 @@ public class AbsenceTypeDao extends DaoBase {
 
   }
 
+  /**
+   * @return la lista degli AbsenceType che non siano di internalUse.
+   */
   public List<AbsenceType> certificateTypes() {
 
     final QAbsenceType absenceType = QAbsenceType.absenceType;
 
     return getQueryFactory().from(absenceType)
         .where(absenceType.internalUse.eq(false)).list(absenceType);
-  }
-
-  public ModelQuery.SimpleResults<AbsenceType> getAbsences(Optional<String> name) {
-
-    final QAbsenceType absenceType = QAbsenceType.absenceType;
-    final BooleanBuilder condition = new BooleanBuilder();
-
-    final JPQLQuery query = getQueryFactory().from(absenceType).orderBy(absenceType.code.asc());
-
-    if (name.isPresent() && !name.get().trim().isEmpty()) {
-      condition.andAnyOf(absenceType.code.startsWithIgnoreCase(name.get()),
-          absenceType.description.toLowerCase().like("%" + Strings.toLowerCase(name.get()) + "%"));
-    }
-
-    return ModelQuery.wrap(query.where(condition), absenceType);
   }
 
   /**
@@ -160,8 +150,8 @@ public class AbsenceTypeDao extends DaoBase {
 
   /**
    * Le absenceType con quei codici di assenza.
-   * @param codes
-   * @return
+   * @param codes la lista dei codice di assenza da cercare
+   * @return la lista degli AbsenceType corrispondenti ai codici passati.
    */
   public List<AbsenceType> absenceTypeCodeSet(Set<String> codes) {
     

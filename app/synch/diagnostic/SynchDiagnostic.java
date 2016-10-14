@@ -15,7 +15,7 @@ import java.util.Map;
 
 /**
  * Mette a disposizione servizi di diagnosi dello stato di sincronizzazione. 
- * 
+ * <p>
  * Istituto:
  * Un istituto è correttamente sincronizzato se:
  *  1) Ha il perseoId popolato e l'entità di perseo associata è aggiornata.
@@ -36,6 +36,7 @@ import java.util.Map;
  * Un contratto è correttamente sincronizzato se:
  *  1) Ha il perseoId popolato e l'entità di perseo associata è aggiornata.
  *     Data inizio, Data Fine (con gestione caso determinato)
+ * </p>
  * @author alessandro
  *
  */
@@ -227,7 +228,7 @@ public class SynchDiagnostic {
     
     //Tutti i contratti con perseoId popolato sono sincronizzati
     // Contemporaneamente mi prelevo il contratto attivo epas
-    for(Contract epasContract : epasPerson.contracts) {
+    for (Contract epasContract : epasPerson.contracts) {
       if (DateUtility.isDateIntoInterval(LocalDate.now(), epasContract.periodInterval())) {
         epasActiveContract = epasContract;
       }
