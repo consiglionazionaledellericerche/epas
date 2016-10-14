@@ -167,9 +167,8 @@ public class MonthRecaps extends Controller {
   }
 
   /**
-   * @author alessandro
-   *
-   *         Raccoglitore per il CustomRecap
+   *  Raccoglitore per il CustomRecap.
+   *  @author alessandro
    */
   @Data
   public static class CustomRecapDTO {

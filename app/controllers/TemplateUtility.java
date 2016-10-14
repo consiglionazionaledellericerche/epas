@@ -97,7 +97,8 @@ public class TemplateUtility {
       RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao,
       IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao,
       SynchDiagnostic synchDiagnostic, ConfigurationManager configurationManager,
-      CompetenceCodeDao competenceCodeDao, AbsenceComponentDao absenceComponentDao, NotificationDao notificationDao, UserDao userDao) {
+      CompetenceCodeDao competenceCodeDao, AbsenceComponentDao absenceComponentDao, 
+      NotificationDao notificationDao, UserDao userDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -313,14 +314,14 @@ public class TemplateUtility {
   }
 
   /**
-   * @return tutti i ruoli presenti
+   * @return tutti i ruoli presenti.
    */
   public List<Role> getRoles() {
     return roleDao.getAll();
   }
 
   /**
-   * @return tutti gli uffici sul quale l'utente corrente ha il ruolo di TECHNICAL_ADMIN
+   * @return tutti gli uffici sul quale l'utente corrente ha il ruolo di TECHNICAL_ADMIN.
    */
   public List<Office> getTechnicalAdminOffices() {
     return secureManager.officesTechnicalAdminAllowed(Security.getUser().get())
@@ -477,19 +478,19 @@ public class TemplateUtility {
       if (amount == 0) {
         return "0%";// giorno lavorativo";
       }
-//      int units = amount / 100;
-//      int percent = amount % 100;
-//      String label = " giorni lavorativi";
-//      if (units == 1) {
-//        label = " giorno lavorativo";
-//      }
-//      if (units > 0 && percent > 0) {
-//        return units + label + " + " + percent + "% di un giorno lavorativo";
-//      } else if (units > 0) {
-//        return units + label;
-//      } else if (percent > 0) {
-//        return percent + "% di un giorno lavorativo";
-//      }
+      //      int units = amount / 100;
+      //      int percent = amount % 100;
+      //      String label = " giorni lavorativi";
+      //      if (units == 1) {
+      //        label = " giorno lavorativo";
+      //      }
+      //      if (units > 0 && percent > 0) {
+      //        return units + label + " + " + percent + "% di un giorno lavorativo";
+      //      } else if (units > 0) {
+      //        return units + label;
+      //      } else if (percent > 0) {
+      //        return percent + "% di un giorno lavorativo";
+      //      }
       return amount + "%";
     }
     if (amountType.equals(AmountType.minutes)) {

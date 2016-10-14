@@ -1,4 +1,4 @@
-package personDays;
+package persondays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -103,14 +103,13 @@ public class PersonDaysTest {
    * #1 Uscita pr Ingresso pr
    * Uscita pr Ingresso 
    * Uscita    Ingrssso pr
-   * Uscita    Ingresso    (e sono in istituto non di servizio) 
+   * Uscita    Ingresso    (e sono in istituto non di servizio). 
    */
   @Test
   public void consideredGapLunchPairs() { 
 
     PersonDay personDay = new PersonDay(null, second);
-    List<PairStamping> validPairs;
-    List<PairStamping> gapLunchPair;
+
 
     // #1
     List<Stamping> stampings = Lists.newArrayList();
@@ -118,9 +117,11 @@ public class PersonDaysTest {
     stampings.add(stampings(personDay, 13, 00, WayType.out, lunchST));
     stampings.add(stampings(personDay, 14, 00, WayType.in, lunchST));
     stampings.add(stampings(personDay, 17, 00, WayType.out, null));
-
+    
+    List<PairStamping> gapLunchPair = 
+        personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
     personDay.setStampings(stampings);
-    gapLunchPair = personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
+     
 
     assertThat(gapLunchPair.size()).isEqualTo(1);
     assertThat(gapLunchPair.get(0).timeInPair).isEqualTo(60);
@@ -131,7 +132,8 @@ public class PersonDaysTest {
     stampings.add(stampings(personDay, 17, 00, WayType.out, null));
     personDay.setStampings(stampings);
     
-    validPairs = personDayManager.computeValidPairStampings(personDay);
+    List<PairStamping> validPairs = personDayManager.computeValidPairStampings(personDay);
+    
     gapLunchPair = personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
     
     assertThat(validPairs.size()).isEqualTo(1);

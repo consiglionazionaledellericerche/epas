@@ -2,7 +2,6 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -11,11 +10,9 @@ import com.google.gdata.util.common.base.Preconditions;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonMonthRecapDao;
-import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
 import manager.PersonMonthsManager;
@@ -25,9 +22,7 @@ import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
-import models.Role;
 import models.User;
-import models.UsersRolesOffices;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -35,9 +30,9 @@ import org.joda.time.YearMonth;
 import play.data.validation.Required;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
-import java.nio.file.attribute.UserPrincipalLookupService;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,8 +58,6 @@ public class PersonMonths extends Controller {
   private static SecurityRules rules;
   @Inject
   static WrapperModelFunctionFactory wrapperFunctionFactory;
-  @Inject
-  private static UsersRolesOfficesDao uroDao;
 
   /**
    * metodo che renderizza la visualizzazione del riepilogo orario.

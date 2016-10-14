@@ -233,12 +233,6 @@ public class Certifications extends Controller {
         peopleCertificationStatus);
   }
 
-  /**
-   *
-   * @param officeId
-   * @param year
-   * @param month
-   */
   public static void emptyCertifications(Long officeId, int year, int month) {
 
     flash.clear();  //non avendo per adesso un meccanismo di redirect pulisco il flash...

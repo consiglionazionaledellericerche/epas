@@ -1,24 +1,27 @@
 package controllers;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.zip.GZIPOutputStream;
-
-import org.apache.commons.mail.EmailAttachment;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 
 import helpers.OilConfig;
 import helpers.deserializers.InlineStreamHandler;
-import lombok.val;
+
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+
 import models.User;
 import models.exports.ReportData;
+
+import org.apache.commons.mail.EmailAttachment;
+
 import play.mvc.Mailer;
 import play.mvc.Scope;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.zip.GZIPOutputStream;
 
 
 /**
@@ -91,7 +94,8 @@ public class OilMailer extends Mailer {
       //Informazioni di debug in Attachment
       ByteArrayOutputStream debugGz = new ByteArrayOutputStream();
       GZIPOutputStream debugStream = new GZIPOutputStream(debugGz);
-      debugStream.write(String.format("User Agent: %s\n\n", data.getBrowser().getUserAgent()).getBytes());
+      debugStream.write(
+          String.format("User Agent: %s\n\n", data.getBrowser().getUserAgent()).getBytes());
 
       for (val s : session.all().entrySet()) {
         debugStream.write(String.format("Session.%s: %s\n", s.getKey(), s.getValue()).getBytes());
@@ -119,10 +123,10 @@ public class OilMailer extends Mailer {
       addAttachment(img);
       log.info("Invio segnalazione ad OIL, suject: {}", subject);
       send(user, data, session);
-    } catch (MalformedURLException e) {
-      log.error("malformed url", e);
-    } catch (IOException e) {
-      log.error("io error", e);
+    } catch (MalformedURLException mue) {
+      log.error("malformed url", mue);
+    } catch (IOException ioe) {
+      log.error("io error", ioe);
     }
   }
   
@@ -130,18 +134,20 @@ public class OilMailer extends Mailer {
    * Formato mail di risposta alle richieste dell’esperto (ticket già aperto)
    * L'oggetto è tokenizzato, dove il separatore è la doppia tilde, ed ha il seguente formato:
    * [adp]~~azione~~Id
-   * dove i valori di azione ed Id vengono trasmessi al form tramite query-string, e così come sono vanno riportati nella mail.
+   * dove i valori di azione ed Id vengono trasmessi al form tramite query-string, e così come 
+   * sono vanno riportati nella mail.
    * Un esempio di query-string generata potrebbe essere:
    * http://indirizzoformdirisposta.it?id=9999&azione=c1
    * Il destinatario è sempre oil.cert@cnr.it
    * La descrizione contiene la risposta dell’utente.
    *
-   * @param user
-   * @param oilId
+   * @param user utente a cui inviare la risposta.
+   * @param oilId id del sistema OIL.
    * @param action
-   * @param description
+   * @param description contiene la risposta dell'utente.
    */
-  public static void sendUserReply(Optional<User> user, String oilId, String action, String description) {
+  public static void sendUserReply(Optional<User> user, String oilId, 
+      String action, String description) {
     Verify.verifyNotNull(user);
     Verify.verifyNotNull(oilId);
     Verify.verifyNotNull(action);
@@ -157,7 +163,7 @@ public class OilMailer extends Mailer {
     addRecipient(OilConfig.emailTo());
     setFrom(email);
     
-  //[adp]~~azione~~Id
+    //[adp]~~azione~~Id
     String subject = 
         String.format(OIL_EMAIL_REPLAY_SUBJECT_PATTERN,
             OilConfig.appName(), action, oilId);
