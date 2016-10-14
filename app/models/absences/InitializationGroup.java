@@ -37,24 +37,24 @@ public class InitializationGroup extends BaseModel {
   @JoinColumn(name = "group_absence_type_id", nullable = false)
   public GroupAbsenceType groupAbsenceType;
   
-  @Column(name="initialization_date")
+  @Column(name = "initialization_date")
   public LocalDate initializationDate;
 
-  @Column(name="forced_begin")
+  @Column(name = "forced_begin")
   public LocalDate forcedBegin;
   
-  @Column(name="forced_end")
+  @Column(name = "forced_end")
   public LocalDate forcedEnd;
   
   // if (groupAbsenceType.pattern == programmed)
   
-  @Column(name="takable_total")
+  @Column(name = "takable_total")
   public Integer takableTotal;
   
-  @Column(name="takable_used")
+  @Column(name = "takable_used")
   public Integer takableUsed;
   
-  @Column(name="complation_used")
+  @Column(name = "complation_used")
   public Integer complationUsed;
   
   // if (groupAbsenceType.pattern == vacationsCnr)
