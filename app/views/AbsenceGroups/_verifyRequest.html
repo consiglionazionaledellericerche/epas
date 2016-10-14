@@ -1,5 +1,5 @@
 *{ verify request }* 
-	#{form action:@AbsenceGroups.configureInsert(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit',
+	#{form action:@AbsenceGroups.insert(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit',
 	'data-async':'#absenceData', 'data-async-error':'#absenceData' }
 	
        #{f.hidden 'personId', value:absenceRequestForm.person.id /}
