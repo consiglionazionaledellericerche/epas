@@ -1,11 +1,18 @@
 package security;
 
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
+
+import dao.history.HistoricalDao;
+import dao.UserDao;
 import manager.configurations.EpasParam;
 import models.enumerate.CodesForEmployee;
 import models.enumerate.StampTypes;
 import models.enumerate.AccountRole;
+import models.enumerate.AttachmentType;
 import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.Attachment;
 import models.Configuration;
 import models.Notification;
 import models.Office;
@@ -87,8 +94,6 @@ when
 
      	/* Situazione Mensile */
      	"Stampings.stampings",
-     	/* "Stampings.editEmployee",
-     	"Stampings.updateEmployee", */
 
      	/* Assenze mensili */
      	"Absences.absences",
@@ -188,10 +193,9 @@ end
 rule AdminCanEditStamping
 when
  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
- $s: Stamping()
- $pd: PersonDay() from $s.personDay
- Office(persons.contains($pd.person)) from $uro.office
- $c: PermissionCheck(target == $s, granted == false )
+ $target: Stamping()
+ Office(persons.contains($target.getOwner())) from $uro.office
+ $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save"), target == $target, granted == false )
 then
  $c.grant();
 end
@@ -199,14 +203,11 @@ end
 /* Azioni eseguibili da qualsiasi utente che abbiano come destinatario
  * dell'azione se stesso
  */
-
 rule HasRightOnHimself
 when
   $p: Person(this == currentOperator.person)
   $c: PermissionCheck(action not in (
       "Stampings.blank",
-      "Stampings.edit",
-      "Stampings.save",
       "Absences.blank",
       "Absences.edit",
       "Absences.delete",
@@ -237,8 +238,6 @@ when
   $o: Office() from $uro.office
   $c: PermissionCheck(action not in (
     "Stampings.blank",
-    "Stampings.edit",
-    "Stampings.save",
     "Absences.blank",
     "Absences.edit",
     "Absences.delete",
@@ -510,7 +509,7 @@ end
 rule AtLeastPersonnelAdminMini_Generic
 when
  $uro: UsersRolesOffices()
- Role(name in (Role.PERSONNEL_ADMIN,Role.PERSONNEL_ADMIN_MINI)) from $uro.role
+ Role(name in (Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI)) from $uro.role
  $c: PermissionCheck(action in (
 
         /* Vecchio permesso viewPerson */
@@ -536,7 +535,6 @@ when
          *  TODO rifattorizzare tutte le action di Institutes e Offices
          */
         "Offices.showOffices",
-        "Institutes.list",
 
         /* Vecchio permesso viewCompetenceCode */
         "Competences.manageCompetenceCode",
@@ -577,6 +575,7 @@ when
 
         "Configurations.show",
         "Configurations.edit",
+        "Configurations.removeAttachment",
 
      	"MealTickets.recapMealTickets",
      	"MealTickets.personMealTickets",
@@ -704,8 +703,7 @@ end
 
 rule OnlyForPersonnelAdmin_Generic
 when
- $uro: UsersRolesOffices()
- Role(name == Role.PERSONNEL_ADMIN) from $uro.role
+ $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
  $c: PermissionCheck(action in (
 
  		/*Metodi per la gestione delle assenze bypassando i controlli*/
@@ -733,6 +731,8 @@ when
      	"Configurations.personShow",
      	"Configurations.personEdit",
      	"Configurations.personUpdate",
+     	"Configurations.getAttachment",
+        "Configurations.removeAttachment",
 
         "Contracts.personContracts",
         "Contracts.insert",
@@ -840,6 +840,7 @@ when
      	"Configurations.show",
      	"Configurations.edit",
         "Configurations.update",
+        "Configurations.uploadAttachment",
 
 		"BadgeSystems.joinBadgesPerson",
 		"BadgeSystems.saveBadges",
@@ -864,9 +865,8 @@ end
 
 rule OnlyForPersonnelAdmin_InOffice
 when
- $uro: UsersRolesOffices()
+ $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
  $o: Office( usersRolesOffices contains $uro)
- Role(name == Role.PERSONNEL_ADMIN) from $uro.role
  $c: PermissionCheck(action in (
 
  		/* Vecchio permesso editPerson */
@@ -881,6 +881,7 @@ when
      	"Configurations.personShow",
      	"Configurations.personEdit",
      	"Configurations.personUpdate",
+     	"Configurations.uploadAttachment",
 
         "Contracts.personContracts",
         "Contracts.insert",
@@ -993,8 +994,6 @@ when
         "Absences.editCode",
 
      	"Configurations.show",
-     	"Configurations.edit",
-        "Configurations.update",
 
 		"BadgeSystems.joinBadgesPerson",
 		"BadgeSystems.saveBadges",
@@ -1014,6 +1013,73 @@ when
         "Charts.test"
 
        ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+/************************************************************************************
+ * L'amministratore può inserire le timbrature nel passato senza limiti (per ora)
+ * il controllo che non sia una data futura viene fatta nell'action
+ ************************************************************************************/
+rule adminCanInsertStampings_inDate
+when
+ $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
+ $target: YearMonth()
+ $c: PermissionCheck(action == "Stampings.blank", target == $target, granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Una configurazione può essere modificata se....
+ ******************************************************************************/
+rule canEditConfiguration
+when
+  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
+  $target: Configuration(office == $uro.office, epasParam != EpasParam.TR_AUTOCERTIFICATION)
+  $c: PermissionCheck(action in ("Configurations.edit", "Configurations.update") , target == $target, granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Non è possibile eliminare il file relativo all'autorizzazione per
+ * l'autocertificazione dei tecnologi e ricercatori se il parametro è abilitato
+ ******************************************************************************/
+rule cannotRemoveAttachment
+when
+  $target: Attachment(type == AttachmentType.TR_AUTOCERTIFICATION)
+  $o: Office() from $target.office
+  Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action == "Configurations.removeAttachment", target == $target)
+then
+ $c.revoke();
+end
+
+/*******************************************************************************
+ * L'amministratore del personale può gestire gli allegati per la propria sede
+ ******************************************************************************/
+rule canEditAttachment
+when
+  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
+  $target: Attachment(office == $uro.office)
+  $c: PermissionCheck(action in (
+  "Configurations.getAttachment",
+  "Configurations.removeAttachment"), target == $target, granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * La Configurazione per abilitare l'autocertificazione può essere abilitata se...
+ ******************************************************************************/
+rule canEditAutocertificationConf
+when
+  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
+  $target: Configuration(office == $uro.office, epasParam == EpasParam.TR_AUTOCERTIFICATION)
+  $o: Office() from $uro.office
+  Attachment(type == AttachmentType.TR_AUTOCERTIFICATION) from $o.attachments
+  $c: PermissionCheck(action in ("Configurations.edit", "Configurations.update") , target == $target, granted == false)
 then
  $c.grant();
 end
@@ -1042,6 +1108,41 @@ then
  $c.grant();
 end
 
+
+/************************************************************************************
+ * Un dipendente può autocertificare le proprie timbrature per il lavoro fuori Sede se...
+ ***********************************************************************************/
+rule employeeCanInsertStampingsOffsite
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ $o: Office() from $p.office
+ Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
+ PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
+ $c: PermissionCheck(action == "Stampings.blank", target == $p, granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Un dipendente può modificare le sue timbrature per il lavoro fuori Sede se...
+ ******************************************************************************/
+rule employeeCanEditStampingsOffsite
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ $o: Office() from $p.office
+ $target: Stamping(UserDao.getAllowedStampTypes(currentOperator).contains(stampType), this.getOwner() == $p)
+  $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), target == $target, granted == false)
+ Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
+ PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
+ eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
+ /** non più indietro di 2 mesi fa e solo nei mesi non ancora inviati sugli attestati **/
+eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
+then
+ $c.grant();
+end
+
 /*
  * L'impiegato può modificare/salvare una determinata assenza se:
  */
@@ -1060,40 +1161,68 @@ then
  $c.grant();
 end
 
-/*
- * L'impiegato può modificare/salvare una determinata timbratura se:
- */
-rule EmployeeCanEditStamping
+/*******************************************************************************
+ * Un dipendente può autocertificare le proprie timbrature se...
+ ******************************************************************************/
+rule employeeAutocertificationStampings
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
- $s: Stamping(StampTypes.LAVORO_FUORI_SEDE == stampType)
- $pd: PersonDay() from $s.personDay
- $p: Person(this == currentOperator.person) from $pd.person
+ $p: Person(qualification.qualification <= 3) from currentOperator.person
  $o: Office() from $p.office
- Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
- PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
- $c: PermissionCheck(target == $s, granted == false )
+ Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
+ $c: PermissionCheck(action in ("Stampings.blank", "Stampings.edit", "Stampings.save" , "Stampings.delete" ), target == null, granted == false)
 then
  $c.grant();
 end
 
-
 /*******************************************************************************
- * Azioni per utente employee abilitato alla timbratura fuori sede
+ * Un dipendente può autocertificare le proprie timbrature se...
  ******************************************************************************/
-rule Working_offsite_withTarget
+rule employeeCanInsertStampings_OnPerson
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person(qualification.qualification <= 3) from currentOperator.person
+ $o: Office() from $p.office
+ Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
+ $c: PermissionCheck(action == "Stampings.blank", target == $p, granted == false)
+then
+ $c.grant();
+end
+
+/************************************************************************************
+ * Un dipendente può autocertificare le proprie timbrature entro una certa data se...
+ * Non vengono fatti i controlli sulle configurazioni che vengono già fatti nelle altre drools
+ * in modo che questa regola valga sia nel caso di
+ ************************************************************************************/
+rule employeeCanInsertStampings_inDate
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
- $o: Office() from $p.office
- Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
- PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
- $c: PermissionCheck(action in (
-    "Absences.blank","Stampings.blank", "Stampings.save" ), granted == false, target == $p)
+ $target: YearMonth()
+ $c: PermissionCheck(action == "Stampings.blank", target == $target, granted == false)
+ /** non più indietro di 2 mesi fa e solo nei mesi non ancora inviati sugli attestati **/
+ eval($target.isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target))
 then
  $c.grant();
 end
 
+/*******************************************************************************
+ * Un dipendente può modificare le sue timbrature se...
+ ******************************************************************************/
+rule employeeCanEditStampings
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person(qualification.qualification <= 3) from currentOperator.person
+ $o: Office() from $p.office
+ $target: Stamping(this.getOwner() == $p)
+ $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save" , "Stampings.delete"), granted == false, target == $target)
+ Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
+ eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
+  /** non più indietro di 2 mesi fa e solo nei mesi non ancora inviati sugli attestati **/
+ eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
+then
+ $c.grant();
+end
 
 /*******************************************************************************
  * Azioni utente con ruolo BADGE_READER
