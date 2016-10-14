@@ -86,11 +86,16 @@ public class Bootstrap extends Job<Void> {
           .getResource("../db/import/absence-type-and-qualification-phase2.xml")));
     }
 
+    log.info("Iniziata migrazione assenze ...");
     if (GroupAbsenceType.count() == 0) {
-      log.info("Iniziata migrazione assenze!");
-      //absenceMigration.buildDefaultGroups();
-      log.info("Conclusa migrazione assenze!");
+      log.info(" ... questa operazione richiederà circa due minuti ...");
+      absenceMigration.absenceMigrationProcessor(true);
+    } else {
+      log.info(" ... questa operazione richiederà alcuni secondi ...");
+      absenceMigration.absenceMigrationProcessor(false);
     }
+    
+    log.info("Conclusa migrazione assenze!");
 
     if (User.find("byUsername", "developer").fetch().isEmpty()) {
       Fixtures.loadModels("../db/import/developer.yml");

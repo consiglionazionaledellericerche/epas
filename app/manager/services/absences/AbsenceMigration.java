@@ -34,6 +34,90 @@ import java.util.Set;
 public class AbsenceMigration {
 
   private final AbsenceComponentDao absenceComponentDao;
+  
+  private static JustifiedType nothing;
+  private static JustifiedType specifiedMinutes;
+  private static JustifiedType absenceTypeMinutes;
+  private static JustifiedType allDay;
+  private static JustifiedType halfDay;
+  private static JustifiedType assignAllDay;
+  private static JustifiedType allDayLimit;
+  private static JustifiedType specifiedMinutesLimit;
+  
+  private static CategoryGroupAbsenceType generalCategory;
+  private static CategoryGroupAbsenceType permissionCategory;
+  private static CategoryGroupAbsenceType postpartumCategory;
+  private static CategoryGroupAbsenceType lawCategory;
+  private static CategoryGroupAbsenceType publicFunctionCategory;
+  private static CategoryGroupAbsenceType malattiaCategory;
+  private static CategoryGroupAbsenceType malattiaFiglio1Category;
+  private static CategoryGroupAbsenceType malattiaFiglio2Category;
+  private static CategoryGroupAbsenceType malattiaFiglio3Category;
+  private static CategoryGroupAbsenceType automaticCodes;
+  private static CategoryGroupAbsenceType employeeCodes;
+  
+  private void setStaticVariables() {
+    nothing = absenceComponentDao
+        .getOrBuildJustifiedType(JustifiedTypeName.nothing);
+    specifiedMinutes = absenceComponentDao
+        .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
+    absenceTypeMinutes = absenceComponentDao
+        .getOrBuildJustifiedType(JustifiedTypeName.absence_type_minutes);
+    allDay = absenceComponentDao
+        .getOrBuildJustifiedType(JustifiedTypeName.all_day);
+    halfDay = absenceComponentDao
+        .getOrBuildJustifiedType(JustifiedTypeName.half_day);
+    assignAllDay = absenceComponentDao
+        .getOrBuildJustifiedType(JustifiedTypeName.assign_all_day);
+    allDayLimit = absenceComponentDao
+        .getOrBuildJustifiedType(JustifiedTypeName.all_day_limit);
+    specifiedMinutesLimit = absenceComponentDao
+        .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes_limit);
+    
+    generalCategory = absenceComponentDao
+        .getOrBuildCategoryType(DefaultCategoryType.GENERAL.name, 
+            DefaultCategoryType.GENERAL.priority);
+
+    permissionCategory = absenceComponentDao
+        .getOrBuildCategoryType(DefaultCategoryType.PERMISSION.name, 
+            DefaultCategoryType.PERMISSION.priority);
+
+    postpartumCategory = absenceComponentDao
+        .getOrBuildCategoryType(DefaultCategoryType.POST_PARTUM.name, 
+            DefaultCategoryType.POST_PARTUM.priority);
+
+    lawCategory = absenceComponentDao
+        .getOrBuildCategoryType(DefaultCategoryType.LAW_104_92.name, 
+            DefaultCategoryType.LAW_104_92.priority);
+
+    publicFunctionCategory = absenceComponentDao
+        .getOrBuildCategoryType(DefaultCategoryType.PUBLIC_FUNCTION.name, 
+            DefaultCategoryType.PUBLIC_FUNCTION.priority);
+
+    malattiaCategory = absenceComponentDao
+        .getOrBuildCategoryType(DefaultCategoryType.MALATTIA.name, 
+            DefaultCategoryType.MALATTIA.priority);
+
+    malattiaFiglio1Category = absenceComponentDao
+        .getOrBuildCategoryType(DefaultCategoryType.MALATTIA_FIGLIO_1.name, 
+            DefaultCategoryType.MALATTIA_FIGLIO_1.priority);
+
+    malattiaFiglio2Category = absenceComponentDao
+        .getOrBuildCategoryType(DefaultCategoryType.MALATTIA_FIGLIO_2.name, 
+            DefaultCategoryType.MALATTIA_FIGLIO_2.priority);
+
+    malattiaFiglio3Category = absenceComponentDao
+        .getOrBuildCategoryType(DefaultCategoryType.MALATTIA_FIGLIO_3.name, 
+            DefaultCategoryType.MALATTIA_FIGLIO_3.priority);
+
+    automaticCodes = absenceComponentDao
+        .getOrBuildCategoryType(DefaultCategoryType.AUTOMATIC_CODES.name, 
+            DefaultCategoryType.AUTOMATIC_CODES.priority);
+    
+    employeeCodes = absenceComponentDao
+        .getOrBuildCategoryType(DefaultCategoryType.EMPLOYEE_CODES.name, 
+            DefaultCategoryType.EMPLOYEE_CODES.priority);
+  }
 
   public enum DefaultCategoryType {
 
@@ -47,7 +131,9 @@ public class AbsenceMigration {
     MALATTIA_FIGLIO_3("Malattia terzo figlio", 9),
     PUBLIC_FUNCTION("Pubblica Funzione", 10),
     OTHER_CODES("Altri Codici", 11),
-    AUTOMATIC_CODES("Codici Automatici", 12),;
+    AUTOMATIC_CODES("Codici Automatici", 12),
+    EMPLOYEE_CODES("Codici Dipendenti", 13)
+    ;
 
     public String name;
     public int priority;
@@ -79,7 +165,8 @@ public class AbsenceMigration {
     T_MALATTIA_FIGLIO_3_12,
     T_MALATTIA_FIGLIO_3_13,
     T_MALATTIA_FIGLIO_3_14,
-    T_PB
+    T_PB,
+    T_EMPLOYEE,
     ;
   }
 
@@ -98,7 +185,8 @@ public class AbsenceMigration {
     MALATTIA_FIGLIO_3_12,
     MALATTIA_FIGLIO_3_13,
     MALATTIA_FIGLIO_3_14,
-    PB
+    PB,
+    EMPLOYEE,
     ;
   }
 
@@ -107,30 +195,185 @@ public class AbsenceMigration {
     this.absenceComponentDao = absenceComponentDao;
   }
 
+  /**
+   * Costruisce i gruppi di default.
+   */
+  public void absenceMigrationProcessor(boolean firstTime) { 
+
+    LocalDate expireDate = new LocalDate(2015, 12, 31);
+    
+    setStaticVariables();
+    
+    log.info("  ... Inizia la conversione dei tipi di assenza ai nuovi giustificativi ...");
+    
+    convertJustifiedTypes();
+    
+    log.info("  ... Inizia la migrazione dei gruppi ...");
+
+    build18Group(expireDate);
+    
+    build19Group(expireDate);
+    
+    build661Group(expireDate);
+    
+    buildCongedi(expireDate);
+    
+    buildStudio(expireDate);
+        
+    buildVisitaMedica(expireDate);
+    
+    buildMissionVacationCompensatory(expireDate);
+    
+    buildPubblicaFunzione(expireDate);
+    
+    buildMalattia(expireDate);
+    
+    buildMalattieFigli(expireDate);
+    
+    buildPermessoBreve(expireDate);
+    
+    buildEmployee(expireDate);
+    
+    JPA.em().flush();
+
+    log.info("  ... Configuro il il gruppo altri codici ...");
+    
+    configureOtherCodes();
+    
+    log.info("  ... Inizia la conversione delle assenze ...");
+
+    migrateAllAbsences();
+
+    log.info("  ... Pulizia ...");
+    
+    absenceComponentDao.renameCode("661H1C", "661H1");
+    absenceComponentDao.renameCode("661H2C", "661H2");
+    absenceComponentDao.renameCode("661H3C", "661H3");
+    absenceComponentDao.renameCode("661H4C", "661H4");
+    absenceComponentDao.renameCode("661H5C", "661H5");
+    absenceComponentDao.renameCode("661H6C", "661H6");
+    absenceComponentDao.renameCode("661H7C", "661H7");
+    absenceComponentDao.renameCode("661H8C", "661H8");
+    absenceComponentDao.renameCode("661H9C", "661H9");
+
+    absenceComponentDao.renameCode("18H1C", "18H1");
+    absenceComponentDao.renameCode("18H2C", "18H2");
+    absenceComponentDao.renameCode("18H3C", "18H3");
+    absenceComponentDao.renameCode("18H4C", "18H4");
+    absenceComponentDao.renameCode("18H5C", "18H5");
+    absenceComponentDao.renameCode("18H6C", "18H6");
+    absenceComponentDao.renameCode("18H7C", "18H7");
+    absenceComponentDao.renameCode("18H8C", "18H8");
+    absenceComponentDao.renameCode("18H9C", "18H9");
+
+    absenceComponentDao.renameCode("19H1C", "19H1");
+    absenceComponentDao.renameCode("19H2C", "19H2");
+    absenceComponentDao.renameCode("19H3C", "19H3");
+    absenceComponentDao.renameCode("19H4C", "19H4");
+    absenceComponentDao.renameCode("19H5C", "19H5");
+    absenceComponentDao.renameCode("19H6C", "19H6");
+    absenceComponentDao.renameCode("19H7C", "19H7");
+    absenceComponentDao.renameCode("19H8C", "19H8");
+    absenceComponentDao.renameCode("19H9C", "19H9");
+
+  }
+  
+
+
+
+
+  private void convertJustifiedTypes() {
+    
+    List<AbsenceType> absenceTypes = AbsenceType.findAll();
+    for (AbsenceType absenceType : absenceTypes) {
+      absenceType.code = absenceType.code.toUpperCase();
+      absenceType.justifiedTime = 0;
+      if (absenceType.justifiedTimeAtWork == null) {
+        continue;
+      }
+
+      // Fix 661H7
+      if (absenceType.code.equals("661H7") 
+          && absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)) {
+        absenceType.justifiedTypesPermitted.add(absenceTypeMinutes);
+        absenceType.justifiedTime = 60 * 7;
+        absenceType.save();
+        continue;
+      }
+
+      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.Nothing)) {
+        absenceType.justifiedTypesPermitted.add(nothing);
+      }
+      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)) {
+        absenceType.justifiedTypesPermitted.add(allDay);
+      }
+      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.HalfDay)) {
+        absenceType.justifiedTypesPermitted.add(halfDay);
+      }
+      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AssignAllDay)) {
+        absenceType.justifiedTypesPermitted.add(assignAllDay);
+      }
+      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.OneHour)) {
+        absenceType.justifiedTime = 60;  
+        absenceType.justifiedTypesPermitted.add(absenceTypeMinutes);
+      }
+      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.TwoHours)) {
+        absenceType.justifiedTime = 120;  
+        absenceType.justifiedTypesPermitted.add(absenceTypeMinutes);
+      }
+      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.ThreeHours)) {
+        absenceType.justifiedTime = 180;  
+        absenceType.justifiedTypesPermitted.add(absenceTypeMinutes);
+      }
+      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FourHours)) {
+        absenceType.justifiedTime = 240;  
+        absenceType.justifiedTypesPermitted.add(absenceTypeMinutes);
+      }
+      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FiveHours)) {
+        absenceType.justifiedTime = 300;  
+        absenceType.justifiedTypesPermitted.add(absenceTypeMinutes);
+      }
+      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SixHours)) {
+        absenceType.justifiedTime = 360;  
+        absenceType.justifiedTypesPermitted.add(absenceTypeMinutes);
+      }
+      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SevenHours)) {
+        absenceType.justifiedTime = 420;  
+        absenceType.justifiedTypesPermitted.add(absenceTypeMinutes);
+      }
+      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.EightHours)) {
+        absenceType.justifiedTime = 480;  
+        absenceType.justifiedTypesPermitted.add(absenceTypeMinutes);
+      }
+      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.OneHourMealTimeCounting)
+          || absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.TwoHoursMealTimeCounting)
+          || absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.ThreeHoursMealTimeCounting)
+          || absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FourHoursMealTimeCounting)
+          || absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FiveHoursMealTimeCounting)
+          || absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SixHoursMealTimeCounting)
+          || absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SevenHoursMealTimeCounting)
+          || absenceType.justifiedTimeAtWork.equals(
+              JustifiedTimeAtWork.EightHoursMealTimeCounting)) {
+        absenceType.timeForMealTicket = true;
+      }
+
+      absenceType.save();
+
+    }
+  }
+  
+  
   @SuppressWarnings("deprecation")
   private void migrateAllAbsences() {
+    
+    setStaticVariables(); 
 
-    JustifiedType nothing = absenceComponentDao
-        .getOrBuildJustifiedType(JustifiedTypeName.nothing);
-    JustifiedType specifiedMinutes = absenceComponentDao
-        .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
-    JustifiedType absenceTypeMinutes = absenceComponentDao
-        .getOrBuildJustifiedType(JustifiedTypeName.absence_type_minutes);
-    JustifiedType allDay = absenceComponentDao
-        .getOrBuildJustifiedType(JustifiedTypeName.all_day);
-    JustifiedType halfDay = absenceComponentDao
-        .getOrBuildJustifiedType(JustifiedTypeName.half_day);
-    JustifiedType assignAllDay = absenceComponentDao
-        .getOrBuildJustifiedType(JustifiedTypeName.assign_all_day); 
-
-    int absencesToUpdate = 50;
+    int absencesToUpdate = 100;
 
     List<GroupAbsenceType> groupAbsenceTypes = GroupAbsenceType.findAll();
     for (GroupAbsenceType groupAbsenceType : groupAbsenceTypes) {
       groupAbsenceType = GroupAbsenceType.findById(groupAbsenceType.id);
-      log.info(groupAbsenceType.name);
       Set<AbsenceType> absenceTypes = Sets.newHashSet();
-      //if (groupAbsenceType.name.equals(DefaultGroup.ALTRI.name())) {
       if (groupAbsenceType.takableAbsenceBehaviour != null) {
         absenceTypes.addAll(groupAbsenceType.takableAbsenceBehaviour.takenCodes);
         absenceTypes.addAll(groupAbsenceType.takableAbsenceBehaviour.takableCodes);
@@ -139,15 +382,14 @@ public class AbsenceMigration {
         absenceTypes.addAll(groupAbsenceType.complationAbsenceBehaviour.complationCodes);
         absenceTypes.addAll(groupAbsenceType.complationAbsenceBehaviour.replacingCodes);
       }
-      //}
-
 
       for (AbsenceType absenceType : absenceTypes) {
         absenceType = AbsenceType.findById(absenceType.id);
         for (Absence absence : absenceType.absences) {
           absence = Absence.findById(absence.id);
-          log.info("{} {}", absence.absenceType.code, absence.personDay.person.fullName());
-
+          if (absence.justifiedType != null) {
+            continue;
+          }
           migrateAbsence(absence, 
               nothing, specifiedMinutes, absenceTypeMinutes, allDay, halfDay, assignAllDay);
 
@@ -156,12 +398,7 @@ public class AbsenceMigration {
             absencesToUpdate = 100;
             JPAPlugin.closeTx(false);
             JPAPlugin.startTx(false);
-            nothing = JustifiedType.findById(nothing.id);
-            specifiedMinutes = JustifiedType.findById(specifiedMinutes.id);
-            absenceTypeMinutes = JustifiedType.findById(absenceTypeMinutes.id);
-            allDay = JustifiedType.findById(allDay.id);
-            halfDay = JustifiedType.findById(halfDay.id);
-            assignAllDay = JustifiedType.findById(assignAllDay.id);
+            setStaticVariables();
           }
         }
       }
@@ -348,155 +585,9 @@ public class AbsenceMigration {
     }
 
   }
-
-  /**
-   * Costruisce i gruppi di default.
-   */
-  public void buildDefaultGroups() { 
-
-    LocalDate expireDate = new LocalDate(2015, 12, 31);
-
-    final JustifiedType nothing = absenceComponentDao
-        .getOrBuildJustifiedType(JustifiedTypeName.nothing);
-    final JustifiedType specifiedMinutes = absenceComponentDao
-        .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
-    final JustifiedType absenceTypeMinutes = absenceComponentDao
-        .getOrBuildJustifiedType(JustifiedTypeName.absence_type_minutes);
-    final JustifiedType allDay = absenceComponentDao
-        .getOrBuildJustifiedType(JustifiedTypeName.all_day);
-    final JustifiedType halfDay = absenceComponentDao
-        .getOrBuildJustifiedType(JustifiedTypeName.half_day);
-    final JustifiedType assignAllDay = absenceComponentDao
-        .getOrBuildJustifiedType(JustifiedTypeName.assign_all_day);
-
-    final JustifiedType allDayLimit = absenceComponentDao
-        .getOrBuildJustifiedType(JustifiedTypeName.all_day_limit);
-    final JustifiedType specifiedMinutesLimit = absenceComponentDao
-        .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes_limit);
-
-    final CategoryGroupAbsenceType generalCategory = absenceComponentDao
-        .getOrBuildCategoryType(DefaultCategoryType.GENERAL.name, 
-            DefaultCategoryType.GENERAL.priority);
-
-    final CategoryGroupAbsenceType permissionCategory = absenceComponentDao
-        .getOrBuildCategoryType(DefaultCategoryType.PERMISSION.name, 
-            DefaultCategoryType.PERMISSION.priority);
-
-    final CategoryGroupAbsenceType postpartumCategory = absenceComponentDao
-        .getOrBuildCategoryType(DefaultCategoryType.POST_PARTUM.name, 
-            DefaultCategoryType.POST_PARTUM.priority);
-
-    final CategoryGroupAbsenceType lawCategory = absenceComponentDao
-        .getOrBuildCategoryType(DefaultCategoryType.LAW_104_92.name, 
-            DefaultCategoryType.LAW_104_92.priority);
-
-    final CategoryGroupAbsenceType publicFunctionCategory = absenceComponentDao
-        .getOrBuildCategoryType(DefaultCategoryType.PUBLIC_FUNCTION.name, 
-            DefaultCategoryType.PUBLIC_FUNCTION.priority);
-
-    final CategoryGroupAbsenceType otherCodesCategory = absenceComponentDao
-        .getOrBuildCategoryType(DefaultCategoryType.OTHER_CODES.name, 
-            DefaultCategoryType.OTHER_CODES.priority);
-
-    final CategoryGroupAbsenceType malattiaCategory = absenceComponentDao
-        .getOrBuildCategoryType(DefaultCategoryType.MALATTIA.name, 
-            DefaultCategoryType.MALATTIA.priority);
-
-    final CategoryGroupAbsenceType malattiaFiglio1Category = absenceComponentDao
-        .getOrBuildCategoryType(DefaultCategoryType.MALATTIA_FIGLIO_1.name, 
-            DefaultCategoryType.MALATTIA_FIGLIO_1.priority);
-
-    final CategoryGroupAbsenceType malattiaFiglio2Category = absenceComponentDao
-        .getOrBuildCategoryType(DefaultCategoryType.MALATTIA_FIGLIO_2.name, 
-            DefaultCategoryType.MALATTIA_FIGLIO_2.priority);
-
-    final CategoryGroupAbsenceType malattiaFiglio3Category = absenceComponentDao
-        .getOrBuildCategoryType(DefaultCategoryType.MALATTIA_FIGLIO_3.name, 
-            DefaultCategoryType.MALATTIA_FIGLIO_3.priority);
-
-    final CategoryGroupAbsenceType automaticCodes = absenceComponentDao
-        .getOrBuildCategoryType(DefaultCategoryType.AUTOMATIC_CODES.name, 
-            DefaultCategoryType.AUTOMATIC_CODES.priority);
-
-    List<AbsenceType> absenceTypes = AbsenceType.findAll();
-    for (AbsenceType absenceType : absenceTypes) {
-      absenceType.code = absenceType.code.toUpperCase();
-      absenceType.justifiedTime = 0;
-      if (absenceType.justifiedTimeAtWork == null) {
-        // TODO: andrebbero disabilitate.
-        log.info("absenceType.code {} è justifiedTimeAtWork nullo", absenceType.code);
-        continue;
-      }
-
-      // Fix 661H7
-      if (absenceType.code.equals("661H7") 
-          && absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)) {
-        absenceType.justifiedTypesPermitted.add(absenceTypeMinutes);
-        absenceType.justifiedTime = 60 * 7;
-        absenceType.save();
-        continue;
-      }
-
-      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.Nothing)) {
-        absenceType.justifiedTypesPermitted.add(nothing);
-      }
-      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)) {
-        absenceType.justifiedTypesPermitted.add(allDay);
-      }
-      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.HalfDay)) {
-        absenceType.justifiedTypesPermitted.add(halfDay);
-      }
-      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AssignAllDay)) {
-        absenceType.justifiedTypesPermitted.add(assignAllDay);
-      }
-      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.OneHour)) {
-        absenceType.justifiedTime = 60;  
-        absenceType.justifiedTypesPermitted.add(absenceTypeMinutes);
-      }
-      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.TwoHours)) {
-        absenceType.justifiedTime = 120;  
-        absenceType.justifiedTypesPermitted.add(absenceTypeMinutes);
-      }
-      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.ThreeHours)) {
-        absenceType.justifiedTime = 180;  
-        absenceType.justifiedTypesPermitted.add(absenceTypeMinutes);
-      }
-      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FourHours)) {
-        absenceType.justifiedTime = 240;  
-        absenceType.justifiedTypesPermitted.add(absenceTypeMinutes);
-      }
-      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FiveHours)) {
-        absenceType.justifiedTime = 300;  
-        absenceType.justifiedTypesPermitted.add(absenceTypeMinutes);
-      }
-      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SixHours)) {
-        absenceType.justifiedTime = 360;  
-        absenceType.justifiedTypesPermitted.add(absenceTypeMinutes);
-      }
-      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SevenHours)) {
-        absenceType.justifiedTime = 420;  
-        absenceType.justifiedTypesPermitted.add(absenceTypeMinutes);
-      }
-      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.EightHours)) {
-        absenceType.justifiedTime = 480;  
-        absenceType.justifiedTypesPermitted.add(absenceTypeMinutes);
-      }
-      if (absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.OneHourMealTimeCounting)
-          || absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.TwoHoursMealTimeCounting)
-          || absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.ThreeHoursMealTimeCounting)
-          || absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FourHoursMealTimeCounting)
-          || absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FiveHoursMealTimeCounting)
-          || absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SixHoursMealTimeCounting)
-          || absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SevenHoursMealTimeCounting)
-          || absenceType.justifiedTimeAtWork.equals(
-              JustifiedTimeAtWork.EightHoursMealTimeCounting)) {
-        absenceType.timeForMealTicket = true;
-      }
-
-      absenceType.save();
-
-    }
-
+  
+  private void build18Group(LocalDate expireDate) {
+    
     if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_18.name()).isPresent()) {
 
       //Update AbsenceType
@@ -613,7 +704,11 @@ public class AbsenceMigration {
       group18.save();
 
     }
-
+    
+  }
+  
+  private void build19Group(LocalDate expireDate) {
+    
     if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_19.name()).isPresent()) {
 
       //Update AbsenceType
@@ -728,7 +823,10 @@ public class AbsenceMigration {
       group19.save();
 
     }
-
+    
+  }
+  
+  private void build661Group(LocalDate expireDate) {
     if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_661.name()).isPresent()) {
 
       //Update AbsenceType
@@ -845,7 +943,10 @@ public class AbsenceMigration {
       group661.save();
 
     }
-
+  }
+  
+  private void buildCongedi(LocalDate expireDate) {
+    
     if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_25.name()).isPresent()) {
 
       //Update AbsenceType
@@ -1247,7 +1348,10 @@ public class AbsenceMigration {
       group233.save();
 
     }
-
+    
+  }
+  
+  private void buildStudio(LocalDate expireDate) {
     if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_89.name()).isPresent()) {
 
       //Update AbsenceType
@@ -1335,7 +1439,9 @@ public class AbsenceMigration {
       group89.save();
 
     }
-
+  }
+  
+  private void buildVisitaMedica(LocalDate expireDate) {
     if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_09.name()).isPresent()) {
 
       //Update AbsenceType
@@ -1422,7 +1528,9 @@ public class AbsenceMigration {
       group09.save();
 
     }
-
+  }
+  
+  private void buildMissionVacationCompensatory(LocalDate expireDate) {
     if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MISSIONE.name()).isPresent()) {
 
       //Takable Creation
@@ -1575,7 +1683,9 @@ public class AbsenceMigration {
       groupRiposi.takableAbsenceBehaviour = takeRiposi.get();
       groupRiposi.save();
     }
-
+  }
+  
+  private void buildPubblicaFunzione(LocalDate expireDate) {
     if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_95.name()).isPresent()) {
 
       //Takable Creation
@@ -1593,11 +1703,9 @@ public class AbsenceMigration {
         t95.get().save();
       }
 
-      // Set boolean independente
-      absenceTypes = AbsenceType.findAll();
+      List<AbsenceType> absenceTypes = AbsenceType.findAll();
       for (AbsenceType absenceType : absenceTypes) {
         if (absenceType.code.startsWith("95")) {
-          log.info("AbsenceCode {}", absenceType.code );
           if (absenceType.isExpired()) {
             continue;
           }
@@ -1619,8 +1727,9 @@ public class AbsenceMigration {
 
     }
 
-    JPA.em().flush();
-
+  }
+  
+  private void buildMalattia(LocalDate expireDate) {
     if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.MALATTIA.name()).isPresent()) {
 
       //Takable Creation
@@ -1695,28 +1804,9 @@ public class AbsenceMigration {
       groupMalattia.takableAbsenceBehaviour = takeMalattia.get();
       groupMalattia.save();
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  }
+  
+  private void buildMalattieFigli(LocalDate expireDate) {
     if (!absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_1_12.name()).isPresent()) {
 
@@ -1826,10 +1916,6 @@ public class AbsenceMigration {
       groupMalattia.takableAbsenceBehaviour = takeMalattia14.get();
       groupMalattia.save();
     }
-
-
-
-
 
     if (!absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_2_12.name()).isPresent()) {
@@ -1941,14 +2027,6 @@ public class AbsenceMigration {
       groupMalattia.save();
     }
 
-
-
-
-
-
-
-
-
     if (!absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.MALATTIA_FIGLIO_3_12.name()).isPresent()) {
 
@@ -2058,7 +2136,9 @@ public class AbsenceMigration {
       groupMalattia.takableAbsenceBehaviour = takeMalattia14.get();
       groupMalattia.save();
     }
-
+  }
+  
+  private void buildPermessoBreve(LocalDate expireDate) {
     if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.PB.name()).isPresent()) {
 
       //Takable Creation
@@ -2095,12 +2175,52 @@ public class AbsenceMigration {
       groupPb.takableAbsenceBehaviour = takePb.get();
       groupPb.save();
     }
+  }
+  
+  private void buildEmployee(LocalDate expireDate) {
+    if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.EMPLOYEE.name()).isPresent()) {
 
+      //Takable Creation
+      Optional<TakableAbsenceBehaviour> takePb = absenceComponentDao
+          .takableAbsenceBehaviourByName(DefaultTakable.T_EMPLOYEE.name());
 
+      if (!takePb.isPresent()) {
 
+        takePb = Optional.fromNullable(new TakableAbsenceBehaviour());
+        takePb.get().name = DefaultTakable.T_EMPLOYEE.name();
+        takePb.get().amountType = AmountType.units;
+        takePb.get().takableCodes = Sets.newHashSet();
+        takePb.get().takenCodes = Sets.newHashSet();
+        takePb.get().fixedLimit = -1;
+        takePb.get().save();
 
+        //Update AbsenceType
+        AbsenceType cnr105bp = absenceComponentDao.buildOrEditAbsenceType("105BP", 
+            "Lavoro Fuori Sede - Intera Giornata", 
+            0, Sets.newHashSet(allDay), null, 0, false, false, false, null, null);
 
+        takePb.get().takableCodes.add(cnr105bp);
+        takePb.get().takenCodes.add(cnr105bp);
+        takePb.get().save();
+      }
 
+      // Group Creation
+      GroupAbsenceType groupPb = new GroupAbsenceType();
+      groupPb.category = employeeCodes;
+      groupPb.name = DefaultGroup.EMPLOYEE.name();
+      groupPb.description = "Codici inseribili dai dipendenti";
+      groupPb.pattern = GroupAbsenceTypePattern.simpleGrouping;
+      groupPb.periodType = PeriodType.always;
+      groupPb.takableAbsenceBehaviour = takePb.get();
+      groupPb.save();
+    }
+  }
+  
+  /**
+   * Attribuisce al gruppo altri i codici che non appartengono ad alcun gruppo.
+   */
+  private void configureOtherCodes() {
+    
     if (!absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.ALTRI.name()).isPresent()) {
 
       //Takable Creation
@@ -2120,6 +2240,10 @@ public class AbsenceMigration {
 
       JPA.em().flush();
 
+      final CategoryGroupAbsenceType otherCodesCategory = absenceComponentDao
+          .getOrBuildCategoryType(DefaultCategoryType.OTHER_CODES.name, 
+              DefaultCategoryType.OTHER_CODES.priority);
+      
       // Group Creation
       GroupAbsenceType groupAltri = new GroupAbsenceType();
       groupAltri.category = otherCodesCategory;;
@@ -2130,9 +2254,7 @@ public class AbsenceMigration {
       groupAltri.takableAbsenceBehaviour = takeAltri.get();
       groupAltri.save();
     }
-
-    JPA.em().flush();
-
+    
     Optional<TakableAbsenceBehaviour> takeAltri = absenceComponentDao
         .takableAbsenceBehaviourByName(DefaultTakable.T_ALTRI.name());
     takeAltri.get().takableCodes = Sets.newHashSet();
@@ -2142,59 +2264,16 @@ public class AbsenceMigration {
     JPA.em().flush();
 
     // Set boolean independente
-    absenceTypes = AbsenceType.findAll();
+    List<AbsenceType> absenceTypes = AbsenceType.findAll();
     for (AbsenceType absenceType : absenceTypes) {
-
-      if (absenceType.code.equals("90")) {
-        log.info("trovato");
-      }
-
       absenceType.refresh();
-
       if (absenceType.takableGroup.isEmpty() && absenceType.takenGroup.isEmpty() 
           && absenceType.complationGroup.isEmpty() && absenceType.replacingGroup.isEmpty()) {
-        log.info("AbsenceCode {}", absenceType.code );
         takeAltri.get().takableCodes.add(absenceType);
         takeAltri.get().takenCodes.add(absenceType);
         takeAltri.get().save();
       }
     }
-
-    migrateAllAbsences();
-
-    absenceComponentDao.renameCode("661H1C", "661H1");
-    absenceComponentDao.renameCode("661H2C", "661H2");
-    absenceComponentDao.renameCode("661H3C", "661H3");
-    absenceComponentDao.renameCode("661H4C", "661H4");
-    absenceComponentDao.renameCode("661H5C", "661H5");
-    absenceComponentDao.renameCode("661H6C", "661H6");
-    absenceComponentDao.renameCode("661H7C", "661H7");
-    absenceComponentDao.renameCode("661H8C", "661H8");
-    absenceComponentDao.renameCode("661H9C", "661H9");
-
-    absenceComponentDao.renameCode("18H1C", "18H1");
-    absenceComponentDao.renameCode("18H2C", "18H2");
-    absenceComponentDao.renameCode("18H3C", "18H3");
-    absenceComponentDao.renameCode("18H4C", "18H4");
-    absenceComponentDao.renameCode("18H5C", "18H5");
-    absenceComponentDao.renameCode("18H6C", "18H6");
-    absenceComponentDao.renameCode("18H7C", "18H7");
-    absenceComponentDao.renameCode("18H8C", "18H8");
-    absenceComponentDao.renameCode("18H9C", "18H9");
-
-    absenceComponentDao.renameCode("19H1C", "19H1");
-    absenceComponentDao.renameCode("19H2C", "19H2");
-    absenceComponentDao.renameCode("19H3C", "19H3");
-    absenceComponentDao.renameCode("19H4C", "19H4");
-    absenceComponentDao.renameCode("19H5C", "19H5");
-    absenceComponentDao.renameCode("19H6C", "19H6");
-    absenceComponentDao.renameCode("19H7C", "19H7");
-    absenceComponentDao.renameCode("19H8C", "19H8");
-    absenceComponentDao.renameCode("19H9C", "19H9");
-
   }
-
-
-
 
 }
