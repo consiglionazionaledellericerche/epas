@@ -511,11 +511,13 @@ public class Reperibility extends Controller {
     // update  reports for the approved days and reasons for the working days
     reperibilityManager.updateReperibilityDaysReportFromCompetences(
         reperibilitySumDays, frCompetences);
-    log.debug("**** Nella reperibilitySumDays ci sono {} persone", reperibilitySumDays.rowKeySet().size());
+    log.debug("**** Nella reperibilitySumDays ci sono {} persone", 
+        reperibilitySumDays.rowKeySet().size());
     
     reperibilityManager.updateReperibilityDatesReportFromCompetences(
         reperibilityDateDays, frCompetences);
-    log.debug("**** Nella reperibilityDateDays ci sono {} persone", reperibilityDateDays.rowKeySet().size());
+    log.debug("**** Nella reperibilityDateDays ci sono {} persone", 
+        reperibilityDateDays.rowKeySet().size());
 
     // builds the table with the summary of days and reperibility periods description
     // reading data from the Competence table in the DB

@@ -137,7 +137,8 @@ public class Charts extends Controller {
    */
   public static void exportHourAndOvertime() {
     rules.checkIfPermitted(Security.getUser().get().person.office);
-    //  List<Year> annoList = chartsManager.populateYearList(Security.getUser().get().person.office);
+    //  List<Year> annoList = 
+    //      chartsManager.populateYearList(Security.getUser().get().person.office);
 
     render();
   }

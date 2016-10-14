@@ -78,7 +78,8 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(person);
     notFoundIfNull(from);
    
-    AbsenceRequestForm absenceRequestForm = absenceService.buildInsertForm(person, from, absenceInsertTab, 
+    AbsenceRequestForm absenceRequestForm = 
+        absenceService.buildInsertForm(person, from, absenceInsertTab, 
         to, groupAbsenceType, switchGroup, absenceType, justifiedType, hours, minutes);
 
     if (absenceRequestForm.selectedAbsenceGroupFormItem == null) {
@@ -189,7 +190,8 @@ public class AbsenceGroups extends Controller {
     render(date, categories, groupAbsenceType, periodChain);
   }
   
-  public static void changeGroupStatus(Person person, GroupAbsenceType groupAbsenceType, LocalDate date) {
+  public static void changeGroupStatus(
+      Person person, GroupAbsenceType groupAbsenceType, LocalDate date) {
 
     notFoundIfNull(person);
     notFoundIfNull(date);
@@ -215,7 +217,8 @@ public class AbsenceGroups extends Controller {
     renderText("ok");
   }
   
-  public static void initialization(Long personId, GroupAbsenceType groupAbsenceType, LocalDate date) {
+  public static void initialization(
+      Long personId, GroupAbsenceType groupAbsenceType, LocalDate date) {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
