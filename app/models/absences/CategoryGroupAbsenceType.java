@@ -11,7 +11,7 @@ import javax.persistence.Table;
 @Audited
 @Entity
 @Table(name = "category_group_absence_types")
-public class CategoryGroupAbsenceType extends BaseModel {
+public class CategoryGroupAbsenceType extends BaseModel implements Comparable<CategoryGroupAbsenceType> {
 
   @Column
   public String name;
@@ -21,5 +21,10 @@ public class CategoryGroupAbsenceType extends BaseModel {
   
   @Column
   public int priority;
+
+  @Override
+  public int compareTo(CategoryGroupAbsenceType o) {
+    return name.compareTo(o.name);
+  }
   
 }

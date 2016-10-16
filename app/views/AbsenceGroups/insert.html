@@ -1,25 +1,21 @@
 #{modalAsync id:'modalAbsence', button:'Salva',
-title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
-+ ' per ' + absenceRequestForm.person.fullname }
+title:'Nuovo codice assenza in data ' + absenceForm.from?.format()
++ ' per ' + absenceForm.person.fullname }
 
 <div id="absenceData">
 
- #{absences.insertAbsencesTabs absenceRequestForm:absenceRequestForm /}
+ #{absences.insertAbsencesTabs absenceRequestForm:absenceForm /}
 
  *{ alcune scorciatorie }*
- %{ selectedFormItem = absenceRequestForm.selectedAbsenceGroupFormItem; }%
- %{ selecteSubItem = selectedFormItem?.selectedSubAbsenceGroupFormItems; }%
- %{ alldaySelected = selecteSubItem?.selectedJustified?.name.equals(models.absences.JustifiedType.JustifiedTypeName.all_day) ||
-                     selecteSubItem?.selectedJustified?.name.equals(models.absences.JustifiedType.JustifiedTypeName.assign_all_day) }%
- %{ specifiedMinuteSelected = selecteSubItem?.selectedJustified?.name.equals(models.absences.JustifiedType.JustifiedTypeName.specified_minutes) }%
+ %{ alldaySelected = absenceForm?.justifiedTypeSelected?.name.equals(models.absences.JustifiedType.JustifiedTypeName.all_day) ||
+                     absenceForm?.justifiedTypeSelected?.name.equals(models.absences.JustifiedType.JustifiedTypeName.assign_all_day) }%
+ %{ specifiedMinuteSelected = absenceForm?.justifiedTypeSelected?.name.equals(models.absences.JustifiedType.JustifiedTypeName.specified_minutes) }%
 
- #{if absenceRequestForm.absenceInsertTab.newImplementation() }
    
-   new Implementation
-   
-   #{if !absenceRequestForm.formHasNoGroupChoice() }
+   #{if absenceForm.hasGroupChoice() }
      #{include './_selectGroup.html' /}
    #{/if}
+   
    #{include './_configureSelectedGroup.html' /}
    #{include './_verifyRequest.html' /}
  
@@ -161,23 +157,23 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
   
 
       
-     *{ save request }*
-	 #{form action:@AbsenceGroups.save(), method:'POST', autocomplete:false, class:'form form-horizontal',
+   *{ save request }*
+   #{form action:@AbsenceGroups.save(), method:'POST', autocomplete:false, class:'form form-horizontal',
 	  'data-async':'#page_content', 'data-async-error':'#absenceData', 'data-spinner':'#defaultSpinner'}
 	  
-	     #{f.hidden 'personId', value:absenceRequestForm.person.id /}
+	     #{f.hidden 'personId', value:absenceForm.person.id /}
       
-         #{f.hidden 'from', value:absenceRequestForm.from?.format() /}
+         #{f.hidden 'from', value:absenceForm.from?.format() /}
          #{if alldaySelected }
-          #{f.hidden 'to', value:absenceRequestForm.to?.format() /}
+          #{f.hidden 'to', value:absenceForm.to?.format() /}
          #{/if}
    
-      #{f.hidden 'groupAbsenceType.id', value:selectedFormItem.groupAbsenceType.id /}
-      #{f.hidden 'absenceType.id', value:selecteSubItem.absenceType?.id /}
-      #{f.hidden 'justifiedType.id', value:selecteSubItem.selectedJustified.id /}
+      #{f.hidden 'groupAbsenceType.id', value:absenceForm.groupSelected.id /}
+      #{f.hidden 'absenceType.id', value:absenceForm.absenceTypeSelected?.id /}
+      #{f.hidden 'justifiedType.id', value:absenceForm.justifiedTypeSelected.id /}
       
-      #{f.hidden 'hours', value:selecteSubItem.hours /}
-         #{f.hidden 'minutes', value:selecteSubItem.minutes /}
+      #{f.hidden 'hours', value:absenceForm.hours /}
+      #{f.hidden 'minutes', value:absenceForm.minutes /}
     
       *{
       #{if report.containsProblems() }
@@ -196,59 +192,8 @@ title:'Nuovo codice assenza in data ' + absenceRequestForm.from?.format()
 	   #{b.buttons center:true}
          #{b.submit 'Inserisci'/}
        #{/b.buttons}
-	 #{/form}	  
-    
-   #{/if}#{else}
+   #{/form}	  
    
-   *{ old implementations }*
-	  
-	  #{if forceInsert}
-	    #{set action:@Absences.forceInsert() /}
-	  #{/if}
-	  #{else}
-	    #{set action:@Absences.save() /}
-	  #{/else}
-	
-	  #{form action:action, method:'POST', autocomplete:false,
-	  class:'form form-horizontal', 'data-async':'#page_content',
-	  'data-async-error':'#absenceData', 'data-spinner':'#defaultSpinner'}
-	  
-      #{f.hidden 'personId', value:absenceRequestForm.person.id /}
-	  #{f.hidden 'dateFrom', value:absenceRequestForm.from?.format() /}
-      #{f.date 'dateFrom', value:absenceRequestForm.from?.format(), disabled:true /}     
-      #{f.date 'dateTo', value:absenceRequestForm.to?.format() /}
-      
-      %{ if (absenceType == null) {
-           absenceType = templateUtility.getAbsenceTypes(absenceRequestForm.absenceInsertTab).get(0);
-         }
-      }%
-  
-      
-      #{f.selectModel 'absenceType', items: templateUtility.getAbsenceTypes(absenceRequestForm.absenceInsertTab), value:absenceType, required:true /}
-	  
-	  *{ #{f.input 'absenceFile', type:'file' /} }*
-	
-	  #{b.buttons center:true}
-	  #{b.submit 'Inserisci'/}
-	  #{/b.buttons}
-	
-	  #{/form}
-	  	
-	  #{if absenceRequestForm.absenceInsertTab.equals(manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab.vacation)}
-	  #{alert color:'info'}
-	  <p>Utilizzando il codice <em>FER</em> il software provvederà ad assegnare ferie e permessi
-	    fin quando disponibili nel seguente ordine di priorità:
-	  <ul>
-	    <li>31 (recupero ferie anno precedente)</li>
-	    <li>94 (permesso)</li>
-	    <li>32 (ferie anno corrente)</li>
-	  </ul>
-	  </p>
-	  #{/alert}
-	  #{/if}
-   
-   #{/else}   
-  
    
 </div>
 

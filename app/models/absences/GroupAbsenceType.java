@@ -65,7 +65,19 @@ public class GroupAbsenceType extends BaseModel {
   public Set<GroupAbsenceType> previousGroupChecked;
 
   public String getLabel() {
-    return this.description;
+    if (this.chainDescription != null) {
+      return this.chainDescription;
+    } else {
+      return this.description;
+    }
+  }
+  
+  public String getChainDescription() {
+    if (this.chainDescription != null) {
+      return this.chainDescription;
+    } else {
+      return this.description;
+    }
   }
   
   public enum PeriodType {

@@ -8,19 +8,17 @@ import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.PersonDayManager;
-import manager.services.absences.AbsenceMigration;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
 import manager.services.absences.model.PeriodChain;
-import manager.services.absences.web.AbsenceRequestForm;
+import manager.services.absences.web.AbsenceForm;
 import manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab;
-import manager.services.absences.web.AbsenceRequestForm.AbsenceRequestCategory;
-import manager.services.absences.web.AbsenceRequestForm.SubAbsenceGroupFormItem;
 
 import models.Person;
 import models.PersonDay;
 import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.CategoryGroupAbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.JustifiedType;
@@ -87,23 +85,16 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(person);
     notFoundIfNull(from);
    
-    AbsenceRequestForm absenceRequestForm = 
+    AbsenceForm absenceForm = 
         absenceService.buildInsertForm(person, from, absenceInsertTab, 
         to, groupAbsenceType, switchGroup, absenceType, justifiedType, hours, minutes);
 
-    if (absenceRequestForm.selectedAbsenceGroupFormItem == null) {
-      render(absenceRequestForm);
-    }
-
-    SubAbsenceGroupFormItem selected = absenceRequestForm
-        .selectedAbsenceGroupFormItem.selectedSubAbsenceGroupFormItems;
-
     InsertReport insertReport  = absenceService.insert(person, 
-        absenceRequestForm.selectedAbsenceGroupFormItem.groupAbsenceType, 
-        absenceRequestForm.from, absenceRequestForm.to, 
-        selected.absenceType, selected.selectedJustified, 
-        selected.getHours(), selected.getMinutes(), absenceManager);
-    render(absenceRequestForm, insertReport);
+        absenceForm.groupSelected, 
+        absenceForm.from, absenceForm.to, 
+        absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected, 
+        absenceForm.hours, absenceForm.minutes, absenceManager);
+    render(absenceForm, insertReport);
 
   }
   
@@ -180,7 +171,7 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(person);
     notFoundIfNull(date);
     
-    List<AbsenceRequestCategory> categories = absenceService
+    List<CategoryGroupAbsenceType> categories = absenceService
         .orderedCategories(person, date, groupAbsenceType);
     
     groupAbsenceType = absenceComponentDao.firstGroupOfChain(groupAbsenceType);

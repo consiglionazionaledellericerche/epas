@@ -70,15 +70,15 @@ public class AbsenceEngineUtility {
   /**
    * Le operazioni univocamente identificabili dal justifiedType. Devo riuscire a derivare
    * l'assenza da inserire attraverso il justifiedType.
-   *  Lista con priorità:
-   *  - se esiste un solo codice allDay  -> lo metto tra le opzioni
-   *  - se esiste un solo codice halfDay -> lo metto tra le opzioni
-   *  - se esiste: un solo codice absence_type_minutes con Xminute
-   *               un solo codice absence_type_minutes con Yminute
-   *               ...
-   *               un solo codice absence_type_minutes con Zminute
-   *               un solo codice specifiedMinutes 
-   *               -> metto specifiedMinutes tra le opzioni
+   *  Lista con priorità:<br>
+   *  - se esiste un solo codice allDay  -> lo metto tra le opzioni <br>
+   *  - se esiste un solo codice halfDay -> lo metto tra le opzioni <br>
+   *  - se esiste: un solo codice absence_type_minutes con Xminute <br>
+   *               un solo codice absence_type_minutes con Yminute <br>
+   *               ... <br>
+   *               un solo codice absence_type_minutes con Zminute <br>
+   *               un solo codice specifiedMinutes  <br>
+   *               -> metto specifiedMinutes tra le opzioni <br>
    *  TODO: decidere come gestire il quanto manca               
    *                
    * @param groupAbsenceType gruppo
@@ -124,17 +124,18 @@ public class AbsenceEngineUtility {
           specifiedMinutesFinded++;
         }
         if (justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
-          Integer minuteKey = absenceType.justifiedTime;
-          Integer count = specificMinutesFinded.get(minuteKey);
-          if (count == null) {
-            specificMinutesFinded.put(minuteKey, 1);
-          } else {
-            count++;
-            if (count > 1) {
-              specificMinutesDenied = true;
-            }
-            specificMinutesFinded.put(minuteKey, count);
-          }
+          return Lists.newArrayList();
+//          Integer minuteKey = absenceType.justifiedTime;
+//          Integer count = specificMinutesFinded.get(minuteKey);
+//          if (count == null) {
+//            specificMinutesFinded.put(minuteKey, 1);
+//          } else {
+//            count++;
+//            if (count > 1) {
+//              specificMinutesDenied = true;
+//            }
+//            specificMinutesFinded.put(minuteKey, count);
+//          }
         }
       }
     }
