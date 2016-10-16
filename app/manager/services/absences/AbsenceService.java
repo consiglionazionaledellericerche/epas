@@ -21,10 +21,8 @@ import manager.services.absences.model.DayInPeriod.TemplateRow;
 import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.Scanner;
 import manager.services.absences.model.ServiceFactories;
-import manager.services.absences.web.AbsenceRequestForm;
+import manager.services.absences.web.AbsenceForm;
 import manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab;
-import manager.services.absences.web.AbsenceRequestForm.AbsenceRequestCategory;
-import manager.services.absences.web.AbsenceRequestFormFactory;
 
 import models.Contract;
 import models.Person;
@@ -32,6 +30,7 @@ import models.PersonChildren;
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceType;
+import models.absences.CategoryGroupAbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.JustifiedType;
@@ -39,7 +38,6 @@ import models.absences.JustifiedType;
 import org.joda.time.LocalDate;
 
 import java.util.List;
-import java.util.SortedMap;
 
 /**
  * Interfaccia epas per il componente assenze.
@@ -50,7 +48,6 @@ import java.util.SortedMap;
 @Slf4j
 public class AbsenceService {
 
-  private final AbsenceRequestFormFactory absenceRequestFormFactory;
   private final AbsenceEngineUtility absenceEngineUtility;
   private final AbsenceComponentDao absenceComponentDao;
   private final PersonChildrenDao personChildrenDao;
@@ -65,12 +62,11 @@ public class AbsenceService {
    * @param personChildrenDao injected
    */
   @Inject
-  public AbsenceService(AbsenceRequestFormFactory absenceRequestFormFactory, 
+  public AbsenceService(
       AbsenceEngineUtility absenceEngineUtility,
       ServiceFactories serviceFactories,
       AbsenceComponentDao absenceComponentDao,
       PersonChildrenDao personChildrenDao) {
-    this.absenceRequestFormFactory = absenceRequestFormFactory;
     this.absenceEngineUtility = absenceEngineUtility;
     this.serviceFactories = serviceFactories;
     this.absenceComponentDao = absenceComponentDao;
@@ -85,7 +81,7 @@ public class AbsenceService {
    * @param groupAbsenceType gruppo selezionato
    * @return lista di cateogire.
    */
-  public List<AbsenceRequestCategory> orderedCategories(Person person, LocalDate date, 
+  public List<CategoryGroupAbsenceType> orderedCategories(Person person, LocalDate date, 
       GroupAbsenceType groupAbsenceType) {
     
     if (groupAbsenceType == null || !groupAbsenceType.isPersistent()) {
@@ -93,9 +89,9 @@ public class AbsenceService {
           .groupAbsenceTypeByName(AbsenceInsertTab.defaultTab().groupNames.get(0)).get();
     }
     
-    AbsenceRequestForm form = buildInsertForm(person, date, null, null, 
+    AbsenceForm form = buildInsertForm(person, date, null, null, 
         groupAbsenceType, true, null, null, null, null);
-    List<AbsenceRequestCategory> categories = form.orderedCategories();
+    List<CategoryGroupAbsenceType> categories = form.categories();
     
     return categories;
   }
@@ -115,7 +111,7 @@ public class AbsenceService {
    * @param minutes minuti
    * @return form
    */
-  public AbsenceRequestForm buildInsertForm(
+  public AbsenceForm buildInsertForm(
       Person person, LocalDate from, AbsenceInsertTab absenceInsertTab,                  //tab 
       LocalDate to, GroupAbsenceType groupAbsenceType,  boolean switchGroup,             //group
       AbsenceType absenceType, JustifiedType justifiedType,                              //reconf 
@@ -153,8 +149,9 @@ public class AbsenceService {
     
     //TODO: Preconditions se groupAbsenceType presente verificare che permesso per la persona
     
-    return absenceRequestFormFactory.buildAbsenceRequestForm(person, from, to, 
-        groupAbsenceType, null, null, null);
+    return new AbsenceForm(person, from, to, groupAbsenceType, absenceType, 
+        justifiedType, hours, minutes,
+        absenceComponentDao, absenceEngineUtility);
   }
   
   /**

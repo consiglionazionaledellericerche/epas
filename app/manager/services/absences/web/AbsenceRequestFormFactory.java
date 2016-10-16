@@ -154,6 +154,10 @@ public class AbsenceRequestFormFactory {
       GroupAbsenceType selectedGroupAbsenceType, AbsenceType selectedAbsenceType, 
       JustifiedType selectedJustifiedType, Integer selectedSpecifiedMinutes) {
     
+    if (selectedSpecifiedMinutes == null) {
+      selectedSpecifiedMinutes = 60; //default 1 ora
+    }
+    
     AbsenceGroupFormItem absenceGroupFormItem = new AbsenceGroupFormItem(groupAbsenceType);
     if (selectedGroupAbsenceType != null && selectedGroupAbsenceType.equals(groupAbsenceType)) {
       absenceGroupFormItem.selected = true;
@@ -235,6 +239,17 @@ public class AbsenceRequestFormFactory {
             absenceGroupFormItem.selectedSubAbsenceGroupFormItems = subAbsenceGroupFormItem;
           }
         }
+        
+//        //patch remove automatic if only choice
+//        if (absenceGroupFormItem.subAbsenceGroupFormItems.size() == 2) {
+//          if (absenceGroupFormItem.subAbsenceGroupFormItems.get(0).absenceType == null) {
+//            absenceGroupFormItem.containsAutomatic = false;
+//            absenceGroupFormItem.subAbsenceGroupFormItems.remove(0);
+//            absenceGroupFormItem.selectedSubAbsenceGroupFormItems = absenceGroupFormItem
+//                .selectedSubAbsenceGroupFormItems = 
+//                absenceGroupFormItem.subAbsenceGroupFormItems.get(0); 
+//          }
+//        }
         
         currentGroupAbsenceType = currentGroupAbsenceType.nextGroupToCheck;
       }

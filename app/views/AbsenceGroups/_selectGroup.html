@@ -1,25 +1,27 @@
-*{ #{if absenceRequestForm.categoriesWithSamePriority.values().size() > 1 } }*
+
    #{form action:@AbsenceGroups.insert(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit', 
     'data-async':'#absenceData', 'data-async-error':'#absenceData'}
      
-     #{f.hidden 'personId', value:absenceRequestForm.person.id /}
-     #{f.hidden 'from', value:absenceRequestForm.from?.format() /}
-     #{f.hidden 'to', value:absenceRequestForm.to?.format() /}
+     #{f.hidden 'personId', value:absenceForm.person.id /}
+     #{f.hidden 'from', value:absenceForm.from?.format() /}
+     #{f.hidden 'to', value:absenceForm.to?.format() /}
      
      #{f.hidden 'switchGroup', value:'true' /}
      
      #{f.selectModel 'groupAbsenceType', label:'Tipologia Assenza', personalizeItems:true}
         <option></option>      
         *{ same priority }*
-       #{list items:absenceRequestForm.orderedCategories(), as:'category'}
-           <optgroup label="${category.categoryType.name}">
-           #{list category.items, as:'groupAbsenceTypeItem'}
-	         <option value="${groupAbsenceTypeItem.groupAbsenceType.id}"
-	          #{if groupAbsenceTypeItem.selected} selected #{/if}> ${groupAbsenceTypeItem.getLabel()} </option>
+       #{list items:absenceForm.categories(), as:'category'}
+           <optgroup label="${category.name}">
+           #{list absenceForm.groupsForCategory(category), as:'groupAbsenceType'}
+	         <option value="${groupAbsenceType.id}"
+	          #{if absenceForm.groupSelected.equals(groupAbsenceType)} selected #{/if}> 
+	          ${groupAbsenceType.getChainDescription()}
+	         </option>
   	       #{/list}
   	       </optgroup>
   	    #{/list}
      #{/f.selectModel}
    
    #{/form}
-*{ #{/if} }*   
+   

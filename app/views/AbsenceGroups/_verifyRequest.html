@@ -2,21 +2,21 @@
 	#{form action:@AbsenceGroups.insert(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit',
 	'data-async':'#absenceData', 'data-async-error':'#absenceData' }
 	
-       #{f.hidden 'personId', value:absenceRequestForm.person.id /}
+       #{f.hidden 'personId', value:absenceForm.person.id /}
        
-       #{f.hidden 'from', value:absenceRequestForm.from?.format() /}
+       #{f.hidden 'from', value:absenceForm.from?.format() /}
        #{if alldaySelected }
-         #{f.hidden 'to', value:absenceRequestForm.to?.format() /}
+         #{f.hidden 'to', value:absenceForm.to?.format() /}
        #{/if}
 	   
-	   #{f.hidden 'groupAbsenceType.id', value:selectedFormItem.groupAbsenceType.id /}
-	   #{f.hidden 'absenceType.id', value:selecteSubItem.absenceType?.id /}
-	   #{f.hidden 'justifiedType.id', value:selecteSubItem.selectedJustified.id /}
+	   #{f.hidden 'groupAbsenceType.id', value:absenceForm.groupSelected.id /}
+	   #{f.hidden 'absenceType.id', value:absenceForm.absenceTypeSelected?.id /}
+	   #{f.hidden 'justifiedType.id', value:absenceForm.justifiedTypeSelected.id /}
 	   
 	   *{ seleziona minuti }*    
-       #{if selecteSubItem.selectedJustified.name.equals(models.absences.JustifiedType.JustifiedTypeName.specified_minutes) }
-         #{f.input 'hours', value:selecteSubItem.hours /}
-         #{f.input 'minutes', value:selecteSubItem.minutes /}
+       #{if absenceForm.hasHourMinutesChoice() }
+         #{f.input 'hours', value:absenceForm.hours /}
+         #{f.input 'minutes', value:absenceForm.minutes /}
        #{/if}
        
 	   *{ #{b.buttons center:true}

@@ -261,9 +261,5 @@ public class AbsenceRequestForm {
       return mission;
     }
     
-    public boolean newImplementation() {
-      return true; 
-      //!this.equals(AbsenceInsertTab.compensatory) && !this.equals(AbsenceInsertTab.vacation);
-    }
   }
 }
