@@ -43,7 +43,6 @@ public class Startup extends Job<Void> {
     @Override
     public void execute(Connection connection) {
       try {
-        //org.dbunit.dataset.datatype.DefaultDataTypeFactory
         IDataSet dataSet = new FlatXmlDataSetBuilder()
             .setColumnSensing(true).build(url);
         operation.execute(new H2Connection(connection, ""), dataSet);
@@ -69,12 +68,7 @@ public class Startup extends Job<Void> {
         new DatasetImport(
             DatabaseOperation.INSERT,
             Resources.getResource(
-                Startup.class, "data/absence-type-and-qualification-phase1.xml")));
-    session.doWork(
-        new DatasetImport(
-            DatabaseOperation.INSERT,
-            Resources.getResource(
-                Startup.class, "data/absence-type-and-qualification-phase2.xml")));
+                Startup.class, "data/group-absence-types.xml")));
 
     //competenceCode
     session.doWork(
@@ -111,30 +105,5 @@ public class Startup extends Job<Void> {
         new DatasetImport(
             DatabaseOperation.INSERT,
             Resources.getResource(Startup.class, "data/lucchesi-situation-2016-04.xml")));
-    //
-    //    //santerini slim 2014-03
-    //    session.doWork(
-    //        new DatasetImport(
-    //            DatabaseOperation.INSERT,
-    //            Resources.getResource(Startup.class, "santerini-situation-slim-2014-03.xml")));
-    //
-    //    //martinelli slim 2014-03
-    //    session.doWork(
-    //        new DatasetImport(
-    //            DatabaseOperation.INSERT,
-    //            Resources.getResource(Startup.class, "martinelli-situation-slim-2014-03.xml")));
-    //
-    //    //succurro slim 2014-03
-    //    session.doWork(
-    //        new DatasetImport(
-    //            DatabaseOperation.INSERT,
-    //            Resources.getResource(Startup.class, "succurro-situation-slim-2014-03.xml")));
-    //
-    //    //abba slim 2014-03
-    //    session.doWork(
-    //        new DatasetImport(
-    //            DatabaseOperation.INSERT,
-    //            Resources.getResource(Startup.class, "abba-situation-slim-2014-03.xml")));
-
   }
 }
