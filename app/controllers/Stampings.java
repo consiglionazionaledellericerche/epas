@@ -53,7 +53,6 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.JavaRules;
 import security.SecurityRules;
 
 import java.util.ArrayList;
@@ -102,8 +101,6 @@ public class Stampings extends Controller {
   private static PersonManager personManager;
   @Inject
   private static NotificationManager notificationManager;
-  @Inject
-  private static JavaRules jRules;
   @Inject
   private static UserDao userDao;
 
