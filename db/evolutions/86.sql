@@ -20,7 +20,8 @@ CREATE TABLE takable_absence_behaviours_history (
   --- takable_count_behaviour TEXT,
   --- takaen_count_behaviour TEXT,
   fixed_limit INT,
-  takable_amount_adjust TEXT
+  takable_amount_adjust TEXT,
+  CONSTRAINT takable_absence_behaviours_history_pk PRIMARY KEY(id, _revision)
 );
 
 --- 2) taken_codes_group
@@ -36,7 +37,8 @@ CREATE TABLE taken_codes_group_history (
   _revision INTEGER NOT NULL REFERENCES revinfo(rev),
   _revision_type SMALLINT,
   absence_types_id BIGINT NOT NULL,
-  takable_behaviour_id BIGINT NOT NULL
+  takable_behaviour_id BIGINT NOT NULL,
+  CONSTRAINT taken_codes_group_history_pk PRIMARY KEY(_revision, _revision_type, absence_types_id, takable_behaviour_id)  
 );
 
 --- 3) takable_codes_group
@@ -52,7 +54,8 @@ CREATE TABLE takable_codes_group_history (
   _revision INTEGER NOT NULL REFERENCES revinfo(rev),
   _revision_type SMALLINT,
   absence_types_id BIGINT NOT NULL,
-  takable_behaviour_id BIGINT NOT NULL
+  takable_behaviour_id BIGINT NOT NULL,
+  CONSTRAINT takable_codes_group_history_pk PRIMARY KEY(_revision, _revision_type, absence_types_id, takable_behaviour_id)    
 );
 
 --- 4) complation_absence_behaviours
@@ -67,7 +70,8 @@ CREATE TABLE complation_absence_behaviours_history (
   _revision INTEGER NOT NULL REFERENCES revinfo(rev),
   _revision_type SMALLINT,
   name TEXT,
-  amount_type TEXT
+  amount_type TEXT,
+  CONSTRAINT complation_absence_behaviours_history_pk PRIMARY KEY(id, _revision)
 );
 
 --- 5) complation_codes_group
@@ -83,7 +87,8 @@ CREATE TABLE complation_codes_group_history (
   _revision INTEGER NOT NULL REFERENCES revinfo(rev),
   _revision_type SMALLINT,
   absence_types_id BIGINT NOT NULL,
-  complation_behaviour_id BIGINT NOT NULL
+  complation_behaviour_id BIGINT NOT NULL,
+  CONSTRAINT complation_codes_group_history_pk PRIMARY KEY(_revision, _revision_type, absence_types_id, complation_behaviour_id)  
 );
 
 
@@ -100,7 +105,8 @@ CREATE TABLE replacing_codes_group_history (
   _revision INTEGER NOT NULL REFERENCES revinfo(rev),
   _revision_type SMALLINT,
   absence_types_id BIGINT NOT NULL,
-  complation_behaviour_id BIGINT NOT NULL
+  complation_behaviour_id BIGINT NOT NULL,
+  CONSTRAINT replacing_codes_group_history_pk PRIMARY KEY(_revision, _revision_type, absence_types_id, complation_behaviour_id)    
 );
 
 --- 7) group_absence_types
@@ -118,7 +124,8 @@ CREATE TABLE category_group_absence_types_history (
   _revision_type SMALLINT,
   name TEXT,
   description TEXT,
-  priority INTEGER
+  priority INTEGER,
+  CONSTRAINT category_group_absence_types_history_pk PRIMARY KEY(id, _revision)
 );
 
 CREATE TABLE group_absence_types (
@@ -150,7 +157,8 @@ CREATE TABLE group_absence_types_history (
   period_type TEXT,
   takable_behaviour_id BIGINT,
   complation_behaviour_id BIGINT,
-  next_group_to_check_id BIGINT
+  next_group_to_check_id BIGINT,
+  CONSTRAINT group_absence_types_history_pk PRIMARY KEY(id, _revision)
 );
 
 --- 8) Assenze / Tipi Assenze
@@ -164,7 +172,8 @@ CREATE TABLE justified_types_history (
   id BIGINT NOT NULL,
   _revision INTEGER NOT NULL REFERENCES revinfo(rev),
   _revision_type SMALLINT,
-  name TEXT
+  name TEXT,
+ CONSTRAINT justified_types_history_pk PRIMARY KEY(id, _revision)
 );
 
 CREATE TABLE absence_types_justified_types (
@@ -177,7 +186,9 @@ CREATE TABLE absence_types_justified_types_history (
   _revision INTEGER NOT NULL REFERENCES revinfo(rev),
   _revision_type SMALLINT,
   absence_types_id BIGINT NOT NULL,
-  justified_types_id BIGINT NOT NULL
+  justified_types_id BIGINT NOT NULL,
+  CONSTRAINT absence_types_justified_types_history_pk 
+    PRIMARY KEY(_revision, _revision_type, absence_types_id,justified_types_id)
 );
 
 --- 9) Assenze / Tipi Assenze Errori
@@ -193,7 +204,8 @@ CREATE TABLE absence_troubles_history (
   _revision INTEGER NOT NULL REFERENCES revinfo(rev),
   _revision_type SMALLINT,
   trouble TEXT,
-  absence_id BIGINT
+  absence_id BIGINT,
+  CONSTRAINT absence_troubles_history_pk PRIMARY KEY(id, _revision)
 );
 
 ALTER TABLE absence_types ADD COLUMN time_for_mealticket BOOLEAN default false;
@@ -207,7 +219,7 @@ ALTER TABLE absence_types_history ADD COLUMN replacing_time INT;
 ALTER TABLE absence_types_history ADD COLUMN replacing_type_id BIGINT;
 
 ALTER TABLE absences ADD COLUMN justified_type_id BIGINT REFERENCES justified_types(id);
-ALTER TABLE absences_history ADD COLUMN justified_type_id BIGINT REFERENCES justified_types(id);
+ALTER TABLE absences_history ADD COLUMN justified_type_id BIGINT;
 
 CREATE TABLE initialization_groups (
   id BIGSERIAL PRIMARY KEY,
@@ -243,7 +255,8 @@ CREATE TABLE initialization_groups_history (
   complation_used INT,
   vacation_year INT,
   residual_minutes_last_year INT,
-  residual_minutes_current_year INT
+  residual_minutes_current_year INT,
+  CONSTRAINT initialization_groups_history_pk PRIMARY KEY(id, _revision)
 );
 
 ALTER TABLE person_reperibility_types ALTER id SET DEFAULT nextval('seq_person_reperibility_types'::regclass);
@@ -340,7 +353,9 @@ CREATE TABLE competence_codes_history (
   limit_value INTEGER,
   limit_type TEXT,
   competence_code_group_id BIGINT,
-  limit_unit TEXT
+  limit_unit TEXT,
+    CONSTRAINT competence_codes_history_pk PRIMARY KEY(id, _revision)
+
 );
 
 CREATE TABLE competence_code_groups_history (
@@ -350,7 +365,8 @@ CREATE TABLE competence_code_groups_history (
   label TEXT,
   limit_type TEXT,
   limit_value INTEGER,
-  limit_unit TEXT
+  limit_unit TEXT,
+  CONSTRAINT competence_code_groups_history_pk PRIMARY KEY(id, _revision)
 );
 
 INSERT INTO competence_codes_history
@@ -374,7 +390,7 @@ CREATE TABLE user_roles_history (
     user_id BIGINT NOT NULL,
     roles text,
 
-    PRIMARY KEY (_revision, user_id, roles),
+    PRIMARY KEY (_revision, _revision_type, user_id, roles),
     FOREIGN KEY (_revision) REFERENCES revinfo(rev)
 );
 
@@ -423,6 +439,8 @@ CREATE TABLE attachments_history (
 
 UPDATE stampings SET marked_by_employee = false WHERE marked_by_employee is NULL;
 UPDATE stampings SET marked_by_admin = false WHERE marked_by_admin is NULL;
+
+ALTER TABLE person_configurations_history ADD PRIMARY KEY (id, _revision);
 
 # ---!Downs
 
