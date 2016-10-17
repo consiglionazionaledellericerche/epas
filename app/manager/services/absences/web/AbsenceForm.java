@@ -9,7 +9,7 @@ import dao.absences.AbsenceComponentDao;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.services.absences.AbsenceEngineUtility;
-import manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab;
+import manager.services.absences.AbsenceMigration.DefaultGroup;
 
 import models.Person;
 import models.absences.AbsenceType;
@@ -36,7 +36,8 @@ public class AbsenceForm {
   
   //switch group
   
-  private SortedMap<Integer, Set<CategoryGroupAbsenceType>> categoriesByPriority = Maps.newTreeMap();
+  private SortedMap<Integer, Set<CategoryGroupAbsenceType>> categoriesByPriority = 
+      Maps.newTreeMap();
   private Map<CategoryGroupAbsenceType, Set<GroupAbsenceType>> groupsByCategory =
       Maps.newHashMap();
   public GroupAbsenceType groupSelected;
@@ -61,6 +62,10 @@ public class AbsenceForm {
   public Integer minutes = 0;
   public Integer hours = 0;
   
+  /**
+   * Le categorie (ordinate per priorità).
+   * @return list
+   */
   public List<CategoryGroupAbsenceType> categories() {
     List<CategoryGroupAbsenceType> categories = Lists.newArrayList();
     for (Set<CategoryGroupAbsenceType> set : categoriesByPriority.values()) {
@@ -73,6 +78,10 @@ public class AbsenceForm {
     return groupsByCategory.get(category);
   }
   
+  /**
+   * I gruppi.
+   * @return list
+   */
   public List<GroupAbsenceType> groups() {
     List<GroupAbsenceType> groups = Lists.newArrayList();
     for (Set<GroupAbsenceType> set : this.groupsByCategory.values()) {
@@ -85,12 +94,21 @@ public class AbsenceForm {
     return groups().size() > 1;
   }
   
+  /**
+   * Se la form ha una scelta sul tipo assenza.
+   * @return esito
+   */
   public boolean hasAbsenceTypeChoice() {
     int choices = absenceTypes.size();
-    if (automaticChoiceExists) {
-      choices++;
-    }
+//    if (automaticChoiceExists) {
+//      choices++;
+//    }
     return choices > 1;
+  }
+  
+  public AbsenceType theOnlyAbsenceType() {
+    Verify.verify(!hasAbsenceTypeChoice());
+    return this.absenceTypes.get(0);
   }
   
   public boolean hasJustifiedTypeChoice() {
@@ -105,7 +123,19 @@ public class AbsenceForm {
     return justifiedTypeSelected.name.equals(JustifiedTypeName.all_day);
   }
 
-  
+  /**
+   * Constructor.
+   * @param person person
+   * @param from from 
+   * @param to to
+   * @param groupAbsenceType group
+   * @param absenceType absenceType 
+   * @param justifiedType justifiedType
+   * @param hours hours
+   * @param minutes minutes
+   * @param absenceComponentDao inj
+   * @param absenceEngineUtility inj
+   */
   public AbsenceForm(Person person, LocalDate from, LocalDate to, 
       GroupAbsenceType groupAbsenceType, 
       AbsenceType absenceType, JustifiedType justifiedType, 
@@ -182,7 +212,7 @@ public class AbsenceForm {
       this.automaticChoiceSelected = true;
       this.justifiedTypes = automaticJustifiedTypes;
       
-    } else if (absenceType == null && !this.automaticChoiceExists){
+    } else if (absenceType == null && !this.automaticChoiceExists) {
       // se non ho specificato il tipo e non esiste una gestione automatica utilizzo il primo tipo
       this.absenceTypeSelected = this.absenceTypes.iterator().next();
       this.justifiedTypes = Lists.newArrayList(this.absenceTypeSelected.justifiedTypesPermitted);
@@ -199,7 +229,7 @@ public class AbsenceForm {
     } else {
       this.justifiedTypeSelected = this.justifiedTypes.iterator().next();
     }
-    
+
     if (minutes != null) {
       this.minutes = minutes;
     }
@@ -209,11 +239,67 @@ public class AbsenceForm {
     if (this.minutes <= 0 && this.hours <= 0) {
       this.hours = 1;
     }
-    
+
     return;
   }
-  
-  
-  
+
+  /**
+   * Modella la tab in inserimento assenze. E' una versione provvisoria da analizzare e 
+   * generalizzare.
+   * @author alessandro
+   *
+   */
+  public static enum AbsenceInsertTab {
+
+    mission(Lists.newArrayList(DefaultGroup.MISSIONE.name())),
+    vacation(Lists.newArrayList(DefaultGroup.FERIE_CNR.name())),
+    compensatory(Lists.newArrayList(DefaultGroup.RIPOSI_CNR.name())),
+    automatic(Lists.newArrayList(DefaultGroup.PB.name())),
+    other(Lists.newArrayList(
+        DefaultGroup.G_661.name(), 
+        DefaultGroup.G_89.name(), DefaultGroup.G_09.name(),
+        DefaultGroup.G_18.name(), DefaultGroup.G_19.name(),
+        DefaultGroup.G_23.name(), DefaultGroup.G_25.name(),
+        DefaultGroup.G_232.name(), DefaultGroup.G_252.name(),
+        DefaultGroup.G_233.name(), DefaultGroup.G_253.name(),
+        DefaultGroup.MALATTIA.name(),
+        DefaultGroup.MALATTIA_FIGLIO_1_12.name(),
+        DefaultGroup.MALATTIA_FIGLIO_1_13.name(),
+        DefaultGroup.MALATTIA_FIGLIO_1_14.name(),
+        DefaultGroup.MALATTIA_FIGLIO_2_12.name(),
+        DefaultGroup.MALATTIA_FIGLIO_2_13.name(),
+        DefaultGroup.MALATTIA_FIGLIO_2_14.name(),
+        DefaultGroup.MALATTIA_FIGLIO_3_12.name(),
+        DefaultGroup.MALATTIA_FIGLIO_3_13.name(),
+        DefaultGroup.MALATTIA_FIGLIO_3_14.name(),
+        DefaultGroup.EMPLOYEE.name(),
+        DefaultGroup.ALTRI.name(), DefaultGroup.G_95.name()
+        ));
+
+    public List<String> groupNames;
+
+    private AbsenceInsertTab(List<String> groupNames) {
+      this.groupNames = groupNames;
+    }
+
+    /**
+     * La tab del gruppo.
+     * @param groupAbsenceType gruppo
+     * @return tab
+     */
+    public static AbsenceInsertTab fromGroup(GroupAbsenceType groupAbsenceType) {
+      for (AbsenceInsertTab absenceInsertTab : AbsenceInsertTab.values()) {
+        if (absenceInsertTab.groupNames.contains(groupAbsenceType.name)) {
+          return absenceInsertTab;
+        }
+      }
+      return null;
+    }
+
+    public static AbsenceInsertTab defaultTab() {
+      return mission;
+    }
+
+  }
 
 }

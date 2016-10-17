@@ -29,24 +29,27 @@ public class PeriodChain {
   
   //Assenze coinvolte nella catena (compresi i nuovi inserimenti)
   public Set<Absence> involvedAbsences = Sets.newHashSet() ; //le assenza assegnate ad un periodo
-  public Set<Absence> orphanAbsences = Sets.newHashSet();    //le assenze non assegnate ad alcun periodo 
-                                                             // perchè sono uscito in modo critico mentre le analizzavo
+  public Set<Absence> orphanAbsences = Sets.newHashSet();    //le assenze non assegnate ad alcun 
+                                                             //periodo perchè sono uscito in modo 
+                                                             // critico mentre le analizzavo
 
-  //Tutte le assenze coinvolte nella catena - anche quelle di codici diversi (compresi i nuovi inserimenti) 
+  //Tutte le assenze coinvolte nella catena 
+  // - anche quelle di codici diversi (compresi i nuovi inserimenti) 
   public Map<LocalDate, Set<Absence>> allInvolvedAbsences = Maps.newHashMap();    
   
   //Assenza da inserire
   public AbsencePeriod successPeriodInsert;
-  public ErrorsBox errorsBox = new ErrorsBox();              //per adesso contiene solo il caso di ins. assenza senza figlio.
+  public ErrorsBox errorsBox = new ErrorsBox();              //per adesso contiene solo il caso di 
+                                                             // ins. assenza senza figlio.
   
   //Errori
-  private List<ErrorsBox> periodsErrorsBoxes = null;         //errori dei periodi.. lazy quando ho i periodi
+  private List<ErrorsBox> periodsErrorsBoxes = null; //errori dei periodi.. lazy quando ho i periodi
 
   /**
-   * 
-   * @param person
-   * @param groupAbsenceType
-   * @param date
+   * Constructor PeriodChain.
+   * @param person persona
+   * @param groupAbsenceType gruppo
+   * @param date data
    */
   public PeriodChain(Person person, GroupAbsenceType groupAbsenceType, LocalDate date) {
     this.person = person;
@@ -54,6 +57,10 @@ public class PeriodChain {
     this.groupAbsenceType = groupAbsenceType;
   }
   
+  /**
+   * La descrizione della catena.
+   * @return string
+   */
   public String getChainDescription() {
     if (periods.get(0).groupAbsenceType.chainDescription != null) {
       return periods.get(0).groupAbsenceType.chainDescription;
@@ -61,6 +68,10 @@ public class PeriodChain {
     return periods.get(0).groupAbsenceType.description;
   }
   
+  /**
+   * Il primo periodo della catena.
+   * @return absencePeriod
+   */
   public AbsencePeriod firstPeriod() {
     if (periods.isEmpty()) {
       return null;
@@ -69,8 +80,8 @@ public class PeriodChain {
   }
   
   /**
-   * I codici coinvolti nella periodChain
-   * @return
+   * I codici coinvolti nella periodChain.
+   * @return set
    */
   public Set<AbsenceType> periodChainInvolvedCodes() {
 
@@ -88,6 +99,10 @@ public class PeriodChain {
     return absenceTypes;
   }
   
+  /**
+   * Tutti gli errori verificatisi nella catena.
+   * @return list
+   */
   public List<ErrorsBox> allErrorsInPeriods() {
     if (this.periodsErrorsBoxes != null) {
       return this.periodsErrorsBoxes;
@@ -104,7 +119,7 @@ public class PeriodChain {
   }
   
   public boolean containsCriticalErrors() {
-    return ErrorsBox.containsCriticalErrors(this.allErrorsInPeriods());
+    return ErrorsBox.boxesContainsCriticalErrors(this.allErrorsInPeriods());
   }
   
   public Set<CriticalError> criticalErrors() {

@@ -44,13 +44,14 @@ public class ServiceFactories {
     this.personDayManager = personDayManager;
   }
   
-  
   /**
    * Costruttore per richiesta di scan.
-   * @param person
-   * @param scanFrom
-   * @param absencesToScan
-   * @return
+   * @param person persona
+   * @param scanFrom scanFrom
+   * @param absencesToScan le assenze da scannerizzare
+   * @param orderedChildren i figli ordinati per data di nascita
+   * @param fetchedContracts i contratti
+   * @return scanner
    */
   public Scanner buildScanInstance(Person person, LocalDate scanFrom, 
       List<Absence> absencesToScan, List<PersonChildren> orderedChildren, 
@@ -66,16 +67,19 @@ public class ServiceFactories {
   }
   
 
-  
   /**
-   * Costruisce la catena dei periodi per il gruppo e la data passati.
-   * Calcola anche la soundness del periodo e mette nel report eventuali errori.
-   * @param absenceEngine
-   * @param groupAbsenceType
-   * @param date
-   * @return
+   * Costruisce lo stato del gruppo (la periodChain).
+   * @param person persona
+   * @param groupAbsenceType gruppo
+   * @param date data
+   * @param previousInserts gli inserimenti di successo precedenti (optional)
+   * @param absenceToInsert la nuova assenza da inserire (optional)
+   * @param orderedChildren la lista dei figli ordinati per data di nascita
+   * @param fetchedContracts i contratti
+   * @return periodChain
    */
-  public PeriodChain buildPeriodChain(Person person, GroupAbsenceType groupAbsenceType, LocalDate date,
+  public PeriodChain buildPeriodChain(
+      Person person, GroupAbsenceType groupAbsenceType, LocalDate date,
       List<Absence> previousInserts,
       Absence absenceToInsert,
       List<PersonChildren> orderedChildren, List<Contract> fetchedContracts) { 
@@ -189,7 +193,8 @@ public class ServiceFactories {
       if (takableBehaviour.takableAmountAdjustment != null) {
         // TODO: ex. workingTimePercent
         //bisogna ridurre il limite
-        //engineInstance.absenceEngineProblem = Optional.of(AbsenceEngineProblem.unsupportedOperation);
+        //engineInstance.absenceEngineProblem = 
+        //Optional.of(AbsenceEngineProblem.unsupportedOperation);
       }
 
       absencePeriod.takableCountBehaviour = TakeCountBehaviour.period;
@@ -230,13 +235,6 @@ public class ServiceFactories {
     return absencePeriod;
   }
   
-  /**
-   * Aggiunge ai period tutte le assenze prese e ne calcola l'integrità.
-   * Popola il report con tutti gli errori riscontrati.
-   * @param first
-   * @param absenceEngine
-   * @param absence
-   */
   private void populatePeriodChain(PeriodChain periodChain, 
       List<Absence> involvedAbsencesInGroup, Absence absenceToInsert,
       List<Absence> previousInsert) {
@@ -294,7 +292,9 @@ public class ServiceFactories {
     }
     
     //computo il ruolo dell'assenza nel period
-    boolean isTaken = false, isComplation = false, isReplacing = false;
+    boolean isTaken = false;
+    boolean isComplation = false;
+    boolean isReplacing = false;
     if (absencePeriod.isTakable()) {
       //isTaken = absencePeriod.takenCodes.contains(absence.absenceType);   // no insert
       isTaken = absencePeriod.takableCodes.contains(absence.absenceType); // insert
@@ -331,7 +331,8 @@ public class ServiceFactories {
           .absenceJustifiedAmount(absencePeriod.person, absence, absencePeriod.takeAmountType);
       if (takenAmount < 0) {
         absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.ImplementationProblem);
-        absencePeriod.errorsBox.addCriticalError(absence, CriticalProblem.IncalcolableJustifiedAmount);
+        absencePeriod.errorsBox.addCriticalError(absence, 
+            CriticalProblem.IncalcolableJustifiedAmount);
         return;
       }
       TakenAbsence takenAbsence = absencePeriod.buildTakenAbsence(absence, takenAmount);
@@ -350,7 +351,8 @@ public class ServiceFactories {
           absence, absencePeriod.complationAmountType);
       if (complationAmount <= 0) {
         absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.ImplementationProblem);
-        absencePeriod.errorsBox.addCriticalError(absence, CriticalProblem.IncalcolableJustifiedAmount);
+        absencePeriod.errorsBox.addCriticalError(absence, 
+            CriticalProblem.IncalcolableJustifiedAmount);
         return;
       }
       absencePeriod.addComplationAbsence(absence);
@@ -364,14 +366,6 @@ public class ServiceFactories {
     }
   }
   
-  /**
-   * Ritorna true se sono riuscito ad inserire l'assenza nel periodo senza alcun errore.
-   * @param periodChain
-   * @param absencePeriod
-   * @param absenceToInsert
-   * @param previousInserts
-   * @return
-   */
   private boolean insertAbsenceInPeriod(PeriodChain periodChain, AbsencePeriod absencePeriod, 
       Absence absenceToInsert, List<Absence> previousInserts) {
     if (absenceToInsert == null) {

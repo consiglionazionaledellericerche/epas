@@ -1,7 +1,6 @@
 package controllers;
 
 import dao.PersonDao;
-import dao.absences.AbsenceComponentDao;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,13 +11,12 @@ import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
 import manager.services.absences.model.PeriodChain;
 import manager.services.absences.web.AbsenceForm;
-import manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab;
+import manager.services.absences.web.AbsenceForm.AbsenceInsertTab;
 
 import models.Person;
 import models.PersonDay;
 import models.absences.Absence;
 import models.absences.AbsenceType;
-import models.absences.CategoryGroupAbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.JustifiedType;
@@ -46,8 +44,6 @@ public class AbsenceGroups extends Controller {
   private static AbsenceService absenceService;
   @Inject
   private static ConsistencyManager consistencyManager;
-  @Inject
-  private static AbsenceComponentDao absenceComponentDao;
   @Inject
   private static AbsenceManager absenceManager;
   
@@ -86,7 +82,7 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(from);
    
     AbsenceForm absenceForm = 
-        absenceService.buildInsertForm(person, from, absenceInsertTab, 
+        absenceService.buildAbsenceForm(person, from, absenceInsertTab, 
         to, groupAbsenceType, switchGroup, absenceType, justifiedType, hours, minutes);
 
     InsertReport insertReport  = absenceService.insert(person, 
@@ -162,23 +158,22 @@ public class AbsenceGroups extends Controller {
   /**
    * End point per visualizzare lo stato di un gruppo assenze alla data.
    * 
-   * @param person persona
+   * @param personId persona
    * @param groupAbsenceType gruppo
-   * @param date data
+   * @param from data
    */
-  public static void groupStatus(Person person, GroupAbsenceType groupAbsenceType, LocalDate date) {
+  public static void groupStatus(Long personId, GroupAbsenceType groupAbsenceType, LocalDate from) {
     
+    Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    notFoundIfNull(date);
+    notFoundIfNull(from);
     
-    List<CategoryGroupAbsenceType> categories = absenceService
-        .orderedCategories(person, date, groupAbsenceType);
+    AbsenceForm categorySwitcher = absenceService
+        .buildForCateogorySwitch(person, from, groupAbsenceType);
     
-    groupAbsenceType = absenceComponentDao.firstGroupOfChain(groupAbsenceType);
-        
-    PeriodChain periodChain = absenceService.residual(person, groupAbsenceType, date);
+    PeriodChain periodChain = absenceService.residual(person, categorySwitcher.groupSelected, from);
     
-    render(date, categories, groupAbsenceType, periodChain);
+    render(from, categorySwitcher, groupAbsenceType, periodChain);
   }
   
   /**

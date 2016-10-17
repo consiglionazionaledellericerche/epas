@@ -100,8 +100,8 @@ public class AbsenceEngineUtility {
     JustifiedType allDayVar = null;
     JustifiedType halfDayVar = null;
 
-    Map<Integer, Integer> specificMinutesFinded = Maps.newHashMap(); //(minute, count)
-    boolean specificMinutesDenied = false;
+    //Map<Integer, Integer> specificMinutesFinded = Maps.newHashMap(); //(minute, count)
+    //boolean specificMinutesDenied = false;
     Integer allDayFinded = 0;
     Integer halfDayFinded = 0;
     Integer specifiedMinutesFinded = 0;
@@ -146,7 +146,7 @@ public class AbsenceEngineUtility {
     if (halfDayFinded == 1) {
       justifiedTypes.add(halfDayVar);
     }
-    if (specifiedMinutesFinded == 1 && specificMinutesDenied == false) {
+    if (specifiedMinutesFinded == 1) { //&& specificMinutesDenied == false) {
       justifiedTypes.add(specifiedMinutesVar);
     }
     

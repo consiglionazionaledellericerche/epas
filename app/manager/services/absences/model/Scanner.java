@@ -55,23 +55,37 @@ public class Scanner {
   //PeriodChains
   List<PeriodChain> periodChainScanned = Lists.newArrayList();
   
+  /**
+   * Constructor scanner.
+   * @param person persona
+   * @param scanFrom scanFrom
+   * @param absencesToScan le assenze da scannerizzare
+   * @param orderedChildren la lista dei figli ordinati per data di nascita
+   * @param fetchedContracts i contratti
+   * @param serviceFactories injection
+   * @param absenceEngineUtility injection
+   * @param personDayManager injection
+   * @param absenceComponentDao injection
+   */
   public Scanner(Person person, LocalDate scanFrom, List<Absence> absencesToScan,
       List<PersonChildren> orderedChildren, List<Contract> fetchedContracts, 
       ServiceFactories serviceFactories, AbsenceEngineUtility absenceEngineUtility, 
       PersonDayManager personDayManager, AbsenceComponentDao absenceComponentDao) {
-   this.person = person;
-   this.scanFrom = scanFrom;
-   this.absencesToScan = absencesToScan;
-   this.orderedChildren = orderedChildren;
-   this.fetchedContracts = fetchedContracts;
-   this.serviceFactories = serviceFactories;
-   this.absenceEngineUtility = absenceEngineUtility;
-   this.personDayManager = personDayManager;
-   this.absenceComponentDao = absenceComponentDao;
+    this.person = person;
+    this.scanFrom = scanFrom;
+    this.absencesToScan = absencesToScan;
+    this.orderedChildren = orderedChildren;
+    this.fetchedContracts = fetchedContracts;
+    this.serviceFactories = serviceFactories;
+    this.absenceEngineUtility = absenceEngineUtility;
+    this.personDayManager = personDayManager;
+    this.absenceComponentDao = absenceComponentDao;
   }
 
 
-  
+  /**
+   * Metodo di scan.
+   */
   public void scan() {
     
     //mappa di utilità
@@ -119,13 +133,17 @@ public class Scanner {
     persistScannerTroubles();
   }
 
+  /**
+   * Persiste gli errori riscontrati. Cancella quelli risolti.
+   */
   private void persistScannerTroubles() {
     
     List<ErrorsBox> allErrorsScanned = allErrorsScanned();
     for (Absence absence : this.absencesToScan) {
       List<AbsenceTrouble> toDeleteTroubles = Lists.newArrayList();     //problemi da aggiungere
       List<AbsenceTrouble> toAddTroubles = Lists.newArrayList();        //problemi da rimuovere
-      Set<AbsenceProblem> remainingProblems = ErrorsBox.allAbsenceProblems(allErrorsScanned, absence);
+      Set<AbsenceProblem> remainingProblems = ErrorsBox
+          .allAbsenceProblems(allErrorsScanned, absence);
       //decidere quelli da cancellare
       //   per ogni vecchio absenceTroule verifico se non è presente in remaining
       for (AbsenceTrouble absenceTrouble : absence.troubles) {
@@ -169,7 +187,7 @@ public class Scanner {
   
   /**
    * Il prossimo gruppo da analizzare per la currentAbsence (se c'è).
-   * @return
+   * @return gruppo
    */
   private GroupAbsenceType currentAbsenceNextGroup() {
     if (this.currentAbsence == null) {
@@ -186,8 +204,7 @@ public class Scanner {
   
   /**
    * Configura il prossimo gruppo da analizzare (se esiste).
-   * @param absenceEngine
-   * @return
+   * @param iterator iteratore sulla lista di assenze da scannerizzare.
    */
   private void configureNextGroupToScan(Iterator<Absence> iterator) {
     
@@ -244,7 +261,8 @@ public class Scanner {
         
         //creare il rimpiazzamento corretto
         if (dayInPeriod.isReplacingMissing()) {
-          PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(person, dayInPeriod.getDate());
+          PersonDay personDay = personDayManager
+              .getOrCreateAndPersistPersonDay(person, dayInPeriod.getDate());
           Absence replacingAbsence = new Absence();
           replacingAbsence.absenceType = dayInPeriod.getCorrectReplacing();
           replacingAbsence.date = dayInPeriod.getDate();

@@ -31,7 +31,7 @@ import it.cnr.iit.epas.DateUtility;
 import manager.SecureManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
-import manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab;
+import manager.services.absences.web.AbsenceForm.AbsenceInsertTab;
 
 import models.BadgeReader;
 import models.BadgeSystem;
@@ -48,22 +48,20 @@ import models.UsersRolesOffices;
 import models.WorkingTimeType;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
-import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
-import models.absences.TakableAbsenceBehaviour;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.CodesForEmployee;
 import models.enumerate.StampTypes;
 
 import org.joda.time.LocalDate;
 
-import synch.diagnostic.SynchDiagnostic;
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+
+import synch.diagnostic.SynchDiagnostic;
 
 /**
  * Metodi usabili nel template.
@@ -538,5 +536,53 @@ public class TemplateUtility {
       return true;
     }
     return false;
+  }
+  
+  /**
+   * Formatta l'ammontare nell'amountType fornito.
+   * @param amount ammontare
+   * @param amountType amountType
+   * @return string
+   */
+  public String formatAmount(int amount, AmountType amountType) {
+    if (amountType == null) {
+      return "";
+    }
+    String format = "";
+    if (amountType.equals(AmountType.units)) {
+      if (amount == 0) {
+        return "0 giorni";// giorno lavorativo";
+      }
+      int units = amount / 100;
+      int percent = amount % 100;
+      String label = " giorni lavorativi";
+      if (units == 1) {
+        label = " giorno lavorativo";
+      }
+      if (units > 0 && percent > 0) {
+        return units + label + " + " + percent + "% di un giorno lavorativo";  
+      } else if (units > 0) {
+        return units + label;
+      } else if (percent > 0) {
+        return percent + "% di un giorno lavorativo";
+      }
+      return ((double)amount / 100 )+ " giorni";
+    }
+    if (amountType.equals(AmountType.minutes)) {
+      if (amount == 0) {
+        return "0 minuti";
+      }
+      int hours = amount / 60; //since both are ints, you get an int
+      int minutes = amount % 60;
+
+      if (hours > 0 && minutes > 0) {
+        format = hours + " ore " + minutes + " minuti";
+      } else if (hours > 0) {
+        format = hours + " ore";
+      } else if (minutes > 0) {
+        format = minutes + " minuti";
+      }
+    }
+    return format;
   }
 }

@@ -22,8 +22,11 @@ insertReplacing = Inserimento Rimpiazzamento
 
 absence_type_minutes=Tempo specificato nel tipo assenza
 all_day=Tutto il giorno
+half_day=Mezza giornata
 assign_all_day=Assegna l'intera giornata lavorativa
 specified_minutes=Specificare ore e minuti
+all_day_limit=Niente ma scala una giornata dal limite
+specified_minutes_limit=Niente ma scala i minuti dal limite
 
 nothing=Niente
 minutes=Minuti

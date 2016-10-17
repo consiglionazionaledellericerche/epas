@@ -47,12 +47,14 @@ public class AbsencePeriod {
   public LocalDate limitExceedDate;
   
   // Complation
-  public AmountType complationAmountType;                                           // Tipo di ammontare completamento
-  public SortedMap<Integer, AbsenceType> replacingCodesDesc =                       // I codici di rimpiazzamento ordinati per il loro
-      Maps.newTreeMap(Collections.reverseOrder());                                  // tempo di completamento (decrescente) 
-                                                                                     
-  public Map<AbsenceType, Integer> replacingTimes = Maps.newHashMap();              //I tempi di rimpiazzamento per ogni assenza
-  public Set<AbsenceType> complationCodes;                                          // Codici di completamento     
+  public AmountType complationAmountType;                      // Tipo di ammontare completamento
+  //I codici di rimpiazzamento ordinati per il loro tempo di completamento (decrescente)
+  public SortedMap<Integer, AbsenceType> replacingCodesDesc = 
+      Maps.newTreeMap(Collections.reverseOrder());              
+                                                                                    
+  //I tempi di rimpiazzamento per ogni assenza
+  public Map<AbsenceType, Integer> replacingTimes = Maps.newHashMap();              
+  public Set<AbsenceType> complationCodes;                             // Codici di completamento
   public boolean compromisedTwoComplation = false;
   
   //Errori del periodo
@@ -78,7 +80,16 @@ public class AbsencePeriod {
   public boolean isTakableNoLimit() {
     return takeAmountType != null && getPeriodTakableAmount() < 0;
   }
+  
+  public boolean isTakableWithLimit() {
+    return isTakable() && !isTakableNoLimit();
+  }
 
+  /**
+   * Imposta l'ammontare fisso del periodo.
+   * ex. 150 ore (che possono poi essere decurtate in modo variabile)
+   * @param amount ammontare fisso
+   */
   public void setFixedPeriodTakableAmount(int amount) {
     if (this.takeAmountType.equals(AmountType.units)) {
       // Per non fare operazioni in virgola mobile...
@@ -96,6 +107,10 @@ public class AbsencePeriod {
     return takenAbsences;
   }
   
+  /**
+   * L'ammontare totale prendibile nel periodo.
+   * @return int
+   */
   public int getPeriodTakableAmount() {
     if (!takableCountBehaviour.equals(TakeCountBehaviour.period)) {
       // TODO: sumAllPeriod, sumUntilPeriod;
@@ -104,6 +119,10 @@ public class AbsencePeriod {
     return this.fixedPeriodTakableAmount;
   }
   
+  /**
+   * L'ammontare utilizzato nel periodo.
+   * @return int
+   */
   public int getPeriodTakenAmount() {
     int takenInPeriod = 0;
     for (TakenAbsence takenAbsence : takenAbsences()) {
@@ -121,9 +140,10 @@ public class AbsencePeriod {
   }
   
   /**
-   * Se è possibile quell'ulteriore amount.
-   * @param amount
-   * @return se ho superato il limite
+   * Aggiunge al period l'assenza takable nel periodo.
+   * @param absence assenza
+   * @param takenAmount ammontare
+   * @return l'assenza takable
    */
   public TakenAbsence buildTakenAbsence(Absence absence, int takenAmount) {
     int periodTakableAmount = this.getPeriodTakableAmount();
@@ -143,7 +163,10 @@ public class AbsencePeriod {
     dayInPeriod.getTakenAbsences().add(takenAbsence);
   }
   
-  
+  /**
+   * Aggiunge l'assenza di completamento al periodo.
+   * @param absence assenza di completamento
+   */
   public void addComplationAbsence(Absence absence) {
     DayInPeriod dayInPeriod = getDayInPeriod(absence.getAbsenceDate());
     if (!dayInPeriod.getExistentComplations().isEmpty()) {
@@ -157,6 +180,10 @@ public class AbsencePeriod {
     dayInPeriod.getExistentReplacings().add(absence);
   }
    
+  /**
+   * Tagga il periodo come limite superato alla data.
+   * @param date data
+   */
   public void setLimitExceededDate(LocalDate date) {
     if (this.limitExceedDate == null || this.limitExceedDate.isAfter(date)) {
       this.limitExceedDate = date;
@@ -168,8 +195,9 @@ public class AbsencePeriod {
   }
   
   /**
-   * Requires: no criticalErrors and no twoComplationSameDate
-   * @param absenceEngineUtility
+   * Calcola i rimpiazzamenti corretti nel periodo.
+   * @param absenceEngineUtility inject dep
+   * @param absenceComponentDao inject dep
    */
   public void computeCorrectReplacingInPeriod(AbsenceEngineUtility absenceEngineUtility, 
       AbsenceComponentDao absenceComponentDao) {
@@ -206,6 +234,11 @@ public class AbsencePeriod {
     return;
   }
   
+  /**
+   * Seleziona dalla lista le assenze appartenenti al period.
+   * @param absences assenze
+   * @return list
+   */
   public List<Absence> filterAbsencesInPeriod(List<Absence> absences) {
     DateInterval interval = this.periodInterval();
     List<Absence> filtered = Lists.newArrayList();
@@ -217,6 +250,11 @@ public class AbsencePeriod {
     return filtered;
   }
   
+  /**
+   * La struttura dati DayInPeriod per quella data. Se non esiste la crea.
+   * @param date data
+   * @return il dayInPeriod
+   */
   public DayInPeriod getDayInPeriod(LocalDate date) {
     DayInPeriod dayInPeriod = this.daysInPeriod.get(date);
     if (dayInPeriod == null) {
@@ -227,7 +265,7 @@ public class AbsencePeriod {
   }
   
   public boolean containsCriticalErrors() {
-    return ErrorsBox.containsCriticalErrors(Lists.newArrayList(this.errorsBox));
+    return ErrorsBox.boxesContainsCriticalErrors(Lists.newArrayList(this.errorsBox));
   }
   
 }

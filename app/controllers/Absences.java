@@ -48,6 +48,7 @@ import models.Qualification;
 import models.User;
 import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.JustifiedType;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.QualificationMapping;
@@ -198,8 +199,10 @@ public class Absences extends Controller {
       tecnologi = !tecnologi ? QualificationMapping.TECNOLOGI.contains(q) : tecnologi;
       tecnici = !tecnici ? QualificationMapping.TECNICI.contains(q) : tecnici;
     }
+    
+    List<JustifiedType> allJustifiedType = JustifiedType.findAll();
 
-    render(absenceType, tecnologi, tecnici);
+    render(absenceType, tecnologi, tecnici, allJustifiedType);
   }
 
   /**
@@ -242,10 +245,9 @@ public class Absences extends Controller {
     }
 
     absenceType.save();
-    Logger.info("Inserito/modificato codice di assenza %s", absenceType.code);
     flash.success("Inserito/modificato codice di assenza %s", absenceType.code);
 
-    manageAbsenceCode();
+    editCode(absenceType.id);
   }
 
   /**

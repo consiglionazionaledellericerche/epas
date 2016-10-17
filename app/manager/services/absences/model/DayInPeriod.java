@@ -12,12 +12,14 @@ import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.GroupAbsenceType;
+import models.absences.JustifiedType;
 
 import org.joda.time.LocalDate;
 
 import java.util.List;
 
-@Getter @Setter
+@Getter 
+@Setter
 public class DayInPeriod {
   
   
@@ -38,6 +40,11 @@ public class DayInPeriod {
     this.absencePeriod = absencePeriod;
   }
   
+  /**
+   * Se l'assenza è inserita come taken nel giorno.
+   * @param absence assenza
+   * @return esito
+   */
   public boolean containTakenAbsence(Absence absence) {
     for (TakenAbsence takenAbsence : takenAbsences) {
       if (takenAbsence.absence.equals(absence)) {
@@ -47,6 +54,10 @@ public class DayInPeriod {
     return false;
   }
   
+  /**
+   * I rimpiazzamenti scorretti nel giorno.
+   * @return list
+   */
   public List<Absence> existentWrongReplacing() {
     if (correctReplacing == null) {
       return existentReplacings;
@@ -60,6 +71,10 @@ public class DayInPeriod {
     return wrong;
   }
   
+  /**
+   * Se nel giorno c'è un rimpiazzamento mancante.
+   * @return esito
+   */
   public boolean isReplacingMissing() {
     if (correctReplacing == null) {
       return false;
@@ -72,6 +87,10 @@ public class DayInPeriod {
     return true;
   }
   
+  /**
+   * Le assenze taken che non sono di completamento nel giorno.
+   * @return list
+   */
   public List<TakenAbsence> takenNotComplation() {
     List<TakenAbsence> notComplation = Lists.newArrayList();
     for (TakenAbsence takenAbsence : takenAbsences) {
@@ -83,6 +102,11 @@ public class DayInPeriod {
     return notComplation;
   }
   
+  /**
+   * L'assenza taken di completamento nel giorno (è unica altrimenti sono collocate in 
+   * existentComplations.
+   * @return takenAbsence
+   */
   public TakenAbsence takenComplation() {
     for (TakenAbsence takenAbsence : takenAbsences) {
       if (complationAbsence != null 
@@ -121,8 +145,12 @@ public class DayInPeriod {
     
   }
   
-  
-  public List<TemplateRow> allTemplateRows() {
+  /**
+   * Le righe della tabella web per il periodo.
+   * @param nothing il tempo giustificato nothing da associare al rimpiazzamento (FIXME)
+   * @return list
+   */
+  public List<TemplateRow> allTemplateRows(final JustifiedType nothing) {
     List<TemplateRow> templateRows = Lists.newArrayList();
     
     for (TakenAbsence takenAbsence : takenNotComplation()) {
@@ -135,7 +163,7 @@ public class DayInPeriod {
       TemplateRow complationRow = buildTakenComplation(takenComplation);
       templateRows.add(complationRow);
       if (correctReplacing != null) {
-        TemplateRow replacingRow = buildReplacing(takenComplation);
+        TemplateRow replacingRow = buildReplacing(takenComplation, nothing);
         templateRows.add(replacingRow);
       }
     }
@@ -143,12 +171,17 @@ public class DayInPeriod {
     return templateRows;
   }
   
-  public List<TemplateRow> templateRowsForInsert() {
+  /**
+   * Le righe della tabella web del periodo legate ad un inserimento.
+   * @param nothing il tempo giustificato nothing da associare al rimpiazzamento (FIXME)
+   * @return list
+   */
+  public List<TemplateRow> templateRowsForInsert(final JustifiedType nothing) {
     
     List<TemplateRow> templateRows = Lists.newArrayList();
     
-    if (absencePeriod.attemptedInsertAbsence == null ||
-        !absencePeriod.attemptedInsertAbsence.getAbsenceDate().equals(date)) {
+    if (absencePeriod.attemptedInsertAbsence == null 
+        || !absencePeriod.attemptedInsertAbsence.getAbsenceDate().equals(date)) {
       return templateRows;
     }
     
@@ -170,7 +203,7 @@ public class DayInPeriod {
       //se non ci sono errori inserisco il replacing
       if (!absencePeriod.errorsBox.containAbsenceErrors(insertTakenAbsence.absence)) {
         if (correctReplacing != null) {
-          TemplateRow replacingRow = buildReplacing(insertTakenAbsence);
+          TemplateRow replacingRow = buildReplacing(insertTakenAbsence, nothing);
           templateRows.add(replacingRow);
         }
       }
@@ -189,7 +222,8 @@ public class DayInPeriod {
     if (absencePeriod.isTakable() && !absencePeriod.isTakableNoLimit()) {
       takenRow.usableColumn = true;
       if (!takenRow.onlyNotOnHoliday()) {
-        takenRow.usableLimit = formatAmount(takenAbsence.periodResidualBefore(), takenAbsence.amountType);
+        takenRow.usableLimit = formatAmount(takenAbsence.periodResidualBefore(), 
+            takenAbsence.amountType);
         takenRow.usableTaken = formatAmount(takenAbsence.takenAmount, takenAbsence.amountType);
       }
     }
@@ -207,16 +241,20 @@ public class DayInPeriod {
     complationRow.usableColumn = true;
     complationRow.complationColumn = true;
     if (!complationRow.onlyNotOnHoliday()) {
-      complationRow.usableLimit = formatAmount(takenComplation.periodResidualBefore(), takenComplation.amountType);
-      complationRow.usableTaken = formatAmount(takenComplation.takenAmount, takenComplation.amountType);
+      complationRow.usableLimit = formatAmount(takenComplation.periodResidualBefore(), 
+          takenComplation.amountType);
+      complationRow.usableTaken = formatAmount(takenComplation.takenAmount, 
+          takenComplation.amountType);
     }
-    complationRow.consumedComplationAbsence = formatAmount(complationAbsence.consumedComplation, complationAbsence.amountType);
-    complationRow.consumedComplationBefore = formatAmount(complationAbsence.residualComplationBefore, complationAbsence.amountType);
+    complationRow.consumedComplationAbsence = formatAmount(complationAbsence.consumedComplation, 
+        complationAbsence.amountType);
+    complationRow.consumedComplationBefore = formatAmount(complationAbsence
+        .residualComplationBefore, complationAbsence.amountType);
     
     return complationRow;
   }
   
-  private TemplateRow buildReplacing(TakenAbsence takenComplation) {
+  private TemplateRow buildReplacing(TakenAbsence takenComplation, JustifiedType nothing) {
     TemplateRow replacingRow = new TemplateRow();
     replacingRow.date = date;
     replacingRow.isReplacingRow = true;
@@ -225,6 +263,7 @@ public class DayInPeriod {
     Absence absence = new Absence();
     absence.date = this.date;
     absence.absenceType = this.correctReplacing;
+    absence.justifiedType = nothing;
     replacingRow.absence = absence;
     replacingRow.groupAbsenceType = absencePeriod.groupAbsenceType;
     replacingRow.consumedComplationNext = formatAmount(complationAbsence.residualComplationAfter, 
@@ -255,7 +294,7 @@ public class DayInPeriod {
       } else if (percent > 0) {
         return percent + "% di un giorno lavorativo";
       }
-      return ((double)amount / 100 )+ " giorni";
+      return ((double)amount / 100 ) + " giorni";
     }
     if (amountType.equals(AmountType.minutes)) {
       if (amount == 0) {
