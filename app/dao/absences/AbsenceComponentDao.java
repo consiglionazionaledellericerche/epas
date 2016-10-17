@@ -308,7 +308,7 @@ public class AbsenceComponentDao extends DaoBase {
     obj.description = description;
     obj.justifiedTime = minutes;
     obj.justifiedTypesPermitted.clear();
-    obj.justifiedTimeAtWork = null;
+    //obj.justifiedTimeAtWork = null;
     obj.save();
     JPA.em().flush();
     for (JustifiedType justified : justifiedTypePermitted) {
