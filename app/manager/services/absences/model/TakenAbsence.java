@@ -8,7 +8,9 @@ import lombok.Setter;
 import models.absences.Absence;
 import models.absences.AmountType;
 
-@Builder @Getter @Setter(AccessLevel.PACKAGE)
+@Builder 
+@Getter 
+@Setter(AccessLevel.PACKAGE)
 public class TakenAbsence {
   public Absence absence;
   public AmountType amountType;     //risalibile dal period..
@@ -20,7 +22,10 @@ public class TakenAbsence {
   
   public boolean toInsert;          //segnala che è l'assenza da inserire nella chain
   
-  
+  /**
+   * Se l'assenza non supera i limiti.
+   * @return esito
+   */
   public boolean canAddTakenAbsence() {
     if (periodTakableTotal < 0) {
       //TODO: se non c'è limite programmarlo in un booleano

@@ -243,11 +243,11 @@ public class AbsenceComponentDao extends DaoBase {
    * I gruppi coinvolti dal tipo assenza.
    * 
    * @param absenceType tipo assenza
-   * @param filterNotProgrammed non filtrare i soli programmati
+   * @param onlyProgrammed non filtrare i soli programmati
    * @return entity set
    */
   public Set<GroupAbsenceType> involvedGroupAbsenceType(AbsenceType absenceType, 
-      boolean filterNotProgrammed) {
+      boolean onlyProgrammed) {
 
     //TODO: da fare la fetch perchè è usato in tabellone timbrature per ogni codice assenza.
     
@@ -264,7 +264,7 @@ public class AbsenceComponentDao extends DaoBase {
     for (ComplationAbsenceBehaviour behaviour : absenceType.replacingGroup) {
       groups.addAll(behaviour.groupAbsenceTypes);
     }
-    if (!filterNotProgrammed) {
+    if (!onlyProgrammed) {
       return groups;
     }
     Set<GroupAbsenceType> filteredGroup = Sets.newHashSet();
@@ -307,7 +307,8 @@ public class AbsenceComponentDao extends DaoBase {
     obj.code = code;
     obj.description = description;
     obj.justifiedTime = minutes;
-    obj.justifiedTypesPermitted = Sets.newHashSet();
+    obj.justifiedTypesPermitted.clear();
+    obj.justifiedTimeAtWork = null;
     obj.save();
     JPA.em().flush();
     for (JustifiedType justified : justifiedTypePermitted) {

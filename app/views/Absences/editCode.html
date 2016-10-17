@@ -37,6 +37,10 @@
 		</div>
 
  		#{f.booleanRadio 'absenceType.consideredWeekEnd',popover:'true' /}
+ 		
+ 		  #{f.selectModels 'absenceType.justifiedTypesPermitted.id', value:absenceType.justifiedTypesPermitted,
+               items:allJustifiedType, placeholder:'Come giustifica' /}
+ 		
  	</div>
  </div> 
 

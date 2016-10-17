@@ -11,7 +11,6 @@ title:'Nuovo codice assenza in data ' + absenceForm.from?.format()
                      absenceForm?.justifiedTypeSelected?.name.equals(models.absences.JustifiedType.JustifiedTypeName.assign_all_day) }%
  %{ specifiedMinuteSelected = absenceForm?.justifiedTypeSelected?.name.equals(models.absences.JustifiedType.JustifiedTypeName.specified_minutes) }%
 
-   
    #{if absenceForm.hasGroupChoice() }
      #{include './_selectGroup.html' /}
    #{/if}
@@ -129,10 +128,10 @@ title:'Nuovo codice assenza in data ' + absenceForm.from?.format()
         #{/else}
         
         #{if insertReport.howManyReplacing() == 1}
-          Verrà inserito <strong>1</strong> codice di rimpiazzamento.
+          Verrà inserito <strong>1</strong> codice di completamento.
         #{/if}
         #{elseif insertReport.howManyReplacing() > 1 }
-          Verranno inseriti <strong>${insertReport.howManyReplacing()}</strong> codici di rimpiazzamento.
+          Verranno inseriti <strong>${insertReport.howManyReplacing()}</strong> codici di completamento.
         #{/elseif}
        </p> 
        <p>

@@ -30,29 +30,44 @@
  
  <div class="webui-popover-content" id="${id}">
     
-    #{secure.check 'Absences.edit'}    
-	    #{if _absence.absenceType.internalUse }
-	      <p>
-	        <span class="fa-stack fa-lg">
-	          <i class="fa fa-paper-plane-o fa-stack-1x"></i>
-	          <i class="fa fa-ban fa-stack-2x text-danger"></i>
-	        </span>
-	        <strong class="text-success">Il codice ${_absence.absenceType.code} è ad 
-	        uso interno ePAS e non verrà inviato ad attestati.</strong>
-	      </p>
-	    #{/if}
-	    #{else}
-	      <p>
-	        <span class="fa-stack fa-lg">
-	          <i class="fa fa-paper-plane-o fa-stack-1x"></i>
-	        </span>
-	        <strong class="text-success">Il codice ${_absence.absenceType.code} verrà inviato ad attestati.</strong>
-	      </p>
-	    #{/else}
-    #{/secure.check}
+    
+   #{secure.check 'Absences.edit'}    
+    #{if _absence.absenceType.internalUse }
+      <p>
+        <span class="fa-stack fa-lg">
+          <i class="fa fa-paper-plane-o fa-stack-1x"></i>
+          <i class="fa fa-ban fa-stack-2x text-danger"></i>
+        </span>
+        <strong class="text-success">Il codice ${_absence.absenceType.code} è ad 
+        uso interno ePAS e non verrà inviato ad attestati.</strong>
+      </p>
+    #{/if}
+    #{else}
+      <p>
+        <span class="fa-stack fa-lg">
+          <i class="fa fa-paper-plane-o fa-stack-1x"></i>
+        </span>
+        <strong class="text-success">Il codice ${_absence.absenceType.code} verrà inviato ad attestati.</strong>
+      </p>
+    #{/else}
+   #{/secure.check}
+    
+  <ul class="list-group">
+  
+   <li class="list-group-item">
+    <strong>Codice</strong> <strong>${_absence.absenceType.code}</strong><br>
+    <strong>Descrizione</strong> ${_absence.absenceType.description}<br>  
+    <strong>Data</strong> ${_absence.absenceDate.format()}<br>
+    #{absences.justifiedTime absence:_absence /}<br>
+   </li>
    
-    #{if _person}
-      #{list items:templateUtility.involvedGroupAbsenceType(_absence.absenceType), as:'group'}
+   
+   
+    %{ involvedGroups = templateUtility.involvedGroupAbsenceType(_absence.absenceType); }%   
+    #{if _person && !involvedGroups.empty}
+      #{list items:involvedGroups, as:'group'}
+        <li class="list-group-item"> 
+        <strong>Gruppo</strong><br> 
 	        %{ groupVerified = false; }%
 	        #{list items:_absence.replacingAbsences(group), as:'replacing' }
 	          %{ groupVerified = true; }%
@@ -60,37 +75,39 @@
 	            TODO: codice di completamento interno. Definire la visualizzazione.
 	          #{/if}
 	          #{else}
-	          <p>
+	            ${group.description}
+	            <a href="@{AbsenceGroups.groupStatus('groupAbsenceType.id':group.id, 'personId':_person.id, 'from':_absence.getAbsenceDate().format())}"><i class="fa fa-external-link" aria-hidden="true"></i></a><br>
 	            <span class="fa-stack fa-lg"><i class="fa fa-paper-plane-o fa-stack-1x"></i></span>
-	            <strong class="text-success">Il codice ${replacing.absenceType.code} verrà inviato ad attestati.</strong>
-	            <a href="@{AbsenceGroups.groupStatus('groupAbsenceType.id':group.id, 'person.id':_person.id, 'date':_absence.getAbsenceDate().format())}">Verifica</a>
-	          </p>
+	            <strong class="text-success">In questa data il codice di completamento ${replacing.absenceType.code} verrà inviato ad attestati.</strong>
 	          #{/else}
 	        #{/list}
 	        #{if !groupVerified }
-	          <a href="@{AbsenceGroups.groupStatus('groupAbsenceType.id':group.id, 'person.id':_person.id, 'date':_absence.getAbsenceDate().format())}">${group.description} </a>
-	        #{/if}   
+              ${group.description} 
+	          <a href="@{AbsenceGroups.groupStatus('groupAbsenceType.id':group.id, 'personId':_person.id, 'from':_absence.getAbsenceDate().format())}"> <i class="fa fa-external-link" aria-hidden="true"></i></a>
+	        #{/if}
+	    </li>   
       #{/list}
     #{/if}
     
     
-    <strong class="text-primary">${_absence.absenceType.code}</strong><br>
-    <strong>Data</strong> ${_absence.absenceDate.format()}<br>
-    <strong>Descrizione</strong> ${_absence.absenceType.description}<br>
-    #{absences.justifiedTime absence:_absence /}
     
-    #{if _remainingTroubles }
-    <br>
-         #{list items:_remainingTroubles, as:'trouble'}
-           <strong class="text-danger">&{trouble.trouble}</strong><br>
-         #{/list}
+    #{if _remainingTroubles || !_absence.troubles.empty}
+      <li class="list-group-item list-group-item-danger">
+      <strong class="text-danger"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Errori</strong><br>
+      #{if _remainingTroubles }
+        #{list items:_remainingTroubles, as:'trouble'}
+          &{trouble.trouble}<br>
+        #{/list}
+      #{/if}
+      #{elseif !_absence.troubles.empty}
+        #{list items:_absence.troubles, as:'trouble'}
+          &{trouble.trouble}<br>
+        #{/list}
+       #{/elseif}
+     </li>
     #{/if}
-    #{elseif !_absence.troubles.empty}
-    <br>
-         #{list items:_absence.troubles, as:'trouble'}
-           <strong class="text-danger">&{trouble.trouble}</strong><br>
-         #{/list}
-     #{/elseif}
+     
+   </ul>
 
   </div>
 

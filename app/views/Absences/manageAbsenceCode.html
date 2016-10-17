@@ -36,7 +36,11 @@
 			<td>${_.consideredWeekEnd ? 'Sì' : 'No'}</td>
 			<td>${_.validFrom?.format()}</td>
 			<td>${_.validTo?.format()}</td>
-			<td>${_.justifiedTimeAtWork?.label()}</td>
+			<td>
+			  #{list items:_.justifiedTypesPermitted, as:'justifiedType'}
+			    ${justifiedType.label()}<br>
+			  #{/list}
+			</td>
 			<td>
 				#{list items:_.qualifications, as: 'q'}
 					${q.qualification}#{if !q_isLast},#{/if}

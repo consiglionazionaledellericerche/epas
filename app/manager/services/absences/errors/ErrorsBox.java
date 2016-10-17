@@ -141,6 +141,12 @@ public class ErrorsBox {
     return absenceError(absence, absenceProblem) != null;
   }
   
+  /**
+   * Il problema per quell'assenza.
+   * @param absence assenza
+   * @param absenceProblem problema 
+   * @return absenceError se presente
+   */
   public AbsenceError absenceError(Absence absence, AbsenceProblem absenceProblem) {
     Map<AbsenceProblem, AbsenceError> absenceErrors = absenceErrorsSuperMap.get(absence);
     if (absenceErrors == null) {
@@ -152,6 +158,11 @@ public class ErrorsBox {
     return null;
   }
   
+  /**
+   * I problemi per quell'assenza.
+   * @param absence assenza
+   * @return gli errori
+   */
   public List<AbsenceError> absenceErrors(Absence absence) {
     Map<AbsenceProblem, AbsenceError> absenceErrors = absenceErrorsSuperMap.get(absence);
     if (absenceErrors == null) {
@@ -160,6 +171,11 @@ public class ErrorsBox {
     return Lists.newArrayList(absenceErrors.values());
   }
   
+  /**
+   * I warning per quell'assenza.
+   * @param absence assenza
+   * @return i warning
+   */
   public List<AbsenceError> absenceWarnings(Absence absence) {
     Map<AbsenceProblem, AbsenceError> absenceWarnings = absenceWarningsSuperMap.get(absence);
     if (absenceWarnings == null) {
@@ -168,6 +184,10 @@ public class ErrorsBox {
     return Lists.newArrayList(absenceWarnings.values());
   }
   
+  /**
+   * Gli errori critici nella box.
+   * @return set
+   */
   public Set<CriticalError> criticalErrors() {
     Set<CriticalError> list = Sets.newHashSet();
     for (List<CriticalError> errors : criticalErrorsMap.values()) {
@@ -178,7 +198,12 @@ public class ErrorsBox {
   
   /// STATIC
   
-  public static boolean containsCriticalErrors(List<ErrorsBox> errorsBoxes) {
+  /**
+   * Se le boxes contengono errori critici.
+   * @param errorsBoxes boxes
+   * @return esito
+   */
+  public static boolean boxesContainsCriticalErrors(List<ErrorsBox> errorsBoxes) {
     for (ErrorsBox errorsBox : errorsBoxes) {
       if (errorsBox.containsCriticalErrors()) {
         return true;
@@ -187,6 +212,11 @@ public class ErrorsBox {
     return false;
   }
   
+  /**
+   * Tutti gli errori critici nelle boxes.
+   * @param errorsBoxes boxes
+   * @return set
+   */
   public static Set<CriticalError> allCriticalErrors(List<ErrorsBox> errorsBoxes) {
     Set<CriticalError> errors = Sets.newHashSet();
     for (ErrorsBox errorsBox : errorsBoxes) {
@@ -195,10 +225,18 @@ public class ErrorsBox {
     return errors;
   }
   
-  public static Set<AbsenceProblem> allAbsenceProblems(List<ErrorsBox> errorsBoxes, Absence absence) {
+  /**
+   * Tutti i problemi per l'assenza nelle boxes.
+   * @param errorsBoxes boxes
+   * @param absence assenza
+   * @return set
+   */
+  public static Set<AbsenceProblem> allAbsenceProblems(List<ErrorsBox> errorsBoxes, 
+      Absence absence) {
     Set<AbsenceProblem> allProblems = Sets.newHashSet();
     for (ErrorsBox errorsBox : errorsBoxes) {
-      Map<AbsenceProblem, AbsenceError> absenceErrors = errorsBox.absenceErrorsSuperMap.get(absence);
+      Map<AbsenceProblem, AbsenceError> absenceErrors = errorsBox
+          .absenceErrorsSuperMap.get(absence);
       if (absenceErrors != null) {
         for (AbsenceError absenceError : absenceErrors.values()) {
           allProblems.add(absenceError.absenceProblem);

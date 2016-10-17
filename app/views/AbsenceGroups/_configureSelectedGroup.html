@@ -14,25 +14,32 @@
      
    
      #{f.hidden 'groupAbsenceType.id', value:absenceForm.groupSelected.id /}
-      
-	 #{f.selectModel 'absenceType', personalizeItems:true}
-	   #{if absenceForm.automaticChoiceExists}
-	      <optgroup label="Inserimento Automatico">
-	        <option value=""
-	          #{if absenceForm.automaticChoiceSelected} selected #{/if}>Codice selezionato da ePAS</option>
-		  <optgroup/>
-	   #{/if}   
-	   <optgroup label="Codice Specifico">
-	    #{list absenceForm.absenceTypes, as:'absenceType'}
-	    <option value="${absenceType?.id}"
-	      #{if absenceForm.absenceTypeSelected != null && absenceForm.absenceTypeSelected.equals(absenceType) } selected #{/if}>
-	      ${absenceType.getLabel()}
-	    </option>
-	    #{/list}   
-	   <optgroup/>
-	 #{/f.selectModel}
+     
+     #{if absenceForm.hasAbsenceTypeChoice()} 
+		 #{f.selectModel 'absenceType', personalizeItems:true}
+		   #{if absenceForm.automaticChoiceExists}
+		      <optgroup label="Inserimento Automatico">
+		        <option value=""
+		          #{if absenceForm.automaticChoiceSelected} selected #{/if}>Codice selezionato da ePAS</option>
+			  <optgroup/>
+		   #{/if}   
+		   <optgroup label="Codice Specifico">
+		    #{list absenceForm.absenceTypes, as:'absenceType'}
+		    <option value="${absenceType?.id}"
+		      #{if absenceForm.absenceTypeSelected != null && absenceForm.absenceTypeSelected.equals(absenceType) } selected #{/if}>
+		      ${absenceType.getLabel()}
+		    </option>
+		    #{/list}   
+		   <optgroup/>
+		 #{/f.selectModel}
+	 #{/if}
+	 #{else}
+	   #{f.hidden 'absenceType.id', value:absenceForm.theOnlyAbsenceType() /}
+	   *{ #{f.view 'absenceType', value:absenceForm.theOnlyAbsenceType() /} }*
+	 #{/else}
    
-
-     #{f.selectModel 'justifiedType', items:absenceForm.justifiedTypes, value:absenceForm.justifiedTypeSelected /}
+     #{if absenceForm.hasJustifiedTypeChoice() }
+       #{f.selectModel 'justifiedType', items:absenceForm.justifiedTypes, value:absenceForm.justifiedTypeSelected /}
+     #{/if}
          
 	#{/form}

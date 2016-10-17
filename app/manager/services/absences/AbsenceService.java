@@ -22,7 +22,7 @@ import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.Scanner;
 import manager.services.absences.model.ServiceFactories;
 import manager.services.absences.web.AbsenceForm;
-import manager.services.absences.web.AbsenceRequestForm.AbsenceInsertTab;
+import manager.services.absences.web.AbsenceForm.AbsenceInsertTab;
 
 import models.Contract;
 import models.Person;
@@ -30,10 +30,10 @@ import models.PersonChildren;
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceType;
-import models.absences.CategoryGroupAbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.JustifiedType;
+import models.absences.JustifiedType.JustifiedTypeName;
 
 import org.joda.time.LocalDate;
 
@@ -55,7 +55,6 @@ public class AbsenceService {
   
   /**
    * Costruttore injection.
-   * @param absenceRequestFormFactory injected
    * @param absenceEngineUtility injected
    * @param serviceFactories injected
    * @param absenceComponentDao injected
@@ -74,14 +73,15 @@ public class AbsenceService {
   }
   
   /**
-   * La lista delle categorie abilitate per la persona alla data, ordinate per priorità.
+   * La absenceForm utile alla lista delle categorie abilitate per la persona alla data, 
+   * ordinate per priorità.
    * Se groupAbsenceType è presente imposta il gruppo come selezionato.
    * @param person persona
    * @param date data
    * @param groupAbsenceType gruppo selezionato
-   * @return lista di cateogire.
+   * @return absenceForm.
    */
-  public List<CategoryGroupAbsenceType> orderedCategories(Person person, LocalDate date, 
+  public AbsenceForm buildForCateogorySwitch(Person person, LocalDate date, 
       GroupAbsenceType groupAbsenceType) {
     
     if (groupAbsenceType == null || !groupAbsenceType.isPersistent()) {
@@ -89,11 +89,10 @@ public class AbsenceService {
           .groupAbsenceTypeByName(AbsenceInsertTab.defaultTab().groupNames.get(0)).get();
     }
     
-    AbsenceForm form = buildInsertForm(person, date, null, null, 
+    AbsenceForm form = buildAbsenceForm(person, date, null, null, 
         groupAbsenceType, true, null, null, null, null);
-    List<CategoryGroupAbsenceType> categories = form.categories();
     
-    return categories;
+    return form;
   }
 
   
@@ -111,7 +110,7 @@ public class AbsenceService {
    * @param minutes minuti
    * @return form
    */
-  public AbsenceForm buildInsertForm(
+  public AbsenceForm buildAbsenceForm(
       Person person, LocalDate from, AbsenceInsertTab absenceInsertTab,                  //tab 
       LocalDate to, GroupAbsenceType groupAbsenceType,  boolean switchGroup,             //group
       AbsenceType absenceType, JustifiedType justifiedType,                              //reconf 
@@ -240,7 +239,8 @@ public class AbsenceService {
       }
       for (AbsencePeriod absencePeriod : periodChain.periods) {
         for (DayInPeriod dayInPeriod : absencePeriod.daysInPeriod.values()) {
-          insertTemplateRows.addAll(dayInPeriod.templateRowsForInsert());
+          insertTemplateRows.addAll(dayInPeriod.templateRowsForInsert(
+              absenceComponentDao.getOrBuildJustifiedType(JustifiedTypeName.nothing)));
         }
       }
     }

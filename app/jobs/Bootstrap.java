@@ -91,8 +91,8 @@ public class Bootstrap extends Job<Void> {
       log.info(" ... questa operazione richiederà circa due minuti ...");
       absenceMigration.absenceMigrationProcessor(true);
     } else {
-      log.info(" ... questa operazione richiederà alcuni secondi ...");
-      absenceMigration.absenceMigrationProcessor(false);
+      log.info(" ... migrazione già applicata ...");
+      //absenceMigration.absenceMigrationProcessor(false);
     }
     
     log.info("Conclusa migrazione assenze!");

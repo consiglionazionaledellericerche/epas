@@ -6,29 +6,12 @@
 
 #{title title:periodChain.person.fullname + ' - Controllo assenze con limiti e completamenti' /}
   
-     #{form action:@AbsenceGroups.groupStatus(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit'}
-       #{f.hidden 'person.id', value:periodChain.person.id /}
-       #{f.date 'date', value:date.format() /}     
-
-       *{ TODO: questa select mode fa fattorizzata ora è una copia di _selectGroup }*
-       
-       #{f.selectModel 'groupAbsenceType', label:'Tipologia Assenza', personalizeItems:true}
-        <option></option>      
-        *{ same priority }*
-        #{list items:categories, as:'category'}
-           <optgroup label="${category.categoryType.name}">
-           #{list category.items, as:'groupAbsenceTypeItem'}
-	         <option value="${groupAbsenceTypeItem.groupAbsenceType.id}"
-	          #{if groupAbsenceTypeItem.selected} selected #{/if}> ${groupAbsenceTypeItem.getLabel()} </option>
-  	       #{/list}
-  	       </optgroup>
-  	    #{/list}
-       #{/f.selectModel}
-   
-   #{/form}
-    
-    
-  <a class="btn btn-primary" href="@{Stampings.personStamping(periodChain.person.id, date.year, date.monthOfYear)}">Torna alle timbrature</a>
+  %{ 
+     absenceForm = categorySwitcher;
+     changeFrom = true;
+     dataAsync = '#page_content';
+  }%
+  #{include './_selectGroup.html' /}
     
   #{if periodChain.containsCriticalErrors()}
     #{alert color:'danger'}
@@ -41,15 +24,14 @@
     #{/alert}
   #{/if}
   
+  <ul class="list-group">
+  
   #{list items:periodChain.periods, as:'absencePeriod' }
 
-    
-
-    #{alert color:'info'}
-      <strong>Gruppo</strong> ${absencePeriod.groupAbsenceType.description}<br>
-      <strong>Tipo periodo</strong> &{absencePeriod.groupAbsenceType.periodType} <br>
-      <strong>Validità periodo</strong> ${absencePeriod.from.format()} - ${absencePeriod.to.format()}
-    #{/alert}
+    <li class="list-group-item list-group-item-info">
+      <p>
+        <strong>${absencePeriod.groupAbsenceType.description}</strong>
+      </p>
     
     #{if absencePeriod.errorsBox.containsCriticalErrors() }
       <p>ci sono errori critici. TODO: elencarli</p>
@@ -57,9 +39,38 @@
     #{if absencePeriod.errorsBox.containsAbsencesErrors() }
       <p>ci sono errori legati alle assenze. TODO: elencarli</p>
     #{/if}
+    
+    </li>
+
+    
+    <li class="list-group-item">
+     <p>
+        #{if absencePeriod.isTakableWithLimit() }
+           <strong>Tipo periodo</strong> &{absencePeriod.groupAbsenceType.periodType}<br>
+           <strong>Validità periodo</strong> ${absencePeriod.from.format()} - ${absencePeriod.to.format()}
+       
+           <br><strong>Totale utilizzabile</strong> 
+           ${templateUtility.formatAmount(absencePeriod.getPeriodTakableAmount(), absencePeriod.takeAmountType)}<br>
+       #{/if}
+     </p>
+     <p>  
+       #{if absencePeriod.isTakableWithLimit() }
+           <i class="fa fa-exclamation-circle" aria-hidden="true"></i> Rimangono 
+           <strong><span class="text-success">${templateUtility.formatAmount(absencePeriod.getRemainingAmount(), absencePeriod.takeAmountType)}</span></strong>
+           da utilizzare entro il <strong class="text-success">${absencePeriod.to.format()}</strong>
+           
+
+       #{/if}
+     </p> 
+     
+    
+    #{if absencePeriod.daysInPeriod.values().empty }
+        <em>Non ci sono assenze utilizzate per questo gruppo nel periodo selezionato.</em>
+    #{/if}
+    #{else}
 
      <table class="table table-condensed table-bordered">
-      <tr>
+      <tr class="bg-warning">
         <th>Data</th>
         <th>Assenza</th>
         <th>Limite<br>Utilizzabile</th>
@@ -91,10 +102,19 @@
 
       </table>
       
-      
+     #{/else}
+     
+     #{if absencePeriod.groupAbsenceType.nextGroupToCheck}
+     <i class="fa fa-2x fa-arrow-down" aria-hidden="true"></i>
+     #{/if}
+     
+     </li> 
       
   #{/list}
   
+  </ul>
+  
+  <a class="btn btn-primary" href="@{Stampings.personStamping(periodChain.person.id, from.year, from.monthOfYear)}"><i class="fa fa-hand-o-left" aria-hidden="true"></i> Torna alle timbrature del mese</a>
 
     
 </div>
