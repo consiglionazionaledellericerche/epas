@@ -30,6 +30,7 @@ import manager.NotificationManager;
 import manager.PersonManager;
 import manager.SecureManager;
 import manager.StampingManager;
+import manager.configurations.EpasParam;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
@@ -39,6 +40,7 @@ import manager.recaps.troubles.PersonTroublesInMonthRecapFactory;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.Role;
 import models.Stamping;
 import models.User;
 
@@ -51,7 +53,6 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.JavaRules;
 import security.SecurityRules;
 
 import java.util.ArrayList;
@@ -101,8 +102,6 @@ public class Stampings extends Controller {
   @Inject
   private static NotificationManager notificationManager;
   @Inject
-  private static JavaRules jRules;
-  @Inject
   private static UserDao userDao;
 
   /**
@@ -128,7 +127,12 @@ public class Stampings extends Controller {
         .create(wrperson.getValue(), year, month, true);
 
     Person person = wrperson.getValue();
-    render("@personStamping", psDto, person);
+
+    // Questo mi serve per poter fare le verifiche tramite le drools per l'inserimento timbrature in
+    // un determinato mese
+    final YearMonth yearMonth = new YearMonth(year, month);
+
+    render("@personStamping", psDto, person, yearMonth);
   }
 
 
@@ -159,22 +163,24 @@ public class Stampings extends Controller {
 
     PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, true);
 
-    render(psDto, person);
+    // Questo mi serve per poter fare le verifiche tramite le drools per l'inserimento timbrature in
+    // un determinato mese
+    final YearMonth yearMonth = new YearMonth(year, month);
+
+    render(psDto, person, yearMonth);
   }
 
   /**
    * Nuova timbratura inserita dall'amministratore.
    *
-   * @param person persona
-   * @param date   data
+   * @param personId id della persona
+   * @param date     data
    */
-  // FIXME sono stati rimossi i validatori perchè impedivano alle drools di funzionare correttamente
-  // da ripristinare appena si risolve il problema .
-  public static void blank(Person person, LocalDate date) {
+  public static void blank(Long personId, LocalDate date) {
 
-    if (!person.isPersistent()) {
-      notFound();
-    }
+    final Person person = personDao.getPersonById(personId);
+
+    notFoundIfNull(person);
 
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
 
@@ -186,28 +192,21 @@ public class Stampings extends Controller {
   /**
    * Modifica timbratura dall'amministratore.
    *
-   * @param stamping timbratura
+   * @param stampingId ID timbratura
    */
-  public static void edit(Stamping stamping) {
+  public static void edit(Long stampingId) {
 
-    if (!stamping.isPersistent()) {
-      notFound();
-    }
+    final Stamping stamping = stampingDao.getStampingById(stampingId);
+
+    notFoundIfNull(stamping);
+
+    rules.checkIfPermitted(stamping);
 
     final List<HistoryValue<Stamping>> historyStamping = stampingsHistoryDao
         .stampings(stamping.id);
 
     final Person person = stamping.personDay.person;
     final LocalDate date = stamping.personDay.date;
-
-    final User user = Security.getUser().orNull();
-    if (user != null && (user.person == null || userDao.hasAdminRoles(user))) {
-      rules.checkIfPermitted(person);
-    } else {
-      // FIXME questa è una porcheria fatta perchè le drools in alcuni casi non funzionano come dovrebbero
-      // da rimuovere non appena si riesce a risolvere il problema sulle drools
-      jRules.checkForStamping(stamping);
-    }
 
     render(stamping, person, date, historyStamping);
   }
@@ -225,14 +224,10 @@ public class Stampings extends Controller {
 
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
 
-    Person person = personDao.getPersonById(personId);
-    if (person == null) {
-      flash.error("La persona non esiste!");
-      Persons.list(null, null);
-    }
+    final Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
 
-    PersonDay personDay = personDayDao.getOrBuildPersonDay(person, date);
-    final User currentUser = Security.getUser().get();
+    final PersonDay personDay = personDayDao.getOrBuildPersonDay(person, date);
 
     // server per poter discriminare dopo aver fatto la save della timbratura se si
     // trattava di una nuova timbratura o di una modifica
@@ -240,15 +235,6 @@ public class Stampings extends Controller {
     if (!stamping.isPersistent()) {
       newInsert = true;
       stamping.personDay = personDay;
-    }
-
-    final User user = Security.getUser().orNull();
-    if (user != null && (user.person == null || userDao.hasAdminRoles(user))) {
-      rules.checkIfPermitted(person);
-    } else {
-      // FIXME questa è una porcheria fatta perchè le drools in alcuni casi non funzionano come dovrebbero
-      // da rimuovere non appena si riesce a risolvere il problema sulle drools
-      jRules.checkForStamping(stamping);
     }
 
     if (Validation.hasErrors()) {
@@ -263,18 +249,20 @@ public class Stampings extends Controller {
       render("@edit", stamping, person, date, time, historyStamping);
     }
 
-    personDay.save();
     stamping.date = stampingManager.deparseStampingDateTime(date, time);
+
+    rules.checkIfPermitted(stamping);
+
+    final User currentUser = Security.getUser().get();
+
     if (!currentUser.isSystemUser()) {
-      if (currentUser.person.id.equals(person.id)
-          && !personManager.isPersonnelAdmin(currentUser)) {
+      if (currentUser.hasRoles(Role.PERSONNEL_ADMIN)) {
+        stamping.markedByEmployee = false;
+        stamping.markedByAdmin = true;
+      } else {
         stamping.markedByEmployee = true;
         stamping.markedByAdmin = false;
-      } else {
-        stamping.markedByAdmin = true;
       }
-    } else {
-      stamping.markedByAdmin = true;
     }
 
     personDay.stampings.add(stamping);
@@ -284,14 +272,18 @@ public class Stampings extends Controller {
 
     flash.success(Web.msgSaved(Stampings.class));
 
-    if (!currentUser.isSystemUser() && currentUser.person.id.equals(person.id)
-        && !personManager.isPersonnelAdmin(currentUser)) {
-      notificationManager.notifyStamping(stamping,
-          newInsert ? NotificationManager.CRUD.CREATE : NotificationManager.CRUD.UPDATE);
-      Stampings.stampings(date.getYear(), date.getMonthOfYear());
+    if (!currentUser.isSystemUser() && !currentUser.hasRoles(Role.PERSONNEL_ADMIN) &&
+        currentUser.person.id.equals(person.id)) {
+
+      if (!(currentUser.person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")
+          && currentUser.person.qualification.qualification <= 3)) {
+        notificationManager.notifyStamping(stamping,
+            newInsert ? NotificationManager.CRUD.CREATE : NotificationManager.CRUD.UPDATE);
+      }
+      stampings(date.getYear(), date.getMonthOfYear());
     }
 
-    Stampings.personStamping(person.id, date.getYear(), date.getMonthOfYear());
+    personStamping(person.id, date.getYear(), date.getMonthOfYear());
   }
 
 
@@ -304,17 +296,11 @@ public class Stampings extends Controller {
 
     final Stamping stamping = stampingDao.getStampingById(id);
 
-    Preconditions.checkState(stamping != null);
+    notFoundIfNull(stamping);
 
-    final User user = Security.getUser().orNull();
-    if (user != null && (user.person == null || userDao.hasAdminRoles(user))) {
-      rules.checkIfPermitted(stamping.personDay.person);
-    } else {
-      // FIXME questa è una porcheria fatta perchè le drools in alcuni casi non funzionano come dovrebbero
-      // da rimuovere non appena si riesce a risolvere il problema sulle drools
-      jRules.checkForStamping(stamping);
-      notificationManager.notifyStamping(stamping, NotificationManager.CRUD.DELETE);
-    }
+    final User currentUser = Security.getUser().orNull();
+
+    rules.checkIfPermitted(stamping);
 
     final PersonDay personDay = stamping.personDay;
     stamping.delete();
@@ -323,8 +309,14 @@ public class Stampings extends Controller {
 
     flash.success("Timbratura rimossa correttamente.");
 
-    if (!user.isSystemUser() && user.person.id.equals(personDay.person.id)
-        && !personManager.isPersonnelAdmin(user)) {
+    if (!currentUser.isSystemUser() && !currentUser.hasRoles(Role.PERSONNEL_ADMIN) &&
+        currentUser.person.id.equals(personDay.person.id)) {
+
+      if (!(currentUser.person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")
+          && currentUser.person.qualification.qualification <= 3)) {
+        notificationManager.notifyStamping(stamping, NotificationManager.CRUD.DELETE);
+      }
+
       Stampings.stampings(personDay.date.getYear(), personDay.date.getMonthOfYear());
     }
 
@@ -441,13 +433,9 @@ public class Stampings extends Controller {
    */
   public static void dailyPresenceForPersonInCharge(Integer year, Integer month, Integer day) {
 
-    if (!Security.getUser().get().person.isPersonInCharge) {
-      forbidden();
-    }
-
     LocalDate date = new LocalDate(year, month, day);
 
-    User user = Security.getUser().get();
+    final User user = Security.getUser().get();
 
     List<Person> people = user.person.people;
     int numberOfInOut = stampingManager.maxNumberOfStampingsInMonth(date, people);
@@ -461,8 +449,6 @@ public class Stampings extends Controller {
     boolean groupView = true;
 
     render("@dailyPresence", date, numberOfInOut, showLink, daysRecap, groupView);
-
-
   }
 
   /**

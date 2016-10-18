@@ -10,6 +10,7 @@
 </div>
 #{/secure.check}
 
+
 	<table class="table table-striped table-hover" width="100%" datatable>
 	 <thead>
 	  <tr>
@@ -22,19 +23,12 @@
 	  	<th>&{'absenceType.validTo'}</th>
 	  	<th>&{'absenceType.justifiedTimeAtWork'}</th>
 	  	<th>&{'absenceType.qualifications'}</th>
-
-	  	<th>&{'absenceTypeGroup.label'}</th>
-	  	<th>&{'absenceTypeGroup.minutesExcess'}</th>
-	  	<th>&{'absenceTypeGroup.accumulationType'}</th>
-	  	<th>&{'absenceTypeGroup.limitInMinute'}</th>
-	  	<th>&{'absenceTypeGroup.accumulationBehaviour'}</th>
-	  	<th>&{'absenceTypeGroup.replacingAbsenceType'}</th>
 	  </tr>
 	</thead>
 	<tbody>
 		#{list absenceTypes}
 		<tr>
-			<td class="caratteristica"><a href="@{Absences.editCode(_.id)}">${_.code}</a></td>
+			<td>#{secure.link @Absences.editCode(_.id)}${_.code}#{/secure.link}</td>
 			<td>${_.certificateCode}</td>
 			<td>${_.description}</td>
 			<td>${_.internalUse ? 'Sì' : 'No'}</td>
@@ -42,18 +36,16 @@
 			<td>${_.consideredWeekEnd ? 'Sì' : 'No'}</td>
 			<td>${_.validFrom?.format()}</td>
 			<td>${_.validTo?.format()}</td>
-			<td>${_.justifiedTimeAtWork?.label()}</td>
+			<td>
+			  #{list items:_.justifiedTypesPermitted, as:'justifiedType'}
+			    ${justifiedType.label()}<br>
+			  #{/list}
+			</td>
 			<td>
 				#{list items:_.qualifications, as: 'q'}
 					${q.qualification}#{if !q_isLast},#{/if}
 				#{/list}
 			</td> 
-			<td>${_.absenceTypeGroup?.label}</td>
-			<td>${_.absenceTypeGroup?.minutesExcess}</td>
-			<td>${_.absenceTypeGroup?.accumulationType?.label()}</td>
-			<td>${_.absenceTypeGroup?.limitInMinute}</td>
-			<td>${_.absenceTypeGroup?.accumulationBehaviour?.label()}</td>
-			<td>${_.absenceTypeGroup?.replacingAbsenceType?.code}</td>
 		</tr>
 		#{/list}
 		</tbody>

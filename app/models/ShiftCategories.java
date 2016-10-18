@@ -20,7 +20,7 @@ public class ShiftCategories extends BaseModel {
   public String description;
 
   /**
-   * responsabile della categoria turno
+   * responsabile della categoria turno.
    */
   @ManyToOne(optional = false)
   @JoinColumn(name = "supervisor")

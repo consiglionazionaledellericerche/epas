@@ -1,5 +1,7 @@
 package models;
 
+import com.google.common.base.MoreObjects;
+
 import it.cnr.iit.epas.NullStringBinder;
 
 import models.base.BaseModel;
@@ -7,6 +9,7 @@ import models.enumerate.StampTypes;
 
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDateTime;
+import org.joda.time.YearMonth;
 
 import play.data.binding.As;
 import play.data.validation.Required;
@@ -63,14 +66,14 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
    * true).
    */
   @Column(name = "marked_by_admin")
-  public Boolean markedByAdmin = false;
+  public boolean markedByAdmin = false;
 
   /**
    * con la nuova interpretazione delle possibilità del dipendente, questo campo viene settato a
    * true quando è il dipendente a modificare la propria timbratura.
    */
   @Column(name = "marked_by_employee")
-  public Boolean markedByEmployee = false;
+  public boolean markedByEmployee = false;
   /**
    * true, cella bianca; false, cella gialla.
    */
@@ -110,7 +113,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
     this.personDay = personDay;
     this.date = time;
   }
-  
+
   /**
    * Costruttore.
    *
@@ -125,11 +128,15 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 
   @Override
   public String toString() {
-    return String.format(
-        "Stamping[%d] - personDay.id = %d, way = %s, date = %s, stampType.id = %s, "
-            + "stampModificationType.id = %s",
-        id, personDay.id, way, date, stampType != null ? stampType : "null",
-        stampModificationType != null ? stampModificationType.id : "null");
+    return MoreObjects.toStringHelper(this).omitNullValues()
+        .add("id", id)
+        .add("personDay.id", personDay.id)
+        .add("way", way)
+        .add("date", date)
+        .add("stampType", stampType)
+        .add("stampModificationType", stampModificationType)
+        .toString();
+
   }
 
   /**
@@ -166,6 +173,22 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
     output += WayType.in.equals(this.way) ? " Ingr." : " Usc.";
     output += stampType != null ? " (" + stampType.getIdentifier() + ")" : "";
     return output;
+  }
+
+  /**
+   * Fondamentale per far funzionare alcune drools
+   * @return Restituisce il proprietario della timbratura
+   */
+  public Person getOwner() {
+    return personDay.person;
+  }
+
+  /**
+   * Utile per effettuare i controlli temporali sulle drools
+   * @return il mese relativo alla data della timbratura
+   */
+  public YearMonth getYearMonth() {
+    return new YearMonth(date.getYear(),date.getMonthOfYear());
   }
 
   public enum WayType {

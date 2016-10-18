@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 
 import it.cnr.iit.epas.DateUtility;
 
+import models.absences.JustifiedType;
 import models.base.BaseModel;
 
 import org.apache.commons.lang.WordUtils;
@@ -139,6 +140,9 @@ public class TemplateExtensions extends JavaExtensions {
   }
 
   public static String label(Object obj) {
+    if (obj instanceof JustifiedType) {
+      return Messages.get(obj.toString());
+    }
     if (obj instanceof BaseModel) {
       return ((BaseModel)obj).getLabel();
     }
@@ -216,6 +220,7 @@ public class TemplateExtensions extends JavaExtensions {
   public static String value(LocalDate date) {
     return date.toString("dd/MM/yyyy");
   }
+  
   public static String value(String string) {
     return string;
   }
@@ -229,9 +234,9 @@ public class TemplateExtensions extends JavaExtensions {
     try {
       final Object obj = model.getClass().getField(fieldName).get(model);
       return obj != null ? obj.toString() : null;
-    } catch (Throwable t) {
+    } catch (Throwable throwable) {
       // TODO logging
-      throw Throwables.propagate(t);
+      throw Throwables.propagate(throwable);
     }
   }
   

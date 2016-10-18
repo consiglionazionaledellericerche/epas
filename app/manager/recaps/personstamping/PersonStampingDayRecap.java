@@ -86,8 +86,8 @@ public class PersonStampingDayRecap {
     // personDay non persistenti per rattoppare la visualizzazione in quei casi in cui i personDay
     // sono stati persistiti senza calcolare questa informazione.
     // Appena l'informazione persistita diventerà affidabile si può reinserire la condizione.
-    this.personDay.setHoliday(personDayManager.
-        isHoliday(personDay.getPerson(), personDay.getDate()));
+    this.personDay.setHoliday(personDayManager
+        .isHoliday(personDay.getPerson(), personDay.getDate()));
 
     this.wrPersonDay = wrapperFactory.create(personDay);
 
@@ -160,8 +160,8 @@ public class PersonStampingDayRecap {
 
     // ##### Giorno festivo
 
-    if (personDay.isHoliday() && !personDay.acceptedHolidayWorkingTime &&
-        !personDay.isTicketForcedByAdmin) {
+    if (personDay.isHoliday() && !personDay.acceptedHolidayWorkingTime 
+        && !personDay.isTicketForcedByAdmin) {
       this.mealTicket = MEALTICKET_EMPTY;
       return;
     }

@@ -51,6 +51,8 @@ public class QUser extends EntityPathBase<User> {
 
     public final StringPath recoveryToken = createString("recoveryToken");
 
+    public final SetPath<models.enumerate.AccountRole, EnumPath<models.enumerate.AccountRole>> roles = this.<models.enumerate.AccountRole, EnumPath<models.enumerate.AccountRole>>createSet("roles", models.enumerate.AccountRole.class, EnumPath.class, PathInits.DIRECT2);
+
     public final StringPath username = createString("username");
 
     public final ListPath<models.UsersRolesOffices, QUsersRolesOffices> usersRolesOffices = this.<models.UsersRolesOffices, QUsersRolesOffices>createList("usersRolesOffices", models.UsersRolesOffices.class, QUsersRolesOffices.class, PathInits.DIRECT2);

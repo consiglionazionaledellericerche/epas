@@ -1,7 +1,6 @@
 SELECT SETVAL('public.contract_stamp_profiles_id_seq', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.contract_stamp_profiles;
 SELECT SETVAL('public.meal_ticket_id_seq', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.meal_ticket;
 SELECT SETVAL('public.roles_id_seq', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.roles;
-SELECT SETVAL('public.seq_absence_type_groups', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.absence_type_groups;
 SELECT SETVAL('public.seq_absence_types', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.absence_types;
 SELECT SETVAL('public.seq_absences', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.absences;
 SELECT SETVAL('public.seq_badge_readers', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.badge_readers;

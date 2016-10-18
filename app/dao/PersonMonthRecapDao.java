@@ -86,7 +86,7 @@ public class PersonMonthRecapDao extends DaoBase {
    * @param month
    * @param office
    * @return la lista dei personMonthRecap di tutte le persone che appartengono all'ufficio
-   * office nell'anno year e nel mese month passati come parametro.
+   *        office nell'anno year e nel mese month passati come parametro.
    */
   public List<PersonMonthRecap> getPeopleMonthRecaps(Integer year, Integer month, Office office) {
     QPersonMonthRecap personMonthRecap = QPersonMonthRecap.personMonthRecap;

@@ -37,7 +37,8 @@ public enum StampTypes {
   INTRAMOENIA("i", "intramoenia", "Intramoenia", false),
   GUARDIA_MEDICA("gm", "guardiaMedica", "Guardia Medica", false),
   LAVORO_FUORI_SEDE("lfs", "lavoroFuoriSede", "Lavoro fuori sede", true),
-  PAUSA_PRANZO("pr", "pausaPranzo", "Pausa Pranzo", true);
+  PAUSA_PRANZO("pr", "pausaPranzo", "Pausa Pranzo", true),
+  PERMESSO_BREVE("pb", "permessoBreve", "Permesso Breve", false);
 
   private String identifier;
   private String code;
@@ -80,17 +81,8 @@ public enum StampTypes {
   /**
    * @return la lista degli stamptypes attivi.
    */
-  public static List<StampTypes> onlyActive() {
-
+  public static List<StampTypes> onlyActive(){
     return Arrays.stream(values()).filter(StampTypes::isActive).collect(Collectors.toList());
-
-//    List<StampTypes> list = Lists.newArrayList();
-//    for (StampTypes value : values()) {
-//      if (value.isActive) {
-//        list.add(value);
-//      }
-//    }
-//    return list;
   }
 
   /**
@@ -103,7 +95,4 @@ public enum StampTypes {
     return false;
   }
 
-  public static StampTypes offSiteWorkingForEmployee() {
-    return StampTypes.LAVORO_FUORI_SEDE;
-  }
 }

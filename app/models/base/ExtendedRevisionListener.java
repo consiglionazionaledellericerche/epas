@@ -6,16 +6,20 @@ import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.name.Named;
 
+import injection.StaticInject;
+
 import models.User;
 
 import org.hibernate.envers.RevisionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import injection.StaticInject;
 import security.SecurityModule;
 
 /**
+ * Revision listener che aggiunge le informazioni su owner e ipaddress che hanno modificato
+ * la revisione.
+ * 
  * @author marco
  */
 @StaticInject
@@ -36,8 +40,8 @@ public class ExtendedRevisionListener implements RevisionListener {
       try {
         revision.ipaddress = ipaddress.get();
         revision.owner = user.get().orNull();
-      } catch (ProvisionException e) {
-        LOG.warn("unkown owner or user on {}: {}", revision, e);
+      } catch (ProvisionException ex) {
+        LOG.warn("unkown owner or user on {}: {}", revision, ex);
       }
     } catch (NullPointerException ignored) {
       LOG.warn("NPE", ignored);

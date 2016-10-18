@@ -1,5 +1,8 @@
 package models.exports;
 
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+
 import models.Person;
 import models.PersonReperibilityType;
 
@@ -11,25 +14,13 @@ import org.joda.time.LocalDate;
  *
  * @author arianna
  */
+@RequiredArgsConstructor
+@AllArgsConstructor
 public class AbsenceReperibilityPeriod {
 
   public final Person person;
   public final LocalDate start;
-  public final PersonReperibilityType reperibilityType;
   public LocalDate end;
+  public final PersonReperibilityType reperibilityType;
 
-  public AbsenceReperibilityPeriod(
-      Person person, LocalDate start, PersonReperibilityType type) {
-    this.person = person;
-    this.start = start;
-    this.reperibilityType = type;
-  }
-
-  public AbsenceReperibilityPeriod(
-      Person person, LocalDate start, LocalDate end, PersonReperibilityType type) {
-    this.person = person;
-    this.start = start;
-    this.end = end;
-    this.reperibilityType = type;
-  }
 }

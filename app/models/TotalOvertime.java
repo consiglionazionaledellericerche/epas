@@ -16,7 +16,6 @@ import javax.persistence.Table;
 /**
  * @author dario
  */
-
 @Entity
 @Table(name = "total_overtime")
 public class TotalOvertime extends BaseModel {

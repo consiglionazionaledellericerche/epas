@@ -9,9 +9,9 @@ import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.jpa.impl.JPAQueryFactory;
 
-import models.AbsenceType;
+import models.absences.AbsenceType;
+import models.absences.query.QAbsenceType;
 import models.enumerate.AbsenceTypeMapping;
-import models.query.QAbsenceType;
 
 import org.apache.commons.lang.NotImplementedException;
 
@@ -121,10 +121,11 @@ public class AbsenceTypeManager {
 
     JPQLQuery query = queryFactory.from(absenceType)
             .where(absenceType.code.startsWith("24")
-                    .or(absenceType.code.startsWith("25")
-                            .or(absenceType.code.startsWith("17C")
-                                    .or(absenceType.code.startsWith("C17")
-                                            .or(absenceType.code.startsWith("C18"))))));
+            .or(absenceType.code.startsWith("25")
+            .or(absenceType.code.startsWith("34")
+            .or(absenceType.code.startsWith("17C")
+            .or(absenceType.code.startsWith("C17")
+            .or(absenceType.code.startsWith("C18")))))));
     return query.list(absenceType);
 
   }

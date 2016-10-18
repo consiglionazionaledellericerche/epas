@@ -9,6 +9,7 @@ import com.google.common.collect.Sets;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
+import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
@@ -21,8 +22,8 @@ import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import manager.configurations.EpasParam.RecomputationType;
+import manager.services.absences.AbsenceService;
 
-import models.Absence;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
@@ -33,6 +34,8 @@ import models.StampModificationTypeCode;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
+import models.absences.Absence;
+import models.absences.JustifiedType.JustifiedTypeName;
 import models.base.IPropertiesInPeriodOwner;
 import models.enumerate.Troubles;
 
@@ -66,6 +69,8 @@ public class ConsistencyManager {
   private final PersonDayDao personDayDao;
   private final StampTypeManager stampTypeManager;
   private final ConfigurationManager configurationManager;
+  private final AbsenceService absenceService;
+  private final AbsenceComponentDao absenceComponentDao;
 
 
   /**
@@ -80,6 +85,7 @@ public class ConsistencyManager {
    * @param personDayInTroubleManager personDayInTroubleManager
    * @param configurationManager      configurationManager
    * @param stampTypeManager          stampTypeManager
+   * @param absenceService            absenceService
    * @param wrapperFactory            wrapperFactory
    */
   @Inject
@@ -93,6 +99,9 @@ public class ConsistencyManager {
       PersonDayInTroubleManager personDayInTroubleManager,
       ConfigurationManager configurationManager,
       StampTypeManager stampTypeManager,
+      
+      AbsenceService absenceService,
+      AbsenceComponentDao absenceComponentDao,
 
       IWrapperFactory wrapperFactory) {
 
@@ -103,6 +112,8 @@ public class ConsistencyManager {
     this.contractMonthRecapManager = contractMonthRecapManager;
     this.personDayInTroubleManager = personDayInTroubleManager;
     this.configurationManager = configurationManager;
+    this.absenceService = absenceService;
+    this.absenceComponentDao = absenceComponentDao;
     this.wrapperFactory = wrapperFactory;
     this.personDayDao = personDayDao;
     this.stampTypeManager = stampTypeManager;
@@ -336,6 +347,9 @@ public class ConsistencyManager {
     }
     // (3) Ricalcolo dei residui per mese
     populateContractMonthRecapByPerson(person, new YearMonth(from));
+    
+    // (4) Scan degli errori sulle assenze
+    absenceService.scanner(person, from);
 
     log.info("... ricalcolo dei riepiloghi conclusa.");
   }
@@ -424,6 +438,35 @@ public class ConsistencyManager {
 
     personDayManager.updateTicketAvailable(pd.getValue(), pd.getWorkingTimeTypeDay().get(),
         pd.isFixedTimeAtWork());
+    
+    //Gestione permessi brevi 36 ore anno
+    int timeShortPermission = personDayManager.shortPermissionTime(pd.getValue());
+    Absence shortPermission = null;
+    for (Absence absence : pd.getValue().absences) {
+      if (absence.absenceType.code.equals("PB")) {
+        shortPermission = absence;
+      }
+    }
+
+    if (timeShortPermission == 0 && shortPermission != null) {
+      //delete
+      shortPermission.delete();
+      pd.getValue().absences.remove(shortPermission);
+    } else if (timeShortPermission > 0 && shortPermission == null) {
+      //create
+      shortPermission = new Absence();
+      shortPermission.personDay = pd.getValue();
+      shortPermission.absenceType = absenceComponentDao.absenceTypeByCode("PB").get();
+      shortPermission.justifiedType = absenceComponentDao
+          .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes_limit);
+      shortPermission.justifiedMinutes = timeShortPermission;
+      shortPermission.save();
+      pd.getValue().absences.add(shortPermission);
+    } else if (timeShortPermission > 0 && shortPermission != null) {
+      //edit
+      shortPermission.justifiedMinutes = timeShortPermission;
+      shortPermission.save();
+    }
 
     // controllo problemi strutturali del person day
     if (pd.getValue().date.isBefore(LocalDate.now())) {

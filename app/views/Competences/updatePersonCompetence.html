@@ -1,33 +1,23 @@
 #{modalAsync id:'modalCompetenceCode', title: 'Abilita competenze per ' + person.fullname }
 <div id="updateCompetenceModal" class="col-xs-8 col-xs-offset-2">
+	#{alert color:'info'}
+		Cliccando all'interno della finestra sottostante, selezionare le competenze che si intendono assegnare al dipendente o eventualmente rimuovere
+		quelle in precedenza assegnate e non più valide.
+	#{/alert}
   #{form action:@Competences.saveNewCompetenceConfiguration(), method:'POST', autocomplete:false,
   class:'form form-horizontal', 'data-async':'#page_content',
   'data-async-error':'#updateCompetenceModal'}
 
-  <input type="hidden" name="personId" value="${person.id}"/>
-  <table class="table table-striped table-hover" >
+  #{f.selectModels 'codeListIds',
+  items:templateUtility.allCodeList(), placeholder:'I codici di competenza' /}
 
-    #{list items:pcr.totalCompetenceCode, as:'comp'}
-    <tr>
-      <td><strong>${comp.code}</strong> ${comp.description}</td>
-      <td>
-        #{if pcr.personActiveCompetence.contains(comp)}
-        Sì <input type="radio" value="true" name="competence.${comp.code}" checked="checked"/>
-        No <input type="radio" value="false" name="competence.${comp.code}"/>
-        #{/if}
-        #{else}
-        Sì <input type="radio" value="true" name="competence.${comp.code}"/>
-        No <input type="radio" value="false" checked="checked" name="competence.${comp.code}"/>
-        #{/else}
-      </td>
-
-    </tr>
-    #{/list}
-
-  </table>
-
+  #{if person?.persistent}
+    	#{f.hidden 'personId', value:person.id /}
+  #{/if}  
+  #{f.hidden 'year', value:year /}
+  #{f.hidden 'month', value:month /}
   #{b.buttons center:true}
-  #{b.submit 'Ok'/}
+  		#{b.submit 'Ok'/}
   #{/b.buttons}
 
   #{/form}

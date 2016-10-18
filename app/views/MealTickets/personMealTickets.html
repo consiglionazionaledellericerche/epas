@@ -2,15 +2,16 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione buoni pasto'  /}
 
-#{set breadcrumbs:[recapMealTickets:@MealTickets.recapMealTickets(session.get('yearSelected'),
-session.get('monthSelected'), session.get('officeSelected')), (person.fullname):null] /}
+#{set breadcrumbs:[recapMealTickets:@MealTickets.recapMealTickets(currentData.year,
+ currentData.month, currentData.officeId), (person.fullname):null] /}
 
 #{breadcrumbs breadcrumbs, noHome:true, container:true /}
 
 <div class="container">
 
-  #{mealTickets.personMealTicketsTabs person:recap.contract.person, activeAction:'personMealTickets' /}
+  #{include './_personTabs.html' /}
 
+  #{secure.check 'MealTickets.submitPersonMealTicket'}
   #{alert color:'info'}
   <p>Inserisci i dati del nuovo <strong>Blocco</strong>.</p>
   <p>I campi <strong>Dal Numero</strong> <strong>Al numero</strong> specificano la dimensione del blocco.
@@ -64,6 +65,7 @@ session.get('monthSelected'), session.get('officeSelected')), (person.fullname):
       <button type="submit" class="btn btn-sm btn-primary">Salva</button>
     </div>
     #{/form}
+    #{/secure.check}
     <br>
     #{alert color:'info'}
     #{if recap.getBlockMealTicketReceivedDeliveryDesc().isEmpty()}

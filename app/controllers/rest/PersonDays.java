@@ -17,12 +17,12 @@ import helpers.JsonResponse;
 
 import it.cnr.iit.epas.DateUtility;
 
-import models.Absence;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
+import models.absences.Absence;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;

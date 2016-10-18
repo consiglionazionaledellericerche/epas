@@ -70,6 +70,7 @@ public class PersonMonthRecap extends BaseModel {
         .add("month", month)        
         .toString();
   }
+  
   /**
    * Ritorna true se le ore si riferiscono al mese attuale od al mese precedente 
    * e non sono ancora state approvate.

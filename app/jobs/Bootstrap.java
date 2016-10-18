@@ -6,11 +6,14 @@ import dao.UserDao;
 
 import lombok.extern.slf4j.Slf4j;
 
+import manager.services.absences.AbsenceMigration;
+
 import models.Qualification;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
+import models.absences.GroupAbsenceType;
 
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
@@ -49,14 +52,19 @@ public class Bootstrap extends Job<Void> {
   private static final String JOBS_CONF = "jobs.active";
 
   @Inject
-  static FixUserPermission fixUserPermission;
+  static FixEmployeesPermission fixEmployeesPermission;
   @Inject
-  static UserDao userDao;
+  static AbsenceMigration absenceMigration;
 
+
+  //Aggiunto qui perché non più presente nella classe Play dalla versione >= 1.4.3
+  public static boolean runingInTestMode() {
+    return Play.id.matches("test|test-?.*");
+  }
 
   public void doJob() throws IOException {
 
-    if (Play.runingInTestMode()) {
+    if (runingInTestMode()) {
       log.info("Application in test mode, default boostrap job not started");
       return;
     }
@@ -71,13 +79,23 @@ public class Bootstrap extends Job<Void> {
 
     if (Qualification.count() == 0) {
 
-      //qualification absenceType absenceTypeQualification absenceTypeGroup
       session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
           .getResource("../db/import/absence-type-and-qualification-phase1.xml")));
 
       session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
           .getResource("../db/import/absence-type-and-qualification-phase2.xml")));
     }
+
+    log.info("Iniziata migrazione assenze ...");
+    if (GroupAbsenceType.count() == 0) {
+      log.info(" ... questa operazione richiederà circa due minuti ...");
+      absenceMigration.absenceMigrationProcessor(true);
+    } else {
+      log.info(" ... migrazione già applicata ...");
+      //absenceMigration.absenceMigrationProcessor(false);
+    }
+    
+    log.info("Conclusa migrazione assenze!");
 
     if (User.find("byUsername", "developer").fetch().isEmpty()) {
       Fixtures.loadModels("../db/import/developer.yml");
@@ -86,7 +104,7 @@ public class Bootstrap extends Job<Void> {
     // Allinea tutte le sequenze del db
     Fixtures.executeSQL(Play.getFile("db/import/fix_sequences.sql"));
 
-    fixUserPermission.doJob();
+    fixEmployeesPermission.doJob();
 
     //impostare il campo tipo orario orizzondale si/no effettuando una euristica
     List<WorkingTimeType> wttList = WorkingTimeType.findAll();
@@ -98,18 +116,6 @@ public class Bootstrap extends Job<Void> {
       }
     }
 
-    //L'utente admin non deve disporre del ruolo di amminstratore del personale. FIX
-    User user = userDao.byUsername("admin");
-    if (user != null) {
-      for (UsersRolesOffices uro : user.usersRolesOffices) {
-        if (uro.role.name.equals(Role.PERSONNEL_ADMIN)
-            || uro.role.name.equals(Role.PERSONNEL_ADMIN_MINI)) {
-          uro.delete();
-        }
-      }
-    } else {
-      //BOH
-    }
   }
 
   public static class DatasetImport implements Work {

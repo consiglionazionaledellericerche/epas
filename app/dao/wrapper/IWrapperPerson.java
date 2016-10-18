@@ -120,10 +120,10 @@ public interface IWrapperPerson extends IWrapperModel<Person> {
   
   /**
    * Diagnostiche sullo stato di sincronizzazione della persona.
-   * 
    * Ha perseoId null oppure uno dei suoi contratti attivi o futuri ha perseoId null.
    */
   public boolean isProperSynchronized();
+  
   /**
    * Il contratto della persona con quel perseoId.
    * @param perseoId perseoId

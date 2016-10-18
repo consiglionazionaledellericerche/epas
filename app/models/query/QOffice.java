@@ -28,6 +28,8 @@ public class QOffice extends EntityPathBase<Office> {
 
     public final StringPath address = createString("address");
 
+    public final ListPath<models.Attachment, QAttachment> attachments = this.<models.Attachment, QAttachment>createList("attachments", models.Attachment.class, QAttachment.class, PathInits.DIRECT2);
+
     public final ListPath<models.BadgeSystem, QBadgeSystem> badgeSystems = this.<models.BadgeSystem, QBadgeSystem>createList("badgeSystems", models.BadgeSystem.class, QBadgeSystem.class, PathInits.DIRECT2);
 
     //inherited
@@ -64,6 +66,8 @@ public class QOffice extends EntityPathBase<Office> {
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
+
+    public final ListPath<models.PersonReperibilityType, QPersonReperibilityType> personReperibilityTypes = this.<models.PersonReperibilityType, QPersonReperibilityType>createList("personReperibilityTypes", models.PersonReperibilityType.class, QPersonReperibilityType.class, PathInits.DIRECT2);
 
     public final ListPath<models.Person, QPerson> persons = this.<models.Person, QPerson>createList("persons", models.Person.class, QPerson.class, PathInits.DIRECT2);
 

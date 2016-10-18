@@ -14,6 +14,8 @@ import javax.persistence.Table;
 
 
 /**
+ * Associazione tra persone e tipi di turno (con date di inizio e fine).
+ * 
  * @author cristian
  * @author arianna
  */

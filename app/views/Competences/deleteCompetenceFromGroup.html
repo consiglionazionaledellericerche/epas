@@ -1,0 +1,20 @@
+#{modalAsync title:'Rimuovi codice da gruppo'}
+<div class="text-center">
+  #{alert color:'danger'}
+  <p>Conferma rimozione codice <strong>${code.description}</strong> dal gruppo <strong>${code.competenceCodeGroup.label}</strong> .</p><br>
+
+  #{form action:@deleteCompetenceFromGroup(), method:'POST', autocomplete:false,
+  class:'form form-horizontal' }
+
+  #{f.hidden 'competenceCodeId', value:code.id /}
+  #{f.hidden 'confirmed', value:confirmed /}
+  
+  <div class="container-fluid center">
+    <input class="btn btn-danger" type="submit" value="Elimina"/>
+  </div>
+  #{/form}
+
+  #{/alert}
+
+</div>
+#{/modalAsync}

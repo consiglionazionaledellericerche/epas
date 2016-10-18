@@ -73,114 +73,24 @@
 
       <div class="collapse navbar-collapse">
 
-        #{if ip.isEmployeeVisible() }
-        <ul class="nav navbar-nav">
-          #{if dropDown.equals("dropDownEmployee") }
-          <li class="dropdown active">
-          #{/if}
-            #{else}
-          <li class="dropdown">
-            #{/else}
-
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i>
-              <div class="visible-lg-inline visible-xs-inline"> ${session.username}
-                <span class="caret"></span>
-              </div>
-            </a>
-            <ul class="dropdown-menu">
-              
-              <li><a href="@{Stampings.stampings(session.get("yearSelected"), session.get("monthSelected"))}">Situazione mensile</a></li>
-              <li><a href="@{Absences.absences(session.get("yearSelected"), session.get("monthSelected"))}">Assenze mensili</a></li>
-              <li><a href="@{Absences.absencesPerPerson(session.get("yearSelected"))}">Assenze annuali</a></li>
-              <li><a href="@{Vacations.show(session.get("yearSelected"))}">Ferie</a></li>
-              <li><a href="@{Competences.competences(session.get("yearSelected"), session.get("monthSelected"))}">Competenze</a></li>
-              <li><a href="@{PersonMonths.trainingHours(session.get("yearSelected"))}">Ore di formazione</a></li>
-              <li><a href="@{PersonMonths.hourRecap(session.get("yearSelected"))}">Riepilogo orario</a></li>
-              <li><a href="@{MealTickets.mealTickets()}">Riepilogo buoni pasto</a></li>
-
-              <li class="divider"></li>
-              <li><a href="@{PrintTags.showTag('id':session.get("personSelected"), session.get("monthSelected"),session.get("yearSelected"), true)}">Stampa cartellino presenze</a></li>
-              <li class="divider"></li>
-              <li><a href="@{Persons.changePassword()}">Gestione password</a></li>
-              #{secure.check 'Absences.absencesVisibleForEmployee'}
-              <li class="divider"></li>
-              <li><a href="@{Absences.absencesVisibleForEmployee(session.get("yearSelected"), session.get("monthSelected"), session.get("daySelected"))}">Presenza colleghi</a></li>
-              #{/secure.check}
-            </ul>
-          </li>
-        </ul>
+        *{ Ruolo Dipendente }*
+        #{if currentUser.hasRoles(models.Role.EMPLOYEE) }
+          #{include './_employeeMenu.html' /}
         #{/if}
 
-        #{include './_administrationItems.html' /}
-
-        #{if ip.isConfigurationVisible() }
-        <ul class="nav navbar-nav">
-          #{if dropDown.equals("dropDownConfiguration") }
-          <li class="dropdown active">
-            #{/if}
-            #{else}
-          <li class="dropdown">
-            #{/else}
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-cog"></i>
-              <div class="visible-xs-inline visible-md-inline visible-lg-inline">&{'configurations'}<span class="caret"></span></div>
-            </a>
-            <ul class="dropdown-menu">
-              #{if ip.viewOffice }
-              <li><a href="@{Institutes.list()}">Sedi e Amministratori</a></li>
-              <li><a href="@{BadgeReaders.list()}">&{'badgeReaders'}</a></li>
-              <li><a href="@{BadgeSystems.list()}">&{'badgeSystems'}</a></li>
-        <li><a href="@{Users.list()}">Gestione utenti</a></li>
-              #{/if}
-              #{if ip.viewWorkingTimeType}
-
-              <li><a href="@{Configurations.show(session.get("officeSelected"))}">Parametri</a></li>
-
-              <li><a href="@{WorkingTimes.manageWorkingTime(session.get("officeSelected"))}">Orari Lavoro</a></li>
-
-              #{/if}
-              #{if ip.viewCompetenceCode}
-              <li><a href="@{Competences.manageCompetenceCode()}">Codici Competenze</a></li>
-              #{/if}
-              #{if ip.viewAbsenceType}
-              <li><a href="@{Absences.manageAbsenceCode()}">Codici Assenze</a></li>
-              #{/if}
-              <!--<li><a href="#">Codici Assenze</a></li>
-              <li><a href="#">Codici Competenze</a></li>
-              <li><a href="#">Parametri</a></li>
-              -->
-            </ul>
-          </li>
-        </ul>
+        *{Ruoli di Sistema, Amministratore del personale, Amministratore del personale in sola lettura}*
+        #{if !currentUser.roles.empty || currentUser.hasRoles(models.Role.PERSONNEL_ADMIN,models.Role.PERSONNEL_ADMIN_MINI) }
+          #{include './_adminMenu.html' /}
         #{/if}
 
-        #{if isPersonInCharge}
-        <ul class="nav navbar-nav">
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-users"></i>
-              Gestione gruppo <b class="caret"></b></a>
-            <ul class="dropdown-menu">
-              <li><a href="@{Stampings.dailyPresenceForPersonInCharge(session.get("yearSelected"),
-                session.get("monthSelected"), session.get("daySelected"))}">Presenza giornaliera gruppo</a></li>
-              <li><a href="@{Competences.monthlyOvertime(session.get("yearSelected"),
-                session.get("monthSelected"))}">Straordinari mensili gruppo</a></li>
-            </ul>
-          </li>
-        </ul>
+        *{ Ruoli di sistema e amministratori delle sedi }*
+        #{if !currentUser.roles.empty || currentUser.hasRoles(models.Role.PERSONNEL_ADMIN,models.Role.PERSONNEL_ADMIN_MINI,models.Role.TECHNICAL_ADMIN) }
+          #{include './_configMenu.html' /}
         #{/if}
 
-        #{if ip.isToolsVisible()}
-        <ul class="nav navbar-nav">
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-medkit"></i></i>
-              Tools <b class="caret"></b></a>
-            <ul class="dropdown-menu">
-              <li><a href="@{Administration.utilities()}">Utilities</a></li>
-              <li><a href="@{Administration.playConfiguration()}">&{'application.data'}</a></li>
-              <li><a href="@{Synchronizations.institutes()}">&{'synch.offices'}</a></li>
-              <li><a href="@{Synchronizations.people(session.get("officeSelected"))}">&{'synch.people'}</a></li>
-            </ul>
-          </li>
-        </ul>
+        *{ Ruoli di Sistema }*
+        #{if currentUser.roles.contains(models.enumerate.AccountRole.DEVELOPER) || currentUser.roles.contains(models.enumerate.AccountRole.ADMIN)}
+          #{include '/_toolsMenu.html' /}
         #{/if}
 
         #{include '/menu.html' /}
@@ -204,7 +114,7 @@
 
           #{elseif session.username}
 
-          #{if !ip.isEmployeeVisible()}
+          #{if !currentUser.roles.empty}
           <li data-toggle="tooltip" data-placement="bottom" title="Login effettuato come amministratore ePAS">
             <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${session.username} </a>
           </li>

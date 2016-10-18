@@ -1,0 +1,15 @@
+<div class="container">
+  #{title title:'Gestisci Contratto di ' + contract.person.fullname /}
+</div>
+
+<div id="container-nav-tabs" class="container">
+  <ul class="nav nav-tabs">
+    #{secure.li @Contracts.edit(contract.id) /}
+    #{secure.li @Contracts.updateSourceContract(contract.id) /}
+    #{secure.li @Contracts.updateContractWorkingTimeType(contract.id) /}
+    #{secure.li @Contracts.updateContractVacationPeriod(contract.id) /}
+    #{secure.li @Contracts.updateContractStampProfile(contract.id) /}
+    #{secure.li @Contracts.delete(contract.id) /}
+  </ul>
+</div>
+<br>

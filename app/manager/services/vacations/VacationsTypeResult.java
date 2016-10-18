@@ -8,7 +8,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
-import models.Absence;
+import models.absences.Absence;
 
 import org.joda.time.LocalDate;
 

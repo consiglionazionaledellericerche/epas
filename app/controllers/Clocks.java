@@ -79,9 +79,9 @@ public class Clocks extends Controller {
           + "Inserire l'indirizzo ip nella configurazione della propria sede per abilitarlo");
       try {
         Secure.login();
-      } catch (Throwable e) {
+      } catch (Throwable ex) {
         // TODO Auto-generated catch block
-        e.printStackTrace();
+        ex.printStackTrace();
       }
     }
 

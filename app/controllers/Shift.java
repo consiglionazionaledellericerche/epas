@@ -1,5 +1,7 @@
 package controllers;
 
+import static play.modules.pdf.PDF.renderPDF;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
@@ -19,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import manager.ShiftManager;
 
-import models.Absence;
 import models.Competence;
 import models.Person;
 import models.PersonShiftDay;
@@ -28,6 +29,7 @@ import models.ShiftCategories;
 import models.ShiftTimeTable;
 import models.ShiftType;
 import models.User;
+import models.absences.Absence;
 import models.exports.AbsenceShiftPeriod;
 import models.exports.ShiftPeriod;
 import models.exports.ShiftPeriods;
@@ -44,7 +46,6 @@ import play.data.validation.Required;
 import play.db.jpa.JPA;
 import play.i18n.Messages;
 import play.modules.pdf.PDF.Options;
-import static play.modules.pdf.PDF.renderPDF;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -269,16 +270,19 @@ public class Shift extends Controller {
     
     //  Used TreeBasedTable becouse of the alphabetical name order (persona, A/B, num. giorni)
     Table<Person, String, Integer> personsShiftsWorkedDays =
-        TreeBasedTable.<Person, String, Integer>create(Person.personComparator(), nullSafeStringComparator);
+        TreeBasedTable.<Person, String, Integer>create(
+            Person.personComparator(), nullSafeStringComparator);
 
     // crea la tabella per registrare le assenze e le timbrature inconsistenti con i turni trovati
     // (person, [thAbsences, thNoStampings, thBadStampings], <giorni/fasce orarie inconsistenti>)
     Table<Person, String, List<String>> personsShiftInconsistentAbsences =
-        TreeBasedTable.<Person, String, List<String>>create(Person.personComparator(), nullSafeStringComparator);
+        TreeBasedTable.<Person, String, List<String>>create(
+            Person.personComparator(), nullSafeStringComparator);
     
     // Contains the number of the effective hours of worked shifts
     Table<Person, String, Integer> totalPersonShiftWorkedTime =
-        TreeBasedTable.<Person, String, Integer>create(Person.personComparator(), nullSafeStringComparator);
+        TreeBasedTable.<Person, String, Integer>create(
+            Person.personComparator(), nullSafeStringComparator);
 
     ShiftCategories shiftCategory = ShiftCategories.findById(shiftCategoryId);
     if (shiftCategory == null) {
@@ -305,7 +309,8 @@ public class Shift extends Controller {
       log.debug("CALCOLA IL NUM DI GIORNI EFFETTUATI NEL TURNO PER OGNI PERSONA");
       // conta e memorizza i giorni di turno per ogni persona
       shiftManager.countPersonsShiftsDays(personsShiftDays, personsShiftsWorkedDays);
-      log.debug("* Num di persone nella personsShiftsWorkedDays = {}", personsShiftsWorkedDays.rowKeySet().size());
+      log.debug("* Num di persone nella personsShiftsWorkedDays = {}", 
+          personsShiftsWorkedDays.rowKeySet().size());
 
 
       // Memorizzo le inconsistenze del turno
@@ -313,7 +318,8 @@ public class Shift extends Controller {
           + "del turno %s e memorizzarle", type);
       shiftManager.getShiftInconsistencyTimestampTable(
           personsShiftDays, personsShiftInconsistentAbsences);
-      log.debug("* Num di persone nella personsShiftInconsistentAbsences = {}", personsShiftInconsistentAbsences.rowKeySet().size());
+      log.debug("* Num di persone nella personsShiftInconsistentAbsences = {}", 
+          personsShiftInconsistentAbsences.rowKeySet().size());
     }
     
 
@@ -522,10 +528,10 @@ public class Shift extends Controller {
       renderBinary(is, "reperibilitaRegistro.ics");
       bos.close();
       is.close();
-    } catch (IOException e) {
-      log.error("Io exception building ical", e);
-    } catch (ValidationException e) {
-      log.error("Validation exception generating ical", e);
+    } catch (IOException ex) {
+      log.error("Io exception building ical", ex);
+    } catch (ValidationException ex) {
+      log.error("Validation exception generating ical", ex);
     }
   }
 }

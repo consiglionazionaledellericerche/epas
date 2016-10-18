@@ -370,8 +370,8 @@ public class MealTickets extends Controller {
 
     Preconditions.checkState(mealTicketList.size() > 0);
 
-    List<MealTicket> blockPortionToReturn = MealTicketStaticUtility.
-        blockPortion(mealTicketList, contract, first, last);
+    List<MealTicket> blockPortionToReturn = MealTicketStaticUtility
+        .blockPortion(mealTicketList, contract, first, last);
     for (MealTicket mealTicket : blockPortionToReturn) {
       if (!undo) {
         mealTicket.returned = true;
@@ -456,8 +456,8 @@ public class MealTickets extends Controller {
 
     Preconditions.checkState(mealTicketList.size() > 0);
 
-    List<MealTicket> mealTicketToRemove = MealTicketStaticUtility.
-        blockPortion(mealTicketList, contract, first, last);
+    List<MealTicket> mealTicketToRemove = MealTicketStaticUtility
+        .blockPortion(mealTicketList, contract, first, last);
     LocalDate pastDate = LocalDate.now();
     for (MealTicket mealTicket : mealTicketList) {
       if (mealTicket.date.isBefore(pastDate)) {

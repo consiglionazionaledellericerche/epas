@@ -18,6 +18,8 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 /**
+ * Classe che modella un istituto.
+ * 
  * @author alessandro
  */
 @Audited
@@ -25,7 +27,7 @@ import javax.validation.constraints.NotNull;
 @Table(name = "institutes")
 public class Institute extends MutableModel {
 
-  @Column(name="perseo_id")
+  @Column(name = "perseo_id")
   public Long perseoId;
   
   @Unique
@@ -34,7 +36,7 @@ public class Institute extends MutableModel {
   public String name;
 
   /**
-   * Codice univoco dell'istituto, per l'IIT è 044
+   * Codice univoco dell'istituto, per l'IIT è 044.
    */
   @Unique
   @NotNull

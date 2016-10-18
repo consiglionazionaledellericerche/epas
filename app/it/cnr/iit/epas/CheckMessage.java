@@ -1,6 +1,6 @@
 package it.cnr.iit.epas;
 
-import models.AbsenceType;
+import models.absences.AbsenceType;
 
 /**
  * @author dario questa classe mi occorre per ritornare un oggetto nel quale sintetizzare il

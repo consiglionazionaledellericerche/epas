@@ -1,25 +1,46 @@
 <td class="assenza default-single">
-  #{secure.link @Absences.blank(dayRecap.personDay.person.id, dayRecap.personDay.date?.format()),
-      target:person, display:'hidden', 'data-async-modal':'#modalAbsence'}
-      ___
-  #{/secure.link}
+  #{secure.check 'AbsenceGroups.insert', target: yearMonth }
+    #{secure.check 'AbsenceGroups.insert',  target:person}
+    <a href="@{AbsenceGroups.insert(dayRecap.personDay.person.id, dayRecap.personDay.date?.format())}" data-async-modal="#modalGroupAbsence">
+      __
+    </a>
+    #{/secure.check}
+  #{/secure.check}
 
   #{list items:dayRecap.personDay.absences, as:'absence'}
+    
+    %{ involvedGroups = templateUtility.involvedGroupAbsenceType(absence.absenceType); }%
+    #{if absence.isReplacing(involvedGroups) && !absence.isOrphanReplacing(involvedGroups) }
+        *{ l'assenza di rimpiazzamento non orfana non la visualizzo }*
+    #{/if}
+    #{else}
+    
+	      #{absences.absence-popover absence:absence, person:person, noLabel:true /}
+	      
+	      #{secure.link @AbsenceGroups.edit(absence.id), target: absence, 'data-async-modal':'#modalAbsence'}
+	      
+	      <span webui-popover-hover data-url="#${absence.id}"
+	      
+	        *{ colore codice assenza }*
+	        #{if !absence.troubles.empty}              class="text-danger"   #{/if}
+	        #{elseif absence.absenceType.internalUse}  class="text-muted"    #{/elseif}
+	        #{else}                                    class="text-primary"  #{/else}>
+	        
+	        
+		    #{if !absence.troubles.empty} 
+		      <strong>${absence.absenceType.code}</strong>
+		    #{/if}
+		    #{else} 
+		      ${absence.absenceType.code} 
+		    #{/else}
+		  </span>
+		  
+		  #{/secure.link}
+    
+    #{/else}
 
-  #{secure.link @Absences.edit('absence.id':absence.id), target: absence, 'data-async-modal':'#modalAbsence'}
-    <span webui-popover-hover data-url="#${absence.id}">
-	    ${absence.absenceType.code}
-	  </span>
-    #{if absence.justifiedMinutes}${absence.justifiedMinutes}min #{/if}
-  #{/secure.link}
-
-  #{if absence.absenceFile.exists()}
-    #{secure.link @Absences.downloadAttachment(absence.id), fa:'paperclip'}#{/secure.link}
-  #{/if}
-
-  <div class="webui-popover-content" id="${absence.id}">
-    <strong>${absence.absenceType.code}</strong> ${absence.absenceType.description}
-  </div>
-
+    #{if absence.absenceFile.exists()}
+      #{secure.link @Absences.downloadAttachment(absence.id), fa:'paperclip'}#{/secure.link}
+    #{/if}
   #{/list}
 </td>

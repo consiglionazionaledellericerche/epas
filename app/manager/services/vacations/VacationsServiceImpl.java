@@ -4,9 +4,9 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.ContractDao;
+import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
@@ -17,11 +17,11 @@ import manager.cache.AbsenceTypeManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 
-import models.Absence;
-import models.AbsenceType;
 import models.Contract;
 import models.Office;
 import models.Person;
+import models.absences.Absence;
+import models.absences.AbsenceType;
 import models.enumerate.AbsenceTypeMapping;
 
 import org.joda.time.LocalDate;
@@ -38,7 +38,7 @@ import javax.inject.Inject;
  */
 public class VacationsServiceImpl implements IVacationsService {
 
-  private final AbsenceDao absenceDao;
+  private final AbsenceComponentDao absenceComponentDao;
   private final ContractDao contractDao;
   private final AbsenceTypeDao absenceTypeDao;
 
@@ -60,7 +60,7 @@ public class VacationsServiceImpl implements IVacationsService {
    */
   @Inject
   public VacationsServiceImpl(
-      AbsenceDao absenceDao,
+      AbsenceComponentDao absenceComponentDao,
       AbsenceTypeDao absenceTypeDao,
       ContractDao contractDao,
       ConfigurationManager configurationManager,
@@ -68,7 +68,7 @@ public class VacationsServiceImpl implements IVacationsService {
       IWrapperFactory wrapperFactory,
       VacationsRecapBuilder vacationsRecapImpl) {
 
-    this.absenceDao = absenceDao;
+    this.absenceComponentDao = absenceComponentDao;
     this.absenceTypeDao = absenceTypeDao;
     this.contractDao = contractDao;
     this.configurationManager = configurationManager;
@@ -125,9 +125,9 @@ public class VacationsServiceImpl implements IVacationsService {
     }
 
     // Le assenze
-    List<Absence> absencesForVacationsRecap = absenceDao
-            .getAbsencesInCodeList(person, dateFrom, dateTo,
-                absenceTypeManager.codesForVacations(), true);
+    List<Absence> absencesForVacationsRecap = absenceComponentDao
+            .orderedAbsences(person, dateFrom, dateTo,
+                absenceTypeManager.codesForVacations());
 
     return absencesForVacationsRecap;
   }

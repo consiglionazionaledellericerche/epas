@@ -1,7 +1,5 @@
 package dao;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.inject.Provider;
 
 import com.mysema.query.jpa.JPQLQuery;
@@ -16,6 +14,8 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 /**
+ * Dao per l'accesso alle informazioni dei Role.
+ * 
  * @author dario
  */
 public class RoleDao extends DaoBase {
@@ -27,7 +27,7 @@ public class RoleDao extends DaoBase {
   }
 
   /**
-   * @return il ruolo identificato dall'id passato come parametro
+   * @return il ruolo identificato dall'id passato come parametro.
    */
   public Role getRoleById(Long id) {
     QRole role = QRole.role;
@@ -37,7 +37,7 @@ public class RoleDao extends DaoBase {
   }
 
   /**
-   * @return il ruolo identificato dal nome passato come parametro
+   * @return il ruolo identificato dal nome passato come parametro.
    */
   public Role getRoleByName(String name) {
     QRole role = QRole.role;
@@ -46,36 +46,12 @@ public class RoleDao extends DaoBase {
     return query.singleResult(role);
   }
 
-  public List<Role> getRolesByNames(ImmutableList<String> roles) {
-    QRole role = QRole.role;
-    final JPQLQuery query = getQueryFactory()
-        .from(role).where(role.name.in(roles));
-    return query.list(role);
-  }
-
   /**
-   * La lista dei ruoli di sistema.
+   * @return Tutti i ruoli disponibili.
    */
-  public List<Role> getSystemRolesOffices() {
-
-    List<Role> roleList = Lists.newArrayList();
-    roleList.add(getRoleByName(Role.BADGE_READER));
-    roleList.add(getRoleByName(Role.REST_CLIENT));
-
-    return roleList;
-  }
-
-  /**
-   * 
-   * @return la lista dei ruoli non di sistema.
-   */
-  public List<Role> getAllPhysicalRoles(){
+  public List<Role> getAll() {
     final QRole role = QRole.role;
-    
-    JPQLQuery query = getQueryFactory()
-        .from(role).where(role.name.notIn(Role.BADGE_READER, Role.REST_CLIENT, Role.DEVELOPER, Role.ADMIN));
-        
-    return query.list(role);
+    return getQueryFactory().from(role).list(role);
   }
 
 }

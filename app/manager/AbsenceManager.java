@@ -14,9 +14,8 @@ import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
 import dao.PersonShiftDayDao;
 import dao.WorkingTimeTypeDao;
+import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
-
-import it.cnr.iit.epas.CheckMessage;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,8 +25,6 @@ import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
 import manager.services.vacations.IVacationsService;
 
-import models.Absence;
-import models.AbsenceType;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
@@ -36,6 +33,9 @@ import models.PersonDay;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
 import models.Qualification;
+import models.absences.Absence;
+import models.absences.AbsenceType;
+import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.QualificationMapping;
@@ -68,7 +68,6 @@ public class AbsenceManager {
   private final PersonManager personManager;
   private final PersonDayDao personDayDao;
   private final IVacationsService vacationsService;
-  private final AbsenceGroupManager absenceGroupManager;
   private final ContractDao contractDao;
   private final AbsenceDao absenceDao;
   private final PersonReperibilityDayDao personReperibilityDayDao;
@@ -78,6 +77,7 @@ public class AbsenceManager {
   private final ConfigurationManager configurationManager;
   private final IWrapperFactory wrapperFactory;
   private final PersonDayManager personDayManager;
+  private final AbsenceComponentDao absenceComponentDao;
 
   /**
    * Costruttore.
@@ -91,7 +91,6 @@ public class AbsenceManager {
    * @param personChildrenDao         personChildrenDao
    * @param contractMonthRecapManager contractMonthRecapManager
    * @param personManager             personManager
-   * @param absenceGroupManager       absenceGroupManager
    * @param consistencyManager        consistencyManager
    * @param configurationManager      configurationManager
    * @param wrapperFactory            wrapperFactory
@@ -103,13 +102,13 @@ public class AbsenceManager {
       WorkingTimeTypeDao workingTimeTypeDao,
       ContractDao contractDao,
       AbsenceDao absenceDao,
+      AbsenceComponentDao absenceComponentDao,
       PersonReperibilityDayDao personReperibilityDayDao,
       PersonShiftDayDao personShiftDayDao,
       PersonChildrenDao personChildrenDao,
 
       ContractMonthRecapManager contractMonthRecapManager,
       PersonManager personManager,
-      AbsenceGroupManager absenceGroupManager,
       ConsistencyManager consistencyManager,
       ConfigurationManager configurationManager,
       PersonDayManager personDayManager,
@@ -117,13 +116,13 @@ public class AbsenceManager {
       IWrapperFactory wrapperFactory,
       IVacationsService vacationsService) {
 
+    this.absenceComponentDao = absenceComponentDao;
     this.contractMonthRecapManager = contractMonthRecapManager;
     this.workingTimeTypeDao = workingTimeTypeDao;
     this.personManager = personManager;
     this.personDayDao = personDayDao;
     this.configurationManager = configurationManager;
     this.vacationsService = vacationsService;
-    this.absenceGroupManager = absenceGroupManager;
     this.contractDao = contractDao;
     this.absenceDao = absenceDao;
     this.personReperibilityDayDao = personReperibilityDayDao;
@@ -326,8 +325,6 @@ public class AbsenceManager {
         aiList.add(
             handlerChildIllness(
                 person, actualDate, absenceType, file, otherAbsences, !onlySimulation));
-      } else if (absenceType.absenceTypeGroup != null) {
-        aiList = handlerAbsenceTypeGroup(person, actualDate, absenceType, file, !onlySimulation);
       } else {
         aiList.add(handlerGenericAbsenceType(person, actualDate, absenceType, file,
             mealTicket, justifiedMinutes, !onlySimulation));
@@ -357,7 +354,7 @@ public class AbsenceManager {
       consistencyManager.updatePersonSituation(person.id, dateFrom);
 
       if (air.getAbsenceInReperibilityOrShift() > 0) {
-        sendEmail(person, air);
+        sendReperibilityShiftEmail(person, air.datesInReperibilityOrShift());
       }
     }
 
@@ -383,10 +380,25 @@ public class AbsenceManager {
 
     AbsencesResponse ar = new AbsencesResponse(date, absenceType.code);
 
+    Absence absence = new Absence();
+    absence.date = date;
+    absence.absenceType = absenceType;
+    if (absence.absenceType.justifiedTypesPermitted.size() == 1) {
+      absence.justifiedType = absence.absenceType.justifiedTypesPermitted.iterator().next();
+    } else if (justifiedMinutes.isPresent()) {
+      absence.justifiedMinutes = justifiedMinutes.get();
+      absence.justifiedType = absenceComponentDao
+          .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
+    } else {
+      absence.justifiedType = absenceComponentDao
+          .getOrBuildJustifiedType(JustifiedTypeName.all_day);
+    }
+
     //se non devo considerare festa ed è festa non inserisco l'assenza
     if (!absenceType.consideredWeekEnd && personDayManager.isHoliday(person, date)) {
       ar.setHoliday(true);
       ar.setWarning(AbsencesResponse.NON_UTILIZZABILE_NEI_FESTIVI);
+      ar.setAbsenceInError(absence);
 
     } else {
       // check sulla reperibilità
@@ -405,13 +417,6 @@ public class AbsenceManager {
         }
       } else {
         startAbsence = date;
-      }
-
-
-      Absence absence = new Absence();
-      absence.absenceType = absenceType;
-      if (justifiedMinutes.isPresent()) {
-        absence.justifiedMinutes = justifiedMinutes.get();
       }
 
       if (persist) {
@@ -464,7 +469,7 @@ public class AbsenceManager {
    * Metodo che invia la mail contenente i giorni in cui ci sono inserimenti di assenza in turno o
    * reperibilità.
    */
-  private void sendEmail(Person person, AbsenceInsertReport airl) {
+  public void sendReperibilityShiftEmail(Person person, List<LocalDate> dates) {
     MultiPartEmail email = new MultiPartEmail();
 
     try {
@@ -475,7 +480,7 @@ public class AbsenceManager {
       email.addReplyTo(replayTo);
       email.setSubject("Segnalazione inserimento assenza in giorno con reperibilità/turno");
       String date = "";
-      for (LocalDate data : airl.datesInReperibilityOrShift()) {
+      for (LocalDate data : dates) {
         date = date + data + ' ';
       }
       email.setMsg("E' stato richiesto l'inserimento di una assenza per il giorno " + date
@@ -483,9 +488,9 @@ public class AbsenceManager {
           + "Controllare tramite la segreteria del personale.\n"
           + "\n Servizio ePas");
 
-    } catch (EmailException e) {
+    } catch (EmailException ex) {
       // TODO GESTIRE L'Eccezione nella generazione dell'email
-      e.printStackTrace();
+      ex.printStackTrace();
     }
 
     Mail.send(email);
@@ -585,29 +590,6 @@ public class AbsenceManager {
     //37 non disponibile
     return new AbsencesResponse(date, absenceType.code,
         AbsencesResponse.NESSUN_CODICE_FERIE_ANNO_PRECEDENTE_37);
-  }
-
-  private List<AbsencesResponse> handlerAbsenceTypeGroup(
-      Person person, LocalDate date, AbsenceType absenceType, Optional<Blob> file,
-      boolean persist) {
-
-    CheckMessage checkMessage = absenceGroupManager.checkAbsenceGroup(absenceType, person, date);
-    List<AbsencesResponse> result = Lists.newArrayList();
-
-    if (checkMessage.check == false) {
-      result.add(new AbsencesResponse(date, absenceType.code, AbsencesResponse.ERRORE_GENERICO));
-      return result;
-    }
-
-    result.add(insert(person, date, absenceType, file, Optional.<Integer>absent(), persist));
-
-    if (checkMessage.absenceType != null) {
-      result.add(
-          insert(
-              person, date, checkMessage.absenceType,
-              file, Optional.<Integer>absent(), persist));
-    }
-    return result;
   }
 
   /**

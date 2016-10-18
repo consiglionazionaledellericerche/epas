@@ -69,7 +69,7 @@ public class QCompetence extends EntityPathBase<Competence> {
 
     public QCompetence(Class<? extends Competence> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.competenceCode = inits.isInitialized("competenceCode") ? new QCompetenceCode(forProperty("competenceCode")) : null;
+        this.competenceCode = inits.isInitialized("competenceCode") ? new QCompetenceCode(forProperty("competenceCode"), inits.get("competenceCode")) : null;
         this.person = inits.isInitialized("person") ? new QPerson(forProperty("person"), inits.get("person")) : null;
     }
 

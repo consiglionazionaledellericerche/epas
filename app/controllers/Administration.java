@@ -24,7 +24,6 @@ import manager.PersonDayManager;
 import manager.SecureManager;
 import manager.UserManager;
 
-import models.AbsenceType;
 import models.Contract;
 import models.Office;
 import models.Person;
@@ -33,6 +32,7 @@ import models.Role;
 import models.Stamping;
 import models.User;
 import models.UsersRolesOffices;
+import models.absences.AbsenceType;
 import models.enumerate.JustifiedTimeAtWork;
 
 import org.apache.commons.lang.WordUtils;
@@ -358,6 +358,9 @@ public class Administration extends Controller {
     render("@data", entries);
   }
 
+  /**
+   * Mostra le proprietà della jvm.
+   */
   public static void jvmConfiguration() {
     final Collection<Entry<Object, Object>> entries = Collections2.filter(
         System.getProperties().entrySet(), new Predicate<Entry<Object, Object>>() {
@@ -369,6 +372,9 @@ public class Administration extends Controller {
     render("@data", entries);
   }
 
+  /**
+   * Mostra i valori di Runtime del processo play (Memoria usata, memoria libera, etc).
+   */
   public static void runtimeData() {
 
     final int mb = 1024 * 1024;
@@ -388,7 +394,8 @@ public class Administration extends Controller {
     render();
   }
 
-  public static void saveConfiguration(@Required String name, @Required String value, boolean newParam) {
+  public static void saveConfiguration(@Required String name, @Required String value, 
+      boolean newParam) {
     if (Validation.hasErrors()) {
       response.status = 400;
       if (newParam) {
@@ -411,7 +418,10 @@ public class Administration extends Controller {
   public static void switchUserTo(long id) {
 
     final User user = Administrators.userDao.getUserByIdAndPassword(id, Optional.<String>absent());
-    notFoundIfNull(user);
+
+    if (user == null || user.disabled) {
+      notFound();
+    }
 
     // salva il precedente
     session.put(SUDO_USERNAME, session.get(USERNAME));
@@ -448,7 +458,8 @@ public class Administration extends Controller {
   public static void changePeopleEmailDomain(@Required Office office, @Required String domain,
       boolean sendMail) {
 
-    final Pattern domainPattern = Pattern.compile("(?:[\\w](?:[\\w-]*[\\w])?\\.)+[a-zA-Z0-9](?:[\\w-]*[\\w])?");
+    final Pattern domainPattern = 
+        Pattern.compile("(?:[\\w](?:[\\w-]*[\\w])?\\.)+[a-zA-Z0-9](?:[\\w-]*[\\w])?");
 
     if (!Strings.isNullOrEmpty(domain) && domain.contains("@")) {
       Validation.addError("domain", "Specificare il dominio senza il carattere @");
