@@ -2,6 +2,7 @@
 package controllers;
 
 import dao.PersonDao;
+import dao.UserDao;
 import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
 
@@ -33,6 +34,7 @@ import play.data.validation.Valid;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.List;
@@ -57,6 +59,8 @@ public class AbsenceGroups extends Controller {
   private static SecurityRules rules;
   @Inject
   private static AbsenceHistoryDao absenceHistoryDao;
+  @Inject
+  private static UserDao userDao;
 
   /**
    * End point per la visualizzazione dei gruppi assenze definiti.
@@ -183,13 +187,24 @@ public class AbsenceGroups extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     notFoundIfNull(from);
+    
+    rules.checkIfPermitted(person);
 
     AbsenceForm categorySwitcher = absenceService
         .buildForCateogorySwitch(person, from, groupAbsenceType);
 
     PeriodChain periodChain = absenceService.residual(person, categorySwitcher.groupSelected, from);
+    
+    final User currentUser = Security.getUser().get();
+    boolean isAdmin = false;
+    //se l'user è amministratore visualizzo lo switcher del gruppo
+    if (currentUser.isSystemUser() 
+        || userDao.getUsersWithRoles(person.office, Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI)
+        .contains(currentUser)) {
+      isAdmin = true;
+    }
 
-    render(from, categorySwitcher, groupAbsenceType, periodChain);
+    render(from, categorySwitcher, groupAbsenceType, periodChain, isAdmin);
   }
 
   /**

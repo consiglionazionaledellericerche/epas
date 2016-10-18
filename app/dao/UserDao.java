@@ -13,6 +13,8 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
+
 import helpers.jpa.ModelQuery;
 import helpers.jpa.ModelQuery.SimpleResults;
 
@@ -26,14 +28,14 @@ import models.query.QBadgeReader;
 import models.query.QPerson;
 import models.query.QUser;
 
+import play.Logger;
+
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
-/**
- * @author dario
- */
 public class UserDao extends DaoBase {
 
   @Inject
@@ -89,11 +91,16 @@ public class UserDao extends DaoBase {
     return getUserByUsernameAndPassword(username, Optional.absent());
   }
 
-  public List<String> containsUsername(String username) {
-    Preconditions.checkState(!Strings.isNullOrEmpty(username));
+  /**
+   * Tutti gli username già presenti che contengono il pattern all'interno del proprio username.
+   * @param pattern pattern
+   * @return list
+   */
+  public List<String> containsUsername(String pattern) {
+    Preconditions.checkState(!Strings.isNullOrEmpty(pattern));
     final QUser user = QUser.user;
 
-    return getQueryFactory().from(user).where(user.username.contains(username)).list(user.username);
+    return getQueryFactory().from(user).where(user.username.contains(pattern)).list(user.username);
   }
 
   /**
@@ -163,6 +170,11 @@ public class UserDao extends DaoBase {
     return nameCondition.or(user.username.startsWithIgnoreCase(name));
   }
 
+  /**
+   * Ritorna true se l'user è di sistema oppure è amministatore del personale o tecnico.
+   * @param user user
+   * @return esito
+   */
   public boolean hasAdminRoles(User user) {
     Preconditions.checkNotNull(user);
 
@@ -170,21 +182,39 @@ public class UserDao extends DaoBase {
         || user.hasRoles(Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN) ;
   }
 
+  /**
+   * Gli stamp types utilizzabili dall'user. In particolare gli utenti senza diritti 
+   * di amministrazione potranno usufruire della sola causale lavoro fuori sede.
+   * @param user user
+   * @return list
+   */
   public static List<StampTypes> getAllowedStampTypes(final User user) {
 
     if ((user.isSystemUser()
         || user.hasRoles(Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN))
-        || (user.person.qualification.qualification <= 3 &&
-        user.person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true"))) {
+        || (user.person.qualification.qualification <= 3 
+        && user.person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true"))) {
 
       return StampTypes.onlyActive();
-    } else if (user.person.office.checkConf(EpasParam.WORKING_OFF_SITE, "true") &&
-        // La persona è abilitata in configurazione all'inserimento autonomo di quell'assenza
-        user.person.checkConf(EpasParam.OFF_SITE_STAMPING, "true")) {
+    } else if (user.person.office.checkConf(EpasParam.WORKING_OFF_SITE, "true") 
+        && user.person.checkConf(EpasParam.OFF_SITE_STAMPING, "true")) {
       return ImmutableList.of(StampTypes.LAVORO_FUORI_SEDE);
     }
 
     return Lists.newArrayList();
+  }
+  
+  /**
+   * Gli utenti con almeno uno dei ruoli passati nella lista all'interno dell'office.
+   * @param office ufficio del quale restituire gli utenti
+   * @param roles ruoli da considerare
+   * @return La lista degli utenti con i ruoli specificati nell'ufficio passato come parametro
+   */
+  public List<User> getUsersWithRoles(final Office office, String... roles) {
+       
+    return office.usersRolesOffices.stream()
+        .filter(uro -> Arrays.asList(roles).contains(uro.role.name))
+        .map(uro -> uro.user).distinct().collect(Collectors.toList());
   }
 
 
