@@ -964,12 +964,12 @@ public class AbsenceMigration {
       //Update AbsenceType
       AbsenceType cnr25 = absenceComponentDao.buildOrEditAbsenceType("25", 
           "Astensione facoltativa post partum 30% primo figlio intera giornata", 
-          0, Sets.newHashSet(allDay), null, 0, false, false, false, "25", null);
+          0, Sets.newHashSet(allDay), null, 0, false, true, false, "25", null);
 
       //Update AbsenceType
       AbsenceType cnr25u = absenceComponentDao.buildOrEditAbsenceType("25U", 
           "Astensione facoltativa post partum 30% primo figlio intera giornata altro genitore", 
-          0, Sets.newHashSet(allDayLimit), null, 0, false, false, false, null, null);
+          0, Sets.newHashSet(allDayLimit), null, 0, false, true, false, null, null);
 
       AbsenceType m25 = absenceComponentDao.buildOrEditAbsenceType("25M", 
           "Astensione facoltativa post partum 30% primo figlio in ore e minuti", 
@@ -1029,12 +1029,12 @@ public class AbsenceMigration {
       //Update AbsenceType
       AbsenceType cnr23 = absenceComponentDao.buildOrEditAbsenceType("23", 
           "Astensione facoltativa post partum 100% primo figlio intera giornata", 
-          0, Sets.newHashSet(allDay), null, 0, false, false, false, "23", null);
+          0, Sets.newHashSet(allDay), null, 0, false, true, false, "23", null);
 
       //Update AbsenceType
       AbsenceType cnr23u = absenceComponentDao.buildOrEditAbsenceType("23U", 
           "Astensione facoltativa post partum 100% primo figlio intera giornata altro genitore", 
-          0, Sets.newHashSet(allDayLimit), null, 0, false, false, false, null, null);
+          0, Sets.newHashSet(allDayLimit), null, 0, false, true, false, null, null);
 
       AbsenceType m23 = absenceComponentDao.buildOrEditAbsenceType("23M", 
           "Astensione facoltativa post partum 100% primo figlio in ore e minuti", 
@@ -1098,12 +1098,12 @@ public class AbsenceMigration {
       //Update AbsenceType
       AbsenceType cnr252 = absenceComponentDao.buildOrEditAbsenceType("252", 
           "Astensione facoltativa post partum 30% secondo figlio intera giornata", 
-          0, Sets.newHashSet(allDay), null, 0, false, false, false, "252", null);
+          0, Sets.newHashSet(allDay), null, 0, false, true, false, "252", null);
 
       //Update AbsenceType
       AbsenceType cnr252u = absenceComponentDao.buildOrEditAbsenceType("252U", 
           "Astensione facoltativa post partum 30% secondo figlio intera giornata altro genitore", 
-          0, Sets.newHashSet(allDayLimit), null, 0, false, false, false, null, null);
+          0, Sets.newHashSet(allDayLimit), null, 0, false, true, false, null, null);
 
       AbsenceType m252 = absenceComponentDao.buildOrEditAbsenceType("252M", 
           "Astensione facoltativa post partum 30% secondo figlio in ore e minuti", 
@@ -1163,12 +1163,12 @@ public class AbsenceMigration {
       //Update AbsenceType
       AbsenceType cnr232 = absenceComponentDao.buildOrEditAbsenceType("232", 
           "Astensione facoltativa post partum 100% secondo figlio intera giornata", 
-          0, Sets.newHashSet(allDay), null, 0, false, false, false, "232", null);
+          0, Sets.newHashSet(allDay), null, 0, false, true, false, "232", null);
 
       //Update AbsenceType
       AbsenceType cnr232u = absenceComponentDao.buildOrEditAbsenceType("232U", 
           "Astensione facoltativa post partum 100% secondo figlio intera giornata altro genitore", 
-          0, Sets.newHashSet(allDayLimit), null, 0, false, false, false, null, null);
+          0, Sets.newHashSet(allDayLimit), null, 0, false, true, false, null, null);
 
       AbsenceType m232 = absenceComponentDao.buildOrEditAbsenceType("232M", 
           "Astensione facoltativa post partum 100% secondo figlio in ore e minuti", 
@@ -1232,12 +1232,12 @@ public class AbsenceMigration {
       //Update AbsenceType
       AbsenceType cnr253 = absenceComponentDao.buildOrEditAbsenceType("253", 
           "Astensione facoltativa post partum 30% terzo figlio intera giornata", 
-          0, Sets.newHashSet(allDay), null, 0, false, false, false, "253", null);
+          0, Sets.newHashSet(allDay), null, 0, false, true, false, "253", null);
 
       //Update AbsenceType
       AbsenceType cnr253u = absenceComponentDao.buildOrEditAbsenceType("253U", 
           "Astensione facoltativa post partum 30% terzo figlio intera giornata altro genitore", 
-          0, Sets.newHashSet(allDayLimit), null, 0, false, false, false, null, null);
+          0, Sets.newHashSet(allDayLimit), null, 0, false, true, false, null, null);
 
       AbsenceType m253 = absenceComponentDao.buildOrEditAbsenceType("253M", 
           "Astensione facoltativa post partum 30% terzo figlio in ore e minuti", 
@@ -1297,12 +1297,12 @@ public class AbsenceMigration {
       //Update AbsenceType
       AbsenceType cnr233 = absenceComponentDao.buildOrEditAbsenceType("233", 
           "Astensione facoltativa post partum 100% terzo figlio intera giornata", 
-          0, Sets.newHashSet(allDay), null, 0, false, false, false, "233", null);
+          0, Sets.newHashSet(allDay), null, 0, false, true, false, "233", null);
 
       //Update AbsenceType
       AbsenceType cnr233u = absenceComponentDao.buildOrEditAbsenceType("233U", 
           "Astensione facoltativa post partum 100% terzo figlio intera giornata altro genitore", 
-          0, Sets.newHashSet(allDayLimit), null, 0, false, false, false, null, null);
+          0, Sets.newHashSet(allDayLimit), null, 0, false, true, false, null, null);
 
       AbsenceType m233 = absenceComponentDao.buildOrEditAbsenceType("233M", 
           "Astensione facoltativa post partum 100% terzo figlio in ore e minuti", 

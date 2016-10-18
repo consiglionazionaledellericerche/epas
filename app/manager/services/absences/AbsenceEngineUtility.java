@@ -188,8 +188,15 @@ public class AbsenceEngineUtility {
       amount = -1;
     }
     
+    
     if (amountType.equals(AmountType.units)) {
       int work = absenceWorkingTime(person, absence);
+      if (work == -1) {
+        //Patch: se è festa da verificare.
+        if (absence.justifiedType.name.equals(JustifiedTypeName.all_day)) {
+          return 100;
+        }
+      }
       if (work == 0) {
         return 0;
       }
@@ -201,18 +208,18 @@ public class AbsenceEngineUtility {
   }
   
   /**
-   * Il tempo di lavoro nel giorno dell'assenza.
+   * Il tempo di lavoro nel giorno dell'assenza.<br>
    * @param person persona
    * @param absence assenza
-   * @return tempo a lavoro assenza
+   * @return tempo a lavoro assenza, -1 in caso di giorno contrattuale festivo
    */
-  public int absenceWorkingTime(Person person, Absence absence) {
+  private int absenceWorkingTime(Person person, Absence absence) {
     LocalDate date = absence.getAbsenceDate();
     for (Contract contract : person.contracts) {
       for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
         if (DateUtility.isDateIntoInterval(date, cwtt.periodInterval())) {
           if (cwtt.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek() - 1).holiday) {
-            return 0;
+            return -1;
           }
           return cwtt.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek() - 1)
               .workingTime;
