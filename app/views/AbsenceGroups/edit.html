@@ -79,12 +79,12 @@
 	       </p>
 	  </div>
 	
-	  #{form action:@Absences.delete(), method:'POST', autocomplete:false,
+	  #{form action:@AbsenceGroups.delete(), method:'POST', autocomplete:false,
 		    class:'form form-horizontal', 'data-async':'#page_content',
 		    'data-async-error':'#absenceData'}
-		
-		<input type="hidden" name="absence.id" value="${absence.id}"/>
-	
+
+			#{f.hidden 'absenceId', value: absence.id /}
+
 	    #{f.view 'absence.absenceType.code', label:'Codice', value:absence.absenceType.label()  /}
 		
 	    #{f.view 'dateFrom', value:dateFrom.format() /}

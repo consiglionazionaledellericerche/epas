@@ -174,20 +174,6 @@ then
 end
 
 /*
- * L'amministratore del personale può modificare una determinata assenza se:
- */
-rule AdminCanEditAbsence
-when
- $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
- $a: Absence()
- $pd: PersonDay() from $a.personDay
- Office(persons.contains($pd.person)) from $uro.office
- $c: PermissionCheck(target == $a, granted == false )
-then
- $c.grant();
-end
-
-/*
  * L'amministratore del personale può modificare una determinata timbratura se:
  */
 rule AdminCanEditStamping
@@ -200,6 +186,20 @@ then
  $c.grant();
 end
 
+/*
+ * L'amministratore del personale può modificare una determinata timbratura se:
+ */
+rule AdminCanEditAbsence
+when
+ $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
+ $target: Absence()
+ Office(persons.contains($target.getOwner())) from $uro.office
+ $c: PermissionCheck(action in ("AbsenceGroups.save", "AbsenceGroups.edit", "AbsenceGroups.delete"),
+  target == $target, granted == false )
+then
+ $c.grant();
+end
+
 /* Azioni eseguibili da qualsiasi utente che abbiano come destinatario
  * dell'azione se stesso
  */
@@ -208,11 +208,8 @@ when
   $p: Person(this == currentOperator.person)
   $c: PermissionCheck(action not in (
       "Stampings.blank",
-      "Absences.blank",
-      "Absences.edit",
-      "Absences.delete",
-      "Absences.save"
-  ),target == $p, granted == false)
+      "AbsenceGroups.edit",
+      "AbsenceGroups.delete"),target == $p, granted == false)
 then
  $c.grant();
 end
@@ -238,10 +235,8 @@ when
   $o: Office() from $uro.office
   $c: PermissionCheck(action not in (
     "Stampings.blank",
-    "Absences.blank",
-    "Absences.edit",
-    "Absences.delete",
-    "Absences.save"), $o.persons contains target, granted == false)
+    "AbsenceGroups.edit",
+    "AbsenceGroups.delete"), $o.persons contains target, granted == false)
 then
  $c.grant();
 end
@@ -706,11 +701,6 @@ when
  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
  $c: PermissionCheck(action in (
 
- 		/*Metodi per la gestione delle assenze bypassando i controlli*/
- 		"Absences.forceAbsences",
- 		"Absences.forceRemoval",
- 		"Absences.forceInsert",
-
  		/* Vecchio permesso editPerson */
         "Persons.insertPerson",
 
@@ -772,10 +762,10 @@ when
         "MealTickets.mealTicketsLegacy",
 
         /* Vecchio permesso editPersonDay */
-		"Absences.blank",
-     	"Absences.save",
-     	"Absences.edit",
-     	"Absences.delete",
+        "AbsenceGroups.insert",
+        "AbsenceGroups.save",
+     	"AbsenceGroups.edit",
+     	"AbsenceGroups.delete",
      	"Absences.addAttach",
      	"Absences.removeAttach",
 
@@ -921,10 +911,8 @@ when
         "MealTickets.mealTicketsLegacy",
 
         /* Vecchio permesso editPersonDay */
- 		"Absences.blank",
-     	"Absences.save",
-     	"Absences.edit",
-     	"Absences.delete",
+     	"AbsenceGroups.edit",
+     	"AbsenceGroups.delete",
      	"Absences.addAttach",
      	"Absences.removeAttach",
 
@@ -1019,13 +1007,13 @@ end
 
 /************************************************************************************
  * L'amministratore può inserire le timbrature nel passato senza limiti (per ora)
- * il controllo che non sia una data futura viene fatta nell'action
+ * il controllo che non sia una data futura viene fatta nell'action (sulle stampings)
  ************************************************************************************/
-rule adminCanInsertStampings_inDate
+rule adminCanInsertStampingsAndAbsences_inDate
 when
  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
  $target: YearMonth()
- $c: PermissionCheck(action == "Stampings.blank", target == $target, granted == false)
+ $c: PermissionCheck(action in ("AbsenceGroups.insert", "Stampings.blank"), target == $target, granted == false)
 then
  $c.grant();
 end
@@ -1099,11 +1087,8 @@ when
     "Stampings.edit",
     "Stampings.save",
     "Stampings.delete",
-    "Absences.blank",
-    "Absences.edit",
-    "Absences.delete",
-    "Absences.save"
- ), granted == false, target == null)
+    "AbsenceGroups.edit",
+    "AbsenceGroups.delete"), granted == false, target == null)
 then
  $c.grant();
 end

@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 
 import lombok.Getter;
 
+import models.Person;
 import models.PersonDay;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.base.BaseModel;
@@ -229,5 +230,14 @@ public class Absence extends BaseModel {
       }
     }
     return true;
+  }
+
+  /**
+   * Fondamentale per far funzionare alcune drools
+   * @return Restituisce il proprietario della timbratura
+   */
+  @Transient
+  public Person getOwner() {
+    return personDay.person;
   }
 }
