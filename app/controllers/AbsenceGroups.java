@@ -190,10 +190,13 @@ public class AbsenceGroups extends Controller {
     
     rules.checkIfPermitted(person);
 
+    groupAbsenceType = groupAbsenceType.firstOfChain();
+    
     AbsenceForm categorySwitcher = absenceService
         .buildForCateogorySwitch(person, from, groupAbsenceType);
-
+    
     PeriodChain periodChain = absenceService.residual(person, categorySwitcher.groupSelected, from);
+    
     
     final User currentUser = Security.getUser().get();
     boolean isAdmin = false;

@@ -64,6 +64,10 @@ public class GroupAbsenceType extends BaseModel {
   @OneToMany(mappedBy = "nextGroupToCheck", fetch = FetchType.LAZY)
   public Set<GroupAbsenceType> previousGroupChecked;
 
+  /**
+   * Label.
+   * @return label
+   */
   public String getLabel() {
     if (this.chainDescription != null) {
       return this.chainDescription;
@@ -72,12 +76,30 @@ public class GroupAbsenceType extends BaseModel {
     }
   }
   
+  /**
+   * La stringa che rappresenta la catena cui appartiene il gruppo.
+   * @return chainDescription
+   */
   public String getChainDescription() {
     if (this.chainDescription != null) {
       return this.chainDescription;
     } else {
       return this.description;
     }
+  }
+  
+  /**
+   * Il primo gruppo della catena (quando ho un modo univoco di raggiungerlo).
+   * @return primo gruppo
+   */
+  public GroupAbsenceType firstOfChain() {
+    if (this.previousGroupChecked.isEmpty()) {
+      return this; 
+    }
+    if (this.previousGroupChecked.size() == 1) {
+      return this.previousGroupChecked.iterator().next().firstOfChain();
+    }
+    return this;
   }
   
   public enum PeriodType {
