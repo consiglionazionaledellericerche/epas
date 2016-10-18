@@ -234,7 +234,7 @@ public class Absence extends BaseModel {
 
   /**
    * Fondamentale per far funzionare alcune drools
-   * @return Restituisce il proprietario della timbratura
+   * @return Restituisce il proprietario della timbratura.
    */
   public Person getOwner() {
     return personDay.person;

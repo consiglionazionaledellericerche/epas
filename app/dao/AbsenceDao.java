@@ -168,6 +168,14 @@ public class AbsenceDao extends DaoBase {
     }
   }
 
+  /**
+   *
+   * @param person La persona della quale recuperare le assenze
+   * @param fromDate La data iniziale dell'intervallo temporale da considerare
+   * @param toDate   La data finale dell'intervallo temporale da considerare (opzionale)
+   * @param absenceType Il tipo di assenza specifico
+   * @return La lista delle assenze sull'intervallo e la persona specificati.
+   */
   public ModelQuery.SimpleResults<Absence> findByPersonAndDate(Person person,
       LocalDate fromDate, Optional<LocalDate> toDate, Optional<AbsenceType> absenceType) {
 
@@ -256,7 +264,6 @@ public class AbsenceDao extends DaoBase {
         .orderBy(absence.personDay.person.id.asc(), absence.personDay.date.asc());
     return query.list(absence);
   }
-
 
 
   /**

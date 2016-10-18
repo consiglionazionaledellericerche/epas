@@ -30,7 +30,7 @@ import javax.inject.Inject;
  * @since 05/07/16.
  */
 @Slf4j
-public class chartJob extends Job<List<RenderResult>> {
+public class ChartJob extends Job<List<RenderResult>> {
 
   private Person person;
   private List<ResultFromFile> list;
@@ -38,12 +38,21 @@ public class chartJob extends Job<List<RenderResult>> {
   @Inject
   static AbsenceDao absenceDao;
 
-  public chartJob(Person person, List<ResultFromFile> list) {
+  /**
+   * Costruttore
+   * @param person Persona
+   * @param list   Lista delle assenze estratte dallo schedone annuale delle assenze.
+   */
+  public ChartJob(Person person, List<ResultFromFile> list) {
     super();
     this.person = person;
     this.list = list;
   }
 
+  /**
+   *
+   * @return La lista delle assenze parsate dallo schedone delle assenze annuali.
+   */
   public List<RenderResult> doJobWithResult() {
     List<RenderResult> resultList = Lists.newArrayList();
 
