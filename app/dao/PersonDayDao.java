@@ -8,8 +8,11 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
+import lombok.extern.slf4j.Slf4j;
+
 import models.Person;
 import models.PersonDay;
+import models.Stamping;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
 import models.query.QPersonDay;
@@ -27,6 +30,7 @@ import javax.persistence.EntityManager;
 /**
  * @author dario.
  */
+@Slf4j
 public class PersonDayDao extends DaoBase {
 
   @Inject
@@ -118,9 +122,18 @@ public class PersonDayDao extends DaoBase {
     final QPersonDay personDay = QPersonDay.personDay;
     final QStamping stamping = QStamping.stamping;
 
-    build(person, begin, end, orderedDesc, onlyIsTicketAvailable)
-        .leftJoin(personDay.stampings, stamping).fetch()
-        .list(personDay);
+    JPQLQuery query = build(person, begin, end, orderedDesc, onlyIsTicketAvailable);
+    query = query.leftJoin(personDay.stampings, stamping).fetch();
+    
+    log.info(query.toString());
+    List<PersonDay> personDays = query.list(personDay);
+    
+    if (!personDays.isEmpty()) {
+      int occur = 0;
+      for (Stamping stamp : personDays.iterator().next().getStampings()){
+        log.info("{} - {}", occur++, stamp.toString());
+      }
+    }
 
     final QPersonDayInTrouble troubles = QPersonDayInTrouble.personDayInTrouble;
 
