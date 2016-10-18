@@ -1,9 +1,11 @@
 <td class="assenza default-single">
-  #{secure.link @AbsenceGroups.insert(dayRecap.personDay.person.id, dayRecap.personDay.date?.format()),
+  #{secure.check 'AbsenceGroups.insert', target: yearMonth }
+    #{secure.link @AbsenceGroups.insert(dayRecap.personDay.person.id, dayRecap.personDay.date?.format()),
       target:person, display:'hidden', 'data-async-modal':'#modalGroupAbsence'}
       __
 
-  #{/secure.link}
+    #{/secure.link}
+  #{/secure.check}
 
   #{list items:dayRecap.personDay.absences, as:'absence'}
     
@@ -15,7 +17,7 @@
     
 	      #{absences.absence-popover absence:absence, person:person, noLabel:true /}
 	      
-	      #{secure.link @Absences.edit('absence.id':absence.id), target: absence, 'data-async-modal':'#modalAbsence'}
+	      #{secure.link @AbsenceGroups.edit(absence.id), target: absence, 'data-async-modal':'#modalAbsence'}
 	      
 	      <span webui-popover-hover data-url="#${absence.id}"
 	      
