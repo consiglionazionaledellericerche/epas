@@ -209,8 +209,7 @@ when
   $p: Person(this == currentOperator.person)
   $c: PermissionCheck(action not in (
       "Stampings.blank",
-      "AbsenceGroups.edit",
-      "AbsenceGroups.delete"),target == $p, granted == false)
+      "AbsenceGroups.insert"),target == $p, granted == false)
 then
  $c.grant();
 end
@@ -912,8 +911,6 @@ when
         "MealTickets.mealTicketsLegacy",
 
         /* Vecchio permesso editPersonDay */
-     	"AbsenceGroups.edit",
-     	"AbsenceGroups.delete",
      	"Absences.addAttach",
      	"Absences.removeAttach",
 
@@ -1088,6 +1085,7 @@ when
     "Stampings.edit",
     "Stampings.save",
     "Stampings.delete",
+    "AbsenceGroups.insert",
     "AbsenceGroups.edit",
     "AbsenceGroups.delete"), granted == false, target == null)
 then
@@ -1098,14 +1096,14 @@ end
 /************************************************************************************
  * Un dipendente può autocertificare le proprie timbrature per il lavoro fuori Sede se...
  ***********************************************************************************/
-rule employeeCanInsertStampingsOffsite
+rule employeeCanInsertStampingsAndAbsencesOffsite
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
  PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
- $c: PermissionCheck(action == "Stampings.blank", target == $p, granted == false)
+ $c: PermissionCheck(action in ("AbsenceGroups.insert","Stampings.blank"), target == $p, granted == false)
 then
  $c.grant();
 end
@@ -1185,7 +1183,7 @@ when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
  $target: YearMonth()
- $c: PermissionCheck(action == "Stampings.blank", target == $target, granted == false)
+ $c: PermissionCheck(action in("AbsenceGroups.insert", "Stampings.blank"), target == $target, granted == false)
  /** non più indietro di 2 mesi fa e solo nei mesi non ancora inviati sugli attestati **/
  eval($target.isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target))
 then

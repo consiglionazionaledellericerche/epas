@@ -1,10 +1,10 @@
 <td class="assenza default-single">
   #{secure.check 'AbsenceGroups.insert', target: yearMonth }
-    #{secure.link @AbsenceGroups.insert(dayRecap.personDay.person.id, dayRecap.personDay.date?.format()),
-      target:person, display:'hidden', 'data-async-modal':'#modalGroupAbsence'}
+    #{secure.check 'AbsenceGroups.insert',  target:person}
+    <a href="@{AbsenceGroups.insert(dayRecap.personDay.person.id, dayRecap.personDay.date?.format())}" data-async-modal="#modalGroupAbsence">
       __
-
-    #{/secure.link}
+    </a>
+    #{/secure.check}
   #{/secure.check}
 
   #{list items:dayRecap.personDay.absences, as:'absence'}
@@ -38,7 +38,6 @@
 		  #{/secure.link}
     
     #{/else}
-    
 
     #{if absence.absenceFile.exists()}
       #{secure.link @Absences.downloadAttachment(absence.id), fa:'paperclip'}#{/secure.link}
