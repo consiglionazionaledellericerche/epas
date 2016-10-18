@@ -42,10 +42,10 @@ public class SecurityRules {
 
   @Inject
   SecurityRules(Provider<Optional<User>> user,
-                @Named("request.action") Provider<String> action,
-                Provider<KnowledgeBase> knowledgeBase,
-                @Named(SecurityModule.REQUESTS_CHECKS)
-                Provider<Map<PermissionCheckKey, Boolean>> checks) {
+      @Named("request.action") Provider<String> action,
+      Provider<KnowledgeBase> knowledgeBase,
+      @Named(SecurityModule.REQUESTS_CHECKS)
+          Provider<Map<PermissionCheckKey, Boolean>> checks) {
     currentUser = user;
     currentAction = action;
     knowledge = knowledgeBase;
@@ -139,6 +139,7 @@ public class SecurityRules {
     commands.add(CommandFactory.newInsert(check));
     commands.add(CommandFactory.newInsert(check.getTarget()));
     commands.add(CommandFactory.newInsert(user));
+    commands.add(CommandFactory.newInsertElements(user.roles));
     commands.add(CommandFactory.newInsertElements(user.usersRolesOffices));
     session.execute(CommandFactory.newBatchExecution(commands));
 

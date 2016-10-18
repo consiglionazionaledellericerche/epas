@@ -2,55 +2,56 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Monte ore straordinario'  /}
 
-#{competences.competencesTabs activeAction:'totalOvertimeHours' /}
- 
- <div class="container">
+<div class="container">
 
-	 #{title title:'Monte Ore ' + year + ' per Straordinari ' + office.name, color:'primary' /}
+  #{title title:'Monte Ore ' + year + ' per Straordinari ' + office.name, color:'primary' /}
 
+  #{include './_tabs.html' /}
 
-	 #{alert color:'info'}
-		<p>Gestione del monte ore per straordinari per la sede <strong>${office.name}</strong></p>
-	    <p>
-	      Per aumentare il monte ore inserire il valore da sommare preceduto dal segno +.<br>
-	      Per diminuire il monte ore inserire il valore da sottrarre preceduto dal segno -.
-        </p>
-   		#{/alert}
-   		
-        #{form @Competences.saveOvertime()}
+  #{alert color:'info'}
+  <p>Gestione del monte ore per straordinari per la sede <strong>${office.name}</strong></p>
+  <p>
+    Per aumentare il monte ore inserire il valore da sommare preceduto dal segno +.<br>
+    Per diminuire il monte ore inserire il valore da sottrarre preceduto dal segno -.
+  </p>
+  #{/alert}
 
-          <input type="hidden" name="year" value="${year}"/>
-          <input type="hidden" name="officeId" value="${office.id}"/>
-	
-          #{if totalList.size()!=0}
-            <table class="table table-condensed table-hover">
-	          <tr>
-	            <th>Quando</th>
-	            <th>Ore definite</th>
-	          </tr>
-		      #{list items:totalList, as:'tot'}
-	          <tr>
-	            <td>${tot.date?.format()}</td>
-	            <td>${tot.numberOfHours}</td>
-	          </tr>
-	          #{/list}
-	          
-	          <tr class="success">
-	            <td><strong>Totale monte ore definite</strong></td>
-	            <td><strong>${totale}</strong></td>
-	          
-	          </tr>
-            </table>
-	      #{/if}
-		  <div class="center">
-		    <input type="text" name="numeroOre"/>
-            <input type="submit" value="Salva"/>
-		  </div>	    	    
-  
-        #{/form}
+  #{if totalList.size()!=0}
+  <table class="table table-condensed table-hover">
+    <tr>
+      <th>Quando</th>
+      <th>Ore definite</th>
+    </tr>
+    #{list items:totalList, as:'tot'}
+    <tr>
+      <td>${tot.date?.format()}</td>
+      <td>${tot.numberOfHours}</td>
+    </tr>
+    #{/list}
 
+    <tr class="success">
+      <td><strong>Totale monte ore definite</strong></td>
+      <td><strong>${totale}</strong></td>
 
- </div>
+    </tr>
+  </table>
+  #{/if}
+
+  #{secure.check 'Competences.saveOvertime'}
+  #{form @Competences.saveOvertime()}
+
+  <input type="hidden" name="year" value="${year}"/>
+  <input type="hidden" name="officeId" value="${office.id}"/>
+
+  <div class="center">
+    <input type="text" name="numeroOre"/>
+    <input type="submit" value="Salva"/>
+  </div>
+
+  #{/form}
+  #{/secure.check}
+
+</div>
 
 
 

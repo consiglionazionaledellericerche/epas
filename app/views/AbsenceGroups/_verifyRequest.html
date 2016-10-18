@@ -1,0 +1,25 @@
+*{ verify request }* 
+	#{form action:@AbsenceGroups.insert(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit',
+	'data-async':'#absenceData', 'data-async-error':'#absenceData' }
+	
+       #{f.hidden 'personId', value:absenceForm.person.id /}
+       
+       #{f.hidden 'from', value:absenceForm.from?.format() /}
+       #{if alldaySelected }
+         #{f.hidden 'to', value:absenceForm.to?.format() /}
+       #{/if}
+	   
+	   #{f.hidden 'groupAbsenceType.id', value:absenceForm.groupSelected.id /}
+	   #{f.hidden 'absenceType.id', value:absenceForm.absenceTypeSelected?.id /}
+	   #{f.hidden 'justifiedType.id', value:absenceForm.justifiedTypeSelected.id /}
+	   
+	   *{ seleziona minuti }*    
+       #{if absenceForm.hasHourMinutesChoice() }
+         #{f.input 'hours', value:absenceForm.hours /}
+         #{f.input 'minutes', value:absenceForm.minutes /}
+       #{/if}
+       
+	   *{ #{b.buttons center:true}
+         #{b.submit 'Verifica', color:'warning'/}
+       #{/b.buttons} }*
+	 #{/form}

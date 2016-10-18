@@ -2,13 +2,13 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione buoni pasto'  /}
 
-#{mealTickets.mealTicketsTabs activeAction:'recapMealTickets' /}
+
 
 <div class="container">
 
   #{title title:'Riepilogo Buoni Pasto ' + templateUtility.monthName(month) + ' ' + year + ' ' + office.name, administration:true /}
 
-
+	#{include './_tabs.html' /}
   
     *{
     // TODO ripristinare se serve il pannello di riepilgo dei buoni inseriti nell'ultima action.

@@ -1,4 +1,6 @@
- 
+  
+  #{if flash.error || flash.success}
+    <div id="flashDiv">
     #{if flash.error}
     <div class="sr-only" data-notify="${'notify.error'.label()}" data-notify-type="error">
       &{flash.error}
@@ -8,3 +10,5 @@
       &{flash.success}
     </div>
     #{/if}
+    </div>
+  #{/if}  

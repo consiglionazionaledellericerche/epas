@@ -53,7 +53,8 @@ import javax.inject.Inject;
 /**
  * Wizard per la configurazione iniziale di ePAS.
  * TODO: il wizard non è più mantenuto nella parte di salvataggio della configurazione iniziale.
- *  Se si vuole riabilitare utilizzare la nuova gestione della configurazione. 
+ * Se si vuole riabilitare utilizzare la nuova gestione della configurazione.
+ *
  * @author daniele
  */
 @Slf4j
@@ -121,18 +122,18 @@ public class Wizard extends Controller {
       try {
         properties = new Properties();
         properties.load(new FileInputStream("conf/Wizard_Properties.conf"));
-      } catch (IOException f) {
+      } catch (IOException ex) {
         log.error("Impossibile caricare il file Wizard_Properties.conf per la procedura di Wizard");
       }
       Cache.safeAdd(PROPERTIES_KEY, properties, "10mn");
     }
 
     int stepsCompleted = Collections2.filter(steps, new Predicate<WizardStep>() {
-        @Override
-        public boolean apply(WizardStep step) {
-          return step.completed;
-        }
-      }).size();
+      @Override
+      public boolean apply(WizardStep step) {
+        return step.completed;
+      }
+    }).size();
 
     percent = stepsCompleted * (100 / steps.size());
 
@@ -144,8 +145,8 @@ public class Wizard extends Controller {
       try {
         properties.store(new FileOutputStream("conf/Wizard_Properties.conf"), "Wizard values file");
         Logger.info("Salvato file Wizard_Properties.conf");
-      } catch (IOException e) {
-        flash.error(e.getMessage());
+      } catch (IOException ex) {
+        flash.error(ex.getMessage());
       }
     }
 
@@ -172,12 +173,11 @@ public class Wizard extends Controller {
 
   /**
    * Step 1 del Wizard, cambio password Admin.
-   *
    */
   public static void changeAdminPsw(
       int stepIndex, @Required String adminPassword,
       @Required @Equals(value = "adminPassword", message = "Le password non corrispondono")
-      String adminPasswordRetype) {
+          String adminPasswordRetype) {
 
     if (validation.hasErrors()) {
       params.flash();
@@ -284,8 +284,8 @@ public class Wizard extends Controller {
   public static void seatManagerRole(int stepIndex, Person person, @Required int qualification,
       @Required LocalDate beginDate, LocalDate endContract,
       @Required String managerPassword,
-      @Required @Equals(value = "managerPassword",  message = "Le password non corrispondono")
-      String managerPasswordRetype) {
+      @Required @Equals(value = "managerPassword", message = "Le password non corrispondono")
+          String managerPasswordRetype) {
 
     validation.required(person.name);
     validation.required(person.surname);
@@ -358,15 +358,16 @@ public class Wizard extends Controller {
     Properties properties = new Properties();
     try {
       properties.load(new FileInputStream("conf/Wizard_Properties.conf"));
-    } catch (IOException f) {
+    } catch (IOException ex) {
       Logger.error("Impossibile caricare il file Wizard_Properties.conf durante il Wizard");
     }
 
     //  Creazione admin
-    User adminUser = new User();
-    adminUser.username = Role.ADMIN;
-    adminUser.password = Codec.hexMD5(properties.getProperty("adminPassword"));
-    adminUser.save();
+    // TODO meglio spostare la creazione dell'admin al boot
+    //    User adminUser = new User();
+    //    adminUser.username = Role.ADMIN;
+    //    adminUser.password = Codec.hexMD5(properties.getProperty("adminPassword"));
+    //    adminUser.save();
 
     //  Creazione Istituto e Sede
 
@@ -394,40 +395,38 @@ public class Wizard extends Controller {
     //  Invalido la cache sul conteggio degli uffici
     Cache.safeDelete(Resecure.OFFICE_COUNT);
 
-//    List<String> lunchStart = Splitter.on(":").trimResults()
-//        .splitToList(properties.getProperty("lunchPauseStart"));
-//
-//    List<String> lunchStop = Splitter.on(":").trimResults()
-//        .splitToList(properties.getProperty("lunchPauseEnd"));
-//
-//    List<String> dateOfPatron = Splitter.on("/").trimResults()
-//        .splitToList(properties.getProperty("dateOfPatron"));
-//
-//    confGeneralManager.saveConfGeneral(Parameter.INIT_USE_PROGRAM, office,
-//        Optional.fromNullable(LocalDate.now().toString()));
-//
-//    confGeneralManager.saveConfGeneral(Parameter.DAY_OF_PATRON, office,
-//        Optional.fromNullable(dateOfPatron.get(0)));
-//
-//    confGeneralManager.saveConfGeneral(Parameter.MONTH_OF_PATRON, office,
-//        Optional.fromNullable(dateOfPatron.get(1)));
-//
-//    confGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_START_HOUR, office,
-//        Optional.fromNullable(lunchStart.get(0)));
-//
-//    confGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_START_MINUTE, office,
-//        Optional.fromNullable(lunchStart.get(1)));
-//
-//    confGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_END_HOUR, office,
-//        Optional.fromNullable(lunchStop.get(0)));
-//
-//    confGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_END_MINUTE, office,
-//        Optional.fromNullable(lunchStop.get(1)));
-//
-//    confGeneralManager.saveConfGeneral(Parameter.EMAIL_TO_CONTACT, office,
-//        Optional.fromNullable(properties.getProperty("emailToContact")));
-
-    officeManager.setSystemUserPermission(office);
+    //    List<String> lunchStart = Splitter.on(":").trimResults()
+    //        .splitToList(properties.getProperty("lunchPauseStart"));
+    //
+    //    List<String> lunchStop = Splitter.on(":").trimResults()
+    //        .splitToList(properties.getProperty("lunchPauseEnd"));
+    //
+    //    List<String> dateOfPatron = Splitter.on("/").trimResults()
+    //        .splitToList(properties.getProperty("dateOfPatron"));
+    //
+    //    confGeneralManager.saveConfGeneral(Parameter.INIT_USE_PROGRAM, office,
+    //        Optional.fromNullable(LocalDate.now().toString()));
+    //
+    //    confGeneralManager.saveConfGeneral(Parameter.DAY_OF_PATRON, office,
+    //        Optional.fromNullable(dateOfPatron.get(0)));
+    //
+    //    confGeneralManager.saveConfGeneral(Parameter.MONTH_OF_PATRON, office,
+    //        Optional.fromNullable(dateOfPatron.get(1)));
+    //
+    //    confGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_START_HOUR, office,
+    //        Optional.fromNullable(lunchStart.get(0)));
+    //
+    //    confGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_START_MINUTE, office,
+    //        Optional.fromNullable(lunchStart.get(1)));
+    //
+    //    confGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_END_HOUR, office,
+    //        Optional.fromNullable(lunchStop.get(0)));
+    //
+    //    confGeneralManager.saveConfGeneral(Parameter.MEAL_TIME_END_MINUTE, office,
+    //        Optional.fromNullable(lunchStop.get(1)));
+    //
+    //    confGeneralManager.saveConfGeneral(Parameter.EMAIL_TO_CONTACT, office,
+    //        Optional.fromNullable(properties.getProperty("emailToContact")));
 
     //Creazione persona Amministratore
 
@@ -437,7 +436,7 @@ public class Wizard extends Controller {
     person.email = properties.getProperty("personnelAdminEmail");
 
     person.qualification = qualificationDao.getQualification(Optional
-        .fromNullable(Integer.parseInt(properties.getProperty("personnelAdminQualification"))),
+            .fromNullable(Integer.parseInt(properties.getProperty("personnelAdminQualification"))),
         Optional.<Long>absent(), false).get(0);
 
     if (properties.containsKey("personnelAdminNumber")) {
@@ -477,9 +476,6 @@ public class Wizard extends Controller {
     User manager = userManager.createUser(person);
     manager.password = Codec.hexMD5(properties.getProperty("personnelAdminPassword"));
     manager.save();
-
-    //  Assegnamento dei permessi all'utente creato
-    officeManager.setSystemUserPermission(office);
 
     officeManager.setUro(manager, office, roleDao.getRoleByName(Role.PERSONNEL_ADMIN));
     officeManager.setUro(manager, office, roleDao.getRoleByName(Role.EMPLOYEE));

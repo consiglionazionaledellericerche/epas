@@ -137,9 +137,6 @@ public class Offices extends Controller {
       office.beginDate = new LocalDate(LocalDate.now().getYear() - 1, 12, 31);
       office.save();
 
-      // Per i permessi di developer e admin...
-      officeManager.setSystemUserPermission(office);
-
       // Configurazione iniziale di default ...
       configurationManager.updateConfigurations(office);
 

@@ -10,9 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import manager.recaps.charts.RenderResult;
 import manager.recaps.charts.ResultFromFile;
 
-import models.Absence;
-import models.AbsenceType;
 import models.Person;
+import models.absences.Absence;
+import models.absences.AbsenceType;
 import models.enumerate.CheckType;
 
 import org.joda.time.LocalDate;

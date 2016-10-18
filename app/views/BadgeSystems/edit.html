@@ -10,12 +10,12 @@
 
   #{title title:'Configurazione ' + badgeSystem.name /}
 
-  #{tabs}
-  #{tabItem id:'info', title:'Riepilogo', active:true /}
-  #{tabItem id:'badges', title:'Badge'/}
-  #{tabItem id:'advanced', title:'Avanzate'/}
-  #{tabItem id:'delete', title:'Elimina'/}
-  #{/tabs}
+  #{tabList}
+    #{tabItem id:'info', title:'Riepilogo', active:true /}
+    #{tabItem id:'badges', title:'Badge'/}
+    #{tabItem id:'advanced', title:'Avanzate'/}
+    #{tabItem id:'delete', title:'Elimina'/}
+  #{/tabList}
   <br>
 
   #{tabContent}

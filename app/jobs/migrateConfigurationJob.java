@@ -31,7 +31,7 @@ import javax.inject.Inject;
  * @since 14/07/16.
  */
 @Slf4j
-@OnApplicationStart(async = true)
+//@OnApplicationStart(async = true)
 public class migrateConfigurationJob extends Job {
 
   // La migrateConfiguration và rimossa (e con lei anche tabelle e compagnia inerenti la vecchia

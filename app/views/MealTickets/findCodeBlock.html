@@ -2,12 +2,12 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione buoni pasto'  /}
 
-#{mealTickets.mealTicketsTabs activeAction:'findCodeBlock' /}
-
 <div class="container">
 
   #{title title:'Ricerca Buoni Pasto', administration:true /}
-  
+
+	#{include './_tabs.html' /}
+
   #{alert color:'warning'}
     <p><strong>Ricerca nell'elenco dei blocchi inseriti.</strong></p>
   #{/alert}

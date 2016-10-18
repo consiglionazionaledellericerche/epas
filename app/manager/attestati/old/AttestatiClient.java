@@ -24,12 +24,12 @@ import lombok.extern.slf4j.Slf4j;
 
 import manager.PersonDayManager;
 
-import models.Absence;
 import models.CertificatedData;
 import models.Competence;
 import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
+import models.absences.Absence;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -156,8 +156,9 @@ public class AttestatiClient {
    * @throws MalformedURLException
    * @throws URISyntaxException
    */
-  public SessionAttestati login(String urlToPresence, String attestatiLogin, String attestatiPassword, 
-      SessionAttestati sessionAttestati, Office office, Integer year, Integer month) {
+  public SessionAttestati login(String urlToPresence, String attestatiLogin, 
+      String attestatiPassword, SessionAttestati sessionAttestati, Office office, 
+      Integer year, Integer month) {
 
     try {
       final URI baseUri = new URI(urlToPresence);
@@ -175,7 +176,8 @@ public class AttestatiClient {
             .url(loginUrl)
             .method(Method.POST).execute();
         
-        log.info("Effettuata la richiesta di login all'indirizzo {} come utente {}, codice di risposta http = {} e con messaggio {}.",
+        log.info("Effettuata la richiesta di login all'indirizzo {} come utente {}, "
+            + "codice di risposta http = {} e con messaggio {}.",
             loginUrl, attestatiLogin, loginResponse.statusCode(), loginResponse.statusMessage());
 
         Document loginDoc = loginResponse.parse();
@@ -186,7 +188,8 @@ public class AttestatiClient {
         if (loginMessages.isEmpty()
             || !loginMessages.first().ownText().contains("Login completata con successo.")) {
           //errore login
-          return new SessionAttestati(attestatiLogin, false, loginResponse.cookies(), office, year, month);
+          return new SessionAttestati(
+              attestatiLogin, false, loginResponse.cookies(), office, year, month);
         }
 
         sessionAttestati = new SessionAttestati(attestatiLogin,
@@ -234,7 +237,9 @@ public class AttestatiClient {
                   officeDips.size());
             }
           }
-        } catch(Exception e) {}
+        } catch (Exception ex) {
+          log.error("Eccezione durante il prelevamento dei dati da Attestati.", ex);
+        }
       }
       
       //Genero la lista degli anni per le sedi individuate ...
@@ -256,9 +261,9 @@ public class AttestatiClient {
 
       return sessionAttestati;
 
-    } catch (IOException e) {
+    } catch (IOException ex) {
       log.error("Errore durante la login e fetch informazioni sistema di invio degli attestati."
-          + " Eccezione = {}", e);
+          + " Eccezione = {}", ex);
     } catch (URISyntaxException e1) {
       log.error("Errore durante la login e fetch informazioni sistema di invio degli attestati."
           + " Eccezione = {}", e1);      
@@ -383,11 +388,11 @@ public class AttestatiClient {
     if (performSent) {
       connection.cookies(cookies);
       connection.userAgent(CLIENT_USER_AGENT)
-      .data("matr", dipendente.getMatricola())
-      .data("anno", year.toString())
-      .data("mese", month.toString())
-      .data("sede_id", office.codeId)
-      .method(Method.POST);
+        .data("matr", dipendente.getMatricola())
+        .data("anno", year.toString())
+        .data("mese", month.toString())
+        .data("sede_id", office.codeId)
+        .method(Method.POST);
     }
 
     // Invio le Assenze
@@ -543,10 +548,11 @@ public class AttestatiClient {
     List<RispostaElaboraDati> checks = Lists.newLinkedList();
 
     /**
-     * In questo punto devo mettere le chiamate rest per ciascuno dei parametri da inviare ad attestati:
-     * invece di inviare persona per persona tutte le informazioni, occorre inviare per ciascuna informazione
-     * (assenze, competenze, ore di formazione, buoni pasto) la lista dei dipendenti con le rispettive info
-     * come da documento inviato da pagano 
+     * In questo punto devo mettere le chiamate rest per ciascuno dei parametri da inviare ad 
+     * attestati: 
+     * invece di inviare persona per persona tutte le informazioni, occorre inviare per ciascuna 
+     * informazione (assenze, competenze, ore di formazione, buoni pasto) la lista dei dipendenti
+     * con le rispettive info come da documento inviato da pagano 
      * 
      */
     for (Dipendente dipendente : dipendenti) {

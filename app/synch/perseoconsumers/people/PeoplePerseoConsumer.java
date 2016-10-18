@@ -53,8 +53,8 @@ public class PeoplePerseoConsumer {
       url = PerseoApis.getPersonForEpasEndpoint() + perseoId;
       user = PerseoApis.getPerseoUser();
       pass = PerseoApis.getPerseoPass();
-    } catch (NoSuchFieldException e) {
-      final String error = String.format("Parametro necessario non trovato: %s", e.getMessage());
+    } catch (NoSuchFieldException ex) {
+      final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
       log.error(error);
       throw new ApiRequestException(error);
     }
@@ -78,8 +78,8 @@ public class PeoplePerseoConsumer {
         log.info("Recuperato Json contenente la Persona con id {} da Perseo", perseoId);
         try {
           return new Gson().fromJson(response.getJson(), PerseoPerson.class);
-        } catch (JsonSyntaxException e) {
-          final String error = String.format("Errore nel parsing del json: %s", e.getMessage());
+        } catch (JsonSyntaxException ex) {
+          final String error = String.format("Errore nel parsing del json: %s", ex.getMessage());
           log.warn(error);
           throw new ApiRequestException(error);
         }
@@ -106,8 +106,8 @@ public class PeoplePerseoConsumer {
       }
       user = PerseoApis.getPerseoUser();
       pass = PerseoApis.getPerseoPass();
-    } catch (NoSuchFieldException e) {
-      final String error = String.format("Parametro necessario non trovato: %s", e.getMessage());
+    } catch (NoSuchFieldException ex) {
+      final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
       log.error(error);
       throw new ApiRequestException(error);
     }
@@ -133,8 +133,8 @@ public class PeoplePerseoConsumer {
         try {
           return new Gson().fromJson(response.getJson(), new TypeToken<List<PerseoPerson>>() {
           }.getType());
-        } catch (JsonSyntaxException e) {
-          final String error = String.format("Errore nel parsing del json: %s", e.getMessage());
+        } catch (JsonSyntaxException ex) {
+          final String error = String.format("Errore nel parsing del json: %s", ex.getMessage());
           log.warn(error);
           throw new ApiRequestException(error);
         }
@@ -198,9 +198,9 @@ public class PeoplePerseoConsumer {
     List<PerseoPerson> perseoPeople = Lists.newArrayList();
     try {
       perseoPeople = perseoPeople(departmentPerseoId).get();
-    } catch (InterruptedException | ExecutionException e) {
+    } catch (InterruptedException | ExecutionException ex) {
       String error = String.format("Impossibile recuperare le persone da Perseo - %s",
-          e.getMessage());
+          ex.getMessage());
       log.error(error);
       throw new ApiRequestException(error);
     }
@@ -234,9 +234,9 @@ public class PeoplePerseoConsumer {
     PerseoPerson perseoPerson = null;
     try {
       perseoPerson = perseoPerson(personPerseoId).get();
-    } catch (InterruptedException | ExecutionException e) {
+    } catch (InterruptedException | ExecutionException ex) {
       String error = String.format("Impossibile recuperare la persona con id %d da Perseo - %s",
-          personPerseoId, e.getMessage());
+          personPerseoId, ex.getMessage());
       log.error(error);
       throw new ApiRequestException(error);
     }

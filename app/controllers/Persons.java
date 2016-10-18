@@ -361,7 +361,7 @@ public class Persons extends Controller {
       render("@changePassword",vecchiaPassword, nuovaPassword, confermaPassword, user);
     }
 
-    User user = userDao.getUserByUsernameAndPassword(Security.getUser().get().username,
+    final User user = userDao.getUserByIdAndPassword(Security.getUser().get().id,
         Optional.of(Codec.hexMD5(vecchiaPassword)));
 
     if (user == null) {

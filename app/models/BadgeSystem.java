@@ -31,6 +31,8 @@ import javax.persistence.Table;
 @Audited
 public class BadgeSystem extends BaseModel {
 
+  private static final long serialVersionUID = -2530079366642292082L;
+
   @Unique
   @NotNull
   @Required

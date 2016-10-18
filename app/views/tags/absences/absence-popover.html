@@ -1,0 +1,130 @@
+*{
+  absence l'assenza da visionare
+  groupSelected Se voglio stampare la situazione relativa ad un gruppo. In quel caso oltre al popover stampo
+                la lable. Se null siamo nel tabellone timbrature.
+  remainingTroubles: copia runtime degli errori calcolati
+}*
+
+ %{
+   if (_absence.id == null) {
+     id = _absence.absenceDate.year + _absence.absenceDate.monthOfYear + _absence.absenceType.id; 
+   } else {
+     id = _absence.id;
+   }
+ 
+ }%
+ 
+ #{if !_noLabel}
+	 #{if _groupSelected}
+	   <span class="
+	   #{if templateUtility.isTakableOnly(_absence.absenceType, _groupSelected)} text-success #{/if}
+	   #{elseif templateUtility.isReplacingCode(_absence.absenceType, _groupSelected)} text-default  #{/elseif}
+	   #{elseif templateUtility.isComplationCode(_absence.absenceType, _groupSelected)} text-success #{/elseif}
+	   #{else} text-info #{/else} 
+	   " webui-popover-hover data-url="#${id}"><strong>${_absence.absenceType.code}</strong></span>   
+	 #{/if}
+	 #{else}
+	   <span class="text-default" webui-popover-hover data-url="#${id}"><strong>${_absence.absenceType.code}</strong></span>
+	 #{/else}
+ #{/if}
+ 
+ <div class="webui-popover-content" id="${id}">
+    
+    
+   *{ visualizzare la lista }*
+   %{
+     if (_remainingTroubles || !_absence.troubles.empty) {
+       hasTroubles = true;
+     }
+     involvedGroups = templateUtility.involvedGroupAbsenceType(_absence.absenceType);
+     if ( _person && !involvedGroups.empty) {
+       hasGroups = true;
+     }
+       
+   }%
+      
+    
+   #{secure.check 'AbsenceGroups.edit'}
+    #{if _absence.absenceType.internalUse }
+      <p>
+        <span class="fa-stack fa-lg">
+          <i class="fa fa-paper-plane-o fa-stack-1x"></i>
+          <i class="fa fa-ban fa-stack-2x text-danger"></i>
+        </span>
+        <strong class="text-success">Il codice ${_absence.absenceType.code} è ad 
+        uso interno ePAS e non verrà inviato ad attestati.</strong>
+      </p>
+    #{/if}
+    #{else}
+      <p>
+        <span class="fa-stack fa-lg">
+          <i class="fa fa-paper-plane-o fa-stack-1x"></i>
+        </span>
+        <strong class="text-success">Il codice ${_absence.absenceType.code} verrà inviato ad attestati.</strong>
+      </p>
+    #{/else}
+   #{/secure.check}
+  
+  <ul class="list-group">
+   
+   #{if hasTroubles || hasGroups } <li class="list-group-item"> #{/if}
+
+    <strong>Codice</strong> <strong>${_absence.absenceType.code}</strong><br>
+    <strong>Descrizione</strong> ${_absence.absenceType.description}<br>  
+    <strong>Data</strong> ${_absence.absenceDate.format()}<br>
+    #{absences.justifiedTime absence:_absence /}<br>
+
+   #{if hasTroubles || hasGroups } </li> #{/if}
+   
+   
+   
+   #{if hasGroups}
+      #{list items:involvedGroups, as:'group'}
+        <li class="list-group-item"> 
+        <strong>Gruppo</strong><br> 
+	        %{ groupVerified = false; }%
+	        #{list items:_absence.replacingAbsences(group), as:'replacing' }
+	          %{ groupVerified = true; }%
+	          #{if replacing.absenceType.internalUse }
+	            TODO: codice di completamento interno. Definire la visualizzazione.
+	          #{/if}
+	          #{else}
+	            ${group.description}
+	            <a href="@{AbsenceGroups.groupStatus('groupAbsenceType.id':group.id, 'personId':_person.id, 'from':_absence.getAbsenceDate().format())}"> Riepilogo <i class="fa fa-external-link" aria-hidden="true"></i></a><br>
+	            #{secure.check 'AbsenceGroups.edit'}
+	            <span class="fa-stack fa-lg"><i class="fa fa-paper-plane-o fa-stack-1x"></i></span>
+	            <strong class="text-success">In questa data il codice di completamento ${replacing.absenceType.code} verrà inviato ad attestati.</strong>
+	            #{/secure.check}
+	          #{/else}
+	        #{/list}
+	        #{if !groupVerified }
+              ${group.description} 
+	          <a href="@{AbsenceGroups.groupStatus('groupAbsenceType.id':group.id, 'personId':_person.id, 'from':_absence.getAbsenceDate().format())}"> Riepilogo <i class="fa fa-external-link" aria-hidden="true"></i></a>
+	        #{/if}
+	    </li>   
+      #{/list}
+    #{/if}
+    
+    
+    
+    #{if hasTroubles}
+      <li class="list-group-item list-group-item-danger">
+      <strong class="text-danger"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Errori</strong><br>
+      #{if _remainingTroubles }
+        #{list items:_remainingTroubles, as:'trouble'}
+          &{trouble.trouble}<br>
+        #{/list}
+      #{/if}
+      #{elseif !_absence.troubles.empty}
+        #{list items:_absence.troubles, as:'trouble'}
+          &{trouble.trouble}<br>
+        #{/list}
+       #{/elseif}
+     </li>
+    #{/if}
+     
+   </ul>
+
+  </div>
+
+   

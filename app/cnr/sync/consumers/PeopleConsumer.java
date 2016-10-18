@@ -26,6 +26,11 @@ public class PeopleConsumer {
   private static final String PEOPLE_ENDPOINT = Play.configuration
       .getProperty("perseo.rest.people");
 
+  /**
+   * @param id
+   * @return il ListenableFuture contenete la persona prelevata via REST da perseo.
+   * @throws IllegalStateException nel caso la persona non si trovata.
+   */
   public ListenableFuture<PersonDto> getPerson(int id) throws IllegalStateException {
 
     ListenableFuture<WS.HttpResponse> future = JdkFutureAdapters

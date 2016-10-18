@@ -69,7 +69,7 @@ public class Security extends Secure.Security {
     Logger.trace("Richiesta getUser(), username=%s", username);
 
     //db
-    User user = userDao.getUserByUsernameAndPassword(username, Optional.<String>absent());
+    User user = userDao.byUsername(username);
 
     Logger.trace("User.find('byUsername'), username=%s, e' %s", username, user);
     if (user == null) {
@@ -99,18 +99,17 @@ public class Security extends Secure.Security {
     }
   }
 
-  static Object invoke(String m, Object... args) throws Throwable {
-
+  static Object invoke(String method, Object... args) throws Throwable {
     try {
-      return Java.invokeChildOrStatic(Security.class, m, args);
-    } catch (InvocationTargetException e) {
-      throw e.getTargetException();
+      return Java.invokeChildOrStatic(Security.class, method, args);
+    } catch (InvocationTargetException ex) {
+      throw ex.getTargetException();
     }
   }
 
   /**
    * @return Vero se c'è almeno un istituto abilitato dall'ip contenuto nella richiesta HTTP
-   * ricevuta, false altrimenti.
+   *        ricevuta, false altrimenti.
    */
   public static boolean checkForWebstamping() {
 

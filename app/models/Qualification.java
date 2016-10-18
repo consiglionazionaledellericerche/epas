@@ -1,5 +1,6 @@
 package models;
 
+import models.absences.AbsenceType;
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -15,6 +16,8 @@ import javax.persistence.Table;
 
 
 /**
+ * Qualifiche CNR (livello 1, 2, 3, 4, ...).
+ * 
  * @author dario
  */
 @Entity

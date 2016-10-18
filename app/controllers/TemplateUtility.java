@@ -11,6 +11,7 @@ import com.google.common.collect.Sets;
 import dao.AbsenceTypeDao;
 import dao.BadgeReaderDao;
 import dao.BadgeSystemDao;
+import dao.CompetenceCodeDao;
 import dao.MemoizedCollection;
 import dao.MemoizedResults;
 import dao.NotificationDao;
@@ -20,6 +21,7 @@ import dao.QualificationDao;
 import dao.RoleDao;
 import dao.UserDao;
 import dao.WorkingTimeTypeDao;
+import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 
 import helpers.jpa.ModelQuery;
@@ -29,10 +31,12 @@ import it.cnr.iit.epas.DateUtility;
 import manager.SecureManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
+import manager.services.absences.web.AbsenceForm.AbsenceInsertTab;
 
-import models.AbsenceType;
 import models.BadgeReader;
 import models.BadgeSystem;
+import models.CompetenceCode;
+import models.CompetenceCodeGroup;
 import models.Institute;
 import models.Notification;
 import models.Office;
@@ -42,18 +46,22 @@ import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
+import models.absences.AbsenceType;
+import models.absences.AmountType;
+import models.absences.GroupAbsenceType;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.CodesForEmployee;
+import models.enumerate.StampTypes;
 
 import org.joda.time.LocalDate;
-
-import synch.diagnostic.SynchDiagnostic;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+
+import synch.diagnostic.SynchDiagnostic;
 
 /**
  * Metodi usabili nel template.
@@ -75,9 +83,11 @@ public class TemplateUtility {
   private final BadgeSystemDao badgeSystemDao;
   private final SynchDiagnostic synchDiagnostic;
   private final ConfigurationManager configurationManager;
+  private final CompetenceCodeDao competenceCodeDao;
 
   private final MemoizedCollection<Notification> notifications;
   private final MemoizedCollection<Notification> archivedNotifications;
+  private final AbsenceComponentDao absenceComponentDao;
 
   @Inject
   public TemplateUtility(
@@ -86,6 +96,7 @@ public class TemplateUtility {
       RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao,
       IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao,
       SynchDiagnostic synchDiagnostic, ConfigurationManager configurationManager,
+      CompetenceCodeDao competenceCodeDao, AbsenceComponentDao absenceComponentDao,
       NotificationDao notificationDao, UserDao userDao) {
 
     this.secureManager = secureManager;
@@ -100,7 +111,9 @@ public class TemplateUtility {
     this.badgeSystemDao = badgeSystemDao;
     this.synchDiagnostic = synchDiagnostic;
     this.configurationManager = configurationManager;
+    this.competenceCodeDao = competenceCodeDao;
     this.userDao = userDao;
+    this.absenceComponentDao = absenceComponentDao;
 
     notifications = MemoizedResults
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
@@ -213,6 +226,18 @@ public class TemplateUtility {
     return badgeReaderDao.getBadgeReaderByOffice(person.office);
   }
 
+  public List<CompetenceCode> allCodeList() {
+    return competenceCodeDao.getAllCompetenceCode();
+  }
+
+  public List<CompetenceCode> allCodesWithoutGroup() {
+    return competenceCodeDao.getCodeWithoutGroup();
+  }
+
+  public List<CompetenceCode> allCodesContainingGroupCodes(CompetenceCodeGroup group) {
+    return competenceCodeDao.allCodesContainingGroupCodes(group);
+  }
+
   /**
    * Gli user associati a tutte le persone appartenenti all'istituto.
    */
@@ -238,6 +263,14 @@ public class TemplateUtility {
     }
 
     return users;
+  }
+
+  /**
+   * @return Una lista delle persone assegnabili ad un certo utente dall'operatore corrente
+   */
+  public List<PersonDao.PersonLite> assignablePeople() {
+    return personDao.peopleInOffices(secureManager
+        .officesTechnicalAdminAllowed(Security.getUser().get()));
   }
 
   public List<Role> rolesAssignable(Office office) {
@@ -280,6 +313,22 @@ public class TemplateUtility {
   }
 
   /**
+   * @return tutti i ruoli presenti.
+   */
+  public List<Role> getRoles() {
+    return roleDao.getAll();
+  }
+
+  /**
+   * @return tutti gli uffici sul quale l'utente corrente ha il ruolo di TECHNICAL_ADMIN.
+   */
+  public List<Office> getTechnicalAdminOffices() {
+    return secureManager.officesTechnicalAdminAllowed(Security.getUser().get())
+        .stream().sorted((o, o1) -> o.name.compareTo(o1.name))
+        .collect(Collectors.toList());
+  }
+
+  /**
    * Gli uffici che l'user può assegnare come owner ai BadgeReader. Il super admin può assegnarlo ad
    * ogni ufficio.
    */
@@ -295,7 +344,7 @@ public class TemplateUtility {
       return offices;
     }
 
-    if (user.get().isSuperAdmin()) {
+    if (user.get().isSystemUser()) {
       return officeDao.getAllOffices();
     }
 
@@ -339,6 +388,7 @@ public class TemplateUtility {
         Optional.<BadgeReader>absent()).list();
   }
 
+
   public List<BadgeSystem> getConfiguredBadgeSystems(Office office) {
     List<BadgeSystem> configuredBadgeSystem = Lists.newArrayList();
     for (BadgeSystem badgeSystem : office.badgeSystems) {
@@ -369,10 +419,33 @@ public class TemplateUtility {
     }
   }
 
+  public List<AbsenceType> getAbsenceTypes(AbsenceInsertTab absenceInsertTab) {
+    if (absenceInsertTab.equals(AbsenceInsertTab.vacation)) {
+      return absenceTypeDao.absenceTypeCodeSet((Set)Sets.newHashSet(
+          AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode(),
+          AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode(),
+          AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode(),
+          AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode(),
+          AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()));
+    }
+    if (absenceInsertTab.equals(AbsenceInsertTab.compensatory)) {
+      return absenceTypeDao.absenceTypeCodeSet((Set)Sets.newHashSet(
+          AbsenceTypeMapping.RIPOSO_COMPENSATIVO.getCode()));
+    }
+    return Lists.newArrayList();
+  }
+
+  public Set<GroupAbsenceType> involvedGroupAbsenceType(AbsenceType absenceType) {
+    return absenceComponentDao.involvedGroupAbsenceType(absenceType, true);
+  }
+
   public boolean hasAdminRole() {
     return userDao.hasAdminRoles(Security.getUser().get());
   }
 
+  public List<StampTypes> getStampTypes() {
+    return UserDao.getAllowedStampTypes(Security.getUser().get());
+  }
 
   /**
    * L'istanza del wrapperFactory disponibile nei template.
@@ -397,5 +470,119 @@ public class TemplateUtility {
 
   public MemoizedCollection<Notification> getArchivedNotifications() {
     return archivedNotifications;
+  }
+
+  //FIXME metodo provvisorio per fare le prove.
+  public String printAmount(int amount, AmountType amountType) {
+    String format = "";
+    if (amountType.equals(AmountType.units)) {
+      if (amount == 0) {
+        return "0%";// giorno lavorativo";
+      }
+      //      int units = amount / 100;
+      //      int percent = amount % 100;
+      //      String label = " giorni lavorativi";
+      //      if (units == 1) {
+      //        label = " giorno lavorativo";
+      //      }
+      //      if (units > 0 && percent > 0) {
+      //        return units + label + " + " + percent + "% di un giorno lavorativo";
+      //      } else if (units > 0) {
+      //        return units + label;
+      //      } else if (percent > 0) {
+      //        return percent + "% di un giorno lavorativo";
+      //      }
+      return amount + "%";
+    }
+    if (amountType.equals(AmountType.minutes)) {
+      if (amount == 0) {
+        return "0 minuti";
+      }
+      int hours = amount / 60; //since both are ints, you get an int
+      int minutes = amount % 60;
+
+      if (hours > 0 && minutes > 0) {
+        format = hours + " ore " + minutes + " minuti";
+      } else if (hours > 0) {
+        format = hours + " ore";
+      } else if (minutes > 0) {
+        format = minutes + " minuti";
+      }
+    }
+    return format;
+  }
+
+  public boolean isReplacingCode(AbsenceType absenceType, GroupAbsenceType group) {
+    if (group.complationAbsenceBehaviour != null
+        && group.complationAbsenceBehaviour.replacingCodes.contains(absenceType)) {
+      return true;
+    }
+    return false;
+  }
+
+
+  public boolean isComplationCode(AbsenceType absenceType, GroupAbsenceType group) {
+    if (group.complationAbsenceBehaviour != null
+        && group.complationAbsenceBehaviour.complationCodes.contains(absenceType)) {
+      return true;
+    }
+    return false;
+  }
+
+  public boolean isTakableOnly(AbsenceType absenceType, GroupAbsenceType group) {
+    if (group.takableAbsenceBehaviour != null
+        && group.takableAbsenceBehaviour.takableCodes.contains(absenceType)
+        && !isComplationCode(absenceType, group)) {
+      return true;
+    }
+    return false;
+  }
+  
+  /**
+   * Formatta l'ammontare nell'amountType fornito.
+   * @param amount ammontare
+   * @param amountType amountType
+   * @return string
+   */
+  public String formatAmount(int amount, AmountType amountType) {
+    if (amountType == null) {
+      return "";
+    }
+    String format = "";
+    if (amountType.equals(AmountType.units)) {
+      if (amount == 0) {
+        return "0 giorni";// giorno lavorativo";
+      }
+      int units = amount / 100;
+      int percent = amount % 100;
+      String label = " giorni lavorativi";
+      if (units == 1) {
+        label = " giorno lavorativo";
+      }
+      if (units > 0 && percent > 0) {
+        return units + label + " + " + percent + "% di un giorno lavorativo";  
+      } else if (units > 0) {
+        return units + label;
+      } else if (percent > 0) {
+        return percent + "% di un giorno lavorativo";
+      }
+      return ((double)amount / 100 )+ " giorni";
+    }
+    if (amountType.equals(AmountType.minutes)) {
+      if (amount == 0) {
+        return "0 minuti";
+      }
+      int hours = amount / 60; //since both are ints, you get an int
+      int minutes = amount % 60;
+
+      if (hours > 0 && minutes > 0) {
+        format = hours + " ore " + minutes + " minuti";
+      } else if (hours > 0) {
+        format = hours + " ore";
+      } else if (minutes > 0) {
+        format = minutes + " minuti";
+      }
+    }
+    return format;
   }
 }

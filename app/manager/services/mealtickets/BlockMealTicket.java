@@ -124,16 +124,16 @@ public class BlockMealTicket {
   public int getLast() {
     return this.mealTickets.get(this.mealTickets.size() - 1).number;
   }
-  
+
   /**
    * Se l'istanza contiene tutti blocchi returned. Blocchi misti non sono permessi e causano
    * una eccezione.
-   * @return
+   * @return Se l'istanza contiene tutti blocchi returned, false altrimenti.
    */
   public boolean isReturned() {
     boolean returned = this.mealTickets.get(0).returned;
-    for(MealTicket mealTicket : this.mealTickets) {
-        Verify.verify(mealTicket.returned == returned);
+    for (MealTicket mealTicket : this.mealTickets) {
+      Verify.verify(mealTicket.returned == returned);
     }
     return returned;
   }

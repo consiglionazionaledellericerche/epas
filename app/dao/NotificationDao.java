@@ -34,7 +34,7 @@ public class NotificationDao {
   public ModelQuery.SimpleResults<Notification> listUnreadFor(User operator) {
     final QNotification qn = QNotification.notification;
     return ModelQuery.wrap(queryFactory.from(qn)
-        .where(qn.destination.eq(operator), qn.read.isFalse())
+        .where(qn.recipient.eq(operator), qn.read.isFalse())
         .orderBy(qn.createdAt.desc()), qn);
   }
 
@@ -49,7 +49,7 @@ public class NotificationDao {
   public ModelQuery.SimpleResults<Notification> listFor(User operator, boolean archived) {
     final QNotification qn = QNotification.notification;
     return ModelQuery.wrap(queryFactory.from(qn)
-        .where(qn.destination.eq(operator), qn.read.eq(archived))
+        .where(qn.recipient.eq(operator), qn.read.eq(archived))
         .orderBy(qn.createdAt.desc()), qn);
   }
 }

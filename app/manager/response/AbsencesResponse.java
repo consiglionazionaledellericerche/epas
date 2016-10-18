@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFilter;
 
 import helpers.rest.JacksonModule;
 
-import models.Absence;
+import models.absences.Absence;
 
 import org.joda.time.LocalDate;
 
@@ -34,8 +34,9 @@ public class AbsencesResponse {
   public static final String PERSONDAY_PRECEDENTE_NON_PRESENTE =
       "Nessun personday per il giorno precedente a quando si intende inserire il codice con "
       + "allegato. Verificare";
-  public static final String CODICE_NON_UTILIZZABILE = "Il codice di assenza non è utilizzabile poichè "
-      + "la qualifica della persona non è presente tra quelle che possono utilizzare il codice";
+  public static final String CODICE_NON_UTILIZZABILE = "Il codice di assenza non è utilizzabile "
+      + "poichè la qualifica della persona non è presente tra quelle che possono utilizzare il "
+      + "codice";
 
   private LocalDate date;
   private String absenceCode;
@@ -44,6 +45,7 @@ public class AbsencesResponse {
   private boolean isHoliday = false;
   private boolean isDayInReperibilityOrShift = false;
   private Absence absenceAdded;
+  private Absence absenceInError;
 
   public AbsencesResponse(LocalDate date, String absenceCode) {
     this.date = date;
@@ -111,6 +113,14 @@ public class AbsencesResponse {
 
   public void setAbsenceAdded(Absence absenceAdded) {
     this.absenceAdded = absenceAdded;
+  }
+  
+  public Absence getAbsenceInError() {
+    return absenceInError;
+  }
+
+  public void setAbsenceInError(Absence absenceInError) {
+    this.absenceInError = absenceInError;
   }
 
   public enum toDate implements Function<AbsencesResponse, LocalDate> {

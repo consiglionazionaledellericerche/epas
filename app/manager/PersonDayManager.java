@@ -13,7 +13,6 @@ import dao.PersonShiftDayDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperPersonDay;
 
-import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +22,6 @@ import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import manager.services.PairStamping;
 
-import models.Absence;
-import models.Contract;
-import models.ContractWorkingTimeType;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
@@ -34,6 +30,8 @@ import models.Stamping;
 import models.Stamping.WayType;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
+import models.absences.Absence;
+import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.StampTypes;
@@ -84,8 +82,18 @@ public class PersonDayManager {
    * @return esito
    */
   public boolean isAllDayAbsences(PersonDay pd) {
-
+    
     for (Absence abs : pd.absences) {
+      
+      if (abs.justifiedType != null) {
+        if (abs.justifiedType.name.equals(JustifiedTypeName.all_day) 
+            || abs.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) {
+          return true;
+          
+        }
+        continue;
+      }
+          
       // TODO: per adesso il telelavoro lo considero come giorno lavorativo
       // normale. Chiedere ai romani.
       // TODO: il telelavoro è giorno di lavoro da casa, quindi non giustifica 
@@ -114,6 +122,19 @@ public class PersonDayManager {
     // Calcolo i minuti giustificati dalle assenze.
     int justifiedTime = 0;
     for (Absence abs : pd.getValue().absences) {
+
+      if (abs.justifiedType != null) {
+        if (abs.justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
+          justifiedTime = justifiedTime + abs.justifiedMinutes;
+          continue;
+        }
+        if (abs.justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
+          justifiedTime = justifiedTime + abs.absenceType.justifiedTime;
+          continue;
+        }
+        continue;
+      }
+      
       if (abs.absenceType.justifiedTimeAtWork.minutes != null) {
         justifiedTime = justifiedTime + abs.absenceType.justifiedTimeAtWork.minutes;
       }
@@ -250,6 +271,39 @@ public class PersonDayManager {
 
     return gapPairs;
   }
+  
+  public int shortPermissionTime(PersonDay personDay) {
+    
+    if (!StampTypes.PERMESSO_BREVE.isActive()) {
+      return 0;
+    }
+    
+    List<PairStamping> validPairs = computeValidPairStampings(personDay);
+    
+    List<PairStamping> allGapPairs = Lists.newArrayList();
+    
+    //1) Calcolare tutte le gapPair (fattorizzare col metodo del pranzo)
+    PairStamping previous = null;
+    for (PairStamping validPair : validPairs) {
+      if (previous != null) {
+        if ((previous.second.stampType == null
+            || StampTypes.PERMESSO_BREVE.equals(previous.second.stampType))
+            && (validPair.first.stampType == null
+            || StampTypes.PERMESSO_BREVE.equals(validPair.first.stampType))) {
+
+          allGapPairs.add(new PairStamping(previous.second, validPair.first));
+        }
+      }
+      previous = validPair;
+    }
+    
+    int gapTime = 0;
+    for (PairStamping gapPair : allGapPairs) {
+      gapTime+= gapPair.timeInPair;
+    }
+    
+    return gapTime;
+  }
 
   /**
    * Calcolo del tempo a lavoro e del buono pasto.
@@ -267,6 +321,63 @@ public class PersonDayManager {
 
     for (Absence abs : personDay.getAbsences()) {
 
+      if (abs.justifiedType != null) {
+
+        if (abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
+          cleanTimeAtWork(personDay);
+          personDay.setTimeAtWork(wttd.workingTime);
+          return personDay;
+        }
+        
+        //Questo e' il caso del codice 105BP che garantisce sia l'orario di lavoro che il buono pasto
+        // TODO: se è il 105BP perchè non controllo direttamente il codice? Mistero della fede.
+        if (abs.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) {
+          cleanTimeAtWork(personDay);
+          setTicketStatusIfNotForced(personDay, true);
+          personDay.setTimeAtWork(wttd.workingTime);
+          return personDay;
+        }
+        
+        // Caso di assenza giornaliera.
+        if (abs.justifiedType.name.equals(JustifiedTypeName.all_day)) {
+          cleanTimeAtWork(personDay);
+          setTicketStatusIfNotForced(personDay, false);
+          personDay.setTimeAtWork(0);
+          return personDay;
+        }
+        
+        // Mezza giornata giustificata.
+        if (abs.justifiedType.name.equals(JustifiedTypeName.half_day)) {
+          personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
+              + (wttd.workingTime / 2));
+          continue;
+        }
+        
+        // #######
+        //  Assenze non giornaliere da cumulare ....
+
+        // Giustificativi grana minuti
+        if (abs.justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
+          personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal() + abs.justifiedMinutes);
+          continue;
+        }
+        
+        // Giustificativi grana ore (discriminare per calcolo buono o no)
+        if (abs.justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
+          if (abs.absenceType.timeForMealTicket) {
+            personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal()
+                + abs.absenceType.justifiedTime);
+          } else {
+            personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
+                + abs.absenceType.justifiedTime);
+          }
+          continue;
+        }
+        
+        
+        continue;
+      }
+      
       // #######
       // Assenze che interrompono il ciclo e azzerano quanto calcolato nelle precedenti.
 
