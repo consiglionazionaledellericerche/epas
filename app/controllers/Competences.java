@@ -10,6 +10,7 @@ import com.google.common.collect.Table;
 import com.beust.jcommander.internal.Lists;
 import com.mysema.query.SearchResults;
 
+import dao.CertificationDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
@@ -39,6 +40,8 @@ import manager.recaps.competence.PersonMonthCompetenceRecapFactory;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 
+import models.CertificatedData;
+import models.Certification;
 import models.Competence;
 import models.CompetenceCode;
 import models.CompetenceCodeGroup;
@@ -102,7 +105,11 @@ public class Competences extends Controller {
   private static PersonStampingRecapFactory stampingsRecapFactory;
   @Inject
   private static PersonReperibilityDayDao reperibilityDao;
-
+  @Inject
+  private static CertificationDao certificationDao;
+  @Inject
+  private static PersonMonthRecapDao pmrDao;
+  
 
 
   /**
@@ -319,16 +326,28 @@ public class Competences extends Controller {
    * @param month il mese di riferimento
    */
   public static void saveNewCompetenceConfiguration(List<Long> codeListIds,
-      Long personId, int year, int month) {
+      Long personId, int year, int month, LocalDate date) {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
-    LocalDate date = new LocalDate(year, month, 1);
+    if (date == null) {
+      date = new LocalDate(year, month, 1);
+    }
+    
+    List<Certification> certificationList = certificationDao.personCertifications(person, year, month);
+    CertificatedData certificatedData = pmrDao.getPersonCertificatedData(person, month, year);
+    if (!certificationList.isEmpty() || certificatedData != null) {
+      flash.error("Non si può modificare una configurazione per un anno/mese in cui "
+          + "sono già stati inviati gli attestati");
+      Competences.enabledCompetences(date.getYear(),
+          date.getMonthOfYear(),person.office.id);
+    }
+    
     List<PersonCompetenceCodes> pccList = competenceCodeDao
         .listByPerson(person, Optional.fromNullable(date));
     List<CompetenceCode> codeToAdd = competenceManager.codeToSave(pccList, codeListIds);
     List<CompetenceCode> codeToRemove = competenceManager.codeToDelete(pccList, codeListIds);
-
+    
     competenceManager.persistChanges(person, codeToAdd, codeToRemove, date);
 
     flash.success(String.format("Aggiornate con successo le competenze per %s",

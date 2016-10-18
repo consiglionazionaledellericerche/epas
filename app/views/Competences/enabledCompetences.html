@@ -4,7 +4,7 @@
 
 <div class="container">
 
-	#{title title:'Competenze abilitate ' + office.name, color:'primary' /}
+	#{title title:'Competenze abilitate nel mese di ' + templateUtility.monthName(month) + ' ' + year + ' ' + ' per ' + office.name, color:'primary' /}
 
 	#{include './_tabs.html' /}
 
@@ -38,7 +38,7 @@
  	       		<span class="label label-success" webui-popover-hover data-content="&{'beginCompetenceCode'}">${dto.code.code} - ${dto.code.description}</span>
  	       	#{/elseif}
  	       	#{else}
- 	       		<span class="label label-primary">${dto.code.code} - ${dto.code.description}</span>
+ 	       		<span class="label label-primary" webui-popover-hover data-content="Attivo da: ${dto.beginDate.format()}">${dto.code.code} - ${dto.code.description}</span>
  	       	#{/else}
 
        #{/list}
