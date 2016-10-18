@@ -94,6 +94,7 @@ when
 
      	/* Situazione Mensile */
      	"Stampings.stampings",
+     	"AbsenceGroups.groupStatus", 
 
      	/* Assenze mensili */
      	"Absences.absences",
@@ -203,7 +204,7 @@ end
 /* Azioni eseguibili da qualsiasi utente che abbiano come destinatario
  * dell'azione se stesso
  */
-rule HasRightOnHimself
+rule HasRightOnHimselfExceptFor
 when
   $p: Person(this == currentOperator.person)
   $c: PermissionCheck(action not in (
@@ -235,8 +236,7 @@ when
   $o: Office() from $uro.office
   $c: PermissionCheck(action not in (
     "Stampings.blank",
-    "AbsenceGroups.edit",
-    "AbsenceGroups.delete"), $o.persons contains target, granted == false)
+    "AbsenceGroups.insert"), $o.persons contains target, granted == false)
 then
  $c.grant();
 end
@@ -763,6 +763,7 @@ when
 
         /* Vecchio permesso editPersonDay */
         "AbsenceGroups.insert",
+        "AbsenceGroups.groupStatus",
         "AbsenceGroups.save",
      	"AbsenceGroups.edit",
      	"AbsenceGroups.delete",

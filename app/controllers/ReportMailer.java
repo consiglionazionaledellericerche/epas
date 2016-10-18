@@ -61,7 +61,6 @@ public class ReportMailer extends Mailer {
   @Inject
   static UserDao userDao;
 
-
   /**
    * Costruisce e invia il report agli utenti indicati nella configurazione.
    *
@@ -75,12 +74,8 @@ public class ReportMailer extends Mailer {
 
     if (user.isPresent() && !userDao.hasAdminRoles(user.get())) {
       if (user.get().person != null) {
-        // A partire dagli userRoleOffices dell'ufficio della persona recupero gli indirizzi email
-        // degli amministrativi.....un pò brutto così?
-        dests = user.get().person.office.usersRolesOffices.stream()
-            .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN))
-            .map(uro -> uro.user).filter(u -> u.person != null).map(u -> u.person.email)
-            .collect(Collectors.toList());
+        dests = userDao.getUsersWithRoles(user.get().person.office, Role.PERSONNEL_ADMIN).stream()
+            .filter(u -> u.person != null).map(u -> u.person.email).collect(Collectors.toList());
       }
     } else {
       dests = COMMAS.splitToList(Play.configuration

@@ -34,7 +34,7 @@
 		 #{/f.selectModel}
 	 #{/if}
 	 #{else}
-	   #{f.hidden 'absenceType.id', value:absenceForm.theOnlyAbsenceType() /}
+	   #{f.hidden 'absenceType.id', value:absenceForm.theOnlyAbsenceType().id /}
 	   *{ #{f.view 'absenceType', value:absenceForm.theOnlyAbsenceType() /} }*
 	 #{/else}
    

@@ -6,12 +6,14 @@
 
 #{title title:periodChain.person.fullname + ' - Controllo assenze con limiti e completamenti' /}
   
-  %{ 
+  #{if isAdmin}
+    %{ 
      absenceForm = categorySwitcher;
      changeFrom = true;
      dataAsync = '#page_content';
-  }%
-  #{include './_selectGroup.html' /}
+    }%
+    #{include './_selectGroup.html' /}
+  #{/if}
     
   #{if periodChain.containsCriticalErrors()}
     #{alert color:'danger'}
@@ -58,8 +60,6 @@
            <i class="fa fa-exclamation-circle" aria-hidden="true"></i> Rimangono 
            <strong><span class="text-success">${templateUtility.formatAmount(absencePeriod.getRemainingAmount(), absencePeriod.takeAmountType)}</span></strong>
            da utilizzare entro il <strong class="text-success">${absencePeriod.to.format()}</strong>
-           
-
        #{/if}
      </p> 
      
@@ -113,8 +113,15 @@
   #{/list}
   
   </ul>
-  
-  <a class="btn btn-primary" href="@{Stampings.personStamping(periodChain.person.id, from.year, from.monthOfYear)}"><i class="fa fa-hand-o-left" aria-hidden="true"></i> Torna alle timbrature del mese</a>
+
+  *{ torna a timbrature stampings vs personStampings }*  
+  <a class="btn btn-primary" href=
+  #{if isAdmin}
+   "@{Stampings.personStamping(periodChain.person.id, from.year, from.monthOfYear)}"
+  #{/if}#{else}
+   "@{Stampings.stampings(from.year, from.monthOfYear)}"
+  #{/else}
+  ><i class="fa fa-hand-o-left" aria-hidden="true"></i> Torna alle timbrature del mese</a>
 
     
 </div>
