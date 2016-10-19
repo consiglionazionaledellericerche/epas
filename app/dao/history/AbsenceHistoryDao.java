@@ -14,7 +14,7 @@ import java.util.List;
 
 
 /**
- * @author marco
+ * @author marco.
  */
 public class AbsenceHistoryDao {
 
@@ -25,6 +25,11 @@ public class AbsenceHistoryDao {
     this.auditReader = auditReader;
   }
 
+  /**
+   *
+   * @param absenceId id dell'assenza della quale recuperare lo storico
+   * @return La lista delle revisioni relative all'assenza specificata.
+   */
   @SuppressWarnings("unchecked")
   public List<HistoryValue<Absence>> absences(long absenceId) {
 

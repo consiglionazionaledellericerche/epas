@@ -125,17 +125,6 @@ public class AbsenceEngineUtility {
         }
         if (justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
           return Lists.newArrayList();
-//          Integer minuteKey = absenceType.justifiedTime;
-//          Integer count = specificMinutesFinded.get(minuteKey);
-//          if (count == null) {
-//            specificMinutesFinded.put(minuteKey, 1);
-//          } else {
-//            count++;
-//            if (count > 1) {
-//              specificMinutesDenied = true;
-//            }
-//            specificMinutesFinded.put(minuteKey, count);
-//          }
         }
       }
     }

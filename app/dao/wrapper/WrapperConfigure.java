@@ -4,7 +4,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 
 /**
- * @author marco
+ * @author marco.
  */
 public class WrapperConfigure extends AbstractModule {
 

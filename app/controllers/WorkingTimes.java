@@ -158,13 +158,12 @@ public class WorkingTimes extends Controller {
     render(wtt, cwttList, office);
 
   }
-
   /**
    *
-   * @param officeId
+   * @param officeId id ufficio
    * @param compute
-   * @param name
-   * @param workingTimeTypePattern
+   * @param name nome identificativo dell'orario di lavoro
+   * @param workingTimeTypePattern tipo di orario di lavoro (orizzontale/verticale).
    */
   public static void insertWorkingTimeBaseInformation(Long officeId, boolean compute,
       String name, WorkingTimeTypePattern workingTimeTypePattern) {
@@ -255,15 +254,14 @@ public class WorkingTimes extends Controller {
     }
     return daysProcessed;
   }
-
   /**
    *
-   * @param officeId
-   * @param name
-   * @param step
-   * @param switchDay
-   * @param submit
-   * @param vwt
+   * @param officeId id Ufficio proprietario
+   * @param name nome dell'orario di lavoro
+   * @param step numero dello step di creazione dell'orario verticale
+   * @param switchDay passaggio da un giorno all'altro in fase di creazione
+   * @param submit  booleano per completare la procedura
+   * @param vwt Orario di lavoro verticale.
    */
   public static void insertVerticalWorkingTime(Long officeId, @Required String name, int step,
       boolean switchDay, boolean submit, @Valid VerticalWorkingTime vwt) {

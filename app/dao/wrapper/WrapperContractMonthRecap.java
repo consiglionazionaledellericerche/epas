@@ -9,7 +9,7 @@ import models.ContractMonthRecap;
 import org.joda.time.YearMonth;
 
 /**
- * @author alessandro
+ * @author alessandro.
  */
 public class WrapperContractMonthRecap implements IWrapperContractMonthRecap {
 
