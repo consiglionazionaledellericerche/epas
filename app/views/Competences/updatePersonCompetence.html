@@ -4,8 +4,7 @@
 		Cliccando all'interno della finestra sottostante, selezionare le competenze che si intendono assegnare al 
 		dipendente o eventualmente rimuovere
 		quelle in precedenza assegnate e non più valide.<br>
-		Specificando una data, la configurazione verrà salvata alla data specificata, altrimenti verrà salvata al 
-		primo giorno del mese selezionato.<br>
+		
 	#{/alert}
 	#{alert color: 'warning'}
 		<i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 
@@ -18,7 +17,7 @@
 
   #{f.selectModels 'codeListIds',
   items:templateUtility.allCodeList(), placeholder:'I codici di competenza' /}
-  #{f.date 'date' /}
+  
 
   #{if person?.persistent}
     	#{f.hidden 'personId', value:person.id /}
