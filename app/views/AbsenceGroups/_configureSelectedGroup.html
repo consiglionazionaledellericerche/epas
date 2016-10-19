@@ -41,5 +41,11 @@
      #{if absenceForm.hasJustifiedTypeChoice() }
        #{f.selectModel 'justifiedType', items:absenceForm.justifiedTypes, value:absenceForm.justifiedTypeSelected /}
      #{/if}
+     
+     *{ seleziona minuti }*    
+     #{if absenceForm.hasHourMinutesChoice() }
+       #{f.selectEnum 'hours', items:absenceForm.selectableHours(), value:absenceForm.hours, byEquals:'true' /}
+       #{f.selectEnum 'minutes', items:absenceForm.selectableMinutes(), value:absenceForm.minutes, byEquals:'true' /}
+     #{/if}
          
 	#{/form}
