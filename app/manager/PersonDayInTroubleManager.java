@@ -137,19 +137,27 @@ public class PersonDayInTroubleManager {
 
     log.info("Invio mail troubles per i giorni dal {} al {}. I troubles considerati sono {}.", 
         fromDate, toDate, troubleCausesToSend);
-    
+    int noContract = 0;
+    int noWantEmail = 0;
+    int officeDisabled = 0;
+    int tr = 0;
+    int total = 0;
     for (Person person : personList) {
 
       // FIXME ma non viene già fatto nella query?? PersonDao -> riga 673
       // Controllo se la persona ha attualmente un contratto attivo ...
       Optional<Contract> currentContract = factory.create(person).getCurrentContract();
       if (!currentContract.isPresent()) {
+        log.info("PERSONA SCARTATA PER CONTRATTO NON PRESENTE {}", person);
+        noContract++;
         continue;
       }
       
       // Controllo se la persona desidera ricevere le e-mails ...
       
       if (!person.wantEmail) {
+        log.info("PERSONA SCARTATA PER WantEmail false {}", person);
+        noWantEmail++;
         log.info("Non verrà inviata la mail a {} in quanto il suo campo di invio mail è false",
             person.getFullname());
         continue;
@@ -159,81 +167,97 @@ public class PersonDayInTroubleManager {
         log.info("Non verrà inviata la mail a {} in quanto "
             + "la sua sede {} ha invio mail disabilitato",
             person.getFullname(), person.office.name);
+        log.info("PERSONA SCARTATA PER OfficeDisabled false {}", person);
+        officeDisabled++;
         continue;
       }
-   
+
       if (person.surname.equals("Conti") && person.name.equals("Marco")) {
         continue;
       }
 
-      DateInterval intervalToCheck = DateUtility.intervalIntersection(
-          factory.create(currentContract.get()).getContractDateInterval(),
-          new DateInterval(fromDate, toDate));
-
-      List<PersonDayInTrouble> pdList = personDayInTroubleDao.getPersonDayInTroubleInPeriod(person, 
-          Optional.fromNullable(intervalToCheck.getBegin()), 
-          Optional.fromNullable(intervalToCheck.getEnd()));
-
-      // Selezione dei personDayInTroubles da inviare ...
-      
-      List<LocalDate> troublesDateToSend = Lists.newArrayList();
-      
-      for (PersonDayInTrouble pdt : pdList) {
-
-        if (pdt.personDay.isHoliday) {
-          continue;
-        }
-        
-        Optional<ContractStampProfile> csp = currentContract.get()
-            .getContractStampProfileFromDate(pdt.personDay.date);
-        if (csp.isPresent() && csp.get().fixedworkingtime == true) {
-          continue;
-        }
-
-        if (troubleCausesToSend.contains(pdt.cause)) {
-          troublesDateToSend.add(pdt.personDay.date);
-        }
-      }
-      
-      if (troublesDateToSend.isEmpty()) {
-        log.info("{} non ha problemi da segnalare.", person.getFullname());
+      if (person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")
+          && person.qualification.qualification <= 3) {
+        log.info("PERSONA SCARTATA perchè TR {}", person);
+        tr++;
         continue;
       }
-      
-      try {
 
-        // Invio della e-mail ...
+      total++;
+//      DateInterval intervalToCheck = DateUtility.intervalIntersection(
+//          factory.create(currentContract.get()).getContractDateInterval(),
+//          new DateInterval(fromDate, toDate));
+//
+//      List<PersonDayInTrouble> pdList = personDayInTroubleDao.getPersonDayInTroubleInPeriod(person,
+//          Optional.fromNullable(intervalToCheck.getBegin()),
+//          Optional.fromNullable(intervalToCheck.getEnd()));
+//
+//      // Selezione dei personDayInTroubles da inviare ...
+//
+//      List<LocalDate> troublesDateToSend = Lists.newArrayList();
+//
+//      for (PersonDayInTrouble pdt : pdList) {
+//
+//        if (pdt.personDay.isHoliday) {
+//          continue;
+//        }
+//
+//        Optional<ContractStampProfile> csp = currentContract.get()
+//            .getContractStampProfileFromDate(pdt.personDay.date);
+//        if (csp.isPresent() && csp.get().fixedworkingtime == true) {
+//          continue;
+//        }
+//
+//        if (troubleCausesToSend.contains(pdt.cause)) {
+//          troublesDateToSend.add(pdt.personDay.date);
+//        }
+//      }
+//
+//      if (troublesDateToSend.isEmpty()) {
+//        log.info("{} non ha problemi da segnalare.", person.getFullname());
+//        continue;
+//      }
+//
+//      try {
+//
+//        // Invio della e-mail ...
+//
+//        log.info("Preparo invio mail per {}", person.getFullname());
+//        SimpleEmail simpleEmail = new SimpleEmail();
+//        String reply = (String)configurationManager
+//            .configValue(person.office, EpasParam.EMAIL_TO_CONTACT);
+//
+//        if (!reply.isEmpty()) {
+//          simpleEmail.addReplyTo(reply);
+//        }
+//        simpleEmail.addTo(person.email);
+//        simpleEmail.setSubject("ePas Controllo timbrature");
+//        simpleEmail.setMsg(troubleEmailBody(person, troublesDateToSend, troubleCausesToSend));
+//        Mail.send(simpleEmail);
+//
+//        log.info("Inviata mail a {} contenente le date da controllare : {}",
+//            person.getFullname(), troublesDateToSend);
+//
+//        // Imposto il campo e-mails inviate ...
+//        for (PersonDayInTrouble pd : pdList) {
+//          pd.emailSent = true;
+//          pd.save();
+//        }
 
-        log.info("Preparo invio mail per {}", person.getFullname());
-        SimpleEmail simpleEmail = new SimpleEmail();
-        String reply = (String)configurationManager
-            .configValue(person.office, EpasParam.EMAIL_TO_CONTACT);
-        
-        if (!reply.isEmpty()) {
-          simpleEmail.addReplyTo(reply);
-        }
-        simpleEmail.addTo(person.email);
-        simpleEmail.setSubject("ePas Controllo timbrature");
-        simpleEmail.setMsg(troubleEmailBody(person, troublesDateToSend, troubleCausesToSend));
-        Mail.send(simpleEmail);
-
-        log.info("Inviata mail a {} contenente le date da controllare : {}",
-            person.getFullname(), troublesDateToSend);
-
-        // Imposto il campo e-mails inviate ...
-        for (PersonDayInTrouble pd : pdList) {
-          pd.emailSent = true;
-          pd.save();
-        }
-
-      } catch (Exception e) {
-
-        log.error("sendEmailToPerson({}, {}, {}): fallito invio email per {}",
-                new Object[]{troublesDateToSend, person, troubleCausesToSend, 
-                    person.getFullname()});
-        log.error(e.getStackTrace().toString());
-      }
+//      } catch (Exception e) {
+//
+//        log.error("sendEmailToPerson({}, {}, {}): fallito invio email per {}",
+//                new Object[]{troublesDateToSend, person, troubleCausesToSend,
+//                    person.getFullname()});
+//        log.error(e.getStackTrace().toString());
+//      }
     }
+
+    log.info("NOCONTRAT {}", noContract);
+    log.info("NO WANT EMAIL {}", noWantEmail);
+    log.info("OFFICE DISABLED {}", officeDisabled);
+    log.info("TR {}", tr);
+    log.info("TOTAL {}", total);
   }
   
   /**

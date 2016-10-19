@@ -19,6 +19,8 @@ import helpers.jpa.ModelQuery.SimpleResults;
 
 import it.cnr.iit.epas.DateInterval;
 
+import manager.configurations.EpasParam;
+
 import models.BadgeReader;
 import models.CompetenceCode;
 import models.Contract;
@@ -26,9 +28,11 @@ import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.query.QBadge;
+import models.query.QConfiguration;
 import models.query.QContract;
 import models.query.QContractStampProfile;
 import models.query.QContractWorkingTimeType;
+import models.query.QOffice;
 import models.query.QPerson;
 import models.query.QPersonCompetenceCodes;
 import models.query.QPersonDay;
@@ -220,7 +224,14 @@ public final class PersonDao extends DaoBase {
         Optional.fromNullable(competenceCode), personInCharge, false), person);
 
   }
-  
+
+  /**
+   *
+   * @param offices Uffici dei quali verificare le persone
+   * @param yearMonth Il mese interessato
+   * @param code  Il codice di competenza da considerare
+   * @return La lista delle persone con il codice di competenza abilitato nel mese specificato.
+   */
   public List<Person> listForCompetence(
       Set<Office> offices, YearMonth yearMonth, CompetenceCode code) {
     final QPerson person = QPerson.person;
@@ -465,40 +476,6 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
-   * @param oldId il vecchio id.
-   * @return la persona associata al vecchio id (se presente in anagrafica) passato come parametro
-   */
-  public Person getPersonByOldID(Long oldId, Optional<Set<Office>> offices) {
-
-    final BooleanBuilder condition = new BooleanBuilder();
-    final QPerson person = QPerson.person;
-    if (offices.isPresent()) {
-      condition.and(person.office.in(offices.get()));
-    }
-
-    condition.and(person.oldId.eq(oldId));
-
-
-    final JPQLQuery query = getQueryFactory().from(person).where(condition);
-
-    return query.singleResult(person);
-  }
-
-  /**
-   * @param oldId il vecchio id.
-   * @return la persona associata al vecchio id presente nella vecchia anagrafica.
-   */
-  public Person getPersonByOldID(Long oldId) {
-    return getPersonByOldID(oldId, Optional.<Set<Office>>absent());
-  }
-
-  /**
-   *
-   * @param badgeNumber il numero badge.
-   * @return la persona associata al badgeNumber passato come parametro.
-   */
-
-  /**
    * Il proprietario del badge.
    *
    * @param badgeNumber codice del badge
@@ -649,7 +626,7 @@ public final class PersonDao extends DaoBase {
     final QContract contract = QContract.contract;
 
     final JPQLQuery query = getQueryFactory().from(person)
-        
+
         // join one to many or many to many (only one bag fetchable!!!)
         .leftJoin(person.contracts, contract).fetch()
         .leftJoin(person.personCompetenceCodes, QPersonCompetenceCodes.personCompetenceCodes)
@@ -883,6 +860,48 @@ public final class PersonDao extends DaoBase {
         Projections.bean(PersonLite.class, person.id, person.name, person.surname);
 
     return lightQuery.list(bean);
+  }
+
+  /**
+   * Query ad hoc fatta per l'expandableJob.
+   *
+   * @return la Lista di tutte le persone con i requisiti adatti per poter effettuare le
+   *         segnalazioni dei problemi.
+   */
+  public List<Person> peopleForTrouble() {
+
+    final QPerson person = QPerson.person;
+    final QContract contract = QContract.contract;
+    final QOffice office = QOffice.office;
+    final QConfiguration config = QConfiguration.configuration;
+
+    final BooleanBuilder condition = new BooleanBuilder();
+
+    // Requisiti della Persona
+    condition.and(person.wantEmail.isTrue()); // la persona non ha l'invio mail disabilitato
+
+    // Requisiti sul contratto
+    condition.and(contract.onCertificate.isTrue());  // il contratto è attivo per l'invio attestati
+    // il contratto deve essere attivo oggi
+    final LocalDate today = LocalDate.now();
+    filterContract(condition, Optional.of(today), Optional.of(today));
+
+    // Requisiti sulla configurazione dell'office
+    // L'ufficio ha l'invio mail attivo
+    condition.and(config.epasParam.eq(EpasParam.SEND_EMAIL).and(config.fieldValue.eq("true")))
+        // Se l'ufficio ha il parametro per l'autocertificazione disabilitato coinvolgo
+        // tutti i dipendenti
+        .and(config.epasParam.eq(EpasParam.TR_AUTOCERTIFICATION)
+            .and(config.fieldValue.eq("false")));
+    //            .andAnyOf(config.fieldValue.eq("false"),
+    // Se il parametro è attivo escludo i tecnologi e i ricercatori
+    //                config.fieldValue.eq("true").and(qualification.qualification.gt(3))));
+
+    return queryFactory.from(person)
+        .leftJoin(person.contracts, contract)
+        .leftJoin(person.office, office)
+        .leftJoin(office.configurations, config)
+        .where(condition).list(person);
   }
 
   /**
