@@ -192,6 +192,25 @@ public class Absence extends BaseModel {
   }
   
   /**
+   * Se l'assenza ha un codice di rimpiazzamento nel giorno a lei associabile.
+   * @return esito
+   */
+  @Transient
+  public boolean hasReplacing() {
+    for (ComplationAbsenceBehaviour complation : this.absenceType.complationGroup) {
+      for (Absence absence : this.personDay.absences) {
+        if (absence.equals(this)) {
+          continue;
+        }
+        if (complation.replacingCodes.contains(absence.absenceType)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  
+  /**
    * Se l'assenza ha un ruolo di rimpiazzamento ma nel giorno non esiste il completamento
    * che l'ha generata.
    * @param involvedGroups i gruppi da controllare 
