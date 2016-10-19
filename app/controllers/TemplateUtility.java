@@ -55,13 +55,13 @@ import models.enumerate.StampTypes;
 
 import org.joda.time.LocalDate;
 
+import synch.diagnostic.SynchDiagnostic;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-
-import synch.diagnostic.SynchDiagnostic;
 
 /**
  * Metodi usabili nel template.
@@ -266,7 +266,7 @@ public class TemplateUtility {
   }
 
   /**
-   * @return Una lista delle persone assegnabili ad un certo utente dall'operatore corrente
+   * @return Una lista delle persone assegnabili ad un certo utente dall'operatore corrente.
    */
   public List<PersonDao.PersonLite> assignablePeople() {
     return personDao.peopleInOffices(secureManager
@@ -421,7 +421,7 @@ public class TemplateUtility {
 
   public List<AbsenceType> getAbsenceTypes(AbsenceInsertTab absenceInsertTab) {
     if (absenceInsertTab.equals(AbsenceInsertTab.vacation)) {
-      return absenceTypeDao.absenceTypeCodeSet((Set)Sets.newHashSet(
+      return absenceTypeDao.absenceTypeCodeSet((Set) Sets.newHashSet(
           AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode(),
           AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode(),
           AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode(),
@@ -429,7 +429,7 @@ public class TemplateUtility {
           AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()));
     }
     if (absenceInsertTab.equals(AbsenceInsertTab.compensatory)) {
-      return absenceTypeDao.absenceTypeCodeSet((Set)Sets.newHashSet(
+      return absenceTypeDao.absenceTypeCodeSet((Set) Sets.newHashSet(
           AbsenceTypeMapping.RIPOSO_COMPENSATIVO.getCode()));
     }
     return Lists.newArrayList();
@@ -537,7 +537,7 @@ public class TemplateUtility {
     }
     return false;
   }
-  
+
   /**
    * Formatta l'ammontare nell'amountType fornito.
    * @param amount ammontare
@@ -560,13 +560,13 @@ public class TemplateUtility {
         label = " giorno lavorativo";
       }
       if (units > 0 && percent > 0) {
-        return units + label + " + " + percent + "% di un giorno lavorativo";  
+        return units + label + " + " + percent + "% di un giorno lavorativo";
       } else if (units > 0) {
         return units + label;
       } else if (percent > 0) {
         return percent + "% di un giorno lavorativo";
       }
-      return ((double)amount / 100 )+ " giorni";
+      return ((double) amount / 100) + " giorni";
     }
     if (amountType.equals(AmountType.minutes)) {
       if (amount == 0) {
