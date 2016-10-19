@@ -27,17 +27,25 @@
 		#{list items:yearlyAbsencesRecap.absenceTable.rowMap(), as: 'month'}
 		<tr>
 			
-			<td class="warning">${yearlyAbsencesRecap.fromIntToStringMonth( month.getKey() )}</td>
-			#{list items:yearlyAbsencesRecap.absenceTable.columnKeySet(), as: 'col'}
-			  <td>${month.getValue().get(col)}</td>
-	        #{/list}
+		  <td class="warning">${yearlyAbsencesRecap.fromIntToStringMonth( month.getKey() )}</td>
+          
+          
+          #{list items:yearlyAbsencesRecap.absenceTable.columnKeySet(), as: 'col'}
+          <td>
+		  #{list items:month.getValue().get(col), as:'absence'}
+		    #{if absence}
+		     #{absences.absence-popover absence:absence /}
+		    #{/if}
+		  #{/list}    
+		  </td>
+	      #{/list}
+	      
+	      
 		</tr>
 	    #{/list}
 	  </table>
 	   <div class="alert alert-info" role="alert">
-	   <p>Nella tabella sottostante vengono conteggiate solo le assenze <strong>giornaliere</strong>.<br>
-	   Quelle orarie, visibili nel calendario annuale qui sopra, vengono omesse poichè non sono veri e proprio giorni di
-	   totale assenza dal lavoro.</p>
+	   <p>Nella tabella sottostante vengono conteggiate solo le assenze <strong>giornaliere</strong>.</p>
 	   
 	   </div>
        <div class="col-md-8 col-md-offset-2">
@@ -49,7 +57,7 @@
 		</tr>
 		#{list items:yearlyAbsencesRecap.absenceSummary.entrySet(), as: 'entry'}
 		<tr>
-			#{if entry.getKey().justifiedTimeAtWork.minutes == null}
+			#{if entry.getKey().isAllDayPermitted()}
 				<td>${entry.getKey().code}</td>     
 				<td>${entry.getKey().description}</td>	
 				<td>${entry.getValue()}</td>

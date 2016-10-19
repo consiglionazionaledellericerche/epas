@@ -146,7 +146,8 @@ public class RequestInit extends Controller {
     renderArgs.put("currentData", new CurrentData(year, month, day, personId, officeId));
   }
 
-  private static void computeActionSelected(User user, Set<Office> offices, Integer year, Integer month) {
+  private static void computeActionSelected(
+      User user, Set<Office> offices, Integer year, Integer month) {
 
     final String currentAction = Http.Request.current().action;
 

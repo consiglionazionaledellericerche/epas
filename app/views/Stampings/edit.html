@@ -21,41 +21,45 @@ title:(Action + ' timbratura del ' + date.format() + ' per ' + person.fullname)}
   'data-spinner':'#defaultSpinner'}
 
   #{if stamping?.persistent}
-    #{alert color:'info',center:true}
-      Modifica i dati della timbratura delle ore ${stamping.formattedHour()}
-    #{/alert}
-    <!-- storico ?? -->
+  #{alert color:'info',center:true}
+  Modifica i dati della timbratura delle ore ${stamping.formattedHour()}
+  #{/alert}
+  <!-- storico ?? -->
   #{/if}
   #{else}
-    #{alert color:'info',center:true}
-     Inserisci i dati della nuova timbratura
-    #{/alert}
+  #{alert color:'info',center:true}
+  Inserisci i dati della nuova timbratura
+  #{/alert}
   #{/else}
 
   #{f.hidden 'personId', value:person.id /}
   #{f.hidden 'date', value:date.format() /}
 
   #{if stamping?.persistent}
-    #{f.hidden 'stamping.id', value:stamping.id /}
+  #{f.hidden 'stamping.id', value:stamping.id /}
   #{/if}
 
   #{f.input 'time', popover:'true', value:stamping?.formattedHour(), required:true/}
   #{f.radioEnum 'stamping.way', items:models.Stamping.WayType, required:true /}
-  #{if templateUtility.hasAdminRole()}
-  	#{f.selectEnum 'stamping.stampType', items:models.enumerate.StampTypes.onlyActive() /}
+
+  #{set stampTypes: templateUtility.stampTypes /}
+  #{if stampTypes.size() == 1}
+    #{f.view messages.get('stamping.stampType'), value: stampTypes[0]/}
+    #{f.hidden 'stamping.stampType', value:stampTypes[0] /}
   #{/if}
   #{else}
-  	#{f.input 'stamping.stampType', value:models.enumerate.StampTypes.offSiteWorkingForEmployee(), readonly:'true' /}
+    #{f.selectEnum 'stamping.stampType', items:stampTypes /}
   #{/else}
+
   #{f.input 'stamping.note' /}
 
   #{b.buttons center:true}
 
   #{if stamping?.persistent}
-    #{b.submit 'Aggiorna'/}
+  #{b.submit 'Aggiorna'/}
   #{/if}
   #{else}
-    #{b.submit 'Inserisci'/}
+  #{b.submit 'Inserisci'/}
   #{/else}
 
   #{/b.buttons}
@@ -71,11 +75,11 @@ title:(Action + ' timbratura del ' + date.format() + ' per ' + person.fullname)}
   #{f.view 'time', value:stamping.formattedHour()/}
   #{f.radioEnum 'stamping.way', items:models.Stamping.WayType, disabled:true /}
   #{list items:historyStamping, as:'state'}
-    #{if state.typeIsAdd() }
-      #{f.view 'Dipendente', value:stamping.personDay.person.fullname /}
-      #{f.view 'Inserita il', value:state.formattedRevisionDate() /}
-      #{f.view 'Inserita da', value:state.formattedOwner() /}
-    #{/if}
+  #{if state.typeIsAdd() }
+  #{f.view 'Dipendente', value:stamping.personDay.person.fullname /}
+  #{f.view 'Inserita il', value:state.formattedRevisionDate() /}
+  #{f.view 'Inserita da', value:state.formattedOwner() /}
+  #{/if}
   #{/list}
 </form>
 <div class="alert alert-danger center">

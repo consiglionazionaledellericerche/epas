@@ -40,7 +40,7 @@ public class PersonChildrenDao extends DaoBase {
 
 
   /**
-   * @return la lista di tutti i figli della persona person passata come parametro.
+   * @return la lista di tutti i figli della persona.
    */
   public List<PersonChildren> getAllPersonChildren(Person person) {
     QPersonChildren personChildren = QPersonChildren.personChildren;

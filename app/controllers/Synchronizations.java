@@ -798,7 +798,8 @@ public class Synchronizations extends Controller {
 
     if (perseoDepartmentActiveContractsByPersonPerseoId != null) {
       for (Contract perseoContract : perseoDepartmentActiveContractsByPersonPerseoId.values()) {
-        Contract epasContract = activeContractsEpasByPersonPerseoId.get(perseoContract.person.perseoId);
+        Contract epasContract = 
+            activeContractsEpasByPersonPerseoId.get(perseoContract.person.perseoId);
         if (epasContract != null) {
           continue;
         }
@@ -863,4 +864,5 @@ public class Synchronizations extends Controller {
     flash.success("Istituto %s desincronizzato.", institute.name);
     oldInstitutes();
   }
+  
 }

@@ -1,5 +1,7 @@
 package controllers;
 
+import static play.modules.pdf.PDF.renderPDF;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
@@ -18,9 +20,9 @@ import models.Stamping;
 
 import org.joda.time.LocalDate;
 
-import static play.modules.pdf.PDF.renderPDF;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.List;

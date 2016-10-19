@@ -2,8 +2,8 @@ package models.enumerate;
 
 import com.google.common.collect.Maps;
 
-import models.Absence;
 import models.Stamping;
+import models.absences.Absence;
 
 import play.mvc.Router;
 

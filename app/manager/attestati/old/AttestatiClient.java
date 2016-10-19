@@ -24,12 +24,12 @@ import lombok.extern.slf4j.Slf4j;
 
 import manager.PersonDayManager;
 
-import models.Absence;
 import models.CertificatedData;
 import models.Competence;
 import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
+import models.absences.Absence;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;

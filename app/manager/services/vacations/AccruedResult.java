@@ -6,7 +6,7 @@ import it.cnr.iit.epas.DateInterval;
 
 import lombok.Data;
 
-import models.Absence;
+import models.absences.Absence;
 
 import java.util.List;
 

@@ -1,0 +1,42 @@
+   
+   %{
+     action = play.mvc.Router.reverse(request.action);
+     if (!dataAsync) {
+       dataAsync = '#absenceData';
+     }
+   }%  
+   
+   
+   #{form action:action, method:'POST', autocomplete:false, class:'form form-horizontal auto-submit', 
+    'data-async':dataAsync, 'data-async-error':dataAsync}
+     
+     #{f.hidden 'personId', value:absenceForm.person.id /}
+     
+     #{if changeFrom}
+       #{f.date 'from', value:absenceForm.from?.format(), label:'date' /}    
+     #{/if}#{else}
+       #{f.hidden 'from', value:absenceForm.from?.format() /}
+     #{/else}
+     
+     #{f.hidden 'to', value:absenceForm.to?.format() /}
+     
+     #{f.hidden 'switchGroup', value:'true' /}
+     
+     #{f.selectModel 'groupAbsenceType', label:'Tipologia Assenza', personalizeItems:true}
+        <option></option>      
+       
+       #{list items:absenceForm.categories(), as:'category'}
+           <optgroup label="${category.name}">
+           #{list absenceForm.groupsForCategory(category), as:'groupAbsenceType'}
+	         <option value="${groupAbsenceType.id}"
+	          #{if absenceForm.groupSelected.equals(groupAbsenceType)} selected #{/if}> 
+	          ${groupAbsenceType.getChainDescription()}
+	         </option>
+  	       #{/list}
+  	       </optgroup>
+  	    #{/list}
+     #{/f.selectModel}
+   
+   #{/form}
+   
+   

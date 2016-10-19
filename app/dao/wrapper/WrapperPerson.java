@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.SortedMap;
 
 /**
- * @author marco
+ * @author marco.
  */
 public class WrapperPerson implements IWrapperPerson {
 
@@ -57,15 +57,15 @@ public class WrapperPerson implements IWrapperPerson {
   private Optional<VacationPeriod> currentVacationPeriod = null;
   private Optional<ContractStampProfile> currentContractStampProfile = null;
   private Optional<ContractWorkingTimeType> currentContractWorkingTimeType = null;
-  
-  private Optional<Boolean> properSynchronized = Optional.<Boolean>absent(); 
+
+  private Optional<Boolean> properSynchronized = Optional.<Boolean>absent();
 
   @Inject
   WrapperPerson(@Assisted Person person, ContractDao contractDao,
-                CompetenceManager competenceManager, PersonManager personManager,
-                PersonDao personDao, PersonMonthRecapDao personMonthRecapDao,
-                PersonDayDao personDayDao, CompetenceDao competenceDao,
-                IWrapperFactory wrapperFactory) {
+      CompetenceManager competenceManager, PersonManager personManager,
+      PersonDao personDao, PersonMonthRecapDao personMonthRecapDao,
+      PersonDayDao personDayDao, CompetenceDao competenceDao,
+      IWrapperFactory wrapperFactory) {
     this.value = person;
     this.contractDao = contractDao;
     this.competenceManager = competenceManager;
@@ -111,7 +111,7 @@ public class WrapperPerson implements IWrapperPerson {
 
     if (this.currentContract == null) {
       this.currentContract = Optional.fromNullable(
-              contractDao.getContract(LocalDate.now(), value));
+          contractDao.getContract(LocalDate.now(), value));
     }
     return this.currentContract;
   }
@@ -123,11 +123,11 @@ public class WrapperPerson implements IWrapperPerson {
 
     LocalDate monthBegin = new LocalDate(year, month, 1);
     DateInterval monthInterval = new DateInterval(monthBegin,
-            monthBegin.dayOfMonth().withMaximumValue());
+        monthBegin.dayOfMonth().withMaximumValue());
 
     for (Contract contract : orderedContracts()) {
       if (DateUtility.intervalIntersection(monthInterval, wrapperFactory
-              .create(contract).getContractDateInterval()) != null) {
+          .create(contract).getContractDateInterval()) != null) {
         contracts.add(contract);
       }
     }
@@ -139,24 +139,24 @@ public class WrapperPerson implements IWrapperPerson {
 
     List<Contract> contracts = Lists.newArrayList();
     DateInterval yearInterval = new DateInterval(new LocalDate(year, 1, 1),
-            new LocalDate(year, 12, 31));
+        new LocalDate(year, 12, 31));
 
     for (Contract contract : orderedContracts()) {
       if (DateUtility.intervalIntersection(yearInterval, wrapperFactory
-              .create(contract).getContractDateInterval()) != null) {
+          .create(contract).getContractDateInterval()) != null) {
         contracts.add(contract);
       }
     }
     return contracts;
   }
-  
+
   @Override
   public List<Contract> orderedContracts() {
     if (sortedContracts != null) {
       return sortedContracts;
     }
     SortedMap<LocalDate, Contract> contracts = Maps.newTreeMap();
-    for (Contract contract : value.contracts) { 
+    for (Contract contract : value.contracts) {
       contracts.put(contract.beginDate, contract);
     }
     sortedContracts = Lists.newArrayList(contracts.values());
@@ -233,7 +233,7 @@ public class WrapperPerson implements IWrapperPerson {
   public boolean hasPassToIndefiniteInYear(int year) {
 
     List<Contract> orderedContractInYear = personDao.getContractList(this.value,
-            new LocalDate(year, 1, 1), new LocalDate(year, 12, 31));
+        new LocalDate(year, 1, 1), new LocalDate(year, 12, 31));
 
 
     boolean hasDefinite = false;
@@ -268,7 +268,7 @@ public class WrapperPerson implements IWrapperPerson {
     }
 
     this.currentContractStampProfile = this.currentContract.get()
-            .getContractStampProfileFromDate(LocalDate.now());
+        .getContractStampProfileFromDate(LocalDate.now());
 
     return this.currentContractStampProfile;
   }
@@ -357,7 +357,7 @@ public class WrapperPerson implements IWrapperPerson {
    */
   @Override
   public Competence competence(final CompetenceCode code,
-                               final int year, final int month) {
+      final int year, final int month) {
     Optional<Competence> optCompetence = competenceDao.getCompetence(this.value, year, month, code);
     if (optCompetence.isPresent()) {
       return optCompetence.get();
@@ -408,7 +408,7 @@ public class WrapperPerson implements IWrapperPerson {
     if (currentContract.isPresent()) {
       YearMonth now = new YearMonth(LocalDate.now());
       if (wrapperFactory.create(currentContract.get())
-              .monthRecapMissing(now)) {
+          .monthRecapMissing(now)) {
         return true;
       }
     }
@@ -420,7 +420,7 @@ public class WrapperPerson implements IWrapperPerson {
    */
   public int totalHolidayWorkingTime(Integer year) {
     return personManager.holidayWorkingTimeTotal(value,
-            Optional.fromNullable(year), Optional.<Integer>absent());
+        Optional.fromNullable(year), Optional.<Integer>absent());
   }
 
   /**
@@ -428,7 +428,7 @@ public class WrapperPerson implements IWrapperPerson {
    */
   public int totalHolidayWorkingTimeAccepted(Integer year) {
     return personManager.holidayWorkingTimeAccepted(value,
-            Optional.fromNullable(year), Optional.<Integer>absent());
+        Optional.fromNullable(year), Optional.<Integer>absent());
   }
 
   /**
@@ -436,40 +436,39 @@ public class WrapperPerson implements IWrapperPerson {
    */
   public List<PersonDay> holidyWorkingTimeDay(Integer year) {
     return personDayDao.getHolidayWorkingTime(this.value,
-            Optional.fromNullable(year), Optional.<Integer>absent());
+        Optional.fromNullable(year), Optional.<Integer>absent());
   }
 
   /**
    * Diagnostiche sullo stato di sincronizzazione della persona.
-   * 
    * Ha perseoId null oppure uno dei suoi contratti attivi o futuri ha perseoId null.
    */
   public boolean isProperSynchronized() {
-    
+
     if (this.properSynchronized.isPresent()) {
       return this.properSynchronized.get();
     }
 
     this.properSynchronized = Optional.of(false);
-    
+
     if (this.value.perseoId == null) {
       return this.properSynchronized.get();
     }
-    
+
     for (Contract contract : this.value.contracts) {
       if (!contract.isProperSynchronized()) {
         return this.properSynchronized.get();
       }
     }
-    
+
     this.properSynchronized = Optional.of(true);
     return this.properSynchronized.get();
   }
-  
+
   /**
    * Il contratto della persona con quel perseoId.
-   * @param perseoId
-   * @return
+   * @param perseoId id di perseo della Persona
+   * @return Contract.
    */
   public Contract perseoContract(Long perseoId) {
     if (perseoId == null) {

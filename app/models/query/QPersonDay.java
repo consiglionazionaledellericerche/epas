@@ -26,7 +26,7 @@ public class QPersonDay extends EntityPathBase<PersonDay> {
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
-    public final ListPath<models.Absence, QAbsence> absences = this.<models.Absence, QAbsence>createList("absences", models.Absence.class, QAbsence.class, PathInits.DIRECT2);
+    public final ListPath<models.absences.Absence, models.absences.query.QAbsence> absences = this.<models.absences.Absence, models.absences.query.QAbsence>createList("absences", models.absences.Absence.class, models.absences.query.QAbsence.class, PathInits.DIRECT2);
 
     public final BooleanPath acceptedHolidayWorkingTime = createBoolean("acceptedHolidayWorkingTime");
 

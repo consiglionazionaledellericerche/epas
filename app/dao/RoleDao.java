@@ -14,6 +14,8 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 /**
+ * Dao per l'accesso alle informazioni dei Role.
+ * 
  * @author dario
  */
 public class RoleDao extends DaoBase {
@@ -25,7 +27,7 @@ public class RoleDao extends DaoBase {
   }
 
   /**
-   * @return il ruolo identificato dall'id passato come parametro
+   * @return il ruolo identificato dall'id passato come parametro.
    */
   public Role getRoleById(Long id) {
     QRole role = QRole.role;
@@ -35,7 +37,7 @@ public class RoleDao extends DaoBase {
   }
 
   /**
-   * @return il ruolo identificato dal nome passato come parametro
+   * @return il ruolo identificato dal nome passato come parametro.
    */
   public Role getRoleByName(String name) {
     QRole role = QRole.role;
@@ -45,8 +47,7 @@ public class RoleDao extends DaoBase {
   }
 
   /**
-   *
-   * @return Tutti i ruoli disponibili
+   * @return Tutti i ruoli disponibili.
    */
   public List<Role> getAll() {
     final QRole role = QRole.role;

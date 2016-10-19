@@ -26,10 +26,14 @@ public class DateInterval {
 
   public DateInterval(LocalDate date1, LocalDate date2) {
 
-    if (date1 == null) {
+    if (date1 == null && date2 == null) {
+      date1 = new LocalDate(0, 1, 1);
+      date2 = DateUtility.setInfinity();
+    }
+    else if (date1 == null) {
       date1 = DateUtility.setInfinity();
     }
-    if (date2 == null) {
+    else if (date2 == null) {
       date2 = DateUtility.setInfinity();
     }
 

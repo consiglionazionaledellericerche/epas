@@ -12,13 +12,10 @@ import dao.wrapper.IWrapperPersonDay;
 
 import it.cnr.iit.epas.DateUtility;
 
-import models.AbsenceType;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
-import models.Role;
-import models.User;
-import models.UsersRolesOffices;
+import models.absences.AbsenceType;
 
 import org.joda.time.LocalDate;
 
@@ -95,7 +92,7 @@ public class PersonManager {
 
   /**
    * Conta i codici di assenza.
-   * 
+   *
    * @param personDays lista di PersonDay
    * @return La mappa dei codici di assenza utilizzati nei persondays specificati
    */
@@ -105,9 +102,9 @@ public class PersonManager {
 
     personDays.stream().flatMap(personDay -> personDay.absences.stream()
         .<AbsenceType>map(absence -> absence.absenceType)).forEach(absenceType -> {
-          Integer count = absenceCodeMap.get(absenceType);
-          absenceCodeMap.put(absenceType, (count == null) ? 1 : count + 1);
-        });
+      Integer count = absenceCodeMap.get(absenceType);
+      absenceCodeMap.put(absenceType, (count == null) ? 1 : count + 1);
+    });
 
     return absenceCodeMap;
   }
@@ -164,7 +161,7 @@ public class PersonManager {
         contract.sourceDateResidual != null).max(Comparator
         .comparing(Contract::getSourceDateResidual)).orElse(null);
 
-    if (newerContract != null && newerContract.sourceDateResidual != null 
+    if (newerContract != null && newerContract.sourceDateResidual != null
         && !newerContract.sourceDateResidual.isBefore(begin)
         && !newerContract.sourceDateResidual.isAfter(end)) {
       return newerContract.sourceRecoveryDayUsed + absenceDao
@@ -245,19 +242,6 @@ public class PersonManager {
       value += pd.timeAtWork;
     }
     return value;
-  }
-
-  /**
-   * @param user l'utente
-   * @return true se l'utente è amministratore del personale, false altrimenti.
-   */
-  public boolean isPersonnelAdmin(User user) {
-    List<UsersRolesOffices> uros = uroDao.getUsersRolesOfficesByUser(user);
-    long count = uros.stream().filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)).count();
-    if (count > 0) {
-      return true;
-    }
-    return false;
   }
 
 }

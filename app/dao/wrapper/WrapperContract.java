@@ -255,7 +255,7 @@ public class WrapperContract implements IWrapperContract {
   }
 
   /**
-   * @return La data più recente tra la creazione del contratto e la creazione della persona
+   * @return La data più recente tra la creazione del contratto e la creazione della persona.
    */
   @Override
   public LocalDate dateForInitialization() {

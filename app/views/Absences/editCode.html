@@ -2,18 +2,8 @@
 #{set header:'navbar' /}
 #{set title:'ePAS - Gestione codice d\'assenza' /}
  		
-%{ 
- 		if(absenceTypeGroup?.isPersistent()){
- 			disableGroup = true;
- 		}
- 		else{
-			disableGroup = false;
- 		}
-}%
-	
  #{form @Absences.saveCode(),class:'form-horizontal col-sm-8 col-sm-offset-2'}
  <input type="hidden" name="absenceType.id" value="${absenceType?.id}">
- <input type="hidden" name="absenceTypeGroup.id" value="${absenceType?.absenceTypeGroup?.id}">
 
  <div class="panel panel-primary">
  	<div class="panel-heading">
@@ -47,22 +37,10 @@
 		</div>
 
  		#{f.booleanRadio 'absenceType.consideredWeekEnd',popover:'true' /}
- 		#{f.input 'absenceTypeGroup.label',popover:'true',disabled:disableGroup /}
- 	</div>
- </div> 
-
-	<div class="panel panel-primary">
-		  <div class="panel-heading">
-		    <h3 class="panel-title">Da riempire in caso di gruppo valorizzato</h3>
-		  </div>
-		<div class="panel-body">
-
-		 #{f.selectEnum 'absenceTypeGroup.accumulationType',items:models.enumerate.AccumulationType,disabled:'true',popover:'true',select2:'off' /}
-		 #{f.input 'absenceTypeGroup.limitInMinute',type:'number',disabled:'true',popover:'true' /}
-		 #{f.booleanRadio 'absenceTypeGroup.minutesExcess',popover:'true' /}
-		 #{f.selectEnum 'absenceTypeGroup.accumulationBehaviour',items:models.enumerate.AccumulationBehaviour,disabled:'true',popover:'true',select2:'off' /}
-		 #{f.selectModel 'absenceTypeGroup.replacingAbsenceType',items:templateUtility.certificateAbsenceTypes,disabled:'true',description:'true' /}
-
+ 		
+ 		  #{f.selectModels 'absenceType.justifiedTypesPermitted.id', value:absenceType.justifiedTypesPermitted,
+               items:allJustifiedType, placeholder:'Come giustifica' /}
+ 		
  	</div>
  </div> 
 
@@ -74,24 +52,3 @@
  </div>
 #{/form}
 
-
-#{set 'moreScripts'}
-<script type="text/javascript">
-$(document).ready(function() {
-  // questa parte di codice abilita gli input per la modifica dell'absenceTypeGroup se di valorizza il campo label
-  $("input[name=absenceTypeGroup\\.label]").keyup(function() {
-    if (this.value) {
-      $("#absenceTypeGroup\\_accumulationType").removeAttr('disabled');
-      $("#absenceTypeGroup\\_limitInMinute").removeAttr('disabled');
-      $("#absenceTypeGroup\\_accumulationBehaviour").removeAttr('disabled');
-      $("#absenceTypeGroup\\_replacingAbsenceType").removeAttr('disabled');
-    } else {
-      $("#absenceTypeGroup\\_accumulationType").attr('disabled', 'disabled');
-      $("#absenceTypeGroup\\_limitInMinute").attr('disabled', 'disabled');
-      $("#absenceTypeGroup\\_accumulationBehaviour").attr('disabled', 'disabled');
-      $("#absenceTypeGroup\\_replacingAbsenceType").attr('disabled', 'disabled');
-    }
-  });
- });
-</script>
-#{/set}

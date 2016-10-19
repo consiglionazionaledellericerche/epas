@@ -1,0 +1,45 @@
+#{form action:@AbsenceGroups.insert(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit',
+    'data-async':'#absenceData', 'data-async-error':'#absenceData'}
+   
+     #{f.hidden 'personId', value:absenceForm.person.id /}
+	 
+     #{f.hidden 'from', value:absenceForm.from?.format() /}
+     #{f.date 'from', value:absenceForm.from?.format(), disabled:true /}     
+     #{if alldaySelected }
+       #{f.date 'to', value:absenceForm.to?.format() /}
+     #{/if}
+     #{else}
+       #{f.date 'to', disabled:true  /} 
+     #{/else}
+     
+   
+     #{f.hidden 'groupAbsenceType.id', value:absenceForm.groupSelected.id /}
+     
+     #{if absenceForm.hasAbsenceTypeChoice()} 
+		 #{f.selectModel 'absenceType', personalizeItems:true}
+		   #{if absenceForm.automaticChoiceExists}
+		      <optgroup label="Inserimento Automatico">
+		        <option value=""
+		          #{if absenceForm.automaticChoiceSelected} selected #{/if}>Codice selezionato da ePAS</option>
+			  <optgroup/>
+		   #{/if}   
+		   <optgroup label="Codice Specifico">
+		    #{list absenceForm.absenceTypes, as:'absenceType'}
+		    <option value="${absenceType?.id}"
+		      #{if absenceForm.absenceTypeSelected != null && absenceForm.absenceTypeSelected.equals(absenceType) } selected #{/if}>
+		      ${absenceType.getLabel()}
+		    </option>
+		    #{/list}   
+		   <optgroup/>
+		 #{/f.selectModel}
+	 #{/if}
+	 #{else}
+	   #{f.hidden 'absenceType.id', value:absenceForm.theOnlyAbsenceType().id /}
+	   *{ #{f.view 'absenceType', value:absenceForm.theOnlyAbsenceType() /} }*
+	 #{/else}
+   
+     #{if absenceForm.hasJustifiedTypeChoice() }
+       #{f.selectModel 'justifiedType', items:absenceForm.justifiedTypes, value:absenceForm.justifiedTypeSelected /}
+     #{/if}
+         
+	#{/form}

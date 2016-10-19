@@ -7,9 +7,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import models.Absence;
 import models.Contract;
 import models.VacationPeriod;
+import models.absences.Absence;
 
 import org.joda.time.LocalDate;
 

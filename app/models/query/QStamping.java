@@ -40,6 +40,8 @@ public class QStamping extends EntityPathBase<Stamping> {
 
     public final StringPath note = createString("note");
 
+    public final QPerson owner;
+
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
@@ -69,6 +71,7 @@ public class QStamping extends EntityPathBase<Stamping> {
 
     public QStamping(Class<? extends Stamping> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.owner = inits.isInitialized("owner") ? new QPerson(forProperty("owner"), inits.get("owner")) : null;
         this.personDay = inits.isInitialized("personDay") ? new QPersonDay(forProperty("personDay"), inits.get("personDay")) : null;
         this.stampModificationType = inits.isInitialized("stampModificationType") ? new QStampModificationType(forProperty("stampModificationType")) : null;
     }

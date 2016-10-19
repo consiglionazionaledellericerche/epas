@@ -11,13 +11,16 @@
   #{breadcrumbs ['manageNoOwnerUsers':@Users.noOwnerUsers()], noHome:'true' /}
 
   #{form action:@Users.noOwnerUsers(), class:'form-inline', method:'GET', 'data-reload':'#normalResults', autocomplete:'off'}
-  <div class="row">
-    #{f.searchInput 'name' /}
 
-    #{b.link @blank(), color: 'info', fa: 'plus', class: 'pull-right' }
-      &{'newUser'}
+  #{f.searchInput 'name' /}
+
+  <div class="text-right">
+    #{b.link @blank(), color: 'info', fa: 'plus'}
+    &{'newUser'}
     #{/b.link}
   </div>
+
+
   #{/form}
 
   <br>

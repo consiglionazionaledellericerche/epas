@@ -1,6 +1,5 @@
 package controllers;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
@@ -8,7 +7,6 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
 import com.beust.jcommander.internal.Lists;
-import com.mysema.query.SearchResults;
 
 import dao.CertificationDao;
 import dao.CompetenceCodeDao;
@@ -19,15 +17,12 @@ import dao.PersonMonthRecapDao;
 import dao.PersonReperibilityDayDao;
 import dao.wrapper.IWrapperCompetenceCode;
 import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
 import helpers.Web;
 import helpers.jpa.ModelQuery.SimpleResults;
-
-import lombok.extern.slf4j.Slf4j;
 
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
@@ -49,7 +44,6 @@ import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonCompetenceCodes;
-import models.PersonMonthRecap;
 import models.PersonReperibilityType;
 import models.TotalOvertime;
 import models.User;
@@ -59,9 +53,9 @@ import org.joda.time.YearMonth;
 
 import play.data.validation.Valid;
 import play.data.validation.Validation;
-import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.io.FileInputStream;
@@ -69,11 +63,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
 
 import javax.inject.Inject;
 
-@Slf4j
 @With({Resecure.class})
 public class Competences extends Controller {
 
