@@ -19,7 +19,6 @@ import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.services.mealtickets.MealTicketsServiceImpl.MealTicketOrder;
 
-import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
@@ -27,6 +26,7 @@ import models.ContractMonthRecap;
 import models.ContractWorkingTimeType;
 import models.PersonDay;
 import models.WorkingTimeTypeDay;
+import models.absences.Absence;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;

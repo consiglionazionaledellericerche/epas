@@ -24,7 +24,6 @@ import manager.PersonDayManager;
 import manager.SecureManager;
 import manager.UserManager;
 
-import models.AbsenceType;
 import models.Contract;
 import models.Office;
 import models.Person;
@@ -33,6 +32,7 @@ import models.Role;
 import models.Stamping;
 import models.User;
 import models.UsersRolesOffices;
+import models.absences.AbsenceType;
 import models.enumerate.JustifiedTimeAtWork;
 
 import org.apache.commons.lang.WordUtils;

@@ -130,6 +130,17 @@ public class WorkingTimeTypeDao extends DaoBase {
   }
   
   /**
+   * I minuti di lavoro previsti per quel giorno della persona.
+   * @param date
+   * @param person
+   * @return
+   */
+  public int workingTimeTypeMinutes(LocalDate date, Person person) {
+    return getWorkingTimeType(date, person).get().workingTimeTypeDays.get(date.getDayOfWeek() - 1)
+        .workingTime;
+  }
+  
+  /**
    * Se per il tipo orario la data è un giorno festivo.
    * @param date
    * @param workingTimeType
@@ -141,5 +152,5 @@ public class WorkingTimeTypeDao extends DaoBase {
     Preconditions.checkState(wttd.dayOfWeek == date.getDayOfWeek());
     return wttd.holiday;
   }
-
+  
 }

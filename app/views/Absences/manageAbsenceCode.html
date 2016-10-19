@@ -23,13 +23,6 @@
 	  	<th>&{'absenceType.validTo'}</th>
 	  	<th>&{'absenceType.justifiedTimeAtWork'}</th>
 	  	<th>&{'absenceType.qualifications'}</th>
-
-	  	<th>&{'absenceTypeGroup.label'}</th>
-	  	<th>&{'absenceTypeGroup.minutesExcess'}</th>
-	  	<th>&{'absenceTypeGroup.accumulationType'}</th>
-	  	<th>&{'absenceTypeGroup.limitInMinute'}</th>
-	  	<th>&{'absenceTypeGroup.accumulationBehaviour'}</th>
-	  	<th>&{'absenceTypeGroup.replacingAbsenceType'}</th>
 	  </tr>
 	</thead>
 	<tbody>
@@ -43,18 +36,16 @@
 			<td>${_.consideredWeekEnd ? 'Sì' : 'No'}</td>
 			<td>${_.validFrom?.format()}</td>
 			<td>${_.validTo?.format()}</td>
-			<td>${_.justifiedTimeAtWork?.label()}</td>
+			<td>
+			  #{list items:_.justifiedTypesPermitted, as:'justifiedType'}
+			    ${justifiedType.label()}<br>
+			  #{/list}
+			</td>
 			<td>
 				#{list items:_.qualifications, as: 'q'}
 					${q.qualification}#{if !q_isLast},#{/if}
 				#{/list}
 			</td> 
-			<td>${_.absenceTypeGroup?.label}</td>
-			<td>${_.absenceTypeGroup?.minutesExcess}</td>
-			<td>${_.absenceTypeGroup?.accumulationType?.label()}</td>
-			<td>${_.absenceTypeGroup?.limitInMinute}</td>
-			<td>${_.absenceTypeGroup?.accumulationBehaviour?.label()}</td>
-			<td>${_.absenceTypeGroup?.replacingAbsenceType?.code}</td>
 		</tr>
 		#{/list}
 		</tbody>

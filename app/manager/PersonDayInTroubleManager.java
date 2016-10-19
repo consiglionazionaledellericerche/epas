@@ -139,7 +139,8 @@ public class PersonDayInTroubleManager {
         fromDate, toDate, troubleCausesToSend);
     
     for (Person person : personList) {
-      
+
+      // FIXME ma non viene già fatto nella query?? PersonDao -> riga 673
       // Controllo se la persona ha attualmente un contratto attivo ...
       Optional<Contract> currentContract = factory.create(person).getCurrentContract();
       if (!currentContract.isPresent()) {

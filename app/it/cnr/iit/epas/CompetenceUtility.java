@@ -18,13 +18,13 @@ import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayManager;
 import manager.services.PairStamping;
 
-import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
 import models.PersonDay;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
+import models.absences.Absence;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.ShiftSlot;
 import models.query.QCompetence;

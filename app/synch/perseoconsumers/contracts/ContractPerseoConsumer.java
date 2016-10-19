@@ -70,8 +70,8 @@ public class ContractPerseoConsumer {
       url = PerseoApis.getContractForEpasEndpoint() + perseoContractId;
       user = PerseoApis.getPerseoUser();
       pass = PerseoApis.getPerseoPass();
-    } catch (NoSuchFieldException e) {
-      final String error = String.format("Parametro necessario non trovato: %s", e.getMessage());
+    } catch (NoSuchFieldException ex) {
+      final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
       log.error(error);
       throw new ApiRequestException(error);
     }
@@ -95,8 +95,8 @@ public class ContractPerseoConsumer {
         log.info("Recuperato Json contenente il contratto con id {} da Perseo", perseoContractId);
         try {
           return new Gson().fromJson(response.getJson(), PerseoContract.class);
-        } catch (JsonSyntaxException e) {
-          final String error = String.format("Errore nel parsing del json: %s", e.getMessage());
+        } catch (JsonSyntaxException ex) {
+          final String error = String.format("Errore nel parsing del json: %s", ex.getMessage());
           log.warn(error);
           throw new ApiRequestException(error);
         }
@@ -123,8 +123,8 @@ public class ContractPerseoConsumer {
       }
       user = PerseoApis.getPerseoUser();
       pass = PerseoApis.getPerseoPass();
-    } catch (NoSuchFieldException e) {
-      final String error = String.format("Parametro necessario non trovato: %s", e.getMessage());
+    } catch (NoSuchFieldException ex) {
+      final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
       log.error(error);
       throw new ApiRequestException(error);
     }
@@ -150,8 +150,8 @@ public class ContractPerseoConsumer {
         try {
           return new Gson().fromJson(response.getJson(), new TypeToken<List<PerseoContract>>() {
           }.getType());
-        } catch (JsonSyntaxException e) {
-          final String error = String.format("Errore nel parsing del json: %s", e.getMessage());
+        } catch (JsonSyntaxException ex) {
+          final String error = String.format("Errore nel parsing del json: %s", ex.getMessage());
           log.warn(error);
           throw new ApiRequestException(error);
         }
@@ -206,9 +206,9 @@ public class ContractPerseoConsumer {
 
   /**
    * Le persone di perseo sincronizzate con i loro contratti perseo.
-   *
+   * <p>
    * Mappa: chiave -> personPerseoId valore -> lista dei suoi contratti perseo
-   *
+   * </p>
    * @param office se presente le sole persone della sede altrimenti tutte.
    * @return map
    */
@@ -223,9 +223,9 @@ public class ContractPerseoConsumer {
 
     try {
       perseoContracts = perseoContracts(officePerseoId).get();
-    } catch (InterruptedException | ExecutionException e) {
+    } catch (InterruptedException | ExecutionException ex) {
       String error = String
-          .format("Impossibile recuperare i contratti richiesti da Perseo - %s", e.getMessage());
+          .format("Impossibile recuperare i contratti richiesti da Perseo - %s", ex.getMessage());
       log.error(error);
       throw new ApiRequestException(error);
     }
@@ -260,9 +260,9 @@ public class ContractPerseoConsumer {
     PerseoContract perseoContract = null;
     try {
       perseoContract = perseoContractByPerseoId(contractPerseoId).get();
-    } catch (InterruptedException | ExecutionException e) {
+    } catch (InterruptedException | ExecutionException ex) {
       String error = String.format("Impossibile recuperare il contratto con id %d da Perseo - %s",
-          contractPerseoId, e.getMessage());
+          contractPerseoId, ex.getMessage());
       log.error(error);
       throw new ApiRequestException(error);
     }
@@ -311,10 +311,10 @@ public class ContractPerseoConsumer {
 
     try {
       perseoContracts = perseoContracts(Optional.of(perseoDepartmentId)).get();
-    } catch (InterruptedException | ExecutionException e) {
+    } catch (InterruptedException | ExecutionException ex) {
       String error = String
           .format("Impossibile recuperare i contratti della sede con id %d da Perseo - %s",
-              perseoDepartmentId, e.getMessage());
+              perseoDepartmentId, ex.getMessage());
       log.error(error);
       throw new ApiRequestException(error);
     }

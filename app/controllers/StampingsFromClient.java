@@ -14,7 +14,7 @@ import manager.AbsenceManager;
 import manager.StampingManager;
 import manager.cache.AbsenceTypeManager;
 
-import models.AbsenceType;
+import models.absences.AbsenceType;
 import models.exports.AbsenceFromClient;
 import models.exports.StampingFromClient;
 

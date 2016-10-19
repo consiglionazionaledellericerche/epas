@@ -28,6 +28,11 @@ $(function($) {
 	 * TODO: implementare async-error
 	 */
 	$(document.body).on('click', 'a[data-async]', function(e) {
+		var $body = $('body');
+		var $flashDiv = $body.find('#flashDiv');
+		if ($flashDiv) {
+		  $flashDiv.remove();
+		}
 		var $a = $(this);
 		var target = $a.data('async');
 		var $target = $(target);
@@ -51,7 +56,7 @@ $(function($) {
 			contentType: contentType
 		}).done(function(data, status) {
 			$target.replaceWith($(target, data));
-			$target.initepas();
+			$('body').initepas();
 		}).fail(function(xhr, status, error) {
 			if (xhr.status == 400) {
 				var $res = $(errorTarget, xhr.responseText);
@@ -133,15 +138,20 @@ $(function($) {
   });
   
   PNotify.prototype.options.styling = "fontawesome";
-  
+
   /**
    * Author: Marco
    */
   $(document.body).on('click', 'a[data-async-modal]', function(e) {
-    var $this = $(this);
+	var $body = $('body');
+	var $flashDiv = $body.find('#flashDiv');
+	if ($flashDiv) {
+	  $flashDiv.remove();
+	}
+	var $this = $(this);
     var $modal = $($this.data('async-modal'));
     var url = $this.attr('href');
-    $('body').modalmanager('loading');
+    $body.modalmanager('loading');
     $modal.load(url, '', function() {
       $modal.modal().initepas();
     });
@@ -180,15 +190,18 @@ $(function($) {
     $(':input[data-switcher]', this).select2({
       width: 'resolve',
       containerCssClass: "switcher",
-      dropdownCssClass: "switcher"});
+      dropdownCssClass: "switcher",
+    });
     $(':input[select2]', this).select2({
       allowClear: true,
       theme: "bootstrap",
-      placeholder: "Seleziona un valore"
+      placeholder: "Seleziona un valore",
     });
     $(':input[select2Table]', this).select2({
       minimumResultsForSearch: 25
     });
+    
+    
     $('[popover]').popover({
       trigger: "focus",
       placement: 'right auto',

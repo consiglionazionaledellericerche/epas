@@ -1,0 +1,105 @@
+#{modalAsync id:'modalAbsence', button:'Salva', 
+  title:'Assenza ' + absence.absenceType.code + ' in data ' + dateFrom.format() 
+           + ' per ' + absence.personDay.person.fullname }
+
+#{tabList}
+  #{tabItem id:'editAbs', title:'Riepilogo', active:true /}
+  #{tabItem id:'attach', title:'Allegato' /}
+  #{tabItem id:'deleteAbs', title:'Elimina' /}
+#{/tabList}
+
+<br>
+
+#{tabContent}
+
+  #{tabContentItem id:'editAbs', active:true}
+ 
+	 #{list items:historyAbsence, as:'state'}
+	   #{if state.typeIsAdd() }
+	    <form class="form-horizontal">
+	    #{f.view 'Dipendente', value:absence.personDay.person.fullname /}
+	    #{f.view 'Data', value:absence.personDay.date /}
+	 	#{f.view 'Codice', value:absence.absenceType.code /}
+	 	#{f.view 'Allegato', value:absence.absenceFile.exists() /}
+	 	#{f.view 'Inserita il', value:state.formattedRevisionDate() /}
+	 	#{f.view 'Amministratore', value:state.formattedOwner() /}
+	 	</form> 
+	   #{/if}
+	 #{/list}
+	 
+	 #{if absence.absenceFile.exists() }
+	 	<div class="alert alert-warning center">
+	 	  Apri allegato <a href="@{Absences.downloadAttachment(absence.id)}">
+						<span class="glyphicon glyphicon-envelope"></span>
+					</a>
+	 	</div>
+	 #{/if}
+  #{/tabContentItem}
+
+  #{tabContentItem id:'attach'}
+ 
+	  <div class="alert alert-success center">
+		 <p>Allega un file all'assenza 
+		   con codice ${absence.absenceType.code} del <strong>${absence.personDay.date.format()}</strong>
+		 </p>
+	  </div>
+	  
+	 #{form action:@Absences.addAttach(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal', 'data-async':'#page_content',
+		    'data-async-error':'#absenceData', enctype:'multipart/form-data'}
+		
+		<input type="hidden" name="absence.id" value="${absence.id}"/>
+	
+	    #{f.input 'absenceFile', type:'file' /}
+	
+	    #{b.buttons center:true}   
+	      #{b.submit 'Allega', color:'primary', fa:'envelope' /}
+	    #{/b.buttons}
+	  #{/form}
+	  
+	  #{if absence.absenceFile.exists() }  
+		
+	 	<div class="alert alert-danger center">
+	 	  <p><strong>Attenzione!!!</strong> 
+	 	  Associato a questa assenza esiste già un allegato che verrà sovrascritto
+	 	  <a href="@{Absences.downloadAttachment(absence.id)}">
+		  <span class="glyphicon glyphicon-envelope"></span></a>
+		  </p>
+		  <p>
+		  Per rimuovere questo allegato clicca <a href="@{Absences.removeAttach(absence.id)}"> qui</a>
+		  </p>
+	 	</div>
+	  #{/if}  
+  #{/tabContentItem} 
+ 
+  #{tabContentItem id:'deleteAbs'}
+	  <div class="alert alert-danger center">
+		   <p>Cliccando su elimina si elimineranno tutte le assenze con codice ${absence.absenceType.code} 
+	       presenti nella finestra temporale specificata fino a <strong>Fino A</strong>
+	       </p>
+	  </div>
+	
+	  #{form action:@AbsenceGroups.delete(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal', 'data-async':'#page_content',
+		    'data-async-error':'#absenceData'}
+
+			#{f.hidden 'absenceId', value: absence.id /}
+
+	    #{f.view 'absence.absenceType.code', label:'Codice', value:absence.absenceType.label()  /}
+		
+	    #{f.view 'dateFrom', value:dateFrom.format() /}
+	    #{f.date 'dateTo', value:dateTo.format() /}
+	    
+	    *{ #{f.input 'absenceFile', type:'file' /} }*
+	
+	    #{b.buttons center:true}   
+	      #{b.submit 'Elimina', color:'danger', fa:'trash' /}
+	    #{/b.buttons}
+	  #{/form}
+	  
+  #{/tabContentItem}
+   
+#{/tabContent}
+
+
+#{/modalAsync}

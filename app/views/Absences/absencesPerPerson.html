@@ -61,10 +61,21 @@
 	#{list items:yearlyAbsencesRecap.absenceTable.rowMap(), as: 'month'}
 	<tr>
 		
-		<td class="warning">${yearlyAbsencesRecap.fromIntToStringMonth( month.getKey() )}</td>
-		#{list items:yearlyAbsencesRecap.absenceTable.columnKeySet(), as: 'col'}
-		  <td>${month.getValue().get(col)}</td>
-        #{/list}
+	  <td class="warning">${yearlyAbsencesRecap.fromIntToStringMonth( month.getKey() )}</td>
+	    
+      #{list items:yearlyAbsencesRecap.absenceTable.columnKeySet(), as: 'col'}
+
+          <td>
+		  #{list items:month.getValue().get(col), as:'absence'}
+		    #{if absence}
+		      #{absences.absence-popover absence:absence /}
+		    #{/if}
+		  #{/list}    
+		  </td>
+		
+	   #{/list}
+	    
+ 
 	</tr>
     #{/list}
   </table>

@@ -22,10 +22,10 @@ import it.cnr.iit.epas.DateInterval;
 
 import manager.PersonDayManager;
 
-import models.Absence;
 import models.Competence;
 import models.Person;
 import models.PersonDay;
+import models.absences.Absence;
 
 import org.joda.time.LocalDate;
 

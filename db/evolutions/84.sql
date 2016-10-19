@@ -42,6 +42,9 @@ CREATE TABLE notifications (
     updated_at timestamp without time zone
 );
 
+ALTER TABLE absence_type_groups ADD COLUMN description TEXT;
+ALTER TABLE absence_type_groups_history ADD COLUMN description TEXT;
+
 # ---!Downs
 
 
@@ -55,3 +58,6 @@ ALTER TABLE persons RENAME COLUMN begin_date TO created_at;
 ALTER TABLE persons RENAME COLUMN end_date TO updated_at;
 
 DROP TABLE notifications;
+
+ALTER TABLE absence_type_groups DROP COLUMN description;
+ALTER TABLE absence_type_groups_history DROP COLUMN description;

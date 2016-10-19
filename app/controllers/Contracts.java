@@ -380,7 +380,7 @@ public class Contracts extends Controller {
   /**
    * Salva il nuovo periodo ferie.
    *
-   * @param csp       nuovo periodo di presenza automatica.
+   * @param vp nuovo periodo ferie
    * @param confirmed se conferma ricevuta.
    */
   public static void saveContractVacationPeriod(@Valid VacationPeriod vp, boolean confirmed) {

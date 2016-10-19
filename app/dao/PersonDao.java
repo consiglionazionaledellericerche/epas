@@ -221,7 +221,8 @@ public final class PersonDao extends DaoBase {
 
   }
   
-  public List<Person> listForCompetence(Set<Office> offices, YearMonth yearMonth, CompetenceCode code) {
+  public List<Person> listForCompetence(
+      Set<Office> offices, YearMonth yearMonth, CompetenceCode code) {
     final QPerson person = QPerson.person;
     int year = yearMonth.getYear();
     int month = yearMonth.getMonthOfYear();
@@ -600,18 +601,6 @@ public final class PersonDao extends DaoBase {
     return query.list(person);
 
   }
-  
-  /**
-   * 
-   * @param code il competence_code da cercare
-   * @return la lista delle persone che hanno il codice di competenza code abilitato.
-   */
-//  public List<Person> peopleWithCompetenceCodeActive(CompetenceCode code) {
-//    final QPerson person = QPerson.person;
-//    JPQLQuery query = getQueryFactory().from(person).where(person.competenceCode.contains(code));
-//    return query.list(person);
-//  }
-
 
   /**
    * La query per la ricerca delle persone. Versione con JPQLQuery injettata per selezionare le
@@ -659,13 +648,20 @@ public final class PersonDao extends DaoBase {
     final QPerson person = QPerson.person;
     final QContract contract = QContract.contract;
 
-    final JPQLQuery query = getQueryFactory().from(person).leftJoin(person.contracts, contract)
-        .fetch().leftJoin(person.user, QUser.user)
-        .leftJoin(person.personCompetenceCodes, QPersonCompetenceCodes.personCompetenceCodes).fetch()
+    final JPQLQuery query = getQueryFactory().from(person)
+        
+        // join one to many or many to many (only one bag fetchable!!!)
+        .leftJoin(person.contracts, contract).fetch()
+        .leftJoin(person.personCompetenceCodes, QPersonCompetenceCodes.personCompetenceCodes)
+        .leftJoin(person.user, QUser.user)
+        // join one to one
         .leftJoin(person.reperibility, QPersonReperibility.personReperibility).fetch()
-        .leftJoin(person.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime)
-        .fetch().leftJoin(person.personShift, QPersonShift.personShift).fetch()
-        .leftJoin(person.qualification).fetch().orderBy(person.surname.asc(), person.name.asc())
+        .leftJoin(
+            person.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime).fetch()
+        .leftJoin(person.personShift, QPersonShift.personShift).fetch()
+        .leftJoin(person.qualification).fetch()
+        // order by
+        .orderBy(person.surname.asc(), person.name.asc())
         .distinct();
 
     final BooleanBuilder condition = new BooleanBuilder();
@@ -759,10 +755,8 @@ public final class PersonDao extends DaoBase {
       Optional<CompetenceCode> compCode) {
 
     if (compCode.isPresent()) {
-      final QPerson person = QPerson.person;
       final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
-      
-      condition.and(pcc.competenceCode.eq(compCode.get()).and(pcc.person.eq(person)));
+      condition.and(pcc.competenceCode.eq(compCode.get()));
     }
   }
 
@@ -867,7 +861,7 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
-   * Questo metodo ci è utile per popolare le select delle persone
+   * Questo metodo ci è utile per popolare le select delle persone.
    *
    * @param offices gli uffici di appartenenza delle persone richieste
    * @return la Lista delle persone appartenenti agli uffici specificati
@@ -890,25 +884,6 @@ public final class PersonDao extends DaoBase {
 
     return lightQuery.list(bean);
   }
-
-  /**
-   *
-   * @param offices
-   * @param onlyTechnician
-   * @param year
-   * @param month
-   * @param onlyOnCertificate
-   * @param code
-   * @return
-   */
-//  public List<Person> getPeopleWithOvertimeEnabled(Set<Office> offices, CompetenceCode code, List<Person> list) {
-//
-//    final QPerson person = QPerson.person;
-//    JPQLQuery query = getQueryFactory().from(person)
-//        .where(person.in(list).and(person.office.in(offices)
-//            .and(person.competenceCode.contains(code)))).orderBy(person.surname.asc());
-//    return query.list(person);
-//  }
 
   /**
    * Dto contenente le sole informazioni della persona richieste dalla select nel template menu.
