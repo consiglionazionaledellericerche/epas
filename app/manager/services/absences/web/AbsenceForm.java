@@ -98,9 +98,6 @@ public class AbsenceForm {
    */
   public boolean hasAbsenceTypeChoice() {
     int choices = absenceTypes.size();
-//    if (automaticChoiceExists) {
-//      choices++;
-//    }
     return choices > 1;
   }
   
@@ -119,6 +116,30 @@ public class AbsenceForm {
   
   public boolean hasToChoice() {
     return justifiedTypeSelected.name.equals(JustifiedTypeName.all_day);
+  }
+  
+  /**
+   * Le ore inseribili per questa richiesta.
+   * @return list
+   */
+  public List<Integer> selectableHours() {
+    List<Integer> hours = Lists.newArrayList();
+    for (int i = 0; i <= 7; i++) {
+      hours.add(i);
+    }
+    return hours;
+  }
+  
+  /**
+   * I minuti inseribili per questa richiesta.
+   * @return list
+   */
+  public List<Integer> selectableMinutes() {
+    List<Integer> hours = Lists.newArrayList();
+    for (int i = 0; i <= 59; i++) {
+      hours.add(i);
+    }
+    return hours;
   }
 
   /**
