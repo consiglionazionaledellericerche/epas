@@ -3,6 +3,14 @@ title:'Inserisci il quantitativo per la competenza ' + competence.competenceCode
 
 <div class="col-sm-2"></div>
 <div id="competenceData" class="col-sm-8">
+#{if competence.competenceCode.disabled}
+	#{alert color:'danger', textcolor:'dark'}
+	<p>Il codice di competenza <strong>${competence.competenceCode.code} - ${competence.competenceCode.description}</strong> risulta 
+	disabilitato. Non è possibile inserire ulteriori quantitativi per questo codice. <br>
+	Per poter inserire nuovi quantitativi occorre prima far abilitare prima il codice.</p>	
+	#{/alert}
+#{/if}
+#{else}
 #{include './_tutorialCodes.html' /}
   #{form action:@saveCompetence(), method:'POST', autocomplete:false,
   class:'form form-horizontal', 'data-async':'#page_content',
@@ -33,5 +41,6 @@ title:'Inserisci il quantitativo per la competenza ' + competence.competenceCode
 	#{/b.buttons}
 	  
   #{/form}
+#{/else}
 </div>
 #{/modalAsync}
