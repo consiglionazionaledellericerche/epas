@@ -1,8 +1,15 @@
-#{modalAsync id:'modalCompetenceCode', title: 'Abilita competenze per ' + person.fullname }
+#{modalAsync id:'modalCompetenceCode', title: 'Abilita competenze per ' + person.fullname + ' nel mese di ' + templateUtility.monthName(month) + ' ' + year}
 <div id="updateCompetenceModal" class="col-xs-8 col-xs-offset-2">
 	#{alert color:'info'}
-		Cliccando all'interno della finestra sottostante, selezionare le competenze che si intendono assegnare al dipendente o eventualmente rimuovere
-		quelle in precedenza assegnate e non più valide.
+		Cliccando all'interno della finestra sottostante, selezionare le competenze che si intendono assegnare al 
+		dipendente o eventualmente rimuovere
+		quelle in precedenza assegnate e non più valide.<br>
+		
+	#{/alert}
+	#{alert color: 'warning'}
+		<i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 
+		<strong>Attenzione:</strong> Se si intende cambiare la configurazione delle competenze assegnate per un mese 
+		in cui sono già stati inviati i dati ad attestati, il sistema impedirà tale modifica.
 	#{/alert}
   #{form action:@Competences.saveNewCompetenceConfiguration(), method:'POST', autocomplete:false,
   class:'form form-horizontal', 'data-async':'#page_content',
@@ -10,6 +17,7 @@
 
   #{f.selectModels 'codeListIds',
   items:templateUtility.allCodeList(), placeholder:'I codici di competenza' /}
+  
 
   #{if person?.persistent}
     	#{f.hidden 'personId', value:person.id /}
