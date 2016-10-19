@@ -7,24 +7,19 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gdata.util.common.base.Preconditions;
 
-import controllers.Security;
-
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
-import dao.CompetenceDao;
 import dao.PersonDao;
-import dao.PersonDayDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 
 import it.cnr.iit.epas.DateUtility;
 
-import jobs.chartJob;
+import jobs.ChartJob;
 
 import lombok.Getter;
 
-import manager.CompetenceManager;
 import manager.recaps.charts.RenderResult;
 import manager.recaps.charts.ResultFromFile;
 import manager.recaps.personstamping.PersonStampingDayRecap;
@@ -35,14 +30,11 @@ import manager.services.vacations.VacationsRecap;
 import models.CompetenceCode;
 import models.Contract;
 import models.ContractMonthRecap;
-import models.Office;
 import models.Person;
-import models.PersonDay;
 import models.WorkingTimeType;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.enumerate.CheckType;
-import models.enumerate.JustifiedTimeAtWork;
 import models.exports.PersonOvertime;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -236,7 +228,7 @@ public class ChartsManager {
       map.forEach((key, value) -> {
         final Person person = personDao.getPersonByNumber(key);
         if (person != null) {
-          promises.add(new chartJob(person, map.get(key)).now());
+          promises.add(new ChartJob(person, map.get(key)).now());
         }
       });
 

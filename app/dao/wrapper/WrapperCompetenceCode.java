@@ -14,7 +14,7 @@ import models.Office;
 import java.util.List;
 
 /**
- * @author alessandro
+ * @author alessandro.
  */
 public class WrapperCompetenceCode implements IWrapperCompetenceCode {
 

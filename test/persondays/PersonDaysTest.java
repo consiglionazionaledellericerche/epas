@@ -43,8 +43,7 @@ public class PersonDaysTest {
    */
   @Test
   public void test() {
-    
-    PersonDay previousForProgressive = new PersonDay(null, first, 0, 0, 60);
+
     PersonDay personDay = new PersonDay(null, second);
     
     List<Stamping> stampings = Lists.newArrayList();
@@ -52,6 +51,8 @@ public class PersonDaysTest {
     stampings.add(stampings(personDay, 16, 30, WayType.out, null));
     
     personDay.setStampings(stampings);
+    
+    PersonDay previousForProgressive = new PersonDay(null, first, 0, 0, 60);
     
     personDayManager.updateTimeAtWork(personDay, normalDay(), false, 
         startLunch, endLunch, startWork, endWork);
@@ -115,10 +116,9 @@ public class PersonDaysTest {
     stampings.add(stampings(personDay, 14, 00, WayType.in, lunchST));
     stampings.add(stampings(personDay, 17, 00, WayType.out, null));
     
+    personDay.setStampings(stampings);
     List<PairStamping> gapLunchPair = 
         personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
-    personDay.setStampings(stampings);
-     
 
     assertThat(gapLunchPair.size()).isEqualTo(1);
     assertThat(gapLunchPair.get(0).timeInPair).isEqualTo(60);
@@ -226,7 +226,7 @@ public class PersonDaysTest {
 
   /**
    * Supporto alla creazione di un WorkingTimeType da non mockare.
-   * @return
+   * @return WorkingTimeTypeDay di default (quelle Normale).
    */
   public WorkingTimeTypeDay normalDay() {
     WorkingTimeTypeDay wttd = new WorkingTimeTypeDay();
@@ -240,12 +240,6 @@ public class PersonDaysTest {
   
   /**
    * Supporto alla creazione di una stamping da non mockare.
-   * @param personDay
-   * @param hour
-   * @param minute
-   * @param way
-   * @param stampType
-   * @return
    */
   public Stamping stampings(PersonDay personDay, int hour, int minute, 
       WayType way, StampTypes stampType) {

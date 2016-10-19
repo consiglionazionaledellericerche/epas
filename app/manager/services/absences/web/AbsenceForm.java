@@ -6,8 +6,6 @@ import com.google.common.collect.Maps;
 
 import dao.absences.AbsenceComponentDao;
 
-import lombok.extern.slf4j.Slf4j;
-
 import manager.services.absences.AbsenceEngineUtility;
 import manager.services.absences.AbsenceMigration.DefaultGroup;
 
@@ -26,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
-@Slf4j
+//@Slf4j
 public class AbsenceForm {
   
   public Person person;
@@ -162,8 +160,6 @@ public class AbsenceForm {
       if (!groupInTab.previousGroupChecked.isEmpty()) {
         continue;
       }
-      
-      log.info("Aggiungo ai gruppi {}", groupInTab.description);
       
       // aggiungo la categoria alla mappa
       Set<CategoryGroupAbsenceType> categoriesSamePriority = 
