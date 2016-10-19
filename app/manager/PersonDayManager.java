@@ -272,6 +272,11 @@ public class PersonDayManager {
     return gapPairs;
   }
   
+  /**
+   * Calcola il tempo di permesso breve nel giorno.
+   * @param personDay personDay
+   * @return minuti
+   */
   public int shortPermissionTime(PersonDay personDay) {
     
     if (!StampTypes.PERMESSO_BREVE.isActive()) {
@@ -299,7 +304,7 @@ public class PersonDayManager {
     
     int gapTime = 0;
     for (PairStamping gapPair : allGapPairs) {
-      gapTime+= gapPair.timeInPair;
+      gapTime += gapPair.timeInPair;
     }
     
     return gapTime;
@@ -329,7 +334,8 @@ public class PersonDayManager {
           return personDay;
         }
         
-        //Questo e' il caso del codice 105BP che garantisce sia l'orario di lavoro che il buono pasto
+        //Questo e' il caso del codice 105BP che garantisce sia l'orario di lavoro 
+        // che il buono pasto
         // TODO: se è il 105BP perchè non controllo direttamente il codice? Mistero della fede.
         if (abs.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) {
           cleanTimeAtWork(personDay);
@@ -358,7 +364,8 @@ public class PersonDayManager {
 
         // Giustificativi grana minuti
         if (abs.justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
-          personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal() + abs.justifiedMinutes);
+          personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal() 
+              + abs.justifiedMinutes);
           continue;
         }
         
@@ -960,19 +967,27 @@ public class PersonDayManager {
       }
     }
     //(2) scarto le stamping di servizio che non appartengono ad alcuna coppia valida
-    List<Stamping> serviceStampingsInValidPair = Lists.newArrayList();
+    List<Stamping> serviceStampingsToCheck = Lists.newArrayList();
     for (Stamping stamping : serviceStampings) {
-      boolean belongToValidPair = false;
+      boolean belongToValidPairNotOutsite = false;
+      boolean belongToValidPairOutsite = false;
       for (PairStamping validPair : validPairs) {
         LocalDateTime outTime = validPair.second.date;
         LocalDateTime inTime = validPair.first.date;
         if (stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime)) {
-          belongToValidPair = true;
+          if (StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE.equals(validPair.second.stampType)
+              || StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE.equals(validPair.first.stampType)) {
+            belongToValidPairOutsite = true;
+          } else {
+            belongToValidPairNotOutsite = true;
+          }
           break;
         }
       }
-      if (belongToValidPair) {
-        serviceStampingsInValidPair.add(stamping);
+      if (belongToValidPairNotOutsite) {
+        serviceStampingsToCheck.add(stamping);
+      } else if (belongToValidPairOutsite) {
+        stamping.valid = true;         //capire se è corretto...
       } else {
         stamping.valid = false;
       }
@@ -983,7 +998,7 @@ public class PersonDayManager {
       LocalDateTime outTime = validPair.second.date;
       LocalDateTime inTime = validPair.first.date;
       List<Stamping> serviceStampingsInSinglePair = Lists.newArrayList();
-      for (Stamping stamping : serviceStampingsInValidPair) {
+      for (Stamping stamping : serviceStampingsToCheck) {
         if (stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime)) {
           serviceStampingsInSinglePair.add(stamping);
         }
@@ -1275,9 +1290,9 @@ public class PersonDayManager {
    * @param personDay personDay
    * @return esito
    */
-  private boolean allValidStampings(PersonDay personDay) {
-
-    return FluentIterable.from(personDay.stampings).filter(
+  public boolean allValidStampings(PersonDay personDay) {
+    List<Stamping> stampings = personDay.stampings;
+    return FluentIterable.from(stampings).filter(
         new Predicate<Stamping>() {
           @Override
           public boolean apply(Stamping input) {
@@ -1303,9 +1318,9 @@ public class PersonDayManager {
 
   /**
    * Se il giorno è festivo per la persona.
-   * @param person
-   * @param date
-   * @return
+   * @param person persona
+   * @param date data
+   * @return esito
    */
   public boolean isHoliday(Person person, LocalDate date) {
 
@@ -1325,27 +1340,6 @@ public class PersonDayManager {
 
     //tempo a lavoro
     return workingTimeTypeDao.isWorkingTypeTypeHoliday(date, workingTimeType.get());
-  }
-  
-  /**
-   * I giorni festivi della persona nella finestra specificata.
-   * @param person
-   * @param from
-   * @param to
-   * @return
-   */
-  public List<LocalDate> holidays(Person person, LocalDate from, LocalDate to) {
-
-    List<LocalDate> holidays = Lists.newArrayList();
-
-    LocalDate date = from;
-    while (!date.isAfter(to)) {
-      if (isHoliday(person, date)) {
-        holidays.add(date);
-        date = date.plusDays(1);
-      }
-    }
-    return holidays;
   }
 
 }
