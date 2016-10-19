@@ -26,7 +26,7 @@ import org.joda.time.YearMonth;
 import java.util.List;
 
 /**
- * @author alessandro
+ * @author alessandro.
  */
 public class WrapperPersonDay implements IWrapperPersonDay {
 

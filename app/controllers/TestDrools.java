@@ -11,7 +11,7 @@ import security.SecurityRules;
 import javax.inject.Inject;
 
 /**
- * @author cristian
+ * @author cristian.
  */
 @With(Resecure.class)
 public class TestDrools extends Controller {
