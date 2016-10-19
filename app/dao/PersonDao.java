@@ -40,6 +40,7 @@ import models.query.QPersonHourForOvertime;
 import models.query.QPersonReperibility;
 import models.query.QPersonShift;
 import models.query.QPersonShiftShiftType;
+import models.query.QQualification;
 import models.query.QUser;
 import models.query.QVacationPeriod;
 import models.query.QWorkingTimeType;
@@ -874,34 +875,61 @@ public final class PersonDao extends DaoBase {
     final QContract contract = QContract.contract;
     final QOffice office = QOffice.office;
     final QConfiguration config = QConfiguration.configuration;
-
-    final BooleanBuilder condition = new BooleanBuilder();
+    
+    final BooleanBuilder baseCondition = new BooleanBuilder();
 
     // Requisiti della Persona
-    condition.and(person.wantEmail.isTrue()); // la persona non ha l'invio mail disabilitato
+    baseCondition.and(person.wantEmail.isTrue()); // la persona non ha l'invio mail disabilitato
 
     // Requisiti sul contratto
-    condition.and(contract.onCertificate.isTrue());  // il contratto è attivo per l'invio attestati
+    // il contratto è attivo per l'invio attestati
+    baseCondition.and(contract.onCertificate.isTrue());  
     // il contratto deve essere attivo oggi
     final LocalDate today = LocalDate.now();
-    filterContract(condition, Optional.of(today), Optional.of(today));
+    filterContract(baseCondition, Optional.of(today), Optional.of(today));
 
+    final BooleanBuilder sendEmailCondition = new BooleanBuilder();
     // Requisiti sulla configurazione dell'office
     // L'ufficio ha l'invio mail attivo
-    condition.and(config.epasParam.eq(EpasParam.SEND_EMAIL).and(config.fieldValue.eq("true")))
-        // Se l'ufficio ha il parametro per l'autocertificazione disabilitato coinvolgo
-        // tutti i dipendenti
-        .and(config.epasParam.eq(EpasParam.TR_AUTOCERTIFICATION)
+    sendEmailCondition
+      .and(config.epasParam.eq(EpasParam.SEND_EMAIL).and(config.fieldValue.eq("true")));
+    // Se l'ufficio ha il parametro per l'autocertificazione disabilitato coinvolgo
+    // tutti i dipendenti
+    
+    final BooleanBuilder trAutoCertificationDisabledCondition = new BooleanBuilder();
+    trAutoCertificationDisabledCondition.and(config.epasParam.eq(EpasParam.TR_AUTOCERTIFICATION)
             .and(config.fieldValue.eq("false")));
-    //            .andAnyOf(config.fieldValue.eq("false"),
-    // Se il parametro è attivo escludo i tecnologi e i ricercatori
-    //                config.fieldValue.eq("true").and(qualification.qualification.gt(3))));
 
-    return queryFactory.from(person)
+    // Se il parametro è attivo escludo i tecnologi e i ricercatori
+    final BooleanBuilder trAutoCertificationEnabledCondition = new BooleanBuilder();
+    trAutoCertificationEnabledCondition.and(config.epasParam.eq(EpasParam.TR_AUTOCERTIFICATION)
+            .and(config.fieldValue.eq("true")).and(person.qualification.qualification.gt(3)));
+
+    JPQLQuery queryPersonSendEmailTrue = queryFactory.from(person)
         .leftJoin(person.contracts, contract)
         .leftJoin(person.office, office)
         .leftJoin(office.configurations, config)
-        .where(condition).list(person);
+        .where(baseCondition, sendEmailCondition);
+    
+    JPQLQuery personAutocertDisabled  = queryFactory.from(person)
+        .leftJoin(person.contracts, contract)
+        .leftJoin(person.office, office)
+        .leftJoin(office.configurations, config)
+        .where(baseCondition, trAutoCertificationDisabledCondition);
+    
+    JPQLQuery personAutocertEnabledQ3  = queryFactory.from(person)
+        .leftJoin(person.contracts, contract)
+        .leftJoin(person.office, office)
+        .leftJoin(office.configurations, config)
+        .where(baseCondition, trAutoCertificationEnabledCondition);
+    
+    return queryFactory.from(person)
+      .where(
+          person.id.in(queryPersonSendEmailTrue.list(person.id)), 
+          person.id.in(personAutocertDisabled.list(person.id))
+            .or(person.id.in(personAutocertEnabledQ3.list(person.id))))
+      .distinct().list(person);
+
   }
 
   /**
