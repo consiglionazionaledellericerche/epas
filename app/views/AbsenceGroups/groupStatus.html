@@ -73,8 +73,10 @@
       <tr class="bg-warning">
         <th>Data</th>
         <th>Assenza</th>
-        <th>Limite<br>Utilizzabile</th>
-        <th>Limite<br>Consumato</th>
+        #{if absencePeriod.isTakableWithLimit() }
+          <th>Limite<br>Utilizzabile</th>
+          <th>Limite<br>Consumato</th>
+        #{/if}
         <th>Completamento<br>Precedente<br></th>
         <th>Completamento<br>Assenza</th>
         <th>Completamento<br>Residuo<br></th>
@@ -91,8 +93,10 @@
           <td>
 	        #{absences.absence-popover absence:rowRecap.absence, groupSelected:absencePeriod.groupAbsenceType /}
           </td>
-          <td>${rowRecap.usableLimit}</td>
-          <td>${rowRecap.usableTaken}</td>
+          #{if absencePeriod.isTakableWithLimit() }
+            <td>${rowRecap.usableLimit}</td>
+            <td>${rowRecap.usableTaken}</td>
+          #{/if}
           <td>${rowRecap.consumedComplationBefore}</td>
           <td>${rowRecap.consumedComplationAbsence}</td>
           <td>${rowRecap.consumedComplationNext}</td>

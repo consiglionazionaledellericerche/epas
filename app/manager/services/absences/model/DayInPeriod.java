@@ -219,7 +219,7 @@ public class DayInPeriod {
     takenRow.groupAbsenceType = absencePeriod.groupAbsenceType;
     takenRow.absenceErrors = absencePeriod.errorsBox.absenceErrors(takenRow.absence);
     takenRow.absenceWarnings = absencePeriod.errorsBox.absenceWarnings(takenRow.absence);
-    if (absencePeriod.isTakable() && !absencePeriod.isTakableNoLimit()) {
+    if (absencePeriod.isTakableWithLimit()) {
       takenRow.usableColumn = true;
       if (!takenRow.onlyNotOnHoliday()) {
         takenRow.usableLimit = formatAmount(takenAbsence.periodResidualBefore(), 
@@ -238,7 +238,9 @@ public class DayInPeriod {
     complationRow.groupAbsenceType = absencePeriod.groupAbsenceType;
     complationRow.absenceErrors = absencePeriod.errorsBox.absenceErrors(complationRow.absence);
     complationRow.absenceWarnings = absencePeriod.errorsBox.absenceWarnings(complationRow.absence);
-    complationRow.usableColumn = true;
+    if (absencePeriod.isTakableWithLimit()) {
+      complationRow.usableColumn = true;
+    }
     complationRow.complationColumn = true;
     if (!complationRow.onlyNotOnHoliday()) {
       complationRow.usableLimit = formatAmount(takenComplation.periodResidualBefore(), 
