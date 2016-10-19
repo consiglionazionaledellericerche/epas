@@ -101,7 +101,7 @@ public class Competences extends Controller {
   private static CertificationDao certificationDao;
   @Inject
   private static PersonMonthRecapDao pmrDao;
-  
+
 
 
   /**
@@ -179,7 +179,7 @@ public class Competences extends Controller {
     manageCompetenceCode();
 
   }
-  
+
   /**
    * Nuovo gruppo di codici competenza.
    */
@@ -318,28 +318,27 @@ public class Competences extends Controller {
    * @param month il mese di riferimento
    */
   public static void saveNewCompetenceConfiguration(List<Long> codeListIds,
-      Long personId, int year, int month, LocalDate date) {
+      Long personId, int year, int month) {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
-    if (date == null) {
-      date = new LocalDate(year, month, 1);
-    }
-    
+
+    LocalDate date = new LocalDate(year, month, 1);
+
     List<Certification> certificationList = certificationDao.personCertifications(person, year, month);
     CertificatedData certificatedData = pmrDao.getPersonCertificatedData(person, month, year);
     if (!certificationList.isEmpty() || certificatedData != null) {
       flash.error("Non si può modificare una configurazione per un anno/mese in cui "
           + "sono già stati inviati gli attestati");
-      Competences.enabledCompetences(date.getYear(),
-          date.getMonthOfYear(),person.office.id);
+      Competences.enabledCompetences(year,
+          month,person.office.id);
     }
-    
+
     List<PersonCompetenceCodes> pccList = competenceCodeDao
         .listByPerson(person, Optional.fromNullable(date));
     List<CompetenceCode> codeToAdd = competenceManager.codeToSave(pccList, codeListIds);
     List<CompetenceCode> codeToRemove = competenceManager.codeToDelete(pccList, codeListIds);
-    
+
     competenceManager.persistChanges(person, codeToAdd, codeToRemove, date);
 
     flash.success(String.format("Aggiornate con successo le competenze per %s",
@@ -462,7 +461,7 @@ public class Competences extends Controller {
     }
     render("@editCompetence", competence, office, year, month, person);
   }
-  
+
   /**
    * genera la form di inserimento per le competenze.
    * @param competenceId l'id della competenza da aggiornare.
@@ -490,7 +489,7 @@ public class Competences extends Controller {
     Office office = competence.person.office;
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-    
+
     String result = "";
 
     if (!validation.hasErrors()) {
@@ -504,7 +503,7 @@ public class Competences extends Controller {
       response.status = 400;
       render("@editCompetence", competence, office);
     }
-    
+
 
     competenceManager.saveCompetence(competence, valueApproved);
     consistencyManager.updatePersonSituation(competence.person.id,
