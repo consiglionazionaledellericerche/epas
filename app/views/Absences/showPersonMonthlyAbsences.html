@@ -13,7 +13,7 @@ title:'Assenze mensili per ' + person.surname + ' ' + person.name }
 	#{list items:absenceToRender, as:'ab'}
 	<tr>
 		<td>${ab.personDay.date.getDayOfMonth()}</td>
-		<td>${ab.absenceType.code}</td>
+		<td>#{absences.absence-popover absence:ab /}</td>
 		<td>${ab.absenceType.description}</td>
 	</tr>
 	#{/list}

@@ -15,22 +15,15 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.QualificationDao;
-import dao.UserDao;
-import dao.wrapper.IWrapperFactory;
 
 import it.cnr.iit.epas.DateUtility;
 
 import manager.AbsenceManager;
-import manager.ConsistencyManager;
-import manager.NotificationManager;
-import manager.PersonDayManager;
-import manager.PersonManager;
 import manager.SecureManager;
 import manager.YearlyAbsencesManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.recaps.YearlyAbsencesRecap;
-import manager.recaps.personstamping.PersonStampingRecapFactory;
 
 import models.Office;
 import models.Person;
@@ -53,6 +46,7 @@ import play.data.validation.Valid;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.io.File;
@@ -81,31 +75,15 @@ public class Absences extends Controller {
   @Inject
   private static AbsenceDao absenceDao;
   @Inject
-  private static AbsenceManager absenceManager;
-  @Inject
   private static SecureManager secureManager;
   @Inject
   private static OfficeDao officeDao;
   @Inject
   private static YearlyAbsencesManager yearlyAbsencesManager;
   @Inject
-  private static PersonManager personManager;
-  @Inject
   private static PersonDayDao personDayDao;
   @Inject
   private static ConfigurationManager confManager;
-  @Inject
-  private static UserDao userDao;
-  @Inject
-  private static NotificationManager notificationManager;
-  @Inject
-  private static IWrapperFactory wrapperFactory;
-  @Inject
-  private static PersonStampingRecapFactory stampingsRecapFactory;
-  @Inject
-  private static ConsistencyManager consistencyManager;
-  @Inject
-  private static PersonDayManager personDayManager;
 
   /**
    * Le assenze della persona nel mese.
