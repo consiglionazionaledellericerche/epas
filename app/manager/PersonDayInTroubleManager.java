@@ -1,5 +1,6 @@
 package manager;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
@@ -29,13 +30,11 @@ import models.enumerate.Troubles;
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import play.libs.Mail;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -158,6 +157,8 @@ public class PersonDayInTroubleManager {
 
       for (PersonDayInTrouble pdt : pdList) {
 
+        // FIXME ma perchè cavolo dovrei fare questi controlli qui prima dell'invio mail?
+        // forse sarebbe meglio evitare che vengano creati PersonDayInTrouble fasulli.....
         final Optional<ContractStampProfile> csp = currentContract.get()
             .getContractStampProfileFromDate(pdt.personDay.date);
 
@@ -215,59 +216,45 @@ public class PersonDayInTroubleManager {
   private String troubleEmailBody(Person person, List<LocalDate> dates,
       List<Troubles> troubleCausesToSend) {
 
-    // FIXME trovare un modo più furbo per creare la lista delle date.
+    // FIXME per com'è strutturato ora è impossibile poter notificare nella stessa email
+    // problemi diversi in date diverse
 
-    List<LocalDate> dateFormat = new ArrayList<LocalDate>();
-    DateTimeFormatter fmt = DateTimeFormat.forPattern("dd-MM-YYYY");
-    String date = "";
-    for (LocalDate d : dates) {
+    final String dateFormatter = "dd/MM/YYYY";
 
-      MonthDay patron = (MonthDay) configurationManager
-          .configValue(person.office, EpasParam.DAY_OF_PATRON, d);
+    final StringBuilder message = new StringBuilder()
+        .append(String.format("Gentile %s,\r\n", person.fullName()))
+        .append("Nelle seguenti date: ");
 
-      if (!DateUtility.isGeneralHoliday(Optional.fromNullable(patron), d)) {
-        dateFormat.add(d);
-        String str = fmt.print(d);
-        date = date + str + ", ";
-      }
-    }
-    String incipit = "";
-    if (dateFormat.size() == 0) {
-      return "";
-    }
-    if (dateFormat.size() > 1) {
-      incipit = "Nei giorni: ";
-    }
-    if (dateFormat.size() == 1) {
-      incipit = "Nel giorno: ";
-    }
-    String message = "";
+    final String formattedDates = Joiner.on(", ").skipNulls()
+        .join(dates.stream().filter(localDate -> {
+          //FIXME Questo controllo qui cosa ci fa!?
+          final MonthDay patron = (MonthDay) configurationManager
+              .configValue(person.office, EpasParam.DAY_OF_PATRON, localDate);
+          //FIXME come sopra.....
+          return !DateUtility.isGeneralHoliday(Optional.fromNullable(patron), localDate);
+          // Ordino per data e riformatto le date
+        }).sorted().map(localDate -> localDate.toString(dateFormatter))
+            .collect(Collectors.toList()));
+
+    message.append(formattedDates).append("\r\n");
 
     // caso del Expandable
     if (troubleCausesToSend.contains(Troubles.NO_ABS_NO_STAMP)) {
-      message = "Gentile " + person.name + " " + person.surname
-          + "\r\n" + incipit + date
-          + " il sistema ePAS ha rilevato un caso di mancanza di timbrature e di codici di assenza."
-          + " \r\n "
-          + "La preghiamo di contattare l'ufficio del personale per regolarizzare la sua posizione."
-          + " \r\n"
-          + "Saluti \r\n"
-          + "Il team di ePAS";
+      message.append("Il sistema ePAS ha rilevato un caso di "
+              + "mancanza di timbrature e di codici di assenza.\r\n");
     }
 
     //caso del DarkNight
     if (troubleCausesToSend.contains(Troubles.UNCOUPLED_FIXED)) {
-      message = "Gentile " + person.name + " " + person.surname
-          + "\r\n" + incipit + date + " il sistema ePAS ha rilevato un caso di timbratura "
-          + "disaccoppiata. \r\n "
-          + "La preghiamo di contattare l'ufficio del personale per regolarizzare la sua "
-          + "posizione. \r\n"
-          + "Saluti \r\n"
-          + "Il team di ePAS";
-
+      message.append("Il sistema ePAS ha rilevato un caso di timbratura disaccoppiata.\r\n");
     }
 
-    return message;
+    message.append("La preghiamo di contattare l'ufficio del"
+        + " personale per regolarizzare la sua posizione.\r\n")
+        .append("\r\nSaluti,\r\n")
+        .append("Il team di ePAS");
+
+    return message.toString();
   }
 
   /**
