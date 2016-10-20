@@ -182,7 +182,8 @@ when
  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
  $target: Stamping()
  Office(persons.contains($target.getOwner())) from $uro.office
- $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save"), target == $target, granted == false )
+ $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"),
+  target == $target, granted == false )
 then
  $c.grant();
 end
