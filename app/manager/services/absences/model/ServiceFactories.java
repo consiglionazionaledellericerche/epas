@@ -356,6 +356,9 @@ public class ServiceFactories {
         return;
       }
       absencePeriod.addComplationAbsence(absence);
+      if (absencePeriod.compromisedTwoComplation) {
+        absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.CompromisedTwoComplation);
+      }
     }
 
     if (isReplacing) {

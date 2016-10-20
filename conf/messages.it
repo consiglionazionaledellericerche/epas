@@ -689,6 +689,7 @@ WayType.out= Uscita
 MissingReplacing=Manca il codice di rimpiazzamento.
 WrongReplacing=Il codice di rimpiazzamento presente non è quello corretto.
 CompromisedReplacing=La sequenza dei rimpiazzamenti è compromessa.
+CompromisedTwoComplation=Due assenze a completamento nello stesso giorno.
 LimitExceeded=Il tetto massimo utilizzabile per il periodo è stato superato.
 AllDayAlreadyExists=Codice che giustifica l'intera giornata già presente.
 NoChildExist=Figlio non presente in anagrafica o fuori età.
