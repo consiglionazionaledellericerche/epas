@@ -25,7 +25,7 @@ import javax.inject.Inject;
 @SuppressWarnings("rawtypes")
 @Slf4j
 // TODO decidere una programmazione precisa
-//@On("0 15 10 L-2 * ?")
+//@On("0 15 10 1-5,L-2 * ?")
 // i primi 5 giorni del mese e dal 25 all'ultimo giorno di ogni mese alle 15
 public class TrAutocertificationAlerts extends Job {
 
@@ -64,10 +64,11 @@ public class TrAutocertificationAlerts extends Job {
     // TODO decidere che tipo di problemi segnalare...
     personDayInTroubleManager.sendTroubleEmails(personDao.trWithAutocertificationOn(),
         from, to, ImmutableList.of(
-            Troubles.NO_ABS_NO_STAMP,
-            Troubles.UNCOUPLED_FIXED,
-            Troubles.UNCOUPLED_HOLIDAY,
-            Troubles.UNCOUPLED_WORKING));
+            Troubles.NO_ABS_NO_STAMP
+//            Troubles.UNCOUPLED_FIXED,
+//            Troubles.UNCOUPLED_HOLIDAY,
+//            Troubles.UNCOUPLED_WORKING
+        ));
 
     log.info("Concluso Job expandable");
   }
