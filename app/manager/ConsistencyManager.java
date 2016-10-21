@@ -99,7 +99,7 @@ public class ConsistencyManager {
       PersonDayInTroubleManager personDayInTroubleManager,
       ConfigurationManager configurationManager,
       StampTypeManager stampTypeManager,
-      
+
       AbsenceService absenceService,
       AbsenceComponentDao absenceComponentDao,
 
@@ -125,11 +125,10 @@ public class ConsistencyManager {
    * @param person    persona (se absent tutte)
    * @param user      utente loggato
    * @param fromDate  dalla data
-   * @param sendMail  se deve inviare le email sui giorni con problemi
    * @param onlyRecap se si vuole aggiornare solo i riepiloghi
    */
   public void fixPersonSituation(Optional<Person> person, Optional<User> user, LocalDate fromDate,
-      boolean sendMail, boolean onlyRecap) {
+      boolean onlyRecap) {
 
     Set<Office> offices = user.isPresent() ? secureManager.officesWriteAllowed(user.get())
         : Sets.newHashSet(officeDao.getAllOffices());
@@ -166,34 +165,7 @@ public class ConsistencyManager {
       JPA.em().clear();
 
     }
-    log.info("... Conclusa.");
-
-    if (sendMail
-        && LocalDate.now().getDayOfWeek() != DateTimeConstants.SATURDAY
-        && LocalDate.now().getDayOfWeek() != DateTimeConstants.SUNDAY) {
-
-      log.info("Inizia la parte di invio email...");
-
-      LocalDate begin = new LocalDate().minusMonths(1);
-      LocalDate end = new LocalDate().minusDays(1);
-
-      personList = personDao.list(Optional.<String>absent(), offices, false, fromDate,
-          LocalDate.now().minusDays(1), true).list();
-
-      try {
-        personDayInTroubleManager.sendTroubleEmails(personList, begin, end, Lists.newArrayList(
-            Troubles.UNCOUPLED_FIXED,
-            Troubles.UNCOUPLED_HOLIDAY,
-            Troubles.UNCOUPLED_WORKING));
-
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-      log.info("... Conclusa.");
-    }
-
     log.info("Conclusa procedura FixPersonsSituation con parametri!");
-
   }
 
   /**
@@ -347,7 +319,7 @@ public class ConsistencyManager {
     }
     // (3) Ricalcolo dei residui per mese
     populateContractMonthRecapByPerson(person, new YearMonth(from));
-    
+
     // (4) Scan degli errori sulle assenze
     absenceService.scanner(person, from);
 
@@ -384,6 +356,9 @@ public class ConsistencyManager {
   private void populatePersonDay(IWrapperPersonDay pd) {
 
     // isHoliday = personManager.isHoliday(this.value.person, this.value.date);
+
+    //FIXME ma siamo sicuri che sia una furbata azzerare completamente le informazioni del personday
+    //Solo perchè non ci serve più per fare i conti?
 
     // il contratto non esiste più nel giorno perchè è stata inserita data terminazione
     if (!pd.getPersonDayContract().isPresent()) {
@@ -438,7 +413,7 @@ public class ConsistencyManager {
 
     personDayManager.updateTicketAvailable(pd.getValue(), pd.getWorkingTimeTypeDay().get(),
         pd.isFixedTimeAtWork());
-    
+
     //Gestione permessi brevi 36 ore anno
     int timeShortPermission = personDayManager.shortPermissionTime(pd.getValue());
     Absence shortPermission = null;
