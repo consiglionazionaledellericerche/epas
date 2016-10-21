@@ -1,4 +1,4 @@
-package manager.services.absences.web;
+package manager.services.absences;
 
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
@@ -6,13 +6,11 @@ import com.google.common.collect.Maps;
 
 import dao.absences.AbsenceComponentDao;
 
-import manager.services.absences.AbsenceEngineUtility;
-import manager.services.absences.AbsenceMigration.DefaultGroup;
-
 import models.Person;
 import models.absences.AbsenceType;
 import models.absences.CategoryGroupAbsenceType;
 import models.absences.GroupAbsenceType;
+import models.absences.GroupAbsenceType.DefaultGroup;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 
@@ -29,7 +27,12 @@ public class AbsenceForm {
   
   public Person person;
   
-  //tab
+  //permission check
+  public List<GroupAbsenceType> groupsPermitted = Lists.newArrayList();
+  public Set<AbsenceInsertTab> tabsVisibile = Sets.newHashSet();
+  boolean permissionDenied = false;
+  
+  //tab selected
   public AbsenceInsertTab absenceInsertTab;
   
   //switch group
@@ -61,88 +64,6 @@ public class AbsenceForm {
   public Integer hours = 0;
   
   /**
-   * Le categorie (ordinate per priorità).
-   * @return list
-   */
-  public List<CategoryGroupAbsenceType> categories() {
-    List<CategoryGroupAbsenceType> categories = Lists.newArrayList();
-    for (Set<CategoryGroupAbsenceType> set : categoriesByPriority.values()) {
-      categories.addAll(set);
-    }
-    return categories;
-  }
-  
-  public Set<GroupAbsenceType> groupsForCategory(CategoryGroupAbsenceType category) {
-    return groupsByCategory.get(category);
-  }
-  
-  /**
-   * I gruppi.
-   * @return list
-   */
-  public List<GroupAbsenceType> groups() {
-    List<GroupAbsenceType> groups = Lists.newArrayList();
-    for (Set<GroupAbsenceType> set : this.groupsByCategory.values()) {
-      groups.addAll(set);
-    }
-    return groups;
-  }
-  
-  public boolean hasGroupChoice() {
-    return groups().size() > 1;
-  }
-  
-  /**
-   * Se la form ha una scelta sul tipo assenza.
-   * @return esito
-   */
-  public boolean hasAbsenceTypeChoice() {
-    int choices = absenceTypes.size();
-    return choices > 1;
-  }
-  
-  public AbsenceType theOnlyAbsenceType() {
-    Verify.verify(!hasAbsenceTypeChoice());
-    return this.absenceTypes.get(0);
-  }
-  
-  public boolean hasJustifiedTypeChoice() {
-    return justifiedTypes.size() > 1;
-  }
-  
-  public boolean hasHourMinutesChoice() {
-    return justifiedTypeSelected.name.equals(JustifiedTypeName.specified_minutes);
-  }
-  
-  public boolean hasToChoice() {
-    return justifiedTypeSelected.name.equals(JustifiedTypeName.all_day);
-  }
-  
-  /**
-   * Le ore inseribili per questa richiesta.
-   * @return list
-   */
-  public List<Integer> selectableHours() {
-    List<Integer> hours = Lists.newArrayList();
-    for (int i = 0; i <= 7; i++) {
-      hours.add(i);
-    }
-    return hours;
-  }
-  
-  /**
-   * I minuti inseribili per questa richiesta.
-   * @return list
-   */
-  public List<Integer> selectableMinutes() {
-    List<Integer> hours = Lists.newArrayList();
-    for (int i = 0; i <= 59; i++) {
-      hours.add(i);
-    }
-    return hours;
-  }
-
-  /**
    * Constructor.
    * @param person person
    * @param from from 
@@ -155,10 +76,10 @@ public class AbsenceForm {
    * @param absenceComponentDao inj
    * @param absenceEngineUtility inj
    */
-  public AbsenceForm(Person person, LocalDate from, LocalDate to, 
+  protected AbsenceForm(Person person, LocalDate from, LocalDate to, 
       GroupAbsenceType groupAbsenceType, 
       AbsenceType absenceType, JustifiedType justifiedType, 
-      Integer hours, Integer minutes, 
+      Integer hours, Integer minutes, List<GroupAbsenceType> groupsPermitted,
       AbsenceComponentDao absenceComponentDao, AbsenceEngineUtility absenceEngineUtility) {   
     
     this.person = person;
@@ -169,14 +90,17 @@ public class AbsenceForm {
     } else {
       this.to = from;
     }
+    this.groupsPermitted = groupsPermitted;
     
+    //calcolo delle tab visibili
+    this.setTabsVisible();
+
+    // generazione della lista dei gruppi della richiesta
     this.absenceInsertTab = AbsenceInsertTab.fromGroup(groupAbsenceType);
-    
-    // generazione della lista dei gruppi 
-    
+
     List<GroupAbsenceType> personGroupsInTab = absenceComponentDao
         .groupsAbsenceTypeByName(this.absenceInsertTab.groupNames);
-    
+
     for (GroupAbsenceType groupInTab : personGroupsInTab) {
       if (!groupInTab.previousGroupChecked.isEmpty()) {
         continue;
@@ -259,6 +183,105 @@ public class AbsenceForm {
 
     return;
   }
+  
+  /**
+   * Le categorie (ordinate per priorità).
+   * @return list
+   */
+  public List<CategoryGroupAbsenceType> categories() {
+    List<CategoryGroupAbsenceType> categories = Lists.newArrayList();
+    for (Set<CategoryGroupAbsenceType> set : categoriesByPriority.values()) {
+      categories.addAll(set);
+    }
+    return categories;
+  }
+  
+  public Set<GroupAbsenceType> groupsForCategory(CategoryGroupAbsenceType category) {
+    return groupsByCategory.get(category);
+  }
+  
+  /**
+   * I gruppi.
+   * @return list
+   */
+  public List<GroupAbsenceType> groups() {
+    List<GroupAbsenceType> groups = Lists.newArrayList();
+    for (Set<GroupAbsenceType> set : this.groupsByCategory.values()) {
+      groups.addAll(set);
+    }
+    return groups;
+  }
+  
+  public boolean hasGroupChoice() {
+    return groups().size() > 1;
+  }
+  
+  /**
+   * Se la form ha una scelta sul tipo assenza.
+   * @return esito
+   */
+  public boolean hasAbsenceTypeChoice() {
+    int choices = absenceTypes.size();
+    return choices > 1;
+  }
+  
+  public AbsenceType theOnlyAbsenceType() {
+    Verify.verify(!hasAbsenceTypeChoice());
+    return this.absenceTypes.get(0);
+  }
+  
+  public boolean hasJustifiedTypeChoice() {
+    return justifiedTypes.size() > 1;
+  }
+  
+  public boolean hasHourMinutesChoice() {
+    return justifiedTypeSelected.name.equals(JustifiedTypeName.specified_minutes);
+  }
+  
+  public boolean hasToChoice() {
+    return justifiedTypeSelected.name.equals(JustifiedTypeName.all_day);
+  }
+  
+  /**
+   * Le ore inseribili per questa richiesta.
+   * @return list
+   */
+  public List<Integer> selectableHours() {
+    List<Integer> hours = Lists.newArrayList();
+    for (int i = 0; i <= 7; i++) {
+      hours.add(i);
+    }
+    return hours;
+  }
+  
+  /**
+   * I minuti inseribili per questa richiesta.
+   * @return list
+   */
+  public List<Integer> selectableMinutes() {
+    List<Integer> hours = Lists.newArrayList();
+    for (int i = 0; i <= 59; i++) {
+      hours.add(i);
+    }
+    return hours;
+  }
+  
+  /**
+   * Setter per le tab visibili a partire dai groupsPermitted.
+   */
+  private void setTabsVisible() {
+    this.tabsVisibile = Sets.newHashSet();
+    for (GroupAbsenceType group : this.groupsPermitted) {
+      for (AbsenceInsertTab tab : AbsenceInsertTab.values()) {
+        if (this.tabsVisibile.contains(tab) || tab.label == null) {
+          continue;
+        }
+        if (tab.groupNames.contains(group.name)) {
+          this.tabsVisibile.add(tab);
+        }
+      }
+    }
+  }
 
   /**
    * Modella la tab in inserimento assenze. E' una versione provvisoria da analizzare e 
@@ -268,10 +291,10 @@ public class AbsenceForm {
    */
   public static enum AbsenceInsertTab {
 
-    mission(Lists.newArrayList(DefaultGroup.MISSIONE.name())),
-    vacation(Lists.newArrayList(DefaultGroup.FERIE_CNR.name())),
-    compensatory(Lists.newArrayList(DefaultGroup.RIPOSI_CNR.name())),
-    automatic(Lists.newArrayList(DefaultGroup.PB.name())),
+    mission(Lists.newArrayList(DefaultGroup.MISSIONE.name()), "Missione"),
+    vacation(Lists.newArrayList(DefaultGroup.FERIE_CNR.name()), "Ferie e Festività Soppr."),
+    compensatory(Lists.newArrayList(DefaultGroup.RIPOSI_CNR.name()), "Riposo Compensativo"),
+    automatic(Lists.newArrayList(DefaultGroup.PB.name()), null),
     other(Lists.newArrayList(
         DefaultGroup.G_661.name(), 
         DefaultGroup.G_89.name(), DefaultGroup.G_09.name(),
@@ -289,14 +312,16 @@ public class AbsenceForm {
         DefaultGroup.MALATTIA_FIGLIO_3_12.name(),
         DefaultGroup.MALATTIA_FIGLIO_3_13.name(),
         DefaultGroup.MALATTIA_FIGLIO_3_14.name(),
-        DefaultGroup.EMPLOYEE.name(),
         DefaultGroup.ALTRI.name(), DefaultGroup.G_95.name()
-        ));
+        ), "Altre Tipologie"),
+    employee(Lists.newArrayList(DefaultGroup.EMPLOYEE.name()), "Codici per dipendenti");
 
     public List<String> groupNames;
+    public String label;
 
-    private AbsenceInsertTab(List<String> groupNames) {
+    private AbsenceInsertTab(List<String> groupNames, String label) {
       this.groupNames = groupNames;
+      this.label = label;
     }
 
     /**
@@ -312,11 +337,10 @@ public class AbsenceForm {
       }
       return null;
     }
-
+    
     public static AbsenceInsertTab defaultTab() {
       return mission;
     }
-
   }
 
 }
