@@ -51,7 +51,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -232,7 +231,7 @@ public class Administration extends Controller {
     if (person.isPersistent()) {
       optPerson = Optional.fromNullable(person);
     }
-    consistencyManager.fixPersonSituation(optPerson, Security.getUser(), date, false, onlyRecap);
+    consistencyManager.fixPersonSituation(optPerson, Security.getUser(), date, onlyRecap);
 
     flash.success("Esecuzione terminata");
 
@@ -331,6 +330,10 @@ public class Administration extends Controller {
     utilities();
   }
 
+  /**
+   * Riformatta nome e cognome di tutte le persone in minuscolo con la prima lettera maiuscola
+   * (Es. Mario Rossi).
+   */
   public static void capitalizePeople() {
 
     List<Person> people = Person.findAll();
@@ -348,6 +351,9 @@ public class Administration extends Controller {
 
   }
 
+  /**
+   * Mostra tutti i parametri di configurazione del play.
+   */
   public static void playConfiguration() {
     Set<Entry<Object, Object>> entries = Sets.newHashSet();
     Play.configuration.entrySet().forEach(e -> {
@@ -390,11 +396,20 @@ public class Administration extends Controller {
     render("@data", entries);
   }
 
+  /**
+   * Render del modale per l'aggiunta di un nuovo parametro di configurazione.
+   */
   public static void addConfiguration() {
     render();
   }
 
-  public static void saveConfiguration(@Required String name, @Required String value, 
+  /**
+   *
+   * @param name  Nome del parametro
+   * @param value Valore del parametro
+   * @param newParam  booleano che discrimina un nuovo inserimento da una modifica.
+   */
+  public static void saveConfiguration(@Required String name, @Required String value,
       boolean newParam) {
     if (Validation.hasErrors()) {
       response.status = 400;
@@ -455,10 +470,17 @@ public class Administration extends Controller {
     redirect(Play.ctxPath + "/");
   }
 
+  /**
+   * Sostituisce il dominio email di tutte le persone dell'ufficio specificato.
+   *
+   * @param office  Ufficio interessato.
+   * @param domain  nuovo dominio
+   * @param sendMail booleano per effettuare l'invio email d'avviso di creazione delle persone.
+   */
   public static void changePeopleEmailDomain(@Required Office office, @Required String domain,
       boolean sendMail) {
 
-    final Pattern domainPattern = 
+    final Pattern domainPattern =
         Pattern.compile("(?:[\\w](?:[\\w-]*[\\w])?\\.)+[a-zA-Z0-9](?:[\\w-]*[\\w])?");
 
     if (!Strings.isNullOrEmpty(domain) && domain.contains("@")) {
@@ -487,18 +509,20 @@ public class Administration extends Controller {
 
     utilities();
   }
-  
-  
+
+  /**
+   * renderizza gli indirizzi email di tutti gli amministratori sul sistema.
+   */
   public static void administratorsEmails() {
-    
+
     List<UsersRolesOffices> uros = UsersRolesOffices.findAll();
-    
-    List<String> emails = uros.stream().filter(uro -> {
-      return uro.role.name.equals(Role.PERSONNEL_ADMIN) && uro.user.person != null;
-    }).map(uro -> uro.user.person.email).collect(Collectors.toList());
-    
+
+    List<String> emails = uros.stream().filter(uro ->
+        uro.role.name.equals(Role.PERSONNEL_ADMIN) && uro.user.person != null)
+        .map(uro -> uro.user.person.email).distinct().collect(Collectors.toList());
+
     renderText(emails);
-    
+
   }
 
 }

@@ -39,7 +39,7 @@ public class PersonTroublesInMonthRecap {
 
     this.person = person;
     List<PersonDayInTrouble> troubles = personDayInTroubleDao.getPersonDayInTroubleInPeriod(person, 
-        Optional.fromNullable(monthBegin), Optional.fromNullable(monthEnd));
+        Optional.fromNullable(monthBegin), Optional.fromNullable(monthEnd),Optional.absent());
 
 
     for (PersonDayInTrouble trouble : troubles) {
