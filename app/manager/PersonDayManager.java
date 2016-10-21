@@ -1277,13 +1277,8 @@ public class PersonDayManager {
    */
   private boolean allValidStampings(PersonDay personDay) {
 
-    return FluentIterable.from(personDay.stampings).filter(
-        new Predicate<Stamping>() {
-          @Override
-          public boolean apply(Stamping input) {
-            return !input.valid;
-          }
-        }).isEmpty();
+    return !personDay.stampings.stream().filter(stamping -> !stamping.isValid()).findAny()
+        .isPresent();
   }
 
   /**
