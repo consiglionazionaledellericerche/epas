@@ -357,6 +357,9 @@ public class ConsistencyManager {
 
     // isHoliday = personManager.isHoliday(this.value.person, this.value.date);
 
+    //FIXME ma siamo sicuri che sia una furbata azzerare completamente le informazioni del personday
+    //Solo perchè non ci serve più per fare i conti?
+
     // il contratto non esiste più nel giorno perchè è stata inserita data terminazione
     if (!pd.getPersonDayContract().isPresent()) {
       pd.getValue().isHoliday = false;

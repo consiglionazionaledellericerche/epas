@@ -64,10 +64,7 @@ public class DarkNightJob extends Job {
       log.info("Inizia la parte di invio email...");
 
       personDayInTroubleManager.sendTroubleEmails(personDao.eligiblesForSendingAlerts(),
-          begin, end, ImmutableList.of(
-              Troubles.UNCOUPLED_FIXED,
-              Troubles.UNCOUPLED_HOLIDAY,
-              Troubles.UNCOUPLED_WORKING));
+          begin, end, ImmutableList.of(Troubles.UNCOUPLED_WORKING));
     }
 
     log.info("Concluso DarkNightJob");
