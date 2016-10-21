@@ -31,7 +31,7 @@ import it.cnr.iit.epas.DateUtility;
 import manager.SecureManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
-import manager.services.absences.web.AbsenceForm.AbsenceInsertTab;
+import manager.services.absences.AbsenceForm.AbsenceInsertTab;
 
 import models.BadgeReader;
 import models.BadgeSystem;

@@ -1,23 +1,17 @@
+#{if _absenceRequestForm.tabsVisibile}
 <div id="container-nav-tabs" class="container">
   <ul class="nav nav-tabs">
-
-    <li #{if _absenceRequestForm.absenceInsertTab.equals(manager.services.absences.web.AbsenceForm.AbsenceInsertTab.mission)} class="active" #{/if}>
-      <a data-async="#absenceData" href="@{AbsenceGroups.insert(_absenceRequestForm.person.id, _absenceRequestForm.from.format(), manager.services.absences.web.AbsenceForm.AbsenceInsertTab.mission)}">Missione</a>
-    </li>
-    <li #{if _absenceRequestForm.absenceInsertTab.equals(manager.services.absences.web.AbsenceForm.AbsenceInsertTab.vacation)} class="active" #{/if}>
-      <a data-async="#absenceData" href="@{AbsenceGroups.insert(_absenceRequestForm.person.id, _absenceRequestForm.from.format(), manager.services.absences.web.AbsenceForm.AbsenceInsertTab.vacation)}">Ferie e Festività Soppr.</a>
-    </li>
-    <li #{if _absenceRequestForm.absenceInsertTab.equals(manager.services.absences.web.AbsenceForm.AbsenceInsertTab.compensatory)} class="active" #{/if}>
-      <a data-async="#absenceData" href="@{AbsenceGroups.insert(_absenceRequestForm.person.id, _absenceRequestForm.from.format(), manager.services.absences.web.AbsenceForm.AbsenceInsertTab.compensatory)}">Riposo Compensativo</a>
-    </li>
-    <li #{if _absenceRequestForm.absenceInsertTab.equals(manager.services.absences.web.AbsenceForm.AbsenceInsertTab.other)} class="active" #{/if}>
-      <a data-async="#absenceData" href="@{AbsenceGroups.insert(_absenceRequestForm.person.id, _absenceRequestForm.from.format(), manager.services.absences.web.AbsenceForm.AbsenceInsertTab.other)}">Altre Tipologie</a>
-    </li>
-*{
-    <li #{if _absenceRequestForm.absenceInsertTab.equals(manager.services.absences.web.AbsenceForm.AbsenceInsertTab.employee)} class="active" #{/if}>
-    <a data-async="#absenceData" href="@{AbsenceGroups.insert(_absenceRequestForm.person.id, _absenceRequestForm.from.format(), manager.services.absences.web.AbsenceForm.AbsenceInsertTab.employee)}">Codici Per Dipendenti</a>
-    </li>
-   }*
+  
+  #{list items:manager.services.absences.AbsenceForm.AbsenceInsertTab.values(), as:'tab' }
+     #{if _absenceRequestForm.tabsVisibile.contains(tab) }
+       <li #{if _absenceRequestForm.absenceInsertTab.equals(tab)} class="active" #{/if}>
+         <a data-async="#absenceData" 
+         href="@{AbsenceGroups.insert(_absenceRequestForm.person.id, _absenceRequestForm.from.format(), tab)}">
+         ${tab.label}</a>
+       </li>
+     #{/if}
+  #{/list}
   </ul>
 </div>
 <br>
+#{/if}
