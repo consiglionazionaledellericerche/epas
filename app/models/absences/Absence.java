@@ -267,4 +267,16 @@ public class Absence extends BaseModel {
   public YearMonth getYearMonth() {
     return new YearMonth(personDay.date.getYear(),personDay.date.getMonthOfYear());
   }
+
+  /**
+   * Al momento viene usato solo nella drools EmployeeCanEditAbsence per fare le verifiche
+   * sugli inserimenti delle assenze dei dipendenti.
+   * Da rimuovere appena si crea il nuovo metodo che fa dei controlli utilizzando la nuova
+   * modellazione dei gruppi dei codici di assenza
+   *
+   * @return la stringa del codice di assenza.
+   */
+  public String getCode() {
+    return absenceType.code;
+  }
 }

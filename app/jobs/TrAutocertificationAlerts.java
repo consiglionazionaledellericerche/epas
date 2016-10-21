@@ -22,19 +22,20 @@ import javax.inject.Inject;
  * @author daniele
  * @since 20/10/16.
  */
-@SuppressWarnings("rawtypes")
 @Slf4j
 @On("0 0 15 ? * MON-FRI")
 public class TrAutocertificationAlerts extends Job {
 
-  private static final String JOBS_CONF = "jobs.active";
-  // i primi 5 giorni del mese e dal 25 all'ultimo giorno di ogni mese alle 15
-  private static final int FIRST_DAY = 25;
-  private static final int LATEST_DAY = 5;
   @Inject
   static PersonDayInTroubleManager personDayInTroubleManager;
   @Inject
   static PersonDao personDao;
+
+
+  private static final String JOBS_CONF = "jobs.active";
+  // i primi 5 giorni del mese e dal 25 all'ultimo giorno di ogni mese alle 15, ma non nei weekend
+  private static final int FIRST_DAY = 25;
+  private static final int LATEST_DAY = 5;
 
   /**
    * Esecuzione Job.
