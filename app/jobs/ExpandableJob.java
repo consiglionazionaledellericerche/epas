@@ -1,17 +1,13 @@
 package jobs;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableList;
 
-import dao.OfficeDao;
 import dao.PersonDao;
 
 import lombok.extern.slf4j.Slf4j;
 
 import manager.PersonDayInTroubleManager;
 
-import models.Person;
 import models.enumerate.Troubles;
 
 import org.joda.time.LocalDate;
@@ -19,8 +15,6 @@ import org.joda.time.LocalDate;
 import play.Play;
 import play.jobs.Job;
 import play.jobs.On;
-
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -32,12 +26,13 @@ public class ExpandableJob extends Job {
 
   private static final String JOBS_CONF = "jobs.active";
   @Inject
-  private static PersonDayInTroubleManager personDayInTroubleManager;
+  static PersonDayInTroubleManager personDayInTroubleManager;
   @Inject
-  private static OfficeDao officeDao;
-  @Inject
-  private static PersonDao personDao;
+  static PersonDao personDao;
 
+  /**
+   * Esecuzione Job.
+   */
   public void doJob() {
 
     // in modo da inibire l'esecuzione dei job in base alla configurazione
@@ -48,24 +43,11 @@ public class ExpandableJob extends Job {
 
     log.info("Start Job expandable");
 
-    LocalDate fromDate = LocalDate.now().minusMonths(2);
-    LocalDate toDate = LocalDate.now().minusDays(1);
+    final LocalDate fromDate = LocalDate.now().minusMonths(2);
+    final LocalDate toDate = LocalDate.now().minusDays(1);
 
-    List<Person> personList = personDao.list(
-            Optional.<String>absent(),
-            Sets.newHashSet(officeDao.getAllOffices()),
-            false,
-            fromDate,
-            toDate,
-            true).list();
-
-    try {
-      personDayInTroubleManager.sendTroubleEmails(personList, fromDate, toDate, Lists.newArrayList(
-          Troubles.NO_ABS_NO_STAMP));
-      
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    personDayInTroubleManager.sendTroubleEmails(personDao.eligiblesForSendingAlerts(),
+        fromDate, toDate, ImmutableList.of(Troubles.NO_ABS_NO_STAMP));
 
     log.info("Concluso Job expandable");
   }

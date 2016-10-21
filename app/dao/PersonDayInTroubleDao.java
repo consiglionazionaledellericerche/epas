@@ -10,6 +10,7 @@ import com.mysema.query.jpa.JPQLQueryFactory;
 
 import models.Person;
 import models.PersonDayInTrouble;
+import models.enumerate.Troubles;
 import models.query.QPersonDayInTrouble;
 
 import org.joda.time.LocalDate;
@@ -31,7 +32,8 @@ public class PersonDayInTroubleDao extends DaoBase {
    *     (fixed = false).
    */
   public List<PersonDayInTrouble> getPersonDayInTroubleInPeriod(
-      Person person, Optional<LocalDate> begin, Optional<LocalDate> end) {
+      Person person, Optional<LocalDate> begin, Optional<LocalDate> end,
+      Optional<List<Troubles>> troubles) {
 
     QPersonDayInTrouble pdit = QPersonDayInTrouble.personDayInTrouble;
 
@@ -41,6 +43,9 @@ public class PersonDayInTroubleDao extends DaoBase {
     }
     if (end.isPresent()) {
       conditions.and(pdit.personDay.date.loe(end.get()));
+    }
+    if (troubles.isPresent()) {
+      conditions.and(pdit.cause.in(troubles.get()));
     }
 
     final JPQLQuery query = getQueryFactory().from(pdit).where(conditions);
