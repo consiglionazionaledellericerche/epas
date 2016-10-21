@@ -5,7 +5,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 import dao.PersonDayInTroubleDao;
 import dao.wrapper.IWrapperContract;
@@ -21,7 +20,6 @@ import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 
 import models.Contract;
-import models.ContractStampProfile;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
@@ -29,7 +27,6 @@ import models.enumerate.Troubles;
 
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.LocalDate;
-import org.joda.time.MonthDay;
 
 import play.libs.Mail;
 
@@ -96,18 +93,6 @@ public class PersonDayInTroubleManager {
    */
   public void fixTrouble(final PersonDay pd, final Troubles cause) {
 
-    // Questo codice schianta se si fa una remove e si continua l'iterazione
-    //
-    //  for(PersonDayInTrouble pdt : pd.troubles){
-    //    if( pdt.cause.equals(cause)){
-    //      pd.troubles.remove(pdt);
-    //      pdt.delete();
-    //
-    //      log.info("Rimosso PersonDayInTrouble {} - {} - {}",
-    //        pd.person.getFullname(), pd.date, cause);
-    //     }
-    //  }
-
     Iterables.removeIf(pd.troubles, new Predicate<PersonDayInTrouble>() {
       @Override
       public boolean apply(PersonDayInTrouble pdt) {
@@ -150,26 +135,10 @@ public class PersonDayInTroubleManager {
 
       List<PersonDayInTrouble> pdList = personDayInTroubleDao.getPersonDayInTroubleInPeriod(person,
           Optional.fromNullable(intervalToCheck.getBegin()),
-          Optional.fromNullable(intervalToCheck.getEnd()));
+          Optional.fromNullable(intervalToCheck.getEnd()),
+          Optional.of(troubleCausesToSend));
 
-      // Selezione dei personDayInTroubles da inviare ...
-      List<LocalDate> troublesDateToSend = Lists.newArrayList();
-
-      for (PersonDayInTrouble pdt : pdList) {
-
-        // FIXME ma perchè cavolo dovrei fare questi controlli qui prima dell'invio mail?
-        // forse sarebbe meglio evitare che vengano creati PersonDayInTrouble fasulli.....
-        final Optional<ContractStampProfile> csp = currentContract.get()
-            .getContractStampProfileFromDate(pdt.personDay.date);
-
-        if (!pdt.personDay.isHoliday
-            && !(csp.isPresent() && csp.get().fixedworkingtime)
-            && troubleCausesToSend.contains(pdt.cause)) {
-          troublesDateToSend.add(pdt.personDay.date);
-        }
-      }
-
-      if (troublesDateToSend.isEmpty()) {
+      if (pdList.isEmpty()) {
         log.info("{} non ha problemi da segnalare.", person.getFullname());
         continue;
       }
@@ -186,11 +155,11 @@ public class PersonDayInTroubleManager {
         }
         simpleEmail.addTo(person.email);
         simpleEmail.setSubject("ePas Controllo timbrature");
-        simpleEmail.setMsg(troubleEmailBody(person, troublesDateToSend, troubleCausesToSend));
+        simpleEmail.setMsg(troubleEmailBody(person, pdList, troubleCausesToSend));
         Mail.send(simpleEmail);
 
-        log.info("Inviata mail a {} contenente le date da controllare : {}",
-            person.getFullname(), troublesDateToSend);
+        log.debug("Inviata mail a {} per segnalare i problemi {}",
+            person.getFullname(), troubleCausesToSend);
 
         // Imposto il campo e-mails inviate ...
         for (PersonDayInTrouble pd : pdList) {
@@ -200,7 +169,7 @@ public class PersonDayInTroubleManager {
 
       } catch (Exception e) {
         log.error("sendEmailToPerson({}, {}, {}): fallito invio email per {}",
-            troublesDateToSend, person, troubleCausesToSend, person.getFullname());
+            pdList, person, troubleCausesToSend, person.getFullname());
         log.error(e.getStackTrace().toString());
       }
     }
@@ -209,47 +178,52 @@ public class PersonDayInTroubleManager {
   /**
    * Formatta il corpo della email da inviare al dipendente con i suoi troubles.
    * @param person persona 
-   * @param dates le date da segnalare nel corpo.
+   * @param pdtList la lista dei personDaysInTrouble da segnalare.
    * @param troubleCausesToSend i troubles da inviare.
    * @return il corpo
    */
-  private String troubleEmailBody(Person person, List<LocalDate> dates,
+  private String troubleEmailBody(Person person, List<PersonDayInTrouble> pdtList,
       List<Troubles> troubleCausesToSend) {
-
-    // FIXME per com'è strutturato ora è impossibile poter notificare nella stessa email
-    // problemi diversi in date diverse
 
     final String dateFormatter = "dd/MM/YYYY";
 
     final StringBuilder message = new StringBuilder()
-        .append(String.format("Gentile %s,\r\n", person.fullName()))
-        .append("Nelle seguenti date: ");
-
-    final String formattedDates = Joiner.on(", ").skipNulls()
-        .join(dates.stream().filter(localDate -> {
-          //FIXME Questo controllo qui cosa ci fa!?
-          final MonthDay patron = (MonthDay) configurationManager
-              .configValue(person.office, EpasParam.DAY_OF_PATRON, localDate);
-          //FIXME come sopra.....
-          return !DateUtility.isGeneralHoliday(Optional.fromNullable(patron), localDate);
-          // Ordino per data e riformatto le date
-        }).sorted().map(localDate -> localDate.toString(dateFormatter))
-            .collect(Collectors.toList()));
-
-    message.append(formattedDates).append("\r\n");
+        .append(String.format("Gentile %s,\r\n", person.fullName()));
 
     // caso del Expandable
     if (troubleCausesToSend.contains(Troubles.NO_ABS_NO_STAMP)) {
-      message.append("Il sistema ePAS ha rilevato un caso di "
-              + "mancanza di timbrature e di codici di assenza.\r\n");
+
+      final List<String> formattedDates = pdtList.stream()
+          .filter(pdt -> pdt.cause == Troubles.NO_ABS_NO_STAMP)
+          .map(pdt -> pdt.personDay.date).sorted()
+          .map(localDate -> localDate.toString(dateFormatter))
+          .collect(Collectors.toList());
+
+      if (!formattedDates.isEmpty()) {
+        message.append("\r\nNelle seguenti date: ")
+            .append(Joiner.on(", ").skipNulls().join(formattedDates)).append("\r\n")
+            .append("Il sistema ePAS ha rilevato un caso di "
+                + "mancanza di timbrature e di codici di assenza.\r\n");
+      }
     }
 
     //caso del DarkNight
-    if (troubleCausesToSend.contains(Troubles.UNCOUPLED_FIXED)) {
-      message.append("Il sistema ePAS ha rilevato un caso di timbratura disaccoppiata.\r\n");
+    if (troubleCausesToSend.contains(Troubles.UNCOUPLED_WORKING)) {
+
+      final List<String> formattedDates = pdtList.stream()
+          .filter(pdt -> pdt.cause == Troubles.UNCOUPLED_WORKING)
+          .map(pdt -> pdt.personDay.date).sorted()
+          .map(localDate -> localDate.toString(dateFormatter))
+          .collect(Collectors.toList());
+
+      if (!formattedDates.isEmpty()) {
+        message.append("\r\nNelle seguenti date: ")
+            .append(Joiner.on(", ").skipNulls().join(formattedDates)).append("\r\n")
+            .append("Il sistema ePAS ha rilevato un caso di timbratura disaccoppiata.\r\n");
+      }
     }
 
-    message.append("La preghiamo di contattare l'ufficio del"
+    message.append("\r\nLa preghiamo di contattare l'ufficio del"
         + " personale per regolarizzare la sua posizione.\r\n")
         .append("\r\nSaluti,\r\n")
         .append("Il team di ePAS");
@@ -265,7 +239,7 @@ public class PersonDayInTroubleManager {
   public final void cleanPersonDayInTrouble(Person person) {
 
     final List<PersonDayInTrouble> pdtList = personDayInTroubleDao.getPersonDayInTroubleInPeriod(
-        person, Optional.<LocalDate>absent(), Optional.<LocalDate>absent());
+        person, Optional.absent(), Optional.absent(), Optional.absent());
 
     List<IWrapperContract> wrapperContracts = FluentIterable.from(person.contracts)
         .transform(wrapperModelFunctionFactory.contract()).toList();
