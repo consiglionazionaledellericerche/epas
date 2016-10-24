@@ -24,8 +24,8 @@ import javax.inject.Inject;
  * @since 20/10/16.
  */
 @Slf4j
+// Ogni giorno alle 15 dal lunedì al venerdì
 @On("0 0 15 ? * MON-FRI")
-@Every("20s")
 public class TrAutocertificationAlerts extends Job {
 
   private static final String JOBS_CONF = "jobs.active";
@@ -33,7 +33,6 @@ public class TrAutocertificationAlerts extends Job {
 
   @Inject
   static PersonDayInTroubleManager personDayInTroubleManager;
-  // i primi 5 giorni del mese e dal 25 all'ultimo giorno di ogni mese alle 15, ma non nei weekend
   @Inject
   static PersonDao personDao;
 
@@ -59,6 +58,7 @@ public class TrAutocertificationAlerts extends Job {
     final LocalDate fifthFromLast = today.dayOfMonth()
         .withMaximumValue().minusDays(DAYS);
 
+    // Solo i primi 5 e gli ultimi 5 giorni del mese
     if (today.isAfter(fifthDayOfMonth) && today.isBefore(fifthFromLast)) {
       return;
     }
