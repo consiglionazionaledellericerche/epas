@@ -22,18 +22,20 @@ import javax.inject.Inject;
  * @author daniele
  * @since 20/10/16.
  */
-@SuppressWarnings("rawtypes")
 @Slf4j
-@On("0 15 10 1-5 * ?")
-//TODO Come diavolo dovrei scrivere la schedulazione decisa qui sotto!??
-// i primi 5 giorni del mese e dal 25 all'ultimo giorno di ogni mese alle 15
+@On("0 0 15 ? * MON-FRI")
 public class TrAutocertificationAlerts extends Job {
 
-  private static final String JOBS_CONF = "jobs.active";
   @Inject
   static PersonDayInTroubleManager personDayInTroubleManager;
   @Inject
   static PersonDao personDao;
+
+
+  private static final String JOBS_CONF = "jobs.active";
+  // i primi 5 giorni del mese e dal 25 all'ultimo giorno di ogni mese alle 15, ma non nei weekend
+  private static final int FIRST_DAY = 25;
+  private static final int LATEST_DAY = 5;
 
   /**
    * Esecuzione Job.
@@ -46,14 +48,15 @@ public class TrAutocertificationAlerts extends Job {
       return;
     }
 
-    log.info("Start Job TrAutocertificationAlerts");
-
+    final LocalDate today = LocalDate.now();
     final LocalDate from;
     final LocalDate to;
-    final LocalDate today = LocalDate.now();
 
+    if (today.getDayOfMonth() > LATEST_DAY && today.getDayOfMonth() < FIRST_DAY) {
+      return;
+    }
     // Se sono a inizio mese verifico tutto il mese precedente
-    if (today.getDayOfMonth() <= 5) {
+    if (today.getDayOfMonth() <= LATEST_DAY) {
       from = today.minusMonths(1).dayOfMonth().withMinimumValue();
       to = today.minusMonths(1).dayOfMonth().withMaximumValue();
     } else {
@@ -62,9 +65,11 @@ public class TrAutocertificationAlerts extends Job {
       to = today.minusDays(1);
     }
 
+    log.info("Start Job TrAutocertificationAlerts");
+
     personDayInTroubleManager.sendTroubleEmails(personDao.trWithAutocertificationOn(),
         from, to, ImmutableList.of(Troubles.NO_ABS_NO_STAMP, Troubles.UNCOUPLED_WORKING));
 
-    log.info("Concluso Job expandable");
+    log.info("Concluso Job TrAutocertificationAlerts");
   }
 }
