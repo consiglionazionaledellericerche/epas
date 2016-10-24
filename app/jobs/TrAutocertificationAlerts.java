@@ -13,6 +13,7 @@ import models.enumerate.Troubles;
 import org.joda.time.LocalDate;
 
 import play.Play;
+import play.jobs.Every;
 import play.jobs.Job;
 import play.jobs.On;
 
@@ -24,18 +25,18 @@ import javax.inject.Inject;
  */
 @Slf4j
 @On("0 0 15 ? * MON-FRI")
+@Every("20s")
 public class TrAutocertificationAlerts extends Job {
+
+  private static final String JOBS_CONF = "jobs.active";
+  private static final int DAYS = 5;
 
   @Inject
   static PersonDayInTroubleManager personDayInTroubleManager;
+  // i primi 5 giorni del mese e dal 25 all'ultimo giorno di ogni mese alle 15, ma non nei weekend
   @Inject
   static PersonDao personDao;
 
-
-  private static final String JOBS_CONF = "jobs.active";
-  // i primi 5 giorni del mese e dal 25 all'ultimo giorno di ogni mese alle 15, ma non nei weekend
-  private static final int FIRST_DAY = 25;
-  private static final int LATEST_DAY = 5;
 
   /**
    * Esecuzione Job.
@@ -52,11 +53,17 @@ public class TrAutocertificationAlerts extends Job {
     final LocalDate from;
     final LocalDate to;
 
-    if (today.getDayOfMonth() > LATEST_DAY && today.getDayOfMonth() < FIRST_DAY) {
+    // Quinto giorno del mese
+    final LocalDate fifthDayOfMonth = today.withDayOfMonth(DAYS);
+    // Quintultimo giorno del mese
+    final LocalDate fifthFromLast = today.dayOfMonth()
+        .withMaximumValue().minusDays(DAYS);
+
+    if (today.isAfter(fifthDayOfMonth) && today.isBefore(fifthFromLast)) {
       return;
     }
     // Se sono a inizio mese verifico tutto il mese precedente
-    if (today.getDayOfMonth() <= LATEST_DAY) {
+    if (!today.isAfter(fifthDayOfMonth)) {
       from = today.minusMonths(1).dayOfMonth().withMinimumValue();
       to = today.minusMonths(1).dayOfMonth().withMaximumValue();
     } else {
