@@ -363,7 +363,7 @@ public class AbsenceService {
    * @param readOnly sola lettura
    * @return list
    */
-  private List<GroupAbsenceType> groupsPermitted(Person person, boolean readOnly) {
+  public List<GroupAbsenceType> groupsPermitted(Person person, boolean readOnly) {
     List<GroupAbsenceType> groupsPermitted = absenceComponentDao.allGroupAbsenceType();
     if (readOnly) {
       return groupsPermitted;
@@ -374,6 +374,7 @@ public class AbsenceService {
     if (!currentUser.isSystemUser()) {
       if (currentUser.person.id.equals(person.id)
           && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)) {
+        //verificare... perchè non controllo has personnel admin role on person.office?
         groupsPermitted = absenceComponentDao.groupsAbsenceTypeByName(
             Lists.newArrayList(DefaultGroup.EMPLOYEE.name()));
       }
