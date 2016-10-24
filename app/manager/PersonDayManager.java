@@ -1257,7 +1257,7 @@ public class PersonDayManager {
    * @param personDay personDay
    * @return esito
    */
-  private boolean allValidStampings(PersonDay personDay) {
+  public boolean allValidStampings(PersonDay personDay) {
 
     return !personDay.stampings.stream().filter(stamping -> !stamping.isValid()).findAny()
         .isPresent();
