@@ -4,7 +4,9 @@
 
 #{tabList}
   #{tabItem id:'editAbs', title:'Riepilogo', active:true /}
-  #{tabItem id:'attach', title:'Allegato' /}
+	#{secure.check 'Absences.addAttach'}
+    #{tabItem id:'attach', title:'Allegato' /}
+  #{/secure.check}
   #{tabItem id:'deleteAbs', title:'Elimina' /}
 #{/tabList}
 
@@ -36,6 +38,7 @@
 	 #{/if}
   #{/tabContentItem}
 
+  #{secure.check 'Absences.addAttach'}
   #{tabContentItem id:'attach'}
  
 	  <div class="alert alert-success center">
@@ -71,7 +74,8 @@
 	 	</div>
 	  #{/if}  
   #{/tabContentItem} 
- 
+  #{/secure.check}
+
   #{tabContentItem id:'deleteAbs'}
 	  <div class="alert alert-danger center">
 		   <p>Cliccando su elimina si elimineranno tutte le assenze con codice ${absence.absenceType.code} 

@@ -13,6 +13,7 @@ import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import play.db.jpa.Blob;
 
@@ -257,5 +258,25 @@ public class Absence extends BaseModel {
    */
   public Person getOwner() {
     return personDay.person;
+  }
+
+  /**
+   * Utile per effettuare i controlli temporali sulle drools
+   * @return il mese relativo alla data della timbratura.
+   */
+  public YearMonth getYearMonth() {
+    return new YearMonth(personDay.date.getYear(),personDay.date.getMonthOfYear());
+  }
+
+  /**
+   * Al momento viene usato solo nella drools EmployeeCanEditAbsence per fare le verifiche
+   * sugli inserimenti delle assenze dei dipendenti.
+   * Da rimuovere appena si crea il nuovo metodo che fa dei controlli utilizzando la nuova
+   * modellazione dei gruppi dei codici di assenza
+   *
+   * @return la stringa del codice di assenza.
+   */
+  public String getCode() {
+    return absenceType.code;
   }
 }

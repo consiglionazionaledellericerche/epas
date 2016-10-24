@@ -124,13 +124,12 @@ public class PersonDayDao extends DaoBase {
 
     JPQLQuery query = build(person, begin, end, orderedDesc, onlyIsTicketAvailable);
     query = query.leftJoin(personDay.stampings, stamping).fetch();
-    
-    log.info(query.toString());
+
     List<PersonDay> personDays = query.list(personDay);
-    
+
     if (!personDays.isEmpty()) {
       int occur = 0;
-      for (Stamping stamp : personDays.iterator().next().getStampings()){
+      for (Stamping stamp : personDays.iterator().next().getStampings()) {
         log.info("{} - {}", occur++, stamp.toString());
       }
     }
@@ -145,10 +144,10 @@ public class PersonDayDao extends DaoBase {
     final QAbsenceType absenceType = QAbsenceType.absenceType;
 
     return build(person, begin, end, orderedDesc, onlyIsTicketAvailable)
-            .leftJoin(personDay.absences, absence).fetch()
-            .leftJoin(absence.absenceType, absenceType).fetch()
-            .orderBy(personDay.date.asc())
-            .list(personDay);
+        .leftJoin(personDay.absences, absence).fetch()
+        .leftJoin(absence.absenceType, absenceType).fetch()
+        .orderBy(personDay.date.asc())
+        .list(personDay);
 
   }
 
@@ -264,9 +263,9 @@ public class PersonDayDao extends DaoBase {
    */
   public List<PersonDay> getPersonDayForPeopleInDay(List<Person> personList, LocalDate date) {
     QPersonDay personDay = QPersonDay.personDay;
-    final JPQLQuery query = 
+    final JPQLQuery query =
         getQueryFactory().from(personDay)
-          .where(personDay.date.eq(date).and(personDay.person.in(personList)));
+            .where(personDay.date.eq(date).and(personDay.person.in(personList)));
     return query.orderBy(personDay.person.surname.asc()).list(personDay);
   }
 
@@ -275,7 +274,7 @@ public class PersonDayDao extends DaoBase {
    */
   public PersonDay getOldestPersonDay() {
     QPersonDay personDay = QPersonDay.personDay;
-    final JPQLQuery query = 
+    final JPQLQuery query =
         getQueryFactory().from(personDay).orderBy(personDay.date.asc()).limit(1);
     return query.singleResult(personDay);
   }
