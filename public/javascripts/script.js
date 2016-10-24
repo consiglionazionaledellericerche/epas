@@ -46,7 +46,7 @@ $(function($) {
 		$spinner.addClass('visible');
 		
 		url = url.substring(0, url.indexOf('?'));
-		method = 'post';
+		method = 'get';
 
 		// TODO: chiamata ajax simile alla versione form. 
 		$.ajax({
@@ -71,6 +71,12 @@ $(function($) {
 		});
 		e.preventDefault();
 	});
+	
+//	$(document.body).on('change', 'form[disable-onchange'), function(e) {
+//		var $form = $(this);
+//		//TODO tutti se sono più di uno
+//    	$form.find('button').attr('disabled', 'disabled');
+//	}
 	/**
 	 * Author: Marco
 	 * form ajax attivate con l'attributo data-async:
@@ -90,10 +96,24 @@ $(function($) {
 			formData = new FormData($form[0]) //IE9? issue stackoverflow 20795449
 		}
 
+        //spinner
 		var spinner = $form.data('spinner');
 		var $spinner = $(spinner);
 		$spinner.removeClass('hidden');
 		$spinner.addClass('visible');
+		
+		//se presente l'attributo data-related disabilita
+		//tutte le form della pagina con lo stesso identificativo
+		if ($form.data('related')) {
+		  $("form").each(function() {
+			related = $(this).data('related');
+			if (related === $form.data('related')) {
+			  $button = $(this).find('button');
+			  $button.attr('disabled', 'disabled');
+			}
+  		  });
+		}
+		
     //        $form.find(':input').prop("readonly", true);
     //        var bgcolor = $form.css('background-color');
     //        $form.css('backround-color', '#e0e0e0');
