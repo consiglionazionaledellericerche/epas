@@ -259,10 +259,23 @@ public class AbsenceService {
             .absenceProblem(AbsenceProblem.NoChildExist).build());
         insertTemplateRows.add(templateRow);
       }
+      AbsencePeriod lastPeriod = periodChain.lastPeriod();
       for (AbsencePeriod absencePeriod : periodChain.periods) {
-        for (DayInPeriod dayInPeriod : absencePeriod.daysInPeriod.values()) {
-          insertTemplateRows.addAll(dayInPeriod.templateRowsForInsert(
-              absenceComponentDao.getOrBuildJustifiedType(JustifiedTypeName.nothing)));
+        boolean addResult = false;
+        //Aggiungo il risultato in caso di fallimento per il solo ultimo periodo
+        if (periodChain.successPeriodInsert == null && absencePeriod.equals(lastPeriod)) {
+          addResult = true;
+        }
+        //Aggiungo il risultato in caso di successo per il solo periodo di successo
+        if (periodChain.successPeriodInsert != null 
+            && periodChain.successPeriodInsert.equals(absencePeriod)) {
+          addResult = true;
+        }
+        if (addResult) {
+          for (DayInPeriod dayInPeriod : absencePeriod.daysInPeriod.values()) {
+            insertTemplateRows.addAll(dayInPeriod.templateRowsForInsert(
+                absenceComponentDao.getOrBuildJustifiedType(JustifiedTypeName.nothing)));
+          }
         }
       }
     }
