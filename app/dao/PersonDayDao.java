@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import models.Person;
 import models.PersonDay;
-import models.Stamping;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
 import models.query.QPersonDay;
@@ -30,7 +29,7 @@ import javax.persistence.EntityManager;
 /**
  * @author dario.
  */
-@Slf4j
+//@Slf4j
 public class PersonDayDao extends DaoBase {
 
   @Inject
@@ -124,15 +123,7 @@ public class PersonDayDao extends DaoBase {
 
     JPQLQuery query = build(person, begin, end, orderedDesc, onlyIsTicketAvailable);
     query = query.leftJoin(personDay.stampings, stamping).fetch();
-
-    List<PersonDay> personDays = query.list(personDay);
-
-    if (!personDays.isEmpty()) {
-      int occur = 0;
-      for (Stamping stamp : personDays.iterator().next().getStampings()) {
-        log.info("{} - {}", occur++, stamp.toString());
-      }
-    }
+    query.list(personDay);
 
     final QPersonDayInTrouble troubles = QPersonDayInTrouble.personDayInTrouble;
 
