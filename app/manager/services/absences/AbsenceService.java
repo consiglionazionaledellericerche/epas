@@ -5,6 +5,8 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
+import controllers.Security;
+
 import dao.PersonChildrenDao;
 import dao.absences.AbsenceComponentDao;
 
@@ -13,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
+import manager.services.absences.AbsenceForm.AbsenceInsertTab;
 import manager.services.absences.errors.AbsenceError;
 import manager.services.absences.errors.CriticalError;
 import manager.services.absences.model.AbsencePeriod;
@@ -21,16 +24,17 @@ import manager.services.absences.model.DayInPeriod.TemplateRow;
 import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.Scanner;
 import manager.services.absences.model.ServiceFactories;
-import manager.services.absences.web.AbsenceForm;
-import manager.services.absences.web.AbsenceForm.AbsenceInsertTab;
 
 import models.Contract;
 import models.Person;
 import models.PersonChildren;
+import models.Role;
+import models.User;
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
+import models.absences.GroupAbsenceType.DefaultGroup;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
@@ -90,7 +94,7 @@ public class AbsenceService {
     }
     
     AbsenceForm form = buildAbsenceForm(person, date, null, null, 
-        groupAbsenceType, true, null, null, null, null);
+        groupAbsenceType, true, null, null, null, null, true);
     
     return form;
   }
@@ -108,13 +112,14 @@ public class AbsenceService {
    * @param justifiedType giustificativo
    * @param hours ore
    * @param minutes minuti
+   * @param readOnly se richiesta sola lettura
    * @return form
    */
   public AbsenceForm buildAbsenceForm(
       Person person, LocalDate from, AbsenceInsertTab absenceInsertTab,                  //tab 
       LocalDate to, GroupAbsenceType groupAbsenceType,  boolean switchGroup,             //group
       AbsenceType absenceType, JustifiedType justifiedType,                              //reconf 
-      Integer hours, Integer minutes) {
+      Integer hours, Integer minutes, boolean readOnly) {
     
     //clean entities
     if (groupAbsenceType == null || !groupAbsenceType.isPersistent()) {
@@ -128,14 +133,31 @@ public class AbsenceService {
       absenceType = null;
     }
     
-    if (groupAbsenceType == null) {
-      if (absenceInsertTab == null) {
-        absenceInsertTab = AbsenceInsertTab.defaultTab();
-      } 
-      groupAbsenceType = absenceComponentDao
-          .groupAbsenceTypeByName(absenceInsertTab.groupNames.get(0)).get();
-      to = null;
+    List<GroupAbsenceType> groupsPermitted = groupsPermitted(person, readOnly);
+    
+    if (groupAbsenceType != null) {
+      Verify.verify(groupsPermitted.contains(groupAbsenceType));
+      absenceInsertTab = AbsenceInsertTab.fromGroup(groupAbsenceType);
+    } else {
+      if (absenceInsertTab != null) {
+        groupAbsenceType = absenceComponentDao
+            .groupAbsenceTypeByName(absenceInsertTab.groupNames.get(0)).get();
+        Verify.verify(groupsPermitted.contains(groupAbsenceType));
+      } else {
+        //selezionare missione?
+        for (GroupAbsenceType group : groupsPermitted) {
+          if (group.name.equals(DefaultGroup.MISSIONE.name())) {
+            groupAbsenceType = group;
+            break;
+          }
+        }
+        if (groupAbsenceType == null) {
+          groupAbsenceType = groupsPermitted.get(0);  
+        }
+        absenceInsertTab = AbsenceInsertTab.fromGroup(groupAbsenceType);  
+      }
     }
+    
     if (switchGroup) {
       absenceType = null;
       justifiedType = null;
@@ -149,7 +171,7 @@ public class AbsenceService {
     //TODO: Preconditions se groupAbsenceType presente verificare che permesso per la persona
     
     return new AbsenceForm(person, from, to, groupAbsenceType, absenceType, 
-        justifiedType, hours, minutes,
+        justifiedType, hours, minutes, groupsPermitted,
         absenceComponentDao, absenceEngineUtility);
   }
   
@@ -331,6 +353,35 @@ public class AbsenceService {
 
     return periodChain;
 
+  }
+  
+  /**
+   * I gruppi su cui l'utente collegato ha i diritti per la persona passata. 
+   * A seconda che la richista avvenga in lettura.
+   * o in scrittura.
+   * @param person persona
+   * @param readOnly sola lettura
+   * @return list
+   */
+  public List<GroupAbsenceType> groupsPermitted(Person person, boolean readOnly) {
+    List<GroupAbsenceType> groupsPermitted = absenceComponentDao.allGroupAbsenceType();
+    if (readOnly) {
+      return groupsPermitted;
+    }
+    final User currentUser = Security.getUser().get();
+    final GroupAbsenceType employee = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.EMPLOYEE.name()).get();
+    if (!currentUser.isSystemUser()) {
+      if (currentUser.person.id.equals(person.id)
+          && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)) {
+        //verificare... perchè non controllo has personnel admin role on person.office?
+        groupsPermitted = absenceComponentDao.groupsAbsenceTypeByName(
+            Lists.newArrayList(DefaultGroup.EMPLOYEE.name()));
+      }
+    } else {
+      groupsPermitted.remove(employee);
+    }
+    return groupsPermitted;
   }
 
   

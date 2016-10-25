@@ -1,5 +1,6 @@
 #{form action:@AbsenceGroups.insert(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit',
-    'data-async':'#absenceData', 'data-async-error':'#absenceData'}
+    'data-async':'#absenceData', 'data-async-error':'#absenceData', 'data-related':'insertAbsence', 
+    'data-spinner':'#modalSpinner'}
    
      #{f.hidden 'personId', value:absenceForm.person.id /}
 	 

@@ -182,7 +182,8 @@ when
  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
  $target: Stamping()
  Office(persons.contains($target.getOwner())) from $uro.office
- $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save"), target == $target, granted == false )
+ $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"),
+  target == $target, granted == false )
 then
  $c.grant();
 end
@@ -1087,7 +1088,8 @@ when
     "Stampings.delete",
     "AbsenceGroups.insert",
     "AbsenceGroups.edit",
-    "AbsenceGroups.delete"), granted == false, target == null)
+    "AbsenceGroups.delete",
+    "AbsenceGroups.save"), granted == false, target == null)
 then
  $c.grant();
 end
@@ -1117,12 +1119,12 @@ when
  $p: Person() from currentOperator.person
  $o: Office() from $p.office
  $target: Stamping(UserDao.getAllowedStampTypes(currentOperator).contains(stampType), this.getOwner() == $p)
-  $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), target == $target, granted == false)
+ $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), target == $target, granted == false)
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
  PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
  /** non più indietro di 2 mesi fa e solo nei mesi non ancora inviati sugli attestati **/
-eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
+ eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
 then
  $c.grant();
 end
@@ -1133,14 +1135,15 @@ end
 rule EmployeeCanEditAbsence
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
- $a: Absence()
- $at: AbsenceType(CodesForEmployee.getCodes().contains(code)) from $a.absenceType
- $pd: PersonDay() from $a.personDay
- $p: Person(this == currentOperator.person) from $pd.person
+ $p: Person() from currentOperator.person
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
  PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
- $c: PermissionCheck(target == $a, granted == false )
+ /** Sostituire il metodo che valuta che tipo di assenza può inserire il dipendente utilizzando la nuova modellazione **/
+ $target: Absence(CodesForEmployee.getCodes().contains(this.getCode()), this.getOwner() == $p)
+ $c: PermissionCheck(action in ("AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
+ eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
+ eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
 then
  $c.grant();
 end

@@ -177,7 +177,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 
   /**
    * Fondamentale per far funzionare alcune drools
-   * @return Restituisce il proprietario della timbratura
+   * @return Restituisce il proprietario della timbratura.
    */
   public Person getOwner() {
     return personDay.person;
@@ -185,7 +185,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 
   /**
    * Utile per effettuare i controlli temporali sulle drools
-   * @return il mese relativo alla data della timbratura
+   * @return il mese relativo alla data della timbratura.
    */
   public YearMonth getYearMonth() {
     return new YearMonth(date.getYear(),date.getMonthOfYear());

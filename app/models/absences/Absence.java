@@ -13,6 +13,7 @@ import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import play.db.jpa.Blob;
 
@@ -192,6 +193,25 @@ public class Absence extends BaseModel {
   }
   
   /**
+   * Se l'assenza ha un codice di rimpiazzamento nel giorno a lei associabile.
+   * @return esito
+   */
+  @Transient
+  public boolean hasReplacing() {
+    for (ComplationAbsenceBehaviour complation : this.absenceType.complationGroup) {
+      for (Absence absence : this.personDay.absences) {
+        if (absence.equals(this)) {
+          continue;
+        }
+        if (complation.replacingCodes.contains(absence.absenceType)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  
+  /**
    * Se l'assenza ha un ruolo di rimpiazzamento ma nel giorno non esiste il completamento
    * che l'ha generata.
    * @param involvedGroups i gruppi da controllare 
@@ -238,5 +258,25 @@ public class Absence extends BaseModel {
    */
   public Person getOwner() {
     return personDay.person;
+  }
+
+  /**
+   * Utile per effettuare i controlli temporali sulle drools
+   * @return il mese relativo alla data della timbratura.
+   */
+  public YearMonth getYearMonth() {
+    return new YearMonth(personDay.date.getYear(),personDay.date.getMonthOfYear());
+  }
+
+  /**
+   * Al momento viene usato solo nella drools EmployeeCanEditAbsence per fare le verifiche
+   * sugli inserimenti delle assenze dei dipendenti.
+   * Da rimuovere appena si crea il nuovo metodo che fa dei controlli utilizzando la nuova
+   * modellazione dei gruppi dei codici di assenza
+   *
+   * @return la stringa del codice di assenza.
+   */
+  public String getCode() {
+    return absenceType.code;
   }
 }

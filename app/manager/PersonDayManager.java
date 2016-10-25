@@ -5,7 +5,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
 import dao.PersonDayDao;
@@ -45,7 +44,6 @@ import org.joda.time.MonthDay;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 
 @Slf4j
@@ -82,18 +80,18 @@ public class PersonDayManager {
    * @return esito
    */
   public boolean isAllDayAbsences(PersonDay pd) {
-    
+
     for (Absence abs : pd.absences) {
-      
+
       if (abs.justifiedType != null) {
-        if (abs.justifiedType.name.equals(JustifiedTypeName.all_day) 
+        if (abs.justifiedType.name.equals(JustifiedTypeName.all_day)
             || abs.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) {
           return true;
-          
+
         }
         continue;
       }
-          
+
       // TODO: per adesso il telelavoro lo considero come giorno lavorativo
       // normale. Chiedere ai romani.
       // TODO: il telelavoro è giorno di lavoro da casa, quindi non giustifica 
@@ -134,7 +132,7 @@ public class PersonDayManager {
         }
         continue;
       }
-      
+
       if (abs.absenceType.justifiedTimeAtWork.minutes != null) {
         justifiedTime = justifiedTime + abs.absenceType.justifiedTimeAtWork.minutes;
       }
@@ -271,17 +269,22 @@ public class PersonDayManager {
 
     return gapPairs;
   }
-  
+
+  /**
+   * Calcola il tempo di permesso breve nel giorno.
+   * @param personDay personDay
+   * @return minuti
+   */
   public int shortPermissionTime(PersonDay personDay) {
-    
+
     if (!StampTypes.PERMESSO_BREVE.isActive()) {
       return 0;
     }
-    
+
     List<PairStamping> validPairs = computeValidPairStampings(personDay);
-    
+
     List<PairStamping> allGapPairs = Lists.newArrayList();
-    
+
     //1) Calcolare tutte le gapPair (fattorizzare col metodo del pranzo)
     PairStamping previous = null;
     for (PairStamping validPair : validPairs) {
@@ -296,12 +299,12 @@ public class PersonDayManager {
       }
       previous = validPair;
     }
-    
+
     int gapTime = 0;
     for (PairStamping gapPair : allGapPairs) {
-      gapTime+= gapPair.timeInPair;
+      gapTime += gapPair.timeInPair;
     }
-    
+
     return gapTime;
   }
 
@@ -329,7 +332,8 @@ public class PersonDayManager {
           return personDay;
         }
         
-        //Questo e' il caso del codice 105BP che garantisce sia l'orario di lavoro che il buono pasto
+        //Questo e' il caso del codice 105BP che garantisce sia l'orario di lavoro
+        // che il buono pasto
         // TODO: se è il 105BP perchè non controllo direttamente il codice? Mistero della fede.
         if (abs.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) {
           cleanTimeAtWork(personDay);
@@ -337,7 +341,7 @@ public class PersonDayManager {
           personDay.setTimeAtWork(wttd.workingTime);
           return personDay;
         }
-        
+
         // Caso di assenza giornaliera.
         if (abs.justifiedType.name.equals(JustifiedTypeName.all_day)) {
           cleanTimeAtWork(personDay);
@@ -345,23 +349,24 @@ public class PersonDayManager {
           personDay.setTimeAtWork(0);
           return personDay;
         }
-        
+
         // Mezza giornata giustificata.
         if (abs.justifiedType.name.equals(JustifiedTypeName.half_day)) {
           personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
               + (wttd.workingTime / 2));
           continue;
         }
-        
+
         // #######
         //  Assenze non giornaliere da cumulare ....
 
         // Giustificativi grana minuti
         if (abs.justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
-          personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal() + abs.justifiedMinutes);
+          personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
+              + abs.justifiedMinutes);
           continue;
         }
-        
+
         // Giustificativi grana ore (discriminare per calcolo buono o no)
         if (abs.justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
           if (abs.absenceType.timeForMealTicket) {
@@ -373,11 +378,11 @@ public class PersonDayManager {
           }
           continue;
         }
-        
-        
+
+
         continue;
       }
-      
+
       // #######
       // Assenze che interrompono il ciclo e azzerano quanto calcolato nelle precedenti.
 
@@ -699,94 +704,63 @@ public class PersonDayManager {
 
     Preconditions.checkState(pd.getPersonDayContract().isPresent());
 
-    // Una mappa contenente tutti i problemi del giorno da inserire o rimuovere.
-    // Il booleano associato al Trouble e' settato a TRUE se il problema e' presente,
-    // a FALSE se invece non e' presente
-    final Map<Troubles, Boolean> troubles = Maps.newHashMap();
+    final PersonDay personDay = pd.getValue();
 
+    final LocalDate sourceDateResidual = pd.getPersonDayContract().get().sourceDateResidual;
     //se prima o uguale a source contract il problema è fixato
-    if (pd.getPersonDayContract().get().sourceDateResidual != null) {
+    if (sourceDateResidual != null && !personDay.date.isAfter(sourceDateResidual)) {
+      personDay.troubles.forEach(PersonDayInTrouble::delete);
 
-      if (!pd.getValue().date.isAfter(pd.getPersonDayContract().get().sourceDateResidual)) {
-
-        for (PersonDayInTrouble pdt : pd.getValue().troubles) {
-          pd.getValue().troubles.remove(pdt);
-          pdt.delete();
-          log.info("Fixato {} perchè precedente a sourceContract({})",
-              pd.getValue().date, pd.getPersonDayContract().get().sourceDateResidual);
-        }
-        return;
-      }
+      log.info("Eliminati tutti i PersonDaysinTrouble relativi al giorno {} della persona {}"
+              + " perchè precedente a sourceContract({})",
+          personDay.date, personDay.person.fullName(),
+          pd.getPersonDayContract().get().sourceDateResidual);
+      return;
     }
 
     setValidPairStampings(pd.getValue());
 
-    if (pd.isFixedTimeAtWork()) {
+    final boolean allValidStampings = allValidStampings(personDay);
+    final boolean isAllDayAbsences = isAllDayAbsences(personDay);
+    final boolean noStampings = personDay.stampings.isEmpty();
+    final boolean isFixedTimeAtWork = pd.isFixedTimeAtWork();
+    final boolean isHoliday = personDay.isHoliday;
+    final boolean isEnoughHourlyAbsences = isEnoughHourlyAbsences(pd);
+
+    if (isFixedTimeAtWork) {
       //persona fixed
-      if (allValidStampings(pd.getValue())) {
-        troubles.put(Troubles.UNCOUPLED_FIXED, Boolean.FALSE);
+      if (allValidStampings) {
+        personDayInTroubleManager.fixTrouble(personDay, Troubles.UNCOUPLED_FIXED);
       } else {
-        troubles.put(Troubles.UNCOUPLED_FIXED, Boolean.TRUE);
+        personDayInTroubleManager.setTrouble(personDay, Troubles.UNCOUPLED_FIXED);
       }
+    }
+
+    //persona not fixed
+
+    // ### CASO 1
+    //caso no festa + no assenze giornaliere + no timbrature + (qualcosa capire cosa)
+    if (!isHoliday && !isAllDayAbsences && noStampings && !isEnoughHourlyAbsences) {
+      personDayInTroubleManager.setTrouble(personDay, Troubles.NO_ABS_NO_STAMP);
     } else {
-
-      //persona not fixed
-
-      // ### CASO 1
-      //caso no festa + no assenze giornaliere + no timbrature + (qualcosa capire cosa) 
-      if (!pd.getValue().isHoliday
-          && !isAllDayAbsences(pd.getValue())
-          && pd.getValue().stampings.isEmpty()
-          && !isEnoughHourlyAbsences(pd)) {
-
-        troubles.put(Troubles.NO_ABS_NO_STAMP, Boolean.TRUE);
-      } else {
-        troubles.put(Troubles.NO_ABS_NO_STAMP, Boolean.FALSE);
-      }
-
-      // ### CASO 2
-      //caso no festa + no assenze giornaliere + timbrature disaccoppiate
-      if (!pd.getValue().isHoliday
-          && !isAllDayAbsences(pd.getValue())
-          && !allValidStampings(pd.getValue())) {
-
-        troubles.put(Troubles.UNCOUPLED_WORKING, Boolean.TRUE);
-      } else {
-        troubles.put(Troubles.UNCOUPLED_WORKING, Boolean.FALSE);
-      }
-
-      // ### CASO 3
-      //caso è festa + no assenze giornaliere + timbrature disaccoppiate
-      if (pd.getValue().isHoliday
-          && !isAllDayAbsences(pd.getValue())
-          && !allValidStampings(pd.getValue())) {
-
-        troubles.put(Troubles.UNCOUPLED_HOLIDAY, Boolean.TRUE);
-      } else {
-        troubles.put(Troubles.UNCOUPLED_HOLIDAY, Boolean.FALSE);
-      }
+      personDayInTroubleManager.fixTrouble(personDay, Troubles.NO_ABS_NO_STAMP);
     }
 
-    //INSERIMENTO/RIMOZIONE dei personDayInTrouble
-    for (Troubles trouble : troubles.keySet()) {
-      //Se valore e' true e quindi inserisco il personDayinTrouble
-      if (troubles.get(trouble)) {
-        personDayInTroubleManager.setTrouble(pd.getValue(), trouble);
-      } else {
-        personDayInTroubleManager.fixTrouble(pd.getValue(), trouble);
-      }
+    // ### CASO 2
+    //caso no festa + no assenze giornaliere + timbrature disaccoppiate
+    if (!isHoliday && !isAllDayAbsences && !allValidStampings) {
+      personDayInTroubleManager.setTrouble(personDay, Troubles.UNCOUPLED_WORKING);
+    } else {
+      personDayInTroubleManager.fixTrouble(personDay, Troubles.UNCOUPLED_WORKING);
     }
 
-  }
-
-  /**
-   * Verifica se il giorno è in trouble.
-   *
-   * @return true se il person day è in trouble
-   */
-  public boolean isInTrouble(PersonDay pd) {
-
-    return !pd.troubles.isEmpty();
+    // ### CASO 3
+    //caso è festa + no assenze giornaliere + timbrature disaccoppiate
+    if (isHoliday && !isAllDayAbsences && !allValidStampings) {
+      personDayInTroubleManager.setTrouble(personDay, Troubles.UNCOUPLED_HOLIDAY);
+    } else {
+      personDayInTroubleManager.fixTrouble(personDay, Troubles.UNCOUPLED_HOLIDAY);
+    }
   }
 
   /**
@@ -960,19 +934,27 @@ public class PersonDayManager {
       }
     }
     //(2) scarto le stamping di servizio che non appartengono ad alcuna coppia valida
-    List<Stamping> serviceStampingsInValidPair = Lists.newArrayList();
+    List<Stamping> serviceStampingsToCheck = Lists.newArrayList();
     for (Stamping stamping : serviceStampings) {
-      boolean belongToValidPair = false;
+      boolean belongToValidPairNotOutsite = false;
+      boolean belongToValidPairOutsite = false;
       for (PairStamping validPair : validPairs) {
         LocalDateTime outTime = validPair.second.date;
         LocalDateTime inTime = validPair.first.date;
         if (stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime)) {
-          belongToValidPair = true;
+          if (StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE.equals(validPair.second.stampType)
+              || StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE.equals(validPair.first.stampType)) {
+            belongToValidPairOutsite = true;
+          } else {
+            belongToValidPairNotOutsite = true;
+          }
           break;
         }
       }
-      if (belongToValidPair) {
-        serviceStampingsInValidPair.add(stamping);
+      if (belongToValidPairNotOutsite) {
+        serviceStampingsToCheck.add(stamping);
+      } else if (belongToValidPairOutsite) {
+        stamping.valid = true;         //capire se è corretto...
       } else {
         stamping.valid = false;
       }
@@ -983,7 +965,7 @@ public class PersonDayManager {
       LocalDateTime outTime = validPair.second.date;
       LocalDateTime inTime = validPair.first.date;
       List<Stamping> serviceStampingsInSinglePair = Lists.newArrayList();
-      for (Stamping stamping : serviceStampingsInValidPair) {
+      for (Stamping stamping : serviceStampingsToCheck) {
         if (stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime)) {
           serviceStampingsInSinglePair.add(stamping);
         }
@@ -1275,15 +1257,10 @@ public class PersonDayManager {
    * @param personDay personDay
    * @return esito
    */
-  private boolean allValidStampings(PersonDay personDay) {
+  public boolean allValidStampings(PersonDay personDay) {
 
-    return FluentIterable.from(personDay.stampings).filter(
-        new Predicate<Stamping>() {
-          @Override
-          public boolean apply(Stamping input) {
-            return !input.valid;
-          }
-        }).isEmpty();
+    return !personDay.stampings.stream().filter(stamping -> !stamping.isValid()).findAny()
+        .isPresent();
   }
 
   /**
@@ -1303,9 +1280,9 @@ public class PersonDayManager {
 
   /**
    * Se il giorno è festivo per la persona.
-   * @param person
-   * @param date
-   * @return
+   * @param person Persona interessata
+   * @param date data da controllare
+   * @return true se il giorno è festivo, false altrimenti.
    */
   public boolean isHoliday(Person person, LocalDate date) {
 
@@ -1317,7 +1294,7 @@ public class PersonDayManager {
     }
 
     Optional<WorkingTimeType> workingTimeType = workingTimeTypeDao.getWorkingTimeType(date, person);
-    
+
     //persona fuori contratto
     if (!workingTimeType.isPresent()) {
       return false;
@@ -1325,27 +1302,6 @@ public class PersonDayManager {
 
     //tempo a lavoro
     return workingTimeTypeDao.isWorkingTypeTypeHoliday(date, workingTimeType.get());
-  }
-  
-  /**
-   * I giorni festivi della persona nella finestra specificata.
-   * @param person
-   * @param from
-   * @param to
-   * @return
-   */
-  public List<LocalDate> holidays(Person person, LocalDate from, LocalDate to) {
-
-    List<LocalDate> holidays = Lists.newArrayList();
-
-    LocalDate date = from;
-    while (!date.isAfter(to)) {
-      if (isHoliday(person, date)) {
-        holidays.add(date);
-        date = date.plusDays(1);
-      }
-    }
-    return holidays;
   }
 
 }
