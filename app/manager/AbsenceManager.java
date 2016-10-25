@@ -410,7 +410,7 @@ public class AbsenceManager {
 
       LocalDate startAbsence = null;
       if (file.isPresent()) {
-        startAbsence = beginDateToInsertAbsenceFile(date, person, absenceType);
+        startAbsence = beginDateToSequentialAbsences(date, person, absenceType);
         if (startAbsence == null) {
           ar.setWarning(AbsencesResponse.PERSONDAY_PRECEDENTE_NON_PRESENTE);
           return ar;
@@ -678,6 +678,14 @@ public class AbsenceManager {
     }
   }
 
+  /**
+   * Rimuove le assenze della persona nel periodo selezionato per il tipo di assenza.
+   * @param person persona
+   * @param dateFrom data inizio
+   * @param dateTo data fine
+   * @param absenceType tipo assenza da rimuovere
+   * @return numero di assenze rimosse
+   */
   public int removeAbsencesInPeriod(Person person, LocalDate dateFrom,
       LocalDate dateTo, AbsenceType absenceType) {
 
@@ -726,17 +734,6 @@ public class AbsenceManager {
     consistencyManager.updatePersonSituation(person.id, dateFrom);
 
     return deleted;
-  }
-
-  public boolean AbsenceTypeIsTecnologo(Qualification qualification) {
-    return QualificationMapping.TECNOLOGI.getRange().contains(qualification.qualification);
-  }
-
-  public boolean isTechnician(List<Qualification> list) {
-    for (Qualification q : list) {
-      return QualificationMapping.TECNICI.getRange().contains(q.qualification);
-    }
-    return false;
   }
 
   /**
@@ -822,12 +819,14 @@ public class AbsenceManager {
   }
 
   /**
-   * @return la data iniziale da cui parte l'inserimento di un certo codice di assenza di modo da
-   * poter verificare se in quella data è stato inserito anche il file associato al codice di
-   * assenza ed evitare quindi di inserire un file per ogni giorno del periodo.
+   * La data iniziale di una sequenza consecutiva di assenze dello stesso tipo
+   * @param date data 
+   * @param person persona
+   * @param absenceType tipo assenza
+   * @return data iniziale.
    */
-  private LocalDate beginDateToInsertAbsenceFile(
-      LocalDate date, Person person, AbsenceType absenceType) {
+  private LocalDate beginDateToSequentialAbsences(LocalDate date, Person person, 
+      AbsenceType absenceType) {
 
     boolean begin = false;
     LocalDate startAbsence = date;

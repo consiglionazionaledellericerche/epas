@@ -97,6 +97,51 @@ public class PersonDaysTest {
   }
   
   /**
+   * Quando una persona dispone di una coppia di timbrature valide <br> 
+   * (cioè che contribuiscono a calcolare il tempo a lavoro)<br> 
+   * in cui almeno una delle due timbrature è taggata con 
+   * StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE... <br>
+   * <u>Allora:</u><br>
+   * All'interno di tale coppia possono esserci tutte
+   * e sole timbrature di servizio. 
+   * L'ordine delle timbrature di servizio in questo caso non è più vincolante. 
+   * Esse contribuiscono esclusivamente a segnalare la presenza in sede o meno della persona. 
+   */
+  public void mazzantiIsInServiceOutSite() {
+
+    //coppia valida con dentro una timbratura di servizio ok
+    PersonDay personDay = new PersonDay(null, second);
+    List<Stamping> stamps = Lists.newArrayList();
+    stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE));
+    stamps.add(stampings(personDay, 15, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO));
+    stamps.add(stampings(personDay, 19, 30, WayType.out, null));
+    personDayManager.computeValidPairStampings(personDay);
+    assertThat(personDayManager.allValidStampings(personDay));
+
+    //coppia valida con dentro timbrature di servizio con ordine sparso ok 
+    personDay = new PersonDay(null, second);
+    stamps = Lists.newArrayList();
+    stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE));
+    stamps.add(stampings(personDay, 14, 30, WayType.out, StampTypes.MOTIVI_DI_SERVIZIO));
+    stamps.add(stampings(personDay, 15, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO));
+    stamps.add(stampings(personDay, 16, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO));
+    stamps.add(stampings(personDay, 19, 30, WayType.out, null));
+    personDayManager.computeValidPairStampings(personDay);
+    assertThat(personDayManager.allValidStampings(personDay));
+
+    //coppia non valida 
+    personDay = new PersonDay(null, second);
+    stamps = Lists.newArrayList();
+    stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE));
+    stamps.add(stampings(personDay, 15, 30, WayType.in, null));
+    stamps.add(stampings(personDay, 19, 30, WayType.out, null));
+    personDayManager.computeValidPairStampings(personDay);
+    assertThat(!personDayManager.allValidStampings(personDay));
+
+    
+  }
+  
+  /**
    * Le pause pranzo da considerare sono tutte quelle che hanno:
    * #1 Uscita pr Ingresso pr
    * Uscita pr Ingresso 

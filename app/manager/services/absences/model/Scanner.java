@@ -167,8 +167,12 @@ public class Scanner {
       }
       //eseguire
       for (AbsenceTrouble toDelete : toDeleteTroubles) {
-        log.info("Rimuovo problem {} {}", absence.toString(), toDelete.trouble);
-        toDelete.delete();
+        if (toDelete.isPersistent()) { //FIXME Issue #324
+          toDelete.refresh();
+          log.info("Rimuovo problem {} {}", absence.toString(), toDelete.trouble);
+          toDelete.delete();  
+        }
+        
       }
       for (AbsenceTrouble toAdd : toAddTroubles) {
         log.info("Aggiungo problem {} {}", absence.toString(), toAdd.trouble);

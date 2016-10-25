@@ -28,10 +28,11 @@ public class PeriodChain {
   public List<AbsencePeriod> periods = Lists.newArrayList();
   
   //Assenze coinvolte nella catena (compresi i nuovi inserimenti)
-  public Set<Absence> involvedAbsences = Sets.newHashSet() ; //le assenza assegnate ad un periodo
-  public Set<Absence> orphanAbsences = Sets.newHashSet();    //le assenze non assegnate ad alcun 
-                                                             //periodo perchè sono uscito in modo 
-                                                             // critico mentre le analizzavo
+  //le assenza assegnate ad un periodo
+  public Set<Absence> involvedAbsences = Sets.newHashSet() ; 
+  //le assenze non assegnate ad alcun periodo perchè 
+  //sono uscito in modo critico mentre le analizzavo
+  public Set<Absence> orphanAbsences = Sets.newHashSet();     
 
   //Tutte le assenze coinvolte nella catena 
   // - anche quelle di codici diversi (compresi i nuovi inserimenti) 
@@ -39,8 +40,8 @@ public class PeriodChain {
   
   //Assenza da inserire
   public AbsencePeriod successPeriodInsert;
-  public ErrorsBox errorsBox = new ErrorsBox();              //per adesso contiene solo il caso di 
-                                                             // ins. assenza senza figlio.
+  //per adesso contiene solo il caso di ins. assenza senza figlio.
+  public ErrorsBox errorsBox = new ErrorsBox();               
   
   //Errori
   private List<ErrorsBox> periodsErrorsBoxes = null; //errori dei periodi.. lazy quando ho i periodi

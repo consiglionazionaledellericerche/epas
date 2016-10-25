@@ -640,10 +640,12 @@ public class CompetenceManager {
       newPcc.save();
     });
     codeToRemove.forEach(item -> {
+      
       Optional<PersonCompetenceCodes> pcc = competenceCodeDao.getByPersonAndCode(person, item);
       if (pcc.isPresent()) {
         pcc.get().endDate = date;
         pcc.get().save();
+        
       } else {
         throw new RuntimeException(Messages.get("errorCompetenceCodeException"));
       }
@@ -677,4 +679,7 @@ public class CompetenceManager {
     }
     return compList;
   }
+  
+  
+  
 }

@@ -125,7 +125,11 @@ public class CompetenceCodeDao extends DaoBase {
    * 
    * @param group il gruppo di codici di competenza
    * @param except opzionale: se presente serve per tralasciare quel competenceCode nella ricerca
+<<<<<<< HEAD
+   *     dei codici appartenenti al gruppo group
+=======
    *        dei codici appartenenti al gruppo group
+>>>>>>> refs/remotes/origin/develop
    * @return la lista dei codici di competenza che appartengono al gruppo passato come parametro.
    */
   public List<CompetenceCode> getCodeWithGroup(CompetenceCodeGroup group, 
@@ -165,8 +169,9 @@ public class CompetenceCodeDao extends DaoBase {
     final BooleanBuilder condition = new BooleanBuilder();
     if (date.isPresent()) {
       condition.and(pcc.beginDate.loe(date.get().dayOfMonth().withMaximumValue())
-          .andAnyOf(
-              pcc.endDate.isNull(), pcc.endDate.goe(date.get().dayOfMonth().withMaximumValue())));
+          .andAnyOf(pcc.endDate.isNull(), 
+              pcc.endDate.goe(date.get().dayOfMonth().withMaximumValue())));
+
     }
     final JPQLQuery query = getQueryFactory().from(pcc).where(pcc.person.eq(person).and(condition));
     return query.list(pcc);
@@ -174,23 +179,38 @@ public class CompetenceCodeDao extends DaoBase {
   
   /**
    * 
-   * @param person
-   * @param code
+   * @param person la persona
+   * @param code il codice di competenza
    * @return il PersonCompetenceCode relativo ai parametri passati, se presente.
    */
   public Optional<PersonCompetenceCodes> getByPersonAndCode(Person person, CompetenceCode code) {
     final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
     final JPQLQuery query = getQueryFactory().from(pcc)
-        .where(pcc.person.eq(person).and(pcc.competenceCode.eq(code)));
+        .where(pcc.person.eq(person).and(pcc.competenceCode.eq(code)))
+        .orderBy(pcc.beginDate.desc());
     return Optional.fromNullable(query.singleResult(pcc));
   }
   
   /**
    * 
-   * @param code
-   * @param date
-   * @param office
-   * @return
+   * @param person la persona di cui si vuole il PersonCompetenceCodes
+   * @param code il codice di competenza per quel PersonCompetenceCodes
+   * @return la lista di PersonCompetenceCodes relativa ai parametri passati al metodo.
+   */
+  public List<PersonCompetenceCodes> listByPersonAndCode(Person person, CompetenceCode code) {
+    final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
+    final JPQLQuery query = getQueryFactory().from(pcc)
+        .where(pcc.person.eq(person).and(pcc.competenceCode.eq(code)))
+        .orderBy(pcc.beginDate.desc());
+    return query.list(pcc);
+  }
+  
+  /**
+   * 
+   * @param code il codice di competenza
+   * @param date la data, se presente, in cui cercare 
+   * @param office la sede
+   * @return la lista dei personCompetenceCodes che rispondono ai parametri passati.
    */
   public List<PersonCompetenceCodes> listByCompetenceCode(CompetenceCode code, 
       Optional<LocalDate> date, Office office) {
@@ -198,8 +218,8 @@ public class CompetenceCodeDao extends DaoBase {
     final BooleanBuilder condition = new BooleanBuilder();
     if (date.isPresent()) {
       condition.and(pcc.beginDate.loe(date.get().dayOfMonth().withMaximumValue())
-          .andAnyOf(
-              pcc.endDate.isNull(), pcc.endDate.goe(date.get().dayOfMonth().withMaximumValue())));
+          .andAnyOf(pcc.endDate.isNull(), 
+              pcc.endDate.goe(date.get().dayOfMonth().withMaximumValue())));
     }
     final JPQLQuery query = getQueryFactory().from(pcc)
         .where(pcc.competenceCode.eq(code)

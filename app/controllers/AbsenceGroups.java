@@ -11,11 +11,11 @@ import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.PersonDayManager;
+import manager.services.absences.AbsenceForm;
+import manager.services.absences.AbsenceForm.AbsenceInsertTab;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
 import manager.services.absences.model.PeriodChain;
-import manager.services.absences.web.AbsenceForm;
-import manager.services.absences.web.AbsenceForm.AbsenceInsertTab;
 
 import models.Person;
 import models.PersonDay;
@@ -101,7 +101,7 @@ public class AbsenceGroups extends Controller {
 
     AbsenceForm absenceForm =
         absenceService.buildAbsenceForm(person, from, absenceInsertTab,
-            to, groupAbsenceType, switchGroup, absenceType, justifiedType, hours, minutes);
+            to, groupAbsenceType, switchGroup, absenceType, justifiedType, hours, minutes, false);
 
     InsertReport insertReport = absenceService.insert(person,
         absenceForm.groupSelected,
@@ -168,6 +168,17 @@ public class AbsenceGroups extends Controller {
         JPA.em().flush();
         consistencyManager.updatePersonSituation(person.id, from);
         flash.success("Codici di assenza inseriti.");
+      }
+    }
+    
+    //String referer = request.headers.get("referer").value();
+    
+    // FIXME utilizzare un parametro proveniente dalla vista per rifarne il redirect
+    final User currentUser = Security.getUser().get();
+    if (!currentUser.isSystemUser()) {
+      if (currentUser.person.id.equals(person.id)
+          && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)) {
+        Stampings.stampings(from.getYear(), from.getMonthOfYear());
       }
     }
 
@@ -299,9 +310,10 @@ public class AbsenceGroups extends Controller {
       flash.success("Rimossi %s codici assenza di tipo %s", deleted, absence.absenceType.code);
     }
 
-    final User currentUser = Security.getUser().get();
+    
 
     // FIXME utilizzare un parametro proveniente dalla vista per rifarne il redirect
+    final User currentUser = Security.getUser().get();
     if (!currentUser.isSystemUser()) {
       if (currentUser.person.id.equals(person.id)
           && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)) {

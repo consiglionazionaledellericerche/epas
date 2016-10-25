@@ -265,8 +265,9 @@ public class Stampings extends Controller {
       }
     }
 
-    personDay.stampings.add(stamping);
-    personDay.save();
+    stamping.personDay = personDay;
+    stamping.save();
+
 
     consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
 

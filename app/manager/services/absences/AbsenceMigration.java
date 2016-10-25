@@ -14,6 +14,10 @@ import models.absences.AmountType;
 import models.absences.CategoryGroupAbsenceType;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
+import models.absences.GroupAbsenceType.DefaultCategoryType;
+import models.absences.GroupAbsenceType.DefaultComplation;
+import models.absences.GroupAbsenceType.DefaultGroup;
+import models.absences.GroupAbsenceType.DefaultTakable;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.GroupAbsenceType.PeriodType;
 import models.absences.JustifiedType;
@@ -117,77 +121,6 @@ public class AbsenceMigration {
     employeeCodes = absenceComponentDao
         .getOrBuildCategoryType(DefaultCategoryType.EMPLOYEE_CODES.name, 
             DefaultCategoryType.EMPLOYEE_CODES.priority);
-  }
-
-  public enum DefaultCategoryType {
-
-    GENERAL("Assenze generali cnr", 1),
-    PERMISSION("Permessi vari", 2),
-    POST_PARTUM("Congedi parentali", 3),
-    LAW_104_92("Disabilità legge 104/92", 5), 
-    MALATTIA("Malattia Dipendente", 6),
-    MALATTIA_FIGLIO_1("Malattia primo figlio", 7),
-    MALATTIA_FIGLIO_2("Malattia secondo figlio", 8),
-    MALATTIA_FIGLIO_3("Malattia terzo figlio", 9),
-    PUBLIC_FUNCTION("Pubblica Funzione", 10),
-    OTHER_CODES("Altri Codici", 11),
-    AUTOMATIC_CODES("Codici Automatici", 12),
-    EMPLOYEE_CODES("Codici Dipendenti", 13)
-    ;
-
-    public String name;
-    public int priority;
-
-    private DefaultCategoryType(String name, int priority) {
-      this.name = name;
-      this.priority = priority;
-    }
-
-  }
-
-  public enum DefaultComplation {
-    C_18, C_19, C_661, 
-    C_23, C_25, C_232, C_252, C_233, C_253, 
-    C_89, C_09;
-  }
-
-  public enum DefaultTakable {
-    T_18, T_19, T_661, 
-    T_23, T_25, T_232, T_252, T_233, T_253, 
-    T_89, T_09, T_FERIE_CNR, T_RIPOSI_CNR, T_MISSIONE, T_95, T_ALTRI,
-    T_MALATTIA,
-    T_MALATTIA_FIGLIO_1_12,
-    T_MALATTIA_FIGLIO_1_13,
-    T_MALATTIA_FIGLIO_1_14,
-    T_MALATTIA_FIGLIO_2_12,
-    T_MALATTIA_FIGLIO_2_13,
-    T_MALATTIA_FIGLIO_2_14,
-    T_MALATTIA_FIGLIO_3_12,
-    T_MALATTIA_FIGLIO_3_13,
-    T_MALATTIA_FIGLIO_3_14,
-    T_PB,
-    T_EMPLOYEE,
-    ;
-  }
-
-  public enum DefaultGroup {
-    G_18, G_19, G_661, 
-    G_23, G_25, G_232, G_252, G_233, G_253,
-
-    G_89, G_09, MISSIONE, ALTRI, FERIE_CNR, RIPOSI_CNR, G_95,
-    MALATTIA, 
-    MALATTIA_FIGLIO_1_12,
-    MALATTIA_FIGLIO_1_13,
-    MALATTIA_FIGLIO_1_14,
-    MALATTIA_FIGLIO_2_12,
-    MALATTIA_FIGLIO_2_13,
-    MALATTIA_FIGLIO_2_14,
-    MALATTIA_FIGLIO_3_12,
-    MALATTIA_FIGLIO_3_13,
-    MALATTIA_FIGLIO_3_14,
-    PB,
-    EMPLOYEE,
-    ;
   }
 
   @Inject
@@ -969,7 +902,7 @@ public class AbsenceMigration {
       //Update AbsenceType
       AbsenceType cnr25u = absenceComponentDao.buildOrEditAbsenceType("25U", 
           "Astensione facoltativa post partum 30% primo figlio intera giornata altro genitore", 
-          0, Sets.newHashSet(allDayLimit), null, 0, false, true, false, null, null);
+          0, Sets.newHashSet(allDayLimit), null, 0, true, true, false, null, null);
 
       AbsenceType m25 = absenceComponentDao.buildOrEditAbsenceType("25M", 
           "Astensione facoltativa post partum 30% primo figlio in ore e minuti", 
@@ -1034,7 +967,7 @@ public class AbsenceMigration {
       //Update AbsenceType
       AbsenceType cnr23u = absenceComponentDao.buildOrEditAbsenceType("23U", 
           "Astensione facoltativa post partum 100% primo figlio intera giornata altro genitore", 
-          0, Sets.newHashSet(allDayLimit), null, 0, false, true, false, null, null);
+          0, Sets.newHashSet(allDayLimit), null, 0, true, true, false, null, null);
 
       AbsenceType m23 = absenceComponentDao.buildOrEditAbsenceType("23M", 
           "Astensione facoltativa post partum 100% primo figlio in ore e minuti", 
@@ -1103,7 +1036,7 @@ public class AbsenceMigration {
       //Update AbsenceType
       AbsenceType cnr252u = absenceComponentDao.buildOrEditAbsenceType("252U", 
           "Astensione facoltativa post partum 30% secondo figlio intera giornata altro genitore", 
-          0, Sets.newHashSet(allDayLimit), null, 0, false, true, false, null, null);
+          0, Sets.newHashSet(allDayLimit), null, 0, true, true, false, null, null);
 
       AbsenceType m252 = absenceComponentDao.buildOrEditAbsenceType("252M", 
           "Astensione facoltativa post partum 30% secondo figlio in ore e minuti", 
@@ -1168,7 +1101,7 @@ public class AbsenceMigration {
       //Update AbsenceType
       AbsenceType cnr232u = absenceComponentDao.buildOrEditAbsenceType("232U", 
           "Astensione facoltativa post partum 100% secondo figlio intera giornata altro genitore", 
-          0, Sets.newHashSet(allDayLimit), null, 0, false, true, false, null, null);
+          0, Sets.newHashSet(allDayLimit), null, 0, true, true, false, null, null);
 
       AbsenceType m232 = absenceComponentDao.buildOrEditAbsenceType("232M", 
           "Astensione facoltativa post partum 100% secondo figlio in ore e minuti", 
@@ -1237,7 +1170,7 @@ public class AbsenceMigration {
       //Update AbsenceType
       AbsenceType cnr253u = absenceComponentDao.buildOrEditAbsenceType("253U", 
           "Astensione facoltativa post partum 30% terzo figlio intera giornata altro genitore", 
-          0, Sets.newHashSet(allDayLimit), null, 0, false, true, false, null, null);
+          0, Sets.newHashSet(allDayLimit), null, 0, true, true, false, null, null);
 
       AbsenceType m253 = absenceComponentDao.buildOrEditAbsenceType("253M", 
           "Astensione facoltativa post partum 30% terzo figlio in ore e minuti", 
@@ -1302,7 +1235,7 @@ public class AbsenceMigration {
       //Update AbsenceType
       AbsenceType cnr233u = absenceComponentDao.buildOrEditAbsenceType("233U", 
           "Astensione facoltativa post partum 100% terzo figlio intera giornata altro genitore", 
-          0, Sets.newHashSet(allDayLimit), null, 0, false, true, false, null, null);
+          0, Sets.newHashSet(allDayLimit), null, 0, true, true, false, null, null);
 
       AbsenceType m233 = absenceComponentDao.buildOrEditAbsenceType("233M", 
           "Astensione facoltativa post partum 100% terzo figlio in ore e minuti", 
