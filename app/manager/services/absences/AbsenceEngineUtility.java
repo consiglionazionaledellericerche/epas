@@ -374,7 +374,7 @@ public class AbsenceEngineUtility {
       Person person, Absence absence, 
       Map<LocalDate, Set<Absence>> allCodeAbsences) {
     
-    log.debug("L'assenza data={}, codice={} viene processata per i vincoli generici", 
+    log.trace("L'assenza data={}, codice={} viene processata per i vincoli generici", 
         absence.getAbsenceDate(), absence.getAbsenceType().code);
     
     final boolean isHoliday = personDayManager.isHoliday(person, absence.getAbsenceDate());
