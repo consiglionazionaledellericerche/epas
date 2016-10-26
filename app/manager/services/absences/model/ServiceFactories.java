@@ -68,7 +68,9 @@ public class ServiceFactories {
   
 
   /**
-   * Costruisce lo stato del gruppo (la periodChain).
+   * Costruisce lo stato del gruppo (la periodChain). <br>
+   * absenceToInsert se presente viene inserita nella computazione del gruppo per la valutazione
+   * della soundness.
    * @param person persona
    * @param groupAbsenceType gruppo
    * @param date data
@@ -239,6 +241,8 @@ public class ServiceFactories {
       List<Absence> involvedAbsencesInGroup, Absence absenceToInsert,
       List<Absence> previousInsert) {
     
+    boolean typeToInfer = (absenceToInsert != null && absenceToInsert.absenceType == null);
+    
     for (AbsencePeriod absencePeriod : periodChain.periods) {
       
       //Dispatch di tutte le assenze coinvolte gruppo e inserimenti precedenti
@@ -260,6 +264,16 @@ public class ServiceFactories {
         previousInsert.add(absenceToInsert);
         periodChain.successPeriodInsert = absencePeriod;
         return;
+      }
+      if (typeToInfer) {
+        //Preparare l'assenza da inserire nel prossimo gruppo (generalmente si resetta absenceType
+        // nuovo oggetto identico per avere una istanza nuova indipendente da inserire nei 
+        //report)
+        Absence nextAbsenceToInsert = new Absence();
+        nextAbsenceToInsert.date = absenceToInsert.getAbsenceDate();
+        nextAbsenceToInsert.justifiedType = absenceToInsert.justifiedType;
+        nextAbsenceToInsert.justifiedMinutes = absenceToInsert.justifiedMinutes;
+        absenceToInsert = nextAbsenceToInsert;
       }
     } 
     

@@ -192,8 +192,20 @@ $(function($) {
   }
   $(document.body).on('hide.bs.collapse', 'section,div', toggleChevron);
   $(document.body).on('show.bs.collapse', 'section,div', toggleChevron);
-  $.fn.initepas = function() {
-	  
+
+  //  <div class="panel panel-info" id="notifications" data-load-async="@{Application.test()}">
+  //  <div class="panel-heading">
+  //  <i class="fa fa-spin fa-spinner fa-2x"></i> Caricamento test in corso...
+  //  </div>
+  //</div>  
+  $('[data-load-async]', this).each(function() {
+      var $this = $(this);
+      $this.load($this.data('loadAsync'), function() {
+        $this.initepas();
+      });
+  });
+  
+  $.fn.initepas = function() {	    
 	$('[data-notify]', this).each(function() {
 	  var $this = $(this);
 	  var title = $this.data('notify')
