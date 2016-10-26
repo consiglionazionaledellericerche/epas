@@ -9,13 +9,8 @@ public enum Troubles {
 
   public String description;
 
-  private Troubles(String description) {
+  Troubles(String description) {
     this.description = description;
   }
 
-  public boolean isStampingTrouble(Troubles trouble) {
-    return trouble.equals(UNCOUPLED_FIXED)
-            || trouble.equals(UNCOUPLED_WORKING)
-            || trouble.equals(UNCOUPLED_HOLIDAY);
-  }
 }
