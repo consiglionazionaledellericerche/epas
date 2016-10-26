@@ -178,11 +178,11 @@ public class PersonDayInTroubleManager {
   /**
    * Formatta il corpo della email da inviare al dipendente con i suoi troubles.
    * @param person persona 
-   * @param pdtList la lista dei personDaysInTrouble da segnalare.
+   * @param daysInTrouble la lista dei personDaysInTrouble da segnalare.
    * @param troubleCausesToSend i troubles da inviare.
    * @return il corpo
    */
-  private String troubleEmailBody(Person person, List<PersonDayInTrouble> pdtList,
+  private String troubleEmailBody(Person person, List<PersonDayInTrouble> daysInTrouble,
       List<Troubles> troubleCausesToSend) {
 
     final String dateFormatter = "dd/MM/YYYY";
@@ -193,7 +193,7 @@ public class PersonDayInTroubleManager {
     // caso del Expandable
     if (troubleCausesToSend.contains(Troubles.NO_ABS_NO_STAMP)) {
 
-      final List<String> formattedDates = pdtList.stream()
+      final List<String> formattedDates = daysInTrouble.stream()
           .filter(pdt -> pdt.cause == Troubles.NO_ABS_NO_STAMP)
           .map(pdt -> pdt.personDay.date).sorted()
           .map(localDate -> localDate.toString(dateFormatter))
@@ -210,7 +210,7 @@ public class PersonDayInTroubleManager {
     //caso del DarkNight
     if (troubleCausesToSend.contains(Troubles.UNCOUPLED_WORKING)) {
 
-      final List<String> formattedDates = pdtList.stream()
+      final List<String> formattedDates = daysInTrouble.stream()
           .filter(pdt -> pdt.cause == Troubles.UNCOUPLED_WORKING)
           .map(pdt -> pdt.personDay.date).sorted()
           .map(localDate -> localDate.toString(dateFormatter))
