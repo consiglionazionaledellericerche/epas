@@ -81,6 +81,17 @@ public class PeriodChain {
   }
   
   /**
+   * L'ultimo periodo della catena.
+   * @return absencePeriod
+   */
+  public AbsencePeriod lastPeriod() {
+    if (periods.isEmpty()) {
+      return null;
+    }
+    return periods.get(periods.size() - 1);
+  }
+  
+  /**
    * I codici coinvolti nella periodChain.
    * @return set
    */
