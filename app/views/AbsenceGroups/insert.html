@@ -173,21 +173,9 @@ title:'Nuovo codice assenza in data ' + absenceForm.from?.format()
       
       #{f.hidden 'hours', value:absenceForm.hours /}
       #{f.hidden 'minutes', value:absenceForm.minutes /}
+      
+      #{f.hidden 'forceInsert', value:forceInsert /}
     
-      *{
-      #{if report.containsProblems() }
-	       #{alert color:'info'}
-	         <p> La richiesta contiene errori e non può essere completata. </p>
-	         <p> E' comunque possibile forzare l'inserimento <strong>selezionando 
-	         il codice specifico</strong> e cliccando su Salva. Non verranno effettuati controlli di integrità dei dati inseriti.
-	         </p>
-	       #{/alert}
-	       #{if !selecteSubItem.isAutomatic() }
-	            #{f.checkbox 'forceInsert', value:forceInsert /}
-	       #{/if}
-	  #{/if}
-	  }*
-	 
 	   #{b.buttons center:true}
          #{b.submit 'Inserisci'/}
        #{/b.buttons}

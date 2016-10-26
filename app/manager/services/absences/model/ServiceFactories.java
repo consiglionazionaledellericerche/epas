@@ -177,7 +177,7 @@ public class ServiceFactories {
         absencePeriod.from = childInterval.getBegin();
         absencePeriod.to = childInterval.getEnd();
 
-      } catch (Exception e) {
+      } catch (Exception ex) {
         absencePeriod.ignorePeriod = true;
         return absencePeriod;
       }
