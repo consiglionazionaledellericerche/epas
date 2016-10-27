@@ -155,7 +155,7 @@ public class AbsenceGroups extends Controller {
         personDay.save();
       }
       if (!insertReport.reperibilityShiftDate().isEmpty()) {
-        //absenceManager.sendReperibilityShiftEmail(person, insertReport.reperibilityShiftDate());
+        absenceManager.sendReperibilityShiftEmail(person, insertReport.reperibilityShiftDate());
         log.info("Inserite assenze con reperibilità e turni {} {}. Le email sono disabilitate.",
             person.fullName(), insertReport.reperibilityShiftDate());
       }
