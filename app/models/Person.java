@@ -270,6 +270,11 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   }
 
   @Override
+  public String getLabel() {
+    return String.format("%s (matricola = {})", getFullname(), number);
+  }
+  
+  @Override
   public Collection<IPropertyInPeriod> periods(Object type) {
 
     if (type.getClass().equals(EpasParam.class)) {
