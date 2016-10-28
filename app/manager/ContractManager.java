@@ -42,9 +42,10 @@ public class ContractManager {
   /**
    * Constructor.
    *
-   * @param consistencyManager {@link ConsistencyManager}
-   * @param vacationCodeDao    {@link VacationCodeDao}
-   * @param wrapperFactory     {@link IWrapperFactory}
+   * @param consistencyManager          {@link manager.ConsistencyManager}
+   * @param periodManager               {@link manager.PeriodManager}
+   * @param personDayInTroubleManager   {@link manager.PersonDayInTroubleManager}
+   * @param wrapperFactory              {@link IWrapperFactory}
    */
   @Inject
   public ContractManager(

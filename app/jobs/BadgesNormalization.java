@@ -19,7 +19,7 @@ import javax.inject.Inject;
  */
 @Slf4j
 @OnApplicationStart(async = true)
-public class BadgesNormalization extends Job {
+public class BadgesNormalization extends Job<Void> {
 
   @Inject
   static BadgeManager badgeManager;

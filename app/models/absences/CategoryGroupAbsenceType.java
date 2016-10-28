@@ -14,6 +14,8 @@ import javax.persistence.Table;
 public class CategoryGroupAbsenceType extends BaseModel 
     implements Comparable<CategoryGroupAbsenceType> {
 
+  private static final long serialVersionUID = 4580659910825885894L;
+
   @Column
   public String name;
 

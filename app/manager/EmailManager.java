@@ -79,7 +79,6 @@ public class EmailManager {
   /**
    * Invia la email per il recovery password successiva a creazione persona. (Solo se
    * il parametro send email della sua sede è attivo).  
-   * @param person
    */
   public void newUserMail(Person person) {
     Preconditions.checkState(person != null && person.isPersistent());
