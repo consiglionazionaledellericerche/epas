@@ -37,9 +37,7 @@ import models.User;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.base.IPropertiesInPeriodOwner;
-import models.enumerate.Troubles;
 
-import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;

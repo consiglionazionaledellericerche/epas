@@ -19,7 +19,7 @@ import javax.inject.Inject;
  */
 @Slf4j
 @OnApplicationStart(async = true)
-public class OfficeConfigurationFix extends Job {
+public class OfficeConfigurationFix extends Job<Void> {
 
   @Inject
   static ConfigurationManager configurationManager;

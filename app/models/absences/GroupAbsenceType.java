@@ -24,6 +24,8 @@ import javax.persistence.Table;
 @Table(name = "group_absence_types")
 public class GroupAbsenceType extends BaseModel {
 
+  private static final long serialVersionUID = 3290760775533091791L;
+
   @Column
   public String name;
   

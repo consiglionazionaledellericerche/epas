@@ -40,7 +40,7 @@ public class BadRequest extends Result {
     response.status = Http.StatusCode.BAD_REQUEST;
     try {
       response.out.write(description.getBytes());
-    } catch (IOException e) {
+    } catch (IOException ioe) {
       Logger.error("Exception during apply of badRequest with description");
     }
   }

@@ -167,10 +167,10 @@ public class PersonDayInTroubleManager {
           pd.save();
         }
 
-      } catch (Exception e) {
+      } catch (Exception ex) {
         log.error("sendEmailToPerson({}, {}, {}): fallito invio email per {}",
             pdList, person, troubleCausesToSend, person.getFullname());
-        log.error(e.getStackTrace().toString());
+        log.error(ex.getStackTrace().toString());
       }
     }
   }

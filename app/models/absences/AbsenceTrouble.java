@@ -19,6 +19,8 @@ import javax.persistence.Table;
 @Table(name = "absence_troubles")
 public class AbsenceTrouble extends BaseModel {
 
+  private static final long serialVersionUID = -5066077912284859060L;
+
   @Enumerated(EnumType.STRING)
   public AbsenceProblem trouble;
 
@@ -67,8 +69,5 @@ public class AbsenceTrouble extends BaseModel {
     }
 
   }
-  
-  
 
-  
 }

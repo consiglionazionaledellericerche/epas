@@ -102,9 +102,9 @@ public class PersonManager {
 
     personDays.stream().flatMap(personDay -> personDay.absences.stream()
         .<AbsenceType>map(absence -> absence.absenceType)).forEach(absenceType -> {
-      Integer count = absenceCodeMap.get(absenceType);
-      absenceCodeMap.put(absenceType, (count == null) ? 1 : count + 1);
-    });
+          Integer count = absenceCodeMap.get(absenceType);
+          absenceCodeMap.put(absenceType, (count == null) ? 1 : count + 1);
+        });
 
     return absenceCodeMap;
   }
