@@ -81,7 +81,6 @@ public class ReperibilityManager {
   private final PersonDayDao personDayDao;
   private final CompetenceCodeDao competenceCodeDao;
   private final PersonDayManager personDayManager;
-  private final OfficeDao officeDao;
 
   @Inject
   public ReperibilityManager(
@@ -95,7 +94,6 @@ public class ReperibilityManager {
     this.personDayDao = personDayDao;
     this.competenceCodeDao = competenceCodeDao;
     this.personDayManager = personDayManager;
-    this.officeDao = officeDao;
   }
 
   /**

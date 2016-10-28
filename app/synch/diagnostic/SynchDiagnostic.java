@@ -45,9 +45,6 @@ public class SynchDiagnostic {
   
   /**
    * Comparazione Institute epas <-> perseo.
-   * @param epasInstitute
-   * @param perseoInstitute
-   * @return
    */
   private boolean instituteEquals(Institute epasInstitute, Institute perseoInstitute) {
     
@@ -110,8 +107,6 @@ public class SynchDiagnostic {
   
   /**
    * Comparazione seat epas <-> perseo.
-   * @param epasOffice
-   * @param perseoOffice
    * @return esito
    */
   private boolean seatEquals(Office epasOffice, Office perseoOffice) {
@@ -134,12 +129,6 @@ public class SynchDiagnostic {
     return true;
   }
   
-  /**
-   * 
-   * @param epasOffice
-   * @param perseoOffice
-   * @return
-   */
   public boolean isSeatSynchronized(Office epasOffice, Office perseoOffice, 
       Map<Integer, Person> epasPeople, Map<Integer, Person> perseoPeople, 
       Map<Integer, List<Contract>> perseoContracts) {
@@ -169,9 +158,6 @@ public class SynchDiagnostic {
   
   /**
    * Comparazione persone epas <-> perseo.
-   * @param epasPerson
-   * @param perseoPerson
-   * @return
    */
   public boolean personEquals(Person epasPerson, Person perseoPerson) {
     
@@ -199,11 +185,6 @@ public class SynchDiagnostic {
   
   /**
    * Diagnostica della persona.
-   * 
-   * @param epasPerson
-   * @param perseoPerson
-   * @param perseoContracts
-   * @return
    */
   public boolean isPersonSynchronized(Person epasPerson, Person perseoPerson, 
       List<Contract> perseoContracts) {
@@ -256,9 +237,6 @@ public class SynchDiagnostic {
   
   /**
    * Comparazione contratti epas <-> perseo.
-   * @param epasContract
-   * @param perseoContract
-   * @return
    */
   private boolean contractEquals(Contract epasContract, Contract perseoContract) {
     

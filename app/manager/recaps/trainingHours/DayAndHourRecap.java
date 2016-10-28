@@ -15,6 +15,6 @@ public class DayAndHourRecap {
 
   @Override
   public String toString() {
-    return "Da: "+ begin.toString() + " A: " + end.toString() + " " + trainingHours + "ore"; 
+    return "Da: " + begin.toString() + " A: " + end.toString() + " " + trainingHours + "ore"; 
   }
 }

@@ -169,7 +169,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   public List<CertificatedData> certificatedData = Lists.newArrayList();
 
   /**
-   * Dati derivanti dall'invio col nuovo sistema degli attestati
+   * Dati derivanti dall'invio col nuovo sistema degli attestati.
    */
   @OneToMany(mappedBy = "person")
   public List<Certification> certifications = Lists.newArrayList();
@@ -190,14 +190,6 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @NotAudited
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public List<Competence> competences = Lists.newArrayList();
-
-  /**
-   * relazione con la tabella dei codici competenza per stabilire se una persona ha diritto o meno a
-   * una certa competenza.
-   */
-//  @NotAudited
-//  @ManyToMany(cascade = {CascadeType.REFRESH})
-//  public List<CompetenceCode> competenceCode = Lists.newArrayList();
 
   @NotAudited
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
@@ -327,10 +319,10 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   }
 
   /**
-   * @param param Parametro di configurazione da controllare
+   * @param param Parametro di configurazione da controllare.
    * @param value valore atteso
    * @return true se la persona contiene il parametro di configurazione specificato con il valore
-   * indicato
+   *        indicato
    */
   public boolean checkConf(EpasParam param, String value) {
     return personConfigurations.stream().filter(conf -> conf.epasParam == param
@@ -339,11 +331,11 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   /**
    * Verifica se il mese passato come parametro è successivo all'ultimo mese inviato
-   * con gli attestati
+   * con gli attestati.
    *
    * @param readablePartial La 'data' da verificare
    * @return true se la data passata come parametro è successiva all'ultimo mese sul quale sono
-   * stati inviati gli attestai per la persona interessata
+   *        stati inviati gli attestai per la persona interessata
    */
   public boolean checkLastCertificationDate(final ReadablePartial readablePartial) {
 

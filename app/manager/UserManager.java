@@ -127,8 +127,7 @@ public class UserManager {
    * @param enable  se deve essere disabilitato
    */
   public void saveUser(User user, Set<Office> offices, Set<Role> roles, boolean enable) {
-    Codec codec = new Codec();
-    user.password = codec.hexMD5(user.password);
+    user.password = Codec.hexMD5(user.password);
     if (enable) {
       user.disabled = false;
       user.expireDate = null;

@@ -114,8 +114,6 @@ public class PersonStampingDayRecap {
       this.fixedWorkingTimeCode = fixedStampModificationType;
     }
 
-//    this.computeWorkTime(personDay.getTimeAtWork());
-
     // is sourceContract (solo se monthContracts presente)
     if (monthContracts.isPresent()) {
       for (Contract contract : monthContracts.get()) {

@@ -1,7 +1,5 @@
 package manager.configurations;
 
-import controllers.Configurations;
-
 import lombok.Data;
 
 import manager.configurations.EpasParam.EpasParamValueType;
