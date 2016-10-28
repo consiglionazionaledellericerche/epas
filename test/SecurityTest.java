@@ -7,6 +7,8 @@ import play.test.FunctionalTest;
 import java.time.YearMonth;
 
 /**
+ * Classe di verifica di base dell'attivazione della parte di Security. 
+ * 
  * @author cristian
  *
  */
@@ -35,7 +37,7 @@ public class SecurityTest extends FunctionalTest {
     assertLocationRedirect(
         urlSituazioneMensile, responseRedirect);
 
-    Response responsePresente = GET("/", true);
+    Response responsePresente = httpGet("/", true);
     assertContentMatch("ePAS - Timbrature", responsePresente);
     assertContentMatch("cristian.lucchesi", responsePresente);
 
@@ -50,11 +52,11 @@ public class SecurityTest extends FunctionalTest {
   }
 
   /** Fixed a bug in the default version of this method. It dosn't follow redirects properly **/
-  public static Response GET(Object url, boolean followRedirect) {
+  public static Response httpGet(Object url, boolean followRedirect) {
     Response response = GET(url);
     if (Http.StatusCode.FOUND == response.status && followRedirect) {
       String redirectedTo = response.getHeader("Location");
-      response = GET(redirectedTo,followRedirect);
+      response = httpGet(redirectedTo,followRedirect);
     }
     return response;
   }

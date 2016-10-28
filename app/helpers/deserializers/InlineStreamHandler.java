@@ -10,7 +10,7 @@ import java.net.URLStreamHandler;
 
 
 /**
- * Uno stram handler per fare il mock di dati in memoria.
+ * Uno stream handler per fare il mock di dati in memoria.
  *
  * @author marco
  *

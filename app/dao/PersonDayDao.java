@@ -8,8 +8,6 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
-import lombok.extern.slf4j.Slf4j;
-
 import models.Person;
 import models.PersonDay;
 import models.absences.query.QAbsence;
@@ -29,7 +27,6 @@ import javax.persistence.EntityManager;
 /**
  * @author dario.
  */
-//@Slf4j
 public class PersonDayDao extends DaoBase {
 
   @Inject

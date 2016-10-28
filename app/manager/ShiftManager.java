@@ -1,7 +1,6 @@
 package manager;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
@@ -15,10 +14,10 @@ import dao.PersonMonthRecapDao;
 import dao.PersonShiftDayDao;
 import dao.ShiftDao;
 
-import helpers.BadRequest;
-
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.DateUtility;
+
+import helpers.BadRequest;
 
 import lombok.extern.slf4j.Slf4j;
 

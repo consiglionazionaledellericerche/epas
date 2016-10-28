@@ -149,6 +149,7 @@ public class ContractPerseoConsumer {
             response.getStatus(), response.getStatusText());
         try {
           return new Gson().fromJson(response.getJson(), new TypeToken<List<PerseoContract>>() {
+            private static final long serialVersionUID = -8512911372979430117L;
           }.getType());
         } catch (JsonSyntaxException ex) {
           final String error = String.format("Errore nel parsing del json: %s", ex.getMessage());

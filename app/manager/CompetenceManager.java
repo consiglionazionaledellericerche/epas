@@ -62,7 +62,7 @@ public class CompetenceManager {
   private final IWrapperFactory wrapperFactory;
   private final PersonDayManager personDayManager;
   private final PersonReperibilityDayDao reperibilityDao;
-  private static PersonStampingRecapFactory stampingsRecapFactory;
+  private final PersonStampingRecapFactory stampingsRecapFactory;
 
   /**
    * Costruttore.
@@ -167,7 +167,7 @@ public class CompetenceManager {
       } else {
         return false;
       }
-    } catch (Exception e) {
+    } catch (Exception ex) {
       return false;
     }
     total.save();
@@ -440,8 +440,11 @@ public class CompetenceManager {
   *     servizi per reperibilità sono stati abilitati sulla sede.
   */
   private Integer countDaysForReperibility(YearMonth yearMonth, Office office) {
-    int numbers = reperibilityDao.getReperibilityTypeByOffice(office, Optional.fromNullable(false)) != null 
-        ? reperibilityDao.getReperibilityTypeByOffice(office, Optional.fromNullable(false)).size() : 0;
+    int numbers = 
+        reperibilityDao.getReperibilityTypeByOffice(office, Optional.fromNullable(false)) != null 
+          ? reperibilityDao.getReperibilityTypeByOffice(
+                office, Optional.fromNullable(false)).size() 
+              : 0;
     return numbers * (new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1)
         .dayOfMonth().getMaximumValue());
   }
@@ -501,14 +504,11 @@ public class CompetenceManager {
     return false;
   }
   
-  /**
-   * 
-   * @param office
-   * @param competenceCodeList
+  /** 
    * @return true se esiste almeno un servizio per reperibilità inizializzato, false altrimenti.
    */
-  public boolean isServiceForReperibilityInitialized(Office office, 
-      List<CompetenceCode> competenceCodeList) {
+  public boolean isServiceForReperibilityInitialized(
+      Office office, List<CompetenceCode> competenceCodeList) {
     boolean servicesInitialized = true;
     if (competenceCodeList.stream().anyMatch(isReperibility())) {
       List<PersonReperibilityType> prtList = reperibilityDao

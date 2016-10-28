@@ -28,8 +28,6 @@ import models.query.QBadgeReader;
 import models.query.QPerson;
 import models.query.QUser;
 
-import play.Logger;
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;

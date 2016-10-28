@@ -218,7 +218,7 @@ public class CertificationService {
           personAttestatiCertifications(person, year, month, personCertification); 
       if (attestatiCertifications == null) {
         log.info("Impossibile scaricare le informazioni da attestati per {}", person.getFullname());
-        //attestatiCertifications = Maps.newHashMap(); //TODO: da segnalare in qualche modo all'user 
+        //attestatiCertifications = Maps.newHashMap(); TODO: da segnalare in qualche modo all'user 
       }
       personCertificationStatus.validate = personCertification.validato;
     }
@@ -471,17 +471,14 @@ public class CertificationService {
 
       return certification;
 
-    } catch (Exception e) {
-      log.error(e.toString());
+    } catch (Exception ex) {
+      log.error(ex.toString());
       return null;
     }
   }
 
   /**
    * Rimuove il record in attestati. (Non usare per buoni pasto).
-   * @param certification
-   * @param token
-   * @return
    */
   public boolean removeAttestati(Certification certification, Optional<String> token) {
 
