@@ -131,7 +131,7 @@ public enum EpasParam {
 
   /**
    * Permette di abilitare/disabilitare la funzione di autocertificazione per i livelli 1-3 del
-   * proprio orario di lavoro
+   * proprio orario di lavoro.
    */
   TR_AUTOCERTIFICATION("researchers_technologists_autocertification",
       EpasParamCategory.AUTOCERTIFICATION,

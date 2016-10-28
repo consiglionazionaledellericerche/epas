@@ -18,7 +18,7 @@ public class CompetenceRecapFactory {
   
   @Inject
   CompetenceRecapFactory(PersonDao personDao, CompetenceManager competenceManager, 
-      CompetenceDao competenceDao){
+      CompetenceDao competenceDao) {
     this.competenceDao = competenceDao;
     this.competenceManager = competenceManager;
     this.personDao = personDao;

@@ -10,6 +10,8 @@ import javax.persistence.PreUpdate;
 @MappedSuperclass
 public abstract class MutableModel extends BaseModel {
 
+  private static final long serialVersionUID = 4890911962768274977L;
+
   @Column(name = "created_at")
   public LocalDateTime createdAt;
 

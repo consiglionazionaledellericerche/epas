@@ -111,7 +111,8 @@ public class PersonStampingRecap {
     //******************************************************************************************
     // DATI MENSILI
     //******************************************************************************************
-    List<Contract> monthContracts = wrapperFactory.create(person).orderedMonthContracts(year, month);
+    List<Contract> monthContracts = 
+        wrapperFactory.create(person).orderedMonthContracts(year, month);
 
     this.numberOfMealTicketToUse = personDayManager.numberOfMealTicketToUse(personDays);
     this.numberOfMealTicketToRender = personDayManager.numberOfMealTicketToRender(personDays);
