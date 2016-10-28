@@ -442,8 +442,8 @@ public class AbsenceManager {
       } else {
         absence.date = pd.date;
 
-        log.info("Simulato inserimento nuova assenza {} per {} in data: {}",
-            absence.absenceType.code, pd.person.getFullname(), absence.date);
+        log.debug("Simulato inserimento nuova assenza {} per {} in data: {}",
+            absence.absenceType.code, pd.person.getLabel(), absence.date);
       }
 
       ar.setAbsenceAdded(absence);

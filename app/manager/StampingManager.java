@@ -150,10 +150,8 @@ public class StampingManager {
 
     // Check stamping duplicata
     if (checkDuplicateStamping(personDay, stampingFromClient)) {
-      log.info("All'interno della lista di timbrature di {} nel giorno {} "
-              + "c'è una timbratura uguale a quella passata dallo"
-              + "stampingsFromClient: {}",
-          new Object[]{person.getFullname(), personDay.date, stampingFromClient.dateTime});
+      log.info("Timbratura delle {} già presente per {}",
+          person.getLabel(), stampingFromClient.dateTime);
       return true;
     }
 
@@ -168,6 +166,8 @@ public class StampingManager {
 
     personDay.stampings.add(stamping);
     personDay.save();
+    
+    log.info("Inserita timbratura {} per {}", stamping.getLabel(), person.getLabel());
 
     // Ricalcolo
     if (recompute) {
