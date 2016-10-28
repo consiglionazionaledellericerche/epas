@@ -102,7 +102,7 @@ public class StampingTemplate {
   }
 
   /**
-   * Se stampare il popover sulla stampingTemplate
+   * Se stampare il popover sulla stampingTemplate.
    */
   public boolean showPopover() {
     if (!stampModificationTypes.isEmpty() || stamping.stampType != null) {

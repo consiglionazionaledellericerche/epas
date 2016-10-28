@@ -8,7 +8,6 @@ import org.hamcrest.core.IsNull;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-import play.Logger;
 import play.mvc.Http;
 import play.mvc.Http.Response;
 import play.mvc.Router;
@@ -32,8 +31,8 @@ public class ShibbolethTest extends FunctionalTest {
     MockShibboleth.removeAll();
     MockShibboleth.set("eppn","cristian.lucchesi@iit.cnr.it");
 
-    final String LOGIN_URL = Router.reverse("shib.Shibboleth.login").url;
-    Response response = GET(LOGIN_URL,true);
+    final String loginUrl = Router.reverse("shib.Shibboleth.login").url;
+    Response response = httpGet(loginUrl,true);
     assertIsOk(response);
     log.debug("response.contentType = {}", response.contentType);
     assertContentType("text/html", response);
@@ -50,11 +49,11 @@ public class ShibbolethTest extends FunctionalTest {
   /**
    * Fixed a bug in the default version of this method. It dosn't follow redirects properly.
    */
-  public static Response GET(Object url, boolean followRedirect) {
+  public static Response httpGet(Object url, boolean followRedirect) {
     Response response = GET(url);
     if (Http.StatusCode.FOUND == response.status && followRedirect) {
       String redirectedTo = response.getHeader("Location");
-      response = GET(redirectedTo,followRedirect);
+      response = httpGet(redirectedTo,followRedirect);
     }
     return response;
   }

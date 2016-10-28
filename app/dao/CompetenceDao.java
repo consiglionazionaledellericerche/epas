@@ -22,9 +22,7 @@ import models.query.QCompetenceCode;
 import models.query.QPerson;
 import models.query.QPersonCompetenceCodes;
 import models.query.QPersonHourForOvertime;
-import models.query.QPersonReperibility;
 import models.query.QPersonReperibilityType;
-import models.query.QPersonShiftShiftType;
 import models.query.QTotalOvertime;
 
 import org.joda.time.LocalDate;

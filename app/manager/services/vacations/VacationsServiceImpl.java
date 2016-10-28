@@ -50,7 +50,6 @@ public class VacationsServiceImpl implements IVacationsService {
 
   /**
    * Costruttore.
-   * @param absenceDao absenceDao
    * @param absenceTypeDao absenceTypeDao
    * @param contractDao contractDao
    * @param absenceTypeManager absenceTypeManager

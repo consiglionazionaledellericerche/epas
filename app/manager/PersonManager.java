@@ -35,7 +35,6 @@ public class PersonManager {
   public final PersonDayManager personDayManager;
   private final IWrapperFactory wrapperFactory;
   private final AbsenceDao absenceDao;
-  private final UsersRolesOfficesDao uroDao;
 
   /**
    * Costrutture.
@@ -58,7 +57,6 @@ public class PersonManager {
     this.absenceDao = absenceDao;
     this.personDayManager = personDayManager;
     this.wrapperFactory = wrapperFactory;
-    this.uroDao = uroDao;
   }
 
   /**
