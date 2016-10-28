@@ -1,12 +1,12 @@
 package jobs;
 
+import injection.StaticInject;
+
 import manager.OfficeManager;
 
 import models.Person;
 import models.Role;
 import models.UsersRolesOffices;
-
-import injection.StaticInject;
 
 import java.util.List;
 

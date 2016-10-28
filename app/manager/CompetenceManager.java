@@ -8,12 +8,9 @@ import com.google.inject.Inject;
 
 import com.beust.jcommander.internal.Maps;
 
-import controllers.Competences;
-
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
-import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
 import dao.wrapper.IWrapperContract;
@@ -21,33 +18,22 @@ import dao.wrapper.IWrapperFactory;
 
 import helpers.jpa.ModelQuery.SimpleResults;
 
-import it.cnr.iit.epas.DateUtility;
-
-import manager.AbsenceManager.AbsenceToDate;
 import manager.competences.CompetenceCodeDTO;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 
 import models.Competence;
 import models.CompetenceCode;
-import models.CompetenceCodeGroup;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
 import models.PersonCompetenceCodes;
 import models.PersonDay;
-import models.PersonMonthRecap;
 import models.PersonReperibilityType;
 import models.TotalOvertime;
-import models.enumerate.LimitType;
 
 import org.apache.commons.lang.StringUtils;
-import org.assertj.core.api.AssertionInfo;
-import org.assertj.core.description.Description;
-import org.assertj.core.internal.Strings;
-import org.assertj.core.presentation.Representation;
-import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import org.slf4j.Logger;
@@ -60,7 +46,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
