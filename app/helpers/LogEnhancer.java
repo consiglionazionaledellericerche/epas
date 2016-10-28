@@ -1,11 +1,11 @@
 package helpers;
 
+import controllers.Security;
+
 import org.slf4j.MDC;
 
 import play.mvc.Before;
 import play.mvc.Controller;
-
-import controllers.Security;
 
 /**
  * Inserisce nella MDC dei log alcune informazioni.
@@ -15,10 +15,12 @@ import controllers.Security;
  */
 public class LogEnhancer extends Controller {
 
-  private final static String ANONYMOUS_USERNAME = "anonymous"; 
+  private static final String ANONYMOUS_USERNAME = "anonymous"; 
   
-  @Before(unless = {"login", "authenticate", "logout"})
+  @Before(unless = {"login", "authenticate"})
   static void injectTemplateData() {
-    MDC.put("user", Security.getUser().isPresent() ? Security.getUser().get().username : ANONYMOUS_USERNAME);
+    MDC.put(
+        "user", 
+        Security.getUser().isPresent() ? Security.getUser().get().username : ANONYMOUS_USERNAME);
   }
 }
