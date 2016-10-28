@@ -1,11 +1,12 @@
 package helpers;
 
-import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 
 import org.testng.collections.Maps;
 
-import lombok.extern.slf4j.Slf4j;
 import play.Play;
+
+import java.util.Map;
 
 /**
  * Nella configurazione ci possono essere:
@@ -13,7 +14,8 @@ import play.Play;
  *  <dt>oil.app.name</dt><dd>Nome dell'instanza OIL, utilizzato nel subject del messaggio</dd>
  *  <dt>oil.email.to</dt><dd>Indirizzo email di OIL a cui inviare le segnalazioni</dd>
  *  <dt>oil.email.subject</dt><dd>Oggetto delle segnalazioni</dd>
- *  <dt>oil.categories.default</dt><dd>Id della categoria da selezionare come predefinita (facoltativo)</dd>
+ *  <dt>oil.categories.default</dt><dd>Id della categoria da selezionare come 
+ *      predefinita (facoltativo)</dd>
  * </dl>
  * Comunque ci sono dei default.
 */
@@ -36,7 +38,8 @@ public class OilConfig {
   private static final String OIL_DEFAULT_APP_NAME = "siper";
   private static final String OIL_DEFAULT_EMAIL_TO = "helpdesk.mailbox@cnr.it";
   private static final String OIL_DEFAULT_EMAIL_SUBJECT = "Segnalazione ePAS";
-  private static final String OIL_DEFAULT_CATEGORIES = "50:Problemi Tecnici - ePAS,51:Problemi Amministrativi - ePAS";
+  private static final String OIL_DEFAULT_CATEGORIES = 
+      "50:Problemi Tecnici - ePAS,51:Problemi Amministrativi - ePAS";
   private static final String OIL_DEFAULT_SELECTED_CATEGORY = "0";
   
   /**
@@ -48,13 +51,13 @@ public class OilConfig {
    * all'utente per la sua selezione.
    * 
    * @return una mappa contenente come chiave il codice della categoria, come valore il testo
-   *    da visualizzare all'utente.
+   *        da visualizzare all'utente.
    */
   public static Map<String, String> categoryMap() {
     String oilCategories = categories();
     Map<String, String> categoryMap = Maps.newLinkedHashMap();
-    if(oilCategories != null && !oilCategories.isEmpty()) {
-      for(String category : oilCategories.split(",")) {
+    if (oilCategories != null && !oilCategories.isEmpty()) {
+      for (String category : oilCategories.split(",")) {
         String[] categoryFields = category.split(":");
         if (categoryFields.length == 2) {
           categoryMap.put(categoryFields[0], categoryFields[1]);
