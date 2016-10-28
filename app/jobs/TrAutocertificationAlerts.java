@@ -13,7 +13,6 @@ import models.enumerate.Troubles;
 import org.joda.time.LocalDate;
 
 import play.Play;
-import play.jobs.Every;
 import play.jobs.Job;
 import play.jobs.On;
 
@@ -26,7 +25,7 @@ import javax.inject.Inject;
 @Slf4j
 // Ogni giorno alle 15 dal lunedì al venerdì
 @On("0 0 15 ? * MON-FRI")
-public class TrAutocertificationAlerts extends Job {
+public class TrAutocertificationAlerts extends Job<Void> {
 
   private static final String JOBS_CONF = "jobs.active";
   private static final int DAYS = 5;

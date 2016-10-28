@@ -20,7 +20,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 
 import play.jobs.Job;
-import play.jobs.OnApplicationStart;
 
 import java.util.List;
 
@@ -32,7 +31,7 @@ import javax.inject.Inject;
  */
 @Slf4j
 //@OnApplicationStart(async = true)
-public class migrateConfigurationJob extends Job {
+public class migrateConfigurationJob extends Job<Void> {
 
   // La migrateConfiguration và rimossa (e con lei anche tabelle e compagnia inerenti la vecchia
   // gestione delle configurazioni) appena verrà effettuato l'aggiornamento dell'ise.

@@ -21,9 +21,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-@SuppressWarnings("rawtypes")
 @Slf4j
-public class RemoveInvalidStampingsJob extends Job {
+public class RemoveInvalidStampingsJob extends Job<Void> {
 
   @Inject
   private static PersonDayDao personDayDao;
