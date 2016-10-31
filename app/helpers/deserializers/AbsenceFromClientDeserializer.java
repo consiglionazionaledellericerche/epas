@@ -67,9 +67,9 @@ public class AbsenceFromClientDeserializer implements JsonDeserializer<AbsenceFr
     }
 
     if (person == null) {
-      log.warn("Impossibile trovare la persona dal Json "
-              + "ricevuto: matricolaFirma {}", matricolaFirma);
-      throw new JsonParseException("Persona non trovata in anagrafica");
+      log.warn("Impossibile trovare la persona dal Json ricevuto: matricolaFirma {}", 
+          matricolaFirma);
+      return null;
     }
     afc.person = person;
 

@@ -49,10 +49,10 @@ public class ErrorsBox {
       absenceError.conflictingAbsences.add(conflictingAsbence);
     }
     if (map.equals(absenceErrorsSuperMap)) {
-      log.info("Aggiunto errore alla mappa {} {}", absence.toString(), absenceProblem);  
+      log.trace("Aggiunto errore alla mappa {} {}", absence.toString(), absenceProblem);  
     }
     if (map.equals(absenceWarningsSuperMap)) {
-      log.info("Aggiunto warning alla mappa {} {}", absence.toString(), absenceProblem);
+      log.trace("Aggiunto warning alla mappa {} {}", absence.toString(), absenceProblem);
     }
     
   }
@@ -100,7 +100,7 @@ public class ErrorsBox {
         .absenceType(absenceType)
         .criticalProblem(criticalProblem).build());
     
-    log.info("Aggiunto errore critico alla mappa {}", criticalProblem);
+    log.trace("Aggiunto errore critico alla mappa {}", criticalProblem);
   }
   
   public void addCriticalError(LocalDate date, CriticalProblem criticalProblem) {
