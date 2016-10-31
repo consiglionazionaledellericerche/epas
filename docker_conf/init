@@ -9,8 +9,6 @@ fi
 
 PROTOCOL=${PROTOCOL:-http}
 EPAS_SHIB_LOGIN=${EPAS_SHIB_LOGIN:-false}
-LOG_LEVEL=${LOG_LEVEL:-INFO}
-LOG_ON_FILE=${LOG_ON_FILE:-false}
 
 # use default port number if it is still not set
 case "${PROTOCOL}" in
@@ -41,6 +39,21 @@ if [ -z "${DB_PASS}" ]; then
 else
 	DB_USER_PASS="$DB_USER:$DB_PASS"
 fi
+
+######## LOGS Settings #########
+
+LOG_LEVEL=${LOG_LEVEL:-INFO}
+APPENDERS=${APPENDERS:-"stdout, stderr"}
+GRAYLOG_HOST=${GRAYLOG_HOST}
+GRAYLOG_PORT=${GRAYLOG_PORT:-3514}
+GRAYLOG_ORIGIN_HOST=${GRAYLOG_ORIGIN_HOST:-$VIRTUAL_HOST}
+
+cp ${APP_HOME}/docker_conf/log4j.prod.properties ${APP_HOME}/conf/
+sed 's#{{LOG_LEVEL}}#'"${LOG_LEVEL}"'#' -i ${APP_HOME}/conf/log4j.prod.properties
+sed 's#{{APPENDERS}}#'"${APPENDERS}"'#' -i ${APP_HOME}/conf/log4j.prod.properties
+sed 's#{{GRAYLOG_HOST}}#'"${GRAYLOG_HOST}"'#' -i ${APP_HOME}/conf/log4j.prod.properties
+sed 's#{{GRAYLOG_PORT}}#'"${GRAYLOG_PORT}"'#' -i ${APP_HOME}/conf/log4j.prod.properties
+sed 's#{{GRAYLOG_ORIGIN_HOST}}#'"${GRAYLOG_ORIGIN_HOST}"'#' -i ${APP_HOME}/conf/log4j.prod.properties
 
 # Backup db
 cp ${APP_HOME}/docker_conf/backupdb.sh ${APP_HOME}/tools/backupdb.sh
@@ -182,19 +195,6 @@ fi
 
 sed 's#{{SKIP_IP_CHECK}}#'"${SKIP_IP_CHECK}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{EPAS_SHIB_LOGIN}}#'"${EPAS_SHIB_LOGIN}"'#' -i ${APP_HOME}/conf/prod.conf
-
-cp ${APP_HOME}/docker_conf/log4j.prod.properties ${APP_HOME}/conf/
-sed 's#{{LOG_LEVEL}}#'"${LOG_LEVEL}"'#' -i ${APP_HOME}/conf/log4j.prod.properties
-
-case "${LOG_ON_FILE}" in
-  false) sed 's/{{FILE}}//g' -i ${APP_HOME}/conf/log4j.prod.properties ;;
-  true) sed 's#{{FILE}}#'", file"'#' -i ${APP_HOME}/conf/log4j.prod.properties ;;
-  *)
-    echo "ERROR: "
-    echo "  Please specify true or false in LOG_ON_FILE Env."
-    exit 1
-    ;;
-esac
 
 appRun () {
   echo "Applico eventuali evoluzioni al database..."
