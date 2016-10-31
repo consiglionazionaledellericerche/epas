@@ -250,10 +250,10 @@ public class ConsistencyManager {
     final Person person = personDao.fetchPersonForComputation(personId, Optional.fromNullable(from),
         Optional.<LocalDate>absent());
 
-    log.info("Lanciato aggiornamento situazione {} da {} a oggi", person.getFullname(), from);
+    log.debug("Lanciato aggiornamento situazione {} da {} a oggi", person.getFullname(), from);
 
     if (person.qualification == null) {
-      log.info("... annullato ricalcolo per {} in quanto priva di qualifica", person.getFullname());
+      log.warn("... annullato ricalcolo per {} in quanto priva di qualifica", person.getFullname());
       return;
     }
 
@@ -275,7 +275,7 @@ public class ConsistencyManager {
       personDaysMap.put(personDay.date, personDay);
     }
 
-    log.info("... fetch dei dati conclusa, inizio dei ricalcoli.");
+    log.trace("... fetch dei dati conclusa, inizio dei ricalcoli.");
 
     PersonDay previous = null;
 
@@ -313,7 +313,7 @@ public class ConsistencyManager {
 
       }
 
-      log.info("... ricalcolo dei giorni lavorativi conclusa.");
+      log.trace("... ricalcolo dei giorni lavorativi conclusa.");
     }
     // (3) Ricalcolo dei residui per mese
     populateContractMonthRecapByPerson(person, new YearMonth(from));
@@ -321,7 +321,7 @@ public class ConsistencyManager {
     // (4) Scan degli errori sulle assenze
     absenceService.scanner(person, from);
 
-    log.info("... ricalcolo dei riepiloghi conclusa.");
+    log.trace("... ricalcolo dei riepiloghi conclusa.");
   }
 
   /**
