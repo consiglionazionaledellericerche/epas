@@ -710,6 +710,7 @@ public class PersonDayManager {
     //se prima o uguale a source contract il problema è fixato
     if (sourceDateResidual != null && !personDay.date.isAfter(sourceDateResidual)) {
       personDay.troubles.forEach(PersonDayInTrouble::delete);
+      personDay.troubles.clear();
 
       log.info("Eliminati tutti i PersonDaysinTrouble relativi al giorno {} della persona {}"
               + " perchè precedente a sourceContract({})",
@@ -727,36 +728,32 @@ public class PersonDayManager {
     final boolean isHoliday = personDay.isHoliday;
     final boolean isEnoughHourlyAbsences = isEnoughHourlyAbsences(pd);
 
-    if (isFixedTimeAtWork) {
-      //persona fixed
-      if (allValidStampings) {
-        personDayInTroubleManager.fixTrouble(personDay, Troubles.UNCOUPLED_FIXED);
-      } else {
-        personDayInTroubleManager.setTrouble(personDay, Troubles.UNCOUPLED_FIXED);
-      }
+    // PRESENZA AUTOMATICA
+    if (isFixedTimeAtWork && !allValidStampings) {
+      personDayInTroubleManager.setTrouble(personDay, Troubles.UNCOUPLED_FIXED);
+    } else {
+      personDayInTroubleManager.fixTrouble(personDay, Troubles.UNCOUPLED_FIXED);
     }
 
-    //persona not fixed
+    // CASI STANDARD
 
-    // ### CASO 1
-    //caso no festa + no assenze giornaliere + no timbrature + (qualcosa capire cosa)
-    if (!isHoliday && !isAllDayAbsences && noStampings && !isEnoughHourlyAbsences) {
+    // ### CASO 1: no festa + no assenze giornaliere + no timbrature + (qualcosa capire cosa)
+    if (!isFixedTimeAtWork && !isHoliday && !isAllDayAbsences && noStampings
+        && !isEnoughHourlyAbsences) {
       personDayInTroubleManager.setTrouble(personDay, Troubles.NO_ABS_NO_STAMP);
     } else {
       personDayInTroubleManager.fixTrouble(personDay, Troubles.NO_ABS_NO_STAMP);
     }
 
-    // ### CASO 2
-    //caso no festa + no assenze giornaliere + timbrature disaccoppiate
-    if (!isHoliday && !isAllDayAbsences && !allValidStampings) {
+    // ### CASO 2: no festa + no assenze giornaliere + timbrature disaccoppiate
+    if (!isFixedTimeAtWork && !isHoliday && !isAllDayAbsences && !allValidStampings) {
       personDayInTroubleManager.setTrouble(personDay, Troubles.UNCOUPLED_WORKING);
     } else {
       personDayInTroubleManager.fixTrouble(personDay, Troubles.UNCOUPLED_WORKING);
     }
 
-    // ### CASO 3
-    //caso è festa + no assenze giornaliere + timbrature disaccoppiate
-    if (isHoliday && !isAllDayAbsences && !allValidStampings) {
+    // ### CASO 3 festa + no assenze giornaliere + timbrature disaccoppiate
+    if (!isFixedTimeAtWork && isHoliday && !isAllDayAbsences && !allValidStampings) {
       personDayInTroubleManager.setTrouble(personDay, Troubles.UNCOUPLED_HOLIDAY);
     } else {
       personDayInTroubleManager.fixTrouble(personDay, Troubles.UNCOUPLED_HOLIDAY);
