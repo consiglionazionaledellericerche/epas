@@ -6,82 +6,39 @@
 
 #{title title:'Gruppi di Assenze' /}
 
-  #{list items:groups, as:'group'}
-
-  <ul class="list-group">
-    <li class="list-group-item list-group-item-info">
-      <strong>${group.description.label()}</strong>
-      <span class="label label-info">${group.name}</span> 
-    </li>
-    <li class="list-group-item">
-      
-      *{ <span class="label label-default">Codice</span> &{group.name}<br> }* 
-
-      <span class="label label-default">Categoria</span> ${group.category.name} <br>
-      <span class="label label-default">Tipologia</span> &{group.pattern} <br>
-      <span class="label label-default">Periodo</span> &{group.periodType} <br>
-      #{if group.nextGroupToCheck}
-      <span class="label label-default">Gruppo successivo</span> <strong>${group.nextGroupToCheck.description.label()}</strong>
-      #{/if}
-    </li>
-    #{if group.takableAbsenceBehaviour}  
-    <li class="list-group-item">
-      <span class="label label-primary">Limite</span>  <span class="label label-danger"> ${group.takableAbsenceBehaviour.fixedLimit} &{group.takableAbsenceBehaviour.amountType} </span><br>
-      #{if group.takableAbsenceBehaviour.takableAmountAdjustment }
-      <span class="label label-primary">Aggiustamento</span> <span class="label label-danger"> &{group.takableAbsenceBehaviour.takableAmountAdjustment}</span><br>  
-      #{/if}
-      
-      *{ <span class="label label-primary">Codice</span> ${group.takableAbsenceBehaviour.name}<br> }*
-      <span class="label label-primary">Codici considerati</span> 
-      #{list items:group.takableAbsenceBehaviour.takableCodes, as:'absenceType'}
-        #{if !absenceType.expired }
-          #{absences.absenceType absenceType:absenceType /}
-        #{/if}  
-      #{/list}
-      #{list items:group.takableAbsenceBehaviour.takableCodes, as:'absenceType'}
-        #{if absenceType.expired }
-          #{absences.absenceType absenceType:absenceType /}
-        #{/if}    
-      #{/list}  
-      
-    </li>
-    #{/if}
-    #{if group.complationAbsenceBehaviour}  
-    <li class="list-group-item list-group-item-warning">
-    
-      <span class="label label-primary">Completamento</span> &{group.complationAbsenceBehaviour.amountType}<br>
-      *{ <span class="label label-primary">Codice</span> ${group.complationAbsenceBehaviour.name}<br> }*
-      <span class="label label-primary">Codici completamento</span> 
-      #{list items:group.complationAbsenceBehaviour.complationCodes, as:'absenceType'}
-        #{if !absenceType.expired }
-          #{absences.absenceType absenceType:absenceType /}
-        #{/if}    
-      #{/list} 
-      #{list items:group.complationAbsenceBehaviour.complationCodes, as:'absenceType'}
-        #{if absenceType.expired }
-          #{absences.absenceType absenceType:absenceType /}
-        #{/if}    
-      #{/list} 
-      <br>
-      
-      <span class="label label-primary">Codici rimpiazzamento</span> 
-      #{list items:group.complationAbsenceBehaviour.replacingCodes, as:'absenceType'}
-        #{if !absenceType.expired }
-          #{absences.absenceType absenceType:absenceType /}
-        #{/if}    
-      #{/list} 
-      #{list items:group.complationAbsenceBehaviour.replacingCodes, as:'absenceType'}
-        #{if absenceType.expired }
-          #{absences.absenceType absenceType:absenceType /}
-        #{/if}    
-      #{/list} 
-      
-    </li>
-    #{/if}
-    
-  </ul>
+ #{form action:@AbsenceGroups.show(), method:'GET', autocomplete:false,
+		    class:'form form-horizontal auto-submit'}
+		#{f.selectModel 'category', inputName:'categoryId', items:categories, value:category /}
+ #{/form}
+ 
+ <table class="table table-bordered" datatable> 
+   <thead>
+ 	<tr>
+ 	  <th class="col-md-3">Gruppo</th>
+ 	  <th>Categoria</th>
+ 	  <th>Tipologia</th>
+ 	  <th>Periodo</th>
+ 	  <th>Limiti e codici</th>
+ 	  <th>Completamenti e codici</th>
+ 	</tr>
+   </thead>
+   <tbody>
+ #{list items:groups, as:'group'}
   
-  #{/list}
+  *{ todo questo filtro andrebbe fatto direttamente nel controller }*
+  #{if group.category.equals(category)}    
+  <tr>
+  
+    #{include './_showGroup.html' /}
+  </tr>
+  #{/if}
+  
+  
+  
+  
+ #{/list}
+ </tbody>
 
+ </table>
   
 </div>
