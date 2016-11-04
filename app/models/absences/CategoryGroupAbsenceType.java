@@ -30,4 +30,10 @@ public class CategoryGroupAbsenceType extends BaseModel
     return name.compareTo(obj.name);
   }
   
+  /**
+   * To String.
+   */
+  public String toString() {
+    return this.name;
+  }
 }
