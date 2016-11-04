@@ -85,6 +85,8 @@ endDate=Data Fine
 from=Da
 to=A
 
+category=Categoria
+
 child.bornDate= Data di Nascita
 child.name= Nome
 child.surname= Cognome
@@ -507,6 +509,7 @@ Absences.absencesPerPerson= Assenze Annuali
 Absences.absencesVisibleForEmployee= Presenze Giornaliere
 Absences.manageAbsenceCode= Gestione Codici d'assenza
 Absences.showGeneralMonthlyAbsences= Assenze
+AbsenceGroups.show=Gruppi Assenze
 Administration.playConfiguration= Informazioni Applicazione
 Administration.utilities= Utilities
 BadgeReaders.list= Sorgenti Timbrature

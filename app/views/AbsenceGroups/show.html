@@ -6,17 +6,24 @@
 
 #{title title:'Gruppi di Assenze' /}
 
+
+
+
  #{form action:@AbsenceGroups.show(), method:'GET', autocomplete:false,
 		    class:'form form-horizontal auto-submit'}
 		#{f.selectModel 'category', inputName:'categoryId', items:categories, value:category /}
  #{/form}
  
- <table class="table table-bordered" datatable> 
+
+ 
+ <table class="table table-bordered"> 
    <thead>
  	<tr>
  	  <th class="col-md-3">Gruppo</th>
+ 	  *{
  	  <th>Categoria</th>
  	  <th>Tipologia</th>
+ 	  }*
  	  <th>Periodo</th>
  	  <th>Limiti e codici</th>
  	  <th>Completamenti e codici</th>
@@ -40,5 +47,29 @@
  </tbody>
 
  </table>
+ 
+<div class="panel panel-default">
+  <div class="panel-body"> 
+  <p>Tramite questa vista è possibile comprendere il comportamento dei gruppi di codici assenza.</p>
+  
+  <br>
+  <span class="label label-danger">Numero Minuti</span> Limite per il gruppo definito conteggiato in minuti <br>
+  <span class="label label-danger">Numero Giorni</span> Limite per il gruppo definito conteggiato in giorni <br>
+  
+  <br>
+  <span class="label label-warning">Completamento in Minuti</span> I codici di <span class="label label-info">completamento</span> da inviare alla Sede Centrale vengono inseriti sulla base dei minuti effettivi giustificati. <br> 
+  <span class="label label-warning">Completamento in Giorni</span> I codici di <span class="label label-info">completamento</span> da inviare alla Sede Centrale vengono inseriti al consumo di una intera giornata lavorativa, rapportata al tipo orario del dipendente. <br> 
+  
+  <br>
+  <i class="fa fa-link" aria-hidden="true"></i> Il gruppo è prendibile dopo l'esaurimento di un gruppo con una priorità maggiore. <br>
+  <i class="fa fa-star" aria-hidden="true"></i> Il gruppo è di tipo speciale, limiti e completamenti sono gestiti con algoritmi specifici. <br>
+  <i class="fa fa-asterisk" aria-hidden="true"></i> Il gruppo è di tipo semplice, nessun limite e completamento definito. 
+ </div>
+</div>
+
+
   
 </div>
+
+
+ 
