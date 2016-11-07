@@ -1,7 +1,6 @@
 package models;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 
 import models.base.BaseModel;
@@ -11,7 +10,6 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
-import play.Logger;
 import play.data.validation.MinSize;
 import play.data.validation.Required;
 import play.data.validation.Unique;

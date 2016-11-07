@@ -81,7 +81,7 @@ public enum StampTypes {
   /**
    * @return la lista degli stamptypes attivi.
    */
-  public static List<StampTypes> onlyActive(){
+  public static List<StampTypes> onlyActive() {
     return Arrays.stream(values()).filter(StampTypes::isActive).collect(Collectors.toList());
   }
 

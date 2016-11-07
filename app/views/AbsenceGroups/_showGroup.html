@@ -1,0 +1,107 @@
+    
+    <!-- Gruppo -->
+    <td class="bd-info">
+      #{if group.previousGroupChecked}
+      <i class="fa fa-link" aria-hidden="true"></i>
+      #{/if}
+      #{if group.pattern.equals(models.absences.GroupAbsenceType.GroupAbsenceTypePattern.vacationsCnr)
+        || group.pattern.equals(models.absences.GroupAbsenceType.GroupAbsenceTypePattern.compensatoryRestCnr)}
+        <i class="fa fa-star" aria-hidden="true"></i>  
+      #{/if}
+      #{if group.pattern.equals(models.absences.GroupAbsenceType.GroupAbsenceTypePattern.simpleGrouping) }
+        <i class="fa fa-asterisk" aria-hidden="true"></i>  
+      #{/if}
+      
+      #{secure.link @AbsenceGroups.editGroup(group.id),  'data-async-modal':'#defaultModal' }
+      <strong> ${group.description.label()}</strong>
+      #{/secure.link}
+      
+      
+      *{ <span class="label label-info">${group.name}</span> }* 
+    </td>
+    
+    
+    <!-- Caratteristiche -->
+    *{ <td>${group.category.name}</td> }*
+    *{ <td>&{group.pattern}</td> }*
+    <td>&{group.periodType}</td>
+    *{
+      #{if group.nextGroupToCheck}
+      <span class="label label-default">Gruppo successivo</span> <strong>${group.nextGroupToCheck.description.label()}</strong>
+      #{/if}
+    }*
+    
+    <!-- Takable-->
+    
+    #{if group.takableAbsenceBehaviour}  
+     <td>
+      #{if group.takableAbsenceBehaviour.fixedLimit > 0}
+      <span class="label label-danger">${group.takableAbsenceBehaviour.fixedLimit} &{group.takableAbsenceBehaviour.amountType}</span><br>
+      #{/if}
+      *{
+      #{else}
+      <span class="label label-danger">Nessun limite</span><br>
+      #{/else}
+      }*
+      
+      *{
+       #{if group.takableAbsenceBehaviour.takableAmountAdjustment } 
+      <span class="label label-primary">Aggiustamento</span> <span class="label label-danger"> &{group.takableAbsenceBehaviour.takableAmountAdjustment}</span><br>  
+      #{/if}
+      }*
+      
+      *{ <span class="label label-primary">Codice</span> ${group.takableAbsenceBehaviour.name}<br> }*
+     
+      #{list items:group.takableAbsenceBehaviour.takableCodes, as:'absenceType'}
+        #{if !absenceType.expired }
+          #{absences.absenceType absenceType:absenceType /}
+        #{/if}  
+      #{/list}
+      #{list items:group.takableAbsenceBehaviour.takableCodes, as:'absenceType'}
+        #{if absenceType.expired }
+          #{absences.absenceType absenceType:absenceType /}
+        #{/if}    
+      #{/list}  
+     </td>  
+    
+    
+    #{/if}
+    #{else}
+    <td></td>
+    #{/else}
+    
+    
+    <!-- Complation-->
+    #{if group.complationAbsenceBehaviour}  
+     <td>
+      <span class="label label-warning">Completamento in &{group.complationAbsenceBehaviour.amountType}</span><br>
+      *{ <span class="label label-primary">Codice</span> ${group.complationAbsenceBehaviour.name}<br> }*
+
+      #{list items:group.complationAbsenceBehaviour.complationCodes, as:'absenceType'}
+        #{if !absenceType.expired }
+          #{absences.absenceType absenceType:absenceType /}
+        #{/if}    
+      #{/list} 
+      #{list items:group.complationAbsenceBehaviour.complationCodes, as:'absenceType'}
+        #{if absenceType.expired }
+          #{absences.absenceType absenceType:absenceType /}
+        #{/if}    
+      #{/list} 
+      <br>
+ 
+      #{list items:group.complationAbsenceBehaviour.replacingCodes, as:'absenceType'}
+        #{if !absenceType.expired }
+          #{absences.absenceType absenceType:absenceType /}
+        #{/if}    
+      #{/list} 
+      #{list items:group.complationAbsenceBehaviour.replacingCodes, as:'absenceType'}
+        #{if absenceType.expired }
+          #{absences.absenceType absenceType:absenceType /}
+        #{/if}    
+      #{/list} 
+    </td>  
+    #{/if}
+    
+    #{else}
+    <td></td>
+    #{/else}

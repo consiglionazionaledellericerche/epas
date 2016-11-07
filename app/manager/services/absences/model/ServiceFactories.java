@@ -176,8 +176,11 @@ public class ServiceFactories {
                 .get(absencePeriod.groupAbsenceType.periodType.childNumber - 1).bornDate);
         absencePeriod.from = childInterval.getBegin();
         absencePeriod.to = childInterval.getEnd();
-
-      } catch (Exception e) {
+        if (!DateUtility.isDateIntoInterval(date, childInterval)) {
+          absencePeriod.ignorePeriod = true;
+          return absencePeriod; 
+        }
+      } catch (Exception ex) {
         absencePeriod.ignorePeriod = true;
         return absencePeriod;
       }

@@ -62,7 +62,8 @@ require:
     - com.github.fge -> jackson-coreutils 1.6
     - org.testng -> testng 6.9.10
     - org.apache.poi -> poi 3.14
-
+    - org.graylog2 -> gelfj 1.1.15
+    
 # My custom repository
 
 repositories:

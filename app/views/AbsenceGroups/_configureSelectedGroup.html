@@ -48,5 +48,15 @@
        #{f.selectEnum 'hours', items:absenceForm.selectableHours(), value:absenceForm.hours, byEquals:'true' /}
        #{f.selectEnum 'minutes', items:absenceForm.selectableMinutes(), value:absenceForm.minutes, byEquals:'true' /}
      #{/if}
+     
+     #{if absenceForm.absenceTypeSelected || !absenceForm.hasAbsenceTypeChoice() }
+       #{f.checkbox 'forceInsert', value:forceInsert /}
+       #{if forceInsert}
+         #{alert color:'warning'}
+           <p><strong>Attenzione:</strong> Forzando l'inserimento di un codice al momento del salvataggio
+           non verrà effettuato alcun tipo di controllo.</p>
+         #{/alert}
+       #{/if}
+     #{/if}
          
 	#{/form}

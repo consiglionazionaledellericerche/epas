@@ -35,7 +35,6 @@ public class PersonManager {
   public final PersonDayManager personDayManager;
   private final IWrapperFactory wrapperFactory;
   private final AbsenceDao absenceDao;
-  private final UsersRolesOfficesDao uroDao;
 
   /**
    * Costrutture.
@@ -58,7 +57,6 @@ public class PersonManager {
     this.absenceDao = absenceDao;
     this.personDayManager = personDayManager;
     this.wrapperFactory = wrapperFactory;
-    this.uroDao = uroDao;
   }
 
   /**
@@ -102,9 +100,9 @@ public class PersonManager {
 
     personDays.stream().flatMap(personDay -> personDay.absences.stream()
         .<AbsenceType>map(absence -> absence.absenceType)).forEach(absenceType -> {
-      Integer count = absenceCodeMap.get(absenceType);
-      absenceCodeMap.put(absenceType, (count == null) ? 1 : count + 1);
-    });
+          Integer count = absenceCodeMap.get(absenceType);
+          absenceCodeMap.put(absenceType, (count == null) ? 1 : count + 1);
+        });
 
     return absenceCodeMap;
   }

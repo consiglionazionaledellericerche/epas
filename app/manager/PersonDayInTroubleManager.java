@@ -139,13 +139,13 @@ public class PersonDayInTroubleManager {
           Optional.of(troubleCausesToSend));
 
       if (pdList.isEmpty()) {
-        log.info("{} non ha problemi da segnalare.", person.getFullname());
+        log.debug("{} non ha problemi da segnalare.", person.getLabel());
         continue;
       }
 
       try {
         // Invio della e-mail ...
-        log.info("Preparo invio mail per {}", person.getFullname());
+        log.trace("Preparo invio mail per {}", person.getFullname());
         SimpleEmail simpleEmail = new SimpleEmail();
         String reply = (String) configurationManager
             .configValue(person.office, EpasParam.EMAIL_TO_CONTACT);
@@ -158,8 +158,8 @@ public class PersonDayInTroubleManager {
         simpleEmail.setMsg(troubleEmailBody(person, pdList, troubleCausesToSend));
         Mail.send(simpleEmail);
 
-        log.debug("Inviata mail a {} per segnalare i problemi {}",
-            person.getFullname(), troubleCausesToSend);
+        log.info("Inviata mail a {} per segnalare i problemi {}",
+            person.getLabel(), troubleCausesToSend);
 
         // Imposto il campo e-mails inviate ...
         for (PersonDayInTrouble pd : pdList) {
@@ -167,10 +167,9 @@ public class PersonDayInTroubleManager {
           pd.save();
         }
 
-      } catch (Exception e) {
+      } catch (Exception ex) {
         log.error("sendEmailToPerson({}, {}, {}): fallito invio email per {}",
-            pdList, person, troubleCausesToSend, person.getFullname());
-        log.error(e.getStackTrace().toString());
+            pdList, person, troubleCausesToSend, person.getFullname(), ex);
       }
     }
   }

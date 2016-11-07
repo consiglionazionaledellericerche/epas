@@ -2,16 +2,12 @@ package jobs;
 
 import com.google.common.io.Resources;
 
-import dao.UserDao;
-
 import lombok.extern.slf4j.Slf4j;
 
 import manager.services.absences.AbsenceMigration;
 
 import models.Qualification;
-import models.Role;
 import models.User;
-import models.UsersRolesOffices;
 import models.WorkingTimeType;
 import models.absences.GroupAbsenceType;
 
@@ -135,12 +131,12 @@ public class Bootstrap extends Job<Void> {
         IDataSet dataSet = new FlatXmlDataSetBuilder()
             .setColumnSensing(true).build(url);
         operation.execute(new H2Connection(connection, ""), dataSet);
-      } catch (DataSetException e) {
-        e.printStackTrace();
-      } catch (DatabaseUnitException e) {
-        e.printStackTrace();
-      } catch (SQLException e) {
-        e.printStackTrace();
+      } catch (DataSetException dse) {
+        dse.printStackTrace();
+      } catch (DatabaseUnitException due) {
+        due.printStackTrace();
+      } catch (SQLException sqle) {
+        sqle.printStackTrace();
       }
     }
   }

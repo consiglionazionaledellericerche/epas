@@ -29,6 +29,8 @@ import javax.validation.constraints.NotNull;
 @Table(name = "attachments")
 public class Attachment extends MutableModel {
 
+  private static final long serialVersionUID = 7907525510585924187L;
+
   @NotNull
   @Required
   public String filename;

@@ -85,6 +85,8 @@ endDate=Data Fine
 from=Da
 to=A
 
+category=Categoria
+
 child.bornDate= Data di Nascita
 child.name= Nome
 child.surname= Cognome
@@ -507,6 +509,7 @@ Absences.absencesPerPerson= Assenze Annuali
 Absences.absencesVisibleForEmployee= Presenze Giornaliere
 Absences.manageAbsenceCode= Gestione Codici d'assenza
 Absences.showGeneralMonthlyAbsences= Assenze
+AbsenceGroups.show=Gruppi Assenze
 Administration.playConfiguration= Informazioni Applicazione
 Administration.utilities= Utilities
 BadgeReaders.list= Sorgenti Timbrature
@@ -697,16 +700,25 @@ NotOnHoliday=Non di festa
 InReperibility=In Reperibilità
 InReperibilityOrShift=In Turno o Reperibilità
 InShift=In Turno
+ForceInsert=Inserimento forzato
 
 child1_0_3=Primo figlio 0-3 anni
 child1_0_6=Primo figlio 0-6 anni
 child1_0_12=Primo figlio 0-12 anni
+child1_3_12=Primo figlio 3-12 anni
 child2_0_3=Secondo figlio 0-3 anni
 child2_0_6=Secondo figlio 0-6 anni
 child2_0_12=Secondo figlio 0-12 anni
+child2_3_12=Secondo figlio 3-12 anni
 child3_0_3=Terzo figlio 0-3 anni
 child3_0_6=Terzo figlio 0-6 anni
 child3_0_12=Terzo figlio 0-12 anni
+child3_3_12=Terzo figlio 3-12 anni
+
+always=Sempre
+compensatoryRestCnr=Riposo Compensativo CNR
+vacationsCnr=Ferie CNR
+simpleGrouping=Gruppo Semplice
 
 
 

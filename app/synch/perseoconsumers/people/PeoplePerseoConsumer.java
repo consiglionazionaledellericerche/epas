@@ -132,6 +132,7 @@ public class PeoplePerseoConsumer {
             response.getStatus(), response.getStatusText());
         try {
           return new Gson().fromJson(response.getJson(), new TypeToken<List<PerseoPerson>>() {
+            private static final long serialVersionUID = 6287635192815160188L;
           }.getType());
         } catch (JsonSyntaxException ex) {
           final String error = String.format("Errore nel parsing del json: %s", ex.getMessage());
