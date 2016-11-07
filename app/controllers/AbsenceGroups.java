@@ -23,6 +23,7 @@ import models.Role;
 import models.User;
 import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.CategoryGroupAbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.JustifiedType;
@@ -64,12 +65,39 @@ public class AbsenceGroups extends Controller {
 
   /**
    * End point per la visualizzazione dei gruppi assenze definiti.
+   * @param categoryId filtro categoria
    */
-  public static void show() {
+  public static void show(Long categoryId) {
 
     List<GroupAbsenceType> groups = GroupAbsenceType.findAll();
-    render(groups);
+    List<CategoryGroupAbsenceType> categories = CategoryGroupAbsenceType.findAll();
+    CategoryGroupAbsenceType category = categories.iterator().next();
+    if (categoryId != null) {
+      category = CategoryGroupAbsenceType.findById(categoryId);
+    }
+    
+    render(groups, categories, category);
 
+  }
+  
+  /**
+   * End point per la modifica del gruppo.
+   * @param groupAbsenceTypeId gruppo
+   */
+  public static void editGroup(Long groupAbsenceTypeId) {
+    GroupAbsenceType groupAbsenceType = GroupAbsenceType.findById(groupAbsenceTypeId);
+    notFoundIfNull(groupAbsenceType);
+    
+    render(groupAbsenceType);
+  }
+  
+  /**
+   * End point per il salvataggio del gruppo.
+   * @param groupAbsenceType gruppo
+   */
+  public static void updateGroup(GroupAbsenceType groupAbsenceType) {
+    groupAbsenceType.save();
+    show(groupAbsenceType.category.id);
   }
 
 
@@ -91,7 +119,7 @@ public class AbsenceGroups extends Controller {
       Long personId, LocalDate from, AbsenceInsertTab absenceInsertTab,      //tab
       LocalDate to, GroupAbsenceType groupAbsenceType, boolean switchGroup, //group
       AbsenceType absenceType, JustifiedType justifiedType,                  //confGroup 
-      Integer hours, Integer minutes) {
+      Integer hours, Integer minutes, boolean forceInsert) {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
@@ -107,8 +135,8 @@ public class AbsenceGroups extends Controller {
         absenceForm.groupSelected,
         absenceForm.from, absenceForm.to,
         absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
-        absenceForm.hours, absenceForm.minutes, absenceManager);
-    render(absenceForm, insertReport);
+        absenceForm.hours, absenceForm.minutes, forceInsert, absenceManager);
+    render(absenceForm, insertReport, forceInsert);
 
   }
 
@@ -140,36 +168,30 @@ public class AbsenceGroups extends Controller {
       absenceType = null;
     }
 
-    if (forceInsert) {
-      //report = absenceService.forceInsert(person, groupAbsenceType, from, to, 
-      //    AbsenceRequestType.insert, absenceType, justifiedType, hours, minutes);
-      flash.error("L'inserimento forzato è in fase di implementazione ...");
-    } else {
+    InsertReport insertReport = absenceService.insert(person, groupAbsenceType, from, to,
+        absenceType, justifiedType, hours, minutes, forceInsert, absenceManager);
 
-      InsertReport insertReport = absenceService.insert(person, groupAbsenceType, from, to,
-          absenceType, justifiedType, hours, minutes, absenceManager);
-
-      //Persistenza
-      if (!insertReport.absencesToPersist.isEmpty()) {
-        for (Absence absence : insertReport.absencesToPersist) {
-          PersonDay personDay = personDayManager
-              .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
-          absence.personDay = personDay;
-          personDay.absences.add(absence);
-          rules.checkIfPermitted(absence);
-          absence.save();
-          personDay.save();
-        }
-        if (!insertReport.reperibilityShiftDate().isEmpty()) {
-          //absenceManager.sendReperibilityShiftEmail(person, insertReport.reperibilityShiftDate());
-          log.info("Inserite assenze con reperibilità e turni {} {}. Le email sono disabilitate.",
-              person.fullName(), insertReport.reperibilityShiftDate());
-        }
-        JPA.em().flush();
-        consistencyManager.updatePersonSituation(person.id, from);
-        flash.success("Codici di assenza inseriti.");
+    //Persistenza
+    if (!insertReport.absencesToPersist.isEmpty()) {
+      for (Absence absence : insertReport.absencesToPersist) {
+        PersonDay personDay = personDayManager
+            .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
+        absence.personDay = personDay;
+        personDay.absences.add(absence);
+        rules.checkIfPermitted(absence);
+        absence.save();
+        personDay.save();
       }
+      if (!insertReport.reperibilityShiftDate().isEmpty()) {
+        absenceManager.sendReperibilityShiftEmail(person, insertReport.reperibilityShiftDate());
+        log.info("Inserite assenze con reperibilità e turni {} {}. Le email sono disabilitate.",
+            person.fullName(), insertReport.reperibilityShiftDate());
+      }
+      JPA.em().flush();
+      consistencyManager.updatePersonSituation(person.id, from);
+      flash.success("Codici di assenza inseriti.");
     }
+
     
     //String referer = request.headers.get("referer").value();
     

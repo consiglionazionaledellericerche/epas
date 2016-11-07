@@ -32,13 +32,11 @@ import models.PersonChildren;
 import models.PersonDay;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
-import models.Qualification;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;
-import models.enumerate.QualificationMapping;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
@@ -444,8 +442,8 @@ public class AbsenceManager {
       } else {
         absence.date = pd.date;
 
-        log.info("Simulato inserimento nuova assenza {} per {} in data: {}",
-            absence.absenceType.code, pd.person.getFullname(), absence.date);
+        log.debug("Simulato inserimento nuova assenza {} per {} in data: {}",
+            absence.absenceType.code, pd.person.getLabel(), absence.date);
       }
 
       ar.setAbsenceAdded(absence);

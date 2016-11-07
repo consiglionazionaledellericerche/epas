@@ -5,8 +5,6 @@ import com.google.common.collect.Lists;
 
 import dao.AbsenceDao;
 
-import lombok.extern.slf4j.Slf4j;
-
 import manager.recaps.charts.RenderResult;
 import manager.recaps.charts.ResultFromFile;
 
@@ -29,7 +27,6 @@ import javax.inject.Inject;
  * @author daniele
  * @since 05/07/16.
  */
-@Slf4j
 public class ChartJob extends Job<List<RenderResult>> {
 
   private Person person;

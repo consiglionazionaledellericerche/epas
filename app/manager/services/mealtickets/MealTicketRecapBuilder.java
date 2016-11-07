@@ -99,7 +99,8 @@ public class MealTicketRecapBuilder {
     }
 
     mealTicketRecap.setRemaining(mealTicketRecap.getMealTicketsReceivedExpireOrderedAsc().size() 
-        - mealTicketRecap.getPersonDaysMealTickets().size() + mealTicketRecap.getSourcedInInterval());
+        - mealTicketRecap.getPersonDaysMealTickets().size() 
+        + mealTicketRecap.getSourcedInInterval());
 
     return mealTicketRecap;
   }

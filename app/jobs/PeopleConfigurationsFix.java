@@ -19,7 +19,7 @@ import javax.inject.Inject;
  */
 @Slf4j
 @OnApplicationStart(async = true)
-public class PeopleConfigurationsFix extends Job {
+public class PeopleConfigurationsFix extends Job<Void> {
 
   @Inject
   static ConfigurationManager configurationManager;

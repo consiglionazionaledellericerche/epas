@@ -21,7 +21,7 @@ import javax.persistence.EntityManager;
 public class StampTypeManager {
 
   protected final JPQLQueryFactory queryFactory;
-  private final String SMT_PREFIX = "smt";
+  private static final String SMT_PREFIX = "smt";
 
   @Inject
   StampTypeManager(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
@@ -29,7 +29,7 @@ public class StampTypeManager {
   }
 
   /**
-   * @return lo stampModificationType relativo al codice code passato come parametro
+   * @return lo stampModificationType relativo al codice code passato come parametro.
    */
   private StampModificationType getStampModificationTypeByCode(
           StampModificationTypeCode smtCode) {

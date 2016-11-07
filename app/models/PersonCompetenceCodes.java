@@ -1,15 +1,9 @@
 package models;
 
-import models.base.BaseModel;
-import models.base.IPropertiesInPeriodOwner;
 import models.base.PeriodModel;
 
-import org.joda.time.LocalDate;
-
 import play.data.validation.Required;
-import play.db.jpa.Model;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -24,6 +18,8 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "persons_competence_codes")
 public class PersonCompetenceCodes extends PeriodModel {
+
+  private static final long serialVersionUID = 1769306446762966211L;
 
   @Required
   @ManyToOne

@@ -3,6 +3,7 @@ package manager.services.absences;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
+import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
 
 import controllers.Security;
@@ -191,11 +192,18 @@ public class AbsenceService {
   public InsertReport insert(Person person, GroupAbsenceType groupAbsenceType, 
       LocalDate from, LocalDate to, 
       AbsenceType absenceType, JustifiedType justifiedType, 
-      Integer hours, Integer minutes, AbsenceManager absenceManager) {
+      Integer hours, Integer minutes, boolean forceInsert, AbsenceManager absenceManager) {
+    
+    //Inserimento forzato (nessun controllo)
+    if (forceInsert) {
+      Preconditions.checkNotNull(absenceType);
+      return forceInsert(person, groupAbsenceType, from, to, 
+          absenceType, justifiedType, hours, minutes);
+    }
     
     if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.vacationsCnr)) {
       InsertReport insertReport = temporaryInsertVacation(person, 
-          groupAbsenceType, from, to, null, absenceManager);
+          groupAbsenceType, from, to, absenceType, absenceManager);
       return insertReport;
     } else if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.compensatoryRestCnr)) {
       InsertReport insertReport = temporaryInsertCompensatoryRest(person, 
@@ -203,13 +211,11 @@ public class AbsenceService {
       return insertReport;
     } 
     
-    Integer specifiedMinutes = absenceEngineUtility.getMinutes(hours, minutes);
-    LocalDate currentDate = from;
-    
     List<PeriodChain> chains = Lists.newArrayList();
     List<Absence> previousInserts = Lists.newArrayList();
     List<CriticalError> criticalErrors = Lists.newArrayList();
-    
+    LocalDate currentDate = from;
+    Integer specifiedMinutes = absenceEngineUtility.getMinutes(hours, minutes);    
     while (true) {
 
       //Preparare l'assenza da inserire
@@ -301,8 +307,47 @@ public class AbsenceService {
     return insertReport;
   }
   
-  
-  
+  private InsertReport forceInsert(Person person, GroupAbsenceType groupAbsenceType, 
+      LocalDate from, LocalDate to, 
+      AbsenceType absenceType, JustifiedType justifiedType, 
+      Integer hours, Integer minutes) {
+    InsertReport insertReport = new InsertReport();
+    
+    Integer specifiedMinutes = absenceEngineUtility.getMinutes(hours, minutes);   
+    LocalDate currentDate = from;
+    
+    while (true) {
+
+      //Preparare l'assenza da inserire
+      Absence absenceToInsert = new Absence();
+      absenceToInsert.date = currentDate;
+      absenceToInsert.absenceType = absenceType;
+      absenceToInsert.justifiedType = justifiedType;
+      if (specifiedMinutes != null) {
+        absenceToInsert.justifiedMinutes = specifiedMinutes;
+      }
+      
+      insertReport.absencesToPersist.add(absenceToInsert);
+      
+      TemplateRow templateRow = new TemplateRow();
+      templateRow.absence = absenceToInsert;
+      templateRow.date = currentDate;
+      templateRow.absenceWarnings.add(AbsenceError.builder()
+          .absence(absenceToInsert)
+          .absenceProblem(AbsenceProblem.ForceInsert).build());
+      insertReport.insertTemplateRows.add(templateRow);
+      
+      if (to == null) {
+        break;
+      }
+      currentDate = currentDate.plusDays(1);
+      if (currentDate.isAfter(to)) {
+        break;
+      }
+    }
+    
+    return insertReport;
+  }
   
 
   /**

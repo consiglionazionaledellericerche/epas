@@ -25,6 +25,8 @@ import javax.persistence.Table;
 @Table(name = "complation_absence_behaviours")
 public class ComplationAbsenceBehaviour extends BaseModel {
 
+  private static final long serialVersionUID = 3990946316183363917L;
+
   @Column(name = "name")
   public String name;
   

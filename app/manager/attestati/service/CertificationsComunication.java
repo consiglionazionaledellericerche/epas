@@ -37,8 +37,6 @@ import play.libs.WS.WSRequest;
 import java.util.List;
 import java.util.Set;
 
-import synch.perseoconsumers.office.PerseoOffice;
-
 /**
  * Componente che si occupa di inviare e ricevere dati verso Nuovo Attestati.
  * @author alessandro
@@ -55,14 +53,14 @@ public class CertificationsComunication {
   private static final String API_URL_BUONI_PASTO = "/rigaBuoniPasto";
   private static final String API_URL_FORMAZIONE = "/rigaFormazione";
   private static final String API_URL_COMPETENZA = "/rigaCompetenza";
-  
+
   private static final String API_URL_ASSENZE_PER_CONTRATTO = "/contratto/codiciAssenza";
-  
-  
+
+
   //http://attestativ2.rm.cnr.it/api/ext/contratto/codiciAssenza/{CODICE_CONTRATTO}
-  
+
   private static final String JSON_CONTENT_TYPE = "application/json";
-  
+
   //OAuh
   private static final String OAUTH_CLIENT_SECRET = "mySecretOAuthSecret";
   private static final String OAUTH_CONTENT_TYPE = "application/x-www-form-urlencoded";
@@ -70,12 +68,12 @@ public class CertificationsComunication {
   private static final String OAUTH_AUTHORIZATION = "YXR0ZXN0YXRpYXBwOm15U2VjcmV0T0F1dGhTZWNyZXQ=";
   private static final String OAUTH_GRANT_TYPE = "password";
   private static final String OAUTH_CLIENT_ID = "attestatiapp";
-  
+
   @Inject
   public CertificationsComunication() {
-    
+
   }
-  
+
   /**
    * Per l'ottenenere il Bearer Token:
    * curl -s -X POST -H "Content-Type: application/x-www-form-urlencoded" 
@@ -91,7 +89,7 @@ public class CertificationsComunication {
     final String url;
     final String user;
     final String pass;
-    
+
     try {
       url = AttestatiApis.getAttestatiBaseUrl();
       user = AttestatiApis.getAttestatiUser();
@@ -101,13 +99,13 @@ public class CertificationsComunication {
       log.error(error);
       throw new ApiRequestException(error);
     }
-    
+
     try {
-      
+
       String body = String
           .format("username=%s&password=%s&grant_type=%s&client_secret=%s&client_id=%s", 
               user, pass, OAUTH_GRANT_TYPE, OAUTH_CLIENT_SECRET, OAUTH_CLIENT_ID);
-      
+
       WSRequest req = WS.url(url + OAUTH_URL)
           .setHeader("Content-Type", OAUTH_CONTENT_TYPE)
           .setHeader("Authorization", "Basic " + OAUTH_AUTHORIZATION)
@@ -121,7 +119,7 @@ public class CertificationsComunication {
       return Optional.<String>absent();
     }
   }
-  
+
   private Optional<String> reloadToken(Optional<String> token) {
     if (!token.isPresent()) {
       token = getToken();
@@ -131,7 +129,7 @@ public class CertificationsComunication {
     }
     return token;
   }
-  
+
   /**
    * Costruisce una WSRequest predisposta alla comunicazione con le api attestati.
    * @param token token
@@ -140,9 +138,9 @@ public class CertificationsComunication {
    * @return
    */
   private WSRequest prepareOAuthRequest(String token, String url, String contentType) {
-    
+
     final String baseUrl;
-    
+
     try {
       baseUrl = AttestatiApis.getAttestatiBaseUrl();
     } catch (NoSuchFieldException ex) {
@@ -150,13 +148,13 @@ public class CertificationsComunication {
       log.error(error);
       throw new ApiRequestException(error);
     }
-    
+
     WSRequest wsRequest = WS.url( baseUrl + url)
         .setHeader("Content-Type", contentType)
         .setHeader("Authorization", "Bearer " + token);
     return wsRequest;
   }
-  
+
   /**
    * Preleva la lista delle matricole da attestati.
    * @param office sede
@@ -167,11 +165,11 @@ public class CertificationsComunication {
    */
   public Set<Integer> getPeopleList(Office office, int year, int month, 
       Optional<String> token) {
-    
+
     if (!reloadToken(token).isPresent()) {
       return Sets.newHashSet();
     }
-    
+
     try {
       String url = API_URL + API_URL_LISTA_DIPENDENTI + "/" + office.codeId 
           + "/" + year + "/" + month;
@@ -180,7 +178,7 @@ public class CertificationsComunication {
       HttpResponse httpResponse = wsRequest.get();
 
       String json = httpResponse.getJson().toString();
-      
+
       ListaDipendenti listaDipendenti = new Gson().fromJson(json, ListaDipendenti.class);
       Set<Integer> numbers = Sets.newHashSet(); 
       for (Matricola matricola : listaDipendenti.dipendenti) {
@@ -192,7 +190,7 @@ public class CertificationsComunication {
 
     return Sets.newHashSet();
   }
-  
+
   /**
    * curl -X GET -H "Authorization: Bearer cf24c413-9cf7-485d-a10b-87776e5659c7" 
    * -H "Content-Type: application/json" 
@@ -204,7 +202,7 @@ public class CertificationsComunication {
    */
   public Optional<SeatCertification> getPersonSeatCertification(Person person, 
       int month, int year, Optional<String> token) {
-   
+
     if (!reloadToken(token).isPresent()) {
       return Optional.<SeatCertification>absent();
     }
@@ -218,9 +216,9 @@ public class CertificationsComunication {
 
       SeatCertification seatCertification = 
           new Gson().fromJson(httpResponse.getJson(), SeatCertification.class);
-      
+
       Verify.verify(seatCertification.dipendenti.get(0).matricola == person.number);
-      
+
       return Optional.fromNullable(seatCertification);
 
     } catch (Exception ex) {}
@@ -228,7 +226,7 @@ public class CertificationsComunication {
     return Optional.<SeatCertification>absent();
 
   }
-  
+
   /**
    * Conversione del json di risposta da attestati.
    * @param httpResponse risposta
@@ -237,13 +235,13 @@ public class CertificationsComunication {
   public Optional<RispostaAttestati> parseRispostaAttestati(HttpResponse httpResponse) {
     try {
       return Optional.fromNullable(new Gson()
-        .fromJson(httpResponse.getJson(), RispostaAttestati.class));
+          .fromJson(httpResponse.getJson(), RispostaAttestati.class));
     } catch (Exception ex) {
       return Optional.<RispostaAttestati>absent();
     }
   }
-  
-  
+
+
   /**
    * Invia la riga di assenza ad attestati.
    * @param token token
@@ -264,7 +262,7 @@ public class CertificationsComunication {
 
     return wsRequest.post();
   }
-  
+
   /**
    * Invia la riga di assenza ad attestati.
    * @param token token
@@ -289,7 +287,7 @@ public class CertificationsComunication {
     } 
     return wsRequest.post();
   }
-  
+
   /**
    * Invia la riga di assenza ad attestati.
    * @param token token
@@ -310,7 +308,7 @@ public class CertificationsComunication {
 
     return wsRequest.post();
   }
-  
+
   /**
    * Invia la riga di assenza ad attestati.
    * @param token token
@@ -331,7 +329,7 @@ public class CertificationsComunication {
 
     return wsRequest.post();
   }
-  
+
   /**
    * Invia la riga di assenza ad attestati.
    * @param token token
@@ -352,7 +350,7 @@ public class CertificationsComunication {
 
     return wsRequest.delete();
   }
-  
+
   /**
    * Invia la riga di assenza ad attestati.
    * @param token token
@@ -373,7 +371,7 @@ public class CertificationsComunication {
 
     return wsRequest.delete();
   }
-  
+
   /**
    * Invia la riga di assenza ad attestati.
    * @param token token
@@ -394,18 +392,18 @@ public class CertificationsComunication {
 
     return wsRequest.delete();
   }
-  
+
   /**
-   * Preleva da attestati la lista dei codici assenza (per il tipo contratto CL0609)
+   * Preleva da attestati la lista dei codici assenza (per il tipo contratto CL0609).
    * @param token token
    * @return lista dei codici assenza
    */
   public List<CodiceAssenza> getAbsencesList(Optional<String> token) {
-    
+
     if (!reloadToken(token).isPresent()) {
       return Lists.newArrayList();
     }
-    
+
     try {
       String url = API_URL + API_URL_ASSENZE_PER_CONTRATTO + "/" + "CL0609";
 
@@ -413,10 +411,12 @@ public class CertificationsComunication {
       HttpResponse httpResponse = wsRequest.get();
 
       String json = httpResponse.getJson().toString();
-      
+
       List<CodiceAssenza> listaCodiciAssenza = new Gson().fromJson(json, 
-          new TypeToken<List<CodiceAssenza>>() {}.getType());
-      
+          new TypeToken<List<CodiceAssenza>>() {
+            private static final long serialVersionUID = 7349718637394974415L;
+        }.getType());
+
       return listaCodiciAssenza;
 
     } catch (Exception ex) {}
