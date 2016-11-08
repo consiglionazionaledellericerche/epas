@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import manager.ConsistencyManager;
 import manager.NotificationManager;
-import manager.PersonManager;
+import manager.PersonDayManager;
 import manager.SecureManager;
 import manager.StampingManager;
 import manager.configurations.EpasParam;
@@ -72,37 +72,37 @@ import javax.inject.Inject;
 public class Stampings extends Controller {
 
   @Inject
-  private static PersonStampingRecapFactory stampingsRecapFactory;
+  static PersonStampingRecapFactory stampingsRecapFactory;
   @Inject
-  private static PersonDao personDao;
+  static PersonDao personDao;
   @Inject
-  private static SecurityRules rules;
+  static SecurityRules rules;
   @Inject
-  private static StampingManager stampingManager;
+  static StampingManager stampingManager;
   @Inject
-  private static StampingDao stampingDao;
+  static StampingDao stampingDao;
   @Inject
-  private static PersonDayDao personDayDao;
+  static PersonDayDao personDayDao;
   @Inject
-  private static SecureManager secureManager;
+  static SecureManager secureManager;
   @Inject
-  private static PersonTroublesInMonthRecapFactory personTroubleRecapFactory;
+  static PersonTroublesInMonthRecapFactory personTroubleRecapFactory;
   @Inject
-  private static IWrapperFactory wrapperFactory;
+  static IWrapperFactory wrapperFactory;
   @Inject
-  private static WrapperModelFunctionFactory wrapperFunctionFactory;
+  static WrapperModelFunctionFactory wrapperFunctionFactory;
   @Inject
-  private static ConsistencyManager consistencyManager;
+  static ConsistencyManager consistencyManager;
   @Inject
-  private static StampingHistoryDao stampingsHistoryDao;
+  static StampingHistoryDao stampingsHistoryDao;
   @Inject
-  private static OfficeDao officeDao;
+  static OfficeDao officeDao;
   @Inject
-  private static PersonManager personManager;
+  static PersonDayManager personDayManager;
   @Inject
-  private static NotificationManager notificationManager;
+  static NotificationManager notificationManager;
   @Inject
-  private static UserDao userDao;
+  static UserDao userDao;
 
   /**
    * Tabellone timbrature dipendente.
@@ -227,15 +227,9 @@ public class Stampings extends Controller {
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
-    final PersonDay personDay = personDayDao.getOrBuildPersonDay(person, date);
-
-    // server per poter discriminare dopo aver fatto la save della timbratura se si
+    // serve per poter discriminare dopo aver fatto la save della timbratura se si
     // trattava di una nuova timbratura o di una modifica
-    boolean newInsert = false;
-    if (!stamping.isPersistent()) {
-      newInsert = true;
-      stamping.personDay = personDay;
-    }
+    boolean newInsert = !stamping.isPersistent();
 
     if (Validation.hasErrors()) {
       response.status = 400;
@@ -250,6 +244,8 @@ public class Stampings extends Controller {
     }
 
     stamping.date = stampingManager.deparseStampingDateTime(date, time);
+    final PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(person, date);
+    stamping.personDay = personDay;
 
     rules.checkIfPermitted(stamping);
 
@@ -265,16 +261,14 @@ public class Stampings extends Controller {
       }
     }
 
-    stamping.personDay = personDay;
     stamping.save();
-
 
     consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
 
     flash.success(Web.msgSaved(Stampings.class));
 
-    if (!currentUser.isSystemUser() && !currentUser.hasRoles(Role.PERSONNEL_ADMIN) &&
-        currentUser.person.id.equals(person.id)) {
+    if (!currentUser.isSystemUser() && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)
+        && currentUser.person.id.equals(person.id)) {
 
       if (!(currentUser.person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")
           && currentUser.person.qualification.qualification <= 3)) {

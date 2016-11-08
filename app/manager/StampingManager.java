@@ -164,9 +164,6 @@ public class StampingManager {
     stamping.personDay = personDay;
     stamping.save();
 
-    personDay.stampings.add(stamping);
-    personDay.save();
-    
     log.info("Inserita timbratura {} per {}", stamping.getLabel(), person.getLabel());
 
     // Ricalcolo
