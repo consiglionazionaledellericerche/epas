@@ -458,6 +458,10 @@ views.tags.display.date.month.9=Settembre
 
 vacations.takable=Usufruibili
 
+takableTotal=Limite Totale
+takableUsed=Limite Consumato
+complationUsed=Completato
+
 wtt.description= Nome Tipo Orario
 wtt.office=Sede
 wtt= Tipo Orario
@@ -510,6 +514,7 @@ Absences.absencesVisibleForEmployee= Presenze Giornaliere
 Absences.manageAbsenceCode= Gestione Codici d'assenza
 Absences.showGeneralMonthlyAbsences= Assenze
 AbsenceGroups.show=Gruppi Assenze
+AbsenceGroups.initialization=Assenze Iniziali
 Administration.playConfiguration= Informazioni Applicazione
 Administration.utilities= Utilities
 BadgeReaders.list= Sorgenti Timbrature

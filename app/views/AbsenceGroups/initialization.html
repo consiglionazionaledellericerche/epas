@@ -2,22 +2,96 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Assenze'  /}
 
+#{set breadcrumbs:['Lista Persone':@Persons.list(), 
+  (person.fullname):null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+#{include 'Persons/_tabs.html' /}
+
 <div class="container">
 
-  #{title title:'Inizializzazione Gruppi di Assenze' /}
+  #{form action:@AbsenceGroups.initialization(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit'}
 
-  #{form action:@AbsenceGroups.save(), method:'POST', autocomplete:false, class:'form form-horizontal'}
+  #{f.selectModel 'groupAbsenceType', inputName:'groupAbsenceTypeId', label:'Tipologia Assenza', personalizeItems:true}
+        <option></option>      
+       
+       #{list items:initializableGroups, as:'group'}
+           <option value="${group.id}"
+	          #{if group.equals(groupAbsenceType)} selected #{/if}> 
+	          ${group.description}
+	       </option>
+  	    #{/list}
+     #{/f.selectModel}
+     
+     #{f.date 'date'/}
+     #{f.hidden 'personId', value:person.id /}
+     
+  
+  #{/form}
+  
+   #{if periodChain.containsCriticalErrors()}
+    #{alert color:'danger'}
+      <p>Impossibile visualizzare la situazione. Effettuare una segnalazione.</p>
+    #{/alert}
+  #{/if}
+  #{if periodChain.childIsMissing()}
+    #{alert color:'danger'}
+      <p>Impossibile visualizzare la situazione. Figlio non presente in anagrafica o fuori età.</p>
+    #{/alert}
+  #{/if}
+  
+  #{list items:periodChain.periods, as:'absencePeriod' }
 
-  #{f.selectModel 'groupAbsenceType', label:'Tipologia Assenza', items:initializableGroups /}
-  #{f.date 'date'/}
+    <li class="list-group-item list-group-item-info">
+      <p>
+        <strong>${absencePeriod.groupAbsenceType.description}</strong>
+      </p>
+    
+    #{if absencePeriod.errorsBox.containsCriticalErrors() }
+      <p>ci sono errori critici. TODO: elencarli</p>
+    #{/if}
+    #{if absencePeriod.errorsBox.containsAbsencesErrors() }
+      <p>ci sono errori legati alle assenze. TODO: elencarli</p>
+    #{/if}
+    
+    </li>
 
+    
+    <li class="list-group-item">
+     <p>
+        #{if absencePeriod.isTakableWithLimit() }
+           <strong>Tipo periodo</strong> &{absencePeriod.groupAbsenceType.periodType}<br>
+           <strong>Validità periodo</strong> ${absencePeriod.from.format()} - ${absencePeriod.to.format()}
+       
+           <br><strong>Totale utilizzabile</strong> 
+           ${templateUtility.formatAmount(absencePeriod.getPeriodTakableAmount(), absencePeriod.takeAmountType)}<br>
+       #{/if}
+     </p>
+     <p>  
+       #{if absencePeriod.isTakableWithLimit() }
+           <i class="fa fa-exclamation-circle" aria-hidden="true"></i> Rimangono 
+           <strong><span class="text-success">${templateUtility.formatAmount(absencePeriod.getRemainingAmount(), absencePeriod.takeAmountType)}</span></strong>
+           da utilizzare entro il <strong class="text-success">${absencePeriod.to.format()}</strong>
+       #{/if}
+     </p>
+  #{/list} 
+    
+  #{form action:@AbsenceGroups.saveInitialization(), method:'POST', autocomplete:false, class:'form form-horizontal group'}
+  
+  #{f.hidden 'groupAbsenceType.id', value:groupAbsenceType?.id /}
+  #{f.hidden 'date', value:date /}
+  #{f.hidden 'person.id', value:'person.id' /}
+
+  *{
   #{f.date 'forceBegin', disabled:'true' /}
-  #{f.date 'forceEnd', disabled:'true' /}
-
+  #{f.date 'forceEnd', disabled:'true' /} 
+  }*
+  
+    
   #{f.input 'takableTotal', type:'number' /}
   #{f.input 'takableUsed', type:'number' /}
   #{f.input 'complationUsed', type:'number' /}
-
+  
   #{/form}
 
 </div>

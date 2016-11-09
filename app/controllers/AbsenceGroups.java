@@ -1,6 +1,8 @@
 
 package controllers;
 
+import com.google.common.base.Verify;
+
 import dao.PersonDao;
 import dao.UserDao;
 import dao.history.AbsenceHistoryDao;
@@ -251,25 +253,38 @@ public class AbsenceGroups extends Controller {
    * @param date             data
    */
   public static void initialization(
-      Long personId, GroupAbsenceType groupAbsenceType, LocalDate date) {
+      Long personId, Long groupAbsenceTypeId, LocalDate date) {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-
-    //costruire la situazione residuale per la data
-    //AbsenceEngine absenceEngine = absenceService.residual(person, groupAbsenceType, date);
-
+    if (date == null) {
+      date = LocalDate.now();
+    }
+    
     List<GroupAbsenceType> initializableGroups = initializablesGroups();
+    GroupAbsenceType groupAbsenceType = initializableGroups.iterator().next();
+    
+    if (groupAbsenceTypeId != null) {
+      groupAbsenceType = GroupAbsenceType.findById(groupAbsenceTypeId);
+      notFoundIfNull(groupAbsenceType);
+      Verify.verify(initializableGroups.contains(groupAbsenceType));
+    }
+    
+    PeriodChain periodChain = absenceService.residual(person, groupAbsenceType, date);
+    
+    render(initializableGroups, date, person, groupAbsenceType, periodChain);
 
-    render(initializableGroups, person);
-
+  }
+  
+  public static void saveInitialization() {
+    renderText("todo");
   }
 
   private static List<GroupAbsenceType> initializablesGroups() {
     List<GroupAbsenceType> initializables = Lists.newArrayList();
     List<GroupAbsenceType> allGroups = GroupAbsenceType.findAll();
     for (GroupAbsenceType group : allGroups) {
-      if (!group.pattern.equals(GroupAbsenceTypePattern.simpleGrouping)) {
+      if (group.pattern.equals(GroupAbsenceTypePattern.programmed)) {
         initializables.add(group);
       }
     }
