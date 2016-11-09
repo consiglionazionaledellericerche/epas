@@ -398,6 +398,10 @@ type.description =Descrizione
 type.office =Sede
 type.supervisor =Supervisore servizio
 
+cat.description =Descrizione
+cat.office =Sede
+cat.supervisor =Supervisore servizio
+
 uro.office=Sede
 uro.role= Ruolo
 uro.user= Utente
@@ -564,7 +568,7 @@ Users.list= Gestione Utenti
 Vacations.show= Ferie
 VacationsAdmin.list= Ferie e Permessi
 WorkingTimes.manageWorkingTime= Gestione Orari di Lavoro
-Competences.activateServices= Gestione Servizi Reperibilità
+Competences.activateServices= Gestione Servizi
 
 ########################
 # Enumerati

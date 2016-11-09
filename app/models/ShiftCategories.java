@@ -5,9 +5,11 @@ import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 
 @Entity
@@ -25,5 +27,17 @@ public class ShiftCategories extends BaseModel {
   @ManyToOne(optional = false)
   @JoinColumn(name = "supervisor")
   public Person supervisor;
+  
+  public boolean disabled;
+  
+  @ManyToOne(optional = false, fetch = FetchType.EAGER)
+  @JoinColumn(name = "office_id")
+  @NotNull
+  public Office office; 
+  
+  @Override
+  public String toString() {
+    return String.format("ShiftCategory[%d] - description = %s", id, description);
+  }
 }
 
