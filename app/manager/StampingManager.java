@@ -150,8 +150,8 @@ public class StampingManager {
 
     // Check stamping duplicata
     if (checkDuplicateStamping(personDay, stampingFromClient)) {
-      log.info("Timbratura delle {} già presente per {}",
-          person.getLabel(), stampingFromClient.dateTime);
+      log.info("Timbratura delle {} già presente per {} (matricola = {}) ",
+          stampingFromClient.dateTime, person, person.number);
       return true;
     }
 
@@ -164,7 +164,8 @@ public class StampingManager {
     stamping.personDay = personDay;
     stamping.save();
 
-    log.info("Inserita timbratura {} per {}", stamping.getLabel(), person.getLabel());
+    log.info("Inserita timbratura {} per {} (matricola = {}) ",
+        stamping.getLabel(), person, person.number);
 
     // Ricalcolo
     if (recompute) {
