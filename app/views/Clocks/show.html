@@ -4,78 +4,81 @@
 
 #{set 'moreStyles'}
 <style type="text/css">
-.panel{
-	margin-top: 110px;
+.panel {
+  margin-top: 110px;
 }
-#top_divider{
-	margin-top: 5px;
-	margin-bottom: 55px;
+#top_divider {
+  margin-top: 5px;
+  margin-bottom: 55px;
 }
-
-.panel-title{
-	text-align: center;
-	font-style: italic;
-	text-transform: capitalize;
-	font-size: 35px;
-	color: #1990d5;
+.panel-title {
+  text-align: center;
+  font-style: italic;
+  text-transform: capitalize;
+  font-size: 35px;
+  color: #1990d5;
 }
-fieldset > legend{
-	margin-top: 1em;
-	margin-top: 1em;
+fieldset>legend {
+  margin-top: 1em;
+  margin-top: 1em;
 }
-#bottom_line{
-	margin-top: 2em;
+#bottom_line {
+  margin-top: 2em;
 }
 </style>
 #{get 'moreStyles' /}
 #{/set}
 
 #{set 'moreScripts'}
-	<script type = "text/javascript" >
-		function preventBack(){window.history.forward();}
-		setTimeout("preventBack()", 0);
-		window.onunload=function(){null};
-	</script>
-	<script>
-		function startTime()
-		{
-			var today=new Date();
-			var h=today.getHours();
-			var m=today.getMinutes();
-			var s=today.getSeconds();
-			// add a zero in front of numbers<10
-			m=checkTime(m);
-			s=checkTime(s);
-			document.getElementById('clockBase').innerHTML=h+":"+m+":"+s;
-			t=setTimeout(function(){startTime()},500);
-		}
-		
-		function checkTime(i)
-		{
-			if (i<10)
-				{
-					i="0" + i;
-				}
-			return i;
-		}
-	</script>
+<script type="text/javascript">
+function preventBack() {
+  window.history.forward();
+}
+setTimeout("preventBack()", 0);
+window.onunload = function() {
+  null
+};
+
+function startTime() {
+  var today = new Date();
+  var h = today.getHours();
+  var m = today.getMinutes();
+  var s = today.getSeconds();
+  // add a zero in front of numbers<10
+  m = checkTime(m);
+  s = checkTime(s);
+  document.getElementById('clockBase').innerHTML = h + ":" + m + ":" + s;
+  t = setTimeout(function() {
+    startTime()
+  }, 500);
+}
+
+function checkTime(i) {
+  if (i < 10) {
+    i = "0" + i;
+  }
+  return i;
+}
+
+</script>
 #{/set}
 
 <div class="container center">
 
-<div id="clockBase"></div>
+  <div id="clockBase"></div>
 
-<h1 class="margin-bottom">Timbratura web per il giorno ${data.format()}</h1>
+  <h1 class="margin-bottom">Timbratura web per il giorno ${data.format()}</h1>
 
-<div class="col-sm-offset-2 col-sm-8">
-#{form action:@Clocks.clockLogin(), class:'form-horizontal', role:'form'}
+  <div class="col-sm-offset-2 col-sm-8">
+    #{form action:@Clocks.clockLogin(), class:'form-horizontal', role:'form'}
 
-  	#{f.selectModel 'person',items:personList,label:'Nome' /}
-  	#{f.input 'password',type:'password',label:'Password' /}
+    #{f.selectModel 'person',items:personList,label:'Nome' /}
+    #{f.input 'password',type:'password',label:'Password' /}
 
-    <input type="submit" class="btn btn-success col-xs-2 col-xs-offset-5" name ="submit" value="Login" align="center"/>
-#{/form}
-</div>
+    <input type="submit" class="btn btn-success col-xs-2 col-xs-offset-5" name="submit"
+           value="Login" align="center"/>
+    #{/form}
+  </div>
 
 </div>
 
