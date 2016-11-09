@@ -36,7 +36,6 @@ public class PersonStampingDayRecap {
   private static final String MEALTICKET_YES = "YES";
   private static final String MEALTICKET_YES_IF_EXIT_NOW = "YES_IF_EXIT_NOW";
   private static final String MEALTICKET_NO = "NO";
-  private static final String MEALTICKET_EMPTY = "";
 
   private static StampModificationType fixedStampModificationType = null;
 
@@ -89,18 +88,18 @@ public class PersonStampingDayRecap {
     this.personDay.setHoliday(personDayManager
         .isHoliday(personDay.getPerson(), personDay.getDate()));
 
-    this.wrPersonDay = wrapperFactory.create(personDay);
+    wrPersonDay = wrapperFactory.create(personDay);
 
-    this.stampingsTemplate = getStampingsTemplate(wrPersonDay, stampingTemplateFactory,
+    stampingsTemplate = getStampingsTemplate(wrPersonDay, stampingTemplateFactory,
         personDayManager, numberOfInOut, considerExitingNow);
 
-    this.note.addAll(getStampingsNote(this.stampingsTemplate));
+    note.addAll(getStampingsNote(this.stampingsTemplate));
 
-    this.wttd = this.wrPersonDay.getWorkingTimeTypeDay();
+    wttd = this.wrPersonDay.getWorkingTimeTypeDay();
 
-    this.lunchInterval = (LocalTimeInterval) configurationManager.configValue(
+    lunchInterval = (LocalTimeInterval) configurationManager.configValue(
         personDay.getPerson().office, EpasParam.LUNCH_INTERVAL, personDay.getDate());
-    this.workInterval = (LocalTimeInterval) configurationManager.configValue(
+    workInterval = (LocalTimeInterval) configurationManager.configValue(
         personDay.getPerson().office, EpasParam.WORK_INTERVAL, personDay.getDate());
 
     boolean thereAreAllDayAbsences = personDayManager.isAllDayAbsences(personDay);
@@ -111,7 +110,7 @@ public class PersonStampingDayRecap {
             stampTypeManager.getStampMofificationType(
                 StampModificationTypeCode.FIXED_WORKINGTIME);
       }
-      this.fixedWorkingTimeCode = fixedStampModificationType;
+      fixedWorkingTimeCode = fixedStampModificationType;
     }
 
     // is sourceContract (solo se monthContracts presente)
@@ -128,16 +127,16 @@ public class PersonStampingDayRecap {
             || (contract.getSourceDateResidual() != null
             && !personDay.getDate().isAfter(contract.getSourceDateResidual()))
             || personDay.getDate().isBefore(personDay.getPerson().beginDate)) {
-          this.ignoreDay = true;
+          ignoreDay = true;
         }
 
         if (contract.getBeginDate().isEqual(personDay.getDate())) {
-          this.firstDay = true;
+          firstDay = true;
         }
       }
     }
 
-    this.computeMealTicket(personDay, thereAreAllDayAbsences);
+    computeMealTicket(personDay, thereAreAllDayAbsences);
   }
 
 
@@ -150,17 +149,16 @@ public class PersonStampingDayRecap {
   private void computeMealTicket(PersonDay personDay, boolean thereAreAllDayAbsences) {
 
     // ##### Giorno ignorato (fuori contratto)
-
-    if (this.ignoreDay || !this.personDay.isPersistent()) {
-      this.mealTicket = MEALTICKET_EMPTY;
+    if (ignoreDay || !this.personDay.isPersistent()) {
+      mealTicket = null;
       return;
     }
 
     // ##### Giorno festivo
 
-    if (personDay.isHoliday() && !personDay.acceptedHolidayWorkingTime 
+    if (personDay.isHoliday() && !personDay.acceptedHolidayWorkingTime
         && !personDay.isTicketForcedByAdmin) {
-      this.mealTicket = MEALTICKET_EMPTY;
+      mealTicket = null;
       return;
     }
 
@@ -168,9 +166,9 @@ public class PersonStampingDayRecap {
 
     if (personDay.isFuture()) {
       if (thereAreAllDayAbsences) {
-        this.mealTicket = MEALTICKET_NO;
+        mealTicket = MEALTICKET_NO;
       } else {
-        this.mealTicket = MEALTICKET_EMPTY;
+        mealTicket = null;
       }
       return;
     }
@@ -181,23 +179,23 @@ public class PersonStampingDayRecap {
     if (personDay.isTicketAvailable()) {
       if (personDay.isTicketForcedByAdmin) {
         // si e forzato
-        this.mealTicket = MEALTICKET_YES;
+        mealTicket = MEALTICKET_YES;
       } else if (personDay.isToday()) {
         if (thereAreAllDayAbsences) {
           // si non forzato oggi con assenze giornalire FIXME: perchè decido qua no?
-          this.mealTicket = MEALTICKET_NO;
+          mealTicket = MEALTICKET_NO;
         } else {
           if (personDay.isConsideredExitingNow()) {
             // si non forzato oggi considerando l'uscita in questo momento
-            this.mealTicket = MEALTICKET_YES_IF_EXIT_NOW;
+            mealTicket = MEALTICKET_YES_IF_EXIT_NOW;
           } else {
             // si non forzato oggi senza considerare l'uscita in questo momento
-            this.mealTicket = MEALTICKET_YES;
+            mealTicket = MEALTICKET_YES;
           }
         }
       } else {
         // si non forzato giorni passati
-        this.mealTicket = MEALTICKET_YES;
+        mealTicket = MEALTICKET_YES;
       }
       return;
     }
@@ -208,17 +206,17 @@ public class PersonStampingDayRecap {
     if (!personDay.isTicketAvailable) {
       if (personDay.isTicketForcedByAdmin) {
         // no forzato
-        this.mealTicket = MEALTICKET_NO;
+        mealTicket = MEALTICKET_NO;
       } else {
         if (personDay.isPast()) {
           // no non forzato giorni passati
-          this.mealTicket = MEALTICKET_NO;
+          mealTicket = MEALTICKET_NO;
         } else if (personDay.isToday() || !thereAreAllDayAbsences) {
           // no non forzato oggi senza assenze giornaliere
-          this.mealTicket = MEALTICKET_NOT_YET;
+          mealTicket = MEALTICKET_NOT_YET;
         } else {
           // no non forzato oggi con assenze giornaliere
-          this.mealTicket = MEALTICKET_NO;
+          mealTicket = MEALTICKET_NO;
         }
       }
     }
