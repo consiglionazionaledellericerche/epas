@@ -5,7 +5,7 @@ Action = (cat != null && cat.persistent) ? 'Modifica ' : 'Nuovo '
 title:(Action + ' servizio per turno')}
 
 <div id="absenceCodeData">
-  #{form action:@Competences.saveService(), method:'POST', autocomplete:false,
+  #{form action:@Competences.saveShift(), method:'POST', autocomplete:false,
   class:'form form-horizontal', 'data-async':'#page_content',
   'data-async-error':'#absenceCodeData'}
   

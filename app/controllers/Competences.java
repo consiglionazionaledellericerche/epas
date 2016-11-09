@@ -774,7 +774,7 @@ public class Competences extends Controller {
    * @param type il servizio da persistere
    * @param office la sede di appartenenza del servizio
    */
-  public static void saveService(@Valid PersonReperibilityType type, @Valid Office office) {
+  public static void saveReperibility(@Valid PersonReperibilityType type, @Valid Office office) {
 
     rules.checkIfPermitted(office);
     if (!validation.hasErrors()) {
@@ -790,13 +790,38 @@ public class Competences extends Controller {
       response.status = 400;
       List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
           new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
-      render("@editService", type, officePeople, office);
+      render("@editShift", type, officePeople, office);
     }
     type.office = office;
     type.save();
     flash.success("Nuovo servizio %s inserito correttamente per la sede %s",
         type.description, type.office);
     activateServices(type.office.id);
+  }
+  
+  public static void saveShift(@Valid ShiftCategories cat, @Valid Office office) {
+
+    rules.checkIfPermitted(office);
+    if (!validation.hasErrors()) {
+      if (cat.supervisor == null) {
+        validation.addError("category.supervisor", "non può essere null");
+      }
+      if (cat.description == null || cat.description.isEmpty()) {
+        validation.addError("category.description", "non può essere null");
+      }
+
+    }
+    if (validation.hasErrors()) {
+      response.status = 400;
+      List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
+          new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
+      render("@editShift", cat, officePeople, office);
+    }
+    cat.office = office;
+    cat.save();
+    flash.success("Nuovo servizio %s inserito correttamente per la sede %s",
+        cat.description, cat.office);
+    activateServices(cat.office.id);
   }
 
   /**
