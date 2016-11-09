@@ -87,19 +87,19 @@ public class PersonDay extends BaseModel {
   public Integer decurted = 0;
 
   @Column(name = "is_ticket_available")
-  public boolean isTicketAvailable = true;
+  public boolean isTicketAvailable;
 
   @Column(name = "is_ticket_forced_by_admin")
-  public boolean isTicketForcedByAdmin = false;
+  public boolean isTicketForcedByAdmin;
 
   @Column(name = "accepted_holiday_working_time")
-  public boolean acceptedHolidayWorkingTime = false;
+  public boolean acceptedHolidayWorkingTime;
 
   @Column(name = "is_working_in_another_place")
-  public boolean isWorkingInAnotherPlace = false;
+  public boolean isWorkingInAnotherPlace;
 
   @Column(name = "is_holiday")
-  public boolean isHoliday = false;
+  public boolean isHoliday;
 
   @OneToMany(mappedBy = "personDay", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
   @OrderBy("date ASC")
@@ -117,11 +117,11 @@ public class PersonDay extends BaseModel {
   public StampModificationType stampModificationType;
 
   @Transient
-  public MealTicket mealTicketAssigned = null;
+  public MealTicket mealTicketAssigned;
 
   @Transient
-  public boolean isConsideredExitingNow = false;
-  
+  public boolean isConsideredExitingNow;
+
   /**
    * Costruttore.
    *
@@ -132,7 +132,7 @@ public class PersonDay extends BaseModel {
    * @param progressive progressive
    */
   public PersonDay(Person person, LocalDate date,
-                   int timeAtWork, int difference, int progressive) {
+      int timeAtWork, int difference, int progressive) {
     this.person = person;
     this.date = date;
     this.timeAtWork = timeAtWork;
@@ -156,15 +156,15 @@ public class PersonDay extends BaseModel {
   public boolean isToday() {
     return this.date.isEqual(LocalDate.now());
   }
-  
+
   /**
    * @return true se la data del personDay è passata, false altrimenti.
    */
   public boolean isPast() {
     return this.date.isBefore(LocalDate.now());
   }
-  
-  /** 
+
+  /**
    * @return true se la data del personDay è futura, false altrimenti.
    */
   public boolean isFuture() {
@@ -175,7 +175,7 @@ public class PersonDay extends BaseModel {
    * Nel caso di orario effettuato fuori dalla finestra dell'orario sede.
    * <p>
    * TODO: vedere se aggiungere una colonna invece di calcolare questo invariante.
-
+   *
    * timeAtWork = StampingTime - decurtedWork - decurtedMeal + justifiedTimeMeal +
    * justifiedTimeNoMeal
    *
@@ -204,7 +204,7 @@ public class PersonDay extends BaseModel {
 
     return decurtedWork;
   }
-  
+
   /**
    * Il tempo assegnabile è quello a lavoro meno i giustificativi.
    * assignableTime = timeAtWork - justifiedTimeMeal - justifiedTimeNoMeal
@@ -213,8 +213,8 @@ public class PersonDay extends BaseModel {
   public int getAssignableTime() {
     return this.timeAtWork - this.justifiedTimeMeal - this.justifiedTimeNoMeal;
   }
-  
-  
+
+
   /**
    * metodo che resetta un personday azzerando i valori in esso contenuti.
    */
@@ -226,18 +226,18 @@ public class PersonDay extends BaseModel {
       this.id = id;
       this.save();
     } catch (IllegalAccessException iae) {
-      log.error("Impossibile accedere all'istanza dell'oggetto {}", this.getClass());      
-    } catch (InvocationTargetException ite) {      
+      log.error("Impossibile accedere all'istanza dell'oggetto {}", this.getClass());
+    } catch (InvocationTargetException ite) {
       log.error("Errore sulla chiamata del metodo");
     }
   }
-  
+
   @Override
   public String toString() {
     return String.format(
         "PersonDay[%d] - person.id = %d, date = %s, difference = %s, isTicketAvailable = %s, "
-        + "isTicketForcedByAdmin = %s, modificationType = %s, progressive = %s, timeAtWork = %s",
-        id, person.id, date, difference, isTicketAvailable, isTicketForcedByAdmin, 
+            + "isTicketForcedByAdmin = %s, modificationType = %s, progressive = %s, timeAtWork = %s",
+        id, person.id, date, difference, isTicketAvailable, isTicketForcedByAdmin,
         stampModificationType, progressive, timeAtWork);
   }
 
