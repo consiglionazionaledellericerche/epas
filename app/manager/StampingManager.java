@@ -23,6 +23,8 @@ import models.exports.StampingFromClient;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
+import play.db.jpa.JPA;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -150,8 +152,8 @@ public class StampingManager {
 
     // Check stamping duplicata
     if (checkDuplicateStamping(personDay, stampingFromClient)) {
-      log.info("Timbratura delle {} già presente per {}",
-          person.getLabel(), stampingFromClient.dateTime);
+      log.info("Timbratura delle {} già presente per {} (matricola = {}) ",
+          stampingFromClient.dateTime, person, person.number);
       return true;
     }
 
@@ -164,11 +166,15 @@ public class StampingManager {
     stamping.personDay = personDay;
     stamping.save();
 
-    personDay.stampings.add(stamping);
-    personDay.save();
-    
-    log.info("Inserita timbratura {} per {}", stamping.getLabel(), person.getLabel());
+    log.info("Inserita timbratura {} per {} (matricola = {}) ",
+        stamping.getLabel(), person, person.number);
 
+    //anche in questo caso indagare...
+    personDay.save();
+    personDay.refresh();
+    JPA.em().flush();
+    //////////////////////////////////
+    
     // Ricalcolo
     if (recompute) {
       consistencyManager.updatePersonSituation(person.id, personDay.date);

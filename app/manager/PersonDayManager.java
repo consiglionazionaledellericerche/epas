@@ -331,7 +331,7 @@ public class PersonDayManager {
           personDay.setTimeAtWork(wttd.workingTime);
           return personDay;
         }
-        
+
         //Questo e' il caso del codice 105BP che garantisce sia l'orario di lavoro
         // che il buono pasto
         // TODO: se è il 105BP perchè non controllo direttamente il codice? Mistero della fede.
@@ -1263,6 +1263,9 @@ public class PersonDayManager {
   /**
    * Cerca il personDay se non esiste lo crea e lo persiste.
    */
+  // FIXME questo è un duplicato del metodo che esisteva già nel personDayDao
+  // è stato rimosso da li, ma spostare questo metodo in quella classe in alcuni casi
+  // limita le classi da injettare, valutare se spostarlo
   public PersonDay getOrCreateAndPersistPersonDay(Person person, LocalDate date) {
 
     Optional<PersonDay> optPersonDay = personDayDao.getPersonDay(person, date);
@@ -1270,6 +1273,7 @@ public class PersonDayManager {
       return optPersonDay.get();
     }
     PersonDay personDay = new PersonDay(person, date);
+    // FIXME cosa ci fa l'informazione della festività in questo metodo?
     personDay.isHoliday = isHoliday(person, date);
     personDay.create();
     return personDay;

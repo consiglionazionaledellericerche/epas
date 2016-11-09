@@ -297,12 +297,10 @@ public class ConsistencyManager {
 
         IWrapperPersonDay wrPersonDay = wrapperFactory.create(personDay);
 
-        // set previous for progressive
         if (previous != null) {
+          // set previous for progressive
           wrPersonDay.setPreviousForProgressive(Optional.fromNullable(previous));
-        }
-        // set previous for night stamp
-        if (previous != null) {
+          // set previous for night stamp
           wrPersonDay.setPreviousForNightStamp(Optional.fromNullable(previous));
         }
 
@@ -310,7 +308,6 @@ public class ConsistencyManager {
 
         previous = personDay;
         date = date.plusDays(1);
-
       }
 
       log.trace("... ricalcolo dei giorni lavorativi conclusa.");
@@ -354,9 +351,6 @@ public class ConsistencyManager {
   private void populatePersonDay(IWrapperPersonDay pd) {
 
     // isHoliday = personManager.isHoliday(this.value.person, this.value.date);
-
-    //FIXME ma siamo sicuri che sia una furbata azzerare completamente le informazioni del personday
-    //Solo perchè non ci serve più per fare i conti?
 
     // il contratto non esiste più nel giorno perchè è stata inserita data terminazione
     if (!pd.getPersonDayContract().isPresent()) {
@@ -447,7 +441,6 @@ public class ConsistencyManager {
     }
 
     pd.getValue().save();
-
   }
 
   /**
