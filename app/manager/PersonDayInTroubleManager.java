@@ -45,9 +45,10 @@ public class PersonDayInTroubleManager {
 
   /**
    * Costruttore.
-   * @param personDayInTroubleDao personDayInTroubleDao
-   * @param configurationManager configurationManager
-   * @param factory factory
+   *
+   * @param personDayInTroubleDao       personDayInTroubleDao
+   * @param configurationManager        configurationManager
+   * @param factory                     factory
    * @param wrapperModelFunctionFactory wrapperModelFunctionFactory
    */
   @Inject
@@ -65,7 +66,8 @@ public class PersonDayInTroubleManager {
 
   /**
    * Crea il personDayInTrouble per quel giorno (se non esiste già).
-   * @param pd giorno 
+   *
+   * @param pd    giorno
    * @param cause causa
    */
   public void setTrouble(PersonDay pd, Troubles cause) {
@@ -109,11 +111,12 @@ public class PersonDayInTroubleManager {
   }
 
   /**
-   * Invia le email alle persone appartenenti alla lista, inerenti i giorni con problemi 
+   * Invia le email alle persone appartenenti alla lista, inerenti i giorni con problemi
    * nell'intervallo fromDate, toDate del tipo appartenente alla lista di troblesToSend.
-   * @param personList le persone a cui inviare le email
-   * @param fromDate da
-   * @param toDate fino
+   *
+   * @param personList          le persone a cui inviare le email
+   * @param fromDate            da
+   * @param toDate              fino
    * @param troubleCausesToSend tipi di problemi da inviare.
    */
   public void sendTroubleEmails(List<Person> personList, LocalDate fromDate, LocalDate toDate,
@@ -139,7 +142,7 @@ public class PersonDayInTroubleManager {
           Optional.of(troubleCausesToSend));
 
       if (pdList.isEmpty()) {
-        log.debug("{} non ha problemi da segnalare.", person.getLabel());
+        log.debug("{} (matricola = {})  non ha problemi da segnalare.", person, person.number);
         continue;
       }
 
@@ -158,8 +161,8 @@ public class PersonDayInTroubleManager {
         simpleEmail.setMsg(troubleEmailBody(person, pdList, troubleCausesToSend));
         Mail.send(simpleEmail);
 
-        log.info("Inviata mail a {} per segnalare i problemi {}",
-            person.getLabel(), troubleCausesToSend);
+        log.info("Inviata mail a {} (matricola = {})  per segnalare i problemi {}",
+            person, person.number, troubleCausesToSend);
 
         // Imposto il campo e-mails inviate ...
         for (PersonDayInTrouble pd : pdList) {
@@ -176,8 +179,9 @@ public class PersonDayInTroubleManager {
 
   /**
    * Formatta il corpo della email da inviare al dipendente con i suoi troubles.
-   * @param person persona 
-   * @param daysInTrouble la lista dei personDaysInTrouble da segnalare.
+   *
+   * @param person              persona
+   * @param daysInTrouble       la lista dei personDaysInTrouble da segnalare.
    * @param troubleCausesToSend i troubles da inviare.
    * @return il corpo
    */
@@ -232,7 +236,8 @@ public class PersonDayInTroubleManager {
 
   /**
    * Elimina i personDayInTrouble che non appartengono ad alcun contratto valido ePAS. (Cioè
-   * anche quelli che appartengono ad un contratto ma sono precedenti la sua inizializzazione). 
+   * anche quelli che appartengono ad un contratto ma sono precedenti la sua inizializzazione).
+   *
    * @param person persona
    */
   public final void cleanPersonDayInTrouble(Person person) {
