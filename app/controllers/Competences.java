@@ -15,6 +15,7 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonMonthRecapDao;
 import dao.PersonReperibilityDayDao;
+import dao.ShiftDao;
 import dao.wrapper.IWrapperCompetenceCode;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
@@ -45,6 +46,8 @@ import models.Office;
 import models.Person;
 import models.PersonCompetenceCodes;
 import models.PersonReperibilityType;
+import models.ShiftCategories;
+import models.ShiftType;
 import models.TotalOvertime;
 import models.User;
 
@@ -101,6 +104,8 @@ public class Competences extends Controller {
   private static CertificationDao certificationDao;
   @Inject
   private static PersonMonthRecapDao pmrDao;
+  @Inject
+  private static ShiftDao shiftDao;
 
 
 
@@ -728,8 +733,10 @@ public class Competences extends Controller {
     rules.checkIfPermitted(office);
     List<PersonReperibilityType> prtList = reperibilityDao
         .getReperibilityTypeByOffice(office, Optional.<Boolean>absent());
+    List<ShiftCategories> scList = shiftDao
+        .getAllCategoriesByOffice(office, Optional.<Boolean>absent());
 
-    render(office, prtList);
+    render(office, prtList, scList);
   }
 
   /**
@@ -737,14 +744,29 @@ public class Competences extends Controller {
    *     per la reperibilità.
    * @param officeId l'id dell'ufficio a cui associare il servizio
    */
-  public static void addService(Long officeId) {
+  public static void addReperibility(Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
     rules.checkIfPermitted(office);
     List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
 
-    render("@editService", officePeople, office);
+    render("@editReperibility", officePeople, office);
+  }
+  
+  /**
+   * Metodo che renderizza la form di inserimento di un nuovo servizio da attivare
+   *     per la reperibilità.
+   * @param officeId l'id dell'ufficio a cui associare il servizio
+   */
+  public static void addShift(Long officeId) {
+
+    Office office = officeDao.getOfficeById(officeId);
+    rules.checkIfPermitted(office);
+    List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
+        new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
+
+    render("@editShift", officePeople, office);
   }
 
   /**
@@ -782,7 +804,7 @@ public class Competences extends Controller {
    * @param reperibilityTypeId l'id del servizio da disabilitare/abilitare
    * @param confirmed il booleano per consentire la persistenza di una modifica
    */
-  public static void evaluateService(Long reperibilityTypeId, boolean confirmed) {
+  public static void evaluateReperibility(Long reperibilityTypeId, boolean confirmed) {
     PersonReperibilityType type = reperibilityDao.getPersonReperibilityTypeById(reperibilityTypeId);
     notFoundIfNull(type);
     if (!confirmed) {
@@ -812,7 +834,7 @@ public class Competences extends Controller {
    * metodo che ritorna la form di inserimento/modifica di un servizio.
    * @param reperibilityTypeId l'id del servizio da editare
    */
-  public static void editService(Long reperibilityTypeId) {
+  public static void editReperibility(Long reperibilityTypeId) {
     PersonReperibilityType type = reperibilityDao.getPersonReperibilityTypeById(reperibilityTypeId);
     Office office = type.office;
     rules.checkIfPermitted(office);
@@ -820,6 +842,53 @@ public class Competences extends Controller {
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
 
     render(type, officePeople, office);
+  }
+  
+  
+  /**
+   * metodo che controlla e poi persiste la disabilitazione/abilitazione di un servizio.
+   * @param reperibilityTypeId l'id del servizio da disabilitare/abilitare
+   * @param confirmed il booleano per consentire la persistenza di una modifica
+   */
+  public static void evaluateShift(Long shiftCategoryId, boolean confirmed) {
+    ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
+    notFoundIfNull(cat);
+    if (!confirmed) {
+      confirmed = true;
+      render(cat, confirmed);
+    }
+    if (cat.disabled) {
+      cat.disabled = false;
+      cat.save();
+      flash.success("Riabilitato servizio %s", cat.description);
+      activateServices(cat.office.id);
+    }
+    List<ShiftType> shiftTypeList = shiftDao.getTypesByCategory(cat);
+    if (!shiftTypeList.isEmpty()) {
+      cat.disabled = true;
+      cat.save();
+      flash.success("Il servizio è stato disabilitato e non rimosso perchè legato con informazioni "
+          + "importanti presenti in altre tabelle");
+
+    } else {
+      cat.delete();
+      flash.success("Servizio rimosso con successo");
+    }
+    activateServices(cat.office.id);
+  }
+
+  /**
+   * metodo che ritorna la form di inserimento/modifica di un servizio.
+   * @param reperibilityTypeId l'id del servizio da editare
+   */
+  public static void editShift(Long shiftCategoryId) {
+    ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
+    Office office = cat.office;
+    rules.checkIfPermitted(office);
+    List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
+        new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
+
+    render(cat, officePeople, office);
   }
 
 }

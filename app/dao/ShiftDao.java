@@ -1,10 +1,13 @@
 package dao;
 
+import com.google.common.base.Optional;
 import com.google.inject.Provider;
 
+import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
+import models.Office;
 import models.Person;
 import models.PersonShift;
 import models.PersonShiftDay;
@@ -14,6 +17,7 @@ import models.ShiftType;
 import models.query.QPersonShiftDay;
 import models.query.QPersonShiftShiftType;
 import models.query.QShiftCancelled;
+import models.query.QShiftCategories;
 import models.query.QShiftType;
 
 import org.joda.time.LocalDate;
@@ -137,6 +141,48 @@ public class ShiftDao extends DaoBase {
     JPQLQuery query = getQueryFactory().from(st)
             .where(st.type.eq(type));
     return query.singleResult(st.shiftCategories);
+  }
+  
+  /**
+   * 
+   * @param office l'ufficio per cui si chiede la lista dei servizi
+   * @param isActive se passato, controlla solo i servizi attivi
+   * @return la lista dei servizi per cui è stato attivato il turno.
+   */
+  public List<ShiftCategories> getAllCategoriesByOffice(Office office, 
+      Optional<Boolean> isActive) {
+    QShiftCategories sc = QShiftCategories.shiftCategories;
+    BooleanBuilder condition = new BooleanBuilder();
+    if (isActive.isPresent()) {
+      condition.and(sc.disabled.eq(isActive.get()));
+    }
+    JPQLQuery query = getQueryFactory().from(sc).where(sc.office.eq(office).and(condition));
+    return query.list(sc);
+  }
+  
+  /**
+   * 
+   * @param id l'identificativo del turno
+   * @return la categoria di turno corrispondente all'id passato come parametro.
+   */
+  public ShiftCategories getShiftCategoryById(Long id) {
+    final QShiftCategories sc = QShiftCategories.shiftCategories;
+
+    JPQLQuery query = getQueryFactory().from(sc)
+            .where(sc.id.eq(id));
+    return query.singleResult(sc.shiftCategories);
+
+  }
+  
+  /**
+   * 
+   * @param sc la categoria di turno 
+   * @return la lista dei tipi turno associati alla categoria passata come parametro.
+   */
+  public List<ShiftType> getTypesByCategory(ShiftCategories sc) {
+    final QShiftType shiftType = QShiftType.shiftType;
+    JPQLQuery query = getQueryFactory().from(shiftType).where(shiftType.shiftCategories.eq(sc));
+    return query.list(shiftType);
   }
 
 }

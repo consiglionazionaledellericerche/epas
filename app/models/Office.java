@@ -95,6 +95,9 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
 
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   public List<PersonReperibilityType> personReperibilityTypes = Lists.newArrayList();
+  
+  @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
+  public List<ShiftCategories> shiftCategories = Lists.newArrayList();
 
   @NotAudited
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
