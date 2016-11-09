@@ -32,6 +32,7 @@ import org.joda.time.Minutes;
 
 import play.data.binding.As;
 import play.data.validation.Required;
+import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
@@ -203,6 +204,12 @@ public class Clocks extends Controller {
     stamping.note = note;
     stamping.markedByAdmin = false;
     stamping.save();
+    
+    //indagare con più calma perchè senza intervenire l'update perde la 
+    //timbratura inserita
+    personDay.save();
+    personDay.refresh();
+    JPA.em().flush();
 
     consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
 

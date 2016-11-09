@@ -23,6 +23,8 @@ import models.exports.StampingFromClient;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
+import play.db.jpa.JPA;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -167,7 +169,11 @@ public class StampingManager {
     log.info("Inserita timbratura {} per {} (matricola = {}) ",
         stamping.getLabel(), person, person.number);
 
-    //JPA.em().flush();
+    //anche in questo caso indagare...
+    personDay.save();
+    personDay.refresh();
+    JPA.em().flush();
+    //////////////////////////////////
     
     // Ricalcolo
     if (recompute) {
