@@ -167,6 +167,8 @@ public class StampingManager {
     log.info("Inserita timbratura {} per {} (matricola = {}) ",
         stamping.getLabel(), person, person.number);
 
+    //JPA.em().flush();
+    
     // Ricalcolo
     if (recompute) {
       consistencyManager.updatePersonSituation(person.id, personDay.date);

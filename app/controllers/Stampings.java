@@ -53,6 +53,7 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.ArrayList;
@@ -262,6 +263,8 @@ public class Stampings extends Controller {
     }
 
     stamping.save();
+    
+    //JPA.em().flush();
 
     consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
 
