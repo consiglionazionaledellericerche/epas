@@ -4,32 +4,39 @@
 
 #{set 'moreScripts'}
 <script type="text/javascript">
-		function preventBack(){window.history.forward();}
-		setTimeout("preventBack()", 0);
-		window.onunload=function(){null};
+function preventBack() {
+  window.history.forward();
+}
+setTimeout("preventBack()", 0);
+window.onunload = function() {
+  null
+};
 
-		function startTime()
-		{
-			var today=new Date();
-			var h=today.getHours();
-			var m=today.getMinutes();
-			var s=today.getSeconds();
-			// add a zero in front of numbers<10
-			m=checkTime(m);
-			s=checkTime(s);
-			document.getElementById('clockBase').innerHTML=h+":"+m+":"+s;
-			t=setTimeout(function(){startTime()},500);
-		}
+function startTime() {
+  var today = new Date();
+  var h = today.getHours();
+  var m = today.getMinutes();
+  var s = today.getSeconds();
+  // add a zero in front of numbers<10
+  m = checkTime(m);
+  s = checkTime(s);
+  document.getElementById('clockBase').innerHTML = h + ":" + m + ":" + s;
+  t = setTimeout(function() {
+    startTime()
+  }, 500);
+}
 
-		function checkTime(i)
-		{
-			if (i<10)
-				{
-					i="0" + i;
-				}
-			return i;
-		}
+function checkTime(i) {
+  if (i < 10) {
+    i = "0" + i;
+  }
+  return i;
+}
 </script>
+#{/set}
+
+#{set 'moreStyles'}
+#{stylesheet 'stampingsTable.css'/}
 #{/set}
 
 <div class="container">
@@ -46,8 +53,7 @@
 
       <tr>
         <th class="group-single">Giorno</th>
-        <th class="group-single">Buono<br>mensa</th>
-
+        <th class="group-single">Buono<br>pasto</th>
         <th class="invisible"></th>
 
         <th class="group-single">Codice <br>assenza</th>
@@ -62,8 +68,7 @@
         <th class="group-single">Tempo<br>lavoro</th>
         <th class="group-single">Diffe-<br/>renza</th>
         <th class="group-single">Progres-<br/>sivo</th>
-        <th class="group-single hidden-xs hidden-sm">Tipo<br>Orario</th>
-        <th class="group-single hidden-xs hidden-sm">Note</th>
+        <th class="group-single">Tipo<br>Orario</th>
       </tr>
 
       <tr#{if dayRecap.ignoreDay} class="ignore_day"#{/if}>
@@ -74,21 +79,87 @@
 
       #{include 'Stampings/personStampingComponents/_mealTicketsTemplate.html' /}
       <td class="invisible"></td>
-      #{include 'Stampings/personStampingComponents/_absencesTemplate.html' /}
-      #{include 'Stampings/personStampingComponents/_stampingsTemplate.html' /}
+
+      <!-- ASSENZE -->
+      <td class="assenza default-single">
+        #{list items:dayRecap.personDay.absences, as:'absence'}
+
+        %{ involvedGroups = templateUtility.involvedGroupAbsenceType(absence.absenceType); }%
+        #{if absence.isReplacing(involvedGroups) && !absence.isOrphanReplacing(involvedGroups) }
+        *{ l'assenza di rimpiazzamento non orfana non la visualizzo }*
+        #{/if}
+        #{else}
+
+        #{absences.absence-popover absence:absence, person:person, noLabel:true /}
+        <span webui-popover-hover data-url="#${absence.id}"
+
+              *{ colore codice assenza }*
+              #{if !absence.troubles.empty} class="text-danger" #{/if}
+        #{elseif absence.absenceType.internalUse} class="text-muted" #{/elseif}
+        #{else} class="text-primary" #{/else}>
+
+        #{if !absence.troubles.empty}
+        <strong>${absence.absenceType.code}</strong>
+        #{/if}
+        #{else}
+        ${absence.absenceType.code}
+        #{/else}
+        </span>
+
+        #{/else}
+        #{/list}
+      </td>
+
+      <!-- TIMBRATURE -->
+      #{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
+
+      *{ posizione timbratura }*
+      <td class="position${stampingTemplate.pairPosition} stamping
+
+        *{ colore timbratura }*
+        #{if stampingTemplate.colour.equals("in")} default-left" #{/if}
+      #{elseif stampingTemplate.colour.equals("out")} default-right" #{/elseif}
+      #{elseif stampingTemplate.colour.equals("warn")} warn" #{/elseif}
+
+      *{ popover }*
+      #{if stampingTemplate.showPopover()} webui-popover-hover
+      data-url="#${stampingTemplate.stamping.id}" #{/if}
+      >
+      #{if stampingTemplate.date}
+      ${stampingTemplate.hour}
+      #{/if}
+      #{elseif stampingTemplate.pairPosition.equals("center")}
+      <a title="Timbratura di servizio mancante" class="initialism">
+        <i class="icon-warning-sign"></i>
+        </a>
+      #{/elseif}
+
+      #{if stampingTemplate.stamping.stampType}
+      <strong>${stampingTemplate.stamping.stampType.identifier}</strong>
+        #{/if}
+      #{list items:stampingTemplate.stampModificationTypes, as:'smt'}
+      <strong>${smt.code}</strong>
+      #{/list}
+      </td>
+
+      #{if stampingTemplate.showPopover()}
+      <div class="webui-popover-content" id="${stampingTemplate.stamping.id}">
+        #{if stampingTemplate.stamping.stampType}
+        <p><strong>${stampingTemplate.stamping.stampType.identifier}</strong>
+          ${stampingTemplate.stamping.stampType.description}</p>
+        #{/if}
+        #{list items:stampingTemplate.stampModificationTypes, as:'smt'}
+        <p><strong>${smt.code}</strong> ${smt.description}</p>
+        #{/list}
+        #{if stampingTemplate.stamping.note}<strong>note: </strong><em>${stampingTemplate.stamping.note}</em></p>
+        #{/if}
+      </div>
+      #{/if}
+      #{/list}
+
       <td class="invisible"></td>
       #{include 'Stampings/personStampingComponents/_workTimeDifferenceProgressive.html' /}
       #{include 'Stampings/personStampingComponents/_workingTimeTypePopover.html' /}
-
-      <td class="default-single note">
-        #{if dayRecap.note.size != 0}
-        <a href="#" class="btn btn-small note" popover-hover data-html="true"
-           data-content="${('<ul><li>'+dayRecap.note.join('</li><li>')+'</li></ul>').escape()}"
-           title="Info timbrature">
-          Info
-        </a>
-        #{/if}
-      </td>
 
       </tr>
     </table>
