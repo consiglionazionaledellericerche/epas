@@ -19,6 +19,7 @@ import models.enumerate.Parameter;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 
+import play.Play;
 import play.jobs.Job;
 
 import java.util.List;
@@ -30,7 +31,6 @@ import javax.inject.Inject;
  * @since 14/07/16.
  */
 @Slf4j
-//@OnApplicationStart(async = true)
 public class migrateConfigurationJob extends Job<Void> {
 
   // La migrateConfiguration và rimossa (e con lei anche tabelle e compagnia inerenti la vecchia
@@ -47,7 +47,15 @@ public class migrateConfigurationJob extends Job<Void> {
   @Inject
   static PeriodManager periodManager;
 
+  @Override
   public void doJob() throws Exception {
+
+    //in modo da inibire l'esecuzione dei job in base alla configurazione
+    if (!"true".equals(Play.configuration.getProperty(Bootstrap.JOBS_CONF))) {
+      log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
+      return;
+    }
+
     //migrazione nuova configurazione
     List<Office> offices = officeDao.allOffices().list();
     for (Office office : offices) {
