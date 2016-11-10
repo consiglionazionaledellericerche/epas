@@ -102,7 +102,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   }
 
   // costruttore di default implicitamente utilizzato dal play(controllers)
-  public Stamping() {
+  Stamping() {
   }
 
   /**
@@ -113,7 +113,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
    */
   public Stamping(PersonDay personDay, LocalDateTime time) {
     this.personDay = personDay;
-    this.date = time;
+    date = time;
     personDay.stampings.add(this);
   }
 
@@ -133,14 +133,9 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   /**
    * Comparator Stamping.
    */
-  public int compareTo(Stamping compareStamping) {
-    if (date.isBefore(compareStamping.date)) {
-      return -1;
-    } else if (date.isAfter(compareStamping.date)) {
-      return 1;
-    } else {
-      return 0;
-    }
+  @Override
+  public int compareTo(final Stamping compareStamping) {
+    return date.compareTo(compareStamping.date);
   }
 
   /**
