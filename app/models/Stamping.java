@@ -14,7 +14,6 @@ import org.joda.time.YearMonth;
 import play.data.binding.As;
 import play.data.validation.Required;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -32,7 +31,6 @@ import javax.persistence.Transient;
 @Audited
 @Entity
 @Table(name = "stampings")
-
 public class Stamping extends BaseModel implements Comparable<Stamping> {
 
 
@@ -67,14 +65,13 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
    * true).
    */
   @Column(name = "marked_by_admin")
-  public boolean markedByAdmin = false;
-
+  public boolean markedByAdmin;
   /**
    * con la nuova interpretazione delle possibilità del dipendente, questo campo viene settato a
    * true quando è il dipendente a modificare la propria timbratura.
    */
   @Column(name = "marked_by_employee")
-  public boolean markedByEmployee = false;
+  public boolean markedByEmployee;
   /**
    * true, cella bianca; false, cella gialla.
    */
@@ -87,25 +84,25 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
    * true, la cella fittizia di uscita adesso.
    */
   @Transient
-  public boolean exitingNow = false;
+  public boolean exitingNow;
 
   @Transient
   public boolean isValid() {
-    return this.valid;
+    return valid;
   }
 
   @Transient
   public boolean isIn() {
-    return way.equals(WayType.in);
+    return way == WayType.in;
   }
 
   @Transient
   public boolean isOut() {
-    return way.equals(WayType.out);
+    return way == WayType.out;
   }
 
   // costruttore di default implicitamente utilizzato dal play(controllers)
-  Stamping() {
+  public Stamping() {
   }
 
   /**
@@ -117,7 +114,6 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   public Stamping(PersonDay personDay, LocalDateTime time) {
     this.personDay = personDay;
     this.date = time;
-    
     personDay.stampings.add(this);
   }
 
@@ -165,13 +161,14 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   @Transient
   public String getLabel() {
     String output = formattedHour();
-    output += WayType.in.equals(this.way) ? " Ingr." : " Usc.";
+    output += way == WayType.in ? " Ingr." : " Usc.";
     output += stampType != null ? " (" + stampType.getIdentifier() + ")" : "";
     return output;
   }
 
   /**
    * Fondamentale per far funzionare alcune drools
+   *
    * @return Restituisce il proprietario della timbratura.
    */
   public Person getOwner() {
@@ -180,10 +177,11 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 
   /**
    * Utile per effettuare i controlli temporali sulle drools
+   *
    * @return il mese relativo alla data della timbratura.
    */
   public YearMonth getYearMonth() {
-    return new YearMonth(date.getYear(),date.getMonthOfYear());
+    return new YearMonth(date.getYear(), date.getMonthOfYear());
   }
 
   public enum WayType {
