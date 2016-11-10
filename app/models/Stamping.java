@@ -14,6 +14,7 @@ import org.joda.time.YearMonth;
 import play.data.binding.As;
 import play.data.validation.Required;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -103,6 +104,10 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
     return way.equals(WayType.out);
   }
 
+  // costruttore di default implicitamente utilizzato dal play(controllers)
+  Stamping() {
+  }
+
   /**
    * Costruttore.
    *
@@ -112,18 +117,8 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   public Stamping(PersonDay personDay, LocalDateTime time) {
     this.personDay = personDay;
     this.date = time;
-  }
-
-  /**
-   * Costruttore.
-   *
-   * @param personDay personDay
-   * @param time      time
-   */
-  public Stamping(PersonDay personDay, WayType way, LocalDateTime time) {
-    this.personDay = personDay;
-    this.date = time;
-    this.way = way;
+    
+    personDay.stampings.add(this);
   }
 
   @Override
