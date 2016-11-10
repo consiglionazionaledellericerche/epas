@@ -190,8 +190,8 @@ public class Clocks extends Controller {
     stamping.personDay.stampings.stream().filter(s -> !stamping.equals(s)).forEach(s -> {
 
       if (Minutes.minutesBetween(s.date, stamping.date).getMinutes() < 1
-          || (s.way.equals(stamping.way)
-          && Minutes.minutesBetween(s.date, stamping.date).getMinutes() < 2)) {
+          || s.way == stamping.way
+          && Minutes.minutesBetween(s.date, stamping.date).getMinutes() < 2) {
 
         flash.error("Impossibile inserire 2 timbrature così ravvicinate."
             + "Attendere 1 minuto per timbrature nel verso opposto o "

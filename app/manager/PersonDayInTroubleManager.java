@@ -98,7 +98,7 @@ public class PersonDayInTroubleManager {
     Iterables.removeIf(pd.troubles, new Predicate<PersonDayInTrouble>() {
       @Override
       public boolean apply(PersonDayInTrouble pdt) {
-        if (pdt.cause.equals(cause)) {
+        if (pdt.cause == cause) {
           pdt.delete();
 
           log.info("Rimosso PersonDayInTrouble {} - {} - {}",

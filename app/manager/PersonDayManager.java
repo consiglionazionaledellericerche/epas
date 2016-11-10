@@ -780,24 +780,18 @@ public class PersonDayManager {
 
     if (personDay.isToday() && considerExitingNow) {
       //aggiungo l'uscita fittizia 'now' nel caso risulti dentro il cnr non di servizio
-      boolean lastStampingIsIn = false;
 
       Collections.sort(personDay.stampings);
 
+      boolean lastStampingIsIn = false;
       for (Stamping stamping : personDay.stampings) {
-        if (!StampTypes.MOTIVI_DI_SERVIZIO.equals(stamping.stampType)) {
-          if (stamping.isOut()) {
-            lastStampingIsIn = false;
-          } else {
-
-            lastStampingIsIn = true;
-          }
+        if (stamping.stampType != StampTypes.MOTIVI_DI_SERVIZIO) {
+          lastStampingIsIn = !stamping.isOut();
         }
       }
       if (lastStampingIsIn) {
         Stamping stampingExitingNow = new Stamping(personDay, LocalDateTime.now());
         stampingExitingNow.way = WayType.out;
-        stampingExitingNow.markedByAdmin = false;
         stampingExitingNow.exitingNow = true;
         personDay.isConsideredExitingNow = true;
         queSeraSera(wrPersonDay);
@@ -818,7 +812,8 @@ public class PersonDayManager {
       //sono dentro e trovo una entrata
       if (isLastIn && s.way == WayType.in) {
         //creo l'uscita fittizia
-        Stamping stamping = new Stamping(personDay, null);
+        Stamping stamping = new Stamping();
+        stamping.personDay = personDay;
         stamping.way = WayType.out;
         stampingsForTemplate.add(stamping);
         //salvo l'entrata
@@ -838,19 +833,20 @@ public class PersonDayManager {
       //sono fuori e trovo una uscita
       if (!isLastIn && s.way == WayType.out) {
         //creo l'entrata fittizia
-        Stamping stamping = new Stamping(personDay, null);
+        Stamping stamping = new Stamping();
+        stamping.personDay = personDay;
         stamping.way = WayType.in;
         stampingsForTemplate.add(stamping);
         //salvo l'uscita
         stampingsForTemplate.add(s);
         isLastIn = false;
-        continue;
       }
     }
     while (stampingsForTemplate.size() < numberOfInOut * 2) {
       if (isLastIn) {
         //creo l'uscita fittizia
-        Stamping stamping = new Stamping(personDay, null);
+        Stamping stamping = new Stamping();
+        stamping.personDay = personDay;
         stamping.way = WayType.out;
         stampingsForTemplate.add(stamping);
         isLastIn = false;
@@ -858,11 +854,11 @@ public class PersonDayManager {
       }
       if (!isLastIn) {
         //creo l'entrata fittizia
-        Stamping stamping = new Stamping(personDay, null);
+        Stamping stamping = new Stamping();
+        stamping.personDay = personDay;
         stamping.way = WayType.in;
         stampingsForTemplate.add(stamping);
         isLastIn = true;
-        continue;
       }
     }
 
@@ -875,7 +871,6 @@ public class PersonDayManager {
    * @modify setta il campo stamping.valid di ciascuna stampings contenuta nel personDay.<br>
    * @modify setta il campo stamping.pairId con il valore dalla coppia a cui appartengono.
    */
-
   public List<PairStamping> computeValidPairStampings(PersonDay personDay) {
 
     //Lavoro su una copia ordinata.
