@@ -98,7 +98,7 @@ public class PersonDayInTroubleManager {
     Iterables.removeIf(pd.troubles, new Predicate<PersonDayInTrouble>() {
       @Override
       public boolean apply(PersonDayInTrouble pdt) {
-        if (pdt.cause.equals(cause)) {
+        if (pdt.cause == cause) {
           pdt.delete();
 
           log.info("Rimosso PersonDayInTrouble {} - {} - {}",
@@ -126,10 +126,6 @@ public class PersonDayInTroubleManager {
         fromDate, toDate, troubleCausesToSend);
 
     for (Person person : personList) {
-
-      if (person.surname.equals("Conti") && person.name.equals("Marco")) {
-        continue;
-      }
 
       final Optional<Contract> currentContract = factory.create(person).getCurrentContract();
       DateInterval intervalToCheck = DateUtility.intervalIntersection(

@@ -10,11 +10,11 @@ import manager.ConsistencyManager;
 
 import models.Person;
 import models.PersonDay;
-import models.Stamping;
 
 import org.joda.time.LocalDate;
 
 import play.Logger;
+import play.Play;
 import play.jobs.Job;
 
 import java.util.List;
@@ -34,25 +34,29 @@ public class RemoveInvalidStampingsJob extends Job<Void> {
   private final LocalDate end;
 
   public RemoveInvalidStampingsJob(Person person, LocalDate begin, LocalDate end) {
-    super();
     this.person = person;
     this.begin = begin;
     this.end = end;
   }
 
+  @Override
   public void doJob() {
+
+    //in modo da inibire l'esecuzione dei job in base alla configurazione
+    if (!"true".equals(Play.configuration.getProperty(Bootstrap.JOBS_CONF))) {
+      log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
+      return;
+    }
 
     log.info("Inizio Job RemoveInvalidStampingsJob per {},Dal {} al {}", person, begin, end);
     List<PersonDay> persondays = personDayDao.getPersonDayInPeriod(person, begin, Optional.of(end));
 
     for (PersonDay pd : persondays) {
-      for (Stamping stamping : pd.stampings) {
-        if (!stamping.valid) {
-          log.info("Eliminazione timbratura non valida per {} in data {} : {}",
-              pd.person.fullName(), pd.date, stamping);
-          stamping.delete();
-        }
-      }
+      pd.stampings.stream().filter(stamping -> !stamping.valid).forEach(stamping -> {
+        log.info("Eliminazione timbratura non valida per {} in data {} : {}",
+            pd.person.fullName(), pd.date, stamping);
+        stamping.delete();
+      });
     }
 
     consistencyManager.updatePersonSituation(person.id, begin);
