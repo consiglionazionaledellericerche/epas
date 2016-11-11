@@ -65,7 +65,8 @@ public class ContractDao extends DaoBase {
     final BooleanBuilder condition = new BooleanBuilder()
         .andAnyOf(contract.endContract.isNull().and(contract.endDate.isNull()),
             contract.endContract.isNull().and(contract.endDate.goe(begin)),
-            contract.endDate.isNull().and(contract.endContract.goe(begin)));
+            contract.endDate.isNull().and(contract.endContract.goe(begin)),
+            contract.endDate.goe(begin).and(contract.endContract.goe(begin)));
 
     if (end.isPresent()) {
       condition.and(contract.beginDate.loe(end.get()));
@@ -123,7 +124,7 @@ public class ContractDao extends DaoBase {
   }
 
   /**
-   * @return il contratto attivo per quella persona alla date date.
+   * @return il contratto attivo per quella persona alla data date.
    */
   public Contract getContract(LocalDate date, Person person) {
 

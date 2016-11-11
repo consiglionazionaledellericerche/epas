@@ -163,17 +163,10 @@ public class StampingManager {
     stamping.markedByAdmin = stampingFromClient.markedByAdmin;
     stamping.way = stampingFromClient.inOut == 0 ? WayType.in : WayType.out;
     stamping.stampType = stampingFromClient.stampType;
-    stamping.personDay = personDay;
     stamping.save();
 
     log.info("Inserita timbratura {} per {} (matricola = {}) ",
         stamping.getLabel(), person, person.number);
-
-    //anche in questo caso indagare...
-    personDay.save();
-    personDay.refresh();
-    JPA.em().flush();
-    //////////////////////////////////
     
     // Ricalcolo
     if (recompute) {

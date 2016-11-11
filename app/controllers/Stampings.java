@@ -261,11 +261,10 @@ public class Stampings extends Controller {
         stamping.markedByAdmin = false;
       }
     }
-
     stamping.save();
+    // non è usato il costruttore con la add, quindi aggiugniamo qui a mano:
+    personDay.stampings.add(stamping);
     
-    //JPA.em().flush();
-
     consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
 
     flash.success(Web.msgSaved(Stampings.class));
