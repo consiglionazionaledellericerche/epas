@@ -127,10 +127,6 @@ public class PersonDayInTroubleManager {
 
     for (Person person : personList) {
 
-      if (person.surname.equals("Conti") && person.name.equals("Marco")) {
-        continue;
-      }
-
       final Optional<Contract> currentContract = factory.create(person).getCurrentContract();
       DateInterval intervalToCheck = DateUtility.intervalIntersection(
           factory.create(currentContract.get()).getContractDateInterval(),
