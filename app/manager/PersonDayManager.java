@@ -473,13 +473,13 @@ public class PersonDayManager {
 
     // 1) Calcolo del tempo passato in pausa pranzo dalle timbrature.
     List<PairStamping> gapLunchPairs = getGapLunchPairs(personDay, startLunch, endLunch);
-    int effectiveTimeSpent = 0;
     boolean baessoAlgorithm = true;
     for (PairStamping lunchPair : gapLunchPairs) {
       if (lunchPair.prPair) {
         baessoAlgorithm = false;
       }
     }
+    int effectiveTimeSpent = 0;
     if (baessoAlgorithm) {
       if (!gapLunchPairs.isEmpty()) {
         // recupero la durata della pausa pranzo fatta
