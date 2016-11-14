@@ -20,6 +20,7 @@ import models.absences.CategoryGroupAbsenceType;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
+import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
@@ -28,6 +29,7 @@ import models.absences.query.QAbsenceType;
 import models.absences.query.QCategoryGroupAbsenceType;
 import models.absences.query.QComplationAbsenceBehaviour;
 import models.absences.query.QGroupAbsenceType;
+import models.absences.query.QInitializationGroup;
 import models.absences.query.QJustifiedType;
 import models.absences.query.QTakableAbsenceBehaviour;
 
@@ -443,5 +445,18 @@ public class AbsenceComponentDao extends DaoBase {
       set.add(absence);
     }
     return map;
+  }
+  
+  /**
+   * Inizializzazioni per quella persona.
+   * @param person persona
+   * @return list
+   */
+  public List<InitializationGroup> personInitializationGroups(Person person) {
+    QInitializationGroup initializationGroup = QInitializationGroup.initializationGroup;
+    final JPQLQuery query = getQueryFactory()
+        .from(initializationGroup)
+        .where(initializationGroup.person.eq(person));
+    return query.list(initializationGroup);
   }
 }

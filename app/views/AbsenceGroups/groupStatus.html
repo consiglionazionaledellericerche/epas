@@ -89,6 +89,8 @@
             #{if rowRecap.date}
               ${rowRecap.date.format()}
             #{/if}  
+            #{if rowRecap.beforeInitialization} before
+            #{/if}
           </td>
           <td>
 	        #{absences.absence-popover absence:rowRecap.absence, groupSelected:absencePeriod.groupAbsenceType /}

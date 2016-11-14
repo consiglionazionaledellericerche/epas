@@ -23,7 +23,7 @@
   	    #{/list}
      #{/f.selectModel}
      
-     #{f.date 'date'/}
+     #{f.date 'date', value:date.format() /}
      #{f.hidden 'personId', value:person.id /}
      
   
@@ -40,25 +40,20 @@
     #{/alert}
   #{/if}
   
-  #{list items:periodChain.periods, as:'absencePeriod' }
+  
 
-    <li class="list-group-item list-group-item-info">
-      <p>
-        <strong>${absencePeriod.groupAbsenceType.description}</strong>
-      </p>
+  <ul>
+  
+  <!-- Suggerimento -->
+  <li class="list-group-item list-group-item-info">
+    <p>
+        Imposta i valori di inizializzazione per <strong>${groupAbsenceType.description}</strong> alla data <strong>${date.format()}</strong>
+    </p>
+  </li>
+  <li class="list-group-item">
     
-    #{if absencePeriod.errorsBox.containsCriticalErrors() }
-      <p>ci sono errori critici. TODO: elencarli</p>
-    #{/if}
-    #{if absencePeriod.errorsBox.containsAbsencesErrors() }
-      <p>ci sono errori legati alle assenze. TODO: elencarli</p>
-    #{/if}
-    
-    </li>
-
-    
-    <li class="list-group-item">
-     <p>
+    <!-- Riepilogo gruppo -->
+    <p>
         #{if absencePeriod.isTakableWithLimit() }
            <strong>Tipo periodo</strong> &{absencePeriod.groupAbsenceType.periodType}<br>
            <strong>Validità periodo</strong> ${absencePeriod.from.format()} - ${absencePeriod.to.format()}
@@ -66,32 +61,65 @@
            <br><strong>Totale utilizzabile</strong> 
            ${templateUtility.formatAmount(absencePeriod.getPeriodTakableAmount(), absencePeriod.takeAmountType)}<br>
        #{/if}
+    </p>
+    <!-- Inizializzazione precedente -->
+    #{if absencePeriod.initialization}
+     <p>Per questo gruppo è già presente una inizializzazione. Cliccando su salva verrà sovrascritta.<br> 
+        #{f.view 'date', value:initializationDto.date /} 
+        #{f.view 'takableTotal', type:'number' /}
+        #{f.view 'takableUsed', type:'number' /}
+        #{f.view 'complationUsed', type:'number' /}
      </p>
-     <p>  
-       #{if absencePeriod.isTakableWithLimit() }
-           <i class="fa fa-exclamation-circle" aria-hidden="true"></i> Rimangono 
-           <strong><span class="text-success">${templateUtility.formatAmount(absencePeriod.getRemainingAmount(), absencePeriod.takeAmountType)}</span></strong>
-           da utilizzare entro il <strong class="text-success">${absencePeriod.to.format()}</strong>
-       #{/if}
-     </p>
-  #{/list} 
+    #{/if}
     
   #{form action:@AbsenceGroups.saveInitialization(), method:'POST', autocomplete:false, class:'form form-horizontal group'}
   
-  #{f.hidden 'groupAbsenceType.id', value:groupAbsenceType?.id /}
-  #{f.hidden 'date', value:date /}
-  #{f.hidden 'person.id', value:'person.id' /}
+  
+  
+  
+  #{f.hidden 'groupAbsenceTypeId', value:groupAbsenceType.id /}
+  #{f.hidden 'date', value:date.format() /}
+  #{f.hidden 'personId', value:person.id /}
 
   *{
   #{f.date 'forceBegin', disabled:'true' /}
-  #{f.date 'forceEnd', disabled:'true' /} 
+  #{f.date 'forceEnd', disabled:'true' /}
+  #{f.input 'takableTotal', type:'number' /} 
   }*
   
-    
-  #{f.input 'takableTotal', type:'number' /}
-  #{f.input 'takableUsed', type:'number' /}
-  #{f.input 'complationUsed', type:'number' /}
+  #{if initializationDto.takenInHourMinute()}
+    #{f.input 'initializationDto.takenHours', value:initializationDto.takenHours, type:'number' /}
+    #{f.selectEnum 'initializationDto.takenMinutes', items:initializationDto.selectableMinutes(), value:initializationDto.takenMinutes, byEquals:'true' /}
+  #{/if}
+  #{if initializationDto.takenInUnits()}
+    #{f.input 'initializationDto.takenUnits', value:initializationDto.takenUnits, type:'number' /}
+  #{/if}
+  
+  #{if initializationDto.complationInHourMinute()}
+    #{f.input 'initializationDto.complationHours', value:initializationDto.complationHours, type:'number' /}
+    #{f.selectEnum 'initializationDto.complationMinutes', items:initializationDto.selectableMinutes(), value:initializationDto.complationMinutes, byEquals:'true' /}
+  #{/if}
+  #{if initializationDto.complationInUnits()}
+    #{f.input 'initializationDto.complationUnits', value:initializationDto.complationUnits, type:'number' /}
+  #{/if}
+  
+ 
+  #{b.buttons center:true}
+   #{b.submit 'Salva'/}
+  #{/b.buttons}
+
   
   #{/form}
+  </li>
 
+  #{if absencePeriod.errorsBox.containsCriticalErrors() }
+      <li class="list-group-item">ci sono errori critici. TODO: elencarli</li>
+  #{/if}
+  #{if absencePeriod.errorsBox.containsAbsencesErrors() }
+     <li class="list-group-item">ci sono errori legati alle assenze. TODO: elencarli</li>
+  #{/if}
+    
+
+  </ul>
+  
 </div>

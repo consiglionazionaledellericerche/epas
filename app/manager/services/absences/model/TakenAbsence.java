@@ -15,10 +15,13 @@ public class TakenAbsence {
   public Absence absence;
   public AmountType amountType;     //risalibile dal period..
   
+  
   public int periodTakableTotal;   //situazione prima della assenza
   public int periodTakenBefore;     
 
   public int takenAmount;
+  
+  public boolean beforeInitialization = false; 
   
   public boolean toInsert;          //segnala che è l'assenza da inserire nella chain
   

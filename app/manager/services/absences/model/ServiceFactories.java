@@ -20,6 +20,7 @@ import models.absences.AbsenceType;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.PeriodType;
+import models.absences.InitializationGroup;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 
@@ -55,9 +56,9 @@ public class ServiceFactories {
    */
   public Scanner buildScanInstance(Person person, LocalDate scanFrom, 
       List<Absence> absencesToScan, List<PersonChildren> orderedChildren, 
-      List<Contract> fetchedContracts) {
+      List<Contract> fetchedContracts, List<InitializationGroup> initializationGroups) {
     Scanner absenceEngineScan = new Scanner(person, scanFrom, 
-        absencesToScan, orderedChildren, fetchedContracts, 
+        absencesToScan, orderedChildren, fetchedContracts, initializationGroups,
         this, absenceEngineUtility, personDayManager, absenceComponentDao);
     for (Absence absence : absenceEngineScan.absencesToScan) {
       Set<GroupAbsenceType> groupsToScan = absenceEngineUtility.involvedGroup(absence.absenceType); 
@@ -84,14 +85,15 @@ public class ServiceFactories {
       Person person, GroupAbsenceType groupAbsenceType, LocalDate date,
       List<Absence> previousInserts,
       Absence absenceToInsert,
-      List<PersonChildren> orderedChildren, List<Contract> fetchedContracts) { 
+      List<PersonChildren> orderedChildren, List<Contract> fetchedContracts, 
+      List<InitializationGroup> initializationGroups) { 
     
     PeriodChain periodChain = new PeriodChain(person, groupAbsenceType, date);
     
     GroupAbsenceType currentGroup = groupAbsenceType;
     while (currentGroup != null) {
       AbsencePeriod currentPeriod = buildAbsencePeriod(person, currentGroup, date, 
-          orderedChildren, fetchedContracts);
+          orderedChildren, fetchedContracts, initializationGroups);
       if (!currentPeriod.ignorePeriod) { 
         periodChain.periods.add(currentPeriod);  
       }
@@ -153,9 +155,7 @@ public class ServiceFactories {
   private AbsencePeriod buildAbsencePeriod(Person person, GroupAbsenceType groupAbsenceType, 
       LocalDate date, 
       List<PersonChildren> orderedChildren,
-      List<Contract> fetchedContracts) {
-    
-    // recuperare l'inizializzazione (questo lo posso fare anche fuori) per i fix sulle date.
+      List<Contract> fetchedContracts, List<InitializationGroup> initializationGroup) {
     
     AbsencePeriod absencePeriod = new AbsencePeriod(person, groupAbsenceType);
     
@@ -186,6 +186,15 @@ public class ServiceFactories {
       }
     }
     
+    // recuperare l'inizializzazione
+    for (InitializationGroup initialization : initializationGroup) {
+      if (initialization.groupAbsenceType.equals(groupAbsenceType) 
+          && DateUtility.isDateIntoInterval(initialization.initializationDate, 
+              absencePeriod.periodInterval())) {
+        absencePeriod.initialization = initialization;
+      }
+    }
+    
     // Parte takable
     if (absencePeriod.groupAbsenceType.takableAbsenceBehaviour != null) {
 
@@ -200,6 +209,10 @@ public class ServiceFactories {
         //bisogna ridurre il limite
         //engineInstance.absenceEngineProblem = 
         //Optional.of(AbsenceEngineProblem.unsupportedOperation);
+      }
+      if (absencePeriod.initialization != null 
+          && absencePeriod.initialization.takableTotal != null) {
+        absencePeriod.setFixedPeriodTakableAmount(absencePeriod.initialization.takableTotal);
       }
 
       absencePeriod.takableCountBehaviour = TakeCountBehaviour.period;
