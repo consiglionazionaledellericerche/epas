@@ -37,6 +37,7 @@ import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.DefaultGroup;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
+import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 
@@ -229,10 +230,13 @@ public class AbsenceService {
       
       List<PersonChildren> orderedChildren = personChildrenDao.getAllPersonChildren(person);   
       List<Contract> fetchedContracts = person.contracts; //TODO: fetch
+      List<InitializationGroup> initializationGroups = 
+          absenceComponentDao.personInitializationGroups(person); 
       
       PeriodChain periodChain = serviceFactories
           .buildPeriodChain(person, groupAbsenceType, currentDate, 
-              previousInserts, absenceToInsert, orderedChildren, fetchedContracts);
+              previousInserts, absenceToInsert, 
+              orderedChildren, fetchedContracts, initializationGroups);
 
       criticalErrors.addAll(periodChain.criticalErrors());
       
@@ -376,9 +380,11 @@ public class AbsenceService {
         null, Lists.newArrayList());
     List<PersonChildren> orderedChildren = personChildrenDao.getAllPersonChildren(person);    
     List<Contract> fetchedContracts = person.contracts; //TODO: fetch
+    List<InitializationGroup> initializationGroups = 
+        absenceComponentDao.personInitializationGroups(person);
     
     Scanner absenceScan = serviceFactories.buildScanInstance(person, from, absencesToScan, 
-        orderedChildren, fetchedContracts);
+        orderedChildren, fetchedContracts, initializationGroups);
         
     // scan dei gruppi
     absenceScan.scan();
@@ -404,10 +410,12 @@ public class AbsenceService {
     
     List<PersonChildren> orderedChildren = personChildrenDao.getAllPersonChildren(person);   
     List<Contract> fetchedContracts = person.contracts; //TODO: fetch
+    List<InitializationGroup> initializationGroups = 
+        absenceComponentDao.personInitializationGroups(person);
     
     PeriodChain periodChain = serviceFactories.buildPeriodChain(person, groupAbsenceType, date, 
         Lists.newArrayList(), null,
-        orderedChildren, fetchedContracts);
+        orderedChildren, fetchedContracts, initializationGroups);
 
     return periodChain;
 

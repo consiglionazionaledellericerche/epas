@@ -17,6 +17,7 @@ import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.GroupAbsenceType;
+import models.absences.InitializationGroup;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 
 import org.joda.time.LocalDate;
@@ -35,6 +36,7 @@ public class AbsencePeriod {
   public GroupAbsenceType groupAbsenceType;
   public LocalDate from;                      // Data inizio
   public LocalDate to;                        // Data fine
+  public InitializationGroup initialization;  // Inizializazione period (se presente)
   public SortedMap<LocalDate, DayInPeriod> daysInPeriod = Maps.newTreeMap();
   
   // Takable
@@ -125,8 +127,13 @@ public class AbsencePeriod {
    */
   public int getPeriodTakenAmount() {
     int takenInPeriod = 0;
+    if (this.initialization != null) {
+      takenInPeriod = this.initialization.takableUsed;
+    }
     for (TakenAbsence takenAbsence : takenAbsences()) {
-      takenInPeriod += takenAbsence.getTakenAmount();
+      if (!takenAbsence.beforeInitialization) {
+        takenInPeriod += takenAbsence.getTakenAmount();
+      }
     }
     if (!takenCountBehaviour.equals(TakeCountBehaviour.period)) {
       // TODO: sumAllPeriod, sumUntilPeriod;
@@ -146,15 +153,19 @@ public class AbsencePeriod {
    * @return l'assenza takable
    */
   public TakenAbsence buildTakenAbsence(Absence absence, int takenAmount) {
-    int periodTakableAmount = this.getPeriodTakableAmount();
+
     int periodTakenAmount = this.getPeriodTakenAmount();
     TakenAbsence takenAbsence = TakenAbsence.builder()
         .absence(absence)
         .amountType(this.takeAmountType)
-        .periodTakableTotal(periodTakableAmount)
+        .periodTakableTotal(this.getPeriodTakableAmount())
         .periodTakenBefore(periodTakenAmount)
         .takenAmount(takenAmount)
         .build();
+    if (this.initialization != null 
+        && absence.date.isAfter(this.initialization.initializationDate)) {
+      takenAbsence.beforeInitialization = true;
+    }  
     return takenAbsence;
   }
   

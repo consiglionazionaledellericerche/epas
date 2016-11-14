@@ -151,6 +151,8 @@ public class AbsenceEngineUtility {
    */
   public int absenceJustifiedAmount(Person person, Absence absence, AmountType amountType) {
     
+    log.debug("absence:{}", absence.toString());
+    
     int amount = 0;
 
     if (absence.justifiedType.name.equals(JustifiedTypeName.nothing)) {
@@ -175,22 +177,26 @@ public class AbsenceEngineUtility {
     } else if (absence.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) {
       amount = -1;
     }
-    
+    log.debug("amount:{}", amount);
     
     if (amountType.equals(AmountType.units)) {
       int work = absenceWorkingTime(person, absence);
       if (work == -1) {
         //Patch: se è festa da verificare.
         if (absence.justifiedType.name.equals(JustifiedTypeName.all_day)) {
+          log.debug("return:{}", 100);
           return 100;
-        }
+        } 
       }
       if (work == 0) {
+        log.debug("return:{}", 0);
         return 0;
       }
       int result = amount * 100 / work;
+      log.debug("return:{}", result);
       return result;
     } else {
+      log.debug("return:{}", amount);
       return amount;
     }
   }

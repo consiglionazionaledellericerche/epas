@@ -19,6 +19,7 @@ import models.absences.Absence;
 import models.absences.AbsenceTrouble;
 import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.GroupAbsenceType;
+import models.absences.InitializationGroup;
 import models.absences.JustifiedType.JustifiedTypeName;
 
 import org.joda.time.LocalDate;
@@ -41,6 +42,7 @@ public class Scanner {
   public Person person;
   public List<PersonChildren> orderedChildren;
   public List<Contract> fetchedContracts;
+  public List<InitializationGroup> initializationGroups;
   
   //Puntatori scan
   public LocalDate scanFrom;
@@ -69,6 +71,7 @@ public class Scanner {
    */
   public Scanner(Person person, LocalDate scanFrom, List<Absence> absencesToScan,
       List<PersonChildren> orderedChildren, List<Contract> fetchedContracts, 
+      List<InitializationGroup> initializationGroups,
       ServiceFactories serviceFactories, AbsenceEngineUtility absenceEngineUtility, 
       PersonDayManager personDayManager, AbsenceComponentDao absenceComponentDao) {
     this.person = person;
@@ -76,6 +79,7 @@ public class Scanner {
     this.absencesToScan = absencesToScan;
     this.orderedChildren = orderedChildren;
     this.fetchedContracts = fetchedContracts;
+    this.initializationGroups = initializationGroups;
     this.serviceFactories = serviceFactories;
     this.absenceEngineUtility = absenceEngineUtility;
     this.personDayManager = personDayManager;
@@ -107,7 +111,7 @@ public class Scanner {
       
       PeriodChain periodChain = serviceFactories.buildPeriodChain(person, this.nextGroupToScan, 
           this.currentAbsence.getAbsenceDate(), Lists.newArrayList(), null, 
-          orderedChildren, fetchedContracts);
+          orderedChildren, fetchedContracts, initializationGroups);
       this.periodChainScanned.add(periodChain);
       
       //caso eccezionale non esiste figlio

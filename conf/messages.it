@@ -462,6 +462,16 @@ takableTotal=Limite Totale
 takableUsed=Limite Consumato
 complationUsed=Completato
 
+initializationDto.takenHours=Ore Utilizzate
+initializationDto.takenMinutes=Minuti Utilizzati
+initializationDto.takenUnits=Giorni Utilizzati
+
+initializationDto.complationHours=Ore da Completare
+initializationDto.complationMinutes=Minuti da Completare
+initializationDto.complationUnits=Giornata da Completare
+
+
+
 wtt.description= Nome Tipo Orario
 wtt.office=Sede
 wtt= Tipo Orario

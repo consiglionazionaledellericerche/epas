@@ -1,6 +1,7 @@
 
 package controllers;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 
 import dao.PersonDao;
@@ -17,6 +18,7 @@ import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceForm.AbsenceInsertTab;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
+import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.PeriodChain;
 
 import models.Person;
@@ -25,15 +27,20 @@ import models.Role;
 import models.User;
 import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.AmountType;
 import models.absences.CategoryGroupAbsenceType;
 import models.absences.GroupAbsenceType;
-import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
+import models.absences.GroupAbsenceType.DefaultGroup;
+import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
 
+import play.data.validation.Max;
+import play.data.validation.Min;
 import play.data.validation.Valid;
+import play.data.validation.Validation;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -271,20 +278,73 @@ public class AbsenceGroups extends Controller {
     }
     
     PeriodChain periodChain = absenceService.residual(person, groupAbsenceType, date);
+    if (periodChain.periods.isEmpty()) {
+      render(initializableGroups, person, periodChain);
+    }
     
-    render(initializableGroups, date, person, groupAbsenceType, periodChain);
+    AbsencePeriod absencePeriod = periodChain.periods.iterator().next();
+    InitializationDto initializationDto = new InitializationDto();
+    initializationDto.takenAmountType = absencePeriod.takeAmountType;
+    initializationDto.complationAmountType = absencePeriod.complationAmountType;
+    
+    render(initializableGroups, person, groupAbsenceType, date, periodChain, absencePeriod, initializationDto);
 
   }
   
-  public static void saveInitialization() {
-    renderText("todo");
+  public static void saveInitialization(Long personId, Long groupAbsenceTypeId, LocalDate date, 
+      @Valid InitializationDto initializationDto) {
+    
+    // Lo stato della richiesta
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    GroupAbsenceType groupAbsenceType = GroupAbsenceType.findById(groupAbsenceTypeId);
+    notFoundIfNull(groupAbsenceType);
+    notFoundIfNull(date);
+    PeriodChain periodChain = absenceService.residual(person, 
+        groupAbsenceType, date);
+    Preconditions.checkState(!periodChain.periods.isEmpty());
+    AbsencePeriod absencePeriod = periodChain.periods.iterator().next();
+    initializationDto.takenAmountType = absencePeriod.takeAmountType;
+    initializationDto.complationAmountType = absencePeriod.complationAmountType;
+
+    // Gli errori della richiesta inserimento inizializzazione
+    if (Validation.hasErrors()) {
+      flash.error("Correggere gli errori indicati");
+      render("@initialization", person, groupAbsenceType, date, absencePeriod, periodChain, 
+          initializationDto);
+    }
+    
+    // Conversione (riduce la complessità per l'amministratore)
+    InitializationGroup initialization = new InitializationGroup();
+    initialization.person = person;
+    initialization.initializationDate = date;
+    initialization.groupAbsenceType = groupAbsenceType;
+    if (absencePeriod.initialization != null) {
+      initialization = absencePeriod.initialization;
+    }
+    initializationDto.populateInitialization(initialization);
+    initialization.save();
+    
+    flash.success("Inizializzazione salvata con successo. (Scherzo)");
+    
+    initialization(person.id, groupAbsenceType.id, date);
   }
 
   private static List<GroupAbsenceType> initializablesGroups() {
     List<GroupAbsenceType> initializables = Lists.newArrayList();
     List<GroupAbsenceType> allGroups = GroupAbsenceType.findAll();
     for (GroupAbsenceType group : allGroups) {
-      if (group.pattern.equals(GroupAbsenceTypePattern.programmed)) {
+      if (group.name.equals(DefaultGroup.G_09.name()) 
+          || group.name.equals(DefaultGroup.G_89.name())
+          || group.name.equals(DefaultGroup.G_661.name())
+//          || group.name.equals(DefaultGroup.G_18.name())
+//          || group.name.equals(DefaultGroup.G_19.name())
+          || group.name.equals(DefaultGroup.G_23.name())
+          || group.name.equals(DefaultGroup.G_25.name())
+          || group.name.equals(DefaultGroup.G_232.name())
+          || group.name.equals(DefaultGroup.G_252.name())
+          || group.name.equals(DefaultGroup.G_233.name())
+          || group.name.equals(DefaultGroup.G_253.name())) {
         initializables.add(group);
       }
     }
@@ -359,5 +419,75 @@ public class AbsenceGroups extends Controller {
     }
 
     Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
+  }
+  
+  public static class InitializationDto {
+    
+    public AmountType takenAmountType;
+    public AmountType complationAmountType;
+    
+    @Min(0)
+    public Integer takenHours = 0;
+    @Min(0) @Max(59)
+    public Integer takenMinutes = 0;
+    @Min(0) @Max(99)
+    public Integer takenUnits = 0;
+
+    @Min(0)
+    public Integer complationHours = 0;
+    @Min(0) @Max(59)
+    public Integer complationMinutes = 0;
+    @Min(0) @Max(99)
+    public Integer complationUnits = 0; //percent
+    
+    public boolean takenInHourMinute() {
+      return this.takenAmountType == AmountType.minutes; 
+    }
+    
+    public boolean takenInUnits() {
+      return this.takenAmountType == AmountType.units; 
+    }
+    
+    public boolean complationInHourMinute() {
+      return this.complationAmountType != null && this.complationAmountType == AmountType.minutes;
+    }
+    
+    public boolean complationInUnits() {
+      return this.complationAmountType != null && this.complationAmountType == AmountType.units;
+    }
+    
+    public InitializationGroup populateInitialization(InitializationGroup initialization) {
+      
+      //reset
+      initialization.complationUsed = 0;
+      initialization.takableUsed = 0;
+      
+      if (this.takenInHourMinute()) {
+        initialization.takableUsed = this.takenHours * 60 + this.takenMinutes;
+      }
+      if (this.takenInUnits()) {
+        initialization.takableUsed = this.takenUnits;
+      }
+      if (this.complationInHourMinute()) {
+        initialization.complationUsed = this.complationHours * 60 + this.complationMinutes;
+      }
+      if (this.complationInUnits()) {
+        initialization.complationUsed = this.complationUnits;
+      }
+      
+      return initialization;
+    }
+    
+    /**
+     * I minuti inseribili...
+     * @return list
+     */
+    public List<Integer> selectableMinutes() {
+      List<Integer> hours = Lists.newArrayList();
+      for (int i = 0; i <= 59; i++) {
+        hours.add(i);
+      }
+      return hours;
+    }
   }
 }

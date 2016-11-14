@@ -124,6 +124,7 @@ public class DayInPeriod {
 
     public Absence absence;
     public GroupAbsenceType groupAbsenceType;
+    public boolean beforeInitialization = false;
     public List<AbsenceError> absenceErrors = Lists.newArrayList();
     public List<AbsenceError> absenceWarnings = Lists.newArrayList();
 
@@ -154,13 +155,13 @@ public class DayInPeriod {
     List<TemplateRow> templateRows = Lists.newArrayList();
     
     for (TakenAbsence takenAbsence : takenNotComplation()) {
-      TemplateRow takenRow = buildTakenNotComplation(takenAbsence);
+      TemplateRow takenRow = buildTakenNotComplation(takenAbsence, takenAbsence.beforeInitialization);
       templateRows.add(takenRow);
     }
 
     TakenAbsence takenComplation = takenComplation();
     if (takenComplation != null) {
-      TemplateRow complationRow = buildTakenComplation(takenComplation);
+      TemplateRow complationRow = buildTakenComplation(takenComplation, takenComplation.beforeInitialization);
       templateRows.add(complationRow);
       if (correctReplacing != null) {
         TemplateRow replacingRow = buildReplacing(takenComplation, nothing);
@@ -193,11 +194,13 @@ public class DayInPeriod {
     }
     
     if (takenNotComplation().contains(insertTakenAbsence)) {
-      TemplateRow takenRow = buildTakenNotComplation(insertTakenAbsence);
+      TemplateRow takenRow = buildTakenNotComplation(insertTakenAbsence, 
+          insertTakenAbsence.beforeInitialization);
       templateRows.add(takenRow);
     }
     if (takenComplation() != null && takenComplation().equals(insertTakenAbsence)) {
-      TemplateRow complationRow = buildTakenComplation(insertTakenAbsence);
+      TemplateRow complationRow = buildTakenComplation(insertTakenAbsence, 
+          insertTakenAbsence.beforeInitialization);
       templateRows.add(complationRow);
       
       //se non ci sono errori inserisco il replacing
@@ -212,9 +215,11 @@ public class DayInPeriod {
     return templateRows;
   }
   
-  private TemplateRow buildTakenNotComplation(TakenAbsence takenAbsence) {
+  private TemplateRow buildTakenNotComplation(TakenAbsence takenAbsence, 
+      boolean beforeInitialization) {
     TemplateRow takenRow = new TemplateRow();
     takenRow.date = takenAbsence.absence.getAbsenceDate();
+    takenRow.beforeInitialization = beforeInitialization;
     takenRow.absence = takenAbsence.absence;
     takenRow.groupAbsenceType = absencePeriod.groupAbsenceType;
     takenRow.absenceErrors = absencePeriod.errorsBox.absenceErrors(takenRow.absence);
@@ -231,8 +236,10 @@ public class DayInPeriod {
     return takenRow;
   }
   
-  private TemplateRow buildTakenComplation(TakenAbsence takenComplation) {
+  private TemplateRow buildTakenComplation(TakenAbsence takenComplation, 
+      boolean beforeInitialization) {
     TemplateRow complationRow = new TemplateRow();
+    complationRow.beforeInitialization = beforeInitialization;
     complationRow.date = complationAbsence.absence.getAbsenceDate();
     complationRow.absence = complationAbsence.absence;
     complationRow.groupAbsenceType = absencePeriod.groupAbsenceType;
