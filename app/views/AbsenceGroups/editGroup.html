@@ -1,0 +1,27 @@
+#{modalAsync id:'defaultModal', button:'Salva', title: 'Modifica gruppo' }
+
+ <div id="groupData">
+
+	 #{form action:@AbsenceGroups.updateGroup(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal', 'data-async':'#page_content',
+		    'data-async-error':'#groupData'}
+		
+		<input type="hidden" name="groupAbsenceType.id" value="${groupAbsenceType.id}"/>
+		
+	    #{f.input 'groupAbsenceType.description'/}
+	    
+	    #{if !groupAbsenceType.chainDescription.equals(groupAbsenceType.description) }
+	      #{f.input 'groupAbsenceType.chainDescription' /}
+	    #{/if}
+	    #{else}
+	      #{f.input 'groupAbsenceType.chainDescription', value:'' /}
+	    #{/else}
+	
+	    #{b.buttons center:true}   
+	      #{b.submit 'Salva' /}
+	    #{/b.buttons}
+	  #{/form}
+
+  </div>
+
+#{/modalAsync}

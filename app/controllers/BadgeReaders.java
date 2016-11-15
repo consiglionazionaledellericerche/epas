@@ -317,8 +317,8 @@ public class BadgeReaders extends Controller {
       Optional<UsersRolesOffices> uro = uroDao.getUsersRolesOffices(badgeReader.user,
           role, badgeSystem.office);
       if (uro.isPresent()) {
+        log.info("UserRoleOffice rimosso: {}", uro.get());
         uro.get().delete();
-        log.info("UserRoleOffice rimosso: {}", uro);
       } else {
         log.warn("L'userRoleOffice da rimuovere {} {} {} avrebbe dovuto esistere.",
             badgeReader.code, role.name, badgeSystem.office);

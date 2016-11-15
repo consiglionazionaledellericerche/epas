@@ -203,7 +203,7 @@ public class AbsenceService {
     
     if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.vacationsCnr)) {
       InsertReport insertReport = temporaryInsertVacation(person, 
-          groupAbsenceType, from, to, null, absenceManager);
+          groupAbsenceType, from, to, absenceType, absenceManager);
       return insertReport;
     } else if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.compensatoryRestCnr)) {
       InsertReport insertReport = temporaryInsertCompensatoryRest(person, 

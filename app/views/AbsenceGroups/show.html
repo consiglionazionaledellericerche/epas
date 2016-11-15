@@ -6,82 +6,70 @@
 
 #{title title:'Gruppi di Assenze' /}
 
-  #{list items:groups, as:'group'}
 
-  <ul class="list-group">
-    <li class="list-group-item list-group-item-info">
-      <strong>${group.description.label()}</strong>
-      <span class="label label-info">${group.name}</span> 
-    </li>
-    <li class="list-group-item">
-      
-      *{ <span class="label label-default">Codice</span> &{group.name}<br> }* 
 
-      <span class="label label-default">Categoria</span> ${group.category.name} <br>
-      <span class="label label-default">Tipologia</span> &{group.pattern} <br>
-      <span class="label label-default">Periodo</span> &{group.periodType} <br>
-      #{if group.nextGroupToCheck}
-      <span class="label label-default">Gruppo successivo</span> <strong>${group.nextGroupToCheck.description.label()}</strong>
-      #{/if}
-    </li>
-    #{if group.takableAbsenceBehaviour}  
-    <li class="list-group-item">
-      <span class="label label-primary">Limite</span>  <span class="label label-danger"> ${group.takableAbsenceBehaviour.fixedLimit} &{group.takableAbsenceBehaviour.amountType} </span><br>
-      #{if group.takableAbsenceBehaviour.takableAmountAdjustment }
-      <span class="label label-primary">Aggiustamento</span> <span class="label label-danger"> &{group.takableAbsenceBehaviour.takableAmountAdjustment}</span><br>  
-      #{/if}
-      
-      *{ <span class="label label-primary">Codice</span> ${group.takableAbsenceBehaviour.name}<br> }*
-      <span class="label label-primary">Codici considerati</span> 
-      #{list items:group.takableAbsenceBehaviour.takableCodes, as:'absenceType'}
-        #{if !absenceType.expired }
-          #{absences.absenceType absenceType:absenceType /}
-        #{/if}  
-      #{/list}
-      #{list items:group.takableAbsenceBehaviour.takableCodes, as:'absenceType'}
-        #{if absenceType.expired }
-          #{absences.absenceType absenceType:absenceType /}
-        #{/if}    
-      #{/list}  
-      
-    </li>
-    #{/if}
-    #{if group.complationAbsenceBehaviour}  
-    <li class="list-group-item list-group-item-warning">
-    
-      <span class="label label-primary">Completamento</span> &{group.complationAbsenceBehaviour.amountType}<br>
-      *{ <span class="label label-primary">Codice</span> ${group.complationAbsenceBehaviour.name}<br> }*
-      <span class="label label-primary">Codici completamento</span> 
-      #{list items:group.complationAbsenceBehaviour.complationCodes, as:'absenceType'}
-        #{if !absenceType.expired }
-          #{absences.absenceType absenceType:absenceType /}
-        #{/if}    
-      #{/list} 
-      #{list items:group.complationAbsenceBehaviour.complationCodes, as:'absenceType'}
-        #{if absenceType.expired }
-          #{absences.absenceType absenceType:absenceType /}
-        #{/if}    
-      #{/list} 
-      <br>
-      
-      <span class="label label-primary">Codici rimpiazzamento</span> 
-      #{list items:group.complationAbsenceBehaviour.replacingCodes, as:'absenceType'}
-        #{if !absenceType.expired }
-          #{absences.absenceType absenceType:absenceType /}
-        #{/if}    
-      #{/list} 
-      #{list items:group.complationAbsenceBehaviour.replacingCodes, as:'absenceType'}
-        #{if absenceType.expired }
-          #{absences.absenceType absenceType:absenceType /}
-        #{/if}    
-      #{/list} 
-      
-    </li>
-    #{/if}
-    
-  </ul>
+
+ #{form action:@AbsenceGroups.show(), method:'GET', autocomplete:false,
+		    class:'form form-horizontal auto-submit'}
+		#{f.selectModel 'category', inputName:'categoryId', items:categories, value:category /}
+ #{/form}
+ 
+
+ 
+ <table class="table table-bordered"> 
+   <thead>
+ 	<tr>
+ 	  <th class="col-md-3">Gruppo</th>
+ 	  *{
+ 	  <th>Categoria</th>
+ 	  <th>Tipologia</th>
+ 	  }*
+ 	  <th>Periodo</th>
+ 	  <th>Limiti e codici</th>
+ 	  <th>Completamenti e codici</th>
+ 	</tr>
+   </thead>
+   <tbody>
+ #{list items:groups, as:'group'}
   
-  #{/list}
+  *{ todo questo filtro andrebbe fatto direttamente nel controller }*
+  #{if group.category.equals(category)}    
+  <tr>
+  
+    #{include './_showGroup.html' /}
+  </tr>
+  #{/if}
+  
+  
+  
+  
+ #{/list}
+ </tbody>
+
+ </table>
+ 
+<div class="panel panel-default">
+  <div class="panel-body"> 
+  <p>Tramite questa vista è possibile comprendere il comportamento dei gruppi di codici assenza.</p>
+  
+  <br>
+  <span class="label label-danger">Numero Minuti</span> Limite per il gruppo definito conteggiato in minuti <br>
+  <span class="label label-danger">Numero Giorni</span> Limite per il gruppo definito conteggiato in giorni <br>
+  
+  <br>
+  <span class="label label-warning">Completamento in Minuti</span> I codici di <span class="label label-info">completamento</span> da inviare alla Sede Centrale vengono inseriti sulla base dei minuti effettivi giustificati. <br> 
+  <span class="label label-warning">Completamento in Giorni</span> I codici di <span class="label label-info">completamento</span> da inviare alla Sede Centrale vengono inseriti al consumo di una intera giornata lavorativa, rapportata al tipo orario del dipendente. <br> 
+  
+  <br>
+  <i class="fa fa-link" aria-hidden="true"></i> Il gruppo è prendibile dopo l'esaurimento di un gruppo con una priorità maggiore. <br>
+  <i class="fa fa-star" aria-hidden="true"></i> Il gruppo è di tipo speciale, limiti e completamenti sono gestiti con algoritmi specifici. <br>
+  <i class="fa fa-asterisk" aria-hidden="true"></i> Il gruppo è di tipo semplice, nessun limite e completamento definito. 
+ </div>
+</div>
+
 
   
 </div>
+
+
+ 

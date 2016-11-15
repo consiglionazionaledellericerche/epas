@@ -1,5 +1,7 @@
 package models.absences;
 
+import com.google.common.base.Strings;
+
 import it.cnr.iit.epas.DateInterval;
 
 import models.base.BaseModel;
@@ -23,6 +25,8 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "group_absence_types")
 public class GroupAbsenceType extends BaseModel {
+
+  private static final long serialVersionUID = 3290760775533091791L;
 
   @Column
   public String name;
@@ -68,11 +72,7 @@ public class GroupAbsenceType extends BaseModel {
    * @return label
    */
   public String getLabel() {
-    if (this.chainDescription != null) {
-      return this.chainDescription;
-    } else {
-      return this.description;
-    }
+    return getChainDescription();
   }
   
   /**
@@ -80,7 +80,7 @@ public class GroupAbsenceType extends BaseModel {
    * @return chainDescription
    */
   public String getChainDescription() {
-    if (this.chainDescription != null) {
+    if (!Strings.isNullOrEmpty(this.chainDescription)) {
       return this.chainDescription;
     } else {
       return this.description;

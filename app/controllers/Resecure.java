@@ -1,5 +1,7 @@
 package controllers;
 
+import helpers.LogEnhancer;
+
 import models.Office;
 
 import play.Play;
@@ -21,7 +23,7 @@ import javax.inject.Inject;
  *
  * @author marco
  */
-@With(RequestInit.class)
+@With({ RequestInit.class, LogEnhancer.class })
 public class Resecure extends Controller {
 
   public static final String OFFICE_COUNT = "officeCount";

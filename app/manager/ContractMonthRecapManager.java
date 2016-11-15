@@ -62,15 +62,17 @@ public class ContractMonthRecapManager {
    * assume che se il precedente riepilogo è absent() significa che non serve ai fini della
    * computazione. Il controllo di fornire il parametro corretto è demandato al chiamante. <br>
    *
-   * Aggiorna i campi del riepilogo contenuto in cmr, nella parte residuale ovvero:<br> - residui
+   * <p>Aggiorna i campi del riepilogo contenuto in cmr, nella parte residuale ovvero:<br> - residui
    * anno corrente <br> - residui anno passato <br> - buoni pasto rimanenti <br> alla data
    * calcolaFinoA.<br>
-   *
-   * Durante la computazione memorizza anche le seguenti informazioni in cmr: <br> - progressivo
+   * </p>
+   * 
+   * <p>Durante la computazione memorizza anche le seguenti informazioni in cmr: <br> - progressivo
    * finale totale, positivo e negativo del mese <br> - straordinari s1, s2, s3 assegnati nel
    * mese<br> - riposi compensativi effettuati in numero e minuti totali<br> - buoni pasto
    * consegnati ed consumati nel mese <br>
-   *
+   * </p>
+   * 
    * @param recapPreviousMonth    se presente è il riepilogo precedente.
    * @param otherCompensatoryRest altri riposi compensativi non persistiti nel db.
    */
@@ -464,8 +466,9 @@ public class ContractMonthRecapManager {
       cmr.straordinariMinutiS2Print = 0;
       cmr.straordinariMinutiS3Print = 0;
 
-      List<Competence> competences = competenceDao
-          .getCompetences(Optional.fromNullable(cmr.person), cmr.year, Optional.fromNullable(cmr.month), codes);
+      List<Competence> competences = 
+          competenceDao.getCompetences(
+              Optional.fromNullable(cmr.person), cmr.year, Optional.fromNullable(cmr.month), codes);
 
       for (Competence competence : competences) {
 

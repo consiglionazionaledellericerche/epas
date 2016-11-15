@@ -16,6 +16,17 @@ title:'Nuovo codice assenza in data ' + absenceForm.from?.format()
    #{/if}
    
    #{include './_configureSelectedGroup.html' /}
+   
+   #{if absenceForm.groupSelected.name.startsWith('MALATTIA_FIGLIO')}
+   #{alert color:'danger'}
+   <p>
+   <i class="fa fa-fa2 fa-exclamation-triangle" aria-hidden="true"></i>
+   I gruppi riguardanti i codici malattia figli sono in fase di implementazione pertanto il controllo
+   sul superamento dei limiti è disabilitato. L'implementazione verrà completata a breve.</p>
+   #{/alert}
+   #{/if}
+
+   
  
    #{if insertReport }
    

@@ -47,6 +47,7 @@ import models.Person;
 import models.PersonCompetenceCodes;
 import models.PersonReperibilityType;
 import models.ShiftCategories;
+import models.ShiftTimeTable;
 import models.ShiftType;
 import models.TotalOvertime;
 import models.User;
@@ -916,4 +917,13 @@ public class Competences extends Controller {
     render(cat, officePeople, office);
   }
 
+  /**
+   * 
+   * @param shiftCategoryId
+   */
+  public static void configureShift(Long shiftCategoryId) {
+    ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
+    List<ShiftTimeTable> shiftList = shiftDao.getAllShifts();
+    render(shiftList, cat);
+  }
 }

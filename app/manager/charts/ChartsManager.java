@@ -336,7 +336,7 @@ public class ChartsManager {
 
   /**
    * @return la situazione in termini di ferie usate anno corrente e passato, permessi usati e
-   * residuo per la persona passata come parametro.
+   *        residuo per la persona passata come parametro.
    */
   public FileInputStream exportDataSituation(Person person) throws IOException {
     File tempFile = File.createTempFile("esportazioneSituazioneFinale" + person.surname, ".csv");
@@ -400,11 +400,11 @@ public class ChartsManager {
   /**
    * @param file file daparsare per il recupero delle informazioni sulle assenze
    * @return una mappa con chiave le matricole dei dipendenti e con valori le liste di oggetti di
-   * tipo ResultFromFile che contengono l'assenza e la data in cui l'assenza è stata presa.
+   *        tipo ResultFromFile che contengono l'assenza e la data in cui l'assenza è stata presa.
    */
   private Map<Integer, List<ResultFromFile>> createMap(File file) {
     if (file == null) {
-      log.error("file nullo nella chiamata della checkSituationPastYear");
+      log.warn("file nullo nella chiamata della checkSituationPastYear");
     }
     final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/YYYY H.mm.ss");
     Map<Integer, List<ResultFromFile>> map = Maps.newHashMap();
@@ -454,13 +454,13 @@ public class ChartsManager {
           }
           list.add(result);
           map.put(matricola, list);
-        } catch (Exception e) {
+        } catch (Exception ex) {
           log.debug("La linea {} del file non è nel formato corretto per essere parsata.", line);
           continue;
         }
       }
       in.close();
-    } catch (Exception e) {
+    } catch (Exception ex) {
       log.error("Errori durante il parsing del file delle timbrature {}", file.getName());
       return Maps.newHashMap();
     }
@@ -629,8 +629,8 @@ public class ChartsManager {
     font.setBoldweight(Font.BOLDWEIGHT_BOLD);
     CellStyle cs = wb.createCellStyle();
     cs.setFont(font);
-    cs.setBorderBottom(cs.BORDER_DOUBLE);
-    cs.setAlignment(cs.ALIGN_CENTER);
+    cs.setBorderBottom(CellStyle.BORDER_DOUBLE);
+    cs.setAlignment(CellStyle.ALIGN_CENTER);
     return cs;
   }
 
@@ -644,7 +644,7 @@ public class ChartsManager {
     cs.setFillForegroundColor(IndexedColors.BLUE_GREY.getIndex());
     Font font = wb.createFont();
     font.setColor(Font.COLOR_RED);
-    cs.setAlignment(cs.ALIGN_CENTER);
+    cs.setAlignment(CellStyle.ALIGN_CENTER);
     cs.setFont(font);    
     return cs;
   }
@@ -657,7 +657,7 @@ public class ChartsManager {
   private CellStyle createWorkingday(Workbook wb) {
     CellStyle cs = wb.createCellStyle();
     Font font = wb.createFont();
-    cs.setAlignment(cs.ALIGN_CENTER);
+    cs.setAlignment(CellStyle.ALIGN_CENTER);
     cs.setFont(font);
     return cs;
   }

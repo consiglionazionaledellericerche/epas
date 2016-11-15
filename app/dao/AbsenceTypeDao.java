@@ -5,19 +5,15 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.types.Projections;
-
-import helpers.jpa.ModelQuery;
 
 import models.Person;
 import models.absences.AbsenceType;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
 
-import org.bouncycastle.util.Strings;
 import org.joda.time.LocalDate;
 
 import java.util.List;

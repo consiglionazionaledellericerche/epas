@@ -8,12 +8,9 @@ import com.google.inject.Inject;
 
 import com.beust.jcommander.internal.Maps;
 
-import controllers.Competences;
-
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
-import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
 import dao.wrapper.IWrapperContract;
@@ -21,33 +18,22 @@ import dao.wrapper.IWrapperFactory;
 
 import helpers.jpa.ModelQuery.SimpleResults;
 
-import it.cnr.iit.epas.DateUtility;
-
-import manager.AbsenceManager.AbsenceToDate;
 import manager.competences.CompetenceCodeDTO;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 
 import models.Competence;
 import models.CompetenceCode;
-import models.CompetenceCodeGroup;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
 import models.PersonCompetenceCodes;
 import models.PersonDay;
-import models.PersonMonthRecap;
 import models.PersonReperibilityType;
 import models.TotalOvertime;
-import models.enumerate.LimitType;
 
 import org.apache.commons.lang.StringUtils;
-import org.assertj.core.api.AssertionInfo;
-import org.assertj.core.description.Description;
-import org.assertj.core.internal.Strings;
-import org.assertj.core.presentation.Representation;
-import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import org.slf4j.Logger;
@@ -60,10 +46,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 
 public class CompetenceManager {
@@ -77,7 +63,7 @@ public class CompetenceManager {
   private final IWrapperFactory wrapperFactory;
   private final PersonDayManager personDayManager;
   private final PersonReperibilityDayDao reperibilityDao;
-  private static PersonStampingRecapFactory stampingsRecapFactory;
+  private final PersonStampingRecapFactory stampingsRecapFactory;
 
   /**
    * Costruttore.
@@ -108,8 +94,8 @@ public class CompetenceManager {
   public static Predicate<CompetenceCode> isReperibility() {
     return p -> p.code.equalsIgnoreCase("207") || p.code.equalsIgnoreCase("208");
   }
-  
-  
+
+
   /**
    * @return la lista di stringhe popolata con i codici dei vari tipi di straordinario prendibili.
    */
@@ -182,7 +168,7 @@ public class CompetenceManager {
       } else {
         return false;
       }
-    } catch (Exception e) {
+    } catch (Exception ex) {
       return false;
     }
     total.save();
@@ -357,7 +343,7 @@ public class CompetenceManager {
    *     Stringa vuota altrimenti.
    */
   public String canAddCompetence(Competence comp, Integer value) {
-    
+
     String result = "";
     if (!isCompetenceEnabled(comp)) {
       result = Messages.get("CompManager.notEnabled");
@@ -369,8 +355,8 @@ public class CompetenceManager {
     switch (comp.competenceCode.limitType) {
       case monthly:        
         group = competenceCodeDao
-            .getCodeWithGroup(comp.competenceCode.competenceCodeGroup, 
-                Optional.fromNullable(comp.competenceCode));
+        .getCodeWithGroup(comp.competenceCode.competenceCodeGroup, 
+            Optional.fromNullable(comp.competenceCode));
         compList = competenceDao
             .getCompetences(Optional.fromNullable(comp.person), comp.year, 
                 Optional.fromNullable(comp.month), group);
@@ -400,11 +386,11 @@ public class CompetenceManager {
         break;
       case yearly:
         group = competenceCodeDao
-            .getCodeWithGroup(comp.competenceCode.competenceCodeGroup, 
-                Optional.fromNullable(comp.competenceCode));
+        .getCodeWithGroup(comp.competenceCode.competenceCodeGroup, 
+            Optional.fromNullable(comp.competenceCode));
         compList = competenceDao
             .getCompetences(Optional.fromNullable(comp.person), comp.year, 
-            Optional.<Integer>absent(), group);
+                Optional.<Integer>absent(), group);
         sum = compList.stream().mapToInt(i -> i.valueApproved).sum();      
         if (sum + value > comp.competenceCode.competenceCodeGroup.limitValue) {
           result = Messages.get("CompManager.overYearLimit");
@@ -449,18 +435,21 @@ public class CompetenceManager {
 
 
   /**
-  * @param yearMonth l'anno/mese di riferimento
-  * @param office la sede per cui si cercano i servizi per reperibilità abilitati
-  * @return il numero di giorni di reperibilità disponibili sulla base di quanti 
-  *     servizi per reperibilità sono stati abilitati sulla sede.
-  */
+   * @param yearMonth l'anno/mese di riferimento
+   * @param office la sede per cui si cercano i servizi per reperibilità abilitati
+   * @return il numero di giorni di reperibilità disponibili sulla base di quanti 
+   *     servizi per reperibilità sono stati abilitati sulla sede.
+   */
   private Integer countDaysForReperibility(YearMonth yearMonth, Office office) {
-    int numbers = reperibilityDao.getReperibilityTypeByOffice(office, Optional.fromNullable(false)) != null 
-        ? reperibilityDao.getReperibilityTypeByOffice(office, Optional.fromNullable(false)).size() : 0;
+    int numbers = 
+        reperibilityDao.getReperibilityTypeByOffice(office, Optional.fromNullable(false)) != null 
+        ? reperibilityDao.getReperibilityTypeByOffice(
+            office, Optional.fromNullable(false)).size() 
+            : 0;
     return numbers * (new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1)
         .dayOfMonth().getMaximumValue());
   }
-  
+
   /**
    * 
    * @param office la sede su cui cercare.
@@ -474,8 +463,8 @@ public class CompetenceManager {
     }
     return true;
   }
-  
-  
+
+
   /**
    * 
    * @param comp la competenza 
@@ -485,19 +474,24 @@ public class CompetenceManager {
    *     true altrimenti.
    */
   private boolean handlerReperibility(Competence comp, Integer value, List<CompetenceCode> group) {
-    
+
     int maxDays = countDaysForReperibility(new YearMonth(comp.year, comp.month), 
         comp.person.office);
-    List<Competence> peopleMonthList = competenceDao
-        .getCompetences(Optional.<Person>absent(), comp.year, 
-            Optional.fromNullable(comp.month), group);
+
+    List<String> groupCodes = group.stream().map(objA -> {
+      String objB = new String();
+      objB = objA.code;
+      return objB;
+    }).collect(Collectors.toList());
+    List<Competence> peopleMonthList = competenceDao.getCompetencesInOffice(comp.year, 
+        comp.month, groupCodes, comp.person.office, false);
     int peopleSum = peopleMonthList.stream().mapToInt(i -> i.valueApproved).sum();
     if (peopleSum + value > maxDays) {
       return false;
     }
     return true;
   }
-  
+
   /**
    * 
    * @param comp la competenza
@@ -515,15 +509,12 @@ public class CompetenceManager {
     } 
     return false;
   }
-  
-  /**
-   * 
-   * @param office
-   * @param competenceCodeList
+
+  /** 
    * @return true se esiste almeno un servizio per reperibilità inizializzato, false altrimenti.
    */
-  public boolean isServiceForReperibilityInitialized(Office office, 
-      List<CompetenceCode> competenceCodeList) {
+  public boolean isServiceForReperibilityInitialized(
+      Office office, List<CompetenceCode> competenceCodeList) {
     boolean servicesInitialized = true;
     if (competenceCodeList.stream().anyMatch(isReperibility())) {
       List<PersonReperibilityType> prtList = reperibilityDao
@@ -534,7 +525,7 @@ public class CompetenceManager {
     }
     return servicesInitialized;
   }
-  
+
   /**
    * 
    * @param personList la lista di persone
@@ -564,7 +555,7 @@ public class CompetenceManager {
     }
     return map;
   }
-  
+
   /**
    * 
    * @param pccList la lista di PersonCompetenceCodes di partenza
@@ -596,7 +587,7 @@ public class CompetenceManager {
     }
     return codeToAdd;
   }
-  
+
   /**
    * 
    * @param pccList la lista di personcompetencecode
@@ -618,10 +609,10 @@ public class CompetenceManager {
         }
       });
     }
-    
+
     return codeToRemove;
   }
-  
+
   /**
    * il metodo che persiste la situazione di codici di competenza per la persona.
    * @param person la persona per cui persistere la situazione delle competenze
@@ -631,7 +622,7 @@ public class CompetenceManager {
    */
   public void persistChanges(Person person, List<CompetenceCode> codeToAdd, 
       List<CompetenceCode> codeToRemove, LocalDate date) {
-    
+
     codeToAdd.forEach(item -> {
       PersonCompetenceCodes newPcc = new PersonCompetenceCodes();
       newPcc.competenceCode = item;
@@ -640,18 +631,18 @@ public class CompetenceManager {
       newPcc.save();
     });
     codeToRemove.forEach(item -> {
-      
+
       Optional<PersonCompetenceCodes> pcc = competenceCodeDao.getByPersonAndCode(person, item);
       if (pcc.isPresent()) {
         pcc.get().endDate = date;
         pcc.get().save();
-        
+
       } else {
         throw new RuntimeException(Messages.get("errorCompetenceCodeException"));
       }
     });
   }
-  
+
   /**
    * 
    * @param personList la lista di persone attive 
@@ -675,11 +666,11 @@ public class CompetenceManager {
         competence.save();
         compList.add(competence);
       }
-          
+
     }
     return compList;
   }
-  
-  
-  
+
+
+
 }

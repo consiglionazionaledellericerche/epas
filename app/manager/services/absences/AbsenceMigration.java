@@ -1013,7 +1013,7 @@ public class AbsenceMigration {
       group23.name = DefaultGroup.G_23.name();
       group23.description = 
           "Astensione facoltativa post partum 100% primo figlio 0-12 anni 30 giorni";
-      group23.chainDescription = "23 - Astensione facoltativa post partum primo figlio";
+      group23.chainDescription = "23/25 - Astensione facoltativa post partum primo figlio";
       group23.pattern = GroupAbsenceTypePattern.programmed;
       group23.periodType = PeriodType.child1_0_12;
       group23.complationAbsenceBehaviour = c23.get();
@@ -1147,7 +1147,7 @@ public class AbsenceMigration {
       group232.name = DefaultGroup.G_232.name();
       group232.description = 
           "Astensione facoltativa post partum 100% secondo figlio 0-12 anni 30 giorni";
-      group232.chainDescription = "232 - Astensione facoltativa post partum secondo figlio";
+      group232.chainDescription = "232/252 - Astensione facoltativa post partum secondo figlio";
       group232.pattern = GroupAbsenceTypePattern.programmed;
       group232.periodType = PeriodType.child2_0_12;
       group232.complationAbsenceBehaviour = c232.get();
@@ -1281,7 +1281,7 @@ public class AbsenceMigration {
       group233.name = DefaultGroup.G_233.name();
       group233.description = 
           "Astensione facoltativa post partum 100% terzo figlio 0-12 anni 30 giorni";
-      group233.chainDescription = "233 - Astensione facoltativa post partum terzo figlio";
+      group233.chainDescription = "233/253 - Astensione facoltativa post partum terzo figlio";
       group233.pattern = GroupAbsenceTypePattern.programmed;
       group233.periodType = PeriodType.child3_0_12;
       group233.complationAbsenceBehaviour = c233.get();
@@ -1743,7 +1743,7 @@ public class AbsenceMigration {
       GroupAbsenceType groupMalattia = new GroupAbsenceType();
       groupMalattia.category = malattiaCategory;
       groupMalattia.name = DefaultGroup.MALATTIA.name();
-      groupMalattia.description = "111 - Malattia";
+      groupMalattia.description = "11* - Malattia";
       groupMalattia.pattern = GroupAbsenceTypePattern.simpleGrouping;
       groupMalattia.periodType = PeriodType.always;
       groupMalattia.takableAbsenceBehaviour = takeMalattia.get();

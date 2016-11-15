@@ -2,16 +2,12 @@ package jobs;
 
 import com.google.common.io.Resources;
 
-import dao.UserDao;
-
 import lombok.extern.slf4j.Slf4j;
 
 import manager.services.absences.AbsenceMigration;
 
 import models.Qualification;
-import models.Role;
 import models.User;
-import models.UsersRolesOffices;
 import models.WorkingTimeType;
 import models.absences.GroupAbsenceType;
 
@@ -49,19 +45,17 @@ import javax.inject.Inject;
 @Slf4j
 public class Bootstrap extends Job<Void> {
 
-  private static final String JOBS_CONF = "jobs.active";
+  static final String JOBS_CONF = "jobs.active";
 
-  @Inject
-  static FixEmployeesPermission fixEmployeesPermission;
   @Inject
   static AbsenceMigration absenceMigration;
-
 
   //Aggiunto qui perché non più presente nella classe Play dalla versione >= 1.4.3
   public static boolean runingInTestMode() {
     return Play.id.matches("test|test-?.*");
   }
 
+  @Override
   public void doJob() throws IOException {
 
     if (runingInTestMode()) {
@@ -69,9 +63,9 @@ public class Bootstrap extends Job<Void> {
       return;
     }
 
-    // in modo da inibire l'esecuzione dei job in base alla configurazione
-    if ("false".equals(Play.configuration.getProperty(JOBS_CONF))) {
-      log.info("Bootstrap Interrotto. Disattivato dalla configurazione.");
+    //in modo da inibire l'esecuzione dei job in base alla configurazione
+    if (!"true".equals(Play.configuration.getProperty(JOBS_CONF))) {
+      log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
       return;
     }
 
@@ -104,8 +98,6 @@ public class Bootstrap extends Job<Void> {
     // Allinea tutte le sequenze del db
     Fixtures.executeSQL(Play.getFile("db/import/fix_sequences.sql"));
 
-    fixEmployeesPermission.doJob();
-
     //impostare il campo tipo orario orizzondale si/no effettuando una euristica
     List<WorkingTimeType> wttList = WorkingTimeType.findAll();
     for (WorkingTimeType wtt : wttList) {
@@ -135,12 +127,12 @@ public class Bootstrap extends Job<Void> {
         IDataSet dataSet = new FlatXmlDataSetBuilder()
             .setColumnSensing(true).build(url);
         operation.execute(new H2Connection(connection, ""), dataSet);
-      } catch (DataSetException e) {
-        e.printStackTrace();
-      } catch (DatabaseUnitException e) {
-        e.printStackTrace();
-      } catch (SQLException e) {
-        e.printStackTrace();
+      } catch (DataSetException dse) {
+        dse.printStackTrace();
+      } catch (DatabaseUnitException due) {
+        due.printStackTrace();
+      } catch (SQLException sqle) {
+        sqle.printStackTrace();
       }
     }
   }
