@@ -23,6 +23,7 @@ import models.Role;
 import models.User;
 import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.CategoryGroupAbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.JustifiedType;
@@ -64,12 +65,39 @@ public class AbsenceGroups extends Controller {
 
   /**
    * End point per la visualizzazione dei gruppi assenze definiti.
+   * @param categoryId filtro categoria
    */
-  public static void show() {
+  public static void show(Long categoryId) {
 
     List<GroupAbsenceType> groups = GroupAbsenceType.findAll();
-    render(groups);
+    List<CategoryGroupAbsenceType> categories = CategoryGroupAbsenceType.findAll();
+    CategoryGroupAbsenceType category = categories.iterator().next();
+    if (categoryId != null) {
+      category = CategoryGroupAbsenceType.findById(categoryId);
+    }
+    
+    render(groups, categories, category);
 
+  }
+  
+  /**
+   * End point per la modifica del gruppo.
+   * @param groupAbsenceTypeId gruppo
+   */
+  public static void editGroup(Long groupAbsenceTypeId) {
+    GroupAbsenceType groupAbsenceType = GroupAbsenceType.findById(groupAbsenceTypeId);
+    notFoundIfNull(groupAbsenceType);
+    
+    render(groupAbsenceType);
+  }
+  
+  /**
+   * End point per il salvataggio del gruppo.
+   * @param groupAbsenceType gruppo
+   */
+  public static void updateGroup(GroupAbsenceType groupAbsenceType) {
+    groupAbsenceType.save();
+    show(groupAbsenceType.category.id);
   }
 
 

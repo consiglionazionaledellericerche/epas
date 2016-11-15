@@ -102,6 +102,7 @@ public class RolePerseoConsumer {
             response.getStatus(), response.getStatusText());
         try {
           return new Gson().fromJson(response.getJson(), new TypeToken<List<PerseoRole>>() {
+            private static final long serialVersionUID = -2548702453839391511L;
           }.getType());
         } catch (JsonSyntaxException ex) {
           final String error = String.format("Errore nel parsing del json: %s", ex.getMessage());

@@ -28,6 +28,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -169,7 +170,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   public List<CertificatedData> certificatedData = Lists.newArrayList();
 
   /**
-   * Dati derivanti dall'invio col nuovo sistema degli attestati
+   * Dati derivanti dall'invio col nuovo sistema degli attestati.
    */
   @OneToMany(mappedBy = "person")
   public List<Certification> certifications = Lists.newArrayList();
@@ -190,14 +191,6 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @NotAudited
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public List<Competence> competences = Lists.newArrayList();
-
-  /**
-   * relazione con la tabella dei codici competenza per stabilire se una persona ha diritto o meno a
-   * una certa competenza.
-   */
-//  @NotAudited
-//  @ManyToMany(cascade = {CascadeType.REFRESH})
-//  public List<CompetenceCode> competenceCode = Lists.newArrayList();
 
   @NotAudited
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
@@ -298,13 +291,8 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
    * @return insieme filtrato
    */
   private Set<IPropertyInPeriod> filterConfigurations(EpasParam epasPersonParam) {
-    Set<IPropertyInPeriod> configurations = Sets.newHashSet();
-    for (PersonConfiguration configuration : this.personConfigurations) {
-      if (configuration.epasParam.equals(epasPersonParam)) {
-        configurations.add(configuration);
-      }
-    }
-    return configurations;
+    return personConfigurations.stream()
+        .filter(conf -> conf.epasParam == epasPersonParam).collect(Collectors.toSet());
   }
 
   @PrePersist
@@ -327,7 +315,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   }
 
   /**
-   * @param param Parametro di configurazione da controllare
+   * @param param Parametro di configurazione da controllare.
    * @param value valore atteso
    * @return true se la persona contiene il parametro di configurazione specificato con il valore
    * indicato
@@ -339,7 +327,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   /**
    * Verifica se il mese passato come parametro è successivo all'ultimo mese inviato
-   * con gli attestati
+   * con gli attestati.
    *
    * @param readablePartial La 'data' da verificare
    * @return true se la data passata come parametro è successiva all'ultimo mese sul quale sono

@@ -99,6 +99,7 @@
     <tr>
       <th>Servizio</th>
       <th>Eventuale supervisore</th>
+      <th>Configura servizio</th>
       <th>Elimina</th>
     </tr>
     </thead>
@@ -110,6 +111,9 @@
         ${sc.description}
       #{/secure.link}
     <td>${sc.supervisor}</td>
+    <td>#{secure.link @Competences.configureShift(sc.id)}
+        Configura
+      #{/secure.link}</td>
     <td>
       #{secure.check 'Competences.evaluateShift'}
       #{if sc.disabled}

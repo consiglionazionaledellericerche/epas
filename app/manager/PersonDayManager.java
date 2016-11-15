@@ -2,8 +2,7 @@ package manager;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
@@ -44,6 +43,7 @@ import org.joda.time.MonthDay;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -83,13 +83,9 @@ public class PersonDayManager {
 
     for (Absence abs : pd.absences) {
 
-      if (abs.justifiedType != null) {
-        if (abs.justifiedType.name.equals(JustifiedTypeName.all_day)
-            || abs.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) {
-          return true;
-
-        }
-        continue;
+      if (abs.justifiedType.name == JustifiedTypeName.all_day
+          || abs.justifiedType.name == JustifiedTypeName.assign_all_day) {
+        return true;
       }
 
       // TODO: per adesso il telelavoro lo considero come giorno lavorativo
@@ -100,8 +96,8 @@ public class PersonDayManager {
       //  return false;
       //} else 
       if (abs.justifiedMinutes == null //eludo PEPE, RITING etc...
-          && (abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)
-          || abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AssignAllDay))) {
+          && (abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay
+          || abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AssignAllDay)) {
         return true;
       }
     }
@@ -122,19 +118,19 @@ public class PersonDayManager {
     for (Absence abs : pd.getValue().absences) {
 
       if (abs.justifiedType != null) {
-        if (abs.justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
-          justifiedTime = justifiedTime + abs.justifiedMinutes;
+        if (abs.justifiedType.name == JustifiedTypeName.specified_minutes) {
+          justifiedTime += abs.justifiedMinutes;
           continue;
         }
-        if (abs.justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
-          justifiedTime = justifiedTime + abs.absenceType.justifiedTime;
+        if (abs.justifiedType.name == JustifiedTypeName.absence_type_minutes) {
+          justifiedTime += abs.absenceType.justifiedTime;
           continue;
         }
         continue;
       }
 
       if (abs.absenceType.justifiedTimeAtWork.minutes != null) {
-        justifiedTime = justifiedTime + abs.absenceType.justifiedTimeAtWork.minutes;
+        justifiedTime += abs.absenceType.justifiedTimeAtWork.minutes;
       }
     }
 
@@ -143,11 +139,7 @@ public class PersonDayManager {
       return pd.getWorkingTimeTypeDay().get().workingTime / 2 < justifiedTime;
     } else {
       // Livelli I - III (decidere meglio)
-      if (pd.getValue().absences.size() >= 1) {
-        return true;
-      } else {
-        return false;
-      }
+      return pd.getValue().absences.size() >= 1;
     }
   }
 
@@ -193,11 +185,7 @@ public class PersonDayManager {
         workingTimeInThreshold += outMinute - inMinute;
       }
     }
-    if (workingTimeInThreshold >= wttd.ticketAfternoonWorkingTime) {
-      return true;
-    } else {
-      return false;
-    }
+    return workingTimeInThreshold >= wttd.ticketAfternoonWorkingTime;
   }
 
   /**
@@ -226,9 +214,9 @@ public class PersonDayManager {
     for (PairStamping validPair : validPairs) {
       if (previous != null) {
         if ((previous.second.stampType == null
-            || StampTypes.PAUSA_PRANZO.equals(previous.second.stampType))
+            || previous.second.stampType == StampTypes.PAUSA_PRANZO)
             && (validPair.first.stampType == null
-            || StampTypes.PAUSA_PRANZO.equals(validPair.first.stampType))) {
+            || validPair.first.stampType == StampTypes.PAUSA_PRANZO)) {
 
           allGapPairs.add(new PairStamping(previous.second, validPair.first));
         }
@@ -261,8 +249,8 @@ public class PersonDayManager {
         outForCompute = endLunch;
       }
       int timeInPair = 0;
-      timeInPair = timeInPair - DateUtility.toMinute(inForCompute);
-      timeInPair = timeInPair + DateUtility.toMinute(outForCompute);
+      timeInPair -= DateUtility.toMinute(inForCompute);
+      timeInPair += DateUtility.toMinute(outForCompute);
       gapPair.timeInPair = timeInPair;
       gapPairs.add(gapPair);
     }
@@ -272,6 +260,7 @@ public class PersonDayManager {
 
   /**
    * Calcola il tempo di permesso breve nel giorno.
+   *
    * @param personDay personDay
    * @return minuti
    */
@@ -290,9 +279,9 @@ public class PersonDayManager {
     for (PairStamping validPair : validPairs) {
       if (previous != null) {
         if ((previous.second.stampType == null
-            || StampTypes.PERMESSO_BREVE.equals(previous.second.stampType))
+            || previous.second.stampType == StampTypes.PERMESSO_BREVE)
             && (validPair.first.stampType == null
-            || StampTypes.PERMESSO_BREVE.equals(validPair.first.stampType))) {
+            || validPair.first.stampType == StampTypes.PERMESSO_BREVE)) {
 
           allGapPairs.add(new PairStamping(previous.second, validPair.first));
         }
@@ -331,11 +320,11 @@ public class PersonDayManager {
           personDay.setTimeAtWork(wttd.workingTime);
           return personDay;
         }
-        
+
         //Questo e' il caso del codice 105BP che garantisce sia l'orario di lavoro
         // che il buono pasto
         // TODO: se è il 105BP perchè non controllo direttamente il codice? Mistero della fede.
-        if (abs.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) {
+        if (abs.justifiedType.name == JustifiedTypeName.assign_all_day) {
           cleanTimeAtWork(personDay);
           setTicketStatusIfNotForced(personDay, true);
           personDay.setTimeAtWork(wttd.workingTime);
@@ -343,7 +332,7 @@ public class PersonDayManager {
         }
 
         // Caso di assenza giornaliera.
-        if (abs.justifiedType.name.equals(JustifiedTypeName.all_day)) {
+        if (abs.justifiedType.name == JustifiedTypeName.all_day) {
           cleanTimeAtWork(personDay);
           setTicketStatusIfNotForced(personDay, false);
           personDay.setTimeAtWork(0);
@@ -351,7 +340,7 @@ public class PersonDayManager {
         }
 
         // Mezza giornata giustificata.
-        if (abs.justifiedType.name.equals(JustifiedTypeName.half_day)) {
+        if (abs.justifiedType.name == JustifiedTypeName.half_day) {
           personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
               + (wttd.workingTime / 2));
           continue;
@@ -361,14 +350,14 @@ public class PersonDayManager {
         //  Assenze non giornaliere da cumulare ....
 
         // Giustificativi grana minuti
-        if (abs.justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
+        if (abs.justifiedType.name == JustifiedTypeName.specified_minutes) {
           personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
               + abs.justifiedMinutes);
           continue;
         }
 
         // Giustificativi grana ore (discriminare per calcolo buono o no)
-        if (abs.justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
+        if (abs.justifiedType.name == JustifiedTypeName.absence_type_minutes) {
           if (abs.absenceType.timeForMealTicket) {
             personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal()
                 + abs.absenceType.justifiedTime);
@@ -393,7 +382,7 @@ public class PersonDayManager {
       }
 
       //Questo e' il caso del codice 105BP che garantisce sia l'orario di lavoro che il buono pasto
-      if (abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AssignAllDay)) {
+      if (abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AssignAllDay) {
         cleanTimeAtWork(personDay);
         setTicketStatusIfNotForced(personDay, true);
         personDay.setTimeAtWork(wttd.workingTime);
@@ -402,7 +391,7 @@ public class PersonDayManager {
 
       // Caso di assenza giornaliera.
       if (abs.justifiedMinutes == null && //evito i PEPE, RITING etc...
-          abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay)) {
+          abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay) {
         cleanTimeAtWork(personDay);
         setTicketStatusIfNotForced(personDay, false);
         personDay.setTimeAtWork(0);
@@ -434,7 +423,6 @@ public class PersonDayManager {
       if (abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.HalfDay) {
         personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
             + (wttd.workingTime / 2));
-        continue;
       }
     }
 
@@ -455,7 +443,7 @@ public class PersonDayManager {
     personDay.setStampingsTime(stampingMinutes(validPairs));
 
     // Minuti effettivi decurtati della fascia istituto
-    int workingMinutesInValidPairs = (workingMinutes(validPairs, startWork, endWork));
+    int workingMinutesInValidPairs = workingMinutes(validPairs, startWork, endWork);
 
     // Imposto il tempo a lavoro come somma di tutte le poste calcolate.
     personDay.setTimeAtWork(workingMinutesInValidPairs + personDay.getJustifiedTimeMeal()
@@ -485,15 +473,15 @@ public class PersonDayManager {
 
     // 1) Calcolo del tempo passato in pausa pranzo dalle timbrature.
     List<PairStamping> gapLunchPairs = getGapLunchPairs(personDay, startLunch, endLunch);
-    int effectiveTimeSpent = 0;
     boolean baessoAlgorithm = true;
     for (PairStamping lunchPair : gapLunchPairs) {
       if (lunchPair.prPair) {
         baessoAlgorithm = false;
       }
     }
+    int effectiveTimeSpent = 0;
     if (baessoAlgorithm) {
-      if (gapLunchPairs.size() > 0) {
+      if (!gapLunchPairs.isEmpty()) {
         // recupero la durata della pausa pranzo fatta
         effectiveTimeSpent = gapLunchPairs.get(0).timeInPair;
       }
@@ -777,30 +765,20 @@ public class PersonDayManager {
       boolean considerExitingNow) {
 
     PersonDay personDay = wrPersonDay.getValue();
+    // Lavoro su una copia perchè il costruttore delle Stamping aggiunge la stamping al personday
+    // e iterare sulla lista mentre si fanno delle add alla lista stessa non è una bella cosa...
+    final List<Stamping> stampings = ImmutableList
+        .copyOf(personDay.stampings.stream().sorted().collect(Collectors.toList()));
 
-    if (personDay.isToday() && considerExitingNow) {
+    if (personDay.isToday() && considerExitingNow && !stampings.isEmpty()) {
       //aggiungo l'uscita fittizia 'now' nel caso risulti dentro il cnr non di servizio
-      boolean lastStampingIsIn = false;
+      final Stamping lastStamping = stampings.get(stampings.size() - 1);
 
-      Collections.sort(personDay.stampings);
-
-      for (Stamping stamping : personDay.stampings) {
-        if (!StampTypes.MOTIVI_DI_SERVIZIO.equals(stamping.stampType)) {
-          if (stamping.isOut()) {
-            lastStampingIsIn = false;
-          } else {
-
-            lastStampingIsIn = true;
-          }
-        }
-      }
-      if (lastStampingIsIn) {
+      if (lastStamping.stampType != StampTypes.MOTIVI_DI_SERVIZIO && !lastStamping.isOut()) {
         Stamping stampingExitingNow = new Stamping(personDay, LocalDateTime.now());
         stampingExitingNow.way = WayType.out;
-        stampingExitingNow.markedByAdmin = false;
         stampingExitingNow.exitingNow = true;
         personDay.isConsideredExitingNow = true;
-        personDay.stampings.add(stampingExitingNow);
         queSeraSera(wrPersonDay);
         personDay.stampings.remove(stampingExitingNow);
       }
@@ -808,7 +786,7 @@ public class PersonDayManager {
     List<Stamping> stampingsForTemplate = new ArrayList<Stamping>();
     boolean isLastIn = false;
 
-    for (Stamping s : personDay.stampings) {
+    for (Stamping s : stampings) {
       //sono dentro e trovo una uscita
       if (isLastIn && s.way == WayType.out) {
         //salvo l'uscita
@@ -845,7 +823,6 @@ public class PersonDayManager {
         //salvo l'uscita
         stampingsForTemplate.add(s);
         isLastIn = false;
-        continue;
       }
     }
     while (stampingsForTemplate.size() < numberOfInOut * 2) {
@@ -855,15 +832,12 @@ public class PersonDayManager {
         stamping.way = WayType.out;
         stampingsForTemplate.add(stamping);
         isLastIn = false;
-        continue;
-      }
-      if (!isLastIn) {
+      } else {
         //creo l'entrata fittizia
         Stamping stamping = new Stamping(personDay, null);
         stamping.way = WayType.in;
         stampingsForTemplate.add(stamping);
         isLastIn = true;
-        continue;
       }
     }
 
@@ -876,13 +850,11 @@ public class PersonDayManager {
    * @modify setta il campo stamping.valid di ciascuna stampings contenuta nel personDay.<br>
    * @modify setta il campo stamping.pairId con il valore dalla coppia a cui appartengono.
    */
-
   public List<PairStamping> computeValidPairStampings(PersonDay personDay) {
 
     //Lavoro su una copia ordinata.
-    List<Stamping> stampings = Lists.newArrayList();
-    stampings.addAll(personDay.getStampings());
-    Collections.sort(stampings);
+    final List<Stamping> stampings = ImmutableList
+        .copyOf(personDay.stampings.stream().sorted().collect(Collectors.toList()));
 
     //(1)Costruisco le coppie valide per calcolare il worktime
     List<PairStamping> validPairs = Lists.newArrayList();
@@ -893,7 +865,7 @@ public class PersonDayManager {
       //le stampings di servizio non entrano a far parte del calcolo del work time
       //ma le controllo successivamente
       //per segnalare eventuali errori di accoppiamento e appartenenza a orario di lavoro valido
-      if (StampTypes.MOTIVI_DI_SERVIZIO.equals(stamping.stampType)) {
+      if (stamping.stampType == StampTypes.MOTIVI_DI_SERVIZIO) {
         serviceStampings.add(stamping);
         continue;
       }
@@ -926,7 +898,6 @@ public class PersonDayManager {
         if (stamping.isIn()) {
           stampEnter.valid = false;
           stampEnter = stamping;
-          continue;
         }
       }
     }
@@ -939,8 +910,8 @@ public class PersonDayManager {
         LocalDateTime outTime = validPair.second.date;
         LocalDateTime inTime = validPair.first.date;
         if (stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime)) {
-          if (StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE.equals(validPair.second.stampType)
-              || StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE.equals(validPair.first.stampType)) {
+          if (validPair.second.stampType == StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE
+              || validPair.first.stampType == StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE) {
             belongToValidPairOutsite = true;
           } else {
             belongToValidPairNotOutsite = true;
@@ -961,12 +932,9 @@ public class PersonDayManager {
     for (PairStamping validPair : validPairs) {
       LocalDateTime outTime = validPair.second.date;
       LocalDateTime inTime = validPair.first.date;
-      List<Stamping> serviceStampingsInSinglePair = Lists.newArrayList();
-      for (Stamping stamping : serviceStampingsToCheck) {
-        if (stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime)) {
-          serviceStampingsInSinglePair.add(stamping);
-        }
-      }
+      List<Stamping> serviceStampingsInSinglePair = serviceStampingsToCheck.stream()
+          .filter(stamping -> stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime))
+          .collect(Collectors.toList());
       //check
       Stamping serviceExit = null;
       for (Stamping stamping : serviceStampingsInSinglePair) {
@@ -1124,13 +1092,9 @@ public class PersonDayManager {
    * @return esito
    */
   public boolean isOnMission(PersonDay personDay) {
-    return !FluentIterable.from(personDay.absences).filter(
-        new Predicate<Absence>() {
-          @Override
-          public boolean apply(Absence absence) {
-            return absence.absenceType.code.equals(AbsenceTypeMapping.MISSIONE.getCode());
-          }
-        }).isEmpty();
+    return personDay.absences.stream()
+        .filter(absence -> absence.absenceType.code.equals(AbsenceTypeMapping.MISSIONE.getCode()))
+        .findAny().isPresent();
   }
 
   /**
@@ -1148,30 +1112,29 @@ public class PersonDayManager {
     for (Stamping s : pd.stampings) {
       if (lastWay == null) {
         //trovo out chiudo una coppia
-        if (s.way.description.equals("out")) {
+        if ("out".equals(s.way.description)) {
           coupleOfStampings++;
           lastWay = null;
           continue;
         }
         //trovo in lastWay diventa in
-        if (s.way.description.equals("in")) {
+        if ("in".equals(s.way.description)) {
           lastWay = s.way.description;
           continue;
         }
 
       }
       //lastWay in
-      if (lastWay.equals("in")) {
+      if ("in".equals(lastWay)) {
         //trovo out chiudo una coppia
-        if (s.way.description.equals("out")) {
+        if ("out".equals(s.way.description)) {
           coupleOfStampings++;
           lastWay = null;
           continue;
         }
         //trovo in chiudo una coppia e lastWay resta in
-        if (s.way.description.equals("in")) {
+        if ("in".equals(s.way.description)) {
           coupleOfStampings++;
-          continue;
         }
       }
     }
@@ -1263,6 +1226,9 @@ public class PersonDayManager {
   /**
    * Cerca il personDay se non esiste lo crea e lo persiste.
    */
+  // FIXME questo è un duplicato del metodo che esisteva già nel personDayDao
+  // è stato rimosso da li, ma spostare questo metodo in quella classe in alcuni casi
+  // limita le classi da injettare, valutare se spostarlo
   public PersonDay getOrCreateAndPersistPersonDay(Person person, LocalDate date) {
 
     Optional<PersonDay> optPersonDay = personDayDao.getPersonDay(person, date);
@@ -1270,6 +1236,7 @@ public class PersonDayManager {
       return optPersonDay.get();
     }
     PersonDay personDay = new PersonDay(person, date);
+    // FIXME cosa ci fa l'informazione della festività in questo metodo?
     personDay.isHoliday = isHoliday(person, date);
     personDay.create();
     return personDay;
@@ -1277,8 +1244,9 @@ public class PersonDayManager {
 
   /**
    * Se il giorno è festivo per la persona.
+   *
    * @param person Persona interessata
-   * @param date data da controllare
+   * @param date   data da controllare
    * @return true se il giorno è festivo, false altrimenti.
    */
   public boolean isHoliday(Person person, LocalDate date) {

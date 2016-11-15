@@ -13,11 +13,13 @@ import models.PersonShift;
 import models.PersonShiftDay;
 import models.ShiftCancelled;
 import models.ShiftCategories;
+import models.ShiftTimeTable;
 import models.ShiftType;
 import models.query.QPersonShiftDay;
 import models.query.QPersonShiftShiftType;
 import models.query.QShiftCancelled;
 import models.query.QShiftCategories;
+import models.query.QShiftTimeTable;
 import models.query.QShiftType;
 
 import org.joda.time.LocalDate;
@@ -185,5 +187,14 @@ public class ShiftDao extends DaoBase {
     return query.list(shiftType);
   }
 
+  /**
+   * 
+   * @return la lista di tutti i tipi di turno disponibili in anagrafica.
+   */
+  public List<ShiftTimeTable> getAllShifts() {
+    final QShiftTimeTable stt = QShiftTimeTable.shiftTimeTable;
+    JPQLQuery query = getQueryFactory().from(stt);
+    return query.list(stt);
+  }
 }
 

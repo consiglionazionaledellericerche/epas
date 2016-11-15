@@ -37,9 +37,7 @@ import models.User;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.base.IPropertiesInPeriodOwner;
-import models.enumerate.Troubles;
 
-import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
@@ -48,7 +46,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import play.db.jpa.JPA;
+import play.jobs.Job;
+import play.libs.F.Promise;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -144,27 +145,28 @@ public class ConsistencyManager {
           LocalDate.now().minusDays(1), true).list();
     }
 
+    final List<Promise<Void>> results = new ArrayList<>();
     for (Person p : personList) {
-      if (onlyRecap) {
-        updatePersonRecaps(p.id, fromDate);
-      } else {
-        updatePersonSituation(p.id, fromDate);
-      }
-      // attenzione quando si forzano le transazioni o si invalida la cache dell'entityManager,
-      // possono esserci effetti collaterali....vedi il blocco try sotto
-      JPA.em().flush();
-      JPA.em().clear();
+      
+      results.add(new Job<Void>() {
+        
+        @Override
+        public void doJob() {
+          final Person person = Person.findById(p.id);
+          
+          if (onlyRecap) {
+            updatePersonRecaps(person.id, fromDate);
+          } else {
+            updatePersonSituation(person.id, fromDate);
+          }
+          
+          personDayInTroubleManager.cleanPersonDayInTrouble(person);
+          log.debug("Elaborata la persona ... {}", person);
+        }
+      }.now());
+      
     }
-
-    log.info("Inizia la parte di pulizia days in trouble...");
-    for (Person p : personList) {
-
-      personDayInTroubleManager.cleanPersonDayInTrouble(p);
-
-      JPA.em().flush();
-      JPA.em().clear();
-
-    }
+    Promise.waitAll(results);
     log.info("Conclusa procedura FixPersonsSituation con parametri!");
   }
 
@@ -252,10 +254,10 @@ public class ConsistencyManager {
     final Person person = personDao.fetchPersonForComputation(personId, Optional.fromNullable(from),
         Optional.<LocalDate>absent());
 
-    log.info("Lanciato aggiornamento situazione {} da {} a oggi", person.getFullname(), from);
+    log.debug("Lanciato aggiornamento situazione {} da {} a oggi", person.getFullname(), from);
 
     if (person.qualification == null) {
-      log.info("... annullato ricalcolo per {} in quanto priva di qualifica", person.getFullname());
+      log.warn("... annullato ricalcolo per {} in quanto priva di qualifica", person.getFullname());
       return;
     }
 
@@ -277,7 +279,7 @@ public class ConsistencyManager {
       personDaysMap.put(personDay.date, personDay);
     }
 
-    log.info("... fetch dei dati conclusa, inizio dei ricalcoli.");
+    log.trace("... fetch dei dati conclusa, inizio dei ricalcoli.");
 
     PersonDay previous = null;
 
@@ -299,12 +301,10 @@ public class ConsistencyManager {
 
         IWrapperPersonDay wrPersonDay = wrapperFactory.create(personDay);
 
-        // set previous for progressive
         if (previous != null) {
+          // set previous for progressive
           wrPersonDay.setPreviousForProgressive(Optional.fromNullable(previous));
-        }
-        // set previous for night stamp
-        if (previous != null) {
+          // set previous for night stamp
           wrPersonDay.setPreviousForNightStamp(Optional.fromNullable(previous));
         }
 
@@ -312,10 +312,9 @@ public class ConsistencyManager {
 
         previous = personDay;
         date = date.plusDays(1);
-
       }
 
-      log.info("... ricalcolo dei giorni lavorativi conclusa.");
+      log.trace("... ricalcolo dei giorni lavorativi conclusa.");
     }
     // (3) Ricalcolo dei residui per mese
     populateContractMonthRecapByPerson(person, new YearMonth(from));
@@ -323,7 +322,7 @@ public class ConsistencyManager {
     // (4) Scan degli errori sulle assenze
     absenceService.scanner(person, from);
 
-    log.info("... ricalcolo dei riepiloghi conclusa.");
+    log.trace("... ricalcolo dei riepiloghi conclusa.");
   }
 
   /**
@@ -356,9 +355,6 @@ public class ConsistencyManager {
   private void populatePersonDay(IWrapperPersonDay pd) {
 
     // isHoliday = personManager.isHoliday(this.value.person, this.value.date);
-
-    //FIXME ma siamo sicuri che sia una furbata azzerare completamente le informazioni del personday
-    //Solo perchè non ci serve più per fare i conti?
 
     // il contratto non esiste più nel giorno perchè è stata inserita data terminazione
     if (!pd.getPersonDayContract().isPresent()) {
@@ -449,7 +445,6 @@ public class ConsistencyManager {
     }
 
     pd.getValue().save();
-
   }
 
   /**
@@ -519,9 +514,6 @@ public class ConsistencyManager {
                 + "della mezzanotte";
 
         enterStamp.save();
-
-        pd.getValue().stampings.add(enterStamp);
-        pd.getValue().save();
       }
     }
   }

@@ -161,7 +161,7 @@ public class ConfGeneralManager {
     try {
       return Optional.fromNullable(new LocalDate(getConfGeneral(param, office).fieldValue));
 
-    } catch (Exception e) {
+    } catch (Exception ex) {
       return Optional.<LocalDate>absent();
     }
 

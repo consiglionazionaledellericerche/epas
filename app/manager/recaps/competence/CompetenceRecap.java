@@ -36,7 +36,8 @@ public class CompetenceRecap {
   
   
   public CompetenceRecap(PersonDao personDao, CompetenceManager competenceManager, 
-      CompetenceDao competenceDao, int year, int month, Office office, CompetenceCode competenceCode) {
+      CompetenceDao competenceDao, int year, int month, Office office, 
+      CompetenceCode competenceCode) {
     this.month = month;
     this.year = year;
     this.office = office;

@@ -2,13 +2,18 @@
 
 *{ 
    getLabel = true chiama la getLabel() del modello (default toString())
+   inputName = per forzare il nome del parametro
 }*
 
 #{f.edit _arg, label:_label}
   %{
     value = _attrs.containsKey('value') ? _value : field.value
+    name = field.name + '.id';
+    if (_inputName) {
+      name = _inputName
+    }
   }%
-  <select class="form-control ${_class}" name="${field.name}.id" id="${field.id}"#{ifnot _select2} select2#{/ifnot}#{if _disabled} disabled#{/if}#{if _popover} popover data-content='&{field.name+'.popover'}'#{/if} >
+  <select class="form-control ${_class}" name="${name}" id="${field.id}"#{ifnot _select2} select2#{/ifnot}#{if _disabled} disabled#{/if}#{if _popover} popover data-content='&{field.name+'.popover'}'#{/if} >
     #{if _personalizeItems}
       #{doBody /}
     #{/if}

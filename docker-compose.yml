@@ -45,13 +45,17 @@ epas:
 #    - PROTOCOL=                             # default: http  -- (http,https)
 #    - EPAS_SHIB_LOGIN=                      # default: false  -- (true,false)
 #    - JOBS_ACTIVE=                          # default: false  -- (true,false) --  Se forzato a true abilita l'esecuzione di tutti i job
-#    - LOG_LEVEL=                            # default: INFO   -- (OFF,FATAL,ERROR,WARN,INFO,DEBUG,TRACE,ALL)
-#    - LOG_ON_FILE=                          # default: false  -- (true, false)
 #    - SKIP_IP_CHECK=                        # default: false -- (true,false) -- Disabilita il controllo sugli indirizzi ip delle richieste
 #    - URL_ATTESTATI=                        # default: https://attestativ2.rm.cnr.it
 #    - URL_USER=
 #    - URL_PASS=
-#### Container ####
+######## LOGS ###########
+#    - LOG_LEVEL=                            # Opzionale. default: INFO   -- (OFF,FATAL,ERROR,WARN,INFO,DEBUG,TRACE,ALL)
+#    - APPENDERS=                            # Opzionale. default: stdout, stderr -- (stdout, stderr, file, graylog2). Abilita i log sulla console, file e server graylog
+#    - GRAYLOG_HOST=                         # Obbligatorio se attivato log sull'appender graylog2. default: null
+#    - GRAYLOG_PORT=                         # Opzionale. default: 3514
+#    - GRAYLOG_ORIGIN_HOST=                  # Opzionale. default: valore in VIRTUAL_HOST
+###### Container ########
 #    - BACKUP_CRON=                          # default: disattivato. (utilizzare il format del crontab. Es. 0 0 * * *)
 #    - CERT_NAME=                            # default: valore specificato in VIRTUAL_HOST -- Specifica un nome diverso per i file del certificato SSL
     - TZ=Europe/Rome                        # Imposta la timezone nel container docker

@@ -24,7 +24,6 @@ import javax.inject.Inject;
 @On("0 0 15 ? * MON,WED,FRI")
 public class ExpandableJob extends Job {
 
-  private static final String JOBS_CONF = "jobs.active";
   @Inject
   static PersonDayInTroubleManager personDayInTroubleManager;
   @Inject
@@ -33,11 +32,12 @@ public class ExpandableJob extends Job {
   /**
    * Esecuzione Job.
    */
+  @Override
   public void doJob() {
 
-    // in modo da inibire l'esecuzione dei job in base alla configurazione
-    if (!"true".equals(Play.configuration.getProperty(JOBS_CONF))) {
-      log.info("ExpandableJob Interrotto. Disattivato dalla configurazione.");
+    //in modo da inibire l'esecuzione dei job in base alla configurazione
+    if (!"true".equals(Play.configuration.getProperty(Bootstrap.JOBS_CONF))) {
+      log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
       return;
     }
 

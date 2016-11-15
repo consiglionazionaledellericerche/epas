@@ -31,7 +31,7 @@ public class AbsenceFromClientDeserializer implements JsonDeserializer<AbsenceFr
   private static PersonDao personDao;
 
   /**
-   * Deserializza il JSON proveniente dal SolariAbsence Client per imporare le assenze romane.
+   * Deserializza il JSON proveniente dal SolariAbsence Client per importare le assenze romane.
    */
   @Override
   public AbsenceFromClient deserialize(JsonElement json, Type arg1,
@@ -67,9 +67,9 @@ public class AbsenceFromClientDeserializer implements JsonDeserializer<AbsenceFr
     }
 
     if (person == null) {
-      log.error("Impossibile trovare la persona dal Json "
-              + "ricevuto: matricolaFirma {}", matricolaFirma);
-      throw new JsonParseException("Persona non trovata in anagrafica");
+      log.warn("Impossibile trovare la persona dal Json ricevuto: matricolaFirma {}", 
+          matricolaFirma);
+      return null;
     }
     afc.person = person;
 

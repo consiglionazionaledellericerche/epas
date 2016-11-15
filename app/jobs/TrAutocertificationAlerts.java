@@ -13,7 +13,6 @@ import models.enumerate.Troubles;
 import org.joda.time.LocalDate;
 
 import play.Play;
-import play.jobs.Every;
 import play.jobs.Job;
 import play.jobs.On;
 
@@ -26,9 +25,8 @@ import javax.inject.Inject;
 @Slf4j
 // Ogni giorno alle 15 dal lunedì al venerdì
 @On("0 0 15 ? * MON-FRI")
-public class TrAutocertificationAlerts extends Job {
+public class TrAutocertificationAlerts extends Job<Void> {
 
-  private static final String JOBS_CONF = "jobs.active";
   private static final int DAYS = 5;
 
   @Inject
@@ -40,11 +38,12 @@ public class TrAutocertificationAlerts extends Job {
   /**
    * Esecuzione Job.
    */
+  @Override
   public void doJob() {
 
-    // in modo da inibire l'esecuzione dei job in base alla configurazione
-    if (!"true".equals(Play.configuration.getProperty(JOBS_CONF))) {
-      log.info("ExpandableJob Interrotto. Disattivato dalla configurazione.");
+    //in modo da inibire l'esecuzione dei job in base alla configurazione
+    if (!"true".equals(Play.configuration.getProperty(Bootstrap.JOBS_CONF))) {
+      log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
       return;
     }
 

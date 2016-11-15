@@ -43,7 +43,8 @@
   #{/accordionItem}
   #{/accordionGroup}
 #{/list}
-  
+
+  *{
   #{accordionGroup 'absenceRecap'}
   #{accordionItem 'accordion_absence', parent:'absenceRecap', 
                   title:'Riepilogo Assenze', open:false, color:'primary'} 
@@ -62,4 +63,7 @@
 		  #{/list}
         </table>
   #{/accordionItem}
+  
   #{/accordionGroup}
+  }*
+  

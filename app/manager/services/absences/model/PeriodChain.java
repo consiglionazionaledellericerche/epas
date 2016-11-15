@@ -63,10 +63,7 @@ public class PeriodChain {
    * @return string
    */
   public String getChainDescription() {
-    if (periods.get(0).groupAbsenceType.chainDescription != null) {
-      return periods.get(0).groupAbsenceType.chainDescription;
-    }
-    return periods.get(0).groupAbsenceType.description;
+    return periods.get(0).groupAbsenceType.getChainDescription();
   }
   
   /**

@@ -32,13 +32,11 @@ import models.PersonChildren;
 import models.PersonDay;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
-import models.Qualification;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;
-import models.enumerate.QualificationMapping;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
@@ -444,8 +442,8 @@ public class AbsenceManager {
       } else {
         absence.date = pd.date;
 
-        log.info("Simulato inserimento nuova assenza {} per {} in data: {}",
-            absence.absenceType.code, pd.person.getFullname(), absence.date);
+        log.debug("Simulato inserimento nuova assenza {} per {} (matricola = {}) in data: {}",
+            absence.absenceType.code, pd.person, pd.person.number, absence.date);
       }
 
       ar.setAbsenceAdded(absence);
@@ -680,9 +678,10 @@ public class AbsenceManager {
 
   /**
    * Rimuove le assenze della persona nel periodo selezionato per il tipo di assenza.
-   * @param person persona
-   * @param dateFrom data inizio
-   * @param dateTo data fine
+   *
+   * @param person      persona
+   * @param dateFrom    data inizio
+   * @param dateTo      data fine
    * @param absenceType tipo assenza da rimuovere
    * @return numero di assenze rimosse
    */
@@ -820,12 +819,13 @@ public class AbsenceManager {
 
   /**
    * La data iniziale di una sequenza consecutiva di assenze dello stesso tipo
-   * @param date data 
-   * @param person persona
+   *
+   * @param date        data
+   * @param person      persona
    * @param absenceType tipo assenza
    * @return data iniziale.
    */
-  private LocalDate beginDateToSequentialAbsences(LocalDate date, Person person, 
+  private LocalDate beginDateToSequentialAbsences(LocalDate date, Person person,
       AbsenceType absenceType) {
 
     boolean begin = false;

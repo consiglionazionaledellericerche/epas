@@ -39,7 +39,7 @@ public class BadgeManager {
           log.info("Normalizzato badge.code: da {} a {}", code, number);
         }
       }
-    } catch (Exception e) {
+    } catch (Exception ex) {
       //Tipo String
       //log.info("Impossibile {}", badge.code);
     }

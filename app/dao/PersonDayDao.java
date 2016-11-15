@@ -8,8 +8,6 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
-import lombok.extern.slf4j.Slf4j;
-
 import models.Person;
 import models.PersonDay;
 import models.absences.query.QAbsence;
@@ -29,7 +27,6 @@ import javax.persistence.EntityManager;
 /**
  * @author dario.
  */
-//@Slf4j
 public class PersonDayDao extends DaoBase {
 
   @Inject
@@ -65,19 +62,6 @@ public class PersonDayDao extends DaoBase {
         .where(personDay.person.eq(person).and(personDay.date.eq(date)));
 
     return Optional.fromNullable(query.singleResult(personDay));
-  }
-
-  /**
-   * Cerca il personDay se non esiste ne crea una copia.
-   */
-  public PersonDay getOrBuildPersonDay(Person person, LocalDate date) {
-
-    Optional<PersonDay> optPersonDay = getPersonDay(person, date);
-    if (optPersonDay.isPresent()) {
-      return optPersonDay.get();
-    }
-    PersonDay personDay = new PersonDay(person, date);
-    return personDay;
   }
 
   /**

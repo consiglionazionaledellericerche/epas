@@ -8,7 +8,6 @@ import controllers.Resecure.NoCheck;
 
 import dao.OfficeDao;
 import dao.PersonDao;
-import dao.PersonDayDao;
 
 import it.cnr.iit.epas.NullStringBinder;
 
@@ -19,29 +18,27 @@ import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingDayRecapFactory;
 
 import models.Contract;
-import models.Notification;
 import models.Office;
 import models.Person;
 import models.PersonDay;
-import models.Role;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
-import models.enumerate.NotificationSubject;
 import models.enumerate.StampTypes;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.Minutes;
 
-import play.Logger;
 import play.data.binding.As;
 import play.data.validation.Required;
+import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -55,8 +52,6 @@ public class Clocks extends Controller {
   static OfficeManager officeManager;
   @Inject
   static PersonDao personDao;
-  @Inject
-  static PersonDayDao personDayDao;
   @Inject
   static PersonDayManager personDayManager;
   @Inject
@@ -145,16 +140,9 @@ public class Clocks extends Controller {
 
     }
 
-    LocalDate today = LocalDate.now();
+    final LocalDate today = LocalDate.now();
 
-    PersonDay personDay = personDayDao.getPersonDay(user.person, today).orNull();
-
-    if (personDay == null) {
-      Logger.debug("Prima timbratura per %s non c'è il personday quindi va creato.",
-          user.person.fullName());
-      personDay = new PersonDay(user.person, today);
-      personDay.create();
-    }
+    final PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(user.person, today);
 
     int numberOfInOut = personDayManager.numberOfInOutInPersonDay(personDay) + 1;
 
@@ -193,34 +181,32 @@ public class Clocks extends Controller {
           + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
           + " abilitarlo");
       show();
-
     }
 
-    final PersonDay personDay = personDayDao.getOrBuildPersonDay(user.person, LocalDate.now());
-
+    final PersonDay personDay = personDayManager
+        .getOrCreateAndPersistPersonDay(user.person, LocalDate.now());
     final Stamping stamping = new Stamping(personDay, LocalDateTime.now());
 
-    for (Stamping s : stamping.personDay.stampings) {
+    stamping.personDay.stampings.stream().filter(s -> !stamping.equals(s)).forEach(s -> {
 
       if (Minutes.minutesBetween(s.date, stamping.date).getMinutes() < 1
-          || (s.way.equals(stamping.way)
-          && Minutes.minutesBetween(s.date, stamping.date).getMinutes() < 2)) {
+          || s.way == stamping.way
+          && Minutes.minutesBetween(s.date, stamping.date).getMinutes() < 2) {
 
         flash.error("Impossibile inserire 2 timbrature così ravvicinate."
             + "Attendere 1 minuto per timbrature nel verso opposto o "
             + "2 minuti per timbrature dello stesso verso");
         daySituation();
       }
-    }
+    });
 
     stamping.way = way;
     stamping.stampType = stampType;
     stamping.note = note;
     stamping.markedByAdmin = false;
-
     stamping.save();
-
-    consistencyManager.updatePersonSituation(user.person.id, stamping.personDay.date);
+    
+    consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
 
     daySituation();
   }
