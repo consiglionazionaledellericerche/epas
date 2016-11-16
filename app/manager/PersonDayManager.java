@@ -351,8 +351,14 @@ public class PersonDayManager {
 
         // Giustificativi grana minuti
         if (abs.justifiedType.name == JustifiedTypeName.specified_minutes) {
-          personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
-              + abs.justifiedMinutes);
+
+          if (abs.absenceType.timeForMealTicket) {
+            personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal()
+                + abs.absenceType.justifiedTimeAtWork.minutes);
+          } else {
+            personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
+                + abs.justifiedMinutes);          
+          }
           continue;
         }
 
@@ -372,58 +378,61 @@ public class PersonDayManager {
         continue;
       }
 
-      // #######
-      // Assenze che interrompono il ciclo e azzerano quanto calcolato nelle precedenti.
-
-      if (abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
-        cleanTimeAtWork(personDay);
-        personDay.setTimeAtWork(wttd.workingTime);
-        return personDay;
-      }
-
-      //Questo e' il caso del codice 105BP che garantisce sia l'orario di lavoro che il buono pasto
-      if (abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AssignAllDay) {
-        cleanTimeAtWork(personDay);
-        setTicketStatusIfNotForced(personDay, true);
-        personDay.setTimeAtWork(wttd.workingTime);
-        return personDay;
-      }
-
-      // Caso di assenza giornaliera.
-      if (abs.justifiedMinutes == null && //evito i PEPE, RITING etc...
-          abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay) {
-        cleanTimeAtWork(personDay);
-        setTicketStatusIfNotForced(personDay, false);
-        personDay.setTimeAtWork(0);
-        return personDay;
-      }
-
-      // #######
-      //  Assenze non giornaliere da cumulare ....
-
-      // Giustificativi grana minuti (priorità sugli altri casi) Ex. PEPE
-      if (abs.justifiedMinutes != null) {
-        personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal() + abs.justifiedMinutes);
-        continue;
-      }
-
-      // Giustificativi grana ore (discriminare per calcolo buono o no)
-      if (abs.absenceType.justifiedTimeAtWork.minutes != null) {
-        if (abs.absenceType.justifiedTimeAtWork.mealTimeCounting) {
-          personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal()
-              + abs.absenceType.justifiedTimeAtWork.minutes);
-        } else {
-          personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
-              + abs.absenceType.justifiedTimeAtWork.minutes);
-        }
-        continue;
-      }
-
-      // Mezza giornata giustificata.
-      if (abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.HalfDay) {
-        personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
-            + (wttd.workingTime / 2));
-      }
+// VECCHIA MODELLAZIONE
+//      // #######
+//      // Assenze che interrompono il ciclo e azzerano quanto calcolato nelle precedenti.
+//
+//      if (abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
+//        cleanTimeAtWork(personDay);
+//        personDay.setTimeAtWork(wttd.workingTime);
+//        return personDay;
+//      }
+//
+//      //Questo e' il caso del codice 105BP che garantisce sia l'orario di lavoro che il buono 
+//      //pasto
+//      if (abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AssignAllDay) {
+//        cleanTimeAtWork(personDay);
+//        setTicketStatusIfNotForced(personDay, true);
+//        personDay.setTimeAtWork(wttd.workingTime);
+//        return personDay;
+//      }
+//
+//      // Caso di assenza giornaliera.
+//      if (abs.justifiedMinutes == null && //evito i PEPE, RITING etc...
+//          abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay) {
+//        cleanTimeAtWork(personDay);
+//        setTicketStatusIfNotForced(personDay, false);
+//        personDay.setTimeAtWork(0);
+//        return personDay;
+//      }
+//
+//      // #######
+//      //  Assenze non giornaliere da cumulare ....
+//
+//      // Giustificativi grana minuti (priorità sugli altri casi) Ex. PEPE
+//      if (abs.justifiedMinutes != null) {
+//        personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal() 
+//            + abs.justifiedMinutes);
+//        continue;
+//      }
+//
+//      // Giustificativi grana ore (discriminare per calcolo buono o no)
+//      if (abs.absenceType.justifiedTimeAtWork.minutes != null) {
+//        if (abs.absenceType.justifiedTimeAtWork.mealTimeCounting) {
+//          personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal()
+//              + abs.absenceType.justifiedTimeAtWork.minutes);
+//        } else {
+//          personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
+//              + abs.absenceType.justifiedTimeAtWork.minutes);
+//        }
+//        continue;
+//      }
+//
+//      // Mezza giornata giustificata.
+//      if (abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.HalfDay) {
+//        personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
+//            + (wttd.workingTime / 2));
+//      }
     }
 
     // Se hanno il tempo di lavoro fissato non calcolo niente
