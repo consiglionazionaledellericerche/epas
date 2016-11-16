@@ -19,6 +19,7 @@ import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceType;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
+import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.GroupAbsenceType.PeriodType;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
@@ -122,10 +123,28 @@ public class ServiceFactories {
         periodChain.to = absencePeriod.to;
       }
     }
+
+    // fetch delle assenze che servono e populate
+
+    if (groupAbsenceType.pattern == GroupAbsenceTypePattern.simpleGrouping) {
+      // nel caso simple grouping è semplice... solo vincoli generici per la data richiesta.
+      periodChain.allInvolvedAbsences = absenceComponentDao
+          .mapAbsences(absenceComponentDao
+              .orderedAbsences(
+              periodChain.person, 
+              absenceToInsert.getAbsenceDate().minusDays(7),    //costante da inserire nel vincolo 
+              absenceToInsert.getAbsenceDate().plusDays(7),     //del week end 
+              Lists.newArrayList()), null);
+      periodChain.allInvolvedAbsences = absenceComponentDao
+          .mapAbsences(previousInserts, periodChain.allInvolvedAbsences);
+      periodChain = insertAbsenceInSimpleGroup(periodChain, absenceToInsert);
+      return periodChain;
+    }
     
-    // fetch di tutte le assenze nel periodo (comprese previous inserts)
-    //TODO: qui si può efficientare molto se il periodChain ha le stesse date
-    // di quello precedente.......
+    //TODO: efficientare:
+    // 1) se il periodChain ha le stesse date l'esito è invariante.
+    // 2) se il periodo è always vengono caricate tutte le assenze della persona... 
+    //    vedere se si riesce a fare meglio.
     periodChain.allInvolvedAbsences = absenceComponentDao
         .mapAbsences(absenceComponentDao
             .orderedAbsences(
@@ -142,7 +161,7 @@ public class ServiceFactories {
             periodChain.from, periodChain.to, 
             Lists.newArrayList(periodChain.periodChainInvolvedCodes())), 
         previousInserts);
- 
+    
     // assegnare ad ogni periodo le assenze di competenza e calcoli
     populatePeriodChain(periodChain, involvedAbsencesInGroup, absenceToInsert, previousInserts);
  
@@ -429,6 +448,30 @@ public class ServiceFactories {
 
   }
   
- 
+  /**
+   * Inserimento nel caso di GroupAbsenceTypePattern.simpleGrouping.
+   * @param periodChain catena
+   * @param absenceToInsert assenza da inserire
+   * @return la catena con l'esito
+   */
+  private PeriodChain insertAbsenceInSimpleGroup(PeriodChain periodChain, Absence absenceToInsert) {
+    
+    AbsencePeriod absencePeriod = periodChain.firstPeriod(); 
+    absencePeriod.attemptedInsertAbsence = absenceToInsert;
+    
+    // i vincoli generici
+    absenceEngineUtility.genericConstraints(absencePeriod.errorsBox, 
+        periodChain.person, absenceToInsert, 
+        periodChain.allInvolvedAbsences);
+    TakenAbsence takenAbsence = absencePeriod.buildTakenAbsence(absenceToInsert, 0);
+    absencePeriod.addTakenAbsence(takenAbsence);
+    if (!absencePeriod.errorsBox.containsCriticalErrors() 
+        && !absencePeriod.errorsBox.containAbsenceErrors(absenceToInsert)) {
+      // successo
+      periodChain.successPeriodInsert = absencePeriod;
+    }
+    
+    return periodChain;
+  }
   
 }
