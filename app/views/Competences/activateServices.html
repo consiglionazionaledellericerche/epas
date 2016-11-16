@@ -105,7 +105,7 @@
     </thead>
     <tbody>
     #{list items:scList, as:'sc'}
-    <tr #{if prt.disabled}class="danger" webui-popover-hover data-content="&{'serviceDisabled'}" #{/if}>
+    <tr #{if sc.disabled}class="danger" webui-popover-hover data-content="&{'serviceDisabled'}" #{/if}>
     <td>
       #{secure.link @Competences.editShift(sc.id), 'data-async-modal':'#defaultModal'}
         ${sc.description}
