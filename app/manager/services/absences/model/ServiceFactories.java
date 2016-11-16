@@ -124,10 +124,11 @@ public class ServiceFactories {
       }
     }
 
-    // fetch delle assenze che servono e populate
-
     if (groupAbsenceType.pattern == GroupAbsenceTypePattern.simpleGrouping) {
-      // nel caso simple grouping è semplice... solo vincoli generici per la data richiesta.
+      // nel caso simple grouping controllo solo i vincoli generici per la nuova assenza da inserire
+      if (absenceToInsert == null) { 
+        return periodChain;
+      }
       periodChain.allInvolvedAbsences = absenceComponentDao
           .mapAbsences(absenceComponentDao
               .orderedAbsences(
@@ -141,6 +142,7 @@ public class ServiceFactories {
       return periodChain;
     }
     
+    // fetch delle assenze globali
     //TODO: efficientare:
     // 1) se il periodChain ha le stesse date l'esito è invariante.
     // 2) se il periodo è always vengono caricate tutte le assenze della persona... 
