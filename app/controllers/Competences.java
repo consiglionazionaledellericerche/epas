@@ -506,8 +506,13 @@ public class Competences extends Controller {
 
 
     competenceManager.saveCompetence(competence, valueApproved);
-    consistencyManager.updatePersonSituation(competence.person.id,
-        new LocalDate(competence.year, competence.month, 1));
+    if (competence.competenceCode.code.equalsIgnoreCase("S1") || 
+        competence.competenceCode.code.equalsIgnoreCase("S2") || 
+        competence.competenceCode.code.equalsIgnoreCase("S3")) {
+
+      consistencyManager.updatePersonSituation(competence.person.id,
+          new LocalDate(competence.year, competence.month, 1)); 
+    }
     int month = competence.month;
     int year = competence.year;
     IWrapperCompetenceCode wrCompetenceCode = wrapperFactory.create(competence.competenceCode);
