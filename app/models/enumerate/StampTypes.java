@@ -26,29 +26,34 @@ public enum StampTypes {
     9 | guardiaMedica          | Guardia Medica           | gm
    */
 
-  MOTIVI_DI_SERVIZIO("s", "motiviDiServizio", "Motivi di servizio", true),
-  MOTIVI_DI_SERVIZIO_FUORI_SEDE("sf", "servizioFuoriSede", "Motivi di Servizio Fuori Sede", true),
-  VISITA_MEDICA("vm", "visitaMedica", "Visita Medica", false),
-  PERMESSO_SINDACALE("ps", "permessoSindacale", "Permesso sindacale", false),
-  INCARICO_DI_INSEGNAMENTO("is", "incaricoDiInsegnamento", "Incarico di insegnamento", false),
-  DIRITTO_ALLO_STUDIO("das", "dirittoAlloStudio", "Diritto allo studio", false),
-  MOTIVI_PERSONALI("mp", "motiviPersonali", "Motivi personali", false),
-  REPERIBILITA("r", "reperibilita", "Reperibilità ", false),
-  INTRAMOENIA("i", "intramoenia", "Intramoenia", false),
-  GUARDIA_MEDICA("gm", "guardiaMedica", "Guardia Medica", false),
-  LAVORO_FUORI_SEDE("lfs", "lavoroFuoriSede", "Lavoro fuori sede", true),
-  PAUSA_PRANZO("pr", "pausaPranzo", "Pausa Pranzo", true),
-  PERMESSO_BREVE("pb", "permessoBreve", "Permesso Breve", false);
+  MOTIVI_DI_SERVIZIO("s", "motiviDiServizio", "Motivi di servizio", false, true),
+  MOTIVI_DI_SERVIZIO_FUORI_SEDE("sf", "servizioFuoriSede", "Motivi di Servizio Fuori Sede", 
+      false, true),
+  LAVORO_FUORI_SEDE("lfs", "lavoroFuoriSede", "Lavoro fuori sede", true, true),
+  PAUSA_PRANZO("pr", "pausaPranzo", "Pausa Pranzo", true, true),
+  
+  VISITA_MEDICA("vm", "visitaMedica", "Visita Medica", false, false),
+  PERMESSO_SINDACALE("ps", "permessoSindacale", "Permesso sindacale", false, false),
+  INCARICO_DI_INSEGNAMENTO("is", "incaricoDiInsegnamento", "Incarico di insegnamento", false, false),
+  DIRITTO_ALLO_STUDIO("das", "dirittoAlloStudio", "Diritto allo studio", false, false),
+  MOTIVI_PERSONALI("mp", "motiviPersonali", "Motivi personali", false, false),
+  REPERIBILITA("r", "reperibilita", "Reperibilità ", false, false),
+  INTRAMOENIA("i", "intramoenia", "Intramoenia", false, false),
+  GUARDIA_MEDICA("gm", "guardiaMedica", "Guardia Medica" ,false, false),
+  PERMESSO_BREVE("pb", "permessoBreve", "Permesso Breve", false, false);
 
   private String identifier;
   private String code;
   private String description;
+  private boolean gapLunchPairs;
   private boolean isActive;
 
-  StampTypes(String identifier, String code, String description, boolean isActive) {
+  StampTypes(String identifier, String code, String description, boolean gapLunchPair, 
+      boolean isActive) {
     this.identifier = identifier;
     this.code = code;
     this.description = description;
+    this.gapLunchPairs = gapLunchPair;
     this.isActive = isActive;
   }
 
