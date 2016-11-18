@@ -34,7 +34,8 @@ public enum StampTypes {
   
   VISITA_MEDICA("vm", "visitaMedica", "Visita Medica", false, false),
   PERMESSO_SINDACALE("ps", "permessoSindacale", "Permesso sindacale", false, false),
-  INCARICO_DI_INSEGNAMENTO("is", "incaricoDiInsegnamento", "Incarico di insegnamento", false, false),
+  INCARICO_DI_INSEGNAMENTO("is", "incaricoDiInsegnamento", "Incarico di insegnamento", false, 
+      false),
   DIRITTO_ALLO_STUDIO("das", "dirittoAlloStudio", "Diritto allo studio", false, false),
   MOTIVI_PERSONALI("mp", "motiviPersonali", "Motivi personali", false, false),
   REPERIBILITA("r", "reperibilita", "Reperibilità ", false, false),
