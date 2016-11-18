@@ -9,6 +9,7 @@ import com.google.inject.Inject;
 import dao.PersonDayDao;
 import dao.PersonShiftDayDao;
 import dao.WorkingTimeTypeDao;
+import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
 
 import it.cnr.iit.epas.DateUtility;
@@ -54,6 +55,7 @@ public class PersonDayManager {
   private final PersonShiftDayDao personShiftDayDao;
   private final PersonDayDao personDayDao;
   private final WorkingTimeTypeDao workingTimeTypeDao;
+  private final IWrapperFactory wrapperFactory;
 
   /**
    * Costruttore.
@@ -65,13 +67,15 @@ public class PersonDayManager {
   @Inject
   public PersonDayManager(ConfigurationManager configurationManager,
       PersonDayInTroubleManager personDayInTroubleManager, PersonDayDao personDayDao,
-      PersonShiftDayDao personShiftDayDao, WorkingTimeTypeDao workingTimeTypeDao) {
+      PersonShiftDayDao personShiftDayDao, WorkingTimeTypeDao workingTimeTypeDao, 
+      IWrapperFactory wrapperFactory) {
 
     this.configurationManager = configurationManager;
     this.personDayInTroubleManager = personDayInTroubleManager;
     this.personShiftDayDao = personShiftDayDao;
     this.personDayDao = personDayDao;
     this.workingTimeTypeDao = workingTimeTypeDao;
+    this.wrapperFactory = wrapperFactory;
   }
 
   /**
@@ -205,7 +209,7 @@ public class PersonDayManager {
   public List<PairStamping> getGapLunchPairs(PersonDay personDay, LocalTime startLunch,
       LocalTime endLunch) {
 
-    List<PairStamping> validPairs = computeValidPairStampings(personDay);
+    List<PairStamping> validPairs = computeValidPairStampings(personDay.stampings);
 
     List<PairStamping> allGapPairs = Lists.newArrayList();
 
@@ -270,7 +274,7 @@ public class PersonDayManager {
       return 0;
     }
 
-    List<PairStamping> validPairs = computeValidPairStampings(personDay);
+    List<PairStamping> validPairs = computeValidPairStampings(personDay.stampings);
 
     List<PairStamping> allGapPairs = Lists.newArrayList();
 
@@ -446,7 +450,7 @@ public class PersonDayManager {
     }
 
     //Le coppie valide
-    List<PairStamping> validPairs = computeValidPairStampings(personDay);
+    List<PairStamping> validPairs = computeValidPairStampings(personDay.stampings);
 
     // Minuti derivanti dalle timbrature
     personDay.setStampingsTime(stampingMinutes(validPairs));
@@ -522,7 +526,8 @@ public class PersonDayManager {
     }
 
     // Controllo pausa pomeridiana (solo se la soglia è definita)
-    if (!isAfternoonThresholdConditionSatisfied(computeValidPairStampings(personDay), wttd)) {
+    if (!isAfternoonThresholdConditionSatisfied(
+        computeValidPairStampings(personDay.stampings), wttd)) {
       setTicketStatusIfNotForced(personDay, false);
       return personDay;
     }
@@ -656,36 +661,63 @@ public class PersonDayManager {
       pd.setTicketAvailable(isTicketAvailable);
     }
   }
-
+  
   /**
-   * Stessa logica di populatePersonDay ma senza persistere i calcoli (usato per il giorno di
-   * oggi).
+   * Computa le timbrature valide e nel caso popola il tempo uscendo in questo momento.
+   * @param personDay personDay
+   * @param now ora
    */
-  public void queSeraSera(IWrapperPersonDay pd) {
+  public void validStampingsAndQueSeraSera(PersonDay personDay, LocalDateTime now) {
 
-    //Strutture dati transienti necessarie al calcolo
-    if (!pd.getPersonDayContract().isPresent()) {
+    // giorno attivo (altrimenti mancano le strutture dati per il calcolo)
+    IWrapperPersonDay wrapper = wrapperFactory.create(personDay);
+    if (!wrapper.getPersonDayContract().isPresent()) {
       return;
+    }  
+    
+    //Lavoro su una copia ordinata.
+    final List<Stamping> orderedStampings = ImmutableList
+        .copyOf(personDay.stampings.stream().sorted().collect(Collectors.toList()));
+    
+    if (personDay.isToday()                                                     
+        && !orderedStampings.isEmpty()                                      
+        && (orderedStampings.get(orderedStampings.size() - 1).isIn()        
+            || orderedStampings.get(orderedStampings.size() - 1).stampType  
+            == StampTypes.MOTIVI_DI_SERVIZIO)) {                                                    
+      
+      //aggiungo l'uscita fittizia 'now' nel caso risulti in servizio
+      Stamping stampingExitingNow = new Stamping(personDay, now);
+      stampingExitingNow.way = WayType.out;
+      stampingExitingNow.exitingNow = true;
+      personDay.isConsideredExitingNow = true;
+
+      Preconditions.checkArgument(wrapper.getWorkingTimeTypeDay().isPresent());
+
+      LocalTimeInterval lunchInterval = (LocalTimeInterval) configurationManager.configValue(
+          wrapper.getValue().person.office, EpasParam.LUNCH_INTERVAL, wrapper.getValue().getDate());
+
+      LocalTimeInterval workInterval = (LocalTimeInterval) configurationManager.configValue(
+          wrapper.getValue().person.office, EpasParam.WORK_INTERVAL, wrapper.getValue().getDate());
+
+      updateTimeAtWork(wrapper.getValue(), wrapper.getWorkingTimeTypeDay().get(),
+          wrapper.isFixedTimeAtWork(), lunchInterval.from, lunchInterval.to, workInterval.from,
+          workInterval.to);
+
+      updateDifference(wrapper.getValue(), wrapper.getWorkingTimeTypeDay().get(), 
+          wrapper.isFixedTimeAtWork());
+
+      updateProgressive(wrapper.getValue(), wrapper.getPreviousForProgressive());
+
+      updateTicketAvailable(wrapper.getValue(), wrapper.getWorkingTimeTypeDay().get(), 
+          wrapper.isFixedTimeAtWork());
+      
+      // rimuovo l'uscita fittizia
+      personDay.stampings.remove(stampingExitingNow);
+
+    } else {
+      setValidPairStampings(personDay);                
     }
-
-    Preconditions.checkArgument(pd.getWorkingTimeTypeDay().isPresent());
-
-    LocalTimeInterval lunchInterval = (LocalTimeInterval) configurationManager.configValue(
-        pd.getValue().person.office, EpasParam.LUNCH_INTERVAL, pd.getValue().getDate());
-
-    LocalTimeInterval workInterval = (LocalTimeInterval) configurationManager.configValue(
-        pd.getValue().person.office, EpasParam.WORK_INTERVAL, pd.getValue().getDate());
-
-    updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(),
-        pd.isFixedTimeAtWork(), lunchInterval.from, lunchInterval.to, workInterval.from,
-        workInterval.to);
-
-    updateDifference(pd.getValue(), pd.getWorkingTimeTypeDay().get(), pd.isFixedTimeAtWork());
-
-    updateProgressive(pd.getValue(), pd.getPreviousForProgressive());
-
-    updateTicketAvailable(pd.getValue(), pd.getWorkingTimeTypeDay().get(), pd.isFixedTimeAtWork());
-
+    
   }
 
 
@@ -757,101 +789,6 @@ public class PersonDayManager {
     }
   }
 
-  /**
-   * La lista delle timbrature del personDay modificata con: <br> (1) l'inserimento di una
-   * timbratura null nel caso in cui esistano due timbrature consecutive di ingresso o di uscita,
-   * mettendo tale timbratura nulla in mezzo alle due <br> (2) l'inserimento di una timbratura di
-   * uscita fittizia nel caso di today se la persona risulta dentro il CNR non di servizio per
-   * calcolare il tempo di lavoro provvisorio <br> (3) l'inserimento di timbrature null per arrivare
-   * alla dimensione del numberOfInOut
-   *
-   * @param wrPersonDay        personDay
-   * @param numberOfInOut      numero minimo di coppie  da visualizzare.
-   * @param considerExitingNow se voglio considerare la timbratura uscendo adesso.
-   * @return lista di stampings per il template.
-   */
-  public List<Stamping> getStampingsForTemplate(IWrapperPersonDay wrPersonDay, int numberOfInOut,
-      boolean considerExitingNow) {
-
-    PersonDay personDay = wrPersonDay.getValue();
-    // Lavoro su una copia perchè il costruttore delle Stamping aggiunge la stamping al personday
-    // e iterare sulla lista mentre si fanno delle add alla lista stessa non è una bella cosa...
-    final List<Stamping> stampings = ImmutableList
-        .copyOf(personDay.stampings.stream().sorted().collect(Collectors.toList()));
-
-    if (personDay.isToday() && considerExitingNow && !stampings.isEmpty()) {
-      //aggiungo l'uscita fittizia 'now' nel caso risulti dentro il cnr non di servizio
-      final Stamping lastStamping = stampings.get(stampings.size() - 1);
-
-      if (lastStamping.stampType != StampTypes.MOTIVI_DI_SERVIZIO && !lastStamping.isOut()) {
-        Stamping stampingExitingNow = new Stamping(personDay, LocalDateTime.now());
-        stampingExitingNow.way = WayType.out;
-        stampingExitingNow.exitingNow = true;
-        personDay.isConsideredExitingNow = true;
-        queSeraSera(wrPersonDay);
-        personDay.stampings.remove(stampingExitingNow);
-      }
-    }
-    List<Stamping> stampingsForTemplate = new ArrayList<Stamping>();
-    boolean isLastIn = false;
-
-    for (Stamping s : stampings) {
-      //sono dentro e trovo una uscita
-      if (isLastIn && s.way == WayType.out) {
-        //salvo l'uscita
-        stampingsForTemplate.add(s);
-        isLastIn = false;
-        continue;
-      }
-      //sono dentro e trovo una entrata
-      if (isLastIn && s.way == WayType.in) {
-        //creo l'uscita fittizia
-        Stamping stamping = new Stamping(personDay, null);
-        stamping.way = WayType.out;
-        stampingsForTemplate.add(stamping);
-        //salvo l'entrata
-        stampingsForTemplate.add(s);
-        isLastIn = true;
-        continue;
-      }
-
-      //sono fuori e trovo una entrata
-      if (!isLastIn && s.way == WayType.in) {
-        //salvo l'entrata
-        stampingsForTemplate.add(s);
-        isLastIn = true;
-        continue;
-      }
-
-      //sono fuori e trovo una uscita
-      if (!isLastIn && s.way == WayType.out) {
-        //creo l'entrata fittizia
-        Stamping stamping = new Stamping(personDay, null);
-        stamping.way = WayType.in;
-        stampingsForTemplate.add(stamping);
-        //salvo l'uscita
-        stampingsForTemplate.add(s);
-        isLastIn = false;
-      }
-    }
-    while (stampingsForTemplate.size() < numberOfInOut * 2) {
-      if (isLastIn) {
-        //creo l'uscita fittizia
-        Stamping stamping = new Stamping(personDay, null);
-        stamping.way = WayType.out;
-        stampingsForTemplate.add(stamping);
-        isLastIn = false;
-      } else {
-        //creo l'entrata fittizia
-        Stamping stamping = new Stamping(personDay, null);
-        stamping.way = WayType.in;
-        stampingsForTemplate.add(stamping);
-        isLastIn = true;
-      }
-    }
-
-    return stampingsForTemplate;
-  }
 
   /**
    * Calcola le coppie di stampings valide al fine del calcolo del time at work. <br>
@@ -859,18 +796,18 @@ public class PersonDayManager {
    * @modify setta il campo stamping.valid di ciascuna stampings contenuta nel personDay.<br>
    * @modify setta il campo stamping.pairId con il valore dalla coppia a cui appartengono.
    */
-  public List<PairStamping> computeValidPairStampings(PersonDay personDay) {
+  public List<PairStamping> computeValidPairStampings(List<Stamping> stampings) {
 
     //Lavoro su una copia ordinata.
-    final List<Stamping> stampings = ImmutableList
-        .copyOf(personDay.stampings.stream().sorted().collect(Collectors.toList()));
+    final List<Stamping> orderedStampings = ImmutableList
+        .copyOf(stampings.stream().sorted().collect(Collectors.toList()));
 
     //(1)Costruisco le coppie valide per calcolare il worktime
     List<PairStamping> validPairs = Lists.newArrayList();
     List<Stamping> serviceStampings = Lists.newArrayList();
     Stamping stampEnter = null;
 
-    for (Stamping stamping : stampings) {
+    for (Stamping stamping : orderedStampings) {
       //le stampings di servizio non entrano a far parte del calcolo del work time
       //ma le controllo successivamente
       //per segnalare eventuali errori di accoppiamento e appartenenza a orario di lavoro valido
@@ -989,10 +926,8 @@ public class PersonDayManager {
    * @param pd il PersonDay.
    */
   public void setValidPairStampings(PersonDay pd) {
-
     if (!pd.stampings.isEmpty()) {
-
-      computeValidPairStampings(pd);
+      computeValidPairStampings(pd.stampings);
     }
   }
 

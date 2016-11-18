@@ -14,10 +14,10 @@ import dao.PersonMonthRecapDao;
 import dao.PersonShiftDayDao;
 import dao.ShiftDao;
 
+import helpers.BadRequest;
+
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.DateUtility;
-
-import helpers.BadRequest;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -206,7 +206,7 @@ public class ShiftManager {
             //-----------------------------
             // legge le coppie di timbrature valide
             List<PairStamping> pairStampings =
-                personDayManager.computeValidPairStampings(personDay.get());
+                personDayManager.computeValidPairStampings(personDay.get().stampings);
 
             // se c'e' una timbratura guardo se e' entro il turno
             if ((personDay.get().stampings.size() == 1)
