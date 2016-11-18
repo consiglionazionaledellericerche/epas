@@ -696,7 +696,10 @@ public class PersonDayManager {
       WorkingTimeTypeDay wttd, boolean fixed, 
       LocalTimeInterval lunchInterval, LocalTimeInterval workInterval) {
 
-    //aggiungo l'uscita fittizia 'now' nel caso risulti in servizio
+    // aggiungo l'uscita fittizia 'now' nel caso risulti in servizio
+    // TODO: non crearla nell'entity... da fastidio ai test. 
+    // Crearla dentro updateTimeAtWork ma senza aggiungerla alla lista del personDay.
+    
     Stamping stampingExitingNow = new Stamping(personDay, now);
     stampingExitingNow.way = WayType.out;
     stampingExitingNow.exitingNow = true;
