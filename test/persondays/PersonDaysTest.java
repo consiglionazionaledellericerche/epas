@@ -107,6 +107,7 @@ public class PersonDaysTest {
    * L'ordine delle timbrature di servizio in questo caso non è più vincolante. 
    * Esse contribuiscono esclusivamente a segnalare la presenza in sede o meno della persona. 
    */
+  @Test
   public void mazzantiIsInServiceOutSite() {
 
     //coppia valida con dentro una timbratura di servizio ok
@@ -141,6 +142,32 @@ public class PersonDaysTest {
     
   }
   
+  @Test
+  public void consideredGapLunchPairsOutOfSite() {
+    
+    PersonDay personDay = new PersonDay(null, second);
+    List<Stamping> stampings = Lists.newArrayList();
+    stampings.add(stampings(personDay, 8, 30, WayType.in, null));
+    stampings.add(stampings(personDay, 11, 30, WayType.out, null));
+    
+    assertThat(StampTypes.LAVORO_FUORI_SEDE.isGapLunchPairs()).isEqualTo(true);
+    
+    stampings.add(stampings(personDay, 15, 30, WayType.in, StampTypes.LAVORO_FUORI_SEDE));
+    stampings.add(stampings(personDay, 19, 30, WayType.out, null));
+    
+    personDay.setStampings(stampings);
+    
+    personDayManager.updateTimeAtWork(personDay, normalDay(), false, 
+        startLunch, endLunch, startWork, endWork);
+    personDayManager.updateTicketAvailable(personDay, normalDay(), false);
+    
+    assertThat(personDay.getTimeAtWork()).isEqualTo(420);   //7:00 ore
+    assertThat(personDay.getStampingsTime()).isEqualTo(420);//7:00 ore     
+    assertThat(personDay.getDecurted()).isEqualTo(null);      //00 minuti
+    assertThat(personDay.isTicketAvailable).isEqualTo(true);
+    
+  }
+  
   /**
    * Le pause pranzo da considerare sono tutte quelle che hanno:
    * #1 Uscita pr Ingresso pr
@@ -153,6 +180,8 @@ public class PersonDaysTest {
 
     PersonDay personDay = new PersonDay(null, second);
 
+    assertThat(lunchST.isGapLunchPairs()).isEqualTo(true);
+    assertThat(StampTypes.MOTIVI_PERSONALI.isGapLunchPairs()).isEqualTo(false);
 
     // #1
     List<Stamping> stampings = Lists.newArrayList();
