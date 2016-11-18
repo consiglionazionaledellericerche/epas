@@ -6,6 +6,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 import manager.PersonDayManager;
+import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import manager.services.PairStamping;
 
 import models.PersonDay;
@@ -36,7 +37,7 @@ public class PersonDaysTest {
   public static StampTypes serviceST = StampTypes.MOTIVI_DI_SERVIZIO;
   
   public static PersonDayManager personDayManager = new PersonDayManager(
-      null, null, null, null, null, null);
+      null, null, null, null, null);
   
   /**
    * Test su un giorno Normale.
@@ -273,9 +274,31 @@ public class PersonDaysTest {
    * Il test verifica il funzionamento del meccanismo di stima del tempo al
    * lavoro uscendo in questo momento.
    */
+  @Test
   public void estimatedTimeAtWorkToday() {
     
+    PersonDay previousForProgressive = new PersonDay(null, first, 0, 0, 60);
+
     
+    PersonDay personDay = new PersonDay(null, second);
+    
+    List<Stamping> stampings = Lists.newArrayList();
+    stampings.add(stampings(personDay, 9, 30, WayType.in, null));
+    
+    LocalDateTime exitingTime = new LocalDateTime(second.getYear(), second.getMonthOfYear(), 
+        second.getDayOfMonth(), 16, 30);
+    //final LocalDateTime time18 = new LocalDateTime(second).withHourOfDay(18);
+    
+    personDayManager.validStampingsAndQueSeraSera(personDay, exitingTime, 
+        Optional.fromNullable(previousForProgressive), normalDay(), false,
+        new LocalTimeInterval(startLunch, endLunch), new LocalTimeInterval(startWork, endWork));
+    
+    assertThat(personDay.getTimeAtWork()).isEqualTo(390);   //6:30 ore
+    assertThat(personDay.getStampingsTime()).isEqualTo(420);//7:00 ore     
+    assertThat(personDay.getDecurted()).isEqualTo(30);      //30 minuti
+    assertThat(personDay.getDifference()).isEqualTo(-42);
+    assertThat(personDay.getProgressive()).isEqualTo(18);
+    assertThat(personDay.isTicketAvailable).isEqualTo(true);
   }
 
   /**

@@ -94,24 +94,33 @@ public class PersonStampingDayRecap {
         .isHoliday(personDay.getPerson(), personDay.getDate()));
 
     wrPersonDay = wrapperFactory.create(personDay);
-
-    // 1) computazioni (colore timbrature e uscita in questo momento nel caso di oggi) 
-    personDayManager.validStampingsAndQueSeraSera(personDay, LocalDateTime.now());
-
-    // 2) inserimento timbrature null e i colori per le coppie
-    stampingsTemplate = getStampingsTemplate(personDay.stampings, stampingTemplateFactory, 
-        numberOfInOut);
-
-    // 3) altre info
     
-    note.addAll(getStampingsNote(this.stampingsTemplate));
-
     wttd = this.wrPersonDay.getWorkingTimeTypeDay();
 
     lunchInterval = (LocalTimeInterval) configurationManager.configValue(
         personDay.getPerson().office, EpasParam.LUNCH_INTERVAL, personDay.getDate());
     workInterval = (LocalTimeInterval) configurationManager.configValue(
         personDay.getPerson().office, EpasParam.WORK_INTERVAL, personDay.getDate());
+    
+    // 1) computazioni: valid/pair timbrature e uscita in questo momento nel caso di oggi
+    if (personDayManager.toComputeExitingNow(personDay) 
+        && wrPersonDay.getPersonDayContract().isPresent()
+        && wttd.isPresent()) {
+      
+      // se siamo nel caso di compute e se la persona è attiva effetto il que sera sera.
+      personDayManager.validStampingsAndQueSeraSera(personDay, LocalDateTime.now(), 
+          wrPersonDay.getPreviousForProgressive(), wttd.get(), 
+          wrPersonDay.isFixedTimeAtWork(), lunchInterval, workInterval);
+    } else { 
+      // altrimenti setto le sole valid stamping
+      personDayManager.setValidPairStampings(personDay);  
+    }
+
+    // 2) genero le stamping template (colori e timbrature fittizie)
+    stampingsTemplate = getStampingsTemplate(personDay.stampings, stampingTemplateFactory, 
+        numberOfInOut);
+    
+    note.addAll(getStampingsNote(this.stampingsTemplate));
 
     boolean thereAreAllDayAbsences = personDayManager.isAllDayAbsences(personDay);
 
