@@ -68,6 +68,12 @@ public class WrapperPersonDay implements IWrapperPersonDay {
     return this.previousForProgressive;
   }
 
+  /**
+   * Instanzia la variabile lazy previousForProgressive. 
+   * potentialOnlyPrevious se presente è l'unico candidato possibile.
+   *  
+   * @param potentialOnlyPrevious se presente è l'unico candidato
+   */
   public void setPreviousForProgressive(Optional<PersonDay> potentialOnlyPrevious) {
 
     this.previousForProgressive = Optional.<PersonDay>absent();
@@ -137,6 +143,12 @@ public class WrapperPersonDay implements IWrapperPersonDay {
 
   }
 
+  /**
+   * Instanzia la variabile lazy previousForNightStamp. 
+   * potentialOnlyPrevious se presente è l'unico candidato possibile.
+   *  
+   * @param potentialOnlyPrevious se presente è l'unico candidato
+   */
   public void setPreviousForNightStamp(Optional<PersonDay> potentialOnlyPrevious) {
 
     this.previousForNightStamp = Optional.absent();
@@ -170,6 +182,10 @@ public class WrapperPersonDay implements IWrapperPersonDay {
     this.previousForNightStamp = Optional.fromNullable(candidate);
   }
 
+  /**
+   * Ritorna il contratto associato al personDay, se presente. Instanzia una variabile lazy.
+   * @return il contratto
+   */
   public Optional<Contract> getPersonDayContract() {
 
     if (this.personDayContract != null) {
@@ -217,6 +233,10 @@ public class WrapperPersonDay implements IWrapperPersonDay {
     return this.isFixedTimeAtWorkk;
   }
 
+  /**
+   * Ritorna il tipo orario associato al personDay, se presente. Instanzia una variabile lazy.
+   * @return il tipo orario
+   */
   public Optional<WorkingTimeTypeDay> getWorkingTimeTypeDay() {
 
     if (this.workingTimeTypeDay != null) {
