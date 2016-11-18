@@ -46,7 +46,8 @@ public enum StampTypes {
   private String identifier;
   private String code;
   private String description;
-  private boolean gapLunchPairs;
+  //se true la timbratura viene considerata per il calcolo della pausa pranzo
+  private boolean gapLunchPairs;  
   private boolean isActive;
 
   StampTypes(String identifier, String code, String description, boolean gapLunchPair, 
