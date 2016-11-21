@@ -138,7 +138,7 @@ public class PersonStampingRecap {
     LocalDate today = LocalDate.now();
 
     for (PersonDay pd : totalPersonDays) {
-      personDayManager.setValidPairStampings(pd);
+      personDayManager.setValidPairStampings(pd.stampings);
 
       PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(pd, this.numberOfInOut,
           considerExitingNow, Optional.fromNullable(monthContracts));

@@ -112,9 +112,13 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
    * @param time      time
    */
   public Stamping(PersonDay personDay, LocalDateTime time) {
-    this.personDay = personDay;
+    // FIXME se necessito di una stamping senza personDay (ex. per uscita in questo momento)
+    // questo costruttore mi impedisce di costruirla. Per adesso permetto di passare personDay null.
     date = time;
-    personDay.stampings.add(this);
+    if (personDay != null) {
+      this.personDay = personDay;
+      personDay.stampings.add(this);
+    }
   }
 
   @Override
