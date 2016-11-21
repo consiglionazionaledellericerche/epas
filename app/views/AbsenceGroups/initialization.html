@@ -87,22 +87,11 @@
   #{f.input 'takableTotal', type:'number' /} 
   }*
   
-  #{if initializationDto.takenInHourMinute()}
-    #{f.input 'initializationDto.takenHours', value:initializationDto.takenHours, type:'number' /}
-    #{f.selectEnum 'initializationDto.takenMinutes', items:initializationDto.selectableMinutes(), value:initializationDto.takenMinutes, byEquals:'true' /}
-  #{/if}
-  #{if initializationDto.takenInUnits()}
+  #{if initializationDto.isDayTakable()}
     #{f.input 'initializationDto.takenUnits', value:initializationDto.takenUnits, type:'number' /}
   #{/if}
-  
-  #{if initializationDto.complationInHourMinute()}
-    #{f.input 'initializationDto.complationHours', value:initializationDto.complationHours, type:'number' /}
-    #{f.selectEnum 'initializationDto.complationMinutes', items:initializationDto.selectableMinutes(), value:initializationDto.complationMinutes, byEquals:'true' /}
-  #{/if}
-  #{if initializationDto.complationInUnits()}
-    #{f.input 'initializationDto.complationUnits', value:initializationDto.complationUnits, type:'number' /}
-  #{/if}
-  
+  #{f.input 'initializationDto.takenHours', value:initializationDto.takenHours, type:'number' /}
+  #{f.selectEnum 'initializationDto.takenMinutes', items:initializationDto.selectableMinutes(), value:initializationDto.takenMinutes, byEquals:'true' /}
  
   #{b.buttons center:true}
    #{b.submit 'Salva'/}

@@ -464,12 +464,7 @@ complationUsed=Completato
 
 initializationDto.takenHours=Ore Utilizzate
 initializationDto.takenMinutes=Minuti Utilizzati
-initializationDto.takenUnits=Giorni Utilizzati
-
-initializationDto.complationHours=Ore da Completare
-initializationDto.complationMinutes=Minuti da Completare
-initializationDto.complationUnits=Giornata da Completare
-
+initializationDto.takenUnits=Giorni Completi Utilizzati
 
 
 wtt.description= Nome Tipo Orario

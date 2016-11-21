@@ -1294,15 +1294,16 @@ public class PersonDayManager {
       return true;
     }
 
-    Optional<WorkingTimeType> workingTimeType = workingTimeTypeDao.getWorkingTimeType(date, person);
+    Optional<WorkingTimeTypeDay> workingTimeTypeDay = workingTimeTypeDao
+        .getWorkingTimeTypeDay(date, person);
 
     //persona fuori contratto
-    if (!workingTimeType.isPresent()) {
+    if (!workingTimeTypeDay.isPresent()) {
       return false;
     }
 
     //tempo a lavoro
-    return workingTimeTypeDao.isWorkingTypeTypeHoliday(date, workingTimeType.get());
+    return workingTimeTypeDay.get().holiday;
   }
 
 }

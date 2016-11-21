@@ -304,7 +304,9 @@ public class AbsenceGroups extends Controller {
         groupAbsenceType, date);
     Preconditions.checkState(!periodChain.periods.isEmpty());
     AbsencePeriod absencePeriod = periodChain.periods.iterator().next();
-    initializationDto.takenAmountType = absencePeriod.takeAmountType;
+    if (absencePeriod.isTakableWithLimit()) {
+      initializationDto.takenAmountType = absencePeriod.takeAmountType;
+    }
     initializationDto.complationAmountType = absencePeriod.complationAmountType;
 
     // Gli errori della richiesta inserimento inizializzazione
@@ -314,16 +316,10 @@ public class AbsenceGroups extends Controller {
           initializationDto);
     }
     
-    // Conversione (riduce la complessità per l'amministratore)
-    InitializationGroup initialization = new InitializationGroup();
-    initialization.person = person;
-    initialization.initializationDate = date;
-    initialization.groupAbsenceType = groupAbsenceType;
-    if (absencePeriod.initialization != null) {
-      initialization = absencePeriod.initialization;
-    }
-    initializationDto.populateInitialization(initialization);
-    initialization.save();
+//    InitializationGroup initialization = absenceService.populateInitialization(person, date, 
+//        groupAbsenceType, absencePeriod.initialization, initializationDto);
+//    
+//    initialization.save();
     
     flash.success("Inizializzazione salvata con successo. (Scherzo)");
     
@@ -337,8 +333,8 @@ public class AbsenceGroups extends Controller {
       if (group.name.equals(DefaultGroup.G_09.name()) 
           || group.name.equals(DefaultGroup.G_89.name())
           || group.name.equals(DefaultGroup.G_661.name())
-//          || group.name.equals(DefaultGroup.G_18.name())
-//          || group.name.equals(DefaultGroup.G_19.name())
+          || group.name.equals(DefaultGroup.G_18.name())
+          || group.name.equals(DefaultGroup.G_19.name())
           || group.name.equals(DefaultGroup.G_23.name())
           || group.name.equals(DefaultGroup.G_25.name())
           || group.name.equals(DefaultGroup.G_232.name())
@@ -432,50 +428,67 @@ public class AbsenceGroups extends Controller {
     public Integer takenMinutes = 0;
     @Min(0) @Max(99)
     public Integer takenUnits = 0;
-
-    @Min(0)
-    public Integer complationHours = 0;
-    @Min(0) @Max(59)
-    public Integer complationMinutes = 0;
-    @Min(0) @Max(99)
-    public Integer complationUnits = 0; //percent
+       
     
-    public boolean takenInHourMinute() {
-      return this.takenAmountType == AmountType.minutes; 
-    }
-    
-    public boolean takenInUnits() {
-      return this.takenAmountType == AmountType.units; 
-    }
-    
-    public boolean complationInHourMinute() {
-      return this.complationAmountType != null && this.complationAmountType == AmountType.minutes;
-    }
-    
-    public boolean complationInUnits() {
-      return this.complationAmountType != null && this.complationAmountType == AmountType.units;
-    }
-    
-    public InitializationGroup populateInitialization(InitializationGroup initialization) {
+    public InitializationGroup populateInitialization(InitializationGroup initialization, 
+        int workTime) {
       
       //reset
       initialization.complationUsed = 0;
       initialization.takableUsed = 0;
       
-      if (this.takenInHourMinute()) {
-        initialization.takableUsed = this.takenHours * 60 + this.takenMinutes;
+      //Takable used
+      if (isMinuteTakable()) {
+        initialization.takableUsed = minutes(this.takenHours, this.takenMinutes);
       }
-      if (this.takenInUnits()) {
-        initialization.takableUsed = this.takenUnits;
+      if (isDayTakable()) {
+        initialization.takableUsed = (this.takenUnits * 100) 
+            + workingTypePercent(this.takenHours, this.takenMinutes, workTime);
       }
-      if (this.complationInHourMinute()) {
-        initialization.complationUsed = this.complationHours * 60 + this.complationMinutes;
+      
+      //Complation used
+      if (isMinuteComplation()) {
+        initialization.complationUsed = minutes(this.takenHours, this.takenMinutes);
       }
-      if (this.complationInUnits()) {
-        initialization.complationUsed = this.complationUnits;
+      if (isDayComplation()) {
+        initialization.complationUsed = 
+            workingTypePercentModule(this.takenHours, this.takenMinutes, workTime);
+      }
+      if (isMinuteTakable() && isMinuteComplation()) {
+        //eccezione 661.. forse il gruppo è da modellare meglio
+        initialization.complationUsed = this.takenMinutes;
       }
       
       return initialization;
+    }
+    
+    public boolean isDayTakable() {
+      return this.takenAmountType != null && this.takenAmountType == AmountType.units; 
+    }
+    
+    public boolean isMinuteTakable() {
+      return this.takenAmountType != null && this.takenAmountType == AmountType.minutes;
+    }
+    
+    public boolean isDayComplation() {
+      return this.complationAmountType != null && this.complationAmountType == AmountType.units; 
+    }
+    
+    public int minutes(int hours, int minutes) {
+      return hours * 60 + minutes;
+    }
+    
+    public boolean isMinuteComplation() {
+      return this.complationAmountType != null && this.complationAmountType == AmountType.minutes;
+    }
+    
+    public int workingTypePercent(int hours, int minutes, int workTime) {
+      return minutes(hours, minutes) / workTime * 100;
+      
+    }
+    
+    public int workingTypePercentModule(int hours, int minutes, int workTime) {
+      return workingTypePercent(hours, minutes, workTime) % 100;
     }
     
     /**
