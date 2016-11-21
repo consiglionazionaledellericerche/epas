@@ -6,6 +6,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 import manager.PersonDayManager;
+import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import manager.services.PairStamping;
 
 import models.PersonDay;
@@ -116,7 +117,7 @@ public class PersonDaysTest {
     stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE));
     stamps.add(stampings(personDay, 15, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO));
     stamps.add(stampings(personDay, 19, 30, WayType.out, null));
-    personDayManager.computeValidPairStampings(personDay);
+    personDayManager.setValidPairStampings(personDay.stampings);
     assertThat(personDayManager.allValidStampings(personDay));
 
     //coppia valida con dentro timbrature di servizio con ordine sparso ok 
@@ -127,7 +128,7 @@ public class PersonDaysTest {
     stamps.add(stampings(personDay, 15, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO));
     stamps.add(stampings(personDay, 16, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO));
     stamps.add(stampings(personDay, 19, 30, WayType.out, null));
-    personDayManager.computeValidPairStampings(personDay);
+    personDayManager.setValidPairStampings(personDay.stampings);
     assertThat(personDayManager.allValidStampings(personDay));
 
     //coppia non valida 
@@ -136,7 +137,7 @@ public class PersonDaysTest {
     stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE));
     stamps.add(stampings(personDay, 15, 30, WayType.in, null));
     stamps.add(stampings(personDay, 19, 30, WayType.out, null));
-    personDayManager.computeValidPairStampings(personDay);
+    personDayManager.setValidPairStampings(personDay.stampings);
     assertThat(!personDayManager.allValidStampings(personDay));
 
   }
@@ -224,7 +225,7 @@ public class PersonDaysTest {
     stampings.add(stampings(personDay, 17, 00, WayType.out, null));
     personDay.setStampings(stampings);
     
-    List<PairStamping> validPairs = personDayManager.computeValidPairStampings(personDay);
+    List<PairStamping> validPairs = personDayManager.getValidPairStampings(personDay.stampings);
     
     gapLunchPair = personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
     
@@ -251,7 +252,7 @@ public class PersonDaysTest {
     stampings.add(stampings(personDay, 17, 00, WayType.out, null));
     personDay.setStampings(stampings);
     
-    validPairs = personDayManager.computeValidPairStampings(personDay);
+    validPairs = personDayManager.getValidPairStampings(personDay.stampings);
     gapLunchPair = personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
     
     assertThat(validPairs.size()).isEqualTo(1);
@@ -277,7 +278,7 @@ public class PersonDaysTest {
     stampings.add(stampings(personDay, 17, 00, WayType.out, null));
     personDay.setStampings(stampings);
     
-    validPairs = personDayManager.computeValidPairStampings(personDay);
+    validPairs = personDayManager.getValidPairStampings(personDay.stampings);
     gapLunchPair = personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
     
     assertThat(validPairs.size()).isEqualTo(1);
@@ -292,7 +293,7 @@ public class PersonDaysTest {
     stampings.add(stampings(personDay, 17, 00, WayType.out, null));
     personDay.setStampings(stampings);
     
-    validPairs = personDayManager.computeValidPairStampings(personDay);
+    validPairs = personDayManager.getValidPairStampings(personDay.stampings);
     gapLunchPair = personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
     
     assertThat(validPairs.size()).isEqualTo(2);
@@ -311,12 +312,43 @@ public class PersonDaysTest {
     LocalTime startLunch = new LocalTime(12,0,0);
     LocalTime endLunch = new LocalTime(15,0,0);
 
-    validPairs = personDayManager.computeValidPairStampings(personDay);
+    validPairs = personDayManager.getValidPairStampings(personDay.stampings);
     gapLunchPair = personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
     
     assertThat(gapLunchPair.size()).isEqualTo(0);
     
     
+  }
+  
+  /**
+   * Il test verifica il funzionamento del meccanismo di stima del tempo al
+   * lavoro uscendo in questo momento.
+   */
+  @Test
+  public void estimatedTimeAtWorkToday() {
+    
+    PersonDay previousForProgressive = new PersonDay(null, first, 0, 0, 60);
+
+    
+    PersonDay personDay = new PersonDay(null, second);
+    
+    List<Stamping> stampings = Lists.newArrayList();
+    stampings.add(stampings(personDay, 9, 30, WayType.in, null));
+    
+    LocalDateTime exitingTime = new LocalDateTime(second.getYear(), second.getMonthOfYear(), 
+        second.getDayOfMonth(), 16, 30);
+    //final LocalDateTime time18 = new LocalDateTime(second).withHourOfDay(18);
+    
+    personDayManager.queSeraSera(personDay, exitingTime, 
+        Optional.fromNullable(previousForProgressive), normalDay(), false,
+        new LocalTimeInterval(startLunch, endLunch), new LocalTimeInterval(startWork, endWork));
+    
+    assertThat(personDay.getTimeAtWork()).isEqualTo(390);   //6:30 ore
+    assertThat(personDay.getStampingsTime()).isEqualTo(420);//7:00 ore     
+    assertThat(personDay.getDecurted()).isEqualTo(30);      //30 minuti
+    assertThat(personDay.getDifference()).isEqualTo(-42);
+    assertThat(personDay.getProgressive()).isEqualTo(18);
+    assertThat(personDay.isTicketAvailable).isEqualTo(true);
   }
 
   /**

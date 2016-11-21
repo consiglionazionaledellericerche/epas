@@ -205,7 +205,7 @@ public class PersonDayManager {
   public List<PairStamping> getGapLunchPairs(PersonDay personDay, LocalTime startLunch,
       LocalTime endLunch) {
 
-    List<PairStamping> validPairs = computeValidPairStampings(personDay);
+    List<PairStamping> validPairs = getValidPairStampings(personDay.stampings);
 
     List<PairStamping> allGapPairs = Lists.newArrayList();
 
@@ -270,7 +270,7 @@ public class PersonDayManager {
       return 0;
     }
 
-    List<PairStamping> validPairs = computeValidPairStampings(personDay);
+    List<PairStamping> validPairs = computeValidPairStampings(personDay.stampings);
 
     List<PairStamping> allGapPairs = Lists.newArrayList();
 
@@ -296,17 +296,44 @@ public class PersonDayManager {
 
     return gapTime;
   }
-
+  
   /**
    * Calcolo del tempo a lavoro e del buono pasto.
-   *
-   * @param personDay personDay.
-   * @param wttd      tipo orario personDay.
-   * @return oggetto modificato.
+   * 
+   * @param personDay personDay
+   * @param wttd tipo orario
+   * @param fixedTimeAtWork se la persona ha la presenza automatica
+   * @param startLunch inizio fascia pranzo
+   * @param endLunch fine fascia pranzo
+   * @param startWork inizio apertura sede
+   * @param endWork fine apertura sede 
+   * @return personDay modificato
    */
   public PersonDay updateTimeAtWork(PersonDay personDay, WorkingTimeTypeDay wttd,
       boolean fixedTimeAtWork, LocalTime startLunch, LocalTime endLunch,
       LocalTime startWork, LocalTime endWork) {
+    
+    return updateTimeAtWork(personDay, wttd, fixedTimeAtWork, startLunch, endLunch, 
+        startWork, endWork, 
+        Optional.absent());
+  }
+  
+  /**
+   * Calcolo del tempo a lavoro e del buono pasto.
+   * 
+   * @param personDay personDay
+   * @param wttd tipo orario
+   * @param fixedTimeAtWork se la persona ha la presenza automatica
+   * @param startLunch inizio fascia pranzo
+   * @param endLunch fine fascia pranzo
+   * @param startWork inizio apertura sede
+   * @param endWork fine apertura sede
+   * @param exitingNow timbratura fittizia uscendo in questo momento 
+   * @return personDay modificato
+   */
+  public PersonDay updateTimeAtWork(PersonDay personDay, WorkingTimeTypeDay wttd,
+      boolean fixedTimeAtWork, LocalTime startLunch, LocalTime endLunch,
+      LocalTime startWork, LocalTime endWork, Optional<Stamping> exitingNow) {
 
     // Pulizia stato personDay.
     cleanTimeAtWork(personDay);
@@ -377,62 +404,6 @@ public class PersonDayManager {
 
         continue;
       }
-
-// VECCHIA MODELLAZIONE
-//      // #######
-//      // Assenze che interrompono il ciclo e azzerano quanto calcolato nelle precedenti.
-//
-//      if (abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
-//        cleanTimeAtWork(personDay);
-//        personDay.setTimeAtWork(wttd.workingTime);
-//        return personDay;
-//      }
-//
-//      //Questo e' il caso del codice 105BP che garantisce sia l'orario di lavoro che il buono 
-//      //pasto
-//      if (abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AssignAllDay) {
-//        cleanTimeAtWork(personDay);
-//        setTicketStatusIfNotForced(personDay, true);
-//        personDay.setTimeAtWork(wttd.workingTime);
-//        return personDay;
-//      }
-//
-//      // Caso di assenza giornaliera.
-//      if (abs.justifiedMinutes == null && //evito i PEPE, RITING etc...
-//          abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay) {
-//        cleanTimeAtWork(personDay);
-//        setTicketStatusIfNotForced(personDay, false);
-//        personDay.setTimeAtWork(0);
-//        return personDay;
-//      }
-//
-//      // #######
-//      //  Assenze non giornaliere da cumulare ....
-//
-//      // Giustificativi grana minuti (priorità sugli altri casi) Ex. PEPE
-//      if (abs.justifiedMinutes != null) {
-//        personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal() 
-//            + abs.justifiedMinutes);
-//        continue;
-//      }
-//
-//      // Giustificativi grana ore (discriminare per calcolo buono o no)
-//      if (abs.absenceType.justifiedTimeAtWork.minutes != null) {
-//        if (abs.absenceType.justifiedTimeAtWork.mealTimeCounting) {
-//          personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal()
-//              + abs.absenceType.justifiedTimeAtWork.minutes);
-//        } else {
-//          personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
-//              + abs.absenceType.justifiedTimeAtWork.minutes);
-//        }
-//        continue;
-//      }
-//
-//      // Mezza giornata giustificata.
-//      if (abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.HalfDay) {
-//        personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
-//            + (wttd.workingTime / 2));
-//      }
     }
 
     // Se hanno il tempo di lavoro fissato non calcolo niente
@@ -446,7 +417,7 @@ public class PersonDayManager {
     }
 
     //Le coppie valide
-    List<PairStamping> validPairs = computeValidPairStampings(personDay);
+    List<PairStamping> validPairs = getValidPairStampings(personDay.stampings, exitingNow);
 
     // Minuti derivanti dalle timbrature
     personDay.setStampingsTime(stampingMinutes(validPairs));
@@ -522,7 +493,8 @@ public class PersonDayManager {
     }
 
     // Controllo pausa pomeridiana (solo se la soglia è definita)
-    if (!isAfternoonThresholdConditionSatisfied(computeValidPairStampings(personDay), wttd)) {
+    if (!isAfternoonThresholdConditionSatisfied(
+        computeValidPairStampings(personDay.stampings), wttd)) {
       setTicketStatusIfNotForced(personDay, false);
       return personDay;
     }
@@ -656,35 +628,62 @@ public class PersonDayManager {
       pd.setTicketAvailable(isTicketAvailable);
     }
   }
+  
+  /**
+   * Se il personDay ricade nel caso del calcolo stima uscendo in questo momento.
+   * @param personDay personDay
+   * @return esito
+   */
+  public boolean toComputeExitingNow(PersonDay personDay) {
+    
+    if (!personDay.isToday()) {
+      return false;
+    }
+    if (personDay.stampings.isEmpty()) {
+      return false;
+    }
+    
+    final List<Stamping> ordered = ImmutableList
+        .copyOf(personDay.stampings.stream().sorted().collect(Collectors.toList()));
+    if (ordered.get(ordered.size() - 1).isIn()        
+        || ordered.get(ordered.size() - 1).stampType == StampTypes.MOTIVI_DI_SERVIZIO) {
+      return true;
+    }
+    
+    return false;
+    
+  }
 
   /**
-   * Stessa logica di populatePersonDay ma senza persistere i calcoli (usato per il giorno di
-   * oggi).
+   * Computa le timbrature valide e nel caso popola il tempo uscendo in questo momento.
+   * @param personDay personDay
+   * @param now momento exitingNow
+   * @param previousForProgressive personDay precedente per progressivo
+   * @param wttd tipo orario giorno
+   * @param fixed se la persona è fixed nel giorno
    */
-  public void queSeraSera(IWrapperPersonDay pd) {
+  public void queSeraSera(PersonDay personDay, LocalDateTime now, 
+      Optional<PersonDay> previousForProgressive, 
+      WorkingTimeTypeDay wttd, boolean fixed, 
+      LocalTimeInterval lunchInterval, LocalTimeInterval workInterval) {
 
-    //Strutture dati transienti necessarie al calcolo
-    if (!pd.getPersonDayContract().isPresent()) {
-      return;
-    }
+    // aggiungo l'uscita fittizia 'now' nel caso risulti in servizio
+    // TODO: non crearla nell'entity... da fastidio ai test. 
+    // Crearla dentro updateTimeAtWork ma senza aggiungerla alla lista del personDay.
+    
+    Stamping stampingExitingNow = new Stamping(null, now);
+    stampingExitingNow.way = WayType.out;
+    stampingExitingNow.exitingNow = true;
+    personDay.isConsideredExitingNow = true;
 
-    Preconditions.checkArgument(pd.getWorkingTimeTypeDay().isPresent());
+    updateTimeAtWork(personDay, wttd, fixed, lunchInterval.from, lunchInterval.to, 
+        workInterval.from, workInterval.to, Optional.of(stampingExitingNow));
 
-    LocalTimeInterval lunchInterval = (LocalTimeInterval) configurationManager.configValue(
-        pd.getValue().person.office, EpasParam.LUNCH_INTERVAL, pd.getValue().getDate());
+    updateDifference(personDay, wttd, fixed);
 
-    LocalTimeInterval workInterval = (LocalTimeInterval) configurationManager.configValue(
-        pd.getValue().person.office, EpasParam.WORK_INTERVAL, pd.getValue().getDate());
+    updateProgressive(personDay, previousForProgressive);
 
-    updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(),
-        pd.isFixedTimeAtWork(), lunchInterval.from, lunchInterval.to, workInterval.from,
-        workInterval.to);
-
-    updateDifference(pd.getValue(), pd.getWorkingTimeTypeDay().get(), pd.isFixedTimeAtWork());
-
-    updateProgressive(pd.getValue(), pd.getPreviousForProgressive());
-
-    updateTicketAvailable(pd.getValue(), pd.getWorkingTimeTypeDay().get(), pd.isFixedTimeAtWork());
+    updateTicketAvailable(personDay, wttd, fixed);
 
   }
 
@@ -716,7 +715,7 @@ public class PersonDayManager {
       return;
     }
 
-    setValidPairStampings(pd.getValue());
+    setValidPairStampings(pd.getValue().stampings);
 
     final boolean allValidStampings = allValidStampings(personDay);
     final boolean isAllDayAbsences = isAllDayAbsences(personDay);
@@ -758,100 +757,51 @@ public class PersonDayManager {
   }
 
   /**
-   * La lista delle timbrature del personDay modificata con: <br> (1) l'inserimento di una
-   * timbratura null nel caso in cui esistano due timbrature consecutive di ingresso o di uscita,
-   * mettendo tale timbratura nulla in mezzo alle due <br> (2) l'inserimento di una timbratura di
-   * uscita fittizia nel caso di today se la persona risulta dentro il CNR non di servizio per
-   * calcolare il tempo di lavoro provvisorio <br> (3) l'inserimento di timbrature null per arrivare
-   * alla dimensione del numberOfInOut
-   *
-   * @param wrPersonDay        personDay
-   * @param numberOfInOut      numero minimo di coppie  da visualizzare.
-   * @param considerExitingNow se voglio considerare la timbratura uscendo adesso.
-   * @return lista di stampings per il template.
+   * Calcola le coppie di stampings valide al fine del calcolo del time at work. <br>
+   * 
+   * @param stampings stampings
+   * @return coppie
    */
-  public List<Stamping> getStampingsForTemplate(IWrapperPersonDay wrPersonDay, int numberOfInOut,
-      boolean considerExitingNow) {
-
-    PersonDay personDay = wrPersonDay.getValue();
-    // Lavoro su una copia perchè il costruttore delle Stamping aggiunge la stamping al personday
-    // e iterare sulla lista mentre si fanno delle add alla lista stessa non è una bella cosa...
-    final List<Stamping> stampings = ImmutableList
-        .copyOf(personDay.stampings.stream().sorted().collect(Collectors.toList()));
-
-    if (personDay.isToday() && considerExitingNow && !stampings.isEmpty()) {
-      //aggiungo l'uscita fittizia 'now' nel caso risulti dentro il cnr non di servizio
-      final Stamping lastStamping = stampings.get(stampings.size() - 1);
-
-      if (lastStamping.stampType != StampTypes.MOTIVI_DI_SERVIZIO && !lastStamping.isOut()) {
-        Stamping stampingExitingNow = new Stamping(personDay, LocalDateTime.now());
-        stampingExitingNow.way = WayType.out;
-        stampingExitingNow.exitingNow = true;
-        personDay.isConsideredExitingNow = true;
-        queSeraSera(wrPersonDay);
-        personDay.stampings.remove(stampingExitingNow);
-      }
-    }
-    List<Stamping> stampingsForTemplate = new ArrayList<Stamping>();
-    boolean isLastIn = false;
-
-    for (Stamping s : stampings) {
-      //sono dentro e trovo una uscita
-      if (isLastIn && s.way == WayType.out) {
-        //salvo l'uscita
-        stampingsForTemplate.add(s);
-        isLastIn = false;
-        continue;
-      }
-      //sono dentro e trovo una entrata
-      if (isLastIn && s.way == WayType.in) {
-        //creo l'uscita fittizia
-        Stamping stamping = new Stamping(personDay, null);
-        stamping.way = WayType.out;
-        stampingsForTemplate.add(stamping);
-        //salvo l'entrata
-        stampingsForTemplate.add(s);
-        isLastIn = true;
-        continue;
-      }
-
-      //sono fuori e trovo una entrata
-      if (!isLastIn && s.way == WayType.in) {
-        //salvo l'entrata
-        stampingsForTemplate.add(s);
-        isLastIn = true;
-        continue;
-      }
-
-      //sono fuori e trovo una uscita
-      if (!isLastIn && s.way == WayType.out) {
-        //creo l'entrata fittizia
-        Stamping stamping = new Stamping(personDay, null);
-        stamping.way = WayType.in;
-        stampingsForTemplate.add(stamping);
-        //salvo l'uscita
-        stampingsForTemplate.add(s);
-        isLastIn = false;
-      }
-    }
-    while (stampingsForTemplate.size() < numberOfInOut * 2) {
-      if (isLastIn) {
-        //creo l'uscita fittizia
-        Stamping stamping = new Stamping(personDay, null);
-        stamping.way = WayType.out;
-        stampingsForTemplate.add(stamping);
-        isLastIn = false;
-      } else {
-        //creo l'entrata fittizia
-        Stamping stamping = new Stamping(personDay, null);
-        stamping.way = WayType.in;
-        stampingsForTemplate.add(stamping);
-        isLastIn = true;
-      }
-    }
-
-    return stampingsForTemplate;
+  public List<PairStamping> getValidPairStampings(List<Stamping> stampings) {
+    
+    final List<Stamping> orderedStampings = ImmutableList
+        .copyOf(stampings.stream().sorted().collect(Collectors.toList()));
+    
+    return computeValidPairStampings(orderedStampings);
   }
+  
+  /**
+   * Calcola le coppie di stampings valide al fine del calcolo del time at work. <br>
+   * 
+   * @param stampings stampings
+   * @return coppie
+   */
+  public List<PairStamping> getValidPairStampings(List<Stamping> stampings, 
+      Optional<Stamping> exitingNow) {
+    List<Stamping> copy = Lists.newArrayList(stampings);
+    if (exitingNow.isPresent()) {
+      copy.add(exitingNow.get());
+    }
+    Collections.sort(copy);
+    return computeValidPairStampings(copy);
+  }
+  
+  /**
+   * - Setta il campo valid per ciascuna stamping del personDay 
+   * (sulla base del loro valore al momento della call) <br>
+   * - Associa ogni stamping alla coppia valida individuata se presente
+   *    (campo stamping.pairId) 
+   *
+   * @param stampings la lista di timbrature
+   */
+  public void setValidPairStampings(List<Stamping> stampings) {
+    
+    final List<Stamping> orderedStampings = ImmutableList
+        .copyOf(stampings.stream().sorted().collect(Collectors.toList()));
+
+    computeValidPairStampings(orderedStampings);
+  }
+  
 
   /**
    * Calcola le coppie di stampings valide al fine del calcolo del time at work. <br>
@@ -859,18 +809,18 @@ public class PersonDayManager {
    * @modify setta il campo stamping.valid di ciascuna stampings contenuta nel personDay.<br>
    * @modify setta il campo stamping.pairId con il valore dalla coppia a cui appartengono.
    */
-  public List<PairStamping> computeValidPairStampings(PersonDay personDay) {
+  private List<PairStamping> computeValidPairStampings(List<Stamping> orderedStampings) {
 
-    //Lavoro su una copia ordinata.
-    final List<Stamping> stampings = ImmutableList
-        .copyOf(personDay.stampings.stream().sorted().collect(Collectors.toList()));
+    if (orderedStampings.isEmpty()) {
+      return Lists.newArrayList();
+    }
 
     //(1)Costruisco le coppie valide per calcolare il worktime
     List<PairStamping> validPairs = Lists.newArrayList();
     List<Stamping> serviceStampings = Lists.newArrayList();
     Stamping stampEnter = null;
 
-    for (Stamping stamping : stampings) {
+    for (Stamping stamping : orderedStampings) {
       //le stampings di servizio non entrano a far parte del calcolo del work time
       //ma le controllo successivamente
       //per segnalare eventuali errori di accoppiamento e appartenenza a orario di lavoro valido
@@ -980,21 +930,7 @@ public class PersonDayManager {
     return validPairs;
   }
 
-  /**
-   * 1) Setta il campo valid per ciascuna stamping del personDay (sulla base del loro valore al
-   * momento della call) <br>
-   * 2) Associa ogni stamping alla coppia valida individuata se presente
-   * (campo stamping.pairId) <br>
-   *
-   * @param pd il PersonDay.
-   */
-  public void setValidPairStampings(PersonDay pd) {
 
-    if (!pd.stampings.isEmpty()) {
-
-      computeValidPairStampings(pd);
-    }
-  }
 
   /**
    * Calcola il numero massimo di coppie di colonne ingresso/uscita.
