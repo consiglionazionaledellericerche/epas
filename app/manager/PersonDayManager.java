@@ -214,9 +214,9 @@ public class PersonDayManager {
     for (PairStamping validPair : validPairs) {
       if (previous != null) {
         if ((previous.second.stampType == null
-            || previous.second.stampType == StampTypes.PAUSA_PRANZO)
+            || previous.second.stampType.isGapLunchPairs())
             && (validPair.first.stampType == null
-            || validPair.first.stampType == StampTypes.PAUSA_PRANZO)) {
+            || validPair.first.stampType.isGapLunchPairs())) {
 
           allGapPairs.add(new PairStamping(previous.second, validPair.first));
         }
