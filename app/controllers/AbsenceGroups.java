@@ -1,11 +1,13 @@
 
 package controllers;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 
 import dao.PersonDao;
 import dao.UserDao;
+import dao.WorkingTimeTypeDao;
 import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
 
@@ -25,6 +27,7 @@ import models.Person;
 import models.PersonDay;
 import models.Role;
 import models.User;
+import models.WorkingTimeTypeDay;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
@@ -71,6 +74,8 @@ public class AbsenceGroups extends Controller {
   private static AbsenceHistoryDao absenceHistoryDao;
   @Inject
   private static UserDao userDao;
+  @Inject
+  private static WorkingTimeTypeDao workingTimeTypeDao;
 
   /**
    * End point per la visualizzazione dei gruppi assenze definiti.
@@ -316,12 +321,20 @@ public class AbsenceGroups extends Controller {
           initializationDto);
     }
     
-//    InitializationGroup initialization = absenceService.populateInitialization(person, date, 
-//        groupAbsenceType, absencePeriod.initialization, initializationDto);
-//    
-//    initialization.save();
+    Optional<WorkingTimeTypeDay> wttd = workingTimeTypeDao.getWorkingTimeTypeDay(date, person);
+    if (!wttd.isPresent() || wttd.get().workingTime <= 0) {
+      //TODO: add error scegliere una data attiva e feriale.
+    }
     
-    flash.success("Inizializzazione salvata con successo. (Scherzo)");
+    InitializationGroup initialization = absenceService.populateInitialization(person, date, 
+        groupAbsenceType, wttd.get().workingTime, absencePeriod.initialization, initializationDto);
+    if (initialization == null) {
+      //TODO: add error errore inatteso
+    }
+    
+    initialization.save();
+    
+    flash.success("Inizializzazione salvata con successo.");
     
     initialization(person.id, groupAbsenceType.id, date);
   }
@@ -483,7 +496,7 @@ public class AbsenceGroups extends Controller {
     }
     
     public int workingTypePercent(int hours, int minutes, int workTime) {
-      return minutes(hours, minutes) / workTime * 100;
+      return (minutes(hours, minutes) / workTime) * 100;
       
     }
     
