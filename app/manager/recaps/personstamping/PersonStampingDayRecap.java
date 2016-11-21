@@ -108,12 +108,12 @@ public class PersonStampingDayRecap {
         && wttd.isPresent()) {
       
       // se siamo nel caso di compute e se la persona è attiva effetto il que sera sera.
-      personDayManager.validStampingsAndQueSeraSera(personDay, LocalDateTime.now(), 
+      personDayManager.queSeraSera(personDay, LocalDateTime.now(), 
           wrPersonDay.getPreviousForProgressive(), wttd.get(), 
           wrPersonDay.isFixedTimeAtWork(), lunchInterval, workInterval);
     } else { 
       // altrimenti setto le sole valid stamping
-      personDayManager.setValidPairStampings(personDay);  
+      personDayManager.setValidPairStampings(personDay.stampings);  
     }
 
     // 2) genero le stamping template (colori e timbrature fittizie)

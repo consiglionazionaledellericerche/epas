@@ -206,7 +206,7 @@ public class ShiftManager {
             //-----------------------------
             // legge le coppie di timbrature valide
             List<PairStamping> pairStampings =
-                personDayManager.computeValidPairStampings(personDay.get().stampings);
+                personDayManager.getValidPairStampings(personDay.get().stampings);
 
             // se c'e' una timbratura guardo se e' entro il turno
             if ((personDay.get().stampings.size() == 1)
