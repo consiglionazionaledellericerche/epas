@@ -116,7 +116,7 @@ public class PersonDaysTest {
     stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE));
     stamps.add(stampings(personDay, 15, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO));
     stamps.add(stampings(personDay, 19, 30, WayType.out, null));
-    personDayManager.computeValidPairStampings(personDay.stampings);
+    personDayManager.setValidPairStampings(personDay.stampings);
     assertThat(personDayManager.allValidStampings(personDay));
 
     //coppia valida con dentro timbrature di servizio con ordine sparso ok 
@@ -127,7 +127,7 @@ public class PersonDaysTest {
     stamps.add(stampings(personDay, 15, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO));
     stamps.add(stampings(personDay, 16, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO));
     stamps.add(stampings(personDay, 19, 30, WayType.out, null));
-    personDayManager.computeValidPairStampings(personDay.stampings);
+    personDayManager.setValidPairStampings(personDay.stampings);
     assertThat(personDayManager.allValidStampings(personDay));
 
     //coppia non valida 
@@ -136,7 +136,7 @@ public class PersonDaysTest {
     stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE));
     stamps.add(stampings(personDay, 15, 30, WayType.in, null));
     stamps.add(stampings(personDay, 19, 30, WayType.out, null));
-    personDayManager.computeValidPairStampings(personDay.stampings);
+    personDayManager.setValidPairStampings(personDay.stampings);
     assertThat(!personDayManager.allValidStampings(personDay));
 
     
@@ -175,7 +175,7 @@ public class PersonDaysTest {
     stampings.add(stampings(personDay, 17, 00, WayType.out, null));
     personDay.setStampings(stampings);
     
-    List<PairStamping> validPairs = personDayManager.computeValidPairStampings(personDay.stampings);
+    List<PairStamping> validPairs = personDayManager.getValidPairStampings(personDay.stampings);
     
     gapLunchPair = personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
     
@@ -202,7 +202,7 @@ public class PersonDaysTest {
     stampings.add(stampings(personDay, 17, 00, WayType.out, null));
     personDay.setStampings(stampings);
     
-    validPairs = personDayManager.computeValidPairStampings(personDay.stampings);
+    validPairs = personDayManager.getValidPairStampings(personDay.stampings);
     gapLunchPair = personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
     
     assertThat(validPairs.size()).isEqualTo(1);
@@ -228,7 +228,7 @@ public class PersonDaysTest {
     stampings.add(stampings(personDay, 17, 00, WayType.out, null));
     personDay.setStampings(stampings);
     
-    validPairs = personDayManager.computeValidPairStampings(personDay.stampings);
+    validPairs = personDayManager.getValidPairStampings(personDay.stampings);
     gapLunchPair = personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
     
     assertThat(validPairs.size()).isEqualTo(1);
@@ -243,7 +243,7 @@ public class PersonDaysTest {
     stampings.add(stampings(personDay, 17, 00, WayType.out, null));
     personDay.setStampings(stampings);
     
-    validPairs = personDayManager.computeValidPairStampings(personDay.stampings);
+    validPairs = personDayManager.getValidPairStampings(personDay.stampings);
     gapLunchPair = personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
     
     assertThat(validPairs.size()).isEqualTo(2);
@@ -262,7 +262,7 @@ public class PersonDaysTest {
     LocalTime startLunch = new LocalTime(12,0,0);
     LocalTime endLunch = new LocalTime(15,0,0);
 
-    validPairs = personDayManager.computeValidPairStampings(personDay.stampings);
+    validPairs = personDayManager.getValidPairStampings(personDay.stampings);
     gapLunchPair = personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
     
     assertThat(gapLunchPair.size()).isEqualTo(0);
@@ -289,7 +289,7 @@ public class PersonDaysTest {
         second.getDayOfMonth(), 16, 30);
     //final LocalDateTime time18 = new LocalDateTime(second).withHourOfDay(18);
     
-    personDayManager.validStampingsAndQueSeraSera(personDay, exitingTime, 
+    personDayManager.queSeraSera(personDay, exitingTime, 
         Optional.fromNullable(previousForProgressive), normalDay(), false,
         new LocalTimeInterval(startLunch, endLunch), new LocalTimeInterval(startWork, endWork));
     
