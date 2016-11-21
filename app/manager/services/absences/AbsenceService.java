@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
 
+import controllers.AbsenceGroups.InitializationDto;
 import controllers.Security;
 
 import dao.PersonChildrenDao;
@@ -448,6 +449,27 @@ public class AbsenceService {
       groupsPermitted.remove(employee);
     }
     return groupsPermitted;
+  }
+  
+  public InitializationGroup populateInitialization(Person person, LocalDate date,
+      GroupAbsenceType groupAbsenceType, int workTime,
+      InitializationGroup previous,  
+      InitializationDto initializationDto) {
+    
+    // Conversione (riduce la complessità per l'amministratore)
+    InitializationGroup initialization = new InitializationGroup();
+    initialization.person = person;
+    initialization.initializationDate = date;
+    initialization.groupAbsenceType = groupAbsenceType;
+    if (previous != null) {
+      initialization = previous;
+    }
+    
+    initializationDto.populateInitialization(initialization, workTime);
+    
+    
+    return null;
+    
   }
 
   
