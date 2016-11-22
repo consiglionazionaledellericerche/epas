@@ -230,23 +230,14 @@ public class ServiceFactories {
       
       absencePeriod.complationAmountType = complationBehaviour.amountType;
       absencePeriod.complationCodes = complationBehaviour.complationCodes;
+      
       // i codici di rimpiazzamento li preparo ordinati per ammontare di rimpiazzamento
-      for (AbsenceType absenceType : complationBehaviour.replacingCodes) {
-        int amount = absenceEngineUtility.replacingAmount(absenceType, 
-            absencePeriod.complationAmountType);
-        if (amount < 1) {
-          absencePeriod.errorsBox.addCriticalError(date, absenceType, 
-              CriticalProblem.IncalcolableReplacingAmount);
-          continue;
-        }
-        if (absencePeriod.replacingCodesDesc.get(amount) != null) {
-          AbsenceType conflictingType = absencePeriod.replacingCodesDesc.get(amount);
-          absencePeriod.errorsBox.addCriticalError(date, absenceType, conflictingType, 
-              CriticalProblem.ConflictingReplacingAmount);
-          continue;
-        }
-        absencePeriod.replacingCodesDesc.put(amount, absenceType);
-        absencePeriod.replacingTimes.put(absenceType, amount);
+      absenceEngineUtility.setReplacingCodesDesc(
+          absencePeriod.complationAmountType, complationBehaviour.replacingCodes, date, //final
+          absencePeriod.replacingCodesDesc, absencePeriod.errorsBox);                   //edit
+      // genero la mappa inversa
+      for (Integer amount : absencePeriod.replacingCodesDesc.keySet()) {
+        absencePeriod.replacingTimes.put(absencePeriod.replacingCodesDesc.get(amount), amount);
       }
     }
     

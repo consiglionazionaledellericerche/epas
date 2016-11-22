@@ -6,7 +6,6 @@ import com.google.common.collect.Lists;
 import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
 
-import controllers.AbsenceGroups.InitializationDto;
 import controllers.Security;
 
 import dao.PersonChildrenDao;
@@ -451,27 +450,112 @@ public class AbsenceService {
     return groupsPermitted;
   }
   
+  /**
+   * TODO: Operazione inversa.. è più complessa del previsto.
+   * @param absencePeriod period 
+   * @param workTime tempo a lavoro medio
+   * @return dto
+   */
+  public InitializationDto buildDto(AbsencePeriod absencePeriod, int workTime) {
+    InitializationDto initializationDto = new InitializationDto();
+    
+    if (absencePeriod.initialization == null) {
+      return initializationDto;
+    }
+    
+    int remaining = absencePeriod.initialization.takableUsed;
+    
+    if (absencePeriod.isTakableWithLimit()) {
+      if (absencePeriod.isTakableUnits()) {
+        initializationDto.takenUnits = absencePeriod.initialization.takableUsed / 100;
+        remaining = workingTimeMinutes(absencePeriod.initialization.takableUsed % 100, workTime);
+      } 
+    } 
+    
+    if (absencePeriod.isComplationMinutes()) {
+      remaining = absencePeriod.initialization.complationUsed;
+    } else if (absencePeriod.isComplationUnits()) {
+      remaining = workingTimeMinutes(absencePeriod.initialization.complationUsed % 100, workTime);
+    }
+    
+    initializationDto.takenHours = remaining / 60;
+    initializationDto.takenMinutes = remaining % 60;
+    
+    return initializationDto;
+    
+  }
+  
+  /**
+   * A partire dal dto crea l'oggetto InitializationGroup. Se esiste già una inizializzazione 
+   * nel period la sovrascrive.
+   * @param person persona
+   * @param date data inizializzazione
+   * @param absencePeriod period
+   * @param workTime tempo a lavoro medio
+   * @param initializationDto dto
+   * @return inizializzazione
+   */
   public InitializationGroup populateInitialization(Person person, LocalDate date,
-      GroupAbsenceType groupAbsenceType, int workTime,
-      InitializationGroup previous,  
-      InitializationDto initializationDto) {
+      AbsencePeriod absencePeriod, int workTime, InitializationDto initializationDto) {
     
     // Conversione (riduce la complessità per l'amministratore)
     InitializationGroup initialization = new InitializationGroup();
     initialization.person = person;
     initialization.initializationDate = date;
-    initialization.groupAbsenceType = groupAbsenceType;
-    if (previous != null) {
-      initialization = previous;
+    initialization.groupAbsenceType = absencePeriod.groupAbsenceType;
+    if (absencePeriod.initialization != null) {
+      initialization = absencePeriod.initialization;
     }
     
-    initializationDto.populateInitialization(initialization, workTime);
+    //reset
+    initialization.complationUsed = 0;
+    initialization.takableUsed = 0;
     
+    int minutes = initializationDto.takenHours * 60 + initializationDto.takenMinutes;
     
-    return null;
+    //Takable used
+    if (absencePeriod.isTakableMinutes()) {
+      initialization.takableUsed = minutes;
+    } else if (absencePeriod.isTakableUnits()) {
+      initialization.takableUsed = (initializationDto.takenUnits * 100) 
+          + workingTypePercent(minutes, workTime);
+    }
     
-  }
+    //Complation used
+    if (absencePeriod.isComplationUnits()) {
+      initialization.complationUsed = workingTypePercentModule(minutes, workTime);
+    } else if (absencePeriod.isComplationMinutes()) {
+      
+      //completare finchè si può minutes
+      while (true) {
+        Optional<AbsenceType> absenceType = absenceEngineUtility
+            .whichReplacingCode(absencePeriod.replacingCodesDesc, date, minutes);
+        if (!absenceType.isPresent()) {
+          break;
+        }
+        minutes -= absencePeriod.replacingTimes.get(absenceType.get());
+      }
+      initialization.complationUsed = minutes;
+    }
 
+    return initialization;
+  }
+  
+  private int workingTimeMinutes(int percent, int workTime) {
+    // workTime : 100 = x : percent
+    return workTime * percent / 100;
+  }
+  
+  private int workingTypePercent(int minutes, int workTime) {
+    int time = minutes * 100; 
+    int percent = (time) / workTime;
+    return percent;
+  }
+  
+  private int workingTypePercentModule(int minutes, int workTime) {
+    int workTimePercent = workingTypePercent(minutes, workTime); 
+    return workTimePercent % 100;
+  }
   
   @Deprecated
   private InsertReport temporaryInsertCompensatoryRest(Person person, 

@@ -86,6 +86,14 @@ public class AbsencePeriod {
   public boolean isTakableWithLimit() {
     return isTakable() && !isTakableNoLimit();
   }
+  
+  public boolean isTakableUnits() {
+    return isTakableWithLimit() && this.takeAmountType == AmountType.units;
+  }
+  
+  public boolean isTakableMinutes() {
+    return isTakableWithLimit() && this.takeAmountType == AmountType.minutes;
+  }
 
   /**
    * Imposta l'ammontare fisso del periodo.
@@ -202,8 +210,17 @@ public class AbsencePeriod {
   }
   
   public boolean isComplation() {
-    return complationAmountType != null; 
+    return this.complationAmountType != null; 
   }
+  
+  public boolean isComplationUnits() {
+    return isComplation() && this.complationAmountType == AmountType.units; 
+  }
+  
+  public boolean isComplationMinutes() {
+    return isComplation() && this.complationAmountType == AmountType.minutes; 
+  }
+  
   
   /**
    * Calcola i rimpiazzamenti corretti nel periodo.
@@ -234,7 +251,7 @@ public class AbsencePeriod {
           .residualComplationBefore(complationAmount - amount)
           .consumedComplation(amount).build();
       Optional<AbsenceType> replacingCode = absenceEngineUtility
-          .whichReplacingCode(this, absence.getAbsenceDate(), complationAmount);
+          .whichReplacingCode(this.replacingCodesDesc, absence.getAbsenceDate(), complationAmount);
       if (replacingCode.isPresent()) {
         dayInPeriod.setCorrectReplacing(replacingCode.get());
         complationAmount -= this.replacingTimes.get(replacingCode.get());

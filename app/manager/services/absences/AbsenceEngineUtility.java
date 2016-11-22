@@ -1,6 +1,7 @@
 package manager.services.absences;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
@@ -13,6 +14,7 @@ import it.cnr.iit.epas.DateUtility;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.PersonDayManager;
+import manager.services.absences.errors.CriticalError.CriticalProblem;
 import manager.services.absences.errors.ErrorsBox;
 import manager.services.absences.model.AbsencePeriod;
 
@@ -33,9 +35,11 @@ import models.absences.TakableAbsenceBehaviour;
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 
 @Slf4j
 public class AbsenceEngineUtility {
@@ -329,16 +333,50 @@ public class AbsenceEngineUtility {
   }
   
   /**
+   * Popola la lista ordinata in senso decrescente replacingCodesDesc a partire dal set di codici
+   * replacingCodes. Popola gli eventuali errori.
+   * @param complationAmountType tipo ammontare
+   * @param replacingCodes i codici da analizzare
+   * @param date data per errori
+   * @param replacingCodesDesc lista popolata
+   * @param errorsBox errori popolati
+   */
+  public void setReplacingCodesDesc(final AmountType complationAmountType, 
+      final Set<AbsenceType> replacingCodes, final LocalDate date,
+      SortedMap<Integer, AbsenceType> replacingCodesDesc, 
+      ErrorsBox errorsBox) {
+    
+    //replacingCodesDesc = Maps.newTreeMap(Collections.reverseOrder());          
+    
+    for (AbsenceType absenceType : replacingCodes) {
+      int amount = replacingAmount(absenceType, complationAmountType);
+      if (amount < 1) {
+        errorsBox.addCriticalError(date, absenceType, 
+            CriticalProblem.IncalcolableReplacingAmount);
+        continue;
+      }
+      if (replacingCodesDesc.get(amount) != null) {
+        AbsenceType conflictingType = replacingCodesDesc.get(amount);
+        errorsBox.addCriticalError(date, absenceType, conflictingType, 
+            CriticalProblem.ConflictingReplacingAmount);
+        continue;
+      }
+      replacingCodesDesc.put(amount, absenceType);
+    }
+  }
+  
+  /**
    * Quale rimpiazzamento inserire se aggiungo il complationAmount al period nella data. 
    * @return tipo del rimpiazzamento
    */
-  public Optional<AbsenceType> whichReplacingCode(AbsencePeriod absencePeriod, 
+  public Optional<AbsenceType> whichReplacingCode(
+      SortedMap<Integer, AbsenceType> replacingCodesDesc, 
       LocalDate date, int complationAmount) {
     
-    for (Integer replacingTime : absencePeriod.replacingCodesDesc.keySet()) {
+    for (Integer replacingTime : replacingCodesDesc.keySet()) {
       int amountToCompare = replacingTime;
       if (amountToCompare <= complationAmount) {
-        return Optional.of(absencePeriod.replacingCodesDesc.get(replacingTime));
+        return Optional.of(replacingCodesDesc.get(replacingTime));
       }
     }
     

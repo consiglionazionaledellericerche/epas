@@ -73,7 +73,27 @@ public class WorkingTimeType extends BaseModel {
   public String toString() {
     return description;
   }
-
+  
+  /**
+   * Il tempo a lavoro medio giornaliero. 
+   * @return tempo medio.
+   */
+  public int weekAverageWorkingTime() {
+    int count = 0;
+    int sum = 0;
+    for (WorkingTimeTypeDay wttd : this.workingTimeTypeDays) {
+      if (wttd.workingTime > 0) {
+        sum += wttd.workingTime;
+        count++;
+      }
+    }
+    return sum / count;
+  }
+  
+  /**
+   * Euristica per capire se il tipo orario è orizzontale.
+   * @return esito
+   */
   @Transient
   public boolean horizontalEuristic() {
 
