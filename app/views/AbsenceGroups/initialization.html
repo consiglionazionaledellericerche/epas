@@ -25,90 +25,99 @@
      
      #{f.date 'date', value:date.format() /}
      #{f.hidden 'personId', value:person.id /}
-     
   
   #{/form}
   
-   #{if periodChain.containsCriticalErrors()}
-    #{alert color:'danger'}
-      <p>Impossibile visualizzare la situazione. Effettuare una segnalazione.</p>
-    #{/alert}
-  #{/if}
-  #{if periodChain.childIsMissing()}
-    #{alert color:'danger'}
-      <p>Impossibile visualizzare la situazione. Figlio non presente in anagrafica o fuori età.</p>
-    #{/alert}
-  #{/if}
-  
-  
+  #{if periodChain}
+	  #{if periodChain.containsCriticalErrors()}
+	    #{alert color:'danger'}
+	      <p>Impossibile visualizzare la situazione. Effettuare una segnalazione.</p>
+	    #{/alert}
+	  #{/if}
+	  #{if periodChain.childIsMissing()}
+	    #{alert color:'danger'}
+	      <p>Impossibile visualizzare la situazione. Figlio non presente in anagrafica o fuori età.</p>
+	    #{/alert}
+	  #{/if}
 
-  <ul>
+	  <ul>
+	  
+	  <!-- Suggerimento -->
+	  <li class="list-group-item list-group-item-info">
+	    <p>
+	        Imposta i valori di inizializzazione per <strong>${groupAbsenceType.description}</strong> alla data <strong>${date.format()}</strong>
+	    </p>
+	  </li>
+	  <li class="list-group-item">
+	    
+	    <!-- Riepilogo gruppo -->
+	    <p>
+	        #{if absencePeriod.isTakableWithLimit() }
+	           <strong>Tipo periodo</strong> &{absencePeriod.groupAbsenceType.periodType}<br>
+	           <strong>Validità periodo</strong> ${absencePeriod.from.format()} - ${absencePeriod.to.format()}
+	       
+	           <br><strong>Totale utilizzabile</strong> 
+	           ${templateUtility.formatAmount(absencePeriod.getPeriodTakableAmount(), absencePeriod.takeAmountType)}<br>
+	        #{/if}
+	        #{if averageWeekWorkingTime > 0}
+	             <strong>Tempo a lavoro medio</strong> ${averageWeekWorkingTime.printHourMinute()}<br>  
+	        #{/if}
+	       
+	    </p>
+	    <!-- Inizializzazione precedente -->
+	    #{if absencePeriod.initialization}
+	    
+	     #{alert color:'warning'}
+	       Per questo gruppo è già presente una inizializzazione. Cliccando su salva verrà sovrascritta.
+	     #{/alert}
+	        *{
+	        ${absencePeriod.initialization.initializationDate}<br> 
+	        takable total ${absencePeriod.initialization.takableTotal}<br>
+	        takable used ${absencePeriod.initialization.takableUsed}<br>
+	        complation used ${absencePeriod.initialization.complationUsed}<br>
+	        }*
+	     </p>
+	    #{/if}
+	    
+	  #{form action:@AbsenceGroups.saveInitialization(), method:'POST', autocomplete:false, class:'form form-horizontal group'}
+	  
+	  
+	  
+	  
+	  #{f.hidden 'groupAbsenceTypeId', value:groupAbsenceType.id /}
+	  #{f.hidden 'date', value:date.format() /}
+	  #{f.hidden 'personId', value:person.id /}
+	
+	  *{
+	  #{f.date 'forceBegin', disabled:'true' /}
+	  #{f.date 'forceEnd', disabled:'true' /}
+	  #{f.input 'takableTotal', type:'number' /} 
+	  }*
+	  
+	  #{if absencePeriod.isTakableUnits()}
+	    #{f.input 'initializationDto.takenUnits', value:initializationDto.takenUnits, type:'number' /}
+	  #{/if}
+	  #{f.input 'initializationDto.takenHours', value:initializationDto.takenHours, type:'number' /}
+	  #{f.selectEnum 'initializationDto.takenMinutes', items:initializationDto.selectableMinutes(), value:initializationDto.takenMinutes, byEquals:'true' /}
+	 
+	  #{b.buttons center:true}
+	   #{b.submit 'Salva'/}
+	  #{/b.buttons}
+	
+	  
+	  #{/form}
+	  </li>
+	
+	  #{if absencePeriod.errorsBox.containsCriticalErrors() }
+	      <li class="list-group-item">ci sono errori critici. TODO: elencarli</li>
+	  #{/if}
+	  #{if absencePeriod.errorsBox.containsAbsencesErrors() }
+	     <li class="list-group-item">ci sono errori legati alle assenze. TODO: elencarli</li>
+	  #{/if}
+	    
+	
+	  </ul>
   
-  <!-- Suggerimento -->
-  <li class="list-group-item list-group-item-info">
-    <p>
-        Imposta i valori di inizializzazione per <strong>${groupAbsenceType.description}</strong> alla data <strong>${date.format()}</strong>
-    </p>
-  </li>
-  <li class="list-group-item">
-    
-    <!-- Riepilogo gruppo -->
-    <p>
-        #{if absencePeriod.isTakableWithLimit() }
-           <strong>Tipo periodo</strong> &{absencePeriod.groupAbsenceType.periodType}<br>
-           <strong>Validità periodo</strong> ${absencePeriod.from.format()} - ${absencePeriod.to.format()}
-       
-           <br><strong>Totale utilizzabile</strong> 
-           ${templateUtility.formatAmount(absencePeriod.getPeriodTakableAmount(), absencePeriod.takeAmountType)}<br>
-       #{/if}
-    </p>
-    <!-- Inizializzazione precedente -->
-    #{if absencePeriod.initialization}
-     <p>Per questo gruppo è già presente una inizializzazione. Cliccando su salva verrà sovrascritta.<br> 
-        #{f.view 'date', value:initializationDto.date /} 
-        #{f.view 'takableTotal', type:'number' /}
-        #{f.view 'takableUsed', type:'number' /}
-        #{f.view 'complationUsed', type:'number' /}
-     </p>
-    #{/if}
-    
-  #{form action:@AbsenceGroups.saveInitialization(), method:'POST', autocomplete:false, class:'form form-horizontal group'}
-  
-  
-  
-  
-  #{f.hidden 'groupAbsenceTypeId', value:groupAbsenceType.id /}
-  #{f.hidden 'date', value:date.format() /}
-  #{f.hidden 'personId', value:person.id /}
-
-  *{
-  #{f.date 'forceBegin', disabled:'true' /}
-  #{f.date 'forceEnd', disabled:'true' /}
-  #{f.input 'takableTotal', type:'number' /} 
-  }*
-  
-  #{if initializationDto.isDayTakable()}
-    #{f.input 'initializationDto.takenUnits', value:initializationDto.takenUnits, type:'number' /}
   #{/if}
-  #{f.input 'initializationDto.takenHours', value:initializationDto.takenHours, type:'number' /}
-  #{f.selectEnum 'initializationDto.takenMinutes', items:initializationDto.selectableMinutes(), value:initializationDto.takenMinutes, byEquals:'true' /}
- 
-  #{b.buttons center:true}
-   #{b.submit 'Salva'/}
-  #{/b.buttons}
-
-  
-  #{/form}
-  </li>
-
-  #{if absencePeriod.errorsBox.containsCriticalErrors() }
-      <li class="list-group-item">ci sono errori critici. TODO: elencarli</li>
-  #{/if}
-  #{if absencePeriod.errorsBox.containsAbsencesErrors() }
-     <li class="list-group-item">ci sono errori legati alle assenze. TODO: elencarli</li>
-  #{/if}
-    
-
-  </ul>
   
 </div>

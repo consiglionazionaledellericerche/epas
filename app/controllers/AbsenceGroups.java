@@ -20,6 +20,7 @@ import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceForm.AbsenceInsertTab;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
+import manager.services.absences.InitializationDto;
 import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.PeriodChain;
 
@@ -27,10 +28,9 @@ import models.Person;
 import models.PersonDay;
 import models.Role;
 import models.User;
-import models.WorkingTimeTypeDay;
+import models.WorkingTimeType;
 import models.absences.Absence;
 import models.absences.AbsenceType;
-import models.absences.AmountType;
 import models.absences.CategoryGroupAbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.DefaultGroup;
@@ -40,8 +40,6 @@ import models.absences.JustifiedType;
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
 
-import play.data.validation.Max;
-import play.data.validation.Min;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.db.jpa.JPA;
@@ -273,29 +271,48 @@ public class AbsenceGroups extends Controller {
       date = LocalDate.now();
     }
     
+    //Gruppi inizializzabili e gruppo selezionato
     List<GroupAbsenceType> initializableGroups = initializablesGroups();
     GroupAbsenceType groupAbsenceType = initializableGroups.iterator().next();
-    
     if (groupAbsenceTypeId != null) {
       groupAbsenceType = GroupAbsenceType.findById(groupAbsenceTypeId);
       notFoundIfNull(groupAbsenceType);
       Verify.verify(initializableGroups.contains(groupAbsenceType));
     }
     
+    //Tempo a lavoro medio
+    Optional<WorkingTimeType> wtt = workingTimeTypeDao.getWorkingTimeType(date, person);
+    if (!wtt.isPresent()) {
+      wtt = workingTimeTypeDao.getWorkingTimeType(date.plusDays(1), person);
+    }
+    if (!wtt.isPresent()) {
+      Validation.addError("date", "Deve essere una data attiva, "
+          + "o immediatamente precedente l'inizio di un contratto.");
+      render(initializableGroups, groupAbsenceType, date, person);
+    }
+    int averageWeekWorkingTime = wtt.get().weekAverageWorkingTime();
+    
+    //Stato del gruppo
     PeriodChain periodChain = absenceService.residual(person, groupAbsenceType, date);
     if (periodChain.periods.isEmpty()) {
       render(initializableGroups, person, periodChain);
     }
-    
     AbsencePeriod absencePeriod = periodChain.periods.iterator().next();
+  
     InitializationDto initializationDto = new InitializationDto();
-    initializationDto.takenAmountType = absencePeriod.takeAmountType;
-    initializationDto.complationAmountType = absencePeriod.complationAmountType;
     
-    render(initializableGroups, person, groupAbsenceType, date, periodChain, absencePeriod, initializationDto);
+    render(initializableGroups, person, groupAbsenceType, date, averageWeekWorkingTime, 
+        periodChain, absencePeriod, initializationDto);
 
   }
   
+  /**
+   * Persiste una nuova inizializzazione
+   * @param personId persona
+   * @param groupAbsenceTypeId gruppo
+   * @param date data
+   * @param initializationDto dto
+   */
   public static void saveInitialization(Long personId, Long groupAbsenceTypeId, LocalDate date, 
       @Valid InitializationDto initializationDto) {
     
@@ -309,11 +326,18 @@ public class AbsenceGroups extends Controller {
         groupAbsenceType, date);
     Preconditions.checkState(!periodChain.periods.isEmpty());
     AbsencePeriod absencePeriod = periodChain.periods.iterator().next();
-    if (absencePeriod.isTakableWithLimit()) {
-      initializationDto.takenAmountType = absencePeriod.takeAmountType;
-    }
-    initializationDto.complationAmountType = absencePeriod.complationAmountType;
+    
 
+    //Tempo a lavoro medio
+    Optional<WorkingTimeType> wtt = workingTimeTypeDao.getWorkingTimeType(date, person);
+    if (!wtt.isPresent()) {
+      wtt = workingTimeTypeDao.getWorkingTimeType(date.plusDays(1), person);
+    }
+    if (!wtt.isPresent()) {
+      Validation.addError("date", "Deve essere una data attiva, "
+          + "o immediatamente precedente l'inizio di un contratto.");
+    }
+    
     // Gli errori della richiesta inserimento inizializzazione
     if (Validation.hasErrors()) {
       flash.error("Correggere gli errori indicati");
@@ -321,18 +345,17 @@ public class AbsenceGroups extends Controller {
           initializationDto);
     }
     
-    Optional<WorkingTimeTypeDay> wttd = workingTimeTypeDao.getWorkingTimeTypeDay(date, person);
-    if (!wttd.isPresent() || wttd.get().workingTime <= 0) {
-      //TODO: add error scegliere una data attiva e feriale.
-    }
-    
     InitializationGroup initialization = absenceService.populateInitialization(person, date, 
-        groupAbsenceType, wttd.get().workingTime, absencePeriod.initialization, initializationDto);
+        absencePeriod, wtt.get().weekAverageWorkingTime(), 
+         
+        initializationDto);
     if (initialization == null) {
       //TODO: add error errore inatteso
     }
     
     initialization.save();
+    
+    //TODO: check del gruppo per gli errori
     
     flash.success("Inizializzazione salvata con successo.");
     
@@ -430,90 +453,5 @@ public class AbsenceGroups extends Controller {
     Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
   }
   
-  public static class InitializationDto {
-    
-    public AmountType takenAmountType;
-    public AmountType complationAmountType;
-    
-    @Min(0)
-    public Integer takenHours = 0;
-    @Min(0) @Max(59)
-    public Integer takenMinutes = 0;
-    @Min(0) @Max(99)
-    public Integer takenUnits = 0;
-       
-    
-    public InitializationGroup populateInitialization(InitializationGroup initialization, 
-        int workTime) {
-      
-      //reset
-      initialization.complationUsed = 0;
-      initialization.takableUsed = 0;
-      
-      //Takable used
-      if (isMinuteTakable()) {
-        initialization.takableUsed = minutes(this.takenHours, this.takenMinutes);
-      }
-      if (isDayTakable()) {
-        initialization.takableUsed = (this.takenUnits * 100) 
-            + workingTypePercent(this.takenHours, this.takenMinutes, workTime);
-      }
-      
-      //Complation used
-      if (isMinuteComplation()) {
-        initialization.complationUsed = minutes(this.takenHours, this.takenMinutes);
-      }
-      if (isDayComplation()) {
-        initialization.complationUsed = 
-            workingTypePercentModule(this.takenHours, this.takenMinutes, workTime);
-      }
-      if (isMinuteTakable() && isMinuteComplation()) {
-        //eccezione 661.. forse il gruppo è da modellare meglio
-        initialization.complationUsed = this.takenMinutes;
-      }
-      
-      return initialization;
-    }
-    
-    public boolean isDayTakable() {
-      return this.takenAmountType != null && this.takenAmountType == AmountType.units; 
-    }
-    
-    public boolean isMinuteTakable() {
-      return this.takenAmountType != null && this.takenAmountType == AmountType.minutes;
-    }
-    
-    public boolean isDayComplation() {
-      return this.complationAmountType != null && this.complationAmountType == AmountType.units; 
-    }
-    
-    public int minutes(int hours, int minutes) {
-      return hours * 60 + minutes;
-    }
-    
-    public boolean isMinuteComplation() {
-      return this.complationAmountType != null && this.complationAmountType == AmountType.minutes;
-    }
-    
-    public int workingTypePercent(int hours, int minutes, int workTime) {
-      return (minutes(hours, minutes) / workTime) * 100;
-      
-    }
-    
-    public int workingTypePercentModule(int hours, int minutes, int workTime) {
-      return workingTypePercent(hours, minutes, workTime) % 100;
-    }
-    
-    /**
-     * I minuti inseribili...
-     * @return list
-     */
-    public List<Integer> selectableMinutes() {
-      List<Integer> hours = Lists.newArrayList();
-      for (int i = 0; i <= 59; i++) {
-        hours.add(i);
-      }
-      return hours;
-    }
-  }
+  
 }
