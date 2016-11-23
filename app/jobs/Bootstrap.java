@@ -88,6 +88,8 @@ public class Bootstrap extends Job<Void> {
       log.info(" ... migrazione già applicata ...");
       //absenceMigration.absenceMigrationProcessor(false);
     }
+    absenceMigration.fixFuoriSedeCodes();
+    log.info("... codice FUORI SEDE ripristinati e disabilitati ...");
     
     log.info("Conclusa migrazione assenze!");
 
