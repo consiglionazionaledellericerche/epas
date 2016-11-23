@@ -19,6 +19,7 @@ import dao.wrapper.IWrapperFactory;
 import helpers.jpa.ModelQuery.SimpleResults;
 
 import manager.competences.CompetenceCodeDTO;
+import manager.competences.ShiftTimeTableDto;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 
@@ -31,6 +32,7 @@ import models.Person;
 import models.PersonCompetenceCodes;
 import models.PersonDay;
 import models.PersonReperibilityType;
+import models.ShiftTimeTable;
 import models.TotalOvertime;
 
 import org.apache.commons.lang.StringUtils;
@@ -672,5 +674,28 @@ public class CompetenceManager {
   }
 
 
+  /**
+   * 
+   * @param list la lista contenente tutte le timetable dei turni disponibili
+   * @return una lista di dto modellati per esigenze di template.
+   */
+  public List<ShiftTimeTableDto> convertFromShiftTimeTable(List<ShiftTimeTable> list) {
+    final String stamping_format = "HH:mm";
+    List<ShiftTimeTableDto> dtoList = list.stream().map(shiftTimeTable -> {
+      ShiftTimeTableDto dto = new ShiftTimeTableDto();
+      dto.id = shiftTimeTable.id;
+      dto.endAfternoon = shiftTimeTable.endAfternoon.toString(stamping_format);
+      dto.endAfternoonLunchTime = shiftTimeTable.endAfternoonLunchTime.toString(stamping_format);
+      dto.endMorning = shiftTimeTable.endMorning.toString(stamping_format);
+      dto.endMorningLunchTime = shiftTimeTable.endMorningLunchTime.toString(stamping_format);
+      dto.startAfternoon = shiftTimeTable.startAfternoon.toString(stamping_format);
+      dto.startAfternoonLunchTime = shiftTimeTable
+          .startAfternoonLunchTime.toString(stamping_format);
+      dto.startMorning = shiftTimeTable.startMorning.toString(stamping_format);
+      dto.startMorningLunchTime = shiftTimeTable.startMorningLunchTime.toString(stamping_format);
+      return dto;
+    }).collect(Collectors.toList());
+    return dtoList;
+  }
 
 }

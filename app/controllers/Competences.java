@@ -29,6 +29,7 @@ import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.SecureManager;
 import manager.competences.CompetenceCodeDTO;
+import manager.competences.ShiftTimeTableDto;
 import manager.recaps.competence.CompetenceRecap;
 import manager.recaps.competence.CompetenceRecapFactory;
 import manager.recaps.competence.PersonMonthCompetenceRecap;
@@ -67,6 +68,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -754,7 +756,7 @@ public class Competences extends Controller {
 
     render("@editReperibility", officePeople, office);
   }
-  
+
   /**
    * Metodo che renderizza la form di inserimento di un nuovo servizio da attivare
    *     per la reperibilità.
@@ -799,7 +801,7 @@ public class Competences extends Controller {
         type.description, type.office);
     activateServices(type.office.id);
   }
-  
+
   public static void saveShift(@Valid ShiftCategories cat, @Valid Office office) {
 
     rules.checkIfPermitted(office);
@@ -869,8 +871,8 @@ public class Competences extends Controller {
 
     render(type, officePeople, office);
   }
-  
-  
+
+
   /**
    * metodo che controlla e poi persiste la disabilitazione/abilitazione di un servizio.
    * @param reperibilityTypeId l'id del servizio da disabilitare/abilitare
@@ -905,7 +907,7 @@ public class Competences extends Controller {
 
   /**
    * metodo che ritorna la form di inserimento/modifica di un servizio.
-   * @param reperibilityTypeId l'id del servizio da editare
+   * @param shiftCategoryId l'id del servizio da editare
    */
   public static void editShift(Long shiftCategoryId) {
     ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
@@ -918,12 +920,30 @@ public class Competences extends Controller {
   }
 
   /**
-   * 
-   * @param shiftCategoryId
+   * metodo che ritorna al template le informazioni per poter configurare correttamente il turno.
+   * @param shiftCategoryId l'id del turno da configurare
    */
   public static void configureShift(Long shiftCategoryId) {
     ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
+    
     List<ShiftTimeTable> shiftList = shiftDao.getAllShifts();
-    render(shiftList, cat);
+    List<ShiftTimeTableDto> dtoList = competenceManager.convertFromShiftTimeTable(shiftList);
+    render(dtoList, cat);
+  }
+  
+  /**
+   * 
+   * @param id
+   * @param shiftCategoryId
+   */
+  public static void linkTimeTableToShift(Long id, Long shiftCategoryId) {
+    ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
+    ShiftTimeTable timeTable = shiftDao.getShiftTimeTableById(id);
+    ShiftType shift = new ShiftType();
+    shift.shiftCategories = cat;
+    shift.shiftTimeTable = timeTable;
+    shift.save();
+    flash.success("");
+    render();
   }
 }

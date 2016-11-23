@@ -196,5 +196,16 @@ public class ShiftDao extends DaoBase {
     JPQLQuery query = getQueryFactory().from(stt);
     return query.list(stt);
   }
+
+  /**
+   * 
+   * @param id l'id della timeTable che si intende ritornare
+   * @return la timeTable per i turni da associare al servizio.
+   */
+  public ShiftTimeTable getShiftTimeTableById(Long id) {
+    final QShiftTimeTable stt = QShiftTimeTable.shiftTimeTable;
+    JPQLQuery query = getQueryFactory().from(stt).where(stt.id.eq(id));
+    return query.singleResult(stt);
+  }
 }
 
