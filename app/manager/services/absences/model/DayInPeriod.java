@@ -155,13 +155,15 @@ public class DayInPeriod {
     List<TemplateRow> templateRows = Lists.newArrayList();
     
     for (TakenAbsence takenAbsence : takenNotComplation()) {
-      TemplateRow takenRow = buildTakenNotComplation(takenAbsence, takenAbsence.beforeInitialization);
+      TemplateRow takenRow = buildTakenNotComplation(takenAbsence, 
+          takenAbsence.beforeInitialization);
       templateRows.add(takenRow);
     }
 
     TakenAbsence takenComplation = takenComplation();
     if (takenComplation != null) {
-      TemplateRow complationRow = buildTakenComplation(takenComplation, takenComplation.beforeInitialization);
+      TemplateRow complationRow = buildTakenComplation(takenComplation, 
+          takenComplation.beforeInitialization);
       templateRows.add(complationRow);
       if (correctReplacing != null) {
         TemplateRow replacingRow = buildReplacing(takenComplation, nothing);
@@ -226,7 +228,7 @@ public class DayInPeriod {
     takenRow.absenceWarnings = absencePeriod.errorsBox.absenceWarnings(takenRow.absence);
     if (absencePeriod.isTakableWithLimit()) {
       takenRow.usableColumn = true;
-      if (!takenRow.onlyNotOnHoliday()) {
+      if (!takenRow.onlyNotOnHoliday() && !beforeInitialization) {
         takenRow.usableLimit = formatAmount(takenAbsence.periodResidualBefore(), 
             takenAbsence.amountType);
         takenRow.usableTaken = formatAmount(takenAbsence.takenAmount, takenAbsence.amountType);
@@ -249,7 +251,7 @@ public class DayInPeriod {
       complationRow.usableColumn = true;
     }
     complationRow.complationColumn = true;
-    if (!complationRow.onlyNotOnHoliday()) {
+    if (!complationRow.onlyNotOnHoliday() && !beforeInitialization) {
       complationRow.usableLimit = formatAmount(takenComplation.periodResidualBefore(), 
           takenComplation.amountType);
       complationRow.usableTaken = formatAmount(takenComplation.takenAmount, 

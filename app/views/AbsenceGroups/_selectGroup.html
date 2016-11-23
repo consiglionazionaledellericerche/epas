@@ -4,6 +4,11 @@
      if (!dataAsync) {
        dataAsync = '#absenceData';
      }
+     if (selectGroupById) {
+     groupInputName = 'groupAbsenceTypeId';
+     } else {
+     groupInputName = 'groupAbsenceType.id';
+     } 
    }%  
    
    
@@ -22,7 +27,7 @@
      
      #{f.hidden 'switchGroup', value:'true' /}
      
-     #{f.selectModel 'groupAbsenceType', label:'Tipologia Assenza', personalizeItems:true}
+     #{f.selectModel 'groupAbsenceType', inputName:groupInputName, label:'Tipologia Assenza', personalizeItems:true}
         <option></option>      
        
        #{list items:absenceForm.categories(), as:'category'}

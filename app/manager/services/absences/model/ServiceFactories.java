@@ -16,7 +16,6 @@ import models.Person;
 import models.PersonChildren;
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
-import models.absences.AbsenceType;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.PeriodType;
@@ -94,9 +93,10 @@ public class ServiceFactories {
     while (currentGroup != null) {
       AbsencePeriod currentPeriod = buildAbsencePeriod(person, currentGroup, date, 
           orderedChildren, fetchedContracts, initializationGroups);
-      if (!currentPeriod.ignorePeriod) { 
+      if (!currentPeriod.ignoreChildPeriod) { 
         periodChain.periods.add(currentPeriod);  
       }
+      
       if (currentPeriod.errorsBox.containsCriticalErrors()) {
         return periodChain;
       }
@@ -177,11 +177,11 @@ public class ServiceFactories {
         absencePeriod.from = childInterval.getBegin();
         absencePeriod.to = childInterval.getEnd();
         if (!DateUtility.isDateIntoInterval(date, childInterval)) {
-          absencePeriod.ignorePeriod = true;
+          absencePeriod.ignoreChildPeriod = true;
           return absencePeriod; 
         }
       } catch (Exception ex) {
-        absencePeriod.ignorePeriod = true;
+        absencePeriod.ignoreChildPeriod = true;
         return absencePeriod;
       }
     }
@@ -189,7 +189,7 @@ public class ServiceFactories {
     // recuperare l'inizializzazione
     for (InitializationGroup initialization : initializationGroup) {
       if (initialization.groupAbsenceType.equals(groupAbsenceType) 
-          && DateUtility.isDateIntoInterval(initialization.initializationDate, 
+          && DateUtility.isDateIntoInterval(initialization.date, 
               absencePeriod.periodInterval())) {
         absencePeriod.initialization = initialization;
       }
@@ -360,7 +360,11 @@ public class ServiceFactories {
       if (!takenAbsence.canAddTakenAbsence()) {
         absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.LimitExceeded);
         absencePeriod.setLimitExceededDate(absence.getAbsenceDate());
-      }  
+      }
+      if (takenAbsence.isBeforeInitialization()) {
+        absencePeriod.errorsBox.addAbsenceWarning(absence, 
+            AbsenceProblem.IgnoredBeforeInitialization);
+      }
       absencePeriod.addTakenAbsence(takenAbsence);
     }
 
@@ -399,7 +403,7 @@ public class ServiceFactories {
         absencePeriod.periodInterval())) {
       return false;
     }
-      
+    
     if (absenceToInsert.absenceType == null) {
       absenceToInsert = absenceEngineUtility.inferAbsenceType(absencePeriod, absenceToInsert);
       if (absenceToInsert.absenceType == null) {
