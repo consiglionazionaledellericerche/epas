@@ -493,7 +493,7 @@ public class CompetenceUtility {
             // legge le coppie di timbrature valide
             //FIXME injettare il PersonDayManager
             List<PairStamping> pairStampings =
-                personDayManager.computeValidPairStampings(personDay.get());
+                personDayManager.getValidPairStampings(personDay.get().stampings);
 
             //Logger.debug("Dimensione di pairStampings =%s", pairStampings.size());
 

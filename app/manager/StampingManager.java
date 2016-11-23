@@ -1,6 +1,7 @@
 package manager;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Verify;
 import com.google.inject.Inject;
 
 import dao.PersonDao;
@@ -22,8 +23,6 @@ import models.exports.StampingFromClient;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-
-import play.db.jpa.JPA;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,14 +66,14 @@ public class StampingManager {
   private static boolean checkDuplicateStamping(
       PersonDay pd, StampingFromClient stamping) {
 
-    for (Stamping s : pd.stampings) {
+    for (Stamping stamp : pd.stampings) {
 
-      if (s.date.isEqual(stamping.dateTime)) {
+      if (stamp.date.isEqual(stamping.dateTime)) {
         return true;
       }
-      if (s.date.isEqual(stamping.dateTime.minusMinutes(1))
-          && ((s.isIn() && stamping.inOut == 0)
-          || (s.isOut() && stamping.inOut == 1))) {
+      if (stamp.date.isEqual(stamping.dateTime.minusMinutes(1))
+          && (stamp.isIn() && stamping.inOut == 0
+          || stamp.isOut() && stamping.inOut == 1)) {
         return true;
       }
     }
@@ -129,32 +128,22 @@ public class StampingManager {
   /**
    * Stamping dal formato del client al formato ePAS.
    */
-  public boolean createStampingFromClient(
-      StampingFromClient stampingFromClient, boolean recompute) {
+  public boolean createStampingFromClient(StampingFromClient stampingFromClient,
+      boolean recompute) {
 
     // Check della richiesta
+    Verify.verifyNotNull(stampingFromClient);
 
-    if (stampingFromClient == null) {
-      return false;
-    }
-
-    Person person = personDao.getPersonById(stampingFromClient.personId);
-    if (person == null) {
-      log.warn("L'id della persona passata tramite json non ha trovato "
-          + "corrispondenza nell'anagrafica del personale. "
-          + "Controllare id = {}", stampingFromClient.personId);
-      return false;
-    }
-
+    final Person person = stampingFromClient.person;
     // Recuperare il personDay
-    PersonDay personDay = personDayManager
-        .getOrCreateAndPersistPersonDay(person, stampingFromClient.dateTime.toLocalDate());
+    PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(
+        stampingFromClient.person, stampingFromClient.dateTime.toLocalDate());
 
     // Check stamping duplicata
     if (checkDuplicateStamping(personDay, stampingFromClient)) {
       log.info("Timbratura delle {} già presente per {} (matricola = {}) ",
           stampingFromClient.dateTime, person, person.number);
-      return true;
+      return false;
     }
 
     //Creazione stamping e inserimento
@@ -167,7 +156,7 @@ public class StampingManager {
 
     log.info("Inserita timbratura {} per {} (matricola = {}) ",
         stamping.getLabel(), person, person.number);
-    
+
     // Ricalcolo
     if (recompute) {
       consistencyManager.updatePersonSituation(person.id, personDay.date);
@@ -196,7 +185,7 @@ public class StampingManager {
         personDay = pd.get();
       }
 
-      personDayManager.setValidPairStampings(personDay);
+      personDayManager.setValidPairStampings(personDay.stampings);
       daysRecap.add(stampingDayRecapFactory
           .create(personDay, numberOfInOut, true, Optional.<List<Contract>>absent()));
 

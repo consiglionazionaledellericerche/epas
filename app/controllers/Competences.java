@@ -333,7 +333,8 @@ public class Competences extends Controller {
 
     LocalDate date = new LocalDate(year, month, 1);
 
-    List<Certification> certificationList = certificationDao.personCertifications(person, year, month);
+    List<Certification> certificationList = certificationDao
+        .personCertifications(person, year, month);
     CertificatedData certificatedData = pmrDao.getPersonCertificatedData(person, month, year);
     if (!certificationList.isEmpty() || certificatedData != null) {
       flash.error("Non si può modificare una configurazione per un anno/mese in cui "
@@ -450,10 +451,11 @@ public class Competences extends Controller {
 
   /**
    *
-   * @param personId
-   * @param competenceId
-   * @param month
-   * @param year
+   * @param personId l'id della persona
+   * @param competenceId l'id della competenza
+   * @param month il mese 
+   * @param year l'anno
+   *     ritorna la form di inserimento di un codice di competenza per una persona.
    */
   public static void insertCompetence(Long personId, Long competenceId, int month, int year) {
     Person person = personDao.getPersonById(personId);
@@ -514,8 +516,13 @@ public class Competences extends Controller {
 
 
     competenceManager.saveCompetence(competence, valueApproved);
-    consistencyManager.updatePersonSituation(competence.person.id,
-        new LocalDate(competence.year, competence.month, 1));
+    if (competence.competenceCode.code.equalsIgnoreCase("S1") 
+        || competence.competenceCode.code.equalsIgnoreCase("S2") 
+        || competence.competenceCode.code.equalsIgnoreCase("S3")) {
+
+      consistencyManager.updatePersonSituation(competence.person.id,
+          new LocalDate(competence.year, competence.month, 1)); 
+    }
     int month = competence.month;
     int year = competence.year;
     IWrapperCompetenceCode wrCompetenceCode = wrapperFactory.create(competence.competenceCode);
