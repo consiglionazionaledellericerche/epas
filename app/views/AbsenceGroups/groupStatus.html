@@ -11,6 +11,7 @@
      absenceForm = categorySwitcher;
      changeFrom = true;
      dataAsync = '#page_content';
+     selectGroupById = true;
     }%
     #{include './_selectGroup.html' /}
   #{/if}
@@ -55,6 +56,19 @@
            ${templateUtility.formatAmount(absencePeriod.getPeriodTakableAmount(), absencePeriod.takeAmountType)}<br>
        #{/if}
      </p>
+     
+     <p>
+     #{if absencePeriod.initialization}
+       %{ initializationGroup = absencePeriod.initialization; }%
+       #{include './_initializationStatus.html' /}
+       <a class="btn btn-sm btn-warning pull-right" href="@{AbsenceGroups.initialization(absencePeriod.person.id, absencePeriod.groupAbsenceType.id, periodChain.date)}">Modifica inizializzazione</a>
+     #{/if}
+     #{else}
+       Per questo periodo non è stata definita alcuna inizializzazione. 
+       <a class="btn btn-sm btn-warning pull-right" href="@{AbsenceGroups.initialization(absencePeriod.person.id, absencePeriod.groupAbsenceType.id, periodChain.date)}">Definisci i dati iniziali</a>      
+     #{/else}
+     </p>
+     
      <p>  
        #{if absencePeriod.isTakableWithLimit() }
            <i class="fa fa-exclamation-circle" aria-hidden="true"></i> Rimangono 
@@ -84,13 +98,11 @@
       
       #{list items:absencePeriod.daysInPeriod.values(), as:'dayInPeriod'}
       #{list items:dayInPeriod.allTemplateRows(), as:'rowRecap' }
-        <tr>
+        <tr #{if rowRecap.beforeInitialization} class="bg-grey" #{/if}>
           <td>
             #{if rowRecap.date}
               ${rowRecap.date.format()}
             #{/if}  
-            #{if rowRecap.beforeInitialization} before
-            #{/if}
           </td>
           <td>
 	        #{absences.absence-popover absence:rowRecap.absence, groupSelected:absencePeriod.groupAbsenceType /}
@@ -127,7 +139,7 @@
   #{/if}#{else}
    "@{Stampings.stampings(from.year, from.monthOfYear)}"
   #{/else}
-  ><i class="fa fa-hand-o-left" aria-hidden="true"></i> Torna alle timbrature del mese</a>
+  ><i class="fa fa-hand-o-left" aria-hidden="true"></i> Vai alle timbrature del mese</a>
 
     
 </div>

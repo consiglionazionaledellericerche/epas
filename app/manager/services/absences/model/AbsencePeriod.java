@@ -61,7 +61,8 @@ public class AbsencePeriod {
   
   //Errori del periodo
   public ErrorsBox errorsBox = new ErrorsBox();
-  public boolean ignorePeriod = false;
+  public boolean ignoreChildPeriod = false;
+  public boolean ignoreInitializationPeriod = false;
   
   //Tentativo di inserimento assenza nel periodo
   public Absence attemptedInsertAbsence;
@@ -134,10 +135,9 @@ public class AbsencePeriod {
    * @return int
    */
   public int getPeriodTakenAmount() {
-    int takenInPeriod = 0;
-    if (this.initialization != null) {
-      takenInPeriod = this.initialization.takableUsed;
-    }
+    
+    int takenInPeriod = getInitializationTakableUsed();
+    
     for (TakenAbsence takenAbsence : takenAbsences()) {
       if (!takenAbsence.beforeInitialization) {
         takenInPeriod += takenAbsence.getTakenAmount();
@@ -171,7 +171,7 @@ public class AbsencePeriod {
         .takenAmount(takenAmount)
         .build();
     if (this.initialization != null 
-        && absence.date.isAfter(this.initialization.initializationDate)) {
+        && !absence.getAbsenceDate().isAfter(this.initialization.date)) {
       takenAbsence.beforeInitialization = true;
     }  
     return takenAbsence;
@@ -234,8 +234,11 @@ public class AbsencePeriod {
       return;
     }
 
-    int complationAmount = 0;
+    int complationAmount = getInitializationComplationUsed(absenceEngineUtility);
     for (DayInPeriod dayInPeriod : this.daysInPeriod.values()) {
+      if (this.initialization != null && !dayInPeriod.getDate().isAfter(this.initialization.date)) {
+        continue;
+      }
       if (dayInPeriod.getExistentComplations().isEmpty()) {
         continue;
       }
@@ -296,6 +299,75 @@ public class AbsencePeriod {
     return ErrorsBox.boxesContainsCriticalErrors(Lists.newArrayList(this.errorsBox));
   }
   
+  /**
+   * L'inizializzazione nella parte takable.
+   * @return int
+   */
+  public int getInitializationTakableUsed() {
+    
+    //TODO: si può instanziare una variabile lazy
+    
+    if (this.initialization == null) {
+      return 0;
+    }
+    
+    int minutes = this.initialization.hoursInput * 60 + this.initialization.minutesInput;
+    //Takable used
+    if (this.isTakableMinutes()) {
+      return minutes;
+    } else if (this.isTakableUnits()) {
+      return (this.initialization.unitsInput * 100) 
+          + workingTypePercent(minutes, this.initialization.averageWeekTime);
+    }
+    
+    return 0;
+  }
+  
+  /**
+   * L'inizializzazione nella parte completamento.
+   * @param absenceEngineUtility inject
+   * @return int
+   */
+  public int getInitializationComplationUsed(AbsenceEngineUtility absenceEngineUtility) {
+    
+    //TODO: si può instanziare una variabile lazy
+    
+    if (this.initialization == null) {
+      return 0;
+    }
+    
+    int minutes = this.initialization.hoursInput * 60 + this.initialization.minutesInput;
+    
+    //Complation used
+    if (this.isComplationUnits()) {
+      return workingTypePercentModule(minutes, this.initialization.averageWeekTime);
+    } else if (this.isComplationMinutes()) {
+      
+      //completare finchè si può minutes
+      while (true) {
+        Optional<AbsenceType> absenceType = absenceEngineUtility
+            .whichReplacingCode(this.replacingCodesDesc, this.initialization.date, minutes);
+        if (!absenceType.isPresent()) {
+          break;
+        }
+        minutes -= this.replacingTimes.get(absenceType.get());
+      }
+      return minutes;
+    }
+    
+    return 0;
+  }
+  
+  private int workingTypePercent(int minutes, int workTime) {
+    int time = minutes * 100; 
+    int percent = (time) / workTime;
+    return percent;
+  }
+  
+  private int workingTypePercentModule(int minutes, int workTime) {
+    int workTimePercent = workingTypePercent(minutes, workTime); 
+    return workTimePercent % 100;
+  }
 }
 
 

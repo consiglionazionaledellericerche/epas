@@ -462,9 +462,9 @@ takableTotal=Limite Totale
 takableUsed=Limite Consumato
 complationUsed=Completato
 
-initializationDto.takenHours=Ore Utilizzate
-initializationDto.takenMinutes=Minuti Utilizzati
-initializationDto.takenUnits=Giorni Completi Utilizzati
+initializationGroup.hoursInput =Ore Utilizzate
+initializationGroup.minutesInput =Minuti Utilizzati
+initializationGroup.unitsInput=Giorni Completi Utilizzati
 
 
 wtt.description= Nome Tipo Orario
@@ -711,6 +711,7 @@ InReperibility=In Reperibilità
 InReperibilityOrShift=In Turno o Reperibilità
 InShift=In Turno
 ForceInsert=Inserimento forzato
+IgnoredBeforeInitialization=Precedente l'inizializzazione
 
 child1_0_3=Primo figlio 0-3 anni
 child1_0_6=Primo figlio 0-6 anni

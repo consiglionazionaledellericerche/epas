@@ -278,7 +278,8 @@ public class Scanner {
           replacingAbsence.justifiedType = absenceComponentDao
               .getOrBuildJustifiedType(JustifiedTypeName.nothing);
           personDay.absences.add(replacingAbsence);
-          replacingAbsence.save(); 
+          replacingAbsence.save();
+          personDay.refresh();
           personDay.save();
           JPA.em().flush();
           dayInPeriod.getExistentReplacings().add(replacingAbsence);

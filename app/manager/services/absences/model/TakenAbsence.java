@@ -30,6 +30,11 @@ public class TakenAbsence {
    * @return esito
    */
   public boolean canAddTakenAbsence() {
+    
+    if (beforeInitialization) {
+      return true;
+    }
+    
     if (periodTakableTotal < 0) {
       //TODO: se non c'è limite programmarlo in un booleano
       return true;
