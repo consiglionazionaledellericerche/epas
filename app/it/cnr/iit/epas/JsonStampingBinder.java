@@ -56,7 +56,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
       }
       if (user.get().badgeReader == null) {
         log.error("L'utente {} utilizzato per l'invio della timbratura"
-            + " non ha una istanza badgeReader valida associata.");
+            + " non ha una istanza badgeReader valida associata.", user.get().username);
         return null;
       }
 
