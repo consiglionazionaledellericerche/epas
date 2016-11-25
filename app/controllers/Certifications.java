@@ -77,12 +77,6 @@ public class Certifications extends Controller {
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
 
-    //Nuovo attestati?
-    if (!(Boolean) configurationManager.configValue(office, EpasParam.NEW_ATTESTATI)) {
-      flash.error("La sede non è configurata all'utilizzo del nuovo attestati.");
-      forbidden();
-    }
-
     //Mese selezionato
     Optional<YearMonth> monthToUpload = factory.create(office).nextYearMonthToUpload();
     Verify.verify(monthToUpload.isPresent());
@@ -174,11 +168,6 @@ public class Certifications extends Controller {
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
 
-    //Nuovo attestati
-    if (!(Boolean) configurationManager.configValue(office, EpasParam.NEW_ATTESTATI)) {
-      forbidden();
-    }
-
     LocalDate monthBegin = new LocalDate(year, month, 1);
     LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
 
@@ -240,11 +229,6 @@ public class Certifications extends Controller {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-
-    //Nuovo attestati
-    if (!(Boolean) configurationManager.configValue(office, EpasParam.NEW_ATTESTATI)) {
-      forbidden();
-    }
 
     LocalDate monthBegin = new LocalDate(year, month, 1);
     LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
