@@ -5,7 +5,8 @@ package helpers.rest;
  */
 public class ApiRequestException extends RuntimeException {
 
-  private String message;
+  private static final long serialVersionUID = 5106927141254697844L;
+  private final String message;
 
   public ApiRequestException(final String message) {
     this.message = message;
@@ -13,6 +14,11 @@ public class ApiRequestException extends RuntimeException {
 
   @Override
   public String toString() {
+    return message;
+  }
+
+  @Override
+  public String getMessage() {
     return message;
   }
 }
