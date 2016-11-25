@@ -69,15 +69,19 @@ public class AbsenceType extends BaseModel {
   @Column(name = "internal_use")
   public boolean internalUse = false;
   
+  @Getter
   @Column(name = "considered_week_end")
   public boolean consideredWeekEnd = false;
   
+  @Getter
   @Column(name = "time_for_mealticket")
   public boolean timeForMealTicket = false;
   
+  @Getter
   @Column(name = "justified_time")
   public Integer justifiedTime;
   
+  @Getter
   @ManyToMany
   @JoinTable(name = "absence_types_justified_types", 
       joinColumns = { @JoinColumn(name = "absence_types_id") }, 

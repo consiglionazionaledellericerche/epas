@@ -1,5 +1,7 @@
 package models.absences;
 
+import lombok.Getter;
+
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -32,10 +34,12 @@ public class TakableAbsenceBehaviour extends BaseModel {
   @OneToMany(mappedBy = "takableAbsenceBehaviour", fetch = FetchType.LAZY)
   public Set<GroupAbsenceType> groupAbsenceTypes = Sets.newHashSet();
   
+  @Getter
   @Column(name = "amount_type")
   @Enumerated(EnumType.STRING)
   public AmountType amountType;
   
+  @Getter
   @ManyToMany
   @JoinTable(name = "taken_codes_group", 
       joinColumns = { @JoinColumn(name = "takable_behaviour_id") }, 
@@ -47,6 +51,7 @@ public class TakableAbsenceBehaviour extends BaseModel {
   //  @Enumerated(EnumType.STRING)
   //  public TakeCountBehaviour takableCountBehaviour;
   
+  @Getter
   @ManyToMany
   @JoinTable(name = "takable_codes_group", 
       joinColumns = { @JoinColumn(name = "takable_behaviour_id") }, 
@@ -54,9 +59,11 @@ public class TakableAbsenceBehaviour extends BaseModel {
   @OrderBy("code")
   public Set<AbsenceType> takableCodes = Sets.newHashSet();
   
+  @Getter
   @Column(name = "fixed_limit")
   public Integer fixedLimit;
   
+  @Getter
   @Column(name = "takable_amount_adjust")
   @Enumerated(EnumType.STRING)
   public TakeAmountAdjustment takableAmountAdjustment;
