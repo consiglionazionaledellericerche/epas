@@ -2,62 +2,61 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestisci ' + cat.description /}
 
-#{set breadcrumbs:['Gestisci servizi':@Competences.activateServices(), 
+#{set breadcrumbs:['Gestisci servizi':@Competences.activateServices(cat.office.id), 
   (cat.description):null] /}
 #{breadcrumbs breadcrumbs, noHome:true, container:true /}
 
 <div class="container">
 #{form @Competences.linkTimeTableToShift(), class:'form-horizontal', 
 	'data-async':'#page_content', 'data-async-error':'#modifyContract', 
-	'data-spinner':'#defaultSpinner' } 
-	
-#{title title:'Organizzazione del lavoro in turni - Seleziona tipologia' /}
-#{alert info}
-Selezionare la voce della tabella che corrisponde alla tipologia di turno che si intende applicare al servizio <strong>${cat.description}</strong>
-#{/alert}
-<table class="table table-condensed table-hover table-bordered center">
+	'data-spinner':'#defaultSpinner' }
+	 
+#{title title:'Organizzazione del lavoro in turni - Creazione attività per turno' /}
 
-	<tr>
-		<th>Seleziona</th>
-		<th>Inizio turno mattina</th>
-		<th>Fine turno mattina</th>
-		
-		<th>Inizio turno pomeriggio</th>
-		<th>Fine turno pomeriggio</th>
-		<th>Info aggiuntive</th>
-	</tr>
+#{if type.shiftCategories != null}
+Puppare molto
+#{/if}
+#{else}
+	#{alert info}
+		Specificare nome e descrizione per l'attività relativa a <strong>${cat.description}</strong><br>
+		E selezionare la tipologia di turno da applicare tra quelle proposte in tabella.		
+	#{/alert}	
+#{/else}
+#{f.input 'type.type',required:'true'/}
+#{f.input 'type.description',required:'true'/}
 
+#{f.hidden 'cat.id', value:cat.id /}
 
-%{i = 0;}%
+<table class="table table-hover table-striped table-bordered">
+<tr>
+	<th>Seleziona</th>
+	<th>Inizio turno mattina</th>
+	<th>Fine turno mattina</th>
+	<th>Inizio turno pomeriggio</th>
+	<th>Fine turno pomeriggio</th>
+	<th>Info aggiuntive</th>
+</tr>
 #{list items:dtoList, as:'key'}
-	#{if i % 2 != 0}
-    <tr class="info">
-    #{/if}
-    #{else}
-    <tr>
-    #{/else}
-    	<td>    	
-        	<input type="radio" name="option" value="${key.id}" aria-label="puppare">
-      	</td>
-    	<td>${key.startMorning}</td>
- 	  	<td>${key.endMorning}</td>
- 	  	
- 	  	<td>${key.startAfternoon}</td>
- 	  	<td>${key.endAfternoon}</td>
- 	  	<td class="default-single" webui-popover-hover data-url="#shift-${key.id}"  data-title="Info turno">
- 	  	<i class="fa fa-info-circle" aria-hidden="true"></i>
-   		</td>
-  		<div class="webui-popover-content" id="shift-${key.id}">  			
-  			Inizio pausa pranzo turno mattina: <strong>${key.startMorningLunchTime}</strong><br>
-  			Fine pausa pranzo turno mattina: <strong>${key.endMorningLunchTime}</strong><br>
-			Inizio pausa pranzo turno pomeriggio: <strong>${key.startAfternoonLunchTime}</strong><br>
-			Fine pausa pranzo turno pomeriggio: <strong>${key.endAfternoonLunchTime}</strong><br>			  
-		</div> 	  	
-	%{i++}%
-    #{/list}
-    </tr>
-
+	<tr>
+		<td><input type="radio" name="shift" value="${key.id}"> </td>
+		<td>${key.startMorning}</td>
+		<td>${key.endMorning}</td>
+		<td>${key.startAfternoon}</td>
+		<td>${key.endAfternoon}</td>
+		<td><i class="fa fa-info-circle" aria-hidden="true" webui-popover-hover data-url="#shift-${key.id}" data-placement="right"  data-title="Info turno">
+	 	  	</i>
+	 	</td>
+			<div class="webui-popover-content" id="shift-${key.id}">  			
+	  			Inizio pausa pranzo turno mattina: <strong>${key.startMorningLunchTime}</strong><br>
+	  			Fine pausa pranzo turno mattina: <strong>${key.endMorningLunchTime}</strong><br>
+				Inizio pausa pranzo turno pomeriggio: <strong>${key.startAfternoonLunchTime}</strong><br>
+				Fine pausa pranzo turno pomeriggio: <strong>${key.endAfternoonLunchTime}</strong><br>			  
+			</div> 	  
+		
+	</tr>
+#{/list}
 </table>
+
 		#{b.buttons center:true}
 		   #{b.submit 'Conferma'/}
 		   

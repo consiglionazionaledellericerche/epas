@@ -99,7 +99,8 @@
     <tr>
       <th>Servizio</th>
       <th>Eventuale supervisore</th>
-      <th>Configura servizio</th>
+      <th>Configura servizio (aggiungi attività)</th>
+      <th>Gestisci attività</th>
       <th>Elimina</th>
     </tr>
     </thead>
@@ -111,9 +112,18 @@
         ${sc.description}
       #{/secure.link}
     <td>${sc.supervisor}</td>
-    <td>#{secure.link @Competences.configureShift(sc.id)}
-        Configura
-      #{/secure.link}</td>
+    <td>
+    	#{secure.link @Competences.configureShift(sc.id)}
+    		<i class="fa fa-plus" aria-hidden="true"></i> Crea attività per turno
+    	#{/secure.link}
+
+    </td>
+    <td>
+    	
+    	#{secure.link @Competences.manageShift(sc.id)}
+        	<i class="fa fa-calendar" aria-hidden="true"></i> Gestisci
+        #{/secure.link}
+    </td>
     <td>
       #{secure.check 'Competences.evaluateShift'}
       #{if sc.disabled}

@@ -396,6 +396,7 @@ ticketNumberFrom=Dal Numero
 ticketNumberTo=Al Numero
 time= Orario
 
+type.type =Nome attività
 type.description =Descrizione
 type.office =Sede
 type.supervisor =Supervisore servizio

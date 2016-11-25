@@ -25,6 +25,8 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
 import helpers.jpa.ModelQuery.SimpleResults;
 
+import lombok.extern.slf4j.Slf4j;
+
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.SecureManager;
@@ -72,6 +74,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+@Slf4j
 @With({Resecure.class})
 public class Competences extends Controller {
 
@@ -450,7 +453,6 @@ public class Competences extends Controller {
   }
 
   /**
-   *
    * @param personId l'id della persona
    * @param competenceId l'id della competenza
    * @param month il mese 
@@ -809,6 +811,12 @@ public class Competences extends Controller {
     activateServices(type.office.id);
   }
 
+  /**
+   * 
+   * @param cat il servizio per turno
+   * @param office la sede a cui si vuole collegare il servizio
+   *     metodo che persiste il servizio associandolo alla sede.
+   */
   public static void saveShift(@Valid ShiftCategories cat, @Valid Office office) {
 
     rules.checkIfPermitted(office);
@@ -928,29 +936,42 @@ public class Competences extends Controller {
 
   /**
    * metodo che ritorna al template le informazioni per poter configurare correttamente il turno.
-   * @param shiftCategoryId l'id del turno da configurare
+   * @param shiftCategoryId l'id del servzio da configurare
    */
   public static void configureShift(Long shiftCategoryId) {
     ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
-    
+    notFoundIfNull(cat);
+    ShiftType type = new ShiftType();
     List<ShiftTimeTable> shiftList = shiftDao.getAllShifts();
     List<ShiftTimeTableDto> dtoList = competenceManager.convertFromShiftTimeTable(shiftList);
-    render(dtoList, cat);
+    render(dtoList, cat, shiftList, type);
+  }
+  
+  public static void manageShift(Long shiftCategoryId) {
+    
   }
   
   /**
    * 
-   * @param id
-   * @param shiftCategoryId
+   * @param id l'identificativo del tipo di turno
+   * @param shiftCategoryId l'identificativo del tipo di servizio
+   *     linka il tipo di turno al servizio selezionato.
    */
-  public static void linkTimeTableToShift(Long id, Long shiftCategoryId) {
-    ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
-    ShiftTimeTable timeTable = shiftDao.getShiftTimeTableById(id);
-    ShiftType shift = new ShiftType();
-    shift.shiftCategories = cat;
-    shift.shiftTimeTable = timeTable;
-    shift.save();
-    flash.success("");
-    render();
+  public static void linkTimeTableToShift(Long shift, ShiftCategories cat, ShiftType type) {
+    
+    log.debug("salve");
+    notFoundIfNull(cat);
+    
+    ShiftTimeTable timeTable = shiftDao.getShiftTimeTableById(shift);
+    notFoundIfNull(timeTable);
+    rules.checkIfPermitted(cat.office);
+
+    type.shiftCategories = cat;
+    type.shiftTimeTable = timeTable;
+    type.save();
+    
+//    sBis.save();
+    flash.success("Configurato correttamente il servizio %s", cat.description);
+    activateServices(cat.office.id);
   }
 }
