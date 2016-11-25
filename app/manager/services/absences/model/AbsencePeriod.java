@@ -227,8 +227,7 @@ public class AbsencePeriod {
    * @param absenceEngineUtility inject dep
    * @param absenceComponentDao inject dep
    */
-  public void computeCorrectReplacingInPeriod(AbsenceEngineUtility absenceEngineUtility, 
-      AbsenceComponentDao absenceComponentDao) {
+  public void computeCorrectReplacingInPeriod(AbsenceEngineUtility absenceEngineUtility) {
 
     if (!this.isComplation()) {
       return;

@@ -58,7 +58,7 @@ public class ServiceFactories {
       List<Contract> fetchedContracts, List<InitializationGroup> initializationGroups) {
     Scanner absenceEngineScan = new Scanner(person, scanFrom, 
         absencesToScan, orderedChildren, fetchedContracts, initializationGroups,
-        this, absenceEngineUtility, personDayManager, absenceComponentDao);
+        this, absenceEngineUtility, personDayManager);
     for (Absence absence : absenceEngineScan.absencesToScan) {
       Set<GroupAbsenceType> groupsToScan = absenceEngineUtility.involvedGroup(absence.absenceType); 
       absenceEngineScan.absencesGroupsToScan.put(absence, groupsToScan);
@@ -92,7 +92,7 @@ public class ServiceFactories {
     GroupAbsenceType currentGroup = groupAbsenceType;
     while (currentGroup != null) {
       AbsencePeriod currentPeriod = buildAbsencePeriod(person, currentGroup, date, 
-          orderedChildren, fetchedContracts, initializationGroups);
+          orderedChildren, initializationGroups);
       if (!currentPeriod.ignoreChildPeriod) { 
         periodChain.periods.add(currentPeriod);  
       }
@@ -128,17 +128,17 @@ public class ServiceFactories {
     // fetch di tutte le assenze nel periodo (comprese previous inserts)
     //TODO: qui si può efficientare molto se il periodChain ha le stesse date
     // di quello precedente.......
-    periodChain.allInvolvedAbsences = absenceComponentDao
+    periodChain.allInvolvedAbsences = absenceEngineUtility
         .mapAbsences(absenceComponentDao
             .orderedAbsences(
             periodChain.person, 
             periodChain.from, periodChain.to, 
             Lists.newArrayList()), null);
-    periodChain.allInvolvedAbsences = absenceComponentDao
+    periodChain.allInvolvedAbsences = absenceEngineUtility
         .mapAbsences(previousInserts, periodChain.allInvolvedAbsences);
     
     // fetch delle assenze della catena (comprese previous inserts)
-    List<Absence> involvedAbsencesInGroup = absenceComponentDao.orderAbsences(
+    List<Absence> involvedAbsencesInGroup = absenceEngineUtility.orderAbsences(
         absenceComponentDao.orderedAbsences(
             periodChain.person, 
             periodChain.from, periodChain.to, 
@@ -154,8 +154,8 @@ public class ServiceFactories {
   
   private AbsencePeriod buildAbsencePeriod(Person person, GroupAbsenceType groupAbsenceType, 
       LocalDate date, 
-      List<PersonChildren> orderedChildren,
-      List<Contract> fetchedContracts, List<InitializationGroup> initializationGroup) {
+      List<PersonChildren> orderedChildren, 
+      List<InitializationGroup> initializationGroup) {
     
     AbsencePeriod absencePeriod = new AbsencePeriod(person, groupAbsenceType);
     
@@ -264,7 +264,7 @@ public class ServiceFactories {
 
       // Se la situazione non è compromessa eseguo lo scan dei rimpiazzamenti
       if (!absencePeriod.containsCriticalErrors() && !absencePeriod.compromisedTwoComplation) {
-        absencePeriod.computeCorrectReplacingInPeriod(absenceEngineUtility, absenceComponentDao);
+        absencePeriod.computeCorrectReplacingInPeriod(absenceEngineUtility);
       }
       
       if (successInsertInPeriod) {

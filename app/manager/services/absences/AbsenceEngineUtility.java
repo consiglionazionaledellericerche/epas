@@ -155,8 +155,6 @@ public class AbsenceEngineUtility {
    */
   public int absenceJustifiedAmount(Person person, Absence absence, AmountType amountType) {
     
-    log.debug("absence:{}", absence.toString());
-    
     int amount = 0;
 
     if (absence.justifiedType.name.equals(JustifiedTypeName.nothing)) {
@@ -181,26 +179,21 @@ public class AbsenceEngineUtility {
     } else if (absence.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) {
       amount = -1;
     }
-    log.debug("amount:{}", amount);
     
     if (amountType.equals(AmountType.units)) {
       int work = absenceWorkingTime(person, absence);
       if (work == -1) {
         //Patch: se è festa da verificare.
         if (absence.justifiedType.name.equals(JustifiedTypeName.all_day)) {
-          log.debug("return:{}", 100);
           return 100;
         } 
       }
       if (work == 0) {
-        log.debug("return:{}", 0);
         return 0;
       }
       int result = amount * 100 / work;
-      log.debug("return:{}", result);
       return result;
     } else {
-      log.debug("return:{}", amount);
       return amount;
     }
   }
@@ -468,6 +461,52 @@ public class AbsenceEngineUtility {
 
      
     return genericErrors;
+  }
+  
+  /**
+   * Ordina per data tutte le liste di assenze in una unica lista.
+   * @param absences liste di assenze
+   * @return entity list
+   */
+  public List<Absence> orderAbsences(List<Absence>... absences) {
+    SortedMap<LocalDate, Set<Absence>> map = Maps.newTreeMap();
+    for (List<Absence> list : absences) {
+      for (Absence absence : list) {
+        Set<Absence> set = map.get(absence.getAbsenceDate());
+        if (set == null) {
+          set = Sets.newHashSet();
+          map.put(absence.getAbsenceDate(), set);
+        }
+        set.add(absence);
+      }
+    }
+    List<Absence> result = Lists.newArrayList();
+    for (Set<Absence> set : map.values()) {
+      result.addAll(set);
+    }
+    return result;
+  }
+  
+  /**
+   * Aggiunge alla mappa le assenze presenti in absences.
+   * @param absences le assenze da aggiungere alla mappa
+   * @param map mappa
+   * @return mappa
+   */
+  public Map<LocalDate, Set<Absence>> mapAbsences(List<Absence> absences, 
+      Map<LocalDate, Set<Absence>> map) {
+    if (map == null) {
+      map = Maps.newHashMap();
+    }
+    for (Absence absence : absences) {
+      Set<Absence> set = map.get(absence);
+      if (set == null) {
+        set = Sets.newHashSet();
+        map.put(absence.getAbsenceDate(), set);
+      }
+      set.add(absence);
+    }
+    return map;
   }
   
       
