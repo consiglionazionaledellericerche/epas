@@ -1,9 +1,8 @@
 package manager.services.absences.model;
 
+import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
-import dao.absences.AbsenceComponentDao;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,6 +19,7 @@ import models.absences.AbsenceTrouble;
 import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.GroupAbsenceType;
 import models.absences.InitializationGroup;
+import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 
 import org.joda.time.LocalDate;
@@ -37,7 +37,6 @@ public class Scanner {
   public ServiceFactories serviceFactories;
   public AbsenceEngineUtility absenceEngineUtility;
   public PersonDayManager personDayManager;
-  public AbsenceComponentDao absenceComponentDao;
   
   public Person person;
   public List<PersonChildren> orderedChildren;
@@ -67,13 +66,12 @@ public class Scanner {
    * @param serviceFactories injection
    * @param absenceEngineUtility injection
    * @param personDayManager injection
-   * @param absenceComponentDao injection
    */
   public Scanner(Person person, LocalDate scanFrom, List<Absence> absencesToScan,
       List<PersonChildren> orderedChildren, List<Contract> fetchedContracts, 
       List<InitializationGroup> initializationGroups,
       ServiceFactories serviceFactories, AbsenceEngineUtility absenceEngineUtility, 
-      PersonDayManager personDayManager, AbsenceComponentDao absenceComponentDao) {
+      PersonDayManager personDayManager) {
     this.person = person;
     this.scanFrom = scanFrom;
     this.absencesToScan = absencesToScan;
@@ -83,7 +81,6 @@ public class Scanner {
     this.serviceFactories = serviceFactories;
     this.absenceEngineUtility = absenceEngineUtility;
     this.personDayManager = personDayManager;
-    this.absenceComponentDao = absenceComponentDao;
   }
 
 
@@ -93,7 +90,7 @@ public class Scanner {
   public void scan() {
     
     //mappa di utilità
-    Map<LocalDate, Set<Absence>> absencesToScanMap = absenceComponentDao
+    Map<LocalDate, Set<Absence>> absencesToScanMap = absenceEngineUtility
         .mapAbsences(this.absencesToScan, null);
     
     // analisi dei requisiti generici
@@ -269,14 +266,23 @@ public class Scanner {
         
         //creare il rimpiazzamento corretto
         if (dayInPeriod.isReplacingMissing()) {
+          //TODO: per la testabilità conviene disaccoppiare. 
+          // Questo metodo crea le assenze da aggiungere ed un metodo che le aggiunge ai personDays
           PersonDay personDay = personDayManager
               .getOrCreateAndPersistPersonDay(person, dayInPeriod.getDate());
+          
           Absence replacingAbsence = new Absence();
           replacingAbsence.absenceType = dayInPeriod.getCorrectReplacing();
           replacingAbsence.date = dayInPeriod.getDate();
           replacingAbsence.personDay = personDay;
-          replacingAbsence.justifiedType = absenceComponentDao
-              .getOrBuildJustifiedType(JustifiedTypeName.nothing);
+          //justified type nothin (deve essere permitted per il tipo)
+          for (JustifiedType justifiedType : replacingAbsence.absenceType.justifiedTypesPermitted) {
+            if (justifiedType.name == JustifiedTypeName.nothing) {
+              replacingAbsence.justifiedType = justifiedType;
+              break;
+            }
+          }
+          Verify.verifyNotNull(replacingAbsence.justifiedType);
           personDay.absences.add(replacingAbsence);
           replacingAbsence.save();
           personDay.refresh();

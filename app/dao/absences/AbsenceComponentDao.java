@@ -402,52 +402,6 @@ public class AbsenceComponentDao extends DaoBase {
   }
   
   /**
-   * Ordina per data tutte le liste di assenze in una unica lista.
-   * @param absences liste di assenze
-   * @return entity list
-   */
-  public List<Absence> orderAbsences(List<Absence>... absences) {
-    SortedMap<LocalDate, Set<Absence>> map = Maps.newTreeMap();
-    for (List<Absence> list : absences) {
-      for (Absence absence : list) {
-        Set<Absence> set = map.get(absence.getAbsenceDate());
-        if (set == null) {
-          set = Sets.newHashSet();
-          map.put(absence.getAbsenceDate(), set);
-        }
-        set.add(absence);
-      }
-    }
-    List<Absence> result = Lists.newArrayList();
-    for (Set<Absence> set : map.values()) {
-      result.addAll(set);
-    }
-    return result;
-  }
-  
-  /**
-   * Aggiunge alla mappa le assenze presenti in absences.
-   * @param absences le assenze da aggiungere alla mappa
-   * @param map mappa
-   * @return mappa
-   */
-  public Map<LocalDate, Set<Absence>> mapAbsences(List<Absence> absences, 
-      Map<LocalDate, Set<Absence>> map) {
-    if (map == null) {
-      map = Maps.newHashMap();
-    }
-    for (Absence absence : absences) {
-      Set<Absence> set = map.get(absence);
-      if (set == null) {
-        set = Sets.newHashSet();
-        map.put(absence.getAbsenceDate(), set);
-      }
-      set.add(absence);
-    }
-    return map;
-  }
-  
-  /**
    * Inizializzazioni per quella persona.
    * @param person persona
    * @return list
