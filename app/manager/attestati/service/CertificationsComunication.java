@@ -7,6 +7,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
+import helpers.CacheValues;
 import helpers.rest.ApiRequestException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -27,18 +28,15 @@ import models.Certification;
 import models.Office;
 import models.Person;
 
-import org.testng.collections.Sets;
-
-import play.cache.Cache;
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSRequest;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 /**
@@ -75,6 +73,7 @@ public class CertificationsComunication {
 
   private static final String OAUTH_TOKEN = "oauth.token.attestati";
 
+
   /**
    * Per l'ottenenere il Bearer Token:
    * curl -s -X POST -H "Content-Type: application/x-www-form-urlencoded"
@@ -86,16 +85,7 @@ public class CertificationsComunication {
    *
    * @return il token
    */
-  public Optional<String> getToken() {
-
-    OauthToken token = Cache.get(OAUTH_TOKEN, OauthToken.class);
-
-    // Se non ho un token valido, o il token sta per scadere (meno di 60 sec rimasti)
-    // ne richiedo un'altro, altrimenti uso quello che ho già
-    if (token != null && !LocalDateTime.now().minusSeconds(60)
-        .isAfter(token.tookAt.plusSeconds(token.expires_in))) {
-      return Optional.of(token.access_token);
-    }
+  public OauthToken getToken() {
 
     final String url;
     final String user;
@@ -128,19 +118,11 @@ public class CertificationsComunication {
       Gson gson = new Gson();
       OauthToken accessToken = gson.fromJson(response.getJson(), OauthToken.class);
 
-      // Il Token è unico per tutta l'applicazione,
-      // lo salvo in cache per evitare di richiederlo ogni volta
-      Cache.add(OAUTH_TOKEN, accessToken);
-
-      return Optional.fromNullable(token.access_token);
+      log.debug("Prelevato token oauth dal server degli attestati");
+      return accessToken;
     } catch (Exception ex) {
-      return Optional.absent();
+      return null;
     }
-  }
-
-  private void invalidAndRefreshToken() {
-    Cache.delete(OAUTH_TOKEN);
-    getToken();
   }
 
 
@@ -175,36 +157,36 @@ public class CertificationsComunication {
    * @param office sede
    * @param year   anno
    * @param month  mese
-   * @param token  token
    * @return insieme di numbers
    */
-  public Set<Integer> getPeopleList(Office office, int year, int month) {
+  public Set<Integer> getPeopleList(Office office, int year, int month) throws ExecutionException {
 
-    final String token = getToken().orNull();
-    if (token != null) {
-
-      final String url = API_URL + API_URL_LISTA_DIPENDENTI + "/" + office.codeId
-          + "/" + year + "/" + month;
-
-      WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
-      HttpResponse httpResponse = wsRequest.get();
-
-      JsonObject body = httpResponse.getJson().getAsJsonObject();
-
-      if (body.has("error") && "invalid_token".equals(body.get("error").getAsString())) {
-        invalidAndRefreshToken();
-        throw new IllegalAccessError("Invalid Token: " + token);
-      }
-      if (body.has("message")) {
-        throw new ApiRequestException(body.get("message").getAsString());
-      }
-
-      ListaDipendenti listaDipendenti = new Gson().fromJson(body, ListaDipendenti.class);
-
-      return listaDipendenti.dipendenti.stream().map(matricola -> matricola.matricola)
-          .collect(Collectors.toSet());
+    String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
+    if (token == null) {
+      CacheValues.oauthToken.invalidateAll();
+      token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
     }
-    return Sets.newHashSet();
+
+    final String url = API_URL + API_URL_LISTA_DIPENDENTI + "/" + office.codeId
+        + "/" + year + "/" + month;
+
+    WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
+    HttpResponse httpResponse = wsRequest.get();
+
+    JsonObject body = httpResponse.getJson().getAsJsonObject();
+
+    if (body.has("error") && "invalid_token".equals(body.get("error").getAsString())) {
+      CacheValues.oauthToken.invalidateAll();
+      throw new IllegalAccessError("Invalid Token: " + token);
+    }
+    if (body.has("message")) {
+      throw new ApiRequestException(body.get("message").getAsString());
+    }
+
+    ListaDipendenti listaDipendenti = new Gson().fromJson(body, ListaDipendenti.class);
+
+    return listaDipendenti.dipendenti.stream().map(matricola -> matricola.matricola)
+        .collect(Collectors.toSet());
   }
 
   /**
@@ -215,12 +197,11 @@ public class CertificationsComunication {
    * @param person persona
    * @param month  mese
    * @param year   anno
-   * @param token  token
    */
   public Optional<SeatCertification> getPersonSeatCertification(Person person,
-      int month, int year) {
+      int month, int year) throws ExecutionException {
 
-    final String token = getToken().orNull();
+    final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
     if (token == null) {
       return Optional.absent();
     }
@@ -235,7 +216,7 @@ public class CertificationsComunication {
       final JsonObject body = httpResponse.getJson().getAsJsonObject();
 
       if (body.has("error") && "invalid_token".equals(body.get("error").getAsString())) {
-        invalidAndRefreshToken();
+        CacheValues.oauthToken.invalidateAll();
         throw new Exception("Invalid Token: " + token);
       }
 
@@ -243,7 +224,7 @@ public class CertificationsComunication {
 
       Verify.verify(seatCertification.dipendenti.get(0).matricola == person.number);
 
-      return Optional.fromNullable(seatCertification);
+      return Optional.of(seatCertification);
 
     } catch (Exception ex) {
       log.error("Errore di comunicazione col server degli Attestati {}", ex.getMessage());
@@ -272,13 +253,12 @@ public class CertificationsComunication {
   /**
    * Invia la riga di assenza ad attestati.
    *
-   * @param token         token
    * @param certification attestato
    * @return risposta
    */
-  public HttpResponse sendRigaAssenza(Certification certification) {
+  public HttpResponse sendRigaAssenza(Certification certification) throws ExecutionException {
 
-    final String token = getToken().orNull();
+    final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
     if (token == null) {
       return null;
     }
@@ -296,14 +276,13 @@ public class CertificationsComunication {
   /**
    * Invia la riga di assenza ad attestati.
    *
-   * @param token         token
    * @param certification attestato
    * @return risposta
    */
   public HttpResponse sendRigaBuoniPasto(Certification certification,
-      boolean update) {
+      boolean update) throws ExecutionException {
 
-    final String token = getToken().orNull();
+    final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
     if (token == null) {
       return null;
     }
@@ -324,12 +303,11 @@ public class CertificationsComunication {
   /**
    * Invia la riga di assenza ad attestati.
    *
-   * @param token         token
    * @param certification attestato
    * @return risposta
    */
-  public HttpResponse sendRigaFormazione(Certification certification) {
-    final String token = getToken().orNull();
+  public HttpResponse sendRigaFormazione(Certification certification) throws ExecutionException {
+    final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
     if (token == null) {
       return null;
     }
@@ -347,12 +325,11 @@ public class CertificationsComunication {
   /**
    * Invia la riga di assenza ad attestati.
    *
-   * @param token         token
    * @param certification attestato
    * @return risposta
    */
-  public HttpResponse sendRigaCompetenza(Certification certification) {
-    final String token = getToken().orNull();
+  public HttpResponse sendRigaCompetenza(Certification certification) throws ExecutionException {
+    final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
     if (token == null) {
       return null;
     }
@@ -370,12 +347,11 @@ public class CertificationsComunication {
   /**
    * Invia la riga di assenza ad attestati.
    *
-   * @param token         token
    * @param certification attestato
    * @return risposta
    */
-  public HttpResponse deleteRigaAssenza(Certification certification) {
-    final String token = getToken().orNull();
+  public HttpResponse deleteRigaAssenza(Certification certification) throws ExecutionException {
+    final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
     if (token == null) {
       return null;
     }
@@ -393,12 +369,11 @@ public class CertificationsComunication {
   /**
    * Invia la riga di assenza ad attestati.
    *
-   * @param token         token
    * @param certification attestato
    * @return risposta
    */
-  public HttpResponse deleteRigaFormazione(Certification certification) {
-    final String token = getToken().orNull();
+  public HttpResponse deleteRigaFormazione(Certification certification) throws ExecutionException {
+    final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
     if (token == null) {
       return null;
     }
@@ -415,12 +390,11 @@ public class CertificationsComunication {
   /**
    * Invia la riga di assenza ad attestati.
    *
-   * @param token         token
    * @param certification attestato
    * @return risposta
    */
-  public HttpResponse deleteRigaCompetenza(Certification certification) {
-    final String token = getToken().orNull();
+  public HttpResponse deleteRigaCompetenza(Certification certification) throws ExecutionException {
+    final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
     if (token == null) {
       return null;
     }
@@ -438,12 +412,11 @@ public class CertificationsComunication {
   /**
    * Preleva da attestati la lista dei codici assenza (per il tipo contratto CL0609).
    *
-   * @param token token
    * @return lista dei codici assenza
    */
-  public List<CodiceAssenza> getAbsencesList() {
+  public List<CodiceAssenza> getAbsencesList() throws ExecutionException {
 
-    final String token = getToken().orNull();
+    final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
     if (token == null) {
       return Lists.newArrayList();
     }
@@ -457,7 +430,7 @@ public class CertificationsComunication {
       final JsonObject body = httpResponse.getJson().getAsJsonObject();
 
       if (body.has("error") && "invalid_token".equals(body.get("error").getAsString())) {
-        invalidAndRefreshToken();
+        CacheValues.oauthToken.invalidateAll();
         throw new Exception("Invalid Token: " + token);
       }
 

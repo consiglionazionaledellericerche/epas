@@ -40,6 +40,7 @@ import play.mvc.Http;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Funzionalità integrazione ePAS - Nuovo Attestati.
@@ -49,7 +50,6 @@ import java.util.Set;
 @Slf4j
 public class CertificationService {
 
-  private static final String TOKEN_ATTESTATI = "token-attestati";
   private final CertificationsComunication certificationsComunication;
 
   private final PersonMonthRecapDao personMonthRecapDao;
@@ -97,10 +97,9 @@ public class CertificationService {
    * @param office sede
    * @param year   anno
    * @param month  mese
-   * @param token  token
    * @return insieme di number
    */
-  public Set<Integer> peopleList(Office office, int year, int month) {
+  public Set<Integer> peopleList(Office office, int year, int month) throws ExecutionException {
     return certificationsComunication.getPeopleList(office, year, month);
   }
 
@@ -110,7 +109,6 @@ public class CertificationService {
    * @param person            persona
    * @param year              anno
    * @param month             mese
-   * @param seatCertification situazione della persona in attestati.
    * @return null in caso di errore.
    */
   private Map<String, Certification> personAttestatiCertifications(Person person,
@@ -180,11 +178,10 @@ public class CertificationService {
    * @param year    anno
    * @param month   mese
    * @param numbers numeri attestati in cui ricercarla
-   * @param token   token
    * @return lo stato
    */
   public PersonCertificationStatus buildPersonStaticStatus(Person person, int year, int month,
-      Set<Integer> numbers) {
+      Set<Integer> numbers) throws ExecutionException {
 
     PersonCertificationStatus personCertificationStatus = new PersonCertificationStatus();
     personCertificationStatus.person = person;
@@ -345,10 +342,9 @@ public class CertificationService {
    * Elaborazione persona.
    *
    * @param personCertificationStatus il suo stato
-   * @param token                     token
    * @return lo stato dopo l'elaborazione.
    */
-  public PersonCertificationStatus process(PersonCertificationStatus personCertificationStatus) {
+  public PersonCertificationStatus process(PersonCertificationStatus personCertificationStatus) throws ExecutionException {
 
     personCertificationStatus.staticView = false;
 
@@ -474,7 +470,7 @@ public class CertificationService {
   /**
    * Rimuove il record in attestati. (Non usare per buoni pasto).
    */
-  public boolean removeAttestati(Certification certification) {
+  public boolean removeAttestati(Certification certification) throws ExecutionException {
 
     HttpResponse httpResponse;
     Optional<RispostaAttestati> rispostaAttestati;
@@ -669,11 +665,10 @@ public class CertificationService {
    * Prova a rimuovere tutti i record presenti su attestati.
    *
    * @param personCertificationStatus status
-   * @param token                     token
    * @return il nuovo stato
    */
   public PersonCertificationStatus emptyAttestati(
-      PersonCertificationStatus personCertificationStatus) {
+      PersonCertificationStatus personCertificationStatus) throws ExecutionException {
 
     if (personCertificationStatus.attestatiCertifications != null) {
       for (Certification certification :
@@ -709,10 +704,9 @@ public class CertificationService {
   /**
    * La lista dei codici assenza... TODO: conversione al tipo epas??
    *
-   * @param token token
    * @return lista
    */
-  public Map<String, CodiceAssenza> absenceCodes() {
+  public Map<String, CodiceAssenza> absenceCodes() throws ExecutionException {
 
     List<CodiceAssenza> codiciAssenza = certificationsComunication.getAbsencesList();
     Map<String, CodiceAssenza> map = Maps.newConcurrentHashMap();

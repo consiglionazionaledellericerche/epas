@@ -10,17 +10,11 @@
      if (next > 99 ){ $('#loading').fadeOut(1000); }
      $('.progress-bar').css('width', next+'%').attr('aria-valuenow', next);
     }
-
 </script>
 #{/set}
 <div class="container">
   #{title title:'ePAS - Supporto per Invio Attestati', administration:true /}
 </div>
-
-*{
-#{certifications.certificationsTabs activeAction:'certifications' /}
-}*
-
 
 <div class="container">
 
@@ -46,64 +40,58 @@
     E' possibile processare i dati più volte, fino a quando
     l'attestato non sarà validato attraverso la funzione <em>Valida Attestati</em> in attestati.<br>
     L'operazione Processa non ha effetti per ogni attestato già validato <i class="fa fa-ban"
-                                                                            aria-hidden="true"
-                                                                            popover-hover
                                                                             data-content="Attestato validato su attestati non modificabile."></i>
   </p>
   #{/alert}
 
-  #{if matricoleAttestati && !matricoleAttestati.empty} *{ se è injettato è stata ottenuta
+  #{if matchNumbers && !matchNumbers.empty} *{ se è injettato è stata ottenuta
   l'autenticazione }*
   #{if !notInEpas.empty}
-  #{alert color:'danger'}
-  <p>Ci sono matricole attive in attestati non inserite in ePAS.</p>
-  #{list notInEpas}
-  <span class="label label-danger">${_}</span>
-  #{/list}
-  #{/alert}
+    #{alert color:'danger'}
+    <p>Ci sono matricole attive in attestati non inserite in ePAS.</p>
+      #{list notInEpas}
+        <span class="label label-danger">${_}</span>
+      #{/list}
+    #{/alert}
   #{/if}
 
-  #{if peopleNotInAttestati}
-  #{alert color:'danger'}
-  <p>Ci sono persone attive nel mese in ePAS non in attestati. Controllare le loro matricole.</p>
-  #{list items:peopleCertificationStatus, as:'personCertificationStatus'}
-  #{if personCertificationStatus.notInAttestati}
-  <span class="label label-danger">${personCertificationStatus.person.fullname}</span>
-  #{/if}
-  #{/list}
-  #{/alert}
+  #{if !notInAttestati.empty}
+    #{alert color:'danger'}
+    <p>Ci sono persone attive nel mese in ePAS non in attestati. Controllare le loro matricole.</p>
+      #{list notInAttestati}
+        <span class="label label-danger">${_}</span>
+      #{/list}
+    #{/alert}
   #{/if}
 
-  #{set stepSize:100/matricoleAttestati.size() /}
+  #{set stepSize:100/matchNumbers.size() /}
 
   <div id="loading">
     <h6><em class="text-muted"><i class="fa fa-spin fa-spinner"></i> Caricamento in corso...</em></h6>
     <div class="progress">
       <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar"
-           aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-        <span class="sr-only">45% Complete</span>
+           aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" >
+        <span class="sr-only">10% Complete</span>
       </div>
     </div>
   </div>
 
 
   #{secure.check 'Certifications.processAll'}
-  <a class="btn btn-warning" href="@{Certifications.processAll(office.id, year, month)}">Processa <i
-      class="fa fa-cloud-upload" aria-hidden="true"></i></a>
+  <a class="btn btn-warning" href="@{Certifications.processAll(office.id, year, month)}">Processa <i class="fa fa-cloud-upload" aria-hidden="true"></i></a>
   #{/secure.check}
   <a class="btn btn-primary" href="@{Certifications.certifications(office.id, year, month)}">Aggiorna
     <i class="fa fa-refresh" aria-hidden="true"></i></a>
 
   *{
   <a class="btn btn-danger pull-right"
-     href="@{Certifications.emptyCertifications(office.id, year, month)}">Svuota Attestati <i
-      class="fa fa-trash-o" aria-hidden="true"></i></a>
+     href="@{Certifications.emptyCertifications(office.id, year, month)}">Svuota Attestati <i class="fa fa-trash-o" aria-hidden="true"></i></a>
   }*
 
   <ul class="list-group">
 
     #{list people, as:'person' }
-    #{if !matricoleAttestati.empty && matricoleAttestati.contains(person.number)}
+    #{if !matchNumbers.empty && matchNumbers.contains(person.number)}
     <div data-load-async="@{personStatus(person.id, year, month, stepSize)}">
       ${person.fullname}
       <i class="fa fa-spin fa-spinner"></i> Caricamento in corso...
