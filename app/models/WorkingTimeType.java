@@ -2,6 +2,8 @@ package models;
 
 import com.google.common.collect.Lists;
 
+import lombok.Getter;
+
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -37,11 +39,13 @@ public class WorkingTimeType extends BaseModel {
 
   private static final long serialVersionUID = -3443521979786226461L;
 
+  @Getter
   @Required
   @Column(nullable = false)
   @Unique("office")
   public String description;
 
+  @Getter
   @Required
   public Boolean horizontal;
 
@@ -65,6 +69,7 @@ public class WorkingTimeType extends BaseModel {
   @Column(name = "disabled")
   public boolean disabled = false;
 
+  @Getter
   @OneToMany(mappedBy = "workingTimeType", fetch = FetchType.EAGER)
   @OrderBy("dayOfWeek")
   public List<WorkingTimeTypeDay> workingTimeTypeDays = new ArrayList<WorkingTimeTypeDay>();
