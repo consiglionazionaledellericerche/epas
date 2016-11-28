@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import manager.attestati.dto.show.CodiceAssenza;
 import manager.attestati.service.CertificationService;
 import manager.attestati.service.PersonCertificationStatus;
-import manager.configurations.ConfigurationManager;
 
 import models.Office;
 import models.Person;
@@ -35,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -50,17 +50,15 @@ public class Certifications extends Controller {
 
 
   @Inject
-  private static SecurityRules rules;
+  static SecurityRules rules;
   @Inject
-  private static OfficeDao officeDao;
+  static OfficeDao officeDao;
   @Inject
-  private static IWrapperFactory factory;
+  static IWrapperFactory factory;
   @Inject
-  private static PersonDao personDao;
+  static PersonDao personDao;
   @Inject
-  private static ConfigurationManager configurationManager;
-  @Inject
-  private static CertificationService certificationService;
+  static CertificationService certificationService;
 
   /**
    * Pagina principale nuovo invio attestati.
@@ -129,33 +127,21 @@ public class Certifications extends Controller {
         .distinct().collect(Collectors.toSet());
 
     final Set<Integer> notInEpas = Sets.difference(matricoleAttestati, matricoleEpas);
-    List<PersonCertificationStatus> peopleCertificationStatus = Lists.newArrayList();
+    final Set<Integer> notInAttestati = Sets.difference(matricoleEpas, matricoleAttestati);
 
-//    log.info("MATRICOLE ATTESTATI {} {}", matricoleAttestati.size(), matricoleAttestati.stream()
-//        .sorted().collect(Collectors.toList()));
-//    log.info("MATRICOLE EPAS {} {}", matricoleEpas.size(), matricoleEpas.stream()
-//        .sorted().collect(Collectors.toList()));
-//    log.info("DIFFERENZE {} {}", notInEpas.size(), notInEpas.stream()
-//        .sorted().collect(Collectors.toList()));
-//    for (Person person : people) {
-//
-//      // Costruisco lo status generale
-//      PersonCertificationStatus personCertificationStatus = certificationService
-//          .buildPersonStaticStatus(person, year, month, matricoleAttestati);
-//
-//      peopleCertificationStatus.add(personCertificationStatus);
-//    }
+    final Set<Integer> matchNumbers = Sets.newHashSet(matricoleEpas);
+    matchNumbers.retainAll(matricoleAttestati);
 
-    render(office, year, month, people, notInEpas, matricoleAttestati);
+    render(office, year, month, people, notInEpas, notInAttestati, matchNumbers);
   }
 
-  public static void personStatus(Long personId, int year, int month, int totalSize) {
+  public static void personStatus(Long personId, int year, int month, double totalSize) throws ExecutionException {
     final Person person = personDao.getPersonById(personId);
 
     // Costruisco lo status generale
     PersonCertificationStatus personCertificationStatus = certificationService
         .buildPersonStaticStatus(person, year, month, null);
-    int stepSize = totalSize;
+    double stepSize = totalSize;
     render(personCertificationStatus, stepSize);
   }
 
@@ -167,7 +153,7 @@ public class Certifications extends Controller {
    * @param year     anno
    * @param month    mese
    */
-  public static void processAll(Long officeId, Integer year, Integer month) {
+  public static void processAll(Long officeId, Integer year, Integer month) throws ExecutionException {
 
     flash.clear();  //non avendo per adesso un meccanismo di redirect pulisco il flash...
 
@@ -224,7 +210,7 @@ public class Certifications extends Controller {
         peopleCertificationStatus);
   }
 
-  public static void emptyCertifications(Long officeId, int year, int month) {
+  public static void emptyCertifications(Long officeId, int year, int month) throws ExecutionException {
 
     flash.clear();  //non avendo per adesso un meccanismo di redirect pulisco il flash...
 
@@ -288,7 +274,7 @@ public class Certifications extends Controller {
   /**
    * I codici assenza in attestati.
    */
-  public static void certificationsAbsenceCodes() {
+  public static void certificationsAbsenceCodes() throws ExecutionException {
 
     // Mappa dei codici di assenza in attestati
     Map<String, CodiceAssenza> attestatiAbsenceCodes = certificationService.absenceCodes();
