@@ -18,7 +18,6 @@ import manager.attestati.dto.show.CodiceAssenza;
 import manager.attestati.service.CertificationService;
 import manager.attestati.service.PersonCertificationStatus;
 import manager.configurations.ConfigurationManager;
-import manager.configurations.EpasParam;
 
 import models.Office;
 import models.Person;
@@ -30,12 +29,13 @@ import org.joda.time.YearMonth;
 
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -48,6 +48,7 @@ import javax.inject.Inject;
 @With({Resecure.class})
 public class Certifications extends Controller {
 
+
   @Inject
   private static SecurityRules rules;
   @Inject
@@ -58,7 +59,6 @@ public class Certifications extends Controller {
   private static PersonDao personDao;
   @Inject
   private static ConfigurationManager configurationManager;
-
   @Inject
   private static CertificationService certificationService;
 
@@ -107,51 +107,58 @@ public class Certifications extends Controller {
 
 
     //Il mese selezionato è abilitato?
-    Optional<String> token = certificationService.buildToken();
-    if (!token.isPresent()) {
-      flash.error("Impossibile instaurare il collegamento col server di attestati."
-          + " Effettuare una segnalazione.");
-      render(office, year, month);
-    }
-    boolean autenticate = certificationService.authentication(office, token, true);
+    boolean autenticate = certificationService.authentication(office, true);
     if (!autenticate) {
       flash.error("L'utente app.epas non è abilitato alla sede selezionata");
       render(office, year, month);
     }
 
+    Set<Integer> matricoleAttestati = new HashSet<>();
     //Lo stralcio è stato effettuato?
-    Set<Integer> numbers = certificationService.peopleList(office, year, month, token);
-    if (numbers.isEmpty()) {
-      flash.error("E' necessario effettuare lo stralcio dei dati per processare "
-          + "gli attestati (sede %s, anno %s, mese %s).", office.name, year, month);
-      render(office, year, month, numbers);
+    try {
+      matricoleAttestati = certificationService.peopleList(office, year, month);
+    } catch (Exception e) {
+      flash.error("Errore di connessione ad Attestati - %s", e.getMessage());
+      render(office, year, month);
     }
 
-    List<Person> people = personDao.list(Optional.<String>absent(),
+    List<Person> people = personDao.list(Optional.absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
 
+    final Set<Integer> matricoleEpas = people.stream().map(person -> person.number)
+        .distinct().collect(Collectors.toSet());
+
+    final Set<Integer> notInEpas = Sets.difference(matricoleAttestati, matricoleEpas);
     List<PersonCertificationStatus> peopleCertificationStatus = Lists.newArrayList();
-    boolean peopleNotInAttestati = false;
-    for (Person person : people) {
 
-      // Costruisco lo status generale
-      PersonCertificationStatus personCertificationStatus = certificationService
-          .buildPersonStaticStatus(person, year, month, numbers, token);
+//    log.info("MATRICOLE ATTESTATI {} {}", matricoleAttestati.size(), matricoleAttestati.stream()
+//        .sorted().collect(Collectors.toList()));
+//    log.info("MATRICOLE EPAS {} {}", matricoleEpas.size(), matricoleEpas.stream()
+//        .sorted().collect(Collectors.toList()));
+//    log.info("DIFFERENZE {} {}", notInEpas.size(), notInEpas.stream()
+//        .sorted().collect(Collectors.toList()));
+//    for (Person person : people) {
+//
+//      // Costruisco lo status generale
+//      PersonCertificationStatus personCertificationStatus = certificationService
+//          .buildPersonStaticStatus(person, year, month, matricoleAttestati);
+//
+//      peopleCertificationStatus.add(personCertificationStatus);
+//    }
 
-      if (personCertificationStatus.match()) {
-        // La matricola la rimuovo da quelle in attestati (alla fine rimangono quelle non trovate)
-        numbers.remove(person.number);
-      }
-
-      if (personCertificationStatus.notInAttestati) {
-        peopleNotInAttestati = true;
-      }
-
-      peopleCertificationStatus.add(personCertificationStatus);
-    }
-
-    render(office, year, month, peopleCertificationStatus, numbers, peopleNotInAttestati);
+    render(office, year, month, people, notInEpas, matricoleAttestati);
   }
+
+  public static void personStatus(Long personId, int year, int month, int totalSize) {
+    final Person person = personDao.getPersonById(personId);
+
+    // Costruisco lo status generale
+    PersonCertificationStatus personCertificationStatus = certificationService
+        .buildPersonStaticStatus(person, year, month, null);
+    int stepSize = totalSize;
+    render(personCertificationStatus, stepSize);
+  }
+
 
   /**
    * Elaborazione.
@@ -172,15 +179,14 @@ public class Certifications extends Controller {
     LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
 
     //Il mese selezionato è abilitato?
-    Optional<String> token = certificationService.buildToken();
-    boolean autenticate = certificationService.authentication(office, token, true);
+    boolean autenticate = certificationService.authentication(office, true);
     if (!autenticate) {
       flash.error("L'utente app.epas non è abilitato alla sede selezionata");
       renderTemplate("@certifications", office, year, month);
     }
 
     //Lo stralcio è stato effettuato?
-    Set<Integer> numbers = certificationService.peopleList(office, year, month, token);
+    Set<Integer> numbers = certificationService.peopleList(office, year, month);
     if (numbers.isEmpty()) {
       flash.error("E' necessario effettuare lo stralcio dei dati per processare "
           + "gli attestati (sede %s, anno %s, mese %s).", office.name, year, month);
@@ -197,21 +203,17 @@ public class Certifications extends Controller {
 
       // Costruisco lo status generale
       PersonCertificationStatus personCertificationStatus = certificationService
-          .buildPersonStaticStatus(person, year, month, numbers, token);
+          .buildPersonStaticStatus(person, year, month, numbers);
 
-      if (personCertificationStatus.match()) {
-
-        if (!personCertificationStatus.validate) {
-          // Se l'attestato non è stato validato applico il process
-          certificationService.process(personCertificationStatus, token);
-        }
-        // La matricola la rimuovo da quelle in attestati (alla fine rimangono quelle non trovate)
-        numbers.remove(person.number);
-      }
-
-      if (personCertificationStatus.notInAttestati) {
-        peopleNotInAttestati = true;
-      }
+//      if (personCertificationStatus.match()) {
+//
+//        if (!personCertificationStatus.validate) {
+//          // Se l'attestato non è stato validato applico il process
+//          certificationService.process(personCertificationStatus, token);
+//        }
+//        // La matricola la rimuovo da quelle in attestati (alla fine rimangono quelle non trovate)
+//        numbers.remove(person.number);
+//      }
 
       peopleCertificationStatus.add(personCertificationStatus);
     }
@@ -234,15 +236,14 @@ public class Certifications extends Controller {
     LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
 
     //Il mese selezionato è abilitato?
-    Optional<String> token = certificationService.buildToken();
-    boolean autenticate = certificationService.authentication(office, token, true);
+    boolean autenticate = certificationService.authentication(office, true);
     if (!autenticate) {
       flash.error("L'utente app.epas non è abilitato alla sede selezionata");
       renderTemplate("@certifications", office, year, month);
     }
 
     //Lo stralcio è stato effettuato?
-    Set<Integer> numbers = certificationService.peopleList(office, year, month, token);
+    Set<Integer> numbers = certificationService.peopleList(office, year, month);
     if (numbers.isEmpty()) {
       flash.error("E' necessario effettuare lo stralcio dei dati per processare "
           + "gli attestati (sede %s, anno %s, mese %s).", office.name, year, month);
@@ -259,23 +260,20 @@ public class Certifications extends Controller {
 
       // Costruisco lo status generale
       PersonCertificationStatus personCertificationStatus = certificationService
-          .buildPersonStaticStatus(person, year, month, numbers, token);
+          .buildPersonStaticStatus(person, year, month, numbers);
 
       // Elimino ogni record
-      certificationService.emptyAttestati(personCertificationStatus, token);
+      certificationService.emptyAttestati(personCertificationStatus);
 
       // Ricostruzione nuovo stato (coi record eliminati)
       personCertificationStatus = certificationService
-          .buildPersonStaticStatus(person, year, month, numbers, token);
+          .buildPersonStaticStatus(person, year, month, numbers);
 
-      if (personCertificationStatus.match()) {
-        // La matricola la rimuovo da quelle in attestati (alla fine rimangono quelle non trovate)
-        numbers.remove(person.number);
-      }
+//      if (personCertificationStatus.match()) {
+//        // La matricola la rimuovo da quelle in attestati (alla fine rimangono quelle non trovate)
+//        numbers.remove(person.number);
+//      }
 
-      if (personCertificationStatus.notInAttestati) {
-        peopleNotInAttestati = true;
-      }
 
       peopleCertificationStatus.add(personCertificationStatus);
     }
@@ -286,15 +284,14 @@ public class Certifications extends Controller {
         peopleCertificationStatus);
 
   }
-  
+
   /**
    * I codici assenza in attestati.
    */
   public static void certificationsAbsenceCodes() {
-    Optional<String> token = certificationService.buildToken();
 
     // Mappa dei codici di assenza in attestati
-    Map<String, CodiceAssenza> attestatiAbsenceCodes = certificationService.absenceCodes(token);
+    Map<String, CodiceAssenza> attestatiAbsenceCodes = certificationService.absenceCodes();
     if (attestatiAbsenceCodes.isEmpty()) {
       flash.error("L'utente app.epas non è in grado di ottenere le informazioni richieste.");
     }

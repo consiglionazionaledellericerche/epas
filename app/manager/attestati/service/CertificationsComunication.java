@@ -200,12 +200,9 @@ public class CertificationsComunication {
       }
 
       ListaDipendenti listaDipendenti = new Gson().fromJson(body, ListaDipendenti.class);
-      Set<Integer> numbers = Sets.newHashSet();
 
-      numbers.addAll(listaDipendenti.dipendenti.stream()
-          .map(matricola -> matricola.matricola).collect(Collectors.toList()));
-      return numbers;
-
+      return listaDipendenti.dipendenti.stream().map(matricola -> matricola.matricola)
+          .collect(Collectors.toSet());
     }
     return Sets.newHashSet();
   }
