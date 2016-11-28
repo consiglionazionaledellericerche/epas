@@ -14,29 +14,25 @@ import java.util.Set;
 /**
  * La situazione inerente un mese di una persona.
  * Permette di definire lo stato e i warning se presenti.
- * 
- * @author alessandro
  *
+ * @author alessandro
  */
 public class PersonCertificationStatus {
-  
+
   public Person person;
   public int year;
   public int month;
-  
+
   public boolean validate = false;
-  
-  public boolean notInEpas = false;
-  public boolean notInAttestati = false;
-  
+
   public boolean staticView = true;
-  
+
   public boolean okProcessable;             //Coerenza epas e attestati
   public boolean incompleteProcessable;     //Incoerenza epas e attestati
-  
+
   public boolean okNotProcessable;          //Coerenza interna epas non processabile
   public boolean incompleteNotProcessable;  //Incoerenza interna epas non processabile 
-  
+
   // Strutture dati statiche
   protected Map<String, Certification> actualCertifications;
   protected Map<String, Certification> epasCertifications;
@@ -48,53 +44,41 @@ public class PersonCertificationStatus {
   public Map<String, Certification> problemCertifications = Maps.newHashMap();
   public Map<String, Certification> toSendCertifications = Maps.newHashMap();
   public Certification attestatiMealToOverwrite;
-  
-  /**
-   * @return true se La matricola è presente sia in attestati che in epas,
-   *        false altrimenti. 
-   */
-  public boolean match() {
-    if (this.notInAttestati || this.notInEpas) {
-      return false;
-    }
-    return true;
-  }
-   
-  
+
   public PersonCertificationStatus computeStaticStatus() {
-    
-    this.staticView = true;
-    
-    if (this.incompleteProcessable) {
-      
+
+    staticView = true;
+
+    if (incompleteProcessable) {
+
       //Comparazione attuali e attestati
-      Set<String> allKey = Sets.newHashSet(); 
+      Set<String> allKey = Sets.newHashSet();
       allKey.addAll(actualCertifications.keySet());
       allKey.addAll(attestatiCertifications.keySet());
-      
+
       for (String key : allKey) {
         Certification actualCertification = actualCertifications.get(key);
         Certification epasCertification = epasCertifications.get(key);
         Certification attestatiCertification = attestatiCertifications.get(key);
-        
+
         //Corretto
         if (actualCertification != null && attestatiCertification != null) {
           correctCertifications.put(key, attestatiCertification);
           continue;
         }
-        
+
         //Da cancellare
         if (actualCertification == null) {
-          
+
           //Patch mealTicket record
-          if (attestatiCertification.certificationType.equals(CertificationType.MEAL)) {
+          if (attestatiCertification.certificationType == CertificationType.MEAL) {
             attestatiMealToOverwrite = attestatiCertification;
           } else {
             toDeleteCertifications.put(key, attestatiCertification);
           }
           continue;
         }
-        
+
         //Da inserire (o riprovare a inserire)
         if (attestatiCertification == null) {
           if (epasCertification != null && epasCertification.containProblems()) {
@@ -102,26 +86,25 @@ public class PersonCertificationStatus {
             continue;
           }
           toSendCertifications.put(key, actualCertification);
-          continue;
         }
       }
     }
-    
-    if (this.okProcessable) {
+
+    if (okProcessable) {
       correctCertifications = epasCertifications;
     }
-    
-    if (this.incompleteNotProcessable) {
-      
-      Set<String> allKey = Sets.newHashSet(); 
+
+    if (incompleteNotProcessable) {
+
+      Set<String> allKey = Sets.newHashSet();
       allKey.addAll(actualCertifications.keySet());
       allKey.addAll(epasCertifications.keySet());
-      
+
       for (String key : allKey) {
-        
+
         Certification actualCertification = actualCertifications.get(key);
         Certification epasCertification = epasCertifications.get(key);
-                
+
         if (actualCertification == null && epasCertification != null) {
           // Nelle toDelete inserisco quelle epas non in attuali
           toDeleteCertifications.put(key, epasCertification);
@@ -139,21 +122,21 @@ public class PersonCertificationStatus {
         }
       }
     }
-    
+
     return this;
   }
-  
+
   public PersonCertificationStatus computeProcessStatus() {
-    
+
     if (incompleteProcessable) {
-      if (toDeleteCertifications.values().isEmpty() && problemCertifications.values().isEmpty() 
-          && toSendCertifications.values().isEmpty() ) {
-        this.incompleteProcessable = false;
-        this.okProcessable = true;
+      if (toDeleteCertifications.values().isEmpty() && problemCertifications.values().isEmpty()
+          && toSendCertifications.values().isEmpty()) {
+        incompleteProcessable = false;
+        okProcessable = true;
       }
     }
     return this;
-    
+
   }
 
 }

@@ -35,6 +35,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 import play.libs.WS.HttpResponse;
+import play.mvc.Http;
 
 import java.util.List;
 import java.util.Map;
@@ -42,12 +43,13 @@ import java.util.Set;
 
 /**
  * Funzionalità integrazione ePAS - Nuovo Attestati.
- * @author alessandro
  *
+ * @author alessandro
  */
 @Slf4j
 public class CertificationService {
 
+  private static final String TOKEN_ATTESTATI = "token-attestati";
   private final CertificationsComunication certificationsComunication;
 
   private final PersonMonthRecapDao personMonthRecapDao;
@@ -60,8 +62,8 @@ public class CertificationService {
 
   @Inject
   public CertificationService(CertificationsComunication certificationsComunication,
-      AbsenceDao absenceDao, CompetenceDao competenceDao, PersonMonthRecapDao personMonthRecapDao, 
-      PersonDayManager personDayManager, PersonDayDao personDayDao, 
+      AbsenceDao absenceDao, CompetenceDao competenceDao, PersonMonthRecapDao personMonthRecapDao,
+      PersonDayManager personDayManager, PersonDayDao personDayDao,
       CertificationDao certificationDao) {
     this.certificationsComunication = certificationsComunication;
     this.absenceDao = absenceDao;
@@ -73,21 +75,13 @@ public class CertificationService {
   }
 
   /**
-   * Ritorna il token di comunicazione.
-   * @return token
-   */
-  public Optional<String> buildToken() {
-    return certificationsComunication.getToken();
-  }
-
-  /**
    * Se il token è abilitato alla sede.
+   *
    * @param office sede
-   * @param token token 
    * @param result result (da rimuovere)
    * @return esito
    */
-  public boolean authentication(Office office, Optional<String> token, boolean result) {
+  public boolean authentication(Office office, boolean result) {
 
     // TODO: chiedere a Pagano come discriminare il caso.
 
@@ -97,29 +91,29 @@ public class CertificationService {
   /**
    * Le matricole abilitate all'invio attestati per la sede nel mese.
    * Nota bene: se la lista è vuota significa che non è stato effettuato lo stralcio oppure
-   * un errore nel protocollo di comunicazione con attestati. 
-   * Es. Periodo 201603 non presente per la sede 224500. 
-   * @param office sede 
-   * @param year anno
-   * @param month mese 
-   * @param token token
+   * un errore nel protocollo di comunicazione con attestati.
+   * Es. Periodo 201603 non presente per la sede 224500.
+   *
+   * @param office sede
+   * @param year   anno
+   * @param month  mese
+   * @param token  token
    * @return insieme di number
    */
-  public Set<Integer> peopleList(Office office, int year, int month, Optional<String> token) {
-
-    return certificationsComunication.getPeopleList(office, year, month, token);
-
+  public Set<Integer> peopleList(Office office, int year, int month) {
+    return certificationsComunication.getPeopleList(office, year, month);
   }
 
   /**
-   * Le certificazioni già presenti su attestati. 
-   * @param person persona
-   * @param year anno
-   * @param month mese
+   * Le certificazioni già presenti su attestati.
+   *
+   * @param person            persona
+   * @param year              anno
+   * @param month             mese
    * @param seatCertification situazione della persona in attestati.
    * @return null in caso di errore.
    */
-  private Map<String, Certification> personAttestatiCertifications(Person person, 
+  private Map<String, Certification> personAttestatiCertifications(Person person,
       int year, int month, PersonCertification personCertification) {
 
     Map<String, Certification> certifications = Maps.newHashMap();
@@ -181,41 +175,43 @@ public class CertificationService {
 
   /**
    * Costruisce la situazione attestati di una persona.
-   * @param person persona
-   * @param year anno
-   * @param month mese
+   *
+   * @param person  persona
+   * @param year    anno
+   * @param month   mese
    * @param numbers numeri attestati in cui ricercarla
-   * @param token token
+   * @param token   token
    * @return lo stato
    */
   public PersonCertificationStatus buildPersonStaticStatus(Person person, int year, int month,
-      Set<Integer> numbers, Optional<String> token) {
+      Set<Integer> numbers) {
 
     PersonCertificationStatus personCertificationStatus = new PersonCertificationStatus();
     personCertificationStatus.person = person;
     personCertificationStatus.year = year;
     personCertificationStatus.month = month;
 
-    // Esco perchè finchè non sistemo la matricola non ha senso fare altro.
-    if (person.number == null) {
-      personCertificationStatus.notInAttestati = true;
-      return personCertificationStatus;
-    } else {
-      if (!numbers.contains(person.number)) {
-        personCertificationStatus.notInAttestati = true;
-        return personCertificationStatus;
-      }
-    }
+//    // Esco perchè finchè non sistemo la matricola non ha senso fare altro.
+//    if (person.number == null) {
+//      personCertificationStatus.notInAttestati = true;
+//      return personCertificationStatus;
+//    }
+//    else {
+//      if (!numbers.contains(person.number)) {
+//        personCertificationStatus.notInAttestati = true;
+//        return personCertificationStatus;
+//      }
+//    }
 
     // Le certificazioni in attestati e lo stato di validazione ...
     Map<String, Certification> attestatiCertifications = Maps.newHashMap();
 
     Optional<SeatCertification> seatCertification = certificationsComunication
-        .getPersonSeatCertification(person, month, year, token);
+        .getPersonSeatCertification(person, month, year);
     if (seatCertification.isPresent()) {
       PersonCertification personCertification = seatCertification.get().dipendenti.get(0);
-      attestatiCertifications = 
-          personAttestatiCertifications(person, year, month, personCertification); 
+      attestatiCertifications =
+          personAttestatiCertifications(person, year, month, personCertification);
       if (attestatiCertifications == null) {
         log.info("Impossibile scaricare le informazioni da attestati per {}", person.getFullname());
         //attestatiCertifications = Maps.newHashMap(); TODO: da segnalare in qualche modo all'user 
@@ -231,7 +227,7 @@ public class CertificationService {
 
     // Lo stato attuale epas
     Map<String, Certification> actualCertifications = Maps.newHashMap();
-    actualCertifications = trainingHours(person, year, month, actualCertifications); 
+    actualCertifications = trainingHours(person, year, month, actualCertifications);
     actualCertifications = absences(person, year, month, actualCertifications);
     actualCertifications = competences(person, year, month, actualCertifications);
     actualCertifications = mealTicket(person, year, month, actualCertifications);
@@ -269,10 +265,10 @@ public class CertificationService {
   }
 
   private Map<String, Certification> updateEpasCertifications(
-      Map<String, Certification> epasCertifications, 
+      Map<String, Certification> epasCertifications,
       Map<String, Certification> attestatiCertifications) {
 
-    Set<String> allKey = Sets.newHashSet(); 
+    Set<String> allKey = Sets.newHashSet();
     allKey.addAll(epasCertifications.keySet());
     allKey.addAll(attestatiCertifications.keySet());
 
@@ -290,7 +286,7 @@ public class CertificationService {
       }
 
       if (attestatiCertification == null) {
-        log.info("Rimossa certifications obsoleta. {}", epasCertification.toString());
+        log.info("Rimossa certifications obsoleta. {}", epasCertification);
         epasCertification.delete();
         epasCertifications.remove(key);
         continue;
@@ -302,7 +298,7 @@ public class CertificationService {
         epasCertification.save();
       }
 
-      if (epasCertification.attestatiId == null 
+      if (epasCertification.attestatiId == null
           || epasCertification.attestatiId != attestatiCertification.attestatiId) {
         epasCertification.attestatiId = attestatiCertification.attestatiId;
         epasCertification.save();
@@ -316,14 +312,15 @@ public class CertificationService {
 
   /**
    * Se le due mappe contententi certificazioni sono equivalenti e non contengono errori.
+   *
    * @param map1 map1
    * @param map2 map2
    * @return esito
    */
-  public boolean certificationsEquivalent(Map<String, Certification> map1, 
+  public boolean certificationsEquivalent(Map<String, Certification> map1,
       Map<String, Certification> map2) {
 
-    Set<String> allKey = Sets.newHashSet(); 
+    Set<String> allKey = Sets.newHashSet();
     allKey.addAll(map1.keySet());
     allKey.addAll(map2.keySet());
 
@@ -346,19 +343,19 @@ public class CertificationService {
 
   /**
    * Elaborazione persona.
+   *
    * @param personCertificationStatus il suo stato
-   * @param token token
+   * @param token                     token
    * @return lo stato dopo l'elaborazione.
    */
-  public PersonCertificationStatus process(PersonCertificationStatus personCertificationStatus, 
-      Optional<String> token) {
+  public PersonCertificationStatus process(PersonCertificationStatus personCertificationStatus) {
 
     personCertificationStatus.staticView = false;
 
     // Da cancellare
     Map<String, Certification> notErasable = Maps.newHashMap();
     for (Certification certification : personCertificationStatus.toDeleteCertifications.values()) {
-      if (!removeAttestati(certification, token)) {
+      if (!removeAttestati(certification)) {
         notErasable.put(certification.aMapKey(), certification);
       }
     }
@@ -368,16 +365,16 @@ public class CertificationService {
     List<Certification> sended = Lists.newArrayList();
     Map<String, Certification> containProblemCertifications = Maps.newHashMap();
     for (Certification certification : personCertificationStatus.problemCertifications.values()) {
-      if (sendCertification(certification, token) == null) {
+      if (sendCertification(certification) == null) {
         //Quando non riesco ad inviare la certificazione rimane dovè.
         containProblemCertifications.put(certification.aMapKey(), certification);
       } else {
         if (!certification.containProblems()) {
           sended.add(certification);
-          certification.save();  
+          certification.save();
         } else {
           containProblemCertifications.put(certification.aMapKey(), certification);
-          certification.save();  
+          certification.save();
         }
       }
     }
@@ -385,7 +382,7 @@ public class CertificationService {
     // Da inviare
     Map<String, Certification> notSended = Maps.newHashMap();
     for (Certification certification : personCertificationStatus.toSendCertifications.values()) {
-      if (sendCertification(certification, token) == null) {
+      if (sendCertification(certification) == null) {
         // Quando non riesco ad inviare la certificazione rimane dovè.
         notSended.put(certification.aMapKey(), certification);
       } else {
@@ -414,36 +411,33 @@ public class CertificationService {
 
   /**
    * Invia la certificazione ad attestati.
-   * @param certification
-   * @param token
-   * @return
    */
-  public Certification sendCertification(Certification certification, Optional<String> token) {
+  public Certification sendCertification(Certification certification) {
 
     try {
       HttpResponse httpResponse;
       Optional<RispostaAttestati> rispostaAttestati;
 
-      if (certification.certificationType.equals(CertificationType.ABSENCE)) {
-        httpResponse = certificationsComunication.sendRigaAssenza(token, certification);
+      if (certification.certificationType == CertificationType.ABSENCE) {
+        httpResponse = certificationsComunication.sendRigaAssenza(certification);
         rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
-      } else if (certification.certificationType.equals(CertificationType.FORMATION)) {
-        httpResponse = certificationsComunication.sendRigaFormazione(token, certification);
+      } else if (certification.certificationType == CertificationType.FORMATION) {
+        httpResponse = certificationsComunication.sendRigaFormazione(certification);
         rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
-      } else if (certification.certificationType.equals(CertificationType.MEAL)) {
-        httpResponse = certificationsComunication.sendRigaBuoniPasto(token, certification, false);
+      } else if (certification.certificationType == CertificationType.MEAL) {
+        httpResponse = certificationsComunication.sendRigaBuoniPasto(certification, false);
         rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
-        if (rispostaAttestati.isPresent() 
+        if (rispostaAttestati.isPresent()
             && rispostaAttestati.get().message.contains("attestato_buoni_pasto_ukey")) {
-          httpResponse = certificationsComunication.sendRigaBuoniPasto(token, certification, true);
+          httpResponse = certificationsComunication.sendRigaBuoniPasto(certification, true);
           rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
         }
 
-      } else if (certification.certificationType.equals(CertificationType.COMPETENCE)) {
-        httpResponse = certificationsComunication.sendRigaCompetenza(token, certification);
+      } else if (certification.certificationType == CertificationType.COMPETENCE) {
+        httpResponse = certificationsComunication.sendRigaCompetenza(certification);
         rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
       } else {
@@ -480,30 +474,30 @@ public class CertificationService {
   /**
    * Rimuove il record in attestati. (Non usare per buoni pasto).
    */
-  public boolean removeAttestati(Certification certification, Optional<String> token) {
+  public boolean removeAttestati(Certification certification) {
 
     HttpResponse httpResponse;
     Optional<RispostaAttestati> rispostaAttestati;
 
-    if (certification.certificationType.equals(CertificationType.ABSENCE)) {
-      httpResponse = certificationsComunication.deleteRigaAssenza(token, certification);
+    if (certification.certificationType == CertificationType.ABSENCE) {
+      httpResponse = certificationsComunication.deleteRigaAssenza(certification);
       rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
-    } else if (certification.certificationType.equals(CertificationType.FORMATION)) {
-      httpResponse = certificationsComunication.deleteRigaFormazione(token, certification);
+    } else if (certification.certificationType == CertificationType.FORMATION) {
+      httpResponse = certificationsComunication.deleteRigaFormazione(certification);
       rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
-    } else if (certification.certificationType.equals(CertificationType.COMPETENCE)) {
-      httpResponse = certificationsComunication.deleteRigaCompetenza(token, certification);
+    } else if (certification.certificationType == CertificationType.COMPETENCE) {
+      httpResponse = certificationsComunication.deleteRigaCompetenza(certification);
       rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
-    } else if (certification.certificationType.equals(CertificationType.MEAL)) {
+    } else if (certification.certificationType == CertificationType.MEAL) {
       certification.content = "0";
-      httpResponse = certificationsComunication.sendRigaBuoniPasto(token, certification, false);
+      httpResponse = certificationsComunication.sendRigaBuoniPasto(certification, false);
       rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
-      if (rispostaAttestati.isPresent() 
+      if (rispostaAttestati.isPresent()
           && rispostaAttestati.get().message.contains("attestato_buoni_pasto_ukey")) {
-        httpResponse = certificationsComunication.sendRigaBuoniPasto(token, certification, true);
+        httpResponse = certificationsComunication.sendRigaBuoniPasto(certification, true);
         rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
       }
     } else {
@@ -511,25 +505,23 @@ public class CertificationService {
     }
 
     // Esito 
-    if (httpResponse.getStatus() == 200) {
-      return true;
-    }
+    return httpResponse.getStatus() == Http.StatusCode.OK;
 
-    return false;
   }
 
   /**
    * Produce le certification delle ore di formazione per la persona.
+   *
    * @param person persona
-   * @param year anno
-   * @param month mese
+   * @param year   anno
+   * @param month  mese
    * @return certificazioni (sotto forma di mappa)
    */
-  private Map<String, Certification> trainingHours(Person person, int year, int month, 
+  private Map<String, Certification> trainingHours(Person person, int year, int month,
       Map<String, Certification> certifications) {
 
     List<PersonMonthRecap> trainingHoursList = personMonthRecapDao
-        .getPersonMonthRecapInYearOrWithMoreDetails(person, year, 
+        .getPersonMonthRecapInYearOrWithMoreDetails(person, year,
             Optional.fromNullable(month), Optional.<Boolean>absent());
     for (PersonMonthRecap personMonthRecap : trainingHoursList) {
 
@@ -550,18 +542,18 @@ public class CertificationService {
   }
 
 
-
   /**
    * Produce le certification delle assenze per la persona.
+   *
    * @param person persona
-   * @param year anno
-   * @param month mese
+   * @param year   anno
+   * @param month  mese
    * @return certificazioni (sotto forma di mappa)
    */
   private Map<String, Certification> absences(Person person, int year, int month,
       Map<String, Certification> certifications) {
 
-    log.info("Persona {}", person);
+//    log.info("Persona {}", person);
 
     List<Absence> absences = absenceDao
         .getAbsencesNotInternalUseInMonth(person, year, month);
@@ -584,8 +576,8 @@ public class CertificationService {
 
       //Codice per attestati
       String absenceCodeToSend = absence.absenceType.code.toUpperCase();
-      if (absence.absenceType.certificateCode != null 
-          && !absence.absenceType.certificateCode.trim().isEmpty()) { 
+      if (absence.absenceType.certificateCode != null
+          && !absence.absenceType.certificateCode.trim().isEmpty()) {
         absenceCodeToSend = absence.absenceType.certificateCode.toUpperCase();
       }
 
@@ -596,7 +588,7 @@ public class CertificationService {
         previousDate = absence.personDay.date;
         certification.content = absenceCodeToSend + ";" + dayBegin + ";" + dayEnd;
         continue;
-      } 
+      }
 
       // 2) Fine Assenza più giorni
       if (previousDate != null) {
@@ -606,7 +598,7 @@ public class CertificationService {
       }
 
       // 3) Nuova Assenza  
-      dayBegin =  absence.personDay.date.getDayOfMonth();
+      dayBegin = absence.personDay.date.getDayOfMonth();
       dayEnd = absence.personDay.date.getDayOfMonth();
       previousDate = absence.personDay.date;
       previousAbsenceCode = absenceCodeToSend;
@@ -625,7 +617,7 @@ public class CertificationService {
     return certifications;
   }
 
-  private Map<String, Certification> competences(Person person, int year, int month, 
+  private Map<String, Certification> competences(Person person, int year, int month,
       Map<String, Certification> certifications) {
 
     List<Competence> competences = competenceDao
@@ -648,9 +640,10 @@ public class CertificationService {
 
   /**
    * Produce la certificazione buoni pasto della persona.
+   *
    * @param person persona
-   * @param year anno 
-   * @param month mese
+   * @param year   anno
+   * @param month  mese
    * @return certification (sotto forma di mappa)
    */
   private Map<String, Certification> mealTicket(Person person, int year, int month,
@@ -673,53 +666,55 @@ public class CertificationService {
   }
 
   /**
-   * Prova a rimuovere tutti i record presenti su attestati. 
+   * Prova a rimuovere tutti i record presenti su attestati.
+   *
    * @param personCertificationStatus status
-   * @param token token
+   * @param token                     token
    * @return il nuovo stato
    */
   public PersonCertificationStatus emptyAttestati(
-      PersonCertificationStatus personCertificationStatus, Optional<String> token) {
+      PersonCertificationStatus personCertificationStatus) {
 
     if (personCertificationStatus.attestatiCertifications != null) {
-      for (Certification certification : 
+      for (Certification certification :
           personCertificationStatus.attestatiCertifications.values()) {
-        if (certification.attestatiId != null 
-            || certification.certificationType.equals(CertificationType.MEAL)) {
-          removeAttestati(certification, token);
+        if (certification.attestatiId != null
+            || certification.certificationType == CertificationType.MEAL) {
+          removeAttestati(certification);
         }
       }
     }
 
     if (personCertificationStatus.epasCertifications != null) {
       for (Certification certification : personCertificationStatus.epasCertifications.values()) {
-        if (certification.attestatiId != null 
-            || certification.certificationType.equals(CertificationType.MEAL)) {
-          removeAttestati(certification, token);
+        if (certification.attestatiId != null
+            || certification.certificationType == CertificationType.MEAL) {
+          removeAttestati(certification);
         }
       }
     }
 
     if (personCertificationStatus.actualCertifications != null) {
       for (Certification certification : personCertificationStatus.actualCertifications.values()) {
-        if (certification.attestatiId != null 
-            || certification.certificationType.equals(CertificationType.MEAL)) {
-          removeAttestati(certification, token);
+        if (certification.attestatiId != null
+            || certification.certificationType == CertificationType.MEAL) {
+          removeAttestati(certification);
         }
       }
     }
 
     return personCertificationStatus;
   }
-  
+
   /**
    * La lista dei codici assenza... TODO: conversione al tipo epas??
+   *
    * @param token token
    * @return lista
    */
-  public Map<String, CodiceAssenza> absenceCodes(Optional<String> token) {
-    
-    List<CodiceAssenza> codiciAssenza = certificationsComunication.getAbsencesList(token);
+  public Map<String, CodiceAssenza> absenceCodes() {
+
+    List<CodiceAssenza> codiciAssenza = certificationsComunication.getAbsencesList();
     Map<String, CodiceAssenza> map = Maps.newConcurrentHashMap();
     for (CodiceAssenza codiceAssenza : codiciAssenza) {
       map.put(codiceAssenza.codice.trim().toUpperCase(), codiceAssenza);
