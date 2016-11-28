@@ -110,6 +110,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @Column(name = "end_contract")
   public LocalDate endContract;
 
+  @Getter
   @NotAudited
   @OneToMany(mappedBy = "contract", cascade = {CascadeType.REMOVE})
   @OrderBy("beginDate")
