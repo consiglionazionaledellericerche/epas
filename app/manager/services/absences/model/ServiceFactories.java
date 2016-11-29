@@ -93,6 +93,39 @@ public class ServiceFactories {
       List<PersonChildren> orderedChildren, List<Contract> fetchedContracts, 
       List<InitializationGroup> initializationGroups) { 
     
+    //1 costruire i periods
+    PeriodChain periodChain = buildPeriodChainPhase1(person, groupAbsenceType, date, 
+        orderedChildren, initializationGroups, previousInserts);
+        
+    //DAO fetch delle assenze (una volta ottenuti i limiti temporali della catena)
+    // separato per inject nei test
+    List<Absence> allPersistedAbsences = absenceComponentDao.orderedAbsences(periodChain.person, 
+        periodChain.from, periodChain.to, Lists.newArrayList());
+    List<Absence> groupPersistedAbsences = absenceComponentDao.orderedAbsences(periodChain.person, 
+        periodChain.from, periodChain.to, 
+        Lists.newArrayList(periodChain.periodChainInvolvedCodes()));
+
+    //2 assegnare ad ogni periodo le assenze di competenza e calcoli
+    buildPeriodChainPhase2(periodChain, absenceToInsert, 
+        allPersistedAbsences, groupPersistedAbsences);
+ 
+    return periodChain;
+  }
+  
+  /**
+   * Prima fase di costruzione (generazione dei periodi).
+   * @param person person
+   * @param groupAbsenceType group
+   * @param date date
+   * @param orderedChildren orderedChildren
+   * @param initializationGroups initializationGroups
+   * @param previousInserts previousInserts
+   * @return periodChain phase1
+   */
+  public PeriodChain buildPeriodChainPhase1(Person person, GroupAbsenceType groupAbsenceType, 
+      LocalDate date, List<PersonChildren> orderedChildren, 
+      List<InitializationGroup> initializationGroups, List<Absence> previousInserts) {
+    
     PeriodChain periodChain = new PeriodChain(person, groupAbsenceType, date);
     
     GroupAbsenceType currentGroup = groupAbsenceType;
@@ -131,32 +164,85 @@ public class ServiceFactories {
       }
     }
     
-    // fetch di tutte le assenze nel periodo (comprese previous inserts)
-    //TODO: qui si può efficientare molto se il periodChain ha le stesse date
-    // di quello precedente.......
-    periodChain.allInvolvedAbsences = absenceEngineUtility
-        .mapAbsences(absenceComponentDao
-            .orderedAbsences(
-            periodChain.person, 
-            periodChain.from, periodChain.to, 
-            Lists.newArrayList()), null);
-    periodChain.allInvolvedAbsences = absenceEngineUtility
-        .mapAbsences(previousInserts, periodChain.allInvolvedAbsences);
+    periodChain.previousInserts = previousInserts;
     
-    // fetch delle assenze della catena (comprese previous inserts)
-    List<Absence> involvedAbsencesInGroup = absenceEngineUtility.orderAbsences(
-        absenceComponentDao.orderedAbsences(
-            periodChain.person, 
-            periodChain.from, periodChain.to, 
-            Lists.newArrayList(periodChain.periodChainInvolvedCodes())), 
-        previousInserts);
- 
-    // assegnare ad ogni periodo le assenze di competenza e calcoli
-    populatePeriodChain(periodChain, involvedAbsencesInGroup, absenceToInsert, previousInserts);
- 
     return periodChain;
   }
   
+  /**
+   * Seconda fase di costruzione dispatch ed analisi delle assenze (esistenti, inserite e
+   * da inserire). 
+   * @param periodChain periodChain
+   * @param absenceToInsert assenza da inserire
+   * @param allPersistedAbsences tutte le assenze persistite nel periodo (tutti i tipi)
+   * @param groupPersistedAbsences le assenze persistite nel periodo (relative al gruppo)
+   */
+  public void buildPeriodChainPhase2(PeriodChain periodChain, 
+      Absence absenceToInsert, List<Absence> allPersistedAbsences, 
+      List<Absence> groupPersistedAbsences) {
+    
+    periodChain.allInvolvedAbsences = absenceEngineUtility
+        .mapAbsences(allPersistedAbsences, null);
+    periodChain.allInvolvedAbsences = absenceEngineUtility
+        .mapAbsences(periodChain.previousInserts, periodChain.allInvolvedAbsences);
+    
+    periodChain.involvedAbsencesInGroup = absenceEngineUtility
+        .orderAbsences(groupPersistedAbsences, periodChain.previousInserts);
+    
+    boolean typeToInfer = (absenceToInsert != null && absenceToInsert.absenceType == null);
+    
+    for (AbsencePeriod absencePeriod : periodChain.periods) {
+      
+      //Dispatch di tutte le assenze coinvolte gruppo e inserimenti precedenti
+      for (Absence absence : absencePeriod
+          .filterAbsencesInPeriod(periodChain.involvedAbsencesInGroup)) {
+        dispatchAbsenceInPeriod(periodChain, absencePeriod, absence);
+      }
+      
+      //Gestione assenza da inserire (per ultima)
+      boolean successInsertInPeriod = 
+          insertAbsenceInPeriod(periodChain, absencePeriod, absenceToInsert);
+
+      // Se la situazione non è compromessa eseguo lo scan dei rimpiazzamenti
+      if (!absencePeriod.containsCriticalErrors() && !absencePeriod.compromisedTwoComplation) {
+        absencePeriod.computeCorrectReplacingInPeriod(absenceEngineUtility);
+      }
+      
+      if (successInsertInPeriod) {
+        periodChain.previousInserts.add(absenceToInsert);
+        periodChain.successPeriodInsert = absencePeriod;
+        return;
+      }
+      if (typeToInfer) {
+        //Preparare l'assenza da inserire nel prossimo gruppo (generalmente si resetta absenceType
+        // nuovo oggetto identico per avere una istanza nuova indipendente da inserire nei 
+        //report)
+        Absence nextAbsenceToInsert = new Absence();
+        nextAbsenceToInsert.date = absenceToInsert.getAbsenceDate();
+        nextAbsenceToInsert.justifiedType = absenceToInsert.justifiedType;
+        nextAbsenceToInsert.justifiedMinutes = absenceToInsert.justifiedMinutes;
+        absenceToInsert = nextAbsenceToInsert;
+      }
+    } 
+    
+    //Le assenze non assegnate
+    for (Absence absence : periodChain.involvedAbsencesInGroup) {
+      if (!periodChain.involvedAbsences.contains(absence)) {
+        periodChain.orphanAbsences.add(absence);
+      }
+    }
+    
+    // Se il gruppo è compromesso tutte le sue assenze sono compromesse
+    if (periodChain.containsCriticalErrors()) {
+      for (AbsencePeriod absencePeriod : periodChain.periods) {
+        for (Absence absence : absencePeriod
+            .filterAbsencesInPeriod(Lists.newArrayList(periodChain.involvedAbsences))) {
+          absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.ImplementationProblem);
+        }
+      }
+    }
+   
+  }
   
   private AbsencePeriod buildAbsencePeriod(Person person, GroupAbsenceType groupAbsenceType, 
       LocalDate date, 
@@ -248,65 +334,6 @@ public class ServiceFactories {
     }
     
     return absencePeriod;
-  }
-  
-  private void populatePeriodChain(PeriodChain periodChain, 
-      List<Absence> involvedAbsencesInGroup, Absence absenceToInsert,
-      List<Absence> previousInsert) {
-    
-    boolean typeToInfer = (absenceToInsert != null && absenceToInsert.absenceType == null);
-    
-    for (AbsencePeriod absencePeriod : periodChain.periods) {
-      
-      //Dispatch di tutte le assenze coinvolte gruppo e inserimenti precedenti
-      for (Absence absence : absencePeriod
-          .filterAbsencesInPeriod(involvedAbsencesInGroup)) {
-        dispatchAbsenceInPeriod(periodChain, absencePeriod, absence);
-      }
-      
-      //Gestione assenza da inserire (per ultima)
-      boolean successInsertInPeriod = 
-          insertAbsenceInPeriod(periodChain, absencePeriod, absenceToInsert, previousInsert);
-
-      // Se la situazione non è compromessa eseguo lo scan dei rimpiazzamenti
-      if (!absencePeriod.containsCriticalErrors() && !absencePeriod.compromisedTwoComplation) {
-        absencePeriod.computeCorrectReplacingInPeriod(absenceEngineUtility);
-      }
-      
-      if (successInsertInPeriod) {
-        previousInsert.add(absenceToInsert);
-        periodChain.successPeriodInsert = absencePeriod;
-        return;
-      }
-      if (typeToInfer) {
-        //Preparare l'assenza da inserire nel prossimo gruppo (generalmente si resetta absenceType
-        // nuovo oggetto identico per avere una istanza nuova indipendente da inserire nei 
-        //report)
-        Absence nextAbsenceToInsert = new Absence();
-        nextAbsenceToInsert.date = absenceToInsert.getAbsenceDate();
-        nextAbsenceToInsert.justifiedType = absenceToInsert.justifiedType;
-        nextAbsenceToInsert.justifiedMinutes = absenceToInsert.justifiedMinutes;
-        absenceToInsert = nextAbsenceToInsert;
-      }
-    } 
-    
-    //Le assenze non assegnate
-    for (Absence absence : involvedAbsencesInGroup) {
-      if (!periodChain.involvedAbsences.contains(absence)) {
-        periodChain.orphanAbsences.add(absence);
-      }
-    }
-    
-    // Se il gruppo è compromesso tutte le sue assenze sono compromesse
-    if (periodChain.containsCriticalErrors()) {
-      for (AbsencePeriod absencePeriod : periodChain.periods) {
-        for (Absence absence : absencePeriod
-            .filterAbsencesInPeriod(Lists.newArrayList(periodChain.involvedAbsences))) {
-          absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.ImplementationProblem);
-        }
-      }
-    }
-   
   }
 
   private void dispatchAbsenceInPeriod(PeriodChain periodChain, 
@@ -401,7 +428,7 @@ public class ServiceFactories {
   }
   
   private boolean insertAbsenceInPeriod(PeriodChain periodChain, AbsencePeriod absencePeriod, 
-      Absence absenceToInsert, List<Absence> previousInserts) {
+      Absence absenceToInsert) {
     if (absenceToInsert == null) {
       return false;
     }
