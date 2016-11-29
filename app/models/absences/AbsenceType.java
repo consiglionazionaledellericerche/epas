@@ -88,9 +88,11 @@ public class AbsenceType extends BaseModel {
       inverseJoinColumns = { @JoinColumn(name = "justified_types_id") })
   public Set<JustifiedType> justifiedTypesPermitted = Sets.newHashSet();
   
+  @Getter
   @Column(name = "replacing_time")
   public Integer replacingTime;
   
+  @Getter
   @ManyToOne
   @JoinColumn(name = "replacing_type_id")
   public JustifiedType replacingType;
