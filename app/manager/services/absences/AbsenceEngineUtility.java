@@ -240,12 +240,13 @@ public class AbsenceEngineUtility {
       return -1;
     }
     if (amountType.equals(AmountType.units) 
-        && absenceType.replacingType.name.equals(JustifiedTypeName.all_day)) {
+        && absenceType.getReplacingType().getName().equals(JustifiedTypeName.all_day)) {
       return unitReplacingAmount; //una unità
     } 
     if (amountType.equals(AmountType.minutes) 
-        && absenceType.replacingType.name.equals(JustifiedTypeName.absence_type_minutes)) {
-      return absenceType.replacingTime;
+        && absenceType.getReplacingType().getName()
+        .equals(JustifiedTypeName.absence_type_minutes)) {
+      return absenceType.getReplacingTime();
     }
 
     return -1;

@@ -36,8 +36,14 @@ public class ServiceFactories {
   private AbsenceComponentDao absenceComponentDao;
   private PersonDayManager personDayManager;
 
+  /**
+   * Constructor.
+   * @param absenceEngineUtility inj
+   * @param absenceComponentDao inj
+   * @param personDayManager inj
+   */
   @Inject
-  ServiceFactories(AbsenceEngineUtility absenceEngineUtility, 
+  public ServiceFactories(AbsenceEngineUtility absenceEngineUtility, 
       AbsenceComponentDao absenceComponentDao, PersonDayManager personDayManager) {
     this.absenceEngineUtility = absenceEngineUtility;
     this.absenceComponentDao = absenceComponentDao;
@@ -159,21 +165,21 @@ public class ServiceFactories {
     
     AbsencePeriod absencePeriod = new AbsencePeriod(person, groupAbsenceType);
     
-    if (absencePeriod.groupAbsenceType.periodType.equals(PeriodType.year)) {
+    if (absencePeriod.groupAbsenceType.getPeriodType().equals(PeriodType.year)) {
       absencePeriod.from = new LocalDate(date.getYear(), 1, 1);
       absencePeriod.to = new LocalDate(date.getYear(), 12, 31);
-    } else if (absencePeriod.groupAbsenceType.periodType.equals(PeriodType.month)) {
+    } else if (absencePeriod.groupAbsenceType.getPeriodType().equals(PeriodType.month)) {
       absencePeriod.from = date.dayOfMonth().withMinimumValue();
       absencePeriod.to = date.dayOfMonth().withMaximumValue();
-    } else if (absencePeriod.groupAbsenceType.periodType.equals(PeriodType.always)) {
+    } else if (absencePeriod.groupAbsenceType.getPeriodType().equals(PeriodType.always)) {
       absencePeriod.from = null;
       absencePeriod.to = null;
-    } else if (absencePeriod.groupAbsenceType.periodType.isChildPeriod()) {
+    } else if (absencePeriod.groupAbsenceType.getPeriodType().isChildPeriod()) {
       // Caso inerente i figli.
       try {
-        DateInterval childInterval = absencePeriod.groupAbsenceType.periodType
+        DateInterval childInterval = absencePeriod.groupAbsenceType.getPeriodType()
             .getChildInterval(orderedChildren
-                .get(absencePeriod.groupAbsenceType.periodType.childNumber - 1).bornDate);
+                .get(absencePeriod.groupAbsenceType.getPeriodType().childNumber - 1).bornDate);
         absencePeriod.from = childInterval.getBegin();
         absencePeriod.to = childInterval.getEnd();
         if (!DateUtility.isDateIntoInterval(date, childInterval)) {
@@ -196,15 +202,15 @@ public class ServiceFactories {
     }
     
     // Parte takable
-    if (absencePeriod.groupAbsenceType.takableAbsenceBehaviour != null) {
+    if (absencePeriod.groupAbsenceType.getTakableAbsenceBehaviour() != null) {
 
       TakableAbsenceBehaviour takableBehaviour = 
-          absencePeriod.groupAbsenceType.takableAbsenceBehaviour;
+          absencePeriod.groupAbsenceType.getTakableAbsenceBehaviour();
 
-      absencePeriod.takeAmountType = takableBehaviour.amountType;
+      absencePeriod.takeAmountType = takableBehaviour.getAmountType();
 
-      absencePeriod.setFixedPeriodTakableAmount(takableBehaviour.fixedLimit);
-      if (takableBehaviour.takableAmountAdjustment != null) {
+      absencePeriod.setFixedPeriodTakableAmount(takableBehaviour.getFixedLimit());
+      if (takableBehaviour.getTakableAmountAdjustment() != null) {
         // TODO: ex. workingTimePercent
         //bisogna ridurre il limite
         //engineInstance.absenceEngineProblem = 
@@ -218,22 +224,22 @@ public class ServiceFactories {
       absencePeriod.takableCountBehaviour = TakeCountBehaviour.period;
       absencePeriod.takenCountBehaviour = TakeCountBehaviour.period;
 
-      absencePeriod.takenCodes = takableBehaviour.takenCodes;
-      absencePeriod.takableCodes = takableBehaviour.takableCodes;
+      absencePeriod.takenCodes = takableBehaviour.getTakenCodes();
+      absencePeriod.takableCodes = takableBehaviour.getTakableCodes();
 
     }
     
-    if (absencePeriod.groupAbsenceType.complationAbsenceBehaviour != null) {
+    if (absencePeriod.groupAbsenceType.getComplationAbsenceBehaviour() != null) {
       
       ComplationAbsenceBehaviour complationBehaviour = 
-          absencePeriod.groupAbsenceType.complationAbsenceBehaviour;
+          absencePeriod.groupAbsenceType.getComplationAbsenceBehaviour();
       
-      absencePeriod.complationAmountType = complationBehaviour.amountType;
-      absencePeriod.complationCodes = complationBehaviour.complationCodes;
+      absencePeriod.complationAmountType = complationBehaviour.getAmountType();
+      absencePeriod.complationCodes = complationBehaviour.getComplationCodes();
       
       // i codici di rimpiazzamento li preparo ordinati per ammontare di rimpiazzamento
       absenceEngineUtility.setReplacingCodesDesc(
-          absencePeriod.complationAmountType, complationBehaviour.replacingCodes, date, //final
+          absencePeriod.complationAmountType, complationBehaviour.getReplacingCodes(), date, //final
           absencePeriod.replacingCodesDesc, absencePeriod.errorsBox);                   //edit
       // genero la mappa inversa
       for (Integer amount : absencePeriod.replacingCodesDesc.keySet()) {
