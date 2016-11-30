@@ -2220,5 +2220,53 @@ public class AbsenceMigration {
       }
     }
   }
+  
+  /**
+   * Fix dei codici FUORI SEDE troppo Rella.
+   */
+  public void fixFuoriSedeCodes() {
+    
+    setStaticVariables();
+    
+    List<AbsenceType> absenceTypes = AbsenceType.findAll();
+    for (AbsenceType absenceType : absenceTypes) {
+      if (!absenceType.code.contains("FUORI SEDE")) {
+        continue;
+      }
+      JustifiedType justifiedType = allDay;
+      Integer minutes = null;
+      
+      if (absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay) {
+        justifiedType = allDay;
+      }
+      if (absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.OneHourMealTimeCounting
+          || absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.TwoHoursMealTimeCounting
+          || absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.ThreeHoursMealTimeCounting
+          || absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.FourHoursMealTimeCounting
+          || absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.FiveHoursMealTimeCounting
+          || absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.SixHoursMealTimeCounting
+          || absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.SevenHoursMealTimeCounting
+          || absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.EightHoursMealTimeCounting) {
+        justifiedType = specifiedMinutes;
+        minutes = absenceType.justifiedTimeAtWork.minutes;
+      }
+      if (absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.Nothing) {
+        justifiedType = nothing;
+      }
+      
+      absenceType.timeForMealTicket = true;
+      absenceType.justifiedTypesPermitted.clear();
+      absenceType.justifiedTypesPermitted.add(justifiedType);
+      absenceType.save();
+      
+      for (Absence absence : absenceType.absences) {
+        absence.justifiedType = justifiedType;
+        absence.justifiedMinutes =  minutes;
+        absence.save();
+      }
+      
+    }
+    
+  }
 
 }

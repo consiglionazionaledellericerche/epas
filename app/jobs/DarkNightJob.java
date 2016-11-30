@@ -29,7 +29,6 @@ import javax.inject.Inject;
 // @Every("30s") // ogni 30 secondi.
 public class DarkNightJob extends Job {
 
-  private static final String JOBS_CONF = "jobs.active";
   private static final List<Integer> weekEnd = ImmutableList
       .of(DateTimeConstants.SATURDAY, DateTimeConstants.SUNDAY);
 
@@ -43,11 +42,12 @@ public class DarkNightJob extends Job {
   /**
    * Esecuzione Job.
    */
+  @Override
   public void doJob() {
 
     //in modo da inibire l'esecuzione dei job in base alla configurazione
-    if (!"true".equals(Play.configuration.getProperty(JOBS_CONF))) {
-      log.info("DarkNightJob Interrotto. Disattivato dalla configurazione.");
+    if (!"true".equals(Play.configuration.getProperty(Bootstrap.JOBS_CONF))) {
+      log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
       return;
     }
 

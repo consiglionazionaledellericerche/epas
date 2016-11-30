@@ -46,7 +46,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import play.db.jpa.JPA;
+import play.jobs.Job;
+import play.libs.F.Promise;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -142,27 +145,28 @@ public class ConsistencyManager {
           LocalDate.now().minusDays(1), true).list();
     }
 
+    final List<Promise<Void>> results = new ArrayList<>();
     for (Person p : personList) {
-      if (onlyRecap) {
-        updatePersonRecaps(p.id, fromDate);
-      } else {
-        updatePersonSituation(p.id, fromDate);
-      }
-      // attenzione quando si forzano le transazioni o si invalida la cache dell'entityManager,
-      // possono esserci effetti collaterali....vedi il blocco try sotto
-      JPA.em().flush();
-      JPA.em().clear();
+      
+      results.add(new Job<Void>() {
+        
+        @Override
+        public void doJob() {
+          final Person person = Person.findById(p.id);
+          
+          if (onlyRecap) {
+            updatePersonRecaps(person.id, fromDate);
+          } else {
+            updatePersonSituation(person.id, fromDate);
+          }
+          
+          personDayInTroubleManager.cleanPersonDayInTrouble(person);
+          log.debug("Elaborata la persona ... {}", person);
+        }
+      }.now());
+      
     }
-
-    log.info("Inizia la parte di pulizia days in trouble...");
-    for (Person p : personList) {
-
-      personDayInTroubleManager.cleanPersonDayInTrouble(p);
-
-      JPA.em().flush();
-      JPA.em().clear();
-
-    }
+    Promise.waitAll(results);
     log.info("Conclusa procedura FixPersonsSituation con parametri!");
   }
 
@@ -352,14 +356,6 @@ public class ConsistencyManager {
 
     // isHoliday = personManager.isHoliday(this.value.person, this.value.date);
 
-    //FIXME ma siamo sicuri che sia una furbata azzerare completamente le informazioni del personday
-    //Solo perchè non ci serve più per fare i conti?
-
-    // Mi assicuro che prima di fare tutti i conti il personDay sia in uno stato consistente
-    if (pd.getValue().isPersistent()) {
-      pd.getValue().refresh();
-    }
-
     // il contratto non esiste più nel giorno perchè è stata inserita data terminazione
     if (!pd.getPersonDayContract().isPresent()) {
       pd.getValue().isHoliday = false;
@@ -518,9 +514,6 @@ public class ConsistencyManager {
                 + "della mezzanotte";
 
         enterStamp.save();
-
-        pd.getValue().stampings.add(enterStamp);
-        pd.getValue().save();
       }
     }
   }

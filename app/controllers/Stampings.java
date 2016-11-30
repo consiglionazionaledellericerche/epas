@@ -53,6 +53,7 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.ArrayList;
@@ -244,8 +245,14 @@ public class Stampings extends Controller {
     }
 
     stamping.date = stampingManager.deparseStampingDateTime(date, time);
-    final PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(person, date);
-    stamping.personDay = personDay;
+
+    // Se si tratta di un update ha già tutti i riferimenti al personday
+    if (newInsert) {
+      final PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(person, date);
+      stamping.personDay = personDay;
+      // non è usato il costruttore con la add, quindi aggiungiamo qui a mano:
+      personDay.stampings.add(stamping);
+    }
 
     rules.checkIfPermitted(stamping);
 
@@ -260,10 +267,9 @@ public class Stampings extends Controller {
         stamping.markedByAdmin = false;
       }
     }
-
     stamping.save();
 
-    consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
+    consistencyManager.updatePersonSituation(stamping.personDay.person.id, stamping.personDay.date);
 
     flash.success(Web.msgSaved(Stampings.class));
 

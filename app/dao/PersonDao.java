@@ -687,10 +687,15 @@ public final class PersonDao extends DaoBase {
     }
 
     if (start.isPresent()) {
-
+      // entrambe le date nulle
       condition.andAnyOf(contract.endContract.isNull().and(contract.endDate.isNull()),
-          contract.endDate.isNotNull().and(contract.endDate.goe(start.get())),
-          contract.endContract.isNotNull().and(contract.endContract.goe(start.get())));
+          // una nulla e l'altra successiva
+          contract.endContract.isNull().and(contract.endDate.goe(start.get())),
+          // viceversa rispetto alla precedente
+          contract.endDate.isNull().and(contract.endContract.goe(start.get())),
+          //entrambe valorizzate ed entrambe successive
+          contract.endDate.goe(start.get()).and(contract.endContract.goe(start.get()))
+          );
     }
   }
 

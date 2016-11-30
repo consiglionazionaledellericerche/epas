@@ -32,11 +32,13 @@ import org.joda.time.Minutes;
 
 import play.data.binding.As;
 import play.data.validation.Required;
+import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -185,25 +187,25 @@ public class Clocks extends Controller {
         .getOrCreateAndPersistPersonDay(user.person, LocalDate.now());
     final Stamping stamping = new Stamping(personDay, LocalDateTime.now());
 
-    for (Stamping s : stamping.personDay.stampings) {
+    stamping.personDay.stampings.stream().filter(s -> !stamping.equals(s)).forEach(s -> {
 
       if (Minutes.minutesBetween(s.date, stamping.date).getMinutes() < 1
-          || (s.way.equals(stamping.way)
-          && Minutes.minutesBetween(s.date, stamping.date).getMinutes() < 2)) {
+          || s.way == stamping.way
+          && Minutes.minutesBetween(s.date, stamping.date).getMinutes() < 2) {
 
         flash.error("Impossibile inserire 2 timbrature così ravvicinate."
             + "Attendere 1 minuto per timbrature nel verso opposto o "
             + "2 minuti per timbrature dello stesso verso");
         daySituation();
       }
-    }
+    });
 
     stamping.way = way;
     stamping.stampType = stampType;
     stamping.note = note;
     stamping.markedByAdmin = false;
     stamping.save();
-
+    
     consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
 
     daySituation();
