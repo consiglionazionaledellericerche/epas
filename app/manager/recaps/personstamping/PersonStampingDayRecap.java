@@ -1,6 +1,7 @@
 package manager.recaps.personstamping;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 import dao.wrapper.IWrapperFactory;
@@ -19,9 +20,13 @@ import models.PersonDay;
 import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
+import models.Stamping.WayType;
 import models.WorkingTimeTypeDay;
 
+import org.joda.time.LocalDateTime;
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Oggetto che modella il giorno di una persona nelle viste - personStamping - stampings -.
@@ -36,7 +41,6 @@ public class PersonStampingDayRecap {
   private static final String MEALTICKET_YES = "YES";
   private static final String MEALTICKET_YES_IF_EXIT_NOW = "YES_IF_EXIT_NOW";
   private static final String MEALTICKET_NO = "NO";
-  private static final String MEALTICKET_EMPTY = "";
 
   private static StampModificationType fixedStampModificationType = null;
 
@@ -47,7 +51,7 @@ public class PersonStampingDayRecap {
   public LocalTimeInterval workInterval;
   public boolean ignoreDay = false;
   public boolean firstDay = false;
-  public List<StampingTemplate> stampingsTemplate;
+  public List<StampingTemplate> stampingsTemplate = Lists.newArrayList();
 
   // visualizzazioni particolari da spostare
   public String mealTicket;
@@ -89,19 +93,34 @@ public class PersonStampingDayRecap {
     this.personDay.setHoliday(personDayManager
         .isHoliday(personDay.getPerson(), personDay.getDate()));
 
-    this.wrPersonDay = wrapperFactory.create(personDay);
+    wrPersonDay = wrapperFactory.create(personDay);
+    
+    wttd = this.wrPersonDay.getWorkingTimeTypeDay();
 
-    this.stampingsTemplate = getStampingsTemplate(wrPersonDay, stampingTemplateFactory,
-        personDayManager, numberOfInOut, considerExitingNow);
-
-    this.note.addAll(getStampingsNote(this.stampingsTemplate));
-
-    this.wttd = this.wrPersonDay.getWorkingTimeTypeDay();
-
-    this.lunchInterval = (LocalTimeInterval) configurationManager.configValue(
+    lunchInterval = (LocalTimeInterval) configurationManager.configValue(
         personDay.getPerson().office, EpasParam.LUNCH_INTERVAL, personDay.getDate());
-    this.workInterval = (LocalTimeInterval) configurationManager.configValue(
+    workInterval = (LocalTimeInterval) configurationManager.configValue(
         personDay.getPerson().office, EpasParam.WORK_INTERVAL, personDay.getDate());
+    
+    // 1) computazioni: valid/pair timbrature e uscita in questo momento nel caso di oggi
+    if (personDayManager.toComputeExitingNow(personDay) 
+        && wrPersonDay.getPersonDayContract().isPresent()
+        && wttd.isPresent()) {
+      
+      // se siamo nel caso di compute e se la persona è attiva effetto il que sera sera.
+      personDayManager.queSeraSera(personDay, LocalDateTime.now(), 
+          wrPersonDay.getPreviousForProgressive(), wttd.get(), 
+          wrPersonDay.isFixedTimeAtWork(), lunchInterval, workInterval);
+    } else { 
+      // altrimenti setto le sole valid stamping
+      personDayManager.setValidPairStampings(personDay.stampings);  
+    }
+
+    // 2) genero le stamping template (colori e timbrature fittizie)
+    stampingsTemplate = getStampingsTemplate(personDay.stampings, stampingTemplateFactory, 
+        numberOfInOut);
+    
+    note.addAll(getStampingsNote(this.stampingsTemplate));
 
     boolean thereAreAllDayAbsences = personDayManager.isAllDayAbsences(personDay);
 
@@ -111,7 +130,7 @@ public class PersonStampingDayRecap {
             stampTypeManager.getStampMofificationType(
                 StampModificationTypeCode.FIXED_WORKINGTIME);
       }
-      this.fixedWorkingTimeCode = fixedStampModificationType;
+      fixedWorkingTimeCode = fixedStampModificationType;
     }
 
     // is sourceContract (solo se monthContracts presente)
@@ -128,16 +147,16 @@ public class PersonStampingDayRecap {
             || (contract.getSourceDateResidual() != null
             && !personDay.getDate().isAfter(contract.getSourceDateResidual()))
             || personDay.getDate().isBefore(personDay.getPerson().beginDate)) {
-          this.ignoreDay = true;
+          ignoreDay = true;
         }
 
         if (contract.getBeginDate().isEqual(personDay.getDate())) {
-          this.firstDay = true;
+          firstDay = true;
         }
       }
     }
 
-    this.computeMealTicket(personDay, thereAreAllDayAbsences);
+    computeMealTicket(personDay, thereAreAllDayAbsences);
   }
 
 
@@ -150,17 +169,16 @@ public class PersonStampingDayRecap {
   private void computeMealTicket(PersonDay personDay, boolean thereAreAllDayAbsences) {
 
     // ##### Giorno ignorato (fuori contratto)
-
-    if (this.ignoreDay || !this.personDay.isPersistent()) {
-      this.mealTicket = MEALTICKET_EMPTY;
+    if (ignoreDay || !personDay.isPersistent()) {
+      mealTicket = null;
       return;
     }
 
     // ##### Giorno festivo
 
-    if (personDay.isHoliday() && !personDay.acceptedHolidayWorkingTime 
+    if (personDay.isHoliday() && !personDay.acceptedHolidayWorkingTime
         && !personDay.isTicketForcedByAdmin) {
-      this.mealTicket = MEALTICKET_EMPTY;
+      mealTicket = null;
       return;
     }
 
@@ -168,9 +186,9 @@ public class PersonStampingDayRecap {
 
     if (personDay.isFuture()) {
       if (thereAreAllDayAbsences) {
-        this.mealTicket = MEALTICKET_NO;
+        mealTicket = MEALTICKET_NO;
       } else {
-        this.mealTicket = MEALTICKET_EMPTY;
+        mealTicket = null;
       }
       return;
     }
@@ -181,23 +199,23 @@ public class PersonStampingDayRecap {
     if (personDay.isTicketAvailable()) {
       if (personDay.isTicketForcedByAdmin) {
         // si e forzato
-        this.mealTicket = MEALTICKET_YES;
+        mealTicket = MEALTICKET_YES;
       } else if (personDay.isToday()) {
         if (thereAreAllDayAbsences) {
           // si non forzato oggi con assenze giornalire FIXME: perchè decido qua no?
-          this.mealTicket = MEALTICKET_NO;
+          mealTicket = MEALTICKET_NO;
         } else {
           if (personDay.isConsideredExitingNow()) {
             // si non forzato oggi considerando l'uscita in questo momento
-            this.mealTicket = MEALTICKET_YES_IF_EXIT_NOW;
+            mealTicket = MEALTICKET_YES_IF_EXIT_NOW;
           } else {
             // si non forzato oggi senza considerare l'uscita in questo momento
-            this.mealTicket = MEALTICKET_YES;
+            mealTicket = MEALTICKET_YES;
           }
         }
       } else {
         // si non forzato giorni passati
-        this.mealTicket = MEALTICKET_YES;
+        mealTicket = MEALTICKET_YES;
       }
       return;
     }
@@ -208,42 +226,99 @@ public class PersonStampingDayRecap {
     if (!personDay.isTicketAvailable) {
       if (personDay.isTicketForcedByAdmin) {
         // no forzato
-        this.mealTicket = MEALTICKET_NO;
+        mealTicket = MEALTICKET_NO;
       } else {
         if (personDay.isPast()) {
           // no non forzato giorni passati
-          this.mealTicket = MEALTICKET_NO;
+          mealTicket = MEALTICKET_NO;
         } else if (personDay.isToday() || !thereAreAllDayAbsences) {
           // no non forzato oggi senza assenze giornaliere
-          this.mealTicket = MEALTICKET_NOT_YET;
+          mealTicket = MEALTICKET_NOT_YET;
         } else {
           // no non forzato oggi con assenze giornaliere
-          this.mealTicket = MEALTICKET_NO;
+          mealTicket = MEALTICKET_NO;
         }
       }
     }
   }
 
   /**
-   * Crea le timbrature da visualizzare nel tabellone timbrature. <br> 1) Riempita di timbrature
-   * fittizie nelle celle vuote, fino ad arrivare alla dimensione di numberOfInOut. <br> 2) Con
-   * associato il colore e il tipo di bordatura da visualizzare nel tabellone.
-   *
-   * @param wrPersonDay   il personDay
-   * @param numberOfInOut numero di timbrature.
-   * @return la lista di timbrature per il template.
+   * N.B. deve essere stata precedentemente chiamata la computeValidStamping per la lista stampings.
+   * 
+   * <br> Crea le timbrature da visualizzare nel tabellone timbrature. 
+   * <br> 
+   * 1) Riempita di timbrature fittizie nelle celle vuote, fino ad arrivare alla dimensione di 
+   * numberOfInOut. 
+   * <br> 
+   * 2) Con associato il colore e il tipo di bordatura da visualizzare nel tabellone.
    */
-  private List<StampingTemplate> getStampingsTemplate(IWrapperPersonDay wrPersonDay,
-      StampingTemplateFactory stampingTemplateFactory, PersonDayManager personDayManager,
-      int numberOfInOut, boolean considerExitingNow) {
+  private List<StampingTemplate> getStampingsTemplate(List<Stamping> stampings, 
+      StampingTemplateFactory stampingTemplateFactory, int numberOfInOut) {
 
-    List<Stamping> stampings = personDayManager
-        .getStampingsForTemplate(wrPersonDay, numberOfInOut, considerExitingNow);
+    final List<Stamping> orderedStampings = ImmutableList
+        .copyOf(stampings.stream().sorted().collect(Collectors.toList()));
+    
+    List<Stamping> stampingsForTemplate = Lists.newArrayList();
+    
+    boolean isLastIn = false;
+    
+    for (Stamping s : orderedStampings) {
+      //sono dentro e trovo una uscita
+      if (isLastIn && s.way == WayType.out) {
+        //salvo l'uscita
+        stampingsForTemplate.add(s);
+        isLastIn = false;
+        continue;
+      }
+      //sono dentro e trovo una entrata
+      if (isLastIn && s.way == WayType.in) {
+        //creo l'uscita fittizia
+        Stamping stamping = new Stamping(null, null);
+        stamping.way = WayType.out;
+        stampingsForTemplate.add(stamping);
+        //salvo l'entrata
+        stampingsForTemplate.add(s);
+        isLastIn = true;
+        continue;
+      }
 
-    List<StampingTemplate> stampingsTemplate = Lists.newArrayList();
+      //sono fuori e trovo una entrata
+      if (!isLastIn && s.way == WayType.in) {
+        //salvo l'entrata
+        stampingsForTemplate.add(s);
+        isLastIn = true;
+        continue;
+      }
+
+      //sono fuori e trovo una uscita
+      if (!isLastIn && s.way == WayType.out) {
+        //creo l'entrata fittizia
+        Stamping stamping = new Stamping(null, null);
+        stamping.way = WayType.in;
+        stampingsForTemplate.add(stamping);
+        //salvo l'uscita
+        stampingsForTemplate.add(s);
+        isLastIn = false;
+      }
+    }
+    while (stampingsForTemplate.size() < numberOfInOut * 2) {
+      if (isLastIn) {
+        //creo l'uscita fittizia
+        Stamping stamping = new Stamping(null, null);
+        stamping.way = WayType.out;
+        stampingsForTemplate.add(stamping);
+        isLastIn = false;
+      } else {
+        //creo l'entrata fittizia
+        Stamping stamping = new Stamping(null, null);
+        stamping.way = WayType.in;
+        stampingsForTemplate.add(stamping);
+        isLastIn = true;
+      }
+    }
 
     boolean samePair = false;
-    for (Stamping stamping : stampings) {
+    for (Stamping stamping : stampingsForTemplate) {
 
       //La posizione della timbratura all'interno della sua coppia.
       String position = "none";

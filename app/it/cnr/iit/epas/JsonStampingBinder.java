@@ -49,13 +49,13 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
     try {
       Optional<User> user = Security.getUser();
       if (!user.isPresent()) {
-        log.info("StampingFromClient: {}, {}, {}, {}, {}", 
+        log.info("StampingFromClient: {}, {}, {}, {}, {}",
             name, annotations, value, actualClass, genericType);
         log.info("StampingFromClient: l'user non presente");
         return null;
       }
       if (user.get().badgeReader == null) {
-        log.error("L'utente {} utilizzato per l'invio della timbratura" 
+        log.error("L'utente {} utilizzato per l'invio della timbratura"
             + " non ha una istanza badgeReader valida associata.");
         return null;
       }
@@ -69,16 +69,13 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
       stamping.badgeReader = user.get().badgeReader;
 
       String matricolaFirma = jsonObject.get("matricolaFirma").getAsString();
+      stamping.numeroBadge = matricolaFirma;
 
       final Person person = personDao.getPersonByBadgeNumber(matricolaFirma, stamping.badgeReader);
 
-      if (person == null) {
-        log.warn("Non e' stato possibile recuperare la persona a cui si riferisce la timbratura,"
-            + " matricolaFirma={}. Controllare il database.", matricolaFirma);
-        return null;
+      if (person != null) {
+        stamping.person = person;
       }
-
-      stamping.personId = person.id;
 
       final Integer inOut = jsonObject.get("operazione").getAsInt();
       if (inOut != null) {
@@ -98,7 +95,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
       if (jsonObject.has("admin") && !jsonObject.get("admin").isJsonNull()) {
         String admin = jsonObject.get("admin").getAsString();
-        if (admin.equals("true")) {
+        if ("true".equals(admin)) {
           stamping.markedByAdmin = true;
         }
       }
@@ -118,7 +115,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
         return null;
       }
 
-      log.debug("Effettuato il binding, stampingFromClient = {}", stamping.toString());
+      log.debug("Effettuato il binding, stampingFromClient = {}", stamping);
 
       return stamping;
     } catch (Exception e) {

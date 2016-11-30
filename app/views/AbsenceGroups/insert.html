@@ -176,9 +176,9 @@ title:'Nuovo codice assenza in data ' + absenceForm.from?.format()
 	     #{f.hidden 'personId', value:absenceForm.person.id /}
       
          #{f.hidden 'from', value:absenceForm.from?.format() /}
-         #{if alldaySelected }
+         *{ #{if alldaySelected } }*
           #{f.hidden 'to', value:absenceForm.to?.format() /}
-         #{/if}
+         *{ #{/if} }*
    
       #{f.hidden 'groupAbsenceType.id', value:absenceForm.groupSelected.id /}
       #{f.hidden 'absenceType.id', value:absenceForm.absenceTypeSelected?.id /}

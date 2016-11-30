@@ -251,9 +251,22 @@ public class AbsenceService {
       }
     }
     
+    return buildInsertReport(chains, criticalErrors);
+    
+  }
+  
+  /**
+   * Costruisce il report per l'inserimento.
+   * @param chains catene con gli inserimenti.
+   * @param criticalErrors errori critici.
+   * @return insert report
+   */
+  private InsertReport buildInsertReport(List<PeriodChain> chains, 
+      List<CriticalError> criticalErrors) {
+    
     InsertReport insertReport = new InsertReport();
     
-    //Se una catena contiene errori esco
+    //Se una catena contiene errori critici il report è vuoto.
     if (!criticalErrors.isEmpty()) {
       insertReport.criticalErrors = criticalErrors;
       return insertReport;
@@ -262,6 +275,8 @@ public class AbsenceService {
     //Gli esiti sotto forma di template rows
     List<TemplateRow> insertTemplateRows = Lists.newArrayList();
     for (PeriodChain periodChain : chains) {
+      
+      //caso particolare di errore figli.
       if (periodChain.childIsMissing()) {
         TemplateRow templateRow = new TemplateRow();
         templateRow.date = periodChain.date;
@@ -269,6 +284,7 @@ public class AbsenceService {
             .absenceProblem(AbsenceProblem.NoChildExist).build());
         insertTemplateRows.add(templateRow);
       }
+      
       AbsencePeriod lastPeriod = periodChain.lastPeriod();
       for (AbsencePeriod absencePeriod : periodChain.periods) {
         boolean addResult = false;
@@ -310,6 +326,7 @@ public class AbsenceService {
     
     return insertReport;
   }
+  
   
   private InsertReport forceInsert(Person person, GroupAbsenceType groupAbsenceType, 
       LocalDate from, LocalDate to, 

@@ -61,8 +61,7 @@ public class AbsencePeriod {
   
   //Errori del periodo
   public ErrorsBox errorsBox = new ErrorsBox();
-  public boolean ignoreChildPeriod = false;
-  public boolean ignoreInitializationPeriod = false;
+  public boolean ignorePeriod = false;
   
   //Tentativo di inserimento assenza nel periodo
   public Absence attemptedInsertAbsence;

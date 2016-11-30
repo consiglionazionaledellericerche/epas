@@ -22,6 +22,7 @@ import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
+import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.GroupAbsenceType.PeriodType;
 import models.absences.InitializationGroup;
 import models.absences.JustifiedType.JustifiedTypeName;
@@ -108,22 +109,38 @@ public class ServiceFactories {
     //1 costruire i periods
     PeriodChain periodChain = buildPeriodChainPhase1(person, groupAbsenceType, date, 
         orderedChildren, initializationGroups, previousInserts);
-        
+
+    List<Absence> allPersistedAbsences = null;
+    List<Absence> groupPersistedAbsences = null;
+
     //DAO fetch delle assenze (una volta ottenuti i limiti temporali della catena)
     // separato per inject nei test
-    List<Absence> allPersistedAbsences = absenceComponentDao.orderedAbsences(periodChain.person, 
-        periodChain.from, periodChain.to, Lists.newArrayList());
-    List<Absence> groupPersistedAbsences = absenceComponentDao.orderedAbsences(periodChain.person, 
-        periodChain.from, periodChain.to, 
-        Lists.newArrayList(periodChain.periodChainInvolvedCodes()));
+    if (groupAbsenceType.pattern == GroupAbsenceTypePattern.simpleGrouping) {
+      allPersistedAbsences = absenceComponentDao.orderedAbsences(periodChain.person, 
+          absenceToInsert.getAbsenceDate().minusDays(7),    //costante da inserire nel vincolo
+          absenceToInsert.getAbsenceDate().plusDays(7),     //del week end 
+          Lists.newArrayList());
+    } else {
+      allPersistedAbsences = absenceComponentDao.orderedAbsences(periodChain.person, 
+          periodChain.from, periodChain.to, Lists.newArrayList());
+      groupPersistedAbsences = absenceComponentDao.orderedAbsences(periodChain.person, 
+          periodChain.from, periodChain.to, 
+          Lists.newArrayList(periodChain.periodChainInvolvedCodes()));
+    }
 
     //2 assegnare ad ogni periodo le assenze di competenza e calcoli
-    buildPeriodChainPhase2(periodChain, absenceToInsert, 
-        allPersistedAbsences, groupPersistedAbsences);
- 
+    if (groupAbsenceType.pattern == GroupAbsenceTypePattern.simpleGrouping) {
+
+      insertAbsenceInSimpleGroup(periodChain, allPersistedAbsences, absenceToInsert);
+
+    } else {
+      buildPeriodChainPhase2(periodChain, absenceToInsert, 
+          allPersistedAbsences, groupPersistedAbsences);
+    }
+
     return periodChain;
   }
-  
+
   /**
    * Prima fase di costruzione (generazione dei periodi).
    * @param person person
@@ -144,7 +161,7 @@ public class ServiceFactories {
     while (currentGroup != null) {
       AbsencePeriod currentPeriod = buildAbsencePeriod(person, currentGroup, date, 
           orderedChildren, initializationGroups);
-      if (!currentPeriod.ignoreChildPeriod) { 
+      if (!currentPeriod.ignorePeriod) { 
         periodChain.periods.add(currentPeriod);  
       }
       
@@ -281,11 +298,11 @@ public class ServiceFactories {
         absencePeriod.from = childInterval.getBegin();
         absencePeriod.to = childInterval.getEnd();
         if (!DateUtility.isDateIntoInterval(date, childInterval)) {
-          absencePeriod.ignoreChildPeriod = true;
+          absencePeriod.ignorePeriod = true;
           return absencePeriod; 
         }
       } catch (Exception ex) {
-        absencePeriod.ignoreChildPeriod = true;
+        absencePeriod.ignorePeriod = true;
         return absencePeriod;
       }
     }
@@ -484,6 +501,45 @@ public class ServiceFactories {
 
 
   /**
+   * Inserimento nel caso di GroupAbsenceTypePattern.simpleGrouping.
+   * @param periodChain catena
+   * @param absenceToInsert assenza da inserire
+   * @return la catena con l'esito
+   */
+  private PeriodChain insertAbsenceInSimpleGroup(PeriodChain periodChain, 
+      List<Absence> allPersistedAbsences, 
+      Absence absenceToInsert) {
+
+    //nel caso simple grouping controllo solo i vincoli generici per la nuova assenza da inserire
+    if (absenceToInsert == null) { 
+      return periodChain;
+    }
+
+
+    periodChain.allInvolvedAbsences = absenceEngineUtility
+        .mapAbsences(allPersistedAbsences, null);
+    periodChain.allInvolvedAbsences = absenceEngineUtility
+        .mapAbsences(periodChain.previousInserts, periodChain.allInvolvedAbsences);
+
+    AbsencePeriod absencePeriod = periodChain.firstPeriod(); 
+    absencePeriod.attemptedInsertAbsence = absenceToInsert;
+
+    // i vincoli generici
+    genericConstraints(absencePeriod.errorsBox, 
+        periodChain.person, absenceToInsert, 
+        periodChain.allInvolvedAbsences);
+    TakenAbsence takenAbsence = absencePeriod.buildTakenAbsence(absenceToInsert, 0);
+    absencePeriod.addTakenAbsence(takenAbsence);
+    if (!absencePeriod.errorsBox.containsCriticalErrors() 
+        && !absencePeriod.errorsBox.containAbsenceErrors(absenceToInsert)) {
+      // successo
+      periodChain.successPeriodInsert = absencePeriod;
+    }
+
+    return periodChain;
+  }
+
+  /**
    * I vincoli generici assenza.
    * @param genericErrors box errori
    * @param person persona
@@ -504,14 +560,14 @@ public class ServiceFactories {
     if (!absence.getAbsenceType().isConsideredWeekEnd() && isHoliday) {
       genericErrors.addAbsenceError(absence, AbsenceProblem.NotOnHoliday);
     } else {
-//      //check sulla reperibilità
-//      if (personReperibilityDayDao
-//          .getPersonReperibilityDay(person, absence.getAbsenceDate()).isPresent()) {
-//        genericErrors.addAbsenceWarning(absence, AbsenceProblem.InReperibility); 
-//      }
-//      if (personShiftDayDao.getPersonShiftDay(person, absence.getAbsenceDate()).isPresent()) {
-//        genericErrors.addAbsenceWarning(absence, AbsenceProblem.InShift); 
-//      }
+      //      //check sulla reperibilità
+      //      if (personReperibilityDayDao
+      //          .getPersonReperibilityDay(person, absence.getAbsenceDate()).isPresent()) {
+      //        genericErrors.addAbsenceWarning(absence, AbsenceProblem.InReperibility); 
+      //      }
+      //      if (personShiftDayDao.getPersonShiftDay(person, absence.getAbsenceDate()).isPresent()) {
+      //        genericErrors.addAbsenceWarning(absence, AbsenceProblem.InShift); 
+      //      }
     }
 
     //Un codice giornaliero già presente 
