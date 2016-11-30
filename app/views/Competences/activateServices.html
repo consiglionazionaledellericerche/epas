@@ -119,10 +119,15 @@
 
     </td>
     <td>
-    	
-    	#{secure.link @Competences.manageShift(sc.id)}
-        	<i class="fa fa-calendar" aria-hidden="true"></i> Gestisci
-        #{/secure.link}
+    	<ul>
+    	#{list items:sc.shiftTypes, as:'stype'}
+	    	<li>
+	    	#{secure.link @Competences.manageShiftType(stype.id)}
+	        	<i class="fa fa-calendar" aria-hidden="true"></i> ${stype.type}
+	        #{/secure.link}
+	        </li>
+        #{/list}
+        </ul>
     </td>
     <td>
       #{secure.check 'Competences.evaluateShift'}

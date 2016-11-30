@@ -947,7 +947,7 @@ public class Competences extends Controller {
     render(dtoList, cat, shiftList, type);
   }
   
-  public static void manageShift(Long shiftCategoryId) {
+  public static void manageShiftType(Long shiftTypeId) {
     
   }
   
