@@ -99,7 +99,7 @@
 	        #{/list}
 	        #{if !groupVerified }
               ${group.description} 
-	          <a href="@{AbsenceGroups.groupStatus('groupAbsenceType.id':group.id, 'personId':_person.id, 'from':_absence.getAbsenceDate().format())}"> Riepilogo <i class="fa fa-external-link" aria-hidden="true"></i></a>
+	          <a href="@{AbsenceGroups.groupStatus('groupAbsenceTypeId':group.id, 'personId':_person.id, 'from':_absence.getAbsenceDate().format())}"> Riepilogo <i class="fa fa-external-link" aria-hidden="true"></i></a>
 	        #{/if}
 	    </li>   
       #{/list}

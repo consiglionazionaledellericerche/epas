@@ -269,7 +269,7 @@ public class DayInPeriod {
     TemplateRow replacingRow = new TemplateRow();
     replacingRow.date = date;
     replacingRow.isReplacingRow = true;
-    replacingRow.usableColumn = true;
+    replacingRow.usableColumn = false;
     replacingRow.complationColumn = true;
     Absence absence = new Absence();
     absence.date = this.date;
