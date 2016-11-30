@@ -48,8 +48,6 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
     public final NumberPath<Integer> justifiedTime = createNumber("justifiedTime", Integer.class);
 
-    public final EnumPath<models.enumerate.JustifiedTimeAtWork> justifiedTimeAtWork = createEnum("justifiedTimeAtWork", models.enumerate.JustifiedTimeAtWork.class);
-
     public final SetPath<models.absences.JustifiedType, QJustifiedType> justifiedTypesPermitted = this.<models.absences.JustifiedType, QJustifiedType>createSet("justifiedTypesPermitted", models.absences.JustifiedType.class, QJustifiedType.class, PathInits.DIRECT2);
 
     //inherited

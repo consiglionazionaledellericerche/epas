@@ -26,12 +26,10 @@ import models.PersonDayInTrouble;
 import models.PersonShiftDay;
 import models.Stamping;
 import models.Stamping.WayType;
-import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.StampTypes;
 import models.enumerate.Troubles;
 
@@ -88,18 +86,6 @@ public class PersonDayManager {
         return true;
       }
 
-      // TODO: per adesso il telelavoro lo considero come giorno lavorativo
-      // normale. Chiedere ai romani.
-      // TODO: il telelavoro è giorno di lavoro da casa, quindi non giustifica 
-      // ma assegna tempo a lavoro, ma non assegna buono pasto.
-      //if (abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
-      //  return false;
-      //} else 
-      if (abs.justifiedMinutes == null //eludo PEPE, RITING etc...
-          && (abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay
-          || abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AssignAllDay)) {
-        return true;
-      }
     }
     return false;
   }
@@ -126,11 +112,8 @@ public class PersonDayManager {
           justifiedTime += abs.absenceType.justifiedTime;
           continue;
         }
+        //TODO: quando ci sarà considerare il quello che manca.
         continue;
-      }
-
-      if (abs.absenceType.justifiedTimeAtWork.minutes != null) {
-        justifiedTime += abs.absenceType.justifiedTimeAtWork.minutes;
       }
     }
 
@@ -381,7 +364,7 @@ public class PersonDayManager {
 
           if (abs.absenceType.timeForMealTicket) {
             personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal()
-                + abs.absenceType.justifiedTimeAtWork.minutes);
+                + abs.justifiedMinutes);
           } else {
             personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
                 + abs.justifiedMinutes);          

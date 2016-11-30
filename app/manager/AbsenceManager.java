@@ -9,7 +9,6 @@ import com.google.common.collect.Lists;
 
 import dao.AbsenceDao;
 import dao.ContractDao;
-import dao.PersonChildrenDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
 import dao.PersonShiftDayDao;
@@ -28,7 +27,6 @@ import manager.services.vacations.IVacationsService;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
-import models.PersonChildren;
 import models.PersonDay;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
@@ -36,7 +34,6 @@ import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.JustifiedTimeAtWork;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
@@ -70,7 +67,6 @@ public class AbsenceManager {
   private final AbsenceDao absenceDao;
   private final PersonReperibilityDayDao personReperibilityDayDao;
   private final PersonShiftDayDao personShiftDayDao;
-  private final PersonChildrenDao personChildrenDao;
   private final ConsistencyManager consistencyManager;
   private final ConfigurationManager configurationManager;
   private final IWrapperFactory wrapperFactory;
@@ -86,7 +82,6 @@ public class AbsenceManager {
    * @param absenceDao                absenceDao
    * @param personReperibilityDayDao  personReperibilityDayDao
    * @param personShiftDayDao         personShiftDayDao
-   * @param personChildrenDao         personChildrenDao
    * @param contractMonthRecapManager contractMonthRecapManager
    * @param personManager             personManager
    * @param consistencyManager        consistencyManager
@@ -103,14 +98,11 @@ public class AbsenceManager {
       AbsenceComponentDao absenceComponentDao,
       PersonReperibilityDayDao personReperibilityDayDao,
       PersonShiftDayDao personShiftDayDao,
-      PersonChildrenDao personChildrenDao,
-
       ContractMonthRecapManager contractMonthRecapManager,
       PersonManager personManager,
       ConsistencyManager consistencyManager,
       ConfigurationManager configurationManager,
       PersonDayManager personDayManager,
-
       IWrapperFactory wrapperFactory,
       IVacationsService vacationsService) {
 
@@ -125,7 +117,6 @@ public class AbsenceManager {
     this.absenceDao = absenceDao;
     this.personReperibilityDayDao = personReperibilityDayDao;
     this.personShiftDayDao = personShiftDayDao;
-    this.personChildrenDao = personChildrenDao;
     this.consistencyManager = consistencyManager;
     this.wrapperFactory = wrapperFactory;
     this.personDayManager = personDayManager;
@@ -318,11 +309,6 @@ public class AbsenceManager {
       } else if (AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.is(absenceType)) {
         aiList.add(
             handler37(person, actualDate, absenceType, file, otherAbsences, !onlySimulation));
-      } else if ((absenceType.code.startsWith("12") || absenceType.code.startsWith("13"))) {
-        // TODO: Inserire i codici di assenza necessari nell'AbsenceTypeMapping
-        aiList.add(
-            handlerChildIllness(
-                person, actualDate, absenceType, file, otherAbsences, !onlySimulation));
       } else {
         aiList.add(handlerGenericAbsenceType(person, actualDate, absenceType, file,
             mealTicket, justifiedMinutes, !onlySimulation));
@@ -591,21 +577,6 @@ public class AbsenceManager {
   }
 
   /**
-   * Handler inserimento assenza per malattia figli 12* 13*.
-   */
-  private AbsencesResponse handlerChildIllness(
-      Person person, LocalDate date, AbsenceType absenceType,
-      Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
-
-    if (canTakePermissionIllnessChild(person, date, absenceType, otherAbsences)) {
-      return insert(person, date, absenceType, file, Optional.<Integer>absent(), persist);
-    }
-
-    return new AbsencesResponse(date, absenceType.code,
-        AbsencesResponse.CODICI_MALATTIA_FIGLI_NON_DISPONIBILE);
-  }
-
-  /**
    * Gestisce l'inserimento dei codici FER, 94-31-32 nell'ordine. Fino ad esaurimento.
    */
   private AbsencesResponse handlerFer(Person person, LocalDate date, AbsenceType absenceType,
@@ -733,70 +704,6 @@ public class AbsenceManager {
     consistencyManager.updatePersonSituation(person.id, dateFrom);
 
     return deleted;
-  }
-
-  /**
-   * metodo per stabilire se una persona può ancora prendere o meno giorni di permesso causa
-   * malattia del figlio.
-   */
-  private boolean canTakePermissionIllnessChild(
-      Person person, LocalDate date, AbsenceType abt, List<Absence> otherAbsences) {
-
-    Preconditions.checkNotNull(person);
-    Preconditions.checkNotNull(abt);
-    Preconditions.checkNotNull(date);
-    Preconditions.checkState(person.isPersistent());
-    Preconditions.checkState(abt.isPersistent());
-
-    List<PersonChildren> childList = personChildrenDao.getAllPersonChildren(person);
-
-    // 1.Si verifica come prima cosa che la persona abbia il numero di figli adatto
-    // all'utilizzo del codice richiesto
-
-    int childNumber = 1;
-    if (abt.code.length() >= 3) {
-      // Se il codice è richiesto per i successivi figli lo recupero dal codice
-      childNumber = Integer.parseInt(abt.code.substring(2));
-    }
-    if (childList.size() < childNumber) {
-      return false;
-    }
-
-    // 2. Si verifica che il figlio sia in età per l'utilizzo del codice d'assenza
-
-    LocalDate limitDate = null;
-    PersonChildren child = childList.get(childNumber - 1);
-    int yearAbsences = 0;
-    if (abt.code.startsWith("12")) {
-      limitDate = child.bornDate.plusYears(3);
-      yearAbsences = 30;
-    }
-    if (abt.code.startsWith("13")) {
-      limitDate = child.bornDate.plusYears(8);
-      yearAbsences = 5;
-    }
-    if (limitDate.isBefore(date)) {
-      return false;
-    }
-
-    // 3.  Verifica del numero di assenze prese con quel codice nell'ultimo anno permesso
-    LocalDate begin = child.bornDate.withYear(date.getYear());
-    if (!begin.isBefore(date)) {
-      begin = begin.minusYears(1);
-    }
-
-    List<Absence> usateDb = absenceDao.getAbsenceByCodeInPeriod(Optional.of(person),
-        Optional.of(abt.code), begin, begin.plusYears(1),
-        Optional.<JustifiedTimeAtWork>absent(), false, false);
-
-    // TODO: di otherAbsences devo conteggiare
-    // le sole assenze [begin, begin.plusYears(1)]
-
-    int usate = usateDb.size() + otherAbsences.size();
-
-    log.info("usate {}, di totali {}", usate, yearAbsences);
-    return usate < yearAbsences;
-
   }
 
   /**

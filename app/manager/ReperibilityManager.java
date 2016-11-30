@@ -27,7 +27,7 @@ import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
 import models.absences.Absence;
-import models.enumerate.JustifiedTimeAtWork;
+import models.absences.JustifiedType.JustifiedTypeName;
 import models.exports.AbsenceReperibilityPeriod;
 import models.exports.ReperibilityPeriod;
 
@@ -818,7 +818,7 @@ public class ReperibilityManager {
         // check for absences
         if (!personDay.get().absences.isEmpty()) {
           for (Absence absence : personDay.get().absences) {
-            if (absence.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay) {
+            if (absence.justifiedType.name == JustifiedTypeName.all_day) {
               log.info("La reperibilità di {} {} è incompatibile con la sua assenza nel "
                   + "giorno {}", person.name, person.surname, personReperibilityDay.date);
 

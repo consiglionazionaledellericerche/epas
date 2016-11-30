@@ -33,8 +33,8 @@ import models.User;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.JustifiedType;
+import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.QualificationMapping;
 
 import org.joda.time.LocalDate;
@@ -119,7 +119,7 @@ public class Absences extends Controller {
         Optional.fromNullable(absenceCode),
         DateUtility.getMonthFirstDay(yearMonth),
         DateUtility.getMonthLastDay(yearMonth),
-        Optional.<JustifiedTimeAtWork>absent(),
+        Optional.<JustifiedTypeName>absent(),
         false,
         true);
 
@@ -357,7 +357,7 @@ public class Absences extends Controller {
         Optional.<Person>absent(), Optional.fromNullable(code),
         new LocalDate(year, month, 1),
         new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(),
-        Optional.<JustifiedTimeAtWork>absent(), true, false);
+        Optional.<JustifiedTypeName>absent(), true, false);
     byte[] buffer = new byte[1024];
 
     for (Absence abs : absList) {
@@ -451,7 +451,7 @@ public class Absences extends Controller {
 
     List<Absence> absenceList = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person),
         Optional.<String>absent(), from, to,
-        Optional.of(JustifiedTimeAtWork.AllDay), false, false);
+        Optional.of(JustifiedTypeName.all_day), false, false);
 
     for (Absence abs : absenceList) {
       if (AbsenceTypeMapping.MISSIONE.is(abs.absenceType)) {
@@ -577,11 +577,11 @@ public class Absences extends Controller {
     if (absenceTypeCode.equals("Totale")) {
       absenceToRender = absenceDao.getAbsenceByCodeInPeriod(
           Optional.fromNullable(person), Optional.<String>absent(),
-          monthBegin, monthEnd, Optional.<JustifiedTimeAtWork>absent(), false, true);
+          monthBegin, monthEnd, Optional.<JustifiedTypeName>absent(), false, true);
     } else {
       absenceToRender = absenceDao.getAbsenceByCodeInPeriod(
           Optional.fromNullable(person), Optional.fromNullable(absenceTypeCode),
-          monthBegin, monthEnd, Optional.<JustifiedTimeAtWork>absent(), false, true);
+          monthBegin, monthEnd, Optional.<JustifiedTypeName>absent(), false, true);
     }
 
     render(person, absenceToRender);

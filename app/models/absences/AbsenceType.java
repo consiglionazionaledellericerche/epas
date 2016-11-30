@@ -8,7 +8,6 @@ import lombok.Getter;
 
 import models.Qualification;
 import models.base.BaseModel;
-import models.enumerate.JustifiedTimeAtWork;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -39,15 +38,6 @@ public class AbsenceType extends BaseModel {
 
   private static final long serialVersionUID = 7157167508454574329L;
 
-  // Vecchia Modellazione (Da rimuovere)
-  
-  @Required
-  @Enumerated(EnumType.STRING)
-  @Column(name = "justified_time_at_work")
-  public JustifiedTimeAtWork justifiedTimeAtWork;
-  
-  // Nuova Modellazione
-  
   @ManyToMany
   public List<Qualification> qualifications = Lists.newArrayList();
 
