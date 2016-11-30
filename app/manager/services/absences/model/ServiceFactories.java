@@ -110,12 +110,15 @@ public class ServiceFactories {
     PeriodChain periodChain = buildPeriodChainPhase1(person, groupAbsenceType, date, 
         orderedChildren, initializationGroups, previousInserts);
 
-    List<Absence> allPersistedAbsences = null;
-    List<Absence> groupPersistedAbsences = null;
+    List<Absence> allPersistedAbsences = Lists.newArrayList();
+    List<Absence> groupPersistedAbsences = Lists.newArrayList();
 
     //DAO fetch delle assenze (una volta ottenuti i limiti temporali della catena)
     // separato per inject nei test
     if (groupAbsenceType.pattern == GroupAbsenceTypePattern.simpleGrouping) {
+      if (absenceToInsert == null) {
+        return periodChain;
+      }
       allPersistedAbsences = absenceComponentDao.orderedAbsences(periodChain.person, 
           absenceToInsert.getAbsenceDate().minusDays(7),    //costante da inserire nel vincolo
           absenceToInsert.getAbsenceDate().plusDays(7),     //del week end 
