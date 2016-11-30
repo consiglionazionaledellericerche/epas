@@ -1,7 +1,10 @@
 package manager.services.absences.model;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
+import dao.PersonReperibilityDayDao;
+import dao.PersonShiftDayDao;
 import dao.absences.AbsenceComponentDao;
 
 import it.cnr.iit.epas.DateInterval;
@@ -10,6 +13,7 @@ import it.cnr.iit.epas.DateUtility;
 import manager.PersonDayManager;
 import manager.services.absences.AbsenceEngineUtility;
 import manager.services.absences.errors.CriticalError.CriticalProblem;
+import manager.services.absences.errors.ErrorsBox;
 
 import models.Contract;
 import models.Person;
@@ -20,12 +24,14 @@ import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.PeriodType;
 import models.absences.InitializationGroup;
+import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 
 import org.joda.time.LocalDate;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -35,6 +41,8 @@ public class ServiceFactories {
   private AbsenceEngineUtility absenceEngineUtility;
   private AbsenceComponentDao absenceComponentDao;
   private PersonDayManager personDayManager;
+  private final PersonReperibilityDayDao personReperibilityDayDao;
+  private final PersonShiftDayDao personShiftDayDao;
 
   /**
    * Constructor.
@@ -44,10 +52,14 @@ public class ServiceFactories {
    */
   @Inject
   public ServiceFactories(AbsenceEngineUtility absenceEngineUtility, 
-      AbsenceComponentDao absenceComponentDao, PersonDayManager personDayManager) {
+      AbsenceComponentDao absenceComponentDao, PersonDayManager personDayManager, 
+      PersonReperibilityDayDao personReperibilityDayDao, 
+      PersonShiftDayDao personShiftDayDao) {
     this.absenceEngineUtility = absenceEngineUtility;
     this.absenceComponentDao = absenceComponentDao;
     this.personDayManager = personDayManager;
+    this.personReperibilityDayDao = personReperibilityDayDao;
+    this.personShiftDayDao = personShiftDayDao;
   }
   
   /**
@@ -189,7 +201,7 @@ public class ServiceFactories {
     periodChain.involvedAbsencesInGroup = absenceEngineUtility
         .orderAbsences(groupPersistedAbsences, periodChain.previousInserts);
     
-    boolean typeToInfer = (absenceToInsert != null && absenceToInsert.absenceType == null);
+    boolean typeToInfer = (absenceToInsert != null && absenceToInsert.getAbsenceType() == null);
     
     for (AbsencePeriod absencePeriod : periodChain.periods) {
       
@@ -219,8 +231,8 @@ public class ServiceFactories {
         //report)
         Absence nextAbsenceToInsert = new Absence();
         nextAbsenceToInsert.date = absenceToInsert.getAbsenceDate();
-        nextAbsenceToInsert.justifiedType = absenceToInsert.justifiedType;
-        nextAbsenceToInsert.justifiedMinutes = absenceToInsert.justifiedMinutes;
+        nextAbsenceToInsert.justifiedType = absenceToInsert.getJustifiedType();
+        nextAbsenceToInsert.justifiedMinutes = absenceToInsert.getJustifiedMinutes();
         absenceToInsert = nextAbsenceToInsert;
       }
     } 
@@ -351,12 +363,12 @@ public class ServiceFactories {
     boolean isReplacing = false;
     if (absencePeriod.isTakable()) {
       //isTaken = absencePeriod.takenCodes.contains(absence.absenceType);   // no insert
-      isTaken = absencePeriod.takableCodes.contains(absence.absenceType); // insert
+      isTaken = absencePeriod.takableCodes.contains(absence.getAbsenceType()); // insert
     }
     if (absencePeriod.isComplation()) {
       isReplacing = absencePeriod.replacingCodesDesc.values()
-          .contains(absence.absenceType);
-      isComplation = absencePeriod.complationCodes.contains(absence.absenceType);
+          .contains(absence.getAbsenceType());
+      isComplation = absencePeriod.complationCodes.contains(absence.getAbsenceType());
     }
     if (!isTaken && !isComplation && !isReplacing) {
       return; //ex 23 appartiene al 100% ma non al 30% quindi non ha ruolo
@@ -437,15 +449,15 @@ public class ServiceFactories {
       return false;
     }
     
-    if (absenceToInsert.absenceType == null) {
+    if (absenceToInsert.getAbsenceType() == null) {
       absenceToInsert = absenceEngineUtility.inferAbsenceType(absencePeriod, absenceToInsert);
-      if (absenceToInsert.absenceType == null) {
+      if (absenceToInsert.getAbsenceType() == null) {
         return false;
       }
     }
     
     // i vincoli generici
-    absenceEngineUtility.genericConstraints(absencePeriod.errorsBox, 
+    genericConstraints(absencePeriod.errorsBox, 
         periodChain.person, absenceToInsert, 
         periodChain.allInvolvedAbsences);
     
@@ -469,7 +481,74 @@ public class ServiceFactories {
     return true;
 
   }
-  
- 
-  
+
+
+  /**
+   * I vincoli generici assenza.
+   * @param genericErrors box errori
+   * @param person persona
+   * @param absence assenza
+   * @param allCodeAbsences tutti i codici che potrebbero conflittuare.
+   * @return error box
+   */
+  public ErrorsBox genericConstraints(ErrorsBox genericErrors, 
+      Person person, Absence absence, 
+      Map<LocalDate, Set<Absence>> allCodeAbsences) {
+
+    //log.trace("L'assenza data={}, codice={} viene processata per i vincoli generici", 
+    //    absence.getAbsenceDate(), absence.getAbsenceType().getCode());
+
+    final boolean isHoliday = personDayManager.isHoliday(person, absence.getAbsenceDate());
+
+    //Codice non prendibile nei giorni di festa ed è festa.
+    if (!absence.getAbsenceType().isConsideredWeekEnd() && isHoliday) {
+      genericErrors.addAbsenceError(absence, AbsenceProblem.NotOnHoliday);
+    } else {
+//      //check sulla reperibilità
+//      if (personReperibilityDayDao
+//          .getPersonReperibilityDay(person, absence.getAbsenceDate()).isPresent()) {
+//        genericErrors.addAbsenceWarning(absence, AbsenceProblem.InReperibility); 
+//      }
+//      if (personShiftDayDao.getPersonShiftDay(person, absence.getAbsenceDate()).isPresent()) {
+//        genericErrors.addAbsenceWarning(absence, AbsenceProblem.InShift); 
+//      }
+    }
+
+    //Un codice giornaliero già presente 
+    Set<Absence> dayAbsences = allCodeAbsences.get(absence.getAbsenceDate());
+    if (dayAbsences == null) {
+      dayAbsences = Sets.newHashSet();
+    }
+    for (Absence oldAbsence : dayAbsences) {
+      //stessa entità
+      if (/*oldAbsence.isPersistent() && absence.isPersistent() && */oldAbsence.equals(absence)) {
+        continue;
+      }
+      //altra data
+      if (!oldAbsence.getAbsenceDate().isEqual(absence.getAbsenceDate())) {
+        continue;
+      }
+      //tempo giustificato non giornaliero
+      if ((oldAbsence.getJustifiedType().getName().equals(JustifiedTypeName.all_day) 
+          || oldAbsence.getJustifiedType().getName()
+          .equals(JustifiedTypeName.assign_all_day)) == false) {
+        continue;
+      }
+      genericErrors.addAbsenceError(absence, AbsenceProblem.AllDayAlreadyExists, oldAbsence);
+    }
+
+
+    //TODO:
+    // Strange weekend
+
+    // Configuration qualification grant
+
+    // DayLimitGroupCode
+
+
+    return genericErrors;
+  }
+
+
+
 }

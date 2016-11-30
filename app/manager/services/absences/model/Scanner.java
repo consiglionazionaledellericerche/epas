@@ -95,7 +95,7 @@ public class Scanner {
     
     // analisi dei requisiti generici
     for (Absence absence : this.absencesToScan) {
-      this.genericErrors = absenceEngineUtility
+      this.genericErrors = serviceFactories
           .genericConstraints(genericErrors, person, absence, absencesToScanMap);
     }
     

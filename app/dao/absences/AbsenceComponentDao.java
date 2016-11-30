@@ -2,7 +2,6 @@ package dao.absences;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -38,9 +37,7 @@ import org.joda.time.LocalDate;
 import play.db.jpa.JPA;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 
 import javax.persistence.EntityManager;
 
@@ -413,4 +410,17 @@ public class AbsenceComponentDao extends DaoBase {
         .where(initializationGroup.person.eq(person));
     return query.list(initializationGroup);
   }
-}
+  
+  /**
+   * I tipi giustificativi con quei nomi. 
+   * @param justifiedTypeName nomi
+   * @return list
+   */
+  public List<JustifiedType> justifiedTypes(List<JustifiedTypeName> justifiedTypeName) {
+    List<JustifiedType> types = Lists.newArrayList();
+    for (JustifiedTypeName name : justifiedTypeName) {
+      types.add(getOrBuildJustifiedType(name));
+    }
+    return types;
+  }
+} 

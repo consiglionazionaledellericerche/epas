@@ -5,15 +5,8 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
-import dao.PersonReperibilityDayDao;
-import dao.PersonShiftDayDao;
-import dao.absences.AbsenceComponentDao;
-
 import it.cnr.iit.epas.DateUtility;
 
-import lombok.extern.slf4j.Slf4j;
-
-import manager.PersonDayManager;
 import manager.services.absences.errors.CriticalError.CriticalProblem;
 import manager.services.absences.errors.ErrorsBox;
 import manager.services.absences.model.AbsencePeriod;
@@ -22,7 +15,6 @@ import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Person;
 import models.absences.Absence;
-import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.ComplationAbsenceBehaviour;
@@ -35,41 +27,22 @@ import models.absences.TakableAbsenceBehaviour;
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
-@Slf4j
 public class AbsenceEngineUtility {
   
-  private final AbsenceComponentDao absenceComponentDao;
-  private final PersonDayManager personDayManager;
-  
   private final Integer unitReplacingAmount = 1 * 100;
-  private final PersonReperibilityDayDao personReperibilityDayDao;
-  private final PersonShiftDayDao personShiftDayDao;
 
   /**
    * Constructor for injection.
-   * @param absenceComponentDao injected
-   * @param personDayManager injected
-   * @param personReperibilityDayDao injected
-   * @param personShiftDayDao injected
    */
   @Inject
-  public AbsenceEngineUtility(AbsenceComponentDao absenceComponentDao, 
-      PersonDayManager personDayManager, 
-      PersonReperibilityDayDao personReperibilityDayDao,
-      PersonShiftDayDao personShiftDayDao ) {
-    this.absenceComponentDao = absenceComponentDao;
-    this.personDayManager = personDayManager;
-    this.personReperibilityDayDao = personReperibilityDayDao;
-    this.personShiftDayDao = personShiftDayDao;
+  public AbsenceEngineUtility() {
   }
-
-  
+ 
   /**
    * Le operazioni univocamente identificabili dal justifiedType. Devo riuscire a derivare
    * l'assenza da inserire attraverso il justifiedType.
@@ -87,21 +60,19 @@ public class AbsenceEngineUtility {
    * @param groupAbsenceType gruppo
    * @return entity list
    */
-  public List<JustifiedType> automaticJustifiedType(GroupAbsenceType groupAbsenceType) {
+  public List<JustifiedTypeName> automaticJustifiedType(GroupAbsenceType groupAbsenceType) {
     
     // TODO: gruppo ferie, riposi compensativi
     if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.vacationsCnr)) {
-      return Lists.newArrayList(absenceComponentDao
-          .getOrBuildJustifiedType(JustifiedTypeName.all_day));
+      return Lists.newArrayList(JustifiedTypeName.all_day);
     }
     
-    List<JustifiedType> justifiedTypes = Lists.newArrayList();
+    List<JustifiedTypeName> justifiedTypes = Lists.newArrayList();
     
     //TODO: Copia che mi metto da parte... ma andrebbe cachata!!
-    final JustifiedType specifiedMinutesVar = 
-        absenceComponentDao.getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
-    JustifiedType allDayVar = null;
-    JustifiedType halfDayVar = null;
+    final JustifiedTypeName specifiedMinutesVar = JustifiedTypeName.specified_minutes;
+    JustifiedTypeName allDayVar = null;
+    JustifiedTypeName halfDayVar = null;
 
     //Map<Integer, Integer> specificMinutesFinded = Maps.newHashMap(); //(minute, count)
     //boolean specificMinutesDenied = false;
@@ -115,18 +86,18 @@ public class AbsenceEngineUtility {
     
     for (AbsenceType absenceType : groupAbsenceType.takableAbsenceBehaviour.takableCodes) {
       for (JustifiedType justifiedType : absenceType.justifiedTypesPermitted) { 
-        if (justifiedType.name.equals(JustifiedTypeName.all_day)) {
+        if (justifiedType.getName().equals(JustifiedTypeName.all_day)) {
           allDayFinded++;
-          allDayVar = justifiedType;
+          allDayVar = justifiedType.getName();
         }
-        if (justifiedType.name.equals(JustifiedTypeName.half_day)) {
+        if (justifiedType.getName().equals(JustifiedTypeName.half_day)) {
           halfDayFinded++;
-          halfDayVar = justifiedType;
+          halfDayVar = justifiedType.getName();
         }
-        if (justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
+        if (justifiedType.getName().equals(JustifiedTypeName.specified_minutes)) {
           specifiedMinutesFinded++;
         }
-        if (justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
+        if (justifiedType.getName().equals(JustifiedTypeName.absence_type_minutes)) {
           return Lists.newArrayList();
         }
       }
@@ -157,26 +128,27 @@ public class AbsenceEngineUtility {
     
     int amount = 0;
 
-    if (absence.justifiedType.name.equals(JustifiedTypeName.nothing)) {
+    if (absence.getJustifiedType().getName().equals(JustifiedTypeName.nothing)) {
       amount = 0;
-    } else if (absence.justifiedType.name.equals(JustifiedTypeName.all_day) 
-        || absence.justifiedType.name.equals(JustifiedTypeName.all_day_limit)) {
+    } else if (absence.getJustifiedType().getName().equals(JustifiedTypeName.all_day) 
+        || absence.getJustifiedType().getName().equals(JustifiedTypeName.all_day_limit)) {
       amount = absenceWorkingTime(person, absence);
-    } else if (absence.justifiedType.name.equals(JustifiedTypeName.half_day)) {
+    } else if (absence.getJustifiedType().getName().equals(JustifiedTypeName.half_day)) {
       amount = absenceWorkingTime(person, absence) / 2;
-    } else if (absence.justifiedType.name.equals(JustifiedTypeName.missing_time) 
-        || absence.justifiedType.name.equals(JustifiedTypeName.specified_minutes)
-        || absence.justifiedType.name.equals(JustifiedTypeName.specified_minutes_limit)) {
+    } else if (absence.getJustifiedType().getName().equals(JustifiedTypeName.missing_time) 
+        || absence.getJustifiedType().getName().equals(JustifiedTypeName.specified_minutes)
+        || absence.getJustifiedType().getName().equals(JustifiedTypeName.specified_minutes_limit)) {
       // TODO: quello che manca va implementato. Occorre persistere la dacisione di quanto manca
       // se non si vogliono fare troppi calcoli.
-      if (absence.justifiedMinutes == null) {
+      if (absence.getJustifiedMinutes() == null) {
         amount = 0;
       } else {
-        amount = absence.justifiedMinutes;
+        amount = absence.getJustifiedMinutes();
       }
-    } else if (absence.justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
-      amount = absence.absenceType.justifiedTime;
-    } else if (absence.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) {
+    } else if (absence.getJustifiedType().getName()
+        .equals(JustifiedTypeName.absence_type_minutes)) {
+      amount = absence.getAbsenceType().getJustifiedTime();
+    } else if (absence.getJustifiedType().getName().equals(JustifiedTypeName.assign_all_day)) {
       amount = -1;
     }
     
@@ -184,7 +156,7 @@ public class AbsenceEngineUtility {
       int work = absenceWorkingTime(person, absence);
       if (work == -1) {
         //Patch: se è festa da verificare.
-        if (absence.justifiedType.name.equals(JustifiedTypeName.all_day)) {
+        if (absence.getJustifiedType().getName().equals(JustifiedTypeName.all_day)) {
           return 100;
         } 
       }
@@ -261,38 +233,39 @@ public class AbsenceEngineUtility {
    */
   public Absence inferAbsenceType(AbsencePeriod absencePeriod, Absence absence) {
 
-    if (absence.justifiedType == null || !absencePeriod.isTakable()) {
+    if (absence.getJustifiedType() == null || !absencePeriod.isTakable()) {
       return absence;
     }
     
     // Controllo che il tipo sia inferibile
-    if (!automaticJustifiedType(absencePeriod.groupAbsenceType).contains(absence.justifiedType)) {
+    if (!automaticJustifiedType(absencePeriod.groupAbsenceType)
+        .contains(absence.getJustifiedType().getName())) {
       return absence;
     }
 
     //Cerco il codice
-    if (absence.justifiedType.name.equals(JustifiedTypeName.all_day)) {
+    if (absence.getJustifiedType().getName().equals(JustifiedTypeName.all_day)) {
       for (AbsenceType absenceType : absencePeriod.takableCodes) { 
-        if (absenceType.justifiedTypesPermitted.contains(absence.justifiedType)) {
+        if (absenceType.justifiedTypesPermitted.contains(absence.getJustifiedType())) {
           absence.absenceType = absenceType;
           return absence;
         }
       }
     }
-    if (absence.justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
+    if (absence.getJustifiedType().getName().equals(JustifiedTypeName.specified_minutes)) {
       
       AbsenceType specifiedMinutes = null;
       for (AbsenceType absenceType : absencePeriod.takableCodes) {
-        for (JustifiedType absenceTypeJustifiedType : absenceType.justifiedTypesPermitted) {
-          if (absenceTypeJustifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
-            if (absence.justifiedMinutes != null) {
+        for (JustifiedType absenceTypeJustifiedType : absenceType.getJustifiedTypesPermitted()) {
+          if (absenceTypeJustifiedType.getName().equals(JustifiedTypeName.specified_minutes)) {
+            if (absence.getJustifiedMinutes() != null) {
               absence.absenceType = absenceType;
               return absence; 
             }
             specifiedMinutes = absenceType;
           }
-          if (absenceTypeJustifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
-            if (absenceType.justifiedTime.equals(absence.justifiedMinutes)) { 
+          if (absenceTypeJustifiedType.getName().equals(JustifiedTypeName.absence_type_minutes)) {
+            if (absenceType.getJustifiedTime().equals(absence.getJustifiedMinutes())) { 
               absence.absenceType = absenceType;
               absence.justifiedType = absenceTypeJustifiedType;
               return absence;
@@ -399,71 +372,7 @@ public class AbsenceEngineUtility {
     return involvedGroup;
   }
   
-  /**
-   * I vincoli generici assenza.
-   * @param genericErrors box errori
-   * @param person persona
-   * @param absence assenza
-   * @param allCodeAbsences tutti i codici che potrebbero conflittuare.
-   * @return error box
-   */
-  public ErrorsBox genericConstraints(ErrorsBox genericErrors, 
-      Person person, Absence absence, 
-      Map<LocalDate, Set<Absence>> allCodeAbsences) {
     
-    log.trace("L'assenza data={}, codice={} viene processata per i vincoli generici", 
-        absence.getAbsenceDate(), absence.getAbsenceType().code);
-    
-    final boolean isHoliday = personDayManager.isHoliday(person, absence.getAbsenceDate());
-    
-    //Codice non prendibile nei giorni di festa ed è festa.
-    if (!absence.absenceType.consideredWeekEnd && isHoliday) {
-      genericErrors.addAbsenceError(absence, AbsenceProblem.NotOnHoliday);
-    } else {
-      //check sulla reperibilità
-      if (personReperibilityDayDao
-          .getPersonReperibilityDay(person, absence.getAbsenceDate()).isPresent()) {
-        genericErrors.addAbsenceWarning(absence, AbsenceProblem.InReperibility); 
-      }
-      if (personShiftDayDao.getPersonShiftDay(person, absence.getAbsenceDate()).isPresent()) {
-        genericErrors.addAbsenceWarning(absence, AbsenceProblem.InShift); 
-      }
-    }
-    
-    //Un codice giornaliero già presente 
-    Set<Absence> dayAbsences = allCodeAbsences.get(absence.getAbsenceDate());
-    if (dayAbsences == null) {
-      dayAbsences = Sets.newHashSet();
-    }
-    for (Absence oldAbsence : dayAbsences) {
-      //stessa entità
-      if (oldAbsence.isPersistent() && absence.isPersistent() && oldAbsence.equals(absence)) {
-        continue;
-      }
-      //altra data
-      if (!oldAbsence.getAbsenceDate().isEqual(absence.getAbsenceDate())) {
-        continue;
-      }
-      //tempo giustificato non giornaliero
-      if ((oldAbsence.justifiedType.name.equals(JustifiedTypeName.all_day) 
-          || oldAbsence.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) == false) {
-        continue;
-      }
-      genericErrors.addAbsenceError(absence, AbsenceProblem.AllDayAlreadyExists, oldAbsence);
-    }
-
-  
-    //TODO:
-    // Strange weekend
-    
-    // Configuration qualification grant
-    
-    // DayLimitGroupCode
-
-     
-    return genericErrors;
-  }
-  
   /**
    * Ordina per data tutte le liste di assenze in una unica lista.
    * @param absences liste di assenze

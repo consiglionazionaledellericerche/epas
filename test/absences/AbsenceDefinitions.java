@@ -90,10 +90,7 @@ public class AbsenceDefinitions {
   public enum ComplationBehaviourDefinition {
 
     Complation_661(AmountType.minutes, 
-        ImmutableSet.of(AbsenceTypeDefinition._661H1, AbsenceTypeDefinition._661H2,
-            AbsenceTypeDefinition._661H3, AbsenceTypeDefinition._661H4, 
-            AbsenceTypeDefinition._661H5, AbsenceTypeDefinition._661H6,
-            AbsenceTypeDefinition._661H7),
+        ImmutableSet.of(AbsenceTypeDefinition._661M),
         ImmutableSet.of(AbsenceTypeDefinition._661H1, AbsenceTypeDefinition._661H2,
             AbsenceTypeDefinition._661H3, AbsenceTypeDefinition._661H4, 
             AbsenceTypeDefinition._661H5, AbsenceTypeDefinition._661H6,
