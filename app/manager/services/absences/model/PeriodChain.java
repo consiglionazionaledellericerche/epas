@@ -27,16 +27,19 @@ public class PeriodChain {
   public LocalDate to = null;                                       
   public List<AbsencePeriod> periods = Lists.newArrayList();
   
-  //Assenze coinvolte nella catena (compresi i nuovi inserimenti)
-  //le assenza assegnate ad un periodo
-  public Set<Absence> involvedAbsences = Sets.newHashSet() ; 
-  //le assenze non assegnate ad alcun periodo perchè 
-  //sono uscito in modo critico mentre le analizzavo
-  public Set<Absence> orphanAbsences = Sets.newHashSet();     
-
   //Tutte le assenze coinvolte nella catena 
   // - anche quelle di codici diversi (compresi i nuovi inserimenti) 
   public Map<LocalDate, Set<Absence>> allInvolvedAbsences = Maps.newHashMap();    
+  //Le assenze coinvolte nella catena relative al gruppo
+  // - di tutti i period, anche non assegnate, comprese le assenze inserite precedentemente
+  public List<Absence> involvedAbsencesInGroup = Lists.newArrayList();
+  
+  public List<Absence> previousInserts = Lists.newArrayList();
+
+  //Assenze coinvolte nella catena (compresi i nuovi inserimenti) assegnate ad un periodo
+  public Set<Absence> involvedAbsences = Sets.newHashSet() ; 
+  //le assenze non assegnate ad alcun periodo perchè sono uscito in modo critico causa errori
+  public Set<Absence> orphanAbsences = Sets.newHashSet();  
   
   //Assenza da inserire
   public AbsencePeriod successPeriodInsert;

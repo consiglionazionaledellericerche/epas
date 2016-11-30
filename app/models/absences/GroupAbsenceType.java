@@ -4,6 +4,8 @@ import com.google.common.base.Strings;
 
 import it.cnr.iit.epas.DateInterval;
 
+import lombok.Getter;
+
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -44,22 +46,27 @@ public class GroupAbsenceType extends BaseModel {
   @JoinColumn(name = "category_type_id")
   public CategoryGroupAbsenceType category;
   
+  @Getter
   @Column(name = "pattern")
   @Enumerated(EnumType.STRING)
   public GroupAbsenceTypePattern pattern;
   
+  @Getter
   @Column(name = "period_type")
   @Enumerated(EnumType.STRING)
   public PeriodType periodType;
   
+  @Getter
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "takable_behaviour_id")
   public TakableAbsenceBehaviour takableAbsenceBehaviour;
   
+  @Getter
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "complation_behaviour_id")
   public ComplationAbsenceBehaviour complationAbsenceBehaviour;
   
+  @Getter
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "next_group_to_check_id")
   public GroupAbsenceType nextGroupToCheck;

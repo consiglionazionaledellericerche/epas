@@ -54,9 +54,11 @@ public class Absence extends BaseModel {
   @Column(name = "absence_file", nullable = true)
   public Blob absenceFile;
 
+  @Getter
   @Column(name = "justified_minutes", nullable = true)
   public Integer justifiedMinutes;
 
+  @Getter
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "justified_type_id")
   public JustifiedType justifiedType;
@@ -88,11 +90,11 @@ public class Absence extends BaseModel {
    */
   @Transient
   public LocalDate getAbsenceDate() {
-    if (this.personDay != null && this.personDay.date != null) { 
-      return this.personDay.date;
+    if (this.getPersonDay() != null && this.getPersonDay().getDate() != null) { 
+      return this.getPersonDay().getDate();
     } 
-    if (this.date != null) {
-      return this.date;
+    if (this.getDate() != null) {
+      return this.getDate();
     }
     throw new IllegalStateException();
   }

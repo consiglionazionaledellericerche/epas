@@ -2,22 +2,130 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Assenze'  /}
 
+#{set breadcrumbs:['Lista Persone':@Persons.list(), 
+  (initializationGroup.person.fullname):null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+%{ person = initializationGroup.person; }%
+
+#{include 'Persons/_tabs.html' /}
+
 <div class="container">
 
-  #{title title:'Inizializzazione Gruppi di Assenze' /}
+  #{form action:@AbsenceGroups.initialization(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit'}
 
-  #{form action:@AbsenceGroups.save(), method:'POST', autocomplete:false, class:'form form-horizontal'}
-
-  #{f.selectModel 'groupAbsenceType', label:'Tipologia Assenza', items:initializableGroups /}
-  #{f.date 'date'/}
-
-  #{f.date 'forceBegin', disabled:'true' /}
-  #{f.date 'forceEnd', disabled:'true' /}
-
-  #{f.input 'takableTotal', type:'number' /}
-  #{f.input 'takableUsed', type:'number' /}
-  #{f.input 'complationUsed', type:'number' /}
-
+  #{f.selectModel 'groupAbsenceType', inputName:'groupAbsenceTypeId', label:'Tipologia Assenza', personalizeItems:true}
+        <option></option>      
+       
+       #{list items:initializableGroups, as:'group'}
+           <option value="${group.id}"
+	          #{if group.equals(initializationGroup.groupAbsenceType)} selected #{/if}> 
+	          ${group.description}
+	       </option>
+  	    #{/list}
+     #{/f.selectModel}
+     
+     #{f.date 'date', value:date.format() /}
+     #{f.hidden 'personId', value:initializationGroup.person.id /}
+  
   #{/form}
+  
+  #{if periodChain}
+	  #{if periodChain.containsCriticalErrors()}
+	    #{alert color:'danger'}
+	      <p>Impossibile visualizzare la situazione. Effettuare una segnalazione.</p>
+	    #{/alert}
+	  #{/if}
+	  #{if periodChain.childIsMissing()}
+	    #{alert color:'danger'}
+	      <p>Impossibile visualizzare la situazione. Figlio non presente in anagrafica o fuori età.</p>
+	    #{/alert}
+	  #{/if}
 
+	  <ul>
+	  
+	  <!-- Suggerimento -->
+	  <li class="list-group-item list-group-item-info">
+	    <p>
+	        Imposta i valori di inizializzazione per <strong>${initializationGroup.groupAbsenceType.description}</strong> 
+	    </p>
+	  </li>
+	  
+	  <li class="list-group-item">
+	  
+	  <!-- Riepilogo gruppo -->
+	  <a class="btn btn-warning btn-sm pull-right" href="@{AbsenceGroups.groupStatus(absencePeriod.person.id, absencePeriod.groupAbsenceType.id, periodChain.date.format())}">
+	    <i class="fa fa-search" aria-hidden="true"></i> Stato delle assenze
+	  </a>
+	    
+	  <p>
+	        #{if absencePeriod.isTakableWithLimit() }
+	           <strong>Tipo periodo</strong> &{absencePeriod.groupAbsenceType.periodType}<br>
+	           <strong>Validità periodo</strong> ${absencePeriod.from.format()} - ${absencePeriod.to.format()}
+	       
+	           <br><strong>Totale utilizzabile</strong> 
+	           ${templateUtility.formatAmount(absencePeriod.getPeriodTakableAmount(), absencePeriod.takeAmountType)}<br>
+	        #{/if}
+	        #{if averageWeekWorkingTime > 0}
+	             <strong>Tempo a lavoro medio</strong> ${averageWeekWorkingTime.printHourMinute()}<br>  
+	        #{/if}
+	       
+	  </p>
+	  </li>
+	  
+	  #{if initializationGroup.persistent}
+	  <li class="list-group-item">
+	  <div>
+	  <!-- Inizializzazione precedente -->
+	       #{include './_initializationStatus.html' /}
+	       #{form action:@AbsenceGroups.deleteInitialization(), method:'POST', autocomplete:false}
+	         #{f.hidden 'initializationGroup.id', value:initializationGroup.id /}
+	         <button class="btn btn-danger btn-sm pull-right" type="submit">Rimuovi inizializzazione</button>    
+	       #{/form}
+	       <br>
+	       Cliccando su Salva i vecchi dati verranno sovrascritti.	
+	  </div>
+	  </li>
+	  #{/if}
+
+	  <li class="list-group-item">  
+	  #{form action:@AbsenceGroups.saveInitialization(), method:'POST', autocomplete:false, class:'form form-horizontal group'}
+	  
+	  
+	  #{if initializationGroup.persistent}
+	    #{f.hidden 'initializationGroup.id', value:initializationGroup.id /}
+	  #{/if}
+	  
+	  #{f.hidden 'initializationGroup.groupAbsenceType.id', value:initializationGroup.groupAbsenceType.id /}
+	  #{f.hidden 'initializationGroup.date', value:date.format() /}
+	  #{f.hidden 'initializationGroup.person.id', value:initializationGroup.person.id /}
+	  
+	  #{f.view 'Data', value:date.format() /}
+	  #{if absencePeriod.isTakableUnits()}
+	    #{f.input 'initializationGroup.unitsInput', value:initializationGroup.unitsInput, type:'number' /}
+	  #{/if}
+	  #{f.input 'initializationGroup.hoursInput', value:initializationGroup.hoursInput, type:'number' /}
+	  #{f.selectEnum 'initializationGroup.minutesInput', items:initializationGroup.selectableMinutes(), value:initializationGroup.minutesInput, byEquals:'true' /}
+	 
+	  #{b.buttons center:true}
+	   #{b.submit 'Salva'/}
+	  #{/b.buttons}
+	
+	  
+	  #{/form}
+	  
+	  </li>
+	
+	  #{if absencePeriod.errorsBox.containsCriticalErrors() }
+	      <li class="list-group-item">ci sono errori critici. TODO: elencarli</li>
+	  #{/if}
+	  #{if absencePeriod.errorsBox.containsAbsencesErrors() }
+	     <li class="list-group-item">ci sono errori legati alle assenze. TODO: elencarli</li>
+	  #{/if}
+	    
+	
+	  </ul>
+  
+  #{/if}
+  
 </div>

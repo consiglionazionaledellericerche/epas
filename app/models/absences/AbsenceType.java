@@ -69,24 +69,30 @@ public class AbsenceType extends BaseModel {
   @Column(name = "internal_use")
   public boolean internalUse = false;
   
+  @Getter
   @Column(name = "considered_week_end")
   public boolean consideredWeekEnd = false;
   
+  @Getter
   @Column(name = "time_for_mealticket")
   public boolean timeForMealTicket = false;
   
+  @Getter
   @Column(name = "justified_time")
   public Integer justifiedTime;
   
+  @Getter
   @ManyToMany
   @JoinTable(name = "absence_types_justified_types", 
       joinColumns = { @JoinColumn(name = "absence_types_id") }, 
       inverseJoinColumns = { @JoinColumn(name = "justified_types_id") })
   public Set<JustifiedType> justifiedTypesPermitted = Sets.newHashSet();
   
+  @Getter
   @Column(name = "replacing_time")
   public Integer replacingTime;
   
+  @Getter
   @ManyToOne
   @JoinColumn(name = "replacing_type_id")
   public JustifiedType replacingType;
