@@ -65,9 +65,11 @@
 <div id="riepiloghi">
 
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 left">
+    *{
     #{secure.link @Persons.edit(person.id), target:person}
       ${person.fullname}
 	#{/secure.link}
+	}*
     #{include './personStampingComponents/_alerts.html' /}
     #{include './personStampingComponents/_contractsRecap.html' /}
   </div>
