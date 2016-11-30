@@ -13,6 +13,8 @@ import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
+import dao.PersonShiftDayDao;
+import dao.ShiftDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
@@ -32,6 +34,7 @@ import models.Person;
 import models.PersonCompetenceCodes;
 import models.PersonDay;
 import models.PersonReperibilityType;
+import models.PersonShift;
 import models.ShiftTimeTable;
 import models.TotalOvertime;
 
@@ -66,6 +69,7 @@ public class CompetenceManager {
   private final PersonDayManager personDayManager;
   private final PersonReperibilityDayDao reperibilityDao;
   private final PersonStampingRecapFactory stampingsRecapFactory;
+  private final PersonShiftDayDao personShiftDayDao;
 
   /**
    * Costruttore.
@@ -82,7 +86,7 @@ public class CompetenceManager {
       OfficeDao officeDao, CompetenceDao competenceDao,
       PersonDayDao personDayDao, IWrapperFactory wrapperFactory,
       PersonDayManager personDayManager, PersonReperibilityDayDao reperibilityDao,
-      PersonStampingRecapFactory stampingsRecapFactory) {
+      PersonStampingRecapFactory stampingsRecapFactory, PersonShiftDayDao personshiftDayDao) {
     this.competenceCodeDao = competenceCodeDao;
     this.officeDao = officeDao;
     this.competenceDao = competenceDao;
@@ -90,7 +94,8 @@ public class CompetenceManager {
     this.wrapperFactory = wrapperFactory;
     this.personDayManager = personDayManager;
     this.reperibilityDao = reperibilityDao;
-    this.stampingsRecapFactory = stampingsRecapFactory;    
+    this.stampingsRecapFactory = stampingsRecapFactory;   
+    this.personShiftDayDao = personshiftDayDao;
   }
 
   public static Predicate<CompetenceCode> isReperibility() {
@@ -631,6 +636,21 @@ public class CompetenceManager {
       newPcc.person = person;
       newPcc.beginDate = date;
       newPcc.save();
+      
+      if (item.code.equals("T1") || item.code.equals("T2") || item.code.equals("T3")) {
+        PersonShift personShift = null;
+        personShift = personShiftDayDao.getPersonShiftByPerson(person);
+        if (personShift != null) {
+          log.info("L'utente {} è già presente in tabella person_shift", person.fullName());
+        } else {
+          personShift = new PersonShift();
+          personShift.person = person;
+          personShift.description = "Turni di " +person.fullName();
+          personShift.jolly = false;
+          personShift.save();
+        }
+        
+      }
     });
     codeToRemove.forEach(item -> {
 
@@ -638,7 +658,14 @@ public class CompetenceManager {
       if (pcc.isPresent()) {
         pcc.get().endDate = date;
         pcc.get().save();
-
+        if (item.code.equals("T1") || item.code.equals("T2") || item.code.equals("T3")) {
+          PersonShift personShift = personShiftDayDao.getPersonShiftByPerson(pcc.get().person);
+          if (personShift != null) {
+            personShift.delete();
+          } else {
+            log.warn("Non è presente in tabella person_shift l'utente {}", person.fullName());
+          }
+        }
       } else {
         throw new RuntimeException(Messages.get("errorCompetenceCodeException"));
       }
