@@ -560,14 +560,14 @@ public class ServiceFactories {
     if (!absence.getAbsenceType().isConsideredWeekEnd() && isHoliday) {
       genericErrors.addAbsenceError(absence, AbsenceProblem.NotOnHoliday);
     } else {
-      //      //check sulla reperibilità
-      //      if (personReperibilityDayDao
-      //          .getPersonReperibilityDay(person, absence.getAbsenceDate()).isPresent()) {
-      //        genericErrors.addAbsenceWarning(absence, AbsenceProblem.InReperibility); 
-      //      }
-      //      if (personShiftDayDao.getPersonShiftDay(person, absence.getAbsenceDate()).isPresent()) {
-      //        genericErrors.addAbsenceWarning(absence, AbsenceProblem.InShift); 
-      //      }
+      //check sulla reperibilità
+      if (personReperibilityDayDao
+          .getPersonReperibilityDay(person, absence.getAbsenceDate()).isPresent()) {
+        genericErrors.addAbsenceWarning(absence, AbsenceProblem.InReperibility); 
+      }
+      if (personShiftDayDao.getPersonShiftDay(person, absence.getAbsenceDate()).isPresent()) {
+        genericErrors.addAbsenceWarning(absence, AbsenceProblem.InShift); 
+      }
     }
 
     //Un codice giornaliero già presente 

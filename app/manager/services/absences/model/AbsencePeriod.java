@@ -224,7 +224,6 @@ public class AbsencePeriod {
   /**
    * Calcola i rimpiazzamenti corretti nel periodo.
    * @param absenceEngineUtility inject dep
-   * @param absenceComponentDao inject dep
    */
   public void computeCorrectReplacingInPeriod(AbsenceEngineUtility absenceEngineUtility) {
 

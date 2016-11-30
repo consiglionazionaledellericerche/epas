@@ -1,12 +1,16 @@
 package absences;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
+import dao.PersonReperibilityDayDao;
+import dao.PersonShiftDayDao;
 
 import manager.PersonDayManager;
 import manager.services.absences.AbsenceEngineUtility;
@@ -90,6 +94,12 @@ public class AbsencesBasicTest {
     return new AbsenceEngineUtility();
   }
   
+  /**
+   * Mock personDayManager.
+   * @param person persona
+   * @param holidays i giorni festivi
+   * @return mock
+   */
   public PersonDayManager getPersonDayManager(Person person, List<LocalDate> holidays) {
     PersonDayManager personDayManager = mock(PersonDayManager.class);
     for (LocalDate date : holidays) {
@@ -98,10 +108,41 @@ public class AbsencesBasicTest {
     return personDayManager;
   }
   
+  /**
+   * Mock personReperibilityDayDao.
+   * @return mock
+   */
+  public PersonReperibilityDayDao getPersonReperibilityDayDao() {
+    PersonReperibilityDayDao personReperibilityDayDao = mock(PersonReperibilityDayDao.class);
+    when(personReperibilityDayDao.getPersonReperibilityDay(any(Person.class), any(LocalDate.class)))
+      .thenReturn(Optional.absent());
+    return personReperibilityDayDao;
+  }
+  
+  /**
+   * Mock personShiftDayDao.
+   * @return mock
+   */
+  public PersonShiftDayDao getPersonShiftDayDao() {
+    PersonShiftDayDao personShiftDayDao = mock(PersonShiftDayDao.class);
+    when(personShiftDayDao.getPersonShiftDay(any(Person.class), any(LocalDate.class)))
+      .thenReturn(Optional.absent());
+    return personShiftDayDao;
+  }
+  
+  /**
+   * Istanza serviceFactories.
+   * @param person persona
+   * @param holidays giorni di festa
+   * @return istanza.
+   */
   public ServiceFactories getServiceFactories(Person person, List<LocalDate> holidays) {
     return new ServiceFactories(getUtility(), null, 
-        getPersonDayManager(person, holidays), null, null);
+        getPersonDayManager(person, holidays), 
+        getPersonReperibilityDayDao(), getPersonShiftDayDao());
   }
+  
+  
   
   
   
