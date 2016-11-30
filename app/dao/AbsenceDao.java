@@ -21,8 +21,8 @@ import models.Contract;
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.query.QAbsence;
-import models.enumerate.JustifiedTimeAtWork;
 import models.exports.FrequentAbsenceCode;
 import models.query.QPersonDay;
 
@@ -97,7 +97,7 @@ public class AbsenceDao extends DaoBase {
    */
   public List<Absence> getAbsenceByCodeInPeriod(
       Optional<Person> person, Optional<String> code, LocalDate from, LocalDate to,
-      Optional<JustifiedTimeAtWork> justifiedTimeAtWork, boolean forAttachment,
+      Optional<JustifiedTypeName> justifiedTypeName, boolean forAttachment,
       boolean ordered) {
 
     final QAbsence absence = QAbsence.absence;
@@ -110,8 +110,8 @@ public class AbsenceDao extends DaoBase {
     if (person.isPresent()) {
       condition.and(absence.personDay.person.eq(person.get()));
     }
-    if (justifiedTimeAtWork.isPresent()) {
-      condition.and(absence.absenceType.justifiedTimeAtWork.eq(justifiedTimeAtWork.get()));
+    if (justifiedTypeName.isPresent()) {
+      condition.and(absence.justifiedType.name.eq(justifiedTypeName.get()));
     }
     if (code.isPresent()) {
       condition.and(absence.absenceType.code.eq(code.get()));
@@ -228,8 +228,8 @@ public class AbsenceDao extends DaoBase {
         .from(absence)
         .where(absence.personDay.person.eq(person).and(
             absence.personDay.date.between(fromDate, toDate.or(fromDate))).and(
-            absence.absenceType.justifiedTimeAtWork.eq(JustifiedTimeAtWork.AllDay)
-                .or(absence.absenceType.justifiedTimeAtWork.eq(JustifiedTimeAtWork.AssignAllDay))))
+            absence.justifiedType.name.eq(JustifiedTypeName.all_day)
+                .or(absence.justifiedType.name.eq(JustifiedTypeName.assign_all_day))))
         .list(absence);
 
   }
@@ -282,7 +282,7 @@ public class AbsenceDao extends DaoBase {
         getAbsenceByCodeInPeriod(
             Optional.fromNullable(contract.person), Optional.fromNullable(ab.code),
             contractInterInterval.getBegin(), contractInterInterval.getEnd(),
-            Optional.<JustifiedTimeAtWork>absent(), false, true);
+            Optional.<JustifiedTypeName>absent(), false, true);
 
     return absences;
 

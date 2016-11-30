@@ -9,7 +9,7 @@ import dao.AbsenceDao;
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
-import models.enumerate.JustifiedTimeAtWork;
+import models.absences.JustifiedType.JustifiedTypeName;
 
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -59,7 +59,7 @@ public class YearlyAbsencesManager {
       List<Absence> absenceInMonth =
           absenceDao.getAbsenceByCodeInPeriod(
               Optional.fromNullable(p), Optional.<String>absent(), begin, end,
-              Optional.<JustifiedTimeAtWork>absent(), false, false);
+              Optional.<JustifiedTypeName>absent(), false, false);
 
       tableMonthlyAbsences.put(p, abt, absenceInMonth.size());
       for (Absence abs : absenceInMonth) {
