@@ -125,11 +125,7 @@ public class CompetenceCodeDao extends DaoBase {
    * 
    * @param group il gruppo di codici di competenza
    * @param except opzionale: se presente serve per tralasciare quel competenceCode nella ricerca
-<<<<<<< HEAD
    *     dei codici appartenenti al gruppo group
-=======
-   *        dei codici appartenenti al gruppo group
->>>>>>> refs/remotes/origin/develop
    * @return la lista dei codici di competenza che appartengono al gruppo passato come parametro.
    */
   public List<CompetenceCode> getCodeWithGroup(CompetenceCodeGroup group, 
@@ -224,6 +220,24 @@ public class CompetenceCodeDao extends DaoBase {
     final JPQLQuery query = getQueryFactory().from(pcc)
         .where(pcc.competenceCode.eq(code)
             .and(pcc.person.office.eq(office)).and(condition));
+    return query.list(pcc);
+  }
+  
+  /**
+   * 
+   * @param codesList la lista dei codici di assenza da ricercare
+   * @param date la data (opzionale) che deve essere contenuta nel periodo di possesso di una certa competenza
+   * @return la lista delle persone con abilitate le competenze passate nella lista come parametro.
+   */
+  public List<PersonCompetenceCodes> listByCodes(List<CompetenceCode> codesList, Optional<LocalDate> date) {
+    final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
+    final BooleanBuilder condition = new BooleanBuilder();
+    if (date.isPresent()) {
+      condition.and(pcc.beginDate.loe(date.get().dayOfMonth().withMaximumValue())
+          .andAnyOf(pcc.endDate.isNull(), 
+              pcc.endDate.goe(date.get().dayOfMonth().withMaximumValue())));
+    }
+    final JPQLQuery query = getQueryFactory().from(pcc).where(pcc.competenceCode.in(codesList).and(condition));
     return query.list(pcc);
   }
 }

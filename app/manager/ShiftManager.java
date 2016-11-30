@@ -28,6 +28,7 @@ import models.Competence;
 import models.CompetenceCode;
 import models.Office;
 import models.Person;
+import models.PersonCompetenceCodes;
 import models.PersonDay;
 import models.PersonReperibility;
 import models.PersonReperibilityType;
@@ -76,6 +77,9 @@ import javax.inject.Inject;
  */
 @Slf4j
 public class ShiftManager {
+
+  private static final String codShiftNight = "T2";
+  private static final String codShiftHolyday = "T3";
 
   private static final String codShift = "T1";            // codice dei turni
   //nome della colonna per i giorni di mancata timbratura della tabella delle inconsistenze
@@ -178,11 +182,11 @@ public class ShiftManager {
               (inconsistentAbsenceTable.contains(person, thNoStampings))
               ? inconsistentAbsenceTable.get(person, thNoStampings)
                   : new ArrayList<String>();
-              noStampingDays.add(personShiftDay.date.toString("dd MMM"));
-              inconsistentAbsenceTable.put(person, thNoStampings, noStampingDays);
+          noStampingDays.add(personShiftDay.date.toString("dd MMM"));
+          inconsistentAbsenceTable.put(person, thNoStampings, noStampingDays);
 
-              log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", 
-                  person, thNoStampings, inconsistentAbsenceTable.get(person, thNoStampings));
+          log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", 
+              person, thNoStampings, inconsistentAbsenceTable.get(person, thNoStampings));
         }
       } else {
 
@@ -199,8 +203,8 @@ public class ShiftManager {
             noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings))
                 ? inconsistentAbsenceTable.get(person, thNoStampings)
                     : new ArrayList<String>();
-                noStampingDays.add(personShiftDay.date.toString("dd MMM"));
-                inconsistentAbsenceTable.put(person, thNoStampings, noStampingDays);
+            noStampingDays.add(personShiftDay.date.toString("dd MMM"));
+            inconsistentAbsenceTable.put(person, thNoStampings, noStampingDays);
 
                 //log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thNoStampings, 
                 //      inconsistentAbsenceTable.get(person, thNoStampings));
@@ -228,16 +232,16 @@ public class ShiftManager {
                       : "- **:**".concat(personDay.get().stampings.get(0).date.toLocalTime()
                           .toString("HH:mm"));
 
-                      badStampingDays =
-                          (inconsistentAbsenceTable.contains(person, thBadStampings))
-                          ? inconsistentAbsenceTable.get(person, thBadStampings)
+              badStampingDays =
+                  (inconsistentAbsenceTable.contains(person, thBadStampings))
+                  ? inconsistentAbsenceTable.get(person, thBadStampings)
                               : new ArrayList<String>();
-                          badStampingDays.add(
+              badStampingDays.add(
                               personShiftDay.date.toString("dd MMM").concat(" -> ").concat(stamp));
-                          inconsistentAbsenceTable.put(person, thBadStampings, badStampingDays);
+              inconsistentAbsenceTable.put(person, thBadStampings, badStampingDays);
 
-                          log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}",
-                              person, thBadStampings, inconsistentAbsenceTable.get(person, thBadStampings));
+              log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}",
+                  person, thBadStampings, inconsistentAbsenceTable.get(person, thBadStampings));
 
                           // se e' vuota => manca qualche timbratura
             } else if (pairStampings.isEmpty()) {
@@ -249,11 +253,11 @@ public class ShiftManager {
                   (inconsistentAbsenceTable.contains(person, thBadStampings))
                   ? inconsistentAbsenceTable.get(person, thBadStampings)
                       : new ArrayList<String>();
-                  badStampingDays.add(
-                      personShiftDay.date.toString("dd MMM").concat(" -> timbrature disaccoppiate"));
-                  inconsistentAbsenceTable.put(person, thBadStampings, badStampingDays);
+              badStampingDays.add(
+                  personShiftDay.date.toString("dd MMM").concat(" -> timbrature disaccoppiate"));
+              inconsistentAbsenceTable.put(person, thBadStampings, badStampingDays);
 
-                  log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}",
+              log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}",
                       person, thBadStampings, inconsistentAbsenceTable.get(person, thBadStampings));
 
                   // controlla che le coppie di timbrature coprano
@@ -327,21 +331,21 @@ public class ShiftManager {
                     upLimit =
                         (pairStamping.second.date.toLocalTime().isBefore(startLunchTime))
                         ? pairStamping.second.date.toLocalTime() : startLunchTime;
-                        workingMinutes += DateUtility.getDifferenceBetweenLocalTime(lowLimit, upLimit);
-                        //log.debug("N.1 - ss={} -- slt={} lowLimit={} upLimit={} workingMinutes={}", 
-                        //      startShift, startLunchTime, lowLimit, upLimit, workingMinutes);
+                    workingMinutes += DateUtility.getDifferenceBetweenLocalTime(lowLimit, upLimit);
+                    //log.debug("N.1 - ss={} -- slt={} lowLimit={} upLimit={} workingMinutes={}", 
+                    //      startShift, startLunchTime, lowLimit, upLimit, workingMinutes);
 
-                        // calcola gli scostamenti dalla prima fascia del turno tenendo conto dei 15
-                        // min di comporto se il turnista è entrato prima
-                        if (pairStamping.first.date.toLocalTime().isBefore(startShift)) {
-                          newLimit = (pairStamping.first.date.toLocalTime()
+                    // calcola gli scostamenti dalla prima fascia del turno tenendo conto dei 15
+                    // min di comporto se il turnista è entrato prima
+                    if (pairStamping.first.date.toLocalTime().isBefore(startShift)) {
+                      newLimit = (pairStamping.first.date.toLocalTime()
                               .isBefore(startShift.minusMinutes(15)))
                               ? startShift.minusMinutes(15) : pairStamping.first.date.toLocalTime();
-                              if (pairStamping.first.date.toLocalTime()
-                                  .isBefore(startShift.minusMinutes(15))) {
-                                inTolleranceLimit = false;
-                              }
-                        } else {
+                      if (pairStamping.first.date.toLocalTime()
+                          .isBefore(startShift.minusMinutes(15))) {
+                        inTolleranceLimit = false;
+                      }
+                    } else {
                           // è entrato dopo
                           newLimit =
                               (pairStamping.first.date.toLocalTime().isAfter(startShift.plusMinutes(15)))
@@ -1565,10 +1569,15 @@ public class ShiftManager {
     }
   }
 
+  /***********************************************************************************************/
+  /**Sezione di metodi utilizzati al bootstrap per sistemare le situazioni sui turni             */
+  /***********************************************************************************************/
+
+
   /**
-   * questo metodo di utilità viene chiamato al bootstrap per associare il giusto ufficio ai tipi
-   * di reperibilità eventualmente presenti nel db in virtù del nuovo legame tra office e 
-   * personReperibilityType.
+   * questo metodo di utilità viene chiamato al bootstrap per associare il giusto ufficio ai servizi
+   * di turno eventualmente presenti nel db in virtù del nuovo legame tra office e 
+   * shiftCategories.
    */
   public void associateOfficeToShiftService() {
     List<ShiftCategories> shiftList = personShiftDayDao.getAllShiftType();
@@ -1591,5 +1600,34 @@ public class ShiftManager {
         shift.save();
       }
     }
+  }
+
+  /**
+   * popola la tabella PersonShift andando a cercare nel db tutte le persone che son già 
+   * state abilitate a usufruire dell'indennità di turno.
+   */
+  public void populatePersonShiftTable() {
+    CompetenceCode shift = competenceCodeDao.getCompetenceCodeByCode(codShift);
+    CompetenceCode shiftNight = competenceCodeDao.getCompetenceCodeByCode(codShiftNight);
+    CompetenceCode shiftHoliday = competenceCodeDao.getCompetenceCodeByCode(codShiftHolyday);
+    List<CompetenceCode> codeList = Lists.newArrayList();
+    codeList.add(shift);
+    codeList.add(shiftNight);
+    codeList.add(shiftHoliday);
+    List<PersonCompetenceCodes> shiftPeople = competenceCodeDao
+        .listByCodes(codeList, Optional.fromNullable(LocalDate.now()));
+    shiftPeople.forEach(item -> {
+      if (personShiftDayDao.getPersonShiftByPerson(item.person) == null) {
+        PersonShift personShift = new PersonShift();
+        personShift.description = "turni di " + item.person.fullName();
+        personShift.jolly = false;
+        personShift.person = item.person;
+        personShift.save();
+      } else {
+        log.info("Dipendente {} {} già associato all'interno della tabella person_shift", 
+            item.person.name, item.person.surname);
+      }
+
+    });
   }
 }

@@ -1,6 +1,7 @@
 # ---!Ups
 
 ALTER TABLE shift_type ALTER id SET DEFAULT nextval('seq_shift_type'::regclass);
+ALTER TABLE person_shift ALTER id SET DEFAULT nextval('seq_person_shift'::regclass);
 
 ALTER TABLE shift_categories_history ADD COLUMN office_id BIGINT;
 ALTER TABLE shift_categories_history ADD COLUMN disabled BOOLEAN;
