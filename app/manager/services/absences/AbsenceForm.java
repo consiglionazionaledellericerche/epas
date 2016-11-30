@@ -140,8 +140,8 @@ public class AbsenceForm {
     this.absenceTypes = Lists.newArrayList(typeConsidered.values());
     
     // esistenza gestione automatica: i tipi giustificativi automatici
-    List<JustifiedType> automaticJustifiedTypes = 
-        absenceEngineUtility.automaticJustifiedType(groupAbsenceType); 
+    List<JustifiedType> automaticJustifiedTypes = absenceComponentDao.justifiedTypes(
+        absenceEngineUtility.automaticJustifiedType(groupAbsenceType)); 
     if (!automaticJustifiedTypes.isEmpty()) {
       this.automaticChoiceExists = true;
     }

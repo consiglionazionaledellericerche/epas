@@ -458,6 +458,15 @@ views.tags.display.date.month.9=Settembre
 
 vacations.takable=Usufruibili
 
+takableTotal=Limite Totale
+takableUsed=Limite Consumato
+complationUsed=Completato
+
+initializationGroup.hoursInput =Ore Utilizzate
+initializationGroup.minutesInput =Minuti Utilizzati
+initializationGroup.unitsInput=Giorni Completi Utilizzati
+
+
 wtt.description= Nome Tipo Orario
 wtt.office=Sede
 wtt= Tipo Orario
@@ -510,6 +519,7 @@ Absences.absencesVisibleForEmployee= Presenze Giornaliere
 Absences.manageAbsenceCode= Gestione Codici d'assenza
 Absences.showGeneralMonthlyAbsences= Assenze
 AbsenceGroups.show=Gruppi Assenze
+AbsenceGroups.initialization=Assenze Iniziali
 Administration.playConfiguration= Informazioni Applicazione
 Administration.utilities= Utilities
 BadgeReaders.list= Sorgenti Timbrature
@@ -701,6 +711,7 @@ InReperibility=In Reperibilità
 InReperibilityOrShift=In Turno o Reperibilità
 InShift=In Turno
 ForceInsert=Inserimento forzato
+IgnoredBeforeInitialization=Precedente l'inizializzazione
 
 child1_0_3=Primo figlio 0-3 anni
 child1_0_6=Primo figlio 0-6 anni

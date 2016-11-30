@@ -1,8 +1,13 @@
 
 package controllers;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
+
 import dao.PersonDao;
 import dao.UserDao;
+import dao.WorkingTimeTypeDao;
 import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
 
@@ -15,23 +20,27 @@ import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceForm.AbsenceInsertTab;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
+import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.PeriodChain;
 
 import models.Person;
 import models.PersonDay;
 import models.Role;
 import models.User;
+import models.WorkingTimeType;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.CategoryGroupAbsenceType;
 import models.absences.GroupAbsenceType;
-import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
+import models.absences.GroupAbsenceType.DefaultGroup;
+import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
 
 import play.data.validation.Valid;
+import play.data.validation.Validation;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -62,6 +71,8 @@ public class AbsenceGroups extends Controller {
   private static AbsenceHistoryDao absenceHistoryDao;
   @Inject
   private static UserDao userDao;
+  @Inject
+  private static WorkingTimeTypeDao workingTimeTypeDao;
 
   /**
    * End point per la visualizzazione dei gruppi assenze definiti.
@@ -211,14 +222,15 @@ public class AbsenceGroups extends Controller {
   /**
    * End point per visualizzare lo stato di un gruppo assenze alla data.
    *
-   * @param personId         persona
-   * @param groupAbsenceType gruppo
-   * @param from             data
+   * @param personId persona
+   * @param groupAbsenceTypeId gruppo
+   * @param from data
    */
-  public static void groupStatus(Long personId, GroupAbsenceType groupAbsenceType, LocalDate from) {
+  public static void groupStatus(Long personId, Long groupAbsenceTypeId, LocalDate from) {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
+    GroupAbsenceType groupAbsenceType = GroupAbsenceType.findById(groupAbsenceTypeId);
     notFoundIfNull(from);
     
     rules.checkIfPermitted(person);
@@ -246,30 +258,151 @@ public class AbsenceGroups extends Controller {
   /**
    * End point per definire l'inizializzazione di un gruppo.
    *
-   * @param personId         persona
-   * @param groupAbsenceType gruppo
-   * @param date             data
+   * @param personId persona
+   * @param groupAbsenceTypeId gruppo
+   * @param date data
    */
-  public static void initialization(
-      Long personId, GroupAbsenceType groupAbsenceType, LocalDate date) {
+  public static void initialization(Long personId, Long groupAbsenceTypeId, LocalDate date) {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-
-    //costruire la situazione residuale per la data
-    //AbsenceEngine absenceEngine = absenceService.residual(person, groupAbsenceType, date);
-
+    if (date == null) {
+      date = LocalDate.now();
+    }
+    
+    //Gruppi inizializzabili e gruppo selezionato
     List<GroupAbsenceType> initializableGroups = initializablesGroups();
-
-    render(initializableGroups, person);
+    GroupAbsenceType groupAbsenceType = initializableGroups.iterator().next();
+    if (groupAbsenceTypeId != null) {
+      groupAbsenceType = GroupAbsenceType.findById(groupAbsenceTypeId);
+      notFoundIfNull(groupAbsenceType);
+      Verify.verify(initializableGroups.contains(groupAbsenceType));
+    }
+    
+    InitializationGroup initializationGroup = 
+        new InitializationGroup(person, groupAbsenceType, date);
+    
+    
+    //Tempo a lavoro medio
+    Optional<WorkingTimeType> wtt = workingTimeTypeDao.getWorkingTimeType(date, person);
+    if (!wtt.isPresent()) {
+      wtt = workingTimeTypeDao.getWorkingTimeType(date.plusDays(1), person);
+    }
+    if (!wtt.isPresent()) {
+      Validation.addError("date", "Deve essere una data attiva, "
+          + "o immediatamente precedente l'inizio di un contratto.");
+      render(initializableGroups, initializationGroup);
+    }
+    int averageWeekWorkingTime = wtt.get().weekAverageWorkingTime();
+    
+    //Stato del gruppo
+    PeriodChain periodChain = absenceService.residual(person, groupAbsenceType, date);
+    if (periodChain.periods.isEmpty()) {
+      render(initializableGroups, initializationGroup, periodChain);
+    }
+    AbsencePeriod absencePeriod = periodChain.periods.iterator().next();
+  
+    if (absencePeriod.initialization != null) {
+      initializationGroup = absencePeriod.initialization;
+      if (absencePeriod.initialization.averageWeekTime != averageWeekWorkingTime) {
+        //TODO: un warning? Se non è stato fatto andrebbe fatto l'update dei derivati
+      }
+    } else {
+      initializationGroup.averageWeekTime = averageWeekWorkingTime;
+    }
+    
+    
+    render(initializableGroups, date, initializationGroup, periodChain, absencePeriod);
 
   }
+  
+  /**
+   * Persiste una nuova inizializzazione.
+   * @param initializationGroup initializationGroup
+   */
+  public static void saveInitialization(@Valid InitializationGroup initializationGroup) {
+    
+    // Lo stato della richiesta
+    
+    notFoundIfNull(initializationGroup.person);
+    notFoundIfNull(initializationGroup.groupAbsenceType);
+    notFoundIfNull(initializationGroup.date);
+    PeriodChain periodChain = absenceService.residual(initializationGroup.person, 
+        initializationGroup.groupAbsenceType, initializationGroup.date);
+    Preconditions.checkState(!periodChain.periods.isEmpty());
+    AbsencePeriod absencePeriod = periodChain.periods.iterator().next();
+    
+
+    //Tempo a lavoro medio
+    Optional<WorkingTimeType> wtt = workingTimeTypeDao
+        .getWorkingTimeType(initializationGroup.date, initializationGroup.person);
+    if (!wtt.isPresent()) {
+      wtt = workingTimeTypeDao
+          .getWorkingTimeType(initializationGroup.date.plusDays(1), initializationGroup.person);
+    }
+    if (!wtt.isPresent()) {
+      Validation.addError("date", "Deve essere una data attiva, "
+          + "o immediatamente precedente l'inizio di un contratto.");
+    }
+    
+    // Gli errori della richiesta inserimento inizializzazione
+    if (Validation.hasErrors()) {
+      flash.error("Correggere gli errori indicati");
+      render("@initialization", absencePeriod, periodChain, initializationGroup);
+    }
+    
+    // se esiste già una inizilizzazione devo sovrascrivere quella.
+    if (absencePeriod.initialization != null) {
+      Verify.verify(absencePeriod.initialization.id.equals(initializationGroup.id));
+    }
+    
+    //new average
+    initializationGroup.averageWeekTime = wtt.get().weekAverageWorkingTime();
+    
+    initializationGroup.save();
+    
+    //TODO: check del gruppo per i ricalcoli
+    
+    flash.success("Inizializzazione salvata con successo.");
+    
+    initialization(initializationGroup.person.id, initializationGroup.groupAbsenceType.id, 
+        initializationGroup.date);
+  }
+  
+  /**
+   * Elimina l'inizializzazione.
+   * @param initializationGroup inizializzazione
+   */
+  public static void deleteInitialization(InitializationGroup initializationGroup) {
+    
+    notFoundIfNull(initializationGroup);
+    
+    initializationGroup.delete();
+    
+    flash.success("Inizializzazione rimossa con successo.");
+    
+    //TODO: check del gruppo per i ricalcoli
+    
+    initialization(initializationGroup.person.id, initializationGroup.groupAbsenceType.id, 
+        initializationGroup.date);
+  }
+  
 
   private static List<GroupAbsenceType> initializablesGroups() {
     List<GroupAbsenceType> initializables = Lists.newArrayList();
     List<GroupAbsenceType> allGroups = GroupAbsenceType.findAll();
     for (GroupAbsenceType group : allGroups) {
-      if (!group.pattern.equals(GroupAbsenceTypePattern.simpleGrouping)) {
+      if (group.name.equals(DefaultGroup.G_09.name()) 
+          || group.name.equals(DefaultGroup.G_89.name())
+          || group.name.equals(DefaultGroup.G_661.name())
+          || group.name.equals(DefaultGroup.G_18.name())
+          || group.name.equals(DefaultGroup.G_19.name())
+          || group.name.equals(DefaultGroup.G_23.name())
+          || group.name.equals(DefaultGroup.G_25.name())
+          || group.name.equals(DefaultGroup.G_232.name())
+          || group.name.equals(DefaultGroup.G_252.name())
+          || group.name.equals(DefaultGroup.G_233.name())
+          || group.name.equals(DefaultGroup.G_253.name())) {
         initializables.add(group);
       }
     }
@@ -345,4 +478,6 @@ public class AbsenceGroups extends Controller {
 
     Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
   }
+  
+  
 }

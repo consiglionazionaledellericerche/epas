@@ -304,6 +304,10 @@ public class Synchronizations extends Controller {
     institutes();
   }
 
+  /**
+   * Sincronizzazione persone.
+   * @param officeId sede
+   */
   public static void people(Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
@@ -664,8 +668,8 @@ public class Synchronizations extends Controller {
     try {
       contractInPerseo = contractPerseoConsumer
           .perseoContractPerseoId(perseoId, contract.person);
-    } catch (ApiRequestException e) {
-      flash.error("%s", e);
+    } catch (ApiRequestException ex) {
+      flash.error("%s", ex);
     }
     if (contractInPerseo.isPresent()) {
       joinUpdateContract(contract, contractInPerseo.get());
@@ -675,6 +679,10 @@ public class Synchronizations extends Controller {
     oldActiveContracts(contract.person.office.id);
   }
 
+  /**
+   * Associa tutti i contratti attivi.
+   * @param officeId officeId
+   */
   public static void joinAllActiveContractsInOffice(Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
@@ -695,8 +703,8 @@ public class Synchronizations extends Controller {
       try {
         perseoDepartmentActiveContractsByPersonPerseoId = contractPerseoConsumer
             .perseoDepartmentActiveContractsByPersonPerseoId(office.perseoId, office);
-      } catch (ApiRequestException e) {
-        flash.error("%s", e);
+      } catch (ApiRequestException ex) {
+        flash.error("%s", ex);
       }
     }
 
@@ -746,7 +754,6 @@ public class Synchronizations extends Controller {
    * Posso importare un contratto da perseo... purchè la sua persona sia sincronizzata e non
    * conflitti con le date dei contratti epas.
    */
-  @SuppressWarnings("deprecation")
   public static void importContract(Long perseoId, Long epasPersonId) {
 
     Person person = personDao.getPersonById(epasPersonId);
@@ -756,12 +763,13 @@ public class Synchronizations extends Controller {
     Optional<Contract> contractInPerseo = Optional.absent();
     try {
       contractInPerseo = contractPerseoConsumer.perseoContractPerseoId(perseoId, person);
-    } catch (ApiRequestException e) {
-      flash.error("%s", e);
+    } catch (ApiRequestException ex) {
+      flash.error("%s", ex);
     }
 
     if (contractInPerseo.isPresent()) {
-      WorkingTimeType normal = workingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
+      WorkingTimeType normal = workingTimeTypeDao
+          .workingTypeTypeByDescription("Normale", Optional.absent());
 
       // Salvare il contratto.
       if (!contractManager.properContractCreate(contractInPerseo.get(), normal, false)) {
@@ -789,12 +797,12 @@ public class Synchronizations extends Controller {
     try {
       perseoDepartmentActiveContractsByPersonPerseoId = contractPerseoConsumer
           .perseoDepartmentActiveContractsByPersonPerseoId(office.perseoId, office);
-    } catch (ApiRequestException e) {
-      return Optional.of(e);
+    } catch (ApiRequestException ex) {
+      return Optional.of(ex);
     }
 
-    @SuppressWarnings("deprecation")
-    WorkingTimeType normal = workingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
+    WorkingTimeType normal = workingTimeTypeDao
+        .workingTypeTypeByDescription("Normale", Optional.absent());
 
     if (perseoDepartmentActiveContractsByPersonPerseoId != null) {
       for (Contract perseoContract : perseoDepartmentActiveContractsByPersonPerseoId.values()) {

@@ -2,7 +2,6 @@ package dao.absences;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -20,6 +19,7 @@ import models.absences.CategoryGroupAbsenceType;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
+import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
@@ -28,6 +28,7 @@ import models.absences.query.QAbsenceType;
 import models.absences.query.QCategoryGroupAbsenceType;
 import models.absences.query.QComplationAbsenceBehaviour;
 import models.absences.query.QGroupAbsenceType;
+import models.absences.query.QInitializationGroup;
 import models.absences.query.QJustifiedType;
 import models.absences.query.QTakableAbsenceBehaviour;
 
@@ -36,9 +37,7 @@ import org.joda.time.LocalDate;
 import play.db.jpa.JPA;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 
 import javax.persistence.EntityManager;
 
@@ -400,48 +399,28 @@ public class AbsenceComponentDao extends DaoBase {
   }
   
   /**
-   * Ordina per data tutte le liste di assenze in una unica lista.
-   * @param absences liste di assenze
-   * @return entity list
+   * Inizializzazioni per quella persona.
+   * @param person persona
+   * @return list
    */
-  public List<Absence> orderAbsences(List<Absence>... absences) {
-    SortedMap<LocalDate, Set<Absence>> map = Maps.newTreeMap();
-    for (List<Absence> list : absences) {
-      for (Absence absence : list) {
-        Set<Absence> set = map.get(absence.getAbsenceDate());
-        if (set == null) {
-          set = Sets.newHashSet();
-          map.put(absence.getAbsenceDate(), set);
-        }
-        set.add(absence);
-      }
-    }
-    List<Absence> result = Lists.newArrayList();
-    for (Set<Absence> set : map.values()) {
-      result.addAll(set);
-    }
-    return result;
+  public List<InitializationGroup> personInitializationGroups(Person person) {
+    QInitializationGroup initializationGroup = QInitializationGroup.initializationGroup;
+    final JPQLQuery query = getQueryFactory()
+        .from(initializationGroup)
+        .where(initializationGroup.person.eq(person));
+    return query.list(initializationGroup);
   }
   
   /**
-   * Aggiunge alla mappa le assenze presenti in absences.
-   * @param absences le assenze da aggiungere alla mappa
-   * @param map mappa
-   * @return mappa
+   * I tipi giustificativi con quei nomi. 
+   * @param justifiedTypeName nomi
+   * @return list
    */
-  public Map<LocalDate, Set<Absence>> mapAbsences(List<Absence> absences, 
-      Map<LocalDate, Set<Absence>> map) {
-    if (map == null) {
-      map = Maps.newHashMap();
+  public List<JustifiedType> justifiedTypes(List<JustifiedTypeName> justifiedTypeName) {
+    List<JustifiedType> types = Lists.newArrayList();
+    for (JustifiedTypeName name : justifiedTypeName) {
+      types.add(getOrBuildJustifiedType(name));
     }
-    for (Absence absence : absences) {
-      Set<Absence> set = map.get(absence);
-      if (set == null) {
-        set = Sets.newHashSet();
-        map.put(absence.getAbsenceDate(), set);
-      }
-      set.add(absence);
-    }
-    return map;
+    return types;
   }
-}
+} 
