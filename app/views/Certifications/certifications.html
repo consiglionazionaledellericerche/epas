@@ -93,8 +93,17 @@
     #{list people, as:'person' }
     #{if !matchNumbers.empty && matchNumbers.contains(person.number)}
     <div data-load-async="@{personStatus(person.id, year, month, stepSize)}">
-      ${person.fullname}
-      <i class="fa fa-spin fa-spinner"></i> Caricamento in corso...
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col-xs-3">
+            <strong>${person.fullname}</strong>
+            <br><em>matricola:</em> ${person.number}
+          </div>
+          <div class="col-xs-3">
+            <i class="fa fa-spin fa-spinner"></i> Caricamento in corso...
+          </div>
+        </div>
+      </li>
     </div>
     #{/if}
     #{else}
