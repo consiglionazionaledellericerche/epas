@@ -89,21 +89,6 @@ public class CertificationService {
   }
 
   /**
-   * Le matricole abilitate all'invio attestati per la sede nel mese.
-   * Nota bene: se la lista è vuota significa che non è stato effettuato lo stralcio oppure
-   * un errore nel protocollo di comunicazione con attestati.
-   * Es. Periodo 201603 non presente per la sede 224500.
-   *
-   * @param office sede
-   * @param year   anno
-   * @param month  mese
-   * @return insieme di number
-   */
-  public Set<Integer> peopleList(Office office, int year, int month) throws ExecutionException {
-    return certificationsComunication.getPeopleList(office, year, month);
-  }
-
-  /**
    * Le certificazioni già presenti su attestati.
    *
    * @param person            persona

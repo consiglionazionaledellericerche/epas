@@ -9,6 +9,9 @@
      var next = +current + value;
      if (next > 99 ){ $('#loading').fadeOut(1000); }
      $('.progress-bar').css('width', next+'%').attr('aria-valuenow', next);
+     <!-- TODO aggiornare anche il testo dello span -->
+     <!--var span = $('.progress-bar').children('span');-->
+     <!--console.log(span);-->
     }
 </script>
 #{/set}
@@ -64,14 +67,12 @@
     #{/alert}
   #{/if}
 
-  #{set stepSize:100/matchNumbers.size() /}
-
   <div id="loading">
     <h6><em class="text-muted"><i class="fa fa-spin fa-spinner"></i> Caricamento in corso...</em></h6>
     <div class="progress">
       <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar"
            aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" >
-        <span class="sr-only">10% Complete</span>
+        <span class="sr-only">0% Complete</span>
       </div>
     </div>
   </div>
@@ -92,7 +93,7 @@
 
     #{list people, as:'person' }
     #{if !matchNumbers.empty && matchNumbers.contains(person.number)}
-    <div data-load-async="@{personStatus(person.id, year, month, stepSize)}">
+    <div data-load-async="@{personStatus(person.id, year, month)}">
       <li class="list-group-item">
         <div class="row">
           <div class="col-xs-3">
