@@ -43,8 +43,10 @@ public class CacheValues {
               return certification.getToken();
             }
 
-            // Refresh automatico (in asincrono) del token se sta per scadere (meno di 5 minuti rimasti)
-            // TODO scrivere metodo per la richiesta di un refresh token invece che chiedere un nuovo token
+            // Refresh automatico (in asincrono) del token se sta per scadere
+            // (meno di 5 minuti rimasti)
+            // TODO scrivere metodo per la richiesta di un refresh token invece
+            // che chiedere un nuovo token
             @Override
             public ListenableFuture<OauthToken> reload(final String key, OauthToken token) {
               // Se non sta per scadere restituisco quello che ho già
