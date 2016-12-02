@@ -165,25 +165,13 @@ public class CertificationService {
    * @param numbers numeri attestati in cui ricercarla
    * @return lo stato
    */
-  public PersonCertificationStatus buildPersonStaticStatus(Person person, int year, int month,
-      Set<Integer> numbers) throws ExecutionException {
+  public PersonCertData buildPersonStaticStatus(Person person, int year, int month)
+      throws ExecutionException {
 
-    PersonCertificationStatus personCertificationStatus = new PersonCertificationStatus();
-    personCertificationStatus.person = person;
-    personCertificationStatus.year = year;
-    personCertificationStatus.month = month;
-
-//    // Esco perchè finchè non sistemo la matricola non ha senso fare altro.
-//    if (person.number == null) {
-//      personCertificationStatus.notInAttestati = true;
-//      return personCertificationStatus;
-//    }
-//    else {
-//      if (!numbers.contains(person.number)) {
-//        personCertificationStatus.notInAttestati = true;
-//        return personCertificationStatus;
-//      }
-//    }
+    PersonCertData personCertData = new PersonCertData();
+    personCertData.person = person;
+    personCertData.year = year;
+    personCertData.month = month;
 
     // Le certificazioni in attestati e lo stato di validazione ...
     Map<String, Certification> attestatiCertifications = Maps.newHashMap();
@@ -198,7 +186,7 @@ public class CertificationService {
         log.info("Impossibile scaricare le informazioni da attestati per {}", person.getFullname());
         //attestatiCertifications = Maps.newHashMap(); TODO: da segnalare in qualche modo all'user 
       }
-      personCertificationStatus.validate = personCertification.validato;
+      personCertData.validate = personCertification.validato;
     }
 
     // Le certificazioni in epas
@@ -219,31 +207,31 @@ public class CertificationService {
       if (certificationsEquivalent(attestatiCertifications, actualCertifications)) {
         // Stato attuale equivalente ad attestati
         epasCertifications = updateEpasCertifications(epasCertifications, attestatiCertifications);
-        personCertificationStatus.okProcessable = true;
-        personCertificationStatus.epasCertifications = epasCertifications;
+        personCertData.okProcessable = true;
+        personCertData.epasCertifications = epasCertifications;
       } else {
         // Stato attuale non equivalente ad attestati        
-        personCertificationStatus.incompleteProcessable = true;
-        personCertificationStatus.actualCertifications = actualCertifications;
-        personCertificationStatus.epasCertifications = epasCertifications;
-        personCertificationStatus.attestatiCertifications = attestatiCertifications;
+        personCertData.incompleteProcessable = true;
+        personCertData.actualCertifications = actualCertifications;
+        personCertData.epasCertifications = epasCertifications;
+        personCertData.attestatiCertifications = attestatiCertifications;
       }
     } else {
       // Non Riesco a scaricare gli attestati della persona
       if (certificationsEquivalent(actualCertifications, epasCertifications)) {
         // Ultimo invio corretto
-        personCertificationStatus.okNotProcessable = true;
-        personCertificationStatus.epasCertifications = epasCertifications;
+        personCertData.okNotProcessable = true;
+        personCertData.epasCertifications = epasCertifications;
       } else {
         // Ultimo invio con problemi o obsoleto        
-        personCertificationStatus.incompleteNotProcessable = true;
-        personCertificationStatus.actualCertifications = actualCertifications;
-        personCertificationStatus.epasCertifications = epasCertifications;
+        personCertData.incompleteNotProcessable = true;
+        personCertData.actualCertifications = actualCertifications;
+        personCertData.epasCertifications = epasCertifications;
       }
     }
 
-    personCertificationStatus.computeStaticStatus();
-    return personCertificationStatus;
+    personCertData.computeStaticStatus();
+    return personCertData;
   }
 
   private Map<String, Certification> updateEpasCertifications(
@@ -326,27 +314,31 @@ public class CertificationService {
   /**
    * Elaborazione persona.
    *
-   * @param personCertificationStatus il suo stato
+   * @param personCertData il suo stato
    * @return lo stato dopo l'elaborazione.
    */
-  public PersonCertificationStatus process(PersonCertificationStatus personCertificationStatus)
+  // TODO Questa parte andrebbe resa più semplice perchè per trasmettere le informazioni
+  // ad attestati sono costretto ad avere un PersonCertData che è il risultato
+  // ottenuto dal metodo buildPersonStaticStatus il quale a sua volta effettua una richiesta
+  // ad attestati per il recupero delle informazioni della persona
+  public PersonCertData process(PersonCertData personCertData)
       throws ExecutionException, NoSuchFieldException {
 
-    personCertificationStatus.staticView = false;
+    personCertData.staticView = false;
 
     // Da cancellare
     Map<String, Certification> notErasable = Maps.newHashMap();
-    for (Certification certification : personCertificationStatus.toDeleteCertifications.values()) {
+    for (Certification certification : personCertData.toDeleteCertifications.values()) {
       if (!removeAttestati(certification)) {
         notErasable.put(certification.aMapKey(), certification);
       }
     }
-    personCertificationStatus.toDeleteCertifications = notErasable;
+    personCertData.toDeleteCertifications = notErasable;
 
     // Le certificaioni che avevano problemi provo a reinviarle.
     List<Certification> sended = Lists.newArrayList();
     Map<String, Certification> containProblemCertifications = Maps.newHashMap();
-    for (Certification certification : personCertificationStatus.problemCertifications.values()) {
+    for (Certification certification : personCertData.problemCertifications.values()) {
       if (sendCertification(certification) == null) {
         //Quando non riesco ad inviare la certificazione rimane dovè.
         containProblemCertifications.put(certification.aMapKey(), certification);
@@ -363,7 +355,7 @@ public class CertificationService {
 
     // Da inviare
     Map<String, Certification> notSended = Maps.newHashMap();
-    for (Certification certification : personCertificationStatus.toSendCertifications.values()) {
+    for (Certification certification : personCertData.toSendCertifications.values()) {
       if (sendCertification(certification) == null) {
         // Quando non riesco ad inviare la certificazione rimane dovè.
         notSended.put(certification.aMapKey(), certification);
@@ -377,16 +369,16 @@ public class CertificationService {
       }
     }
 
-    personCertificationStatus.problemCertifications = containProblemCertifications;
-    personCertificationStatus.toSendCertifications = notSended;
+    personCertData.problemCertifications = containProblemCertifications;
+    personCertData.toSendCertifications = notSended;
 
     for (Certification certification : sended) {
-      personCertificationStatus.correctCertifications.put(certification.aMapKey(), certification);
+      personCertData.correctCertifications.put(certification.aMapKey(), certification);
     }
 
-    personCertificationStatus.computeProcessStatus();
+    personCertData.computeProcessStatus();
 
-    return personCertificationStatus;
+    return personCertData;
 
   }
 
@@ -651,16 +643,16 @@ public class CertificationService {
   /**
    * Prova a rimuovere tutti i record presenti su attestati.
    *
-   * @param personCertificationStatus status
+   * @param personCertData status
    * @return il nuovo stato
    */
-  public PersonCertificationStatus emptyAttestati(
-      PersonCertificationStatus personCertificationStatus)
+  public PersonCertData emptyAttestati(
+      PersonCertData personCertData)
       throws ExecutionException, NoSuchFieldException {
 
-    if (personCertificationStatus.attestatiCertifications != null) {
+    if (personCertData.attestatiCertifications != null) {
       for (Certification certification :
-          personCertificationStatus.attestatiCertifications.values()) {
+          personCertData.attestatiCertifications.values()) {
         if (certification.attestatiId != null
             || certification.certificationType == CertificationType.MEAL) {
           removeAttestati(certification);
@@ -668,8 +660,8 @@ public class CertificationService {
       }
     }
 
-    if (personCertificationStatus.epasCertifications != null) {
-      for (Certification certification : personCertificationStatus.epasCertifications.values()) {
+    if (personCertData.epasCertifications != null) {
+      for (Certification certification : personCertData.epasCertifications.values()) {
         if (certification.attestatiId != null
             || certification.certificationType == CertificationType.MEAL) {
           removeAttestati(certification);
@@ -677,8 +669,8 @@ public class CertificationService {
       }
     }
 
-    if (personCertificationStatus.actualCertifications != null) {
-      for (Certification certification : personCertificationStatus.actualCertifications.values()) {
+    if (personCertData.actualCertifications != null) {
+      for (Certification certification : personCertData.actualCertifications.values()) {
         if (certification.attestatiId != null
             || certification.certificationType == CertificationType.MEAL) {
           removeAttestati(certification);
@@ -686,7 +678,7 @@ public class CertificationService {
       }
     }
 
-    return personCertificationStatus;
+    return personCertData;
   }
 
   /**
