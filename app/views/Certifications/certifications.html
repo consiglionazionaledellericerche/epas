@@ -7,11 +7,10 @@
     function progress(value){
      var current = $('.progress-bar').attr("aria-valuenow");
      var next = +current + value;
+     next= Math.round(next * 100) / 100
      if (next > 99 ){ $('#loading').fadeOut(1000); }
      $('.progress-bar').css('width', next+'%').attr('aria-valuenow', next);
-     <!-- TODO aggiornare anche il testo dello span -->
-     <!--var span = $('.progress-bar').children('span');-->
-     <!--console.log(span);-->
+     $('.progress-bar').children('span.sr-only:first').text(next+'%'+' Completato');
     }
 </script>
 #{/set}
@@ -20,7 +19,6 @@
 </div>
 
 <div class="container">
-
   #{alert color:'info'}
   <p>
     Attraverso questa pagina è possibile popolare gli attestati CNR per il mese e sede selezionati
@@ -67,8 +65,26 @@
     #{/alert}
   #{/if}
 
+  #{b.buttons center:true}
+  #{if process}
+    #{b.link @certifications(office.id, validYear, validMonth), color:'info', fa:'refresh'}
+      <span class="text-default">Aggiorna dati</span>
+    #{/b.link}
+  #{/if}
+  #{else}
+    #{b.link @processAll(office.id, validYear, validMonth), color:'warning', fa:'cloud-upload'}
+      <span class="text-default">Carica tutti i dati su Attestati</span>
+    #{/b.link}
+  #{/else}
+  #{/b.buttons}
+  <br>
   <div id="loading">
-    <h6><em class="text-muted"><i class="fa fa-spin fa-spinner"></i> Caricamento in corso...</em></h6>
+    #{if process}
+      <h6><em class="text-muted"><i class="fa fa-spin fa-spinner"></i> Invio dati in corso...</em></h6>
+    #{/if}
+    #{else}
+      <h6><em class="text-muted"><i class="fa fa-spin fa-spinner"></i> Caricamento in corso...</em></h6>
+    #{/else}
     <div class="progress">
       <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar"
            aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" >
@@ -78,22 +94,31 @@
   </div>
 
 
+  *{
+  MI SERVE UN MODO PER PASSARE IL COMANDO PROCESS AL CONTROLLER CERTIFICATIONS
+  SENZA CHE QUESTO VADA NELL'URL, IN MODO CHE SE SI FA REFRESH DELLA PAGINA NON VENGA RIEFFETTUATO
+  L'INVIO AD ATTESTATI
   #{secure.check 'Certifications.processAll'}
-  <a class="btn btn-warning" href="@{Certifications.processAll(office.id, year, month)}">Processa <i class="fa fa-cloud-upload" aria-hidden="true"></i></a>
+    <a class="btn btn-warning" href="@{Certifications.processAll(office.id, validYear, validMonth)}">Processa <i class="fa fa-cloud-upload" aria-hidden="true"></i></a>
   #{/secure.check}
-  <a class="btn btn-primary" href="@{Certifications.certifications(office.id, year, month)}">Aggiorna
-    <i class="fa fa-refresh" aria-hidden="true"></i></a>
-
+ }*
   *{
   <a class="btn btn-danger pull-right"
-     href="@{Certifications.emptyCertifications(office.id, year, month)}">Svuota Attestati <i class="fa fa-trash-o" aria-hidden="true"></i></a>
+     href="@{Certifications.emptyCertifications(office.id, validYear, validMonth)}">Svuota Attestati <i class="fa fa-trash-o" aria-hidden="true"></i></a>
   }*
 
   <ul class="list-group">
 
     #{list people, as:'person' }
     #{if !matchNumbers.empty && matchNumbers.contains(person.number)}
-    <div data-load-async="@{personStatus(person.id, year, month)}">
+    #{if process}
+    <!-- INVIO INFORMAZIONI AD ATTESTATI-->
+      <div data-load-async="@{process(person.id, validYear, validMonth, false)}">
+    #{/if}
+    #{else}
+    <!-- CARICAMENTO INFORMAZIONI DA ATTESTATI -->
+      <div data-load-async="@{personStatus(person.id, validYear, validMonth)}">
+    #{/else}
       <li class="list-group-item">
         <div class="row">
           <div class="col-xs-3">
@@ -101,7 +126,12 @@
             <br><em>matricola:</em> ${person.number}
           </div>
           <div class="col-xs-3">
-            <i class="fa fa-spin fa-spinner"></i> Caricamento in corso...
+            #{if process}
+              <i class="fa fa-spin fa-spinner"></i> Invio dati in corso...
+            #{/if}
+            #{else}
+              <i class="fa fa-spin fa-spinner"></i> Caricamento dati in corso...
+            #{/else}
           </div>
         </div>
       </li>
@@ -120,7 +150,6 @@
       </div>
     </li>
     #{/else}
-
     #{/list}
   </ul>
   #{/if}
