@@ -143,7 +143,9 @@ public class Absences extends Controller {
    */
   public static void insertCode() {
 
-    render("@editCode");
+    AbsenceType absenceType = new AbsenceType();
+    List<JustifiedType> allJustifiedType = JustifiedType.findAll();
+    render("@editCode", absenceType, allJustifiedType);
   }
 
   /**

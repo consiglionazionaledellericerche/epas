@@ -239,43 +239,6 @@ public class AbsenceComponentDao extends DaoBase {
   }
   
   /**
-   * I gruppi coinvolti dal tipo assenza.
-   * 
-   * @param absenceType tipo assenza
-   * @param onlyProgrammed non filtrare i soli programmati
-   * @return entity set
-   */
-  public Set<GroupAbsenceType> involvedGroupAbsenceType(AbsenceType absenceType, 
-      boolean onlyProgrammed) {
-
-    //TODO: da fare la fetch perchè è usato in tabellone timbrature per ogni codice assenza.
-    
-    Set<GroupAbsenceType> groups = Sets.newHashSet();
-    for (TakableAbsenceBehaviour behaviour : absenceType.takableGroup) {
-      groups.addAll(behaviour.groupAbsenceTypes);
-    }
-    for (TakableAbsenceBehaviour behaviour : absenceType.takenGroup) {
-      groups.addAll(behaviour.groupAbsenceTypes);
-    }
-    for (ComplationAbsenceBehaviour behaviour : absenceType.complationGroup) {
-      groups.addAll(behaviour.groupAbsenceTypes);
-    }
-    for (ComplationAbsenceBehaviour behaviour : absenceType.replacingGroup) {
-      groups.addAll(behaviour.groupAbsenceTypes);
-    }
-    if (!onlyProgrammed) {
-      return groups;
-    }
-    Set<GroupAbsenceType> filteredGroup = Sets.newHashSet();
-    for (GroupAbsenceType groupAbsenceType : groups) {
-      if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.programmed)) {
-        filteredGroup.add(groupAbsenceType);
-      }
-    }
-    return filteredGroup;
-  }
-  
-  /**
    * Crea l'assenza con queste caratteristiche. Se esiste già una entity con quel codice la 
    * aggiorna.
    * @param code codice

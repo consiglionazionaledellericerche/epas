@@ -4,12 +4,15 @@
 
 <div class="container">
 
+*{
 #{title title:'Gruppi di Assenze' /}
+}*
+
+#{set breadcrumbs:['Gruppi Assenze':@AbsenceGroups.showGroups(), (category):null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
 
 
-
-
- #{form action:@AbsenceGroups.show(), method:'GET', autocomplete:false,
+ #{form action:@AbsenceGroups.showGroups(), method:'GET', autocomplete:false,
 		    class:'form form-horizontal auto-submit'}
 		#{f.selectModel 'category', inputName:'categoryId', items:categories, value:category /}
  #{/form}

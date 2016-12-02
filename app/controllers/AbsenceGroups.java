@@ -6,10 +6,14 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 
 import dao.PersonDao;
+import dao.QualificationDao;
 import dao.UserDao;
 import dao.WorkingTimeTypeDao;
 import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
+
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,6 +29,7 @@ import manager.services.absences.model.PeriodChain;
 
 import models.Person;
 import models.PersonDay;
+import models.Qualification;
 import models.Role;
 import models.User;
 import models.WorkingTimeType;
@@ -35,6 +40,7 @@ import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.DefaultGroup;
 import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
+import models.enumerate.QualificationMapping;
 
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
@@ -73,12 +79,14 @@ public class AbsenceGroups extends Controller {
   private static UserDao userDao;
   @Inject
   private static WorkingTimeTypeDao workingTimeTypeDao;
+  @Inject
+  private static QualificationDao qualificationDao;
 
   /**
-   * End point per la visualizzazione dei gruppi assenze definiti.
+   * End point per la visualizzazione dei gruppi assenze definiti. EX show
    * @param categoryId filtro categoria
    */
-  public static void show(Long categoryId) {
+  public static void showGroups(Long categoryId) {
 
     List<GroupAbsenceType> groups = GroupAbsenceType.findAll();
     List<CategoryGroupAbsenceType> categories = CategoryGroupAbsenceType.findAll();
@@ -108,7 +116,109 @@ public class AbsenceGroups extends Controller {
    */
   public static void updateGroup(GroupAbsenceType groupAbsenceType) {
     groupAbsenceType.save();
-    show(groupAbsenceType.category.id);
+    showGroups(groupAbsenceType.category.id);
+  }
+  
+  
+  /**
+   * End point lista codici assenza.
+   */
+  public static void showAbsenceTypes() {
+    List<AbsenceType> absenceTypes = AbsenceType.findAll();
+    render(absenceTypes);
+  }
+  
+  /**
+   * Visualizza il codice di assenza.
+   *
+   * @param absenceTypeId id
+   */
+  public static void viewAbsenceType(Long absenceTypeId) {
+
+    AbsenceType absenceType = AbsenceType.findById(absenceTypeId);
+    notFoundIfNull(absenceType);
+    render(absenceType);
+    
+  }
+  
+  /**
+   * Inserimento nuovo codice di assenza.
+   */
+  public static void insertAbsenceType() {
+    AbsenceType absenceType = new AbsenceType();
+    List<JustifiedType> allJustifiedType = JustifiedType.findAll();
+    render("@editAbsenceType", absenceType, allJustifiedType);
+  }
+  
+  
+  
+  /**
+   * Modifica codice assenza.
+   *
+   * @param absenceTypeId id
+   */
+  public static void editAbsenceType(Long absenceTypeId) {
+
+    AbsenceType absenceType = AbsenceType.findById(absenceTypeId);
+    notFoundIfNull(absenceType);
+
+    boolean tecnologi = false;
+    boolean tecnici = false;
+
+    for (Qualification q : absenceType.qualifications) {
+      tecnologi = !tecnologi ? QualificationMapping.TECNOLOGI.contains(q) : tecnologi;
+      tecnici = !tecnici ? QualificationMapping.TECNICI.contains(q) : tecnici;
+    }
+
+    List<JustifiedType> allJustifiedType = JustifiedType.findAll();
+
+    render(absenceType, tecnologi, tecnici, allJustifiedType);
+  }
+  
+  /**
+   * Salva il nuovo/modificato codice di assenza.
+   *
+   * @param absenceType il tipo di assenza
+   * @param tecnologi   se il codice di assenza è valido per i tecnologi
+   * @param tecnici     se il codice di assenza è valido per i tecnici
+   */
+  public static void saveAbsenceType(@Valid AbsenceType absenceType,
+      boolean tecnologi, boolean tecnici) {
+
+    List<JustifiedType> allJustifiedType = JustifiedType.findAll();
+    
+    if (validation.hasErrors()) {
+      flash.error("Correggere gli errori indicati");
+      render("@editAbsenceType", absenceType, allJustifiedType, tecnologi, tecnici);
+    }
+
+    absenceType.qualifications.clear();
+    if (tecnici) {
+      absenceType.qualifications.addAll(
+          qualificationDao.getByQualificationMapping(QualificationMapping.TECNICI));
+    }
+    if (tecnologi) {
+      absenceType.qualifications.addAll(
+          qualificationDao.getByQualificationMapping(QualificationMapping.TECNOLOGI));
+    }
+    
+    if (absenceType.qualifications.isEmpty()) {
+      flash.error("Selezionare almeno una categoria tra Tecnologi e Tecnici");
+      render("@editAbsenceType", absenceType, allJustifiedType, tecnologi, tecnici);
+    }
+    if (absenceType.justifiedTypesPermitted.isEmpty()) {
+      flash.error("Selezionare almeno una tipologia di Tempo Giustificato");
+      render("@editAbsenceType", absenceType, allJustifiedType, tecnologi, tecnici);
+    }
+    if (absenceType.isAbsenceTypeMinutesPermitted() && absenceType.justifiedTime == null) {
+      flash.error("Specificare i minuti del tipo assenza.");
+      render("@editAbsenceType", absenceType, allJustifiedType, tecnologi, tecnici);
+    }
+
+    absenceType.save();
+    flash.success("Inserito/modificato codice di assenza %s", absenceType.code);
+
+    editAbsenceType(absenceType.id);
   }
 
 
@@ -479,5 +589,65 @@ public class AbsenceGroups extends Controller {
     Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
   }
   
+  /**
+   * 1.
+   */
+  public static void absenceAnalyzer() {
+    List<Absence> absences = Absence.findAll();
+    List<Absence> notPermitted = Lists.newArrayList();
+    List<Absence> outOfDate = Lists.newArrayList();
+    for (Absence absence : absences) {
+      if (!absence.absenceType.justifiedTypesPermitted.contains(absence.justifiedType)) {
+        notPermitted.add(absence);
+        log.info("{} is: {}, permitted: {}", absence.toString(), 
+            absence.justifiedType, absence.absenceType.justifiedTypesPermitted);
+      }
+      if (absence.absenceType.isExpired()) {
+        if (!DateUtility.isDateIntoInterval(absence.getAbsenceDate(), 
+            new DateInterval(absence.absenceType.validFrom, absence.absenceType.validTo))) {
+          outOfDate.add(absence);
+        }
+      }
+    }
+    render(notPermitted, outOfDate);
+  }
+  
+  
+  /**
+   * Valori altrimenti non modificabili.
+   */
+  public static void editAbsenceCriticalValue(Long absenceId) {
+    
+    if (absenceId != null) {
+      Absence absence = Absence.findById(absenceId);
+      render(absence);
+    }
+    render();
+    
+  }
+  
+  /**
+   * Salva i valori altrimenti non modificabili.
+   * @param absenceId tipo assenza
+   * @param justifiedType tipo giustificativo
+   * @param justifiedMinutes minuti specificati
+   */
+  public static void saveAbsenceCriticalValue(Long absenceId, 
+      JustifiedType justifiedType, Integer justifiedMinutes) {
+    
+    Absence absence = Absence.findById(absenceId);
+    notFoundIfNull(absence);
+    notFoundIfNull(justifiedType);
+    
+    //TODO: deve appartenere a absenceType.justifiedTypePermitted
+    absence.justifiedType = justifiedType;
+    absence.justifiedMinutes = justifiedMinutes;
+    
+    absence.save();
+
+    flash.success("Operazione eseguita.");
+    editAbsenceCriticalValue(absence.id);
+    
+  }
   
 }

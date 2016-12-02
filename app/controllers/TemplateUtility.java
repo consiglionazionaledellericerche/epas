@@ -55,13 +55,13 @@ import models.enumerate.StampTypes;
 
 import org.joda.time.LocalDate;
 
-import synch.diagnostic.SynchDiagnostic;
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+
+import synch.diagnostic.SynchDiagnostic;
 
 /**
  * Metodi usabili nel template.
@@ -433,10 +433,6 @@ public class TemplateUtility {
           AbsenceTypeMapping.RIPOSO_COMPENSATIVO.getCode()));
     }
     return Lists.newArrayList();
-  }
-
-  public Set<GroupAbsenceType> involvedGroupAbsenceType(AbsenceType absenceType) {
-    return absenceComponentDao.involvedGroupAbsenceType(absenceType, true);
   }
 
   public boolean hasAdminRole() {

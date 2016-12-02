@@ -1,0 +1,81 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Gestione codice d\'assenza' /}
+
+#{set breadcrumbs:['Codici Assenza':@AbsenceGroups.showAbsenceTypes(), (absenceType.code):null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+ 		
+ <div class="container">
+    #{form @AbsenceGroups.saveAbsenceType(),class:'form-horizontal'}
+
+    #{alert color:'info'}
+      <p>
+ 	    #{if absenceType?.isPersistent()}
+ 		  Modifica dati per codice di assenza <strong>${absenceType.code}#{if absenceType.description} ${absenceType.description}</strong>#{/if}
+ 	    #{/if}#{else}
+ 		  Inserimento nuovo codice d'assenza.
+   	    #{/else}
+ 	  </p>
+      #{/alert}
+
+        <input type="hidden" name="absenceType.id" value="${absenceType?.id}">
+ 	
+ 		#{f.input 'absenceType.code',required:'true',value:absenceType?.code,popover:'true' /}
+ 		#{f.input 'absenceType.certificateCode',popover:'true' /}
+ 		#{f.input 'absenceType.description',popover:'true' /}
+ 		#{f.booleanRadio 'absenceType.internalUse',popover:'true' /}
+ 		#{f.date 'absenceType.validFrom',view:'year',popover:'true' /}
+ 		#{f.date 'absenceType.validTo',view:'year',popover:'true' /}
+
+ 		<div class="form-group">
+ 			<label class="col-sm-3 control-label">Utilizzabile per le categorie:</label>
+ 				<div class="col-sm-6">
+ 					<label class="checkbox-inline">
+						<input name="tecnologi" type="checkbox"#{if tecnologi} checked#{/if}> Livelli I-III 
+					</label>  
+					<label class="checkbox-inline"> 
+						<input name="tecnici" type="checkbox"#{if tecnici} checked#{/if}> Livelli IV-VIII
+					</label>
+				</div>
+		</div>
+
+ 		#{f.booleanRadio 'absenceType.consideredWeekEnd',popover:'true' /}
+ 		
+ 		#{f.selectModels 'absenceType.justifiedTypesPermitted.id', label:'absenceType.justifiedTypesPermitted', 
+ 		  value:absenceType.justifiedTypesPermitted,
+               items:allJustifiedType, placeholder:'Come giustifica' /}
+        #{f.input 'absenceType.justifiedTime', type:'number' /}   
+        #{f.booleanRadio 'absenceType.timeForMealTicket', popover:'true' /}
+       
+        <div class="container center">
+          #{secure.check 'AbsenceGroups.saveAbsenceType' }
+	        <input class="btn btn-primary" type="submit" value="Ok">  
+          #{/secure.check}
+          
+          <input class="btn" action="action" type="button" value="Indietro" onclick="history.go(-1);">
+        </div>
+   #{/form}
+
+</div>
+<div class="container">   
+  <br>
+    #{if absenceType.onlySimpleGroupInvolved() }
+      #{alert color:'warning'}
+        <p>Questo codice non appartiene ad alcun gruppo o esclusivamente a gruppi semplici. 
+        E' possibile modificare la sua appartenenza a gruppi semplici.</p>
+      #{/alert}
+    #{/if}
+    #{else}
+        <p>Questo codice appartiene a gruppi programmati o particolari. La sua modifica è vincolata
+        al rilascio delle prossime versioni ePAS.
+        </p>
+    #{/else}
+    
+    #{list items:absenceType.takableGroup, as:'takableGroup' }
+      ${takableGroup.groupAbsenceType.description}
+    #{/list}
+</div>
+
+
+
+
