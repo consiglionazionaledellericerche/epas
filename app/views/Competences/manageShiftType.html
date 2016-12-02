@@ -1,0 +1,13 @@
+#{modalAsync id:'defaultModal', button:'Salva', 
+title: 'Gestisci attività' }
+<div id="absenceCodeData">
+#{form action:@Competences.evaluateShift(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#absenceCodeData'}
+
+
+
+#{/form}
+
+</div>
+#{/modalAsync}

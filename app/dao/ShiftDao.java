@@ -15,6 +15,8 @@ import models.ShiftCancelled;
 import models.ShiftCategories;
 import models.ShiftTimeTable;
 import models.ShiftType;
+import models.query.QPerson;
+import models.query.QPersonShift;
 import models.query.QPersonShiftDay;
 import models.query.QPersonShiftShiftType;
 import models.query.QShiftCancelled;
@@ -140,6 +142,17 @@ public class ShiftDao extends DaoBase {
     return query.singleResult(psst.personShift);
   }
 
+  /**
+   * 
+   * @param office la sede di cui si vogliono le persone che stanno in turno
+   * @return la lista dei personShift con persone che appartengono all'ufficio passato come parametro. 
+   */
+  public List<PersonShift> getPeopleForShift(Office office) {
+    final QPersonShift ps = QPersonShift.personShift;
+    final QPerson person = QPerson.person;
+    JPQLQuery query = getQueryFactory().from(person).leftJoin(person.personShift, ps).where(person.office.eq(office));
+    return query.list(ps);
+  }
 
   /**
    * @author arianna

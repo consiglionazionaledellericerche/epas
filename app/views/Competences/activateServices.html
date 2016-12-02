@@ -9,7 +9,7 @@
   		#{tabItem id:'reperibility', title:'Reperibilità', active:true /}
   		#{tabItem id:'shift', title:'Turni' /}
   	#{/tabList}
-
+	#{f.hidden 'officeId', value:office.id}
 	#{tabContent}
 		#{tabContentItem id:'reperibility', active:true}
   		<br>
