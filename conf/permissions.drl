@@ -805,6 +805,8 @@ when
         "UploadSituation.performCheckData",
 
         "Certifications.certifications",
+        "Certifications.personStatus",
+        "Certifications.process",
         "Certifications.processAll",
         "Certifications.emptyCertifications",
 

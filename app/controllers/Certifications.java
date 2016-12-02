@@ -243,7 +243,7 @@ public class Certifications extends Controller {
       render();
     }
 
-    PersonCertData personCertData = previousCertData;
+    PersonCertData personCertData = null;
     if (!previousCertData.validate) {
       // Se l'attestato non è stato validato applico il process
       try {
