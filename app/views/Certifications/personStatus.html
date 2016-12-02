@@ -1,31 +1,38 @@
+#{if personCertData}
 <li class="list-group-item
-	    #{if personCertificationStatus.okProcessable || personCertificationStatus.okNotProcessable} list-group-item-success#{/if}
-	    #{if personCertificationStatus.incompleteNotProcessable} list-group-item-danger#{/if}
-	    #{if personCertificationStatus.incompleteProcessable} list-group-item-warning#{/if}
-	    ">
+	    #{if personCertData.okProcessable || personCertData.okNotProcessable} list-group-item-success#{/if}
+	    #{if personCertData.incompleteNotProcessable} list-group-item-danger#{/if}
+	    #{if personCertData.incompleteProcessable} list-group-item-warning#{/if}" >
   <div class="row">
     <div class="col-xs-3">
-      <strong>${personCertificationStatus.person.fullname}</strong>
-      <br><em>matricola:</em> ${personCertificationStatus.person.number}
+      <strong>${personCertData.person.fullname}</strong>
+      <br><em>matricola:</em> ${personCertData.person.number}
+      <br>
+      #{ifnot personCertData.validate}
+      #{b.link @Certifications.process(personCertData.person.id, personCertData.year, personCertData.month, true),
+      class: 'btn-xs', fa: 'cloud-upload', 'rel':'nofollow' }
+        Invia ad attestati
+      #{/b.link}
+      #{/ifnot}
     </div>
     <div class="col-xs-3">
-      #{if !personCertificationStatus.validate}
+      #{if !personCertData.validate}
 
-      #{if personCertificationStatus.okProcessable}
+      #{if personCertData.okProcessable}
       <p class="text-success"><i class="fa fa-check fa-2x"
                                  popover-hover data-content="Attestato processato correttamente in attesa di validazione."></i>
         #{/if}
-        #{if personCertificationStatus.incompleteProcessable}
+        #{if personCertData.incompleteProcessable}
       <p class="text-warning"><i class="fa fa-cloud-upload fa-2x" style="color:#f0ad4e"
                                  popover-hover data-content="Attestato incompleto da processare."></i>
         #{/if}
 
 
-        #{if personCertificationStatus.okNotProcessable}
+        #{if personCertData.okNotProcessable}
       <p class="text-muted"><i class="fa fa-check fa-2x"
                                popover-hover data-content="Attestato processato correttamente, non modificabile."></i>
         #{/if}
-        #{if personCertificationStatus.incompleteNotProcessable}
+        #{if personCertData.incompleteNotProcessable}
       <p class="text-danger"><i class="fa fa-frown-o fa-2x"
                                 popover data-content="Attestato incompleto non processabile."></i>
         #{/if}
@@ -40,39 +47,36 @@
 
     <div class="col-xs-6">
 
-      #{if personCertificationStatus.incompleteProcessable
-      || personCertificationStatus.okProcessable}
+      #{if personCertData.incompleteProcessable || personCertData.okProcessable}
 
-      #{list items:personCertificationStatus.correctCertifications.values(), as:'certification'}
+      #{list items:personCertData.correctCertifications.values(), as:'certification'}
       #{certifications.showCertification certification:certification, type:'correct' /}
       #{/list}
-      #{list items:personCertificationStatus.toSendCertifications.values(), as:'certification'}
+      #{list items:personCertData.toSendCertifications.values(), as:'certification'}
       #{certifications.showCertification certification:certification, type:'toSend' /}
       #{/list}
-      #{list items:personCertificationStatus.problemCertifications.values(), as:'certification'}
+      #{list items:personCertData.problemCertifications.values(), as:'certification'}
       #{certifications.showCertification certification:certification, type:'problems' /}
       #{/list}
-      #{list items:personCertificationStatus.toDeleteCertifications.values(), as:'certification'}
+      #{list items:personCertData.toDeleteCertifications.values(), as:'certification'}
       #{certifications.showCertification certification:certification, type:'toDelete',
-      staticView:personCertificationStatus.staticView /}
+      staticView:personCertData.staticView /}
       #{/list}
 
       #{/if}
 
+      #{if personCertData.incompleteNotProcessable || personCertData.okNotProcessable}
 
-      #{if personCertificationStatus.incompleteNotProcessable ||
-      personCertificationStatus.okNotProcessable}
-
-      #{list items:personCertificationStatus.correctCertifications.values(), as:'certification'}
+      #{list items:personCertData.correctCertifications.values(), as:'certification'}
       #{certifications.showCertification certification:certification, type:'correct', muted:true /}
       #{/list}
-      #{list items:personCertificationStatus.toSendCertifications.values(), as:'certification'}
+      #{list items:personCertData.toSendCertifications.values(), as:'certification'}
       #{certifications.showCertification certification:certification, type:'toSend', muted:true /}
       #{/list}
-      #{list items:personCertificationStatus.problemCertifications.values(), as:'certification'}
+      #{list items:personCertData.problemCertifications.values(), as:'certification'}
       #{certifications.showCertification certification:certification, type:'problems', muted:true /}
       #{/list}
-      #{list items:personCertificationStatus.toDeleteCertifications.values(), as:'certification'}
+      #{list items:personCertData.toDeleteCertifications.values(), as:'certification'}
       #{certifications.showCertification certification:certification, type:'toDelete',
       muted:true /}
       #{/list}
@@ -81,5 +85,19 @@
 
     </div>
   </div>
-  <script>progress(${stepSize});</script>
 </li>
+#{/if}
+#{else}
+<li class="list-group-item list-group-item-danger">
+  <div class="row">
+    <div class="col-xs-3">
+      <strong>${person.fullname}</strong>
+      <br><em>matricola:</em> ${person.number}
+    </div>
+    <div class="col-xs-3">
+      <em class="text-danger">Errore nel caricamento delle informazioni da Attestati</em>
+    </div>
+  </div>
+</li>
+#{/else}
+<script>progress(${stepSize});</script>

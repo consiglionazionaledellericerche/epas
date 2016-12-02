@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import manager.attestati.dto.show.CodiceAssenza;
 import manager.attestati.service.CertificationService;
-import manager.attestati.service.PersonCertificationStatus;
+import manager.attestati.service.PersonCertData;
 
 import models.Office;
 import models.Person;
@@ -28,6 +28,7 @@ import models.absences.AbsenceType;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
+import play.cache.Cache;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -48,9 +49,8 @@ import javax.inject.Inject;
  * @author alessandro
  */
 @Slf4j
-@With({Resecure.class})
+@With(Resecure.class)
 public class Certifications extends Controller {
-
 
   @Inject
   static SecurityRules rules;
@@ -71,6 +71,14 @@ public class Certifications extends Controller {
    * @param month    mese
    */
   public static void certifications(Long officeId, Integer year, Integer month) {
+
+    // Utilizzato per capire quando effettuare l'invio delle informazioni ad attestati
+    // Questo perchè se utilizzassimo un controller apposito che si occupa anche di fare la render
+    // rimarrebbe l'url nella barra degli indirizzi e un eventuale refresh ne causerebbe il reinvio
+    // TODO trovare una soluzione più elegante
+    final String commandKey = String.format("id-%s-year-%s-month-%s", officeId, year, month);
+    Boolean process = (Boolean) Cache.get(commandKey);
+    Cache.safeDelete(commandKey);
 
     flash.clear();  //non avendo per adesso un meccanismo di redirect pulisco il flash...
 
@@ -111,30 +119,55 @@ public class Certifications extends Controller {
 
     Set<Integer> matricoleAttestati = new HashSet<>();
 
-    final Map.Entry<Office, YearMonth> key = new AbstractMap
+    final Map.Entry<Office, YearMonth> cacheKey = new AbstractMap
         .SimpleEntry<>(office, monthToUpload.get());
 
     try {
-      matricoleAttestati = CacheValues.AttestatiSerialNumbers.get(key);
+      matricoleAttestati = CacheValues.AttestatiSerialNumbers.get(cacheKey);
     } catch (Exception e) {
       flash.error("Errore di connessione al server di Attestati - %s", cleanMessage(e).getMessage());
       log.error("Errore durante la connessione al server di attestati: {}", e.getMessage());
       render(office, validYear, validMonth);
     }
 
-    List<Person> people = personDao.list(Optional.absent(),
+    if (matricoleAttestati.isEmpty()) {
+      flash.error("Nessuna matricola presente per il mese %s/%s.\r\n" +
+          "Effettuare lo stralcio sul server di Attestati", validMonth, validYear);
+      render(office, validYear, validMonth);
+    }
+
+    final List<Person> people = personDao.list(Optional.absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
 
     final Set<Integer> matricoleEpas = people.stream().map(person -> person.number)
         .distinct().collect(Collectors.toSet());
 
     final Set<Integer> notInEpas = Sets.difference(matricoleAttestati, matricoleEpas);
+
     final Set<Integer> notInAttestati = Sets.difference(matricoleEpas, matricoleAttestati);
 
     final Set<Integer> matchNumbers = Sets.newHashSet(matricoleEpas);
     matchNumbers.retainAll(matricoleAttestati);
 
-    render(office, validYear, validMonth, people, notInEpas, notInAttestati, matchNumbers);
+    render(office, validYear, validMonth, people, notInEpas, notInAttestati, matchNumbers, process);
+  }
+
+  /**
+   * Metodo scritto per evitare di passare direttamente al controller il boolean per effetuare
+   * l'invio degli attestati.
+   * In questo nell'url non rimane mai l'indirizzo che effettua l'invio dei dati e se si ricarica
+   * la pagina non si corre il rischio di farlo.
+   * La soluzione fa abbastanza schifo...trovarne una migliore
+   *
+   * @param officeId id Ufficio
+   * @param year     anno
+   * @param month    mese.
+   */
+  public static void processAll(Long officeId, Integer year, Integer month) {
+
+    final String commandKey = String.format("id-%s-year-%s-month-%s", officeId, year, month);
+    Cache.safeAdd(commandKey, Boolean.TRUE, "10s");
+    certifications(officeId, year, month);
   }
 
   /**
@@ -143,25 +176,28 @@ public class Certifications extends Controller {
    * @param month    mese
    */
   public static void personStatus(Long personId, int year, int month) {
-    final Person person = personDao.getPersonById(personId);
 
-    // Costruisco lo status generale
-    PersonCertificationStatus personCertificationStatus = null;
+    final Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    rules.checkIfPermitted(person);
+
+    PersonCertData personCertData = null;
     try {
-      personCertificationStatus = certificationService
-          .buildPersonStaticStatus(person, year, month, null);
+      // Costruisco lo status generale
+      final Map.Entry<Person, YearMonth> cacheKey = new AbstractMap
+          .SimpleEntry<>(person, new YearMonth(year, month));
+      personCertData = CacheValues.personStatus.get(cacheKey);
     } catch (Exception e) {
       log.error("Errore nel recupero delle informazioni dal server di attestati per la persona {}: {}",
           person, cleanMessage(e).getMessage());
-      return;
+      render();
     }
 
-    final Map.Entry<Office, YearMonth> key = new AbstractMap
-        .SimpleEntry<>(person.office, new YearMonth(year, month));
-
     // La percentuale di completamento della progress bar rispetto al totale da elaborare
-    double stepSize = 0;
+    double stepSize;
     try {
+      final Map.Entry<Office, YearMonth> key = new AbstractMap
+          .SimpleEntry<>(person.office, new YearMonth(year, month));
       stepSize = CacheValues.elaborationStep.get(key);
     } catch (Exception e) {
       log.error("Impossibile recuperare la percentuale di avanzamento per la persona {}: {}",
@@ -169,8 +205,7 @@ public class Certifications extends Controller {
       return;
     }
 
-
-    render(personCertificationStatus, stepSize);
+    render(personCertData, stepSize, person);
   }
 
   public static void codici() {
@@ -182,79 +217,69 @@ public class Certifications extends Controller {
     }
   }
 
-
   /**
-   * Elaborazione.
+   * Effettua l'invio dei dati ad attestati e l'elaborazione di una persona
    *
-   * @param officeId sede
+   * @param personId id della persona
    * @param year     anno
-   * @param month    mese
+   * @param month    mese.
    */
-  public static void processAll(Long officeId, Integer year, Integer month) {
+  public static void process(Long personId, int year, int month, boolean redirect) {
 
-    flash.clear();  //non avendo per adesso un meccanismo di redirect pulisco il flash...
+    final Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    rules.checkIfPermitted(person);
 
-    Office office = officeDao.getOfficeById(officeId);
-    notFoundIfNull(office);
-    rules.checkIfPermitted(office);
+    final Map.Entry<Person, YearMonth> cacheKey = new AbstractMap
+        .SimpleEntry<>(person, new YearMonth(year, month));
 
-    LocalDate monthBegin = new LocalDate(year, month, 1);
-    LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
-
-    //Il mese selezionato è abilitato?
-    boolean autenticate = certificationService.authentication(office, true);
-    if (!autenticate) {
-      flash.error("L'utente app.epas non è abilitato alla sede selezionata");
-      renderTemplate("@certifications", office, year, month);
-    }
-
-    //Lo stralcio è stato effettuato?
-    final Map.Entry<Office, YearMonth> key = new AbstractMap
-        .SimpleEntry<>(office, new YearMonth(year, month));
+    PersonCertData previousCertData = null;
     try {
-      Set<Integer> matricoleAttestati = CacheValues.AttestatiSerialNumbers.get(key);
+      // Costruisco lo status generale
+      previousCertData = CacheValues.personStatus.get(cacheKey);
     } catch (Exception e) {
-      flash.error("Errore di connessione ad Attestati - %s", e.getMessage());
-      render(office, year, month);
+      log.error("Errore nel recupero delle informazioni dal server di attestati" +
+          " per la persona {}: {}", person, cleanMessage(e).getMessage());
+      render();
     }
 
-//    //Lo stralcio è stato effettuato?
-//    Set<Integer> numbers = certificationService.peopleList(office, year, month);
-//    if (numbers.isEmpty()) {
-//      flash.error("E' necessario effettuare lo stralcio dei dati per processare "
-//          + "gli attestati (sede %s, anno %s, mese %s).", office.name, year, month);
-//      renderTemplate("@certifications", office, year, month, numbers);
-//    }
+    PersonCertData personCertData = previousCertData;
+    if (!previousCertData.validate) {
+      // Se l'attestato non è stato validato applico il process
+      try {
+        personCertData = certificationService.process(previousCertData);
+      } catch (ExecutionException | NoSuchFieldException e) {
+        log.error("Errore nell'invio delle informazioni al server di attestati " +
+            "per la persona {}: {}", person, cleanMessage(e).getMessage());
+      }
+    }
+//     Se riesco nell'invio ne aggiorno lo stato in cache
+    if (personCertData != null) {
+      CacheValues.personStatus.put(cacheKey, personCertData);
+    } else {
+      // Altrimenti invalido il valore presente
+      CacheValues.personStatus.invalidate(cacheKey);
+    }
 
-    List<Person> people = personDao.list(Optional.<String>absent(),
-        Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
+    // La percentuale di completamento della progress bar rispetto al totale da elaborare
+    double stepSize;
+    try {
+      final Map.Entry<Office, YearMonth> key = new AbstractMap
+          .SimpleEntry<>(person.office, new YearMonth(year, month));
+      stepSize = CacheValues.elaborationStep.get(key);
+    } catch (Exception e) {
+      log.error("Impossibile recuperare la percentuale di avanzamento per la persona {}: {}",
+          person, cleanMessage(e).getMessage());
+      return;
+    }
 
-    List<PersonCertificationStatus> peopleCertificationStatus = Lists.newArrayList();
-    boolean peopleNotInAttestati = false;
+    // permette di chiamare questo controller anche in maniera sincrona per il reinvio delle
+    // informazioni per una sola persona tramite link (button sulla singola persona)
+    if (redirect) {
+      certifications(person.office.id, year, month);
+    }
 
-//    for (Person person : people) {
-//
-//      // Costruisco lo status generale
-//      PersonCertificationStatus personCertificationStatus = certificationService
-//          .buildPersonStaticStatus(person, year, month, numbers);
-//
-////      if (personCertificationStatus.match()) {
-////
-////        if (!personCertificationStatus.validate) {
-////          // Se l'attestato non è stato validato applico il process
-////          certificationService.process(personCertificationStatus, token);
-////        }
-////        // La matricola la rimuovo da quelle in attestati (alla fine rimangono quelle non trovate)
-////        numbers.remove(person.number);
-////      }
-//
-//      peopleCertificationStatus.add(personCertificationStatus);
-//    }
-
-//    flash.success("Elaborazione completata");
-//
-//    renderTemplate("@certifications", office, year, month, numbers, peopleNotInAttestati,
-//        peopleCertificationStatus);
+    render("@personStatus", personCertData, stepSize, person);
   }
 
 //  public static void emptyCertifications(Long officeId, int year, int month) throws ExecutionException {
@@ -290,13 +315,13 @@ public class Certifications extends Controller {
 //    List<Person> people = personDao.list(Optional.<String>absent(),
 //        Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
 //
-//    List<PersonCertificationStatus> peopleCertificationStatus = Lists.newArrayList();
+//    List<PersonCertData> peopleCertificationStatus = Lists.newArrayList();
 //    boolean peopleNotInAttestati = false;
 //
 //    for (Person person : people) {
 //
 //      // Costruisco lo status generale
-//      PersonCertificationStatus personCertificationStatus = certificationService
+//      PersonCertData personCertificationStatus = certificationService
 //          .buildPersonStaticStatus(person, year, month, numbers);
 //
 //      // Elimino ogni record
@@ -355,13 +380,17 @@ public class Certifications extends Controller {
   }
 
   /**
-   *
    * @param e eccezione
    * @return L'ultimo elemento Throwable di una concatenazione di eccezioni
    */
   private static Throwable cleanMessage(Exception e) {
     // Recupera il messaggio pulito dalla gerarchia delle eccezioni
-    Throwable throwable = e.getCause();
+    Throwable throwable;
+    if (e.getCause() != null) {
+      throwable = e.getCause();
+    } else {
+      return e;
+    }
     while (throwable.getCause() != null) {
       throwable = throwable.getCause();
     }
