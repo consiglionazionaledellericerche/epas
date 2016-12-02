@@ -948,7 +948,11 @@ public class Competences extends Controller {
   }
   
   public static void manageShiftType(Long shiftTypeId) {
-    
+    Optional<ShiftType> type = shiftDao.getShiftTypeById(shiftTypeId);
+    if (!type.isPresent()) {
+      flash.error("Si cerca di caricare un'attività inesistente! Verificare l'id");
+      
+    }
   }
   
   /**

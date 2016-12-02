@@ -52,6 +52,16 @@ public class ShiftDao extends DaoBase {
   }
 
   /**
+   * 
+   * @param id l'identificativo numerico dell'attività sul turno
+   * @return l'attività del servizio.
+   */
+  public Optional<ShiftType> getShiftTypeById(Long id) {
+    final QShiftType shiftType = QShiftType.shiftType;
+    JPQLQuery query = getQueryFactory().from(shiftType).where(shiftType.id.eq(id));
+    return Optional.fromNullable(query.singleResult(shiftType));
+  }
+  /**
    * @return la lista dei personShiftDay con ShiftType 'type' presenti nel periodo tra 'begin' e
    *     'to'.
    */
