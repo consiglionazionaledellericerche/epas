@@ -79,15 +79,18 @@ public class Certifications extends Controller {
     rules.checkIfPermitted(office);
 
     //Mese selezionato
-    Optional<YearMonth> monthToUpload = factory.create(office).nextYearMonthToUpload();
-    Verify.verify(monthToUpload.isPresent());
+    Optional<YearMonth> monthToUpload;
 
     if (year != null && month != null) {
       monthToUpload = Optional.fromNullable(new YearMonth(year, month));
+    } else {
+      monthToUpload = factory.create(office).nextYearMonthToUpload();
     }
 
-    year = monthToUpload.get().getYear();
-    month = monthToUpload.get().getMonthOfYear();
+    Verify.verify(monthToUpload.isPresent());
+
+    int validYear = monthToUpload.get().getYear();
+    int validMonth = monthToUpload.get().getMonthOfYear();
 
     // Patch per la navigazione del menù ... ####################################
     // Al primo accesso (da menù) dove non ho mese e anno devo prendere il default
@@ -106,14 +109,6 @@ public class Certifications extends Controller {
         monthToUpload.get().getMonthOfYear(), 1);
     LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
 
-
-    //Il mese selezionato è abilitato?
-    boolean autenticate = certificationService.authentication(office, true);
-    if (!autenticate) {
-      flash.error("L'utente app.epas non è abilitato alla sede selezionata");
-      render(office, year, month);
-    }
-
     Set<Integer> matricoleAttestati = new HashSet<>();
 
     final Map.Entry<Office, YearMonth> key = new AbstractMap
@@ -122,15 +117,9 @@ public class Certifications extends Controller {
     try {
       matricoleAttestati = CacheValues.AttestatiSerialNumbers.get(key);
     } catch (Exception e) {
-
-      // Recupera il messaggio pulito dalla gerarchia delle eccezioni
-      Throwable throwable = e.getCause();
-      while (throwable.getCause() != null) {
-        throwable = throwable.getCause();
-      }
-      flash.error("Errore di connessione al server di Attestati - %s", throwable.getMessage());
+      flash.error("Errore di connessione al server di Attestati - %s", cleanMessage(e).getMessage());
       log.error("Errore durante la connessione al server di attestati: {}", e.getMessage());
-      render(office, year, month);
+      render(office, validYear, validMonth);
     }
 
     List<Person> people = personDao.list(Optional.absent(),
@@ -145,15 +134,13 @@ public class Certifications extends Controller {
     final Set<Integer> matchNumbers = Sets.newHashSet(matricoleEpas);
     matchNumbers.retainAll(matricoleAttestati);
 
-    render(office, year, month, people, notInEpas, notInAttestati, matchNumbers);
+    render(office, validYear, validMonth, people, notInEpas, notInAttestati, matchNumbers);
   }
 
   /**
-   *
    * @param personId id della persona
-   * @param year anno
-   * @param month mese
-   * @throws ExecutionException eccezione.
+   * @param year     anno
+   * @param month    mese
    */
   public static void personStatus(Long personId, int year, int month) {
     final Person person = personDao.getPersonById(personId);
@@ -164,8 +151,8 @@ public class Certifications extends Controller {
       personCertificationStatus = certificationService
           .buildPersonStaticStatus(person, year, month, null);
     } catch (Exception e) {
-      log.error("Errore nel recupero delle informazioni dal server di attestati per la persona {}",
-          person);
+      log.error("Errore nel recupero delle informazioni dal server di attestati per la persona {}: {}",
+          person, cleanMessage(e).getMessage());
       return;
     }
 
@@ -177,8 +164,11 @@ public class Certifications extends Controller {
     try {
       stepSize = CacheValues.elaborationStep.get(key);
     } catch (Exception e) {
-      log.error("Impossibile recuperare la percentuale di avanzamento per la persona {}", person);
+      log.error("Impossibile recuperare la percentuale di avanzamento per la persona {}: {}",
+          person, cleanMessage(e).getMessage());
+      return;
     }
+
 
     render(personCertificationStatus, stepSize);
   }
@@ -187,7 +177,8 @@ public class Certifications extends Controller {
     try {
       renderText(certificationService.absenceCodes());
     } catch (Exception e) {
-      renderText("Impossibile recuperare i codici dal server di attestati\r\n" + e.getMessage());
+      renderText("Impossibile recuperare i codici dal server di attestati\r\n" +
+          cleanMessage(e).getMessage());
     }
   }
 
@@ -199,7 +190,7 @@ public class Certifications extends Controller {
    * @param year     anno
    * @param month    mese
    */
-  public static void processAll(Long officeId, Integer year, Integer month) throws ExecutionException {
+  public static void processAll(Long officeId, Integer year, Integer month) {
 
     flash.clear();  //non avendo per adesso un meccanismo di redirect pulisco il flash...
 
@@ -217,12 +208,11 @@ public class Certifications extends Controller {
       renderTemplate("@certifications", office, year, month);
     }
 
-    Set<Integer> matricoleAttestati = new HashSet<>();
     //Lo stralcio è stato effettuato?
     final Map.Entry<Office, YearMonth> key = new AbstractMap
         .SimpleEntry<>(office, new YearMonth(year, month));
     try {
-      matricoleAttestati = CacheValues.AttestatiSerialNumbers.get(key);
+      Set<Integer> matricoleAttestati = CacheValues.AttestatiSerialNumbers.get(key);
     } catch (Exception e) {
       flash.error("Errore di connessione ad Attestati - %s", e.getMessage());
       render(office, year, month);
@@ -361,9 +351,21 @@ public class Certifications extends Controller {
       epasAbsenceTypes.put(absenceType.code.trim().toUpperCase(), absenceType);
     }
 
-
     render(attestatiAbsenceCodes, epasAbsences, epasAbsenceTypes);
   }
 
+  /**
+   *
+   * @param e eccezione
+   * @return L'ultimo elemento Throwable di una concatenazione di eccezioni
+   */
+  private static Throwable cleanMessage(Exception e) {
+    // Recupera il messaggio pulito dalla gerarchia delle eccezioni
+    Throwable throwable = e.getCause();
+    while (throwable.getCause() != null) {
+      throwable = throwable.getCause();
+    }
+    return throwable;
+  }
 
 }
