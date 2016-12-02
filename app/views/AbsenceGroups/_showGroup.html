@@ -12,7 +12,7 @@
         <i class="fa fa-asterisk" aria-hidden="true"></i>  
       #{/if}
       
-      #{secure.link @AbsenceGroups.editGroup(group.id),  'data-async-modal':'#defaultModal' }
+      #{secure.link @AbsenceGroups.editGroup(group.id) }
       <strong> ${group.description.label()}</strong>
       #{/secure.link}
       
