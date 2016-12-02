@@ -15,8 +15,10 @@ import dao.PersonDao;
 
 import lombok.extern.slf4j.Slf4j;
 
+import manager.attestati.service.CertificationService;
 import manager.attestati.service.CertificationsComunication;
 import manager.attestati.service.OauthToken;
+import manager.attestati.service.PersonCertData;
 
 import models.Office;
 import models.Person;
@@ -48,6 +50,8 @@ public final class CacheValues {
   private static final int FIVE_MINUTES = 5 * DateTimeConstants.SECONDS_PER_MINUTE;
   @Inject
   static CertificationsComunication certification;
+  @Inject
+  static CertificationService certService;
   // Meglio non statico??
   public static LoadingCache<String, OauthToken> oauthToken = CacheBuilder.newBuilder()
       .refreshAfterWrite(1, TimeUnit.MINUTES)
@@ -58,7 +62,8 @@ public final class CacheValues {
           .expireAfterWrite(10, TimeUnit.MINUTES)
           .build(new CacheLoader<Map.Entry<Office, YearMonth>, Set<Integer>>() {
             @Override
-            public Set<Integer> load(Map.Entry<Office, YearMonth> key) throws ExecutionException {
+            public Set<Integer> load(Map.Entry<Office, YearMonth> key)
+                throws ExecutionException, NoSuchFieldException {
               return certification.getPeopleList(
                   key.getKey(), key.getValue().getYear(), key.getValue().getMonthOfYear());
             }
@@ -72,6 +77,37 @@ public final class CacheValues {
       CacheBuilder.newBuilder()
           .expireAfterWrite(10, TimeUnit.MINUTES)
           .build(new StepCacheLoader());
+
+  /**
+   * Occhio a questi valori che vengono rinnovati nel caso vengano inviate le informazioni
+   * ad attestati.
+   * Bisognerebbe evitare di impacchettare i dati presenti su epas e quelli presenti in attestati
+   * in un unica struttura ed effettuare le elaborazioni a runtime, o eventualmente salvare
+   * in cache anche quelle.
+   *
+   * RICORDARSI di AGGIORNARE I VALORI CON UNA
+   * personStatus.put(Map.Entry<Long, YearMonth>, PersonCertData>)
+   * DOPO OGNI INVIO!!!!
+   *
+   * E' ANCHE ALTAMENTE CONSIGLIATO INVALIDARE TUTTI I VALORI DI UN DETERMINATO UFFICIO
+   * QUADO SI RIEFFETTUA IL REFRESH DELLA SCHERMATA DI ATTESTATI
+   */
+  public static LoadingCache<Map.Entry<Person, YearMonth>, PersonCertData> personStatus =
+      CacheBuilder.newBuilder()
+          .expireAfterWrite(10, TimeUnit.MINUTES)
+          .build(
+              new CacheLoader<Map.Entry<Person, YearMonth>, PersonCertData>() {
+                @Override
+                public PersonCertData load(Map.Entry<Person, YearMonth> key)
+                    throws ExecutionException {
+                  final Person person = key.getKey();
+                  int year = key.getValue().getYear();
+                  int month = key.getValue().getMonthOfYear();
+                  return certService
+                      .buildPersonStaticStatus(person, year, month);
+                }
+              }
+          );
 
 
   private static class OauthTokenCacheLoader extends CacheLoader<String, OauthToken> {
