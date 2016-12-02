@@ -970,7 +970,6 @@ public class Competences extends Controller {
     type.shiftTimeTable = timeTable;
     type.save();
     
-//    sBis.save();
     flash.success("Configurato correttamente il servizio %s", cat.description);
     activateServices(cat.office.id);
   }

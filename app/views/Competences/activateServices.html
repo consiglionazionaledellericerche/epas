@@ -122,7 +122,7 @@
     	<ul>
     	#{list items:sc.shiftTypes, as:'stype'}
 	    	<li>
-	    	#{secure.link @Competences.manageShiftType(stype.id)}
+	    	#{secure.link @Competences.manageShiftType(stype.id), 'data-async-modal':'#defaultModal'}
 	        	<i class="fa fa-calendar" aria-hidden="true"></i> ${stype.type}
 	        #{/secure.link}
 	        </li>
