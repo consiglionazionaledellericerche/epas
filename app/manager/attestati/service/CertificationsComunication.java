@@ -69,7 +69,9 @@ public class CertificationsComunication {
   private static final String OAUTH_CONTENT_TYPE = "application/x-www-form-urlencoded";
   private static final String OAUTH_URL = "/oauth/token";
   private static final String OAUTH_AUTHORIZATION = "YXR0ZXN0YXRpYXBwOm15U2VjcmV0T0F1dGhTZWNyZXQ=";
-  private static final String OAUTH_GRANT_TYPE = "password";
+  private static final String TOKEN_GRANT_TYPE = "password";
+  private static final String REFRESHTOKEN_GRANT_TYPE = "refresh_token";
+
   private static final String OAUTH_CLIENT_ID = "attestatiapp";
 
   private static final String OAUTH_TOKEN = "oauth.token.attestati";
@@ -86,27 +88,16 @@ public class CertificationsComunication {
    *
    * @return il token
    */
-  public OauthToken getToken() {
+  public OauthToken getToken() throws NoSuchFieldException {
 
-    final String url;
-    final String user;
-    final String pass;
-
-    try {
-      url = AttestatiApis.getAttestatiBaseUrl();
-      user = AttestatiApis.getAttestatiUser();
-      pass = AttestatiApis.getAttestatiPass();
-    } catch (NoSuchFieldException ex) {
-      final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
-      log.error(error);
-      throw new ApiRequestException(error);
-    }
-
+    final String url = AttestatiApis.getAttestatiBaseUrl();
+    final String user = AttestatiApis.getAttestatiUser();
+    final String pass = AttestatiApis.getAttestatiPass();
 
     final Map<String, String> parameters = new HashMap<>();
     parameters.put("username", user);
     parameters.put("password", pass);
-    parameters.put("grant_type", OAUTH_GRANT_TYPE);
+    parameters.put("grant_type", TOKEN_GRANT_TYPE);
     parameters.put("client_secret", OAUTH_CLIENT_SECRET);
     parameters.put("client_id", OAUTH_CLIENT_ID);
 
@@ -116,10 +107,47 @@ public class CertificationsComunication {
         .setParameters(parameters);
 
     HttpResponse response = req.post();
+
+    if (!response.getContentType().contains("application/json")) {
+      throw new ApiRequestException(String.format("Risposta inattesta dal server di Attestati" +
+          " {Content-Type=%s - statusCode=%s} ", response.getContentType(), response.getStatus()));
+    }
     Gson gson = new Gson();
     OauthToken accessToken = gson.fromJson(response.getJson(), OauthToken.class);
 
-    log.debug("Prelevato token oauth dal server degli attestati");
+    log.debug("Ottenuto access-token dal server degli attestati");
+    return accessToken;
+  }
+
+  /**
+   * @param token token precedente (già ottenuto dal server)
+   * @return Un nuovo token Oauth con validità estesa
+   */
+  public OauthToken refreshToken(OauthToken token) throws NoSuchFieldException {
+
+    final String url = AttestatiApis.getAttestatiBaseUrl();
+
+    final Map<String, String> parameters = new HashMap<>();
+    parameters.put("grant_type", TOKEN_GRANT_TYPE);
+    parameters.put("client_secret", OAUTH_CLIENT_SECRET);
+    parameters.put("client_id", OAUTH_CLIENT_ID);
+    parameters.put("refresh_token", token.refresh_token);
+
+    WSRequest req = WS.url(url + OAUTH_URL)
+        .setHeader("Content-Type", OAUTH_CONTENT_TYPE)
+        .setHeader("Authorization", "Basic " + OAUTH_AUTHORIZATION)
+        .setParameters(parameters);
+
+    HttpResponse response = req.post();
+
+    if (!response.getContentType().contains("application/json")) {
+      throw new ApiRequestException(String.format("Risposta inattesta dal server di Attestati" +
+          " {Content-Type=%s - statusCode=%s} ", response.getContentType(), response.getStatus()));
+    }
+    Gson gson = new Gson();
+    OauthToken accessToken = gson.fromJson(response.getJson(), OauthToken.class);
+
+    log.debug("Ottenuto refresh-token oauth dal server degli attestati");
     return accessToken;
   }
 
@@ -131,17 +159,9 @@ public class CertificationsComunication {
    * @param url         url
    * @param contentType contentType
    */
-  private WSRequest prepareOAuthRequest(String token, String url, String contentType) {
+  private WSRequest prepareOAuthRequest(String token, String url, String contentType) throws NoSuchFieldException {
 
-    final String baseUrl;
-
-    try {
-      baseUrl = AttestatiApis.getAttestatiBaseUrl();
-    } catch (NoSuchFieldException ex) {
-      final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
-      log.error(error);
-      throw new ApiRequestException(error);
-    }
+    final String baseUrl = AttestatiApis.getAttestatiBaseUrl();
 
     WSRequest wsRequest = WS.url(baseUrl + url)
         .setHeader("Content-Type", contentType)
@@ -157,13 +177,10 @@ public class CertificationsComunication {
    * @param month  mese
    * @return insieme di numbers
    */
-  public Set<Integer> getPeopleList(Office office, int year, int month) throws ExecutionException {
+  public Set<Integer> getPeopleList(Office office, int year, int month)
+      throws NoSuchFieldException, ExecutionException {
 
     String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
-    if (token == null) {
-      CacheValues.oauthToken.invalidateAll();
-      token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
-    }
 
     final String url = API_URL + API_URL_LISTA_DIPENDENTI + "/" + office.codeId
         + "/" + year + "/" + month;
@@ -231,7 +248,7 @@ public class CertificationsComunication {
       log.error("Errore di comunicazione col server degli Attestati {}", ex.getMessage());
     }
 
-    return Optional.<SeatCertification>absent();
+    return Optional.absent();
 
   }
 
@@ -257,7 +274,8 @@ public class CertificationsComunication {
    * @param certification attestato
    * @return risposta
    */
-  public HttpResponse sendRigaAssenza(Certification certification) throws ExecutionException {
+  public HttpResponse sendRigaAssenza(Certification certification)
+      throws ExecutionException, NoSuchFieldException {
 
     final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
     if (token == null) {
@@ -281,12 +299,9 @@ public class CertificationsComunication {
    * @return risposta
    */
   public HttpResponse sendRigaBuoniPasto(Certification certification,
-      boolean update) throws ExecutionException {
+      boolean update) throws ExecutionException, NoSuchFieldException {
 
     final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
-    if (token == null) {
-      return null;
-    }
 
     String url = API_URL + API_URL_BUONI_PASTO;
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
@@ -307,11 +322,9 @@ public class CertificationsComunication {
    * @param certification attestato
    * @return risposta
    */
-  public HttpResponse sendRigaFormazione(Certification certification) throws ExecutionException {
+  public HttpResponse sendRigaFormazione(Certification certification)
+      throws ExecutionException, NoSuchFieldException {
     final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
-    if (token == null) {
-      return null;
-    }
 
     String url = API_URL + API_URL_FORMAZIONE;
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
@@ -329,11 +342,9 @@ public class CertificationsComunication {
    * @param certification attestato
    * @return risposta
    */
-  public HttpResponse sendRigaCompetenza(Certification certification) throws ExecutionException {
+  public HttpResponse sendRigaCompetenza(Certification certification)
+      throws ExecutionException, NoSuchFieldException {
     final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
-    if (token == null) {
-      return null;
-    }
 
     String url = API_URL + API_URL_COMPETENZA;
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
@@ -351,11 +362,9 @@ public class CertificationsComunication {
    * @param certification attestato
    * @return risposta
    */
-  public HttpResponse deleteRigaAssenza(Certification certification) throws ExecutionException {
+  public HttpResponse deleteRigaAssenza(Certification certification)
+      throws ExecutionException, NoSuchFieldException {
     final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
-    if (token == null) {
-      return null;
-    }
 
     String url = API_URL + API_URL_ASSENZA;
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
@@ -373,11 +382,10 @@ public class CertificationsComunication {
    * @param certification attestato
    * @return risposta
    */
-  public HttpResponse deleteRigaFormazione(Certification certification) throws ExecutionException {
+  public HttpResponse deleteRigaFormazione(Certification certification)
+      throws ExecutionException, NoSuchFieldException {
     final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
-    if (token == null) {
-      return null;
-    }
+
     String url = API_URL + API_URL_FORMAZIONE;
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
 
@@ -394,11 +402,9 @@ public class CertificationsComunication {
    * @param certification attestato
    * @return risposta
    */
-  public HttpResponse deleteRigaCompetenza(Certification certification) throws ExecutionException {
+  public HttpResponse deleteRigaCompetenza(Certification certification)
+      throws ExecutionException, NoSuchFieldException {
     final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
-    if (token == null) {
-      return null;
-    }
 
     String url = API_URL + API_URL_COMPETENZA;
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
