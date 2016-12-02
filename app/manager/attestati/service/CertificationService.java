@@ -91,9 +91,9 @@ public class CertificationService {
   /**
    * Le certificazioni già presenti su attestati.
    *
-   * @param person            persona
-   * @param year              anno
-   * @param month             mese
+   * @param person persona
+   * @param year   anno
+   * @param month  mese
    * @return null in caso di errore.
    */
   private Map<String, Certification> personAttestatiCertifications(Person person,
@@ -281,7 +281,7 @@ public class CertificationService {
       }
 
       if (epasCertification.attestatiId == null
-          || epasCertification.attestatiId != attestatiCertification.attestatiId) {
+          || !epasCertification.attestatiId.equals(attestatiCertification.attestatiId)) {
         epasCertification.attestatiId = attestatiCertification.attestatiId;
         epasCertification.save();
       }
@@ -329,7 +329,8 @@ public class CertificationService {
    * @param personCertificationStatus il suo stato
    * @return lo stato dopo l'elaborazione.
    */
-  public PersonCertificationStatus process(PersonCertificationStatus personCertificationStatus) throws ExecutionException {
+  public PersonCertificationStatus process(PersonCertificationStatus personCertificationStatus)
+      throws ExecutionException, NoSuchFieldException {
 
     personCertificationStatus.staticView = false;
 
@@ -350,11 +351,11 @@ public class CertificationService {
         //Quando non riesco ad inviare la certificazione rimane dovè.
         containProblemCertifications.put(certification.aMapKey(), certification);
       } else {
-        if (!certification.containProblems()) {
-          sended.add(certification);
+        if (certification.containProblems()) {
+          containProblemCertifications.put(certification.aMapKey(), certification);
           certification.save();
         } else {
-          containProblemCertifications.put(certification.aMapKey(), certification);
+          sended.add(certification);
           certification.save();
         }
       }
@@ -455,7 +456,8 @@ public class CertificationService {
   /**
    * Rimuove il record in attestati. (Non usare per buoni pasto).
    */
-  public boolean removeAttestati(Certification certification) throws ExecutionException {
+  public boolean removeAttestati(Certification certification)
+      throws ExecutionException, NoSuchFieldException {
 
     HttpResponse httpResponse;
     Optional<RispostaAttestati> rispostaAttestati;
@@ -503,7 +505,7 @@ public class CertificationService {
 
     List<PersonMonthRecap> trainingHoursList = personMonthRecapDao
         .getPersonMonthRecapInYearOrWithMoreDetails(person, year,
-            Optional.fromNullable(month), Optional.<Boolean>absent());
+            Optional.fromNullable(month), Optional.absent());
     for (PersonMonthRecap personMonthRecap : trainingHoursList) {
 
       // Nuova certificazione
@@ -546,7 +548,6 @@ public class CertificationService {
     LocalDate previousDate = null;
     String previousAbsenceCode = null;
     Integer dayBegin = null;
-    Integer dayEnd = null;
 
     for (Absence absence : absences) {
 
@@ -563,6 +564,7 @@ public class CertificationService {
       }
 
       // 1) Continua Assenza più giorni
+      Integer dayEnd;
       if (previousDate != null && previousDate.plusDays(1).equals(absence.personDay.date)
           && previousAbsenceCode.equals(absenceCodeToSend)) {
         dayEnd = absence.personDay.date.getDayOfMonth();
@@ -653,7 +655,8 @@ public class CertificationService {
    * @return il nuovo stato
    */
   public PersonCertificationStatus emptyAttestati(
-      PersonCertificationStatus personCertificationStatus) throws ExecutionException {
+      PersonCertificationStatus personCertificationStatus)
+      throws ExecutionException, NoSuchFieldException {
 
     if (personCertificationStatus.attestatiCertifications != null) {
       for (Certification certification :
