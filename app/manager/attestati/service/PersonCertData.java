@@ -17,7 +17,7 @@ import java.util.Set;
  *
  * @author alessandro
  */
-public class PersonCertificationStatus {
+public class PersonCertData {
 
   public Person person;
   public int year;
@@ -45,7 +45,7 @@ public class PersonCertificationStatus {
   public Map<String, Certification> toSendCertifications = Maps.newHashMap();
   public Certification attestatiMealToOverwrite;
 
-  public PersonCertificationStatus computeStaticStatus() {
+  public PersonCertData computeStaticStatus() {
 
     staticView = true;
 
@@ -126,7 +126,7 @@ public class PersonCertificationStatus {
     return this;
   }
 
-  public PersonCertificationStatus computeProcessStatus() {
+  public PersonCertData computeProcessStatus() {
 
     if (incompleteProcessable) {
       if (toDeleteCertifications.values().isEmpty() && problemCertifications.values().isEmpty()

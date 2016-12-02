@@ -4,8 +4,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 import helpers.CacheValues;
 import helpers.rest.ApiRequestException;
@@ -32,6 +30,7 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSRequest;
+import play.mvc.Http;
 
 import java.util.HashMap;
 import java.util.List;
@@ -112,8 +111,8 @@ public class CertificationsComunication {
       throw new ApiRequestException(String.format("Risposta inattesta dal server di Attestati" +
           " {Content-Type=%s - statusCode=%s} ", response.getContentType(), response.getStatus()));
     }
-    Gson gson = new Gson();
-    OauthToken accessToken = gson.fromJson(response.getJson(), OauthToken.class);
+
+    OauthToken accessToken = new Gson().fromJson(response.getJson(), OauthToken.class);
 
     log.debug("Ottenuto access-token dal server degli attestati");
     return accessToken;
@@ -144,8 +143,8 @@ public class CertificationsComunication {
       throw new ApiRequestException(String.format("Risposta inattesta dal server di Attestati" +
           " {Content-Type=%s - statusCode=%s} ", response.getContentType(), response.getStatus()));
     }
-    Gson gson = new Gson();
-    OauthToken accessToken = gson.fromJson(response.getJson(), OauthToken.class);
+
+    OauthToken accessToken = new Gson().fromJson(response.getJson(), OauthToken.class);
 
     log.debug("Ottenuto refresh-token oauth dal server degli attestati");
     return accessToken;
@@ -188,17 +187,14 @@ public class CertificationsComunication {
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
     HttpResponse httpResponse = wsRequest.get();
 
-    JsonObject body = httpResponse.getJson().getAsJsonObject();
-
-    if (body.has("error") && "invalid_token".equals(body.get("error").getAsString())) {
+    // Caso di token non valido
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
       CacheValues.oauthToken.invalidateAll();
       throw new IllegalAccessError("Invalid Token: " + token);
     }
-    if (body.has("message")) {
-      throw new ApiRequestException(body.get("message").getAsString());
-    }
 
-    ListaDipendenti listaDipendenti = new Gson().fromJson(body, ListaDipendenti.class);
+    ListaDipendenti listaDipendenti = new Gson()
+        .fromJson(httpResponse.getJson(), ListaDipendenti.class);
 
     log.info("Recuperata lista delle matricole da attestati per l'ufficio {} -  mese {}/{}",
         office, month, year);
@@ -231,14 +227,13 @@ public class CertificationsComunication {
       WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
       HttpResponse httpResponse = wsRequest.get();
 
-      final JsonObject body = httpResponse.getJson().getAsJsonObject();
-
-      if (body.has("error") && "invalid_token".equals(body.get("error").getAsString())) {
+      // Caso di token non valido
+      if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
         CacheValues.oauthToken.invalidateAll();
-        throw new Exception("Invalid Token: " + token);
+        throw new IllegalAccessError("Invalid Token: " + token);
       }
 
-      SeatCertification seatCertification = new Gson().fromJson(body, SeatCertification.class);
+      SeatCertification seatCertification = new Gson().fromJson(httpResponse.getJson(), SeatCertification.class);
 
       Verify.verify(seatCertification.dipendenti.get(0).matricola == person.number);
 
@@ -434,18 +429,14 @@ public class CertificationsComunication {
       WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
       HttpResponse httpResponse = wsRequest.get();
 
+      // Caso di token non valido
+      if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
+        CacheValues.oauthToken.invalidateAll();
+        throw new IllegalAccessError("Invalid Token: " + token);
+      }
 
-      JsonArray json = httpResponse.getJson().getAsJsonArray();
-
-//      // TODO nel caso di risposta corretta il server restituisce un JsonArray,
-//      // nel caso di token non valido un JsonObject, implementare i controlli necessari
-//      final JsonObject body = httpResponse.getJson().getAsJsonObject();
-//      if (body.has("error") && "invalid_token".equals(body.get("error").getAsString())) {
-//        CacheValues.oauthToken.invalidateAll();
-//        throw new Exception("Invalid Token: " + token);
-//      }
-
-      final CodiceAssenza[] lista = new Gson().fromJson(json, CodiceAssenza[].class);
+      final CodiceAssenza[] lista = new Gson().fromJson(httpResponse.getJson(),
+          CodiceAssenza[].class);
 
       return Arrays.asList(lista);
 
