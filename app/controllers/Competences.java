@@ -49,6 +49,7 @@ import models.Office;
 import models.Person;
 import models.PersonCompetenceCodes;
 import models.PersonReperibilityType;
+import models.PersonShift;
 import models.ShiftCategories;
 import models.ShiftTimeTable;
 import models.ShiftType;
@@ -947,11 +948,14 @@ public class Competences extends Controller {
     render(dtoList, cat, shiftList, type);
   }
   
-  public static void manageShiftType(Long shiftTypeId) {
+  public static void manageShiftType(Long shiftTypeId, Long officeId) {
     Optional<ShiftType> type = shiftDao.getShiftTypeById(shiftTypeId);
     if (!type.isPresent()) {
       flash.error("Si cerca di caricare un'attività inesistente! Verificare l'id");
-      
+      activateServices(officeId);
+    } else {
+      Office office = officeDao.getOfficeById(officeId);
+      List<PersonShift> peopleForShift = shiftDao.getPeopleForShift(office); 
     }
   }
   
