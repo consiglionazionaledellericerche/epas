@@ -2,7 +2,7 @@ package dao.absences;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -16,6 +16,7 @@ import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.CategoryGroupAbsenceType;
+import models.absences.CategoryTab;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
@@ -26,6 +27,7 @@ import models.absences.TakableAbsenceBehaviour;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
 import models.absences.query.QCategoryGroupAbsenceType;
+import models.absences.query.QCategoryTab;
 import models.absences.query.QComplationAbsenceBehaviour;
 import models.absences.query.QGroupAbsenceType;
 import models.absences.query.QInitializationGroup;
@@ -38,6 +40,7 @@ import play.db.jpa.JPA;
 
 import java.util.List;
 import java.util.Set;
+import java.util.SortedMap;
 
 import javax.persistence.EntityManager;
 
@@ -117,6 +120,45 @@ public class AbsenceComponentDao extends DaoBase {
       obj.save();
     }
     return obj;
+  }
+  
+  /**
+   * Le categorie con quei nomi.
+   * @param names nomi
+   * @return list
+   */
+  public List<CategoryGroupAbsenceType> categoryByNames(List<String> names) {
+    QCategoryGroupAbsenceType category = QCategoryGroupAbsenceType.categoryGroupAbsenceType;
+    return getQueryFactory().from(category)
+        .where(category.name.in(names)).list(category);
+  }
+  
+  /**
+   * La categoria con quel nome.
+   * @param name nome
+   * @return entity
+   */
+  public CategoryGroupAbsenceType categoryByName(String name) {
+    QCategoryGroupAbsenceType category = QCategoryGroupAbsenceType.categoryGroupAbsenceType;
+    return getQueryFactory().from(category)
+        .where(category.name.eq(name)).singleResult(category);
+  }
+  
+  /**
+   * Le categorie ordinate per priorità.
+   */
+  public List<CategoryGroupAbsenceType> categoriesByPriority() {
+    QCategoryGroupAbsenceType category = QCategoryGroupAbsenceType.categoryGroupAbsenceType;
+    return getQueryFactory().from(category).orderBy(category.priority.asc()).list(category);
+  }
+  
+  /**
+   * Le tab ordinate per priorità.
+   */
+  public List<CategoryTab> tabsByPriority() {
+    QCategoryTab categoryTab = QCategoryTab.categoryTab;
+    return getQueryFactory().from(categoryTab).orderBy(categoryTab.priority.asc())
+        .list(categoryTab);
   }
   
   /**
@@ -372,6 +414,35 @@ public class AbsenceComponentDao extends DaoBase {
         .from(initializationGroup)
         .where(initializationGroup.person.eq(person));
     return query.list(initializationGroup);
+  }
+  
+  /**
+   * Le categorie che contengono gruppi inizializzabili.
+   * @return list
+   */
+  public List<CategoryGroupAbsenceType> initializablesCategory() {
+    SortedMap<Integer, CategoryGroupAbsenceType> categories = Maps.newTreeMap();
+    List<GroupAbsenceType> allGroups = GroupAbsenceType.findAll();
+    for (GroupAbsenceType group : allGroups) {
+      if (group.initializable) {
+        categories.put(group.category.priority, group.category);
+      }
+    }
+    return Lists.newArrayList(categories.values());
+  }
+  
+  /**
+   * Il primo gruppo inizializzabile per quella categoria.
+   * @param category category
+   * @return gruppo
+   */
+  public GroupAbsenceType firstGroupInitializable(CategoryGroupAbsenceType category) {
+    for (GroupAbsenceType group : category.groupAbsenceTypes) {
+      if (group.initializable) {
+        return group;
+      }
+    }
+    return null;
   }
   
   /**

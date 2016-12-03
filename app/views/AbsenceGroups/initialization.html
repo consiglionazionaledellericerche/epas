@@ -16,13 +16,18 @@
 
   #{f.selectModel 'groupAbsenceType', inputName:'groupAbsenceTypeId', label:'Tipologia Assenza', personalizeItems:true}
         <option></option>      
-       
-       #{list items:initializableGroups, as:'group'}
+       #{list items:initializableCategories, as:'category'}
+       <optgroup label="${category.name}">
+       #{list items:category.groupAbsenceTypes, as:'group'}
+         #{if group.initializable}  
            <option value="${group.id}"
 	          #{if group.equals(initializationGroup.groupAbsenceType)} selected #{/if}> 
 	          ${group.description}
 	       </option>
-  	    #{/list}
+	     #{/if}  
+  	   #{/list}
+  	   </optgroup>
+  	   #{/list} 
      #{/f.selectModel}
      
      #{f.date 'date', value:date.format() /}
@@ -30,7 +35,7 @@
   
   #{/form}
   
-  #{if periodChain}
+ 
 	  #{if periodChain.containsCriticalErrors()}
 	    #{alert color:'danger'}
 	      <p>Impossibile visualizzare la situazione. Effettuare una segnalazione.</p>
@@ -43,7 +48,7 @@
 	  #{/if}
 
 	  <ul>
-	  
+   #{if absencePeriod}  
 	  <!-- Suggerimento -->
 	  <li class="list-group-item list-group-item-info">
 	    <p>

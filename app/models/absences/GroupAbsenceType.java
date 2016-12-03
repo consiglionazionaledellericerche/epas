@@ -11,6 +11,8 @@ import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
+import play.data.validation.Required;
+
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -30,6 +32,7 @@ public class GroupAbsenceType extends BaseModel {
 
   private static final long serialVersionUID = 3290760775533091791L;
 
+  @Required
   @Column
   public String name;
   
@@ -46,6 +49,7 @@ public class GroupAbsenceType extends BaseModel {
   @JoinColumn(name = "category_type_id")
   public CategoryGroupAbsenceType category;
   
+  @Required
   @Getter
   @Column(name = "pattern")
   @Enumerated(EnumType.STRING)
@@ -74,6 +78,12 @@ public class GroupAbsenceType extends BaseModel {
   @OneToMany(mappedBy = "nextGroupToCheck", fetch = FetchType.LAZY)
   public Set<GroupAbsenceType> previousGroupChecked;
 
+  @Column
+  public boolean automatic = false;
+  
+  @Column
+  public boolean initializable = false;
+  
   /**
    * Label.
    * @return label

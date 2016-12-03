@@ -8,15 +8,32 @@
 #{title title:'Gruppi di Assenze' /}
 }*
 
-#{set breadcrumbs:['Gruppi Assenze':@AbsenceGroups.showGroups(), (category):null] /}
+#{set breadcrumbs:['Gruppi Assenze':@AbsenceGroups.showGroups(null), (selected):@AbsenceGroups.showGroups(selected)] /}
 #{breadcrumbs breadcrumbs, noHome:true, container:true /}
-
-
+  
  #{form action:@AbsenceGroups.showGroups(), method:'GET', autocomplete:false,
 		    class:'form form-horizontal auto-submit'}
-		#{f.selectModel 'category', inputName:'categoryId', items:categories, value:category /}
+    
+    #{f.selectModel 'category', inputName:'categoryId', personalizeItems:true}
+        <option></option>      
+       
+       #{list items:categoryTabs, as:'categoryTab'}
+           <optgroup label="${categoryTab.name}">
+           #{list categoryTab.categoryGroupAbsenceTypes, as:'category'}
+	         <option value="${category.id}"
+	          #{if category.equals(selected)} selected #{/if}> 
+	          ${category.name}
+	         </option>
+  	       #{/list}
+  	       </optgroup>
+  	    #{/list}
+     #{/f.selectModel}
+
  #{/form}
  
+ #{alert color:'info'}
+    <p>Elenco dei gruppi definiti per la categoria <strong>${selected.name}</strong></p>
+ #{/alert}
 
  
  <table class="table table-bordered"> 
@@ -33,19 +50,10 @@
  	</tr>
    </thead>
    <tbody>
- #{list items:groups, as:'group'}
-  
-  *{ todo questo filtro andrebbe fatto direttamente nel controller }*
-  #{if group.category.equals(category)}    
+ #{list items:selected.groupAbsenceTypes, as:'group'}
   <tr>
-  
     #{include './_showGroup.html' /}
   </tr>
-  #{/if}
-  
-  
-  
-  
  #{/list}
  </tbody>
 
@@ -66,9 +74,17 @@
   <br>
   <i class="fa fa-link" aria-hidden="true"></i> Il gruppo è prendibile dopo l'esaurimento di un gruppo con una priorità maggiore. <br>
   <i class="fa fa-star" aria-hidden="true"></i> Il gruppo è di tipo speciale, limiti e completamenti sono gestiti con algoritmi specifici. <br>
-  <i class="fa fa-asterisk" aria-hidden="true"></i> Il gruppo è di tipo semplice, nessun limite e completamento definito. 
+  <i class="fa fa-asterisk" aria-hidden="true"></i> Il gruppo è di tipo semplice, nessun limite e completamento definito. <br>
+  <i class="fa fa-magic" aria-hidden="true"></i> Il gruppo è di tipo automatico, i codici vengono inseriti dal sistema sulla base di determinati eventi o configurazioni.<br>
+  
  </div>
 </div>
+
+  <div class="row text-center">
+	#{secure.link @AbsenceGroups.insertGroup(selected.id), class:'btn btn-primary',fa:'plus' }
+		Nuovo gruppo
+	#{/secure.link}
+  </div>
 
 
   

@@ -59,21 +59,23 @@
 </div>
 <div class="container">   
   <br>
-    #{if absenceType.onlySimpleGroupInvolved() }
-      #{alert color:'warning'}
-        <p>Questo codice non appartiene ad alcun gruppo o esclusivamente a gruppi semplici. 
-        E' possibile modificare la sua appartenenza a gruppi semplici.</p>
-      #{/alert}
-    #{/if}
-    #{else}
-        <p>Questo codice appartiene a gruppi programmati o particolari. La sua modifica è vincolata
+    #{if !absenceType.onlySimpleGroupInvolved() }
+      <p>Questo codice appartiene a gruppi programmati o particolari. La sua modifica è vincolata
         al rilascio delle prossime versioni ePAS.
         </p>
+    #{/if}
+    #{else}
+     
+     #{selectModels items:absenceType.takableGroup, as:'takableGroup' }
+      #{list items:takableGroup.groupAbsenceTypes, as:'group'}
+        ${group.description}
+      #{/list}
+     #{/list}    
+    involvedGroupAbsenceType
+    
     #{/else}
     
-    #{list items:absenceType.takableGroup, as:'takableGroup' }
-      ${takableGroup.groupAbsenceType.description}
-    #{/list}
+
 </div>
 
 

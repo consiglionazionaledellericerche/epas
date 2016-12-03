@@ -4,18 +4,21 @@
 
 <div class="container">
 
-  #{set breadcrumbs:['Gruppi Assenze':@AbsenceGroups.showGroups(), 
+  #{set breadcrumbs:['Gruppi Assenze':@AbsenceGroups.showGroups(null), 
     (groupAbsenceType.category):@AbsenceGroups.showGroups(groupAbsenceType.category.id), (groupAbsenceType):groupAbsenceType] /}
   
   #{breadcrumbs breadcrumbs, noHome:true, container:true /}
 
-	 #{form action:@AbsenceGroups.updateGroup(), method:'POST', autocomplete:false,
-		    class:'form form-horizontal', 'data-async':'#page_content',
-		    'data-async-error':'#groupData'}
+	 #{form action:@AbsenceGroups.saveGroup(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal'}
 		
 		<input type="hidden" name="groupAbsenceType.id" value="${groupAbsenceType.id}"/>
 		
+		#{f.input 'groupAbsenceType.name' /}
+		
 	    #{f.input 'groupAbsenceType.description'/}
+	    
+	    #{f.selectEnum 'groupAbsenceType.pattern', items:models.absences.GroupAbsenceType.GroupAbsenceTypePattern.values() /}
 	    
 	    #{if !groupAbsenceType.chainDescription.equals(groupAbsenceType.description) }
 	      #{f.input 'groupAbsenceType.chainDescription' /}
@@ -23,6 +26,11 @@
 	    #{else}
 	      #{f.input 'groupAbsenceType.chainDescription', value:'' /}
 	    #{/else}
+	    
+	    #{f.selectModel 'groupAbsenceType.category', items:allCategories /}
+	    
+	    #{f.booleanRadio 'groupAbsenceType.automatic' /}
+	    #{f.booleanRadio 'groupAbsenceType.initializable' /}
 	
 	    #{b.buttons center:true}   
 	      #{b.submit 'Salva' /}
