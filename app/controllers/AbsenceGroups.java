@@ -44,11 +44,14 @@ import models.absences.GroupAbsenceType.PeriodType;
 import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.TakableAbsenceBehaviour;
+import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
 import models.enumerate.QualificationMapping;
 
+import org.assertj.core.util.Sets;
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
 
+import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.db.jpa.JPA;
@@ -58,6 +61,7 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -249,8 +253,14 @@ public class AbsenceGroups extends Controller {
     groupAbsenceType.pattern = GroupAbsenceTypePattern.simpleGrouping;
     
     List<CategoryGroupAbsenceType> allCategories = CategoryGroupAbsenceType.findAll();
+    List<AbsenceType> allAbsenceTypes = AbsenceType.findAll();
     
-    render("@editGroup", groupAbsenceType, allCategories);
+    //Default pattern
+    Integer fixedLimit = -1;
+    AmountType takeAmountType = AmountType.units;
+    
+    render("@editGroup", groupAbsenceType, fixedLimit, takeAmountType, 
+        allCategories, allAbsenceTypes);
   }
   
   /**
@@ -261,34 +271,77 @@ public class AbsenceGroups extends Controller {
     GroupAbsenceType groupAbsenceType = GroupAbsenceType.findById(groupAbsenceTypeId);
     notFoundIfNull(groupAbsenceType);
     List<CategoryGroupAbsenceType> allCategories = CategoryGroupAbsenceType.findAll();
-    render(groupAbsenceType, allCategories);
+    List<AbsenceType> allAbsenceTypes = AbsenceType.findAll();
+    
+    //Stato precedente gruppo
+    AmountType takeAmountType = groupAbsenceType.takableAbsenceBehaviour.amountType;
+    Integer fixedLimit = groupAbsenceType.takableAbsenceBehaviour.fixedLimit;
+    Set<AbsenceType> takableCodes = groupAbsenceType.takableAbsenceBehaviour.takableCodes;
+    TakeAmountAdjustment takableAmountAdjustment = groupAbsenceType
+        .takableAbsenceBehaviour.takableAmountAdjustment;
+    AmountType complationAmountType = null;
+    Set<AbsenceType> complationCodes = Sets.newHashSet();
+    Set<AbsenceType> replacingCodes = Sets.newHashSet();
+    if (groupAbsenceType.complationAbsenceBehaviour != null) {
+      complationAmountType = groupAbsenceType.complationAbsenceBehaviour.amountType;
+      complationCodes = groupAbsenceType.complationAbsenceBehaviour.complationCodes;
+      replacingCodes = groupAbsenceType.complationAbsenceBehaviour.replacingCodes;
+    }
+      
+    render(groupAbsenceType, takeAmountType, fixedLimit, takableCodes, takableAmountAdjustment, 
+        complationAmountType, complationCodes, replacingCodes, 
+        allCategories, allAbsenceTypes);
   }
   
   /**
    * End point per il salvataggio del gruppo.
    * @param groupAbsenceType gruppo
    */
-  public static void saveGroup(@Valid GroupAbsenceType groupAbsenceType) {
+  public static void saveGroup(@Valid GroupAbsenceType groupAbsenceType, 
+      List<AbsenceType> takableCodes, 
+      @Required AmountType takeAmountType, 
+      @Required Integer fixedLimit, 
+      TakeAmountAdjustment takableAmountAdjustment, 
+      
+      AmountType complationAmountType,
+      List<AbsenceType> complationCodes, List<AbsenceType> replacingCodes) {
     
-    if (groupAbsenceType.isPersistent()) {
-      groupAbsenceType.save();  
-    } else {
-      
-      if (groupAbsenceType.pattern != GroupAbsenceTypePattern.simpleGrouping) {
-        flash.error("E' possibile creare solo gruppi di tipo semplice");
-        List<CategoryGroupAbsenceType> allCategories = CategoryGroupAbsenceType.findAll();
-        render("@editGroup", groupAbsenceType, allCategories);
+    if (takableCodes.isEmpty()) {
+      Validation.addError("takableCodes", "Deve contenere almeno un codice.");
+    }
+    if (complationAmountType != null) {
+      if (complationCodes.isEmpty()) {
+        Validation.addError("complationCodes", "Deve contenere almeno un codice.");
       }
-      
-      //simple grouping creation
-      groupAbsenceType.periodType = PeriodType.always;
-      TakableAbsenceBehaviour takableAbsenceBehaviour = new TakableAbsenceBehaviour();
-      takableAbsenceBehaviour.name = "T_" + groupAbsenceType.name;
-      takableAbsenceBehaviour.fixedLimit = -1;
-      takableAbsenceBehaviour.amountType = AmountType.units;
-      takableAbsenceBehaviour.save();
-      groupAbsenceType.takableAbsenceBehaviour = takableAbsenceBehaviour;
-      groupAbsenceType.save();
+      if (replacingCodes.isEmpty()) {
+        Validation.addError("replacingCodes", "Deve contenere almeno un codice.");
+      }
+    }
+    
+    if (validation.hasErrors()) {
+      List<CategoryGroupAbsenceType> allCategories = CategoryGroupAbsenceType.findAll();
+      List<AbsenceType> allAbsenceTypes = AbsenceType.findAll();
+      render("@editGroup", groupAbsenceType, 
+          takableCodes, takeAmountType, fixedLimit, takableAmountAdjustment, 
+          complationAmountType, complationCodes, replacingCodes, 
+          allCategories, allAbsenceTypes );
+    }
+    
+    if (!groupAbsenceType.isPersistent()) {
+            
+      if (groupAbsenceType.pattern != GroupAbsenceTypePattern.simpleGrouping) {
+        
+        //simple grouping creation
+        groupAbsenceType.periodType = PeriodType.always;
+        TakableAbsenceBehaviour takableAbsenceBehaviour = new TakableAbsenceBehaviour();
+        takableAbsenceBehaviour.name = "T_" + groupAbsenceType.name;
+        takableAbsenceBehaviour.fixedLimit = -1;
+        takableAbsenceBehaviour.amountType = AmountType.units;
+        takableAbsenceBehaviour.takableCodes = Sets.newHashSet(takableCodes);
+        takableAbsenceBehaviour.save();
+        groupAbsenceType.takableAbsenceBehaviour = takableAbsenceBehaviour;
+        groupAbsenceType.save();
+      }
     }
     flash.success("Operazione eseguita con successo");
     showGroups(groupAbsenceType.category.id);
