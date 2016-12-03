@@ -31,7 +31,23 @@
 	    
 	    #{f.booleanRadio 'groupAbsenceType.automatic' /}
 	    #{f.booleanRadio 'groupAbsenceType.initializable' /}
-	
+	    
+	    
+	    <!-- Parte takable -->
+	    
+	    #{f.selectEnum 'takeAmountType', items:models.absences.AmountType.values(), value:takeAmountType /}
+	    #{f.input 'fixedLimit', value:fixedLimit /}
+        #{f.selectEnum 'takableAmountAdjustment', items:models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment.values(), value:takableAmountAdjustment /}	    
+	    
+	    #{f.selectModels 'takableCodes.id', 
+ 		  value:takableCodes,
+               items:allAbsenceTypes /}
+
+        #{f.selectEnum 'complationAmountType', items:models.absences.AmountType.values(), value:complationAmountType /}
+		#{f.selectModels 'complationCodes.id', value:complationCodes, items:allAbsenceTypes /}
+        #{f.selectModels 'replacingCodes.id', value:replacingCodes, items:allAbsenceTypes /}      
+          
+	    
 	    #{b.buttons center:true}   
 	      #{b.submit 'Salva' /}
 	    #{/b.buttons}
