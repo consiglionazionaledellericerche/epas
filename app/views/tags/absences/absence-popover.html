@@ -36,7 +36,7 @@
      if (_remainingTroubles || !_absence.troubles.empty) {
        hasTroubles = true;
      }
-     involvedGroups = absence.absenceType.involvedGroupAbsenceType(true); 
+     involvedGroups = _absence.absenceType.involvedGroupAbsenceType(true); 
      if ( _person && !involvedGroups.empty) {
        hasGroups = true;
      }

@@ -21,6 +21,19 @@ absenceType.used=Usato
 groupAbsenceType=Gruppo di Codici
 groupAbsenceType.description=Descrizione
 groupAbsenceType.chainDescription=Descrizione Catena
+groupAbsenceType.automatic=Inserimento Automatico
+groupAbsenceType.initializable=Inizializzabile
+groupAbsenceType.category= Categoria
+groupAbsenceType.name=Nome
+groupAbsenceType.pattern= Pattern
+
+
+
+categoryGroupAbsenceType.name=Nome
+categoryGroupAbsenceType.description=Descrizione
+categoryGroupAbsenceType.priority=Priorità
+categoryGroupAbsenceType.tab=Tab
+
 TooEarlyReplacing=Codice di completamento anticipato
 
 justifiedType=Tempo giustificato
@@ -739,6 +752,10 @@ always=Sempre
 compensatoryRestCnr=Riposo Compensativo CNR
 vacationsCnr=Ferie CNR
 simpleGrouping=Gruppo Semplice
+GroupAbsenceTypePattern.compensatoryRestCnr=Riposo Compensativo CNR
+GroupAbsenceTypePattern.vacationsCnr=Ferie CNR
+GroupAbsenceTypePattern.simpleGrouping=Gruppo Semplice
+GroupAbsenceTypePattern.programmed=Programmato
 
 
 

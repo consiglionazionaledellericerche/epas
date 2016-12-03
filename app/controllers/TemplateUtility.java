@@ -31,7 +31,6 @@ import it.cnr.iit.epas.DateUtility;
 import manager.SecureManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
-import manager.services.absences.AbsenceForm.AbsenceInsertTab;
 
 import models.BadgeReader;
 import models.BadgeSystem;
@@ -419,21 +418,21 @@ public class TemplateUtility {
     }
   }
 
-  public List<AbsenceType> getAbsenceTypes(AbsenceInsertTab absenceInsertTab) {
-    if (absenceInsertTab.equals(AbsenceInsertTab.vacation)) {
-      return absenceTypeDao.absenceTypeCodeSet((Set) Sets.newHashSet(
-          AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode(),
-          AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode(),
-          AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode(),
-          AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode(),
-          AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()));
-    }
-    if (absenceInsertTab.equals(AbsenceInsertTab.compensatory)) {
-      return absenceTypeDao.absenceTypeCodeSet((Set) Sets.newHashSet(
-          AbsenceTypeMapping.RIPOSO_COMPENSATIVO.getCode()));
-    }
-    return Lists.newArrayList();
-  }
+//  public List<AbsenceType> getAbsenceTypes(AbsenceInsertTab absenceInsertTab) {
+//    if (absenceInsertTab.equals(AbsenceInsertTab.vacation)) {
+//      return absenceTypeDao.absenceTypeCodeSet((Set) Sets.newHashSet(
+//          AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode(),
+//          AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode(),
+//          AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode(),
+//          AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode(),
+//          AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()));
+//    }
+//    if (absenceInsertTab.equals(AbsenceInsertTab.compensatory)) {
+//      return absenceTypeDao.absenceTypeCodeSet((Set) Sets.newHashSet(
+//          AbsenceTypeMapping.RIPOSO_COMPENSATIVO.getCode()));
+//    }
+//    return Lists.newArrayList();
+//  }
 
   public boolean hasAdminRole() {
     return userDao.hasAdminRoles(Security.getUser().get());
