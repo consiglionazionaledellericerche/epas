@@ -67,7 +67,7 @@
       *{ Controllo Presenze Timbrature Mancanti / Presenza giornaliera / Riepilogo Mensile }*
 
       #{secure.li @Stampings.missingStamping(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected")) }
-      <i class="fa fa-clock-o" aria-hidden="true"></i>
+      <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
       #{/secure.li}
 
       #{secure.li @Stampings.dailyPresence(session.get("yearSelected"), session.get("monthSelected"), session.get("daySelected"), session.get("officeSelected")) }
