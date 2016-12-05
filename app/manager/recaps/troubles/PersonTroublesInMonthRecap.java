@@ -29,6 +29,7 @@ public class PersonTroublesInMonthRecap {
   public List<Integer> troublesNoAbsenceNoStampingsL = Lists.newArrayList();
   public List<Integer> troublesNoAbsenceUncoupledStampingsNotHolidayL = Lists.newArrayList();
   public List<Integer> troublesNoAbsenceUncoupledStampingsHolidayL = Lists.newArrayList();
+  public List<Integer> troublesNotEnoughWorkTime = Lists.newArrayList();
 
   public int holidayWorkingTimeNotAccepted = 0;
   public int holidayWorkingTimeAccepted = 0;
@@ -38,41 +39,42 @@ public class PersonTroublesInMonthRecap {
       Person person, LocalDate monthBegin, LocalDate monthEnd) {
 
     this.person = person;
-    List<PersonDayInTrouble> troubles = personDayInTroubleDao.getPersonDayInTroubleInPeriod(person, 
-        Optional.fromNullable(monthBegin), Optional.fromNullable(monthEnd),Optional.absent());
+    List<PersonDayInTrouble> troubles = personDayInTroubleDao.getPersonDayInTroubleInPeriod(person,
+        Optional.fromNullable(monthBegin), Optional.fromNullable(monthEnd), Optional.absent());
 
 
     for (PersonDayInTrouble trouble : troubles) {
 
-      if (trouble.cause.equals(Troubles.UNCOUPLED_FIXED)) {
-        this.troublesAutoFixedL.add(trouble.personDay.date.getDayOfMonth());
+      if (trouble.cause == Troubles.UNCOUPLED_FIXED) {
+        troublesAutoFixedL.add(trouble.personDay.date.getDayOfMonth());
       }
 
-      if (trouble.cause.equals(Troubles.NO_ABS_NO_STAMP)) {
-        this.troublesNoAbsenceNoStampingsL
-                .add(trouble.personDay.date.getDayOfMonth());
+      if (trouble.cause == Troubles.NO_ABS_NO_STAMP) {
+        troublesNoAbsenceNoStampingsL.add(trouble.personDay.date.getDayOfMonth());
       }
 
-      if (trouble.cause.equals(Troubles.UNCOUPLED_WORKING)) {
-        this.troublesNoAbsenceUncoupledStampingsNotHolidayL
-                .add(trouble.personDay.date.getDayOfMonth());
+      if (trouble.cause == Troubles.UNCOUPLED_WORKING) {
+        troublesNoAbsenceUncoupledStampingsNotHolidayL.add(trouble.personDay.date.getDayOfMonth());
       }
 
-      if (trouble.cause.equals(Troubles.UNCOUPLED_HOLIDAY)) {
-        this.troublesNoAbsenceUncoupledStampingsHolidayL
-                .add(trouble.personDay.date.getDayOfMonth());
+      if (trouble.cause == Troubles.UNCOUPLED_HOLIDAY) {
+        troublesNoAbsenceUncoupledStampingsHolidayL.add(trouble.personDay.date.getDayOfMonth());
+      }
+
+      if (trouble.cause == Troubles.NOT_ENOUGH_WORKTIME) {
+        troublesNotEnoughWorkTime.add(trouble.personDay.date.getDayOfMonth());
       }
     }
 
     this.holidayWorkingTimeNotAccepted = personManager
-            .holidayWorkingTimeNotAccepted(person,
-                    Optional.fromNullable(monthBegin.getYear()),
-                    Optional.fromNullable(monthBegin.getMonthOfYear()));
+        .holidayWorkingTimeNotAccepted(person,
+            Optional.fromNullable(monthBegin.getYear()),
+            Optional.fromNullable(monthBegin.getMonthOfYear()));
 
     this.holidayWorkingTimeAccepted = personManager
-            .holidayWorkingTimeAccepted(person,
-                    Optional.fromNullable(monthBegin.getYear()),
-                    Optional.fromNullable(monthBegin.getMonthOfYear()));
+        .holidayWorkingTimeAccepted(person,
+            Optional.fromNullable(monthBegin.getYear()),
+            Optional.fromNullable(monthBegin.getMonthOfYear()));
 
   }
 
