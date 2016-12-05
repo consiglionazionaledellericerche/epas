@@ -32,4 +32,10 @@ public class PersonShift extends BaseModel {
 
   @OneToMany(mappedBy = "personShift")
   public List<PersonShiftDay> personShiftDays = new ArrayList<PersonShiftDay>();
+  
+  @Override
+  public String toString() {
+    return this.person.name +" "+this.person.surname;
+  }
+
 }

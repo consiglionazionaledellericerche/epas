@@ -1,11 +1,32 @@
 #{modalAsync id:'defaultModal', button:'Salva', 
-title: 'Gestisci attività' }
+title: 'Assegna personale alla attività' }
 <div id="absenceCodeData">
-#{form action:@Competences.evaluateShift(), method:'POST', autocomplete:false,
+	
+#{form action:@Competences.linkPeopleToShift(), method:'POST', autocomplete:false,
   class:'form form-horizontal', 'data-async':'#page_content',
   'data-async-error':'#absenceCodeData'}
-
-
+	#{if peopleForShift.isEmpty()}
+		#{alert color:'warning'}
+			Per poter assegnare dei dipendenti all'attività <strong>${shiftType.description}</strong>
+			occorre prima abilitare la competenza turno ai dipendenti stessi andando su: <br>
+			<i>Amministrazione</i> <i class="fa fa-long-arrow-right" aria-hidden="true"></i> 
+			<i>Competenze</i> <i class="fa fa-long-arrow-right" aria-hidden="true"></i>
+			<i>Abilita competenze</i>
+		#{/alert}
+	#{/if}
+	#{else}
+	#{alert color:'info'}
+		Selezionare dalla lista le persone che si intende associare al turno <strong>${shiftType.description}</strong>
+		
+	#{/alert}
+		#{f.selectModels 'peopleIds',
+  		items:peopleForShift, placeholder:'I codici di competenza' /}
+	#{/else}
+	
+  
+  #{b.buttons center:true}
+  		#{b.submit 'Ok'/}
+  #{/b.buttons}
 
 #{/form}
 
