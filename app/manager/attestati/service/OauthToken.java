@@ -14,5 +14,5 @@ public class OauthToken implements Serializable {
   public String refresh_token;
   public int expires_in;
   public String scope;
-  public LocalDateTime took_at = LocalDateTime.now();
+  public LocalDateTime taken_at = LocalDateTime.now();
 }

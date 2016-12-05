@@ -29,6 +29,7 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
 
 import injection.StaticInject;
+import static play.Invoker.executor;
 
 import java.util.List;
 import java.util.Map;
@@ -36,8 +37,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static play.Invoker.executor;
 
 /**
  * @author daniele
@@ -122,10 +121,10 @@ public final class CacheValues {
     public ListenableFuture<OauthToken> reload(final String key, OauthToken token)
         throws NoSuchFieldException {
       // Se non sta per scadere restituisco quello che ho già
-      if (!LocalDateTime.now().isAfter(token.took_at
+      if (!LocalDateTime.now().isAfter(token.taken_at
           .plusSeconds(token.expires_in - FIVE_MINUTES))) {
         return Futures.immediateFuture(token);
-      } else if (LocalDateTime.now().isAfter(token.took_at.plusSeconds(token.expires_in))) {
+      } else if (LocalDateTime.now().isAfter(token.taken_at.plusSeconds(token.expires_in))) {
         // Se è già scaduto lo richiedo in maniera sincrona
         return Futures.immediateFuture(certification.refreshToken(token));
       } else {
