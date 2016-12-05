@@ -948,15 +948,22 @@ public class Competences extends Controller {
     render(dtoList, cat, shiftList, type);
   }
   
-  public static void manageShiftType(Long shiftTypeId, Long officeId) {
+  public static void manageShiftType(Long shiftTypeId) {
     Optional<ShiftType> type = shiftDao.getShiftTypeById(shiftTypeId);
     if (!type.isPresent()) {
       flash.error("Si cerca di caricare un'attività inesistente! Verificare l'id");
-      activateServices(officeId);
+      activateServices(new Long(session.get("officeSelected")));
     } else {
-      Office office = officeDao.getOfficeById(officeId);
-      List<PersonShift> peopleForShift = shiftDao.getPeopleForShift(office); 
+      ShiftType shiftType = type.get();
+      Office office = officeDao.getOfficeById(shiftType.shiftCategories.office.id);
+      List<PersonShift> peopleForShift = shiftDao.getPeopleForShift(office);
+      
+      render(peopleForShift,shiftType, office);
     }
+  }
+  
+  public static void linkPeopleToShift(List<Long> peopleIds) {
+    
   }
   
   /**

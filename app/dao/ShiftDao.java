@@ -150,7 +150,8 @@ public class ShiftDao extends DaoBase {
   public List<PersonShift> getPeopleForShift(Office office) {
     final QPersonShift ps = QPersonShift.personShift;
     final QPerson person = QPerson.person;
-    JPQLQuery query = getQueryFactory().from(person).leftJoin(person.personShift, ps).where(person.office.eq(office));
+    JPQLQuery query = getQueryFactory().from(person)
+        .leftJoin(person.personShift, ps).fetchAll().where(person.office.eq(office).and(person.eq(ps.person)));
     return query.list(ps);
   }
 

@@ -333,6 +333,8 @@ PDFReport.thNoStampings=Mancata timbratura
 PDFReport.thReqHour=Num. di ore spettanti
 PDFReport.thWarnStampings=Orario incompleto fuori tolleranza
 
+peopleIds=Persone associabili all'attività
+
 person.badgeNumber=Numero Badge
 person.badge= Numero badge
 person.birthday=Data di nascita
