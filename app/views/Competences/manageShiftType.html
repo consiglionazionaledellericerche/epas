@@ -15,12 +15,34 @@ title: 'Assegna personale alla attività' }
 		#{/alert}
 	#{/if}
 	#{else}
+	<table class="table" datatable>
+	<thead>
+    	<tr>
+    		<th>Turnista</th>
+    		<th>Attività</th>
+    		<th>Data inizio</th>
+    		<th>Data fine</th>
+    	</tr>
+    </thead>
+    <tbody>
+    #{list items:associatedPeopleShift, as:'aps'}
+    	<tr>
+    		<td>aps.personShift.person.fullname()</td>
+    		<td>aps.shiftType.description</td>
+    		<td>aps.beginDate</td>
+    		<td>aps.endDate</td>
+    	</tr>
+    #{/list}
+    </tbody>
+	</table>
 	#{alert color:'info'}
-		Selezionare dalla lista le persone che si intende associare al turno <strong>${shiftType.description}</strong>
-		
+		Selezionare dalla lista le persone che si intende associare al turno <strong>${shiftType.description}</strong><br>
+		e specificare il periodo per cui si vuole associare la persona al turno.
 	#{/alert}
 		#{f.selectModels 'peopleIds',
   		items:peopleForShift, placeholder:'I codici di competenza' /}
+  		#{f.date 'beginDate', value:beginDate?.format() /}
+	    #{f.date 'endDate', value:endDate?.format() /}
 	#{/else}
 	
   
