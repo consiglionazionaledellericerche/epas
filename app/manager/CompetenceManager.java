@@ -35,7 +35,9 @@ import models.PersonCompetenceCodes;
 import models.PersonDay;
 import models.PersonReperibilityType;
 import models.PersonShift;
+import models.PersonShiftShiftType;
 import models.ShiftTimeTable;
+import models.ShiftType;
 import models.TotalOvertime;
 
 import org.apache.commons.lang.StringUtils;
@@ -70,6 +72,7 @@ public class CompetenceManager {
   private final PersonReperibilityDayDao reperibilityDao;
   private final PersonStampingRecapFactory stampingsRecapFactory;
   private final PersonShiftDayDao personShiftDayDao;
+  private final ShiftDao shiftDao;
 
   /**
    * Costruttore.
@@ -86,7 +89,8 @@ public class CompetenceManager {
       OfficeDao officeDao, CompetenceDao competenceDao,
       PersonDayDao personDayDao, IWrapperFactory wrapperFactory,
       PersonDayManager personDayManager, PersonReperibilityDayDao reperibilityDao,
-      PersonStampingRecapFactory stampingsRecapFactory, PersonShiftDayDao personshiftDayDao) {
+      PersonStampingRecapFactory stampingsRecapFactory, PersonShiftDayDao personshiftDayDao,
+      ShiftDao shiftDao) {
     this.competenceCodeDao = competenceCodeDao;
     this.officeDao = officeDao;
     this.competenceDao = competenceDao;
@@ -96,6 +100,7 @@ public class CompetenceManager {
     this.reperibilityDao = reperibilityDao;
     this.stampingsRecapFactory = stampingsRecapFactory;   
     this.personShiftDayDao = personshiftDayDao;
+    this.shiftDao = shiftDao;
   }
 
   public static Predicate<CompetenceCode> isReperibility() {
@@ -619,6 +624,60 @@ public class CompetenceManager {
 
     return codeToRemove;
   }
+  
+  /**
+   * 
+   * @param psstList la lista dei personShiftShiftType
+   * @param peopleIds la lista degli id dei personShift
+   * @return la lista dei personShift da aggiungere alla tabella 
+   *     dei PersonShiftShiftType.
+   */
+  public List<PersonShift> peopleToAdd(List<PersonShiftShiftType> psstList, List<Long> peopleIds) {
+    List<PersonShift> peopleToAdd = Lists.newArrayList();
+    if (peopleIds == null || peopleIds.isEmpty()) {
+      return peopleToAdd;
+    }
+    for (Long id : peopleIds) {
+      PersonShift ps = shiftDao.gerPersonShiftById(id);
+      if (psstList.isEmpty()) {
+        peopleToAdd.add(ps);
+      } else {
+        boolean found = false;
+        for (PersonShiftShiftType psst : psstList) {
+          if (psst.personShift.equals(ps)) {
+            found = true;
+          }
+        }
+        if (!found) {
+          peopleToAdd.add(ps);
+        }
+      }      
+    }
+    return peopleToAdd;
+  }
+  
+  /**
+   * 
+   * @param psstList la lista dei personShiftShiftType da controllare
+   * @param peopleIds la lista degli id dei personShift
+   * @return la lista dei personShift da rimuovere.
+   */
+  public List<PersonShift> peopleToDelete(List<PersonShiftShiftType> psstList, 
+      List<Long> peopleIds) {
+    List<PersonShift> peopleToRemove = Lists.newArrayList();
+    if (peopleIds == null || peopleIds.isEmpty()) {
+      psstList.forEach(item -> {
+        peopleToRemove.add(item.personShift);
+      });
+    } else {
+      psstList.forEach(item -> {
+        if (!peopleIds.contains(item.personShift.id)) {
+          peopleToRemove.add(item.personShift);
+        }
+      });
+    }
+    return peopleToRemove;
+  }
 
   /**
    * il metodo che persiste la situazione di codici di competenza per la persona.
@@ -672,6 +731,34 @@ public class CompetenceManager {
     });
   }
 
+  /**
+   * 
+   * @param peopleToAdd
+   * @param shiftType
+   * @param peopleToRemove
+   * @param beginDate
+   * @param endDate
+   */
+  public void persistPersonShiftShiftType(List<PersonShift> peopleToAdd, ShiftType shiftType,
+      List<PersonShift> peopleToRemove, LocalDate beginDate, LocalDate endDate) {
+    
+    peopleToAdd.forEach(item -> {
+      PersonShiftShiftType psst = new PersonShiftShiftType();
+      psst.personShift = item;
+      psst.beginDate = beginDate;
+      psst.endDate = endDate;
+      psst.shiftType = shiftType;
+      psst.save();
+    });
+   
+    peopleToRemove.forEach(item -> {
+      Optional<PersonShiftShiftType> psst = shiftDao.getByPersonShiftAndShiftType(item, shiftType);
+      if (psst.isPresent()) {
+        psst.get().endDate = endDate;
+        psst.get().save();
+      }
+    });
+  }
   /**
    * 
    * @param personList la lista di persone attive 

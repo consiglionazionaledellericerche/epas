@@ -50,6 +50,7 @@ import models.Person;
 import models.PersonCompetenceCodes;
 import models.PersonReperibilityType;
 import models.PersonShift;
+import models.PersonShiftShiftType;
 import models.ShiftCategories;
 import models.ShiftTimeTable;
 import models.ShiftType;
@@ -948,6 +949,10 @@ public class Competences extends Controller {
     render(dtoList, cat, shiftList, type);
   }
   
+  /**
+   * metodo che ritorna al template le informazioni sull'attività passata come parametro.
+   * @param shiftTypeId l'id dell'attività da configurare
+   */
   public static void manageShiftType(Long shiftTypeId) {
     Optional<ShiftType> type = shiftDao.getShiftTypeById(shiftTypeId);
     if (!type.isPresent()) {
@@ -957,20 +962,35 @@ public class Competences extends Controller {
       ShiftType shiftType = type.get();
       Office office = officeDao.getOfficeById(shiftType.shiftCategories.office.id);
       List<PersonShift> peopleForShift = shiftDao.getPeopleForShift(office);
-      
-      render(peopleForShift,shiftType, office);
+      List<PersonShiftShiftType> associatedPeopleShift = shiftDao
+          .getAssociatedPeopleToShift(shiftType);
+      render(peopleForShift,shiftType, office, associatedPeopleShift);
     }
-  }
-  
-  public static void linkPeopleToShift(List<Long> peopleIds) {
-    
   }
   
   /**
    * 
-   * @param id l'identificativo del tipo di turno
-   * @param shiftCategoryId l'identificativo del tipo di servizio
-   *     linka il tipo di turno al servizio selezionato.
+   * @param peopleIds
+   * @param shiftType
+   * @param beginDate
+   * @param endDate
+   */
+  public static void linkPeopleToShift(List<Long> peopleIds, ShiftType shiftType,
+      LocalDate beginDate, LocalDate endDate) {
+    notFoundIfNull(shiftType);
+    rules.checkIfPermitted(shiftType.shiftCategories.office);
+    List<PersonShiftShiftType> psstList = shiftDao.getAssociatedPeopleToShift(shiftType);
+    List<PersonShift> peopleToAdd = competenceManager.peopleToAdd(psstList, peopleIds);
+    List<PersonShift> peoleToRemove = competenceManager.peopleToDelete(psstList, peopleIds);
+    competenceManager.persistPersonShiftShiftType(peopleToAdd, shiftType, 
+        peoleToRemove, beginDate, endDate);
+  }
+  
+  /**
+   * metodo che associa il servizio, all'attività e alla timetable associata.
+   * @param shift l'id della timetable da associare al turno
+   * @param cat il servizio per cui si vuol definire l'attività
+   * @param type l'attività da linkare al servizio
    */
   public static void linkTimeTableToShift(Long shift, ShiftCategories cat, ShiftType type) {
     

@@ -11,6 +11,7 @@ import models.Office;
 import models.Person;
 import models.PersonShift;
 import models.PersonShiftDay;
+import models.PersonShiftShiftType;
 import models.ShiftCancelled;
 import models.ShiftCategories;
 import models.ShiftTimeTable;
@@ -156,6 +157,17 @@ public class ShiftDao extends DaoBase {
   }
 
   /**
+   * 
+   * @param id l'id del personShift
+   * @return il personShift associato all'id passato come parametro.
+   */
+  public PersonShift gerPersonShiftById(Long id) {
+    final QPersonShift ps = QPersonShift.personShift;
+    JPQLQuery query = getQueryFactory().from(ps).where(ps.id.eq(id));
+    return query.singleResult(ps);        
+  }
+  
+  /**
    * @author arianna
 
    * @return la categoria associata al tipo di turno.
@@ -230,6 +242,32 @@ public class ShiftDao extends DaoBase {
     final QShiftTimeTable stt = QShiftTimeTable.shiftTimeTable;
     JPQLQuery query = getQueryFactory().from(stt).where(stt.id.eq(id));
     return query.singleResult(stt);
+  }
+  
+  /**
+   * 
+   * @param shiftType l'attività per cui si vogliono le persone associate
+   * @return la lista di persone associate all'attività passata come parametro.
+   */
+  public List<PersonShiftShiftType> getAssociatedPeopleToShift(ShiftType shiftType) {
+    final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
+    JPQLQuery query = getQueryFactory().from(psst).where(psst.shiftType.eq(shiftType));
+    return query.list(psst);
+  }
+  
+  /**
+   * 
+   * @param personShift
+   * @param shiftType
+   * @return
+   */
+  public Optional<PersonShiftShiftType> getByPersonShiftAndShiftType(PersonShift personShift, 
+      ShiftType shiftType) {
+    final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
+    JPQLQuery query = getQueryFactory().from(psst)
+        .where(psst.personShift.eq(personShift)
+            .and(psst.shiftType.eq(shiftType)));
+    return Optional.fromNullable(query.singleResult(psst));
   }
 }
 
