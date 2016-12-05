@@ -12,7 +12,7 @@
   <ul class="nav nav-tabs">
     <li #{if _activeAction.equals("missingStampings")} class="active" #{/if}>
       <a href="@{Stampings.missingStamping(session.get("yearSelected"),
-         session.get("monthSelected"), session.get("officeSelected") )}">Timbrature Mancanti</a>
+         session.get("monthSelected"), session.get("officeSelected") )}">Problemi sui giorni</a>
     </li>
     <li #{if _activeAction.equals("dailyPresence")} class="active" #{/if}>
       <a href="@{Stampings.dailyPresence(session.get("yearSelected"),

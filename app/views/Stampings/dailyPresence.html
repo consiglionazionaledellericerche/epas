@@ -7,22 +7,14 @@
 #{/set}
 
 <div class="container">
-  #{if office}
-  #{title title:'Controllo presenze ' + office.name /}
-  #{/if}
-  #{else}
-  #{title title:'Controllo presenze ' + date.format() /}
-  #{/else}
+  #{title title:'Presenza giornaliera del ' + date.format() + ' - ' + office?.name /}
 </div>
 
 #{if !groupView}
 #{stampings.presenceDashboardTabs activeAction:'dailyPresence' /}
 #{/if}
 
-<div class="container-fluid col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
-  <div class="center">
-    #{title title:date.format()/}
-  </div>
+<div class="container">
   <table id="tabellonetimbrature" class="table table-bordered table-condensed table-hover">
     <tr>
       <th class="group-single">Nome</th>
