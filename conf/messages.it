@@ -1,65 +1,5 @@
 ADD= Inserimento
 
-absenceFile=Allegato
-absenceType= Codice assenza
-absenceType.certificateCode= Attestati
-absenceType.code= Codice
-absenceType.consideredWeekEnd= Festivi
-absenceType.description= Descrizione
-absenceType.internalUse= Interno
-absenceType.qualifications= Livelli
-absenceType.tecnici= Tecnici
-absenceType.tecnologi= Tecnologi
-absenceType.validFrom= Inizio validita'
-absenceType.validTo= Fine validita'
-absenceType.active= Attivo
-absenceType.justifiedTypesPermitted=Tempo giustificato  
-absenceType.timeForMealTicket=Considerato per buono pasto
-absenceType.justifiedTime=Minuti specificati nel tipo assenza
-absenceType.used=Usato
-
-groupAbsenceType=Gruppo di Codici
-groupAbsenceType.description=Descrizione
-groupAbsenceType.chainDescription=Descrizione Catena
-groupAbsenceType.automatic=Inserimento Automatico
-groupAbsenceType.initializable=Inizializzabile
-groupAbsenceType.category= Categoria
-groupAbsenceType.name=Nome
-groupAbsenceType.pattern= Pattern
-
-
-
-categoryGroupAbsenceType.name=Nome
-categoryGroupAbsenceType.description=Descrizione
-categoryGroupAbsenceType.priority=Priorità
-categoryGroupAbsenceType.tab=Tab
-
-TooEarlyReplacing=Codice di completamento anticipato
-
-justifiedType=Tempo giustificato
-
-insert=Inserimento
-insertReplacing = Inserimento Rimpiazzamento
-
-absence_type_minutes=Tempo specificato nel tipo assenza
-all_day=Tutto il giorno
-half_day=Mezza giornata
-assign_all_day=Assegna l'intera giornata lavorativa
-specified_minutes=Specificare ore e minuti
-all_day_limit=Niente ma scala una giornata dal limite
-specified_minutes_limit=Niente ma scala i minuti dal limite
-
-nothing=Niente
-minutes=Minuti
-hours=Ore
-units=Giorni
-month=Mese
-year=Anno
-programmed=Programmato
-child0_12=Figlio 0-12 anni
-child0_6=Figlio 0-6 anni
-workingTimeAndWorkingPeriodPercent=Percentuale Tempo Lavoro e Orario Lavoro
-
 administrations= Amministrazione
 administrator= Amministratore
 adminPassword= Password Amministratore
@@ -483,9 +423,7 @@ takableTotal=Limite Totale
 takableUsed=Limite Consumato
 complationUsed=Completato
 
-initializationGroup.hoursInput =Ore Utilizzate
-initializationGroup.minutesInput =Minuti Utilizzati
-initializationGroup.unitsInput=Giorni Completi Utilizzati
+
 
 
 wtt.description= Nome Tipo Orario
@@ -609,41 +547,9 @@ AccountRole.DEVELOPER= developer
 AccountRole.ADMIN= Admin
 AccountRole.RO_ADMIN= Admin in sola lettura
 
-AccumulationType.no= No
-AccumulationType.yearly= Annuale
-AccumulationType.monthly= Mensile
-AccumulationType.always= Sempre
-
-AccumulationBehaviour.nothing= Niente
-AccumulationBehaviour.replaceCodeAndDecreaseAccumulation= Sostituisce il codice e decrementa l'accumulo
-AccumulationBehaviour.noMoreAbsencesAccepted= Non accettare ulteriori assenze
-
 chartType= Tipo di grafico
 ChartTypes.BARS= Grafico a barre
 ChartTypes.COLUMNS= Grafico a colonne
-
-JustifiedTimeAtWork.AllDay= Intera giornata
-JustifiedTimeAtWork.HalfDay= Mezza giornata
-JustifiedTimeAtWork.OneHour= 1 ora
-JustifiedTimeAtWork.TwoHours= 2 ore
-JustifiedTimeAtWork.ThreeHours= 3 ore
-JustifiedTimeAtWork.FourHours= 4 ore
-JustifiedTimeAtWork.FiveHours= 5 ore
-JustifiedTimeAtWork.SixHours= 6 ore
-JustifiedTimeAtWork.SevenHours= 7 ore
-JustifiedTimeAtWork.EightHours= 8 ore
-JustifiedTimeAtWork.OneHourMealTimeCounting= 1 ora (conteggiata per buono pasto)
-JustifiedTimeAtWork.TwoHoursMealTimeCounting= 2 ore (conteggiate per buono pasto)
-JustifiedTimeAtWork.ThreeHoursMealTimeCounting= 3 ore (conteggiate per buono pasto)
-JustifiedTimeAtWork.FourHoursMealTimeCounting= 4 ore (conteggiate per buono pasto)
-JustifiedTimeAtWork.FiveHoursMealTimeCounting= 5 ore (conteggiate per buono pasto)
-JustifiedTimeAtWork.SixHoursMealTimeCounting= 6 ore (conteggiate per buono pasto)
-JustifiedTimeAtWork.SevenHoursMealTimeCounting= 7 ore (conteggiate per buono pasto)
-JustifiedTimeAtWork.EightHoursMealTimeCounting= 8 ore (conteggiate per buono pasto)
-JustifiedTimeAtWork.Nothing= Niente
-JustifiedTimeAtWork.TimeToComplete= Quello che manca
-JustifiedTimeAtWork.ReduceWorkingTimeOfTwoHours= Riduce orario di lavoro di 2 ore
-JustifiedTimeAtWork.AssignAllDay= Assegna intera giornata
 
 LimitType.monthly= Mensile
 LimitType.yearly= Annuale
@@ -719,8 +625,115 @@ configurationDto.localdateNewValue=Nuovo Valore
 WayType.in= Ingresso
 WayType.out= Uscita
 
-# Enumerati Assenze
+###########################################################################
+#	Descrizioni campi (usati nei popovers e nelle descrizioni dei campi)
+###########################################################################
 
+emailToContact.popover= L&#39;indirizzo email qui specificato sarà utilizzato come campo per i reply alle mail inviate dal sistema
+
+institute.cds.popover= Codice univoco del centro di spesa (per l&#39;IIT è 044)
+institute.code.popover= Sigla Istituto - Es. IIT,IBBR,ISAFOM etc.
+
+lunchPauseStart.popover= Inserire l&#39;orario nel formato hh:mm
+lunchPauseEnd.popover= Inserire l&#39;orario nel formato hh:mm
+
+office.code.popover= Codice univoco della sede (per l&#39;IIT di Pisa è 044000)
+office.codeId.popover= Id univoco della Sede. Serve per l&#39;invio degli attestati a Roma (per l&#39;IIT di Pisa è &quot;223400&quot;)
+office.joiningDate.popover= Data di affiliazione della sede
+
+time.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
+
+person.eppn.popover= Inserire la propria email cnr Es:mario.rossi@cnr.it
+
+domain.popover= Specificare il dominio sprovvisto del carattere @ (Es. iit.cnr.it)
+
+###########################################################################
+#	Messaggi utilizzati nelle viste
+###########################################################################
+
+tr_autocertification.alert= Per poter abilitare la funzione <strong>&{TR_AUTOCERTIFICATION}</strong> &egrave; necessario caricare un documento con l&apos;autorizzazione del proprio direttore.
+tr_autocertification.file= File di Autorizzazione
+
+description.WORKING_OFF_SITE= L&apos;abilitazione del parametro <strong>&{WORKING_OFF_SITE}</strong> permette, se abilitato anche nella configurazione del dipendente, l&apos;inserimento autonomo delle informazioni relative al <strong>Lavoro Fuori Sede</strong>.<br> L&apos;inserimento/modifica/eliminazione di una timbratura o del codice d'assenza 105BP, comporta l'invio di una notifica ai propri amministratori del personale.<br> L&apos;inserimento di queste informazioni &egrave; limitato solamente agli ultimi 2 mesi e non &egrave permesso nei mesi per i quali sono gi&agrave; stati inviati gli attestati di presenza.
+description.TR_AUTOCERTIFICATION= L&apos;abilitazione del parametro <strong>&{TR_AUTOCERTIFICATION}</strong> attiver&agrave; la possibilit&agrave; per i Tecnologi e i Ricercatori di questa sede di autocertificare la propria presenza a lavoro, e dunque di inserire in autonomia le proprie timbrature.<br> L&apos;inserimento di queste informazioni &egrave; limitato solamente agli ultimi 2 mesi e non &egrave permesso nei mesi per i quali sono gi&agrave; stati inviati gli attestati di presenza.
+
+###########################################################################
+#	COMPONENTE ASSENZE
+###########################################################################
+
+absenceFile=Allegato
+absenceType= Codice assenza
+absenceType.certificateCode= Attestati
+absenceType.code= Codice
+absenceType.consideredWeekEnd= Festivi
+absenceType.description= Descrizione
+absenceType.internalUse= Interno
+absenceType.qualifications= Livelli
+absenceType.tecnici= Tecnici
+absenceType.tecnologi= Tecnologi
+absenceType.validFrom= Inizio validita'
+absenceType.validTo= Fine validita'
+absenceType.active= Attivo
+absenceType.justifiedTypesPermitted=Tempo giustificato  
+absenceType.timeForMealTicket=Considerato per buono pasto
+absenceType.justifiedTime=Minuti specificati nel tipo assenza
+absenceType.used=Usato
+
+groupAbsenceType=Gruppo di Codici
+groupAbsenceType.description=Descrizione
+groupAbsenceType.chainDescription=Descrizione Catena
+groupAbsenceType.automatic=Inserimento Automatico
+groupAbsenceType.initializable=Inizializzabile
+groupAbsenceType.category= Categoria
+groupAbsenceType.name=Nome
+groupAbsenceType.pattern= Pattern
+
+categoryGroupAbsenceType.name=Nome
+categoryGroupAbsenceType.description=Descrizione
+categoryGroupAbsenceType.priority=Priorità
+categoryGroupAbsenceType.tab=Tab
+
+justifiedType=Tempo giustificato
+
+insert=Inserimento
+insertReplacing = Inserimento Rimpiazzamento
+
+absence_type_minutes=Tempo specificato nel tipo assenza
+all_day=Tutto il giorno
+half_day=Mezza giornata
+assign_all_day=Assegna l'intera giornata lavorativa
+specified_minutes=Specificare ore e minuti
+all_day_limit=Niente ma scala una giornata dal limite
+specified_minutes_limit=Niente ma scala i minuti dal limite
+
+nothing=Niente
+minutes=Minuti
+hours=Ore
+units=Giorni
+month=Mese
+year=Anno
+programmed=Programmato
+child0_12=Figlio 0-12 anni
+child0_6=Figlio 0-6 anni
+workingTimeAndWorkingPeriodPercent=Percentuale Tempo Lavoro e Orario Lavoro
+takeAmountType=Tipo Limite
+fixedLimit=Limite fissato
+takableAmountAdjustment=Aggiustamento limite fissato
+takableCodes.id=Codici Prendibili
+complationAmountType=Tipo Completamento
+complationCodes.id=Codici Completamento
+replacingCodes.id=Codici Rimpiazzamento
+TakeAmountAdjustment.workingTimePercent=Percentuale tipo orario
+TakeAmountAdjustment.workingPeriodPercent=Percentuale periodo lavorato
+TakeAmountAdjustment.workingTimeAndWorkingPeriodPercent=Percentuale tipo orario e periodo lavorato
+AmountType.minutes=Minuti
+AmountType.units=Giorni
+
+initializationGroup.hoursInput =Ore Utilizzate
+initializationGroup.minutesInput =Minuti Utilizzati
+initializationGroup.unitsInput=Giorni Completi Utilizzati
+
+TooEarlyReplacing=Codice di completamento anticipato
 MissingReplacing=Manca il codice di rimpiazzamento.
 WrongReplacing=Il codice di rimpiazzamento presente non è quello corretto.
 CompromisedReplacing=La sequenza dei rimpiazzamenti è compromessa.
@@ -757,54 +770,17 @@ GroupAbsenceTypePattern.vacationsCnr=Ferie CNR
 GroupAbsenceTypePattern.simpleGrouping=Gruppo Semplice
 GroupAbsenceTypePattern.programmed=Programmato
 
-
-
-###########################################################################
-#	Descrizioni campi (usati nei popovers e nelle descrizioni dei campi)
-###########################################################################
-
+#DA VERIFICARE
 absenceType.code.popover= Codice di assenza
-
 absenceType.certificateCode.popover= Usare solo se il codice che deve andare negli attestati di presenza è diverso da quello definito nella riga precedente (questo diventa il codice ufficiale e il precedente un alias per uso interno)
-
 absenceType.description.popover= Descrizione codice di assenza
-
 absenceType.internalUse.popover= Seleziona "Si" se il codice è solo per uso interno (non previsto dal CNR) non sarà trasferito negli attestati di presenza
-
 absenceType.validFrom.popover= Data inizio validità di questo codice (se vuoto valido da sempre)
-
 absenceType.validTo.popover= Data fine validità di questo codice (se vuoto valido per sempre)
-
 modifierType.popover= Scegliere "Giustifica" se si desidera che il codice giustifichi un certo numero di ore;Al contrario si selezioni "Assegna" se si vuole che il codice aggiunga le ore al tempo di lavoro della persona (es. cod 105BP)
-
 absenceType.justifiedTimeAtWork.popover= Il valore scelto influenzerà il calcolo nel tempo del lavoro della giornata nel quale verrà utilizzato questo codice di assenza
-
 absenceType.consideredWeekEnd.popover= Seleziona Si se il codice può essere inserito anche nel week end e nei festivi
 
-emailToContact.popover= L&#39;indirizzo email qui specificato sarà utilizzato come campo per i reply alle mail inviate dal sistema
-
-institute.cds.popover= Codice univoco del centro di spesa (per l&#39;IIT è 044)
-institute.code.popover= Sigla Istituto - Es. IIT,IBBR,ISAFOM etc.
-
-lunchPauseStart.popover= Inserire l&#39;orario nel formato hh:mm
-lunchPauseEnd.popover= Inserire l&#39;orario nel formato hh:mm
-
-office.code.popover= Codice univoco della sede (per l&#39;IIT di Pisa è 044000)
-office.codeId.popover= Id univoco della Sede. Serve per l&#39;invio degli attestati a Roma (per l&#39;IIT di Pisa è &quot;223400&quot;)
-office.joiningDate.popover= Data di affiliazione della sede
-
-time.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
-
-person.eppn.popover= Inserire la propria email cnr Es:mario.rossi@cnr.it
-
-domain.popover= Specificare il dominio sprovvisto del carattere @ (Es. iit.cnr.it)
-
 ###########################################################################
-#	Messaggi utilizzati nelle viste
+#	FINE COMPONENTE ASSENZE
 ###########################################################################
-
-tr_autocertification.alert= Per poter abilitare la funzione <strong>&{TR_AUTOCERTIFICATION}</strong> &egrave; necessario caricare un documento con l&apos;autorizzazione del proprio direttore.
-tr_autocertification.file= File di Autorizzazione
-
-description.WORKING_OFF_SITE= L&apos;abilitazione del parametro <strong>&{WORKING_OFF_SITE}</strong> permette, se abilitato anche nella configurazione del dipendente, l&apos;inserimento autonomo delle informazioni relative al <strong>Lavoro Fuori Sede</strong>.<br> L&apos;inserimento/modifica/eliminazione di una timbratura o del codice d'assenza 105BP, comporta l'invio di una notifica ai propri amministratori del personale.<br> L&apos;inserimento di queste informazioni &egrave; limitato solamente agli ultimi 2 mesi e non &egrave permesso nei mesi per i quali sono gi&agrave; stati inviati gli attestati di presenza.
-description.TR_AUTOCERTIFICATION= L&apos;abilitazione del parametro <strong>&{TR_AUTOCERTIFICATION}</strong> attiver&agrave; la possibilit&agrave; per i Tecnologi e i Ricercatori di questa sede di autocertificare la propria presenza a lavoro, e dunque di inserire in autonomia le proprie timbrature.<br> L&apos;inserimento di queste informazioni &egrave; limitato solamente agli ultimi 2 mesi e non &egrave permesso nei mesi per i quali sono gi&agrave; stati inviati gli attestati di presenza.
