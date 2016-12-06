@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+import com.google.inject.Inject;
 
 import helpers.CacheValues;
 import helpers.rest.ApiRequestException;
@@ -75,6 +76,8 @@ public class CertificationsComunication {
 
   private static final String OAUTH_TOKEN = "oauth.token.attestati";
 
+  @Inject
+  private CacheValues cacheValues;
 
   /**
    * Per l'ottenenere il Bearer Token:
@@ -180,7 +183,7 @@ public class CertificationsComunication {
   public Set<Integer> getPeopleList(Office office, int year, int month)
       throws NoSuchFieldException, ExecutionException {
 
-    String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
+    String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
 
     final String url = API_URL + API_URL_LISTA_DIPENDENTI + "/" + office.codeId
         + "/" + year + "/" + month;
@@ -190,7 +193,7 @@ public class CertificationsComunication {
 
     // Caso di token non valido
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
-      CacheValues.oauthToken.invalidateAll();
+      cacheValues.oauthToken.invalidateAll();
       throw new IllegalAccessError("Invalid Token: " + token);
     }
 
@@ -216,7 +219,7 @@ public class CertificationsComunication {
   public Optional<SeatCertification> getPersonSeatCertification(Person person,
       int month, int year) throws ExecutionException {
 
-    final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
+    final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
     if (token == null) {
       return Optional.absent();
     }
@@ -230,7 +233,7 @@ public class CertificationsComunication {
 
       // Caso di token non valido
       if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
-        CacheValues.oauthToken.invalidateAll();
+        cacheValues.oauthToken.invalidateAll();
         throw new IllegalAccessError("Invalid Token: " + token);
       }
 
@@ -274,7 +277,7 @@ public class CertificationsComunication {
   public HttpResponse sendRigaAssenza(Certification certification)
       throws ExecutionException, NoSuchFieldException {
 
-    final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
+    final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
     if (token == null) {
       return null;
     }
@@ -298,7 +301,7 @@ public class CertificationsComunication {
   public HttpResponse sendRigaBuoniPasto(Certification certification,
       boolean update) throws ExecutionException, NoSuchFieldException {
 
-    final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
+    final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
 
     String url = API_URL + API_URL_BUONI_PASTO;
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
@@ -321,7 +324,7 @@ public class CertificationsComunication {
    */
   public HttpResponse sendRigaFormazione(Certification certification)
       throws ExecutionException, NoSuchFieldException {
-    final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
+    final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
 
     String url = API_URL + API_URL_FORMAZIONE;
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
@@ -341,7 +344,7 @@ public class CertificationsComunication {
    */
   public HttpResponse sendRigaCompetenza(Certification certification)
       throws ExecutionException, NoSuchFieldException {
-    final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
+    final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
 
     String url = API_URL + API_URL_COMPETENZA;
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
@@ -361,7 +364,7 @@ public class CertificationsComunication {
    */
   public HttpResponse deleteRigaAssenza(Certification certification)
       throws ExecutionException, NoSuchFieldException {
-    final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
+    final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
 
     String url = API_URL + API_URL_ASSENZA;
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
@@ -381,7 +384,7 @@ public class CertificationsComunication {
    */
   public HttpResponse deleteRigaFormazione(Certification certification)
       throws ExecutionException, NoSuchFieldException {
-    final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
+    final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
 
     String url = API_URL + API_URL_FORMAZIONE;
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
@@ -401,7 +404,7 @@ public class CertificationsComunication {
    */
   public HttpResponse deleteRigaCompetenza(Certification certification)
       throws ExecutionException, NoSuchFieldException {
-    final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
+    final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
 
     String url = API_URL + API_URL_COMPETENZA;
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
@@ -420,7 +423,7 @@ public class CertificationsComunication {
    */
   public List<CodiceAssenza> getAbsencesList() throws ExecutionException {
 
-    final String token = CacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
+    final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
     if (token == null) {
       return Lists.newArrayList();
     }
@@ -433,7 +436,7 @@ public class CertificationsComunication {
 
       // Caso di token non valido
       if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
-        CacheValues.oauthToken.invalidateAll();
+        cacheValues.oauthToken.invalidateAll();
         throw new IllegalAccessError("Invalid Token: " + token);
       }
 
