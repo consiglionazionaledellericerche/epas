@@ -26,6 +26,8 @@ public class QGroupAbsenceType extends EntityPathBase<GroupAbsenceType> {
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
+    public final BooleanPath automatic = createBoolean("automatic");
+
     public final QCategoryGroupAbsenceType category;
 
     public final StringPath chainDescription = createString("chainDescription");
@@ -39,6 +41,8 @@ public class QGroupAbsenceType extends EntityPathBase<GroupAbsenceType> {
 
     //inherited
     public final NumberPath<Long> id = _super.id;
+
+    public final BooleanPath initializable = createBoolean("initializable");
 
     public final StringPath name = createString("name");
 
@@ -73,7 +77,7 @@ public class QGroupAbsenceType extends EntityPathBase<GroupAbsenceType> {
 
     public QGroupAbsenceType(Class<? extends GroupAbsenceType> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.category = inits.isInitialized("category") ? new QCategoryGroupAbsenceType(forProperty("category")) : null;
+        this.category = inits.isInitialized("category") ? new QCategoryGroupAbsenceType(forProperty("category"), inits.get("category")) : null;
         this.complationAbsenceBehaviour = inits.isInitialized("complationAbsenceBehaviour") ? new QComplationAbsenceBehaviour(forProperty("complationAbsenceBehaviour")) : null;
         this.nextGroupToCheck = inits.isInitialized("nextGroupToCheck") ? new QGroupAbsenceType(forProperty("nextGroupToCheck"), inits.get("nextGroupToCheck")) : null;
         this.takableAbsenceBehaviour = inits.isInitialized("takableAbsenceBehaviour") ? new QTakableAbsenceBehaviour(forProperty("takableAbsenceBehaviour")) : null;

@@ -8,7 +8,7 @@ require:
     - org.hibernate -> hibernate-envers 4.2.19.Final:
           transitive: false
     - org.jadira.usertype -> usertype.core 4.0.0.GA
-    - com.google.guava -> guava 19.0
+    - com.google.guava -> guava 20.0
     - com.google.inject -> guice 4.1.0:
        exclude:
         - org.ow2.asm -> asm *
@@ -22,8 +22,8 @@ require:
     - org.mnode.ical4j -> ical4j 1.0.6
     - org.jsoup -> jsoup 1.8.3
     - org.dbunit -> dbunit 2.5.1
-    - org.mockito -> mockito-core 2.0.32-beta
-    - org.assertj -> assertj-core 3.2.0:
+    - org.mockito -> mockito-core 2.0.52-beta
+    - org.assertj -> assertj-core 3.4.1:
        exclude:
         - org.ow2.asm -> asm *
     - org.assertj -> assertj-guava 2.0.0:
@@ -52,14 +52,14 @@ require:
         - org.eclipse.persistence -> eclipselink *
     - asufana -> play-lombok 1.2.3
     - org.projectlombok -> lombok 1.16.10
-    - com.fatboyindustrial.gson-jodatime-serialisers -> gson-jodatime-serialisers 1.1.0
-    - com.fasterxml.jackson.core -> jackson-core 2.6.3
-    - com.fasterxml.jackson.core -> jackson-annotations 2.6.3
-    - com.fasterxml.jackson.core -> jackson-databind 2.6.3
-    - com.fasterxml.jackson.datatype -> jackson-datatype-joda 2.6.3
-    - com.fasterxml.jackson.datatype -> jackson-datatype-hibernate4 2.6.3
-    - com.fasterxml.jackson.module -> jackson-module-afterburner 2.6.3
-    - com.github.fge -> jackson-coreutils 1.6
+    - com.fatboyindustrial.gson-jodatime-serialisers -> gson-jodatime-serialisers 1.2.0
+    - com.fasterxml.jackson.core -> jackson-core 2.7.3
+    - com.fasterxml.jackson.core -> jackson-annotations 2.7.3
+    - com.fasterxml.jackson.core -> jackson-databind 2.7.3
+    - com.fasterxml.jackson.datatype -> jackson-datatype-joda 2.7.3
+    - com.fasterxml.jackson.datatype -> jackson-datatype-hibernate4 2.7.3
+    - com.fasterxml.jackson.module -> jackson-module-afterburner 2.7.3
+    - com.github.fge -> jackson-coreutils 1.8
     - org.testng -> testng 6.9.10
     - org.apache.poi -> poi 3.14
     - org.graylog2 -> gelfj 1.1.15

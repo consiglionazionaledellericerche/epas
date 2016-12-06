@@ -1,5 +1,7 @@
 package models.absences;
 
+import lombok.Getter;
+
 import models.base.BaseModel;
 
 import org.assertj.core.util.Lists;
@@ -41,7 +43,7 @@ public class JustifiedType extends BaseModel {
     
   }
   
-  @Column
+  @Getter @Column
   @Enumerated(EnumType.STRING)
   public JustifiedTypeName name;
   

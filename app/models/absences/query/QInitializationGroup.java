@@ -26,7 +26,9 @@ public class QInitializationGroup extends EntityPathBase<InitializationGroup> {
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
-    public final NumberPath<Integer> complationUsed = createNumber("complationUsed", Integer.class);
+    public final NumberPath<Integer> averageWeekTime = createNumber("averageWeekTime", Integer.class);
+
+    public final DatePath<org.joda.time.LocalDate> date = createDate("date", org.joda.time.LocalDate.class);
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
@@ -37,10 +39,12 @@ public class QInitializationGroup extends EntityPathBase<InitializationGroup> {
 
     public final QGroupAbsenceType groupAbsenceType;
 
+    public final NumberPath<Integer> hoursInput = createNumber("hoursInput", Integer.class);
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 
-    public final DatePath<org.joda.time.LocalDate> initializationDate = createDate("initializationDate", org.joda.time.LocalDate.class);
+    public final NumberPath<Integer> minutesInput = createNumber("minutesInput", Integer.class);
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
@@ -53,7 +57,7 @@ public class QInitializationGroup extends EntityPathBase<InitializationGroup> {
 
     public final NumberPath<Integer> takableTotal = createNumber("takableTotal", Integer.class);
 
-    public final NumberPath<Integer> takableUsed = createNumber("takableUsed", Integer.class);
+    public final NumberPath<Integer> unitsInput = createNumber("unitsInput", Integer.class);
 
     public final NumberPath<Integer> vacationYear = createNumber("vacationYear", Integer.class);
 

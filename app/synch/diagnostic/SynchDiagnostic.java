@@ -1,5 +1,7 @@
 package synch.diagnostic;
 
+import com.google.common.collect.Maps;
+
 import it.cnr.iit.epas.DateUtility;
 
 import models.Contract;
@@ -7,7 +9,6 @@ import models.Institute;
 import models.Office;
 import models.Person;
 
-import org.assertj.core.util.Maps;
 import org.joda.time.LocalDate;
 
 import java.util.List;

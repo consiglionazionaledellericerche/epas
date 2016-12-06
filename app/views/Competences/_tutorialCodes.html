@@ -41,7 +41,8 @@
   			Non esistono casi di assegnamento di valori superiori a quel limite.
   		</p>
   	#{/elseif}
-  	#{elseif competence.competenceCode.competenceCodeGroup.label.equals('Gruppo Ind.tà rischio')}
+  	#{elseif competence.competenceCode.competenceCodeGroup != null && 
+  	competence.competenceCode.competenceCodeGroup.label.equals('Gruppo Ind.tà rischio')}
   		<p>Questo codice appartiene al gruppo delle indennità di rischio.<br>
   			Il quantitativo da assegnare per questo codice è espresso in <strong>giorni</strong>
   			e deve essere uguale al numero di giorni di presenza a lavoro nel mese per il dipendente.
