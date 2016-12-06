@@ -155,7 +155,7 @@ public class ErrorsBox {
     if (absenceErrors.get(absenceProblem) == null) {
       return null;
     }
-    return null;
+    return absenceErrors.get(absenceProblem);
   }
   
   /**

@@ -241,11 +241,16 @@ public class TemplateExtensions extends JavaExtensions {
     }
   }
   
-  public static String printHourMinute(Integer i) {
-    if (i > 0) {
-      return DateUtility.fromMinuteToHourMinute(i);
+  /**
+   * Minuti in formato HH:MM.
+   * @param minutes minuti
+   * @return stringa formattata
+   */
+  public static String printHourMinute(Integer minutes) {
+    if (minutes > 0) {
+      return DateUtility.fromMinuteToHourMinute(minutes);
     } else {
-      return DateUtility.fromMinuteToHourMinute(i);
+      return DateUtility.fromMinuteToHourMinute(minutes);
     }
   }
   

@@ -71,8 +71,10 @@ title:'Nuovo codice assenza in data ' + absenceForm.from?.format()
       #{list items:insertReport.insertTemplateRows, as:'templateRow' }
         <tr  
              #{if templateRow.onlyNotOnHoliday()} class="text-muted" #{/if}
+             #{elseif templateRow.beforeInitialization} class="bg-grey" #{/elseif}
              #{elseif templateRow.absenceErrors} class="bg-danger"#{/elseif}
-             #{elseif templateRow.absenceErrors.empty} *{ class="bg-success" }* #{/elseif}>
+             #{elseif templateRow.absenceErrors.empty} *{ class="bg-success" }* #{/elseif}
+          >
           <td data-order="${templateRow.date}"> 
             ${templateRow.date.format()}
           </td>
@@ -89,7 +91,7 @@ title:'Nuovo codice assenza in data ' + absenceForm.from?.format()
               *{ popover degli errori dell'assenza }*
               %{id = insertReport.insertTemplateRows.indexOf(templateRow); }%
               <span webui-popover-hover data-url="#pop${id}">
-                <em class="text-danger">Mostra i dettagli</em> <i class="fa fa-times text-danger" aria-hidden="true"></i>
+                <i class="fa fa-times text-danger" aria-hidden="true"></i> <em class="text-danger">Mostra i dettagli</em> 
               </span>
               <div class="webui-popover-content" id="pop${id}"> 
               #{list items:templateRow.absenceErrors, as:'absenceError'}
@@ -104,7 +106,7 @@ title:'Nuovo codice assenza in data ' + absenceForm.from?.format()
             #{/elseif}
             #{else} <i class="fa fa-check text-success" aria-hidden="true"></i> #{/else}
             
-            #{if templateRow.absenceWarnings, as:'absenceWarning'}
+            #{if templateRow.absenceWarnings}
               #{list items:templateRow.absenceWarnings, as:'absenceWarning'}
                 <span class="label label-warning">&{absenceWarning.absenceProblem}</span> 
               #{/list}
@@ -174,9 +176,9 @@ title:'Nuovo codice assenza in data ' + absenceForm.from?.format()
 	     #{f.hidden 'personId', value:absenceForm.person.id /}
       
          #{f.hidden 'from', value:absenceForm.from?.format() /}
-         #{if alldaySelected }
+         *{ #{if alldaySelected } }*
           #{f.hidden 'to', value:absenceForm.to?.format() /}
-         #{/if}
+         *{ #{/if} }*
    
       #{f.hidden 'groupAbsenceType.id', value:absenceForm.groupSelected.id /}
       #{f.hidden 'absenceType.id', value:absenceForm.absenceTypeSelected?.id /}

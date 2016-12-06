@@ -1,15 +1,15 @@
-#{if _absenceRequestForm.tabsVisibile}
+*{ almeno una tab visibile ... }*
+#{if _absenceRequestForm.tabsVisibile.values()}
 <div id="container-nav-tabs" class="container">
   <ul class="nav nav-tabs">
   
-  #{list items:manager.services.absences.AbsenceForm.AbsenceInsertTab.values(), as:'tab' }
-     #{if _absenceRequestForm.tabsVisibile.contains(tab) }
-       <li #{if _absenceRequestForm.absenceInsertTab.equals(tab)} class="active" #{/if}>
+  *{ per ogni tab visibile ... }*  
+  #{list items:_absenceRequestForm.tabsVisibile.values(), as:'tab' }
+       <li #{if _absenceRequestForm.categoryTabSelected.equals(tab)} class="active" #{/if}>
          <a data-async="#absenceData" 
-         href="@{AbsenceGroups.insert(_absenceRequestForm.person.id, _absenceRequestForm.from.format(), tab)}">
+         href="@{AbsenceGroups.insert('personId':_absenceRequestForm.person.id, 'from':_absenceRequestForm.from.format(), 'categoryTab.id':tab.id)}">
          ${tab.label}</a>
        </li>
-     #{/if}
   #{/list}
   </ul>
 </div>

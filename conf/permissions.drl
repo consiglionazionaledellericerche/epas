@@ -288,12 +288,15 @@ when
   AccountRole(this == AccountRole.RO_ADMIN)
   $c: PermissionCheck(action in (
     "Absences.absenceInPeriod",
-    "Absences.manageAbsenceCode",
     "Absences.manageAttachmentsPerCode",
     "Absences.manageAttachmentsPerPerson",
     "Absences.showGeneralMonthlyAbsences",
     "Absences.showPersonMonthlyAbsences",
     "Absences.yearlyAbsences",
+    "AbsenceGroups.showAbsenceTypes",
+    "AbsenceGroups.showGroups",
+    "AbsenceGroups.editGroup",       /* per la show... */
+    "AbsenceGroups.editAbsenceType", /* per la show... */
     "BadgeReaders.list",
     "BadgeSystems.list",
     "BadgeSystems.personBadges",
@@ -705,9 +708,12 @@ when
  		/* Vecchio permesso editPerson */
         "Persons.insertPerson",
 
-		/* Vecchio permesso editAbsenceCode */
-		/* FIXME: stesso ragionamento del editCompetenceCode vedi sotto */
-		"Absences.manageAbsenceCode",
+        "AbsenceGroups.showGroups",
+        "AbsenceGroups.showAbsenceTypes",
+        "AbsenceGroups.editGroup",       /* per la show... */
+        "AbsenceGroups.editAbsenceType", /* per la show... */
+        
+        "Competences.edit",              /* per la show... */
 
 		/*********** duplicate prima di avere il contesto office  *************/
 
@@ -829,16 +835,7 @@ when
         "WorkingTimes.insertWorkingTimeBaseInformation",
         "WorkingTimes.insertVerticalWorkingTime",
 
-        /* Vecchio permesso editCompetenceCode */
-        /* FIXME vedi in regola onlyForPersonnelAdmin_InOffice */
-        "Competences.edit",
-        "Competences.save",
-
-        /* Vecchio permesso editAbsenceCode */
-		/* FIXME: stesso ragionamento del editCompetenceCode vedi sotto */
-        "Absences.editCode",
-
-     	"Configurations.show",
+    	"Configurations.show",
      	"Configurations.edit",
         "Configurations.update",
         "Configurations.uploadAttachment",
@@ -982,21 +979,6 @@ when
         "WorkingTimes.saveHorizontal",
         "WorkingTimes.insertWorkingTimeBaseInformation",
         "WorkingTimes.insertVerticalWorkingTime",
-
-        /* Vecchio permesso editCompetenceCode
-         *  FIXME: i codici competenza non sono associati all'office. Quindi non ha senso
- 	     *  impostare la regola editCompetenceCode_InOffice. O si associano all'office in modo
- 	     *  che ogni ufficio possa avere i propri privati (come in workingTimeType) oppure si
- 	     *  rimuove questo permesso ai PersonellAdmin e si delega esclusivamente a utente SuperUser.
- 	     *  Quest'ultima soluzione potrebbe essere la più opportuna e meno dispendiosa in ottica
- 	     *  centralizzazione.
- 	     */
-        "Competences.edit",
-        "Competences.save",
-
-        /* Vecchio permesso editAbsenceCode */
-		/* FIXME: stesso ragionamento del editCompetenceCode*/
-        "Absences.editCode",
 
      	"Configurations.show",
 

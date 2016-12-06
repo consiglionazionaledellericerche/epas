@@ -1,0 +1,35 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Gestione codice d\'assenza' /}
+
+ <div class="container">
+    #{form @AbsenceGroups.saveCategoryTab(),class:'form-horizontal'}
+
+    #{alert color:'info'}
+      <p>
+ 	    #{if categoryTab?.isPersistent()}
+ 		  Modifica dati per la Tab <strong>${categoryTab.name}</strong>
+ 	    #{/if}#{else}
+ 		  Nuova categoryTab.
+   	    #{/else}
+ 	  </p>
+      #{/alert}
+
+        <input type="hidden" name="categoryTab.id" value="${categoryTab?.id}">
+ 	
+ 		#{f.input 'categoryTab.name', required:'true', value:categoryTab?.name /}
+ 		#{f.input 'categoryTab.description' /} 
+ 		#{f.input 'categoryTab.priority' /}
+ 		       
+        <div class="container center">
+            <a class="btn btn-default" href="@{AbsenceGroups.showCategories()}">Torna alle Categorie</a>
+	        <input class="btn btn-primary" type="submit" value="Ok">
+	        <a class="btn btn-danger" href="@{AbsenceGroups.deleteCategoryTab(categoryTab.id)}">Elimina</a>
+        </div>
+   #{/form}
+
+</div>
+
+
+
+

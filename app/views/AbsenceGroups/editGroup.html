@@ -1,14 +1,28 @@
-#{modalAsync id:'defaultModal', button:'Salva', title: 'Modifica gruppo' }
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Assenze'  /}
 
- <div id="groupData">
+<div class="container">
 
-	 #{form action:@AbsenceGroups.updateGroup(), method:'POST', autocomplete:false,
-		    class:'form form-horizontal', 'data-async':'#page_content',
-		    'data-async-error':'#groupData'}
+  #{set breadcrumbs:['Gruppi Assenze':@AbsenceGroups.showGroups(null), 
+    (groupAbsenceType.category):@AbsenceGroups.showGroups(groupAbsenceType.category.id), (groupAbsenceType):groupAbsenceType] /}
+  
+  #{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+	 #{form action:@AbsenceGroups.saveGroup(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal'}
+		
+		#{alert color:'warning'}
+          <p>Informazioni generali sul gruppo. </p>
+        #{/alert}
 		
 		<input type="hidden" name="groupAbsenceType.id" value="${groupAbsenceType.id}"/>
 		
+		#{f.input 'groupAbsenceType.name' /}
+		
 	    #{f.input 'groupAbsenceType.description'/}
+	    
+	    #{f.selectEnum 'groupAbsenceType.pattern', items:models.absences.GroupAbsenceType.GroupAbsenceTypePattern.values() /}
 	    
 	    #{if !groupAbsenceType.chainDescription.equals(groupAbsenceType.description) }
 	      #{f.input 'groupAbsenceType.chainDescription' /}
@@ -16,12 +30,55 @@
 	    #{else}
 	      #{f.input 'groupAbsenceType.chainDescription', value:'' /}
 	    #{/else}
-	
-	    #{b.buttons center:true}   
-	      #{b.submit 'Salva' /}
-	    #{/b.buttons}
+	    
+	    #{f.selectModel 'groupAbsenceType.category', items:allCategories /}
+	    
+	    #{f.booleanRadio 'groupAbsenceType.automatic' /}
+	    #{f.booleanRadio 'groupAbsenceType.initializable' /}
+	    
+	    #{f.selectEnum 'groupAbsenceType.periodType', items:models.absences.GroupAbsenceType.PeriodType.values() /}
+	    
+	    #{f.selectModel 'groupAbsenceType.nextGroupToCheck', items:allGroups /}
+
+	    #{f.selectModels 'takableCodesIds', 
+ 		  value:takableCodes,
+               items:allAbsenceTypes /}
+	    
+	    <!-- Parte takable -->
+	    
+	    #{alert color:'warning'}
+	      <p>Parte sul tetto massimo. Impostare un valore negativo nel caso di nessun limite.</p>
+        #{/alert}
+	    
+	    #{f.selectEnum 'takeAmountType', items:models.absences.AmountType.values(), value:takeAmountType /}
+	    #{f.input 'fixedLimit', type:'number', value:fixedLimit /}
+        #{f.selectEnum 'takableAmountAdjustment', items:models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment.values(), value:takableAmountAdjustment /}	    
+               
+        #{alert color:'warning'}
+          <p>Parte sul funzionamento del completamento. Impostare il tipo di completamento vuoto per nessun completamento.
+          I codici di completamento selezionati devono appartenere alla lista dei codici prendibili.</p>
+        #{/alert}
+
+        #{f.selectEnum 'complationAmountType', items:models.absences.AmountType.values(), value:complationAmountType /}
+		#{f.selectModels 'complationCodesIds', value:complationCodes, items:allAbsenceTypes /}
+        #{f.selectModels 'replacingCodesIds', value:replacingCodes, items:allAbsenceTypes /}      
+          
+	    #{secure.check 'AbsenceGroups.saveGroup' }
+	      #{b.buttons center:true}   
+	        %{ canSave = true; }%
+	        #{b.submit 'Salva' /}
+	      #{/b.buttons}
+	    #{/secure.check}
 	  #{/form}
+	  
+	  #{if !canSave}
+	  #{alert color:'success'}
+	    <p><i class="fa fa-lock" aria-hidden="true"></i>
+	     Gruppo non modificabile. Per dubbi, domande o richiesta di
+	    modifiche inviare una segnalazione.</p> 
+	  #{/alert}
+	  #{/if}
 
-  </div>
+</div>
 
-#{/modalAsync}
+

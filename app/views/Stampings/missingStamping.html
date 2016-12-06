@@ -16,7 +16,7 @@
 #{/set}
 
 <div class="container">
-  #{title title:'Controllo presenze ' + office.name /}
+	#{title title:'Riepilogo problemi sui giorni del mese ' + month+'/'+year +  ' - ' + office?.name /}
 </div>
 
 #{stampings.presenceDashboardTabs activeAction:'missingStampings' /}
@@ -28,6 +28,7 @@
 		  <th style="min-width: 300px;">Nome</th>
 		  <th>No assenze e timbrature</th>
 		  <th>Timbrature disaccoppiate<br>giorno feriale</th>
+			<th>Orario di lavoro insufficiente</th>
 		  <th>Lavoro festivo</th>
 		</tr>
 	
@@ -56,7 +57,13 @@
 			  <span class="badge badge-warning">${day}</span>
 			#{/list}
 	     </td>
-	     
+
+			 <td>
+				#{list personMissingStampings.troublesNotEnoughWorkTime, as:'day'}
+				 <span class="badge badge-default">${day}</span>
+				#{/list}
+			 </td>
+
 	     <td>
 	        #{if personMissingStampings.holidayWorkingTimeNotAccepted> 0 }
 	        <span class="badge badge-warning">Non Accettate: ${personMissingStampings.holidayWorkingTimeNotAccepted.toHourTime()}</span><br>

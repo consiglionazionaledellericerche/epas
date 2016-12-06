@@ -4,12 +4,9 @@ import com.google.common.io.Resources;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.services.absences.AbsenceMigration;
-
 import models.Qualification;
 import models.User;
 import models.WorkingTimeType;
-import models.absences.GroupAbsenceType;
 
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
@@ -32,8 +29,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-import javax.inject.Inject;
-
 
 /**
  * Carica nel database dell'applicazione i dati iniziali predefiniti nel caso questi non siano già
@@ -46,9 +41,6 @@ import javax.inject.Inject;
 public class Bootstrap extends Job<Void> {
 
   static final String JOBS_CONF = "jobs.active";
-
-  @Inject
-  static AbsenceMigration absenceMigration;
 
   //Aggiunto qui perché non più presente nella classe Play dalla versione >= 1.4.3
   public static boolean runingInTestMode() {
@@ -79,17 +71,6 @@ public class Bootstrap extends Job<Void> {
       session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
           .getResource("../db/import/absence-type-and-qualification-phase2.xml")));
     }
-
-    log.info("Iniziata migrazione assenze ...");
-    if (GroupAbsenceType.count() == 0) {
-      log.info(" ... questa operazione richiederà circa due minuti ...");
-      absenceMigration.absenceMigrationProcessor(true);
-    } else {
-      log.info(" ... migrazione già applicata ...");
-      //absenceMigration.absenceMigrationProcessor(false);
-    }
-    absenceMigration.fixFuoriSedeCodes();
-    log.info("... codice FUORI SEDE ripristinati e disabilitati ...");
     
     log.info("Conclusa migrazione assenze!");
 

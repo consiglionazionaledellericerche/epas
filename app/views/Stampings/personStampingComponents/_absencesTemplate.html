@@ -9,7 +9,7 @@
 
   #{list items:dayRecap.personDay.absences, as:'absence'}
     
-    %{ involvedGroups = templateUtility.involvedGroupAbsenceType(absence.absenceType); }%
+    %{ involvedGroups = absence.absenceType.involvedGroupAbsenceType(true);  }%
     #{if absence.isReplacing(involvedGroups) && !absence.isOrphanReplacing(involvedGroups) }
         *{ l'assenza di rimpiazzamento non orfana non la visualizzo }*
     #{/if}

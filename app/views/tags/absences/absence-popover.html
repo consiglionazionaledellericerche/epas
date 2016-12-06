@@ -36,7 +36,7 @@
      if (_remainingTroubles || !_absence.troubles.empty) {
        hasTroubles = true;
      }
-     involvedGroups = templateUtility.involvedGroupAbsenceType(_absence.absenceType);
+     involvedGroups = _absence.absenceType.involvedGroupAbsenceType(true); 
      if ( _person && !involvedGroups.empty) {
        hasGroups = true;
      }
@@ -72,6 +72,7 @@
     <strong>Codice</strong> <strong>${_absence.absenceType.code}</strong><br>
     <strong>Descrizione</strong> ${_absence.absenceType.description}<br>  
     <strong>Data</strong> ${_absence.absenceDate.format()}<br>
+    <strong>Tipo Giustificazione</strong> &{_absence.justifiedType}<br>
     #{absences.justifiedTime absence:_absence /}<br>
 
    #{if hasTroubles || hasGroups } </li> #{/if}
@@ -90,7 +91,7 @@
 	          #{/if}
 	          #{else}
 	            ${group.description}
-	            <a href="@{AbsenceGroups.groupStatus('groupAbsenceType.id':group.id, 'personId':_person.id, 'from':_absence.getAbsenceDate().format())}"> Riepilogo <i class="fa fa-external-link" aria-hidden="true"></i></a><br>
+	            <a href="@{AbsenceGroups.groupStatus('groupAbsenceTypeId':group.id, 'personId':_person.id, 'from':_absence.getAbsenceDate().format())}"> Riepilogo <i class="fa fa-external-link" aria-hidden="true"></i></a><br>
 	            #{secure.check 'AbsenceGroups.edit'}
 	            <span class="fa-stack fa-lg"><i class="fa fa-paper-plane-o fa-stack-1x"></i></span>
 	            <strong class="text-success">In questa data il codice di completamento ${replacing.absenceType.code} verrà inviato ad attestati.</strong>
@@ -99,7 +100,7 @@
 	        #{/list}
 	        #{if !groupVerified }
               ${group.description} 
-	          <a href="@{AbsenceGroups.groupStatus('groupAbsenceType.id':group.id, 'personId':_person.id, 'from':_absence.getAbsenceDate().format())}"> Riepilogo <i class="fa fa-external-link" aria-hidden="true"></i></a>
+	          <a href="@{AbsenceGroups.groupStatus('groupAbsenceTypeId':group.id, 'personId':_person.id, 'from':_absence.getAbsenceDate().format())}"> Riepilogo <i class="fa fa-external-link" aria-hidden="true"></i></a>
 	        #{/if}
 	    </li>   
       #{/list}

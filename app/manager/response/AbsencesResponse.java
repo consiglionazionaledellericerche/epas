@@ -25,8 +25,6 @@ public class AbsencesResponse {
       "Monte ore insufficiente per l'assegnamento del riposo compensativo";
   public static final String NON_UTILIZZABILE_NEI_FESTIVI =
       "Codice non utilizzabile in un giorno festivo";
-  public static final String CODICI_MALATTIA_FIGLI_NON_DISPONIBILE =
-      "Impossibile usufruire dei codici ferie per malattia dei figli";
   public static final String NESSUN_CODICE_FERIE_ANNO_PRECEDENTE_37 =
       "Nessun codice ferie dell'anno precedente 37 utilizzabile";
   public static final String ERRORE_GENERICO =
