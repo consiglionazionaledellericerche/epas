@@ -1001,12 +1001,18 @@ public class Competences extends Controller {
    * @param cat il servizio per cui si vuol definire l'attività
    * @param type l'attività da linkare al servizio
    */
-  public static void linkTimeTableToShift(Long shift, ShiftCategories cat, ShiftType type) {
+  public static void linkTimeTableToShift(Long shift, ShiftCategories cat, @Valid ShiftType type) {
     
     notFoundIfNull(cat);
     rules.checkIfPermitted(cat.office);
     ShiftTimeTable timeTable = shiftDao.getShiftTimeTableById(shift);
     notFoundIfNull(timeTable);    
+    if (validation.hasErrors()) {
+      response.status = 400;
+      List<ShiftTimeTable> shiftList = shiftDao.getAllShifts();
+      List<ShiftTimeTableDto> dtoList = competenceManager.convertFromShiftTimeTable(shiftList);
+      render("@configureShift", shiftList, dtoList, cat, type);
+    }
 
     type.shiftCategories = cat;
     type.shiftTimeTable = timeTable;

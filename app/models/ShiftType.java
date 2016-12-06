@@ -24,7 +24,9 @@ public class ShiftType extends BaseModel {
 
   private static final long serialVersionUID = 3156856871540530483L;
 
+  @Required
   public String type;
+  @Required
   public String description;
 
   @NotAudited
