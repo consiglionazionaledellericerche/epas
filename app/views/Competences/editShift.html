@@ -4,6 +4,8 @@ Action = (cat != null && cat.persistent) ? 'Modifica ' : 'Nuovo '
 #{modalAsync id:'modalActivateService', 
 title:(Action + ' servizio per turno')}
 
+<div class="row">
+<div class="col-md-8 col-md-offset-2">
 <div id="absenceCodeData">
   #{form action:@Competences.saveShift(), method:'POST', autocomplete:false,
   class:'form form-horizontal', 'data-async':'#page_content',
@@ -17,7 +19,33 @@ title:(Action + ' servizio per turno')}
   
   #{f.view 'cat.office', value:office /}
   #{f.selectModel 'cat.supervisor', items: officePeople, required:true /}
-
+  #{if !nuovo}
+  
+  #{alert color:'info'}
+  	Attività collegate al servizio
+  #{/alert}
+  <table class="table">
+  <tr>
+  	<th>Nome attività</th>
+  	<th>Descrizione</th>
+  	<th>Dipendenti associati</th>
+  </tr>
+  #{list items:map.entrySet(), as:'key'}
+  	<tr>
+  		<td>${key.getKey().type}</td>
+  		<td>${key.getKey().description}</td>
+  		<td>
+  			<ul>
+  			#{list items:key.getValue(), as:'psst'}
+  				<li>${psst.personShift.person.fullName()}</li>
+  			#{/list}
+  			</ul>
+  		</td>
+  	</tr> 
+  #{/list}
+  </table>
+  #{/if}
+  
 	#{b.buttons center:true}
 
   		#{if cat?.persistent}
@@ -29,5 +57,7 @@ title:(Action + ' servizio per turno')}
 
   	#{/b.buttons}
   #{/form}
+</div>
+</div>
 </div>
 #{/modalAsync}
