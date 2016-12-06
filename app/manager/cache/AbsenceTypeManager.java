@@ -1,7 +1,6 @@
 package manager.cache;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -10,14 +9,17 @@ import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.jpa.impl.JPAQueryFactory;
 
 import models.absences.AbsenceType;
+import models.absences.GroupAbsenceType;
 import models.absences.query.QAbsenceType;
+import models.absences.query.QGroupAbsenceType;
 import models.enumerate.AbsenceTypeMapping;
 
 import org.apache.commons.lang.NotImplementedException;
+import org.testng.collections.Sets;
 
 import play.cache.Cache;
 
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -25,7 +27,7 @@ public class AbsenceTypeManager {
 
   protected final JPQLQueryFactory queryFactory;
   private static final String ABT_PREFIX = "abt";
-  private static final String POST_PARTUM_LIST = "post-partum-list";
+  private static final String REDUCING_SET = "reducing-set";
   private static final String CODES_FOR_VACATION = "codes-for-vacation";
 
   @Inject
@@ -66,13 +68,17 @@ public class AbsenceTypeManager {
 
   }
 
-  public List<AbsenceType> postPartumCodes() {
+  /**
+   * Codici per il calcolo della riduzione delle ferie cache.
+   * @return set
+   */
+  public Set<AbsenceType> reducingCodes() {
 
-    List<AbsenceType> value = (List<AbsenceType>) Cache.get(POST_PARTUM_LIST);
+    Set<AbsenceType> value = (Set<AbsenceType>) Cache.get(REDUCING_SET);
 
     if (value == null) {
       value = getReducingAccruingDaysForVacations();
-      Cache.set(POST_PARTUM_LIST, value);
+      Cache.set(REDUCING_SET, value);
     }
     for (AbsenceType abt : value) {
       abt.merge();
@@ -81,9 +87,13 @@ public class AbsenceTypeManager {
     return value;
   }
 
-  public List<AbsenceType> codesForVacations() {
-    List<AbsenceType> value = (List<AbsenceType>) Cache.get(CODES_FOR_VACATION);
-
+  /**
+   * Codici per il calcolo delle ferie cache.
+   * @return set
+   */
+  public Set<AbsenceType> codesForVacations() {
+    Set<AbsenceType> value = (Set<AbsenceType>) Cache.get(CODES_FOR_VACATION);
+    value = getCodesForVacations(); //To remove
     if (value == null) {
       value = getCodesForVacations();
       Cache.set(CODES_FOR_VACATION, value);
@@ -112,36 +122,33 @@ public class AbsenceTypeManager {
   }
 
   /**
-   * @return la lista di tutti i codici di assenza che prevedono la riduzione dei giorni dell'anno
+   * @return set di tutti i codici di assenza che prevedono la riduzione dei giorni dell'anno
    *     su cui computare la maturazione delle ferie.
    */
-  private List<AbsenceType> getReducingAccruingDaysForVacations() {
+  private Set<AbsenceType> getReducingAccruingDaysForVacations() {
 
-    QAbsenceType absenceType = QAbsenceType.absenceType;
+    QGroupAbsenceType groupAbsenceType = QGroupAbsenceType.groupAbsenceType;
 
-    JPQLQuery query = queryFactory.from(absenceType)
-            .where(absenceType.code.startsWith("24")
-            .or(absenceType.code.startsWith("25")
-            .or(absenceType.code.startsWith("34")
-            .or(absenceType.code.startsWith("17C")
-            .or(absenceType.code.startsWith("C17")
-            .or(absenceType.code.startsWith("C18")))))));
-    return query.list(absenceType);
-
+    GroupAbsenceType group = queryFactory.from(groupAbsenceType)
+            .leftJoin(groupAbsenceType.takableAbsenceBehaviour)
+            .leftJoin(groupAbsenceType.takableAbsenceBehaviour.takableCodes)
+            .where(groupAbsenceType.name.eq(GroupAbsenceType.REDUCING_VACATIONS_NAME))
+            .singleResult(groupAbsenceType);
+    
+    return group.takableAbsenceBehaviour.takableCodes;
   }
 
   /**
-   * @return la lista di tutti i codici di assenza che prevedono la riduzione dei giorni dell'anno
-   *     su cui computare la maturazione delle ferie.
+   * @return set di tutti i codici di assenza da considerare per il calcolo delle ferie.
    */
-  private List<AbsenceType> getCodesForVacations() {
+  private Set<AbsenceType> getCodesForVacations() {
 
-    List<AbsenceType> codes = Lists.newArrayList();
+    Set<AbsenceType> codes = Sets.newHashSet();
     codes.add(getAbsenceType(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode()));
     codes.add(getAbsenceType(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode()));
     codes.add(getAbsenceType(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode()));
     codes.add(getAbsenceType(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()));
-    codes.addAll(postPartumCodes());
+    codes.addAll(reducingCodes());
 
     return codes;
 
