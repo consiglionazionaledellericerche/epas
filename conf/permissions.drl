@@ -295,8 +295,8 @@ when
     "Absences.yearlyAbsences",
     "AbsenceGroups.showAbsenceTypes",
     "AbsenceGroups.showGroups",
-    "AbsenceGroups.editGroup",       /* per la show... /*
-    "AbsenceGroups.editAbsenceType", /* per la show... /*
+    "AbsenceGroups.editGroup",       /* per la show... */
+    "AbsenceGroups.editAbsenceType", /* per la show... */
     "BadgeReaders.list",
     "BadgeSystems.list",
     "BadgeSystems.personBadges",
@@ -709,10 +709,10 @@ when
 
         "AbsenceGroups.showGroups",
         "AbsenceGroups.showAbsenceTypes",
-        "AbsenceGroups.editGroup",       /* per la show... /*
-        "AbsenceGroups.editAbsenceType", /* per la show... /*
+        "AbsenceGroups.editGroup",       /* per la show... */
+        "AbsenceGroups.editAbsenceType", /* per la show... */
         
-        "Competences.edit", /* per la show... /*
+        "Competences.edit",              /* per la show... */
 
 		/*********** duplicate prima di avere il contesto office  *************/
 
