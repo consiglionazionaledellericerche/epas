@@ -49,8 +49,17 @@
        
         <div class="container center">
           #{secure.check 'AbsenceGroups.saveAbsenceType' }
-	        <input class="btn btn-primary" type="submit" value="Ok">  
+	        <input class="btn btn-primary" type="submit" value="Ok">
+	        %{ canSave = true; }%  
           #{/secure.check}
+          
+          #{if !canSave}
+	        #{alert color:'success'}
+	          <p><i class="fa fa-lock" aria-hidden="true"></i>
+	           Codice non modificabile. Per dubbi, domande o richiesta di
+	             modifiche inviare una segnalazione.</p> 
+	        #{/alert}
+	      #{/if}
           
           <input class="btn" action="action" type="button" value="Indietro" onclick="history.go(-1);">
         </div>
