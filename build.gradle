@@ -85,7 +85,7 @@ dependencies {
   compile "jaxen:jaxen:1.1.1"
   compile "net.sf.jtidy:jtidy:r938"
   compile "com.google.code.maven-play-plugin.org.allcolor.shanidom:shani-parser:1.4.17"
-  // End of Pdf-0.9 module
+  // End of Pdf-0.9 module dependencies
   
   playModule "kjetland:fastergt:1.8@zip"
   compile fileTree(dir: 'modules/', include: ['*.jar'])
@@ -226,7 +226,7 @@ task playRun(dependsOn: 'classes', type: JavaExec) {
   def lombokJar = configurations.runtime.resolvedConfiguration.resolvedArtifacts.find { it.name == "lombok" }
   
   classpath = sourceSets.main.runtimeClasspath
-  main = 'play.server.Server'
+  main = 'FrameworkStarter'
   systemProperty "playFramework", playHome
   systemProperty "writepid", false
   systemProperty "play.debug", "yes"

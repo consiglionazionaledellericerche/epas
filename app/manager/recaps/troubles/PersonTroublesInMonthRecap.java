@@ -65,14 +65,14 @@ public class PersonTroublesInMonthRecap {
     }
 
     this.holidayWorkingTimeNotAccepted = personManager
-            .holidayWorkingTimeNotAccepted(person,
-                    Optional.fromNullable(monthBegin.getYear()),
-                    Optional.fromNullable(monthBegin.getMonthOfYear()));
+        .holidayWorkingTimeNotAccepted(person,
+            Optional.fromNullable(monthBegin.getYear()),
+            Optional.fromNullable(monthBegin.getMonthOfYear()));
 
     this.holidayWorkingTimeAccepted = personManager
-            .holidayWorkingTimeAccepted(person,
-                    Optional.fromNullable(monthBegin.getYear()),
-                    Optional.fromNullable(monthBegin.getMonthOfYear()));
+        .holidayWorkingTimeAccepted(person,
+            Optional.fromNullable(monthBegin.getYear()),
+            Optional.fromNullable(monthBegin.getMonthOfYear()));
 
   }
 
