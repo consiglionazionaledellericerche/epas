@@ -51,11 +51,16 @@
         <i class="fa fa-comments" aria-hidden="true"></i>
       #{/secure.li}
 
+      <li class="divider"></li>
+
       #{secure.li @AbsenceGroups.showAbsenceTypes() }
         <i class="fa fa-barcode" aria-hidden="true"></i>
       #{/secure.li}
       #{secure.li @AbsenceGroups.showGroups() }
         <i class="fa fa-archive" aria-hidden="true"></i>
+      #{/secure.li}
+      #{secure.li @AbsenceGroups.showCategories() }
+       <i class="fa fa-tag" aria-hidden="true"></i>
       #{/secure.li}
 
       #{secure.check 'Users.list'}

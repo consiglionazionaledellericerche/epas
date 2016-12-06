@@ -72,7 +72,7 @@
     <strong>Codice</strong> <strong>${_absence.absenceType.code}</strong><br>
     <strong>Descrizione</strong> ${_absence.absenceType.description}<br>  
     <strong>Data</strong> ${_absence.absenceDate.format()}<br>
-    <strong>Tipo Giustificazione</strong> ${_absence.justifiedType}<br>
+    <strong>Tipo Giustificazione</strong> &{_absence.justifiedType}<br>
     #{absences.justifiedTime absence:_absence /}<br>
 
    #{if hasTroubles || hasGroups } </li> #{/if}
