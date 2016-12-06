@@ -39,6 +39,10 @@
 	    #{f.selectEnum 'groupAbsenceType.periodType', items:models.absences.GroupAbsenceType.PeriodType.values() /}
 	    
 	    #{f.selectModel 'groupAbsenceType.nextGroupToCheck', items:allGroups /}
+
+	    #{f.selectModels 'takableCodesIds', 
+ 		  value:takableCodes,
+               items:allAbsenceTypes /}
 	    
 	    <!-- Parte takable -->
 	    
@@ -49,10 +53,6 @@
 	    #{f.selectEnum 'takeAmountType', items:models.absences.AmountType.values(), value:takeAmountType /}
 	    #{f.input 'fixedLimit', type:'number', value:fixedLimit /}
         #{f.selectEnum 'takableAmountAdjustment', items:models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment.values(), value:takableAmountAdjustment /}	    
-	    
-	    #{f.selectModels 'takableCodesIds', 
- 		  value:takableCodes,
-               items:allAbsenceTypes /}
                
         #{alert color:'warning'}
           <p>Parte sul funzionamento del completamento. Impostare il tipo di completamento vuoto per nessun completamento.
@@ -63,11 +63,21 @@
 		#{f.selectModels 'complationCodesIds', value:complationCodes, items:allAbsenceTypes /}
         #{f.selectModels 'replacingCodesIds', value:replacingCodes, items:allAbsenceTypes /}      
           
-	    
-	    #{b.buttons center:true}   
-	      #{b.submit 'Salva' /}
-	    #{/b.buttons}
+	    #{secure.check 'AbsenceGroups.saveGroup' }
+	      #{b.buttons center:true}   
+	        %{ canSave = true; }%
+	        #{b.submit 'Salva' /}
+	      #{/b.buttons}
+	    #{/secure.check}
 	  #{/form}
+	  
+	  #{if !canSave}
+	  #{alert color:'success'}
+	    <p><i class="fa fa-lock" aria-hidden="true"></i>
+	     Gruppo non modificabile. Per dubbi, domande o richiesta di
+	    modifiche inviare una segnalazione.</p> 
+	  #{/alert}
+	  #{/if}
 
 </div>
 

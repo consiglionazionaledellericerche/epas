@@ -405,19 +405,7 @@ public class AbsenceGroups extends Controller {
     render(absenceTypes);
   }
   
-  /**
-   * Visualizza il codice di assenza.
-   *
-   * @param absenceTypeId id
-   */
-  public static void viewAbsenceType(Long absenceTypeId) {
-
-    AbsenceType absenceType = AbsenceType.findById(absenceTypeId);
-    notFoundIfNull(absenceType);
-    render(absenceType);
-    
-  }
-  
+ 
   /**
    * Inserimento nuovo codice di assenza.
    */
@@ -428,9 +416,7 @@ public class AbsenceGroups extends Controller {
         .groupAbsenceTypeOfPattern(GroupAbsenceTypePattern.simpleGrouping);
     render("@editAbsenceType", absenceType, allJustifiedType, allSimpleGroup);
   }
-  
-  
-  
+   
   /**
    * Modifica codice assenza.
    *

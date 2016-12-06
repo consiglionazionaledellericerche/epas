@@ -475,7 +475,6 @@ errorCompetenceCodeException= Codice di competenza non presente tra quelli abili
 Absences.absences= Assenze Mensili
 Absences.absencesPerPerson= Assenze Annuali
 Absences.absencesVisibleForEmployee= Presenze Giornaliere
-Absences.manageAbsenceCode= Gestione Codici d'assenza
 Absences.showGeneralMonthlyAbsences= Assenze
 AbsenceGroups.showGroups=Gruppi Assenze
 AbsenceGroups.initialization=Assenze Iniziali
