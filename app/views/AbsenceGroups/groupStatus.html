@@ -58,6 +58,7 @@
      </p>
      
      <p>
+     #{if absencePeriod.groupAbsenceType.initializable }
      #{if absencePeriod.initialization}
        %{ initializationGroup = absencePeriod.initialization; }%
        #{include './_initializationStatus.html' /}
@@ -67,6 +68,7 @@
        Per questo periodo non è stata definita alcuna inizializzazione. 
        <a class="btn btn-sm btn-warning pull-right" href="@{AbsenceGroups.initialization(absencePeriod.person.id, absencePeriod.groupAbsenceType.id, periodChain.date)}">Definisci i dati iniziali</a>      
      #{/else}
+     #{/if}
      </p>
      
      <p>  

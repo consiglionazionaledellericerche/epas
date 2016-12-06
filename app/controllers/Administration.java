@@ -32,8 +32,6 @@ import models.Role;
 import models.Stamping;
 import models.User;
 import models.UsersRolesOffices;
-import models.absences.AbsenceType;
-import models.enumerate.JustifiedTimeAtWork;
 
 import org.apache.commons.lang.WordUtils;
 import org.assertj.core.util.Strings;
@@ -91,80 +89,80 @@ public class Administration extends Controller {
    */
   public static void initializeRomanAbsences() {
 
-    AbsenceType absenceType = AbsenceType.find("byCode", "PEPE").first();
-    if (absenceType == null) {
-      // creare le assenze romane
-      absenceType = new AbsenceType();
-      absenceType.code = "PEPE";
-      absenceType.description = "Permesso Personale";
-      absenceType.internalUse = true;
-      absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
-      absenceType.save();
-    }
-    absenceType = AbsenceType.find("byCode", "RITING").first();
-    if (absenceType == null) {
-      absenceType = new AbsenceType();
-      absenceType.code = "RITING";
-      absenceType.description = "AUTORIZ.DIRIG.RITARDO.INGR.TUR";
-      absenceType.internalUse = true;
-      absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
-      absenceType.save();
-    }
-
-    absenceType = AbsenceType.find("byCode", "661h").first();
-    if (absenceType == null) {
-      absenceType = new AbsenceType();
-      absenceType.code = "661h";
-      absenceType.description = "PERM.ORARIO GRAVI MOTIVI";
-      absenceType.internalUse = true;
-      absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
-      absenceType.save();
-    }
-    absenceType = AbsenceType.find("byCode", "09B").first();
-    if (absenceType == null) {
-      absenceType = new AbsenceType();
-      absenceType.code = "09B";
-      absenceType.description = "ORE DI  MALAT. O VIS.ME";
-      absenceType.internalUse = true;
-      absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
-      absenceType.save();
-    }
-    absenceType = AbsenceType.find("byCode", "103").first();
-    if (absenceType == null) {
-      absenceType = new AbsenceType();
-      absenceType.code = "103";
-      absenceType.description = "Telelavoro";
-      absenceType.internalUse = true;
-      absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
-      absenceType.save();
-    }
-    absenceType = AbsenceType.find("byCode", "91.").first();
-    if (absenceType == null) {
-      absenceType = new AbsenceType();
-      absenceType.code = "91.";
-      absenceType.description = "RIPOSO COMPENSATIVO 1/3 L";
-      absenceType.internalUse = true;
-      absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
-      absenceType.save();
-    }
-    absenceType = AbsenceType.find("byCode", "91CE").first();
-    if (absenceType == null) {
-      absenceType = new AbsenceType();
-      absenceType.code = "91CE";
-      absenceType.description = "RIP. COMP.CHIUSURA ENTE";
-      absenceType.internalUse = true;
-      absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
-      absenceType.save();
-    }
-    absenceType = AbsenceType.find("byCode", "182").first();
-    if (absenceType == null) {
-      absenceType = new AbsenceType();
-      absenceType.code = "182";
-      absenceType.description = "PERM ASSIST.PARENTI 2";
-      absenceType.internalUse = true;
-      absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
-      absenceType.save();
-    }
+    //    AbsenceType absenceType = AbsenceType.find("byCode", "PEPE").first();
+    //    if (absenceType == null) {
+    //      // creare le assenze romane
+    //      absenceType = new AbsenceType();
+    //      absenceType.code = "PEPE";
+    //      absenceType.description = "Permesso Personale";
+    //      absenceType.internalUse = true;
+    //      absenceType.getJustifiedTypesPermitted() = JustifiedTimeAtWork.AllDay;
+    //      absenceType.save();
+    //    }
+    //    absenceType = AbsenceType.find("byCode", "RITING").first();
+    //    if (absenceType == null) {
+    //      absenceType = new AbsenceType();
+    //      absenceType.code = "RITING";
+    //      absenceType.description = "AUTORIZ.DIRIG.RITARDO.INGR.TUR";
+    //      absenceType.internalUse = true;
+    //      absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
+    //      absenceType.save();
+    //    }
+    //
+    //    absenceType = AbsenceType.find("byCode", "661h").first();
+    //    if (absenceType == null) {
+    //      absenceType = new AbsenceType();
+    //      absenceType.code = "661h";
+    //      absenceType.description = "PERM.ORARIO GRAVI MOTIVI";
+    //      absenceType.internalUse = true;
+    //      absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
+    //      absenceType.save();
+    //    }
+    //    absenceType = AbsenceType.find("byCode", "09B").first();
+    //    if (absenceType == null) {
+    //      absenceType = new AbsenceType();
+    //      absenceType.code = "09B";
+    //      absenceType.description = "ORE DI  MALAT. O VIS.ME";
+    //      absenceType.internalUse = true;
+    //      absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
+    //      absenceType.save();
+    //    }
+    //    absenceType = AbsenceType.find("byCode", "103").first();
+    //    if (absenceType == null) {
+    //      absenceType = new AbsenceType();
+    //      absenceType.code = "103";
+    //      absenceType.description = "Telelavoro";
+    //      absenceType.internalUse = true;
+    //      absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
+    //      absenceType.save();
+    //    }
+    //    absenceType = AbsenceType.find("byCode", "91.").first();
+    //    if (absenceType == null) {
+    //      absenceType = new AbsenceType();
+    //      absenceType.code = "91.";
+    //      absenceType.description = "RIPOSO COMPENSATIVO 1/3 L";
+    //      absenceType.internalUse = true;
+    //      absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
+    //      absenceType.save();
+    //    }
+    //    absenceType = AbsenceType.find("byCode", "91CE").first();
+    //    if (absenceType == null) {
+    //      absenceType = new AbsenceType();
+    //      absenceType.code = "91CE";
+    //      absenceType.description = "RIP. COMP.CHIUSURA ENTE";
+    //      absenceType.internalUse = true;
+    //      absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
+    //      absenceType.save();
+    //    }
+    //    absenceType = AbsenceType.find("byCode", "182").first();
+    //    if (absenceType == null) {
+    //      absenceType = new AbsenceType();
+    //      absenceType.code = "182";
+    //      absenceType.description = "PERM ASSIST.PARENTI 2";
+    //      absenceType.internalUse = true;
+    //      absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.AllDay;
+    //      absenceType.save();
+    //    }
 
   }
 

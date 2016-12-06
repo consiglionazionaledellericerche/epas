@@ -34,7 +34,7 @@ import models.ShiftCancelled;
 import models.ShiftCategories;
 import models.ShiftType;
 import models.absences.Absence;
-import models.enumerate.JustifiedTimeAtWork;
+import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.ShiftSlot;
 import models.exports.AbsenceShiftPeriod;
 import models.exports.ShiftPeriod;
@@ -668,7 +668,7 @@ public class ShiftManager {
         if (!personDay.get().absences.isEmpty()) {
           //log.debug("E assente!!!! Esamino le assenze({})", personDay.get().absences.size());
           for (Absence absence : personDay.get().absences) {
-            if (absence.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay) {
+            if (absence.justifiedType.name == JustifiedTypeName.all_day) {
 
               if (absence.absenceType.code.equals("92")) {
                 log.info("Il turno di {} {} e' coincidente con una missione il giorno {}",
