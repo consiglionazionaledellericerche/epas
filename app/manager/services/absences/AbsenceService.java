@@ -16,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
-import manager.services.absences.AbsenceForm.AbsenceInsertTab;
 import manager.services.absences.errors.AbsenceError;
 import manager.services.absences.errors.CriticalError;
 import manager.services.absences.model.AbsencePeriod;
@@ -34,6 +33,7 @@ import models.User;
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceType;
+import models.absences.CategoryTab;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.DefaultGroup;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
@@ -87,12 +87,13 @@ public class AbsenceService {
    * @param groupAbsenceType gruppo selezionato
    * @return absenceForm.
    */
-  public AbsenceForm buildForCateogorySwitch(Person person, LocalDate date, 
+  public AbsenceForm buildForCategorySwitch(Person person, LocalDate date, 
       GroupAbsenceType groupAbsenceType) {
     
     if (groupAbsenceType == null || !groupAbsenceType.isPersistent()) {
       groupAbsenceType = absenceComponentDao
-          .groupAbsenceTypeByName(AbsenceInsertTab.defaultTab().groupNames.get(0)).get();
+          .categoriesByPriority().get(0)
+          .groupAbsenceTypes.iterator().next();
     }
     
     AbsenceForm form = buildAbsenceForm(person, date, null, null, 
@@ -106,7 +107,7 @@ public class AbsenceService {
    * Genera la form di inserimento assenza.
    * @param person person
    * @param from data inizio
-   * @param absenceInsertTab web tab
+   * @param categoryTab tab
    * @param to data fine
    * @param groupAbsenceType gruppo
    * @param switchGroup se passa a nuovo gruppo
@@ -118,7 +119,7 @@ public class AbsenceService {
    * @return form
    */
   public AbsenceForm buildAbsenceForm(
-      Person person, LocalDate from, AbsenceInsertTab absenceInsertTab,                  //tab 
+      Person person, LocalDate from, CategoryTab categoryTab,                            //tab 
       LocalDate to, GroupAbsenceType groupAbsenceType,  boolean switchGroup,             //group
       AbsenceType absenceType, JustifiedType justifiedType,                              //reconf 
       Integer hours, Integer minutes, boolean readOnly) {
@@ -134,16 +135,19 @@ public class AbsenceService {
     if (absenceType == null || !absenceType.isPersistent()) {
       absenceType = null;
     }
+    if (categoryTab == null || !categoryTab.isPersistent()) {
+      categoryTab = null;
+    }
     
     List<GroupAbsenceType> groupsPermitted = groupsPermitted(person, readOnly);
     
     if (groupAbsenceType != null) {
       Verify.verify(groupsPermitted.contains(groupAbsenceType));
-      absenceInsertTab = AbsenceInsertTab.fromGroup(groupAbsenceType);
+      categoryTab = groupAbsenceType.category.tab;
     } else {
-      if (absenceInsertTab != null) {
-        groupAbsenceType = absenceComponentDao
-            .groupAbsenceTypeByName(absenceInsertTab.groupNames.get(0)).get();
+      if (categoryTab != null) {
+        groupAbsenceType = categoryTab.firstByPriority()
+            .groupAbsenceTypes.iterator().next();
         Verify.verify(groupsPermitted.contains(groupAbsenceType));
       } else {
         //selezionare missione?
@@ -156,7 +160,7 @@ public class AbsenceService {
         if (groupAbsenceType == null) {
           groupAbsenceType = groupsPermitted.get(0);  
         }
-        absenceInsertTab = AbsenceInsertTab.fromGroup(groupAbsenceType);  
+        categoryTab = absenceComponentDao.categoriesByPriority().iterator().next().tab;  
       }
     }
     

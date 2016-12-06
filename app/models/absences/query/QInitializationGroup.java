@@ -28,8 +28,6 @@ public class QInitializationGroup extends EntityPathBase<InitializationGroup> {
 
     public final NumberPath<Integer> averageWeekTime = createNumber("averageWeekTime", Integer.class);
 
-    public final NumberPath<Integer> complationUsed = createNumber("complationUsed", Integer.class);
-
     public final DatePath<org.joda.time.LocalDate> date = createDate("date", org.joda.time.LocalDate.class);
 
     //inherited
@@ -58,8 +56,6 @@ public class QInitializationGroup extends EntityPathBase<InitializationGroup> {
     public final NumberPath<Integer> residualMinutesLastYear = createNumber("residualMinutesLastYear", Integer.class);
 
     public final NumberPath<Integer> takableTotal = createNumber("takableTotal", Integer.class);
-
-    public final NumberPath<Integer> takableUsed = createNumber("takableUsed", Integer.class);
 
     public final NumberPath<Integer> unitsInput = createNumber("unitsInput", Integer.class);
 

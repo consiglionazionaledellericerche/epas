@@ -33,8 +33,8 @@ import models.User;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.JustifiedType;
+import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.QualificationMapping;
 
 import org.joda.time.LocalDate;
@@ -68,8 +68,6 @@ public class Absences extends Controller {
   private static SecurityRules rules;
   @Inject
   private static AbsenceTypeDao absenceTypeDao;
-  @Inject
-  private static QualificationDao qualificationDao;
   @Inject
   private static PersonDao personDao;
   @Inject
@@ -119,7 +117,7 @@ public class Absences extends Controller {
         Optional.fromNullable(absenceCode),
         DateUtility.getMonthFirstDay(yearMonth),
         DateUtility.getMonthLastDay(yearMonth),
-        Optional.<JustifiedTimeAtWork>absent(),
+        Optional.<JustifiedTypeName>absent(),
         false,
         true);
 
@@ -130,91 +128,7 @@ public class Absences extends Controller {
   }
 
   /**
-   * metodo che renderizza la pagina di gestione dei codici di assenza.
-   */
-  public static void manageAbsenceCode() {
-
-    List<AbsenceType> absenceTypes = AbsenceType.findAll();
-    render(absenceTypes);
-  }
-
-  /**
-   * metodo che chiama la render della edit code per modificare/inserire un codice di assenza.
-   */
-  public static void insertCode() {
-
-    render("@editCode");
-  }
-
-  /**
-   * metodo che renderizza la pagina per gestire/inserire un codice di assenza.
-   *
-   * @param absenceCodeId l'id del codice di assenza che si intende modificare/inserire
-   */
-  public static void editCode(@Required Long absenceCodeId) {
-
-    AbsenceType absenceType = absenceTypeDao.getAbsenceTypeById(absenceCodeId);
-
-    boolean tecnologi = false;
-    boolean tecnici = false;
-
-    for (Qualification q : absenceType.qualifications) {
-      tecnologi = !tecnologi ? QualificationMapping.TECNOLOGI.contains(q) : tecnologi;
-      tecnici = !tecnici ? QualificationMapping.TECNICI.contains(q) : tecnici;
-    }
-
-    List<JustifiedType> allJustifiedType = JustifiedType.findAll();
-
-    render(absenceType, tecnologi, tecnici, allJustifiedType);
-  }
-
-  /**
-   * metodo che salva il nuovo/modificato codice di assenza.
-   *
-   * @param absenceType il tipo di assenza
-   * @param tecnologi   se il codice di assenza è valido per i tecnologi
-   * @param tecnici     se il codice di assenza è valido per i tecnici
-   */
-  public static void saveCode(@Valid AbsenceType absenceType,
-      boolean tecnologi, boolean tecnici) {
-
-    //FIXME capire come mai senza il flash.clear si sovrappongono i messaggi
-    flash.clear();
-    if (validation.hasErrors()) {
-      flash.error("Correggere gli errori indicati");
-      render("@editCode", absenceType, tecnologi, tecnici);
-    }
-    Logger.info("tecnologi  %s - tecnici %s", tecnologi, tecnici);
-
-    if (!(tecnologi || tecnici)) {
-      flash.error("Selezionare almeno una categoria tra Tecnologi e Tecnici");
-      render("@editCode", absenceType, tecnologi, tecnici);
-    }
-
-    absenceType.qualifications.clear();
-    Range<Integer> qualifiche;
-    if (tecnologi && tecnici) {
-      qualifiche = QualificationMapping.TECNICI.getRange()
-          .span(QualificationMapping.TECNOLOGI.getRange());
-    } else if (tecnologi) {
-      qualifiche = QualificationMapping.TECNOLOGI.getRange();
-    } else {
-      qualifiche = QualificationMapping.TECNICI.getRange();
-    }
-
-    for (int i = qualifiche.lowerEndpoint(); i <= qualifiche.upperEndpoint(); i++) {
-      Qualification qual = qualificationDao.byQualification(i).orNull();
-      absenceType.qualifications.add(qual);
-    }
-
-    absenceType.save();
-    flash.success("Inserito/modificato codice di assenza %s", absenceType.code);
-
-    editCode(absenceType.id);
-  }
-
-  /**
-   * metodo che permette l'attachment di un file a una assenza.
+   * Metodo che permette l'attachment di un file a una assenza.
    *
    * @param absence     l'assenza
    * @param absenceFile il file associato a quella assenza
@@ -357,7 +271,7 @@ public class Absences extends Controller {
         Optional.<Person>absent(), Optional.fromNullable(code),
         new LocalDate(year, month, 1),
         new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(),
-        Optional.<JustifiedTimeAtWork>absent(), true, false);
+        Optional.<JustifiedTypeName>absent(), true, false);
     byte[] buffer = new byte[1024];
 
     for (Absence abs : absList) {
@@ -451,7 +365,7 @@ public class Absences extends Controller {
 
     List<Absence> absenceList = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person),
         Optional.<String>absent(), from, to,
-        Optional.of(JustifiedTimeAtWork.AllDay), false, false);
+        Optional.of(JustifiedTypeName.all_day), false, false);
 
     for (Absence abs : absenceList) {
       if (AbsenceTypeMapping.MISSIONE.is(abs.absenceType)) {
@@ -577,11 +491,11 @@ public class Absences extends Controller {
     if (absenceTypeCode.equals("Totale")) {
       absenceToRender = absenceDao.getAbsenceByCodeInPeriod(
           Optional.fromNullable(person), Optional.<String>absent(),
-          monthBegin, monthEnd, Optional.<JustifiedTimeAtWork>absent(), false, true);
+          monthBegin, monthEnd, Optional.<JustifiedTypeName>absent(), false, true);
     } else {
       absenceToRender = absenceDao.getAbsenceByCodeInPeriod(
           Optional.fromNullable(person), Optional.fromNullable(absenceTypeCode),
-          monthBegin, monthEnd, Optional.<JustifiedTimeAtWork>absent(), false, true);
+          monthBegin, monthEnd, Optional.<JustifiedTypeName>absent(), false, true);
     }
 
     render(person, absenceToRender);

@@ -1,14 +1,17 @@
 package models.absences;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ContiguousSet;
+import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import lombok.Getter;
 
 import models.Qualification;
+import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.base.BaseModel;
-import models.enumerate.JustifiedTimeAtWork;
+import models.enumerate.QualificationMapping;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -22,8 +25,6 @@ import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
@@ -39,15 +40,6 @@ public class AbsenceType extends BaseModel {
 
   private static final long serialVersionUID = 7157167508454574329L;
 
-  // Vecchia Modellazione (Da rimuovere)
-  
-  @Required
-  @Enumerated(EnumType.STRING)
-  @Column(name = "justified_time_at_work")
-  public JustifiedTimeAtWork justifiedTimeAtWork;
-  
-  // Nuova Modellazione
-  
   @ManyToMany
   public List<Qualification> qualifications = Lists.newArrayList();
 
@@ -199,4 +191,75 @@ public class AbsenceType extends BaseModel {
     }
     return false;
   }
+  
+  /**
+   * Se il codice di assenza è utilizzabile per tutte le qualifiche del mapping.
+   * @param mapping mapping
+   * @return esito
+   */
+  @Transient
+  public boolean isQualificationMapping(QualificationMapping mapping) {
+    Set<Integer> set = ContiguousSet.create(mapping.getRange(), 
+        DiscreteDomain.integers());
+    Set<Integer> actuals = Sets.newHashSet();
+    for (Qualification qualification : qualifications) {
+      actuals.add(qualification.qualification);
+    }
+    for (Integer item : set) {
+      if (!actuals.contains(item)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
+  /**
+   * I gruppi coinvolti dal tipo assenza.
+   * 
+   * @param onlyProgrammed non filtrare i soli programmati
+   * @return entity set
+   */
+  public Set<GroupAbsenceType> involvedGroupAbsenceType(boolean onlyProgrammed) {
+
+    //TODO: da fare la fetch perchè è usato in tabellone timbrature per ogni codice assenza.
+    
+    Set<GroupAbsenceType> groups = Sets.newHashSet();
+    for (TakableAbsenceBehaviour behaviour : this.takableGroup) {
+      groups.addAll(behaviour.groupAbsenceTypes);
+    }
+    for (TakableAbsenceBehaviour behaviour : this.takenGroup) {
+      groups.addAll(behaviour.groupAbsenceTypes);
+    }
+    for (ComplationAbsenceBehaviour behaviour : this.complationGroup) {
+      groups.addAll(behaviour.groupAbsenceTypes);
+    }
+    for (ComplationAbsenceBehaviour behaviour : this.replacingGroup) {
+      groups.addAll(behaviour.groupAbsenceTypes);
+    }
+    if (!onlyProgrammed) {
+      return groups;
+    }
+    Set<GroupAbsenceType> filteredGroup = Sets.newHashSet();
+    for (GroupAbsenceType groupAbsenceType : groups) {
+      if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.programmed)) {
+        filteredGroup.add(groupAbsenceType);
+      }
+    }
+    return filteredGroup;
+  }
+  
+  /**
+   * Se il codice è coinvolto solo in gruppi semplici.
+   * @return esito
+   */
+  public boolean onlySimpleGroupInvolved() {
+    for (GroupAbsenceType group : involvedGroupAbsenceType(false)) {
+      if (group.pattern == GroupAbsenceTypePattern.simpleGrouping) {
+        continue;
+      }
+      return false;
+    }
+    return true;
+  }
+  
 }

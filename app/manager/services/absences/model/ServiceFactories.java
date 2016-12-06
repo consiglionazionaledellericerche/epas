@@ -517,7 +517,16 @@ public class ServiceFactories {
     if (absenceToInsert == null) { 
       return periodChain;
     }
-
+    
+    if (absenceToInsert.getAbsenceType() == null) {
+      absenceToInsert = absenceEngineUtility
+          .inferAbsenceType(periodChain.firstPeriod(), absenceToInsert);
+      if (absenceToInsert.getAbsenceType() == null) {
+        periodChain.errorsBox.addCriticalError(absenceToInsert, 
+            CriticalProblem.CantInferAbsenceCode);
+        return periodChain;
+      }
+    }
 
     periodChain.allInvolvedAbsences = absenceEngineUtility
         .mapAbsences(allPersistedAbsences, null);

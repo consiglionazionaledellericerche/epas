@@ -11,6 +11,8 @@ import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
+import play.data.validation.Required;
+
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -30,10 +32,12 @@ public class GroupAbsenceType extends BaseModel {
 
   private static final long serialVersionUID = 3290760775533091791L;
 
+  @Required
   @Column
   public String name;
   
   //Astensione facoltativa post partum 100% primo figlio 0-12 anni 30 giorni 
+  @Required
   @Column
   public String description;
 
@@ -46,11 +50,13 @@ public class GroupAbsenceType extends BaseModel {
   @JoinColumn(name = "category_type_id")
   public CategoryGroupAbsenceType category;
   
+  @Required
   @Getter
   @Column(name = "pattern")
   @Enumerated(EnumType.STRING)
   public GroupAbsenceTypePattern pattern;
   
+  @Required
   @Getter
   @Column(name = "period_type")
   @Enumerated(EnumType.STRING)
@@ -74,6 +80,12 @@ public class GroupAbsenceType extends BaseModel {
   @OneToMany(mappedBy = "nextGroupToCheck", fetch = FetchType.LAZY)
   public Set<GroupAbsenceType> previousGroupChecked;
 
+  @Column
+  public boolean automatic = false;
+  
+  @Column
+  public boolean initializable = false;
+  
   /**
    * Label.
    * @return label
