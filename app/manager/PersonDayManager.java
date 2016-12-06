@@ -183,12 +183,13 @@ public class PersonDayManager {
    * @param personDay  personDay
    * @param startLunch inizio fascia pranzo istituto
    * @param endLunch   fine fascia pranzo istituto
+   * @param exitingNow timbratura fittizia uscendo in questo momento
    * @return la lista delle pause pranzo
    */
   public List<PairStamping> getGapLunchPairs(PersonDay personDay, LocalTime startLunch,
-      LocalTime endLunch) {
+      LocalTime endLunch, Optional<Stamping> exitingNow) {
 
-    List<PairStamping> validPairs = getValidPairStampings(personDay.stampings);
+    List<PairStamping> validPairs = getValidPairStampings(personDay.stampings, exitingNow);
 
     List<PairStamping> allGapPairs = Lists.newArrayList();
 
@@ -435,7 +436,8 @@ public class PersonDayManager {
     // dal tempo a lavoro.
 
     // 1) Calcolo del tempo passato in pausa pranzo dalle timbrature.
-    List<PairStamping> gapLunchPairs = getGapLunchPairs(personDay, startLunch, endLunch);
+    List<PairStamping> gapLunchPairs = 
+        getGapLunchPairs(personDay, startLunch, endLunch, exitingNow);
     boolean baessoAlgorithm = true;
     for (PairStamping lunchPair : gapLunchPairs) {
       if (lunchPair.prPair) {
