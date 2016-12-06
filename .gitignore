@@ -23,3 +23,5 @@ lib/
 /scrap.jpage
 /.pydevproject
 /fabfile.pyc
+/bin/
+/.gradle/
