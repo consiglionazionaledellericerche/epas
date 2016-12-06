@@ -94,11 +94,14 @@
   #{/alert}
   #{/if}
   #{else}
+  
+  #{include './_tutorialShift.html'/}
+  
   <table class="table">
     <thead>
     <tr>
       <th>Servizio</th>
-      <th>Eventuale supervisore</th>
+      <th>Responsabile servizio</th>
       <th>Configura servizio (aggiungi attività)</th>
       <th>Associa personale</th>
       <th>Elimina</th>
@@ -134,12 +137,12 @@
       #{secure.check 'Competences.evaluateShift'}
       #{if sc.disabled}
       <a class="btn btn-primary btn-xs" href="@{Competences.evaluateShift(sc.id)}" data-async-modal="#defaultModal">
-        Riabilita
+        Riabilita ${sc.description}
       </a>
       #{/if}
       #{else}
       <a class="btn btn-danger btn-xs" href="@{Competences.evaluateShift(sc.id)}" data-async-modal="#defaultModal">
-        Disabilita
+        Disabilita ${sc.description}
       </a>
       #{/else}
       #{/secure.check}
