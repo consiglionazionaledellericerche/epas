@@ -5,6 +5,9 @@ title: 'Assegna personale alla attività' }
 #{form action:@Competences.linkPeopleToShift(), method:'POST', autocomplete:false,
   class:'form form-horizontal', 'data-async':'#page_content',
   'data-async-error':'#absenceCodeData'}
+  	#{if shiftType.persistent}
+ 		#{f.hidden 'shiftType.id' /}
+	#{/if}
 	#{if peopleForShift.isEmpty()}
 		#{alert color:'warning'}
 			Per poter assegnare dei dipendenti all'attività <strong>${shiftType.description}</strong>
@@ -14,35 +17,13 @@ title: 'Assegna personale alla attività' }
 			<i>Abilita competenze</i>
 		#{/alert}
 	#{/if}
-	#{else}
-	<table class="table" datatable>
-	<thead>
-    	<tr>
-    		<th>Turnista</th>
-    		<th>Attività</th>
-    		<th>Data inizio</th>
-    		<th>Data fine</th>
-    	</tr>
-    </thead>
-    <tbody>
-    #{list items:associatedPeopleShift, as:'aps'}
-    	<tr>
-    		<td>aps.personShift.person.fullname()</td>
-    		<td>aps.shiftType.description</td>
-    		<td>aps.beginDate</td>
-    		<td>aps.endDate</td>
-    	</tr>
-    #{/list}
-    </tbody>
-	</table>
+	#{else}	
+	
 	#{alert color:'info'}
-		Selezionare dalla lista le persone che si intende associare al turno <strong>${shiftType.description}</strong><br>
-		e specificare il periodo per cui si vuole associare la persona al turno.
+		Selezionare dalla lista le persone che si intende associare al turno <strong>${shiftType.description}</strong>.
 	#{/alert}
 		#{f.selectModels 'peopleIds',
-  		items:peopleForShift, placeholder:'I codici di competenza' /}
-  		#{f.date 'beginDate', value:beginDate?.format() /}
-	    #{f.date 'endDate', value:endDate?.format() /}
+  		items:templateUtility.allPersonShiftByOffice(office), placeholder:'I codici di competenza' /}
 	#{/else}
 	
   

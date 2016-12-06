@@ -892,7 +892,7 @@ public class Competences extends Controller {
 
   /**
    * metodo che controlla e poi persiste la disabilitazione/abilitazione di un servizio.
-   * @param reperibilityTypeId l'id del servizio da disabilitare/abilitare
+   * @param shiftCategoryId l'id del servizio da disabilitare/abilitare
    * @param confirmed il booleano per consentire la persistenza di una modifica
    */
   public static void evaluateShift(Long shiftCategoryId, boolean confirmed) {
@@ -962,28 +962,32 @@ public class Competences extends Controller {
       ShiftType shiftType = type.get();
       Office office = officeDao.getOfficeById(shiftType.shiftCategories.office.id);
       List<PersonShift> peopleForShift = shiftDao.getPeopleForShift(office);
+      List<PersonShift> peopleIds = Lists.newArrayList();
       List<PersonShiftShiftType> associatedPeopleShift = shiftDao
-          .getAssociatedPeopleToShift(shiftType);
-      render(peopleForShift,shiftType, office, associatedPeopleShift);
+          .getAssociatedPeopleToShift(shiftType, Optional.fromNullable(LocalDate.now()));
+      for (PersonShiftShiftType psst : associatedPeopleShift) {
+        peopleIds.add(psst.personShift);
+      }
+      render(peopleIds,shiftType, office, peopleForShift);
     }
   }
   
   /**
-   * 
-   * @param peopleIds
-   * @param shiftType
-   * @param beginDate
-   * @param endDate
+   * metodo che persiste i person_shift_shift_type.
+   * @param peopleIds la lista degli id delle persone da aggiungere/rimuovere
+   * @param shiftType l'attività su cui aggiungere/rimuovere le persone
    */
-  public static void linkPeopleToShift(List<Long> peopleIds, ShiftType shiftType,
-      LocalDate beginDate, LocalDate endDate) {
+  public static void linkPeopleToShift(List<Long> peopleIds, ShiftType shiftType) {
     notFoundIfNull(shiftType);
     rules.checkIfPermitted(shiftType.shiftCategories.office);
-    List<PersonShiftShiftType> psstList = shiftDao.getAssociatedPeopleToShift(shiftType);
+    List<PersonShiftShiftType> psstList = shiftDao.getAssociatedPeopleToShift(shiftType, 
+        Optional.fromNullable(LocalDate.now()));
     List<PersonShift> peopleToAdd = competenceManager.peopleToAdd(psstList, peopleIds);
     List<PersonShift> peoleToRemove = competenceManager.peopleToDelete(psstList, peopleIds);
-    competenceManager.persistPersonShiftShiftType(peopleToAdd, shiftType, 
-        peoleToRemove, beginDate, endDate);
+    competenceManager.persistPersonShiftShiftType(peopleToAdd, shiftType,peoleToRemove);
+    flash.success("Aggiornata lista di persone appartenenti all'attività di turno %s", 
+        shiftType.description);
+    activateServices(shiftType.shiftCategories.office.id);
   }
   
   /**
