@@ -791,15 +791,7 @@ public class Competences extends Controller {
   public static void saveReperibility(@Valid PersonReperibilityType type, @Valid Office office) {
 
     rules.checkIfPermitted(office);
-    if (!validation.hasErrors()) {
-      if (type.supervisor == null) {
-        validation.addError("type.supervisor", "non può essere null");
-      }
-      if (type.description == null || type.description.isEmpty()) {
-        validation.addError("type.description", "non può essere null");
-      }
 
-    }
     if (validation.hasErrors()) {
       response.status = 400;
       List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
@@ -822,15 +814,7 @@ public class Competences extends Controller {
   public static void saveShift(@Valid ShiftCategories cat, @Valid Office office) {
 
     rules.checkIfPermitted(office);
-    if (!validation.hasErrors()) {
-      if (cat.supervisor == null) {
-        validation.addError("category.supervisor", "non può essere null");
-      }
-      if (cat.description == null || cat.description.isEmpty()) {
-        validation.addError("category.description", "non può essere null");
-      }
 
-    }
     if (validation.hasErrors()) {
       response.status = 400;
       List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),

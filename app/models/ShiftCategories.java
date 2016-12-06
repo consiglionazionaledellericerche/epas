@@ -5,6 +5,9 @@ import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
+import play.data.validation.Required;
+import play.data.validation.Unique;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +27,8 @@ public class ShiftCategories extends BaseModel {
 
   private static final long serialVersionUID = 3156856871540530483L;
 
+  @Required
+  @Unique
   public String description;
 
   /**
@@ -31,6 +36,7 @@ public class ShiftCategories extends BaseModel {
    */
   @ManyToOne(optional = false)
   @JoinColumn(name = "supervisor")
+  @Required
   public Person supervisor;
   
   public boolean disabled;
