@@ -80,6 +80,24 @@ public class AbsenceComponentDao extends DaoBase {
   }
   
   /**
+   * Gli absenceTypes con quegli id. Se non vengono caricati tutti gli id ritorna null.
+   * @param ids gli id
+   * @return list o null
+   */
+  public List<AbsenceType> absenceTypesByIds(List<Long> ids) {
+    if (ids == null || ids.isEmpty()) {
+      return Lists.newArrayList();
+    }
+    QAbsenceType absenceType = QAbsenceType.absenceType;
+    List<AbsenceType> types = getQueryFactory().from(absenceType)
+        .where(absenceType.id.in(ids)).list(absenceType);
+    if (types.size() != ids.size()) {
+      return null;
+    }
+    return types;
+  }
+  
+  /**
    * Ritorna il JustifiedType con quel nome. Se non esiste lo crea.
    * @param name nome
    * @return entity

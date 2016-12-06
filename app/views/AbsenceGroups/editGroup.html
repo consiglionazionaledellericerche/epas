@@ -12,6 +12,10 @@
 	 #{form action:@AbsenceGroups.saveGroup(), method:'POST', autocomplete:false,
 		    class:'form form-horizontal'}
 		
+		#{alert color:'warning'}
+          <p>Informazioni generali sul gruppo. </p>
+        #{/alert}
+		
 		<input type="hidden" name="groupAbsenceType.id" value="${groupAbsenceType.id}"/>
 		
 		#{f.input 'groupAbsenceType.name' /}
@@ -32,20 +36,32 @@
 	    #{f.booleanRadio 'groupAbsenceType.automatic' /}
 	    #{f.booleanRadio 'groupAbsenceType.initializable' /}
 	    
+	    #{f.selectEnum 'groupAbsenceType.periodType', items:models.absences.GroupAbsenceType.PeriodType.values() /}
+	    
+	    #{f.selectModel 'groupAbsenceType.nextGroupToCheck', items:allGroups /}
 	    
 	    <!-- Parte takable -->
 	    
+	    #{alert color:'warning'}
+	      <p>Parte sul tetto massimo. Impostare un valore negativo nel caso di nessun limite.</p>
+        #{/alert}
+	    
 	    #{f.selectEnum 'takeAmountType', items:models.absences.AmountType.values(), value:takeAmountType /}
-	    #{f.input 'fixedLimit', value:fixedLimit /}
+	    #{f.input 'fixedLimit', type:'number', value:fixedLimit /}
         #{f.selectEnum 'takableAmountAdjustment', items:models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment.values(), value:takableAmountAdjustment /}	    
 	    
-	    #{f.selectModels 'takableCodes.id', 
+	    #{f.selectModels 'takableCodesIds', 
  		  value:takableCodes,
                items:allAbsenceTypes /}
+               
+        #{alert color:'warning'}
+          <p>Parte sul funzionamento del completamento. Impostare il tipo di completamento vuoto per nessun completamento.
+          I codici di completamento selezionati devono appartenere alla lista dei codici prendibili.</p>
+        #{/alert}
 
         #{f.selectEnum 'complationAmountType', items:models.absences.AmountType.values(), value:complationAmountType /}
-		#{f.selectModels 'complationCodes.id', value:complationCodes, items:allAbsenceTypes /}
-        #{f.selectModels 'replacingCodes.id', value:replacingCodes, items:allAbsenceTypes /}      
+		#{f.selectModels 'complationCodesIds', value:complationCodes, items:allAbsenceTypes /}
+        #{f.selectModels 'replacingCodesIds', value:replacingCodes, items:allAbsenceTypes /}      
           
 	    
 	    #{b.buttons center:true}   

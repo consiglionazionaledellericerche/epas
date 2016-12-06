@@ -27,6 +27,7 @@ import javax.persistence.Table;
 public class TakableAbsenceBehaviour extends BaseModel {
 
   private static final long serialVersionUID = 486763865630858142L;
+  public static final String NAME_PREFIX = "T_";
 
   @Column(name = "name")
   public String name;

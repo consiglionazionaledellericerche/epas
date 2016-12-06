@@ -57,27 +57,6 @@
    #{/form}
 
 </div>
-<div class="container">   
-  <br>
-    #{if !absenceType.onlySimpleGroupInvolved() }
-      <p>Questo codice appartiene a gruppi programmati o particolari. La sua modifica è vincolata
-        al rilascio delle prossime versioni ePAS.
-        </p>
-    #{/if}
-    #{else}
-     
-     #{selectModels items:absenceType.takableGroup, as:'takableGroup' }
-      #{list items:takableGroup.groupAbsenceTypes, as:'group'}
-        ${group.description}
-      #{/list}
-     #{/list}    
-    involvedGroupAbsenceType
-    
-    #{/else}
-    
-
-</div>
-
 
 
 

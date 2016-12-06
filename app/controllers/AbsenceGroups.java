@@ -38,9 +38,9 @@ import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.CategoryGroupAbsenceType;
 import models.absences.CategoryTab;
+import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
-import models.absences.GroupAbsenceType.PeriodType;
 import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.TakableAbsenceBehaviour;
@@ -272,6 +272,7 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(groupAbsenceType);
     List<CategoryGroupAbsenceType> allCategories = CategoryGroupAbsenceType.findAll();
     List<AbsenceType> allAbsenceTypes = AbsenceType.findAll();
+    List<GroupAbsenceType> allGroups = GroupAbsenceType.findAll();
     
     //Stato precedente gruppo
     AmountType takeAmountType = groupAbsenceType.takableAbsenceBehaviour.amountType;
@@ -290,7 +291,7 @@ public class AbsenceGroups extends Controller {
       
     render(groupAbsenceType, takeAmountType, fixedLimit, takableCodes, takableAmountAdjustment, 
         complationAmountType, complationCodes, replacingCodes, 
-        allCategories, allAbsenceTypes);
+        allCategories, allAbsenceTypes, allGroups);
   }
   
   /**
@@ -298,53 +299,101 @@ public class AbsenceGroups extends Controller {
    * @param groupAbsenceType gruppo
    */
   public static void saveGroup(@Valid GroupAbsenceType groupAbsenceType, 
-      List<AbsenceType> takableCodes, 
+      List<Long> takableCodesIds, 
       @Required AmountType takeAmountType, 
       @Required Integer fixedLimit, 
       TakeAmountAdjustment takableAmountAdjustment, 
       
       AmountType complationAmountType,
-      List<AbsenceType> complationCodes, List<AbsenceType> replacingCodes) {
+      List<Long> complationCodesIds, List<Long> replacingCodesIds) {
+    
+    //Fetch absenceTypes
+    List<AbsenceType> takableCodes = absenceComponentDao.absenceTypesByIds(takableCodesIds);
+    List<AbsenceType> complationCodes = absenceComponentDao.absenceTypesByIds(complationCodesIds);
+    List<AbsenceType> replacingCodes = absenceComponentDao.absenceTypesByIds(replacingCodesIds);
+    if (takableCodes == null || complationCodes == null || replacingCodes == null) {
+      //se null significa dimensione diversa fra input e fetch.
+      badRequest();
+    }
     
     if (takableCodes.isEmpty()) {
-      Validation.addError("takableCodes", "Deve contenere almeno un codice.");
+      Validation.addError("takableCodesIds", "Deve contenere almeno un codice.");
     }
     if (complationAmountType != null) {
       if (complationCodes.isEmpty()) {
-        Validation.addError("complationCodes", "Deve contenere almeno un codice.");
+        Validation.addError("complationCodesIds", "Deve contenere almeno un codice.");
       }
       if (replacingCodes.isEmpty()) {
-        Validation.addError("replacingCodes", "Deve contenere almeno un codice.");
+        Validation.addError("replacingCodesIds", "Deve contenere almeno un codice.");
       }
     }
     
     if (validation.hasErrors()) {
+      List<GroupAbsenceType> allGroups = GroupAbsenceType.findAll();
       List<CategoryGroupAbsenceType> allCategories = CategoryGroupAbsenceType.findAll();
       List<AbsenceType> allAbsenceTypes = AbsenceType.findAll();
       render("@editGroup", groupAbsenceType, 
           takableCodes, takeAmountType, fixedLimit, takableAmountAdjustment, 
           complationAmountType, complationCodes, replacingCodes, 
-          allCategories, allAbsenceTypes );
+          allCategories, allAbsenceTypes, allGroups);
     }
     
+    //Save take
+    TakableAbsenceBehaviour takableBehaviour;
     if (!groupAbsenceType.isPersistent()) {
-            
-      if (groupAbsenceType.pattern != GroupAbsenceTypePattern.simpleGrouping) {
-        
-        //simple grouping creation
-        groupAbsenceType.periodType = PeriodType.always;
-        TakableAbsenceBehaviour takableAbsenceBehaviour = new TakableAbsenceBehaviour();
-        takableAbsenceBehaviour.name = "T_" + groupAbsenceType.name;
-        takableAbsenceBehaviour.fixedLimit = -1;
-        takableAbsenceBehaviour.amountType = AmountType.units;
-        takableAbsenceBehaviour.takableCodes = Sets.newHashSet(takableCodes);
-        takableAbsenceBehaviour.save();
-        groupAbsenceType.takableAbsenceBehaviour = takableAbsenceBehaviour;
-        groupAbsenceType.save();
-      }
+      takableBehaviour = new TakableAbsenceBehaviour();
+      takableBehaviour.groupAbsenceTypes.add(groupAbsenceType);
+      takableBehaviour.name = TakableAbsenceBehaviour.NAME_PREFIX + groupAbsenceType.name;
+    } else {
+      takableBehaviour = groupAbsenceType.takableAbsenceBehaviour;
     }
+    
+    takableBehaviour.amountType = takeAmountType;
+    takableBehaviour.takableCodes.clear();
+    takableBehaviour.takenCodes.clear();
+    takableBehaviour.takableCodes = Sets.newHashSet(takableCodes);
+    takableBehaviour.takenCodes = Sets.newHashSet(takableCodes);
+    takableBehaviour.fixedLimit = fixedLimit;
+    takableBehaviour.takableAmountAdjustment = takableAmountAdjustment;
+    takableBehaviour.save();
+    groupAbsenceType.takableAbsenceBehaviour = takableBehaviour;
+    
+    //Save complatio
+    ComplationAbsenceBehaviour complationBehaviour;
+    if (!groupAbsenceType.isPersistent() || groupAbsenceType.complationAbsenceBehaviour == null) {
+      complationBehaviour = new ComplationAbsenceBehaviour();
+      complationBehaviour.name = ComplationAbsenceBehaviour.NAME_PREFIX + groupAbsenceType.name;
+      complationBehaviour.groupAbsenceTypes.add(groupAbsenceType);
+    } else {
+      complationBehaviour = groupAbsenceType.complationAbsenceBehaviour;
+    }
+    
+    if (complationAmountType == null) {
+      //distruzione
+      if (groupAbsenceType.complationAbsenceBehaviour != null) {
+        ComplationAbsenceBehaviour complationToRemove = groupAbsenceType.complationAbsenceBehaviour;
+        groupAbsenceType.complationAbsenceBehaviour = null;
+        groupAbsenceType.save();
+        complationToRemove.groupAbsenceTypes.remove(groupAbsenceType);
+        complationToRemove.complationCodes.clear();
+        complationToRemove.replacingCodes.clear();
+        complationToRemove.delete();
+      }
+    } else {
+      //creazione / modifica
+      complationBehaviour.complationCodes.clear();
+      complationBehaviour.replacingCodes.clear();
+      complationBehaviour.complationCodes = Sets.newHashSet(complationCodes);
+      complationBehaviour.replacingCodes = Sets.newHashSet(replacingCodes);
+      complationBehaviour.amountType = complationAmountType;
+      complationBehaviour.save();
+      groupAbsenceType.complationAbsenceBehaviour = complationBehaviour;
+    }
+    
+    groupAbsenceType.save();
+  
     flash.success("Operazione eseguita con successo");
-    showGroups(groupAbsenceType.category.id);
+    editGroup(groupAbsenceType.id);
   }
   
   

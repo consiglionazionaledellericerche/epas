@@ -37,6 +37,7 @@ public class GroupAbsenceType extends BaseModel {
   public String name;
   
   //Astensione facoltativa post partum 100% primo figlio 0-12 anni 30 giorni 
+  @Required
   @Column
   public String description;
 
@@ -55,6 +56,7 @@ public class GroupAbsenceType extends BaseModel {
   @Enumerated(EnumType.STRING)
   public GroupAbsenceTypePattern pattern;
   
+  @Required
   @Getter
   @Column(name = "period_type")
   @Enumerated(EnumType.STRING)
