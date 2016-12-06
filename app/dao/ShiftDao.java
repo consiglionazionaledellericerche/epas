@@ -64,6 +64,7 @@ public class ShiftDao extends DaoBase {
     JPQLQuery query = getQueryFactory().from(shiftType).where(shiftType.id.eq(id));
     return Optional.fromNullable(query.singleResult(shiftType));
   }
+  
   /**
    * @return la lista dei personShiftDay con ShiftType 'type' presenti nel periodo tra 'begin' e
    *     'to'.
@@ -146,13 +147,16 @@ public class ShiftDao extends DaoBase {
   /**
    * 
    * @param office la sede di cui si vogliono le persone che stanno in turno
-   * @return la lista dei personShift con persone che appartengono all'ufficio passato come parametro. 
+   * @return la lista dei personShift con persone che appartengono all'ufficio 
+   *     passato come parametro. 
    */
   public List<PersonShift> getPeopleForShift(Office office) {
     final QPersonShift ps = QPersonShift.personShift;
     final QPerson person = QPerson.person;
     JPQLQuery query = getQueryFactory().from(person)
-        .leftJoin(person.personShift, ps).fetchAll().where(person.office.eq(office).and(person.eq(ps.person)));
+        .leftJoin(person.personShift, ps).fetchAll()
+        .where(person.office.eq(office)
+            .and(person.eq(ps.person)));
     return query.list(ps);
   }
 
@@ -247,19 +251,29 @@ public class ShiftDao extends DaoBase {
   /**
    * 
    * @param shiftType l'attività per cui si vogliono le persone associate
+   * @param date se presente, la data in cui si richiede la situazione dei dipendenti 
+   *     associati al turno
    * @return la lista di persone associate all'attività passata come parametro.
    */
-  public List<PersonShiftShiftType> getAssociatedPeopleToShift(ShiftType shiftType) {
+  public List<PersonShiftShiftType> getAssociatedPeopleToShift(ShiftType shiftType, 
+      Optional<LocalDate> date) {
     final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
+    BooleanBuilder condition = new BooleanBuilder();
+    if (date.isPresent()) {
+      condition.and(psst.beginDate.loe(date.get().dayOfMonth().withMaximumValue())
+          .andAnyOf(psst.endDate.isNull(), 
+              psst.endDate.goe(date.get().dayOfMonth().withMaximumValue())));
+
+    }
     JPQLQuery query = getQueryFactory().from(psst).where(psst.shiftType.eq(shiftType));
     return query.list(psst);
   }
   
   /**
    * 
-   * @param personShift
-   * @param shiftType
-   * @return
+   * @param personShift la persona associata al turno
+   * @param shiftType l'attività di un servizio di turno
+   * @return l'eventuale associazione tra persona e attività di turno se presente.
    */
   public Optional<PersonShiftShiftType> getByPersonShiftAndShiftType(PersonShift personShift, 
       ShiftType shiftType) {

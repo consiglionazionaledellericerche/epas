@@ -740,13 +740,12 @@ public class CompetenceManager {
    * @param endDate
    */
   public void persistPersonShiftShiftType(List<PersonShift> peopleToAdd, ShiftType shiftType,
-      List<PersonShift> peopleToRemove, LocalDate beginDate, LocalDate endDate) {
+      List<PersonShift> peopleToRemove) {
     
     peopleToAdd.forEach(item -> {
       PersonShiftShiftType psst = new PersonShiftShiftType();
       psst.personShift = item;
-      psst.beginDate = beginDate;
-      psst.endDate = endDate;
+      psst.beginDate = LocalDate.now();
       psst.shiftType = shiftType;
       psst.save();
     });
@@ -754,7 +753,7 @@ public class CompetenceManager {
     peopleToRemove.forEach(item -> {
       Optional<PersonShiftShiftType> psst = shiftDao.getByPersonShiftAndShiftType(item, shiftType);
       if (psst.isPresent()) {
-        psst.get().endDate = endDate;
+        psst.get().endDate = LocalDate.now();
         psst.get().save();
       }
     });
