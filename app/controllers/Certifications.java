@@ -17,7 +17,7 @@ import helpers.CacheValues;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.attestati.dto.show.CodiceAssenza;
-import manager.attestati.service.CertificationService;
+import manager.attestati.service.ICertificationService;
 import manager.attestati.service.PersonCertData;
 
 import models.Office;
@@ -61,8 +61,10 @@ public class Certifications extends Controller {
   @Inject
   static PersonDao personDao;
   @Inject
-  static CertificationService certificationService;
-
+  static ICertificationService certificationService;
+  @Inject
+  static CacheValues cacheValues;
+  
   /**
    * Pagina principale nuovo invio attestati.
    *
@@ -123,7 +125,7 @@ public class Certifications extends Controller {
         .SimpleEntry<>(office, monthToUpload.get());
 
     try {
-      matricoleAttestati = CacheValues.AttestatiSerialNumbers.get(cacheKey);
+      matricoleAttestati = cacheValues.attestatiSerialNumbers.get(cacheKey);
     } catch (Exception e) {
       flash.error("Errore di connessione al server di Attestati - %s", cleanMessage(e).getMessage());
       log.error("Errore durante la connessione al server di attestati: {}", e.getMessage());
@@ -186,7 +188,7 @@ public class Certifications extends Controller {
       // Costruisco lo status generale
       final Map.Entry<Person, YearMonth> cacheKey = new AbstractMap
           .SimpleEntry<>(person, new YearMonth(year, month));
-      personCertData = CacheValues.personStatus.get(cacheKey);
+      personCertData = cacheValues.personStatus.get(cacheKey);
     } catch (Exception e) {
       log.error("Errore nel recupero delle informazioni dal server di attestati per la persona {}: {}",
           person, cleanMessage(e).getMessage());
@@ -198,7 +200,7 @@ public class Certifications extends Controller {
     try {
       final Map.Entry<Office, YearMonth> key = new AbstractMap
           .SimpleEntry<>(person.office, new YearMonth(year, month));
-      stepSize = CacheValues.elaborationStep.get(key);
+      stepSize = cacheValues.elaborationStep.get(key);
     } catch (Exception e) {
       log.error("Impossibile recuperare la percentuale di avanzamento per la persona {}: {}",
           person, cleanMessage(e).getMessage());
@@ -236,7 +238,7 @@ public class Certifications extends Controller {
     PersonCertData previousCertData = null;
     try {
       // Costruisco lo status generale
-      previousCertData = CacheValues.personStatus.get(cacheKey);
+      previousCertData = cacheValues.personStatus.get(cacheKey);
     } catch (Exception e) {
       log.error("Errore nel recupero delle informazioni dal server di attestati" +
           " per la persona {}: {}", person, cleanMessage(e).getMessage());
@@ -255,10 +257,10 @@ public class Certifications extends Controller {
     }
 //     Se riesco nell'invio ne aggiorno lo stato in cache
     if (personCertData != null) {
-      CacheValues.personStatus.put(cacheKey, personCertData);
+      cacheValues.personStatus.put(cacheKey, personCertData);
     } else {
       // Altrimenti invalido il valore presente
-      CacheValues.personStatus.invalidate(cacheKey);
+      cacheValues.personStatus.invalidate(cacheKey);
     }
 
     // La percentuale di completamento della progress bar rispetto al totale da elaborare
@@ -266,7 +268,7 @@ public class Certifications extends Controller {
     try {
       final Map.Entry<Office, YearMonth> key = new AbstractMap
           .SimpleEntry<>(person.office, new YearMonth(year, month));
-      stepSize = CacheValues.elaborationStep.get(key);
+      stepSize = cacheValues.elaborationStep.get(key);
     } catch (Exception e) {
       log.error("Impossibile recuperare la percentuale di avanzamento per la persona {}: {}",
           person, cleanMessage(e).getMessage());

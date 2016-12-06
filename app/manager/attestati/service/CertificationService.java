@@ -48,7 +48,7 @@ import java.util.concurrent.ExecutionException;
  * @author alessandro
  */
 @Slf4j
-public class CertificationService {
+public class CertificationService implements ICertificationService {
 
   private final CertificationsComunication certificationsComunication;
 
@@ -74,13 +74,10 @@ public class CertificationService {
     this.certificationDao = certificationDao;
   }
 
-  /**
-   * Se il token è abilitato alla sede.
-   *
-   * @param office sede
-   * @param result result (da rimuovere)
-   * @return esito
+  /* (non-Javadoc)
+   * @see manager.attestati.service.ICertificationService#authentication(models.Office, boolean)
    */
+  @Override
   public boolean authentication(Office office, boolean result) {
 
     // TODO: chiedere a Pagano come discriminare il caso.
@@ -156,15 +153,10 @@ public class CertificationService {
     return certifications;
   }
 
-  /**
-   * Costruisce la situazione attestati di una persona.
-   *
-   * @param person  persona
-   * @param year    anno
-   * @param month   mese
-   * @param numbers numeri attestati in cui ricercarla
-   * @return lo stato
+  /* (non-Javadoc)
+   * @see manager.attestati.service.ICertificationService#buildPersonStaticStatus(models.Person, int, int)
    */
+  @Override
   public PersonCertData buildPersonStaticStatus(Person person, int year, int month)
       throws ExecutionException {
 
@@ -280,13 +272,10 @@ public class CertificationService {
 
   }
 
-  /**
-   * Se le due mappe contententi certificazioni sono equivalenti e non contengono errori.
-   *
-   * @param map1 map1
-   * @param map2 map2
-   * @return esito
+  /* (non-Javadoc)
+   * @see manager.attestati.service.ICertificationService#certificationsEquivalent(java.util.Map, java.util.Map)
    */
+  @Override
   public boolean certificationsEquivalent(Map<String, Certification> map1,
       Map<String, Certification> map2) {
 
@@ -311,16 +300,14 @@ public class CertificationService {
     return true;
   }
 
-  /**
-   * Elaborazione persona.
-   *
-   * @param personCertData il suo stato
-   * @return lo stato dopo l'elaborazione.
+  /* (non-Javadoc)
+   * @see manager.attestati.service.ICertificationService#process(manager.attestati.service.PersonCertData)
    */
   // TODO Questa parte andrebbe resa più semplice perchè per trasmettere le informazioni
   // ad attestati sono costretto ad avere un PersonCertData che è il risultato
   // ottenuto dal metodo buildPersonStaticStatus il quale a sua volta effettua una richiesta
   // ad attestati per il recupero delle informazioni della persona
+  @Override
   public PersonCertData process(PersonCertData personCertData)
       throws ExecutionException, NoSuchFieldException {
 
@@ -383,9 +370,10 @@ public class CertificationService {
   }
 
 
-  /**
-   * Invia la certificazione ad attestati.
+  /* (non-Javadoc)
+   * @see manager.attestati.service.ICertificationService#sendCertification(models.Certification)
    */
+  @Override
   public Certification sendCertification(Certification certification) {
 
     try {
@@ -445,9 +433,10 @@ public class CertificationService {
     }
   }
 
-  /**
-   * Rimuove il record in attestati. (Non usare per buoni pasto).
+  /* (non-Javadoc)
+   * @see manager.attestati.service.ICertificationService#removeAttestati(models.Certification)
    */
+  @Override
   public boolean removeAttestati(Certification certification)
       throws ExecutionException, NoSuchFieldException {
 
@@ -640,12 +629,10 @@ public class CertificationService {
     return certifications;
   }
 
-  /**
-   * Prova a rimuovere tutti i record presenti su attestati.
-   *
-   * @param personCertData status
-   * @return il nuovo stato
+  /* (non-Javadoc)
+   * @see manager.attestati.service.ICertificationService#emptyAttestati(manager.attestati.service.PersonCertData)
    */
+  @Override
   public PersonCertData emptyAttestati(
       PersonCertData personCertData)
       throws ExecutionException, NoSuchFieldException {
@@ -681,11 +668,10 @@ public class CertificationService {
     return personCertData;
   }
 
-  /**
-   * La lista dei codici assenza... TODO: conversione al tipo epas??
-   *
-   * @return lista
+  /* (non-Javadoc)
+   * @see manager.attestati.service.ICertificationService#absenceCodes()
    */
+  @Override
   public Map<String, CodiceAssenza> absenceCodes() throws ExecutionException {
 
     List<CodiceAssenza> codiciAssenza = certificationsComunication.getAbsencesList();
