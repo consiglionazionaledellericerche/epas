@@ -732,9 +732,9 @@ public class Competences extends Controller {
   }
 
 
-  /* ********************************************************
-   * Parte relativa ai servizi da attivare per reperibilità *
-   * ********************************************************/
+  /* ****************************************************************
+   * Parte relativa ai servizi da attivare per reperibilità e turni *
+   * ****************************************************************/
 
   /**
    * Metodo che renderizza la form di visualizzazione dei servizi attivi per un ufficio.
@@ -852,6 +852,7 @@ public class Competences extends Controller {
   public static void evaluateReperibility(Long reperibilityTypeId, boolean confirmed) {
     PersonReperibilityType type = reperibilityDao.getPersonReperibilityTypeById(reperibilityTypeId);
     notFoundIfNull(type);
+    rules.checkIfPermitted(type.office);
     if (!confirmed) {
       confirmed = true;
       render(type, confirmed);
@@ -898,6 +899,7 @@ public class Competences extends Controller {
   public static void evaluateShift(Long shiftCategoryId, boolean confirmed) {
     ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
     notFoundIfNull(cat);
+    rules.checkIfPermitted(cat.office);
     if (!confirmed) {
       confirmed = true;
       render(cat, confirmed);
@@ -943,6 +945,7 @@ public class Competences extends Controller {
   public static void configureShift(Long shiftCategoryId) {
     ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
     notFoundIfNull(cat);
+    rules.checkIfPermitted(cat.office);
     ShiftType type = new ShiftType();
     List<ShiftTimeTable> shiftList = shiftDao.getAllShifts();
     List<ShiftTimeTableDto> dtoList = competenceManager.convertFromShiftTimeTable(shiftList);
@@ -955,10 +958,12 @@ public class Competences extends Controller {
    */
   public static void manageShiftType(Long shiftTypeId) {
     Optional<ShiftType> type = shiftDao.getShiftTypeById(shiftTypeId);
+    
     if (!type.isPresent()) {
       flash.error("Si cerca di caricare un'attività inesistente! Verificare l'id");
       activateServices(new Long(session.get("officeSelected")));
     } else {
+      rules.checkIfPermitted(type.get().shiftCategories.office);
       ShiftType shiftType = type.get();
       Office office = officeDao.getOfficeById(shiftType.shiftCategories.office.id);
       List<PersonShift> peopleForShift = shiftDao.getPeopleForShift(office);
@@ -998,12 +1003,10 @@ public class Competences extends Controller {
    */
   public static void linkTimeTableToShift(Long shift, ShiftCategories cat, ShiftType type) {
     
-    log.debug("salve");
     notFoundIfNull(cat);
-    
-    ShiftTimeTable timeTable = shiftDao.getShiftTimeTableById(shift);
-    notFoundIfNull(timeTable);
     rules.checkIfPermitted(cat.office);
+    ShiftTimeTable timeTable = shiftDao.getShiftTimeTableById(shift);
+    notFoundIfNull(timeTable);    
 
     type.shiftCategories = cat;
     type.shiftTimeTable = timeTable;

@@ -789,9 +789,14 @@ when
         "Competences.editReperibility",
         "Competences.editShift",
         "Competences.activateServices",
-        "Competences.saveService",
         "Competences.evaluateReperibility",
         "Competences.evaluateShift",
+        "Competences.saveReperibility",
+        "Competences.saveShift",
+        "Competences.configureShift",
+        "Competences.manageShiftType,
+        "Competences.linkPeopleToShift",
+        "Competences.linkTimeTableToShift",
 
         /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
@@ -937,9 +942,14 @@ when
         "Competences.editReperibility",
         "Competences.editShift",
         "Competences.activateServices",
-        "Competences.saveService",
         "Competences.evaluateReperibility",
         "Competences.evaluateShift",
+        "Competences.saveReperibility",
+        "Competences.saveShift",
+        "Competences.configureShift",
+        "Competences.manageShiftType,
+        "Competences.linkPeopleToShift",
+        "Competences.linkTimeTableToShift",
 
          /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
