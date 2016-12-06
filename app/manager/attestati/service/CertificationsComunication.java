@@ -26,12 +26,12 @@ import models.Certification;
 import models.Office;
 import models.Person;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSRequest;
 import play.mvc.Http;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -119,7 +119,7 @@ public class CertificationsComunication {
   }
 
   /**
-   * @param token token precedente (già ottenuto dal server)
+   * @param token token precedente (già ottenuto dal server).
    * @return Un nuovo token Oauth con validità estesa
    */
   public OauthToken refreshToken(OauthToken token) throws NoSuchFieldException {
@@ -158,7 +158,8 @@ public class CertificationsComunication {
    * @param url         url
    * @param contentType contentType
    */
-  private WSRequest prepareOAuthRequest(String token, String url, String contentType) throws NoSuchFieldException {
+  private WSRequest prepareOAuthRequest(String token, String url, String contentType) 
+      throws NoSuchFieldException {
 
     final String baseUrl = AttestatiApis.getAttestatiBaseUrl();
 
@@ -233,7 +234,8 @@ public class CertificationsComunication {
         throw new IllegalAccessError("Invalid Token: " + token);
       }
 
-      SeatCertification seatCertification = new Gson().fromJson(httpResponse.getJson(), SeatCertification.class);
+      SeatCertification seatCertification = 
+          new Gson().fromJson(httpResponse.getJson(), SeatCertification.class);
 
       Verify.verify(seatCertification.dipendenti.get(0).matricola == person.number);
 
