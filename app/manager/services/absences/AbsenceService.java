@@ -3,6 +3,7 @@ package manager.services.absences;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
 
@@ -398,7 +399,7 @@ public class AbsenceService {
     log.debug("Lanciata procedura scan assenze person={}, from={}", person.fullName(), from);
 
     List<Absence> absencesToScan = absenceComponentDao.orderedAbsences(person, from, 
-        null, Lists.newArrayList());
+        null, Sets.newHashSet());
     List<PersonChildren> orderedChildren = personChildrenDao.getAllPersonChildren(person);    
     List<Contract> fetchedContracts = person.contracts; //TODO: fetch
     List<InitializationGroup> initializationGroups = 
