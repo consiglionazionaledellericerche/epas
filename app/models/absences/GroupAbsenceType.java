@@ -31,6 +31,9 @@ import javax.persistence.Table;
 public class GroupAbsenceType extends BaseModel {
 
   private static final long serialVersionUID = 3290760775533091791L;
+  
+  public static final String EMPLOYEE_NAME = "EMPLOYEE";
+  public static final String REDUCING_VACATIONS_NAME = "REDUCING_VACATIONS";
 
   @Required
   @Column

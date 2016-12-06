@@ -122,13 +122,13 @@ public class ServiceFactories {
       allPersistedAbsences = absenceComponentDao.orderedAbsences(periodChain.person, 
           absenceToInsert.getAbsenceDate().minusDays(7),    //costante da inserire nel vincolo
           absenceToInsert.getAbsenceDate().plusDays(7),     //del week end 
-          Lists.newArrayList());
+          Sets.newHashSet());
     } else {
       allPersistedAbsences = absenceComponentDao.orderedAbsences(periodChain.person, 
-          periodChain.from, periodChain.to, Lists.newArrayList());
+          periodChain.from, periodChain.to,Sets.newHashSet());
       groupPersistedAbsences = absenceComponentDao.orderedAbsences(periodChain.person, 
           periodChain.from, periodChain.to, 
-          Lists.newArrayList(periodChain.periodChainInvolvedCodes()));
+          periodChain.periodChainInvolvedCodes());
     }
 
     //2 assegnare ad ogni periodo le assenze di competenza e calcoli

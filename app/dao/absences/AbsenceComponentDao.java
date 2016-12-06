@@ -388,11 +388,11 @@ public class AbsenceComponentDao extends DaoBase {
    * @param person person
    * @param begin data inizio
    * @param end data fine
-   * @param codeList lista dei codici
+   * @param codeSet set dei codici
    * @return entity list
    */
   public List<Absence> orderedAbsences(Person person, LocalDate begin, LocalDate end, 
-      List<AbsenceType> codeList) {
+      Set<AbsenceType> codeSet) {
 
     final QAbsence absence = QAbsence.absence;
    
@@ -404,8 +404,8 @@ public class AbsenceComponentDao extends DaoBase {
     if (end != null) {
       conditions.and(absence.personDay.date.loe(end));
     }
-    if (!codeList.isEmpty()) {
-      conditions.and(absence.absenceType.in(codeList));
+    if (!codeSet.isEmpty()) {
+      conditions.and(absence.absenceType.in(codeSet));
     }
     return getQueryFactory().from(absence)
         .leftJoin(absence.justifiedType).fetch()
