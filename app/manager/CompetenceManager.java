@@ -32,6 +32,7 @@ import models.PersonCompetenceCodes;
 import models.PersonDay;
 import models.PersonReperibilityType;
 import models.TotalOvertime;
+import models.enumerate.LimitUnit;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
@@ -671,6 +672,24 @@ public class CompetenceManager {
     return compList;
   }
 
+  /**
+   * 
+   * @param competenceList la lista delle competenze assegnate nell'anno/mese a una persona
+   * @return una mappa già formata per la visualizzazione della situazione mensile delle competenze
+   *     della singola persona.
+   */
+  public Map<CompetenceCode, String> createMapForCompetences(List<Competence> competenceList) {
+    Map<CompetenceCode, String> map = Maps.newHashMap();
+    competenceList.forEach(item -> {
+      if (item.competenceCode.limitUnit != null) {
+        map.put(item.competenceCode, item.valueApproved+" "+item.competenceCode.limitUnit.getDescription());
+      } else {
+        map.put(item.competenceCode, item.valueApproved+"");
+      }
+      
+    });
+    return map;
+  }
 
-
+  
 }
