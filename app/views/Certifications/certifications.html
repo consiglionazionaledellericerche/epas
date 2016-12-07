@@ -66,16 +66,14 @@
   #{/if}
 
   #{b.buttons center:true}
-  #{if process}
-    #{b.link @certifications(office.id, validYear, validMonth), color:'info', fa:'refresh'}
+    #{ifnot process}
+      #{b.link @processAll(office.id, validYear, validMonth), color:'warning', fa:'cloud-upload'}
+        <span class="text-default">Carica tutti i dati su Attestati</span>
+      #{/b.link}
+    #{/ifnot}
+    #{b.link @clearCacheValues(office.id, validYear, validMonth), color:'info', fa:'refresh'}
       <span class="text-default">Aggiorna dati</span>
     #{/b.link}
-  #{/if}
-  #{else}
-    #{b.link @processAll(office.id, validYear, validMonth), color:'warning', fa:'cloud-upload'}
-      <span class="text-default">Carica tutti i dati su Attestati</span>
-    #{/b.link}
-  #{/else}
   #{/b.buttons}
   <br>
   <div id="loading">
