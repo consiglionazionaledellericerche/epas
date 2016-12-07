@@ -38,23 +38,25 @@
       #{/if}
       
       <form class='form-horizontal'>
-      <!-- Inizio contratto -->
+      <!-- Inizio contratto (beginDate) -->
       #{f.view 'Inizio Contratto', label:'Inizio Contratto', value:wrCurrentContract.value.beginDate.format() /}
 
-      <!-- Scadenza contratto -->
-      #{if wrCurrentContract.value.isTemporaryMissing}
-        #{if wrCurrentContract.value.endDate}
-          #{f.view 'Fine Contratto', label:'Fine Contratto', value:wrCurrentContract.value.endDate.format() /}
+      <!-- Scadenza contratto (endDate) -->
+      #{if wrCurrentContract.value.endDate == null && !wrCurrentContract.value.isTemporaryMissing}
+        <!-- tempo indeterminato -->
+        #{f.view 'Fine Contratto', label:'Fine Contratto', value:'Indeterminato' /}
+      #{/if} 
+      #{else}
+        <!-- contratto determinato -->
+        #{if wrCurrentContract.value.isTemporaryMissing}
+          #{f.view 'Fine Contratto', label:'Fine Contratto', value:'Tempo determinato da definire' /}
         #{/if}
         #{else}
-          #{f.view 'Fine Contratto', label:'Fine Contratto', value:'Tempo determinato da definire' /}
+          #{f.view 'Fine Contratto', label:'Fine Contratto', value:wrCurrentContract.value.endDate.format() /}            
         #{/else}
-      #{/if}
-      #{else}
-        #{f.view 'Fine Contratto', label:'Fine Contratto', value:'Indeterminato' /}
       #{/else}
       
-      <!-- Terminazione contratto -->
+      <!-- Terminazione contratto (endContract) -->
       #{if wrCurrentContract.value.endContract}
         #{f.view 'Terminazione Contratto', label:'Terminazione Contratto', value:wrCurrentContract.value.endContract.format() /}
       #{/if}
@@ -98,20 +100,23 @@
 		</tr>
     #{list items:contractList, as:'contract'}
  		<tr>
-			<td>${contract.value.beginDate?.format()}</td>
-			<td>
+		<td>${contract.value.beginDate?.format()}</td>
+		
+		<td>
         #{if contract.value.endDate}
           ${contract.value.endDate.format()}
         #{/if}
-			  #{elseif contract.value.isTemporaryMissing}
+		#{elseif contract.value.isTemporaryMissing}
           <em class="text-danger">Tempo determinato da definire !!!</em>
         #{/elseif}
         #{else}
           <em>Indeterminato</em>
         #{/else}
-			</td>
-			<td>${contract.value.endContract?.format()}</td>
-			<td>
+		</td>
+		
+		<td>${contract.value.endContract?.format()}</td>
+		
+		<td>
 			#{b.buttons center:true}
         #{b.link @Contracts.edit(contract.value.id), color:'primary', title:'Gestisci'/}
       #{/b.buttons}
