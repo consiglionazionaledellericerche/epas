@@ -29,6 +29,7 @@ import helpers.jpa.ModelQuery;
 import it.cnr.iit.epas.DateUtility;
 
 import manager.SecureManager;
+import manager.attestati.service.AttestatiApis;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.services.absences.AbsenceForm.AbsenceInsertTab;
@@ -540,7 +541,8 @@ public class TemplateUtility {
 
   /**
    * Formatta l'ammontare nell'amountType fornito.
-   * @param amount ammontare
+   *
+   * @param amount     ammontare
    * @param amountType amountType
    * @return string
    */
@@ -584,5 +586,14 @@ public class TemplateUtility {
       }
     }
     return format;
+  }
+
+  public String getAttestatiUrl() {
+    try {
+      return AttestatiApis.getAttestatiBaseUrl();
+    } catch (NoSuchFieldException e) {
+      // Empty URL
+      return "#";
+    }
   }
 }
