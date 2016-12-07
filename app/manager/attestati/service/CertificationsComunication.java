@@ -76,6 +76,8 @@ public class CertificationsComunication {
 
   private static final String OAUTH_TOKEN = "oauth.token.attestati";
 
+  private static final String POST_TIMEOUT = "5min";
+
   @Inject
   private CacheValues cacheValues;
 
@@ -130,7 +132,7 @@ public class CertificationsComunication {
     final String url = AttestatiApis.getAttestatiBaseUrl();
 
     final Map<String, String> parameters = new HashMap<>();
-    parameters.put("grant_type", TOKEN_GRANT_TYPE);
+    parameters.put("grant_type", REFRESHTOKEN_GRANT_TYPE);
     parameters.put("client_secret", OAUTH_CLIENT_SECRET);
     parameters.put("client_id", OAUTH_CLIENT_ID);
     parameters.put("refresh_token", token.refresh_token);
@@ -161,7 +163,7 @@ public class CertificationsComunication {
    * @param url         url
    * @param contentType contentType
    */
-  private WSRequest prepareOAuthRequest(String token, String url, String contentType) 
+  private WSRequest prepareOAuthRequest(String token, String url, String contentType)
       throws NoSuchFieldException {
 
     final String baseUrl = AttestatiApis.getAttestatiBaseUrl();
@@ -169,6 +171,8 @@ public class CertificationsComunication {
     WSRequest wsRequest = WS.url(baseUrl + url)
         .setHeader("Content-Type", contentType)
         .setHeader("Authorization", "Bearer " + token);
+
+    wsRequest.timeout(POST_TIMEOUT);
     return wsRequest;
   }
 
@@ -237,7 +241,7 @@ public class CertificationsComunication {
         throw new IllegalAccessError("Invalid Token: " + token);
       }
 
-      SeatCertification seatCertification = 
+      SeatCertification seatCertification =
           new Gson().fromJson(httpResponse.getJson(), SeatCertification.class);
 
       Verify.verify(seatCertification.dipendenti.get(0).matricola == person.number);
