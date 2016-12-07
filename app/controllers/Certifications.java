@@ -106,17 +106,15 @@ public class Certifications extends Controller {
     // Al primo accesso (da menù) dove non ho mese e anno devo prendere il default
     // (NextMonthToUpload). In quel caso aggiorno la sessione nel cookie. Dovrebbe
     // occuparsene la RequestInit.
-    session.put("monthSelected", monthToUpload.get().getMonthOfYear());
-    session.put("yearSelected", monthToUpload.get().getYear());
-    renderArgs.put("currentData", new CurrentData(monthToUpload.get().getYear(),
-        monthToUpload.get().getMonthOfYear(),
+    session.put("monthSelected", validMonth);
+    session.put("yearSelected", validYear);
+    renderArgs.put("currentData", new CurrentData(validYear, validMonth,
         Integer.parseInt(session.get("daySelected")),
         Long.parseLong(session.get("personSelected")),
         office.id));
     // ##########################################################################
 
-    LocalDate monthBegin = new LocalDate(monthToUpload.get().getYear(),
-        monthToUpload.get().getMonthOfYear(), 1);
+    LocalDate monthBegin = new LocalDate(validYear, validMonth, 1);
     LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
 
     Set<Integer> matricoleAttestati = new HashSet<>();
@@ -318,6 +316,7 @@ public class Certifications extends Controller {
     render("@personStatus", personCertData, stepSize, person);
   }
 
+  // TODO metodo da rifattorizzare (se può avere un'utilità) o da eliminare
 //  public static void emptyCertifications(Long officeId, int year, int month) throws ExecutionException {
 //
 //    flash.clear();  //non avendo per adesso un meccanismo di redirect pulisco il flash...
@@ -342,7 +341,7 @@ public class Certifications extends Controller {
 //    final Map.Entry<Office, YearMonth> key = new AbstractMap
 //        .SimpleEntry<>(office, new YearMonth(year, month));
 //    try {
-//      matricoleAttestati = CacheValues.AttestatiSerialNumbers.get(key);
+//      matricoleAttestati = cacheValues.attestatiSerialNumbers.get(key);
 //    } catch (Exception e) {
 //      flash.error("Errore di connessione ad Attestati - %s", e.getMessage());
 //      render("@certifications", office, year, month);
@@ -358,20 +357,19 @@ public class Certifications extends Controller {
 //
 //      // Costruisco lo status generale
 //      PersonCertData personCertificationStatus = certificationService
-//          .buildPersonStaticStatus(person, year, month, numbers);
+//          .buildPersonStaticStatus(person, year, month);
 //
 //      // Elimino ogni record
 //      certificationService.emptyAttestati(personCertificationStatus);
 //
 //      // Ricostruzione nuovo stato (coi record eliminati)
 //      personCertificationStatus = certificationService
-//          .buildPersonStaticStatus(person, year, month, numbers);
+//          .buildPersonStaticStatus(person, year, month);
 //
 ////      if (personCertificationStatus.match()) {
 ////        // La matricola la rimuovo da quelle in attestati (alla fine rimangono quelle non trovate)
 ////        numbers.remove(person.number);
 ////      }
-//
 //
 //      peopleCertificationStatus.add(personCertificationStatus);
 //    }

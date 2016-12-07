@@ -19,36 +19,52 @@
 </div>
 
 <div class="container">
-  #{alert color:'info'}
+  #{alert color:'info', dismissible: true}
   <p>
-    Attraverso questa pagina è possibile popolare gli attestati CNR per il mese e sede selezionati
-    nella nuova
-    piattaforma.
+    La funzione di invio di attestati automatizza la trasmissione delle informazioni da ePas al
+    server di
+    <a href="${templateUtility.attestatiUrl}" target="_blank">
+      <strong><em>Attestati</em></strong>.
+    </a>
+  <br>
+    La validazione finale degli attestati di presenza rimane compito dell'amministratore del
+    personale e va eseguita direttamente sul server di
+    <a href="${templateUtility.attestatiUrl}" target="_blank">
+      <strong><em>Attestati</em></strong>.
+    </a>
   </p>
   #{/alert}
 
-  #{alert color:'info'}
+  #{alert color:'info', dismissible: true}
   <p><strong>Guida</strong></p>
   <p>
-    Dopo aver effettuato l'operazione di <em>Stralcio</em> in attestati, cliccare sul
-    pulsante <strong>Processa</strong>.
-  </p>
-  <p>
-    La procedura si occuperà di inviare i dati ancora non presenti in attestati e di rimuovere
-    quelli obsoleti.
+    Per utilizzare questa funzionalità occorre prima aver effettuato lo stralcio per il mese
+    interessato sul server di
+    <a href="${templateUtility.attestatiUrl}" target="_blank">
+      <strong><em>Attestati</em></strong>.
+    </a>
+  <br>
+    Per inviare le informazioni per tutto il personale utilizzare il pulsante
+    <em>'Carica tutti i dati su Attestati'</em>
+  <br>
+    Per inviare le informazioni relative ad un solo dipendente utilizzare il pulsante
+    <em>'Invia ad Attestati'</em> presente nella lista del personale.
   </p>
   <p><strong>Nota bene</strong><br>
-    E' possibile processare i dati più volte, fino a quando
-    l'attestato non sarà validato attraverso la funzione <em>Valida Attestati</em> in attestati.<br>
-    L'operazione Processa non ha effetti per ogni attestato già validato <i class="fa fa-ban"
-                                                                            data-content="Attestato validato su attestati non modificabile."></i>
+    E' possibile inviare i dati più volte, fino a quando
+    l'attestato non sarà validato attraverso la funzione <em>Valida Attestati</em> in
+    <a href="${templateUtility.attestatiUrl}" target="_blank">
+      <strong><em>Attestati</em></strong>.
+    </a>
+    <br>
+    L'operazione di invio non ha effetti per ogni attestato già validato <i class="fa fa-ban"></i>
   </p>
   #{/alert}
 
   #{if matchNumbers && !matchNumbers.empty} *{ se è injettato è stata ottenuta
   l'autenticazione }*
   #{if !notInEpas.empty}
-    #{alert color:'danger'}
+    #{alert color:'danger', dismissible: true}
     <p>Ci sono matricole attive in attestati non inserite in ePAS.</p>
       #{list notInEpas}
         <span class="label label-danger">${_}</span>
@@ -57,7 +73,7 @@
   #{/if}
 
   #{if !notInAttestati.empty}
-    #{alert color:'danger'}
+    #{alert color:'danger', , dismissible: true}
     <p>Ci sono persone attive nel mese in ePAS non in attestati. Controllare le loro matricole.</p>
       #{list notInAttestati}
         <span class="label label-danger">${_}</span>
@@ -65,7 +81,6 @@
     #{/alert}
   #{/if}
 
-  #{b.buttons center:true}
     #{ifnot process}
       #{b.link @processAll(office.id, validYear, validMonth), color:'warning', fa:'cloud-upload'}
         <span class="text-default">Carica tutti i dati su Attestati</span>
@@ -74,7 +89,10 @@
     #{b.link @clearCacheValues(office.id, validYear, validMonth), color:'info', fa:'refresh'}
       <span class="text-default">Aggiorna dati</span>
     #{/b.link}
-  #{/b.buttons}
+    #{b.link templateUtility.attestatiUrl, 'target':'_blank', color: 'default', fa: 'arrow-right', class: 'pull-right'}
+      Vai su Attestati
+    #{/b.link}
+
   <br>
   <div id="loading">
     #{if process}
@@ -90,16 +108,7 @@
       </div>
     </div>
   </div>
-
-
-  *{
-  MI SERVE UN MODO PER PASSARE IL COMANDO PROCESS AL CONTROLLER CERTIFICATIONS
-  SENZA CHE QUESTO VADA NELL'URL, IN MODO CHE SE SI FA REFRESH DELLA PAGINA NON VENGA RIEFFETTUATO
-  L'INVIO AD ATTESTATI
-  #{secure.check 'Certifications.processAll'}
-    <a class="btn btn-warning" href="@{Certifications.processAll(office.id, validYear, validMonth)}">Processa <i class="fa fa-cloud-upload" aria-hidden="true"></i></a>
-  #{/secure.check}
- }*
+ <br>
   *{
   <a class="btn btn-danger pull-right"
      href="@{Certifications.emptyCertifications(office.id, validYear, validMonth)}">Svuota Attestati <i class="fa fa-trash-o" aria-hidden="true"></i></a>
