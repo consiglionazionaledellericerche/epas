@@ -65,6 +65,8 @@ public class Certifications extends Controller {
   @Inject
   static CacheValues cacheValues;
 
+  private static final String PROCESS_COMMAND_KEY = "id-%s-year-%s-month-%s";
+
   /**
    * Pagina principale nuovo invio attestati.
    *
@@ -78,7 +80,7 @@ public class Certifications extends Controller {
     // Questo perchè se utilizzassimo un controller apposito che si occupa anche di fare la render
     // rimarrebbe l'url nella barra degli indirizzi e un eventuale refresh ne causerebbe il reinvio
     // TODO trovare una soluzione più elegante
-    final String commandKey = String.format("id-%s-year-%s-month-%s", officeId, year, month);
+    final String commandKey = String.format(PROCESS_COMMAND_KEY, officeId, year, month);
     Boolean process = (Boolean) Cache.get(commandKey);
     Cache.safeDelete(commandKey);
 
@@ -165,7 +167,7 @@ public class Certifications extends Controller {
    */
   public static void processAll(Long officeId, Integer year, Integer month) {
 
-    final String commandKey = String.format("id-%s-year-%s-month-%s", officeId, year, month);
+    final String commandKey = String.format(PROCESS_COMMAND_KEY, officeId, year, month);
     Cache.safeAdd(commandKey, Boolean.TRUE, "10s");
     certifications(officeId, year, month);
   }
