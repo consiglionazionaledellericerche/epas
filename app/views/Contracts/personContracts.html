@@ -42,7 +42,7 @@
       #{f.view 'Inizio Contratto', label:'Inizio Contratto', value:wrCurrentContract.value.beginDate.format() /}
 
       <!-- Scadenza contratto -->
-      #{if wrCurrentContract.value.isTemporary}
+      #{if wrCurrentContract.value.isTemporaryMissing}
         #{if wrCurrentContract.value.endDate}
           #{f.view 'Fine Contratto', label:'Fine Contratto', value:wrCurrentContract.value.endDate.format() /}
         #{/if}
@@ -103,7 +103,7 @@
         #{if contract.value.endDate}
           ${contract.value.endDate.format()}
         #{/if}
-			  #{elseif contract.value.isTemporary}
+			  #{elseif contract.value.isTemporaryMissing}
           <em class="text-danger">Tempo determinato da definire !!!</em>
         #{/elseif}
         #{else}
