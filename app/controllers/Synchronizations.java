@@ -733,13 +733,13 @@ public class Synchronizations extends Controller {
     //copy ( TODO: update method)
 
     epasContract.beginDate = perseoContract.beginDate;
-    if (perseoContract.isTemporary && perseoContract.endDate == null) {
+    if (perseoContract.isTemporaryMissing && perseoContract.endDate == null) {
       // TODO caso particolare
     } else {
       epasContract.endDate = perseoContract.endDate;
     }
     epasContract.endContract = perseoContract.endContract;
-    epasContract.isTemporary = perseoContract.isTemporary;
+    epasContract.isTemporaryMissing = perseoContract.isTemporaryMissing;
     epasContract.perseoId = perseoContract.perseoId;
 
     // TODO: update periods e ricalcoli!!!
