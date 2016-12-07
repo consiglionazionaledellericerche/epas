@@ -30,16 +30,19 @@ public class AbsenceDefinitions {
 
   public enum CategoryTabDefinition {
     
-    Missione("Missione", 0, true),
-    Ferie("Ferie e Festività Soppr.", 1, false),
-    Riposi("Riposo Compensativo", 2, false),
-    AltreTipologie("Altre Tipologie", 2, false);
+    Missione(1, "Missione", 0, true),
+    Ferie(2, "Ferie e Festività Soppr.", 1, false),
+    Riposi(3, "Riposo Compensativo", 2, false),
+    AltreTipologie(4, "Altre Tipologie", 3, false),
+    CodiciDipendenti(5, "Codici Dipendenti", 4, false);
     
+    public int id;
     public String description;
     public int priority;
     public boolean isDefault;
     
-    private CategoryTabDefinition(String description, int priority, boolean isDefault) {
+    private CategoryTabDefinition(int id, String description, int priority, boolean isDefault) {
+      this.id = id;
       this.description = description;
       this.priority = priority;
       this.isDefault = isDefault;
@@ -47,6 +50,35 @@ public class AbsenceDefinitions {
   }
   
   public enum CategoryDefinition {
+    
+    Missione(1, "Missione", 0, CategoryTabDefinition.Missione),
+    Ferie(13, "Ferie e Festività Soppr.", 1, CategoryTabDefinition.Ferie),
+    Riposi(14, "Riposo Compensativo", 2, CategoryTabDefinition.Riposi),
+    Permessi(2, "Permessi Vari", 3, CategoryTabDefinition.AltreTipologie),
+    Congedi(3, "Congedi Parentali", 4, CategoryTabDefinition.AltreTipologie),
+    L104(4, "Disabilità legge 104/92", 5, CategoryTabDefinition.AltreTipologie),
+    PubblicaFunz(5, "Pubblica Funzione", 6, CategoryTabDefinition.AltreTipologie),
+    MalattiaDipendente(6, "Malattia Dipendente", 7, CategoryTabDefinition.AltreTipologie),
+    MalattiaPrimoFiglio(7, "Malattia Primo Figlio", 8, CategoryTabDefinition.AltreTipologie),
+    MalattiaSecondoFiglio(8, "Malattia Secondo Figlio", 9, CategoryTabDefinition.AltreTipologie),
+    MalattiaTerzoFiglio(9, "Malattia Terzo Figlio", 10, CategoryTabDefinition.AltreTipologie),
+    CodiciAutomatici(10, "Codici Automatici", 11, CategoryTabDefinition.AltreTipologie),
+    CodiciDipendenti(11, "Codici Dipendenti", 12, CategoryTabDefinition.AltreTipologie),
+    AltriCodici(12, "Altri Codici", 12, CategoryTabDefinition.AltreTipologie);
+    
+    public int id;
+    public CategoryTabDefinition tabDefinition;
+    public String description;
+    public Integer priority;
+
+    private CategoryDefinition(int id, String description, Integer priority, 
+        CategoryTabDefinition tabDefinition) {
+      this.id = id;
+      this.description = description;
+      this.priority = priority;
+      this.tabDefinition = tabDefinition;
+      
+    }
     
   }
   
