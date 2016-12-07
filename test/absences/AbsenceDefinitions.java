@@ -28,6 +28,28 @@ public class AbsenceDefinitions {
   public static Set<JustifiedTypeName> PERMITTED_SPECIFIED_MINUTES = 
       ImmutableSet.of(JustifiedTypeName.specified_minutes);
 
+  public enum CategoryTabDefinition {
+    
+    Missione("Missione", 0, true),
+    Ferie("Ferie e Festività Soppr.", 1, false),
+    Riposi("Riposo Compensativo", 2, false),
+    AltreTipologie("Altre Tipologie", 2, false);
+    
+    public String description;
+    public int priority;
+    public boolean isDefault;
+    
+    private CategoryTabDefinition(String description, int priority, boolean isDefault) {
+      this.description = description;
+      this.priority = priority;
+      this.isDefault = isDefault;
+    }
+  }
+  
+  public enum CategoryDefinition {
+    
+  }
+  
   public enum AbsenceTypeDefinition {
 
     _661H1(0, false, false, PERMITTED_NOTHING, ONE_HOUR, JustifiedTypeName.absence_type_minutes),
