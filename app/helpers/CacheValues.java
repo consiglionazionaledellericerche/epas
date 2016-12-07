@@ -1,7 +1,5 @@
 package helpers;
 
-import static play.Invoker.executor;
-
 import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -11,6 +9,7 @@ import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListenableFutureTask;
+import com.google.common.util.concurrent.MoreExecutors;
 
 import dao.PersonDao;
 
@@ -37,6 +36,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+
 /**
  * @author daniele
  * @since 28/11/16.
@@ -46,21 +46,18 @@ import java.util.stream.Collectors;
 public final class CacheValues {
 
   private static final int FIVE_MINUTES = 5 * DateTimeConstants.SECONDS_PER_MINUTE;
-  //@Inject
-  private final CertificationsComunication certification;
-  //@Inject
-  private final ICertificationService certService;
 
+  private final CertificationsComunication certification;
+  private final ICertificationService certService;
   private final PersonDao personDao;
-  
-  // Meglio non statico??
+
   public LoadingCache<String, OauthToken> oauthToken = CacheBuilder.newBuilder()
       .refreshAfterWrite(1, TimeUnit.MINUTES)
       .build(new OauthTokenCacheLoader());
 
   public LoadingCache<Map.Entry<Office, YearMonth>, Set<Integer>> attestatiSerialNumbers =
       CacheBuilder.newBuilder()
-          .expireAfterWrite(10, TimeUnit.MINUTES)
+          .expireAfterWrite(20, TimeUnit.MINUTES)
           .build(new CacheLoader<Map.Entry<Office, YearMonth>, Set<Integer>>() {
             @Override
             public Set<Integer> load(Map.Entry<Office, YearMonth> key)
@@ -75,7 +72,7 @@ public final class CacheValues {
   // viene utilizzatpo per la progressione della progressbar di caricamento e invio
   public LoadingCache<Map.Entry<Office, YearMonth>, Double> elaborationStep =
       CacheBuilder.newBuilder()
-          .expireAfterWrite(10, TimeUnit.MINUTES)
+          .expireAfterWrite(20, TimeUnit.MINUTES)
           .build(new StepCacheLoader());
 
   /**
@@ -94,7 +91,7 @@ public final class CacheValues {
    */
   public LoadingCache<Map.Entry<Person, YearMonth>, PersonCertData> personStatus =
       CacheBuilder.newBuilder()
-          .expireAfterWrite(10, TimeUnit.MINUTES)
+          .expireAfterWrite(20, TimeUnit.MINUTES)
           .build(
               new CacheLoader<Map.Entry<Person, YearMonth>, PersonCertData>() {
                 @Override
@@ -132,7 +129,7 @@ public final class CacheValues {
         // Faccio il refresh in maniera asincrona
         ListenableFutureTask<OauthToken> task = ListenableFutureTask
             .create(() -> certification.refreshToken(token));
-        executor.execute(task);
+        MoreExecutors.directExecutor().execute(task);
         return task;
       }
     }
