@@ -154,8 +154,8 @@ public final class CacheValues {
 
       final Set<Integer> matchNumbers = Sets.newHashSet(matricoleEpas);
       matchNumbers.retainAll(matricoleAttestati);
-      log.debug("Calcolata percentuale caricamento per persona per l'ufficio {}-mese {}/{}",
-          key.getKey(), year, month);
+      log.debug("Calcolata percentuale caricamento per persona per l'ufficio {} - mese {}/{}",
+          key.getKey(), month, year);
       return 100 / (double) matchNumbers.size();
     }
   }

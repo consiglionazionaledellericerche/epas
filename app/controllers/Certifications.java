@@ -64,7 +64,7 @@ public class Certifications extends Controller {
   static ICertificationService certificationService;
   @Inject
   static CacheValues cacheValues;
-  
+
   /**
    * Pagina principale nuovo invio attestati.
    *
@@ -169,6 +169,40 @@ public class Certifications extends Controller {
 
     final String commandKey = String.format("id-%s-year-%s-month-%s", officeId, year, month);
     Cache.safeAdd(commandKey, Boolean.TRUE, "10s");
+    certifications(officeId, year, month);
+  }
+
+  /**
+   * invalida tutti i parametri in cache legati a quell'ufficio e quel mese per forzarne il
+   * ricalcolo con le interrogazioni ad attestati
+   *
+   * @param officeId id del'ufficio
+   * @param year     anno
+   * @param month    mese.
+   */
+  public static void clearCacheValues(Long officeId, Integer year, Integer month) {
+    final Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+
+    rules.checkIfPermitted(office);
+
+    final YearMonth yearMonth = new YearMonth(year, month);
+    final Map.Entry<Office, YearMonth> cacheKey = new AbstractMap
+        .SimpleEntry<>(office, yearMonth);
+
+    cacheValues.attestatiSerialNumbers.invalidate(cacheKey);
+    cacheValues.elaborationStep.invalidate(cacheKey);
+
+    LocalDate monthBegin = new LocalDate(year, month, 1);
+    LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+
+    personDao.list(Optional.absent(), Sets.newHashSet(Lists.newArrayList(office)),
+        false, monthBegin, monthEnd, true).list().forEach(person -> {
+      final Map.Entry<Person, YearMonth> personKey = new AbstractMap
+          .SimpleEntry<>(person, yearMonth);
+      cacheValues.personStatus.invalidate(personKey);
+    });
+    log.info("Svuotati tutti i valori dalla cache: ufficio {} - mese {}/{}", office, month, year);
     certifications(officeId, year, month);
   }
 
