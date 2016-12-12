@@ -2,6 +2,7 @@ package synch.perseoconsumers.office;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.Futures;
@@ -16,8 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import models.Institute;
 import models.Office;
-
-import org.assertj.core.util.Lists;
 
 import play.libs.WS;
 import play.libs.WS.HttpResponse;

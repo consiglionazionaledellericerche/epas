@@ -811,6 +811,9 @@ when
         "UploadSituation.performCheckData",
 
         "Certifications.certifications",
+        "Certifications.clearCacheValues",
+        "Certifications.personStatus",
+        "Certifications.process",
         "Certifications.processAll",
         "Certifications.emptyCertifications",
 
@@ -947,6 +950,7 @@ when
         "UploadSituation.performCheckData",
 
         "Certifications.certifications",
+        "Certifications.clearCacheValues",
         "Certifications.processAll",
         "Certifications.emptyCertifications",
 

@@ -1,6 +1,7 @@
 package synch.perseoconsumers;
 
-import org.assertj.core.util.Strings;
+
+import com.google.common.base.Strings;
 
 import play.Play;
 
@@ -63,7 +64,7 @@ public class PerseoApis {
     return getPerseoBaseUrl()
         + Play.configuration.getProperty(ALL_CONTRACTS_FOR_EPAS_ENDPOINT);
   }
-  
+
   public static String getAllDepartmentContractsForEpasEndpoint() throws NoSuchFieldException {
     return getPerseoBaseUrl()
         + Play.configuration.getProperty(ALL_DEPARTMENT_CONTRACTS_FOR_EPAS_ENDPOINT);
@@ -85,7 +86,7 @@ public class PerseoApis {
   public static String getPersonForEpasEndpoint() throws NoSuchFieldException {
     return getPerseoBaseUrl() + Play.configuration.getProperty(PERSON_FOR_EPAS_ENDPOINT);
   }
-  
+
   public static String getAllRolesEpasEndpoint() throws NoSuchFieldException {
     return getPerseoBaseUrl() + Play.configuration.getProperty(ALL_ROLES_ENDPOINT);
   }
