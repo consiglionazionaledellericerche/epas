@@ -43,29 +43,32 @@ title:('Riepilogo ore '+mese.value.contractDescription), open:true, color:'prima
 <!--  Anno corrente -->
 <p><h4>Situazione residuo derivante dall'anno corrente</h4><p>
 <table class="table table-bordered table-condensed">
-
-  #{if mese.value.initResiduoAnnoCorrenteNelMese != 0}
-  <tr>
-    <td class="col-xs-10">Residuo da inizializzazione (${mese.contract.value.sourceDateResidual})</td>
-    #{if mese.value.initResiduoAnnoCorrenteNelMese > 0}
-    <td class="col-xs-2 success">${mese.value.initResiduoAnnoCorrenteNelMese.toHourTimeWithPlus()}</td>
-    #{/if}
-    #{else}
-    <td class="col-xs-2 danger">${mese.value.initResiduoAnnoCorrenteNelMese.toHourTimeWithMinus()}</td>
-    #{/else}
-  </tr>
+  
+  
+  #{if mese.contract.residualInitInYearMonth(yearMonth)}
+	  <tr>
+	    <td class="col-xs-10">Residuo da inizializzazione (${mese.contract.value.sourceDateResidual})</td>
+	    #{if mese.value.initResiduoAnnoCorrenteNelMese >= 0}
+	    <td class="col-xs-2 success">${mese.value.initResiduoAnnoCorrenteNelMese.toHourTimeWithPlus()}</td>
+	    #{/if}
+	    #{else}
+	    <td class="col-xs-2 danger">${mese.value.initResiduoAnnoCorrenteNelMese.toHourTimeWithMinus()}</td>
+	    #{/else}
+	  </tr>
   #{/if}
-
-  <tr>
-    <td class="col-xs-10">Residuo dai mesi precedenti</td>
-    #{if mese.getPreviousRecapInYear().present}
-    <td class="col-xs-2 success">${mese.getPreviousRecapInYear().get().remainingMinutesCurrentYear.toHourTimeWithPlus()}</td>
-    #{/if}
-    #{else}
-    <td class="col-xs-2 success">+00:00</td>
-    #{/else}
-
-  </tr>
+  #{else}
+	  <tr>
+	    <td class="col-xs-10">Residuo dai mesi precedenti</td>
+	    #{if mese.getPreviousRecapInYear().present}
+	    <td class="col-xs-2 success">${mese.getPreviousRecapInYear().get().remainingMinutesCurrentYear.toHourTimeWithPlus()}</td>
+	    #{/if}
+	    #{else}
+	    <td class="col-xs-2 success">+00:00</td>
+	    #{/else}
+	
+	  </tr>
+  #{/else}
+  
   <tr>
     <td class="col-xs-10">Residuo del mese positivo</td>
     <td class="col-xs-2 success">${mese.value.getPositiveResidualInMonth().toHourTimeWithPlus()}</td>
