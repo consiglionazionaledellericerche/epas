@@ -671,9 +671,10 @@ public class CertificationService implements ICertificationService {
   /* (non-Javadoc)
    * @see manager.attestati.service.ICertificationService#absenceCodes()
    */
-  public Map<String, CodiceAssenza> absenceCodes(Optional<String> token) {
-    
-    List<CodiceAssenza> codiciAssenza = certificationsComunication.getAbsencesList(token);
+  @Override
+  public Map<String, CodiceAssenza> absenceCodes() throws ExecutionException {
+
+    List<CodiceAssenza> codiciAssenza = certificationsComunication.getAbsencesList();
     Map<String, CodiceAssenza> map = Maps.newHashMap();
     for (CodiceAssenza codiceAssenza : codiciAssenza) {
       map.put(codiceAssenza.codice.trim().toUpperCase(), codiceAssenza);
