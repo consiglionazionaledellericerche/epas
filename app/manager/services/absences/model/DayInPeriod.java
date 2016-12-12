@@ -14,6 +14,7 @@ import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
+import models.absences.JustifiedType.JustifiedTypeName;
 
 import org.joda.time.LocalDate;
 
@@ -158,7 +159,12 @@ public class DayInPeriod {
    * @param nothing il tempo giustificato nothing da associare al rimpiazzamento (FIXME)
    * @return list
    */
-  public List<TemplateRow> allTemplateRows(final JustifiedType nothing) {
+  public List<TemplateRow> allTemplateRows() {
+    
+    //FIXME: questo justifiedType serve per i replacing. Injettarlo
+    JustifiedType nothing = new JustifiedType();
+    nothing.name = JustifiedTypeName.nothing;   
+
     List<TemplateRow> templateRows = Lists.newArrayList();
 
     for (TakenAbsence takenAbsence : takenNotComplation()) {
