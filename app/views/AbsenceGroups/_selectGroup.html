@@ -31,7 +31,7 @@
         <option></option>      
        
        #{list items:absenceForm.categories(), as:'category'}
-           <optgroup label="${category.name}">
+           <optgroup label="${category.label}">
            #{list absenceForm.groupsForCategory(category), as:'groupAbsenceType'}
 	         <option value="${groupAbsenceType.id}"
 	          #{if absenceForm.groupSelected.equals(groupAbsenceType)} selected #{/if}> 
