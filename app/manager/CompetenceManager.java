@@ -706,6 +706,7 @@ public class CompetenceManager {
           personShift.person = person;
           personShift.description = "Turni di " +person.fullName();
           personShift.jolly = false;
+          personShift.disabled = false;
           personShift.save();
         }
         
@@ -720,7 +721,8 @@ public class CompetenceManager {
         if (item.code.equals("T1") || item.code.equals("T2") || item.code.equals("T3")) {
           PersonShift personShift = personShiftDayDao.getPersonShiftByPerson(pcc.get().person);
           if (personShift != null) {
-            personShift.delete();
+            personShift.disabled = true;
+            personShift.save();
           } else {
             log.warn("Non è presente in tabella person_shift l'utente {}", person.fullName());
           }

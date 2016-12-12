@@ -156,7 +156,7 @@ public class ShiftDao extends DaoBase {
     JPQLQuery query = getQueryFactory().from(person)
         .leftJoin(person.personShift, ps).fetchAll()
         .where(person.office.eq(office)
-            .and(person.eq(ps.person)));
+            .and(person.eq(ps.person).and(ps.disabled.eq(false))));
     return query.list(ps);
   }
 
