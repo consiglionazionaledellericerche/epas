@@ -47,7 +47,7 @@ public class CategoryGroupAbsenceType extends BaseModel
    * To String.
    */
   public String toString() {
-    return this.name;
+    return this.description;
   }
 
 }
