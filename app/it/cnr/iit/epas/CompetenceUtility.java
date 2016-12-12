@@ -24,7 +24,7 @@ import models.PersonDay;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
 import models.absences.Absence;
-import models.enumerate.JustifiedTimeAtWork;
+import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.ShiftSlot;
 import models.query.QCompetence;
 import models.query.QCompetenceCode;
@@ -376,7 +376,7 @@ public class CompetenceUtility {
         // check for absences
         if (!personDay.get().absences.isEmpty()) {
           for (Absence absence : personDay.get().absences) {
-            if (absence.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay) {
+            if (absence.justifiedType.name == JustifiedTypeName.all_day) {
               log.info("La reperibilita' di {} {} e' incompatibile con la sua assenza nel "
                   + "giorno {}", person.name, person.surname, personReperibilityDay.date);
 
@@ -941,7 +941,7 @@ public class CompetenceUtility {
         if (!personDay.get().absences.isEmpty()) {
           log.debug("E assente!!!! Esamino le assenze({})", personDay.get().absences.size());
           for (Absence absence : personDay.get().absences) {
-            if (absence.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay) {
+            if (absence.justifiedType.name == JustifiedTypeName.all_day) {
 
               if (absence.absenceType.code.equals("92")) {
                 log.info("Il turno di {} {} e' coincidente con una missione il giorno {}",

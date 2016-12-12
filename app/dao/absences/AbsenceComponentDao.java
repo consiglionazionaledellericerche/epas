@@ -3,7 +3,6 @@ package dao.absences;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -17,17 +16,21 @@ import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.CategoryGroupAbsenceType;
+import models.absences.CategoryTab;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
+import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
 import models.absences.query.QCategoryGroupAbsenceType;
+import models.absences.query.QCategoryTab;
 import models.absences.query.QComplationAbsenceBehaviour;
 import models.absences.query.QGroupAbsenceType;
+import models.absences.query.QInitializationGroup;
 import models.absences.query.QJustifiedType;
 import models.absences.query.QTakableAbsenceBehaviour;
 
@@ -36,7 +39,6 @@ import org.joda.time.LocalDate;
 import play.db.jpa.JPA;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
@@ -75,6 +77,24 @@ public class AbsenceComponentDao extends DaoBase {
         .from(absenceType)
         .where(absenceType.code.eq(string).or(absenceType.code.equalsIgnoreCase(string)));
     return Optional.fromNullable(query.singleResult(absenceType));
+  }
+  
+  /**
+   * Gli absenceTypes con quegli id. Se non vengono caricati tutti gli id ritorna null.
+   * @param ids gli id
+   * @return list o null
+   */
+  public List<AbsenceType> absenceTypesByIds(List<Long> ids) {
+    if (ids == null || ids.isEmpty()) {
+      return Lists.newArrayList();
+    }
+    QAbsenceType absenceType = QAbsenceType.absenceType;
+    List<AbsenceType> types = getQueryFactory().from(absenceType)
+        .where(absenceType.id.in(ids)).list(absenceType);
+    if (types.size() != ids.size()) {
+      return null;
+    }
+    return types;
   }
   
   /**
@@ -118,6 +138,45 @@ public class AbsenceComponentDao extends DaoBase {
       obj.save();
     }
     return obj;
+  }
+  
+  /**
+   * Le categorie con quei nomi.
+   * @param names nomi
+   * @return list
+   */
+  public List<CategoryGroupAbsenceType> categoryByNames(List<String> names) {
+    QCategoryGroupAbsenceType category = QCategoryGroupAbsenceType.categoryGroupAbsenceType;
+    return getQueryFactory().from(category)
+        .where(category.name.in(names)).list(category);
+  }
+  
+  /**
+   * La categoria con quel nome.
+   * @param name nome
+   * @return entity
+   */
+  public CategoryGroupAbsenceType categoryByName(String name) {
+    QCategoryGroupAbsenceType category = QCategoryGroupAbsenceType.categoryGroupAbsenceType;
+    return getQueryFactory().from(category)
+        .where(category.name.eq(name)).singleResult(category);
+  }
+  
+  /**
+   * Le categorie ordinate per priorità.
+   */
+  public List<CategoryGroupAbsenceType> categoriesByPriority() {
+    QCategoryGroupAbsenceType category = QCategoryGroupAbsenceType.categoryGroupAbsenceType;
+    return getQueryFactory().from(category).orderBy(category.priority.asc()).list(category);
+  }
+  
+  /**
+   * Le tab ordinate per priorità.
+   */
+  public List<CategoryTab> tabsByPriority() {
+    QCategoryTab categoryTab = QCategoryTab.categoryTab;
+    return getQueryFactory().from(categoryTab).orderBy(categoryTab.priority.asc())
+        .list(categoryTab);
   }
   
   /**
@@ -240,43 +299,6 @@ public class AbsenceComponentDao extends DaoBase {
   }
   
   /**
-   * I gruppi coinvolti dal tipo assenza.
-   * 
-   * @param absenceType tipo assenza
-   * @param onlyProgrammed non filtrare i soli programmati
-   * @return entity set
-   */
-  public Set<GroupAbsenceType> involvedGroupAbsenceType(AbsenceType absenceType, 
-      boolean onlyProgrammed) {
-
-    //TODO: da fare la fetch perchè è usato in tabellone timbrature per ogni codice assenza.
-    
-    Set<GroupAbsenceType> groups = Sets.newHashSet();
-    for (TakableAbsenceBehaviour behaviour : absenceType.takableGroup) {
-      groups.addAll(behaviour.groupAbsenceTypes);
-    }
-    for (TakableAbsenceBehaviour behaviour : absenceType.takenGroup) {
-      groups.addAll(behaviour.groupAbsenceTypes);
-    }
-    for (ComplationAbsenceBehaviour behaviour : absenceType.complationGroup) {
-      groups.addAll(behaviour.groupAbsenceTypes);
-    }
-    for (ComplationAbsenceBehaviour behaviour : absenceType.replacingGroup) {
-      groups.addAll(behaviour.groupAbsenceTypes);
-    }
-    if (!onlyProgrammed) {
-      return groups;
-    }
-    Set<GroupAbsenceType> filteredGroup = Sets.newHashSet();
-    for (GroupAbsenceType groupAbsenceType : groups) {
-      if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.programmed)) {
-        filteredGroup.add(groupAbsenceType);
-      }
-    }
-    return filteredGroup;
-  }
-  
-  /**
    * Crea l'assenza con queste caratteristiche. Se esiste già una entity con quel codice la 
    * aggiorna.
    * @param code codice
@@ -366,11 +388,11 @@ public class AbsenceComponentDao extends DaoBase {
    * @param person person
    * @param begin data inizio
    * @param end data fine
-   * @param codeList lista dei codici
+   * @param codeSet set dei codici
    * @return entity list
    */
   public List<Absence> orderedAbsences(Person person, LocalDate begin, LocalDate end, 
-      List<AbsenceType> codeList) {
+      Set<AbsenceType> codeSet) {
 
     final QAbsence absence = QAbsence.absence;
    
@@ -382,8 +404,8 @@ public class AbsenceComponentDao extends DaoBase {
     if (end != null) {
       conditions.and(absence.personDay.date.loe(end));
     }
-    if (!codeList.isEmpty()) {
-      conditions.and(absence.absenceType.in(codeList));
+    if (!codeSet.isEmpty()) {
+      conditions.and(absence.absenceType.in(codeSet));
     }
     return getQueryFactory().from(absence)
         .leftJoin(absence.justifiedType).fetch()
@@ -400,48 +422,57 @@ public class AbsenceComponentDao extends DaoBase {
   }
   
   /**
-   * Ordina per data tutte le liste di assenze in una unica lista.
-   * @param absences liste di assenze
-   * @return entity list
+   * Inizializzazioni per quella persona.
+   * @param person persona
+   * @return list
    */
-  public List<Absence> orderAbsences(List<Absence>... absences) {
-    SortedMap<LocalDate, Set<Absence>> map = Maps.newTreeMap();
-    for (List<Absence> list : absences) {
-      for (Absence absence : list) {
-        Set<Absence> set = map.get(absence.getAbsenceDate());
-        if (set == null) {
-          set = Sets.newHashSet();
-          map.put(absence.getAbsenceDate(), set);
-        }
-        set.add(absence);
-      }
-    }
-    List<Absence> result = Lists.newArrayList();
-    for (Set<Absence> set : map.values()) {
-      result.addAll(set);
-    }
-    return result;
+  public List<InitializationGroup> personInitializationGroups(Person person) {
+    QInitializationGroup initializationGroup = QInitializationGroup.initializationGroup;
+    final JPQLQuery query = getQueryFactory()
+        .from(initializationGroup)
+        .where(initializationGroup.person.eq(person));
+    return query.list(initializationGroup);
   }
   
   /**
-   * Aggiunge alla mappa le assenze presenti in absences.
-   * @param absences le assenze da aggiungere alla mappa
-   * @param map mappa
-   * @return mappa
+   * Le categorie che contengono gruppi inizializzabili.
+   * @return list
    */
-  public Map<LocalDate, Set<Absence>> mapAbsences(List<Absence> absences, 
-      Map<LocalDate, Set<Absence>> map) {
-    if (map == null) {
-      map = Maps.newHashMap();
-    }
-    for (Absence absence : absences) {
-      Set<Absence> set = map.get(absence);
-      if (set == null) {
-        set = Sets.newHashSet();
-        map.put(absence.getAbsenceDate(), set);
+  public List<CategoryGroupAbsenceType> initializablesCategory() {
+    SortedMap<Integer, CategoryGroupAbsenceType> categories = Maps.newTreeMap();
+    List<GroupAbsenceType> allGroups = GroupAbsenceType.findAll();
+    for (GroupAbsenceType group : allGroups) {
+      if (group.initializable) {
+        categories.put(group.category.priority, group.category);
       }
-      set.add(absence);
     }
-    return map;
+    return Lists.newArrayList(categories.values());
   }
-}
+  
+  /**
+   * Il primo gruppo inizializzabile per quella categoria.
+   * @param category category
+   * @return gruppo
+   */
+  public GroupAbsenceType firstGroupInitializable(CategoryGroupAbsenceType category) {
+    for (GroupAbsenceType group : category.groupAbsenceTypes) {
+      if (group.initializable) {
+        return group;
+      }
+    }
+    return null;
+  }
+  
+  /**
+   * I tipi giustificativi con quei nomi. 
+   * @param justifiedTypeName nomi
+   * @return list
+   */
+  public List<JustifiedType> justifiedTypes(List<JustifiedTypeName> justifiedTypeName) {
+    List<JustifiedType> types = Lists.newArrayList();
+    for (JustifiedTypeName name : justifiedTypeName) {
+      types.add(getOrBuildJustifiedType(name));
+    }
+    return types;
+  }
+} 

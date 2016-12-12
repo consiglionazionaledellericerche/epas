@@ -2,6 +2,8 @@ package models.absences;
 
 import com.google.common.collect.Sets;
 
+import lombok.Getter;
+
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -26,6 +28,7 @@ import javax.persistence.Table;
 public class ComplationAbsenceBehaviour extends BaseModel {
 
   private static final long serialVersionUID = 3990946316183363917L;
+  public static final String NAME_PREFIX = "C_";
 
   @Column(name = "name")
   public String name;
@@ -33,10 +36,12 @@ public class ComplationAbsenceBehaviour extends BaseModel {
   @OneToMany(mappedBy = "complationAbsenceBehaviour", fetch = FetchType.LAZY)
   public Set<GroupAbsenceType> groupAbsenceTypes = Sets.newHashSet();
   
+  @Getter
   @Column(name = "amount_type")
   @Enumerated(EnumType.STRING)
   public AmountType amountType;
 
+  @Getter
   @ManyToMany
   @JoinTable(name = "complation_codes_group", 
         joinColumns = { @JoinColumn(name = "complation_behaviour_id") }, 
@@ -44,6 +49,7 @@ public class ComplationAbsenceBehaviour extends BaseModel {
   @OrderBy("code")
   public Set<AbsenceType> complationCodes = Sets.newHashSet();
 
+  @Getter
   @ManyToMany
   @JoinTable(name = "replacing_codes_group", 
         joinColumns = { @JoinColumn(name = "complation_behaviour_id") }, 

@@ -4,8 +4,14 @@ import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
 
+import java.util.Set;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Audited
@@ -24,7 +30,14 @@ public class CategoryGroupAbsenceType extends BaseModel
   
   @Column
   public int priority;
+  
+  @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
+  public Set<GroupAbsenceType> groupAbsenceTypes;
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "category_tab_id")
+  public CategoryTab tab;
+  
   @Override
   public int compareTo(CategoryGroupAbsenceType obj) {
     return name.compareTo(obj.name);
@@ -36,4 +49,5 @@ public class CategoryGroupAbsenceType extends BaseModel
   public String toString() {
     return this.name;
   }
+
 }

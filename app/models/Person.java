@@ -6,6 +6,8 @@ import com.google.common.collect.Sets;
 
 import it.cnr.iit.epas.NullStringBinder;
 
+import lombok.Getter;
+
 import manager.configurations.EpasParam;
 
 import models.base.IPropertiesInPeriodOwner;
@@ -150,6 +152,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @OneToMany(mappedBy = "supervisor")
   public List<ShiftCategories> shiftCategories = Lists.newArrayList();
 
+  @Getter
   @NotAudited
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public List<Contract> contracts = Lists.newArrayList();
@@ -165,7 +168,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
    */
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public List<PersonDay> personDays = Lists.newArrayList();
-
+  
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public List<CertificatedData> certificatedData = Lists.newArrayList();
 

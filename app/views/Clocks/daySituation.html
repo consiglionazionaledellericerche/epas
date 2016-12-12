@@ -84,8 +84,10 @@ function checkTime(i) {
       <td class="assenza default-single">
         #{list items:dayRecap.personDay.absences, as:'absence'}
 
-        %{ involvedGroups = templateUtility.involvedGroupAbsenceType(absence.absenceType); }%
-        #{if absence.isReplacing(involvedGroups) && !absence.isOrphanReplacing(involvedGroups) }
+        %{ 
+           involvedGroups = absence.absenceType.involvedGroupAbsenceType(true); 
+         }%
+        #{if absence.isReplacing(involvedGroups) && !absence.isOrphanReplacing(absence.absenceType) }
         *{ l'assenza di rimpiazzamento non orfana non la visualizzo }*
         #{/if}
         #{else}

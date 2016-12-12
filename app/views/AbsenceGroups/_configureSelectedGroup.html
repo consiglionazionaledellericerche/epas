@@ -6,9 +6,9 @@
 	 
      #{f.hidden 'from', value:absenceForm.from?.format() /}
      #{f.date 'from', value:absenceForm.from?.format(), disabled:true /}     
-     #{if alldaySelected }
+     *{ #{if alldaySelected } }*
        #{f.date 'to', value:absenceForm.to?.format() /}
-     #{/if}
+     *{ #{/if} }*
      #{else}
        #{f.date 'to', disabled:true  /} 
      #{/else}

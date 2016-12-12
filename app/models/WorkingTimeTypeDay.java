@@ -1,5 +1,6 @@
 package models;
 
+import lombok.Getter;
 import lombok.ToString;
 
 import models.base.BaseModel;
@@ -38,6 +39,7 @@ public class WorkingTimeTypeDay extends BaseModel {
   @JoinColumn(name = "working_time_type_id", nullable = false)
   public WorkingTimeType workingTimeType;
 
+  @Getter
   @Required
   @Min(1)
   @Max(7)
@@ -46,20 +48,24 @@ public class WorkingTimeTypeDay extends BaseModel {
   /**
    * tempo di lavoro giornaliero espresso in minuti.
    */
+  @Getter
   @Required
   public Integer workingTime;
 
   /**
    * booleano per controllo se il giorno in questione è festivo o meno.
    */
+  @Getter
   public boolean holiday = false;
 
   /**
    * tempo di lavoro espresso in minuti che conteggia se possibile usufruire del buono pasto.
    */
+  @Getter
   @Required
   public Integer mealTicketTime = 0;
 
+  @Getter
   @Required
   public Integer breakTicketTime = 0;
 
@@ -67,12 +73,14 @@ public class WorkingTimeTypeDay extends BaseModel {
    * La soglia pomeridiana dopo la quale è necessario effettuare lavoro per avere diritto al buono
    * pasto.
    */
+  @Getter
   @Column(name = "ticket_afternoon_threshold")
   public Integer ticketAfternoonThreshold = 0;
 
   /**
    * La quantità di lavoro dopo la soglia pomeridiana necessaria per avere diritto al buono pasto.
    */
+  @Getter
   @Column(name = "ticket_afternoon_working_time")
   public Integer ticketAfternoonWorkingTime = 0;
 

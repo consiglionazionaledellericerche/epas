@@ -32,7 +32,6 @@ import manager.SecureManager;
 import manager.attestati.service.AttestatiApis;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
-import manager.services.absences.AbsenceForm.AbsenceInsertTab;
 
 import models.BadgeReader;
 import models.BadgeSystem;
@@ -56,13 +55,13 @@ import models.enumerate.StampTypes;
 
 import org.joda.time.LocalDate;
 
-import synch.diagnostic.SynchDiagnostic;
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+
+import synch.diagnostic.SynchDiagnostic;
 
 /**
  * Metodi usabili nel template.
@@ -420,25 +419,21 @@ public class TemplateUtility {
     }
   }
 
-  public List<AbsenceType> getAbsenceTypes(AbsenceInsertTab absenceInsertTab) {
-    if (absenceInsertTab.equals(AbsenceInsertTab.vacation)) {
-      return absenceTypeDao.absenceTypeCodeSet((Set) Sets.newHashSet(
-          AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode(),
-          AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode(),
-          AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode(),
-          AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode(),
-          AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()));
-    }
-    if (absenceInsertTab.equals(AbsenceInsertTab.compensatory)) {
-      return absenceTypeDao.absenceTypeCodeSet((Set) Sets.newHashSet(
-          AbsenceTypeMapping.RIPOSO_COMPENSATIVO.getCode()));
-    }
-    return Lists.newArrayList();
-  }
-
-  public Set<GroupAbsenceType> involvedGroupAbsenceType(AbsenceType absenceType) {
-    return absenceComponentDao.involvedGroupAbsenceType(absenceType, true);
-  }
+//  public List<AbsenceType> getAbsenceTypes(AbsenceInsertTab absenceInsertTab) {
+//    if (absenceInsertTab.equals(AbsenceInsertTab.vacation)) {
+//      return absenceTypeDao.absenceTypeCodeSet((Set) Sets.newHashSet(
+//          AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode(),
+//          AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode(),
+//          AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode(),
+//          AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode(),
+//          AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()));
+//    }
+//    if (absenceInsertTab.equals(AbsenceInsertTab.compensatory)) {
+//      return absenceTypeDao.absenceTypeCodeSet((Set) Sets.newHashSet(
+//          AbsenceTypeMapping.RIPOSO_COMPENSATIVO.getCode()));
+//    }
+//    return Lists.newArrayList();
+//  }
 
   public boolean hasAdminRole() {
     return userDao.hasAdminRoles(Security.getUser().get());

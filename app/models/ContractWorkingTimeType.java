@@ -1,5 +1,7 @@
 package models;
 
+import lombok.Getter;
+
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PropertyInPeriod;
@@ -24,11 +26,13 @@ public class ContractWorkingTimeType extends PropertyInPeriod implements IProper
 
   private static final long serialVersionUID = 3730183716240278997L;
 
+  @Getter
   @Required
   @ManyToOne
   @JoinColumn(name = "contract_id")
   public Contract contract;
 
+  @Getter
   @Required
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "working_time_type_id")

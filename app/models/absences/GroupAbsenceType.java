@@ -4,10 +4,14 @@ import com.google.common.base.Strings;
 
 import it.cnr.iit.epas.DateInterval;
 
+import lombok.Getter;
+
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
+
+import play.data.validation.Required;
 
 import java.util.Set;
 
@@ -27,11 +31,16 @@ import javax.persistence.Table;
 public class GroupAbsenceType extends BaseModel {
 
   private static final long serialVersionUID = 3290760775533091791L;
+  
+  public static final String EMPLOYEE_NAME = "EMPLOYEE";
+  public static final String REDUCING_VACATIONS_NAME = "REDUCING_VACATIONS";
 
+  @Required
   @Column
   public String name;
   
   //Astensione facoltativa post partum 100% primo figlio 0-12 anni 30 giorni 
+  @Required
   @Column
   public String description;
 
@@ -44,22 +53,29 @@ public class GroupAbsenceType extends BaseModel {
   @JoinColumn(name = "category_type_id")
   public CategoryGroupAbsenceType category;
   
+  @Required
+  @Getter
   @Column(name = "pattern")
   @Enumerated(EnumType.STRING)
   public GroupAbsenceTypePattern pattern;
   
+  @Required
+  @Getter
   @Column(name = "period_type")
   @Enumerated(EnumType.STRING)
   public PeriodType periodType;
   
+  @Getter
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "takable_behaviour_id")
   public TakableAbsenceBehaviour takableAbsenceBehaviour;
   
+  @Getter
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "complation_behaviour_id")
   public ComplationAbsenceBehaviour complationAbsenceBehaviour;
   
+  @Getter
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "next_group_to_check_id")
   public GroupAbsenceType nextGroupToCheck;
@@ -67,6 +83,12 @@ public class GroupAbsenceType extends BaseModel {
   @OneToMany(mappedBy = "nextGroupToCheck", fetch = FetchType.LAZY)
   public Set<GroupAbsenceType> previousGroupChecked;
 
+  @Column
+  public boolean automatic = false;
+  
+  @Column
+  public boolean initializable = false;
+  
   /**
    * Label.
    * @return label

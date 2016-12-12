@@ -214,7 +214,7 @@ public class PersonDaysTest {
     
     personDay.setStampings(stampings);
     List<PairStamping> gapLunchPair = 
-        personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
+        personDayManager.getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());
 
     assertThat(gapLunchPair.size()).isEqualTo(1);
     assertThat(gapLunchPair.get(0).timeInPair).isEqualTo(60);
@@ -227,7 +227,8 @@ public class PersonDaysTest {
     
     List<PairStamping> validPairs = personDayManager.getValidPairStampings(personDay.stampings);
     
-    gapLunchPair = personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
+    gapLunchPair = personDayManager
+        .getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());
     
     assertThat(validPairs.size()).isEqualTo(1);
     assertThat(validPairs.get(0).timeInPair).isEqualTo(180);
@@ -241,7 +242,8 @@ public class PersonDaysTest {
     stampings.add(stampings(personDay, 14, 00, WayType.in, null));
     stampings.add(stampings(personDay, 17, 00, WayType.out, null));
     personDay.setStampings(stampings);
-    gapLunchPair = personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
+    gapLunchPair = personDayManager
+        .getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());
     
     assertThat(gapLunchPair.size()).isEqualTo(1);
     assertThat(gapLunchPair.get(0).timeInPair).isEqualTo(60);
@@ -253,7 +255,8 @@ public class PersonDaysTest {
     personDay.setStampings(stampings);
     
     validPairs = personDayManager.getValidPairStampings(personDay.stampings);
-    gapLunchPair = personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
+    gapLunchPair = personDayManager
+        .getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());
     
     assertThat(validPairs.size()).isEqualTo(1);
     assertThat(validPairs.get(0).timeInPair).isEqualTo(180);
@@ -267,7 +270,8 @@ public class PersonDaysTest {
     stampings.add(stampings(personDay, 17, 00, WayType.out, null));
     personDay.setStampings(stampings);
     
-    gapLunchPair = personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
+    gapLunchPair = personDayManager
+        .getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());
     
     assertThat(gapLunchPair.size()).isEqualTo(1);
     assertThat(gapLunchPair.get(0).timeInPair).isEqualTo(60);
@@ -279,7 +283,8 @@ public class PersonDaysTest {
     personDay.setStampings(stampings);
     
     validPairs = personDayManager.getValidPairStampings(personDay.stampings);
-    gapLunchPair = personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
+    gapLunchPair = personDayManager
+        .getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());
     
     assertThat(validPairs.size()).isEqualTo(1);
     assertThat(validPairs.get(0).timeInPair).isEqualTo(180);
@@ -294,7 +299,8 @@ public class PersonDaysTest {
     personDay.setStampings(stampings);
     
     validPairs = personDayManager.getValidPairStampings(personDay.stampings);
-    gapLunchPair = personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
+    gapLunchPair = personDayManager
+        .getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());
     
     assertThat(validPairs.size()).isEqualTo(2);
     assertThat(gapLunchPair.size()).isEqualTo(0);
@@ -313,7 +319,8 @@ public class PersonDaysTest {
     LocalTime endLunch = new LocalTime(15,0,0);
 
     validPairs = personDayManager.getValidPairStampings(personDay.stampings);
-    gapLunchPair = personDayManager.getGapLunchPairs(personDay, startLunch, endLunch);
+    gapLunchPair = personDayManager
+        .getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());
     
     assertThat(gapLunchPair.size()).isEqualTo(0);
     
@@ -329,7 +336,7 @@ public class PersonDaysTest {
     
     PersonDay previousForProgressive = new PersonDay(null, first, 0, 0, 60);
 
-    
+    //Caso base una timbratura di ingresso
     PersonDay personDay = new PersonDay(null, second);
     
     List<Stamping> stampings = Lists.newArrayList();
@@ -349,6 +356,26 @@ public class PersonDaysTest {
     assertThat(personDay.getDifference()).isEqualTo(-42);
     assertThat(personDay.getProgressive()).isEqualTo(18);
     assertThat(personDay.isTicketAvailable).isEqualTo(true);
+    
+    //Caso con uscita per pranzo
+    personDay = new PersonDay(null, second);
+    stampings = Lists.newArrayList();
+    stampings.add(stampings(personDay, 9, 00, WayType.in, null));       //4 ore mattina
+    stampings.add(stampings(personDay, 13, 00, WayType.out, null));     //pausa pranzo 1 ora
+    stampings.add(stampings(personDay, 14, 00, WayType.in, null));
+    
+    exitingTime = new LocalDateTime(second.getYear(), second.getMonthOfYear(),  //4 ore pom. 
+        second.getDayOfMonth(), 18, 00);
+    
+    LocalTime startLunch12 = new LocalTime(12,0,0);
+    LocalTime endLunch15 = new LocalTime(15,0,0);
+    personDayManager.queSeraSera(personDay, exitingTime, 
+        Optional.fromNullable(previousForProgressive), normalDay(), false,
+        new LocalTimeInterval(startLunch12, endLunch15), new LocalTimeInterval(startWork, endWork));
+
+    assertThat(personDay.getTimeAtWork()).isEqualTo(480);   //8 ore
+    assertThat(personDay.isTicketAvailable).isEqualTo(true);
+    
   }
 
   /**

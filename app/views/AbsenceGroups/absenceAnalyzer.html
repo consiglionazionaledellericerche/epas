@@ -1,0 +1,79 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Codici di assenza' /}
+
+ <div class="container">
+   
+   #{alert color:'info'}
+     <p>Assenze con tipo giustificativo incompatibile.</p>
+   #{/alert}
+   
+   
+   <table class="table table-condensed table-bordered" datatable> 
+    <thead>
+     <tr>
+      <th>Id</th>
+      <th>Codice</th>
+      <th>Data</th>
+      <th>Persona</th>
+      <th>Sede</th>
+      <th>Tipo Giustificazione</th>
+      <th>Minuti</th>
+     </tr>
+    </thead>
+    <tbody> 
+     #{list items:notPermitted, as:'absence'}
+      <tr>
+        <td>${absence.id} 
+          <a href="@{AbsenceGroups.editAbsenceCriticalValue(absence.id)}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+          </a>
+        </td>
+        <td><a href="@{AbsenceGroups.editAbsenceType(absence.absenceType.id)}">${absence.absenceType.code}</a></td>
+        <td data-order="${absence.absenceDate}">
+         %{ date = absence.getAbsenceDate(); }%
+         
+         <a href="@{Stampings.personStamping(absence.personDay.person.id, date.year, date.monthOfYear)}">${absence.absenceDate.format()}</a></td>
+        <td>${absence.personDay.person.fullname}</td>
+        <td>${absence.personDay.person.office.name}</td>
+        <td>&{absence.justifiedType?.name}</td>
+        <td>${absence.justifiedMinutes}</td>
+      </tr>
+     #{/list}
+    </tbody>   
+   </table>
+   
+   #{alert color:'info'}
+     <p>Assenze con tipo scaduto utilizzate fuori finestra.</p>
+   #{/alert}
+   
+   <table class="table table-condensed table-bordered" datatable> 
+    <thead>
+     <tr>
+      <th>Id</th>
+      <th>Codice</th>
+      <th>Data</th>
+      <th>Persona</th>
+      <th>Sede</th>
+      <th>Tipo Giustificazione</th>
+      <th>Minuti</th>
+     </tr>
+    </thead>
+    <tbody> 
+     #{list outOfDate, as:'absence'}
+      <tr>
+        <td>${absence.id}</td>
+        <td><a href="@{AbsenceGroups.editAbsenceType(absence.absenceType.id)}">${absence.absenceType.code}</a></td>
+        <td data-order="${absence.absenceDate}">
+         %{ date = absence.getAbsenceDate(); }%
+         
+         <a href="@{Stampings.personStamping(absence.personDay.person.id, date.year, date.monthOfYear)}">${absence.absenceDate.format()}</a></td>
+        <td>${absence.personDay.person.fullname}</td>
+        <td>${absence.personDay.person.office.name}</td>
+        <td>&{absence.justifiedType?.name}</td>
+        <td>${absence.justifiedMinutes}</td>
+      </tr>
+     #{/list}
+    </tbody>   
+   </table>
+   
+</div>

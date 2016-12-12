@@ -10,7 +10,7 @@
 
 //<span>Categoria</span> <select id="feedback-category" name="category"><option value="">Seleziona una categoria</option><option value="technical">Tecnica</option><option value="assenze">Assenze</option>
 $(function() {
-    $.feedback({initButtonText: '<i class="fa fa-bug"></i> Segnala un problema',
+    $.feedback({initButtonText: '<i class="fa fa-comments-o"></i> Invia segnalazione',
           ajaxURL: "@{ReportCentre.sendReport()}",
           tpl: {
           description:	'<div id="feedback-welcome"><div class="feedback-logo">Segnalazione</div><p>Con questo puoi segnalare un problema o dare un suggerimento.</p><p>Scrivi una breve descrizione del problema riscontrato:</p><textarea id="feedback-note-tmp"></textarea><p>Successivamente potrai identificare l\'area della pagina correlata al problema.</p><button id="feedback-welcome-next" class="feedback-next-btn feedback-btn-gray">Continua</button><div id="feedback-welcome-error">Descrizione richiesta.</div><div class="feedback-wizard-close"></div></div>',
