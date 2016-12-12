@@ -78,7 +78,7 @@
           <font color="#000000">${person.currentContract.get().endDate?.format()}</font>
         #{/if}
         #{else}
-          #{if person.currentContract.get().isTemporary}
+          #{if person.currentContract.get().isTemporaryMissing}
             <em class="text-danger">Data da inserire</em>
           #{/if}
         #{/else}
