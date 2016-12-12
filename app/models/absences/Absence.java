@@ -141,36 +141,6 @@ public class Absence extends BaseModel {
   }
 
   /**
-   * Se l'assenza giustifica tutto il giorno.
-   * @return esito
-   */
-  @Transient 
-  public boolean justifiedAllDay() {
-    if (this.justifiedType == null) {
-      throw new IllegalStateException();
-    }
-    if (this.justifiedType.name.equals(JustifiedTypeName.all_day)) {
-      return true;
-    }
-    return false;
-  }
-  
-  /**
-   * Se l'assenza giustifica niente ma scala il giorno dal limite.
-   * @return esito
-   */
-  @Transient 
-  public boolean justifiedAllDayLimit() {
-    if (this.justifiedType == null) {
-      throw new IllegalStateException();
-    }
-    if (this.justifiedType.name.equals(JustifiedTypeName.all_day_limit)) {
-      return true;
-    }
-    return false;
-  }
-  
-  /**
    * Le altre assenze con ruolo di rimpiazzamento nel giorno per quel gruppo.
    * @param groupAbsenceType gruppo
    * @return lista di assenze.
