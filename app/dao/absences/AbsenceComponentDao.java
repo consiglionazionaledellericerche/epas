@@ -180,6 +180,17 @@ public class AbsenceComponentDao extends DaoBase {
   }
   
   /**
+   * La tab con quel nome.
+   * @param name nome
+   * @return entity
+   */
+  public CategoryTab tabByName(String name) {
+    QCategoryTab categoryTab = QCategoryTab.categoryTab;
+    return getQueryFactory().from(categoryTab)
+        .where(categoryTab.name.eq(name)).singleResult(categoryTab);
+  }
+  
+  /**
    * Il comportamento completamento con quel nome.
    * @param name nome
    * @return entity

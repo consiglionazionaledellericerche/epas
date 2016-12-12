@@ -1,6 +1,7 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -365,12 +366,9 @@ public class Competences extends Controller {
 
     Optional<User> user = Security.getUser();
 
-    if (!user.isPresent() || user.get().person == null) {
-      flash.error("Accesso negato.");
-      Stampings.stampings(year, month);
-    }
+    Verify.verify(user.isPresent());
+    Verify.verifyNotNull(user.get().person);
 
-    //Redirect in caso di mese futuro
     LocalDate today = LocalDate.now();
     if (year > today.getYear() || today.getYear() == year && month > today.getMonthOfYear()) {
       flash.error("Impossibile accedere a situazione futura, "
@@ -387,11 +385,23 @@ public class Competences extends Controller {
       flash.error("Nessun contratto attivo nel mese.");
       Stampings.stampings(year, month);
     }
+    
+    List<PersonCompetenceCodes> pccList = competenceCodeDao
+        .listByPerson(person, Optional.fromNullable(LocalDate.now()
+            .withMonthOfYear(month).withYear(year)));
+    List<CompetenceCode> codeListIds = Lists.newArrayList();
+    for (PersonCompetenceCodes pcc : pccList) {
+      codeListIds.add(pcc.competenceCode);
+    }
+    
+    List<Competence> competenceList = competenceDao.getCompetences(Optional.fromNullable(person), 
+        year, Optional.fromNullable(month), codeListIds);
+    Map<CompetenceCode, String> map = competenceManager.createMapForCompetences(competenceList);
 
     Optional<PersonMonthCompetenceRecap> personMonthCompetenceRecap =
         personMonthCompetenceRecapFactory.create(contract.get(), month, year);
 
-    render(personMonthCompetenceRecap, person, year, month);
+    render(personMonthCompetenceRecap, person, year, month, competenceList, map);
 
   }
 

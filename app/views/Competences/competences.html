@@ -3,7 +3,7 @@
 #{set title: 'ePAS - Situazione Mensile'  /}
 
 <div class="container">
-  #{title title:('Riepilogo straordinari e altre competenze ' + templateUtility.monthName(session.get("monthSelected")) + ' ' + year) /}
+  #{title title:('Riepilogo competenze ' + templateUtility.monthName(session.get("monthSelected")) + ' ' + year) /}
 
   #{if !personMonthCompetenceRecap.present}
     #{alert color:'danger'}
@@ -13,53 +13,28 @@
   #{/if}
   #{else}
   
-      
-      <table class="table table-bordered table-hover">
+  	#{if map.isEmpty()}
+      #{alert color:'info'}
+      <p>
+      Per questo mese non sono state assegnate competenze o non sono state abilitate.</p>
+      #{/alert}
+  	#{/if}
+  	#{else}
+  		<table class="table table-bordered table-hover">
         
         <tr class="warning">
           <th>Competenza</th>
           <th>Quantità</th>
         </tr>
-        
+        #{list items:map.entrySet(), as:'entry'}
         <tr>
-          <td>Ind.tà rep.tà feriale (207)</td>
-          <td>${personMonthCompetenceRecap.get().weekDayAvailability}</td>
-        </tr>
-        
-        <tr>
-          <td>Ind.tà rep.tà festiva (208)</td>
-          <td>${personMonthCompetenceRecap.get().holidaysAvailability}</td>
-        </tr>
-        
-        <tr>
-          <td>Straordinario diurno nei giorni lavorativi</td>
-          <td>(${personMonthCompetenceRecap.get().progressivoFinalePositivoMese.toHour()}) ${personMonthCompetenceRecap.get().daylightWorkingDaysOvertime}</td>
-        </tr>
-        
-        <tr>
-          <td>Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi</td>
-          <td>${personMonthCompetenceRecap.get().daylightholidaysOvertime}</td>
-        </tr>
-        
-        <tr>
-          <td>Turno ordinario (T1)</td>
-          <td>${personMonthCompetenceRecap.get().ordinaryShift}</td>
-        </tr>
-        
-        <tr>
-          <td>Turno notturno (T2)</td>
-          <td>${personMonthCompetenceRecap.get().nightShift}</td>
-        </tr>
-
-      </table>
-      
-      #{alert color:'info'}
-      <p>
-      Il numero tra parentesi, nella colonna degli straordinari, rappresenta le ore di lavoro 
-      fatte in più nel mese sulle quali possono essere pagati gli straordinari.</p>
-      #{/alert}
-      
-   #{/else}
+          <td>${entry.getKey().description} (${entry.getKey().code})</td>
+          <td>${entry.getValue()}</td>
+        </tr>       
+		#{/list}
+      	</table>
+  	#{/else}      
+  #{/else}
     
 </div> 
 

@@ -175,7 +175,7 @@ public class ContractPerseoConsumer {
         ? new LocalDate(perseoContract.expireContract) : null;
     contract.endContract = perseoContract.endContract != null
         ? new LocalDate(perseoContract.endContract) : null;
-    contract.isTemporary = perseoContract.temporary;
+    contract.isTemporaryMissing = perseoContract.temporary;
     contract.perseoId = perseoContract.id;
     contract.person = person;
 
