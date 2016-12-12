@@ -2,169 +2,163 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Invio Attestati'  /}
 
+#{set 'moreScripts'}
+<script type="text/javascript">
+    function progress(value){
+     var current = $('.progress-bar').attr("aria-valuenow");
+     var next = +current + value;
+     next= Math.round(next * 100) / 100
+     if (next > 99 ){ $('#loading').fadeOut(1000); }
+     $('.progress-bar').css('width', next+'%').attr('aria-valuenow', next);
+     $('.progress-bar').children('span.sr-only:first').text(next+'%'+' Completato');
+    }
+</script>
+#{/set}
 <div class="container">
-#{title title:'ePAS - Supporto per Invio Attestati', administration:true /}
+  #{title title:'ePAS - Supporto per Invio Attestati', administration:true /}
 </div>
 
-*{
-#{certifications.certificationsTabs activeAction:'certifications' /}
-}*
-
-
 <div class="container">
+  #{alert color:'info', dismissible: true}
+  <p>
+    La funzione di invio di attestati automatizza la trasmissione delle informazioni da ePas al
+    server di
+    <a href="${templateUtility.attestatiUrl}" target="_blank">
+      <strong><em>Attestati</em></strong>.
+    </a>
+  <br>
+    La validazione finale degli attestati di presenza rimane compito dell'amministratore del
+    personale e va eseguita direttamente sul server di
+    <a href="${templateUtility.attestatiUrl}" target="_blank">
+      <strong><em>Attestati</em></strong>.
+    </a>
+  </p>
+  #{/alert}
 
- 
- #{alert color:'info'}
-   <p> 
-     Attraverso questa pagina è possibile popolare gli attestati CNR per il mese e sede selezionati nella nuova
-     piattaforma. 
-   </p>
- #{/alert}
- 
- #{alert color:'info'}
-    <p><strong>Guida</strong></p>
-    <p>  
-     Dopo aver effettuato l'operazione di <em>Stralcio</em> in attestati, cliccare sul
-     pulsante <strong>Processa</strong>. 
-   </p>
-   <p>
-     La procedura si occuperà di inviare i dati ancora non presenti in attestati e di rimuovere quelli obsoleti.
-   </p>
-   <p><strong>Nota bene</strong><br>
-     E' possibile processare i dati più volte, fino a quando
-     l'attestato non sarà validato attraverso la funzione <em>Valida Attestati</em> in attestati.<br>
-     L'operazione Processa non ha effetti per ogni attestato già validato  <i class="fa fa-ban" aria-hidden="true" popover-hover data-content="Attestato validato su attestati non modificabile."></i> 
-   </p>
- #{/alert}
- 
- #{if numbers != null}  *{ se è injettato è stata ottenuta l'autenticazione }*  
-	 #{if !numbers.empty}
-	   #{alert color:'danger'}
-	     <p>Ci sono matricole attive in attestati non inserite in ePAS.</p>
-	     #{list items:numbers, as:'number'}
-	       <span class="label label-danger">${number}</span>
-	     #{/list}
-	   #{/alert}
-	 #{/if}
-	  
-	 #{if peopleNotInAttestati}
-	   #{alert color:'danger'}
-	     <p>Ci sono persone attive nel mese in ePAS non in attestati. Controllare le loro matricole.</p>
-	     #{list items:peopleCertificationStatus, as:'personCertificationStatus'}
-	       #{if  personCertificationStatus.notInAttestati}
-	       <span class="label label-danger">${personCertificationStatus.person.fullname}</span>
-	       #{/if}
-	     #{/list}
-	   #{/alert}
-	  #{/if}  
-	
-	#{/if}
-	
-	
-	 
-	#{if peopleCertificationStatus} *{ se è injettato è stato fatto lo stralcio }*  
+  #{alert color:'info', dismissible: true}
+  <p><strong>Guida</strong></p>
+  <p>
+    Per utilizzare questa funzionalità occorre prima aver effettuato lo stralcio per il mese
+    interessato sul server di
+    <a href="${templateUtility.attestatiUrl}" target="_blank">
+      <strong><em>Attestati</em></strong>.
+    </a>
+  <br>
+    Per inviare le informazioni per tutto il personale utilizzare il pulsante
+    <em>'Carica tutti i dati su Attestati'</em>
+  <br>
+    Per inviare le informazioni relative ad un solo dipendente utilizzare il pulsante
+    <em>'Invia ad Attestati'</em> presente nella lista del personale.
+  </p>
+  <p><strong>Nota bene</strong><br>
+    E' possibile inviare i dati più volte, fino a quando
+    l'attestato non sarà validato attraverso la funzione <em>Valida Attestati</em> in
+    <a href="${templateUtility.attestatiUrl}" target="_blank">
+      <strong><em>Attestati</em></strong>.
+    </a>
+    <br>
+    L'operazione di invio non ha effetti per ogni attestato già validato <i class="fa fa-ban"></i>
+  </p>
+  #{/alert}
 
-	#{secure.check 'Certifications.processAll'}
-	<a class="btn btn-warning" href="@{Certifications.processAll(office.id, year, month)}">Processa <i class="fa fa-cloud-upload" aria-hidden="true"></i></a>
-	#{/secure.check}
-	<a class="btn btn-primary" href="@{Certifications.certifications(office.id, year, month)}">Aggiorna <i class="fa fa-refresh" aria-hidden="true"></i></a>
-	
-	*{
-	<a class="btn btn-danger pull-right" href="@{Certifications.emptyCertifications(office.id, year, month)}">Svuota Attestati <i class="fa fa-trash-o" aria-hidden="true"></i></a>
-	}*
-	
-	<ul class="list-group">
-	  #{list items:peopleCertificationStatus, as:'personCertificationStatus' }
-	  
-	  
-	  
-	  <li class="list-group-item 
-	    #{if personCertificationStatus.okProcessable || personCertificationStatus.okNotProcessable} list-group-item-success#{/if}
-	    #{if personCertificationStatus.incompleteNotProcessable} list-group-item-danger#{/if}
-	    #{if personCertificationStatus.incompleteProcessable} list-group-item-warning#{/if}
-	    ">
-	    <div class="row">
-	    <div class="col-xs-3">
-	    <strong>${personCertificationStatus.person.fullname}<br>${personCertificationStatus.person.number}</strong>
-	    </div>
-	    <div class="col-xs-3">
-	      #{if !personCertificationStatus.validate}
-	       
-	        #{if personCertificationStatus.okProcessable}
-		      <p class="text-success"><i class="fa fa-check fa-2x"
-		      popover-hover data-content="Attestato processato correttamente in attesa di validazione."></i>
-		    #{/if}
-		    #{if personCertificationStatus.incompleteProcessable}
-		      <p class="text-warning"><i class="fa fa-cloud-upload fa-2x" style="color:#f0ad4e"
-		      popover-hover data-content="Attestato incompleto da processare."></i>
-		    #{/if}
-		    
-		
-		    #{if personCertificationStatus.okNotProcessable}
-		      <p class="text-muted"><i class="fa fa-check fa-2x"
-		      popover-hover data-content="Attestato processato correttamente, non modificabile."></i>
-		    #{/if}
-		    #{if personCertificationStatus.incompleteNotProcessable}
-		    <p class="text-danger"><i class="fa fa-frown-o fa-2x"
-	         popover data-content="Attestato incompleto non processabile."></i>
-		    #{/if}
-		    
-	      #{/if}
-	      #{else}  
-	          <p class="text-danger"><i class="fa fa-ban fa-2x" aria-hidden="true" 
-	          popover-hover data-content="Attestato validato su attestati non modificabile."></i>
-	      #{/else}		    
-		    </p>
-	    </div>
-	    
-	    <div class="col-xs-6">
-		
-		    #{if personCertificationStatus.incompleteProcessable 
-		    	|| personCertificationStatus.okProcessable}
-		    
-		      #{list items:personCertificationStatus.correctCertifications.values(), as:'certification'}
-		        #{certifications.showCertification certification:certification, type:'correct' /}
-		      #{/list}
-		      #{list items:personCertificationStatus.toSendCertifications.values(), as:'certification'}
-		        #{certifications.showCertification certification:certification, type:'toSend' /}
-		      #{/list}
-		      #{list items:personCertificationStatus.problemCertifications.values(), as:'certification'}
-		        #{certifications.showCertification certification:certification, type:'problems' /}
-		      #{/list}
-		      #{list items:personCertificationStatus.toDeleteCertifications.values(), as:'certification'}
-		        #{certifications.showCertification certification:certification, type:'toDelete', 
-		          staticView:personCertificationStatus.staticView /}
-		      #{/list}
-		    
-		    #{/if}
-		    
-		
-		    #{if personCertificationStatus.incompleteNotProcessable || 
-		    personCertificationStatus.okNotProcessable}
-		    
-		      #{list items:personCertificationStatus.correctCertifications.values(), as:'certification'}
-		        #{certifications.showCertification certification:certification, type:'correct', muted:true /}
-		      #{/list}
-		      #{list items:personCertificationStatus.toSendCertifications.values(), as:'certification'}
-		        #{certifications.showCertification certification:certification, type:'toSend', muted:true /}
-		      #{/list}
-		      #{list items:personCertificationStatus.problemCertifications.values(), as:'certification'}
-		        #{certifications.showCertification certification:certification, type:'problems', muted:true /}
-		      #{/list}
-		      #{list items:personCertificationStatus.toDeleteCertifications.values(), as:'certification'}
-		        #{certifications.showCertification certification:certification, type:'toDelete', 
-		          muted:true /}
-		      #{/list}
-		      
-		    #{/if}
-	
-	    </div>
-	    </div>
-	  </li>
-	
-	  #{/list}
-	</ul>
-  
+  #{if matchNumbers && !matchNumbers.empty} *{ se è injettato è stata ottenuta
+  l'autenticazione }*
+  #{if !notInEpas.empty}
+    #{alert color:'danger', dismissible: true}
+    <p>Ci sono matricole attive in attestati non inserite in ePAS.</p>
+      #{list notInEpas}
+        <span class="label label-danger">${_}</span>
+      #{/list}
+    #{/alert}
   #{/if}
-  
+
+  #{if !notInAttestati.empty}
+    #{alert color:'danger', , dismissible: true}
+    <p>Ci sono persone attive nel mese in ePAS non in attestati. Controllare le loro matricole.</p>
+      #{list notInAttestati}
+        <span class="label label-danger">${_}</span>
+      #{/list}
+    #{/alert}
+  #{/if}
+
+    #{ifnot process}
+      #{b.link @processAll(office.id, validYear, validMonth), color:'warning', fa:'cloud-upload'}
+        <span class="text-default">Carica tutti i dati su Attestati</span>
+      #{/b.link}
+    #{/ifnot}
+    #{b.link @clearCacheValues(office.id, validYear, validMonth), color:'info', fa:'refresh'}
+      <span class="text-default">Aggiorna dati</span>
+    #{/b.link}
+    #{b.link templateUtility.attestatiUrl, 'target':'_blank', color: 'default', fa: 'arrow-right', class: 'pull-right'}
+      Vai su Attestati
+    #{/b.link}
+
+  <br>
+  <div id="loading">
+    #{if process}
+      <h6><em class="text-muted"><i class="fa fa-spin fa-spinner"></i> Invio dati in corso...</em></h6>
+    #{/if}
+    #{else}
+      <h6><em class="text-muted"><i class="fa fa-spin fa-spinner"></i> Caricamento in corso...</em></h6>
+    #{/else}
+    <div class="progress">
+      <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar"
+           aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" >
+        <span class="sr-only">0% Complete</span>
+      </div>
+    </div>
+  </div>
+ <br>
+  *{
+  <a class="btn btn-danger pull-right"
+     href="@{Certifications.emptyCertifications(office.id, validYear, validMonth)}">Svuota Attestati <i class="fa fa-trash-o" aria-hidden="true"></i></a>
+  }*
+
+  <ul class="list-group">
+
+    #{list people, as:'person' }
+    #{if !matchNumbers.empty && matchNumbers.contains(person.number)}
+    #{if process}
+    <!-- INVIO INFORMAZIONI AD ATTESTATI-->
+      <div data-load-async="@{process(person.id, validYear, validMonth, false)}">
+    #{/if}
+    #{else}
+    <!-- CARICAMENTO INFORMAZIONI DA ATTESTATI -->
+      <div data-load-async="@{personStatus(person.id, validYear, validMonth)}">
+    #{/else}
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col-xs-3">
+            <strong>${person.fullname}</strong>
+            <br><em>matricola:</em> ${person.number}
+          </div>
+          <div class="col-xs-3">
+            #{if process}
+              <i class="fa fa-spin fa-spinner"></i> Invio dati in corso...
+            #{/if}
+            #{else}
+              <i class="fa fa-spin fa-spinner"></i> Caricamento dati in corso...
+            #{/else}
+          </div>
+        </div>
+      </li>
+    </div>
+    #{/if}
+    #{else}
+    <li class="list-group-item disabled">
+      <div class="row">
+        <div class="col-xs-3">
+          <strong>${person.fullname}</strong>
+          <br><em>matricola:</em> ${person.number}
+        </div>
+        <div class="col-xs-3">
+          <em>Non presente su Attestati</em>
+        </div>
+      </div>
+    </li>
+    #{/else}
+    #{/list}
+  </ul>
+  #{/if}
+
 </div>

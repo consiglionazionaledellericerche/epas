@@ -2,6 +2,7 @@ package synch.perseoconsumers.roles;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
@@ -26,8 +27,6 @@ import models.Person;
 import models.Role;
 import models.UsersRolesOffices;
 
-import org.assertj.core.util.Lists;
-
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import synch.perseoconsumers.PerseoApis;
@@ -50,8 +49,8 @@ public class RolePerseoConsumer {
    *
    * @param personDao injected PersonDao
    * @param officeDao injected OfficeDao
-   * @param roleDao injected RoleDao
-   * @param uroDao injected UsersRolesOfficesDao 
+   * @param roleDao   injected RoleDao
+   * @param uroDao    injected UsersRolesOfficesDao
    */
   @Inject
   public RolePerseoConsumer(PersonDao personDao, OfficeDao officeDao, RoleDao roleDao,
@@ -116,7 +115,7 @@ public class RolePerseoConsumer {
   /**
    * Serve per sincronizzare i ruoli epas.
    *
-   * @param office             ?
+   * @param office ?
    * @return mappa
    */
   public Map<Long, Set<String>> perseoRoles(Optional<Office> office) {

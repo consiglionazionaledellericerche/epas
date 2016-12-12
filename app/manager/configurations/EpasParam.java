@@ -86,15 +86,7 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
-
-  NEW_ATTESTATI("new_attestati",
-      EpasParamCategory.GENERAL,
-      EpasParamTimeType.GENERAL,
-      EpasParamValueType.BOOLEAN,
-      EpasParamValueType.formatValue(false),
-      Lists.<RecomputationType>newArrayList(),
-      Office.class),
-
+  
   /**
    * Di quanto indietro nel tempo effettuare il ricalcolo dei personDays.
    */
