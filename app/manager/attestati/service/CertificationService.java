@@ -2,6 +2,7 @@ package manager.attestati.service;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
@@ -30,7 +31,6 @@ import models.PersonMonthRecap;
 import models.absences.Absence;
 import models.enumerate.CertificationType;
 
-import org.assertj.core.util.Maps;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
@@ -671,11 +671,10 @@ public class CertificationService implements ICertificationService {
   /* (non-Javadoc)
    * @see manager.attestati.service.ICertificationService#absenceCodes()
    */
-  @Override
-  public Map<String, CodiceAssenza> absenceCodes() throws ExecutionException {
-
-    List<CodiceAssenza> codiciAssenza = certificationsComunication.getAbsencesList();
-    Map<String, CodiceAssenza> map = Maps.newConcurrentHashMap();
+  public Map<String, CodiceAssenza> absenceCodes(Optional<String> token) {
+    
+    List<CodiceAssenza> codiciAssenza = certificationsComunication.getAbsencesList(token);
+    Map<String, CodiceAssenza> map = Maps.newHashMap();
     for (CodiceAssenza codiceAssenza : codiciAssenza) {
       map.put(codiceAssenza.codice.trim().toUpperCase(), codiceAssenza);
     }

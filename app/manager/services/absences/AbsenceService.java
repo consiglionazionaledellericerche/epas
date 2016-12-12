@@ -3,6 +3,7 @@ package manager.services.absences;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
 
@@ -16,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
-import manager.services.absences.AbsenceForm.AbsenceInsertTab;
 import manager.services.absences.errors.AbsenceError;
 import manager.services.absences.errors.CriticalError;
 import manager.services.absences.model.AbsencePeriod;
@@ -34,9 +34,11 @@ import models.User;
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceType;
+import models.absences.CategoryTab;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.DefaultGroup;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
+import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 
@@ -86,12 +88,13 @@ public class AbsenceService {
    * @param groupAbsenceType gruppo selezionato
    * @return absenceForm.
    */
-  public AbsenceForm buildForCateogorySwitch(Person person, LocalDate date, 
+  public AbsenceForm buildForCategorySwitch(Person person, LocalDate date, 
       GroupAbsenceType groupAbsenceType) {
     
     if (groupAbsenceType == null || !groupAbsenceType.isPersistent()) {
       groupAbsenceType = absenceComponentDao
-          .groupAbsenceTypeByName(AbsenceInsertTab.defaultTab().groupNames.get(0)).get();
+          .categoriesByPriority().get(0)
+          .groupAbsenceTypes.iterator().next();
     }
     
     AbsenceForm form = buildAbsenceForm(person, date, null, null, 
@@ -105,7 +108,7 @@ public class AbsenceService {
    * Genera la form di inserimento assenza.
    * @param person person
    * @param from data inizio
-   * @param absenceInsertTab web tab
+   * @param categoryTab tab
    * @param to data fine
    * @param groupAbsenceType gruppo
    * @param switchGroup se passa a nuovo gruppo
@@ -117,7 +120,7 @@ public class AbsenceService {
    * @return form
    */
   public AbsenceForm buildAbsenceForm(
-      Person person, LocalDate from, AbsenceInsertTab absenceInsertTab,                  //tab 
+      Person person, LocalDate from, CategoryTab categoryTab,                            //tab 
       LocalDate to, GroupAbsenceType groupAbsenceType,  boolean switchGroup,             //group
       AbsenceType absenceType, JustifiedType justifiedType,                              //reconf 
       Integer hours, Integer minutes, boolean readOnly) {
@@ -133,16 +136,19 @@ public class AbsenceService {
     if (absenceType == null || !absenceType.isPersistent()) {
       absenceType = null;
     }
+    if (categoryTab == null || !categoryTab.isPersistent()) {
+      categoryTab = null;
+    }
     
     List<GroupAbsenceType> groupsPermitted = groupsPermitted(person, readOnly);
     
     if (groupAbsenceType != null) {
       Verify.verify(groupsPermitted.contains(groupAbsenceType));
-      absenceInsertTab = AbsenceInsertTab.fromGroup(groupAbsenceType);
+      categoryTab = groupAbsenceType.category.tab;
     } else {
-      if (absenceInsertTab != null) {
-        groupAbsenceType = absenceComponentDao
-            .groupAbsenceTypeByName(absenceInsertTab.groupNames.get(0)).get();
+      if (categoryTab != null) {
+        groupAbsenceType = categoryTab.firstByPriority()
+            .groupAbsenceTypes.iterator().next();
         Verify.verify(groupsPermitted.contains(groupAbsenceType));
       } else {
         //selezionare missione?
@@ -155,7 +161,7 @@ public class AbsenceService {
         if (groupAbsenceType == null) {
           groupAbsenceType = groupsPermitted.get(0);  
         }
-        absenceInsertTab = AbsenceInsertTab.fromGroup(groupAbsenceType);  
+        categoryTab = absenceComponentDao.categoriesByPriority().iterator().next().tab;  
       }
     }
     
@@ -229,10 +235,13 @@ public class AbsenceService {
       
       List<PersonChildren> orderedChildren = personChildrenDao.getAllPersonChildren(person);   
       List<Contract> fetchedContracts = person.contracts; //TODO: fetch
+      List<InitializationGroup> initializationGroups = 
+          absenceComponentDao.personInitializationGroups(person); 
       
       PeriodChain periodChain = serviceFactories
           .buildPeriodChain(person, groupAbsenceType, currentDate, 
-              previousInserts, absenceToInsert, orderedChildren, fetchedContracts);
+              previousInserts, absenceToInsert, 
+              orderedChildren, fetchedContracts, initializationGroups);
 
       criticalErrors.addAll(periodChain.criticalErrors());
       
@@ -390,12 +399,14 @@ public class AbsenceService {
     log.debug("Lanciata procedura scan assenze person={}, from={}", person.fullName(), from);
 
     List<Absence> absencesToScan = absenceComponentDao.orderedAbsences(person, from, 
-        null, Lists.newArrayList());
+        null, Sets.newHashSet());
     List<PersonChildren> orderedChildren = personChildrenDao.getAllPersonChildren(person);    
     List<Contract> fetchedContracts = person.contracts; //TODO: fetch
+    List<InitializationGroup> initializationGroups = 
+        absenceComponentDao.personInitializationGroups(person);
     
     Scanner absenceScan = serviceFactories.buildScanInstance(person, from, absencesToScan, 
-        orderedChildren, fetchedContracts);
+        orderedChildren, fetchedContracts, initializationGroups);
         
     // scan dei gruppi
     absenceScan.scan();
@@ -421,10 +432,12 @@ public class AbsenceService {
     
     List<PersonChildren> orderedChildren = personChildrenDao.getAllPersonChildren(person);   
     List<Contract> fetchedContracts = person.contracts; //TODO: fetch
+    List<InitializationGroup> initializationGroups = 
+        absenceComponentDao.personInitializationGroups(person);
     
     PeriodChain periodChain = serviceFactories.buildPeriodChain(person, groupAbsenceType, date, 
         Lists.newArrayList(), null,
-        orderedChildren, fetchedContracts);
+        orderedChildren, fetchedContracts, initializationGroups);
 
     return periodChain;
 
@@ -458,7 +471,6 @@ public class AbsenceService {
     }
     return groupsPermitted;
   }
-
   
   @Deprecated
   private InsertReport temporaryInsertCompensatoryRest(Person person, 

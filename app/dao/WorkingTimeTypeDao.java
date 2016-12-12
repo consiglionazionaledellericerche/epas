@@ -2,6 +2,7 @@ package dao;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
 import com.google.inject.Provider;
 
 import com.mysema.query.jpa.JPQLQuery;
@@ -39,14 +40,6 @@ public class WorkingTimeTypeDao extends DaoBase {
                      Provider<EntityManager> emp, ContractDao contractDao) {
     super(queryFactory, emp);
     this.contractDao = contractDao;
-  }
-
-  @Deprecated
-  public WorkingTimeType getWorkingTimeTypeByDescription(String description) {
-    final QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
-    final JPQLQuery query = getQueryFactory().from(wtt)
-            .where(wtt.description.eq(description));
-    return query.singleResult(wtt);
   }
 
   /**
@@ -93,6 +86,11 @@ public class WorkingTimeTypeDao extends DaoBase {
     return query.list(wtt);
   }
 
+  /**
+   * WorkingTimeType by id.
+   * @param id id
+   * @return wtt
+   */
   public WorkingTimeType getWorkingTimeTypeById(Long id) {
     final QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
     final JPQLQuery query = getQueryFactory().from(wtt)
@@ -114,6 +112,13 @@ public class WorkingTimeTypeDao extends DaoBase {
   /**
    * @return il tipo di orario di lavoro utilizzato in date.
    */
+  
+  /**
+   * Il tipo orario per la persona attivo nel giorno.
+   * @param date data
+   * @param person persona
+   * @return il tipo orario se presente
+   */
   public Optional<WorkingTimeType> getWorkingTimeType(LocalDate date, Person person) {
 
     Contract contract = contractDao.getContract(date, person);
@@ -130,27 +135,25 @@ public class WorkingTimeTypeDao extends DaoBase {
   }
   
   /**
-   * I minuti di lavoro previsti per quel giorno della persona.
-   * @param date
-   * @param person
-   * @return
+   * Il tipo orario del giorno per la persona.
+   * @param date data
+   * @param person persona
+   * @return il tipo orario del giorno se presente
    */
-  public int workingTimeTypeMinutes(LocalDate date, Person person) {
-    return getWorkingTimeType(date, person).get().workingTimeTypeDays.get(date.getDayOfWeek() - 1)
-        .workingTime;
-  }
-  
-  /**
-   * Se per il tipo orario la data è un giorno festivo.
-   * @param date
-   * @param workingTimeType
-   * @return
-   */
-  public boolean isWorkingTypeTypeHoliday(LocalDate date, WorkingTimeType workingTimeType) {
-    int dayOfWeekIndex = date.getDayOfWeek() - 1;
-    WorkingTimeTypeDay wttd = workingTimeType.workingTimeTypeDays.get(dayOfWeekIndex);
-    Preconditions.checkState(wttd.dayOfWeek == date.getDayOfWeek());
-    return wttd.holiday;
+  public Optional<WorkingTimeTypeDay> getWorkingTimeTypeDay(LocalDate date, Person person) {
+    Optional<WorkingTimeType> wtt = getWorkingTimeType(date, person);
+    if (!wtt.isPresent()) {
+      return Optional.absent();
+    }
+    int index = date.getDayOfWeek() - 1;
+    Verify.verify(index < wtt.get().workingTimeTypeDays.size());
+    Optional<WorkingTimeTypeDay> wttd = 
+        Optional.fromNullable(wtt.get().workingTimeTypeDays.get(index));
+
+    Verify.verify(wttd.isPresent());
+    Verify.verify(wttd.get().dayOfWeek == date.getDayOfWeek());
+    
+    return wttd;
   }
   
 }

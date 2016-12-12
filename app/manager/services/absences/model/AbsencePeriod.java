@@ -17,6 +17,7 @@ import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.GroupAbsenceType;
+import models.absences.InitializationGroup;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 
 import org.joda.time.LocalDate;
@@ -35,6 +36,7 @@ public class AbsencePeriod {
   public GroupAbsenceType groupAbsenceType;
   public LocalDate from;                      // Data inizio
   public LocalDate to;                        // Data fine
+  public InitializationGroup initialization;  // Inizializazione period (se presente)
   public SortedMap<LocalDate, DayInPeriod> daysInPeriod = Maps.newTreeMap();
   
   // Takable
@@ -84,6 +86,14 @@ public class AbsencePeriod {
   public boolean isTakableWithLimit() {
     return isTakable() && !isTakableNoLimit();
   }
+  
+  public boolean isTakableUnits() {
+    return isTakableWithLimit() && this.takeAmountType == AmountType.units;
+  }
+  
+  public boolean isTakableMinutes() {
+    return isTakableWithLimit() && this.takeAmountType == AmountType.minutes;
+  }
 
   /**
    * Imposta l'ammontare fisso del periodo.
@@ -124,9 +134,13 @@ public class AbsencePeriod {
    * @return int
    */
   public int getPeriodTakenAmount() {
-    int takenInPeriod = 0;
+    
+    int takenInPeriod = getInitializationTakableUsed();
+    
     for (TakenAbsence takenAbsence : takenAbsences()) {
-      takenInPeriod += takenAbsence.getTakenAmount();
+      if (!takenAbsence.beforeInitialization) {
+        takenInPeriod += takenAbsence.getTakenAmount();
+      }
     }
     if (!takenCountBehaviour.equals(TakeCountBehaviour.period)) {
       // TODO: sumAllPeriod, sumUntilPeriod;
@@ -146,15 +160,19 @@ public class AbsencePeriod {
    * @return l'assenza takable
    */
   public TakenAbsence buildTakenAbsence(Absence absence, int takenAmount) {
-    int periodTakableAmount = this.getPeriodTakableAmount();
+
     int periodTakenAmount = this.getPeriodTakenAmount();
     TakenAbsence takenAbsence = TakenAbsence.builder()
         .absence(absence)
         .amountType(this.takeAmountType)
-        .periodTakableTotal(periodTakableAmount)
+        .periodTakableTotal(this.getPeriodTakableAmount())
         .periodTakenBefore(periodTakenAmount)
         .takenAmount(takenAmount)
         .build();
+    if (this.initialization != null 
+        && !absence.getAbsenceDate().isAfter(this.initialization.date)) {
+      takenAbsence.beforeInitialization = true;
+    }  
     return takenAbsence;
   }
   
@@ -191,23 +209,33 @@ public class AbsencePeriod {
   }
   
   public boolean isComplation() {
-    return complationAmountType != null; 
+    return this.complationAmountType != null; 
   }
+  
+  public boolean isComplationUnits() {
+    return isComplation() && this.complationAmountType == AmountType.units; 
+  }
+  
+  public boolean isComplationMinutes() {
+    return isComplation() && this.complationAmountType == AmountType.minutes; 
+  }
+  
   
   /**
    * Calcola i rimpiazzamenti corretti nel periodo.
    * @param absenceEngineUtility inject dep
-   * @param absenceComponentDao inject dep
    */
-  public void computeCorrectReplacingInPeriod(AbsenceEngineUtility absenceEngineUtility, 
-      AbsenceComponentDao absenceComponentDao) {
+  public void computeCorrectReplacingInPeriod(AbsenceEngineUtility absenceEngineUtility) {
 
     if (!this.isComplation()) {
       return;
     }
 
-    int complationAmount = 0;
+    int complationAmount = getInitializationComplationUsed(absenceEngineUtility);
     for (DayInPeriod dayInPeriod : this.daysInPeriod.values()) {
+      if (this.initialization != null && !dayInPeriod.getDate().isAfter(this.initialization.date)) {
+        continue;
+      }
       if (dayInPeriod.getExistentComplations().isEmpty()) {
         continue;
       }
@@ -223,7 +251,7 @@ public class AbsencePeriod {
           .residualComplationBefore(complationAmount - amount)
           .consumedComplation(amount).build();
       Optional<AbsenceType> replacingCode = absenceEngineUtility
-          .whichReplacingCode(this, absence.getAbsenceDate(), complationAmount);
+          .whichReplacingCode(this.replacingCodesDesc, absence.getAbsenceDate(), complationAmount);
       if (replacingCode.isPresent()) {
         dayInPeriod.setCorrectReplacing(replacingCode.get());
         complationAmount -= this.replacingTimes.get(replacingCode.get());
@@ -268,6 +296,75 @@ public class AbsencePeriod {
     return ErrorsBox.boxesContainsCriticalErrors(Lists.newArrayList(this.errorsBox));
   }
   
+  /**
+   * L'inizializzazione nella parte takable.
+   * @return int
+   */
+  public int getInitializationTakableUsed() {
+    
+    //TODO: si può instanziare una variabile lazy
+    
+    if (this.initialization == null) {
+      return 0;
+    }
+    
+    int minutes = this.initialization.hoursInput * 60 + this.initialization.minutesInput;
+    //Takable used
+    if (this.isTakableMinutes()) {
+      return minutes;
+    } else if (this.isTakableUnits()) {
+      return (this.initialization.unitsInput * 100) 
+          + workingTypePercent(minutes, this.initialization.averageWeekTime);
+    }
+    
+    return 0;
+  }
+  
+  /**
+   * L'inizializzazione nella parte completamento.
+   * @param absenceEngineUtility inject
+   * @return int
+   */
+  public int getInitializationComplationUsed(AbsenceEngineUtility absenceEngineUtility) {
+    
+    //TODO: si può instanziare una variabile lazy
+    
+    if (this.initialization == null) {
+      return 0;
+    }
+    
+    int minutes = this.initialization.hoursInput * 60 + this.initialization.minutesInput;
+    
+    //Complation used
+    if (this.isComplationUnits()) {
+      return workingTypePercentModule(minutes, this.initialization.averageWeekTime);
+    } else if (this.isComplationMinutes()) {
+      
+      //completare finchè si può minutes
+      while (true) {
+        Optional<AbsenceType> absenceType = absenceEngineUtility
+            .whichReplacingCode(this.replacingCodesDesc, this.initialization.date, minutes);
+        if (!absenceType.isPresent()) {
+          break;
+        }
+        minutes -= this.replacingTimes.get(absenceType.get());
+      }
+      return minutes;
+    }
+    
+    return 0;
+  }
+  
+  private int workingTypePercent(int minutes, int workTime) {
+    int time = minutes * 100; 
+    int percent = (time) / workTime;
+    return percent;
+  }
+  
+  private int workingTypePercentModule(int minutes, int workTime) {
+    int workTimePercent = workingTypePercent(minutes, workTime); 
+    return workTimePercent % 100;
+  }
 }
 
 

@@ -1,10 +1,20 @@
 
 package controllers;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
+
 import dao.PersonDao;
+import dao.QualificationDao;
 import dao.UserDao;
+import dao.WorkingTimeTypeDao;
+import dao.absences.AbsenceComponentDao;
 import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
+
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,26 +22,38 @@ import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.PersonDayManager;
 import manager.services.absences.AbsenceForm;
-import manager.services.absences.AbsenceForm.AbsenceInsertTab;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
+import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.PeriodChain;
 
 import models.Person;
 import models.PersonDay;
+import models.Qualification;
 import models.Role;
 import models.User;
+import models.WorkingTimeType;
 import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.AmountType;
 import models.absences.CategoryGroupAbsenceType;
+import models.absences.CategoryTab;
+import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
+import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
+import models.absences.TakableAbsenceBehaviour;
+import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
+import models.enumerate.QualificationMapping;
 
+import org.assertj.core.util.Sets;
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
 
+import play.data.validation.Required;
 import play.data.validation.Valid;
+import play.data.validation.Validation;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -39,6 +61,7 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -62,22 +85,182 @@ public class AbsenceGroups extends Controller {
   private static AbsenceHistoryDao absenceHistoryDao;
   @Inject
   private static UserDao userDao;
+  @Inject
+  private static WorkingTimeTypeDao workingTimeTypeDao;
+  @Inject
+  private static QualificationDao qualificationDao;
+  @Inject
+  private static AbsenceComponentDao absenceComponentDao;
 
   /**
-   * End point per la visualizzazione dei gruppi assenze definiti.
+   * La lista delle categorie definite.
+   */
+  public static void showCategories() {
+    
+    List<CategoryGroupAbsenceType> categories = CategoryGroupAbsenceType.findAll();
+    List<CategoryTab> categoryTabs = CategoryTab.findAll();
+    
+    //    if (categoryTabs.isEmpty()) {
+    //      int count = 1;
+    //      for (AbsenceInsertTab absenceInsertTab : AbsenceInsertTab.values()) {
+    //        CategoryTab categoryTab = new CategoryTab();
+    //        categoryTab.name = absenceInsertTab.name();
+    //        categoryTab.priority = count;
+    //        if (AbsenceInsertTab.defaultTab() == absenceInsertTab) {
+    //          categoryTab.isDefault = true;
+    //        }
+    //        categoryTab.save();
+    //        count++;
+    //      }
+    //      categoryTabs = CategoryTab.findAll();
+    //    }
+    
+    render(categories, categoryTabs);
+  }
+  
+  /**
+   * Nuova tab.
+   */
+  public static void insertCategoryTab() {
+    CategoryTab categoryTab = new CategoryTab();
+    render("@editCategoryTab", categoryTab);
+  }
+  
+  /**
+   * Edit tab.
+   * @param categoryTabId id
+   */
+  public static void editCategoryTab(Long categoryTabId) {
+    CategoryTab categoryTab = CategoryTab.findById(categoryTabId);
+    notFoundIfNull(categoryTab);
+    render(categoryTab);
+  }
+  
+  /**
+   * Save tab.
+   * @param categoryTab tab
+   */
+  public static void saveCategoryTab(@Valid CategoryTab categoryTab) {
+    
+    if (validation.hasErrors()) {
+      flash.error("Correggere gli errori indicati");
+      render("@editCategoryType", categoryTab);
+    }
+    categoryTab.save();
+    flash.success("Operazione eseguita.");
+    editCategoryTab(categoryTab.id);
+  }
+  
+  /**
+   * Rimuove la tab.
+   * @param categoryTabId tab
+   */
+  public static void deleteCategoryTab(Long categoryTabId) {
+    CategoryTab categoryTab = CategoryTab.findById(categoryTabId);
+    notFoundIfNull(categoryTab);
+    if (!categoryTab.categoryGroupAbsenceTypes.isEmpty()) {
+      flash.error("Non è possibile eliminare una tab associata a categorie");
+      editCategoryTab(categoryTabId);
+    }
+    categoryTab.delete();
+    flash.success("Operazione effettuata.");
+    showCategories();
+  }
+  
+  /**
+   * Nuova category.
+   */
+  public static void insertCategoryGroupAbsenceType() {
+    CategoryGroupAbsenceType categoryGroupAbsenceType = new CategoryGroupAbsenceType();
+    List<CategoryTab> allCategoryTab = CategoryTab.findAll();
+    render("@editCategoryGroupAbsenceType", categoryGroupAbsenceType, allCategoryTab);
+  }
+  
+  /**
+   * Edit category.
+   * @param categoryGroupAbsenceTypeId id
+   */
+  public static void editCategoryGroupAbsenceType(Long categoryGroupAbsenceTypeId) {
+    CategoryGroupAbsenceType categoryGroupAbsenceType = 
+        CategoryGroupAbsenceType.findById(categoryGroupAbsenceTypeId);
+    notFoundIfNull(categoryGroupAbsenceType);
+    List<CategoryTab> allCategoryTab = CategoryTab.findAll();
+    render(categoryGroupAbsenceType, allCategoryTab);
+  }
+  
+  /**
+   * Save category.
+   * @param categoryGroupAbsenceType tab
+   */
+  public static void saveCategoryGroupAbsenceType(
+      @Valid CategoryGroupAbsenceType categoryGroupAbsenceType) {
+    
+    if (validation.hasErrors()) {
+      List<CategoryTab> allCategoryTab = CategoryTab.findAll();
+      flash.error("Correggere gli errori indicati");
+      render("@editCategoryGroupAbsenceType", categoryGroupAbsenceType, allCategoryTab);
+    }
+    categoryGroupAbsenceType.save();
+    flash.success("Operazione eseguita.");
+    editCategoryGroupAbsenceType(categoryGroupAbsenceType.id);
+  }
+  
+  /**
+   * Rimuove la category.
+   * @param categoryGroupAbsenceTypeId tab
+   */
+  public static void deleteCategoryGroupAbsenceType(Long categoryGroupAbsenceTypeId) {
+    CategoryGroupAbsenceType categoryGroupAbsenceType = 
+        CategoryGroupAbsenceType.findById(categoryGroupAbsenceTypeId);
+    notFoundIfNull(categoryGroupAbsenceType);
+    if (!categoryGroupAbsenceType.groupAbsenceTypes.isEmpty()) {
+      flash.error("Non è possibile eliminare una categoria associata a un gruppo");
+      editCategoryGroupAbsenceType(categoryGroupAbsenceTypeId);
+    }
+    categoryGroupAbsenceType.delete();
+    flash.success("Operazione effettuata.");
+    showCategories();
+  }
+  
+  
+  /**
+   * End point per la visualizzazione dei gruppi assenze definiti. EX show
    * @param categoryId filtro categoria
    */
-  public static void show(Long categoryId) {
+  public static void showGroups(Long categoryId) {
 
-    List<GroupAbsenceType> groups = GroupAbsenceType.findAll();
-    List<CategoryGroupAbsenceType> categories = CategoryGroupAbsenceType.findAll();
-    CategoryGroupAbsenceType category = categories.iterator().next();
+    List<CategoryTab> categoryTabs = absenceComponentDao.tabsByPriority();
+    
+    CategoryGroupAbsenceType selected = categoryTabs.get(0).firstByPriority();
     if (categoryId != null) {
-      category = CategoryGroupAbsenceType.findById(categoryId);
+      selected = CategoryGroupAbsenceType.findById(categoryId);
     }
     
-    render(groups, categories, category);
+    render(categoryTabs, selected);
 
+  }
+  
+  /**
+   * End point per la creazione di un gruppo.
+   */
+  public static void insertGroup(Long categoryId) {
+    CategoryGroupAbsenceType categoryGroupAbsenceType = 
+        CategoryGroupAbsenceType.findById(categoryId);
+    notFoundIfNull(categoryGroupAbsenceType);
+    
+    GroupAbsenceType groupAbsenceType = new GroupAbsenceType();
+    groupAbsenceType.category = categoryGroupAbsenceType;
+    groupAbsenceType.pattern = GroupAbsenceTypePattern.simpleGrouping;
+    
+    List<CategoryGroupAbsenceType> allCategories = CategoryGroupAbsenceType.findAll();
+    List<AbsenceType> allAbsenceTypes = AbsenceType.findAll();
+    
+    //Default pattern
+    Integer fixedLimit = -1;
+    AmountType takeAmountType = AmountType.units;
+    
+    render("@editGroup", groupAbsenceType, fixedLimit, takeAmountType, 
+        allCategories, allAbsenceTypes);
   }
   
   /**
@@ -87,17 +270,222 @@ public class AbsenceGroups extends Controller {
   public static void editGroup(Long groupAbsenceTypeId) {
     GroupAbsenceType groupAbsenceType = GroupAbsenceType.findById(groupAbsenceTypeId);
     notFoundIfNull(groupAbsenceType);
+    List<CategoryGroupAbsenceType> allCategories = CategoryGroupAbsenceType.findAll();
+    List<AbsenceType> allAbsenceTypes = AbsenceType.findAll();
+    List<GroupAbsenceType> allGroups = GroupAbsenceType.findAll();
     
-    render(groupAbsenceType);
+    //Stato precedente gruppo
+    AmountType takeAmountType = groupAbsenceType.takableAbsenceBehaviour.amountType;
+    Integer fixedLimit = groupAbsenceType.takableAbsenceBehaviour.fixedLimit;
+    Set<AbsenceType> takableCodes = groupAbsenceType.takableAbsenceBehaviour.takableCodes;
+    TakeAmountAdjustment takableAmountAdjustment = groupAbsenceType
+        .takableAbsenceBehaviour.takableAmountAdjustment;
+    AmountType complationAmountType = null;
+    Set<AbsenceType> complationCodes = Sets.newHashSet();
+    Set<AbsenceType> replacingCodes = Sets.newHashSet();
+    if (groupAbsenceType.complationAbsenceBehaviour != null) {
+      complationAmountType = groupAbsenceType.complationAbsenceBehaviour.amountType;
+      complationCodes = groupAbsenceType.complationAbsenceBehaviour.complationCodes;
+      replacingCodes = groupAbsenceType.complationAbsenceBehaviour.replacingCodes;
+    }
+      
+    render(groupAbsenceType, takeAmountType, fixedLimit, takableCodes, takableAmountAdjustment, 
+        complationAmountType, complationCodes, replacingCodes, 
+        allCategories, allAbsenceTypes, allGroups);
   }
   
   /**
    * End point per il salvataggio del gruppo.
    * @param groupAbsenceType gruppo
    */
-  public static void updateGroup(GroupAbsenceType groupAbsenceType) {
+  public static void saveGroup(@Valid GroupAbsenceType groupAbsenceType, 
+      List<Long> takableCodesIds, 
+      @Required AmountType takeAmountType, 
+      @Required Integer fixedLimit, 
+      TakeAmountAdjustment takableAmountAdjustment, 
+      
+      AmountType complationAmountType,
+      List<Long> complationCodesIds, List<Long> replacingCodesIds) {
+    
+    //Fetch absenceTypes
+    List<AbsenceType> takableCodes = absenceComponentDao.absenceTypesByIds(takableCodesIds);
+    List<AbsenceType> complationCodes = absenceComponentDao.absenceTypesByIds(complationCodesIds);
+    List<AbsenceType> replacingCodes = absenceComponentDao.absenceTypesByIds(replacingCodesIds);
+    if (takableCodes == null || complationCodes == null || replacingCodes == null) {
+      //se null significa dimensione diversa fra input e fetch.
+      badRequest();
+    }
+    
+    if (takableCodes.isEmpty()) {
+      Validation.addError("takableCodesIds", "Deve contenere almeno un codice.");
+    }
+    if (complationAmountType != null) {
+      if (complationCodes.isEmpty()) {
+        Validation.addError("complationCodesIds", "Deve contenere almeno un codice.");
+      }
+      if (replacingCodes.isEmpty()) {
+        Validation.addError("replacingCodesIds", "Deve contenere almeno un codice.");
+      }
+    }
+    
+    if (validation.hasErrors()) {
+      List<GroupAbsenceType> allGroups = GroupAbsenceType.findAll();
+      List<CategoryGroupAbsenceType> allCategories = CategoryGroupAbsenceType.findAll();
+      List<AbsenceType> allAbsenceTypes = AbsenceType.findAll();
+      render("@editGroup", groupAbsenceType, 
+          takableCodes, takeAmountType, fixedLimit, takableAmountAdjustment, 
+          complationAmountType, complationCodes, replacingCodes, 
+          allCategories, allAbsenceTypes, allGroups);
+    }
+    
+    //Save take
+    TakableAbsenceBehaviour takableBehaviour;
+    if (!groupAbsenceType.isPersistent()) {
+      takableBehaviour = new TakableAbsenceBehaviour();
+      takableBehaviour.groupAbsenceTypes.add(groupAbsenceType);
+      takableBehaviour.name = TakableAbsenceBehaviour.NAME_PREFIX + groupAbsenceType.name;
+    } else {
+      takableBehaviour = groupAbsenceType.takableAbsenceBehaviour;
+    }
+    
+    takableBehaviour.amountType = takeAmountType;
+    takableBehaviour.takableCodes.clear();
+    takableBehaviour.takenCodes.clear();
+    takableBehaviour.takableCodes = Sets.newHashSet(takableCodes);
+    takableBehaviour.takenCodes = Sets.newHashSet(takableCodes);
+    takableBehaviour.fixedLimit = fixedLimit;
+    takableBehaviour.takableAmountAdjustment = takableAmountAdjustment;
+    takableBehaviour.save();
+    groupAbsenceType.takableAbsenceBehaviour = takableBehaviour;
+    
+    //Save complatio
+    ComplationAbsenceBehaviour complationBehaviour;
+    if (!groupAbsenceType.isPersistent() || groupAbsenceType.complationAbsenceBehaviour == null) {
+      complationBehaviour = new ComplationAbsenceBehaviour();
+      complationBehaviour.name = ComplationAbsenceBehaviour.NAME_PREFIX + groupAbsenceType.name;
+      complationBehaviour.groupAbsenceTypes.add(groupAbsenceType);
+    } else {
+      complationBehaviour = groupAbsenceType.complationAbsenceBehaviour;
+    }
+    
+    if (complationAmountType == null) {
+      //distruzione
+      if (groupAbsenceType.complationAbsenceBehaviour != null) {
+        ComplationAbsenceBehaviour complationToRemove = groupAbsenceType.complationAbsenceBehaviour;
+        groupAbsenceType.complationAbsenceBehaviour = null;
+        groupAbsenceType.save();
+        complationToRemove.groupAbsenceTypes.remove(groupAbsenceType);
+        complationToRemove.complationCodes.clear();
+        complationToRemove.replacingCodes.clear();
+        complationToRemove.delete();
+      }
+    } else {
+      //creazione / modifica
+      complationBehaviour.complationCodes.clear();
+      complationBehaviour.replacingCodes.clear();
+      complationBehaviour.complationCodes = Sets.newHashSet(complationCodes);
+      complationBehaviour.replacingCodes = Sets.newHashSet(replacingCodes);
+      complationBehaviour.amountType = complationAmountType;
+      complationBehaviour.save();
+      groupAbsenceType.complationAbsenceBehaviour = complationBehaviour;
+    }
+    
     groupAbsenceType.save();
-    show(groupAbsenceType.category.id);
+  
+    flash.success("Operazione eseguita con successo");
+    editGroup(groupAbsenceType.id);
+  }
+  
+  
+  /**
+   * End point lista codici assenza.
+   */
+  public static void showAbsenceTypes() {
+    List<AbsenceType> absenceTypes = AbsenceType.findAll();
+    render(absenceTypes);
+  }
+  
+ 
+  /**
+   * Inserimento nuovo codice di assenza.
+   */
+  public static void insertAbsenceType() {
+    AbsenceType absenceType = new AbsenceType();
+    List<JustifiedType> allJustifiedType = JustifiedType.findAll();
+    List<GroupAbsenceType> allSimpleGroup = absenceComponentDao
+        .groupAbsenceTypeOfPattern(GroupAbsenceTypePattern.simpleGrouping);
+    render("@editAbsenceType", absenceType, allJustifiedType, allSimpleGroup);
+  }
+   
+  /**
+   * Modifica codice assenza.
+   *
+   * @param absenceTypeId id
+   */
+  public static void editAbsenceType(Long absenceTypeId) {
+
+    AbsenceType absenceType = AbsenceType.findById(absenceTypeId);
+    notFoundIfNull(absenceType);
+
+    boolean tecnologi = false;
+    boolean tecnici = false;
+
+    for (Qualification q : absenceType.qualifications) {
+      tecnologi = !tecnologi ? QualificationMapping.TECNOLOGI.contains(q) : tecnologi;
+      tecnici = !tecnici ? QualificationMapping.TECNICI.contains(q) : tecnici;
+    }
+
+    List<JustifiedType> allJustifiedType = JustifiedType.findAll();
+    List<GroupAbsenceType> allSimpleGroup = absenceComponentDao
+        .groupAbsenceTypeOfPattern(GroupAbsenceTypePattern.simpleGrouping);
+
+    render(absenceType, allSimpleGroup, tecnologi, tecnici, allJustifiedType);
+  }
+  
+  /**
+   * Salva il nuovo/modificato codice di assenza.
+   *
+   * @param absenceType il tipo di assenza
+   * @param tecnologi   se il codice di assenza è valido per i tecnologi
+   * @param tecnici     se il codice di assenza è valido per i tecnici
+   */
+  public static void saveAbsenceType(@Valid AbsenceType absenceType,
+      boolean tecnologi, boolean tecnici) {
+
+    List<JustifiedType> allJustifiedType = JustifiedType.findAll();
+    
+    if (validation.hasErrors()) {
+      flash.error("Correggere gli errori indicati");
+      render("@editAbsenceType", absenceType, allJustifiedType, tecnologi, tecnici);
+    }
+
+    absenceType.qualifications.clear();
+    if (tecnici) {
+      absenceType.qualifications.addAll(
+          qualificationDao.getByQualificationMapping(QualificationMapping.TECNICI));
+    }
+    if (tecnologi) {
+      absenceType.qualifications.addAll(
+          qualificationDao.getByQualificationMapping(QualificationMapping.TECNOLOGI));
+    }
+    
+    if (absenceType.qualifications.isEmpty()) {
+      flash.error("Selezionare almeno una categoria tra Tecnologi e Tecnici");
+      render("@editAbsenceType", absenceType, allJustifiedType, tecnologi, tecnici);
+    }
+    if (absenceType.justifiedTypesPermitted.isEmpty()) {
+      flash.error("Selezionare almeno una tipologia di Tempo Giustificato");
+      render("@editAbsenceType", absenceType, allJustifiedType, tecnologi, tecnici);
+    }
+    if (absenceType.isAbsenceTypeMinutesPermitted() && absenceType.justifiedTime == null) {
+      flash.error("Specificare i minuti del tipo assenza.");
+      render("@editAbsenceType", absenceType, allJustifiedType, tecnologi, tecnici);
+    }
+
+    absenceType.save();
+    flash.success("Inserito/modificato codice di assenza %s", absenceType.code);
+
+    editAbsenceType(absenceType.id);
   }
 
 
@@ -106,7 +494,7 @@ public class AbsenceGroups extends Controller {
    *
    * @param personId         persona
    * @param from             data inizio
-   * @param absenceInsertTab web tab
+   * @param categoryTab      tab
    * @param to               data fine
    * @param groupAbsenceType gruppo assenze
    * @param switchGroup      se cambio gruppo di assenze
@@ -116,9 +504,9 @@ public class AbsenceGroups extends Controller {
    * @param minutes          minuti
    */
   public static void insert(
-      Long personId, LocalDate from, AbsenceInsertTab absenceInsertTab,      //tab
+      Long personId, LocalDate from, CategoryTab categoryTab,                      //tab
       LocalDate to, GroupAbsenceType groupAbsenceType, boolean switchGroup, //group
-      AbsenceType absenceType, JustifiedType justifiedType,                  //confGroup 
+      AbsenceType absenceType, JustifiedType justifiedType,                 //confGroup 
       Integer hours, Integer minutes, boolean forceInsert) {
 
     Person person = personDao.getPersonById(personId);
@@ -128,7 +516,7 @@ public class AbsenceGroups extends Controller {
     rules.checkIfPermitted(person);
 
     AbsenceForm absenceForm =
-        absenceService.buildAbsenceForm(person, from, absenceInsertTab,
+        absenceService.buildAbsenceForm(person, from, categoryTab,
             to, groupAbsenceType, switchGroup, absenceType, justifiedType, hours, minutes, false);
 
     InsertReport insertReport = absenceService.insert(person,
@@ -211,14 +599,15 @@ public class AbsenceGroups extends Controller {
   /**
    * End point per visualizzare lo stato di un gruppo assenze alla data.
    *
-   * @param personId         persona
-   * @param groupAbsenceType gruppo
-   * @param from             data
+   * @param personId persona
+   * @param groupAbsenceTypeId gruppo
+   * @param from data
    */
-  public static void groupStatus(Long personId, GroupAbsenceType groupAbsenceType, LocalDate from) {
+  public static void groupStatus(Long personId, Long groupAbsenceTypeId, LocalDate from) {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
+    GroupAbsenceType groupAbsenceType = GroupAbsenceType.findById(groupAbsenceTypeId);
     notFoundIfNull(from);
     
     rules.checkIfPermitted(person);
@@ -226,7 +615,7 @@ public class AbsenceGroups extends Controller {
     groupAbsenceType = groupAbsenceType.firstOfChain();
     
     AbsenceForm categorySwitcher = absenceService
-        .buildForCateogorySwitch(person, from, groupAbsenceType);
+        .buildForCategorySwitch(person, from, groupAbsenceType);
     
     PeriodChain periodChain = absenceService.residual(person, categorySwitcher.groupSelected, from);
     
@@ -246,37 +635,138 @@ public class AbsenceGroups extends Controller {
   /**
    * End point per definire l'inizializzazione di un gruppo.
    *
-   * @param personId         persona
-   * @param groupAbsenceType gruppo
-   * @param date             data
+   * @param personId persona
+   * @param groupAbsenceTypeId gruppo
+   * @param date data
    */
-  public static void initialization(
-      Long personId, GroupAbsenceType groupAbsenceType, LocalDate date) {
+  public static void initialization(Long personId, Long groupAbsenceTypeId, LocalDate date) {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-
-    //costruire la situazione residuale per la data
-    //AbsenceEngine absenceEngine = absenceService.residual(person, groupAbsenceType, date);
-
-    List<GroupAbsenceType> initializableGroups = initializablesGroups();
-
-    render(initializableGroups, person);
-
-  }
-
-  private static List<GroupAbsenceType> initializablesGroups() {
-    List<GroupAbsenceType> initializables = Lists.newArrayList();
-    List<GroupAbsenceType> allGroups = GroupAbsenceType.findAll();
-    for (GroupAbsenceType group : allGroups) {
-      if (!group.pattern.equals(GroupAbsenceTypePattern.simpleGrouping)) {
-        initializables.add(group);
-      }
+    if (date == null) {
+      date = LocalDate.now();
     }
-    return initializables;
+    
+    //Categorie inizializzabili e gruppo selezionato
+    List<CategoryGroupAbsenceType> initializableCategories = 
+        absenceComponentDao.initializablesCategory();
+    Verify.verify(!initializableCategories.isEmpty());
+    GroupAbsenceType groupAbsenceType = absenceComponentDao.firstGroupInitializable(
+        initializableCategories.iterator().next());
+    
+    if (groupAbsenceTypeId != null) {
+      groupAbsenceType = GroupAbsenceType.findById(groupAbsenceTypeId);
+      notFoundIfNull(groupAbsenceType);
+      Verify.verify(groupAbsenceType.initializable);
+    }
+    
+    InitializationGroup initializationGroup = 
+        new InitializationGroup(person, groupAbsenceType, date);
+    
+    //Tempo a lavoro medio
+    Optional<WorkingTimeType> wtt = workingTimeTypeDao.getWorkingTimeType(date, person);
+    if (!wtt.isPresent()) {
+      wtt = workingTimeTypeDao.getWorkingTimeType(date.plusDays(1), person);
+    }
+    if (!wtt.isPresent()) {
+      Validation.addError("date", "Deve essere una data attiva, "
+          + "o immediatamente precedente l'inizio di un contratto.");
+      render(initializableCategories, initializationGroup);
+    }
+    int averageWeekWorkingTime = wtt.get().weekAverageWorkingTime();
+    
+    //Stato del gruppo
+    PeriodChain periodChain = absenceService.residual(person, groupAbsenceType, date);
+    if (periodChain.periods.isEmpty()) {
+      render(initializableCategories, initializationGroup, periodChain);
+    }
+    AbsencePeriod absencePeriod = periodChain.periods.iterator().next();
+  
+    if (absencePeriod.initialization != null) {
+      initializationGroup = absencePeriod.initialization;
+      if (absencePeriod.initialization.averageWeekTime != averageWeekWorkingTime) {
+        //TODO: un warning? Se non è stato fatto andrebbe fatto l'update dei derivati
+      }
+    } else {
+      initializationGroup.averageWeekTime = averageWeekWorkingTime;
+    }
+    
+    
+    render(initializableCategories, date, initializationGroup, periodChain, absencePeriod);
 
   }
+  
+  /**
+   * Persiste una nuova inizializzazione.
+   * @param initializationGroup initializationGroup
+   */
+  public static void saveInitialization(@Valid InitializationGroup initializationGroup) {
+    
+    // Lo stato della richiesta
+    
+    notFoundIfNull(initializationGroup.person);
+    notFoundIfNull(initializationGroup.groupAbsenceType);
+    notFoundIfNull(initializationGroup.date);
+    PeriodChain periodChain = absenceService.residual(initializationGroup.person, 
+        initializationGroup.groupAbsenceType, initializationGroup.date);
+    Preconditions.checkState(!periodChain.periods.isEmpty());
+    AbsencePeriod absencePeriod = periodChain.periods.iterator().next();
+    
 
+    //Tempo a lavoro medio
+    Optional<WorkingTimeType> wtt = workingTimeTypeDao
+        .getWorkingTimeType(initializationGroup.date, initializationGroup.person);
+    if (!wtt.isPresent()) {
+      wtt = workingTimeTypeDao
+          .getWorkingTimeType(initializationGroup.date.plusDays(1), initializationGroup.person);
+    }
+    if (!wtt.isPresent()) {
+      Validation.addError("date", "Deve essere una data attiva, "
+          + "o immediatamente precedente l'inizio di un contratto.");
+    }
+    
+    // Gli errori della richiesta inserimento inizializzazione
+    if (Validation.hasErrors()) {
+      flash.error("Correggere gli errori indicati");
+      render("@initialization", absencePeriod, periodChain, initializationGroup);
+    }
+    
+    // se esiste già una inizilizzazione devo sovrascrivere quella.
+    if (absencePeriod.initialization != null) {
+      Verify.verify(absencePeriod.initialization.id.equals(initializationGroup.id));
+    }
+    
+    //new average
+    initializationGroup.averageWeekTime = wtt.get().weekAverageWorkingTime();
+    
+    initializationGroup.save();
+    
+    //TODO: check del gruppo per i ricalcoli
+    
+    flash.success("Inizializzazione salvata con successo.");
+    
+    initialization(initializationGroup.person.id, initializationGroup.groupAbsenceType.id, 
+        initializationGroup.date);
+  }
+  
+  /**
+   * Elimina l'inizializzazione.
+   * @param initializationGroup inizializzazione
+   */
+  public static void deleteInitialization(InitializationGroup initializationGroup) {
+    
+    notFoundIfNull(initializationGroup);
+    
+    initializationGroup.delete();
+    
+    flash.success("Inizializzazione rimossa con successo.");
+    
+    //TODO: check del gruppo per i ricalcoli
+    
+    initialization(initializationGroup.person.id, initializationGroup.groupAbsenceType.id, 
+        initializationGroup.date);
+  }
+  
 
   /**
    * metodo che renderizza la pagina di modifica di una determinata assenza.
@@ -345,4 +835,66 @@ public class AbsenceGroups extends Controller {
 
     Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
   }
+  
+  /**
+   * 1.
+   */
+  public static void absenceAnalyzer() {
+    List<Absence> absences = Absence.findAll();
+    List<Absence> notPermitted = Lists.newArrayList();
+    List<Absence> outOfDate = Lists.newArrayList();
+    for (Absence absence : absences) {
+      if (!absence.absenceType.justifiedTypesPermitted.contains(absence.justifiedType)) {
+        notPermitted.add(absence);
+        log.info("{} is: {}, permitted: {}", absence.toString(), 
+            absence.justifiedType, absence.absenceType.justifiedTypesPermitted);
+      }
+      if (absence.absenceType.isExpired()) {
+        if (!DateUtility.isDateIntoInterval(absence.getAbsenceDate(), 
+            new DateInterval(absence.absenceType.validFrom, absence.absenceType.validTo))) {
+          outOfDate.add(absence);
+        }
+      }
+    }
+    render(notPermitted, outOfDate);
+  }
+  
+  
+  /**
+   * Valori altrimenti non modificabili.
+   */
+  public static void editAbsenceCriticalValue(Long absenceId) {
+    
+    if (absenceId != null) {
+      Absence absence = Absence.findById(absenceId);
+      render(absence);
+    }
+    render();
+    
+  }
+  
+  /**
+   * Salva i valori altrimenti non modificabili.
+   * @param absenceId tipo assenza
+   * @param justifiedType tipo giustificativo
+   * @param justifiedMinutes minuti specificati
+   */
+  public static void saveAbsenceCriticalValue(Long absenceId, 
+      JustifiedType justifiedType, Integer justifiedMinutes) {
+    
+    Absence absence = Absence.findById(absenceId);
+    notFoundIfNull(absence);
+    notFoundIfNull(justifiedType);
+    
+    //TODO: deve appartenere a absenceType.justifiedTypePermitted
+    absence.justifiedType = justifiedType;
+    absence.justifiedMinutes = justifiedMinutes;
+    
+    absence.save();
+
+    flash.success("Operazione eseguita.");
+    editAbsenceCriticalValue(absence.id);
+    
+  }
+  
 }

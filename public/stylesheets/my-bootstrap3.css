@@ -238,6 +238,7 @@ tfoot input {
 /* -----------------------------------------------------*/
 
 .list-group-item-grey{ background-color: #EAEAEA; }
+.bg-grey{ background-color: #EAEAEA; }
 
 .data-select-bar{
   margin-top: 2em;

@@ -26,12 +26,10 @@ import models.PersonDayInTrouble;
 import models.PersonShiftDay;
 import models.Stamping;
 import models.Stamping.WayType;
-import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.StampTypes;
 import models.enumerate.Troubles;
 
@@ -88,18 +86,6 @@ public class PersonDayManager {
         return true;
       }
 
-      // TODO: per adesso il telelavoro lo considero come giorno lavorativo
-      // normale. Chiedere ai romani.
-      // TODO: il telelavoro è giorno di lavoro da casa, quindi non giustifica 
-      // ma assegna tempo a lavoro, ma non assegna buono pasto.
-      //if (abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
-      //  return false;
-      //} else 
-      if (abs.justifiedMinutes == null //eludo PEPE, RITING etc...
-          && (abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay
-          || abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AssignAllDay)) {
-        return true;
-      }
     }
     return false;
   }
@@ -126,11 +112,8 @@ public class PersonDayManager {
           justifiedTime += abs.absenceType.justifiedTime;
           continue;
         }
+        //TODO: quando ci sarà considerare il quello che manca.
         continue;
-      }
-
-      if (abs.absenceType.justifiedTimeAtWork.minutes != null) {
-        justifiedTime += abs.absenceType.justifiedTimeAtWork.minutes;
       }
     }
 
@@ -200,12 +183,13 @@ public class PersonDayManager {
    * @param personDay  personDay
    * @param startLunch inizio fascia pranzo istituto
    * @param endLunch   fine fascia pranzo istituto
+   * @param exitingNow timbratura fittizia uscendo in questo momento
    * @return la lista delle pause pranzo
    */
   public List<PairStamping> getGapLunchPairs(PersonDay personDay, LocalTime startLunch,
-      LocalTime endLunch) {
+      LocalTime endLunch, Optional<Stamping> exitingNow) {
 
-    List<PairStamping> validPairs = getValidPairStampings(personDay.stampings);
+    List<PairStamping> validPairs = getValidPairStampings(personDay.stampings, exitingNow);
 
     List<PairStamping> allGapPairs = Lists.newArrayList();
 
@@ -296,10 +280,10 @@ public class PersonDayManager {
 
     return gapTime;
   }
-  
+
   /**
    * Calcolo del tempo a lavoro e del buono pasto.
-   * 
+   *
    * @param personDay personDay
    * @param wttd tipo orario
    * @param fixedTimeAtWork se la persona ha la presenza automatica
@@ -312,15 +296,15 @@ public class PersonDayManager {
   public PersonDay updateTimeAtWork(PersonDay personDay, WorkingTimeTypeDay wttd,
       boolean fixedTimeAtWork, LocalTime startLunch, LocalTime endLunch,
       LocalTime startWork, LocalTime endWork) {
-    
-    return updateTimeAtWork(personDay, wttd, fixedTimeAtWork, startLunch, endLunch, 
-        startWork, endWork, 
+
+    return updateTimeAtWork(personDay, wttd, fixedTimeAtWork, startLunch, endLunch,
+        startWork, endWork,
         Optional.absent());
   }
-  
+
   /**
    * Calcolo del tempo a lavoro e del buono pasto.
-   * 
+   *
    * @param personDay personDay
    * @param wttd tipo orario
    * @param fixedTimeAtWork se la persona ha la presenza automatica
@@ -381,10 +365,10 @@ public class PersonDayManager {
 
           if (abs.absenceType.timeForMealTicket) {
             personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal()
-                + abs.absenceType.justifiedTimeAtWork.minutes);
+                + abs.justifiedMinutes);
           } else {
             personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
-                + abs.justifiedMinutes);          
+                + abs.justifiedMinutes);
           }
           continue;
         }
@@ -452,7 +436,8 @@ public class PersonDayManager {
     // dal tempo a lavoro.
 
     // 1) Calcolo del tempo passato in pausa pranzo dalle timbrature.
-    List<PairStamping> gapLunchPairs = getGapLunchPairs(personDay, startLunch, endLunch);
+    List<PairStamping> gapLunchPairs = 
+        getGapLunchPairs(personDay, startLunch, endLunch, exitingNow);
     boolean baessoAlgorithm = true;
     for (PairStamping lunchPair : gapLunchPairs) {
       if (lunchPair.prPair) {
@@ -628,30 +613,30 @@ public class PersonDayManager {
       pd.setTicketAvailable(isTicketAvailable);
     }
   }
-  
+
   /**
    * Se il personDay ricade nel caso del calcolo stima uscendo in questo momento.
    * @param personDay personDay
    * @return esito
    */
   public boolean toComputeExitingNow(PersonDay personDay) {
-    
+
     if (!personDay.isToday()) {
       return false;
     }
     if (personDay.stampings.isEmpty()) {
       return false;
     }
-    
+
     final List<Stamping> ordered = ImmutableList
         .copyOf(personDay.stampings.stream().sorted().collect(Collectors.toList()));
-    if (ordered.get(ordered.size() - 1).isIn()        
+    if (ordered.get(ordered.size() - 1).isIn()
         || ordered.get(ordered.size() - 1).stampType == StampTypes.MOTIVI_DI_SERVIZIO) {
       return true;
     }
-    
+
     return false;
-    
+
   }
 
   /**
@@ -662,21 +647,21 @@ public class PersonDayManager {
    * @param wttd tipo orario giorno
    * @param fixed se la persona è fixed nel giorno
    */
-  public void queSeraSera(PersonDay personDay, LocalDateTime now, 
-      Optional<PersonDay> previousForProgressive, 
-      WorkingTimeTypeDay wttd, boolean fixed, 
+  public void queSeraSera(PersonDay personDay, LocalDateTime now,
+      Optional<PersonDay> previousForProgressive,
+      WorkingTimeTypeDay wttd, boolean fixed,
       LocalTimeInterval lunchInterval, LocalTimeInterval workInterval) {
 
     // aggiungo l'uscita fittizia 'now' nel caso risulti in servizio
     // TODO: non crearla nell'entity... da fastidio ai test. 
     // Crearla dentro updateTimeAtWork ma senza aggiungerla alla lista del personDay.
-    
+
     Stamping stampingExitingNow = new Stamping(null, now);
     stampingExitingNow.way = WayType.out;
     stampingExitingNow.exitingNow = true;
     personDay.isConsideredExitingNow = true;
 
-    updateTimeAtWork(personDay, wttd, fixed, lunchInterval.from, lunchInterval.to, 
+    updateTimeAtWork(personDay, wttd, fixed, lunchInterval.from, lunchInterval.to,
         workInterval.from, workInterval.to, Optional.of(stampingExitingNow));
 
     updateDifference(personDay, wttd, fixed);
@@ -723,6 +708,8 @@ public class PersonDayManager {
     final boolean isFixedTimeAtWork = pd.isFixedTimeAtWork();
     final boolean isHoliday = personDay.isHoliday;
     final boolean isEnoughHourlyAbsences = isEnoughHourlyAbsences(pd);
+    final boolean noAbsences = personDay.absences.isEmpty();
+    final int workingTime = pd.getWorkingTimeTypeDay().get().getWorkingTime();
 
     // PRESENZA AUTOMATICA
     if (isFixedTimeAtWork && !allValidStampings) {
@@ -754,29 +741,46 @@ public class PersonDayManager {
     } else {
       personDayInTroubleManager.fixTrouble(personDay, Troubles.UNCOUPLED_HOLIDAY);
     }
+
+
+    // ### CASO 4 Tempo a lavoro (di timbrature + assenze) non sufficiente
+    // Per i livelli 4-8 dev'essere almeno la metà del tempo a lavoro
+
+    // Non ha la timbratura automatica
+    if (!isFixedTimeAtWork
+        // E' di livello 4-8
+        && personDay.person.qualification.qualification > 3
+        // c'è almeno 1 tra assenze e timbrature
+        && (!noStampings || !noAbsences)
+        // Il tempo a lavoro non è almeno la metà di quello previsto
+        && personDay.timeAtWork < (workingTime / 2)) {
+      personDayInTroubleManager.setTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);
+    } else {
+      personDayInTroubleManager.fixTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);
+    }
   }
 
   /**
    * Calcola le coppie di stampings valide al fine del calcolo del time at work. <br>
-   * 
+   *
    * @param stampings stampings
    * @return coppie
    */
   public List<PairStamping> getValidPairStampings(List<Stamping> stampings) {
-    
+
     final List<Stamping> orderedStampings = ImmutableList
         .copyOf(stampings.stream().sorted().collect(Collectors.toList()));
-    
+
     return computeValidPairStampings(orderedStampings);
   }
-  
+
   /**
    * Calcola le coppie di stampings valide al fine del calcolo del time at work. <br>
-   * 
+   *
    * @param stampings stampings
    * @return coppie
    */
-  public List<PairStamping> getValidPairStampings(List<Stamping> stampings, 
+  public List<PairStamping> getValidPairStampings(List<Stamping> stampings,
       Optional<Stamping> exitingNow) {
     List<Stamping> copy = Lists.newArrayList(stampings);
     if (exitingNow.isPresent()) {
@@ -785,7 +789,7 @@ public class PersonDayManager {
     Collections.sort(copy);
     return computeValidPairStampings(copy);
   }
-  
+
   /**
    * - Setta il campo valid per ciascuna stamping del personDay 
    * (sulla base del loro valore al momento della call) <br>
@@ -795,13 +799,13 @@ public class PersonDayManager {
    * @param stampings la lista di timbrature
    */
   public void setValidPairStampings(List<Stamping> stampings) {
-    
+
     final List<Stamping> orderedStampings = ImmutableList
         .copyOf(stampings.stream().sorted().collect(Collectors.toList()));
 
     computeValidPairStampings(orderedStampings);
   }
-  
+
 
   /**
    * Calcola le coppie di stampings valide al fine del calcolo del time at work. <br>
@@ -929,7 +933,6 @@ public class PersonDayManager {
 
     return validPairs;
   }
-
 
 
   /**
@@ -1203,15 +1206,16 @@ public class PersonDayManager {
       return true;
     }
 
-    Optional<WorkingTimeType> workingTimeType = workingTimeTypeDao.getWorkingTimeType(date, person);
+    Optional<WorkingTimeTypeDay> workingTimeTypeDay = workingTimeTypeDao
+        .getWorkingTimeTypeDay(date, person);
 
     //persona fuori contratto
-    if (!workingTimeType.isPresent()) {
+    if (!workingTimeTypeDay.isPresent()) {
       return false;
     }
 
     //tempo a lavoro
-    return workingTimeTypeDao.isWorkingTypeTypeHoliday(date, workingTimeType.get());
+    return workingTimeTypeDay.get().holiday;
   }
 
 }

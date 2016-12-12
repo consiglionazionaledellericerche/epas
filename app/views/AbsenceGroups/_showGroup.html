@@ -11,12 +11,14 @@
       #{if group.pattern.equals(models.absences.GroupAbsenceType.GroupAbsenceTypePattern.simpleGrouping) }
         <i class="fa fa-asterisk" aria-hidden="true"></i>  
       #{/if}
+      #{if group.automatic }
+        <i class="fa fa-magic" aria-hidden="true"></i>
+      #{/if}
       
-      #{secure.link @AbsenceGroups.editGroup(group.id),  'data-async-modal':'#defaultModal' }
+      #{secure.link @AbsenceGroups.editGroup(group.id) }
       <strong> ${group.description.label()}</strong>
       #{/secure.link}
-      
-      
+
       *{ <span class="label label-info">${group.name}</span> }* 
     </td>
     

@@ -1,44 +1,5 @@
 ADD= Inserimento
 
-absenceFile=Allegato
-absenceType= Codice assenza
-absenceType.certificateCode= Codice per attestati di presenza
-absenceType.code= Codice d'assenza
-absenceType.consideredWeekEnd= Utilizzabile nei weekend/festivi
-absenceType.description= Descrizione codice
-absenceType.internalUse= Codice a uso interno
-absenceType.justifiedTimeAtWork= Tempo di lavoro giustificato
-absenceType.qualifications= Utilizzabile per i livelli
-absenceType.validFrom= Inizio validita'
-absenceType.validTo= Fine validita'
-
-groupAbsenceType=Gruppo di Codici
-TooEarlyReplacing=Codice di completamento anticipato
-
-justifiedType=Tempo giustificato
-
-insert=Inserimento
-insertReplacing = Inserimento Rimpiazzamento
-
-absence_type_minutes=Tempo specificato nel tipo assenza
-all_day=Tutto il giorno
-half_day=Mezza giornata
-assign_all_day=Assegna l'intera giornata lavorativa
-specified_minutes=Specificare ore e minuti
-all_day_limit=Niente ma scala una giornata dal limite
-specified_minutes_limit=Niente ma scala i minuti dal limite
-
-nothing=Niente
-minutes=Minuti
-hours=Ore
-units=Giorni
-month=Mese
-year=Anno
-programmed=Programmato
-child0_12=Figlio 0-12 anni
-child0_6=Figlio 0-6 anni
-workingTimeAndWorkingPeriodPercent=Percentuale Tempo Lavoro e Orario Lavoro
-
 administrations= Amministrazione
 administrator= Amministratore
 adminPassword= Password Amministratore
@@ -458,6 +419,13 @@ views.tags.display.date.month.9=Settembre
 
 vacations.takable=Usufruibili
 
+takableTotal=Limite Totale
+takableUsed=Limite Consumato
+complationUsed=Completato
+
+
+
+
 wtt.description= Nome Tipo Orario
 wtt.office=Sede
 wtt= Tipo Orario
@@ -507,9 +475,11 @@ errorCompetenceCodeException= Codice di competenza non presente tra quelli abili
 Absences.absences= Assenze Mensili
 Absences.absencesPerPerson= Assenze Annuali
 Absences.absencesVisibleForEmployee= Presenze Giornaliere
-Absences.manageAbsenceCode= Gestione Codici d'assenza
 Absences.showGeneralMonthlyAbsences= Assenze
-AbsenceGroups.show=Gruppi Assenze
+AbsenceGroups.showGroups=Gruppi Assenze
+AbsenceGroups.initialization=Assenze Iniziali
+AbsenceGroups.showAbsenceTypes=Codici Assenza
+AbsenceGroups.showCategories=Categorie Assenze
 Administration.playConfiguration= Informazioni Applicazione
 Administration.utilities= Utilities
 BadgeReaders.list= Sorgenti Timbrature
@@ -558,7 +528,7 @@ PrintTags.listPersonForPrintTags= Stampa Cartellino
 PrintTags.showTag= Stampa Cartellino Presenze
 Stampings.dailyPresence= Presenza Giornaliera
 Stampings.dailyPresenceForPersonInCharge= Presenza giornaliera gruppo
-Stampings.missingStamping= Timbrature Mancanti
+Stampings.missingStamping= Riepilogo problemi sui giorni
 Stampings.personStamping= Timbrature
 Stampings.stampings= Situazione Mensile
 Synchronizations.institutes= Sincronizza Sedi
@@ -577,41 +547,9 @@ AccountRole.DEVELOPER= developer
 AccountRole.ADMIN= Admin
 AccountRole.RO_ADMIN= Admin in sola lettura
 
-AccumulationType.no= No
-AccumulationType.yearly= Annuale
-AccumulationType.monthly= Mensile
-AccumulationType.always= Sempre
-
-AccumulationBehaviour.nothing= Niente
-AccumulationBehaviour.replaceCodeAndDecreaseAccumulation= Sostituisce il codice e decrementa l'accumulo
-AccumulationBehaviour.noMoreAbsencesAccepted= Non accettare ulteriori assenze
-
 chartType= Tipo di grafico
 ChartTypes.BARS= Grafico a barre
 ChartTypes.COLUMNS= Grafico a colonne
-
-JustifiedTimeAtWork.AllDay= Intera giornata
-JustifiedTimeAtWork.HalfDay= Mezza giornata
-JustifiedTimeAtWork.OneHour= 1 ora
-JustifiedTimeAtWork.TwoHours= 2 ore
-JustifiedTimeAtWork.ThreeHours= 3 ore
-JustifiedTimeAtWork.FourHours= 4 ore
-JustifiedTimeAtWork.FiveHours= 5 ore
-JustifiedTimeAtWork.SixHours= 6 ore
-JustifiedTimeAtWork.SevenHours= 7 ore
-JustifiedTimeAtWork.EightHours= 8 ore
-JustifiedTimeAtWork.OneHourMealTimeCounting= 1 ora (conteggiata per buono pasto)
-JustifiedTimeAtWork.TwoHoursMealTimeCounting= 2 ore (conteggiate per buono pasto)
-JustifiedTimeAtWork.ThreeHoursMealTimeCounting= 3 ore (conteggiate per buono pasto)
-JustifiedTimeAtWork.FourHoursMealTimeCounting= 4 ore (conteggiate per buono pasto)
-JustifiedTimeAtWork.FiveHoursMealTimeCounting= 5 ore (conteggiate per buono pasto)
-JustifiedTimeAtWork.SixHoursMealTimeCounting= 6 ore (conteggiate per buono pasto)
-JustifiedTimeAtWork.SevenHoursMealTimeCounting= 7 ore (conteggiate per buono pasto)
-JustifiedTimeAtWork.EightHoursMealTimeCounting= 8 ore (conteggiate per buono pasto)
-JustifiedTimeAtWork.Nothing= Niente
-JustifiedTimeAtWork.TimeToComplete= Quello che manca
-JustifiedTimeAtWork.ReduceWorkingTimeOfTwoHours= Riduce orario di lavoro di 2 ore
-JustifiedTimeAtWork.AssignAllDay= Assegna intera giornata
 
 LimitType.monthly= Mensile
 LimitType.yearly= Annuale
@@ -686,62 +624,9 @@ configurationDto.localdateNewValue=Nuovo Valore
 WayType.in= Ingresso
 WayType.out= Uscita
 
-# Enumerati Assenze
-
-MissingReplacing=Manca il codice di rimpiazzamento.
-WrongReplacing=Il codice di rimpiazzamento presente non è quello corretto.
-CompromisedReplacing=La sequenza dei rimpiazzamenti è compromessa.
-CompromisedTwoComplation=Due assenze a completamento nello stesso giorno.
-LimitExceeded=Il tetto massimo utilizzabile per il periodo è stato superato.
-AllDayAlreadyExists=Codice che giustifica l'intera giornata già presente.
-NoChildExist=Figlio non presente in anagrafica o fuori età.
-NotOnHoliday=Non di festa
-InReperibility=In Reperibilità
-InReperibilityOrShift=In Turno o Reperibilità
-InShift=In Turno
-ForceInsert=Inserimento forzato
-
-child1_0_3=Primo figlio 0-3 anni
-child1_0_6=Primo figlio 0-6 anni
-child1_0_12=Primo figlio 0-12 anni
-child1_3_12=Primo figlio 3-12 anni
-child2_0_3=Secondo figlio 0-3 anni
-child2_0_6=Secondo figlio 0-6 anni
-child2_0_12=Secondo figlio 0-12 anni
-child2_3_12=Secondo figlio 3-12 anni
-child3_0_3=Terzo figlio 0-3 anni
-child3_0_6=Terzo figlio 0-6 anni
-child3_0_12=Terzo figlio 0-12 anni
-child3_3_12=Terzo figlio 3-12 anni
-
-always=Sempre
-compensatoryRestCnr=Riposo Compensativo CNR
-vacationsCnr=Ferie CNR
-simpleGrouping=Gruppo Semplice
-
-
-
 ###########################################################################
 #	Descrizioni campi (usati nei popovers e nelle descrizioni dei campi)
 ###########################################################################
-
-absenceType.code.popover= Codice di assenza
-
-absenceType.certificateCode.popover= Usare solo se il codice che deve andare negli attestati di presenza è diverso da quello definito nella riga precedente (questo diventa il codice ufficiale e il precedente un alias per uso interno)
-
-absenceType.description.popover= Descrizione codice di assenza
-
-absenceType.internalUse.popover= Seleziona "Si" se il codice è solo per uso interno (non previsto dal CNR) non sarà trasferito negli attestati di presenza
-
-absenceType.validFrom.popover= Data inizio validità di questo codice (se vuoto valido da sempre)
-
-absenceType.validTo.popover= Data fine validità di questo codice (se vuoto valido per sempre)
-
-modifierType.popover= Scegliere "Giustifica" se si desidera che il codice giustifichi un certo numero di ore;Al contrario si selezioni "Assegna" se si vuole che il codice aggiunga le ore al tempo di lavoro della persona (es. cod 105BP)
-
-absenceType.justifiedTimeAtWork.popover= Il valore scelto influenzerà il calcolo nel tempo del lavoro della giornata nel quale verrà utilizzato questo codice di assenza
-
-absenceType.consideredWeekEnd.popover= Seleziona Si se il codice può essere inserito anche nel week end e nei festivi
 
 emailToContact.popover= L&#39;indirizzo email qui specificato sarà utilizzato come campo per i reply alle mail inviate dal sistema
 
@@ -770,3 +655,162 @@ tr_autocertification.file= File di Autorizzazione
 
 description.WORKING_OFF_SITE= L&apos;abilitazione del parametro <strong>&{WORKING_OFF_SITE}</strong> permette, se abilitato anche nella configurazione del dipendente, l&apos;inserimento autonomo delle informazioni relative al <strong>Lavoro Fuori Sede</strong>.<br> L&apos;inserimento/modifica/eliminazione di una timbratura o del codice d'assenza 105BP, comporta l'invio di una notifica ai propri amministratori del personale.<br> L&apos;inserimento di queste informazioni &egrave; limitato solamente agli ultimi 2 mesi e non &egrave permesso nei mesi per i quali sono gi&agrave; stati inviati gli attestati di presenza.
 description.TR_AUTOCERTIFICATION= L&apos;abilitazione del parametro <strong>&{TR_AUTOCERTIFICATION}</strong> attiver&agrave; la possibilit&agrave; per i Tecnologi e i Ricercatori di questa sede di autocertificare la propria presenza a lavoro, e dunque di inserire in autonomia le proprie timbrature.<br> L&apos;inserimento di queste informazioni &egrave; limitato solamente agli ultimi 2 mesi e non &egrave permesso nei mesi per i quali sono gi&agrave; stati inviati gli attestati di presenza.
+
+###########################################################################
+#	COMPONENTE ASSENZE
+###########################################################################
+
+absenceFile=Allegato
+absenceType= Codice assenza
+absenceType.certificateCode= Attestati
+absenceType.code= Codice
+absenceType.consideredWeekEnd= Festivi
+absenceType.description= Descrizione
+absenceType.internalUse= Interno
+absenceType.qualifications= Livelli
+absenceType.tecnici= Tecnici
+absenceType.tecnologi= Tecnologi
+absenceType.validFrom= Inizio validita'
+absenceType.validTo= Fine validita'
+absenceType.active= Attivo
+absenceType.justifiedTypesPermitted=Tempo giustificato  
+absenceType.timeForMealTicket=Considerato per buono pasto
+absenceType.justifiedTime=Minuti specificati nel tipo assenza
+absenceType.used=Usato
+
+groupAbsenceType=Gruppo di Codici
+groupAbsenceType.description=Descrizione
+groupAbsenceType.chainDescription=Descrizione Catena
+groupAbsenceType.automatic=Inserimento Automatico
+groupAbsenceType.initializable=Inizializzabile
+groupAbsenceType.category= Categoria
+groupAbsenceType.name=Nome
+groupAbsenceType.pattern= Pattern
+groupAbsenceType.periodType=Periodo
+groupAbsenceType.nextGroupToCheck=Gruppo successivo 
+PeriodType.always=Sempre
+PeriodType.year=Annuale
+PeriodType.month=Mensile
+PeriodType.child1_0_3=Primo figlio 0-3 anni
+PeriodType.child1_0_6=Primo figlio 0-6 anni
+PeriodType.child1_0_12=Primo figlio 0-12 anni
+PeriodType.child1_3_12=Primo figlio 3-12 anni
+PeriodType.child1_6_12=Primo figlio 6-12 anni
+PeriodType.child2_0_3=Secondo figlio 0-3 anni
+PeriodType.child2_0_6=Secondo figlio 0-6 anni
+PeriodType.child2_0_12=Secondo figlio 0-12 anni
+PeriodType.child2_3_12=Secondo figlio 3-12 anni
+PeriodType.child2_6_12=Secondo figlio 6-12 anni
+PeriodType.child3_0_3=Terzo figlio 0-3 anni
+PeriodType.child3_0_6=Terzo figlio 0-6 anni
+PeriodType.child3_0_12=Terzo figlio 0-12 anni
+PeriodType.child3_3_12=Terzo figlio 3-12 anni
+PeriodType.child3_6_12=Terzo figlio 6-12 anni
+
+always(0, null, null), year(0, null, null), month(0, null, null),
+    child1_0_3(1, 0, 3), child1_0_6(1, 0, 6), child1_0_12(1, 0, 12), 
+    child1_6_12(1, 6, 12), child1_3_12(1, 3, 12),
+    
+    child2_0_3(2, 0, 3), child2_0_6(2, 0, 6), child2_0_12(2, 0, 12), child2_6_12(2, 6, 12), 
+    child2_3_12(2, 3, 12),
+    
+    child3_0_3(3, 0, 3), child3_0_6(3, 0, 6), child3_0_12(3, 0, 12), child3_6_12(3, 6, 12), 
+    child3_3_12(3, 3, 12);
+
+
+categoryGroupAbsenceType.name=Nome
+categoryGroupAbsenceType.description=Descrizione
+categoryGroupAbsenceType.priority=Priorità
+categoryGroupAbsenceType.tab=Tab
+
+justifiedType=Tempo giustificato
+
+insert=Inserimento
+insertReplacing = Inserimento Rimpiazzamento
+
+absence_type_minutes=Tempo specificato nel tipo assenza
+all_day=Tutto il giorno
+half_day=Mezza giornata
+assign_all_day=Assegna l'intera giornata lavorativa
+specified_minutes=Specificare ore e minuti
+all_day_limit=Niente ma scala una giornata dal limite
+specified_minutes_limit=Niente ma scala i minuti dal limite
+
+nothing=Niente
+minutes=Minuti
+hours=Ore
+units=Giorni
+month=Mese
+year=Anno
+programmed=Programmato
+child0_12=Figlio 0-12 anni
+child0_6=Figlio 0-6 anni
+workingTimeAndWorkingPeriodPercent=Percentuale Tempo Lavoro e Orario Lavoro
+takeAmountType=Tipo Limite
+fixedLimit=Limite fissato
+takableAmountAdjustment=Aggiustamento limite fissato
+takableCodesIds=Codici Prendibili
+complationAmountType=Tipo Completamento
+complationCodesIds=Codici Completamento
+replacingCodesIds=Codici Rimpiazzamento
+TakeAmountAdjustment.workingTimePercent=Percentuale tipo orario
+TakeAmountAdjustment.workingPeriodPercent=Percentuale periodo lavorato
+TakeAmountAdjustment.workingTimeAndWorkingPeriodPercent=Percentuale tipo orario e periodo lavorato
+AmountType.minutes=Minuti
+AmountType.units=Giorni
+
+initializationGroup.hoursInput =Ore Utilizzate
+initializationGroup.minutesInput =Minuti Utilizzati
+initializationGroup.unitsInput=Giorni Completi Utilizzati
+
+TooEarlyReplacing=Codice di completamento anticipato
+MissingReplacing=Manca il codice di rimpiazzamento.
+WrongReplacing=Il codice di rimpiazzamento presente non è quello corretto.
+CompromisedReplacing=La sequenza dei rimpiazzamenti è compromessa.
+CompromisedTwoComplation=Due assenze a completamento nello stesso giorno.
+LimitExceeded=Il tetto massimo utilizzabile per il periodo è stato superato.
+AllDayAlreadyExists=Codice che giustifica l'intera giornata già presente.
+NoChildExist=Figlio non presente in anagrafica o fuori età.
+NotOnHoliday=Non di festa
+InReperibility=In Reperibilità
+InReperibilityOrShift=In Turno o Reperibilità
+InShift=In Turno
+ForceInsert=Inserimento forzato
+IgnoredBeforeInitialization=Precedente l'inizializzazione
+
+child1_0_3=Primo figlio 0-3 anni
+child1_0_6=Primo figlio 0-6 anni
+child1_0_12=Primo figlio 0-12 anni
+child1_3_12=Primo figlio 3-12 anni
+child2_0_3=Secondo figlio 0-3 anni
+child2_0_6=Secondo figlio 0-6 anni
+child2_0_12=Secondo figlio 0-12 anni
+child2_3_12=Secondo figlio 3-12 anni
+child3_0_3=Terzo figlio 0-3 anni
+child3_0_6=Terzo figlio 0-6 anni
+child3_0_12=Terzo figlio 0-12 anni
+child3_3_12=Terzo figlio 3-12 anni
+
+always=Sempre
+compensatoryRestCnr=Riposo Compensativo CNR
+vacationsCnr=Ferie CNR
+simpleGrouping=Gruppo Semplice
+GroupAbsenceTypePattern.compensatoryRestCnr=Riposo Compensativo CNR
+GroupAbsenceTypePattern.vacationsCnr=Ferie CNR
+GroupAbsenceTypePattern.simpleGrouping=Gruppo Semplice
+GroupAbsenceTypePattern.programmed=Programmato
+
+#DA VERIFICARE
+absenceType.code.popover= Codice di assenza
+absenceType.certificateCode.popover= Usare solo se il codice che deve andare negli attestati di presenza è diverso da quello definito nella riga precedente (questo diventa il codice ufficiale e il precedente un alias per uso interno)
+absenceType.description.popover= Descrizione codice di assenza
+absenceType.internalUse.popover= Seleziona "Si" se il codice è solo per uso interno (non previsto dal CNR) non sarà trasferito negli attestati di presenza
+absenceType.validFrom.popover= Data inizio validità di questo codice (se vuoto valido da sempre)
+absenceType.validTo.popover= Data fine validità di questo codice (se vuoto valido per sempre)
+modifierType.popover= Scegliere "Giustifica" se si desidera che il codice giustifichi un certo numero di ore;Al contrario si selezioni "Assegna" se si vuole che il codice aggiunga le ore al tempo di lavoro della persona (es. cod 105BP)
+absenceType.justifiedTimeAtWork.popover= Il valore scelto influenzerà il calcolo nel tempo del lavoro della giornata nel quale verrà utilizzato questo codice di assenza
+absenceType.consideredWeekEnd.popover= Seleziona Si se il codice può essere inserito anche nel week end e nei festivi
+
+###########################################################################
+#	FINE COMPONENTE ASSENZE
+###########################################################################

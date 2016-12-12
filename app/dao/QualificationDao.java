@@ -10,6 +10,7 @@ import com.mysema.query.jpa.JPQLQueryFactory;
 
 import models.Qualification;
 import models.absences.AbsenceType;
+import models.enumerate.QualificationMapping;
 import models.query.QQualification;
 
 import java.util.List;
@@ -97,27 +98,16 @@ public class QualificationDao extends DaoBase {
   }
 
   /**
-   * @return la lista di qualifiche che possono usufruire del codice di assenza abt.
+   * Le qualifiche con quel mapping.
+   * @param mapping mapping
+   * @return qualifiche.
    */
-  public List<Qualification> getQualificationByAbsenceTypeLinked(AbsenceType abt) {
+  public List<Qualification> getByQualificationMapping(QualificationMapping mapping) {
     QQualification qual = QQualification.qualification1;
-    final JPQLQuery query = getQueryFactory().from(qual)
-            .where(qual.absenceTypes.contains(abt));
-    return query.list(qual);
-  }
-
-
-  /**
-   * Costruisce la lista di qualifiche superiori o uguali al limite passato come parametro.
-   *
-   * @return la lista di qualifiche superiori o uguali al limite passato come parametro
-   *     (da usare, ad esempio, per ritornare la lista delle qualifiche dei tecnici che hanno
-   *     qualifica superiore a 3)
-   */
-  public List<Qualification> getQualificationGreaterThan(Integer limit) {
-    QQualification qual = QQualification.qualification1;
-    final JPQLQuery query = getQueryFactory().from(qual)
-            .where(qual.qualification.goe(limit));
+    final JPQLQuery query = getQueryFactory()
+        .from(qual)
+        .where(qual.qualification.goe(mapping.getRange().lowerEndpoint())
+        .and(qual.qualification.loe(mapping.getRange().upperEndpoint())));
 
     return query.list(qual);
   }

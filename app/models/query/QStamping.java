@@ -53,6 +53,8 @@ public class QStamping extends EntityPathBase<Stamping> {
 
     public final EnumPath<Stamping.WayType> way = createEnum("way", Stamping.WayType.class);
 
+    public final ComparablePath<org.joda.time.YearMonth> yearMonth = createComparable("yearMonth", org.joda.time.YearMonth.class);
+
     public QStamping(String variable) {
         this(Stamping.class, forVariable(variable), INITS);
     }

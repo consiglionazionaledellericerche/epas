@@ -51,6 +51,8 @@ public class QCertification extends EntityPathBase<Certification> {
 
     public final NumberPath<Integer> year = createNumber("year", Integer.class);
 
+    public final ComparablePath<org.joda.time.YearMonth> yearMonth = createComparable("yearMonth", org.joda.time.YearMonth.class);
+
     public QCertification(String variable) {
         this(Certification.class, forVariable(variable), INITS);
     }

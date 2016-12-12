@@ -5,6 +5,9 @@ import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
+import org.testng.collections.Lists;
+
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,8 +31,8 @@ public class InitializationGroup extends BaseModel {
   @JoinColumn(name = "group_absence_type_id", nullable = false)
   public GroupAbsenceType groupAbsenceType;
   
-  @Column(name = "initialization_date")
-  public LocalDate initializationDate;
+  @Column(name = "date")
+  public LocalDate date;
 
   @Column(name = "forced_begin")
   public LocalDate forcedBegin;
@@ -39,14 +42,21 @@ public class InitializationGroup extends BaseModel {
   
   // if (groupAbsenceType.pattern == programmed)
   
+  @Column(name = "units_input")
+  public Integer unitsInput = 0;
+  
+  @Column(name = "hours_input")
+  public Integer hoursInput = 0;
+  
+  @Column(name = "minutes_input")
+  public Integer minutesInput = 0;
+  
+  @Column(name = "average_week_time")
+  public Integer averageWeekTime;
+  
+  
   @Column(name = "takable_total")
   public Integer takableTotal;
-  
-  @Column(name = "takable_used")
-  public Integer takableUsed;
-  
-  @Column(name = "complation_used")
-  public Integer complationUsed;
   
   // if (groupAbsenceType.pattern == vacationsCnr)
   
@@ -63,5 +73,36 @@ public class InitializationGroup extends BaseModel {
   @Column(name = "residual_minutes_current_year")
   public Integer residualMinutesCurrentYear;
   
+  /**
+   * Constructor.
+   * @param person persona
+   * @param groupAbsenceType gruppo
+   * @param date data
+   */
+  public InitializationGroup(Person person, GroupAbsenceType groupAbsenceType, LocalDate date) {
+    this.person = person;
+    this.groupAbsenceType = groupAbsenceType;
+    this.date = date;
+  }
+  
+  /**
+   * I minuti in input.
+   * @return i minuti
+   */
+  public int inputMinutes() {
+    return this.hoursInput * 60 + this.minutesInput;
+  }
+  
+  /**
+   * I minuti inseribili...
+   * @return list
+   */
+  public List<Integer> selectableMinutes() {
+    List<Integer> hours = Lists.newArrayList();
+    for (int i = 0; i <= 59; i++) {
+      hours.add(i);
+    }
+    return hours;
+  }
 
 }
