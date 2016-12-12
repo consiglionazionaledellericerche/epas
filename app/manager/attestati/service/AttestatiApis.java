@@ -1,6 +1,7 @@
 package manager.attestati.service;
 
-import org.assertj.core.util.Strings;
+
+import com.google.common.base.Strings;
 
 import play.Play;
 
@@ -10,7 +11,7 @@ public class AttestatiApis {
   private static final String ATTESTATI_BASE_URL = "attestati.base";
   private static final String ATTESTATI_PASS = "attestati.pass";
   private static final String ATTESTATI_USER = "attestati.user";
-  
+
   public static String getAttestatiBaseUrl() throws NoSuchFieldException {
     if (Strings.isNullOrEmpty(Play.configuration.getProperty(ATTESTATI_BASE_URL))) {
       throw new NoSuchFieldException(ERROR + ATTESTATI_BASE_URL);

@@ -2,6 +2,7 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -34,7 +35,6 @@ import models.User;
 import models.UsersRolesOffices;
 
 import org.apache.commons.lang.WordUtils;
-import org.assertj.core.util.Strings;
 import org.joda.time.LocalDate;
 
 import play.Play;
@@ -402,10 +402,9 @@ public class Administration extends Controller {
   }
 
   /**
-   *
-   * @param name  Nome del parametro
-   * @param value Valore del parametro
-   * @param newParam  booleano che discrimina un nuovo inserimento da una modifica.
+   * @param name     Nome del parametro
+   * @param value    Valore del parametro
+   * @param newParam booleano che discrimina un nuovo inserimento da una modifica.
    */
   public static void saveConfiguration(@Required String name, @Required String value,
       boolean newParam) {
@@ -471,8 +470,8 @@ public class Administration extends Controller {
   /**
    * Sostituisce il dominio email di tutte le persone dell'ufficio specificato.
    *
-   * @param office  Ufficio interessato.
-   * @param domain  nuovo dominio
+   * @param office   Ufficio interessato.
+   * @param domain   nuovo dominio
    * @param sendMail booleano per effettuare l'invio email d'avviso di creazione delle persone.
    */
   public static void changePeopleEmailDomain(@Required Office office, @Required String domain,

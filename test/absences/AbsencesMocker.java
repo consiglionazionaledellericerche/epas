@@ -1,13 +1,9 @@
 package absences;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
-import com.beust.jcommander.internal.Lists;
 
 import models.Contract;
 import models.ContractWorkingTimeType;
@@ -28,10 +24,6 @@ import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
 
 import org.joda.time.LocalDate;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import absences.AbsenceDefinitions.AbsenceTypeDefinition;
 import absences.AbsenceDefinitions.ComplationBehaviourDefinition;
 import absences.AbsenceDefinitions.GroupAbsenceTypeDefinition;
@@ -39,13 +31,20 @@ import absences.AbsenceDefinitions.TakableBehaviourDefinition;
 import absences.AbsenceDefinitions.WorkingDayDefinition;
 import absences.AbsenceDefinitions.WorkingDefinition;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 public class AbsencesMocker {
-  
-  private static AbsenceType absenceType(String code, Integer justifiedTime, 
-      boolean consideredWeekEnd, boolean timeForMealTicket, 
-      Set<JustifiedType> justifiedTypePermitted, 
+
+  private static AbsenceType absenceType(String code, Integer justifiedTime,
+      boolean consideredWeekEnd, boolean timeForMealTicket,
+      Set<JustifiedType> justifiedTypePermitted,
       JustifiedType replacingType, Integer replacingTime) {
-    
+
     AbsenceType absenceType = mock(AbsenceType.class);
     when(absenceType.getCode()).thenReturn(code);
     when(absenceType.getJustifiedTypesPermitted()).thenReturn(justifiedTypePermitted);
@@ -56,18 +55,18 @@ public class AbsencesMocker {
     when(absenceType.getReplacingTime()).thenReturn(replacingTime);
     return absenceType;
   }
-  
+
   private static JustifiedType justifiedType(JustifiedTypeName name) {
-    
+
     JustifiedType justifiedType = mock(JustifiedType.class);
     when(justifiedType.getName()).thenReturn(name);
     return justifiedType;
   }
-  
+
   private static TakableAbsenceBehaviour takableAbsenceBehaviour(AmountType amountType,
       Set<AbsenceType> takenCodes, Set<AbsenceType> takableCodes, Integer fixedLimit,
       TakeAmountAdjustment takableAmountAdjustment) {
-    
+
     TakableAbsenceBehaviour behaviour = mock(TakableAbsenceBehaviour.class);
     when(behaviour.getAmountType()).thenReturn(amountType);
     when(behaviour.getTakenCodes()).thenReturn(takenCodes);
@@ -76,91 +75,95 @@ public class AbsencesMocker {
     when(behaviour.getTakableAmountAdjustment()).thenReturn(takableAmountAdjustment);
     return behaviour;
   }
-  
+
   private static ComplationAbsenceBehaviour complationAbsenceBehaviour(AmountType amountType,
       Set<AbsenceType> complationCodes, Set<AbsenceType> replacingCodes) {
-    
+
     ComplationAbsenceBehaviour behaviour = mock(ComplationAbsenceBehaviour.class);
     when(behaviour.getAmountType()).thenReturn(amountType);
     when(behaviour.getComplationCodes()).thenReturn(complationCodes);
     when(behaviour.getReplacingCodes()).thenReturn(replacingCodes);
     return behaviour;
   }
-  
-  private static GroupAbsenceType groupAbsenceType(GroupAbsenceTypePattern pattern, 
+
+  private static GroupAbsenceType groupAbsenceType(GroupAbsenceTypePattern pattern,
       PeriodType periodType, TakableAbsenceBehaviour takableAbsenceBehaviour,
       ComplationAbsenceBehaviour complationAbsenceBehaviour, GroupAbsenceType next) {
-    
+
     GroupAbsenceType group = mock(GroupAbsenceType.class);
     when(group.getPattern()).thenReturn(pattern);
     when(group.getPeriodType()).thenReturn(periodType);
     when(group.getTakableAbsenceBehaviour()).thenReturn(takableAbsenceBehaviour);
     when(group.getComplationAbsenceBehaviour()).thenReturn(complationAbsenceBehaviour);
     when(group.getNextGroupToCheck()).thenReturn(next);
-    
+
     return group;
   }
-  
+
 
   /**
-   * Istanza mockata del gruppo. 
+   * Istanza mockata del gruppo.
+   *
    * @param mapAbsenceTypes mocked absenceType già creati
    * @param groupDefinition definizione grupp
    * @return entity mockata
    */
-  public static GroupAbsenceType mockedGroup(Map<String, AbsenceType> mapAbsenceTypes, 
+  public static GroupAbsenceType mockedGroup(Map<String, AbsenceType> mapAbsenceTypes,
       GroupAbsenceTypeDefinition groupDefinition) {
-    
+
     if (groupDefinition == null) {
       return null;
     }
-    
-    GroupAbsenceType groupAbsenceType = groupAbsenceType( 
-        groupDefinition.pattern, 
-        groupDefinition.periodType, 
-        mockedTakable(mapAbsenceTypes, groupDefinition.takableAbsenceBehaviour), 
+
+    GroupAbsenceType groupAbsenceType = groupAbsenceType(
+        groupDefinition.pattern,
+        groupDefinition.periodType,
+        mockedTakable(mapAbsenceTypes, groupDefinition.takableAbsenceBehaviour),
         mockedComplation(mapAbsenceTypes, groupDefinition.complationAbsenceBehaviour),
         mockedGroup(mapAbsenceTypes, groupDefinition.next));
     return groupAbsenceType;
   }
-  
+
   /**
    * Istanza mockata del takable behaviour.
-   * @param mapAbsenceTypes mocked absenceType già creati
+   *
+   * @param mapAbsenceTypes   mocked absenceType già creati
    * @param takableDefinition definizione
    * @return entity mockata
    */
   public static TakableAbsenceBehaviour mockedTakable(Map<String, AbsenceType> mapAbsenceTypes,
       TakableBehaviourDefinition takableDefinition) {
-    
-    return takableAbsenceBehaviour(takableDefinition.amountType, 
+
+    return takableAbsenceBehaviour(takableDefinition.amountType,
         mockedAbsenceTypes(mapAbsenceTypes, takableDefinition.takenCodes),
         mockedAbsenceTypes(mapAbsenceTypes, takableDefinition.takableCodes),
         takableDefinition.fixedLimit, takableDefinition.takableAmountAdjustment);
   }
-  
+
   /**
    * Istanza mockata del complation behaviour.
-   * @param mapAbsenceTypes mocked absenceType già creati
+   *
+   * @param mapAbsenceTypes      mocked absenceType già creati
    * @param complationDefinition definition
    * @return entity mockata
    */
   public static ComplationAbsenceBehaviour mockedComplation(
       Map<String, AbsenceType> mapAbsenceTypes,
       ComplationBehaviourDefinition complationDefinition) {
-    return complationAbsenceBehaviour(complationDefinition.amountType, 
+    return complationAbsenceBehaviour(complationDefinition.amountType,
         mockedAbsenceTypes(mapAbsenceTypes, complationDefinition.complationCodes),
         mockedAbsenceTypes(mapAbsenceTypes, complationDefinition.replacingCodes));
   }
-  
+
   /**
    * Istanze mockate di absenceType.
-   * @param mapAbsenceTypes mocked absenceType già creati
+   *
+   * @param mapAbsenceTypes        mocked absenceType già creati
    * @param absenceTypeDefinitions definition
    * @return set entity mockate
    */
-  public static Set<AbsenceType> mockedAbsenceTypes(Map<String, AbsenceType> mapAbsenceTypes, 
-      Set<AbsenceTypeDefinition>  absenceTypeDefinitions) {
+  public static Set<AbsenceType> mockedAbsenceTypes(Map<String, AbsenceType> mapAbsenceTypes,
+      Set<AbsenceTypeDefinition> absenceTypeDefinitions) {
     Set<AbsenceType> absenceTypes = Sets.newHashSet();
     for (AbsenceTypeDefinition definition : absenceTypeDefinitions) {
       if (mapAbsenceTypes.get(definition.name()) != null) {
@@ -171,33 +174,35 @@ public class AbsencesMocker {
     }
     return absenceTypes;
   }
-  
+
   /**
-   * Istanza mockata del absenceType. Preleva da map se presente.  
-   * @param mapAbsenceTypes mocked absenceType già creati
+   * Istanza mockata del absenceType. Preleva da map se presente.
+   *
+   * @param mapAbsenceTypes       mocked absenceType già creati
    * @param absenceTypeDefinition definition
    * @return entity mockata
    */
-  public static AbsenceType mockedAbsenceType(Map<String, AbsenceType> mapAbsenceTypes, 
+  public static AbsenceType mockedAbsenceType(Map<String, AbsenceType> mapAbsenceTypes,
       AbsenceTypeDefinition absenceTypeDefinition) {
     AbsenceType mocked = mapAbsenceTypes.get(absenceTypeDefinition.name());
     if (mocked != null) {
       return mocked;
     }
-    mocked = absenceType(absenceTypeDefinition.name(), 
-        absenceTypeDefinition.justifiedTime, 
-        absenceTypeDefinition.consideredWeekEnd, 
-        absenceTypeDefinition.timeForMealTicket, 
+    mocked = absenceType(absenceTypeDefinition.name(),
+        absenceTypeDefinition.justifiedTime,
+        absenceTypeDefinition.consideredWeekEnd,
+        absenceTypeDefinition.timeForMealTicket,
         mockedJustifiedTypes(absenceTypeDefinition.justifiedTypeNamesPermitted),
         mockedJustifiedType(absenceTypeDefinition.replacingType),
         absenceTypeDefinition.replacingTime);
-    
+
     mapAbsenceTypes.put(absenceTypeDefinition.name(), mocked);
     return mocked;
   }
-  
+
   /**
    * Istanze mockate di justifiedType.
+   *
    * @param justifiedTypeNames definition
    * @return set entity mockate
    */
@@ -208,9 +213,10 @@ public class AbsencesMocker {
     }
     return justifiedTypes;
   }
-  
+
   /**
    * Istanza mockata di justifiedType.
+   *
    * @param justifiedTypeName definition
    * @return entity mockata
    */
@@ -218,11 +224,10 @@ public class AbsencesMocker {
     JustifiedType justifiedType = justifiedType(justifiedTypeName);
     return justifiedType;
   }
-  
-  
-  
-  private static WorkingTimeTypeDay workingTimeTypeDay(Integer dayOfWeek, Integer workingTime, 
-      boolean holiday, Integer mealTicketTime, Integer breakTicketTime, 
+
+
+  private static WorkingTimeTypeDay workingTimeTypeDay(Integer dayOfWeek, Integer workingTime,
+      boolean holiday, Integer mealTicketTime, Integer breakTicketTime,
       Integer ticketAfternoonThreshold, Integer ticketAfternoonWorkingTime) {
     WorkingTimeTypeDay workingTimeTypeDay = mock(WorkingTimeTypeDay.class);
     when(workingTimeTypeDay.getDayOfWeek()).thenReturn(dayOfWeek);
@@ -235,7 +240,7 @@ public class AbsencesMocker {
     return workingTimeTypeDay;
   }
 
-  private static WorkingTimeType workingTimeType(String description, boolean horizontal, 
+  private static WorkingTimeType workingTimeType(String description, boolean horizontal,
       List<WorkingTimeTypeDay> orderedWorkingTimeTypeDays) {
     WorkingTimeType workingTimeType = mock(WorkingTimeType.class);
     when(workingTimeType.getDescription()).thenReturn(description);
@@ -244,7 +249,7 @@ public class AbsencesMocker {
     return workingTimeType;
   }
 
-  private static ContractWorkingTimeType contractWorkingTimeType(LocalDate beginDate, 
+  private static ContractWorkingTimeType contractWorkingTimeType(LocalDate beginDate,
       LocalDate endDate, Contract contract, WorkingTimeType workingTimeType) {
     ContractWorkingTimeType contractWorkingTimeType = mock(ContractWorkingTimeType.class);
     when(contractWorkingTimeType.getContract()).thenReturn(contract); //circulary
@@ -254,10 +259,10 @@ public class AbsencesMocker {
     when(contractWorkingTimeType.calculatedEnd()).thenReturn(endDate);
     return contractWorkingTimeType;
   }
-  
-  private static Contract contract(LocalDate beginDate, LocalDate endDate, LocalDate endContract, 
-      Set<ContractWorkingTimeType> contractWorkingTimeType, 
-      List<ContractWorkingTimeType> orderedContractWorkingTimeType) { 
+
+  private static Contract contract(LocalDate beginDate, LocalDate endDate, LocalDate endContract,
+      Set<ContractWorkingTimeType> contractWorkingTimeType,
+      List<ContractWorkingTimeType> orderedContractWorkingTimeType) {
     Contract contract = mock(Contract.class);
     when(contract.getBeginDate()).thenReturn(beginDate);
     when(contract.getEndDate()).thenReturn(endDate);
@@ -266,36 +271,38 @@ public class AbsencesMocker {
     when(contract.calculatedEnd()).thenReturn(Contract.computeEnd(endDate, endContract));
     when(contract.getContractWorkingTimeType()).thenReturn(contractWorkingTimeType);
     when(contract.getContractWorkingTimeTypeOrderedList())
-      .thenReturn(orderedContractWorkingTimeType);
+        .thenReturn(orderedContractWorkingTimeType);
     return contract;
   }
-  
+
   private static Person person(List<Contract> contracts) {
     Person person = mock(Person.class);
-    
+
     when(person.getContracts()).thenReturn(contracts);
     return person;
   }
-  
+
   /**
    * Istanza mockata di un workingTimeTypeDay.
+   *
    * @param workingDayDefinition definition
    * @return mocked entity
    */
   public static WorkingTimeTypeDay mockedWorkingTimeTypeDay(
       WorkingDayDefinition workingDayDefinition) {
-    
-    WorkingTimeTypeDay wttd = workingTimeTypeDay(workingDayDefinition.dayOfWeek, 
-        workingDayDefinition.workingTime, workingDayDefinition.holiday, 
-        workingDayDefinition.mealTicketTime, workingDayDefinition.breakTicketTime, 
-        workingDayDefinition.ticketAfternoonThreshold, 
+
+    WorkingTimeTypeDay wttd = workingTimeTypeDay(workingDayDefinition.dayOfWeek,
+        workingDayDefinition.workingTime, workingDayDefinition.holiday,
+        workingDayDefinition.mealTicketTime, workingDayDefinition.breakTicketTime,
+        workingDayDefinition.ticketAfternoonThreshold,
         workingDayDefinition.ticketAfternoonWorkingTime);
-    
+
     return wttd;
   }
-  
+
   /**
    * Lista di istanze mockate di workingTimeTypeDays.
+   *
    * @param workingDayDefinitions definitions
    * @return list mocked entities
    */
@@ -307,97 +314,102 @@ public class AbsencesMocker {
     }
     return list;
   }
-  
+
   /**
    * Istanza mockata di workingTimeType.
+   *
    * @param workingDefinition definition
    * @return mocked entity
    */
   public static WorkingTimeType mockedWorkingTimeType(WorkingDefinition workingDefinition) {
-    
-    WorkingTimeType wtt = workingTimeType(workingDefinition.name(), 
-        workingDefinition.horizontal, 
+
+    WorkingTimeType wtt = workingTimeType(workingDefinition.name(),
+        workingDefinition.horizontal,
         mockedWorkingTimeTypeDays(workingDefinition.orderedWorkingDayDefinition));
     return wtt;
   }
-  
+
   /**
    * Istanza mockata di contractWorkingTimeType.
-   * @param beginDate data inzio
-   * @param endDate data fine
+   *
+   * @param beginDate       data inzio
+   * @param endDate         data fine
    * @param workingTimeType workingTimeType
    * @return mocked entity
    */
-  public static ContractWorkingTimeType mockedContractWorkingTimeType(LocalDate beginDate, 
+  public static ContractWorkingTimeType mockedContractWorkingTimeType(LocalDate beginDate,
       LocalDate endDate, WorkingTimeType workingTimeType) {
-    ContractWorkingTimeType cwtt = contractWorkingTimeType(beginDate, endDate, null, 
+    ContractWorkingTimeType cwtt = contractWorkingTimeType(beginDate, endDate, null,
         workingTimeType);
     return cwtt;
   }
-  
+
   /**
    * Istanza mockata di Contract.
-   * @param beginDate data inizio
-   * @param endDate data fine
-   * @param endContract endContract
+   *
+   * @param beginDate                      data inizio
+   * @param endDate                        data fine
+   * @param endContract                    endContract
    * @param orderedContractWorkingTimeType lista ordinata
    * @return mocked entity
    */
-  public static Contract mockedContract(LocalDate beginDate, LocalDate endDate, 
-      LocalDate endContract, 
+  public static Contract mockedContract(LocalDate beginDate, LocalDate endDate,
+      LocalDate endContract,
       List<ContractWorkingTimeType> orderedContractWorkingTimeType) {
-    
-    Contract contract = contract(beginDate, endDate, endContract, 
-        Sets.newHashSet(orderedContractWorkingTimeType), 
+
+    Contract contract = contract(beginDate, endDate, endContract,
+        Sets.newHashSet(orderedContractWorkingTimeType),
         orderedContractWorkingTimeType);
     return contract;
   }
-  
+
   public static Person mockedPerson(List<Contract> contracts) {
     Person person = person(contracts);
     return person;
   }
-  
+
   /**
    * Istanza mockata di un dipendente con orario Normale a tempo indeterminato.
+   *
    * @param beginContract inizio contratto
    * @return mocked entity
    */
   public static Person mockedNormalUndefinedEmployee(LocalDate beginContract) {
-    
+
     WorkingTimeType normal = mockedWorkingTimeType(WorkingDefinition.Normal);
     ContractWorkingTimeType cwtt = mockedContractWorkingTimeType(beginContract, null, normal);
     Contract contract = mockedContract(beginContract, null, null, Lists.newArrayList(cwtt));
     Person person = mockedPerson(Lists.newArrayList(contract));
     return person;
   }
-  
-  private static Absence absence(AbsenceType absenceType, LocalDate date, 
+
+  private static Absence absence(AbsenceType absenceType, LocalDate date,
       JustifiedType justifiedType, Integer justifiedMinutes) {
-    
+
     Absence absence = mock(Absence.class);
-    
+
     when(absence.getAbsenceType()).thenReturn(absenceType);
     when(absence.getAbsenceDate()).thenReturn(date);
     when(absence.getJustifiedType()).thenReturn(justifiedType);
     when(absence.getJustifiedMinutes()).thenReturn(justifiedMinutes);
     return absence;
   }
-  
+
   /**
    * Istanza mockata di una assenza.
-   * @param mapAbsenceTypes mappa dei codici di assenza mockati
+   *
+   * @param mapAbsenceTypes       mappa dei codici di assenza mockati
    * @param absenceTypeDefinition absenceType assenza
-   * @param date data
-   * @param justifiedTypeName tipo giustificativo
-   * @param justifiedMinutes minuti giustificati
+   * @param date                  data
+   * @param justifiedTypeName     tipo giustificativo
+   * @param justifiedMinutes      minuti giustificati
    * @return istanza mockata
    */
-  public static Absence mockedAbsence(Map<String, AbsenceType> mapAbsenceTypes, 
-      AbsenceTypeDefinition absenceTypeDefinition, 
+  public static Absence mockedAbsence(Map<String, AbsenceType> mapAbsenceTypes,
+      AbsenceTypeDefinition absenceTypeDefinition,
       LocalDate date, Optional<JustifiedTypeName> justifiedTypeName,
       Integer justifiedMinutes) {
-    
+
     AbsenceType absenceType = mockedAbsenceType(mapAbsenceTypes, absenceTypeDefinition);
     JustifiedType justifiedType = null;
     if (justifiedTypeName.isPresent()) {
@@ -409,5 +421,5 @@ public class AbsencesMocker {
     Absence absence = absence(absenceType, date, justifiedType, justifiedMinutes);
     return absence;
   }
-  
+
 }
