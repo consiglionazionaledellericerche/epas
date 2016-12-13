@@ -185,10 +185,6 @@ public class AbsenceManager {
       int residualMinutes = recap.get().remainingMinutesCurrentYear
           + recap.get().remainingMinutesLastYear;
 
-      for (Absence a : otherCompensatoryRest) {
-        residualMinutes -= workingTimeTypeDao.getWorkingTimeType(a.date, contract.person)
-            .get().workingTimeTypeDays.get(a.date.getDayOfWeek() - 1).workingTime;
-      }
       return residualMinutes >= workingTimeTypeDao
           .getWorkingTimeType(date, contract.person).get().workingTimeTypeDays
           .get(date.getDayOfWeek() - 1).workingTime;
