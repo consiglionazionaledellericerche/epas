@@ -55,7 +55,7 @@
         <thead>
         <tr>
 	      <th>Nome</th>
-	      <th>Mese Precedente</th>
+	      <th>Mese Precedente <br>(o da inizializzazione)</th>
 	      <th>Consegnati mese</th>
 	      <th>Utilizzati mese</th>
 	      <th>Rimanenti</th>
@@ -68,7 +68,13 @@
 	  	       <a href="@{MealTickets.personMealTickets(recap.contract.person.id)}">
 		  	      ${recap.contract.person.surname} ${recap.contract.person.name}</a>
 	  	    </td> 
-	  	    <td>${recap.buoniPastoDalMesePrecedente}</td>
+	  	    
+	  	    #{if recap.buoniPastoDaInizializzazione > 0}
+	  	      <td>${recap.buoniPastoDaInizializzazione}</td>
+	  	    #{/if}#{else}
+	  	      <td>${recap.buoniPastoDalMesePrecedente}</td>
+	  	    #{/else}
+	  	    
 	  	    <td>${recap.buoniPastoConsegnatiNelMese}</td>
 	  	    <td>${recap.buoniPastoUsatiNelMese}</td>
 	  	    <!-- remaining cell -->
