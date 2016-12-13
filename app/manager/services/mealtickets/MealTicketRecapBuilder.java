@@ -28,13 +28,15 @@ public class MealTicketRecapBuilder {
    * @param contract contract
    * @param mealTicketInterval intervallo buoni pasto da considerare
    * @param personDays giorni da considerare
-   * @param expireOrderedDesc buoni pasto ordinati per data scadenza decrescente
-   * @param deliveryOrderedAsc buoni pasto ordinati per data consegna crescente
-   * @param returnedDeliveryOrderedAsc buoni pasto riconsegnati ordinati per data consegna crescente
+   * @param expireOrderedAsc buoni pasto ordinati per data scadenza crescente
+   * @param expireOrderedAscPostInit buoni pasto validi ordinati per data scadenza crescente
+   * @param deliveryOrderedDesc buoni pasto ordinati per data consegna descrescente
+   * @param returnedDeliveryOrderedDesc buoni pasto riconsegnati ordinati per data consegna asc
    * @return il recap
    */
   public MealTicketRecap buildMealTicketRecap(Contract contract, DateInterval mealTicketInterval, 
-      List<PersonDay> personDays, List<MealTicket> expireOrderedAsc, 
+      List<PersonDay> personDays, 
+      List<MealTicket> expireOrderedAsc, List<MealTicket> expireOrderedAscPostInit, 
       List<MealTicket> deliveryOrderedDesc, List<MealTicket> returnedDeliveryOrderedDesc) {
 
     MealTicketRecap mealTicketRecap = new MealTicketRecap();
@@ -47,6 +49,7 @@ public class MealTicketRecapBuilder {
     mealTicketRecap.setPersonDaysMealTickets(personDays);
 
     mealTicketRecap.setMealTicketsReceivedExpireOrderedAsc(expireOrderedAsc);
+    mealTicketRecap.setMealTicketsReceivedExpireOrderedAscPostInit(expireOrderedAscPostInit);
     mealTicketRecap.setMealTicketsReceivedDeliveryOrderedDesc(deliveryOrderedDesc);
     mealTicketRecap.setMealTicketReturnedDeliveryOrderDesc(returnedDeliveryOrderedDesc);
 
@@ -75,16 +78,17 @@ public class MealTicketRecapBuilder {
       
       PersonDay currentPersonDay = mealTicketRecap.getPersonDaysMealTickets().get(i);
 
-      if (mealTicketRecap.getMealTicketsReceivedExpireOrderedAsc().size() == i) {
+      if (mealTicketRecap.getMealTicketsReceivedExpireOrderedAscPostInit().size() == i) {
         mealTicketRecap.setDateRunOut(currentPersonDay.date);
         return mealTicketRecap;
       }
       
       //Attribuire i buoni pasto ai personDay... e taggarli come usati. TODO: da verificare
       int index = i - mealTicketRecap.getSourcedInInterval();
-      if (index > 0 && index < mealTicketRecap.getMealTicketsReceivedExpireOrderedAsc().size()) {
+      if (index > 0 && index < mealTicketRecap
+          .getMealTicketsReceivedExpireOrderedAscPostInit().size()) {
         MealTicket currentMealTicket = mealTicketRecap
-            .getMealTicketsReceivedExpireOrderedAsc()
+            .getMealTicketsReceivedExpireOrderedAscPostInit()
             .get(i - mealTicketRecap.getSourcedInInterval());
 
         if (currentPersonDay.date.isAfter(currentMealTicket.expireDate)) {
@@ -98,7 +102,8 @@ public class MealTicketRecapBuilder {
       }
     }
 
-    mealTicketRecap.setRemaining(mealTicketRecap.getMealTicketsReceivedExpireOrderedAsc().size() 
+    mealTicketRecap.setRemaining(mealTicketRecap
+        .getMealTicketsReceivedExpireOrderedAscPostInit().size() 
         - mealTicketRecap.getPersonDaysMealTickets().size() 
         + mealTicketRecap.getSourcedInInterval());
 
