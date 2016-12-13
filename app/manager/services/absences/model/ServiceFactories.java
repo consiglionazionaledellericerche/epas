@@ -1,5 +1,6 @@
 package manager.services.absences.model;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -329,10 +330,18 @@ public class ServiceFactories {
 
       absencePeriod.setFixedPeriodTakableAmount(takableBehaviour.getFixedLimit());
       if (takableBehaviour.getTakableAmountAdjustment() != null) {
-        // TODO: ex. workingTimePercent
-        //bisogna ridurre il limite
-        //engineInstance.absenceEngineProblem = 
-        //Optional.of(AbsenceEngineProblem.unsupportedOperation);
+        
+        Optional<Integer> adjustment = absenceEngineUtility.takableAmountAdjustment(
+            takableBehaviour.getFixedLimit(), takableBehaviour.getTakableAmountAdjustment(), 
+            absencePeriod.periodInterval(), person.getContracts());
+        
+        if (!adjustment.isPresent()) {
+          absencePeriod.errorsBox.addCriticalError(date, CriticalProblem.IncalcolableAdjustment);
+          return absencePeriod;
+        }
+        
+        absencePeriod.setFixedPeriodTakableAmount(adjustment.get());
+
       }
       if (absencePeriod.initialization != null 
           && absencePeriod.initialization.takableTotal != null) {

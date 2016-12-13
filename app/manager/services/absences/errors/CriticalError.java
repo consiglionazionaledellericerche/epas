@@ -36,7 +36,8 @@ public class CriticalError {
     IncalcolableComplationAmount,    //Absence
     OnlyReplacingRuleViolated,       //Group  
     IncalcolableReplacingAmount,     //Group    
-    ConflictingReplacingAmount;      //Group
+    ConflictingReplacingAmount,      //Group
+    IncalcolableAdjustment;          
 
   }
 }
