@@ -85,6 +85,10 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     List<MealTicket> expireOrderedAsc = mealTicketDao
         .contractMealTickets(contract, Optional.absent(),
             MealTicketOrder.ORDER_BY_EXPIRE_DATE_ASC, false);
+    
+    List<MealTicket> expireOrderedAscPostInit = mealTicketDao
+        .contractMealTickets(contract, dateInterval,
+            MealTicketOrder.ORDER_BY_EXPIRE_DATE_ASC, false);
 
     List<MealTicket> deliveryOrderedDesc = mealTicketDao
         .contractMealTickets(contract, Optional.absent(),
@@ -95,8 +99,8 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
             MealTicketOrder.ORDER_BY_DELIVERY_DATE_DESC, true);
 
     return Optional.fromNullable(mealTicketRecapBuilder.buildMealTicketRecap(
-        contract, dateInterval.get(), personDays,
-        expireOrderedAsc, deliveryOrderedDesc, returnedDeliveryOrderedDesc));
+        contract, dateInterval.get(), personDays, expireOrderedAsc, expireOrderedAscPostInit, 
+        deliveryOrderedDesc, returnedDeliveryOrderedDesc));
   }
 
   /**

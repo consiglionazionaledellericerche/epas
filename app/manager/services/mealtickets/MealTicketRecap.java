@@ -34,6 +34,7 @@ public class MealTicketRecap {
   private List<PersonDay> personDaysMealTickets = Lists.newArrayList();
   private List<MealTicket> mealTicketReturnedDeliveryOrderDesc = Lists.newArrayList();
   private List<MealTicket> mealTicketsReceivedExpireOrderedAsc = Lists.newArrayList();
+  private List<MealTicket> mealTicketsReceivedExpireOrderedAscPostInit = Lists.newArrayList();
   private List<MealTicket> mealTicketsReceivedDeliveryOrderedDesc = Lists.newArrayList();
 
   private int remaining = 0;
