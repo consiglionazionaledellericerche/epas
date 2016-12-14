@@ -1,0 +1,165 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Invio Attestati'  /}
+
+
+<div class="container">
+
+<!-- In entrambi -->
+
+#{alert color:'info'}
+ <p>Codici assenza presenti in attestati ed in epas.</p>
+#{/alert}
+
+<table class="table" datatable> 
+  <thead>
+  <tr>
+    <th>Codice</th>
+    <th>Descrizione</th>
+    <th>qtFrequenza</th>
+    <th>tipoFrequenza</th>
+    <th>tipologia</th>
+    <th>Usata in Epas</th>
+    <th>Gruppi Epas</th>
+  </tr>
+  </thead>
+  <tbody>
+  #{list items:codeComparation.both, as:'bothSuperCode'}
+    
+    <tr>
+      <td>${bothSuperCode.codiceAssenza.codice}</td>
+      <td>${bothSuperCode.codiceAssenza.descrizione}</td>
+      <td>${bothSuperCode.codiceAssenza.qtFrequenza}</td>
+      <td>${bothSuperCode.codiceAssenza.tipoFrequenza}</td>
+      <td>${bothSuperCode.codiceAssenza.tipologia}</td>
+      
+      <td>
+          ${bothSuperCode.absences.size()}
+      </td>      
+        <td>
+          #{if !bothSuperCode.onlyOtherGroup()}
+            <i class="fa fa-star" aria-hidden="true"></i>
+          #{/if}
+        </td>
+    </tr>
+  #{/list}
+  </tbody>
+</table>
+
+#{alert color:'danger'}
+ <p>Codici assenza presenti in attestati e non in epas.</p>
+#{/alert}
+
+<table class="table" datatable> 
+  <thead>
+  <tr>
+    <th>Codice</th>
+    <th>Descrizione</th>
+    <th>qtFrequenza</th>
+    <th>tipoFrequenza</th>
+    <th>tipologia</th>
+    <th>Usata in Epas</th>
+  </tr>
+  </thead>
+  <tbody>
+  #{list items:codeComparation.onlyAttestati, as:'onlyAttestatiSuperCode'}
+    
+    <tr>
+      <td>${onlyAttestatiSuperCode.codiceAssenza.codice}</td>
+      <td>${onlyAttestatiSuperCode.codiceAssenza.descrizione}</td>
+      <td>${onlyAttestatiSuperCode.codiceAssenza.qtFrequenza}</td>
+      <td>${onlyAttestatiSuperCode.codiceAssenza.tipoFrequenza}</td>
+      <td>${onlyAttestatiSuperCode.codiceAssenza.tipologia}</td>
+      
+      <td>
+          ${onlyAttestatiSuperCode.absences.size()}
+      </td>      
+    </tr>
+  #{/list}
+  </tbody>
+</table>
+
+#{alert color:'danger'}
+ <p>Codici assenza presenti in epas non in attestati.</p>
+#{/alert}
+
+<table class="table" datatable> 
+  <thead>
+  <tr>
+    <th>Codice</th>
+    <th>In Att.</th>
+    <th>Usata</th>
+    <th>Descrizione</th>
+    <th>Interno</th>
+    <th>Scaduta</th>
+    <th>Cancellabile</th>
+    <th>Gruppi Epas</th>
+    <th>Problemi</th>
+    
+  </tr>
+  </thead>
+  <tbody>
+  #{list items:codeComparation.onlyEpas, as:'onlyEpasSuperCode'}
+     
+      
+    
+      <tr 
+        #{if onlyEpasSuperCode.erasable() || !onlyEpasSuperCode.onlyOtherGroup()} class="bg-success"  #{/if}
+        #{if onlyEpasSuperCode.withProblems()}
+          #{if onlyEpasSuperCode.absenceType.expired} 
+           class="bg-warning"
+          #{/if}#{else}
+            class="bg-danger"
+          #{/else}
+        #{/if}      
+      >
+        <td>${onlyEpasSuperCode.code}</td>
+        <td>${onlyEpasSuperCode.absenceType.certificateCode}</td>
+        <td>${onlyEpasSuperCode.absences.size()}</td>
+        <td>${onlyEpasSuperCode.absenceType.description}</td>
+        <td>
+          #{if onlyEpasSuperCode.absenceType.internalUse}
+            <i class="fa fa-check" aria-hidden="true"></i>
+
+          #{/if}
+        </td>
+        <td>
+          #{if onlyEpasSuperCode.absenceType.expired}
+            <i class="fa fa-power-off" aria-hidden="true"></i>
+
+
+          #{/if}
+        </td>
+
+        <!-- Cancellabile -->
+        <td>
+        #{if onlyEpasSuperCode.erasable() }
+           <i class="fa fa-scissors" aria-hidden="true"></i>
+        #{/if}
+        </td>
+        
+        <!-- Gruppi epas -->
+        <td>
+          #{if !onlyEpasSuperCode.onlyOtherGroup()}
+            <i class="fa fa-star" aria-hidden="true"></i>
+          #{/if}
+        </td>
+        
+        <!-- Problemi -->
+        <td>
+          #{if onlyEpasSuperCode.withProblems()}
+           <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+          #{/if}
+        </td>
+        
+      </tr>
+    
+  #{/list}
+  </tbody>
+</table>
+
+<a class="btn btn-warning" href="@{AbsenceGroups.certificationsAbsenceCodes(true)}">Elimina Cancellabili</a>
+
+
+
+</div>
