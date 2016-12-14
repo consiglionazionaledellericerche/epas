@@ -1,39 +1,18 @@
 package db.h2support.base;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
 import dao.WorkingTimeTypeDao;
-import dao.absences.AbsenceComponentDao;
 
-import models.Contract;
-import models.ContractWorkingTimeType;
-import models.Person;
-import models.User;
+import db.h2support.base.WorkingTimeTypeDefinitions.WorkingDayDefinition;
+import db.h2support.base.WorkingTimeTypeDefinitions.WorkingDefinition;
+
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
-import models.absences.Absence;
-import models.absences.AbsenceType;
-import models.absences.ComplationAbsenceBehaviour;
-import models.absences.GroupAbsenceType;
-import models.absences.JustifiedType;
-import models.absences.JustifiedType.JustifiedTypeName;
-import models.absences.TakableAbsenceBehaviour;
-
-import org.joda.time.LocalDate;
 
 import java.util.List;
-import java.util.Set;
-
-import db.h2support.base.AbsenceDefinitions.AbsenceTypeDefinition;
-import db.h2support.base.AbsenceDefinitions.ComplationBehaviourDefinition;
-import db.h2support.base.AbsenceDefinitions.GroupAbsenceTypeDefinition;
-import db.h2support.base.AbsenceDefinitions.TakableBehaviourDefinition;
-import db.h2support.base.AbsenceDefinitions.WorkingDayDefinition;
-import db.h2support.base.AbsenceDefinitions.WorkingDefinition;
 
 public class H2WorkingTimeTypeSupport {
 
@@ -70,6 +49,11 @@ public class H2WorkingTimeTypeSupport {
     return list;
   }
 
+  /**
+   * Costruisce e persiste una istanza del tipo orario secondo definizione.
+   * @param workingDefinition definizione 
+   * @return persisted entity
+   */
   public WorkingTimeType getWorkingTimeType(WorkingDefinition workingDefinition) {
     
     WorkingTimeType workingTimeType = workingTimeTypeDao
