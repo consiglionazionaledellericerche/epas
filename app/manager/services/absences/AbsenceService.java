@@ -15,8 +15,11 @@ import dao.absences.AbsenceComponentDao;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.AbsenceManager;
+import manager.attestati.dto.show.CodiceAssenza;
+import manager.attestati.service.CertificationService;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
+import manager.services.absences.certifications.CodeComparation;
 import manager.services.absences.errors.AbsenceError;
 import manager.services.absences.errors.CriticalError;
 import manager.services.absences.model.AbsencePeriod;
@@ -45,6 +48,7 @@ import models.absences.JustifiedType.JustifiedTypeName;
 import org.joda.time.LocalDate;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Interfaccia epas per il componente assenze.
@@ -59,6 +63,7 @@ public class AbsenceService {
   private final AbsenceComponentDao absenceComponentDao;
   private final PersonChildrenDao personChildrenDao;
   private final ServiceFactories serviceFactories;
+  private final CertificationService certificationService;
   
   /**
    * Costruttore injection.
@@ -72,11 +77,13 @@ public class AbsenceService {
       AbsenceEngineUtility absenceEngineUtility,
       ServiceFactories serviceFactories,
       AbsenceComponentDao absenceComponentDao,
-      PersonChildrenDao personChildrenDao) {
+      PersonChildrenDao personChildrenDao, CertificationService certificationService) {
     this.absenceEngineUtility = absenceEngineUtility;
     this.serviceFactories = serviceFactories;
     this.absenceComponentDao = absenceComponentDao;
     this.personChildrenDao = personChildrenDao;
+    this.certificationService = certificationService;
+    
   }
   
   /**
@@ -647,6 +654,51 @@ public class AbsenceService {
       }
       return dates;
     }
+  }
+  
+  /**
+   * Calcola la comparazione con i codici in attestati.
+   */
+  public CodeComparation computeCodeComparation() {
+    
+
+    CodeComparation codeComparation = new CodeComparation();
+
+    try {
+      //Codici di assenza in attestati
+      Map<String, CodiceAssenza> attestatiAbsenceCodes = certificationService.absenceCodes();
+      if (attestatiAbsenceCodes.isEmpty()) {
+        log.info("Impossibile accedere ai codici in attestati");
+        return null;
+      }
+      //Tasformazione in superCodes
+      for (CodiceAssenza codiceAssenza : attestatiAbsenceCodes.values()) {
+        codeComparation.putCodiceAssenza(codiceAssenza);
+      }
+    } catch (Exception ex) {
+      return null;
+    }
+
+    //Codici di assenza epas
+    List<AbsenceType> absenceTypes = AbsenceType.findAll();
+    //Tasformazione in superCodes
+    for (AbsenceType absenceType : absenceTypes) {
+      codeComparation.putAbsenceType(absenceType);
+    }
+    
+    //Tutte le assenze epas
+    List<Absence> absences = Absence.findAll();
+    //Inserimento in superCodes
+    for (Absence absence : absences) {
+      codeComparation.putAbsence(absence);
+    }
+   
+    
+    codeComparation.setOnlyAttestati();
+    codeComparation.setOnlyEpas();
+    codeComparation.setBoth();
+    
+    return codeComparation;
   }
   
 }
