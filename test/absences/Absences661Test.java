@@ -95,14 +95,17 @@ public class Absences661Test extends UnitTest {
   @Test
   public void adjustmentLimit() {
     
+    Fixtures.deleteDatabase();
+    
     //creare il gruppo
     GroupAbsenceType group661 = h2AbsenceSupport
         .getGroupAbsenceType(GroupAbsenceTypeDefinition.Group_661);
     
-    //creare la persona (inizia a lavorare a metà anno)
+    // CASO 1 
+    //la persona inizia a lavorare a metà anno
     Person person = h2Examples.normalUndefinedEmployee(MID_2016);
     
-  //creare la periodChain
+    //creare la periodChain
     PeriodChain periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
         new LocalDate(2016, 11, 15), 
         Lists.newArrayList(), 
@@ -112,6 +115,34 @@ public class Absences661Test extends UnitTest {
     //dal 2016-7-1 al 2016-12-31 sono 184 giorni su 366. da 1080 si passa a 542
     // 366 : 1080 = 184 : x
     assertEquals(periodChain.periods.get(0).getPeriodTakableAmount(), 542);
+    
+    //CASO 2 
+    //la persona ha il part time 50%
+    person = h2Examples.partTime50UndefinedEmployee(BEGIN_2016);
+
+    periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
+        new LocalDate(2016, 11, 15), 
+        Lists.newArrayList(), 
+        Lists.newArrayList(), 
+        Lists.newArrayList());
+
+    //1080 * 50 / 100 = 540
+    assertEquals(periodChain.periods.get(0).getPeriodTakableAmount(), 540);
+    
+    //CASO 3 
+    //la persona inizia a lavorare a metà anno con part time 50% 
+
+    person = h2Examples.partTime50UndefinedEmployee(MID_2016);
+
+    periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
+        new LocalDate(2016, 11, 15), 
+        Lists.newArrayList(), 
+        Lists.newArrayList(), 
+        Lists.newArrayList());
+
+    //Si parte dai 542 di prima ottenuti lavorando 184 giorni, ridotti al 50 % 
+    assertEquals(periodChain.periods.get(0).getPeriodTakableAmount(), 271);
+
     
   }
   
