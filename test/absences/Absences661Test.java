@@ -11,7 +11,6 @@ import db.h2support.base.H2AbsenceSupport;
 
 import injection.StaticInject;
 
-import manager.services.absences.AbsenceEngineUtility;
 import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.ServiceFactories;
 
@@ -86,10 +85,6 @@ public class Absences661Test extends UnitTest {
     assertEquals(periodChain.successPeriodInsert.attemptedInsertAbsence, toInsert);
     assertEquals(periodChain.periods.get(0).getPeriodTakenAmount(), 120);
     
-  }
-  
-  public AbsenceEngineUtility getUtility() {
-    return new AbsenceEngineUtility();
   }
   
 }
