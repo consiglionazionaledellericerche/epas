@@ -32,6 +32,7 @@ import java.util.List;
 public class Absences661Test extends UnitTest {
   
   public static final LocalDate BEGIN_2016 = new LocalDate(2016, 1, 1);
+  public static final LocalDate MID_2016 = new LocalDate(2016, 7, 1);
   public static final LocalDate END_2016 = new LocalDate(2016, 12, 31);
   
   public static final LocalDate FERIAL_1_2016 = new LocalDate(2016, 11, 7); //lun
@@ -84,6 +85,33 @@ public class Absences661Test extends UnitTest {
     assertNotNull(periodChain.successPeriodInsert);
     assertEquals(periodChain.successPeriodInsert.attemptedInsertAbsence, toInsert);
     assertEquals(periodChain.periods.get(0).getPeriodTakenAmount(), 120);
+    
+  }
+  
+  /**
+   * Quando un dipendente non lavora per tutto l'anno e/o ha un tempo a lavoro part time, le 18
+   * ore annue di 661 si riducono proporzionalmente.
+   */
+  @Test
+  public void adjustmentLimit() {
+    
+    //creare il gruppo
+    GroupAbsenceType group661 = h2AbsenceSupport
+        .getGroupAbsenceType(GroupAbsenceTypeDefinition.Group_661);
+    
+    //creare la persona (inizia a lavorare a metà anno)
+    Person person = h2Examples.normalUndefinedEmployee(MID_2016);
+    
+  //creare la periodChain
+    PeriodChain periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
+        new LocalDate(2016, 11, 15), 
+        Lists.newArrayList(), 
+        Lists.newArrayList(), 
+        Lists.newArrayList());
+    
+    //dal 2016-7-1 al 2016-12-31 sono 184 giorni su 366. da 1080 si passa a 542
+    // 366 : 1080 = 184 : x
+    assertEquals(periodChain.periods.get(0).getPeriodTakableAmount(), 542);
     
   }
   
