@@ -1,4 +1,4 @@
-package absences;
+package db.h2support.base;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
