@@ -1,4 +1,4 @@
-package absences;
+package db.h2support.base;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -184,56 +184,5 @@ public class AbsenceDefinitions {
       this.next = next;
     }
   }
-
-  public enum WorkingDayDefinition {
-
-    Normal_1(1, 432, false, 360, 30, null, null),
-    Normal_2(2, 432, false, 360, 30, null, null),
-    Normal_3(3, 432, false, 360, 30, null, null),
-    Normal_4(4, 432, false, 360, 30, null, null),
-    Normal_5(5, 432, false, 360, 30, null, null),
-    Normal_6(6, 0, true, 0, 0, null, null),
-    Normal_7(7, 0, true, 0, 0, null, null);
-
-    public Integer dayOfWeek;
-    public Integer workingTime;
-    public boolean holiday;
-    public Integer mealTicketTime;
-    public Integer breakTicketTime;
-    public Integer ticketAfternoonThreshold;
-    public Integer ticketAfternoonWorkingTime;
-
-    private WorkingDayDefinition(Integer dayOfWeek, Integer workingTime, 
-        boolean holiday, Integer mealTicketTime, Integer breakTicketTime, 
-        Integer ticketAfternoonThreshold, Integer ticketAfternoonWorkingTime) {
-      this.dayOfWeek = dayOfWeek;
-      this.workingTime = workingTime;
-      this.holiday = holiday;
-      this.mealTicketTime = mealTicketTime;
-      this.breakTicketTime = breakTicketTime;
-      this.ticketAfternoonThreshold = ticketAfternoonThreshold;
-      this.ticketAfternoonWorkingTime = ticketAfternoonWorkingTime;
-    }
-
-  }
-
-  public enum WorkingDefinition {
-
-    Normal(true, 
-        ImmutableList.of(WorkingDayDefinition.Normal_1, WorkingDayDefinition.Normal_2, 
-            WorkingDayDefinition.Normal_3, WorkingDayDefinition.Normal_4,
-            WorkingDayDefinition.Normal_5, WorkingDayDefinition.Normal_6, 
-            WorkingDayDefinition.Normal_7));
-
-    public boolean horizontal;
-    public List<WorkingDayDefinition> orderedWorkingDayDefinition;
-
-    private WorkingDefinition(boolean horizontal, 
-        List<WorkingDayDefinition> orderedWorkingDayDefinition) {
-      this.horizontal = horizontal;
-      this.orderedWorkingDayDefinition = orderedWorkingDayDefinition;
-    }
-  }
-
-
+  
 }
