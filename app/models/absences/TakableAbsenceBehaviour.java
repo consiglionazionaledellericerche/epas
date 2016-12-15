@@ -74,7 +74,7 @@ public class TakableAbsenceBehaviour extends BaseModel {
   }
   
   public enum TakeAmountAdjustment {
-    workingTimePercent, workingPeriodPercent, workingTimeAndWorkingPeriodPercent;
+    workingPeriodPercent, workingTimeAndWorkingPeriodPercent;
   }
 
 }
