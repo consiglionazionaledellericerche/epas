@@ -701,4 +701,54 @@ public class AbsenceService {
     return codeComparation;
   }
   
+  public void theGrassHopperMigration() {
+    
+    //1) Edit riting code -> specifiedMinutes
+    
+    //2) Edit pepe code -> specifiedMinutes
+    
+    //3) Edit Fuori sede code
+    //FUORI SEDE H1 -> absenceTypeMinutes 60
+    //FUORI SEDE H7 -> absenceTypeMinutes 60*7
+    //update person situations
+    
+    //4) Convert Absences
+    // absence 232H2 -> 232M 2 hour
+    // absence 232H3 -> 232M 3 hour
+    // absence 233H2 -> 233M 2 hour
+    // absence 233H3 -> 233M 3 hour
+    // absence 23H3 -> 23M 3 hour
+    // update person situations
+    
+    //5) Edit 26 -> absenceTypeMinutes 120
+    //update person situations (forse nessuno)
+    
+    //6) Convert Absences
+    // 26p2h -> 26
+    
+    //7) Delete code 26p2h
+    
+    //8) Disable superCode.withProblems except for 91MD, 91MS, 91S
+    
+    //9) Create Group G_24 from Definitions (code 24 already exists)
+    
+    //10) Create Group G_242 from Definitions (code 242 already exists)
+    
+    //11) Create Group G_243 from Definitions (code 243 already exists)
+    
+    //12) Create Group G_182 from Definitions (code 182 already exists)
+    
+    //13) Create Group G_18P from Definitions
+    
+    //14) Create Group G_182P from Definitions
+    
+    //15) Create Group G_19P from Definitions
+    
+    //16) Add to group MalattiaDipendente
+    // 11C5
+    // 11C9
+    
+    
+  }
+  
 }
