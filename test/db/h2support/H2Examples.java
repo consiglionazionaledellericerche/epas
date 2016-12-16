@@ -16,6 +16,8 @@ import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
 
+import java.util.UUID;
+
 /**
  * Costruzione rapida di entity per test standard.
  * 
@@ -122,7 +124,7 @@ public class H2Examples {
    */
   public Person normalUndefinedEmployee(LocalDate beginContract) {
 
-    final String name = "normalUndefinedEmployee" + beginContract;
+    final String name = "normalUndefinedEmployee" + beginContract + UUID.randomUUID();
     Office office = buildOffice(beginContract, name, name, name);
     WorkingTimeType normal = h2WorkingTimeTypeSupport.getWorkingTimeType(WorkingDefinition.Normal);
     Person person = createPerson(office, name);
@@ -142,7 +144,7 @@ public class H2Examples {
    */
   public Person partTime50UndefinedEmployee(LocalDate beginContract) {
 
-    final String name = "partTime50UndefinedEmployee" + beginContract;
+    final String name = "partTime50UndefinedEmployee" + beginContract + UUID.randomUUID();
     Office office = buildOffice(beginContract, name, name, name);
     
     WorkingTimeType normal = h2WorkingTimeTypeSupport
