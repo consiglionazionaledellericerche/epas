@@ -22,7 +22,6 @@ import models.absences.JustifiedType.JustifiedTypeName;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 
-import play.test.Fixtures;
 import play.test.UnitTest;
 
 import java.util.List;
@@ -39,14 +38,15 @@ public class Absences661Test extends UnitTest {
   public static final LocalDate FERIAL_2_2016 = new LocalDate(2016, 11, 8); //mar
   public static final LocalDate FERIAL_3_2016 = new LocalDate(2016, 11, 9); //mer
   
-  @Inject private static H2Examples h2Examples;
-  @Inject private static H2AbsenceSupport h2AbsenceSupport;
-  @Inject private static ServiceFactories serviceFactories;
-  
+  @Inject 
+  private static H2Examples h2Examples;
+  @Inject 
+  private static H2AbsenceSupport h2AbsenceSupport;
+  @Inject 
+  private static ServiceFactories serviceFactories;
+    
   @Test
   public void test() {
-    
-    Fixtures.deleteDatabase();
     
     //creare il gruppo
     GroupAbsenceType group661 = h2AbsenceSupport
@@ -94,9 +94,7 @@ public class Absences661Test extends UnitTest {
    */
   @Test
   public void adjustmentLimit() {
-    
-    Fixtures.deleteDatabase();
-    
+        
     //creare il gruppo
     GroupAbsenceType group661 = h2AbsenceSupport
         .getGroupAbsenceType(GroupAbsenceTypeDefinition.Group_661);
