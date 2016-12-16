@@ -246,13 +246,23 @@ public class Charts extends Controller {
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
    */
-  public static void test(Person person, int year, int month) {   
+  public static void test(Person person, int year, int month, ExportFile exportFile) {   
     rules.checkIfPermitted(person.office);
+    String suffix = "";
+    if (exportFile.equals(ExportFile.CSV)) {
+      suffix = ".csv";
+    } else {
+      suffix = ".xls";
+    }
     File file = new File("situazioneMensile" + person.surname
-        + DateUtility.fromIntToStringMonth(month) + year + ".xls");
+        + DateUtility.fromIntToStringMonth(month) + year + suffix);
     PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
     file = chartsManager.createFileToExport(psDto, file);
 
     renderBinary(file);
+  }
+  
+  public enum ExportFile {
+    CSV,XLS;
   }
 }

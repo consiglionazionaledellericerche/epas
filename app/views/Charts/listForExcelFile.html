@@ -20,7 +20,15 @@
   	#{form @Charts.test(), method:'POST', autocomplete:false, class:'form form-horizontal'}
   	<input type="hidden" name="month" value="${date.getMonthOfYear()}"/>
   	<input type="hidden" name="year" value="${date.getYear()}"/>
-
+	
+  	#{f.selectEnum 'exportFile', items:controllers.Charts.ExportFile, 
+		value:exportFile, byEquals:true /}
+	
+	#{f.booleanRadio 'forAll', label:'Per tutti', value:false /}
+      
+    
+  	
+	
   		#{f.selectModel 'person', items:personList /}
   		#{b.buttons center:'true'}
   		#{b.back /}
