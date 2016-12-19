@@ -4,7 +4,7 @@
 from fabric.api import *
 from hashlib import md5
 
-env.hosts = ["epas@epas-r1.tools.iit.cnr.it"]
+env.hosts = ["epas@epas-r2.tools.iit.cnr.it"]
 #env.hosts = ["epas@epas-r1.tools.iit.cnr.it"]
 
 APP = "epas"
