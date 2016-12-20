@@ -131,6 +131,9 @@ public class PersonDayInTroubleManager {
       DateInterval intervalToCheck = DateUtility.intervalIntersection(
           factory.create(currentContract.get()).getContractDateInterval(),
           new DateInterval(fromDate, toDate));
+      if (intervalToCheck == null) {
+        continue;
+      }
 
       List<PersonDayInTrouble> pdList = personDayInTroubleDao.getPersonDayInTroubleInPeriod(person,
           Optional.fromNullable(intervalToCheck.getBegin()),
