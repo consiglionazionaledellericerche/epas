@@ -26,6 +26,7 @@ import manager.PersonDayManager;
 import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
+import manager.services.absences.certifications.CodeComparation;
 import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.PeriodChain;
 
@@ -57,10 +58,12 @@ import play.data.validation.Validation;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
@@ -905,6 +908,20 @@ public class AbsenceGroups extends Controller {
     flash.success("Operazione eseguita.");
     editAbsenceCriticalValue(absence.id);
 
+  }
+  
+  /**
+   * I codici assenza in attestati e loro analisi.
+   */
+  public static void certificationsAbsenceCodes(boolean eraseErasable) throws ExecutionException {
+
+    CodeComparation codeComparation = absenceService.computeCodeComparation();
+
+    if (eraseErasable) {
+      codeComparation.eraseErasable();
+    }
+    
+    render(codeComparation);
   }
 
 }
