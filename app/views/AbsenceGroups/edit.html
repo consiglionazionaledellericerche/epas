@@ -84,8 +84,8 @@
 	  </div>
 	
 	  #{form action:@AbsenceGroups.delete(), method:'POST', autocomplete:false,
-		    class:'form form-horizontal', 'data-async':'#page_content',
-		    'data-async-error':'#absenceData'}
+		    class:'form form-horizontal', 'data-async':'#page_content', 'data-spinner':'#defaultSpinner',
+		    'data-async-error':'#absenceData', 'data-related':'absenceData'}
 
 			#{f.hidden 'absenceId', value: absence.id /}
 
