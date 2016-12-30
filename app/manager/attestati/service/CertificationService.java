@@ -335,7 +335,7 @@ public class CertificationService implements ICertificationService {
         } else {
           sended.add(certification);
         }
-        //FIXME a volte si arriva in uno stato detached....
+        //FIXME a volte si arriva in uno stato detached, da verificare....
         certification.save();
       }
     }
