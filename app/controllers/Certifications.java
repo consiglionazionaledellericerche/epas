@@ -388,7 +388,7 @@ public class Certifications extends Controller {
 
   /**
    * CleanMessage.
-   * @param e eccezione
+   * @param ex eccezione
    * @return L'ultimo elemento Throwable di una concatenazione di eccezioni
    */
   private static Throwable cleanMessage(Exception ex) {
