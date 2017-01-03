@@ -26,20 +26,18 @@ title:(Action + ' servizio per turno')}
   #{/alert}
   <table class="table">
   <tr>
-  	<th>Nome attività</th>
+  	<th>Attività</th>
   	<th>Descrizione</th>
-  	<th>Dipendenti associati</th>
+  	<th>Dipendenti associati</th>  	
   </tr>
   #{list items:map.entrySet(), as:'key'}
   	<tr>
-  		<td>${key.getKey().type}</td>
+  		<td>${key.getKey().type}</td>  		
   		<td>${key.getKey().description}</td>
-  		<td>
-  			<ul>
+  		<td>  			
   			#{list items:key.getValue(), as:'psst'}
-  				<li>${psst.personShift.person.fullName()}</li>
-  			#{/list}
-  			</ul>
+  				${psst.personShift.person.fullName()}, 
+  			#{/list}  			
   		</td>
   	</tr> 
   #{/list}

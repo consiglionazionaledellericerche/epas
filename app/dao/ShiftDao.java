@@ -260,12 +260,13 @@ public class ShiftDao extends DaoBase {
     final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
     BooleanBuilder condition = new BooleanBuilder();
     if (date.isPresent()) {
-      condition.and(psst.beginDate.loe(date.get().dayOfMonth().withMaximumValue())
+      condition.and(psst.beginDate.loe(date.get())
           .andAnyOf(psst.endDate.isNull(), 
-              psst.endDate.goe(date.get().dayOfMonth().withMaximumValue())));
+              psst.endDate.gt(date.get())));
 
     }
-    JPQLQuery query = getQueryFactory().from(psst).where(psst.shiftType.eq(shiftType));
+    JPQLQuery query = getQueryFactory().from(psst).where(psst.shiftType.eq(shiftType)
+        .and(condition));
     return query.list(psst);
   }
   
