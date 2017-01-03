@@ -251,12 +251,12 @@ public class SynchDiagnostic {
     }
 
     //Stesso tipo fine
-    if (epasContract.isTemporary != perseoContract.isTemporary) {
+    if (epasContract.isTemporaryMissing != perseoContract.isTemporaryMissing) {
       return false;
     }
     
     //Controllo data fine
-    if (perseoContract.isTemporary && perseoContract.calculatedEnd() == null) {
+    if (perseoContract.isTemporaryMissing && perseoContract.calculatedEnd() == null) {
       // Unico caso in cui comanda il dato in epas che è corretto.
       return true;
     }

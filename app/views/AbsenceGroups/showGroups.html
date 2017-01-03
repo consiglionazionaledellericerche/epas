@@ -18,11 +18,11 @@
         <option></option>      
        
        #{list items:categoryTabs, as:'categoryTab'}
-           <optgroup label="${categoryTab.name}">
+           <optgroup label="${categoryTab.label}">
            #{list categoryTab.categoryGroupAbsenceTypes, as:'category'}
 	         <option value="${category.id}"
 	          #{if category.equals(selected)} selected #{/if}> 
-	          ${category.name}
+	          ${category.label}
 	         </option>
   	       #{/list}
   	       </optgroup>

@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
+import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import manager.services.absences.errors.CriticalError.CriticalProblem;
@@ -23,6 +24,7 @@ import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
+import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
 
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
@@ -417,6 +419,66 @@ public class AbsenceEngineUtility {
       set.add(absence);
     }
     return map;
+  }
+
+  /**
+   * Calcola la riduzione in base al tempo contrattuale effettivamente lavorato ed alla % di
+   * part time. (A seconda del tipo di aggiustamento richiesto).
+   * @param fixed tempo fisso di partenza
+   * @param adjustment tipo aggiustamento richiesto
+   * @param periodInterval periodo totale
+   * @param contracts i contratti del dipendente
+   * @return valora aggiustato (absent se impossibile calcolarlo)
+   */
+  public Optional<Integer> takableAmountAdjustment(int fixed, TakeAmountAdjustment adjustment, 
+      DateInterval periodInterval, List<Contract> contracts) {
+    
+    boolean workTimeAdjustment = false;
+    if (adjustment == TakeAmountAdjustment.workingTimeAndWorkingPeriodPercent) {
+      workTimeAdjustment = true;
+    }
+    
+    if (!periodInterval.isClosed()) {
+      return Optional.absent();
+    }
+    
+    int periodDays = DateUtility.daysInInterval(periodInterval);
+    
+    Double totalAssigned = new Double(0);
+    
+    //Ricerca dei periodi di attività
+    for (Contract contract : contracts) {
+      if (DateUtility.intervalIntersection(contract.periodInterval(), periodInterval) == null) {
+        continue;
+      }
+      for (ContractWorkingTimeType cwtt : contract.getContractWorkingTimeTypeOrderedList()) {
+        if (DateUtility.intervalIntersection(cwtt.periodInterval(), periodInterval) == null) {
+          continue;
+        }
+        
+        //Intesezione
+        DateInterval cwttInverval = DateUtility
+            .intervalIntersection(cwtt.periodInterval(), periodInterval);
+
+        //Per ogni contractWorkingTimeType coinvolto
+        int cwttDays = DateUtility.daysInInterval(cwttInverval);
+
+        //Incidenza cwtt sul periodo totale (in giorni)
+        Double cwttPercent = ((double)cwttDays * 100) / periodDays;
+        
+        //Adeguamento sull'incidenza del periodo
+        Double cwttAssigned = (cwttPercent * fixed) / 100;
+        
+        if (workTimeAdjustment) {
+          //Adeguamento sull'incidenza del tipo orario
+          cwttAssigned = (cwttAssigned * cwtt.getWorkingTimeType().percentEuristic()) / 100;
+        }
+        
+        totalAssigned += cwttAssigned;
+      }
+    }
+    
+    return Optional.of(totalAssigned.intValue());
   }
   
       

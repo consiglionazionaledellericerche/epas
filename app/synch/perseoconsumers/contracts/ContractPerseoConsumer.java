@@ -3,7 +3,9 @@ package synch.perseoconsumers.contracts;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
@@ -24,8 +26,6 @@ import models.Contract;
 import models.Office;
 import models.Person;
 
-import org.assertj.core.util.Lists;
-import org.assertj.core.util.Sets;
 import org.joda.time.LocalDate;
 
 import play.libs.WS;
@@ -175,7 +175,7 @@ public class ContractPerseoConsumer {
         ? new LocalDate(perseoContract.expireContract) : null;
     contract.endContract = perseoContract.endContract != null
         ? new LocalDate(perseoContract.endContract) : null;
-    contract.isTemporary = perseoContract.temporary;
+    contract.isTemporaryMissing = perseoContract.temporary;
     contract.perseoId = perseoContract.id;
     contract.person = person;
 
@@ -210,6 +210,7 @@ public class ContractPerseoConsumer {
    * <p>
    * Mappa: chiave -> personPerseoId valore -> lista dei suoi contratti perseo
    * </p>
+   *
    * @param office se presente le sole persone della sede altrimenti tutte.
    * @return map
    */

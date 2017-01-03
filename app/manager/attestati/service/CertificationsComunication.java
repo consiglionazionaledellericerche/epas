@@ -3,10 +3,10 @@ package manager.attestati.service;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.inject.Inject;
 
+import helpers.CacheValues;
 import helpers.rest.ApiRequestException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,6 @@ import manager.attestati.dto.insert.InserimentoRigaCompetenza;
 import manager.attestati.dto.insert.InserimentoRigaFormazione;
 import manager.attestati.dto.show.CodiceAssenza;
 import manager.attestati.dto.show.ListaDipendenti;
-import manager.attestati.dto.show.ListaDipendenti.Matricola;
 import manager.attestati.dto.show.RispostaAttestati;
 import manager.attestati.dto.show.SeatCertification;
 
@@ -28,19 +27,23 @@ import models.Certification;
 import models.Office;
 import models.Person;
 
-import org.testng.collections.Sets;
-
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSRequest;
+import play.mvc.Http;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 /**
  * Componente che si occupa di inviare e ricevere dati verso Nuovo Attestati.
- * @author alessandro
  *
+ * @author alessandro
  */
 @Slf4j
 public class CertificationsComunication {
@@ -66,195 +69,225 @@ public class CertificationsComunication {
   private static final String OAUTH_CONTENT_TYPE = "application/x-www-form-urlencoded";
   private static final String OAUTH_URL = "/oauth/token";
   private static final String OAUTH_AUTHORIZATION = "YXR0ZXN0YXRpYXBwOm15U2VjcmV0T0F1dGhTZWNyZXQ=";
-  private static final String OAUTH_GRANT_TYPE = "password";
+  private static final String TOKEN_GRANT_TYPE = "password";
+  private static final String REFRESHTOKEN_GRANT_TYPE = "refresh_token";
+
   private static final String OAUTH_CLIENT_ID = "attestatiapp";
 
-  @Inject
-  public CertificationsComunication() {
+  private static final String OAUTH_TOKEN = "oauth.token.attestati";
 
-  }
+  private static final String POST_TIMEOUT = "5min";
+
+  @Inject
+  private CacheValues cacheValues;
 
   /**
    * Per l'ottenenere il Bearer Token:
-   * curl -s -X POST -H "Content-Type: application/x-www-form-urlencoded" 
-   * -H "Authorization: Basic YXR0ZXN0YXRpYXBwOm15U2VjcmV0T0F1dGhTZWNyZXQ="  
+   * curl -s -X POST -H "Content-Type: application/x-www-form-urlencoded"
+   * -H "Authorization: Basic YXR0ZXN0YXRpYXBwOm15U2VjcmV0T0F1dGhTZWNyZXQ="
    * -d 'username=app.epas&password=.............
    * &grant_type=password&scope=read%20write
-   * &client_secret=mySecretOAuthSecret&client_id=attestatiapp' 
+   * &client_secret=mySecretOAuthSecret&client_id=attestatiapp'
    * "http://as2dock.si.cnr.it/oauth/token"
+   *
    * @return il token
    */
-  public Optional<String> getToken() {
+  public OauthToken getToken() throws NoSuchFieldException {
 
-    final String url;
-    final String user;
-    final String pass;
+    final String url = AttestatiApis.getAttestatiBaseUrl();
+    final String user = AttestatiApis.getAttestatiUser();
+    final String pass = AttestatiApis.getAttestatiPass();
 
-    try {
-      url = AttestatiApis.getAttestatiBaseUrl();
-      user = AttestatiApis.getAttestatiUser();
-      pass = AttestatiApis.getAttestatiPass();
-    } catch (NoSuchFieldException ex) {
-      final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
-      log.error(error);
-      throw new ApiRequestException(error);
+    final Map<String, String> parameters = new HashMap<>();
+    parameters.put("username", user);
+    parameters.put("password", pass);
+    parameters.put("grant_type", TOKEN_GRANT_TYPE);
+    parameters.put("client_secret", OAUTH_CLIENT_SECRET);
+    parameters.put("client_id", OAUTH_CLIENT_ID);
+
+    WSRequest req = WS.url(url + OAUTH_URL)
+        .setHeader("Content-Type", OAUTH_CONTENT_TYPE)
+        .setHeader("Authorization", "Basic " + OAUTH_AUTHORIZATION)
+        .setParameters(parameters);
+
+    HttpResponse response = req.post();
+
+    if (!response.getContentType().contains("application/json")) {
+      throw new ApiRequestException(String.format("Risposta inattesta dal server di Attestati" +
+          " {Content-Type=%s - statusCode=%s} ", response.getContentType(), response.getStatus()));
     }
 
-    try {
+    OauthToken accessToken = new Gson().fromJson(response.getJson(), OauthToken.class);
 
-      String body = String
-          .format("username=%s&password=%s&grant_type=%s&client_secret=%s&client_id=%s", 
-              user, pass, OAUTH_GRANT_TYPE, OAUTH_CLIENT_SECRET, OAUTH_CLIENT_ID);
-
-      WSRequest req = WS.url(url + OAUTH_URL)
-          .setHeader("Content-Type", OAUTH_CONTENT_TYPE)
-          .setHeader("Authorization", "Basic " + OAUTH_AUTHORIZATION)
-          .body(body);
-      HttpResponse response = req.post();
-      Gson gson = new Gson();
-      TokenDTO token = gson.fromJson(response.getJson(), TokenDTO.class);
-
-      return Optional.fromNullable(token.access_token);
-    } catch (Exception ex) {
-      return Optional.<String>absent();
-    }
-  }
-
-  private Optional<String> reloadToken(Optional<String> token) {
-    if (!token.isPresent()) {
-      token = getToken();
-      if (!token.isPresent()) {
-        return Optional.<String>absent();
-      }
-    }
-    return token;
+    log.debug("Ottenuto access-token dal server degli attestati");
+    return accessToken;
   }
 
   /**
-   * Costruisce una WSRequest predisposta alla comunicazione con le api attestati.
-   * @param token token
-   * @param url url 
-   * @param contentType contentType
-   * @return
+   * @param token token precedente (già ottenuto dal server).
+   * @return Un nuovo token Oauth con validità estesa
    */
-  private WSRequest prepareOAuthRequest(String token, String url, String contentType) {
+  public OauthToken refreshToken(OauthToken token) throws NoSuchFieldException {
 
-    final String baseUrl;
+    final String url = AttestatiApis.getAttestatiBaseUrl();
 
-    try {
-      baseUrl = AttestatiApis.getAttestatiBaseUrl();
-    } catch (NoSuchFieldException ex) {
-      final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
-      log.error(error);
-      throw new ApiRequestException(error);
+    final Map<String, String> parameters = new HashMap<>();
+    parameters.put("grant_type", REFRESHTOKEN_GRANT_TYPE);
+    parameters.put("client_secret", OAUTH_CLIENT_SECRET);
+    parameters.put("client_id", OAUTH_CLIENT_ID);
+    parameters.put("refresh_token", token.refresh_token);
+
+    WSRequest req = WS.url(url + OAUTH_URL)
+        .setHeader("Content-Type", OAUTH_CONTENT_TYPE)
+        .setHeader("Authorization", "Basic " + OAUTH_AUTHORIZATION)
+        .setParameters(parameters);
+
+    HttpResponse response = req.post();
+
+    if (!response.getContentType().contains("application/json")) {
+      throw new ApiRequestException(String.format("Risposta inattesta dal server di Attestati" +
+          " {Content-Type=%s - statusCode=%s} ", response.getContentType(), response.getStatus()));
     }
 
-    WSRequest wsRequest = WS.url( baseUrl + url)
+    OauthToken accessToken = new Gson().fromJson(response.getJson(), OauthToken.class);
+
+    log.debug("Ottenuto refresh-token oauth dal server degli attestati");
+    return accessToken;
+  }
+
+
+  /**
+   * Costruisce una WSRequest predisposta alla comunicazione con le api attestati.
+   *
+   * @param token       token
+   * @param url         url
+   * @param contentType contentType
+   */
+  private WSRequest prepareOAuthRequest(String token, String url, String contentType)
+      throws NoSuchFieldException {
+
+    final String baseUrl = AttestatiApis.getAttestatiBaseUrl();
+
+    WSRequest wsRequest = WS.url(baseUrl + url)
         .setHeader("Content-Type", contentType)
         .setHeader("Authorization", "Bearer " + token);
+
+    wsRequest.timeout(POST_TIMEOUT);
     return wsRequest;
   }
 
   /**
    * Preleva la lista delle matricole da attestati.
+   *
    * @param office sede
-   * @param year anno
-   * @param month mese 
-   * @param token token
+   * @param year   anno
+   * @param month  mese
    * @return insieme di numbers
    */
-  public Set<Integer> getPeopleList(Office office, int year, int month, 
-      Optional<String> token) {
+  public Set<Integer> getPeopleList(Office office, int year, int month)
+      throws NoSuchFieldException, ExecutionException {
 
-    if (!reloadToken(token).isPresent()) {
-      return Sets.newHashSet();
+    String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
+
+    final String url = API_URL + API_URL_LISTA_DIPENDENTI + "/" + office.codeId
+        + "/" + year + "/" + month;
+
+    WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
+    HttpResponse httpResponse = wsRequest.get();
+
+    // Caso di token non valido
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
+      cacheValues.oauthToken.invalidateAll();
+      throw new IllegalAccessError("Invalid Token: " + token);
     }
 
-    try {
-      String url = API_URL + API_URL_LISTA_DIPENDENTI + "/" + office.codeId 
-          + "/" + year + "/" + month;
+    ListaDipendenti listaDipendenti = new Gson()
+        .fromJson(httpResponse.getJson(), ListaDipendenti.class);
 
-      WSRequest wsRequest = prepareOAuthRequest(token.get(), url, JSON_CONTENT_TYPE);
-      HttpResponse httpResponse = wsRequest.get();
+    log.info("Recuperata lista delle matricole da attestati per l'ufficio {} -  mese {}/{}",
+        office, month, year);
 
-      String json = httpResponse.getJson().toString();
-
-      ListaDipendenti listaDipendenti = new Gson().fromJson(json, ListaDipendenti.class);
-      Set<Integer> numbers = Sets.newHashSet(); 
-      for (Matricola matricola : listaDipendenti.dipendenti) {
-        numbers.add(matricola.matricola);
-      }
-      return numbers;
-
-    } catch (Exception ex) {}
-
-    return Sets.newHashSet();
+    return listaDipendenti.dipendenti.stream().map(matricola -> matricola.matricola)
+        .collect(Collectors.toSet());
   }
 
   /**
-   * curl -X GET -H "Authorization: Bearer cf24c413-9cf7-485d-a10b-87776e5659c7" 
-   * -H "Content-Type: application/json" 
+   * curl -X GET -H "Authorization: Bearer cf24c413-9cf7-485d-a10b-87776e5659c7"
+   * -H "Content-Type: application/json"
    * http://as2dock.si.cnr.it/api/ext/attestato/{{CODICESEDE}}/{{MATRICOLA}}/{{ANNO}}/{{MESE}}
+   *
    * @param person persona
-   * @param month mese
-   * @param year anno
-   * @param token token
+   * @param month  mese
+   * @param year   anno
    */
-  public Optional<SeatCertification> getPersonSeatCertification(Person person, 
-      int month, int year, Optional<String> token) {
+  public Optional<SeatCertification> getPersonSeatCertification(Person person,
+      int month, int year) throws ExecutionException {
 
-    if (!reloadToken(token).isPresent()) {
-      return Optional.<SeatCertification>absent();
+    final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
+    if (token == null) {
+      return Optional.absent();
     }
 
     try {
-      String url = ATTESTATI_API_URL + "/" + person.office.codeId 
+      String url = ATTESTATI_API_URL + "/" + person.office.codeId
           + "/" + person.number + "/" + year + "/" + month;
 
-      WSRequest wsRequest = prepareOAuthRequest(token.get(), url, JSON_CONTENT_TYPE);
+      WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
       HttpResponse httpResponse = wsRequest.get();
 
-      SeatCertification seatCertification = 
+      // Caso di token non valido
+      if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
+        cacheValues.oauthToken.invalidateAll();
+        throw new IllegalAccessError("Invalid Token: " + token);
+      }
+
+      SeatCertification seatCertification =
           new Gson().fromJson(httpResponse.getJson(), SeatCertification.class);
 
       Verify.verify(seatCertification.dipendenti.get(0).matricola == person.number);
 
-      return Optional.fromNullable(seatCertification);
+      return Optional.of(seatCertification);
 
-    } catch (Exception ex) {}
+    } catch (Exception ex) {
+      log.error("Errore di comunicazione col server degli Attestati {}", ex.getMessage());
+    }
 
-    return Optional.<SeatCertification>absent();
+    return Optional.absent();
 
   }
 
   /**
    * Conversione del json di risposta da attestati.
+   *
    * @param httpResponse risposta
    * @return rispostaAttestati
    */
-  public Optional<RispostaAttestati> parseRispostaAttestati(HttpResponse httpResponse) {
+  Optional<RispostaAttestati> parseRispostaAttestati(HttpResponse httpResponse) {
     try {
       return Optional.fromNullable(new Gson()
           .fromJson(httpResponse.getJson(), RispostaAttestati.class));
     } catch (Exception ex) {
-      return Optional.<RispostaAttestati>absent();
+      return Optional.absent();
     }
   }
 
 
   /**
    * Invia la riga di assenza ad attestati.
-   * @param token token
+   *
    * @param certification attestato
    * @return risposta
    */
-  public HttpResponse sendRigaAssenza(Optional<String> token, Certification certification) {
-    if (!reloadToken(token).isPresent()) {
+  public HttpResponse sendRigaAssenza(Certification certification)
+      throws ExecutionException, NoSuchFieldException {
+
+    final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
+    if (token == null) {
       return null;
     }
 
     String url = API_URL + API_URL_ASSENZA;
-    WSRequest wsRequest = prepareOAuthRequest(token.get(), url, JSON_CONTENT_TYPE);
+    WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
 
     InserimentoRigaAssenza riga = new InserimentoRigaAssenza(certification);
     String json = new Gson().toJson(riga);
@@ -265,18 +298,17 @@ public class CertificationsComunication {
 
   /**
    * Invia la riga di assenza ad attestati.
-   * @param token token
+   *
    * @param certification attestato
    * @return risposta
    */
-  public HttpResponse sendRigaBuoniPasto(Optional<String> token, Certification certification, 
-      boolean update) {
-    if (!reloadToken(token).isPresent()) {
-      return null;
-    }
+  public HttpResponse sendRigaBuoniPasto(Certification certification,
+      boolean update) throws ExecutionException, NoSuchFieldException {
+
+    final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
 
     String url = API_URL + API_URL_BUONI_PASTO;
-    WSRequest wsRequest = prepareOAuthRequest(token.get(), url, JSON_CONTENT_TYPE);
+    WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
 
     InserimentoRigaBuoniPasto riga = new InserimentoRigaBuoniPasto(certification);
     String json = new Gson().toJson(riga);
@@ -284,23 +316,22 @@ public class CertificationsComunication {
 
     if (update) {
       return wsRequest.put();
-    } 
+    }
     return wsRequest.post();
   }
 
   /**
    * Invia la riga di assenza ad attestati.
-   * @param token token
+   *
    * @param certification attestato
    * @return risposta
    */
-  public HttpResponse sendRigaFormazione(Optional<String> token, Certification certification) {
-    if (!reloadToken(token).isPresent()) {
-      return null;
-    }
+  public HttpResponse sendRigaFormazione(Certification certification)
+      throws ExecutionException, NoSuchFieldException {
+    final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
 
     String url = API_URL + API_URL_FORMAZIONE;
-    WSRequest wsRequest = prepareOAuthRequest(token.get(), url, JSON_CONTENT_TYPE);
+    WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
 
     InserimentoRigaFormazione riga = new InserimentoRigaFormazione(certification);
     String json = new Gson().toJson(riga);
@@ -311,17 +342,16 @@ public class CertificationsComunication {
 
   /**
    * Invia la riga di assenza ad attestati.
-   * @param token token
+   *
    * @param certification attestato
    * @return risposta
    */
-  public HttpResponse sendRigaCompetenza(Optional<String> token, Certification certification) {
-    if (!reloadToken(token).isPresent()) {
-      return null;
-    }
+  public HttpResponse sendRigaCompetenza(Certification certification)
+      throws ExecutionException, NoSuchFieldException {
+    final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
 
     String url = API_URL + API_URL_COMPETENZA;
-    WSRequest wsRequest = prepareOAuthRequest(token.get(), url, JSON_CONTENT_TYPE);
+    WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
 
     InserimentoRigaCompetenza riga = new InserimentoRigaCompetenza(certification);
     String json = new Gson().toJson(riga);
@@ -332,17 +362,16 @@ public class CertificationsComunication {
 
   /**
    * Invia la riga di assenza ad attestati.
-   * @param token token
+   *
    * @param certification attestato
    * @return risposta
    */
-  public HttpResponse deleteRigaAssenza(Optional<String> token, Certification certification) {
-    if (!reloadToken(token).isPresent()) {
-      return null;
-    }
+  public HttpResponse deleteRigaAssenza(Certification certification)
+      throws ExecutionException, NoSuchFieldException {
+    final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
 
     String url = API_URL + API_URL_ASSENZA;
-    WSRequest wsRequest = prepareOAuthRequest(token.get(), url, JSON_CONTENT_TYPE);
+    WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
 
     CancellazioneRigaAssenza rigaAssenza = new CancellazioneRigaAssenza(certification);
     String json = new Gson().toJson(rigaAssenza);
@@ -353,17 +382,16 @@ public class CertificationsComunication {
 
   /**
    * Invia la riga di assenza ad attestati.
-   * @param token token
+   *
    * @param certification attestato
    * @return risposta
    */
-  public HttpResponse deleteRigaFormazione(Optional<String> token, Certification certification) {
-    if (!reloadToken(token).isPresent()) {
-      return null;
-    }
+  public HttpResponse deleteRigaFormazione(Certification certification)
+      throws ExecutionException, NoSuchFieldException {
+    final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
 
     String url = API_URL + API_URL_FORMAZIONE;
-    WSRequest wsRequest = prepareOAuthRequest(token.get(), url, JSON_CONTENT_TYPE);
+    WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
 
     CancellazioneRigaFormazione riga = new CancellazioneRigaFormazione(certification);
     String json = new Gson().toJson(riga);
@@ -374,17 +402,16 @@ public class CertificationsComunication {
 
   /**
    * Invia la riga di assenza ad attestati.
-   * @param token token
+   *
    * @param certification attestato
    * @return risposta
    */
-  public HttpResponse deleteRigaCompetenza(Optional<String> token, Certification certification) {
-    if (!reloadToken(token).isPresent()) {
-      return null;
-    }
+  public HttpResponse deleteRigaCompetenza(Certification certification)
+      throws ExecutionException, NoSuchFieldException {
+    final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
 
     String url = API_URL + API_URL_COMPETENZA;
-    WSRequest wsRequest = prepareOAuthRequest(token.get(), url, JSON_CONTENT_TYPE);
+    WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
 
     CancellazioneRigaCompetenza riga = new CancellazioneRigaCompetenza(certification);
     String json = new Gson().toJson(riga);
@@ -395,32 +422,36 @@ public class CertificationsComunication {
 
   /**
    * Preleva da attestati la lista dei codici assenza (per il tipo contratto CL0609).
-   * @param token token
+   *
    * @return lista dei codici assenza
    */
-  public List<CodiceAssenza> getAbsencesList(Optional<String> token) {
+  public List<CodiceAssenza> getAbsencesList() throws ExecutionException {
 
-    if (!reloadToken(token).isPresent()) {
+    final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
+    if (token == null) {
       return Lists.newArrayList();
     }
 
     try {
       String url = API_URL + API_URL_ASSENZE_PER_CONTRATTO + "/" + "CL0609";
 
-      WSRequest wsRequest = prepareOAuthRequest(token.get(), url, JSON_CONTENT_TYPE);
+      WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
       HttpResponse httpResponse = wsRequest.get();
 
-      String json = httpResponse.getJson().toString();
+      // Caso di token non valido
+      if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
+        cacheValues.oauthToken.invalidateAll();
+        throw new IllegalAccessError("Invalid Token: " + token);
+      }
 
-      List<CodiceAssenza> listaCodiciAssenza = new Gson().fromJson(json, 
-          new TypeToken<List<CodiceAssenza>>() {
-            private static final long serialVersionUID = 7349718637394974415L;
-        }.getType());
+      final CodiceAssenza[] lista = new Gson().fromJson(httpResponse.getJson(),
+          CodiceAssenza[].class);
 
-      return listaCodiciAssenza;
+      return Arrays.asList(lista);
 
-    } catch (Exception ex) {}
-
+    } catch (Exception ex) {
+      log.error("Errore di comunicazione col server degli Attestati {}", ex.getMessage());
+    }
     return Lists.newArrayList();
   }
 

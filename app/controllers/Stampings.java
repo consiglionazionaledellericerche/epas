@@ -113,6 +113,9 @@ public class Stampings extends Controller {
    */
   public static void stampings(final Integer year, final Integer month) {
 
+    if (year == null || month == null) {
+      stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
+    }
     IWrapperPerson wrperson = wrapperFactory
         .create(Security.getUser().get().person);
 

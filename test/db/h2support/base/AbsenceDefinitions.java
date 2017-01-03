@@ -1,4 +1,4 @@
-package absences;
+package db.h2support.base;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -28,6 +28,60 @@ public class AbsenceDefinitions {
   public static Set<JustifiedTypeName> PERMITTED_SPECIFIED_MINUTES = 
       ImmutableSet.of(JustifiedTypeName.specified_minutes);
 
+  public enum CategoryTabDefinition {
+    
+    Missione(1, "Missione", 0, true),
+    Ferie(2, "Ferie e Festività Soppr.", 1, false),
+    Riposi(3, "Riposo Compensativo", 2, false),
+    AltreTipologie(4, "Altre Tipologie", 3, false),
+    CodiciDipendenti(5, "Codici Dipendenti", 4, false);
+    
+    public int id;
+    public String description;
+    public int priority;
+    public boolean isDefault;
+    
+    private CategoryTabDefinition(int id, String description, int priority, boolean isDefault) {
+      this.id = id;
+      this.description = description;
+      this.priority = priority;
+      this.isDefault = isDefault;
+    }
+  }
+  
+  public enum CategoryDefinition {
+    
+    Missione(1, "Missione", 0, CategoryTabDefinition.Missione),
+    Ferie(13, "Ferie e Festività Soppr.", 1, CategoryTabDefinition.Ferie),
+    Riposi(14, "Riposo Compensativo", 2, CategoryTabDefinition.Riposi),
+    Permessi(2, "Permessi Vari", 3, CategoryTabDefinition.AltreTipologie),
+    Congedi(3, "Congedi Parentali", 4, CategoryTabDefinition.AltreTipologie),
+    L104(4, "Disabilità legge 104/92", 5, CategoryTabDefinition.AltreTipologie),
+    PubblicaFunz(5, "Pubblica Funzione", 6, CategoryTabDefinition.AltreTipologie),
+    MalattiaDipendente(6, "Malattia Dipendente", 7, CategoryTabDefinition.AltreTipologie),
+    MalattiaPrimoFiglio(7, "Malattia Primo Figlio", 8, CategoryTabDefinition.AltreTipologie),
+    MalattiaSecondoFiglio(8, "Malattia Secondo Figlio", 9, CategoryTabDefinition.AltreTipologie),
+    MalattiaTerzoFiglio(9, "Malattia Terzo Figlio", 10, CategoryTabDefinition.AltreTipologie),
+    CodiciAutomatici(10, "Codici Automatici", 11, CategoryTabDefinition.AltreTipologie),
+    CodiciDipendenti(11, "Codici Dipendenti", 12, CategoryTabDefinition.AltreTipologie),
+    AltriCodici(12, "Altri Codici", 12, CategoryTabDefinition.AltreTipologie);
+    
+    public int id;
+    public CategoryTabDefinition tabDefinition;
+    public String description;
+    public Integer priority;
+
+    private CategoryDefinition(int id, String description, Integer priority, 
+        CategoryTabDefinition tabDefinition) {
+      this.id = id;
+      this.description = description;
+      this.priority = priority;
+      this.tabDefinition = tabDefinition;
+      
+    }
+    
+  }
+  
   public enum AbsenceTypeDefinition {
 
     _661H1(0, false, false, PERMITTED_NOTHING, ONE_HOUR, JustifiedTypeName.absence_type_minutes),
@@ -130,56 +184,5 @@ public class AbsenceDefinitions {
       this.next = next;
     }
   }
-
-  public enum WorkingDayDefinition {
-
-    Normal_1(1, 432, false, 360, 30, null, null),
-    Normal_2(2, 432, false, 360, 30, null, null),
-    Normal_3(3, 432, false, 360, 30, null, null),
-    Normal_4(4, 432, false, 360, 30, null, null),
-    Normal_5(5, 432, false, 360, 30, null, null),
-    Normal_6(6, 0, true, 0, 0, null, null),
-    Normal_7(7, 0, true, 0, 0, null, null);
-
-    public Integer dayOfWeek;
-    public Integer workingTime;
-    public boolean holiday;
-    public Integer mealTicketTime;
-    public Integer breakTicketTime;
-    public Integer ticketAfternoonThreshold;
-    public Integer ticketAfternoonWorkingTime;
-
-    private WorkingDayDefinition(Integer dayOfWeek, Integer workingTime, 
-        boolean holiday, Integer mealTicketTime, Integer breakTicketTime, 
-        Integer ticketAfternoonThreshold, Integer ticketAfternoonWorkingTime) {
-      this.dayOfWeek = dayOfWeek;
-      this.workingTime = workingTime;
-      this.holiday = holiday;
-      this.mealTicketTime = mealTicketTime;
-      this.breakTicketTime = breakTicketTime;
-      this.ticketAfternoonThreshold = ticketAfternoonThreshold;
-      this.ticketAfternoonWorkingTime = ticketAfternoonWorkingTime;
-    }
-
-  }
-
-  public enum WorkingDefinition {
-
-    Normal(true, 
-        ImmutableList.of(WorkingDayDefinition.Normal_1, WorkingDayDefinition.Normal_2, 
-            WorkingDayDefinition.Normal_3, WorkingDayDefinition.Normal_4,
-            WorkingDayDefinition.Normal_5, WorkingDayDefinition.Normal_6, 
-            WorkingDayDefinition.Normal_7));
-
-    public boolean horizontal;
-    public List<WorkingDayDefinition> orderedWorkingDayDefinition;
-
-    private WorkingDefinition(boolean horizontal, 
-        List<WorkingDayDefinition> orderedWorkingDayDefinition) {
-      this.horizontal = horizontal;
-      this.orderedWorkingDayDefinition = orderedWorkingDayDefinition;
-    }
-  }
-
-
+  
 }

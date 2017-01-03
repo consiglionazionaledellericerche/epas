@@ -24,7 +24,7 @@
      verrà visualizzato un riepilogo delle modifiche e chiesto un comando di conferma. </p>
   #{/alert}
   
-  #{if wrappedContract.value.isTemporary && wrappedContract.value.endDate == null}
+  #{if wrappedContract.value.isTemporaryMissing && wrappedContract.value.endDate == null}
     #{alert color:'danger'}
       <p>Il contratto selezionato è stato automaticamente importato dai sistemi centrali CNR e 
       risulta essere della tipologia Tempo Determinato. Per completare la configurazione

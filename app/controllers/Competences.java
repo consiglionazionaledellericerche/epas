@@ -1,12 +1,12 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
-
-import com.beust.jcommander.internal.Lists;
 
 import dao.CertificationDao;
 import dao.CompetenceCodeDao;
@@ -64,7 +64,6 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 import java.io.FileInputStream;
@@ -116,7 +115,6 @@ public class Competences extends Controller {
   private static ShiftDao shiftDao;
 
 
-
   /**
    * Crud CompetenceCode.
    */
@@ -136,8 +134,9 @@ public class Competences extends Controller {
 
   /**
    * salva la competenza come abilitata/disabilitata.
+   *
    * @param competenceCodeId l'id della competenza da abilitare/disabilitare
-   * @param confirmed se siamo in fase di conferma o meno
+   * @param confirmed        se siamo in fase di conferma o meno
    */
   public static void evaluateCompetenceCode(Long competenceCodeId, boolean confirmed) {
     CompetenceCode comp = competenceCodeDao.getCompetenceCodeById(competenceCodeId);
@@ -158,6 +157,7 @@ public class Competences extends Controller {
 
   /**
    * restituisce la form per l'aggiunta di un codice di competenza a un gruppo.
+   *
    * @param competenceCodeGroupId l'id del gruppo di codici competenza
    */
   public static void addCompetenceCodeToGroup(Long competenceCodeGroupId) {
@@ -168,13 +168,14 @@ public class Competences extends Controller {
 
   /**
    * aggiunge le competenze al gruppo passato come parametro.
+   *
    * @param group il gruppo a cui aggiungere competenze
    */
   public static void addCompetences(CompetenceCodeGroup group, CompetenceCode code) {
     notFoundIfNull(group);
     if (!code.limitUnit.name().equals(group.limitUnit.name())) {
       validation.addError("code", "L'unità di misura del limite del codice è diversa "
-          + "da quella del gruppo");          
+          + "da quella del gruppo");
     }
     if (!code.limitType.name().equals(group.limitType.name())) {
       validation.addError("code", "Il tipo di limite del codice è diverso da quello del gruppo");
@@ -203,6 +204,7 @@ public class Competences extends Controller {
 
   /**
    * Modifica codice competenza. Chiama la show se chi invoca il metodo è un utente fisico.
+   *
    * @param competenceCodeId codice
    */
   public static void edit(Long competenceCodeId) {
@@ -216,6 +218,7 @@ public class Competences extends Controller {
 
   /**
    * metodo che renderizza la sola visualizzazione dei dati di un competenceCode.
+   *
    * @param competenceCode il codice di competenza da visualizzare
    */
   public static void show(CompetenceCode competenceCode) {
@@ -245,6 +248,7 @@ public class Competences extends Controller {
 
   /**
    * salva il gruppo di codici competenza con i codici associati.
+   *
    * @param group il gruppo di codici competenza
    */
   public static void saveGroup(@Valid final CompetenceCodeGroup group) {
@@ -267,6 +271,7 @@ public class Competences extends Controller {
 
   /**
    * cancella il codice di competenza dal gruppo.
+   *
    * @param competenceCodeId l'id del codice di competenza da cancellare
    */
   public static void deleteCompetenceFromGroup(Long competenceCodeId, boolean confirmed) {
@@ -325,10 +330,11 @@ public class Competences extends Controller {
 
   /**
    * salva la nuova configurazione dei codici di competenza abilitati per la persona.
+   *
    * @param codeListIds la lista degli id dei codici di competenza per la nuova configurazione
-   * @param personId l'id della persona di cui modificare le competenze abilitate
-   * @param year l'anno di riferimento
-   * @param month il mese di riferimento
+   * @param personId    l'id della persona di cui modificare le competenze abilitate
+   * @param year        l'anno di riferimento
+   * @param month       il mese di riferimento
    */
   public static void saveNewCompetenceConfiguration(List<Long> codeListIds,
       Long personId, int year, int month) {
@@ -345,7 +351,7 @@ public class Competences extends Controller {
       flash.error("Non si può modificare una configurazione per un anno/mese in cui "
           + "sono già stati inviati gli attestati");
       Competences.enabledCompetences(year,
-          month,person.office.id);
+          month, person.office.id);
     }
 
     List<PersonCompetenceCodes> pccList = competenceCodeDao
@@ -358,10 +364,9 @@ public class Competences extends Controller {
     flash.success(String.format("Aggiornate con successo le competenze per %s",
         person.fullName()));
     Competences.enabledCompetences(date.getYear(),
-        date.getMonthOfYear(),person.office.id);
+        date.getMonthOfYear(), person.office.id);
 
   }
-
 
 
   /**
@@ -374,12 +379,9 @@ public class Competences extends Controller {
 
     Optional<User> user = Security.getUser();
 
-    if (!user.isPresent() || user.get().person == null) {
-      flash.error("Accesso negato.");
-      Stampings.stampings(year, month);
-    }
+    Verify.verify(user.isPresent());
+    Verify.verifyNotNull(user.get().person);
 
-    //Redirect in caso di mese futuro
     LocalDate today = LocalDate.now();
     if (year > today.getYear() || today.getYear() == year && month > today.getMonthOfYear()) {
       flash.error("Impossibile accedere a situazione futura, "
@@ -396,11 +398,23 @@ public class Competences extends Controller {
       flash.error("Nessun contratto attivo nel mese.");
       Stampings.stampings(year, month);
     }
+    
+    List<PersonCompetenceCodes> pccList = competenceCodeDao
+        .listByPerson(person, Optional.fromNullable(LocalDate.now()
+            .withMonthOfYear(month).withYear(year)));
+    List<CompetenceCode> codeListIds = Lists.newArrayList();
+    for (PersonCompetenceCodes pcc : pccList) {
+      codeListIds.add(pcc.competenceCode);
+    }
+    
+    List<Competence> competenceList = competenceDao.getCompetences(Optional.fromNullable(person), 
+        year, Optional.fromNullable(month), codeListIds);
+    Map<CompetenceCode, String> map = competenceManager.createMapForCompetences(competenceList);
 
     Optional<PersonMonthCompetenceRecap> personMonthCompetenceRecap =
         personMonthCompetenceRecapFactory.create(contract.get(), month, year);
 
-    render(personMonthCompetenceRecap, person, year, month);
+    render(personMonthCompetenceRecap, person, year, month, competenceList, map);
 
   }
 
@@ -455,11 +469,15 @@ public class Competences extends Controller {
   }
 
   /**
+<<<<<<< HEAD
    * @param personId l'id della persona
+=======
+   * @param personId     l'id della persona
+>>>>>>> refs/remotes/origin/master
    * @param competenceId l'id della competenza
-   * @param month il mese 
-   * @param year l'anno
-   *     ritorna la form di inserimento di un codice di competenza per una persona.
+   * @param month        il mese
+   * @param year         l'anno ritorna la form di inserimento di un codice di competenza per una
+   *                     persona.
    */
   public static void insertCompetence(Long personId, Long competenceId, int month, int year) {
     Person person = personDao.getPersonById(personId);
@@ -471,13 +489,14 @@ public class Competences extends Controller {
     if (competence.competenceCode.code.equals("S1")) {
       PersonStampingRecap psDto = stampingsRecapFactory.create(competence.person,
           competence.year, competence.month, true);
-      render("@editCompetence",competence, psDto, office, year, month, person);
+      render("@editCompetence", competence, psDto, office, year, month, person);
     }
     render("@editCompetence", competence, office, year, month, person);
   }
 
   /**
    * genera la form di inserimento per le competenze.
+   *
    * @param competenceId l'id della competenza da aggiornare.
    */
   public static void editCompetence(Long competenceId) {
@@ -495,6 +514,7 @@ public class Competences extends Controller {
 
   /**
    * salva la competenza passata per parametro se è conforme ai limiti eventuali previsti per essa.
+   *
    * @param competence la competenza relativa alla persona
    */
   public static void saveCompetence(Integer valueApproved, @Valid Competence competence) {
@@ -510,7 +530,7 @@ public class Competences extends Controller {
       result = competenceManager.canAddCompetence(competence, valueApproved);
       if (!result.isEmpty()) {
         validation.addError("valueApproved", result);
-      }      
+      }
     }
     if (validation.hasErrors()) {
 
@@ -520,12 +540,12 @@ public class Competences extends Controller {
 
 
     competenceManager.saveCompetence(competence, valueApproved);
-    if (competence.competenceCode.code.equalsIgnoreCase("S1") 
-        || competence.competenceCode.code.equalsIgnoreCase("S2") 
+    if (competence.competenceCode.code.equalsIgnoreCase("S1")
+        || competence.competenceCode.code.equalsIgnoreCase("S2")
         || competence.competenceCode.code.equalsIgnoreCase("S3")) {
 
       consistencyManager.updatePersonSituation(competence.person.id,
-          new LocalDate(competence.year, competence.month, 1)); 
+          new LocalDate(competence.year, competence.month, 1));
     }
     int month = competence.month;
     int year = competence.year;
@@ -738,6 +758,7 @@ public class Competences extends Controller {
 
   /**
    * Metodo che renderizza la form di visualizzazione dei servizi attivi per un ufficio.
+   *
    * @param officeId l'id dell'ufficio per cui visualizzare i servizi attivi
    */
   public static void activateServices(Long officeId) {
@@ -755,7 +776,8 @@ public class Competences extends Controller {
 
   /**
    * Metodo che renderizza la form di inserimento di un nuovo servizio da attivare
-   *     per la reperibilità.
+   * per la reperibilità.
+   *
    * @param officeId l'id dell'ufficio a cui associare il servizio
    */
   public static void addReperibility(Long officeId) {
@@ -785,7 +807,8 @@ public class Competences extends Controller {
 
   /**
    * metodo che persiste il servizio per reperibilità o comunque lo modifica se già presente.
-   * @param type il servizio da persistere
+   *
+   * @param type   il servizio da persistere
    * @param office la sede di appartenenza del servizio
    */
   public static void saveReperibility(@Valid PersonReperibilityType type, @Valid Office office) {
@@ -830,8 +853,9 @@ public class Competences extends Controller {
 
   /**
    * metodo che controlla e poi persiste la disabilitazione/abilitazione di un servizio.
+   *
    * @param reperibilityTypeId l'id del servizio da disabilitare/abilitare
-   * @param confirmed il booleano per consentire la persistenza di una modifica
+   * @param confirmed          il booleano per consentire la persistenza di una modifica
    */
   public static void evaluateReperibility(Long reperibilityTypeId, boolean confirmed) {
     PersonReperibilityType type = reperibilityDao.getPersonReperibilityTypeById(reperibilityTypeId);
@@ -862,6 +886,7 @@ public class Competences extends Controller {
 
   /**
    * metodo che ritorna la form di inserimento/modifica di un servizio.
+   *
    * @param reperibilityTypeId l'id del servizio da editare
    */
   public static void editReperibility(Long reperibilityTypeId) {

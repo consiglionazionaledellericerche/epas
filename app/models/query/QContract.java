@@ -46,7 +46,7 @@ public class QContract extends EntityPathBase<Contract> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
-    public final BooleanPath isTemporary = createBoolean("isTemporary");
+    public final BooleanPath isTemporaryMissing = createBoolean("isTemporaryMissing");
 
     public final ListPath<models.MealTicket, QMealTicket> mealTickets = this.<models.MealTicket, QMealTicket>createList("mealTickets", models.MealTicket.class, QMealTicket.class, PathInits.DIRECT2);
 

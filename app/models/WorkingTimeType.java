@@ -38,6 +38,9 @@ import javax.persistence.Transient;
 public class WorkingTimeType extends BaseModel {
 
   private static final long serialVersionUID = -3443521979786226461L;
+  
+  //serve per il calcolo della percentuale part time
+  public static final int WORKTIME_BASE = 432;
 
   @Getter
   @Required
@@ -145,6 +148,28 @@ public class WorkingTimeType extends BaseModel {
     return equal;
 
   }
+  
+  /**
+   * Calcola il tempo percentuale di part time.
+   * @return percentuale
+   */
+  public int percentEuristic() {
+    int totalMinutes = 0;
+    int totalDays = 0;
+    for (WorkingTimeTypeDay workingTimeTypeDay : this.workingTimeTypeDays) {
+      if (!workingTimeTypeDay.holiday) {
+        totalMinutes += workingTimeTypeDay.workingTime;
+        totalDays++;
+      }
+    }
+    if (totalDays == 0) {
+      return 100;
+    }
+    
+    int percent = ((totalMinutes / totalDays) * 100) / WORKTIME_BASE;  
+    return percent;
+  }
+    
 
 }
 

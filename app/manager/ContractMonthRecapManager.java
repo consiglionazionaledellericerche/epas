@@ -28,10 +28,12 @@ import models.PersonDay;
 import models.WorkingTimeTypeDay;
 import models.absences.Absence;
 
+import org.assertj.core.util.Sets;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -186,7 +188,7 @@ public class ContractMonthRecapManager {
     IWrapperContract wrContract = wrapperFactory.create(cmr.contract);
 
     setMealTicketsInformation(cmr, validDataForMealTickets);
-    setPersonDayInformation(cmr, validDataForPersonDay);
+    setPersonDayInformation(cmr, validDataForPersonDay, otherCompensatoryRest);
     setPersonMonthInformation(cmr, wrContract,
         validDataForCompensatoryRest, otherCompensatoryRest);
 
@@ -362,7 +364,7 @@ public class ContractMonthRecapManager {
    * cmr.progressivoFinalePositivoMeseAux <br> cmr.progressivoFinaleNegativoMese <br>
    */
   private void setPersonDayInformation(ContractMonthRecap cmr,
-      DateInterval validDataForPersonDay) {
+      DateInterval validDataForPersonDay, List<Absence> otherCompensatoryRests) {
 
     if (validDataForPersonDay != null) {
 
@@ -383,8 +385,17 @@ public class ContractMonthRecapManager {
         }
       }
 
+      //Nei giorni in cui simulo l'inserimento di riposi compensativi la differenza è zero.
+      Set<LocalDate> otherCompensatoryDates = Sets.newHashSet(); 
+      for (Absence otherCompensatoryRest : otherCompensatoryRests) {
+        otherCompensatoryDates.add(otherCompensatoryRest.getAbsenceDate());
+      }
+      
       //progressivo finale positivo e negativo mese
       for (PersonDay pd : pdList) {
+        if (otherCompensatoryDates.contains(pd.date)) {
+          continue;
+        }
         if (pd.difference >= 0) {
           cmr.progressivoFinalePositivoMeseAux += pd.difference;
         } else {
