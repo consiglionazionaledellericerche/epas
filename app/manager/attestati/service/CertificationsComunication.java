@@ -198,7 +198,8 @@ public class CertificationsComunication {
     // Caso di token non valido
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
       cacheValues.oauthToken.invalidateAll();
-      throw new IllegalAccessError("Invalid Token: " + token);
+      log.error("Token Oauth non valido: {}", token);
+      throw new ApiRequestException("Invalid token");
     }
 
     ListaDipendenti listaDipendenti = new Gson()
@@ -221,7 +222,7 @@ public class CertificationsComunication {
    * @param year   anno
    */
   public Optional<SeatCertification> getPersonSeatCertification(Person person,
-      int month, int year) throws ExecutionException {
+                                                                int month, int year) throws ExecutionException {
 
     final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
     if (token == null) {
@@ -238,7 +239,8 @@ public class CertificationsComunication {
       // Caso di token non valido
       if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
         cacheValues.oauthToken.invalidateAll();
-        throw new IllegalAccessError("Invalid Token: " + token);
+        log.error("Token Oauth non valido: {}", token);
+        throw new ApiRequestException("Invalid token");
       }
 
       SeatCertification seatCertification =
@@ -303,7 +305,7 @@ public class CertificationsComunication {
    * @return risposta
    */
   public HttpResponse sendRigaBuoniPasto(Certification certification,
-      boolean update) throws ExecutionException, NoSuchFieldException {
+                                         boolean update) throws ExecutionException, NoSuchFieldException {
 
     final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
 
@@ -441,7 +443,8 @@ public class CertificationsComunication {
       // Caso di token non valido
       if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
         cacheValues.oauthToken.invalidateAll();
-        throw new IllegalAccessError("Invalid Token: " + token);
+        log.error("Token Oauth non valido: {}", token);
+        throw new ApiRequestException("Invalid token");
       }
 
       final CodiceAssenza[] lista = new Gson().fromJson(httpResponse.getJson(),
