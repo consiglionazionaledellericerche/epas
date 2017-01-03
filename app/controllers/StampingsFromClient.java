@@ -8,6 +8,8 @@ import controllers.Resecure.BasicAuth;
 
 import dao.PersonDao;
 
+import helpers.JsonResponse;
+
 import it.cnr.iit.epas.JsonStampingBinder;
 
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +25,6 @@ import models.exports.StampingFromClient;
 import play.data.binding.As;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
-import play.mvc.Http;
 import play.mvc.With;
 import security.SecurityRules;
 
@@ -45,8 +46,6 @@ public class StampingsFromClient extends Controller {
   @Inject
   static PersonDao personDao;
 
-  public static final int CONFLICT = 409;
-
   /**
    * Aggiunge una timbratura ad una persona.
    */
@@ -57,26 +56,23 @@ public class StampingsFromClient extends Controller {
 
     // Malformed Json (400)
     if (body == null) {
-      badRequest();
+      JsonResponse.badRequest();
     }
 
     // Badge number not present (404)
     if (body.person == null) {
       log.warn("Non e' stato possibile recuperare la persona a cui si riferisce la timbratura,"
           + " matricolaFirma={}. Controllare il database.", body.numeroBadge);
-      // non uso il notFound() per evitare di restituire il contenuto html
-      response.status = Http.StatusCode.NOT_FOUND;
-      return;
+      JsonResponse.notFound();
     }
 
     // Stamping already present (409)
     if (!stampingManager.createStampingFromClient(body, true)) {
-      response.status = CONFLICT;
-      return;
+      JsonResponse.conflict();
     }
 
     // Success (200)
-    ok();
+    JsonResponse.ok();
   }
 
   /**
@@ -90,27 +86,24 @@ public class StampingsFromClient extends Controller {
 
     // Malformed Json (400)
     if (body == null) {
-      badRequest();
+      JsonResponse.badRequest();
     }
 
     // Badge number not present (404)
     if (body.person == null) {
       log.warn("Non e' stato possibile recuperare la persona a cui si riferisce la timbratura,"
           + " matricolaFirma={}. Controllare il database.", body.numeroBadge);
-      // non uso il notFound() per evitare di restituire il contenuto html
-      response.status = Http.StatusCode.NOT_FOUND;
-      return;
+      JsonResponse.badRequest();
     }
 
 
     // Stamping already present (409)
     if (!stampingManager.createStampingFromClient(body, false)) {
-      response.status = CONFLICT;
-      return;
+      JsonResponse.conflict();
     }
 
     // Success (200)
-    ok();
+    JsonResponse.ok();
   }
 
 

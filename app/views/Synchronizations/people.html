@@ -61,7 +61,7 @@
 	        <span class="label label-primary">${perseoContract.beginDate}</span>
 	        <span class="label label-primary">${perseoContract.endDate}</span>
 	        <span class="label label-danger">${perseoContract.endContract}</span>
-	        #{if perseoContract.isTemporary && perseoContract.endDate == null}
+	        #{if perseoContract.isTemporaryMissing && perseoContract.endDate == null}
 	          <span class="label label-warning">Temporary</span>
 	        #{/if}
 	        <span class="label label-success">${perseoContract.perseoId}</span>
@@ -73,7 +73,7 @@
 	             <span class="label label-primary">${epasContract.beginDate}</span>
 	             <span class="label label-primary">${epasContract.endDate}</span>
 	             <span class="label label-danger">${epasContract.endContract}</span>
-	             #{if epasContract.isTemporary && epasContract.endDate == null}
+	             #{if epasContract.isTemporaryMissing && epasContract.endDate == null}
 	               <span class="label label-warning">Temporary</span>
 	             #{/if} 
 	           #{/if}

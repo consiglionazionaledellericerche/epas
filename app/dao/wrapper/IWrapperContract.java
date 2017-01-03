@@ -67,6 +67,13 @@ public interface IWrapperContract extends IWrapperModel<Contract> {
    * @return il mese
    */
   YearMonth getLastMonthToRecap();
+  
+  /**
+   * Se il contratto è stato inizializzato per la parte residuale nel mese passato come argomento. 
+   * @param yearMonth mese
+   * @return esito
+   */
+  boolean residualInitInYearMonth(YearMonth yearMonth);
 
   //List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList();
 

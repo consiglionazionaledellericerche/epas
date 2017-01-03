@@ -166,6 +166,19 @@ public class WrapperContract implements IWrapperContract {
     }
     return currentMonth;
   }
+  
+  /**
+   * Se il contratto è stato inizializzato per la parte residuale nel mese passato come argomento. 
+   * @param yearMonth mese
+   * @return esito
+   */
+  @Override
+  public boolean residualInitInYearMonth(YearMonth yearMonth) {
+    if (value.sourceDateResidual == null) {
+      return false;
+    }
+    return new YearMonth(value.sourceDateResidual).equals(yearMonth);
+  }
 
   /**
    * Il riepilogo mensile attualmente persistito (se esiste).
@@ -324,5 +337,7 @@ public class WrapperContract implements IWrapperContract {
 
     return false;
   }
+
+
 
 }

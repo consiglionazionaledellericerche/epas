@@ -15,8 +15,11 @@ import dao.absences.AbsenceComponentDao;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.AbsenceManager;
+import manager.attestati.dto.show.CodiceAssenza;
+import manager.attestati.service.CertificationService;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
+import manager.services.absences.certifications.CodeComparation;
 import manager.services.absences.errors.AbsenceError;
 import manager.services.absences.errors.CriticalError;
 import manager.services.absences.model.AbsencePeriod;
@@ -45,6 +48,7 @@ import models.absences.JustifiedType.JustifiedTypeName;
 import org.joda.time.LocalDate;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Interfaccia epas per il componente assenze.
@@ -59,6 +63,7 @@ public class AbsenceService {
   private final AbsenceComponentDao absenceComponentDao;
   private final PersonChildrenDao personChildrenDao;
   private final ServiceFactories serviceFactories;
+  private final CertificationService certificationService;
   
   /**
    * Costruttore injection.
@@ -72,11 +77,13 @@ public class AbsenceService {
       AbsenceEngineUtility absenceEngineUtility,
       ServiceFactories serviceFactories,
       AbsenceComponentDao absenceComponentDao,
-      PersonChildrenDao personChildrenDao) {
+      PersonChildrenDao personChildrenDao, CertificationService certificationService) {
     this.absenceEngineUtility = absenceEngineUtility;
     this.serviceFactories = serviceFactories;
     this.absenceComponentDao = absenceComponentDao;
     this.personChildrenDao = personChildrenDao;
+    this.certificationService = certificationService;
+    
   }
   
   /**
@@ -647,6 +654,101 @@ public class AbsenceService {
       }
       return dates;
     }
+  }
+  
+  /**
+   * Calcola la comparazione con i codici in attestati.
+   */
+  public CodeComparation computeCodeComparation() {
+    
+
+    CodeComparation codeComparation = new CodeComparation();
+
+    try {
+      //Codici di assenza in attestati
+      Map<String, CodiceAssenza> attestatiAbsenceCodes = certificationService.absenceCodes();
+      if (attestatiAbsenceCodes.isEmpty()) {
+        log.info("Impossibile accedere ai codici in attestati");
+        return null;
+      }
+      //Tasformazione in superCodes
+      for (CodiceAssenza codiceAssenza : attestatiAbsenceCodes.values()) {
+        codeComparation.putCodiceAssenza(codiceAssenza);
+      }
+    } catch (Exception ex) {
+      return null;
+    }
+
+    //Codici di assenza epas
+    List<AbsenceType> absenceTypes = AbsenceType.findAll();
+    //Tasformazione in superCodes
+    for (AbsenceType absenceType : absenceTypes) {
+      codeComparation.putAbsenceType(absenceType);
+    }
+    
+    //Tutte le assenze epas
+    List<Absence> absences = Absence.findAll();
+    //Inserimento in superCodes
+    for (Absence absence : absences) {
+      codeComparation.putAbsence(absence);
+    }
+   
+    
+    codeComparation.setOnlyAttestati();
+    codeComparation.setOnlyEpas();
+    codeComparation.setBoth();
+    
+    return codeComparation;
+  }
+  
+  public void theGrassHopperMigration() {
+    
+    //1) Edit riting code -> specifiedMinutes
+    
+    //2) Edit pepe code -> specifiedMinutes
+    
+    //3) Edit Fuori sede code
+    //FUORI SEDE H1 -> absenceTypeMinutes 60
+    //FUORI SEDE H7 -> absenceTypeMinutes 60*7
+    //update person situations
+    
+    //4) Convert Absences
+    // absence 232H2 -> 232M 2 hour
+    // absence 232H3 -> 232M 3 hour
+    // absence 233H2 -> 233M 2 hour
+    // absence 233H3 -> 233M 3 hour
+    // absence 23H3 -> 23M 3 hour
+    // update person situations
+    
+    //5) Edit 26 -> absenceTypeMinutes 120
+    //update person situations (forse nessuno)
+    
+    //6) Convert Absences
+    // 26p2h -> 26
+    
+    //7) Delete code 26p2h
+    
+    //8) Disable superCode.withProblems except for 91MD, 91MS, 91S
+    
+    //9) Create Group G_24 from Definitions (code 24 already exists)
+    
+    //10) Create Group G_242 from Definitions (code 242 already exists)
+    
+    //11) Create Group G_243 from Definitions (code 243 already exists)
+    
+    //12) Create Group G_182 from Definitions (code 182 already exists)
+    
+    //13) Create Group G_18P from Definitions
+    
+    //14) Create Group G_182P from Definitions
+    
+    //15) Create Group G_19P from Definitions
+    
+    //16) Add to group MalattiaDipendente
+    // 11C5
+    // 11C9
+    
+    
   }
   
 }

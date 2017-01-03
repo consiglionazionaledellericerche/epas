@@ -1,6 +1,7 @@
 package manager.services.absences.model;
 
-import com.beust.jcommander.internal.Lists;
+
+import com.google.common.collect.Lists;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -13,35 +14,37 @@ import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
+import models.absences.JustifiedType.JustifiedTypeName;
 
 import org.joda.time.LocalDate;
 
 import java.util.List;
 
-@Getter 
+@Getter
 @Setter
 public class DayInPeriod {
-  
-  
+
+
   private LocalDate date;
   private AbsencePeriod absencePeriod;
-  
+
   //Lo stato limiti (anche quelli in eccesso)
   private List<TakenAbsence> takenAbsences = Lists.newArrayList();
   private List<Absence> existentComplations = Lists.newArrayList();
   private ComplationAbsence complationAbsence; //quando è unico
-  
+
   //Il rimpiazzamento
-  private List<Absence> existentReplacings = Lists.newArrayList();  
+  private List<Absence> existentReplacings = Lists.newArrayList();
   private AbsenceType correctReplacing;
-  
+
   public DayInPeriod(LocalDate date, AbsencePeriod absencePeriod) {
     this.date = date;
     this.absencePeriod = absencePeriod;
   }
-  
+
   /**
    * Se l'assenza è inserita come taken nel giorno.
+   *
    * @param absence assenza
    * @return esito
    */
@@ -53,9 +56,10 @@ public class DayInPeriod {
     }
     return false;
   }
-  
+
   /**
    * I rimpiazzamenti scorretti nel giorno.
+   *
    * @return list
    */
   public List<Absence> existentWrongReplacing() {
@@ -70,9 +74,10 @@ public class DayInPeriod {
     }
     return wrong;
   }
-  
+
   /**
    * Se nel giorno c'è un rimpiazzamento mancante.
+   *
    * @return esito
    */
   public boolean isReplacingMissing() {
@@ -86,30 +91,32 @@ public class DayInPeriod {
     }
     return true;
   }
-  
+
   /**
    * Le assenze taken che non sono di completamento nel giorno.
+   *
    * @return list
    */
   public List<TakenAbsence> takenNotComplation() {
     List<TakenAbsence> notComplation = Lists.newArrayList();
     for (TakenAbsence takenAbsence : takenAbsences) {
-      if (complationAbsence == null 
+      if (complationAbsence == null
           || !complationAbsence.absence.equals(takenAbsence.absence)) {
         notComplation.add(takenAbsence);
       }
     }
     return notComplation;
   }
-  
+
   /**
-   * L'assenza taken di completamento nel giorno (è unica altrimenti sono collocate in 
+   * L'assenza taken di completamento nel giorno (è unica altrimenti sono collocate in
    * existentComplations.
+   *
    * @return takenAbsence
    */
   public TakenAbsence takenComplation() {
     for (TakenAbsence takenAbsence : takenAbsences) {
-      if (complationAbsence != null 
+      if (complationAbsence != null
           && complationAbsence.absence.equals(takenAbsence.absence)) {
         return takenAbsence;
       }
@@ -117,7 +124,7 @@ public class DayInPeriod {
     return null;
   }
 
-  
+
   public static class TemplateRow {
 
     public LocalDate date;
@@ -136,33 +143,39 @@ public class DayInPeriod {
     public String consumedComplationBefore;
     public String consumedComplationAbsence;
     public String consumedComplationNext;
-    
+
     public boolean isReplacingRow = false;
-    
+
     public boolean onlyNotOnHoliday() {
-      return absenceErrors.size() == 1 
+      return absenceErrors.size() == 1
           && absenceErrors.iterator().next().absenceProblem.equals(AbsenceProblem.NotOnHoliday);
     }
-    
+
   }
-  
+
   /**
    * Le righe della tabella web per il periodo.
+   *
    * @param nothing il tempo giustificato nothing da associare al rimpiazzamento (FIXME)
    * @return list
    */
-  public List<TemplateRow> allTemplateRows(final JustifiedType nothing) {
-    List<TemplateRow> templateRows = Lists.newArrayList();
+  public List<TemplateRow> allTemplateRows() {
     
+    //FIXME: questo justifiedType serve per i replacing. Injettarlo
+    JustifiedType nothing = new JustifiedType();
+    nothing.name = JustifiedTypeName.nothing;   
+
+    List<TemplateRow> templateRows = Lists.newArrayList();
+
     for (TakenAbsence takenAbsence : takenNotComplation()) {
-      TemplateRow takenRow = buildTakenNotComplation(takenAbsence, 
+      TemplateRow takenRow = buildTakenNotComplation(takenAbsence,
           takenAbsence.beforeInitialization);
       templateRows.add(takenRow);
     }
 
     TakenAbsence takenComplation = takenComplation();
     if (takenComplation != null) {
-      TemplateRow complationRow = buildTakenComplation(takenComplation, 
+      TemplateRow complationRow = buildTakenComplation(takenComplation,
           takenComplation.beforeInitialization);
       templateRows.add(complationRow);
       if (correctReplacing != null) {
@@ -173,38 +186,39 @@ public class DayInPeriod {
 
     return templateRows;
   }
-  
+
   /**
    * Le righe della tabella web del periodo legate ad un inserimento.
+   *
    * @param nothing il tempo giustificato nothing da associare al rimpiazzamento (FIXME)
    * @return list
    */
   public List<TemplateRow> templateRowsForInsert(final JustifiedType nothing) {
-    
+
     List<TemplateRow> templateRows = Lists.newArrayList();
-    
-    if (absencePeriod.attemptedInsertAbsence == null 
+
+    if (absencePeriod.attemptedInsertAbsence == null
         || !absencePeriod.attemptedInsertAbsence.getAbsenceDate().equals(date)) {
       return templateRows;
     }
-    
+
     TakenAbsence insertTakenAbsence = null;
     for (TakenAbsence takenAbsence : takenAbsences) {
       if (takenAbsence.absence.equals(absencePeriod.attemptedInsertAbsence)) {
         insertTakenAbsence = takenAbsence;
       }
     }
-    
+
     if (takenNotComplation().contains(insertTakenAbsence)) {
-      TemplateRow takenRow = buildTakenNotComplation(insertTakenAbsence, 
+      TemplateRow takenRow = buildTakenNotComplation(insertTakenAbsence,
           insertTakenAbsence.beforeInitialization);
       templateRows.add(takenRow);
     }
     if (takenComplation() != null && takenComplation().equals(insertTakenAbsence)) {
-      TemplateRow complationRow = buildTakenComplation(insertTakenAbsence, 
+      TemplateRow complationRow = buildTakenComplation(insertTakenAbsence,
           insertTakenAbsence.beforeInitialization);
       templateRows.add(complationRow);
-      
+
       //se non ci sono errori inserisco il replacing
       if (!absencePeriod.errorsBox.containAbsenceErrors(insertTakenAbsence.absence)) {
         if (correctReplacing != null) {
@@ -213,11 +227,11 @@ public class DayInPeriod {
         }
       }
     }
-      
+
     return templateRows;
   }
-  
-  private TemplateRow buildTakenNotComplation(TakenAbsence takenAbsence, 
+
+  private TemplateRow buildTakenNotComplation(TakenAbsence takenAbsence,
       boolean beforeInitialization) {
     TemplateRow takenRow = new TemplateRow();
     takenRow.date = takenAbsence.absence.getAbsenceDate();
@@ -229,16 +243,16 @@ public class DayInPeriod {
     if (absencePeriod.isTakableWithLimit()) {
       takenRow.usableColumn = true;
       if (!takenRow.onlyNotOnHoliday() && !beforeInitialization) {
-        takenRow.usableLimit = formatAmount(takenAbsence.periodResidualBefore(), 
+        takenRow.usableLimit = formatAmount(takenAbsence.periodResidualBefore(),
             takenAbsence.amountType);
         takenRow.usableTaken = formatAmount(takenAbsence.takenAmount, takenAbsence.amountType);
       }
     }
-    
+
     return takenRow;
   }
-  
-  private TemplateRow buildTakenComplation(TakenAbsence takenComplation, 
+
+  private TemplateRow buildTakenComplation(TakenAbsence takenComplation,
       boolean beforeInitialization) {
     TemplateRow complationRow = new TemplateRow();
     complationRow.beforeInitialization = beforeInitialization;
@@ -252,19 +266,19 @@ public class DayInPeriod {
     }
     complationRow.complationColumn = true;
     if (!complationRow.onlyNotOnHoliday() && !beforeInitialization) {
-      complationRow.usableLimit = formatAmount(takenComplation.periodResidualBefore(), 
+      complationRow.usableLimit = formatAmount(takenComplation.periodResidualBefore(),
           takenComplation.amountType);
-      complationRow.usableTaken = formatAmount(takenComplation.takenAmount, 
+      complationRow.usableTaken = formatAmount(takenComplation.takenAmount,
           takenComplation.amountType);
     }
-    complationRow.consumedComplationAbsence = formatAmount(complationAbsence.consumedComplation, 
+    complationRow.consumedComplationAbsence = formatAmount(complationAbsence.consumedComplation,
         complationAbsence.amountType);
     complationRow.consumedComplationBefore = formatAmount(complationAbsence
         .residualComplationBefore, complationAbsence.amountType);
-    
+
     return complationRow;
   }
-  
+
   private TemplateRow buildReplacing(TakenAbsence takenComplation, JustifiedType nothing) {
     TemplateRow replacingRow = new TemplateRow();
     replacingRow.date = date;
@@ -277,11 +291,11 @@ public class DayInPeriod {
     absence.justifiedType = nothing;
     replacingRow.absence = absence;
     replacingRow.groupAbsenceType = absencePeriod.groupAbsenceType;
-    replacingRow.consumedComplationNext = formatAmount(complationAbsence.residualComplationAfter, 
+    replacingRow.consumedComplationNext = formatAmount(complationAbsence.residualComplationAfter,
         complationAbsence.amountType);
     return replacingRow;
   }
-  
+
   //FIXME metodo provvisorio per fare le prove.
   private static String formatAmount(int amount, AmountType amountType) {
     if (amountType == null) {
@@ -299,13 +313,13 @@ public class DayInPeriod {
         label = " giorno lavorativo";
       }
       if (units > 0 && percent > 0) {
-        return units + label + " + " + percent + "% di un giorno lavorativo";  
+        return units + label + " + " + percent + "% di un giorno lavorativo";
       } else if (units > 0) {
         return units + label;
       } else if (percent > 0) {
         return percent + "% di un giorno lavorativo";
       }
-      return ((double)amount / 100 ) + " giorni";
+      return ((double) amount / 100) + " giorni";
     }
     if (amountType.equals(AmountType.minutes)) {
       if (amount == 0) {
@@ -324,12 +338,7 @@ public class DayInPeriod {
     }
     return format;
   }
-  
-  
-
-  
 
 
-  
 }
 

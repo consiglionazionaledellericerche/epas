@@ -1,10 +1,11 @@
 package models.absences;
 
+import com.google.common.collect.Lists;
+
 import lombok.Getter;
 
 import models.base.BaseModel;
 
-import org.assertj.core.util.Lists;
 import org.hibernate.envers.Audited;
 
 import java.util.List;
@@ -27,32 +28,33 @@ public class JustifiedType extends BaseModel {
 
   public enum JustifiedTypeName {
 
-    nothing, 
-    
-    absence_type_minutes, 
-    specified_minutes, 
-    missing_time, 
-    half_day, 
-    all_day, 
-    
+    nothing,
+
+    absence_type_minutes,
+    specified_minutes,
+    missing_time,
+    half_day,
+    all_day,
+
     assign_all_day,
-    
+
     all_day_limit,
     absence_type_limit,
     specified_minutes_limit;
-    
+
   }
-  
-  @Getter @Column
+
+  @Getter
+  @Column
   @Enumerated(EnumType.STRING)
   public JustifiedTypeName name;
-  
+
   @ManyToMany(mappedBy = "justifiedTypesPermitted")
   public Set<AbsenceType> absenceTypes;
-  
+
   @OneToMany(mappedBy = "justifiedType")
   public List<Absence> absences = Lists.newArrayList();
-  
+
   @Override
   public String toString() {
     return this.name.name();

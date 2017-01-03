@@ -73,7 +73,15 @@
     <strong>Descrizione</strong> ${_absence.absenceType.description}<br>  
     <strong>Data</strong> ${_absence.absenceDate.format()}<br>
     <strong>Tipo Giustificazione</strong> &{_absence.justifiedType}<br>
-    #{absences.justifiedTime absence:_absence /}<br>
+        #{if _absence.nothingJustified() }
+          <strong>Tempo Giustificato</strong>
+             Questo codice non giustifica alcun orario.
+        #{/if}
+	    #{if _absence.justifiedTime() }
+	      <strong>Tempo Specificato</strong>
+	       ${_absence.justifiedTime().printHourMinute()}
+	    #{/if}
+   <br>
 
    #{if hasTroubles || hasGroups } </li> #{/if}
    

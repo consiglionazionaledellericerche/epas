@@ -1,0 +1,103 @@
+#{if personCertData}
+<li class="list-group-item
+	    #{if personCertData.okProcessable || personCertData.okNotProcessable} list-group-item-success#{/if}
+	    #{if personCertData.incompleteNotProcessable} list-group-item-danger#{/if}
+	    #{if personCertData.incompleteProcessable} list-group-item-warning#{/if}" >
+  <div class="row">
+    <div class="col-xs-3">
+      <strong>${personCertData.person.fullname}</strong>
+      <br><em>matricola:</em> ${personCertData.person.number}
+      <br>
+      #{ifnot personCertData.validate}
+      #{b.link @Certifications.process(personCertData.person.id, personCertData.year, personCertData.month, true),
+      class: 'btn-xs', fa: 'cloud-upload', 'rel':'nofollow' }
+        Invia ad attestati
+      #{/b.link}
+      #{/ifnot}
+    </div>
+    <div class="col-xs-3">
+      #{if !personCertData.validate}
+
+      #{if personCertData.okProcessable}
+      <p class="text-success"><i class="fa fa-check fa-2x"
+                                 popover-hover data-content="Attestato processato correttamente in attesa di validazione."></i>
+        #{/if}
+        #{if personCertData.incompleteProcessable}
+      <p class="text-warning"><i class="fa fa-cloud-upload fa-2x" style="color:#f0ad4e"
+                                 popover-hover data-content="Attestato incompleto da processare."></i>
+        #{/if}
+
+
+        #{if personCertData.okNotProcessable}
+      <p class="text-muted"><i class="fa fa-check fa-2x"
+                               popover-hover data-content="Attestato processato correttamente, non modificabile."></i>
+        #{/if}
+        #{if personCertData.incompleteNotProcessable}
+      <p class="text-danger"><i class="fa fa-frown-o fa-2x"
+                                popover data-content="Attestato incompleto non processabile."></i>
+        #{/if}
+
+        #{/if}
+        #{else}
+      <p class="text-danger"><i class="fa fa-ban fa-2x" aria-hidden="true"
+                                popover-hover data-content="Attestato validato su attestati non modificabile."></i>
+        #{/else}
+      </p>
+    </div>
+
+    <div class="col-xs-6">
+
+      #{if personCertData.incompleteProcessable || personCertData.okProcessable}
+
+      #{list items:personCertData.correctCertifications.values(), as:'certification'}
+      #{certifications.showCertification certification:certification, type:'correct' /}
+      #{/list}
+      #{list items:personCertData.toSendCertifications.values(), as:'certification'}
+      #{certifications.showCertification certification:certification, type:'toSend' /}
+      #{/list}
+      #{list items:personCertData.problemCertifications.values(), as:'certification'}
+      #{certifications.showCertification certification:certification, type:'problems' /}
+      #{/list}
+      #{list items:personCertData.toDeleteCertifications.values(), as:'certification'}
+      #{certifications.showCertification certification:certification, type:'toDelete',
+      staticView:personCertData.staticView /}
+      #{/list}
+
+      #{/if}
+
+      #{if personCertData.incompleteNotProcessable || personCertData.okNotProcessable}
+
+      #{list items:personCertData.correctCertifications.values(), as:'certification'}
+      #{certifications.showCertification certification:certification, type:'correct', muted:true /}
+      #{/list}
+      #{list items:personCertData.toSendCertifications.values(), as:'certification'}
+      #{certifications.showCertification certification:certification, type:'toSend', muted:true /}
+      #{/list}
+      #{list items:personCertData.problemCertifications.values(), as:'certification'}
+      #{certifications.showCertification certification:certification, type:'problems', muted:true /}
+      #{/list}
+      #{list items:personCertData.toDeleteCertifications.values(), as:'certification'}
+      #{certifications.showCertification certification:certification, type:'toDelete',
+      muted:true /}
+      #{/list}
+
+      #{/if}
+
+    </div>
+  </div>
+</li>
+#{/if}
+#{else}
+<li class="list-group-item list-group-item-danger">
+  <div class="row">
+    <div class="col-xs-3">
+      <strong>${person.fullname}</strong>
+      <br><em>matricola:</em> ${person.number}
+    </div>
+    <div class="col-xs-3">
+      <em class="text-danger">Errore nel caricamento delle informazioni da Attestati</em>
+    </div>
+  </div>
+</li>
+#{/else}
+<script>progress(${stepSize});</script>

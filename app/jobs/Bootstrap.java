@@ -72,6 +72,7 @@ public class Bootstrap extends Job<Void> {
           .getResource("../db/import/absence-type-and-qualification-phase2.xml")));
     }
     
+    
     log.info("Conclusa migrazione assenze!");
 
     if (User.find("byUsername", "developer").fetch().isEmpty()) {

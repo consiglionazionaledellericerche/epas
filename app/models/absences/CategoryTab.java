@@ -59,6 +59,6 @@ public class CategoryTab extends BaseModel implements Comparable<CategoryTab> {
    * To String.
    */
   public String toString() {
-    return this.name;
+    return this.description;
   }
 }

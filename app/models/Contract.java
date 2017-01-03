@@ -48,7 +48,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
    * determinato senza data fine specificata.
    */
   @Column(name = "is_temporary")
-  public boolean isTemporary = false;
+  public boolean isTemporaryMissing = false;
 
   /*
    * Quando viene valorizzata la sourceDateResidual, deve essere valorizzata
