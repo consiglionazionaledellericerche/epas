@@ -332,11 +332,11 @@ public class CertificationService implements ICertificationService {
       } else {
         if (certification.containProblems()) {
           containProblemCertifications.put(certification.aMapKey(), certification);
-          certification.save();
         } else {
           sended.add(certification);
-          certification.save();
         }
+        //FIXME a volte si arriva in uno stato detached, da verificare....
+        certification.save();
       }
     }
 

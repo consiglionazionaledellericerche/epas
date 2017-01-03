@@ -8,13 +8,11 @@ package manager.attestati.old;
 @SuppressWarnings("serial")
 public final class AttestatiException extends RuntimeException {
 
-  private String exception;
-
-  public AttestatiException(final String exception) {
-    this.exception = exception;
+  public AttestatiException(final String message) {
+    super(message);
   }
 
   public String toString() {
-    return exception;
+    return getMessage();
   }
 }
