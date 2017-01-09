@@ -313,8 +313,8 @@ public class Stampings extends Controller {
 
     flash.success("Timbratura rimossa correttamente.");
 
-    if (!currentUser.isSystemUser() && !currentUser.hasRoles(Role.PERSONNEL_ADMIN) &&
-        currentUser.person.id.equals(personDay.person.id)) {
+    if (!currentUser.isSystemUser() && !currentUser.hasRoles(Role.PERSONNEL_ADMIN) 
+        && currentUser.person.id.equals(personDay.person.id)) {
 
       if (!(currentUser.person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")
           && currentUser.person.qualification.qualification <= 3)) {
@@ -407,11 +407,17 @@ public class Stampings extends Controller {
   public static void dailyPresence(final Integer year, final Integer month,
       final Integer day, final Long officeId) {
 
+    notFoundIfNull(officeId);
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-
-    LocalDate date = new LocalDate(year, month, day);
+    
+    LocalDate date;
+    if (year == null || month == null || day == null) {
+      date = LocalDate.now();
+    } else {
+      date = new LocalDate(year, month, day);
+    }
 
     List<Person> activePersonsInDay = personDao.list(
         Optional.<String>absent(), Sets.newHashSet(office),
@@ -522,6 +528,9 @@ public class Stampings extends Controller {
     Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
   }
 
+  /**
+   * Forza la decisione sul buono pasto di un giorno specifico per un dipendente.
+   */
   public static void forceMealTicket(Long personDayId, boolean confirmed,
       MealTicketDecision mealTicketDecision) {
 
