@@ -1140,7 +1140,7 @@ end
 rule employeeAutocertificationStampings
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
- $p: Person(qualification.qualification <= 3) from currentOperator.person
+ $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
  $c: PermissionCheck(action in ("Stampings.blank", "Stampings.edit", "Stampings.save" , "Stampings.delete" ), target == null, granted == false)
@@ -1154,7 +1154,7 @@ end
 rule employeeCanInsertStampings_OnPerson
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
- $p: Person(qualification.qualification <= 3) from currentOperator.person
+ $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
  $c: PermissionCheck(action == "Stampings.blank", target == $p, granted == false)
@@ -1185,7 +1185,7 @@ end
 rule employeeCanEditStampings
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
- $p: Person(qualification.qualification <= 3) from currentOperator.person
+ $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
  $o: Office() from $p.office
  $target: Stamping(this.getOwner() == $p)
  $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save" , "Stampings.delete"), granted == false, target == $target)
