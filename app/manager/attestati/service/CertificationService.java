@@ -429,7 +429,8 @@ public class CertificationService implements ICertificationService {
 
     } catch (Exception ex) {
       log.error(ex.toString());
-      return null;
+      certification.problems = "Eccezione: " + ex.getMessage();
+      return certification;
     }
   }
 
