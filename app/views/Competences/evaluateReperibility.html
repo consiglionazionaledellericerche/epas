@@ -1,7 +1,7 @@
 #{modalAsync id:'modalActivateService', button:'Salva', 
 title:(type.disabled ? 'Abilita servizio' : 'Disabilita servizio')}
 <div id="absenceCodeData">
-#{form action:@Competences.evaluateService(), method:'POST', autocomplete:false,
+#{form action:@Competences.evaluateReperibility(), method:'POST', autocomplete:false,
   class:'form form-horizontal', 'data-async':'#page_content',
   'data-async-error':'#absenceCodeData'}
   	#{f.hidden 'reperibilityTypeId', value:type.id /}

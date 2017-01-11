@@ -1,0 +1,61 @@
+%{
+Action = (cat != null && cat.persistent) ? 'Modifica ' : 'Nuovo '
+}%
+#{modalAsync id:'modalActivateService', 
+title:(Action + ' servizio per turno')}
+
+<div class="row">
+<div class="col-md-8 col-md-offset-2">
+<div id="absenceCodeData">
+  #{form action:@Competences.saveShift(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#absenceCodeData'}
+  
+  #{f.hidden 'cat.id' /}
+  #{f.input 'cat.description'/}
+  #{if office?.persistent}
+    	#{f.hidden 'office.id', value:office.id /}
+  #{/if}
+  
+  #{f.view 'cat.office', value:office /}
+  #{f.selectModel 'cat.supervisor', items: officePeople, required:true /}
+  #{if !nuovo}
+  
+  #{alert color:'info'}
+  	Attività collegate al servizio
+  #{/alert}
+  <table class="table">
+  <tr>
+  	<th>Attività</th>
+  	<th>Descrizione</th>
+  	<th>Dipendenti associati</th>  	
+  </tr>
+  #{list items:map.entrySet(), as:'key'}
+  	<tr>
+  		<td>${key.getKey().type}</td>  		
+  		<td>${key.getKey().description}</td>
+  		<td>  			
+  			#{list items:key.getValue(), as:'psst'}
+  				${psst.personShift.person.fullName()}, 
+  			#{/list}  			
+  		</td>
+  	</tr> 
+  #{/list}
+  </table>
+  #{/if}
+  
+	#{b.buttons center:true}
+
+  		#{if cat?.persistent}
+    		#{b.submit 'Aggiorna'/}
+  		#{/if}
+  		#{else}
+  	  		#{b.submit 'Inserisci'/}
+  		#{/else}
+
+  	#{/b.buttons}
+  #{/form}
+</div>
+</div>
+</div>
+#{/modalAsync}
