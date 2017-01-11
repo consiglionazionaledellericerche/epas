@@ -1,52 +1,97 @@
 ###    Le variabili volumes sono mappate come - host_folder:container_folder
 ###    Correggere all'occorrenza i path per le cartelle sull'host ma lasciare inalterati i path sui container docker  
 
-
-client:
-
-  image: docker-registry.services.iit.cnr.it/smartclockclient:latest
+postgres:
+  image: postgres:9.4
 
   volumes:
-  - /etc/localtime:/etc/localtime:ro
-  - /etc/timezone:/etc/timezone:ro
-  - /home/epas/client:/client/data
-
-  environment:
-
-  - BR_IP_ADDRESS=192.168.100.101
-  - BR_USER=FC03
-  - BR_PASSWORD=258456
-  - SERVER_HOST=epas.amministrazione.cnr.it
-  - SERVER_PROTOCOL=https
-  - SERVER_PORT=443
-  - EPAS_CLIENT_USER=perugiaBadge
-  - EPAS_CLIENT_PASSWORD=perugiaBadge
-  - LOG_LEVEL=DEBUG
-#  - CRON=* * * * *
+    - /opt/epas/db/data:/var/lib/postgresql/data
+    - /etc/localtime:/etc/localtime:ro
+    - /etc/timezone:/etc/timezone:ro
+    - /opt/epas/backups/:/tmp:ro
 
   restart: always
 
-client2:
+nginx:
 
-  image: docker-registry.services.iit.cnr.it/smartclockclient:latest
+  image: jwilder/nginx-proxy:latest
+
+  ports:
+    - "80:80"
+#    - "443:443"
 
   volumes:
-  - /etc/localtime:/etc/localtime:ro
-  - /etc/timezone:/etc/timezone:ro
-  - /home/epas/client-rende:/client/data
-
-  environment:
-
-  - BR_IP_ADDRESS=194.119.196.94
-  - BR_USER=FC03
-  - BR_PASSWORD=12345
-  - SERVER_HOST=epas.amministrazione.cnr.it
-  - SERVER_PROTOCOL=https
-  - SERVER_PORT=443
-  - EPAS_CLIENT_USER=rendeIrpiBadge
-  - EPAS_CLIENT_PASSWORD=rendeIrpiBadge
-  - LOG_LEVEL=DEBUG
-#  - CRON=* * * * *
+    - /etc/localtime:/etc/localtime:ro
+    - /etc/timezone:/etc/timezone:ro
+    - /var/run/docker.sock:/tmp/docker.sock
+#    - /opt/epas/certs/:/etc/nginx/certs
 
   restart: always
 
+epas:
+
+  image: docker-registry.services.iit.cnr.it/epas:latest
+
+  volumes:
+    - /opt/epas/logs:/home/epas/epas/logs
+    - /opt/epas/attachments:/home/epas/epas/data/attachments
+    - /opt/epas/backups:/home/epas/epas/backups
+    - /etc/localtime:/etc/localtime:ro
+    - /etc/timezone:/etc/timezone:ro
+
+  environment:
+#### APPLICAZIONE ####
+    - VIRTUAL_HOST=
+#    - PROTOCOL=                             # default: http  -- (http,https)
+#    - EPAS_SHIB_LOGIN=                      # default: false  -- (true,false)
+#    - JOBS_ACTIVE=                          # default: false  -- (true,false) --  Se forzato a true abilita l'esecuzione di tutti i job
+#    - SKIP_IP_CHECK=                        # default: false -- (true,false) -- Disabilita il controllo sugli indirizzi ip delle richieste
+#    - URL_ATTESTATI=                        # default: https://attestativ2.rm.cnr.it
+#    - URL_USER=
+#    - URL_PASS=
+######## LOGS ###########
+#    - LOG_LEVEL=                            # Opzionale. default: INFO   -- (OFF,FATAL,ERROR,WARN,INFO,DEBUG,TRACE,ALL)
+#    - APPENDERS=                            # Opzionale. default: stdout, stderr -- (stdout, stderr, file, graylog2). Abilita i log sulla console, file e server graylog
+#    - GRAYLOG_HOST=                         # Obbligatorio se attivato log sull'appender graylog2. default: null
+#    - GRAYLOG_PORT=                         # Opzionale. default: 3514
+#    - GRAYLOG_ORIGIN_HOST=                  # Opzionale. default: valore in VIRTUAL_HOST
+###### Container ########
+#    - BACKUP_CRON=                          # default: disattivato. (utilizzare il format del crontab. Es. 0 0 * * *)
+#    - CERT_NAME=                            # default: valore specificato in VIRTUAL_HOST -- Specifica un nome diverso per i file del certificato SSL
+    - TZ=Europe/Rome                        # Imposta la timezone nel container docker
+#### Connessione DB ####
+#    - DB_HOST=                              # default: indirizzo assegnato al container postgres linkato
+#    - DB_NAME=                              # default: epas
+#    - DB_PASS=                              # default: "non necessaria"
+#    - DB_PORT=                              # default: 5432
+#    - DB_USER=                              # default: postgres
+#### server SMTP ####
+#    - SMTP_HOST=                            # default: smtp.cnr.it
+#    - SMTP_PORT=                            # default: 25 se SMTP_CHANNEL è impostato clear o starttls; 465 se impostato su ssl
+#    - SMTP_CHANNEL=                         # default: clear -- (clear, ssl ,starttls)
+#    - SMTP_FROM=                            # default: epas@cnr.it -- Indirizzo utilizzato per il campo mittente delle mail inviate dal sistema
+#    - SMTP_PROTOCOL=                        # default: smtp -- (smtp, smtps)
+#    - SMTP_USER=                            # user utilizzato per l'autenticazione sul server smtp (se necessario)
+#    - SMTP_PASS=                            # password utilizzato per l'autenticazione sul server smtp (se necessaria)
+#### Interfacce Rest ####
+#    - PERSEO_BASE=                          # default: http://perseo.devel.iit.cnr.it
+#    - PERSEO_PASS=                          # password utilizzata per l'autenticazione con le interfacce rest di perseo
+#    - PERSEO_USER=                          # user utilizzato per l'autenticazione con le interfacce rest di perseo
+#### Integrazione OIL ###
+#    - OIL_ENABLED=true                      # default: false. Se impostato abilita l'invio delle segnalazioni ad OIL
+#    - OIL_EMAIL_TO=                         # default: helpdesk.mailbox@cnr.it
+#                                                       Indirizzo email a cui inviare l'apertura delle segnalazioni OIL.
+#    - OIL_APP_NAME=                         # default: siper. Utilizzato nell'oggetto delle email inviate a OIL per l'apertura delle segnalazioni.
+#    - OIL_CATEGORIES=                       # default: 50:Problemi Tecnici - ePAS,51:Problemi Amministrativi - ePAS. 
+#                                                       Specifica le categorie utilizzate in OIL.
+#                                                       La lista delle categorie è suddivisa da ",", il campo ":" è utilizzato invece
+#                                                       come separatore tra l'id della categoria ed il nome visualizzato all'utente, 
+#                                                       es.: 1:Registrazione Timbrature,2:Gestione Assenze,3:Gestione Competenze,4:Altro
+#    - OIL_CATEGORIES_SELECTED=              # default: 0. Contiene l'id della categoria da mostrare già selezionata all'utente finale.
+#                                                       Per non mostrare nessuna categoria pre-selezionata specificare 0 o un qualsiasi altro
+#                                                       numero cnon compreso tra gli id delle categories.                                           
+
+  links:
+    - postgres
+
+  restart: unless-stopped
