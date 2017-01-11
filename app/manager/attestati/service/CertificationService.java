@@ -335,6 +335,7 @@ public class CertificationService implements ICertificationService {
         } else {
           sended.add(certification);
         }
+        //FIXME a volte si arriva in uno stato detached, da verificare....
         certification.save();
       }
     }
@@ -407,9 +408,9 @@ public class CertificationService implements ICertificationService {
       }
 
       // Esito 
-      if (httpResponse.getStatus() == 200) {
+      if (httpResponse.getStatus() == Http.StatusCode.OK) {
         certification.problems = "";
-      } else if (httpResponse.getStatus() == 500) {
+      } else if (httpResponse.getStatus() == Http.StatusCode.INTERNAL_ERROR) {
 
         if (rispostaAttestati.isPresent()) {
           certification.problems = rispostaAttestati.get().message;
