@@ -7,9 +7,11 @@ import models.Person;
 
 import play.mvc.Controller;
 import play.mvc.Router;
+import play.mvc.With;
 
 import java.util.Map;
 
+@With(Resecure.class)
 public class SwitchTemplate extends Controller {
 
   public static final String USERNAME_SESSION_KEY = "username";
@@ -58,7 +60,7 @@ public class SwitchTemplate extends Controller {
 
   public static void updatePerson(Person person, final String actionSelected) throws Throwable {
 
-    if (actionSelected == null) {
+    if (actionSelected == null || session.isEmpty()) {
       flash.error("La sessione è scaduta. Effettuare nuovamente login.");
       Secure.login();
     }
@@ -74,7 +76,7 @@ public class SwitchTemplate extends Controller {
 
   public static void updateOffice(Office office, final String actionSelected) throws Throwable {
 
-    if (actionSelected == null) {
+    if (actionSelected == null || session.isEmpty()) {
       flash.error("La sessione è scaduta. Effettuare nuovamente login.");
       Secure.login();
     }
