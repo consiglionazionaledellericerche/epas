@@ -28,14 +28,20 @@ public class QShiftCategories extends EntityPathBase<ShiftCategories> {
 
     public final StringPath description = createString("description");
 
+    public final BooleanPath disabled = createBoolean("disabled");
+
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
     //inherited
     public final NumberPath<Long> id = _super.id;
 
+    public final QOffice office;
+
     //inherited
     public final BooleanPath persistent = _super.persistent;
+
+    public final ListPath<models.ShiftType, QShiftType> shiftTypes = this.<models.ShiftType, QShiftType>createList("shiftTypes", models.ShiftType.class, QShiftType.class, PathInits.DIRECT2);
 
     public final QPerson supervisor;
 
@@ -57,6 +63,7 @@ public class QShiftCategories extends EntityPathBase<ShiftCategories> {
 
     public QShiftCategories(Class<? extends ShiftCategories> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
         this.supervisor = inits.isInitialized("supervisor") ? new QPerson(forProperty("supervisor"), inits.get("supervisor")) : null;
     }
 

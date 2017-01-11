@@ -1,0 +1,34 @@
+#{modalAsync id:'modalActivateService', button:'Salva', 
+title:(cat.disabled ? 'Abilita servizio' : 'Disabilita servizio')}
+<div id="absenceCodeData">
+#{form action:@Competences.evaluateShift(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#absenceCodeData'}
+  	#{f.hidden 'shiftCategoryId', value:cat.id /}
+  	#{f.hidden 'confirmed', value:confirmed /}
+	#{if !cat.disabled}
+  		#{alert color:'danger'}
+  			<p>Conferma rimozione del servizio <strong>${cat.description}</strong>.</p>
+  			<p>Nel caso in cui il servizio fosse già utilizzato e quindi avesse legami con altre tabelle contenenti informazioni
+  			sensibili, questo non verrà eliminato ma <em>disabilitato</em>.</p><br>
+  		#{/alert}
+  	#{/if}
+  	#{else}
+  		#{alert color:'success'}
+  			<p>Abilitando questo servizio, esso tornerà ad avere una normale visualizzazione nella lista dei servizi attivi, 
+  				e tornerà ad essere considerato per stabilire il tetto massimo di giorni di reperibilità mensile per la sede.</p>
+  		#{/alert}
+  	#{/else}
+  
+	#{b.buttons center:true}
+		#{if cat.disabled}
+			#{b.submit 'Abilita', color:'success' /}
+		#{/if}
+		#{else}
+			#{b.submit 'Disabilita', color:'danger' /}
+		#{/else}
+	#{/b.buttons}
+   
+  #{/form}
+</div>
+#{/modalAsync}

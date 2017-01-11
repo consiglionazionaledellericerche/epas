@@ -12,12 +12,15 @@ import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
+import dao.PersonShiftDayDao;
+import dao.ShiftDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
 import helpers.jpa.ModelQuery.SimpleResults;
 
 import manager.competences.CompetenceCodeDTO;
+import manager.competences.ShiftTimeTableDto;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 
@@ -30,6 +33,10 @@ import models.Person;
 import models.PersonCompetenceCodes;
 import models.PersonDay;
 import models.PersonReperibilityType;
+import models.PersonShift;
+import models.PersonShiftShiftType;
+import models.ShiftTimeTable;
+import models.ShiftType;
 import models.TotalOvertime;
 import models.enumerate.LimitUnit;
 
@@ -64,6 +71,8 @@ public class CompetenceManager {
   private final PersonDayManager personDayManager;
   private final PersonReperibilityDayDao reperibilityDao;
   private final PersonStampingRecapFactory stampingsRecapFactory;
+  private final PersonShiftDayDao personShiftDayDao;
+  private final ShiftDao shiftDao;
 
   /**
    * Costruttore.
@@ -80,7 +89,8 @@ public class CompetenceManager {
       OfficeDao officeDao, CompetenceDao competenceDao,
       PersonDayDao personDayDao, IWrapperFactory wrapperFactory,
       PersonDayManager personDayManager, PersonReperibilityDayDao reperibilityDao,
-      PersonStampingRecapFactory stampingsRecapFactory) {
+      PersonStampingRecapFactory stampingsRecapFactory, PersonShiftDayDao personshiftDayDao,
+      ShiftDao shiftDao) {
     this.competenceCodeDao = competenceCodeDao;
     this.officeDao = officeDao;
     this.competenceDao = competenceDao;
@@ -88,7 +98,13 @@ public class CompetenceManager {
     this.wrapperFactory = wrapperFactory;
     this.personDayManager = personDayManager;
     this.reperibilityDao = reperibilityDao;
-    this.stampingsRecapFactory = stampingsRecapFactory;
+
+    this.stampingsRecapFactory = stampingsRecapFactory;   
+    this.personShiftDayDao = personshiftDayDao;
+    this.shiftDao = shiftDao;
+
+
+
   }
 
   public static Predicate<CompetenceCode> isReperibility() {
@@ -354,8 +370,8 @@ public class CompetenceManager {
     switch (comp.competenceCode.limitType) {
       case monthly:
         group = competenceCodeDao
-            .getCodeWithGroup(comp.competenceCode.competenceCodeGroup,
-                Optional.fromNullable(comp.competenceCode));
+        .getCodeWithGroup(comp.competenceCode.competenceCodeGroup,
+            Optional.fromNullable(comp.competenceCode));
         compList = competenceDao
             .getCompetences(Optional.fromNullable(comp.person), comp.year,
                 Optional.fromNullable(comp.month), group);
@@ -385,8 +401,8 @@ public class CompetenceManager {
         break;
       case yearly:
         group = competenceCodeDao
-            .getCodeWithGroup(comp.competenceCode.competenceCodeGroup,
-                Optional.fromNullable(comp.competenceCode));
+        .getCodeWithGroup(comp.competenceCode.competenceCodeGroup,
+            Optional.fromNullable(comp.competenceCode));
         compList = competenceDao
             .getCompetences(Optional.fromNullable(comp.person), comp.year,
                 Optional.<Integer>absent(), group);
@@ -397,7 +413,7 @@ public class CompetenceManager {
         break;
       case onMonthlyPresence:
         PersonStampingRecap psDto = stampingsRecapFactory
-            .create(comp.person, comp.year, comp.month, true);
+        .create(comp.person, comp.year, comp.month, true);
         if (psDto.basedWorkingDays != value) {
           result = Messages.get("CompManager.diffBasedWorkingDay");
         }
@@ -442,11 +458,11 @@ public class CompetenceManager {
   private Integer countDaysForReperibility(YearMonth yearMonth, Office office) {
     int numbers =
         reperibilityDao.getReperibilityTypeByOffice(office, Optional.fromNullable(false)) != null
-            ? reperibilityDao.getReperibilityTypeByOffice(
+        ? reperibilityDao.getReperibilityTypeByOffice(
             office, Optional.fromNullable(false)).size()
             : 0;
-    return numbers * (new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1)
-        .dayOfMonth().getMaximumValue());
+            return numbers * (new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1)
+                .dayOfMonth().getMaximumValue());
   }
 
   /**
@@ -607,6 +623,60 @@ public class CompetenceManager {
   }
 
   /**
+   * 
+   * @param psstList la lista dei personShiftShiftType
+   * @param peopleIds la lista degli id dei personShift
+   * @return la lista dei personShift da aggiungere alla tabella 
+   *     dei PersonShiftShiftType.
+   */
+  public List<PersonShift> peopleToAdd(List<PersonShiftShiftType> psstList, List<Long> peopleIds) {
+    List<PersonShift> peopleToAdd = Lists.newArrayList();
+    if (peopleIds == null || peopleIds.isEmpty()) {
+      return peopleToAdd;
+    }
+    for (Long id : peopleIds) {
+      PersonShift ps = shiftDao.gerPersonShiftById(id);
+      if (psstList.isEmpty()) {
+        peopleToAdd.add(ps);
+      } else {
+        boolean found = false;
+        for (PersonShiftShiftType psst : psstList) {
+          if (psst.personShift.equals(ps)) {
+            found = true;
+          }
+        }
+        if (!found) {
+          peopleToAdd.add(ps);
+        }
+      }      
+    }
+    return peopleToAdd;
+  }
+
+  /**
+   * 
+   * @param psstList la lista dei personShiftShiftType da controllare
+   * @param peopleIds la lista degli id dei personShift
+   * @return la lista dei personShift da rimuovere.
+   */
+  public List<PersonShift> peopleToDelete(List<PersonShiftShiftType> psstList, 
+      List<Long> peopleIds) {
+    List<PersonShift> peopleToRemove = Lists.newArrayList();
+    if (peopleIds == null || peopleIds.isEmpty()) {
+      psstList.forEach(item -> {
+        peopleToRemove.add(item.personShift);
+      });
+    } else {
+      psstList.forEach(item -> {
+        if (!peopleIds.contains(item.personShift.id)) {
+          peopleToRemove.add(item.personShift);
+        }
+      });
+    }
+    return peopleToRemove;
+  }
+
+  /**
    * il metodo che persiste la situazione di codici di competenza per la persona.
    *
    * @param person       la persona per cui persistere la situazione delle competenze
@@ -624,6 +694,22 @@ public class CompetenceManager {
       newPcc.person = person;
       newPcc.beginDate = date;
       newPcc.save();
+
+      if (item.code.equals("T1") || item.code.equals("T2") || item.code.equals("T3")) {
+        PersonShift personShift = null;
+        personShift = personShiftDayDao.getPersonShiftByPerson(person);
+        if (personShift != null) {
+          log.info("L'utente {} è già presente in tabella person_shift", person.fullName());
+        } else {
+          personShift = new PersonShift();
+          personShift.person = person;
+          personShift.description = "Turni di " +person.fullName();
+          personShift.jolly = false;
+          personShift.disabled = false;
+          personShift.save();
+        }
+
+      }
     });
     codeToRemove.forEach(item -> {
 
@@ -631,13 +717,48 @@ public class CompetenceManager {
       if (pcc.isPresent()) {
         pcc.get().endDate = date;
         pcc.get().save();
-
+        if (item.code.equals("T1") || item.code.equals("T2") || item.code.equals("T3")) {
+          PersonShift personShift = personShiftDayDao.getPersonShiftByPerson(pcc.get().person);
+          if (personShift != null) {
+            personShift.disabled = true;
+            personShift.save();
+          } else {
+            log.warn("Non è presente in tabella person_shift l'utente {}", person.fullName());
+          }
+        }
       } else {
         throw new RuntimeException(Messages.get("errorCompetenceCodeException"));
       }
     });
   }
 
+  /**
+   * 
+   * @param peopleToAdd
+   * @param shiftType
+   * @param peopleToRemove
+   * @param beginDate
+   * @param endDate
+   */
+  public void persistPersonShiftShiftType(List<PersonShift> peopleToAdd, ShiftType shiftType,
+      List<PersonShift> peopleToRemove) {
+
+    peopleToAdd.forEach(item -> {
+      PersonShiftShiftType psst = new PersonShiftShiftType();
+      psst.personShift = item;
+      psst.beginDate = LocalDate.now();
+      psst.shiftType = shiftType;
+      psst.save();
+    });
+
+    peopleToRemove.forEach(item -> {
+      Optional<PersonShiftShiftType> psst = shiftDao.getByPersonShiftAndShiftType(item, shiftType);
+      if (psst.isPresent()) {
+        psst.get().endDate = LocalDate.now();
+        psst.get().save();
+      }
+    });
+  }
   /**
    * @param personList la lista di persone attive
    * @param date       la data in cui si richiedono le competenze
@@ -682,6 +803,30 @@ public class CompetenceManager {
 
     });
     return map;
+
   }
 
+  /**
+   * 
+   * @param list la lista contenente tutte le timetable dei turni disponibili
+   * @return una lista di dto modellati per esigenze di template.
+   */
+  public List<ShiftTimeTableDto> convertFromShiftTimeTable(List<ShiftTimeTable> list) {
+    final String stamping_format = "HH:mm";
+    List<ShiftTimeTableDto> dtoList = list.stream().map(shiftTimeTable -> {
+      ShiftTimeTableDto dto = new ShiftTimeTableDto();
+      dto.id = shiftTimeTable.id;
+      dto.endAfternoon = shiftTimeTable.endAfternoon.toString(stamping_format);
+      dto.endAfternoonLunchTime = shiftTimeTable.endAfternoonLunchTime.toString(stamping_format);
+      dto.endMorning = shiftTimeTable.endMorning.toString(stamping_format);
+      dto.endMorningLunchTime = shiftTimeTable.endMorningLunchTime.toString(stamping_format);
+      dto.startAfternoon = shiftTimeTable.startAfternoon.toString(stamping_format);
+      dto.startAfternoonLunchTime = shiftTimeTable
+          .startAfternoonLunchTime.toString(stamping_format);
+      dto.startMorning = shiftTimeTable.startMorning.toString(stamping_format);
+      dto.startMorningLunchTime = shiftTimeTable.startMorningLunchTime.toString(stamping_format);
+      return dto;
+    }).collect(Collectors.toList());
+    return dtoList;
+  }
 }
