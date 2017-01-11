@@ -28,6 +28,8 @@ public class QPersonShift extends EntityPathBase<PersonShift> {
 
     public final StringPath description = createString("description");
 
+    public final BooleanPath disabled = createBoolean("disabled");
+
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
