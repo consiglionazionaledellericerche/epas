@@ -57,8 +57,9 @@ when
      	"Notifications.list",
      	"Notifications.archiveds",
      	"Notifications.readAndRedirect",
-     	"Notifications.read"
-       ), target == null, granted == false)
+     	"Notifications.read") 
+      || action.startsWith("SwitchTemplate."), 
+      target == null, granted == false)
 then
  $c.grant();
 end
