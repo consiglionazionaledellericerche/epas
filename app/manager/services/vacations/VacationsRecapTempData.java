@@ -97,14 +97,17 @@ public class VacationsRecapTempData {
       this.postPartum.add(ab);
     }
     
-    //TODO farli diventare un getter di contract
-    if (contract.getSourceDateResidual() != null
-        && contract.getSourceDateResidual().getYear() == year) {
-
-      this.sourceVacationLastYearUsed += contract.getSourceVacationLastYearUsed();
-      this.sourceVacationCurrentYearUsed += contract.getSourceVacationCurrentYearUsed();
-      this.sourcePermissionUsed += contract.getSourcePermissionUsed();
-
+    //Recupero informazioni da inizializzazione.
+    if (contract.getSourceDateResidual() != null) {
+      if (contract.getSourceDateResidual().getYear() == year) {
+        // Se anno ripilogo uguale all'anno di inizializzazione (caso semplice)
+        this.sourceVacationLastYearUsed += contract.getSourceVacationLastYearUsed();
+        this.sourceVacationCurrentYearUsed += contract.getSourceVacationCurrentYearUsed();
+        this.sourcePermissionUsed += contract.getSourcePermissionUsed();  
+      } else if (contract.getSourceDateResidual().getYear() == year - 1) {
+        // Se anno riepilogo è l'anno successivo a quello di inizializzazione (caso particolare)
+        this.sourceVacationLastYearUsed += contract.getSourceVacationCurrentYearUsed();
+      }
     }
   }
 }
