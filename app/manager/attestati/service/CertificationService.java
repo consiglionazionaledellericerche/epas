@@ -408,9 +408,9 @@ public class CertificationService implements ICertificationService {
       }
 
       // Esito 
-      if (httpResponse.getStatus() == 200) {
+      if (httpResponse.getStatus() == Http.StatusCode.OK) {
         certification.problems = "";
-      } else if (httpResponse.getStatus() == 500) {
+      } else if (httpResponse.getStatus() == Http.StatusCode.INTERNAL_ERROR) {
 
         if (rispostaAttestati.isPresent()) {
           certification.problems = rispostaAttestati.get().message;
@@ -429,7 +429,8 @@ public class CertificationService implements ICertificationService {
 
     } catch (Exception ex) {
       log.error(ex.toString());
-      return null;
+      certification.problems = "Eccezione: " + ex.getMessage();
+      return certification;
     }
   }
 
