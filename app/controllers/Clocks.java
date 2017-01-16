@@ -32,18 +32,16 @@ import org.joda.time.Minutes;
 
 import play.data.binding.As;
 import play.data.validation.Required;
-import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
 
-@With({Resecure.class})
+@With(Resecure.class)
 public class Clocks extends Controller {
 
   @Inject
@@ -156,7 +154,13 @@ public class Clocks extends Controller {
   /**
    * @param wayType verso timbratura.
    */
-  public static void webStamping(WayType wayType) {
+  public static void webStamping(@Required WayType wayType) {
+
+    if (validation.hasErrors()) {
+      flash.error("E' necessario indicare un verso corretto per la timbratura");
+      daySituation();
+    }
+
     final Person currentPerson = Security.getUser().get().person;
     final LocalDate today = LocalDate.now();
     render(wayType, currentPerson, today);
@@ -167,7 +171,7 @@ public class Clocks extends Controller {
    * @param stampType Causale timbratura
    * @param note      eventuali note.
    */
-  public static void insertWebStamping(@Required WayType way, StampTypes stampType,
+  public static void insertWebStamping(WayType way, StampTypes stampType,
       @As(binder = NullStringBinder.class) String note) {
 
     final User user = Security.getUser().get();
@@ -187,6 +191,17 @@ public class Clocks extends Controller {
         .getOrCreateAndPersistPersonDay(user.person, LocalDate.now());
     final Stamping stamping = new Stamping(personDay, LocalDateTime.now());
 
+    stamping.way = way;
+    stamping.stampType = stampType;
+    stamping.note = note;
+
+    validation.valid(stamping);
+
+    if (validation.hasErrors()) {
+      flash.error("Timbratura mal formata. Impossibile salvarla");
+      daySituation();
+    }
+
     stamping.personDay.stampings.stream().filter(s -> !stamping.equals(s)).forEach(s -> {
 
       if (Minutes.minutesBetween(s.date, stamping.date).getMinutes() < 1
@@ -200,12 +215,8 @@ public class Clocks extends Controller {
       }
     });
 
-    stamping.way = way;
-    stamping.stampType = stampType;
-    stamping.note = note;
-    stamping.markedByAdmin = false;
     stamping.save();
-    
+
     consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
 
     daySituation();
