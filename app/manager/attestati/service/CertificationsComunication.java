@@ -64,7 +64,7 @@ public class CertificationsComunication {
 
   private static final String JSON_CONTENT_TYPE = "application/json";
 
-  //OAuh
+  //OAuth
   private static final String OAUTH_CLIENT_SECRET = "mySecretOAuthSecret";
   private static final String OAUTH_CONTENT_TYPE = "application/x-www-form-urlencoded";
   private static final String OAUTH_URL = "/oauth/token";
@@ -150,7 +150,11 @@ public class CertificationsComunication {
     if (response.getStatus() != Http.StatusCode.OK) {
       log.warn("Errore durante la richiesta del Refresh-Token Oauth: {}; {}",
           response.getStatus(), response.getString());
-      throw new ApiRequestException("Impossibile ottenere Refresh-Token Oauth dal server");
+      // Data l'inaffidabilita' del refresh-token dato da attestati (scade dopo non si sa quanto
+      // tempo e in maniera totalmente scorrelata dalla durata dell'access-token attraverso il quale
+      // viene fornito) nel caso la risposta sia negativa effettuo una richiesta per un nuovo
+      // access token
+      return getToken();
     }
 
     OauthToken accessToken = new Gson().fromJson(response.getJson(), OauthToken.class);
