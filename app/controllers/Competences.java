@@ -25,6 +25,8 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
 import helpers.jpa.ModelQuery.SimpleResults;
 
+import it.cnr.iit.epas.DateInterval;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.CompetenceManager;
@@ -358,7 +360,7 @@ public class Competences extends Controller {
         .listByPerson(person, Optional.fromNullable(date));
     List<CompetenceCode> codeToAdd = competenceManager.codeToSave(pccList, codeListIds);
     List<CompetenceCode> codeToRemove = competenceManager.codeToDelete(pccList, codeListIds);
-
+    
     competenceManager.persistChanges(person, codeToAdd, codeToRemove, date);
 
     flash.success(String.format("Aggiornate con successo le competenze per %s",

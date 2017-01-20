@@ -19,6 +19,9 @@ import dao.wrapper.IWrapperFactory;
 
 import helpers.jpa.ModelQuery.SimpleResults;
 
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
+
 import manager.competences.CompetenceCodeDTO;
 import manager.competences.ShiftTimeTableDto;
 import manager.recaps.personstamping.PersonStampingRecap;
@@ -53,6 +56,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -510,14 +514,11 @@ public class CompetenceManager {
    * @return true se la competenza è abilitata per la persona. False altrimenti.
    */
   private boolean isCompetenceEnabled(Competence comp) {
+    LocalDate date = new LocalDate(comp.year, comp.month, 1);
     Optional<PersonCompetenceCodes> pcc = competenceCodeDao
-        .getByPersonAndCode(comp.person, comp.competenceCode);
-    if (pcc.isPresent()) {
-      LocalDate date = new LocalDate(comp.year, comp.month, 1);
-      if (!pcc.get().beginDate.isAfter(date)
-          && (pcc.get().endDate == null || !pcc.get().endDate.isBefore(date))) {
-        return true;
-      }
+        .getByPersonAndCodeAndDate(comp.person, comp.competenceCode, date);
+    if (pcc.isPresent()) {      
+      return true;     
     }
     return false;
   }
@@ -689,33 +690,55 @@ public class CompetenceManager {
       List<CompetenceCode> codeToRemove, LocalDate date) {
 
     codeToAdd.forEach(item -> {
-      PersonCompetenceCodes newPcc = new PersonCompetenceCodes();
-      newPcc.competenceCode = item;
-      newPcc.person = person;
-      newPcc.beginDate = date;
-      newPcc.save();
+      List<PersonCompetenceCodes> pccList = competenceCodeDao.listByPersonAndCode(person, item);
+      if (pccList.isEmpty()) {
+        createPersonCompetenceCode(person, date, Optional.<LocalDate>absent(), item);
+        if (item.code.equals("T1") || item.code.equals("T2") || item.code.equals("T3")) {
+          createPersonShift(person);
+        }
+      } else {
+        PersonCompetenceCodes temp = null;
+        // conviene crearsi un PCC di appoggio dove mettere il pcc precedente o successivo rispetto a quello che si
+        //intende creare così da poterlo poi utilizzare fuori dal ciclo per creare i corretti intervalli temporali
+        //dei personcompetencecodes.
+        Iterator<PersonCompetenceCodes> iter = pccList.iterator();
+        boolean found = false;
+        while(iter.hasNext() || !found) {
 
-      if (item.code.equals("T1") || item.code.equals("T2") || item.code.equals("T3")) {
-        PersonShift personShift = null;
-        personShift = personShiftDayDao.getPersonShiftByPerson(person);
-        if (personShift != null) {
-          log.info("L'utente {} è già presente in tabella person_shift", person.fullName());
-        } else {
-          personShift = new PersonShift();
-          personShift.person = person;
-          personShift.description = "Turni di " +person.fullName();
-          personShift.jolly = false;
-          personShift.disabled = false;
-          personShift.save();
+          DateInterval interval = new DateInterval(iter.next().beginDate, iter.next().endDate);
+          if (DateUtility.isDateIntoInterval(date, interval)) {
+            if (temp == null) {
+              iter.next().endDate = null;
+              iter.next().beginDate = date;
+              iter.next().save();
+            } else {
+              iter.next().beginDate = date;
+              iter.next().endDate = temp.beginDate.minusDays(1);
+              iter.next().save();
+            }
+            temp = iter.next();
+            found = true;
+          } else {
+            //bene ma non benissimo...
+            if (pccList.get(0).endDate != null && pccList.get(0).endDate.isBefore(date)) {
+              createPersonCompetenceCode(person, date, Optional.<LocalDate>absent(),item);
+            } else {
+              createPersonCompetenceCode(person, date, Optional.fromNullable(pccList.get(0).beginDate.minusDays(1)), item);
+            }
+            found = true;
+          }
+
         }
 
       }
+
     });
     codeToRemove.forEach(item -> {
 
-      Optional<PersonCompetenceCodes> pcc = competenceCodeDao.getByPersonAndCode(person, item);
+      LocalDate endMonth = date.dayOfMonth().withMaximumValue();
+      Optional<PersonCompetenceCodes> pcc = competenceCodeDao.getByPersonAndCodeAndDate(person, item, date);
       if (pcc.isPresent()) {
-        pcc.get().endDate = date;
+        pcc.get().endDate = endMonth;
         pcc.get().save();
         if (item.code.equals("T1") || item.code.equals("T2") || item.code.equals("T3")) {
           PersonShift personShift = personShiftDayDao.getPersonShiftByPerson(pcc.get().person);
@@ -828,5 +851,42 @@ public class CompetenceManager {
       return dto;
     }).collect(Collectors.toList());
     return dtoList;
+  }
+
+  /**
+   * crea un personShift a partire dalla persona passata come parametro.
+   * @param person la persona di cui si vuole creare l'istanza di personShift
+   */
+  private void createPersonShift(Person person) {
+    PersonShift personShift = null;
+    personShift = personShiftDayDao.getPersonShiftByPerson(person);
+    if (personShift != null) {
+      log.info("L'utente {} è già presente in tabella person_shift", person.fullName());
+    } else {
+      personShift = new PersonShift();
+      personShift.person = person;
+      personShift.description = "Turni di " +person.fullName();
+      personShift.jolly = false;
+      personShift.disabled = false;
+      personShift.save();
+    }
+  }
+
+  /**
+   * persiste sul db un personcompetencecode.
+   * @param person la persona che ha associata la competenza
+   * @param date la data da cui è valida quella competenza
+   * @param code la competenza da abilitare
+   */
+  private void createPersonCompetenceCode(Person person, LocalDate dateBegin, 
+      Optional<LocalDate> dateEnd, CompetenceCode code) {
+    PersonCompetenceCodes newPcc = new PersonCompetenceCodes();
+    newPcc.competenceCode = code;
+    newPcc.person = person;
+    newPcc.beginDate = dateBegin;
+    if (dateEnd.isPresent()) {
+      newPcc.endDate = dateEnd.get();
+    }
+    newPcc.save();
   }
 }
