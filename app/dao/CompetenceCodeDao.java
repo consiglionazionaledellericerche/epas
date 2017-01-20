@@ -179,11 +179,15 @@ public class CompetenceCodeDao extends DaoBase {
    * @param code il codice di competenza
    * @return il PersonCompetenceCode relativo ai parametri passati, se presente.
    */
-  public Optional<PersonCompetenceCodes> getByPersonAndCode(Person person, CompetenceCode code) {
+  public Optional<PersonCompetenceCodes> getByPersonAndCodeAndDate(Person person, 
+      CompetenceCode code, LocalDate date) {
     final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
+       
     final JPQLQuery query = getQueryFactory().from(pcc)
-        .where(pcc.person.eq(person).and(pcc.competenceCode.eq(code)))
-        .orderBy(pcc.beginDate.desc());
+        .where(pcc.person.eq(person)
+            .and(pcc.competenceCode.eq(code))
+            .and(pcc.beginDate.loe(date).andAnyOf(pcc.endDate.goe(date), pcc.endDate.isNull())));
+    
     return Optional.fromNullable(query.singleResult(pcc));
   }
   
