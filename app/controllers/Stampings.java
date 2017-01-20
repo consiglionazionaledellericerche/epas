@@ -49,11 +49,9 @@ import org.joda.time.YearMonth;
 
 import play.data.binding.As;
 import play.data.validation.CheckWith;
-import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 import java.util.ArrayList;
@@ -235,7 +233,7 @@ public class Stampings extends Controller {
     // trattava di una nuova timbratura o di una modifica
     boolean newInsert = !stamping.isPersistent();
 
-    if (date != null && time !=null){
+    if (date != null && time != null) {
       stamping.date = stampingManager.deparseStampingDateTime(date, time);
     }
 
@@ -317,7 +315,7 @@ public class Stampings extends Controller {
 
     flash.success("Timbratura rimossa correttamente.");
 
-    if (!currentUser.isSystemUser() && !currentUser.hasRoles(Role.PERSONNEL_ADMIN) 
+    if (!currentUser.isSystemUser() && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)
         && currentUser.person.id.equals(personDay.person.id)) {
 
       if (!(currentUser.person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")
@@ -415,7 +413,7 @@ public class Stampings extends Controller {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-    
+
     LocalDate date;
     if (year == null || month == null || day == null) {
       date = LocalDate.now();
