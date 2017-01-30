@@ -125,7 +125,8 @@ public class PersonDayInTroubleManager {
 
       final Optional<Contract> currentContract = factory.create(person).getCurrentContract();
       if (!currentContract.isPresent()) {
-        log.error("Nessun contratto trovato per {} attivo alla data odierna", person);
+        log.error("Nessun contratto trovato attivo alla data odierna per {} - {} ", person,
+            person.office);
         continue;
       }
       DateInterval intervalToCheck = DateUtility.intervalIntersection(
