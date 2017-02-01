@@ -788,7 +788,7 @@ public class ReperibilityManager {
       Optional<PersonDay> personDay = personDayDao.getPersonDay(person, personReperibilityDay.date);
 
       // if there are no events and it is not an holiday -> error
-      if (!personDay.isPresent() & LocalDate.now().isAfter(personReperibilityDay.date)) {
+      if (!personDay.isPresent() && LocalDate.now().isAfter(personReperibilityDay.date)) {
         //if (!person.isHoliday(personReperibilityDay.date)) {
         if (!personDay.get().isHoliday) {
           log.info("La reperibilità di {} {} è incompatibile con la sua mancata timbratura nel "
