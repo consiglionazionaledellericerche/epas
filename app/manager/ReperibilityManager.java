@@ -753,8 +753,8 @@ public class ReperibilityManager {
   public void updateReperibilityDatesReportFromCompetences(
       Table<Person, String, List<String>> reperibilityDateDays, List<Competence> competenceList) {
     for (Competence competence : competenceList) {
-      log.debug("Metto nella tabella competence = {}", competence.toString());
-      List<String> str = Arrays.asList(competence.reason.split(" "));
+      log.debug("Metto nella tabella competence = {}", competence.toString());      
+    	  List<String> str = (competence.reason != null) ? Arrays.asList(competence.reason.split(" ")) : Arrays.asList(" ");
       reperibilityDateDays.put(competence.person, competence.competenceCode.codeToPresence, str);
     }
   }
