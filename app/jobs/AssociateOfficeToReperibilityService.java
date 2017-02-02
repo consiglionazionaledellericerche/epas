@@ -6,12 +6,11 @@ import manager.ReperibilityManager;
 
 import play.Play;
 import play.jobs.Job;
-import play.jobs.OnApplicationStart;
 
 import javax.inject.Inject;
 
 @Slf4j
-@OnApplicationStart(async = true)
+//@OnApplicationStart(async = true)
 public class AssociateOfficeToReperibilityService extends Job<Void> {
 
   @Inject
