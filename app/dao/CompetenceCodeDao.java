@@ -8,6 +8,9 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
+import java.util.List;
+import javax.persistence.EntityManager;
+
 import models.CompetenceCode;
 import models.CompetenceCodeGroup;
 import models.Office;
@@ -18,10 +21,6 @@ import models.query.QCompetenceCodeGroup;
 import models.query.QPersonCompetenceCodes;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
-
-import javax.persistence.EntityManager;
 
 /**
  * Dao per l'accesso alle informazioni dei CompetenceCode.
@@ -207,6 +206,23 @@ public class CompetenceCodeDao extends DaoBase {
   
   /**
    * 
+   * @param person la persona di cui cercare la competenza
+   * @param code il codice di competenza
+   * @param date la data da cui cercare
+   * @return se esiste, il personcompetencecode temporalmente più vicino nel futuro alla data 
+   *     passata come parametro per la persona passata come parametro.
+   */
+  public Optional<PersonCompetenceCodes> getNearFuture(Person person, 
+      CompetenceCode code, LocalDate date) {
+    final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
+    final JPQLQuery query = getQueryFactory().from(pcc)
+        .where(pcc.person.eq(person).and(pcc.competenceCode.eq(code).and(pcc.beginDate.gt(date))))
+        .orderBy(pcc.beginDate.asc());
+    return Optional.fromNullable(query.singleResult(pcc));
+  }
+  
+  /**
+   * 
    * @param code il codice di competenza
    * @param date la data, se presente, in cui cercare 
    * @param office la sede
@@ -230,10 +246,12 @@ public class CompetenceCodeDao extends DaoBase {
   /**
    * 
    * @param codesList la lista dei codici di assenza da ricercare
-   * @param date la data (opzionale) che deve essere contenuta nel periodo di possesso di una certa competenza
+   * @param date la data (opzionale) che deve essere contenuta nel periodo di possesso di una 
+   *     certa competenza
    * @return la lista delle persone con abilitate le competenze passate nella lista come parametro.
    */
-  public List<PersonCompetenceCodes> listByCodes(List<CompetenceCode> codesList, Optional<LocalDate> date) {
+  public List<PersonCompetenceCodes> listByCodes(List<CompetenceCode> codesList, 
+      Optional<LocalDate> date) {
     final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
     final BooleanBuilder condition = new BooleanBuilder();
     if (date.isPresent()) {
@@ -241,7 +259,8 @@ public class CompetenceCodeDao extends DaoBase {
           .andAnyOf(pcc.endDate.isNull(), 
               pcc.endDate.goe(date.get().dayOfMonth().withMaximumValue())));
     }
-    final JPQLQuery query = getQueryFactory().from(pcc).where(pcc.competenceCode.in(codesList).and(condition));
+    final JPQLQuery query = getQueryFactory().from(pcc)
+        .where(pcc.competenceCode.in(codesList).and(condition));
     return query.list(pcc);
   }
 }

@@ -320,6 +320,13 @@ public class Competences extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
+    boolean certificationsSent = false;
+    List<Certification> certificationList = certificationDao
+        .personCertifications(person, year, month);
+    CertificatedData certificatedData = pmrDao.getPersonCertificatedData(person, month, year);
+    if (!certificationList.isEmpty() || certificatedData != null) {
+      certificationsSent = true;
+    }
     LocalDate date = new LocalDate(year, month, 1);
     List<PersonCompetenceCodes> pccList = competenceCodeDao
         .listByPerson(person, Optional.fromNullable(date));
@@ -327,7 +334,7 @@ public class Competences extends Controller {
     for (PersonCompetenceCodes pcc : pccList) {
       codeListIds.add(pcc.competenceCode);
     }
-    render(person, codeListIds, year, month);
+    render(person, codeListIds, year, month, certificationsSent);
   }
 
   /**
@@ -345,16 +352,6 @@ public class Competences extends Controller {
     rules.checkIfPermitted(person.office);
 
     LocalDate date = new LocalDate(year, month, 1);
-
-    List<Certification> certificationList = certificationDao
-        .personCertifications(person, year, month);
-    CertificatedData certificatedData = pmrDao.getPersonCertificatedData(person, month, year);
-    if (!certificationList.isEmpty() || certificatedData != null) {
-      flash.error("Non si può modificare una configurazione per un anno/mese in cui "
-          + "sono già stati inviati gli attestati");
-      Competences.enabledCompetences(year,
-          month, person.office.id);
-    }
 
     List<PersonCompetenceCodes> pccList = competenceCodeDao
         .listByPerson(person, Optional.fromNullable(date));
