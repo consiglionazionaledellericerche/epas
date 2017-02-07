@@ -64,7 +64,7 @@ public class CertificationsComunication {
 
   private static final String JSON_CONTENT_TYPE = "application/json";
 
-  //OAuh
+  //OAuth
   private static final String OAUTH_CLIENT_SECRET = "mySecretOAuthSecret";
   private static final String OAUTH_CONTENT_TYPE = "application/x-www-form-urlencoded";
   private static final String OAUTH_URL = "/oauth/token";
@@ -112,14 +112,15 @@ public class CertificationsComunication {
 
     HttpResponse response = req.post();
 
-    if (!response.getContentType().contains("application/json")) {
-      throw new ApiRequestException(String.format("Risposta inattesta dal server di Attestati" +
-          " {Content-Type=%s - statusCode=%s} ", response.getContentType(), response.getStatus()));
+    if (response.getStatus() != Http.StatusCode.OK) {
+      log.warn("Errore durante la richiesta del Token Oauth: {}; {}",
+          response.getStatus(), response.getString());
+      throw new ApiRequestException("Impossibile ottenere Token Oauth dal server");
     }
 
     OauthToken accessToken = new Gson().fromJson(response.getJson(), OauthToken.class);
 
-    log.debug("Ottenuto access-token dal server degli attestati");
+    log.info("Ottenuto access-token dal server degli attestati: {}", response.getString());
     return accessToken;
   }
 
@@ -142,16 +143,23 @@ public class CertificationsComunication {
         .setHeader("Authorization", "Basic " + OAUTH_AUTHORIZATION)
         .setParameters(parameters);
 
+    log.info("Invio richiesta Refresh-Token ad attestati. Token precedente: {}", token
+        .refresh_token);
     HttpResponse response = req.post();
 
-    if (!response.getContentType().contains("application/json")) {
-      throw new ApiRequestException(String.format("Risposta inattesta dal server di Attestati" +
-          " {Content-Type=%s - statusCode=%s} ", response.getContentType(), response.getStatus()));
+    if (response.getStatus() != Http.StatusCode.OK) {
+      log.warn("Errore durante la richiesta del Refresh-Token Oauth: {}; {}",
+          response.getStatus(), response.getString());
+      // Data l'inaffidabilita' del refresh-token dato da attestati (scade dopo non si sa quanto
+      // tempo e in maniera totalmente scorrelata dalla durata dell'access-token attraverso il quale
+      // viene fornito) nel caso la risposta sia negativa effettuo una richiesta per un nuovo
+      // access token
+      return getToken();
     }
 
     OauthToken accessToken = new Gson().fromJson(response.getJson(), OauthToken.class);
 
-    log.debug("Ottenuto refresh-token oauth dal server degli attestati");
+    log.info("Ottenuto refresh-token oauth dal server degli attestati: {}", response.getString());
     return accessToken;
   }
 
@@ -182,7 +190,7 @@ public class CertificationsComunication {
    * @param office sede
    * @param year   anno
    * @param month  mese
-   * @return insieme di numbers
+   * @return L'insieme delle matricole relative alla sede richiesta
    */
   public Set<Integer> getPeopleList(Office office, int year, int month)
       throws NoSuchFieldException, ExecutionException {
@@ -222,7 +230,7 @@ public class CertificationsComunication {
    * @param year   anno
    */
   public Optional<SeatCertification> getPersonSeatCertification(Person person,
-                                                                int month, int year) throws ExecutionException {
+      int month, int year) throws ExecutionException {
 
     final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
     if (token == null) {
@@ -305,7 +313,7 @@ public class CertificationsComunication {
    * @return risposta
    */
   public HttpResponse sendRigaBuoniPasto(Certification certification,
-                                         boolean update) throws ExecutionException, NoSuchFieldException {
+      boolean update) throws ExecutionException, NoSuchFieldException {
 
     final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
 

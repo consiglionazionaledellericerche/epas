@@ -23,6 +23,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
 
 
 /**
@@ -48,10 +49,11 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   @JoinColumn(name = "stamp_modification_type_id")
   public StampModificationType stampModificationType;
 
+  @Required @NotNull
   @Column(nullable = false)
   public LocalDateTime date;
 
-  @Required
+  @Required @NotNull
   @Enumerated(EnumType.STRING)
   public WayType way;
 
