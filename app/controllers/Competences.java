@@ -25,6 +25,8 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
 import helpers.jpa.ModelQuery.SimpleResults;
 
+import it.cnr.iit.epas.DateInterval;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.CompetenceManager;
@@ -318,6 +320,13 @@ public class Competences extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
+    boolean certificationsSent = false;
+    List<Certification> certificationList = certificationDao
+        .personCertifications(person, year, month);
+    CertificatedData certificatedData = pmrDao.getPersonCertificatedData(person, month, year);
+    if (!certificationList.isEmpty() || certificatedData != null) {
+      certificationsSent = true;
+    }
     LocalDate date = new LocalDate(year, month, 1);
     List<PersonCompetenceCodes> pccList = competenceCodeDao
         .listByPerson(person, Optional.fromNullable(date));
@@ -325,7 +334,7 @@ public class Competences extends Controller {
     for (PersonCompetenceCodes pcc : pccList) {
       codeListIds.add(pcc.competenceCode);
     }
-    render(person, codeListIds, year, month);
+    render(person, codeListIds, year, month, certificationsSent);
   }
 
   /**
@@ -344,21 +353,11 @@ public class Competences extends Controller {
 
     LocalDate date = new LocalDate(year, month, 1);
 
-    List<Certification> certificationList = certificationDao
-        .personCertifications(person, year, month);
-    CertificatedData certificatedData = pmrDao.getPersonCertificatedData(person, month, year);
-    if (!certificationList.isEmpty() || certificatedData != null) {
-      flash.error("Non si può modificare una configurazione per un anno/mese in cui "
-          + "sono già stati inviati gli attestati");
-      Competences.enabledCompetences(year,
-          month, person.office.id);
-    }
-
     List<PersonCompetenceCodes> pccList = competenceCodeDao
         .listByPerson(person, Optional.fromNullable(date));
     List<CompetenceCode> codeToAdd = competenceManager.codeToSave(pccList, codeListIds);
     List<CompetenceCode> codeToRemove = competenceManager.codeToDelete(pccList, codeListIds);
-
+    
     competenceManager.persistChanges(person, codeToAdd, codeToRemove, date);
 
     flash.success(String.format("Aggiornate con successo le competenze per %s",
