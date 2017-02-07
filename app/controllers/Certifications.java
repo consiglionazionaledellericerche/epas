@@ -58,7 +58,7 @@ public class Certifications extends Controller {
   @Inject
   static PersonDao personDao;
   @Inject
-  static ICertificationService certificationService;
+  static ICertificationService certService;
   @Inject
   static CacheValues cacheValues;
 
@@ -248,7 +248,7 @@ public class Certifications extends Controller {
    */
   public static void codici() {
     try {
-      renderText(certificationService.absenceCodes());
+      renderText(certService.absenceCodes());
     } catch (Exception ex) {
       renderText("Impossibile recuperare i codici dal server di attestati\r\n" 
           + cleanMessage(ex).getMessage());
@@ -268,13 +268,11 @@ public class Certifications extends Controller {
     notFoundIfNull(person);
     rules.checkIfPermitted(person);
 
-    final Map.Entry<Person, YearMonth> cacheKey = new AbstractMap
-        .SimpleEntry<>(person, new YearMonth(year, month));
-
     PersonCertData previousCertData = null;
     try {
       // Costruisco lo status generale
-      previousCertData = cacheValues.personStatus.get(cacheKey);
+      // Non uso la cache qui per evitare eventuali stati incongruenti durante l'invio
+      previousCertData = certService.buildPersonStaticStatus(person,year,month);
     } catch (Exception e) {
       log.error("Errore nel recupero delle informazioni dal server di attestati" +
           " per la persona {}: {}", person, cleanMessage(e).getMessage());
@@ -285,13 +283,17 @@ public class Certifications extends Controller {
     if (!previousCertData.validate) {
       // Se l'attestato non è stato validato applico il process
       try {
-        personCertData = certificationService.process(previousCertData);
+        personCertData = certService.process(previousCertData);
       } catch (ExecutionException | NoSuchFieldException e) {
         log.error("Errore nell'invio delle informazioni al server di attestati " +
             "per la persona {}: {}", person, cleanMessage(e).getMessage());
       }
     }
-//     Se riesco nell'invio ne aggiorno lo stato in cache
+
+    final Map.Entry<Person, YearMonth> cacheKey = new AbstractMap
+        .SimpleEntry<>(person, new YearMonth(year, month));
+
+    // Se riesco nell'invio ne aggiorno lo stato in cache
     if (personCertData != null) {
       cacheValues.personStatus.put(cacheKey, personCertData);
     } else {
@@ -333,7 +335,7 @@ public class Certifications extends Controller {
 //    LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
 //
 //    //Il mese selezionato è abilitato?
-//    boolean autenticate = certificationService.authentication(office, true);
+//    boolean autenticate = certService.authentication(office, true);
 //    if (!autenticate) {
 //      flash.error("L'utente app.epas non è abilitato alla sede selezionata");
 //      renderTemplate("@certifications", office, year, month);
@@ -360,14 +362,14 @@ public class Certifications extends Controller {
 //    for (Person person : people) {
 //
 //      // Costruisco lo status generale
-//      PersonCertData personCertificationStatus = certificationService
+//      PersonCertData personCertificationStatus = certService
 //          .buildPersonStaticStatus(person, year, month);
 //
 //      // Elimino ogni record
-//      certificationService.emptyAttestati(personCertificationStatus);
+//      certService.emptyAttestati(personCertificationStatus);
 //
 //      // Ricostruzione nuovo stato (coi record eliminati)
-//      personCertificationStatus = certificationService
+//      personCertificationStatus = certService
 //          .buildPersonStaticStatus(person, year, month);
 //
 ////      if (personCertificationStatus.match()) {

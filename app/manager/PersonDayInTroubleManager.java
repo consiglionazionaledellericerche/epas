@@ -2,7 +2,6 @@ package manager;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 
@@ -73,7 +72,7 @@ public class PersonDayInTroubleManager {
   public void setTrouble(PersonDay pd, Troubles cause) {
 
     for (PersonDayInTrouble pdt : pd.troubles) {
-      if (pdt.cause.equals(cause)) {
+      if (pdt.cause == cause) {
         // Se esiste gia' non faccio nulla
         return;
       }
@@ -95,18 +94,15 @@ public class PersonDayInTroubleManager {
    */
   public void fixTrouble(final PersonDay pd, final Troubles cause) {
 
-    Iterables.removeIf(pd.troubles, new Predicate<PersonDayInTrouble>() {
-      @Override
-      public boolean apply(PersonDayInTrouble pdt) {
-        if (pdt.cause == cause) {
-          pdt.delete();
+    Iterables.removeIf(pd.troubles, pdt -> {
+      if (pdt.cause == cause) {
+        pdt.delete();
 
-          log.info("Rimosso PersonDayInTrouble {} - {} - {}",
-              pd.person.getFullname(), pd.date, cause);
-          return true;
-        }
-        return false;
+        log.info("Rimosso PersonDayInTrouble {} - {} - {}",
+            pd.person.getFullname(), pd.date, cause);
+        return true;
       }
+      return false;
     });
   }
 
@@ -128,8 +124,13 @@ public class PersonDayInTroubleManager {
     for (Person person : personList) {
 
       final Optional<Contract> currentContract = factory.create(person).getCurrentContract();
+      if (!currentContract.isPresent()) {
+        log.error("Nessun contratto trovato attivo alla data odierna per {} - {} ", person,
+            person.office);
+        continue;
+      }
       DateInterval intervalToCheck = DateUtility.intervalIntersection(
-          factory.create(currentContract.get()).getContractDateInterval(),
+          factory.create(currentContract.get()).getContractDatabaseInterval(),
           new DateInterval(fromDate, toDate));
       if (intervalToCheck == null) {
         continue;
@@ -248,14 +249,9 @@ public class PersonDayInTroubleManager {
         .transform(wrapperModelFunctionFactory.contract()).toList();
 
     for (PersonDayInTrouble pdt : pdtList) {
-      boolean toDelete = true;
-      for (IWrapperContract wrContract : wrapperContracts) {
-        if (DateUtility.isDateIntoInterval(pdt.personDay.date,
-            wrContract.getContractDatabaseInterval())) {
-          toDelete = false;
-          break;
-        }
-      }
+      boolean toDelete = wrapperContracts.stream()
+          .noneMatch(wrContract -> DateUtility.isDateIntoInterval(pdt.personDay.date,
+              wrContract.getContractDatabaseInterval()));
       if (toDelete) {
         log.info("Eliminato Pd-Trouble di {} data {}", person.fullName(), pdt.personDay.date);
         pdt.delete();
