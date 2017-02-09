@@ -25,8 +25,6 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
 import helpers.jpa.ModelQuery.SimpleResults;
 
-import it.cnr.iit.epas.DateInterval;
-
 import lombok.extern.slf4j.Slf4j;
 
 import manager.CompetenceManager;
@@ -73,7 +71,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+
 
 import javax.inject.Inject;
 
