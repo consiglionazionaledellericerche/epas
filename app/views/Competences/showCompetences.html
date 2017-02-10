@@ -29,14 +29,27 @@
 	<input type="hidden" name="year" value="${compDto.year}"/>
     <input type="hidden" name="month" value="${compDto.month}"/>
     <input type="hidden" name="officeId" value="${compDto.office.id}"/>
-
+	<input type="hidden" name="codeId" value="${wrCompetenceCode.value.id}"/>
 	#{f.selectModel 'competenceCode', label:'Codice', items:competenceCodeList,
-    	value:wrCompetenceCode.value /}
+    	value:wrCompetenceCode.value /} 		
     
     #{/form}
 
     <section id="results">
-
+    <br>
+    
+	#{if wrCompetenceCode.value.limitType.equals(models.enumerate.LimitType.onMonthlyPresence)}
+		#{alert color:'warning'}
+			<p>Se sono state effettuate modifiche alle timbrature o alle assenze nelle giornate del mese
+			di &{templateUtility.monthName(compDto.month)}, successive al <strong>1 &{templateUtility.monthName(compDto.month)}</strong>, è possibile effettuare il ricalcolo 
+			della competenza premendo il tasto qui sotto</p>
+		
+		<a class="btn btn-warning offset-col-sm-4" href="@{Competences.recalculateBonus(office.id, wrCompetenceCode.value.id, year, month)}">
+      		Ricalcola competenza
+    	</a>
+    	#{/alert}
+	#{/if}
+	<br>
 	   <table class="table" datatable>
       		<thead>
       		<tr>
@@ -65,17 +78,17 @@
       		</tbody>
        </table>
 
-  <br>
-  <br>
-  #{alert color:'warning'}
-  Totale competenze <strong>${wrCompetenceCode.value.description} ${wrCompetenceCode.value.code}</strong>
-    assegnate nel mese per <strong>${compDto.office.name}</strong>
-  <a data-tooltip data-toggle="tooltip" data-placement="right"
-     title="Per aggiornare questo valore ricaricare la pagina">
-    <strong>${wrCompetenceCode.totalFromCompetenceCode(compDto.month, compDto.year, compDto.office.id)}</strong>
-  </a>
-  #{/alert}
-  </section>
+	  <br>
+	  <br>
+	  #{alert color:'warning'}
+	  Totale competenze <strong>${wrCompetenceCode.value.description} ${wrCompetenceCode.value.code}</strong>
+	    assegnate nel mese per <strong>${compDto.office.name}</strong>
+	  <a data-tooltip data-toggle="tooltip" data-placement="right"
+	     title="Per aggiornare questo valore ricaricare la pagina">
+	    <strong>${wrCompetenceCode.totalFromCompetenceCode(compDto.month, compDto.year, compDto.office.id)}</strong>
+	  </a>
+	  #{/alert}
+	  </section>
   
   #{title title:'Riepilogo Straordinari assegnati ' + compDto.year, color:'primary' /}
 
