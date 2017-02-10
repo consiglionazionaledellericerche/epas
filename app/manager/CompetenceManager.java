@@ -908,6 +908,7 @@ public class CompetenceManager {
 
     final List<Promise<Void>> results = new ArrayList<>();
     for (Office o : offices) {
+
       personList = personDao.listForCompetence(Sets.newHashSet(o), yearMonth, code);
       for (Person p : personList) {
         results.add(new Job<Void>() {
@@ -954,7 +955,7 @@ public class CompetenceManager {
         comp.valueApproved = psDto.basedWorkingDays;
         comp.save();
       }
-      
+      log.debug("Assegnati {} giorni a {}", psDto.basedWorkingDays, person.fullName());
     } else {
       log.warn("La competenza {} non risulta abilitata per il dipendente {} nel mese "
           + "e nell'anno selezionati", code, person.fullName());
