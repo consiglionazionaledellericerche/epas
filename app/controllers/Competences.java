@@ -70,6 +70,7 @@ import security.SecurityRules;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -650,12 +651,19 @@ public class Competences extends Controller {
     notFoundIfNull(office);
 
     rules.checkIfPermitted(office);
+    
+    Comparator<Person> comparator = new Comparator<Person>() {
+      public int compare(Person p1, Person p2) {
 
-    Set<Person> personSet = Sets.newHashSet();
+        return p1.surname.compareTo(p2.surname);
+      }
+    };
+    
+    Set<Person> personSet = Sets.newTreeSet(comparator);
 
     Map<CompetenceCode, Integer> totalValueAssigned = Maps.newHashMap();
 
-    Map<Person, Map<CompetenceCode, Integer>> mapPersonCompetenceRecap = Maps.newHashMap();
+    Map<Person, Map<CompetenceCode, Integer>> mapPersonCompetenceRecap = Maps.newTreeMap(comparator);
 
     List<Competence> competenceInYear = competenceDao
         .getCompetenceInYear(year, Optional.fromNullable(office));
