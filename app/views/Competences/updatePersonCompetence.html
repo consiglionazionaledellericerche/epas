@@ -2,15 +2,20 @@
 <div id="updateCompetenceModal" class="col-xs-8 col-xs-offset-2">
 	#{alert color:'info'}
 		Cliccando all'interno della finestra sottostante, selezionare le competenze che si intendono assegnare al 
-		dipendente o eventualmente rimuovere
-		quelle in precedenza assegnate e non più valide.<br>
+		dipendente o eventualmente rimuovere quelle in precedenza assegnate e non più valide.<br>
+		In caso di assegnamento di una nuova competenza, verrà impostata come data di inizio validità <strong>il primo giorno
+		di questo mese</strong>.<br>
+		In caso di rimozione di una competenza, verrà impostata come data di fine validità <strong>l'ultimo giorno di questo mese</strong>.
 		
 	#{/alert}
+	#{if certificationsSent}
 	#{alert color: 'warning'}
 		<i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 
-		<strong>Attenzione:</strong> Se si intende cambiare la configurazione delle competenze assegnate per un mese 
-		in cui sono già stati inviati i dati ad attestati, il sistema impedirà tale modifica.
+		<strong>Attenzione:</strong> Per questo mese i dati sono già stati caricati su Attestati.<br>
+		Modificando la mappa delle competenze abilitate, potrebbero riscontrarsi differenze tra i dati presenti su ePAS <br>
+		e i dati presenti su Attestati.		
 	#{/alert}
+	#{/if}
   #{form action:@Competences.saveNewCompetenceConfiguration(), method:'POST', autocomplete:false,
   class:'form form-horizontal', 'data-async':'#page_content',
   'data-async-error':'#updateCompetenceModal'}

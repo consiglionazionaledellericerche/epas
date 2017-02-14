@@ -127,7 +127,10 @@ public class ContractDao extends DaoBase {
    * @return il contratto attivo per quella persona alla data date.
    */
   public Contract getContract(LocalDate date, Person person) {
-
+    // FIXME ci sono alcuni casi nei quali i valori in person.contracts (in questo metodo) non sono
+    // allineati con tutti i record presenti sul db e capita che viene restituito un valore nullo
+    // incongruente con i dati presenti
+    // TODO da sostituire con una query?
     for (Contract c : person.contracts) {
       if (DateUtility.isDateIntoInterval(date, factory.create(c).getContractDateInterval())) {
         return c;
