@@ -746,8 +746,10 @@ public class PersonDayManager {
     if (!isFixedTimeAtWork
         // E' di livello 4-8
         && personDay.person.qualification.qualification > 3
-        // c'è almeno 1 tra assenze e timbrature
-        && (!noStampings || !noAbsences)
+        // non deve essere festivo
+        && !personDay.isHoliday
+        // le assenze non devono essere giornaliere 
+        && !isAllDayAbsences
         // Il tempo a lavoro non è almeno la metà di quello previsto
         && personDay.timeAtWork < (workingTime / 2)) {
       personDayInTroubleManager.setTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);

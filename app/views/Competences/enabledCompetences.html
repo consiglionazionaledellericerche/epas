@@ -30,10 +30,13 @@
  	  </td>
  	  <td>
  	   #{list items:key.getValue(), as:'dto'}
-
- 	       	#{if dto.endDate != null && dto.endDate.getMonthOfYear() == date.getMonthOfYear() && dto.endDate.getYear() == date.getYear()}
+			#{if dto.endDate != null && dto.endDate.getMonthOfYear() == date.getMonthOfYear() && dto.endDate.getYear() == date.getYear() &&
+				dto.beginDate.getMonthOfYear() == date.getMonthOfYear() && dto.beginDate.getYear() == date.getYear()}
+				<span class="label label-info" webui-popover-hover data-content="&{'beginEndCompetenceCode'}">${dto.code.code} - ${dto.code.description}</span>
+			#{/if}
+ 	       	#{elseif dto.endDate != null && dto.endDate.getMonthOfYear() == date.getMonthOfYear() && dto.endDate.getYear() == date.getYear()}
  	       		<span class="label label-warning" webui-popover-hover data-content="&{'endCompetenceCode'}">${dto.code.code} - ${dto.code.description}</span>
- 	       	#{/if}
+ 	       	#{/elseif}
  	       	#{elseif dto.beginDate.getMonthOfYear() == date.getMonthOfYear() && dto.beginDate.getYear() == date.getYear()}
  	       		<span class="label label-success" webui-popover-hover data-content="&{'beginCompetenceCode'}">${dto.code.code} - ${dto.code.description}</span>
  	       	#{/elseif}
