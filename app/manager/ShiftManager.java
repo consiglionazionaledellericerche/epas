@@ -156,7 +156,8 @@ public class ShiftManager {
           : personShiftDay.shiftType.shiftTimeTable.endAfternoonLunchTime;
 
       // Add flexibility (15 min.) due to the new rules (PROT. N. 0008692 del 2/12/2014)
-      LocalTime roundedStartShift = startShift.plusMinutes(15);
+      //LocalTime roundedStartShift = startShift.plusMinutes(15);
+      LocalTime roundedStartShift = startShift.plusMinutes(personShiftDay.shiftType.tolerance);
 
       //log.debug("Turno: {}-{}  {}-{}", startShift, startLunchTime, endLunchTime, endShift);
 

@@ -22,7 +22,7 @@
 		E selezionare la tipologia di turno da applicare tra quelle proposte in tabella.		
 	#{/alert}	
 #{/else}
-#{f.input 'type.type',required:'true'/}
+#{f.input 'type.type', required:'true'/}
 #{f.input 'type.description',required:'true'/}
 
 #{f.hidden 'cat.id', value:cat.id /}
@@ -56,7 +56,7 @@
 	</tr>
 #{/list}
 </table>
-
+#{f.input 'type.tolerance', type:'number', popover:'true', required:'true'/}
 		#{b.buttons center:true}
 		   #{b.submit 'Conferma'/}
 		   
