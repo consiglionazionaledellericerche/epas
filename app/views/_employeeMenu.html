@@ -15,11 +15,32 @@
 
   <li class="dropdown #{if request.action in actions}active#{/if}">
 
+                
+
     *{ responsività dropDown }*
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i>
-      <div class="visible-lg-inline visible-xs-inline"> ${session.username}
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+    
+     <div class="webui-popover-content" id="loginPopup">
+       <p class="text-success">Connessione effettuata via Identity Provider CNR</p>
+  	 </div>
+    
+     #{if !session.get('shibboleth')}  
+       <span webui-popover-hover data-url="#loginPopup"> 
+  	     <i class="fa fa-id-card" aria-hidden="true"></i>
+       </span>
+     #{/if}
+     #{else}
+      <i class="fa fa-user"></i>
+     #{/else}
+     <div class="visible-lg-inline visible-xs-inline"> ${session.username}
         <span class="caret"></span>
-      </div>
+     </div>
+      
+                    
+                            
+
+              
+
     </a>
 
     *{ items }*
