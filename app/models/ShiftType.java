@@ -28,6 +28,8 @@ public class ShiftType extends BaseModel {
   public String type;
   @Required
   public String description;
+  
+  public int tolerance;
 
   @NotAudited
   @OneToMany(mappedBy = "shiftType")

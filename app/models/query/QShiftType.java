@@ -47,6 +47,8 @@ public class QShiftType extends EntityPathBase<ShiftType> {
 
     public final QShiftTimeTable shiftTimeTable;
 
+    public final NumberPath<Integer> tolerance = createNumber("tolerance", Integer.class);
+
     public final StringPath type = createString("type");
 
     public QShiftType(String variable) {
