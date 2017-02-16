@@ -253,31 +253,27 @@ public class PersonDayManager {
     if (!StampTypes.PERMESSO_BREVE.isActive()) {
       return 0;
     }
-
     List<PairStamping> validPairs = computeValidPairStampings(personDay.stampings);
 
-    List<PairStamping> allGapPairs = Lists.newArrayList();
-
+    int gapTime = 0;
     //1) Calcolare tutte le gapPair (fattorizzare col metodo del pranzo)
     PairStamping previous = null;
     for (PairStamping validPair : validPairs) {
       if (previous != null) {
-        if ((previous.second.stampType == null
-            || previous.second.stampType == StampTypes.PERMESSO_BREVE)
-            && (validPair.first.stampType == null
-            || validPair.first.stampType == StampTypes.PERMESSO_BREVE)) {
-
-          allGapPairs.add(new PairStamping(previous.second, validPair.first));
+        Stamping first = previous.second;
+        Stamping second = validPair.first;
+        //almeno una delle due permesso breve
+        if ( (first.stampType != null && first.stampType == StampTypes.PERMESSO_BREVE) 
+            || (second.stampType != null && second.stampType == StampTypes.PERMESSO_BREVE)) {
+          //solo permessi brevi
+          if ( (first.stampType == null || first.stampType == StampTypes.PERMESSO_BREVE)
+              && (second.stampType == null || second.stampType == StampTypes.PERMESSO_BREVE)) {
+            gapTime += new PairStamping(first, second).timeInPair;
+          }
         }
       }
       previous = validPair;
     }
-
-    int gapTime = 0;
-    for (PairStamping gapPair : allGapPairs) {
-      gapTime += gapPair.timeInPair;
-    }
-
     return gapTime;
   }
 
@@ -750,8 +746,10 @@ public class PersonDayManager {
     if (!isFixedTimeAtWork
         // E' di livello 4-8
         && personDay.person.qualification.qualification > 3
-        // c'è almeno 1 tra assenze e timbrature
-        && (!noStampings || !noAbsences)
+        // non deve essere festivo
+        && !personDay.isHoliday
+        // le assenze non devono essere giornaliere 
+        && !isAllDayAbsences
         // Il tempo a lavoro non è almeno la metà di quello previsto
         && personDay.timeAtWork < (workingTime / 2)) {
       personDayInTroubleManager.setTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);
