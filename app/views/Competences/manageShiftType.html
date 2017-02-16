@@ -13,6 +13,8 @@ title: ('Assegna personale alla ' +type.type+ ' - ' +type.description)}
 	#{/alert}
 	#{f.input 'type.type' /}
 	#{f.input 'type.description' /}
+	#{f.input 'type.tolerance',type:'number' /}
+	#{f.input 'type.hourTolerance', type:'number' /}
 	#{if peopleForShift.isEmpty()}
 		#{alert color:'warning'}
 			Per poter assegnare dei dipendenti all'attività <strong>${type.description}</strong>

@@ -10,6 +10,7 @@ import play.data.validation.Required;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -30,6 +31,9 @@ public class ShiftType extends BaseModel {
   public String description;
   
   public int tolerance;
+  
+  @Column(name="hour_tolerance")
+  public int hourTolerance;
 
   @NotAudited
   @OneToMany(mappedBy = "shiftType")
