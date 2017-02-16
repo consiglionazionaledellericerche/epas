@@ -83,58 +83,71 @@
     </display>  
   </class>  
   <association id="10">    
-    <end type="SOURCE" refId="9" navigable="false">      
-      <attribute id="11" name="supervisor"/>      
-      <multiplicity id="12" minimum="0" maximum="1"/>    
+    <end type="SOURCE" refId="2" navigable="false">      
+      <attribute id="11" name="personShiftDays">        
+        <position height="17" width="88" x="496" y="285"/>      
+      </attribute>      
+      <multiplicity id="12" minimum="0" maximum="2147483647">        
+        <position height="15" width="21" x="596" y="291"/>      
+      </multiplicity>    
     </end>    
-    <end type="TARGET" refId="1" navigable="true"/>    
+    <end type="TARGET" refId="3" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
   <association id="13">    
-    <bendpoint x="459" y="447"/>    
-    <end type="SOURCE" refId="3" navigable="false">      
-      <attribute id="14" name="personShift">        
-        <position height="0" width="0" x="-338" y="162"/>      
+    <end type="SOURCE" refId="5" navigable="false">      
+      <attribute id="14" name="shiftCategories">        
+        <position height="0" width="0" x="0" y="0"/>      
       </attribute>      
       <multiplicity id="15" minimum="0" maximum="1">        
-        <position height="0" width="0" x="-338" y="162"/>      
+        <position height="0" width="0" x="0" y="0"/>      
       </multiplicity>    
     </end>    
-    <end type="TARGET" refId="2" navigable="true"/>    
+    <end type="TARGET" refId="9" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
   <association id="16">    
-    <end type="SOURCE" refId="5" navigable="false">      
-      <attribute id="17" name="personShiftShiftTypes">        
+    <end type="SOURCE" refId="9" navigable="false">      
+      <attribute id="17" name="shiftTypes">        
         <position height="0" width="0" x="0" y="0"/>      
       </attribute>      
       <multiplicity id="18" minimum="0" maximum="2147483647">        
         <position height="0" width="0" x="0" y="0"/>      
       </multiplicity>    
     </end>    
-    <end type="TARGET" refId="4" navigable="true"/>    
+    <end type="TARGET" refId="5" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
   <association id="19">    
-    <end type="SOURCE" refId="1" navigable="false">      
-      <attribute id="20" name="competences"/>      
-      <multiplicity id="21" minimum="0" maximum="2147483647"/>    
-    </end>    
-    <end type="TARGET" refId="8" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="22">    
-    <end type="SOURCE" refId="5" navigable="false">      
-      <attribute id="23" name="shiftTimeTable"/>      
-      <multiplicity id="24" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="7" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="25">    
     <bendpoint x="63" y="224"/>    
     <bendpoint x="65" y="243"/>    
     <end type="SOURCE" refId="1" navigable="false">      
+      <attribute id="20" name="personShift">        
+        <position height="0" width="0" x="-338" y="162"/>      
+      </attribute>      
+      <multiplicity id="21" minimum="0" maximum="1">        
+        <position height="0" width="0" x="-338" y="162"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="2" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="22">    
+    <bendpoint x="713" y="530"/>    
+    <end type="SOURCE" refId="5" navigable="false">      
+      <attribute id="23" name="personShiftDays">        
+        <position height="0" width="0" x="-7" y="-147"/>      
+      </attribute>      
+      <multiplicity id="24" minimum="0" maximum="2147483647">        
+        <position height="0" width="0" x="-7" y="-147"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="3" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="25">    
+    <bendpoint x="646" y="307"/>    
+    <end type="SOURCE" refId="4" navigable="false">      
       <attribute id="26" name="personShift">        
         <position height="0" width="0" x="-338" y="162"/>      
       </attribute>      
@@ -146,145 +159,164 @@
     <display labels="true" multiplicity="true"/>  
   </association>  
   <association id="28">    
-    <end type="SOURCE" refId="6" navigable="false">      
-      <attribute id="29" name="type">        
+    <end type="SOURCE" refId="1" navigable="false">      
+      <attribute id="29" name="shiftCategories">        
         <position height="0" width="0" x="0" y="0"/>      
       </attribute>      
-      <multiplicity id="30" minimum="0" maximum="1">        
+      <multiplicity id="30" minimum="0" maximum="2147483647">        
         <position height="0" width="0" x="0" y="0"/>      
       </multiplicity>    
     </end>    
-    <end type="TARGET" refId="5" navigable="true"/>    
+    <end type="TARGET" refId="9" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
   <association id="31">    
-    <bendpoint x="646" y="307"/>    
-    <end type="SOURCE" refId="4" navigable="false">      
-      <attribute id="32" name="personShift">        
-        <position height="0" width="0" x="-338" y="162"/>      
+    <end type="SOURCE" refId="6" navigable="false">      
+      <attribute id="32" name="type">        
+        <position height="0" width="0" x="0" y="0"/>      
       </attribute>      
       <multiplicity id="33" minimum="0" maximum="1">        
-        <position height="0" width="0" x="-338" y="162"/>      
+        <position height="0" width="0" x="0" y="0"/>      
       </multiplicity>    
     </end>    
-    <end type="TARGET" refId="2" navigable="true"/>    
+    <end type="TARGET" refId="5" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
   <association id="34">    
-    <end type="SOURCE" refId="9" navigable="false">      
-      <attribute id="35" name="shiftTypes"/>      
-      <multiplicity id="36" minimum="0" maximum="2147483647"/>    
-    </end>    
-    <end type="TARGET" refId="5" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="37">    
-    <end type="SOURCE" refId="2" navigable="false">      
-      <attribute id="38" name="personShiftDays">        
-        <position height="17" width="88" x="496" y="285"/>      
-      </attribute>      
-      <multiplicity id="39" minimum="0" maximum="2147483647">        
-        <position height="15" width="21" x="596" y="291"/>      
-      </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="3" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="40">    
-    <bendpoint x="713" y="530"/>    
-    <end type="SOURCE" refId="5" navigable="false">      
-      <attribute id="41" name="personShiftDays">        
-        <position height="0" width="0" x="-7" y="-147"/>      
-      </attribute>      
-      <multiplicity id="42" minimum="0" maximum="2147483647">        
-        <position height="0" width="0" x="-7" y="-147"/>      
-      </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="3" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="43">    
-    <bendpoint x="941" y="441"/>    
-    <end type="SOURCE" refId="4" navigable="false">      
-      <attribute id="44" name="shiftType">        
-        <position height="0" width="0" x="0" y="0"/>      
-      </attribute>      
-      <multiplicity id="45" minimum="0" maximum="1">        
-        <position height="0" width="0" x="0" y="0"/>      
-      </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="5" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="46">    
     <bendpoint x="899" y="798"/>    
     <end type="SOURCE" refId="5" navigable="false">      
-      <attribute id="47" name="shiftCancelled">        
+      <attribute id="35" name="shiftCancelled">        
         <position height="0" width="0" x="280" y="39"/>      
       </attribute>      
-      <multiplicity id="48" minimum="0" maximum="2147483647">        
+      <multiplicity id="36" minimum="0" maximum="2147483647">        
         <position height="0" width="0" x="280" y="39"/>      
       </multiplicity>    
     </end>    
     <end type="TARGET" refId="6" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <association id="49">    
+  <association id="37">    
+    <end type="SOURCE" refId="1" navigable="false">      
+      <attribute id="38" name="competences">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="39" minimum="0" maximum="2147483647">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="8" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="40">    
     <bendpoint x="690" y="603"/>    
     <end type="SOURCE" refId="3" navigable="false">      
-      <attribute id="50" name="shiftType">        
+      <attribute id="41" name="shiftType">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="42" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="5" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="43">    
+    <end type="SOURCE" refId="5" navigable="false">      
+      <attribute id="44" name="personShiftShiftTypes">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="45" minimum="0" maximum="2147483647">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="4" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="46">    
+    <bendpoint x="941" y="441"/>    
+    <end type="SOURCE" refId="4" navigable="false">      
+      <attribute id="47" name="shiftType">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="48" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="5" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="49">    
+    <end type="SOURCE" refId="8" navigable="false">      
+      <attribute id="50" name="person">        
         <position height="0" width="0" x="0" y="0"/>      
       </attribute>      
       <multiplicity id="51" minimum="0" maximum="1">        
         <position height="0" width="0" x="0" y="0"/>      
       </multiplicity>    
     </end>    
-    <end type="TARGET" refId="5" navigable="true"/>    
+    <end type="TARGET" refId="1" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
   <association id="52">    
-    <end type="SOURCE" refId="7" navigable="false">      
-      <attribute id="53" name="shiftTypes"/>      
-      <multiplicity id="54" minimum="0" maximum="2147483647"/>    
+    <bendpoint x="459" y="447"/>    
+    <end type="SOURCE" refId="3" navigable="false">      
+      <attribute id="53" name="personShift">        
+        <position height="0" width="0" x="-338" y="162"/>      
+      </attribute>      
+      <multiplicity id="54" minimum="0" maximum="1">        
+        <position height="0" width="0" x="-338" y="162"/>      
+      </multiplicity>    
     </end>    
-    <end type="TARGET" refId="5" navigable="true"/>    
+    <end type="TARGET" refId="2" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
   <association id="55">    
-    <end type="SOURCE" refId="5" navigable="false">      
-      <attribute id="56" name="shiftCategories"/>      
-      <multiplicity id="57" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="9" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="58">    
     <bendpoint x="334" y="327"/>    
     <end type="SOURCE" refId="2" navigable="false">      
-      <attribute id="59" name="person">        
+      <attribute id="56" name="person">        
         <position height="17" width="43" x="292" y="320"/>      
       </attribute>      
-      <multiplicity id="60" minimum="0" maximum="1">        
+      <multiplicity id="57" minimum="0" maximum="1">        
         <position height="0" width="0" x="51" y="-10"/>      
       </multiplicity>    
     </end>    
     <end type="TARGET" refId="1" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <association id="61">    
-    <end type="SOURCE" refId="1" navigable="false">      
-      <attribute id="62" name="shiftCategories"/>      
-      <multiplicity id="63" minimum="0" maximum="2147483647"/>    
+  <association id="58">    
+    <end type="SOURCE" refId="7" navigable="false">      
+      <attribute id="59" name="shiftTypes">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="60" minimum="0" maximum="2147483647">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
     </end>    
-    <end type="TARGET" refId="9" navigable="true"/>    
+    <end type="TARGET" refId="5" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="61">    
+    <end type="SOURCE" refId="9" navigable="false">      
+      <attribute id="62" name="supervisor">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="63" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="1" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
   <association id="64">    
-    <end type="SOURCE" refId="8" navigable="false">      
-      <attribute id="65" name="person"/>      
-      <multiplicity id="66" minimum="0" maximum="1"/>    
+    <end type="SOURCE" refId="5" navigable="false">      
+      <attribute id="65" name="shiftTimeTable">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="66" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
     </end>    
-    <end type="TARGET" refId="1" navigable="true"/>    
+    <end type="TARGET" refId="7" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
   <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 

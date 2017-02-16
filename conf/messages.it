@@ -171,6 +171,7 @@ file= File
 
 disabled= Codice di competenza disabilitato
 enabled= Abilita Codice di competenza
+beginEndCompetenceCode= In questo mese inizia e termina la validità di utilizzo del codice di competenza.
 beginCompetenceCode= In questo mese inizia l'utilizzo del codice di competenza.
 endCompetenceCode= In questo mese termina l'utilizzo del codice di competenza. Dal prossimo mese non sarà più usabile e visibile in questa lista.
 firstDay= Giorno inizio contratto
