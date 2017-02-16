@@ -240,7 +240,7 @@ public class Shift extends Controller {
         personShiftDayDao.getPersonShiftDayByTypeAndPeriod(startDate, endDate, shiftType);
 
     //inconsistentAbsence = CompetenceUtility.getShiftInconsistencyTimestampTable(personShiftDays);
-    shiftManager.getShiftInconsistencyTimestampTable(personShiftDays, inconsistentAbsence);
+    shiftManager.getShiftInconsistencyTimestampTable(personShiftDays, inconsistentAbsence, shiftType);
 
     //return inconsistentAbsence;
   }
@@ -317,7 +317,7 @@ public class Shift extends Controller {
       log.debug("Chiamo la getShiftInconsistencyTimestampTable PER TROVARE LE INCONSISTENZE "
           + "del turno %s e memorizzarle", type);
       shiftManager.getShiftInconsistencyTimestampTable(
-          personsShiftDays, personsShiftInconsistentAbsences);
+          personsShiftDays, personsShiftInconsistentAbsences, shiftType);
       log.debug("* Num di persone nella personsShiftInconsistentAbsences = {}", 
           personsShiftInconsistentAbsences.rowKeySet().size());
     }
