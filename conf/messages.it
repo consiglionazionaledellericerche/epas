@@ -365,6 +365,7 @@ type.description =Descrizione
 type.office =Sede
 type.supervisor =Supervisore servizio
 type.tolerance =Tolleranza
+type.hourTolerance =Tolleranza per turno
 
 cat.description =Descrizione
 cat.office =Sede
@@ -655,7 +656,8 @@ person.eppn.popover= Inserire la propria email cnr Es:mario.rossi@cnr.it
 
 domain.popover= Specificare il dominio sprovvisto del carattere @ (Es. iit.cnr.it)
 
-type.tolerance.popover= Specificare l&apos;eventuale tolleranza <strong> in minuti </strong> da applicare alle timbrature per inserirle o meno nel turno. Inserire 0 se non si vuole tolleranza.
+type.tolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare alle timbrature per inserirle o meno nel turno. Inserire 0 se non si vuole tolleranza.
+type.hourTolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare sull&apos;attività di turno per determinare se un turno è valido o no.
 
 ###########################################################################
 #	Messaggi utilizzati nelle viste
