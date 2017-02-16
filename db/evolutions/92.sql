@@ -2,6 +2,7 @@
 
 ALTER TABLE shift_type ADD COLUMN tolerance INT;
 ALTER TABLE shift_type_history ADD COLUMN tolerance INT;
+update shift_type set tolerance = 0;
 
 # ---!Downs
 
