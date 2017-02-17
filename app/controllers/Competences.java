@@ -987,7 +987,7 @@ public class Competences extends Controller {
       for (PersonShiftShiftType psst : associatedPeopleShift) {
         peopleIds.add(psst.personShift);
       }
-      render(peopleIds,type, office, peopleForShift);
+      render(peopleIds,type, office, peopleForShift, associatedPeopleShift);
     }
   }
   
@@ -996,24 +996,35 @@ public class Competences extends Controller {
    * @param peopleIds la lista degli id delle persone da aggiungere/rimuovere
    * @param shiftType l'attività su cui aggiungere/rimuovere le persone
    */
-  public static void linkPeopleToShift(List<Long> peopleIds, @Valid ShiftType type) {
-    notFoundIfNull(type);
-    rules.checkIfPermitted(type.shiftCategories.office);
+  
+  public static void linkPeopleToShift(Long typeId) {
+    Optional<ShiftType> type = shiftDao.getShiftTypeById(typeId);
+    if (!type.isPresent()) {
+      //TODO: ritornare qualche errore
+    }
+    
+    rules.checkIfPermitted(type.get().shiftCategories.office);
     if (validation.hasErrors()) {
       response.status = 400;
-      List<PersonShift> peopleForShift = shiftDao.getPeopleForShift(type.shiftCategories.office);
-      Office office = type.shiftCategories.office;     
-      render("@manageShiftType", type, peopleForShift, peopleIds, office);
+      List<PersonShift> peopleForShift = shiftDao.getPeopleForShift(type.get().shiftCategories.office);
+      Office office = type.get().shiftCategories.office;     
+      render("@manageShiftType", type, peopleForShift, office);
     }
-    type.save();
-    List<PersonShiftShiftType> psstList = shiftDao.getAssociatedPeopleToShift(type, 
+    type.get().save();
+    List<PersonShiftShiftType> psstList = shiftDao.getAssociatedPeopleToShift(type.get(), 
         Optional.fromNullable(LocalDate.now()));
-    List<PersonShift> peopleToAdd = competenceManager.peopleToAdd(psstList, peopleIds);
-    List<PersonShift> peoleToRemove = competenceManager.peopleToDelete(psstList, peopleIds);
-    competenceManager.persistPersonShiftShiftType(peopleToAdd, type,peoleToRemove);
-    flash.success("Aggiornata lista di persone appartenenti all'attività di turno %s", 
-        type.description);
-    activateServices(type.shiftCategories.office.id);
+    List<PersonShift> peopleForShift = shiftDao.getPeopleForShift(type.get().shiftCategories.office);
+//    List<PersonShift> peopleToAdd = competenceManager.peopleToAdd(psstList, peopleIds);
+//    List<PersonShift> peoleToRemove = competenceManager.peopleToDelete(psstList, peopleIds);
+//    competenceManager.persistPersonShiftShiftType(peopleToAdd, type,peoleToRemove);
+    List<PersonShift> available = peopleForShift.stream()
+        .filter(e -> (psstList.stream()
+                .filter(d -> d.personShift.equals(e))
+                .count())<1)
+                .collect(Collectors.toList());
+    log.debug("bau");
+    ShiftType activity = type.get();
+    render(available, activity);
   }
   
   /**
@@ -1042,5 +1053,9 @@ public class Competences extends Controller {
     
     flash.success("Configurato correttamente il servizio %s", cat.description);
     activateServices(cat.office.id);
+  }
+  
+  public static void saveActivityConfiguration() {
+    
   }
 }

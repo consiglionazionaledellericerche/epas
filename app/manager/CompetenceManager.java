@@ -891,7 +891,6 @@ public class CompetenceManager {
       personShift = new PersonShift();
       personShift.person = person;
       personShift.description = "Turni di " + person.fullName();
-      personShift.jolly = false;
       personShift.disabled = false;
       personShift.save();
     }

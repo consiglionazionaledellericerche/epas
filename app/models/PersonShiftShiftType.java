@@ -42,4 +42,6 @@ public class PersonShiftShiftType extends BaseModel {
 
   @Column(name = "end_date")
   public LocalDate endDate;
+  
+  public boolean jolly;
 }

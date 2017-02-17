@@ -1,10 +1,18 @@
-#{modalAsync id:'defaultModal', button:'Salva', 
-title: ('Assegna personale alla ' +type.type+ ' - ' +type.description)}
-<div id="absenceCodeData">
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestisci ' + type.description /}
+
+#{set breadcrumbs:['Gestisci servizi':@Competences.activateServices(type.shiftCategories.office.id), 
+  (type.description):null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+<div class="container">
+
+#{title title:'Gestisci attività', administration:true /}
 	
-#{form action:@Competences.linkPeopleToShift(), method:'POST', autocomplete:false,
-  class:'form form-horizontal', 'data-async':'#page_content',
-  'data-async-error':'#absenceCodeData'}
+#{form action:@Competences.linkPeopleToShift(), class:'form form-horizontal', 
+	'data-async':'#page_content', 'data-async-error':'#absenceCodeData',
+	'data-spinner':'#defaultSpinner' }
   	#{if type.persistent}
  		#{f.hidden 'type.id' /}
 	#{/if}
@@ -14,7 +22,13 @@ title: ('Assegna personale alla ' +type.type+ ' - ' +type.description)}
 	#{f.input 'type.type' /}
 	#{f.input 'type.description' /}
 	#{f.input 'type.tolerance',type:'number' /}
-	#{f.input 'type.hourTolerance', type:'number' /}
+	#{f.input 'type.hourTolerance', type:'number' /}		
+  
+	  #{b.buttons center:true}
+	  		#{b.submit 'Ok'/}
+	  #{/b.buttons}
+
+#{/form}
 	#{if peopleForShift.isEmpty()}
 		#{alert color:'warning'}
 			Per poter assegnare dei dipendenti all'attività <strong>${type.description}</strong>
@@ -25,20 +39,32 @@ title: ('Assegna personale alla ' +type.type+ ' - ' +type.description)}
 		#{/alert}
 	#{/if}
 	#{else}	
-	
-	#{alert color:'info'}
-		Selezionare dalla lista le persone che si intende associare al turno <strong>${type.description}</strong>.
-	#{/alert}
-		#{f.selectModels 'peopleIds',
-  		items:templateUtility.allPersonShiftByOffice(office), placeholder:'I codici di competenza' /}
+	<div class="text-center">
+    <a class="btn btn-success" href="@{Competences.linkPeopleToShift(type.id)}" data-async-modal="#modalAddPersonToActivity"><i class="fa fa-user-plus"></i>
+      Inserisci una nuova persona sull'attività</a>
+  	</div>
+	<table class="table table-striped table-hover table-condensed center" datatable>
+	<thead>
+    <tr>
+      <th>Nome</th>
+      <th>Inizio attività di turno</th>
+      <th>Fine attività di turno</th>
+      <th>Jolly</th>
+    </tr>
+    </thead>
+    <tbody>
+	#{list items:associatedPeopleShift, as:'person'}
+	<tr>
+		<td>${person.person.fullname()}</td>
+		<td>${person.beginDate}</td>
+		<td>${person.endDate}</td>
+		<td>${person.jolly}</td>
+	</tr>
+	#{/list}
+	</tbody>
+	</table>
+		
 	#{/else}
-	
-  
-  #{b.buttons center:true}
-  		#{b.submit 'Ok'/}
-  #{/b.buttons}
-
-#{/form}
-
 </div>
-#{/modalAsync}
+
+<div id="modalAddPersonToActivity" class="modal fade container" tabindex="-1"></div>
