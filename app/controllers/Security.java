@@ -128,7 +128,7 @@ public class Security extends Secure.Security {
       session.clear();
       response.removeCookie("rememberme");
       Security.invoke("onDisconnected");
-      if (!session.contains("shibboleth")) {
+      if (session.contains("shibboleth")) {
         flash.success("secure.logoutShibboleth");
       } else {
         flash.success("secure.logout");
