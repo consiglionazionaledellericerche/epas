@@ -329,8 +329,9 @@ restoreUser= Torna chi eri
 
 roleIds= Ruoli attribuibili
 
-secure.error=Oops! Username o password sconosciuti
-secure.logout=Utente correttamente disconnesso
+secure.error=Oops! Username o password sconosciuti.
+secure.logout=Utente correttamente disconnesso.
+secure.logoutShibboleth=Per completare il logout è necessario chiudere il browser.
 
 serviceDisabled =Servizio disabilitato
 
