@@ -41,7 +41,7 @@ public enum StampTypes {
   REPERIBILITA("r", "reperibilita", "Reperibilità ", false, false),
   INTRAMOENIA("i", "intramoenia", "Intramoenia", false, false),
   GUARDIA_MEDICA("gm", "guardiaMedica", "Guardia Medica" ,false, false),
-  PERMESSO_BREVE("pb", "permessoBreve", "Permesso Breve", false, true);
+  PERMESSO_BREVE("pb", "permessoBreve", "Permesso Breve", false, false);
 
   private String identifier;
   private String code;
