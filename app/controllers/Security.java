@@ -118,5 +118,26 @@ public class Security extends Secure.Security {
 
     return !officeManager.getOfficesWithAllowedIp(addresses).isEmpty();
   }
+  
+  /**
+   * ridefinizione di logout per discriminare il messaggio a seconda della tipologia connessione.
+   */
+  public static void logout() {
+    try {
+      Security.invoke("onDisconnect");
+      session.clear();
+      response.removeCookie("rememberme");
+      Security.invoke("onDisconnected");
+      if (!session.contains("shibboleth")) {
+        flash.success("secure.logoutShibboleth");
+      } else {
+        flash.success("secure.logout");
+      }
+      Secure.login();
+    } catch (Throwable e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
 
 }
