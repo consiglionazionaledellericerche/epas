@@ -19,28 +19,32 @@
 
     *{ responsività dropDown }*
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-    
-     <div class="webui-popover-content" id="loginPopup">
-       <p class="text-success">Connessione effettuata via Identity Provider CNR</p>
+     
+     <!-- popover element che indicano la tipologia di connessione -->
+     <div class="webui-popover-content" id="loginShibboleth">
+       <p class="text-success">Connessione effettuata tramite credenziali CNR</p>
   	 </div>
-    
-     #{if !session.get('shibboleth')}  
-       <span webui-popover-hover data-url="#loginPopup"> 
+  	 <div class="webui-popover-content" id="loginLocal">
+       <p>Connessione effettuata tramite credenziali locali ePAS</p>
+  	 </div>
+     
+     <!-- selezione icona e popover a seconda della tipologia di connessione -->
+     #{if session.get('shibboleth')}  
+       <span webui-popover-hover data-url="#loginShibboleth"> 
   	     <i class="fa fa-id-card" aria-hidden="true"></i>
        </span>
      #{/if}
      #{else}
-      <i class="fa fa-user"></i>
+      <span webui-popover-hover data-url="#loginLocal"> 
+        <i class="fa fa-user"></i>
+      </span>  
      #{/else}
+     
+     <!-- visualizza l'username -->
      <div class="visible-lg-inline visible-xs-inline"> ${session.username}
         <span class="caret"></span>
      </div>
       
-                    
-                            
-
-              
-
     </a>
 
     *{ items }*
