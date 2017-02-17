@@ -125,7 +125,7 @@
     	<ul>
     	#{list items:sc.shiftTypes, as:'stype'}
 	    	<li>
-	    	#{secure.link @Competences.manageShiftType(stype.id), 'data-async-modal':'#defaultModal'}
+	    	#{secure.link @Competences.manageShiftType(stype.id)}
 	    	  	
 	        	<i class="fa fa-calendar" aria-hidden="true"></i> ${stype.type}
 	        #{/secure.link}
@@ -158,4 +158,3 @@
 </div>
 
 <div id="modalActivateService" class="modal fade container" tabindex="-1"></div>
-<div id="defaultModal" class="modal fade container" tabindex="-1"></div>

@@ -36,6 +36,8 @@ public class QPersonShiftShiftType extends EntityPathBase<PersonShiftShiftType> 
     //inherited
     public final NumberPath<Long> id = _super.id;
 
+    public final BooleanPath jolly = createBoolean("jolly");
+
     //inherited
     public final BooleanPath persistent = _super.persistent;
 

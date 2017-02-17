@@ -1,0 +1,21 @@
+#{modalAsync id:'modalAddPersonToActivity',  
+title:('Aggiungi persona alla attività: '+activity.description )}
+<div id="absenceCodeData">
+	#{alert color:'info'}
+		Selezionare la persona da aggiungere all'attività. Specificare la data di adesione all'attività e se
+		la persona deve essere un jolly oppure no.
+	#{/alert}
+  #{form action:@Competences.saveActivityConfiguration(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#absenceCodeData'}
+  
+  	#{f.selectModel 'person',items:available /}
+    #{f.date 'beginDate' /}
+    #{f.booleanRadio 'jolly' /}
+
+	#{b.buttons center:true}
+		#{b.submit 'Aggiungi'/}
+	#{/b.buttons}
+  #{/form}
+</div>
+#{/modalAsync}
