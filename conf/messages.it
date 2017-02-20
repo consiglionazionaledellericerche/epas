@@ -303,6 +303,7 @@ person.birthday=Data di nascita
 person.currentVacationPeriod= Ferie
 person.currentWorkingTimeType= Tipo Orario
 person.email=Email
+person.perseoId=Perseo id
 person.eppn=Eppn (Per login Shibboleth)
 person.isPersonInCharge= Responsabile gruppo di lavoro
 person.name=Nome
@@ -555,6 +556,7 @@ Competences.activateServices= Gestione Servizi
 AccountRole.DEVELOPER= developer
 AccountRole.ADMIN= Admin
 AccountRole.RO_ADMIN= Admin in sola lettura
+AccountRole.ABSENCES_MANAGER= Gestore assenze
 
 chartType= Tipo di grafico
 ChartTypes.BARS= Grafico a barre
@@ -652,6 +654,7 @@ office.joiningDate.popover= Data di affiliazione della sede
 time.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
 
 person.eppn.popover= Inserire la propria email cnr Es:mario.rossi@cnr.it
+person.perseoId.popover= Il perseoId è utilizzato per il collegamento tra utente e perseo Es:4200
 
 domain.popover= Specificare il dominio sprovvisto del carattere @ (Es. iit.cnr.it)
 

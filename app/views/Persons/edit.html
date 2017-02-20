@@ -26,7 +26,7 @@
 
 				#{f.checkbox 'person.isPersonInCharge',title:'Selezionare se la persona in questione deve essere un responsabile'/}
 
-	#{f.booleanRadio 'person.wantEmail' /}
+	      #{f.booleanRadio 'person.wantEmail' /}
 	<div class="col-sm-6 col-sm-offset-3">
 		#{alert color:'info'}
 					Abilitando l'invio mail per il dipendente, si permetterà alle procedure di controllo sui 
@@ -42,8 +42,10 @@
 		#{panel title:'Altre informazioni', color:'primary'}
 				#{f.input 'person.telephone'/}
 				#{f.date 'person.birthday',view:'year'/}
-				#{f.input 'person.eppn', popover: true/}
-
+				#{secure.check 'Persons.updatePerseoId'}
+          #{f.input 'person.perseoId', popover: true/}
+        #{/secure.check}
+				#{f.input 'person.eppn', popover: true/}        
 	<div class="col-sm-6 col-sm-offset-3">
 		#{alert color:'info'}
 		<p>Il campo opzionale <strong>Eppn</strong> viene utilizzato per il login shibboleth quando
