@@ -556,7 +556,7 @@ Competences.activateServices= Gestione Servizi
 AccountRole.DEVELOPER= developer
 AccountRole.ADMIN= Admin
 AccountRole.RO_ADMIN= Admin in sola lettura
-AccountRole.SKYNET= Skynet
+AccountRole.ABSENCES_MANAGER= Gestore assenze
 
 chartType= Tipo di grafico
 ChartTypes.BARS= Grafico a barre
