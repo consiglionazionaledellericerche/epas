@@ -41,6 +41,7 @@ import manager.recaps.competence.PersonMonthCompetenceRecapFactory;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 
+import models.Badge;
 import models.CertificatedData;
 import models.Certification;
 import models.Competence;
@@ -64,6 +65,7 @@ import org.joda.time.YearMonth;
 
 import play.data.validation.Valid;
 import play.data.validation.Validation;
+import play.db.jpa.GenericModel;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -991,12 +993,11 @@ public class Competences extends Controller {
     }
   }
   
-  /**
-   * metodo che persiste i person_shift_shift_type.
-   * @param peopleIds la lista degli id delle persone da aggiungere/rimuovere
-   * @param shiftType l'attività su cui aggiungere/rimuovere le persone
-   */
   
+  /**
+   * ritorna la form di inserimento del personale da assegnare all'attività passata come parametro.
+   * @param typeId l'id della attività a cui assegnare personale
+   */
   public static void linkPeopleToShift(Long typeId) {
     Optional<ShiftType> type = shiftDao.getShiftTypeById(typeId);
     if (!type.isPresent()) {
@@ -1006,21 +1007,23 @@ public class Competences extends Controller {
     rules.checkIfPermitted(type.get().shiftCategories.office);
     if (validation.hasErrors()) {
       response.status = 400;
-      List<PersonShift> peopleForShift = shiftDao.getPeopleForShift(type.get().shiftCategories.office);
+      List<PersonShift> peopleForShift = 
+          shiftDao.getPeopleForShift(type.get().shiftCategories.office);
       Office office = type.get().shiftCategories.office;     
       render("@manageShiftType", type, peopleForShift, office);
     }
     type.get().save();
     List<PersonShiftShiftType> psstList = shiftDao.getAssociatedPeopleToShift(type.get(), 
         Optional.fromNullable(LocalDate.now()));
-    List<PersonShift> peopleForShift = shiftDao.getPeopleForShift(type.get().shiftCategories.office);
+    List<PersonShift> peopleForShift = 
+        shiftDao.getPeopleForShift(type.get().shiftCategories.office);
 //    List<PersonShift> peopleToAdd = competenceManager.peopleToAdd(psstList, peopleIds);
 //    List<PersonShift> peoleToRemove = competenceManager.peopleToDelete(psstList, peopleIds);
 //    competenceManager.persistPersonShiftShiftType(peopleToAdd, type,peoleToRemove);
     List<PersonShift> available = peopleForShift.stream()
         .filter(e -> (psstList.stream()
                 .filter(d -> d.personShift.equals(e))
-                .count())<1)
+                .count()) < 1)
                 .collect(Collectors.toList());
     log.debug("bau");
     ShiftType activity = type.get();
@@ -1055,7 +1058,39 @@ public class Competences extends Controller {
     activateServices(cat.office.id);
   }
   
-  public static void saveActivityConfiguration() {
-    
+  /**
+   * metodo che associa la persona all'attività.
+   * @param person la persona in turno che deve prendere parte a un'attività
+   * @param activity l'attività in turno in cui inserire la persona
+   * @param beginDate la data di inizio partecipazione della persona all'attività in turno
+   * @param jolly true se la persona può partecipare ai diversi turni in attività 
+   *     (mattina e pomeriggio di solito), false altrimenti
+   */
+  public static void saveActivityConfiguration(PersonShift person, ShiftType activity, 
+      LocalDate beginDate, boolean jolly) {
+    notFoundIfNull(person);
+    rules.checkIfPermitted(person.person.office);
+    competenceManager.persistPersonShiftShiftType(person, beginDate, activity, jolly);
+    flash.success("Aggiunto %s all'attività", person.person.fullName());
+    manageShiftType(activity.id);
+  }
+  
+  /**
+   * 
+   * @param personShiftShiftTypeId
+   * @param confirmed
+   */
+  public static void deletePersonShiftShiftType(Long personShiftShiftTypeId, boolean confirmed) {
+    final PersonShiftShiftType psst = shiftDao.getById(personShiftShiftTypeId);
+    notFoundIfNull(psst);
+    rules.checkIfPermitted(psst.shiftType.shiftCategories.office);
+    if (!confirmed) {
+      confirmed = true;
+      render("@deletePersonShiftShiftType", psst, confirmed);
+    }
+    psst.delete();
+
+    flash.success("Badge Rimosso con successo");
+    manageShiftType(psst.shiftType.id);
   }
 }

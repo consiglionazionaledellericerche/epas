@@ -9,26 +9,7 @@
 <div class="container">
 
 #{title title:'Gestisci attività', administration:true /}
-	
-#{form action:@Competences.linkPeopleToShift(), class:'form form-horizontal', 
-	'data-async':'#page_content', 'data-async-error':'#absenceCodeData',
-	'data-spinner':'#defaultSpinner' }
-  	#{if type.persistent}
- 		#{f.hidden 'type.id' /}
-	#{/if}
-	#{alert color: 'info'}
-		Il nome e la descrizione della attività possono essere cambiati in qualsiasi momento.
-	#{/alert}
-	#{f.input 'type.type' /}
-	#{f.input 'type.description' /}
-	#{f.input 'type.tolerance',type:'number' /}
-	#{f.input 'type.hourTolerance', type:'number' /}		
-  
-	  #{b.buttons center:true}
-	  		#{b.submit 'Ok'/}
-	  #{/b.buttons}
 
-#{/form}
 	#{if peopleForShift.isEmpty()}
 		#{alert color:'warning'}
 			Per poter assegnare dei dipendenti all'attività <strong>${type.description}</strong>
@@ -50,21 +31,55 @@
       <th>Inizio attività di turno</th>
       <th>Fine attività di turno</th>
       <th>Jolly</th>
+      <th>Elimina</th>
     </tr>
     </thead>
     <tbody>
-	#{list items:associatedPeopleShift, as:'person'}
+	#{list items:associatedPeopleShift, as:'psst'}
 	<tr>
-		<td>${person.person.fullname()}</td>
-		<td>${person.beginDate}</td>
-		<td>${person.endDate}</td>
-		<td>${person.jolly}</td>
+		<td>${psst.personShift.person.fullName()}</td>
+		<td>${psst.beginDate}</td>
+		<td>${psst.endDate}</td>
+		<td>#{if psst.jolly == true}
+				SI
+			#{/if}
+			#{else}
+				NO
+			#{/else}
+		</td>
+		<td><a class="btn btn-danger btn-xs" href="@{Competences.deletePersonShiftShiftType(psst.id)}"
+           data-async-modal="#defaultModal">Rimuovi</a></td>
 	</tr>
 	#{/list}
 	</tbody>
 	</table>
 		
 	#{/else}
+	
+	#{accordionItem 'infoAttivita', parent:'info', title:'Informazioni attività', open:true, color:'primary' }
+
+	#{form action:@Competences.linkPeopleToShift(), class:'form form-horizontal', 
+		'data-async':'#page_content', 'data-async-error':'#absenceCodeData',
+		'data-spinner':'#defaultSpinner' }
+  		#{if type.persistent}
+ 			#{f.hidden 'type.id' /}
+		#{/if}
+		#{alert color: 'info'}
+			Il nome e la descrizione della attività possono essere cambiati in qualsiasi momento.
+		#{/alert}
+		#{f.input 'type.type' /}
+		#{f.input 'type.description' /}
+		#{f.input 'type.tolerance',type:'number' /}
+		#{f.input 'type.hourTolerance', type:'number' /}		
+  
+	  #{b.buttons center:true}
+	  		#{b.submit 'Ok'/}
+	  #{/b.buttons}
+
+	#{/form}
+
+	#{/accordionItem}
 </div>
 
 <div id="modalAddPersonToActivity" class="modal fade container" tabindex="-1"></div>
+<div id="defaultModal" class="modal fade container" tabindex="-1"></div>

@@ -626,6 +626,7 @@ public class CompetenceManager {
    * @return la lista dei personShift da aggiungere alla tabella 
    *     dei PersonShiftShiftType.
    */
+  @Deprecated
   public List<PersonShift> peopleToAdd(List<PersonShiftShiftType> psstList, List<Long> peopleIds) {
     List<PersonShift> peopleToAdd = Lists.newArrayList();
     if (peopleIds == null || peopleIds.isEmpty()) {
@@ -656,6 +657,7 @@ public class CompetenceManager {
    * @param peopleIds la lista degli id dei personShift
    * @return la lista dei personShift da rimuovere.
    */
+  @Deprecated
   public List<PersonShift> peopleToDelete(List<PersonShiftShiftType> psstList, 
       List<Long> peopleIds) {
     List<PersonShift> peopleToRemove = Lists.newArrayList();
@@ -780,30 +782,24 @@ public class CompetenceManager {
     });
   }
 
+
   /**
-   * aggiorna la lista delle persone associate ai vari turni.
-   * @param peopleToAdd lista di persone da aggiungere tra i personShift
-   * @param shiftType il tipo di turno su cui svolgere le operazioni
-   * @param peopleToRemove lista di persone da rimuovere dai personShift
+   * persiste il personShiftShiftType con i parametri passati al metodo.
+   * @param person la persona in turno da associare all'attività
+   * @param beginDate la data di inizio partecipazione all'attività in turno
+   * @param type l'attività su cui far aderire la persona
+   * @param jolly true se la persona è jolly e può fare più turni 
+   *     sull'attività (di solito mattina e pomeriggio), false altrimenti
    */
-  public void persistPersonShiftShiftType(List<PersonShift> peopleToAdd, ShiftType shiftType,
-      List<PersonShift> peopleToRemove) {
-
-    peopleToAdd.forEach(item -> {
-      PersonShiftShiftType psst = new PersonShiftShiftType();
-      psst.personShift = item;
-      psst.beginDate = LocalDate.now();
-      psst.shiftType = shiftType;
-      psst.save();
-    });
-
-    peopleToRemove.forEach(item -> {
-      Optional<PersonShiftShiftType> psst = shiftDao.getByPersonShiftAndShiftType(item, shiftType);
-      if (psst.isPresent()) {
-        psst.get().endDate = LocalDate.now();
-        psst.get().save();
-      }
-    });
+  public void persistPersonShiftShiftType(PersonShift person, LocalDate beginDate, 
+      ShiftType type, boolean jolly) {
+    PersonShiftShiftType psst = new PersonShiftShiftType();
+    psst.beginDate = beginDate;
+    psst.shiftType = type;
+    psst.jolly = jolly;
+    psst.personShift = person;
+    psst.endDate = null;
+    psst.save();
   }
   
   /**
