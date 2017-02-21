@@ -9,6 +9,9 @@ title:('Aggiungi persona alla attività: '+activity.description )}
   class:'form form-horizontal', 'data-async':'#page_content',
   'data-async-error':'#absenceCodeData'}
   
+  	#{if activity.persistent}
+    	#{f.hidden 'activity.id'/}
+	#{/if}
   	#{f.selectModel 'person',items:available /}
     #{f.date 'beginDate' /}
     #{f.booleanRadio 'jolly' /}
