@@ -1022,15 +1022,12 @@ public class Competences extends Controller {
         Optional.fromNullable(LocalDate.now()));
     List<PersonShift> peopleForShift = 
         shiftDao.getPeopleForShift(type.get().shiftCategories.office);
-//    List<PersonShift> peopleToAdd = competenceManager.peopleToAdd(psstList, peopleIds);
-//    List<PersonShift> peoleToRemove = competenceManager.peopleToDelete(psstList, peopleIds);
-//    competenceManager.persistPersonShiftShiftType(peopleToAdd, type,peoleToRemove);
+
     List<PersonShift> available = peopleForShift.stream()
         .filter(e -> (psstList.stream()
                 .filter(d -> d.personShift.equals(e))
                 .count()) < 1)
                 .collect(Collectors.toList());
-    log.debug("bau");
     ShiftType activity = type.get();
     render(available, activity);
   }
