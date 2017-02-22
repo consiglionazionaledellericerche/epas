@@ -470,11 +470,7 @@ public class Competences extends Controller {
   }
 
   /**
-<<<<<<< HEAD
    * @param personId l'id della persona
-=======
-   * @param personId     l'id della persona
->>>>>>> refs/remotes/origin/master
    * @param competenceId l'id della competenza
    * @param month        il mese
    * @param year         l'anno ritorna la form di inserimento di un codice di competenza per una
@@ -983,14 +979,22 @@ public class Competences extends Controller {
       ShiftType type = shiftType.get();
       Office office = officeDao.getOfficeById(type.shiftCategories.office.id);
       List<PersonShift> peopleForShift = shiftDao.getPeopleForShift(office);
-      List<PersonShift> peopleIds = Lists.newArrayList();
+      
       List<PersonShiftShiftType> associatedPeopleShift = shiftDao
           .getAssociatedPeopleToShift(type, Optional.fromNullable(LocalDate.now()));
-      for (PersonShiftShiftType psst : associatedPeopleShift) {
-        peopleIds.add(psst.personShift);
-      }
-      render(peopleIds,type, office, peopleForShift, associatedPeopleShift);
+      LocalDate date = LocalDate.now();
+      render(type, date, office, peopleForShift, associatedPeopleShift);
     }
+  }
+  
+  /**
+   * modifica i parametri dell'attività passata tramite id.
+   * @param type l'attività di cui si vogliono modificare i parametri
+   */
+  public static void editActivity(ShiftType type) {
+    type.save();
+    flash.success("Modificati parametri per l'attività: %s", type.description);
+    manageShiftType(type.id);
   }
   
   
@@ -1001,7 +1005,8 @@ public class Competences extends Controller {
   public static void linkPeopleToShift(Long typeId) {
     Optional<ShiftType> type = shiftDao.getShiftTypeById(typeId);
     if (!type.isPresent()) {
-      //TODO: ritornare qualche errore
+      flash.error("Attività non presente. Verificare l'identificativo");
+      activateServices(new Long(session.get("officeSelected")));
     }
     
     rules.checkIfPermitted(type.get().shiftCategories.office);
@@ -1050,7 +1055,6 @@ public class Competences extends Controller {
       render("@configureShift", shiftList, dtoList, cat, type);
     }
     type.shiftCategories = cat;
-    type.shiftCategories = cat;
     type.shiftTimeTable = timeTable;
     type.save();
     
@@ -1076,11 +1080,13 @@ public class Competences extends Controller {
   }
   
   /**
-   * 
-   * @param personShiftShiftTypeId
-   * @param confirmed
+   * rimuove una persona da una attività applicando la data di terminazione al periodo.
+   * @param personShiftShiftTypeId l'id del personShiftShiftType da eliminare
+   * @param confirmed booleano che determina se siamo alla prima chiamata del metodo o 
+   *     alla conferma della rimozione
    */
-  public static void deletePersonShiftShiftType(Long personShiftShiftTypeId, boolean confirmed) {
+  public static void deletePersonShiftShiftType(Long personShiftShiftTypeId, 
+     @Valid LocalDate endDate, boolean confirmed) {
     final PersonShiftShiftType psst = shiftDao.getById(personShiftShiftTypeId);
     notFoundIfNull(psst);
     rules.checkIfPermitted(psst.shiftType.shiftCategories.office);
@@ -1088,9 +1094,15 @@ public class Competences extends Controller {
       confirmed = true;
       render("@deletePersonShiftShiftType", psst, confirmed);
     }
-    psst.delete();
+    if (validation.hasErrors()) {
+      response.status = 400;
+      render("@deletePersonShiftShiftType", psst, confirmed);
+    }
+    psst.endDate = endDate;
+    psst.save();
 
-    flash.success("Badge Rimosso con successo");
+    flash.success("Terminata esperienza per %s nell'attività %s in data %s", 
+        psst.personShift.person.fullName(), psst.shiftType.description, psst.endDate);
     manageShiftType(psst.shiftType.id);
   }
 }
