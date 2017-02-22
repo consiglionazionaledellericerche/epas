@@ -644,18 +644,12 @@ public class Competences extends Controller {
 
     rules.checkIfPermitted(office);
     
-    Comparator<Person> comparator = new Comparator<Person>() {
-      public int compare(Person p1, Person p2) {
-
-        return p1.surname.compareTo(p2.surname);
-      }
-    };
-    
-    Set<Person> personSet = Sets.newTreeSet(comparator);
+    Set<Person> personSet = Sets.newTreeSet(Person.personComparator());
 
     Map<CompetenceCode, Integer> totalValueAssigned = Maps.newHashMap();
 
-    Map<Person, Map<CompetenceCode, Integer>> mapPersonCompetenceRecap = Maps.newTreeMap(comparator);
+    Map<Person, Map<CompetenceCode, Integer>> mapPersonCompetenceRecap = 
+        Maps.newTreeMap(Person.personComparator());
 
     List<Competence> competenceInYear = competenceDao
         .getCompetenceInYear(year, Optional.fromNullable(office));
