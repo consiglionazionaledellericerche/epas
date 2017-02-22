@@ -102,9 +102,6 @@ public class CompetenceManager {
     this.stampingsRecapFactory = stampingsRecapFactory;   
     this.personShiftDayDao = personshiftDayDao;
     this.shiftDao = shiftDao;
-
-
-
   }
 
   public static Predicate<CompetenceCode> isReperibility() {
@@ -241,25 +238,6 @@ public class CompetenceManager {
   }
 
   /**
-   * @return true se avviene correttamente il cambiamento della lista di competenze attive per la
-   *     persona Person passata come parametro.
-   */
-  public boolean saveNewCompetenceEnabledConfiguration(
-      Map<String, Boolean> competence,
-      List<CompetenceCode> competenceCode, Person person) {
-    for (CompetenceCode code : competenceCode) {
-      boolean value = false;
-      if (competence.containsKey(code.code)) {
-        value = competence.get(code.code);
-        log.info("competence {} is {}", code.code, value);
-      }
-
-    }
-    person.save();
-    return true;
-  }
-
-  /**
    * @return il file contenente tutti gli straordinari effettuati dalle persone presenti nella lista
    *     personList nell'anno year.
    */
@@ -333,23 +311,6 @@ public class CompetenceManager {
     return 0;
   }
 
-  /**
-   * La lista dei codici competenza attivi per le persone nell'anno.
-   */
-  public List<CompetenceCode> activeCompetence(int year) {
-
-    List<CompetenceCode> competenceCodeList = Lists.newArrayList();
-
-    List<Competence> competenceList =
-        competenceDao.getCompetenceInYear(year, Optional.<Office>absent());
-
-    for (Competence comp : competenceList) {
-      if (!competenceCodeList.contains(comp.competenceCode)) {
-        competenceCodeList.add(comp.competenceCode);
-      }
-    }
-    return competenceCodeList;
-  }
 
   /**
    * @param comp  la competenza da aggiornare
@@ -470,8 +431,8 @@ public class CompetenceManager {
    * @return true se ci sono servizi attivi per la reperibilità. False altrimenti.
    */
   private boolean servicesActivated(Office office) {
-    List<PersonReperibilityType> prtList = reperibilityDao
-        .getReperibilityTypeByOffice(office, Optional.fromNullable(false));
+    List<PersonReperibilityType> prtList = 
+        reperibilityDao.getReperibilityTypeByOffice(office, Optional.fromNullable(false));
     if (prtList.isEmpty()) {
       return false;
     }
@@ -619,61 +580,6 @@ public class CompetenceManager {
     return codeToRemove;
   }
 
-  /**
-   * 
-   * @param psstList la lista dei personShiftShiftType
-   * @param peopleIds la lista degli id dei personShift
-   * @return la lista dei personShift da aggiungere alla tabella 
-   *     dei PersonShiftShiftType.
-   */
-  @Deprecated
-  public List<PersonShift> peopleToAdd(List<PersonShiftShiftType> psstList, List<Long> peopleIds) {
-    List<PersonShift> peopleToAdd = Lists.newArrayList();
-    if (peopleIds == null || peopleIds.isEmpty()) {
-      return peopleToAdd;
-    }
-    for (Long id : peopleIds) {
-      PersonShift ps = shiftDao.gerPersonShiftById(id);
-      if (psstList.isEmpty()) {
-        peopleToAdd.add(ps);
-      } else {
-        boolean found = false;
-        for (PersonShiftShiftType psst : psstList) {
-          if (psst.personShift.equals(ps)) {
-            found = true;
-          }
-        }
-        if (!found) {
-          peopleToAdd.add(ps);
-        }
-      }      
-    }
-    return peopleToAdd;
-  }
-
-  /**
-   * 
-   * @param psstList la lista dei personShiftShiftType da controllare
-   * @param peopleIds la lista degli id dei personShift
-   * @return la lista dei personShift da rimuovere.
-   */
-  @Deprecated
-  public List<PersonShift> peopleToDelete(List<PersonShiftShiftType> psstList, 
-      List<Long> peopleIds) {
-    List<PersonShift> peopleToRemove = Lists.newArrayList();
-    if (peopleIds == null || peopleIds.isEmpty()) {
-      psstList.forEach(item -> {
-        peopleToRemove.add(item.personShift);
-      });
-    } else {
-      psstList.forEach(item -> {
-        if (!peopleIds.contains(item.personShift.id)) {
-          peopleToRemove.add(item.personShift);
-        }
-      });
-    }
-    return peopleToRemove;
-  }
 
   /**
    * il metodo che persiste la situazione di codici di competenza per la persona.
