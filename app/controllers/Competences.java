@@ -67,7 +67,6 @@ import security.SecurityRules;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -744,6 +743,37 @@ public class Competences extends Controller {
 
   }
 
+  /**
+   * ricalcola tutti i valori del codice di competenza a presenza mensile recuperato dall'id 
+   *     passato come parametro per tutti i dipendenti della sede recuperata dall'id passato 
+   *     come parametro per l'anno e il mese passati come parametro.
+   * @param officeId l'id della sede per cui fare i conteggi
+   * @param codeId l'id del codice di competenza da controllare
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   */
+  public static void recalculateBonus(Long officeId, Long codeId, int year, int month) {
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+
+    rules.checkIfPermitted(office);
+    CompetenceCode competenceCode = competenceCodeDao.getCompetenceCodeById(codeId);
+    YearMonth yearMonth = new YearMonth(year, month);
+    competenceManager.applyBonus(Optional.fromNullable(office), competenceCode, yearMonth);
+    
+    IWrapperCompetenceCode wrCompetenceCode = wrapperFactory.create(competenceCode);
+    List<CompetenceCode> competenceCodeList = competenceDao
+        .activeCompetenceCode(office, new LocalDate(year, month, 1)); 
+    
+    CompetenceRecap compDto = competenceRecapFactory
+        .create(office, competenceCode, year, month);
+    boolean servicesInitialized = competenceManager
+        .isServiceForReperibilityInitialized(office, competenceCodeList);
+    flash.success("Aggiornati i valori per la competenza %s", competenceCode.code);
+
+    render("@showCompetences", year, month, office,
+        wrCompetenceCode, competenceCodeList, compDto, servicesInitialized);
+  }
 
   /* ****************************************************************
    * Parte relativa ai servizi da attivare per reperibilità e turni *
