@@ -13,7 +13,7 @@
   <!-- Bootstrap core CSS -->
   #{stylesheet 'bootstrap-production/css/bootstrap.min.css'/}
 
-  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.4/select2.min.css">
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-css/1.4.6/select2-bootstrap.min.css">
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/css/bootstrap-modal.min.css">
@@ -98,38 +98,44 @@
         <ul class="nav navbar-nav navbar-right">
 
           #{include './_notificationsMenu.html' /}
+          
           #{if session.contains("sudo.username")}
 
-          #{if loginResponse != null}
-          <li data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR">
-            <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${loginResponse.getUsernameCnr()}</a>
-          </li>
+            #{if loginResponse != null}
+              <li data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR">
+                <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${loginResponse.getUsernameCnr()}</a>
+              </li>
+            #{/if}
+            
+            <li>
+              <a href="@{Administration.restoreUser()}">
+                &{'restoreUser'}&nbsp<i class="fa fa-sign-out"></i>
+              </a>
+            </li>
           #{/if}
-          <li>
-            <a href="@{Administration.restoreUser()}">
-              &{'restoreUser'}&nbsp<i class="fa fa-sign-out"></i>
-            </a>
-          </li>
-          #{/if}
-
           #{elseif session.username}
-
-          #{if !currentUser.roles.empty}
-          <li data-toggle="tooltip" data-placement="bottom" title="Login effettuato come amministratore ePAS">
-            <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${session.username} </a>
-          </li>
-          #{/if}
-          #{if loginResponse != null}
-          <li data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR">
-            <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${loginResponse.getUsernameCnr()}</a>
-          </li>
-          #{/if}
-
-          <li>
-            <a id="logout" href="@{secure.logout()}">
-              &{'logout'}&nbsp<i class="fa fa-sign-out"></i>
-            </a>
-          </li>
+			
+			<!-- vecchie etichette non più utilizzate -->
+			*{
+            #{if !currentUser.roles.empty}
+              <li data-toggle="tooltip" data-placement="bottom" title="Login effettuato come amministratore ePAS">
+                <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${session.username} </a>
+              </li>
+            #{/if}
+            #{if loginResponse != null}
+              <li data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR">
+                <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${loginResponse.getUsernameCnr()}</a>
+              </li>
+            #{/if}
+            }*
+            
+			<!-- Logout -->            
+            <li>
+              <a id="logout" href="@{Security.logout()}">
+                &{'logout'}&nbsp<i class="fa fa-sign-out"></i>
+              </a>
+            </li>
+            
           #{/elseif}
         </ul>
 

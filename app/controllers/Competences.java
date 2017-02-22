@@ -25,8 +25,6 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
 import helpers.jpa.ModelQuery.SimpleResults;
 
-import lombok.extern.slf4j.Slf4j;
-
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.SecureManager;
@@ -64,6 +62,7 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.io.FileInputStream;
@@ -72,10 +71,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 import javax.inject.Inject;
 
-@Slf4j
 @With({Resecure.class})
 public class Competences extends Controller {
 
@@ -174,13 +171,13 @@ public class Competences extends Controller {
   public static void addCompetences(CompetenceCodeGroup group, CompetenceCode code) {
     notFoundIfNull(group);
     if (!code.limitUnit.name().equals(group.limitUnit.name())) {
-      validation.addError("code", "L'unità di misura del limite del codice è diversa "
+      Validation.addError("code", "L'unità di misura del limite del codice è diversa "
           + "da quella del gruppo");
     }
     if (!code.limitType.name().equals(group.limitType.name())) {
-      validation.addError("code", "Il tipo di limite del codice è diverso da quello del gruppo");
+      Validation.addError("code", "Il tipo di limite del codice è diverso da quello del gruppo");
     }
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
 
       response.status = 400;
       render("@addCompetenceCodeToGroup", group);
@@ -519,13 +516,13 @@ public class Competences extends Controller {
 
     String result = "";
 
-    if (!validation.hasErrors()) {
+    if (!Validation.hasErrors()) {
       result = competenceManager.canAddCompetence(competence, valueApproved);
       if (!result.isEmpty()) {
-        validation.addError("valueApproved", result);
+        Validation.addError("valueApproved", result);
       }
     }
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
 
       response.status = 400;
       render("@editCompetence", competence, office);
@@ -609,8 +606,8 @@ public class Competences extends Controller {
   }
 
   /**
-   * Esporta in formato .csv la situazione annuale degli straordinari. TODO: parametrico
-   * all'office.
+   * Esporta in formato .csv la situazione annuale degli straordinari. 
+   * TODO: parametrico all'office.
    *
    * @param year anno
    */
@@ -630,8 +627,9 @@ public class Competences extends Controller {
   }
 
   /**
-   * Le competence approvate nell'anno alle persone della sede. TODO: implementare un metodo nel
-   * manager nel quale spostare la business logic di questa azione.
+   * Le competence approvate nell'anno alle persone della sede. 
+   * TODO: implementare un metodo nel manager nel quale spostare la business logic 
+   * di questa azione.
    *
    * @param year        anno
    * @param onlyDefined solo per determinati
@@ -644,12 +642,13 @@ public class Competences extends Controller {
     notFoundIfNull(office);
 
     rules.checkIfPermitted(office);
-
-    Set<Person> personSet = Sets.newHashSet();
+    
+    Set<Person> personSet = Sets.newTreeSet(Person.personComparator());
 
     Map<CompetenceCode, Integer> totalValueAssigned = Maps.newHashMap();
 
-    Map<Person, Map<CompetenceCode, Integer>> mapPersonCompetenceRecap = Maps.newHashMap();
+    Map<Person, Map<CompetenceCode, Integer>> mapPersonCompetenceRecap = 
+        Maps.newTreeMap(Person.personComparator());
 
     List<Competence> competenceInYear = competenceDao
         .getCompetenceInYear(year, Optional.fromNullable(office));
@@ -839,7 +838,7 @@ public class Competences extends Controller {
 
     rules.checkIfPermitted(office);
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
       List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
           new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
@@ -862,7 +861,7 @@ public class Competences extends Controller {
 
     rules.checkIfPermitted(office);
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
       List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
           new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
@@ -1019,12 +1018,12 @@ public class Competences extends Controller {
   /**
    * metodo che persiste i person_shift_shift_type.
    * @param peopleIds la lista degli id delle persone da aggiungere/rimuovere
-   * @param shiftType l'attività su cui aggiungere/rimuovere le persone
+   * @param type l'attività su cui aggiungere/rimuovere le persone
    */
   public static void linkPeopleToShift(List<Long> peopleIds, @Valid ShiftType type) {
     notFoundIfNull(type);
     rules.checkIfPermitted(type.shiftCategories.office);
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
       List<PersonShift> peopleForShift = shiftDao.getPeopleForShift(type.shiftCategories.office);
       Office office = type.shiftCategories.office;     
@@ -1054,7 +1053,7 @@ public class Competences extends Controller {
     ShiftTimeTable timeTable = shiftDao.getShiftTimeTableById(shift);
     notFoundIfNull(timeTable);  
     
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
       List<ShiftTimeTable> shiftList = shiftDao.getAllShifts();
       List<ShiftTimeTableDto> dtoList = competenceManager.convertFromShiftTimeTable(shiftList);
