@@ -31,7 +31,7 @@
       <th>Inizio attività di turno</th>
       <th>Fine attività di turno</th>
       <th>Jolly</th>
-      <th>Elimina</th>
+      <th>Termina</th>
     </tr>
     </thead>
     <tbody>
@@ -39,7 +39,13 @@
 	<tr>
 		<td>${psst.personShift.person.fullName()}</td>
 		<td>${psst.beginDate}</td>
-		<td>${psst.endDate}</td>
+		<td>#{if psst.endDate == null}
+				<i>Indeterminato</i>
+			#{/if}
+			#{else}
+				${psst.endDate}
+			#{/else}
+		</td>
 		<td>#{if psst.jolly == true}
 				SI
 			#{/if}
@@ -47,8 +53,14 @@
 				NO
 			#{/else}
 		</td>
-		<td><a class="btn btn-danger btn-xs" href="@{Competences.deletePersonShiftShiftType(psst.id)}"
-           data-async-modal="#defaultModal">Rimuovi</a></td>
+		<td>
+			#{if psst.endDate != null && psst.endDate.isAfter(date)}
+			Terminato
+			#{/if}
+			#{else}
+			<a class="btn btn-danger btn-xs" href="@{Competences.deletePersonShiftShiftType(psst.id)}"
+           data-async-modal="#defaultModal">Termina partecipazione</a>
+			#{/else}</td>
 	</tr>
 	#{/list}
 	</tbody>
@@ -58,7 +70,7 @@
 	
 	#{accordionItem 'infoAttivita', parent:'info', title:'Informazioni attività', open:true, color:'primary' }
 
-	#{form action:@Competences.linkPeopleToShift(), class:'form form-horizontal', 
+	#{form action:@Competences.editActivity(), class:'form form-horizontal', 
 		'data-async':'#page_content', 'data-async-error':'#absenceCodeData',
 		'data-spinner':'#defaultSpinner' }
   		#{if type.persistent}
