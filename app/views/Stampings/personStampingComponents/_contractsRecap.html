@@ -26,12 +26,12 @@ title:('Riepilogo ore '+mese.value.contractDescription), open:true, color:'prima
     <td class="col-xs-2 success">${mese.getResidualLastYearInit().toHourTimeWithPlus()}</td>
   </tr>
   <tr>
-    <td class="col-xs-10">Residuo da anno precedente utilizzato questo mese come riposo compensativo</td>
-    <td class="col-xs-2 danger">${mese.value.riposiCompensativiMinutiImputatoAnnoPassato.toHourTimeWithMinus()}</td>
-  </tr>
-  <tr>
     <td class="col-xs-10">Residuo da anno precedente utilizzato questo mese come recupero ore</td>
     <td class="col-xs-2 danger">${mese.value.progressivoFinaleNegativoMeseImputatoAnnoPassato.toHourTimeWithMinus()}</td>
+  </tr>
+  <tr>
+    <td class="col-xs-10">Residuo da anno precedente utilizzato questo mese come riposo compensativo</td>
+    <td class="col-xs-2 danger">${mese.value.riposiCompensativiMinutiImputatoAnnoPassato.toHourTimeWithMinus()}</td>
   </tr>
   <tr class="warning">
     <td class="col-xs-10">Residuo da anno precedente disponibile alla fine del mese</td>
@@ -94,19 +94,17 @@ title:('Riepilogo ore '+mese.value.contractDescription), open:true, color:'prima
     <td class="col-xs-2 danger">${mese.value.straordinariMinutiS3Print.toHourTimeWithMinus()}</td>
   </tr>
   #{/if}
-
-  #{if mese.value.riposiCompensativiMinutiImputatoAnnoCorrente != 0}
-  <tr>
-    <td class="col-xs-10">Residuo da anno corrente utilizzato come riposo compensativi</td>
-    <td class="col-xs-2 danger">${mese.value.riposiCompensativiMinutiImputatoAnnoCorrente.toHourTimeWithMinus()}</td>
-  </tr>
-  #{/if}
-
-
+  
   #{if mese.value.progressivoFinaleNegativoMeseImputatoAnnoCorrente != 0}
   <tr>
     <td class="col-xs-10">Residuo da anno corrente utilizzato come recupero ore</td>
     <td class="col-xs-2 danger">${mese.value.progressivoFinaleNegativoMeseImputatoAnnoCorrente.toHourTimeWithMinus()}</td>
+  </tr>
+  #{/if}
+  #{if mese.value.riposiCompensativiMinutiImputatoAnnoCorrente != 0}
+  <tr>
+    <td class="col-xs-10">Residuo da anno corrente utilizzato come riposo compensativi</td>
+    <td class="col-xs-2 danger">${mese.value.riposiCompensativiMinutiImputatoAnnoCorrente.toHourTimeWithMinus()}</td>
   </tr>
   #{/if}
 
