@@ -1298,6 +1298,27 @@ then
 end
 
 /*******************************************************************************
+ * Azioni via REST per Skynet
+ ******************************************************************************/
+
+rule Skynet
+when
+ AccountRole(this in (AccountRole.ABSENCES_MANAGER)) 
+ $c: PermissionCheck(action in (
+
+        "rest.Absences.absencesInPeriod",
+        "rest.Absences.insertAbsence",
+        "rest.Absences.checkAbsence",
+
+        "rest.Absences.checkAbsenceByPerseoId",
+        "rest.Absences.insertAbsenceByPerseoId"
+
+       ), granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
  * Azioni via REST e iCal per Turni e Reperibilità
  ******************************************************************************/
 
