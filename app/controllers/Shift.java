@@ -24,6 +24,7 @@ import manager.ShiftManager;
 import models.Competence;
 import models.Person;
 import models.PersonShiftDay;
+import models.PersonShiftShiftType;
 import models.ShiftCancelled;
 import models.ShiftCategories;
 import models.ShiftTimeTable;
@@ -102,16 +103,17 @@ public class Shift extends Controller {
 
     log.debug("Cerco Turnisti di tipo {}", shiftType.type);
 
-    final List<Person> personList = personDao.getPersonForShift(type);
+    //final List<Person> personList = personDao.getPersonForShift(type);
+    final List<PersonShiftShiftType> personList = shiftDao.getAssociatedPeopleToShift(shiftType, Optional.fromNullable(LocalDate.now()));
 
     log.debug("Shift personList called, found {} shift person", personList.size());
 
-    if (log.isTraceEnabled()) {
-//      for (Person p : personList) {
-//        log.trace("name={} surname={} id={} jolly={}",
-//            p.name, p.surname, p.id, p.personShift.jolly);
-//      }
-    }
+    /*if (log.isTraceEnabled()) {
+      for (PersonShiftShiftType p : personList) {
+       log.trace("name={} surname={} id={} jolly={}",
+            p.personShift.person.name, p.personShift.person.surname, p.personShift.person.id, p.jolly);
+       }
+    }*/
     render(personList);
   }
 
