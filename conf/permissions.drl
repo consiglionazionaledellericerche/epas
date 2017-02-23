@@ -804,7 +804,10 @@ when
         "Competences.saveShift",
         "Competences.configureShift",
         "Competences.manageShiftType",
+        "Competences.editActivity",
         "Competences.linkPeopleToShift",
+        "Competences.saveActivityConfiguration",
+        "Competences.deletePersonShiftShiftType",
         "Competences.linkTimeTableToShift",
 
         /* Vecchio permesso uploadSituation */
@@ -951,7 +954,10 @@ when
         "Competences.saveShift",
         "Competences.configureShift",
         "Competences.manageShiftType",
+        "Competences.editActivity",
         "Competences.linkPeopleToShift",
+        "Competences.saveActivityConfiguration",
+        "Competences.deletePersonShiftShiftType",
         "Competences.linkTimeTableToShift",
 
          /* Vecchio permesso uploadSituation */

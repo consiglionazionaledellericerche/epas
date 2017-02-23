@@ -107,10 +107,10 @@ public class Shift extends Controller {
     log.debug("Shift personList called, found {} shift person", personList.size());
 
     if (log.isTraceEnabled()) {
-      for (Person p : personList) {
-        log.trace("name={} surname={} id={} jolly={}",
-            p.name, p.surname, p.id, p.personShift.jolly);
-      }
+//      for (Person p : personList) {
+//        log.trace("name={} surname={} id={} jolly={}",
+//            p.name, p.surname, p.id, p.personShift.jolly);
+//      }
     }
     render(personList);
   }

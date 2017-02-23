@@ -1,0 +1,27 @@
+#{modalAsync title:'Rimuovi Persona dalla attività '}
+<div class="text-center">
+  #{alert color:'danger'}
+  <p>Conferma terminazione di partecipazione <strong>${psst.personShift.person.fullName()}</strong>
+     alla attività <strong>${psst.shiftType.description}</strong>.<br>
+	</p><br>
+
+  #{form action:@deletePersonShiftShiftType(), method:'POST', autocomplete:false,
+  class:'form form-horizontal' }
+
+  #{f.hidden 'personShiftShiftTypeId', value:psst.id /}
+  #{f.hidden 'confirmed', value:confirmed /}
+  
+  #{f.date 'endDate' /}
+  
+
+  <div class="container-fluid center">
+    <input class="btn btn-danger" type="submit" value="Termina"/>
+  </div>
+  #{/form}
+
+
+  #{/alert}
+
+
+</div>
+#{/modalAsync}

@@ -41,6 +41,7 @@ import manager.recaps.competence.PersonMonthCompetenceRecapFactory;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 
+import models.Badge;
 import models.CertificatedData;
 import models.Certification;
 import models.Competence;
@@ -64,6 +65,7 @@ import org.joda.time.YearMonth;
 
 import play.data.validation.Valid;
 import play.data.validation.Validation;
+import play.db.jpa.GenericModel;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -468,11 +470,7 @@ public class Competences extends Controller {
   }
 
   /**
-<<<<<<< HEAD
    * @param personId l'id della persona
-=======
-   * @param personId     l'id della persona
->>>>>>> refs/remotes/origin/master
    * @param competenceId l'id della competenza
    * @param month        il mese
    * @param year         l'anno ritorna la form di inserimento di un codice di competenza per una
@@ -981,39 +979,57 @@ public class Competences extends Controller {
       ShiftType type = shiftType.get();
       Office office = officeDao.getOfficeById(type.shiftCategories.office.id);
       List<PersonShift> peopleForShift = shiftDao.getPeopleForShift(office);
-      List<PersonShift> peopleIds = Lists.newArrayList();
+      
       List<PersonShiftShiftType> associatedPeopleShift = shiftDao
           .getAssociatedPeopleToShift(type, Optional.fromNullable(LocalDate.now()));
-      for (PersonShiftShiftType psst : associatedPeopleShift) {
-        peopleIds.add(psst.personShift);
-      }
-      render(peopleIds,type, office, peopleForShift);
+      LocalDate date = LocalDate.now();
+      render(type, date, office, peopleForShift, associatedPeopleShift);
     }
   }
   
   /**
-   * metodo che persiste i person_shift_shift_type.
-   * @param peopleIds la lista degli id delle persone da aggiungere/rimuovere
-   * @param shiftType l'attività su cui aggiungere/rimuovere le persone
+   * modifica i parametri dell'attività passata tramite id.
+   * @param type l'attività di cui si vogliono modificare i parametri
    */
-  public static void linkPeopleToShift(List<Long> peopleIds, @Valid ShiftType type) {
-    notFoundIfNull(type);
-    rules.checkIfPermitted(type.shiftCategories.office);
+  public static void editActivity(ShiftType type) {
+    type.save();
+    flash.success("Modificati parametri per l'attività: %s", type.description);
+    manageShiftType(type.id);
+  }
+  
+  
+  /**
+   * ritorna la form di inserimento del personale da assegnare all'attività passata come parametro.
+   * @param typeId l'id della attività a cui assegnare personale
+   */
+  public static void linkPeopleToShift(Long typeId) {
+    Optional<ShiftType> type = shiftDao.getShiftTypeById(typeId);
+    if (!type.isPresent()) {
+      flash.error("Attività non presente. Verificare l'identificativo");
+      activateServices(new Long(session.get("officeSelected")));
+    }
+    
+    rules.checkIfPermitted(type.get().shiftCategories.office);
     if (validation.hasErrors()) {
       response.status = 400;
-      List<PersonShift> peopleForShift = shiftDao.getPeopleForShift(type.shiftCategories.office);
-      Office office = type.shiftCategories.office;     
-      render("@manageShiftType", type, peopleForShift, peopleIds, office);
+      List<PersonShift> peopleForShift = 
+          shiftDao.getPeopleForShift(type.get().shiftCategories.office);
+      Office office = type.get().shiftCategories.office;     
+      render("@manageShiftType", type, peopleForShift, office);
     }
-    type.save();
-    List<PersonShiftShiftType> psstList = shiftDao.getAssociatedPeopleToShift(type, 
+    type.get().save();
+    List<PersonShiftShiftType> psstList = shiftDao.getAssociatedPeopleToShift(type.get(), 
         Optional.fromNullable(LocalDate.now()));
-    List<PersonShift> peopleToAdd = competenceManager.peopleToAdd(psstList, peopleIds);
-    List<PersonShift> peoleToRemove = competenceManager.peopleToDelete(psstList, peopleIds);
-    competenceManager.persistPersonShiftShiftType(peopleToAdd, type,peoleToRemove);
-    flash.success("Aggiornata lista di persone appartenenti all'attività di turno %s", 
-        type.description);
-    activateServices(type.shiftCategories.office.id);
+    List<PersonShift> peopleForShift = 
+        shiftDao.getPeopleForShift(type.get().shiftCategories.office);
+
+    List<PersonShift> available = peopleForShift.stream()
+        .filter(e -> (psstList.stream()
+                .filter(d -> d.personShift.equals(e))
+                .count()) < 1)
+                .collect(Collectors.toList());
+    ShiftType activity = type.get();
+    render(available, activity);
   }
   
   /**
@@ -1036,11 +1052,54 @@ public class Competences extends Controller {
       render("@configureShift", shiftList, dtoList, cat, type);
     }
     type.shiftCategories = cat;
-    type.shiftCategories = cat;
     type.shiftTimeTable = timeTable;
     type.save();
     
     flash.success("Configurato correttamente il servizio %s", cat.description);
     activateServices(cat.office.id);
+  }
+  
+  /**
+   * metodo che associa la persona all'attività.
+   * @param person la persona in turno che deve prendere parte a un'attività
+   * @param activity l'attività in turno in cui inserire la persona
+   * @param beginDate la data di inizio partecipazione della persona all'attività in turno
+   * @param jolly true se la persona può partecipare ai diversi turni in attività 
+   *     (mattina e pomeriggio di solito), false altrimenti
+   */
+  public static void saveActivityConfiguration(PersonShift person, ShiftType activity, 
+      LocalDate beginDate, boolean jolly) {
+    notFoundIfNull(person);
+    rules.checkIfPermitted(person.person.office);
+    competenceManager.persistPersonShiftShiftType(person, beginDate, activity, jolly);
+    flash.success("Aggiunto %s all'attività", person.person.fullName());
+    manageShiftType(activity.id);
+  }
+  
+  /**
+   * rimuove una persona da una attività applicando la data di terminazione al periodo.
+   * @param personShiftShiftTypeId l'id del personShiftShiftType da eliminare
+   * @param confirmed booleano che determina se siamo alla prima chiamata del metodo o 
+   *     alla conferma della rimozione
+   */
+  public static void deletePersonShiftShiftType(Long personShiftShiftTypeId, 
+     @Valid LocalDate endDate, boolean confirmed) {
+    final PersonShiftShiftType psst = shiftDao.getById(personShiftShiftTypeId);
+    notFoundIfNull(psst);
+    rules.checkIfPermitted(psst.shiftType.shiftCategories.office);
+    if (!confirmed) {
+      confirmed = true;
+      render("@deletePersonShiftShiftType", psst, confirmed);
+    }
+    if (validation.hasErrors()) {
+      response.status = 400;
+      render("@deletePersonShiftShiftType", psst, confirmed);
+    }
+    psst.endDate = endDate;
+    psst.save();
+
+    flash.success("Terminata esperienza per %s nell'attività %s in data %s", 
+        psst.personShift.person.fullName(), psst.shiftType.description, psst.endDate);
+    manageShiftType(psst.shiftType.id);
   }
 }

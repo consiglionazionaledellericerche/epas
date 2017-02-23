@@ -1554,7 +1554,6 @@ public class ShiftManager {
       if (personShiftDayDao.getPersonShiftByPerson(item.person) == null) {
         PersonShift personShift = new PersonShift();
         personShift.description = "turni di " + item.person.fullName();
-        personShift.jolly = false;
         personShift.person = item.person;
         personShift.save();
       } else {
