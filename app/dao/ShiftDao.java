@@ -284,5 +284,17 @@ public class ShiftDao extends DaoBase {
             .and(psst.shiftType.eq(shiftType)));
     return Optional.fromNullable(query.singleResult(psst));
   }
+  
+  /**
+   * 
+   * @param id
+   * @return
+   */
+  public PersonShiftShiftType getById(Long id) {
+    final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
+    JPQLQuery query = getQueryFactory().from(psst)
+        .where(psst.id.eq(id));
+    return query.singleResult(psst);
+  }
 }
 

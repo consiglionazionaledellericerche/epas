@@ -321,6 +321,10 @@ personUser= Utente associato ad una persona
 PersonMonths.insertPeopleTrainingHours= Inserisci ore di formazione
 
 peopleGroupId= Persone del gruppo di Lavoro
+
+psst.beginDate =Data inizio
+psst.endDate =Data fine
+
 qualification=Livello
 
 recapMealTickets=Riepilogo Buoni Pasto
