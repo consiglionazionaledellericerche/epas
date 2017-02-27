@@ -16,6 +16,7 @@ import models.CompetenceCodeGroup;
 import models.Office;
 import models.Person;
 import models.PersonCompetenceCodes;
+import models.enumerate.LimitType;
 import models.query.QCompetenceCode;
 import models.query.QCompetenceCodeGroup;
 import models.query.QPersonCompetenceCodes;
@@ -73,6 +74,20 @@ public class CompetenceCodeDao extends DaoBase {
 
     return query.singleResult(competenceCode);
 
+  }
+  
+  /**
+   * 
+   * @param limitType il tipo di limite di utilizzo del codice di competenza
+   * @return la lista dei codici di competenza con limit type uguale a quello passato come parametro.
+   */
+  public List<CompetenceCode> getCompetenceCodeByLimitType(LimitType limitType) {
+    
+    final QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
+    
+    final JPQLQuery query = getQueryFactory().from(competenceCode)
+        .where(competenceCode.limitType.eq(limitType)).orderBy(competenceCode.code.asc());
+    return query.list(competenceCode);
   }
 
   /**
