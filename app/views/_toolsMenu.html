@@ -31,6 +31,10 @@
       #{secure.li @Synchronizations.people(session.get("officeSelected")) }
       <i class="fa fa-refresh" aria-hidden="true"></i>
       #{/secure.li}
+      
+      #{secure.li @AbsenceGroups.certificationsAbsenceCodes() }
+      <i class="fa fa-refresh" aria-hidden="true"></i>
+      #{/secure.li}
 
     </ul>
   </li>

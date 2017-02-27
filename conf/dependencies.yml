@@ -4,11 +4,11 @@ require:
     - play
     - play -> shibboleth 1.2
     - play -> secure
-    - kjetland -> fastergt 1.8
+    - play-codeborne -> fastergt 1.9
     - org.hibernate -> hibernate-envers 4.2.19.Final:
           transitive: false
     - org.jadira.usertype -> usertype.core 4.0.0.GA
-    - com.google.guava -> guava 20.0
+    - com.google.guava -> guava 21.0
     - com.google.inject -> guice 4.1.0:
        exclude:
         - org.ow2.asm -> asm *
@@ -51,7 +51,7 @@ require:
         - org.springframework.roo -> org.springframework.roo.annotations *
         - org.eclipse.persistence -> eclipselink *
     - asufana -> play-lombok 1.2.3
-    - org.projectlombok -> lombok 1.16.10
+    - org.projectlombok -> lombok 1.16.12
     - com.fatboyindustrial.gson-jodatime-serialisers -> gson-jodatime-serialisers 1.2.0
     - com.fasterxml.jackson.core -> jackson-core 2.7.3
     - com.fasterxml.jackson.core -> jackson-annotations 2.7.3
@@ -67,11 +67,11 @@ require:
 # My custom repository
 
 repositories:
-    - kjetland:
-        type:       http
-        artifact:   "http://mbknor.github.com/play-modules/[module]-[revision].zip"
+    - codeborne:
+        type: http
+        artifact: https://repo.codeborne.com/play-[module]/[module]-[revision].zip
         contains:
-            - kjetland -> *
+            - play-codeborne -> *
     - github:
          type:      http
          artifact:  "https://github.com/jackmoore/colorbox"

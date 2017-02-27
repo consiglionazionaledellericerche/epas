@@ -19,6 +19,7 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.QualificationDao;
 import dao.RoleDao;
+import dao.ShiftDao;
 import dao.UserDao;
 import dao.WorkingTimeTypeDao;
 import dao.absences.AbsenceComponentDao;
@@ -41,6 +42,7 @@ import models.Institute;
 import models.Notification;
 import models.Office;
 import models.Person;
+import models.PersonShift;
 import models.Qualification;
 import models.Role;
 import models.User;
@@ -51,6 +53,7 @@ import models.absences.AmountType;
 import models.absences.GroupAbsenceType;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.CodesForEmployee;
+import models.enumerate.LimitType;
 import models.enumerate.StampTypes;
 
 import org.joda.time.LocalDate;
@@ -84,7 +87,7 @@ public class TemplateUtility {
   private final SynchDiagnostic synchDiagnostic;
   private final ConfigurationManager configurationManager;
   private final CompetenceCodeDao competenceCodeDao;
-
+  private final ShiftDao shiftDao;
   private final MemoizedCollection<Notification> notifications;
   private final MemoizedCollection<Notification> archivedNotifications;
   private final AbsenceComponentDao absenceComponentDao;
@@ -96,7 +99,7 @@ public class TemplateUtility {
       RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao,
       IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao,
       SynchDiagnostic synchDiagnostic, ConfigurationManager configurationManager,
-      CompetenceCodeDao competenceCodeDao, AbsenceComponentDao absenceComponentDao,
+      CompetenceCodeDao competenceCodeDao, ShiftDao shiftDao, AbsenceComponentDao absenceComponentDao,
       NotificationDao notificationDao, UserDao userDao) {
 
     this.secureManager = secureManager;
@@ -112,6 +115,7 @@ public class TemplateUtility {
     this.synchDiagnostic = synchDiagnostic;
     this.configurationManager = configurationManager;
     this.competenceCodeDao = competenceCodeDao;
+    this.shiftDao = shiftDao;
     this.userDao = userDao;
     this.absenceComponentDao = absenceComponentDao;
 
@@ -236,6 +240,14 @@ public class TemplateUtility {
 
   public List<CompetenceCode> allCodesContainingGroupCodes(CompetenceCodeGroup group) {
     return competenceCodeDao.allCodesContainingGroupCodes(group);
+  }
+  
+  public List<PersonShift> allPersonShiftByOffice(Office office) {
+    return shiftDao.getPeopleForShift(office);
+  }
+  
+  public List<CompetenceCode> allOnMonthlyPresenceCodes() {
+    return competenceCodeDao.getCompetenceCodeByLimitType(LimitType.onMonthlyPresence);
   }
 
   /**

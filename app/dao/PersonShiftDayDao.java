@@ -7,12 +7,16 @@ import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import models.Person;
+import models.PersonReperibilityType;
 import models.PersonShift;
 import models.PersonShiftDay;
+import models.ShiftCategories;
 import models.ShiftType;
 import models.enumerate.ShiftSlot;
+import models.query.QPersonReperibilityType;
 import models.query.QPersonShift;
 import models.query.QPersonShiftDay;
+import models.query.QShiftCategories;
 
 import org.joda.time.LocalDate;
 
@@ -91,6 +95,16 @@ public class PersonShiftDayDao extends DaoBase {
     final QPersonShift personShift = QPersonShift.personShift;
     JPQLQuery query = getQueryFactory().from(personShift).where(personShift.person.eq(person));
     return query.singleResult(personShift);
+  }
+  
+  /**
+   * 
+   * @return la lista di tutti i PersonReperibilityType presenti sul db.
+   */
+  public List<ShiftCategories> getAllShiftType() {
+    QShiftCategories shift = QShiftCategories.shiftCategories;
+    JPQLQuery query = getQueryFactory().from(shift).orderBy(shift.description.asc());
+    return query.list(shift);
   }
 
 }
