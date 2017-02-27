@@ -53,6 +53,7 @@ import models.absences.AmountType;
 import models.absences.GroupAbsenceType;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.CodesForEmployee;
+import models.enumerate.LimitType;
 import models.enumerate.StampTypes;
 
 import org.joda.time.LocalDate;
@@ -243,6 +244,10 @@ public class TemplateUtility {
   
   public List<PersonShift> allPersonShiftByOffice(Office office) {
     return shiftDao.getPeopleForShift(office);
+  }
+  
+  public List<CompetenceCode> allOnMonthlyPresenceCodes() {
+    return competenceCodeDao.getCompetenceCodeByLimitType(LimitType.onMonthlyPresence);
   }
 
   /**
