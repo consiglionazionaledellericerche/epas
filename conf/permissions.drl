@@ -57,8 +57,9 @@ when
      	"Notifications.list",
      	"Notifications.archiveds",
      	"Notifications.readAndRedirect",
-     	"Notifications.read"
-       ), target == null, granted == false)
+     	"Notifications.read") 
+      || action.startsWith("SwitchTemplate."), 
+      target == null, granted == false)
 then
  $c.grant();
 end
@@ -305,6 +306,7 @@ when
     "Charts.overtimeOnPositiveResidual",
     "Charts.overtimeOnPositiveResidualInYear",
     "Competences.activateServices",
+    "Competences.addService",
     "Competences.approvedCompetenceInYear",
     "Competences.enabledCompetences",
     "Competences.manageCompetenceCode",
@@ -789,12 +791,22 @@ when
         "Competences.saveNewCompetenceConfiguration",
         "Competences.insertCompetence",
         "Competences.editCompetence",
+        "Competences.recalculateBonus",
         "Competences.saveCompetence",
-        "Competences.addService",
-        "Competences.editService",
+        "Competences.addReperibility",
+        "Competences.addShift",
+        "Competences.editReperibility",
+        "Competences.editShift",
         "Competences.activateServices",
-        "Competences.saveService",
-        "Competences.evaluateService",
+        "Competences.addService",
+        "Competences.evaluateReperibility",
+        "Competences.evaluateShift",
+        "Competences.saveReperibility",
+        "Competences.saveShift",
+        "Competences.configureShift",
+        "Competences.manageShiftType",
+        "Competences.linkPeopleToShift",
+        "Competences.linkTimeTableToShift",
 
         /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
@@ -928,12 +940,21 @@ when
         "Competences.saveNewCompetenceConfiguration",
         "Competences.insertCompetence",
         "Competences.editCompetence",
+        "Competences.recalculateBonus",
         "Competences.saveCompetence",
-        "Competences.addService",
-        "Competences.editService",
+        "Competences.addReperibility",
+        "Competences.addShift",
+        "Competences.editReperibility",
+        "Competences.editShift",
         "Competences.activateServices",
-        "Competences.saveService",
-        "Competences.evaluateService",
+        "Competences.evaluateReperibility",
+        "Competences.evaluateShift",
+        "Competences.saveReperibility",
+        "Competences.saveShift",
+        "Competences.configureShift",
+        "Competences.manageShiftType",
+        "Competences.linkPeopleToShift",
+        "Competences.linkTimeTableToShift",
 
          /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
@@ -1140,7 +1161,7 @@ end
 rule employeeAutocertificationStampings
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
- $p: Person(qualification.qualification <= 3) from currentOperator.person
+ $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
  $c: PermissionCheck(action in ("Stampings.blank", "Stampings.edit", "Stampings.save" , "Stampings.delete" ), target == null, granted == false)
@@ -1154,7 +1175,7 @@ end
 rule employeeCanInsertStampings_OnPerson
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
- $p: Person(qualification.qualification <= 3) from currentOperator.person
+ $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
  $c: PermissionCheck(action == "Stampings.blank", target == $p, granted == false)
@@ -1185,7 +1206,7 @@ end
 rule employeeCanEditStampings
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
- $p: Person(qualification.qualification <= 3) from currentOperator.person
+ $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
  $o: Office() from $p.office
  $target: Stamping(this.getOwner() == $p)
  $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save" , "Stampings.delete"), granted == false, target == $target)
@@ -1274,6 +1295,27 @@ when
         "rest.Absences.insertAbsenceByPerseoId"
 
        ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Azioni via REST per Skynet
+ ******************************************************************************/
+
+rule Skynet
+when
+ AccountRole(this in (AccountRole.ABSENCES_MANAGER)) 
+ $c: PermissionCheck(action in (
+
+        "rest.Absences.absencesInPeriod",
+        "rest.Absences.insertAbsence",
+        "rest.Absences.checkAbsence",
+
+        "rest.Absences.checkAbsenceByPerseoId",
+        "rest.Absences.insertAbsenceByPerseoId"
+
+       ), granted == false)
 then
  $c.grant();
 end

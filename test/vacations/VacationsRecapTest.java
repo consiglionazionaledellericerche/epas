@@ -205,8 +205,49 @@ public class VacationsRecapTest {
     assertThat(recap.getVacationsCurrentYear().getAccrued()).isEqualTo(-1);
     assertThat(recap.getVacationsCurrentYear().getNotYetUsedTakeable()).isEqualTo(28);
   }
+  
+  /**
+   * Il source contract va utilizzato in modo appropriato nel caso in cui si debba costruire 
+   * il riepilogo per l'anno successivo l'inizializzazione.
+   * Esempio con data inizializzazione nel 2016 
+   * A) Se voglio costruire il riepilogo dell'anno 2016 il bind è automatico. 
+   * ferie da inizializzazione 2015 = contract.getSourceVacationLastYearUsed()      
+   * ferie da inizializzazione 2016 = contract.getSourceVacationCurrentYearUsed() 
+   * permessi da inizializzazione 2016 = contact.getSourcePermissionCurrentYearUsed()
+   * B) Se voglio costruire il riepilogo dell'anno 2017 il bind corretto è 
+   * ferie da inizializzazione 2016 = contract.getSourceVacationCurrentYearUsed()
+   * (gli altri campi sono inutili)                  
+   */
+  @Test
+  public void initializationShouldWorksTheNextYear() {
+    
+    final LocalDate expireDate2015 = new LocalDate(2015, 8, 31);
+    final LocalDate expireDate2016 = new LocalDate(2016, 8, 31);
+    final LocalDate expireDate2017 = new LocalDate(2017, 8, 31);
 
+    //Esempio Pinna IMM - Lecce
+    
+    Contract contract = MockContract.builder()
+        .contractManager(getContractManager())
+        .beginDate(new LocalDate(2001, 1, 16))
+        .sourceDateResidual(new LocalDate(2016, 10, 31))
+        .sourceVacationLastYearUsed(28)
+        .sourceVacationCurrentYearUsed(5)
+        .sourcePermissionUsed(4)
+        .build();
 
+    final VacationsRecap recap2016 = new VacationsRecapBuilder().buildVacationRecap(
+        2016, contract, Lists.newArrayList(), LocalDate.now(), expireDate2015, expireDate2016);
+    
+    assertThat(recap2016.getVacationsCurrentYear().getNotYetUsedTotal()).isEqualTo(23);
+    
+    final VacationsRecap recap2017 = new VacationsRecapBuilder().buildVacationRecap(
+        2017, contract, Lists.newArrayList(), LocalDate.now(), expireDate2016, expireDate2017);
+    
+    assertThat(recap2017.getVacationsLastYear().getNotYetUsedTotal()).isEqualTo(23);
+    
+  }
+  
   public ContractManager getContractManager() {
     return new ContractManager(null, null, null, null);
   }

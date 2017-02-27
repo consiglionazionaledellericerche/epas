@@ -3,7 +3,6 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import controllers.RequestInit.CurrentData;
@@ -16,14 +15,11 @@ import helpers.CacheValues;
 
 import lombok.extern.slf4j.Slf4j;
 
-import manager.attestati.dto.show.CodiceAssenza;
 import manager.attestati.service.ICertificationService;
 import manager.attestati.service.PersonCertData;
 
 import models.Office;
 import models.Person;
-import models.absences.Absence;
-import models.absences.AbsenceType;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -31,6 +27,7 @@ import org.joda.time.YearMonth;
 import play.cache.Cache;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
 
 import java.util.AbstractMap;
@@ -61,7 +58,7 @@ public class Certifications extends Controller {
   @Inject
   static PersonDao personDao;
   @Inject
-  static ICertificationService certificationService;
+  static ICertificationService certService;
   @Inject
   static CacheValues cacheValues;
 
@@ -126,15 +123,16 @@ public class Certifications extends Controller {
 
     try {
       matricoleAttestati = cacheValues.attestatiSerialNumbers.get(cacheKey);
-    } catch (Exception e) {
-      flash.error("Errore di connessione al server di Attestati - %s", cleanMessage(e).getMessage());
-      log.error("Errore durante la connessione al server di attestati: {}", e.getMessage());
+    } catch (Exception ex) {
+      flash.error("Errore di connessione al server di Attestati - %s", 
+          cleanMessage(ex).getMessage());
+      log.error("Errore durante la connessione al server di attestati: {}", ex.getMessage());
       render(office, validYear, validMonth);
     }
 
     if (matricoleAttestati.isEmpty()) {
-      flash.error("Nessuna matricola presente per il mese %s/%s.\r\n" +
-          "Effettuare lo stralcio sul server di Attestati", validMonth, validYear);
+      flash.error("Nessuna matricola presente per il mese %s/%s.\r\n" 
+          + "Effettuare lo stralcio sul server di Attestati", validMonth, validYear);
       render(office, validYear, validMonth);
     }
 
@@ -198,15 +196,16 @@ public class Certifications extends Controller {
 
     personDao.list(Optional.absent(), Sets.newHashSet(Lists.newArrayList(office)),
         false, monthBegin, monthEnd, true).list().forEach(person -> {
-      final Map.Entry<Person, YearMonth> personKey = new AbstractMap
-          .SimpleEntry<>(person, yearMonth);
-      cacheValues.personStatus.invalidate(personKey);
-    });
+          final Map.Entry<Person, YearMonth> personKey = new AbstractMap
+              .SimpleEntry<>(person, yearMonth);
+          cacheValues.personStatus.invalidate(personKey);
+        });
     log.info("Svuotati tutti i valori dalla cache: ufficio {} - mese {}/{}", office, month, year);
     certifications(officeId, year, month);
   }
 
   /**
+   * PersonStatus.
    * @param personId id della persona
    * @param year     anno
    * @param month    mese
@@ -223,9 +222,9 @@ public class Certifications extends Controller {
       final Map.Entry<Person, YearMonth> cacheKey = new AbstractMap
           .SimpleEntry<>(person, new YearMonth(year, month));
       personCertData = cacheValues.personStatus.get(cacheKey);
-    } catch (Exception e) {
-      log.error("Errore nel recupero delle informazioni dal server di attestati per la persona {}: {}",
-          person, cleanMessage(e).getMessage());
+    } catch (Exception ex) {
+      log.error("Errore nel recupero delle informazioni dal server di attestati per la persona {}: "
+          + "{}", person, cleanMessage(ex).getMessage());
       render();
     }
 
@@ -235,21 +234,24 @@ public class Certifications extends Controller {
       final Map.Entry<Office, YearMonth> key = new AbstractMap
           .SimpleEntry<>(person.office, new YearMonth(year, month));
       stepSize = cacheValues.elaborationStep.get(key);
-    } catch (Exception e) {
+    } catch (Exception ex) {
       log.error("Impossibile recuperare la percentuale di avanzamento per la persona {}: {}",
-          person, cleanMessage(e).getMessage());
+          person, cleanMessage(ex).getMessage());
       return;
     }
 
     render(personCertData, stepSize, person);
   }
 
+  /**
+   * Codici.
+   */
   public static void codici() {
     try {
-      renderText(certificationService.absenceCodes());
-    } catch (Exception e) {
-      renderText("Impossibile recuperare i codici dal server di attestati\r\n" +
-          cleanMessage(e).getMessage());
+      renderText(certService.absenceCodes());
+    } catch (Exception ex) {
+      renderText("Impossibile recuperare i codici dal server di attestati\r\n" 
+          + cleanMessage(ex).getMessage());
     }
   }
 
@@ -266,13 +268,11 @@ public class Certifications extends Controller {
     notFoundIfNull(person);
     rules.checkIfPermitted(person);
 
-    final Map.Entry<Person, YearMonth> cacheKey = new AbstractMap
-        .SimpleEntry<>(person, new YearMonth(year, month));
-
     PersonCertData previousCertData = null;
     try {
       // Costruisco lo status generale
-      previousCertData = cacheValues.personStatus.get(cacheKey);
+      // Non uso la cache qui per evitare eventuali stati incongruenti durante l'invio
+      previousCertData = certService.buildPersonStaticStatus(person,year,month);
     } catch (Exception e) {
       log.error("Errore nel recupero delle informazioni dal server di attestati" +
           " per la persona {}: {}", person, cleanMessage(e).getMessage());
@@ -283,13 +283,17 @@ public class Certifications extends Controller {
     if (!previousCertData.validate) {
       // Se l'attestato non è stato validato applico il process
       try {
-        personCertData = certificationService.process(previousCertData);
+        personCertData = certService.process(previousCertData);
       } catch (ExecutionException | NoSuchFieldException e) {
         log.error("Errore nell'invio delle informazioni al server di attestati " +
             "per la persona {}: {}", person, cleanMessage(e).getMessage());
       }
     }
-//     Se riesco nell'invio ne aggiorno lo stato in cache
+
+    final Map.Entry<Person, YearMonth> cacheKey = new AbstractMap
+        .SimpleEntry<>(person, new YearMonth(year, month));
+
+    // Se riesco nell'invio ne aggiorno lo stato in cache
     if (personCertData != null) {
       cacheValues.personStatus.put(cacheKey, personCertData);
     } else {
@@ -331,7 +335,7 @@ public class Certifications extends Controller {
 //    LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
 //
 //    //Il mese selezionato è abilitato?
-//    boolean autenticate = certificationService.authentication(office, true);
+//    boolean autenticate = certService.authentication(office, true);
 //    if (!autenticate) {
 //      flash.error("L'utente app.epas non è abilitato alla sede selezionata");
 //      renderTemplate("@certifications", office, year, month);
@@ -358,14 +362,14 @@ public class Certifications extends Controller {
 //    for (Person person : people) {
 //
 //      // Costruisco lo status generale
-//      PersonCertData personCertificationStatus = certificationService
+//      PersonCertData personCertificationStatus = certService
 //          .buildPersonStaticStatus(person, year, month);
 //
 //      // Elimino ogni record
-//      certificationService.emptyAttestati(personCertificationStatus);
+//      certService.emptyAttestati(personCertificationStatus);
 //
 //      // Ricostruzione nuovo stato (coi record eliminati)
-//      personCertificationStatus = certificationService
+//      personCertificationStatus = certService
 //          .buildPersonStaticStatus(person, year, month);
 //
 ////      if (personCertificationStatus.match()) {
@@ -383,49 +387,19 @@ public class Certifications extends Controller {
 //
 //  }
 
-  /**
-   * I codici assenza in attestati.
-   */
-  public static void certificationsAbsenceCodes() throws ExecutionException {
-
-    // Mappa dei codici di assenza in attestati
-    Map<String, CodiceAssenza> attestatiAbsenceCodes = certificationService.absenceCodes();
-    if (attestatiAbsenceCodes.isEmpty()) {
-      flash.error("L'utente app.epas non è in grado di ottenere le informazioni richieste.");
-    }
-
-    // Mappa dei codici assenza in epas e loro utilizzo
-    Map<String, List<Absence>> epasAbsences = Maps.newHashMap();
-    List<AbsenceType> absenceTypes = AbsenceType.findAll();
-    List<Absence> absences = Absence.findAll();
-    for (AbsenceType absenceType : absenceTypes) {
-      log.info(absenceType.code.trim().toUpperCase());
-      epasAbsences.put(absenceType.code.trim().toUpperCase(), Lists.newArrayList());
-    }
-    for (Absence absence : absences) {
-      epasAbsences.get(absence.absenceType.code.trim().toUpperCase()).add(absence);
-    }
-
-    // Mappa dei codici epas
-    Map<String, AbsenceType> epasAbsenceTypes = Maps.newHashMap();
-    for (AbsenceType absenceType : absenceTypes) {
-      epasAbsenceTypes.put(absenceType.code.trim().toUpperCase(), absenceType);
-    }
-
-    render(attestatiAbsenceCodes, epasAbsences, epasAbsenceTypes);
-  }
 
   /**
-   * @param e eccezione
+   * CleanMessage.
+   * @param ex eccezione
    * @return L'ultimo elemento Throwable di una concatenazione di eccezioni
    */
-  private static Throwable cleanMessage(Exception e) {
+  private static Throwable cleanMessage(Exception ex) {
     // Recupera il messaggio pulito dalla gerarchia delle eccezioni
     Throwable throwable;
-    if (e.getCause() != null) {
-      throwable = e.getCause();
+    if (ex.getCause() != null) {
+      throwable = ex.getCause();
     } else {
-      return e;
+      return ex;
     }
     while (throwable.getCause() != null) {
       throwable = throwable.getCause();

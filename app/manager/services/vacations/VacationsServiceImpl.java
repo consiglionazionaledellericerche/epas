@@ -145,11 +145,11 @@ public class VacationsServiceImpl implements IVacationsService {
   private Optional<VacationsRecap> create(int year, Contract contract,
       LocalDate accruedDate, List<Absence> otherAbsences, Optional<LocalDate> dateAsToday) {
 
-    IWrapperContract wrContract = wrapperFactory.create(contract);
-
     if (contract == null || accruedDate == null) {
       return Optional.<VacationsRecap>absent();
     }
+    
+    IWrapperContract wrContract = wrapperFactory.create(contract);
 
     if (wrContract.getValue().vacationPeriods == null
         || wrContract.getValue().vacationPeriods.isEmpty()) {

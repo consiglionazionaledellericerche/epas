@@ -1,6 +1,8 @@
 package controllers;
 
 
+import com.google.common.net.UrlEscapers;
+
 import dao.PersonDao;
 
 import lombok.extern.slf4j.Slf4j;
@@ -69,8 +71,9 @@ public class ShibbolethSecurity extends controllers.shib.Security {
       Cache.set("personId", person.id, Security.CACHE_DURATION);
 
       session.put("username", person.user.username);
-
-      flash.success("Welcome, " + person.name + ' ' + person.surname);
+      session.put("shibboleth", true);
+      
+      flash.success("Benvenuto " + person.name + ' ' + person.surname);
       log.info("Person {} successfully logged in", person.user.username);
       log.trace("Permission list for {} {}: {}",
           person.name, person.surname, person.user.usersRolesOffices);
@@ -130,8 +133,7 @@ public class ShibbolethSecurity extends controllers.shib.Security {
   public static void login() throws Throwable {
 
     // Determine where the Shibboleth Login initiator is
-    String shibLogin = Play.configuration.getProperty("shib.login.url",
-            null);
+    String shibLogin = Play.configuration.getProperty("shib.login.url", null);
     if (shibLogin == null) {
       shibLogin = request.getBase() + "/Shibboleth.sso/Login";
     }
@@ -148,13 +150,14 @@ public class ShibbolethSecurity extends controllers.shib.Security {
     // embed it in the target url.
     if (flash.get("url") != null) {
       if (isMock()) {
-        shibLogin += "&return=" + flash.get("url");
+        shibLogin += "&return=" + UrlEscapers.urlFormParameterEscaper().escape(flash.get("url"));
       } else {
-        shibLogin += "?return=" + flash.get("url");
+        shibLogin += "?return=" + UrlEscapers.urlFormParameterEscaper().escape(flash.get("url"));
       }
     }
     log.debug("Shib: Redirecting to Shibboleth login initiator: {}", shibLogin);
 
     redirect(shibLogin);
   }
+  
 }

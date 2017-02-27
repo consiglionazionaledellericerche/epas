@@ -82,34 +82,39 @@ function checkTime(i) {
 
       <!-- ASSENZE -->
       <td class="assenza default-single">
-        #{list items:dayRecap.personDay.absences, as:'absence'}
+      #{list items:dayRecap.personDay.absences, as:'absence'}
+      
+       <!-- Calcolo dei gruppi coinvolti -->
+       %{ 
+         involvedGroups = absence.absenceType.involvedGroupAbsenceType(true);  
+       }%
+    
+       <!-- Assenza da non visualizzare perchè è un rimpiazzamento corretto -->
+       #{if absence.isReplacing(involvedGroups) && !absence.isOrphanReplacing(involvedGroups) }#{/if}
+       #{else}
 
-        %{ 
-           involvedGroups = absence.absenceType.involvedGroupAbsenceType(true); 
-         }%
-        #{if absence.isReplacing(involvedGroups) && !absence.isOrphanReplacing(absence.absenceType) }
-        *{ l'assenza di rimpiazzamento non orfana non la visualizzo }*
-        #{/if}
-        #{else}
+          <!-- Costruzione contenuto popover -->
+	      #{absences.absence-popover absence:absence, person:person, noLabel:true /}
+	      
+	      <!-- Link popover (nome del codice) -->
+	      <span webui-popover-hover data-url="#${absence.id}"
+	
+	      *{ colore codice assenza }*
+	      #{if !absence.troubles.empty} class="text-danger" #{/if}
+	      #{elseif absence.absenceType.internalUse} class="text-muted" #{/elseif}
+	      #{else} class="text-primary" #{/else}>
+	
+	      #{if !absence.troubles.empty}
+	      <strong>${absence.absenceType.code}</strong>
+	      #{/if}
+	      #{else}
+	        ${absence.absenceType.code}
+	      #{/else}
+	      </span>
 
-        #{absences.absence-popover absence:absence, person:person, noLabel:true /}
-        <span webui-popover-hover data-url="#${absence.id}"
-
-              *{ colore codice assenza }*
-              #{if !absence.troubles.empty} class="text-danger" #{/if}
-        #{elseif absence.absenceType.internalUse} class="text-muted" #{/elseif}
-        #{else} class="text-primary" #{/else}>
-
-        #{if !absence.troubles.empty}
-        <strong>${absence.absenceType.code}</strong>
-        #{/if}
-        #{else}
-        ${absence.absenceType.code}
-        #{/else}
-        </span>
-
-        #{/else}
-        #{/list}
+       #{/else}
+       
+      #{/list}
       </td>
 
       <!-- TIMBRATURE -->

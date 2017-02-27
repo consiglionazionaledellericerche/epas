@@ -9,37 +9,45 @@
 
   #{list items:dayRecap.personDay.absences, as:'absence'}
     
-    %{ involvedGroups = absence.absenceType.involvedGroupAbsenceType(true);  }%
-    #{if absence.isReplacing(involvedGroups) && !absence.isOrphanReplacing(involvedGroups) }
-        *{ l'assenza di rimpiazzamento non orfana non la visualizzo }*
-    #{/if}
-    #{else}
+    <!-- Calcolo dei gruppi coinvolti -->
+    %{ 
+      involvedGroups = absence.absenceType.involvedGroupAbsenceType(true);  
+    }%
     
+    <!-- Assenza da non visualizzare perchè è un rimpiazzamento corretto -->
+    #{if absence.isReplacing(involvedGroups) && !absence.isOrphanReplacing(involvedGroups) }#{/if}
+    #{else}
+          
+        <!-- Assenza da visualizzare -->
+        
+          <!-- Costruzione contenuto popover -->
 	      #{absences.absence-popover absence:absence, person:person, noLabel:true /}
 	      
+	      <!-- Link popover (nome del codice)  -->
 	      #{secure.link @AbsenceGroups.edit(absence.id), target: absence, 'data-async-modal':'#modalAbsence'}
 	      
-	      <span webui-popover-hover data-url="#${absence.id}"
-	      
-	        *{ colore codice assenza }*
-	        #{if !absence.troubles.empty}              class="text-danger"   #{/if}
-	        #{elseif absence.absenceType.internalUse}  class="text-muted"    #{/elseif}
-	        #{else}                                    class="text-primary"  #{/else}>
-	        
-	        
-		    #{if !absence.troubles.empty} 
-		      <strong>${absence.absenceType.code}</strong>
-		    #{/if}
-		    #{else} 
-		      ${absence.absenceType.code} 
-		    #{/else}
-		    
-		    #{secure.check 'AbsenceGroups.edit'}
-		    #{if absence.hasReplacing() }
-		      *
-		    #{/if}
-		    #{/secure.check}
-		  </span>
+		   <span webui-popover-hover data-url="#${absence.id}"
+		      
+		        *{ colore codice assenza }*
+		        #{if !absence.troubles.empty}              class="text-danger"   #{/if}
+		        #{elseif absence.absenceType.internalUse}  class="text-muted"    #{/elseif}
+		        #{else}                                    class="text-primary"  #{/else}>
+		        
+			    #{if !absence.troubles.empty} 
+			      <strong>${absence.absenceType.code}</strong>
+			    #{/if}
+			    #{else} 
+			      ${absence.absenceType.code} 
+			    #{/else}
+			    
+			    <!-- Asterisco presenza rimpiazzamento (solo per amministratore) -->
+			    #{secure.check 'AbsenceGroups.edit'}
+			      #{if absence.hasReplacing() }
+			        *
+			      #{/if}
+			    #{/secure.check}
+			    
+			</span>
 		  
 		  #{/secure.link}
     

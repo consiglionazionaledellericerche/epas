@@ -117,11 +117,11 @@
   <ul class="list-group">
 
     #{list people, as:'person' }
-    #{if !matchNumbers.empty && matchNumbers.contains(person.number)}
-    #{if process}
-    <!-- INVIO INFORMAZIONI AD ATTESTATI-->
+    #{if !matchNumbers.empty && person.number in matchNumbers}
+      #{if process}
+        <!-- INVIO INFORMAZIONI AD ATTESTATI-->
       <div data-load-async="@{process(person.id, validYear, validMonth, false)}">
-    #{/if}
+      #{/if}
     #{else}
     <!-- CARICAMENTO INFORMAZIONI DA ATTESTATI -->
       <div data-load-async="@{personStatus(person.id, validYear, validMonth)}">
