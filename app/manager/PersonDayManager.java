@@ -78,18 +78,11 @@ public class PersonDayManager {
    * @return esito
    */
   public boolean isAllDayAbsences(PersonDay pd) {
-
-    for (Absence abs : pd.absences) {
-
-      if (abs.justifiedType.name == JustifiedTypeName.all_day
-          || abs.justifiedType.name == JustifiedTypeName.assign_all_day) {
-        return true;
-      }
-
-    }
-    return false;
+    return pd.absences.stream()
+        .anyMatch(absence -> absence.justifiedType.name == JustifiedTypeName.all_day
+        || absence.justifiedType.name == JustifiedTypeName.assign_all_day);
   }
-
+  
   /**
    * Se le assenze orarie giustificano abbanstanza per ritenere il dipendente a lavoro.
    *
@@ -742,26 +735,38 @@ public class PersonDayManager {
       personDayInTroubleManager.fixTrouble(personDay, Troubles.UNCOUPLED_HOLIDAY);
     }
 
-
     // ### CASO 4 Tempo a lavoro (di timbrature + assenze) non sufficiente
     // Per i livelli 4-8 dev'essere almeno la metà del tempo a lavoro
-
-    // Non ha la timbratura automatica
-    if (!isFixedTimeAtWork
-        // E' di livello 4-8
-        && personDay.person.qualification.qualification > 3
-        // non deve essere festivo
-        && !personDay.isHoliday
-        // le assenze non devono essere giornaliere 
-        && !isAllDayAbsences
-        // Il tempo a lavoro non è almeno la metà di quello previsto
-        && personDay.timeAtWork < (workingTime / 2)) {
+    
+    if (isValidDay(personDay, pd)) {
       personDayInTroubleManager.setTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);
     } else {
       personDayInTroubleManager.fixTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);
     }
   }
 
+  /**
+   * 
+   * @param personDay il personDay relativo alla persona e al giorno di interesse
+   * @param pd il wrapper contenente i metodi di utilità
+   * @return true se è un giorno valido rispetto a tempo a lavoro, festivo, assenze ecc...
+   *     false altrimenti.
+   */
+  public boolean isValidDay(PersonDay personDay, IWrapperPersonDay pd) {
+    if (// Non ha la timbratura automatica
+        !pd.isFixedTimeAtWork()
+        // E' di livello 4-8
+        && personDay.person.qualification.qualification > 3
+        // non deve essere festivo
+        && !personDay.isHoliday
+        // le assenze non devono essere giornaliere 
+        && !isAllDayAbsences(personDay)
+        // Il tempo a lavoro non è almeno la metà di quello previsto
+        && personDay.timeAtWork < (pd.getWorkingTimeTypeDay().get().getWorkingTime() / 2)) {
+      return true;
+    }
+    return false;
+  }
   /**
    * Calcola le coppie di stampings valide al fine del calcolo del time at work. <br>
    *
