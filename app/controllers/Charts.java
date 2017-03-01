@@ -25,6 +25,8 @@ import models.Office;
 import models.Person;
 import models.exports.PersonOvertime;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.joda.time.LocalDate;
 
 import play.Logger;
@@ -61,8 +63,8 @@ public class Charts extends Controller {
   static OfficeDao officeDao;
   @Inject
   static CompetenceCodeDao competenceCodeDao;
-  @Inject
-  static PersonStampingRecapFactory stampingsRecapFactory;
+//  @Inject
+  //
 
   public static void overtimeOnPositiveResidual(Integer year, Integer month, Long officeId) {
 
@@ -234,7 +236,7 @@ public class Charts extends Controller {
     List<Person> personList = personDao.list(
         Optional.<String>absent(), set, false, date, 
         date.dayOfMonth().withMaximumValue(), true).list();
-
+    
     render(personList, date, year, month);
   }
 
@@ -246,20 +248,26 @@ public class Charts extends Controller {
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
    */
-  public static void test(Person person, int year, int month, ExportFile exportFile) {   
-    rules.checkIfPermitted(person.office);
+  public static void test(Person person, int year, int month, ExportFile exportFile, 
+      boolean forAll, LocalDate beginDate, LocalDate endDate) {   
+    //rules.checkIfPermitted(Security.getUser().get().person.office);
+    Optional<Person> optPerson = Optional.<Person>absent();
+    if (person.isPersistent()) {
+      optPerson = Optional.fromNullable(person);
+    }
+    File file = null;
     String suffix = "";
     if (exportFile.equals(ExportFile.CSV)) {
-      suffix = ".csv";
+      file = chartsManager.buildExcel(Security.getUser(), year, month, 
+          forAll, optPerson, beginDate, endDate);
     } else {
       suffix = ".xls";
     }
-    File file = new File("situazioneMensile" + person.surname
-        + DateUtility.fromIntToStringMonth(month) + year + suffix);
-    PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
-    file = chartsManager.createFileToExport(psDto, file);
 
+      
+        
     renderBinary(file);
+
   }
   
   public enum ExportFile {
