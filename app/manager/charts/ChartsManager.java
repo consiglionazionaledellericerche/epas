@@ -5,10 +5,12 @@ import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
@@ -20,17 +22,21 @@ import jobs.ChartJob;
 
 import lombok.Getter;
 
+import manager.SecureManager;
 import manager.recaps.charts.RenderResult;
 import manager.recaps.charts.ResultFromFile;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
+import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.services.vacations.IVacationsService;
 import manager.services.vacations.VacationsRecap;
 
 import models.CompetenceCode;
 import models.Contract;
 import models.ContractMonthRecap;
+import models.Office;
 import models.Person;
+import models.User;
 import models.WorkingTimeType;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -67,6 +73,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -80,7 +87,9 @@ public class ChartsManager {
   private final AbsenceDao absenceDao;
   private final IVacationsService vacationsService;
   private final IWrapperFactory wrapperFactory;
-
+  private final PersonStampingRecapFactory stampingsRecapFactory;
+  private final SecureManager secureManager;
+  private final OfficeDao officeDao;
 
   /**
    * Costruttore.
@@ -94,12 +103,16 @@ public class ChartsManager {
   @Inject
   public ChartsManager(CompetenceCodeDao competenceCodeDao,
       PersonDao personDao, IVacationsService vacationsService,
-      AbsenceDao absenceDao, IWrapperFactory wrapperFactory) {
+      AbsenceDao absenceDao, IWrapperFactory wrapperFactory, 
+      PersonStampingRecapFactory stampingsRecapFactory, SecureManager secureManager, OfficeDao officeDao) {
     this.competenceCodeDao = competenceCodeDao;
     this.personDao = personDao;
     this.absenceDao = absenceDao;
     this.vacationsService = vacationsService;
     this.wrapperFactory = wrapperFactory;
+    this.stampingsRecapFactory = stampingsRecapFactory;
+    this.secureManager = secureManager;
+    this.officeDao = officeDao;
   }
 
 
@@ -473,55 +486,55 @@ public class ChartsManager {
    * @return una lista di RenderResult che contengono un riepilogo, assenza per assenza, della
    *     situazione di esse sul db locale.
    */
-  private List<RenderResult> transformInRenderList(Person person, List<ResultFromFile> list,
-      boolean alsoPastYear) {
-
-    Long start = System.nanoTime();
-    List<RenderResult> resultList = Lists.newArrayList();
-    LocalDate dateFrom = null;
-    LocalDate dateTo = list.get(list.size() - 1).dataAssenza;
-    if (alsoPastYear) {
-      dateFrom = list.get(0).dataAssenza;
-    } else {
-      dateFrom = dateTo.withYear(dateTo.getYear())
-          .withMonthOfYear(DateTimeConstants.JANUARY).withDayOfMonth(1);
-    }
-
-    List<Absence> absences = absenceDao.findByPersonAndDate(person,
-        dateFrom, Optional.fromNullable(dateTo), Optional.<AbsenceType>absent()).list();
-
-    list.forEach(item -> {
-      RenderResult result = null;
-      List<Absence> values = absences
-          .stream()
-          .filter(r -> r.personDay.date.isEqual(item.dataAssenza))
-          .collect(Collectors.toList());
-      if (!values.isEmpty()) {
-        Predicate<Absence> a1 = a -> a.absenceType.code.equalsIgnoreCase(item.codice)
-            || a.absenceType.certificateCode.equalsIgnoreCase(item.codice);
-        if (values.stream().anyMatch(a1)) {
-          result = new RenderResult(null, person.number, person.name,
-              person.surname, item.codice, item.dataAssenza, true, "Ok",
-              values.stream().filter(r1 -> r1.absenceType.code.equalsIgnoreCase(item.codice)
-                  || r1.absenceType.certificateCode.equalsIgnoreCase(item.codice))
-              .findFirst().get().absenceType.code, CheckType.SUCCESS);
-        } else {
-          result = new RenderResult(null, person.number, person.name,
-              person.surname, item.codice, item.dataAssenza, false,
-              "Mismatch tra assenza trovata e quella dello schedone",
-              values.stream().findFirst().get().absenceType.code, CheckType.WARNING);
-        }
-      } else {
-        result = new RenderResult(null, person.number, person.name,
-            person.surname, item.codice, item.dataAssenza, false,
-            "Nessuna assenza per il giorno", null, CheckType.DANGER);
-      }
-      resultList.add(result);
-    });
-    Long end = System.nanoTime();
-    log.debug("TEMPO per la persona {}: {} ms", person, (end - start) / 1000000);
-    return resultList;
-  }
+//  private List<RenderResult> transformInRenderList(Person person, List<ResultFromFile> list,
+//      boolean alsoPastYear) {
+//
+//    Long start = System.nanoTime();
+//    List<RenderResult> resultList = Lists.newArrayList();
+//    LocalDate dateFrom = null;
+//    LocalDate dateTo = list.get(list.size() - 1).dataAssenza;
+//    if (alsoPastYear) {
+//      dateFrom = list.get(0).dataAssenza;
+//    } else {
+//      dateFrom = dateTo.withYear(dateTo.getYear())
+//          .withMonthOfYear(DateTimeConstants.JANUARY).withDayOfMonth(1);
+//    }
+//
+//    List<Absence> absences = absenceDao.findByPersonAndDate(person,
+//        dateFrom, Optional.fromNullable(dateTo), Optional.<AbsenceType>absent()).list();
+//
+//    list.forEach(item -> {
+//      RenderResult result = null;
+//      List<Absence> values = absences
+//          .stream()
+//          .filter(r -> r.personDay.date.isEqual(item.dataAssenza))
+//          .collect(Collectors.toList());
+//      if (!values.isEmpty()) {
+//        Predicate<Absence> a1 = a -> a.absenceType.code.equalsIgnoreCase(item.codice)
+//            || a.absenceType.certificateCode.equalsIgnoreCase(item.codice);
+//        if (values.stream().anyMatch(a1)) {
+//          result = new RenderResult(null, person.number, person.name,
+//              person.surname, item.codice, item.dataAssenza, true, "Ok",
+//              values.stream().filter(r1 -> r1.absenceType.code.equalsIgnoreCase(item.codice)
+//                  || r1.absenceType.certificateCode.equalsIgnoreCase(item.codice))
+//              .findFirst().get().absenceType.code, CheckType.SUCCESS);
+//        } else {
+//          result = new RenderResult(null, person.number, person.name,
+//              person.surname, item.codice, item.dataAssenza, false,
+//              "Mismatch tra assenza trovata e quella dello schedone",
+//              values.stream().findFirst().get().absenceType.code, CheckType.WARNING);
+//        }
+//      } else {
+//        result = new RenderResult(null, person.number, person.name,
+//            person.surname, item.codice, item.dataAssenza, false,
+//            "Nessuna assenza per il giorno", null, CheckType.DANGER);
+//      }
+//      resultList.add(result);
+//    });
+//    Long end = System.nanoTime();
+//    log.debug("TEMPO per la persona {}: {} ms", person, (end - start) / 1000000);
+//    return resultList;
+//  }
 
   @Getter
   public static final class RenderChart {
@@ -533,6 +546,53 @@ public class ChartsManager {
       this.personOvertime = personOvertime;
     }
   }
+  
+  /**
+   * 
+   * @param user se presente determina 
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   * @param forAll se si richiede la stampa per tutti
+   * @param person la persona (opzionale) se si richiede la situazione mensile solo per una persona
+   * @param beginDate la data di inizio 
+   * @param endDate la data di fine
+   * @return un file contenente tutte le informazioni sulle ore di lavoro rispetto ai parametri passati.
+   */
+  public File buildExcel(Optional<User> user, int year, int month, boolean forAll, Optional<Person> person, 
+      LocalDate beginDate, LocalDate endDate) {
+    
+    Set<Office> offices = user.isPresent() ? secureManager.officesWriteAllowed(user.get())
+        : Sets.newHashSet(officeDao.getAllOffices());
+    List<Person> personList = Lists.newArrayList();
+    File file = new File("situazioneMensile" 
+        + DateUtility.fromIntToStringMonth(month) + year + ".xls");
+    Workbook wb = new HSSFWorkbook();
+    
+    if (person.isPresent()) {
+      personList.add(person.get());
+      if (beginDate != null && endDate != null) {
+        LocalDate tempDate = beginDate;
+        while (!tempDate.isAfter(endDate)) {
+          PersonStampingRecap psDto = stampingsRecapFactory.create(person.get(), 
+              tempDate.getYear(), tempDate.getMonthOfYear(), false);
+          file = createFileToExport(psDto, file, wb);
+          tempDate = tempDate.plusMonths(1);
+        }
+      } else {
+        PersonStampingRecap psDto = stampingsRecapFactory.create(person.get(), year, month, false);
+        file = createFileToExport(psDto, file, wb);
+      }
+    } else {
+      personList = personDao.list(Optional.<String>absent(), offices, false, LocalDate.now(),
+          LocalDate.now(), true).list();
+      for (Person p : personList) {
+        PersonStampingRecap psDto = stampingsRecapFactory.create(p, year, month, false);
+        file = createFileToExport(psDto, file, wb);
+      }
+    }    
+    
+    return file;
+  }
 
   /**
    * 
@@ -541,11 +601,12 @@ public class ChartsManager {
    * @return il file contenente la situazione mensile della persona a cui fa riferimento
    *     il personStampingRecap passato come parametro.
    */
-  public File createFileToExport(PersonStampingRecap psDto, File file) {
+  private File createFileToExport(PersonStampingRecap psDto, File file, Workbook wb) {
     try {
       FileOutputStream out = new FileOutputStream(file);
-      Workbook wb = new HSSFWorkbook();
-      Sheet sheet = wb.createSheet();
+      
+      Sheet sheet = wb.createSheet(psDto.person.fullName());
+      
       CellStyle cs = createHeader(wb);
       Row row = null;
       Cell cell = null;
@@ -571,11 +632,18 @@ public class ChartsManager {
         }
       }
       int rownum = 1;
+      CellStyle cellHoliday = createHoliday(wb);
+      CellStyle cellWorkingDay = createWorkingday(wb);
       for (PersonStampingDayRecap day : psDto.daysRecap) {
         row = sheet.createRow(rownum);
+        
         for (int cellnum = 0; cellnum < 3; cellnum++) {
           cell = row.createCell(cellnum);
-          cell = configureDay(day, cell, wb);
+          if (day.personDay.isHoliday) {
+            cell.setCellStyle(cellHoliday);
+          } else {
+            cell.setCellStyle(cellWorkingDay);
+          }
           switch (cellnum) {
             case 0:              
               cell.setCellValue(day.personDay.date.toString());              
@@ -639,7 +707,7 @@ public class ChartsManager {
    * @param wb il workbook su cui applicare lo stile
    * @return lo stile per una cella che identifica un giorno di vacanza.
    */
-  private CellStyle createHoliday(Workbook wb) {
+  private static final CellStyle createHoliday(Workbook wb) {
     CellStyle cs = wb.createCellStyle();
     cs.setFillForegroundColor(IndexedColors.BLUE_GREY.getIndex());
     Font font = wb.createFont();
@@ -654,7 +722,7 @@ public class ChartsManager {
    * @param wb il workbook su cui applicare lo stile
    * @return lo stile per una cella che identifica un giorno lavorativo.
    */
-  private CellStyle createWorkingday(Workbook wb) {
+  private static final CellStyle createWorkingday(Workbook wb) {
     CellStyle cs = wb.createCellStyle();
     Font font = wb.createFont();
     cs.setAlignment(CellStyle.ALIGN_CENTER);
@@ -662,21 +730,6 @@ public class ChartsManager {
     return cs;
   }
   
-  /**
-   * 
-   * @param day il giorno di riferimento
-   * @param cell la cella a cui applicare lo stile
-   * @param wb il workbook a cui la cella appartiene
-   * @return la cella configurata secondo la tipologia di giorno.
-   */
-  private Cell configureDay(PersonStampingDayRecap day, Cell cell, Workbook wb) {
-    if (day.personDay.isHoliday) {
-      cell.setCellStyle(createHoliday(wb));
-    } else {
-      cell.setCellStyle(createWorkingday(wb));
-    }
-    return cell;
-  }
 }
 
 

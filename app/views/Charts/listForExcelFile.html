@@ -10,10 +10,13 @@
 
 	#{alert color:'info'}
 		<i class="fa fa-info-circle fa-2x" aria-hidden="true"> Info:</i><br><br>
-  		<p>Sarà generato un file Excel in formato .xls contenente la situazione mensile della persona selezionata utilizzabile al fine di avere un riscontro orario per 
-  		la rendicontazione dei progetti.</p>
-  		<p>Usando i menu in alto per anno, mese e sede, sarà possibile ottenere la situazione della persona desiderata nel periodo di interesse.
-  		</p>
+  		<p>Può essere generato un file in formato .xls o .csv contenente la situazione mensile di tutte le persone
+  		della propria sede, utilizzabile al fine di avere un riscontro orario per la rendicontazione dei progetti.</p>
+  		<p>Usando i menu in alto per anno, mese e sede, sarà possibile ottenere la situazione nel mese/anno di 
+  		interesse.</p>
+  		<p>Selezionando <i><strong>no</strong></i> alla voce "per tutti", è possibile effettuare l'esportazione per le persone 
+  		che interessano, selezionandole dal menu. In quel caso, sarà inoltre possibile specificare un intervallo
+  		temporale più lungo immettendo le date specifiche nei campi "data inizio" e "data fine". </p>
   		<p>Selezionare uno dei nomi presenti nella lista e premere ok.</p>
   	#{/alert}
   	
@@ -24,16 +27,33 @@
   	#{f.selectEnum 'exportFile', items:controllers.Charts.ExportFile, 
 		value:exportFile, byEquals:true /}
 	
-	#{f.booleanRadio 'forAll', label:'Per tutti', value:false /}
-      
+	#{f.booleanRadio 'forAll', label:'Per tutti', value:true /}
     
+    <div id="single-person" #{if !forAll} style="display: none" #{/if}>	
+  	#{f.selectModel 'person', items:personList /}
   	
-	
-  		#{f.selectModel 'person', items:personList /}
-  		#{b.buttons center:'true'}
+  	#{f.date 'beginDate' /}
+  	#{f.date 'endDate' /}
+  	</div>
+  	#{b.buttons center:'true'}
   		#{b.back /}
   		#{b.ok /}
-  		#{/b.buttons}
+  	#{/b.buttons}
+  	
   	#{/form}
 
 </div>
+
+#{set 'moreScripts'}
+  <script type="text/javascript">
+	$(document).ready(function() {
+					
+		$("input[name='forAll']").change(function(){
+			
+			jQuery( "#single-person" ).toggle(0);
+		
+		});
+		       
+	 });
+	</script>
+#{/set}
