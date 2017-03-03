@@ -51,7 +51,7 @@ require:
         - org.springframework.roo -> org.springframework.roo.annotations *
         - org.eclipse.persistence -> eclipselink *
     - asufana -> play-lombok 1.2.3
-    - org.projectlombok -> lombok 1.16.12
+    - org.projectlombok -> lombok 1.16.14
     - com.fatboyindustrial.gson-jodatime-serialisers -> gson-jodatime-serialisers 1.2.0
     - com.fasterxml.jackson.core -> jackson-core 2.7.3
     - com.fasterxml.jackson.core -> jackson-annotations 2.7.3
