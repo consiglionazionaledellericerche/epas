@@ -64,6 +64,7 @@ require:
     - org.apache.poi -> poi 3.14
     - org.graylog2 -> gelfj 1.1.15
     - org.apache.commons -> commons-csv 1.4
+    - org.apache.commons -> commons-compress 1.13
     
 # My custom repository
 

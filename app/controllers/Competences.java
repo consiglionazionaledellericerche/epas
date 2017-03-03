@@ -25,6 +25,14 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
 import helpers.jpa.ModelQuery.SimpleResults;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
+
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.SecureManager;
@@ -65,13 +73,6 @@ import play.mvc.With;
 
 import security.SecurityRules;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
 
 @With({Resecure.class})
 public class Competences extends Controller {

@@ -10,26 +10,24 @@ import dao.PersonDao;
 
 import helpers.jpa.ModelQuery.SimpleResults;
 
-import it.cnr.iit.epas.DateUtility;
-
 import lombok.extern.slf4j.Slf4j;
 
 import manager.SecureManager;
 import manager.charts.ChartsManager;
 import manager.recaps.charts.RenderResult;
-import manager.recaps.personstamping.PersonStampingRecap;
-import manager.recaps.personstamping.PersonStampingRecapFactory;
 
 import models.CompetenceCode;
 import models.Office;
 import models.Person;
 import models.exports.PersonOvertime;
 
+import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.joda.time.LocalDate;
 
 import play.Logger;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -37,6 +35,7 @@ import security.SecurityRules;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -63,7 +62,7 @@ public class Charts extends Controller {
   static OfficeDao officeDao;
   @Inject
   static CompetenceCodeDao competenceCodeDao;
-//  @Inject
+  //  @Inject
   //
 
   public static void overtimeOnPositiveResidual(Integer year, Integer month, Long officeId) {
@@ -225,7 +224,7 @@ public class Charts extends Controller {
    * @param month il mese di riferimento
    */
   public static void listForExcelFile(int year, int month, Long officeId) {
-    
+
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
@@ -236,8 +235,8 @@ public class Charts extends Controller {
     List<Person> personList = personDao.list(
         Optional.<String>absent(), set, false, date, 
         date.dayOfMonth().withMaximumValue(), true).list();
-    
-    render(personList, date, year, month);
+
+    render(personList, date, year, month, office);
   }
 
 
@@ -249,27 +248,43 @@ public class Charts extends Controller {
    * @param month il mese di riferimento
    */
   public static void test(Person person, int year, int month, ExportFile exportFile, 
-      boolean forAll, LocalDate beginDate, LocalDate endDate) {   
-    //rules.checkIfPermitted(Security.getUser().get().person.office);
+      boolean forAll, LocalDate beginDate, LocalDate endDate, Long officeId) {   
+    Office office = officeDao.getOfficeById(officeId);
+    rules.checkIfPermitted(office);
+    if (exportFile == null) {
+      Validation.addError("exportFile", "Specificare il formato dell'esportazione.");      
+    }
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      
+      Set<Office> set = Sets.newHashSet(office);
+      LocalDate date = new LocalDate(year, month, 1);
+      List<Person> personList = personDao.list(
+          Optional.<String>absent(), set, false, date, 
+          date.dayOfMonth().withMaximumValue(), true).list();
+      
+      render("@listForExcelFile", year, month, office, date, personList);
+    }
     Optional<Person> optPerson = Optional.<Person>absent();
     if (person.isPersistent()) {
       optPerson = Optional.fromNullable(person);
     }
     File file = null;
-    String suffix = "";
-    if (exportFile.equals(ExportFile.CSV)) {
-      file = chartsManager.buildExcel(Security.getUser(), year, month, 
-          forAll, optPerson, beginDate, endDate);
-    } else {
-      suffix = ".xls";
+    try {
+      file = chartsManager.buildFile(Security.getUser(), year, month, 
+          forAll, optPerson, beginDate, endDate, exportFile);
+    } catch (FileNotFoundException | ArchiveException ex) {
+      
+      ex.printStackTrace();
+    } catch (IOException ex) {
+      
+      ex.printStackTrace();
     }
 
-      
-        
     renderBinary(file);
 
   }
-  
+
   public enum ExportFile {
     CSV,XLS;
   }
