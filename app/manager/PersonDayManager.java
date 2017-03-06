@@ -767,6 +767,7 @@ public class PersonDayManager {
     }
     return false;
   }
+  
   /**
    * Calcola le coppie di stampings valide al fine del calcolo del time at work. <br>
    *

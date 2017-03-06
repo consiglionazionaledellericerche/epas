@@ -13,7 +13,8 @@ import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
 import dao.PersonShiftDayDao;
 import dao.ShiftDao;
-
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPersonDay;
 import helpers.BadRequest;
 
 import it.cnr.iit.epas.CompetenceUtility;
@@ -119,6 +120,8 @@ public class ShiftManager {
   private CompetenceDao competenceDao;
   @Inject
   private PersonMonthRecapDao personMonthRecapDao;
+  @Inject
+  private IWrapperFactory wrapperFactory;
 
   /**
    * Costruisce la tabella delle inconsistenza tra i giorni di turno dati e le timbrature.
@@ -197,17 +200,16 @@ public class ShiftManager {
                   + "giorno {} (personDay == null)",
               person.name, person.surname, personShiftDay.date);
 
-          noStampingDays =
-              (inconsistentAbsenceTable.contains(person, thNoStampings))
-                  ? inconsistentAbsenceTable.get(person, thNoStampings)
-                  : new ArrayList<String>();
-          noStampingDays.add(personShiftDay.date.toString("dd MMM"));
-          inconsistentAbsenceTable.put(person, thNoStampings, noStampingDays);
-
+          updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thNoStampings, personShiftDay.date.toString("dd MMM"));
           log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}",
               person, thNoStampings, inconsistentAbsenceTable.get(person, thNoStampings));
         }
       } else {
+    	  //TODO:
+    	  IWrapperPersonDay wrPersonDay = wrapperFactory.create(personDay.get());
+    	  if (personDayManager.isValidDay(personDay.get(), wrPersonDay)) {
+    		  
+    	  }
 
         // check for the stampings in working days
         if (!personDay.get().isHoliday && LocalDate.now().isAfter(personShiftDay.date)) {
@@ -218,13 +220,7 @@ public class ShiftManager {
             log.info("Il turno di {} {} e' incompatibile con la sue mancate timbrature nel "
                 + "giorno {}", person.name, person.surname, personDay.get().date);
 
-
-            noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings))
-                ? inconsistentAbsenceTable.get(person, thNoStampings)
-                : new ArrayList<String>();
-            noStampingDays.add(personShiftDay.date.toString("dd MMM"));
-            inconsistentAbsenceTable.put(person, thNoStampings, noStampingDays);
-
+            updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thNoStampings, personShiftDay.date.toString("dd MMM"));
             //log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thNoStampings, 
             //      inconsistentAbsenceTable.get(person, thNoStampings));
           } else {
@@ -245,9 +241,7 @@ public class ShiftManager {
         		  String stamp = (personDay.get().stampings.get(0).isIn()) ? personDay.get().stampings.get(0).date.toLocalTime().toString("HH:mm").concat("- **:**")
         				  : "- **:**".concat(personDay.get().stampings.get(0).date.toLocalTime().toString("HH:mm"));
 
-        		  badStampingDays = (inconsistentAbsenceTable.contains(personDay.get().person, thBadStampings)) ? inconsistentAbsenceTable.get(person, thBadStampings) : new ArrayList<String>();
-        		  badStampingDays.add(personDay.get().date.toString("dd MMM").concat(" -> ").concat(stamp));
-        		  inconsistentAbsenceTable.put(person, thBadStampings, badStampingDays);
+        		  updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thBadStampings, personDay.get().date.toString("dd MMM").concat(" -> ").concat(stamp));
         		  log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", personDay.get().person, thBadStampings, inconsistentAbsenceTable.get(person, thBadStampings));
 
         	  // se e' vuota => manca qualche timbratura
@@ -256,9 +250,7 @@ public class ShiftManager {
         		  log.info("Il turno di {} {} e' incompatibile con la sue  timbrature disallineate nel"
         				  + " giorno {}", person.name, person.surname, personDay.get().date);
 
-        		  badStampingDays = (inconsistentAbsenceTable.contains(person, thBadStampings)) ? inconsistentAbsenceTable.get(person, thBadStampings) : new ArrayList<String>();
-        		  badStampingDays.add(personDay.get().date.toString("dd MMM").concat(" -> timbrature disaccoppiate"));
-        		  inconsistentAbsenceTable.put(person, thBadStampings, badStampingDays);
+        		  updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thBadStampings, personDay.get().date.toString("dd MMM").concat(" -> timbrature disaccoppiate"));
         		  log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thBadStampings, inconsistentAbsenceTable.get(person, thBadStampings));
 
         	  // controlla che le coppie di timbrature coprano
@@ -267,84 +259,96 @@ public class ShiftManager {
         		  
         		  WorkedParameters wp = checkShiftWorkedMins(personDay, shiftType, startShift, startLunchTime ,endLunchTime, endShift);
 
-                // check if the difference between the worked hours in the shift periods are less
-                // than 2 hours (new rules for shift)
+        		  // check if the difference between the worked hours in the shift periods are less
+        		  // than 2 hours (new rules for shift)
 
-                String lackOfTime = competenceUtility.calcStringShiftHoursFromMinutes(wp.lackOfTime);
-                String workedTime = competenceUtility.calcStringShiftHoursFromMinutes(wp.workedTime);
-                String label;
+        		  String lackOfTime = competenceUtility.calcStringShiftHoursFromMinutes(wp.lackOfTime);
+        		  String workedTime = competenceUtility.calcStringShiftHoursFromMinutes(wp.workedTime);
+        		  String label;
 
-                // legge la tolleranza per quel turno
-                int globalTollerancePerShift = shiftType.hourTolerance;
+        		  // legge la tolleranza per quel turno
+        		  int globalTollerancePerShift = shiftType.hourTolerance;
 
-                if (wp.lackOfTime > globalTollerancePerShift) {
+        		  if (wp.lackOfTime > globalTollerancePerShift) {
 
-                	log.info("Il turno di {} {} nel giorno {} non e' stato completato - "
-                          + "timbrature: {} ",
-                      person.name, person.surname, personDay.get().date, wp.stampings);
+        			  log.info("Il turno di {} {} nel giorno {} non e' stato completato - "
+                          + "timbrature: {} ", person.name, person.surname, personDay.get().date, wp.stampings);
 
-                	badStampingDays = (inconsistentAbsenceTable.contains(person, thMissingTime)) ? inconsistentAbsenceTable.get(person, thMissingTime) : Lists.<String>newArrayList();
-                    badStampingDays.add(personShiftDay.date.toString("dd MMM").concat(" -> ").concat(wp.stampings).concat("(").concat(workedTime).concat(" ore lavorate)"));
-                    inconsistentAbsenceTable.put(person, thMissingTime, badStampingDays);
-
-                    log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thMissingTime, inconsistentAbsenceTable.get(person, thMissingTime));
+        			  updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thMissingTime, personShiftDay.date.toString("dd MMM").concat(" -> ").concat(wp.stampings).concat("(").concat(workedTime).concat(" ore lavorate)"));
+        			  log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thMissingTime, inconsistentAbsenceTable.get(person, thMissingTime));
                     
-                } else if (wp.lackOfTime != 0) {
-                	label = (wp.inTolerance) ? thIncompleteTime : thWarnStampings;
+        		  } else if (wp.lackOfTime != 0) {
+        			  
 
-                	log.info("Il turno di {} {} nel giorno {} non e'stato completato per meno di 2"
+        			  log.info("Il turno di {} {} nel giorno {} non e'stato completato per meno di 2"
                           + " ore ({} minuti ({})) - CONTROLLARE PERMESSO timbrature: {}",
                           person.name, person.surname, personDay.get().date, wp.lackOfTime,
                           lackOfTime, wp.stampings);
-                	log.info("Timbrature nella tolleranza dei 15 min. = {}", wp.inTolerance);
+        			  log.info("Timbrature nella tolleranza dei 15 min. = {}", wp.inTolerance);
 
-                	badStampingDays = (inconsistentAbsenceTable.contains(person, label)) ? inconsistentAbsenceTable.get(person, label) : Lists.<String>newArrayList();
-                	badStampingDays.add(personShiftDay.date.toString("dd MMM").concat(" -> ").concat(wp.stampings).concat("(").concat(lackOfTime).concat(" ore mancanti)"));
+        			  label = (wp.inTolerance) ? thIncompleteTime : thWarnStampings;
+        			  String str = personShiftDay.date.toString("dd MMM").concat(" -> ").concat(wp.stampings).concat("(").concat(lackOfTime).concat(" ore mancanti)");
+        			  updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, label, str);
+        			  
+        			  updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thLackTime, Integer.toString(wp.lackOfTime));
 
-                	lackOfTimes = (inconsistentAbsenceTable.contains(person, thLackTime)) ? inconsistentAbsenceTable.get(person, thLackTime) : Lists.<String>newArrayList();
-                	lackOfTimes.add(Integer.toString(wp.lackOfTime));
-                	inconsistentAbsenceTable.put(person, label, badStampingDays);
-                	inconsistentAbsenceTable.put(person, thLackTime, lackOfTimes);
+        			  //log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thLackTime,
+        			  //    inconsistentAbsenceTable.get(person, thLackTime));
+        		  }
 
-                	//log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thLackTime,
-                	//    inconsistentAbsenceTable.get(person, thLackTime));
-                }
+        	  	} // fine if esistenza timbrature
+          	} // fine se non è giorno festivo
 
-        	  } // fine if esistenza timbrature
-          } // fine se non è giorno festivo
+          	// check for absences
+          	if (!personDay.get().absences.isEmpty()) {
+          		//log.debug("E assente!!!! Esamino le assenze({})", personDay.get().absences.size());
+          		for (Absence absence : personDay.get().absences) {
+          			if (absence.justifiedType.name == JustifiedTypeName.all_day) {
 
-          // check for absences
-          if (!personDay.get().absences.isEmpty()) {
-        	  //log.debug("E assente!!!! Esamino le assenze({})", personDay.get().absences.size());
-        	  for (Absence absence : personDay.get().absences) {
-        		  if (absence.justifiedType.name == JustifiedTypeName.all_day) {
+          				if (absence.absenceType.code.equals("92")) {
+          					log.info("Il turno di {} {} e' coincidente con una missione il giorno {}", person.name, person.surname, personShiftDay.date);
 
-        			  if (absence.absenceType.code.equals("92")) {
-        				  log.info("Il turno di {} {} e' coincidente con una missione il giorno {}", person.name, person.surname, personShiftDay.date);
+          					absenceDays = (inconsistentAbsenceTable.contains(person, thMissions)) ? inconsistentAbsenceTable.get(person, thMissions) : Lists.<String>newArrayList();
+          					absenceDays.add(personShiftDay.date.toString("dd MMM"));
+          					inconsistentAbsenceTable.put(person, thMissions, absenceDays);
+          				} else {
+          					log.info("Il turno di {} {} e' incompatibile con la sua assenza nel giorno {}", person.name, person.surname, personShiftDay.date);
 
-        				  absenceDays = (inconsistentAbsenceTable.contains(person, thMissions)) ? inconsistentAbsenceTable.get(person, thMissions) : Lists.<String>newArrayList();
-        				  absenceDays.add(personShiftDay.date.toString("dd MMM"));
-        				  inconsistentAbsenceTable.put(person, thMissions, absenceDays);
-        			  } else {
-        				  log.info("Il turno di {} {} e' incompatibile con la sua assenza nel giorno {}", person.name, person.surname, personShiftDay.date);
-
-        				  absenceDays = (inconsistentAbsenceTable.contains(person, thAbsences))
-                        ? inconsistentAbsenceTable.get(person, thAbsences)
-                        : Lists.<String>newArrayList();
-                absenceDays.add(personShiftDay.date.toString("dd MMM"));
-                inconsistentAbsenceTable.put(person, thAbsences, absenceDays);
-              }
-            }
-          }
-        }
-      } // fine personDay != null
-    }
-    //return inconsistentAbsenceTable;
-    }  
-    //log.debug("*** La funzione che calcola le inconsistenze rende una tabella con {} persone", inconsistentAbsenceTable.rowKeySet().size());
-    
+          					absenceDays = (inconsistentAbsenceTable.contains(person, thAbsences))
+          							? inconsistentAbsenceTable.get(person, thAbsences)
+          									: Lists.<String>newArrayList();
+          					absenceDays.add(personShiftDay.date.toString("dd MMM"));
+          					inconsistentAbsenceTable.put(person, thAbsences, absenceDays);
+          				}
+          			}
+          		}
+          	}
+        } // fine check of working days
+      } // fine personDay is present
+    } // fine ciclo sui personShiftDays  
   }
 
+  
+  /*
+   * aggiorna il contenuto della cella di una tabella del tipo <Person, String, List<String>>
+   * tipicamente utilizzata per contenere le inconsistenze tra i turni e le timbrature
+   * 
+   * @param table 	tabella da aggiornare
+   * @param th		stringa identificativa della colonna
+   * @param tr		persona identificativa della riga
+   * @param element	stringa da aggiungere alla cella
+   */
+  static void updateCellOfTableOfInconsistency(Table<Person, String, List<String>> table, Person tr, String th, String element) { 
+	  
+	  List<String> cell = new ArrayList<String>();   
+	  
+	  // prende l'elemento della tabella, se esiste, altrimenti lo crea
+	  cell = (table.contains(tr, th)) ? table.get(tr, th) : new ArrayList<String>();
+	  
+	  cell.add(element);
+	  table.put(tr, th, cell);
+  }
+  
   
   /*
    * 
@@ -685,9 +689,6 @@ public class ShiftManager {
       return wp;
   }
 	  
-  
-  
-  
   
   
 

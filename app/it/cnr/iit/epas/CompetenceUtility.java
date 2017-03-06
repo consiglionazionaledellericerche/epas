@@ -619,7 +619,6 @@ public class CompetenceUtility {
 
                     // calcola gli scostamenti dalla prima fascia del turno tenendo conto dei
                     // 15 min di comporto se il turnista è entrato prima
-                    //TODO: mettere il parametro 15 minuti parametrico
                     if (pairStamping.first.date.toLocalTime().isBefore(startShift)) {
                       newLimit =
                           (pairStamping.first.date.toLocalTime().isBefore(startShift.minusMinutes(15)))
