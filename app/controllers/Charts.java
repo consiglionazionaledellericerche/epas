@@ -22,8 +22,6 @@ import models.Person;
 import models.exports.PersonOvertime;
 
 import org.apache.commons.compress.archivers.ArchiveException;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
 import org.joda.time.LocalDate;
 
 import play.Logger;
@@ -247,7 +245,7 @@ public class Charts extends Controller {
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
    */
-  public static void test(Person person, int year, int month, ExportFile exportFile, 
+  public static void test(List<Long> peopleIds, int year, int month, ExportFile exportFile, 
       boolean forAll, LocalDate beginDate, LocalDate endDate, Long officeId) {   
     Office office = officeDao.getOfficeById(officeId);
     rules.checkIfPermitted(office);
@@ -265,14 +263,14 @@ public class Charts extends Controller {
       
       render("@listForExcelFile", year, month, office, date, personList);
     }
-    Optional<Person> optPerson = Optional.<Person>absent();
-    if (person.isPersistent()) {
-      optPerson = Optional.fromNullable(person);
-    }
+//    Optional<Person> optPerson = Optional.<Person>absent();
+//    if (person.isPersistent()) {
+//      optPerson = Optional.fromNullable(person);
+//    }
     File file = null;
     try {
       file = chartsManager.buildFile(Security.getUser(), year, month, 
-          forAll, optPerson, beginDate, endDate, exportFile);
+          forAll, peopleIds, beginDate, endDate, exportFile);
     } catch (FileNotFoundException | ArchiveException ex) {
       
       ex.printStackTrace();
