@@ -33,7 +33,9 @@
 	#{f.booleanRadio 'forAll', label:'Per tutti', value:true /}
     
     <div id="single-person" #{if !forAll} style="display: none" #{/if}>	
-  	#{f.selectModel 'person', items:personList /}
+    #{f.selectModels 'peopleIds',
+  		items:personList, placeholder:'Il personale' /}
+  
   	
   	#{f.date 'beginDate' /}
   	#{f.date 'endDate' /}

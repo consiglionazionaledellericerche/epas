@@ -1,6 +1,7 @@
 package manager.charts;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
@@ -34,6 +35,7 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -281,8 +283,8 @@ public class ChartsManager {
     out.write("Cognome Nome,");
     for (int i = 1; i <= month; i++) {
       out.append("ore straordinari " + DateUtility.fromIntToStringMonth(i)
-          + ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i)
-          + ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
+      + ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i)
+      + ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
     }
 
     out.append("ore straordinari TOTALI,ore riposi compensativi TOTALI, ore in più TOTALI");
@@ -557,7 +559,7 @@ public class ChartsManager {
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
    * @param forAll se si richiede la stampa per tutti
-   * @param person la persona (opzionale) se si richiede la situazione mensile solo per una persona
+   * @param peopleIds la lista degli id delle persone selezionate per essere esportate
    * @param beginDate la data di inizio 
    * @param endDate la data di fine
    * @param exportFile il formato in cui esportare le informazioni
@@ -567,7 +569,7 @@ public class ChartsManager {
    * @throws IOException eccezione durante le procedure di input/output
    */
   public File buildFile(Optional<User> user, int year, int month, boolean forAll, 
-      Optional<Person> person, LocalDate beginDate, LocalDate endDate, 
+      List<Long> peopleIds, LocalDate beginDate, LocalDate endDate, 
       ExportFile exportFile) throws ArchiveException, IOException {
 
     Set<Office> offices = user.isPresent() ? secureManager.officesWriteAllowed(user.get())
@@ -586,36 +588,42 @@ public class ChartsManager {
     }    
     Workbook wb = new HSSFWorkbook();
     // verifico se devo fare l'esportazione per una persona o per tutti...
-    if (person.isPresent()) {
-      personList.add(person.get());
+    if (!peopleIds.isEmpty()) {
+      personList = peopleIds.stream().map(item -> personDao.getPersonById(item))
+          .collect(Collectors.toList());    
+      
       //controllo se devo fare l'esportazione per un mese specifico o per un periodo...
       if (beginDate != null && endDate != null) {
-        LocalDate tempDate = beginDate;
-        while (!tempDate.isAfter(endDate)) {
-          PersonStampingRecap psDto = stampingsRecapFactory.create(person.get(), 
-              tempDate.getYear(), tempDate.getMonthOfYear(), false);
+        for (Person person : personList) {
+          LocalDate tempDate = beginDate;
+          while (!tempDate.isAfter(endDate)) {
+            PersonStampingRecap psDto = stampingsRecapFactory.create(person, 
+                tempDate.getYear(), tempDate.getMonthOfYear(), false);
+            if (isExcel) {
+              file = createFileXLSToExport(psDto, file, wb);
+            } else {
+              file = createFileCSVToExport(psDto);
+            }          
+            tempDate = tempDate.plusMonths(1);
+          }
+        }       
+      } else {
+        for (Person person : personList) {
+          PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
           if (isExcel) {
             file = createFileXLSToExport(psDto, file, wb);
           } else {
             file = createFileCSVToExport(psDto);
-          }          
-          tempDate = tempDate.plusMonths(1);
-        }
-      } else {
-        PersonStampingRecap psDto = stampingsRecapFactory.create(person.get(), year, month, false);
-        if (isExcel) {
-          file = createFileXLSToExport(psDto, file, wb);
-        } else {
-          file = createFileCSVToExport(psDto);
-        }        
+          } 
+        }               
       }
     } else {
       // preparo per l'esportazione in formato zip di file .csv
       File destination = new File("situazioneMensile.zip");
       OutputStream archiveStream = new FileOutputStream(destination);;
-      
+
       ArchiveOutputStream archive = new ArchiveStreamFactory()
-            .createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream);     
+          .createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream);     
 
       personList = personDao.list(Optional.<String>absent(), offices, false, LocalDate.now(),
           LocalDate.now(), true).list();
@@ -629,7 +637,7 @@ public class ChartsManager {
           ZipArchiveEntry entry = new ZipArchiveEntry(psDto.person.fullName());
           file = createFileCSVToExport(psDto);
           BufferedInputStream input = new BufferedInputStream(new FileInputStream(file));
-          
+
           try {
             archive.putArchiveEntry(entry);
             IOUtils.copy(input, archive);
@@ -647,6 +655,7 @@ public class ChartsManager {
 
     return file;
   }
+
 
 
   /**
