@@ -737,12 +737,14 @@ public class PersonDayManager {
 
     // ### CASO 4 Tempo a lavoro (di timbrature + assenze) non sufficiente
     // Per i livelli 4-8 dev'essere almeno la metà del tempo a lavoro
-    
-    if (isValidDay(personDay, pd)) {
-      personDayInTroubleManager.setTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);
-    } else {
-      personDayInTroubleManager.fixTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);
+    if (!isFixedTimeAtWork && personDay.person.qualification.qualification > 3) {
+      if (!isValidDay(personDay, pd)) {
+        personDayInTroubleManager.setTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);
+      } else {
+        personDayInTroubleManager.fixTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);
+      }
     }
+    
   }
 
   /**
@@ -753,19 +755,15 @@ public class PersonDayManager {
    *     false altrimenti.
    */
   public boolean isValidDay(PersonDay personDay, IWrapperPersonDay pd) {
-    if (// Non ha la timbratura automatica
-        !pd.isFixedTimeAtWork()
-        // E' di livello 4-8
-        && personDay.person.qualification.qualification > 3
-        // non deve essere festivo
-        && !personDay.isHoliday
+    if (// non deve essere festivo
+        !personDay.isHoliday
         // le assenze non devono essere giornaliere 
         && !isAllDayAbsences(personDay)
         // Il tempo a lavoro non è almeno la metà di quello previsto
         && personDay.timeAtWork < (pd.getWorkingTimeTypeDay().get().getWorkingTime() / 2)) {
-      return true;
+      return false;
     }
-    return false;
+    return true;
   }
   
   /**
