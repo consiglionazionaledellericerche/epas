@@ -271,10 +271,12 @@ public class Charts extends Controller {
       Validation.addError("exportFile", "Specificare il formato dell'esportazione.");      
     }
     if (beginDate == null && endDate != null) {
-      Validation.addError("beginDate","Valorizzare entrambe le date di inizio e fine!");      
+      Validation.addError("beginDate","Valorizzare le date di inizio e fine o "
+          + "lasciare entrambe vuote per usare il mese e anno del menu");      
     }
     if (beginDate != null && endDate == null) {
-      Validation.addError("endDate","Valorizzare entrambe le date di inizio e fine!");
+      Validation.addError("endDate","Valorizzare le date di inizio e fine o "
+          + "lasciare entrambe vuote per usare il mese e anno del menu");
     }
     if (beginDate != null && endDate != null && !beginDate.isBefore(endDate)) {
       Validation.addError("endDate","La data di fine non può precedere la data di inizio!");      
