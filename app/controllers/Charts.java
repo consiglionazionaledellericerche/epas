@@ -245,12 +245,16 @@ public class Charts extends Controller {
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
    */
-  public static void test(List<Long> peopleIds, int year, int month, ExportFile exportFile, 
+  public static void exportTimesheetSituation(List<Long> peopleIds, int year, int month, ExportFile exportFile, 
       boolean forAll, LocalDate beginDate, LocalDate endDate, Long officeId) {   
     Office office = officeDao.getOfficeById(officeId);
     rules.checkIfPermitted(office);
     if (exportFile == null) {
       Validation.addError("exportFile", "Specificare il formato dell'esportazione.");      
+    }
+    if (beginDate != null && endDate != null && !beginDate.isBefore(endDate)) {
+      flash.error("La data di fine non può precedere la data di inizio!");
+      listForExcelFile(year, month, officeId);
     }
     if (Validation.hasErrors()) {
       response.status = 400;
@@ -261,21 +265,15 @@ public class Charts extends Controller {
           Optional.<String>absent(), set, false, date, 
           date.dayOfMonth().withMaximumValue(), true).list();
       
-      render("@listForExcelFile", year, month, office, date, personList);
+      render("@listForExcelFile", year, month, office, date, personList, forAll);
     }
-//    Optional<Person> optPerson = Optional.<Person>absent();
-//    if (person.isPersistent()) {
-//      optPerson = Optional.fromNullable(person);
-//    }
     File file = null;
     try {
-      file = chartsManager.buildFile(Security.getUser(), year, month, 
+      file = chartsManager.buildFile(office, year, month, 
           forAll, peopleIds, beginDate, endDate, exportFile);
-    } catch (FileNotFoundException | ArchiveException ex) {
-      
+    } catch (FileNotFoundException | ArchiveException ex) {      
       ex.printStackTrace();
-    } catch (IOException ex) {
-      
+    } catch (IOException ex) {      
       ex.printStackTrace();
     }
 

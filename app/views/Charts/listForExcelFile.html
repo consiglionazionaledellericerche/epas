@@ -16,13 +16,13 @@
   		verrà creato un archivio .zip contenente un file per ogni dipendente.</p>
   		<p>Usando i menu in alto per anno, mese e sede, sarà possibile ottenere la situazione nel mese/anno di 
   		interesse.</p>
-  		<p>Selezionando <i><strong>no</strong></i> alla voce "per tutti", è possibile effettuare l'esportazione per la persona 
-  		che interessa, selezionandola dal menu. In quel caso, sarà inoltre possibile specificare un intervallo
+  		<p>Selezionando <i><strong>no</strong></i> alla voce "per tutti", è possibile effettuare l'esportazione per le persone 
+  		che interessano, selezionandole dal menu. In quel caso, sarà inoltre possibile specificare un intervallo
   		temporale più lungo immettendo le date specifiche nei campi "data inizio" e "data fine". </p>
   		
   	#{/alert}
   	
-  	#{form @Charts.test(), method:'POST', autocomplete:false, class:'form form-horizontal'}
+  	#{form @Charts.exportTimesheetSituation(), method:'POST', autocomplete:false, class:'form form-horizontal'}
   	<input type="hidden" name="month" value="${date.getMonthOfYear()}"/>
   	<input type="hidden" name="year" value="${date.getYear()}"/>
   	<input type="hidden" name="officeId" value="${office.id}"/>
