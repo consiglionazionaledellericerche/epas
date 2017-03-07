@@ -30,9 +30,9 @@
   	#{f.selectEnum 'exportFile', items:controllers.Charts.ExportFile, 
 		value:exportFile, byEquals:true /}
 	
-	#{f.booleanRadio 'forAll', label:'Per tutti', value:true /}
+	#{f.booleanRadio 'forAll', label:'Per tutti' /}
     
-    <div id="single-person" #{if !forAll} style="display: none" #{/if}>	
+    <div id="single-person" #{if forAll} style="display: none" #{/if}>	
     #{f.selectModels 'peopleIds',
   		items:personList, placeholder:'Il personale' /}
   
