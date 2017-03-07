@@ -1,7 +1,6 @@
 package manager.charts;
 
 import com.google.common.base.CharMatcher;
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
@@ -568,94 +567,117 @@ public class ChartsManager {
    * @throws ArchiveException eccezione in creazione dell'archivio
    * @throws IOException eccezione durante le procedure di input/output
    */
-  public File buildFile(Optional<User> user, int year, int month, boolean forAll, 
+  public File buildFile(Office office, int year, int month, boolean forAll, 
       List<Long> peopleIds, LocalDate beginDate, LocalDate endDate, 
       ExportFile exportFile) throws ArchiveException, IOException {
 
-    Set<Office> offices = user.isPresent() ? secureManager.officesWriteAllowed(user.get())
-        : Sets.newHashSet(officeDao.getAllOffices());
+    Set<Office> offices = Sets.newHashSet(office);
     List<Person> personList = Lists.newArrayList();
-    boolean isExcel = false;
+
     File file = null;
     // controllo che tipo di esportazione devo fare...
     if (exportFile.equals(ExportFile.CSV)) {
-      file = new File("situazioneMensile" 
-          + DateUtility.fromIntToStringMonth(month) + year + ".csv");
-    } else {
-      isExcel = true;
-      file = new File("situazioneMensile" 
-          + DateUtility.fromIntToStringMonth(month) + year + ".xls");
-    }    
-    Workbook wb = new HSSFWorkbook();
-    // verifico se devo fare l'esportazione per una persona o per tutti...
-    if (!peopleIds.isEmpty()) {
-      personList = peopleIds.stream().map(item -> personDao.getPersonById(item))
-          .collect(Collectors.toList());    
-      
-      //controllo se devo fare l'esportazione per un mese specifico o per un periodo...
-      if (beginDate != null && endDate != null) {
-        for (Person person : personList) {
-          LocalDate tempDate = beginDate;
-          while (!tempDate.isAfter(endDate)) {
-            PersonStampingRecap psDto = stampingsRecapFactory.create(person, 
-                tempDate.getYear(), tempDate.getMonthOfYear(), false);
-            if (isExcel) {
-              file = createFileXLSToExport(psDto, file, wb);
-            } else {
-              file = createFileCSVToExport(psDto);
-            }          
-            tempDate = tempDate.plusMonths(1);
-          }
-        }       
-      } else {
-        for (Person person : personList) {
-          PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
-          if (isExcel) {
-            file = createFileXLSToExport(psDto, file, wb);
-          } else {
-            file = createFileCSVToExport(psDto);
-          } 
-        }               
-      }
-    } else {
-      // preparo per l'esportazione in formato zip di file .csv
+
       File destination = new File("situazioneMensile.zip");
       OutputStream archiveStream = new FileOutputStream(destination);;
 
       ArchiveOutputStream archive = new ArchiveStreamFactory()
-          .createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream);     
+          .createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream);  
+      if (peopleIds != null) {
+        personList = peopleIds.stream().map(item -> personDao.getPersonById(item))
+            .collect(Collectors.toList());    
 
-      personList = personDao.list(Optional.<String>absent(), offices, false, LocalDate.now(),
-          LocalDate.now(), true).list();
-      for (Person p : personList) {
-        PersonStampingRecap psDto = stampingsRecapFactory.create(p, year, month, false);
-        // controllo se devo esportare in excel...
-        if (isExcel) {
-          file = createFileXLSToExport(psDto, file, wb);
+        if (beginDate != null && endDate != null) {
+          for (Person person : personList) {
+            LocalDate tempDate = beginDate;
+            while (!tempDate.isAfter(endDate)) {
+              PersonStampingRecap psDto = stampingsRecapFactory.create(person, 
+                  tempDate.getYear(), tempDate.getMonthOfYear(), false);
+              archive = generateArchive(archive, psDto);
+              tempDate = tempDate.plusMonths(1);
+            }
+          }       
         } else {
-          // esporto in .csv: formo il .zip da ritornare
-          ZipArchiveEntry entry = new ZipArchiveEntry(psDto.person.fullName());
-          file = createFileCSVToExport(psDto);
-          BufferedInputStream input = new BufferedInputStream(new FileInputStream(file));
+          for (Person person : personList) {
+            PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
+            archive = generateArchive(archive, psDto); 
+          }               
+        }
+      } else {
 
-          try {
-            archive.putArchiveEntry(entry);
-            IOUtils.copy(input, archive);
-            input.close();
-            archive.closeArchiveEntry();
-          } catch (IOException ex) {            
-            ex.printStackTrace();
-          }          
+        personList = personDao.list(Optional.<String>absent(), offices, false, LocalDate.now(),
+            LocalDate.now(), true).list();
+        for (Person p : personList) {
+          PersonStampingRecap psDto = stampingsRecapFactory.create(p, year, month, false);
+          archive = generateArchive(archive, psDto);
         }        
       }
       archive.finish();
       archiveStream.close();
       return destination;
-    }    
+    } else {
+
+      file = new File("situazioneMensile" 
+          + DateUtility.fromIntToStringMonth(month) + year + ".xls");
+      Workbook wb = new HSSFWorkbook();
+      if (peopleIds != null) {
+        personList = peopleIds.stream().map(item -> personDao.getPersonById(item))
+            .collect(Collectors.toList()); 
+        if (beginDate != null && endDate != null) {
+          for (Person person : personList) {
+            LocalDate tempDate = beginDate;
+            while (!tempDate.isAfter(endDate)) {
+              PersonStampingRecap psDto = stampingsRecapFactory.create(person, 
+                  tempDate.getYear(), tempDate.getMonthOfYear(), false);
+              file = createFileXLSToExport(psDto, file, wb);
+              tempDate = tempDate.plusMonths(1);
+            }
+          }       
+        } else {
+          for (Person person : personList) {
+            PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
+            file = createFileXLSToExport(psDto, file, wb);
+          }               
+        }
+      } else {
+        personList = personDao.list(Optional.<String>absent(), offices, false, LocalDate.now(),
+            LocalDate.now(), true).list();
+        for (Person p : personList) {
+          PersonStampingRecap psDto = stampingsRecapFactory.create(p, year, month, false);
+          file = createFileXLSToExport(psDto, file, wb);
+        }
+      }   
+    }  
 
     return file;
   }
 
+  /**
+   * 
+   * @param archive l'archivio da aggiornare
+   * @param psDto il personStampingRecap da cui prendere i dati
+   * @return l'archivio aggiornato contenente i fogli csv generati sulla base del 
+   *     PersonStampingRecap.
+   * @throws FileNotFoundException eccezione se non trova il file
+   */
+  private ArchiveOutputStream generateArchive(ArchiveOutputStream archive, 
+      PersonStampingRecap psDto) 
+          throws FileNotFoundException {
+    ZipArchiveEntry entry = new ZipArchiveEntry(psDto.person.surname + "_" 
+          + psDto.person.name + ".csv");
+    File file = createFileCSVToExport(psDto);
+    BufferedInputStream input = new BufferedInputStream(new FileInputStream(file));
+
+    try {
+      archive.putArchiveEntry(entry);
+      IOUtils.copy(input, archive);
+      input.close();
+      archive.closeArchiveEntry();
+    } catch (IOException ex) {            
+      ex.printStackTrace();
+    }  
+    return archive;
+  }
 
 
   /**
