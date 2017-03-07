@@ -10,6 +10,17 @@ import dao.PersonDao;
 
 import helpers.jpa.ModelQuery.SimpleResults;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.SecureManager;
@@ -31,16 +42,7 @@ import play.mvc.With;
 
 import security.SecurityRules;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import javax.inject.Inject;
 
 @With({Resecure.class})
 @Slf4j
@@ -63,6 +65,12 @@ public class Charts extends Controller {
   //  @Inject
   //
 
+  /**
+   * 
+   * @param year
+   * @param month
+   * @param officeId
+   */
   public static void overtimeOnPositiveResidual(Integer year, Integer month, Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
@@ -142,6 +150,11 @@ public class Charts extends Controller {
     render();
   }
 
+  /**
+   * 
+   * @param file
+   * @param officeId
+   */
   public static void checkLastYearAbsences(File file, Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
@@ -229,32 +242,42 @@ public class Charts extends Controller {
     Set<Office> set = Sets.newHashSet();
     set.add(office);
     LocalDate date = new LocalDate(year, month, 1);
-
+    boolean forAll = true;
     List<Person> personList = personDao.list(
         Optional.<String>absent(), set, false, date, 
         date.dayOfMonth().withMaximumValue(), true).list();
 
-    render(personList, date, year, month, office);
+    render(personList, date, year, month, office, forAll);
   }
 
 
   /**
-   * ritorna un file in formato excel contenente la situazione mensile esportata a fini
-   * di rendicontazione.
-   * @param person la persona di cui si vuole la situazione mensile
-   * @param year l'anno di riferimento
-   * @param month il mese di riferimento
+   * ritorna l'esportazione dei dati per rendicontazione secondo i parametri passati.
+   * @param peopleIds l'eventuale lista di id dei dipendenti di cui fare l'esportazione
+   * @param year l'anno
+   * @param month il mese
+   * @param exportFile il formato dell'esportazione
+   * @param forAll se per tutti i dipendenti o no
+   * @param beginDate l'eventuale data inizio
+   * @param endDate l'eventuale data fine
+   * @param officeId l'id della sede
    */
-  public static void exportTimesheetSituation(List<Long> peopleIds, int year, int month, ExportFile exportFile, 
-      boolean forAll, LocalDate beginDate, LocalDate endDate, Long officeId) {   
+  public static void exportTimesheetSituation(List<Long> peopleIds, int year, 
+      int month, ExportFile exportFile, boolean forAll, LocalDate beginDate, 
+      LocalDate endDate, Long officeId) {   
     Office office = officeDao.getOfficeById(officeId);
     rules.checkIfPermitted(office);
     if (exportFile == null) {
       Validation.addError("exportFile", "Specificare il formato dell'esportazione.");      
     }
+    if (beginDate == null && endDate != null) {
+      Validation.addError("beginDate","Valorizzare entrambe le date di inizio e fine!");      
+    }
+    if (beginDate != null && endDate == null) {
+      Validation.addError("endDate","Valorizzare entrambe le date di inizio e fine!");
+    }
     if (beginDate != null && endDate != null && !beginDate.isBefore(endDate)) {
-      flash.error("La data di fine non può precedere la data di inizio!");
-      listForExcelFile(year, month, officeId);
+      Validation.addError("endDate","La data di fine non può precedere la data di inizio!");      
     }
     if (Validation.hasErrors()) {
       response.status = 400;
@@ -265,7 +288,8 @@ public class Charts extends Controller {
           Optional.<String>absent(), set, false, date, 
           date.dayOfMonth().withMaximumValue(), true).list();
       
-      render("@listForExcelFile", year, month, office, date, personList, forAll);
+      render("@listForExcelFile", year, month, office, 
+          date, personList, forAll, beginDate, endDate);
     }
     File file = null;
     try {

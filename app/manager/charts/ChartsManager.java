@@ -583,7 +583,7 @@ public class ChartsManager {
 
       ArchiveOutputStream archive = new ArchiveStreamFactory()
           .createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream);  
-      if (peopleIds != null) {
+      if (!forAll) {
         personList = peopleIds.stream().map(item -> personDao.getPersonById(item))
             .collect(Collectors.toList());    
 
@@ -620,7 +620,7 @@ public class ChartsManager {
       file = new File("situazioneMensile" 
           + DateUtility.fromIntToStringMonth(month) + year + ".xls");
       Workbook wb = new HSSFWorkbook();
-      if (peopleIds != null) {
+      if (!forAll) {
         personList = peopleIds.stream().map(item -> personDao.getPersonById(item))
             .collect(Collectors.toList()); 
         if (beginDate != null && endDate != null) {
