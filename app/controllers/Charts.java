@@ -246,37 +246,36 @@ public class Charts extends Controller {
     List<Person> personList = personDao.list(
         Optional.<String>absent(), set, false, date, 
         date.dayOfMonth().withMaximumValue(), true).list();
+    
 
-    render(personList, date, year, month, office, forAll);
+    render(personList, date, office, forAll);
   }
 
 
   /**
    * ritorna l'esportazione dei dati per rendicontazione secondo i parametri passati.
    * @param peopleIds l'eventuale lista di id dei dipendenti di cui fare l'esportazione
-   * @param year l'anno
-   * @param month il mese
    * @param exportFile il formato dell'esportazione
    * @param forAll se per tutti i dipendenti o no
    * @param beginDate l'eventuale data inizio
    * @param endDate l'eventuale data fine
    * @param officeId l'id della sede
    */
-  public static void exportTimesheetSituation(List<Long> peopleIds, int year, 
-      int month, ExportFile exportFile, boolean forAll, LocalDate beginDate, 
-      LocalDate endDate, Long officeId) {   
+  public static void exportTimesheetSituation(List<Long> peopleIds, ExportFile exportFile, 
+      boolean forAll, LocalDate beginDate, LocalDate endDate, Long officeId) {   
     Office office = officeDao.getOfficeById(officeId);
     rules.checkIfPermitted(office);
     if (exportFile == null) {
       Validation.addError("exportFile", "Specificare il formato dell'esportazione.");      
     }
+    if (beginDate == null && endDate == null) {
+      Validation.addError("beginDate", "Valorizzare entrambe le date di inizio e fine");
+    }
     if (beginDate == null && endDate != null) {
-      Validation.addError("beginDate","Valorizzare le date di inizio e fine o "
-          + "lasciare entrambe vuote per usare il mese e anno del menu");      
+      Validation.addError("beginDate","Valorizzare entrambe le date di inizio e fine");      
     }
     if (beginDate != null && endDate == null) {
-      Validation.addError("endDate","Valorizzare le date di inizio e fine o "
-          + "lasciare entrambe vuote per usare il mese e anno del menu");
+      Validation.addError("endDate","Valorizzare entrambe le date di inizio e fine");
     }
     if (beginDate != null && endDate != null && !beginDate.isBefore(endDate)) {
       Validation.addError("endDate","La data di fine non può precedere la data di inizio!");      
@@ -285,18 +284,17 @@ public class Charts extends Controller {
       response.status = 400;
       
       Set<Office> set = Sets.newHashSet(office);
-      LocalDate date = new LocalDate(year, month, 1);
+      LocalDate date = LocalDate.now();
       List<Person> personList = personDao.list(
-          Optional.<String>absent(), set, false, date, 
-          date.dayOfMonth().withMaximumValue(), true).list();
+          Optional.<String>absent(), set, false, beginDate, 
+          endDate, true).list();
       
-      render("@listForExcelFile", year, month, office, 
+      render("@listForExcelFile", office, 
           date, personList, forAll, beginDate, endDate);
     }
     File file = null;
     try {
-      file = chartsManager.buildFile(office, year, month, 
-          forAll, peopleIds, beginDate, endDate, exportFile);
+      file = chartsManager.buildFile(office, forAll, peopleIds, beginDate, endDate, exportFile);
     } catch (FileNotFoundException | ArchiveException ex) {      
       ex.printStackTrace();
     } catch (IOException ex) {      

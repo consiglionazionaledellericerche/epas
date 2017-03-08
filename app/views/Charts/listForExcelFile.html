@@ -29,16 +29,13 @@
 	
   	#{f.selectEnum 'exportFile', items:controllers.Charts.ExportFile, 
 		value:exportFile, byEquals:true /}
-	
+	#{f.date 'beginDate', value:date.format() /}
+  	#{f.date 'endDate', value:date.dayOfMonth().withMaximumValue().format() /}
 	#{f.booleanRadio 'forAll', label:'Per tutti' /}
     
     <div id="single-person" #{if forAll} style="display: none" #{/if}>	
     #{f.selectModels 'peopleIds',
-  		items:personList, placeholder:'Il personale' /}
-  
-  	
-  	#{f.date 'beginDate' /}
-  	#{f.date 'endDate' /}
+  		items:personList, placeholder:'Il personale' /}  	
   	</div>
   	#{b.buttons center:'true'}
   		#{b.back /}

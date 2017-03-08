@@ -282,8 +282,8 @@ public class ChartsManager {
     out.write("Cognome Nome,");
     for (int i = 1; i <= month; i++) {
       out.append("ore straordinari " + DateUtility.fromIntToStringMonth(i)
-      + ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i)
-      + ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
+          + ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i)
+          + ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
     }
 
     out.append("ore straordinari TOTALI,ore riposi compensativi TOTALI, ore in più TOTALI");
@@ -554,9 +554,6 @@ public class ChartsManager {
 
   /**
    * 
-   * @param user se presente determina 
-   * @param year l'anno di riferimento
-   * @param month il mese di riferimento
    * @param forAll se si richiede la stampa per tutti
    * @param peopleIds la lista degli id delle persone selezionate per essere esportate
    * @param beginDate la data di inizio 
@@ -567,7 +564,7 @@ public class ChartsManager {
    * @throws ArchiveException eccezione in creazione dell'archivio
    * @throws IOException eccezione durante le procedure di input/output
    */
-  public File buildFile(Office office, int year, int month, boolean forAll, 
+  public File buildFile(Office office, boolean forAll, 
       List<Long> peopleIds, LocalDate beginDate, LocalDate endDate, 
       ExportFile exportFile) throws ArchiveException, IOException {
 
@@ -578,77 +575,59 @@ public class ChartsManager {
     // controllo che tipo di esportazione devo fare...
     if (exportFile.equals(ExportFile.CSV)) {
 
-      File destination = new File("situazioneMensile.zip");
+      File destination = new File("situazioneMensileDa" 
+          + DateUtility.fromIntToStringMonth(beginDate.getMonthOfYear()) + beginDate.getYear() 
+          + "A" + DateUtility.fromIntToStringMonth(endDate.getMonthOfYear()) + endDate.getYear()
+          + ".zip");
       OutputStream archiveStream = new FileOutputStream(destination);;
 
       ArchiveOutputStream archive = new ArchiveStreamFactory()
           .createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream);  
       if (!forAll) {
         personList = peopleIds.stream().map(item -> personDao.getPersonById(item))
-            .collect(Collectors.toList());    
-
-        if (beginDate != null && endDate != null) {
-          for (Person person : personList) {
-            LocalDate tempDate = beginDate;
-            while (!tempDate.isAfter(endDate)) {
-              PersonStampingRecap psDto = stampingsRecapFactory.create(person, 
-                  tempDate.getYear(), tempDate.getMonthOfYear(), false);
-              archive = generateArchive(archive, psDto);
-              tempDate = tempDate.plusMonths(1);
-            }
-          }       
-        } else {
-          for (Person person : personList) {
-            PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
-            archive = generateArchive(archive, psDto); 
-          }               
-        }
+            .collect(Collectors.toList());
       } else {
-
         personList = personDao.list(Optional.<String>absent(), offices, false, LocalDate.now(),
             LocalDate.now(), true).list();
-        for (Person p : personList) {
-          PersonStampingRecap psDto = stampingsRecapFactory.create(p, year, month, false);
-          archive = generateArchive(archive, psDto);
-        }        
       }
+
+      for (Person person : personList) {
+        LocalDate tempDate = beginDate;
+        while (!tempDate.isAfter(endDate)) {
+          PersonStampingRecap psDto = stampingsRecapFactory.create(person, 
+              tempDate.getYear(), tempDate.getMonthOfYear(), false);
+          archive = generateArchive(archive, psDto);
+          tempDate = tempDate.plusMonths(1);
+        }
+      }       
       archive.finish();
       archiveStream.close();
       return destination;
     } else {
 
-      file = new File("situazioneMensile" 
-          + DateUtility.fromIntToStringMonth(month) + year + ".xls");
+      file = new File("situazioneMensileDa" 
+          + DateUtility.fromIntToStringMonth(beginDate.getMonthOfYear()) + beginDate.getYear() 
+          + "A" + DateUtility.fromIntToStringMonth(endDate.getMonthOfYear()) + endDate.getYear()
+          + ".xls");
       Workbook wb = new HSSFWorkbook();
       if (!forAll) {
         personList = peopleIds.stream().map(item -> personDao.getPersonById(item))
             .collect(Collectors.toList()); 
-        if (beginDate != null && endDate != null) {
-          for (Person person : personList) {
-            LocalDate tempDate = beginDate;
-            while (!tempDate.isAfter(endDate)) {
-              PersonStampingRecap psDto = stampingsRecapFactory.create(person, 
-                  tempDate.getYear(), tempDate.getMonthOfYear(), false);
-              file = createFileXLSToExport(psDto, file, wb);
-              tempDate = tempDate.plusMonths(1);
-            }
-          }       
-        } else {
-          for (Person person : personList) {
-            PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
-            file = createFileXLSToExport(psDto, file, wb);
-          }               
-        }
       } else {
         personList = personDao.list(Optional.<String>absent(), offices, false, LocalDate.now(),
             LocalDate.now(), true).list();
-        for (Person p : personList) {
-          PersonStampingRecap psDto = stampingsRecapFactory.create(p, year, month, false);
+      }
+      for (Person person : personList) {
+        LocalDate tempDate = beginDate;
+        while (!tempDate.isAfter(endDate)) {
+          PersonStampingRecap psDto = stampingsRecapFactory.create(person, 
+              tempDate.getYear(), tempDate.getMonthOfYear(), false);
           file = createFileXLSToExport(psDto, file, wb);
+          tempDate = tempDate.plusMonths(1);
         }
-      }   
-    }  
+      }       
 
+    }
     return file;
   }
 
@@ -664,7 +643,7 @@ public class ChartsManager {
       PersonStampingRecap psDto) 
           throws FileNotFoundException {
     ZipArchiveEntry entry = new ZipArchiveEntry(psDto.person.surname + "_" 
-          + psDto.person.name + ".csv");
+        + psDto.person.name + "_" + DateUtility.fromIntToStringMonth(psDto.month) + ".csv");
     File file = createFileCSVToExport(psDto);
     BufferedInputStream input = new BufferedInputStream(new FileInputStream(file));
 
@@ -673,7 +652,8 @@ public class ChartsManager {
       IOUtils.copy(input, archive);
       input.close();
       archive.closeArchiveEntry();
-    } catch (IOException ex) {            
+    } catch (IOException ex) { 
+      log.error("Error in closing archive");
       ex.printStackTrace();
     }  
     return archive;
@@ -716,7 +696,7 @@ public class ChartsManager {
       }
 
     } catch (Exception ex) {      
-      System.out.println("Error in CsvFileWriter !!!");
+      log.error("Error in CsvFileWriter !!!");
       ex.printStackTrace();
 
     } finally {
@@ -725,7 +705,7 @@ public class ChartsManager {
         fileWriter.close();
         csvFilePrinter.close();
       } catch (IOException ex) {
-        System.out.println("Error while flushing/closing fileWriter/csvPrinter !!!");
+        log.error("Error while flushing/closing fileWriter/csvPrinter !!!");
         ex.printStackTrace();
       }
     }
@@ -743,7 +723,8 @@ public class ChartsManager {
     try {
       FileOutputStream out = new FileOutputStream(file);
 
-      Sheet sheet = wb.createSheet(psDto.person.fullName());
+      Sheet sheet = wb.createSheet(psDto.person.fullName() + "_" 
+          + DateUtility.fromIntToStringMonth(psDto.month) + psDto.year);
 
       CellStyle cs = createHeader(wb);
       Row row = null;
@@ -812,11 +793,11 @@ public class ChartsManager {
         wb.close();
         out.close();
       } catch (IOException ex) {
-        log.debug("problema in chiusura stream");
+        log.error("problema in chiusura stream");
         ex.printStackTrace();
       }
     } catch (FileNotFoundException ex) {
-      log.debug("Problema in riconoscimento file");
+      log.error("Problema in riconoscimento file");
       ex.printStackTrace();
     }
     return file;
