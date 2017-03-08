@@ -94,6 +94,7 @@ public class CompetenceUtility {
    * ore = days*6 + (int)(days/2) + resto;
    *
    * @author arianna
+   * TODO: parametrico rispetto ale pre del DB (ampo ore retribuite)
    */
   public BigDecimal calcShiftHoursFromDays(int days) {
     BigDecimal decDays = new BigDecimal(days);

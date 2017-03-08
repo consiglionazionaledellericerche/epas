@@ -283,6 +283,7 @@ passwordSuccessfullyChanged = Password modificata con successo
 password= Password
 
 PDFReport.thAbsences=Assenza
+PDFReport.thBadWorkindDay=Giorno lavorativo non valido
 PDFReport.thAppHour =Num. di ore approvate
 PDFReport.thBadStampings=Timbrature errate
 PDFReport.thDays=Num. di giorni
