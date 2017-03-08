@@ -300,9 +300,9 @@ public class Charts extends Controller {
     } catch (IOException ex) {      
       ex.printStackTrace();
     }
-
+    
     renderBinary(file);
-
+    
   }
 
   public enum ExportFile {
