@@ -570,16 +570,17 @@ public class ChartsManager {
 
     Set<Office> offices = Sets.newHashSet(office);
     List<Person> personList = Lists.newArrayList();
-
+    
     File file = null;
     // controllo che tipo di esportazione devo fare...
     if (exportFile.equals(ExportFile.CSV)) {
-
-      File destination = new File("situazioneMensileDa" 
+      // genero l'archivio che dovrà contenere i file .csv
+      File destination = File.createTempFile("situazioneMensileDa" 
           + DateUtility.fromIntToStringMonth(beginDate.getMonthOfYear()) + beginDate.getYear() 
           + "A" + DateUtility.fromIntToStringMonth(endDate.getMonthOfYear()) + endDate.getYear()
-          + ".zip");
-      OutputStream archiveStream = new FileOutputStream(destination);;
+          , ".zip");
+      
+      OutputStream archiveStream = new FileOutputStream(destination);
 
       ArchiveOutputStream archive = new ArchiveStreamFactory()
           .createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream);  
@@ -590,25 +591,27 @@ public class ChartsManager {
         personList = personDao.list(Optional.<String>absent(), offices, false, LocalDate.now(),
             LocalDate.now(), true).list();
       }
-
+      // scorro la lista delle persone per cui esportare i dati...
       for (Person person : personList) {
         LocalDate tempDate = beginDate;
         while (!tempDate.isAfter(endDate)) {
           PersonStampingRecap psDto = stampingsRecapFactory.create(person, 
               tempDate.getYear(), tempDate.getMonthOfYear(), false);
+          // aggiungo all'archivio il file...
           archive = generateArchive(archive, psDto);
           tempDate = tempDate.plusMonths(1);
         }
       }       
+      // gestisco la chiususa e il ritorno dell'archivio...
       archive.finish();
       archiveStream.close();
       return destination;
     } else {
-
-      file = new File("situazioneMensileDa" 
+      // genero il file excel...
+      file = File.createTempFile("situazioneMensileDa" 
           + DateUtility.fromIntToStringMonth(beginDate.getMonthOfYear()) + beginDate.getYear() 
           + "A" + DateUtility.fromIntToStringMonth(endDate.getMonthOfYear()) + endDate.getYear()
-          + ".xls");
+          , ".xls");
       Workbook wb = new HSSFWorkbook();
       if (!forAll) {
         personList = peopleIds.stream().map(item -> personDao.getPersonById(item))
@@ -617,11 +620,13 @@ public class ChartsManager {
         personList = personDao.list(Optional.<String>absent(), offices, false, LocalDate.now(),
             LocalDate.now(), true).list();
       }
+      // scorro la lista delle persone per cui devo fare l'esportazione...
       for (Person person : personList) {
         LocalDate tempDate = beginDate;
         while (!tempDate.isAfter(endDate)) {
           PersonStampingRecap psDto = stampingsRecapFactory.create(person, 
               tempDate.getYear(), tempDate.getMonthOfYear(), false);
+          // aggiorno il file aggiungendo un nuovo foglio per ogni persona...
           file = createFileXLSToExport(psDto, file, wb);
           tempDate = tempDate.plusMonths(1);
         }
@@ -644,9 +649,15 @@ public class ChartsManager {
           throws FileNotFoundException {
     ZipArchiveEntry entry = new ZipArchiveEntry(psDto.person.surname + "_" 
         + psDto.person.name + "_" + DateUtility.fromIntToStringMonth(psDto.month) + ".csv");
-    File file = createFileCSVToExport(psDto);
+    File file = null;
+    try {
+      file = createFileCSVToExport(psDto);
+    } catch (IOException e) {
+      log.error("Error in creation CSV file from PersonStampingDTO");
+      e.printStackTrace();
+    }
     BufferedInputStream input = new BufferedInputStream(new FileInputStream(file));
-
+    
     try {
       archive.putArchiveEntry(entry);
       IOUtils.copy(input, archive);
@@ -655,7 +666,8 @@ public class ChartsManager {
     } catch (IOException ex) { 
       log.error("Error in closing archive");
       ex.printStackTrace();
-    }  
+    }
+    file.delete();
     return archive;
   }
 
@@ -664,13 +676,14 @@ public class ChartsManager {
    * 
    * @param psDto il personStampingDayRecap da cui partire per prendere le informazioni
    * @return un file di tipo csv contenente la situazione mensile.
+   * @throws IOException 
    */
-  private File createFileCSVToExport(PersonStampingRecap psDto) {
+  private File createFileCSVToExport(PersonStampingRecap psDto) throws IOException {
     final String newLineseparator = "\n";
     final Object [] fileHeader = {"Giorno","Ore di lavoro (hh:mm)","Assenza"};
     FileWriter fileWriter = null;
     CSVPrinter csvFilePrinter = null;
-    File file = new File("situazione mensile" + psDto.person.fullName());
+    File file = new File("situazione mensile" + psDto.person.fullName() + ".csv");
     try {
 
       fileWriter = new FileWriter(file.getName());
