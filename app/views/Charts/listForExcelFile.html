@@ -24,8 +24,8 @@
 	
   	#{f.selectEnum 'exportFile', items:controllers.Charts.ExportFile, 
 		value:exportFile, byEquals:true /}
-	#{f.date 'beginDate', value:date.format() /}
-  	#{f.date 'endDate', value:date.dayOfMonth().withMaximumValue().format() /}
+	#{f.date 'beginDate'/}
+  	#{f.date 'endDate' /}
 	#{f.booleanRadio 'forAll', label:'Per tutti' /}
     
     <div id="single-person" #{if forAll} style="display: none" #{/if}>	
