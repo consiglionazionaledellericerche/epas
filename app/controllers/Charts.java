@@ -290,7 +290,7 @@ public class Charts extends Controller {
           Optional.<String>absent(), set, false, beginDate, 
           endDate, true).list();
       
-      render("@listForExcelFile", office, 
+      render("@listForExcelFile", office, exportFile,
           date, personList, forAll, beginDate, endDate);
     }
     InputStream file = null;
