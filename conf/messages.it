@@ -218,6 +218,10 @@ MealTicketDecision.FORCED_TRUE=Forzato Si
 MealTicketDecision.FORCED_FALSE=Forzato No
 mealTicketDecision=Valore Buono Pasto
 
+ExportFile.CSV=CSV
+ExportFile.XLS=XLS
+exportFile=Formato per esportazione
+
 block.first=Dal
 block.last=Al
 
