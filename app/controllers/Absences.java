@@ -4,7 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Range;
+
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
@@ -14,7 +14,7 @@ import dao.AbsenceTypeDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
-import dao.QualificationDao;
+
 
 import it.cnr.iit.epas.DateUtility;
 
@@ -28,21 +28,18 @@ import manager.recaps.YearlyAbsencesRecap;
 import models.Office;
 import models.Person;
 import models.PersonDay;
-import models.Qualification;
+
 import models.User;
 import models.absences.Absence;
 import models.absences.AbsenceType;
-import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.QualificationMapping;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 import play.Logger;
 import play.data.validation.Required;
-import play.data.validation.Valid;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
