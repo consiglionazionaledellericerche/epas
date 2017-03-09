@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -292,7 +293,7 @@ public class Charts extends Controller {
       render("@listForExcelFile", office, 
           date, personList, forAll, beginDate, endDate);
     }
-    File file = null;
+    InputStream file = null;
     try {
       file = chartsManager.buildFile(office, forAll, peopleIds, beginDate, endDate, exportFile);
     } catch (FileNotFoundException | ArchiveException ex) {      

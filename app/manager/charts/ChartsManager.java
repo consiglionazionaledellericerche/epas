@@ -22,6 +22,8 @@ import it.cnr.iit.epas.DateUtility;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -35,6 +37,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.inject.Inject;
 
@@ -282,8 +286,8 @@ public class ChartsManager {
     out.write("Cognome Nome,");
     for (int i = 1; i <= month; i++) {
       out.append("ore straordinari " + DateUtility.fromIntToStringMonth(i)
-          + ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i)
-          + ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
+      + ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i)
+      + ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
     }
 
     out.append("ore straordinari TOTALI,ore riposi compensativi TOTALI, ore in più TOTALI");
@@ -564,62 +568,59 @@ public class ChartsManager {
    * @throws ArchiveException eccezione in creazione dell'archivio
    * @throws IOException eccezione durante le procedure di input/output
    */
-  public File buildFile(Office office, boolean forAll, 
+  public InputStream buildFile(Office office, boolean forAll, 
       List<Long> peopleIds, LocalDate beginDate, LocalDate endDate, 
       ExportFile exportFile) throws ArchiveException, IOException {
 
     Set<Office> offices = Sets.newHashSet(office);
     List<Person> personList = Lists.newArrayList();
-    
+    if (!forAll) {
+      personList = peopleIds.stream().map(item -> personDao.getPersonById(item))
+          .collect(Collectors.toList());
+    } else {
+      personList = personDao.list(Optional.<String>absent(), offices, false, LocalDate.now(),
+          LocalDate.now(), true).list();
+    }
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    ZipOutputStream zos = new ZipOutputStream(out);
+    byte[] buffer = new byte[1024];
+
     File file = null;
     // controllo che tipo di esportazione devo fare...
     if (exportFile.equals(ExportFile.CSV)) {
-      // genero l'archivio che dovrà contenere i file .csv
-      File destination = File.createTempFile("situazioneMensileDa" 
-          + DateUtility.fromIntToStringMonth(beginDate.getMonthOfYear()) + beginDate.getYear() 
-          + "A" + DateUtility.fromIntToStringMonth(endDate.getMonthOfYear()) + endDate.getYear()
-          , ".zip");
       
-      OutputStream archiveStream = new FileOutputStream(destination);
-
-      ArchiveOutputStream archive = new ArchiveStreamFactory()
-          .createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream);  
-      if (!forAll) {
-        personList = peopleIds.stream().map(item -> personDao.getPersonById(item))
-            .collect(Collectors.toList());
-      } else {
-        personList = personDao.list(Optional.<String>absent(), offices, false, LocalDate.now(),
-            LocalDate.now(), true).list();
-      }
-      // scorro la lista delle persone per cui esportare i dati...
       for (Person person : personList) {
         LocalDate tempDate = beginDate;
         while (!tempDate.isAfter(endDate)) {
           PersonStampingRecap psDto = stampingsRecapFactory.create(person, 
               tempDate.getYear(), tempDate.getMonthOfYear(), false);
-          // aggiungo all'archivio il file...
-          archive = generateArchive(archive, psDto);
+          file = createFileCSVToExport(psDto);
+          //preparo lo stream da inviare al chiamante...
+          FileInputStream in = new FileInputStream(file); 
+          try{                       
+            zos.putNextEntry(new ZipEntry(file.getName()));
+            int length;
+            while ((length = in.read(buffer)) > 0) {
+                zos.write(buffer, 0, length);
+            }
+          } catch (IOException ex) {
+            ex.printStackTrace();
+          }
+          in.close();  
+          file.delete();
           tempDate = tempDate.plusMonths(1);
         }
-      }       
-      // gestisco la chiususa e il ritorno dell'archivio...
-      archive.finish();
-      archiveStream.close();
-      return destination;
-    } else {
+      }
+      zos.closeEntry();
+      zos.close();      
+    } else {      
       // genero il file excel...
       file = File.createTempFile("situazioneMensileDa" 
           + DateUtility.fromIntToStringMonth(beginDate.getMonthOfYear()) + beginDate.getYear() 
           + "A" + DateUtility.fromIntToStringMonth(endDate.getMonthOfYear()) + endDate.getYear()
           , ".xls");
-      Workbook wb = new HSSFWorkbook();
-      if (!forAll) {
-        personList = peopleIds.stream().map(item -> personDao.getPersonById(item))
-            .collect(Collectors.toList()); 
-      } else {
-        personList = personDao.list(Optional.<String>absent(), offices, false, LocalDate.now(),
-            LocalDate.now(), true).list();
-      }
+
+      Workbook wb = new HSSFWorkbook();     
       // scorro la lista delle persone per cui devo fare l'esportazione...
       for (Person person : personList) {
         LocalDate tempDate = beginDate;
@@ -629,47 +630,28 @@ public class ChartsManager {
           // aggiorno il file aggiungendo un nuovo foglio per ogni persona...
           file = createFileXLSToExport(psDto, file, wb);
           tempDate = tempDate.plusMonths(1);
+        }        
+      }     
+      //faccio lo stream da inviare al chiamante...
+      FileInputStream in = new FileInputStream(file); 
+      try{                       
+        zos.putNextEntry(new ZipEntry(file.getName()));
+        int length;
+        while ((length = in.read(buffer)) > 0) {
+            zos.write(buffer, 0, length);
         }
-      }       
-
+      } catch (IOException ex) {
+        ex.printStackTrace();
+      }
+      in.close();  
+      file.delete();
+      zos.closeEntry();
+      zos.close();
+      
     }
-    return file;
+    return new ByteArrayInputStream(out.toByteArray());
   }
 
-  /**
-   * 
-   * @param archive l'archivio da aggiornare
-   * @param psDto il personStampingRecap da cui prendere i dati
-   * @return l'archivio aggiornato contenente i fogli csv generati sulla base del 
-   *     PersonStampingRecap.
-   * @throws FileNotFoundException eccezione se non trova il file
-   */
-  private ArchiveOutputStream generateArchive(ArchiveOutputStream archive, 
-      PersonStampingRecap psDto) 
-          throws FileNotFoundException {
-    ZipArchiveEntry entry = new ZipArchiveEntry(psDto.person.surname + "_" 
-        + psDto.person.name + "_" + DateUtility.fromIntToStringMonth(psDto.month) + ".csv");
-    File file = null;
-    try {
-      file = createFileCSVToExport(psDto);
-    } catch (IOException e) {
-      log.error("Error in creation CSV file from PersonStampingDTO");
-      e.printStackTrace();
-    }
-    BufferedInputStream input = new BufferedInputStream(new FileInputStream(file));
-    
-    try {
-      archive.putArchiveEntry(entry);
-      IOUtils.copy(input, archive);
-      input.close();
-      archive.closeArchiveEntry();
-    } catch (IOException ex) { 
-      log.error("Error in closing archive");
-      ex.printStackTrace();
-    }
-    file.delete();
-    return archive;
-  }
 
 
   /**
@@ -683,7 +665,10 @@ public class ChartsManager {
     final Object [] fileHeader = {"Giorno","Ore di lavoro (hh:mm)","Assenza"};
     FileWriter fileWriter = null;
     CSVPrinter csvFilePrinter = null;
-    File file = new File("situazione mensile" + psDto.person.fullName() + ".csv");
+    File file = new File("situazione_mensile" 
+    + psDto.person.surname 
+    + '_' + psDto.person.name 
+    + '_' + DateUtility.fromIntToStringMonth(psDto.month) + ".csv");
     try {
 
       fileWriter = new FileWriter(file.getName());
