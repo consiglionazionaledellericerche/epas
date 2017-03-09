@@ -10,18 +10,6 @@ import dao.PersonDao;
 
 import helpers.jpa.ModelQuery.SimpleResults;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
 
 import manager.SecureManager;
@@ -37,11 +25,23 @@ import org.apache.commons.compress.archivers.ArchiveException;
 import org.joda.time.LocalDate;
 
 import play.Logger;
+import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import security.SecurityRules;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 
 
@@ -63,8 +63,6 @@ public class Charts extends Controller {
   static OfficeDao officeDao;
   @Inject
   static CompetenceCodeDao competenceCodeDao;
-  //  @Inject
-  //
 
   /**
    * 
@@ -262,27 +260,15 @@ public class Charts extends Controller {
    * @param endDate l'eventuale data fine
    * @param officeId l'id della sede
    */
-  public static void exportTimesheetSituation(List<Long> peopleIds, ExportFile exportFile, 
-      boolean forAll, LocalDate beginDate, LocalDate endDate, Long officeId) {   
+  public static void exportTimesheetSituation(List<Long> peopleIds, @Required ExportFile exportFile, 
+      boolean forAll, @Required LocalDate beginDate, @Required LocalDate endDate, Long officeId) {   
     Office office = officeDao.getOfficeById(officeId);
     rules.checkIfPermitted(office);
-    if (exportFile == null) {
-      Validation.addError("exportFile", "Specificare il formato dell'esportazione.");      
-    }
-    if (beginDate == null && endDate == null) {
-      Validation.addError("beginDate", "Valorizzare entrambe le date di inizio e fine");
-    }
-    if (beginDate == null && endDate != null) {
-      Validation.addError("beginDate","Valorizzare entrambe le date di inizio e fine");      
-    }
-    if (beginDate != null && endDate == null) {
-      Validation.addError("endDate","Valorizzare entrambe le date di inizio e fine");
-    }
+    
     if (beginDate != null && endDate != null && !beginDate.isBefore(endDate)) {
       Validation.addError("endDate","La data di fine non può precedere la data di inizio!");      
     }
-    if (Validation.hasErrors()) {
-      response.status = 400;
+    if (Validation.hasErrors()) {      
       
       Set<Office> set = Sets.newHashSet(office);
       LocalDate date = LocalDate.now();
@@ -296,10 +282,10 @@ public class Charts extends Controller {
     InputStream file = null;
     try {
       file = chartsManager.buildFile(office, forAll, peopleIds, beginDate, endDate, exportFile);
-    } catch (FileNotFoundException | ArchiveException ex) {      
-      ex.printStackTrace();
-    } catch (IOException ex) {      
-      ex.printStackTrace();
+    } catch ( ArchiveException | IOException ex ) {
+      flash.error("Errore durante l'esportazione del tempo al lavoro");
+      listForExcelFile(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear(), officeId);
+      log.error("Errore durante l'esportazione del tempo al lavoro", ex);
     }
     
     renderBinary(file);
