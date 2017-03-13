@@ -30,7 +30,7 @@ import javax.inject.Inject;
  * 
  */
 @Slf4j
-@OnApplicationStart(async = true)
+//@OnApplicationStart(async = true)
 public class AbsenceGroupConfigurations extends Job<Void> {
 
   @Inject
