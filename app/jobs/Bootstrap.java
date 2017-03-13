@@ -1,8 +1,11 @@
 package jobs;
 
 import com.google.common.io.Resources;
+import com.google.inject.Inject;
 
 import lombok.extern.slf4j.Slf4j;
+
+import manager.services.absences.AbsenceService;
 
 import models.Qualification;
 import models.User;
@@ -41,6 +44,9 @@ import java.util.List;
 public class Bootstrap extends Job<Void> {
 
   static final String JOBS_CONF = "jobs.active";
+  
+  @Inject static AbsenceService absenceService;
+  
 
   //Aggiunto qui perché non più presente nella classe Play dalla versione >= 1.4.3
   public static boolean runingInTestMode() {
@@ -72,8 +78,7 @@ public class Bootstrap extends Job<Void> {
           .getResource("../db/import/absence-type-and-qualification-phase2.xml")));
     }
     
-    
-    log.info("Conclusa migrazione assenze!");
+    absenceService.fixPostPartumGroups();
 
     if (User.find("byUsername", "developer").fetch().isEmpty()) {
       Fixtures.loadModels("../db/import/developer.yml");
