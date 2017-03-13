@@ -692,6 +692,8 @@ absenceType.active= Attivo
 absenceType.justifiedTypesPermitted=Tempo giustificato  
 absenceType.timeForMealTicket=Considerato per buono pasto
 absenceType.justifiedTime=Minuti specificati nel tipo assenza
+
+absenceType.replacingTime=Minuti per completamento
 absenceType.used=Usato
 
 groupAbsenceType=Gruppo di Codici
