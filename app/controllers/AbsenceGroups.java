@@ -928,4 +928,8 @@ public class AbsenceGroups extends Controller {
     render(codeComparation);
   }
   
+  public static void fixPostPartumGroups() {
+    absenceService.fixPostPartumGroups();
+  }
+  
 }
