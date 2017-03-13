@@ -2,7 +2,7 @@ package manager.services.mealtickets;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
+import lombok.extern.slf4j.Slf4j;
 import models.Contract;
 import models.MealTicket;
 import models.PersonDay;
@@ -15,6 +15,7 @@ import java.util.List;
  * Costruisce il recap dei buoni pasto.
  * @author alessandro
  */
+@Slf4j
 public class MealTicketRecapBuilder {
 
   /**
@@ -60,52 +61,55 @@ public class MealTicketRecapBuilder {
       mealTicketRecap.setSourcedInInterval(contract.getSourceRemainingMealTicket());
     }
     
-    int sourced = mealTicketRecap.getSourcedInInterval();
+    //Imposto i rimanenti
+    mealTicketRecap.setRemaining(mealTicketRecap
+        .getMealTicketsReceivedExpireOrderedAscPostInit().size() 
+        - mealTicketRecap.getPersonDaysMealTickets().size() 
+        + mealTicketRecap.getSourcedInInterval());
     
-    //MAPPING
-    //init lazy variable
+    //Matching dei buoni coi giorni
+
+    //init lazy variable buoni non utilizzati
     for (MealTicket mealTicket : mealTicketRecap.getMealTicketsReceivedExpireOrderedAsc()) {
       mealTicket.used = false;
     }
-    //mapping
-    for (int i = 0; i < mealTicketRecap.getPersonDaysMealTickets().size(); i++) {
+    
+    //se non ci sono giorni nessun buono è stato utilizzato
+    if (mealTicketRecap.getPersonDaysMealTickets().isEmpty()) {
+      return mealTicketRecap;
+    }
+    
+    int sourced = mealTicketRecap.getSourcedInInterval();
+    int nextTicketToAssign = 0;
+    
+    for (PersonDay personDay : mealTicketRecap.getPersonDaysMealTickets()) {
       
-      // scarto i giorni sourced
+      //Assegno al personDay tutti i buoni da inizializzazione
       if (sourced > 0) {
         sourced--;
         continue;
       }
       
-      PersonDay currentPersonDay = mealTicketRecap.getPersonDaysMealTickets().get(i);
-
-      if (mealTicketRecap.getMealTicketsReceivedExpireOrderedAscPostInit().size() == i) {
-        mealTicketRecap.setDateRunOut(currentPersonDay.date);
+      //Non ho altri buoni pasto da assegnare. Run Out.
+      if (nextTicketToAssign 
+          >= mealTicketRecap.getMealTicketsReceivedExpireOrderedAscPostInit().size()) {
+        mealTicketRecap.setDateRunOut(personDay.date);
         return mealTicketRecap;
       }
       
-      //Attribuire i buoni pasto ai personDay... e taggarli come usati. TODO: da verificare
-      int index = i - mealTicketRecap.getSourcedInInterval();
-      if (index > 0 && index < mealTicketRecap
-          .getMealTicketsReceivedExpireOrderedAscPostInit().size()) {
-        MealTicket currentMealTicket = mealTicketRecap
-            .getMealTicketsReceivedExpireOrderedAscPostInit()
-            .get(i - mealTicketRecap.getSourcedInInterval());
-
-        if (currentPersonDay.date.isAfter(currentMealTicket.expireDate)) {
-          mealTicketRecap.setDateExpire(currentPersonDay.date);
-          //continue;
-          //return;
-        }
-
-        currentPersonDay.mealTicketAssigned = currentMealTicket;
-        currentMealTicket.used = true;
+      MealTicket mealTicket = mealTicketRecap.getMealTicketsReceivedExpireOrderedAscPostInit()
+          .get(nextTicketToAssign);
+      nextTicketToAssign++;
+      
+      //Mi salvo la data in cui ho iniziato a consumare buoni pasto scaduti 
+      if (mealTicketRecap.getDateExpire() == null && 
+          personDay.date.isAfter(mealTicket.expireDate)) {
+        mealTicketRecap.setDateExpire(personDay.date);
       }
+      
+      personDay.mealTicketAssigned = mealTicket;
+      mealTicket.used = true;
     }
-
-    mealTicketRecap.setRemaining(mealTicketRecap
-        .getMealTicketsReceivedExpireOrderedAscPostInit().size() 
-        - mealTicketRecap.getPersonDaysMealTickets().size() 
-        + mealTicketRecap.getSourcedInInterval());
 
     return mealTicketRecap;
   }
