@@ -230,10 +230,11 @@ public class ShiftManager {
 
             // legge le coppie di timbrature valide
             List<PairStamping> pairStampings = personDayManager.getValidPairStampings(personDay.get().stampings);
-
+            //FIXME: bisognerebbe prima fare una verifica su quale tipo di tolleranza è presente per l'attività (entrata, uscita, entrambe)
+            // dopo di che in questo caso specifico CREDO debba essere verificata, se presente, la tolleranza sull'entrata
             if ((personDay.get().stampings.size() == 1)
-                && ((personDay.get().stampings.get(0).isIn() && personDay.get().stampings.get(0).date.toLocalTime().isAfter(startShift.plusMinutes(shiftType.tolerance)))
-                    || (personDay.get().stampings.get(0).isOut() && personDay.get().stampings.get(0).date.toLocalTime().isBefore(startShift.plusMinutes(shiftType.tolerance))))) {
+                && ((personDay.get().stampings.get(0).isIn() && personDay.get().stampings.get(0).date.toLocalTime().isAfter(startShift.plusMinutes(shiftType.entranceTolerance)))
+                    || (personDay.get().stampings.get(0).isOut() && personDay.get().stampings.get(0).date.toLocalTime().isBefore(startShift.plusMinutes(shiftType.entranceTolerance))))) {
 
               String stamp = (personDay.get().stampings.get(0).isIn()) ? personDay.get().stampings.get(0).date.toLocalTime().toString("HH:mm").concat("- **:**")
                   : "- **:**".concat(personDay.get().stampings.get(0).date.toLocalTime().toString("HH:mm"));
@@ -395,17 +396,19 @@ public class ShiftManager {
           // calcola gli scostamenti dall'ingresso tenendo conto della tolleranza
           //--------------------------------------------------------------------------------------
           // min di comporto se il turnista è entrato prima
+          //FIXME: anche qui, occorrerebbe testare prima che tipo di tolleranza è attribuita all'attività e, nel caso si tratti
+          // di tolleranza sull'entrata, applicarla.
           if (pairStamping.first.date.toLocalTime().isBefore(startShift)) {
-            if (pairStamping.first.date.toLocalTime().isBefore(startShift.minusMinutes(shiftType.tolerance))) {
-              newLimit = startShift.minusMinutes(shiftType.tolerance);
+            if (pairStamping.first.date.toLocalTime().isBefore(startShift.minusMinutes(shiftType.entranceTolerance))) {
+              newLimit = startShift.minusMinutes(shiftType.entranceTolerance);
               inTolleranceLimit = false;
             } else {
               newLimit = pairStamping.first.date.toLocalTime();
             } 
           } else {
             // è entrato dopo
-            if (pairStamping.first.date.toLocalTime().isAfter(startShift.plusMinutes(shiftType.tolerance))) {
-              newLimit = startShift.plusMinutes(shiftType.tolerance);
+            if (pairStamping.first.date.toLocalTime().isAfter(startShift.plusMinutes(shiftType.entranceTolerance))) {
+              newLimit = startShift.plusMinutes(shiftType.entranceTolerance);
               inTolleranceLimit = false;
             } else {
               newLimit = pairStamping.first.date.toLocalTime();
@@ -418,11 +421,13 @@ public class ShiftManager {
           // calcola gli scostamenti dell'ingresso in pausa pranzo tenendo conto della tolleranza
           //--------------------------------------------------------------------------------------
           // se il turnista è andato a  pranzo prima
+          //FIXME: anche qui occorre controllare che tipo di tolleranza è applicata all'attività e, se si tratta di tolleranza
+          // in entrata, applicarla
           if (pairStamping.second.date.toLocalTime().isBefore(startLunchTime)) {
             //log.debug("vedo uscita per pranzo prima");
 
-            if (startLunchTime.minusMinutes(shiftType.tolerance).isAfter(pairStamping.second.date.toLocalTime())) {
-              newLimit = startLunchTime.minusMinutes(shiftType.tolerance);
+            if (startLunchTime.minusMinutes(shiftType.entranceTolerance).isAfter(pairStamping.second.date.toLocalTime())) {
+              newLimit = startLunchTime.minusMinutes(shiftType.entranceTolerance);
               inTolleranceLimit = false;
             } else {
               newLimit = pairStamping.second.date.toLocalTime();
@@ -433,13 +438,13 @@ public class ShiftManager {
           } else if (pairStamping.second.date.toLocalTime().isBefore(endLunchTime)) {
             // è andato a pranzo dopo
             //log.debug("vedo uscita per pranzo dopo");
-            if (startLunchTime.plusMinutes(shiftType.tolerance).isAfter(pairStamping.second.date.toLocalTime())) {
+            if (startLunchTime.plusMinutes(shiftType.entranceTolerance).isAfter(pairStamping.second.date.toLocalTime())) {
               newLimit = pairStamping.second.date.toLocalTime();
             } else {
-              newLimit = startLunchTime.plusMinutes(shiftType.tolerance);
+              newLimit = startLunchTime.plusMinutes(shiftType.entranceTolerance);
             }
 
-            if (startLunchTime.plusMinutes(shiftType.tolerance).isBefore(pairStamping.second.date.toLocalTime())) {
+            if (startLunchTime.plusMinutes(shiftType.entranceTolerance).isBefore(pairStamping.second.date.toLocalTime())) {
               inTolleranceLimit = false;
             }
 
@@ -470,7 +475,7 @@ public class ShiftManager {
           if (pairStamping.first.date.toLocalTime().isBefore(endLunchTime) && pairStamping.first.date.toLocalTime().isAfter(startLunchTime)) {
             //log.debug("vedo rientro da pranzo prima");
 
-            newLimit = (endLunchTime.minusMinutes(shiftType.tolerance) .isAfter(pairStamping.first.date.toLocalTime())) ? endLunchTime.minusMinutes(shiftType.tolerance) : pairStamping.first.date.toLocalTime();
+            newLimit = (endLunchTime.minusMinutes(shiftType.entranceTolerance) .isAfter(pairStamping.first.date.toLocalTime())) ? endLunchTime.minusMinutes(shiftType.entranceTolerance) : pairStamping.first.date.toLocalTime();
 
             diffEndLunchTime = DateUtility.getDifferenceBetweenLocalTime(newLimit, endLunchTime);
             //log.debug("diffEndLunchTime=getDifferenceBetweenLocalTime({}, {})={}", 
@@ -479,8 +484,8 @@ public class ShiftManager {
             // è rientrato dopo
             //log.debug("vedo rientro da pranzo dopo");
 
-            if (pairStamping.first.date.toLocalTime().isAfter(endLunchTime.plusMinutes(shiftType.tolerance))) {
-              newLimit = endLunchTime.plusMinutes(shiftType.tolerance);
+            if (pairStamping.first.date.toLocalTime().isAfter(endLunchTime.plusMinutes(shiftType.entranceTolerance))) {
+              newLimit = endLunchTime.plusMinutes(shiftType.entranceTolerance);
               inTolleranceLimit = false;
             } else {
               newLimit = pairStamping.first.date.toLocalTime();
@@ -491,12 +496,15 @@ public class ShiftManager {
             //    endLunchTime, newLimit, diffEndLunchTime);
           }
 
-
+          //FIXME: anche in questo caso occorre verificare quale sia la tolleranza applicata e, se si tratta di tolleranza in uscita,
+          // conteggiarla nei calcoli che vengono effettuati.
           // se il turnista è uscito prima del turno
           if (pairStamping.second.date.toLocalTime().isBefore(endShift)) {
             //log.debug("vedo uscita prima della fine turno")
-            if (endShift.minusMinutes(shiftType.tolerance).isAfter(pairStamping.second.date.toLocalTime())) {
-              newLimit = endShift.minusMinutes(shiftType.tolerance);
+            //TODO: verificare che qui l'exitTolerance sia valorizzato e, nel caso, controllare quello
+            // altrimenti non va fatto il controllo di tolleranza sull'uscita
+            if (endShift.minusMinutes(shiftType.exitTolerance).isAfter(pairStamping.second.date.toLocalTime())) {
+              newLimit = endShift.minusMinutes(shiftType.exitTolerance);
               inTolleranceLimit = false;
             } else {
               newLimit = pairStamping.second.date.toLocalTime();
@@ -504,7 +512,7 @@ public class ShiftManager {
           } else {
             //log.debug("vedo uscita dopo la fine turno");
             // il turnista è uscito dopo la fine del turno
-            newLimit = (pairStamping.second.date.toLocalTime().isAfter(endShift.plusMinutes(shiftType.tolerance))) ? endShift.plusMinutes(shiftType.tolerance) : pairStamping.second.date.toLocalTime();
+            newLimit = (pairStamping.second.date.toLocalTime().isAfter(endShift.plusMinutes(shiftType.exitTolerance))) ? endShift.plusMinutes(shiftType.exitTolerance) : pairStamping.second.date.toLocalTime();
           }
           diffEndShift = DateUtility.getDifferenceBetweenLocalTime(endShift, newLimit);
           //log.debug("diffEndShift={}", diffEndShift);

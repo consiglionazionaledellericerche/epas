@@ -369,8 +369,10 @@ type.type =Nome attività
 type.description =Descrizione
 type.office =Sede
 type.supervisor =Supervisore servizio
-type.tolerance =Tolleranza
-type.hourTolerance =Tolleranza per turno
+tolerance =Tolleranza (minuti)
+type.hourTolerance =Tolleranza per turno (minuti)
+type.breakInShiftEnabled = Abilitare una pausa internamente al turno?
+type.breakInShift =Durata della pausa (in minuti) 
 
 cat.description =Descrizione
 cat.office =Sede
@@ -636,6 +638,12 @@ configurationDto.stringNewValue=Nuovo Valore
 configurationDto.integerNewValue=Nuovo Valore
 configurationDto.localdateNewValue=Nuovo Valore
 
+whichTolerance =Quando applicare la tolleranza
+
+ToleranceType.entrance= Solo Ingresso
+ToleranceType.exit= Solo Uscita
+ToleranceType.both= Entrambe
+
 WayType.in= Ingresso
 WayType.out= Uscita
 
@@ -661,8 +669,11 @@ person.eppn.popover= Inserire la propria email cnr Es:mario.rossi@cnr.it
 
 domain.popover= Specificare il dominio sprovvisto del carattere @ (Es. iit.cnr.it)
 
-type.tolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare alle timbrature per inserirle o meno nel turno. Inserire 0 se non si vuole tolleranza.
+tolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare alle timbrature per inserirle o meno nel turno. Inserire 0 se non si vuole tolleranza.
 type.hourTolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare sull&apos;attività di turno per determinare se un turno è valido o no.
+type.type.popover = Il nome da attribuire all&apos;attività sul turno
+type.description.popover= Una descrizione dell&apos;attività
+type.breakInShiftEnabled.popover =Se da regolamento dei turni è prevista una pausa all&#39;interno del turno cliccare sì, no altrimenti.
 
 ###########################################################################
 #	Messaggi utilizzati nelle viste

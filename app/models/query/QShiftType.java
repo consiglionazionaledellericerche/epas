@@ -26,10 +26,18 @@ public class QShiftType extends EntityPathBase<ShiftType> {
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
+    public final NumberPath<Integer> breakInShift = createNumber("breakInShift", Integer.class);
+
+    public final BooleanPath breakInShiftEnabled = createBoolean("breakInShiftEnabled");
+
     public final StringPath description = createString("description");
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
+
+    public final NumberPath<Integer> entranceTolerance = createNumber("entranceTolerance", Integer.class);
+
+    public final NumberPath<Integer> exitTolerance = createNumber("exitTolerance", Integer.class);
 
     public final NumberPath<Integer> hourTolerance = createNumber("hourTolerance", Integer.class);
 
@@ -48,8 +56,6 @@ public class QShiftType extends EntityPathBase<ShiftType> {
     public final QShiftCategories shiftCategories;
 
     public final QShiftTimeTable shiftTimeTable;
-
-    public final NumberPath<Integer> tolerance = createNumber("tolerance", Integer.class);
 
     public final StringPath type = createString("type");
 

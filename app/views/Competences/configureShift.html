@@ -22,9 +22,16 @@
 		E selezionare la tipologia di turno da applicare tra quelle proposte in tabella.		
 	#{/alert}	
 #{/else}
-#{f.input 'type.type', required:'true'/}
-#{f.input 'type.description',required:'true'/}
+#{f.input 'type.type', popover:'true',required:'true'/}
+#{f.input 'type.description', popover:'true', required:'true'/}
+#{f.input 'tolerance', type:'number', popover:'true', required:'true'/}
+#{f.radioEnum 'whichTolerance', items:models.ShiftType.ToleranceType /}
 
+#{f.input 'type.hourTolerance', type:'number', popover:'true', required:'true'/}
+#{f.booleanRadio 'type.breakInShiftEnabled', value:false, popover:'true' /}
+<div id="horizontal-mealticket" #{if !type.breakInShiftEnabled} style="display: none" #{/if}>
+#{f.input 'type.breakInShift', type:'number' /}
+</div>
 #{f.hidden 'cat.id', value:cat.id /}
 
 <table class="table table-hover table-striped table-bordered">
@@ -56,11 +63,24 @@
 	</tr>
 #{/list}
 </table>
-#{f.input 'type.tolerance', type:'number', popover:'true', required:'true'/}
-#{f.input 'type.hourTolerance', type:'number', popover:'true', required:'true'/}
+
 		#{b.buttons center:true}
 		   #{b.submit 'Conferma'/}
 		   
 		#{/b.buttons}
 	#{/form}
 </div>
+
+#{set 'moreScripts'}
+  <script type="text/javascript">
+	$(document).ready(function() {
+				
+		$("input[name='type.breakInShiftEnabled']").change(function(){
+			
+			jQuery( "#horizontal-mealticket" ).toggle(0);
+		
+		});		
+       
+	 });
+	</script>
+#{/set}

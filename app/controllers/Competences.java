@@ -25,8 +25,6 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
 import helpers.jpa.ModelQuery.SimpleResults;
 
-import it.cnr.iit.epas.DateInterval;
-
 import lombok.extern.slf4j.Slf4j;
 
 import manager.CompetenceManager;
@@ -41,7 +39,6 @@ import manager.recaps.competence.PersonMonthCompetenceRecapFactory;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 
-import models.Badge;
 import models.CertificatedData;
 import models.Certification;
 import models.Competence;
@@ -57,6 +54,7 @@ import models.PersonShiftShiftType;
 import models.ShiftCategories;
 import models.ShiftTimeTable;
 import models.ShiftType;
+import models.ShiftType.ToleranceType;
 import models.TotalOvertime;
 import models.User;
 
@@ -65,7 +63,6 @@ import org.joda.time.YearMonth;
 
 import play.data.validation.Valid;
 import play.data.validation.Validation;
-import play.db.jpa.GenericModel;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -178,13 +175,13 @@ public class Competences extends Controller {
   public static void addCompetences(CompetenceCodeGroup group, CompetenceCode code) {
     notFoundIfNull(group);
     if (!code.limitUnit.name().equals(group.limitUnit.name())) {
-      validation.addError("code", "L'unità di misura del limite del codice è diversa "
+      Validation.addError("code", "L'unità di misura del limite del codice è diversa "
           + "da quella del gruppo");
     }
     if (!code.limitType.name().equals(group.limitType.name())) {
-      validation.addError("code", "Il tipo di limite del codice è diverso da quello del gruppo");
+      Validation.addError("code", "Il tipo di limite del codice è diverso da quello del gruppo");
     }
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
 
       response.status = 400;
       render("@addCompetenceCodeToGroup", group);
@@ -523,13 +520,13 @@ public class Competences extends Controller {
 
     String result = "";
 
-    if (!validation.hasErrors()) {
+    if (!Validation.hasErrors()) {
       result = competenceManager.canAddCompetence(competence, valueApproved);
       if (!result.isEmpty()) {
-        validation.addError("valueApproved", result);
+        Validation.addError("valueApproved", result);
       }
     }
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
 
       response.status = 400;
       render("@editCompetence", competence, office);
@@ -812,7 +809,7 @@ public class Competences extends Controller {
 
     rules.checkIfPermitted(office);
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
       List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
           new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
@@ -835,7 +832,7 @@ public class Competences extends Controller {
 
     rules.checkIfPermitted(office);
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
       List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
           new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
@@ -1010,7 +1007,7 @@ public class Competences extends Controller {
     }
     
     rules.checkIfPermitted(type.get().shiftCategories.office);
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
       List<PersonShift> peopleForShift = 
           shiftDao.getPeopleForShift(type.get().shiftCategories.office);
@@ -1038,18 +1035,38 @@ public class Competences extends Controller {
    * @param cat il servizio per cui si vuol definire l'attività
    * @param type l'attività da linkare al servizio
    */
-  public static void linkTimeTableToShift(Long shift, ShiftCategories cat, @Valid ShiftType type) {
+  public static void linkTimeTableToShift(ToleranceType whichTolerance, int tolerance, Long shift, 
+      ShiftCategories cat, @Valid ShiftType type) {
     
     notFoundIfNull(cat);
     rules.checkIfPermitted(cat.office);
-    ShiftTimeTable timeTable = shiftDao.getShiftTimeTableById(shift);
-    notFoundIfNull(timeTable);  
+    if (shift == null) {
+      Validation.addError("shift", "selezionare una timetable");
+//      flash.error("Selezionare una delle possibili timetable presenti.");
+//      configureShift(cat.id);
+    }
     
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
       List<ShiftTimeTable> shiftList = shiftDao.getAllShifts();
       List<ShiftTimeTableDto> dtoList = competenceManager.convertFromShiftTimeTable(shiftList);
+      flash.error("Compilare correttamente i campi");
       render("@configureShift", shiftList, dtoList, cat, type);
+    }
+    ShiftTimeTable timeTable = shiftDao.getShiftTimeTableById(shift);
+    notFoundIfNull(timeTable);  
+    switch(whichTolerance) {
+      case entrance:
+        type.entranceTolerance = tolerance;
+        break;
+      case exit:
+        type.exitTolerance = tolerance;
+        break;
+      case both:
+        type.entranceTolerance = type.exitTolerance = tolerance;
+        break;
+        default:
+        break;
     }
     type.shiftCategories = cat;
     type.shiftTimeTable = timeTable;
@@ -1091,7 +1108,7 @@ public class Competences extends Controller {
       confirmed = true;
       render("@deletePersonShiftShiftType", psst, confirmed);
     }
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
       render("@deletePersonShiftShiftType", psst, confirmed);
     }

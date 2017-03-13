@@ -30,10 +30,20 @@ public class ShiftType extends BaseModel {
   @Required
   public String description;
   
-  public int tolerance;
+  @Column(name="entrance_tolerance")
+  public int entranceTolerance;
+  
+  @Column(name="exit_tolerance")
+  public int exitTolerance;
   
   @Column(name="hour_tolerance")
   public int hourTolerance;
+  
+  @Column(name="break_in_shift_enabled")
+  public boolean breakInShiftEnabled;
+  
+  @Column(name="break_in_shift")
+  public int breakInShift;
 
   @NotAudited
   @OneToMany(mappedBy = "shiftType")
@@ -56,4 +66,21 @@ public class ShiftType extends BaseModel {
   @ManyToOne(optional = false)
   @JoinColumn(name = "shift_categories_id")
   public ShiftCategories shiftCategories;
+  
+  
+  public enum ToleranceType {
+    entrance("entrance"),
+    exit("exit"),
+    both("both");
+    
+    public String description;
+
+    ToleranceType(String description) {
+      this.description = description;
+    }
+
+    public String getDescription() {
+      return this.description;
+    }
+  }
 }
