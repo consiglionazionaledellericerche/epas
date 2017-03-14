@@ -534,4 +534,9 @@ public class Shift extends Controller {
       log.error("Validation exception generating ical", ex);
     }
   }
+  
+  
+  public static void handleShifts() {
+   render(); 
+  }
 }

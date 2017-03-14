@@ -82,6 +82,11 @@
         #{if !currentUser.roles.empty || currentUser.hasRoles(models.Role.PERSONNEL_ADMIN,models.Role.PERSONNEL_ADMIN_MINI) }
           #{include './_adminMenu.html' /}
         #{/if}
+        
+        *{Ruoli di sistema e gestori dei turni}*
+        #{if currentUser.roles.contains(models.enumerate.AccountRole.DEVELOPER) || currentUser.roles.contains(models.enumerate.AccountRole.ADMIN) || !currentUser.person.shiftCategories.empty}
+          #{include './_shiftMenu.html' /}
+        #{/if}
 
         *{ Ruoli di sistema e amministratori delle sedi }*
         #{if !currentUser.roles.empty || currentUser.hasRoles(models.Role.PERSONNEL_ADMIN,models.Role.PERSONNEL_ADMIN_MINI,models.Role.TECHNICAL_ADMIN) }
