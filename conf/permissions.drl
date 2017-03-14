@@ -859,7 +859,7 @@ when
         "PersonMonths.save",
         "PersonMonths.saveTrainingHours",
         "Charts.listForExcelFile",
-        "Charts.test"
+        "Charts.exportTimesheetSituation"
 
         ), target == null, granted == false)
 then
@@ -1004,7 +1004,7 @@ when
         "PersonMonths.save",
         "PersonMonths.saveTrainingHours",
         "Charts.listForExcelFile",
-        "Charts.test"
+        "Charts.exportTimesheetSituation"
 
        ), target == $o, granted == false)
 then
