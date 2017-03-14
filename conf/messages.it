@@ -340,6 +340,8 @@ secure.logoutShibboleth=Per completare il logout è necessario chiudere il brows
 
 serviceDisabled =Servizio disabilitato
 
+shifts =Gestione turni
+
 show= Visualizza
 edit= Modifica
 
@@ -552,6 +554,7 @@ Vacations.show= Ferie
 VacationsAdmin.list= Ferie e Permessi
 WorkingTimes.manageWorkingTime= Gestione Orari di Lavoro
 Competences.activateServices= Gestione Servizi
+Shift.handleShifts =Gestisci turni
 
 ########################
 # Enumerati
