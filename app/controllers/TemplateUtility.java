@@ -250,6 +250,7 @@ public class TemplateUtility {
     return competenceCodeDao.getCompetenceCodeByLimitType(LimitType.onMonthlyPresence);
   }
 
+   
   /**
    * Gli user associati a tutte le persone appartenenti all'istituto.
    */

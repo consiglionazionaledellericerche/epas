@@ -41,7 +41,7 @@ import java.util.List;
 public class Bootstrap extends Job<Void> {
 
   static final String JOBS_CONF = "jobs.active";
-
+  
   //Aggiunto qui perché non più presente nella classe Play dalla versione >= 1.4.3
   public static boolean runingInTestMode() {
     return Play.id.matches("test|test-?.*");
@@ -50,11 +50,12 @@ public class Bootstrap extends Job<Void> {
   @Override
   public void doJob() throws IOException {
 
+    
     if (runingInTestMode()) {
       log.info("Application in test mode, default boostrap job not started");
       return;
     }
-
+    
     //in modo da inibire l'esecuzione dei job in base alla configurazione
     if (!"true".equals(Play.configuration.getProperty(JOBS_CONF))) {
       log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
@@ -71,9 +72,6 @@ public class Bootstrap extends Job<Void> {
       session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
           .getResource("../db/import/absence-type-and-qualification-phase2.xml")));
     }
-    
-    
-    log.info("Conclusa migrazione assenze!");
 
     if (User.find("byUsername", "developer").fetch().isEmpty()) {
       Fixtures.loadModels("../db/import/developer.yml");
