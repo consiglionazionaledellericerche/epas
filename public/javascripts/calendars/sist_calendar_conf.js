@@ -63,13 +63,13 @@ function sistCalendar (category, mode)
 	//this.epasServer = 'epas.devel.iit.cnr.it/';
 	//this.epasServer = 'scorpio.nic.it:9001/';
 	//this.epasServer = 'epas.tools.iit.cnr.it/';
-	this.epasServer = 'localhost:9000';
+	this.epasServer = '/';
 
 	// Route base per le chiamate REST	
 	//this.basicRestRoute 	= 'epas.devel.iit.cnr.it/' + this.category;
 	//this.basicRestRoute 	=  this.epasServer + this.category;
 	//this.basicRestRoute 	= 'epas.tools.iit.cnr.it/' + this.category;
-	this.basicRestRoute = 'localhost:9000' + this.category;
+	this.basicRestRoute = '/' + this.category;
 	
 }
 
