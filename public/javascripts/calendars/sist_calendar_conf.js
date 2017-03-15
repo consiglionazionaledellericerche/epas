@@ -57,17 +57,20 @@ function sistCalendar (category, mode)
 
 	// Uri al modulo Drupal che effettua le chiamate REST in scrittura verso EPAS
 	//this.uriProxy	= 'https://sistorg.devel.iit.cnr.it/sistorg-dev4/rest/proxy/calendar';
-	this.uriProxy	= 'https://sistorg.iit.cnr.it/rest/proxy/calendar';
-
+	//this.uriProxy	= 'https://sistorg.iit.cnr.it/rest/proxy/calendar';
+	this.uriProxy = 'localhost:9000';
+	
 	//this.epasServer = 'epas.devel.iit.cnr.it/';
 	//this.epasServer = 'scorpio.nic.it:9001/';
-	this.epasServer = 'epas.tools.iit.cnr.it/';
+	//this.epasServer = 'epas.tools.iit.cnr.it/';
+	this.epasServer = 'localhost:9000';
 
 	// Route base per le chiamate REST	
 	//this.basicRestRoute 	= 'epas.devel.iit.cnr.it/' + this.category;
 	//this.basicRestRoute 	=  this.epasServer + this.category;
-	this.basicRestRoute 	= 'epas.tools.iit.cnr.it/' + this.category;
-
+	//this.basicRestRoute 	= 'epas.tools.iit.cnr.it/' + this.category;
+	this.basicRestRoute = 'localhost:9000' + this.category;
+	
 }
 
 
