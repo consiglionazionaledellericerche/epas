@@ -14,6 +14,11 @@ import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
+
 import manager.cache.CompetenceCodeManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
@@ -31,11 +36,6 @@ import models.absences.Absence;
 import org.assertj.core.util.Sets;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
 
 /**
  * Contentitore per le funzionalità relative ai ContractMonthRecap.

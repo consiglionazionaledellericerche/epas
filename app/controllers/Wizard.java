@@ -12,6 +12,14 @@ import dao.WorkingTimeTypeDao;
 
 import helpers.validators.StringIsTime;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Properties;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ContractManager;
@@ -40,14 +48,6 @@ import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.libs.Codec;
 import play.mvc.Controller;
-
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.List;
-import java.util.Properties;
-
-import javax.inject.Inject;
 
 
 /**

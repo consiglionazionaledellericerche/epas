@@ -2,6 +2,8 @@ package manager.services.vacations;
 
 import com.google.common.collect.Lists;
 
+import java.util.List;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,8 +12,6 @@ import lombok.Setter;
 import models.Contract;
 import models.absences.Absence;
 import models.enumerate.AbsenceTypeMapping;
-
-import java.util.List;
 
 /**
  * Costruisce in modo efficiente i dati temporanei per il calcolo del vacation recap.

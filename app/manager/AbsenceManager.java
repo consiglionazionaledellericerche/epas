@@ -16,6 +16,11 @@ import dao.WorkingTimeTypeDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.configurations.ConfigurationManager;
@@ -42,11 +47,6 @@ import org.joda.time.YearMonth;
 
 import play.db.jpa.Blob;
 import play.libs.Mail;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
 
 
 /**

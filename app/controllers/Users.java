@@ -4,7 +4,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-
 import com.mysema.query.SearchResults;
 
 import dao.OfficeDao;
@@ -14,6 +13,11 @@ import dao.UsersRolesOfficesDao;
 import helpers.Web;
 
 import it.cnr.iit.epas.NullStringBinder;
+
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,12 +36,8 @@ import play.data.validation.Validation;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
-
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
 
 @Slf4j
 @With({Resecure.class})

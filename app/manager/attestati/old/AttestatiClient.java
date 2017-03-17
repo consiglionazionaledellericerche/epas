@@ -19,6 +19,19 @@ import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
 import dao.wrapper.IWrapperFactory;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
+
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,19 +55,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import play.Logger;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
 
 /**
  * Incapsula le funzionalità necessarie per l'interazione via HTTP GET/POST con il sistema degli
@@ -151,10 +151,6 @@ public class AttestatiClient {
    * @param attestatiPassword password
    * @param year anno 
    * @param month mese
-   * @return
-   * @throws AttestatiException
-   * @throws MalformedURLException
-   * @throws URISyntaxException
    */
   public SessionAttestati login(String urlToPresence, String attestatiLogin, 
       String attestatiPassword, SessionAttestati sessionAttestati, Office office, 
@@ -348,28 +344,17 @@ public class AttestatiClient {
 
       return listaDipendenti;
 
-    } catch (IOException e) {
+    } catch (IOException ex) {
       log.error("Errore durante il prelevamento della lista dei dipendneti. Eccezione = {}",
-          e.getStackTrace().toString());
+          ex.getStackTrace().toString());
       throw new AttestatiException(
           String.format("Errore durante il prelevamento della lista dei dipendneti. Eccezione = %s",
-              e.getStackTrace().toString()));
+              ex.getStackTrace().toString()));
     }
   }
 
   /**
-   * 
-   * @param cookies
-   * @param dipendente
-   * @param year
-   * @param month
-   * @param absences
-   * @param competences
-   * @param pmList
-   * @param mealTicket
-   * @return
-   * @throws URISyntaxException
-   * @throws MalformedURLException
+   * Invia la richiesta di elaborazione di un dipendente. 
    */
   private RispostaElaboraDati elaboraDatiDipendenteClient(
           Map<String, String> cookies, Dipendente dipendente, Integer year, Integer month,
@@ -663,9 +648,6 @@ public class AttestatiClient {
   /**
    * Costruisce l'oggetto che contiene le liste comparate dei dipendenti.
    * (Quelli attivi su CNR, quelli attivi su EPAS e le differenze).
-   * @param office
-   * @param sessionAttestati
-   * @return
    */
   public DipendenteComparedRecap buildComparedLists(Office office, 
       SessionAttestati sessionAttestati) {
@@ -688,11 +670,6 @@ public class AttestatiClient {
     return recap;
   }
     
-  /**
-   * @param listaDipendenti
-   * @param activeDipendenti
-   * @return
-   */
   private Set<Dipendente> getDipendenteNonInEpas(Set<Dipendente> listaDipendenti,
       Set<Dipendente> activeDipendenti) {
    
@@ -705,12 +682,6 @@ public class AttestatiClient {
     return dipendentiNonInEpas;
   }
 
-  /**
-   * 
-   * @param listaDipendenti
-   * @param activeDipendenti
-   * @return
-   */
   private Set<Dipendente> getDipendenteNonInCnr(Set<Dipendente> listaDipendenti,
       Set<Dipendente> activeDipendenti) {
     Set<Dipendente> dipendentiNonInCnr =
@@ -727,7 +698,6 @@ public class AttestatiClient {
    * @param office sede
    * @param year anno 
    * @param month mese
-   * @return
    */
   public Set<Dipendente> officeActivePeopleAsDipendente(Office office, int year, int month) {
 

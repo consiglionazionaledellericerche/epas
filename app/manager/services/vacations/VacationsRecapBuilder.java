@@ -6,6 +6,8 @@ import com.google.common.collect.ImmutableList;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import java.util.List;
+
 import manager.services.vacations.VacationsTypeResult.TypeVacation;
 
 import models.Contract;
@@ -14,8 +16,6 @@ import models.absences.Absence;
 import models.enumerate.VacationCode;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
 
 /**
  * Builder del riepilogo ferie e delle strutture dati annesse (i passaggi intermedi).

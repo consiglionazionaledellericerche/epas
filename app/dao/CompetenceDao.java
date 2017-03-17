@@ -3,12 +3,15 @@ package dao;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import dao.wrapper.IWrapperFactory;
+
+import java.util.List;
+
+import javax.persistence.EntityManager;
 
 import models.Competence;
 import models.CompetenceCode;
@@ -28,10 +31,6 @@ import models.query.QTotalOvertime;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-
-import javax.persistence.EntityManager;
 
 /**
  * @author dario

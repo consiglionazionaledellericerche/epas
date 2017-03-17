@@ -1,11 +1,11 @@
 package helpers;
 
+import java.util.Date;
+
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
 import play.templates.JavaExtensions;
-
-import java.util.Date;
 
 public class PersonTags extends JavaExtensions {
 

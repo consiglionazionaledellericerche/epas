@@ -2,7 +2,6 @@ package helpers.jpa;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-
 import com.mysema.query.QueryModifiers;
 import com.mysema.query.SearchResults;
 import com.mysema.query.jpa.JPQLQuery;
@@ -11,12 +10,12 @@ import com.mysema.query.types.Expression;
 
 import helpers.Paginator;
 
+import java.util.List;
+
 import models.base.BaseModel;
 
 import play.db.jpa.JPA;
 import play.mvc.Scope;
-
-import java.util.List;
 
 /**
  * @author marco

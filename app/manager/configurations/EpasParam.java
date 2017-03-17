@@ -3,6 +3,8 @@ package manager.configurations;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
+import java.util.List;
+
 import manager.configurations.EpasParam.EpasParamValueType.IpList;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 
@@ -14,8 +16,6 @@ import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
 import org.joda.time.format.DateTimeFormat;
 import org.testng.collections.Lists;
-
-import java.util.List;
 
 public enum EpasParam {
 
@@ -224,11 +224,11 @@ public enum EpasParam {
   public final EpasParamValueType epasParamValueType;
   public final List<RecomputationType> recomputationTypes;
   public final Object defaultValue;
-  public final Class target;
+  public final Class<?> target;
 
   EpasParam(String name, EpasParamCategory category, EpasParamTimeType epasParamTimeType,
       EpasParamValueType epasParamValueType, Object defaultValue,
-      List<RecomputationType> recomputationTypes, Class target) {
+      List<RecomputationType> recomputationTypes, Class<?> target) {
     this.name = name;
     this.category = category;
     this.epasParamTimeType = epasParamTimeType;

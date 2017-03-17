@@ -6,7 +6,6 @@ public class InserimentoRigaAssenza extends RichiestaInserimentoAttestati {
 
   /**
    * Constructor.
-   * @param certification
    */
   public InserimentoRigaAssenza(Certification certification) {
     this.codiceSede = Integer.parseInt(certification.person.office.codeId);

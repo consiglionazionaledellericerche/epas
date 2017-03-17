@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * enumerato contenente i codici giustificativi che possono essere presi dai dipendenti che hanno
- * abilitata la timbratura per lavoro fuori sede
+ * Enumerato contenente i codici giustificativi che possono essere presi dai dipendenti che hanno
+ * abilitata la timbratura per lavoro fuori sede.
  *
  * @author dario
  */

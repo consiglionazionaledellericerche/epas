@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 
+import java.util.List;
+
 import manager.ContractManager;
 import manager.services.vacations.VacationsRecap;
 import manager.services.vacations.VacationsRecapBuilder;
@@ -22,8 +24,6 @@ import models.enumerate.AbsenceTypeMapping;
 import org.joda.time.LocalDate;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
-
-import java.util.List;
 
 /**
  * Verifica di base degli algoritmi relativi ai resoconti ferie.

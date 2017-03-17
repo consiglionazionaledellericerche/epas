@@ -2,6 +2,14 @@ package models;
 
 import com.google.common.base.MoreObjects;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -10,14 +18,6 @@ import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
 import play.data.validation.Unique;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
 
 @Audited
 @Entity

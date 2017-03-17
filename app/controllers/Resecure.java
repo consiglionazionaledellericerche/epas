@@ -2,6 +2,13 @@ package controllers;
 
 import helpers.LogEnhancer;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import javax.inject.Inject;
+
 import models.Office;
 
 import play.Play;
@@ -9,14 +16,8 @@ import play.cache.Cache;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import javax.inject.Inject;
 
 /**
  * Contiene metodi per l'attivazione dei controlli sui permessi per le richieste ai controller.

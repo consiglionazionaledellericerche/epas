@@ -8,7 +8,6 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
 
 import controllers.Resecure.BasicAuth;
 
@@ -20,6 +19,17 @@ import dao.PersonReperibilityDayDao;
 
 import it.cnr.iit.epas.JsonReperibilityChangePeriodsBinder;
 import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,21 +58,11 @@ import org.joda.time.LocalDate;
 import play.Logger;
 import play.data.binding.As;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.modules.pdf.PDF.Options;
 import play.mvc.Controller;
 import play.mvc.With;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
 
 
 /**
@@ -459,8 +459,8 @@ public class Reperibility extends Controller {
   public static void exportMonthAsPDF(
       @Required int year, @Required int month, @Required Long type) {
 
-    if (validation.hasErrors()) {
-      badRequest("Parametri mancanti. " + validation.errors());
+    if (Validation.hasErrors()) {
+      badRequest("Parametri mancanti. " + Validation.errors());
     }
 
     PersonReperibilityType reperibilityType =
@@ -564,7 +564,7 @@ public class Reperibility extends Controller {
   @BasicAuth
   public static void iCal(@Required Long type, @Required int year, Long personId) {
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       badRequest("Parametri mancanti. " + validation.errors());
     }
     Optional<User> currentUser = Security.getUser();
@@ -609,11 +609,11 @@ public class Reperibility extends Controller {
       renderBinary(is, "reperibilitaRegistro.ics");
       bos.close();
       is.close();
-    } catch (IOException e) {
-      log.error("Io exception building ical", e);
+    } catch (IOException ex) {
+      log.error("Io exception building ical", ex);
       error("Io exception building ical");
-    } catch (ValidationException e) {
-      log.error("Validation exception generating ical", e);
+    } catch (ValidationException ex) {
+      log.error("Validation exception generating ical", ex);
       error("Validation exception generating ical");
     }
   }

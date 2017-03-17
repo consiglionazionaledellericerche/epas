@@ -10,6 +10,17 @@ import dao.PersonDao;
 
 import helpers.jpa.ModelQuery.SimpleResults;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.SecureManager;
@@ -32,17 +43,6 @@ import play.mvc.With;
 
 import security.SecurityRules;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
 
 
 @With({Resecure.class})
@@ -64,12 +64,6 @@ public class Charts extends Controller {
   @Inject
   static CompetenceCodeDao competenceCodeDao;
 
-  /**
-   * 
-   * @param year
-   * @param month
-   * @param officeId
-   */
   public static void overtimeOnPositiveResidual(Integer year, Integer month, Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
@@ -149,11 +143,6 @@ public class Charts extends Controller {
     render();
   }
 
-  /**
-   * 
-   * @param file
-   * @param officeId
-   */
   public static void checkLastYearAbsences(File file, Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
@@ -260,8 +249,9 @@ public class Charts extends Controller {
    * @param endDate l'eventuale data fine
    * @param officeId l'id della sede
    */
-  public static void exportTimesheetSituation(List<Long> peopleIds, @Required ExportFile exportFile, 
-      boolean forAll, @Required LocalDate beginDate, @Required LocalDate endDate, Long officeId) {   
+  public static void exportTimesheetSituation(List<Long> peopleIds, 
+      @Required ExportFile exportFile, boolean forAll, @Required LocalDate beginDate, 
+      @Required LocalDate endDate, Long officeId) {   
     Office office = officeDao.getOfficeById(officeId);
     rules.checkIfPermitted(office);
     

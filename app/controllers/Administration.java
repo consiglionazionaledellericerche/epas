@@ -16,6 +16,16 @@ import dao.wrapper.IWrapperFactory;
 
 import it.cnr.iit.epas.CompetenceUtility;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.CompetenceManager;
@@ -46,16 +56,6 @@ import play.data.validation.Validation;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
 
 @Slf4j
 @With({Resecure.class})
@@ -260,7 +260,7 @@ public class Administration extends Controller {
   public static void deleteUncoupledStampings(
       List<Long> peopleId, @Required LocalDate begin, LocalDate end, boolean forAll) {
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       params.flash();
       utilities();
     }
@@ -527,13 +527,6 @@ public class Administration extends Controller {
 
   }
   
-  /**
-   * 
-   * @param office
-   * @param code
-   * @param year
-   * @param month
-   */
   public static void applyBonus(Office office, CompetenceCode code, int year, int month) {
     
     Optional<Office> optOffice = Optional.<Office>absent();

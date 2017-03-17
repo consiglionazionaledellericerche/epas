@@ -3,13 +3,13 @@ package manager.recaps.recomputation;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
+import java.util.List;
+
 import manager.configurations.EpasParam;
 
 import models.base.IPropertyInPeriod;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
 
 public class RecomputeRecap {
 

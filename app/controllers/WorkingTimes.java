@@ -18,6 +18,13 @@ import helpers.ValidationHelper;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
+
 import manager.ContractManager;
 import manager.WorkingTimeTypeManager;
 
@@ -36,17 +43,12 @@ import play.Logger;
 import play.cache.Cache;
 import play.data.validation.Required;
 import play.data.validation.Valid;
+import play.data.validation.Validation;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
 
 @With({Resecure.class})
 public class WorkingTimes extends Controller {
@@ -179,16 +181,16 @@ public class WorkingTimes extends Controller {
 
     //Controllo unicità
     if (name == null || name.isEmpty()) {
-      validation.addError("name", "non può essere vuoto");
+      Validation.addError("name", "non può essere vuoto");
     } else {
       WorkingTimeType wtt = workingTimeTypeDao.workingTypeTypeByDescription(name,
           Optional.<Office>absent());
       if (wtt != null) {
-        validation.addError("name", "già presente in archivio.");
+        Validation.addError("name", "già presente in archivio.");
       }
     }
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       render(office, name, workingTimeTypePattern);
     }
 
@@ -254,6 +256,7 @@ public class WorkingTimes extends Controller {
     }
     return daysProcessed;
   }
+  
   /**
    *
    * @param officeId id Ufficio proprietario
@@ -340,11 +343,10 @@ public class WorkingTimes extends Controller {
     WorkingTimeType wtt = workingTimeTypeDao.workingTypeTypeByDescription(
         horizontalPattern.name, Optional.fromNullable(office));
     if (wtt != null) {
-      validation.addError("horizontalPattern.name",
-          "nome già presente", horizontalPattern.name);
+      Validation.addError("horizontalPattern.name", "nome già presente", horizontalPattern.name);
     }
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       boolean horizontal = true;
       render("@insertWorkingTime", horizontalPattern, horizontal, office);
     }
@@ -362,8 +364,8 @@ public class WorkingTimes extends Controller {
       WorkingTimeTypeDay wttd4, WorkingTimeTypeDay wttd5,
       WorkingTimeTypeDay wttd6, WorkingTimeTypeDay wttd7) {
 
-    if (validation.hasErrors()) {
-      flash.error(ValidationHelper.errorsMessages(validation.errors()));
+    if (Validation.hasErrors()) {
+      flash.error(ValidationHelper.errorsMessages(Validation.errors()));
       manageWorkingTime(wtt.office.id);
     }
 

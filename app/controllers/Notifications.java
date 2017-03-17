@@ -4,13 +4,14 @@ import com.mysema.query.SearchResults;
 
 import dao.NotificationDao;
 
+import javax.inject.Inject;
+
 import models.Notification;
 
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
-import javax.inject.Inject;
+import security.SecurityRules;
 
 /**
  * Controller to manage notifications.

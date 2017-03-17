@@ -7,6 +7,11 @@ import com.google.common.collect.Sets;
 
 import dao.absences.AbsenceComponentDao;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+
 import models.Person;
 import models.absences.AbsenceType;
 import models.absences.CategoryGroupAbsenceType;
@@ -16,11 +21,6 @@ import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
 
 //@Slf4j
 public class AbsenceForm {

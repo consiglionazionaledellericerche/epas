@@ -1,18 +1,17 @@
 package dao;
 
 import com.google.inject.Provider;
-
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
-
-import models.Contract;
-import models.VacationPeriod;
-import models.query.QVacationPeriod;
 
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+
+import models.Contract;
+import models.VacationPeriod;
+import models.query.QVacationPeriod;
 
 /**
  * Dao per i periodi di ferie.
