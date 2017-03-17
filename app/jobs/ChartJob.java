@@ -5,6 +5,12 @@ import com.google.common.collect.Lists;
 
 import dao.AbsenceDao;
 
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
 import manager.recaps.charts.RenderResult;
 import manager.recaps.charts.ResultFromFile;
 
@@ -16,12 +22,6 @@ import models.enumerate.CheckType;
 import org.joda.time.LocalDate;
 
 import play.jobs.Job;
-
-import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 /**
  * @author daniele

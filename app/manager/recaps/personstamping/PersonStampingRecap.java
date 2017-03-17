@@ -8,6 +8,11 @@ import dao.PersonDayDao;
 import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import manager.PersonDayManager;
 import manager.PersonManager;
 
@@ -23,11 +28,6 @@ import models.enumerate.StampTypes;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Oggetto che modella il contenuto della vista contenente il tabellone timbrature. Gerarchia:

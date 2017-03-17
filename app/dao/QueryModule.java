@@ -3,13 +3,12 @@ package dao;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
-
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.jpa.impl.JPAQueryFactory;
 
-import play.db.jpa.JPA;
-
 import javax.persistence.EntityManager;
+
+import play.db.jpa.JPA;
 
 public class QueryModule extends AbstractModule {
 

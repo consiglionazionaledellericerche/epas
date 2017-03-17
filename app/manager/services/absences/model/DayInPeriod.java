@@ -3,6 +3,8 @@ package manager.services.absences.model;
 
 import com.google.common.collect.Lists;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,8 +19,6 @@ import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
 
 @Getter
 @Setter
@@ -156,7 +156,6 @@ public class DayInPeriod {
   /**
    * Le righe della tabella web per il periodo.
    *
-   * @param nothing il tempo giustificato nothing da associare al rimpiazzamento (FIXME)
    * @return list
    */
   public List<TemplateRow> allTemplateRows() {

@@ -6,14 +6,14 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import play.Play;
 import play.PlayPlugin;
 import play.inject.BeanSource;
-
-import java.util.Set;
 
 /**
  * Injection Plugin.
@@ -37,10 +37,10 @@ public class InjectionPlugin extends PlayPlugin implements BeanSource {
         modules.add((Module) cls.newInstance());
       }
       injector = Guice.createInjector(modules);
-    } catch (InstantiationException e) {
-      LOG.error("injection error", e);
-    } catch (IllegalAccessException e) {
-      LOG.error("injection error", e);
+    } catch (InstantiationException ex) {
+      LOG.error("injection error", ex);
+    } catch (IllegalAccessException ex) {
+      LOG.error("injection error", ex);
     }
     play.inject.Injector.inject(this);
   }

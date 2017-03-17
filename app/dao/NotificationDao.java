@@ -1,7 +1,6 @@
 package dao;
 
 import com.google.inject.Inject;
-
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import helpers.jpa.ModelQuery;

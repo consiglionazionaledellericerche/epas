@@ -5,6 +5,8 @@ import com.google.inject.Inject;
 import db.h2support.base.H2WorkingTimeTypeSupport;
 import db.h2support.base.WorkingTimeTypeDefinitions.WorkingDefinition;
 
+import java.util.UUID;
+
 import manager.configurations.ConfigurationManager;
 
 import models.Contract;
@@ -15,8 +17,6 @@ import models.User;
 import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
-
-import java.util.UUID;
 
 /**
  * Costruzione rapida di entity per test standard.

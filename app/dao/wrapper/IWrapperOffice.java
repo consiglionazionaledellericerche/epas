@@ -2,12 +2,12 @@ package dao.wrapper;
 
 import com.google.common.base.Optional;
 
+import java.util.List;
+
 import models.Office;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
-import java.util.List;
 
 /**
  * Office potenziato.

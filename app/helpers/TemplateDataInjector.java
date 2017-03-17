@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 import controllers.TemplateUtility;
+
 import injection.StaticInject;
 
 import play.mvc.Before;

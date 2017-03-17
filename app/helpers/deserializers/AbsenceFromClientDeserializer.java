@@ -12,16 +12,16 @@ import dao.PersonDao;
 
 import injection.StaticInject;
 
+import java.lang.reflect.Type;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import models.Person;
 import models.exports.AbsenceFromClient;
 
 import org.joda.time.LocalDate;
-
-import java.lang.reflect.Type;
-
-import javax.inject.Inject;
 
 @Slf4j
 @StaticInject

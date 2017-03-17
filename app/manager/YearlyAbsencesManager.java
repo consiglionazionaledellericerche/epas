@@ -6,6 +6,11 @@ import com.google.common.collect.TreeBasedTable;
 
 import dao.AbsenceDao;
 
+import java.util.Comparator;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -14,11 +19,6 @@ import models.absences.JustifiedType.JustifiedTypeName;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Comparator;
-import java.util.List;
-
-import javax.inject.Inject;
 
 public class YearlyAbsencesManager {
 

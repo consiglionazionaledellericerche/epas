@@ -7,6 +7,15 @@ import com.google.gson.JsonParser;
 
 import dao.PersonDao;
 
+import injection.StaticInject;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import models.Person;
@@ -17,16 +26,8 @@ import models.exports.ShiftPeriods;
 
 import org.joda.time.LocalDate;
 
-import injection.StaticInject;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
 
 /**
  * Read json sent from the sist-org shift calendar. Json consist of periods of shift of a
@@ -118,9 +119,9 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
 
       return new ShiftPeriods(shiftPeriods);
 
-    } catch (Exception e) {
-      log.error("Problem during binding List<ShiftPeriod>.", e);
-      throw e;
+    } catch (Exception ex) {
+      log.error("Problem during binding List<ShiftPeriod>.", ex);
+      throw ex;
     }
   }
 

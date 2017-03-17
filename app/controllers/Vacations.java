@@ -7,6 +7,10 @@ import com.google.gdata.util.common.base.Preconditions;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
 import manager.services.vacations.IVacationsService;
 import manager.services.vacations.VacationsRecap;
 
@@ -18,10 +22,6 @@ import org.joda.time.YearMonth;
 
 import play.mvc.Controller;
 import play.mvc.With;
-
-import java.util.List;
-
-import javax.inject.Inject;
 
 @With({Resecure.class})
 public class Vacations extends Controller {

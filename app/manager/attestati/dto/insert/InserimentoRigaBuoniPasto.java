@@ -6,7 +6,6 @@ public class InserimentoRigaBuoniPasto extends RichiestaInserimentoAttestati {
 
   /**
    * Constructor.
-   * @param certification
    */
   public InserimentoRigaBuoniPasto(Certification certification) {
     this.codiceSede = Integer.parseInt(certification.person.office.codeId);

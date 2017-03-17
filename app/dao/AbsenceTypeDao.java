@@ -9,18 +9,18 @@ import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.types.Projections;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.persistence.EntityManager;
+
 import models.Person;
 import models.absences.AbsenceType;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.persistence.EntityManager;
 
 /**
  * Dao per l'accesso alle informazioni degli AbsenceType.

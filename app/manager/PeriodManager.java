@@ -9,6 +9,10 @@ import edu.emory.mathcs.backport.java.util.Collections;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
 import manager.configurations.EpasParam;
 import manager.recaps.recomputation.RecomputeRecap;
 
@@ -18,10 +22,6 @@ import models.base.IPropertyInPeriod;
 import org.joda.time.LocalDate;
 
 import play.db.jpa.JPA;
-
-import java.util.List;
-
-import javax.inject.Inject;
 
 /**
  * Manager per la gestione dei periodi.

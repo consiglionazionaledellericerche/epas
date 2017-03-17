@@ -3,6 +3,19 @@ package models.absences;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import lombok.Getter;
 
 import models.Person;
@@ -16,19 +29,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 import play.db.jpa.Blob;
-
-import java.util.List;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
 
 @Audited
 @Entity

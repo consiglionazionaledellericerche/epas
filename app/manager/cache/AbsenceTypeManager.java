@@ -3,10 +3,13 @@ package manager.cache;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.jpa.impl.JPAQueryFactory;
+
+import java.util.Set;
+
+import javax.persistence.EntityManager;
 
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
@@ -18,10 +21,6 @@ import org.apache.commons.lang.NotImplementedException;
 import org.testng.collections.Sets;
 
 import play.cache.Cache;
-
-import java.util.Set;
-
-import javax.persistence.EntityManager;
 
 public class AbsenceTypeManager {
 

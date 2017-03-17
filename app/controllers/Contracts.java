@@ -18,6 +18,10 @@ import helpers.Web;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ContractManager;
@@ -36,13 +40,11 @@ import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
 import play.data.validation.Valid;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
-
-import java.util.List;
-
-import javax.inject.Inject;
 
 @Slf4j
 @With({Resecure.class})
@@ -128,24 +130,24 @@ public class Contracts extends Controller {
 
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
 
-    if (!validation.hasErrors()) {
+    if (!Validation.hasErrors()) {
       if (contract.sourceDateResidual != null
           && contract.sourceDateResidual.isBefore(beginDate)) {
-        validation.addError("beginDate",
+        Validation.addError("beginDate",
             "non può essere successiva alla data di inizializzazione");
       }
       if (endDate != null && endDate.isBefore(beginDate)) {
-        validation.addError("endDate", "non può precedere l'inizio del contratto.");
+        Validation.addError("endDate", "non può precedere l'inizio del contratto.");
       }
       if (endContract != null && endContract.isBefore(beginDate)) {
-        validation.addError("endContract", "non può precedere l'inizio del contratto.");
+        Validation.addError("endContract", "non può precedere l'inizio del contratto.");
       }
       if (endDate != null && endContract != null && endContract.isAfter(endDate)) {
-        validation.addError("endContract", "non può essere successivo alla scadenza del contratto");
+        Validation.addError("endContract", "non può essere successivo alla scadenza del contratto");
       }
     }
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
       render("@edit", contract, wrappedContract, beginDate, endDate, endContract,
           onCertificate);
@@ -160,7 +162,7 @@ public class Contracts extends Controller {
     contract.endContract = endContract;
     contract.onCertificate = onCertificate;
     if (!contractManager.isContractNotOverlapping(contract)) {
-      validation.addError("contract.crossValidationFailed",
+      Validation.addError("contract.crossValidationFailed",
           "Il contratto non può intersecarsi" + " con altri contratti del dipendente.");
       render("@edit", contract, wrappedContract, beginDate, endDate, endContract,
           onCertificate);
@@ -221,21 +223,21 @@ public class Contracts extends Controller {
     rules.checkIfPermitted(contract.person.office);
 
 
-    if (!validation.hasErrors()) {
+    if (!Validation.hasErrors()) {
 
       if (contract.endDate != null
           && contract.endDate.isBefore(contract.beginDate)) {
-        validation.addError("contract.endDate", "non può precedere l'inizio del contratto.");
+        Validation.addError("contract.endDate", "non può precedere l'inizio del contratto.");
 
       } else if (!contractManager.properContractCreate(contract, wtt, true)) {
-        validation.addError("contract.beginDate", "i contratti non possono sovrapporsi.");
+        Validation.addError("contract.beginDate", "i contratti non possono sovrapporsi.");
         if (contract.endDate != null) {
-          validation.addError("contract.endDate", "i contratti non possono sovrapporsi.");
+          Validation.addError("contract.endDate", "i contratti non possono sovrapporsi.");
         }
       }
     }
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
       render("@insert", contract, wtt);
     }
@@ -309,18 +311,18 @@ public class Contracts extends Controller {
     IWrapperContract wrappedContract = wrapperFactory.create(cwtt.contract);
     Contract contract = cwtt.contract;
 
-    if (!validation.hasErrors()) {
+    if (!Validation.hasErrors()) {
       if (!DateUtility.isDateIntoInterval(cwtt.beginDate,
           wrappedContract.getContractDateInterval())) {
-        validation.addError("cwtt.beginDate", "deve appartenere al contratto");
+        Validation.addError("cwtt.beginDate", "deve appartenere al contratto");
       }
       if (cwtt.endDate != null && !DateUtility.isDateIntoInterval(cwtt.endDate,
           wrappedContract.getContractDateInterval())) {
-        validation.addError("cwtt.endDate", "deve appartenere al contratto");
+        Validation.addError("cwtt.endDate", "deve appartenere al contratto");
       }
     }
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
 
       render("@updateContractWorkingTimeType", cwtt, contract);
@@ -393,18 +395,18 @@ public class Contracts extends Controller {
     IWrapperContract wrappedContract = wrapperFactory.create(vp.contract);
     Contract contract = vp.contract;
 
-    if (!validation.hasErrors()) {
+    if (!Validation.hasErrors()) {
       if (!DateUtility.isDateIntoInterval(vp.beginDate,
           wrappedContract.getContractDateInterval())) {
-        validation.addError("vp.beginDate", "deve appartenere al contratto");
+        Validation.addError("vp.beginDate", "deve appartenere al contratto");
       }
       if (vp.endDate != null && !DateUtility.isDateIntoInterval(vp.endDate,
           wrappedContract.getContractDateInterval())) {
-        validation.addError("vp.endDate", "deve appartenere al contratto");
+        Validation.addError("vp.endDate", "deve appartenere al contratto");
       }
     }
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
 
       render("@updateContractVacationPeriod", vp, contract);
@@ -475,18 +477,18 @@ public class Contracts extends Controller {
     IWrapperContract wrappedContract = wrapperFactory.create(csp.contract);
     Contract contract = csp.contract;
 
-    if (!validation.hasErrors()) {
+    if (!Validation.hasErrors()) {
       if (!DateUtility.isDateIntoInterval(csp.beginDate,
           wrappedContract.getContractDateInterval())) {
-        validation.addError("csp.beginDate", "deve appartenere al contratto");
+        Validation.addError("csp.beginDate", "deve appartenere al contratto");
       }
       if (csp.endDate != null && !DateUtility.isDateIntoInterval(csp.endDate,
           wrappedContract.getContractDateInterval())) {
-        validation.addError("csp.endDate", "deve appartenere al contratto");
+        Validation.addError("csp.endDate", "deve appartenere al contratto");
       }
     }
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
 
       render("@updateContractStampProfile", csp, contract);
@@ -573,7 +575,7 @@ public class Contracts extends Controller {
           .key("sourceDateResidual").message("validation.before");
     }
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors: {}", validation.errorsMap());
       render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice, sourceDateResidual);
@@ -664,7 +666,7 @@ public class Contracts extends Controller {
           .key("sourceDateMealTicket").message("validation.after");
     }
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
       render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice,
           sourceDateMealTicket);

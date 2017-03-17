@@ -2,10 +2,17 @@ package dao.history;
 
 import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
-
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import helpers.jpa.HistoryViews;
+
+import injection.StaticInject;
+
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.persistence.EntityManager;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,14 +24,6 @@ import models.base.query.QRevision;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.query.AuditEntity;
 import org.joda.time.LocalDateTime;
-
-import injection.StaticInject;
-
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.persistence.EntityManager;
 
 @StaticInject
 @Slf4j
@@ -38,8 +37,8 @@ public class HistoricalDao {
   private static Provider<EntityManager> emp;
 
   /**
-   * @param id the id to search
-   * @return the Revision object
+   * @param id the id to search.
+   * @return the Revision object.
    */
   public static Revision getRevision(int id) {
     return Verify.verifyNotNull(queryFactory.from(QRevision.revision)

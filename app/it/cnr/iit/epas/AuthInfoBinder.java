@@ -3,15 +3,15 @@ package it.cnr.iit.epas;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+
 import lombok.extern.slf4j.Slf4j;
 
 import models.exports.AuthInfo;
 
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 
 /**
  * Binder per le informazioni sul auth info (username, password).

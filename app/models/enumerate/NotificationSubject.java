@@ -2,12 +2,12 @@ package models.enumerate;
 
 import com.google.common.collect.Maps;
 
+import java.util.Map;
+
 import models.Stamping;
 import models.absences.Absence;
 
 import play.mvc.Router;
-
-import java.util.Map;
 
 /**
  * Notification subject types.
@@ -15,23 +15,23 @@ import java.util.Map;
  * @author marco
  */
 public enum NotificationSubject {
-  /**
+  /*
    * Notifiche di sistema.
    */
   SYSTEM,
-  /**
+  /*
    * Commento.
    */
   COMMENT,
-  /**
+  /*
    * Messaggio.
    */
   MESSAGE,
-  /**
+  /*
    * Notifiche relative a timbrature inserite o modificate
    */
   STAMPING,
-  /**
+  /*
    * Notifiche relative alle assenze inserite o modificate
    */
   ABSENCE;

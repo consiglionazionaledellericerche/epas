@@ -11,6 +11,8 @@ import db.h2support.base.H2AbsenceSupport;
 
 import injection.StaticInject;
 
+import java.util.List;
+
 import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.ServiceFactories;
 
@@ -23,8 +25,6 @@ import org.joda.time.LocalDate;
 import org.junit.Test;
 
 import play.test.UnitTest;
-
-import java.util.List;
 
 
 @StaticInject

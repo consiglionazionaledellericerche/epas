@@ -7,15 +7,7 @@ import com.google.gson.JsonParser;
 
 import dao.PersonDao;
 
-import models.Person;
-import models.exports.PersonEmailFromJson;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import injection.StaticInject;
-import play.data.binding.Global;
-import play.data.binding.TypeBinder;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -23,6 +15,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+
+import models.Person;
+import models.exports.PersonEmailFromJson;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import play.data.binding.Global;
+import play.data.binding.TypeBinder;
 
 @Global
 @StaticInject
@@ -64,8 +65,8 @@ public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJson> {
       pefjl.persons = persons;
 
       return pefjl;
-    } catch (Exception e) {
-      log.error("Errore durante il parsing del Json della lista persone {}", e);
+    } catch (Exception ex) {
+      log.error("Errore durante il parsing del Json della lista persone {}", ex);
       return null;
     }
   }

@@ -13,6 +13,13 @@ import com.google.common.util.concurrent.MoreExecutors;
 
 import dao.PersonDao;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,13 +35,6 @@ import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 
 /**
@@ -130,13 +130,13 @@ public final class CacheValues {
         return Futures.immediateFuture(token);
       } else if (LocalDateTime.now().isAfter(token.taken_at.plusSeconds(token.expires_in))) {
         // Se è già scaduto lo richiedo in maniera sincrona
-        log.info("Token Oauth presente in cache scaduto. Invio nuova richiesta per un " +
-            "refresh-token: token {}, expires_in {}", token.access_token, token.expires_in);
+        log.info("Token Oauth presente in cache scaduto. Invio nuova richiesta per un " 
+            + "refresh-token: token {}, expires_in {}", token.access_token, token.expires_in);
         return Futures.immediateFuture(certification.refreshToken(token));
       } else {
-        log.info("Token Oauth presente in cache in scadenza. Restituito valore attuale e invio " +
-            "nuova richiesta (in modalita' asincrona) di un refresh Token: token {}, expires_in " +
-            "{}", token.access_token, token.expires_in);
+        log.info("Token Oauth presente in cache in scadenza. Restituito valore attuale e invio " 
+            + "nuova richiesta (in modalita' asincrona) di un refresh Token: token {}, expires_in "
+            + "{}", token.access_token, token.expires_in);
         // Faccio il refresh in maniera asincrona
         ListenableFutureTask<OauthToken> task = ListenableFutureTask
             .create(() -> certification.refreshToken(token));

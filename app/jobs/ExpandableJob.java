@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 
 import dao.PersonDao;
 
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.PersonDayInTroubleManager;
@@ -15,8 +17,6 @@ import org.joda.time.LocalDate;
 import play.Play;
 import play.jobs.Job;
 import play.jobs.On;
-
-import javax.inject.Inject;
 
 //@On("0 34 15 ? * *")
 @SuppressWarnings("rawtypes")
