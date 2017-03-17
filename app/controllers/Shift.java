@@ -539,4 +539,18 @@ public class Shift extends Controller {
   public static void handleShifts() {
    render(); 
   }
+  
+  public static List<ShiftCategories> renderIds() {
+    User currentUser = Security.getUser().get();
+    if (currentUser.person == null) {
+      log.error("agli utenti di sistema non sono associati turni!");
+      return null;
+    } else {
+      
+      List<ShiftCategories> list = shiftDao.getCategoriesBySupervisor(currentUser.person);
+      log.debug("lista trovata!");
+      return list;
+    }   
+    
+  }  
 }

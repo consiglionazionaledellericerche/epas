@@ -12,15 +12,16 @@ var userAllowed = false;
 	jQuery(document).ready(function() {
 
     // read the Group Ids of the user and all roles for the groups          
-    var gids = Drupal.settings.sistCalendar.gids['node'];
-    for (var gid in gids) {
-      groupTypes = shiftConfGroup.getTypes4Group(gid);
-      for(one in groupTypes){
-        if($.inArray(groupTypes[one], types) < 0){
-          types.push(groupTypes[one]);
-        }
-      }
-    }
+//    var gids = Drupal.settings.sistCalendar.gids['node'];
+//    for (var gid in gids) {
+//      groupTypes = shiftConfGroup.getTypes4Group(gid);
+//      for(one in groupTypes){
+//        if($.inArray(groupTypes[one], types) < 0){
+//          types.push(groupTypes[one]);
+//        }
+//      }
+//    }
+	types = jQuery.get('renderIds'); 
 
     if (types.length > 1) {
 			userAllowed = true;
