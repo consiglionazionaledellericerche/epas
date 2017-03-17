@@ -6,11 +6,17 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
-
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import dao.PersonDayDao;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,13 +41,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 
 import play.i18n.Messages;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
 
 @Slf4j
 public class CompetenceUtility {
@@ -217,7 +216,7 @@ public class CompetenceUtility {
         log.debug("La query sulle competenze ha trovato {} e "
                 + "myCompetence.valueRequested.ROUND_CEILING={} "
                 + "<= myCompetence.valueApproved=%d",
-            myCompetence.toString(), myCompetence.valueRequested.ROUND_CEILING,
+            myCompetence.toString(), BigDecimal.ROUND_CEILING,
             myCompetence.valueApproved);
         // Last rounding was on ceiling, so we round to floor
         //valueApproved = requestedHours.setScale(0, RoundingMode.DOWN).intValue();
@@ -622,7 +621,8 @@ public class CompetenceUtility {
                     //TODO: mettere il parametro 15 minuti parametrico
                     if (pairStamping.first.date.toLocalTime().isBefore(startShift)) {
                       newLimit =
-                          (pairStamping.first.date.toLocalTime().isBefore(startShift.minusMinutes(15)))
+                          (pairStamping.first.date.toLocalTime()
+                              .isBefore(startShift.minusMinutes(15)))
                               ? startShift.minusMinutes(15) : pairStamping.first.date.toLocalTime();
                       if (pairStamping.first.date.toLocalTime()
                           .isBefore(startShift.minusMinutes(15))) {
@@ -631,9 +631,11 @@ public class CompetenceUtility {
                     } else {
                       // è entrato dopo
                       newLimit =
-                          (pairStamping.first.date.toLocalTime().isAfter(startShift.plusMinutes(15)))
+                          (pairStamping.first.date.toLocalTime()
+                              .isAfter(startShift.plusMinutes(15)))
                               ? startShift.plusMinutes(15) : pairStamping.first.date.toLocalTime();
-                      if (pairStamping.first.date.toLocalTime().isAfter(startShift.plusMinutes(15))) {
+                      if (pairStamping.first.date.toLocalTime()
+                            .isAfter(startShift.plusMinutes(15))) {
                         inTolleranceLimit = false;
                       }
                     }
@@ -648,7 +650,8 @@ public class CompetenceUtility {
                       newLimit =
                           (startLunchTime.minusMinutes(15)
                               .isAfter(pairStamping.second.date.toLocalTime()))
-                              ? startLunchTime.minusMinutes(15) : pairStamping.second.date.toLocalTime();
+                              ? startLunchTime.minusMinutes(15) 
+                                  : pairStamping.second.date.toLocalTime();
                       diffStartLunchTime =
                           DateUtility.getDifferenceBetweenLocalTime(newLimit, startLunchTime);
                       if (startLunchTime.minusMinutes(15)
@@ -661,7 +664,8 @@ public class CompetenceUtility {
                       newLimit =
                           (startLunchTime.plusMinutes(15)
                               .isAfter(pairStamping.second.date.toLocalTime()))
-                              ? pairStamping.second.date.toLocalTime() : startLunchTime.plusMinutes(15);
+                              ? pairStamping.second.date.toLocalTime() 
+                                  : startLunchTime.plusMinutes(15);
                       if (startLunchTime.plusMinutes(15)
                           .isBefore(pairStamping.second.date.toLocalTime())) {
                         inTolleranceLimit = false;
@@ -700,7 +704,8 @@ public class CompetenceUtility {
                       newLimit =
                           (endLunchTime.minusMinutes(15)
                               .isAfter(pairStamping.first.date.toLocalTime()))
-                              ? endLunchTime.minusMinutes(15) : pairStamping.first.date.toLocalTime();
+                              ? endLunchTime.minusMinutes(15) 
+                                  : pairStamping.first.date.toLocalTime();
                       diffEndLunchTime =
                           DateUtility.getDifferenceBetweenLocalTime(newLimit, endLunchTime);
                       log.debug("diffEndLunchTime=getDifferenceBetweenLocalTime({}, {})={}",
@@ -710,8 +715,10 @@ public class CompetenceUtility {
                       // è rientrato dopo
                       log.trace("vedo rientro da pranzo dopo");
                       newLimit =
-                          (pairStamping.first.date.toLocalTime().isAfter(endLunchTime.plusMinutes(15)))
-                              ? endLunchTime.plusMinutes(15) : pairStamping.first.date.toLocalTime();
+                          (pairStamping.first.date.toLocalTime()
+                                .isAfter(endLunchTime.plusMinutes(15)))
+                              ? endLunchTime.plusMinutes(15) 
+                                  : pairStamping.first.date.toLocalTime();
                       if (pairStamping.first.date.toLocalTime()
                           .isAfter(endLunchTime.plusMinutes(15))) {
                         inTolleranceLimit = false;
@@ -727,9 +734,11 @@ public class CompetenceUtility {
                     if (pairStamping.second.date.toLocalTime().isBefore(endShift)) {
                       log.debug("vedo uscita prima della fine turno");
                       newLimit =
-                          (endShift.minusMinutes(15).isAfter(pairStamping.second.date.toLocalTime()))
+                          (endShift.minusMinutes(15)
+                                .isAfter(pairStamping.second.date.toLocalTime()))
                               ? endShift.minusMinutes(15) : pairStamping.second.date.toLocalTime();
-                      if (endShift.minusMinutes(15).isAfter(pairStamping.second.date.toLocalTime())) {
+                      if (endShift.minusMinutes(15)
+                            .isAfter(pairStamping.second.date.toLocalTime())) {
                         inTolleranceLimit = false;
                       }
                     } else {
@@ -949,14 +958,16 @@ public class CompetenceUtility {
 
                 absenceDays =
                     (inconsistentAbsenceTable.contains(person, thMissions))
-                        ? inconsistentAbsenceTable.get(person, thMissions) : new ArrayList<String>();
+                        ? inconsistentAbsenceTable.get(person, thMissions) 
+                            : new ArrayList<String>();
                 absenceDays.add(personShiftDay.date.toString("dd MMM"));
                 inconsistentAbsenceTable.put(person, thMissions, absenceDays);
 
 
                 absenceDays =
                     (inconsistentAbsenceTable.contains(person, thAbsences))
-                        ? inconsistentAbsenceTable.get(person, thAbsences) : new ArrayList<String>();
+                        ? inconsistentAbsenceTable.get(person, thAbsences) : 
+                          new ArrayList<String>();
                 absenceDays.add(personShiftDay.date.toString("dd MMM"));
                 inconsistentAbsenceTable.put(person, thAbsences, absenceDays);
               }

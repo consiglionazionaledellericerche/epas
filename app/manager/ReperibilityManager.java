@@ -16,6 +16,15 @@ import dao.PersonReperibilityDayDao;
 
 import helpers.BadRequest;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import models.Competence;
@@ -44,15 +53,6 @@ import org.joda.time.LocalDate;
 
 import play.Logger;
 import play.i18n.Messages;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.inject.Inject;
 
 /**
  * Gestore delle funzionalità relative alle reperibilità.
@@ -447,8 +447,8 @@ public class ReperibilityManager {
    * @param year             anno di riferimento del calendario
    * @param reperibilityType tipo di reperibilità di cui costrire il calendario
    * @return Lista di tabelle (una per ogni mese dell'anno) contenenti per ogni persona e giorno del
-   * mese l'indicazione se la persona ha effettuato un turno di reperibilità festivo (FS) o feriale
-   * (FR)
+   *     mese l'indicazione se la persona ha effettuato un turno di reperibilità festivo (FS) o 
+   *     feriale (FR)
    */
   public List<Table<Person, Integer, String>> buildYearlyReperibilityCalendar(
       int year, PersonReperibilityType reperibilityType) {
@@ -736,7 +736,8 @@ public class ReperibilityManager {
       Table<Person, String, Integer> personsApprovedCompetence, List<Competence> competenceList) {
     for (Competence competence : competenceList) {
       log.debug("-- Metto nella tabella competence = {}", competence.toString());
-      log.debug("La tabella contiene {} ? {}", competence.person, personsApprovedCompetence.containsRow(competence.person));
+      log.debug("La tabella contiene {} ? {}", 
+          competence.person, personsApprovedCompetence.containsRow(competence.person));
       personsApprovedCompetence.put(
           competence.person, competence.competenceCode.codeToPresence, competence.valueApproved);
     }
@@ -753,7 +754,8 @@ public class ReperibilityManager {
       Table<Person, String, List<String>> reperibilityDateDays, List<Competence> competenceList) {
     for (Competence competence : competenceList) {
       log.debug("Metto nella tabella competence = {}", competence.toString());
-      List<String> str = (competence.reason != null) ? Arrays.asList(competence.reason.split(" ")) : Arrays.asList(" ");
+      List<String> str = (competence.reason != null) 
+          ? Arrays.asList(competence.reason.split(" ")) : Arrays.asList(" ");
       reperibilityDateDays.put(competence.person, competence.competenceCode.codeToPresence, str);
     }
   }

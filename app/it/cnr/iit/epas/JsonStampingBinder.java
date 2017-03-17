@@ -9,6 +9,13 @@ import controllers.Security;
 
 import dao.PersonDao;
 
+import injection.StaticInject;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import models.Person;
@@ -18,14 +25,8 @@ import models.exports.StampingFromClient;
 
 import org.joda.time.LocalDateTime;
 
-import injection.StaticInject;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-
-import javax.inject.Inject;
 
 /**
  * @author cristian.
@@ -118,7 +119,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
       log.debug("Effettuato il binding, stampingFromClient = {}", stamping);
 
       return stamping;
-    } catch (Exception e) {
+    } catch (Exception ex) {
       log.error("Problem during binding StampingFromClient: {}, {}, {}, {}, {}",
           name, annotations, value, actualClass, genericType);
       return null;

@@ -13,6 +13,16 @@ import dao.wrapper.IWrapperFactory;
 
 import helpers.CacheValues;
 
+import java.util.AbstractMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.attestati.service.ICertificationService;
@@ -29,16 +39,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import security.SecurityRules;
-
-import java.util.AbstractMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 /**
  * Il controller per l'invio dei dati certificati al nuovo attestati.
@@ -273,9 +273,9 @@ public class Certifications extends Controller {
       // Costruisco lo status generale
       // Non uso la cache qui per evitare eventuali stati incongruenti durante l'invio
       previousCertData = certService.buildPersonStaticStatus(person,year,month);
-    } catch (Exception e) {
-      log.error("Errore nel recupero delle informazioni dal server di attestati" +
-          " per la persona {}: {}", person, cleanMessage(e).getMessage());
+    } catch (Exception ex) {
+      log.error("Errore nel recupero delle informazioni dal server di attestati"
+          + " per la persona {}: {}", person, cleanMessage(ex).getMessage());
       render();
     }
 
@@ -284,9 +284,9 @@ public class Certifications extends Controller {
       // Se l'attestato non è stato validato applico il process
       try {
         personCertData = certService.process(previousCertData);
-      } catch (ExecutionException | NoSuchFieldException e) {
-        log.error("Errore nell'invio delle informazioni al server di attestati " +
-            "per la persona {}: {}", person, cleanMessage(e).getMessage());
+      } catch (ExecutionException | NoSuchFieldException ex) {
+        log.error("Errore nell'invio delle informazioni al server di attestati " 
+            + "per la persona {}: {}", person, cleanMessage(ex).getMessage());
       }
     }
 
@@ -307,9 +307,9 @@ public class Certifications extends Controller {
       final Map.Entry<Office, YearMonth> key = new AbstractMap
           .SimpleEntry<>(person.office, new YearMonth(year, month));
       stepSize = cacheValues.elaborationStep.get(key);
-    } catch (Exception e) {
+    } catch (Exception ex) {
       log.error("Impossibile recuperare la percentuale di avanzamento per la persona {}: {}",
-          person, cleanMessage(e).getMessage());
+          person, cleanMessage(ex).getMessage());
       return;
     }
 

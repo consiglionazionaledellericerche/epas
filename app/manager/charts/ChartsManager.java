@@ -11,7 +11,6 @@ import com.google.gdata.util.common.base.Preconditions;
 import controllers.Charts.ExportFile;
 
 import dao.CompetenceCodeDao;
-import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
@@ -19,7 +18,6 @@ import dao.wrapper.IWrapperPerson;
 
 import it.cnr.iit.epas.DateUtility;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -32,7 +30,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,7 +43,6 @@ import jobs.ChartJob;
 
 import lombok.Getter;
 
-import manager.SecureManager;
 import manager.recaps.charts.RenderResult;
 import manager.recaps.charts.ResultFromFile;
 import manager.recaps.personstamping.PersonStampingDayRecap;
@@ -60,19 +56,13 @@ import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
-import models.User;
 import models.WorkingTimeType;
 import models.absences.Absence;
 import models.exports.PersonOvertime;
 
 import org.apache.commons.compress.archivers.ArchiveException;
-import org.apache.commons.compress.archivers.ArchiveOutputStream;
-import org.apache.commons.compress.archivers.ArchiveStreamFactory;
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -99,8 +89,6 @@ public class ChartsManager {
   private final IVacationsService vacationsService;
   private final IWrapperFactory wrapperFactory;
   private final PersonStampingRecapFactory stampingsRecapFactory;
-  private final SecureManager secureManager;
-  private final OfficeDao officeDao;
 
   /**
    * Costruttore.
@@ -113,15 +101,12 @@ public class ChartsManager {
   @Inject
   public ChartsManager(CompetenceCodeDao competenceCodeDao,
       PersonDao personDao, IVacationsService vacationsService,
-      IWrapperFactory wrapperFactory, PersonStampingRecapFactory stampingsRecapFactory, 
-      SecureManager secureManager, OfficeDao officeDao) {
+      IWrapperFactory wrapperFactory, PersonStampingRecapFactory stampingsRecapFactory) {
     this.competenceCodeDao = competenceCodeDao;
     this.personDao = personDao;
     this.vacationsService = vacationsService;
     this.wrapperFactory = wrapperFactory;
     this.stampingsRecapFactory = stampingsRecapFactory;
-    this.secureManager = secureManager;
-    this.officeDao = officeDao;
   }
 
 
@@ -286,8 +271,8 @@ public class ChartsManager {
     out.write("Cognome Nome,");
     for (int i = 1; i <= month; i++) {
       out.append("ore straordinari " + DateUtility.fromIntToStringMonth(i)
-      + ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i)
-      + ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
+          + ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i)
+          + ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
     }
 
     out.append("ore straordinari TOTALI,ore riposi compensativi TOTALI, ore in più TOTALI");
@@ -594,14 +579,14 @@ public class ChartsManager {
         while (!tempDate.isAfter(endDate)) {
           PersonStampingRecap psDto = stampingsRecapFactory.create(person, 
               tempDate.getYear(), tempDate.getMonthOfYear(), false);
-          file = createFileCSVToExport(psDto);
+          file = createFileCsvToExport(psDto);
           //preparo lo stream da inviare al chiamante...
           FileInputStream in = new FileInputStream(file); 
-          try{                       
+          try {                       
             zos.putNextEntry(new ZipEntry(file.getName()));
             int length;
             while ((length = in.read(buffer)) > 0) {
-                zos.write(buffer, 0, length);
+              zos.write(buffer, 0, length);
             }
           } catch (IOException ex) {
             ex.printStackTrace();
@@ -617,8 +602,8 @@ public class ChartsManager {
       // genero il file excel...
       file = File.createTempFile("situazioneMensileDa" 
           + DateUtility.fromIntToStringMonth(beginDate.getMonthOfYear()) + beginDate.getYear() 
-          + "A" + DateUtility.fromIntToStringMonth(endDate.getMonthOfYear()) + endDate.getYear()
-          , ".xls");
+          + "A" + DateUtility.fromIntToStringMonth(endDate.getMonthOfYear()) + endDate.getYear(), 
+          ".xls");
 
       Workbook wb = new HSSFWorkbook();     
       // scorro la lista delle persone per cui devo fare l'esportazione...
@@ -628,17 +613,17 @@ public class ChartsManager {
           PersonStampingRecap psDto = stampingsRecapFactory.create(person, 
               tempDate.getYear(), tempDate.getMonthOfYear(), false);
           // aggiorno il file aggiungendo un nuovo foglio per ogni persona...
-          file = createFileXLSToExport(psDto, file, wb);
+          file = createFileXlsToExport(psDto, file, wb);
           tempDate = tempDate.plusMonths(1);
         }        
       }     
       //faccio lo stream da inviare al chiamante...
       FileInputStream in = new FileInputStream(file); 
-      try{                       
+      try {
         zos.putNextEntry(new ZipEntry(file.getName()));
         int length;
         while ((length = in.read(buffer)) > 0) {
-            zos.write(buffer, 0, length);
+          zos.write(buffer, 0, length);
         }
       } catch (IOException ex) {
         ex.printStackTrace();
@@ -658,17 +643,15 @@ public class ChartsManager {
    * 
    * @param psDto il personStampingDayRecap da cui partire per prendere le informazioni
    * @return un file di tipo csv contenente la situazione mensile.
-   * @throws IOException 
    */
-  private File createFileCSVToExport(PersonStampingRecap psDto) throws IOException {
+  private File createFileCsvToExport(PersonStampingRecap psDto) throws IOException {
     final String newLineseparator = "\n";
     final Object [] fileHeader = {"Giorno","Ore di lavoro (hh:mm)","Assenza"};
     FileWriter fileWriter = null;
     CSVPrinter csvFilePrinter = null;
-    File file = new File("situazione_mensile" 
-    + psDto.person.surname 
-    + '_' + psDto.person.name 
-    + '_' + DateUtility.fromIntToStringMonth(psDto.month) + ".csv");
+    File file = new File("situazione_mensile" + psDto.person.surname 
+        + '_' + psDto.person.name 
+        + '_' + DateUtility.fromIntToStringMonth(psDto.month) + ".csv");
     try {
 
       fileWriter = new FileWriter(file.getName());
@@ -717,7 +700,7 @@ public class ChartsManager {
    * @return il file contenente la situazione mensile della persona a cui fa riferimento
    *     il personStampingRecap passato come parametro.
    */
-  private File createFileXLSToExport(PersonStampingRecap psDto, File file, Workbook wb) {
+  private File createFileXlsToExport(PersonStampingRecap psDto, File file, Workbook wb) {
     try {
       FileOutputStream out = new FileOutputStream(file);
 

@@ -9,6 +9,14 @@ import com.google.inject.Inject;
 import helpers.CacheValues;
 import helpers.rest.ApiRequestException;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.attestati.dto.drop.CancellazioneRigaAssenza;
@@ -31,14 +39,6 @@ import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSRequest;
 import play.mvc.Http;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 /**
  * Componente che si occupa di inviare e ricevere dati verso Nuovo Attestati.

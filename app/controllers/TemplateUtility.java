@@ -29,6 +29,12 @@ import helpers.jpa.ModelQuery;
 
 import it.cnr.iit.epas.DateUtility;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
 import manager.SecureManager;
 import manager.attestati.service.AttestatiApis;
 import manager.configurations.ConfigurationManager;
@@ -57,12 +63,6 @@ import models.enumerate.LimitType;
 import models.enumerate.StampTypes;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 import synch.diagnostic.SynchDiagnostic;
 

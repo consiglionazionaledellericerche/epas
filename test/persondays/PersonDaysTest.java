@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
+import java.util.List;
+
 import manager.PersonDayManager;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import manager.services.PairStamping;
@@ -19,8 +21,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.testng.annotations.Test;
-
-import java.util.List;
 
 public class PersonDaysTest {
 

@@ -1,12 +1,5 @@
 package models.absences;
 
-import lombok.Getter;
-
-import models.base.BaseModel;
-
-import org.hibernate.envers.Audited;
-import org.testng.collections.Sets;
-
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -20,6 +13,13 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+
+import lombok.Getter;
+
+import models.base.BaseModel;
+
+import org.hibernate.envers.Audited;
+import org.testng.collections.Sets;
 
 @Audited
 @Entity

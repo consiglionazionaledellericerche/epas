@@ -9,6 +9,16 @@ import dao.UserDao;
 
 import helpers.deserializers.InlineStreamHandler;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.zip.GZIPOutputStream;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import models.Role;
@@ -20,16 +30,6 @@ import org.apache.commons.mail.EmailAttachment;
 import play.Play;
 import play.mvc.Mailer;
 import play.mvc.Scope;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.zip.GZIPOutputStream;
-
-import javax.inject.Inject;
 
 /**
  * Invio delle segnalazioni per email. Nella configurazione ci possono essere: <dl>
@@ -120,10 +120,10 @@ public class ReportMailer extends Mailer {
       img.setDisposition(EmailAttachment.ATTACHMENT);
       addAttachment(img);
       send(user, data, session);
-    } catch (MalformedURLException e) {
-      log.error("malformed url", e);
-    } catch (IOException e) {
-      log.error("io error", e);
+    } catch (MalformedURLException ex) {
+      log.error("malformed url", ex);
+    } catch (IOException ex) {
+      log.error("io error", ex);
     }
   }
 }

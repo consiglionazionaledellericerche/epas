@@ -4,6 +4,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.services.absences.errors.CriticalError.CriticalProblem;
@@ -13,10 +17,6 @@ import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceType;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @Slf4j
 public class ErrorsBox {

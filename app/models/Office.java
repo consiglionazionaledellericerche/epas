@@ -5,20 +5,6 @@ import com.google.common.collect.Sets;
 
 import it.cnr.iit.epas.NullStringBinder;
 
-import manager.configurations.EpasParam;
-
-import models.base.IPropertiesInPeriodOwner;
-import models.base.IPropertyInPeriod;
-import models.base.PeriodModel;
-
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
-import org.joda.time.LocalDate;
-
-import play.data.binding.As;
-import play.data.validation.Required;
-import play.data.validation.Unique;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -34,6 +20,20 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+
+import manager.configurations.EpasParam;
+
+import models.base.IPropertiesInPeriodOwner;
+import models.base.IPropertyInPeriod;
+import models.base.PeriodModel;
+
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+import org.joda.time.LocalDate;
+
+import play.data.binding.As;
+import play.data.validation.Required;
+import play.data.validation.Unique;
 
 
 @Entity

@@ -1,9 +1,9 @@
 package controllers.rest;
 
-import com.google.common.base.Optional;
-
 import cnr.sync.dto.PersonDayDto;
 import cnr.sync.dto.PersonMonthDto;
+
+import com.google.common.base.Optional;
 
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
@@ -17,6 +17,10 @@ import helpers.JsonResponse;
 
 import it.cnr.iit.epas.DateUtility;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
@@ -29,11 +33,8 @@ import org.joda.time.YearMonth;
 
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
-
-import java.util.List;
-
-import javax.inject.Inject;
 
 @With(Resecure.class)
 public class PersonDays extends Controller {

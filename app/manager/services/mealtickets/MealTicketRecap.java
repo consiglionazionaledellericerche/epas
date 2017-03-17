@@ -5,6 +5,8 @@ import com.google.common.collect.Lists;
 
 import it.cnr.iit.epas.DateInterval;
 
+import java.util.List;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,8 +16,6 @@ import models.MealTicket;
 import models.PersonDay;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
 
 /**
  * Riepilogo buoni pasto di un contratto.

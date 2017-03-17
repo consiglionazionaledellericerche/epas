@@ -7,10 +7,10 @@ import com.google.gdata.util.common.base.Preconditions;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import java.util.List;
+
 import models.Contract;
 import models.MealTicket;
-
-import java.util.List;
 
 public class MealTicketStaticUtility {
 

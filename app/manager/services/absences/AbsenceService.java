@@ -12,6 +12,9 @@ import controllers.Security;
 import dao.PersonChildrenDao;
 import dao.absences.AbsenceComponentDao;
 
+import java.util.List;
+import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.AbsenceManager;
@@ -52,9 +55,6 @@ import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Interfaccia epas per il componente assenze.
@@ -767,7 +767,7 @@ public class AbsenceService {
       code24U = absenceComponentDao.absenceTypeByCode("24U").get();
     }
     code24U.description = 
-        "Astensione facoltativa post partum non retrib. primo figlio intera giornata altro genitore";
+      "Astensione facoltativa post partum non retrib. primo figlio intera giornata altro genitore";
     code24U.certificateCode = "24U";
     code24U.internalUse = true;
     code24U.justifiedTypesPermitted.clear();
@@ -913,7 +913,8 @@ public class AbsenceService {
       code242U = absenceComponentDao.absenceTypeByCode("242U").get();
     }
     code242U.description = 
-        "Astensione facoltativa post partum non retrib. secondo figlio intera giornata altro genitore";
+        "Astensione facoltativa post partum non retrib. secondo figlio intera giornata "
+        + "altro genitore";
     code242U.certificateCode = "242U";
     code242U.internalUse = true;
     code242U.justifiedTypesPermitted.clear();
@@ -1060,7 +1061,8 @@ public class AbsenceService {
       code243U = absenceComponentDao.absenceTypeByCode("243U").get();
     }
     code243U.description = 
-        "Astensione facoltativa post partum non retrib. terzo figlio intera giornata altro genitore";
+        "Astensione facoltativa post partum non retrib. terzo figlio intera giornata "
+        + "altro genitore";
     code243U.certificateCode = "243U";
     code243U.internalUse = true;
     code243U.justifiedTypesPermitted.clear();
