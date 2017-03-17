@@ -83,6 +83,31 @@ then
  $c.grant();
 end
 
+/*Questa parte per il nuovo ruolo supervisore dei turni */
+rule isShiftSupervisor_generic
+when 
+  $uro: UsersRolesOffices()
+  Role(name == Role.SHIFT_SUPERVISOR) from $uro.role
+  $c: PermissionCheck(action in (
+  		"Shift.handleShifts",
+  		"Shift.renderIds"), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule isShiftSupervisor_inOffice
+when 
+  $uro: UsersRolesOffices()
+  $o: Office( usersRolesOffices contains $uro)
+  Role(name == Role.SHIFT_SUPERVISOR) from $uro.role
+  $c: PermissionCheck(action in (
+  		"Shift.handleShifts",
+  		"Shift.renderIds"), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+/*Fine parte di ruolo supervisore dei turni*/
 
 rule IsEmployee
 when

@@ -6,18 +6,32 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
+import controllers.Security;
+
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
 import dao.PersonShiftDayDao;
+import dao.RoleDao;
 import dao.ShiftDao;
+import dao.UsersRolesOfficesDao;
 
 import helpers.BadRequest;
 
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.DateUtility;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.inject.Inject;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,9 +45,12 @@ import models.PersonCompetenceCodes;
 import models.PersonDay;
 import models.PersonShift;
 import models.PersonShiftDay;
+import models.Role;
 import models.ShiftCancelled;
 import models.ShiftCategories;
 import models.ShiftType;
+import models.User;
+import models.UsersRolesOffices;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.ShiftSlot;
@@ -56,15 +73,7 @@ import org.joda.time.LocalTime;
 import play.db.jpa.JPA;
 import play.i18n.Messages;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 
-import javax.inject.Inject;
 
 
 /**
@@ -112,6 +121,10 @@ public class ShiftManager {
   private CompetenceDao competenceDao;
   @Inject
   private PersonMonthRecapDao personMonthRecapDao;
+  @Inject
+  private UsersRolesOfficesDao uroDao;
+  @Inject
+  private RoleDao roleDao;
 
   /**
    * Costruisce la tabella delle inconsistenza tra i giorni di turno dati e le timbrature.
@@ -1580,10 +1593,28 @@ public class ShiftManager {
 
     });
   }
+  
+  
 
   /***********************************************************************************************/
   /**Sezione di metodi utilizzati al bootstrap per sistemare le situazioni sui turni             */
   /***********************************************************************************************/
+  
+  public void linkSupervisorToRole() {
+    List<ShiftCategories> list = ShiftCategories.findAll();
+    Role role = roleDao.getRoleByName(Role.SHIFT_SUPERVISOR);
+    list.forEach(item -> {
+      Optional<UsersRolesOffices> optional = uroDao.getUsersRolesOffices(item.supervisor.user, role, item.office);
+      if (!optional.isPresent()) {
+        UsersRolesOffices uro = new UsersRolesOffices();
+        uro.office = item.office;
+        uro.role = role;
+        uro.user = item.supervisor.user;
+        uro.save();
+        log.info("aggiunto ruolo di supervisore turni per {} della sede {}", item.supervisor.fullName(), item.office);
+      }
+    });
+  }
 
   // shift day
   public static final class Sd {

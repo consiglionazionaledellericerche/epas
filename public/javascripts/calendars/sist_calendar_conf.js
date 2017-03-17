@@ -106,7 +106,7 @@ sistCalendar.prototype = {
 		return colors;
 	},
 
-
+	
 	// colori delle tipologie di assenze
 	getAbsenceColor: function() {
 		var colors = new Array("MEDIUMSEAGREEN", "GOLDENROD", "CORNFLOWERBLUE", "DARKORCHID", "TOMATO");
