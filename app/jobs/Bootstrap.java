@@ -2,6 +2,12 @@ package jobs;
 
 import com.google.common.io.Resources;
 
+import java.io.IOException;
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 
 import models.Qualification;
@@ -22,12 +28,6 @@ import play.db.jpa.JPA;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.test.Fixtures;
-
-import java.io.IOException;
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
 
 
 /**

@@ -2,6 +2,13 @@ package models;
 
 import it.cnr.iit.epas.NullStringBinder;
 
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
+
 import lombok.EqualsAndHashCode;
 
 import models.base.BaseModel;
@@ -10,13 +17,6 @@ import org.hibernate.envers.Audited;
 
 import play.data.binding.As;
 import play.data.validation.Required;
-
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
 
 /**
  * Sono stati implementati i metodi Equals e HashCode in modo che Se sono presenti più badge per la

@@ -5,15 +5,15 @@ import com.google.common.collect.Maps;
 
 import dao.PersonMonthRecapDao;
 
-import models.Person;
-import models.PersonMonthRecap;
-
-import org.joda.time.LocalDate;
-
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+
+import models.Person;
+import models.PersonMonthRecap;
+
+import org.joda.time.LocalDate;
 
 public class PersonMonthsManager {
 
@@ -27,21 +27,19 @@ public class PersonMonthsManager {
 
   /**
    * salva le ore di formazione per il periodo specificato.
-   * @param pm il personMonthRecao
    * @param approved se sono già approvate o no le ore di formazione
    * @param value la quantità di ore di formazione da approvare
-   * @param from data inizio del periodo di formazione
-   * @param to data fine del periodo di formazione.
+   * @param begin data inizio del periodo di formazione
+   * @param end data fine del periodo di formazione.
    */
-  public void saveTrainingHours(Person person, Integer year, Integer month, Integer begin, Integer end,
-      boolean approved, Integer value) {
+  public void saveTrainingHours(Person person, Integer year, Integer month, Integer begin, 
+        Integer end, boolean approved, Integer value) {
     PersonMonthRecap pm = new PersonMonthRecap(person, year, month);
     LocalDate beginDate = new LocalDate(year, month, begin);
-    LocalDate endDate = new LocalDate(year, month, end);
     pm.hoursApproved = false;
     pm.trainingHours = value;
     pm.fromDate = beginDate;
-    pm.toDate = endDate;
+    pm.toDate = new LocalDate(year, month, end);
     pm.save();
   }
 

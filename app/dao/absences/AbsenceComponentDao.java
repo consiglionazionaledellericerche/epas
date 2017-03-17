@@ -5,12 +5,17 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import dao.DaoBase;
+
+import java.util.List;
+import java.util.Set;
+import java.util.SortedMap;
+
+import javax.persistence.EntityManager;
 
 import models.Person;
 import models.absences.Absence;
@@ -37,12 +42,6 @@ import models.absences.query.QTakableAbsenceBehaviour;
 import org.joda.time.LocalDate;
 
 import play.db.jpa.JPA;
-
-import java.util.List;
-import java.util.Set;
-import java.util.SortedMap;
-
-import javax.persistence.EntityManager;
 
 /**
  * Dao per il componente assenze.

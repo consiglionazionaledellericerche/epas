@@ -8,16 +8,7 @@ import com.google.gson.JsonParser;
 import dao.CompetenceCodeDao;
 import dao.PersonDao;
 
-import lombok.extern.slf4j.Slf4j;
-
-import models.Competence;
-import models.CompetenceCode;
-import models.Person;
-import models.exports.PersonsCompetences;
-
 import injection.StaticInject;
-import play.data.binding.Global;
-import play.data.binding.TypeBinder;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -25,6 +16,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+
+import lombok.extern.slf4j.Slf4j;
+
+import models.Competence;
+import models.CompetenceCode;
+import models.Person;
+import models.exports.PersonsCompetences;
+
+import play.data.binding.Global;
+import play.data.binding.TypeBinder;
 
 
 /**
@@ -93,9 +94,9 @@ public class JsonRequestedOvertimeBinder implements TypeBinder<PersonsCompetence
 
       return new PersonsCompetences(personsCompetences);
 
-    } catch (Exception e) {
-      log.error("Problem during binding List<Competence>.", e);
-      throw e;
+    } catch (Exception ex) {
+      log.error("Problem during binding List<Competence>.", ex);
+      throw ex;
     }
   }
 

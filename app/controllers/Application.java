@@ -3,13 +3,13 @@ package controllers;
 import dao.OfficeDao;
 import dao.wrapper.IWrapperFactory;
 
+import javax.inject.Inject;
+
 import org.joda.time.LocalDate;
 
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
-
-import javax.inject.Inject;
 
 @With({Resecure.class})
 public class Application extends Controller {

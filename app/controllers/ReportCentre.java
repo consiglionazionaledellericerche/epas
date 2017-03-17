@@ -12,18 +12,19 @@ import helpers.OilConfig;
 import helpers.Web;
 import helpers.deserializers.ImageToByteArrayDeserializer;
 
-import models.User;
-import models.exports.ReportData;
-
-import play.Play;
-import play.data.validation.Required;
-import play.mvc.Controller;
-
 import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.util.Map;
 
 import javax.inject.Inject;
+
+import models.User;
+import models.exports.ReportData;
+
+import play.Play;
+import play.data.validation.Required;
+import play.data.validation.Validation;
+import play.mvc.Controller;
 
 public class ReportCentre extends Controller {
 
@@ -65,7 +66,7 @@ public class ReportCentre extends Controller {
   }
 
   public static void oilUserReply(@Required String id, @Required String azione) {
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       flash.error(Web.MSG_HAS_ERRORS);
       Application.index();
     }
@@ -74,7 +75,7 @@ public class ReportCentre extends Controller {
 
   public static void sendOilUserReplay(@Required String id, @Required String azione,
       @Required String description) {
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       flash.error(Web.MSG_HAS_ERRORS);
       oilUserReply(id, azione);
     }

@@ -17,6 +17,11 @@ import helpers.jpa.ModelQuery;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+
 import models.Contract;
 import models.Person;
 import models.absences.Absence;
@@ -27,11 +32,6 @@ import models.exports.FrequentAbsenceCode;
 import models.query.QPersonDay;
 
 import org.joda.time.LocalDate;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.persistence.EntityManager;
 
 /**
  * Dao per l'accesso alle informazioni delle Absence.

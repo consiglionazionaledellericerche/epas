@@ -1,16 +1,19 @@
 package dao;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.inject.Provider;
-
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.types.expr.BooleanExpression;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import models.Contract;
 import models.ContractWorkingTimeType;
@@ -21,11 +24,6 @@ import models.WorkingTimeTypeDay;
 import models.query.QWorkingTimeType;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 /**
  * Dao per i WorkingTimeType.

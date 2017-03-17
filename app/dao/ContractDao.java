@@ -3,7 +3,6 @@ package dao;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Provider;
-
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
@@ -11,6 +10,11 @@ import com.mysema.query.jpa.JPQLQueryFactory;
 import dao.wrapper.IWrapperFactory;
 
 import it.cnr.iit.epas.DateUtility;
+
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import models.Contract;
 import models.ContractStampProfile;
@@ -22,11 +26,6 @@ import models.query.QContractStampProfile;
 import models.query.QContractWorkingTimeType;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 /**
  * Dao per i contract.
@@ -90,7 +89,7 @@ public class ContractDao extends DaoBase {
 
   /**
    * @return la lista di contratti associati alla persona person passata come parametro ordinati per
-   * data inizio contratto.
+   *     data inizio contratto.
    */
   public List<Contract> getPersonContractList(Person person) {
     QContract contract = QContract.contract;
@@ -141,9 +140,9 @@ public class ContractDao extends DaoBase {
 
   /**
    * @return la lista dei contractStampProfile relativi alla persona person o al contratto contract
-   * passati come parametro e ordinati per data inizio del contractStampProfile La funzione permette
-   * di scegliere quale dei due parametri indicare per effettuare la ricerca. Sono mutuamente
-   * esclusivi.
+   *     passati come parametro e ordinati per data inizio del contractStampProfile La funzione 
+   *     permette di scegliere quale dei due parametri indicare per effettuare la ricerca. 
+   *     Sono mutuamente esclusivi.
    */
   public List<ContractStampProfile> getPersonContractStampProfile(Optional<Person> person,
       Optional<Contract> contract) {

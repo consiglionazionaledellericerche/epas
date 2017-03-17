@@ -1,13 +1,13 @@
 package models.base;
 
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import org.joda.time.LocalDate;
-
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
 
 /**
  * Classe base per le proprietà in un determinato periodo.

@@ -12,6 +12,8 @@ import helpers.JsonResponse;
 
 import it.cnr.iit.epas.JsonStampingBinder;
 
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.AbsenceManager;
@@ -26,9 +28,8 @@ import play.data.binding.As;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
-import javax.inject.Inject;
+import security.SecurityRules;
 
 
 @With(Resecure.class)

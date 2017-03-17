@@ -15,6 +15,11 @@ import dao.wrapper.IWrapperFactory;
 
 import it.cnr.iit.epas.DateInterval;
 
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
+
 import manager.ConsistencyManager;
 import manager.services.mealtickets.BlockMealTicket;
 import manager.services.mealtickets.IMealTicketsService;
@@ -35,14 +40,11 @@ import play.data.validation.Max;
 import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Valid;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
-
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
 
 @With({Resecure.class})
 public class MealTickets extends Controller {
@@ -265,10 +267,10 @@ public class MealTickets extends Controller {
     recap = currentRecap.get();
 
     if (ticketNumberFrom > ticketNumberTo) {
-      validation.addError("ticketNumberFrom", "sequenza non valida");
+      Validation.addError("ticketNumberFrom", "sequenza non valida");
     }
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
 
       render("@personMealTickets", person, recap, codeBlock, ticketNumberFrom, ticketNumberTo,

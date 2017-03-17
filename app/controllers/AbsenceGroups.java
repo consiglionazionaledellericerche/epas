@@ -18,6 +18,12 @@ import dao.history.HistoryValue;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.AbsenceManager;
@@ -60,12 +66,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import security.SecurityRules;
-
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-
-import javax.inject.Inject;
 
 @Slf4j
 @With({Resecure.class, RequestInit.class})
@@ -146,7 +146,7 @@ public class AbsenceGroups extends Controller {
    */
   public static void saveCategoryTab(@Valid CategoryTab categoryTab) {
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       flash.error("Correggere gli errori indicati");
       render("@editCategoryType", categoryTab);
     }
@@ -202,7 +202,7 @@ public class AbsenceGroups extends Controller {
   public static void saveCategoryGroupAbsenceType(
       @Valid CategoryGroupAbsenceType categoryGroupAbsenceType) {
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       List<CategoryTab> allCategoryTab = CategoryTab.findAll();
       flash.error("Correggere gli errori indicati");
       render("@editCategoryGroupAbsenceType", categoryGroupAbsenceType, allCategoryTab);
@@ -339,7 +339,7 @@ public class AbsenceGroups extends Controller {
       }
     }
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       List<GroupAbsenceType> allGroups = GroupAbsenceType.findAll();
       List<CategoryGroupAbsenceType> allCategories = CategoryGroupAbsenceType.findAll();
       List<AbsenceType> allAbsenceTypes = AbsenceType.findAll();
@@ -465,7 +465,7 @@ public class AbsenceGroups extends Controller {
 
     List<JustifiedType> allJustifiedType = JustifiedType.findAll();
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       flash.error("Correggere gli errori indicati");
       render("@editAbsenceType", absenceType, allJustifiedType, tecnologi, tecnici);
     }

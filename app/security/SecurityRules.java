@@ -7,6 +7,9 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+import java.util.List;
+import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
 
 import models.User;
@@ -19,9 +22,6 @@ import org.drools.event.rule.DefaultAgendaEventListener;
 import org.drools.runtime.StatelessKnowledgeSession;
 
 import play.mvc.results.Forbidden;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author marco

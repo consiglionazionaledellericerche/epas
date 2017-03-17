@@ -16,6 +16,9 @@ import dao.PersonMonthRecapDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import java.util.List;
+import java.util.SortedMap;
+
 import manager.CompetenceManager;
 import manager.PersonManager;
 
@@ -32,9 +35,6 @@ import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
-import java.util.List;
-import java.util.SortedMap;
 
 /**
  * @author marco.

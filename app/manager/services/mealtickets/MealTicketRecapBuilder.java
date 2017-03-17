@@ -2,20 +2,19 @@ package manager.services.mealtickets;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
+
 import models.Contract;
 import models.MealTicket;
 import models.PersonDay;
 
 import org.joda.time.LocalDate;
 
-import java.util.List;
-
 /**
  * Costruisce il recap dei buoni pasto.
  * @author alessandro
  */
-@Slf4j
 public class MealTicketRecapBuilder {
 
   /**
@@ -102,8 +101,8 @@ public class MealTicketRecapBuilder {
       nextTicketToAssign++;
       
       //Mi salvo la data in cui ho iniziato a consumare buoni pasto scaduti 
-      if (mealTicketRecap.getDateExpire() == null && 
-          personDay.date.isAfter(mealTicket.expireDate)) {
+      if (mealTicketRecap.getDateExpire() == null  
+          && personDay.date.isAfter(mealTicket.expireDate)) {
         mealTicketRecap.setDateExpire(personDay.date);
       }
       

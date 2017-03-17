@@ -3,12 +3,12 @@ package manager.recaps.personstamping;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperFactory;
 
+import javax.inject.Inject;
+
 import manager.PersonDayManager;
 import manager.PersonManager;
 
 import models.Person;
-
-import javax.inject.Inject;
 
 public class PersonStampingRecapFactory {
 

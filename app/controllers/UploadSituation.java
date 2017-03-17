@@ -12,6 +12,13 @@ import dao.PersonMonthRecapDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.UploadSituationManager;
@@ -32,16 +39,11 @@ import play.Play;
 import play.cache.Cache;
 import play.data.validation.Required;
 import play.data.validation.Valid;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
-
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
 
 /**
  * Contiene in metodi necessari per l'interazione tra utente, ePAS e sistema centrale del CNR per
@@ -171,15 +173,15 @@ public class UploadSituation extends Controller {
     rules.checkIfPermitted(office);
 
     IWrapperOffice wrOffice = factory.create(office);
-    if (!validation.hasErrors()) {
+    if (!Validation.hasErrors()) {
       //controllo che il mese sia uploadable
       if (!wrOffice.isYearMonthUploadable(new YearMonth(year, month))) {
-        validation.addError("year", "non può essere precedente al primo mese riepilogabile");
-        validation.addError("month", "non può essere precedente al primo mese riepilogabile");
+        Validation.addError("year", "non può essere precedente al primo mese riepilogabile");
+        Validation.addError("month", "non può essere precedente al primo mese riepilogabile");
       }
     }
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
       //flash.error(Web.msgHasErrors());
       log.warn("validation errors: {}", validation.errorsMap());
@@ -213,15 +215,15 @@ public class UploadSituation extends Controller {
 
     if (updateSession) {
       //cambio mese, effettuo la validazione prima di fetchare.
-      if (!validation.hasErrors()) {
+      if (!Validation.hasErrors()) {
         //controllo che il mese sia uploadable
         if (!wrOffice.isYearMonthUploadable(new YearMonth(year, month))) {
-          validation.addError("year", "non può essere precedente al primo mese riepilogabile");
-          validation.addError("month", "non può essere precedente al primo mese riepilogabile");
+          Validation.addError("year", "non può essere precedente al primo mese riepilogabile");
+          Validation.addError("month", "non può essere precedente al primo mese riepilogabile");
         }
       }
 
-      if (validation.hasErrors()) {
+      if (Validation.hasErrors()) {
         response.status = 400;
         log.warn("validation errors: {}", validation.errorsMap());
         Optional<YearMonth> monthToUpload = Optional.of(new YearMonth(year, month));

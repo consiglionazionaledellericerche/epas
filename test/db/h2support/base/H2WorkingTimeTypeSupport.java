@@ -9,10 +9,10 @@ import dao.WorkingTimeTypeDao;
 import db.h2support.base.WorkingTimeTypeDefinitions.WorkingDayDefinition;
 import db.h2support.base.WorkingTimeTypeDefinitions.WorkingDefinition;
 
+import java.util.List;
+
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
-
-import java.util.List;
 
 public class H2WorkingTimeTypeSupport {
 

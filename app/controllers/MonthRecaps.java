@@ -12,6 +12,11 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
+
 import lombok.Data;
 
 import manager.PersonManager;
@@ -29,12 +34,8 @@ import org.joda.time.YearMonth;
 
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
-
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
 
 @With({Resecure.class})
 public class MonthRecaps extends Controller {

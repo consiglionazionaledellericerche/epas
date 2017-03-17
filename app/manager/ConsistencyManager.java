@@ -17,6 +17,14 @@ import dao.wrapper.IWrapperPersonDay;
 
 import it.cnr.iit.epas.DateInterval;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
+
 import manager.cache.StampTypeManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
@@ -48,14 +56,6 @@ import org.slf4j.LoggerFactory;
 import play.db.jpa.JPA;
 import play.jobs.Job;
 import play.libs.F.Promise;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
 
 public class ConsistencyManager {
 

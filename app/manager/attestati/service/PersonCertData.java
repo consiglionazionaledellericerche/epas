@@ -3,12 +3,12 @@ package manager.attestati.service;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+import java.util.Map;
+import java.util.Set;
+
 import models.Certification;
 import models.Person;
 import models.enumerate.CertificationType;
-
-import java.util.Map;
-import java.util.Set;
 
 /**
  * La situazione inerente un mese di una persona.
