@@ -314,7 +314,6 @@ public class Shift extends Controller {
       log.debug("* Num di persone nella personsShiftsWorkedDays = {}", 
           personsShiftsWorkedDays.rowKeySet().size());
 
-
       // Memorizzo le inconsistenze del turno
       log.debug("Chiamo la getShiftInconsistencyTimestampTable PER TROVARE LE INCONSISTENZE "
           + "del turno %s e memorizzarle", type);
@@ -329,7 +328,8 @@ public class Shift extends Controller {
         + "in totalShiftSumHours");
 
 
-    // Calcola i giorni totali di turno effettuati e le eventuali ore mancanti
+    // Calcola i giorni totali di turno effettuati e le eventuali ore mancanti e li mette in 
+    // personsShiftInconsistentAbsences
     totalPersonShiftWorkedTime =
         shiftManager.calcShiftWorkedDaysAndLackTime(
             personsShiftsWorkedDays, personsShiftInconsistentAbsences);

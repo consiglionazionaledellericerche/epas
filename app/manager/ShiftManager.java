@@ -318,7 +318,7 @@ public class ShiftManager {
   /*
    * 
    */
-  WorkedParameters checkShiftWorkedMins(Optional<PersonDay> personDay, ShiftType shiftType, LocalTime startShift, LocalTime startLunchTime, LocalTime endLunchTime, LocalTime endShift) {
+  WorkedParameters checkShiftWorkedMins (Optional<PersonDay> personDay, ShiftType shiftType, LocalTime startShift, LocalTime startLunchTime, LocalTime endLunchTime, LocalTime endShift) {
 
     WorkedParameters wp = new WorkedParameters();
 
@@ -949,7 +949,7 @@ public class ShiftManager {
 
       BigDecimal sessanta = new BigDecimal("60");
 
-      log.debug("Calcolo le ore di turno dai giorni = {}",
+      log.debug("Calcolo le ore di turno teoriche dai giorni = {}",
           personsShiftHours.get(person, thDays));
       BigDecimal numOfHours =
           competenceUtility.calcShiftHoursFromDays(personsShiftHours.get(person, thDays));
@@ -1076,6 +1076,8 @@ public class ShiftManager {
         personShiftSumDaysForTypes.size());
 
   }
+  
+
 
   /**
    * Crea la tabella contenente le informazioni da stampare sul report dei turni mensile.
@@ -1191,7 +1193,7 @@ public class ShiftManager {
 
       // check for lack of worked time and summarize the minutes
       if (totalInconsistentAbsences.contains(person, thLackTime)) {
-        log.debug("non è vuoto");
+        log.debug("thLackTime non è vuoto");
         String[] timeStr;
         for (String time : totalInconsistentAbsences.get(person, thLackTime)) {
 

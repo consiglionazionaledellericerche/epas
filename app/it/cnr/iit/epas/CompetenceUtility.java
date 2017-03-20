@@ -109,6 +109,31 @@ public class CompetenceUtility {
 
     return hours;
   }
+  
+  /**
+   * Calcola le ore di turno dai giorni (days)
+   * resto = (days%2 == 0) ? 0 : 0.5
+   * ore = days*6 + (int)(days/2) + resto;
+   *
+   * @author arianna
+   * TODO: parametrico rispetto ale pre del DB (ampo ore retribuite)
+   */
+  public BigDecimal calcShiftHoursFromDays2(int days) {
+    BigDecimal decDays = new BigDecimal(days);
+    
+    // read the defined shift time associated to the shift type
+    
+    BigDecimal due = new BigDecimal("2");
+
+    BigDecimal minutes = (days % 2 == 0) ? BigDecimal.ZERO : new BigDecimal("0.5");
+    BigDecimal hours =
+        decDays.multiply(
+            new BigDecimal(6)).add(decDays.divide(due, RoundingMode.HALF_DOWN)).add(minutes);
+
+    log.debug("La calcShiftHoursFromDays restituisce hours = {}", hours);
+
+    return hours;
+  }
 
 
   /**
