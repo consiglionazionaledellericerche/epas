@@ -57,6 +57,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.inject.Inject;
 
@@ -540,7 +542,7 @@ public class Shift extends Controller {
    render(); 
   }
   
-  public static List<ShiftCategories> renderIds() {
+  public static List<Long> renderIds() {
     User currentUser = Security.getUser().get();
     if (currentUser.person == null) {
       log.error("agli utenti di sistema non sono associati turni!");
@@ -548,8 +550,13 @@ public class Shift extends Controller {
     } else {
       
       List<ShiftCategories> list = shiftDao.getCategoriesBySupervisor(currentUser.person);
+
+      List<Long> ids = list.stream()
+              .map(i -> new Long(i.id))
+              .collect(Collectors.<Long> toList());
+
       log.debug("lista trovata!");
-      return list;
+      return ids;
     }   
     
   }  
