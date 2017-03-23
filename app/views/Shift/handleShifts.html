@@ -7,36 +7,38 @@
 #{stylesheet 'calendars/shift.css'/}
 #{stylesheet 'calendars/sist_fullcalendar.css'/}
 #{/set}
-<div id='popup-overlay' style='visibility: hidden;'></div>
 
-<!-- <div id='loading' style='margin: 0 auto;'><img src='".$base_url."/sites/default/files/images/gears3.gif'><b> Loading...</b></img></div> -->
+<div class="container">
+<div id="popup-overlay" style="visibility: hidden;"></div>
 
-<div id='wrap'>
+<!-- <div id="loading" style="margin: 0 auto;"><img src="".$base_url."/sites/default/files/images/gears3.gif"><b> Loading...</b></img></div> -->
 
-      <div id='cal-nav-button'>
-              <input type='button' id='prev' name='prev' value='&#9668;' /> <input type='button' id='next' name='next' value='&#9658;' /> <input type='button' id='oggi' name='oggi' value='oggi' />
+<div id="wrap">
+
+      <div id="cal-nav-button">
+              <input type="button" id="prev" name="prev" value="&#9668;" /> <input type="button" id="next" name="next" value="&#9658;" /> <input type="button" id="oggi" name="oggi" value="oggi" />
       </div>
 
-<div id='external-events'></div>
+<div id="external-events"></div>
 
-      <div class='funzioni'>
+      <div class="funzioni">
 
-              <span class='titolo-funzioni'> Gestione turni</span>
-              <ul class='funzioni'>
-              <li id='salva'>Salva turni mensili</li>
+              <span class="titolo-funzioni"> Gestione turni</span>
+              <ul class="funzioni">
+              <li id="salva">Salva turni mensili</li>
               </ul>
 
-              <span class='titolo-funzioni'> Report periodici</span>
-              <ul class='funzioni'>
-              <li id='pdf-report-mese'>Report mensile</li>
-              <li id='pdf-cal-mese'>Calendario mensile</li>
+              <span class="titolo-funzioni"> Report periodici</span>
+              <ul class="funzioni">
+              <li id="pdf-report-mese">Report mensile</li>
+              <li id="pdf-cal-mese">Calendario mensile</li>
               </ul>
       </div>
 
-      <div id='calendar'></div>
-      <div style='clear:left'></div>
+      <div id="calendar"></div>
+      <div style="clear:left"></div>
 </div>
-
+</div>
 
 #{set 'moreScripts'}
 <script src="../public/javascripts/calendars/fullcalendar.min.js"></script>
