@@ -1,0 +1,239 @@
+/*-------------------------------------------------------------
+* Definizione dei CSS comuni a tutti i calendari del portale
+*-------------------------------------------------------------*/
+
+        body {
+                margin-top: 40px;
+                text-align: center;
+                font-size: 13px;
+                font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
+        }
+
+        #calendar {
+                float: right;
+                width: 760px;
+		margin-top: -40px;
+        }
+
+        #wrap {
+                /*width: 1200px;*/
+                margin: 0 auto;
+        }
+
+        #external-events {
+                float: left;
+                width: 140px;
+                padding: 0 10px 10px 10px;
+                border: 1px solid #ccc;
+                background: #eee;
+                text-align: left;
+        }
+
+        #external-events h4 {
+                font-size: 13px;
+                margin-top: 0;
+                padding-top: 1em;
+        }
+
+        .external-event { /* try to mimick the look of a real event */
+                margin: 10px 0;
+                padding: 2px 4px;
+                background: red;
+                color: #fff;
+                font-size: .80em;
+                cursor: pointer;
+        }
+
+	.titolo-external {
+                font-size: 14px;
+                display: block;
+                margin-top: 0;
+                margin-bottom: 0.8em;
+                padding-top: 0.5em;
+		color: #CC6030;
+		/*font-weight: bold;*/
+        }
+
+	.hidden {
+		display: none;
+	}
+
+	.ghost {
+		visibility: hidden;
+	}
+
+        div.funzioni {
+                width: 150px;
+                padding-left: 10px;
+                text-align: left;
+                margin: 10px 0 10px 20px;
+                float: right;
+		/*background: #eee;
+		border: 1px solid #ccc;*/
+        }
+
+	.titolo-funzioni {
+                font-size: 14px;
+		/*font-weight: bold;*/
+		display: block;
+                margin-top: 0;
+                margin-bottom: 0.8em;
+		background: #e4e4e2;
+		padding: 0.5em;
+		color: #CC6030;
+	}
+
+	ul.funzioni {
+		margin-top: 0;
+		list-style-type: none; 
+	}
+
+	ul.funzioni li {
+		display: block;
+		padding-bottom: 0.8em;
+		margin-left: -3em;
+	}
+
+	ul.funzioni li:over {
+		color: black;
+	}
+
+        .funzioni input {
+                vertical-align: middle;
+                margin: 5px 0;
+	}
+
+
+        /*
+        * Modifica sul colore del testo dei  giorni del fine settimana
+        * Fabio Benedetti 30-10-2012
+        */
+        .fc-sat.fc-widget-content, .fc-sun.fc-widget-content {
+                color: red;
+		/*background-color: #FFF0F0;*/
+        }
+
+	/* CSS dei bottoni per cancella eventi e turni */
+	.remove-event{
+  		float: right;
+  		width: 16px;
+  		height: 16px;
+	}
+
+	.remove-shift{
+  		float: right;
+		width: 16px;
+		height: 16px;
+	}
+
+	/* Bottoni per la navigazione del calendario  */
+	#cal-nav-button {
+        	width: 140px;
+        	padding: 10px;
+        	border: 1px solid #ccc;
+        	background: #eee;
+        	text-align: left;
+        	margin-bottom: 10px;
+        }
+
+	#cal-nav-button input {
+        	width: 40px;
+        	font-size: 14px;
+        	cursor: pointer;
+        }
+
+
+/* COLOR DEFINITION */
+
+        /* colors definition for draggable items */
+        .MEDIUMSEAGREEN {
+                background: MEDIUMSEAGREEN;
+        }
+
+        .TOMATO {
+                background: TOMATO;
+        }
+
+        .GOLDENROD {
+                background: GOLDENROD;
+        }
+
+        .CORNFLOWERBLUE {
+                background: CORNFLOWERBLUE;
+        }
+
+        .DARKORCHID {
+                background: DARKORCHID;
+        }
+
+        .PINK {
+                background: PINK;
+        }
+	
+	/* CSS per gli eventi passati  */
+	.oldEvent{
+                opacity: 0.5;
+        }
+	
+
+/* CSS per i link  */
+a.custom-link:hover{
+  font-weight: bold;
+  color: #66666D;
+}
+
+
+/* POPUP scelta calendario */
+div#popup-overlay{
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    position: fixed;
+    z-index: 99;
+}
+
+
+div#popup-panel{
+    margin: auto;
+    margin-top: 20%;
+    padding-bottom: 40px;
+    width: 400px;
+    border: 5px solid whitesmoke;
+    border-radius: 10px 10px 10px;
+    box-shadow: 2px 2px 10px #000;
+    background-color: whitesmoke;
+}
+
+
+div#popup-title{
+    margin: auto;
+    padding-top: 15px;
+    text-align: center;
+    color: white;
+    font-size: 30px;
+    font-weight: bold;
+    font-family: arial, georgia, verdana;
+    width: 99.5%;
+    height: 50px;
+    border-radius: 5px;
+    text-transform: capitalize;
+
+    background: rgb(204,126,95); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(204,126,95,1) 0%, rgba(204,99,55,1) 50%, rgba(204,88,42,1) 51%, rgba(204,88,38,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(204,126,95,1)), color-stop(50%,rgba(204,99,55,1)), color-stop(51%,rgba(204,88,42,1)), color-stop(100%,rgba(204,88,38,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(204,126,95,1) 0%,rgba(204,99,55,1) 50%,rgba(204,88,42,1) 51%,rgba(204,88,38,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(204,126,95,1) 0%,rgba(204,99,55,1) 50%,rgba(204,88,42,1) 51%,rgba(204,88,38,1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(204,126,95,1) 0%,rgba(204,99,55,1) 50%,rgba(204,88,42,1) 51%,rgba(204,88,38,1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(204,126,95,1) 0%,rgba(204,99,55,1) 50%,rgba(204,88,42,1) 51%,rgba(204,88,38,1) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cc7e5f', endColorstr='#cc5826',GradientType=0 ); /* IE6-9 */
+}
+
+
+div#popup-content{
+    padding: 5px 20px;
+    color: #666;
+    font-size: 14px;
+    font-weight: bold;
+}
