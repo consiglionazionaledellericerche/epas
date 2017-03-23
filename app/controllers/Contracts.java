@@ -4,8 +4,10 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableSet;
 
 import dao.ContractDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
@@ -31,11 +33,13 @@ import manager.recaps.recomputation.RecomputeRecap;
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
+import models.Office;
 import models.Person;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.base.IPropertyInPeriod;
 
+import org.apache.commons.compress.utils.Lists;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
@@ -48,7 +52,7 @@ import security.SecurityRules;
 
 @Slf4j
 @With({Resecure.class})
-public class Contracts extends Controller {
+public class Contracts extends Controller { 
 
   @Inject
   static PersonDao personDao;
@@ -60,6 +64,8 @@ public class Contracts extends Controller {
   static SecurityRules rules;
   @Inject
   static ContractDao contractDao;
+  @Inject
+  static OfficeDao officeDao;
   @Inject
   static IWrapperFactory wrapperFactory;
   @Inject
@@ -631,9 +637,9 @@ public class Contracts extends Controller {
       contractManager.setSourceContractProperly(contract);
       contractManager.properContractUpdate(contract, recomputeFrom, false);
 
-      flash.success(Web.msgSaved(Contract.class));
+      flash.success("Contratto di %s inizializzato correttamente.", contract.person.fullName());
 
-      updateSourceContract(contract.id);
+      initializationsStatus(contract.person.office.id);
     }
 
   }
@@ -702,5 +708,41 @@ public class Contracts extends Controller {
     flash.success(Web.msgSaved(Contract.class));
 
     updateSourceContract(contract.id);
+  }
+  
+  /**
+   * Gestore delle inizializzazioni della sede.
+   */
+  public static void initializationsStatus(Long officeId) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+
+    List<IWrapperContract> initializationsMissing = Lists.newArrayList();
+    List<IWrapperContract> correctInitialized = Lists.newArrayList();
+    List<IWrapperContract> correctNotInitialized = Lists.newArrayList();
+    
+    //Tutti i dipendenti sotto forma di wrapperPerson
+    for (IWrapperPerson wrPerson : FluentIterable.from(personDao.listFetched(Optional.absent(),
+        ImmutableSet.of(office), false, null, null, false).list())
+        .transform(wrapperFunctionFactory.person()).toList()) {
+      
+      if (!wrPerson.getCurrentContract().isPresent()) {
+        continue;
+      }
+      
+      if (wrPerson.currentContractInitializationMissing()) {
+        initializationsMissing.add(wrapperFactory.create(wrPerson.getCurrentContract().get()));
+      } else {
+        if (wrPerson.getCurrentContract().get().sourceDateResidual != null) {
+          correctInitialized.add(wrapperFactory.create(wrPerson.getCurrentContract().get()));
+        } else {
+          correctNotInitialized.add(wrapperFactory.create(wrPerson.getCurrentContract().get()));
+        }
+      }
+      
+    }
+    
+    render(initializationsMissing, correctInitialized, correctNotInitialized, office);
   }
 }
