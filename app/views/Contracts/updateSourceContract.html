@@ -1,15 +1,6 @@
-#{extends 'main.html' /}
-#{set header:'navbar' /}
-#{set title: 'ePAS - Modifica ' + contract.person.fullname /}
+#{modalAsync title: 'Inizializza contratto' }
 
-#{set breadcrumbs:['Lista Persone':@Persons.list(), 
-  (contract.person.fullname):@Contracts.personContracts(contract.person.id), 
-  'Gestisci Contratto':null] /}
-#{breadcrumbs breadcrumbs, noHome:true, container:true /}
-
-#{include './_tabs.html' /}
-
-<div class="container" id="updateSource">
+<div id="updateSource">
 
 #{if wrContract.initializationMissing()}
   <div class="alert alert-danger">
@@ -49,76 +40,85 @@
 	 #{/alert}
 	 #{/if}
 	 
-      #{form @Contracts.saveResidualSourceContract(), 'method':'POST', class:'form-horizontal', 
-      'data-async':'#page_content', 'data-async-error':'#updateSource', 'data-spinner':'#defaultSpinner'}
-	    <input type="hidden" name="contract.id" value="${contract.id}" />
+     <!-- Form di input -->		
+	 #{if !confirmedResidual}
+	   #{form @Contracts.saveResidualSourceContract(), 'method':'POST', class:'form-horizontal', 
+         'data-async':'#updateSource', 'data-async-error':'#updateSource', 'data-spinner':'#defaultSpinner'}
 
-	    #{if !confirmedResidual}
-	    	<!-- Form di input -->			
-		    #{f.date 'sourceDateResidual', value:contract.sourceDateResidual?.format(), biglabel:true  /}
-		    #{f.input 'contract.sourceRemainingMinutesLastYear', biglabel:true /}
-		    #{f.input 'contract.sourceRemainingMinutesCurrentYear', biglabel:true  /}
-		    #{f.input 'contract.sourceVacationLastYearUsed', biglabel:true  /}
-		    #{f.input 'contract.sourceVacationCurrentYearUsed', biglabel:true  /}
-		    #{f.input 'contract.sourcePermissionUsed', biglabel:true  /}
-			  #{f.input 'contract.sourceRecoveryDayUsed', biglabel:true  /}
+        <input type="hidden" name="contract.id" value="${contract.id}" />
+	
+	    #{f.date 'sourceDateResidual', value:contract.sourceDateResidual?.format(), biglabel:true  /}
+	    #{f.input 'contract.sourceRemainingMinutesLastYear', biglabel:true /}
+	    #{f.input 'contract.sourceRemainingMinutesCurrentYear', biglabel:true  /}
+	    #{f.input 'contract.sourceVacationLastYearUsed', biglabel:true  /}
+	    #{f.input 'contract.sourceVacationCurrentYearUsed', biglabel:true  /}
+	    #{f.input 'contract.sourcePermissionUsed', biglabel:true  /}
+		#{f.input 'contract.sourceRecoveryDayUsed', biglabel:true  /}
 
-				#{secure.check 'Contracts.saveResidualSourceContract'}
-		    #{b.buttons center:true}
-          #{b.submit 'Salva'/}
-        #{/b.buttons}
-				#{/secure.check}
+		#{secure.check 'Contracts.saveResidualSourceContract'}
+	      #{b.buttons center:true}
+               #{b.submit 'Salva'/}
+             #{/b.buttons}
+		#{/secure.check}
+	  #{/form}	
+	#{/if}
+	<!-- Form di conferma -->
+	#{else}
+
+	  #{form @Contracts.saveResidualSourceContract(), 'method':'POST', class:'form-horizontal', 
+         'data-async':'#page_content', 'data-async-error':'#updateSource', 'data-spinner':'#defaultSpinner'}
+			
+		<input type="hidden" name="contract.id" value="${contract.id}" />
+		#{f.hidden 'confirmedResidual', value:true /}
+		#{f.simpleView 'sourceDateResidual', value:sourceDateResidual.format(), biglabel:true, hidden:true /}
+		#{f.simpleView 'contract.sourceRemainingMinutesLastYear', biglabel:true, hidden:true /}
+		#{f.simpleView 'contract.sourceRemainingMinutesCurrentYear', biglabel:true, hidden:true /}
+		#{f.simpleView 'contract.sourceVacationLastYearUsed', biglabel:true, hidden:true /}
+		#{f.simpleView 'contract.sourceVacationCurrentYearUsed', biglabel:true, hidden:true /}
+		#{f.simpleView 'contract.sourcePermissionUsed', biglabel:true, hidden:true /}
+		#{f.simpleView 'contract.sourceRecoveryDayUsed', biglabel:true, hidden:true /}
+
+		#{if removeMandatory}
+		  #{alert color:'danger'}
+		    Questa inizializzazione è necessaria. Procedere solo se si intende modificare la data
+		    di inizio del contratto.
+		  #{/alert}
 		#{/if}
-		#{else}
-			<!-- Form di conferma -->			
-			#{f.hidden 'confirmedResidual', value:true /}
-			#{f.simpleView 'sourceDateResidual', value:sourceDateResidual.format(), biglabel:true, hidden:true /}
-			#{f.simpleView 'contract.sourceRemainingMinutesLastYear', biglabel:true, hidden:true /}
-			#{f.simpleView 'contract.sourceRemainingMinutesCurrentYear', biglabel:true, hidden:true /}
-			#{f.simpleView 'contract.sourceVacationLastYearUsed', biglabel:true, hidden:true /}
-			#{f.simpleView 'contract.sourceVacationCurrentYearUsed', biglabel:true, hidden:true /}
-			#{f.simpleView 'contract.sourcePermissionUsed', biglabel:true, hidden:true /}
-			#{f.simpleView 'contract.sourceRecoveryDayUsed', biglabel:true, hidden:true /}
+		#{if removeUnnecessary}
+		  #{alert color:'danger'}
+		    La rimozione di questa inizializzazione comporterà il ricalcolo della situazione della
+		    persona dall'inizio del contratto <strong>${recomputeFrom.format()}</strong> 
+		    al <strong>${recomputeTo.format()}</strong> 
+		    per un totale di <strong>${days}</strong> giorni. 
+		  #{/alert}			  
+		#{/if}  
+		  
+		#{if sourceNew}
+		    #{alert color:'danger'}
+				La definizione di questa inizializzazione comporterà il ricalcolo della situazione
+				della persona dal 
+				<strong>${recomputeFrom.format()}</strong> al <strong>${recomputeTo.format()}</strong> 
+				per un totale di <strong>${days}</strong> giorni.		      
+		    #{/alert}
+		#{/if}
+		#{if sourceUpdate}
+		    #{alert color:'danger'}
+				La definizione di questa inizializzazione sovrascriverà quella esistente 
+				impostata alla data ${contract.sourceDateResidual.format()}<br>
+				Comporterà il ricalcolo della situazione della persona dal 
+				<strong>${recomputeFrom.format()}</strong> al <strong>${recomputeTo.format()}</strong>
+				 per un totale di <strong>${days}</strong> giorni.		      
+		    #{/alert} 
+		#{/if}
+		
+		#{b.buttons center:true}
+            #{b.cancel @updateSourceContract(contract.id) /}
+            #{b.submit 'Conferma'/}
+        #{/b.buttons}
+      #{/form}	  
+	#{/else}
+   
 
-			#{if removeMandatory}
-			  #{alert color:'danger'}
-			    Questa inizializzazione è necessaria. Procedere solo se si intende modificare la data
-			    di inizio del contratto.
-			  #{/alert}
-			#{/if}
-			#{if removeUnnecessary}
-			  #{alert color:'danger'}
-			    La rimozione di questa inizializzazione comporterà il ricalcolo della situazione della
-			    persona dall'inizio del contratto <strong>${recomputeFrom.format()}</strong> 
-			    al <strong>${recomputeTo.format()}</strong> 
-			    per un totale di <strong>${days}</strong> giorni. 
-			  #{/alert}			  
-			#{/if}  
-			  
-			#{if sourceNew}
-			    #{alert color:'danger'}
-					La definizione di questa inizializzazione comporterà il ricalcolo della situazione
-					della persona dal 
-					<strong>${recomputeFrom.format()}</strong> al <strong>${recomputeTo.format()}</strong> 
-					per un totale di <strong>${days}</strong> giorni.		      
-			    #{/alert}
-			#{/if}
-			#{if sourceUpdate}
-			    #{alert color:'danger'}
-					La definizione di questa inizializzazione sovrascriverà quella esistente 
-					impostata alla data ${contract.sourceDateResidual.format()}<br>
-					Comporterà il ricalcolo della situazione della persona dal 
-					<strong>${recomputeFrom.format()}</strong> al <strong>${recomputeTo.format()}</strong>
-					 per un totale di <strong>${days}</strong> giorni.		      
-			    #{/alert} 
-			#{/if}
-			#{b.buttons center:true}
-	            #{b.cancel @updateSourceContract(contract.id) /}
-	            #{b.submit 'Conferma'/}
-	        #{/b.buttons}
-		#{/else}
-	    
-      #{/form}
     #{/panel}
   #{if !wrContract.initializationMissing()}  
   <div id="sourceMeal">    
@@ -185,4 +185,6 @@
   </div>
   #{/if}
 </div>
+
+#{/modalAsync}        
 

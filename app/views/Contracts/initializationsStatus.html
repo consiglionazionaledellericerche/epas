@@ -1,0 +1,188 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Stato inizializzazioni'  /}
+
+#{set 'moreStyles'}
+<style>
+  td.alignLeft { text-align: left !important; }
+</style>
+#{/set}
+
+<div class="container">
+  #{title title:'Riepilogo inizializzazioni personale attivo ' + office /}
+
+  #{alert color:'success'}
+  <p>
+    Elenco dei dipendenti attivi correttamente inizializzati.
+  </p>
+  <p></p>
+  #{/alert}
+  
+  <table class="table table-bordered table-striped table-hover table-condensed center">
+    <thead>
+    <tr>
+      <th>&{'person.name'}</th>
+      <th>&{'person.number'}</th>
+      <th>Inizio<br>Contratto</th>
+      <th>Data <br>Iniziale</th>
+      <th>Ferie usate<br>anno passato</th>
+      <th>Ferie usate<br>anno corrente</th>
+      <th>Permessi<br>usati</th>
+      <th>Riposi comp.<br>usati</th>
+      <th>Residuo<br>anno passato</th>
+      <th>Residuo<br>anno corrente</th>
+    </tr>
+    </thead>
+    <tbody>
+    #{list items:correctInitialized, as:'contract'}
+
+    <tr>
+      <td class="alignLeft">
+        ${contract.value.person.fullname}
+      </td>
+       
+      <td>${contract.value.person.number}</td>
+      <td data-order="${contract.value.beginDate}">
+        ${contract.value.beginDate?.format()}
+      </td>
+
+      <td>
+        ${contract.value.sourceDateResidual?.format()}
+      </td>
+      <td>
+        ${contract.value.sourceVacationLastYearUsed}
+      </td>
+      <td>
+        ${contract.value.sourceVacationCurrentYearUsed}
+      </td>
+      <td>
+        ${contract.value.sourcePermissionUsed}
+      </td>
+      <td>
+        ${contract.value.sourceRecoveryDayUsed}
+      </td>
+      <td>
+         ${contract.value.sourceRemainingMinutesLastYear?.printHourMinute()}
+      </td>
+      <td>
+        ${contract.value.sourceRemainingMinutesCurrentYear?.printHourMinute()}
+      </td>
+
+    </tr>
+
+    #{/list}
+    </tbody>
+  </table>
+
+
+  #{alert color:'danger'}
+  <p>
+    Elenco dei dipendenti attivi della sede con inizializzazione mancante, obbligatoria per il corretto utilizzo del sistema.
+  </p>
+  <p></p>
+  #{/alert}
+  
+  <table class="table table-bordered table-striped table-hover table-condensed center">
+    <thead>
+    <tr>
+      <th>&{'person.name'}</th>
+      <th>&{'person.number'}</th>
+      <th>Inizio<br>Contratto</th>
+      <th>Fine<br>Contratto</th>
+      <th>Inizializzabile Dal</th>
+      <th>Suggerimenti</th>
+    </tr>
+    </thead>
+    <tbody>
+    #{list items:initializationsMissing, as:'contract'}
+
+    <tr>
+      <td class="alignLeft">
+        ${contract.value.person.fullname}
+      </td>
+       
+      <td>${contract.value.person.number}</td>
+      <td data-order="${contract.value.beginDate}">
+        ${contract.value.beginDate?.format()}
+      </td>
+      <td data-order="${contract.value.endDate}">
+        #{if contract.value.endDate}
+          ${contract.value.endDate.format()}
+        #{/if}
+        #{else}
+          #{if contract.value.isTemporaryMissing}
+            <em class="text-danger">Data da inserire</em>
+          #{/if}
+        #{/else}
+
+      </td>
+      <td>
+        ${contract.dateForInitialization().format()}
+      </td>
+      <td>
+        <a href="@{updateSourceContract(contract.value.id)}" data-async-modal="#defaultModal">Inizializza</a>
+      </td>
+
+    </tr>
+
+    #{/list}
+    </tbody>
+  </table>
+  
+ 
+  #{alert color:'info'}
+    <p>
+      Elenco dei dipendenti attivi non inizializzati e che non necessitano di inizializzazione.
+    </p>
+  #{/alert}
+  <table class="table table-bordered table-striped table-hover table-condensed center">
+    <thead>
+    <tr>
+      <th>&{'person.name'}</th>
+      <th>&{'person.number'}</th>
+      <th>Inizio<br>Contratto</th>
+      <th>Fine<br>Contratto</th>
+      <th>Inizializzabile Dal</th>
+    </tr>
+    </thead>
+    <tbody>
+    #{list items:correctNotInitialized, as:'contract'}
+
+    <tr>
+      <td class="alignLeft">
+        ${contract.value.person.fullname}
+      </td>
+       
+      <td>${contract.value.person.number}</td>
+      <td data-order="${contract.value.beginDate}">
+        ${contract.value.beginDate?.format()}
+      </td>
+
+      <td data-order="${contract.value.endDate}">
+        #{if contract.value.endDate}
+          ${contract.value.endDate.format()}
+        #{/if}
+        #{else}
+          #{if contract.value.isTemporaryMissing}
+            <em class="text-danger">Data da inserire</em>
+          #{/if}
+        #{/else}
+
+      </td>
+      <td>
+        ${contract.dateForInitialization().format()}
+      </td>
+      <td>
+        <a href="@{updateSourceContract(contract.value.id)}">Inizializza</a>
+      </td>
+
+    </tr>
+
+    #{/list}
+    </tbody>
+  </table>
+
+
+
+</div>
+
