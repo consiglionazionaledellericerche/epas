@@ -19,8 +19,8 @@ jQuery(document).ready(function() {
 //        }
 //      }
 //    }
-	var json = $.getJSON('http://localhost:9000/shift/renderIds', function(data) {
-		console.log("data = " + data);
+	var json = $.getJSON('renderIds', function(data) {
+		
 		$.each(data, function(index, element) {
 	        types.push(element);
 	    });
