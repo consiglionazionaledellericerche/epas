@@ -8,7 +8,7 @@
 *
 *************************************************************************/
 function _RestJsonCall (uri, type, asyncMode, dataJson) {
-
+	console.log("uri = " + uri);
 	//console.log('nella _RestJsonCall - uri='+uri+' dataJson='+dataJson);
 	var result;
 	jQuery.ajax({
