@@ -517,6 +517,7 @@ Contracts.updateContractStampProfile= Presenza Automatica
 Contracts.updateContractVacationPeriod= Piani Ferie
 Contracts.updateContractWorkingTimeType= Tipo Orario
 Contracts.updateSourceContract= Inizializzazione
+Contracts.initializationsStatus=Dati Iniziali
 Institutes.list= Sedi e Amministratori
 MealTickets.editPersonMealTickets= Modifica Buoni Consegnati
 MealTickets.findCodeBlock= Ricerca Buoni Pasto
