@@ -2,8 +2,13 @@ package manager.configurations;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableSet;
 
 import java.util.List;
+import java.util.Set;
+
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 
 import manager.configurations.EpasParam.EpasParamValueType.IpList;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
@@ -17,6 +22,9 @@ import org.joda.time.MonthDay;
 import org.joda.time.format.DateTimeFormat;
 import org.testng.collections.Lists;
 
+import play.Play;
+
+@Slf4j
 public enum EpasParam {
 
   //#######################################
@@ -359,7 +367,7 @@ public enum EpasParam {
      */
     public static Object parseValue(final EpasParamValueType type, final String value) {
       try {
-        switch (type) {
+        switch(type) {
           case LOCALDATE:
             return new LocalDate(value);
           case LOCALTIME:
@@ -397,5 +405,16 @@ public enum EpasParam {
     }
   }
 
+  /**
+   * @return la lista dei cds che non sono abilitati a visualizzare la 
+   *     "Presenza automatica" sui contratti dei dipendenti.
+   */
+  public static Set<String> revokedCdsStampProfilePermission() {
+    val cds = ImmutableSet.copyOf(
+        Play.configuration.getProperty("permission.revoke.contract.stamp_profile.cds", "000")
+          .split(","));
+    log.debug("revokedCds4StampProfilePermission = {}", cds);    
+    return cds;
+  }
 
 }
