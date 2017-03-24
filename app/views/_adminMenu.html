@@ -13,7 +13,9 @@
   'MonthRecaps.showRecaps',
   'Charts.checkLastYearAbsences',
   'PrintTags.listPersonForPrintTags',
-  'Certifications.certifications'] /}
+  'Certifications.certifications',
+  'Contracts.initializationsStatus',
+  'Contracts.initializationsMeal'] /}
 
   <li class="dropdown #{if request.action in actions}active#{/if}">
 
@@ -30,6 +32,10 @@
       #{secure.li @Persons.list() }
       <i class="fa fa-users" aria-hidden="true"></i>
       #{/secure.li}
+      #{secure.li @Contracts.initializationsStatus(session.get("officeSelected")) }
+      <i class="fa fa-flag-checkered" aria-hidden="true"></i>
+      #{/secure.li}
+
       #{secure.check 'Stampings.personStamping'}
       <li role="separator" class="divider"></li>
       #{/secure.check}
