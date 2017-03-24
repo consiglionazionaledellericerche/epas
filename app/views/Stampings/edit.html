@@ -39,7 +39,7 @@ title:(Action + ' timbratura del ' + date.format() + ' per ' + person.fullname)}
   #{f.hidden 'stamping.id', value:stamping.id /}
   #{/if}
 
-  #{f.input 'time', popover:'true', value:stamping?.formattedHour(), required:true/}
+  #{f.input 'time', popover:'true', value:stamping?.isPersistent() ? stamping?.formattedHour() : time, required:true/}
   #{f.radioEnum 'stamping.way', items:models.Stamping.WayType, required:true /}
 
   #{set stampTypes: templateUtility.stampTypes /}
