@@ -328,9 +328,6 @@ public class ContractManager {
     if (contract.sourceRemainingMealTicket == null) {
       contract.sourceRemainingMealTicket = 0;
     }
-    if (contract.sourceDateMealTicket == null && contract.sourceDateResidual != null) {
-      contract.sourceDateMealTicket = contract.sourceDateResidual;
-    }
     contract.save();
   }
 
