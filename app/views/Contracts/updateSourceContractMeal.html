@@ -1,0 +1,78 @@
+#{modalAsync title: 'Inizializza buoni pasto ' + contract.person.fullname }
+
+  #{if !wrContract.initializationMissing()}  
+  <div id="sourceMeal">    
+
+       <div class="alert alert-info">
+		  <p>
+          	Tramite questa form è possibile inizializzare il <strong>residuo buoni pasto</strong> in un momento arbitrario del contratto selezionato.  
+  		  </p> 
+       </div>
+       
+       #{if wrContract.mealTicketInitBeforeGeneralInit() }
+        #{alert color:'warning', center:true}
+	      <p><i class="fa fa-2x fa-times bg-warning"></i> &{'contract.mealTicketInitBeforeGeneralInit'}</p>
+	       
+	      <p>Si consiglia di definire una inizializzazione del residuo buoni
+	      pasto successiva a <strong>${wrContract.value.sourceDateResidual.format()}</strong>.
+	      </p>
+        #{/alert}
+       #{/if}
+       
+       <!-- Form di input -->		
+	   #{if !confirmedMeal}
+	      #{form @Contracts.saveMealTicketSourceContract(), 'method':'POST', class:'form-horizontal', 
+            'data-async':'#sourceMeal', 'data-async-error':'#sourceMeal', 'data-spinner':'#defaultSpinner'}
+	        
+	        <input type="hidden" name="contract.id" value="${contract.id}" />
+		    #{f.date 'sourceDateMealTicket', value:contract.sourceDateMealTicket?.format(), biglabel:true  /}
+		    #{f.input 'contract.sourceRemainingMealTicket', biglabel:true  /}
+
+			#{secure.check 'Contracts.saveMealTicketSourceContract'}
+			  #{b.buttons center:true}
+                #{b.submit 'Salva'/}
+			  #{/b.buttons}
+			#{/secure.check}
+	   	  #{/form}
+	   #{/if}
+       <!-- Form di conferma -->	
+	   #{else}
+	   
+	     #{form @Contracts.saveMealTicketSourceContract(), 'method':'POST', class:'form-horizontal', 
+           'data-async':'#page_content', 'data-async-error':'#sourceMeal', 'data-spinner':'#defaultSpinner'}
+			
+			<input type="hidden" name="contract.id" value="${contract.id}" />
+			#{f.hidden 'confirmedMeal', value:true /}
+			#{f.simpleView 'sourceDateMealTicket', value:sourceDateMealTicket.format(), biglabel:true, hidden:true /}
+			#{f.simpleView 'contract.sourceRemainingMealTicket', biglabel:true, hidden:true /}
+			
+		    #{if sourceNew}
+		      #{alert color:'danger'}
+				Verranno rigenerati i riepiloghi della persona a partire dal mese 
+				<strong>${recomputeFrom.format()}</strong> a quello attuale. 
+				per un totale di <strong>${months}</strong> mesi.
+		      #{/alert}
+		    #{/if}
+		    #{if sourceUpdate}
+		      #{alert color:'danger'}
+				La definizione di questa inizializzazione sovrascriverà quella esistente 
+				impostata alla data ${contract.sourceDateMealTicket.format()}<br>
+				Verranno rigenerati i riepiloghi della persona a partire dal mese 
+				<strong>${recomputeFrom.format()}</strong> a quello attuale. 
+				per un totale di <strong>${months}</strong> mesi.	      
+		      #{/alert} 
+		    #{/if}
+		    
+		    #{b.buttons center:true}
+              #{b.submit 'Conferma'/}
+            #{/b.buttons}
+         
+         #{/form}
+	  
+	   #{/else}
+       
+  </div>
+  #{/if}
+
+#{/modalAsync}        
+
