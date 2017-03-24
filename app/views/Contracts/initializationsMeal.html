@@ -1,0 +1,120 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Stato inizializzazioni'  /}
+
+#{set 'moreStyles'}
+<style>
+  td.alignLeft { text-align: left !important; }
+</style>
+#{/set}
+
+#{tabs.initializationsTabs action:'initializationsMeal', office:office /}
+
+<div class="container">
+
+  #{title title:'Inizializzazione buoni pasto dipendenti ' + office.name /}
+
+  #{alert color:'success'}
+  <p>
+    Elenco dei dipendenti attivi con inizializzazione buoni pasto definita.
+  </p>
+  <p></p>
+  #{/alert}
+  
+  <table class="table table-bordered table-striped table-hover table-condensed center">
+    <thead>
+    <tr>
+      <th>&{'person.name'}</th>
+      <th>&{'person.number'}</th>
+      <th>Inizio<br>Contratto</th>
+      <th>Data <br>Iniziale</th>
+      <th>Buoni Pasto</th>
+    </tr>
+    </thead>
+    <tbody>
+    #{list items:correctInitialized, as:'contract'}
+
+    <tr>
+      <td class="alignLeft">
+        ${contract.value.person.fullname}
+      </td>
+       
+      <td>${contract.value.person.number}</td>
+      <td data-order="${contract.value.beginDate}">
+        ${contract.value.beginDate?.format()}
+      </td>
+
+      <td>
+        <a href="@{updateSourceContractMeal(contract.value.id)}" data-async-modal="#defaultModal">
+          ${contract.value.sourceDateMealTicket?.format()}
+        </a>
+      </td>
+
+      <td>
+        ${contract.value.sourceRemainingMealTicket}
+      </td>
+
+    </tr>
+
+    #{/list}
+    </tbody>
+  </table>
+  
+ 
+  #{alert color:'info'}
+    <p>
+      Elenco dei dipendenti attivi senza inizializzazione buoni pasto.
+    </p>
+  #{/alert}
+  <table class="table table-bordered table-striped table-hover table-condensed center">
+    <thead>
+    <tr>
+      <th>&{'person.name'}</th>
+      <th>&{'person.number'}</th>
+      <th>Inizio<br>Contratto</th>
+      <th>Fine<br>Contratto</th>
+      <th>Inizializzabile Dal</th>
+      <th>Suggerimenti</th>
+    </tr>
+    </thead>
+    <tbody>
+    #{list items:correctNotInitialized, as:'contract'}
+
+    <tr>
+      <td class="alignLeft">
+        ${contract.value.person.fullname}
+      </td>
+       
+      <td>${contract.value.person.number}</td>
+      <td data-order="${contract.value.beginDate}">
+        ${contract.value.beginDate?.format()}
+      </td>
+
+      <td data-order="${contract.value.endDate}">
+        #{if contract.value.endDate}
+          ${contract.value.endDate.format()}
+        #{/if}
+        #{else}
+          #{if contract.value.isTemporaryMissing}
+            <em class="text-danger">Data da inserire</em>
+          #{/if}
+        #{/else}
+
+      </td>
+      <td>
+        ${contract.dateForInitialization().format()}
+      </td>
+      <td>
+        <a href="@{updateSourceContractMeal(contract.value.id)}" data-async-modal="#defaultModal"">Inizializza</a>
+      </td>
+
+    </tr>
+
+    #{/list}
+    </tbody>
+  </table>
+
+
+
+</div>
+

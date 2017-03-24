@@ -542,6 +542,23 @@ public class Contracts extends Controller {
     if (contract.sourceDateResidual == null) {
       contractManager.cleanResidualInitialization(contract);
     }
+
+    IWrapperOffice wrOffice = wrapperFactory.create(contract.person.office);
+    IWrapperPerson wrPerson = wrapperFactory.create(contract.person);
+
+    render(contract, wrContract, wrOffice, wrPerson);
+  }
+  
+  /**
+   * Pagina aggiornamento buoni pasto iniziali del contratto.
+   */
+  public static void updateSourceContractMeal(Long contractId) {
+
+    Contract contract = contractDao.getContractById(contractId);
+    notFoundIfNull(contract);
+    rules.checkIfPermitted(contract.person.office);
+
+    IWrapperContract wrContract = wrapperFactory.create(contract);
     if (contract.sourceDateMealTicket == null) {
       contractManager.cleanMealTicketInitialization(contract);
     }
@@ -551,6 +568,7 @@ public class Contracts extends Controller {
 
     render(contract, wrContract, wrOffice, wrPerson);
   }
+
 
   /**
    * Salva l'inizializzazione.
@@ -592,33 +610,28 @@ public class Contracts extends Controller {
     if (recomputeTo.isAfter(LocalDate.now())) {
       recomputeTo = LocalDate.now();
     }
-    //eliminazione inizializzazione.
-    if (sourceDateResidual == null) {
+    
+    //simulazione eliminazione inizializzazione.
+    if (sourceDateResidual == null && !confirmedResidual) {
       contractManager.cleanResidualInitialization(contract);
-      boolean removeMandatory = false;
-      boolean removeUnnecessary = false;
-      if (contract.beginDate.isBefore(wrContract.dateForInitialization())) {
-        removeMandatory = true;
-      } else {
-        removeUnnecessary = true;
+      boolean removeMandatory = contract.beginDate.isBefore(wrContract.dateForInitialization());
+      boolean removeUnnecessary = !removeMandatory;
+      if (removeUnnecessary) {
         recomputeFrom = contract.beginDate;
       }
-      if (!confirmedResidual) {
-        confirmedResidual = true;
-        int days = 0;
-        if (recomputeFrom != null) {
-          days = DateUtility.daysInInterval(new DateInterval(recomputeFrom, recomputeTo));
-        }
-        render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice,
-            confirmedResidual, removeMandatory, removeUnnecessary,
-            recomputeFrom, recomputeTo, days);
-      } else {
-        //calcoli
+      confirmedResidual = true;
+      int days = 0;
+      if (recomputeFrom != null) {
+        days = DateUtility.daysInInterval(new DateInterval(recomputeFrom, recomputeTo));
       }
+      render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice,
+          confirmedResidual, removeMandatory, removeUnnecessary,
+          recomputeFrom, recomputeTo, days);
     }
 
-    //configurazione inizializzazione
-    if (!confirmedResidual) {
+    //simulazione nuova inizializzazione
+    if (sourceDateResidual != null && !confirmedResidual) {
+
       confirmedResidual = true;
       int days = DateUtility.daysInInterval(new DateInterval(recomputeFrom, recomputeTo));
       boolean sourceNew = false;
@@ -631,16 +644,17 @@ public class Contracts extends Controller {
 
       render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice, sourceDateResidual,
           confirmedResidual, sourceNew, sourceUpdate, recomputeFrom, recomputeTo, days);
+    }
 
-    } else {
+    //esecuzione
+    if (confirmedResidual) {
       contract.sourceDateResidual = sourceDateResidual;
       contractManager.setSourceContractProperly(contract);
       contractManager.properContractUpdate(contract, recomputeFrom, false);
 
       flash.success("Contratto di %s inizializzato correttamente.", contract.person.fullName());
-
-      initializationsStatus(contract.person.office.id);
     }
+    initializationsStatus(contract.person.office.id);
 
   }
 
@@ -674,7 +688,7 @@ public class Contracts extends Controller {
 
     if (Validation.hasErrors()) {
       response.status = 400;
-      render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice,
+      render("@updateSourceContractMeal", contract, wrContract, wrPerson, wrOffice,
           sourceDateMealTicket);
     }
 
@@ -694,7 +708,7 @@ public class Contracts extends Controller {
         sourceUpdate = true;
       }
 
-      render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice,
+      render("@updateSourceContractMeal", contract, wrContract, wrPerson, wrOffice,
           sourceDateMealTicket, confirmedMeal,
           sourceNew, sourceUpdate, recomputeFrom, recomputeTo, months);
 
@@ -705,9 +719,9 @@ public class Contracts extends Controller {
     contractManager.setSourceContractProperly(contract);
     contractManager.properContractUpdate(contract, recomputeFrom, true);
 
-    flash.success(Web.msgSaved(Contract.class));
+    flash.success("Buoni pasto di %s inizializzati correttamente.", contract.person.fullName());
 
-    updateSourceContract(contract.id);
+    initializationsMeal(contract.person.office.id);
   }
   
   /**
@@ -744,5 +758,41 @@ public class Contracts extends Controller {
     }
     
     render(initializationsMissing, correctInitialized, correctNotInitialized, office);
+  }
+
+  /**
+   * Gestore delle inizializzazioni buoni pasto della sede.
+   */
+  public static void initializationsMeal(Long officeId) {
+
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+
+    List<IWrapperContract> correctInitialized = Lists.newArrayList();
+    List<IWrapperContract> correctNotInitialized = Lists.newArrayList();
+
+    //Tutti i dipendenti sotto forma di wrapperPerson TODO: rifattorizzare
+    for (IWrapperPerson wrPerson : FluentIterable.from(personDao.listFetched(Optional.absent(),
+        ImmutableSet.of(office), false, null, null, false).list())
+        .transform(wrapperFunctionFactory.person()).toList()) {
+
+      if (!wrPerson.getCurrentContract().isPresent()) {
+        continue;
+      }
+
+      if (wrPerson.currentContractInitializationMissing()) {
+        //initializationsMissing.add(wrapperFactory.create(wrPerson.getCurrentContract().get()));
+      } else {
+        if (wrPerson.getCurrentContract().get().sourceDateMealTicket != null) {
+          correctInitialized.add(wrapperFactory.create(wrPerson.getCurrentContract().get()));
+        } else {
+          correctNotInitialized.add(wrapperFactory.create(wrPerson.getCurrentContract().get()));
+        }
+      }
+
+    }
+
+    render(correctInitialized, correctNotInitialized, office);
+
   }
 }

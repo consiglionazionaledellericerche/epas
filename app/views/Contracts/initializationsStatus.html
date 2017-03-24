@@ -8,8 +8,11 @@
 </style>
 #{/set}
 
+#{tabs.initializationsTabs action:'initializationsStatus', office:office /}
+
 <div class="container">
-  #{title title:'Riepilogo inizializzazioni personale attivo ' + office /}
+
+  #{title title:'Inizializzazione Generale dipendenti ' + office.name /}
 
   #{alert color:'success'}
   <p>
@@ -47,7 +50,9 @@
       </td>
 
       <td>
-        ${contract.value.sourceDateResidual?.format()}
+        <a href="@{updateSourceContract(contract.value.id)}" data-async-modal="#defaultModal">
+          ${contract.value.sourceDateResidual?.format()}
+        </a>
       </td>
       <td>
         ${contract.value.sourceVacationLastYearUsed}
@@ -117,7 +122,7 @@
 
       </td>
       <td>
-        ${contract.dateForInitialization().format()}
+          ${contract.dateForInitialization().format()}
       </td>
       <td>
         <a href="@{updateSourceContract(contract.value.id)}" data-async-modal="#defaultModal">Inizializza</a>
@@ -143,6 +148,7 @@
       <th>Inizio<br>Contratto</th>
       <th>Fine<br>Contratto</th>
       <th>Inizializzabile Dal</th>
+      <th>Suggerimenti</th>
     </tr>
     </thead>
     <tbody>
@@ -173,7 +179,7 @@
         ${contract.dateForInitialization().format()}
       </td>
       <td>
-        <a href="@{updateSourceContract(contract.value.id)}">Inizializza</a>
+        <a href="@{updateSourceContract(contract.value.id)}" data-async-modal="#defaultModal">Inizializza</a>
       </td>
 
     </tr>
