@@ -249,7 +249,8 @@ public class RequestInit extends Controller {
         "Charts.listForExcelFile",
         "Charts.exportTimesheetSituation",
         "Competences.activateServices",
-        "Contracts.initializationsStatus");
+        "Contracts.initializationsStatus",
+        "Contracts.initializationsMeal");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
         "Stampings.insertWorkingOffSitePresence",
@@ -290,7 +291,9 @@ public class RequestInit extends Controller {
         "Configurations.show",
         "Certifications.certifications",
         "Certifications.processAll",
-        "PersonMonths.visualizePeopleTrainingHours");
+        "PersonMonths.visualizePeopleTrainingHours",
+        "Contracts.initializationsStatus",
+        "Contracts.initializationsMeal");
 
     final Collection<String> dropDownConfigurationActions = ImmutableList.of(
         "WorkingTimes.manageWorkingTime",
