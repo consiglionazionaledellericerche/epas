@@ -12,13 +12,76 @@
 
 <div class="container">
 
-  #{title title:'Inizializzazione buoni pasto dipendenti ' + office.name /}
-
-  #{alert color:'success'}
+  #{title title:'Inizializzazione Buoni Pasto ' + office.name /}
+  
+  <!-- Tutti i dipendenti sono correttamente inizializzati -->
+  #{if initializationsBeforeGeneral.empty}
+    #{alert color:'success'}
+      <i class="fa fa-2x fa-check bg-success"></i>
+      L'inizializzazione buoni pasto, ove presente, è correttamente impostata per tutti i dipendenti della sede.
+    #{/alert}
+  #{/if}
+  <!-- Alcuni dipendenti non sono correttamente inizializzati (elenco) -->
+  #{else}
+	#{alert color:'warning'}
+	    <p>
+	      <i class="fa fa-2x fa-warning bg-warning"></i> 
+	      Sono presenti dipendenti attivi della sede con una inizializzazione buoni pasto contenente problemi.
+	    </p>
+	    <p>
+	      Tali inizializzazioni possono risultare confondenti, si suggerisce di correggerle.
+	    </p>
+	    <p>
+         Per correggere una inizializzazione cliccare sulla sua <strong>Data iniziale</strong>
+        </p>
+	#{/alert}
+	   <table class="table table-bordered table-striped table-hover table-condensed center">
+	    <thead>
+	    <tr>
+	      <th>&{'person.name'}</th>
+	      <th>&{'person.number'}</th>
+	      <th>Inizio<br>Contratto</th>
+	      <th>Data <br>Iniziale</th>
+	      <th>Buoni Pasto</th>
+	    </tr>
+	    </thead>
+	    <tbody>
+	    #{list items:initializationsBeforeGeneral, as:'contract'}
+	
+	    <tr>
+	      <td class="alignLeft">
+	        ${contract.value.person.fullname}
+	      </td>
+	       
+	      <td>${contract.value.person.number}</td>
+	      <td data-order="${contract.value.beginDate}">
+	        ${contract.value.beginDate?.format()}
+	      </td>
+	
+	      <td>
+	        <a href="@{updateSourceContractMeal(contract.value.id)}" data-async-modal="#defaultModal">
+	          ${contract.value.sourceDateMealTicket?.format()}
+	        </a>
+	      </td>
+	
+	      <td>
+	        ${contract.value.sourceRemainingMealTicket}
+	      </td>
+	
+	    </tr>
+	
+	    #{/list}
+	    </tbody>
+	  </table>
+  #{/else}
+  
+  #{alert color:'info'}
   <p>
     Elenco dei dipendenti attivi con inizializzazione buoni pasto definita.
   </p>
-  <p></p>
+  <p>
+    Per modificare l'inizializzazione cliccare sulla <strong>Data iniziale</strong>
+  </p>
   #{/alert}
   
   <table class="table table-bordered table-striped table-hover table-condensed center">
@@ -59,6 +122,8 @@
     #{/list}
     </tbody>
   </table>
+  
+  
   
  
   #{alert color:'info'}
@@ -102,7 +167,7 @@
 
       </td>
       <td>
-        ${contract.dateForInitialization().format()}
+        ${contract.dateForMealInitialization().format()}
       </td>
       <td>
         <a href="@{updateSourceContractMeal(contract.value.id)}" data-async-modal="#defaultModal"">Inizializza</a>
