@@ -8,7 +8,7 @@
     #{secure.li @Contracts.updateSourceContract(contract.id) /}
     #{secure.li @Contracts.updateContractWorkingTimeType(contract.id) /}
     #{secure.li @Contracts.updateContractVacationPeriod(contract.id) /}
-    #{secure.li @Contracts.updateContractStampProfile(contract.id) /}
+    #{secure.li @Contracts.updateContractStampProfile(contract.id), target:contract.person.office /}
     #{secure.li @Contracts.delete(contract.id) /}
   </ul>
 </div>

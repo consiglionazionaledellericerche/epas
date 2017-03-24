@@ -896,8 +896,6 @@ when
         "Contracts.updateSourceContract",
      	"Contracts.saveResidualSourceContract",
      	"Contracts.saveMealTicketSourceContract",
-		"Contracts.updateContractStampProfile",
-        "Contracts.saveContractStampProfile",
         "Contracts.updateContractWorkingTimeType",
         "Contracts.saveContractWorkingTimeType",
         "Contracts.updateContractVacationPeriod",
@@ -1007,6 +1005,22 @@ when
         "Charts.exportTimesheetSituation"
 
        ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+/*************************************************************
+ * Alcune sedi non hanno la timbratura automatica impostabile
+ ************************************************************/
+rule OnlyForPersonnelAdmin_Not_InOffice_SAC
+when
+ $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
+ $o: Office( usersRolesOffices contains $uro, 
+    EpasParam.revokedCdsStampProfilePermission() not contains institute.getCds())
+ $c: PermissionCheck(action in (
+    "Contracts.updateContractStampProfile",
+    "Contracts.saveContractStampProfile"
+    ), target == $o, granted == false)
 then
  $c.grant();
 end
