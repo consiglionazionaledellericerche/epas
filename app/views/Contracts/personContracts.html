@@ -17,22 +17,12 @@
       Il dipendente attualmente non ha un contratto attivo.
     #{/if}
     #{else}  
-      #{if wrCurrentContract.initializationMissing() }
+      #{if wrCurrentContract.initializationMissing() || wrCurrentContract.mealTicketInitBeforeGeneralInit() }
         #{alert color:'danger', center:true}
-	      <p><i class="fa fa-2x fa-times bg-danger"></i> Il contratto attuale necessita di inizializzazione poichè ePAS 
-	    	potrebbe non disporre di tutta l'informazione necessaria.
+	      <p><i class="fa fa-2x fa-times bg-danger"></i> Il contratto attuale non è correttamente inizializzato.
 	      </p>
 	      #{b.buttons center:true}
-	        #{b.link @Contracts.updateSourceContract(wrCurrentContract.value.id), color:'danger', title:'Inizializza'/}
-	      #{/b.buttons}
-        #{/alert}
-      #{/if}
-      
-      #{if wrCurrentContract.mealTicketInitBeforeGeneralInit() }
-        #{alert color:'warning', center:true}
-	      <p><i class="fa fa-2x fa-times bg-warning"></i> &{'contract.mealTicketInitBeforeGeneralInit'}</p>
-	      #{b.buttons center:true}
-	        #{b.link @Contracts.updateSourceContract(wrCurrentContract.value.id), color:'warning', title:'Inizializzazione'/}
+	        #{b.link @Contracts.initializationsStatus(wrCurrentContract.value.person.office.id), color:'danger', title:'Inizializzazioni'/}
 	      #{/b.buttons}
         #{/alert}
       #{/if}
