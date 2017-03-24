@@ -7,9 +7,9 @@
 	   	   <p><em>Il giorno attuale non è considerato nel conteggio dei buoni pasto utilizzati.</em></p>
    	   #{/if}
    	   <table class="table table-bordered table-condensed">
-   	      #{if mese.value.buoniPastoDaInizializzazione > 0}
+   	      #{if mese.value.buoniPastoDaInizializzazione > 0 || mese.value.buoniPastoDaInizializzazione < 0}
    	       <tr>
-		    <td class="col-xs-10">Buoni pasto da inizializzazione</td>
+		    <td class="col-xs-10">Buoni pasto da inizializzazione <em>(al ${mese.value.contract.sourceDateMealTicket.format()})</em></td>
 		    <td class="col-xs-2 success">${mese.value.buoniPastoDaInizializzazione}</td>
 		   </tr>
    	      #{/if}
