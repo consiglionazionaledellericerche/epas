@@ -93,7 +93,7 @@ public class Shift extends Controller {
    * @author arianna
    *
    */
-  @BasicAuth
+  //@BasicAuth
   public static void personList(String type) {
     response.accessControl("*");
 

@@ -90,7 +90,15 @@ when
   Role(name == Role.SHIFT_SUPERVISOR) from $uro.role
   $c: PermissionCheck(action in (
   		"Shift.handleShifts",
-  		"Shift.renderIds"), target == null, granted == false)
+  		"Shift.renderIds", 
+  		"Shift.personList",
+        "Shift.timeTable",
+        "Shift.find",
+        "Shift.update",
+        "Shift.exportMonthAsPDF",
+        "Shift.exportMonthCalAsPDF",
+        "Shift.absence",
+        "Shift.iCal"), target == null, granted == false)
 then
  $c.grant();
 end
@@ -102,7 +110,15 @@ when
   Role(name == Role.SHIFT_SUPERVISOR) from $uro.role
   $c: PermissionCheck(action in (
   		"Shift.handleShifts",
-  		"Shift.renderIds"), target == $o, granted == false)
+  		"Shift.renderIds",
+  		"Shift.personList",
+        "Shift.timeTable",
+        "Shift.find",
+        "Shift.update",
+        "Shift.exportMonthAsPDF",
+        "Shift.exportMonthCalAsPDF",
+        "Shift.absence",
+        "Shift.iCal"), target == $o, granted == false)
 then
  $c.grant();
 end

@@ -9,28 +9,9 @@
 *************************************************************************/
 function _RestJsonCall (uri, type, asyncMode, dataJson) {
 	console.log("uri = " + uri);
-	//console.log('nella _RestJsonCall - uri='+uri+' dataJson='+dataJson);
-	var result;
-	jQuery.ajax({
-		headers: {
-			Accept: "application/json",
-    },
-    dataType: "json",
-    contentType: "application/json",
-    url: uri,
-    type: type,
-    async: asyncMode,
-    data: dataJson,
-    success: function (data) {
-			result = data;
-    }
-  })
-  .error(function (jqXHR, textStatus, errorThrown) {
-          console.log("error during proxy call= " + textStatus);
-          console.log("incoming reperebility Text= " + jqXHR.responseText);
-  });
-
-	return result;
+	console.log('nella _RestJsonCall - uri='+uri+' dataJson='+dataJson+' type='+type);
+	
+	return $.getJSON(uri+dataJson);
 }
 
 /**************************************************************************
@@ -1055,13 +1036,13 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
         	//console.log("uriGetShiftPersons="+uriGetShiftPersons);
 
         	var data = new Array();
-        	data.push('GET');
+        	//data.push('GET');
         	data.push(uriGetShiftPersons);
 
-        	var dataJson = JSON.stringify(data);
+        	var dataJson = JSON.stringify(uriGetShiftPersons);
 
 		// exec the URI call
-      var shiftPerson = _RestJsonCall (uriProxy, 'POST', false, dataJson);
+      var shiftPerson = _RestJsonCall (uriProxy, 'GET', false, uriGetShiftPersons);
 
       jQuery.each(shiftPerson, function (i, event) {
           var name = event.name + " " + event.surname;
