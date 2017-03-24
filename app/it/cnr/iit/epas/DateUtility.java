@@ -12,6 +12,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
+import org.joda.time.Months;
 import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -226,8 +227,13 @@ public class DateUtility {
 
   }
 
+  /**
+   * Conta il numero di mesi appartenenti all'intervallo, estremi compresi.
+   * @param inter intervallo
+   * @return numero di mesi
+   */
   public static int monthsInInterval(final DateInterval inter) {
-    return 0;
+    return Months.monthsBetween(inter.getBegin(), inter.getEnd()).getMonths() + 1;
   }
 
   /**
