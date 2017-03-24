@@ -22,7 +22,12 @@
 	      <p><i class="fa fa-2x fa-times bg-danger"></i> Il contratto attuale non è correttamente inizializzato.
 	      </p>
 	      #{b.buttons center:true}
-	        #{b.link @Contracts.initializationsStatus(wrCurrentContract.value.person.office.id), color:'danger', title:'Inizializzazioni'/}
+	        #{if wrCurrentContract.initializationMissing()}
+	          #{b.link @Contracts.initializationsStatus(wrCurrentContract.value.person.office.id), color:'danger', title:'Inizializza'/}
+	        #{/if}
+	        #{else}
+	          #{b.link @Contracts.initializationsMeal(wrCurrentContract.value.person.office.id), color:'danger', title:'Inizializza'/}
+	        #{/else}
 	      #{/b.buttons}
         #{/alert}
       #{/if}
