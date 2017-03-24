@@ -30,21 +30,26 @@ jQuery(document).ready(function() {
     
     
     // read the Group Ids of the user and all roles for the groups          
-    var gids = Drupal.settings.sistCalendar.gids['node'];
+//    var gids = Drupal.settings.sistCalendar.gids['node'];
     
     // lista of calendar types that the group ca manage
     var types = new Array();
     
-    for (var gid in gids) {
-      groupTypes = groupConf.getTypes4Group(gid);
-      for(one in groupTypes){
-        if($.inArray(groupTypes[one], types) < 0){
-          types.push(groupTypes[one]);
-        }
-      }
-    }
-
-    if (types.length > 1) {
+//    for (var gid in gids) {
+//      groupTypes = groupConf.getTypes4Group(gid);
+//      for(one in groupTypes){
+//        if($.inArray(groupTypes[one], types) < 0){
+//          types.push(groupTypes[one]);
+//        }
+//      }
+//    }
+    
+	var json = $.getJSON('renderIds', function(data) {
+		
+		$.each(data, function(index, element) {
+	        types.push(element);
+	    });
+		if (types.length > 1) {
 			userAllowed = true;
 			shiftCalendar.selectPopup(userAllowed, types, 'shiftAdmin', shiftCalendar, groupConf);
 		} else {
@@ -60,7 +65,9 @@ jQuery(document).ready(function() {
 				createCalendarShiftAdmin(userAllowed, calendarType, shiftCalendar, groupConf);			
 			}	
 		}
-    
+		
+	});
+
     
 		// Codice per bottone visuale successiva
 		// ----------------------------------------
