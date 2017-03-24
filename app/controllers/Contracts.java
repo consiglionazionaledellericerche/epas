@@ -682,7 +682,8 @@ public class Contracts extends Controller {
     Preconditions.checkState(!wrContract.initializationMissing());
 
     if (sourceDateMealTicket != null) {
-      validation.future(sourceDateMealTicket.toDate(), wrContract.dateForInitialization().toDate())
+      validation.future(sourceDateMealTicket.toDate(), 
+          wrContract.dateForMealInitialization().minusDays(1).toDate())
           .key("sourceDateMealTicket").message("validation.after");
     }
 
@@ -693,6 +694,14 @@ public class Contracts extends Controller {
     }
 
     LocalDate recomputeFrom = sourceDateMealTicket;
+    if (recomputeFrom == null) {
+      //generale
+      if (contract.sourceDateResidual != null) {
+        recomputeFrom = contract.sourceDateResidual;
+      } else {
+        recomputeFrom = contract.beginDate;
+      }
+    }
     LocalDate recomputeTo = wrContract.getContractDateInterval().getEnd();
     if (recomputeTo.isAfter(LocalDate.now())) {
       recomputeTo = LocalDate.now();
@@ -768,6 +777,7 @@ public class Contracts extends Controller {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
 
+    List<IWrapperContract> initializationsBeforeGeneral = Lists.newArrayList();
     List<IWrapperContract> correctInitialized = Lists.newArrayList();
     List<IWrapperContract> correctNotInitialized = Lists.newArrayList();
 
@@ -783,16 +793,19 @@ public class Contracts extends Controller {
       if (wrPerson.currentContractInitializationMissing()) {
         //initializationsMissing.add(wrapperFactory.create(wrPerson.getCurrentContract().get()));
       } else {
-        if (wrPerson.getCurrentContract().get().sourceDateMealTicket != null) {
-          correctInitialized.add(wrapperFactory.create(wrPerson.getCurrentContract().get()));
+        IWrapperContract wrContract = wrapperFactory.create(wrPerson.getCurrentContract().get());
+        if (wrContract.mealTicketInitBeforeGeneralInit()) {
+          initializationsBeforeGeneral.add(wrContract);
+        } else if (wrContract.getValue().sourceDateMealTicket != null) {
+          correctInitialized.add(wrContract);
         } else {
-          correctNotInitialized.add(wrapperFactory.create(wrPerson.getCurrentContract().get()));
+          correctNotInitialized.add(wrContract);
         }
       }
 
     }
 
-    render(correctInitialized, correctNotInitialized, office);
+    render(initializationsBeforeGeneral, correctInitialized, correctNotInitialized, office);
 
   }
 }
