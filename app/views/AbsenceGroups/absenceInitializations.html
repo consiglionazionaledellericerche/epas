@@ -1,0 +1,109 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Assenze'  /}
+
+#{tabs.initializationsTabs action:'AbsenceGroups.absenceInitializations' /}
+
+<div class="container">
+
+  #{title title:'Inizializzazione Assenze ' + office.name /}
+
+   #{alert color:'info'}
+    #{if groupAbsenceType}
+      <p>Elenco delle inizializzazioni di tipo <strong>${groupAbsenceType.description}</strong> definite per i dipendenti attivi della sede. 
+      <br>Per tornare alla visualizzazione di tutte le tipologie deselezionare il filtro <strong>Tipologia Assenza</strong>.
+      </p>
+      
+    #{/if}
+    #{else}
+      <p>Elenco di <strong>Tutte</strong> le inizializzazioni assenze definite per i dipendenti attivi della sede.
+         <br>Per selezionare un tipo specifico utilizzare il filtro <strong>Tipologia Assenza</strong>.
+      </p>
+    #{/else}
+    <p><i class="fa fa-plus" aria-hidden="true"></i> Per definire una nuova inizializzazione selezionare una <strong>Tipologia Assenza</strong> e cliccare sul <strong>Nome</strong> del dipendente.</p>
+    <p><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Per modificare o eliminare una inizializzazione esistente cliccare sulla sua <strong>Data Iniziale</strong>.</p>
+   #{/alert} 
+   
+   #{form action:@AbsenceGroups.absenceInitializations(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit'}
+  
+  #{f.selectModel 'groupAbsenceType', inputName:'groupAbsenceTypeId', label:'Tipologia Assenza', personalizeItems:true}
+        <option></option>      
+       #{list items:initializableCategories, as:'category'}
+       <optgroup label="${category.label}">
+       #{list items:category.groupAbsenceTypes, as:'group'}
+         #{if group.initializable}  
+           <option value="${group.id}"
+	          #{if group.equals(groupAbsenceType)} selected #{/if}> 
+	          ${group.description}
+	       </option>
+	     #{/if}  
+  	   #{/list}
+  	   </optgroup>
+  	   #{/list} 
+   #{/f.selectModel}
+   
+   #{f.hidden 'officeId', value:office.id /}
+   
+   #{/form}
+     
+  
+    <table class="table table-bordered table-striped table-hover table-condensed center">
+	    <thead>
+	    <tr>
+	      <th>&{'person.name'}</th>
+	      <th>Gruppo</th>
+	      <th>Data Iniziale</th>
+	      <th>Giorni Completi<br>Utilizzati</th>
+	      <th>Ore e Minuti<br>Utilizzati</th>
+	    </tr>
+	    </thead>
+	    <tbody>
+	    #{list items:initializations, as:'initialization'}
+	
+	    <tr>
+	      <td class="alignLeft">
+	        #{if groupAbsenceType}
+	          <a href="@{AbsenceGroups.initialization(initialization.person.id, groupAbsenceType.id, null)}" data-async-modal="#defaultModal">${initialization.person.fullname}</a>
+	        #{/if}
+	        #{else}
+	          ${initialization.person.fullname}
+	        #{/else}
+	      </td>
+	       
+	      <td>${initialization.groupAbsenceType.description}</td>
+	      <td><a href="@{AbsenceGroups.initialization(initialization.person.id, initialization.groupAbsenceType.id, initialization.date.format())}" data-async-modal="#defaultModal">${initialization.date.format()}</a></td>
+	      <td>
+	        #{if initialization.unitsInput}
+	          ${initialization.unitsInput}
+	        #{/if}
+	      </td>
+	      <td>
+	        ${initialization.inputMinutes().printHourMinute()}
+	      </td>
+	    </tr>
+	
+	    #{/list}
+	    
+	    #{list items:withoutInitialization, as:'person'}
+	      <tr>
+	        <td class="alignLeft">
+	          #{if groupAbsenceType}
+	            <a href="@{AbsenceGroups.initialization(person.id, groupAbsenceType.id, null)}" data-async-modal="#defaultModal">${person.fullname}</a>
+	          #{/if}#{else}
+	            ${person.fullname}
+	          #{/else}
+	        </td>
+	        <td><em class="text-muted">Nessuna inizializzazione definita</em></td>
+	        <td></td>
+	        <td></td>
+	        <td></td>
+	      </tr>
+	    #{/list}
+	    
+	    </tbody>
+	  </table>
+  
+ 
+
+  
+</div>
