@@ -707,6 +707,9 @@ public class AbsenceGroups extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
+    
+    rules.checkIfPermitted(person.office);
+    
     GroupAbsenceType groupAbsenceType = GroupAbsenceType.findById(groupAbsenceTypeId);
     notFoundIfNull(groupAbsenceType);
     if (date == null) {
@@ -762,6 +765,9 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(initializationGroup.person);
     notFoundIfNull(initializationGroup.groupAbsenceType);
     notFoundIfNull(initializationGroup.date);
+    
+    rules.checkIfPermitted(initializationGroup.person.office);
+    
     PeriodChain periodChain = absenceService.residual(initializationGroup.person,
         initializationGroup.groupAbsenceType, initializationGroup.date);
     Preconditions.checkState(!periodChain.periods.isEmpty());
@@ -819,6 +825,8 @@ public class AbsenceGroups extends Controller {
 
     notFoundIfNull(initializationGroup);
 
+    rules.checkIfPermitted(initializationGroup.person.office);
+    
     initializationGroup.delete();
 
     flash.success("Inizializzazione rimossa con successo.");
