@@ -755,6 +755,9 @@ when
         "Contracts.saveContractVacationPeriod",
         
         "AbsenceGroups.absenceInitializations",
+        "AbsenceGroups.initialization",
+        "AbsenceGroups.saveInitialization",
+        "AbsenceGroups.deleteInitialization",
 
      	"Persons.children",
      	"Persons.editChild",
@@ -914,7 +917,10 @@ when
         "Contracts.saveContractVacationPeriod",
         
         "AbsenceGroups.absenceInitializations",
-
+        "AbsenceGroups.initialization",
+        "AbsenceGroups.saveInitialization",
+        "AbsenceGroups.deleteInitialization",
+        
      	"Persons.children",
      	"Persons.editChild",
      	"Persons.saveChild",
