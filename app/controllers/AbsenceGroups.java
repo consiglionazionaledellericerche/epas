@@ -658,6 +658,8 @@ public class AbsenceGroups extends Controller {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     
+    rules.checkIfPermitted(office);
+    
     //Categorie inizializzabili e gruppo selezionato
     List<CategoryGroupAbsenceType> initializableCategories =
         absenceComponentDao.initializablesCategory();

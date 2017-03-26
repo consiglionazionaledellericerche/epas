@@ -298,6 +298,7 @@ when
     "AbsenceGroups.showGroups",
     "AbsenceGroups.editGroup",       /* per la show... */
     "AbsenceGroups.editAbsenceType", /* per la show... */
+    "AbsenceGroups.absenceInitializations",
     "BadgeReaders.list",
     "BadgeSystems.list",
     "BadgeSystems.personBadges",
@@ -752,6 +753,8 @@ when
         "Contracts.saveContractWorkingTimeType",
         "Contracts.updateContractVacationPeriod",
         "Contracts.saveContractVacationPeriod",
+        
+        "AbsenceGroups.absenceInitializations",
 
      	"Persons.children",
      	"Persons.editChild",
@@ -909,6 +912,8 @@ when
         "Contracts.saveContractWorkingTimeType",
         "Contracts.updateContractVacationPeriod",
         "Contracts.saveContractVacationPeriod",
+        
+        "AbsenceGroups.absenceInitializations",
 
      	"Persons.children",
      	"Persons.editChild",
