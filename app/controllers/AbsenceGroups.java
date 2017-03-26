@@ -4,9 +4,11 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.QualificationDao;
 import dao.UserDao;
@@ -36,6 +38,7 @@ import manager.services.absences.certifications.CodeComparation;
 import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.PeriodChain;
 
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.Qualification;
@@ -73,6 +76,8 @@ public class AbsenceGroups extends Controller {
 
   @Inject
   private static PersonDao personDao;
+  @Inject
+  private static OfficeDao officeDao;
   @Inject
   private static PersonDayManager personDayManager;
   @Inject
@@ -642,6 +647,51 @@ public class AbsenceGroups extends Controller {
 
     render(from, categorySwitcher, groupAbsenceType, periodChain, isAdmin);
   }
+  
+  /**
+   * Elenco delle inizializzazioni assenze.
+   * @param officeId sede
+   * @param groupAbsenceTypeId gruppo
+   */
+  public static void absenceInitializations(Long officeId, Long groupAbsenceTypeId) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    
+    //Categorie inizializzabili e gruppo selezionato
+    List<CategoryGroupAbsenceType> initializableCategories =
+        absenceComponentDao.initializablesCategory();
+    
+    GroupAbsenceType groupAbsenceType = null;
+    if (groupAbsenceTypeId != null) {
+      groupAbsenceType = absenceComponentDao.groupAbsenceTypeById(groupAbsenceTypeId);
+    }
+    
+    List<InitializationGroup> initializations = Lists.newArrayList();
+    List<Person> withoutInitialization = Lists.newArrayList();
+    
+    //Tutte le persone attive e tutte le inizializzazioni.
+    for (Person person : personDao.listFetched(Optional.absent(),
+        ImmutableSet.of(office), false, LocalDate.now(), LocalDate.now(), false).list()) {
+      boolean existInitialization = false;
+      for (InitializationGroup initializationGroup : person.initializationGroups) {
+
+        if (groupAbsenceType == null 
+            || groupAbsenceType.equals(initializationGroup.groupAbsenceType)) {
+          existInitialization = true;
+          initializations.add(initializationGroup);
+        }
+      }
+      
+      if (!existInitialization) {
+        withoutInitialization.add(person);
+      }
+    }
+    
+    render(initializableCategories, groupAbsenceType, initializations,
+        withoutInitialization, office);
+   
+  }
 
   /**
    * End point per definire l'inizializzazione di un gruppo.
@@ -650,25 +700,15 @@ public class AbsenceGroups extends Controller {
    * @param groupAbsenceTypeId gruppo
    * @param date               data
    */
-  public static void initialization(Long personId, Long groupAbsenceTypeId, LocalDate date) {
+  public static void initialization(Long personId, Long groupAbsenceTypeId, LocalDate date, 
+      boolean redirectToStatus) {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
+    GroupAbsenceType groupAbsenceType = GroupAbsenceType.findById(groupAbsenceTypeId);
+    notFoundIfNull(groupAbsenceType);
     if (date == null) {
       date = LocalDate.now();
-    }
-
-    //Categorie inizializzabili e gruppo selezionato
-    List<CategoryGroupAbsenceType> initializableCategories =
-        absenceComponentDao.initializablesCategory();
-    Verify.verify(!initializableCategories.isEmpty());
-    GroupAbsenceType groupAbsenceType = absenceComponentDao.firstGroupInitializable(
-        initializableCategories.iterator().next());
-
-    if (groupAbsenceTypeId != null) {
-      groupAbsenceType = GroupAbsenceType.findById(groupAbsenceTypeId);
-      notFoundIfNull(groupAbsenceType);
-      Verify.verify(groupAbsenceType.initializable);
     }
 
     InitializationGroup initializationGroup =
@@ -682,14 +722,14 @@ public class AbsenceGroups extends Controller {
     if (!wtt.isPresent()) {
       Validation.addError("date", "Deve essere una data attiva, "
           + "o immediatamente precedente l'inizio di un contratto.");
-      render(initializableCategories, initializationGroup);
+      render(initializationGroup, date, redirectToStatus);
     }
     int averageWeekWorkingTime = wtt.get().weekAverageWorkingTime();
 
     //Stato del gruppo
     PeriodChain periodChain = absenceService.residual(person, groupAbsenceType, date);
     if (periodChain.periods.isEmpty()) {
-      render(initializableCategories, initializationGroup, periodChain);
+      render(initializationGroup, periodChain, date, redirectToStatus);
     }
     AbsencePeriod absencePeriod = periodChain.periods.iterator().next();
 
@@ -703,7 +743,7 @@ public class AbsenceGroups extends Controller {
     }
 
 
-    render(initializableCategories, date, initializationGroup, periodChain, absencePeriod);
+    render(date, initializationGroup, periodChain, absencePeriod, redirectToStatus);
 
   }
 
@@ -712,7 +752,8 @@ public class AbsenceGroups extends Controller {
    *
    * @param initializationGroup initializationGroup
    */
-  public static void saveInitialization(@Valid InitializationGroup initializationGroup) {
+  public static void saveInitialization(@Valid InitializationGroup initializationGroup, 
+      boolean redirectToStatus) {
 
     // Lo stato della richiesta
 
@@ -757,8 +798,13 @@ public class AbsenceGroups extends Controller {
 
     flash.success("Inizializzazione salvata con successo.");
 
-    initialization(initializationGroup.person.id, initializationGroup.groupAbsenceType.id,
-        initializationGroup.date);
+    if (redirectToStatus) {
+      groupStatus(initializationGroup.person.id, initializationGroup.groupAbsenceType.id, 
+          initializationGroup.date);
+    } else {
+      absenceInitializations(initializationGroup.person.office.id, 
+          initializationGroup.groupAbsenceType.id);
+    }
   }
 
   /**
@@ -766,7 +812,8 @@ public class AbsenceGroups extends Controller {
    *
    * @param initializationGroup inizializzazione
    */
-  public static void deleteInitialization(InitializationGroup initializationGroup) {
+  public static void deleteInitialization(InitializationGroup initializationGroup, 
+      boolean redirectToStatus) {
 
     notFoundIfNull(initializationGroup);
 
@@ -776,8 +823,14 @@ public class AbsenceGroups extends Controller {
 
     //TODO: check del gruppo per i ricalcoli
 
-    initialization(initializationGroup.person.id, initializationGroup.groupAbsenceType.id,
-        initializationGroup.date);
+    if (redirectToStatus) {
+      groupStatus(initializationGroup.person.id, initializationGroup.groupAbsenceType.id, 
+          initializationGroup.date);
+    } else {
+      absenceInitializations(initializationGroup.person.office.id, 
+          initializationGroup.groupAbsenceType.id);
+    }
+
   }
 
 
