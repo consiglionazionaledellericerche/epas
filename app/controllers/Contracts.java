@@ -740,6 +740,8 @@ public class Contracts extends Controller {
     
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
+    
+    rules.checkIfPermitted(office);
 
     List<IWrapperContract> initializationsMissing = Lists.newArrayList();
     List<IWrapperContract> correctInitialized = Lists.newArrayList();
@@ -776,6 +778,8 @@ public class Contracts extends Controller {
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
+    
+    rules.checkIfPermitted(office);
 
     List<IWrapperContract> initializationsBeforeGeneral = Lists.newArrayList();
     List<IWrapperContract> correctInitialized = Lists.newArrayList();
