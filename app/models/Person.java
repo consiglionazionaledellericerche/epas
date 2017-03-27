@@ -33,6 +33,7 @@ import lombok.Getter;
 
 import manager.configurations.EpasParam;
 
+import models.absences.InitializationGroup;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
@@ -246,6 +247,9 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
    */
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public List<PersonConfiguration> personConfigurations = Lists.newArrayList();
+  
+  @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+  public Set<InitializationGroup> initializationGroups;
 
 
   public String getName() {

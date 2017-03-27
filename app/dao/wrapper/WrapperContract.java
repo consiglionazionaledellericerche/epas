@@ -286,6 +286,23 @@ public class WrapperContract implements IWrapperContract {
 
     return candidate;
   }
+  
+  /**
+   * @return La data più recente tra la creazione del contratto e la creazione della persona.
+   */
+  @Override
+  public LocalDate dateForMealInitialization() {
+
+    if (initializationMissing()) {
+      return null;
+    }
+    
+    if (value.sourceDateResidual != null) {
+      return value.sourceDateResidual;
+    }
+    
+    return value.beginDate.minusDays(1);
+  }
 
   /**
    * Se il contratto è finito prima che la sede della persona fosse installata in ePAS.

@@ -298,6 +298,7 @@ when
     "AbsenceGroups.showGroups",
     "AbsenceGroups.editGroup",       /* per la show... */
     "AbsenceGroups.editAbsenceType", /* per la show... */
+    "AbsenceGroups.absenceInitializations",
     "BadgeReaders.list",
     "BadgeSystems.list",
     "BadgeSystems.personBadges",
@@ -318,7 +319,8 @@ when
     "Contracts.personContracts",
     "Contracts.updateContractVacationPeriod",
     "Contracts.updateContractWorkingTimeType",
-    "Contracts.updateSourceContract",
+    "Contracts.initializationsStatus",
+    "Contracts.initializationsMeal",
     "Institutes.list",
     "MealTickets.editPersonMealTickets",
     "MealTickets.findCodeBlock",
@@ -739,7 +741,10 @@ when
         "Contracts.update",
         "Contracts.delete",
 
+        "Contracts.initializationsStatus",
+        "Contracts.initializationsMeal",
         "Contracts.updateSourceContract",
+        "Contracts.updateSourceContractMeal",
      	"Contracts.saveResidualSourceContract",
      	"Contracts.saveMealTicketSourceContract",
 		"Contracts.updateContractStampProfile",
@@ -748,6 +753,11 @@ when
         "Contracts.saveContractWorkingTimeType",
         "Contracts.updateContractVacationPeriod",
         "Contracts.saveContractVacationPeriod",
+        
+        "AbsenceGroups.absenceInitializations",
+        "AbsenceGroups.initialization",
+        "AbsenceGroups.saveInitialization",
+        "AbsenceGroups.deleteInitialization",
 
      	"Persons.children",
      	"Persons.editChild",
@@ -893,7 +903,10 @@ when
         "Contracts.update",
         "Contracts.delete",
 
+        "Contracts.initializationsStatus",
+        "Contracts.initializationsMeal",
         "Contracts.updateSourceContract",
+        "Contracts.updateSourceContractMeal",
      	"Contracts.saveResidualSourceContract",
      	"Contracts.saveMealTicketSourceContract",
 		"Contracts.updateContractStampProfile",
@@ -902,7 +915,12 @@ when
         "Contracts.saveContractWorkingTimeType",
         "Contracts.updateContractVacationPeriod",
         "Contracts.saveContractVacationPeriod",
-
+        
+        "AbsenceGroups.absenceInitializations",
+        "AbsenceGroups.initialization",
+        "AbsenceGroups.saveInitialization",
+        "AbsenceGroups.deleteInitialization",
+        
      	"Persons.children",
      	"Persons.editChild",
      	"Persons.saveChild",

@@ -121,13 +121,25 @@ public class ContractMonthRecapManager {
       cmr.buoniPastoDalMesePrecedente =
           recapPreviousMonth.get().remainingMealTickets;
     }
+    //Se è il primo riepilogo dovuto ad inzializzazione utilizzo i dati
+    //in source
     if (contract.sourceDateMealTicket != null
         && contract.sourceDateMealTicket.getYear() == yearMonth.getYear()
         && contract.sourceDateMealTicket.getMonthOfYear() == yearMonth.getMonthOfYear()) {
-      //Se è il primo riepilogo dovuto ad inzializzazione utilizzo i dati
-      //in source
       cmr.buoniPastoDaInizializzazione = contract.sourceRemainingMealTicket;
       cmr.buoniPastoDalMesePrecedente = 0;
+    }
+    //Ma c'è il particolarissimo caso in cui il contratto inizia il primo del mese,
+    // non ho definito inizializzazione generale, e voglio impostare il residuo iniziale 
+    // (all'ultimo giorno del mese precedente)
+    if (contract.sourceDateResidual == null 
+        && contract.sourceDateMealTicket != null 
+        && new YearMonth(contract.beginDate).equals(yearMonth) 
+        && contract.beginDate.getDayOfMonth() == 1 
+        && contract.sourceDateMealTicket.isEqual(contract.beginDate.minusDays(1))) {
+      
+      cmr.buoniPastoDaInizializzazione = 0;
+      cmr.buoniPastoDalMesePrecedente = contract.sourceRemainingMealTicket;
     }
 
     //////////////////////////////////////////////////////////////////////////
