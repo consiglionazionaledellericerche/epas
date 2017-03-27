@@ -62,11 +62,11 @@
      #{if absencePeriod.initialization}
        %{ initializationGroup = absencePeriod.initialization; }%
        #{include './_initializationStatus.html' /}
-       <a class="btn btn-sm btn-warning pull-right" href="@{AbsenceGroups.initialization(absencePeriod.person.id, absencePeriod.groupAbsenceType.id, periodChain.date)}">Modifica inizializzazione</a>
+       <a class="btn btn-sm btn-warning pull-right" href="@{AbsenceGroups.initialization(absencePeriod.person.id, absencePeriod.groupAbsenceType.id, initializationGroup.date.format(), true)}" data-async-modal="#defaultModal">Modifica Inizializzazione</a>
      #{/if}
      #{else}
        Per questo periodo non è stata definita alcuna inizializzazione. 
-       <a class="btn btn-sm btn-warning pull-right" href="@{AbsenceGroups.initialization(absencePeriod.person.id, absencePeriod.groupAbsenceType.id, periodChain.date)}">Definisci i dati iniziali</a>      
+       <a class="btn btn-sm btn-warning pull-right" href="@{AbsenceGroups.initialization(absencePeriod.person.id, absencePeriod.groupAbsenceType.id, periodChain.date, true)}" data-async-modal="#defaultModal">Inizializzazione</a>      
      #{/else}
      #{/if}
      </p>
@@ -81,7 +81,7 @@
      
     
     #{if absencePeriod.daysInPeriod.values().empty }
-        <em>Non ci sono assenze utilizzate per questo gruppo nel periodo selezionato.</em>
+        <p><em>Non ci sono assenze utilizzate per questo gruppo nel periodo selezionato.</em></p>
     #{/if}
     #{else}
 

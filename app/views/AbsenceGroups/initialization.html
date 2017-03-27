@@ -1,69 +1,52 @@
-#{extends 'main.html' /}
-#{set header:'navbar' /}
-#{set title: 'ePAS - Assenze'  /}
+#{modalAsync title: 'Inizializza assenze ' + initializationGroup.person.fullname }
 
-#{set breadcrumbs:['Lista Persone':@Persons.list(), 
-  (initializationGroup.person.fullname):null] /}
-#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+<div id="absenceInit">
 
-%{ person = initializationGroup.person; }%
+  #{form action:@AbsenceGroups.initialization(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit',
+    'data-async':'#absenceInit', 'data-async-error':'#absenceInit', 'data-spinner':'#defaultSpinner'}
 
-#{include 'Persons/_tabs.html' /}
-
-<div class="container">
-
-  #{form action:@AbsenceGroups.initialization(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit'}
-
-  #{f.selectModel 'groupAbsenceType', inputName:'groupAbsenceTypeId', label:'Tipologia Assenza', personalizeItems:true}
-        <option></option>      
-       #{list items:initializableCategories, as:'category'}
-       <optgroup label="${category.name}">
-       #{list items:category.groupAbsenceTypes, as:'group'}
-         #{if group.initializable}  
-           <option value="${group.id}"
-	          #{if group.equals(initializationGroup.groupAbsenceType)} selected #{/if}> 
-	          ${group.description}
-	       </option>
-	     #{/if}  
-  	   #{/list}
-  	   </optgroup>
-  	   #{/list} 
-     #{/f.selectModel}
-     
-     #{f.date 'date', value:date.format() /}
+     #{f.simpleView 'groupAbsenceTypeId', value:initializationGroup.groupAbsenceType.description, label:'Tipologia Assenza' /}
+          
+     #{f.hidden 'groupAbsenceTypeId', value:initializationGroup.groupAbsenceType.id /}
+     #{f.date 'date', label:'Data Inizializzazione', value:date.format() /}
      #{f.hidden 'personId', value:initializationGroup.person.id /}
   
   #{/form}
   
- 
-	  #{if periodChain.containsCriticalErrors()}
-	    #{alert color:'danger'}
-	      <p>Impossibile visualizzare la situazione. Effettuare una segnalazione.</p>
-	    #{/alert}
-	  #{/if}
-	  #{if periodChain.childIsMissing()}
-	    #{alert color:'danger'}
-	      <p>Impossibile visualizzare la situazione. Figlio non presente in anagrafica o fuori età.</p>
-	    #{/alert}
-	  #{/if}
+  <!-- Suggerimento -->
+  #{alert color:'info'}
+	<p>
+	   <i class="fa fa-info-circle" aria-hidden="true"></i> Utilizzare il campo <strong>Data Inizializzazione</strong> per individuare il periodo da inizializzare. 
+	</p>
+	<p>Una volta definiti i valori iniziali verranno ignorate tutte le assenze inserite fino alla <strong>Data Inizializzazione</strong>.</p>
+  #{/alert}
+  
+  #{if periodChain && periodChain.containsCriticalErrors()}
+	  #{alert color:'danger'}
+	    <p><i class="fa fa-times" aria-hidden="true"></i> Impossibile visualizzare la situazione a causa di errori inattesi. Effettuare una segnalazione.</p>
+	  #{/alert}
+  #{/if}
+  #{if periodChain && periodChain.childIsMissing()}
+    #{alert color:'danger'}
+      <p><i class="fa fa-times fa-2x" aria-hidden="true"></i> Impossibile visualizzare la situazione. Figlio non presente in anagrafica o fuori età rispetto alla data selezionata.</p>
+    #{/alert}
+  #{/if}
 
-	  <ul>
    #{if absencePeriod}  
-	  <!-- Suggerimento -->
-	  <li class="list-group-item list-group-item-info">
-	    <p>
-	        Imposta i valori di inizializzazione per <strong>${initializationGroup.groupAbsenceType.description}</strong> 
-	    </p>
-	  </li>
-	  
-	  <li class="list-group-item">
+
+	
 	  
 	  <!-- Riepilogo gruppo -->
-	  <a class="btn btn-warning btn-sm pull-right" href="@{AbsenceGroups.groupStatus(absencePeriod.person.id, absencePeriod.groupAbsenceType.id, periodChain.date.format())}">
-	    <i class="fa fa-search" aria-hidden="true"></i> Stato delle assenze
-	  </a>
-	    
-	  <p>
+	  #{alert color:'warning'}
+	  
+	    <h4><i class="fa fa-arrow-right" aria-hidden="true"></i>
+	    <strong>Periodo individuato da inizializzare</strong></h4>
+	    #{if !redirectToStatus }
+	    <a class="btn btn-warning btn-sm pull-right" href="@{AbsenceGroups.groupStatus(absencePeriod.person.id, absencePeriod.groupAbsenceType.id, periodChain.date.format())}">
+	      <i class="fa fa-search" aria-hidden="true"></i> Stato delle assenze<br> di questo periodo
+	    </a>
+	    #{/if}
+	    <p>
 	        #{if absencePeriod.isTakableWithLimit() }
 	           <strong>Tipo periodo</strong> &{absencePeriod.groupAbsenceType.periodType}<br>
 	           <strong>Validità periodo</strong> ${absencePeriod.from.format()} - ${absencePeriod.to.format()}
@@ -75,27 +58,33 @@
 	             <strong>Tempo a lavoro medio</strong> ${averageWeekWorkingTime.printHourMinute()}<br>  
 	        #{/if}
 	       
-	  </p>
-	  </li>
+	    </p>
+
+	  #{/alert}
 	  
+	    
+	  
+	  <!-- Inizializzazione precedente riepilogo e cancellazione -->	  
 	  #{if initializationGroup.persistent}
-	  <li class="list-group-item">
-	  <div>
-	  <!-- Inizializzazione precedente -->
-	       #{include './_initializationStatus.html' /}
-	       #{form action:@AbsenceGroups.deleteInitialization(), method:'POST', autocomplete:false}
-	         #{f.hidden 'initializationGroup.id', value:initializationGroup.id /}
-	         <button class="btn btn-danger btn-sm pull-right" type="submit">Rimuovi inizializzazione</button>    
-	       #{/form}
-	       <br>
-	       Cliccando su Salva i vecchi dati verranno sovrascritti.	
-	  </div>
-	  </li>
+	    #{alert color:'warning'}
+	        <h4><i class="fa fa-check" aria-hidden="true"></i><strong> Inizializzazione già definita</strong></h4>
+	        #{include './_initializationStatus.html' /}
+	  
+	        #{form action:@AbsenceGroups.deleteInitialization(), method:'POST', autocomplete:false}
+	          #{f.hidden 'initializationGroup.id', value:initializationGroup.id /}
+	          #{f.hidden 'redirectToStatus', value:redirectToStatus /}
+	          <button class="btn btn-danger btn-sm pull-right" type="submit">Rimuovi inizializzazione</button>    
+	        #{/form}
+	        <br>
+	        Cliccando su <strong>Salva</strong> questi dati verranno sovrascritti.	
+ 	    #{/alert}
 	  #{/if}
 
-	  <li class="list-group-item">  
-	  #{form action:@AbsenceGroups.saveInitialization(), method:'POST', autocomplete:false, class:'form form-horizontal group'}
+
+	  #{form action:@AbsenceGroups.saveInitialization(), method:'POST', autocomplete:false, class:'form form-horizontal group', 
+	    'data-async':'#page_content', 'data-async-error':'#absenceInit', 'data-spinner':'#defaultSpinner'}
 	  
+	  #{f.hidden 'redirectToStatus', value:redirectToStatus /}
 	  
 	  #{if initializationGroup.persistent}
 	    #{f.hidden 'initializationGroup.id', value:initializationGroup.id /}
@@ -105,13 +94,15 @@
 	  #{f.hidden 'initializationGroup.date', value:date.format() /}
 	  #{f.hidden 'initializationGroup.person.id', value:initializationGroup.person.id /}
 	  
-	  #{f.view 'Data', value:date.format() /}
+	  #{f.view 'Data Inizializzazione', value:date.format() /}
+	  
 	  #{if absencePeriod.isTakableUnits()}
 	    #{f.input 'initializationGroup.unitsInput', value:initializationGroup.unitsInput, type:'number' /}
 	  #{/if}
 	  #{f.input 'initializationGroup.hoursInput', value:initializationGroup.hoursInput, type:'number' /}
 	  #{f.selectEnum 'initializationGroup.minutesInput', items:initializationGroup.selectableMinutes(), value:initializationGroup.minutesInput, byEquals:'true' /}
 	 
+	  
 	  #{b.buttons center:true}
 	   #{b.submit 'Salva'/}
 	  #{/b.buttons}
@@ -119,7 +110,6 @@
 	  
 	  #{/form}
 	  
-	  </li>
 	
 	  #{if absencePeriod.errorsBox.containsCriticalErrors() }
 	      <li class="list-group-item">ci sono errori critici. TODO: elencarli</li>
@@ -129,8 +119,8 @@
 	  #{/if}
 	    
 	
-	  </ul>
-  
   #{/if}
-  
-</div>
+
+ </div>
+ 
+#{/modalAsync}   

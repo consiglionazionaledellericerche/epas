@@ -1,0 +1,189 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Stato inizializzazioni'  /}
+
+#{set 'moreStyles'}
+<style>
+  td.alignLeft { text-align: left !important; }
+</style>
+#{/set}
+
+#{tabs.initializationsTabs action:'initializationsMeal', office:office /}
+
+<div class="container">
+
+  #{title title:'Inizializzazione Buoni Pasto ' + office.name /}
+  
+  <!-- Tutti i dipendenti sono correttamente inizializzati -->
+  #{if initializationsBeforeGeneral.empty}
+    #{alert color:'success'}
+      <i class="fa fa-2x fa-check bg-success"></i>
+      L'inizializzazione buoni pasto, ove presente, è correttamente impostata per tutti i dipendenti della sede.
+    #{/alert}
+  #{/if}
+  <!-- Alcuni dipendenti non sono correttamente inizializzati (elenco) -->
+  #{else}
+	#{alert color:'warning'}
+	    <p>
+	      <i class="fa fa-2x fa-warning bg-warning"></i> 
+	      Sono presenti dipendenti attivi della sede con una inizializzazione buoni pasto contenente problemi.
+	    </p>
+	    <p>
+	      Tali inizializzazioni possono risultare confondenti, si suggerisce di correggerle.
+	    </p>
+	#{/alert}
+	   <table class="table table-bordered table-striped table-hover table-condensed center">
+	    <thead>
+	    <tr>
+	      <th>&{'person.name'}</th>
+	      <th>&{'person.number'}</th>
+	      <th>Inizio<br>Contratto</th>
+	      <th>Data <br>Iniziale</th>
+	      <th>Buoni Pasto</th>
+	      <td>Modifica</td>
+	    </tr>
+	    </thead>
+	    <tbody>
+	    #{list items:initializationsBeforeGeneral, as:'contract'}
+	
+	    <tr>
+	      <td class="alignLeft">
+	        ${contract.value.person.fullname}
+	      </td>
+	       
+	      <td>${contract.value.person.number}</td>
+	      <td data-order="${contract.value.beginDate}">
+	        ${contract.value.beginDate?.format()}
+	      </td>
+	
+	      <td>
+	        ${contract.value.sourceDateMealTicket?.format()}
+		  </td>
+	
+	      <td>
+	        ${contract.value.sourceRemainingMealTicket}
+	      </td>
+	      
+	      <td>
+            <a href="@{updateSourceContractMeal(contract.value.id)}" data-async-modal="#defaultModal">
+              <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+            </a>  
+          </td>
+          
+        </tr>
+	
+	    #{/list}
+	    </tbody>
+	  </table>
+  #{/else}
+  
+  #{alert color:'info'}
+  <p>
+    Elenco dei dipendenti attivi con inizializzazione buoni pasto definita.
+  </p>
+  #{/alert}
+  
+  <table class="table table-bordered table-striped table-hover table-condensed center">
+    <thead>
+    <tr>
+      <th>&{'person.name'}</th>
+      <th>&{'person.number'}</th>
+      <th>Inizio<br>Contratto</th>
+      <th>Data <br>Iniziale</th>
+      <th>Buoni Pasto</th>
+      <th>Modifica</th>
+    </tr>
+    </thead>
+    <tbody>
+    #{list items:correctInitialized, as:'contract'}
+
+    <tr>
+      <td class="alignLeft">
+        ${contract.value.person.fullname}
+      </td>
+       
+      <td>${contract.value.person.number}</td>
+      <td data-order="${contract.value.beginDate}">
+        ${contract.value.beginDate?.format()}
+      </td>
+
+      <td>
+          ${contract.value.sourceDateMealTicket?.format()}
+      </td>
+
+      <td>
+        ${contract.value.sourceRemainingMealTicket}
+      </td>
+      
+      <td>
+        <a href="@{updateSourceContractMeal(contract.value.id)}" data-async-modal="#defaultModal">
+          <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+        </a>  
+      </td>      
+
+    </tr>
+
+    #{/list}
+    </tbody>
+  </table>
+  
+  
+  
+ 
+  #{alert color:'info'}
+    <p>
+      Elenco dei dipendenti attivi senza inizializzazione buoni pasto.
+    </p>
+  #{/alert}
+  <table class="table table-bordered table-striped table-hover table-condensed center">
+    <thead>
+    <tr>
+      <th>&{'person.name'}</th>
+      <th>&{'person.number'}</th>
+      <th>Inizio<br>Contratto</th>
+      <th>Fine<br>Contratto</th>
+      <th>Inizializzabile Dal</th>
+      <th>Inizializza</th>
+    </tr>
+    </thead>
+    <tbody>
+    #{list items:correctNotInitialized, as:'contract'}
+
+    <tr>
+      <td class="alignLeft">
+        ${contract.value.person.fullname}
+      </td>
+       
+      <td>${contract.value.person.number}</td>
+      <td data-order="${contract.value.beginDate}">
+        ${contract.value.beginDate?.format()}
+      </td>
+
+      <td data-order="${contract.value.endDate}">
+        #{if contract.value.endDate}
+          ${contract.value.endDate.format()}
+        #{/if}
+        #{else}
+          #{if contract.value.isTemporaryMissing}
+            <em class="text-danger">Data da inserire</em>
+          #{/if}
+        #{/else}
+
+      </td>
+      <td>
+        ${contract.dateForMealInitialization().format()}
+      </td>
+      <td>
+        <a href="@{updateSourceContractMeal(contract.value.id)}" data-async-modal="#defaultModal""><i class="fa fa-plus" aria-hidden="true"></i></a>
+      </td>
+
+    </tr>
+
+    #{/list}
+    </tbody>
+  </table>
+
+
+
+</div>
+
