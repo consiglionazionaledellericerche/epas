@@ -4,6 +4,12 @@
 
 #{tabs.initializationsTabs action:'AbsenceGroups.absenceInitializations' /}
 
+#{set 'moreStyles'}
+<style>
+  td.alignLeft { text-align: left !important; }
+</style>
+#{/set}
+
 <div class="container">
 
   #{title title:'Inizializzazione Assenze ' + office.name /}
@@ -20,8 +26,8 @@
          <br>Per selezionare un tipo specifico utilizzare il filtro <strong>Tipologia Assenza</strong>.
       </p>
     #{/else}
-    <p><i class="fa fa-plus" aria-hidden="true"></i> Per definire una nuova inizializzazione selezionare una <strong>Tipologia Assenza</strong> e cliccare sul <strong>Nome</strong> del dipendente.</p>
-    <p><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Per modificare o eliminare una inizializzazione esistente cliccare sulla sua <strong>Data Iniziale</strong>.</p>
+    <p>Per definire una nuova inizializzazione selezionare la <strong>Tipologia Assenza</strong> e cliccare su <i class="fa fa-plus" aria-hidden="true"></i> </p>
+    
    #{/alert} 
    
    #{form action:@AbsenceGroups.absenceInitializations(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit'}
@@ -55,6 +61,10 @@
 	      <th>Data Iniziale</th>
 	      <th>Giorni Completi<br>Utilizzati</th>
 	      <th>Ore e Minuti<br>Utilizzati</th>
+	      #{if groupAbsenceType}
+	        <th>Modifica</th>
+	        <th>Inizializza</th>
+	      #{/if}
 	    </tr>
 	    </thead>
 	    <tbody>
@@ -62,16 +72,11 @@
 	
 	    <tr>
 	      <td class="alignLeft">
-	        #{if groupAbsenceType}
-	          <a href="@{AbsenceGroups.initialization(initialization.person.id, groupAbsenceType.id, null)}" data-async-modal="#defaultModal">${initialization.person.fullname}</a>
-	        #{/if}
-	        #{else}
-	          ${initialization.person.fullname}
-	        #{/else}
+	        ${initialization.person.fullname} 
 	      </td>
 	       
 	      <td>${initialization.groupAbsenceType.description}</td>
-	      <td><a href="@{AbsenceGroups.initialization(initialization.person.id, initialization.groupAbsenceType.id, initialization.date.format())}" data-async-modal="#defaultModal">${initialization.date.format()}</a></td>
+	      <td>${initialization.date.format()}</td>
 	      <td>
 	        #{if initialization.unitsInput}
 	          ${initialization.unitsInput}
@@ -80,6 +85,14 @@
 	      <td>
 	        ${initialization.inputMinutes().printHourMinute()}
 	      </td>
+	      #{if groupAbsenceType}
+	        <td>
+	          <a href="@{AbsenceGroups.initialization(initialization.person.id, initialization.groupAbsenceType.id, initialization.date.format())}" data-async-modal="#defaultModal"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
+	        </td>
+	        <td>
+	          <a href="@{AbsenceGroups.initialization(initialization.person.id, initialization.groupAbsenceType.id, null)}" data-async-modal="#defaultModal"><i class="fa fa-plus" aria-hidden="true"></i></a>
+	        </td>
+	      #{/if}
 	    </tr>
 	
 	    #{/list}
@@ -87,16 +100,18 @@
 	    #{list items:withoutInitialization, as:'person'}
 	      <tr>
 	        <td class="alignLeft">
-	          #{if groupAbsenceType}
-	            <a href="@{AbsenceGroups.initialization(person.id, groupAbsenceType.id, null)}" data-async-modal="#defaultModal">${person.fullname}</a>
-	          #{/if}#{else}
-	            ${person.fullname}
-	          #{/else}
+	          ${person.fullname}
 	        </td>
 	        <td><em class="text-muted">Nessuna inizializzazione definita</em></td>
 	        <td></td>
 	        <td></td>
 	        <td></td>
+	        #{if groupAbsenceType}
+	        <td></td>
+	        <td>
+	          <a href="@{AbsenceGroups.initialization(person.id, groupAbsenceType.id, null)}" data-async-modal="#defaultModal"><i class="fa fa-plus" aria-hidden="true"></i></a>
+	        </td>
+	        #{/if}
 	      </tr>
 	    #{/list}
 	    
