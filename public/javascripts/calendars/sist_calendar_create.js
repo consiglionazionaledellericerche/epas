@@ -11,7 +11,9 @@ function _RestJsonCall (uri, type, asyncMode, dataJson) {
 	console.log("uri = " + uri);
 	console.log('nella _RestJsonCall - uri='+uri+' dataJson='+dataJson+' type='+type);
 	
-	return $.getJSON(uri+dataJson);
+	console.log("Uri="+ uri+dataJson);
+	
+	return $.getJSON(uri+dataJson).data;
 }
 
 /**************************************************************************
@@ -766,30 +768,31 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
        		var dataJson = JSON.stringify(data);
 
 		// exec the URI call
-               	var shiftPerson = _RestJsonCall (shiftCalObj.uriProxy, 'POST', false, dataJson);
+           	var shiftPerson = _RestJsonCall (shiftCalObj.uriProxy, 'POST', false, dataJson);
+           	console.log("shiftPerson="+shiftPerson);
 
-                jQuery.each(shiftPerson, function (i, event) {
-               		var name = event.name + " " + event.surname;
-               		if (!event.jolly) {
-              			 shiftCalObj.createShiftElement(event.id, name, tipoTurno, color).appendTo(div);
-                       		idToShift[event.id] = tipoTurno;
-                       		shiftToColor[tipoTurno] = color;
-               		} else {
-                       		if (jollyPersons.hasOwnProperty(event.id)) {
-                     			var turni = jollyPersons[event.id];
-                      			turni.push(tipoTurno);
-                       			jollyPersons[event.id] = turni;
-                      		} else {
-                      			jollyPersons[event.id] = new Array(tipoTurno);
-                      		}
-                       		idToShift[event.id] = "J";
-                       		shiftToColor["J"] = jollyColor;
-               		}
+            jQuery.each(shiftPerson, function (i, event) {
+           		var name = event.name + " " + event.surname;
+           		if (!event.jolly) {
+          			 shiftCalObj.createShiftElement(event.id, name, tipoTurno, color).appendTo(div);
+                   		idToShift[event.id] = tipoTurno;
+                   		shiftToColor[tipoTurno] = color;
+           		} else {
+                   		if (jollyPersons.hasOwnProperty(event.id)) {
+                 			var turni = jollyPersons[event.id];
+                  			turni.push(tipoTurno);
+                   			jollyPersons[event.id] = turni;
+                  		} else {
+                  			jollyPersons[event.id] = new Array(tipoTurno);
+                  		}
+                   		idToShift[event.id] = "J";
+                   		shiftToColor["J"] = jollyColor;
+           		}
 
-               		// get the email and the mobile phone
-               		idToEmail[event.id] = event.email;
-               		idToMobile[event.id] = event.mobile;
-               		idToName[event.id] = name;
+           		// get the email and the mobile phone
+           		idToEmail[event.id] = event.email;
+           		idToMobile[event.id] = event.mobile;
+           		idToName[event.id] = name;
       		})
 
        		j++;
