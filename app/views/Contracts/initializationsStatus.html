@@ -40,7 +40,7 @@
 	      <th>Inizio<br>Contratto</th>
 	      <th>Fine<br>Contratto</th>
 	      <th>Inizializzabile Dal</th>
-	      <th>Suggerimenti</th>
+	      <th>Inizializza</th>
 	    </tr>
 	    </thead>
 	    <tbody>
@@ -70,7 +70,7 @@
 	          ${contract.dateForInitialization().format()}
 	      </td>
 	      <td>
-	        <a href="@{updateSourceContract(contract.value.id)}" data-async-modal="#defaultModal">Inizializza</a>
+	        <a href="@{updateSourceContract(contract.value.id)}" data-async-modal="#defaultModal"><i class="fa fa-plus" aria-hidden="true"></i></a>
 	      </td>
 	
 	    </tr>
@@ -83,9 +83,6 @@
   #{alert color:'info'}
   <p>
     Elenco dei dipendenti attivi correttamente inizializzati.
-  </p>
-  <p>
-    Per modificare l'inizializzazione cliccare sulla <strong>Data iniziale</strong>
   </p>
   #{/alert}
   
@@ -102,6 +99,7 @@
       <th>Riposi comp.<br>usati</th>
       <th>Residuo<br>anno passato</th>
       <th>Residuo<br>anno corrente</th>
+      <th>Modifica</th>
     </tr>
     </thead>
     <tbody>
@@ -118,9 +116,7 @@
       </td>
 
       <td>
-        <a href="@{updateSourceContract(contract.value.id)}" data-async-modal="#defaultModal">
           ${contract.value.sourceDateResidual?.format()}
-        </a>
       </td>
       <td>
         ${contract.value.sourceVacationLastYearUsed}
@@ -139,6 +135,11 @@
       </td>
       <td>
         ${contract.value.sourceRemainingMinutesCurrentYear?.printHourMinute()}
+      </td>
+      <td>
+        <a href="@{updateSourceContract(contract.value.id)}" data-async-modal="#defaultModal"><a href="@{updateSourceContract(contract.value.id)}" data-async-modal="#defaultModal">
+          <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+        </a>  
       </td>
 
     </tr>
@@ -161,7 +162,7 @@
       <th>Inizio<br>Contratto</th>
       <th>Fine<br>Contratto</th>
       <th>Inizializzabile Dal</th>
-      <th>Suggerimenti</th>
+      <th>Inizializza</th>
     </tr>
     </thead>
     <tbody>
@@ -192,7 +193,7 @@
         ${contract.dateForInitialization().format()}
       </td>
       <td>
-        <a href="@{updateSourceContract(contract.value.id)}" data-async-modal="#defaultModal">Inizializza</a>
+        <a href="@{updateSourceContract(contract.value.id)}" data-async-modal="#defaultModal"><i class="fa fa-plus" aria-hidden="true"></i></a>
       </td>
 
     </tr>
