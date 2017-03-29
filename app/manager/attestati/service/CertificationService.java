@@ -20,6 +20,8 @@ import java.util.concurrent.ExecutionException;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.PersonDayManager;
+import manager.attestati.dto.internal.StatoAttestatoMese;
+import manager.attestati.dto.internal.clean.ContrattoAttestati;
 import manager.attestati.dto.show.CodiceAssenza;
 import manager.attestati.dto.show.RigaAssenza;
 import manager.attestati.dto.show.RigaCompetenza;
@@ -656,6 +658,25 @@ public class CertificationService implements ICertificationService {
     }
     return map;
   }
+  
+  @Override
+  public Map<Integer, ContrattoAttestati> getCertificationContracts(Office office, int year,
+      int month) throws ExecutionException, NoSuchFieldException {
+    
+    // Pulizia per recuperare il dato sui contratti attivi
+    Map<Integer, ContrattoAttestati> map = Maps.newHashMap();
+    for (StatoAttestatoMese statoAttestatoMese : certificationsComunication
+        .getContrattiAttestati(office, year, month)) {
+      
+      map.put(statoAttestatoMese.dipendente.matricola, ContrattoAttestati.builder()
+          .matricola(statoAttestatoMese.dipendente.matricola)
+          .beginContract(statoAttestatoMese.dipendente.getBeginContract())
+          .endContract(statoAttestatoMese.dipendente.getEndContract()).build());
+    }
+    return map;
+
+  }
+
 
 
 }

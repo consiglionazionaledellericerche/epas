@@ -26,6 +26,7 @@ import manager.attestati.dto.insert.InserimentoRigaAssenza;
 import manager.attestati.dto.insert.InserimentoRigaBuoniPasto;
 import manager.attestati.dto.insert.InserimentoRigaCompetenza;
 import manager.attestati.dto.insert.InserimentoRigaFormazione;
+import manager.attestati.dto.internal.StatoAttestatoMese;
 import manager.attestati.dto.show.CodiceAssenza;
 import manager.attestati.dto.show.ListaDipendenti;
 import manager.attestati.dto.show.RispostaAttestati;
@@ -60,9 +61,11 @@ public class CertificationsComunication {
   private static final String API_URL_ASSENZE_PER_CONTRATTO = "/contratto/codiciAssenza";
   
   //Attestati api internal
-  private static final String API_INT_LISTA_DIPENDENTI_MESE ="/api/rest/sede/listaDipendenti"; // + /223400/2017/3
-  private static final String API_INT_PERIODO = "/api/rest/dipendente/periodo";                // + /145872
-  private static final String API_INT_CRUSCOTTO = "/api/rest/dipendente/stato/cruscotto";      // + /11028/2017"
+  private static final String API_URL_INT = "/api/rest";
+  private static final String API_INT_LISTA_DIPENDENTI_MESE = "/sede/listaDipendenti";
+  //  private static final String API_INT_PERIODO = "/api/rest/dipendente/periodo";      // /145872
+  //  private static final String API_INT_CRUSCOTTO = "/api/rest/dipendente/stato/cruscotto"; 
+  // /11028/2017"
   //http://attestativ2.rm.cnr.it/api/ext/contratto/codiciAssenza/{CODICE_CONTRATTO}
 
   private static final String JSON_CONTENT_TYPE = "application/json";
@@ -467,6 +470,41 @@ public class CertificationsComunication {
       log.error("Errore di comunicazione col server degli Attestati {}", ex.getMessage());
     }
     return Lists.newArrayList();
+  }
+  
+  /**
+   * Preleva la lista sui periodi di attività dei dipendenti in attestati, per sede anno e mese
+   * selezionati.
+   * @param office sede
+   * @param year   anno
+   * @param month  mese
+   * @return i contratti attivi nel mese dipendenti
+   */
+  public List<StatoAttestatoMese> getContrattiAttestati(Office office, int year, int month)
+      throws NoSuchFieldException, ExecutionException {
+
+    String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
+
+    final String url = API_URL_INT + API_INT_LISTA_DIPENDENTI_MESE + "/" + office.codeId
+        + "/" + year + "/" + month;
+
+    WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
+    HttpResponse httpResponse = wsRequest.get();
+
+    // Caso di token non valido
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
+      cacheValues.oauthToken.invalidateAll();
+      log.error("Token Oauth non valido: {}", token);
+      throw new ApiRequestException("Invalid token");
+    }
+
+    StatoAttestatoMese[] statoAttestatiArray = new Gson()
+        .fromJson(httpResponse.getJson(), StatoAttestatoMese[].class);
+
+    log.info("Recuperata lista sullo stato attestati meseper l'ufficio {} -  mese {}/{}",
+        office, month, year);
+
+    return Arrays.asList(statoAttestatiArray);
   }
 
 }
