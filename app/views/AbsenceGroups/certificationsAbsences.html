@@ -1,0 +1,47 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Assenze Attestati'  /}
+
+<div class="container">
+
+#{alert color:'info'}
+ <p>Crushcotto.</p>
+#{/alert}
+
+<table class="table" datatable> 
+  <thead>
+  <tr>
+    <th>Codice</th>
+    <th>Descrizione</th>
+    <th>qtFrequenza</th>
+    <th>tipoFrequenza</th>
+    <th>tipologia</th>
+    <th>Usata in Epas</th>
+    <th>Gruppi Epas</th>
+  </tr>
+  </thead>
+  <tbody>
+  #{list items:codeComparation.both, as:'bothSuperCode'}
+    
+    <tr>
+      <td>${bothSuperCode.codiceAssenza.codice}</td>
+      <td>${bothSuperCode.codiceAssenza.descrizione}</td>
+      <td>${bothSuperCode.codiceAssenza.qtFrequenza}</td>
+      <td>${bothSuperCode.codiceAssenza.tipoFrequenza}</td>
+      <td>${bothSuperCode.codiceAssenza.tipologia}</td>
+      
+      <td>
+          ${bothSuperCode.absences.size()}
+      </td>      
+        <td>
+          #{if !bothSuperCode.onlyOtherGroup()}
+            <i class="fa fa-star" aria-hidden="true"></i>
+          #{/if}
+        </td>
+    </tr>
+  #{/list}
+  </tbody>
+</table>
+
+
+</div>

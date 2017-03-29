@@ -3,6 +3,7 @@ package manager.attestati.service;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import manager.attestati.dto.internal.CruscottoDipendente;
 import manager.attestati.dto.internal.clean.ContrattoAttestati;
 import manager.attestati.dto.show.CodiceAssenza;
 
@@ -82,6 +83,13 @@ public interface ICertificationService {
    * @return mappa matricola - contratto
    */
   Map<Integer, ContrattoAttestati> getCertificationContracts(Office office, int year, int month) 
+      throws ExecutionException, NoSuchFieldException;
+  
+  /**
+   * Il periodo dipendente, solo per fare le prove. Questo metodo dovrà progressivamente 
+   * diventare il metodo che scarica le assenze degli ultimi due anni di una persona.
+   */
+  CruscottoDipendente getCruscottoDipendente(Person person, int year) 
       throws ExecutionException, NoSuchFieldException;
 
 }

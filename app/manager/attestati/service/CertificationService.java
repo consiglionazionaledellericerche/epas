@@ -20,6 +20,8 @@ import java.util.concurrent.ExecutionException;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.PersonDayManager;
+import manager.attestati.dto.internal.CruscottoDipendente;
+import manager.attestati.dto.internal.PeriodoDipendente;
 import manager.attestati.dto.internal.StatoAttestatoMese;
 import manager.attestati.dto.internal.clean.ContrattoAttestati;
 import manager.attestati.dto.show.CodiceAssenza;
@@ -666,17 +668,54 @@ public class CertificationService implements ICertificationService {
     // Pulizia per recuperare il dato sui contratti attivi
     Map<Integer, ContrattoAttestati> map = Maps.newHashMap();
     for (StatoAttestatoMese statoAttestatoMese : certificationsComunication
-        .getContrattiAttestati(office, year, month)) {
+        .getStatoAttestatoMese(office, year, month)) {
       
+      LocalDate beginContract = new LocalDate(statoAttestatoMese.dipendente.dataAssunzione);
+      LocalDate endContract = null;
+      if (statoAttestatoMese.dipendente.dataCessazione != null) {
+        endContract = new LocalDate(statoAttestatoMese.dipendente.dataCessazione);
+      }
       map.put(statoAttestatoMese.dipendente.matricola, ContrattoAttestati.builder()
           .matricola(statoAttestatoMese.dipendente.matricola)
-          .beginContract(statoAttestatoMese.dipendente.getBeginContract())
-          .endContract(statoAttestatoMese.dipendente.getEndContract()).build());
+          .beginContract(beginContract)
+          .endContract(endContract).build());
     }
     return map;
 
   }
+  
+  @Override
+  public CruscottoDipendente getCruscottoDipendente(Person person, int year) 
+      throws ExecutionException, NoSuchFieldException {
+    
+    //prelevare lo stato attuale attestato per il mese attuale della sede della persona
+    for (StatoAttestatoMese statoAttestatoMese : certificationsComunication
+        .getStatoAttestatoMese(person.office, LocalDate.now().getYear(), 
+            LocalDate.now().getMonthOfYear())) {
+      
+      //processo solo quello della persona passata
+      if (person.number.equals(statoAttestatoMese.dipendente.matricola)) {
+        
+        //scarico il periodo della persona per il dipendente id
+        PeriodoDipendente periodoDipendente = certificationsComunication
+            .getPeriodoDipendente(statoAttestatoMese.id);
+        
+        log.info(periodoDipendente.toString());
 
+        //scarico il cruscotto
+        CruscottoDipendente cruscottoDipendente = certificationsComunication
+            .getCruscotto(periodoDipendente.dipendente.id, year);
+        
+        return cruscottoDipendente;
+      }
+       
+      
+    }
+    
+    return null;
+    
 
+    
+  }
 
 }
