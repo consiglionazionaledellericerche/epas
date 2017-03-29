@@ -140,6 +140,7 @@ public class Shift extends Controller {
     render(shiftTimeTable);
 
   }
+  
 
   /**
    * Get shifts from the DB and render to the sistorg portal calendar.
