@@ -123,7 +123,7 @@ public class Shift extends Controller {
    *
    * @author arianna
    */
-  @BasicAuth
+  //@BasicAuth
   public static void timeTable(String type) {
     response.accessControl("*");
 
@@ -147,7 +147,7 @@ public class Shift extends Controller {
    * @author arianna
    * @author dario
    */
-  @BasicAuth
+  //@BasicAuth
   public static void find(
       Integer yearFrom, Integer monthFrom, Integer dayFrom,
       Integer yearTo, Integer monthTo, Integer dayTo, String type) {
@@ -198,7 +198,7 @@ public class Shift extends Controller {
    * @author arianna
    *
    */
-  @BasicAuth
+  //@BasicAuth
   public static void update(
       String type, Integer year, Integer month,
       @As(binder = JsonShiftPeriodsBinder.class) ShiftPeriods body) {
@@ -229,7 +229,7 @@ public class Shift extends Controller {
    *
    * @author arianna
    */
-  @BasicAuth
+  //@BasicAuth
   public static void getInconsistencyTimestamps2Timetable(
       ShiftType shiftType, LocalDate startDate, LocalDate endDate) {
 
