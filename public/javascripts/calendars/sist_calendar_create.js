@@ -10,10 +10,30 @@
 function _RestJsonCall (uri, type, asyncMode, dataJson) {
 	console.log("uri = " + uri);
 	console.log('nella _RestJsonCall - uri='+uri+' dataJson='+dataJson+' type='+type);
-	
 	console.log("Uri="+ uri+dataJson);
+	var result;
 	
-	return $.getJSON(uri+dataJson).data;
+	$.ajax({
+		headers: {
+			Accept: "application/json",
+    	},
+	    dataType: "json",
+		contentType: "application/json",
+		url: uri,
+		type: type,
+		data: dataJson,
+		async: false,
+		success: function(data) {
+			result = data;
+			}
+		})
+		.error(function (jqXHR, textStatus, errorThrown) {
+          console.log("error during proxy call= " + textStatus);
+          console.log("incoming reperebility Text= " + jqXHR.responseText);
+		});
+		
+	return result;
+
 }
 
 /**************************************************************************
@@ -761,14 +781,8 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
        		uriGetShiftPersons = shiftCalObj.getUriRestToGetPersons(tipoTurno);
        		//console.log('uriGetShiftPersons='+uriGetShiftPersons);
 
-       		var data = new Array();
-       		data.push('GET');
-       		data.push(uriGetShiftPersons);
-
-       		var dataJson = JSON.stringify(data);
-
-		// exec the URI call
-           	var shiftPerson = _RestJsonCall (shiftCalObj.uriProxy, 'POST', false, dataJson);
+       		// exec the URI call
+           	var shiftPerson = _RestJsonCall (shiftCalObj.uriProxy + uriGetShiftPersons, 'POST', false, {});
            	console.log("shiftPerson="+shiftPerson);
 
             jQuery.each(shiftPerson, function (i, event) {
@@ -1045,7 +1059,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
         	var dataJson = JSON.stringify(uriGetShiftPersons);
 
 		// exec the URI call
-      var shiftPerson = _RestJsonCall (uriProxy, 'GET', false, uriGetShiftPersons);
+      var shiftPerson = _RestJsonCall (uriProxy + 'uriGetShiftPersons', 'GET', false, {});
 
       jQuery.each(shiftPerson, function (i, event) {
           var name = event.name + " " + event.surname;
@@ -1096,7 +1110,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 
 	var dataJson = JSON.stringify(data);
 
-	var shiftTimeTable = _RestJsonCall (uriProxy, 'POST', false, dataJson);
+	var shiftTimeTable = _RestJsonCall (uriProxy + uriGetShiftTimeTable, 'GET', false, {});
 
 	// fieldset che contiene l'orario
         $('<fieldset>', { id: 'orario' }).appendTo(divContainer);
