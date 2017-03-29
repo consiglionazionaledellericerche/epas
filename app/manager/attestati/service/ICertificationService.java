@@ -67,15 +67,6 @@ public interface ICertificationService {
       throws ExecutionException, NoSuchFieldException;
 
   /**
-   * Prova a rimuovere tutti i record presenti su attestati.
-   *
-   * @param personCertData status
-   * @return il nuovo stato
-   */
-  PersonCertData emptyAttestati(PersonCertData personCertData)
-      throws ExecutionException, NoSuchFieldException;
-
-  /**
    * La lista dei codici assenza... TODO: conversione al tipo epas??
    *
    * @return lista
