@@ -60,6 +60,16 @@ public class CertificationService implements ICertificationService {
   private final CertificationDao certificationDao;
 
 
+  /**
+   * Constructor.
+   * @param certificationsComunication injected.
+   * @param absenceDao injected.
+   * @param competenceDao injected.
+   * @param personMonthRecapDao injected.
+   * @param personDayManager injected.
+   * @param personDayDao injected.
+   * @param certificationDao injected.
+   */
   @Inject
   public CertificationService(CertificationsComunication certificationsComunication,
       AbsenceDao absenceDao, CompetenceDao competenceDao, PersonMonthRecapDao personMonthRecapDao,
@@ -521,7 +531,7 @@ public class CertificationService implements ICertificationService {
   private Map<String, Certification> absences(Person person, int year, int month,
       Map<String, Certification> certifications) {
 
-//    log.info("Persona {}", person);
+    //log.info("Persona {}", person);
 
     List<Absence> absences = absenceDao
         .getAbsencesNotInternalUseInMonth(person, year, month);
@@ -631,46 +641,6 @@ public class CertificationService implements ICertificationService {
     certifications.put(certification.aMapKey(), certification);
 
     return certifications;
-  }
-
-  /* (non-Javadoc)
-   * @see manager.attestati.service.ICertificationService#emptyAttestati(
-   *    manager.attestati.service.PersonCertData)
-   */
-  @Override
-  public PersonCertData emptyAttestati(
-      PersonCertData personCertData)
-      throws ExecutionException, NoSuchFieldException {
-
-    if (personCertData.attestatiCertifications != null) {
-      for (Certification certification :
-          personCertData.attestatiCertifications.values()) {
-        if (certification.attestatiId != null
-            || certification.certificationType == CertificationType.MEAL) {
-          removeAttestati(certification);
-        }
-      }
-    }
-
-    if (personCertData.epasCertifications != null) {
-      for (Certification certification : personCertData.epasCertifications.values()) {
-        if (certification.attestatiId != null
-            || certification.certificationType == CertificationType.MEAL) {
-          removeAttestati(certification);
-        }
-      }
-    }
-
-    if (personCertData.actualCertifications != null) {
-      for (Certification certification : personCertData.actualCertifications.values()) {
-        if (certification.attestatiId != null
-            || certification.certificationType == CertificationType.MEAL) {
-          removeAttestati(certification);
-        }
-      }
-    }
-
-    return personCertData;
   }
 
   /* (non-Javadoc)
