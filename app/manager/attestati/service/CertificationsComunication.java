@@ -58,8 +58,11 @@ public class CertificationsComunication {
   private static final String API_URL_COMPETENZA = "/rigaCompetenza";
 
   private static final String API_URL_ASSENZE_PER_CONTRATTO = "/contratto/codiciAssenza";
-
-
+  
+  //Attestati api internal
+  private static final String API_INT_LISTA_DIPENDENTI_MESE ="/api/rest/sede/listaDipendenti"; // + /223400/2017/3
+  private static final String API_INT_PERIODO = "/api/rest/dipendente/periodo";                // + /145872
+  private static final String API_INT_CRUSCOTTO = "/api/rest/dipendente/stato/cruscotto";      // + /11028/2017"
   //http://attestativ2.rm.cnr.it/api/ext/contratto/codiciAssenza/{CODICE_CONTRATTO}
 
   private static final String JSON_CONTENT_TYPE = "application/json";
