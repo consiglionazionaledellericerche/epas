@@ -171,15 +171,12 @@ jQuery(document).ready(function() {
             		var uriPutRep = shiftCalendar.getUriRestToPutEntity(i, anno + '/' + mese);
         
             		var data = new Array();
-            		data.push('PUT');
-            		data.push(uriPutRep);
-            		data.push(JSON.stringify(val));
             
-            		var dataJson = JSON.stringify(data);
+            		var dataJson = JSON.stringify(val);
             
             		jQuery.ajax({
-                		url: uriProxy,
-               	 		type: "POST",
+                		url: uriPutRep,
+               	 		type: "PUT",
                 		dataType: "json",
                 		contentType: "application/json",
                 		data: dataJson, 
