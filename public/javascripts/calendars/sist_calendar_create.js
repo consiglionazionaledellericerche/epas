@@ -10,7 +10,7 @@
 function _RestJsonCall (uri, type, asyncMode, dataJson) {
 	console.log("uri = " + uri);
 	console.log('nella _RestJsonCall - uri='+uri+' dataJson='+dataJson+' type='+type);
-	console.log("Uri="+ uri+dataJson);
+	console.log("Uri+dataJson="+ uri+dataJson);
 	var result;
 	
 	$.ajax({
@@ -31,7 +31,7 @@ function _RestJsonCall (uri, type, asyncMode, dataJson) {
           console.log("error during proxy call= " + textStatus);
           console.log("incoming reperebility Text= " + jqXHR.responseText);
 		});
-		
+	console.log("result: "+result);	
 	return result;
 
 }
@@ -125,7 +125,7 @@ function createCalendarRepView(allowed, repType, repCalObj, repGrpObj) {
     	var name = event.name + " " + event.surname;
     	repCalendar.createElement(event.id, name, color).appendTo(div);
     	//console.log("person: " + event.email);
-
+    	_RestJsonCall
   		// get the email and the mobile phone
     	idToEmail[event.id] = event.email;
     	idToMobile[event.id] = event.mobile;
@@ -782,7 +782,7 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
        		//console.log('uriGetShiftPersons='+uriGetShiftPersons);
 
        		// exec the URI call
-           	var shiftPerson = _RestJsonCall (shiftCalObj.uriProxy + uriGetShiftPersons, 'POST', false, {});
+           	var shiftPerson = _RestJsonCall (uriProxy + uriGetShiftPersons, 'GET', false, {});
            	console.log("shiftPerson="+shiftPerson);
 
             jQuery.each(shiftPerson, function (i, event) {
@@ -1042,15 +1042,16 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
     	j = 0;
     	while (j < tipoTurni.length) {
         	var tipoTurno = tipoTurni[j];
+        	console.log("tipoTurno:"+tipoTurno);
         	var color = shiftColor.shift();
         	var div = '#' + tipoTurno;
 
         	$('<span>', { class: "titolo-external", text: 'Turno ' + tipoTurno }).appendTo(divContainer);
         	$('<div>', { id: tipoTurno, }).appendTo(divContainer);
-
+        	console.log("chiamata rest a: "+shiftCalendar.category);
         	// uri REST per leggere le persone in turno
         	uriGetShiftPersons = shiftCalendar.getUriRestToGetPersons(tipoTurno);
-        	//console.log("uriGetShiftPersons="+uriGetShiftPersons);
+        	console.log("uriGetShiftPersons="+uriGetShiftPersons);
 
         	var data = new Array();
         	//data.push('GET');
@@ -1059,7 +1060,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
         	var dataJson = JSON.stringify(uriGetShiftPersons);
 
 		// exec the URI call
-      var shiftPerson = _RestJsonCall (uriProxy + 'uriGetShiftPersons', 'GET', false, {});
+      var shiftPerson = _RestJsonCall (uriGetShiftPersons, 'GET', false, {});
 
       jQuery.each(shiftPerson, function (i, event) {
           var name = event.name + " " + event.surname;
@@ -1110,7 +1111,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 
 	var dataJson = JSON.stringify(data);
 
-	var shiftTimeTable = _RestJsonCall (uriProxy + uriGetShiftTimeTable, 'GET', false, {});
+	var shiftTimeTable = _RestJsonCall (uriGetShiftTimeTable, 'GET', false, {});
 
 	// fieldset che contiene l'orario
         $('<fieldset>', { id: 'orario' }).appendTo(divContainer);
