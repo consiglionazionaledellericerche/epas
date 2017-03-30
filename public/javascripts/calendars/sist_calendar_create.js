@@ -9,8 +9,8 @@
 *************************************************************************/
 function _RestJsonCall (uri, type, asyncMode, dataJson) {
 	console.log("uri = " + uri);
-	console.log('nella _RestJsonCall - uri='+uri+' dataJson='+dataJson+' type='+type);
-	console.log("Uri+dataJson="+ uri+dataJson);
+	//console.log('nella _RestJsonCall - uri='+uri+' dataJson='+dataJson+' type='+type);
+	//console.log("Uri+dataJson="+ uri+dataJson);
 	var result;
 	
 	$.ajax({
@@ -31,7 +31,7 @@ function _RestJsonCall (uri, type, asyncMode, dataJson) {
           console.log("error during proxy call= " + textStatus);
           console.log("incoming reperebility Text= " + jqXHR.responseText);
 		});
-	console.log("result: "+result);	
+	//console.log("result: "+result);	
 	return result;
 
 }
@@ -63,7 +63,7 @@ function noDuplicate(objects){
     objtmp = new Object({"email": objectsNoDup[i]});
     objectsEmails.push(objtmp);
   }
-  absentEmails = "{\"emails\":" + JSON.stringify(objectsEmails) + "}";
+  absentEmails = "{emails:" + JSON.stringify(objectsEmails) + "}";
 
   //console.log("DupEmails: "+objects);
   //console.log("NoDupEmails: "+absentEmails);
@@ -1234,13 +1234,13 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
     					uriShiftToGet = shiftCalendar.getUriRestToGetEntity(tipoTurno, uriParam);
                     			//console.log("uriShiftToGet="+uriShiftToGet);
 
-        			var data = new Array();
+/*        			var data = new Array();
         			data.push('GET');
         			data.push(uriShiftToGet);
-        			var dataJson = JSON.stringify(data);
+        			var dataJson = JSON.stringify(data);*/
 
     					// exec the URI call
-              var shiftPeriods = _RestJsonCall (uriProxy, 'POST', false, dataJson);
+              var shiftPeriods = _RestJsonCall (uriShiftToGet, 'GET', false, {});
 
 
     					  // TURNI
@@ -1348,17 +1348,17 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
       			var jsonAbsParameter = JSON.stringify(absParameter);
 
             var data = new Array();
-            data.push('POST');
-            data.push(uriFerieToGet);
+            //data.push('POST');
+            //data.push(uriFerieToGet);
             jsonAbsParameter = noDuplicate(jsonAbsParameter);
             data.push(jsonAbsParameter);
+            console.log("jsonAbsParameter: "+jsonAbsParameter);
 
-
-            var dataJson = JSON.stringify(data);
+            //var dataJson = JSON.stringify(data);
             //console.log("uriFerieToGet"+uriFerieToGet);
-            //console.log('DATAJSON: '+dataJson);
+            console.log('DATAJSON: '+dataJson);
             // exec the URI call
-            var absentPerson = _RestJsonCall (uriProxy, 'POST', false, dataJson);
+            var absentPerson = _RestJsonCall (uriFerieToGet, 'POST', false, jsonAbsParameter);
 
             var indexVac = 0;
             jQuery.each(absentPerson, function (i, event) {
