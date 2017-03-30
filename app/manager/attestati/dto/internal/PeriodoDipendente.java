@@ -38,12 +38,12 @@ public class PeriodoDipendente {
   public static class PeriodoDipendenteDettagli {
     
     public int id;                                  //id dipendente 
-    //public int matricola;                         //17162
+    public int matricola;                         //17162
     //public SedePeriodoDipendente sede;
-    //public String nominativo;                     //TAGLIAFERRI DARIO
+    public String nominativo;                     //TAGLIAFERRI DARIO
     //public Long decorrenzaIniziale;               //1463349600000
-    //public Long dataAssunzione;                   //1463349600000
-    //public Long dataCessazione;                   //1494799200000
+    public Long dataAssunzione;                   //1463349600000
+    public Long dataCessazione;                   //1494799200000
     //public ContrattoPeriodoDipendente contratto;
     //public String profiloDipendente;              //"064"
     //public String lastPeriodoConsolidato;         //"201701"
