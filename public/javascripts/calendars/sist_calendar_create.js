@@ -8,9 +8,7 @@
 *
 *************************************************************************/
 function _RestJsonCall (uri, type, asyncMode, dataJson) {
-	console.log("uri = " + uri);
-	//console.log('nella _RestJsonCall - uri='+uri+' dataJson='+dataJson+' type='+type);
-	//console.log("Uri+dataJson="+ uri+dataJson);
+
 	var result;
 	
 	$.ajax({
@@ -31,7 +29,7 @@ function _RestJsonCall (uri, type, asyncMode, dataJson) {
           console.log("error during proxy call= " + textStatus);
           console.log("incoming reperebility Text= " + jqXHR.responseText);
 		});
-	//console.log("result: "+result);	
+		
 	return result;
 
 }
@@ -783,7 +781,7 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
 
        		// exec the URI call
            	var shiftPerson = _RestJsonCall (uriProxy + uriGetShiftPersons, 'GET', false, {});
-           	console.log("shiftPerson="+shiftPerson);
+           	//console.log("shiftPerson="+shiftPerson);
 
             jQuery.each(shiftPerson, function (i, event) {
            		var name = event.name + " " + event.surname;
@@ -1042,13 +1040,13 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
     	j = 0;
     	while (j < tipoTurni.length) {
         	var tipoTurno = tipoTurni[j];
-        	console.log("tipoTurno:"+tipoTurno);
+        	//console.log("tipoTurno:"+tipoTurno);
         	var color = shiftColor.shift();
         	var div = '#' + tipoTurno;
 
         	$('<span>', { class: "titolo-external", text: 'Turno ' + tipoTurno }).appendTo(divContainer);
         	$('<div>', { id: tipoTurno, }).appendTo(divContainer);
-        	console.log("chiamata rest a: "+shiftCalendar.category);
+        	//console.log("chiamata rest a: "+shiftCalendar.category);
         	// uri REST per leggere le persone in turno
         	uriGetShiftPersons = shiftCalendar.getUriRestToGetPersons(tipoTurno);
         	console.log("uriGetShiftPersons="+uriGetShiftPersons);
@@ -1352,11 +1350,11 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
             //data.push(uriFerieToGet);
             jsonAbsParameter = noDuplicate(jsonAbsParameter);
             data.push(jsonAbsParameter);
-            console.log("jsonAbsParameter: "+jsonAbsParameter);
+            //console.log("jsonAbsParameter: "+jsonAbsParameter);
 
             //var dataJson = JSON.stringify(data);
             //console.log("uriFerieToGet"+uriFerieToGet);
-            console.log('DATAJSON: '+dataJson);
+            //console.log('DATAJSON: '+dataJson);
             // exec the URI call
             var absentPerson = _RestJsonCall (uriFerieToGet, 'POST', false, jsonAbsParameter);
 

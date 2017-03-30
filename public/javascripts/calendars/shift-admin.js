@@ -207,7 +207,7 @@ jQuery(document).ready(function() {
           	//alert("uri report mese="+uri);
 
           	jQuery.ajax({
-            		url: uriProxy,
+            		url: uri,
             		type: "GET",
             		dataType: "json",
             		contentType: "application/json",
@@ -235,7 +235,7 @@ jQuery(document).ready(function() {
             var uri = shiftCalendar.getUriRestToGetMonthlyCalPDF(groupConf.calendarChoise , uriParam);
             //alert("uri calendario mese="+uri);
             jQuery.ajax({
-            	url: uriProxy,
+            	url: uri,
             	type: "GET",
             	dataType: "json",
             	contentType: "application/json",
