@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
@@ -75,6 +76,19 @@ public class AbsenceComponentDao extends DaoBase {
     final JPQLQuery query = getQueryFactory()
         .from(absenceType)
         .where(absenceType.code.eq(string).or(absenceType.code.equalsIgnoreCase(string)));
+    return Optional.fromNullable(query.singleResult(absenceType));
+  }
+  
+  /**
+   * @return l'absenceType relativo al codice passato come parametro nel campo certification.
+   */
+  public Optional<AbsenceType> absenceTypeByCertificationCode(String string) {
+
+    QAbsenceType absenceType = QAbsenceType.absenceType;
+    final JPQLQuery query = getQueryFactory()
+        .from(absenceType)
+        .where(absenceType.certificateCode.eq(string)
+            .or(absenceType.certificateCode.equalsIgnoreCase(string)));
     return Optional.fromNullable(query.singleResult(absenceType));
   }
   

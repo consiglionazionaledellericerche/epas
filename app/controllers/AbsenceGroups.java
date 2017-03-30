@@ -36,6 +36,7 @@ import manager.attestati.service.CertificationService;
 import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
+import manager.services.absences.certifications.CertificationYearSituation;
 import manager.services.absences.certifications.CodeComparation;
 import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.PeriodChain;
@@ -1002,14 +1003,19 @@ public class AbsenceGroups extends Controller {
   /**
    * Le assenze in attestati. //TODO Metodo provvisorio di prova.
    */
-  public static void certificationsAbsences() throws NoSuchFieldException, ExecutionException {
+  public static void certificationsAbsences(Long personId, Integer year) 
+      throws NoSuchFieldException, ExecutionException {
     
-    Person person = personDao.getPersonByNumber(11278);
+    Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     
-    CruscottoDipendente cruscottoDipendente = certService.getCruscottoDipendente(person, 2017);
+    CruscottoDipendente cruscottoDipendente = certService.getCruscottoDipendente(person, year);
     
-    render(cruscottoDipendente);
+    CertificationYearSituation yearSituation = new CertificationYearSituation(absenceComponentDao, 
+        person, cruscottoDipendente);
+    
+    render(yearSituation, person);
   }
+  
   
 }
