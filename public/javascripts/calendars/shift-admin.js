@@ -56,7 +56,7 @@ jQuery(document).ready(function() {
 			if (types.length == 1) {
 				calendarType = types;
         groupConf.calendarChoise = calendarType;
-        console.log(calendarType);
+        //console.log(calendarType);
 				userAllowed = true;
 				createCalendarShiftAdmin(userAllowed, calendarType, shiftCalendar, groupConf);
         jQuery('h1.title').append(" "+groupConf.getShiftDescription(types));
@@ -204,22 +204,21 @@ jQuery(document).ready(function() {
       	if (conf) {
           	var uriParam = currentYear.concat('/').concat(currentMonth);
           	var uri = shiftCalendar.getUriRestToGetMontlyPDF(groupConf.calendarChoise, uriParam);
-          	//alert("uri report mese="+uri);
 
-          	jQuery.ajax({
-            		url: uri,
-            		type: "GET",
-            		dataType: "json",
-            		contentType: "application/json",
-            		data: 'uri=' + uri, 
-            		success: function (responseData, textStatus, jqXHR) {
-                		var win = window.open(responseData, '_blank');
-                		win.focus();
-            		},
-            		error: function (responseData, textStatus, errorThrown) {
-                		alert("ERRORE durante il reperimento del PDF :-(");
-            		}
-        	});
+          	var req = new XMLHttpRequest();
+            req.open("GET", uri, true);
+            req.responseType = "blob";
+
+            req.onload = function (event) {
+              var blob = req.response;
+              console.log(blob.size);
+              var link=document.createElement('a');
+              link.href=window.URL.createObjectURL(blob);
+              link.download="Report"+"_Turni" + currentYear +"_"+currentMonth + ".pdf";
+              link.click();
+            };
+
+            req.send();
       	}
      });
 
@@ -233,21 +232,21 @@ jQuery(document).ready(function() {
         if (conf) {
             var uriParam = currentYear.concat('/').concat(currentMonth);
             var uri = shiftCalendar.getUriRestToGetMonthlyCalPDF(groupConf.calendarChoise , uriParam);
-            //alert("uri calendario mese="+uri);
-            jQuery.ajax({
-            	url: uri,
-            	type: "GET",
-            	dataType: "json",
-            	contentType: "application/json",
-            	data: 'uri=' + uri, 
-            	success: function (responseData, textStatus, jqXHR) {
-                	var win = window.open(responseData, '_blank');
-                	win.focus();
-            	},
-            	error: function (responseData, textStatus, errorThrown) {
-                	alert("ERRORE durante il reperimento del PDF :-(");
-            	}
-           });
+
+            var req = new XMLHttpRequest();
+            req.open("GET", uri, true);
+            req.responseType = "blob";
+
+            req.onload = function (event) {
+              var blob = req.response;
+              console.log(blob.size);
+              var link=document.createElement('a');
+              link.href=window.URL.createObjectURL(blob);
+              link.download="Calendario"+"_Turni" + currentYear +"_"+currentMonth + ".pdf";
+              link.click();
+            };
+
+            req.send();
         }
     });
 });
