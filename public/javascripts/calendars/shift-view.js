@@ -24,6 +24,7 @@ jQuery(document).ready(function() {
 		$.each(data, function(index, element) {
 	        types.push(element);
 	    });
+		console.log("types: "+types );
 	    if (types.length > 1) {
 	    	console
 				userAllowed = true;
@@ -40,32 +41,28 @@ jQuery(document).ready(function() {
 					createCalendarShiftView(userAllowed, calendarType, shiftCalendar, shiftConfGroup);			
 				}	
 			}
-		console.log("types =" + types);
-		console.log("types.length = " + types.length);
+
 
 	});
 	
+	// Codice per bottone visuale successiva
+		// ----------------------------------------
+	jQuery('#next').click(function() {
+	  jQuery('#calendar').fullCalendar('next');
+	  jQuery('#calendar').fullCalendar('rerenderEvents');
+	});
 	
+	// Codice per bottone visuale precedente
+		// ----------------------------------------
+	jQuery('#prev').click(function() {
+	  jQuery('#calendar').fullCalendar('prev');
+	  jQuery('#calendar').fullCalendar('rerenderEvents');
+	});
+	
+	// Codice per bottone visuale giorno odierno
+		// ----------------------------------------
+	jQuery('#oggi').click(function() {
+	  jQuery('#calendar').fullCalendar('today');
+	  jQuery('#calendar').fullCalendar('rerenderEvents');
+	});
 });
-
-// Codice per bottone visuale successiva
-	// ----------------------------------------
-jQuery('#next').click(function() {
-  jQuery('#calendar').fullCalendar('next');
-  jQuery('#calendar').fullCalendar('rerenderEvents');
-});
-
-// Codice per bottone visuale precedente
-	// ----------------------------------------
-jQuery('#prev').click(function() {
-  jQuery('#calendar').fullCalendar('prev');
-  jQuery('#calendar').fullCalendar('rerenderEvents');
-});
-
-// Codice per bottone visuale giorno odierno
-	// ----------------------------------------
-jQuery('#oggi').click(function() {
-  jQuery('#calendar').fullCalendar('today');
-  jQuery('#calendar').fullCalendar('rerenderEvents');
-});
-

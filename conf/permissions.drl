@@ -186,6 +186,12 @@ when
      	 */
      	"Shift.iCal",
      	"Reperibility.iCal",
+     	
+     	/*
+     	 * Visualizzazione della propria situazione dei turni
+     	 */
+     	"Shift.personalShift",
+     	"Shift.renderIds",
 
      	/* Metodi rest */
      	"rest.PersonDays.getDaySituation",

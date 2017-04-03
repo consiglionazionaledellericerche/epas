@@ -537,27 +537,50 @@ public class Shift extends Controller {
     }
   }
   
-  
+  /**
+   * metodo che ritorna la pagina in cui vengono gestiti i turni da parte del responsabile.
+   */
   public static void handleShifts() {
    render(); 
   }
   
+  /**
+   * 
+   * @return la lista degli id dei servizi per turno di cui la persona loggata è responsabile.
+   */
   public static List<Long> renderIds() {
     User currentUser = Security.getUser().get();
     if (currentUser.person == null) {
       log.error("agli utenti di sistema non sono associati turni!");
       return null;
     } else {
+      //controllo che il richiedente sia un supervisore o un turnista
+      if (!currentUser.person.shiftCategories.isEmpty()) {
+        List<ShiftCategories> list = shiftDao.getCategoriesBySupervisor(currentUser.person);
+
+        List<Long> ids = list.stream()
+                .map(i -> new Long(i.id))
+                .collect(Collectors.<Long> toList());
+
+        log.debug("lista trovata!");
+        return ids;
+      }
+      if (currentUser.person.personShift != null) {
+        //TODO: implementare un metodo che ritorni i servizi su cui un dipendente è stato associato.
+      }
       
-      List<ShiftCategories> list = shiftDao.getCategoriesBySupervisor(currentUser.person);
-
-      List<Long> ids = list.stream()
-              .map(i -> new Long(i.id))
-              .collect(Collectors.<Long> toList());
-
-      log.debug("lista trovata!");
-      return ids;
     }   
-    
+    return null;
   }  
+  
+  /**
+   * ritorna la pagina di consultazione dei turni del dipendente in turno.
+   */
+  public static void personalShift() {
+    User currentUser = Security.getUser().get();
+    if (currentUser.person == null) {
+      log.error("agli utenti di sistema non sono associati turni!");      
+    } 
+    render();
+  }
 }
