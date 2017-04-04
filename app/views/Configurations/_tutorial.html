@@ -69,6 +69,14 @@
       o di inserire il codice giustificativo giornaliero "105BP".</p>
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.TR_VACATIONS) }
+      &{'description.' + configuration.epasParam}
+    #{/if}
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.TR_AUTOCERTIFICATION) }
+      &{'description.' + configuration.epasParam}
+    #{/if}
+    
     
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.SEND_EMAIL) }
       <p>Abilitando questa funzionalità sarà possibile notificare a tutti i dipendenti di <strong>${configuration.office.name}</strong> 
