@@ -17,7 +17,7 @@
 
   <!-- toggle holidayWork-->
   #{if dayRecap.personDay.isHoliday && dayRecap.personDay.timeAtWork > 0 }
-    #{secure.check 'Stampings.toggleWorkingHoliday', target: person.office}
+    #{secure.check 'Stampings.toggleWorkingHoliday', target: dayRecap.personDay.person.office}
       <a href="@{Stampings.toggleWorkingHoliday(dayRecap.personDay.id)}">
         #{if dayRecap.personDay.acceptedHolidayWorkingTime } Disabilita#{/if}
         #{else} Abilita#{/else}
