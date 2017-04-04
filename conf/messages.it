@@ -606,6 +606,7 @@ WORKING_OFF_SITE=Lavoro fuori sede
 ABSENCES_FOR_EMPLOYEE=Assenze visibili ai dipendenti
 RECOMPUTATION_LIMIT=Limite temporale dei ricalcoli (in mesi)
 TR_AUTOCERTIFICATION= Autocertificazione presenze per Tecnologi e Ricercatori
+TR_VACATIONS= Inserimento ferie e permessi per Tecnologi e Ricercatori
 
 EXPIRY_VACATION_PAST_YEAR=Giorno massimo utilizzo ferie dell'anno precedente
 MONTH_EXPIRY_RECOVERY_DAYS_13=Mese massimo per utilizzo residui dell'anno precedente per i livelli da 1 a 3
@@ -670,6 +671,7 @@ tr_autocertification.file= File di Autorizzazione
 
 description.WORKING_OFF_SITE= L&apos;abilitazione del parametro <strong>&{WORKING_OFF_SITE}</strong> permette, se abilitato anche nella configurazione del dipendente, l&apos;inserimento autonomo delle informazioni relative al <strong>Lavoro Fuori Sede</strong>.<br> L&apos;inserimento/modifica/eliminazione di una timbratura o del codice d'assenza 105BP, comporta l'invio di una notifica ai propri amministratori del personale.<br> L&apos;inserimento di queste informazioni &egrave; limitato solamente agli ultimi 2 mesi e non &egrave permesso nei mesi per i quali sono gi&agrave; stati inviati gli attestati di presenza.
 description.TR_AUTOCERTIFICATION= L&apos;abilitazione del parametro <strong>&{TR_AUTOCERTIFICATION}</strong> attiver&agrave; la possibilit&agrave; per i Tecnologi e i Ricercatori di questa sede di autocertificare la propria presenza a lavoro, e dunque di inserire in autonomia le proprie timbrature.<br> L&apos;inserimento di queste informazioni &egrave; limitato solamente agli ultimi 2 mesi e non &egrave permesso nei mesi per i quali sono gi&agrave; stati inviati gli attestati di presenza.
+description.TR_VACATIONS= L&apos;abilitazione del parametro <strong>&{TR_VACATIONS}</strong> attiver&agrave; la possibilit&agrave; per i Tecnologi e i Ricercatori di questa sede di autoinserire i propri giorni di ferie e permessi legge.<br> L&apos;inserimento di queste informazioni &egrave; limitato solamente agli ultimi 2 mesi e non &egrave permesso nei mesi per i quali sono gi&agrave; stati inviati gli attestati di presenza.
 
 ###########################################################################
 #	COMPONENTE ASSENZE
