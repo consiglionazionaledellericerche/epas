@@ -5,6 +5,7 @@ import static play.modules.pdf.PDF.renderPDF;
 import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
@@ -548,11 +549,11 @@ public class Shift extends Controller {
    * 
    * @return la lista degli id dei servizi per turno di cui la persona loggata è responsabile.
    */
-  public static List<Long> renderIds() {
+  public static void renderIds() {
     User currentUser = Security.getUser().get();
     if (currentUser.person == null) {
       log.error("agli utenti di sistema non sono associati turni!");
-      return null;
+      renderJSON("");
     } else {
       //controllo che il richiedente sia un supervisore o un turnista
       if (!currentUser.person.shiftCategories.isEmpty()) {
@@ -563,15 +564,42 @@ public class Shift extends Controller {
                 .collect(Collectors.<Long> toList());
 
         log.debug("lista trovata!");
-        return ids;
+        renderJSON(ids);
       }
       if (currentUser.person.personShift != null) {
         //TODO: implementare un metodo che ritorni i servizi su cui un dipendente è stato associato.
       }
       
     }   
-    return null;
+    renderJSON("");
   }  
+  
+  /**
+   * 
+   * @param shiftType l'id del servizio di turno
+   */
+  public static void renderServices(Long shiftType) {
+    ShiftCategories cat = shiftDao.getShiftCategoryById(shiftType);
+    if (cat == null) {
+      notFound();
+    }
+    renderJSON(cat.shiftTypes.stream()
+        .map(i -> new String(i.type))
+        .collect(Collectors.<String> toList()));
+  }
+  
+  /**
+   * ritorna la descrizione del turno passato come parametro.
+   * @param shiftType l'id del servizio di turno
+   */
+  public static void renderShiftname(Long shiftType) {
+    ShiftCategories cat = shiftDao.getShiftCategoryById(shiftType);
+    if (cat == null) {
+      notFound();
+    }    
+    
+    renderJSON(ImmutableList.of(cat.description));
+  }
   
   /**
    * ritorna la pagina di consultazione dei turni del dipendente in turno.

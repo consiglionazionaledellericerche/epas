@@ -53,13 +53,14 @@ jQuery(document).ready(function() {
 			userAllowed = true;
 			shiftCalendar.selectPopup(userAllowed, types, 'shiftAdmin', shiftCalendar, groupConf);
 		} else {
+			
 			if (types.length == 1) {
 				calendarType = types;
-        groupConf.calendarChoise = calendarType;
-        //console.log(calendarType);
+				groupConf.calendarChoise = calendarType;
+				//console.log(calendarType);
 				userAllowed = true;
 				createCalendarShiftAdmin(userAllowed, calendarType, shiftCalendar, groupConf);
-        jQuery('h1.title').append(" "+groupConf.getShiftDescription(types));
+				jQuery('h1.title').append(" "+groupConf.getShiftDescription(types));
 			} else {
 				userAllowed = false;
 				createCalendarShiftAdmin(userAllowed, calendarType, shiftCalendar, groupConf);			
