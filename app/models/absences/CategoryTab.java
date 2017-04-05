@@ -10,6 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import models.absences.GroupAbsenceType.DefaultTab;
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -56,9 +57,26 @@ public class CategoryTab extends BaseModel implements Comparable<CategoryTab> {
   }
   
   /**
+   * Se esiste fra gli enumerati un corrispondente.
+   * @return matching result
+   */
+  public boolean matchEnum() {
+    for (DefaultTab defaultTab : DefaultTab.values()) {
+      if (defaultTab.name().equals(this.name) 
+          && defaultTab.description.equals(this.description)
+          && defaultTab.priority == this.priority) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  /**
    * To String.
    */
   public String toString() {
     return this.description;
   }
+  
+  
 }
