@@ -1,11 +1,15 @@
 package models.absences;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 import java.util.Set;
@@ -127,10 +131,33 @@ public class AbsenceType extends BaseModel {
    */
   @Transient
   public boolean isExpired() {
-    if (validTo == null) {
-      return false;
+    boolean newResult = false;
+    LocalDate begin = this.validFrom;
+    LocalDate end = this.validTo;
+    if (begin == null) {
+      begin = new LocalDate(2000, 1, 1); //molto prima di epas...
     }
-    return LocalDate.now().isAfter(validTo);
+    if (end == null) {
+      end = new LocalDate(2100, 1, 1);   //molto dopo di epas...
+    }
+    if (DateUtility.isDateIntoInterval(LocalDate.now(), new DateInterval(begin, end))) {
+      newResult = false;
+    } else {
+      newResult = true;
+    }
+    boolean oldResult = false;
+    if (validTo == null) {
+      oldResult = false;
+    } else {
+      oldResult = LocalDate.now().isAfter(validTo);
+    }
+    
+    if (oldResult != newResult) {
+      throw new IllegalStateException();
+    }
+    
+    return newResult;
+    
   }
 
   @Override
@@ -265,6 +292,83 @@ public class AbsenceType extends BaseModel {
   }
   
   /**
+   * Se esiste fra gli enumerati un corrispondente e se è correttamente modellato.
+   * @return absent se il completamento non è presente in enum
+   */
+  public Optional<Boolean> matchEnum() {
+    for (DefaultAbsenceType defaultType : DefaultAbsenceType.values()) {
+      if (defaultType.name().substring(2).equals(this.code)) {
+        if (defaultType.certificationCode.equals(this.certificateCode)
+            && defaultType.description.equals(this.description)
+            && defaultType.internalUse == this.internalUse
+            && defaultType.justifiedTime.equals(this.justifiedTime)
+            && defaultType.consideredWeekEnd == this.consideredWeekEnd
+            && defaultType.timeForMealTicket == this.timeForMealTicket
+            && defaultType.replacingTime.equals(this.replacingTime)
+            ) {
+          //Tipi permessi
+          if (defaultType.justifiedTypeNamesPermitted.size() 
+              != this.justifiedTypesPermitted.size()) {
+            return Optional.of(false); 
+          }
+          for (JustifiedType justifiedType : this.justifiedTypesPermitted) {
+            if (!defaultType.justifiedTypeNamesPermitted.contains(justifiedType.name)) {
+              return Optional.of(false);
+            }
+          }
+          
+          //replecing type nullable
+          if (defaultType.replacingType == null) {
+            if (this.replacingType != null) {
+              return Optional.of(false);
+            }
+          } else {
+            if (!defaultType.replacingType.equals(this.replacingType.name)) {
+              return Optional.of(false);
+            }
+          }
+          //valid from nullable
+          if (defaultType.validFrom == null) {
+            if (this.validFrom != null) {
+              return Optional.of(false);
+            }
+          } else {
+            if (!defaultType.validFrom.equals(this.validFrom)) {
+              return Optional.of(false);
+            }
+          }
+          //valid to nullable
+          if (defaultType.validTo == null) {
+            if (this.validTo != null) {
+              return Optional.of(false);
+            }
+          } else {
+            if (!defaultType.validTo.equals(this.validTo)) {
+              return Optional.of(false);
+            }
+          }
+          
+          return Optional.of(true);
+        } else {
+          return Optional.of(false);
+        }
+      } 
+    }
+    return Optional.absent();
+  }
+  
+  /**
+  
+    
+    public Set<JustifiedTypeName> justifiedTypeNamesPermitted; //ultimo
+    
+    public JustifiedTypeName replacingType;
+    
+    public LocalDate validFrom;
+    public LocalDate validTo;
+   */
+  
+  /**
    * Tipi assenza di default.
    * 
    * @author alessandro
@@ -312,31 +416,31 @@ public class AbsenceType extends BaseModel {
     A_19("19", "Permesso per dipendente disabile L. 104/92 intera giornata",
         false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
         0, null, null, null),
-    A_19H1("19H1C", "Permesso per dipendente disabile L. 104/92 completamento 1 ora",
+    A_19H1("19H1", "Permesso per dipendente disabile L. 104/92 completamento 1 ora",
         false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
         60, JustifiedTypeName.absence_type_minutes, null, null),
-    A_19H2("19H2C", "Permesso per dipendente disabile L. 104/92 completamento 2 ore",
+    A_19H2("19H2", "Permesso per dipendente disabile L. 104/92 completamento 2 ore",
         false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
         120, JustifiedTypeName.absence_type_minutes, null, null),
-    A_19H3("19H3C", "Permesso per dipendente disabile L. 104/92 completamento 3 ore",
+    A_19H3("19H3", "Permesso per dipendente disabile L. 104/92 completamento 3 ore",
         false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
         180, JustifiedTypeName.absence_type_minutes, null, null),
-    A_19H4("19H4C", "Permesso per dipendente disabile L. 104/92 completamento 4 ore",
+    A_19H4("19H4", "Permesso per dipendente disabile L. 104/92 completamento 4 ore",
         false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
         240, JustifiedTypeName.absence_type_minutes, null, null),
-    A_19H5("19H5C", "Permesso per dipendente disabile L. 104/92 completamento 5 ore",
+    A_19H5("19H5", "Permesso per dipendente disabile L. 104/92 completamento 5 ore",
         false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
         300, JustifiedTypeName.absence_type_minutes, null, null),
-    A_19H6("19H6C", "Permesso per dipendente disabile L. 104/92 completamento 6 ore",
+    A_19H6("19H6", "Permesso per dipendente disabile L. 104/92 completamento 6 ore",
         false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
         360, JustifiedTypeName.absence_type_minutes, null, null),
-    A_19H7("19H7C", "Permesso per dipendente disabile L. 104/92 completamento 7 ore",
+    A_19H7("19H7", "Permesso per dipendente disabile L. 104/92 completamento 7 ore",
         false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
         420, JustifiedTypeName.absence_type_minutes, null, null),
-    A_19H8("19H8C", "Permesso per dipendente disabile L. 104/92 completamento 8 ore",
+    A_19H8("19H8", "Permesso per dipendente disabile L. 104/92 completamento 8 ore",
         false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
         480, JustifiedTypeName.absence_type_minutes, null, null),
-    A_19H9("19H9C", "Permesso per dipendente disabile L. 104/92 completamento 9 ore",
+    A_19H9("19H9", "Permesso per dipendente disabile L. 104/92 completamento 9 ore",
         false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
         540, JustifiedTypeName.absence_type_minutes, null, null),
 
@@ -628,17 +732,17 @@ public class AbsenceType extends BaseModel {
     public boolean internalUse;
     
     public Set<JustifiedTypeName> justifiedTypeNamesPermitted;
-    public Integer justifiedTime;
+    public Integer justifiedTime;                              
     
     public boolean consideredWeekEnd;
    
     public boolean timeForMealTicket;
     
     public Integer replacingTime;
-    public JustifiedTypeName replacingType;
+    public JustifiedTypeName replacingType;                     //nullable
     
-    public LocalDate validFrom;
-    public LocalDate validTo;
+    public LocalDate validFrom;                                 //nullable
+    public LocalDate validTo;                                   //nullable
 
     private DefaultAbsenceType(String certificationCode, String description, boolean internalUse, 
         Set<JustifiedTypeName> justifiedTypeNamesPermitted, Integer justifiedTime, 
@@ -657,6 +761,27 @@ public class AbsenceType extends BaseModel {
       this.validFrom = validFrom;
       this.validTo = validTo;
 
+    }
+    
+    /**
+     * Ricerca i codici assenza modellati e non presenti fra quelle passate in arg (db).
+     * @return list
+     */
+    public static List<DefaultAbsenceType> missing(List<AbsenceType> allAbsenceTypes) {
+      List<DefaultAbsenceType> missing = Lists.newArrayList();
+      for (DefaultAbsenceType defaultTypes : DefaultAbsenceType.values()) {
+        boolean found = false;
+        for (AbsenceType type : allAbsenceTypes) {
+          if (defaultTypes.name().substring(2).equals(type.code)) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          missing.add(defaultTypes);
+        }
+      }
+      return missing;
     }
 
   }

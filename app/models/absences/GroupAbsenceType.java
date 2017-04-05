@@ -1,9 +1,11 @@
 package models.absences;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 
 import it.cnr.iit.epas.DateInterval;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -23,6 +25,7 @@ import models.absences.ComplationAbsenceBehaviour.DefaultComplation;
 import models.absences.TakableAbsenceBehaviour.DefaultTakable;
 import models.base.BaseModel;
 
+import org.assertj.core.util.Lists;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
@@ -180,6 +183,53 @@ public class GroupAbsenceType extends BaseModel {
     
   }
   
+  /**
+   * Se esiste fra gli enumerati un corrispondente e se è correttamente modellato.
+   * @return absent se la tab non è presente in enum
+   */
+  public Optional<Boolean> matchEnum() {
+    
+    for (DefaultGroup defaultGroup : DefaultGroup.values()) {
+      if (defaultGroup.name().equals(this.name)) {
+        if (defaultGroup.description.equals(this.description) 
+            && defaultGroup.chainDescription.equals(this.chainDescription)
+            && defaultGroup.category.name().equals(this.category.name)
+            && defaultGroup.pattern.equals(this.pattern)
+            && defaultGroup.periodType.equals(this.periodType)
+            && defaultGroup.takable.name().equals(this.takableAbsenceBehaviour.name)
+            && defaultGroup.automatic == this.automatic
+            && defaultGroup.initializable == this.initializable) {
+          //campi nullable complation
+          if (defaultGroup.complation == null) {
+            if (this.complationAbsenceBehaviour != null) {
+              return Optional.of(false);
+            }
+          } else {
+            if (!defaultGroup.complation.name().equals(this.complationAbsenceBehaviour.name)) {
+              return Optional.of(false);
+            }
+          }
+          //campi nullable next
+          if (defaultGroup.nextGroupToCheck == null) {
+            if (this.nextGroupToCheck != null) {
+              return Optional.of(false);
+            }
+          } else {
+            if (!defaultGroup.nextGroupToCheck.name().equals(this.nextGroupToCheck.name)) {
+              return Optional.of(false);
+            }
+          }
+
+          return Optional.of(true);
+        } else {
+          return Optional.of(false);
+        }
+      } 
+    }
+    return Optional.absent();
+    
+  }
+  
   public String toString() {
     return description;
   }
@@ -334,15 +384,15 @@ public class GroupAbsenceType extends BaseModel {
         DefaultCategoryType.CODICI_DIPENDENTI, 
         GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
         DefaultTakable.T_EMPLOYEE, null, null, false, false);
-    
+   
     public String description;
     public String chainDescription;
     public DefaultCategoryType category;
     public GroupAbsenceTypePattern pattern;
     public PeriodType periodType;
     public DefaultTakable takable;
-    public DefaultComplation complation;
-    public DefaultGroup nextGroupToCheck;
+    public DefaultComplation complation;    //nullable
+    public DefaultGroup nextGroupToCheck;   //nullable
     public boolean automatic;
     public boolean initializable;
     
@@ -364,6 +414,27 @@ public class GroupAbsenceType extends BaseModel {
       this.automatic = automatic;
       this.initializable = initializable;
 
+    }
+    
+    /**
+     * Ricerca i gruppi modellati e non presenti fra quelle passate in arg (db). 
+     * @return list
+     */
+    public static List<DefaultGroup> missing(List<GroupAbsenceType> allGroup) {
+      List<DefaultGroup> missing = Lists.newArrayList();
+      for (DefaultGroup defaultGroup : DefaultGroup.values()) {
+        boolean found = false;
+        for (GroupAbsenceType group : allGroup) {
+          if (defaultGroup.name().equals(group.name)) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          missing.add(defaultGroup);
+        }
+      }
+      return missing;
     }
     
     

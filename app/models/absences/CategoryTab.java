@@ -1,5 +1,6 @@
 package models.absences;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import javax.persistence.Table;
 
 import models.base.BaseModel;
 
+import org.assertj.core.util.Lists;
 import org.hibernate.envers.Audited;
 
 @Audited
@@ -57,18 +59,21 @@ public class CategoryTab extends BaseModel implements Comparable<CategoryTab> {
   }
   
   /**
-   * Se esiste fra gli enumerati un corrispondente.
-   * @return matching result
+   * Se esiste fra gli enumerati un corrispondente e se è correttamente modellato.
+   * @return absent se la tab non è presente in enum
    */
-  public boolean matchEnum() {
+  public Optional<Boolean> matchEnum() {
     for (DefaultTab defaultTab : DefaultTab.values()) {
-      if (defaultTab.name().equals(this.name) 
-          && defaultTab.description.equals(this.description)
-          && defaultTab.priority == this.priority) {
-        return true;
-      }
+      if (defaultTab.name().equals(this.name)) {
+        if (defaultTab.description.equals(this.description)
+            && defaultTab.priority == this.priority) {
+          return Optional.of(true);
+        } else {
+          return Optional.of(false);
+        }
+      } 
     }
-    return false;
+    return Optional.absent();
   }
   
   /**
@@ -102,16 +107,24 @@ public class CategoryTab extends BaseModel implements Comparable<CategoryTab> {
     }
     
     /**
-     * Se l'enum è presente nell'elenco delle tabs in list.
-     * @return present
+     * Ricerca le categorie modellate e non presenti fra quelle passate in arg (db). 
+     * @return list
      */
-    public boolean isPresent(List<CategoryTab> list) {
-      for (CategoryTab tab : list) {
-        if (tab.name.equals(this.name())) {
-          return true;
+    public static List<DefaultTab> missing(List<CategoryTab> allTabs) {
+      List<DefaultTab> missing = Lists.newArrayList();
+      for (DefaultTab defaultCategory : DefaultTab.values()) {
+        boolean found = false;
+        for (CategoryTab category : allTabs) {
+          if (defaultCategory.name().equals(category.name)) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          missing.add(defaultCategory);
         }
       }
-      return false;
+      return missing;
     }
   }
   

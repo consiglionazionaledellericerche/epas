@@ -1,5 +1,7 @@
 package models.absences;
 
+import com.google.common.base.Optional;
+
 import java.util.List;
 import java.util.Set;
 
@@ -14,6 +16,7 @@ import javax.persistence.Table;
 import models.absences.CategoryTab.DefaultTab;
 import models.base.BaseModel;
 
+import org.assertj.core.util.Lists;
 import org.hibernate.envers.Audited;
 
 @Audited
@@ -46,19 +49,24 @@ public class CategoryGroupAbsenceType extends BaseModel
   }
   
   /**
-   * Se esiste fra gli enumerati un corrispondente.
-   * @return matching result
+   * Se esiste fra gli enumerati un corrispondente e se è correttamente modellato.
+   * @return absent se la categoria non è presente in enum
    */
-  public boolean matchEnum() {
+  public Optional<Boolean> matchEnum() {
+    
     for (DefaultCategoryType defaultCategory : DefaultCategoryType.values()) {
-      if (defaultCategory.name().equals(this.name) 
-          && defaultCategory.description.equals(this.description)
-          && defaultCategory.priority == this.priority
-          && defaultCategory.categoryTab.name().equals(this.tab.name)) {
-        return true;
-      }
+      if (defaultCategory.name().equals(this.name)) {
+        if (defaultCategory.description.equals(this.description)
+            && defaultCategory.priority == this.priority
+            && defaultCategory.categoryTab.name().equals(this.tab.name)) {
+          return Optional.of(true);
+        } else {
+          return Optional.of(false);
+        }
+      } 
     }
-    return false;
+    
+    return Optional.absent();
   }
   
   /**
@@ -101,18 +109,25 @@ public class CategoryGroupAbsenceType extends BaseModel
     }
     
     /**
-     * Se l'enum è presente nell'elenco delle categorie in list.
-     * @return present
+     * Ricerca le categorie modellate e non presenti fra quelle passate in arg (db). 
+     * @return list
      */
-    public boolean isPresent(List<CategoryGroupAbsenceType> list) {
-      for (CategoryGroupAbsenceType category : list) {
-        if (category.name.equals(this.name())) {
-          return true;
+    public static List<DefaultCategoryType> missing(List<CategoryGroupAbsenceType> allCategories) {
+      List<DefaultCategoryType> missing = Lists.newArrayList();
+      for (DefaultCategoryType defaultCategory : DefaultCategoryType.values()) {
+        boolean found = false;
+        for (CategoryGroupAbsenceType category : allCategories) {
+          if (defaultCategory.name().equals(category.name)) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          missing.add(defaultCategory);
         }
       }
-      return false;
+      return missing;
     }
-
   }
 
 
