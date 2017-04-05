@@ -2,6 +2,7 @@ package models.absences;
 
 import com.google.common.collect.Sets;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -10,7 +11,6 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import models.absences.GroupAbsenceType.DefaultTab;
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -76,6 +76,43 @@ public class CategoryTab extends BaseModel implements Comparable<CategoryTab> {
    */
   public String toString() {
     return this.description;
+  }
+  
+  /**
+   * Tab di default.
+   * 
+   * @author alessandro
+   *
+   */
+  public enum DefaultTab {
+    ALTRE_TIPOLOGIE("Altre Tipologie", 4),
+    MISSIONE("Missione", 1),
+    FERIE("Ferie e Festività Soppr.", 2),
+    RIPOSO_COMPENSATIVO("Riposo Compensativo", 3),
+    AUTOMATICI("Codici Automatici", 6),
+    DIPENDENTI("Codici Dipendenti", 5),
+    LAVORO_FUORI_SEDE("Lavoro Fuori Sede", 5);
+    
+    public String description;
+    public int priority;
+    
+    private DefaultTab(String description, int priority) {
+      this.description = description;
+      this.priority = priority;
+    }
+    
+    /**
+     * Se l'enum è presente nell'elenco delle tabs in list.
+     * @return present
+     */
+    public boolean isPresent(List<CategoryTab> list) {
+      for (CategoryTab tab : list) {
+        if (tab.name.equals(this.name())) {
+          return true;
+        }
+      }
+      return false;
+    }
   }
   
   

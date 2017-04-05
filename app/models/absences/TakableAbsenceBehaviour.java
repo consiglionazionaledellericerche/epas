@@ -1,5 +1,7 @@
 package models.absences;
 
+import com.google.common.collect.ImmutableSet;
+
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -16,6 +18,7 @@ import javax.persistence.Table;
 
 import lombok.Getter;
 
+import models.absences.AbsenceType.DefaultAbsenceType;
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -75,6 +78,250 @@ public class TakableAbsenceBehaviour extends BaseModel {
   
   public enum TakeAmountAdjustment {
     workingPeriodPercent, workingTimeAndWorkingPeriodPercent;
+  }
+  
+  /**
+   * Comportamenti di prendibilità di default.
+   * 
+   * @author alessandro
+   *
+   */
+  public enum DefaultTakable {
+    
+    T_18(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_18, DefaultAbsenceType.A_18M), 
+        ImmutableSet.of(DefaultAbsenceType.A_18, DefaultAbsenceType.A_18M), 
+        3, null),
+
+    T_19(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_19, DefaultAbsenceType.A_19M), 
+        ImmutableSet.of(DefaultAbsenceType.A_19, DefaultAbsenceType.A_19M), 
+        3, null),
+
+    T_661(AmountType.minutes, 
+        ImmutableSet.of(DefaultAbsenceType.A_661M), 
+        ImmutableSet.of(DefaultAbsenceType.A_661M), 
+        1080, TakeAmountAdjustment.workingTimeAndWorkingPeriodPercent),
+
+    T_89(AmountType.minutes, 
+        ImmutableSet.of(DefaultAbsenceType.A_89M), 
+        ImmutableSet.of(DefaultAbsenceType.A_89M), 
+        9000, TakeAmountAdjustment.workingTimeAndWorkingPeriodPercent),
+
+    T_09(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_09M), 
+        ImmutableSet.of(DefaultAbsenceType.A_09M), 
+        -1, null),
+
+    T_MISSIONE(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_92, 
+            DefaultAbsenceType.A_92H1, 
+            DefaultAbsenceType.A_92H2, 
+            DefaultAbsenceType.A_92H3, 
+            DefaultAbsenceType.A_92H4, 
+            DefaultAbsenceType.A_92H5, 
+            DefaultAbsenceType.A_92H6, 
+            DefaultAbsenceType.A_92H7), 
+        ImmutableSet.of(DefaultAbsenceType.A_92, 
+            DefaultAbsenceType.A_92H1, 
+            DefaultAbsenceType.A_92H2, 
+            DefaultAbsenceType.A_92H3, 
+            DefaultAbsenceType.A_92H4, 
+            DefaultAbsenceType.A_92H5, 
+            DefaultAbsenceType.A_92H6, 
+            DefaultAbsenceType.A_92H7), 
+        -1, null),
+
+    T_FERIE_CNR(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_31, 
+            DefaultAbsenceType.A_32, 
+            DefaultAbsenceType.A_37, 
+            DefaultAbsenceType.A_94), 
+        ImmutableSet.of(DefaultAbsenceType.A_31, 
+            DefaultAbsenceType.A_32, 
+            DefaultAbsenceType.A_37, 
+            DefaultAbsenceType.A_94), 
+        -1, null),
+
+    T_RIPOSI_CNR(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_91), 
+        ImmutableSet.of(DefaultAbsenceType.A_91), 
+        -1, null),
+
+    T_23(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_23, 
+            DefaultAbsenceType.A_23M, 
+            DefaultAbsenceType.A_23U), 
+        ImmutableSet.of(DefaultAbsenceType.A_23, 
+            DefaultAbsenceType.A_23M, 
+            DefaultAbsenceType.A_23U), 30, null),
+
+    T_25(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_25, 
+            DefaultAbsenceType.A_25M, 
+            DefaultAbsenceType.A_25U), 
+        ImmutableSet.of(DefaultAbsenceType.A_25, 
+            DefaultAbsenceType.A_25M, 
+            DefaultAbsenceType.A_25U), 
+        150, null),
+    
+    T_24(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_24, 
+            DefaultAbsenceType.A_24M, 
+            DefaultAbsenceType.A_24U), 
+        ImmutableSet.of(DefaultAbsenceType.A_24, 
+            DefaultAbsenceType.A_24M, 
+            DefaultAbsenceType.A_24U), 
+        600, null),
+
+    T_232(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_232, 
+            DefaultAbsenceType.A_232M, 
+            DefaultAbsenceType.A_232U), 
+        ImmutableSet.of(DefaultAbsenceType.A_232, 
+            DefaultAbsenceType.A_232M, 
+            DefaultAbsenceType.A_232U), 
+        30, null),
+
+    T_252(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_252, 
+            DefaultAbsenceType.A_252M, 
+            DefaultAbsenceType.A_252U), 
+        ImmutableSet.of(DefaultAbsenceType.A_252, 
+            DefaultAbsenceType.A_252M, 
+            DefaultAbsenceType.A_252U), 
+        150, null),
+    
+    T_242(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_242, 
+            DefaultAbsenceType.A_242M, 
+            DefaultAbsenceType.A_242U), 
+        ImmutableSet.of(DefaultAbsenceType.A_242, 
+            DefaultAbsenceType.A_242M, 
+            DefaultAbsenceType.A_242U), 
+        600, null),
+
+    T_233(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_233, 
+            DefaultAbsenceType.A_233M, 
+            DefaultAbsenceType.A_233U), 
+        ImmutableSet.of(DefaultAbsenceType.A_233, 
+            DefaultAbsenceType.A_233M, 
+            DefaultAbsenceType.A_233U), 
+        30, null),
+
+    T_253(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_253, 
+            DefaultAbsenceType.A_253M, 
+            DefaultAbsenceType.A_253U), 
+        ImmutableSet.of(DefaultAbsenceType.A_253, 
+            DefaultAbsenceType.A_253M, 
+            DefaultAbsenceType.A_253U), 
+        150, null),
+    
+    T_243(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_243, 
+            DefaultAbsenceType.A_243M, 
+            DefaultAbsenceType.A_243U), 
+        ImmutableSet.of(DefaultAbsenceType.A_243, 
+            DefaultAbsenceType.A_243M, 
+            DefaultAbsenceType.A_243U), 
+        600, null),
+
+    T_PB(AmountType.minutes, 
+        ImmutableSet.of(DefaultAbsenceType.A_PB), 
+        ImmutableSet.of(DefaultAbsenceType.A_PB), 
+        2160, null),
+
+    T_EMPLOYEE(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_105BP), 
+        ImmutableSet.of(DefaultAbsenceType.A_105BP), 
+        -1, null),
+
+    T_MALATTIA(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_111, 
+            DefaultAbsenceType.A_115, 
+            DefaultAbsenceType.A_116, 
+            DefaultAbsenceType.A_117, 
+            DefaultAbsenceType.A_118, 
+            DefaultAbsenceType.A_119, 
+            DefaultAbsenceType.A_11C, 
+            DefaultAbsenceType.A_11R, 
+            DefaultAbsenceType.A_11S), 
+        ImmutableSet.of(DefaultAbsenceType.A_111, 
+            DefaultAbsenceType.A_115, 
+            DefaultAbsenceType.A_116, 
+            DefaultAbsenceType.A_117, 
+            DefaultAbsenceType.A_118, 
+            DefaultAbsenceType.A_119, 
+            DefaultAbsenceType.A_11C, 
+            DefaultAbsenceType.A_11R, 
+            DefaultAbsenceType.A_11S), 
+        -1, null),
+
+    T_MALATTIA_FIGLIO_1_12(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_12), 
+        ImmutableSet.of(DefaultAbsenceType.A_12), 
+        -1, null),
+
+    T_MALATTIA_FIGLIO_1_13(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_13), 
+        ImmutableSet.of(DefaultAbsenceType.A_13), 
+        -1, null),
+
+    T_MALATTIA_FIGLIO_1_14(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_14), 
+        ImmutableSet.of(DefaultAbsenceType.A_14), 
+        -1, null),
+
+    T_MALATTIA_FIGLIO_2_12(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_122), 
+        ImmutableSet.of(DefaultAbsenceType.A_122), 
+        -1, null),
+
+    T_MALATTIA_FIGLIO_2_13(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_132), 
+        ImmutableSet.of(DefaultAbsenceType.A_132), 
+        -1, null),
+
+    T_MALATTIA_FIGLIO_2_14(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_142), 
+        ImmutableSet.of(DefaultAbsenceType.A_142), 
+        -1, null),
+
+    T_MALATTIA_FIGLIO_3_12(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_123), 
+        ImmutableSet.of(DefaultAbsenceType.A_123), 
+        -1, null),
+
+    T_MALATTIA_FIGLIO_3_13(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_133), 
+        ImmutableSet.of(DefaultAbsenceType.A_133), 
+        -1, null),
+
+    T_MALATTIA_FIGLIO_3_14(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_143), 
+        ImmutableSet.of(DefaultAbsenceType.A_143), 
+        -1, null);
+
+
+    public AmountType amountType;
+    public Set<DefaultAbsenceType> takenCodes;
+    public Set<DefaultAbsenceType> takableCodes;
+    public Integer fixedLimit;
+    public TakeAmountAdjustment takableAmountAdjustment;
+
+    private DefaultTakable(AmountType amountType,
+        Set<DefaultAbsenceType> takenCodes, Set<DefaultAbsenceType> takableCodes, 
+        Integer fixedLimit, TakeAmountAdjustment takableAmountAdjustment) {
+      this.amountType = amountType;
+      this.takenCodes = takenCodes;
+      this.takenCodes = takenCodes;
+      this.takableCodes = takableCodes;
+      this.fixedLimit = fixedLimit;
+      this.takableAmountAdjustment = takableAmountAdjustment;
+
+    }
   }
 
 }

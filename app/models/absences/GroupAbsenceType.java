@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 
 import it.cnr.iit.epas.DateInterval;
 
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -19,6 +18,9 @@ import javax.persistence.Table;
 
 import lombok.Getter;
 
+import models.absences.CategoryGroupAbsenceType.DefaultCategoryType;
+import models.absences.ComplationAbsenceBehaviour.DefaultComplation;
+import models.absences.TakableAbsenceBehaviour.DefaultTakable;
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -182,77 +184,26 @@ public class GroupAbsenceType extends BaseModel {
     return description;
   }
   
-  public enum DefaultCategoryType {
-
-    L_104("Disabilità legge 104/92", 6, DefaultTab.ALTRE_TIPOLOGIE),
-    PERMESSI_VARI("Permessi vari", 4, DefaultTab.ALTRE_TIPOLOGIE),
-    CONGEDI_PARENTALI("Congedi parentali", 5, DefaultTab.ALTRE_TIPOLOGIE),
-    MISSIONE_CNR("Missioni CNR", 1, DefaultTab.MISSIONE), 
-    FERIE_CNR("Ferie CNR", 2, DefaultTab.FERIE),
-    RIPOSI_COMPENSATIVI_CNR("Riposi compensativi CNR", 3, DefaultTab.RIPOSO_COMPENSATIVO),
-    ALTRI_CODICI("Altri Codici", 12, DefaultTab.ALTRE_TIPOLOGIE),
-    MALATTIA_DIPENDENTE("Malattia dipendente", 8, DefaultTab.ALTRE_TIPOLOGIE),
-    MALATTIA_FIGLIO_1("Malattia primo figlio", 9, DefaultTab.ALTRE_TIPOLOGIE),
-    MALATTIA_FIGLIO_2("Malattia secondo figlio", 10, DefaultTab.ALTRE_TIPOLOGIE),
-    MALATTIA_FIGLIO_3("Malattia terzo figlio", 11, DefaultTab.ALTRE_TIPOLOGIE),
-    CODICI_AUTOMATICI("Codici Automatici", 14, DefaultTab.AUTOMATICI),
-    CODICI_DIPENDENTI("Codici Dipendenti", 13, DefaultTab.DIPENDENTI);
-
-    public String description;
-    public int priority;
-    public DefaultTab categoryTab;
-
-    private DefaultCategoryType(String description, int priority, DefaultTab categoryTab) {
-      this.description = description;
-      this.priority = priority;
-      this.categoryTab = categoryTab;
-    }
-    
-    /**
-     * Se l'enum è presente nell'elenco delle categorie in list.
-     * @return present
-     */
-    public boolean isPresent(List<CategoryGroupAbsenceType> list) {
-      for (CategoryGroupAbsenceType category : list) {
-        if (category.name.equals(this.name())) {
-          return true;
-        }
-      }
-      return false;
-    }
-
-  }
-
-  public enum DefaultComplation {
-    C_18, C_19, C_661, 
-    C_23, C_25, C_232, C_252, C_233, C_253, 
-    C_89, C_09;
-  }
-
-  public enum DefaultTakable {
-    T_18, T_19, T_661, 
-    T_23, T_25, T_232, T_252, T_233, T_253, 
-    T_89, T_09, T_FERIE_CNR, T_RIPOSI_CNR, T_MISSIONE, T_95, T_ALTRI,
-    T_MALATTIA,
-    T_MALATTIA_FIGLIO_1_12,
-    T_MALATTIA_FIGLIO_1_13,
-    T_MALATTIA_FIGLIO_1_14,
-    T_MALATTIA_FIGLIO_2_12,
-    T_MALATTIA_FIGLIO_2_13,
-    T_MALATTIA_FIGLIO_2_14,
-    T_MALATTIA_FIGLIO_3_12,
-    T_MALATTIA_FIGLIO_3_13,
-    T_MALATTIA_FIGLIO_3_14,
-    T_PB,
-    T_EMPLOYEE
-    ;
-  }
-
   public enum DefaultGroup {
-    G_18, G_19, G_661, 
-    G_23, G_25, G_232, G_252, G_233, G_253,
+    G_18, 
+    G_19, 
+    G_661, 
+    
+    G_23, 
+    G_25, 
+    G_232, 
+    G_252, 
+    G_233, 
+    G_253,
 
-    G_89, G_09, MISSIONE, ALTRI, FERIE_CNR, RIPOSI_CNR, G_95,
+    G_89, 
+    G_09, 
+    MISSIONE, 
+    ALTRI, 
+    FERIE_CNR, 
+    RIPOSI_CNR, 
+    G_95,
+    
     MALATTIA, 
     MALATTIA_FIGLIO_1_12,
     MALATTIA_FIGLIO_1_13,
@@ -263,41 +214,25 @@ public class GroupAbsenceType extends BaseModel {
     MALATTIA_FIGLIO_3_12,
     MALATTIA_FIGLIO_3_13,
     MALATTIA_FIGLIO_3_14,
+    
     PB,
-    FUORI_SEDE_105BP,
-    ;
-  }
-  
-  public enum DefaultTab {
-    ALTRE_TIPOLOGIE("Altre Tipologie", 4),
-    MISSIONE("Missione", 1),
-    FERIE("Ferie e Festività Soppr.", 2),
-    RIPOSO_COMPENSATIVO("Riposo Compensativo", 3),
-    AUTOMATICI("Codici Automatici", 6),
-    DIPENDENTI("Codici Dipendenti", 5),
-    LAVORO_FUORI_SEDE("Lavoro Fuori Sede", 5);
+    EMPLOYEE,
+    FUORI_SEDE_105BP;
     
     public String description;
-    public int priority;
+    public String chainDescription;
+    public DefaultCategoryType category;
+    public GroupAbsenceTypePattern pattern;
+    public PeriodType periodType;
+    public DefaultTakable takable;
+    public DefaultComplation complation;
+    public DefaultGroup nextGroupToCheck;
+    public boolean automatic;
+    public boolean initializable;
     
-    private DefaultTab(String description, int priority) {
-      this.description = description;
-      this.priority = priority;
-    }
     
-    /**
-     * Se l'enum è presente nell'elenco delle tabs in list.
-     * @return present
-     */
-    public boolean isPresent(List<CategoryTab> list) {
-      for (CategoryTab tab : list) {
-        if (tab.name.equals(this.name())) {
-          return true;
-        }
-      }
-      return false;
-    }
+    
+    
   }
-
   
 }
