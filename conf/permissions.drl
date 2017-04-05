@@ -91,6 +91,8 @@ when
   $c: PermissionCheck(action in (
   		"Shift.handleShifts",
   		"Shift.renderIds", 
+  		"Shift.renderServices",
+  		"Shift.renderShiftname",
   		"Shift.personList",
         "Shift.timeTable",
         "Shift.find",
@@ -111,6 +113,8 @@ when
   $c: PermissionCheck(action in (
   		"Shift.handleShifts",
   		"Shift.renderIds",
+  		"Shift.renderServices",
+  		"Shift.renderShiftname",
   		"Shift.personList",
         "Shift.timeTable",
         "Shift.find",
