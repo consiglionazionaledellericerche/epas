@@ -24,7 +24,7 @@
 	    
 	    #{f.selectEnum 'groupAbsenceType.pattern', items:models.absences.GroupAbsenceType.GroupAbsenceTypePattern.values() /}
 	    
-	    #{if !groupAbsenceType.chainDescription.equals(groupAbsenceType.description) }
+	    #{if !groupAbsenceType.computeChainDescription().equals(groupAbsenceType.description) }
 	      #{f.input 'groupAbsenceType.chainDescription' /}
 	    #{/if}
 	    #{else}
