@@ -1,8 +1,10 @@
 package models.absences;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -22,6 +24,7 @@ import lombok.Getter;
 import models.absences.AbsenceType.DefaultAbsenceType;
 import models.base.BaseModel;
 
+import org.assertj.core.util.Lists;
 import org.hibernate.envers.Audited;
 
 @Audited
@@ -59,6 +62,30 @@ public class ComplationAbsenceBehaviour extends BaseModel {
   @OrderBy("code")
   public Set<AbsenceType> replacingCodes = Sets.newHashSet();
 
+  
+  /**
+   * Se esiste fra gli enumerati un corrispondente e se è correttamente modellato.
+   * @return absent se il completamento non è presente in enum
+   */
+  public Optional<Boolean> matchEnum() {
+    for (DefaultComplation defaultComplation : DefaultComplation.values()) {
+      if (defaultComplation.name().equals(this.name)) {
+        if (!defaultComplation.amountType.equals(this.amountType)) {
+          return Optional.of(false);
+        }
+        if (!matchTypes(defaultComplation.replacingCodes, this.replacingCodes)) {
+          return Optional.of(false);
+        }
+        if (!matchTypes(defaultComplation.complationCodes, this.complationCodes)) {
+          return Optional.of(false);
+        }
+
+        return Optional.of(true);
+      } 
+    }
+    return Optional.absent();
+  }
+  
   /**
    * Comportamenti di completamento di default.
    * 
@@ -151,6 +178,52 @@ public class ComplationAbsenceBehaviour extends BaseModel {
       this.complationCodes = complationCodes;
       this.replacingCodes = replacingCodes;
     }
+    
+    /**
+     * Ricerca i completamenti modellati e non presenti fra quelle passate in arg (db). 
+     * @return list
+     */
+    public static List<DefaultComplation> missing(List<ComplationAbsenceBehaviour> allComplations) {
+      List<DefaultComplation> missing = Lists.newArrayList();
+      for (DefaultComplation defaultComplation : DefaultComplation.values()) {
+        boolean found = false;
+        for (ComplationAbsenceBehaviour complation : allComplations) {
+          if (defaultComplation.name().equals(complation.name)) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          missing.add(defaultComplation);
+        }
+      }
+      return missing;
+    }
+  }
+  
+  /**
+   * Confronta le due liste...
+   * @return se le due liste contengono gli stessi codici
+   */
+  public static boolean matchTypes(Set<DefaultAbsenceType> enumSet, Set<AbsenceType> set) {
+    
+    if (enumSet.size() != set.size()) {
+      return false;
+    }
+    Set<String> codes1 = Sets.newHashSet();
+    for (DefaultAbsenceType defaultType : enumSet) {
+      codes1.add(defaultType.name().substring(2));
+    }
+    Set<String> codes2 = Sets.newHashSet();
+    for (AbsenceType type : set) {
+      codes2.add(type.code);
+    }
+    for (String code : codes1) {
+      if (!codes2.contains(code)) {
+        return false;
+      }
+    }
+    return true;
   }
 
 }

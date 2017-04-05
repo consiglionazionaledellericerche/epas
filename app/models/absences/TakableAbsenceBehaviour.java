@@ -1,7 +1,9 @@
 package models.absences;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -21,6 +23,7 @@ import lombok.Getter;
 import models.absences.AbsenceType.DefaultAbsenceType;
 import models.base.BaseModel;
 
+import org.assertj.core.util.Lists;
 import org.hibernate.envers.Audited;
 import org.testng.collections.Sets;
 
@@ -81,6 +84,44 @@ public class TakableAbsenceBehaviour extends BaseModel {
   }
   
   /**
+   * Se esiste fra gli enumerati un corrispondente e se è correttamente modellato.
+   * @return absent se il completamento non è presente in enum
+   */
+  public Optional<Boolean> matchEnum() {
+    for (DefaultTakable defaultTakable : DefaultTakable.values()) {
+      if (defaultTakable.name().equals(this.name)) {
+        if (!defaultTakable.amountType.equals(this.amountType)) {
+          return Optional.of(false);
+        }
+        if (defaultTakable.fixedLimit != this.fixedLimit) {
+          return Optional.of(false); 
+        }
+        if (!ComplationAbsenceBehaviour.matchTypes(defaultTakable.takenCodes, this.takenCodes)) {
+          return Optional.of(false);
+        }
+        if (!ComplationAbsenceBehaviour
+            .matchTypes(defaultTakable.takableCodes, this.takableCodes)) {
+          return Optional.of(false);
+        }
+        
+        //campi nullable adjustment
+        if (defaultTakable.takableAmountAdjustment == null) {
+          if (this.takableAmountAdjustment != null) {
+            return Optional.of(false);
+          }
+        } else {
+          if (!defaultTakable.takableAmountAdjustment.equals(this.takableAmountAdjustment)) {
+            return Optional.of(false);
+          }
+        }
+
+        return Optional.of(true);
+      } 
+    }
+    return Optional.absent();
+  }
+  
+  /**
    * Comportamenti di prendibilità di default.
    * 
    * @author alessandro
@@ -92,7 +133,7 @@ public class TakableAbsenceBehaviour extends BaseModel {
         ImmutableSet.of(DefaultAbsenceType.A_18, DefaultAbsenceType.A_18M), 
         ImmutableSet.of(DefaultAbsenceType.A_18, DefaultAbsenceType.A_18M), 
         3, null),
-
+    
     T_19(AmountType.units, 
         ImmutableSet.of(DefaultAbsenceType.A_19, DefaultAbsenceType.A_19M), 
         ImmutableSet.of(DefaultAbsenceType.A_19, DefaultAbsenceType.A_19M), 
@@ -308,12 +349,12 @@ public class TakableAbsenceBehaviour extends BaseModel {
     public AmountType amountType;
     public Set<DefaultAbsenceType> takenCodes;
     public Set<DefaultAbsenceType> takableCodes;
-    public Integer fixedLimit;
+    public int fixedLimit;
     public TakeAmountAdjustment takableAmountAdjustment;
 
     private DefaultTakable(AmountType amountType,
         Set<DefaultAbsenceType> takenCodes, Set<DefaultAbsenceType> takableCodes, 
-        Integer fixedLimit, TakeAmountAdjustment takableAmountAdjustment) {
+        int fixedLimit, TakeAmountAdjustment takableAmountAdjustment) {
       this.amountType = amountType;
       this.takenCodes = takenCodes;
       this.takenCodes = takenCodes;
@@ -321,6 +362,27 @@ public class TakableAbsenceBehaviour extends BaseModel {
       this.fixedLimit = fixedLimit;
       this.takableAmountAdjustment = takableAmountAdjustment;
 
+    }
+    
+    /**
+     * Ricerca i comportamenti prendibilità modellati e non presenti fra quelle passate in arg (db).
+     * @return list
+     */
+    public static List<DefaultTakable> missing(List<TakableAbsenceBehaviour> allTakables) {
+      List<DefaultTakable> missing = Lists.newArrayList();
+      for (DefaultTakable defaultTakable : DefaultTakable.values()) {
+        boolean found = false;
+        for (TakableAbsenceBehaviour takable : allTakables) {
+          if (defaultTakable.name().equals(takable.name)) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          missing.add(defaultTakable);
+        }
+      }
+      return missing;
     }
   }
 

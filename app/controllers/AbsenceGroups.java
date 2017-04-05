@@ -999,12 +999,116 @@ public class AbsenceGroups extends Controller {
    */
   public static void consistencyGroups() {
     
-    //Tabs
     List<CategoryTab> allCategoryTabs = absenceComponentDao.tabsByPriority();
     List<CategoryGroupAbsenceType> allCategories = absenceComponentDao.categoriesByPriority();
-    render(allCategoryTabs, allCategories);
-    
-    
+    List<GroupAbsenceType> allGroups = absenceComponentDao.allGroupAbsenceType();
+    List<ComplationAbsenceBehaviour> allComplations = Lists.newArrayList();
+    for (GroupAbsenceType group : allGroups) {
+      if (group.complationAbsenceBehaviour != null) {
+        allComplations.add(group.complationAbsenceBehaviour);
+      }
+    }
+    List<TakableAbsenceBehaviour> allTakables = Lists.newArrayList();
+    for (GroupAbsenceType group : allGroups) {
+      allTakables.add(group.takableAbsenceBehaviour);
+    }
+    List<AbsenceType> allAbsenceTypes = AbsenceType.findAll();
+    render(allCategoryTabs, allCategories, allGroups, allComplations, allTakables, allAbsenceTypes);
   }
   
+  /**
+   * Ripristina alcuni difetti noti sulla modellazione db dei gruppi assenze senza effetti
+   * collaterali.
+   */
+  public static void consistencyCleans() {
+    
+    List<CategoryTab> allCategoryTabs = absenceComponentDao.tabsByPriority();
+    for (CategoryTab tab : allCategoryTabs) {
+      if (tab.categoryGroupAbsenceTypes.isEmpty()) {
+        tab.delete();
+      }
+    }
+    
+    //Patch da spostare: le categorie senza gruppi associati le posso rimuovere.
+    List<CategoryGroupAbsenceType> allCategories = absenceComponentDao.categoriesByPriority();
+    for (CategoryGroupAbsenceType category : allCategories) {
+      if (category.groupAbsenceTypes.isEmpty()) {
+        category.delete();
+      }
+    }
+    
+    List<GroupAbsenceType> allGroups = absenceComponentDao.allGroupAbsenceType();
+    for (GroupAbsenceType group : allGroups) {
+      //Patch da spostare:
+      if (group.chainDescription == null) {
+        group.chainDescription = "";
+        group.save();
+      }
+      
+      if (group.takableAbsenceBehaviour.name.equals("T_G_24")) {
+        group.takableAbsenceBehaviour.name = "T_24";
+        group.takableAbsenceBehaviour.save();
+      }
+      if (group.complationAbsenceBehaviour != null 
+          && group.complationAbsenceBehaviour.name.equals("C_G_24")) {
+        group.complationAbsenceBehaviour.name = "C_24";
+        group.complationAbsenceBehaviour.save();
+      }
+    }
+    List<AbsenceType> allAbsenceTypes = AbsenceType.findAll();
+    for (AbsenceType absenceType : allAbsenceTypes) {
+      if (absenceType.code.equals("19H1")) {
+        absenceType.certificateCode = "19H1";
+        absenceType.save();
+      }
+      if (absenceType.code.equals("19H2")) {
+        absenceType.certificateCode = "19H2";
+        absenceType.save();
+      }
+      if (absenceType.code.equals("19H3")) {
+        absenceType.certificateCode = "19H3";
+        absenceType.save();
+      }
+      if (absenceType.code.equals("19H4")) {
+        absenceType.certificateCode = "19H4";
+        absenceType.save();
+      }
+      if (absenceType.code.equals("19H5")) {
+        absenceType.certificateCode = "19H5";
+        absenceType.save();
+      }
+      if (absenceType.code.equals("19H6")) {
+        absenceType.certificateCode = "19H6";
+        absenceType.save();
+      }
+      if (absenceType.code.equals("19H7")) {
+        absenceType.certificateCode = "19H7";
+        absenceType.save();
+      }
+      if (absenceType.code.equals("19H8")) {
+        absenceType.certificateCode = "19H8";
+        absenceType.save();
+      }
+      if (absenceType.code.equals("19H9")) {
+        absenceType.certificateCode = "19H9";
+        absenceType.save();
+      }
+      if (absenceType.justifiedTime == null) {
+        absenceType.justifiedTime = 0;
+        absenceType.save();
+      }
+      if (absenceType.replacingTime == null) {
+        absenceType.replacingTime = 0;
+        absenceType.save();
+      }
+      if (!absenceType.isExpired()) {
+        absenceType.validFrom = null;
+        absenceType.validTo = null;
+        absenceType.save();
+      }
+    }
+    
+    consistencyGroups();
+  }
+
 }
