@@ -1,0 +1,114 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Controllo Gruppi' /}
+
+ <div class="container">
+   
+   #{alert color:'warning'}
+     <p>Controllo Tabs Database ed enum. TODO: eliminare il campo isDefault non utilizzato.</p>
+   #{/alert}      
+   
+   <table class="table table-condensed table-bordered"> 
+    <thead>
+     <tr>
+      <th>Nome</th>
+      <th>Descrizione</th>
+      <th>Priorità</th>
+      <th>Matching Enum</th>
+     </tr>
+    </thead>
+    <tbody> 
+     #{list items:allCategoryTabs, as:'tab'}
+      <tr>
+        <td>${tab.name}</td>
+        <td>${tab.description}</td>
+        <td>${tab.priority}</td>
+        <td>
+          #{if tab.matchEnum()} <i class="fa fa-check text-success" aria-hidden="true"></i>#{/if}
+          #{else}<i class="fa fa-times text-danger" aria-hidden="true"></i>#{/else}
+        </td>
+      </tr>
+     #{/list}
+    </tbody>   
+   </table>
+   
+   <table class="table table-condensed table-bordered"> 
+    <thead>
+     <tr>
+      <th>Nome</th>
+      <th>Descrizione</th>
+      <th>Priorità</th>
+      <th>Present</th>
+     </tr>
+    </thead>
+    <tbody> 
+     #{list items:models.absences.GroupAbsenceType.DefaultTab.values(), as:'tabEnum' }
+      <tr>
+        <td>${tabEnum.name()}</td>
+        <td>${tabEnum.description}</td>
+        <td>${tabEnum.priority}</td>
+        <td>
+          #{if tabEnum.isPresent(allCategoryTabs)}<i class="fa fa-check text-success" aria-hidden="true"></i> #{/if}
+          #{else}<i class="fa fa-times text-danger" aria-hidden="true"></i>#{/else}
+        </td>
+      </tr>
+     #{/list}
+    </tbody>   
+   </table>
+   
+    #{alert color:'warning'}
+     <p>Controllo Categorie Database ed enum.</p>
+    #{/alert}      
+    
+    <table class="table table-condensed table-bordered"> 
+    <thead>
+     <tr>
+      <th>Nome</th>
+      <th>Descrizione</th>
+      <th>Priorità</th>
+      <th>Tab</th>
+      <th>Matching Enum</th>
+     </tr>
+    </thead>
+    <tbody> 
+     #{list items:allCategories, as:'category'}
+      <tr>
+        <td>${category.name}</td>
+        <td>${category.description}</td>
+        <td>${category.priority}</td>
+        <td>${category.tab?.name}</td>
+        <td>
+          #{if category.matchEnum()} <i class="fa fa-check text-success" aria-hidden="true"></i>#{/if}
+          #{else}<i class="fa fa-times text-danger" aria-hidden="true"></i>#{/else}
+        </td>
+      </tr>
+     #{/list}
+    </tbody>   
+   </table>
+   
+   <table class="table table-condensed table-bordered"> 
+    <thead>
+     <tr>
+      <th>Nome</th>
+      <th>Descrizione</th>
+      <th>Priorità</th>
+      <th>Present</th>
+     </tr>
+    </thead>
+    <tbody> 
+     #{list items:models.absences.GroupAbsenceType.DefaultCategoryType.values(), as:'categoryEnum' }
+      <tr>
+        <td>${categoryEnum.name()}</td>
+        <td>${categoryEnum.description}</td>
+        <td>${categoryEnum.priority}</td>
+        <td>${categoryEnum.categoryTab.name()}</td>
+        <td>
+          #{if categoryEnum.isPresent(allCategories)}<i class="fa fa-check text-success" aria-hidden="true"></i> #{/if}
+          #{else}<i class="fa fa-times text-danger" aria-hidden="true"></i>#{/else}
+        </td>
+      </tr>
+     #{/list}
+    </tbody>   
+   </table>
+   
+</div>

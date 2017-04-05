@@ -991,4 +991,20 @@ public class AbsenceGroups extends Controller {
     absenceService.fixPostPartumGroups();
   }
   
+  /**
+   * Se lo stato del db è consistente la modellazione via enumerati (che garantisce il corretto
+   * funzionamento).
+   * Entità controllate:
+   * Tab, Categorie, Gruppi, Parte takable, Parte completamento, Codici Assenza  
+   */
+  public static void consistencyGroups() {
+    
+    //Tabs
+    List<CategoryTab> allCategoryTabs = absenceComponentDao.tabsByPriority();
+    List<CategoryGroupAbsenceType> allCategories = absenceComponentDao.categoriesByPriority();
+    render(allCategoryTabs, allCategories);
+    
+    
+  }
+  
 }

@@ -10,6 +10,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import models.absences.GroupAbsenceType.DefaultCategoryType;
+import models.absences.GroupAbsenceType.DefaultTab;
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -41,6 +43,22 @@ public class CategoryGroupAbsenceType extends BaseModel
   @Override
   public int compareTo(CategoryGroupAbsenceType obj) {
     return name.compareTo(obj.name);
+  }
+  
+  /**
+   * Se esiste fra gli enumerati un corrispondente.
+   * @return matching result
+   */
+  public boolean matchEnum() {
+    for (DefaultCategoryType defaultCategory : DefaultCategoryType.values()) {
+      if (defaultCategory.name().equals(this.name) 
+          && defaultCategory.description.equals(this.description)
+          && defaultCategory.priority == this.priority
+          && defaultCategory.categoryTab.name().equals(this.tab.name)) {
+        return true;
+      }
+    }
+    return false;
   }
   
   /**
