@@ -66,7 +66,7 @@ public class PeriodChain {
    * @return string
    */
   public String getChainDescription() {
-    return periods.get(0).groupAbsenceType.getChainDescription();
+    return periods.get(0).groupAbsenceType.computeChainDescription();
   }
   
   /**
