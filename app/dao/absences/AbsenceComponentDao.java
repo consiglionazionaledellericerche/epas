@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
@@ -155,10 +156,10 @@ public class AbsenceComponentDao extends DaoBase {
    * @param name nome
    * @return entity
    */
-  public CategoryGroupAbsenceType categoryByName(String name) {
+  public Optional<CategoryGroupAbsenceType> categoryByName(String name) {
     QCategoryGroupAbsenceType category = QCategoryGroupAbsenceType.categoryGroupAbsenceType;
-    return getQueryFactory().from(category)
-        .where(category.name.eq(name)).singleResult(category);
+    return Optional.fromNullable(getQueryFactory().from(category)
+        .where(category.name.eq(name)).singleResult(category));
   }
   
   /**
@@ -183,10 +184,10 @@ public class AbsenceComponentDao extends DaoBase {
    * @param name nome
    * @return entity
    */
-  public CategoryTab tabByName(String name) {
+  public Optional<CategoryTab> tabByName(String name) { 
     QCategoryTab categoryTab = QCategoryTab.categoryTab;
-    return getQueryFactory().from(categoryTab)
-        .where(categoryTab.name.eq(name)).singleResult(categoryTab);
+    return Optional.fromNullable(getQueryFactory().from(categoryTab)
+        .where(categoryTab.name.eq(name)).singleResult(categoryTab));
   }
   
   /**

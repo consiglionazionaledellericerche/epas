@@ -437,9 +437,19 @@ public class GroupAbsenceType extends BaseModel {
       return missing;
     }
     
-    
-    
-    
+    /**
+     * L'enumerato corrispettivo del group (se esiste...) 
+     * @return optional dell'enumerato
+     */
+    public static Optional<DefaultGroup> byName(GroupAbsenceType group) {
+      for (DefaultGroup defaultGroup : DefaultGroup.values()) {
+        if (defaultGroup.name().equals(group.name)) {
+          return Optional.of(defaultGroup);
+        }
+      }
+      return Optional.absent();
+    }
+
   }
   
 }

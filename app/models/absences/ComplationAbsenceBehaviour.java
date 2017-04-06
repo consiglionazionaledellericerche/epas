@@ -22,6 +22,7 @@ import javax.persistence.Table;
 import lombok.Getter;
 
 import models.absences.AbsenceType.DefaultAbsenceType;
+import models.absences.TakableAbsenceBehaviour.DefaultTakable;
 import models.base.BaseModel;
 
 import org.assertj.core.util.Lists;
@@ -198,6 +199,19 @@ public class ComplationAbsenceBehaviour extends BaseModel {
         }
       }
       return missing;
+    }
+    
+    /**
+     * L'enumerato corrispettivo del takable (se esiste...) 
+     * @return optional dell'enumerato
+     */
+    public static Optional<DefaultComplation> byName(ComplationAbsenceBehaviour complation) {
+      for (DefaultComplation defaultComplation : DefaultComplation.values()) {
+        if (defaultComplation.name().equals(complation.name)) {
+          return Optional.of(defaultComplation);
+        }
+      }
+      return Optional.absent();
     }
   }
   

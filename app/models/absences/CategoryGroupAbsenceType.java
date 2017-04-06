@@ -128,6 +128,19 @@ public class CategoryGroupAbsenceType extends BaseModel
       }
       return missing;
     }
+    
+    /**
+     * L'enumerato corrispettivo della categoria (se esiste...) 
+     * @return optional dell'enumerato
+     */
+    public static Optional<DefaultCategoryType> byName(CategoryGroupAbsenceType category) {
+      for (DefaultCategoryType defaultCategory : DefaultCategoryType.values()) {
+        if (defaultCategory.name().equals(category.name)) {
+          return Optional.of(defaultCategory);
+        }
+      }
+      return Optional.absent();
+    }
   }
 
 
