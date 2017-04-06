@@ -96,7 +96,8 @@ public class CategoryTab extends BaseModel implements Comparable<CategoryTab> {
     RIPOSO_COMPENSATIVO("Riposo Compensativo", 3),
     AUTOMATICI("Codici Automatici", 6),
     DIPENDENTI("Codici Dipendenti", 5),
-    LAVORO_FUORI_SEDE("Lavoro Fuori Sede", 5);
+    LAVORO_FUORI_SEDE("Lavoro Fuori Sede", 5),
+    FERIE_DIPENDENTE("Ferie Dipendenti", 7);
     
     public String description;
     public int priority;
@@ -125,6 +126,19 @@ public class CategoryTab extends BaseModel implements Comparable<CategoryTab> {
         }
       }
       return missing;
+    }
+    
+    /**
+     * L'enumerato corrispettivo della tab (se esiste...) 
+     * @return optional dell'enumerato
+     */
+    public static Optional<DefaultTab> byName(CategoryTab tab) {
+      for (DefaultTab defaultTab : DefaultTab.values()) {
+        if (defaultTab.name().equals(tab.name)) {
+          return Optional.of(defaultTab);
+        }
+      }
+      return Optional.absent();
     }
   }
   

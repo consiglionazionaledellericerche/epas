@@ -783,6 +783,19 @@ public class AbsenceType extends BaseModel {
       }
       return missing;
     }
+    
+    /**
+     * L'enumerato corrispettivo del absenceType (se esiste...) 
+     * @return optional dell'enumerato
+     */
+    public static Optional<DefaultAbsenceType> byCode(AbsenceType absenceType) {
+      for (DefaultAbsenceType defaultAbsenceType : DefaultAbsenceType.values()) {
+        if (absenceType.code.equals(defaultAbsenceType.name().substring(2))) {
+          return Optional.of(defaultAbsenceType);
+        }
+      }
+      return Optional.absent();
+    }
 
   }
   
