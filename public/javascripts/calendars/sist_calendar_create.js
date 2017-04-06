@@ -25,7 +25,7 @@ function _RestJsonCall (uri, type, asyncMode, dataJson) {
 			result = data;
 			}
 		})
-		.error(function (jqXHR, textStatus, errorThrown) {
+		.fail(function (jqXHR, textStatus, errorThrown) {
           console.log("error during proxy call= " + textStatus);
           console.log("incoming reperebility Text= " + jqXHR.responseText);
 		});
@@ -175,10 +175,10 @@ function createCalendarRepView(allowed, repType, repCalObj, repGrpObj) {
 
 
       eventRender: function(event, element) {
-        	var inizio = jQuery.fullCalendar.formatDate(event.start, "MM");
-        	var fine = jQuery.fullCalendar.formatDate(event.end, "MM");
-        	var currentView = jQuery('#calendar').fullCalendar('getDate');
-        	var currentViewMonth = jQuery.fullCalendar.formatDate(currentView, "MM");
+        	var inizio = jQuery.fullCalendar(event.start).format("MM");
+        	var fine = jQuery.fullCalendar(event.end).format("MM");
+        	var currentView = jQuery('#calendar').fullCalendar('getDate').stripTime().format();
+        	var currentViewMonth = jQuery.fullCalendar(currentView).format("MM");
 
         	if( (inizio != currentViewMonth) && (fine != currentViewMonth) && (!event.id.match(/@google.com/g)) ){
           		element.addClass('oldEvent');
@@ -191,7 +191,7 @@ function createCalendarRepView(allowed, repType, repCalObj, repGrpObj) {
         	{
         		events: function (start, end, callback) {
             			// build the URI for the json file
-            			var currDate = $('#calendar').fullCalendar('getDate');
+            			var currDate = $('#calendar').fullCalendar('getDate').stripTime().format();
             			var currentYear = jQuery.fullCalendar.formatDate(currDate, "yyyy");
             			firstYear = currentYear;
 
@@ -401,8 +401,8 @@ function createCalendarRepAdmin(allowed, repType, repCalObj, repGrpObj){
          	{
           		events: function (start, end, callback) {
 
-				var currDate = $('#calendar').fullCalendar('getDate');
-            			var currentYear = jQuery.fullCalendar.formatDate(currDate, "yyyy");
+				var currDate = $('#calendar').fullCalendar('getDate').stripTime().format();
+            	var currentYear = jQuery.fullCalendar.formatDate(currDate, "yyyy");
 				firstYear = currentYear;
 
 				var uriParam = currentYear.concat('/01/01/').concat(currentYear.concat('/12/31'));
@@ -696,14 +696,14 @@ function createCalendarRepAdmin(allowed, repType, repCalObj, repGrpObj){
     			},
 
 		  eventRender: function(event, element) {
-			  var inizio = jQuery.fullCalendar.formatDate(event.start, "MM");
-                                var fine = jQuery.fullCalendar.formatDate(event.end, "MM");
-                                var currentView = jQuery('#calendar').fullCalendar('getDate');
-                                var currentViewMonth = jQuery.fullCalendar.formatDate(currentView, "MM");
+			  var inizio = jQuery.fullCalendar(event.start).format("MM");
+			  var fine = jQuery.fullCalendar(event.end).format("MM");
+			  var currentView = jQuery('#calendar').fullCalendar('getDate').stripTime().format();
+			  var currentViewMonth = jQuery.fullCalendar(currentView).format("MM");
 
-                                if( (inizio != currentViewMonth) && (fine != currentViewMonth) && (!event.id.match(/@google.com/g)) ){
-                                        element.addClass('oldEvent');
-                                }
+			  if( (inizio != currentViewMonth) && (fine != currentViewMonth) && (!event.id.match(/@google.com/g)) ){
+                   element.addClass('oldEvent');
+			  }
 		  },
 
 	  });
@@ -886,9 +886,9 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
       		eventSources: [
         	{
           		events: function (start, end, callback) {
-            			var currDate = $('#calendar').fullCalendar('getDate');
-            			var currentYear = jQuery.fullCalendar.formatDate(currDate, "yyyy");
-            			firstYear = currentYear.concat(jQuery.fullCalendar.formatDate(currDate, "MM"));
+            			var currDate = $('#calendar').fullCalendar('getDate').stripTime().format();
+            			var currentYear = jQuery.fullCalendar(currDate).format("YYYY");
+            			firstYear = currentYear.concat(jQuery.fullCalendar(currDate).format("MM"));
 
 			  	// build the URI for the json file
 			  	var uriParam = currentYear.concat('/01/01/').concat(currentYear.concat('/12/31'));
@@ -920,8 +920,8 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
                             				event['eMail'] = idToEmail[event.id];
                             				event['mobile'] = idToMobile[event.id];
                             				if (event.cancelled == 'false') {
-                                				event['start'] = jQuery.fullCalendar.parseDate(event.start.concat(' ').concat(event.ttStart));
-                                				event['end'] = jQuery.fullCalendar.parseDate(event.end.concat(' ').concat(event.ttEnd));
+                                				event['start'] = jQuery.fullCalendar.moment(event.start.concat(' ').concat(event.ttStart));
+                                				event['end'] = jQuery.fullCalendar.moment(event.end.concat(' ').concat(event.ttEnd));
                                     				event['title'] = event.shiftSlot + ' -- ' + idToName[event.id];
 
                                 				//event['allDay'] = false; // If true, shows event time in the event title
@@ -930,8 +930,8 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
                                			 		event['shiftHour'] = event.ttStart;
                             				} else {
                                 				event['title'] = 'Turno ' + tipoTurno + '\n\rANNULLATO';
-                                				event['start'] = jQuery.fullCalendar.parseDate(event.start);
-                               		 			event['end'] = jQuery.fullCalendar.parseDate(event.end);
+                                				event['start'] = jQuery.fullCalendar.moment(event.start);
+                               		 			event['end'] = jQuery.fullCalendar.moment(event.end);
                                 				event['allDay'] = true;
                                 				event['className'] = "del-event";
                                 				event['cancelled'] = true;
@@ -966,10 +966,10 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
 		}, // end eventClick
 
 		eventRender: function(event, element) {
-			  var inizio = jQuery.fullCalendar.formatDate(event.start, "MM");
-			  var fine = jQuery.fullCalendar.formatDate(event.end, "MM");
-			  var currentView = jQuery('#calendar').fullCalendar('getDate');
-			  var currentViewMonth = jQuery.fullCalendar.formatDate(currentView, "MM");
+			  var inizio = jQuery.fullCalendar(event.start).format("MM");
+			  var fine = jQuery.fullCalendar(event.end).format("MM");
+			  var currentView = jQuery('#calendar').fullCalendar('getDate').stripTime().format();
+			  var currentViewMonth = jQuery.fullCalendar(currentView).format("MM");
 
 			  if( (inizio != currentViewMonth) && (fine != currentViewMonth) && (!event.id.match(/@google.com/g)) ){
           			element.addClass('oldEvent');
@@ -1213,13 +1213,19 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
  		eventSources: [
           {
       		events: function (start, end, callback) {
-            var currDate = $('#calendar').fullCalendar('getDate');
-            var currentYear = jQuery.fullCalendar.formatDate(currDate, "yyyy");
-            period = currentYear.concat(jQuery.fullCalendar.formatDate(currDate, "MM"));
+            var currDate = $('#calendar').fullCalendar('getDate').stripTime().format();
+            
+            console.log("currDate: "+currDate);
+            var currentYear = currDate.substring(0,4);
+            console.log("currentYear: "+currentYear);
+            //var currentYear = jQuery.fullCalendar.formatDate(currDate, "yyyy");
+            
+            
+            //period = currentYear.concat(jQuery.fullCalendar.formatDate(currDate, "MM"));
 
       			// build the URI for the json file
       			var uriParam = currentYear.concat('/01/01/').concat(currentYear.concat('/12/31'));
-
+      			console.log("uriParam: "+uriParam);
         		/* get the work shift
         		----------------------------------------------------------------- */
           var datas = new Array();
@@ -1229,6 +1235,8 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 
     				while (j < tipoTurni.length) {
     					var tipoTurno = tipoTurni[j];
+    					
+    					console.log("uriParam: "+uriParam);
     					uriShiftToGet = shiftCalendar.getUriRestToGetEntity(tipoTurno, uriParam);
                     			//console.log("uriShiftToGet="+uriShiftToGet);
 
@@ -1238,6 +1246,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
         			var dataJson = JSON.stringify(data);*/
 
     					// exec the URI call
+    					console.log("UriShiftToGet: "+uriShiftToGet);
               var shiftPeriods = _RestJsonCall (uriShiftToGet, 'GET', false, {});
 
 
@@ -1266,8 +1275,8 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
           						'eMail': idToEmail[event.id],
           						'mobile': idToMobile[event.id],
           						'id': 'turno-'+event.id+'-'+indexRep+"-1",
-          						'start': jQuery.fullCalendar.parseDate(event.start + " " + event.ttStart),
-          						'end': jQuery.fullCalendar.parseDate(currentYear+"-"+startMonth+"-"+lastDayPreMonth + "T" +event.ttEnd + "Z"),
+          						'start': jQuery.fullCalendar.moment(event.start + " " + event.ttStart),
+          						'end': jQuery.fullCalendar.moment(currentYear+"-"+startMonth+"-"+lastDayPreMonth + "T" +event.ttEnd + "Z"),
           					}
           					indexRep++;
 
@@ -1283,8 +1292,8 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
     									'eMail': idToEmail[event.id],
           						'mobile': idToMobile[event.id],
           						'id': 'turno-'+event.id+'-'+indexRep+"-2",
-          						'start': jQuery.fullCalendar.parseDate(currentYear+"-"+endMonth+"-01T" + event.ttStart + "Z"),
-          						'end': jQuery.fullCalendar.parseDate(event.end + " " + event.ttEnd),
+          						'start': jQuery.fullCalendar.moment(currentYear+"-"+endMonth+"-01T" + event.ttStart + "Z"),
+          						'end': jQuery.fullCalendar.moment(event.end + " " + event.ttEnd),
            					}
            					indexRep++;
 
@@ -1316,8 +1325,8 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
           				event['eMail'] = idToEmail[event.id];
           				event['mobile'] = idToMobile[event.id];
     							event['title'] = 'Turno '+tipoTurno+' ANNULLATO';
-          				event['start'] = jQuery.fullCalendar.parseDate(event.start+" "+cancelledHourS);
-          				event['end'] = jQuery.fullCalendar.parseDate(event.end+" "+cancelledHourE);
+          				event['start'] = jQuery.fullCalendar.moment(event.start+" "+cancelledHourS);
+          				event['end'] = jQuery.fullCalendar.moment(event.end+" "+cancelledHourE);
           				event['allDay'] = true;
          	 			  event['className'] = "del-event";
           				event['cancelled'] = true;
@@ -1399,14 +1408,14 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 		var shiftHour = jQuery("input:radio[name=hour]:checked").val().split("-");
 		var shiftSlot = jQuery("input:radio[name=hour]:checked").attr('id');
 
-		var currentView = $('#calendar').fullCalendar('getDate');
-		var currentMonth = $.fullCalendar.formatDate(currentView, 'MM');
+		var currentView = $('#calendar').fullCalendar('getDate').stripTime().format();
+		var currentMonth = $.fullCalendar(currentView).format('MM');
 
 		// assign it the date that was reported with the time period selected by the user
 		// and adds a progressive number to the id in order to avoid repeated events
 		copiedEventObject.allDay = false;
-		copiedEventObject.start = jQuery.fullCalendar.parseDate(date2.concat(' ').concat(shiftHour[0]));
-		copiedEventObject.end = jQuery.fullCalendar.parseDate(date2.concat(' ').concat(shiftHour[1]));
+		copiedEventObject.start = jQuery.fullCalendar.moment(date2.concat(' ').concat(shiftHour[0]));
+		copiedEventObject.end = jQuery.fullCalendar.moment(date2.concat(' ').concat(shiftHour[1]));
 		copiedEventObject.shiftHour = shiftHour[0];
 		copiedEventObject.title = ' -- '.concat(copiedEventObject.title);
 		copiedEventObject.shiftSlot = shiftSlot;
@@ -1543,16 +1552,20 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 
 			  // On click remove-shift
         $(".remove-shift").click(function(e) {
-          startEvent = $.fullCalendar.formatDate(event.start, "yyyy-MM-dd");
-          endEvent = $.fullCalendar.formatDate(event.end, "yyyy-MM-dd");
+        	startEvent = $.fullCalendar(event.start).format("YYYY-MM-DD");
+        	endEvent = $.fullCalendar(event.end).format("YYYY-MM-DD");
+          //startEvent = $.fullCalendar.formatDate(event.start, "yyyy-MM-dd");
+          //endEvent = $.fullCalendar.formatDate(event.end, "YYYY-MM-dd");
           e.stopPropagation();
           var conf = confirm("In questo modo annullerai l'intero turno. Vuoi continuare?");
           if(conf){
             var events = $('#calendar').fullCalendar('clientEvents');
             $.each(events, function(i,v){
               if((event.id != v.id)&&(event.shiftType == v.shiftType) && (event.title != v.title) && (event.shiftHour != v.shiftHour)&&(!v.id.match(/@google.com/g))){
-                start = $.fullCalendar.formatDate(v.start, "yyyy-MM-dd");
-                end = $.fullCalendar.formatDate(v.end, "yyyy-MM-dd");
+                //start = $.fullCalendar.formatDate(v.start, "yyyy-MM-dd");
+                //end = $.fullCalendar.formatDate(v.end, "yyyy-MM-dd");
+                start = $.fullCalendar(v.start).format("YYYY-MM-DD");
+                end = $.fullCalendar(v.end).format("YYYY-MM-DD");
 
                 if(v.shiftHour == "07:00"){
                   startTime = "07:00:00";
@@ -1578,7 +1591,8 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
                     if (v1.end == null) {v1.end = v1.start;}
                     var temp = event.end;
                     temp.setDate(temp.getDate()+1);
-                    temp = $.fullCalendar.formatDate(temp, "yyyy-MM-dd");
+                    //temp = $.fullCalendar.formatDate(temp, "yyyy-MM-dd");
+                    temp = $.fullCalendar(temp).format("YYYY-MM-DD");
                     var v2 = {
                       'title': v.title,
                       'allDay': false,
@@ -1615,7 +1629,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
                 } else if( startEvent >= start && startEvent <= end){
                     var temp3 = event.start;
                     temp3.setDate(temp3.getDate() - 1);
-                    temp3 = $.fullCalendar.formatDate(temp3, "yyyy-MM-dd");
+                    temp3 = $.fullCalendar(temp3).format("YYYY-MM-DD");
                     var v1 = {
                       'title': v.title,
                       'allDay': false,
@@ -1637,7 +1651,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
                     if(endEvent < end){
                       var temp2 = event.end;
                       temp2.setDate(temp2.getDate() + 1);
-                      temp2 = $.fullCalendar.formatDate(temp2, "yyyy-MM-dd");
+                      temp2 = $.fullCalendar(temp2).format("YYYY-MM-DD");
                     var v2 = {
                       'title': "Turno " + event.shiftType + "\n\rANNULLATO",
                       'id': "turno-X"+"-"+v.id,
@@ -1699,8 +1713,8 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 			  }, // end eventMouseout
 
   eventDrop: function(event, dayDelta, minuteDelta, allDay, revertFunc) {
-	  var currentView = $('#calendar').fullCalendar('getDate');
-	  var currentMonth = $.fullCalendar.formatDate(currentView, 'MM');
+	  var currentView = $('#calendar').fullCalendar('getDate').stripTime().format();
+	  var currentMonth = $.fullCalendar(currentView).format('MM');
 
 	  // set data.end = data.start for check problem
           if (event.end == null) {event.end = event.start;}
@@ -1716,11 +1730,15 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
           } else {
 				    // check if absences and shift of a certain person overlap
             var obj = $('#calendar').fullCalendar('clientEvents');
-					  var eventStart = $.fullCalendar.formatDate(event.start, "yyyy-MM-dd");
-            var eventEnd = $.fullCalendar.formatDate(event.end, "yyyy-MM-dd");
+					  //var eventStart = $.fullCalendar.formatDate(event.start, "yyyy-MM-dd");
+            var eventStart = $.fullCalendar(event.start).format("YYYY-MM-DD");
+            //var eventEnd = $.fullCalendar.formatDate(event.end, "yyyy-MM-dd");
+            var eventEnd = $.fullCalendar(event.end).format("YYYY-MM-DD");
 					  jQuery.each(obj, function(i, val) {
-						  var valStart = $.fullCalendar.formatDate(val.start, "yyyy-MM-dd");
-						  var valEnd = $.fullCalendar.formatDate(val.end, "yyyy-MM-dd");
+						  //var valStart = $.fullCalendar.formatDate(val.start, "yyyy-MM-dd");
+						  //var valEnd = $.fullCalendar.formatDate(val.end, "yyyy-MM-dd");
+						  var valStart = $.fullCalendar(val.start).format("YYYY-MM-DD");
+						  var valEnd = $.fullCalendar(val.end).format("YYYY-MM-DD");
 
 						  if (((valStart == eventStart) || (eventStart >= valStart && eventStart <= valEnd)) && (val.id.toString() != event.id.toString())) {
 							  // check for the ferie
@@ -1750,8 +1768,8 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 
 			  eventResize: function(event, dayDelta, minuteDelta, revertFunc) {
 
-				  var currentView = $('#calendar').fullCalendar('getDate');
-				  var currentMonth = $.fullCalendar.formatDate(currentView, 'MM');
+				  var currentView = $('#calendar').fullCalendar('getDate').stripTime().format();
+				  var currentMonth = $.fullCalendar(currentView).format('MM');
 
 				  // set data.end = data.start for check problem
           if (event.end == null) {event.end = event.start;}
@@ -1767,26 +1785,30 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 		    	} else {
           	// check if absences and shift  of a certain person overlap
             var obj = $('#calendar').fullCalendar('clientEvents');
-				    var eventStart = $.fullCalendar.formatDate(event.start, "yyyy-MM-dd");
-				    var eventEnd = $.fullCalendar.formatDate(event.end, "yyyy-MM-dd");
+				    //ar eventStart = $.fullCalendar.formatDate(event.start, "yyyy-MM-dd");
+				    //var eventEnd = $.fullCalendar.formatDate(event.end, "yyyy-MM-dd");
+            var eventStart = $.fullCalendar(event.start).format("YYYY-MM-DD");
+			var eventEnd = $.fullCalendar(event.end).format("YYYY-MM-DD");
             jQuery.each(obj, function(i, val) {
-					    var valStart = $.fullCalendar.formatDate(val.start, "yyyy-MM-dd");
-              var valEnd = $.fullCalendar.formatDate(val.end, "yyyy-MM-dd");
-					    if ((eventEnd >= valStart) && (eventStart < valStart) && (val.id.toString() != event.id.toString())) {
-						    if (val.id.toString().match(/turno/g) && (val.shiftType.toString() == event.shiftType.toString())) {
-                  if (val.shiftHour.toString() === event.shiftHour.toString()) {
-                    alert("ATTENZIONE!\nIl turno delle "+event.shiftHour.toString()+" e gia coperto");
-                    revertFunc();
-                  } else if (val.personId.toString() === event.personId.toString()) {
-                    alert(event.title+" e' gia' in turno ")
-                    revertFunc();
-                  }
-                }
-						    if (val.id.toString().match(/assenza/g) && val.personId.toString() == event.personId.toString()) {
-							    alert("Il turno di "+event.title+" si sovrappone con le sue ferie");
-			         		revertFunc();
-						    }
-					    }
+            	//var valStart = $.fullCalendar.formatDate(val.start, "yyyy-MM-dd");
+            	//var valEnd = $.fullCalendar.formatDate(val.end, "yyyy-MM-dd");
+            	var valStart = $.fullCalendar(val.start).format("YYYY-MM-DD");
+            	var valEnd = $.fullCalendar(val.end).format("YYYY-MM-DD");
+				if ((eventEnd >= valStart) && (eventStart < valStart) && (val.id.toString() != event.id.toString())) {
+				    if (val.id.toString().match(/turno/g) && (val.shiftType.toString() == event.shiftType.toString())) {
+				    	if (val.shiftHour.toString() === event.shiftHour.toString()) {
+				    		alert("ATTENZIONE!\nIl turno delle "+event.shiftHour.toString()+" e gia coperto");
+				    		revertFunc();
+				    	} else if (val.personId.toString() === event.personId.toString()) {
+				    		alert(event.title+" e' gia' in turno ")
+				    		revertFunc();
+				    	}
+				    }
+					if (val.id.toString().match(/assenza/g) && val.personId.toString() == event.personId.toString()) {
+					    alert("Il turno di "+event.title+" si sovrappone con le sue ferie");
+			        	revertFunc();
+					}
+				}
             });
 			    }
       	}, // end eventResize
@@ -1794,8 +1816,8 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 	eventRender: function(event, element){
 		var inizio = jQuery.fullCalendar.formatDate(event.start, "MM");
     		var fine = jQuery.fullCalendar.formatDate(event.end, "MM");
-    		var currentView = jQuery('#calendar').fullCalendar('getDate');
-    		var currentViewMonth = jQuery.fullCalendar.formatDate(currentView, "MM");
+    		var currentView = jQuery('#calendar').fullCalendar('getDate').stripTime().format();
+    		var currentViewMonth = jQuery.fullCalendar(currentView).format("MM");
 
     		if( (inizio != currentViewMonth) && (fine != currentViewMonth) && (!event.id.match(/@google.com/g)) ){
             		element.addClass('oldEvent');
@@ -1945,9 +1967,9 @@ function createCalendarAbsenceView(allowed, persons, absenceCalObj, absenceGrpOb
 
         	{
           		events: function (start, end, callback) {
-            			var currDate = $('#calendar').fullCalendar('getDate');
-            			var currentYear = jQuery.fullCalendar.formatDate(currDate, "yyyy");
-            			firstYear = currentYear.concat(jQuery.fullCalendar.formatDate(currDate, "MM"));
+            			var currDate = $('#calendar').fullCalendar('getDate').stripTime().format();
+            			var currentYear = jQuery.fullCalendar(currDate).format("YYYY");
+            			firstYear = currentYear.concat(jQuery.fullCalendar(currDate).format("MM"));
 
                                 // build the URI for the json file
                                 var uriParam = currentYear.concat('/01/01/').concat(currentYear.concat('/12/31'));
@@ -2009,10 +2031,10 @@ function createCalendarAbsenceView(allowed, persons, absenceCalObj, absenceGrpOb
                 },*/ // end eventClick
 
                 eventRender: function(event, element) {
-                          var inizio = jQuery.fullCalendar.formatDate(event.start, "MM");
-                          var fine = jQuery.fullCalendar.formatDate(event.end, "MM");
-                          var currentView = jQuery('#calendar').fullCalendar('getDate');
-                          var currentViewMonth = jQuery.fullCalendar.formatDate(currentView, "MM");
+                          var inizio = jQuery.fullCalendar(event.start).format("MM");
+                          var fine = jQuery.fullCalendar(event.end).format("MM");
+                          var currentView = jQuery('#calendar').fullCalendar('getDate').stripTime().format();
+                          var currentViewMonth = jQuery.fullCalendar(currentView).format("MM");
 
                           if( (inizio != currentViewMonth) && (fine != currentViewMonth) && (!event.id.match(/@google.com/g)) ){
                                 element.addClass('oldEvent');

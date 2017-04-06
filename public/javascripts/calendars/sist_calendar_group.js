@@ -171,7 +171,7 @@ sistCalendarGroup.prototype = {
 				result = data;
 				}
 			})
-			.error(function (jqXHR, textStatus, errorThrown) {
+			.fail(function (jqXHR, textStatus, errorThrown) {
 	          console.log("error during proxy call= " + textStatus);
 	          
 			});			
@@ -192,7 +192,7 @@ sistCalendarGroup.prototype = {
 				result = data;
 				}
 			})
-			.error(function (jqXHR, textStatus, errorThrown) {
+			.fail(function (jqXHR, textStatus, errorThrown) {
 	          console.log("error during proxy call= " + textStatus);
 	          
 			});			
