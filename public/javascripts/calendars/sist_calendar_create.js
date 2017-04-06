@@ -102,10 +102,10 @@ function createCalendarRepView(allowed, repType, repCalObj, repGrpObj) {
 	//console.log("calendarType="+repType);
 	if (allowed) {
 
-  	// uri to get reperibility persons
+		//uri to get reperibility persons
 		var uriGetRepPersons = repCalObj.getUriRestToGetPersons(repType);
 
-  	//console.log('uriGetRepPersons='+uriGetRepPersons);
+		//console.log('uriGetRepPersons='+uriGetRepPersons);
 
 		var data = new Array();
 		data.push('GET');
@@ -118,19 +118,19 @@ function createCalendarRepView(allowed, repType, repCalObj, repGrpObj) {
 
 		// inizialize parameters and create the reperibility person
 		// to drop in the calendar
-  	jQuery.each(repPerson, function (i, event) {
+		jQuery.each(repPerson, function (i, event) {
 			var color = personColor.shift();
-    	var name = event.name + " " + event.surname;
-    	repCalendar.createElement(event.id, name, color).appendTo(div);
-    	//console.log("person: " + event.email);
-    	_RestJsonCall
-  		// get the email and the mobile phone
-    	idToEmail[event.id] = event.email;
-    	idToMobile[event.id] = event.mobile;
-    	idToColor[event.id] = color;
-    	idToName[event.id] = name;
-  	});
-  } else {
+			var name = event.name + " " + event.surname;
+			repCalendar.createElement(event.id, name, color).appendTo(div);
+			//console.log("person: " + event.email);
+			_RestJsonCall
+			// get the email and the mobile phone
+			idToEmail[event.id] = event.email;
+			idToMobile[event.id] = event.mobile;
+			idToColor[event.id] = color;
+			idToName[event.id] = name;
+		});
+	} else {
 
     /*$('<div>', {
       text: "Nessuna persona reperibile associata al Gruppo '" + repConfGroup.getGroupDescription(gid) + "'"
@@ -141,40 +141,40 @@ function createCalendarRepView(allowed, repType, repCalObj, repGrpObj) {
     /* initialize the calendar
     -----------------------------------------------------------------*/
     jQuery('#calendar').fullCalendar({
-      loading: function(bool){
-        setTimeout(function(){
-          if(bool){
-            jQuery('#loading').hide();
-          }
-        }, 2000);
-      },
+    	loading: function(bool){
+    		setTimeout(function(){
+    			if(bool){
+    				jQuery('#loading').hide();
+    			}
+    		}, 2000);
+    	},
 
-      // renames months in italian
-      monthNames: repCalObj.monthNames,
-      monthNamesShort: repCalObj.monthNamesShort,
+    	// renames months in italian
+    	monthNames: repCalObj.monthNames,
+    	monthNamesShort: repCalObj.monthNamesShort,
 
-      //renames days in italian
-      dayNames: repCalObj.dayNames,
-      dayNamesShort: repCalObj.dayNamesShort,
+    	//renames days in italian
+    	dayNames: repCalObj.dayNames,
+    	dayNamesShort: repCalObj.dayNamesShort,
 
-      // defines the header
-      header: repCalObj.header,
+    	// defines the header
+    	header: repCalObj.header,
 
-      // properties
-      selectable: repCalObj.selectable,      // highlight multiple days
-      editable: repCalObj.editable,
-      droppable: repCalObj.droppable, // this allows things to be dropped onto the calendar !!!
-      firstDay:  repCalObj.firstDay,    // start from monday
-      weekMode: repCalObj.weekMode,
-      timeFormat: repCalObj.timeFormat,   // 24- hours clock
+    	// properties
+    	selectable: repCalObj.selectable,      // highlight multiple days
+    	editable: repCalObj.editable,
+    	droppable: repCalObj.droppable, // this allows things to be dropped onto the calendar !!!
+    	firstDay:  repCalObj.firstDay,    // start from monday
+    	weekMode: repCalObj.weekMode,
+    	timeFormat: repCalObj.timeFormat,   // 24- hours clock
 
 
-      eventClick: function(calEvent, jsEvent, view) {
+    	eventClick: function(calEvent, jsEvent, view) {
       		alert(calEvent.title +'\nTelefono: '+calEvent.mobile+'\nEmail: '+calEvent.eMail);
-      },
+    	},
 
 
-      eventRender: function(event, element) {
+    	eventRender: function(event, element) {
         	var inizio = jQuery.fullCalendar(event.start).format("MM");
         	var fine = jQuery.fullCalendar(event.end).format("MM");
         	var currentView = jQuery('#calendar').fullCalendar('getDate').stripTime().format();
@@ -183,54 +183,54 @@ function createCalendarRepView(allowed, repType, repCalObj, repGrpObj) {
         	if( (inizio != currentViewMonth) && (fine != currentViewMonth) && (!event.id.match(/@google.com/g)) ){
           		element.addClass('oldEvent');
         	}
-      },
-      googleCalendarApiKey: 'AIzaSyAEoRhKv77jIyoqHb0VDNWbPdD_BDuEnFk',
+    	},
+    	googleCalendarApiKey: 'AIzaSyAEoRhKv77jIyoqHb0VDNWbPdD_BDuEnFk',
 
-      // define events to be included
-      eventSources: [
+    	// define events to be included
+    	eventSources: [
         	{
         		events: function (start, end, callback) {
-            			// build the URI for the json file
-            			var currDate = $('#calendar').fullCalendar('getDate').stripTime().format();
-            			var currentYear = jQuery.fullCalendar.formatDate(currDate, "yyyy");
-            			firstYear = currentYear;
+        			// build the URI for the json file
+        			var currDate = $('#calendar').fullCalendar('getDate').stripTime().format();
+        			var currentYear = jQuery.fullCalendar.formatDate(currDate, "yyyy");
+        			firstYear = currentYear;
 
-            			// uri to get reperibility
-            			var uriParam = currentYear.concat('/01/01/').concat(currentYear.concat('/12/31'));
-            			uriRepToGet = repCalObj.getUriRestToGetEntity(repType, uriParam);
-		        	    //console.log('uriRepToGet='+uriRepToGet);
+        			// uri to get reperibility
+        			var uriParam = currentYear.concat('/01/01/').concat(currentYear.concat('/12/31'));
+        			uriRepToGet = repCalObj.getUriRestToGetEntity(repType, uriParam);
+	        	    //console.log('uriRepToGet='+uriRepToGet);
 
-            			/* get the reperibility if the user is allowed
-            			-----------------------------------------------------------------*/
-            			if ((loadedYears.indexOf(currentYear) <  0) && allowed) {
-              				loadedYears.push(currentYear);
+        			/* get the reperibility if the user is allowed
+        			-----------------------------------------------------------------*/
+        			if ((loadedYears.indexOf(currentYear) <  0) && allowed) {
+          				loadedYears.push(currentYear);
 
-              				var data = new Array();
-              				data.push('GET');
-              				data.push(uriRepToGet);
-
-					var dataJson = JSON.stringify(data);
-
-					var repPeriods = _RestJsonCall (repCalObj.uriProxy, 'POST', false, dataJson);
-
-					// create calendar reperibility periods and complete their parameters
-              			jQuery.each(repPeriods, function (i, event) {
-                 				event['color'] = idToColor[event.id];
-                 				event['personId'] = event.id;
-                 				event['title'] = idToName[event.id];
-                 				event['eMail'] = idToEmail[event.id];
-                 				event['mobile'] = idToMobile[event.id];
-                 				event['id'] = 'rep-' + event.id + '-' + indexRep;
-                 				indexRep++;
-
-                 				jQuery('#calendar').fullCalendar('renderEvent', event, true);
-
-                 				// set data.end = data.start for check problem
-                 				if (event.end == null) {
-                 					event.end = event.start;
-                 				}
-            				});
-            			}
+	       				var data = new Array();
+	      				data.push('GET');
+	      				data.push(uriRepToGet);
+	
+						var dataJson = JSON.stringify(data);
+	
+						var repPeriods = _RestJsonCall (repCalObj.uriProxy, 'POST', false, dataJson);
+	
+						// create calendar reperibility periods and complete their parameters
+	          			jQuery.each(repPeriods, function (i, event) {
+	             			event['color'] = idToColor[event.id];
+	         				event['personId'] = event.id;
+	         				event['title'] = idToName[event.id];
+	         				event['eMail'] = idToEmail[event.id];
+	         				event['mobile'] = idToMobile[event.id];
+	         				event['id'] = 'rep-' + event.id + '-' + indexRep;
+	         				indexRep++;
+	
+	         				jQuery('#calendar').fullCalendar('renderEvent', event, true);
+	
+	         				// set data.end = data.start for check problem
+	         				if (event.end == null) {
+	         					event.end = event.start;
+	         				}
+	        			});
+            		}
           		},
         	},
       	],
@@ -239,19 +239,19 @@ function createCalendarRepView(allowed, repType, repCalObj, repGrpObj) {
     /* initialize the external events
     -----------------------------------------------------------------*/
     jQuery('#external-events div.external-event').each(function() {
-            // create an Event Object (http://arshaw.com/fullcalendar/docs/event_data/Event_Object/)
-            // it doesn't need to have a start or end
-            var eventObject = {
-                    id: 'rep-' + jQuery(this).attr("id"),
-                    title: jQuery.trim(jQuery(this).text()),  // use the element's text as the event title
-                    color: jQuery(this).attr("class").split(" ").pop(),
-                    personId: jQuery(this).attr("id"),
-                    eMail: idToEmail[jQuery(this).attr("id")],
-                    mobile: idToMobile[jQuery(this).attr("id")],
-            };
+        // create an Event Object (http://arshaw.com/fullcalendar/docs/event_data/Event_Object/)
+        // it doesn't need to have a start or end
+        var eventObject = {
+                id: 'rep-' + jQuery(this).attr("id"),
+                title: jQuery.trim(jQuery(this).text()),  // use the element's text as the event title
+                color: jQuery(this).attr("class").split(" ").pop(),
+                personId: jQuery(this).attr("id"),
+                eMail: idToEmail[jQuery(this).attr("id")],
+                mobile: idToMobile[jQuery(this).attr("id")],
+        };
 
-            // store the Event Object in the DOM element so we can get to it later
-            jQuery(this).data('eventObject', eventObject);
+        // store the Event Object in the DOM element so we can get to it later
+        jQuery(this).data('eventObject', eventObject);
     });
 } // FINE createCalendarRepView();
 
@@ -303,37 +303,37 @@ function createCalendarRepAdmin(allowed, repType, repCalObj, repGrpObj){
 
 	// legge le persone reperibili che può gestire da EPAS solo se ci sono
 	// reperibili associati a quel gruppo
-    	if (allowed) {
-      		//console.log('uriGetRepPersons='+uriGetRepPersons);
-      		var data = new Array();
-       		data.push('GET');
-       		data.push(uriGetRepPersons);
+	if (allowed) {
+  		//console.log('uriGetRepPersons='+uriGetRepPersons);
+  		var data = new Array();
+   		data.push('GET');
+   		data.push(uriGetRepPersons);
 
-       		var dataJson = JSON.stringify(data);
-       		//console.log(dataJson);
+   		var dataJson = JSON.stringify(data);
+   		//console.log(dataJson);
 
-		// exec the URI call
-               	var repPerson = _RestJsonCall (uriProxy, 'POST', false, dataJson);
+	// exec the URI call
+       	var repPerson = _RestJsonCall (uriProxy, 'POST', false, dataJson);
 
-               	jQuery.each(repPerson, function (i, event) {
+       	jQuery.each(repPerson, function (i, event) {
 
-       	            	var color = personColor.shift();
-               	    	var name = event.name + " " + event.surname;
-               		repCalendar.createElement(event.id, name, color).appendTo(div);
-               		//console.log("person: " + event.email);
+        	var color = personColor.shift();
+   	    	var name = event.name + " " + event.surname;
+       		repCalendar.createElement(event.id, name, color).appendTo(div);
+       		//console.log("person: " + event.email);
 
-              		// get the email and the mobile phone
-               		idToEmail[event.id] = event.email;
-               		idToMobile[event.id] = event.mobile;
-               		idToColor[event.id] = color;
-               		idToName[event.id] = name;
-              	});
+      		// get the email and the mobile phone
+       		idToEmail[event.id] = event.email;
+       		idToMobile[event.id] = event.mobile;
+       		idToColor[event.id] = color;
+       		idToName[event.id] = name;
+      	});
 
 	} else {
       		/*$('<div>', {
        	     text: "Nessuna persona reperibile associata al Gruppo '" + repConfGroup.getGroupDescription(gid) + "'"
        		}).appendTo('#external-events');*/
-    	}
+    }
 
 
 
@@ -365,41 +365,41 @@ function createCalendarRepAdmin(allowed, repType, repCalObj, repGrpObj){
 
 	  /* initialize the calendar
 	  -----------------------------------------------------------------*/
-	  jQuery('#calendar').fullCalendar({
+	jQuery('#calendar').fullCalendar({
 		loading: function(bool) {
 			setTimeout(function() {
-		      		if(bool) {
-            				jQuery('#loading').hide();
-          			}
-		    	}, 2000);
-      		},
+				if(bool) {
+					jQuery('#loading').hide();
+      			}
+			}, 2000);
+  	   	},
 
-		// renames months in italian
-		monthNames: repCalObj.monthNames,
-		monthNamesShort: repCalObj.monthNamesShort,
+	// renames months in italian
+	monthNames: repCalObj.monthNames,
+	monthNamesShort: repCalObj.monthNamesShort,
 
-		//renames days in italian
-		dayNames: repCalObj.dayNames,
-		dayNamesShort: repCalObj.dayNamesShort,
+	//renames days in italian
+	dayNames: repCalObj.dayNames,
+	dayNamesShort: repCalObj.dayNamesShort,
 
-		// defines the header
-		header: repCalObj.header,
+	// defines the header
+	header: repCalObj.header,
 
-		// define the text of the buttton
-		buttonText: repCalObj.buttonText,
+	// define the text of the buttton
+	buttonText: repCalObj.buttonText,
 
-		// properties
-		selectable: repCalObj.selectable,	// highlight multiple days
-		editable: repCalObj.editable,
-		droppable: repCalObj.droppable, // this allows things to be dropped onto the calendar !!!
-		firstDay: repCalObj.firstDay,	// start from monday
-		weekMode: repCalObj.weekMode,
-		timeFormat: repCalObj.timeFormat,	// 24- hours clock
+	// properties
+	selectable: repCalObj.selectable,	// highlight multiple days
+	editable: repCalObj.editable,
+	droppable: repCalObj.droppable, // this allows things to be dropped onto the calendar !!!
+	firstDay: repCalObj.firstDay,	// start from monday
+	weekMode: repCalObj.weekMode,
+	timeFormat: repCalObj.timeFormat,	// 24- hours clock
 
-		// define events to be included
-		eventSources: [
-         	{
-          		events: function (start, end, callback) {
+	// define events to be included
+	eventSources: [
+		{
+			events: function (start, end, callback) {
 
 				var currDate = $('#calendar').fullCalendar('getDate').stripTime().format();
             	var currentYear = jQuery.fullCalendar.formatDate(currDate, "yyyy");
@@ -410,303 +410,303 @@ function createCalendarRepAdmin(allowed, repType, repCalObj, repGrpObj){
 				uriRepToGet = repCalendar.getUriRestToGetEntity(repType, uriParam);
 				uriFerieToGet = repCalendar.getUriRestToGetAbsence(repType, uriParam);
 
-            			/* get the reperibility
-            			-----------------------------------------------------------------*/
-				    if(loadedYears.indexOf(currentYear) <  0) {
-					    loadedYears.push(currentYear);
-					    //console.log('uriRepToGet='+uriRepToGet);
+            	/* get the reperibility
+            	-----------------------------------------------------------------*/
+				if(loadedYears.indexOf(currentYear) <  0) {
+				    loadedYears.push(currentYear);
+					//console.log('uriRepToGet='+uriRepToGet);
 
-					    var data = new Array();
-       						data.push('GET');
-						data.push(uriRepToGet);
-						//console.log("leggo reperibilità da "+uriRepToGet);
+				    var data = new Array();
+					data.push('GET');
+					data.push(uriRepToGet);
+					//console.log("leggo reperibilità da "+uriRepToGet);
 
-						var dataJson = JSON.stringify(data);
+					var dataJson = JSON.stringify(data);
 
-						// exec the URI call
-                				var repPeriods = _RestJsonCall (uriProxy, 'POST', false, dataJson);
+					// exec the URI call
+       				var repPeriods = _RestJsonCall (uriProxy, 'POST', false, dataJson);
 
 					// create the reperibility periods event on the calendar
-				              jQuery.each(repPeriods, function(i, event) {
-					            	var startEv = event.start;
-                            				var endEv = event.end;
-                            				var tempStartMonth = startEv.split("-");
-                            				var tempEndMonth = endEv.split("-");
+       				jQuery.each(repPeriods, function(i, event) {
+					   	var startEv = event.start;
+        				var endEv = event.end;
+        				var tempStartMonth = startEv.split("-");
+        				var tempEndMonth = endEv.split("-");
 
-                            				var startMonth = tempStartMonth[1];
-                            				var endMonth = tempEndMonth[1];
+        				var startMonth = tempStartMonth[1];
+        				var endMonth = tempEndMonth[1];
 
 							// divides the periods if it covers 2 months
-                            				if (startMonth != endMonth) {
-                              					var lastDayPreMonth = new Date(currentYear, startMonth, 0).getDate();
-                              					var event1 = {
-                                      					'color': idToColor[event.id],
-                                      					'personId': event.id,
-                                      					'title': idToName[event.id],
-                                      					'eMail': idToEmail[event.id],
-                                      					'mobile': idToMobile[event.id],
-                                      					'id': 'rep-'+event.id+'-'+indexRep+"-1",
-                                      					'start': event.start,
-                                      					'end': currentYear+"/"+startMonth+"/"+lastDayPreMonth,
-                              					}
-                              					if (event1.end == null) {
-                                      					event1.end = event1.start;
-                                      					event1['allDay'] = 'true';
-                              					} else {
-                                      					event1['allDay'] = 'false';
-                              					}
-                              					indexRep++;
+        				if (startMonth != endMonth) {
+          					var lastDayPreMonth = new Date(currentYear, startMonth, 0).getDate();
+          					var event1 = {
+                  				'color': idToColor[event.id],
+              					'personId': event.id,
+              					'title': idToName[event.id],
+              					'eMail': idToEmail[event.id],
+              					'mobile': idToMobile[event.id],
+              					'id': 'rep-'+event.id+'-'+indexRep+"-1",
+              					'start': event.start,
+              					'end': currentYear+"/"+startMonth+"/"+lastDayPreMonth,
+          					}
+          					if (event1.end == null) {
+                  				event1.end = event1.start;
+                  				event1['allDay'] = 'true';
+          					} else {
+                  				event1['allDay'] = 'false';
+          					}
+          					indexRep++;
 
-                              					var event2 = {
-				                                      'color': idToColor[event.id],
-                                				      'personId': event.id,
-                                      					'title': idToName[event.id],
-                                      					'eMail': idToEmail[event.id],
-                                      					'mobile': idToMobile[event.id],
-                                      					'id': 'rep-'+event.id+'-'+indexRep+"-2",
-                                      					'start': currentYear+"/"+endMonth+"/01",
-                                      					'end': event.end,
-                              					}
-                              					if (event2.end == null) {
-                                      					event2.end = event2.start;
-                                      					event2['allDay'] = 'true';
-                              					} else {
-                                      					event2['allDay'] = 'false';
-                              					}
+          					var event2 = {
+          						'color': idToColor[event.id],
+          						'personId': event.id,
+              					'title': idToName[event.id],
+              					'eMail': idToEmail[event.id],
+              					'mobile': idToMobile[event.id],
+              					'id': 'rep-'+event.id+'-'+indexRep+"-2",
+              					'start': currentYear+"/"+endMonth+"/01",
+              					'end': event.end,
+          					}
+          					if (event2.end == null) {
+                  				event2.end = event2.start;
+                  				event2['allDay'] = 'true';
+          					} else {
+                  				event2['allDay'] = 'false';
+          					}
 
-                              					indexRep++;
-                              					jQuery('#calendar').fullCalendar('renderEvent', event1, true);
-                              					jQuery('#calendar').fullCalendar('renderEvent', event2, true);
-                            				} else {
-                              					event['color'] = idToColor[event.id];
-                              					event['personId'] = event.id;
-                              					event['title'] = idToName[event.id];
-                              					event['eMail'] = idToEmail[event.id];
-                              					event['mobile'] = idToMobile[event.id];
-                              					event['id'] = 'rep-'+event.id+'-'+indexRep;
+          					indexRep++;
+          					jQuery('#calendar').fullCalendar('renderEvent', event1, true);
+          					jQuery('#calendar').fullCalendar('renderEvent', event2, true);
+        				} else {
+          					event['color'] = idToColor[event.id];
+          					event['personId'] = event.id;
+          					event['title'] = idToName[event.id];
+          					event['eMail'] = idToEmail[event.id];
+          					event['mobile'] = idToMobile[event.id];
+          					event['id'] = 'rep-'+event.id+'-'+indexRep;
 
-                             					 jQuery('#calendar').fullCalendar('renderEvent', event, true);
-                              					indexRep++;
+         					jQuery('#calendar').fullCalendar('renderEvent', event, true);
+          					indexRep++;
 
-                              					// set data.end = data.start for check problem
-                              					if (event.end == null) {event.end = event.start;}
-                            				}
-                        			});
+          					// set data.end = data.start for check problem
+          					if (event.end == null) {event.end = event.start;}
+        				}
+       				});
 
 
-					    /* get the holidays
-					    ---------------------------------------------------------------------*/
-					    //console.log('uriFerieToGet='+uriFerieToGet);
-					    var data = new Array();
-              					data.push('GET');
-              					data.push(uriFerieToGet);
-              					//console.log("leggo assenze da "+uriFerieToGet);
+				    /* get the holidays
+				    ---------------------------------------------------------------------*/
+				    //console.log('uriFerieToGet='+uriFerieToGet);
+				    var data = new Array();
+  					data.push('GET');
+  					data.push(uriFerieToGet);
+  					//console.log("leggo assenze da "+uriFerieToGet);
 
-              					var dataJson = JSON.stringify(data);
-						// exec the URI call
-                				var absentPerson = _RestJsonCall (uriProxy, 'POST', false, dataJson);
+  					var dataJson = JSON.stringify(data);
+					// exec the URI call
+    				var absentPerson = _RestJsonCall (uriProxy, 'POST', false, dataJson);
 
-                      				var indexVac = 0;
-                      				jQuery.each(absentPerson, function (i, event) {
-                          			event['color'] = 'LEMONCHIFFON';
-                          			event['textColor'] = 'red';
-                          			event['borderColor'] = 'red';
-                          			event['personId'] = event.id;
-                          			event['title'] = 'Assenza ' + idToName[event.id];
-                          			event['id'] = 'assenza-' + event.id + '-' + indexVac;
-
-                          			jQuery('#calendar').fullCalendar('renderEvent', event, true);
-                          			indexVac++;
-                      				});
-          			}
-        		}
-        		},// end events
+      				var indexVac = 0;
+      				jQuery.each(absentPerson, function (i, event) {
+		      			event['color'] = 'LEMONCHIFFON';
+		      			event['textColor'] = 'red';
+		      			event['borderColor'] = 'red';
+		      			event['personId'] = event.id;
+		      			event['title'] = 'Assenza ' + idToName[event.id];
+		      			event['id'] = 'assenza-' + event.id + '-' + indexVac;
+		
+		      			jQuery('#calendar').fullCalendar('renderEvent', event, true);
+		      			indexVac++;
+      				});
+      			}
+    		}
+        },// end events
         		/*{
         			url: 'https://www.google.com/calendar/feeds/it.italian%23holiday%40group.v.calendar.google.com/public/basic',
         			color: 'red',
         			textColor: 'white'
         		}*/
-      		],
+    ],
 
-		  drop: function(date, allDay) { // this function is called when something is dropped
-			  // retrieve the dropped element's stored Event Object
-			  var originalEventObject = jQuery(this).data('eventObject');
+	drop: function(date, allDay) { // this function is called when something is dropped
+	// retrieve the dropped element's stored Event Object
+	var originalEventObject = jQuery(this).data('eventObject');
+	
+	// we need to copy it, so that multiple events don't have a reference to the same object
+	var copiedEventObject = jQuery.extend({}, originalEventObject);
+	
+	// assign it the date that was reported
+	// and adds a progressive number i order to avoid repeated events
+	copiedEventObject.start = date;
+	copiedEventObject.allDay = allDay;
+	copiedEventObject.id = copiedEventObject.id.concat('-').concat(indexRep);
+	indexRep++;
+	
+	// render the event on the calendar
+	// the last `true` argument determines if the event "sticks" (http://arshaw.com/fullcalendar/docs/event_rendering/renderEvent/)
+	jQuery('#calendar').fullCalendar('renderEvent', copiedEventObject, true);
 
-			  // we need to copy it, so that multiple events don't have a reference to the same object
-			  var copiedEventObject = jQuery.extend({}, originalEventObject);
+    // set data.end = data.start for check problem
+    if (copiedEventObject.end == null) {copiedEventObject.end = copiedEventObject.start;}
 
-			  // assign it the date that was reported
-			  // and adds a progressive number i order to avoid repeated events
-			  copiedEventObject.start = date;
-			  copiedEventObject.allDay = allDay;
-			  copiedEventObject.id = copiedEventObject.id.concat('-').concat(indexRep);
-			  indexRep++;
+    	var cEOstart = copiedEventObject.start;
+		var ymCEO = jQuery.fullCalendar.formatDate(cEOstart, "yyyy").toString().concat(copiedEventObject.start.getMonth());
+		var ymT = yToday.toString().concat(mToday);
 
-			  // render the event on the calendar
-			  // the last `true` argument determines if the event "sticks" (http://arshaw.com/fullcalendar/docs/event_rendering/renderEvent/)
-			  jQuery('#calendar').fullCalendar('renderEvent', copiedEventObject, true);
+		if (jQuery.fullCalendar.formatDate(cEOstart, "yyyy").toString().concat(copiedEventObject.start.getMonth()) < yToday.toString().concat(mToday)) {
+			// reperibility of the previous month cannot be modified from this screen
+			/*alert ('ERRORE!\nNon e possibile modificare la reperibilita del mese precedente');
+          	jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);*/
+		} else {
+			// check if the 'reperibilty ' overlap a ferie o others reperibility
+			var obj = jQuery('#calendar').fullCalendar('clientEvents');
+			jQuery.each(obj, function(i, val) {
+				if(val.id.toString().match(/assenza/g) && val.personId.toString() == copiedEventObject.personId.toString()) {
+					if ((val.start.toString() == date.toString()) || (date >= val.start && date <= val.end)) {
+						alert("Il reperibile e' assente!!!");
+						jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
+						return false;
+					}
+				}
+				else if(val.id.toString().match(/rep/g)  && (val.personId.toString() != copiedEventObject.personId.toString())) {
+					if ((val.start.toString() == date.toString()) || (date >= val.start && date <= val.end)) {
+						alert("La reperobilita di "+copiedEventObject.title+" si sovrappone con quella di "+val.title.toString())
+						jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
+						return false;
+					}
+				}
+			});
+		}
+	},
 
-                               // set data.end = data.start for check problem
-                                if (copiedEventObject.end == null) {copiedEventObject.end = copiedEventObject.start;}
+	eventClick: function(calEvent, jsEvent, view) {
+		if (calEvent.id.toString().match(/rep/g)) {
+			alert(calEvent.title +'\nTelefono: '+calEvent.mobile+'\nEmail: '+calEvent.eMail);
+		} else {
+			alert(calEvent.title +' \ninizio ' +jQuery.fullCalendar.formatDate(calEvent.start, "dd-MM-yyyy")+ '\nfine '+jQuery.fullCalendar.formatDate(calEvent.end, "dd-MM-yyyy"));
+		}
 
-			  var cEOstart = copiedEventObject.start;
-			  var ymCEO = jQuery.fullCalendar.formatDate(cEOstart, "yyyy").toString().concat(copiedEventObject.start.getMonth());
-			  var ymT = yToday.toString().concat(mToday);
+		// change the border color just for fun
+		jQuery(this).css('border-color', 'red');
 
-			  if (jQuery.fullCalendar.formatDate(cEOstart, "yyyy").toString().concat(copiedEventObject.start.getMonth()) < yToday.toString().concat(mToday)) {
-	        		// reperibility of the previous month cannot be modified from this screen
-          			/*alert ('ERRORE!\nNon e possibile modificare la reperibilita del mese precedente');
-          			jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);*/
-			  } else {
-				  // check if the 'reperibilty ' overlap a ferie o others reperibility
-				  var obj = jQuery('#calendar').fullCalendar('clientEvents');
-				  jQuery.each(obj, function(i, val) {
-					  if(val.id.toString().match(/assenza/g) && val.personId.toString() == copiedEventObject.personId.toString()) {
-						 if ((val.start.toString() == date.toString()) || (date >= val.start && date <= val.end)) {
-							  alert("Il reperibile e' assente!!!");
-							  jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
-							  return false;
-						  }
-					  }
-					  else if(val.id.toString().match(/rep/g)  && (val.personId.toString() != copiedEventObject.personId.toString())) {
-						  if ((val.start.toString() == date.toString()) || (date >= val.start && date <= val.end)) {
-        							alert("La reperobilita di "+copiedEventObject.title+" si sovrappone con quella di "+val.title.toString())
-							        jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
-							        return false;
-        						}
-                                        	}
-				  });
-			  }
-		  },
+	},
 
-		  eventClick: function(calEvent, jsEvent, view) {
-			  if (calEvent.id.toString().match(/rep/g)) {
-				  alert(calEvent.title +'\nTelefono: '+calEvent.mobile+'\nEmail: '+calEvent.eMail);
-			  } else {
-		          	alert(calEvent.title +' \ninizio ' +jQuery.fullCalendar.formatDate(calEvent.start, "dd-MM-yyyy")+ '\nfine '+jQuery.fullCalendar.formatDate(calEvent.end, "dd-MM-yyyy"));
-			  }
-
-		          // change the border color just for fun
-   				jQuery(this).css('border-color', 'red');
-
-    			},
-
-		  eventMouseover: function(event, jsEvent, view){
-			    if(event.id.indexOf('rep-') != '-1'){
-				  // Add remove-event button
-				  $(this).find(".fc-event-title").append($("<a>", {
-					  'href': '#',
-					  'class': 'remove-event',
-					  'html': '<img src=\"' + Drupal.settings.basePath + 'sites/default/files/images/remove-button-cross.png\"></img>',
-				  }));
-
-
-				  // On click remove-event
-				  $(".remove-event").click(function(e) {
-					  e.stopPropagation();
-					  var conf = confirm('Sei sicuro di voler cancellare il turno di '+event.title+'?');
-					  if(conf){
-						  $('#calendar').fullCalendar('removeEvents', event.id);
-					  }
-				  });
-			    }
-		  }, // end eventMouseover
+	eventMouseover: function(event, jsEvent, view){
+		if(event.id.indexOf('rep-') != '-1'){
+			// Add remove-event button
+			$(this).find(".fc-event-title").append($("<a>", {
+				'href': '#',
+				'class': 'remove-event',
+				'html': '<img src=\"' + Drupal.settings.basePath + 'sites/default/files/images/remove-button-cross.png\"></img>',
+			}));
 
 
-		  eventMouseout: function(event, jsEvent, view){
-			  $(this).find(".remove-event").remove();
-		  }, // end eventMouseout
+			// On click remove-event
+			$(".remove-event").click(function(e) {
+				e.stopPropagation();
+				var conf = confirm('Sei sicuro di voler cancellare il turno di '+event.title+'?');
+				if(conf){
+					$('#calendar').fullCalendar('removeEvents', event.id);
+				}
+			});
+		}
+	}, // end eventMouseover
 
 
-		  eventDrop: function(event, dayDelta, minuteDelta, allDay, revertFunc) {
-                                var eventStart = event.start;
-			  var eventStartM = (eventStart.getMonth() == 0) ? eventStart.getMonth().toString().concat('0') : eventStart.getMonth();
-			  var todayM = (mToday == 0) ? mToday.toString().concat('0') : mToday;
+	eventMouseout: function(event, jsEvent, view){
+		$(this).find(".remove-event").remove();
+	}, // end eventMouseout
+	
+
+	eventDrop: function(event, dayDelta, minuteDelta, allDay, revertFunc) {
+		var eventStart = event.start;
+		var eventStartM = (eventStart.getMonth() == 0) ? eventStart.getMonth().toString().concat('0') : eventStart.getMonth();
+		var todayM = (mToday == 0) ? mToday.toString().concat('0') : mToday;
 
 
-                                var ymEvent = jQuery.fullCalendar.formatDate(eventStart, "yyyy").toString().concat(eventStartM);
-                                var ymT = yToday.toString().concat(todayM);
+		var ymEvent = jQuery.fullCalendar.formatDate(eventStart, "yyyy").toString().concat(eventStartM);
+		var ymT = yToday.toString().concat(todayM);
 
 
-                               // set data.end = data.start for check problem
-                                if (event.end == null) {event.end = event.start;}
+		// set data.end = data.start for check problem
+		if (event.end == null) {event.end = event.start;}
+			
+		// holiday events cannot be modified
+		if (event.id.toString().match(/assenza/g)) {
+			alert ('Da questa interfaccia non e possibile modificare le assenze!');
+			revertFunc();
+		} else if (jQuery.fullCalendar.formatDate(eventStart, "yyyy").toString().concat(eventStartM) < yToday.toString().concat(todayM)) {
+			// reperibility of the previous month cannot be modified from this screen
+			alert ('ERRORE!\nNon e possibile modificare la reperibilita del mese precedente');
+			revertFunc();
+			return false;
+		} else {
+			// check if ferie and reperibility  of a certain person overlap
+			var obj = jQuery('#calendar').fullCalendar('clientEvents');
+			jQuery.each(obj, function(i, val) {
+				
+				if (((event.end >= val.start) && (event.start <= val.start))  ||
+						((event.end >= val.start) && (event.end <= val.end)) ||
+						((event.start <= val.end) && (event.end >= val.end)) ||
+						((event.end == null) && (event.start >=val.start) && (event.start <= val.end))) {
+					// check for the ferie
+					if (val.id.toString().match(/assenza/g) && val.personId.toString() == event.personId.toString()) {
+						alert("Impossibile spostare la reperibilita.\n Il reperibile e assente!");
+						revertFunc();
+						return false;
+					}
+					else if(val.id.toString().match(/rep/g)  && (val.personId.toString() != event.personId.toString())) {
+						alert("Impossibile spostare la reperibilita.\nLa reperibilita di "+event.title+" si sovrappone con quella di "+val.title)
+						revertFunc();
+						return false;
+					}
+				}
+			});
+		}
+	},
 
-			  // holiday events cannot be modified
-                                if (event.id.toString().match(/assenza/g)) {
-                                        alert ('Da questa interfaccia non e possibile modificare le assenze!');
-                                        revertFunc();
-                                } else if (jQuery.fullCalendar.formatDate(eventStart, "yyyy").toString().concat(eventStartM) < yToday.toString().concat(todayM)) {
-                                // reperibility of the previous month cannot be modified from this screen
-                                        alert ('ERRORE!\nNon e possibile modificare la reperibilita del mese precedente');
-                                        revertFunc();
-				  return false;
-                                } else {
-			  // check if ferie and reperibility  of a certain person overlap
-                              		var obj = jQuery('#calendar').fullCalendar('clientEvents');
-				  jQuery.each(obj, function(i, val) {
+	eventResize: function(event, dayDelta, minuteDelta, revertFunc) {
+		// set data.end = data.start for check problem
+		if (event.end == null) {event.end = event.start;}
+		
+		// holidays events cannot be modified
+		if (event.id.toString().match(/assenza/g)) {
+			alert ('Da questa interfaccia non e possibile modificare le assenze!');
+			revertFunc();
+		} else if (event.end.getMonth() != mToday) {
+			// reperibility of the previous month cannot be modified from this screen
+			//alert ('ERRORE!\nE possibile modificare la reperibilita solo del mese corrente');
+			//revertFunc();
+		} else {
+			// check if ferie and reperibility  of a certain person overlap
+			var obj = jQuery('#calendar').fullCalendar('clientEvents');
+			jQuery.each(obj, function(i, val) {
+				if ((event.end >= val.start) && (event.start < val.start)) {
+					if (val.id.toString().match(/rep/g)) {
+						alert("La reperibilita di "+event.title+" si sovrappone con quella di "+val.title.toString());
+						revertFunc();
+					}
+					if (val.id.toString().match(/assenza/g) && val.personId.toString() == event.personId.toString()) {
+						alert("La reperibilita di "+event.title+" si sovrappone con una sua assenza");
+						revertFunc();
+					}
+				}
+			});
+		}
+	},
 
-					  if (((event.end >= val.start) && (event.start <= val.start))  ||
-					      ((event.end >= val.start) && (event.end <= val.end)) ||
-					      ((event.start <= val.end) && (event.end >= val.end)) ||
-					      ((event.end == null) && (event.start >=val.start) && (event.start <= val.end))) {
-						  // check for the ferie
-						  if (val.id.toString().match(/assenza/g) && val.personId.toString() == event.personId.toString()) {
-        							alert("Impossibile spostare la reperibilita.\n Il reperibile e assente!");
-							  revertFunc();
-							  return false;
-						  }
-						  else if(val.id.toString().match(/rep/g)  && (val.personId.toString() != event.personId.toString())) {
-                                                	        alert("Impossibile spostare la reperibilita.\nLa reperibilita di "+event.title+" si sovrappone con quella di "+val.title)
-							  revertFunc();
-							  return false;
-                                        		}
-					  }
-    					});
-			  }
-		  },
+	eventRender: function(event, element) {
+		var inizio = jQuery.fullCalendar(event.start).format("MM");
+		var fine = jQuery.fullCalendar(event.end).format("MM");
+		var currentView = jQuery('#calendar').fullCalendar('getDate').stripTime().format();
+		var currentViewMonth = jQuery.fullCalendar(currentView).format("MM");
 
-		  eventResize: function(event, dayDelta, minuteDelta, revertFunc) {
-			  // set data.end = data.start for check problem
-			  if (event.end == null) {event.end = event.start;}
-
-		        	// holidays events cannot be modified
-		        	if (event.id.toString().match(/assenza/g)) {
-				  alert ('Da questa interfaccia non e possibile modificare le assenze!');
-				  revertFunc();
-		        	} else if (event.end.getMonth() != mToday) {
-			  // reperibility of the previous month cannot be modified from this screen
-				  //alert ('ERRORE!\nE possibile modificare la reperibilita solo del mese corrente');
-				  //revertFunc();
-		    	} else {
-		        	// check if ferie and reperibility  of a certain person overlap
-                              		var obj = jQuery('#calendar').fullCalendar('clientEvents');
-                              		jQuery.each(obj, function(i, val) {
-					  if ((event.end >= val.start) && (event.start < val.start)) {
-						  if (val.id.toString().match(/rep/g)) {
-							  alert("La reperibilita di "+event.title+" si sovrappone con quella di "+val.title.toString());
-					       		revertFunc();
-						  }
-						  if (val.id.toString().match(/assenza/g) && val.personId.toString() == event.personId.toString()) {
-							  alert("La reperibilita di "+event.title+" si sovrappone con una sua assenza");
-					       		revertFunc();
-						  }
-					  }
-                               		});
-			  }
-    			},
-
-		  eventRender: function(event, element) {
-			  var inizio = jQuery.fullCalendar(event.start).format("MM");
-			  var fine = jQuery.fullCalendar(event.end).format("MM");
-			  var currentView = jQuery('#calendar').fullCalendar('getDate').stripTime().format();
-			  var currentViewMonth = jQuery.fullCalendar(currentView).format("MM");
-
-			  if( (inizio != currentViewMonth) && (fine != currentViewMonth) && (!event.id.match(/@google.com/g)) ){
-                   element.addClass('oldEvent');
-			  }
-		  },
-
-	  });
+		if( (inizio != currentViewMonth) && (fine != currentViewMonth) && (!event.id.match(/@google.com/g)) ){
+			element.addClass('oldEvent');
+		}
+	},
+	
+	});
   } // FINE createCalendarRepAdmin();
 
 
@@ -988,20 +988,18 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
 function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) {
 
 
-      // read the list of the shift associated to the activity
-      tipoTurni = shiftGrpObj.getShiftFromType(shiftType);
+	// read the list of the shift associated to the activity
+	tipoTurni = shiftGrpObj.getShiftFromType(shiftType);
 
-      	// defines date variables
+	// defines date variables
 	var today = new Date();
 	var dToday = today.getDate();
 	var mToday = today.getMonth();
 	var yToday = today.getFullYear();
 
   	// Build relative path of proxy
-      	var uriProxy = shiftCalObj.uriProxy;
-      	//console.log("uriProxy"+uriProxy);
-
-	// used to be appended to the reperibility  events
+    var uriProxy = shiftCalObj.uriProxy;
+    // used to be appended to the reperibility  events
 	var indexRep = 0;
 
 	// decodifica id -> nome reperibile
@@ -1009,7 +1007,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 	var idToName  = new Array();
 	var shiftToColor = new Array();
 	var idToMobile = new Array();
-      	var idToEmail = new Array();
+    var idToEmail = new Array();
 	var idToShift = new Array();
 
 	// contiene le mail dei turnisti
@@ -1019,79 +1017,79 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 	var jollyPersons = new Array();
 
 	var tipi = new Array();
-      	var turni = new Array();
+    var turni = new Array();
 
 	// tipologia di turni da leggere dal DB
 	var tipoTurni = shiftGrpObj.getShiftFromType(shiftType);
 
-      	var loadedPeriod = new Array();
+    var loadedPeriod = new Array();
 	var period = '';
 
-    	// for each shift read the persons involved from the DB
-    	// and adds them to the interface to be drugged
+	// for each shift read the persons involved from the DB
+	// and adds them to the interface to be drugged
 
-    	// div contenente le persone in turno
-    	var divContainer = '#external-events';
+	// div contenente le persone in turno
+	var divContainer = '#external-events';
 
 	// Ora usata per il caricamento dei turni annullati
 	var cancelledHourS = '07:00:00.000';
 	var cancelledHourE = '12:00:00.000';
 
-    	j = 0;
-    	while (j < tipoTurni.length) {
-        	var tipoTurno = tipoTurni[j];
-        	//console.log("tipoTurno:"+tipoTurno);
-        	var color = shiftColor.shift();
-        	var div = '#' + tipoTurno;
+	j = 0;
+	while (j < tipoTurni.length) {
+    	var tipoTurno = tipoTurni[j];
+    	//console.log("tipoTurno:"+tipoTurno);
+    	var color = shiftColor.shift();
+    	var div = '#' + tipoTurno;
 
-        	$('<span>', { class: "titolo-external", text: 'Turno ' + tipoTurno }).appendTo(divContainer);
-        	$('<div>', { id: tipoTurno, }).appendTo(divContainer);
-        	//console.log("chiamata rest a: "+shiftCalendar.category);
-        	// uri REST per leggere le persone in turno
-        	uriGetShiftPersons = shiftCalendar.getUriRestToGetPersons(tipoTurno);
-        	//console.log("uriGetShiftPersons="+uriGetShiftPersons);
+    	$('<span>', { class: "titolo-external", text: 'Turno ' + tipoTurno }).appendTo(divContainer);
+    	$('<div>', { id: tipoTurno, }).appendTo(divContainer);
+    	//console.log("chiamata rest a: "+shiftCalendar.category);
+    	// uri REST per leggere le persone in turno
+    	uriGetShiftPersons = shiftCalendar.getUriRestToGetPersons(tipoTurno);
+    	//console.log("uriGetShiftPersons="+uriGetShiftPersons);
 
-        	var data = new Array();
-        	//data.push('GET');
-        	data.push(uriGetShiftPersons);
+    	var data = new Array();
+    	//data.push('GET');
+    	data.push(uriGetShiftPersons);
 
-        	var dataJson = JSON.stringify(uriGetShiftPersons);
+    	var dataJson = JSON.stringify(uriGetShiftPersons);
 
-		// exec the URI call
-      var shiftPerson = _RestJsonCall (uriGetShiftPersons, 'GET', false, {});
+    	// exec the URI call
+    	var shiftPerson = _RestJsonCall (uriGetShiftPersons, 'GET', false, {});
 
-      jQuery.each(shiftPerson, function (i, event) {
-          var name = event.name + " " + event.surname;
-          if (!event.jolly) {
-              shiftCalendar.createShiftElement(event.id, name, tipoTurno, color).appendTo(div);
-              idToShift[event.id] = tipoTurno;
-              shiftToColor[tipoTurno] = color;
+    	jQuery.each(shiftPerson, function (i, event) {
+    		var name = event.name + " " + event.surname;
+    		if (!event.jolly) {
+    			shiftCalendar.createShiftElement(event.id, name, tipoTurno, color).appendTo(div);
+    			idToShift[event.id] = tipoTurno;
+    			shiftToColor[tipoTurno] = color;
 
               //console.log("creo elemento id: " + event.id+ "name="+event.name+ " tipoTurno=="+tipoTurno+ " color="+color);
-          } else {
-              if (jollyPersons.hasOwnProperty(event.id)) {
-                  var turni = jollyPersons[event.id];
-                  turni.push(tipoTurno);
-                  jollyPersons[event.id] = turni;
-              } else {
-                  jollyPersons[event.id] = new Array(tipoTurno);
-              }
-              idToShift[event.id] = "J";
-              shiftToColor["J"] = jollyColor;
-          }
+    		} else {
+    			if (jollyPersons.hasOwnProperty(event.id)) {
+    				var turni = jollyPersons[event.id];
+    				turni.push(tipoTurno);
+    				jollyPersons[event.id] = turni;
+    			} else {
+    				jollyPersons[event.id] = new Array(tipoTurno);
+    			}
+    			idToShift[event.id] = "J";
+    			shiftToColor["J"] = jollyColor;
+    		}
 
-          // get the email and the mobile phone
-          idToEmail[event.id] = event.email;
-          idToMobile[event.id] = event.mobile;
-          idToName[event.id] = name;
-          var m = event.email;
-          var temp = {email: event.email};
-          personEmails.push(temp);
+    		// get the email and the mobile phone
+    		idToEmail[event.id] = event.email;
+    		idToMobile[event.id] = event.mobile;
+    		idToName[event.id] = name;
+    		var m = event.email;
+    		var temp = {email: event.email};
+    		personEmails.push(temp);
         });
 
-      	j++;
-      	tipoTurno = '';
-    	}
+    	j++;
+    	tipoTurno = '';
+	}
 
 
 	// Read the shift time tables
@@ -1100,8 +1098,8 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 	//---------------------------------------------
 
 	// uri REST per leggere la time table di un turno
-        uriGetShiftTimeTable = shiftCalendar.getUriRestToGetShiftTimeTable(tipoTurni[0]);
-        //console.log("uriGetShiftTimeTable="+uriGetShiftTimeTable);
+    uriGetShiftTimeTable = shiftCalendar.getUriRestToGetShiftTimeTable(tipoTurni[0]);
+    //console.log("uriGetShiftTimeTable="+uriGetShiftTimeTable);
 
 	var data = new Array();
 	data.push('GET');
@@ -1112,44 +1110,39 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 	var shiftTimeTable = _RestJsonCall (uriGetShiftTimeTable, 'GET', false, {});
 
 	// fieldset che contiene l'orario
-        $('<fieldset>', { id: 'orario' }).appendTo(divContainer);
-        $('<legend>', { text: 'Orario' }).appendTo('#orario');
-
+    $('<fieldset>', { id: 'orario' }).appendTo(divContainer);
+    $('<legend>', { text: 'Orario' }).appendTo('#orario');
 	$('<input>', { type: 'radio', id: 'mattina', name: 'hour', value: shiftTimeTable[0].startMorning + '-' + shiftTimeTable[0].endMorning, checked: 'checked' }).appendTo('#orario');
-    	$('<span>', { text: ' ' }).appendTo(divContainer);
+    $('<span>', { text: ' ' }).appendTo(divContainer);
 	$('<label>', { for: 'shift', text: ' Mattina' }).appendTo('#orario');
-
-    	$('<br />').appendTo('#orario');
-
-    	$('<input>', { type: 'radio', id: 'pomeriggio', name: 'hour', value: shiftTimeTable[0].startAfternoon + '-' + shiftTimeTable[0].endAfternoon }).appendTo('#orario');
-    	$('<span>', { text: ' ' }).appendTo(divContainer);
+   	$('<br />').appendTo('#orario');
+	$('<input>', { type: 'radio', id: 'pomeriggio', name: 'hour', value: shiftTimeTable[0].startAfternoon + '-' + shiftTimeTable[0].endAfternoon }).appendTo('#orario');
+	$('<span>', { text: ' ' }).appendTo(divContainer);
 	$('<label>', { for: 'shift', text: ' Pomeriggio' }).appendTo('#orario');
+	$('<br />').appendTo(divContainer);
+	$('<hr />').appendTo(divContainer);
+	$('<span>', { class: 'titolo-external', text: 'Personale sostituto' }).appendTo(divContainer);
 
+	// adds the jolly persons
+	//ATTENZIONE!! si da comunque per scontato che il reperibile sia 1 solo!!!! POI CAMBIARE!!!!!
+	// non torna id='J'
+	for (var id in jollyPersons) {
+    	var turniJ = jollyPersons[id];
 
-    	$('<br />').appendTo(divContainer);
-    	$('<hr />').appendTo(divContainer);
-    	$('<span>', { class: 'titolo-external', text: 'Personale sostituto' }).appendTo(divContainer);
+    	$('<span>', { text: 'Turno: ' }).appendTo(divContainer);
 
-    	// adds the jolly persons
-    	//ATTENZIONE!! si da comunque per scontato che il reperibile sia 1 solo!!!! POI CAMBIARE!!!!!
-    	// non torna id='J'
-    	for (var id in jollyPersons) {
-        	var turniJ = jollyPersons[id];
-
-        	$('<span>', { text: 'Turno: ' }).appendTo(divContainer);
-
-        	for (var i = 0; i < turniJ.length; i++) {
-            		$('<label>', { for: 'shift', text: turniJ[i] }).appendTo(divContainer);
-            		$('<span>', { text: ' ' }).appendTo(divContainer);
-            		$('<input>', { type: 'radio', id: 'shift', name: 'shift', value: turniJ[i], checked: 'checked' }).appendTo(divContainer);
-            		$('<span>', { text: ' ' }).appendTo(divContainer);
-		}
-
-        	$('<div>', { id: 'J' }).appendTo(divContainer);
-        	//console.log( "id=" + id+ "turni="+jollyPersons[ id ] );
-        	//console.log("creo elemento id: " + id+ "name="+idToName[id]+ " tipoTurno=J  color="+jollyColor);
-        	shiftCalendar.createShiftElement(id, idToName[id], "J", jollyColor).appendTo("#J");
+    	for (var i = 0; i < turniJ.length; i++) {
+        		$('<label>', { for: 'shift', text: turniJ[i] }).appendTo(divContainer);
+        		$('<span>', { text: ' ' }).appendTo(divContainer);
+        		$('<input>', { type: 'radio', id: 'shift', name: 'shift', value: turniJ[i], checked: 'checked' }).appendTo(divContainer);
+        		$('<span>', { text: ' ' }).appendTo(divContainer);
     	}
+
+    	$('<div>', { id: 'J' }).appendTo(divContainer);
+    	//console.log( "id=" + id+ "turni="+jollyPersons[ id ] );
+    	//console.log("creo elemento id: " + id+ "name="+idToName[id]+ " tipoTurno=J  color="+jollyColor);
+    	shiftCalendar.createShiftElement(id, idToName[id], "J", jollyColor).appendTo("#J");
+	}
 
 	$('<span>', { class: 'titolo-external', text: 'Annullato' }).appendTo(divContainer);
 	$('<div>', { id: 'X' }).appendTo(divContainer);
@@ -1239,166 +1232,166 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
     					
     					console.log("uriParam: "+uriParam);
     					uriShiftToGet = shiftCalendar.getUriRestToGetEntity(tipoTurno, uriParam);
-                    			//console.log("uriShiftToGet="+uriShiftToGet);
+                    	//console.log("uriShiftToGet="+uriShiftToGet);
 
-/*        			var data = new Array();
-        			data.push('GET');
-        			data.push(uriShiftToGet);
-        			var dataJson = JSON.stringify(data);*/
-
-    				// exec the URI call
-    				console.log("UriShiftToGet: "+uriShiftToGet);
-    				var shiftPeriods = _RestJsonCall (uriShiftToGet, 'GET', false, {});
-
-
-    				// TURNI
-    				var data2 = shiftPeriods;
-    				jQuery.each(data2, function(i, event) {
-	    				var startEv = event.start;
-	      				var endEv = event.end;
-	      				var tempStartMonth = startEv.split("-");
-	      				var tempEndMonth = endEv.split("-");
+	/*        			var data = new Array();
+	        			data.push('GET');
+	        			data.push(uriShiftToGet);
+	        			var dataJson = JSON.stringify(data);*/
 	
-	      				var startMonth = tempStartMonth[1];
-	      				var endMonth = tempEndMonth[1];
-   						if(event.cancelled == 'false') {
-   							if(startMonth != endMonth) {
-   								var lastDayPreMonth = new Date(currentYear, startMonth, 0).getDate();
-   								var event1 = {
-   									'color': shiftToColor[tipoTurno],
-   									'personId': event.id,
-   									'title': ' -- ' + idToName[event.id],
-    								'shiftType': tipoTurno,
-    								'shiftHour': event.ttStart,
-    								'shiftSlot': event.shiftSlot,
-    								'cancelled': false,
-    								'allDay': false,
-    								'eMail': idToEmail[event.id],
-    								'mobile': idToMobile[event.id],
-    								'id': 'turno-'+event.id+'-'+indexRep+"-1",
-    								'start': jQuery.fullCalendar.moment(event.start + " " + event.ttStart),
-    								'end': jQuery.fullCalendar.moment(currentYear+"-"+startMonth+"-"+lastDayPreMonth + "T" +event.ttEnd + "Z"),
-   								}
-   								indexRep++;
+	    				// exec the URI call
+	    				console.log("UriShiftToGet: "+uriShiftToGet);
+	    				var shiftPeriods = _RestJsonCall (uriShiftToGet, 'GET', false, {});
+	
+	
+	    				// TURNI
+	    				var data2 = shiftPeriods;
+	    				jQuery.each(data2, function(i, event) {
+		    				var startEv = event.start;
+		      				var endEv = event.end;
+		      				var tempStartMonth = startEv.split("-");
+		      				var tempEndMonth = endEv.split("-");
+		
+		      				var startMonth = tempStartMonth[1];
+		      				var endMonth = tempEndMonth[1];
+	   						if(event.cancelled == 'false') {
+	   							if(startMonth != endMonth) {
+	   								var lastDayPreMonth = new Date(currentYear, startMonth, 0).getDate();
+	   								var event1 = {
+	   									'color': shiftToColor[tipoTurno],
+	   									'personId': event.id,
+	   									'title': ' -- ' + idToName[event.id],
+	    								'shiftType': tipoTurno,
+	    								'shiftHour': event.ttStart,
+	    								'shiftSlot': event.shiftSlot,
+	    								'cancelled': false,
+	    								'allDay': false,
+	    								'eMail': idToEmail[event.id],
+	    								'mobile': idToMobile[event.id],
+	    								'id': 'turno-'+event.id+'-'+indexRep+"-1",
+	    								'start': jQuery.fullCalendar.moment(event.start + " " + event.ttStart),
+	    								'end': jQuery.fullCalendar.moment(currentYear+"-"+startMonth+"-"+lastDayPreMonth + "T" +event.ttEnd + "Z"),
+	   								}
+	   								indexRep++;
+	
+	   								var event2 = {
+	   									'color': shiftToColor[tipoTurno],
+	    						    	'personId': event.id,
+	       						   		'title': ' -- ' + idToName[event.id],
+	       						   		'shiftType': tipoTurno,
+	    								'shiftHour': event.ttStart,
+	    								'shiftSlot': event.shiftSlot,
+	    								'cancelled': false,
+	    								'allDay': false,
+	    								'eMail': idToEmail[event.id],
+	    								'mobile': idToMobile[event.id],
+	    								'id': 'turno-'+event.id+'-'+indexRep+"-2",
+	    								'start': jQuery.fullCalendar.moment(currentYear+"-"+endMonth+"-01T" + event.ttStart + "Z"),
+	    								'end': jQuery.fullCalendar.moment(event.end + " " + event.ttEnd),
+	   								}
+	           					indexRep++;
+	   						    events.push(event1);
+	   						    events.push(event2);
+	   							//jQuery('#calendar').fullCalendar('renderEvent', event1, true);
+	           					//jQuery('#calendar').fullCalendar('renderEvent', event2, true);
+	   							} else {
+		          					event['color'] = shiftToColor[tipoTurno];
+		          					event['personId'] = event.id;
+		          					event['title'] = ' -- ' + idToName[event.id];
+		    						event['shiftType'] = tipoTurno;
+		          					event['shiftHour'] = event.ttStart;
+		          					event['cancelled'] = false;
+		          					event['allDay'] = false;
+		          					event['eMail'] = idToEmail[event.id];
+		          					event['mobile'] = idToMobile[event.id];
+		          					event['id'] = 'turno-'+event.id+'-'+indexRep;
+									event['start'] = event.start + " " + event.ttStart;
+									event['end'] = event.end + " " + event.ttEnd;
+	
+									jQuery('#calendar').fullCalendar('renderEvent', event, true);
+									indexRep++;
 
-   								var event2 = {
-   									'color': shiftToColor[tipoTurno],
-    						    	'personId': event.id,
-       						   		'title': ' -- ' + idToName[event.id],
-       						   		'shiftType': tipoTurno,
-    								'shiftHour': event.ttStart,
-    								'shiftSlot': event.shiftSlot,
-    								'cancelled': false,
-    								'allDay': false,
-    								'eMail': idToEmail[event.id],
-    								'mobile': idToMobile[event.id],
-    								'id': 'turno-'+event.id+'-'+indexRep+"-2",
-    								'start': jQuery.fullCalendar.moment(currentYear+"-"+endMonth+"-01T" + event.ttStart + "Z"),
-    								'end': jQuery.fullCalendar.moment(event.end + " " + event.ttEnd),
-   								}
-           					indexRep++;
-   						    events.push(event1);
-   						    events.push(event2);
-   							//jQuery('#calendar').fullCalendar('renderEvent', event1, true);
-           					//jQuery('#calendar').fullCalendar('renderEvent', event2, true);
-          				} else {
-          					event['color'] = shiftToColor[tipoTurno];
-          					event['personId'] = event.id;
-          					event['title'] = ' -- ' + idToName[event.id];
-    								event['shiftType'] = tipoTurno;
-          					event['shiftHour'] = event.ttStart;
-          					event['cancelled'] = false;
-          					event['allDay'] = false;
-          					event['eMail'] = idToEmail[event.id];
-          					event['mobile'] = idToMobile[event.id];
-          					event['id'] = 'turno-'+event.id+'-'+indexRep;
-    								event['start'] = event.start + " " + event.ttStart;
-    								event['end'] = event.end + " " + event.ttEnd;
-
-          					jQuery('#calendar').fullCalendar('renderEvent', event, true);
-          					indexRep++;
-
-          					// set data.end = data.start for check problem
-          					if (event.end == null) {event.end = event.start;}
-          				}
-    						} else {
-    							event['color'] = shiftToColor[tipoTurno];
-          				event['shiftType'] = tipoTurno;
-          				event['eMail'] = idToEmail[event.id];
-          				event['mobile'] = idToMobile[event.id];
-    							event['title'] = 'Turno '+tipoTurno+' ANNULLATO';
-          				event['start'] = jQuery.fullCalendar.moment(event.start+" "+cancelledHourS);
-          				event['end'] = jQuery.fullCalendar.moment(event.end+" "+cancelledHourE);
-          				event['allDay'] = true;
-         	 			  event['className'] = "del-event";
-          				event['cancelled'] = true;
-    							event['editable'] = 'false';
-          				event['id'] = 'turno-annullato-'+indexRep;
-          				
-          				events.push(event);
-          				//jQuery('#calendar').fullCalendar('renderEvent', event, true);
-          				indexRep++;
-
-          				// set data.end = data.start for check problem
-          				if (event.end == null) {event.end = event.start;}
+									// set data.end = data.start for check problem
+									if (event.end == null) {event.end = event.start;}
+	   							}	
+	   						} else {
+								event['color'] = shiftToColor[tipoTurno];
+								event['shiftType'] = tipoTurno;
+								event['eMail'] = idToEmail[event.id];
+								event['mobile'] = idToMobile[event.id];
+								event['title'] = 'Turno '+tipoTurno+' ANNULLATO';
+		          				event['start'] = jQuery.fullCalendar.moment(event.start+" "+cancelledHourS);
+		          				event['end'] = jQuery.fullCalendar.moment(event.end+" "+cancelledHourE);
+		          				event['allDay'] = true;
+		         	 			event['className'] = "del-event";
+		          				event['cancelled'] = true;
+		    					event['editable'] = 'false';
+		          				event['id'] = 'turno-annullato-'+indexRep;
+		          				
+		          				events.push(event);
+		          				//jQuery('#calendar').fullCalendar('renderEvent', event, true);
+		          				indexRep++;
+		
+		          				// set data.end = data.start for check problem
+		          				if (event.end == null) {event.end = event.start;}
     						}
-        			});
+	    				});
 
     					j++;
     					tipoTurno = '';
     				}
 
     				/* get the absenses
-            ---------------------------------------------------------------------*/
-            uriFerieToGet = shiftCalendar.getUriRestToGetEntity('absence', uriParam);
+            		---------------------------------------------------------------------*/
+    				uriFerieToGet = shiftCalendar.getUriRestToGetEntity('absence', uriParam);
 
     				// costruisce il json delle email dei turnisti per
-      			// prenderne le assenze
-      			var absParameter = {emails : personEmails};
-      			var jsonAbsParameter = JSON.stringify(absParameter);
+	      			// prenderne le assenze
+	      			var absParameter = {emails : personEmails};
+	      			var jsonAbsParameter = JSON.stringify(absParameter);
 
-            var data = new Array();
-            //data.push('POST');
-            //data.push(uriFerieToGet);
-            jsonAbsParameter = noDuplicate(jsonAbsParameter);
-            data.push(jsonAbsParameter);
-            //console.log("jsonAbsParameter: "+jsonAbsParameter);
+		            var data = new Array();
+		            //data.push('POST');
+		            //data.push(uriFerieToGet);
+		            jsonAbsParameter = noDuplicate(jsonAbsParameter);
+		            data.push(jsonAbsParameter);
+		            //console.log("jsonAbsParameter: "+jsonAbsParameter);
 
-            //var dataJson = JSON.stringify(data);
-            //console.log("uriFerieToGet"+uriFerieToGet);
-            //console.log('DATAJSON: '+dataJson);
-            // exec the URI call
-            var absentPerson = _RestJsonCall (uriFerieToGet, 'POST', false, jsonAbsParameter);
-
-            var indexVac = 0;
-            jQuery.each(absentPerson, function (i, event) {
-              event['color'] = 'LEMONCHIFFON';
-              event['textColor'] = 'red';
-              event['borderColor'] = 'red';
-              event['personId'] = event.personId;
-              event['title'] = 'Assenza ' + idToName[event.personId];
-    					//event['start'] = event.dateFrom;
+		            //var dataJson = JSON.stringify(data);
+		            //console.log("uriFerieToGet"+uriFerieToGet);
+		            //console.log('DATAJSON: '+dataJson);
+		            // exec the URI call
+		            var absentPerson = _RestJsonCall (uriFerieToGet, 'POST', false, jsonAbsParameter);
+		
+		            var indexVac = 0;
+		            jQuery.each(absentPerson, function (i, event) {
+			              event['color'] = 'LEMONCHIFFON';
+			              event['textColor'] = 'red';
+			              event['borderColor'] = 'red';
+			              event['personId'] = event.personId;
+			              event['title'] = 'Assenza ' + idToName[event.personId];
+			    		//event['start'] = event.dateFrom;
     					//event['end'] = event.dateTo;
-              event['id'] = 'assenza-' + event.personId + '-' + indexVac;
-              //console.log("assemza di " + idToName[event.personId] + "event.personId="+event.personId);
+			              event['id'] = 'assenza-' + event.personId + '-' + indexVac;
+			              //console.log("assemza di " + idToName[event.personId] + "event.personId="+event.personId);
 
-              events.push(event);
-              //jQuery('#calendar').fullCalendar('renderEvent', event, true);
-              indexVac++;
-            	});
+			              events.push(event);
+			              //jQuery('#calendar').fullCalendar('renderEvent', event, true);
+			              indexVac++;
+		            });
 
     			};
     			callback(events);
       		}
     		
-      },
-      /*{
-        url: 'https://www.google.com/calendar/feeds/it.italian%23holiday%40group.v.calendar.google.com/public/basic',
-        color: 'red',
-        textColor: 'white'
-      }*/
+          },
+	      /*{
+	        url: 'https://www.google.com/calendar/feeds/it.italian%23holiday%40group.v.calendar.google.com/public/basic',
+	        color: 'red',
+	        textColor: 'white'
+	      }*/
 
-    ],
+        ],
 
 	// this function is called when something is dropped
 	drop: function(date, allDay) {
