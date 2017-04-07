@@ -236,19 +236,30 @@ public class GroupAbsenceType extends BaseModel {
   
   public enum DefaultGroup {
     
+    //Dai codici in attestati si evince che il permesso provvisorio si prende solo a giornate
+    //Quindi non viene abilitato il comportamento sui completamenti del tipo C_18, C_182, C_19.
     G_18("18 - Permesso assistenza parenti/affini disabili L. 104/92 tre giorni mese", 
         "", 
         DefaultCategoryType.L_104, 
         GroupAbsenceTypePattern.programmed, PeriodType.month, 
         DefaultTakable.T_18, DefaultComplation.C_18, null, false, false),
+    G_18P("18P - Permesso provvisorio assistenza parenti/affini disabili L. 104/92 tre giorni mese",
+        "", 
+        DefaultCategoryType.L_104, 
+        GroupAbsenceTypePattern.programmed, PeriodType.month, 
+        DefaultTakable.T_18P, null, null, false, false),
+    
     G_182("182 - Permesso assistenza secondo parenti/affini disabili L. 104/92 tre giorni mese", 
         "", 
         DefaultCategoryType.L_104, 
         GroupAbsenceTypePattern.programmed, PeriodType.month, 
         DefaultTakable.T_182, DefaultComplation.C_182, null, false, false),
+    G_182P("182P - Permesso provvisorio assistenza secondo parenti/affini disabili L. 104/92 tre giorni mese", 
+        "", 
+        DefaultCategoryType.L_104, 
+        GroupAbsenceTypePattern.programmed, PeriodType.month, 
+        DefaultTakable.T_182P, null, null, false, false),
 
-    //Dai codici in attestati si evince che il permesso provvisorio si prende solo a giornate
-    //Quindi non viene abilitato il comportamento sui completamenti del tipo C_19.
     G_19("19 - Permesso per dipendente disabile L. 104/92 tre giorni mese", 
         "", 
         DefaultCategoryType.L_104, 

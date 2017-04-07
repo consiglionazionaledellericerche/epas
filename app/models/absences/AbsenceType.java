@@ -409,6 +409,9 @@ public class AbsenceType extends BaseModel {
     A_18H9("18H9", "Permesso assistenza parenti/affini disabili L. 104/92 completamento 9 ore",
         false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
         540, JustifiedTypeName.absence_type_minutes, null, null),
+    A_18P("18P", "Permesso provvisorio assistenza parenti/affini disabili L. 104/92 intera giornata",
+        false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+        0, null, null, null),
     
     A_182M("182M", "Permesso assistenza secondo parenti/affini disabili L. 104/92 in ore e minuti",
         true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
@@ -443,6 +446,9 @@ public class AbsenceType extends BaseModel {
     A_182H9("182H9", "Permesso assistenza secondo parenti/affini disabili L.104/92 compl. 9 ore",
         false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
         540, JustifiedTypeName.absence_type_minutes, null, null),
+    A_182P("182P", "Permesso provvisorio assistenza secondo parenti/affini disabili L. 104/92 intera giornata",
+        false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+        0, null, null, null),
 
     A_19M("19M", "Permesso per dipendente disabile L. 104/92 in ore e minuti",
         true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
