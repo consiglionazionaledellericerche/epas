@@ -429,6 +429,12 @@ public class GroupAbsenceType extends BaseModel {
         GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
         DefaultTakable.T_EMPLOYEE, null, null, false, false),
     
+    TELELAVORO("Telelavoro", 
+        "", 
+        DefaultCategoryType.ALTRI_CODICI, 
+        GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+        DefaultTakable.T_TELELAVORO, null, null, false, false),
+    
     ALTRI_CODICI("Altri codici generici", 
         "", 
         DefaultCategoryType.ALTRI_CODICI, 
