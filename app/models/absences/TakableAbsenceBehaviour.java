@@ -307,6 +307,13 @@ public class TakableAbsenceBehaviour extends BaseModel {
             DefaultAbsenceType.A_243M, 
             DefaultAbsenceType.A_243U), 
         600, null),
+    
+    T_25P(AmountType.units,                             //se fosse primo figlio mettere: 
+        ImmutableSet.of(DefaultAbsenceType.A_25P,       //23 23M 25 25M 25P 25PM
+            DefaultAbsenceType.A_25PM), 
+        ImmutableSet.of(DefaultAbsenceType.A_25P,       //23 23M 25 25M 25P 25PM
+            DefaultAbsenceType.A_25PM),     
+        -1, null),                                      //150
 
     T_PB(AmountType.minutes, 
         ImmutableSet.of(DefaultAbsenceType.A_PB), 
@@ -392,6 +399,11 @@ public class TakableAbsenceBehaviour extends BaseModel {
     T_MALATTIA_FIGLIO_3_14(AmountType.units, 
         ImmutableSet.of(DefaultAbsenceType.A_143), 
         ImmutableSet.of(DefaultAbsenceType.A_143), 
+        -1, null),
+    
+    T_ALTRI(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_45), 
+        ImmutableSet.of(DefaultAbsenceType.A_45), 
         -1, null);
 
 

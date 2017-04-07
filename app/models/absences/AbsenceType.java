@@ -700,7 +700,6 @@ public class AbsenceType extends BaseModel {
         true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, true, false,
         0, null, null, null),
 
-
     A_243("243", "Astensione facoltativa post partum non retrib. terzo figlio intera giornata",
         false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
         0, null, null, null),
@@ -715,6 +714,16 @@ public class AbsenceType extends BaseModel {
         true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, false, false,
         0, null, null, null),
         
+    A_25P("25P", "Prolungamento astensione facoltativa post partum 30% intera giornata",
+        false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
+        0, null, null, null),
+    A_25PM("25M", "Prolungamento astensione facoltativa post partum 30% in ore e minuti",
+        true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
+        0, null, null, null),
+    A_25PH7("25H7", "Prolungamento astensione facoltativa post partum 30% completamento giornata",
+        false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
+        0, JustifiedTypeName.all_day, null, null),
+    
     A_111("111", ";alattia",
         false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
         0, null, null, null),
@@ -793,8 +802,13 @@ public class AbsenceType extends BaseModel {
 
     A_143("143", "malattia terzo figlio non retribuita",
         false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
-        0, null, new LocalDate(1990, 1, 1), new LocalDate(2008, 12, 31));
+        0, null, new LocalDate(1990, 1, 1), new LocalDate(2008, 12, 31)),
     
+    //Altri codici
+
+    A_45("45", "Congedo straordinario permesso per matrimonio",
+        false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
+        0, null, null, null);
 
     public String certificationCode;
     public String description;
