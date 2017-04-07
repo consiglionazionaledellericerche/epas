@@ -26,6 +26,7 @@ import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.DefaultTakable;
 
+import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
 
 @Slf4j
@@ -52,6 +53,7 @@ public class EnumAllineator {
         //creazione entity a partire dall'enumerato
         AbsenceType absenceType = new AbsenceType();
         absenceType.code = defaultAbsenceType.name().substring(2);
+        absenceType.description = defaultAbsenceType.description;
         absenceType.certificateCode = defaultAbsenceType.certificationCode;
         absenceType.internalUse = defaultAbsenceType.internalUse;
         for (JustifiedTypeName justifiedName : defaultAbsenceType.justifiedTypeNamesPermitted) {
@@ -81,6 +83,7 @@ public class EnumAllineator {
         //gli absenceType che esistono le allineo all'enum
         absenceType.code = defaultAbsenceType.get().name().substring(2);
         absenceType.certificateCode = defaultAbsenceType.get().certificationCode;
+        absenceType.description = defaultAbsenceType.get().description;
         absenceType.internalUse = defaultAbsenceType.get().internalUse;
         updateJustifiedSet(absenceType.justifiedTypesPermitted, 
             defaultAbsenceType.get().justifiedTypeNamesPermitted);
@@ -98,32 +101,27 @@ public class EnumAllineator {
         absenceType.validTo = defaultAbsenceType.get().validTo;
         absenceType.save();
       } else {
-        //gli absenceType che non sono enumerate e non sono associate ad alcun gruppo le elimino
-        //TODO: decidere le politiche (disabilitare se ci sono assenze prese o eliminare
-        if (absenceType.absences.isEmpty()) {
-          for (TakableAbsenceBehaviour takable : absenceType.takableGroup) {
-            takable.takableCodes.remove(absenceType);
-            takable.save();
-          }
-          for (TakableAbsenceBehaviour takable : absenceType.takenGroup) {
-            takable.takenCodes.remove(absenceType);
-            takable.save();
-          }
-          for (ComplationAbsenceBehaviour complation : absenceType.complationGroup) {
-            complation.complationCodes.remove(absenceType);
-            complation.save();
-          }
-          absenceType.save();
-          log.info("Elimino il codice {} non presente nell'enumerato "
-              + "e mai utilizzato", absenceType.code);
-          absenceType.delete();
+        //gli absenceType che non sono enumerati li tolgo dai gruppi.
+        for (TakableAbsenceBehaviour takable : absenceType.takableGroup) {
+          takable.takableCodes.remove(absenceType);
+          takable.save();
         }
-        log.info("Il codice {} non è presente nell'enumerato "
-            + "ma poichè è stato utilizzato viene tenuto", absenceType.code);
+        for (TakableAbsenceBehaviour takable : absenceType.takenGroup) {
+          takable.takenCodes.remove(absenceType);
+          takable.save();
+        }
+        for (ComplationAbsenceBehaviour complation : absenceType.complationGroup) {
+          complation.complationCodes.remove(absenceType);
+          complation.save();
+        }
+        //e li disabilito
+        absenceType.validFrom = new LocalDate(2016, 01, 01);
+        absenceType.validTo = new LocalDate(2016, 01, 01);
+        absenceType.save();
       }
     }
   }
-  
+
   /**
    * Allinea i comportamenti di completamento.
    */
@@ -158,10 +156,12 @@ public class EnumAllineator {
         updateSet(complation.replacingCodes, defaultComplation.get().replacingCodes);
         complation.save();
       } else {
-        //le complation che non sono enumerate e non sono associate ad alcun gruppo le elimino
-        if (complation.complationCodes.isEmpty() && complation.replacingCodes.isEmpty()) {
-          complation.delete();
+        //le complation che non sono enumerate le elimino
+        for (GroupAbsenceType group : complation.groupAbsenceTypes) {
+          group.complationAbsenceBehaviour = null;
+          group.save();
         }
+        complation.delete();
       }
     }
     
@@ -204,10 +204,12 @@ public class EnumAllineator {
         updateSet(takable.takableCodes, defaultTakable.get().takableCodes);
         takable.save();
       } else {
-        //i takable che non sono enumerate e non sono associate ad alcun gruppo le elimino
-        if (takable.takenCodes.isEmpty() && takable.takableCodes.isEmpty()) {
-          takable.delete();
+        //i takable che non sono enumerate  le elimino
+        for (GroupAbsenceType group : takable.groupAbsenceTypes) {
+          group.takableAbsenceBehaviour = null;
+          group.save();
         }
+        takable.delete();
       }
     }
   }
@@ -225,6 +227,7 @@ public class EnumAllineator {
         group.name = defaultGroup.name();
         group.description = defaultGroup.description;
         group.chainDescription = defaultGroup.chainDescription;
+        group.pattern = defaultGroup.pattern;
         group.category = absenceComponentDao.categoryByName(defaultGroup.category.name()).get();
         group.periodType = defaultGroup.periodType;
         group.takableAbsenceBehaviour = absenceComponentDao
