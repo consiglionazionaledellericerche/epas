@@ -254,7 +254,8 @@ public class GroupAbsenceType extends BaseModel {
         DefaultCategoryType.L_104, 
         GroupAbsenceTypePattern.programmed, PeriodType.month, 
         DefaultTakable.T_182, DefaultComplation.C_182, null, false, false),
-    G_182P("182P - Permesso provvisorio assistenza secondo parenti/affini disabili L. 104/92 tre giorni mese", 
+    G_182P("182P - Permesso provvisorio assistenza secondo parenti/affini disabili "
+        + "L. 104/92 tre giorni mese", 
         "", 
         DefaultCategoryType.L_104, 
         GroupAbsenceTypePattern.programmed, PeriodType.month, 
@@ -270,6 +271,12 @@ public class GroupAbsenceType extends BaseModel {
         DefaultCategoryType.L_104, 
         GroupAbsenceTypePattern.programmed, PeriodType.month, 
         DefaultTakable.T_19P, null, null, false, false), 
+    
+    G_26("26 - Permesso per dipendente disabile L. 104/92 due ore giornaliere", 
+        "", 
+        DefaultCategoryType.L_104, 
+        GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+        DefaultTakable.T_26, null, null, false, false),
     
     G_661("661 - Permesso orario per motivi personali 18 ore anno", 
         "", 
@@ -348,7 +355,8 @@ public class GroupAbsenceType extends BaseModel {
         GroupAbsenceTypePattern.programmed, PeriodType.child1_0_12, 
         DefaultTakable.T_23, DefaultComplation.C_23, DefaultGroup.G_25, false, true),
     
-    G_242("242 - Astensione facoltativa post partum non retrib. secondo figlio 0-12 anni 600 giorni", 
+    G_242("242 - Astensione facoltativa post partum non retrib. "
+        + "secondo figlio 0-12 anni 600 giorni", 
         "", 
         DefaultCategoryType.CONGEDI_PARENTALI, 
         GroupAbsenceTypePattern.programmed, PeriodType.child2_0_12, 

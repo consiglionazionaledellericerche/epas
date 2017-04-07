@@ -487,6 +487,11 @@ public class AbsenceType extends BaseModel {
         false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
         0, null, null, null),
     
+    //Il tempo per buono pasto in questo momento è disabilitato. Capire.
+    A_26("26", "Permesso per dipendente disabile L. 104/92 due ore giornaliere",
+        false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 120, false, false,
+        0, null, null, null),
+    
     A_661M("661M", "Permesso orario per motivi personali in ore e minuti",
         true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
         0, null, null, null),
