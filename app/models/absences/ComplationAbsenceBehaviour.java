@@ -107,6 +107,18 @@ public class ComplationAbsenceBehaviour extends BaseModel {
             DefaultAbsenceType.A_18H8, 
             DefaultAbsenceType.A_18H9)),
     
+    C_182(AmountType.minutes, 
+        ImmutableSet.of(DefaultAbsenceType.A_182M), 
+        ImmutableSet.of(DefaultAbsenceType.A_182H1, 
+            DefaultAbsenceType.A_182H2, 
+            DefaultAbsenceType.A_182H3, 
+            DefaultAbsenceType.A_182H4, 
+            DefaultAbsenceType.A_182H5, 
+            DefaultAbsenceType.A_182H6, 
+            DefaultAbsenceType.A_182H7, 
+            DefaultAbsenceType.A_182H8, 
+            DefaultAbsenceType.A_182H9)),
+    
     C_19(AmountType.minutes, 
         ImmutableSet.of(DefaultAbsenceType.A_19M), 
         ImmutableSet.of(DefaultAbsenceType.A_19H1, 

@@ -135,6 +135,11 @@ public class TakableAbsenceBehaviour extends BaseModel {
         ImmutableSet.of(DefaultAbsenceType.A_18, DefaultAbsenceType.A_18M), 
         3, null),
     
+    T_182(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_182, DefaultAbsenceType.A_182M), 
+        ImmutableSet.of(DefaultAbsenceType.A_182, DefaultAbsenceType.A_182M), 
+        3, null),
+    
     T_19(AmountType.units, 
         ImmutableSet.of(DefaultAbsenceType.A_19, DefaultAbsenceType.A_19M), 
         ImmutableSet.of(DefaultAbsenceType.A_19, DefaultAbsenceType.A_19M), 
