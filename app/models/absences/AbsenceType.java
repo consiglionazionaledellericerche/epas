@@ -492,6 +492,13 @@ public class AbsenceType extends BaseModel {
         false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 120, false, false,
         0, null, null, null),
     
+    A_C17("C17", "Congedo assistenza figlio disabile L. 104/92",
+        false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+        0, null, null, null),
+    A_C18("C18", "Congedo straordinario per assistenza L. 104/92",
+        false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+        0, null, null, null),
+    
     A_661M("661M", "Permesso orario per motivi personali in ore e minuti",
         true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
         0, null, null, null),
