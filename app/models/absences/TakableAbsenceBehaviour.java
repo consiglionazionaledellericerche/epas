@@ -21,7 +21,6 @@ import javax.persistence.Table;
 import lombok.Getter;
 
 import models.absences.AbsenceType.DefaultAbsenceType;
-import models.absences.GroupAbsenceType.DefaultGroup;
 import models.base.BaseModel;
 
 import org.assertj.core.util.Lists;
@@ -326,9 +325,14 @@ public class TakableAbsenceBehaviour extends BaseModel {
             DefaultAbsenceType.A_117, 
             DefaultAbsenceType.A_118, 
             DefaultAbsenceType.A_119, 
-            DefaultAbsenceType.A_11C, 
-            DefaultAbsenceType.A_11R, 
-            DefaultAbsenceType.A_11S), 
+            DefaultAbsenceType.A_11C,
+            DefaultAbsenceType.A_11C5,
+            DefaultAbsenceType.A_11C9,
+            DefaultAbsenceType.A_11R,
+            DefaultAbsenceType.A_11R5,
+            DefaultAbsenceType.A_11R9,
+            DefaultAbsenceType.A_11S,
+            DefaultAbsenceType.A_631), 
         ImmutableSet.of(DefaultAbsenceType.A_111, 
             DefaultAbsenceType.A_115, 
             DefaultAbsenceType.A_116, 
@@ -336,8 +340,13 @@ public class TakableAbsenceBehaviour extends BaseModel {
             DefaultAbsenceType.A_118, 
             DefaultAbsenceType.A_119, 
             DefaultAbsenceType.A_11C, 
+            DefaultAbsenceType.A_11C5,
+            DefaultAbsenceType.A_11C9,
             DefaultAbsenceType.A_11R, 
-            DefaultAbsenceType.A_11S), 
+            DefaultAbsenceType.A_11R5,
+            DefaultAbsenceType.A_11R9,
+            DefaultAbsenceType.A_11S,
+            DefaultAbsenceType.A_631), 
         -1, null),
 
     T_MALATTIA_FIGLIO_1_12(AmountType.units, 
