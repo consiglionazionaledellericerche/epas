@@ -398,22 +398,22 @@ public class GroupAbsenceType extends BaseModel {
         GroupAbsenceTypePattern.programmed, PeriodType.always,              //child1_6_12
         DefaultTakable.T_25P, DefaultComplation.C_25P, null, false, false),
     
-    MALATTIA_FIGLIO_2_14("142 - Malattia secondo figlio <= 3 anni non retribuita", 
+    G_MALATTIA_FIGLIO_2_14("142 - Malattia secondo figlio <= 3 anni non retribuita", 
         "", 
         DefaultCategoryType.MALATTIA_FIGLIO_2, 
         GroupAbsenceTypePattern.programmed, PeriodType.child2_0_3, 
         DefaultTakable.T_MALATTIA_FIGLIO_2_14, null, null, false, false),
-    MALATTIA_FIGLIO_3_12("123 - Malattia terzo figlio <= 3 anni retribuita 100%", 
+    G_MALATTIA_FIGLIO_3_12("123 - Malattia terzo figlio <= 3 anni retribuita 100%", 
         "", 
         DefaultCategoryType.MALATTIA_FIGLIO_3, 
         GroupAbsenceTypePattern.programmed, PeriodType.child3_0_3, 
         DefaultTakable.T_MALATTIA_FIGLIO_3_12, null, null, false, false),
-    MALATTIA_FIGLIO_3_13("133 - Malattia terzo figlio oltre 3 anni non retribuita", 
+    G_MALATTIA_FIGLIO_3_13("133 - Malattia terzo figlio oltre 3 anni non retribuita", 
         "", 
         DefaultCategoryType.MALATTIA_FIGLIO_3, 
         GroupAbsenceTypePattern.programmed, PeriodType.child3_3_12, 
         DefaultTakable.T_MALATTIA_FIGLIO_3_13, null, null, false, false),
-    MALATTIA_FIGLIO_3_14("143 - Malattia terzo figlio <= 3 anni non retribuita", 
+    G_MALATTIA_FIGLIO_3_14("143 - Malattia terzo figlio <= 3 anni non retribuita", 
         "", 
         DefaultCategoryType.MALATTIA_FIGLIO_3, 
         GroupAbsenceTypePattern.programmed, PeriodType.child3_0_3, 
@@ -429,17 +429,47 @@ public class GroupAbsenceType extends BaseModel {
         GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
         DefaultTakable.T_EMPLOYEE, null, null, false, false),
     
-    TELELAVORO("Telelavoro", 
+    G_TELELAVORO("Telelavoro", 
         "", 
         DefaultCategoryType.ALTRI_CODICI, 
         GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
         DefaultTakable.T_TELELAVORO, null, null, false, false),
     
-    ALTRI_CODICI("Altri codici generici", 
+    G_ALTRI_CODICI("Altri codici generici", 
         "", 
         DefaultCategoryType.ALTRI_CODICI, 
         GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
-        DefaultTakable.T_ALTRI, null, null, false, false);
+        DefaultTakable.T_ALTRI, null, null, false, false),
+    
+    G_PERMESSI_SINDACALI("7* - Permesso sindacale ore", 
+        "", 
+        DefaultCategoryType.PERMESSI_SINDACALI, 
+        GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+        DefaultTakable.T_PERMESSI_SINDACALI, null, null, false, false),
+    
+    G_PERMESSI_SINDACALI_A("7*A - Permesso sindacale ore non retribuito", 
+        "", 
+        DefaultCategoryType.PERMESSI_SINDACALI, 
+        GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+        DefaultTakable.T_PERMESSI_SINDACALI_A, null, null, false, false),
+    
+    G_PERMESSI_SINDACALI_S("7*S - Permesso sindacale ore rappresentanti lavoratori", 
+        "", 
+        DefaultCategoryType.PERMESSI_SINDACALI, 
+        GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+        DefaultTakable.T_PERMESSI_SINDACALI_S, null, null, false, false),
+    
+    G_PERMESSI_SINDACALI_RSU("7*R - Permesso sindacale ore R.S.U.", 
+        "", 
+        DefaultCategoryType.PERMESSI_SINDACALI, 
+        GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+        DefaultTakable.T_PERMESSI_SINDACALI_R, null, null, false, false),
+    
+    G_PERMESSI_SINDACALI_D("7*D - Permesso sindacale ore dirigenti sindacali", 
+        "", 
+        DefaultCategoryType.PERMESSI_SINDACALI, 
+        GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+        DefaultTakable.T_PERMESSI_SINDACALI_D, null, null, false, false);
    
     public String description;
     public String chainDescription;
