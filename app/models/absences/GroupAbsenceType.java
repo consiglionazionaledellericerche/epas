@@ -242,6 +242,12 @@ public class GroupAbsenceType extends BaseModel {
         GroupAbsenceTypePattern.programmed, PeriodType.month, 
         DefaultTakable.T_18, DefaultComplation.C_18, null, false, false),
     
+    G_182("182 - Permesso assistenza secondo parenti/affini disabili L. 104/92 tre giorni mese", 
+        "", 
+        DefaultCategoryType.L_104, 
+        GroupAbsenceTypePattern.programmed, PeriodType.month, 
+        DefaultTakable.T_182, DefaultComplation.C_182, null, false, false),
+    
     G_19("19 - Permesso per dipendente disabile L. 104/92 tre giorni mese", 
         "", 
         DefaultCategoryType.L_104, 
