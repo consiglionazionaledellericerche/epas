@@ -280,10 +280,10 @@ public class EnumAllineator {
         }
         group.save();
       } else {
-        //i gruppi non enumerati che non hanno ne parte takable ne complation li elimino
-        if (group.takableAbsenceBehaviour == null && group.complationAbsenceBehaviour == null) {
+        //i gruppi non enumerati li elimino
+        //if (group.takableAbsenceBehaviour == null && group.complationAbsenceBehaviour == null) {
           group.delete();
-        }
+        //}
       }
     }
   }
