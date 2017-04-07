@@ -400,6 +400,11 @@ public class TakableAbsenceBehaviour extends BaseModel {
         ImmutableSet.of(DefaultAbsenceType.A_143), 
         ImmutableSet.of(DefaultAbsenceType.A_143), 
         -1, null),
+
+    T_TELELAVORO(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_103, DefaultAbsenceType.A_103BP), 
+        ImmutableSet.of(DefaultAbsenceType.A_103, DefaultAbsenceType.A_103BP), 
+        -1, null),
     
     T_ALTRI(AmountType.units, 
         ImmutableSet.of(DefaultAbsenceType.A_45), 

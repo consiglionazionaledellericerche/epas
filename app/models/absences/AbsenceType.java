@@ -808,6 +808,13 @@ public class AbsenceType extends BaseModel {
 
     A_45("45", "Congedo straordinario permesso per matrimonio",
         false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
+        0, null, null, null),
+    
+    A_103("103", "Telelavoro",
+        false, ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, true, false,
+        0, null, null, null),
+    A_103BP("103BP", "Telelavoro buono pasto",
+        false, ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, true, true,
         0, null, null, null);
 
     public String certificationCode;
