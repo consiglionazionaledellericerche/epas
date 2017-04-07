@@ -344,6 +344,7 @@ public class GroupAbsenceType extends BaseModel {
         DefaultCategoryType.MALATTIA_FIGLIO_2, 
         GroupAbsenceTypePattern.programmed, PeriodType.child2_3_12, 
         DefaultTakable.T_MALATTIA_FIGLIO_2_13, null, null, false, false),
+    
     G_24("24 - Astensione facoltativa post partum non retrib. primo figlio 0-12 anni 600 giorni", 
         "", 
         DefaultCategoryType.CONGEDI_PARENTALI, 
@@ -391,6 +392,12 @@ public class GroupAbsenceType extends BaseModel {
         GroupAbsenceTypePattern.programmed, PeriodType.child3_0_12, 
         DefaultTakable.T_233, DefaultComplation.C_233, DefaultGroup.G_253, false, true),
     
+    G_25P("25P - Prolungamento astensione facoltativa post partum 30% (no limiti)",
+        "", 
+        DefaultCategoryType.CONGEDI_PARENTALI,                              //se fosse primo figlio:
+        GroupAbsenceTypePattern.programmed, PeriodType.always,              //child1_6_12
+        DefaultTakable.T_25P, DefaultComplation.C_25P, null, false, false),
+    
     MALATTIA_FIGLIO_2_14("142 - Malattia secondo figlio <= 3 anni non retribuita", 
         "", 
         DefaultCategoryType.MALATTIA_FIGLIO_2, 
@@ -420,7 +427,13 @@ public class GroupAbsenceType extends BaseModel {
         "", 
         DefaultCategoryType.CODICI_DIPENDENTI, 
         GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
-        DefaultTakable.T_EMPLOYEE, null, null, false, false);
+        DefaultTakable.T_EMPLOYEE, null, null, false, false),
+    
+    ALTRI_CODICI("Altri codici generici", 
+        "", 
+        DefaultCategoryType.ALTRI_CODICI, 
+        GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+        DefaultTakable.T_ALTRI, null, null, false, false);
    
     public String description;
     public String chainDescription;
