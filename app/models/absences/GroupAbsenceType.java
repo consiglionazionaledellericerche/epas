@@ -241,18 +241,25 @@ public class GroupAbsenceType extends BaseModel {
         DefaultCategoryType.L_104, 
         GroupAbsenceTypePattern.programmed, PeriodType.month, 
         DefaultTakable.T_18, DefaultComplation.C_18, null, false, false),
-    
     G_182("182 - Permesso assistenza secondo parenti/affini disabili L. 104/92 tre giorni mese", 
         "", 
         DefaultCategoryType.L_104, 
         GroupAbsenceTypePattern.programmed, PeriodType.month, 
         DefaultTakable.T_182, DefaultComplation.C_182, null, false, false),
-    
+
+    //Dai codici in attestati si evince che il permesso provvisorio si prende solo a giornate
+    //Quindi non viene abilitato il comportamento sui completamenti del tipo C_19.
     G_19("19 - Permesso per dipendente disabile L. 104/92 tre giorni mese", 
         "", 
         DefaultCategoryType.L_104, 
         GroupAbsenceTypePattern.programmed, PeriodType.month, 
         DefaultTakable.T_19, DefaultComplation.C_19, null, false, false),
+    G_19P("19P - Permesso provvisorio per dipendente disabile L. 104/92 tre giorni mese", 
+        "", 
+        DefaultCategoryType.L_104, 
+        GroupAbsenceTypePattern.programmed, PeriodType.month, 
+        DefaultTakable.T_19P, null, null, false, false), 
+    
     G_661("661 - Permesso orario per motivi personali 18 ore anno", 
         "", 
         DefaultCategoryType.PERMESSI_VARI, 

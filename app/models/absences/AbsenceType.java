@@ -477,7 +477,10 @@ public class AbsenceType extends BaseModel {
     A_19H9("19H9", "Permesso per dipendente disabile L. 104/92 completamento 9 ore",
         false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
         540, JustifiedTypeName.absence_type_minutes, null, null),
-
+    A_19P("19P", "Permesso provvisorio per dipendente disabile L. 104/92 intera giornata",
+        false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+        0, null, null, null),
+    
     A_661M("661M", "Permesso orario per motivi personali in ore e minuti",
         true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
         0, null, null, null),
