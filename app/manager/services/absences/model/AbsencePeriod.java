@@ -57,6 +57,9 @@ public class AbsencePeriod {
   public Set<AbsenceType> complationCodes;                             // Codici di completamento
   public boolean compromisedTwoComplation = false;
   
+  //AllPeriods
+  public List<AbsencePeriod> periods;
+  
   //Errori del periodo
   public ErrorsBox errorsBox = new ErrorsBox();
   public boolean ignorePeriod = false;
@@ -115,41 +118,115 @@ public class AbsencePeriod {
     return takenAbsences;
   }
   
-  /**
-   * L'ammontare totale prendibile nel periodo.
-   * @return int
-   */
-  public int getPeriodTakableAmount() {
-    if (!takableCountBehaviour.equals(TakeCountBehaviour.period)) {
-      // TODO: sumAllPeriod, sumUntilPeriod;
-      return 0;
-    }
-    return this.fixedPeriodTakableAmount;
-  }
+//  /**
+//   * L'ammontare totale prendibile nel periodo.
+//   * @return int
+//   */
+//  public int getPeriodTakableAmount() {
+//    if (!takableCountBehaviour.equals(TakeCountBehaviour.period)) {
+//      // TODO: sumAllPeriod, sumUntilPeriod;
+//      return 0;
+//    }
+//    return this.fixedPeriodTakableAmount;
+//  }
+  
+
   
   /**
    * L'ammontare utilizzato nel periodo.
    * @return int
    */
-  public int getPeriodTakenAmount() {
-    
-    int takenInPeriod = getInitializationTakableUsed();
-    
+  public int getPeriodTakenAmount(boolean firstIteration) {
+    int takenInPeriod = 0;
     for (TakenAbsence takenAbsence : takenAbsences()) {
-      if (!takenAbsence.beforeInitialization) {
-        takenInPeriod += takenAbsence.getTakenAmount();
-      }
+      takenInPeriod += takenAbsence.getTakenAmount();
     }
-    if (!takenCountBehaviour.equals(TakeCountBehaviour.period)) {
-      // TODO: sumAllPeriod, sumUntilPeriod;
-      return 0;
-    } 
-    return takenInPeriod;
+    if (takenCountBehaviour.equals(TakeCountBehaviour.period)) {
+      return takenInPeriod;
+    }
+    
+    if (takenCountBehaviour.equals(TakeCountBehaviour.sumAllPeriod) 
+        || takenCountBehaviour.equals(TakeCountBehaviour.sumAllPeriod)) {
+      if (!firstIteration) {
+        return takenInPeriod;
+      } 
+      return getPeriodTakenAmountSumAll(this.takenCountBehaviour);  
+    }
+    
+    return 0;
+    
   }
   
-  public int getRemainingAmount() {
-    return this.getPeriodTakableAmount() - this.getPeriodTakenAmount();
+  /**
+   * L'ammontare totale prendibile nel periodo.
+   * @return int
+   */
+  public int getPeriodTakableAmount() {
+    if (takableCountBehaviour.equals(TakeCountBehaviour.period)) {
+      return this.fixedPeriodTakableAmount;
+    }
+
+    if (takableCountBehaviour.equals(TakeCountBehaviour.sumAllPeriod)) {
+      int takableAmount = 0;
+      for (AbsencePeriod absencePeriod : this.periods) {
+        takableAmount = takableAmount + absencePeriod.fixedPeriodTakableAmount;
+      }
+      return takableAmount;  
+    }
+
+    if (takableCountBehaviour.equals(TakeCountBehaviour.sumUntilPeriod)) {
+      int takableAmount = 0;
+      for (AbsencePeriod absencePeriod : this.periods) {
+        if (absencePeriod.from.isAfter(this.from)) {
+          break;
+        }
+        takableAmount = takableAmount + absencePeriod.fixedPeriodTakableAmount;
+      }
+      return takableAmount;  
+    }
+
+    return 0;
   }
+  
+  private int getPeriodTakenAmountSumAll(TakeCountBehaviour countType) {
+    int taken = 0;
+    for (AbsencePeriod absencePeriod : this.periods) {
+      if (countType.equals(TakeCountBehaviour.sumUntilPeriod) 
+          && absencePeriod.from.isAfter(this.from)) {
+        break;
+      }
+      taken = taken + absencePeriod.getPeriodTakenAmount(false);
+    }
+    return taken;
+  }
+  
+//  /**
+//   * L'ammontare utilizzato nel periodo.
+//   * @return int
+//   */
+//  public int getPeriodTakenAmount() {
+//    
+//    int takenInPeriod = getInitializationTakableUsed();
+//    
+//    for (TakenAbsence takenAbsence : takenAbsences()) {
+//      if (!takenAbsence.beforeInitialization) {
+//        takenInPeriod += takenAbsence.getTakenAmount();
+//      }
+//    }
+//    if (!takenCountBehaviour.equals(TakeCountBehaviour.period)) {
+//      // TODO: sumAllPeriod, sumUntilPeriod;
+//      return 0;
+//    } 
+//    return takenInPeriod;
+//  }
+  
+  public int getRemainingAmount() {
+    return this.getPeriodTakableAmount() - this.getPeriodTakenAmount(true);
+  }
+  
+//  public int getRemainingAmount() {
+//    return this.getPeriodTakableAmount() - this.getPeriodTakenAmount();
+//  }
   
   /**
    * Aggiunge al period l'assenza takable nel periodo.
