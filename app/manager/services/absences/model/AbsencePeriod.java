@@ -37,6 +37,9 @@ public class AbsencePeriod {
   public InitializationGroup initialization;  // Inizializazione period (se presente)
   public SortedMap<LocalDate, DayInPeriod> daysInPeriod = Maps.newTreeMap();
   
+  //AllPeriods
+  public List<AbsencePeriod> periods;
+  
   // Takable
   public AmountType takeAmountType;                // Il tipo di ammontare del periodo
   public TakeCountBehaviour takableCountBehaviour; // Come contare il tetto totale
@@ -56,9 +59,6 @@ public class AbsencePeriod {
   public Map<AbsenceType, Integer> replacingTimes = Maps.newHashMap();              
   public Set<AbsenceType> complationCodes;                             // Codici di completamento
   public boolean compromisedTwoComplation = false;
-  
-  //AllPeriods
-  public List<AbsencePeriod> periods;
   
   //Errori del periodo
   public ErrorsBox errorsBox = new ErrorsBox();
@@ -118,45 +118,6 @@ public class AbsencePeriod {
     return takenAbsences;
   }
   
-//  /**
-//   * L'ammontare totale prendibile nel periodo.
-//   * @return int
-//   */
-//  public int getPeriodTakableAmount() {
-//    if (!takableCountBehaviour.equals(TakeCountBehaviour.period)) {
-//      // TODO: sumAllPeriod, sumUntilPeriod;
-//      return 0;
-//    }
-//    return this.fixedPeriodTakableAmount;
-//  }
-  
-
-  
-  /**
-   * L'ammontare utilizzato nel periodo.
-   * @return int
-   */
-  public int getPeriodTakenAmount(boolean firstIteration) {
-    int takenInPeriod = 0;
-    for (TakenAbsence takenAbsence : takenAbsences()) {
-      takenInPeriod += takenAbsence.getTakenAmount();
-    }
-    if (takenCountBehaviour.equals(TakeCountBehaviour.period)) {
-      return takenInPeriod;
-    }
-    
-    if (takenCountBehaviour.equals(TakeCountBehaviour.sumAllPeriod) 
-        || takenCountBehaviour.equals(TakeCountBehaviour.sumAllPeriod)) {
-      if (!firstIteration) {
-        return takenInPeriod;
-      } 
-      return getPeriodTakenAmountSumAll(this.takenCountBehaviour);  
-    }
-    
-    return 0;
-    
-  }
-  
   /**
    * L'ammontare totale prendibile nel periodo.
    * @return int
@@ -188,6 +149,31 @@ public class AbsencePeriod {
     return 0;
   }
   
+  /**
+   * L'ammontare utilizzato nel periodo.
+   * @return int
+   */
+  public int getPeriodTakenAmount(boolean firstIteration) {
+    int takenInPeriod = 0;
+    for (TakenAbsence takenAbsence : takenAbsences()) {
+      takenInPeriod += takenAbsence.getTakenAmount();
+    }
+    if (takenCountBehaviour.equals(TakeCountBehaviour.period)) {
+      return takenInPeriod;
+    }
+    
+    if (takenCountBehaviour.equals(TakeCountBehaviour.sumAllPeriod) 
+        || takenCountBehaviour.equals(TakeCountBehaviour.sumAllPeriod)) {
+      if (!firstIteration) {
+        return takenInPeriod;
+      } 
+      return getPeriodTakenAmountSumAll(this.takenCountBehaviour);  
+    }
+    
+    return 0;
+    
+  }
+
   private int getPeriodTakenAmountSumAll(TakeCountBehaviour countType) {
     int taken = 0;
     for (AbsencePeriod absencePeriod : this.periods) {
@@ -200,34 +186,10 @@ public class AbsencePeriod {
     return taken;
   }
   
-//  /**
-//   * L'ammontare utilizzato nel periodo.
-//   * @return int
-//   */
-//  public int getPeriodTakenAmount() {
-//    
-//    int takenInPeriod = getInitializationTakableUsed();
-//    
-//    for (TakenAbsence takenAbsence : takenAbsences()) {
-//      if (!takenAbsence.beforeInitialization) {
-//        takenInPeriod += takenAbsence.getTakenAmount();
-//      }
-//    }
-//    if (!takenCountBehaviour.equals(TakeCountBehaviour.period)) {
-//      // TODO: sumAllPeriod, sumUntilPeriod;
-//      return 0;
-//    } 
-//    return takenInPeriod;
-//  }
-  
   public int getRemainingAmount() {
     return this.getPeriodTakableAmount() - this.getPeriodTakenAmount(true);
   }
-  
-//  public int getRemainingAmount() {
-//    return this.getPeriodTakableAmount() - this.getPeriodTakenAmount();
-//  }
-  
+
   /**
    * Aggiunge al period l'assenza takable nel periodo.
    * @param absence assenza
@@ -235,12 +197,12 @@ public class AbsencePeriod {
    * @return l'assenza takable
    */
   public TakenAbsence buildTakenAbsence(Absence absence, int takenAmount) {
-
-    int periodTakenAmount = this.getPeriodTakenAmount();
+    int periodTakableAmount = this.getPeriodTakableAmount();
+    int periodTakenAmount = this.getPeriodTakenAmount(true);
     TakenAbsence takenAbsence = TakenAbsence.builder()
         .absence(absence)
         .amountType(this.takeAmountType)
-        .periodTakableTotal(this.getPeriodTakableAmount())
+        .periodTakableTotal(periodTakableAmount)
         .periodTakenBefore(periodTakenAmount)
         .takenAmount(takenAmount)
         .build();
@@ -284,7 +246,7 @@ public class AbsencePeriod {
   }
   
   public boolean isComplation() {
-    return this.complationAmountType != null; 
+    return this.complationAmountType != null;
   }
   
   public boolean isComplationUnits() {
