@@ -59,6 +59,7 @@ public class Absences661Test extends UnitTest {
     PeriodChain periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
         new LocalDate(2016, 11, 15), 
         Lists.newArrayList(), 
+        person.contracts,
         Lists.newArrayList(), 
         Lists.newArrayList());
     
@@ -84,7 +85,7 @@ public class Absences661Test extends UnitTest {
     
     assertNotNull(periodChain.successPeriodInsert);
     assertEquals(periodChain.successPeriodInsert.attemptedInsertAbsence, toInsert);
-    assertEquals(periodChain.periods.get(0).getPeriodTakenAmount(), 120);
+    assertEquals(periodChain.periods.get(0).getPeriodTakenAmount(true), 120);
     
   }
   
@@ -107,6 +108,7 @@ public class Absences661Test extends UnitTest {
     PeriodChain periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
         new LocalDate(2016, 11, 15), 
         Lists.newArrayList(), 
+        person.contracts,
         Lists.newArrayList(), 
         Lists.newArrayList());
     
@@ -121,6 +123,7 @@ public class Absences661Test extends UnitTest {
     periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
         new LocalDate(2016, 11, 15), 
         Lists.newArrayList(), 
+        person.contracts,
         Lists.newArrayList(), 
         Lists.newArrayList());
 
@@ -135,6 +138,7 @@ public class Absences661Test extends UnitTest {
     periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
         new LocalDate(2016, 11, 15), 
         Lists.newArrayList(), 
+        person.contracts,
         Lists.newArrayList(), 
         Lists.newArrayList());
 
