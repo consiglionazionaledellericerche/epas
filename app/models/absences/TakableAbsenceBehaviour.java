@@ -472,6 +472,11 @@ public class TakableAbsenceBehaviour extends BaseModel {
         ImmutableSet.of(DefaultAbsenceType.A_FA1, DefaultAbsenceType.A_FA2, 
             DefaultAbsenceType.A_FA3, DefaultAbsenceType.A_FA4, DefaultAbsenceType.A_FA5, 
             DefaultAbsenceType.A_FA6, DefaultAbsenceType.A_FA7), 
+        -1, null),
+    
+    T_CONGEDI_PRENATALI(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_20, DefaultAbsenceType.A_21), 
+        ImmutableSet.of(DefaultAbsenceType.A_20, DefaultAbsenceType.A_21), 
         -1, null);
 
 
