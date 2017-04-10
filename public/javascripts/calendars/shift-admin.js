@@ -209,14 +209,18 @@ jQuery(document).ready(function() {
           	jQuery.ajax({
             		url: uri,
             		type: "GET",
-            		dataType: "json",
-            		contentType: "application/json",
-            		data: 'uri=' + uri, 
+            		dataType: "text",
+            		//contentType: "application/json",
+            		//data: 'uri=' + uri, 
             		success: function (responseData, textStatus, jqXHR) {
+            			console.log("responseData="+responseData);
+            			//var url = URL.createObjectURL(responseData);
                 		var win = window.open(responseData, '_blank');
                 		win.focus();
             		},
             		error: function (responseData, textStatus, errorThrown) {
+            			console.log("responseData="+responseData);
+            			console.log("errorThrown="+errorThrown);
                 		alert("ERRORE durante il reperimento del PDF :-(");
             		}
         	});
