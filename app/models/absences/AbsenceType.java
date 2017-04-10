@@ -724,6 +724,14 @@ public class AbsenceType extends BaseModel {
         false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
         0, JustifiedTypeName.all_day, null, null),
     
+    A_20("20", "Congedo/permesso DPR 1026 Art. 20",
+        false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
+        0, null, null, null),
+    
+    A_21("21", "Congedo/permesso per maternità",
+        false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
+        0, null, null, null),
+    
     A_111("111", "Malattia",
         false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
         0, null, null, null),

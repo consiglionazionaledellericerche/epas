@@ -394,9 +394,15 @@ public class GroupAbsenceType extends BaseModel {
     
     G_25P("25P - Prolungamento astensione facoltativa post partum 30% (no limiti)",
         "", 
-        DefaultCategoryType.CONGEDI_PARENTALI,                              //se fosse primo figlio:
+        DefaultCategoryType.CONGEDI_PARENTALI_PROVVISORI,                   //se fosse primo figlio:
         GroupAbsenceTypePattern.programmed, PeriodType.always,              //child1_6_12
         DefaultTakable.T_25P, DefaultComplation.C_25P, null, false, false),
+    
+    G_CONGEDI_PRENATALI("20/21 - Congedi Prenatali", 
+        "", 
+        DefaultCategoryType.CONGEDI_PRENATALI, 
+        GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+        DefaultTakable.T_CONGEDI_PRENATALI, null, null, false, false),
     
     G_MALATTIA_FIGLIO_2_14("142 - Malattia secondo figlio <= 3 anni non retribuita", 
         "", 
