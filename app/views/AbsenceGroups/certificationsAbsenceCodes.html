@@ -21,6 +21,7 @@
     <th>tipologia</th>
     <th>Usata in Epas</th>
     <th>Gruppi Epas</th>
+    <th>Enumerata</th>
   </tr>
   </thead>
   <tbody>
@@ -36,11 +37,16 @@
       <td>
           ${bothSuperCode.absences.size()}
       </td>      
-        <td>
+      <td>
           #{if !bothSuperCode.onlyOtherGroup()}
             <i class="fa fa-star" aria-hidden="true"></i>
           #{/if}
-        </td>
+      </td>
+      <td>
+        #{if models.absences.AbsenceType.DefaultAbsenceType.byCode(bothSuperCode.absenceType).present}
+            <i class="fa fa-star" aria-hidden="true"></i>
+        #{/if}
+      </td>
     </tr>
   #{/list}
   </tbody>

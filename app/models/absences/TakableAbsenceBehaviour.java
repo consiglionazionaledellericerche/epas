@@ -454,6 +454,24 @@ public class TakableAbsenceBehaviour extends BaseModel {
         ImmutableSet.of(DefaultAbsenceType.A_71D, DefaultAbsenceType.A_72D, 
             DefaultAbsenceType.A_73D, DefaultAbsenceType.A_74D, DefaultAbsenceType.A_75D, 
             DefaultAbsenceType.A_76D, DefaultAbsenceType.A_77D, DefaultAbsenceType.A_78D), 
+        -1, null),
+    
+    T_ASSEMBLEA(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_01, DefaultAbsenceType.A_02, 
+            DefaultAbsenceType.A_03, DefaultAbsenceType.A_04, DefaultAbsenceType.A_05, 
+            DefaultAbsenceType.A_06, DefaultAbsenceType.A_07, DefaultAbsenceType.A_08), 
+        ImmutableSet.of(DefaultAbsenceType.A_01, DefaultAbsenceType.A_02, 
+            DefaultAbsenceType.A_03, DefaultAbsenceType.A_04, DefaultAbsenceType.A_05, 
+            DefaultAbsenceType.A_06, DefaultAbsenceType.A_07, DefaultAbsenceType.A_08), 
+        -1, null),
+    
+    T_FORMAZIONE(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_FA1, DefaultAbsenceType.A_FA2, 
+            DefaultAbsenceType.A_FA3, DefaultAbsenceType.A_FA4, DefaultAbsenceType.A_FA5, 
+            DefaultAbsenceType.A_FA6, DefaultAbsenceType.A_FA7), 
+        ImmutableSet.of(DefaultAbsenceType.A_FA1, DefaultAbsenceType.A_FA2, 
+            DefaultAbsenceType.A_FA3, DefaultAbsenceType.A_FA4, DefaultAbsenceType.A_FA5, 
+            DefaultAbsenceType.A_FA6, DefaultAbsenceType.A_FA7), 
         -1, null);
 
 

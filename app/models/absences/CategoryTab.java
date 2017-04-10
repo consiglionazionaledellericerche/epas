@@ -90,14 +90,18 @@ public class CategoryTab extends BaseModel implements Comparable<CategoryTab> {
    *
    */
   public enum DefaultTab {
-    ALTRE_TIPOLOGIE("Altre Tipologie", 4),
+    
     MISSIONE("Missione", 1),
     FERIE("Ferie e Festività Soppr.", 2),
     RIPOSO_COMPENSATIVO("Riposo Compensativo", 3),
-    AUTOMATICI("Codici Automatici", 6),
-    DIPENDENTI("Codici Dipendenti", 5),
-    LAVORO_FUORI_SEDE("Lavoro Fuori Sede", 5),
-    FERIE_DIPENDENTE("Ferie Dipendenti", 7);
+    LEGGE_104("L. 104", 4),
+    MALATTIA("Malattia", 5),
+    CONGEDI_PARENTALI("Congedi Parentali", 6),
+    ALTRE_TIPOLOGIE("Altre Tipologie", 7),
+    DIPENDENTI("Codici Dipendenti", 8),
+    LAVORO_FUORI_SEDE("Lavoro Fuori Sede", 9),
+    FERIE_DIPENDENTE("Ferie Dipendenti", 10),
+    AUTOMATICI("Codici Automatici", 11);
     
     public String description;
     public int priority;

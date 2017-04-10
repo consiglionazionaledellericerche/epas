@@ -719,8 +719,8 @@ public class AbsenceService {
    */
   public void enumAllineator() {
     
-    enumAllineator.handleCategory();
     enumAllineator.handleTab();
+    enumAllineator.handleCategory();
     
     enumAllineator.handleAbsenceTypes();
     enumAllineator.handleComplations();
