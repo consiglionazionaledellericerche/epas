@@ -245,7 +245,7 @@ public class GroupAbsenceType extends BaseModel {
         DefaultTakable.T_18, DefaultComplation.C_18, null, false, false),
     G_18P("18P - Permesso provv. assistenza parenti/affini disabili L. 104/92 tre giorni mese",
         "", 
-        DefaultCategoryType.L_104, 
+        DefaultCategoryType.PERMESSI_PROVVISORI_104, 
         GroupAbsenceTypePattern.programmed, PeriodType.month, 
         DefaultTakable.T_18P, null, null, false, false),
     
@@ -256,7 +256,7 @@ public class GroupAbsenceType extends BaseModel {
         DefaultTakable.T_182, DefaultComplation.C_182, null, false, false),
     G_182P("182P - Permesso provv. assist. secondo parenti/affini dis. L. 104/92 tre gg. mese", 
         "", 
-        DefaultCategoryType.L_104, 
+        DefaultCategoryType.PERMESSI_PROVVISORI_104, 
         GroupAbsenceTypePattern.programmed, PeriodType.month, 
         DefaultTakable.T_182P, null, null, false, false),
 
@@ -267,19 +267,19 @@ public class GroupAbsenceType extends BaseModel {
         DefaultTakable.T_19, DefaultComplation.C_19, null, false, false),
     G_19P("19P - Permesso provv. per dipendente disabile L. 104/92 tre giorni mese", 
         "", 
-        DefaultCategoryType.L_104, 
+        DefaultCategoryType.PERMESSI_PROVVISORI_104, 
         GroupAbsenceTypePattern.programmed, PeriodType.month, 
         DefaultTakable.T_19P, null, null, false, false), 
     
     G_26("26 - Permesso per dipendente disabile L. 104/92 due ore giornaliere", 
         "", 
-        DefaultCategoryType.L_104, 
+        DefaultCategoryType.ALTRI_104, 
         GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
         DefaultTakable.T_26, null, null, false, false),
     
     G_C1718("C17/C18 - Altri congedi L. 104/92", 
         "", 
-        DefaultCategoryType.L_104, 
+        DefaultCategoryType.ALTRI_104, 
         GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
         DefaultTakable.T_C1718, null, null, false, false),
     
@@ -429,7 +429,7 @@ public class GroupAbsenceType extends BaseModel {
         GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
         DefaultTakable.T_EMPLOYEE, null, null, false, false),
     
-    G_TELELAVORO("Telelavoro", 
+    G_TELELAVORO("103/103BP - Telelavoro", 
         "", 
         DefaultCategoryType.ALTRI_CODICI, 
         GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
@@ -441,35 +441,47 @@ public class GroupAbsenceType extends BaseModel {
         GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
         DefaultTakable.T_ALTRI, null, null, false, false),
     
-    G_PERMESSI_SINDACALI("7* - Permesso sindacale ore", 
+    G_PERMESSI_SINDACALI("7 - Permesso sindacale ore", 
         "", 
-        DefaultCategoryType.PERMESSI_SINDACALI, 
+        DefaultCategoryType.ALTRI_CODICI, 
         GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
         DefaultTakable.T_PERMESSI_SINDACALI, null, null, false, false),
     
-    G_PERMESSI_SINDACALI_A("7*A - Permesso sindacale ore non retribuito", 
+    G_PERMESSI_SINDACALI_A("7A - Permesso sindacale ore non retribuito", 
         "", 
-        DefaultCategoryType.PERMESSI_SINDACALI, 
+        DefaultCategoryType.ALTRI_CODICI, 
         GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
         DefaultTakable.T_PERMESSI_SINDACALI_A, null, null, false, false),
     
-    G_PERMESSI_SINDACALI_S("7*S - Permesso sindacale ore rappresentanti lavoratori", 
+    G_PERMESSI_SINDACALI_S("7S - Permesso sindacale ore rappresentanti lavoratori", 
         "", 
-        DefaultCategoryType.PERMESSI_SINDACALI, 
+        DefaultCategoryType.ALTRI_CODICI, 
         GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
         DefaultTakable.T_PERMESSI_SINDACALI_S, null, null, false, false),
     
-    G_PERMESSI_SINDACALI_RSU("7*R - Permesso sindacale ore R.S.U.", 
+    G_PERMESSI_SINDACALI_RSU("7R - Permesso sindacale ore R.S.U.", 
         "", 
-        DefaultCategoryType.PERMESSI_SINDACALI, 
+        DefaultCategoryType.ALTRI_CODICI, 
         GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
         DefaultTakable.T_PERMESSI_SINDACALI_R, null, null, false, false),
     
-    G_PERMESSI_SINDACALI_D("7*D - Permesso sindacale ore dirigenti sindacali", 
+    G_PERMESSI_SINDACALI_D("7D - Permesso sindacale ore dirigenti sindacali", 
         "", 
-        DefaultCategoryType.PERMESSI_SINDACALI, 
+        DefaultCategoryType.ALTRI_CODICI, 
         GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
-        DefaultTakable.T_PERMESSI_SINDACALI_D, null, null, false, false);
+        DefaultTakable.T_PERMESSI_SINDACALI_D, null, null, false, false),
+    
+    G_ASSEMBLEA("0 - Assemblea", 
+        "", 
+        DefaultCategoryType.ALTRI_CODICI, 
+        GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+        DefaultTakable.T_ASSEMBLEA, null, null, false, false),
+    
+    G_FORMAZIONE("FA - Formazione e aggiornamento", 
+        "", 
+        DefaultCategoryType.ALTRI_CODICI, 
+        GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+        DefaultTakable.T_FORMAZIONE, null, null, false, false);
    
     public String description;
     public String chainDescription;
