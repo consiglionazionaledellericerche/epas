@@ -87,7 +87,6 @@ public class CategoryGroupAbsenceType extends BaseModel
     MISSIONE_CNR("Missioni CNR", 1, DefaultTab.MISSIONE), 
     FERIE_CNR("Ferie CNR", 2, DefaultTab.FERIE),
     RIPOSI_COMPENSATIVI_CNR("Riposi compensativi CNR", 3, DefaultTab.RIPOSO_COMPENSATIVO),
-    PERMESSI_VARI("Permessi vari", 4, DefaultTab.ALTRE_TIPOLOGIE),
     CONGEDI_PARENTALI("Congedi parentali", 5, DefaultTab.CONGEDI_PARENTALI),
     
     L_104("Disabilità legge 104/92 - Tre giorni mensili", 6, DefaultTab.LEGGE_104),
@@ -98,9 +97,17 @@ public class CategoryGroupAbsenceType extends BaseModel
     MALATTIA_FIGLIO_1("Malattia primo figlio", 9, DefaultTab.MALATTIA),
     MALATTIA_FIGLIO_2("Malattia secondo figlio", 10, DefaultTab.MALATTIA),
     MALATTIA_FIGLIO_3("Malattia terzo figlio", 11, DefaultTab.MALATTIA),
-    ALTRI_CODICI("Altri Codici", 13, DefaultTab.ALTRE_TIPOLOGIE),
-    CODICI_DIPENDENTI("Codici Dipendenti", 14, DefaultTab.DIPENDENTI),
-    CODICI_AUTOMATICI("Codici Automatici", 15, DefaultTab.AUTOMATICI);
+
+    
+    PERMESSI_PERSONALI("Permessi Personali", 12, DefaultTab.ALTRE_TIPOLOGIE),
+    DIRITTO_STUDIO("Diritto allo studio", 13, DefaultTab.ALTRE_TIPOLOGIE),
+    TELELAVORO("Telelavoro", 14, DefaultTab.ALTRE_TIPOLOGIE),
+    PERMESSI_SINDACALI("Permessi Sindacali", 15, DefaultTab.ALTRE_TIPOLOGIE),
+    ALTRI_GRUPPI("Altri Gruppi", 16, DefaultTab.ALTRE_TIPOLOGIE),
+    TUTTI_I_CODICI("Tutti i codici", 16, DefaultTab.ALTRE_TIPOLOGIE),
+    
+    CODICI_DIPENDENTI("Codici Dipendenti", 17, DefaultTab.DIPENDENTI),
+    CODICI_AUTOMATICI("Codici Automatici", 18, DefaultTab.AUTOMATICI);
 
     public String description;
     public int priority;
