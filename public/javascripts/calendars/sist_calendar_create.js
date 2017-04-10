@@ -707,7 +707,7 @@ function createCalendarRepAdmin(allowed, repType, repCalObj, repGrpObj){
 	},
 	
 	});
-  } // FINE createCalendarRepAdmin();
+} // FINE createCalendarRepAdmin();
 
 
 
@@ -733,11 +733,11 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
 	var idToName  = new Array();
 	var shiftToColor = new Array();
 	var idToMobile = new Array();
-    	var idToEmail = new Array();
-    	var idToShift = new Array();
+	var idToEmail = new Array();
+	var idToShift = new Array();
 
-    	// array containing jolly persons with their shift
-    	var jollyPersons = new Array();
+	// array containing jolly persons with their shift
+	var jollyPersons = new Array();
 
 	var tipi = new Array();
     var turni = new Array();
@@ -751,77 +751,77 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
 	console.log("tipoTurni: "+tipoTurni);
 
 	var firstYear = 0;
-    	var loadedYears = new Array();
+    var loadedYears = new Array();
 
 	// per ogni turno legge i turnisti dal DB EPAS
     	// e crea gli elementi droppabili nel calendario
 
 	// div contenente le persone in turno
-    	var divContainer = '#external-events';
+    var divContainer = '#external-events';
 
 	// Per ogni turno legge le persone di quel turno
 	//-----------------------------------------------
-    	j = 0;
-    	while (j < tipoTurni.length) {
-       		var tipoTurno = tipoTurni[j];
-       		var color = shiftColor.shift();
-       		var div = '#' + tipoTurno;
+	j = 0;
+	while (j < tipoTurni.length) {
+   		var tipoTurno = tipoTurni[j];
+   		var color = shiftColor.shift();
+   		var div = '#' + tipoTurno;
 
-       		$('<span>', {
-      			class: "titolo-external",
-       			text: 'Turno ' + tipoTurno
-      		}).appendTo(divContainer);
-       		$('<div>', {
-       			id: tipoTurno,
-       		}).appendTo(divContainer);
+   		$('<span>', {
+  			class: "titolo-external",
+   			text: 'Turno ' + tipoTurno
+  		}).appendTo(divContainer);
+   		$('<div>', {
+   			id: tipoTurno,
+   		}).appendTo(divContainer);
 
-       		// uri REST per leggere le persone del turno 'tipoTurno'
-       		uriGetShiftPersons = shiftCalObj.getUriRestToGetPersons(tipoTurno);
-       		//console.log('uriGetShiftPersons='+uriGetShiftPersons);
+   		// uri REST per leggere le persone del turno 'tipoTurno'
+   		uriGetShiftPersons = shiftCalObj.getUriRestToGetPersons(tipoTurno);
+   		//console.log('uriGetShiftPersons='+uriGetShiftPersons);
 
-       		// exec the URI call
-           	var shiftPerson = _RestJsonCall (uriProxy + uriGetShiftPersons, 'GET', false, {});
-           	//console.log("shiftPerson="+shiftPerson);
+   		// exec the URI call
+       	var shiftPerson = _RestJsonCall (uriProxy + uriGetShiftPersons, 'GET', false, {});
+       	//console.log("shiftPerson="+shiftPerson);
 
-            jQuery.each(shiftPerson, function (i, event) {
-           		var name = event.name + " " + event.surname;
-           		if (!event.jolly) {
-          			 shiftCalObj.createShiftElement(event.id, name, tipoTurno, color).appendTo(div);
-                   		idToShift[event.id] = tipoTurno;
-                   		shiftToColor[tipoTurno] = color;
-           		} else {
-                   		if (jollyPersons.hasOwnProperty(event.id)) {
-                 			var turni = jollyPersons[event.id];
-                  			turni.push(tipoTurno);
-                   			jollyPersons[event.id] = turni;
-                  		} else {
-                  			jollyPersons[event.id] = new Array(tipoTurno);
-                  		}
-                   		idToShift[event.id] = "J";
-                   		shiftToColor["J"] = jollyColor;
-           		}
+        jQuery.each(shiftPerson, function (i, event) {
+       		var name = event.name + " " + event.surname;
+       		if (!event.jolly) {
+      			 shiftCalObj.createShiftElement(event.id, name, tipoTurno, color).appendTo(div);
+      			 idToShift[event.id] = tipoTurno;
+      			 shiftToColor[tipoTurno] = color;
+       		} else {
+               		if (jollyPersons.hasOwnProperty(event.id)) {
+             			var turni = jollyPersons[event.id];
+              			turni.push(tipoTurno);
+               			jollyPersons[event.id] = turni;
+              		} else {
+              			jollyPersons[event.id] = new Array(tipoTurno);
+              		}
+               		idToShift[event.id] = "J";
+               		shiftToColor["J"] = jollyColor;
+       		}
 
-           		// get the email and the mobile phone
-           		idToEmail[event.id] = event.email;
-           		idToMobile[event.id] = event.mobile;
-           		idToName[event.id] = name;
-      		})
+       		// get the email and the mobile phone
+       		idToEmail[event.id] = event.email;
+       		idToMobile[event.id] = event.mobile;
+       		idToName[event.id] = name;
+  		})
 
-       		j++;
-       		tipoTurno = '';
-   	}
+   		j++;
+   		tipoTurno = '';
+	}
 
-    	$('<br />').appendTo(divContainer);
-    	$('<hr />').appendTo(divContainer);
-    	$('<span>', { class: 'titolo-external', text: 'Personale sostituto' }).appendTo(divContainer);
+	$('<br />').appendTo(divContainer);
+	$('<hr />').appendTo(divContainer);
+	$('<span>', { class: 'titolo-external', text: 'Personale sostituto' }).appendTo(divContainer);
 
 
-    	//ATTENZIONE!! si da comunque per scontato che il reperibile sia 1 solo!!!! POI CAMBIARE!!!!!
-    	// non torna id='J'
-    	for (var id in jollyPersons) {
-        	$('<div>', { id: 'J' }).appendTo(divContainer);
-        	shiftCalendar.createShiftElement(id, idToName[id], "J", jollyColor).appendTo("#J");
-    	}
+	//ATTENZIONE!! si da comunque per scontato che il reperibile sia 1 solo!!!! POI CAMBIARE!!!!!
+	// non torna id='J'
+	for (var id in jollyPersons) {
+    	$('<div>', { id: 'J' }).appendTo(divContainer);
+    	shiftCalendar.createShiftElement(id, idToName[id], "J", jollyColor).appendTo("#J");
+	}
 
 
 
@@ -832,19 +832,19 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
 		// it doesn't need to have a start or end
 
 		var classAttr = new Array();
-      		classAttr = jQuery(this).attr("class").split(" ");
+  		classAttr = jQuery(this).attr("class").split(" ");
 
-      		var eventObject = {
-       			id: 'turno-' + jQuery(this).attr("id"),
-       			title: jQuery.trim(jQuery(this).text()),  // use the element's text as the event title
-       			personId: jQuery(this).attr("id"),
-       			shiftType: classAttr[2],
-       			eMail: idToEmail[jQuery(this).attr("id")],
-       			mobile: idToMobile[jQuery(this).attr("id")],
-       			color: classAttr[3],
-      		};
-      		idToName[jQuery(this).attr("id")] = jQuery.trim(jQuery(this).text());
-      		shiftToColor[eventObject.shiftType] = eventObject.color;
+  		var eventObject = {
+   			id: 'turno-' + jQuery(this).attr("id"),
+   			title: jQuery.trim(jQuery(this).text()),  // use the element's text as the event title
+   			personId: jQuery(this).attr("id"),
+   			shiftType: classAttr[2],
+   			eMail: idToEmail[jQuery(this).attr("id")],
+   			mobile: idToMobile[jQuery(this).attr("id")],
+   			color: classAttr[3],
+  		};
+  		idToName[jQuery(this).attr("id")] = jQuery.trim(jQuery(this).text());
+  		shiftToColor[eventObject.shiftType] = eventObject.color;
 
 		// store the Event Object in the DOM element so we can get to it later
 		jQuery(this).data('eventObject', eventObject);
@@ -859,7 +859,7 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
        				jQuery('#loading').hide();
        			}
        		}, 2000);
-      		},
+      	},
 		// renames months in italian
 		monthNames: shiftCalObj.monthNames,
 		monthNamesShort: shiftCalObj.monthNamesShort,
@@ -893,63 +893,63 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
 			  	// build the URI for the json file
 			  	var uriParam = currentYear.concat('/01/01/').concat(currentYear.concat('/12/31'));
 
-            			/* get the work shift
-            			----------------------------------------------------------------- */
-				  var datas = new Array();
-				  if(loadedYears.indexOf(currentYear) <  0) {
-					  loadedYears.push(currentYear);
-					  j=0;
-					  while (j<tipoTurni.length) {
-						  var tipoTurno = tipoTurni[j];
+        		/* get the work shift
+        		----------------------------------------------------------------- */
+			  	var datas = new Array();
+			  	if(loadedYears.indexOf(currentYear) <  0) {
+			  		loadedYears.push(currentYear);
+			  		j=0;
+			  		while (j<tipoTurni.length) {
+			  			var tipoTurno = tipoTurni[j];
 
-						  uriShiftToGet = shiftCalObj.getUriRestToGetEntity(tipoTurno, uriParam);
-						  //console.log('uriShiftToGet='+uriShiftToGet);
+			  			uriShiftToGet = shiftCalObj.getUriRestToGetEntity(tipoTurno, uriParam);
+			  			//console.log('uriShiftToGet='+uriShiftToGet);
 
-						  var data = new Array();
-						data.push('GET');
-                				data.push(uriShiftToGet);
+			  			var data = new Array();
+			  			data.push('GET');
+            			data.push(uriShiftToGet);
 
-                				var dataJson = JSON.stringify(data);
+            			var dataJson = JSON.stringify(data);
 
-						// exec the URI call
-                				var shiftPerson = _RestJsonCall (shiftCalObj.uriProxy, 'POST', false, dataJson);
+            			// exec the URI call
+            			var shiftPerson = _RestJsonCall (shiftCalObj.uriProxy, 'POST', false, dataJson);
 
-                        			jQuery.each(shiftPerson, function (i, event) {
-                            				event['color'] = shiftToColor[tipoTurno];
-                            				event['shiftType'] = tipoTurno;
-                            				event['eMail'] = idToEmail[event.id];
-                            				event['mobile'] = idToMobile[event.id];
-                            				if (event.cancelled == 'false') {
-                                				event['start'] = jQuery.fullCalendar.moment(event.start.concat(' ').concat(event.ttStart));
-                                				event['end'] = jQuery.fullCalendar.moment(event.end.concat(' ').concat(event.ttEnd));
-                                    				event['title'] = event.shiftSlot + ' -- ' + idToName[event.id];
+                    	jQuery.each(shiftPerson, function (i, event) {
+                    		event['color'] = shiftToColor[tipoTurno];
+                    		event['shiftType'] = tipoTurno;
+                    		event['eMail'] = idToEmail[event.id];
+                    		event['mobile'] = idToMobile[event.id];
+                    		if (event.cancelled == 'false') {
+                    			event['start'] = jQuery.fullCalendar.moment(event.start.concat(' ').concat(event.ttStart));
+                    			event['end'] = jQuery.fullCalendar.moment(event.end.concat(' ').concat(event.ttEnd));
+                    			event['title'] = event.shiftSlot + ' -- ' + idToName[event.id];
 
-                                				//event['allDay'] = false; // If true, shows event time in the event title
-				                                event['cancelled'] = false;
-                                				event['personId'] = event.id;
-                               			 		event['shiftHour'] = event.ttStart;
-                            				} else {
-                                				event['title'] = 'Turno ' + tipoTurno + '\n\rANNULLATO';
-                                				event['start'] = jQuery.fullCalendar.moment(event.start);
-                               		 			event['end'] = jQuery.fullCalendar.moment(event.end);
-                                				event['allDay'] = true;
-                                				event['className'] = "del-event";
-                                				event['cancelled'] = true;
-                            				}
-                            				event['id'] = 'turno-' + event.id + '-' + indexRep;
-                            				indexRep++;
+                    			//event['allDay'] = false; // If true, shows event time in the event title
+                    			event['cancelled'] = false;
+                    			event['personId'] = event.id;
+                    			event['shiftHour'] = event.ttStart;
+                    		} else {
+                    			event['title'] = 'Turno ' + tipoTurno + '\n\rANNULLATO';
+                    			event['start'] = jQuery.fullCalendar.moment(event.start);
+                    			event['end'] = jQuery.fullCalendar.moment(event.end);
+                    			event['allDay'] = true;
+                    			event['className'] = "del-event";
+                    			event['cancelled'] = true;
+                    		}
+                    		event['id'] = 'turno-' + event.id + '-' + indexRep;
+                    		indexRep++;
+                    		
+						jQuery('#calendar').fullCalendar('renderEvent', event, true);
 
-							jQuery('#calendar').fullCalendar('renderEvent', event, true);
+						// set data.end = data.start for check problem
+						if (event.end == null) {
+							event.end = event.start;
+						}
+                    	});
 
-                            				// set data.end = data.start for check problem
-                            				if (event.end == null) {
-                                				event.end = event.start;
-                            				}
-                        			});
-
-                				j++;
-                				tipoTurno = '';
-					}
+                    	j++;
+                    	tipoTurno = '';
+			  		}
 				}
 			    }
          	},
@@ -961,22 +961,22 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
          	}*/
       		],
 
-		  eventClick: function(calEvent, jsEvent, view) {
+      		eventClick: function(calEvent, jsEvent, view) {
 			alert(calEvent.title +' \ninizio ' +jQuery.fullCalendar.formatDate(calEvent.start, "dd-MM-yyyy")+ '\nfine '+jQuery.fullCalendar.formatDate(calEvent.end, "dd-MM-yyyy"));
 		}, // end eventClick
 
 		eventRender: function(event, element) {
-			  var inizio = jQuery.fullCalendar(event.start).format("MM");
-			  var fine = jQuery.fullCalendar(event.end).format("MM");
-			  var currentView = jQuery('#calendar').fullCalendar('getDate').stripTime().format();
-			  var currentViewMonth = jQuery.fullCalendar(currentView).format("MM");
+			var inizio = jQuery.fullCalendar(event.start).format("MM");
+			var fine = jQuery.fullCalendar(event.end).format("MM");
+			var currentView = jQuery('#calendar').fullCalendar('getDate').stripTime().format();
+			var currentViewMonth = jQuery.fullCalendar(currentView).format("MM");
 
-			  if( (inizio != currentViewMonth) && (fine != currentViewMonth) && (!event.id.match(/@google.com/g)) ){
+			if( (inizio != currentViewMonth) && (fine != currentViewMonth) && (!event.id.match(/@google.com/g)) ){
           			element.addClass('oldEvent');
-			  }
-			} // end eventRender
+			}
+		} // end eventRender
 		});
-  } // FINE createCalendarShiftView();
+} // FINE createCalendarShiftView();
 
 
 
@@ -1204,7 +1204,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 
 		// define events to be included
  		eventSources: [
-          {
+        {
       		events: function (start, end, timezone, callback) {
       			//Eventi da visualizzare nel calendario
       			var events = [];
@@ -1432,28 +1432,28 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 		}
 
 		if(originalEventObject.title == 'Turno ANNULLATO'){
-      var shiftType = jQuery("input:radio[name=shift]:checked").val();
-      copiedEventObject.title = 'Turno '+ shiftType +' ANNULLATO';
-      copiedEventObject.shiftType = shiftType;
-      copiedEventObject.color = shiftToColor[shiftType];
-      copiedEventObject.allDay = true;
-      copiedEventObject.editable = false;
-      copiedEventObject.className = 'del-event';
-      copiedEventObject.cancelled = true;
-      copiedEventObject.id = 'turno-annullato-'+indexRep;
-      indexRep++;
-    }
+			var shiftType = jQuery("input:radio[name=shift]:checked").val();
+			copiedEventObject.title = 'Turno '+ shiftType +' ANNULLATO';
+			copiedEventObject.shiftType = shiftType;
+			copiedEventObject.color = shiftToColor[shiftType];
+			copiedEventObject.allDay = true;
+			copiedEventObject.editable = false;
+			copiedEventObject.className = 'del-event';
+			copiedEventObject.cancelled = true;
+			copiedEventObject.id = 'turno-annullato-'+indexRep;
+			indexRep++;
+	    }
 
 	  	// render the event on the calendar
 		// the last `true` argument determines if the event "sticks"
 		jQuery('#calendar').fullCalendar('renderEvent', copiedEventObject, true);
-    //console.log(copiedEventObject);
+		//console.log(copiedEventObject);
 		// set data.end = data.start for check problem
-                if (copiedEventObject.end == null) {copiedEventObject.end = copiedEventObject.start;}
+		if (copiedEventObject.end == null) {copiedEventObject.end = copiedEventObject.start;}
 
 		if (copiedEventObject.start.getMonth() + 1 !=  currentMonth) {
-            		// shift of the previous month cannot be modified from this screen
-            		alert ('ERRORE!\nNon e possibile modificare i turni del mese precedente o successivo a quello visualizzato.');
+			// shift of the previous month cannot be modified from this screen
+			alert ('ERRORE!\nNon e possibile modificare i turni del mese precedente o successivo a quello visualizzato.');
 		  	jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
 		} else {
 			  // check if the shift overlap a ferie o others work shift
@@ -1461,332 +1461,331 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 			  var cEOStart = jQuery.fullCalendar.formatDate(copiedEventObject.start, "yyyy-MM-dd");
 			  var cEOEnd = jQuery.fullCalendar.formatDate(copiedEventObject.end, "yyyy-MM-dd");
 			  jQuery.each(obj, function(i, val) {
-			  	var valStart = jQuery.fullCalendar.formatDate(val.start, "yyyy-MM-dd");
-			  	var valEnd = jQuery.fullCalendar.formatDate(val.end, "yyyy-MM-dd");
+			  var valStart = jQuery.fullCalendar.formatDate(val.start, "yyyy-MM-dd");
+			  var valEnd = jQuery.fullCalendar.formatDate(val.end, "yyyy-MM-dd");
 
 
-			  	// check for the cancelled shift overlap
-			  	if (val.title.toString().match(/ANNULLATO/g) && (val.shiftType == copiedEventObject.shiftType) && (cEOStart >= valStart) && (cEOStart<=valEnd)&&(val.id.toString() != copiedEventObject.id.toString())){
-       			alert("Impossibile aggiungere persone per questo turno in questo giorno.\nTurno Annullato\n");
-            jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
-            return false;
-				  }
+			  // check for the cancelled shift overlap
+			  if (val.title.toString().match(/ANNULLATO/g) && (val.shiftType == copiedEventObject.shiftType) && (cEOStart >= valStart) && (cEOStart<=valEnd)&&(val.id.toString() != copiedEventObject.id.toString())){
+       				alert("Impossibile aggiungere persone per questo turno in questo giorno.\nTurno Annullato\n");
+       				jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
+       				return false;
+			  }
 
 				  // check for absences
-				  if(val.id.toString().match(/assenza/g) && val.personId.toString() == copiedEventObject.personId.toString()) {
-					  if ((valStart == cEOStart) || (cEOStart >= valStart && cEOStart <= valEnd)) {
-						  alert("ERRORE! \nIl turnista e' in ferie!!!");
-						  jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
-					  }
-					// check for shift
-					} else if(val.id.toString().match(/turno/g)  && (val.shiftType.toString() == copiedEventObject.shiftType.toString()) && (val.id.toString() != copiedEventObject.id.toString())) {
-						// interval overlap
-						if ( cEOStart >= valStart && cEOEnd <= valEnd) {
-							if (val.shiftHour.toString() == copiedEventObject.shiftHour.toString()+":00.000") {
-          			alert("Il turno delle "+copiedEventObject.shiftHour.toString()+" e gia coperto");
-								jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
-          		} else if (val.personId.toString() == copiedEventObject.personId.toString()) {
-								alert(copiedEventObject.title+" e' gia' in turno");
-                jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
-							}
-            }
+			  if(val.id.toString().match(/assenza/g) && val.personId.toString() == copiedEventObject.personId.toString()) {
+				  if ((valStart == cEOStart) || (cEOStart >= valStart && cEOStart <= valEnd)) {
+					  alert("ERRORE! \nIl turnista e' in ferie!!!");
+					  jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
+				  }
+				// check for shift
+			  } else if(val.id.toString().match(/turno/g)  && (val.shiftType.toString() == copiedEventObject.shiftType.toString()) && (val.id.toString() != copiedEventObject.id.toString())) {
+				  	// interval overlap
+				  	if ( cEOStart >= valStart && cEOEnd <= valEnd) {
+				  		if (val.shiftHour.toString() == copiedEventObject.shiftHour.toString()+":00.000") {
+				  			alert("Il turno delle "+copiedEventObject.shiftHour.toString()+" e gia coperto");
+				  			jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
+				  		} else if (val.personId.toString() == copiedEventObject.personId.toString()) {
+				  			alert(copiedEventObject.title+" e' gia' in turno");
+				  			jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
+						}
 					}
+				}
 
-          // Check that the jolly person doesn't cover two or more shifts
-          if ( (valStart <= cEOStart) && (cEOStart <= valEnd) && (cEOEnd <= valEnd) && (cEOEnd >= valStart) && (val.personId.toString() == copiedEventObject.personId.toString()) && (val.shiftType != copiedEventObject.shiftType)  && (!copiedEventObject.id.toString().match(/annullato/g))) {
-            alert(copiedEventObject.title+" e' gia' in turno ");
-            jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
-          }
+			  // Check that the jolly person doesn't cover two or more shifts
+			  if ( (valStart <= cEOStart) && (cEOStart <= valEnd) && (cEOEnd <= valEnd) && (cEOEnd >= valStart) && (val.personId.toString() == copiedEventObject.personId.toString()) && (val.shiftType != copiedEventObject.shiftType)  && (!copiedEventObject.id.toString().match(/annullato/g))) {
+				  alert(copiedEventObject.title+" e' gia' in turno ");
+				  jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
+			  }
 			});
 		}
 	},
 
 	eventClick: function(calEvent, jsEvent, view) {
 		if (calEvent.id.toString().match(/rep/g)) {
-			
-		        alert(calEvent.title +' \ninizio ' +jQuery.fullCalendar.formatDate(calEvent.start, "dd-MM-yyyy")+ '\nfine '+jQuery.fullCalendar.formatDate(calEvent.end, "dd-MM-yyyy")+ '\nid: '+calEvent.id+'\npersonId: '+calEvent.personId+'\ntipo turno: '+calEvent.shiftType+'\norario: '+calEvent.shiftHour);
+			alert(calEvent.title +' \ninizio ' +jQuery.fullCalendar.formatDate(calEvent.start, "dd-MM-yyyy")+ '\nfine '+jQuery.fullCalendar.formatDate(calEvent.end, "dd-MM-yyyy")+ '\nid: '+calEvent.id+'\npersonId: '+calEvent.personId+'\ntipo turno: '+calEvent.shiftType+'\norario: '+calEvent.shiftHour);
 		} else {
-		        alert(calEvent.title +' \ntipo turno: '+calEvent.shiftType+' email ' +calEvent.eMail +'\norario: '+calEvent.shiftHour+ '\ninizio ' +jQuery.fullCalendar.formatDate(calEvent.start, "dd-MM-yyyy")+ '\nfine '+jQuery.fullCalendar.formatDate(calEvent.end, "dd-MM-yyyy"));
+		    alert(calEvent.title +' \ntipo turno: '+calEvent.shiftType+' email ' +calEvent.eMail +'\norario: '+calEvent.shiftHour+ '\ninizio ' +jQuery.fullCalendar.formatDate(calEvent.start, "dd-MM-yyyy")+ '\nfine '+jQuery.fullCalendar.formatDate(calEvent.end, "dd-MM-yyyy"));
 		}
-  }, // end eventClick
+	}, // end eventClick
 
 
 	eventMouseover: function(event, jsEvent, view){
 			  // Add remove-event button
         $(this).find(".fc-event-time").append($("<a>", {
-          'href': '#',
-          'class': 'remove-event',
-          'title': 'Cancella questo evento',
-          'alt': 'Remove event',
-          'html': '<img src=\"' + Drupal.settings.basePath + 'sites/default/files/images/remove-button-cross.png\"></img>',
+        	'href': '#',
+        	'class': 'remove-event',
+        	'title': 'Cancella questo evento',
+        	'alt': 'Remove event',
+        	'html': '<img src=\"' + Drupal.settings.basePath + 'sites/default/files/images/remove-button-cross.png\"></img>',
         }));
 
         // Add remove-shift button
-			  if(event.cancelled != true){
+		if(event.cancelled != true){
         	$(this).find(".fc-event-time").append($("<a>", {
-          	'href': '#',
-          	'class': 'remove-shift',
-          	'title': 'Annulla l\'intero turno',
-          	'alt': 'Remove shift',
-          	'html': '<img src=\"' + Drupal.settings.basePath + 'sites/default/files/images/remove-button-sosta.png\"></img>',
+	          	'href': '#',
+	          	'class': 'remove-shift',
+	          	'title': 'Annulla l\'intero turno',
+	          	'alt': 'Remove shift',
+	          	'html': '<img src=\"' + Drupal.settings.basePath + 'sites/default/files/images/remove-button-sosta.png\"></img>',
         	}));
-			  }
+		}
 
         // Add remove-event button for deleted shift
         $(this).filter(".del-event").find(".fc-event-title").append($("<a>", {
-          'href': '#',
-          'class': 'remove-event',
-          'title': 'Cancella questo evento',
-          'alt': 'Remove event',
-          'html': '<img src=\"' + Drupal.settings.basePath + 'sites/default/files/images/remove-button-cross.png\"></img>',
+        	'href': '#',
+        	'class': 'remove-event',
+        	'title': 'Cancella questo evento',
+        	'alt': 'Remove event',
+        	'html': '<img src=\"' + Drupal.settings.basePath + 'sites/default/files/images/remove-button-cross.png\"></img>',
         }));
 
         // On click remove-event
         $(".remove-event").click(function(e) {
-          e.stopPropagation();
-          var conf = confirm("Sei sicuro di voler cancellare il turno?");
-          if(conf){
-            $('#calendar').fullCalendar('removeEvents', event.id);
-          }
+        	e.stopPropagation();
+        	var conf = confirm("Sei sicuro di voler cancellare il turno?");
+        	if(conf){
+        		$('#calendar').fullCalendar('removeEvents', event.id);
+        	}
         });
 
 			  // On click remove-shift
         $(".remove-shift").click(function(e) {
         	startEvent = $.fullCalendar(event.start).format("YYYY-MM-DD");
         	endEvent = $.fullCalendar(event.end).format("YYYY-MM-DD");
-          //startEvent = $.fullCalendar.formatDate(event.start, "yyyy-MM-dd");
-          //endEvent = $.fullCalendar.formatDate(event.end, "YYYY-MM-dd");
-          e.stopPropagation();
-          var conf = confirm("In questo modo annullerai l'intero turno. Vuoi continuare?");
-          if(conf){
-            var events = $('#calendar').fullCalendar('clientEvents');
-            $.each(events, function(i,v){
-              if((event.id != v.id)&&(event.shiftType == v.shiftType) && (event.title != v.title) && (event.shiftHour != v.shiftHour)&&(!v.id.match(/@google.com/g))){
-                //start = $.fullCalendar.formatDate(v.start, "yyyy-MM-dd");
-                //end = $.fullCalendar.formatDate(v.end, "yyyy-MM-dd");
-                start = $.fullCalendar(v.start).format("YYYY-MM-DD");
-                end = $.fullCalendar(v.end).format("YYYY-MM-DD");
+        	//startEvent = $.fullCalendar.formatDate(event.start, "yyyy-MM-dd");
+        	//endEvent = $.fullCalendar.formatDate(event.end, "YYYY-MM-dd");
+        	e.stopPropagation();
+        	var conf = confirm("In questo modo annullerai l'intero turno. Vuoi continuare?");
+        	if(conf){
+        		var events = $('#calendar').fullCalendar('clientEvents');
+        		$.each(events, function(i,v){
+        			if((event.id != v.id)&&(event.shiftType == v.shiftType) && (event.title != v.title) && (event.shiftHour != v.shiftHour)&&(!v.id.match(/@google.com/g))){
+        				//start = $.fullCalendar.formatDate(v.start, "yyyy-MM-dd");
+        				//end = $.fullCalendar.formatDate(v.end, "yyyy-MM-dd");
+        				start = $.fullCalendar(v.start).format("YYYY-MM-DD");
+        				end = $.fullCalendar(v.end).format("YYYY-MM-DD");
 
-                if(v.shiftHour == "07:00"){
-                  startTime = "07:00:00";
-                  endTime = "13:30:00";
-                } else {
-                  startTime = "13:30:00";
-                  endTime = "19:00:00";
-                }
-                if( startEvent <= start && start <= endEvent ){
-                  if(end > endEvent){
-                    var v1 = {
-                      'title': "Turno " + event.shiftType + "\n\rANNULLATO",
-                      'shiftType': event.shiftType,
-                      'cancelled': true,
-                      'id': "turno-X"+"-"+v.id,
-                      'className': 'del-event',
-                      'start': startEvent,
-                      'end': endEvent,
-                      'color': shiftToColor[v.shiftType],
-                    };
-                    $("#calendar").fullCalendar( 'renderEvent', v1, true);
-                    // set data.end = data.start for check problem
-                    if (v1.end == null) {v1.end = v1.start;}
-                    var temp = event.end;
-                    temp.setDate(temp.getDate()+1);
-                    //temp = $.fullCalendar.formatDate(temp, "yyyy-MM-dd");
-                    temp = $.fullCalendar(temp).format("YYYY-MM-DD");
-                    var v2 = {
-                      'title': v.title,
-                      'allDay': false,
-                      'id': v.id + "-1",
-                      'calcelled': false,
-                      'shiftHour': v.shiftHour,
-                      'shiftType': v.shiftType,
-                      'color': shiftToColor[v.shiftType],
-                      'personId': v.personId,
-                      'start': temp + " " + startTime,
-                      'end': end + " " + endTime,
-                    };
-                      $("#calendar").fullCalendar( 'renderEvent', v2, true);
-                      // set data.end = data.start for check problem
-                      if (v2.end == null) {v2.end = v2.start;}
-                      $('#calendar').fullCalendar('removeEvents', v.id);
-                  } else {
-                    var v1 = {
-                      'title': "Turno " + event.shiftType + "\n\rANNULLATO",
-                      'shiftType': event.shiftType,
-                      'cancelled': true,
-                      'id': "turno-X"+"-"+v.id,
-                      'className': 'del-event',
-                      'start': startEvent,
-                      'end': endEvent,
-                      'color': shiftToColor[v.shiftType],
-                    };
-                    $("#calendar").fullCalendar( 'renderEvent', v1, true);
-                    // set data.end = data.start for check problem
-                    if (v1.end == null) {v1.end = v1.start;}
-                    $('#calendar').fullCalendar('removeEvents', v.id);
-                  }
+        				if(v.shiftHour == "07:00"){
+        					startTime = "07:00:00";
+        					endTime = "13:30:00";
+        				} else {
+        					startTime = "13:30:00";
+        					endTime = "19:00:00";
+        				}
+        				if( startEvent <= start && start <= endEvent ){
+        					if(end > endEvent){
+        						var v1 = {
+        							'title': "Turno " + event.shiftType + "\n\rANNULLATO",
+        							'shiftType': event.shiftType,
+        							'cancelled': true,
+        							'id': "turno-X"+"-"+v.id,
+        							'className': 'del-event',
+        							'start': startEvent,
+        							'end': endEvent,
+        							'color': shiftToColor[v.shiftType],
+        						};
+        						$("#calendar").fullCalendar( 'renderEvent', v1, true);
+        						// set data.end = data.start for check problem
+        						if (v1.end == null) {v1.end = v1.start;}
+        						var temp = event.end;
+        						temp.setDate(temp.getDate()+1);
+        						//temp = $.fullCalendar.formatDate(temp, "yyyy-MM-dd");
+        						temp = $.fullCalendar(temp).format("YYYY-MM-DD");
+        						var v2 = {
+        							'title': v.title,
+        							'allDay': false,
+        							'id': v.id + "-1",
+        							'calcelled': false,
+        							'shiftHour': v.shiftHour,
+        							'shiftType': v.shiftType,
+        							'color': shiftToColor[v.shiftType],
+        							'personId': v.personId,
+			                      	'start': temp + " " + startTime,
+			                      	'end': end + " " + endTime,
+			                    };
+        						$("#calendar").fullCalendar( 'renderEvent', v2, true);
+        						// set data.end = data.start for check problem
+        						if (v2.end == null) {v2.end = v2.start;}
+        						$('#calendar').fullCalendar('removeEvents', v.id);
+        					} else {
+        						var v1 = {
+        							'title': "Turno " + event.shiftType + "\n\rANNULLATO",
+        							'shiftType': event.shiftType,
+        							'cancelled': true,
+        							'id': "turno-X"+"-"+v.id,
+        							'className': 'del-event',
+        							'start': startEvent,
+        							'end': endEvent,
+        							'color': shiftToColor[v.shiftType],
+        						};
+        						$("#calendar").fullCalendar( 'renderEvent', v1, true);
+        						// set data.end = data.start for check problem
+        						if (v1.end == null) {v1.end = v1.start;}
+        						$('#calendar').fullCalendar('removeEvents', v.id);
+        					}
 
-                } else if( startEvent >= start && startEvent <= end){
-                    var temp3 = event.start;
-                    temp3.setDate(temp3.getDate() - 1);
-                    temp3 = $.fullCalendar(temp3).format("YYYY-MM-DD");
-                    var v1 = {
-                      'title': v.title,
-                      'allDay': false,
-                      'id': v.id + "-1",
-                      'personId': v.personId,
-                      'shiftHour': v.shiftHour,
-                      'shiftType': v.shiftType,
-                      'cancelled': false,
-                      'color': shiftToColor[v.shiftType],
-                      'personId': v.personId,
-                      'start': start + " " + startTime,
-                      'end': temp3 + " " + endTime,
-                    };
-                    $("#calendar").fullCalendar( 'renderEvent', v1, true);
+        				} else if( startEvent >= start && startEvent <= end){
+        					var temp3 = event.start;
+        					temp3.setDate(temp3.getDate() - 1);
+        					temp3 = $.fullCalendar(temp3).format("YYYY-MM-DD");
+        					var v1 = {
+        						'title': v.title,
+        						'allDay': false,
+        						'id': v.id + "-1",
+        						'personId': v.personId,
+        						'shiftHour': v.shiftHour,
+        						'shiftType': v.shiftType,
+        						'cancelled': false,
+        						'color': shiftToColor[v.shiftType],
+        						'personId': v.personId,
+        						'start': start + " " + startTime,
+        						'end': temp3 + " " + endTime,
+        					};
+        					$("#calendar").fullCalendar( 'renderEvent', v1, true);
 
-                    // set data.end = data.start for check problem
-                    if (v1.end == null) {v1.end = v1.start;}
+        					// set data.end = data.start for check problem
+        					if (v1.end == null) {v1.end = v1.start;}
 
-                    if(endEvent < end){
-                      var temp2 = event.end;
-                      temp2.setDate(temp2.getDate() + 1);
-                      temp2 = $.fullCalendar(temp2).format("YYYY-MM-DD");
-                    var v2 = {
-                      'title': "Turno " + event.shiftType + "\n\rANNULLATO",
-                      'id': "turno-X"+"-"+v.id,
-                      'shiftType': v.shiftType,
-                      'cancelled': true,
-                      'className': 'del-event',
-                      'color': shiftToColor[v.shiftType],
-                      'start': startEvent,
-                      'end': endEvent,
-                    };
-                    $("#calendar").fullCalendar( 'renderEvent', v2, true);
-                    // set data.end = data.start for check problem
-                    if (v2.end == null) {v2.end = v2.start;}
-                    var v3 = {
-                      'title': v.title,
-                      'allDay': false,
-                      'id': v.id + "-2",
-                      'shiftHour': v.shiftHour,
-                      'shiftType': v.shiftType,
-                      'cancelled': false,
-                      'color': shiftToColor[v.shiftType],
-                      'personId': v.personId,
-                      'start': temp2 + " " + startTime,
-                      'end': end + " " + endTime,
-                    };
-                    $("#calendar").fullCalendar( 'renderEvent', v3, true);
-                    // set data.end = data.start for check problem
-                    if (v3.end == null) {v3.end = v3.start;}
-                    $('#calendar').fullCalendar('removeEvents', v.id);
-                  } else if(endEvent >= end){
-                    var v2 = {
-                      'title': "Turno " + event.shiftType + "\n\rANNULLATO",
-                      'id': "turno-X"+"-"+v.id,
-                      'shiftType': v.shiftType,
-                      'cancelled': true,
-                      'className': 'del-event',
-                      'start': startEvent,
-                      'color': shiftToColor[v.shiftType],
-                      'end': endEvent,
-                    };
+        					if(endEvent < end){
+        						var temp2 = event.end;
+        						temp2.setDate(temp2.getDate() + 1);
+        						temp2 = $.fullCalendar(temp2).format("YYYY-MM-DD");
+        						var v2 = {
+        							'title': "Turno " + event.shiftType + "\n\rANNULLATO",
+        							'id': "turno-X"+"-"+v.id,
+        							'shiftType': v.shiftType,
+        							'cancelled': true,
+        							'className': 'del-event',
+        							'color': shiftToColor[v.shiftType],
+        							'start': startEvent,
+        							'end': endEvent,
+        						};
+        						$("#calendar").fullCalendar( 'renderEvent', v2, true);
+        						//	set data.end = data.start for check problem
+        						if (v2.end == null) {v2.end = v2.start;}
+        						var v3 = {
+        							'title': v.title,
+        							'allDay': false,
+        							'id': v.id + "-2",
+        							'shiftHour': v.shiftHour,
+        							'shiftType': v.shiftType,
+        							'cancelled': false,
+        							'color': shiftToColor[v.shiftType],
+        							'personId': v.personId,
+        							'start': temp2 + " " + startTime,
+        							'end': end + " " + endTime,
+        						};
+        						$("#calendar").fullCalendar( 'renderEvent', v3, true);
+        						// set data.end = data.start for check problem
+        						if (v3.end == null) {v3.end = v3.start;}
+        						$('#calendar').fullCalendar('removeEvents', v.id);
+        					} else if(endEvent >= end){
+        						var v2 = {
+        							'title': "Turno " + event.shiftType + "\n\rANNULLATO",
+        							'id': "turno-X"+"-"+v.id,
+        							'shiftType': v.shiftType,
+        							'cancelled': true,
+        							'className': 'del-event',
+        							'start': startEvent,
+        							'color': shiftToColor[v.shiftType],
+        							'end': endEvent,
+        						};
 
-                    $("#calendar").fullCalendar( 'renderEvent', v2, true);
-                    // set data.end = data.start for check problem
-                    if (v2.end == null) {v2.end = v2.start;}
-                    	$('#calendar').fullCalendar('removeEvents', v.id);
-                  }
-                }
-                $('#calendar').fullCalendar('removeEvents', event.id);
-              }
-            });
-          }
+        						$("#calendar").fullCalendar( 'renderEvent', v2, true);
+        						// set data.end = data.start for check problem
+        						if (v2.end == null) {v2.end = v2.start;}
+        						$('#calendar').fullCalendar('removeEvents', v.id);
+        					}
+        				}
+        				$('#calendar').fullCalendar('removeEvents', event.id);
+        			}
+        		});
+        	}
         });
-		  }, // end eventMouseover
+	}, // end eventMouseover
 
-			  eventMouseout: function(event, jsEvent, view) {
-				  $(this).find(".remove-event").remove();
-				  $(this).find(".remove-shift").remove();
-				  $(".del-event").find(".remove-event").remove();
-			  }, // end eventMouseout
+	eventMouseout: function(event, jsEvent, view) {
+		$(this).find(".remove-event").remove();
+		$(this).find(".remove-shift").remove();
+		$(".del-event").find(".remove-event").remove();
+	}, // end eventMouseout
 
-  eventDrop: function(event, dayDelta, minuteDelta, allDay, revertFunc) {
-	  var currentView = $('#calendar').fullCalendar('getDate').stripTime().format();
-	  var currentMonth = $.fullCalendar(currentView).format('MM');
+	eventDrop: function(event, dayDelta, minuteDelta, allDay, revertFunc) {
+		var currentView = $('#calendar').fullCalendar('getDate').stripTime().format();
+		var currentMonth = $.fullCalendar(currentView).format('MM');
 
 	  // set data.end = data.start for check problem
-          if (event.end == null) {event.end = event.start;}
+		if (event.end == null) {event.end = event.start;}
 
 	  // holiday events cannot be modified
-          if (event.id.toString().match(/ferie/g)) {
+		if (event.id.toString().match(/ferie/g)) {
             alert ('Da questa interfaccia non e possibile modificare le ferie!');
             revertFunc();
-          } else if ((event.start.getMonth()+1 != currentMonth) || (event.end.getMonth()+1 != currentMonth)) {
+		} else if ((event.start.getMonth()+1 != currentMonth) || (event.end.getMonth()+1 != currentMonth)) {
             // reperibility of the previous month cannot be modified from this screen
             alert ('ERRORE!\nNon e possibile modificare i turni del mese precedente o successivo a quello visualizzato.');
             revertFunc();
-          } else {
+		} else {
 				    // check if absences and shift of a certain person overlap
             var obj = $('#calendar').fullCalendar('clientEvents');
 					  //var eventStart = $.fullCalendar.formatDate(event.start, "yyyy-MM-dd");
             var eventStart = $.fullCalendar(event.start).format("YYYY-MM-DD");
             //var eventEnd = $.fullCalendar.formatDate(event.end, "yyyy-MM-dd");
             var eventEnd = $.fullCalendar(event.end).format("YYYY-MM-DD");
-					  jQuery.each(obj, function(i, val) {
-						  //var valStart = $.fullCalendar.formatDate(val.start, "yyyy-MM-dd");
-						  //var valEnd = $.fullCalendar.formatDate(val.end, "yyyy-MM-dd");
-						  var valStart = $.fullCalendar(val.start).format("YYYY-MM-DD");
-						  var valEnd = $.fullCalendar(val.end).format("YYYY-MM-DD");
+            jQuery.each(obj, function(i, val) {
+            	//var valStart = $.fullCalendar.formatDate(val.start, "yyyy-MM-dd");
+            	//var valEnd = $.fullCalendar.formatDate(val.end, "yyyy-MM-dd");
+            	var valStart = $.fullCalendar(val.start).format("YYYY-MM-DD");
+            	var valEnd = $.fullCalendar(val.end).format("YYYY-MM-DD");
 
-						  if (((valStart == eventStart) || (eventStart >= valStart && eventStart <= valEnd)) && (val.id.toString() != event.id.toString())) {
-							  // check for the ferie
-							  if (val.id.toString().match(/assenza/g) && val.personId.toString() == event.personId.toString()) {
+            	if (((valStart == eventStart) || (eventStart >= valStart && eventStart <= valEnd)) && (val.id.toString() != event.id.toString())) {
+            		// check for the ferie
+            		if (val.id.toString().match(/assenza/g) && val.personId.toString() == event.personId.toString()) {
           				alert("Impossibile spostare il turno.\n La persona e in ferie!");
-								  revertFunc();
-							  }
-							  // check for the shift
-							  else if (val.id.toString().match(/turno/g)  &&  (val.shiftType.toString() == event.shiftType.toString())) {
-								  if (val.shiftHour.toString() === event.shiftHour.toString()+":00.000") {
-                    alert("Il turno delle "+event.shiftHour.toString()+" e gia coperto");
-									  revertFunc();
-                  } else if (val.personId.toString() === event.personId.toString()) {
-                    alert(event.title+" e' gia' in turno ");
-									  revertFunc();
-                  }
-                }
-						  }
-              // Check that the jolly person doesn't cover two or more shifts
-              if ( (valStart >= eventStart) && (eventStart <= valEnd) && (eventEnd <= valEnd) && (eventEnd >= eventStart) && (val.personId.toString() == event.personId.toString()) && (val.shiftType != event.shiftType) && (!event.id.toString().match(/annullato/g)) ) {
-                alert(event.title+" e' gia' in turno ");
-                jQuery('#calendar').fullCalendar('removeEvents', event.id);
-              }
-      			});
-				  }
-			  }, // end eventdrop
+          				revertFunc();
+            		}
+            		// check for the shift
+            		else if (val.id.toString().match(/turno/g)  &&  (val.shiftType.toString() == event.shiftType.toString())) {
+            			if (val.shiftHour.toString() === event.shiftHour.toString()+":00.000") {
+            				alert("Il turno delle "+event.shiftHour.toString()+" e gia coperto");
+            				revertFunc();
+            			} else if (val.personId.toString() === event.personId.toString()) {
+            				alert(event.title+" e' gia' in turno ");
+            				revertFunc();
+            			}
+            		}
+            	}
+            	// Check that the jolly person doesn't cover two or more shifts
+            	if ( (valStart >= eventStart) && (eventStart <= valEnd) && (eventEnd <= valEnd) && (eventEnd >= eventStart) && (val.personId.toString() == event.personId.toString()) && (val.shiftType != event.shiftType) && (!event.id.toString().match(/annullato/g)) ) {
+            		alert(event.title+" e' gia' in turno ");
+            		jQuery('#calendar').fullCalendar('removeEvents', event.id);
+            	}
+      		});
+		}
+	}, // end eventdrop
 
-			  eventResize: function(event, dayDelta, minuteDelta, revertFunc) {
+	eventResize: function(event, dayDelta, minuteDelta, revertFunc) {
 
-				  var currentView = $('#calendar').fullCalendar('getDate').stripTime().format();
-				  var currentMonth = $.fullCalendar(currentView).format('MM');
+		var currentView = $('#calendar').fullCalendar('getDate').stripTime().format();
+		var currentMonth = $.fullCalendar(currentView).format('MM');
 
-				  // set data.end = data.start for check problem
-          if (event.end == null) {event.end = event.start;}
+		// set data.end = data.start for check problem
+		if (event.end == null) {event.end = event.start;}
 
-        	// holidays events cannot be modified
-        	if (event.id.toString().match(/ferie/g)) {
-				    alert ('da questa interfaccia non e possibile modificare le ferie!');
-				    revertFunc();
-		      } else if (event.end.getMonth()+1 !=  currentMonth) {
-			    // reperibility of the previous month cannot be modified from this screen
-				    alert ('ERRORE!\nNon e possibile modificare i turni del mese precedente o successivo a quello visualizzato.');
-				    revertFunc();
-		    	} else {
-          	// check if absences and shift  of a certain person overlap
+		// holidays events cannot be modified
+		if (event.id.toString().match(/ferie/g)) {
+			alert ('da questa interfaccia non e possibile modificare le ferie!');
+			revertFunc();
+		} else if (event.end.getMonth()+1 !=  currentMonth) {
+			// reperibility of the previous month cannot be modified from this screen
+			alert ('ERRORE!\nNon e possibile modificare i turni del mese precedente o successivo a quello visualizzato.');
+			revertFunc();
+		} else {
+			// check if absences and shift  of a certain person overlap
             var obj = $('#calendar').fullCalendar('clientEvents');
-				    //ar eventStart = $.fullCalendar.formatDate(event.start, "yyyy-MM-dd");
-				    //var eventEnd = $.fullCalendar.formatDate(event.end, "yyyy-MM-dd");
+            //ar eventStart = $.fullCalendar.formatDate(event.start, "yyyy-MM-dd");
+            //var eventEnd = $.fullCalendar.formatDate(event.end, "yyyy-MM-dd");
             var eventStart = $.fullCalendar(event.start).format("YYYY-MM-DD");
 			var eventEnd = $.fullCalendar(event.end).format("YYYY-MM-DD");
             jQuery.each(obj, function(i, val) {
@@ -1824,8 +1823,8 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 //            		element.addClass('oldEvent');
 //    		}
 	} // end eventRender
-});
-   }// FINE createCalendarShiftAdmin();
+	});
+}// FINE createCalendarShiftAdmin();
 
 
 
@@ -1839,26 +1838,26 @@ function createCalendarAbsenceView(allowed, persons, absenceCalObj, absenceGrpOb
 
 
 	// defines date variables
-        var today = new Date();
-        var dToday = today.getDate();
-        var mToday = today.getMonth();
-        var yToday = today.getFullYear();
+	var today = new Date();
+	var dToday = today.getDate();
+	var mToday = today.getMonth();
+	var yToday = today.getFullYear();
 
-         // used to be appended to the reperibility  events
-         var indexAbsence = 0;
+	// used to be appended to the reperibility  events
+	var indexAbsence = 0;
 
-         // decodifica id -> nome reperibile
-         // decodifica id -> colore reperibile
-         var idToDescription  = new Array();
-         var absenceToColor = new Array();
-         var idToMobile = new Array();
-         var idToEmail = new Array();
+	// decodifica id -> nome reperibile
+	// decodifica id -> colore reperibile
+	var idToDescription  = new Array();
+	var absenceToColor = new Array();
+	var idToMobile = new Array();
+	var idToEmail = new Array();
 
-    	var firstYear = 0;
-    	var loadedYears = new Array();
-
-    	// div contenente le persone in turno
-    	var divContainer = '#external-events';
+	var firstYear = 0;
+	var loadedYears = new Array();
+	
+	// div contenente le persone in turno
+	var divContainer = '#external-events';
 
 	// inserisce la lista delle tipologie di assenza
        	$('<span>', { class: "titolo-external", text: 'Tipologie di assenze' }).appendTo(divContainer);
@@ -1868,56 +1867,56 @@ function createCalendarAbsenceView(allowed, persons, absenceCalObj, absenceGrpOb
 	var yyyy = today.getFullYear();
 	var param = yyyy + '/01/01/' + yyyy + '/12/31';
 
-       	// uri REST per leggere le persone del turno 'tipoTurno'
-       	uriGetAbsenceTypes = absenceCalObj.getUriRestToGetAbsenceTypes(param);
-       	//console.log('uriGetAbsenceTypes='+uriGetAbsenceTypes);
+	// uri REST per leggere le persone del turno 'tipoTurno'
+	uriGetAbsenceTypes = absenceCalObj.getUriRestToGetAbsenceTypes(param);
+	//console.log('uriGetAbsenceTypes='+uriGetAbsenceTypes);
 
-       	var data = new Array();
-       	data.push('GET');
-       	data.push(uriGetAbsenceTypes);
-
-       	var dataJson = JSON.stringify(data);
-
-       	console.log(dataJson);
+	var data = new Array();
+	data.push('GET');
+	data.push(uriGetAbsenceTypes);
+	
+	var dataJson = JSON.stringify(data);
+	
+	console.log(dataJson);
 
 	// exec the URI call
-        var absenceTypes = _RestJsonCall (absenceCalObj.uriProxy, 'POST', false, dataJson);
+	var absenceTypes = _RestJsonCall (absenceCalObj.uriProxy, 'POST', false, dataJson);
 
-        //console.log(absenceTypes);
+	//console.log(absenceTypes);
 
-       	jQuery.each(absenceTypes, function (i, event) {
+	jQuery.each(absenceTypes, function (i, event) {
 		var color = absenceColor.shift();
 
-       		var name = event.description;
-               	absenceCalObj.createElement(event.code, name, color).appendTo(divContainer);
-
+		var name = event.description;
+		absenceCalObj.createElement(event.code, name, color).appendTo(divContainer);
+		
 		var absCodes = event.code.split('-');
 		jQuery.each(absCodes, function (i, code) {
 			//console.log('code ' + code);
-               		absenceToColor[code] = color;
+			absenceToColor[code] = color;
 			idToDescription[code] = event.description;
 		});
-       	});
+	});
 
 
-       	// initialize the external events
-       	//-----------------------------------------------------------------
-       	jQuery(' div.external-event').each(function() {
+	// initialize the external events
+	//-----------------------------------------------------------------
+	jQuery(' div.external-event').each(function() {
 
 		var classAttr = new Array();
-      		classAttr = jQuery(this).attr("class").split(" ");
+		classAttr = jQuery(this).attr("class").split(" ");
 
-      		var eventObject = {
-        		id: 'absence-' + jQuery(this).attr("id"),
-        		title: jQuery.trim(jQuery(this).text()),  // use the element's text as the event title
-        		absenceId: jQuery(this).attr("id"),
-        		absenceType: classAttr[2],
-        		color: classAttr[3],
-      		};
+		var eventObject = {
+			id: 'absence-' + jQuery(this).attr("id"),
+			title: jQuery.trim(jQuery(this).text()),  // use the element's text as the event title
+			absenceId: jQuery(this).attr("id"),
+			absenceType: classAttr[2],
+			color: classAttr[3],
+		};
 
-                // store the Event Object in the DOM element so we can get to it later
-                jQuery(this).data('eventObject', eventObject);
-        });
+		// store the Event Object in the DOM element so we can get to it later
+		jQuery(this).data('eventObject', eventObject);
+	});
 
 	// print the general tipe of absence
 	var genericColor = absenceColor.shift();
@@ -1925,100 +1924,99 @@ function createCalendarAbsenceView(allowed, persons, absenceCalObj, absenceGrpOb
 	absenceToColor['X'] = genericColor;
 	idToDescription['X'] = 'Assenza generica';
 
-        // initialize the calendar
-        //-----------------------------------------------------------------
-        jQuery('#calendar').fullCalendar({
+	// initialize the calendar
+	//-----------------------------------------------------------------
+	jQuery('#calendar').fullCalendar({
 		loading: function(bool) {
 			setTimeout(function() {
-          			if(bool) {
-            				jQuery('#loading').hide();
-          			}
-        		}, 2000);
-      		},
+				if(bool) {
+					jQuery('#loading').hide();
+				}
+        	}, 2000);
+      	},
 
-                // renames months in italian
-                monthNames: absenceCalObj.monthNames,
-                monthNamesShort: absenceCalObj.monthNamesShort,
+      	// renames months in italian
+      	monthNames: absenceCalObj.monthNames,
+      	monthNamesShort: absenceCalObj.monthNamesShort,
 
-                //renames days in italian
-                dayNames: absenceCalObj.dayNames,
-                dayNamesShort: absenceCalObj.dayNamesShort,
+      	//renames days in italian
+      	dayNames: absenceCalObj.dayNames,
+      	dayNamesShort: absenceCalObj.dayNamesShort,
 
-                // defines the header
-                header: absenceCalObj.header,
+      	// defines the header
+      	header: absenceCalObj.header,
 
-                // define the text of the buttton
-                buttonText: absenceCalObj.buttonText,
+      	// define the text of the buttton
+      	buttonText: absenceCalObj.buttonText,
 
-                // properties
-                selectable:     absenceCalObj.selectable, // highlight multiple days
-                editable:       absenceCalObj.editable,
-                droppable:      absenceCalObj.droppable,  // this allows things to be dropped onto the calendar !!!
-                firstDay:       absenceCalObj.firstDay,           // start from monday
-                weekMode:       absenceCalObj.weekMode,
-                timeFormat:     absenceCalObj.timeFormat,
+      	// properties
+      	selectable:     absenceCalObj.selectable, // highlight multiple days
+      	editable:       absenceCalObj.editable,
+      	droppable:      absenceCalObj.droppable,  // this allows things to be dropped onto the calendar !!!
+      	firstDay:       absenceCalObj.firstDay,           // start from monday
+      	weekMode:       absenceCalObj.weekMode,
+      	timeFormat:     absenceCalObj.timeFormat,
 
-                // define events to be included
+      	// define events to be included
  		eventSources: [
-                /*{
-                        url: 'https://www.google.com/calendar/feeds/it.italian%23holiday%40group.v.calendar.google.com/public/basic',
-                        color: 'red',
-                        textColor: 'white'
-                },*/
+ 		/*{
+                url: 'https://www.google.com/calendar/feeds/it.italian%23holiday%40group.v.calendar.google.com/public/basic',
+                color: 'red',
+                textColor: 'white'
+          },*/
 
-        	{
+ 			{
           		events: function (start, end, callback) {
-            			var currDate = $('#calendar').fullCalendar('getDate').stripTime().format();
-            			var currentYear = jQuery.fullCalendar(currDate).format("YYYY");
-            			firstYear = currentYear.concat(jQuery.fullCalendar(currDate).format("MM"));
+          			var currDate = $('#calendar').fullCalendar('getDate').stripTime().format();
+          			var currentYear = jQuery.fullCalendar(currDate).format("YYYY");
+          			firstYear = currentYear.concat(jQuery.fullCalendar(currDate).format("MM"));
 
-                                // build the URI for the json file
-                                var uriParam = currentYear.concat('/01/01/').concat(currentYear.concat('/12/31'));
+          			// build the URI for the json file
+          			var uriParam = currentYear.concat('/01/01/').concat(currentYear.concat('/12/31'));
 
-            			// get the absences
-            			//-----------------------------------------------------------------
-                                var datas = new Array();
-                                if(loadedYears.indexOf(currentYear) <  0) {
-                                	loadedYears.push(currentYear);
+          			// get the absences
+          			//-----------------------------------------------------------------
+          			var datas = new Array();
+          			if(loadedYears.indexOf(currentYear) <  0) {
+          				loadedYears.push(currentYear);
 
-                                        uriAbsenceToGet = absenceCalObj.getUriRestToGetEntity('absence', uriParam);
-                                        console.log('uriAbsenceToGet='+uriAbsenceToGet);
+          				uriAbsenceToGet = absenceCalObj.getUriRestToGetEntity('absence', uriParam);
+          				console.log('uriAbsenceToGet='+uriAbsenceToGet);
 
-                                        var data = new Array();
+          				var data = new Array();
+          				data.push('POST');
+          				data.push(uriAbsenceToGet);
+          				data.push(JSON.stringify(persons));
 
-                			data.push('POST');
-                			data.push(uriAbsenceToGet);
-                			data.push(JSON.stringify(persons));
+          				var dataJson = JSON.stringify(data);
 
-                			var dataJson = JSON.stringify(data);
+          				// exec the URI call
+          				var absencePeriod = _RestJsonCall (absenceCalObj.uriProxy, 'POST', false, dataJson);
 
-					// exec the URI call
-                                        var absencePeriod = _RestJsonCall (absenceCalObj.uriProxy, 'POST', false, dataJson);
+          				jQuery.each(absencePeriod, function (i, event) {
+          					if (absenceToColor[event.code]) {
+          						event['color'] = absenceToColor[event.code];
+          					} else {
+          						event['color'] = absenceToColor['X'];
+          					}
 
-                        		jQuery.each(absencePeriod, function (i, event) {
-						if (absenceToColor[event.code]) {
-                            				event['color'] = absenceToColor[event.code];
-						} else {
-							event['color'] = absenceToColor['X'];
-						}
+          					event['absenceType'] = event.code;
+          					event['title'] = event.name + ' ' +event.surname;
+          					//event['start'] = event.dateFrom;
+          					//event['end'] = event.dateTo;
+          					event['allDay'] = true;
+          					event['id'] = 'absence' + indexAbsence;
 
-                            			event['absenceType'] = event.code;
-                                		event['title'] = event.name + ' ' +event.surname;
-                                		//event['start'] = event.dateFrom;
-                                		//event['end'] = event.dateTo;
-                                		event['allDay'] = true;
-						event['id'] = 'absence' + indexAbsence;
+          					indexAbsence++;
+          					jQuery('#calendar').fullCalendar('renderEvent', event, true);
 
-                            			indexAbsence++;
-                            			jQuery('#calendar').fullCalendar('renderEvent', event, true);
-
-                            			// set data.end = data.start for check problem
-                            			if (event.end == null) {
-                                			event.end = event.start;
-                            			}
-                            		});
-	               		}
-			}
+          					// set data.end = data.start for check problem
+          					if (event.end == null) {
+          						event.end = event.start;
+          					}
+          				});
+	               	}
+          		}
          	}
       		],
 
@@ -2031,15 +2029,15 @@ function createCalendarAbsenceView(allowed, persons, absenceCalObj, absenceGrpOb
 
                 },*/ // end eventClick
 
-                eventRender: function(event, element) {
-                          var inizio = jQuery.fullCalendar(event.start).format("MM");
-                          var fine = jQuery.fullCalendar(event.end).format("MM");
-                          var currentView = jQuery('#calendar').fullCalendar('getDate').stripTime().format();
-                          var currentViewMonth = jQuery.fullCalendar(currentView).format("MM");
+            eventRender: function(event, element) {
+                      var inizio = jQuery.fullCalendar(event.start).format("MM");
+                      var fine = jQuery.fullCalendar(event.end).format("MM");
+                      var currentView = jQuery('#calendar').fullCalendar('getDate').stripTime().format();
+                      var currentViewMonth = jQuery.fullCalendar(currentView).format("MM");
 
-                          if( (inizio != currentViewMonth) && (fine != currentViewMonth) && (!event.id.match(/@google.com/g)) ){
-                                element.addClass('oldEvent');
-                          }
-                } // end eventRender
+                      if( (inizio != currentViewMonth) && (fine != currentViewMonth) && (!event.id.match(/@google.com/g)) ){
+                            element.addClass('oldEvent');
+                      }
+            } // end eventRender
       });
   } // FINE createCalendarAbsenceView();
