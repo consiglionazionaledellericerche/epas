@@ -158,11 +158,45 @@ sistCalendarGroup.prototype = {
 	},
 
 	// Ritorna la descrizione del gruppo
-	getShiftDescription: function (shift) {
-		return this.shiftType[shift];
+	getShiftDescription: function (shiftType) {
+		var result;		
+		$.ajax({			
+		    dataType: "json",
+			contentType: "application/json",
+			url: "renderShiftname/"+shiftType,
+			type: "GET",
+			data: {},
+			async: false,
+			success: function(data) {
+				result = data;
+				}
+			})
+			.error(function (jqXHR, textStatus, errorThrown) {
+	          console.log("error during proxy call= " + textStatus);
+	          
+			});			
+		return result;
 	},
 
 	getShiftFromType: function (shiftType) {
-		return this.shiftServices[shiftType];
+		
+		var result;		
+		$.ajax({			
+		    dataType: "json",
+			contentType: "application/json",
+			url: "renderServices/"+shiftType,
+			type: "GET",
+			data: {},
+			async: false,
+			success: function(data) {
+				result = data;
+				}
+			})
+			.error(function (jqXHR, textStatus, errorThrown) {
+	          console.log("error during proxy call= " + textStatus);
+	          
+			});			
+		return result;
+
 	}
 }

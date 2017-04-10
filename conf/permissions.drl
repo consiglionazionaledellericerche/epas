@@ -91,6 +91,8 @@ when
   $c: PermissionCheck(action in (
   		"Shift.handleShifts",
   		"Shift.renderIds", 
+  		"Shift.renderServices",
+  		"Shift.renderShiftname",
   		"Shift.personList",
         "Shift.timeTable",
         "Shift.find",
@@ -111,6 +113,8 @@ when
   $c: PermissionCheck(action in (
   		"Shift.handleShifts",
   		"Shift.renderIds",
+  		"Shift.renderServices",
+  		"Shift.renderShiftname",
   		"Shift.personList",
         "Shift.timeTable",
         "Shift.find",
@@ -186,6 +190,12 @@ when
      	 */
      	"Shift.iCal",
      	"Reperibility.iCal",
+     	
+     	/*
+     	 * Visualizzazione della propria situazione dei turni
+     	 */
+     	"Shift.personalShift",
+     	"Shift.renderIds",
 
      	/* Metodi rest */
      	"rest.PersonDays.getDaySituation",

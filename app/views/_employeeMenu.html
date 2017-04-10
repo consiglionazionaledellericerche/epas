@@ -69,6 +69,12 @@
       #{secure.li @Competences.competences(session.get("yearSelected"), session.get("monthSelected")) }
       <i class="fa fa-money" aria-hidden="true"></i>
       #{/secure.li}
+      
+      #{if currentUser.person != null && currentUser.person.personShift != null}
+       	#{secure.li @Shift.personalShift() }
+      		<i class="fa fa-calendar-check-o" aria-hidden="true"></i>
+      	#{/secure.li}
+      #{/if}
 
       #{secure.li @PersonMonths.trainingHours(session.get("yearSelected")) }
       <i class="fa fa-graduation-cap" aria-hidden="true"></i>

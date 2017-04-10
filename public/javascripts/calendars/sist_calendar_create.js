@@ -740,15 +740,15 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
     	var jollyPersons = new Array();
 
 	var tipi = new Array();
-    	var turni = new Array();
+    var turni = new Array();
 
 	// prende i colori per visualizzare le persone nel calendario
 	var shiftColor = shiftCalObj.getPersonColor(false);
 	var jollyColor = shiftCalObj.getPersonColor(true);
-
+	console.log("shiftType: "+shiftType);
 	// tipologia di turni da leggere dal DB
 	var tipoTurni = shiftGrpObj.getShiftFromType(shiftType);
-
+	console.log("tipoTurni: "+tipoTurni);
 
 	var firstYear = 0;
     	var loadedYears = new Array();
@@ -1049,7 +1049,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
         	//console.log("chiamata rest a: "+shiftCalendar.category);
         	// uri REST per leggere le persone in turno
         	uriGetShiftPersons = shiftCalendar.getUriRestToGetPersons(tipoTurno);
-        	console.log("uriGetShiftPersons="+uriGetShiftPersons);
+        	//console.log("uriGetShiftPersons="+uriGetShiftPersons);
 
         	var data = new Array();
         	//data.push('GET');

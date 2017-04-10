@@ -47,6 +47,8 @@ PUT		/shift/{type}/update/{year}/{month}																Shift.update
 GET		/shift/{type}/iCal/?{personId}?/{<(19|20)\d\d>year}												Shift.iCal
 
 GET		/shift/{type}/absence/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Shift.absence
+GET		/shift/renderServices/{shiftType}																Shift.renderServices
+GET		/shift/renderShiftname/{shiftType}																Shift.renderShiftname
 
 #Gestione straordinari (sist-org)
 GET		/overtimes/getPersonOvertimes/{email}/{year}/{month}						Overtimes.getPersonOvertimes
