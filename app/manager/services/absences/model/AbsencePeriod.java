@@ -67,6 +67,10 @@ public class AbsencePeriod {
   //Tentativo di inserimento assenza nel periodo
   public Absence attemptedInsertAbsence;
   
+  //Assenze che hanno provocato una riduzione della quantità 
+  //(utile solo per visualizzazione.. per ora)
+  public List<Absence> reducingAbsences = Lists.newArrayList();
+  
   AbsencePeriod(Person person, GroupAbsenceType groupAbsenceType) {
     this.person = person;
     this.groupAbsenceType = groupAbsenceType;

@@ -166,7 +166,7 @@ public class ServiceFactories {
 
     if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.vacationsCnr)) {
       periodChain = vacationFactory
-          .buildVacationChain(person, groupAbsenceType, fetchedContracts, date, 0);
+          .buildVacationChain(person, groupAbsenceType, fetchedContracts, date);
     } else if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.compensatoryRestCnr)) {
       throw new IllegalStateException();
     } else {

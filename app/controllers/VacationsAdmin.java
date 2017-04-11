@@ -190,10 +190,6 @@ public class VacationsAdmin extends Controller {
 //        continue;
 //      }
       
-      if (person.surname.equals("Moretti")) {
-        System.out.println();
-      }
-      
       PeriodChain periodChain = absenceService.residual(person, vacationGroup, LocalDate.now());
       comparedVacation.person = person;
       comparedVacation.periodsLastYear = periodChain.vacationSupportList.get(0).get(0);
@@ -323,6 +319,14 @@ public class VacationsAdmin extends Controller {
       return computeTotal(periodsLastYear);
     }
     
+    public int newLastYearPostPartum() {
+      if (periodsLastYear == null) {
+        System.out.println("Last year è null");
+        return 0;
+      }
+      return periodsLastYear.reducingAbsences.size();
+    }
+    
     public int newLastYearAccrued() {
       return computeAccrued(periodsLastYear);
     }
@@ -331,12 +335,28 @@ public class VacationsAdmin extends Controller {
       return computeTotal(periodsCurrentYear);
     }
     
+    public int newCurrentYearPostPartum() {
+      if (periodsCurrentYear == null) {
+        System.out.println("Current year è null");
+        return 0;
+      }
+      return periodsCurrentYear.reducingAbsences.size();
+    }
+    
     public int newCurrentYearAccrued() {
       return computeAccrued(periodsCurrentYear);
     }
     
     public int newPermissionTotal() {
       return computeTotal(periodsPermissions);
+    }
+    
+    public int newPermissionPostPartum() {
+      if (periodsPermissions == null) {
+        System.out.println("Current year è null");
+        return 0;
+      }
+      return periodsPermissions.reducingAbsences.size();
     }
     
     public int newPermissionAccrued() {
@@ -351,6 +371,15 @@ public class VacationsAdmin extends Controller {
         return false;
       }
       if (oldPermissionTotal() != newPermissionTotal()) {
+        return false;
+      }
+      if (oldLastYearPostPartum() != newLastYearPostPartum()) {
+        return false;
+      }
+      if (oldCurrentYearPostPartum() != newCurrentYearPostPartum()) {
+        return false;
+      }
+      if (oldPermissionPostPartum() != newPermissionPostPartum()) {
         return false;
       }
       if (oldLastYearAccrued() != newLastYearAccrued()) {
