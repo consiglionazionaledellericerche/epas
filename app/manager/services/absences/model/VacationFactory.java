@@ -92,13 +92,13 @@ public class VacationFactory {
     
     
     for (AbsencePeriod period : vacationLastYear) {
-      period.periods = vacationLastYear;
+      period.subPeriods = vacationLastYear;
     }
     for (AbsencePeriod period : permission) {  
-      period.periods = permission;
+      period.subPeriods = permission;
     }
     for (AbsencePeriod period : vacationCurrentYear) {
-      period.periods = vacationCurrentYear;
+      period.subPeriods = vacationCurrentYear;
     }
     return periodChain;
   }
@@ -114,6 +114,7 @@ public class VacationFactory {
     
     //Ferie maturate nell'anno
     DateInterval yearInterval = DateUtility.getYearInterval(year);
+    List<Integer> lowerLimits = Lists.newArrayList();
     for (VacationPeriod vacationPeriod : contract.getVacationPeriods()) {
       if (DateUtility
           .intervalIntersection(vacationPeriod.periodInterval(), yearInterval) == null) {
@@ -123,10 +124,14 @@ public class VacationFactory {
       periods.addAll(periodsFromProgression(person, contract, group, beginDate, 
           YearProgression.whichVacationProgression(vacationPeriod.vacationCode), 
           vacationPeriod, takable));
+      lowerLimits.add(vacationPeriod.vacationCode.vacations);
     }
     
+    //Fix del caso sfortunato
+    periods = fixUnlucky(periods, lowerLimits, year);
+    
     //Fix dei giorni post partum
-    fixPostPartum(periods, person, year);
+    periods = fixPostPartum(periods, person, year);
     
     //Ferie usabili entro 31/8
     takable = Sets.newHashSet(code31);
@@ -157,6 +162,79 @@ public class VacationFactory {
     return periods;
   }
   
+  private List<AbsencePeriod> permissionPeriodPerYear(Person person, GroupAbsenceType group, 
+      int year, Contract contract, final AbsenceType code94) {
+    List<AbsencePeriod> periods = Lists.newArrayList();
+
+    Set<AbsenceType> takable = Sets.newHashSet(code94);
+    
+    DateInterval yearInterval = DateUtility.getYearInterval(year);
+    List<Integer> lowerLimits = Lists.newArrayList();
+    //Permessi nell'anno
+    for (VacationPeriod vacationPeriod : contract.getVacationPeriods()) {
+      if (DateUtility
+          .intervalIntersection(vacationPeriod.periodInterval(), yearInterval) == null) {
+        continue;
+      }
+      LocalDate beginDate = yearInterval.getBegin();
+      periods.addAll(periodsFromProgression(person, contract, group, beginDate, 
+          YearProgression.whichPermissionProgression(vacationPeriod.vacationCode),
+          vacationPeriod, takable));
+      lowerLimits.add(vacationPeriod.vacationCode.permissions);
+    }
+
+    //Fix del caso sfortunato
+    periods = fixUnlucky(periods, lowerLimits, year);
+    
+    //Fix dei giorni post partum
+    periods = fixPostPartum(periods, person, year);
+    
+    return periods;
+  }
+  
+  private List<AbsencePeriod> fixUnlucky(List<AbsencePeriod> periods, List<Integer> lowerLimits, 
+      int year) {
+    
+    if (periods.isEmpty()) {
+      return periods;
+    }
+    
+    //deve essere coperto tutto l'anno     
+    LocalDate beginYear = new LocalDate(year, 1, 1);
+    LocalDate endYear = new LocalDate(year, 12, 31);
+    
+    if (!beginYear.isEqual(periods.get(0).from)) {
+      return periods;
+    }
+    if (!endYear.isEqual(periods.get(periods.size() - 1).to)) {
+      return periods;
+    }
+    
+    int lowerLimitSelected = lowerLimits.get(0);
+    for (Integer lowerLimit : lowerLimits) {
+      if (lowerLimitSelected > lowerLimit) {
+        lowerLimitSelected = lowerLimit;
+      }
+    }
+    
+    //per il compute sumAll il period deve avere accesso a tutti i subPeriods fino a quel momento.
+    //glieli faccio conoscere.
+    periods.get(0).subPeriods = periods; 
+    int totalTakable = periods.get(0)
+        .computePeriodTakableAmount(TakeCountBehaviour.sumAllPeriod, null) / 100; 
+    if (lowerLimitSelected > totalTakable) {
+      //Aggiungo la quantità fixed al primo period (decidere.. dal momento che è zero potrebbe
+      //essere aggiunto al secondo. Oppure all'ultimo ma potrebbe essere rimosso se attuassi
+      //il fixedPostPartum successivamente).
+      
+      int previousFixed = periods.get(0)
+          .computePeriodTakableAmount(TakeCountBehaviour.period, null) / 100; //ex: 300 / 100
+      periods.get(0).setFixedPeriodTakableAmount(previousFixed + lowerLimitSelected - totalTakable);
+    }
+    
+    return periods;
+  }
+
   private List<AbsencePeriod> fixPostPartum(List<AbsencePeriod> periods, Person person, int year) {
     
     if (periods.isEmpty()) { 
@@ -189,32 +267,6 @@ public class VacationFactory {
     return periods;
 
   }
-  
-  private List<AbsencePeriod> permissionPeriodPerYear(Person person, GroupAbsenceType group, 
-      int year, Contract contract, final AbsenceType code94) {
-    List<AbsencePeriod> periods = Lists.newArrayList();
-
-    Set<AbsenceType> takable = Sets.newHashSet(code94);
-    
-    DateInterval yearInterval = DateUtility.getYearInterval(year);
-    //Permessi nell'anno
-    for (VacationPeriod vacationPeriod : contract.getVacationPeriods()) {
-      if (DateUtility
-          .intervalIntersection(vacationPeriod.periodInterval(), yearInterval) == null) {
-        continue;
-      }
-      LocalDate beginDate = yearInterval.getBegin();
-      periods.addAll(periodsFromProgression(person, contract, group, beginDate, 
-          YearProgression.whichPermissionProgression(vacationPeriod.vacationCode),
-          vacationPeriod, takable));
-    }
-    
-    //Fix dei giorni post partum
-    fixPostPartum(periods, person, year);
-    
-    return periods;
-  }
-
 
   private List<AbsencePeriod> periodsFromProgression(Person person, Contract contract, 
       GroupAbsenceType group,  LocalDate beginDate, YearProgression yearProgression,
