@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
+import dao.absences.AbsenceComponentDao;
+
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
@@ -31,15 +33,18 @@ public class VacationFactory {
   
   private final ConfigurationManager configurationManager;
   private final AbsenceTypeManager absenceTypeManager;
+  private final AbsenceComponentDao absenceComponentDao;
 
   /**
    * Costruttore. 
    */
   @Inject
   public VacationFactory(ConfigurationManager configurationManager, 
-      AbsenceTypeManager absenceTypeManager) {
+      AbsenceTypeManager absenceTypeManager,
+      AbsenceComponentDao absenceComponentDao) {
     this.configurationManager = configurationManager;
     this.absenceTypeManager = absenceTypeManager;
+    this.absenceComponentDao = absenceComponentDao;
   }
   
   /**
@@ -48,11 +53,10 @@ public class VacationFactory {
    * @param group gruppo
    * @param fetchedContract i contratti
    * @param date la data di maturazione??
-   * @param postPartumInYear il numero di assenze post partum
    * @return la periodChain.
    */
   public PeriodChain buildVacationChain(Person person, GroupAbsenceType group, 
-      List<Contract> fetchedContract, LocalDate date, int postPartumInYear) {
+      List<Contract> fetchedContract, LocalDate date) {
     
     Contract contract = null;
     //creare i period dai contract.vacationperiod
@@ -70,7 +74,7 @@ public class VacationFactory {
     List<AbsencePeriod> vacationLastYear = 
         vacationPeriodPerYear(person, group, date.getYear() - 1, contract, code32, code31, code37);
     List<AbsencePeriod> permission = 
-        permissionPeriodPerYear(person, group, date.getYear(), contract, code94, postPartumInYear);
+        permissionPeriodPerYear(person, group, date.getYear(), contract, code94);
     List<AbsencePeriod> vacationCurrentYear = 
         vacationPeriodPerYear(person, group, date.getYear(), contract, code32, code31, code37);
     
@@ -121,6 +125,9 @@ public class VacationFactory {
           vacationPeriod, takable));
     }
     
+    //Fix dei giorni post partum
+    fixPostPartum(periods, person, year);
+    
     //Ferie usabili entro 31/8
     takable = Sets.newHashSet(code31);
     LocalDate beginNextYear = new LocalDate(year + 1, 1, 1);
@@ -150,8 +157,41 @@ public class VacationFactory {
     return periods;
   }
   
+  private List<AbsencePeriod> fixPostPartum(List<AbsencePeriod> periods, Person person, int year) {
+    
+    if (periods.isEmpty()) { 
+      return periods;
+    }
+    
+    //Un algoritmo elegante...
+    //Contare i giorni di postPartum appartenenti ai periods, e rimuovere (partendo dal fondo)
+    //i periods di dimensione completamente contenuta nel numero di giorni calcolati.
+
+    LocalDate beginPostPartum = periods.get(0).from;
+    LocalDate endPostPartum = periods.get(periods.size() - 1).to;
+    periods.get(0).reducingAbsences = absenceComponentDao.orderedAbsences(person, 
+        beginPostPartum, endPostPartum, absenceTypeManager.reducingCodes());
+    int postPartum = periods.get(0).reducingAbsences.size();
+    if (postPartum == 0) {
+      return periods;
+    }
+    while (postPartum > 0) {
+      AbsencePeriod lastPeriod = periods.get(periods.size() - 1);
+      int days = DateUtility.daysInInterval(lastPeriod.periodInterval());
+      if (postPartum >= days) {
+        postPartum = postPartum - days;
+        periods.remove(lastPeriod);
+      } else {
+        break;
+      }
+    }
+
+    return periods;
+
+  }
+  
   private List<AbsencePeriod> permissionPeriodPerYear(Person person, GroupAbsenceType group, 
-      int year, Contract contract, final AbsenceType code94, int postPartumInYear) {
+      int year, Contract contract, final AbsenceType code94) {
     List<AbsencePeriod> periods = Lists.newArrayList();
 
     Set<AbsenceType> takable = Sets.newHashSet(code94);
@@ -168,6 +208,9 @@ public class VacationFactory {
           YearProgression.whichPermissionProgression(vacationPeriod.vacationCode),
           vacationPeriod, takable));
     }
+    
+    //Fix dei giorni post partum
+    fixPostPartum(periods, person, year);
     
     return periods;
   }

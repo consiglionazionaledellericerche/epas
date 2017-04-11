@@ -39,7 +39,6 @@ public class GroupAbsenceType extends BaseModel {
   private static final long serialVersionUID = 3290760775533091791L;
   
   public static final String EMPLOYEE_NAME = "EMPLOYEE";
-  public static final String REDUCING_VACATIONS_NAME = "REDUCING_VACATIONS";
 
   @Required
   @Column
@@ -309,6 +308,12 @@ public class GroupAbsenceType extends BaseModel {
         DefaultCategoryType.FERIE_CNR, 
         GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, 
         DefaultTakable.T_FERIE_CNR, null, null, false, false),
+    RIDUCE_FERIE_CNR("Riduce ferie e permessi", 
+        "", 
+        DefaultCategoryType.CODICI_AUTOMATICI, 
+        GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, 
+        DefaultTakable.T_RIDUCE_FERIE_CNR, null, null, true, false),
+    
     RIPOSI_CNR("Riposi compensativi CNR", 
         "", 
         DefaultCategoryType.RIPOSI_COMPENSATIVI_CNR, 
