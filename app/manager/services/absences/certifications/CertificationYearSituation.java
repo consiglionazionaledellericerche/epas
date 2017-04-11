@@ -36,6 +36,19 @@ public class CertificationYearSituation {
   public List<AbsenceSituation> absenceSituations = Lists.newArrayList();
   
   /**
+   * La situazione specifica.
+   * @return null se non presente.
+   */
+  public AbsenceSituation getAbsenceSituation(AbsenceImportType type) {
+    for (AbsenceSituation absenceSituation : absenceSituations) {
+      if (absenceSituation.type.equals(type)) {
+        return absenceSituation;
+      }
+    }
+    return null;
+  }
+  
+  /**
    * La situazione circa un singolo codice o gruppo.
    * @author alessandro
    *
@@ -252,6 +265,6 @@ public class CertificationYearSituation {
     }
     
   }
- 
+
   
 }

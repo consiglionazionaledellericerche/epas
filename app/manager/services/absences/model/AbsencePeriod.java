@@ -123,7 +123,7 @@ public class AbsencePeriod {
    * @return int
    */
   public int getPeriodTakableAmount() {
-    int computedTakableAmounut = computePeriodTakableAmount(takableCountBehaviour);
+    int computedTakableAmounut = computePeriodTakableAmount(takableCountBehaviour, this.from);
     return computedTakableAmounut;
   }
   
@@ -131,10 +131,7 @@ public class AbsencePeriod {
    * Calcola l'ammontare in funzione del tipo di conteggio. 
    * @return int
    */
-  public int computePeriodTakableAmount(TakeCountBehaviour countBehaviour) {
-    if (person.surname.equals("Leva")) {
-      System.out.println();
-    }
+  public int computePeriodTakableAmount(TakeCountBehaviour countBehaviour, LocalDate date) {
     
     if (countBehaviour.equals(TakeCountBehaviour.period)) {
       return this.fixedPeriodTakableAmount;
@@ -151,7 +148,7 @@ public class AbsencePeriod {
     if (countBehaviour.equals(TakeCountBehaviour.sumUntilPeriod)) {
       int takableAmount = 0;
       for (AbsencePeriod absencePeriod : this.periods) {
-        if (absencePeriod.from.isAfter(this.from)) {
+        if (absencePeriod.from.isAfter(date)) {
           break;
         }
         takableAmount = takableAmount + absencePeriod.fixedPeriodTakableAmount;

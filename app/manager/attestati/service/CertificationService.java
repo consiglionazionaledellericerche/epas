@@ -691,7 +691,7 @@ public class CertificationService implements ICertificationService {
     //prelevare lo stato attuale attestato per il mese attuale della sede della persona
     for (StatoAttestatoMese statoAttestatoMese : certificationsComunication
         .getStatoAttestatoMese(person.office, year, 
-            LocalDate.now().getMonthOfYear())) {
+            LocalDate.now().getMonthOfYear() - 1)) {
       
       //processo solo quello della persona passata
       if (person.number.equals(statoAttestatoMese.dipendente.matricola)) {

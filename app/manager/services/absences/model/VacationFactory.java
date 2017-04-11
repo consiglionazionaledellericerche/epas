@@ -116,11 +116,9 @@ public class VacationFactory {
         continue;
       }
       LocalDate beginDate = yearInterval.getBegin();
-      if (beginDate.isBefore(vacationPeriod.getBeginDate())) {
-        beginDate = vacationPeriod.getBeginDate();
-      }
-      periods.addAll(periodsFromProgression(person, contract, group, beginDate, YearProgression
-          .whichVacationProgression(vacationPeriod.vacationCode), takable));
+      periods.addAll(periodsFromProgression(person, contract, group, beginDate, 
+          YearProgression.whichVacationProgression(vacationPeriod.vacationCode), 
+          vacationPeriod, takable));
     }
     
     //Ferie usabili entro 31/8
@@ -166,11 +164,9 @@ public class VacationFactory {
         continue;
       }
       LocalDate beginDate = yearInterval.getBegin();
-      if (beginDate.isBefore(vacationPeriod.getBeginDate())) {
-        beginDate = vacationPeriod.getBeginDate();
-      }
-      periods.addAll(periodsFromProgression(person, contract, group, beginDate, YearProgression
-          .whichPermissionProgression(vacationPeriod.vacationCode), takable));
+      periods.addAll(periodsFromProgression(person, contract, group, beginDate, 
+          YearProgression.whichPermissionProgression(vacationPeriod.vacationCode),
+          vacationPeriod, takable));
     }
     
     return periods;
@@ -178,11 +174,19 @@ public class VacationFactory {
 
 
   private List<AbsencePeriod> periodsFromProgression(Person person, Contract contract, 
-      GroupAbsenceType group,  LocalDate beginDate, 
-      YearProgression yearProgression, Set<AbsenceType> takableCodes) {
+      GroupAbsenceType group,  LocalDate beginDate, YearProgression yearProgression,
+      VacationPeriod vacationPeriod, Set<AbsenceType> takableCodes) {
     
     LocalDate endYear = new LocalDate(beginDate.getYear(), 12, 31);
     List<AbsencePeriod> periods = Lists.newArrayList();
+    
+    if (beginDate.isBefore(vacationPeriod.getBeginDate())) {
+      beginDate = vacationPeriod.getBeginDate();
+    }
+    if (vacationPeriod.endDate != null && endYear.isAfter(vacationPeriod.endDate)) {
+      endYear = vacationPeriod.endDate;
+    }
+    
     LocalDate date = beginDate;
     
     for (YearPortion yearPortion : yearProgression.yearPortions) {
@@ -202,7 +206,7 @@ public class VacationFactory {
       Set<AbsenceType> takableCodes, int days, int amount) {
     
     LocalDate endYear = new LocalDate(begin.getYear(), 12, 31);
-    LocalDate end = begin.plusDays(days);
+    LocalDate end = begin.plusDays(days - 1);
     if (end.isAfter(endYear)) {
       end = endYear;
     }
