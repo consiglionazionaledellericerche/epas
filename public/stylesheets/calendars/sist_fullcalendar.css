@@ -235,3 +235,7 @@ div#popup-content {
 	font-size: 14px;
 	font-weight: bold;
 }
+
+.fc-month-view span.fc-title {
+	white-space: normal;
+}
