@@ -903,7 +903,7 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
 				  			var tipoTurno = tipoTurni[j];
 	
 				  			uriShiftToGet = shiftCalObj.getUriRestToGetEntity(tipoTurno, uriParam);
-				  			console.log('+++uriShiftToGet='+uriShiftToGet);
+				  			//console.log('+++uriShiftToGet='+uriShiftToGet);
 	
 				  			var data = new Array();
 				  			data.push('GET');
@@ -1221,7 +1221,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 
       			// build the URI for the json file
       			var uriParam = currentYear.concat('/01/01/').concat(currentYear.concat('/12/31'));
-      			console.log("uriParam: "+uriParam);
+      			//console.log("uriParam: "+uriParam);
         		
       			/* get the work shift
         		----------------------------------------------------------------- */
@@ -1233,9 +1233,9 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
     				while (j < tipoTurni.length) {
     					var tipoTurno = tipoTurni[j];
     					
-    					console.log("uriParam: "+uriParam);
+    					//console.log("uriParam: "+uriParam);
     					uriShiftToGet = shiftCalendar.getUriRestToGetEntity(tipoTurno, uriParam);
-                    	console.log("++ uriShiftToGet="+uriShiftToGet);
+                    	//console.log("++ uriShiftToGet="+uriShiftToGet);
 
 	    				// exec the URI call
 	    				var shiftPeriods = _RestJsonCall (uriShiftToGet, 'GET', false, {});
@@ -1370,7 +1370,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 			    		//event['start'] = event.dateFrom;
     					//event['end'] = event.dateTo;
 			              event['id'] = 'assenza-' + event.personId + '-' + indexVac;
-			              console.log("assenza di " + idToName[event.personId] + "event.personId="+event.personId);
+			              //console.log("assenza di " + idToName[event.personId] + "event.personId="+event.personId);
 			              
 			             // event.color = 'yellow';
 			              events.push(event);
@@ -1396,7 +1396,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 
 	// this function is called when something is dropped
 	drop: function(date, allDay) {
-		var date2 = jQuery.fullCalendar.formatDate(date, "yyyy-MM-dd");
+		var date2 = jQuery.fullCalendar.formatDate(date, "YYYY-MM-DD");
 
 		// retrieve the dropped element's stored Event Object
 		var originalEventObject = jQuery(this).data('eventObject');
@@ -1408,8 +1408,10 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 		var shiftHour = jQuery("input:radio[name=hour]:checked").val().split("-");
 		var shiftSlot = jQuery("input:radio[name=hour]:checked").attr('id');
 
-		var currentView = $('#calendar').fullCalendar('getDate').stripTime().format();
-		var currentMonth = $.fullCalendar(currentView).format('MM');
+		var currentView = new Date();
+		
+		var currentMonth = currentView.getMonth() +1;
+		//console.log("currentMonth: "+currentMonth);
 
 		// assign it the date that was reported with the time period selected by the user
 		// and adds a progressive number to the id in order to avoid repeated events
@@ -1450,63 +1452,70 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 		jQuery('#calendar').fullCalendar('renderEvent', copiedEventObject, true);
 		//console.log(copiedEventObject);
 		// set data.end = data.start for check problem
-		if (copiedEventObject.end == null) {copiedEventObject.end = copiedEventObject.start;}
-
-		if (copiedEventObject.start.getMonth() + 1 !=  currentMonth) {
+		if (copiedEventObject.end == null) {copiedEventObject.end = copiedEventObject.start;}		
+		var month = parseInt(copiedEventObject.start.stripTime().format().substring(5,7));
+		//console.log("month: "+month);
+		/* Qui va messo un controllo che prende da epas se per il mese in cui si vuole cambiare la configurazione dei turni
+		 * sono già stati inviati gli attestati. La logica è che la modifica alla configurazione dei turni deve essere possibile
+		 * solo se le info sui turni non sono già state inviate ad attestati.
+		 */
+		
+		if (month  <  currentMonth) {
 			// shift of the previous month cannot be modified from this screen
-			alert ('ERRORE!\nNon e possibile modificare i turni del mese precedente o successivo a quello visualizzato.');
+			alert ('ERRORE!\nNon e possibile modificare i turni del mese precedente a quello visualizzato.');
 		  	jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
 		} else {
 			  // check if the shift overlap a ferie o others work shift
 			  var obj = jQuery('#calendar').fullCalendar('clientEvents');
-			  var cEOStart = jQuery.fullCalendar.formatDate(copiedEventObject.start, "yyyy-MM-dd");
-			  var cEOEnd = jQuery.fullCalendar.formatDate(copiedEventObject.end, "yyyy-MM-dd");
+			  var cEOStart =  jQuery.fullCalendar.moment(copiedEventObject.start).format("YYYY-MM-DD");
+			  var cEOEnd = jQuery.fullCalendar.moment(copiedEventObject.end).format("YYYY-MM-DD");
+			  
 			  jQuery.each(obj, function(i, val) {
-			  var valStart = jQuery.fullCalendar.formatDate(val.start, "yyyy-MM-dd");
-			  var valEnd = jQuery.fullCalendar.formatDate(val.end, "yyyy-MM-dd");
-
-
-			  // check for the cancelled shift overlap
-			  if (val.title.toString().match(/ANNULLATO/g) && (val.shiftType == copiedEventObject.shiftType) && (cEOStart >= valStart) && (cEOStart<=valEnd)&&(val.id.toString() != copiedEventObject.id.toString())){
-       				alert("Impossibile aggiungere persone per questo turno in questo giorno.\nTurno Annullato\n");
-       				jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
-       				return false;
-			  }
-
-				  // check for absences
-			  if(val.id.toString().match(/assenza/g) && val.personId.toString() == copiedEventObject.personId.toString()) {
-				  if ((valStart == cEOStart) || (cEOStart >= valStart && cEOStart <= valEnd)) {
-					  alert("ERRORE! \nIl turnista e' in ferie!!!");
-					  jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
+				  var valStart = jQuery.fullCalendar.moment(val.start).format("YYYY-MM-DD");
+				  var valEnd = jQuery.fullCalendar.moment(val.end).format("YYYY-MM-DD");
+	
+	
+				  // check for the cancelled shift overlap
+				  if (val.title.toString().match(/ANNULLATO/g) && (val.shiftType == copiedEventObject.shiftType) && (cEOStart >= valStart) && (cEOStart<=valEnd)&&(val.id.toString() != copiedEventObject.id.toString())){
+	       				alert("Impossibile aggiungere persone per questo turno in questo giorno.\nTurno Annullato\n");
+	       				jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
+	       				return false;
 				  }
-				// check for shift
-			  } else if(val.id.toString().match(/turno/g)  && (val.shiftType.toString() == copiedEventObject.shiftType.toString()) && (val.id.toString() != copiedEventObject.id.toString())) {
-				  	// interval overlap
-				  	if ( cEOStart >= valStart && cEOEnd <= valEnd) {
-				  		if (val.shiftHour.toString() == copiedEventObject.shiftHour.toString()+":00.000") {
-				  			alert("Il turno delle "+copiedEventObject.shiftHour.toString()+" e gia coperto");
-				  			jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
-				  		} else if (val.personId.toString() == copiedEventObject.personId.toString()) {
-				  			alert(copiedEventObject.title+" e' gia' in turno");
-				  			jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
+	
+					  // check for absences
+				  if(val.id.toString().match(/assenza/g) && val.personId.toString() == copiedEventObject.personId.toString()) {
+					  if ((valStart == cEOStart) || (cEOStart >= valStart && cEOStart <= valEnd)) {
+						  alert("ERRORE! \nIl turnista e' in ferie!!!");
+						  jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
+					  }
+					// check for shift
+				  } else if(val.id.toString().match(/turno/g)  && (val.shiftType.toString() == copiedEventObject.shiftType.toString()) && (val.id.toString() != copiedEventObject.id.toString())) {
+					  	// interval overlap
+					  	if ( cEOStart >= valStart && cEOEnd <= valEnd) {
+					  		if (val.shiftHour.toString() == copiedEventObject.shiftHour.toString()+":00.000") {
+					  			alert("Il turno delle "+copiedEventObject.shiftHour.toString()+" e gia coperto");
+					  			jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
+					  		} else if (val.personId.toString() == copiedEventObject.personId.toString()) {
+					  			alert(copiedEventObject.title+" e' gia' in turno");
+					  			jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
+							}
 						}
 					}
-				}
-
-			  // Check that the jolly person doesn't cover two or more shifts
-			  if ( (valStart <= cEOStart) && (cEOStart <= valEnd) && (cEOEnd <= valEnd) && (cEOEnd >= valStart) && (val.personId.toString() == copiedEventObject.personId.toString()) && (val.shiftType != copiedEventObject.shiftType)  && (!copiedEventObject.id.toString().match(/annullato/g))) {
-				  alert(copiedEventObject.title+" e' gia' in turno ");
-				  jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
-			  }
+	
+				  // Check that the jolly person doesn't cover two or more shifts
+				  if ( (valStart <= cEOStart) && (cEOStart <= valEnd) && (cEOEnd <= valEnd) && (cEOEnd >= valStart) && (val.personId == copiedEventObject.personId) && (val.shiftType != copiedEventObject.shiftType)  && (!copiedEventObject.id.toString().match(/annullato/g))) {
+					  alert(copiedEventObject.title+" e' gia' in turno ");
+					  jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
+				  }
 			});
 		}
 	},
 
 	eventClick: function(calEvent, jsEvent, view) {
 		if (calEvent.id.toString().match(/rep/g)) {
-			alert(' \ninizio ' +jQuery.fullCalendar.formatDate(calEvent.start, "DD-MM-YYYY")+ '\nfine '+jQuery.fullCalendar.formatDate(calEvent.end, "DD-MM-YYYY")+ '\nid: '+calEvent.id+'\npersonId: '+calEvent.personId+'\ntipo turno: '+calEvent.shiftType+'\norario: '+calEvent.shiftHour);
+			alert(' \ninizio ' +jQuery.fullCalendar.moment(calEvent.start).format("DD-MM-YYYY")+ '\nfine '+jQuery.fullCalendar.moment(calEvent.end).format("DD-MM-YYYY")+ '\nid: '+calEvent.id+'\npersonId: '+calEvent.personId+'\ntipo turno: '+calEvent.shiftType+'\norario: '+calEvent.shiftHour);
 		} else {
-		    alert(calEvent.title +'\ncolor: '+calEvent.color+' \ntipo turno: '+calEvent.shiftType+'\nemail ' +calEvent.eMail +'\norario: '+calEvent.shiftHour+ '\ninizio ' +jQuery.fullCalendar.formatDate(calEvent.start, "DD-MM-YYYY")+ '\nfine '+jQuery.fullCalendar.formatDate(calEvent.end, "DD-MM-YYYY"));
+		    alert(calEvent.title +'\ncolor: '+calEvent.color+' \ntipo turno: '+calEvent.shiftType+'\nemail ' +calEvent.eMail +'\norario: '+calEvent.shiftHour+ '\ninizio ' +jQuery.fullCalendar.moment(calEvent.start).format("DD-MM-YYYY")+ '\nfine '+jQuery.fullCalendar.moment(calEvent.end).format("DD-MM-YYYY"));
 		}
 	}, // end eventClick
 
@@ -1552,8 +1561,8 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 
 			  // On click remove-shift
         $(".remove-shift").click(function(e) {
-        	startEvent = $.fullCalendar(event.start).format("YYYY-MM-DD");
-        	endEvent = $.fullCalendar(event.end).format("YYYY-MM-DD");
+        	startEvent = $.fullCalendar.moment(event.start).format("YYYY-MM-DD");
+        	endEvent = $.fullCalendar.moment(event.end).format("YYYY-MM-DD");
         	//startEvent = $.fullCalendar.formatDate(event.start, "yyyy-MM-dd");
         	//endEvent = $.fullCalendar.formatDate(event.end, "YYYY-MM-dd");
         	e.stopPropagation();
@@ -1564,8 +1573,8 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
         			if((event.id != v.id)&&(event.shiftType == v.shiftType) && (event.title != v.title) && (event.shiftHour != v.shiftHour)&&(!v.id.match(/@google.com/g))){
         				//start = $.fullCalendar.formatDate(v.start, "yyyy-MM-dd");
         				//end = $.fullCalendar.formatDate(v.end, "yyyy-MM-dd");
-        				start = $.fullCalendar(v.start).format("YYYY-MM-DD");
-        				end = $.fullCalendar(v.end).format("YYYY-MM-DD");
+        				start = $.fullCalendar.moment(v.start).format("YYYY-MM-DD");
+        				end = $.fullCalendar.moment(v.end).format("YYYY-MM-DD");
 
         				if(v.shiftHour == "07:00"){
         					startTime = "07:00:00";
@@ -1592,7 +1601,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
         						var temp = event.end;
         						temp.setDate(temp.getDate()+1);
         						//temp = $.fullCalendar.formatDate(temp, "yyyy-MM-dd");
-        						temp = $.fullCalendar(temp).format("YYYY-MM-DD");
+        						temp = $.fullCalendar.moment(temp).format("YYYY-MM-DD");
         						var v2 = {
         							'title': v.title,
         							'allDay': false,
@@ -1629,7 +1638,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
         				} else if( startEvent >= start && startEvent <= end){
         					var temp3 = event.start;
         					temp3.setDate(temp3.getDate() - 1);
-        					temp3 = $.fullCalendar(temp3).format("YYYY-MM-DD");
+        					temp3 = $.fullCalendar.moment(temp3).format("YYYY-MM-DD");
         					var v1 = {
         						'title': v.title,
         						'allDay': false,
@@ -1651,7 +1660,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
         					if(endEvent < end){
         						var temp2 = event.end;
         						temp2.setDate(temp2.getDate() + 1);
-        						temp2 = $.fullCalendar(temp2).format("YYYY-MM-DD");
+        						temp2 = $.fullCalendar.moment(temp2).format("YYYY-MM-DD");
         						var v2 = {
         							'title': "Turno " + event.shiftType + "\n\rANNULLATO",
         							'id': "turno-X"+"-"+v.id,
@@ -1713,17 +1722,17 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 	}, // end eventMouseout
 
 	eventDrop: function(event, dayDelta, minuteDelta, allDay, revertFunc) {
-		var currentView = $('#calendar').fullCalendar('getDate').stripTime().format();
-		var currentMonth = $.fullCalendar(currentView).format('MM');
+		var currentView = new Date();
+		var currentMonth = currentView.getMonth()+1;
 
 	  // set data.end = data.start for check problem
 		if (event.end == null) {event.end = event.start;}
-
+		var month = parseInt(event.start.stripTime().format().substring(5,7));
 	  // holiday events cannot be modified
 		if (event.id.toString().match(/ferie/g)) {
             alert ('Da questa interfaccia non e possibile modificare le ferie!');
             revertFunc();
-		} else if ((event.start.getMonth()+1 != currentMonth) || (event.end.getMonth()+1 != currentMonth)) {
+		} else if ((parseInt(event.start.stripTime().format().substring(5,7)) < currentMonth) || (parseInt(event.end.stripTime().format().substring(5,7)) > currentMonth)) {
             // reperibility of the previous month cannot be modified from this screen
             alert ('ERRORE!\nNon e possibile modificare i turni del mese precedente o successivo a quello visualizzato.');
             revertFunc();
@@ -1731,14 +1740,14 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 				    // check if absences and shift of a certain person overlap
             var obj = $('#calendar').fullCalendar('clientEvents');
 					  //var eventStart = $.fullCalendar.formatDate(event.start, "yyyy-MM-dd");
-            var eventStart = $.fullCalendar(event.start).format("YYYY-MM-DD");
+            var eventStart = $.fullCalendar.moment(event.start).format("YYYY-MM-DD");
             //var eventEnd = $.fullCalendar.formatDate(event.end, "yyyy-MM-dd");
-            var eventEnd = $.fullCalendar(event.end).format("YYYY-MM-DD");
+            var eventEnd = $.fullCalendar.moment(event.end).format("YYYY-MM-DD");
             jQuery.each(obj, function(i, val) {
             	//var valStart = $.fullCalendar.formatDate(val.start, "yyyy-MM-dd");
             	//var valEnd = $.fullCalendar.formatDate(val.end, "yyyy-MM-dd");
-            	var valStart = $.fullCalendar(val.start).format("YYYY-MM-DD");
-            	var valEnd = $.fullCalendar(val.end).format("YYYY-MM-DD");
+            	var valStart = $.fullCalendar.moment(val.start).format("YYYY-MM-DD");
+            	var valEnd = $.fullCalendar.moment(val.end).format("YYYY-MM-DD");
 
             	if (((valStart == eventStart) || (eventStart >= valStart && eventStart <= valEnd)) && (val.id.toString() != event.id.toString())) {
             		// check for the ferie
@@ -1768,8 +1777,8 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 
 	eventResize: function(event, dayDelta, minuteDelta, revertFunc) {
 
-		var currentView = $('#calendar').fullCalendar('getDate').stripTime().format();
-		var currentMonth = $.fullCalendar(currentView).format('MM');
+		var currentView = new Date();
+		var currentMonth = currentView.getMonth() +1;
 
 		// set data.end = data.start for check problem
 		if (event.end == null) {event.end = event.start;}
@@ -1778,22 +1787,22 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 		if (event.id.toString().match(/ferie/g)) {
 			alert ('da questa interfaccia non e possibile modificare le ferie!');
 			revertFunc();
-		} else if (event.end.getMonth()+1 !=  currentMonth) {
+		} else if (parseInt(event.end.stripTime().format().substring(5,7)) <  currentMonth) {
 			// reperibility of the previous month cannot be modified from this screen
-			alert ('ERRORE!\nNon e possibile modificare i turni del mese precedente o successivo a quello visualizzato.');
+			alert ('ERRORE!\nNon e possibile modificare i turni del mese precedente a quello visualizzato.');
 			revertFunc();
 		} else {
 			// check if absences and shift  of a certain person overlap
             var obj = $('#calendar').fullCalendar('clientEvents');
             //ar eventStart = $.fullCalendar.formatDate(event.start, "yyyy-MM-dd");
             //var eventEnd = $.fullCalendar.formatDate(event.end, "yyyy-MM-dd");
-            var eventStart = $.fullCalendar(event.start).format("YYYY-MM-DD");
-			var eventEnd = $.fullCalendar(event.end).format("YYYY-MM-DD");
+            var eventStart = $.fullCalendar.moment(event.start).format("YYYY-MM-DD");
+			var eventEnd = $.fullCalendar.moment(event.end).format("YYYY-MM-DD");
             jQuery.each(obj, function(i, val) {
             	//var valStart = $.fullCalendar.formatDate(val.start, "yyyy-MM-dd");
             	//var valEnd = $.fullCalendar.formatDate(val.end, "yyyy-MM-dd");
-            	var valStart = $.fullCalendar(val.start).format("YYYY-MM-DD");
-            	var valEnd = $.fullCalendar(val.end).format("YYYY-MM-DD");
+            	var valStart = $.fullCalendar.moment(val.start).format("YYYY-MM-DD");
+            	var valEnd = $.fullCalendar.moment(val.end).format("YYYY-MM-DD");
 				if ((eventEnd >= valStart) && (eventStart < valStart) && (val.id.toString() != event.id.toString())) {
 				    if (val.id.toString().match(/turno/g) && (val.shiftType.toString() == event.shiftType.toString())) {
 				    	if (val.shiftHour.toString() === event.shiftHour.toString()) {
