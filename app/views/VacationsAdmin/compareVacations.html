@@ -15,34 +15,70 @@
 
 <div class="container">
   
-   <table  class="table table-striped table-hover table-bordered table-condensed center" datatable width="100%">
+   <table  class="table table-hover table-bordered table-condensed center" datatable width="100%">
 	<thead>
 		<tr>
 		    <th>Nome</th>
-		    <th>FP T O</th>
-		    <th>FP T N</th>
-		    <th>FC T O</th>
-		    <th>FC T N</th>
-		    <th>P T O</th>
-		    <th>P T N</th>
+		    
+		    <!-- 2016 -->
+		    <th>2016 <br>TOT</th>
+		    <th>2016 <br>TOT NEW</th>
+		    <th>2016 <br>MAT</th>
+		    <th>2016 <br>MAT NEW</th>
+		    *{ <th>2016 Att</th> }*
+		    
+		    <!-- 2017 -->
+		    <th>2017 <br>TOT</th>
+		    <th>2017 <br>TOT NEW</th>
+            <th>2017 <br>MAT</th>
+		    <th>2017 <br>MAT NEW</th>
+		    *{ <th>2017 Att</th> }*
+		    
+		    <!-- Permessi -->
+		    <th>P <br>TOT</th>
+		    <th>P <br>NEW</th>
+            <th>P <br>MAT</th>
+		    <th>P <br>MAT NEW</th>
+		    *{ <th>P Att</th> }*
 		</tr>	
 	</thead>
 
 	<tbody>
 		#{list items:comparedVacationList, as:'comparedVacation'}
-		%{ vacationsRecap = comparedVacation.vacationRecap }%
-		<tr>
+		
+		<tr #{if !comparedVacation.epasEquivalent()} class="bg-danger" #{/if}>
 
-			<td>${comparedVacation.person.fullname}</td>
-			
-			<td>${vacationsRecap.vacationsLastYear.total}</td>
-			<td>${comparedVacation.computeTotal(comparedVacation.periodsLastYear)}</td>
-			
-  		    <td>${vacationsRecap.vacationsCurrentYear.total}</td>
-  		    <td>${comparedVacation.computeTotal(comparedVacation.periodsCurrentYear)}</td>
-			
-			<td>${vacationsRecap.permissions.total}</td>
-			<td>${comparedVacation.computeTotal(comparedVacation.periodsPermissions)}</td>
+			<td>
+			  ${comparedVacation.person.fullname}
+			</td>
+            
+            <!-- 2016 -->
+			<td>${comparedVacation.oldLastYearTotal()} (${comparedVacation.oldLastYearPostPartum()})</td>
+			<td>${comparedVacation.newLastYearTotal()}</td>
+			<td>${comparedVacation.oldLastYearAccrued()}</td>
+			<td>${comparedVacation.newLastYearAccrued()}</td>
+			*{ questo dato andrebbe preso dal cruscotto 2016
+            <td>${comparedVacation.attestatiLastYearTotal()}</td>
+            }* 			
+            
+            <!-- 2017 -->
+  		    <td>${comparedVacation.oldCurrentYearTotal()} (${comparedVacation.oldCurrentYearPostPartum()})</td>
+  		    <td>${comparedVacation.newCurrentYearTotal()}</td>
+            <td>${comparedVacation.oldCurrentYearAccrued()}</td>
+			<td>${comparedVacation.newCurrentYearAccrued()}</td>
+  		    *{ 
+  		    <td>${comparedVacation.attestatiCurrentYearTotal()}</td>
+  		    }*
+
+            <!-- Permessi -->
+			<td>${comparedVacation.oldPermissionTotal()} (${comparedVacation.oldPermissionPostPartum()})</td>
+			<td>${comparedVacation.newPermissionTotal()}</td>
+			<td>${comparedVacation.oldPermissionAccrued()}</td>
+			<td>${comparedVacation.newPermissionAccrued()}</td>
+			*{
+			<td>${comparedVacation.attestatiPermissionTotal()}</td>
+			}*
+
 
 		</tr>
 		#{/list}
