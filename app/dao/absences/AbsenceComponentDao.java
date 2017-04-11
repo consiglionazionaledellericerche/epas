@@ -80,6 +80,19 @@ public class AbsenceComponentDao extends DaoBase {
   }
   
   /**
+   * @return l'absenceType relativo al codice passato come parametro nel campo certification.
+   */
+  public Optional<AbsenceType> absenceTypeByCertificationCode(String string) {
+
+    QAbsenceType absenceType = QAbsenceType.absenceType;
+    final JPQLQuery query = getQueryFactory()
+        .from(absenceType)
+        .where(absenceType.certificateCode.eq(string)
+            .or(absenceType.certificateCode.equalsIgnoreCase(string)));
+    return Optional.fromNullable(query.singleResult(absenceType));
+  }
+  
+  /**
    * Gli absenceTypes con quegli id. Se non vengono caricati tutti gli id ritorna null.
    * @param ids gli id
    * @return list o null

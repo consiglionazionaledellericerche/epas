@@ -21,6 +21,7 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -28,6 +29,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import manager.ContractManager;
 import manager.PeriodManager;
+import manager.attestati.dto.internal.clean.ContrattoAttestati;
+import manager.attestati.service.ICertificationService;
 import manager.recaps.recomputation.RecomputeRecap;
 
 import models.Contract;
@@ -70,6 +73,8 @@ public class Contracts extends Controller {
   static IWrapperFactory wrapperFactory;
   @Inject
   static PeriodManager periodManager;
+  @Inject
+  static ICertificationService certService;
 
   /**
    * I contratti del dipendente.
@@ -812,4 +817,37 @@ public class Contracts extends Controller {
     render(initializationsBeforeGeneral, correctInitialized, correctNotInitialized, office);
 
   }
+  
+  /**
+   * Preleva i contratti della sede in attestati.
+   * @param officeId sede
+   * @param year anno
+   * @param month mese
+   */
+  public static void certificationContracts(Long officeId, Integer year, Integer month) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    try { 
+
+      Map<Integer, ContrattoAttestati> contrattiAttestati = 
+          certService.getCertificationContracts(office, year, month);
+      
+      for (ContrattoAttestati contrattoAttestati : contrattiAttestati.values()) {
+        log.info("Matricola: {}, DataInizio: {}, DataFine:{}", contrattoAttestati.matricola, 
+            contrattoAttestati.beginContract, contrattoAttestati.endContract);
+      }
+
+      renderText("ok");
+      
+    } catch (Exception ex) {
+      //TODO: se serve usare Certifications.cleanMessage(Exception ex)
+      log.error("Errore nel recupero delle informazioni dal server di attestati"
+          + " per la sede {}: {}", office, ex);
+      renderText("nok");
+    }
+    
+  }
+
 }
