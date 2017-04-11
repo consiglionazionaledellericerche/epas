@@ -597,7 +597,7 @@ function createCalendarRepAdmin(allowed, repType, repCalObj, repGrpObj){
 			$(this).find(".fc-event-title").append($("<a>", {
 				'href': '#',
 				'class': 'remove-event',
-				'html': '<img src=\"./../images/remove-button-cross.png\"></img>',
+				'html': '<img src=\"'+'/public/images/remove-button-cross.png\"></img>',
 			}));
 
 
@@ -1518,7 +1518,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
         	'class': 'remove-event',
         	'title': 'Cancella questo evento',
         	'alt': 'Remove event',
-        	'html': '<img src=\"' + Drupal.settings.basePath + 'sites/default/files/images/remove-button-cross.png\"></img>',
+        	'html': '<img src=\"' + '/public/images/remove-button-cross.png\"></img>',
         }));
 
         // Add remove-shift button
@@ -1528,7 +1528,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 	          	'class': 'remove-shift',
 	          	'title': 'Annulla l\'intero turno',
 	          	'alt': 'Remove shift',
-	          	'html': '<img src=\"' + Drupal.settings.basePath + 'sites/default/files/images/remove-button-sosta.png\"></img>',
+	          	'html': '<img src=\"'+ '/public/images/remove-button-sosta.png\"></img>',
         	}));
 		}
 
@@ -1538,7 +1538,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
         	'class': 'remove-event',
         	'title': 'Cancella questo evento',
         	'alt': 'Remove event',
-        	'html': '<img src=\"' + Drupal.settings.basePath + 'sites/default/files/images/remove-button-cross.png\"></img>',
+        	'html': '<img src=\"' + '/public/images/remove-button-cross.png\"></img>',
         }));
 
         // On click remove-event
