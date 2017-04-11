@@ -21,17 +21,9 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import lombok.extern.slf4j.Slf4j;
-
 import manager.SecureManager;
-import manager.attestati.dto.internal.CruscottoDipendente;
-import manager.attestati.service.CertificationService;
 import manager.services.absences.AbsenceService;
-import manager.services.absences.certifications.CertificationYearSituation;
-import manager.services.absences.certifications.CertificationYearSituation.AbsenceImportType;
-import manager.services.absences.certifications.CertificationYearSituation.AbsenceSituation;
-import manager.services.absences.model.AbsencePeriod;
-import manager.services.absences.model.PeriodChain;
+import manager.services.absences.model.ComparedVacation;
 import manager.services.vacations.IVacationsService;
 import manager.services.vacations.VacationsRecap;
 
@@ -40,7 +32,6 @@ import models.Office;
 import models.Person;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.DefaultGroup;
-import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 
 import org.joda.time.LocalDate;
 
@@ -50,7 +41,6 @@ import play.mvc.With;
 import security.SecurityRules;
 
 @With({Resecure.class})
-@Slf4j
 public class VacationsAdmin extends Controller {
 
   @Inject
@@ -71,8 +61,6 @@ public class VacationsAdmin extends Controller {
   private static SecurityRules rules;
   @Inject
   private static ContractDao contractDao;
-  @Inject
-  private static CertificationService certService;
 
   /**
    * Riepiloghi ferie della sede.
@@ -145,6 +133,9 @@ public class VacationsAdmin extends Controller {
         isPermissionCurrentYearExpired, contractsWithVacationsProblems, year, offices, office);
   }
   
+  /**
+   * Confronto vecchio/nuovo algoritmo.
+   */
   public static void compareVacations(Integer year, Long officeId) {
     
     Office office = officeDao.getOfficeById(officeId);
@@ -162,273 +153,20 @@ public class VacationsAdmin extends Controller {
     
     for (Person person : personList) {
 
-//      if (comparedVacationList.size() >= 10) { 
-//        break;
-//      }
-      
       IWrapperPerson wrPerson = wrapperFactory.create(person);
-//      if (!isDefined(wrPerson)) {
-//        continue;
-//      }
-      if (!isActive(wrPerson)) {
+      if (!wrPerson.getCurrentContract().isPresent()) {
         continue;
       }
-            
       
-      log.info("person {}", person.fullName());
-      ComparedVacation comparedVacation = new ComparedVacation();
-
-      Optional<VacationsRecap> vr = vacationsService.create(year, 
-          wrPerson.getCurrentContract().get());
-      if (vr.isPresent()) {
-        comparedVacation.vacationRecap = vr.get();
-      } else {
-        continue;
-      }
-
-//      if (vr.get().getVacationsCurrentYear().getTotal() == 28) {
-//        continue;
-//      }
-      
-      PeriodChain periodChain = absenceService.residual(person, vacationGroup, LocalDate.now());
-      comparedVacation.person = person;
-      comparedVacation.periodsLastYear = periodChain.vacationSupportList.get(0).get(0);
-      comparedVacation.periodsCurrentYear = periodChain.vacationSupportList.get(1).get(0);
-      comparedVacation.periodsPermissions = periodChain.vacationSupportList.get(2).get(0);
-      
-//      try {
-//        CruscottoDipendente cruscottoDipendente = certService.getCruscottoDipendente(person, year);
-//        CertificationYearSituation yearSituation = 
-//            new CertificationYearSituation(absenceComponentDao, person, cruscottoDipendente);
-//        comparedVacation.certLastYear = yearSituation
-//            .getAbsenceSituation(AbsenceImportType.FERIE_ANNO_PRECEDENTE);
-//        comparedVacation.certCurrentYear = yearSituation
-//            .getAbsenceSituation(AbsenceImportType.FERIE_ANNO_CORRENTE);
-//        comparedVacation.certPermission = yearSituation
-//            .getAbsenceSituation(AbsenceImportType.PERMESSI_LEGGE);
-//        
-//      } catch (Exception e) {
-//        log.info("Impossibile scaricare l'informazione da attestati di {}", person.fullName());
-//      }
+      ComparedVacation comparedVacation = new ComparedVacation(wrPerson, 
+          wrPerson.getCurrentContract().get(), year, vacationGroup, 
+          absenceService, vacationsService);
       comparedVacationList.add(comparedVacation);
     }
     
     render(year, office, comparedVacationList);
   }
-  
-  private static boolean isActive(IWrapperPerson person) {
-    if (!person.getCurrentContract().isPresent()) {
-      return false;
-    }
-    return true;
-  }
-  
-  private static boolean isUndefined(IWrapperPerson person) {
-    
-    if (person.getValue().surname.equals("Boni")) {
-      return false;
-    }
-    
-    if (!person.getCurrentContract().isPresent()) {
-      return false;
-    }
-    
-    if (person.getCurrentContract().get().calculatedEnd() == null) {
-      return true; //OK
-    }
 
-    return false;
-  }
-  
-  private static boolean isDefined(IWrapperPerson person) {
-    
-//    if (!person.getValue().surname.equals("Cresci")) {
-//      return false;
-//    }
-    
-    if (person.getValue().surname.equals("Boni")) {
-      return false;
-    }
-    
-    if (!person.getCurrentContract().isPresent()) {
-      return false;
-    }
-    
-    if (person.getCurrentContract().get().calculatedEnd() != null) {
-      return true; //OK
-    }
-
-    return false;
-  }
-  
-  public static class ComparedVacation {
-    
-    public Person person;
-    public Contract contract;
-    
-    public AbsencePeriod periodsLastYear;
-    public AbsencePeriod periodsCurrentYear;
-    public AbsencePeriod periodsPermissions;
-    public VacationsRecap vacationRecap;
-    
-    public AbsenceSituation certLastYear;
-    public AbsenceSituation certCurrentYear;
-    public AbsenceSituation certPermission;
-    
-    //Old alg.
-    
-    public int oldLastYearTotal() {
-      return vacationRecap.getVacationsLastYear().getTotal();
-    }
-    
-    public int oldLastYearPostPartum() {
-      return vacationRecap.getVacationsLastYear().getTotalResult().getPostPartum().size();
-    }
-    
-    public int oldLastYearAccrued() {
-      return vacationRecap.getVacationsLastYear().getAccrued();
-    }
-    
-    public int oldCurrentYearTotal() {
-      return vacationRecap.getVacationsCurrentYear().getTotal();
-    }
-    
-    public int oldCurrentYearPostPartum() {
-      return vacationRecap.getVacationsCurrentYear().getTotalResult().getPostPartum().size();
-    }
-    
-    public int oldCurrentYearAccrued() {
-      return vacationRecap.getVacationsCurrentYear().getAccrued();
-    }
-    
-    public int oldPermissionTotal() {
-      return vacationRecap.getPermissions().getTotal();
-    }
-    
-    public int oldPermissionPostPartum() {
-      return vacationRecap.getPermissions().getTotalResult().getPostPartum().size();
-    }
-    
-    public int oldPermissionAccrued() {
-      return vacationRecap.getPermissions().getAccrued();
-    }
-    
-    //New alg
-    
-    public int newLastYearTotal() {
-      return computeTotal(periodsLastYear);
-    }
-    
-    public int newLastYearPostPartum() {
-      if (periodsLastYear == null) {
-        System.out.println("Last year è null");
-        return 0;
-      }
-      return periodsLastYear.reducingAbsences.size();
-    }
-    
-    public int newLastYearAccrued() {
-      return computeAccrued(periodsLastYear);
-    }
-    
-    public int newCurrentYearTotal() {
-      return computeTotal(periodsCurrentYear);
-    }
-    
-    public int newCurrentYearPostPartum() {
-      if (periodsCurrentYear == null) {
-        System.out.println("Current year è null");
-        return 0;
-      }
-      return periodsCurrentYear.reducingAbsences.size();
-    }
-    
-    public int newCurrentYearAccrued() {
-      return computeAccrued(periodsCurrentYear);
-    }
-    
-    public int newPermissionTotal() {
-      return computeTotal(periodsPermissions);
-    }
-    
-    public int newPermissionPostPartum() {
-      if (periodsPermissions == null) {
-        System.out.println("Current year è null");
-        return 0;
-      }
-      return periodsPermissions.reducingAbsences.size();
-    }
-    
-    public int newPermissionAccrued() {
-      return computeAccrued(periodsPermissions);
-    }
-    
-    public boolean epasEquivalent() {
-      if (oldLastYearTotal() != newLastYearTotal()) {
-        return false;
-      }
-      if (oldCurrentYearTotal() != newCurrentYearTotal()) {
-        return false;
-      }
-      if (oldPermissionTotal() != newPermissionTotal()) {
-        return false;
-      }
-      if (oldLastYearPostPartum() != newLastYearPostPartum()) {
-        return false;
-      }
-      if (oldCurrentYearPostPartum() != newCurrentYearPostPartum()) {
-        return false;
-      }
-      if (oldPermissionPostPartum() != newPermissionPostPartum()) {
-        return false;
-      }
-      if (oldLastYearAccrued() != newLastYearAccrued()) {
-        return false;
-      }
-      if (oldCurrentYearAccrued() != newCurrentYearAccrued()) {
-        return false;
-      }
-      if (oldPermissionAccrued() != newPermissionAccrued()) {
-        return false;
-      }
-      return true;
-    }
-    
-    //att
-    
-    public int attestatiLastYearTotal() {
-      if (certLastYear == null) {
-        return -1;
-      }
-      return certLastYear.totalUsable;
-    }
-    
-    public int attestatiCurrentYearTotal() {
-      if (certCurrentYear == null) {
-        return -1;
-      }
-      return certCurrentYear.totalUsable;
-    }
-    
-    public int attestatiPermissionTotal() {
-      if (certPermission == null) {
-        return -1;
-      }
-      return certPermission.totalUsable;
-    }
-    
-    private int computeTotal(AbsencePeriod period) {
-      return period
-          .computePeriodTakableAmount(TakeCountBehaviour.sumAllPeriod, LocalDate.now()) / 100;
-    }
-    
-    private int computeAccrued(AbsencePeriod period) {
-      return period
-          .computePeriodTakableAmount(TakeCountBehaviour.sumUntilPeriod, LocalDate.now()) / 100;
-    }
-
-
-  }
 
   /**
    * Riepilogo ferie anno corrente.

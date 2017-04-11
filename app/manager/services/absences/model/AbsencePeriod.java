@@ -38,7 +38,7 @@ public class AbsencePeriod {
   public SortedMap<LocalDate, DayInPeriod> daysInPeriod = Maps.newTreeMap();
   
   //AllPeriods
-  public List<AbsencePeriod> periods;
+  public List<AbsencePeriod> subPeriods;
   
   // Takable
   public AmountType takeAmountType;                // Il tipo di ammontare del periodo
@@ -143,7 +143,7 @@ public class AbsencePeriod {
 
     if (countBehaviour.equals(TakeCountBehaviour.sumAllPeriod)) {
       int takableAmount = 0;
-      for (AbsencePeriod absencePeriod : this.periods) {
+      for (AbsencePeriod absencePeriod : this.subPeriods) {
         takableAmount = takableAmount + absencePeriod.fixedPeriodTakableAmount;
       }
       return takableAmount;  
@@ -151,7 +151,7 @@ public class AbsencePeriod {
 
     if (countBehaviour.equals(TakeCountBehaviour.sumUntilPeriod)) {
       int takableAmount = 0;
-      for (AbsencePeriod absencePeriod : this.periods) {
+      for (AbsencePeriod absencePeriod : this.subPeriods) {
         if (absencePeriod.from.isAfter(date)) {
           break;
         }
@@ -190,7 +190,7 @@ public class AbsencePeriod {
 
   private int getPeriodTakenAmountSumAll(TakeCountBehaviour countType) {
     int taken = 0;
-    for (AbsencePeriod absencePeriod : this.periods) {
+    for (AbsencePeriod absencePeriod : this.subPeriods) {
       if (countType.equals(TakeCountBehaviour.sumUntilPeriod) 
           && absencePeriod.from.isAfter(this.from)) {
         break;
@@ -415,6 +415,10 @@ public class AbsencePeriod {
   private int workingTypePercentModule(int minutes, int workTime) {
     int workTimePercent = workingTypePercent(minutes, workTime); 
     return workTimePercent % 100;
+  }
+  
+  public String toString() {
+    return from + " " + to + " " + fixedPeriodTakableAmount;  
   }
 }
 
