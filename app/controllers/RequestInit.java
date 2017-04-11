@@ -200,7 +200,8 @@ public class RequestInit extends Controller {
         "Certifications.certifications",
         "Certifications.processAll",
         "Certifications.emptyCertifications",
-        "Charts.overtimeOnPositiveResidualInYear");
+        "Charts.overtimeOnPositiveResidualInYear",
+        "AbsenceGroups.certificationsAbsences");
 
     final Collection<String> personSwitcher = ImmutableList.of(
         "Stampings.personStamping",
@@ -215,7 +216,8 @@ public class RequestInit extends Controller {
         "MealTickets.personMealTickets",
         "MealTickets.editPersonMealTickets",
         "MealTickets.recapPersonMealTickets",
-        "Absences.forceAbsences");
+        "Absences.forceAbsences",
+        "AbsenceGroups.certificationsAbsences");
 
     final Collection<String> officeSwitcher = ImmutableList.of(
         "Stampings.missingStamping",

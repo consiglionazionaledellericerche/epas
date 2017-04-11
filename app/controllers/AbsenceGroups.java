@@ -31,9 +31,12 @@ import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.PersonDayManager;
+import manager.attestati.dto.internal.CruscottoDipendente;
+import manager.attestati.service.CertificationService;
 import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
+import manager.services.absences.certifications.CertificationYearSituation;
 import manager.services.absences.certifications.CodeComparation;
 import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.PeriodChain;
@@ -98,6 +101,8 @@ public class AbsenceGroups extends Controller {
   private static QualificationDao qualificationDao;
   @Inject
   private static AbsenceComponentDao absenceComponentDao;
+  @Inject
+  private static CertificationService certService; 
 
   /**
    * La lista delle categorie definite.
@@ -1010,6 +1015,7 @@ public class AbsenceGroups extends Controller {
     }
     List<AbsenceType> allAbsenceTypes = AbsenceType.findAll();
     render(allCategoryTabs, allCategories, allGroups, allComplations, allTakables, allAbsenceTypes);
+
   }
   
   /**
@@ -1041,6 +1047,23 @@ public class AbsenceGroups extends Controller {
     //    }
 
     consistencyGroups();
+  }
+
+  /** 
+   * Le assenze in attestati. //TODO Metodo provvisorio di prova.
+   */
+  public static void certificationsAbsences(Long personId, Integer year) 
+      throws NoSuchFieldException, ExecutionException {
+    
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    
+    CruscottoDipendente cruscottoDipendente = certService.getCruscottoDipendente(person, year);
+    
+    CertificationYearSituation yearSituation = new CertificationYearSituation(absenceComponentDao, 
+        person, cruscottoDipendente);
+    
+    render(yearSituation, person);
   }
 
 }
