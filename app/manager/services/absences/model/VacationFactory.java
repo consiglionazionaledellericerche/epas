@@ -4,14 +4,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
-import dao.absences.AbsenceComponentDao;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 import java.util.Set;
 
+import manager.cache.AbsenceTypeManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.services.absences.model.YearProgression.YearPortion;
@@ -30,17 +29,28 @@ import org.joda.time.MonthDay;
 
 public class VacationFactory {
   
-  private final AbsenceComponentDao absenceComponentDao;
   private final ConfigurationManager configurationManager;
+  private final AbsenceTypeManager absenceTypeManager;
 
+  /**
+   * Costruttore. 
+   */
   @Inject
-  public VacationFactory( AbsenceComponentDao absenceComponentDao, 
-      ConfigurationManager configurationManager) {
-    this.absenceComponentDao = absenceComponentDao;
+  public VacationFactory(ConfigurationManager configurationManager, 
+      AbsenceTypeManager absenceTypeManager) {
     this.configurationManager = configurationManager;
-    
+    this.absenceTypeManager = absenceTypeManager;
   }
-
+  
+  /**
+   * La periodChain che riduce il problema delle ferie e permessi alla prendibilità di assenze.
+   * @param person persona 
+   * @param group gruppo
+   * @param fetchedContract i contratti
+   * @param date la data di maturazione??
+   * @param postPartumInYear il numero di assenze post partum
+   * @return la periodChain.
+   */
   public PeriodChain buildVacationChain(Person person, GroupAbsenceType group, 
       List<Contract> fetchedContract, LocalDate date, int postPartumInYear) {
     
@@ -52,10 +62,10 @@ public class VacationFactory {
       }
     }
     
-    AbsenceType code32 = absenceComponentDao.absenceTypeByCode("32").get();
-    AbsenceType code31 = absenceComponentDao.absenceTypeByCode("31").get();
-    AbsenceType code37 = absenceComponentDao.absenceTypeByCode("37").get();
-    AbsenceType code94 = absenceComponentDao.absenceTypeByCode("94").get();
+    AbsenceType code32 = absenceTypeManager.getAbsenceType("32");
+    AbsenceType code31 = absenceTypeManager.getAbsenceType("31");
+    AbsenceType code37 = absenceTypeManager.getAbsenceType("37");
+    AbsenceType code94 = absenceTypeManager.getAbsenceType("94");
     
     List<AbsencePeriod> vacationLastYear = 
         vacationPeriodPerYear(person, group, date.getYear() - 1, contract, code32, code31, code37);
@@ -71,10 +81,12 @@ public class VacationFactory {
     PeriodChain periodChain = new PeriodChain(person, group, date);
     periodChain.periods = periods;
     
-    List<List<AbsencePeriod>> listPeriods = Lists.newArrayList();
-    listPeriods.add(vacationLastYear);
-    listPeriods.add(permission);
-    listPeriods.add(vacationCurrentYear);
+    periodChain.vacationSupportList = Lists.newArrayList();
+    periodChain.vacationSupportList.add(vacationLastYear);
+    periodChain.vacationSupportList.add(vacationCurrentYear);
+    periodChain.vacationSupportList.add(permission);
+    
+    
     for (AbsencePeriod period : vacationLastYear) {
       period.periods = vacationLastYear;
     }
@@ -132,8 +144,9 @@ public class VacationFactory {
       endUsableNextYearExtra = contract.calculatedEnd();
     }
     if (!endUsableNextYearExtra.isBefore(beginUsableExtra)) {
-      periods.add(period(person, contract, group, beginUsableExtra, takable, DateUtility.daysInInterval(
-          new DateInterval(beginUsableExtra, endUsableNextYearExtra)) - 1, 0));
+      periods.add(period(person, contract, group, beginUsableExtra, takable, 
+          DateUtility.daysInInterval(new DateInterval(beginUsableExtra, 
+              endUsableNextYearExtra)) - 1, 0));
     }
     
     return periods;

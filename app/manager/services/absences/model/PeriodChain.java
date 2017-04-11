@@ -48,6 +48,10 @@ public class PeriodChain {
   
   //Errori
   private List<ErrorsBox> periodsErrorsBoxes = null; //errori dei periodi.. lazy quando ho i periodi
+  
+  //VacationsSupport 
+  //Permette di recuperare gratis i 3 gruppi ferie passate, correnti, permessi
+  public List<List<AbsencePeriod>> vacationSupportList = Lists.newArrayList();
 
   /**
    * Constructor PeriodChain.

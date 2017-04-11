@@ -1,0 +1,53 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /} 
+#{set title: 'ePAS - Ferie e Permessi' /} 
+
+#{set 'moreStyles'}
+
+<style>
+/* allineamento centrato dei th con rowspan e colspan */
+#tabella-ferie th {
+	vertical-align: inherit;
+}
+</style>
+
+#{/set}
+
+<div class="container">
+  
+   <table  class="table table-striped table-hover table-bordered table-condensed center" datatable width="100%">
+	<thead>
+		<tr>
+		    <th>Nome</th>
+		    <th>FP T O</th>
+		    <th>FP T N</th>
+		    <th>FC T O</th>
+		    <th>FC T N</th>
+		    <th>P T O</th>
+		    <th>P T N</th>
+		</tr>	
+	</thead>
+
+	<tbody>
+		#{list items:comparedVacationList, as:'comparedVacation'}
+		%{ vacationsRecap = comparedVacation.vacationRecap }%
+		<tr>
+
+			<td>${comparedVacation.person.fullname}</td>
+			
+			<td>${vacationsRecap.vacationsLastYear.total}</td>
+			<td>${comparedVacation.computeTotal(comparedVacation.periodsLastYear)}</td>
+			
+  		    <td>${vacationsRecap.vacationsCurrentYear.total}</td>
+  		    <td>${comparedVacation.computeTotal(comparedVacation.periodsCurrentYear)}</td>
+			
+			<td>${vacationsRecap.permissions.total}</td>
+			<td>${comparedVacation.computeTotal(comparedVacation.periodsPermissions)}</td>
+
+		</tr>
+		#{/list}
+
+	</tbody>
+  </table>
+ 
+</div>
