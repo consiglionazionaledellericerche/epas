@@ -1308,7 +1308,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 									jQuery('#calendar').fullCalendar('renderEvent', event, true);
 									indexRep++;
 
-									console.log("NORMALE event.end=" + event.end); 
+									//console.log("NORMALE event.end=" + event.end); 
 									// set data.end = data.start for check problem
 									if (event.end == null) {	
 										event.end = event.start;
@@ -1321,8 +1321,8 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 								event['eMail'] = idToEmail[event.id];
 								event['mobile'] = idToMobile[event.id];
 								event['title'] = 'Turno '+tipoTurno+' ANNULLATO';
-		          				event['start'] = event.start + " " + event.ttStart;
-		          				event['end'] = event.end + " " + event.ttEnd;
+		          				event['start'] = jQuery.fullCalendar.moment(event.start + " " + event.ttStart).format();
+		          				event['end'] = jQuery.fullCalendar.moment(event.end+ " " +event.ttEnd).add(1, 'days');
 		          				event['allDay'] = true;
 		         	 			event['className'] = "del-event";
 		          				event['cancelled'] = true;
@@ -1338,13 +1338,13 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 		          				// set data.end = data.start for check problem
 		          				if (event.end == null) {
 		          					console.log("dentro event.start=" + moment(event.start).format());
-		          					event.end = event.start;
+		          					event.end = jQuery.fullCalendar.moment(event.end+ " " +event.ttEnd).add(1, 'days');
 		          				}
     						}
 	    				});
 
     					j++;
-    					tipoTurno = '';
+    					//tipoTurno = '';
     				}
 
     				/* get the absenses
