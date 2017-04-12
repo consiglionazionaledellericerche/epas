@@ -278,7 +278,7 @@ public class Charts extends Controller {
       log.error("Errore durante l'esportazione del tempo al lavoro", ex);
     }
     
-    renderBinary(file);
+    renderBinary(file, "export.zip", false);
     
   }
 
