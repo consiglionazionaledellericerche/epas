@@ -48,6 +48,14 @@ public class Resecure extends Controller {
     }
   }
 
+  public static boolean check(String action, Object instance) {
+    if (instance != null) {
+      return session.contains("username") && rules.check(action, instance);
+    } else {
+      return session.contains("username") && rules.checkAction(action);
+    }
+  }
+
   /**
    * Con questo si evitano i controlli. 
    *
