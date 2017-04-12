@@ -618,7 +618,7 @@ function createCalendarRepAdmin(allowed, repType, repCalObj, repGrpObj){
 	}, // end eventMouseout
 	
 
-	eventDrop: function(event, dayDelta, minuteDelta, allDay, revertFunc) {
+	eventDrop: function(event, delta, revertFunc) {
 		var eventStart = event.start;
 		var eventStartM = (eventStart.getMonth() == 0) ? eventStart.getMonth().toString().concat('0') : eventStart.getMonth();
 		var todayM = (mToday == 0) ? mToday.toString().concat('0') : mToday;
@@ -665,7 +665,7 @@ function createCalendarRepAdmin(allowed, repType, repCalObj, repGrpObj){
 		}
 	},
 
-	eventResize: function(event, dayDelta, minuteDelta, revertFunc) {
+	eventResize: function(event, dayDelta, revertFunc) {
 		// set data.end = data.start for check problem
 		if (event.end == null) {event.end = event.start;}
 		
@@ -1365,7 +1365,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 		            var absentPerson = _RestJsonCall (uriFerieToGet, 'POST', false, jsonAbsParameter);
 		
 		            var indexVac = 0;
-	/*	            jQuery.each(absentPerson, function (i, event) {
+		            jQuery.each(absentPerson, function (i, event) {
 			              event['color'] = 'LEMONCHIFFON';
 			              event['textColor'] = 'red';
 			              event['borderColor'] = 'red';
@@ -1381,7 +1381,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 			              jQuery('#calendar').fullCalendar('renderEvent', event, true);
 			              indexVac++;
 
-		            });*/
+		            });
     			};
     			
     			callback(events);
@@ -1780,7 +1780,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 		}
 	}, // end eventdrop
 
-	eventResize: function(event, dayDelta, minuteDelta, revertFunc) {
+	eventResize: function(event, delta, revertFunc) {
 
 		var currentView = new Date();
 		var currentMonth = currentView.getMonth() +1;
