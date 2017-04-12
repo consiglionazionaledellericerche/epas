@@ -40,7 +40,8 @@
 	<tbody>
 		#{list items:comparedVacationList, as:'comparedVacation'}
 		
-		<tr #{if !comparedVacation.epasEquivalent()} class="bg-danger" #{/if}>
+		#{if comparedVacation.periodsLastYear != null}
+		<tr #{if !comparedVacation.epasLastYearEquivalent()} class="bg-danger" #{/if}>
 
 			<td>
 			  ${comparedVacation.person.fullname}
@@ -75,6 +76,7 @@
             }* 			
 
 		</tr>
+		#{/if}
 		#{/list}
 
 	</tbody>
@@ -93,6 +95,10 @@
 		    <th>Totali New</th>
 		    <th>Maturate</th>
 		    <th>Maturate New</th>
+		    <th>Inizio</th>
+		    <th>Inizio New</th>
+		    <th>Fine</th>
+		    <th>Fine New</th>
 		    *{ <th>2017 Att</th> }*
 		    
 		</tr>	
@@ -101,7 +107,8 @@
 	<tbody>
 		#{list items:comparedVacationList, as:'comparedVacation'}
 		
-		<tr #{if !comparedVacation.epasEquivalent()} class="bg-danger" #{/if}>
+		#{if comparedVacation.periodsCurrentYear != null}
+		<tr #{if !comparedVacation.epasCurrentYearEquivalent()} class="bg-danger" #{/if}>
 
 			<td>
 			  ${comparedVacation.person.fullname}
@@ -112,11 +119,30 @@
   		    <td>${comparedVacation.newCurrentYearTotal()} (${comparedVacation.newCurrentYearPostPartum()})</td>
             <td>${comparedVacation.oldCurrentYearAccrued()}</td>
 			<td>${comparedVacation.newCurrentYearAccrued()}</td>
+			
+			<td
+			#{if comparedVacation.oldCurrentYearContractLowerLimit()}><em><strong>${comparedVacation.oldCurrentYearLowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.oldCurrentYearLowerLimit().format()}#{/else}	
+			</td>
+			<td
+			#{if comparedVacation.newCurrentYearContractLowerLimit()}><em><strong>${comparedVacation.newCurrentYearLowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.newCurrentYearLowerLimit().format()}#{/else}	
+			</td>
+			<td
+			#{if comparedVacation.oldCurrentYearContractUpperLimit()}><em><strong>${comparedVacation.oldCurrentYearUpperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.oldCurrentYearUpperLimit().format()}#{/else}	
+			</td>
+			<td
+			#{if comparedVacation.newCurrentYearContractUpperLimit()}><em><strong>${comparedVacation.newCurrentYearUpperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.newCurrentYearUpperLimit().format()}#{/else}	
+			</td>
+			
   		    *{ 
   		    <td>${comparedVacation.attestatiCurrentYearTotal()}</td>
   		    }*
 
 		</tr>
+		#{/if}
 		#{/list}
 
 	</tbody>
@@ -141,7 +167,8 @@
 	<tbody>
 		#{list items:comparedVacationList, as:'comparedVacation'}
 		
-		<tr #{if !comparedVacation.epasEquivalent()} class="bg-danger" #{/if}>
+		#{if comparedVacation.periodsPermissions != null}
+		<tr #{if !comparedVacation.epasPermissionEquivalent()} class="bg-danger" #{/if}>
 
 			<td>
 			  ${comparedVacation.person.fullname}
@@ -152,12 +179,31 @@
 			<td>${comparedVacation.newPermissionTotal()} (${comparedVacation.newPermissionPostPartum()})</td>
 			<td>${comparedVacation.oldPermissionAccrued()}</td>
 			<td>${comparedVacation.newPermissionAccrued()}</td>
+			
+						<td
+			#{if comparedVacation.oldPermissionContractLowerLimit()}><em><strong>${comparedVacation.oldPermissionLowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.oldPermissionLowerLimit().format()}#{/else}	
+			</td>
+			<td
+			#{if comparedVacation.newPermissionContractLowerLimit()}><em><strong>${comparedVacation.newPermissionLowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.newPermissionLowerLimit().format()}#{/else}	
+			</td>
+			<td
+			#{if comparedVacation.oldPermissionContractUpperLimit()}><em><strong>${comparedVacation.oldPermissionUpperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.oldPermissionUpperLimit().format()}#{/else}	
+			</td>
+			<td
+			#{if comparedVacation.newPermissionContractUpperLimit()}><em><strong>${comparedVacation.newPermissionUpperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.newPermissionUpperLimit().format()}#{/else}	
+			</td>
+			
 			*{
 			<td>${comparedVacation.attestatiPermissionTotal()}</td>
 			}*
 
 
 		</tr>
+		#{/if}
 		#{/list}
 
 	</tbody>

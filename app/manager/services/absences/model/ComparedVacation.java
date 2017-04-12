@@ -4,6 +4,8 @@ import com.google.common.base.Optional;
 
 import dao.wrapper.IWrapperPerson;
 
+import it.cnr.iit.epas.DateUtility;
+
 import manager.services.absences.AbsenceService;
 import manager.services.absences.certifications.CertificationYearSituation.AbsenceSituation;
 import manager.services.vacations.IVacationsService;
@@ -46,22 +48,33 @@ public class ComparedVacation {
     
     this.contract = contract;
     
-    Optional<VacationsRecap> vr = vacationsService.create(year, 
-        wrPerson.getCurrentContract().get());
+    Optional<VacationsRecap> vr = vacationsService.create(year, contract);
     if (vr.isPresent()) {
       this.vacationRecap = vr.get();
     }
 
-    LocalDate date = LocalDate.now();
+    //La data target per il riepilogo contrattuale
+    LocalDate date = LocalDate.now();           
     if (date.getYear() > year) {
       date = new LocalDate(year, 12, 31);
+    }
+    if (contract.calculatedEnd() != null
+        && contract.calculatedEnd().getYear() == year 
+        && !DateUtility.isDateIntoInterval(date, contract.periodInterval())) {
+      date = contract.calculatedEnd();
     }
     PeriodChain periodChain = absenceService.residual(wrPerson.getValue(), 
         vacationGroup, date);
     this.person = wrPerson.getValue();
-    this.periodsLastYear = periodChain.vacationSupportList.get(0).get(0);
-    this.periodsCurrentYear = periodChain.vacationSupportList.get(1).get(0);
-    this.periodsPermissions = periodChain.vacationSupportList.get(2).get(0);
+    if (!periodChain.vacationSupportList.get(0).isEmpty()) {
+      this.periodsLastYear = periodChain.vacationSupportList.get(0).get(0);
+    }
+    if (!periodChain.vacationSupportList.get(1).isEmpty()) {
+      this.periodsCurrentYear = periodChain.vacationSupportList.get(1).get(0);
+    }
+    if (!periodChain.vacationSupportList.get(2).isEmpty()) {
+      this.periodsPermissions = periodChain.vacationSupportList.get(2).get(0);
+    }
     
     //    try {
     //      CruscottoDipendente cruscottoDipendente = certService
@@ -123,6 +136,23 @@ public class ComparedVacation {
     return vacationRecap.getVacationsCurrentYear().getAccrued();
   }
   
+  public boolean oldCurrentYearContractLowerLimit() {
+    return vacationRecap.getVacationsCurrentYear().isContractLowerLimit();
+  }
+  
+  public LocalDate oldCurrentYearLowerLimit() {
+    return vacationRecap.getVacationsCurrentYear().getLowerLimit();
+  }
+  
+  public boolean oldCurrentYearContractUpperLimit() {
+    return vacationRecap.getVacationsCurrentYear().isContractUpperLimit();
+  }
+  
+  public LocalDate oldCurrentYearUpperLimit() {
+    return vacationRecap.getVacationsCurrentYear().getUpperLimit();
+  }
+  
+  
   //Permission
   public int oldPermissionTotal() {
     return vacationRecap.getPermissions().getTotal();
@@ -134,6 +164,22 @@ public class ComparedVacation {
   
   public int oldPermissionAccrued() {
     return vacationRecap.getPermissions().getAccrued();
+  }
+  
+  public boolean oldPermissionContractLowerLimit() {
+    return vacationRecap.getPermissions().isContractLowerLimit();
+  }
+  
+  public LocalDate oldPermissionLowerLimit() {
+    return vacationRecap.getPermissions().getLowerLimit();
+  }
+  
+  public boolean oldPermissionContractUpperLimit() {
+    return vacationRecap.getPermissions().isContractUpperLimit();
+  }
+  
+  public LocalDate oldPermissionUpperLimit() {
+    return vacationRecap.getPermissions().getUpperLimit();
   }
   
   //NEW 2016/////////////////////////////////////////////
@@ -245,37 +291,76 @@ public class ComparedVacation {
   
   //NEW OLD COMPARE /////////////////////////////////////////
   /**
-   * Confronto.
+   * Confronto anno passato.
    */
-  public boolean epasEquivalent() {
-    if (vacationRecap == null) {
+  public boolean epasLastYearEquivalent() {
+    if (vacationRecap == null || periodsLastYear == null) {
       return true;
     }
     if (oldLastYearTotal() != newLastYearTotal()) {
       return false;
     }
-    if (oldCurrentYearTotal() != newCurrentYearTotal()) {
-      return false;
-    }
-    if (oldPermissionTotal() != newPermissionTotal()) {
-      return false;
-    }
     if (oldLastYearPostPartum() != newLastYearPostPartum()) {
-      return false;
-    }
-    if (oldCurrentYearPostPartum() != newCurrentYearPostPartum()) {
-      return false;
-    }
-    if (oldPermissionPostPartum() != newPermissionPostPartum()) {
       return false;
     }
     if (oldLastYearAccrued() != newLastYearAccrued()) {
       return false;
     }
+    if (!oldLastYearLowerLimit().isEqual(newLastYearLowerLimit())) {
+      return false;
+    }
+    if (!oldLastYearUpperLimit().isEqual(newLastYearUpperLimit())) {
+      return false;
+    }
+    return true;
+  }
+  
+  /**
+   * Confronto anno corrente.
+   */
+  public boolean epasCurrentYearEquivalent() {
+    if (vacationRecap == null || periodsCurrentYear == null) {
+      return true;
+    }
+    if (oldCurrentYearTotal() != newCurrentYearTotal()) {
+      return false;
+    }
+    if (oldCurrentYearPostPartum() != newCurrentYearPostPartum()) {
+      return false;
+    }
     if (oldCurrentYearAccrued() != newCurrentYearAccrued()) {
       return false;
     }
+    if (!oldCurrentYearLowerLimit().isEqual(newCurrentYearLowerLimit())) {
+      return false;
+    }
+    if (!oldCurrentYearUpperLimit().isEqual(newCurrentYearUpperLimit())) {
+      return false;
+    }
+    return true;
+  }
+  
+  /**
+   * Confronto permessi.
+   */
+  public boolean epasPermissionEquivalent() {
+    if (vacationRecap == null || periodsPermissions == null) {
+      return true;
+    }
+    if (oldPermissionTotal() != newPermissionTotal()) {
+      return false;
+    }
+    
+    if (oldPermissionPostPartum() != newPermissionPostPartum()) {
+      return false;
+    }
     if (oldPermissionAccrued() != newPermissionAccrued()) {
+      return false;
+    }
+    if (!oldPermissionLowerLimit().isEqual(newPermissionLowerLimit())) {
+      return false;
+    }
+    if (!oldPermissionUpperLimit().isEqual(newPermissionUpperLimit())) {
       return false;
     }
     return true;
@@ -329,7 +414,6 @@ public class ComparedVacation {
    */
   private AbsencePeriod lastNaturalPeriod(AbsencePeriod period) {
     AbsencePeriod lastPeriod = period.subPeriods.get(period.subPeriods.size() - 1);
-    boolean finded37 = false;
     for (AbsenceType takable : lastPeriod.takableCodes) {
       if (takable.code.equals(DefaultAbsenceType.A_37.name().substring(2))) {
         return period.subPeriods.get(period.subPeriods.size() - 2);

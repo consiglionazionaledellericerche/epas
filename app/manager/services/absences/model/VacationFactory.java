@@ -327,6 +327,10 @@ public class VacationFactory {
     absencePeriod.takenCountBehaviour = TakeCountBehaviour.sumAllPeriod;    
     absencePeriod.from = begin;
     absencePeriod.to = end;
+    //mi assicuro di non eccedere in ogni caso la lunghezza del contratto.
+    if (contract.calculatedEnd() != null && absencePeriod.to.isAfter(contract.calculatedEnd())) {
+      absencePeriod.to = contract.calculatedEnd();
+    }
     absencePeriod.setFixedPeriodTakableAmount(amount);
     absencePeriod.takableCodes = takableCodes;
     absencePeriod.takenCodes = takableCodes;
