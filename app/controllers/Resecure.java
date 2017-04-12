@@ -1,22 +1,15 @@
 package controllers;
 
 import helpers.LogEnhancer;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 import javax.inject.Inject;
-
-import models.Office;
-
 import play.Play;
-import play.cache.Cache;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 /**
@@ -24,7 +17,7 @@ import security.SecurityRules;
  *
  * @author marco
  */
-@With({ RequestInit.class, LogEnhancer.class })
+@With({RequestInit.class, LogEnhancer.class})
 public class Resecure extends Controller {
 
   public static final String OFFICE_COUNT = "officeCount";
@@ -32,32 +25,17 @@ public class Resecure extends Controller {
   @Inject
   static SecurityRules rules;
 
-  @Before
-  static void dbStateCheck() {
-
-    Long officeCount = Cache.get(OFFICE_COUNT, Long.class);
-
-    if (officeCount == null) {
-      officeCount = Office.count();
-      Cache.add(OFFICE_COUNT, officeCount);
-    }
-
-    if (officeCount == 0) {
-      Wizard.wizard(0);
-    }
-  }
-
   @Before(priority = 1, unless = {"login", "authenticate", "logout"})
   static void checkAccess() throws Throwable {
     if (getActionAnnotation(NoCheck.class) != null
         || getControllerInheritedAnnotation(NoCheck.class) != null) {
       return;
-    } else {      
+    } else {
       //Se si tenta di accedere con Basic Auth si controlla subito utente e password
       if (request.user != null && !Security.authenticate(request.user, request.password)) {
-        unauthorized(REALM);                
+        unauthorized(REALM);
       }
-      
+
       if (!Security.getUser().isPresent()) {
         flash.put(
             "url",
@@ -103,6 +81,7 @@ public class Resecure extends Controller {
   @Retention(RetentionPolicy.RUNTIME)
   @Target({ElementType.METHOD})
   public @interface NoCheck {
+
   }
 
   /**
@@ -113,5 +92,6 @@ public class Resecure extends Controller {
   @Retention(RetentionPolicy.RUNTIME)
   @Target({ElementType.METHOD})
   public @interface BasicAuth {
+
   }
 }
