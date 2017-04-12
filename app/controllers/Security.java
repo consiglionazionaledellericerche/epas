@@ -6,18 +6,12 @@ import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
-
 import dao.UserDao;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-
 import javax.inject.Inject;
-
 import manager.OfficeManager;
-
 import models.User;
-
 import play.Logger;
 import play.cache.Cache;
 import play.mvc.Http;
@@ -64,7 +58,7 @@ public class Security extends Secure.Security {
 
     if (username == null || username.isEmpty()) {
       Logger.trace("getUSer failed for username %s", username);
-      return Optional.<User>absent();
+      return Optional.absent();
     }
     Logger.trace("Richiesta getUser(), username=%s", username);
 
@@ -74,7 +68,7 @@ public class Security extends Secure.Security {
     Logger.trace("User.find('byUsername'), username=%s, e' %s", username, user);
     if (user == null) {
       Logger.info("Security.getUser(): USer con username = %s non trovata nel database", username);
-      return Optional.<User>absent();
+      return Optional.absent();
     }
     return Optional.of(user);
   }
@@ -92,7 +86,7 @@ public class Security extends Secure.Security {
     if (request == null) {
       return null;
     }
-    if (request.user != null) {      
+    if (request.user != null) {
       return request.user;
     } else {
       return Secure.Security.connected();
@@ -109,7 +103,7 @@ public class Security extends Secure.Security {
 
   /**
    * @return Vero se c'è almeno un istituto abilitato dall'ip contenuto nella richiesta HTTP
-   *        ricevuta, false altrimenti.
+   * ricevuta, false altrimenti.
    */
   public static boolean checkForWebstamping() {
 
@@ -118,16 +112,16 @@ public class Security extends Secure.Security {
 
     return !officeManager.getOfficesWithAllowedIp(addresses).isEmpty();
   }
-  
+
   /**
    * ridefinizione di logout per discriminare il messaggio a seconda della tipologia connessione.
    */
   public static void logout() {
     try {
-      Security.invoke("onDisconnect");
+      invoke("onDisconnect");
       session.clear();
       response.removeCookie("rememberme");
-      Security.invoke("onDisconnected");
+      invoke("onDisconnected");
       if (session.contains("shibboleth")) {
         flash.success("secure.logoutShibboleth");
       } else {
