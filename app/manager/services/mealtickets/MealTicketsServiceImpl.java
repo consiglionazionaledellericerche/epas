@@ -192,8 +192,9 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     int mealTicketsTransfered = 0;
 
     List<MealTicket> contractMealTicketsDesc = mealTicketDao
-        .getOrderedMealTicketInContract(previousContract);
-
+        .contractMealTickets(previousContract, Optional.absent(), 
+            MealTicketOrder.ORDER_BY_DELIVERY_DATE_DESC, false);
+      
     LocalDate pastDate = LocalDate.now();
     for (int i = 0; i < recap.get().remainingMealTickets; i++) {
 
