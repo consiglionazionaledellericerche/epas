@@ -168,7 +168,9 @@ public class AbsencePeriod {
    * @return int
    */
   public int getPeriodTakenAmount(boolean firstIteration) {
-    int takenInPeriod = 0;
+    
+    int takenInPeriod = getInitializationTakableUsed();
+    
     for (TakenAbsence takenAbsence : takenAbsences()) {
       takenInPeriod += takenAbsence.getTakenAmount();
     }
