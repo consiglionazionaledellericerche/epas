@@ -21,6 +21,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import lombok.extern.slf4j.Slf4j;
+
 import manager.SecureManager;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.model.ComparedVacation;
@@ -41,6 +43,7 @@ import play.mvc.With;
 import security.SecurityRules;
 
 @With({Resecure.class})
+@Slf4j
 public class VacationsAdmin extends Controller {
 
   @Inject
@@ -146,6 +149,8 @@ public class VacationsAdmin extends Controller {
         Sets.newHashSet(office), false, 
         new LocalDate(year, 1, 1), new LocalDate(year, 12, 31), true).list();
     
+    //List<Person> personList = Person.findAll();
+    
     GroupAbsenceType vacationGroup = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
     
@@ -158,13 +163,23 @@ public class VacationsAdmin extends Controller {
         continue;
       }
       
+      if (!person.surname.equals("Bianchi")) {
+        continue;
+      }
+      
       ComparedVacation comparedVacation = new ComparedVacation(wrPerson, 
           wrPerson.getCurrentContract().get(), year, vacationGroup, 
           absenceService, vacationsService);
-      comparedVacationList.add(comparedVacation);
+      
+      if (comparedVacation.epasEquivalent()) {
+        //log.info("{} è equivalente", person.fullName());
+        comparedVacationList.add(comparedVacation);
+      } else {
+        comparedVacationList.add(comparedVacation);
+      }
     }
     
-    render(year, office, comparedVacationList);
+    render(year, comparedVacationList);
   }
 
 

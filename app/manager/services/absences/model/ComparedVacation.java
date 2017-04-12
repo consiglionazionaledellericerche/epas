@@ -11,6 +11,8 @@ import manager.services.vacations.VacationsRecap;
 
 import models.Contract;
 import models.Person;
+import models.absences.AbsenceType;
+import models.absences.AbsenceType.DefaultAbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 
@@ -42,13 +44,20 @@ public class ComparedVacation {
       GroupAbsenceType vacationGroup,
       AbsenceService absenceService, IVacationsService vacationsService) {
     
+    this.contract = contract;
+    
     Optional<VacationsRecap> vr = vacationsService.create(year, 
         wrPerson.getCurrentContract().get());
     if (vr.isPresent()) {
       this.vacationRecap = vr.get();
     }
 
-    PeriodChain periodChain = absenceService.residual(person, vacationGroup, LocalDate.now());
+    LocalDate date = LocalDate.now();
+    if (date.getYear() > year) {
+      date = new LocalDate(year, 12, 31);
+    }
+    PeriodChain periodChain = absenceService.residual(wrPerson.getValue(), 
+        vacationGroup, date);
     this.person = wrPerson.getValue();
     this.periodsLastYear = periodChain.vacationSupportList.get(0).get(0);
     this.periodsCurrentYear = periodChain.vacationSupportList.get(1).get(0);
@@ -72,7 +81,7 @@ public class ComparedVacation {
   }
   
   //Old alg.
-  
+  //2016
   public int oldLastYearTotal() {
     return vacationRecap.getVacationsLastYear().getTotal();
   }
@@ -85,6 +94,23 @@ public class ComparedVacation {
     return vacationRecap.getVacationsLastYear().getAccrued();
   }
   
+  public boolean oldLastYearContractLowerLimit() {
+    return vacationRecap.getVacationsLastYear().isContractLowerLimit();
+  }
+  
+  public LocalDate oldLastYearLowerLimit() {
+    return vacationRecap.getVacationsLastYear().getLowerLimit();
+  }
+  
+  public boolean oldLastYearContractUpperLimit() {
+    return vacationRecap.getVacationsLastYear().isContractUpperLimit();
+  }
+  
+  public LocalDate oldLastYearUpperLimit() {
+    return vacationRecap.getVacationsLastYear().getUpperLimit();
+  }
+  
+  //2017
   public int oldCurrentYearTotal() {
     return vacationRecap.getVacationsCurrentYear().getTotal();
   }
@@ -97,6 +123,7 @@ public class ComparedVacation {
     return vacationRecap.getVacationsCurrentYear().getAccrued();
   }
   
+  //Permission
   public int oldPermissionTotal() {
     return vacationRecap.getPermissions().getTotal();
   }
@@ -109,8 +136,7 @@ public class ComparedVacation {
     return vacationRecap.getPermissions().getAccrued();
   }
   
-  //New alg
-  
+  //NEW 2016/////////////////////////////////////////////
   public int newLastYearTotal() {
     return computeTotal(periodsLastYear);
   }
@@ -129,6 +155,23 @@ public class ComparedVacation {
     return computeAccrued(periodsLastYear);
   }
   
+  public boolean newLastYearContractLowerLimit() {
+    return isContractLowerLimit(periodsLastYear.from);
+  }
+  
+  public LocalDate newLastYearLowerLimit() {
+    return periodsLastYear.from;
+  }
+  
+  public boolean newLastYearContractUpperLimit() {
+    return isContractUpperLimit(lastNaturalPeriod(periodsLastYear).to);
+  }
+  
+  public LocalDate newLastYearUpperLimit() {
+    return lastNaturalPeriod(periodsLastYear).to;
+  }
+  
+  //NEW 2017/////////////////////////////////////////////
   public int newCurrentYearTotal() {
     return computeTotal(periodsCurrentYear);
   }
@@ -146,6 +189,25 @@ public class ComparedVacation {
   public int newCurrentYearAccrued() {
     return computeAccrued(periodsCurrentYear);
   }
+  
+  public boolean newCurrentYearContractLowerLimit() {
+    return isContractLowerLimit(periodsCurrentYear.from);
+  }
+  
+  public LocalDate newCurrentYearLowerLimit() {
+    return periodsCurrentYear.from;
+  }
+  
+  public boolean newCurrentYearContractUpperLimit() {
+    return isContractUpperLimit(lastNaturalPeriod(periodsCurrentYear).to);
+  }
+  
+  public LocalDate newCurrentYearUpperLimit() {
+    return lastNaturalPeriod(periodsCurrentYear).to;
+  }
+  
+  
+  //NEW PERMESSI /////////////////////////////////////////////
   
   public int newPermissionTotal() {
     return computeTotal(periodsPermissions);
@@ -165,10 +227,30 @@ public class ComparedVacation {
     return computeAccrued(periodsPermissions);
   }
   
+  public boolean newPermissionContractLowerLimit() {
+    return isContractLowerLimit(periodsPermissions.from);
+  }
+  
+  public LocalDate newPermissionLowerLimit() {
+    return periodsPermissions.from;
+  }
+  
+  public boolean newPermissionContractUpperLimit() {
+    return isContractUpperLimit(lastNaturalPeriod(periodsPermissions).to);
+  }
+  
+  public LocalDate newPermissionUpperLimit() {
+    return lastNaturalPeriod(periodsPermissions).to;
+  }
+  
+  //NEW OLD COMPARE /////////////////////////////////////////
   /**
    * Confronto.
    */
   public boolean epasEquivalent() {
+    if (vacationRecap == null) {
+      return true;
+    }
     if (oldLastYearTotal() != newLastYearTotal()) {
       return false;
     }
@@ -239,6 +321,36 @@ public class ComparedVacation {
   private int computeAccrued(AbsencePeriod period) {
     return period
         .computePeriodTakableAmount(TakeCountBehaviour.sumUntilPeriod, LocalDate.now()) / 100;
+  }
+  
+  /**
+   * L'ultimo periodo (per la data fine). Se l'ultimo periodo è l'estensione 37 seleziono quello
+   * ancora precedente.
+   */
+  private AbsencePeriod lastNaturalPeriod(AbsencePeriod period) {
+    AbsencePeriod lastPeriod = period.subPeriods.get(period.subPeriods.size() - 1);
+    boolean finded37 = false;
+    for (AbsenceType takable : lastPeriod.takableCodes) {
+      if (takable.code.equals(DefaultAbsenceType.A_37.name().substring(2))) {
+        return period.subPeriods.get(period.subPeriods.size() - 2);
+      }
+    }
+    return lastPeriod;
+  }
+  
+  private boolean isContractUpperLimit(LocalDate date) {
+    if (contract.calculatedEnd() != null 
+        && contract.calculatedEnd().isBefore(date)) {
+      return true;
+    }
+    return false;
+  }
+  
+  private boolean isContractLowerLimit(LocalDate date) {
+    if (contract.beginDate.isAfter(date)) {
+      return true;
+    }
+    return false;
   }
   
 }

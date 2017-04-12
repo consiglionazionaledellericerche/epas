@@ -12,6 +12,8 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import java.util.Set;
 
+import lombok.extern.slf4j.Slf4j;
+
 import manager.cache.AbsenceTypeManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
@@ -29,6 +31,7 @@ import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 
+@Slf4j
 public class VacationFactory {
   
   private final ConfigurationManager configurationManager;
@@ -133,6 +136,9 @@ public class VacationFactory {
     //Fix dei giorni post partum
     periods = fixPostPartum(periods, person, year);
     
+    if (periods.isEmpty()) {
+      return periods;
+    }
     //Ferie usabili entro 31/8
     takable = Sets.newHashSet(code31);
     LocalDate beginNextYear = new LocalDate(year + 1, 1, 1);
@@ -143,7 +149,7 @@ public class VacationFactory {
     }
     if (!endUsableNextYear.isBefore(beginNextYear)) {
       periods.add(period(person, contract, group, beginNextYear, takable, DateUtility
-          .daysInInterval(new DateInterval(beginNextYear, endUsableNextYear)) - 1, 0));
+          .daysInInterval(new DateInterval(beginNextYear, endUsableNextYear)), 0));
     }
     //Ferie usabili entro 31/12 codice 37
     takable = Sets.newHashSet(code37);
@@ -156,7 +162,7 @@ public class VacationFactory {
     if (!endUsableNextYearExtra.isBefore(beginUsableExtra)) {
       periods.add(period(person, contract, group, beginUsableExtra, takable, 
           DateUtility.daysInInterval(new DateInterval(beginUsableExtra, 
-              endUsableNextYearExtra)) - 1, 0));
+              endUsableNextYearExtra)), 0));
     }
     
     return periods;
@@ -271,6 +277,11 @@ public class VacationFactory {
   private List<AbsencePeriod> periodsFromProgression(Person person, Contract contract, 
       GroupAbsenceType group,  LocalDate beginDate, YearProgression yearProgression,
       VacationPeriod vacationPeriod, Set<AbsenceType> takableCodes) {
+    
+    if (yearProgression == null) {
+      log.info("La yearProgression è null...");
+      return Lists.newArrayList();
+    }
     
     LocalDate endYear = new LocalDate(beginDate.getYear(), 12, 31);
     List<AbsencePeriod> periods = Lists.newArrayList();
