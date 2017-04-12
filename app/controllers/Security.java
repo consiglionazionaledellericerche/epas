@@ -1,6 +1,5 @@
 package controllers;
 
-
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
@@ -14,16 +13,16 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import lombok.extern.slf4j.Slf4j;
+
 import manager.OfficeManager;
 
 import models.User;
 
-import play.Logger;
-import play.cache.Cache;
 import play.mvc.Http;
 import play.utils.Java;
 
-
+@Slf4j
 public class Security extends Secure.Security {
 
   public static final String CACHE_DURATION = "30mn";
@@ -38,23 +37,19 @@ public class Security extends Secure.Security {
    * @return true se è autenticato, false altrimenti.
    */
   static boolean authenticate(String username, String password) {
-    Logger.trace("Richiesta autenticazione di %s", username);
+    log.trace("Richiesta autenticazione di {}", username);
 
     User user = userDao.getUserByUsernameAndPassword(username, Optional
         .fromNullable(Hashing.md5().hashString(password, Charsets.UTF_8).toString()));
 
     if (user != null) {
-      Cache.set(username, user, CACHE_DURATION);
-      Cache.set("userId", user.id, CACHE_DURATION);
-
-      Logger.info("user %s successfully logged in from ip %s", user.username,
+      log.info("user {} successfully logged in from ip {}", user.username,
           Http.Request.current().remoteAddress);
-
       return true;
     }
 
     // Oops
-    Logger.info("Failed login for %s ", username);
+    log.info("Failed login for {}", username);
     flash.put("username", username);
     flash.error("Login failed");
     return false;
@@ -63,18 +58,17 @@ public class Security extends Secure.Security {
   private static Optional<User> getUser(String username) {
 
     if (username == null || username.isEmpty()) {
-      Logger.trace("getUSer failed for username %s", username);
-      return Optional.<User>absent();
+      log.trace("getUSer failed for username {}", username);
+      return Optional.absent();
     }
-    Logger.trace("Richiesta getUser(), username=%s", username);
+    log.trace("Richiesta getUser(), username={}", username);
 
     //db
     User user = userDao.byUsername(username);
 
-    Logger.trace("User.find('byUsername'), username=%s, e' %s", username, user);
     if (user == null) {
-      Logger.info("Security.getUser(): USer con username = %s non trovata nel database", username);
-      return Optional.<User>absent();
+      log.info("Security.getUser(): User con username = {} non trovata nel database", username);
+      return Optional.absent();
     }
     return Optional.of(user);
   }
@@ -88,17 +82,6 @@ public class Security extends Secure.Security {
     return getUser(connected());
   }
 
-  static String connected() {
-    if (request == null) {
-      return null;
-    }
-    if (request.user != null && authenticate(request.user, request.password)) {      
-      return request.user;
-    } else {
-      return Secure.Security.connected();
-    }
-  }
-
   static Object invoke(String method, Object... args) throws Throwable {
     try {
       return Java.invokeChildOrStatic(Security.class, method, args);
@@ -109,7 +92,7 @@ public class Security extends Secure.Security {
 
   /**
    * @return Vero se c'è almeno un istituto abilitato dall'ip contenuto nella richiesta HTTP
-   *        ricevuta, false altrimenti.
+   *     ricevuta, false altrimenti.
    */
   public static boolean checkForWebstamping() {
 
@@ -118,16 +101,16 @@ public class Security extends Secure.Security {
 
     return !officeManager.getOfficesWithAllowedIp(addresses).isEmpty();
   }
-  
+
   /**
    * ridefinizione di logout per discriminare il messaggio a seconda della tipologia connessione.
    */
   public static void logout() {
     try {
-      Security.invoke("onDisconnect");
+      invoke("onDisconnect");
       session.clear();
       response.removeCookie("rememberme");
-      Security.invoke("onDisconnected");
+      invoke("onDisconnected");
       if (session.contains("shibboleth")) {
         flash.success("secure.logoutShibboleth");
       } else {
