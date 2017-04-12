@@ -28,6 +28,8 @@
 		    <th>Totali New</th>
 		    <th>Maturate</th>
 		    <th>Maturate New</th>
+		    <th>Usate</th>
+		    <th>Usate New</th>
 		    <th>Inizio</th>
 		    <th>Inizio New</th>
 		    <th>Fine</th>
@@ -52,6 +54,9 @@
 			<td>${comparedVacation.newLastYearTotal()} (${comparedVacation.newLastYearPostPartum()})</td>
 			<td>${comparedVacation.oldLastYearAccrued()}</td>
 			<td>${comparedVacation.newLastYearAccrued()}</td>
+			
+			<td>${comparedVacation.oldLastYearUsed()}</td>
+			<td>${comparedVacation.newLastYearUsed()}</td>
 			
 			<td
 			#{if comparedVacation.oldLastYearContractLowerLimit()}><em><strong>${comparedVacation.oldLastYearLowerLimit().format()}</strong></em>#{/if}
@@ -95,6 +100,8 @@
 		    <th>Totali New</th>
 		    <th>Maturate</th>
 		    <th>Maturate New</th>
+		    <th>Usate</th>
+		    <th>Usate New</th>
 		    <th>Inizio</th>
 		    <th>Inizio New</th>
 		    <th>Fine</th>
@@ -119,6 +126,9 @@
   		    <td>${comparedVacation.newCurrentYearTotal()} (${comparedVacation.newCurrentYearPostPartum()})</td>
             <td>${comparedVacation.oldCurrentYearAccrued()}</td>
 			<td>${comparedVacation.newCurrentYearAccrued()}</td>
+			
+			<td>${comparedVacation.oldCurrentYearUsed()}</td>
+			<td>${comparedVacation.newCurrentYearUsed()}</td>
 			
 			<td
 			#{if comparedVacation.oldCurrentYearContractLowerLimit()}><em><strong>${comparedVacation.oldCurrentYearLowerLimit().format()}</strong></em>#{/if}
@@ -160,6 +170,12 @@
 		    <th>Totali New</th>
 		    <th>Maturate</th>
 		    <th>Maturate New</th>
+		    <th>Usate</th>
+		    <th>Usate New</th>
+		    <th>Inizio</th>
+		    <th>Inizio New</th>
+		    <th>Fine</th>
+		    <th>Fine New</th>
 		    *{ <th>P Att</th> }*
 		</tr>	
 	</thead>
@@ -180,7 +196,10 @@
 			<td>${comparedVacation.oldPermissionAccrued()}</td>
 			<td>${comparedVacation.newPermissionAccrued()}</td>
 			
-						<td
+			<td>${comparedVacation.oldPermissionUsed()}</td>
+			<td>${comparedVacation.newPermissionUsed()}</td>
+			
+			<td
 			#{if comparedVacation.oldPermissionContractLowerLimit()}><em><strong>${comparedVacation.oldPermissionLowerLimit().format()}</strong></em>#{/if}
 			#{else} class="text-muted">${comparedVacation.oldPermissionLowerLimit().format()}#{/else}	
 			</td>
