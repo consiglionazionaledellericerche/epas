@@ -1,7 +1,5 @@
 package models;
 
-import models.base.BaseModel;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +9,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import models.base.BaseModel;
 
 
 @Entity
@@ -37,7 +37,7 @@ public class PersonShift extends BaseModel {
   
   @Override
   public String toString() {
-    return this.person.name +" "+this.person.surname;
+    return this.person.name + " " + this.person.surname;
   }
 
 }

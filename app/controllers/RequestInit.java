@@ -11,6 +11,13 @@ import dao.UserDao;
 
 import helpers.TemplateDataInjector;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
 import manager.SecureManager;
 
 import models.Office;
@@ -23,13 +30,6 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 
 /**
@@ -248,7 +248,10 @@ public class RequestInit extends Controller {
         "Charts.overtimeOnPositiveResidualInYear",
         "Charts.listForExcelFile",
         "Charts.exportTimesheetSituation",
-        "Competences.activateServices");
+        "Competences.activateServices",
+        "Contracts.initializationsStatus",
+        "Contracts.initializationsMeal",
+        "AbsenceGroups.absenceInitializations");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
         "Stampings.insertWorkingOffSitePresence",
@@ -289,7 +292,10 @@ public class RequestInit extends Controller {
         "Configurations.show",
         "Certifications.certifications",
         "Certifications.processAll",
-        "PersonMonths.visualizePeopleTrainingHours");
+        "PersonMonths.visualizePeopleTrainingHours",
+        "Contracts.initializationsStatus",
+        "Contracts.initializationsMeal",
+        "AbsenceGroups.absenceInitializations");
 
     final Collection<String> dropDownConfigurationActions = ImmutableList.of(
         "WorkingTimes.manageWorkingTime",

@@ -3,21 +3,19 @@ package dao;
 import com.google.common.base.Optional;
 import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Provider;
-
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
-
-import models.Qualification;
-import models.absences.AbsenceType;
-import models.enumerate.QualificationMapping;
-import models.query.QQualification;
 
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+
+import models.Qualification;
+import models.enumerate.QualificationMapping;
+import models.query.QQualification;
 
 /**
  * Dao per l'accesso alle informazioni delle Qualification.

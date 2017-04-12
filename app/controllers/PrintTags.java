@@ -10,6 +10,10 @@ import dao.history.HistoryValue;
 import dao.history.StampingHistoryDao;
 import dao.wrapper.IWrapperFactory;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
 import manager.SecureManager;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
@@ -24,10 +28,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import security.SecurityRules;
-
-import java.util.List;
-
-import javax.inject.Inject;
 
 @With({Resecure.class})
 public class PrintTags extends Controller {

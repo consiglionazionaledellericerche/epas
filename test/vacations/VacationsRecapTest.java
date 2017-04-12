@@ -1,8 +1,9 @@
 package vacations;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+
+import java.util.List;
 
 import manager.ContractManager;
 import manager.services.vacations.VacationsRecap;
@@ -20,17 +21,16 @@ import models.absences.AbsenceType;
 import models.enumerate.AbsenceTypeMapping;
 
 import org.joda.time.LocalDate;
-import org.testng.annotations.Test;
-import org.testng.collections.Lists;
+import org.junit.Test;
 
-import java.util.List;
+import play.test.UnitTest;
 
 /**
  * Verifica di base degli algoritmi relativi ai resoconti ferie.
  *
  * @author cristian
  */
-public class VacationsRecapTest {
+public class VacationsRecapTest extends UnitTest {
 
   static AbsenceType code31 = MockAbsenceType.builder()
       .code(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode())
@@ -85,23 +85,38 @@ public class VacationsRecapTest {
     final VacationsRecap recapIndef = new VacationsRecapBuilder().buildVacationRecap(
         2016, contract, absencesToConsider, accruedDate, expireDateLastYear, expireDateCurrentYear);
 
-    assertThat(recapIndef.getVacationsLastYear().isExpired()).isEqualTo(true);
-    assertThat(recapIndef.getVacationsLastYear().getTotal()).isEqualTo(28);
-    assertThat(recapIndef.getVacationsLastYear().getUsed()).isEqualTo(2);
-    assertThat(recapIndef.getVacationsLastYear().getNotYetUsedTotal()).isEqualTo(26);
-    assertThat(recapIndef.getVacationsLastYear().getNotYetUsedTakeable()).isEqualTo(0);
+    org.assertj.core.api.Assertions.assertThat(
+        recapIndef.getVacationsLastYear().isExpired()).isEqualTo(true);
+    org.assertj.core.api.Assertions.assertThat(
+        recapIndef.getVacationsLastYear().getTotal()).isEqualTo(28);
+    org.assertj.core.api.Assertions.assertThat(
+        recapIndef.getVacationsLastYear().getUsed()).isEqualTo(2);
+    org.assertj.core.api.Assertions.assertThat(
+        recapIndef.getVacationsLastYear().getNotYetUsedTotal()).isEqualTo(26);
+    org.assertj.core.api.Assertions.assertThat(
+        recapIndef.getVacationsLastYear().getNotYetUsedTakeable()).isEqualTo(0);
 
-    assertThat(recapIndef.getVacationsCurrentYear().isExpired()).isEqualTo(false);
-    assertThat(recapIndef.getVacationsCurrentYear().getTotal()).isEqualTo(28);
-    assertThat(recapIndef.getVacationsCurrentYear().getUsed()).isEqualTo(1);
-    assertThat(recapIndef.getVacationsCurrentYear().getNotYetUsedTotal()).isEqualTo(27);
-    assertThat(recapIndef.getVacationsCurrentYear().getNotYetUsedTakeable()).isEqualTo(27);
+    org.assertj.core.api.Assertions.assertThat(
+        recapIndef.getVacationsCurrentYear().isExpired()).isEqualTo(false);
+    org.assertj.core.api.Assertions.assertThat(
+        recapIndef.getVacationsCurrentYear().getTotal()).isEqualTo(28);
+    org.assertj.core.api.Assertions.assertThat(
+        recapIndef.getVacationsCurrentYear().getUsed()).isEqualTo(1);
+    org.assertj.core.api.Assertions.assertThat(
+        recapIndef.getVacationsCurrentYear().getNotYetUsedTotal()).isEqualTo(27);
+    org.assertj.core.api.Assertions.assertThat(
+        recapIndef.getVacationsCurrentYear().getNotYetUsedTakeable()).isEqualTo(27);
 
-    assertThat(recapIndef.getPermissions().isExpired()).isEqualTo(false);
-    assertThat(recapIndef.getPermissions().getTotal()).isEqualTo(4);
-    assertThat(recapIndef.getPermissions().getUsed()).isEqualTo(1);
-    assertThat(recapIndef.getPermissions().getNotYetUsedTotal()).isEqualTo(3);
-    assertThat(recapIndef.getPermissions().getNotYetUsedTakeable()).isEqualTo(3);
+    org.assertj.core.api.Assertions.assertThat(
+        recapIndef.getPermissions().isExpired()).isEqualTo(false);
+    org.assertj.core.api.Assertions.assertThat(
+        recapIndef.getPermissions().getTotal()).isEqualTo(4);
+    org.assertj.core.api.Assertions.assertThat(
+        recapIndef.getPermissions().getUsed()).isEqualTo(1);
+    org.assertj.core.api.Assertions.assertThat(
+        recapIndef.getPermissions().getNotYetUsedTotal()).isEqualTo(3);
+    org.assertj.core.api.Assertions.assertThat(
+        recapIndef.getPermissions().getNotYetUsedTakeable()).isEqualTo(3);
 
     //Un tempo determinato
     contract = MockContract.builder()
@@ -113,23 +128,38 @@ public class VacationsRecapTest {
     final VacationsRecap recapDef = new VacationsRecapBuilder().buildVacationRecap(
         2016, contract, absencesToConsider, accruedDate, expireDateLastYear, expireDateCurrentYear);
 
-    assertThat(recapDef.getVacationsLastYear().isExpired()).isEqualTo(true);
-    assertThat(recapDef.getVacationsLastYear().getTotal()).isEqualTo(28);
-    assertThat(recapDef.getVacationsLastYear().getUsed()).isEqualTo(2);
-    assertThat(recapDef.getVacationsLastYear().getNotYetUsedTotal()).isEqualTo(26);
-    assertThat(recapDef.getVacationsLastYear().getNotYetUsedTakeable()).isEqualTo(0);
+    org.assertj.core.api.Assertions.assertThat(
+        recapDef.getVacationsLastYear().isExpired()).isEqualTo(true);
+    org.assertj.core.api.Assertions.assertThat(
+        recapDef.getVacationsLastYear().getTotal()).isEqualTo(28);
+    org.assertj.core.api.Assertions.assertThat(
+        recapDef.getVacationsLastYear().getUsed()).isEqualTo(2);
+    org.assertj.core.api.Assertions.assertThat(
+        recapDef.getVacationsLastYear().getNotYetUsedTotal()).isEqualTo(26);
+    org.assertj.core.api.Assertions.assertThat(
+        recapDef.getVacationsLastYear().getNotYetUsedTakeable()).isEqualTo(0);
 
-    assertThat(recapDef.getVacationsCurrentYear().isExpired()).isEqualTo(false);
-    assertThat(recapDef.getVacationsCurrentYear().getTotal()).isEqualTo(21);
-    assertThat(recapDef.getVacationsCurrentYear().getUsed()).isEqualTo(1);
-    assertThat(recapDef.getVacationsCurrentYear().getNotYetUsedTotal()).isEqualTo(20);
-    assertThat(recapDef.getVacationsCurrentYear().getNotYetUsedTakeable()).isEqualTo(17);
+    org.assertj.core.api.Assertions.assertThat(
+        recapDef.getVacationsCurrentYear().isExpired()).isEqualTo(false);
+    org.assertj.core.api.Assertions.assertThat(
+        recapDef.getVacationsCurrentYear().getTotal()).isEqualTo(21);
+    org.assertj.core.api.Assertions.assertThat(
+        recapDef.getVacationsCurrentYear().getUsed()).isEqualTo(1);
+    org.assertj.core.api.Assertions.assertThat(
+        recapDef.getVacationsCurrentYear().getNotYetUsedTotal()).isEqualTo(20);
+    org.assertj.core.api.Assertions.assertThat(
+        recapDef.getVacationsCurrentYear().getNotYetUsedTakeable()).isEqualTo(17);
 
-    assertThat(recapDef.getPermissions().isExpired()).isEqualTo(false);
-    assertThat(recapDef.getPermissions().getTotal()).isEqualTo(3);
-    assertThat(recapDef.getPermissions().getUsed()).isEqualTo(1);
-    assertThat(recapDef.getPermissions().getNotYetUsedTotal()).isEqualTo(2);
-    assertThat(recapDef.getPermissions().getNotYetUsedTakeable()).isEqualTo(2);
+    org.assertj.core.api.Assertions.assertThat(
+        recapDef.getPermissions().isExpired()).isEqualTo(false);
+    org.assertj.core.api.Assertions.assertThat(
+        recapDef.getPermissions().getTotal()).isEqualTo(3);
+    org.assertj.core.api.Assertions.assertThat(
+        recapDef.getPermissions().getUsed()).isEqualTo(1);
+    org.assertj.core.api.Assertions.assertThat(
+        recapDef.getPermissions().getNotYetUsedTotal()).isEqualTo(2);
+    org.assertj.core.api.Assertions.assertThat(
+        recapDef.getPermissions().getNotYetUsedTakeable()).isEqualTo(2);
   }
 
   /**
@@ -164,14 +194,21 @@ public class VacationsRecapTest {
     final VacationsRecap recap = new VacationsRecapBuilder().buildVacationRecap(
         2015, contract, absencesToConsider, accruedDate, expireDateLastYear, expireDateCurrentYear);
 
-    assertThat(recap.getVacationsCurrentYear().getTotalResult().getAccrued()).isEqualTo(25);
-    assertThat(recap.getVacationsCurrentYear().getTotalResult().getFixed()).isEqualTo(1);
-    assertThat(recap.getVacationsCurrentYear().getAccruedResult().getAccrued()).isEqualTo(0);
+    org.assertj.core.api.Assertions.assertThat(
+        recap.getVacationsCurrentYear().getTotalResult().getAccrued()).isEqualTo(25);
+    org.assertj.core.api.Assertions.assertThat(
+        recap.getVacationsCurrentYear().getTotalResult().getFixed()).isEqualTo(1);
+    org.assertj.core.api.Assertions.assertThat(
+        recap.getVacationsCurrentYear().getAccruedResult().getAccrued()).isEqualTo(0);
 
-    assertThat(recap.getVacationsCurrentYear().getTotal()).isEqualTo(26);
-    assertThat(recap.getVacationsCurrentYear().getAccrued()).isEqualTo(1);
-    assertThat(recap.getVacationsCurrentYear().getNotYetUsedAccrued()).isEqualTo(1);
-    assertThat(recap.getVacationsCurrentYear().getNotYetUsedTakeable()).isEqualTo(26);
+    org.assertj.core.api.Assertions.assertThat(
+        recap.getVacationsCurrentYear().getTotal()).isEqualTo(26);
+    org.assertj.core.api.Assertions.assertThat(
+        recap.getVacationsCurrentYear().getAccrued()).isEqualTo(1);
+    org.assertj.core.api.Assertions.assertThat(
+        recap.getVacationsCurrentYear().getNotYetUsedAccrued()).isEqualTo(1);
+    org.assertj.core.api.Assertions.assertThat(
+        recap.getVacationsCurrentYear().getNotYetUsedTakeable()).isEqualTo(26);
   }
 
   /**
@@ -196,14 +233,20 @@ public class VacationsRecapTest {
     final VacationsRecap recap = new VacationsRecapBuilder().buildVacationRecap(
         2016, contract, absencesToConsider, accruedDate, expireDateLastYear, expireDateCurrentYear);
 
-    assertThat(recap.getVacationsCurrentYear().getTotalResult().getAccrued()).isEqualTo(29);
-    assertThat(recap.getVacationsCurrentYear().getTotalResult().getFixed()).isEqualTo(-1);
-    assertThat(recap.getVacationsCurrentYear().getAccruedResult().getAccrued()).isEqualTo(0);
+    org.assertj.core.api.Assertions.assertThat(
+        recap.getVacationsCurrentYear().getTotalResult().getAccrued()).isEqualTo(29);
+    org.assertj.core.api.Assertions.assertThat(
+        recap.getVacationsCurrentYear().getTotalResult().getFixed()).isEqualTo(-1);
+    org.assertj.core.api.Assertions.assertThat(
+        recap.getVacationsCurrentYear().getAccruedResult().getAccrued()).isEqualTo(0);
 
-    assertThat(recap.getVacationsCurrentYear().getTotal()).isEqualTo(28);
+    org.assertj.core.api.Assertions.assertThat(
+        recap.getVacationsCurrentYear().getTotal()).isEqualTo(28);
     // FIXME: le accrued dovrebbero avere il limite inferiore zero. Modificare l'algoritmo.
-    assertThat(recap.getVacationsCurrentYear().getAccrued()).isEqualTo(-1);
-    assertThat(recap.getVacationsCurrentYear().getNotYetUsedTakeable()).isEqualTo(28);
+    org.assertj.core.api.Assertions.assertThat(
+        recap.getVacationsCurrentYear().getAccrued()).isEqualTo(-1);
+    org.assertj.core.api.Assertions.assertThat(
+        recap.getVacationsCurrentYear().getNotYetUsedTakeable()).isEqualTo(28);
   }
   
   /**
@@ -239,12 +282,14 @@ public class VacationsRecapTest {
     final VacationsRecap recap2016 = new VacationsRecapBuilder().buildVacationRecap(
         2016, contract, Lists.newArrayList(), LocalDate.now(), expireDate2015, expireDate2016);
     
-    assertThat(recap2016.getVacationsCurrentYear().getNotYetUsedTotal()).isEqualTo(23);
+    org.assertj.core.api.Assertions.assertThat(
+        recap2016.getVacationsCurrentYear().getNotYetUsedTotal()).isEqualTo(23);
     
     final VacationsRecap recap2017 = new VacationsRecapBuilder().buildVacationRecap(
         2017, contract, Lists.newArrayList(), LocalDate.now(), expireDate2016, expireDate2017);
     
-    assertThat(recap2017.getVacationsLastYear().getNotYetUsedTotal()).isEqualTo(23);
+    org.assertj.core.api.Assertions.assertThat(
+        recap2017.getVacationsLastYear().getNotYetUsedTotal()).isEqualTo(23);
     
   }
   

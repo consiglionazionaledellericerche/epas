@@ -11,6 +11,11 @@ import dao.PersonDao;
 
 import it.cnr.iit.epas.NullStringBinder;
 
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
+
 import manager.ConsistencyManager;
 import manager.OfficeManager;
 import manager.PersonDayManager;
@@ -32,14 +37,10 @@ import org.joda.time.Minutes;
 
 import play.data.binding.As;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
-
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
 
 @With(Resecure.class)
 public class Clocks extends Controller {
@@ -156,7 +157,7 @@ public class Clocks extends Controller {
    */
   public static void webStamping(@Required WayType wayType) {
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       flash.error("E' necessario indicare un verso corretto per la timbratura");
       daySituation();
     }
@@ -197,7 +198,7 @@ public class Clocks extends Controller {
 
     validation.valid(stamping);
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       flash.error("Timbratura mal formata. Impossibile salvarla");
       daySituation();
     }

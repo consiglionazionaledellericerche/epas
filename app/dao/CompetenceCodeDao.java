@@ -3,12 +3,12 @@ package dao;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import models.CompetenceCode;
@@ -79,7 +79,8 @@ public class CompetenceCodeDao extends DaoBase {
   /**
    * 
    * @param limitType il tipo di limite di utilizzo del codice di competenza
-   * @return la lista dei codici di competenza con limit type uguale a quello passato come parametro.
+   * @return la lista dei codici di competenza con limit type uguale a quello 
+   *     passato come parametro.
    */
   public List<CompetenceCode> getCompetenceCodeByLimitType(LimitType limitType) {
     

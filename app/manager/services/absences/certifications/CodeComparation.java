@@ -3,17 +3,16 @@ package manager.services.absences.certifications;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import manager.attestati.dto.show.CodiceAssenza;
-import manager.services.absences.certifications.CodeComparation.SuperCode;
 import manager.services.absences.enums.GroupEnum;
 
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Contiene la comparazione epas - attestati.

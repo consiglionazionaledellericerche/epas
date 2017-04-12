@@ -17,6 +17,17 @@ import dao.ShiftDao;
 
 import it.cnr.iit.epas.JsonShiftPeriodsBinder;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ShiftManager;
@@ -48,17 +59,6 @@ import play.i18n.Messages;
 import play.modules.pdf.PDF.Options;
 import play.mvc.Controller;
 import play.mvc.With;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-
-import javax.inject.Inject;
 
 
 /**

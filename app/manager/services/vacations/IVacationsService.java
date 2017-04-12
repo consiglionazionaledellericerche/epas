@@ -2,6 +2,8 @@ package manager.services.vacations;
 
 import com.google.common.base.Optional;
 
+import java.util.List;
+
 import models.Contract;
 import models.Office;
 import models.Person;
@@ -9,8 +11,6 @@ import models.absences.Absence;
 import models.absences.AbsenceType;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
 
 /**
  * Servizio ferie e permessi.

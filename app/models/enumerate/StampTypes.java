@@ -1,10 +1,10 @@
 package models.enumerate;
 
-import lombok.Getter;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import lombok.Getter;
 
 /**
  * @author cristian.
@@ -41,7 +41,7 @@ public enum StampTypes {
   REPERIBILITA("r", "reperibilita", "Reperibilità ", false, false),
   INTRAMOENIA("i", "intramoenia", "Intramoenia", false, false),
   GUARDIA_MEDICA("gm", "guardiaMedica", "Guardia Medica" ,false, false),
-  PERMESSO_BREVE("pb", "permessoBreve", "Permesso Breve", false, false);
+  PERMESSO_BREVE("pb", "permessoBreve", "Permesso Breve", false, true);
 
   private String identifier;
   private String code;

@@ -1,0 +1,120 @@
+#{modalAsync title: 'Inizializza buoni pasto ' + contract.person.fullname }
+
+  #{if !wrContract.initializationMissing()}  
+  <div id="sourceMeal">    
+     
+       <!-- Alert: Warning inizializzazione buoni pasto precedente a quella generale -->
+       #{if wrContract.mealTicketInitBeforeGeneralInit() }
+        #{alert color:'warning'}
+	      <p>
+	        <i class="fa fa-2x fa-warning bg-warning"></i>
+	        L'inizializzazione esistente dei buoni pasto alla data <strong>${wrContract.value.sourceDateMealTicket.format()}</strong> 
+	        precede l'inizializzazione generale definita in data <strong>${wrContract.value.sourceDateResidual.format()}</strong>. 
+	        Ai fini del calcolo viene quindi ignorata.
+	      </p>
+	       
+	      <p>
+	        Per convenienza si consiglia di definire una inizializzazione del residuo buoni
+	        pasto con data uguale o successiva a quella dell'inizializzazione generale quando presente</strong>.
+	      </p>
+	      <p>   
+	        In alternativa eliminare l'inizializzazione buoni pasto esistente svuotando il campo <strong>Data Inizializzazione</strong>
+	      </p>
+	      
+        #{/alert}
+       #{/if}
+       <!-- Alert: Success inizializzazione buoni pasto impostata -->
+       #{elseif wrContract.value.sourceDateMealTicket}
+        #{alert color:'success'}
+		  <p>
+           <i class="fa fa-2x fa-check bg-success"></i> Esiste già una inizializzazione buoni pasto definita alla data <strong>${wrContract.value.sourceDateMealTicket.format()}</strong>
+          </p>
+          <p>
+            Se si desidera modificare la data e l'inizializzazione esistente consigliamo di scegliere una data uguale o successiva al 
+		    <strong>${wrContract.dateForMealInitialization().format()}</strong> e impostare nuovamente il valore dai buoni pasto residui.
+		  </p>
+		  <p>
+            Se si desidera rimuovere questa inizializzazione svuotare il campo <strong>Data inizializzazione</strong>.
+		  </p>
+         #{/alert}
+       #{/elseif}
+       <!-- Alert: Success inizializzazione buoni pasto non impostata -->
+       #{else}
+         #{alert color:'success'}
+         <p>
+		   Se si desidera definire l'inizializzazione scegliere una data uguale o successiva al 
+		   <strong>${wrContract.dateForMealInitialization().format()}</strong>.
+		 </p> 
+		 #{/alert}
+       #{/else}
+       
+       #{alert color:'info'}
+		  <p>
+          	Inserire i buoni pasto residui del dipendente alla fine della giornata specificata nel campo 
+          	<strong>Data Inizializzazione</strong>.  
+  		  </p> 
+       #{/alert}
+       
+       <!-- Form di input -->		
+	   #{if !confirmedMeal}
+	      #{form @Contracts.saveMealTicketSourceContract(), 'method':'POST', class:'form-horizontal', 
+            'data-async':'#sourceMeal', 'data-async-error':'#sourceMeal', 'data-spinner':'#defaultSpinner'}
+	        
+	        <input type="hidden" name="contract.id" value="${contract.id}" />
+		    #{f.date 'sourceDateMealTicket', value:contract.sourceDateMealTicket?.format(), biglabel:true  /}
+		    #{f.input 'contract.sourceRemainingMealTicket', biglabel:true  /}
+
+			#{secure.check 'Contracts.saveMealTicketSourceContract'}
+			  #{b.buttons center:true}
+                #{b.submit 'Salva'/}
+			  #{/b.buttons}
+			#{/secure.check}
+	   	  #{/form}
+	   #{/if}
+       <!-- Form di conferma -->	
+	   #{else}
+	   
+	     #{form @Contracts.saveMealTicketSourceContract(), 'method':'POST', class:'form-horizontal', 
+           'data-async':'#page_content', 'data-async-error':'#sourceMeal', 'data-spinner':'#defaultSpinner'}
+			
+			<input type="hidden" name="contract.id" value="${contract.id}" />
+			#{f.hidden 'confirmedMeal', value:true /}
+			#{f.simpleView 'sourceDateMealTicket', value:sourceDateMealTicket.format(), biglabel:true, hidden:true /}
+			#{f.simpleView 'contract.sourceRemainingMealTicket', biglabel:true, hidden:true /}
+			
+		    #{if sourceNew}
+		      #{alert color:'warning'}
+				Verranno rigenerati i riepiloghi mensili della persona a partire dal giorno 
+				<strong>${recomputeFrom.format()}</strong> a quello attuale  
+				per un totale di <strong>${months}</strong> mesi.
+		      #{/alert}
+		    #{/if}
+		    #{if sourceUpdate}
+		      #{alert color:'warning'}
+		        #{if sourceDateMealTicket}
+		          La definizione di questa inizializzazione sovrascriverà quella esistente 
+				  impostata alla data <strong>${contract.sourceDateMealTicket.format()}</strong><br>
+				  Verranno rigenerati i riepiloghi mensili della persona 
+		        #{/if}#{else}
+		          La rimozione di questa inizializzazione definita alla data <strong>${contract.sourceDateMealTicket.format()}</strong>
+		          comporterà il ricalcolo dei riepiloghi mensili della persona
+		        #{/else}
+		        a partire dal giorno 
+				  <strong>${recomputeFrom.format()}</strong> a quello attuale 
+				  per un totale di <strong>${months}</strong> mesi.	      
+		      #{/alert} 
+		    #{/if}
+		    
+		    #{b.buttons center:true}
+              #{b.submit 'Conferma'/}
+            #{/b.buttons}
+         
+         #{/form}
+	  
+	   #{/else}
+       
+  </div>
+  #{/if}
+
+#{/modalAsync}        
+

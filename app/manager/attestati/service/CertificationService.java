@@ -12,6 +12,11 @@ import dao.CompetenceDao;
 import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.PersonDayManager;
@@ -36,11 +41,6 @@ import org.joda.time.YearMonth;
 
 import play.libs.WS.HttpResponse;
 import play.mvc.Http;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Funzionalità integrazione ePAS - Nuovo Attestati.
@@ -154,7 +154,8 @@ public class CertificationService implements ICertificationService {
   }
 
   /* (non-Javadoc)
-   * @see manager.attestati.service.ICertificationService#buildPersonStaticStatus(models.Person, int, int)
+   * @see manager.attestati.service.ICertificationService#buildPersonStaticStatus(
+   *    models.Person, int, int)
    */
   @Override
   public PersonCertData buildPersonStaticStatus(Person person, int year, int month)
@@ -273,7 +274,8 @@ public class CertificationService implements ICertificationService {
   }
 
   /* (non-Javadoc)
-   * @see manager.attestati.service.ICertificationService#certificationsEquivalent(java.util.Map, java.util.Map)
+   * @see manager.attestati.service.ICertificationService#certificationsEquivalent(
+   *    java.util.Map, java.util.Map)
    */
   @Override
   public boolean certificationsEquivalent(Map<String, Certification> map1,
@@ -301,7 +303,8 @@ public class CertificationService implements ICertificationService {
   }
 
   /* (non-Javadoc)
-   * @see manager.attestati.service.ICertificationService#process(manager.attestati.service.PersonCertData)
+   * @see manager.attestati.service.ICertificationService#process(
+   *    manager.attestati.service.PersonCertData)
    */
   // TODO Questa parte andrebbe resa più semplice perchè per trasmettere le informazioni
   // ad attestati sono costretto ad avere un PersonCertData che è il risultato
@@ -631,7 +634,8 @@ public class CertificationService implements ICertificationService {
   }
 
   /* (non-Javadoc)
-   * @see manager.attestati.service.ICertificationService#emptyAttestati(manager.attestati.service.PersonCertData)
+   * @see manager.attestati.service.ICertificationService#emptyAttestati(
+   *    manager.attestati.service.PersonCertData)
    */
   @Override
   public PersonCertData emptyAttestati(

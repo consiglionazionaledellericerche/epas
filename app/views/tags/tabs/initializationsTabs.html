@@ -1,0 +1,20 @@
+*{
+  action: ['initializationsStatus', 'initializationsMeal']
+  office:
+}*
+
+<div id="container-nav-tabs" class="container">
+  <ul class="nav nav-tabs">
+  
+       <li #{if _action.equals('initializationsStatus')} class="active" #{/if}>
+         <a href="@{Contracts.initializationsStatus(session.get("officeSelected"))}">Inizializzazione Generale</a>
+       </li>
+       <li #{if _action.equals('initializationsMeal')} class="active" #{/if}>
+         <a href="@{Contracts.initializationsMeal(session.get("officeSelected"))}">Inizializzazione Buoni Pasto</a>
+       </li>
+       <li #{if _action.equals('AbsenceGroups.absenceInitializations')} class="active" #{/if}>
+           <a href="@{AbsenceGroups.absenceInitializations(session.get("officeSelected"))}">Inizializzazione Assenze</a>
+       </li>
+
+  </ul>
+</div>

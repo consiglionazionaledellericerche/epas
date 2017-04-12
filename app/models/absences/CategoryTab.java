@@ -2,10 +2,6 @@ package models.absences;
 
 import com.google.common.collect.Sets;
 
-import models.base.BaseModel;
-
-import org.hibernate.envers.Audited;
-
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -13,6 +9,10 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import models.base.BaseModel;
+
+import org.hibernate.envers.Audited;
 
 @Audited
 @Entity

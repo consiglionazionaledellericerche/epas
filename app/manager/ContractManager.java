@@ -9,6 +9,10 @@ import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
 import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractStampProfile;
@@ -21,10 +25,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 import play.db.jpa.JPA;
-
-import java.util.List;
-
-import javax.inject.Inject;
 
 
 /**
@@ -327,9 +327,6 @@ public class ContractManager {
     }
     if (contract.sourceRemainingMealTicket == null) {
       contract.sourceRemainingMealTicket = 0;
-    }
-    if (contract.sourceDateMealTicket == null && contract.sourceDateResidual != null) {
-      contract.sourceDateMealTicket = contract.sourceDateResidual;
     }
     contract.save();
   }

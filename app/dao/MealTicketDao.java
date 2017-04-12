@@ -3,12 +3,15 @@ package dao;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import it.cnr.iit.epas.DateInterval;
+
+import java.util.List;
+
+import javax.persistence.EntityManager;
 
 import manager.services.mealtickets.MealTicketsServiceImpl.MealTicketOrder;
 
@@ -20,10 +23,6 @@ import models.query.QMealTicket;
 import models.query.QPerson;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
-
-import javax.persistence.EntityManager;
 
 /**
  * DAO per i MealTicket.

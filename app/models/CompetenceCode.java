@@ -2,16 +2,6 @@ package models;
 
 import com.google.common.collect.Lists;
 
-import models.base.BaseModel;
-import models.enumerate.LimitType;
-import models.enumerate.LimitUnit;
-
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
-
-import play.data.validation.Required;
-import play.data.validation.Unique;
-
 import java.util.List;
 
 import javax.persistence.Column;
@@ -22,6 +12,16 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import models.base.BaseModel;
+import models.enumerate.LimitType;
+import models.enumerate.LimitUnit;
+
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+
+import play.data.validation.Required;
+import play.data.validation.Unique;
 
 
 /**

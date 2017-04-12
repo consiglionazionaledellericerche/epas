@@ -4,13 +4,16 @@ import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import helpers.jpa.ModelQuery;
 import helpers.jpa.ModelQuery.SimpleResults;
+
+import java.util.List;
+
+import javax.persistence.EntityManager;
 
 import models.Institute;
 import models.Office;
@@ -19,10 +22,6 @@ import models.User;
 import models.query.QInstitute;
 import models.query.QOffice;
 import models.query.QUsersRolesOffices;
-
-import java.util.List;
-
-import javax.persistence.EntityManager;
 
 /**
  * Dao per gli uffici.

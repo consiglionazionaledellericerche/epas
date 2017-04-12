@@ -7,6 +7,15 @@ import com.google.gson.JsonParser;
 
 import dao.PersonDao;
 
+import injection.StaticInject;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import models.Person;
@@ -15,17 +24,9 @@ import models.exports.ReperibilityPeriods;
 
 import org.joda.time.LocalDate;
 
-import injection.StaticInject;
 import play.Logger;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
 
 /**
  * Binder per il json dei periodi di reperibilità.
@@ -90,9 +91,9 @@ public class JsonReperibilityPeriodsBinder implements TypeBinder<ReperibilityPer
 
       return new ReperibilityPeriods(reperibilityPeriods);
 
-    } catch (Exception e) {
-      Logger.error(e, "Problem during binding List<ReperibilityPeriod>.");
-      throw e;
+    } catch (Exception ex) {
+      Logger.error(ex, "Problem during binding List<ReperibilityPeriod>.");
+      throw ex;
     }
   }
 

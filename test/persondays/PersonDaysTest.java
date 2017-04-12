@@ -1,9 +1,9 @@
 package persondays;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+
+import java.util.List;
 
 import manager.PersonDayManager;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
@@ -18,11 +18,11 @@ import models.enumerate.StampTypes;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
-import java.util.List;
+import play.test.UnitTest;
 
-public class PersonDaysTest {
+public class PersonDaysTest extends UnitTest {
 
   public static LocalTime startLunch = new LocalTime(1,0,0);
   public static LocalTime endLunch = new LocalTime(23,0,0);
@@ -61,12 +61,15 @@ public class PersonDaysTest {
     personDayManager.updateProgressive(personDay, Optional.fromNullable(previousForProgressive));
     personDayManager.updateTicketAvailable(personDay, normalDay(), false);
     
-    assertThat(personDay.getTimeAtWork()).isEqualTo(390);   //6:30 ore
-    assertThat(personDay.getStampingsTime()).isEqualTo(420);//7:00 ore     
-    assertThat(personDay.getDecurted()).isEqualTo(30);      //30 minuti
-    assertThat(personDay.getDifference()).isEqualTo(-42);
-    assertThat(personDay.getProgressive()).isEqualTo(18);
-    assertThat(personDay.isTicketAvailable).isEqualTo(true);
+    org.assertj.core.api.Assertions.assertThat(
+        personDay.getTimeAtWork()).isEqualTo(390);   //6:30 ore
+    org.assertj.core.api.Assertions.assertThat(
+        personDay.getStampingsTime()).isEqualTo(420);//7:00 ore     
+    org.assertj.core.api.Assertions.assertThat(
+        personDay.getDecurted()).isEqualTo(30);      //30 minuti
+    org.assertj.core.api.Assertions.assertThat(personDay.getDifference()).isEqualTo(-42);
+    org.assertj.core.api.Assertions.assertThat(personDay.getProgressive()).isEqualTo(18);
+    org.assertj.core.api.Assertions.assertThat(personDay.isTicketAvailable).isEqualTo(true);
     
   }
   
@@ -90,10 +93,14 @@ public class PersonDaysTest {
         startLunch, endLunch, startWork, endWork);
     personDayManager.updateTicketAvailable(personDay, normalDay(), false);
     
-    assertThat(personDay.getTimeAtWork()).isEqualTo(420);   //7:00 ore
-    assertThat(personDay.getStampingsTime()).isEqualTo(420);//7:00 ore     
-    assertThat(personDay.getDecurted()).isEqualTo(null);      //00 minuti
-    assertThat(personDay.isTicketAvailable).isEqualTo(true);
+    org.assertj.core.api.Assertions.assertThat(
+        personDay.getTimeAtWork()).isEqualTo(420);   //7:00 ore
+    org.assertj.core.api.Assertions.assertThat(
+        personDay.getStampingsTime()).isEqualTo(420);//7:00 ore     
+    org.assertj.core.api.Assertions.assertThat(
+        personDay.getDecurted()).isEqualTo(null);      //00 minuti
+    org.assertj.core.api.Assertions.assertThat(
+        personDay.isTicketAvailable).isEqualTo(true);
     
   }
   
@@ -118,7 +125,7 @@ public class PersonDaysTest {
     stamps.add(stampings(personDay, 15, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO));
     stamps.add(stampings(personDay, 19, 30, WayType.out, null));
     personDayManager.setValidPairStampings(personDay.stampings);
-    assertThat(personDayManager.allValidStampings(personDay));
+    org.assertj.core.api.Assertions.assertThat(personDayManager.allValidStampings(personDay));
 
     //coppia valida con dentro timbrature di servizio con ordine sparso ok 
     personDay = new PersonDay(null, second);
@@ -129,7 +136,7 @@ public class PersonDaysTest {
     stamps.add(stampings(personDay, 16, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO));
     stamps.add(stampings(personDay, 19, 30, WayType.out, null));
     personDayManager.setValidPairStampings(personDay.stampings);
-    assertThat(personDayManager.allValidStampings(personDay));
+    org.assertj.core.api.Assertions.assertThat(personDayManager.allValidStampings(personDay));
 
     //coppia non valida 
     personDay = new PersonDay(null, second);
@@ -138,15 +145,17 @@ public class PersonDaysTest {
     stamps.add(stampings(personDay, 15, 30, WayType.in, null));
     stamps.add(stampings(personDay, 19, 30, WayType.out, null));
     personDayManager.setValidPairStampings(personDay.stampings);
-    assertThat(!personDayManager.allValidStampings(personDay));
+    org.assertj.core.api.Assertions.assertThat(!personDayManager.allValidStampings(personDay));
 
   }
   
   @Test
   public void consideredGapLunchPairsOutOfSite() {
     
-    assertThat(StampTypes.LAVORO_FUORI_SEDE.isGapLunchPairs()).isEqualTo(true);
-    assertThat(StampTypes.PAUSA_PRANZO.isGapLunchPairs()).isEqualTo(true);
+    org.assertj.core.api.Assertions.assertThat(
+        StampTypes.LAVORO_FUORI_SEDE.isGapLunchPairs()).isEqualTo(true);
+    org.assertj.core.api.Assertions.assertThat(
+        StampTypes.PAUSA_PRANZO.isGapLunchPairs()).isEqualTo(true);
     
     PersonDay personDay = new PersonDay(null, second);
     List<Stamping> stampings = Lists.newArrayList();
@@ -162,10 +171,14 @@ public class PersonDaysTest {
         startLunch, endLunch, startWork, endWork);
     personDayManager.updateTicketAvailable(personDay, normalDay(), false);
     
-    assertThat(personDay.getTimeAtWork()).isEqualTo(420);     //7:00 ore
-    assertThat(personDay.getStampingsTime()).isEqualTo(420);  //7:00 ore     
-    assertThat(personDay.getDecurted()).isEqualTo(null);      //00 minuti
-    assertThat(personDay.isTicketAvailable).isEqualTo(true);
+    org.assertj.core.api.Assertions.assertThat(
+        personDay.getTimeAtWork()).isEqualTo(420);     //7:00 ore
+    org.assertj.core.api.Assertions.assertThat(
+        personDay.getStampingsTime()).isEqualTo(420);  //7:00 ore     
+    org.assertj.core.api.Assertions.assertThat(
+        personDay.getDecurted()).isEqualTo(null);      //00 minuti
+    org.assertj.core.api.Assertions.assertThat(
+        personDay.isTicketAvailable).isEqualTo(true);
     
     // # anche le coppie che hanno due causali diverse ma che hanno il parametro gapLunchPairs true
     
@@ -183,10 +196,14 @@ public class PersonDaysTest {
         startLunch, endLunch, startWork, endWork);
     personDayManager.updateTicketAvailable(personDay, normalDay(), false);
     
-    assertThat(personDay.getTimeAtWork()).isEqualTo(420);     //7:00 ore
-    assertThat(personDay.getStampingsTime()).isEqualTo(420);  //7:00 ore     
-    assertThat(personDay.getDecurted()).isEqualTo(null);      //00 minuti
-    assertThat(personDay.isTicketAvailable).isEqualTo(true);
+    org.assertj.core.api.Assertions.assertThat(
+        personDay.getTimeAtWork()).isEqualTo(420);     //7:00 ore
+    org.assertj.core.api.Assertions.assertThat(
+        personDay.getStampingsTime()).isEqualTo(420);  //7:00 ore     
+    org.assertj.core.api.Assertions.assertThat(
+        personDay.getDecurted()).isEqualTo(null);      //00 minuti
+    org.assertj.core.api.Assertions.assertThat(
+        personDay.isTicketAvailable).isEqualTo(true);
     
   }
   
@@ -202,8 +219,10 @@ public class PersonDaysTest {
 
     PersonDay personDay = new PersonDay(null, second);
 
-    assertThat(lunchST.isGapLunchPairs()).isEqualTo(true);
-    assertThat(StampTypes.MOTIVI_PERSONALI.isGapLunchPairs()).isEqualTo(false);
+    org.assertj.core.api.Assertions.assertThat(
+        lunchST.isGapLunchPairs()).isEqualTo(true);
+    org.assertj.core.api.Assertions.assertThat(
+        StampTypes.MOTIVI_PERSONALI.isGapLunchPairs()).isEqualTo(false);
 
     // #1
     List<Stamping> stampings = Lists.newArrayList();
@@ -216,8 +235,8 @@ public class PersonDaysTest {
     List<PairStamping> gapLunchPair = 
         personDayManager.getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());
 
-    assertThat(gapLunchPair.size()).isEqualTo(1);
-    assertThat(gapLunchPair.get(0).timeInPair).isEqualTo(60);
+    org.assertj.core.api.Assertions.assertThat(gapLunchPair.size()).isEqualTo(1);
+    org.assertj.core.api.Assertions.assertThat(gapLunchPair.get(0).timeInPair).isEqualTo(60);
 
     stampings = Lists.newArrayList();
     stampings.add(stampings(personDay, 13, 00, WayType.out, lunchST));
@@ -230,9 +249,9 @@ public class PersonDaysTest {
     gapLunchPair = personDayManager
         .getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());
     
-    assertThat(validPairs.size()).isEqualTo(1);
-    assertThat(validPairs.get(0).timeInPair).isEqualTo(180);
-    assertThat(gapLunchPair.size()).isEqualTo(0);
+    org.assertj.core.api.Assertions.assertThat(validPairs.size()).isEqualTo(1);
+    org.assertj.core.api.Assertions.assertThat(validPairs.get(0).timeInPair).isEqualTo(180);
+    org.assertj.core.api.Assertions.assertThat(gapLunchPair.size()).isEqualTo(0);
 
 
     // #2
@@ -245,8 +264,8 @@ public class PersonDaysTest {
     gapLunchPair = personDayManager
         .getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());
     
-    assertThat(gapLunchPair.size()).isEqualTo(1);
-    assertThat(gapLunchPair.get(0).timeInPair).isEqualTo(60);
+    org.assertj.core.api.Assertions.assertThat(gapLunchPair.size()).isEqualTo(1);
+    org.assertj.core.api.Assertions.assertThat(gapLunchPair.get(0).timeInPair).isEqualTo(60);
     
     stampings = Lists.newArrayList();
     stampings.add(stampings(personDay, 13, 00, WayType.out, lunchST));
@@ -258,9 +277,9 @@ public class PersonDaysTest {
     gapLunchPair = personDayManager
         .getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());
     
-    assertThat(validPairs.size()).isEqualTo(1);
-    assertThat(validPairs.get(0).timeInPair).isEqualTo(180);
-    assertThat(gapLunchPair.size()).isEqualTo(0);
+    org.assertj.core.api.Assertions.assertThat(validPairs.size()).isEqualTo(1);
+    org.assertj.core.api.Assertions.assertThat(validPairs.get(0).timeInPair).isEqualTo(180);
+    org.assertj.core.api.Assertions.assertThat(gapLunchPair.size()).isEqualTo(0);
      
     // #3
     stampings = Lists.newArrayList();
@@ -273,8 +292,8 @@ public class PersonDaysTest {
     gapLunchPair = personDayManager
         .getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());
     
-    assertThat(gapLunchPair.size()).isEqualTo(1);
-    assertThat(gapLunchPair.get(0).timeInPair).isEqualTo(60);
+    org.assertj.core.api.Assertions.assertThat(gapLunchPair.size()).isEqualTo(1);
+    org.assertj.core.api.Assertions.assertThat(gapLunchPair.get(0).timeInPair).isEqualTo(60);
     
     stampings = Lists.newArrayList();
     stampings.add(stampings(personDay, 13, 00, WayType.out, null));
@@ -286,9 +305,9 @@ public class PersonDaysTest {
     gapLunchPair = personDayManager
         .getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());
     
-    assertThat(validPairs.size()).isEqualTo(1);
-    assertThat(validPairs.get(0).timeInPair).isEqualTo(180);
-    assertThat(gapLunchPair.size()).isEqualTo(0);
+    org.assertj.core.api.Assertions.assertThat(validPairs.size()).isEqualTo(1);
+    org.assertj.core.api.Assertions.assertThat(validPairs.get(0).timeInPair).isEqualTo(180);
+    org.assertj.core.api.Assertions.assertThat(gapLunchPair.size()).isEqualTo(0);
     
     // # L'ingresso post pranzo deve essere coerente.
     stampings = Lists.newArrayList();
@@ -302,8 +321,8 @@ public class PersonDaysTest {
     gapLunchPair = personDayManager
         .getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());
     
-    assertThat(validPairs.size()).isEqualTo(2);
-    assertThat(gapLunchPair.size()).isEqualTo(0);
+    org.assertj.core.api.Assertions.assertThat(validPairs.size()).isEqualTo(2);
+    org.assertj.core.api.Assertions.assertThat(gapLunchPair.size()).isEqualTo(0);
        
     stampings = Lists.newArrayList();
     stampings.add(stampings(personDay, 8, 00, WayType.in, null));
@@ -322,7 +341,7 @@ public class PersonDaysTest {
     gapLunchPair = personDayManager
         .getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());
     
-    assertThat(gapLunchPair.size()).isEqualTo(0);
+    org.assertj.core.api.Assertions.assertThat(gapLunchPair.size()).isEqualTo(0);
     
     
   }
@@ -350,12 +369,18 @@ public class PersonDaysTest {
         Optional.fromNullable(previousForProgressive), normalDay(), false,
         new LocalTimeInterval(startLunch, endLunch), new LocalTimeInterval(startWork, endWork));
     
-    assertThat(personDay.getTimeAtWork()).isEqualTo(390);   //6:30 ore
-    assertThat(personDay.getStampingsTime()).isEqualTo(420);//7:00 ore     
-    assertThat(personDay.getDecurted()).isEqualTo(30);      //30 minuti
-    assertThat(personDay.getDifference()).isEqualTo(-42);
-    assertThat(personDay.getProgressive()).isEqualTo(18);
-    assertThat(personDay.isTicketAvailable).isEqualTo(true);
+    org.assertj.core.api.Assertions.assertThat(
+        personDay.getTimeAtWork()).isEqualTo(390);   //6:30 ore
+    org.assertj.core.api.Assertions.assertThat(
+        personDay.getStampingsTime()).isEqualTo(420);//7:00 ore     
+    org.assertj.core.api.Assertions.assertThat(
+        personDay.getDecurted()).isEqualTo(30);      //30 minuti
+    org.assertj.core.api.Assertions.assertThat(
+        personDay.getDifference()).isEqualTo(-42);
+    org.assertj.core.api.Assertions.assertThat(
+        personDay.getProgressive()).isEqualTo(18);
+    org.assertj.core.api.Assertions.assertThat(
+        personDay.isTicketAvailable).isEqualTo(true);
     
     //Caso con uscita per pranzo
     personDay = new PersonDay(null, second);
@@ -373,8 +398,8 @@ public class PersonDaysTest {
         Optional.fromNullable(previousForProgressive), normalDay(), false,
         new LocalTimeInterval(startLunch12, endLunch15), new LocalTimeInterval(startWork, endWork));
 
-    assertThat(personDay.getTimeAtWork()).isEqualTo(480);   //8 ore
-    assertThat(personDay.isTicketAvailable).isEqualTo(true);
+    org.assertj.core.api.Assertions.assertThat(personDay.getTimeAtWork()).isEqualTo(480);   //8 ore
+    org.assertj.core.api.Assertions.assertThat(personDay.isTicketAvailable).isEqualTo(true);
     
   }
 

@@ -9,6 +9,9 @@ import com.google.inject.Inject;
 import dao.OfficeDao;
 import dao.UsersRolesOfficesDao;
 
+import java.util.List;
+import java.util.Set;
+
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType;
@@ -21,9 +24,6 @@ import models.User;
 import models.UsersRolesOffices;
 
 import play.Play;
-
-import java.util.List;
-import java.util.Set;
 
 public class OfficeManager {
 

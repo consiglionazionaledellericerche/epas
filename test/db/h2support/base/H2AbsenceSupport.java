@@ -12,6 +12,8 @@ import db.h2support.base.AbsenceDefinitions.ComplationBehaviourDefinition;
 import db.h2support.base.AbsenceDefinitions.GroupAbsenceTypeDefinition;
 import db.h2support.base.AbsenceDefinitions.TakableBehaviourDefinition;
 
+import java.util.Set;
+
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.ComplationAbsenceBehaviour;
@@ -21,8 +23,6 @@ import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 
 import org.joda.time.LocalDate;
-
-import java.util.Set;
 
 public class H2AbsenceSupport {
   

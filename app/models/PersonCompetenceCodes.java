@@ -1,14 +1,14 @@
 package models;
 
-import models.base.PeriodModel;
-
-import play.data.validation.Required;
-
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import models.base.PeriodModel;
+
+import play.data.validation.Required;
 
 /**
  * 
