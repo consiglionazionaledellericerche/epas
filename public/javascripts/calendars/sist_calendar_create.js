@@ -1308,8 +1308,6 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 									jQuery('#calendar').fullCalendar('renderEvent', event, true);
 									indexRep++;
 
-									//console.log("NORMALE event.end=" + event.end); 
-									// set data.end = data.start for check problem
 									if (event.end == null) {	
 										event.end = event.start;
 									}
@@ -1360,8 +1358,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 		            
 		            jsonAbsParameter = noDuplicate(jsonAbsParameter);
 		            data.push(jsonAbsParameter);
-		            //console.log("jsonAbsParameter: "+jsonAbsParameter);
-
+		            
 		            var absentPerson = _RestJsonCall (uriFerieToGet, 'POST', false, jsonAbsParameter);
 		
 		            var indexVac = 0;
@@ -1371,13 +1368,11 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 			              event['borderColor'] = 'red';
 			              event['personId'] = event.personId;
 			              event['title'] = 'Assenza ' + idToName[event.personId];
-			    		//event['start'] = event.dateFrom;
-    					//event['end'] = event.dateTo;
+			              event['start'] = jQuery.fullCalendar.moment(event.start).format();
+			              event['end'] = jQuery.fullCalendar.moment(event.end).add(1, 'days');
 			              event['id'] = 'assenza-' + event.personId + '-' + indexVac;
-			              //console.log("assenza di " + idToName[event.personId] + "event.personId="+event.personId);
-			              
-			             // event.color = 'yellow';
-			              events.push(event);
+			             			             
+			              //events.push(event);
 			              jQuery('#calendar').fullCalendar('renderEvent', event, true);
 			              indexVac++;
 
