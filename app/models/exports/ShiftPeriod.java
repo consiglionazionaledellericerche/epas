@@ -60,10 +60,12 @@ public class ShiftPeriod {
 
   // for cancelled shift
   public ShiftPeriod(LocalDate start, LocalDate end, ShiftType shiftType,
-      boolean cancelled) {
+      boolean cancelled, LocalTime startSlot, LocalTime endSlot) {
     this.start = start;
     this.end = end;
     this.shiftType = shiftType;
     this.cancelled = cancelled;
+    this.startSlot = startSlot;
+    this.endSlot = endSlot;
   }
 }
