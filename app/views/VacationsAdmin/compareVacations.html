@@ -15,31 +15,25 @@
 
 <div class="container">
   
+   #{alert color:'info'}
+     <p>Ferie Anno Precedente ${(year -1)}
+   #{/alert}
    <table  class="table table-hover table-bordered table-condensed center" datatable width="100%">
 	<thead>
 		<tr>
 		    <th>Nome</th>
 		    
 		    <!-- 2016 -->
-		    <th>2016 <br>TOT</th>
-		    <th>2016 <br>TOT NEW</th>
-		    <th>2016 <br>MAT</th>
-		    <th>2016 <br>MAT NEW</th>
+		    <th>Totali</th>
+		    <th>Totali New</th>
+		    <th>Maturate</th>
+		    <th>Maturate New</th>
+		    <th>Inizio</th>
+		    <th>Inizio New</th>
+		    <th>Fine</th>
+		    <th>Fine New</th>
 		    *{ <th>2016 Att</th> }*
 		    
-		    <!-- 2017 -->
-		    <th>2017 <br>TOT</th>
-		    <th>2017 <br>TOT NEW</th>
-            <th>2017 <br>MAT</th>
-		    <th>2017 <br>MAT NEW</th>
-		    *{ <th>2017 Att</th> }*
-		    
-		    <!-- Permessi -->
-		    <th>P <br>TOT</th>
-		    <th>P <br>NEW</th>
-            <th>P <br>MAT</th>
-		    <th>P <br>MAT NEW</th>
-		    *{ <th>P Att</th> }*
 		</tr>	
 	</thead>
 
@@ -57,9 +51,61 @@
 			<td>${comparedVacation.newLastYearTotal()} (${comparedVacation.newLastYearPostPartum()})</td>
 			<td>${comparedVacation.oldLastYearAccrued()}</td>
 			<td>${comparedVacation.newLastYearAccrued()}</td>
+			
+			<td
+			#{if comparedVacation.oldLastYearContractLowerLimit()}><em><strong>${comparedVacation.oldLastYearLowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.oldLastYearLowerLimit().format()}#{/else}	
+			</td>
+			<td
+			#{if comparedVacation.newLastYearContractLowerLimit()}><em><strong>${comparedVacation.newLastYearLowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.newLastYearLowerLimit().format()}#{/else}	
+			</td>
+			<td
+			#{if comparedVacation.oldLastYearContractUpperLimit()}><em><strong>${comparedVacation.oldLastYearUpperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.oldLastYearUpperLimit().format()}#{/else}	
+			</td>
+			<td
+			#{if comparedVacation.newLastYearContractUpperLimit()}><em><strong>${comparedVacation.newLastYearUpperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.newLastYearUpperLimit().format()}#{/else}	
+			</td>
+			
+			
 			*{ questo dato andrebbe preso dal cruscotto 2016
             <td>${comparedVacation.attestatiLastYearTotal()}</td>
             }* 			
+
+		</tr>
+		#{/list}
+
+	</tbody>
+  </table>
+  
+  #{alert color:'info'}
+    <p>Ferie Anno Corrente ${(year)}
+  #{/alert}
+  <table  class="table table-hover table-bordered table-condensed center" datatable width="100%">
+	<thead>
+		<tr>
+		    <th>Nome</th>
+		    
+		    <!-- 2017 -->
+		    <th>Totali</th>
+		    <th>Totali New</th>
+		    <th>Maturate</th>
+		    <th>Maturate New</th>
+		    *{ <th>2017 Att</th> }*
+		    
+		</tr>	
+	</thead>
+
+	<tbody>
+		#{list items:comparedVacationList, as:'comparedVacation'}
+		
+		<tr #{if !comparedVacation.epasEquivalent()} class="bg-danger" #{/if}>
+
+			<td>
+			  ${comparedVacation.person.fullname}
+			</td>
             
             <!-- 2017 -->
   		    <td>${comparedVacation.oldCurrentYearTotal()} (${comparedVacation.oldCurrentYearPostPartum()})</td>
@@ -70,6 +116,37 @@
   		    <td>${comparedVacation.attestatiCurrentYearTotal()}</td>
   		    }*
 
+		</tr>
+		#{/list}
+
+	</tbody>
+  </table>  
+  #{alert color:'info'}
+    <p>Permessi ${(year)}
+  #{/alert}
+  <table  class="table table-hover table-bordered table-condensed center" datatable width="100%">
+	<thead>
+		<tr>
+		    <th>Nome</th>
+		    
+		    <!-- Permessi -->
+		    <th>Totali</th>
+		    <th>Totali New</th>
+		    <th>Maturate</th>
+		    <th>Maturate New</th>
+		    *{ <th>P Att</th> }*
+		</tr>	
+	</thead>
+
+	<tbody>
+		#{list items:comparedVacationList, as:'comparedVacation'}
+		
+		<tr #{if !comparedVacation.epasEquivalent()} class="bg-danger" #{/if}>
+
+			<td>
+			  ${comparedVacation.person.fullname}
+			</td>
+          
             <!-- Permessi -->
 			<td>${comparedVacation.oldPermissionTotal()} (${comparedVacation.oldPermissionPostPartum()})</td>
 			<td>${comparedVacation.newPermissionTotal()} (${comparedVacation.newPermissionPostPartum()})</td>
@@ -85,5 +162,6 @@
 
 	</tbody>
   </table>
+  
  
 </div>

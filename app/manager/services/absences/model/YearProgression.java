@@ -174,7 +174,7 @@ public enum YearProgression {
         return yearProgression;
       }
     }
-    throw new IllegalStateException();
+    return null; //throw new IllegalStateException();
   }
   
   public static YearProgression whichPermissionProgression(VacationCode vacationCode) {
@@ -183,7 +183,7 @@ public enum YearProgression {
         return yearProgression;
       }
     }
-    throw new IllegalStateException();
+    return null; //throw new IllegalStateException();
   }
 
 }

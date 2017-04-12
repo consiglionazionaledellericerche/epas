@@ -91,5 +91,9 @@ public class VacationPeriod extends PropertyInPeriod implements IPropertyInPerio
   public String getLabel() {
     return this.vacationCode.name;
   }
+  
+  public String toString() {
+    return "[" + beginDate + "," + endDate + "] " + vacationCode.name;
+  }
  
 }
