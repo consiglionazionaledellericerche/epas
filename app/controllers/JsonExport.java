@@ -8,6 +8,11 @@ import com.google.common.collect.FluentIterable;
 import dao.OfficeDao;
 import dao.PersonDao;
 
+import java.util.HashSet;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import models.Office;
@@ -17,11 +22,6 @@ import org.joda.time.LocalDate;
 
 import play.mvc.Controller;
 import play.mvc.With;
-
-import java.util.HashSet;
-import java.util.List;
-
-import javax.inject.Inject;
 
 /**
  * @author cristian

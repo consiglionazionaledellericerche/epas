@@ -3,10 +3,11 @@ package manager.cache;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.jpa.impl.JPAQueryFactory;
+
+import javax.persistence.EntityManager;
 
 import models.CompetenceCode;
 import models.query.QCompetenceCode;
@@ -14,8 +15,6 @@ import models.query.QCompetenceCode;
 import org.apache.commons.lang.NotImplementedException;
 
 import play.cache.Cache;
-
-import javax.persistence.EntityManager;
 
 public class CompetenceCodeManager {
 

@@ -7,14 +7,14 @@ import com.google.inject.Provider;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
+import java.util.List;
+
+import javax.persistence.EntityManager;
+
 import models.Badge;
 import models.BadgeReader;
 import models.Person;
 import models.query.QBadge;
-
-import java.util.List;
-
-import javax.persistence.EntityManager;
 
 public class BadgeDao extends DaoBase {
 

@@ -7,6 +7,9 @@ import com.google.inject.Inject;
 import dao.PersonDao;
 import dao.PersonDayDao;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.recaps.personstamping.PersonStampingDayRecap;
@@ -23,9 +26,6 @@ import models.exports.StampingFromClient;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 public class StampingManager {
@@ -198,7 +198,7 @@ public class StampingManager {
    * @param user     l'utente che vuole inserire la timbratura
    * @param employee la persona per cui si vuole inserire la timbratura
    * @return true se lo stampType relativo alla timbratura da inserire è tra quelli previsti per la
-   * timbratura fuori sede, false altrimenti.
+   *     timbratura fuori sede, false altrimenti.
    */
   public boolean checkStampType(Stamping stamping, User user, Person employee) {
     if (user.person.id.equals(employee.id)

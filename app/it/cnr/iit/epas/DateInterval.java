@@ -29,11 +29,9 @@ public class DateInterval {
     if (date1 == null && date2 == null) {
       date1 = new LocalDate(0, 1, 1);
       date2 = DateUtility.setInfinity();
-    }
-    else if (date1 == null) {
+    } else if (date1 == null) {
       date1 = DateUtility.setInfinity();
-    }
-    else if (date2 == null) {
+    } else if (date2 == null) {
       date2 = DateUtility.setInfinity();
     }
 

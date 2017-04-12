@@ -6,7 +6,6 @@ public class InserimentoRigaCompetenza extends RichiestaInserimentoAttestati {
 
   /**
    * Constructor.
-   * @param certification
    */
   public InserimentoRigaCompetenza(Certification certification) {
     this.codiceSede = Integer.parseInt(certification.person.office.codeId);

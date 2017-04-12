@@ -4,10 +4,14 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
-import dao.absences.AbsenceComponentDao;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
 
 import manager.services.absences.AbsenceEngineUtility;
 import manager.services.absences.errors.ErrorsBox;
@@ -22,12 +26,6 @@ import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
 
 public class AbsencePeriod {
   

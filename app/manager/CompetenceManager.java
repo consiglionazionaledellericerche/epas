@@ -55,7 +55,6 @@ import models.PersonShiftShiftType;
 import models.ShiftTimeTable;
 import models.ShiftType;
 import models.TotalOvertime;
-import models.User;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
@@ -81,7 +80,6 @@ public class CompetenceManager {
   private final PersonStampingRecapFactory stampingsRecapFactory;
   private final PersonShiftDayDao personShiftDayDao;
   private final ShiftDao shiftDao;
-  private final SecureManager secureManager;
   private final PersonDao personDao;
 
   /**
@@ -100,7 +98,7 @@ public class CompetenceManager {
       PersonDayDao personDayDao, IWrapperFactory wrapperFactory,
       PersonDayManager personDayManager, PersonReperibilityDayDao reperibilityDao,
       PersonStampingRecapFactory stampingsRecapFactory, PersonShiftDayDao personshiftDayDao,
-      ShiftDao shiftDao, SecureManager secureManager, PersonDao personDao) {
+      ShiftDao shiftDao, PersonDao personDao) {
     this.competenceCodeDao = competenceCodeDao;
     this.officeDao = officeDao;
     this.competenceDao = competenceDao;
@@ -112,7 +110,6 @@ public class CompetenceManager {
     this.stampingsRecapFactory = stampingsRecapFactory;   
     this.personShiftDayDao = personshiftDayDao;
     this.shiftDao = shiftDao;
-    this.secureManager = secureManager;
     this.personDao = personDao;
 
 
@@ -424,8 +421,8 @@ public class CompetenceManager {
         }
         break;
       case onMonthlyPresence:
-        PersonStampingRecap psDto = stampingsRecapFactory
-        .create(comp.person, comp.year, comp.month, true);
+        PersonStampingRecap psDto = 
+            stampingsRecapFactory.create(comp.person, comp.year, comp.month, true);
         if (psDto.basedWorkingDays != value) {
           result = Messages.get("CompManager.diffBasedWorkingDay");
         }
@@ -473,8 +470,8 @@ public class CompetenceManager {
         ? reperibilityDao.getReperibilityTypeByOffice(
             office, Optional.fromNullable(false)).size()
             : 0;
-            return numbers * (new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1)
-                .dayOfMonth().getMaximumValue());
+    return numbers * (new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1)
+        .dayOfMonth().getMaximumValue());
   }
 
   /**

@@ -6,9 +6,9 @@ import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.wrapper.IWrapperFactory;
 
-import models.Contract;
-
 import javax.inject.Inject;
+
+import models.Contract;
 
 public class PersonMonthCompetenceRecapFactory {
 

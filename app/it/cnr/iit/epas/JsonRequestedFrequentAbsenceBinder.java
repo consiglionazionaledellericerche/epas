@@ -3,15 +3,15 @@ package it.cnr.iit.epas;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+
 import lombok.extern.slf4j.Slf4j;
 
 import models.exports.FrequentAbsenceCode;
 import models.exports.PeriodAbsenceCode;
 
 import play.data.binding.TypeBinder;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 
 @Slf4j
 public class JsonRequestedFrequentAbsenceBinder implements TypeBinder<FrequentAbsenceCode> {
@@ -36,9 +36,9 @@ public class JsonRequestedFrequentAbsenceBinder implements TypeBinder<FrequentAb
       log.debug("Il periodo va da {} a {}",
           periodAbsenceCode.dateFrom, periodAbsenceCode.dateTo);
       return periodAbsenceCode;
-    } catch (Exception e) {
+    } catch (Exception ex) {
       log.error("Errore durante il parsing del Json...(dei codici di assenza piu' frequenti?): {}",
-          e);
+          ex);
       return null;
     }
 

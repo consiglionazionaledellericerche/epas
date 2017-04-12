@@ -6,24 +6,6 @@ import com.google.common.collect.Sets;
 
 import it.cnr.iit.epas.NullStringBinder;
 
-import lombok.Getter;
-
-import manager.configurations.EpasParam;
-
-import models.base.IPropertiesInPeriodOwner;
-import models.base.IPropertyInPeriod;
-import models.base.PeriodModel;
-
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
-import org.joda.time.LocalDate;
-import org.joda.time.ReadablePartial;
-
-import play.data.binding.As;
-import play.data.validation.Email;
-import play.data.validation.Required;
-import play.data.validation.Unique;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -46,6 +28,25 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+
+import lombok.Getter;
+
+import manager.configurations.EpasParam;
+
+import models.absences.InitializationGroup;
+import models.base.IPropertiesInPeriodOwner;
+import models.base.IPropertyInPeriod;
+import models.base.PeriodModel;
+
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+import org.joda.time.LocalDate;
+import org.joda.time.ReadablePartial;
+
+import play.data.binding.As;
+import play.data.validation.Email;
+import play.data.validation.Required;
+import play.data.validation.Unique;
 
 /**
  * Entity per le persone.
@@ -246,6 +247,9 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
    */
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public List<PersonConfiguration> personConfigurations = Lists.newArrayList();
+  
+  @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+  public Set<InitializationGroup> initializationGroups;
 
 
   public String getName() {
@@ -321,7 +325,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
    * @param param Parametro di configurazione da controllare.
    * @param value valore atteso
    * @return true se la persona contiene il parametro di configurazione specificato con il valore
-   * indicato
+   *     indicato
    */
   public boolean checkConf(EpasParam param, String value) {
     return personConfigurations.stream().filter(conf -> conf.epasParam == param
@@ -334,7 +338,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
    *
    * @param readablePartial La 'data' da verificare
    * @return true se la data passata come parametro è successiva all'ultimo mese sul quale sono
-   * stati inviati gli attestai per la persona interessata
+   *     stati inviati gli attestai per la persona interessata
    */
   public boolean checkLastCertificationDate(final ReadablePartial readablePartial) {
 

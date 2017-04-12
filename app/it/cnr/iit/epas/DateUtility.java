@@ -3,18 +3,19 @@ package it.cnr.iit.epas;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
+import org.joda.time.Months;
 import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class DateUtility {
 
@@ -226,8 +227,13 @@ public class DateUtility {
 
   }
 
+  /**
+   * Conta il numero di mesi appartenenti all'intervallo, estremi compresi.
+   * @param inter intervallo
+   * @return numero di mesi
+   */
   public static int monthsInInterval(final DateInterval inter) {
-    return 0;
+    return Months.monthsBetween(inter.getBegin(), inter.getEnd()).getMonths() + 1;
   }
 
   /**

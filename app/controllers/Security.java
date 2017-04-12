@@ -9,6 +9,11 @@ import com.google.common.hash.Hashing;
 
 import dao.UserDao;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import manager.OfficeManager;
 
 import models.User;
@@ -17,11 +22,6 @@ import play.Logger;
 import play.cache.Cache;
 import play.mvc.Http;
 import play.utils.Java;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-
-import javax.inject.Inject;
 
 
 public class Security extends Secure.Security {
@@ -134,9 +134,9 @@ public class Security extends Secure.Security {
         flash.success("secure.logout");
       }
       Secure.login();
-    } catch (Throwable e) {
+    } catch (Throwable ex) {
       // TODO Auto-generated catch block
-      e.printStackTrace();
+      ex.printStackTrace();
     }
   }
 

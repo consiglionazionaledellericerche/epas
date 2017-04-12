@@ -5,6 +5,8 @@ import com.google.common.base.Strings;
 import dao.PersonDao;
 import dao.UserDao;
 
+import javax.inject.Inject;
+
 import manager.EmailManager;
 import manager.UserManager;
 
@@ -20,8 +22,6 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.libs.Codec;
 import play.mvc.Controller;
-
-import javax.inject.Inject;
 
 public class LostPassword extends Controller {
 
@@ -120,7 +120,7 @@ public class LostPassword extends Controller {
       Secure.login();
     }
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       flash.error("Correggere gli errori riportati");
       render("@lostPasswordRecovery", token, nuovaPassword, confermaPassword);
     }

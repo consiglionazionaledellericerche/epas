@@ -8,6 +8,14 @@ import com.google.common.collect.Lists;
 
 import dao.UserDao;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import models.Office;
@@ -19,14 +27,6 @@ import models.UsersRolesOffices;
 import org.joda.time.LocalDate;
 
 import play.libs.Codec;
-
-import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
 
 /**
  * @author daniele

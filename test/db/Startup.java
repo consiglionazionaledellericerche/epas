@@ -2,6 +2,10 @@ package db;
 
 import com.google.common.io.Resources;
 
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
@@ -16,10 +20,6 @@ import play.Play.Mode;
 import play.db.jpa.JPA;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
-
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
  * Job di creazione del db per i test.

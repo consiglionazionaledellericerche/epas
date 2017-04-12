@@ -4,15 +4,6 @@ import com.google.common.base.Strings;
 
 import it.cnr.iit.epas.DateInterval;
 
-import lombok.Getter;
-
-import models.base.BaseModel;
-
-import org.hibernate.envers.Audited;
-import org.joda.time.LocalDate;
-
-import play.data.validation.Required;
-
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -24,6 +15,15 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import lombok.Getter;
+
+import models.base.BaseModel;
+
+import org.hibernate.envers.Audited;
+import org.joda.time.LocalDate;
+
+import play.data.validation.Required;
 
 @Audited
 @Entity

@@ -18,6 +18,12 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 
 import helpers.rest.ApiRequestException;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ContractManager;
@@ -36,20 +42,16 @@ import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
 
+import play.data.validation.Validation;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import synch.perseoconsumers.contracts.ContractPerseoConsumer;
 import synch.perseoconsumers.office.OfficePerseoConsumer;
 import synch.perseoconsumers.people.PeoplePerseoConsumer;
 import synch.perseoconsumers.roles.RolePerseoConsumer;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
 
 @Slf4j
 @With({Resecure.class})
@@ -243,8 +245,8 @@ public class Synchronizations extends Controller {
     if (!institute.isPresent()) {
 
       //Istituto non presente
-      validation.valid("instituteWithThatSeat", instituteWithThatSeat.get());
-      if (validation.hasErrors()) {
+      Validation.valid("instituteWithThatSeat", instituteWithThatSeat.get());
+      if (Validation.hasErrors()) {
         // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
         log.info("L'importazione della sede con perseoId={} ha comportato errori di validazione "
             + "nel suo istituto. errors={}.", seatPerseoId, validation.errorsMap());
@@ -264,7 +266,7 @@ public class Synchronizations extends Controller {
 
     //Salvataggio sede
     validation.valid(seat);
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
       log.info("L'importazione della sede con perseoId={} ha comportato errori di validazione "
           + "nella sede. errors={}.", seatPerseoId, validation.errorsMap());
@@ -496,7 +498,7 @@ public class Synchronizations extends Controller {
 
       personInPerseo.get().office = office.get();
       validation.valid(personInPerseo.get());
-      if (validation.hasErrors()) {
+      if (Validation.hasErrors()) {
         // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
         log.info("L'importazione della persone con perseoId={} ha comportato errori di validazione "
             + "nella persona. errors={}.", perseoId, validation.errorsMap());
@@ -576,12 +578,12 @@ public class Synchronizations extends Controller {
         perseoPerson.office = office;
 
         validation.valid(perseoPerson);
-        if (validation.hasErrors()) {
+        if (Validation.hasErrors()) {
           // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
           log.info("L'importazione della persone con perseoId={} ha comportato errori di "
               + "validazione nella persona. errors={}.", 
               perseoPerson.perseoId, validation.errorsMap());
-          validation.clear();
+          Validation.clear();
           continue;
         }
 
@@ -591,7 +593,7 @@ public class Synchronizations extends Controller {
           log.info("L'importazione della persone con perseoId={} ha comportato errori di "
               + "validazione nella persona. errors={}.", 
               perseoPerson.perseoId, validation.errorsMap());
-          validation.clear();
+          Validation.clear();
           continue;
         }
       }

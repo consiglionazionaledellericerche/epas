@@ -3,6 +3,8 @@ package manager.services.mealtickets;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 
+import java.util.List;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,8 +14,6 @@ import models.MealTicket;
 import models.Person;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
 
 /**
  * Blocco di buoni pasto.

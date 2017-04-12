@@ -17,6 +17,11 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 
 import helpers.Web;
 
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ContractManager;
@@ -51,12 +56,8 @@ import play.i18n.Messages;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
-
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
 
 @Slf4j
 @With({Resecure.class})
@@ -355,7 +356,7 @@ public class Persons extends Controller {
           String confermaPassword) {
 
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       flash.error("Correggere gli errori riportati");
       final User user = Security.getUser().get();
       render("@changePassword",vecchiaPassword, nuovaPassword, confermaPassword, user);
@@ -453,8 +454,8 @@ public class Persons extends Controller {
         }
         if (otherChild.name.equals(child.name) && otherChild.surname.equals(child.surname)
             || otherChild.name.equals(child.surname) && otherChild.surname.equals(child.name)) {
-          validation.addError("child.name", "nome e cognome già presenti.");
-          validation.addError("child.surname", "nome e cognome già presenti.");
+          Validation.addError("child.name", "nome e cognome già presenti.");
+          Validation.addError("child.surname", "nome e cognome già presenti.");
         }
       }
     }

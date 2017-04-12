@@ -14,6 +14,11 @@ import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
+
 import manager.SecureManager;
 import manager.services.vacations.IVacationsService;
 import manager.services.vacations.VacationsRecap;
@@ -26,12 +31,8 @@ import org.joda.time.LocalDate;
 
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
-
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
 
 @With({Resecure.class})
 public class VacationsAdmin extends Controller {

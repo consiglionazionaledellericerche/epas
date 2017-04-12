@@ -19,6 +19,16 @@ import helpers.BadRequest;
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.DateUtility;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.services.PairStamping;
@@ -55,16 +65,6 @@ import org.joda.time.LocalTime;
 
 import play.db.jpa.JPA;
 import play.i18n.Messages;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.inject.Inject;
 
 
 /**
@@ -414,7 +414,8 @@ public class ShiftManager {
                       newLimit =
                           (endLunchTime.minusMinutes(15)
                               .isAfter(pairStamping.first.date.toLocalTime()))
-                              ? endLunchTime.minusMinutes(15) : pairStamping.first.date.toLocalTime();
+                              ? endLunchTime.minusMinutes(15) 
+                                  : pairStamping.first.date.toLocalTime();
                       diffEndLunchTime =
                           DateUtility.getDifferenceBetweenLocalTime(newLimit, endLunchTime);
                       //log.debug("diffEndLunchTime=getDifferenceBetweenLocalTime({}, {})={}", 
@@ -426,7 +427,8 @@ public class ShiftManager {
                       newLimit =
                           (pairStamping.first.date.toLocalTime()
                               .isAfter(endLunchTime.plusMinutes(15)))
-                              ? endLunchTime.plusMinutes(15) : pairStamping.first.date.toLocalTime();
+                              ? endLunchTime.plusMinutes(15) 
+                                  : pairStamping.first.date.toLocalTime();
                       if (pairStamping.first.date.toLocalTime()
                           .isAfter(endLunchTime.plusMinutes(15))) {
                         inTolleranceLimit = false;
@@ -646,10 +648,12 @@ public class ShiftManager {
 
                   badStampingDays =
                       (inconsistentAbsenceTable.contains(person, label))
-                          ? inconsistentAbsenceTable.get(person, label) : Lists.<String>newArrayList();
+                          ? inconsistentAbsenceTable.get(person, label) 
+                              : Lists.<String>newArrayList();
                   badStampingDays.add(
                       personShiftDay.date.toString("dd MMM").concat(" -> ")
-                          .concat(stampings).concat("(").concat(lackOfTime).concat(" ore mancanti)"));
+                          .concat(stampings).concat("(").concat(lackOfTime)
+                          .concat(" ore mancanti)"));
 
                   lackOfTimes =
                       (inconsistentAbsenceTable.contains(person, thLackTime))
@@ -1581,10 +1585,9 @@ public class ShiftManager {
     });
   }
 
-  /***********************************************************************************************/
-  /**Sezione di metodi utilizzati al bootstrap per sistemare le situazioni sui turni             */
-  /***********************************************************************************************/
-
+  /* **********************************************************************************/
+  /* Sezione di metodi utilizzati al bootstrap per sistemare le situazioni sui turni  */
+  /* **********************************************************************************/
   // shift day
   public static final class Sd {
     Person mattina;

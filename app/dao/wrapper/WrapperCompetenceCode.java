@@ -7,11 +7,11 @@ import com.google.inject.assistedinject.Assisted;
 import dao.CompetenceDao;
 import dao.OfficeDao;
 
+import java.util.List;
+
 import models.Competence;
 import models.CompetenceCode;
 import models.Office;
-
-import java.util.List;
 
 /**
  * @author alessandro.

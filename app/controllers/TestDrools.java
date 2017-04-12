@@ -2,13 +2,14 @@ package controllers;
 
 import dao.PersonDao;
 
+import javax.inject.Inject;
+
 import models.Person;
 
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
-import javax.inject.Inject;
+import security.SecurityRules;
 
 /**
  * @author cristian.

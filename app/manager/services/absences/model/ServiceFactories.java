@@ -11,6 +11,12 @@ import dao.absences.AbsenceComponentDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
+
 import manager.PersonDayManager;
 import manager.services.absences.AbsenceEngineUtility;
 import manager.services.absences.errors.CriticalError.CriticalProblem;
@@ -31,12 +37,6 @@ import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
 
 public class ServiceFactories {
 
