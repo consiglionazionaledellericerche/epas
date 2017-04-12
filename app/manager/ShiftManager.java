@@ -774,10 +774,12 @@ public class ShiftManager {
     List<ShiftPeriod> shiftPeriods = new ArrayList<ShiftPeriod>();
     ShiftPeriod shiftPeriod = null;
 
+    LocalTime ttStart = new LocalTime(7, 0, 0);
+    LocalTime ttEnd = new LocalTime(12, 0, 0);
 
     for (ShiftCancelled sc : personShiftCancelled) {
       if (shiftPeriod == null || !shiftPeriod.end.plusDays(1).equals(sc.date)) {
-        shiftPeriod = new ShiftPeriod(sc.date, sc.date, sc.type, true);
+        shiftPeriod = new ShiftPeriod(sc.date, sc.date, sc.type, true, ttStart, ttEnd);
         shiftPeriods.add(shiftPeriod);
         log.trace("Creato nuovo shiftPeriod di cancellati, start={}, end={}, type={}",
             shiftPeriod.start, shiftPeriod.end, shiftPeriod.shiftType.type);
