@@ -126,22 +126,6 @@ public class MealTicketDao extends DaoBase {
   }
 
   /**
-   * FIXME: utilizzare contractMealTickets con gli opportuni parametri Ritorna la lista dei buoni
-   * pasto associati al contratto ordinata per data di consegna in ordine decrescente (da quelli
-   * consegnati per ultimi a quelli consegnati per primi).
-   */
-  public List<MealTicket> getOrderedMealTicketInContract(Contract contract) {
-    final QMealTicket mealTicket = QMealTicket.mealTicket;
-
-    final JPQLQuery query = getQueryFactory()
-        .from(mealTicket)
-        .where(mealTicket.contract.eq(contract))
-        .orderBy(mealTicket.date.desc());
-
-    return query.list(mealTicket);
-  }
-
-  /**
    * utilizzare contractMealTickets con gli opportuni parametri I buoni pasto di un blocco ordinati
    * per codice asc. Se contract presente i soli associati a quel contratto.
    *
