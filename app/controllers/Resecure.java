@@ -9,10 +9,6 @@ import java.lang.annotation.Target;
 
 import javax.inject.Inject;
 
-import models.Office;
-
-import play.Play;
-import play.cache.Cache;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -24,28 +20,13 @@ import security.SecurityRules;
  *
  * @author marco
  */
-@With({ RequestInit.class, LogEnhancer.class })
+@With({RequestInit.class, LogEnhancer.class})
 public class Resecure extends Controller {
 
   public static final String OFFICE_COUNT = "officeCount";
   private static final String REALM = "E-PAS";
   @Inject
   static SecurityRules rules;
-
-  @Before
-  static void dbStateCheck() {
-
-    Long officeCount = Cache.get(OFFICE_COUNT, Long.class);
-
-    if (officeCount == null) {
-      officeCount = Office.count();
-      Cache.add(OFFICE_COUNT, officeCount);
-    }
-
-    if (officeCount == 0) {
-      Wizard.wizard(0);
-    }
-  }
 
   @Before(priority = 1, unless = {"login", "authenticate", "logout"})
   static void checkAccess() throws Throwable {
@@ -58,34 +39,12 @@ public class Resecure extends Controller {
         if (request.user == null
             || !Security.authenticate(request.user, request.password)) {
           unauthorized(REALM);
+        } else {
+          return;
         }
-      }
-      if (!Security.getUser().isPresent()) {
-        flash.put(
-            "url",
-            // seems a good default
-            "GET".equals(request.method) ? request.url : Play.ctxPath + "/");
-        Secure.login();
-      }
-      // Checks
-      Check check = getActionAnnotation(Check.class);
-      if (check != null) {
-        check(check);
-      }
-      check = getControllerInheritedAnnotation(Check.class);
-      if (check != null) {
-        check(check);
-      }
+      }      
+      Secure.checkAccess();      
       rules.checkIfPermitted();
-    }
-  }
-
-  private static void check(Check check) throws Throwable {
-    for (String profile : check.value()) {
-      boolean hasProfile = (Boolean) Security.invoke("check", profile);
-      if (!hasProfile) {
-        Security.invoke("onCheckFailed", profile);
-      }
     }
   }
 
@@ -98,22 +57,26 @@ public class Resecure extends Controller {
   }
 
   /**
+   * Con questo si evitano i controlli. 
+   *
    * @author marco
    *
-   *         Con questo si evitano i controlli.
    */
   @Retention(RetentionPolicy.RUNTIME)
   @Target({ElementType.METHOD})
   public @interface NoCheck {
+
   }
 
   /**
+   * Con questo si adotta soltanto la basicauth.
+   * 
    * @author marco
-   *
-   *         Con questo si adotta soltanto la basicauth.
+   * 
    */
   @Retention(RetentionPolicy.RUNTIME)
   @Target({ElementType.METHOD})
   public @interface BasicAuth {
+
   }
 }
