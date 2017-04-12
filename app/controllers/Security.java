@@ -92,7 +92,7 @@ public class Security extends Secure.Security {
     if (request == null) {
       return null;
     }
-    if (request.user != null && authenticate(request.user, request.password)) {      
+    if (request.user != null) {      
       return request.user;
     } else {
       return Secure.Security.connected();

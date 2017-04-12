@@ -52,14 +52,12 @@ public class Resecure extends Controller {
     if (getActionAnnotation(NoCheck.class) != null
         || getControllerInheritedAnnotation(NoCheck.class) != null) {
       return;
-    } else {
-      if (getActionAnnotation(BasicAuth.class) != null
-          || getControllerInheritedAnnotation(BasicAuth.class) != null) {
-        if (request.user == null
-            || !Security.authenticate(request.user, request.password)) {
-          unauthorized(REALM);
-        }
+    } else {      
+      //Se si tenta di accedere con Basic Auth si controlla subito utente e password
+      if (request.user != null && !Security.authenticate(request.user, request.password)) {
+        unauthorized(REALM);                
       }
+      
       if (!Security.getUser().isPresent()) {
         flash.put(
             "url",
