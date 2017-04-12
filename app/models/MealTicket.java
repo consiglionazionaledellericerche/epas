@@ -67,6 +67,7 @@ public class MealTicket extends BaseModel {
     return MoreObjects.toStringHelper(this)
             .add("id", id)
             .add("contract", contract.id)
+            .add("code", code)
             .add("person", contract.person.name + " " + contract.person.surname)
             .add("date", date)
             .add("expire", expireDate).toString();

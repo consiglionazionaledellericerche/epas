@@ -234,8 +234,7 @@ public class MealTickets extends Controller {
           mealTicketsTransfered, contract.person.name, contract.person.surname);
     }
 
-    MealTickets.recapMealTickets(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear(),
-        contract.person.office.id);
+    MealTickets.recapPersonMealTickets(contract.person.id);
   }
 
   /**
