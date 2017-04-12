@@ -145,11 +145,12 @@ public class VacationsAdmin extends Controller {
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
 
-    List<Person> personList = personDao.list(Optional.<String>absent(),
-        Sets.newHashSet(office), false, 
-        new LocalDate(year, 1, 1), new LocalDate(year, 12, 31), true).list();
+    LocalDate beginYear = new LocalDate(year, 1, 1);
+    LocalDate endYear = new LocalDate(year, 12, 31);
+    DateInterval yearInterval = new DateInterval(beginYear, endYear);
     
-    //List<Person> personList = Person.findAll();
+    List<Person> personList = personDao.list(Optional.<String>absent(),
+        Sets.newHashSet(office), false, beginYear, endYear, true).list();
     
     GroupAbsenceType vacationGroup = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
@@ -159,24 +160,27 @@ public class VacationsAdmin extends Controller {
     for (Person person : personList) {
 
       IWrapperPerson wrPerson = wrapperFactory.create(person);
-      if (!wrPerson.getCurrentContract().isPresent()) {
-        continue;
-      }
       
-      if (!person.surname.equals("Bianchi")) {
-        continue;
-      }
-      
-      ComparedVacation comparedVacation = new ComparedVacation(wrPerson, 
-          wrPerson.getCurrentContract().get(), year, vacationGroup, 
-          absenceService, vacationsService);
-      
-      if (comparedVacation.epasEquivalent()) {
-        //log.info("{} è equivalente", person.fullName());
+      for (Contract contract : person.contracts) {
+
+        IWrapperContract cwrContract = wrapperFactory.create(contract);
+        if (DateUtility.intervalIntersection(cwrContract.getContractDateInterval(),
+            yearInterval) == null) {
+
+          //Questo evento andrebbe segnalato... la list dovrebbe caricare
+          // nello heap solo i contratti attivi nel periodo specificato.
+          continue;
+        }
+
+        ComparedVacation comparedVacation = new ComparedVacation(wrPerson, 
+            contract, year, vacationGroup, 
+            absenceService, vacationsService);
+
         comparedVacationList.add(comparedVacation);
-      } else {
-        comparedVacationList.add(comparedVacation);
+        
       }
+      
+      
     }
     
     render(year, comparedVacationList);
