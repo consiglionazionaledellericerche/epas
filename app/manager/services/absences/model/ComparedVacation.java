@@ -123,6 +123,10 @@ public class ComparedVacation {
     return vacationRecap.getVacationsLastYear().getUpperLimit();
   }
   
+  public int oldLastYearUsed() {
+    return vacationRecap.getVacationsLastYear().getUsed();
+  }
+  
   //2017
   public int oldCurrentYearTotal() {
     return vacationRecap.getVacationsCurrentYear().getTotal();
@@ -152,6 +156,9 @@ public class ComparedVacation {
     return vacationRecap.getVacationsCurrentYear().getUpperLimit();
   }
   
+  public int oldCurrentYearUsed() {
+    return vacationRecap.getVacationsCurrentYear().getUsed();
+  }
   
   //Permission
   public int oldPermissionTotal() {
@@ -180,6 +187,10 @@ public class ComparedVacation {
   
   public LocalDate oldPermissionUpperLimit() {
     return vacationRecap.getPermissions().getUpperLimit();
+  }
+  
+  public int oldPermissionUsed() {
+    return vacationRecap.getPermissions().getUsed();
   }
   
   //NEW 2016/////////////////////////////////////////////
@@ -217,6 +228,10 @@ public class ComparedVacation {
     return lastNaturalPeriod(periodsLastYear).to;
   }
   
+  public int newLastYearUsed() {
+    return computeUsed(periodsLastYear);
+  }
+  
   //NEW 2017/////////////////////////////////////////////
   public int newCurrentYearTotal() {
     return computeTotal(periodsCurrentYear);
@@ -251,6 +266,11 @@ public class ComparedVacation {
   public LocalDate newCurrentYearUpperLimit() {
     return lastNaturalPeriod(periodsCurrentYear).to;
   }
+  
+  public int newCurrentYearUsed() {
+    return computeUsed(periodsCurrentYear);
+  }
+  
   
   
   //NEW PERMESSI /////////////////////////////////////////////
@@ -289,6 +309,10 @@ public class ComparedVacation {
     return lastNaturalPeriod(periodsPermissions).to;
   }
   
+  public int newPermissionUsed() {
+    return computeUsed(periodsPermissions);
+  }
+  
   //NEW OLD COMPARE /////////////////////////////////////////
   /**
    * Confronto anno passato.
@@ -310,6 +334,9 @@ public class ComparedVacation {
       return false;
     }
     if (!oldLastYearUpperLimit().isEqual(newLastYearUpperLimit())) {
+      return false;
+    }
+    if (oldLastYearUsed() != newLastYearUsed()) {
       return false;
     }
     return true;
@@ -337,6 +364,9 @@ public class ComparedVacation {
     if (!oldCurrentYearUpperLimit().isEqual(newCurrentYearUpperLimit())) {
       return false;
     }
+    if (oldCurrentYearUsed() != newCurrentYearUsed()) {
+      return false;
+    }
     return true;
   }
   
@@ -361,6 +391,9 @@ public class ComparedVacation {
       return false;
     }
     if (!oldPermissionUpperLimit().isEqual(newPermissionUpperLimit())) {
+      return false;
+    }
+    if (oldPermissionUsed() != newPermissionUsed()) {
       return false;
     }
     return true;
@@ -406,6 +439,10 @@ public class ComparedVacation {
   private int computeAccrued(AbsencePeriod period) {
     return period
         .computePeriodTakableAmount(TakeCountBehaviour.sumUntilPeriod, LocalDate.now()) / 100;
+  }
+  
+  private int computeUsed(AbsencePeriod period) {
+    return period.getPeriodTakenAmount(true) / 100;
   }
   
   /**
