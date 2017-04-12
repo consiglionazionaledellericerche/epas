@@ -172,7 +172,9 @@ public class AbsencePeriod {
     int takenInPeriod = getInitializationTakableUsed();
     
     for (TakenAbsence takenAbsence : takenAbsences()) {
-      takenInPeriod += takenAbsence.getTakenAmount();
+      if (!takenAbsence.beforeInitialization) {
+        takenInPeriod += takenAbsence.getTakenAmount();
+      }
     }
     if (takenCountBehaviour.equals(TakeCountBehaviour.period)) {
       return takenInPeriod;
