@@ -37,7 +37,7 @@
 		<tr>
 		    <td>
 				<a
-				href="@{VacationsAdmin.vacationsCurrentYear(vacationSituation.contract.id, vacationSituation.year)}"
+				href="@{VacationsAdmin.vacationSummary(vacationSituation.contract.id, vacationSituation.currentYear.year, 'VACATION')}"
 				data-async-modal="#defaultModal">
 					${vacationSituation.contract.person.fullname}</a>
 			</td>

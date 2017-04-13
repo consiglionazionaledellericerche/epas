@@ -24,6 +24,9 @@ public class DateInterval {
     }
   }
 
+  /**
+   * Costruttore.
+   */
   public DateInterval(LocalDate date1, LocalDate date2) {
 
     if (date1 == null && date2 == null) {
@@ -56,13 +59,18 @@ public class DateInterval {
     return end;
   }
 
+  /**
+   * Se non è infinito.
+   */
   public boolean isClosed() {
-
     if (DateUtility.isInfinity(this.end)) {
       return false;
     }
     return true;
-
+  }
+  
+  public int dayInInterval() {
+    return DateUtility.daysInInterval(this);
   }
 
   @Override
