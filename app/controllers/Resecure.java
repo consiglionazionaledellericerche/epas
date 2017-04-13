@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.mvc.Scope.Session;
 
 import security.SecurityRules;
 
@@ -40,10 +41,11 @@ public class Resecure extends Controller {
             || !Security.authenticate(request.user, request.password)) {
           unauthorized(REALM);
         } else {
-          return;
+          // WARNING: inserimento in sessione per farlo digerire alla play Security
+          Session.current().put("username", request.user);
         }
-      }      
-      Secure.checkAccess();      
+      }
+      Secure.checkAccess();
       rules.checkIfPermitted();
     }
   }
