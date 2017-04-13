@@ -106,9 +106,7 @@ when
 
      	/* Ferie */
      	"Vacations.show",
-     	"Vacations.permissionCurrentYear",
-     	"Vacations.vacationsCurrentYear",
-       	"Vacations.vacationsLastYear",
+     	"Vacations.personVacationSummary",
 
        	/* Competenze */
      	"Competences.competences",
@@ -275,8 +273,7 @@ when
     || action.startsWith("PersonMonths.")
     || action.startsWith("Stampings.")
     || action.startsWith("UploadSituation.")
-    || action.startsWith("Vacations.")
-    || action.startsWith("VacationsAdmin."))
+    || action.startsWith("Vacations."))
 then
  $c.revoke();
 end
@@ -342,10 +339,8 @@ when
     "Stampings.dailyPresence",
     "Stampings.missingStamping",
     "Stampings.personStamping",
-    "VacationsAdmin.list",
-    "VacationsAdmin.permissionCurrentYear",
-    "VacationsAdmin.vacationsCurrentYear",
-    "VacationsAdmin.vacationsLastYear",
+    "Vacations.list",
+    "Vacations.vacationSummary",
     "WorkingTimes.manageOfficeWorkingTime",
     "WorkingTimes.manageWorkingTime",
     "WorkingTimes.showContract",
@@ -591,10 +586,8 @@ when
 
         "Stampings.personStamping",
 
-		"VacationsAdmin.list",
-        "VacationsAdmin.vacationsLastYear",
-        "VacationsAdmin.vacationsCurrentYear",
-        "VacationsAdmin.permissionCurrentYear",
+		"Vacations.list",
+        "Vacations.vacationSummary",
 
         /* Vecchio permesso viewCompetence */
         "Competences.showCompetences",
@@ -673,10 +666,8 @@ when
         "Stampings.dailyPresence",
         "Stampings.missingStamping",
 
-        "VacationsAdmin.list",
-        "VacationsAdmin.vacationsLastYear",
-        "VacationsAdmin.vacationsCurrentYear",
-        "VacationsAdmin.permissionCurrentYear",
+        "Vacations.list",
+        "Vacations.vacationSummary",
 
         /* Vecchio permesso viewCompetence */
         "Competences.showCompetences",
