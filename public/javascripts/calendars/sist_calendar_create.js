@@ -1520,17 +1520,19 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 
 
 	eventMouseover: function(event, jsEvent, view){
-			  // Add remove-event button
-        $(this).find(".fc-time").append($("<a>", {
-        	'href': '#',
-        	'class': 'remove-event',
-        	'title': 'Cancella questo evento',
-        	'alt': 'Remove event',
-        	'html': '<img src=\"' + '/public/images/remove-button-cross.png\"></img>',
-        }));
+		// Add remove-event button
+		if (!event.id.toString().match(/assenza/g)){
+	        $(this).find(".fc-time").append($("<a>", {
+	        	'href': '#',
+	        	'class': 'remove-event',
+	        	'title': 'Cancella questo evento',
+	        	'alt': 'Remove event',
+	        	'html': '<img src=\"' + '/public/images/remove-button-cross.png\"></img>',
+	        }));
+		}
 
         // Add remove-shift button
-		if(event.cancelled != true){
+		if (event.id.toString().match(/turno/g) && !event.id.toString().match(/annullato/g)){
         	$(this).find(".fc-time").append($("<a>", {
 	          	'href': '#',
 	          	'class': 'remove-shift',
@@ -1539,15 +1541,6 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 	          	'html': '<img src=\"'+ '/public/images/remove-button-sosta.png\"></img>',
         	}));
 		}
-
-        // Add remove-event button for deleted shift
-        $(this).filter(".del-event").find(".fc-title").append($("<a>", {
-        	'href': '#',
-        	'class': 'remove-event',
-        	'title': 'Cancella questo evento',
-        	'alt': 'Remove event',
-        	'html': '<img src=\"' + '/public/images/remove-button-cross.png\"></img>',
-        }));
 
         // On click remove-event
         $(".remove-event").click(function(e) {
