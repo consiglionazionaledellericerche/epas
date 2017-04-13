@@ -123,6 +123,12 @@ public class ComparedVacation {
     if (old.used() != summary.used()) {
       return false;
     }
+    if (old.usableTotal() != summary.usableTotal()) {
+      return false;
+    }
+    if (old.usable() != summary.usable()) {
+      return false;
+    }
     return true;
   }
   
@@ -209,6 +215,14 @@ public class ComparedVacation {
       return result.getUsed();
     }
     
+    public int usable() { 
+      return result.getNotYetUsedTakeable();
+    }
+    
+    public int usableTotal() { 
+      return result.getNotYetUsedTotal();
+    }
+    
   }
 
   
@@ -258,6 +272,18 @@ public class ComparedVacation {
     
     public int used() {
       return computeUsed(absencePeriod);
+    }
+    
+    public int usable() {
+      if (absencePeriod.takableCountBehaviour.equals(TakeCountBehaviour.sumUntilPeriod)) {
+        return accrued() - used(); 
+      } else {
+        return total() - used();
+      }
+    }
+    
+    public int usableTotal() { 
+      return total() - used();
     }
     
     private int computeTotal(AbsencePeriod period) {
