@@ -172,15 +172,15 @@ public class VacationsAdmin extends Controller {
           continue;
         }
 
-        ComparedVacation comparedVacation = new ComparedVacation(wrPerson, 
-            contract, year, vacationGroup, 
-            absenceService, vacationsService);
-
-        comparedVacationList.add(comparedVacation);
-        
+        try {
+          ComparedVacation comparedVacation = new ComparedVacation(wrPerson, 
+              contract, year, vacationGroup, 
+              absenceService, vacationsService);
+          comparedVacationList.add(comparedVacation);
+        } catch (Exception ex) {
+          log.info("");
+        }
       }
-      
-      
     }
     
     render(year, comparedVacationList);

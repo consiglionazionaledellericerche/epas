@@ -368,8 +368,11 @@ public class AbsencePeriod {
     if (this.isTakableMinutes()) {
       return minutes;
     } else if (this.isTakableUnits()) {
-      return (this.initialization.unitsInput * 100) 
-          + workingTypePercent(minutes, this.initialization.averageWeekTime);
+      int units = (this.initialization.unitsInput * 100);
+      if (minutes > 0) {
+        units = units + workingTypePercent(minutes, this.initialization.averageWeekTime); 
+      }
+      return units; 
     }
     
     return 0;
