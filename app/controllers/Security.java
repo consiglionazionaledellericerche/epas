@@ -37,7 +37,7 @@ public class Security extends Secure.Security {
    * @return true se è autenticato, false altrimenti.
    */
   static boolean authenticate(String username, String password) {
-    log.trace("Richiesta autenticazione di {}", username);
+    log.debug("Richiesta autenticazione di {}", username);
 
     User user = userDao.getUserByUsernameAndPassword(username, Optional
         .fromNullable(Hashing.md5().hashString(password, Charsets.UTF_8).toString()));
