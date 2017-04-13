@@ -7,20 +7,19 @@ import com.google.inject.Inject;
 
 import dao.absences.AbsenceComponentDao;
 
-import db.h2support.base.AbsenceDefinitions.AbsenceTypeDefinition;
-import db.h2support.base.AbsenceDefinitions.ComplationBehaviourDefinition;
-import db.h2support.base.AbsenceDefinitions.GroupAbsenceTypeDefinition;
-import db.h2support.base.AbsenceDefinitions.TakableBehaviourDefinition;
-
 import java.util.Set;
 
 import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.AbsenceType.DefaultAbsenceType;
 import models.absences.ComplationAbsenceBehaviour;
+import models.absences.ComplationAbsenceBehaviour.DefaultComplation;
 import models.absences.GroupAbsenceType;
+import models.absences.GroupAbsenceType.DefaultGroup;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
+import models.absences.TakableAbsenceBehaviour.DefaultTakable;
 
 import org.joda.time.LocalDate;
 
@@ -35,38 +34,41 @@ public class H2AbsenceSupport {
 
   /**
    * Costruisce e persiste una istanza del tipo di assenza secondo definizione.
-   * @param absenceTypeDefinition definizione 
+   * @param defaultAbsenceType definizione 
    * @return persisted entity
    */
-  public AbsenceType createAbsenceType(AbsenceTypeDefinition absenceTypeDefinition) {
+  public AbsenceType createAbsenceType(DefaultAbsenceType defaultAbsenceType) {
 
     AbsenceType absenceType = new AbsenceType();
-    absenceType.code = absenceTypeDefinition.name();
-    absenceType.justifiedTime = absenceTypeDefinition.justifiedTime;
-    absenceType.consideredWeekEnd = absenceTypeDefinition.consideredWeekEnd;
-    absenceType.timeForMealTicket = absenceTypeDefinition.timeForMealTicket;
+    absenceType.code = defaultAbsenceType.name();
+    absenceType.justifiedTime = defaultAbsenceType.justifiedTime;
+    absenceType.consideredWeekEnd = defaultAbsenceType.consideredWeekEnd;
+    absenceType.timeForMealTicket = defaultAbsenceType.timeForMealTicket;
 
-    absenceTypeDefinition.justifiedTypeNamesPermitted.forEach(name -> 
+    defaultAbsenceType.justifiedTypeNamesPermitted.forEach(name -> 
         absenceType.justifiedTypesPermitted.add(absenceComponentDao.getOrBuildJustifiedType(name)));
 
-    absenceType.replacingType = absenceComponentDao
-        .getOrBuildJustifiedType(absenceTypeDefinition.replacingType);
-    absenceType.replacingTime = absenceTypeDefinition.replacingTime;
+    if (defaultAbsenceType.replacingType != null) {
+      absenceType.replacingType = absenceComponentDao
+          .getOrBuildJustifiedType(defaultAbsenceType.replacingType);
+    }
+    absenceType.replacingTime = defaultAbsenceType.replacingTime;
     absenceType.save();
     return absenceType;
   }
   
   /**
    * Preleva dal db l'istanza con quella definizione.
-   * @param definition definizione
+   * @param defaultAbsenceType definizione
    * @return entity
    */
-  public AbsenceType getAbsenceType(AbsenceTypeDefinition definition) {
-    Optional<AbsenceType> absenceType = absenceComponentDao.absenceTypeByCode(definition.name()); 
+  public AbsenceType getAbsenceType(DefaultAbsenceType defaultAbsenceType) {
+    Optional<AbsenceType> absenceType = absenceComponentDao
+        .absenceTypeByCode(defaultAbsenceType.name()); 
     if (absenceType.isPresent()) {
       return absenceType.get();
     } 
-    return createAbsenceType(definition);
+    return createAbsenceType(defaultAbsenceType);
   }
   
   /**
@@ -74,10 +76,10 @@ public class H2AbsenceSupport {
    * @param absenceTypeDefinitions definizioni
    * @return entities
    */
-  public Set<AbsenceType> getAbsenceTypes(Set<AbsenceTypeDefinition> absenceTypeDefinitions) {
+  public Set<AbsenceType> getAbsenceTypes(Set<DefaultAbsenceType> absenceTypeDefinitions) {
     
     Set<AbsenceType> absenceTypes = Sets.newHashSet();
-    for (AbsenceTypeDefinition definition : absenceTypeDefinitions) {
+    for (DefaultAbsenceType definition : absenceTypeDefinitions) {
       Optional<AbsenceType> absenceType = absenceComponentDao.absenceTypeByCode(definition.name()); 
       if (absenceType.isPresent()) {
         absenceTypes.add(absenceType.get());
@@ -94,7 +96,7 @@ public class H2AbsenceSupport {
    * @return entity
    */
   public TakableAbsenceBehaviour getTakableAbsenceBehaviour(
-      TakableBehaviourDefinition takableDefinition) {
+      DefaultTakable takableDefinition) {
 
     TakableAbsenceBehaviour behaviour = new TakableAbsenceBehaviour();
     behaviour.name = takableDefinition.name();
@@ -113,7 +115,7 @@ public class H2AbsenceSupport {
    * @return entity
    */
   public ComplationAbsenceBehaviour getComplationAbsenceBehaviour(
-      ComplationBehaviourDefinition complationDefinition) {
+      DefaultComplation complationDefinition) {
 
     ComplationAbsenceBehaviour behaviour = new ComplationAbsenceBehaviour();
     behaviour.name = complationDefinition.name();
@@ -125,24 +127,24 @@ public class H2AbsenceSupport {
 
   /**
    * Preleva dal db l'istanza con quella definizione.
-   * @param groupDefinition definizione
+   * @param defaultGroup definizione
    * @return entity
    */
-  public GroupAbsenceType getGroupAbsenceType(GroupAbsenceTypeDefinition groupDefinition) {
+  public GroupAbsenceType getGroupAbsenceType(DefaultGroup defaultGroup) {
 
-    if (groupDefinition == null) {
+    if (defaultGroup == null) {
       return null;
     }
     
     GroupAbsenceType group = new GroupAbsenceType();
-    group.name = groupDefinition.name();
-    group.pattern = groupDefinition.pattern;
-    group.periodType = groupDefinition.periodType;
+    group.name = defaultGroup.name();
+    group.pattern = defaultGroup.pattern;
+    group.periodType = defaultGroup.periodType;
     group.takableAbsenceBehaviour = 
-        getTakableAbsenceBehaviour(groupDefinition.takableAbsenceBehaviour);
+        getTakableAbsenceBehaviour(defaultGroup.takable);
     group.complationAbsenceBehaviour = 
-        getComplationAbsenceBehaviour(groupDefinition.complationAbsenceBehaviour);
-    group.nextGroupToCheck = getGroupAbsenceType(groupDefinition.next);
+        getComplationAbsenceBehaviour(defaultGroup.complation);
+    group.nextGroupToCheck = getGroupAbsenceType(defaultGroup.nextGroupToCheck);
     
     return group;
   }
@@ -151,17 +153,17 @@ public class H2AbsenceSupport {
    * Istanza di una assenza. Per adesso non persistita perchè ai fini dei test non mandatoria 
    * (ma lo sarà presto). Serve il personDay.
    *
-   * @param absenceTypeDefinition absenceType assenza
+   * @param defaultAbsenceType absenceType assenza
    * @param date                  data
    * @param justifiedTypeName     tipo giustificativo
    * @param justifiedMinutes      minuti giustificati
    * @return istanza non persistente
    */
-  public Absence absenceInstance(AbsenceTypeDefinition absenceTypeDefinition,
+  public Absence absenceInstance(DefaultAbsenceType defaultAbsenceType,
       LocalDate date, Optional<JustifiedTypeName> justifiedTypeName,
       Integer justifiedMinutes) {
 
-    AbsenceType absenceType = getAbsenceType(absenceTypeDefinition);
+    AbsenceType absenceType = getAbsenceType(defaultAbsenceType);
     JustifiedType justifiedType = null;
     if (justifiedTypeName.isPresent()) {
       justifiedType = absenceComponentDao.getOrBuildJustifiedType(justifiedTypeName.get());
