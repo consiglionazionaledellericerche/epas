@@ -31,7 +31,7 @@ public class Security extends Secure.Security {
    * @return true se è autenticato, false altrimenti.
    */
   static boolean authenticate(String username, String password) {
-    log.trace("Richiesta autenticazione di {}", username);
+    log.debug("Richiesta autenticazione di {}", username);
 
     User user = userDao.getUserByUsernameAndPassword(username, Optional
         .fromNullable(Hashing.md5().hashString(password, Charsets.UTF_8).toString()));
@@ -69,6 +69,17 @@ public class Security extends Secure.Security {
       return Optional.of((User) request.args.get(CURRENT_USER));
     }
     return Optional.absent();
+  }
+
+  static String connected() {
+    if (request == null) {
+      return null;
+    }
+    if (request.user != null) {
+      return request.user;
+    } else {
+      return Secure.Security.connected();
+    }
   }
 
   static Object invoke(String method, Object... args) throws Throwable {
