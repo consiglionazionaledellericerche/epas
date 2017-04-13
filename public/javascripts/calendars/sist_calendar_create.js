@@ -1319,9 +1319,9 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 								event['eMail'] = idToEmail[event.id];
 								event['mobile'] = idToMobile[event.id];
 								event['title'] = 'Turno '+tipoTurno+' ANNULLATO';
-		          				event['start'] = jQuery.fullCalendar.moment(event.start + " " + event.ttStart).format();
-		          				event['end'] = jQuery.fullCalendar.moment(event.end+ " " +event.ttEnd).add(1, 'days');
-		          				event['allDay'] = true;
+		          				event['start'] = event.start + " " + event.ttStart;
+		          				event['end'] = event.end + " " + event.ttEnd;
+		          				event['allDay'] = false;
 		         	 			event['className'] = "del-event";
 		          				event['cancelled'] = true;
 		    					event['editable'] = 'false';
@@ -1330,13 +1330,11 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 		          				//events.push(event);
 		          				jQuery('#calendar').fullCalendar('renderEvent', event, true);
 		          				indexRep++;
-		          				
-		          				console.log("CANCELLATO event.end=" + event.end);
 								
 		          				// set data.end = data.start for check problem
 		          				if (event.end == null) {
 		          					console.log("dentro event.start=" + moment(event.start).format());
-		          					event.end = jQuery.fullCalendar.moment(event.end+ " " +event.ttEnd).add(1, 'days');
+		          					event.end = jQuery.fullCalendar.moment(event.end+ " " +event.ttEnd);
 		          				}
     						}
 	    				});
@@ -1368,8 +1366,9 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 			              event['borderColor'] = 'red';
 			              event['personId'] = event.personId;
 			              event['title'] = 'Assenza ' + idToName[event.personId];
+			              event['allDay'] = false;
 			              event['start'] = jQuery.fullCalendar.moment(event.start).format();
-			              event['end'] = jQuery.fullCalendar.moment(event.end).add(1, 'days');
+			              event['end'] = jQuery.fullCalendar.moment(event.end).format();
 			              event['id'] = 'assenza-' + event.personId + '-' + indexVac;
 			             			             
 			              //events.push(event);
@@ -1482,8 +1481,8 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 	       			return false;
 				  }
 	
-					  // check for absences
-				  if(val.id.toString().match(/assenza/g) && val.personId.toString() == copiedEventObject.personId.toString()) {
+				  // check for absences
+				  if (val.id.toString().match(/assenza/g) && val.personId.toString() == copiedEventObject.personId.toString()) {
 					  if ((valStart == cEOStart) || (cEOStart >= valStart && cEOStart <= valEnd)) {
 						  alert("ERRORE! \nIl turnista e' in ferie!!!");
 						  jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
