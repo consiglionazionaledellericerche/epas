@@ -42,7 +42,7 @@
 	<tbody>
 		#{list items:comparedVacationList, as:'comparedVacation'}
 		
-		#{if comparedVacation.periodsLastYear != null}
+		#{if comparedVacation.lastYear != null}
 		<tr #{if !comparedVacation.epasLastYearEquivalent()} class="bg-danger" #{/if}>
 
 			<td>
@@ -50,34 +50,34 @@
 			</td>
             
             <!-- 2016 -->
-			<td>${comparedVacation.oldLastYearTotal()} (${comparedVacation.oldLastYearPostPartum()})</td>
-			<td>${comparedVacation.newLastYearTotal()} (${comparedVacation.newLastYearPostPartum()})</td>
-			<td>${comparedVacation.oldLastYearAccrued()}</td>
-			<td>${comparedVacation.newLastYearAccrued()}</td>
+			<td>${comparedVacation.oldLastYear.total()} (${comparedVacation.oldLastYear.postPartum()})</td>
+			<td>${comparedVacation.lastYear.total()} (${comparedVacation.lastYear.postPartum()})</td>
+			<td>${comparedVacation.oldLastYear.accrued()}</td>
+			<td>${comparedVacation.lastYear.accrued()}</td>
 			
-			<td>${comparedVacation.oldLastYearUsed()}</td>
-			<td>${comparedVacation.newLastYearUsed()}</td>
+			<td>${comparedVacation.oldLastYear.used()}</td>
+			<td>${comparedVacation.lastYear.used()}</td>
 			
 			<td
-			#{if comparedVacation.oldLastYearContractLowerLimit()}><em><strong>${comparedVacation.oldLastYearLowerLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.oldLastYearLowerLimit().format()}#{/else}	
+			#{if comparedVacation.oldLastYear.isContractLowerLimit()}><em><strong>${comparedVacation.oldLastYear.lowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.oldLastYear.lowerLimit().format()}#{/else}	
 			</td>
 			<td
-			#{if comparedVacation.newLastYearContractLowerLimit()}><em><strong>${comparedVacation.newLastYearLowerLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.newLastYearLowerLimit().format()}#{/else}	
+			#{if comparedVacation.lastYear.isContractLowerLimit()}><em><strong>${comparedVacation.lastYear.lowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.lastYear.lowerLimit().format()}#{/else}	
 			</td>
 			<td
-			#{if comparedVacation.oldLastYearContractUpperLimit()}><em><strong>${comparedVacation.oldLastYearUpperLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.oldLastYearUpperLimit().format()}#{/else}	
+			#{if comparedVacation.oldLastYear.isContractUpperLimit()}><em><strong>${comparedVacation.oldLastYear.upperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.oldLastYear.upperLimit().format()}#{/else}	
 			</td>
 			<td
-			#{if comparedVacation.newLastYearContractUpperLimit()}><em><strong>${comparedVacation.newLastYearUpperLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.newLastYearUpperLimit().format()}#{/else}	
+			#{if comparedVacation.lastYear.isContractUpperLimit()}><em><strong>${comparedVacation.lastYear.upperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.lastYear.upperLimit().format()}#{/else}	
 			</td>
 			
 			
 			*{ questo dato andrebbe preso dal cruscotto 2016
-            <td>${comparedVacation.attestatiLastYearTotal()}</td>
+            <td>${comparedVacation.attestatiLastYear.total()}</td>
             }* 			
 
 		</tr>
@@ -114,7 +114,7 @@
 	<tbody>
 		#{list items:comparedVacationList, as:'comparedVacation'}
 		
-		#{if comparedVacation.periodsCurrentYear != null}
+		#{if comparedVacation.currentYear != null}
 		<tr #{if !comparedVacation.epasCurrentYearEquivalent()} class="bg-danger" #{/if}>
 
 			<td>
@@ -122,33 +122,33 @@
 			</td>
             
             <!-- 2017 -->
-  		    <td>${comparedVacation.oldCurrentYearTotal()} (${comparedVacation.oldCurrentYearPostPartum()})</td>
-  		    <td>${comparedVacation.newCurrentYearTotal()} (${comparedVacation.newCurrentYearPostPartum()})</td>
-            <td>${comparedVacation.oldCurrentYearAccrued()}</td>
-			<td>${comparedVacation.newCurrentYearAccrued()}</td>
+  		    <td>${comparedVacation.oldCurrentYear.total()} (${comparedVacation.oldCurrentYear.postPartum()})</td>
+  		    <td>${comparedVacation.currentYear.total()} (${comparedVacation.currentYear.postPartum()})</td>
+            <td>${comparedVacation.oldCurrentYear.accrued()}</td>
+			<td>${comparedVacation.currentYear.accrued()}</td>
 			
-			<td>${comparedVacation.oldCurrentYearUsed()}</td>
-			<td>${comparedVacation.newCurrentYearUsed()}</td>
+			<td>${comparedVacation.oldCurrentYear.used()}</td>
+			<td>${comparedVacation.currentYear.used()}</td>
 			
 			<td
-			#{if comparedVacation.oldCurrentYearContractLowerLimit()}><em><strong>${comparedVacation.oldCurrentYearLowerLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.oldCurrentYearLowerLimit().format()}#{/else}	
+			#{if comparedVacation.oldCurrentYear.isContractLowerLimit()}><em><strong>${comparedVacation.oldCurrentYear.lowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.oldCurrentYear.lowerLimit().format()}#{/else}	
 			</td>
 			<td
-			#{if comparedVacation.newCurrentYearContractLowerLimit()}><em><strong>${comparedVacation.newCurrentYearLowerLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.newCurrentYearLowerLimit().format()}#{/else}	
+			#{if comparedVacation.currentYear.isContractLowerLimit()}><em><strong>${comparedVacation.currentYear.lowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.currentYear.lowerLimit().format()}#{/else}	
 			</td>
 			<td
-			#{if comparedVacation.oldCurrentYearContractUpperLimit()}><em><strong>${comparedVacation.oldCurrentYearUpperLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.oldCurrentYearUpperLimit().format()}#{/else}	
+			#{if comparedVacation.oldCurrentYear.isContractUpperLimit()}><em><strong>${comparedVacation.oldCurrentYear.upperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.oldCurrentYear.upperLimit().format()}#{/else}	
 			</td>
 			<td
-			#{if comparedVacation.newCurrentYearContractUpperLimit()}><em><strong>${comparedVacation.newCurrentYearUpperLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.newCurrentYearUpperLimit().format()}#{/else}	
+			#{if comparedVacation.currentYear.isContractUpperLimit()}><em><strong>${comparedVacation.currentYear.upperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.currentYear.upperLimit().format()}#{/else}	
 			</td>
 			
   		    *{ 
-  		    <td>${comparedVacation.attestatiCurrentYearTotal()}</td>
+  		    <td>${comparedVacation.attestatiCurrentYear.total()}</td>
   		    }*
 
 		</tr>
@@ -183,7 +183,7 @@
 	<tbody>
 		#{list items:comparedVacationList, as:'comparedVacation'}
 		
-		#{if comparedVacation.periodsPermissions != null}
+		#{if comparedVacation.permissions != null}
 		<tr #{if !comparedVacation.epasPermissionEquivalent()} class="bg-danger" #{/if}>
 
 			<td>
@@ -191,33 +191,33 @@
 			</td>
           
             <!-- Permessi -->
-			<td>${comparedVacation.oldPermissionTotal()} (${comparedVacation.oldPermissionPostPartum()})</td>
-			<td>${comparedVacation.newPermissionTotal()} (${comparedVacation.newPermissionPostPartum()})</td>
-			<td>${comparedVacation.oldPermissionAccrued()}</td>
-			<td>${comparedVacation.newPermissionAccrued()}</td>
+			<td>${comparedVacation.oldPermissions.total()} (${comparedVacation.oldPermissions.postPartum()})</td>
+			<td>${comparedVacation.permissions.total()} (${comparedVacation.permissions.postPartum()})</td>
+			<td>${comparedVacation.oldPermissions.accrued()}</td>
+			<td>${comparedVacation.permissions.accrued()}</td>
 			
-			<td>${comparedVacation.oldPermissionUsed()}</td>
-			<td>${comparedVacation.newPermissionUsed()}</td>
+			<td>${comparedVacation.oldPermissions.used()}</td>
+			<td>${comparedVacation.permissions.used()}</td>
 			
 			<td
-			#{if comparedVacation.oldPermissionContractLowerLimit()}><em><strong>${comparedVacation.oldPermissionLowerLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.oldPermissionLowerLimit().format()}#{/else}	
+			#{if comparedVacation.oldPermissions.isContractLowerLimit()}><em><strong>${comparedVacation.oldPermissions.lowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.oldPermissions.lowerLimit().format()}#{/else}	
 			</td>
 			<td
-			#{if comparedVacation.newPermissionContractLowerLimit()}><em><strong>${comparedVacation.newPermissionLowerLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.newPermissionLowerLimit().format()}#{/else}	
+			#{if comparedVacation.permissions.isContractLowerLimit()}><em><strong>${comparedVacation.permissions.lowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.permissions.lowerLimit().format()}#{/else}	
 			</td>
 			<td
-			#{if comparedVacation.oldPermissionContractUpperLimit()}><em><strong>${comparedVacation.oldPermissionUpperLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.oldPermissionUpperLimit().format()}#{/else}	
+			#{if comparedVacation.oldPermissions.isContractUpperLimit()}><em><strong>${comparedVacation.oldPermissions.upperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.oldPermissions.upperLimit().format()}#{/else}	
 			</td>
 			<td
-			#{if comparedVacation.newPermissionContractUpperLimit()}><em><strong>${comparedVacation.newPermissionUpperLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.newPermissionUpperLimit().format()}#{/else}	
+			#{if comparedVacation.permissions.isContractUpperLimit()}><em><strong>${comparedVacation.permissions.upperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${comparedVacation.permissions.upperLimit().format()}#{/else}	
 			</td>
 			
 			*{
-			<td>${comparedVacation.attestatiPermissionTotal()}</td>
+			<td>${comparedVacation.attestatiPermission.total()}</td>
 			}*
 
 
