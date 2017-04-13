@@ -1,0 +1,103 @@
+#{title title:('Residui Totali Anno ' + year), administration:true /}
+  
+  #{alert color:'info'}
+    <p>Per verificare i residui maturati navigare le specifiche tabs.</p>
+    <p><strong>*</strong> L'asterisco evidenzia che il contratto della persona inizia o finisce durante il 
+    periodo di usufruibilità del residuo. 
+    <br>
+    Il dipendente potrebbe quindi disporre di meno giorni rispetto a quelli normali per esaurire il residuo rimanente.</p>
+    
+    #{if isVacationLastYearExpired || isVacationCurrentYearExpired || isPermissionCurrentYearExpired }
+    <p><span class="glyphicon glyphicon-remove" style="color: red;"></span> Questo simbolo indica che il relativo
+    residuo adesso non è più utilizzabile in quanto scaduto.</p>
+    #{/if}
+    
+  #{/alert}
+  
+  <table  class="table table-striped table-hover table-bordered table-condensed center" datatable width="100%">
+	<thead>
+		<tr>
+		    <th rowspan="2">Nome</th>
+		    <th colspan="3">Residui</th>
+			<th rowspan="2">Totale</th>
+		</tr>	
+		<tr>
+			<th>Ferie ${year-1} 
+				#{if isVacationLastYearExpired}	
+				<span class="glyphicon glyphicon-remove" style="color: red;"></span>
+				#{/if}
+			</th>
+			<th>Ferie ${year}
+			    #{if isVacationCurrentYearExpired}	
+				<span class="glyphicon glyphicon-remove" style="color: red;"></span>
+				#{/if}
+			</th>
+			<th>Permessi ${year}
+			    #{if isPermissionCurrentYearExpired}	
+				<span class="glyphicon glyphicon-remove" style="color: red;"></span>
+				#{/if}
+			</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		#{list items:vacationSituations, as:'vacationSituation'}
+		<tr>
+			<td>${vacationSituation.contract.person.fullname}</td>
+		    
+		    
+			<!-- residui totali -->
+
+			<!-- ferie anno precedente -->
+            <td>
+			#{if vacationSituation.lastYear != null}
+			  <a href="@{VacationsAdmin.vacationsLastYear(vacationSituation.contract.id, vacationSituation.year)}" 
+			     data-async-modal="#defaultModal">
+				${vacationSituation.lastYear.usableTotal()}
+			  </a>
+			  #{if vacationSituation.lastYear.isContractLowerLimit() 
+			       || vacationSituation.lastYear.isContractUpperLimit()}
+			    <strong>*</strong>
+			  #{/if}
+			#{/if}
+			</td>
+			
+
+		
+			<!-- ferie anno corrente -->
+            <td>
+			#{if vacationSituation.currentYear != null}
+			  <a href="@{VacationsAdmin.vacationsCurrentYear(vacationSituation.contract.id, vacationSituation.year)}" 
+			     data-async-modal="#defaultModal">
+				${vacationSituation.currentYear.usableTotal()}
+			  </a>
+			  #{if vacationSituation.currentYear.isContractLowerLimit() 
+			       || vacationSituation.currentYear.isContractUpperLimit()}
+			    <strong>*</strong>
+			  #{/if}
+			#{/if}
+			</td>
+	
+			<!-- permessi anno corrente -->
+            <td>
+			#{if vacationSituation.permissions != null}
+			  <a href="@{VacationsAdmin.permissionCurrentYear(vacationSituation.contract.id, vacationSituation.year)}" 
+			     data-async-modal="#defaultModal">
+				${vacationSituation.permissions.usableTotal()}
+			  </a>
+			  #{if vacationSituation.permissions.isContractLowerLimit() 
+			       || vacationSituation.permissions.isContractUpperLimit()}
+			    <strong>*</strong>
+			  #{/if}
+			#{/if}
+			</td>
+
+			<td>
+			   ${vacationSituation.sumUsableTotal()}
+			</td>
+			
+		</tr>
+		#{/list}
+
+	</tbody>
+  </table>

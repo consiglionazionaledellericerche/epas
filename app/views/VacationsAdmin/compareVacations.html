@@ -44,49 +44,49 @@
 	</thead>
 
 	<tbody>
-		#{list items:comparedVacationList, as:'comparedVacation'}
+		#{list items:vacationSituations, as:'vacationSituation'}
 		
-		#{if comparedVacation.lastYear != null}
-		<tr #{if !comparedVacation.epasLastYearEquivalent()} class="bg-danger" #{/if}>
+		#{if vacationSituation.lastYear != null}
+		<tr #{if !vacationSituation.epasLastYearEquivalent()} class="bg-danger" #{/if}>
 
 			<td>
-			  ${comparedVacation.person.fullname}
+			  ${vacationSituation.person.fullname}
 			</td>
             
             <!-- 2016 -->
-			<td>${comparedVacation.oldLastYear.total()} (${comparedVacation.oldLastYear.postPartum()})</td>
-			<td>${comparedVacation.lastYear.total()} (${comparedVacation.lastYear.postPartum()})</td>
-			<td>${comparedVacation.oldLastYear.accrued()}</td>
-			<td>${comparedVacation.lastYear.accrued()}</td>
+			<td>${vacationSituation.oldLastYear.total()} (${vacationSituation.oldLastYear.postPartum()})</td>
+			<td>${vacationSituation.lastYear.total()} (${vacationSituation.lastYear.postPartum()})</td>
+			<td>${vacationSituation.oldLastYear.accrued()}</td>
+			<td>${vacationSituation.lastYear.accrued()}</td>
 			
-			<td>${comparedVacation.oldLastYear.used()}</td>
-			<td>${comparedVacation.lastYear.used()}</td>
+			<td>${vacationSituation.oldLastYear.used()}</td>
+			<td>${vacationSituation.lastYear.used()}</td>
 			
-			<td>${comparedVacation.oldLastYear.usable()}</td>
-			<td>${comparedVacation.lastYear.usable()}</td>
-			<td>${comparedVacation.oldLastYear.usableTotal()}</td>
-			<td>${comparedVacation.lastYear.usableTotal()}</td>
+			<td>${vacationSituation.oldLastYear.usable()}</td>
+			<td>${vacationSituation.lastYear.usable()}</td>
+			<td>${vacationSituation.oldLastYear.usableTotal()}</td>
+			<td>${vacationSituation.lastYear.usableTotal()}</td>
 			
 			<td
-			#{if comparedVacation.oldLastYear.isContractLowerLimit()}><em><strong>${comparedVacation.oldLastYear.lowerLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.oldLastYear.lowerLimit().format()}#{/else}	
+			#{if vacationSituation.oldLastYear.isContractLowerLimit()}><em><strong>${vacationSituation.oldLastYear.lowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.oldLastYear.lowerLimit().format()}#{/else}	
 			</td>
 			<td
-			#{if comparedVacation.lastYear.isContractLowerLimit()}><em><strong>${comparedVacation.lastYear.lowerLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.lastYear.lowerLimit().format()}#{/else}	
+			#{if vacationSituation.lastYear.isContractLowerLimit()}><em><strong>${vacationSituation.lastYear.lowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.lastYear.lowerLimit().format()}#{/else}	
 			</td>
 			<td
-			#{if comparedVacation.oldLastYear.isContractUpperLimit()}><em><strong>${comparedVacation.oldLastYear.upperLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.oldLastYear.upperLimit().format()}#{/else}	
+			#{if vacationSituation.oldLastYear.isContractUpperLimit()}><em><strong>${vacationSituation.oldLastYear.upperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.oldLastYear.upperLimit().format()}#{/else}	
 			</td>
 			<td
-			#{if comparedVacation.lastYear.isContractUpperLimit()}><em><strong>${comparedVacation.lastYear.upperLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.lastYear.upperLimit().format()}#{/else}	
+			#{if vacationSituation.lastYear.isContractUpperLimit()}><em><strong>${vacationSituation.lastYear.upperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.lastYear.upperLimit().format()}#{/else}	
 			</td>
 			
 			
 			*{ questo dato andrebbe preso dal cruscotto 2016
-            <td>${comparedVacation.attestatiLastYear.total()}</td>
+            <td>${vacationSituation.attestatiLastYear.total()}</td>
             }* 			
 
 		</tr>
@@ -125,48 +125,48 @@
 	</thead>
 
 	<tbody>
-		#{list items:comparedVacationList, as:'comparedVacation'}
+		#{list items:vacationSituations, as:'vacationSituation'}
 		
-		#{if comparedVacation.currentYear != null}
-		<tr #{if !comparedVacation.epasCurrentYearEquivalent()} class="bg-danger" #{/if}>
+		#{if vacationSituation.currentYear != null}
+		<tr #{if !vacationSituation.epasCurrentYearEquivalent()} class="bg-danger" #{/if}>
 
 			<td>
-			  ${comparedVacation.person.fullname}
+			  ${vacationSituation.person.fullname}
 			</td>
             
             <!-- 2017 -->
-  		    <td>${comparedVacation.oldCurrentYear.total()} (${comparedVacation.oldCurrentYear.postPartum()})</td>
-  		    <td>${comparedVacation.currentYear.total()} (${comparedVacation.currentYear.postPartum()})</td>
-            <td>${comparedVacation.oldCurrentYear.accrued()}</td>
-			<td>${comparedVacation.currentYear.accrued()}</td>
+  		    <td>${vacationSituation.oldCurrentYear.total()} (${vacationSituation.oldCurrentYear.postPartum()})</td>
+  		    <td>${vacationSituation.currentYear.total()} (${vacationSituation.currentYear.postPartum()})</td>
+            <td>${vacationSituation.oldCurrentYear.accrued()}</td>
+			<td>${vacationSituation.currentYear.accrued()}</td>
 			
-			<td>${comparedVacation.oldCurrentYear.used()}</td>
-			<td>${comparedVacation.currentYear.used()}</td>
+			<td>${vacationSituation.oldCurrentYear.used()}</td>
+			<td>${vacationSituation.currentYear.used()}</td>
 			
-			<td>${comparedVacation.oldCurrentYear.usable()}</td>
-			<td>${comparedVacation.currentYear.usable()}</td>
-			<td>${comparedVacation.oldCurrentYear.usableTotal()}</td>
-			<td>${comparedVacation.currentYear.usableTotal()}</td>
+			<td>${vacationSituation.oldCurrentYear.usable()}</td>
+			<td>${vacationSituation.currentYear.usable()}</td>
+			<td>${vacationSituation.oldCurrentYear.usableTotal()}</td>
+			<td>${vacationSituation.currentYear.usableTotal()}</td>
 			
 			<td
-			#{if comparedVacation.oldCurrentYear.isContractLowerLimit()}><em><strong>${comparedVacation.oldCurrentYear.lowerLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.oldCurrentYear.lowerLimit().format()}#{/else}	
+			#{if vacationSituation.oldCurrentYear.isContractLowerLimit()}><em><strong>${vacationSituation.oldCurrentYear.lowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.oldCurrentYear.lowerLimit().format()}#{/else}	
 			</td>
 			<td
-			#{if comparedVacation.currentYear.isContractLowerLimit()}><em><strong>${comparedVacation.currentYear.lowerLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.currentYear.lowerLimit().format()}#{/else}	
+			#{if vacationSituation.currentYear.isContractLowerLimit()}><em><strong>${vacationSituation.currentYear.lowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.currentYear.lowerLimit().format()}#{/else}	
 			</td>
 			<td
-			#{if comparedVacation.oldCurrentYear.isContractUpperLimit()}><em><strong>${comparedVacation.oldCurrentYear.upperLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.oldCurrentYear.upperLimit().format()}#{/else}	
+			#{if vacationSituation.oldCurrentYear.isContractUpperLimit()}><em><strong>${vacationSituation.oldCurrentYear.upperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.oldCurrentYear.upperLimit().format()}#{/else}	
 			</td>
 			<td
-			#{if comparedVacation.currentYear.isContractUpperLimit()}><em><strong>${comparedVacation.currentYear.upperLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.currentYear.upperLimit().format()}#{/else}	
+			#{if vacationSituation.currentYear.isContractUpperLimit()}><em><strong>${vacationSituation.currentYear.upperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.currentYear.upperLimit().format()}#{/else}	
 			</td>
 			
   		    *{ 
-  		    <td>${comparedVacation.attestatiCurrentYear.total()}</td>
+  		    <td>${vacationSituation.attestatiCurrentYear.total()}</td>
   		    }*
 
 		</tr>
@@ -203,49 +203,49 @@
 	</thead>
 
 	<tbody>
-		#{list items:comparedVacationList, as:'comparedVacation'}
+		#{list items:vacationSituations, as:'vacationSituation'}
 		
-		#{if comparedVacation.permissions != null}
-		<tr #{if !comparedVacation.epasPermissionEquivalent()} class="bg-danger" #{/if}>
+		#{if vacationSituation.permissions != null}
+		<tr #{if !vacationSituation.epasPermissionEquivalent()} class="bg-danger" #{/if}>
 
 			<td>
-			  ${comparedVacation.person.fullname}
+			  ${vacationSituation.person.fullname}
 			</td>
           
             <!-- Permessi -->
-			<td>${comparedVacation.oldPermissions.total()} (${comparedVacation.oldPermissions.postPartum()})</td>
-			<td>${comparedVacation.permissions.total()} (${comparedVacation.permissions.postPartum()})</td>
-			<td>${comparedVacation.oldPermissions.accrued()}</td>
-			<td>${comparedVacation.permissions.accrued()}</td>
+			<td>${vacationSituation.oldPermissions.total()} (${vacationSituation.oldPermissions.postPartum()})</td>
+			<td>${vacationSituation.permissions.total()} (${vacationSituation.permissions.postPartum()})</td>
+			<td>${vacationSituation.oldPermissions.accrued()}</td>
+			<td>${vacationSituation.permissions.accrued()}</td>
 			
-			<td>${comparedVacation.oldPermissions.used()}</td>
-			<td>${comparedVacation.permissions.used()}</td>
+			<td>${vacationSituation.oldPermissions.used()}</td>
+			<td>${vacationSituation.permissions.used()}</td>
 			
 			
-			<td>${comparedVacation.oldPermissions.usable()}</td>
-			<td>${comparedVacation.permissions.usable()}</td>
-			<td>${comparedVacation.oldPermissions.usableTotal()}</td>
-			<td>${comparedVacation.permissions.usableTotal()}</td>
+			<td>${vacationSituation.oldPermissions.usable()}</td>
+			<td>${vacationSituation.permissions.usable()}</td>
+			<td>${vacationSituation.oldPermissions.usableTotal()}</td>
+			<td>${vacationSituation.permissions.usableTotal()}</td>
 			
 			<td
-			#{if comparedVacation.oldPermissions.isContractLowerLimit()}><em><strong>${comparedVacation.oldPermissions.lowerLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.oldPermissions.lowerLimit().format()}#{/else}	
+			#{if vacationSituation.oldPermissions.isContractLowerLimit()}><em><strong>${vacationSituation.oldPermissions.lowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.oldPermissions.lowerLimit().format()}#{/else}	
 			</td>
 			<td
-			#{if comparedVacation.permissions.isContractLowerLimit()}><em><strong>${comparedVacation.permissions.lowerLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.permissions.lowerLimit().format()}#{/else}	
+			#{if vacationSituation.permissions.isContractLowerLimit()}><em><strong>${vacationSituation.permissions.lowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.permissions.lowerLimit().format()}#{/else}	
 			</td>
 			<td
-			#{if comparedVacation.oldPermissions.isContractUpperLimit()}><em><strong>${comparedVacation.oldPermissions.upperLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.oldPermissions.upperLimit().format()}#{/else}	
+			#{if vacationSituation.oldPermissions.isContractUpperLimit()}><em><strong>${vacationSituation.oldPermissions.upperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.oldPermissions.upperLimit().format()}#{/else}	
 			</td>
 			<td
-			#{if comparedVacation.permissions.isContractUpperLimit()}><em><strong>${comparedVacation.permissions.upperLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${comparedVacation.permissions.upperLimit().format()}#{/else}	
+			#{if vacationSituation.permissions.isContractUpperLimit()}><em><strong>${vacationSituation.permissions.upperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.permissions.upperLimit().format()}#{/else}	
 			</td>
 			
 			*{
-			<td>${comparedVacation.attestatiPermission.total()}</td>
+			<td>${vacationSituation.attestatiPermission.total()}</td>
 			}*
 
 

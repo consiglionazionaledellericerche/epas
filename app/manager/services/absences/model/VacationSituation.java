@@ -25,10 +25,11 @@ import org.joda.time.LocalDate;
  * @author alessandro
  *
  */
-public class ComparedVacation {
+public class VacationSituation {
 
   public Person person;
   public Contract contract;
+  public int year;
   
   public VacationSummary lastYear;
   public VacationSummary currentYear;
@@ -37,21 +38,24 @@ public class ComparedVacation {
   public OldVacationSummary oldLastYear;
   public OldVacationSummary oldCurrentYear;
   public OldVacationSummary oldPermissions;
-  
+   
   /**
    * Costruttore.
    */
-  public ComparedVacation(IWrapperPerson wrPerson, Contract contract, int year, 
-      GroupAbsenceType vacationGroup,
-      AbsenceService absenceService, IVacationsService vacationsService) {
+  public VacationSituation(IWrapperPerson wrPerson, Contract contract, int year, 
+      GroupAbsenceType vacationGroup, AbsenceService absenceService, 
+      IVacationsService vacationsService) {
     
     this.contract = contract;
+    this.year = year;
     
-    Optional<VacationsRecap> vr = vacationsService.create(year, contract);
-    if (vr.isPresent()) {
-      this.oldLastYear = new OldVacationSummary(vr.get().getVacationsLastYear());
-      this.oldCurrentYear = new OldVacationSummary(vr.get().getVacationsCurrentYear());
-      this.oldPermissions = new OldVacationSummary(vr.get().getPermissions());
+    if (vacationsService != null) { 
+      Optional<VacationsRecap> vr = vacationsService.create(year, contract);
+      if (vr.isPresent()) {
+        this.oldLastYear = new OldVacationSummary(vr.get().getVacationsLastYear());
+        this.oldCurrentYear = new OldVacationSummary(vr.get().getVacationsCurrentYear());
+        this.oldPermissions = new OldVacationSummary(vr.get().getPermissions());
+      }
     }
 
     //La data target per il riepilogo contrattuale
@@ -96,6 +100,22 @@ public class ComparedVacation {
     //    }
   }
   
+  /**
+   * I giorni rimanenti totali.
+   */
+  public int sumUsableTotal() {
+    int totalRemaining = 0;
+    if (lastYear != null) {
+      totalRemaining += lastYear.usableTotal();
+    } 
+    if (currentYear != null) {
+      totalRemaining += currentYear.usableTotal();
+    }
+    if (permissions != null) {
+      totalRemaining += permissions.usableTotal();
+    }
+    return totalRemaining;
+  }
  
   /**
    * Confronto anno passato.

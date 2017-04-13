@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import manager.SecureManager;
 import manager.services.absences.AbsenceService;
-import manager.services.absences.model.ComparedVacation;
+import manager.services.absences.model.VacationSituation;
 import manager.services.vacations.IVacationsService;
 import manager.services.vacations.VacationsRecap;
 
@@ -137,6 +137,79 @@ public class VacationsAdmin extends Controller {
   }
   
   /**
+   * Riepiloghi ferie della sede.
+   *
+   * @param year     anno
+   * @param officeId sede
+   */
+  public static void listControl(Integer year, Long officeId) {
+
+    Set<Office> offices = secureManager.officesReadAllowed(Security.getUser().get());
+    if (offices.isEmpty()) {
+      forbidden();
+    }
+    if (officeId == null) {
+      officeId = offices.iterator().next().id;
+    }
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+
+    LocalDate beginYear = new LocalDate(year, 1, 1);
+    LocalDate endYear = new LocalDate(year, 12, 31);
+    DateInterval yearInterval = new DateInterval(beginYear, endYear);
+    
+    GroupAbsenceType vacationGroup = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
+
+    List<Person> personList = personDao.list(Optional.<String>absent(),
+        Sets.newHashSet(office), false, beginYear, endYear, true).list();
+
+    List<VacationSituation> vacationSituations = Lists.newArrayList();
+    
+    for (Person person : personList) {
+
+      IWrapperPerson wrPerson = wrapperFactory.create(person);
+      
+      for (Contract contract : person.contracts) {
+
+        IWrapperContract cwrContract = wrapperFactory.create(contract);
+        if (DateUtility.intervalIntersection(cwrContract.getContractDateInterval(),
+            yearInterval) == null) {
+
+          //Questo evento andrebbe segnalato... la list dovrebbe caricare
+          // nello heap solo i contratti attivi nel periodo specificato.
+          continue;
+        }
+
+        try {
+          VacationSituation vacationSituation = new VacationSituation(wrPerson, 
+              contract, year, vacationGroup, 
+              absenceService, vacationsService);
+          vacationSituations.add(vacationSituation);
+        } catch (Exception ex) {
+          log.info("");
+        }
+
+      }
+    }
+
+    boolean isVacationLastYearExpired = vacationsService.isVacationsLastYearExpired(year,
+        vacationsService.vacationsLastYearExpireDate(year, office));
+
+    boolean isVacationCurrentYearExpired = vacationsService.isVacationsLastYearExpired(year + 1,
+        vacationsService.vacationsLastYearExpireDate(year + 1, office));
+
+    boolean isPermissionCurrentYearExpired = false;
+    if (new LocalDate(year, 12, 31).isBefore(LocalDate.now())) {
+      isPermissionCurrentYearExpired = true;
+    }
+
+    render(vacationSituations, isVacationLastYearExpired, isVacationCurrentYearExpired,
+        isPermissionCurrentYearExpired, year, offices, office);
+  }
+  
+  /**
    * Confronto vecchio/nuovo algoritmo.
    */
   public static void compareVacations(Integer year, Long officeId) {
@@ -155,7 +228,7 @@ public class VacationsAdmin extends Controller {
     GroupAbsenceType vacationGroup = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
     
-    List<ComparedVacation> comparedVacationList = Lists.newArrayList();
+    List<VacationSituation> vacationSituations = Lists.newArrayList();
     
     for (Person person : personList) {
 
@@ -173,17 +246,17 @@ public class VacationsAdmin extends Controller {
         }
 
         try {
-          ComparedVacation comparedVacation = new ComparedVacation(wrPerson, 
+          VacationSituation vacationSituation = new VacationSituation(wrPerson, 
               contract, year, vacationGroup, 
               absenceService, vacationsService);
-          comparedVacationList.add(comparedVacation);
+          vacationSituations.add(vacationSituation);
         } catch (Exception ex) {
           log.info("");
         }
       }
     }
     
-    render(year, comparedVacationList);
+    render(year, vacationSituations);
   }
 
 
