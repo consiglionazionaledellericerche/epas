@@ -5,20 +5,13 @@ import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
-
 import dao.UserDao;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.OfficeManager;
-
 import models.User;
-
 import play.mvc.Http;
 import play.utils.Java;
 
@@ -26,6 +19,7 @@ import play.utils.Java;
 public class Security extends Secure.Security {
 
   public static final String CACHE_DURATION = "30mn";
+  public static final String CURRENT_USER = "current_user";
 
   //FIXME residuo dei vecchi residui, rimuoverlo e sostituirlo nei metodi che lo utilizzano
   @Inject
@@ -45,6 +39,7 @@ public class Security extends Secure.Security {
     if (user != null) {
       log.info("user {} successfully logged in from ip {}", user.username,
           Http.Request.current().remoteAddress);
+      request.args.put(CURRENT_USER, user);
       return true;
     }
 
@@ -55,31 +50,25 @@ public class Security extends Secure.Security {
     return false;
   }
 
-  private static Optional<User> getUser(String username) {
-
-    if (username == null || username.isEmpty()) {
-      log.trace("getUSer failed for username {}", username);
-      return Optional.absent();
-    }
-    log.trace("Richiesta getUser(), username={}", username);
-
-    //db
-    User user = userDao.byUsername(username);
-
-    if (user == null) {
-      log.info("Security.getUser(): User con username = {} non trovata nel database", username);
-      return Optional.absent();
-    }
-    return Optional.of(user);
-  }
-
   /**
-   * Preleva (opzionalmente) l'utente loggato.
-   *
-   * @return l'utente correntemente loggato se presente
+   * @return l'utente corrente, se presente, altrimenti "absent".
    */
   public static Optional<User> getUser() {
-    return getUser(connected());
+    if (request.args.containsKey(CURRENT_USER)) {
+      return Optional.of((User) request.args.get(CURRENT_USER));
+    }
+    if (session != null && isConnected()) {
+      final Optional<User> user = Optional.fromNullable(userDao.byUsername(connected()));
+      if (user.isPresent()) {
+        request.args.put(CURRENT_USER, user.get());
+      }
+      return user;
+    }
+    if (request.user != null && request.password != null && authenticate(request.user,
+        request.password)) {
+      return Optional.of((User) request.args.get(CURRENT_USER));
+    }
+    return Optional.absent();
   }
 
   static Object invoke(String method, Object... args) throws Throwable {
@@ -92,7 +81,7 @@ public class Security extends Secure.Security {
 
   /**
    * @return Vero se c'è almeno un istituto abilitato dall'ip contenuto nella richiesta HTTP
-   *     ricevuta, false altrimenti.
+   * ricevuta, false altrimenti.
    */
   public static boolean checkForWebstamping() {
 
