@@ -71,17 +71,6 @@ public class Security extends Secure.Security {
     return Optional.absent();
   }
 
-  static String connected() {
-    if (request == null) {
-      return null;
-    }
-    if (request.user != null) {
-      return request.user;
-    } else {
-      return Secure.Security.connected();
-    }
-  }
-
   static Object invoke(String method, Object... args) throws Throwable {
     try {
       return Java.invokeChildOrStatic(Security.class, method, args);
