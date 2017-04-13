@@ -1,18 +1,21 @@
 package manager.services.absences.model;
 
 import com.google.common.base.Optional;
-
-import dao.wrapper.IWrapperPerson;
+import com.google.common.collect.Lists;
 
 import it.cnr.iit.epas.DateUtility;
 
+import java.util.List;
+
 import manager.services.absences.AbsenceService;
+import manager.services.absences.model.VacationSituation.VacationSummary.TypeSummary;
 import manager.services.vacations.IVacationsService;
 import manager.services.vacations.VacationsRecap;
 import manager.services.vacations.VacationsTypeResult;
 
 import models.Contract;
 import models.Person;
+import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.AbsenceType.DefaultAbsenceType;
 import models.absences.GroupAbsenceType;
@@ -42,10 +45,11 @@ public class VacationSituation {
   /**
    * Costruttore.
    */
-  public VacationSituation(IWrapperPerson wrPerson, Contract contract, int year, 
+  public VacationSituation(Person person, Contract contract, int year, 
       GroupAbsenceType vacationGroup, AbsenceService absenceService, 
       IVacationsService vacationsService) {
     
+    this.person = person;
     this.contract = contract;
     this.year = year;
     
@@ -68,19 +72,18 @@ public class VacationSituation {
         && !DateUtility.isDateIntoInterval(date, contract.periodInterval())) {
       date = contract.calculatedEnd();
     }
-    PeriodChain periodChain = absenceService.residual(wrPerson.getValue(), 
-        vacationGroup, date);
-    this.person = wrPerson.getValue();
+    PeriodChain periodChain = absenceService.residual(person, vacationGroup, date);
     if (!periodChain.vacationSupportList.get(0).isEmpty()) {
-      this.lastYear = new VacationSummary(contract, periodChain.vacationSupportList.get(0).get(0));
+      this.lastYear = new VacationSummary(contract, periodChain.vacationSupportList.get(0).get(0), 
+          year - 1, TypeSummary.VACATION);
     }
     if (!periodChain.vacationSupportList.get(1).isEmpty()) {
-      this.currentYear = 
-          new VacationSummary(contract, periodChain.vacationSupportList.get(1).get(0));
+      this.currentYear = new VacationSummary(contract, 
+          periodChain.vacationSupportList.get(1).get(0), year, TypeSummary.VACATION);
     }
     if (!periodChain.vacationSupportList.get(2).isEmpty()) {
-      this.permissions = 
-          new VacationSummary(contract, periodChain.vacationSupportList.get(2).get(0));
+      this.permissions = new VacationSummary(contract, 
+          periodChain.vacationSupportList.get(2).get(0), year, TypeSummary.PERMISSION);
     }
     
     //    try {
@@ -248,12 +251,24 @@ public class VacationSituation {
   
   public static class VacationSummary {
     
+    public TypeSummary type;
+    public int year;
     public Contract contract;
     public AbsencePeriod absencePeriod;
     
-    public VacationSummary(Contract contract, AbsencePeriod absencePeriod) {
+    /**
+     * Constructor.
+     */
+    public VacationSummary(Contract contract, AbsencePeriod absencePeriod, 
+        int year, TypeSummary type) {
+      this.year = year;
+      this.type = type;
       this.contract = contract;
       this.absencePeriod = absencePeriod;
+    }
+    
+    public static enum TypeSummary {
+      VACATION, PERMISSION;
     }
     
     public int total() {
@@ -349,6 +364,57 @@ public class VacationSituation {
       return lastPeriod;
     }
     
+    /**
+     * I giorni da inizializzazione.
+     */
+    public int sourced() {
+      int sourced = 0;
+      for (AbsencePeriod period : absencePeriod.subPeriods) {
+        if (period.initialization != null) {
+          sourced += period.initialization.unitsInput;
+        }
+      }
+      return sourced;
+    }
+    
+    /**
+     * Le assenze utilizzate (post inizializzazione).
+     */
+    public List<Absence> absencesUsed() {
+      List<Absence> absencesUsed = Lists.newArrayList();
+      for (AbsencePeriod period : absencePeriod.subPeriods) {
+        for (DayInPeriod day : period.daysInPeriod.values()) {
+          for (TakenAbsence takenAbsence : day.getTakenAbsences()) {
+            if (!takenAbsence.beforeInitialization) {
+              absencesUsed.add(takenAbsence.absence);
+            }
+          }
+        }
+      }
+      return absencesUsed;
+    }
+    
+    /**
+     * I giorni maturati nel periodo per il riepilogo. 
+     */
+    public int periodAmountAccrued(AbsencePeriod period) {
+      if (LocalDate.now().isBefore(period.from)) {
+        return 0;
+      }
+      return period.vacationAmountBeforeInitialization;
+    }
+    
+    /**
+     * Una label che da il titolo.
+     * TODO: spostare su message.
+     */
+    public String title() {
+      if (this.type.equals(TypeSummary.VACATION)) {
+        return this.contract.person.fullName() + " - " + "Riepilogo Ferie " + this.year;  
+      } else {
+        return this.contract.person.fullName() + " - " + "Riepilogo Permessi Legge " + this.year;
+      }
+    }
   }
   
 }

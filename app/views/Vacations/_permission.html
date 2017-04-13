@@ -1,9 +1,9 @@
- #{title title:('Situazione Ferie anno ' + (year-1)), administration:true /}
+ #{title title:('Situazione Permessi anno ' + year), administration:true /}
   
   #{alert color:'info'}
     <p>Nella cella <strong>&{'vacations.takable'}</strong> per i tempi determinati vengono considerati solo i giorni
     maturati mentre per i tempi indeterminati vengono considerati i giorni totali rimanenti.</p>
-    #{if isVacationLastYearExpired}
+    #{if isPermissionpermissionsExpired}
     <p><span class="glyphicon glyphicon-remove" style="color: red;"></span> Questo simbolo indica che il relativo
     residuo adesso non è più utilizzabile in quanto scaduto.</p>
     #{/if}
@@ -21,7 +21,7 @@
 		</tr>	
 		<tr>
 		    <th>&{'vacations.takable'}
-		    #{if isVacationLastYearExpired}
+		    #{if isPermissionpermissionsExpired}
     			<span class="glyphicon glyphicon-remove" style="color: red;"></span>
             #{/if}
 		    </th>
@@ -33,31 +33,31 @@
 
 	<tbody>
 		#{list items:vacationSituations, as:'vacationSituation'}
-		#{if vacationSituation.lastYear != null}
+		#{if vacationSituation.permissions != null}
 		<tr>
 		    <td>
 				<a
-				href="@{VacationsAdmin.vacationsLastYear(vacationSituation.contract.id, vacationSituation.year)}"
+				href="@{VacationsAdmin.vacationSummary(vacationSituation.contract.id, vacationSituation.permissions.year, 'PERMISSION')}"
 				data-async-modal="#defaultModal">
 					${vacationSituation.contract.person.fullname}</a>
 			</td>
 			
-			<td>${vacationSituation.lastYear.total()}</td>
-			<td>${vacationSituation.lastYear.accrued()}</td>
-			<td>${vacationSituation.lastYear.used()}</td>
+			<td>${vacationSituation.permissions.total()}</td>
+			<td>${vacationSituation.permissions.accrued()}</td>
+			<td>${vacationSituation.permissions.used()}</td>
 			
 			<!-- residui totali -->
-			<td>${vacationSituation.lastYear.usable()}</td>
-  		    <td>${vacationSituation.lastYear.usableTotal()}</td>
+			<td>${vacationSituation.permissions.usable()}</td>
+  		    <td>${vacationSituation.permissions.usableTotal()}</td>
 				
 			<!-- limiti utilizzo -->	
 			<td
-			#{if vacationSituation.lastYear.isContractLowerLimit()}><em><strong>${vacationSituation.lastYear.lowerLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${vacationSituation.lastYear.lowerLimit().format()}#{/else}	
+			#{if vacationSituation.permissions.isContractLowerLimit()}><em><strong>${vacationSituation.permissions.lowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.permissions.lowerLimit().format()}#{/else}	
 			</td>
 			<td
-			#{if vacationSituation.lastYear.isContractUpperLimit()}><em><strong>${vacationSituation.lastYear.upperLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${vacationSituation.lastYear.upperLimit().format()}#{/else}	
+			#{if vacationSituation.permissions.isContractUpperLimit()}><em><strong>${vacationSituation.permissions.upperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.permissions.upperLimit().format()}#{/else}	
 			</td>
 
 		</tr>

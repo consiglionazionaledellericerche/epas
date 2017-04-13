@@ -23,6 +23,7 @@ import models.absences.AmountType;
 import models.absences.GroupAbsenceType;
 import models.absences.InitializationGroup;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
+import models.enumerate.VacationCode;
 
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
@@ -67,9 +68,13 @@ public class AbsencePeriod {
   //Tentativo di inserimento assenza nel periodo
   public Absence attemptedInsertAbsence;
   
+  //Supporto alla gestione ferie e permessi
   //Assenze che hanno provocato una riduzione della quantità 
-  //(utile solo per visualizzazione.. per ora)
   public List<Absence> reducingAbsences = Lists.newArrayList();
+  //Ammontare periodo (prima della patch per gestire l'inizializzazione)
+  public int vacationAmountBeforeInitialization = 0;
+  //VacationPeriod che ha generato il period
+  public VacationCode vacationCode;
   
   AbsencePeriod(Person person, GroupAbsenceType groupAbsenceType) {
     this.person = person;

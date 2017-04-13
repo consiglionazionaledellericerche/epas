@@ -51,7 +51,8 @@
 			<!-- ferie anno precedente -->
             <td>
 			#{if vacationSituation.lastYear != null}
-			  <a href="@{VacationsAdmin.vacationsLastYear(vacationSituation.contract.id, vacationSituation.year)}" 
+			  <a 
+			     href="@{Vacations.vacationSummary(vacationSituation.contract.id, vacationSituation.lastYear.year, 'VACATION')}"
 			     data-async-modal="#defaultModal">
 				${vacationSituation.lastYear.usableTotal()}
 			  </a>
@@ -67,7 +68,8 @@
 			<!-- ferie anno corrente -->
             <td>
 			#{if vacationSituation.currentYear != null}
-			  <a href="@{VacationsAdmin.vacationsCurrentYear(vacationSituation.contract.id, vacationSituation.year)}" 
+			  <a
+                 href="@{Vacations.vacationSummary(vacationSituation.contract.id, vacationSituation.currentYear.year, 'VACATION')}"
 			     data-async-modal="#defaultModal">
 				${vacationSituation.currentYear.usableTotal()}
 			  </a>
@@ -81,7 +83,8 @@
 			<!-- permessi anno corrente -->
             <td>
 			#{if vacationSituation.permissions != null}
-			  <a href="@{VacationsAdmin.permissionCurrentYear(vacationSituation.contract.id, vacationSituation.year)}" 
+			  <a
+			     href="@{Vacations.vacationSummary(vacationSituation.contract.id, vacationSituation.permissions.year, 'PERMISSION')}" 
 			     data-async-modal="#defaultModal">
 				${vacationSituation.permissions.usableTotal()}
 			  </a>

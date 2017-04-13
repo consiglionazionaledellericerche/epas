@@ -323,6 +323,7 @@ public class VacationFactory {
 
       AbsencePeriod absencePeriod = period(person, contract, group, date, takableCodes, 
           yearPortion.days, yearPortion.amount);
+      absencePeriod.vacationCode = vacationPeriod.vacationCode;
       periods.add(absencePeriod);
       date = absencePeriod.to.plusDays(1);
       if (date.isAfter(endYear)) {
@@ -338,9 +339,6 @@ public class VacationFactory {
    */
   private List<AbsencePeriod> handleInitialization(List<AbsencePeriod> periods, 
       Integer initializationDays, LocalDate initializationDate, GroupAbsenceType group) {
-//    if (initializationDays == 0) {
-//      return periods;
-//    }
     if (initializationDate == null) {
       return periods;
     }
@@ -399,6 +397,7 @@ public class VacationFactory {
       absencePeriod.to = contract.calculatedEnd();
     }
     absencePeriod.setFixedPeriodTakableAmount(amount);
+    absencePeriod.vacationAmountBeforeInitialization = amount;
     absencePeriod.takableCodes = takableCodes;
     absencePeriod.takenCodes = takableCodes;
 
