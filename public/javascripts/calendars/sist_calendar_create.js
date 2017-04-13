@@ -1361,19 +1361,19 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 		
 		            var indexVac = 0;
 		            jQuery.each(absentPerson, function (i, event) {
-			              event['color'] = 'LEMONCHIFFON';
-			              event['textColor'] = 'red';
-			              event['borderColor'] = 'red';
-			              event['personId'] = event.personId;
-			              event['title'] = 'Assenza ' + idToName[event.personId];
-			              event['allDay'] = false;
-			              event['start'] = jQuery.fullCalendar.moment(event.start).format();
-			              event['end'] = jQuery.fullCalendar.moment(event.end).format();
-			              event['id'] = 'assenza-' + event.personId + '-' + indexVac;
-			             			             
-			              //events.push(event);
-			              jQuery('#calendar').fullCalendar('renderEvent', event, true);
-			              indexVac++;
+		            	event['color'] = 'LEMONCHIFFON';
+			            event['textColor'] = 'red';
+			            event['borderColor'] = 'red';
+			            event['personId'] = event.personId;
+			            event['title'] = 'Assenza ' + idToName[event.personId];
+			            event['start'] = event.start;
+			            event['end'] = event.end + "T23:59:00.000";
+			            event['allDay'] = false;
+			            event['id'] = 'assenza-' + event.personId + '-' + indexVac;
+			            
+			            events.push(event);
+			            jQuery('#calendar').fullCalendar('renderEvent', event, true);
+			            indexVac++;
 
 		            });
     			};
@@ -1471,7 +1471,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 			  jQuery.each(obj, function(i, val) {
 				  var valStart = jQuery.fullCalendar.moment(val.start).format("YYYY-MM-DD");
 				  var valEnd = jQuery.fullCalendar.moment(val.end).format("YYYY-MM-DD");
-				  console.log("val.end="+val.end+ "title="+val.title);
+				  //console.log("val.end="+val.end+ "title="+val.title);
 
 				  // check for the cancelled shift overlap
 				  if (val.title.toString().match(/ANNULLATO/g) && (val.shiftType == copiedEventObject.shiftType) && (cEOStart >= valStart) && (cEOStart<=valEnd)&&(val.id.toString() != copiedEventObject.id.toString())){
