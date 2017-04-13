@@ -110,88 +110,88 @@ jQuery(document).ready(function() {
       jQuery('#calendar').fullCalendar('rerenderEvents');
     });
 
-		// salva i turno del DB delle presenze
-		// ----------------------------------------
-		jQuery("#salva").click( function () {
-			var obj = jQuery('#calendar').fullCalendar('clientEvents');
-			
-			var startDate = today;
-      			var endDate = today;
-			var calDate = $('#calendar').fullCalendar('getDate');
-
-			// mese correntemente visualizzato (partendo da 0)
-      			var mese = calDate.getMonth();
-			var anno = calDate.getFullYear();
-
+	// salva i turno del DB delle presenze
+	// ----------------------------------------
+	jQuery("#salva").click( function () {
+		var obj = jQuery('#calendar').fullCalendar('clientEvents');
 		
-			turni = new Object();
+		var startDate = today;
+  		var endDate = today;
+		var calDate = $('#calendar').fullCalendar('getDate');
 
-			// tipologia di turni da leggere dal DB
-                	var tipoTurni = groupConf.getShiftFromType(calendarType);
-      			jQuery.each(tipoTurni, function (i, val) {
-          			turni[val] = new Array();
-      			});
+		// mese correntemente visualizzato (partendo da 0)
+  		var mese = calDate.getMonth();
+		var anno = calDate.getFullYear();
 
-      			jQuery.each(obj, function(i, val) {
-				if ((val.id.toString().match('turno')) && (val.start.getMonth() == mese) && (val.start.getFullYear() == anno)) {
-					if (val.cancelled.toString() == 'true') {
-						var shiftPersona = {
-							start: jQuery.fullCalendar.formatDate(val.start, "yyyy-MM-dd"),
-	            					end: jQuery.fullCalendar.formatDate(val.end, "yyyy-MM-dd"),
-							cancelled: true,
-						}
-					} else {
-						var timeTableEnd = (val.shiftHour.toString().match('07:00')) ? "13:30" : "19:00"; 
-						var shiftPersona = {
-							id: val.personId,
-							start: jQuery.fullCalendar.formatDate(val.start, "yyyy-MM-dd"),
-							end: jQuery.fullCalendar.formatDate(val.end, "yyyy-MM-dd"),
-							cancelled: false,
-							shiftSlot: val.shiftSlot,
-							//time_table_start: val.shiftHour,
-							//time_table_end: timeTableEnd,
-						};
-					}
-					
-					// divide shifts for types
-					turni[val.shiftType.toString()].push(shiftPersona);
-          				
-					if (val.start < startDate) {
-              					startDate = val.start;
-          				}
-          				if (val.end > endDate) {
-              					endDate = val.end;
-          				}
+	
+		turni = new Object();
+
+		// tipologia di turni da leggere dal DB
+		var tipoTurni = groupConf.getShiftFromType(calendarType);
+		jQuery.each(tipoTurni, function (i, val) {
+  			turni[val] = new Array();
+		});
+
+		jQuery.each(obj, function(i, val) {
+		if ((val.id.toString().match('turno')) && (val.start.getMonth() == mese) && (val.start.getFullYear() == anno)) {
+			if (val.cancelled.toString() == 'true') {
+				var shiftPersona = {
+					start: jQuery.fullCalendar.formatDate(val.start, "yyyy-MM-dd"),
+        					end: jQuery.fullCalendar.formatDate(val.end, "yyyy-MM-dd"),
+					cancelled: true,
 				}
-			});
+			} else {
+				var timeTableEnd = (val.shiftHour.toString().match('07:00')) ? "13:30" : "19:00"; 
+				var shiftPersona = {
+					id: val.personId,
+					start: jQuery.fullCalendar.formatDate(val.start, "yyyy-MM-dd"),
+					end: jQuery.fullCalendar.formatDate(val.end, "yyyy-MM-dd"),
+					cancelled: false,
+					shiftSlot: val.shiftSlot,
+					//time_table_start: val.shiftHour,
+					//time_table_end: timeTableEnd,
+				};
+			}
+			
+			// divide shifts for types
+			turni[val.shiftType.toString()].push(shiftPersona);
+  				
+			if (val.start < startDate) {
+      					startDate = val.start;
+  				}
+  				if (val.end > endDate) {
+      					endDate = val.end;
+  				}
+			}
+		});
 
-			mese = mese + 1;
+		mese = mese + 1;
 
-			jQuery.each(turni, function(i, val) {
-            		// uri to put shifts
-            		var uriPutRep = shiftCalendar.getUriRestToPutEntity(i, anno + '/' + mese);
-        
-            		var data = new Array();
-            
-            		var dataJson = JSON.stringify(val);
-            
-            		jQuery.ajax({
-                		url: uriPutRep,
-               	 		type: "PUT",
-                		dataType: "json",
-                		contentType: "application/json",
-                		data: dataJson, 
-                		success: function (responseData, textStatus, jqXHR) {
-                    			alert("Le modifiche del turno " +i+ " sono state salvate con successo!!! :-)");
-                		},
-                		error: function (responseData, textStatus, errorThrown) {
-					var msg = responseData.responseText;
-					msg = msg.replace(/[[\]"]/g,'');
-					//console.log(msg);
-					alert('ERRORE durante il salvataggio del turno ' +i+'!\n' +msg);
-                		}
-            		});
-        });
+		jQuery.each(turni, function(i, val) {
+    		// uri to put shifts
+    		var uriPutRep = shiftCalendar.getUriRestToPutEntity(i, anno + '/' + mese);
+
+    		var data = new Array();
+    
+    		var dataJson = JSON.stringify(val);
+    
+    		jQuery.ajax({
+        		url: uriPutRep,
+       	 		type: "PUT",
+        		dataType: "json",
+        		contentType: "application/json",
+        		data: dataJson, 
+        		success: function (responseData, textStatus, jqXHR) {
+            			alert("Le modifiche del turno " +i+ " sono state salvate con successo!!! :-)");
+        		},
+        		error: function (responseData, textStatus, errorThrown) {
+			var msg = responseData.responseText;
+			msg = msg.replace(/[[\]"]/g,'');
+			//console.log(msg);
+			alert('ERRORE durante il salvataggio del turno ' +i+'!\n' +msg);
+        		}
+    		});
+		});
     });
 
 
