@@ -4,11 +4,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
-import db.h2support.H2Examples;
-import db.h2support.base.AbsenceDefinitions.AbsenceTypeDefinition;
-import db.h2support.base.AbsenceDefinitions.GroupAbsenceTypeDefinition;
-import db.h2support.base.H2AbsenceSupport;
-
 import injection.StaticInject;
 
 import java.util.List;
@@ -18,13 +13,18 @@ import manager.services.absences.model.ServiceFactories;
 
 import models.Person;
 import models.absences.Absence;
+import models.absences.AbsenceType.DefaultAbsenceType;
 import models.absences.GroupAbsenceType;
+import models.absences.GroupAbsenceType.DefaultGroup;
 import models.absences.JustifiedType.JustifiedTypeName;
 
 import org.joda.time.LocalDate;
 import org.junit.Test;
 
 import play.test.UnitTest;
+
+import db.h2support.H2Examples;
+import db.h2support.base.H2AbsenceSupport;
 
 
 @StaticInject
@@ -50,7 +50,7 @@ public class Absences661Test extends UnitTest {
     
     //creare il gruppo
     GroupAbsenceType group661 = h2AbsenceSupport
-        .getGroupAbsenceType(GroupAbsenceTypeDefinition.Group_661);
+        .getGroupAbsenceType(DefaultGroup.G_661);
     
     //creare la persona
     Person person = h2Examples.normalUndefinedEmployee(BEGIN_2016);
@@ -69,15 +69,15 @@ public class Absences661Test extends UnitTest {
     assertEquals(periodChain.periods.get(0).getPeriodTakableAmount(), 1080);
     
     //creare le assenze da considerare
-    Absence absence1 = h2AbsenceSupport.absenceInstance(AbsenceTypeDefinition._661M, 
+    Absence absence1 = h2AbsenceSupport.absenceInstance(DefaultAbsenceType.A_661M, 
         FERIAL_1_2016, Optional.of(JustifiedTypeName.specified_minutes), 80);
-    Absence absence2 = h2AbsenceSupport.absenceInstance(AbsenceTypeDefinition._661H1, 
+    Absence absence2 = h2AbsenceSupport.absenceInstance(DefaultAbsenceType.A_661H1, 
         FERIAL_1_2016, Optional.of(JustifiedTypeName.nothing), 0);
     List<Absence> allPersistedAbsences = Lists.newArrayList(absence1, absence2);
     List<Absence> groupPersistedAbsences = Lists.newArrayList(absence1, absence2);
     
     //creare la assenza da inserire
-    Absence toInsert = h2AbsenceSupport.absenceInstance(AbsenceTypeDefinition._661M, 
+    Absence toInsert = h2AbsenceSupport.absenceInstance(DefaultAbsenceType.A_661M, 
         FERIAL_3_2016, Optional.of(JustifiedTypeName.specified_minutes), 40);
     
     serviceFactories.buildPeriodChainPhase2(periodChain, toInsert, 
@@ -97,8 +97,7 @@ public class Absences661Test extends UnitTest {
   public void adjustmentLimit() {
         
     //creare il gruppo
-    GroupAbsenceType group661 = h2AbsenceSupport
-        .getGroupAbsenceType(GroupAbsenceTypeDefinition.Group_661);
+    GroupAbsenceType group661 = h2AbsenceSupport.getGroupAbsenceType(DefaultGroup.G_661);
     
     // CASO 1 
     //la persona inizia a lavorare a metà anno
