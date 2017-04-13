@@ -3,32 +3,21 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-
 import controllers.Resecure.BasicAuth;
-
 import dao.PersonDao;
-
 import helpers.JsonResponse;
-
 import it.cnr.iit.epas.JsonStampingBinder;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.AbsenceManager;
 import manager.StampingManager;
 import manager.cache.AbsenceTypeManager;
-
 import models.absences.AbsenceType;
 import models.exports.AbsenceFromClient;
 import models.exports.StampingFromClient;
-
 import play.data.binding.As;
-import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 
@@ -53,17 +42,13 @@ public class StampingsFromClient extends Controller {
   @BasicAuth
   public static void create(@As(binder = JsonStampingBinder.class) StampingFromClient body) {
 
-    //rulesssssssssssssss
-
     // Malformed Json (400)
     if (body == null) {
       JsonResponse.badRequest();
     }
 
     // Badge number not present (404)
-    if (body.person == null) {
-      log.warn("Non e' stato possibile recuperare la persona a cui si riferisce la timbratura,"
-          + " matricolaFirma={}. Controllare il database.", body.numeroBadge);
+    if (!stampingManager.linkToPerson(body).isPresent()) {
       JsonResponse.notFound();
     }
 
@@ -83,20 +68,15 @@ public class StampingsFromClient extends Controller {
   public static void createNotRecompute(@As(binder = JsonStampingBinder.class)
       StampingFromClient body) {
 
-    //rulesssssssssssssss
-
     // Malformed Json (400)
     if (body == null) {
       JsonResponse.badRequest();
     }
 
     // Badge number not present (404)
-    if (body.person == null) {
-      log.warn("Non e' stato possibile recuperare la persona a cui si riferisce la timbratura,"
-          + " matricolaFirma={}. Controllare il database.", body.numeroBadge);
+    if (!stampingManager.linkToPerson(body).isPresent()) {
       JsonResponse.badRequest();
     }
-
 
     // Stamping already present (409)
     if (!stampingManager.createStampingFromClient(body, false)) {
@@ -109,7 +89,7 @@ public class StampingsFromClient extends Controller {
 
 
   /**
-   * Inseriemento di assenza con ricalcolo.
+   * Inserimento di assenza con ricalcolo.
    */
   @BasicAuth
   public static void absence(AbsenceFromClient body) {
@@ -120,7 +100,7 @@ public class StampingsFromClient extends Controller {
 
     AbsenceType abt = absenceTypeManager.getAbsenceType(body.code);
 
-    Optional<Integer> justifiedMinutes = Optional.<Integer>absent();
+    Optional<Integer> justifiedMinutes = Optional.absent();
     if (!Strings.isNullOrEmpty(body.inizio) && !Strings.isNullOrEmpty(body.fine)) {
       justifiedMinutes = Optional.fromNullable(Integer.parseInt(body.fine)
           - Integer.parseInt(body.inizio));
@@ -128,7 +108,7 @@ public class StampingsFromClient extends Controller {
 
     absenceManager.insertAbsenceRecompute(body.person, body.date,
         Optional.fromNullable(body.date),
-        abt, Optional.<Blob>absent(), Optional.<String>absent(), justifiedMinutes);
+        abt, Optional.absent(), Optional.absent(), justifiedMinutes);
 
     renderText("ok");
   }
@@ -145,7 +125,7 @@ public class StampingsFromClient extends Controller {
 
     AbsenceType abt = absenceTypeManager.getAbsenceType(body.code);
 
-    Optional<Integer> justifiedMinutes = Optional.<Integer>absent();
+    Optional<Integer> justifiedMinutes = Optional.absent();
     if (!Strings.isNullOrEmpty(body.inizio) && !Strings.isNullOrEmpty(body.fine)) {
       justifiedMinutes = Optional.fromNullable(Integer.parseInt(body.fine)
           - Integer.parseInt(body.inizio));
@@ -153,10 +133,9 @@ public class StampingsFromClient extends Controller {
 
     absenceManager.insertAbsenceNotRecompute(body.person, body.date,
         Optional.fromNullable(body.date),
-        abt, Optional.<Blob>absent(), Optional.<String>absent(), justifiedMinutes);
+        abt, Optional.absent(), Optional.absent(), justifiedMinutes);
 
     renderText("ok");
   }
-
 
 }
