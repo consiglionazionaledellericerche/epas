@@ -13,7 +13,7 @@
 
 #{/set}
 
-<div class="container">
+<div class="container-fluid">
   
    #{alert color:'info'}
      <p>Ferie Anno Precedente ${(year -1)}
@@ -30,6 +30,10 @@
 		    <th>Maturate New</th>
 		    <th>Usate</th>
 		    <th>Usate New</th>
+		    <th>Usufruibili</th>
+		    <th>Usufruibili New</th>
+            <th>Rimanenti</th>
+		    <th>Rimanenti New</th>
 		    <th>Inizio</th>
 		    <th>Inizio New</th>
 		    <th>Fine</th>
@@ -57,6 +61,11 @@
 			
 			<td>${comparedVacation.oldLastYear.used()}</td>
 			<td>${comparedVacation.lastYear.used()}</td>
+			
+			<td>${comparedVacation.oldLastYear.usable()}</td>
+			<td>${comparedVacation.lastYear.usable()}</td>
+			<td>${comparedVacation.oldLastYear.usableTotal()}</td>
+			<td>${comparedVacation.lastYear.usableTotal()}</td>
 			
 			<td
 			#{if comparedVacation.oldLastYear.isContractLowerLimit()}><em><strong>${comparedVacation.oldLastYear.lowerLimit().format()}</strong></em>#{/if}
@@ -102,6 +111,10 @@
 		    <th>Maturate New</th>
 		    <th>Usate</th>
 		    <th>Usate New</th>
+		    <th>Usufruibili</th>
+		    <th>Usufruibili New</th>
+            <th>Rimanenti</th>
+		    <th>Rimanenti New</th>
 		    <th>Inizio</th>
 		    <th>Inizio New</th>
 		    <th>Fine</th>
@@ -129,6 +142,11 @@
 			
 			<td>${comparedVacation.oldCurrentYear.used()}</td>
 			<td>${comparedVacation.currentYear.used()}</td>
+			
+			<td>${comparedVacation.oldCurrentYear.usable()}</td>
+			<td>${comparedVacation.currentYear.usable()}</td>
+			<td>${comparedVacation.oldCurrentYear.usableTotal()}</td>
+			<td>${comparedVacation.currentYear.usableTotal()}</td>
 			
 			<td
 			#{if comparedVacation.oldCurrentYear.isContractLowerLimit()}><em><strong>${comparedVacation.oldCurrentYear.lowerLimit().format()}</strong></em>#{/if}
@@ -172,6 +190,10 @@
 		    <th>Maturate New</th>
 		    <th>Usate</th>
 		    <th>Usate New</th>
+		    <th>Usufruibili</th>
+		    <th>Usufruibili New</th>
+            <th>Rimanenti</th>
+		    <th>Rimanenti New</th>
 		    <th>Inizio</th>
 		    <th>Inizio New</th>
 		    <th>Fine</th>
@@ -198,6 +220,12 @@
 			
 			<td>${comparedVacation.oldPermissions.used()}</td>
 			<td>${comparedVacation.permissions.used()}</td>
+			
+			
+			<td>${comparedVacation.oldPermissions.usable()}</td>
+			<td>${comparedVacation.permissions.usable()}</td>
+			<td>${comparedVacation.oldPermissions.usableTotal()}</td>
+			<td>${comparedVacation.permissions.usableTotal()}</td>
 			
 			<td
 			#{if comparedVacation.oldPermissions.isContractLowerLimit()}><em><strong>${comparedVacation.oldPermissions.lowerLimit().format()}</strong></em>#{/if}
