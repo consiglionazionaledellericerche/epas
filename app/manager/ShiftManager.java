@@ -802,8 +802,10 @@ public class ShiftManager {
    * @param month        mese nel quale sono stati lavorati i turni
    * @param shiftPeriods - lista di periodi di turno lavorati e cancellati
    */
-  public void savePersonShiftDaysFromShiftPeriods(
+  public List<String> savePersonShiftDaysFromShiftPeriods(
       ShiftType shiftType, Integer year, Integer month, ShiftPeriods shiftPeriods) {
+    
+    List<String> returnList = Lists.newArrayList();
     //Il mese e l'anno ci servono per "azzerare" eventuale giorni di turno rimasti vuoti
     LocalDate monthToManage = new LocalDate(year, month, 1);
 
@@ -849,8 +851,9 @@ public class ShiftManager {
             String msg =
                 String.format("Assenza incompatibile di %s %s per il giorno %s",
                     shiftPeriod.person.name, shiftPeriod.person.surname, day);
-
-            BadRequest.badRequest(msg);
+            returnList.add(msg);
+            return returnList;
+            //BadRequest.badRequest(msg);
           }
 
           // Salvataggio del giorno di turno
@@ -941,6 +944,8 @@ public class ShiftManager {
             shiftType.description, dateToRemove);
       }
     }
+    returnList.add("ok");
+    return returnList;
   }
 
   /**

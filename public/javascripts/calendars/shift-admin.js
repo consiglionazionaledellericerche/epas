@@ -28,21 +28,8 @@ jQuery(document).ready(function() {
 		jQuery('#loading').hide();
 	}, 2000);
 
-
-	// read the Group Ids of the user and all roles for the groups          
-//	var gids = Drupal.settings.sistCalendar.gids['node'];
-
 	// lista of calendar types that the group ca manage
 	var types = new Array();
-
-//	for (var gid in gids) {
-//	groupTypes = groupConf.getTypes4Group(gid);
-//	for(one in groupTypes){
-//	if($.inArray(groupTypes[one], types) < 0){
-//	types.push(groupTypes[one]);
-//	}
-//	}
-//	}
 
 	var json = $.getJSON('renderIds', function(data) {
 
@@ -134,10 +121,7 @@ jQuery(document).ready(function() {
 		});
 
 		jQuery.each(obj, function(i, val) {
-			console.log("mese: "+val.start.format('MM'));
-			console.log("anno: "+val.start.format('YYYY'));
-			console.log("mese calcolato: "+mese);
-			console.log("anno calcolato: "+anno);
+			
 			if ((val.id.toString().match('turno')) && (val.start.format('MM') == mese) && (val.start.format('YYYY') == anno)) {
 				if (val.cancelled.toString() == 'true') {
 					var shiftPersona = {
@@ -170,17 +154,12 @@ jQuery(document).ready(function() {
 			}
 		});
 
-		//mese = mese + 1;
-
 		jQuery.each(turni, function(i, val) {
 			// uri to put shifts
 			var uriPutRep = shiftCalendar.getUriRestToPutEntity(i, anno + '/' + mese);
-
 			var data = new Array();
-			console.log("val: "+val);
 			var dataJson = JSON.stringify(val);
-			console.log("dataJson: "+dataJson);
-
+			
 			jQuery.ajax({
 				url: uriPutRep,
 				type: "PUT",
@@ -195,9 +174,7 @@ jQuery(document).ready(function() {
 			.fail(function (jqXHR, textStatus, errorThrown) {
 				console.log("error during proxy call= " + textStatus);
 				console.log("incoming reperebility Text= " + jqXHR.responseText);
-				var msg = responseData.responseText;
-				msg = msg.replace(/[[\]"]/g,'');
-				//console.log(msg);
+				
 				alert('ERRORE durante il salvataggio del turno ' +i+'!\n' +msg);
 			});
 
