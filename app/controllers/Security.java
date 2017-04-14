@@ -39,7 +39,6 @@ public class Security extends Secure.Security {
     if (user != null) {
       log.info("user {} successfully logged in from ip {}", user.username,
           Http.Request.current().remoteAddress);
-      request.args.put(CURRENT_USER, user);
       return true;
     }
 
@@ -54,19 +53,20 @@ public class Security extends Secure.Security {
    * @return l'utente corrente, se presente, altrimenti "absent".
    */
   public static Optional<User> getUser() {
-    if (request.args.containsKey(CURRENT_USER)) {
-      return Optional.of((User) request.args.get(CURRENT_USER));
-    }
     if (session != null && isConnected()) {
-      final Optional<User> user = Optional.fromNullable(userDao.byUsername(connected()));
-      if (user.isPresent()) {
+      if (request.args.containsKey(CURRENT_USER)) {
+        return Optional.of((User) request.args.get(CURRENT_USER));
+      }
+      Optional<User> user = Optional.fromNullable(userDao.byUsername(connected()));
+      if (user.isPresent()){
         request.args.put(CURRENT_USER, user.get());
       }
-      return user;
+      return Optional.fromNullable(userDao.byUsername(connected()));
     }
     if (request.user != null && request.password != null && authenticate(request.user,
         request.password)) {
-      return Optional.of((User) request.args.get(CURRENT_USER));
+      session.put("username", request.user);
+      return Optional.fromNullable(userDao.byUsername(connected()));
     }
     return Optional.absent();
   }
