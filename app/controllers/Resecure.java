@@ -32,7 +32,7 @@ public class Resecure extends Controller {
     }
     if (getActionAnnotation(BasicAuth.class) != null
         || getControllerInheritedAnnotation(BasicAuth.class) != null) {
-      if (!request.args.containsKey(Security.CURRENT_USER)) {
+      if (!Secure.Security.isConnected()) {
         unauthorized(REALM);
       }
     } else {
@@ -55,7 +55,7 @@ public class Resecure extends Controller {
    * @author marco
    */
   @Retention(RetentionPolicy.RUNTIME)
-  @Target({ElementType.METHOD})
+  @Target(ElementType.METHOD)
   public @interface NoCheck {
 
   }
@@ -66,7 +66,7 @@ public class Resecure extends Controller {
    * @author marco
    */
   @Retention(RetentionPolicy.RUNTIME)
-  @Target({ElementType.METHOD})
+  @Target(ElementType.METHOD)
   public @interface BasicAuth {
 
   }
