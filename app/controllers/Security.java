@@ -61,7 +61,7 @@ public class Security extends Secure.Security {
       if (user.isPresent()){
         request.args.put(CURRENT_USER, user.get());
       }
-      return Optional.fromNullable(userDao.byUsername(connected()));
+      return user;
     }
     if (request.user != null && request.password != null && authenticate(request.user,
         request.password)) {
