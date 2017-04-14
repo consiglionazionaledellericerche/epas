@@ -2,21 +2,21 @@ package db.h2support;
 
 import com.google.inject.Inject;
 
-import db.h2support.base.H2WorkingTimeTypeSupport;
-import db.h2support.base.WorkingTimeTypeDefinitions.WorkingDefinition;
-
 import java.util.UUID;
 
+import manager.ContractManager;
 import manager.configurations.ConfigurationManager;
 
 import models.Contract;
-import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
 import models.User;
 import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
+
+import db.h2support.base.H2WorkingTimeTypeSupport;
+import db.h2support.base.WorkingTimeTypeDefinitions.WorkingDefinition;
 
 /**
  * Costruzione rapida di entity per test standard.
@@ -28,34 +28,18 @@ public class H2Examples {
 
   private final H2WorkingTimeTypeSupport h2WorkingTimeTypeSupport;
   private final ConfigurationManager configurationManager;
+  private final ContractManager contractManager;
   
+  /**
+   * Injection. 
+   */
   @Inject
   public H2Examples(H2WorkingTimeTypeSupport h2WorkingTimeTypeSupport, 
-      ConfigurationManager configurationManager) {
+      ConfigurationManager configurationManager, ContractManager contractManager) {
     this.h2WorkingTimeTypeSupport = h2WorkingTimeTypeSupport;
     this.configurationManager = configurationManager;
+    this.contractManager = contractManager;
   }
-
-  /**
-   * Costruisce e persiste il contractWorkingTimeType.
-   * @param beginDate data inizio
-   * @param endDate data fine
-   * @param contract contratto
-   * @param workingTimeType workingTimeType
-   * @return persisted entity
-   */
-  private ContractWorkingTimeType buildContractWorkingTimeType(LocalDate beginDate,
-      LocalDate endDate, Contract contract, WorkingTimeType workingTimeType) {
-    
-    ContractWorkingTimeType contractWorkingTimeType = new ContractWorkingTimeType();
-    contractWorkingTimeType.contract = contract;
-    contractWorkingTimeType.workingTimeType = workingTimeType;
-    contractWorkingTimeType.beginDate = beginDate;
-    contractWorkingTimeType.endDate = endDate;
-    contractWorkingTimeType.save();
-    return contractWorkingTimeType;
-  }
-  
 
   /**
    * Costruisce e persiste il contratto.
@@ -66,13 +50,13 @@ public class H2Examples {
    * @return persisted entity
    */
   private Contract buildContract(Person person, LocalDate beginDate, LocalDate endDate, 
-      LocalDate endContract) {
+      LocalDate endContract, WorkingTimeType workingTimeType) {
     Contract contract = new Contract();
     contract.person = person;
     contract.beginDate = beginDate;
     contract.endDate = endDate;
     contract.endContract = endContract;
-    contract.save();
+    contractManager.properContractCreate(contract, workingTimeType, false);
     return contract;
   }
 
@@ -128,8 +112,7 @@ public class H2Examples {
     Office office = buildOffice(beginContract, name, name, name);
     WorkingTimeType normal = h2WorkingTimeTypeSupport.getWorkingTimeType(WorkingDefinition.Normal);
     Person person = createPerson(office, name);
-    Contract contract = buildContract(person, beginContract, null, null);
-    buildContractWorkingTimeType(beginContract, null, contract, normal);
+    Contract contract = buildContract(person, beginContract, null, null, normal);
     contract.refresh();
     person.refresh();
     
@@ -150,8 +133,7 @@ public class H2Examples {
     WorkingTimeType normal = h2WorkingTimeTypeSupport
         .getWorkingTimeType(WorkingDefinition.PartTime50);
     Person person = createPerson(office, name);
-    Contract contract = buildContract(person, beginContract, null, null);
-    buildContractWorkingTimeType(beginContract, null, contract, normal);
+    Contract contract = buildContract(person, beginContract, null, null, normal);
     contract.refresh();
     person.refresh();
     

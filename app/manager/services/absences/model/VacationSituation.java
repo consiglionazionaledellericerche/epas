@@ -7,6 +7,8 @@ import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
+
 import manager.services.absences.AbsenceService;
 import manager.services.absences.model.VacationSituation.VacationSummary.TypeSummary;
 import manager.services.vacations.IVacationsService;
@@ -28,6 +30,7 @@ import org.joda.time.LocalDate;
  * @author alessandro
  *
  */
+@Slf4j
 public class VacationSituation {
 
   public Person person;
@@ -46,8 +49,8 @@ public class VacationSituation {
    * Costruttore.
    */
   public VacationSituation(Person person, Contract contract, int year, 
-      GroupAbsenceType vacationGroup, AbsenceService absenceService, 
-      IVacationsService vacationsService) {
+      GroupAbsenceType vacationGroup, Optional<LocalDate> residualDate, 
+      AbsenceService absenceService, IVacationsService vacationsService) {
     
     this.person = person;
     this.contract = contract;
@@ -63,15 +66,11 @@ public class VacationSituation {
     }
 
     //La data target per il riepilogo contrattuale
-    LocalDate date = LocalDate.now();           
-    if (date.getYear() > year) {
-      date = new LocalDate(year, 12, 31);
+    LocalDate date = residualDate(residualDate, year);
+    if (date == null) {
+      return;
     }
-    if (contract.calculatedEnd() != null
-        && contract.calculatedEnd().getYear() == year 
-        && !DateUtility.isDateIntoInterval(date, contract.periodInterval())) {
-      date = contract.calculatedEnd();
-    }
+    
     PeriodChain periodChain = absenceService.residual(person, vacationGroup, date);
     if (!periodChain.vacationSupportList.get(0).isEmpty()) {
       this.lastYear = new VacationSummary(contract, periodChain.vacationSupportList.get(0).get(0), 
@@ -101,6 +100,31 @@ public class VacationSituation {
     //    } catch (Exception e) {
     //      log.info("Impossibile scaricare l'informazione da attestati di {}", person.fullName());
     //    }
+  }
+  
+  /**
+   * La data per cui fornire il residuo. Se non l'ho fornita ritorno un default.
+   */
+  private LocalDate residualDate(Optional<LocalDate> residualDate, int year) {
+    if (!residualDate.isPresent()) {
+      LocalDate date = LocalDate.now();           
+      if (date.getYear() > year) {
+        date = new LocalDate(year, 12, 31);
+      }
+      if (contract.calculatedEnd() != null
+          && contract.calculatedEnd().getYear() == year 
+          && !DateUtility.isDateIntoInterval(date, contract.periodInterval())) {
+        date = contract.calculatedEnd();
+      }
+      return date;
+    } else {
+      //La data che passo deve essere una data contenuta nell'anno.
+      if (residualDate.get().getYear() != year) {
+        log.info("VacationSummary: anno={} data={}: la data deve appartenere all'anno.");
+        return null;
+      }
+      return residualDate.get();
+    }
   }
   
   /**
@@ -309,12 +333,29 @@ public class VacationSituation {
       return computeUsed(absencePeriod);
     }
     
+    /**
+     * I giorni usabili. (Usufruibili, per i det solo le maturate).
+     */
     public int usable() {
       if (absencePeriod.takableCountBehaviour.equals(TakeCountBehaviour.sumUntilPeriod)) {
         return accrued() - used(); 
       } else {
         return total() - used();
       }
+    }
+    
+    /**
+     * Se il periodo è scaduto alla data dateToCheck. Se absent considera oggi.
+     */
+    public boolean expired(Optional<LocalDate> dateToCheck) {
+      LocalDate date = LocalDate.now();
+      if (dateToCheck.isPresent()) {
+        date = dateToCheck.get();
+      }
+      if (lastNaturalPeriod(absencePeriod).to.isAfter(date)) {
+        return false;
+      }
+      return true;
     }
     
     public int usableTotal() { 

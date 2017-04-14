@@ -105,7 +105,7 @@ public class PeriodChain {
     for (AbsencePeriod absencePeriod : this.periods) {
       if (absencePeriod.isTakable()) {
         absenceTypes.addAll(absencePeriod.takenCodes);
-        //absenceTypes.addAll(currentAbsesncePeriod.takableComponent.get().takableCodes);
+        absenceTypes.addAll(absencePeriod.takableCodes);
       }
       if (absencePeriod.isComplation()) {
         absenceTypes.addAll(absencePeriod.replacingCodesDesc.values());
