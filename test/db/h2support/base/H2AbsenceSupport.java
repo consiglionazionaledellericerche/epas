@@ -5,10 +5,13 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
+import dao.PersonDayDao;
 import dao.absences.AbsenceComponentDao;
 
 import java.util.Set;
 
+import models.Person;
+import models.PersonDay;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.AbsenceType.DefaultAbsenceType;
@@ -26,10 +29,12 @@ import org.joda.time.LocalDate;
 public class H2AbsenceSupport {
   
   private final AbsenceComponentDao absenceComponentDao;
+  private final PersonDayDao personDayDao;
   
   @Inject
-  public H2AbsenceSupport(AbsenceComponentDao absenceComponentDao) {
+  public H2AbsenceSupport(AbsenceComponentDao absenceComponentDao, PersonDayDao personDayDao) {
     this.absenceComponentDao = absenceComponentDao;
+    this.personDayDao = personDayDao;
   }
 
   /**
@@ -40,7 +45,7 @@ public class H2AbsenceSupport {
   public AbsenceType createAbsenceType(DefaultAbsenceType defaultAbsenceType) {
 
     AbsenceType absenceType = new AbsenceType();
-    absenceType.code = defaultAbsenceType.name();
+    absenceType.code = defaultAbsenceType.name().substring(2);
     absenceType.justifiedTime = defaultAbsenceType.justifiedTime;
     absenceType.consideredWeekEnd = defaultAbsenceType.consideredWeekEnd;
     absenceType.timeForMealTicket = defaultAbsenceType.timeForMealTicket;
@@ -64,7 +69,7 @@ public class H2AbsenceSupport {
    */
   public AbsenceType getAbsenceType(DefaultAbsenceType defaultAbsenceType) {
     Optional<AbsenceType> absenceType = absenceComponentDao
-        .absenceTypeByCode(defaultAbsenceType.name()); 
+        .absenceTypeByCode(defaultAbsenceType.name().substring(2)); 
     if (absenceType.isPresent()) {
       return absenceType.get();
     } 
@@ -117,6 +122,9 @@ public class H2AbsenceSupport {
   public ComplationAbsenceBehaviour getComplationAbsenceBehaviour(
       DefaultComplation complationDefinition) {
 
+    if (complationDefinition == null) {
+      return null;
+    }
     ComplationAbsenceBehaviour behaviour = new ComplationAbsenceBehaviour();
     behaviour.name = complationDefinition.name();
     behaviour.amountType = complationDefinition.amountType;
@@ -176,8 +184,50 @@ public class H2AbsenceSupport {
     absence.absenceType = absenceType;
     absence.justifiedType = justifiedType;
     absence.justifiedMinutes = justifiedMinutes;
-
+    
     return absence;
   }
+  
+  /**
+   * Istanza di una assenza. Per adesso non persistita perchè ai fini dei test non mandatoria 
+   * (ma lo sarà presto). Serve il personDay.
+   *
+   * @param defaultAbsenceType absenceType assenza
+   * @param date                  data
+   * @param justifiedTypeName     tipo giustificativo
+   * @param justifiedMinutes      minuti giustificati
+   * @return istanza non persistente
+   */
+  public Absence absence(DefaultAbsenceType defaultAbsenceType,
+      LocalDate date, Optional<JustifiedTypeName> justifiedTypeName,
+      Integer justifiedMinutes, Person person) {
+
+    Absence absence = 
+        absenceInstance(defaultAbsenceType, date, justifiedTypeName, justifiedMinutes);
+    
+    absence.personDay = getPersonDay(person, date);
+    absence.personDay.refresh();
+    absence.save();
+    
+    return absence;
+  }
+
+  /**
+   * Il personDay della persona a quella data.
+   * @param person persona
+   * @param date data
+   * @return personDay
+   */
+  public PersonDay getPersonDay(Person person, LocalDate date) {
+    Optional<PersonDay> personDay = personDayDao.getPersonDay(person, date);
+    if (personDay.isPresent()) {
+      return personDay.get();
+    }
+    
+    PersonDay newPersonDay = new PersonDay(person, date);
+    newPersonDay.save();
+    return newPersonDay;
+  }
+  
 
 }

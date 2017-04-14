@@ -27,8 +27,6 @@ import manager.services.absences.model.VacationSituation;
 import manager.services.absences.model.VacationSituation.VacationSummary;
 import manager.services.absences.model.VacationSituation.VacationSummary.TypeSummary;
 import manager.services.vacations.IVacationsService;
-import manager.services.vacations.VacationsRecap;
-import manager.services.vacations.VacationsServiceImpl;
 
 import models.Contract;
 import models.Office;
@@ -38,7 +36,6 @@ import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.DefaultGroup;
 
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 
 import play.mvc.Controller;
 import play.mvc.With;
@@ -91,7 +88,7 @@ public class Vacations extends Controller {
     for (Contract contract : person.orderedYearContracts(year)) {
       
       VacationSituation vacationSituation = new VacationSituation(person.getValue(), 
-          contract, year, vacationGroup, absenceService, null);
+          contract, year, vacationGroup, Optional.absent(), absenceService, null);
       vacationSituations.add(vacationSituation);
     }
 
@@ -119,10 +116,10 @@ public class Vacations extends Controller {
     VacationSummary vacationSummary;
     if (type.equals(TypeSummary.PERMISSION)) {
       vacationSummary = new VacationSituation(contract.person, 
-          contract, year, vacationGroup, absenceService, null).permissions;
+          contract, year, vacationGroup, Optional.absent(), absenceService, null).permissions;
     } else {
       vacationSummary = new VacationSituation(contract.person, 
-          contract, year, vacationGroup, absenceService, null).currentYear;
+          contract, year, vacationGroup, Optional.absent(), absenceService, null).currentYear;
     }
     
     renderTemplate("Vacations/vacationSummary.html", vacationSummary);
@@ -168,7 +165,7 @@ public class Vacations extends Controller {
 
         try {
           VacationSituation vacationSituation = new VacationSituation(person, 
-              contract, year, vacationGroup, 
+              contract, year, vacationGroup, Optional.absent(), 
               absenceService, null);
           vacationSituations.add(vacationSituation);
         } catch (Exception ex) {
@@ -214,10 +211,10 @@ public class Vacations extends Controller {
     VacationSummary vacationSummary;
     if (type.equals(TypeSummary.PERMISSION)) {
       vacationSummary = new VacationSituation(contract.person, 
-          contract, year, vacationGroup, absenceService, null).permissions;
+          contract, year, vacationGroup, Optional.absent(), absenceService, null).permissions;
     } else {
       vacationSummary = new VacationSituation(contract.person, 
-          contract, year, vacationGroup, absenceService, null).currentYear;
+          contract, year, vacationGroup, Optional.absent(), absenceService, null).currentYear;
     }
     
     render(vacationSummary);
@@ -260,7 +257,7 @@ public class Vacations extends Controller {
 
         try {
           VacationSituation vacationSituation = new VacationSituation(person, 
-              contract, year, vacationGroup, 
+              contract, year, vacationGroup, Optional.absent(), 
               absenceService, vacationsService);
           vacationSituations.add(vacationSituation);
         } catch (Exception ex) {
