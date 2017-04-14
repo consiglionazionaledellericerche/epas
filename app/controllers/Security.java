@@ -44,8 +44,6 @@ public class Security extends Secure.Security {
 
     // Oops
     log.info("Failed login for {}", username);
-    flash.put("username", username);
-    flash.error("Login failed");
     return false;
   }
 
