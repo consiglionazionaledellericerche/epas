@@ -175,9 +175,9 @@ public class VacationSituation {
     if (old.usableTotal() != summary.usableTotal()) {
       return false;
     }
-    if (old.usable() != summary.usable()) {
-      return false;
-    }
+//    if (old.usable() != summary.usable()) {
+//      return false;
+//    }
     return true;
   }
   
