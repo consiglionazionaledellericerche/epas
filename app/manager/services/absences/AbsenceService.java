@@ -715,15 +715,33 @@ public class AbsenceService {
    */
   public void enumAllineator() {
     
-    enumAllineator.handleTab();
-    enumAllineator.handleCategory();
+    enumAllineator.handleTab(false);
+    enumAllineator.handleCategory(false);
     
-    enumAllineator.handleAbsenceTypes();
-    enumAllineator.handleComplations();
-    enumAllineator.handleTakables();
-    enumAllineator.handleGroup();
-    enumAllineator.handleCategory();
-    enumAllineator.handleTab();
+    enumAllineator.handleAbsenceTypes(false);
+    enumAllineator.handleComplations(false);
+    enumAllineator.handleTakables(false);
+    enumAllineator.handleGroup(false);
+    enumAllineator.handleCategory(false);
+    enumAllineator.handleTab(false);
+  }
+  
+  /**
+   * Inizializza il db.
+   */
+  public void enumInitializator() {
+
+    if (AbsenceType.count() > 0) {
+      return;
+    }
+    enumAllineator.handleTab(true);
+    enumAllineator.handleCategory(true);
+
+    enumAllineator.handleAbsenceTypes(true);
+    enumAllineator.handleComplations(true);
+    enumAllineator.handleTakables(true);
+    enumAllineator.handleGroup(true);
+
   }
   
 }

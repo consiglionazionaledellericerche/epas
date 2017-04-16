@@ -297,7 +297,7 @@ public class AbsenceType extends BaseModel {
    */
   public Optional<Boolean> matchEnum() {
     for (DefaultAbsenceType defaultType : DefaultAbsenceType.values()) {
-      if (defaultType.name().substring(2).equals(this.code)) {
+      if (defaultType.getCode().equals(this.code)) {
         if (defaultType.certificationCode.equals(this.certificateCode)
             && defaultType.description.equals(this.description)
             && defaultType.internalUse == this.internalUse
@@ -1570,7 +1570,7 @@ public class AbsenceType extends BaseModel {
       for (DefaultAbsenceType defaultTypes : DefaultAbsenceType.values()) {
         boolean found = false;
         for (AbsenceType type : allAbsenceTypes) {
-          if (defaultTypes.name().substring(2).equals(type.code)) {
+          if (defaultTypes.getCode().equals(type.code)) {
             found = true;
             break;
           }
@@ -1582,13 +1582,17 @@ public class AbsenceType extends BaseModel {
       return missing;
     }
 
+    public String getCode() {
+      return this.name().substring(2);
+    }
+    
     /**
      * L'enumerato corrispettivo del absenceType (se esiste...) 
      * @return optional dell'enumerato
      */
     public static Optional<DefaultAbsenceType> byCode(AbsenceType absenceType) {
       for (DefaultAbsenceType defaultAbsenceType : DefaultAbsenceType.values()) {
-        if (absenceType.code.equals(defaultAbsenceType.name().substring(2))) {
+        if (absenceType.code.equals(defaultAbsenceType.getCode())) {
           return Optional.of(defaultAbsenceType);
         }
       }

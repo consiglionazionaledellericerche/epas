@@ -213,14 +213,21 @@ public class TakableAbsenceBehaviour extends BaseModel {
         -1, null),
 
     T_FERIE_CNR(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_31, //taken
+            DefaultAbsenceType.A_32,
+            DefaultAbsenceType.A_37, 
+            DefaultAbsenceType.A_94), 
+        ImmutableSet.of(DefaultAbsenceType.A_31, //takable 
+            DefaultAbsenceType.A_32, 
+            DefaultAbsenceType.A_94), 
+        -1, null),
+    
+    T_FERIE_CNR_PROROGA(AmountType.units, 
         ImmutableSet.of(DefaultAbsenceType.A_31, 
             DefaultAbsenceType.A_32, 
             DefaultAbsenceType.A_37, 
-            DefaultAbsenceType.A_94), 
-        ImmutableSet.of(DefaultAbsenceType.A_31, 
-            DefaultAbsenceType.A_32, 
-            DefaultAbsenceType.A_37, 
-            DefaultAbsenceType.A_94), 
+            DefaultAbsenceType.A_94),
+        ImmutableSet.of(DefaultAbsenceType.A_37), 
         -1, null),
     
     T_RIDUCE_FERIE_CNR(AmountType.units, 

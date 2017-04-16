@@ -1,6 +1,10 @@
 package db.h2support;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
+
+import db.h2support.base.H2WorkingTimeTypeSupport;
+import db.h2support.base.WorkingTimeTypeDefinitions.WorkingDefinition;
 
 import java.util.UUID;
 
@@ -14,9 +18,6 @@ import models.User;
 import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
-
-import db.h2support.base.H2WorkingTimeTypeSupport;
-import db.h2support.base.WorkingTimeTypeDefinitions.WorkingDefinition;
 
 /**
  * Costruzione rapida di entity per test standard.
@@ -49,13 +50,17 @@ public class H2Examples {
    * @param endContract terminazione
    * @return persisted entity
    */
-  private Contract buildContract(Person person, LocalDate beginDate, LocalDate endDate, 
-      LocalDate endContract, WorkingTimeType workingTimeType) {
+  private Contract buildContract(Person person, LocalDate beginDate, Optional<LocalDate> endDate, 
+      Optional<LocalDate> endContract, WorkingTimeType workingTimeType) {
     Contract contract = new Contract();
     contract.person = person;
     contract.beginDate = beginDate;
-    contract.endDate = endDate;
-    contract.endContract = endContract;
+    if (endDate.isPresent()) {
+      contract.endDate = endDate.get();
+    }
+    if (endContract.isPresent()) {
+      contract.endContract = endContract.get();
+    }
     contractManager.properContractCreate(contract, workingTimeType, false);
     return contract;
   }
@@ -101,18 +106,20 @@ public class H2Examples {
   }
 
   /**
-   * Istanza di un dipendente con orario Normale a tempo indeterminato.
+   * Istanza di un dipendente con orario Normale.
    *
    * @param beginContract inizio contratto
    * @return mocked entity
    */
-  public Person normalUndefinedEmployee(LocalDate beginContract) {
+  public Person normalEmployee(LocalDate beginContract, 
+      Optional<LocalDate> expireContract) {
 
     final String name = "normalUndefinedEmployee" + beginContract + UUID.randomUUID();
     Office office = buildOffice(beginContract, name, name, name);
     WorkingTimeType normal = h2WorkingTimeTypeSupport.getWorkingTimeType(WorkingDefinition.Normal);
     Person person = createPerson(office, name);
-    Contract contract = buildContract(person, beginContract, null, null, normal);
+    Contract contract = 
+        buildContract(person, beginContract, expireContract, Optional.absent(), normal);
     contract.refresh();
     person.refresh();
     
@@ -120,12 +127,12 @@ public class H2Examples {
   }
   
   /**
-   * Istanza di un dipendente con orario PartTime 50 a tempo indeterminato.
+   * Istanza di un dipendente con orario PartTime 50.
    *
    * @param beginContract inizio contratto
    * @return mocked entity
    */
-  public Person partTime50UndefinedEmployee(LocalDate beginContract) {
+  public Person partTime50Employee(LocalDate beginContract) {
 
     final String name = "partTime50UndefinedEmployee" + beginContract + UUID.randomUUID();
     Office office = buildOffice(beginContract, name, name, name);
@@ -133,7 +140,8 @@ public class H2Examples {
     WorkingTimeType normal = h2WorkingTimeTypeSupport
         .getWorkingTimeType(WorkingDefinition.PartTime50);
     Person person = createPerson(office, name);
-    Contract contract = buildContract(person, beginContract, null, null, normal);
+    Contract contract = 
+        buildContract(person, beginContract, Optional.absent(), Optional.absent(), normal);
     contract.refresh();
     person.refresh();
     
