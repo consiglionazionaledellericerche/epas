@@ -84,9 +84,6 @@ public class VacationFactory {
         initializationCurrentYear = contract.sourceVacationLastYearUsed;
       }
     }
-
-    //TODO: questo deve essere un require nella modellazione, altrimenti dopo schianta.
-    Set<AbsenceType> codes = group.takableAbsenceBehaviour.takenCodes; // === 31-32-94-37
     
     List<AbsencePeriod> vacationLastYear = null;
     List<AbsencePeriod> permission  = null;
@@ -95,25 +92,19 @@ public class VacationFactory {
     if (group.name.equals(DefaultGroup.FERIE_CNR.name())) {
       //se il gruppo è vacation i codici posso anche prenderli.
       vacationLastYear = vacationPeriodPerYear(person, group, year - 1, contract, 
-          subSetCode(codes, DefaultAbsenceType.A_31), subSetCode(codes, DefaultAbsenceType.A_31),
-          initializationLastYear);
-      permission = permissionPeriodPerYear(person, group, year, contract, 
-          subSetCode(codes, DefaultAbsenceType.A_94), subSetCode(codes, DefaultAbsenceType.A_94), 
+          initializationLastYear, false);
+      permission = permissionPeriodPerYear(person, group, year, contract,  
           initializationPermission);
       vacationCurrentYear = vacationPeriodPerYear(person, group, year, contract,
-          subSetCode(codes, DefaultAbsenceType.A_32), subSetCode(codes, DefaultAbsenceType.A_32),
-          initializationCurrentYear);
+          initializationCurrentYear, false);
     } else {
       //se il gruppo è il prorogation i codici non posso prenderli.
-      vacationLastYear = vacationPeriodPerYear(person, group, year - 1, contract, 
-          Sets.newHashSet(), subSetCode(codes, DefaultAbsenceType.A_31),
-          initializationLastYear);
+      vacationLastYear = vacationPeriodPerYear(person, group, year - 1, contract,
+          initializationLastYear, true);
       permission = permissionPeriodPerYear(person, group, year, contract, 
-          Sets.newHashSet(), subSetCode(codes, DefaultAbsenceType.A_94), 
           initializationPermission);
       vacationCurrentYear = vacationPeriodPerYear(person, group, year, contract,
-          Sets.newHashSet(), subSetCode(codes, DefaultAbsenceType.A_32),
-          initializationCurrentYear);      
+          initializationCurrentYear, true);      
     }
 
     
@@ -143,10 +134,17 @@ public class VacationFactory {
   }
   
   private List<AbsencePeriod> vacationPeriodPerYear(Person person, GroupAbsenceType group, 
-      int year, Contract contract, Set<AbsenceType> takableCodes, Set<AbsenceType> takenCodes,
-      Integer initializationDays) {
+      int year, Contract contract, Integer initializationDays, boolean prorogation) {
     
     List<AbsencePeriod> periods = Lists.newArrayList();
+    
+    //TODO: questo deve essere un require nella modellazione, altrimenti dopo schianta.
+    Set<AbsenceType> codes = group.takableAbsenceBehaviour.takenCodes; // === 31-32-94-37
+    Set<AbsenceType> takableCodes = subSetCode(codes, DefaultAbsenceType.A_32);
+    Set<AbsenceType> takenCodes = subSetCode(codes, DefaultAbsenceType.A_32);
+    if (prorogation) {
+      takableCodes = Sets.newHashSet();
+    }
     
     //Ferie maturate nell'anno
     DateInterval yearInterval = DateUtility.getYearInterval(year);
@@ -176,7 +174,7 @@ public class VacationFactory {
       return periods;
     }
     
-    Set<AbsenceType> codes = group.takableAbsenceBehaviour.takenCodes; // === 31-32-94-37
+
 
     //Ferie usabili entro 31/8
     Set<AbsenceType> takable = subSetCode(codes, DefaultAbsenceType.A_31);
@@ -193,12 +191,10 @@ public class VacationFactory {
     }
     
     //Ferie usabili entro 31/12 codice 37
-    if (group.name.equals(DefaultGroup.FERIE_CNR.name())) {
-      //se il gruppo è vacation i 37 li conto e basta ma non posso prenderli.
+    if (!prorogation) {
       takable = Sets.newHashSet();
       taken = subSetCode(codes, DefaultAbsenceType.A_37);
     } else {
-      //se il gruppo è il prorogation posso anche prenderli.
       takable = subSetCode(codes, DefaultAbsenceType.A_37);
       taken = subSetCode(codes, DefaultAbsenceType.A_37);
     }
@@ -222,10 +218,13 @@ public class VacationFactory {
   }
   
   private List<AbsencePeriod> permissionPeriodPerYear(Person person, GroupAbsenceType group, 
-      int year, Contract contract, Set<AbsenceType> takableCodes, Set<AbsenceType> takenCodes,
-      int initializationDays) {
+      int year, Contract contract, int initializationDays) {
     List<AbsencePeriod> periods = Lists.newArrayList();
 
+    Set<AbsenceType> codes = group.takableAbsenceBehaviour.takenCodes; // === 31-32-94-37
+    Set<AbsenceType> takableCodes = subSetCode(codes, DefaultAbsenceType.A_94);
+    Set<AbsenceType> takenCodes = subSetCode(codes, DefaultAbsenceType.A_94);
+    
     DateInterval yearInterval = DateUtility.getYearInterval(year);
     List<Integer> lowerLimits = Lists.newArrayList();
     //Permessi nell'anno
@@ -339,7 +338,7 @@ public class VacationFactory {
     }
     
     //Un algoritmo elegante...
-    //Contare i giorni di postPartum appartenenti ai periods, e rimuovere (partendo dal fondo)
+    //Contare i giorni di postPartum appartenenti ai periods, e svuotare (partendo dal fondo)
     //i periods di dimensione completamente contenuta nel numero di giorni calcolati.
 
     LocalDate beginPostPartum = periods.get(0).from;
@@ -352,12 +351,14 @@ public class VacationFactory {
     if (postPartum == 0) {
       return periods;
     }
-    while (postPartum > 0) {
-      AbsencePeriod lastPeriod = periods.get(periods.size() - 1);
+    int index = periods.size() - 1; //a way to navigate the periods desc... 
+    while (postPartum > 0 && index >= 0) {
+      AbsencePeriod lastPeriod = periods.get(index);
+      index--;
       int days = DateUtility.daysInInterval(lastPeriod.periodInterval());
       if (postPartum >= days) {
         postPartum = postPartum - days;
-        periods.remove(lastPeriod);
+        lastPeriod.setFixedPeriodTakableAmount(0);
       } else {
         break;
       }
