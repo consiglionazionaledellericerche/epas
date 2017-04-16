@@ -242,7 +242,7 @@ public class ComplationAbsenceBehaviour extends BaseModel {
     }
     Set<String> codes1 = Sets.newHashSet();
     for (DefaultAbsenceType defaultType : enumSet) {
-      codes1.add(defaultType.name().substring(2));
+      codes1.add(defaultType.getCode());
     }
     Set<String> codes2 = Sets.newHashSet();
     for (AbsenceType type : set) {

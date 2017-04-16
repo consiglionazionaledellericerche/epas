@@ -29,7 +29,8 @@ import models.absences.TakableAbsenceBehaviour.DefaultTakable;
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
 
-@Slf4j
+import play.db.jpa.JPA;
+
 public class EnumAllineator {
   
   private final AbsenceComponentDao absenceComponentDao;
@@ -45,14 +46,14 @@ public class EnumAllineator {
   /**
    * Allinea i tipi assenza.
    */
-  public void handleAbsenceTypes() {
+  public void handleAbsenceTypes(boolean initialization) {
     //i codici che non esistono li creo
     for (DefaultAbsenceType defaultAbsenceType : DefaultAbsenceType.values()) {
-      if (!absenceComponentDao
-          .absenceTypeByCode(defaultAbsenceType.name().substring(2)).isPresent()) {
+      if (initialization || !absenceComponentDao
+          .absenceTypeByCode(defaultAbsenceType.getCode()).isPresent()) {
         //creazione entity a partire dall'enumerato
         AbsenceType absenceType = new AbsenceType();
-        absenceType.code = defaultAbsenceType.name().substring(2);
+        absenceType.code = defaultAbsenceType.getCode();
         absenceType.description = defaultAbsenceType.description;
         absenceType.certificateCode = defaultAbsenceType.certificationCode;
         absenceType.internalUse = defaultAbsenceType.internalUse;
@@ -76,12 +77,16 @@ public class EnumAllineator {
       }
     }
     
+    if (initialization) {
+      return;
+    }
+    
     List<AbsenceType> allAbsenceType = AbsenceType.findAll();
     for (AbsenceType absenceType : allAbsenceType) {
       Optional<DefaultAbsenceType> defaultAbsenceType = DefaultAbsenceType.byCode(absenceType); 
       if (defaultAbsenceType.isPresent()) {
         //gli absenceType che esistono le allineo all'enum
-        absenceType.code = defaultAbsenceType.get().name().substring(2);
+        absenceType.code = defaultAbsenceType.get().getCode();
         absenceType.certificateCode = defaultAbsenceType.get().certificationCode;
         absenceType.description = defaultAbsenceType.get().description;
         absenceType.internalUse = defaultAbsenceType.get().internalUse;
@@ -125,10 +130,10 @@ public class EnumAllineator {
   /**
    * Allinea i comportamenti di completamento.
    */
-  public void handleComplations() {
+  public void handleComplations(boolean initialization) {
     //i complation che non esistono li creo
     for (DefaultComplation defaultComplation : DefaultComplation.values()) {
-      if (!absenceComponentDao
+      if (initialization || !absenceComponentDao
           .complationAbsenceBehaviourByName(defaultComplation.name()).isPresent()) {
         //creazione entity a partire dall'enumerato
         ComplationAbsenceBehaviour complation = new ComplationAbsenceBehaviour();
@@ -136,14 +141,18 @@ public class EnumAllineator {
         complation.amountType = defaultComplation.amountType;
         for (DefaultAbsenceType defaultType : defaultComplation.complationCodes) {
           complation.complationCodes.add(
-              absenceComponentDao.absenceTypeByCode(defaultType.name().substring(2)).get());
+              absenceComponentDao.absenceTypeByCode(defaultType.getCode()).get());
         }
         for (DefaultAbsenceType defaultType : defaultComplation.replacingCodes) {
           complation.replacingCodes.add(
-              absenceComponentDao.absenceTypeByCode(defaultType.name().substring(2)).get());
+              absenceComponentDao.absenceTypeByCode(defaultType.getCode()).get());
         }
         complation.save();
       }
+    }
+    
+    if (initialization) {
+      return;
     }
     
     List<ComplationAbsenceBehaviour> allComplation = ComplationAbsenceBehaviour.findAll();
@@ -170,10 +179,11 @@ public class EnumAllineator {
   /**
    * Allinea i comportamenti di prendibilità.
    */
-  public void handleTakables() {
+  public void handleTakables(boolean initialization) {
     //i takable che non esistono li creo
     for (DefaultTakable defaultTakable : DefaultTakable.values()) {
-      if (!absenceComponentDao.takableAbsenceBehaviourByName(defaultTakable.name()).isPresent()) {
+      if (initialization || !absenceComponentDao
+          .takableAbsenceBehaviourByName(defaultTakable.name()).isPresent()) {
         //creazione entity a partire dall'enumerato
         TakableAbsenceBehaviour takable = new TakableAbsenceBehaviour();
         takable.name = defaultTakable.name();
@@ -182,14 +192,18 @@ public class EnumAllineator {
         takable.takableAmountAdjustment = defaultTakable.takableAmountAdjustment;
         for (DefaultAbsenceType defaultType : defaultTakable.takenCodes) {
           takable.takenCodes.add(
-              absenceComponentDao.absenceTypeByCode(defaultType.name().substring(2)).get());
+              absenceComponentDao.absenceTypeByCode(defaultType.getCode()).get());
         }
         for (DefaultAbsenceType defaultType : defaultTakable.takableCodes) {
           takable.takableCodes.add(
-              absenceComponentDao.absenceTypeByCode(defaultType.name().substring(2)).get());
+              absenceComponentDao.absenceTypeByCode(defaultType.getCode()).get());
         }
         takable.save();
       }
+    }
+    
+    if (initialization) {
+      return;
     }
     
     List<TakableAbsenceBehaviour> allTakable = TakableAbsenceBehaviour.findAll();
@@ -217,11 +231,12 @@ public class EnumAllineator {
   /**
    * Allinea i gruppi.
    */
-  public void handleGroup() {
+  public void handleGroup(boolean initialization) {
     
     //i gruppi che non esistono li creo
     for (DefaultGroup defaultGroup : DefaultGroup.values()) {
-      if (!absenceComponentDao.groupAbsenceTypeByName(defaultGroup.name()).isPresent()) {
+      if (initialization 
+          || !absenceComponentDao.groupAbsenceTypeByName(defaultGroup.name()).isPresent()) {
         //creazione entity a partire dall'enumerato
         GroupAbsenceType group = new GroupAbsenceType();
         group.name = defaultGroup.name();
@@ -248,6 +263,10 @@ public class EnumAllineator {
         group.initializable = defaultGroup.initializable;
         group.save();
       }
+    }
+    
+    if (initialization) {
+      return;
     }
     
     for (GroupAbsenceType group : absenceComponentDao.allGroupAbsenceType()) {
@@ -289,11 +308,12 @@ public class EnumAllineator {
   /**
    * Allinea le categorie.
    */
-  public void handleCategory() {
+  public void handleCategory(boolean initialization) {
     
     //le categorie che non esistono le creo
     for (DefaultCategoryType defaultCategory : DefaultCategoryType.values()) {
-      if (!absenceComponentDao.categoryByName(defaultCategory.name()).isPresent()) {
+      if (initialization 
+          || !absenceComponentDao.categoryByName(defaultCategory.name()).isPresent()) {
         //creazione entity a partire dall'enumerato
         CategoryGroupAbsenceType category = new CategoryGroupAbsenceType();
         category.name = defaultCategory.name();
@@ -302,6 +322,10 @@ public class EnumAllineator {
         category.tab = absenceComponentDao.tabByName(defaultCategory.categoryTab.name()).get();
         category.save();
       }
+    }
+    
+    if (initialization) {
+      return;
     }
 
     for (CategoryGroupAbsenceType categoryTab : absenceComponentDao.categoriesByPriority()) {
@@ -325,11 +349,11 @@ public class EnumAllineator {
   /**
    * Allinea le tab.
    */
-  public void handleTab() {
+  public void handleTab(boolean initialization) {
 
     //le tab che non esistono le creo
     for (DefaultTab defaultTab : DefaultTab.values()) {
-      if (!absenceComponentDao.tabByName(defaultTab.name()).isPresent()) {
+      if (initialization || !absenceComponentDao.tabByName(defaultTab.name()).isPresent()) {
         //creazione entity a partire dall'enumerato
         CategoryTab categoryTab = new CategoryTab();
         categoryTab.name = defaultTab.name();
@@ -337,6 +361,10 @@ public class EnumAllineator {
         categoryTab.priority = defaultTab.priority;
         categoryTab.save();
       }
+    }
+    
+    if (initialization) {
+      return;
     }
 
     for (CategoryTab categoryTab : absenceComponentDao.tabsByPriority()) {
@@ -367,7 +395,7 @@ public class EnumAllineator {
     
     Set<String> newStringSet = Sets.newHashSet();
     for (DefaultAbsenceType defaultType : newEnumSet) {
-      newStringSet.add(defaultType.name().substring(2));
+      newStringSet.add(defaultType.getCode());
     }
    
     //Eliminare quelli non più contenuti

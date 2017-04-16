@@ -36,6 +36,7 @@ public class VacationSituation {
   public Person person;
   public Contract contract;
   public int year;
+  public LocalDate date;
   
   public VacationSummary lastYear;
   public VacationSummary currentYear;
@@ -70,19 +71,20 @@ public class VacationSituation {
     if (date == null) {
       return;
     }
+    this.date = date;
     
     PeriodChain periodChain = absenceService.residual(person, vacationGroup, date);
     if (!periodChain.vacationSupportList.get(0).isEmpty()) {
       this.lastYear = new VacationSummary(contract, periodChain.vacationSupportList.get(0).get(0), 
-          year - 1, TypeSummary.VACATION);
+          year - 1, date, TypeSummary.VACATION);
     }
     if (!periodChain.vacationSupportList.get(1).isEmpty()) {
       this.currentYear = new VacationSummary(contract, 
-          periodChain.vacationSupportList.get(1).get(0), year, TypeSummary.VACATION);
+          periodChain.vacationSupportList.get(1).get(0), year, date, TypeSummary.VACATION);
     }
     if (!periodChain.vacationSupportList.get(2).isEmpty()) {
       this.permissions = new VacationSummary(contract, 
-          periodChain.vacationSupportList.get(2).get(0), year, TypeSummary.PERMISSION);
+          periodChain.vacationSupportList.get(2).get(0), year, date, TypeSummary.PERMISSION);
     }
     
     //    try {
@@ -277,6 +279,7 @@ public class VacationSituation {
     
     public TypeSummary type;
     public int year;
+    public LocalDate date;  //data situazione. Tipicamenete oggi. Determina maturate e scadute.
     public Contract contract;
     public AbsencePeriod absencePeriod;
     
@@ -284,9 +287,10 @@ public class VacationSituation {
      * Constructor.
      */
     public VacationSummary(Contract contract, AbsencePeriod absencePeriod, 
-        int year, TypeSummary type) {
+        int year, LocalDate date, TypeSummary type) {
       this.year = year;
       this.type = type;
+      this.date = date;
       this.contract = contract;
       this.absencePeriod = absencePeriod;
     }
@@ -337,6 +341,9 @@ public class VacationSituation {
      * I giorni usabili. (Usufruibili, per i det solo le maturate).
      */
     public int usable() {
+      if (expired()) {
+        return 0;
+      }
       if (absencePeriod.takableCountBehaviour.equals(TakeCountBehaviour.sumUntilPeriod)) {
         return accrued() - used(); 
       } else {
@@ -347,11 +354,7 @@ public class VacationSituation {
     /**
      * Se il periodo è scaduto alla data dateToCheck. Se absent considera oggi.
      */
-    public boolean expired(Optional<LocalDate> dateToCheck) {
-      LocalDate date = LocalDate.now();
-      if (dateToCheck.isPresent()) {
-        date = dateToCheck.get();
-      }
+    public boolean expired() {
       if (lastNaturalPeriod(absencePeriod).to.isAfter(date)) {
         return false;
       }
@@ -364,12 +367,12 @@ public class VacationSituation {
     
     private int computeTotal(AbsencePeriod period) {
       return period
-          .computePeriodTakableAmount(TakeCountBehaviour.sumAllPeriod, LocalDate.now()) / 100;
+          .computePeriodTakableAmount(TakeCountBehaviour.sumAllPeriod, date) / 100;
     }
     
     private int computeAccrued(AbsencePeriod period) {
       return period
-          .computePeriodTakableAmount(TakeCountBehaviour.sumUntilPeriod, LocalDate.now()) / 100;
+          .computePeriodTakableAmount(TakeCountBehaviour.sumUntilPeriod, date) / 100;
     }
     
     private int computeUsed(AbsencePeriod period) {
@@ -397,8 +400,8 @@ public class VacationSituation {
      */
     private AbsencePeriod lastNaturalPeriod(AbsencePeriod period) {
       AbsencePeriod lastPeriod = period.subPeriods.get(period.subPeriods.size() - 1);
-      for (AbsenceType takable : lastPeriod.takableCodes) {
-        if (takable.code.equals(DefaultAbsenceType.A_37.name().substring(2))) {
+      for (AbsenceType taken : lastPeriod.takenCodes) {
+        if (taken.code.equals(DefaultAbsenceType.A_37.getCode())) {
           return period.subPeriods.get(period.subPeriods.size() - 2);
         }
       }
@@ -439,7 +442,7 @@ public class VacationSituation {
      * I giorni maturati nel periodo per il riepilogo. 
      */
     public int periodAmountAccrued(AbsencePeriod period) {
-      if (LocalDate.now().isBefore(period.from)) {
+      if (date.isBefore(period.from)) {
         return 0;
       }
       return period.vacationAmountBeforeInitialization;

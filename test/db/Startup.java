@@ -64,11 +64,11 @@ public class Startup extends Job<Void> {
     }
     Session session = (Session) JPA.em().getDelegate();
 
-    session.doWork(
-        new DatasetImport(
-            DatabaseOperation.INSERT,
-            Resources.getResource(
-                Startup.class, "data/group-absence-types.xml")));
+//    session.doWork(
+//        new DatasetImport(
+//            DatabaseOperation.INSERT,
+//            Resources.getResource(
+//                Startup.class, "data/group-absence-types.xml")));
 
     //competenceCode
     session.doWork(
@@ -100,10 +100,10 @@ public class Startup extends Job<Void> {
             Resources.getResource(Startup.class, "data/working-time-types.xml")));
 
 
-    //lucchesi slim 2016-04
-    session.doWork(
-        new DatasetImport(
-            DatabaseOperation.INSERT,
-            Resources.getResource(Startup.class, "data/lucchesi-situation-2016-04.xml")));
+//    //lucchesi slim 2016-04
+//    session.doWork(
+//        new DatasetImport(
+//            DatabaseOperation.INSERT,
+//            Resources.getResource(Startup.class, "data/lucchesi-situation-2016-04.xml")));
   }
 }

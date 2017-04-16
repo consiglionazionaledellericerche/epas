@@ -4,10 +4,16 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
+import dao.absences.AbsenceComponentDao;
+
+import db.h2support.H2Examples;
+import db.h2support.base.H2AbsenceSupport;
+
 import injection.StaticInject;
 
 import java.util.List;
 
+import manager.services.absences.AbsenceService;
 import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.ServiceFactories;
 
@@ -23,8 +29,7 @@ import org.junit.Test;
 
 import play.test.UnitTest;
 
-import db.h2support.H2Examples;
-import db.h2support.base.H2AbsenceSupport;
+
 
 
 @StaticInject
@@ -44,16 +49,22 @@ public class Absences661Test extends UnitTest {
   private static H2AbsenceSupport h2AbsenceSupport;
   @Inject 
   private static ServiceFactories serviceFactories;
-    
+  @Inject
+  private static AbsenceComponentDao absenceComponentDao;
+  @Inject
+  private static AbsenceService absenceService;
+  
   @Test
   public void test() {
     
+    absenceService.enumInitializator();
+    
     //creare il gruppo
-    GroupAbsenceType group661 = h2AbsenceSupport
-        .getGroupAbsenceType(DefaultGroup.G_661);
+    GroupAbsenceType group661 = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_661.name()).get();
     
     //creare la persona
-    Person person = h2Examples.normalUndefinedEmployee(BEGIN_2016);
+    Person person = h2Examples.normalEmployee(BEGIN_2016, Optional.absent());
     
     //creare la periodChain
     PeriodChain periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
@@ -96,12 +107,15 @@ public class Absences661Test extends UnitTest {
   @Test
   public void adjustmentLimit() {
         
+    absenceService.enumInitializator();
+    
     //creare il gruppo
-    GroupAbsenceType group661 = h2AbsenceSupport.getGroupAbsenceType(DefaultGroup.G_661);
+    GroupAbsenceType group661 = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_661.name()).get();
     
     // CASO 1 
     //la persona inizia a lavorare a metà anno
-    Person person = h2Examples.normalUndefinedEmployee(MID_2016);
+    Person person = h2Examples.normalEmployee(MID_2016, Optional.absent());
     
     //creare la periodChain
     PeriodChain periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
@@ -117,7 +131,7 @@ public class Absences661Test extends UnitTest {
     
     //CASO 2 
     //la persona ha il part time 50%
-    person = h2Examples.partTime50UndefinedEmployee(BEGIN_2016);
+    person = h2Examples.partTime50Employee(BEGIN_2016);
 
     periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
         new LocalDate(2016, 11, 15), 
@@ -132,7 +146,7 @@ public class Absences661Test extends UnitTest {
     //CASO 3 
     //la persona inizia a lavorare a metà anno con part time 50% 
 
-    person = h2Examples.partTime50UndefinedEmployee(MID_2016);
+    person = h2Examples.partTime50Employee(MID_2016);
 
     periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
         new LocalDate(2016, 11, 15), 
