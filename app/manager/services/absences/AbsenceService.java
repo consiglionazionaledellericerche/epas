@@ -168,7 +168,7 @@ public class AbsenceService {
     } else {
       if (categoryTab != null) {
         groupAbsenceType = categoryTab.firstByPriority()
-            .groupAbsenceTypes.iterator().next();
+            .orderedGroupsInCategory(true).iterator().next();
         Verify.verify(groupsPermitted.contains(groupAbsenceType));
       } else {
         //selezionare missione?

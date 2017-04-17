@@ -7,6 +7,7 @@ import com.google.common.collect.Sets;
 
 import dao.absences.AbsenceComponentDao;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,8 +40,8 @@ public class AbsenceForm {
   
   private SortedMap<Integer, Set<CategoryGroupAbsenceType>> categoriesByPriority = 
       Maps.newTreeMap();
-  private Map<CategoryGroupAbsenceType, Set<GroupAbsenceType>> groupsByCategory =
-      Maps.newHashMap();
+  private Map<CategoryGroupAbsenceType, List<GroupAbsenceType>> groupsByCategory =
+      Maps.newHashMap();    //la lista dei gruppi è ordinata per priorità
   public GroupAbsenceType groupSelected;
   
   // switch date
@@ -112,19 +113,9 @@ public class AbsenceForm {
       }
       categoriesSamePriority.add(categoryInTab);
       
-      for (GroupAbsenceType groupInTab : categoryInTab.groupAbsenceTypes) {
-        if (!groupInTab.previousGroupChecked.isEmpty()) {
-          continue;
-        }
-
-        // aggiungo il gruppo alla lista della categoria 
-        Set<GroupAbsenceType> categoryGroups = groupsByCategory.get(groupInTab.category);
-        if (categoryGroups == null) {
-          categoryGroups = Sets.newHashSet();
-          groupsByCategory.put(groupInTab.category, categoryGroups);
-        }
-        categoryGroups.add(groupInTab);
-      }
+      
+      groupsByCategory.put(categoryInTab, categoryInTab.orderedGroupsInCategory(true));
+      
     }
     
     // i tipi assenza selezionabili
@@ -199,7 +190,11 @@ public class AbsenceForm {
     return categories;
   }
   
-  public Set<GroupAbsenceType> groupsForCategory(CategoryGroupAbsenceType category) {
+  /**
+   * I gruppi della categoria (già ordinati per priorità).
+   * @param category categoria
+   */
+  public List<GroupAbsenceType> groupsForCategory(CategoryGroupAbsenceType category) {
     return groupsByCategory.get(category);
   }
   
@@ -209,7 +204,7 @@ public class AbsenceForm {
    */
   public List<GroupAbsenceType> groups() {
     List<GroupAbsenceType> groups = Lists.newArrayList();
-    for (Set<GroupAbsenceType> set : this.groupsByCategory.values()) {
+    for (List<GroupAbsenceType> set : this.groupsByCategory.values()) {
       groups.addAll(set);
     }
     return groups;

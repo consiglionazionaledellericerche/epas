@@ -244,6 +244,7 @@ public class EnumAllineator {
         group.chainDescription = defaultGroup.chainDescription;
         group.pattern = defaultGroup.pattern;
         group.category = absenceComponentDao.categoryByName(defaultGroup.category.name()).get();
+        group.priority = defaultGroup.priority;
         group.periodType = defaultGroup.periodType;
         group.takableAbsenceBehaviour = absenceComponentDao
             .takableAbsenceBehaviourByName(defaultGroup.takable.name()).get();
@@ -277,7 +278,7 @@ public class EnumAllineator {
         group.chainDescription = defaultGroup.get().chainDescription;
         group.category = absenceComponentDao
             .categoryByName(defaultGroup.get().category.name()).get();
-        
+        group.priority = defaultGroup.get().priority;
         //OSS: capire la politica di aggiornamento... dovrei essere bravo a modificare l'enumerato
         //in modo da evitare effetti collaterali (spostando i codici da takable a taken) e per
         //correggere errori. Questi cambiamenti possono avvenire automaticamente.
