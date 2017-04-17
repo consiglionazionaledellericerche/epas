@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 
 import it.cnr.iit.epas.DateUtility;
 
+import java.io.Serializable;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +26,10 @@ import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 
 import org.joda.time.LocalDate;
 
+import play.cache.Cache;
+
 /**
- * Una classe per il confronto fra la vecchia e la nuova implementazione delle ferie.
+ * Contiene lo stato ferie annuale di un contratto.
  * @author alessandro
  *
  */
@@ -42,6 +45,10 @@ public class VacationSituation {
   public VacationSummary currentYear;
   public VacationSummary permissions;
   
+  public VacationSummaryCached lastYearCached;
+  public VacationSummaryCached currentYearCached;
+  public VacationSummaryCached permissionsCached;
+  
   public OldVacationSummary oldLastYear;
   public OldVacationSummary oldCurrentYear;
   public OldVacationSummary oldPermissions;
@@ -50,7 +57,7 @@ public class VacationSituation {
    * Costruttore.
    */
   public VacationSituation(Person person, Contract contract, int year, 
-      GroupAbsenceType vacationGroup, Optional<LocalDate> residualDate, 
+      GroupAbsenceType vacationGroup, Optional<LocalDate> residualDate, boolean cache, 
       AbsenceService absenceService, IVacationsService vacationsService) {
     
     this.person = person;
@@ -73,6 +80,24 @@ public class VacationSituation {
     }
     this.date = date;
     
+    final String lastYearKey = contract.id + "-" + (year - 1) + "-" + TypeSummary.VACATION.name();
+    final String currentYearKey = contract.id + "-" + year + "-" + TypeSummary.VACATION.name();
+    final String permissionsKey = contract.id + "-" + year + "-" + TypeSummary.PERMISSION.name();
+    
+    //Provo a prelevare la situazione dalla cache
+    if (cache) {
+      this.lastYearCached = (VacationSummaryCached)Cache.get(lastYearKey);
+      this.currentYearCached = (VacationSummaryCached)Cache.get(currentYearKey);
+      this.permissionsCached = (VacationSummaryCached)Cache.get(permissionsKey);
+      if (this.lastYearCached != null && this.lastYearCached.date.isEqual(date)
+          && this.currentYearCached != null && this.currentYearCached.date.isEqual(date)
+          && this.permissionsCached != null && this.permissionsCached.date.isEqual(date)) {
+        //Tutto correttamente cachato.
+        return;
+      } else {
+        log.info("La situazione di {} non era cachata", contract.person.fullName());
+      }
+    }
     PeriodChain periodChain = absenceService.residual(person, vacationGroup, date);
     if (!periodChain.vacationSupportList.get(0).isEmpty()) {
       this.lastYear = new VacationSummary(contract, periodChain.vacationSupportList.get(0).get(0), 
@@ -86,6 +111,17 @@ public class VacationSituation {
       this.permissions = new VacationSummary(contract, 
           periodChain.vacationSupportList.get(2).get(0), year, date, TypeSummary.PERMISSION);
     }
+
+    this.lastYearCached = new VacationSummaryCached(this.lastYear, 
+        contract, year - 1, date, TypeSummary.VACATION);
+    this.currentYearCached = new VacationSummaryCached(this.currentYear,
+        contract, year, date, TypeSummary.VACATION);
+    this.permissionsCached = new VacationSummaryCached(this.permissions,
+        contract, year, date, TypeSummary.PERMISSION);
+    
+    Cache.set(lastYearKey, this.lastYearCached);
+    Cache.set(currentYearKey, this.currentYearCached);
+    Cache.set(permissionsKey, this.permissionsCached);
     
     //    try {
     //      CruscottoDipendente cruscottoDipendente = certService
@@ -175,9 +211,9 @@ public class VacationSituation {
     if (old.usableTotal() != summary.usableTotal()) {
       return false;
     }
-//    if (old.usable() != summary.usable()) {
-//      return false;
-//    }
+    //    if (old.usable() != summary.usable()) {
+    //     return false;
+    //    }
     return true;
   }
   
@@ -458,6 +494,67 @@ public class VacationSituation {
       } else {
         return this.contract.person.fullName() + " - " + "Riepilogo Permessi Legge " + this.year;
       }
+    }
+  }
+  
+  /**
+   * Versione cachata del riepilogo.
+   * @author alessandro
+   *
+   */
+  public static class VacationSummaryCached implements Serializable {
+    
+    public boolean exists = true;
+    public TypeSummary type;
+    public int year;
+    public LocalDate date; 
+    public Contract contract;
+    
+    public int total;
+    public int postPartum;
+    public int accrued;
+    public int used;
+    public int usable;
+    public boolean expired;
+    public int usableTotal;
+    public boolean isContractLowerLimit;
+    public LocalDate lowerLimit;
+    public boolean isContractUpperLimit;
+    public LocalDate upperLimit;
+    
+    /**
+     * Costruttore. Se il vacationSummary è null significa che il riepilogo non esiste:
+     * Setto exists = false;
+     */
+    public VacationSummaryCached(VacationSummary vacationSummary, Contract contract, int year, 
+        LocalDate date, TypeSummary type) {
+      
+      if (vacationSummary == null) {
+        this.exists = false;
+        this.type = type;
+        this.year = year;
+        this.date = date;
+        this.contract = contract;
+        this.contract.merge();
+      } else {
+        this.type = vacationSummary.type;
+        this.year = vacationSummary.year;
+        this.date = vacationSummary.date;
+        this.contract = vacationSummary.contract;
+        this.contract.merge();
+        this.total = vacationSummary.total();
+        this.postPartum = vacationSummary.postPartum();
+        this.accrued = vacationSummary.accrued();
+        this.used = vacationSummary.used();
+        this.usable = vacationSummary.usable();
+        this.expired = vacationSummary.expired();
+        this.usableTotal = vacationSummary.usableTotal();
+        this.isContractLowerLimit = vacationSummary.isContractLowerLimit();
+        this.lowerLimit = vacationSummary.lowerLimit();
+        this.isContractUpperLimit = vacationSummary.isContractUpperLimit();
+        this.upperLimit = vacationSummary.upperLimit();
+      }
+      
     }
   }
   
