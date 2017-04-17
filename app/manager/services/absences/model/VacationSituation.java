@@ -1,19 +1,11 @@
 package manager.services.absences.model;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-
-import it.cnr.iit.epas.DateUtility;
 
 import java.io.Serializable;
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
-
-import manager.services.absences.AbsenceService;
 import manager.services.absences.model.VacationSituation.VacationSummary.TypeSummary;
-import manager.services.vacations.IVacationsService;
-import manager.services.vacations.VacationsRecap;
 import manager.services.vacations.VacationsTypeResult;
 
 import models.Contract;
@@ -21,19 +13,15 @@ import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.AbsenceType.DefaultAbsenceType;
-import models.absences.GroupAbsenceType;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 
 import org.joda.time.LocalDate;
-
-import play.cache.Cache;
 
 /**
  * Contiene lo stato ferie annuale di un contratto.
  * @author alessandro
  *
  */
-@Slf4j
 public class VacationSituation {
 
   public Person person;
@@ -53,118 +41,6 @@ public class VacationSituation {
   public OldVacationSummary oldCurrentYear;
   public OldVacationSummary oldPermissions;
    
-  /**
-   * Costruttore.
-   */
-  public VacationSituation(Person person, Contract contract, int year, 
-      GroupAbsenceType vacationGroup, Optional<LocalDate> residualDate, boolean cache, 
-      AbsenceService absenceService, IVacationsService vacationsService) {
-    
-    this.person = person;
-    this.contract = contract;
-    this.year = year;
-    
-    if (vacationsService != null) { 
-      Optional<VacationsRecap> vr = vacationsService.create(year, contract);
-      if (vr.isPresent()) {
-        this.oldLastYear = new OldVacationSummary(vr.get().getVacationsLastYear());
-        this.oldCurrentYear = new OldVacationSummary(vr.get().getVacationsCurrentYear());
-        this.oldPermissions = new OldVacationSummary(vr.get().getPermissions());
-      }
-    }
-
-    //La data target per il riepilogo contrattuale
-    LocalDate date = residualDate(residualDate, year);
-    if (date == null) {
-      return;
-    }
-    this.date = date;
-    
-    final String lastYearKey = contract.id + "-" + (year - 1) + "-" + TypeSummary.VACATION.name();
-    final String currentYearKey = contract.id + "-" + year + "-" + TypeSummary.VACATION.name();
-    final String permissionsKey = contract.id + "-" + year + "-" + TypeSummary.PERMISSION.name();
-    
-    //Provo a prelevare la situazione dalla cache
-    if (cache) {
-      this.lastYearCached = (VacationSummaryCached)Cache.get(lastYearKey);
-      this.currentYearCached = (VacationSummaryCached)Cache.get(currentYearKey);
-      this.permissionsCached = (VacationSummaryCached)Cache.get(permissionsKey);
-      if (this.lastYearCached != null && this.lastYearCached.date.isEqual(date)
-          && this.currentYearCached != null && this.currentYearCached.date.isEqual(date)
-          && this.permissionsCached != null && this.permissionsCached.date.isEqual(date)) {
-        //Tutto correttamente cachato.
-        return;
-      } else {
-        log.info("La situazione di {} non era cachata", contract.person.fullName());
-      }
-    }
-    PeriodChain periodChain = absenceService.residual(person, vacationGroup, date);
-    if (!periodChain.vacationSupportList.get(0).isEmpty()) {
-      this.lastYear = new VacationSummary(contract, periodChain.vacationSupportList.get(0).get(0), 
-          year - 1, date, TypeSummary.VACATION);
-    }
-    if (!periodChain.vacationSupportList.get(1).isEmpty()) {
-      this.currentYear = new VacationSummary(contract, 
-          periodChain.vacationSupportList.get(1).get(0), year, date, TypeSummary.VACATION);
-    }
-    if (!periodChain.vacationSupportList.get(2).isEmpty()) {
-      this.permissions = new VacationSummary(contract, 
-          periodChain.vacationSupportList.get(2).get(0), year, date, TypeSummary.PERMISSION);
-    }
-
-    this.lastYearCached = new VacationSummaryCached(this.lastYear, 
-        contract, year - 1, date, TypeSummary.VACATION);
-    this.currentYearCached = new VacationSummaryCached(this.currentYear,
-        contract, year, date, TypeSummary.VACATION);
-    this.permissionsCached = new VacationSummaryCached(this.permissions,
-        contract, year, date, TypeSummary.PERMISSION);
-    
-    Cache.set(lastYearKey, this.lastYearCached);
-    Cache.set(currentYearKey, this.currentYearCached);
-    Cache.set(permissionsKey, this.permissionsCached);
-    
-    //    try {
-    //      CruscottoDipendente cruscottoDipendente = certService
-    //        .getCruscottoDipendente(person, year);
-    //      CertificationYearSituation yearSituation = 
-    //          new CertificationYearSituation(absenceComponentDao, person, cruscottoDipendente);
-    //      comparedVacation.certLastYear = yearSituation
-    //          .getAbsenceSituation(AbsenceImportType.FERIE_ANNO_PRECEDENTE);
-    //      comparedVacation.certCurrentYear = yearSituation
-    //          .getAbsenceSituation(AbsenceImportType.FERIE_ANNO_CORRENTE);
-    //      comparedVacation.certPermission = yearSituation
-    //          .getAbsenceSituation(AbsenceImportType.PERMESSI_LEGGE);
-    //      
-    //    } catch (Exception e) {
-    //      log.info("Impossibile scaricare l'informazione da attestati di {}", person.fullName());
-    //    }
-  }
-  
-  /**
-   * La data per cui fornire il residuo. Se non l'ho fornita ritorno un default.
-   */
-  private LocalDate residualDate(Optional<LocalDate> residualDate, int year) {
-    if (!residualDate.isPresent()) {
-      LocalDate date = LocalDate.now();           
-      if (date.getYear() > year) {
-        date = new LocalDate(year, 12, 31);
-      }
-      if (contract.calculatedEnd() != null
-          && contract.calculatedEnd().getYear() == year 
-          && !DateUtility.isDateIntoInterval(date, contract.periodInterval())) {
-        date = contract.calculatedEnd();
-      }
-      return date;
-    } else {
-      //La data che passo deve essere una data contenuta nell'anno.
-      if (residualDate.get().getYear() != year) {
-        log.info("VacationSummary: anno={} data={}: la data deve appartenere all'anno.");
-        return null;
-      }
-      return residualDate.get();
-    }
-  }
-  
   /**
    * I giorni rimanenti totali.
    */

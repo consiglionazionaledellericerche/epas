@@ -87,8 +87,8 @@ public class Vacations extends Controller {
 
     for (Contract contract : person.orderedYearContracts(year)) {
       
-      VacationSituation vacationSituation = new VacationSituation(person.getValue(), 
-          contract, year, vacationGroup, Optional.absent(), false, absenceService, null);
+      VacationSituation vacationSituation = absenceService.buildVacationSituation(contract, year, 
+          vacationGroup, Optional.absent(), false, null);
       vacationSituations.add(vacationSituation);
     }
 
@@ -115,11 +115,11 @@ public class Vacations extends Controller {
         .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
     VacationSummary vacationSummary;
     if (type.equals(TypeSummary.PERMISSION)) {
-      vacationSummary = new VacationSituation(contract.person, contract, year, vacationGroup, 
-          Optional.absent(), false, absenceService, null).permissions;
+      vacationSummary = absenceService.buildVacationSituation(contract, year, vacationGroup, 
+          Optional.absent(), false, null).permissions;
     } else {
-      vacationSummary = new VacationSituation(contract.person, contract, year, vacationGroup, 
-          Optional.absent(), false, absenceService, null).currentYear;
+      vacationSummary = absenceService.buildVacationSituation(contract, year, vacationGroup, 
+          Optional.absent(), false, null).currentYear;
     }
     
     renderTemplate("Vacations/vacationSummary.html", vacationSummary);
@@ -162,11 +162,10 @@ public class Vacations extends Controller {
           // nello heap solo i contratti attivi nel periodo specificato.
           continue;
         }
-
+        
         try {
-          VacationSituation vacationSituation = new VacationSituation(person, 
-              contract, year, vacationGroup, Optional.absent(), true, 
-              absenceService, null);
+          VacationSituation vacationSituation = absenceService.buildVacationSituation(contract, 
+              year, vacationGroup, Optional.absent(), true, null);
           vacationSituations.add(vacationSituation);
         } catch (Exception ex) {
           log.info("");
@@ -210,11 +209,11 @@ public class Vacations extends Controller {
         .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
     VacationSummary vacationSummary;
     if (type.equals(TypeSummary.PERMISSION)) {
-      vacationSummary = new VacationSituation(contract.person, contract, year, vacationGroup, 
-          Optional.absent(), false, absenceService, null).permissions;
+      vacationSummary = absenceService.buildVacationSituation(contract, year, vacationGroup, 
+          Optional.absent(), false, null).permissions;
     } else {
-      vacationSummary = new VacationSituation(contract.person, contract, year, vacationGroup, 
-          Optional.absent(), false, absenceService, null).currentYear;
+      vacationSummary = absenceService.buildVacationSituation(contract, year, vacationGroup, 
+          Optional.absent(), false, null).currentYear;
     }
     
     render(vacationSummary);
@@ -254,11 +253,10 @@ public class Vacations extends Controller {
           // nello heap solo i contratti attivi nel periodo specificato.
           continue;
         }
-
+        
         try {
-          VacationSituation vacationSituation = new VacationSituation(person, 
-              contract, year, vacationGroup, Optional.absent(), false,
-              absenceService, vacationsService);
+          VacationSituation vacationSituation = absenceService.buildVacationSituation(contract, 
+              year, vacationGroup, Optional.absent(), false, vacationsService);
           vacationSituations.add(vacationSituation);
         } catch (Exception ex) {
           log.info("");
