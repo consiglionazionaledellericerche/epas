@@ -63,7 +63,8 @@ public class VacationsTest extends UnitTest {
         new LocalDate(2016, 9, 11), Optional.absent(), 0, person);
 
     VacationSituation vacationSituation = new VacationSituation(person, 
-        person.contracts.get(0), 2016, vacationGroup, Optional.of(today), absenceService, null);
+        person.contracts.get(0), 2016, vacationGroup, Optional.of(today), false, 
+        absenceService, null);
 
     assertTrue(vacationSituation.lastYear.expired());
     assertEquals(vacationSituation.lastYear.total(), 28);
@@ -97,7 +98,8 @@ public class VacationsTest extends UnitTest {
         new LocalDate(2016, 9, 11), Optional.absent(), 0, person2);
     
     VacationSituation vacationSituation2 = new VacationSituation(person2, 
-        person2.contracts.get(0), 2016, vacationGroup, Optional.of(today), absenceService, null);
+        person2.contracts.get(0), 2016, vacationGroup, Optional.of(today), false, 
+        absenceService, null);
     
     assertTrue(vacationSituation2.lastYear.expired());
     assertEquals(vacationSituation2.lastYear.total(), 28);
@@ -147,7 +149,8 @@ public class VacationsTest extends UnitTest {
     final LocalDate today = new LocalDate(2015, 1, 1); //recap date
 
     VacationSituation vacationSituation = new VacationSituation(person, 
-        person.contracts.get(0), 2015, vacationGroup, Optional.of(today), absenceService, null);
+        person.contracts.get(0), 2015, vacationGroup, Optional.of(today), false, 
+        absenceService, null);
 
     assertEquals(vacationSituation.currentYear.total(), 26);
     assertEquals(vacationSituation.currentYear.accrued(), 1);
@@ -174,7 +177,8 @@ public class VacationsTest extends UnitTest {
     final LocalDate today = new LocalDate(2016, 1, 1); //recap date
 
     VacationSituation vacationSituation = new VacationSituation(person, 
-        person.contracts.get(0), 2016, vacationGroup, Optional.of(today), absenceService, null);
+        person.contracts.get(0), 2016, vacationGroup, Optional.of(today), false, 
+        absenceService, null);
 
     assertEquals(vacationSituation.currentYear.total(), 28);
     assertEquals(vacationSituation.currentYear.accrued(), 0);
@@ -214,13 +218,13 @@ public class VacationsTest extends UnitTest {
     
     VacationSituation vacationSituation = new VacationSituation(person, 
         contract, 2016, vacationGroup, 
-        Optional.of(new LocalDate(2016, 1, 1)), absenceService, null);
+        Optional.of(new LocalDate(2016, 1, 1)), false, absenceService, null);
 
     assertEquals(vacationSituation.currentYear.usable(), 23);
 
     VacationSituation vacationSituation2 = new VacationSituation(person, 
         contract, 2017, vacationGroup, 
-        Optional.of(new LocalDate(2017, 1, 1)), absenceService, null);
+        Optional.of(new LocalDate(2017, 1, 1)), false, absenceService, null);
     
     assertEquals(vacationSituation2.lastYear.usable(), 23);
     
