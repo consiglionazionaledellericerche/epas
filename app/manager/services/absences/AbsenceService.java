@@ -838,6 +838,19 @@ public class AbsenceService {
   }
   
   /**
+   * Elimina i periodi ferie in cache per quella persona a partire dalla data from.
+   * @param person persona 
+   * @param from from
+   */
+  public void emptyVacationCache(Person person, LocalDate from) {
+    for (Contract contract : person.contracts) {
+      if (DateUtility.isDateIntoInterval(from, contract.periodInterval())) {
+        emptyVacationCache(contract);
+      }
+    }
+  }
+  
+  /**
    * Elimina i riepiloghi ferie in cache per quel contratto.
    * @param contract cotratto
    */
