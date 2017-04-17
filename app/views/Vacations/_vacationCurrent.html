@@ -33,31 +33,31 @@
 
 	<tbody>
 		#{list items:vacationSituations, as:'vacationSituation'}
-		#{if vacationSituation.currentYear != null}
+		#{if vacationSituation.currentYearCached.exists}
 		<tr>
 		    <td>
 				<a
-				href="@{Vacations.vacationSummary(vacationSituation.contract.id, vacationSituation.currentYear.year, 'VACATION')}"
+				href="@{Vacations.vacationSummary(vacationSituation.contract.id, vacationSituation.currentYearCached.year, 'VACATION')}"
 				data-async-modal="#defaultModal">
 					${vacationSituation.contract.person.fullname}</a>
 			</td>
 			
-			<td>${vacationSituation.currentYear.total()}</td>
-			<td>${vacationSituation.currentYear.accrued()}</td>
-			<td>${vacationSituation.currentYear.used()}</td>
+			<td>${vacationSituation.currentYearCached.total}</td>
+			<td>${vacationSituation.currentYearCached.accrued}</td>
+			<td>${vacationSituation.currentYearCached.used}</td>
 			
 			<!-- residui totali -->
-			<td>${vacationSituation.currentYear.usable()}</td>
-  		    <td>${vacationSituation.currentYear.usableTotal()}</td>
+			<td>${vacationSituation.currentYearCached.usable}</td>
+  		    <td>${vacationSituation.currentYearCached.usableTotal}</td>
 				
 			<!-- limiti utilizzo -->	
 			<td
-			#{if vacationSituation.currentYear.isContractLowerLimit()}><em><strong>${vacationSituation.currentYear.lowerLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${vacationSituation.currentYear.lowerLimit().format()}#{/else}	
+			#{if vacationSituation.currentYearCached.isContractLowerLimit}><em><strong>${vacationSituation.currentYearCached.lowerLimit.format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.currentYearCached.lowerLimit.format()}#{/else}	
 			</td>
 			<td
-			#{if vacationSituation.currentYear.isContractUpperLimit()}><em><strong>${vacationSituation.currentYear.upperLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${vacationSituation.currentYear.upperLimit().format()}#{/else}	
+			#{if vacationSituation.currentYearCached.isContractUpperLimit}><em><strong>${vacationSituation.currentYearCached.upperLimit.format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.currentYearCached.upperLimit.format()}#{/else}	
 			</td>
 
 		</tr>

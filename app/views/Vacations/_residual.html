@@ -50,14 +50,14 @@
 
 			<!-- ferie anno precedente -->
             <td>
-			#{if vacationSituation.lastYear != null}
+			#{if vacationSituation.lastYearCached.exists}
 			  <a 
-			     href="@{Vacations.vacationSummary(vacationSituation.contract.id, vacationSituation.lastYear.year, 'VACATION')}"
+			     href="@{Vacations.vacationSummary(vacationSituation.contract.id, vacationSituation.lastYearCached.year, 'VACATION')}"
 			     data-async-modal="#defaultModal">
-				${vacationSituation.lastYear.usableTotal()}
+				${vacationSituation.lastYearCached.usableTotal}
 			  </a>
-			  #{if vacationSituation.lastYear.isContractLowerLimit() 
-			       || vacationSituation.lastYear.isContractUpperLimit()}
+			  #{if vacationSituation.lastYearCached.isContractLowerLimit 
+			       || vacationSituation.lastYearCached.isContractUpperLimit}
 			    <strong>*</strong>
 			  #{/if}
 			#{/if}
@@ -67,14 +67,14 @@
 		
 			<!-- ferie anno corrente -->
             <td>
-			#{if vacationSituation.currentYear != null}
+			#{if vacationSituation.currentYearCached.exists}
 			  <a
-                 href="@{Vacations.vacationSummary(vacationSituation.contract.id, vacationSituation.currentYear.year, 'VACATION')}"
+                 href="@{Vacations.vacationSummary(vacationSituation.contract.id, vacationSituation.currentYearCached.year, 'VACATION')}"
 			     data-async-modal="#defaultModal">
-				${vacationSituation.currentYear.usableTotal()}
+				${vacationSituation.currentYearCached.usableTotal}
 			  </a>
-			  #{if vacationSituation.currentYear.isContractLowerLimit() 
-			       || vacationSituation.currentYear.isContractUpperLimit()}
+			  #{if vacationSituation.currentYearCached.isContractLowerLimit 
+			       || vacationSituation.currentYearCached.isContractUpperLimit}
 			    <strong>*</strong>
 			  #{/if}
 			#{/if}
@@ -82,14 +82,14 @@
 	
 			<!-- permessi anno corrente -->
             <td>
-			#{if vacationSituation.permissions != null}
+			#{if vacationSituation.permissionsCached.exists}
 			  <a
-			     href="@{Vacations.vacationSummary(vacationSituation.contract.id, vacationSituation.permissions.year, 'PERMISSION')}" 
+			     href="@{Vacations.vacationSummary(vacationSituation.contract.id, vacationSituation.permissionsCached.year, 'PERMISSION')}" 
 			     data-async-modal="#defaultModal">
-				${vacationSituation.permissions.usableTotal()}
+				${vacationSituation.permissionsCached.usableTotal}
 			  </a>
-			  #{if vacationSituation.permissions.isContractLowerLimit() 
-			       || vacationSituation.permissions.isContractUpperLimit()}
+			  #{if vacationSituation.permissionsCached.isContractLowerLimit 
+			       || vacationSituation.permissionsCached.isContractUpperLimit}
 			    <strong>*</strong>
 			  #{/if}
 			#{/if}
