@@ -33,31 +33,31 @@
 
 	<tbody>
 		#{list items:vacationSituations, as:'vacationSituation'}
-		#{if vacationSituation.lastYear != null}
+		#{if vacationSituation.lastYearCached.exists}
 		<tr>
 		    <td>
 				<a
-				href="@{Vacations.vacationSummary(vacationSituation.contract.id, vacationSituation.lastYear.year, 'VACATION')}"
+				href="@{Vacations.vacationSummary(vacationSituation.contract.id, vacationSituation.lastYearCached.year, 'VACATION')}"
 				data-async-modal="#defaultModal">
 					${vacationSituation.contract.person.fullname}</a>
 			</td>
 			
-			<td>${vacationSituation.lastYear.total()}</td>
-			<td>${vacationSituation.lastYear.accrued()}</td>
-			<td>${vacationSituation.lastYear.used()}</td>
+			<td>${vacationSituation.lastYearCached.total}</td>
+			<td>${vacationSituation.lastYearCached.accrued}</td>
+			<td>${vacationSituation.lastYearCached.used}</td>
 			
 			<!-- residui totali -->
-			<td>${vacationSituation.lastYear.usable()}</td>
-  		    <td>${vacationSituation.lastYear.usableTotal()}</td>
+			<td>${vacationSituation.lastYearCached.usable}</td>
+  		    <td>${vacationSituation.lastYearCached.usableTotal}</td>
 				
 			<!-- limiti utilizzo -->	
 			<td
-			#{if vacationSituation.lastYear.isContractLowerLimit()}><em><strong>${vacationSituation.lastYear.lowerLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${vacationSituation.lastYear.lowerLimit().format()}#{/else}	
+			#{if vacationSituation.lastYearCached.isContractLowerLimit}><em><strong>${vacationSituation.lastYearCached.lowerLimit.format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.lastYearCached.lowerLimit.format()}#{/else}	
 			</td>
 			<td
-			#{if vacationSituation.lastYear.isContractUpperLimit()}><em><strong>${vacationSituation.lastYear.upperLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${vacationSituation.lastYear.upperLimit().format()}#{/else}	
+			#{if vacationSituation.lastYearCached.isContractUpperLimit}><em><strong>${vacationSituation.lastYearCached.upperLimit.format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.lastYearCached.upperLimit.format()}#{/else}	
 			</td>
 
 		</tr>

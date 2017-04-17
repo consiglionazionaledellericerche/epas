@@ -170,14 +170,14 @@ public class VacationSituation {
    */
   public int sumUsableTotal() {
     int totalRemaining = 0;
-    if (lastYear != null) {
-      totalRemaining += lastYear.usableTotal();
+    if (lastYearCached.exists) {
+      totalRemaining += lastYearCached.usableTotal;
     } 
-    if (currentYear != null) {
-      totalRemaining += currentYear.usableTotal();
+    if (currentYearCached.exists) {
+      totalRemaining += currentYearCached.usableTotal;
     }
-    if (permissions != null) {
-      totalRemaining += permissions.usableTotal();
+    if (permissionsCached != null) {
+      totalRemaining += permissionsCached.usableTotal;
     }
     return totalRemaining;
   }

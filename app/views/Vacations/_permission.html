@@ -33,31 +33,31 @@
 
 	<tbody>
 		#{list items:vacationSituations, as:'vacationSituation'}
-		#{if vacationSituation.permissions != null}
+		#{if vacationSituation.permissionsCached.exists}
 		<tr>
 		    <td>
 				<a
-				href="@{Vacations.vacationSummary(vacationSituation.contract.id, vacationSituation.permissions.year, 'PERMISSION')}"
+				href="@{Vacations.vacationSummary(vacationSituation.contract.id, vacationSituation.permissionsCached.year, 'PERMISSION')}"
 				data-async-modal="#defaultModal">
 					${vacationSituation.contract.person.fullname}</a>
 			</td>
 			
-			<td>${vacationSituation.permissions.total()}</td>
-			<td>${vacationSituation.permissions.accrued()}</td>
-			<td>${vacationSituation.permissions.used()}</td>
+			<td>${vacationSituation.permissionsCached.total}</td>
+			<td>${vacationSituation.permissionsCached.accrued}</td>
+			<td>${vacationSituation.permissionsCached.used}</td>
 			
 			<!-- residui totali -->
-			<td>${vacationSituation.permissions.usable()}</td>
-  		    <td>${vacationSituation.permissions.usableTotal()}</td>
+			<td>${vacationSituation.permissionsCached.usable}</td>
+  		    <td>${vacationSituation.permissionsCached.usableTotal}</td>
 				
 			<!-- limiti utilizzo -->	
 			<td
-			#{if vacationSituation.permissions.isContractLowerLimit()}><em><strong>${vacationSituation.permissions.lowerLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${vacationSituation.permissions.lowerLimit().format()}#{/else}	
+			#{if vacationSituation.permissionsCached.isContractLowerLimit}><em><strong>${vacationSituation.permissionsCached.lowerLimit.format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.permissionsCached.lowerLimit.format()}#{/else}	
 			</td>
 			<td
-			#{if vacationSituation.permissions.isContractUpperLimit()}><em><strong>${vacationSituation.permissions.upperLimit().format()}</strong></em>#{/if}
-			#{else} class="text-muted">${vacationSituation.permissions.upperLimit().format()}#{/else}	
+			#{if vacationSituation.permissionsCached.isContractUpperLimit}><em><strong>${vacationSituation.permissionsCached.upperLimit.format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.permissionsCached.upperLimit.format()}#{/else}	
 			</td>
 
 		</tr>
