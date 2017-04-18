@@ -782,9 +782,9 @@ public class AbsenceService {
       situation.lastYearCached = (VacationSummaryCached)Cache.get(lastYearKey);
       situation.currentYearCached = (VacationSummaryCached)Cache.get(currentYearKey);
       situation.permissionsCached = (VacationSummaryCached)Cache.get(permissionsKey);
-      if (situation.lastYearCached != null && situation.lastYearCached.date.isEqual(date)
-          && situation.currentYearCached != null && situation.currentYearCached.date.isEqual(date)
-          && situation.permissionsCached != null && situation.permissionsCached.date.isEqual(date)
+      if (situation.lastYearCached != null //&& situation.lastYearCached.date.isEqual(date)
+          && situation.currentYearCached != null //&& situation.currentYearCached.date.isEqual(date)
+          && situation.permissionsCached != null //&& situation.permissionsCached.date.isEqual(date)
           ) {
         //Tutto correttamente cachato.
         return situation;
@@ -807,16 +807,18 @@ public class AbsenceService {
           periodChain.vacationSupportList.get(2).get(0), year, date, TypeSummary.PERMISSION);
     }
 
-    situation.lastYearCached = new VacationSummaryCached(situation.lastYear, 
-        contract, year - 1, date, TypeSummary.VACATION);
-    situation.currentYearCached = new VacationSummaryCached(situation.currentYear,
-        contract, year, date, TypeSummary.VACATION);
-    situation.permissionsCached = new VacationSummaryCached(situation.permissions,
-        contract, year, date, TypeSummary.PERMISSION);
+    if (cache) {
+      situation.lastYearCached = new VacationSummaryCached(situation.lastYear, 
+          contract, year - 1, date, TypeSummary.VACATION);
+      situation.currentYearCached = new VacationSummaryCached(situation.currentYear,
+          contract, year, date, TypeSummary.VACATION);
+      situation.permissionsCached = new VacationSummaryCached(situation.permissions,
+          contract, year, date, TypeSummary.PERMISSION);
 
-    Cache.set(lastYearKey, situation.lastYearCached);
-    Cache.set(currentYearKey, situation.currentYearCached);
-    Cache.set(permissionsKey, situation.permissionsCached);
+      Cache.set(lastYearKey, situation.lastYearCached);
+      Cache.set(currentYearKey, situation.currentYearCached);
+      Cache.set(permissionsKey, situation.permissionsCached);
+    }
 
     //    try {
     //      CruscottoDipendente cruscottoDipendente = certService
@@ -871,7 +873,7 @@ public class AbsenceService {
   }
   
   private String vacationCacheKey(Contract contract, int year, TypeSummary type) {
-    return contract.id + "-" + year + "-" + TypeSummary.VACATION.name();
+    return contract.id + "-" + year + "-" + type.name();
   }
 
   /**
