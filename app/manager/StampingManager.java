@@ -3,19 +3,14 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.inject.Inject;
-
+import controllers.Security;
 import dao.PersonDao;
 import dao.PersonDayDao;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingDayRecapFactory;
-
-import models.Contract;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
@@ -23,7 +18,6 @@ import models.Stamping.WayType;
 import models.User;
 import models.enumerate.StampTypes;
 import models.exports.StampingFromClient;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
@@ -37,11 +31,11 @@ public class StampingManager {
   private final ConsistencyManager consistencyManager;
 
   /**
-   * @param personDayDao            il dao per cercare i personday
-   * @param personDao               il dao per cercare le persone
-   * @param personDayManager        il manager per lavorare sui personday
+   * @param personDayDao il dao per cercare i personday
+   * @param personDao il dao per cercare le persone
+   * @param personDayManager il manager per lavorare sui personday
    * @param stampingDayRecapFactory il factory per lavorare sugli stampingDayRecap
-   * @param consistencyManager      il costruttore dell'injector.
+   * @param consistencyManager il costruttore dell'injector.
    */
   @Inject
   public StampingManager(PersonDayDao personDayDao,
@@ -59,7 +53,7 @@ public class StampingManager {
 
 
   /**
-   * @param pd       il personday
+   * @param pd il personday
    * @param stamping la timbratura
    * @return true se esiste una timbratura nel personday uguale a quella passata.
    */
@@ -98,7 +92,7 @@ public class StampingManager {
    * Calcola il numero massimo di coppie ingresso/uscita in un giorno specifico per tutte le persone
    * presenti nella lista di persone attive a quella data.
    *
-   * @param date               data
+   * @param date data
    * @param activePersonsInDay lista delle persone da verificare
    * @return numero di coppie
    */
@@ -108,11 +102,10 @@ public class StampingManager {
     int max = 0;
 
     for (Person person : activePersonsInDay) {
-      PersonDay personDay = null;
       Optional<PersonDay> pd = personDayDao.getPersonDay(person, date);
 
       if (pd.isPresent()) {
-        personDay = pd.get();
+        PersonDay personDay = pd.get();
         if (max < personDayManager.numberOfInOutInPersonDay(personDay)) {
           max = personDayManager.numberOfInOutInPersonDay(personDay);
         }
@@ -172,40 +165,60 @@ public class StampingManager {
       List<Person> activePersonsInDay,
       LocalDate dayPresence, int numberOfInOut) {
 
-    List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
+    List<PersonStampingDayRecap> daysRecap = new ArrayList<>();
     for (Person person : activePersonsInDay) {
 
-      PersonDay personDay = null;
       person = personDao.getPersonById(person.id);
       Optional<PersonDay> pd = personDayDao.getPersonDay(person, dayPresence);
 
-      if (!pd.isPresent()) {
-        continue;
-      } else {
-        personDay = pd.get();
+      if (pd.isPresent()) {
+        personDayManager.setValidPairStampings(pd.get().stampings);
+        daysRecap.add(stampingDayRecapFactory
+            .create(pd.get(), numberOfInOut, true, Optional.absent()));
       }
-
-      personDayManager.setValidPairStampings(personDay.stampings);
-      daysRecap.add(stampingDayRecapFactory
-          .create(personDay, numberOfInOut, true, Optional.<List<Contract>>absent()));
-
     }
     return daysRecap;
   }
 
   /**
    * @param stamping la timbratura da controllare
-   * @param user     l'utente che vuole inserire la timbratura
+   * @param user l'utente che vuole inserire la timbratura
    * @param employee la persona per cui si vuole inserire la timbratura
    * @return true se lo stampType relativo alla timbratura da inserire è tra quelli previsti per la
-   *     timbratura fuori sede, false altrimenti.
+   * timbratura fuori sede, false altrimenti.
    */
   public boolean checkStampType(Stamping stamping, User user, Person employee) {
-    if (user.person.id.equals(employee.id)
-        && stamping.stampType.equals(StampTypes.LAVORO_FUORI_SEDE)) {
-      return true;
+    return user.person.id.equals(employee.id)
+        && stamping.stampType == StampTypes.LAVORO_FUORI_SEDE;
+  }
+
+  /**
+   * Associa la persona alla timbratura ricevuta via REST
+   *
+   * @param stamping DTO costruito dal Json
+   * @return un Optional contenente la person o absent
+   */
+  public Optional<Person> linkToPerson(StampingFromClient stamping) {
+
+    Optional<User> user = Security.getUser();
+    if (!user.isPresent()) {
+      log.error("Impossibile recuperare l'utente che ha inviato la timbratura: {}", stamping);
+      return Optional.absent();
     }
-    return false;
+    if (user.get().badgeReader == null) {
+      log.error("L'utente {} utilizzato per l'invio della timbratura"
+          + " non ha una istanza badgeReader valida associata.", user.get().username);
+      return Optional.absent();
+    }
+    final Optional<Person> person = Optional.fromNullable(personDao
+        .getPersonByBadgeNumber(stamping.numeroBadge, user.get().badgeReader));
+
+    if (!person.isPresent()) {
+      log.warn("Non e' stato possibile recuperare la persona a cui si riferisce la timbratura,"
+          + " matricolaFirma={}. Controllare il database.", stamping.numeroBadge);
+    }
+    stamping.person = person.get();
+    return person;
   }
 
 }

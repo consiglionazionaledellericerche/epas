@@ -18,11 +18,11 @@
   <input class="form-control margin-top" placeholder="Username" type="text" name="username"
          value="${flash.username}"/>
   <input class="form-control margin-top" placeholder="Password" type="password" name="password"
-         value=""/>
+         value="${flash.password}"/>
 
   <div class="checkbox">
     <label>
-      <input type="checkbox" name="remember"> Remember me
+      <input type="checkbox" name="remember" #{if flash.remember}checked#{/if}> Remember me
     </label>
   </div>
   <!-- Submit -->
