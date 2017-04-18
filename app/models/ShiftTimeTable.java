@@ -9,6 +9,9 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -36,6 +39,12 @@ public class ShiftTimeTable extends BaseModel {
   // end time of afternoon shift
   @Column(name = "end_afternoon", columnDefinition = "VARCHAR")
   public LocalTime endAfternoon;
+  
+  @Column(name = "start_evening", columnDefinition = "VARCHAR")
+  public LocalTime startEvening;
+  
+  @Column(name = "end_evening", columnDefinition = "VARCHAR")
+  public LocalTime endEvening;
 
   // start time for morning lunch break
   @Column(name = "start_morning_lunch_time", columnDefinition = "VARCHAR")
@@ -52,6 +61,14 @@ public class ShiftTimeTable extends BaseModel {
   // end time for the lunch break
   @Column(name = "end_afternoon_lunch_time", columnDefinition = "VARCHAR")
   public LocalTime endAfternoonLunchTime;
+  
+  // start time for the lunch break
+  @Column(name = "start_evening_lunch_time", columnDefinition = "VARCHAR")
+  public LocalTime startEveningLunchTime;
+
+  // end time for the lunch break
+  @Column(name = "end_evening_lunch_time", columnDefinition = "VARCHAR")
+  public LocalTime endEveningLunchTime;
 
   // total amount of working minutes
   @Column(name = "total_working_minutes")
@@ -60,5 +77,9 @@ public class ShiftTimeTable extends BaseModel {
   // Paid minuts per shift
   @Column(name = "paid_minutes")
   public Integer paidMinutes;
+  
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "office_id")
+  public Office office;
 
 }

@@ -73,6 +73,8 @@ public class QOffice extends EntityPathBase<Office> {
 
     public final ListPath<models.ShiftCategories, QShiftCategories> shiftCategories = this.<models.ShiftCategories, QShiftCategories>createList("shiftCategories", models.ShiftCategories.class, QShiftCategories.class, PathInits.DIRECT2);
 
+    public final ListPath<models.ShiftTimeTable, QShiftTimeTable> shiftTimeTable = this.<models.ShiftTimeTable, QShiftTimeTable>createList("shiftTimeTable", models.ShiftTimeTable.class, QShiftTimeTable.class, PathInits.DIRECT2);
+
     public final ListPath<models.TotalOvertime, QTotalOvertime> totalOvertimes = this.<models.TotalOvertime, QTotalOvertime>createList("totalOvertimes", models.TotalOvertime.class, QTotalOvertime.class, PathInits.DIRECT2);
 
     public final ListPath<models.User, QUser> users = this.<models.User, QUser>createList("users", models.User.class, QUser.class, PathInits.DIRECT2);

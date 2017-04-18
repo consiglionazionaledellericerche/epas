@@ -78,7 +78,7 @@ public class QShiftType extends EntityPathBase<ShiftType> {
     public QShiftType(Class<? extends ShiftType> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
         this.shiftCategories = inits.isInitialized("shiftCategories") ? new QShiftCategories(forProperty("shiftCategories"), inits.get("shiftCategories")) : null;
-        this.shiftTimeTable = inits.isInitialized("shiftTimeTable") ? new QShiftTimeTable(forProperty("shiftTimeTable")) : null;
+        this.shiftTimeTable = inits.isInitialized("shiftTimeTable") ? new QShiftTimeTable(forProperty("shiftTimeTable"), inits.get("shiftTimeTable")) : null;
     }
 
 }

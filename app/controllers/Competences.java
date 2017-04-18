@@ -55,12 +55,16 @@ import models.ShiftCategories;
 import models.ShiftTimeTable;
 import models.ShiftType;
 import models.ShiftType.ToleranceType;
+import models.dto.ShiftTypeService;
+import models.dto.VerticalWorkingTime;
 import models.TotalOvertime;
 import models.User;
+import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
+import play.cache.Cache;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -79,6 +83,8 @@ import javax.inject.Inject;
 @Slf4j
 @With({Resecure.class})
 public class Competences extends Controller {
+  
+  private static final String SHIFT_TYPE_SERVICE_STEP = "sts";
 
   @Inject
   private static CompetenceRecapFactory competenceRecapFactory;
@@ -948,6 +954,39 @@ public class Competences extends Controller {
   }
 
   /**
+   * 
+   * @param officeId
+   */
+  public static void addShiftTimeTable(Long shiftCategoryId, ShiftTypeService sts) {
+    ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
+    notFoundIfNull(cat);
+    rules.checkIfPermitted(cat.office);
+    List<ShiftTimeTable> shiftList = shiftDao.getAllShifts();
+    List<ShiftTimeTableDto> dtoList = competenceManager.convertFromShiftTimeTable(shiftList);
+    render(shiftList, dtoList, cat, sts);
+  }
+  
+  /**
+   * 
+   * @param shiftCategoryId
+   * @param sts
+   */
+  public static void configureShiftTimeTable(Long shiftCategoryId, ShiftTypeService sts) {
+    ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
+    notFoundIfNull(cat);
+    rules.checkIfPermitted(cat.office);
+    notFoundIfNull(sts);
+    Office office = cat.office;
+    ShiftTimeTable timeTable = new ShiftTimeTable();
+    render(timeTable, cat, office);
+    
+  }
+  
+  public static void saveTimeTable() {
+    
+  }
+  
+  /**
    * metodo che ritorna al template le informazioni per poter configurare correttamente il turno.
    * @param shiftCategoryId l'id del servzio da configurare
    */
@@ -955,10 +994,10 @@ public class Competences extends Controller {
     ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
     notFoundIfNull(cat);
     rules.checkIfPermitted(cat.office);
-    ShiftType type = new ShiftType();
-    List<ShiftTimeTable> shiftList = shiftDao.getAllShifts();
-    List<ShiftTimeTableDto> dtoList = competenceManager.convertFromShiftTimeTable(shiftList);
-    render(dtoList, cat, shiftList, type);
+    ShiftTypeService sts = new ShiftTypeService();
+    ShiftType type = new ShiftType();   
+    
+    render(cat, type, sts);
   }
   
   /**

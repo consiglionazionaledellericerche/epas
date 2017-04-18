@@ -17,55 +17,32 @@
 ------
 #{/if}
 #{else}
-	#{alert info}
+	#{alert color:'info'}
 		Specificare nome e descrizione per l'attività relativa a <strong>${cat.description}</strong><br>
 		E selezionare la tipologia di turno da applicare tra quelle proposte in tabella.		
 	#{/alert}	
 #{/else}
-#{f.input 'type.type', popover:'true',required:'true'/}
-#{f.input 'type.description', popover:'true', required:'true'/}
-#{f.input 'tolerance', type:'number', popover:'true', required:'true'/}
-#{f.radioEnum 'whichTolerance', items:models.ShiftType.ToleranceType /}
+#{f.input 'sts.name', popover:'true',required:'true'/}
+#{f.input 'sts.description', popover:'true', required:'true'/}
+#{f.input 'sts.tolerance', type:'number', popover:'true', required:'true'/}
+#{f.radioEnum 'sts.toleranceType', items:models.ShiftType.ToleranceType /}
 
-#{f.input 'type.hourTolerance', type:'number', popover:'true', required:'true'/}
-#{f.booleanRadio 'type.breakInShiftEnabled', value:false, popover:'true' /}
+#{f.input 'sts.hourTolerance', type:'number', popover:'true', required:'true'/}
+#{f.booleanRadio 'sts.breakInShiftEnabled', value:false, popover:'true' /}
 <div id="horizontal-mealticket" #{if !type.breakInShiftEnabled} style="display: none" #{/if}>
-#{f.input 'type.breakInShift', type:'number' /}
+#{f.input 'sts.breakInShift', type:'number' /}
 </div>
 #{f.hidden 'cat.id', value:cat.id /}
 
-<table class="table table-hover table-striped table-bordered">
-<tr>
-	<th>Seleziona</th>
-	<th>Inizio turno mattina</th>
-	<th>Fine turno mattina</th>
-	<th>Inizio turno pomeriggio</th>
-	<th>Fine turno pomeriggio</th>
-	<th>Info aggiuntive</th>
-</tr>
-#{list items:dtoList, as:'key'}
-	<tr>
-		<td><input type="radio" name="shift" value="${key.id}"> </td>
-		<td>${key.startMorning}</td>
-		<td>${key.endMorning}</td>
-		<td>${key.startAfternoon}</td>
-		<td>${key.endAfternoon}</td>
-		<td><i class="fa fa-info-circle" aria-hidden="true" webui-popover-hover data-url="#shift-${key.id}" data-placement="right"  data-title="Info turno">
-	 	  	</i>
-	 	</td>
-			<div class="webui-popover-content" id="shift-${key.id}">  			
-	  			Inizio pausa pranzo turno mattina: <strong>${key.startMorningLunchTime}</strong><br>
-	  			Fine pausa pranzo turno mattina: <strong>${key.endMorningLunchTime}</strong><br>
-				Inizio pausa pranzo turno pomeriggio: <strong>${key.startAfternoonLunchTime}</strong><br>
-				Fine pausa pranzo turno pomeriggio: <strong>${key.endAfternoonLunchTime}</strong><br>			  
-			</div> 	  
-		
-	</tr>
-#{/list}
-</table>
 
 		#{b.buttons center:true}
-		   #{b.submit 'Conferma'/}
+			#{b.link @Competences.activateServices(cat.office.id)}
+      			Indietro
+    		#{/b.link}
+    		#{b.link @Competences.addShiftTimeTable(cat.office.id, sts)}
+      			Avanti
+    		#{/b.link}
+		    #{b.submit 'Conferma'/}
 		   
 		#{/b.buttons}
 	#{/form}
@@ -75,7 +52,7 @@
   <script type="text/javascript">
 	$(document).ready(function() {
 				
-		$("input[name='type.breakInShiftEnabled']").change(function(){
+		$("input[name='sts.breakInShiftEnabled']").change(function(){
 			
 			jQuery( "#horizontal-mealticket" ).toggle(0);
 		

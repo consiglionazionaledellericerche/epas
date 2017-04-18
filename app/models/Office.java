@@ -106,6 +106,10 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
   @NotAudited
   @OneToMany(mappedBy = "office")
   public List<WorkingTimeType> workingTimeType = Lists.newArrayList();
+  
+  @NotAudited
+  @OneToMany(mappedBy = "office")
+  public List<ShiftTimeTable> shiftTimeTable = Lists.newArrayList();
 
   @NotAudited
   @OneToMany(mappedBy = "office")
