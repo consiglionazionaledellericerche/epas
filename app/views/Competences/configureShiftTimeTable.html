@@ -1,0 +1,80 @@
+#{modalAsync id:'modalActivateService', 
+title:('Nuova timetable per ' +office.name)}
+
+<div id="timeTableData">
+#{form action:@saveTimeTable(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#timeTableData'}
+
+#{alert color:'info'}
+	Turno di mattina
+#{/alert}
+<div class="row">
+	  <div class="col-sm-1"></div>
+	  <div class="col-sm-5">
+	  #{f.input 'sts.timeTable.startMorning', type:text, required:'true' /}
+	  </div>
+	  <div class="col-sm-5">
+	  #{f.input 'sts.timeTable.endMorning', type:text, required:'true' /}
+	  </div>	  
+</div>
+<div class="row">
+	  <div class="col-sm-1"></div>
+	  <div class="col-sm-5">
+	  #{f.input 'sts.timeTable.startMorningLunchTime', type:text, required:'true' /}
+	  </div>
+	  <div class="col-sm-5">
+	  #{f.input 'sts.timeTable.endMorningLunchTime', type:text, required:'true' /}
+	  </div>	  
+</div>
+
+#{alert color:'warning'}
+	Turno di pomeriggio
+#{/alert}
+<div class="row">
+	  <div class="col-sm-1"></div>
+	  <div class="col-sm-5">
+	  #{f.input 'sts.timeTable.startAfternoon', type:text, required:'true' /}
+	  </div>
+	  <div class="col-sm-5">
+	  #{f.input 'sts.timeTable.endAfternoon', type:text, required:'true' /}
+	  </div>	  
+</div>
+<div class="row">
+	  <div class="col-sm-1"></div>
+	  <div class="col-sm-5">
+	  #{f.input 'sts.timeTable.startAfternoonLunchTime', type:text, required:'true' /}
+	  </div>
+	  <div class="col-sm-5">
+	  #{f.input 'sts.timeTable.endAfternoonLunchTime', type:text, required:'true' /}
+	  </div>	  
+</div>
+#{alert color:'danger'}
+	Turno di notte
+#{/alert}
+<div class="row">
+	  <div class="col-sm-1"></div>
+	  <div class="col-sm-5">
+	  #{f.input 'sts.timeTable.startEvening', type:text /}
+	  </div>
+	  <div class="col-sm-5">
+	  #{f.input 'sts.timeTable.endEvening', type:text /}
+	  </div>	  
+</div>
+<div class="row">
+	  <div class="col-sm-1"></div>
+	  <div class="col-sm-5">
+	  #{f.input 'sts.timeTable.startEveningLunchTime', type:text /}
+	  </div>
+	  <div class="col-sm-5">
+	  #{f.input 'sts.timeTable.endEveningLunchTime', type:text /}
+	  </div>	  
+</div>
+
+	  	  #{b.buttons center:true}
+	        #{b.submit 'Salva'/}
+	      #{/b.buttons}
+
+#{/form}
+</div>
+#{/modalAsync}
