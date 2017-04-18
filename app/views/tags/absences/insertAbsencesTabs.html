@@ -13,7 +13,7 @@
   #{/list}
   <li #{if _findCode} class="active" #{/if}>
     <a data-async="#absenceData" 
-       href="@{AbsenceGroups.allCodes('personId':_absenceRequestForm.person.id, 'from':_absenceRequestForm.from.format())}">
+       href="@{AbsenceGroups.findCode('personId':_absenceRequestForm.person.id, 'from':_absenceRequestForm.from.format())}">
        <i class="fa fa-search" aria-hidden="true"></i> Ricerca Codici</a>
   </li>
   
