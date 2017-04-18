@@ -5,12 +5,18 @@
   
   *{ per ogni tab visibile ... }*  
   #{list items:_absenceRequestForm.tabsVisibile.values(), as:'tab' }
-       <li #{if _absenceRequestForm.categoryTabSelected.equals(tab)} class="active" #{/if}>
+       <li #{if !_findCode && _absenceRequestForm.categoryTabSelected.equals(tab)} class="active" #{/if}>
          <a data-async="#absenceData" 
          href="@{AbsenceGroups.insert('personId':_absenceRequestForm.person.id, 'from':_absenceRequestForm.from.format(), 'categoryTab.id':tab.id)}">
          ${tab.label}</a>
        </li>
   #{/list}
+  <li #{if _findCode} class="active" #{/if}>
+    <a data-async="#absenceData" 
+       href="@{AbsenceGroups.allCodes('personId':_absenceRequestForm.person.id, 'from':_absenceRequestForm.from.format())}">
+       <i class="fa fa-search" aria-hidden="true"></i> Ricerca Codici</a>
+  </li>
+  
   </ul>
 </div>
 <br>

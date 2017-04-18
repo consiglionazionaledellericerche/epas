@@ -292,6 +292,32 @@ public class AbsenceType extends BaseModel {
   }
   
   /**
+   * Il gruppo con priorità più alta di cui il tipo è takable.
+   * @return gruppo
+   */
+  public GroupAbsenceType defaultTakableGroup() {
+    if (this.code.equals("24")) {
+      System.out.println("");
+    }
+    GroupAbsenceType groupSelected = null;
+    for (TakableAbsenceBehaviour behaviour : this.takableGroup) {   //o uno o due...
+      for (GroupAbsenceType group : behaviour.groupAbsenceTypes) {  //quasi sempre 1
+        if (group.automatic == true) {
+          continue;
+        }
+        if (groupSelected == null) {
+          groupSelected = group;
+          continue;
+        }
+        if (groupSelected.priority > group.priority) {
+          groupSelected = group;
+        }
+      }
+    }
+    return groupSelected;
+  }
+  
+  /**
    * Se esiste fra gli enumerati un corrispondente e se è correttamente modellato.
    * @return absent se il completamento non è presente in enum
    */

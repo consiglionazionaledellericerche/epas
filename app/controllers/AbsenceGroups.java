@@ -509,7 +509,40 @@ public class AbsenceGroups extends Controller {
     editAbsenceType(absenceType.id);
   }
 
-
+  /**
+   * Tab per la consultazione di tutti i codici e link per l'inserimento.
+   * @param personId persona selezionata
+   * @param from data selezionata
+   */
+  public static void findCode(Long personId, LocalDate from) {
+    
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    notFoundIfNull(from);
+    
+    AbsenceForm absenceForm = absenceService.buildAbsenceForm(person, from, null,
+            null, null, true, null, null, null, null, false);
+    
+    //La lista di tutti i codici takable... con associato il gruppo con maggiore priorità.
+    Set<AbsenceType> allTakable = Sets.newHashSet();
+    for (GroupAbsenceType group : absenceComponentDao.allGroupAbsenceType()) {
+      if (group.automatic) {
+        continue;
+      }
+      for (AbsenceType abt : group.takableAbsenceBehaviour.takableCodes) {
+        if (abt.defaultTakableGroup() == null) {
+          log.info("Il defaultTakable è null per {}", abt.code);
+          abt.defaultTakableGroup();
+        }
+      }
+      //TODO eventualmente controllo prendibilità della persona alla data (figli, l 104 etc.)
+      allTakable.addAll(group.takableAbsenceBehaviour.takableCodes);
+    }
+    
+    render(absenceForm, allTakable);
+    
+  }
+  
   /**
    * End point per la simulazione di inserimento assenze.s
    *
