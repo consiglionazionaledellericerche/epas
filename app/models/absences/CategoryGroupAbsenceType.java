@@ -124,8 +124,7 @@ public class CategoryGroupAbsenceType extends BaseModel
     FERIE_CNR("Ferie e permessi legge", 2, DefaultTab.FERIE_PERMESSI_RIPOSI),
     RIPOSI_COMPENSATIVI_CNR("Riposi compensativi", 3, DefaultTab.FERIE_PERMESSI_RIPOSI),
     
-    CONGEDI_PARENTALI("Congedi parentali", 5, DefaultTab.CONGEDI_PARENTALI),
-    CONGEDI_PARENTALI_PROVVISORI("Congedi parentali provvisori", 6, DefaultTab.CONGEDI_PARENTALI),
+    ASTENSIONE_POSTPARTUM("Astensione post partum", 5, DefaultTab.CONGEDI_PARENTALI),
     CONGEDI_PRENATALI("Congedi prenatali", 7, DefaultTab.CONGEDI_PARENTALI),
     
     L_104("Disabilità legge 104/92 - Tre giorni mensili", 6, DefaultTab.LEGGE_104),
