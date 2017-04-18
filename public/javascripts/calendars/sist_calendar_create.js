@@ -790,15 +790,15 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
       			 idToShift[event.id] = tipoTurno;
       			 shiftToColor[tipoTurno] = color;
        		} else {
-               		if (jollyPersons.hasOwnProperty(event.id)) {
-             			var turni = jollyPersons[event.id];
-              			turni.push(tipoTurno);
-               			jollyPersons[event.id] = turni;
-              		} else {
-              			jollyPersons[event.id] = new Array(tipoTurno);
-              		}
-               		idToShift[event.id] = "J";
-               		shiftToColor["J"] = jollyColor;
+           		if (jollyPersons.hasOwnProperty(event.id)) {
+         			var turni = jollyPersons[event.id];
+          			turni.push(tipoTurno);
+           			jollyPersons[event.id] = turni;
+          		} else {
+          			jollyPersons[event.id] = new Array(tipoTurno);
+          		}
+           		idToShift[event.id] = "J";
+           		shiftToColor["J"] = jollyColor;
        		}
 
        		// get the email and the mobile phone
@@ -829,7 +829,6 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
 	   -----------------------------------------------------------------*/
 	jQuery(' div.external-event').each(function() {
 		// create an Event Object (http://arshaw.com/fullcalendar/docs/event_data/Event_Object/)
-		// it doesn't need to have a start or end
 
 		var classAttr = new Array();
   		classAttr = jQuery(this).attr("class").split(" ");
@@ -1065,8 +1064,6 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
     			shiftCalendar.createShiftElement(event.id, name, tipoTurno, color).appendTo(div);
     			idToShift[event.id] = tipoTurno;
     			shiftToColor[tipoTurno] = color;
-
-              //console.log("creo elemento id: " + event.id+ "name="+event.name+ " tipoTurno=="+tipoTurno+ " color="+color);
     		} else {
     			if (jollyPersons.hasOwnProperty(event.id)) {
     				var turni = jollyPersons[event.id];
@@ -1106,8 +1103,6 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 	data.push('GET');
 	data.push(uriGetShiftTimeTable);
 
-	var dataJson = JSON.stringify(data);
-
 	var shiftTimeTable = _RestJsonCall (uriGetShiftTimeTable, 'GET', false, {});
 
 	// fieldset che contiene l'orario
@@ -1127,9 +1122,15 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 	// adds the jolly persons
 	//ATTENZIONE!! si da comunque per scontato che il reperibile sia 1 solo!!!! POI CAMBIARE!!!!!
 	// non torna id='J'
+	if (jollyPersons.lenght > 0) {
+		
+	}
+	// for each jolly person 
 	for (var id in jollyPersons) {
     	var turniJ = jollyPersons[id];
+    	console.log("stampo possibili turni di id="+id + " turni J="+jollyPersons[id]);
 
+    	// prints the possible shift types
     	$('<span>', { text: 'Turno: ' }).appendTo(divContainer);
 
     	for (var i = 0; i < turniJ.length; i++) {
@@ -1140,11 +1141,12 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
     	}
 
     	$('<div>', { id: 'J' }).appendTo(divContainer);
-    	//console.log( "id=" + id+ "turni="+jollyPersons[ id ] );
-    	//console.log("creo elemento id: " + id+ "name="+idToName[id]+ " tipoTurno=J  color="+jollyColor);
+    	
+    	console.log("creo elemento id: " + id+ " name="+idToName[id]+ " tipoTurno=J  color="+jollyColor);
     	shiftCalendar.createShiftElement(id, idToName[id], "J", jollyColor).appendTo("#J");
 	}
 
+	// prints the cancelled shift
 	$('<span>', { class: 'titolo-external', text: 'Annullato' }).appendTo(divContainer);
 	$('<div>', { id: 'X' }).appendTo(divContainer);
 	shiftCalendar.createShiftElement('', 'Turno ANNULLATO', "X", "CORNFLOWERBLUE").appendTo("#X");
@@ -1427,12 +1429,12 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 		// change the color and the shift Type attribute for the sobstitute
 		if (copiedEventObject.shiftType == 'J') {
 			// read the assigned shif for the sobstitute
-          		var shiftType = jQuery("input:radio[name=shift]:checked").val();
+          	var shiftType = jQuery("input:radio[name=shift]:checked").val();
 		  	copiedEventObject.shiftType = shiftType;
 			copiedEventObject.color = shiftToColor[shiftType];
 		}
 
-		if(originalEventObject.title == 'Turno ANNULLATO'){
+		if (originalEventObject.title == 'Turno ANNULLATO'){
 			var shiftType = jQuery("input:radio[name=shift]:checked").val();
 			copiedEventObject.title = 'Turno '+ shiftType +' ANNULLATO';
 			copiedEventObject.shiftType = shiftType;
