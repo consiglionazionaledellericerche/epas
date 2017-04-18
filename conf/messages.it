@@ -365,14 +365,28 @@ ticketNumberFrom=Dal Numero
 ticketNumberTo=Al Numero
 time= Orario
 
-type.type =Nome attività
-type.description =Descrizione
-type.office =Sede
-type.supervisor =Supervisore servizio
-tolerance =Tolleranza (minuti)
-type.hourTolerance =Tolleranza per turno (minuti)
-type.breakInShiftEnabled = Abilitare una pausa internamente al turno?
-type.breakInShift =Durata della pausa (in minuti) 
+sts.name =Nome attività
+sts.description =Descrizione
+sts.office =Sede
+sts.supervisor =Supervisore servizio
+sts.tolerance =Tolleranza (minuti)
+sts.hourTolerance =Tolleranza per turno (minuti)
+sts.breakInShiftEnabled = Abilitare una pausa internamente al turno?
+sts.breakInShift =Durata della pausa (in minuti) 
+sts.toleranceType =Quando applicare la tolleranza
+sts.timeTable.startMorning =inizio turno
+sts.timeTable.endMorning =fine turno
+sts.timeTable.startAfternoon =inizio turno
+sts.timeTable.endAfternoon =fine turno
+sts.timeTable.startEvening =inizio turno
+sts.timeTable.endEvening =fine turno
+
+sts.timeTable.startMorningLunchTime =inizio pranzo
+sts.timeTable.endMorningLunchTime =fine pranzo
+sts.timeTable.startAfternoonLunchTime =inizio pranzo
+sts.timeTable.endAfternoonLunchTime =fine pranzo
+sts.timeTable.startEveningLunchTime =inizio pranzo
+sts.timeTable.endEveningLunchTime =fine pranzo
 
 cat.description =Descrizione
 cat.office =Sede
@@ -669,11 +683,11 @@ person.eppn.popover= Inserire la propria email cnr Es:mario.rossi@cnr.it
 
 domain.popover= Specificare il dominio sprovvisto del carattere @ (Es. iit.cnr.it)
 
-tolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare alle timbrature per inserirle o meno nel turno. Inserire 0 se non si vuole tolleranza.
-type.hourTolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare sull&apos;attività di turno per determinare se un turno è valido o no.
-type.type.popover = Il nome da attribuire all&apos;attività sul turno
-type.description.popover= Una descrizione dell&apos;attività
-type.breakInShiftEnabled.popover =Se da regolamento dei turni è prevista una pausa all&#39;interno del turno cliccare sì, no altrimenti.
+sts.tolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare alle timbrature per inserirle o meno nel turno. Inserire 0 se non si vuole tolleranza.
+sts.hourTolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare sull&apos;attività di turno per determinare se un turno è valido o no.
+sts.name.popover = Il nome da attribuire all&apos;attività sul turno
+sts.description.popover= Una descrizione dell&apos;attività
+sts.breakInShiftEnabled.popover =Se da regolamento dei turni è prevista una pausa all&#39;interno del turno cliccare sì, no altrimenti.
 
 ###########################################################################
 #	Messaggi utilizzati nelle viste
