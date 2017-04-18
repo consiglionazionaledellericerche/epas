@@ -1,59 +1,46 @@
 var Drupal = Drupal || { 'settings': {}, 'behaviors': {}, 'themes': {}, 'locale': {} };
 
-// crea un calendario per i turni
+//crea un calendario per i turni
 var shiftCalendar = new sistCalendar("shift", "admin");
 var groupConf = new sistCalendarGroup("shift", "admin");
 
-// prende i colori per visualizzare le persone nel calendario
+//prende i colori per visualizzare le persone nel calendario
 var shiftColor = shiftCalendar.getPersonColor(false);
 var jollyColor = shiftCalendar.getPersonColor(true);
 
 var uriShiftToPost = shiftCalendar.uriRepToPut;
 
-// prende la uri REST per la scrittura dei turni sul DB
+//prende la uri REST per la scrittura dei turni sul DB
 var uriProxy = shiftCalendar.uriProxy;
 
 var userAllowed = false;
 
-// tipo di attività dei turni
+//tipo di attività dei turni
 var calendarType = '';
 var loadedPeriod = new Array();
 
 jQuery(document).ready(function() {
 
-    // defines date variables       
-    var today = new Date();
+	// defines date variables       
+	var today = new Date();
 
-    setTimeout(function(){
-      jQuery('#loading').hide();
-    }, 2000);
-    
-    
-    // read the Group Ids of the user and all roles for the groups          
-//    var gids = Drupal.settings.sistCalendar.gids['node'];
-    
-    // lista of calendar types that the group ca manage
-    var types = new Array();
-    
-//    for (var gid in gids) {
-//      groupTypes = groupConf.getTypes4Group(gid);
-//      for(one in groupTypes){
-//        if($.inArray(groupTypes[one], types) < 0){
-//          types.push(groupTypes[one]);
-//        }
-//      }
-//    }
-    
+	setTimeout(function(){
+		jQuery('#loading').hide();
+	}, 2000);
+
+	// lista of calendar types that the group ca manage
+	var types = new Array();
+
 	var json = $.getJSON('renderIds', function(data) {
-		
+
 		$.each(data, function(index, element) {
-	        types.push(element);
-	    });
+			types.push(element);
+		});
 		if (types.length > 1) {
 			userAllowed = true;
 			shiftCalendar.selectPopup(userAllowed, types, 'shiftAdmin', shiftCalendar, groupConf);
 		} else {
-			
+
 			if (types.length == 1) {
 				calendarType = types;
 				groupConf.calendarChoise = calendarType;
@@ -66,188 +53,187 @@ jQuery(document).ready(function() {
 				createCalendarShiftAdmin(userAllowed, calendarType, shiftCalendar, groupConf);			
 			}	
 		}
-		
+
 	});
 
-    
-		// Codice per bottone visuale successiva
-		// ----------------------------------------
-    jQuery('#next').click(function() {
-     	jQuery('#calendar').fullCalendar('next');
 
-      //view = $('#calendar').fullCalendar('getView');
-      //alert("Primo giorno is " + view.visStart);
+	// Codice per bottone visuale successiva
+	// ----------------------------------------
+	jQuery('#next').click(function() {
+		jQuery('#calendar').fullCalendar('next');
 
-      var currDate = $('#calendar').fullCalendar('getDate');
-      var currentYear = jQuery.fullCalendar.formatDate(currDate, "yyyy");
-      period = currentYear.concat(jQuery.fullCalendar.formatDate(currDate, "MM"));
-      
-      if(loadedPeriod.indexOf(currentYear) <  0) {
-              loadedPeriod.push(currentYear);
-      }
-      jQuery('#calendar').fullCalendar('rerenderEvents');
-    });
+		//view = $('#calendar').fullCalendar('getView');
+		//alert("Primo giorno is " + view.visStart);
 
-    // Codice per bottone visuale precedente
-		// ----------------------------------------
-    jQuery('#prev').click(function() {
-     	jQuery('#calendar').fullCalendar('prev');
+		var currDate = $('#calendar').fullCalendar('getDate');
+		var currentYear = jQuery.fullCalendar.formatDate(currDate, "YYYY");
+		period = currentYear.concat(jQuery.fullCalendar.formatDate(currDate, "MM"));
 
-      var currDate = $('#calendar').fullCalendar('getDate');
-      var currentYear = jQuery.fullCalendar.formatDate(currDate, "yyyy");
-      period = currentYear.concat(jQuery.fullCalendar.formatDate(currDate, "MM"));
+		if(loadedPeriod.indexOf(currentYear) <  0) {
+			loadedPeriod.push(currentYear);
+		}
+		jQuery('#calendar').fullCalendar('rerenderEvents');
+	});
 
-      if(loadedPeriod.indexOf(currentYear) <  0) {
-              loadedPeriod.push(currentYear);
-      }
-      jQuery('#calendar').fullCalendar('rerenderEvents');
-    });
+	// Codice per bottone visuale precedente
+	// ----------------------------------------
+	jQuery('#prev').click(function() {
+		jQuery('#calendar').fullCalendar('prev');
 
-    // Codice per bottone visuale giorno odierno
-		// ----------------------------------------
-    jQuery('#oggi').click(function() {
-      jQuery('#calendar').fullCalendar('today');
-      jQuery('#calendar').fullCalendar('rerenderEvents');
-    });
+		var currDate = $('#calendar').fullCalendar('getDate');
+		var currentYear = jQuery.fullCalendar.formatDate(currDate, "YYYY");
+
+		period = currentYear.concat(jQuery.fullCalendar.formatDate(currDate, "MM"));
+
+		if(loadedPeriod.indexOf(currentYear) <  0) {
+			loadedPeriod.push(currentYear);
+		}
+		jQuery('#calendar').fullCalendar('rerenderEvents');
+	});
+
+	// Codice per bottone visuale giorno odierno
+	// ----------------------------------------
+	jQuery('#oggi').click(function() {
+		jQuery('#calendar').fullCalendar('today');
+		jQuery('#calendar').fullCalendar('rerenderEvents');
+	});
 
 	// salva i turno del DB delle presenze
 	// ----------------------------------------
 	jQuery("#salva").click( function () {
 		var obj = jQuery('#calendar').fullCalendar('clientEvents');
-		
+
 		var startDate = today;
-  		var endDate = today;
-		var calDate = $('#calendar').fullCalendar('getDate');
+		var endDate = today;
+		var calDate = $('#calendar').fullCalendar('getDate').stripTime().format();
 
 		// mese correntemente visualizzato (partendo da 0)
-  		var mese = calDate.getMonth();
-		var anno = calDate.getFullYear();
+		var mese = parseInt(calDate.substring(5,7));
+		var anno = parseInt(calDate.substring(0,4));
 
-	
+
 		turni = new Object();
 
 		// tipologia di turni da leggere dal DB
 		var tipoTurni = groupConf.getShiftFromType(calendarType);
 		jQuery.each(tipoTurni, function (i, val) {
-  			turni[val] = new Array();
+			turni[val] = new Array();
 		});
 
 		jQuery.each(obj, function(i, val) {
-		if ((val.id.toString().match('turno')) && (val.start.getMonth() == mese) && (val.start.getFullYear() == anno)) {
-			if (val.cancelled.toString() == 'true') {
-				var shiftPersona = {
-					start: jQuery.fullCalendar.formatDate(val.start, "yyyy-MM-dd"),
-        					end: jQuery.fullCalendar.formatDate(val.end, "yyyy-MM-dd"),
-					cancelled: true,
-				}
-			} else {
-				var timeTableEnd = (val.shiftHour.toString().match('07:00')) ? "13:30" : "19:00"; 
-				var shiftPersona = {
-					id: val.personId,
-					start: jQuery.fullCalendar.formatDate(val.start, "yyyy-MM-dd"),
-					end: jQuery.fullCalendar.formatDate(val.end, "yyyy-MM-dd"),
-					cancelled: false,
-					shiftSlot: val.shiftSlot,
-					//time_table_start: val.shiftHour,
-					//time_table_end: timeTableEnd,
-				};
-			}
 			
-			// divide shifts for types
-			turni[val.shiftType.toString()].push(shiftPersona);
-  				
-			if (val.start < startDate) {
-      					startDate = val.start;
-  				}
-  				if (val.end > endDate) {
-      					endDate = val.end;
-  				}
+			if ((val.id.toString().match('turno')) && (val.start.format('MM') == mese) && (val.start.format('YYYY') == anno)) {
+				if (val.cancelled.toString() == 'true') {
+					var shiftPersona = {
+							start: moment(val.start).format("YYYY-MM-DD"),
+							end: moment(val.end).format("YYYY-MM-DD"),
+							cancelled: true,
+					}
+				} else {
+					var timeTableEnd = (val.shiftHour.toString().match('07:00')) ? "13:30" : "19:00"; 
+					var shiftPersona = {
+							id: val.personId,
+							start: moment(val.start).format("YYYY-MM-DD"),
+							end: moment(val.end).format("YYYY-MM-DD"),
+							cancelled: false,
+							shiftSlot: val.shiftSlot,
+							//time_table_start: val.shiftHour,
+							//time_table_end: timeTableEnd,
+					};
+				}
+
+				// divide shifts for types
+				turni[val.shiftType.toString()].push(shiftPersona);
+
+				if (val.start < startDate) {
+					startDate = val.start;
+				}
+				if (val.end > endDate) {
+					endDate = val.end;
+				}
 			}
 		});
-
-		mese = mese + 1;
 
 		jQuery.each(turni, function(i, val) {
-    		// uri to put shifts
-    		var uriPutRep = shiftCalendar.getUriRestToPutEntity(i, anno + '/' + mese);
+			// uri to put shifts
+			var uriPutRep = shiftCalendar.getUriRestToPutEntity(i, anno + '/' + mese);
+			var data = new Array();
+			var dataJson = JSON.stringify(val);
+			
+			jQuery.ajax({
+				url: uriPutRep,
+				type: "PUT",
+				dataType: "json",
+				contentType: "application/json",
+				data: dataJson, 
+				//async: false,
+				success: function (data) {
+					alert("Le modifiche del turno " +i+ " sono state salvate con successo!!! :-)");
+				}
+			})
+			.fail(function (jqXHR, textStatus, errorThrown) {
+				console.log("error during proxy call= " + textStatus);
+				console.log("incoming reperebility Text= " + jqXHR.responseText);
+				
+				alert('ERRORE durante il salvataggio del turno ' +i+'!\n' +msg);
+			});
 
-    		var data = new Array();
-    
-    		var dataJson = JSON.stringify(val);
-    
-    		jQuery.ajax({
-        		url: uriPutRep,
-       	 		type: "PUT",
-        		dataType: "json",
-        		contentType: "application/json",
-        		data: dataJson, 
-        		success: function (responseData, textStatus, jqXHR) {
-            			alert("Le modifiche del turno " +i+ " sono state salvate con successo!!! :-)");
-        		},
-        		error: function (responseData, textStatus, errorThrown) {
-			var msg = responseData.responseText;
-			msg = msg.replace(/[[\]"]/g,'');
-			//console.log(msg);
-			alert('ERRORE durante il salvataggio del turno ' +i+'!\n' +msg);
-        		}
-    		});
 		});
-    });
+	});
 
 
-    // button for the pdf document with the hourly monthly report 
-    jQuery("#pdf-report-mese").click( function () {
-	var currDate = $('#calendar').fullCalendar('getDate');
-      	var currentYear = jQuery.fullCalendar.formatDate(currDate, "yyyy");
-      	var currentMonth = jQuery.fullCalendar.formatDate(currDate, "MM");
+	// button for the pdf document with the hourly monthly report 
+	jQuery("#pdf-report-mese").click( function () {
+		var currDate = $('#calendar').fullCalendar('getDate');
+		var currentYear = jQuery.fullCalendar.formatDate(currDate, "YYYY");
+		var currentMonth = jQuery.fullCalendar.formatDate(currDate, "MM");
 
-      	var conf = confirm('Sei sicuro di voler generare il report mensile del mese di '+currentMonth+'?');
-      	if (conf) {
-          	var uriParam = currentYear.concat('/').concat(currentMonth);
-          	var uri = shiftCalendar.getUriRestToGetMontlyPDF(groupConf.calendarChoise, uriParam);
+		var conf = confirm('Sei sicuro di voler generare il report mensile del mese di '+currentMonth+'?');
+		if (conf) {
+			var uriParam = currentYear.concat('/').concat(currentMonth);
+			var uri = shiftCalendar.getUriRestToGetMontlyPDF(groupConf.calendarChoise, uriParam);
+			
+			var req = new XMLHttpRequest();
+			req.open("GET", uri, true);
+			req.responseType = "blob";
 
-          	var req = new XMLHttpRequest();
-            req.open("GET", uri, true);
-            req.responseType = "blob";
+			req.onload = function (event) {
+				var blob = req.response;
+				console.log(blob.size);
+				var link=document.createElement('a');
+				link.href=window.URL.createObjectURL(blob);
+				link.download="Report"+"_Turni" + currentYear +"_"+currentMonth + ".pdf";
+				link.click();
+			};
 
-            req.onload = function (event) {
-              var blob = req.response;
-              console.log(blob.size);
-              var link=document.createElement('a');
-              link.href=window.URL.createObjectURL(blob);
-              link.download="Report"+"_Turni" + currentYear +"_"+currentMonth + ".pdf";
-              link.click();
-            };
+			req.send();
+		}
+	});
 
-            req.send();
-      	}
-     });
+	// create the monthly calendar
+	jQuery("#pdf-cal-mese").click(function () {
+		var currDate = $('#calendar').fullCalendar('getDate');
+		var currentYear = jQuery.fullCalendar.formatDate(currDate, "YYYY");
+		console.log("currentYear: "+currentYear);
+		var currentMonth = jQuery.fullCalendar.formatDate(currDate, "MM");
 
-		// create the monthly calendar
-    jQuery("#pdf-cal-mese").click(function () {
-        var currDate = $('#calendar').fullCalendar('getDate');
-        var currentYear = jQuery.fullCalendar.formatDate(currDate, "yyyy");
-        var currentMonth = jQuery.fullCalendar.formatDate(currDate, "MM");
-
-        var conf = confirm('Sei sicuro di voler generare il calendario PDF del mese di ' + currentMonth + '?');
-        if (conf) {
-            var uriParam = currentYear.concat('/').concat(currentMonth);
-            var uri = shiftCalendar.getUriRestToGetMonthlyCalPDF(groupConf.calendarChoise , uriParam);
-
-            var req = new XMLHttpRequest();
-            req.open("GET", uri, true);
-            req.responseType = "blob";
-
-            req.onload = function (event) {
-              var blob = req.response;
-              console.log(blob.size);
-              var link=document.createElement('a');
-              link.href=window.URL.createObjectURL(blob);
-              link.download="Calendario"+"_Turni" + currentYear +"_"+currentMonth + ".pdf";
-              link.click();
-            };
-
-            req.send();
-        }
-    });
+		var conf = confirm('Sei sicuro di voler generare il calendario PDF del mese di ' + currentMonth + '?');
+		if (conf) {
+			var uriParam = currentYear.concat('/').concat(currentMonth);
+			var uri = shiftCalendar.getUriRestToGetMonthlyCalPDF(groupConf.calendarChoise , uriParam);
+			
+			var req = new XMLHttpRequest();
+			req.open("GET", uri, true);
+			req.responseType = "blob";
+			req.onload = function (event) {
+				var blob = req.response;
+				console.log(blob.size);
+				var link=document.createElement('a');
+				link.href=window.URL.createObjectURL(blob);
+				link.download="Calendario"+"_Turni" + currentYear +"_"+currentMonth + ".pdf";
+				link.click();
+			};
+			req.send();
+		}
+	});
 });

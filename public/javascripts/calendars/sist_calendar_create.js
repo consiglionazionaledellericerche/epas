@@ -23,7 +23,7 @@ function _RestJsonCall (uri, type, asyncMode, dataJson) {
 		async: false,
 		success: function(data) {
 			result = data;
-			}
+		}
 		})
 		.fail(function (jqXHR, textStatus, errorThrown) {
           console.log("error during proxy call= " + textStatus);
