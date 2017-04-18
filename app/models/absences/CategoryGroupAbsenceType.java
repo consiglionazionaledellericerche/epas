@@ -121,8 +121,8 @@ public class CategoryGroupAbsenceType extends BaseModel
   public enum DefaultCategoryType {
 
     MISSIONE_CNR("Missioni CNR", 1, DefaultTab.MISSIONE), 
-    FERIE_CNR("Ferie CNR", 2, DefaultTab.FERIE),
-    RIPOSI_COMPENSATIVI_CNR("Riposi compensativi CNR", 3, DefaultTab.RIPOSO_COMPENSATIVO),
+    FERIE_CNR("Ferie e permessi legge", 2, DefaultTab.FERIE_PERMESSI_RIPOSI),
+    RIPOSI_COMPENSATIVI_CNR("Riposi compensativi", 3, DefaultTab.FERIE_PERMESSI_RIPOSI),
     
     CONGEDI_PARENTALI("Congedi parentali", 5, DefaultTab.CONGEDI_PARENTALI),
     CONGEDI_PARENTALI_PROVVISORI("Congedi parentali provvisori", 6, DefaultTab.CONGEDI_PARENTALI),
@@ -133,17 +133,22 @@ public class CategoryGroupAbsenceType extends BaseModel
     ALTRI_104("Altri congedi legge 104/92", 8, DefaultTab.LEGGE_104),
     
     MALATTIA_DIPENDENTE("Malattia dipendente", 8, DefaultTab.MALATTIA),
-    MALATTIA_FIGLIO_1("Malattia primo figlio", 9, DefaultTab.MALATTIA),
-    MALATTIA_FIGLIO_2("Malattia secondo figlio", 10, DefaultTab.MALATTIA),
-    MALATTIA_FIGLIO_3("Malattia terzo figlio", 11, DefaultTab.MALATTIA),
+    VISITA_MEDICA("Visita medica", 9, DefaultTab.MALATTIA),
+    
+    MALATTIA_FIGLIO_1("Malattia primo figlio", 9, DefaultTab.CONGEDI_PARENTALI),
+    MALATTIA_FIGLIO_2("Malattia secondo figlio", 10, DefaultTab.CONGEDI_PARENTALI),
+    MALATTIA_FIGLIO_3("Malattia terzo figlio", 11, DefaultTab.CONGEDI_PARENTALI),
+    
+    CONGEDO_MATRIMONIO("Congedo per matrimonio", 12, 
+        DefaultTab.CONGEDI_PARENTALI),
 
     
-    PERMESSI_PERSONALI("Permessi Personali", 12, DefaultTab.ALTRE_TIPOLOGIE),
-    DIRITTO_STUDIO("Diritto allo studio", 13, DefaultTab.ALTRE_TIPOLOGIE),
-    TELELAVORO("Telelavoro", 14, DefaultTab.ALTRE_TIPOLOGIE),
-    PERMESSI_SINDACALI("Permessi Sindacali", 15, DefaultTab.ALTRE_TIPOLOGIE),
-    ALTRI_GRUPPI("Altri Gruppi", 16, DefaultTab.ALTRE_TIPOLOGIE),
-    TUTTI_I_CODICI("Tutti i codici", 16, DefaultTab.ALTRE_TIPOLOGIE),
+    PERMESSI_PERSONALI("Permessi Personali", 12, DefaultTab.FERIE_PERMESSI_RIPOSI),
+    //DIRITTO_STUDIO("Diritto allo studio", 13, DefaultTab.ALTRE_TIPOLOGIE),
+    //TELELAVORO("Telelavoro", 14, DefaultTab.ALTRI_GRUPPI),
+    //PERMESSI_SINDACALI("Permessi Sindacali", 15, DefaultTab.ALTRI_GRUPPI),
+    ALTRI_CODICI("Altri Codici", 16, DefaultTab.ALTRI_CODICI),
+    //TUTTI_I_CODICI("Tutti i codici", 16, DefaultTab.ALTRE_TIPOLOGIE),
     
     CODICI_DIPENDENTI("Codici Dipendenti", 17, DefaultTab.DIPENDENTI),
     CODICI_AUTOMATICI("Codici Automatici", 18, DefaultTab.AUTOMATICI);
