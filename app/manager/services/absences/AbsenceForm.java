@@ -113,9 +113,7 @@ public class AbsenceForm {
       }
       categoriesSamePriority.add(categoryInTab);
       
-      
       groupsByCategory.put(categoryInTab, categoryInTab.orderedGroupsInCategory(true));
-      
     }
     
     // i tipi assenza selezionabili
@@ -269,6 +267,9 @@ public class AbsenceForm {
    */
   private void setTabsVisible() {
     for (GroupAbsenceType group : this.groupsPermitted) {
+      if (group.automatic == true) { 
+        continue;
+      }
       this.tabsVisibile.put(group.category.tab.priority, group.category.tab);
     }
   }
