@@ -1,0 +1,51 @@
+#{modalAsync id:'modalAbsence', button:'Salva',
+title:'Nuovo codice assenza in data ' + absenceForm.from?.format()
++ ' per ' + absenceForm.person.fullname }
+
+<div id="absenceData">
+
+ #{absences.insertAbsencesTabs absenceRequestForm:absenceForm, findCode:true /}
+   
+   #{alert color:'info'}
+     <p>Ricerca dei codici di assenza attualmente configurati.</p>
+     <p>Una volta individuato il codice da inserire navigare la sua <em>Tipologia</em>.</p>
+   #{/alert}
+ 
+   <table class="table table-condensed table-hover" datatable-small>
+				    
+			<thead>
+			  <tr class="warning">
+				 <th>Codice</th>
+			     <th>Descrizione</th>
+			     <th>Tipologia</th>
+			     *{ <th>Inserisci</th> }*
+			  </tr>
+			</thead>
+			<tbody>
+			#{list items:allTakable, as:'absenceType'}
+			    <tr>
+			       <td data-order="${absenceType.code}">${absenceType.code}</td>
+			       <td>${absenceType.description}</td>
+			       <td>${absenceType.defaultTakableGroup().category.tab.description}</td>
+			       *{
+			       <td>
+			         #{form action:@AbsenceGroups.insert(), method:'POST', autocomplete:false, class:'form form-horizontal',
+                       'data-async':'#absenceData', 'data-async-error':'#absenceData', 
+                       'data-spinner':'#modalSpinner'}
+                       #{f.hidden 'personId', value:absenceForm.person.id /}
+	                   #{f.hidden 'from', value:absenceForm.from?.format() /}
+                       #{f.hidden 'groupAbsenceType.id', value:absenceType.defaultTakableGroup().id /}     
+                       #{f.hidden 'absenceType.id', value:absenceType.id /}
+					   <button class="btn btn-sm" type="submit">Inserisci</button>
+                     #{/form}  
+			       </td>
+			       }*
+			    </tr>
+			#{/list}
+			</tbody>
+   </table>
+   
+
+</div>
+
+#{/modalAsync}
