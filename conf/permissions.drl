@@ -772,6 +772,7 @@ when
 
         /* Vecchio permesso editPersonDay */
         "AbsenceGroups.insert",
+        "AbsenceGroups.findCode",
         "AbsenceGroups.groupStatus",
         "AbsenceGroups.save",
      	"AbsenceGroups.edit",
@@ -1124,7 +1125,6 @@ then
  $c.grant();
 end
 
-
 /************************************************************************************
  * Un dipendente può autocertificare le proprie timbrature per il lavoro fuori Sede se...
  ***********************************************************************************/
@@ -1159,9 +1159,10 @@ then
  $c.grant();
 end
 
-/*
+
+/******************************************************************************
  * L'impiegato può modificare/salvare una determinata assenza se:
- */
+ ******************************************************************************/
 rule EmployeeCanEditAbsence
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
@@ -1236,6 +1237,59 @@ when
  Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
   /** non più indietro di 2 mesi fa e solo nei mesi non ancora inviati sugli attestati **/
+ eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Un ricercatore tecnologo se può gestirsi le ferie può accedere alle actions:
+ * (no target)
+ ******************************************************************************/
+rule trVacations
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
+ $o: Office() from $p.office
+ Configuration(epasParam == EpasParam.TR_VACATIONS, fieldValue == true) from $o.configurations
+ $c: PermissionCheck(action in (
+    "AbsenceGroups.insert",
+    "AbsenceGroups.edit",
+    "AbsenceGroups.delete",
+    "AbsenceGroups.save"), granted == false, target == null)
+then
+ $c.grant();
+end
+
+/************************************************************************************
+ * Un ricercatore e tecnologo può accedere all'inserimento di un giorno di ferie se
+ ***********************************************************************************/
+rule trCanInsertVacation
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
+ $o: Office() from $p.office
+ Configuration(epasParam == EpasParam.TR_VACATIONS, fieldValue == true) from $o.configurations
+ $c: PermissionCheck(action in ("AbsenceGroups.insert"), target == $p, granted == false)
+then
+ $c.grant();
+end
+
+/******************************************************************************
+ * Un ricercatore e tecnologo può salvare (modificare) una assenza di ferie se
+ * TODO: buttare il codesForEmployee e controllare i codici takable del gruppo
+ * codici per dipendenti
+ ******************************************************************************/
+rule trCanEditAbsence
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
+ $o: Office() from $p.office
+ Configuration(epasParam == EpasParam.TR_VACATIONS, fieldValue == true) from $o.configurations
+ /** Sostituire il metodo che valuta che tipo di assenza può inserire il dipendente utilizzando la nuova modellazione **/
+ $target: Absence(CodesForEmployee.getVacationCodes().contains(this.getCode()), this.getOwner() == $p)
+ $c: PermissionCheck(action in ("AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
+ eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
  eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
 then
  $c.grant();

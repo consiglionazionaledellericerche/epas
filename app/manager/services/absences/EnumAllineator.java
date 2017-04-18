@@ -270,7 +270,7 @@ public class EnumAllineator {
       return;
     }
     
-    for (GroupAbsenceType group : absenceComponentDao.allGroupAbsenceType()) {
+    for (GroupAbsenceType group : absenceComponentDao.allGroupAbsenceType(true)) {
       Optional<DefaultGroup> defaultGroup = DefaultGroup.byName(group); 
       if (defaultGroup.isPresent()) {
         //i gruppi che esistono li allineo all'enum

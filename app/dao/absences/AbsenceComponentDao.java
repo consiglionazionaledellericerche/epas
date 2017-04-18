@@ -275,13 +275,18 @@ public class AbsenceComponentDao extends DaoBase {
    * Tutti i gruppi.
    * @return entity list
    */
-  public List<GroupAbsenceType> allGroupAbsenceType() {
+  public List<GroupAbsenceType> allGroupAbsenceType(boolean alsoAutomatic) {
     
     QGroupAbsenceType groupAbsenceType = QGroupAbsenceType.groupAbsenceType;
-
+    
+    BooleanBuilder conditions = new BooleanBuilder();
+    if (!alsoAutomatic) {
+      conditions.and(groupAbsenceType.automatic.eq(false));
+    }
     return getQueryFactory().from(groupAbsenceType)
         .leftJoin(groupAbsenceType.category).fetch()
         .leftJoin(groupAbsenceType.previousGroupChecked).fetch()
+        .where(conditions)
         .list(groupAbsenceType);
   }
   
@@ -292,7 +297,7 @@ public class AbsenceComponentDao extends DaoBase {
    */
   public GroupAbsenceType firstGroupOfChain(GroupAbsenceType groupAbsenceType) {
     GroupAbsenceType group = groupAbsenceType;
-    List<GroupAbsenceType> all = allGroupAbsenceType();
+    List<GroupAbsenceType> all = allGroupAbsenceType(true);
     boolean changed = true;
     while (changed) {
       changed = false;

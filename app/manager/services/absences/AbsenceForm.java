@@ -267,7 +267,7 @@ public class AbsenceForm {
    */
   private void setTabsVisible() {
     for (GroupAbsenceType group : this.groupsPermitted) {
-      if (group.automatic == true) { 
+      if (group.automatic) { 
         continue;
       }
       this.tabsVisibile.put(group.category.tab.priority, group.category.tab);

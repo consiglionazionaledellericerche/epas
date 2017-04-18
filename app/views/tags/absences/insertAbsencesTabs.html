@@ -11,11 +11,13 @@
          ${tab.label}</a>
        </li>
   #{/list}
+  #{secure.check 'AbsenceGroups.findCode',  target:_absenceRequestForm.person.office}
   <li #{if _findCode} class="active" #{/if}>
     <a data-async="#absenceData" 
        href="@{AbsenceGroups.findCode('personId':_absenceRequestForm.person.id, 'from':_absenceRequestForm.from.format())}">
        <i class="fa fa-search" aria-hidden="true"></i> Ricerca Codici</a>
   </li>
+  #{/secure.check}
   
   </ul>
 </div>

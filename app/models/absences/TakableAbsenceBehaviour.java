@@ -354,11 +354,6 @@ public class TakableAbsenceBehaviour extends BaseModel {
         ImmutableSet.of(DefaultAbsenceType.A_PB), 
         2160, null),
 
-    T_EMPLOYEE(AmountType.units, 
-        ImmutableSet.of(DefaultAbsenceType.A_105BP), 
-        ImmutableSet.of(DefaultAbsenceType.A_105BP), 
-        -1, null),
-
     T_MALATTIA(AmountType.units, 
         ImmutableSet.of(DefaultAbsenceType.A_111, 
             DefaultAbsenceType.A_115, 
