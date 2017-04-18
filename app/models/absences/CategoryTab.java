@@ -99,9 +99,11 @@ public class CategoryTab extends BaseModel implements Comparable<CategoryTab> {
     LEGGE_104("L. 104", 6),
 
     ALTRI_CODICI("Altri Codici", 7),
-    DIPENDENTI("Codici Dipendenti", 8),
+
+    //Per dipendenti
     LAVORO_FUORI_SEDE("Lavoro Fuori Sede", 9),
-    FERIE_DIPENDENTE("Ferie Dipendenti", 10),
+    FERIE_DIPENDENTI("Ferie e Permessi", 10),
+    
     AUTOMATICI("Codici Automatici", 11);
     
     public String description;

@@ -525,10 +525,7 @@ public class AbsenceGroups extends Controller {
     
     //La lista di tutti i codici takable... con associato il gruppo con maggiore priorità.
     Set<AbsenceType> allTakable = Sets.newHashSet();
-    for (GroupAbsenceType group : absenceComponentDao.allGroupAbsenceType()) {
-      if (group.automatic) {
-        continue;
-      }
+    for (GroupAbsenceType group : absenceComponentDao.allGroupAbsenceType(false)) {
       for (AbsenceType abt : group.takableAbsenceBehaviour.takableCodes) {
         if (abt.defaultTakableGroup() == null) {
           log.info("Il defaultTakable è null per {}", abt.code);
@@ -1035,7 +1032,7 @@ public class AbsenceGroups extends Controller {
     
     List<CategoryTab> allCategoryTabs = absenceComponentDao.tabsByPriority();
     List<CategoryGroupAbsenceType> allCategories = absenceComponentDao.categoriesByPriority();
-    List<GroupAbsenceType> allGroups = absenceComponentDao.allGroupAbsenceType();
+    List<GroupAbsenceType> allGroups = absenceComponentDao.allGroupAbsenceType(true);
     List<ComplationAbsenceBehaviour> allComplations = Lists.newArrayList();
     for (GroupAbsenceType group : allGroups) {
       if (group.complationAbsenceBehaviour != null) {

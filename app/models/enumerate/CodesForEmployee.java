@@ -1,5 +1,7 @@
 package models.enumerate;
 
+import com.beust.jcommander.internal.Lists;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,7 +15,7 @@ import java.util.stream.Collectors;
 public enum CodesForEmployee {
 
   BP("105BP");
-
+  
   private String description;
 
   CodesForEmployee(String description) {
@@ -27,5 +29,13 @@ public enum CodesForEmployee {
   public static List<String> getCodes() {
     return Arrays.stream(values()).map(CodesForEmployee::getDescription)
         .collect(Collectors.toList());
+  }
+  
+  public static List<String> getOffseatCodes() {
+    return Lists.newArrayList("105BP");
+  }
+  
+  public static List<String> getVacationCodes() {
+    return Lists.newArrayList("31", "32", "94");
   }
 }

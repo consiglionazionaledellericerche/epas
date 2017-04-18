@@ -20,8 +20,11 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.AbsenceManager;
+import manager.SecureManager;
 import manager.attestati.dto.show.CodiceAssenza;
 import manager.attestati.service.CertificationService;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
 import manager.services.absences.certifications.CodeComparation;
@@ -44,7 +47,6 @@ import manager.services.vacations.VacationsRecap;
 import models.Contract;
 import models.Person;
 import models.PersonChildren;
-import models.Role;
 import models.User;
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
@@ -76,6 +78,8 @@ public class AbsenceService {
   private final ServiceFactories serviceFactories;
   private final CertificationService certificationService;
   private final EnumAllineator enumAllineator;
+  private final ConfigurationManager confManager;
+  private final SecureManager secureManager;
   
   /**
    * Costruttore injection.
@@ -90,12 +94,16 @@ public class AbsenceService {
       ServiceFactories serviceFactories,
       AbsenceComponentDao absenceComponentDao,
       PersonChildrenDao personChildrenDao, CertificationService certificationService,
+      ConfigurationManager confManager,
+      SecureManager secureManager,
       EnumAllineator enumAllineator) {
     this.absenceEngineUtility = absenceEngineUtility;
     this.serviceFactories = serviceFactories;
     this.absenceComponentDao = absenceComponentDao;
     this.personChildrenDao = personChildrenDao;
     this.certificationService = certificationService;
+    this.confManager = confManager;
+    this.secureManager = secureManager;
     this.enumAllineator = enumAllineator;
   }
   
@@ -468,34 +476,48 @@ public class AbsenceService {
    * @return list
    */
   public List<GroupAbsenceType> groupsPermitted(Person person, boolean readOnly) {
-    List<GroupAbsenceType> groupsPermitted = absenceComponentDao.allGroupAbsenceType();
+    List<GroupAbsenceType> groupsPermitted = absenceComponentDao.allGroupAbsenceType(false);
     if (readOnly) {
       return groupsPermitted;
     }
+    
+    //Fetch special groups
+    final GroupAbsenceType employeeVacation = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_FERIE_CNR_DIPENDENTI.name()).get();
+    final GroupAbsenceType employeeOffseat = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_LAVORO_FUORI_SEDE.name()).get();
+    
     final User currentUser = Security.getUser().get();
-    final GroupAbsenceType employee = absenceComponentDao
-        .groupAbsenceTypeByName(DefaultGroup.EMPLOYEE.name()).get();
-    if (!currentUser.isSystemUser()) {
-      //Gruppo codici per dipendenti: non deve essere un amministratore.
-      if (currentUser.person.id.equals(person.id)
-          && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)) {
-        //verificare... perchè non controllo has personnel admin role on person.office?
-        groupsPermitted = absenceComponentDao.groupsAbsenceTypeByName(
-            Lists.newArrayList(DefaultGroup.EMPLOYEE.name()));
-      }
-      
-      //Grouppo ferie e permessi: non deve essere un amministratore, deve essere un livello 1-3 
-      // e il parametro per la sede deve essere abilitato
-      
-    } else {
-      groupsPermitted.remove(employee);
+    final boolean officeWriteAdmin = secureManager
+        .officesWriteAllowed(currentUser).contains(person.office);
+    
+    //Utente di sistema o amministratore della persona
+    if (currentUser.isSystemUser() || officeWriteAdmin) {
+      groupsPermitted.remove(employeeVacation);
+      groupsPermitted.remove(employeeOffseat);
+      return groupsPermitted;
     }
     
-    //I gruppi codici automatici li rimuovo TODO: implementare un filtro.
-    final GroupAbsenceType automatic = absenceComponentDao
-        .groupAbsenceTypeByName(DefaultGroup.PB.name()).get();
-    groupsPermitted.remove(automatic);
-    return groupsPermitted;
+    //Persona stessa non autoamministrata
+    if (currentUser.person.equals(person) && !officeWriteAdmin) {
+      
+      //vedere le configurazioni
+      groupsPermitted = Lists.newArrayList();
+  
+      if ((Boolean)confManager.configValue(person.office, EpasParam.WORKING_OFF_SITE) 
+          && (Boolean)confManager.configValue(person, EpasParam.OFF_SITE_STAMPING)) {
+        groupsPermitted.add(employeeOffseat);
+      }
+
+      if ((Boolean)confManager.configValue(person.office, EpasParam.TR_VACATIONS)) {
+        //deve essere un livello 1-3
+        groupsPermitted.add(employeeVacation);  
+      }
+      
+      return groupsPermitted;
+    }
+    
+    return Lists.newArrayList();
   }
   
   @Deprecated

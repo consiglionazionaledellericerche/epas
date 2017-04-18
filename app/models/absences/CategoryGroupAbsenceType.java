@@ -141,6 +141,7 @@ public class CategoryGroupAbsenceType extends BaseModel
     CONGEDO_MATRIMONIO("Congedo per matrimonio", 12, 
         DefaultTab.CONGEDI_PARENTALI),
 
+
     
     PERMESSI_PERSONALI("Permessi Personali", 12, DefaultTab.FERIE_PERMESSI_RIPOSI),
     //DIRITTO_STUDIO("Diritto allo studio", 13, DefaultTab.ALTRE_TIPOLOGIE),
@@ -148,8 +149,10 @@ public class CategoryGroupAbsenceType extends BaseModel
     //PERMESSI_SINDACALI("Permessi Sindacali", 15, DefaultTab.ALTRI_GRUPPI),
     ALTRI_CODICI("Altri Codici", 16, DefaultTab.ALTRI_CODICI),
     //TUTTI_I_CODICI("Tutti i codici", 16, DefaultTab.ALTRE_TIPOLOGIE),
+
+    LAVORO_FUORI_SEDE("Lavoro fuori sede", 17, DefaultTab.LAVORO_FUORI_SEDE),
+    FERIE_DIPENDENTI("Ferie e permessi legge", 18, DefaultTab.FERIE_DIPENDENTI),
     
-    CODICI_DIPENDENTI("Codici Dipendenti", 17, DefaultTab.DIPENDENTI),
     CODICI_AUTOMATICI("Codici Automatici", 18, DefaultTab.AUTOMATICI);
 
     public String description;
