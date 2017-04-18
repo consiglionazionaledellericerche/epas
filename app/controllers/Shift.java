@@ -41,6 +41,7 @@ import net.fortuna.ical4j.model.ValidationException;
 
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.joda.time.LocalDate;
+import org.testng.collections.Lists;
 
 import play.data.binding.As;
 import play.data.validation.Required;
@@ -218,8 +219,8 @@ public class Shift extends Controller {
     log.debug("shiftType={}", shiftType.description);
 
     // save the recived shift periods with type shiftType in the month "month" of the "year" year
-    shiftManager.savePersonShiftDaysFromShiftPeriods(shiftType, year, month, body);
-
+    List<String> list = shiftManager.savePersonShiftDaysFromShiftPeriods(shiftType, year, month, body);
+    renderJSON(list);
   }
 
 
