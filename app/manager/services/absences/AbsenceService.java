@@ -53,11 +53,11 @@ import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceType;
 import models.absences.CategoryTab;
 import models.absences.GroupAbsenceType;
-import models.absences.GroupAbsenceType.DefaultGroup;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.definitions.DefaultGroup;
 
 import org.joda.time.LocalDate;
 

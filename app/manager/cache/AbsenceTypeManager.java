@@ -13,6 +13,7 @@ import javax.persistence.EntityManager;
 
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
+import models.absences.definitions.DefaultGroup;
 import models.absences.query.QAbsenceType;
 import models.absences.query.QGroupAbsenceType;
 import models.enumerate.AbsenceTypeMapping;
@@ -131,7 +132,7 @@ public class AbsenceTypeManager {
     GroupAbsenceType group = queryFactory.from(groupAbsenceType)
             .leftJoin(groupAbsenceType.takableAbsenceBehaviour)
             .leftJoin(groupAbsenceType.takableAbsenceBehaviour.takableCodes)
-            .where(groupAbsenceType.name.eq(GroupAbsenceType.DefaultGroup.RIDUCE_FERIE_CNR.name()))
+            .where(groupAbsenceType.name.eq(DefaultGroup.RIDUCE_FERIE_CNR.name()))
             .singleResult(groupAbsenceType);
     
     if (group != null) {

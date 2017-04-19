@@ -43,7 +43,7 @@
           #{/if}
       </td>
       <td>
-        #{if models.absences.AbsenceType.DefaultAbsenceType.byCode(bothSuperCode.absenceType).present}
+        #{if models.absences.definitions.DefaultAbsenceType.byCode(bothSuperCode.absenceType).present}
             <i class="fa fa-star" aria-hidden="true"></i>
         #{/if}
       </td>
