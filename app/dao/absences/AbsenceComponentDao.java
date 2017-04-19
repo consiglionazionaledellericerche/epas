@@ -534,7 +534,22 @@ public class AbsenceComponentDao extends DaoBase {
       personAbsences.add(trouble);
     }
     return map;
-    
-    
+  }
+
+  /**
+   * Le assenze con quel codice in quel giorno per la persona.
+   * @param person persona 
+   * @param date data
+   * @param code codice
+   * @return list
+   */
+  public List<Absence> findAbsences(Person person, LocalDate date, String code) {
+    QAbsence absence = QAbsence.absence;
+    return getQueryFactory()
+        .from(absence)
+        .leftJoin(absence.personDay, QPersonDay.personDay)
+        .leftJoin(absence.personDay.person, QPerson.person)
+        .where(absence.personDay.person.eq(person).and(absence.personDay.date.eq(date)))
+        .list(absence);
   }
 } 
