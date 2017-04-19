@@ -233,16 +233,18 @@ public class ServiceFactories {
         .orderAbsences(groupPersistedAbsences, periodChain.previousInserts);
     
     boolean typeToInfer = (absenceToInsert != null && absenceToInsert.getAbsenceType() == null);
-    
+
+    //Dispatch di tutte le assenze coinvolte gruppo e inserimenti precedenti
     for (AbsencePeriod absencePeriod : periodChain.periods) {
-      
-      //Dispatch di tutte le assenze coinvolte gruppo e inserimenti precedenti
       for (Absence absence : absencePeriod
           .filterAbsencesInPeriod(periodChain.involvedAbsencesInGroup)) {
         dispatchAbsenceInPeriod(periodChain, absencePeriod, absence);
       }
+    }
+
+    //Gestione assenza da inserire (per ultima)
+    for (AbsencePeriod absencePeriod : periodChain.periods) {
       
-      //Gestione assenza da inserire (per ultima)
       boolean successInsertInPeriod = 
           insertAbsenceInPeriod(periodChain, absencePeriod, absenceToInsert);
 

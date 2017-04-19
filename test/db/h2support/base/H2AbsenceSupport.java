@@ -4,8 +4,13 @@ import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.inject.Inject;
 
+import com.beust.jcommander.internal.Lists;
+
 import dao.PersonDayDao;
 import dao.absences.AbsenceComponentDao;
+
+import java.util.List;
+import java.util.Set;
 
 import models.Person;
 import models.PersonDay;
@@ -61,8 +66,7 @@ public class H2AbsenceSupport {
   }
   
   /**
-   * Istanza di una assenza. Per adesso non persistita perchè ai fini dei test non mandatoria 
-   * (ma lo sarà presto). Serve il personDay.
+   * Istanza di una assenza. 
    *
    * @param defaultAbsenceType absenceType assenza
    * @param date                  data
@@ -99,6 +103,25 @@ public class H2AbsenceSupport {
     PersonDay newPersonDay = new PersonDay(person, date);
     newPersonDay.save();
     return newPersonDay;
+  }
+  
+  /**
+   * Costruzione multipla di assenze all day.
+   * @param person persona
+   * @param defaultAbsenceType tipo essere all day permitted
+   * @param dates date
+   * @return list
+   */
+  public List<Absence> multipleAllDayInstances(Person person, DefaultAbsenceType defaultAbsenceType,
+      Set<LocalDate> dates) {
+    
+    List<Absence> absences = Lists.newArrayList();
+    for (LocalDate date : dates) {
+      absences
+      .add(absence(defaultAbsenceType, date, Optional.of(JustifiedTypeName.all_day), 0, person));
+    }
+    
+    return absences;
   }
   
 
