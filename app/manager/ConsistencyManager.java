@@ -44,8 +44,8 @@ import models.Stamping.WayType;
 import models.User;
 import models.absences.Absence;
 import models.absences.GroupAbsenceType;
-import models.absences.GroupAbsenceType.DefaultGroup;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.definitions.DefaultGroup;
 import models.base.IPropertiesInPeriodOwner;
 
 import org.joda.time.LocalDate;

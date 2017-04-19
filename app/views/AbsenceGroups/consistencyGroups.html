@@ -8,9 +8,9 @@
    
     #{alert color:'info'}
      <p>Controllo Tabs <strong>TODO</strong> eliminare il campo isDefault non utilizzato.</p>
-     #{if !models.absences.CategoryTab.DefaultTab.missing(allCategoryTabs).empty}
+     #{if !models.absences.definitions.DefaultTab.missing(allCategoryTabs).empty}
        <p>Nel database sono assenti le seguenti tab modellate: </p>
-       #{list items:models.absences.CategoryTab.DefaultTab.missing(allCategoryTabs), as:'categoryTab'}
+       #{list items:models.absences.definitions.DefaultTab.missing(allCategoryTabs), as:'categoryTab'}
          <strong>${categoryTab.name()}</strong>
        #{/list}
      #{/if}#{else}
@@ -45,9 +45,9 @@
    
     #{alert color:'info'}
      <p>Controllo Categorie</p>
-     #{if !models.absences.CategoryGroupAbsenceType.DefaultCategoryType.missing(allCategories).empty}
+     #{if !models.absences.definitions.DefaultCategoryType.missing(allCategories).empty}
        <p>Nel database sono assenti le seguenti categorie modellate: </p>
-       #{list items:models.absences.CategoryGroupAbsenceType.DefaultCategoryType.missing(allCategories), as:'category'}
+       #{list items:models.absences.definitions.DefaultCategoryType.missing(allCategories), as:'category'}
          <strong>${category.name()}</strong>
        #{/list}
      #{/if}#{else}
@@ -83,9 +83,9 @@
       
     #{alert color:'info'}
      <p>Controllo Gruppi</p>
-     #{if !models.absences.GroupAbsenceType.DefaultGroup.missing(allGroups).empty}
+     #{if !models.absences.definitions.DefaultGroup.missing(allGroups).empty}
        <p>Nel database sono assenti i seguenti gruppi modellati: </p>
-       #{list items:models.absences.GroupAbsenceType.DefaultGroup.missing(allGroups), as:'group'}
+       #{list items:models.absences.definitions.DefaultGroup.missing(allGroups), as:'group'}
          <strong>${group.name()}</strong>
        #{/list}
      #{/if}#{else}
@@ -130,9 +130,9 @@
    
    #{alert color:'info'}
      <p>Controllo Completamenti</p>
-     #{if !models.absences.ComplationAbsenceBehaviour.DefaultComplation.missing(allComplations).empty}
+     #{if !models.absences.definitions.DefaultComplation.missing(allComplations).empty}
        <p>Nel database sono assenti i seguenti comportamenti di completamento modellati: </p>
-       #{list items:models.absences.ComplationAbsenceBehaviour.DefaultComplation.missing(allComplations), as:'complation'}
+       #{list items:models.absences.definitions.DefaultComplation.missing(allComplations), as:'complation'}
          <strong>${complation.name()}</strong>
        #{/list}
      #{/if}#{else}
@@ -175,9 +175,9 @@
    
     #{alert color:'info'}
      <p>Controllo Prendibilità</p>
-     #{if !models.absences.TakableAbsenceBehaviour.DefaultTakable.missing(allTakables).empty}
+     #{if !models.absences.definitions.DefaultTakable.missing(allTakables).empty}
        <p>Nel database sono assenti i seguenti comportamenti di prendibilità modellati: </p>
-       #{list items:models.absences.TakableAbsenceBehaviour.DefaultTakable.missing(allTakables), as:'takable'}
+       #{list items:models.absences.definitions.DefaultTakable.missing(allTakables), as:'takable'}
          <strong>${takable.name()}</strong>
        #{/list}
      #{/if}#{else}
@@ -224,9 +224,9 @@
    
    #{alert color:'info'}
      <p>Controllo Codici</p>
-     #{if !models.absences.AbsenceType.DefaultAbsenceType.missing(allAbsenceTypes).empty}
+     #{if !models.absences.definitions.DefaultAbsenceType.missing(allAbsenceTypes).empty}
        <p>Nel database sono assenti i seguenti codici assenza modellati: </p>
-       #{list items:models.absences.AbsenceType.DefaultAbsenceType.missing(allAbsenceTypes), as:'absenceType'}
+       #{list items:models.absences.definitions.DefaultAbsenceType.missing(allAbsenceTypes), as:'absenceType'}
          <strong>${absenceType.name()}</strong>
        #{/list}
      #{/if}#{else}

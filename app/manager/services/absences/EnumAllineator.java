@@ -12,19 +12,19 @@ import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 
 import models.absences.AbsenceType;
-import models.absences.AbsenceType.DefaultAbsenceType;
 import models.absences.CategoryGroupAbsenceType;
-import models.absences.CategoryGroupAbsenceType.DefaultCategoryType;
 import models.absences.CategoryTab;
-import models.absences.CategoryTab.DefaultTab;
 import models.absences.ComplationAbsenceBehaviour;
-import models.absences.ComplationAbsenceBehaviour.DefaultComplation;
 import models.absences.GroupAbsenceType;
-import models.absences.GroupAbsenceType.DefaultGroup;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
-import models.absences.TakableAbsenceBehaviour.DefaultTakable;
+import models.absences.definitions.DefaultAbsenceType;
+import models.absences.definitions.DefaultCategoryType;
+import models.absences.definitions.DefaultComplation;
+import models.absences.definitions.DefaultGroup;
+import models.absences.definitions.DefaultTab;
+import models.absences.definitions.DefaultTakable;
 
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;

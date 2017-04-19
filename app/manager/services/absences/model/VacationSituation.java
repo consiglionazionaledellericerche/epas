@@ -12,8 +12,8 @@ import models.Contract;
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
-import models.absences.AbsenceType.DefaultAbsenceType;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
+import models.absences.definitions.DefaultAbsenceType;
 
 import org.joda.time.LocalDate;
 

@@ -23,12 +23,12 @@ import models.Office;
 import models.Person;
 import models.VacationPeriod;
 import models.absences.AbsenceType;
-import models.absences.AbsenceType.DefaultAbsenceType;
 import models.absences.AmountType;
 import models.absences.GroupAbsenceType;
-import models.absences.GroupAbsenceType.DefaultGroup;
 import models.absences.InitializationGroup;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
+import models.absences.definitions.DefaultAbsenceType;
+import models.absences.definitions.DefaultGroup;
 
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
@@ -344,7 +344,7 @@ public class VacationFactory {
     LocalDate beginPostPartum = periods.get(0).from;
     LocalDate endPostPartum = periods.get(periods.size() - 1).to;
     GroupAbsenceType reducingGroup = absenceComponentDao
-        .groupAbsenceTypeByName(GroupAbsenceType.DefaultGroup.RIDUCE_FERIE_CNR.name()).get();
+        .groupAbsenceTypeByName(DefaultGroup.RIDUCE_FERIE_CNR.name()).get();
     periods.get(0).reducingAbsences = absenceComponentDao.orderedAbsences(person, 
         beginPostPartum, endPostPartum, reducingGroup.takableAbsenceBehaviour.takableCodes);
     int postPartum = periods.get(0).reducingAbsences.size();

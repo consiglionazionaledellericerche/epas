@@ -33,7 +33,7 @@ import models.Office;
 import models.Person;
 import models.User;
 import models.absences.GroupAbsenceType;
-import models.absences.GroupAbsenceType.DefaultGroup;
+import models.absences.definitions.DefaultGroup;
 
 import org.joda.time.LocalDate;
 

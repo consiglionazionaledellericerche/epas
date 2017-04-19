@@ -19,10 +19,10 @@ import manager.services.absences.model.ServiceFactories;
 
 import models.Person;
 import models.absences.Absence;
-import models.absences.AbsenceType.DefaultAbsenceType;
 import models.absences.GroupAbsenceType;
-import models.absences.GroupAbsenceType.DefaultGroup;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.definitions.DefaultAbsenceType;
+import models.absences.definitions.DefaultGroup;
 
 import org.joda.time.LocalDate;
 import org.junit.Test;

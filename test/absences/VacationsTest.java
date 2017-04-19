@@ -15,9 +15,9 @@ import manager.services.absences.model.VacationSituation;
 
 import models.Contract;
 import models.Person;
-import models.absences.AbsenceType.DefaultAbsenceType;
 import models.absences.GroupAbsenceType;
-import models.absences.GroupAbsenceType.DefaultGroup;
+import models.absences.definitions.DefaultAbsenceType;
+import models.absences.definitions.DefaultGroup;
 
 import org.joda.time.LocalDate;
 import org.junit.Test;

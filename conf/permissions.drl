@@ -906,6 +906,7 @@ when
         "Contracts.updateContractVacationPeriod",
         "Contracts.saveContractVacationPeriod",
         
+        "AbsenceGroups.findCode",
         "AbsenceGroups.absenceInitializations",
         "AbsenceGroups.initialization",
         "AbsenceGroups.saveInitialization",

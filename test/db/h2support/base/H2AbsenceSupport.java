@@ -11,9 +11,9 @@ import models.Person;
 import models.PersonDay;
 import models.absences.Absence;
 import models.absences.AbsenceType;
-import models.absences.AbsenceType.DefaultAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.definitions.DefaultAbsenceType;
 
 import org.joda.time.LocalDate;
 
