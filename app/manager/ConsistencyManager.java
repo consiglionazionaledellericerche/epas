@@ -43,7 +43,9 @@ import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
 import models.absences.Absence;
+import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.definitions.DefaultGroup;
 import models.base.IPropertiesInPeriodOwner;
 
 import org.joda.time.LocalDate;
@@ -321,7 +323,18 @@ public class ConsistencyManager {
 
     // (4) Scan degli errori sulle assenze
     absenceService.scanner(person, from);
-
+    
+    // (5) Empty vacation cache
+    absenceService.emptyVacationCache(person, from);
+    Optional<Contract> contract = wrPerson.getCurrentContract();
+    if (contract.isPresent()) {
+      //TODO: async
+      GroupAbsenceType vacationGroup = absenceComponentDao
+          .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
+      absenceService.buildVacationSituation(contract.get(), LocalDate.now().getYear(), 
+          vacationGroup, Optional.absent(), true, null);
+    }
+    
     log.trace("... ricalcolo dei riepiloghi conclusa.");
   }
 

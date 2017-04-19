@@ -4,7 +4,9 @@
   'Administration.utilities',
   'Administration.playConfiguration',
   'Synchronizations.institutes',
-  'Synchronizations.people'] /}
+  'Synchronizations.people',
+  'AbsenceGroups.certificationsAbsenceCodes',
+  'AbsenceGroups.certificationsAbsences'] /}
 
   <li class="dropdown #{if request.action in actions}active#{/if}">
 
@@ -33,7 +35,10 @@
       #{/secure.li}
       
       #{secure.li @AbsenceGroups.certificationsAbsenceCodes() }
-      <i class="fa fa-refresh" aria-hidden="true"></i>
+      <i class="fa fa-cloud" aria-hidden="true"></i>
+      #{/secure.li}
+      #{secure.li @AbsenceGroups.certificationsAbsences(session.get("personSelected"), session.get("yearSelected")) }
+      <i class="fa fa-cloud" aria-hidden="true"></i>
       #{/secure.li}
 
     </ul>

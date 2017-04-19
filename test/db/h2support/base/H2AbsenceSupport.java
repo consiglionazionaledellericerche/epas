@@ -2,166 +2,53 @@ package db.h2support.base;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
+import com.beust.jcommander.internal.Lists;
+
+import dao.PersonDayDao;
 import dao.absences.AbsenceComponentDao;
 
-import db.h2support.base.AbsenceDefinitions.AbsenceTypeDefinition;
-import db.h2support.base.AbsenceDefinitions.ComplationBehaviourDefinition;
-import db.h2support.base.AbsenceDefinitions.GroupAbsenceTypeDefinition;
-import db.h2support.base.AbsenceDefinitions.TakableBehaviourDefinition;
-
+import java.util.List;
 import java.util.Set;
 
+import models.Person;
+import models.PersonDay;
 import models.absences.Absence;
 import models.absences.AbsenceType;
-import models.absences.ComplationAbsenceBehaviour;
-import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
-import models.absences.TakableAbsenceBehaviour;
+import models.absences.definitions.DefaultAbsenceType;
 
 import org.joda.time.LocalDate;
 
 public class H2AbsenceSupport {
   
   private final AbsenceComponentDao absenceComponentDao;
+  private final PersonDayDao personDayDao;
   
   @Inject
-  public H2AbsenceSupport(AbsenceComponentDao absenceComponentDao) {
+  public H2AbsenceSupport(AbsenceComponentDao absenceComponentDao, PersonDayDao personDayDao) {
     this.absenceComponentDao = absenceComponentDao;
+    this.personDayDao = personDayDao;
   }
 
-  /**
-   * Costruisce e persiste una istanza del tipo di assenza secondo definizione.
-   * @param absenceTypeDefinition definizione 
-   * @return persisted entity
-   */
-  public AbsenceType createAbsenceType(AbsenceTypeDefinition absenceTypeDefinition) {
-
-    AbsenceType absenceType = new AbsenceType();
-    absenceType.code = absenceTypeDefinition.name();
-    absenceType.justifiedTime = absenceTypeDefinition.justifiedTime;
-    absenceType.consideredWeekEnd = absenceTypeDefinition.consideredWeekEnd;
-    absenceType.timeForMealTicket = absenceTypeDefinition.timeForMealTicket;
-
-    absenceTypeDefinition.justifiedTypeNamesPermitted.forEach(name -> 
-        absenceType.justifiedTypesPermitted.add(absenceComponentDao.getOrBuildJustifiedType(name)));
-
-    absenceType.replacingType = absenceComponentDao
-        .getOrBuildJustifiedType(absenceTypeDefinition.replacingType);
-    absenceType.replacingTime = absenceTypeDefinition.replacingTime;
-    absenceType.save();
-    return absenceType;
-  }
-  
-  /**
-   * Preleva dal db l'istanza con quella definizione.
-   * @param definition definizione
-   * @return entity
-   */
-  public AbsenceType getAbsenceType(AbsenceTypeDefinition definition) {
-    Optional<AbsenceType> absenceType = absenceComponentDao.absenceTypeByCode(definition.name()); 
-    if (absenceType.isPresent()) {
-      return absenceType.get();
-    } 
-    return createAbsenceType(definition);
-  }
-  
-  /**
-   * Preleva dal db le istanze con quelle definizioni.
-   * @param absenceTypeDefinitions definizioni
-   * @return entities
-   */
-  public Set<AbsenceType> getAbsenceTypes(Set<AbsenceTypeDefinition> absenceTypeDefinitions) {
-    
-    Set<AbsenceType> absenceTypes = Sets.newHashSet();
-    for (AbsenceTypeDefinition definition : absenceTypeDefinitions) {
-      Optional<AbsenceType> absenceType = absenceComponentDao.absenceTypeByCode(definition.name()); 
-      if (absenceType.isPresent()) {
-        absenceTypes.add(absenceType.get());
-      } else {
-        absenceTypes.add(createAbsenceType(definition));
-      }
-    }
-    return absenceTypes;
-  }
-
-  /**
-   * Preleva dal db l'istanza con quella definizione.
-   * @param takableDefinition definizione
-   * @return entity
-   */
-  public TakableAbsenceBehaviour getTakableAbsenceBehaviour(
-      TakableBehaviourDefinition takableDefinition) {
-
-    TakableAbsenceBehaviour behaviour = new TakableAbsenceBehaviour();
-    behaviour.name = takableDefinition.name();
-    behaviour.amountType = takableDefinition.amountType;
-    behaviour.takenCodes = getAbsenceTypes(takableDefinition.takenCodes);
-    behaviour.takableCodes = getAbsenceTypes(takableDefinition.takableCodes);
-    behaviour.fixedLimit = takableDefinition.fixedLimit;
-    behaviour.takableAmountAdjustment = takableDefinition.takableAmountAdjustment;
-    behaviour.save();
-    return behaviour;
-  }
-
-  /**
-   * Preleva dal db l'istanza con quella definizione.
-   * @param complationDefinition definizione
-   * @return entity
-   */
-  public ComplationAbsenceBehaviour getComplationAbsenceBehaviour(
-      ComplationBehaviourDefinition complationDefinition) {
-
-    ComplationAbsenceBehaviour behaviour = new ComplationAbsenceBehaviour();
-    behaviour.name = complationDefinition.name();
-    behaviour.amountType = complationDefinition.amountType;
-    behaviour.complationCodes = getAbsenceTypes(complationDefinition.complationCodes);
-    behaviour.replacingCodes = getAbsenceTypes(complationDefinition.replacingCodes);
-    return behaviour;
-  }
-
-  /**
-   * Preleva dal db l'istanza con quella definizione.
-   * @param groupDefinition definizione
-   * @return entity
-   */
-  public GroupAbsenceType getGroupAbsenceType(GroupAbsenceTypeDefinition groupDefinition) {
-
-    if (groupDefinition == null) {
-      return null;
-    }
-    
-    GroupAbsenceType group = new GroupAbsenceType();
-    group.name = groupDefinition.name();
-    group.pattern = groupDefinition.pattern;
-    group.periodType = groupDefinition.periodType;
-    group.takableAbsenceBehaviour = 
-        getTakableAbsenceBehaviour(groupDefinition.takableAbsenceBehaviour);
-    group.complationAbsenceBehaviour = 
-        getComplationAbsenceBehaviour(groupDefinition.complationAbsenceBehaviour);
-    group.nextGroupToCheck = getGroupAbsenceType(groupDefinition.next);
-    
-    return group;
-  }
-  
   /**
    * Istanza di una assenza. Per adesso non persistita perchè ai fini dei test non mandatoria 
    * (ma lo sarà presto). Serve il personDay.
    *
-   * @param absenceTypeDefinition absenceType assenza
+   * @param defaultAbsenceType absenceType assenza
    * @param date                  data
    * @param justifiedTypeName     tipo giustificativo
    * @param justifiedMinutes      minuti giustificati
    * @return istanza non persistente
    */
-  public Absence absenceInstance(AbsenceTypeDefinition absenceTypeDefinition,
+  public Absence absenceInstance(DefaultAbsenceType defaultAbsenceType,
       LocalDate date, Optional<JustifiedTypeName> justifiedTypeName,
       Integer justifiedMinutes) {
 
-    AbsenceType absenceType = getAbsenceType(absenceTypeDefinition);
+    AbsenceType absenceType = absenceComponentDao
+        .absenceTypeByCode(defaultAbsenceType.getCode()).get();
     JustifiedType justifiedType = null;
     if (justifiedTypeName.isPresent()) {
       justifiedType = absenceComponentDao.getOrBuildJustifiedType(justifiedTypeName.get());
@@ -174,8 +61,68 @@ public class H2AbsenceSupport {
     absence.absenceType = absenceType;
     absence.justifiedType = justifiedType;
     absence.justifiedMinutes = justifiedMinutes;
-
+    
     return absence;
   }
+  
+  /**
+   * Istanza di una assenza. 
+   *
+   * @param defaultAbsenceType absenceType assenza
+   * @param date                  data
+   * @param justifiedTypeName     tipo giustificativo
+   * @param justifiedMinutes      minuti giustificati
+   * @return istanza non persistente
+   */
+  public Absence absence(DefaultAbsenceType defaultAbsenceType,
+      LocalDate date, Optional<JustifiedTypeName> justifiedTypeName,
+      Integer justifiedMinutes, Person person) {
+
+    Absence absence = 
+        absenceInstance(defaultAbsenceType, date, justifiedTypeName, justifiedMinutes);
+    
+    absence.personDay = getPersonDay(person, date);
+    absence.personDay.refresh();
+    absence.save();
+    
+    return absence;
+  }
+
+  /**
+   * Il personDay della persona a quella data.
+   * @param person persona
+   * @param date data
+   * @return personDay
+   */
+  public PersonDay getPersonDay(Person person, LocalDate date) {
+    Optional<PersonDay> personDay = personDayDao.getPersonDay(person, date);
+    if (personDay.isPresent()) {
+      return personDay.get();
+    }
+    
+    PersonDay newPersonDay = new PersonDay(person, date);
+    newPersonDay.save();
+    return newPersonDay;
+  }
+  
+  /**
+   * Costruzione multipla di assenze all day.
+   * @param person persona
+   * @param defaultAbsenceType tipo essere all day permitted
+   * @param dates date
+   * @return list
+   */
+  public List<Absence> multipleAllDayInstances(Person person, DefaultAbsenceType defaultAbsenceType,
+      Set<LocalDate> dates) {
+    
+    List<Absence> absences = Lists.newArrayList();
+    for (LocalDate date : dates) {
+      absences
+      .add(absence(defaultAbsenceType, date, Optional.of(JustifiedTypeName.all_day), 0, person));
+    }
+    
+    return absences;
+  }
+  
 
 }

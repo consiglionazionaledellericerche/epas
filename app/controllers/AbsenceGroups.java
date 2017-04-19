@@ -21,6 +21,7 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -31,9 +32,12 @@ import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.PersonDayManager;
+import manager.attestati.dto.internal.CruscottoDipendente;
+import manager.attestati.service.CertificationService;
 import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
+import manager.services.absences.certifications.CertificationYearSituation;
 import manager.services.absences.certifications.CodeComparation;
 import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.PeriodChain;
@@ -98,6 +102,8 @@ public class AbsenceGroups extends Controller {
   private static QualificationDao qualificationDao;
   @Inject
   private static AbsenceComponentDao absenceComponentDao;
+  @Inject
+  private static CertificationService certService; 
 
   /**
    * La lista delle categorie definite.
@@ -504,7 +510,37 @@ public class AbsenceGroups extends Controller {
     editAbsenceType(absenceType.id);
   }
 
-
+  /**
+   * Tab per la consultazione di tutti i codici e link per l'inserimento.
+   * @param personId persona selezionata
+   * @param from data selezionata
+   */
+  public static void findCode(Long personId, LocalDate from) {
+    
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    notFoundIfNull(from);
+    
+    AbsenceForm absenceForm = absenceService.buildAbsenceForm(person, from, null,
+            null, null, true, null, null, null, null, false);
+    
+    //La lista di tutti i codici takable... con associato il gruppo con maggiore priorità.
+    Set<AbsenceType> allTakable = Sets.newHashSet();
+    for (GroupAbsenceType group : absenceComponentDao.allGroupAbsenceType(false)) {
+      for (AbsenceType abt : group.takableAbsenceBehaviour.takableCodes) {
+        if (abt.defaultTakableGroup() == null) {
+          log.info("Il defaultTakable è null per {}", abt.code);
+          abt.defaultTakableGroup();
+        }
+      }
+      //TODO eventualmente controllo prendibilità della persona alla data (figli, l 104 etc.)
+      allTakable.addAll(group.takableAbsenceBehaviour.takableCodes);
+    }
+    
+    render(absenceForm, allTakable);
+    
+  }
+  
   /**
    * End point per la simulazione di inserimento assenze.s
    *
@@ -910,6 +946,27 @@ public class AbsenceGroups extends Controller {
 
     Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
   }
+  
+  /**
+   * Gli errori sulle assenze di quella sede.
+   * @param officeId sede
+   */
+  public static void absenceTroubles(Long officeId, int year, int month) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    
+    //Tutte le persone attive nel mese attuale?
+    List<Person> people = personDao.list(Optional.<String>absent(), 
+        Sets.newHashSet(office), false, 
+        new LocalDate(year, month, 1), 
+        new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true).list();
+    
+    //Tutti gli absenceErrors di quelle persone...
+    Map<Person, List<Absence>> mapTroubles = absenceComponentDao.absenceTroubles(people);
+    
+    render(people, mapTroubles, office, year, month);
+  }
 
   /**
    * 1.
@@ -986,9 +1043,79 @@ public class AbsenceGroups extends Controller {
     
     render(codeComparation);
   }
-  
-  public static void fixPostPartumGroups() {
-    absenceService.fixPostPartumGroups();
+ 
+  /**
+   * Se lo stato del db è consistente la modellazione via enumerati (che garantisce il corretto
+   * funzionamento).
+   * Entità controllate:
+   * Tab, Categorie, Gruppi, Parte takable, Parte completamento, Codici Assenza  
+   */
+  public static void consistencyGroups() {
+    
+    List<CategoryTab> allCategoryTabs = absenceComponentDao.tabsByPriority();
+    List<CategoryGroupAbsenceType> allCategories = absenceComponentDao.categoriesByPriority();
+    List<GroupAbsenceType> allGroups = absenceComponentDao.allGroupAbsenceType(true);
+    List<ComplationAbsenceBehaviour> allComplations = Lists.newArrayList();
+    for (GroupAbsenceType group : allGroups) {
+      if (group.complationAbsenceBehaviour != null) {
+        allComplations.add(group.complationAbsenceBehaviour);
+      }
+    }
+    List<TakableAbsenceBehaviour> allTakables = Lists.newArrayList();
+    for (GroupAbsenceType group : allGroups) {
+      allTakables.add(group.takableAbsenceBehaviour);
+    }
+    List<AbsenceType> allAbsenceTypes = AbsenceType.findAll();
+    render(allCategoryTabs, allCategories, allGroups, allComplations, allTakables, allAbsenceTypes);
+
   }
   
+  /**
+   * Allinea la modellazione con gli enumerati.
+   */
+  public static void consistencyCleans() {
+    
+    absenceService.enumAllineator();
+    
+    //TODO: in questi casi bisogna validare per bene gli enumerati....
+    //    List<AbsenceType> allAbsenceTypes = AbsenceType.findAll();
+    //    for (AbsenceType absenceType : allAbsenceTypes) {
+    //      //justified time 0 anzichè null
+    //      if (absenceType.justifiedTime == null) {
+    //        absenceType.justifiedTime = 0;
+    //        absenceType.save();
+    //      }
+    //      //replacing time 0 anzichè null
+    //      if (absenceType.replacingTime == null) {
+    //        absenceType.replacingTime = 0;
+    //        absenceType.save();
+    //      }
+    //      //un codice attivo è sempre stato attivo (null, null)
+    //      if (!absenceType.isExpired()) {
+    //        absenceType.validFrom = null;
+    //        absenceType.validTo = null;
+    //        absenceType.save();
+    //      }
+    //    }
+
+    consistencyGroups();
+  }
+
+  /** 
+   * Le assenze in attestati. //TODO Metodo provvisorio di prova.
+   */
+  public static void certificationsAbsences(Long personId, Integer year) 
+      throws NoSuchFieldException, ExecutionException {
+    
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    
+    CruscottoDipendente cruscottoDipendente = certService.getCruscottoDipendente(person, year);
+    
+    CertificationYearSituation yearSituation = new CertificationYearSituation(absenceComponentDao, 
+        person, cruscottoDipendente);
+    
+    render(yearSituation, person);
+  }
+
 }

@@ -14,6 +14,11 @@
       <a href="@{Stampings.missingStamping(session.get("yearSelected"),
          session.get("monthSelected"), session.get("officeSelected") )}">Problemi sui giorni</a>
     </li>
+        <li #{if _activeAction.equals("absenceTroubles")} class="active" #{/if}>
+      <a href="@{AbsenceGroups.absenceTroubles(session.get("officeSelected"), session.get("yearSelected"),
+         session.get("monthSelected"))}">
+        Problemi assenze</a>
+    </li>
     <li #{if _activeAction.equals("dailyPresence")} class="active" #{/if}>
       <a href="@{Stampings.dailyPresence(session.get("yearSelected"),
          session.get("monthSelected"), session.get("daySelected"), session.get("officeSelected") )}">Presenza Giornaliera</a>
