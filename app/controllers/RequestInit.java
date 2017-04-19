@@ -1,6 +1,5 @@
 package controllers;
 
-
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -184,7 +183,8 @@ public class RequestInit extends Controller {
         "Absences.forceAbsences",
         "Charts.overtimeOnPositiveResidual",
         "Charts.listForExcelFile",
-        "Charts.exportTimesheetSituation");
+        "Charts.exportTimesheetSituation",
+        "AbsenceGroups.absenceTroubles");
 
 
     final Collection<String> yearSwitcher = ImmutableList.of(
@@ -253,7 +253,8 @@ public class RequestInit extends Controller {
         "Competences.activateServices",
         "Contracts.initializationsStatus",
         "Contracts.initializationsMeal",
-        "AbsenceGroups.absenceInitializations");
+        "AbsenceGroups.absenceInitializations",
+        "AbsenceGroups.absenceTroubles");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
         "Stampings.insertWorkingOffSitePresence",
@@ -297,7 +298,8 @@ public class RequestInit extends Controller {
         "PersonMonths.visualizePeopleTrainingHours",
         "Contracts.initializationsStatus",
         "Contracts.initializationsMeal",
-        "AbsenceGroups.absenceInitializations");
+        "AbsenceGroups.absenceInitializations",
+        "AbsenceGroups.absenceTroubles");
 
     final Collection<String> dropDownConfigurationActions = ImmutableList.of(
         "WorkingTimes.manageWorkingTime",
