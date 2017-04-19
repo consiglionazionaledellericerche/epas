@@ -15,7 +15,6 @@ public class StampingFromClient {
 
   public String numeroBadge;
   public Integer inOut;
-  public BadgeReader badgeReader;
   public StampTypes stampType;
   public Person person;
   public boolean markedByAdmin;
