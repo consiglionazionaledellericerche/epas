@@ -247,9 +247,15 @@ public enum DefaultGroup {
   
   G_PUBBLICA_FUNZIONE("Codici Pubblica Funzione", 
       "", 
-      DefaultCategoryType.PUBBLICA_FUNZIOINE, 1,
+      DefaultCategoryType.PUBBLICA_FUNZIOINE, 2,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
-      DefaultTakable.T_PUBBLICA_FUNZIONE, null, null, false, false);
+      DefaultTakable.T_PUBBLICA_FUNZIONE, null, null, false, false),
+  
+  G_ASPETTATIVA("Codici Aspettativa", 
+      "", 
+      DefaultCategoryType.ASPETTATIVA, 1,
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+      DefaultTakable.T_ASPETTATIVA, null, null, false, false);
   
 
 

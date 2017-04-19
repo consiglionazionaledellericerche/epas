@@ -44,6 +44,7 @@ public enum DefaultCategoryType {
   //TELELAVORO("Telelavoro", 14, DefaultTab.ALTRI_GRUPPI),
   //PERMESSI_SINDACALI("Permessi Sindacali", 15, DefaultTab.ALTRI_GRUPPI),
   ALTRI_CODICI("Altri Codici", 16, DefaultTab.ALTRI_CODICI),
+  ASPETTATIVA("Codici Aspettativa", 16, DefaultTab.ALTRI_CODICI),
   PUBBLICA_FUNZIOINE("Pubblica Funzione", 16, DefaultTab.ALTRI_CODICI),
 
   LAVORO_FUORI_SEDE("Lavoro fuori sede", 17, DefaultTab.LAVORO_FUORI_SEDE),
