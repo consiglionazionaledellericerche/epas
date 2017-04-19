@@ -296,6 +296,7 @@ when
     "AbsenceGroups.editGroup",       /* per la show... */
     "AbsenceGroups.editAbsenceType", /* per la show... */
     "AbsenceGroups.absenceInitializations",
+    "AbsenceGroups.absenceTroubles",
     "BadgeReaders.list",
     "BadgeSystems.list",
     "BadgeSystems.personBadges",
@@ -556,6 +557,8 @@ when
 		"Absences.showGeneralMonthlyAbsences",
 		"Absences.manageAttachmentsPerCode",
         "Absences.yearlyAbsences",
+        
+        "AbsenceGroups.absenceTroubles",
 
         "BadgeSystems.personBadges",
 
@@ -640,6 +643,8 @@ when
         "Absences.manageAttachmentsPerCode",
         "Absences.downloadAttachment",
         "Absences.zipAttachment",
+        
+        "AbsenceGroups.absenceTroubles",
 
 		"BadgeSystems.personBadges",
 

@@ -168,6 +168,8 @@ public class ServiceFactories {
       periodChain = vacationFactory
           .buildVacationChain(person, groupAbsenceType, fetchedContracts, date);
     } else if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.compensatoryRestCnr)) {
+      //TODO: implementare la migrazione riposi compensativi. Una volta completata 
+      // riattivare lo scan del gruppo 
       throw new IllegalStateException();
     } else {
       GroupAbsenceType currentGroup = groupAbsenceType;

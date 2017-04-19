@@ -21,6 +21,7 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -944,6 +945,27 @@ public class AbsenceGroups extends Controller {
     }
 
     Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
+  }
+  
+  /**
+   * Gli errori sulle assenze di quella sede.
+   * @param officeId sede
+   */
+  public static void absenceTroubles(Long officeId, int year, int month) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    
+    //Tutte le persone attive nel mese attuale?
+    List<Person> people = personDao.list(Optional.<String>absent(), 
+        Sets.newHashSet(office), false, 
+        new LocalDate(year, month, 1), 
+        new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true).list();
+    
+    //Tutti gli absenceErrors di quelle persone...
+    Map<Person, List<Absence>> mapTroubles = absenceComponentDao.absenceTroubles(people);
+    
+    render(people, mapTroubles, office, year, month);
   }
 
   /**
