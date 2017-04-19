@@ -1,32 +1,25 @@
 package controllers;
 
-
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
-
 import dao.UserDao;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-
 import javax.inject.Inject;
-
+import lombok.extern.slf4j.Slf4j;
 import manager.OfficeManager;
-
 import models.User;
-
-import play.Logger;
-import play.cache.Cache;
 import play.mvc.Http;
 import play.utils.Java;
 
-
+@Slf4j
 public class Security extends Secure.Security {
 
   public static final String CACHE_DURATION = "30mn";
+  public static final String CURRENT_USER = "current_user";
 
   //FIXME residuo dei vecchi residui, rimuoverlo e sostituirlo nei metodi che lo utilizzano
   @Inject
@@ -38,65 +31,51 @@ public class Security extends Secure.Security {
    * @return true se è autenticato, false altrimenti.
    */
   static boolean authenticate(String username, String password) {
-    Logger.trace("Richiesta autenticazione di %s", username);
+    log.debug("Richiesta autenticazione di {}", username);
 
     User user = userDao.getUserByUsernameAndPassword(username, Optional
         .fromNullable(Hashing.md5().hashString(password, Charsets.UTF_8).toString()));
 
     if (user != null) {
-      Cache.set(username, user, CACHE_DURATION);
-      Cache.set("userId", user.id, CACHE_DURATION);
-
-      Logger.info("user %s successfully logged in from ip %s", user.username,
+      log.info("user {} successfully logged in from ip {}", user.username,
           Http.Request.current().remoteAddress);
-
       return true;
     }
 
     // Oops
-    Logger.info("Failed login for %s ", username);
-    flash.put("username", username);
-    flash.error("Login failed");
+    log.info("Failed login for {}", username);
     return false;
   }
 
-  private static Optional<User> getUser(String username) {
-
-    if (username == null || username.isEmpty()) {
-      Logger.trace("getUSer failed for username %s", username);
-      return Optional.<User>absent();
-    }
-    Logger.trace("Richiesta getUser(), username=%s", username);
-
-    //db
-    User user = userDao.byUsername(username);
-
-    Logger.trace("User.find('byUsername'), username=%s, e' %s", username, user);
-    if (user == null) {
-      Logger.info("Security.getUser(): USer con username = %s non trovata nel database", username);
-      return Optional.<User>absent();
-    }
-    return Optional.of(user);
-  }
-
   /**
-   * Preleva (opzionalmente) l'utente loggato.
+   * In questo metodo viene gestito sia il caso di connessione tramite interfaccia che tramite Basic
+   * Auth. Non viene però salvata però da nessuna parte il tipo di autenticazione effettuata.
    *
-   * @return l'utente correntemente loggato se presente
+   * Perciò è possibile utilizzare tramite autenticazione Basic sia i controller standard che quelli
+   * con l'annotation '@BasicAuth'.
+   *
+   * Per cambiare questo comportamento bisognerebbe salvare quest'informazione
+   * (anche in sessione volendo), e utilizzarla nel metodo Resecure.checkAccess.
+   *
+   * @return l'utente corrente, se presente, altrimenti "absent".
    */
   public static Optional<User> getUser() {
-    return getUser(connected());
-  }
-
-  static String connected() {
-    if (request == null) {
-      return null;
+    if (session != null && isConnected()) {
+      if (request.args.containsKey(CURRENT_USER)) {
+        return Optional.of((User) request.args.get(CURRENT_USER));
+      }
+      Optional<User> user = Optional.fromNullable(userDao.byUsername(connected()));
+      if (user.isPresent()){
+        request.args.put(CURRENT_USER, user.get());
+      }
+      return user;
     }
-    if (request.user != null) {
-      return request.user;
-    } else {
-      return Secure.Security.connected();
+    if (request.user != null && request.password != null && authenticate(request.user,
+        request.password)) {
+      session.put("username", request.user);
+      return Optional.fromNullable(userDao.byUsername(connected()));
     }
+    return Optional.absent();
   }
 
   static Object invoke(String method, Object... args) throws Throwable {
@@ -109,7 +88,7 @@ public class Security extends Secure.Security {
 
   /**
    * @return Vero se c'è almeno un istituto abilitato dall'ip contenuto nella richiesta HTTP
-   *        ricevuta, false altrimenti.
+   * ricevuta, false altrimenti.
    */
   public static boolean checkForWebstamping() {
 
@@ -118,16 +97,16 @@ public class Security extends Secure.Security {
 
     return !officeManager.getOfficesWithAllowedIp(addresses).isEmpty();
   }
-  
+
   /**
    * ridefinizione di logout per discriminare il messaggio a seconda della tipologia connessione.
    */
   public static void logout() {
     try {
-      Security.invoke("onDisconnect");
+      invoke("onDisconnect");
       session.clear();
       response.removeCookie("rememberme");
-      Security.invoke("onDisconnected");
+      invoke("onDisconnected");
       if (session.contains("shibboleth")) {
         flash.success("secure.logoutShibboleth");
       } else {
