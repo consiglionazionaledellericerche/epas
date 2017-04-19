@@ -186,7 +186,7 @@ public class VacationFactory {
       endUsableNextYear = contract.calculatedEnd();
     }
     if (!endUsableNextYear.isBefore(beginNextYear)) {
-      periods.add(period(person, contract, group, beginNextYear, takable, taken,
+      periods.add(period(person, contract, group, beginNextYear, endUsableNextYear, takable, taken,
           DateUtility.daysInInterval(new DateInterval(beginNextYear, endUsableNextYear)), 0));
     }
     
@@ -206,7 +206,8 @@ public class VacationFactory {
       endUsableNextYearExtra = contract.calculatedEnd();
     }
     if (!endUsableNextYearExtra.isBefore(beginUsableExtra)) {
-      periods.add(period(person, contract, group, beginUsableExtra, takable, taken,
+      periods.add(period(person, contract, group, beginUsableExtra, endUsableNextYearExtra,
+          takable, taken,
           DateUtility.daysInInterval(new DateInterval(beginUsableExtra, endUsableNextYearExtra)), 
           0));
     }
@@ -226,7 +227,7 @@ public class VacationFactory {
     Set<AbsenceType> takenCodes = subSetCode(codes, DefaultAbsenceType.A_94);
     
     DateInterval yearInterval = DateUtility.getYearInterval(year);
-    List<Integer> lowerLimits = Lists.newArrayList();
+    List<Integer> limits = Lists.newArrayList();
     //Permessi nell'anno
     for (VacationPeriod vacationPeriod : contract.getVacationPeriods()) {
       if (DateUtility
@@ -237,11 +238,14 @@ public class VacationFactory {
       periods.addAll(periodsFromProgression(person, contract, group, beginDate, 
           YearProgression.whichPermissionProgression(vacationPeriod.vacationCode),
           vacationPeriod, takableCodes, takenCodes));
-      lowerLimits.add(vacationPeriod.vacationCode.permissions);
+      limits.add(vacationPeriod.vacationCode.permissions);
     }
 
     //Fix del caso sfortunato
-    periods = fixUnlucky(periods, lowerLimits, year);
+    periods = fixUnlucky(periods, limits, year);
+    
+    //Fix del caso fortunato
+    periods = fixTooLucky(periods, limits, year);
     
     //Fix dei giorni post partum
     periods = fixPostPartum(periods, person, year);
@@ -391,8 +395,8 @@ public class VacationFactory {
     
     for (YearPortion yearPortion : yearProgression.yearPortions) {
 
-      AbsencePeriod absencePeriod = period(person, contract, group, date, takableCodes, takenCodes,
-          yearPortion.days, yearPortion.amount);
+      AbsencePeriod absencePeriod = period(person, contract, group, date, endYear, 
+          takableCodes, takenCodes, yearPortion.days, yearPortion.amount);
       absencePeriod.vacationCode = vacationPeriod.vacationCode;
       periods.add(absencePeriod);
       date = absencePeriod.to.plusDays(1);
@@ -443,10 +447,9 @@ public class VacationFactory {
   }
   
   private AbsencePeriod period(Person person, Contract contract,
-      GroupAbsenceType group, LocalDate begin, 
+      GroupAbsenceType group, LocalDate begin, LocalDate endYear,
       Set<AbsenceType> takableCodes, Set<AbsenceType> takenCodes, int days, int amount) {
     
-    LocalDate endYear = new LocalDate(begin.getYear(), 12, 31);
     LocalDate end = begin.plusDays(days - 1);
     if (end.isAfter(endYear)) {
       end = endYear;
@@ -455,11 +458,13 @@ public class VacationFactory {
     AbsencePeriod absencePeriod = new AbsencePeriod(person, group);
     absencePeriod.takeAmountType = AmountType.units;
     if (contract.endDate == null) {
-      absencePeriod.takableCountBehaviour = TakeCountBehaviour.sumAllPeriod;  
+      absencePeriod.takableCountBehaviour = TakeCountBehaviour.sumAllPeriod;
+      absencePeriod.takenCountBehaviour = TakeCountBehaviour.sumAllPeriod;
     } else {
       absencePeriod.takableCountBehaviour = TakeCountBehaviour.sumUntilPeriod; //TD
+      absencePeriod.takenCountBehaviour = TakeCountBehaviour.sumUntilPeriod;
     }
-    absencePeriod.takenCountBehaviour = TakeCountBehaviour.sumAllPeriod;    
+        
     absencePeriod.from = begin;
     absencePeriod.to = end;
     //mi assicuro di non eccedere in ogni caso la lunghezza del contratto.

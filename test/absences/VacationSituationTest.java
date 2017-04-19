@@ -26,7 +26,7 @@ import play.test.UnitTest;
 
 
 @StaticInject
-public class VacationsTest extends UnitTest {
+public class VacationSituationTest extends UnitTest {
   
   public static final LocalDate EXPIRE_DATE_LAST_YEAR = new LocalDate(2016, 8, 31);
   public static final LocalDate EXPIRE_DATE_CURRENT_YEAR = new LocalDate(2017, 8, 31);

@@ -63,7 +63,7 @@ public class VacationSituation {
    */
   public boolean epasEquivalent(OldVacationSummary old, VacationSummary summary) {
 
-    if (old.result == null || summary == null) {
+    if (old == null || old.result == null || summary == null) {
       return true;
     }
     if (old.total() != summary.total()) {
@@ -288,7 +288,8 @@ public class VacationSituation {
     }
     
     private int computeUsed(AbsencePeriod period) {
-      return period.getPeriodTakenAmount(true) / 100;
+      return period
+          .computePeriodTakenAmount(TakeCountBehaviour.sumAllPeriod, lastPeriod(period).to) / 100;
     }
     
     private boolean isContractUpperLimit(LocalDate date) {
@@ -318,6 +319,13 @@ public class VacationSituation {
         }
       }
       return lastPeriod;
+    }
+    
+    /**
+     * L'ultimo periodo (per la data fine).
+     */
+    private AbsencePeriod lastPeriod(AbsencePeriod period) {
+      return period.subPeriods.get(period.subPeriods.size() - 1);
     }
     
     /**

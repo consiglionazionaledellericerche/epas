@@ -172,45 +172,50 @@ public class AbsencePeriod {
    * L'ammontare utilizzato nel periodo.
    * @return int
    */
-  public int getPeriodTakenAmount(boolean firstIteration) {
+  public int getPeriodTakenAmount() {
+    int computedTakenAmounut = computePeriodTakenAmount(takenCountBehaviour, this.from);
+    return computedTakenAmounut;
+  }
+  
+  /**
+   * Calcola l'ammontare in funzione del tipo di conteggio. 
+   */
+  public int computePeriodTakenAmount(TakeCountBehaviour countBehaviour, LocalDate date) {
     
-    int takenInPeriod = getInitializationTakableUsed();
-    
-    for (TakenAbsence takenAbsence : takenAbsences()) {
-      if (!takenAbsence.beforeInitialization) {
-        takenInPeriod += takenAbsence.getTakenAmount();
+    if (countBehaviour.equals(TakeCountBehaviour.period)) {
+      int takenInPeriod = getInitializationTakableUsed();
+      for (TakenAbsence takenAbsence : takenAbsences()) {
+        if (!takenAbsence.beforeInitialization) {
+          takenInPeriod += takenAbsence.getTakenAmount();
+        }
       }
-    }
-    if (takenCountBehaviour.equals(TakeCountBehaviour.period)) {
       return takenInPeriod;
     }
     
-    if (takenCountBehaviour.equals(TakeCountBehaviour.sumAllPeriod) 
-        || takenCountBehaviour.equals(TakeCountBehaviour.sumAllPeriod)) {
-      if (!firstIteration) {
-        return takenInPeriod;
-      } 
-      return getPeriodTakenAmountSumAll(this.takenCountBehaviour);  
+    if (countBehaviour.equals(TakeCountBehaviour.sumAllPeriod) 
+        || countBehaviour.equals(TakeCountBehaviour.sumUntilPeriod)) {
+      int taken = 0;
+      for (AbsencePeriod absencePeriod : this.subPeriods) {
+        if (countBehaviour.equals(TakeCountBehaviour.sumUntilPeriod) 
+            && absencePeriod.from.isAfter(date)) {
+          break;
+        }
+        taken = taken + absencePeriod.getInitializationTakableUsed();
+        for (TakenAbsence takenAbsence : absencePeriod.takenAbsences()) {
+          if (!takenAbsence.beforeInitialization) {
+            taken = taken + takenAbsence.getTakenAmount();
+          }
+        }
+      }
+      return taken;
     }
     
     return 0;
     
   }
-
-  private int getPeriodTakenAmountSumAll(TakeCountBehaviour countType) {
-    int taken = 0;
-    for (AbsencePeriod absencePeriod : this.subPeriods) {
-      if (countType.equals(TakeCountBehaviour.sumUntilPeriod) 
-          && absencePeriod.from.isAfter(this.from)) {
-        break;
-      }
-      taken = taken + absencePeriod.getPeriodTakenAmount(false);
-    }
-    return taken;
-  }
   
   public int getRemainingAmount() {
-    return this.getPeriodTakableAmount() - this.getPeriodTakenAmount(true);
+    return this.getPeriodTakableAmount() - this.getPeriodTakenAmount();
   }
 
   /**
@@ -221,7 +226,7 @@ public class AbsencePeriod {
    */
   public TakenAbsence buildTakenAbsence(Absence absence, int takenAmount) {
     int periodTakableAmount = this.getPeriodTakableAmount();
-    int periodTakenAmount = this.getPeriodTakenAmount(true);
+    int periodTakenAmount = this.getPeriodTakenAmount();
     TakenAbsence takenAbsence = TakenAbsence.builder()
         .absence(absence)
         .amountType(this.takeAmountType)
@@ -430,7 +435,7 @@ public class AbsencePeriod {
   }
   
   public String toString() {
-    return from + " " + to + " " + fixedPeriodTakableAmount;  
+    return from + " " + to + " " + fixedPeriodTakableAmount + takableCodes;  
   }
 }
 

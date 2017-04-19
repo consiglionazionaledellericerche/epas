@@ -96,7 +96,7 @@ public class Absences661Test extends UnitTest {
     
     assertNotNull(periodChain.successPeriodInsert);
     assertEquals(periodChain.successPeriodInsert.attemptedInsertAbsence, toInsert);
-    assertEquals(periodChain.periods.get(0).getPeriodTakenAmount(true), 120);
+    assertEquals(periodChain.periods.get(0).getPeriodTakenAmount(), 120);
     
   }
   
