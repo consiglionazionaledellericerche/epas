@@ -4,15 +4,16 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
+import dao.absences.AbsenceComponentDao;
+
 import db.h2support.H2Examples;
-import db.h2support.base.AbsenceDefinitions.AbsenceTypeDefinition;
-import db.h2support.base.AbsenceDefinitions.GroupAbsenceTypeDefinition;
 import db.h2support.base.H2AbsenceSupport;
 
 import injection.StaticInject;
 
 import java.util.List;
 
+import manager.services.absences.AbsenceService;
 import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.ServiceFactories;
 
@@ -20,11 +21,15 @@ import models.Person;
 import models.absences.Absence;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.definitions.DefaultAbsenceType;
+import models.absences.definitions.DefaultGroup;
 
 import org.joda.time.LocalDate;
 import org.junit.Test;
 
 import play.test.UnitTest;
+
+
 
 
 @StaticInject
@@ -44,21 +49,28 @@ public class Absences661Test extends UnitTest {
   private static H2AbsenceSupport h2AbsenceSupport;
   @Inject 
   private static ServiceFactories serviceFactories;
-    
+  @Inject
+  private static AbsenceComponentDao absenceComponentDao;
+  @Inject
+  private static AbsenceService absenceService;
+  
   @Test
   public void test() {
     
+    absenceService.enumInitializator();
+    
     //creare il gruppo
-    GroupAbsenceType group661 = h2AbsenceSupport
-        .getGroupAbsenceType(GroupAbsenceTypeDefinition.Group_661);
+    GroupAbsenceType group661 = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_661.name()).get();
     
     //creare la persona
-    Person person = h2Examples.normalUndefinedEmployee(BEGIN_2016);
+    Person person = h2Examples.normalEmployee(BEGIN_2016, Optional.absent());
     
     //creare la periodChain
     PeriodChain periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
         new LocalDate(2016, 11, 15), 
         Lists.newArrayList(), 
+        person.contracts,
         Lists.newArrayList(), 
         Lists.newArrayList());
     
@@ -68,15 +80,15 @@ public class Absences661Test extends UnitTest {
     assertEquals(periodChain.periods.get(0).getPeriodTakableAmount(), 1080);
     
     //creare le assenze da considerare
-    Absence absence1 = h2AbsenceSupport.absenceInstance(AbsenceTypeDefinition._661M, 
+    Absence absence1 = h2AbsenceSupport.absenceInstance(DefaultAbsenceType.A_661M, 
         FERIAL_1_2016, Optional.of(JustifiedTypeName.specified_minutes), 80);
-    Absence absence2 = h2AbsenceSupport.absenceInstance(AbsenceTypeDefinition._661H1, 
+    Absence absence2 = h2AbsenceSupport.absenceInstance(DefaultAbsenceType.A_661H1, 
         FERIAL_1_2016, Optional.of(JustifiedTypeName.nothing), 0);
     List<Absence> allPersistedAbsences = Lists.newArrayList(absence1, absence2);
     List<Absence> groupPersistedAbsences = Lists.newArrayList(absence1, absence2);
     
     //creare la assenza da inserire
-    Absence toInsert = h2AbsenceSupport.absenceInstance(AbsenceTypeDefinition._661M, 
+    Absence toInsert = h2AbsenceSupport.absenceInstance(DefaultAbsenceType.A_661M, 
         FERIAL_3_2016, Optional.of(JustifiedTypeName.specified_minutes), 40);
     
     serviceFactories.buildPeriodChainPhase2(periodChain, toInsert, 
@@ -95,18 +107,21 @@ public class Absences661Test extends UnitTest {
   @Test
   public void adjustmentLimit() {
         
+    absenceService.enumInitializator();
+    
     //creare il gruppo
-    GroupAbsenceType group661 = h2AbsenceSupport
-        .getGroupAbsenceType(GroupAbsenceTypeDefinition.Group_661);
+    GroupAbsenceType group661 = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_661.name()).get();
     
     // CASO 1 
     //la persona inizia a lavorare a metà anno
-    Person person = h2Examples.normalUndefinedEmployee(MID_2016);
+    Person person = h2Examples.normalEmployee(MID_2016, Optional.absent());
     
     //creare la periodChain
     PeriodChain periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
         new LocalDate(2016, 11, 15), 
         Lists.newArrayList(), 
+        person.contracts,
         Lists.newArrayList(), 
         Lists.newArrayList());
     
@@ -116,11 +131,12 @@ public class Absences661Test extends UnitTest {
     
     //CASO 2 
     //la persona ha il part time 50%
-    person = h2Examples.partTime50UndefinedEmployee(BEGIN_2016);
+    person = h2Examples.partTime50Employee(BEGIN_2016);
 
     periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
         new LocalDate(2016, 11, 15), 
         Lists.newArrayList(), 
+        person.contracts,
         Lists.newArrayList(), 
         Lists.newArrayList());
 
@@ -130,11 +146,12 @@ public class Absences661Test extends UnitTest {
     //CASO 3 
     //la persona inizia a lavorare a metà anno con part time 50% 
 
-    person = h2Examples.partTime50UndefinedEmployee(MID_2016);
+    person = h2Examples.partTime50Employee(MID_2016);
 
     periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
         new LocalDate(2016, 11, 15), 
         Lists.newArrayList(), 
+        person.contracts,
         Lists.newArrayList(), 
         Lists.newArrayList());
 

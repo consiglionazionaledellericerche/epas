@@ -1,0 +1,175 @@
+
+#{modalAsync title: vacationSummary.title() }
+
+  
+<div>
+
+
+ 
+   #{tabList}
+	 	#{tabItem id:'infoTot', title:'Riepilogo', active:true /}
+        #{tabItem id:'date', title:'Date Utilizzo' /}
+        #{tabItem id:'calcTot', title:'Calcolo Giorni Totali' /}
+        #{tabItem id:'calcAcc', title:'Calcolo Giorni Maturati' /}
+   #{/tabList}
+  
+  <br>
+
+   #{tabContent}
+   
+     <!-- Riepilogo Residui -->
+     #{tabContentItem id:'infoTot', active:true}
+	 
+		 <div class="col-md-6 col-md-offset-3">
+		   <table class="table">
+		     <tr>
+		       <td><strong>Totali</strong></td>
+		       <td>${vacationSummary.total()}</td>
+		     </tr>
+		     <tr>
+		       <td><strong>Maturate</strong></td>
+		       <td>${vacationSummary.accrued()}</td>
+		     </tr>
+		     <tr>
+		       <td><strong>Usate</strong></td>
+		       <td>${vacationSummary.used()}</td>
+		     </tr>
+		   </table>
+	   </div>
+	   
+	   <div class="col-md-12">
+	   #{alert color:'info'}
+	   <p>Le assenze <strong>&{'vacations.takable'}</strong> sono le assenze maturate che il dipendente può effettivamente utilizzare in questo
+	   momento.</p>
+	      <p>Le assenze <strong>Rimanenti</strong> sono tutte le assenze (maturate e non) residue per il dipendente.</p>
+	   #{/alert}
+	   </div>
+	   
+	   <div class="col-md-6 col-md-offset-3">
+		   <table class="table">
+		     <tr>
+		       <td><strong>&{'vacations.takable'}</strong></td>
+		       <td>${vacationSummary.usable()}</td>
+		     </tr>
+		     <tr>
+		       <td><strong>Rimanenti</strong></td>
+		       <td>${vacationSummary.usableTotal()}</td>
+		     </tr>
+		     <tr>
+		       <td><strong>Limite Massimo Utilizzo</strong></td>
+		       <td>${vacationSummary.upperLimit().format()}</td>
+		     </tr>
+		   </table>
+	   </div>
+	   
+	   
+    #{/tabContentItem}
+    
+    <!-- Riepilogo Giorni utilizzati -->
+    #{tabContentItem id:'date' }
+     
+         #{if vacationSummary.sourced() > 0}
+	        <div class="alert alert-info">
+				<p><strong>${vacationSummary.sourced()}</strong> giorni utilizzati sono stati definiti da
+				da inizializzazione ePAS.</p>
+			</div>	
+		  #{/if}
+       
+         <div class="col-md-8 col-md-offset-2">
+	        <table class="table table-condensed table-hover" datatable-small>
+				    
+			<thead>
+			  <tr class="warning">
+				 <th class="col-xs-4">Data</th>
+			     <th class="col-xs-2">Codice</th>
+			     <th class="col-xs-6">Descrizione</th>
+			  </tr>
+			</thead>
+			<tbody>
+			#{list items:vacationSummary.absencesUsed(), as:'absence'}
+			    <tr>
+			       <td data-order="${absence.personDay.date}">${absence.personDay.date.format()}</td>
+			       <td>${absence.absenceType.code}</td>
+			       <td>${absence.absenceType.description}</td>
+			    </tr>
+			#{/list}
+			</tbody>
+		    </table>
+          </div>
+          
+          <br>
+   
+	 #{/tabContentItem}  
+   
+
+  
+     <!-- Calcolo giorni totali -->
+     #{tabContentItem id:'calcTot'}
+    
+       #{alert color:'info'}
+	     <p>Sono stati calcolati <strong>${vacationSummary.total()}</strong> giorni totali.</p>
+	   #{/alert}
+	   
+	   <table class="table table-condensed">
+	     <tr>
+           <th>Piano Ferie</th>
+	       <th>Dal</th>
+	       <th>Al</th>
+	       <th>Giorni nel periodo</th>
+	       <th>Maturati</th>
+	     </tr>
+	     #{list items:vacationSummary.absencePeriod.subPeriods, as:'period'}
+	       #{if period.vacationCode}
+	       <tr>
+	         <td>${period.vacationCode.name}</td>
+	         <td>${period.from.format()}</td>
+	         <td>${period.to.format()}</td>
+	         <td>${period.periodInterval().dayInInterval()}</td>
+	         <td><strong>${period.vacationAmountBeforeInitialization}</strong></td>
+	       </tr>
+	       #{/if}
+	     #{/list}
+	   </table>
+	    
+    
+     #{/tabContentItem}
+     
+      <!-- Calcolo giorni maturati -->
+     #{tabContentItem id:'calcAcc'}
+    
+       #{alert color:'info'}
+	     <p>Sono stati calcolati <strong>${vacationSummary.accrued()}</strong> giorni maturati.</p>
+	   #{/alert}
+	   
+	   <table class="table table-condensed">
+	     <tr>
+           <th>Piano Ferie</th>
+	       <th>Dal</th>
+	       <th>Al</th>
+	       <th>Giorni nel periodo</th>
+	       <th>Maturati</th>
+	     </tr>
+	     #{list items:vacationSummary.absencePeriod.subPeriods, as:'period'}
+	       #{if period.vacationCode}
+	       <tr>
+	         <td>${period.vacationCode.name}</td>
+	         <td>${period.from.format()}</td>
+	         <td>${period.to.format()}</td>
+	         <td>${period.periodInterval().dayInInterval()}</td>
+	         <td><strong>${vacationSummary.periodAmountAccrued(period)}</strong></td>
+	       </tr>
+	       #{/if}
+	     #{/list}
+	   </table>
+	    
+    
+     #{/tabContentItem}
+    
+      
+   #{/tabContent}  
+
+</div>     
+     
+ 
+#{/modalAsync}        
+

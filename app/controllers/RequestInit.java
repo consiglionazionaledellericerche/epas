@@ -1,6 +1,5 @@
 package controllers;
 
-
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -184,7 +183,8 @@ public class RequestInit extends Controller {
         "Absences.forceAbsences",
         "Charts.overtimeOnPositiveResidual",
         "Charts.listForExcelFile",
-        "Charts.exportTimesheetSituation");
+        "Charts.exportTimesheetSituation",
+        "AbsenceGroups.absenceTroubles");
 
 
     final Collection<String> yearSwitcher = ImmutableList.of(
@@ -196,11 +196,12 @@ public class RequestInit extends Controller {
         "PersonMonths.trainingHours",
         "PersonMonths.hourRecap",
         "Vacations.show",
-        "VacationsAdmin.list",
+        "Vacations.list",
         "Certifications.certifications",
         "Certifications.processAll",
         "Certifications.emptyCertifications",
-        "Charts.overtimeOnPositiveResidualInYear");
+        "Charts.overtimeOnPositiveResidualInYear",
+        "AbsenceGroups.certificationsAbsences");
 
     final Collection<String> personSwitcher = ImmutableList.of(
         "Stampings.personStamping",
@@ -215,12 +216,13 @@ public class RequestInit extends Controller {
         "MealTickets.personMealTickets",
         "MealTickets.editPersonMealTickets",
         "MealTickets.recapPersonMealTickets",
-        "Absences.forceAbsences");
+        "Absences.forceAbsences",
+        "AbsenceGroups.certificationsAbsences");
 
     final Collection<String> officeSwitcher = ImmutableList.of(
         "Stampings.missingStamping",
         "Stampings.dailyPresence",
-        "VacationsAdmin.list",
+        "Vacations.list",
         "Absences.showGeneralMonthlyAbsences",
         "Absences.manageAttachmentsPerCode",
         "Competences.showCompetences",
@@ -251,7 +253,8 @@ public class RequestInit extends Controller {
         "Competences.activateServices",
         "Contracts.initializationsStatus",
         "Contracts.initializationsMeal",
-        "AbsenceGroups.absenceInitializations");
+        "AbsenceGroups.absenceInitializations",
+        "AbsenceGroups.absenceTroubles");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
         "Stampings.insertWorkingOffSitePresence",
@@ -270,7 +273,7 @@ public class RequestInit extends Controller {
         "Stampings.missingStamping",
         "Stampings.holidaySituation",
         "Stampings.dailyPresence",
-        "VacationsAdmin.list",
+        "Vacations.list",
         "Persons.list",
         "Persons.edit",
         "Contracts.personContracts",
@@ -295,7 +298,8 @@ public class RequestInit extends Controller {
         "PersonMonths.visualizePeopleTrainingHours",
         "Contracts.initializationsStatus",
         "Contracts.initializationsMeal",
-        "AbsenceGroups.absenceInitializations");
+        "AbsenceGroups.absenceInitializations",
+        "AbsenceGroups.absenceTroubles");
 
     final Collection<String> dropDownConfigurationActions = ImmutableList.of(
         "WorkingTimes.manageWorkingTime",

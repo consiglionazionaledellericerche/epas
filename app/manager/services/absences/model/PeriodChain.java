@@ -48,6 +48,10 @@ public class PeriodChain {
   
   //Errori
   private List<ErrorsBox> periodsErrorsBoxes = null; //errori dei periodi.. lazy quando ho i periodi
+  
+  //VacationsSupport 
+  //Permette di recuperare gratis i 3 gruppi ferie passate, correnti, permessi
+  public List<List<AbsencePeriod>> vacationSupportList = Lists.newArrayList();
 
   /**
    * Constructor PeriodChain.
@@ -66,7 +70,7 @@ public class PeriodChain {
    * @return string
    */
   public String getChainDescription() {
-    return periods.get(0).groupAbsenceType.getChainDescription();
+    return periods.get(0).groupAbsenceType.computeChainDescription();
   }
   
   /**
@@ -101,7 +105,7 @@ public class PeriodChain {
     for (AbsencePeriod absencePeriod : this.periods) {
       if (absencePeriod.isTakable()) {
         absenceTypes.addAll(absencePeriod.takenCodes);
-        //absenceTypes.addAll(currentAbsesncePeriod.takableComponent.get().takableCodes);
+        absenceTypes.addAll(absencePeriod.takableCodes);
       }
       if (absencePeriod.isComplation()) {
         absenceTypes.addAll(absencePeriod.replacingCodesDesc.values());

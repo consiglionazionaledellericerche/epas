@@ -5,26 +5,20 @@
 
 <div class="container">
 
-#{title title:('Ferie e Permessi ' + session.get("yearSelected")) /}
+#{title title:('Ferie e Permessi ' + year) /}
    
-   #{if !notInitializedContracts.empty}
-     #{alert color:'danger'}
-       <p>Risultano non correttamente inizializzati i dati su ferie e permessi per i seguenti 
-       contratti attivi nell'anno selezionato.</p>
-       <ul>
-       #{list items:notInitializedContracts, as:'contract'}
-         <li>Contratto iniziato il <strong>${contract.beginDate.format()}</strong></li>
-       #{/list}
-        </ul>
-        <p>Impossibile costruire la situazione richiesta.</p>
+   #{if vacationSituations.empty}
+     #{alert color:'warning'}
+       <p>Nessun contratto attivo per l'anno richiesto.</p>
      #{/alert}
    #{/if}
    
-   #{list items:vacationsRecapList, as:'vacationsRecap'}
+   #{list items:vacationSituations, as:'vacationSituation'}
 	
 	#{panel title:'Ferie', dim:6, color:'primary' }
 	     
       <table class="table table-bordered table-hover">
+      
       <tr class="warning">
         <th>Anno</th>
         <th>Totali (maturate)</th>
@@ -32,74 +26,73 @@
         <th>Residue (maturate)</th>
       </tr>
 
-      <!-- Ferie Past year -->  	
+      <!-- Ferie Past year -->  
+      #{if vacationSituation.lastYear != null}	
       <tr>
-        <!-- year -->
-        <td>${vacationsRecap.vacationsRequest.year - 1}</td>
-        <!-- totali (maturate) -->
-        <td>${vacationsRecap.vacationsLastYear.total} (${vacationsRecap.vacationsLastYear.accrued})</td>
-        <!-- utilizzate -->
+        <td>${vacationSituation.lastYear.year}</td>
+        <td>${vacationSituation.lastYear.total()} (${vacationSituation.lastYear.accrued()})</td>
         <td>
-           <a href="@{Vacations.vacationsLastYear(vacationsRecap.vacationsRequest.year)}" 
+           <a href="@{Vacations.personVacationSummary(vacationSituation.contract.id, vacationSituation.lastYear.year, 'VACATION')}" 
               data-async-modal="#defaultModal">
-			${vacationsRecap.vacationsLastYear.used}
+			${vacationSituation.lastYear.used()}
 		  </a>
 	    </td>
-	    <!-- residue (maturate) -->
-        <td>${vacationsRecap.vacationsLastYear.notYetUsedTotal} 
-           (${vacationsRecap.vacationsLastYear.notYetUsedAccrued}) </td>
-
+        <td>${vacationSituation.lastYear.usableTotal()} 
+           (${vacationSituation.lastYear.usable()}) 
+        </td>
       </tr>
+      #{/if}
       
       <!-- Ferie Current year -->
+      #{if vacationSituation.currentYear != null}
       <tr>
-        <!-- year -->
-        <td>${vacationsRecap.vacationsRequest.year}</td>
-        <!-- totali (maturate) -->
-        <td>${vacationsRecap.vacationsCurrentYear.total} (${vacationsRecap.vacationsCurrentYear.accrued})</td>
-        <!-- utilizzate -->
+        <td>${vacationSituation.currentYear.year}</td>
+        <td>${vacationSituation.currentYear.total()} (${vacationSituation.currentYear.accrued()})</td>
         <td>
-           <a href="@{Vacations.vacationsCurrentYear(vacationsRecap.vacationsRequest.year)}" 
+           <a href="@{Vacations.personVacationSummary(vacationSituation.contract.id, vacationSituation.currentYear.year, 'VACATION')}" 
               data-async-modal="#defaultModal">
-			${vacationsRecap.vacationsCurrentYear.used}
+			${vacationSituation.currentYear.used()}
 		  </a>
 	    </td>
-	    <!-- residue (maturate) -->
-        <td>${vacationsRecap.vacationsCurrentYear.notYetUsedTotal} 
-           (${vacationsRecap.vacationsCurrentYear.notYetUsedAccrued}) </td>
-
+        <td>${vacationSituation.currentYear.usableTotal()} 
+           (${vacationSituation.currentYear.usable()}) 
+        </td>
       </tr>
+      #{/if}
   	</table>
   	
 	#{/panel}
 	
 	#{panel title:'Permessi legge 937/77', dim:6, color:'primary' }
-	      
-      <table class="table table-bordered table-hover">
-      <tr class="warning">
-        <th>Anno</th>
-        <th>Totali (maturati)</th>
-        <th>Utilizzati</th>
-        <th>Residui (maturati)</th>
-      </tr>  	
-      <tr>
-        <!-- year -->
-        <td>${vacationsRecap.vacationsRequest.year}</td>
-        <!-- totali (maturate) -->
-        <td>${vacationsRecap.permissions.total} (${vacationsRecap.permissions.accrued})</td>
-        <!-- utilizzate -->
-        <td>
-           <a href="@{Vacations.permissionCurrentYear(vacationsRecap.vacationsRequest.year)}" 
-              data-async-modal="#defaultModal">
-			${vacationsRecap.permissions.used}
-		  </a>
-	    </td>
-	    <!-- residue (maturate) -->
-        <td>${vacationsRecap.permissions.notYetUsedTotal} 
-           (${vacationsRecap.permissions.notYetUsedAccrued}) </td>
-      </tr>
-  	</table>
-      
+	  
+	  #{if vacationSituation.permissions != null}    
+        <table class="table table-bordered table-hover">
+	      <tr class="warning">
+	        <th>Anno</th>
+	        <th>Totali (maturati)</th>
+	        <th>Utilizzati</th>
+	        <th>Residui (maturati)</th>
+	      </tr>  	
+	      <tr>
+	        <!-- year -->
+	        <td>${vacationSituation.permissions.year}</td>
+	        <!-- totali (maturate) -->
+	        <td>${vacationSituation.permissions.total()} (${vacationSituation.permissions.accrued()})</td>
+	        <!-- utilizzate -->
+	        <td>
+	           <a href="@{Vacations.personVacationSummary(vacationSituation.contract.id, vacationSituation.permissions.year, 'PERMISSION')}" 
+	              data-async-modal="#defaultModal">
+				${vacationSituation.permissions.used()}
+			  </a>
+		    </td>
+		    <!-- residue (maturate) -->
+	        <td>${vacationSituation.permissions.usableTotal()} 
+	           (${vacationSituation.permissions.usable()}) </td>
+	      </tr>
+  	    </table>
+      #{/if}#{else}
+      <p>Nessun dato da visualizzare.</p>
+      #{/else}  
 	#{/panel}      
     
     <div class="col-md-12">
@@ -112,7 +105,7 @@
 	      <th>Valore</th>
 	    </tr>
 	    
-	    #{list items: vacationsRecap.vacationsRequest.contractVacationPeriod, as: 'vp'}
+	    #{list items: vacationSituation.contract.vacationPeriods, as: 'vp'}
 	    <tr>
 	      <td>${vp.beginDate.format()}</td>
 	      <td>

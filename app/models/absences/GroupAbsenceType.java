@@ -1,5 +1,6 @@
 package models.absences;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 
 import it.cnr.iit.epas.DateInterval;
@@ -18,6 +19,7 @@ import javax.persistence.Table;
 
 import lombok.Getter;
 
+import models.absences.definitions.DefaultGroup;
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -33,7 +35,6 @@ public class GroupAbsenceType extends BaseModel {
   private static final long serialVersionUID = 3290760775533091791L;
   
   public static final String EMPLOYEE_NAME = "EMPLOYEE";
-  public static final String REDUCING_VACATIONS_NAME = "REDUCING_VACATIONS";
 
   @Required
   @Column
@@ -52,6 +53,9 @@ public class GroupAbsenceType extends BaseModel {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "category_type_id")
   public CategoryGroupAbsenceType category;
+  
+  @Column
+  public int priority;
   
   @Required
   @Getter
@@ -94,14 +98,14 @@ public class GroupAbsenceType extends BaseModel {
    * @return label
    */
   public String getLabel() {
-    return getChainDescription();
+    return computeChainDescription();
   }
   
   /**
    * La stringa che rappresenta la catena cui appartiene il gruppo.
    * @return chainDescription
    */
-  public String getChainDescription() {
+  public String computeChainDescription() {
     if (!Strings.isNullOrEmpty(this.chainDescription)) {
       return this.chainDescription;
     } else {
@@ -177,80 +181,56 @@ public class GroupAbsenceType extends BaseModel {
     
   }
   
+  /**
+   * Se esiste fra gli enumerati un corrispondente e se è correttamente modellato.
+   * @return absent se la tab non è presente in enum
+   */
+  public Optional<Boolean> matchEnum() {
+    
+    for (DefaultGroup defaultGroup : DefaultGroup.values()) {
+      if (defaultGroup.name().equals(this.name)) {
+        if (defaultGroup.description.equals(this.description) 
+            && defaultGroup.chainDescription.equals(this.chainDescription)
+            && defaultGroup.category.name().equals(this.category.name)
+            && defaultGroup.priority == this.priority
+            && defaultGroup.pattern.equals(this.pattern)
+            && defaultGroup.periodType.equals(this.periodType)
+            && defaultGroup.takable.name().equals(this.takableAbsenceBehaviour.name)
+            && defaultGroup.automatic == this.automatic
+            && defaultGroup.initializable == this.initializable) {
+          //campi nullable complation
+          if (defaultGroup.complation == null) {
+            if (this.complationAbsenceBehaviour != null) {
+              return Optional.of(false);
+            }
+          } else {
+            if (!defaultGroup.complation.name().equals(this.complationAbsenceBehaviour.name)) {
+              return Optional.of(false);
+            }
+          }
+          //campi nullable next
+          if (defaultGroup.nextGroupToCheck == null) {
+            if (this.nextGroupToCheck != null) {
+              return Optional.of(false);
+            }
+          } else {
+            if (!defaultGroup.nextGroupToCheck.name().equals(this.nextGroupToCheck.name)) {
+              return Optional.of(false);
+            }
+          }
+
+          return Optional.of(true);
+        } else {
+          return Optional.of(false);
+        }
+      } 
+    }
+    return Optional.absent();
+    
+  }
+  
   public String toString() {
     return description;
   }
-  
-  public enum DefaultCategoryType {
-
-    GENERAL("Assenze generali cnr", 1),
-    PERMISSION("Permessi vari", 2),
-    POST_PARTUM("Congedi parentali", 3),
-    LAW_104_92("Disabilità legge 104/92", 5), 
-    MALATTIA("Malattia Dipendente", 6),
-    MALATTIA_FIGLIO_1("Malattia primo figlio", 7),
-    MALATTIA_FIGLIO_2("Malattia secondo figlio", 8),
-    MALATTIA_FIGLIO_3("Malattia terzo figlio", 9),
-    PUBLIC_FUNCTION("Pubblica Funzione", 10),
-    OTHER_CODES("Altri Codici", 11),
-    AUTOMATIC_CODES("Codici Automatici", 12),
-    EMPLOYEE_CODES("Codici Dipendenti", 13)
-    ;
-
-    public String name;
-    public int priority;
-
-    private DefaultCategoryType(String name, int priority) {
-      this.name = name;
-      this.priority = priority;
-    }
-
-  }
-
-  public enum DefaultComplation {
-    C_18, C_19, C_661, 
-    C_23, C_25, C_232, C_252, C_233, C_253, 
-    C_89, C_09;
-  }
-
-  public enum DefaultTakable {
-    T_18, T_19, T_661, 
-    T_23, T_25, T_232, T_252, T_233, T_253, 
-    T_89, T_09, T_FERIE_CNR, T_RIPOSI_CNR, T_MISSIONE, T_95, T_ALTRI,
-    T_MALATTIA,
-    T_MALATTIA_FIGLIO_1_12,
-    T_MALATTIA_FIGLIO_1_13,
-    T_MALATTIA_FIGLIO_1_14,
-    T_MALATTIA_FIGLIO_2_12,
-    T_MALATTIA_FIGLIO_2_13,
-    T_MALATTIA_FIGLIO_2_14,
-    T_MALATTIA_FIGLIO_3_12,
-    T_MALATTIA_FIGLIO_3_13,
-    T_MALATTIA_FIGLIO_3_14,
-    T_PB,
-    T_EMPLOYEE,
-    ;
-  }
-
-  public enum DefaultGroup {
-    G_18, G_19, G_661, 
-    G_23, G_25, G_232, G_252, G_233, G_253,
-
-    G_89, G_09, MISSIONE, ALTRI, FERIE_CNR, RIPOSI_CNR, G_95,
-    MALATTIA, 
-    MALATTIA_FIGLIO_1_12,
-    MALATTIA_FIGLIO_1_13,
-    MALATTIA_FIGLIO_1_14,
-    MALATTIA_FIGLIO_2_12,
-    MALATTIA_FIGLIO_2_13,
-    MALATTIA_FIGLIO_2_14,
-    MALATTIA_FIGLIO_3_12,
-    MALATTIA_FIGLIO_3_13,
-    MALATTIA_FIGLIO_3_14,
-    PB,
-    EMPLOYEE,
-    ;
-  }
-
   
 }

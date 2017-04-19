@@ -45,6 +45,7 @@ public class ServiceFactories {
   private PersonDayManager personDayManager;
   private final PersonReperibilityDayDao personReperibilityDayDao;
   private final PersonShiftDayDao personShiftDayDao;
+  private final VacationFactory vacationFactory;
 
   /**
    * Constructor.
@@ -56,12 +57,14 @@ public class ServiceFactories {
   public ServiceFactories(AbsenceEngineUtility absenceEngineUtility, 
       AbsenceComponentDao absenceComponentDao, PersonDayManager personDayManager, 
       PersonReperibilityDayDao personReperibilityDayDao, 
-      PersonShiftDayDao personShiftDayDao) {
+      PersonShiftDayDao personShiftDayDao, VacationFactory vacationFactory) {
     this.absenceEngineUtility = absenceEngineUtility;
     this.absenceComponentDao = absenceComponentDao;
     this.personDayManager = personDayManager;
     this.personReperibilityDayDao = personReperibilityDayDao;
     this.personShiftDayDao = personShiftDayDao;
+    this.vacationFactory = vacationFactory;
+    
   }
   
   /**
@@ -109,7 +112,7 @@ public class ServiceFactories {
     
     //1 costruire i periods
     PeriodChain periodChain = buildPeriodChainPhase1(person, groupAbsenceType, date, 
-        orderedChildren, initializationGroups, previousInserts);
+        orderedChildren, fetchedContracts, initializationGroups, previousInserts);
 
     List<Absence> allPersistedAbsences = Lists.newArrayList();
     List<Absence> groupPersistedAbsences = Lists.newArrayList();
@@ -156,23 +159,32 @@ public class ServiceFactories {
    * @return periodChain phase1
    */
   public PeriodChain buildPeriodChainPhase1(Person person, GroupAbsenceType groupAbsenceType, 
-      LocalDate date, List<PersonChildren> orderedChildren, 
+      LocalDate date, List<PersonChildren> orderedChildren, List<Contract> fetchedContracts,
       List<InitializationGroup> initializationGroups, List<Absence> previousInserts) {
     
     PeriodChain periodChain = new PeriodChain(person, groupAbsenceType, date);
-    
-    GroupAbsenceType currentGroup = groupAbsenceType;
-    while (currentGroup != null) {
-      AbsencePeriod currentPeriod = buildAbsencePeriod(person, currentGroup, date, 
-          orderedChildren, initializationGroups);
-      if (!currentPeriod.ignorePeriod) { 
-        periodChain.periods.add(currentPeriod);  
+
+    if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.vacationsCnr)) {
+      periodChain = vacationFactory
+          .buildVacationChain(person, groupAbsenceType, fetchedContracts, date);
+    } else if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.compensatoryRestCnr)) {
+      //TODO: implementare la migrazione riposi compensativi. Una volta completata 
+      // riattivare lo scan del gruppo 
+      throw new IllegalStateException();
+    } else {
+      GroupAbsenceType currentGroup = groupAbsenceType;
+      while (currentGroup != null) {
+        AbsencePeriod currentPeriod = buildAbsencePeriod(person, currentGroup, date, 
+            orderedChildren, initializationGroups);
+        if (!currentPeriod.ignorePeriod) { 
+          periodChain.periods.add(currentPeriod);  
+        }
+
+        if (currentPeriod.errorsBox.containsCriticalErrors()) {
+          return periodChain;
+        }
+        currentGroup = currentGroup.nextGroupToCheck;
       }
-      
-      if (currentPeriod.errorsBox.containsCriticalErrors()) {
-        return periodChain;
-      }
-      currentGroup = currentGroup.nextGroupToCheck;
     }
 
     if (periodChain.periods.isEmpty()) {
@@ -223,16 +235,18 @@ public class ServiceFactories {
         .orderAbsences(groupPersistedAbsences, periodChain.previousInserts);
     
     boolean typeToInfer = (absenceToInsert != null && absenceToInsert.getAbsenceType() == null);
-    
+
+    //Dispatch di tutte le assenze coinvolte gruppo e inserimenti precedenti
     for (AbsencePeriod absencePeriod : periodChain.periods) {
-      
-      //Dispatch di tutte le assenze coinvolte gruppo e inserimenti precedenti
       for (Absence absence : absencePeriod
           .filterAbsencesInPeriod(periodChain.involvedAbsencesInGroup)) {
         dispatchAbsenceInPeriod(periodChain, absencePeriod, absence);
       }
+    }
+
+    //Gestione assenza da inserire (per ultima)
+    for (AbsencePeriod absencePeriod : periodChain.periods) {
       
-      //Gestione assenza da inserire (per ultima)
       boolean successInsertInPeriod = 
           insertAbsenceInPeriod(periodChain, absencePeriod, absenceToInsert);
 
@@ -391,8 +405,8 @@ public class ServiceFactories {
     boolean isComplation = false;
     boolean isReplacing = false;
     if (absencePeriod.isTakable()) {
-      //isTaken = absencePeriod.takenCodes.contains(absence.absenceType);   // no insert
-      isTaken = absencePeriod.takableCodes.contains(absence.getAbsenceType()); // insert
+      isTaken = absencePeriod.takenCodes.contains(absence.absenceType);   // no insert
+      //isTaken = absencePeriod.takableCodes.contains(absence.getAbsenceType()); // insert
     }
     if (absencePeriod.isComplation()) {
       isReplacing = absencePeriod.replacingCodesDesc.values()

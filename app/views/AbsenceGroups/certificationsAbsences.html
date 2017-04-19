@@ -1,0 +1,52 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Assenze Attestati'  /}
+
+<div class="container">
+
+#{alert color:'info'}
+ <p>Crushcotto ${person.fullname} anno ${yearSituation.year}.</p>
+ <p>Data Inizio <strong>${yearSituation.beginDate.format()}</strong></p>
+ <p>#{if yearSituation.endDate} Data Fine <strong>${yearSituation.endDate.format()} #{/if}</strong></p>
+#{/alert}
+
+<table class="table table-bordered table-condensed table-hover"> 
+  <thead>
+  <tr>
+    <th>Tipo</th>
+    <th>Codici</th>
+    <th>Usate</th>
+    <th>Date</th>
+    <th>Totali Usabili</th>
+    <th>Totali Residue</th>
+  </tr>
+  </thead>
+  <tbody>
+  #{list items:yearSituation.absenceSituations, as:'absenceSituation'}
+    <tr>
+      <td>${absenceSituation.type}</td>
+      <td>
+        #{list items:absenceSituation.datesPerCode.keySet(), as:'code'}
+          ${code}<br>
+        #{/list}
+      </td>
+      <td>${absenceSituation.totalUsed()}</td>
+      <td>
+       #{list items:absenceSituation.datesPerCode.keySet(), as:'code'}
+         #{list items:absenceSituation.datesPerCode.get(code), as:'date'}
+          ${date} ${code} 
+          #{if absenceSituation.isAbsencePresent(code, date)} <i class="fa fa-check text-success" aria-hidden="true"></i> #{/if}
+          #{else} <i class="fa fa-times text-danger" aria-hidden="true"></i> #{/else}
+          <br>
+         #{/list} 
+        #{/list}
+      </td>
+      <td>${absenceSituation.totalUsable}</td>
+      <td>${absenceSituation.totalResidual}</td>
+    </tr>
+  #{/list}
+  </tbody>
+</table>
+
+
+</div>

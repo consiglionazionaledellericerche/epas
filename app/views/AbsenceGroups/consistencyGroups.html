@@ -1,0 +1,328 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Controllo Gruppi' /}
+
+ <div class="container-fluid">
+ 
+    <a class="btn btn-primary" href="@{AbsenceGroups.consistencyCleans()}">Pulizia</a>
+   
+    #{alert color:'info'}
+     <p>Controllo Tabs <strong>TODO</strong> eliminare il campo isDefault non utilizzato.</p>
+     #{if !models.absences.definitions.DefaultTab.missing(allCategoryTabs).empty}
+       <p>Nel database sono assenti le seguenti tab modellate: </p>
+       #{list items:models.absences.definitions.DefaultTab.missing(allCategoryTabs), as:'categoryTab'}
+         <strong>${categoryTab.name()}</strong>
+       #{/list}
+     #{/if}#{else}
+       <p>Tutte le categorie enumerate sono presenti su DB.</p>
+     #{/else}
+    #{/alert}     
+   
+   <table class="table table-condensed table-bordered"> 
+    <thead>
+     <tr>
+      <th>Nome</th>
+      <th>Descrizione</th>
+      <th>Priorità</th>
+     </tr>
+    </thead>
+    <tbody> 
+     #{list items:allCategoryTabs, as:'tab'}
+     
+      <tr #{if tab.matchEnum().present}
+            #{if tab.matchEnum().get()} class="bg-success" #{/if}
+            #{else}                     class="bg-danger"  #{/else}
+          #{/if}
+          #{else} class="bg-warning"#{/else}>
+          
+        <td>${tab.name}</td>
+        <td>${tab.description}</td>
+        <td>${tab.priority}</td>
+      </tr>
+     #{/list}
+    </tbody>   
+   </table>
+   
+    #{alert color:'info'}
+     <p>Controllo Categorie</p>
+     #{if !models.absences.definitions.DefaultCategoryType.missing(allCategories).empty}
+       <p>Nel database sono assenti le seguenti categorie modellate: </p>
+       #{list items:models.absences.definitions.DefaultCategoryType.missing(allCategories), as:'category'}
+         <strong>${category.name()}</strong>
+       #{/list}
+     #{/if}#{else}
+       <p>Tutte le categorie enumerate sono presenti su DB.</p>
+     #{/else}
+    #{/alert}      
+    
+    <table class="table table-condensed table-bordered"> 
+    <thead>
+     <tr>
+      <th>Nome</th>
+      <th>Descrizione</th>
+      <th>Priorità</th>
+      <th>Tab</th>
+     </tr>
+    </thead>
+    <tbody> 
+     #{list items:allCategories, as:'category'}
+      <tr #{if category.matchEnum().present}
+            #{if category.matchEnum().get()} class="bg-success" #{/if}
+            #{else}                          class="bg-danger"  #{/else}
+          #{/if}
+          #{else} class="bg-warning"#{/else}>
+        <td>${category.name}</td>
+        <td>${category.description}</td>
+        <td>${category.priority}</td>
+        <td>${category.tab?.name}</td>
+      </tr>
+     #{/list}
+    </tbody>   
+   </table>
+   
+      
+    #{alert color:'info'}
+     <p>Controllo Gruppi</p>
+     #{if !models.absences.definitions.DefaultGroup.missing(allGroups).empty}
+       <p>Nel database sono assenti i seguenti gruppi modellati: </p>
+       #{list items:models.absences.definitions.DefaultGroup.missing(allGroups), as:'group'}
+         <strong>${group.name()}</strong>
+       #{/list}
+     #{/if}#{else}
+       <p>Tutti i gruppi enumerati sono presenti su DB.</p>
+     #{/else}
+    #{/alert}    
+    
+    <table class="table table-condensed table-bordered"> 
+    <thead>
+     <tr>
+      <th>Nome</th>
+      <th>Descrizione</th>
+      <th>Categoria</th>
+      <th>Pattern</th>
+      <th>Periodo</th>
+      <th>Takable</th>
+      <th>Complation</th>
+      <th>Auto</th>
+      <th>Init</th>
+     </tr>
+    </thead>
+    <tbody> 
+     #{list items:allGroups, as:'group'}
+      <tr #{if group.matchEnum().present}
+            #{if group.matchEnum().get()} class="bg-success" #{/if}
+            #{else}                       class="bg-danger"  #{/else}
+          #{/if}
+          #{else} class="bg-warning"#{/else}>
+        <td>${group.name}</td>
+        <td>${group.description}</td>
+        <td>${group.category.name}</td>
+        <td>${group.pattern}</td>
+        <td>${group.periodType}</td>
+        <td>${group.takableAbsenceBehaviour.name}</td>
+        <td>${group.complationAbsenceBehaviour?.name}</td>
+        <td>${group.automatic}</td>
+        <td>${group.initializable}</td>
+      </tr>
+     #{/list}
+    </tbody>   
+   </table>
+   
+   #{alert color:'info'}
+     <p>Controllo Completamenti</p>
+     #{if !models.absences.definitions.DefaultComplation.missing(allComplations).empty}
+       <p>Nel database sono assenti i seguenti comportamenti di completamento modellati: </p>
+       #{list items:models.absences.definitions.DefaultComplation.missing(allComplations), as:'complation'}
+         <strong>${complation.name()}</strong>
+       #{/list}
+     #{/if}#{else}
+       <p>Tutti i comportamenti di completamento enumerati sono presenti su DB.</p>
+     #{/else}
+   #{/alert}
+   
+   <table class="table table-condensed table-bordered"> 
+    <thead>
+     <tr>
+      <th>Nome</th>
+      <th>Amount</th>
+      <th>Completamenti</th>
+      <th>Rimpiazzamenti</th>
+     </tr>
+    </thead>
+    <tbody> 
+     #{list items:allComplations, as:'complation'}
+      <tr #{if complation.matchEnum().present}
+            #{if complation.matchEnum().get()} class="bg-success" #{/if}
+            #{else}                            class="bg-danger"  #{/else}
+          #{/if}
+          #{else} class="bg-warning"#{/else}>
+        <td>${complation.name}</td>
+        <td>${complation.amountType}</td>
+        <td>
+          #{list items:complation.replacingCodes, as:'absenceType'}
+            ${absenceType.code}
+          #{/list}
+        </td>
+        <td>
+          #{list items:complation.complationCodes, as:'absenceType'}
+            ${absenceType.code}
+          #{/list}
+        </td>
+      </tr>
+     #{/list}
+    </tbody>   
+   </table>  
+   
+    #{alert color:'info'}
+     <p>Controllo Prendibilità</p>
+     #{if !models.absences.definitions.DefaultTakable.missing(allTakables).empty}
+       <p>Nel database sono assenti i seguenti comportamenti di prendibilità modellati: </p>
+       #{list items:models.absences.definitions.DefaultTakable.missing(allTakables), as:'takable'}
+         <strong>${takable.name()}</strong>
+       #{/list}
+     #{/if}#{else}
+       <p>Tutti i comportamenti di prendibilità enumerati sono presenti su DB.</p>
+     #{/else}
+   #{/alert}  
+   
+   <table class="table table-condensed table-bordered"> 
+    <thead>
+     <tr>
+      <th>Nome</th>
+      <th>Amount</th>
+      <th>Limite</th>
+      <th>Aggiustamento</th>
+      <th>Presi</th>
+      <th>Prendibili</th>
+     </tr>
+    </thead>
+    <tbody> 
+     #{list items:allTakables, as:'takable'}
+      <tr #{if takable.matchEnum().present}
+            #{if takable.matchEnum().get()} class="bg-success" #{/if}
+            #{else}                         class="bg-danger"  #{/else}
+          #{/if}
+          #{else} class="bg-warning"#{/else}>
+        <td>${takable.name}</td>
+        <td>${takable.amountType}</td>
+        <td>${takable.fixedLimit}</td>
+        <td>${takable.takableAmountAdjustment}</td>
+        <td>
+          #{list items:takable.takenCodes, as:'absenceType'}
+            ${absenceType.code}
+          #{/list}
+        </td>
+        <td>
+          #{list items:takable.takableCodes, as:'absenceType'}
+            ${absenceType.code}
+          #{/list}
+        </td>
+      </tr>
+     #{/list}
+    </tbody>   
+   </table>  
+   
+   #{alert color:'info'}
+     <p>Controllo Codici</p>
+     #{if !models.absences.definitions.DefaultAbsenceType.missing(allAbsenceTypes).empty}
+       <p>Nel database sono assenti i seguenti codici assenza modellati: </p>
+       #{list items:models.absences.definitions.DefaultAbsenceType.missing(allAbsenceTypes), as:'absenceType'}
+         <strong>${absenceType.name()}</strong>
+       #{/list}
+     #{/if}#{else}
+       <p>Tutti i codici assenza enumerati sono presenti su DB.</p>
+     #{/else}
+   #{/alert}  
+   
+   <table class="table table-condensed table-bordered"> 
+    <thead>
+     <tr>
+      <th>Nome</th>
+      <th>Cert</th>
+      <th>Descrizione</th>
+      <th>Interno</th>
+      <th>Tipo</th>
+      <th>Tempo</th>
+      <th>Weekend</th>
+      <th>Meal</th>
+      <th>Tipo R.</th>
+      <th>Tempo R.</th>
+      <th>Dal</th>
+      <th>Al</th>
+     </tr>
+    </thead>
+    <tbody> 
+     #{list items:allAbsenceTypes, as:'absenceType'}
+      #{if absenceType.matchEnum().present}
+      <tr #{if absenceType.matchEnum().present}
+            #{if absenceType.matchEnum().get()} class="bg-success" #{/if}
+            #{else}                             class="bg-danger"  #{/else}
+          #{/if}
+          #{else} class="bg-warning"#{/else}>
+        <td>${absenceType.code}</td>
+        <td>${absenceType.certificateCode}</td>
+        <td>${absenceType.description}</td>
+        <td>${absenceType.internalUse}</td>
+        <td>
+          #{list items:absenceType.justifiedTypesPermitted, as:'justifiedType'}
+            ${justifiedType.name}
+          #{/list}
+        </td>
+        <td>${absenceType.justifiedTime}</td>
+        <td>${absenceType.consideredWeekEnd}</td>
+        <td>${absenceType.timeForMealTicket}</td>
+        <td>${absenceType.replacingType?.name}</td>
+        <td>${absenceType.replacingTime}</td>
+        <td>${absenceType.validFrom?.format()}</td>
+        <td>${absenceType.validTo?.format()}</td>
+      </tr>
+      #{/if}
+     #{/list}
+    </tbody>   
+   </table>  
+   
+   <table class="table table-condensed table-bordered"> 
+    <thead>
+     <tr>
+      <th>Nome</th>
+      <th>Cert</th>
+      <th>Descrizione</th>
+      <th>Interno</th>
+      <th>Tipo</th>
+      <th>Tempo</th>
+      <th>Weekend</th>
+      <th>Meal</th>
+      <th>Tipo R.</th>
+      <th>Tempo R.</th>
+      <th>Dal</th>
+      <th>Al</th>
+     </tr>
+    </thead>
+    <tbody> 
+     #{list items:allAbsenceTypes, as:'absenceType'}
+      #{if !absenceType.matchEnum().present}
+      <tr #{if absenceType.expired} class="bg-grey" #{/if}
+          #{else}                   class="bg-warning"#{/else}>
+        <td>${absenceType.code}</td>
+        <td>${absenceType.certificateCode}</td>
+        <td>${absenceType.description}</td>
+        <td>${absenceType.internalUse}</td>
+        <td>
+          #{list items:absenceType.justifiedTypesPermitted, as:'justifiedType'}
+            ${justifiedType.name}
+          #{/list}
+        </td>
+        <td>${absenceType.justifiedTime}</td>
+        <td>${absenceType.consideredWeekEnd}</td>
+        <td>${absenceType.timeForMealTicket}</td>
+        <td>${absenceType.replacingType?.name}</td>
+        <td>${absenceType.replacingTime}</td>
+        <td>${absenceType.validFrom?.format()}</td>
+        <td>${absenceType.validTo?.format()}</td>
+      </tr>
+      #{/if}
+     #{/list}
+    </tbody>   
+   </table>  
+   
+</div>
