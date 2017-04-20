@@ -185,7 +185,7 @@ public class StampingManager {
    * @param user l'utente che vuole inserire la timbratura
    * @param employee la persona per cui si vuole inserire la timbratura
    * @return true se lo stampType relativo alla timbratura da inserire è tra quelli previsti per la
-   * timbratura fuori sede, false altrimenti.
+   *     timbratura fuori sede, false altrimenti.
    */
   public boolean checkStampType(Stamping stamping, User user, Person employee) {
     return user.person.id.equals(employee.id)
@@ -193,7 +193,7 @@ public class StampingManager {
   }
 
   /**
-   * Associa la persona alla timbratura ricevuta via REST
+   * Associa la persona alla timbratura ricevuta via REST.
    *
    * @param stamping DTO costruito dal Json
    * @return un Optional contenente la person o absent
@@ -213,11 +213,13 @@ public class StampingManager {
     final Optional<Person> person = Optional.fromNullable(personDao
         .getPersonByBadgeNumber(stamping.numeroBadge, user.get().badgeReader));
 
-    if (!person.isPresent()) {
+    if (person.isPresent()) {
+      stamping.person = person.get();      
+    } else {
       log.warn("Non e' stato possibile recuperare la persona a cui si riferisce la timbratura,"
           + " matricolaFirma={}. Controllare il database.", stamping.numeroBadge);
     }
-    stamping.person = person.get();
+   
     return person;
   }
 
