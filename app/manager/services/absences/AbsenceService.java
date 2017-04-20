@@ -27,6 +27,8 @@ import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
+import manager.services.absences.certifications.CertificationYearSituation;
+import manager.services.absences.certifications.CertificationYearSituation.AbsenceSituation;
 import manager.services.absences.certifications.CodeComparation;
 import manager.services.absences.errors.AbsenceError;
 import manager.services.absences.errors.CriticalError;
@@ -57,6 +59,7 @@ import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
 
 import org.joda.time.LocalDate;
@@ -80,7 +83,7 @@ public class AbsenceService {
   private final EnumAllineator enumAllineator;
   private final ConfigurationManager confManager;
   private final SecureManager secureManager;
-  
+   
   /**
    * Costruttore injection.
    * @param absenceEngineUtility injected
@@ -231,7 +234,7 @@ public class AbsenceService {
     //Inserimento forzato (nessun controllo)
     if (forceInsert) {
       Preconditions.checkNotNull(absenceType);
-      return forceInsert(person, groupAbsenceType, from, to, 
+      return forceInsert(person, from, to, 
           absenceType, justifiedType, hours, minutes);
     }
     
@@ -357,7 +360,7 @@ public class AbsenceService {
   }
   
   
-  private InsertReport forceInsert(Person person, GroupAbsenceType groupAbsenceType, 
+  private InsertReport forceInsert(Person person, 
       LocalDate from, LocalDate to, 
       AbsenceType absenceType, JustifiedType justifiedType, 
       Integer hours, Integer minutes) {
@@ -922,6 +925,204 @@ public class AbsenceService {
       }
       return residualDate.get();
     }
+  }
+
+  /**
+   * Le assenze mancanti rispetto ad attestati da persistere.
+   * @param situation sitauzione
+   * @return list
+   */
+  public List<Absence> certificationAbsencesToPersist(CertificationYearSituation situation) {
+
+    List<Absence> absenceToPersist = Lists.newArrayList();
+    
+    JustifiedType allDay = absenceComponentDao
+        .getOrBuildJustifiedType(JustifiedTypeName.all_day);
+    JustifiedType specified = absenceComponentDao
+        .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
+
+    for (AbsenceSituation absenceSituation : situation.absenceSituations) {
+      for (String code : absenceSituation.datesPerCode.keySet()) {
+        Optional<AbsenceType> type = absenceComponentDao.absenceTypeByCode(code);
+        if (!type.isPresent()) {
+          log.info("Un codice utilizzato su attestati non è presente su ePAS {}", code);
+          continue;
+        }
+
+        for (LocalDate date : absenceSituation.datesPerCode.get(code)) {
+          
+          AbsenceType aux = type.get();
+          
+          //1) I congedi parentali completamento (li faccio diventare normali)
+          if (code.equals(DefaultAbsenceType.A_23H7.getCode())) {
+            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_23.getCode()).get();
+          }
+          if (code.equals(DefaultAbsenceType.A_232H7.getCode())) {
+            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_232.getCode()).get();
+          }
+          if (code.equals(DefaultAbsenceType.A_233H7.getCode())) {
+            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_233.getCode()).get();
+          }
+          if (code.equals(DefaultAbsenceType.A_25H7.getCode())) {
+            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_25.getCode()).get();
+          }
+          if (code.equals(DefaultAbsenceType.A_252H7.getCode())) {
+            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_252.getCode()).get();
+          }
+          if (code.equals(DefaultAbsenceType.A_253H7.getCode())) {
+            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_253.getCode()).get();
+          }
+          if (code.equals(DefaultAbsenceType.A_24H7.getCode())) {
+            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_24.getCode()).get();
+          }
+          if (code.equals(DefaultAbsenceType.A_242H7.getCode())) {
+            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_242.getCode()).get();
+          }
+          if (code.equals(DefaultAbsenceType.A_243H7.getCode())) {
+            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_243.getCode()).get();
+          }
+          if (code.equals(DefaultAbsenceType.A_25PH7.getCode())) {
+            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_25P.getCode()).get();
+          }
+          if (!aux.equals(type.get())) {
+            if (absenceComponentDao.findAbsences(situation.person, date, aux.code).isEmpty()) {
+              forceInsert(situation.person, date, null, aux, allDay, null, null);
+            } else {
+              log.info("Assenza presente {} {} {}", situation.person.fullName(), date, aux.code);
+            }
+            continue;
+          }
+
+          //2) I 661H* li faccio diventare 661M
+          if (code.equals(DefaultAbsenceType.A_661H1.getCode()) 
+              || code.equals(DefaultAbsenceType.A_661H2.getCode())
+              || code.equals(DefaultAbsenceType.A_661H3.getCode())
+              || code.equals(DefaultAbsenceType.A_661H4.getCode())
+              || code.equals(DefaultAbsenceType.A_661H5.getCode())
+              || code.equals(DefaultAbsenceType.A_661H6.getCode())
+              || code.equals(DefaultAbsenceType.A_661H7.getCode())
+              || code.equals(DefaultAbsenceType.A_661H8.getCode())
+              || code.equals(DefaultAbsenceType.A_661H9.getCode())) {
+            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_661M.getCode()).get();
+          }
+          if (!aux.equals(type.get())) {
+            if (absenceComponentDao.findAbsences(situation.person, date, aux.code).isEmpty()) {
+              absenceToPersist.addAll(forceInsert(situation.person, date, null, aux, specified, 
+                  type.get().replacingTime / 60, 0).absencesToPersist);
+            } else {
+              log.info("Assenza presente {} {} {}", situation.person.fullName(), date, aux.code);
+            }
+            continue;
+          } 
+          
+          //3) I 18H* 19H* 182H* li faccio diventare 18M, 19M, 182M
+          if (code.equals(DefaultAbsenceType.A_18H1.getCode()) 
+              || code.equals(DefaultAbsenceType.A_18H2.getCode())
+              || code.equals(DefaultAbsenceType.A_18H3.getCode())
+              || code.equals(DefaultAbsenceType.A_18H4.getCode())
+              || code.equals(DefaultAbsenceType.A_18H5.getCode())
+              || code.equals(DefaultAbsenceType.A_18H6.getCode())
+              || code.equals(DefaultAbsenceType.A_18H7.getCode())
+              || code.equals(DefaultAbsenceType.A_18H8.getCode())
+              || code.equals(DefaultAbsenceType.A_18H9.getCode())) {
+            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_18M.getCode()).get();
+          }
+          if (code.equals(DefaultAbsenceType.A_182H1.getCode()) 
+              || code.equals(DefaultAbsenceType.A_182H2.getCode())
+              || code.equals(DefaultAbsenceType.A_182H3.getCode())
+              || code.equals(DefaultAbsenceType.A_182H4.getCode())
+              || code.equals(DefaultAbsenceType.A_182H5.getCode())
+              || code.equals(DefaultAbsenceType.A_182H6.getCode())
+              || code.equals(DefaultAbsenceType.A_182H7.getCode())
+              || code.equals(DefaultAbsenceType.A_182H8.getCode())
+              || code.equals(DefaultAbsenceType.A_182H9.getCode())) {
+            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_182M.getCode()).get();
+          }
+          if (code.equals(DefaultAbsenceType.A_19H1.getCode()) 
+              || code.equals(DefaultAbsenceType.A_19H2.getCode())
+              || code.equals(DefaultAbsenceType.A_19H3.getCode())
+              || code.equals(DefaultAbsenceType.A_19H4.getCode())
+              || code.equals(DefaultAbsenceType.A_19H5.getCode())
+              || code.equals(DefaultAbsenceType.A_19H6.getCode())
+              || code.equals(DefaultAbsenceType.A_19H7.getCode())
+              || code.equals(DefaultAbsenceType.A_19H8.getCode())
+              || code.equals(DefaultAbsenceType.A_19H9.getCode())) {
+            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_19M.getCode()).get();
+          }
+          if (!aux.equals(type.get())) {
+            if (absenceComponentDao.findAbsences(situation.person, date, aux.code).isEmpty()) {
+              absenceToPersist.addAll(forceInsert(situation.person, date, null, aux, specified, 
+                  type.get().replacingTime / 60, 0).absencesToPersist);
+            } else {
+              log.info("Assenza presente {} {} {}", situation.person.fullName(), date, aux.code);
+            }
+            continue;
+          } 
+          
+          //7) 89 (diritto allo studio). Converto i completamenti in assenze a minuti.
+          if (code.equals(DefaultAbsenceType.A_89.getCode())) {
+            //TODO: working time day, ricordarsi che è stata importata da attestati.
+            //all'inizio ogni dipendente ha il tipo orario 7:12, ma potrebbe essere ridotta
+            //quando verrà impostato l'orario corretto.
+            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_89M.getCode()).get();
+            if (absenceComponentDao.findAbsences(situation.person, date, aux.code).isEmpty()) {
+              absenceToPersist.addAll(forceInsert(situation.person, date, null, aux, specified, 
+                  432, 0).absencesToPersist);
+            } else {
+              log.info("Assenza presente {} {} {}", situation.person.fullName(), date, aux.code);
+            }
+            continue;
+          }
+          
+          //8) 09 (visita medica). Stesso ragionamento.
+          if (code.equals(DefaultAbsenceType.A_89.getCode())) {
+            //TODO: vedi 89
+            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_89M.getCode()).get();
+            if (absenceComponentDao.findAbsences(situation.person, date, aux.code).isEmpty()) {
+              absenceToPersist.addAll(forceInsert(situation.person, date, null, aux, specified, 
+                  432, 0).absencesToPersist); 
+            } else {
+              log.info("Assenza presente {} {} {}", situation.person.fullName(), date, aux.code);
+            }
+            continue;
+          }
+          
+          //Gli altri li inserisco senza paura 
+          // (a patto che il tipo sia allDay o absence_type_minutes)
+          if (type.get().justifiedTypesPermitted.size() != 1) {
+            log.info("Impossibile importare una assenza senza justified univoco o definito {}", 
+                type.get().code);
+            continue;
+          }
+          JustifiedType justifiedType = type.get().justifiedTypesPermitted.iterator().next();
+          if (justifiedType.name.equals(JustifiedTypeName.all_day)) {
+            if (absenceComponentDao
+                .findAbsences(situation.person, date, type.get().code).isEmpty()) {
+              absenceToPersist.addAll(forceInsert(situation.person, date, null, 
+                  type.get(), justifiedType, 0, 0).absencesToPersist); 
+            } else {
+              log.info("Assenza presente {} {} {}", situation.person.fullName(), date, aux.code);
+            }
+            continue;
+          }
+          if (justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
+            int hour = type.get().justifiedTime / 60;
+            int minute = type.get().justifiedTime % 60;
+            if (absenceComponentDao
+                .findAbsences(situation.person, date, type.get().code).isEmpty()) {
+              absenceToPersist.addAll(forceInsert(situation.person, date, null, 
+                  type.get(), justifiedType, hour, minute).absencesToPersist); 
+            } else {
+              log.info("Assenza presente {} {} {}", situation.person.fullName(), date, aux.code);
+            }
+            continue;
+          }
+
+
+        }
+      }
+    }
+    return absenceToPersist;
   }
   
 }

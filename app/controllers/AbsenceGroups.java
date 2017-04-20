@@ -1102,7 +1102,7 @@ public class AbsenceGroups extends Controller {
   }
 
   /** 
-   * Le assenze in attestati. //TODO Metodo provvisorio di prova.
+   * Le assenze in attestati.
    */
   public static void certificationsAbsences(Long personId, Integer year) 
       throws NoSuchFieldException, ExecutionException {
@@ -1116,6 +1116,42 @@ public class AbsenceGroups extends Controller {
         person, cruscottoDipendente);
     
     render(yearSituation, person);
+  }
+  
+  /**
+   * Importa le assenze mancanti da attestati.
+   */
+  public static void importCertificationsAbsences(Long personId, Integer year) 
+      throws NoSuchFieldException, ExecutionException {
+    
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+
+    CruscottoDipendente cruscottoDipendente = certService.getCruscottoDipendente(person, year);
+
+    CertificationYearSituation yearSituation = new CertificationYearSituation(absenceComponentDao, 
+        person, cruscottoDipendente);
+
+
+    LocalDate updateFrom = LocalDate.now();
+    for (Absence absence : absenceService.certificationAbsencesToPersist((yearSituation))) {
+
+      PersonDay personDay = personDayManager
+          .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
+      absence.personDay = personDay;
+      personDay.absences.add(absence);
+      rules.checkIfPermitted(absence);
+      absence.save();
+      personDay.save();
+      if (personDay.date.isBefore(updateFrom)) {
+        updateFrom = personDay.date;
+      }
+    }
+
+    JPA.em().flush();
+    consistencyManager.updatePersonSituation(person.id, updateFrom);
+    
+    certificationsAbsences(person.id, year);
   }
 
 }
