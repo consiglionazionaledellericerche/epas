@@ -90,7 +90,7 @@ public enum DefaultGroup {
       DefaultCategoryType.FERIE_CNR, 0,
       GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, 
       DefaultTakable.T_FERIE_CNR, null, null, false, false),
-  G_FERIE_CNR_DIPENDENTI("Ferie e permessi legge", 
+  FERIE_CNR_DIPENDENTI("Ferie e permessi legge", 
       "", 
       DefaultCategoryType.FERIE_DIPENDENTI, 2,
       GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, 
@@ -111,6 +111,12 @@ public enum DefaultGroup {
       DefaultCategoryType.RIPOSI_COMPENSATIVI_CNR, 0,
       GroupAbsenceTypePattern.compensatoryRestCnr, PeriodType.always, 
       DefaultTakable.T_RIPOSI_CNR, null, null, false, false),
+  RIPOSI_CNR_DIPENDENTI("91 - Riposo compensativo", 
+      "", 
+      DefaultCategoryType.RIPOSI_COMPENSATIVI_DIPENDENTI, 0,
+      GroupAbsenceTypePattern.compensatoryRestCnr, PeriodType.always, 
+      DefaultTakable.T_RIPOSI_CNR, null, null, false, false),
+  
   MALATTIA("Codici malattia dipendente", 
       "", 
       DefaultCategoryType.MALATTIA_DIPENDENTE, 0,
@@ -239,7 +245,7 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
       DefaultTakable.T_ALTRI, null, null, false, false),
   
-  G_LAVORO_FUORI_SEDE("Lavoro fuori sede", 
+  LAVORO_FUORI_SEDE("Lavoro fuori sede", 
       "", 
       DefaultCategoryType.LAVORO_FUORI_SEDE, 0,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
@@ -325,6 +331,42 @@ public enum DefaultGroup {
       }
     }
     return Optional.absent();
+  }
+  
+  /**
+   * Codici ferie prendibili dal gruppo ferie per dipendenti.
+   * @return list
+   */
+  public static List<String> employeeVacationCodes() {
+    List<String> codes = Lists.newArrayList();
+    for (DefaultAbsenceType takable : DefaultGroup.FERIE_CNR_DIPENDENTI.takable.takableCodes) {
+      codes.add(takable.getCode());
+    }
+    return codes;
+  }
+  
+  /**
+   * Codici ferie prendibili dal gruppo riposi compensativi per dipendenti.
+   * @return list
+   */
+  public static List<String> employeeCompensatoryCodes() {
+    List<String> codes = Lists.newArrayList();
+    for (DefaultAbsenceType takable : DefaultGroup.RIPOSI_CNR_DIPENDENTI.takable.takableCodes) {
+      codes.add(takable.getCode());
+    }
+    return codes;
+  }
+  
+  /**
+   * Codici ferie prendibili dal gruppo lavoro fuori sede per dipendenti. (105BP)
+   * @return list
+   */
+  public static List<String> employeeOffSeatCodes() {
+    List<String> codes = Lists.newArrayList();
+    for (DefaultAbsenceType takable : DefaultGroup.LAVORO_FUORI_SEDE.takable.takableCodes) {
+      codes.add(takable.getCode());
+    }
+    return codes;
   }
 
 }
