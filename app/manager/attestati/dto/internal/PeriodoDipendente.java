@@ -1,11 +1,5 @@
 package manager.attestati.dto.internal;
 
-import com.google.common.collect.Lists;
-
-import java.util.List;
-
-import org.joda.time.LocalDate;
-
 /**
  * Json caricato quando si clicca su un nominativo a partire dall'elenco dei dipendenti
  * della sede.
