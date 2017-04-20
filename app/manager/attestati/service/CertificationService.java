@@ -688,10 +688,15 @@ public class CertificationService implements ICertificationService {
   public CruscottoDipendente getCruscottoDipendente(Person person, int year) 
       throws ExecutionException, NoSuchFieldException {
     
+    //Dicembre per gli anni passati, il mese scorso se anno corrente.
+    int month = 12;
+    if (year == LocalDate.now().getYear()) {
+      month = LocalDate.now().getMonthOfYear() - 1;
+    }
+    
     //prelevare lo stato attuale attestato per il mese attuale della sede della persona
     for (StatoAttestatoMese statoAttestatoMese : certificationsComunication
-        .getStatoAttestatoMese(person.office, year, 
-            LocalDate.now().getMonthOfYear() - 1)) {
+        .getStatoAttestatoMese(person.office, year, month)) {
       
       //processo solo quello della persona passata
       if (person.number.equals(statoAttestatoMese.dipendente.matricola)) {

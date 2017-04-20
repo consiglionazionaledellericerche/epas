@@ -169,8 +169,9 @@ public class CruscottoDipendente {
   public static LocalDate formatter(String time) {
     final DateTimeFormatter dtf = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
     LocalDateTime dt = dtf.parseLocalDateTime(time.substring(0, 23));
-    dt = dt.plusHours(1);
-    return new LocalDate(dt);
+    dt = dt.plusHours(2);
+    LocalDate date = new LocalDate(dt);
+    return date;
   }
 
 }
