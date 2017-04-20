@@ -9,6 +9,7 @@ import dao.absences.AbsenceComponentDao;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import manager.attestati.dto.internal.CruscottoDipendente;
 import manager.attestati.dto.internal.CruscottoDipendente.SituazioneDipendenteAssenze;
@@ -105,6 +106,8 @@ public class CertificationYearSituation {
      */
     public boolean isAbsencePresent(String code, LocalDate date) {
       
+      Set<AbsenceType> certificationCodes = Sets.newHashSet();
+      
       Optional<AbsenceType> absenceType = absenceComponentDao.absenceTypeByCode(code);
       if (!absenceType.isPresent() 
           || (absenceType.get().certificateCode != null 
@@ -113,17 +116,23 @@ public class CertificationYearSituation {
         //Se non lo trovo oppure il codice in attestati è diverso da quello trovato
         //Lo cerco per codice attestati. Si potrebbe migliorare popolando per ogni codice 
         //la colonna codice attestati.
-        absenceType = absenceComponentDao.absenceTypeByCertificationCode(code);
+      } else {
+        certificationCodes.add(absenceType.get());
       }
       
-      if (!absenceType.isPresent()) {
+      certificationCodes.addAll(absenceComponentDao.absenceTypesByCertificationCode(code));
+      
+      if (certificationCodes.isEmpty()) {
         return false;
       }
-      
+
+      List<Absence> absences = Lists.newArrayList();
+      for (AbsenceType certificationType : certificationCodes) {
+        absences.addAll(absenceComponentDao.orderedAbsences(person, date, date, 
+            Sets.newHashSet(certificationType)));
+      }
+
       //Dovrebbe essere unica
-      List<Absence> absences = absenceComponentDao.orderedAbsences(person, date, date, 
-          Sets.newHashSet(absenceType.get()));
-      
       if (absences.isEmpty()) {
         return false;
       }
