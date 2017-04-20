@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
+import manager.NotificationManager;
 import manager.PersonDayManager;
 import manager.attestati.dto.internal.CruscottoDipendente;
 import manager.attestati.service.CertificationService;
@@ -61,6 +62,7 @@ import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
+import models.absences.definitions.DefaultGroup;
 import models.enumerate.QualificationMapping;
 
 import org.joda.time.LocalDate;
@@ -104,6 +106,8 @@ public class AbsenceGroups extends Controller {
   private static AbsenceComponentDao absenceComponentDao;
   @Inject
   private static CertificationService certService; 
+  @Inject
+  static NotificationManager notificationManager;
 
   /**
    * La lista delle categorie definite.
@@ -621,6 +625,13 @@ public class AbsenceGroups extends Controller {
         rules.checkIfPermitted(absence);
         absence.save();
         personDay.save();
+        
+        if (groupAbsenceType.name.equals(DefaultGroup.FERIE_CNR_DIPENDENTI.name()) 
+            || groupAbsenceType.name.equals(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name())
+            || groupAbsenceType.name.equals(DefaultGroup.LAVORO_FUORI_SEDE.name())) {
+          notificationManager.notifyAbsence(absence, NotificationManager.CRUD.CREATE);
+        }
+        
       }
       if (!insertReport.reperibilityShiftDate().isEmpty()) {
         absenceManager.sendReperibilityShiftEmail(person, insertReport.reperibilityShiftDate());
@@ -630,6 +641,7 @@ public class AbsenceGroups extends Controller {
       JPA.em().flush();
       consistencyManager.updatePersonSituation(person.id, from);
       flash.success("Codici di assenza inseriti.");
+      
     }
 
 

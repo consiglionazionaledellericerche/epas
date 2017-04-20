@@ -89,7 +89,8 @@ public class VacationFactory {
     List<AbsencePeriod> permission  = null;
     List<AbsencePeriod> vacationCurrentYear = null;
     
-    if (group.name.equals(DefaultGroup.FERIE_CNR.name())) {
+    if (group.name.equals(DefaultGroup.FERIE_CNR.name()) 
+        || group.name.equals(DefaultGroup.FERIE_CNR_DIPENDENTI.name())) {
       //se il gruppo è vacation i codici posso anche prenderli.
       vacationLastYear = vacationPeriodPerYear(person, group, year - 1, contract, 
           initializationLastYear, false);

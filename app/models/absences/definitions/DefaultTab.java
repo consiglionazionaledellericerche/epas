@@ -28,6 +28,7 @@ public enum DefaultTab {
   //Per dipendenti
   LAVORO_FUORI_SEDE("Lavoro Fuori Sede", 9),
   FERIE_DIPENDENTI("Ferie e Permessi", 10),
+  RIPOSI_DIPENDENTI("Riposo Compensativo", 11),
   
   AUTOMATICI("Codici Automatici", 11);
   
