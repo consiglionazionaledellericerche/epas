@@ -154,6 +154,11 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_91), 
       ImmutableSet.of(DefaultAbsenceType.A_91), 
       -1, null),
+  
+  T_LAVORO_FUORI_SEDE(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_105BP), 
+      ImmutableSet.of(DefaultAbsenceType.A_105BP), 
+      -1, null),
 
   T_23(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_23, 
@@ -353,7 +358,21 @@ public enum DefaultTakable {
           
           DefaultAbsenceType.A_FA1, DefaultAbsenceType.A_FA2, 
           DefaultAbsenceType.A_FA3, DefaultAbsenceType.A_FA4, DefaultAbsenceType.A_FA5, 
-          DefaultAbsenceType.A_FA6, DefaultAbsenceType.A_FA7),
+          DefaultAbsenceType.A_FA6, DefaultAbsenceType.A_FA7,
+          
+          DefaultAbsenceType.A_OA1, DefaultAbsenceType.A_OA2, 
+          DefaultAbsenceType.A_OA3, DefaultAbsenceType.A_OA4, DefaultAbsenceType.A_OA5, 
+          DefaultAbsenceType.A_OA6, DefaultAbsenceType.A_OA7,
+          
+          DefaultAbsenceType.A_33, DefaultAbsenceType.A_33B, DefaultAbsenceType.A_33C,
+          DefaultAbsenceType.A_34, DefaultAbsenceType.A_38, DefaultAbsenceType.A_39,
+          
+          DefaultAbsenceType.A_681, DefaultAbsenceType.A_691, 
+          DefaultAbsenceType.A_441, DefaultAbsenceType.A_6N,
+          DefaultAbsenceType.A_67, DefaultAbsenceType.A_80, DefaultAbsenceType.A_662,
+          DefaultAbsenceType.A_62S50V, DefaultAbsenceType.A_79, DefaultAbsenceType.A_ES_L133,
+          DefaultAbsenceType.A_99, DefaultAbsenceType.A_65, DefaultAbsenceType.A_61,
+          DefaultAbsenceType.A_16, DefaultAbsenceType.A_42, DefaultAbsenceType.A_93),
       ImmutableSet.of(DefaultAbsenceType.A_103, DefaultAbsenceType.A_103BP, 
           DefaultAbsenceType.A_71, DefaultAbsenceType.A_72, DefaultAbsenceType.A_73,
           DefaultAbsenceType.A_74, DefaultAbsenceType.A_75, DefaultAbsenceType.A_76,
@@ -375,7 +394,18 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_06, DefaultAbsenceType.A_07, DefaultAbsenceType.A_08,
           DefaultAbsenceType.A_FA1, DefaultAbsenceType.A_FA2, 
           DefaultAbsenceType.A_FA3, DefaultAbsenceType.A_FA4, DefaultAbsenceType.A_FA5, 
-          DefaultAbsenceType.A_FA6, DefaultAbsenceType.A_FA7),
+          DefaultAbsenceType.A_FA6, DefaultAbsenceType.A_FA7,
+          DefaultAbsenceType.A_OA1, DefaultAbsenceType.A_OA2, 
+          DefaultAbsenceType.A_OA3, DefaultAbsenceType.A_OA4, DefaultAbsenceType.A_OA5, 
+          DefaultAbsenceType.A_OA6, DefaultAbsenceType.A_OA7,
+          DefaultAbsenceType.A_33, DefaultAbsenceType.A_33B, DefaultAbsenceType.A_33C,
+          DefaultAbsenceType.A_34, DefaultAbsenceType.A_38, DefaultAbsenceType.A_39,
+          DefaultAbsenceType.A_681, DefaultAbsenceType.A_691, 
+          DefaultAbsenceType.A_441, DefaultAbsenceType.A_6N,
+          DefaultAbsenceType.A_67, DefaultAbsenceType.A_80, DefaultAbsenceType.A_662,
+          DefaultAbsenceType.A_62S50V, DefaultAbsenceType.A_79, DefaultAbsenceType.A_ES_L133,
+          DefaultAbsenceType.A_99, DefaultAbsenceType.A_65, DefaultAbsenceType.A_61,
+          DefaultAbsenceType.A_16, DefaultAbsenceType.A_42, DefaultAbsenceType.A_93),
       -1, null),
   
   T_CONGEDO_MATRIMONIO(AmountType.units, 
@@ -403,9 +433,13 @@ public enum DefaultTakable {
 
   T_PUBBLICA_FUNZIONE(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_9599B, 
-          DefaultAbsenceType.A_9591, DefaultAbsenceType.A_9599), 
-      ImmutableSet.of(DefaultAbsenceType.A_9599B, 
-          DefaultAbsenceType.A_9591, DefaultAbsenceType.A_9599), 
+          DefaultAbsenceType.A_9591, DefaultAbsenceType.A_9599, DefaultAbsenceType.A_95041E,
+          DefaultAbsenceType.A_9505, DefaultAbsenceType.A_95042E, DefaultAbsenceType.A_9504,
+          DefaultAbsenceType.A_95053), 
+      ImmutableSet.of(DefaultAbsenceType.A_9599B,
+          DefaultAbsenceType.A_9591, DefaultAbsenceType.A_9599, DefaultAbsenceType.A_95041E,
+          DefaultAbsenceType.A_9505, DefaultAbsenceType.A_95042E, DefaultAbsenceType.A_9504,
+          DefaultAbsenceType.A_95053), 
       -1, null);
 
 

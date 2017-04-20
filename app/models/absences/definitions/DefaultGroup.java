@@ -249,7 +249,7 @@ public enum DefaultGroup {
       "", 
       DefaultCategoryType.LAVORO_FUORI_SEDE, 0,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
-      DefaultTakable.T_ALTRI, null, null, false, false),
+      DefaultTakable.T_LAVORO_FUORI_SEDE, null, null, false, false),
   
   G_PUBBLICA_FUNZIONE("Codici Pubblica Funzione", 
       "", 
