@@ -777,6 +777,7 @@ when
 
         /* Vecchio permesso editPersonDay */
         "AbsenceGroups.insert",
+        "AbsenceGroups.insertAssisted",
         "AbsenceGroups.findCode",
         "AbsenceGroups.groupStatus",
         "AbsenceGroups.save",
@@ -911,6 +912,7 @@ when
         "Contracts.updateContractVacationPeriod",
         "Contracts.saveContractVacationPeriod",
         
+        "AbsenceGroups.insertAssisted",
         "AbsenceGroups.findCode",
         "AbsenceGroups.absenceInitializations",
         "AbsenceGroups.initialization",
