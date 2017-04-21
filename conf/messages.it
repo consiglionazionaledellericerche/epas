@@ -367,7 +367,7 @@ time= Orario
 
 sts.name =Nome attività
 sts.description =Descrizione
-sts.office =Sede
+type.office =Sede
 sts.supervisor =Supervisore servizio
 sts.tolerance =Tolleranza (minuti)
 sts.hourTolerance =Tolleranza per turno (minuti)
@@ -381,12 +381,17 @@ sts.timeTable.endAfternoon =fine turno
 sts.timeTable.startEvening =inizio turno
 sts.timeTable.endEvening =fine turno
 
-sts.timeTable.startMorningLunchTime =inizio pranzo
-sts.timeTable.endMorningLunchTime =fine pranzo
-sts.timeTable.startAfternoonLunchTime =inizio pranzo
-sts.timeTable.endAfternoonLunchTime =fine pranzo
-sts.timeTable.startEveningLunchTime =inizio pranzo
-sts.timeTable.endEveningLunchTime =fine pranzo
+type.type =Nome
+type.description =Descrizione
+type.tolerance =Tolleranza (minuti) 
+type.hourTolerance =Tolleranza per turno (minuti)
+
+type.timeTable.startMorningLunchTime =inizio pranzo
+type.timeTable.endMorningLunchTime =fine pranzo
+type.timeTable.startAfternoonLunchTime =inizio pranzo
+type.timeTable.endAfternoonLunchTime =fine pranzo
+type.timeTable.startEveningLunchTime =inizio pranzo
+type.timeTable.endEveningLunchTime =fine pranzo
 
 cat.description =Descrizione
 cat.office =Sede
@@ -683,11 +688,11 @@ person.eppn.popover= Inserire la propria email cnr Es:mario.rossi@cnr.it
 
 domain.popover= Specificare il dominio sprovvisto del carattere @ (Es. iit.cnr.it)
 
-sts.tolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare alle timbrature per inserirle o meno nel turno. Inserire 0 se non si vuole tolleranza.
-sts.hourTolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare sull&apos;attività di turno per determinare se un turno è valido o no.
-sts.name.popover = Il nome da attribuire all&apos;attività sul turno
-sts.description.popover= Una descrizione dell&apos;attività
-sts.breakInShiftEnabled.popover =Se da regolamento dei turni è prevista una pausa all&#39;interno del turno cliccare sì, no altrimenti.
+type.tolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare alle timbrature per inserirle o meno nel turno. Inserire 0 se non si vuole tolleranza.
+type.hourTolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare sull&apos;attività di turno per determinare se un turno è valido o no.
+type.name.popover = Il nome da attribuire all&apos;attività sul turno
+type.description.popover= Una descrizione dell&apos;attività
+type.breakInShiftEnabled.popover =Se da regolamento dei turni è prevista una pausa all&#39;interno del turno cliccare sì, no altrimenti.
 
 ###########################################################################
 #	Messaggi utilizzati nelle viste

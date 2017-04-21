@@ -5,15 +5,20 @@
 <div class="container">
   #{title title:'Codici e gruppi di competenza', administration:true /}
   #{secure.check 'Competences.insertCompetenceCode' }
-  #{b.buttons center:true}
-  #{secure.link @Competences.insertCompetenceCode(), 'data-async-modal':'#modalCompetenceCode', class:'btn btn-primary',fa:'plus' }
-  <em>Definisci nuovo codice di competenza</em>
-  #{/secure.link}
-  #{secure.link @Competences.insertCompetenceCodeGroup(), 'data-async-modal':'#modalCompetenceCode', class:'btn btn-info',fa:'cubes' }
-  <em>Definisci nuovo gruppo di codici di competenza</em>
-  #{/secure.link}
-  #{/b.buttons}
+  	#{b.buttons center:true}
+  		#{secure.link @Competences.insertCompetenceCode(), 'data-async-modal':'#modalCompetenceCode', class:'btn btn-primary',fa:'plus' }
+  		<em>Definisci nuovo codice di competenza</em>
+  		#{/secure.link}
+  		#{secure.link @Competences.insertCompetenceCodeGroup(), 'data-async-modal':'#modalCompetenceCode', class:'btn btn-info',fa:'cubes' }
+  		<em>Definisci nuovo gruppo di codici di competenza</em>
+  		#{/secure.link}
+  		#{secure.link @Competences.configureShiftTimeTable(), 'data-async-modal':'#modalCompetenceCode', class:'btn btn-success', fa:'calendar' }
+  		<em>Definisci nuova timetable per turni</em>
+  		#{/secure.link}
+  	#{/b.buttons}
   #{/secure.check}
+  	
+
   <br>
   #{accordionGroup 'codici'}
   #{accordionItem 'CodiciSenzaGruppo', parent:'codici', title:'Codici senza gruppo', open:true, color:'warning'}

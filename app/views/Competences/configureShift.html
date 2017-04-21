@@ -7,46 +7,88 @@
 #{breadcrumbs breadcrumbs, noHome:true, container:true /}
 
 <div class="container">
-#{form @Competences.linkTimeTableToShift(), class:'form-horizontal', 
-	'data-async':'#page_content', 'data-async-error':'#modifyContract', 
-	'data-spinner':'#defaultSpinner' }
-	 
-#{title title:'Organizzazione del lavoro in turni - Creazione attività per turno' /}
+#{form @Competences.configureShift(), class:'form-horizontal', method: 'POST'}
+	#{f.hidden 'step', value:step /}
+	
+	
+	#{if step == 1}  
+		#{f.hidden 'shiftCategoryId', value:cat.id /}
+		#{title title:'Organizzazione del lavoro in turni - Creazione attività per turno' /}
+	
+	
+		#{alert color:'info'}
+			Specificare nome e descrizione per l'attività relativa a <strong>${cat.description}</strong><br>
+			E selezionare la tipologia di turno da applicare tra quelle proposte in tabella.		
+		#{/alert}	
+	
+		#{f.input 'sts.name', popover:'true',required:'true'/}
+		#{f.input 'sts.description', value:type?.description, popover:'true', required:'true'/}
+		#{f.input 'sts.tolerance', type:'number', popover:'true', required:'true'/}
+		#{f.radioEnum 'sts.toleranceType', items:models.ShiftType.ToleranceType /}
+		
+		#{f.input 'sts.hourTolerance', type:'number', popover:'true', required:'true'/}
+		#{f.booleanRadio 'sts.breakInShiftEnabled',  popover:'true' /}
+		<div id="horizontal-mealticket" #{if !sts.breakInShiftEnabled} style="display: none" #{/if}>
+			#{f.input 'sts.breakInShift', type:'number' /}
+		
+		</div>	
+		
+	#{/if}
+	
+	#{if step == 2}
+		#{f.hidden 'shiftCategoryId', value:cat.id /}
+		#{title title:'Organizzazione del lavoro in turni - Associazione timetable' /}
+		#{alert color:'info'}
+			E' necessario associare all'attività <strong>${sts.name}</strong> una timetable tra quelle proposte o, in alternativa, 
+			definirne una propria tramite il pulsante sotto.	
+		#{/alert}	
+		<table class="table table-hover table-striped table-bordered">
+		<tr>
+			<th>Seleziona</th>
+			<th>Inizio turno mattina</th>
+			<th>Fine turno mattina</th>
+			<th>Inizio turno pomeriggio</th>
+			<th>Fine turno pomeriggio</th>
+			<th>Info aggiuntive</th>
+		</tr>
+		#{list items:dtoList, as:'key'}
+		<tr>
+			<td><input type="radio" name="shift" value="${key.id}"> </td>
+			<td>${key.startMorning}</td>
+			<td>${key.endMorning}</td>
+			<td>${key.startAfternoon}</td>
+			<td>${key.endAfternoon}</td>
+			<td><i class="fa fa-info-circle" aria-hidden="true" webui-popover-hover data-url="#shift-${key.id}" data-placement="right"  data-title="Info turno">
+		 	  	</i>
+		 	</td>
+				<div class="webui-popover-content" id="shift-${key.id}">  			
+		  			Inizio pausa pranzo turno mattina: <strong>${key.startMorningLunchTime}</strong><br>
+		  			Fine pausa pranzo turno mattina: <strong>${key.endMorningLunchTime}</strong><br>
+					Inizio pausa pranzo turno pomeriggio: <strong>${key.startAfternoonLunchTime}</strong><br>
+					Fine pausa pranzo turno pomeriggio: <strong>${key.endAfternoonLunchTime}</strong><br>			  
+				</div> 	  
+			
+		</tr>
+		#{/list}
+		</table>
 
-#{if type.shiftCategories != null}
-------
-#{/if}
-#{else}
-	#{alert color:'info'}
-		Specificare nome e descrizione per l'attività relativa a <strong>${cat.description}</strong><br>
-		E selezionare la tipologia di turno da applicare tra quelle proposte in tabella.		
-	#{/alert}	
-#{/else}
-#{f.input 'sts.name', popover:'true',required:'true'/}
-#{f.input 'sts.description', popover:'true', required:'true'/}
-#{f.input 'sts.tolerance', type:'number', popover:'true', required:'true'/}
-#{f.radioEnum 'sts.toleranceType', items:models.ShiftType.ToleranceType /}
-
-#{f.input 'sts.hourTolerance', type:'number', popover:'true', required:'true'/}
-#{f.booleanRadio 'sts.breakInShiftEnabled', value:false, popover:'true' /}
-<div id="horizontal-mealticket" #{if !type.breakInShiftEnabled} style="display: none" #{/if}>
-#{f.input 'sts.breakInShift', type:'number' /}
-</div>
-#{f.hidden 'cat.id', value:cat.id /}
-
-
-		#{b.buttons center:true}
+	#{/if}
+	
+	#{b.buttons center:true}
 			#{b.link @Competences.activateServices(cat.office.id)}
-      			Indietro
-    		#{/b.link}
-    		#{b.link @Competences.addShiftTimeTable(cat.office.id, sts)}
-      			Avanti
-    		#{/b.link}
-		    #{b.submit 'Conferma'/}
-		   
+	   			Indietro
+	   		#{/b.link}
+			#{if step != 2 }
+				#{b.submit 'Avanti' /}
+			#{/if}
+			#{else}
+				#{b.submit 'Crea' /}
+			#{/else}   
 		#{/b.buttons}
-	#{/form}
+#{/form}
 </div>
+
+<div id="modalActivateService" class="modal fade container" tabindex="-1"></div>
 
 #{set 'moreScripts'}
   <script type="text/javascript">
