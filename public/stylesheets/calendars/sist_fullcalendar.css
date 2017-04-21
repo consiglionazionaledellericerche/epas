@@ -14,7 +14,7 @@
 
 #external-events {
 	float: left;
-	width: 140px;
+	width: 155px;
 	padding: 0 10px 10px 10px;
 	border: 1px solid #ccc;
 	background: #eee;
@@ -32,15 +32,31 @@
 	padding: 2px 4px;
 	background: red;
 	color: #fff;
-	font-size: .80em;
+	font-size: .8em;
 	cursor: pointer;
+}
+
+h1#page-title {
+	font-size: 30px;
+	font-family: inherit;
+	font-weight: 500;
+	line-height:1.1;
+	color: inherit;
+	margin-bottom: 4px;
+	padding: 2px;	
+}
+
+.fc-header-toolbar h2 {
+	font-size: 20px;	
+	font-weight: 500;
+	color: #CC6030;
 }
 
 .titolo-external {
 	font-size: 14px;
 	display: block;
-	margin-top: 0;
-	margin-bottom: 0.8em;
+	margin-top: 0.6em;
+	margin-bottom: 0.3em;
 	padding-top: 0.5em;
 	color: #CC6030;
 	/*font-weight: bold;*/
@@ -55,7 +71,7 @@
 }
 
 div.funzioni {
-	width: 150px;
+	width: 155px;
 	padding-left: 10px;
 	text-align: left;
 	margin: 10px 0 10px 20px;
@@ -119,7 +135,7 @@ ul.funzioni li:over {
 
 /* Bottoni per la navigazione del calendario  */
 #cal-nav-button {
-	width: 140px;
+	width: 155px;
 	padding: 10px;
 	border: 1px solid #ccc;
 	background: #eee;

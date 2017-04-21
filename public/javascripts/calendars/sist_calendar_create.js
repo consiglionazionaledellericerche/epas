@@ -782,7 +782,7 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
    		// exec the URI call
        	var shiftPerson = _RestJsonCall (uriProxy + uriGetShiftPersons, 'GET', false, {});
        	//console.log("shiftPerson="+shiftPerson);
-
+       	
         jQuery.each(shiftPerson, function (i, event) {
        		var name = event.name + " " + event.surname;
        		if (!event.jolly) {
@@ -794,6 +794,7 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
          			var turni = jollyPersons[event.id];
           			turni.push(tipoTurno);
            			jollyPersons[event.id] = turni;
+           			
           		} else {
           			jollyPersons[event.id] = new Array(tipoTurno);
           		}
@@ -987,10 +988,6 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
 /************************************************************************************************/
 function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) {
 
-
-	// read the list of the shift associated to the activity
-	tipoTurni = shiftGrpObj.getShiftFromType(shiftType);
-
 	// defines date variables
 	var today = new Date();
 	var dToday = today.getDate();
@@ -1021,6 +1018,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 
 	// tipologia di turni da leggere dal DB
 	var tipoTurni = shiftGrpObj.getShiftFromType(shiftType);
+	tipoTurni.sort();
 
     var loadedPeriod = new Array();
 	var period = '';
@@ -1031,14 +1029,15 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 	// div contenente le persone in turno
 	var divContainer = '#external-events';
 
-	// Ora usata per il caricamento dei turni annullati
-	var cancelledHourS = '07:00:00.000';
-	var cancelledHourE = '12:00:00.000';
-
 	j = 0;
+	var calendarShiftTypes = new Set();
+	
 	while (j < tipoTurni.length) {
     	var tipoTurno = tipoTurni[j];
     	//console.log("tipoTurno:"+tipoTurno);
+    	
+		calendarShiftTypes.add(tipoTurno);
+		
     	var color = shiftColor.shift();
     	var div = '#' + tipoTurno;
 
@@ -1049,15 +1048,12 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
     	uriGetShiftPersons = shiftCalendar.getUriRestToGetPersons(tipoTurno);
     	//console.log("uriGetShiftPersons="+uriGetShiftPersons);
 
-    	var data = new Array();
-    	//data.push('GET');
-    	data.push(uriGetShiftPersons);
 
     	var dataJson = JSON.stringify(uriGetShiftPersons);
 
     	// exec the URI call
     	var shiftPerson = _RestJsonCall (uriGetShiftPersons, 'GET', false, {});
-
+    	
     	jQuery.each(shiftPerson, function (i, event) {
     		var name = event.name + " " + event.surname;
     		if (!event.jolly) {
@@ -1074,6 +1070,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
     			}
     			idToShift[event.id] = "J";
     			shiftToColor["J"] = jollyColor;
+    	
     		}
 
     		// get the email and the mobile phone
@@ -1099,10 +1096,6 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
     uriGetShiftTimeTable = shiftCalendar.getUriRestToGetShiftTimeTable(tipoTurni[0]);
     //console.log("uriGetShiftTimeTable="+uriGetShiftTimeTable);
 
-	var data = new Array();
-	data.push('GET');
-	data.push(uriGetShiftTimeTable);
-
 	var shiftTimeTable = _RestJsonCall (uriGetShiftTimeTable, 'GET', false, {});
 
 	// fieldset che contiene l'orario
@@ -1115,41 +1108,54 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 	$('<input>', { type: 'radio', id: 'pomeriggio', name: 'hour', value: shiftTimeTable[0].startAfternoon + '-' + shiftTimeTable[0].endAfternoon }).appendTo('#orario');
 	$('<span>', { text: ' ' }).appendTo(divContainer);
 	$('<label>', { for: 'shift', text: ' Pomeriggio' }).appendTo('#orario');
-	$('<br />').appendTo(divContainer);
-	$('<hr />').appendTo(divContainer);
+	// $('<br />').appendTo(divContainer);
+	//$('<hr />').appendTo(divContainer);
+	
+	
 	$('<span>', { class: 'titolo-external', text: 'Personale sostituto' }).appendTo(divContainer);
 
 	// adds the jolly persons
 	//ATTENZIONE!! si da comunque per scontato che il reperibile sia 1 solo!!!! POI CAMBIARE!!!!!
 	// non torna id='J'
-	if (jollyPersons.lenght > 0) {
-		
-	}
+
+	// prints the all Jolly person
+	$('<div>', { id: 'J' }).appendTo(divContainer);
+
 	// for each jolly person 
-	for (var id in jollyPersons) {
+	for (var id in jollyPersons) {	
+		//console.log("creo elemento id: " + id+ " name="+idToName[id]+ " tipoTurno=J  color="+jollyColor);
+		shiftCalendar.createShiftElement(id, idToName[id], "J", jollyColor).appendTo("#J");
+		
     	var turniJ = jollyPersons[id];
-    	console.log("stampo possibili turni di id="+id + " turni J="+jollyPersons[id]);
+    	var label = 'scelta-turni'.concat(id);
+    	//console.log("stampo possibili turni di id="+id + " turni J="+jollyPersons[id]);
 
     	// prints the possible shift types
-    	$('<span>', { text: 'Turno: ' }).appendTo(divContainer);
-
+    	$('<div>', { id: label }).appendTo("#J");
+    	$('<span>', { text: 'Turno: ' }).appendTo("#scelta-turni"+id);
     	for (var i = 0; i < turniJ.length; i++) {
-        		$('<label>', { for: 'shift', text: turniJ[i] }).appendTo(divContainer);
-        		$('<span>', { text: ' ' }).appendTo(divContainer);
-        		$('<input>', { type: 'radio', id: 'shift', name: 'shift', value: turniJ[i], checked: 'checked' }).appendTo(divContainer);
-        		$('<span>', { text: ' ' }).appendTo(divContainer);
+        		$('<label>', { for: 'shift', text: turniJ[i] }).appendTo("#scelta-turni"+id);
+        		$('<span>', { text: ' ' }).appendTo("#scelta-turni"+id);
+        		$('<input>', { type: 'radio', id: 'shift', name: 'shift', value: turniJ[i], checked: 'checked' }).appendTo("#scelta-turni"+id);
+        		$('<span>', { text: ' ' }).appendTo("#scelta-turni"+id);
     	}
-
-    	$('<div>', { id: 'J' }).appendTo(divContainer);
-    	
-    	console.log("creo elemento id: " + id+ " name="+idToName[id]+ " tipoTurno=J  color="+jollyColor);
-    	shiftCalendar.createShiftElement(id, idToName[id], "J", jollyColor).appendTo("#J");
 	}
 
 	// prints the cancelled shift
-	$('<span>', { class: 'titolo-external', text: 'Annullato' }).appendTo(divContainer);
+	$('<span>', { class: 'titolo-external', text: 'Turno Annullato' }).appendTo(divContainer);
 	$('<div>', { id: 'X' }).appendTo(divContainer);
 	shiftCalendar.createShiftElement('', 'Turno ANNULLATO', "X", "CORNFLOWERBLUE").appendTo("#X");
+	
+	// prints the possible shift types for cancelled shift
+	$('<span>', { text: 'Turno: ' }).appendTo("#X");
+	calendarShiftTypes.forEach(function(type) {
+		$('<label>', { for: 'shift', text: type }).appendTo("#X");
+		$('<span>', { text: ' ' }).appendTo("#X");
+		$('<input>', { type: 'radio', id: 'shift', name: 'shift', value: type, checked: 'checked' }).appendTo("#X");
+		$('<span>', { text: ' ' }).appendTo("#X");
+		console.log(type);
+	});
+
 
 	/* initialize the external events
 	-----------------------------------------------------------------*/

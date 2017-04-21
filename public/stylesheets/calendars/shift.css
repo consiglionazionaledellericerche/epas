@@ -1,56 +1,69 @@
-        label {
-                font-size: 0.80em;
-                font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
-                color: #666;
-                display: inline;
-        }
+label {
+	 font-size: 0.80em;
+	 font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
+	 color: #666;
+	 display: inline;
+}
 
-        legend {
-                font-size: 1em;
-                font-weight: bold;
-                /*color: #666;*/
-        }
-		
-	#external-events input {
-		margin: 0;
-		vertical-align: middle;
-		font-size: 14px;
-	}
+fieldset#orario {
+	margin-top: 1.5em;
+	margin-bottom: 1.5em;
+}
 
-	.grigio {
-            	width: 140px;
-                padding: 10px;
-                border: 1px solid #ccc;
-                background: #eee;
-                text-align: left;
-                margin: 10px 0 10px;
-	}
+legend {
+     font-size: 1em;
+     font-weight: bold;
+     margin-bottom: 0.5em;
+     /*color: #666;*/
+}		
 
-        .grigio input {
-                vertical-align: middle;
-             	margin: 5px 0;
-        }
+#external-events input {
+	margin: 0;
+	vertical-align: middle;
+	font-size: 14px;
+}
 
-	.grigio h4 {
-                font-size: 13px;
-        }
+.grigio {
+   	width: 140px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    background: #eee;
+    text-align: left;
+    margin: 10px 0 10px;
+}
 
-	.titolo-caselle {
-		font-size: 13px;
-		font-weight: bold;
-	}
+.grigio input {
+    vertical-align: middle;
+ 	margin: 5px 0;
+}
+
+.grigio h4 {
+	font-size: 13px;
+}
+
+[id^=titolo-caselle] {
+	font-size: 13px;
+	font-weight: bold;
+}
 	
+hr {
+	margin: 0;
+}
 
-	li#pdf-report-mese:hover, li#pdf-cal-mese:hover, li#salva:hover {
-		/*font-weight: bold;*/
-		cursor: pointer;
-		pointer: hand;
-		color: #CC6030;
-	}
+[id^=scelta-turni] {
+	margin-top: -6px;
+}
 
-        /* CSS per i link  */
-        a.custom-link:hover{
-                font-weight: normal;
-                color: #CC6030;
-        }
+li#pdf-report-mese:hover, li#pdf-cal-mese:hover, li#salva:hover {
+	/*font-weight: bold;*/
+	cursor: pointer;
+	pointer: hand;
+	color: #CC6030;
+}
+
+/* CSS per i link  */
+a.custom-link:hover{
+    font-weight: normal;
+    color: #CC6030;
+}
 
