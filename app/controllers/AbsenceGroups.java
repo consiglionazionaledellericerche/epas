@@ -583,6 +583,42 @@ public class AbsenceGroups extends Controller {
     render(absenceForm, insertReport, forceInsert);
 
   }
+  
+  /**
+   * Inserimento assistito partendo dalla ricerca.
+   * @param personId persona
+   * @param from data inizio
+   * @param absenceType tipo
+   */
+  public static void insertAssisted(Long personId, LocalDate from, AbsenceType absenceType) {
+    
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    notFoundIfNull(from);
+    notFoundIfNull(absenceType);
+
+    rules.checkIfPermitted(person);
+    
+    GroupAbsenceType groupAbsenceType = absenceType.defaultTakableGroup();
+    if (groupAbsenceType.firstOfChain() != null) {
+      groupAbsenceType = groupAbsenceType.firstOfChain();
+    }
+    if (!groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.simpleGrouping)) {
+      absenceType = null;
+    }
+    
+    AbsenceForm absenceForm =
+        absenceService.buildAbsenceForm(person, from, null,
+            null, groupAbsenceType, false, absenceType, null, null, null, false);
+
+    InsertReport insertReport = absenceService.insert(person,
+        absenceForm.groupSelected,
+        absenceForm.from, absenceForm.to,
+        absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
+        absenceForm.hours, absenceForm.minutes, false, absenceManager);
+    
+    render("@insert", absenceForm, insertReport);
+  }
 
   /**
    * End Point per il salvataggio di assenze.

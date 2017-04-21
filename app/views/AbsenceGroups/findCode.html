@@ -28,12 +28,12 @@ title:'Nuovo codice assenza in data ' + absenceForm.from?.format()
 			       <td>${absenceType.defaultTakableGroup().category.tab.description}</td>
 			       <td>${absenceType.description}</td>
 			       <td>
-			         #{form action:@AbsenceGroups.insert(), method:'POST', autocomplete:false, class:'form form-horizontal',
+			         #{form action:@AbsenceGroups.insertAssisted(), method:'POST', autocomplete:false, class:'form form-horizontal',
                        'data-async':'#absenceData', 'data-async-error':'#absenceData', 
                        'data-spinner':'#modalSpinner'}
                        #{f.hidden 'personId', value:absenceForm.person.id /}
 	                   #{f.hidden 'from', value:absenceForm.from?.format() /}
-                       #{f.hidden 'groupAbsenceType.id', value:absenceType.defaultTakableGroup().id /}     
+                       *{ #{f.hidden 'groupAbsenceType.id', value:absenceType.defaultTakableGroup().firstOfChain().id /} }*     
                        #{f.hidden 'absenceType.id', value:absenceType.id /}
 					   <button class="button-as-link" type="submit">Seleziona</button>
                      #{/form}  
