@@ -48,9 +48,12 @@ import models.PersonDay;
 import models.PersonReperibilityType;
 import models.PersonShift;
 import models.PersonShiftShiftType;
+import models.ShiftCategories;
 import models.ShiftTimeTable;
 import models.ShiftType;
 import models.TotalOvertime;
+import models.dto.ShiftTypeService;
+
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -778,6 +781,37 @@ public class CompetenceManager {
       return dto;
     }).collect(Collectors.toList());
     return dtoList;
+  }
+  
+  /**
+   * persiste l'attività di turno con tutte le info corredate.
+   * @param service il dto da cui estrarre le informazioni per il salvataggio dell'attività di turno
+   * @param stt la shifttimetable associata all'attività di turno
+   * @param cat il turno a cui associare l'attività
+   */
+  public void persistShiftType(ShiftTypeService service, ShiftTimeTable stt, ShiftCategories cat) {
+    ShiftType st = new ShiftType();
+    st.breakInShift = service.breakInShift;
+    st.breakInShiftEnabled = service.breakInShiftEnabled;
+    st.description = service.description;
+    st.type = service.name;
+    st.shiftTimeTable = stt;
+    switch(service.toleranceType) {
+      case entrance:
+        st.entranceTolerance = service.tolerance;
+        break;
+      case exit:
+        st.exitTolerance = service.tolerance;
+        break;
+      case both:
+        st.entranceTolerance = st.exitTolerance = service.tolerance;
+        break;
+        default:
+          break;
+    }
+    st.hourTolerance = service.hourTolerance;
+    st.shiftCategories = cat;
+    st.save();
   }
 
   /**

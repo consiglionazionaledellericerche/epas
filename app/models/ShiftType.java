@@ -1,11 +1,11 @@
 package models;
 
+import lombok.ToString;
+
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
-
-import play.data.validation.Required;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +18,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 
+@ToString(of= {"type", "description"})
 @Entity
 @Audited
 @Table(name = "shift_type")
@@ -25,9 +26,9 @@ public class ShiftType extends BaseModel {
 
   private static final long serialVersionUID = 3156856871540530483L;
 
-  @Required
+  
   public String type;
-  @Required
+  
   public String description;
   
   @Column(name="entrance_tolerance")
