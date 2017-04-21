@@ -1,9 +1,7 @@
 package controllers;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -57,8 +55,6 @@ import models.WorkingTimeType;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.GroupAbsenceType;
-import models.enumerate.AbsenceTypeMapping;
-import models.enumerate.CodesForEmployee;
 import models.enumerate.LimitType;
 import models.enumerate.StampTypes;
 
@@ -412,42 +408,7 @@ public class TemplateUtility {
     return configuredBadgeSystem;
   }
 
-  /**
-   * I codici di assenza ordinati dai più utilizzati.
-   * Se non si hanno i privilegi di amministratore restituisco solo quelli abilitati
-   * per il dipendente.
-   */
-  public List<AbsenceType> getAbsenceTypes() {
-
-    if (userDao.hasAdminRoles(Security.getUser().get())) {
-      Optional<AbsenceType> ferCode = absenceTypeDao
-          .getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode());
-      Preconditions.checkState(ferCode.isPresent());
-
-      return FluentIterable.from(Lists.newArrayList(ferCode.get()))
-          .append(absenceTypeDao.getFrequentTypes()).toList();
-    } else {
-      return absenceTypeDao.getAbsenceTypeForEmployee(ImmutableList
-          .of(CodesForEmployee.BP.getDescription()));
-    }
-  }
-
-//  public List<AbsenceType> getAbsenceTypes(AbsenceInsertTab absenceInsertTab) {
-//    if (absenceInsertTab.equals(AbsenceInsertTab.vacation)) {
-//      return absenceTypeDao.absenceTypeCodeSet((Set) Sets.newHashSet(
-//          AbsenceTypeMapping.FERIE_FESTIVITA_SOPPRESSE_EPAS.getCode(),
-//          AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode(),
-//          AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode(),
-//          AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode(),
-//          AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode()));
-//    }
-//    if (absenceInsertTab.equals(AbsenceInsertTab.compensatory)) {
-//      return absenceTypeDao.absenceTypeCodeSet((Set) Sets.newHashSet(
-//          AbsenceTypeMapping.RIPOSO_COMPENSATIVO.getCode()));
-//    }
-//    return Lists.newArrayList();
-//  }
-
+  
   public boolean hasAdminRole() {
     return userDao.hasAdminRoles(Security.getUser().get());
   }

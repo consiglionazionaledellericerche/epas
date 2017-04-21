@@ -73,6 +73,10 @@
       &{'description.' + configuration.epasParam}
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.TR_COMPENSATORY) }
+      &{'description.' + configuration.epasParam}
+    #{/if}
+    
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.TR_AUTOCERTIFICATION) }
       &{'description.' + configuration.epasParam}
     #{/if}

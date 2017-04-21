@@ -6,7 +6,7 @@ import org.joda.time.YearMonth;
 import dao.history.HistoricalDao;
 import dao.UserDao;
 import manager.configurations.EpasParam;
-import models.enumerate.CodesForEmployee;
+import models.absences.definitions.DefaultGroup;
 import models.enumerate.StampTypes;
 import models.enumerate.AccountRole;
 import models.enumerate.AttachmentType;
@@ -777,6 +777,7 @@ when
 
         /* Vecchio permesso editPersonDay */
         "AbsenceGroups.insert",
+        "AbsenceGroups.insertAssisted",
         "AbsenceGroups.findCode",
         "AbsenceGroups.groupStatus",
         "AbsenceGroups.save",
@@ -911,6 +912,7 @@ when
         "Contracts.updateContractVacationPeriod",
         "Contracts.saveContractVacationPeriod",
         
+        "AbsenceGroups.insertAssisted",
         "AbsenceGroups.findCode",
         "AbsenceGroups.absenceInitializations",
         "AbsenceGroups.initialization",
@@ -1177,7 +1179,7 @@ when
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
  PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
  /** Sostituire il metodo che valuta che tipo di assenza può inserire il dipendente utilizzando la nuova modellazione **/
- $target: Absence(CodesForEmployee.getCodes().contains(this.getCode()), this.getOwner() == $p)
+ $target: Absence(DefaultGroup.employeeOffSeatCodes().contains(this.getCode()), this.getOwner() == $p)
  $c: PermissionCheck(action in ("AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
  eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
@@ -1283,17 +1285,64 @@ end
 
 /******************************************************************************
  * Un ricercatore e tecnologo può salvare (modificare) una assenza di ferie se
- * TODO: buttare il codesForEmployee e controllare i codici takable del gruppo
- * codici per dipendenti
  ******************************************************************************/
-rule trCanEditAbsence
+rule trCanEditVacation
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.TR_VACATIONS, fieldValue == true) from $o.configurations
- /** Sostituire il metodo che valuta che tipo di assenza può inserire il dipendente utilizzando la nuova modellazione **/
- $target: Absence(CodesForEmployee.getVacationCodes().contains(this.getCode()), this.getOwner() == $p)
+  $target: Absence(DefaultGroup.employeeVacationCodes().contains(this.getCode()), this.getOwner() == $p)
+ $c: PermissionCheck(action in ("AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
+ eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
+ eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Un ricercatore tecnologo se può gestirsi i riposi compensativi può accedere alle actions:
+ * (no target)
+ ******************************************************************************/
+rule trCompensatory
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
+ $o: Office() from $p.office
+ Configuration(epasParam == EpasParam.TR_COMPENSATORY, fieldValue == true) from $o.configurations
+ $c: PermissionCheck(action in (
+    "AbsenceGroups.insert",
+    "AbsenceGroups.edit",
+    "AbsenceGroups.delete",
+    "AbsenceGroups.save"), granted == false, target == null)
+then
+ $c.grant();
+end
+
+/************************************************************************************
+ * Un ricercatore e tecnologo può accedere all'inserimento di un i riposi compensativi se
+ ***********************************************************************************/
+rule trCanInsertCompensatory
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
+ $o: Office() from $p.office
+ Configuration(epasParam == EpasParam.TR_COMPENSATORY, fieldValue == true) from $o.configurations
+ $c: PermissionCheck(action in ("AbsenceGroups.insert"), target == $p, granted == false)
+then
+ $c.grant();
+end
+
+/******************************************************************************
+ * Un ricercatore e tecnologo può salvare (modificare) una assenza di riposo se
+ ******************************************************************************/
+rule trCanEditCompensatory
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
+ $o: Office() from $p.office
+ Configuration(epasParam == EpasParam.TR_COMPENSATORY, fieldValue == true) from $o.configurations
+ $target: Absence(DefaultGroup.employeeCompensatoryCodes().contains(this.getCode()), this.getOwner() == $p)
  $c: PermissionCheck(action in ("AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
  eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))

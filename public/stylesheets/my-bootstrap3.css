@@ -425,3 +425,13 @@ body.modal-open #wrapper{
 .select2-results {
   max-height: 350px;
 }
+
+button.button-as-link {
+  background:none!important;
+  border:none; 
+  padding:0!important;
+  color:#069;
+  text-decoration:underline;
+  cursor:pointer;
+}
+
