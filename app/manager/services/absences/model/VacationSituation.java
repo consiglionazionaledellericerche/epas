@@ -69,7 +69,7 @@ public class VacationSituation {
     if (old.total() != summary.total()) {
       return false;
     }
-    if (old.postPartum() != summary.postPartum()) {
+    if (old.postPartum() != summary.postPartum().size()) {
       return false;
     }
     if (old.accrued() != summary.accrued()) {
@@ -218,11 +218,11 @@ public class VacationSituation {
     /**
      * Nuova implementazione: posPartum anno passato.
      */
-    public int postPartum() {
+    public List<Absence> postPartum() {
       if (absencePeriod == null) {
-        return 0;
+        return Lists.newArrayList();
       }
-      return absencePeriod.reducingAbsences.size();
+      return absencePeriod.reducingAbsences;
     }
     
     public int accrued() {
@@ -473,7 +473,7 @@ public class VacationSituation {
      */
     public int subDayPostPartum(AbsencePeriod period) {
       
-      int postPartumToAssign = this.postPartum();
+      int postPartumToAssign = this.postPartum().size();
       int postPartumAssigned = 0;
       
       //parto dall'ultimo period
@@ -523,6 +523,10 @@ public class VacationSituation {
             .get(this.absencePeriod.subPeriods.indexOf(lastEffective) - 1); 
       }
       return progress;
+    }
+    
+    public int subDayToFixPostPartum(AbsencePeriod period) {
+      return period.periodInterval().dayInInterval() - subDayPostPartum(period);
     }
     
     /**
@@ -584,7 +588,7 @@ public class VacationSituation {
         this.contract = vacationSummary.contract;
         this.contract.merge();
         this.total = vacationSummary.total();
-        this.postPartum = vacationSummary.postPartum();
+        this.postPartum = vacationSummary.postPartum().size();
         this.accrued = vacationSummary.accrued();
         this.used = vacationSummary.used();
         this.usable = vacationSummary.usable();

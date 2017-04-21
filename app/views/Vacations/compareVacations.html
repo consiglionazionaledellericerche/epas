@@ -55,7 +55,7 @@
             
             <!-- 2016 -->
 			<td>${vacationSituation.oldLastYear?.total()} (${vacationSituation.oldLastYear?.postPartum()})</td>
-			<td>${vacationSituation.lastYear.total()} (${vacationSituation.lastYear.postPartum()})</td>
+			<td>${vacationSituation.lastYear.total()} (${vacationSituation.lastYear.postPartum().size()})</td>
 			<td>${vacationSituation.oldLastYear?.accrued()}</td>
 			<td>${vacationSituation.lastYear.accrued()}</td>
 			
@@ -136,7 +136,7 @@
             
             <!-- 2017 -->
   		    <td>${vacationSituation.oldCurrentYear?.total()} (${vacationSituation.oldCurrentYear?.postPartum()})</td>
-  		    <td>${vacationSituation.currentYear.total()} (${vacationSituation.currentYear.postPartum()})</td>
+  		    <td>${vacationSituation.currentYear.total()} (${vacationSituation.currentYear.postPartum().size()})</td>
             <td>${vacationSituation.oldCurrentYear?.accrued()}</td>
 			<td>${vacationSituation.currentYear.accrued()}</td>
 			
@@ -214,7 +214,7 @@
           
             <!-- Permessi -->
 			<td>${vacationSituation.oldPermissions?.total()} (${vacationSituation.oldPermissions?.postPartum()})</td>
-			<td>${vacationSituation.permissions.total()} (${vacationSituation.permissions.postPartum()})</td>
+			<td>${vacationSituation.permissions.total()} (${vacationSituation.permissions.postPartum().size()})</td>
 			<td>${vacationSituation.oldPermissions?.accrued()}</td>
 			<td>${vacationSituation.permissions.accrued()}</td>
 			
