@@ -9,6 +9,9 @@
    #{tabList}
 	 	#{tabItem id:'infoTot', title:'Riepilogo', active:true /}
         #{tabItem id:'date', title:'Date Utilizzo' /}
+        #{if !vacationSummary.postPartum().empty }
+          #{tabItem id:'dateReduction', title:'Date Riduzione' /}
+        #{/if}
         #{tabItem id:'calcTot', title:'Calcolo Giorni Totali' /}
         #{tabItem id:'calcAcc', title:'Calcolo Giorni Maturati' /}
    #{/tabList}
@@ -99,8 +102,38 @@
           
           <br>
    
-	 #{/tabContentItem}  
+	 #{/tabContentItem}
+	 
+	 #{if !vacationSummary.postPartum().empty }
+	 <!-- Riepilogo Giorni riduzione -->
+     #{tabContentItem id:'dateReduction' }
+     
+         <div class="col-md-8 col-md-offset-2">
+	        <table class="table table-condensed table-hover" datatable-small>
+				    
+			<thead>
+			  <tr class="warning">
+				 <th class="col-xs-4">Data</th>
+			     <th class="col-xs-2">Codice</th>
+			     <th class="col-xs-6">Descrizione</th>
+			  </tr>
+			</thead>
+			<tbody>
+			#{list items:vacationSummary.postPartum(), as:'absence'}
+			    <tr>
+			       <td data-order="${absence.personDay.date}">${absence.personDay.date.format()}</td>
+			       <td>${absence.absenceType.code}</td>
+			       <td>${absence.absenceType.description}</td>
+			    </tr>
+			#{/list}
+			</tbody>
+		    </table>
+          </div>
+          
+          <br>
    
+	 #{/tabContentItem}    
+     #{/if}
 
   
      <!-- Calcolo giorni totali -->
@@ -109,8 +142,8 @@
        
 	     <p>Sono stati calcolati <strong>${vacationSummary.total()}</strong> giorni totali.<br>
 	     I giorni totali di maturazione per l'anno ${vacationSummary.year} sono <strong>${vacationSummary.accruedDayTotal()}</strong>.<br>
-	     #{if vacationSummary.postPartum() > 0 }
-	     Dai giorni dell'anno sono sottratti <strong>${vacationSummary.postPartum()}</strong> giorni di assenza usufruiti 
+	     #{if !vacationSummary.postPartum().empty }
+	     Dai giorni dell'anno sono sottratti <strong>${vacationSummary.postPartum().size()}</strong> giorni di assenza usufruiti 
 	        che non contribuiranno alla maturazione.
 	     #{/if}   
 	     </p>
@@ -124,7 +157,7 @@
 	       <th>Maturati</th>
 	       <th>Progressione</th>
 	       <th>Giorni nell'anno</th>
-	       #{if vacationSummary.postPartum() > 0}
+	       #{if !vacationSummary.postPartum().empty}
 	         <th>Giorni riduzione</th>
 	       #{/if}
 	     </tr>
@@ -145,13 +178,17 @@
 	         </td>
 	         <td><strong>${vacationSummary.subTotalAmount(period)}</strong></td>
 	         <td>${period.periodInterval().dayInInterval()} (${vacationSummary.subDayProgression(period)})</td>
-	         #{if vacationSummary.postPartum() > 0}
+	         #{if !vacationSummary.postPartum().empty}
 	         <td>
 	           #{if vacationSummary.subDayPostPartum(period) > 0}
 	             ${vacationSummary.subDayPostPartum(period)}
 	             (${vacationSummary.subDayPostPartumProgression(period)})
+	             #{if vacationSummary.subDayToFixPostPartum(period) > 0}
+	             <span class="text-warning"><i class="fa fa-exclamation-triangle" 
+                                 popover-hover data-content="Utilizzando ulteriori ${vacationSummary.subDayToFixPostPartum(period)} giorni di riduzione si perderà il diritto ad utilizzare i ${vacationSummary.subAmountBeforeFixedPostPartum(period)} giorni maturati in questo periodo."></i>
+	             </span>
+	             #{/if}
 	           #{/if}
-	           
 	         </td>
 	         #{/if}
 	       </tr>
@@ -167,8 +204,8 @@
     
          <p>Sono stati calcolati <strong>${vacationSummary.accrued()}</strong> giorni maturati alla data di oggi.<br>
 	     I giorni di maturazione trascorsi per l'anno ${vacationSummary.year} sono <strong>${vacationSummary.accruedDay()}</strong>.<br>
-	     #{if vacationSummary.postPartum() > 0 }
-            Dai giorni dell'anno sono sottratti <strong>${vacationSummary.postPartum()}</strong> giorni di assenza usufruiti 
+	     #{if !vacationSummary.postPartum().empty }
+            Dai giorni dell'anno sono sottratti <strong>${vacationSummary.postPartum().size()}</strong> giorni di assenza usufruiti 
 	        che non contribuiranno alla maturazione.
 	     #{/if}   
 	     </p>
@@ -181,7 +218,7 @@
 	       <th>Maturati</th>
 	       <th>Progressione</th>
 	       <th>Giorni nell'anno</th>
-	       #{if vacationSummary.postPartum() > 0}
+	       #{if !vacationSummary.postPartum().empty}
 	         <th>Giorni riduzione</th>
 	       #{/if}
 	     </tr>
@@ -199,11 +236,16 @@
 	         </td>
 	         <td><strong>${vacationSummary.subTotalAmount(period)}</strong></td>
 	         <td>${period.periodInterval().dayInInterval()} (${vacationSummary.subDayProgression(period)})</td>
-	         #{if vacationSummary.postPartum() > 0}
+	         #{if !vacationSummary.postPartum().empty}
 	         <td>
 	           #{if vacationSummary.subDayPostPartum(period) > 0}
 	             ${vacationSummary.subDayPostPartum(period)}
 	             (${vacationSummary.subDayPostPartumProgression(period)})
+	             #{if vacationSummary.subDayToFixPostPartum(period) > 0}
+	             <span class="text-warning"><i class="fa fa-exclamation-triangle" 
+                                 popover-hover data-content="Utilizzando ulteriori ${vacationSummary.subDayToFixPostPartum(period)} giorni di riduzione si perderà il diritto ad utilizzare i ${vacationSummary.subAmountBeforeFixedPostPartum(period)} giorni maturati in questo periodo."></i>
+	             </span>
+	             #{/if}
 	           #{/if}
 	           
 	         </td>
