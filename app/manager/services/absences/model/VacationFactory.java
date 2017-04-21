@@ -291,10 +291,12 @@ public class VacationFactory {
       //Aggiungo la quantità fixed al primo period (decidere.. dal momento che è zero potrebbe
       //essere aggiunto al secondo. Oppure all'ultimo ma potrebbe essere rimosso se attuassi
       //il fixedPostPartum successivamente). //dove imputarlo impatta sul test taverniti.
-      
       int previousFixed = periods.get(0)
           .computePeriodTakableAmount(TakeCountBehaviour.period, null) / 100; //ex: 300 / 100
-      periods.get(0).setFixedPeriodTakableAmount(previousFixed + lowerLimitSelected - totalTakable);
+      int newAmount = previousFixed + lowerLimitSelected - totalTakable;
+      periods.get(0).setFixedPeriodTakableAmount(newAmount);
+      periods.get(0).vacationAmountBeforeFixPostPartum = newAmount;
+      periods.get(0).vacationAmountBeforeInitializationPatch = newAmount;
     }
     
     return periods;
@@ -329,8 +331,10 @@ public class VacationFactory {
       }
       int previousFixed = periodSelected
           .computePeriodTakableAmount(TakeCountBehaviour.period, null) / 100; //ex: 300 / 100
-      periodSelected.setFixedPeriodTakableAmount(previousFixed 
-          - (totalTakable - upperLimitSelected));
+      int newAmount = previousFixed - (totalTakable - upperLimitSelected);
+      periodSelected.setFixedPeriodTakableAmount(newAmount);
+      periods.get(0).vacationAmountBeforeFixPostPartum = newAmount;
+      periods.get(0).vacationAmountBeforeInitializationPatch = newAmount;
     }
     
     return periods;
@@ -363,6 +367,10 @@ public class VacationFactory {
       int days = DateUtility.daysInInterval(lastPeriod.periodInterval());
       if (postPartum >= days) {
         postPartum = postPartum - days;
+        int previousAmount = lastPeriod
+            .computePeriodTakableAmount(TakeCountBehaviour.period, null) / 100;
+        lastPeriod.vacationAmountBeforeFixPostPartum = previousAmount;
+        lastPeriod.vacationAmountBeforeInitializationPatch = 0;
         lastPeriod.setFixedPeriodTakableAmount(0);
       } else {
         break;
@@ -473,7 +481,8 @@ public class VacationFactory {
       absencePeriod.to = contract.calculatedEnd();
     }
     absencePeriod.setFixedPeriodTakableAmount(amount);
-    absencePeriod.vacationAmountBeforeInitialization = amount;
+    absencePeriod.vacationAmountBeforeFixPostPartum = amount;
+    absencePeriod.vacationAmountBeforeInitializationPatch = amount;
     absencePeriod.takableCodes = takableCodes;
     absencePeriod.takenCodes = takenCodes;
 

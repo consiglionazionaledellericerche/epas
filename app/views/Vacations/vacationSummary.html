@@ -106,26 +106,54 @@
      <!-- Calcolo giorni totali -->
      #{tabContentItem id:'calcTot'}
     
-       #{alert color:'info'}
-	     <p>Sono stati calcolati <strong>${vacationSummary.total()}</strong> giorni totali.</p>
-	   #{/alert}
+       
+	     <p>Sono stati calcolati <strong>${vacationSummary.total()}</strong> giorni totali.<br>
+	     I giorni totali di maturazione per l'anno ${vacationSummary.year} sono <strong>${vacationSummary.accruedDayTotal()}</strong>.<br>
+	     #{if vacationSummary.postPartum() > 0 }
+	     Dai giorni dell'anno sono sottratti <strong>${vacationSummary.postPartum()}</strong> giorni di assenza usufruiti 
+	        che non contribuiranno alla maturazione.
+	     #{/if}   
+	     </p>
 	   
-	   <table class="table table-condensed">
+	   
+	   <table class="table table-condensed center">
 	     <tr>
            <th>Piano Ferie</th>
-	       <th>Dal</th>
-	       <th>Al</th>
-	       <th>Giorni nel periodo</th>
+	       <th>Data di Maturazione</th>
+	       *{ <th>Al</th> }*
 	       <th>Maturati</th>
+	       <th>Progressione</th>
+	       <th>Giorni nell'anno</th>
+	       #{if vacationSummary.postPartum() > 0}
+	         <th>Giorni riduzione</th>
+	       #{/if}
 	     </tr>
 	     #{list items:vacationSummary.absencePeriod.subPeriods, as:'period'}
 	       #{if period.vacationCode}
-	       <tr>
+	       <tr #{if vacationSummary.subFixedPostPartum(period)} class="bg-danger" #{/if}>
 	         <td>${period.vacationCode.name}</td>
 	         <td>${period.from.format()}</td>
-	         <td>${period.to.format()}</td>
-	         <td>${period.periodInterval().dayInInterval()}</td>
-	         <td><strong>${period.vacationAmountBeforeInitialization}</strong></td>
+	         *{ <td>${period.to.format()}</td> }*
+	         <td>
+	          *{
+	          ${vacationSummary.subAmount(period)}
+	          #{if vacationSummary.subFixedPostPartum(period)}
+	            (${vacationSummary.subAmountBeforeFixedPostPartum(period)})
+	          #{/if}
+	          }* 
+	          ${vacationSummary.subAmountBeforeFixedPostPartum(period)} 
+	         </td>
+	         <td><strong>${vacationSummary.subTotalAmount(period)}</strong></td>
+	         <td>${period.periodInterval().dayInInterval()} (${vacationSummary.subDayProgression(period)})</td>
+	         #{if vacationSummary.postPartum() > 0}
+	         <td>
+	           #{if vacationSummary.subDayPostPartum(period) > 0}
+	             ${vacationSummary.subDayPostPartum(period)}
+	             (${vacationSummary.subDayPostPartumProgression(period)})
+	           #{/if}
+	           
+	         </td>
+	         #{/if}
 	       </tr>
 	       #{/if}
 	     #{/list}
@@ -137,31 +165,53 @@
       <!-- Calcolo giorni maturati -->
      #{tabContentItem id:'calcAcc'}
     
-       #{alert color:'info'}
-	     <p>Sono stati calcolati <strong>${vacationSummary.accrued()}</strong> giorni maturati.</p>
-	   #{/alert}
+         <p>Sono stati calcolati <strong>${vacationSummary.accrued()}</strong> giorni maturati alla data di oggi.<br>
+	     I giorni di maturazione trascorsi per l'anno ${vacationSummary.year} sono <strong>${vacationSummary.accruedDay()}</strong>.<br>
+	     #{if vacationSummary.postPartum() > 0 }
+            Dai giorni dell'anno sono sottratti <strong>${vacationSummary.postPartum()}</strong> giorni di assenza usufruiti 
+	        che non contribuiranno alla maturazione.
+	     #{/if}   
+	     </p>
 	   
-	   <table class="table table-condensed">
+	   <table class="table table-condensed center">
 	     <tr>
            <th>Piano Ferie</th>
-	       <th>Dal</th>
-	       <th>Al</th>
-	       <th>Giorni nel periodo</th>
+	       <th>Data di Maturazione</th>
+	       *{ <th>Al</th> }*
 	       <th>Maturati</th>
+	       <th>Progressione</th>
+	       <th>Giorni nell'anno</th>
+	       #{if vacationSummary.postPartum() > 0}
+	         <th>Giorni riduzione</th>
+	       #{/if}
 	     </tr>
 	     #{list items:vacationSummary.absencePeriod.subPeriods, as:'period'}
 	       #{if period.vacationCode}
-	       <tr>
+	       <tr 
+	           #{if vacationSummary.subFixedPostPartum(period)} class="bg-danger" #{/if}
+	           #{elseif !vacationSummary.subAccrued(period)}     class="bg-warning" #{/elseif}
+	       >
 	         <td>${period.vacationCode.name}</td>
 	         <td>${period.from.format()}</td>
-	         <td>${period.to.format()}</td>
-	         <td>${period.periodInterval().dayInInterval()}</td>
-	         <td><strong>${vacationSummary.periodAmountAccrued(period)}</strong></td>
+	         *{ <td>${period.to.format()}</td> }*
+	         <td>
+	          ${vacationSummary.subAmountBeforeFixedPostPartum(period)}
+	         </td>
+	         <td><strong>${vacationSummary.subTotalAmount(period)}</strong></td>
+	         <td>${period.periodInterval().dayInInterval()} (${vacationSummary.subDayProgression(period)})</td>
+	         #{if vacationSummary.postPartum() > 0}
+	         <td>
+	           #{if vacationSummary.subDayPostPartum(period) > 0}
+	             ${vacationSummary.subDayPostPartum(period)}
+	             (${vacationSummary.subDayPostPartumProgression(period)})
+	           #{/if}
+	           
+	         </td>
+	         #{/if}
 	       </tr>
 	       #{/if}
 	     #{/list}
 	   </table>
-	    
     
      #{/tabContentItem}
     

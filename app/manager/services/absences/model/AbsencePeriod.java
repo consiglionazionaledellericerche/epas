@@ -68,11 +68,13 @@ public class AbsencePeriod {
   //Tentativo di inserimento assenza nel periodo
   public Absence attemptedInsertAbsence;
   
-  //Supporto alla gestione ferie e permessi
+  //Supporto alla gestione ferie e permessi 
   //Assenze che hanno provocato una riduzione della quantità 
   public List<Absence> reducingAbsences = Lists.newArrayList();
-  //Ammontare periodo (prima della patch per gestire l'inizializzazione)
-  public int vacationAmountBeforeInitialization = 0;
+  //Ammontare periodo (per visualizzazione prima della patch fix post partum)
+  public int vacationAmountBeforeFixPostPartum = 0;
+  //Ammontare periodo (per visualizzazione prima della patch inizializzazione)
+  public int vacationAmountBeforeInitializationPatch = 0;
   //VacationPeriod che ha generato il period
   public VacationCode vacationCode;
   
