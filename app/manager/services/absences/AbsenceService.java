@@ -192,7 +192,7 @@ public class AbsenceService {
         if (groupAbsenceType == null) {
           groupAbsenceType = groupsPermitted.get(0);  
         }
-        categoryTab = absenceComponentDao.categoriesByPriority().iterator().next().tab;  
+        categoryTab = groupAbsenceType.category.tab;  
       }
     }
     
@@ -486,10 +486,12 @@ public class AbsenceService {
     
     //Fetch special groups
     final GroupAbsenceType employeeVacation = absenceComponentDao
-        .groupAbsenceTypeByName(DefaultGroup.G_FERIE_CNR_DIPENDENTI.name()).get();
+        .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR_DIPENDENTI.name()).get();
+    final GroupAbsenceType employeeCompensatory = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name()).get();
     final GroupAbsenceType employeeOffseat = absenceComponentDao
-        .groupAbsenceTypeByName(DefaultGroup.G_LAVORO_FUORI_SEDE.name()).get();
-    
+        .groupAbsenceTypeByName(DefaultGroup.LAVORO_FUORI_SEDE.name()).get();
+
     final User currentUser = Security.getUser().get();
     final boolean officeWriteAdmin = secureManager
         .officesWriteAllowed(currentUser).contains(person.office);
@@ -498,6 +500,7 @@ public class AbsenceService {
     if (currentUser.isSystemUser() || officeWriteAdmin) {
       groupsPermitted.remove(employeeVacation);
       groupsPermitted.remove(employeeOffseat);
+      groupsPermitted.remove(employeeCompensatory);
       return groupsPermitted;
     }
     
@@ -512,9 +515,14 @@ public class AbsenceService {
         groupsPermitted.add(employeeOffseat);
       }
 
-      if ((Boolean)confManager.configValue(person.office, EpasParam.TR_VACATIONS)) {
-        //deve essere un livello 1-3
+      if ((Boolean)confManager.configValue(person.office, EpasParam.TR_VACATIONS)
+          && person.qualification.qualification <= 3) {
         groupsPermitted.add(employeeVacation);  
+      }
+      
+      if ((Boolean)confManager.configValue(person.office, EpasParam.TR_COMPENSATORY)
+          && person.qualification.qualification <= 3) {
+        groupsPermitted.add(employeeCompensatory);  
       }
       
       return groupsPermitted;

@@ -178,19 +178,6 @@ public class AbsenceTypeDao extends DaoBase {
         .map(absenceType, absence.count());
   }
   
-  /**
-   * 
-   * @param codesForEmployees lista dei codici di assenza
-   * @return la lista dei codici di assenza usabili dagli impiegati di livello I-III
-   *        per giustificare il proprio orario di lavoro.
-   */
-  public List<AbsenceType> getAbsenceTypeForEmployee(List<String> codesForEmployees) {
-    QAbsenceType absenceType = QAbsenceType.absenceType;
-    return getQueryFactory().from(absenceType)
-        .where(absenceType.code.in(codesForEmployees))
-        .list(absenceType);
-  }
-
   public class AbsenceTypeDto {
     public String code;
     public long count;

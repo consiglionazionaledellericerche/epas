@@ -36,21 +36,18 @@ public enum DefaultCategoryType {
   
   CONGEDO_MATRIMONIO("Congedo per matrimonio", 12, 
       DefaultTab.CONGEDI_PARENTALI),
-
-
   
   PERMESSI_PERSONALI("Permessi Personali", 12, DefaultTab.FERIE_PERMESSI_RIPOSI),
-  //DIRITTO_STUDIO("Diritto allo studio", 13, DefaultTab.ALTRE_TIPOLOGIE),
-  //TELELAVORO("Telelavoro", 14, DefaultTab.ALTRI_GRUPPI),
-  //PERMESSI_SINDACALI("Permessi Sindacali", 15, DefaultTab.ALTRI_GRUPPI),
+
   ALTRI_CODICI("Altri Codici", 16, DefaultTab.ALTRI_CODICI),
-  ASPETTATIVA("Codici Aspettativa", 16, DefaultTab.ALTRI_CODICI),
-  PUBBLICA_FUNZIOINE("Pubblica Funzione", 16, DefaultTab.ALTRI_CODICI),
+  ASPETTATIVA("Codici Aspettativa", 17, DefaultTab.ALTRI_CODICI),
+  PUBBLICA_FUNZIOINE("Pubblica Funzione", 18, DefaultTab.ALTRI_CODICI),
 
   LAVORO_FUORI_SEDE("Lavoro fuori sede", 17, DefaultTab.LAVORO_FUORI_SEDE),
   FERIE_DIPENDENTI("Ferie e permessi legge", 18, DefaultTab.FERIE_DIPENDENTI),
+  RIPOSI_COMPENSATIVI_DIPENDENTI("Riposi compensativi", 19, DefaultTab.RIPOSI_DIPENDENTI),
   
-  CODICI_AUTOMATICI("Codici Automatici", 18, DefaultTab.AUTOMATICI);
+  CODICI_AUTOMATICI("Codici Automatici", 20, DefaultTab.AUTOMATICI);
 
   public String description;
   public int priority;

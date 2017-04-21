@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
+import manager.NotificationManager;
 import manager.PersonDayManager;
 import manager.attestati.dto.internal.CruscottoDipendente;
 import manager.attestati.service.CertificationService;
@@ -61,6 +62,7 @@ import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
+import models.absences.definitions.DefaultGroup;
 import models.enumerate.QualificationMapping;
 
 import org.joda.time.LocalDate;
@@ -104,6 +106,8 @@ public class AbsenceGroups extends Controller {
   private static AbsenceComponentDao absenceComponentDao;
   @Inject
   private static CertificationService certService; 
+  @Inject
+  static NotificationManager notificationManager;
 
   /**
    * La lista delle categorie definite.
@@ -579,6 +583,42 @@ public class AbsenceGroups extends Controller {
     render(absenceForm, insertReport, forceInsert);
 
   }
+  
+  /**
+   * Inserimento assistito partendo dalla ricerca.
+   * @param personId persona
+   * @param from data inizio
+   * @param absenceType tipo
+   */
+  public static void insertAssisted(Long personId, LocalDate from, AbsenceType absenceType) {
+    
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    notFoundIfNull(from);
+    notFoundIfNull(absenceType);
+
+    rules.checkIfPermitted(person);
+    
+    GroupAbsenceType groupAbsenceType = absenceType.defaultTakableGroup();
+    if (groupAbsenceType.firstOfChain() != null) {
+      groupAbsenceType = groupAbsenceType.firstOfChain();
+    }
+    if (!groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.simpleGrouping)) {
+      absenceType = null;
+    }
+    
+    AbsenceForm absenceForm =
+        absenceService.buildAbsenceForm(person, from, null,
+            null, groupAbsenceType, false, absenceType, null, null, null, false);
+
+    InsertReport insertReport = absenceService.insert(person,
+        absenceForm.groupSelected,
+        absenceForm.from, absenceForm.to,
+        absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
+        absenceForm.hours, absenceForm.minutes, false, absenceManager);
+    
+    render("@insert", absenceForm, insertReport);
+  }
 
   /**
    * End Point per il salvataggio di assenze.
@@ -621,6 +661,13 @@ public class AbsenceGroups extends Controller {
         rules.checkIfPermitted(absence);
         absence.save();
         personDay.save();
+        
+        if (groupAbsenceType.name.equals(DefaultGroup.FERIE_CNR_DIPENDENTI.name()) 
+            || groupAbsenceType.name.equals(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name())
+            || groupAbsenceType.name.equals(DefaultGroup.LAVORO_FUORI_SEDE.name())) {
+          notificationManager.notifyAbsence(absence, NotificationManager.CRUD.CREATE);
+        }
+        
       }
       if (!insertReport.reperibilityShiftDate().isEmpty()) {
         absenceManager.sendReperibilityShiftEmail(person, insertReport.reperibilityShiftDate());
@@ -630,6 +677,7 @@ public class AbsenceGroups extends Controller {
       JPA.em().flush();
       consistencyManager.updatePersonSituation(person.id, from);
       flash.success("Codici di assenza inseriti.");
+      
     }
 
 

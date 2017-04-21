@@ -69,7 +69,7 @@ public class VacationSituation {
     if (old.total() != summary.total()) {
       return false;
     }
-    if (old.postPartum() != summary.postPartum()) {
+    if (old.postPartum() != summary.postPartum().size()) {
       return false;
     }
     if (old.accrued() != summary.accrued()) {
@@ -218,11 +218,11 @@ public class VacationSituation {
     /**
      * Nuova implementazione: posPartum anno passato.
      */
-    public int postPartum() {
+    public List<Absence> postPartum() {
       if (absencePeriod == null) {
-        return 0;
+        return Lists.newArrayList();
       }
-      return absencePeriod.reducingAbsences.size();
+      return absencePeriod.reducingAbsences;
     }
     
     public int accrued() {
@@ -238,11 +238,11 @@ public class VacationSituation {
     }
     
     public boolean isContractUpperLimit() {
-      return isContractUpperLimit(lastNaturalPeriod(absencePeriod).to);
+      return isContractUpperLimit(lastNaturalSubPeriod(absencePeriod).to);
     }
     
     public LocalDate upperLimit() {
-      return lastNaturalPeriod(absencePeriod).to;
+      return lastNaturalSubPeriod(absencePeriod).to;
     }
     
     public int used() {
@@ -267,7 +267,7 @@ public class VacationSituation {
      * Se il periodo è scaduto alla data dateToCheck. Se absent considera oggi.
      */
     public boolean expired() {
-      if (lastNaturalPeriod(absencePeriod).to.isAfter(date)) {
+      if (lastNaturalSubPeriod(absencePeriod).to.isAfter(date)) {
         return false;
       }
       return true;
@@ -289,7 +289,7 @@ public class VacationSituation {
     
     private int computeUsed(AbsencePeriod period) {
       return period
-          .computePeriodTakenAmount(TakeCountBehaviour.sumAllPeriod, lastPeriod(period).to) / 100;
+          .computePeriodTakenAmount(TakeCountBehaviour.sumAllPeriod, lastSubPeriod(period).to) / 100;
     }
     
     private boolean isContractUpperLimit(LocalDate date) {
@@ -308,10 +308,10 @@ public class VacationSituation {
     }
     
     /**
-     * L'ultimo periodo (per la data fine). Se l'ultimo periodo è l'estensione 37 seleziono quello
-     * ancora precedente.
+     * L'ultimo subPeriodo non prorogato (per la data fine). 
+     * Se l'ultimo subPeriod è l'estensione 37 seleziono quello ancora precedente.
      */
-    private AbsencePeriod lastNaturalPeriod(AbsencePeriod period) {
+    private AbsencePeriod lastNaturalSubPeriod(AbsencePeriod period) {
       AbsencePeriod lastPeriod = period.subPeriods.get(period.subPeriods.size() - 1);
       for (AbsenceType taken : lastPeriod.takenCodes) {
         if (taken.code.equals(DefaultAbsenceType.A_37.getCode())) {
@@ -322,10 +322,24 @@ public class VacationSituation {
     }
     
     /**
-     * L'ultimo periodo (per la data fine).
+     * L'ultimo subPeriod (per la data fine).
      */
-    private AbsencePeriod lastPeriod(AbsencePeriod period) {
+    private AbsencePeriod lastSubPeriod(AbsencePeriod period) {
       return period.subPeriods.get(period.subPeriods.size() - 1);
+    }
+    
+    /**
+     * L'ultimo subPeriod che ha contribuito alla maturazione. 
+     * (VacationCode che lo ha generato è popolato). 
+     */
+    private AbsencePeriod lastEffectiveSubPeriod() {
+      AbsencePeriod lastEffective = null;
+      for (AbsencePeriod period : this.absencePeriod.subPeriods) {
+        if (period.vacationCode != null) {
+          lastEffective = period;
+        }
+      }
+      return lastEffective;
     }
     
     /**
@@ -359,13 +373,160 @@ public class VacationSituation {
     }
     
     /**
-     * I giorni maturati nel periodo per il riepilogo. 
+     * I giorni che hanno contribuito alla maturazione. (Quelli appartenenti all'anno solare)
      */
-    public int periodAmountAccrued(AbsencePeriod period) {
+    public int accruedDayTotal() {
+      int days = 0;
+      for (AbsencePeriod period : absencePeriod.subPeriods) {
+        if (period.from.getYear() != this.year) {
+          return days;
+        }
+        days = days + period.periodInterval().dayInInterval();
+      }
+      return days;
+    }
+    
+    /**
+     * I giorni che hanno contribuito alla maturazione fino a oggi. 
+     * (Quelli appartenenti all'anno solare)
+     */
+    public int accruedDay() {
+      int days = 0;
+      for (AbsencePeriod period : absencePeriod.subPeriods) {
+        if (period.from.getYear() != this.year || period.from.isAfter(this.date)) {
+          return days;
+        }
+        days = days + period.periodInterval().dayInInterval();
+      }
+      return days;
+    }
+    
+    /**
+     * Se il subPeriod è stato escluso dal fixPostPartum.
+     */
+    public boolean subFixedPostPartum(AbsencePeriod period) {
+      return period.vacationAmountBeforeInitializationPatch 
+          != period.vacationAmountBeforeFixPostPartum;
+    }
+    
+    /**
+     * Se il subPeriod è stato maturato.
+     */
+    public boolean subAccrued(AbsencePeriod period) {
+      return subAmount(period) == subAmountAccrued(period);
+    }
+    
+    /**
+     * L'ammontare utilizzabile nel subPeriod.
+     */
+    public int subAmount(AbsencePeriod period) {
+      return period.vacationAmountBeforeInitializationPatch;
+    }
+    
+    /**
+     * L'ammontare utilizzabile nel subPeriod maturato. 
+     */
+    public int subAmountAccrued(AbsencePeriod period) {
       if (date.isBefore(period.from)) {
         return 0;
       }
-      return period.vacationAmountBeforeInitialization;
+      return period.vacationAmountBeforeInitializationPatch;
+    }
+    
+    /**
+     * L'ammontare utilizzabile nel subPeriod prima del fix post partum.
+     */
+    public int subAmountBeforeFixedPostPartum(AbsencePeriod period) {
+      return period.vacationAmountBeforeFixPostPartum;
+    }
+    
+    /**
+     * L'ammontare utilizzabile fino al subPeriod.
+     */
+    public int subTotalAmount(AbsencePeriod period) {
+      int total = 0;
+      for (AbsencePeriod subPeriod : this.absencePeriod.subPeriods) {
+        total = total + this.subAmount(subPeriod);
+        if (subPeriod.equals(period)) {
+          break;
+        }
+      }
+      return total;
+    }
+    
+    /**
+     * I giorni coperti nell'anno fino al subPeriod.
+     */
+    public int subDayProgression(AbsencePeriod period) {
+      int progress = 0;
+      for (AbsencePeriod subPeriod : this.absencePeriod.subPeriods) {
+        progress = progress + subPeriod.periodInterval().dayInInterval();
+        if (subPeriod.equals(period)) {
+          break;
+        }
+      }
+      return progress;
+    }
+    
+    /**
+     * I giorni di fix post partum del subPeriod.  
+     */
+    public int subDayPostPartum(AbsencePeriod period) {
+      
+      int postPartumToAssign = this.postPartum().size();
+      int postPartumAssigned = 0;
+      
+      //parto dall'ultimo period
+      AbsencePeriod lastEffective = this.lastEffectiveSubPeriod();
+      while (lastEffective != null) {
+        if (postPartumToAssign == 0) {
+          return 0;
+        }
+        int periodPostPartum = 0;
+        if (postPartumToAssign <= lastEffective.periodInterval().dayInInterval()) {
+          periodPostPartum = postPartumToAssign;
+        } else {
+          periodPostPartum = lastEffective.periodInterval().dayInInterval();
+        }
+        postPartumAssigned = postPartumAssigned + periodPostPartum;
+        postPartumToAssign = postPartumToAssign - periodPostPartum;
+        
+        if (period.equals(lastEffective)) {
+          return periodPostPartum;
+        }
+        lastEffective = this.absencePeriod.subPeriods
+            .get(this.absencePeriod.subPeriods.indexOf(lastEffective) - 1); 
+        //esiste sempre altrimenti sarei uscito alla condizione precedente 
+        //dal momento che lastEffective appartiene a subPeriods. 
+        
+      }
+      
+      return 0;
+    }
+    
+    /**
+     * Progressione dei giorni post partum fino a quel period.
+     */
+    public int subDayPostPartumProgression(AbsencePeriod period) {
+      int progress = 0;
+      //parto dall'ultimo period
+      AbsencePeriod lastEffective = this.lastEffectiveSubPeriod();
+      while (lastEffective != null) {
+        if (subDayPostPartum(lastEffective) == 0) {
+          return 0;
+        }
+        progress = progress + subDayPostPartum(lastEffective);
+        if (lastEffective.equals(period)) {
+          return progress;
+        }
+        lastEffective = this.absencePeriod.subPeriods
+            .get(this.absencePeriod.subPeriods.indexOf(lastEffective) - 1); 
+      }
+      return progress;
+    }
+    
+    public int subDayToFixPostPartum(AbsencePeriod period) {
+      return period.periodInterval().dayInInterval() - subDayPostPartum(period);
     }
     
     /**
@@ -427,7 +588,7 @@ public class VacationSituation {
         this.contract = vacationSummary.contract;
         this.contract.merge();
         this.total = vacationSummary.total();
-        this.postPartum = vacationSummary.postPartum();
+        this.postPartum = vacationSummary.postPartum().size();
         this.accrued = vacationSummary.accrued();
         this.used = vacationSummary.used();
         this.usable = vacationSummary.usable();
