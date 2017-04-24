@@ -33,8 +33,7 @@ import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.NotificationManager;
 import manager.PersonDayManager;
-import manager.attestati.dto.internal.CruscottoDipendente;
-import manager.attestati.service.CertificationService;
+import manager.services.absences.AbsenceCertificationService;
 import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
@@ -105,9 +104,9 @@ public class AbsenceGroups extends Controller {
   @Inject
   private static AbsenceComponentDao absenceComponentDao;
   @Inject
-  private static CertificationService certService; 
-  @Inject
   static NotificationManager notificationManager;
+  @Inject
+  static AbsenceCertificationService absenceCertificationService;
 
   /**
    * La lista delle categorie definite.
@@ -1083,7 +1082,7 @@ public class AbsenceGroups extends Controller {
    */
   public static void certificationsAbsenceCodes(boolean eraseErasable) throws ExecutionException {
 
-    CodeComparation codeComparation = absenceService.computeCodeComparation();
+    CodeComparation codeComparation = absenceCertificationService.computeCodeComparation();
 
     if (eraseErasable) {
       codeComparation.eraseErasable();
@@ -1158,10 +1157,9 @@ public class AbsenceGroups extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     
-    CruscottoDipendente cruscottoDipendente = certService.getCruscottoDipendente(person, year);
-    
-    CertificationYearSituation yearSituation = new CertificationYearSituation(absenceComponentDao, 
-        person, cruscottoDipendente);
+   
+    CertificationYearSituation yearSituation = absenceCertificationService
+        .buildCertificationYearSituation(person, year);
     
     render(yearSituation, person);
   }
@@ -1175,14 +1173,8 @@ public class AbsenceGroups extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
-    CruscottoDipendente cruscottoDipendente = certService.getCruscottoDipendente(person, year);
-
-    CertificationYearSituation yearSituation = new CertificationYearSituation(absenceComponentDao, 
-        person, cruscottoDipendente);
-
-
     LocalDate updateFrom = LocalDate.now();
-    for (Absence absence : absenceService.certificationAbsencesToPersist((yearSituation))) {
+    for (Absence absence : absenceCertificationService.absencesToPersist(person, year)) {
 
       PersonDay personDay = personDayManager
           .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());

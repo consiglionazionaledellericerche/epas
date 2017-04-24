@@ -713,14 +713,8 @@ public class CertificationService implements ICertificationService {
         
         return cruscottoDipendente;
       }
-       
-      
     }
-    
     return null;
-    
-
-    
   }
 
 }

@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import manager.attestati.dto.show.CodiceAssenza;
-import manager.services.absences.enums.GroupEnum;
 
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -167,62 +166,55 @@ public class CodeComparation {
     
    
     /**
-     * Se in epas il superCode risulta assegnato solo al gruppo generico.
-     * @return esito
-     */
-    public boolean onlyOtherGroup() {
-      for (GroupAbsenceType group : absenceType.involvedGroupAbsenceType(false)) {
-        String groupName = group.name;
-        String enumName = GroupEnum.ALTRI.name();
-            
-        if (!groupName.equals(enumName)) {
-          return false;
-        }
-      }
-      return true;
-    }
-    
-    /**
-     * Se il codice solo in epas ha problemi.
+     * Un codice solo in epas ha problemi se non appartiene ad alcun gruppo e non è cancellabile.
      * @return esito
      */
     public boolean withProblems() {
-      
-      //ha problemi un codice che è solo in epas..
-      if (!onlyEpas()) {
-        return false;
-      }
-      
-      //.. e che non è cancellabile e appartiene solo al gruppo altri
-      if (!erasable() && onlyOtherGroup()) {
+      if (onlyEpas() && !groupEpas() && !erasable()) {
         return true;
       }
-      
       return false;
-      
     }
     
     /**
-     * Se il codice solo in epas è cancellabile.
+     * Un codice in epas è cancellabile.
+     * 1) non appartiene ad attestati
+     * 2) non appartiene ad alcun gruppo epas
+     * 3) non è mai stato usato
      * @return esito
      */
     public boolean erasable() {
       
-      //è cancellabile solo un codice che è solo in epas
-      if (!onlyEpas()) {
+      //1) un codice in attestati non è cancellabile
+      if (both() || onlyAttestati()) {
         return false;
       }
       
-      boolean notUsed = absences.isEmpty();
-      boolean onlyOtherGroup = onlyOtherGroup();
-      
-      // non usato e senza gruppo
-      if (notUsed && onlyOtherGroup) {
-        return true;
+      //2) un codice che appartiene ad un gruppo epas non è cancellabile
+      if (groupEpas()) {
+        return false;
       }
       
-      return false;
-        
+      //3) un codice usato non è cancellabile
+      if (!absences.isEmpty()) {
+        return false;
+      }
+      
+      return true;
+    }
+    
+    /**
+     * Se il codice in epas appartiene ad un gruppo epas.
+     * @return esito
+     */
+    public boolean groupEpas() {
+      if (absenceType == null) {
+        return false;
+      }
+      if (absenceType.involvedGroupAbsenceType(false).isEmpty()) {
+        return false;
+      }
+      return true;
     }
   }
   
