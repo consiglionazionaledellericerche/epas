@@ -959,14 +959,16 @@ public class Competences extends Controller {
    * @param shiftCategoryId id del turno
    * @param sts shiftTypeservice da passare alla form contenente le informazioni da visualizzare
    */
-  public static void configureShiftTimeTable(Long shiftCategoryId, ShiftTypeService sts) {
-    ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
-    notFoundIfNull(cat);
-    rules.checkIfPermitted(cat.office);
-    notFoundIfNull(sts);
-    Office office = cat.office;
+  public static void configureShiftTimeTable() {
+    
+    List<Office> officeList = officeDao.getAllOffices();    
+    
     ShiftTimeTable timeTable = new ShiftTimeTable();
-    render(timeTable, cat, office);
+    render(timeTable, officeList);
+    
+  }
+  
+  public static void saveTimeTable(ShiftTimeTable timeTable) {
     
   }
 
@@ -989,6 +991,7 @@ public class Competences extends Controller {
       render(cat, sts, step);
     }
     if (step == 1) {
+      //TODO: inserire dei validatori sui parametri dello ShiftTypeService passato.
       List<ShiftTypeService> list = Lists.newArrayList();
       list.add(sts);
       step++;
@@ -1001,7 +1004,7 @@ public class Competences extends Controller {
       render(shiftList, dtoList, cat, sts, step); 
     }
     if (step == 2) {
-
+      //Inserire un validatore sul valore dell'id della timetable
       List<ShiftTypeService> list = Cache.get(key, List.class);
       ShiftTypeService service = list.get(0);
       ShiftTimeTable stt = shiftDao.getShiftTimeTableById(shift);

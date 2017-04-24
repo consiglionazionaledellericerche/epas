@@ -1,30 +1,39 @@
-#{modalAsync id:'modalActivateService', 
-title:('Nuova timetable per ' +office.name)}
+#{modalAsync id:'modalCompetenceCode', 
+title:('Nuova timetable')}
 
 <div id="timeTableData">
 #{form action:@saveTimeTable(), method:'POST', autocomplete:false,
   class:'form form-horizontal', 'data-async':'#page_content',
   'data-async-error':'#timeTableData'}
-
+  <div class="col-sm-4"></div>
+  <div class="col-sm-4">
+  		 #{select 'officeId', class:'form-control', id:'office'}
+		  		#{list items:officeList, as:'office'}
+		    		#{option office.id}${office.name}#{/option}
+	  			#{/list}
+		 #{/select}
+	</div>
+	<br><br>
 #{alert color:'info'}
 	Turno di mattina
 #{/alert}
+
 <div class="row">
 	  <div class="col-sm-1"></div>
 	  <div class="col-sm-5">
-	  #{f.input 'sts.timeTable.startMorning', type:text, required:'true' /}
+	  #{f.input 'timeTable.startMorning', type:text, required:'true' /}
 	  </div>
 	  <div class="col-sm-5">
-	  #{f.input 'sts.timeTable.endMorning', type:text, required:'true' /}
+	  #{f.input 'timeTable.endMorning', type:text, required:'true' /}
 	  </div>	  
 </div>
 <div class="row">
 	  <div class="col-sm-1"></div>
 	  <div class="col-sm-5">
-	  #{f.input 'sts.timeTable.startMorningLunchTime', type:text, required:'true' /}
+	  #{f.input 'timeTable.startMorningLunchTime', type:text, required:'true' /}
 	  </div>
 	  <div class="col-sm-5">
-	  #{f.input 'sts.timeTable.endMorningLunchTime', type:text, required:'true' /}
+	  #{f.input 'timeTable.endMorningLunchTime', type:text, required:'true' /}
 	  </div>	  
 </div>
 
@@ -34,19 +43,19 @@ title:('Nuova timetable per ' +office.name)}
 <div class="row">
 	  <div class="col-sm-1"></div>
 	  <div class="col-sm-5">
-	  #{f.input 'sts.timeTable.startAfternoon', type:text, required:'true' /}
+	  #{f.input 'timeTable.startAfternoon', type:text, required:'true' /}
 	  </div>
 	  <div class="col-sm-5">
-	  #{f.input 'sts.timeTable.endAfternoon', type:text, required:'true' /}
+	  #{f.input 'timeTable.endAfternoon', type:text, required:'true' /}
 	  </div>	  
 </div>
 <div class="row">
 	  <div class="col-sm-1"></div>
 	  <div class="col-sm-5">
-	  #{f.input 'sts.timeTable.startAfternoonLunchTime', type:text, required:'true' /}
+	  #{f.input 'timeTable.startAfternoonLunchTime', type:text, required:'true' /}
 	  </div>
 	  <div class="col-sm-5">
-	  #{f.input 'sts.timeTable.endAfternoonLunchTime', type:text, required:'true' /}
+	  #{f.input 'timeTable.endAfternoonLunchTime', type:text, required:'true' /}
 	  </div>	  
 </div>
 #{alert color:'danger'}
@@ -55,19 +64,19 @@ title:('Nuova timetable per ' +office.name)}
 <div class="row">
 	  <div class="col-sm-1"></div>
 	  <div class="col-sm-5">
-	  #{f.input 'sts.timeTable.startEvening', type:text /}
+	  #{f.input 'timeTable.startEvening', type:text /}
 	  </div>
 	  <div class="col-sm-5">
-	  #{f.input 'sts.timeTable.endEvening', type:text /}
+	  #{f.input 'timeTable.endEvening', type:text /}
 	  </div>	  
 </div>
 <div class="row">
 	  <div class="col-sm-1"></div>
 	  <div class="col-sm-5">
-	  #{f.input 'sts.timeTable.startEveningLunchTime', type:text /}
+	  #{f.input 'timeTable.startEveningLunchTime', type:text /}
 	  </div>
 	  <div class="col-sm-5">
-	  #{f.input 'sts.timeTable.endEveningLunchTime', type:text /}
+	  #{f.input 'timeTable.endEveningLunchTime', type:text /}
 	  </div>	  
 </div>
 
