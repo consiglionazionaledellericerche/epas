@@ -100,11 +100,7 @@ public enum DefaultGroup {
       DefaultCategoryType.FERIE_CNR, 1,
       GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, 
       DefaultTakable.T_FERIE_CNR_PROROGA, null, null, false, false),
-  RIDUCE_FERIE_CNR("Riduce ferie e permessi", 
-      "", 
-      DefaultCategoryType.CODICI_AUTOMATICI, 0,
-      GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, 
-      DefaultTakable.T_RIDUCE_FERIE_CNR, null, null, true, false),
+
   
   RIPOSI_CNR("91 - Riposo compensativo", 
       "", 
@@ -122,6 +118,7 @@ public enum DefaultGroup {
       DefaultCategoryType.MALATTIA_DIPENDENTE, 0,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
       DefaultTakable.T_MALATTIA, null, null, false, false),
+    
   MALATTIA_FIGLIO_1_12("12 - Malattia primo figlio <= 3 anni retribuita 100%", 
       "", 
       DefaultCategoryType.MALATTIA_FIGLIO_1, 0,
@@ -233,11 +230,6 @@ public enum DefaultGroup {
       DefaultCategoryType.MALATTIA_FIGLIO_3, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.child3_0_3, 
       DefaultTakable.T_MALATTIA_FIGLIO_3_14, null, null, false, false),
-  PB("PB - Permesso breve 36 ore anno", 
-      "", 
-      DefaultCategoryType.CODICI_AUTOMATICI, 0,
-      GroupAbsenceTypePattern.programmed, PeriodType.year, 
-      DefaultTakable.T_PB, null, null, true, false),
   
   G_ALTRI_CODICI("Altri Codici", 
       "", 
@@ -261,9 +253,28 @@ public enum DefaultGroup {
       "", 
       DefaultCategoryType.ASPETTATIVA, 1,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
-      DefaultTakable.T_ASPETTATIVA, null, null, false, false);
+      DefaultTakable.T_ASPETTATIVA, null, null, false, false),
   
-
+  
+  
+  
+  RIDUCE_FERIE_CNR("Riduce ferie e permessi", 
+      "", 
+      DefaultCategoryType.CODICI_AUTOMATICI, 0,
+      GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, 
+      DefaultTakable.T_RIDUCE_FERIE_CNR, null, null, true, false),
+  
+  MALATTIA_3_ANNI("Malattia dipendente 3 anni",
+      "", 
+      DefaultCategoryType.CODICI_AUTOMATICI, 0,
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+      DefaultTakable.T_MALATTIA_3_ANNI, null, null, true, false),
+  
+  PB("PB - Permesso breve 36 ore anno", 
+      "", 
+      DefaultCategoryType.CODICI_AUTOMATICI, 0,
+      GroupAbsenceTypePattern.programmed, PeriodType.year, 
+      DefaultTakable.T_PB, null, null, true, false);
 
   public String description;
   public String chainDescription;

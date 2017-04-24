@@ -1,25 +1,19 @@
 package manager.services.absences.certifications;
 
-import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-
-import dao.absences.AbsenceComponentDao;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import manager.attestati.dto.internal.CruscottoDipendente;
-import manager.attestati.dto.internal.CruscottoDipendente.SituazioneDipendenteAssenze;
-import manager.attestati.dto.internal.CruscottoDipendente.SituazioneParametriControllo;
-
 import models.Person;
 import models.absences.Absence;
-import models.absences.AbsenceType;
+import models.absences.definitions.DefaultGroup;
 
 import org.joda.time.LocalDate;
+import org.testng.collections.Sets;
 
 /**
  * Contiene le informazioni per inizializzare le assenze del dipendente da Attestati.
@@ -56,15 +50,28 @@ public class CertificationYearSituation {
    */
   public static class AbsenceSituation {
 
-    private final AbsenceComponentDao absenceComponentDao;
-    
     public Person person;
     
     //la tipologia situazione
     public AbsenceImportType type; 
-   
-    //la lista delle date per ciascun codice.
-    public Map<String, List<LocalDate>> datesPerCode = Maps.newHashMap();
+ 
+    //le date con assenza epas corretta per quel codice 
+    public Map<String, List<LocalDate>> datesPerCodeOk = Maps.newHashMap();
+    
+    //le date con assenza epas mancante per quel codice, inseribile automaticamente
+    public Map<String, List<LocalDate>> datesPerCodeToAddAutomatically = Maps.newHashMap();
+    
+    //le date con assenza epas mancante per quel codice da inserire manualmente 
+    // 1) riposi compensativi post inizializzazione non presenti in epas
+    public Map<String, List<LocalDate>> datesPerCodeToAddManually = Maps.newHashMap();
+    
+    //le assenze epas significative non presenti in attestati
+    // giorni ferie e permessi dopo l'inizializzazione
+    // giorni di astensione fac. dopo l'inizializzazione
+    // giorni di riduce ferie e permessi (non considerare inizializzazioni, servono gg specifici) 
+    // giorni di malattia figli
+    // giorni di malattia
+    public List<Absence> absencesToRemove = Lists.newArrayList();
     
     //Campi per il controllo residui (da utilizzare se non sono null)
     public Integer totalUsable = null;
@@ -78,202 +85,95 @@ public class CertificationYearSituation {
 
     /**
      * Costruttore absenceSituation.
-     * @param absenceComponentDao injected
      * @param person persona
      */
-    public AbsenceSituation(AbsenceComponentDao absenceComponentDao, Person person) {
-      this.absenceComponentDao = absenceComponentDao;
+    public AbsenceSituation(Person person, AbsenceImportType type) {
       this.person = person;
+      this.type = type;
     }
     
     /**
-     * Calcola la somma delle assenze in datesPerCode.
-     * @return int
+     * Tutti i codici.
      */
-    public int totalUsed() {
-      int totalUsed = 0;
-      for (List<LocalDate> dates : datesPerCode.values()) {
-        totalUsed = totalUsed + dates.size();
-      }
-      return totalUsed;
+    public Set<String> codes() {
+      Set<String> codes = Sets.newHashSet();
+      codes.addAll(datesPerCodeOk.keySet());
+      codes.addAll(datesPerCodeToAddAutomatically.keySet());
+      codes.addAll(datesPerCodeToAddManually.keySet());
+      return codes;
     }
-
-    /**
-     * Se l'assenza è presente su ePAS.
-     * @param code codice in attestati
-     * @param date data
-     * @return esito
-     */
-    public boolean isAbsencePresent(String code, LocalDate date) {
-      
-      Set<AbsenceType> certificationCodes = Sets.newHashSet();
-      
-      Optional<AbsenceType> absenceType = absenceComponentDao.absenceTypeByCode(code);
-      if (!absenceType.isPresent() 
-          || (absenceType.get().certificateCode != null 
-          && !absenceType.get().certificateCode.equalsIgnoreCase(code))) {
-        
-        //Se non lo trovo oppure il codice in attestati è diverso da quello trovato
-        //Lo cerco per codice attestati. Si potrebbe migliorare popolando per ogni codice 
-        //la colonna codice attestati.
-      } else {
-        certificationCodes.add(absenceType.get());
-      }
-      
-      certificationCodes.addAll(absenceComponentDao.absenceTypesByCertificationCode(code));
-      
-      if (certificationCodes.isEmpty()) {
-        return false;
-      }
-
-      List<Absence> absences = Lists.newArrayList();
-      for (AbsenceType certificationType : certificationCodes) {
-        absences.addAll(absenceComponentDao.orderedAbsences(person, date, date, 
-            Sets.newHashSet(certificationType)));
-      }
-
-      //Dovrebbe essere unica
-      if (absences.isEmpty()) {
-        return false;
-      }
-      
-      if (absences.size() > 1) {
-        duplicatedAbsences.addAll(absences);
-      }
-      
-      return true;
-    }
-    
   }
   
   /**
-   * La tipologia assenze da importare da Attestati. 
-   * I parametri absencePattern e controlPattern vengono utilizzati per individuare i record
-   * che arrivano da attestati.
+   * Le tipologie di assenze da importare da Attestati. Significato dei campi:<br>
+   * 1) absenceMatchPattern === situazioneDipendenteAssenze.codice.codice -> record da tenere<br> 
+   * 2) absenceMatchExclusion === situazioneDipendenteAssenze.codice.codice -> record da 
+   * scartare<br>
+   * 3) controlMatchpattern === situazioneParametriControllo.descrizione -> record da tenere<br>
+   * 4) defaultGroup i gruppi epas corrospondenti
+   * 
    * @author alessandro
    *
    */
   public static enum AbsenceImportType {
     
     //Situazioni da prelevare dalla situazione assenze
-    GENERIC(null, null),
-    FERIE_ANNO_CORRENTE("32", null),
-    PERMESSI_LEGGE("94", null),
+    TIPO_GENERICO(
+        null, 
+        null, 
+        null, 
+        null),
+    
+    FERIE_ANNO_CORRENTE(
+        "32", 
+        null,
+        null,
+        ImmutableSet.of(DefaultGroup.FERIE_CNR, DefaultGroup.FERIE_CNR_PROROGA)),
+    
+    PERMESSI_LEGGE(
+        "94", 
+        null, 
+        null,
+        ImmutableSet.of(DefaultGroup.FERIE_CNR, DefaultGroup.FERIE_CNR_PROROGA)),
+    
+    RIPOSO_COMPENSATIVO(
+        "91", 
+        null,  
+        null, 
+        ImmutableSet.of(DefaultGroup.RIPOSI_CNR)),
     
     //Situazioni da prelevare da parametri controllo
-    G661(null, "661"),
-    FERIE_ANNO_PRECEDENTE(null, "Ferie Anno Precedente");
+    PERMESSO_PERSONALE_661(
+        null,
+        ImmutableSet.of("661"), 
+        "Legge 661", 
+        ImmutableSet.of(DefaultGroup.G_661)),
+    
+    FERIE_ANNO_PRECEDENTE(
+        null, 
+        ImmutableSet.of("31"), 
+        "Ferie Anno Precedente", 
+        ImmutableSet.of(DefaultGroup.FERIE_CNR, DefaultGroup.FERIE_CNR_PROROGA)),
+    
+    MALATTIA_PERSONALE(
+        null,
+        DefaultGroup.MALATTIA_3_ANNI.takable.allTakableTakenCodes(), 
+        "Malattia Personale 100%", 
+        ImmutableSet.of(DefaultGroup.MALATTIA_3_ANNI));
 
     
-    public String absencePattern;      // matching campo situazioneDipendenteAssenze.codice.codice
-    public String controlPattern;      // matching campo situazioneParametriControllo.descrizione
+    public String absenceMatchPattern;   
+    public Set<String> absenceMatchExclusions; 
+    public String controlMatchPattern;   
+    public DefaultGroup defaultGroup;    
     
-    private AbsenceImportType(String absencePattern, String controlPattern) {
-      this.absencePattern = absencePattern;
-      this.controlPattern = controlPattern;
-    }
-    
-    /**
-     * Individua la tipologia da importare a partire dalla struttura SituazioneDipendenteAssenze.
-     * @param sda sda
-     * @return type
-     */
-    public static AbsenceImportType get(SituazioneDipendenteAssenze sda) {
-      if (sda.codice.codice.contains("661") || sda.codice.codice.equals("31")) {
-        return null;
-      }
-      for (AbsenceImportType type : AbsenceImportType.values()) {
-        if (type.absencePattern == null) {
-          continue;
-        }
-        if (sda.codice.codice.equals(type.absencePattern)) {
-          return type;
-        }
-      }
-      return AbsenceImportType.GENERIC;
-    }
-    
-    /**
-     * Individua la tipologia da importare 
-     * a partire dalla struttura dati SituazioneParametriControllo.
-     * Mi interessano per adesso solo 661 e ferie anno precedente.
-     * @param spa spa
-     * @return type
-     */
-    public static AbsenceImportType get(SituazioneParametriControllo spa) {
-      for (AbsenceImportType type : AbsenceImportType.values()) {
-        if (type.controlPattern == null) {
-          continue;
-        }
-        if (spa.descrizione.contains(type.controlPattern)) {
-          return type;
-        }
-      }
-      return null;
+    private AbsenceImportType(String absenceMatchPattern, Set<String> absenceMatchExclusions,
+        String controlMatchPattern, 
+        Set<DefaultGroup> defaultGroup) {
+      this.absenceMatchPattern = absenceMatchPattern;
+      this.absenceMatchExclusions = absenceMatchExclusions;
+      this.controlMatchPattern = controlMatchPattern;
     }
   }
-  
-  /**
-   * Costruttore della situazione annuale dipendente.
-   * @param cruscotto cruscotto
-   */
-  public CertificationYearSituation(AbsenceComponentDao absenceComponentDao, Person person, 
-      CruscottoDipendente cruscotto) { 
-    
-    this.person = person;
-    this.year = cruscotto.annoSituazione;
-    
-    this.beginDate = new LocalDate(cruscotto.dipendente.dataAssunzione);
-    if (cruscotto.dipendente.dataCessazione != null) {
-      this.endDate = new LocalDate(cruscotto.dipendente.dataCessazione);
-    }
-    
-    for (SituazioneDipendenteAssenze sda : cruscotto.situazioneDipendenteAssenze) {
-      
-      AbsenceSituation absenceSituation = new AbsenceSituation(absenceComponentDao, person);
-      
-      //type
-      absenceSituation.type = AbsenceImportType.get(sda);
-      if (absenceSituation.type == null) {
-        continue;
-      }
-      
-      //absences
-      absenceSituation.datesPerCode.put(sda.codice.codice, sda.codeDates());
-      
-      //totali residui
-      if (absenceSituation.type.equals(AbsenceImportType.FERIE_ANNO_CORRENTE)
-          || absenceSituation.type.equals(AbsenceImportType.PERMESSI_LEGGE)) {
-        absenceSituation.totalUsable = sda.qtLimiteConsentito;
-        absenceSituation.totalResidual = sda.qtResiduaOreGiorni;
-      }
-      
-      this.absenceSituations.add(absenceSituation);
-    }
-    
-    for (SituazioneParametriControllo spa : cruscotto.situazioneParametriControllo) {
-      
-      AbsenceSituation absenceSituation = new AbsenceSituation(absenceComponentDao, person);
-      
-      //type
-      absenceSituation.type = AbsenceImportType.get(spa);
-      if (absenceSituation.type == null) {
-        continue;
-      }
-      //absences 
-      absenceSituation.datesPerCode = spa.codesDates();
-      
-      //totali residui
-      if (absenceSituation.type.equals(AbsenceImportType.FERIE_ANNO_PRECEDENTE) 
-          || absenceSituation.type.equals(AbsenceImportType.G661)) {
-        absenceSituation.totalUsable = spa.qtLimiteConsentito;
-        absenceSituation.totalResidual = spa.qtResiduaOreGiorni;
-      }
-      
-      this.absenceSituations.add(absenceSituation);
-    }
-    
-  }
-
   
 }
