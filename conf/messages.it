@@ -374,24 +374,24 @@ sts.hourTolerance =Tolleranza per turno (minuti)
 sts.breakInShiftEnabled = Abilitare una pausa internamente al turno?
 sts.breakInShift =Durata della pausa (in minuti) 
 sts.toleranceType =Quando applicare la tolleranza
-sts.timeTable.startMorning =inizio turno
-sts.timeTable.endMorning =fine turno
-sts.timeTable.startAfternoon =inizio turno
-sts.timeTable.endAfternoon =fine turno
-sts.timeTable.startEvening =inizio turno
-sts.timeTable.endEvening =fine turno
+timeTable.startMorning =inizio turno
+timeTable.endMorning =fine turno
+timeTable.startAfternoon =inizio turno
+timeTable.endAfternoon =fine turno
+timeTable.startEvening =inizio turno
+timeTable.endEvening =fine turno
 
 type.type =Nome
 type.description =Descrizione
 type.tolerance =Tolleranza (minuti) 
 type.hourTolerance =Tolleranza per turno (minuti)
 
-type.timeTable.startMorningLunchTime =inizio pranzo
-type.timeTable.endMorningLunchTime =fine pranzo
-type.timeTable.startAfternoonLunchTime =inizio pranzo
-type.timeTable.endAfternoonLunchTime =fine pranzo
-type.timeTable.startEveningLunchTime =inizio pranzo
-type.timeTable.endEveningLunchTime =fine pranzo
+timeTable.startMorningLunchTime =inizio pranzo
+timeTable.endMorningLunchTime =fine pranzo
+timeTable.startAfternoonLunchTime =inizio pranzo
+timeTable.endAfternoonLunchTime =fine pranzo
+timeTable.startEveningLunchTime =inizio pranzo
+timeTable.endEveningLunchTime =fine pranzo
 
 cat.description =Descrizione
 cat.office =Sede
