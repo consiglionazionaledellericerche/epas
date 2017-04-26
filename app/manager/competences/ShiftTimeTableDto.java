@@ -16,4 +16,9 @@ public class ShiftTimeTableDto {
   public String endMorningLunchTime;
   public String startAfternoonLunchTime;
   public String endAfternoonLunchTime;
+  public String startEvening;
+  public String endEvening;
+  public String startEveningLunchTime;
+  public String endEveningLunchTime;
+  public boolean isOfficeTimeTable;
 }

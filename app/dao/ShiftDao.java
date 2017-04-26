@@ -231,11 +231,13 @@ public class ShiftDao extends DaoBase {
    * 
    * @return la lista di tutti i tipi di turno disponibili in anagrafica.
    */
-  public List<ShiftTimeTable> getAllShifts() {
+  public List<ShiftTimeTable> getAllShifts(Office office) {
     final QShiftTimeTable stt = QShiftTimeTable.shiftTimeTable;
-    JPQLQuery query = getQueryFactory().from(stt);
+    JPQLQuery query = getQueryFactory().from(stt).where(stt.office.isNull().or(stt.office.eq(office)));
     return query.list(stt);
   }
+  
+  
 
   /**
    * 

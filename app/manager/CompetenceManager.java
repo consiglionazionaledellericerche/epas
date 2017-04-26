@@ -13,7 +13,6 @@ import dao.OfficeDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
 import dao.PersonShiftDayDao;
-import dao.ShiftDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
@@ -53,10 +52,14 @@ import models.ShiftTimeTable;
 import models.ShiftType;
 import models.TotalOvertime;
 import models.dto.ShiftTypeService;
+import models.dto.TimeTableDto;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,8 +78,7 @@ public class CompetenceManager {
   private final PersonReperibilityDayDao reperibilityDao;
   private final PersonStampingRecapFactory stampingsRecapFactory;
   private final PersonShiftDayDao personShiftDayDao;
-  private final ShiftDao shiftDao;
-
+  
   /**
    * Costruttore.
    *
@@ -92,8 +94,7 @@ public class CompetenceManager {
       OfficeDao officeDao, CompetenceDao competenceDao,
       PersonDayDao personDayDao, IWrapperFactory wrapperFactory,
       PersonDayManager personDayManager, PersonReperibilityDayDao reperibilityDao,
-      PersonStampingRecapFactory stampingsRecapFactory, PersonShiftDayDao personshiftDayDao,
-      ShiftDao shiftDao) {
+      PersonStampingRecapFactory stampingsRecapFactory, PersonShiftDayDao personshiftDayDao) {
     this.competenceCodeDao = competenceCodeDao;
     this.officeDao = officeDao;
     this.competenceDao = competenceDao;
@@ -104,7 +105,7 @@ public class CompetenceManager {
 
     this.stampingsRecapFactory = stampingsRecapFactory;   
     this.personShiftDayDao = personshiftDayDao;
-    this.shiftDao = shiftDao;
+    
   }
 
   public static Predicate<CompetenceCode> isReperibility() {
@@ -768,6 +769,11 @@ public class CompetenceManager {
     final String stamping_format = "HH:mm";
     List<ShiftTimeTableDto> dtoList = list.stream().map(shiftTimeTable -> {
       ShiftTimeTableDto dto = new ShiftTimeTableDto();
+      if (shiftTimeTable.office != null) {
+        dto.isOfficeTimeTable = true;
+      } else {
+        dto.isOfficeTimeTable = false;
+      }
       dto.id = shiftTimeTable.id;
       dto.endAfternoon = shiftTimeTable.endAfternoon.toString(stamping_format);
       dto.endAfternoonLunchTime = shiftTimeTable.endAfternoonLunchTime.toString(stamping_format);
@@ -778,6 +784,10 @@ public class CompetenceManager {
           .startAfternoonLunchTime.toString(stamping_format);
       dto.startMorning = shiftTimeTable.startMorning.toString(stamping_format);
       dto.startMorningLunchTime = shiftTimeTable.startMorningLunchTime.toString(stamping_format);
+      dto.startEvening = shiftTimeTable.startEvening != null ? shiftTimeTable.startEvening.toString(stamping_format) : "";
+      dto.endEvening = shiftTimeTable.endEvening != null ? shiftTimeTable.endEvening.toString(stamping_format) : "";
+      dto.startEveningLunchTime = shiftTimeTable.startEveningLunchTime != null ? shiftTimeTable.startEveningLunchTime.toString(stamping_format) : "";
+      dto.endEveningLunchTime = shiftTimeTable.endEveningLunchTime != null ? shiftTimeTable.endEveningLunchTime.toString(stamping_format) : "";
       return dto;
     }).collect(Collectors.toList());
     return dtoList;
@@ -812,6 +822,50 @@ public class CompetenceManager {
     st.hourTolerance = service.hourTolerance;
     st.shiftCategories = cat;
     st.save();
+  }
+  
+  /**
+   * crea la timetable da associare al turno.
+   * @param timeTable il dto da cui creare la ShiftTimeTable
+   * @param office la sede a cui associare la timeTable
+   */
+  public void createShiftTimeTable(TimeTableDto timeTable, Office office) {
+    
+    ShiftTimeTable stt = new ShiftTimeTable();
+    stt.office = office;
+    stt.paidMinutes = timeTable.paidMinutes;
+    stt.totalWorkMinutes = timeTable.totalWorkMinutes;
+    stt.startMorning = normalize(timeTable.startMorning);
+    stt.endMorning = normalize(timeTable.endMorning);
+    stt.startAfternoon = normalize(timeTable.startAfternoon);
+    stt.endAfternoon = normalize(timeTable.endAfternoon);
+    if (timeTable.startEvening != null && !timeTable.startEvening.equals("")) {
+      stt.startEvening = normalize(timeTable.startEvening);
+    } else {
+      stt.startEvening = null;
+    }
+    if (timeTable.endEvening != null && !timeTable.endEvening.equals("")) {
+      stt.endEvening = normalize(timeTable.endEvening);
+    } else {
+      stt.endEvening = null;
+    }
+     
+    stt.startMorningLunchTime = normalize(timeTable.startMorningLunchTime);
+    stt.endMorningLunchTime = normalize(timeTable.endMorningLunchTime);
+    stt.startAfternoonLunchTime = normalize(timeTable.startAfternoonLunchTime);
+    stt.endAfternoonLunchTime = normalize(timeTable.endAfternoonLunchTime);
+    if (timeTable.startEveningLunchTime != null && !timeTable.startEveningLunchTime.equals("")) {
+      stt.startEveningLunchTime = normalize(timeTable.startEveningLunchTime);
+    } else {
+      stt.startEveningLunchTime = null;
+    }
+    if (timeTable.endEveningLunchTime != null && !timeTable.endEveningLunchTime.equals("")) {
+      stt.endEveningLunchTime = normalize(timeTable.endEveningLunchTime); 
+    } else {
+      stt.endEveningLunchTime = null; 
+    }
+    
+    stt.save();
   }
 
   /**
@@ -866,5 +920,14 @@ public class CompetenceManager {
       pcc.endDate = endDate.get();
     }
     pcc.save();
+  }
+  
+
+  private LocalTime normalize(String time) {
+    time = time.replaceAll(":", "");
+    Integer hour = Integer.parseInt(time.substring(0, 2));
+    Integer minute = Integer.parseInt(time.substring(2, 4));
+    
+    return new LocalTime(hour, minute, 0);
   }
 }
