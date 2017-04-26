@@ -380,10 +380,13 @@ timeTable.startAfternoon =inizio turno
 timeTable.endAfternoon =fine turno
 timeTable.startEvening =inizio turno
 timeTable.endEvening =fine turno
+timeTable.paidMinutes =Quantità retribuita (in minuti)
+timeTable.totalWorkMinutes =Tempo di turno (in minuti)
 
 type.type =Nome
 type.description =Descrizione
-type.tolerance =Tolleranza (minuti) 
+type.entranceTolerance =Tolleranza in ingresso (minuti)
+type.exitTolerance =Tolleranza in uscita (minuti)
 type.hourTolerance =Tolleranza per turno (minuti)
 
 timeTable.startMorningLunchTime =inizio pranzo
@@ -688,11 +691,11 @@ person.eppn.popover= Inserire la propria email cnr Es:mario.rossi@cnr.it
 
 domain.popover= Specificare il dominio sprovvisto del carattere @ (Es. iit.cnr.it)
 
-type.tolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare alle timbrature per inserirle o meno nel turno. Inserire 0 se non si vuole tolleranza.
-type.hourTolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare sull&apos;attività di turno per determinare se un turno è valido o no.
-type.name.popover = Il nome da attribuire all&apos;attività sul turno
-type.description.popover= Una descrizione dell&apos;attività
-type.breakInShiftEnabled.popover =Se da regolamento dei turni è prevista una pausa all&#39;interno del turno cliccare sì, no altrimenti.
+sts.tolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare alle timbrature per inserirle o meno nel turno. Inserire 0 se non si vuole tolleranza.
+sts.hourTolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare sull&apos;attività di turno per determinare se un turno è valido o no.
+sts.name.popover = Il nome da attribuire all&apos;attività sul turno
+sts.description.popover= Una descrizione dell&apos;attività
+sts.breakInShiftEnabled.popover =Se da regolamento dei turni è prevista una pausa all&#39;interno del turno cliccare sì, no altrimenti.
 
 ###########################################################################
 #	Messaggi utilizzati nelle viste

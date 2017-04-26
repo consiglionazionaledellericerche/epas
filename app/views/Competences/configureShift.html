@@ -39,8 +39,9 @@
 		#{f.hidden 'shiftCategoryId', value:cat.id /}
 		#{title title:'Organizzazione del lavoro in turni - Associazione timetable' /}
 		#{alert color:'info'}
-			E' necessario associare all'attività <strong>${sts.name}</strong> una timetable tra quelle proposte o, in alternativa, 
-			definirne una propria tramite il pulsante sotto.	
+			E' necessario associare all'attività <strong>${sts.name}</strong> una timetable tra quelle proposte.
+			Le timetable con sfondo <strong>verde</strong>, sono quelle definite per la propria sede <strong>${cat.office.name}</strong> 
+			
 		#{/alert}	
 		<table class="table table-hover table-striped table-bordered">
 		<tr>
@@ -49,15 +50,24 @@
 			<th>Fine turno mattina</th>
 			<th>Inizio turno pomeriggio</th>
 			<th>Fine turno pomeriggio</th>
+			<th>Inizio turno notturno</th>
+			<th>Fine turno notturno</th>
 			<th>Info aggiuntive</th>
 		</tr>
 		#{list items:dtoList, as:'key'}
+		#{if key.isOfficeTimeTable}
+		<tr class="success">
+		#{/if}
+		#{else}
 		<tr>
+		#{/else}
 			<td><input type="radio" name="shift" value="${key.id}"> </td>
 			<td>${key.startMorning}</td>
 			<td>${key.endMorning}</td>
 			<td>${key.startAfternoon}</td>
 			<td>${key.endAfternoon}</td>
+			<td>${key.startEvening}</td>
+			<td>${key.endEvening}</td>
 			<td><i class="fa fa-info-circle" aria-hidden="true" webui-popover-hover data-url="#shift-${key.id}" data-placement="right"  data-title="Info turno">
 		 	  	</i>
 		 	</td>
@@ -65,7 +75,13 @@
 		  			Inizio pausa pranzo turno mattina: <strong>${key.startMorningLunchTime}</strong><br>
 		  			Fine pausa pranzo turno mattina: <strong>${key.endMorningLunchTime}</strong><br>
 					Inizio pausa pranzo turno pomeriggio: <strong>${key.startAfternoonLunchTime}</strong><br>
-					Fine pausa pranzo turno pomeriggio: <strong>${key.endAfternoonLunchTime}</strong><br>			  
+					Fine pausa pranzo turno pomeriggio: <strong>${key.endAfternoonLunchTime}</strong><br>
+					#{if !key.startEveningLunchTime.equals('')}
+						Inizio pausa pranzo turno notturno: <strong>${key.startEveningLunchTime}</strong><br>
+					#{/if}
+					#{if !key.endEveningLunchTime.equals('')}
+						Fine pausa pranzo turno notturno: <strong>${key.endEveningLunchTime}</strong><br>
+					#{/if}			  
 				</div> 	  
 			
 		</tr>
@@ -74,11 +90,100 @@
 
 	#{/if}
 	
+	#{if step == 3}
+		#{f.hidden 'shiftCategoryId', value:cat.id /}
+		#{title title:'Riepilogo' /}
+		
+		#{alert color:'info'}
+			Configurazione attività di turno (1)			
+		#{/alert}	
+		
+		#{f.view 'Nome attività', value:sts.name /}
+		#{f.view 'Descrizione attività', value:sts.description /}
+		#{f.view 'Minuti di tolleranza per timbratura', value:sts.tolerance /}
+		#{if sts.toleranceType.equals('ToleranceType.entrance')}
+			#{f.view 'Tolleranza applicata', value:'in ingresso' /}
+		#{/if}
+		#{elseif sts.toleranceType.equals('ToleranceType.exit')}
+			#{f.view 'Tolleranza applicata', value:'in uscita' /}
+		#{/elseif}
+		#{else}
+			#{f.view 'Tolleranza applicata', value:'in ingresso e uscita' /}
+		#{/else}
+		#{f.view 'Minuti di tolleranza per turno', value:sts.hourTolerance /}
+		#{if sts.breakInShiftEnabled}
+			#{f.view 'Pausa in turno abilitata', value:'sì' /}
+		#{/if}
+		#{else}
+			#{f.view 'Pausa in turno abilitata', value:'no' /}
+		#{/else}
+		#{f.view 'Durata pausa in turno', value:sts.breakInShift /}		
+		
+		#{alert color:'info'}
+			Configurazione timetable (2)
+		#{/alert}
+		<div class="row">
+			
+	  		<div class="col-sm-6">
+				#{f.view 'Inizio turno mattina', value:stt.startMorning /}
+			</div>
+	  		<div class="col-sm-6">
+			#{f.view 'Fine turno mattina', value:stt.endMorning /}
+			</div>
+		</div>
+		<div class="row">
+			
+		  	<div class="col-sm-6">
+			#{f.view 'Inizio turno pomeriggio', value:stt.startAfternoon /}
+			</div>
+	  		<div class="col-sm-6">
+			#{f.view 'Fine turno pomeriggio', value:stt.endAfternoon /}
+			</div>
+		</div>
+		<div class="row">
+			
+		  	<div class="col-sm-6">
+			#{f.view 'Inizio turno notturno', value:stt.startEvening /}
+			</div>
+	  		<div class="col-sm-6">
+			#{f.view 'Fine turno notturno', value:stt.endEvening /}
+			</div>
+		</div>
+		<div class="row">
+			
+		  	<div class="col-sm-6">
+			#{f.view 'Inizio pausa pranzo turno mattina', value:stt.startMorningLunchTime /}
+			</div>
+	  		<div class="col-sm-6">
+			#{f.view 'Fine pausa pranzo turno mattina', value:stt.endMorningLunchTime /}
+			</div>
+		</div>
+		<div class="row">
+			
+		  	<div class="col-sm-6">
+			#{f.view 'Inizio pausa pranzo turno pomeriggio', value:stt.startAfternoonLunchTime /}
+			</div>
+	  		<div class="col-sm-6">
+			#{f.view 'Fine pausa pranzo turno pomeriggio', value:stt.endAfternoonLunchTime /}
+			</div>
+		</div>
+		<div class="row">
+			
+		  	<div class="col-sm-6">
+			#{f.view 'Inizio pausa pranzo turno notturno', value:stt.startEveningLunchTime /}
+			</div>
+	  		<div class="col-sm-6">
+			#{f.view 'Fine pausa pranzo turno notturno', value:stt.endEveningLunchTime /}
+			</div>
+		</div>
+		
+	#{/if}
+	
 	#{b.buttons center:true}
 			#{b.link @Competences.activateServices(cat.office.id)}
 	   			Indietro
 	   		#{/b.link}
-			#{if step != 2 }
+			#{if step != 3 }
 				#{b.submit 'Avanti' /}
 			#{/if}
 			#{else}

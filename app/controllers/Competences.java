@@ -67,6 +67,7 @@ import models.ShiftType;
 import models.TotalOvertime;
 import models.User;
 import models.dto.ShiftTypeService;
+import models.dto.TimeTableDto;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -85,6 +86,7 @@ import security.SecurityRules;
 public class Competences extends Controller {
 
   private static final String SHIFT_TYPE_SERVICE_STEP = "sts";
+  private static final String TIME_TABLE_STEP = "time";
 
   @Inject
   private static CompetenceRecapFactory competenceRecapFactory;
@@ -956,20 +958,31 @@ public class Competences extends Controller {
 
   /**
    * metodo che ritorna la form di creazione di una nuova timetable.
-   * @param shiftCategoryId id del turno
-   * @param sts shiftTypeservice da passare alla form contenente le informazioni da visualizzare
    */
   public static void configureShiftTimeTable() {
     
     List<Office> officeList = officeDao.getAllOffices();    
     
-    ShiftTimeTable timeTable = new ShiftTimeTable();
+    TimeTableDto timeTable = new TimeTableDto();
     render(timeTable, officeList);
     
   }
   
-  public static void saveTimeTable(ShiftTimeTable timeTable) {
-    
+  /**
+   * form che salva la nuova timetable e la associa alla sede passata come parametro.
+   * @param timeTable la timetable da creare
+   * @param officeId l'id della sede a cui associare la nuova timetable
+   */
+  public static void saveTimeTable(@Valid TimeTableDto timeTable, Long officeId) {
+    if(Validation.hasErrors()) {
+      response.status = 400;
+      List<Office> officeList = officeDao.getAllOffices();
+      render("@configureShiftTimeTable", timeTable, officeList);
+    }
+    Office office = officeDao.getOfficeById(officeId);
+    competenceManager.createShiftTimeTable(timeTable, office);
+    flash.success("Creata nuova timetable");
+    manageCompetenceCode();
   }
 
   /**
@@ -983,7 +996,10 @@ public class Competences extends Controller {
     rules.checkIfPermitted(cat.office);
     final String key = SHIFT_TYPE_SERVICE_STEP 
         + cat.description + Security.getUser().get().username;
+    final String key2 = TIME_TABLE_STEP 
+        + cat.description + Security.getUser().get().username;
     if (step == 0) {
+      // ritorno il dto per creare l'attività
       if (sts == null) {
         sts = new ShiftTypeService();
       }       
@@ -991,29 +1007,58 @@ public class Competences extends Controller {
       render(cat, sts, step);
     }
     if (step == 1) {
-      //TODO: inserire dei validatori sui parametri dello ShiftTypeService passato.
+      
+      if (sts.toleranceType == null) {
+        Validation.addError("sts.toleranceType", "specificare un valore!");
+        render("@configureShift",step, cat, sts);
+      }
+      //metto in cache la struttura dell'attività e ritorno il dto per creare la timetable
       List<ShiftTypeService> list = Lists.newArrayList();
       list.add(sts);
       step++;
       Cache.safeAdd(key, list, "5mn");
-      //Office office = cat.office;
-      List<ShiftTimeTable> shiftList = shiftDao.getAllShifts();
-      
-      List<ShiftTimeTableDto>  dtoList = competenceManager.convertFromShiftTimeTable(shiftList);
+           
+      List<ShiftTimeTableDto>  dtoList = competenceManager
+          .convertFromShiftTimeTable(shiftDao.getAllShifts(cat.office));
             
-      render(shiftList, dtoList, cat, sts, step); 
+      render(dtoList, cat, sts, step); 
     }
     if (step == 2) {
-      //Inserire un validatore sul valore dell'id della timetable
+      if (shift == null) {
+        flash.error("selezionare una timetable!");
+        List<ShiftTimeTable> shiftList = shiftDao.getAllShifts(cat.office);        
+        List<ShiftTimeTableDto>  dtoList = competenceManager.convertFromShiftTimeTable(shiftList);
+        List<ShiftTypeService> list = Cache.get(key, List.class);
+        sts = list.get(0);
+        Cache.safeAdd(key, list, "5mn");
+        
+        render("@configureShift", dtoList, cat, sts, step);
+      }
+      //metto in cache anche il dto della timetable e ritorno entrambi i dto per chiedere conferma 
+      //all'utente di validare la attività e la timetable associata.
+      List<ShiftTimeTable> list2 = Lists.newArrayList();
+      ShiftTimeTable stt = shiftDao.getShiftTimeTableById(shift);
+      list2.add(stt);
+      step++;
+      Cache.safeAdd(key2, list2, "5mn");
+      List<ShiftTypeService> list = Cache.get(key, List.class);
+      sts = list.get(0);
+      Cache.safeAdd(key, list, "5mn");
+      
+      render(stt, step, sts, cat);
+      
+    }
+    if (step == 3) {
+      //effettuo la creazione dell'attività 
       List<ShiftTypeService> list = Cache.get(key, List.class);
       ShiftTypeService service = list.get(0);
-      ShiftTimeTable stt = shiftDao.getShiftTimeTableById(shift);
+      List<ShiftTimeTable> list2 = Cache.get(key2, List.class);
+      ShiftTimeTable stt = list2.get(0);
       competenceManager.persistShiftType(service, stt, cat);
+      Cache.clear();
       flash.success("Attività salvata correttamente!");
       activateServices(cat.office.id);
     }
-    //TODO: fare uno step ulteriore per chiedere conferma della creazione del turno 
-    // con il riepilogo dei parametri.
     
   }
 

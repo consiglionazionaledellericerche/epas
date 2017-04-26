@@ -12,8 +12,10 @@ title:('Nuova timetable')}
 		    		#{option office.id}${office.name}#{/option}
 	  			#{/list}
 		 #{/select}
+		 
 	</div>
 	<br><br>
+
 #{alert color:'info'}
 	Turno di mattina
 #{/alert}
@@ -79,7 +81,16 @@ title:('Nuova timetable')}
 	  #{f.input 'timeTable.endEveningLunchTime', type:text /}
 	  </div>	  
 </div>
-
+<div class="row">
+	<div class="col-sm-offset-4"></div>	
+	#{f.input 'timeTable.totalWorkMinutes', type:'number' /}	
+	
+</div>
+<div class="row">
+	<div class="col-sm-offset-4"></div>
+	#{f.input 'timeTable.paidMinutes', type:'number' /}
+	
+</div>
 	  	  #{b.buttons center:true}
 	        #{b.submit 'Salva'/}
 	      #{/b.buttons}
