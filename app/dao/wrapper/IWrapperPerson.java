@@ -137,5 +137,10 @@ public interface IWrapperPerson extends IWrapperModel<Person> {
    */
   public boolean isTechnician();
   
+  /**
+   * L'ultimo invio attestati effettuato tramite ePAS.
+   */ 
+  public Optional<YearMonth> lastUpload();
+  
 
 }
