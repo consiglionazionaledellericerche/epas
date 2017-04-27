@@ -23,6 +23,7 @@ import manager.CompetenceManager;
 import manager.PersonManager;
 
 import models.CertificatedData;
+import models.Certification;
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
@@ -491,5 +492,22 @@ public class WrapperPerson implements IWrapperPerson {
       return true;
     }
     return false;
+  }
+  
+  /**
+   * L'ultimo invio attestati effettuato tramite ePAS.
+   * @return mese / anno
+   */
+  public Optional<YearMonth> lastUpload() {
+    if (value.certifications.isEmpty()) {
+      return Optional.absent();
+    }
+    YearMonth last = null;
+    for (Certification certification : value.certifications) {
+      if (last == null || last.isBefore(new YearMonth(certification.year, certification.month))) {
+        last = new YearMonth(certification.year, certification.month);
+      }
+    }
+    return Optional.of(last);
   }
 }
