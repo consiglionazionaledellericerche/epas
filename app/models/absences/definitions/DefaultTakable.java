@@ -2,7 +2,6 @@ package models.absences.definitions;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 
 import java.util.List;
 import java.util.Set;
@@ -252,52 +251,21 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_11S), 
       -1, null),
 
-  T_MALATTIA_FIGLIO_1_12(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_12), 
-      ImmutableSet.of(DefaultAbsenceType.A_12), 
+  T_MALATTIA_FIGLIO_1(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_12, DefaultAbsenceType.A_13, DefaultAbsenceType.A_14), 
+      ImmutableSet.of(DefaultAbsenceType.A_12, DefaultAbsenceType.A_13, DefaultAbsenceType.A_14), 
       -1, null),
-
-  T_MALATTIA_FIGLIO_1_13(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_13), 
-      ImmutableSet.of(DefaultAbsenceType.A_13), 
-      -1, null),
-
-  T_MALATTIA_FIGLIO_1_14(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_14), 
-      ImmutableSet.of(DefaultAbsenceType.A_14), 
-      -1, null),
-
-  T_MALATTIA_FIGLIO_2_12(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_122), 
-      ImmutableSet.of(DefaultAbsenceType.A_122), 
-      -1, null),
-
-  T_MALATTIA_FIGLIO_2_13(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_132), 
-      ImmutableSet.of(DefaultAbsenceType.A_132), 
-      -1, null),
-
-  T_MALATTIA_FIGLIO_2_14(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_142), 
-      ImmutableSet.of(DefaultAbsenceType.A_142), 
-      -1, null),
-
-  T_MALATTIA_FIGLIO_3_12(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_123), 
-      ImmutableSet.of(DefaultAbsenceType.A_123), 
-      -1, null),
-
-  T_MALATTIA_FIGLIO_3_13(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_133), 
-      ImmutableSet.of(DefaultAbsenceType.A_133), 
-      -1, null),
-
-  T_MALATTIA_FIGLIO_3_14(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_143), 
-      ImmutableSet.of(DefaultAbsenceType.A_143), 
-      -1, null),
-
   
+  T_MALATTIA_FIGLIO_2(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_122, DefaultAbsenceType.A_132, DefaultAbsenceType.A_142),
+      ImmutableSet.of(DefaultAbsenceType.A_122, DefaultAbsenceType.A_132, DefaultAbsenceType.A_142),
+      -1, null),
+  
+  T_MALATTIA_FIGLIO_3(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_123, DefaultAbsenceType.A_133, DefaultAbsenceType.A_143),
+      ImmutableSet.of(DefaultAbsenceType.A_123, DefaultAbsenceType.A_133, DefaultAbsenceType.A_143),
+      -1, null),
+
   T_ALTRI(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_103, DefaultAbsenceType.A_103BP,
           
@@ -458,6 +426,13 @@ public enum DefaultTakable {
           //DefaultAbsenceType.A_34,
           //DefaultAbsenceType.A_17C,
           DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C17), 
+      -1, null),
+  
+  T_RIPOSI_CNR_ATTESTATI(AmountType.units, 
+      ImmutableSet.of(
+          DefaultAbsenceType.A_91, DefaultAbsenceType.A_91MS, DefaultAbsenceType.A_91MD), 
+      ImmutableSet.of(
+          DefaultAbsenceType.A_91, DefaultAbsenceType.A_91MS, DefaultAbsenceType.A_91MD), 
       -1, null);
 
 
@@ -477,20 +452,6 @@ public enum DefaultTakable {
     this.fixedLimit = fixedLimit;
     this.takableAmountAdjustment = takableAmountAdjustment;
 
-  }
-  
-  /**
-   * Tutti i codici takable e taken.
-   */
-  public Set<String> allTakableTakenCodes() {
-    Set<String> allCodes = Sets.newHashSet();
-    for (DefaultAbsenceType type : this.takableCodes) {
-      allCodes.add(type.getCode());
-    }
-    for (DefaultAbsenceType type : this.takableCodes) {
-      allCodes.add(type.getCode());
-    }
-    return allCodes;
   }
   
   /**
