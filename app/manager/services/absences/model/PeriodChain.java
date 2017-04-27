@@ -116,6 +116,35 @@ public class PeriodChain {
   }
   
   /**
+   * Le assenze coinvolte nella period chain (taken e replacing) 
+   * post inizializzazione nella periodChain. Utile per individuare assenze rilevanti epas
+   * non in attestati (o altro master).
+   */
+  public List<Absence> relevantAbsences(boolean onlyOnCertificate) {
+    List<Absence> absences = Lists.newArrayList();
+    for (AbsencePeriod period : this.periods) {
+      for (DayInPeriod day : period.daysInPeriod.values()) {
+        if (period.initialization != null && !day.getDate().isAfter(period.initialization.date)) {
+          continue;
+        }
+        for (TakenAbsence takenAbsence : day.getTakenAbsences()) { //sia complation che non
+          if (onlyOnCertificate && takenAbsence.absence.absenceType.internalUse) {
+            continue;
+          }
+          absences.add(takenAbsence.absence);
+        }
+        for (Absence absence : day.getExistentReplacings()) {
+          if (onlyOnCertificate && absence.absenceType.internalUse) {
+            continue;
+          }
+          absences.add(absence);
+        }
+      }
+    }
+    return absences;
+  }
+  
+  /**
    * Tutti gli errori verificatisi nella catena.
    * @return list
    */
