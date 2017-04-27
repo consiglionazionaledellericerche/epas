@@ -2,6 +2,7 @@ package manager.services.absences;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
@@ -21,11 +22,13 @@ import manager.attestati.dto.internal.CruscottoDipendente.SituazioneParametriCon
 import manager.attestati.dto.show.CodiceAssenza;
 import manager.attestati.service.CertificationService;
 import manager.services.absences.certifications.CertificationYearSituation;
-import manager.services.absences.certifications.CertificationYearSituation.AbsenceImportType;
 import manager.services.absences.certifications.CertificationYearSituation.AbsenceSituation;
+import manager.services.absences.certifications.CertificationYearSituation.AbsenceSituationType;
 import manager.services.absences.certifications.CodeComparation;
+import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.VacationSituation;
 
+import models.Certification;
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -36,6 +39,7 @@ import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 /**
  * Servizi di comparazione fra assenze epas e assenze attestati.
@@ -67,52 +71,6 @@ public class AbsenceCertificationService {
   }
   
   /**
-   * Calcola la comparazione con i codici in attestati.
-   */
-  public CodeComparation computeCodeComparation() {
-    
-    CodeComparation codeComparation = new CodeComparation();
-
-    try {
-      //Codici di assenza in attestati
-      Map<String, CodiceAssenza> attestatiAbsenceCodes = certificationService.absenceCodes();
-      if (attestatiAbsenceCodes.isEmpty()) {
-        log.info("Impossibile accedere ai codici in attestati");
-        return null;
-      }
-      //Tasformazione in superCodes
-      for (CodiceAssenza codiceAssenza : attestatiAbsenceCodes.values()) {
-        codeComparation.putCodiceAssenza(codiceAssenza);
-      }
-    } catch (Exception ex) {
-      return null;
-    }
-
-    //Codici di assenza epas
-    List<AbsenceType> absenceTypes = AbsenceType.findAll();
-    //Tasformazione in superCodes
-    for (AbsenceType absenceType : absenceTypes) {
-      codeComparation.putAbsenceType(absenceType);
-    }
-    
-    //Tutte le assenze epas
-    List<Absence> absences = Absence.findAll();
-    //Inserimento in superCodes
-    for (Absence absence : absences) {
-      codeComparation.putAbsence(absence);
-    }
-   
-    
-    codeComparation.setOnlyAttestati();
-    codeComparation.setOnlyEpas();
-    codeComparation.setBoth();
-    
-    return codeComparation;
-  }
-  
-  
-  
-  /**
    * Situazione assenze epas/attestati.
    * @param person persona
    * @param year anno
@@ -120,202 +78,211 @@ public class AbsenceCertificationService {
    */
   public CertificationYearSituation buildCertificationYearSituation(Person person, int year) {
     
-    CruscottoDipendente cruscotto = null;
+    CruscottoDipendente cruscottoCurrent = null;
+    CruscottoDipendente cruscottoPrev = null;
     
     try {
-      cruscotto = certificationService.getCruscottoDipendente(person, year);
+      cruscottoCurrent = certificationService.getCruscottoDipendente(person, year);
     } catch (Exception ex) {
-      log.info("Impossibile prelevare il cruscotto di {} per l'anno {}", person.fullName(), year);
+      log.debug("Impossibile prelevare il cruscotto di {} per l'anno {}", person.fullName(), year);
       return null;
+    }
+    try {
+      cruscottoPrev = certificationService.getCruscottoDipendente(person, year - 1);
+    } catch (Exception ex) {
+      log.debug("Impossibile prelevare il cruscotto "
+          + "anno precedente di {} per l'anno {}", person.fullName(), year);
+      cruscottoPrev = null;
     }
     
     CertificationYearSituation situation = new CertificationYearSituation();
     
     situation.person = person;
-    situation.year = cruscotto.annoSituazione;
+    situation.year = cruscottoCurrent.annoSituazione;
     
+    situation.beginDate = new LocalDate(cruscottoCurrent.dipendente.dataAssunzione);
+    if (cruscottoCurrent.dipendente.dataCessazione != null) {
+      situation.endDate = new LocalDate(cruscottoCurrent.dipendente.dataCessazione);
+    }
+    
+    //MAPPONA CON TUTTI I CODICI IN ATTESTATI
+    Map<String, Set<LocalDate>> mappona = Maps.newHashMap();
+    
+    for (SituazioneDipendenteAssenze sda : cruscottoCurrent.situazioneDipendenteAssenze) {
+      putDates(mappona, sda.codice.codice, sda.codeDates());
+    }
+    for (SituazioneParametriControllo spc : cruscottoCurrent.situazioneParametriControllo) {
+      Map<String, Set<LocalDate>> codesDates = spc.codesDates();
+      for (String code : codesDates.keySet()) {
+        putDates(mappona, code, codesDates.get(code));
+      }
+    }
+      
+    if (cruscottoPrev != null) {
+      for (SituazioneDipendenteAssenze sda : cruscottoPrev.situazioneDipendenteAssenze) {
+        putDates(mappona, sda.codice.codice, sda.codeDates());
+      }
+      for (SituazioneParametriControllo spc : cruscottoPrev.situazioneParametriControllo) {
+        Map<String, Set<LocalDate>> codesDates = spc.codesDates();
+        for (String code : codesDates.keySet()) {
+          putDates(mappona, code, codesDates.get(code));
+        }
+      }
+    }
+    
+    Map<String, Set<LocalDate>> inEpas = Maps.newHashMap();
+    Map<String, Set<LocalDate>> notInEpas = Maps.newHashMap();
+    for (String code : mappona.keySet()) {
+      for (LocalDate date : mappona.get(code)) {
+        if (!absenceIsInEpas(person, code, date)) {
+          putDates(notInEpas, code, Sets.newHashSet(date));
+        } else {
+          putDates(inEpas, code, Sets.newHashSet(date));
+        }
+      }
+    }
+      
+    //Inizio a costruire le situazioni
+    
+    //1) ferie e permessi legge
     IWrapperPerson wrPerson = wrapperFactory.create(person);
+    buildVacationSituation(situation, wrPerson, year, inEpas, notInEpas);
+      
+    //2) malattia 3 anni
+    LocalDate from = LocalDate.now().withDayOfMonth(1).minusYears(3).plusMonths(1);
+    LocalDate to = LocalDate.now().dayOfMonth().withMaximumValue();
+    buildGenericSituation(situation, person, AbsenceSituationType.MALATTIA_3_ANNI, 
+        DefaultGroup.MALATTIA_3_ANNI, LocalDate.now(), Optional.of(from), Optional.of(to), 
+        inEpas, notInEpas);
     
-    situation.beginDate = new LocalDate(cruscotto.dipendente.dataAssunzione);
-    if (cruscotto.dipendente.dataCessazione != null) {
-      situation.endDate = new LocalDate(cruscotto.dipendente.dataCessazione);
-    }
+    //3) astensione facoltativa
+    buildGenericSituation(situation, person, AbsenceSituationType.ASTENSIONE_FIGLIO_1, 
+        DefaultGroup.G_23, LocalDate.now(), Optional.absent(), Optional.absent(), 
+        inEpas, notInEpas);
+    buildGenericSituation(situation, person, AbsenceSituationType.ASTENSIONE_FIGLIO_2, 
+        DefaultGroup.G_232, LocalDate.now(), Optional.absent(), Optional.absent(), 
+        inEpas, notInEpas);
+    buildGenericSituation(situation, person, AbsenceSituationType.ASTENSIONE_FIGLIO_3, 
+        DefaultGroup.G_233, LocalDate.now(), Optional.absent(), Optional.absent(), 
+        inEpas, notInEpas);
     
-    for (SituazioneDipendenteAssenze sda : cruscotto.situazioneDipendenteAssenze) {
-      AbsenceSituation absenceSituation = buildAbsenceSituation(wrPerson, sda, year);
-      if (absenceSituation != null) {
-        situation.absenceSituations.add(absenceSituation);
-      }
-    }
+    //4) riduce ferie
+    from = new LocalDate(LocalDate.now().getYear(), 1 ,1);
+    to = new LocalDate(LocalDate.now().getYear(), 12 ,31);
+    buildGenericSituation(situation, person, AbsenceSituationType.RIDUCE_FERIE_ANNO_CORRENTE, 
+        DefaultGroup.RIDUCE_FERIE_CNR, to, Optional.of(from), Optional.of(to), 
+        inEpas, notInEpas);
+    from = from.minusYears(1);
+    to = to.minusYears(1);    
+    buildGenericSituation(situation, person, AbsenceSituationType.RIDUCE_FERIE_ANNO_PRECEDENTE, 
+        DefaultGroup.RIDUCE_FERIE_CNR, to, Optional.of(from), Optional.of(to),
+        inEpas, notInEpas);
     
-    for (SituazioneParametriControllo spa : cruscotto.situazioneParametriControllo) {
-      AbsenceSituation absenceSituation = buildControlSituation(wrPerson, spa);
-      if (absenceSituation != null) {
-        situation.absenceSituations.add(absenceSituation);
-      }
-    }
-   
+    //5) riposo compensativo
+    AbsenceSituation compensatorySituation = buildGenericSituation(situation, person, 
+        AbsenceSituationType.RIPOSO_COMPENSATIVO, 
+        DefaultGroup.RIPOSI_CNR_ATTESTATI, LocalDate.now(), Optional.absent(), Optional.absent(),
+        inEpas, notInEpas);
+    patchCompensatoryRest(compensatorySituation, wrPerson);
+    
+    patchSentCertifications(situation.absenceSituations, wrPerson);
     return situation;
   }
   
   /**
-   * Costruisce la situazione assenze dalla struttura dipendente assenze.
-   * 1) 661
-   * 2) Ferie anno passato
+   * Le assenze da processare non presenti nella map con quei codes. 
    */
-  private AbsenceSituation buildAbsenceSituation(IWrapperPerson wrPerson, 
-      SituazioneDipendenteAssenze sda, int year) {
-
-    //Il tipo di situazione
-    AbsenceImportType absenceImportType = AbsenceImportType.TIPO_GENERICO;
-    
-    //Ignorati perchè prelevati da SituazioneParametriControllo
-    for (AbsenceImportType importType : AbsenceImportType.values()) {
-      if (importType.absenceMatchExclusions == null 
-          || importType.absenceMatchExclusions.isEmpty()) {
+  private List<Absence> absenceNotInAttestati(List<Absence> absencesToProcess, 
+      Map<String, Set<LocalDate>> map, List<String> codes, 
+      Optional<LocalDate> from, Optional<LocalDate> to) { 
+    Set<LocalDate> dates = Sets.newHashSet();
+    for (String code : codes) {
+      if (map.get(code) != null) {
+        dates.addAll(map.get(code));
+      }
+    }
+    List<Absence> list = Lists.newArrayList();
+    for (Absence absence : absencesToProcess) {
+      if (from.isPresent() && absence.getAbsenceDate().isBefore(from.get())) {
         continue;
       }
-      for (String codeExclusion : importType.absenceMatchExclusions) {
-        if (sda.codice.codice.equals(codeExclusion)) {
-          return null;
-        }
-      }
-    }
-
-    //Selezione del tipo di import type
-    for (AbsenceImportType type : AbsenceImportType.values()) {
-      if (type.absenceMatchPattern == null) {
+      if (to.isPresent() && absence.getAbsenceDate().isAfter(to.get())) {
         continue;
       }
-      if (sda.codice.codice.equals(type.absenceMatchPattern)) {
-        absenceImportType = type;
-        break;
+      if (!dates.contains(absence.getAbsenceDate())) {
+        list.add(absence);
       }
     }
-    
-    AbsenceSituation absenceSituation = 
-        new AbsenceSituation(wrPerson.getValue(), absenceImportType);
-    
-    dispatchDates(absenceSituation, wrPerson, sda.codice.codice, sda.codeDates());
-    
-    toRemove(wrPerson, absenceSituation, year);
-    
-    
-    
-    //totali residui
-    if (absenceSituation.type.equals(AbsenceImportType.FERIE_ANNO_CORRENTE)
-        || absenceSituation.type.equals(AbsenceImportType.PERMESSI_LEGGE)) {
-      absenceSituation.totalUsable = sda.qtLimiteConsentito;
-      absenceSituation.totalResidual = sda.qtResiduaOreGiorni;
-    }
-    
-    return absenceSituation;
+    return list;
   }
   
-  
-  
-  /**
-   * Costruisce la situazione assenze dalla struttura parametri di controllo.
-   * 1) 661
-   * 2) Ferie anno passato
-   */
-  private AbsenceSituation buildControlSituation(IWrapperPerson wrPerson, 
-      SituazioneParametriControllo spa) {
+  private AbsenceSituation buildGenericSituation(CertificationYearSituation situation, 
+      Person person, AbsenceSituationType situationType, 
+      DefaultGroup group, LocalDate recap, Optional<LocalDate> from, Optional<LocalDate> to,
+      Map<String, Set<LocalDate>> inEpas, Map<String, Set<LocalDate>> notInEpas) {
     
-    //Il tipo di situazione
-    AbsenceImportType absenceImportType = null;
-    for (AbsenceImportType type : AbsenceImportType.values()) {
-      if (type.controlMatchPattern == null) {
-        continue;
+    AbsenceSituation absenceSituation = new AbsenceSituation(person, situationType);
+    List<String> allCodes = Lists.newArrayList();
+    Set<DefaultAbsenceType> allType = Sets.newHashSet();
+    DefaultGroup currentGroup = group;
+    while (currentGroup != null) {
+      allType.addAll(currentGroup.takable.takableCodes);
+      if (currentGroup.complation != null) {
+        allType.addAll(currentGroup.complation.replacingCodes);
       }
-      if (spa.descrizione.equals(type.controlMatchPattern)) {
-        absenceImportType = type;
-        break;
-      }
+      currentGroup = currentGroup.nextGroupToCheck;
     }
-    if (absenceImportType == null) {
-      return null;  
+    for (DefaultAbsenceType type : allType) {
+      putDatesInterval(absenceSituation.datesPerCodeOk, 
+          type.certificationCode, inEpas.get(type.certificationCode), from, to); 
+      putDatesInterval(absenceSituation.toAddAutomatically, 
+          type.certificationCode, notInEpas.get(type.certificationCode), from, to); 
+      allCodes.add(type.getCode());
     }
+    GroupAbsenceType groupAbsenceType = absenceComponentDao
+        .groupAbsenceTypeByName(group.name()).get();
+    PeriodChain periodChain = absenceService.residual(person, groupAbsenceType, recap);
+    absenceSituation.notPresent = absenceNotInAttestati(periodChain.relevantAbsences(true), 
+        absenceSituation.datesPerCodeOk, allCodes, from, to);
     
-    AbsenceSituation absenceSituation = 
-        new AbsenceSituation(wrPerson.getValue(), absenceImportType);
-    
-    Map<String, List<LocalDate>> codesDates = spa.codesDates();
-    for (String code : codesDates.keySet()) {
-      dispatchDates(absenceSituation, wrPerson, code, codesDates.get(code));  
-    }
-    
-    //TODO: absences To remove
-    
-    //totali residui
-    if (absenceSituation.type.equals(AbsenceImportType.FERIE_ANNO_PRECEDENTE) 
-        || absenceSituation.type.equals(AbsenceImportType.PERMESSO_PERSONALE_661)) {
-      absenceSituation.totalUsable = spa.qtLimiteConsentito;
-      absenceSituation.totalResidual = spa.qtResiduaOreGiorni;
-    }
-    
+    situation.absenceSituations.add(absenceSituation);
     return absenceSituation;
   }
-  
-  /**
-   * Smista le assenze in attestati nelle liste ok, toAddManually, toAdAutomatically.
-   */
-  private AbsenceSituation dispatchDates(AbsenceSituation absenceSituation, 
-      IWrapperPerson wrPerson, String code, List<LocalDate> dates) {
 
-    List<LocalDate> datesOk = Lists.newArrayList();
-    List<LocalDate> datesToAddAutomatically = Lists.newArrayList();
-    List<LocalDate> datesToAddManually = Lists.newArrayList();
-    
-    LocalDate sourceDateResidual = wrPerson.getCurrentContract().get().sourceDateResidual;
-    
+  private void putDates(Map<String, Set<LocalDate>> map, String code, Set<LocalDate> dates) {
+    if (dates == null || dates.isEmpty()) {
+      return;
+    }
+    Set<LocalDate> set = map.get(code);
+    if (set == null) {
+      set = Sets.newHashSet();
+      map.put(code, set);
+    }
+    set.addAll(dates);
+  }
+  
+  private void putDatesInterval(Map<String, Set<LocalDate>> map, String code, Set<LocalDate> dates, 
+      Optional<LocalDate> from, Optional<LocalDate> to) {
+    if (dates == null || dates.isEmpty()) {
+      return;
+    }
+    Set<LocalDate> set = map.get(code);
+    if (set == null) {
+      set = Sets.newHashSet();
+      map.put(code, set);
+    }
     for (LocalDate date : dates) {
-      
-      //caso particolare riposo compensativo
-      if (absenceSituation.type.equals(AbsenceImportType.RIPOSO_COMPENSATIVO)) {
-        boolean isCompensatoryPresent = isAbsencePresent(absenceSituation, code, date);
-
-        //Riposo compensativo pre inizializzazione
-        if (sourceDateResidual != null && !date.isAfter(sourceDateResidual)) {
-          if (isCompensatoryPresent) {
-            datesOk.add(date);
-          } else {
-            datesToAddAutomatically.add(date);
-          }
-          continue;  
-        } 
-        
-        //Giorni post inizializzazione
-        if (isCompensatoryPresent) {
-          datesOk.add(date);
-        } else {
-          datesToAddManually.add(date);
-        }
+      if (from.isPresent() && date.isBefore(from.get())) {
         continue;
       }
-      
-      //caso generico
-      if (isAbsencePresent(absenceSituation, code, date)) {
-        datesOk.add(date);
-      } else {
-        datesToAddAutomatically.add(date);
+      if (to.isPresent() && date.isAfter(to.get())) {
+        continue;
       }
+      set.add(date);
     }
-    
-    absenceSituation.datesPerCodeOk.put(code, datesOk);
-    absenceSituation.datesPerCodeToAddAutomatically.put(code, datesToAddAutomatically);
-    absenceSituation.datesPerCodeToAddManually.put(code, datesToAddManually);
-    
-    return absenceSituation;
   }
   
-  /**
-   * Se l'assenza è presente su ePAS.
-   * @param code codice in attestati
-   * @param date data
-   * @return esito
-   */
-  private boolean isAbsencePresent(AbsenceSituation situation, String code, LocalDate date) {
+  private boolean absenceIsInEpas(Person person, String code, LocalDate date) {
     
     Set<AbsenceType> certificationCodes = Sets.newHashSet();
     
@@ -339,23 +306,149 @@ public class AbsenceCertificationService {
 
     List<Absence> absences = Lists.newArrayList();
     for (AbsenceType certificationType : certificationCodes) {
-      absences.addAll(absenceComponentDao.orderedAbsences(situation.person, date, date, 
+      absences.addAll(absenceComponentDao.orderedAbsences(person, date, date, 
           Sets.newHashSet(certificationType)));
     }
 
-    //Dovrebbe essere unica
     if (absences.isEmpty()) {
       return false;
-    }
-    
-    if (absences.size() > 1) {
-      situation.duplicatedAbsences.addAll(absences);
     }
     
     return true;
   }
   
- 
+  private CertificationYearSituation buildVacationSituation(CertificationYearSituation situation, 
+      IWrapperPerson wrPerson, int year, 
+      Map<String, Set<LocalDate>> mapInEpas, Map<String, Set<LocalDate>> mapNotInEpas) {
+
+    //Situazione in epas
+    GroupAbsenceType vacationGroup = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
+    VacationSituation vacationSituation = absenceService.buildVacationSituation(
+        wrPerson.getCurrentContract().get(), year, vacationGroup, Optional.absent(), false, null);
+    
+    //Situazione ferie anno selezionato
+    AbsenceSituation vacationYear = new AbsenceSituation(wrPerson.getValue(), 
+        AbsenceSituationType.FERIE_ANNO_CORRENTE);
+    
+    final String code32 = DefaultAbsenceType.A_32.getCode();
+    final String code31 = DefaultAbsenceType.A_31.getCode();
+    final String code37 = DefaultAbsenceType.A_37.getCode();
+    final String code94 = DefaultAbsenceType.A_94.getCode();
+    
+    putDatesVacation(vacationYear.datesPerCodeOk, mapInEpas, code32, year);
+    putDatesVacation(vacationYear.toAddAutomatically, mapNotInEpas, code32, year);
+    vacationYear.notPresent = absenceNotInAttestati(
+        vacationSituation.currentYear.absencesUsed(), 
+        vacationYear.datesPerCodeOk, Lists.newArrayList(code32),
+        Optional.absent(), Optional.absent());
+    
+    //Situazione ferie anno precedente
+    AbsenceSituation vacationPreviousYear = new AbsenceSituation(wrPerson.getValue(), 
+        AbsenceSituationType.FERIE_ANNO_PRECEDENTE);
+    
+    putDatesVacation(vacationPreviousYear.datesPerCodeOk, mapInEpas, code32, year - 1);
+    putDatesVacation(vacationPreviousYear.datesPerCodeOk, mapInEpas, code31, year);
+    putDatesVacation(vacationPreviousYear.datesPerCodeOk, mapInEpas ,code37, year);
+    putDatesVacation(vacationPreviousYear.toAddAutomatically, mapNotInEpas, code32,  year - 1);
+    putDatesVacation(vacationPreviousYear.toAddAutomatically, mapNotInEpas, code31,  year);
+    putDatesVacation(vacationPreviousYear.toAddAutomatically, mapNotInEpas,code37,  year);
+    if (vacationSituation.lastYear != null) {
+      vacationPreviousYear.notPresent = absenceNotInAttestati(
+          vacationSituation.lastYear.absencesUsed(),
+          vacationPreviousYear.datesPerCodeOk, Lists.newArrayList(code32, code31, code37),
+          Optional.absent(), Optional.absent());
+    }
+    
+    //Situazione permessi legge anno selezionato
+    AbsenceSituation permissions = new AbsenceSituation(wrPerson.getValue(), 
+        AbsenceSituationType.PERMESSI_LEGGE);
+    
+    putDatesVacation(permissions.datesPerCodeOk, mapInEpas, code94,  year);
+    putDatesVacation(permissions.toAddAutomatically, mapNotInEpas, code94,  year);
+    permissions.notPresent = absenceNotInAttestati(
+        vacationSituation.permissions.absencesUsed(), 
+        permissions.datesPerCodeOk, Lists.newArrayList(code94),
+        Optional.absent(), Optional.absent());
+    
+    situation.absenceSituations.add(vacationYear);
+    situation.absenceSituations.add(vacationPreviousYear);
+    situation.absenceSituations.add(permissions);
+
+    return situation;
+    
+  }
+  
+
+  
+  /**
+   * Aggiunge alla map la data per quel codice. Se year è valorizzato prima di inserirla verifica 
+   * che la data appartenga all'anno. 
+   */
+  private void putDatesVacation(Map<String, Set<LocalDate>> map, Map<String, Set<LocalDate>> source,
+      String code, Integer year) {
+    if (source.get(code) == null) {
+      return;
+    }
+    Set<LocalDate> mapDates = map.get(code);
+    if (mapDates == null) {
+      mapDates = Sets.newHashSet();
+      map.put(code, mapDates);
+    }
+    for (LocalDate date : source.get(code)) {
+      if (year != null && date.getYear() != year) {
+        continue;
+      }
+      map.get(code).add(date);
+    }
+  }
+  
+  private void patchCompensatoryRest(AbsenceSituation absenceSituation, IWrapperPerson wrPerson) {
+    Set<LocalDate> dates = absenceSituation
+        .toAddAutomatically.get(DefaultAbsenceType.A_91.getCode()); 
+    if (dates == null || dates.isEmpty()) {
+      return;
+    }
+    LocalDate sourceDate = wrPerson.getCurrentContract().get().sourceDateResidual;
+    LocalDate beginContract = wrPerson.getCurrentContract().get().beginDate;
+    Set<LocalDate> manually = Sets.newHashSet();
+    for (LocalDate date : dates) {
+      if (date.isBefore(beginContract)) {
+        continue;
+      }
+      if (sourceDate == null || date.isAfter(sourceDate)) {
+        manually.add(date);
+      }
+    }
+    for (LocalDate date : manually) {
+      dates.remove(date);
+    }
+    absenceSituation.toAddManually.put(DefaultAbsenceType.A_91.getCode(), manually);
+  }
+  
+  /**
+   * Le assenze non presenti in attestati dei mesi non successivi l'ultimo caricamento le sposto
+   * nella lista notPresentSent (da rimuovere).
+   */
+  private void patchSentCertifications(List<AbsenceSituation> situations, IWrapperPerson wrPerson) {
+    
+    if (!wrPerson.lastUpload().isPresent()) {
+      return;
+    }
+    YearMonth lastUpload = wrPerson.lastUpload().get();
+    for (AbsenceSituation absenceSituation : situations) {
+      for (Absence absence : absenceSituation.notPresent) {
+        if (!new YearMonth(absence.getAbsenceDate()).isAfter(lastUpload)) {
+          absenceSituation.notPresentSent.add(absence);
+        }
+      }
+      for (Absence absence : absenceSituation.notPresentSent) {
+        absenceSituation.notPresent.remove(absence);
+      }
+    }
+    
+  }
+  
   /**
    * Le assenze mancanti rispetto ad attestati da persistere.
    * @param person person
@@ -374,14 +467,14 @@ public class AbsenceCertificationService {
         .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
 
     for (AbsenceSituation absenceSituation : situation.absenceSituations) {
-      for (String code : absenceSituation.datesPerCodeToAddAutomatically.keySet()) {
+      for (String code : absenceSituation.toAddAutomatically.keySet()) {
         Optional<AbsenceType> type = absenceComponentDao.absenceTypeByCode(code);
         if (!type.isPresent()) {
           log.info("Un codice utilizzato su attestati non è presente su ePAS {}", code);
           continue;
         }
 
-        for (LocalDate date : absenceSituation.datesPerCodeToAddAutomatically.get(code)) {
+        for (LocalDate date : absenceSituation.toAddAutomatically.get(code)) {
           
           AbsenceType aux = type.get();
           
@@ -557,67 +650,49 @@ public class AbsenceCertificationService {
     return absenceToPersist;
   }
   
-  //le assenze epas significative non presenti in attestati
-  // giorni ferie e permessi dopo l'inizializzazione
-  // giorni di astensione fac. dopo l'inizializzazione
-  // giorni di riduce ferie e permessi (non considerare inizializzazioni, servono gg specifici) 
-  // giorni di malattia figli
-  // giorni di malattia
-  private AbsenceSituation toRemove(IWrapperPerson wrPerson, AbsenceSituation absenceSituation, 
-      int year) {
+  /**
+   * Calcola la comparazione con i codici in attestati.
+   */
+  public CodeComparation computeCodeComparation() {
+    
+    CodeComparation codeComparation = new CodeComparation();
 
-    // giorni ferie e permessi dopo l'inizializzazione
-    if (absenceSituation.type.equals(AbsenceImportType.FERIE_ANNO_CORRENTE)) {
-      
-      GroupAbsenceType vacationGroup = absenceComponentDao
-          .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
-      
-      //costruire la situazione ferie year
-      VacationSituation vacationSituation = absenceService
-          .buildVacationSituation(wrPerson.getCurrentContract().get(), year, vacationGroup, 
-              Optional.absent(), false, null);
-
-      absenceSituation.absencesToRemove = absencesNotPresent(absenceSituation.datesPerCodeOk, 
-          vacationSituation.currentYear.absencesUsed(), 
-          Optional.fromNullable(wrPerson.getCurrentContract().get().sourceDateResidual)); 
+    try {
+      //Codici di assenza in attestati
+      Map<String, CodiceAssenza> attestatiAbsenceCodes = certificationService.absenceCodes();
+      if (attestatiAbsenceCodes.isEmpty()) {
+        log.info("Impossibile accedere ai codici in attestati");
+        return null;
+      }
+      //Tasformazione in superCodes
+      for (CodiceAssenza codiceAssenza : attestatiAbsenceCodes.values()) {
+        codeComparation.putCodiceAssenza(codiceAssenza);
+      }
+    } catch (Exception ex) {
+      return null;
     }
 
+    //Codici di assenza epas
+    List<AbsenceType> absenceTypes = AbsenceType.findAll();
+    //Tasformazione in superCodes
+    for (AbsenceType absenceType : absenceTypes) {
+      codeComparation.putAbsenceType(absenceType);
+    }
     
-    return absenceSituation;
+    //Tutte le assenze epas
+    List<Absence> absences = Absence.findAll();
+    //Inserimento in superCodes
+    for (Absence absence : absences) {
+      codeComparation.putAbsence(absence);
+    }
+   
     
+    codeComparation.setOnlyAttestati();
+    codeComparation.setOnlyEpas();
+    codeComparation.setBoth();
     
+    return codeComparation;
   }
   
-  /**
-   * Controlla che le assenze absences siano presenti in attestati con certification code.
-   * Non controlla le assenze precedenti a fromDate.
-   */
-  private List<Absence> absencesNotPresent(Map<String, List<LocalDate>> datesPerCodes, 
-      List<Absence> absences, Optional<LocalDate> fromDate) {
-    
-    List<Absence> absencesNotPresent = Lists.newArrayList();
-    for (Absence absence : absences) {
-      if (fromDate.isPresent() && absence.getAbsenceDate().isBefore(fromDate.get())) {
-        continue;
-      }
-      List<LocalDate> dates = datesPerCodes.get(absence.absenceType.certificateCode);
-      if (dates == null) {
-        absencesNotPresent.add(absence);
-        continue;
-      }
-      boolean finded = false;
-      for (LocalDate date : dates) {
-        if (date.isEqual(absence.getAbsenceDate())) {
-          finded = true;
-          break;
-        }
-      }
-      if (!finded) {
-        absencesNotPresent.add(absence);
-      }
-    }
-    return absencesNotPresent;
-    
-  }
   
 }

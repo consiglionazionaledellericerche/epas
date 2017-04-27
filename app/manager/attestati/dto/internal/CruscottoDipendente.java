@@ -1,19 +1,28 @@
 package manager.attestati.dto.internal;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 import manager.attestati.dto.internal.PeriodoDipendente.PeriodoDipendenteDettagli;
 
+import models.absences.definitions.DefaultAbsenceType;
+import models.absences.definitions.DefaultGroup;
+
 import org.assertj.core.util.Lists;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.testng.collections.Sets;
 
 /**
  * Json caricato quando si richiede il cruscotto annuale di un dipendente.
@@ -60,6 +69,7 @@ public class CruscottoDipendente {
     public Integer qtResiduaOreGiorni;                  //237 
     //presente in missioni
     
+   
     @ToString
     public static class SituazioneCodiceAssenza {
       public int id;                                    //255
@@ -88,8 +98,8 @@ public class CruscottoDipendente {
      * 
      * @return le date utilizzate.
      */
-    public List<LocalDate> codeDates() {
-      List<LocalDate> dates = Lists.newArrayList();
+    public Set<LocalDate> codeDates() {
+      Set<LocalDate> dates = Sets.newHashSet();
       if (giorniConsolidatiMap != null) {
         for (String dateKey : giorniConsolidatiMap.keySet()) {
           dates.add(formatter(dateKey));
@@ -119,7 +129,7 @@ public class CruscottoDipendente {
     public Map<String, String> giorniAssenzaNoConsolidatiMap;
     public int qtResiduaOreGiorni;
     public int qtImputatePeriodiNonConsolidati;
-
+    
     /**
      * Estrae i codici e le rispettive date utilizzate dal controllo situazione.
      * Le mappe giorniAssenzaConsolidatiMap e giorniAssenzaNoConsolidatiMap hanno come
@@ -127,16 +137,16 @@ public class CruscottoDipendente {
      * 
      * @return le date utilizzate.
      */
-    public Map<String, List<LocalDate>> codesDates() {
-      Map<String, List<LocalDate>> codesDates = Maps.newHashMap();
+    public Map<String, Set<LocalDate>> codesDates() {
+      Map<String, Set<LocalDate>> codesDates = Maps.newHashMap();
       
       //1) mappa consolidate
       if (giorniAssenzaConsolidatiMap != null) {
         for (String dateKey : giorniAssenzaConsolidatiMap.keySet()) {
           String code = giorniAssenzaConsolidatiMap.get(dateKey);
-          List<LocalDate> dates = codesDates.get(code);
+          Set<LocalDate> dates = codesDates.get(code);
           if (dates == null) {
-            dates = Lists.newArrayList();
+            dates = Sets.newHashSet();
             codesDates.put(code, dates);
           }
           dates.add(formatter(dateKey));
@@ -147,9 +157,9 @@ public class CruscottoDipendente {
       if (giorniAssenzaNoConsolidatiMap != null) {
         for (String dateKey : giorniAssenzaNoConsolidatiMap.keySet()) {
           String code = giorniAssenzaNoConsolidatiMap.get(dateKey);
-          List<LocalDate> dates = codesDates.get(code);
+          Set<LocalDate> dates = codesDates.get(code);
           if (dates == null) {
-            dates = Lists.newArrayList();
+            dates = Sets.newHashSet();
             codesDates.put(code, dates);
           }
           dates.add(formatter(dateKey));
@@ -161,16 +171,44 @@ public class CruscottoDipendente {
     
   }
   
+  public static enum AbsenceImportType {
+
+    //Situazioni da prelevare da SituazioneParametriControllo
+    PERMESSO_PERSONALE_661(
+        DefaultGroup.G_661.complation.replacingCodes,       //661H1, 66H2, ... , 661H9 
+        "Legge 661"),                                       //descrizione in controllo situazione
+        
+    FERIE_ANNO_PRECEDENTE(
+        ImmutableSet.of(DefaultAbsenceType.A_31, DefaultAbsenceType.A_37), 
+        "Ferie Anno Precedente"),
+    
+    MALATTIA_PERSONALE(
+        DefaultGroup.MALATTIA_3_ANNI.takable.takenCodes,    //111, ...capire se usare anche takable
+        "Malattia Personale 100%");                         //descrizione in controllo situazione
+    
+    public Set<DefaultAbsenceType> codesFromSpc; 
+    public String controlMatchPattern;
+        
+    private AbsenceImportType(Set<DefaultAbsenceType> codesFromSpc,
+        String controlMatchPattern) {
+      this.codesFromSpc = codesFromSpc;
+      this.controlMatchPattern = controlMatchPattern;
+    }
+    
+  }
+  
   /**
    * Formatta la stringa e aggiunge l'ora utc-roma....
    * @param time esempio 2017-01-02T09:23:05.366+0000 da trasformare in utc+1
    * @return data
    */
   public static LocalDate formatter(String time) {
-    final DateTimeFormatter dtf = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
-    LocalDateTime dt = dtf.parseLocalDateTime(time.substring(0, 23));
-    dt = dt.plusHours(2);
-    LocalDate date = new LocalDate(dt);
+    
+    final DateTimeFormatter dtf = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    //DateTime dt = dtf.parseDateTime(time.substring(0, 23));
+    DateTime dt = dtf.parseDateTime(time);
+    DateTime dateTime = dt.toDateTime(DateTimeZone.UTC);
+    LocalDate date = new LocalDate(dateTime);
     return date;
   }
 
