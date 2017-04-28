@@ -252,6 +252,7 @@ public class RequestInit extends Controller {
         "Charts.exportTimesheetSituation",
         "Competences.activateServices",
         "Contracts.initializationsStatus",
+        "Contracts.initializationsVacation",
         "Contracts.initializationsMeal",
         "AbsenceGroups.absenceInitializations",
         "AbsenceGroups.absenceTroubles");

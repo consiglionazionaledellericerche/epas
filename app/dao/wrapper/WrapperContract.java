@@ -325,6 +325,7 @@ public class WrapperContract implements IWrapperContract {
    * @return esito
    */
   @Override
+  @Deprecated //legato alla vecchia implementazione ferie
   public boolean hasMonthRecapForVacationsRecap(int yearToRecap) {
 
     // se non ho il contratto inizializzato il riepilogo ferie non esiste

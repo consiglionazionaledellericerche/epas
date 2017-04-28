@@ -549,7 +549,9 @@ public class AbsenceComponentDao extends DaoBase {
         .from(absence)
         .leftJoin(absence.personDay, QPersonDay.personDay)
         .leftJoin(absence.personDay.person, QPerson.person)
-        .where(absence.personDay.person.eq(person).and(absence.personDay.date.eq(date)))
+        .where(absence.personDay.person.eq(person)
+            .and(absence.personDay.date.eq(date)
+                .and(absence.absenceType.code.eq(code))))
         .list(absence);
   }
 } 

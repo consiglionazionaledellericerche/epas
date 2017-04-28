@@ -57,6 +57,10 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @Getter
   @Column(name = "source_date_residual")
   public LocalDate sourceDateResidual = null;
+  
+  @Getter
+  @Column(name = "source_date_vacation")
+  public LocalDate sourceDateVacation = null;
 
   @Getter
   @Column(name = "source_date_meal_ticket")
