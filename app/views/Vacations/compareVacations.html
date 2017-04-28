@@ -1,0 +1,260 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /} 
+#{set title: 'ePAS - Ferie e Permessi' /} 
+
+#{set 'moreStyles'}
+
+<style>
+/* allineamento centrato dei th con rowspan e colspan */
+#tabella-ferie th {
+	vertical-align: inherit;
+}
+</style>
+
+#{/set}
+
+<div class="container-fluid">
+  
+   #{alert color:'info'}
+     <p>Ferie Anno Precedente ${(year -1)}
+   #{/alert}
+   <table  class="table table-hover table-bordered table-condensed center" datatable width="100%">
+	<thead>
+		<tr>
+		    <th>Nome</th>
+		    
+		    <!-- 2016 -->
+		    <th>Totali</th>
+		    <th>Totali New</th>
+		    <th>Maturate</th>
+		    <th>Maturate New</th>
+		    <th>Usate</th>
+		    <th>Usate New</th>
+		    <th>Usufruibili</th>
+		    <th>Usufruibili New</th>
+            <th>Rimanenti</th>
+		    <th>Rimanenti New</th>
+		    <th>Inizio</th>
+		    <th>Inizio New</th>
+		    <th>Fine</th>
+		    <th>Fine New</th>
+		    *{ <th>2016 Att</th> }*
+		    
+		</tr>	
+	</thead>
+
+	<tbody>
+		#{list items:vacationSituations, as:'vacationSituation'}
+		
+		#{if vacationSituation.lastYear != null}
+		<tr #{if !vacationSituation.epasLastYearEquivalent()} class="bg-danger" #{/if}>
+
+			<td>
+			  ${vacationSituation.person.fullname}
+			</td>
+            
+            <!-- 2016 -->
+			<td>${vacationSituation.oldLastYear?.total()} (${vacationSituation.oldLastYear?.postPartum()})</td>
+			<td>${vacationSituation.lastYear.total()} (${vacationSituation.lastYear.postPartum().size()})</td>
+			<td>${vacationSituation.oldLastYear?.accrued()}</td>
+			<td>${vacationSituation.lastYear.accrued()}</td>
+			
+			<td>${vacationSituation.oldLastYear?.used()}</td>
+			<td>${vacationSituation.lastYear.used()}</td>
+			
+			<td>${vacationSituation.oldLastYear?.usable()}</td>
+			<td>${vacationSituation.lastYear.usable()}</td>
+			<td>${vacationSituation.oldLastYear?.usableTotal()}</td>
+			<td>${vacationSituation.lastYear.usableTotal()}</td>
+			
+			<td
+			#{if vacationSituation.oldLastYear?.isContractLowerLimit()}><em><strong>${vacationSituation.oldLastYear?.lowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.oldLastYear?.lowerLimit().format()}#{/else}	
+			</td>
+			<td
+			#{if vacationSituation.lastYear.isContractLowerLimit()}><em><strong>${vacationSituation.lastYear.lowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.lastYear.lowerLimit().format()}#{/else}	
+			</td>
+			<td
+			#{if vacationSituation.oldLastYear?.isContractUpperLimit()}><em><strong>${vacationSituation.oldLastYear?.upperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.oldLastYear?.upperLimit().format()}#{/else}	
+			</td>
+			<td
+			#{if vacationSituation.lastYear.isContractUpperLimit()}><em><strong>${vacationSituation.lastYear.upperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.lastYear.upperLimit().format()}#{/else}	
+			</td>
+			
+			
+			*{ questo dato andrebbe preso dal cruscotto 2016
+            <td>${vacationSituation.attestatiLastYear.total()}</td>
+            }* 			
+
+		</tr>
+		#{/if}
+		#{/list}
+
+	</tbody>
+  </table>
+  
+  #{alert color:'info'}
+    <p>Ferie Anno Corrente ${(year)}
+  #{/alert}
+  <table  class="table table-hover table-bordered table-condensed center" datatable width="100%">
+	<thead>
+		<tr>
+		    <th>Nome</th>
+		    
+		    <!-- 2017 -->
+		    <th>Totali</th>
+		    <th>Totali New</th>
+		    <th>Maturate</th>
+		    <th>Maturate New</th>
+		    <th>Usate</th>
+		    <th>Usate New</th>
+		    <th>Usufruibili</th>
+		    <th>Usufruibili New</th>
+            <th>Rimanenti</th>
+		    <th>Rimanenti New</th>
+		    <th>Inizio</th>
+		    <th>Inizio New</th>
+		    <th>Fine</th>
+		    <th>Fine New</th>
+		    *{ <th>2017 Att</th> }*
+		    
+		</tr>	
+	</thead>
+
+	<tbody>
+		#{list items:vacationSituations, as:'vacationSituation'}
+		
+		#{if vacationSituation.currentYear != null}
+		<tr #{if !vacationSituation.epasCurrentYearEquivalent()} class="bg-danger" #{/if}>
+
+			<td>
+			  ${vacationSituation.person.fullname}
+			</td>
+            
+            <!-- 2017 -->
+  		    <td>${vacationSituation.oldCurrentYear?.total()} (${vacationSituation.oldCurrentYear?.postPartum()})</td>
+  		    <td>${vacationSituation.currentYear.total()} (${vacationSituation.currentYear.postPartum().size()})</td>
+            <td>${vacationSituation.oldCurrentYear?.accrued()}</td>
+			<td>${vacationSituation.currentYear.accrued()}</td>
+			
+			<td>${vacationSituation.oldCurrentYear?.used()}</td>
+			<td>${vacationSituation.currentYear.used()}</td>
+			
+			<td>${vacationSituation.oldCurrentYear?.usable()}</td>
+			<td>${vacationSituation.currentYear.usable()}</td>
+			<td>${vacationSituation.oldCurrentYear?.usableTotal()}</td>
+			<td>${vacationSituation.currentYear.usableTotal()}</td>
+			
+			<td
+			#{if vacationSituation.oldCurrentYear?.isContractLowerLimit()}><em><strong>${vacationSituation.oldCurrentYear?.lowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.oldCurrentYear?.lowerLimit().format()}#{/else}	
+			</td>
+			<td
+			#{if vacationSituation.currentYear.isContractLowerLimit()}><em><strong>${vacationSituation.currentYear.lowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.currentYear.lowerLimit().format()}#{/else}	
+			</td>
+			<td
+			#{if vacationSituation.oldCurrentYear?.isContractUpperLimit()}><em><strong>${vacationSituation.oldCurrentYear?.upperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.oldCurrentYear?.upperLimit().format()}#{/else}	
+			</td>
+			<td
+			#{if vacationSituation.currentYear.isContractUpperLimit()}><em><strong>${vacationSituation.currentYear.upperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.currentYear.upperLimit().format()}#{/else}	
+			</td>
+			
+  		    *{ 
+  		    <td>${vacationSituation.attestatiCurrentYear.total()}</td>
+  		    }*
+
+		</tr>
+		#{/if}
+		#{/list}
+
+	</tbody>
+  </table>  
+  #{alert color:'info'}
+    <p>Permessi ${(year)}
+  #{/alert}
+  <table  class="table table-hover table-bordered table-condensed center" datatable width="100%">
+	<thead>
+		<tr>
+		    <th>Nome</th>
+		    
+		    <!-- Permessi -->
+		    <th>Totali</th>
+		    <th>Totali New</th>
+		    <th>Maturate</th>
+		    <th>Maturate New</th>
+		    <th>Usate</th>
+		    <th>Usate New</th>
+		    <th>Usufruibili</th>
+		    <th>Usufruibili New</th>
+            <th>Rimanenti</th>
+		    <th>Rimanenti New</th>
+		    <th>Inizio</th>
+		    <th>Inizio New</th>
+		    <th>Fine</th>
+		    <th>Fine New</th>
+		    *{ <th>P Att</th> }*
+		</tr>	
+	</thead>
+
+	<tbody>
+		#{list items:vacationSituations, as:'vacationSituation'}
+		
+		#{if vacationSituation.permissions != null}
+		<tr #{if !vacationSituation.epasPermissionEquivalent()} class="bg-danger" #{/if}>
+
+			<td>
+			  ${vacationSituation.person.fullname}
+			</td>
+          
+            <!-- Permessi -->
+			<td>${vacationSituation.oldPermissions?.total()} (${vacationSituation.oldPermissions?.postPartum()})</td>
+			<td>${vacationSituation.permissions.total()} (${vacationSituation.permissions.postPartum().size()})</td>
+			<td>${vacationSituation.oldPermissions?.accrued()}</td>
+			<td>${vacationSituation.permissions.accrued()}</td>
+			
+			<td>${vacationSituation.oldPermissions?.used()}</td>
+			<td>${vacationSituation.permissions.used()}</td>
+			
+			
+			<td>${vacationSituation.oldPermissions?.usable()}</td>
+			<td>${vacationSituation.permissions.usable()}</td>
+			<td>${vacationSituation.oldPermissions?.usableTotal()}</td>
+			<td>${vacationSituation.permissions.usableTotal()}</td>
+			
+			<td
+			#{if vacationSituation.oldPermissions?.isContractLowerLimit()}><em><strong>${vacationSituation.oldPermissions?.lowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.oldPermissions?.lowerLimit().format()}#{/else}	
+			</td>
+			<td
+			#{if vacationSituation.permissions.isContractLowerLimit()}><em><strong>${vacationSituation.permissions.lowerLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.permissions.lowerLimit().format()}#{/else}	
+			</td>
+			<td
+			#{if vacationSituation.oldPermissions?.isContractUpperLimit()}><em><strong>${vacationSituation.oldPermissions?.upperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.oldPermissions?.upperLimit().format()}#{/else}	
+			</td>
+			<td
+			#{if vacationSituation.permissions.isContractUpperLimit()}><em><strong>${vacationSituation.permissions.upperLimit().format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.permissions.upperLimit().format()}#{/else}	
+			</td>
+			
+			*{
+			<td>${vacationSituation.attestatiPermission.total()}</td>
+			}*
+
+
+		</tr>
+		#{/if}
+		#{/list}
+
+	</tbody>
+  </table>
+  
+ 
+</div>

@@ -48,6 +48,10 @@ public class PeriodChain {
   
   //Errori
   private List<ErrorsBox> periodsErrorsBoxes = null; //errori dei periodi.. lazy quando ho i periodi
+  
+  //VacationsSupport 
+  //Permette di recuperare gratis i 3 gruppi ferie passate, correnti, permessi
+  public List<List<AbsencePeriod>> vacationSupportList = Lists.newArrayList();
 
   /**
    * Constructor PeriodChain.
@@ -66,7 +70,7 @@ public class PeriodChain {
    * @return string
    */
   public String getChainDescription() {
-    return periods.get(0).groupAbsenceType.getChainDescription();
+    return periods.get(0).groupAbsenceType.computeChainDescription();
   }
   
   /**
@@ -101,7 +105,7 @@ public class PeriodChain {
     for (AbsencePeriod absencePeriod : this.periods) {
       if (absencePeriod.isTakable()) {
         absenceTypes.addAll(absencePeriod.takenCodes);
-        //absenceTypes.addAll(currentAbsesncePeriod.takableComponent.get().takableCodes);
+        absenceTypes.addAll(absencePeriod.takableCodes);
       }
       if (absencePeriod.isComplation()) {
         absenceTypes.addAll(absencePeriod.replacingCodesDesc.values());
@@ -109,6 +113,35 @@ public class PeriodChain {
       }
     }
     return absenceTypes;
+  }
+  
+  /**
+   * Le assenze coinvolte nella period chain (taken e replacing) 
+   * post inizializzazione nella periodChain. Utile per individuare assenze rilevanti epas
+   * non in attestati (o altro master).
+   */
+  public List<Absence> relevantAbsences(boolean onlyOnCertificate) {
+    List<Absence> absences = Lists.newArrayList();
+    for (AbsencePeriod period : this.periods) {
+      for (DayInPeriod day : period.daysInPeriod.values()) {
+        if (period.initialization != null && !day.getDate().isAfter(period.initialization.date)) {
+          continue;
+        }
+        for (TakenAbsence takenAbsence : day.getTakenAbsences()) { //sia complation che non
+          if (onlyOnCertificate && takenAbsence.absence.absenceType.internalUse) {
+            continue;
+          }
+          absences.add(takenAbsence.absence);
+        }
+        for (Absence absence : day.getExistentReplacings()) {
+          if (onlyOnCertificate && absence.absenceType.internalUse) {
+            continue;
+          }
+          absences.add(absence);
+        }
+      }
+    }
+    return absences;
   }
   
   /**

@@ -2,34 +2,66 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 
+import dao.ContractDao;
+import dao.OfficeDao;
+import dao.PersonDao;
+import dao.absences.AbsenceComponentDao;
+import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
+
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
+import lombok.extern.slf4j.Slf4j;
+
+import manager.services.absences.AbsenceService;
+import manager.services.absences.model.VacationSituation;
+import manager.services.absences.model.VacationSituation.VacationSummary;
+import manager.services.absences.model.VacationSituation.VacationSummary.TypeSummary;
 import manager.services.vacations.IVacationsService;
-import manager.services.vacations.VacationsRecap;
 
 import models.Contract;
+import models.Office;
+import models.Person;
 import models.User;
+import models.absences.GroupAbsenceType;
+import models.absences.definitions.DefaultGroup;
 
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 
 import play.mvc.Controller;
 import play.mvc.With;
 
+import security.SecurityRules;
+
 @With({Resecure.class})
+@Slf4j
 public class Vacations extends Controller {
 
   @Inject
   private static IVacationsService vacationsService;
   @Inject
   private static IWrapperFactory wrapperFactory;
+  @Inject
+  private static OfficeDao officeDao;
+  @Inject
+  private static PersonDao personDao;
+  @Inject
+  private static AbsenceService absenceService;
+  @Inject
+  private static AbsenceComponentDao absenceComponentDao;
+  @Inject
+  private static SecurityRules rules;
+  @Inject
+  private static ContractDao contractDao;
 
   /**
    * Vista riepiloghi ferie per l'employee.
@@ -39,7 +71,6 @@ public class Vacations extends Controller {
   public static void show(Integer year) {
 
     Optional<User> currentUser = Security.getUser();
-
     Preconditions.checkState(currentUser.isPresent());
     Preconditions.checkNotNull(currentUser.get().person);
 
@@ -49,120 +80,193 @@ public class Vacations extends Controller {
       year = LocalDate.now().getYear();
     }
 
-    List<Contract> contractList = person.orderedYearContracts(year);
+    GroupAbsenceType vacationGroup = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
+    
+    List<VacationSituation> vacationSituations = Lists.newArrayList();
 
-    if (contractList.isEmpty()) {
-      flash.error("Non ci sono contratti attivi nel %s", year);
-      YearMonth lastActiveMonth = person.getLastActiveMonth();
-      show(lastActiveMonth.getYear());
+    for (Contract contract : person.orderedYearContracts(year)) {
+      
+      VacationSituation vacationSituation = absenceService.buildVacationSituation(contract, year, 
+          vacationGroup, Optional.absent(), false, null);
+      vacationSituations.add(vacationSituation);
     }
 
-    List<VacationsRecap> vacationsRecapList = Lists.newArrayList();
+    render(vacationSituations, year);
+  }
+  
+  /**
+   * Situazione di riepilogo contratto per il dipendente.
+   * @param contractId contratto
+   * @param year anno
+   * @param type VACATION/PERMISSION
+   */
+  public static void personVacationSummary(Long contractId, Integer year, TypeSummary type) {
+    
+    Contract contract = contractDao.getContractById(contractId);
+    Optional<User> currentUser = Security.getUser();
+    if (contract == null || type == null 
+        || !currentUser.isPresent() || currentUser.get().person == null 
+        || !contract.person.equals(currentUser.get().person)) {
+      forbidden();
+    }
+    
+    GroupAbsenceType vacationGroup = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
+    VacationSummary vacationSummary;
+    if (type.equals(TypeSummary.PERMISSION)) {
+      vacationSummary = absenceService.buildVacationSituation(contract, year, vacationGroup, 
+          Optional.absent(), false, null).permissions;
+    } else {
+      vacationSummary = absenceService.buildVacationSituation(contract, year, vacationGroup, 
+          Optional.absent(), false, null).currentYear;
+    }
+    
+    renderTemplate("Vacations/vacationSummary.html", vacationSummary);
+  }
 
-    List<Contract> notInitializedContracts = Lists.newArrayList();
 
-    for (Contract contract : contractList) {
-      Optional<VacationsRecap> vacationsRecap;
+  /**
+   * Riepiloghi ferie della sede.
+   *
+   * @param year     anno
+   * @param officeId sede
+   */
+  public static void list(Integer year, Long officeId) {
 
-      vacationsRecap = vacationsService.create(year, contract);
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
 
-      if (!vacationsRecap.isPresent()) {
-        notInitializedContracts.add(contract);
-      } else {
-        vacationsRecapList.add(vacationsRecap.get());
+    LocalDate beginYear = new LocalDate(year, 1, 1);
+    LocalDate endYear = new LocalDate(year, 12, 31);
+    DateInterval yearInterval = new DateInterval(beginYear, endYear);
+    
+    GroupAbsenceType vacationGroup = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
+
+    List<Person> personList = personDao.list(Optional.<String>absent(),
+        Sets.newHashSet(office), false, beginYear, endYear, true).list();
+
+    List<VacationSituation> vacationSituations = Lists.newArrayList();
+    
+    for (Person person : personList) {
+
+      for (Contract contract : person.contracts) {
+
+        IWrapperContract cwrContract = wrapperFactory.create(contract);
+        if (DateUtility.intervalIntersection(cwrContract.getContractDateInterval(),
+            yearInterval) == null) {
+
+          //Questo evento andrebbe segnalato... la list dovrebbe caricare
+          // nello heap solo i contratti attivi nel periodo specificato.
+          continue;
+        }
+        
+        try {
+          VacationSituation vacationSituation = absenceService.buildVacationSituation(contract, 
+              year, vacationGroup, Optional.absent(), true, null);
+          vacationSituations.add(vacationSituation);
+        } catch (Exception ex) {
+          log.info("");
+        }
+
       }
     }
 
-    render(vacationsRecapList, notInitializedContracts);
-  }
+    boolean isVacationLastYearExpired = vacationsService.isVacationsLastYearExpired(year,
+        vacationsService.vacationsLastYearExpireDate(year, office));
 
-  /**
-   * La situazione dell'employee ferie anno corrente per l'anno.
-   *
-   * @param anno anno
-   */
-  public static void vacationsCurrentYear(Integer anno) {
+    boolean isVacationCurrentYearExpired = vacationsService.isVacationsLastYearExpired(year + 1,
+        vacationsService.vacationsLastYearExpireDate(year + 1, office));
 
-    Optional<User> currentUser = Security.getUser();
-    if (!currentUser.isPresent() || currentUser.get().person == null) {
-      flash.error("Accesso negato.");
-      renderTemplate("Application/indexAdmin.html");
+    boolean isPermissionCurrentYearExpired = false;
+    if (new LocalDate(year, 12, 31).isBefore(LocalDate.now())) {
+      isPermissionCurrentYearExpired = true;
     }
 
-    Optional<Contract> contract = wrapperFactory.create(currentUser.get().person)
-        .getCurrentContract();
-
-    Preconditions.checkState(contract.isPresent());
-
-    Optional<VacationsRecap> vr = vacationsService.create(anno, contract.get());
-
-    Preconditions.checkState(vr.isPresent());
-
-    VacationsRecap vacationsRecap = vr.get();
-
-    boolean activeVacationCurrentYear = true;
-
-    render("@recapVacation", vacationsRecap, activeVacationCurrentYear);
-
+    render(vacationSituations, isVacationLastYearExpired, isVacationCurrentYearExpired,
+        isPermissionCurrentYearExpired, year, office);
   }
+  
 
+
+  
   /**
-   * La situazione dell'employee ferie anno passato per l'anno.
-   *
-   * @param anno anno
+   * Situazione di riepilogo contratto.
+   * @param contractId contratto
+   * @param year anno
+   * @param type VACATION/PERMISSION
    */
-  public static void vacationsLastYear(Integer anno) {
-
-    Optional<User> currentUser = Security.getUser();
-    if (!currentUser.isPresent() || currentUser.get().person == null) {
-      flash.error("Accesso negato.");
-      renderTemplate("Application/indexAdmin.html");
+  public static void vacationSummary(Long contractId, Integer year, TypeSummary type) {
+    
+    Contract contract = contractDao.getContractById(contractId);
+    notFoundIfNull(contract);
+    notFoundIfNull(type);
+    rules.checkIfPermitted(contract.person.office);
+    
+    GroupAbsenceType vacationGroup = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
+    VacationSummary vacationSummary;
+    if (type.equals(TypeSummary.PERMISSION)) {
+      vacationSummary = absenceService.buildVacationSituation(contract, year, vacationGroup, 
+          Optional.absent(), false, null).permissions;
+    } else {
+      vacationSummary = absenceService.buildVacationSituation(contract, year, vacationGroup, 
+          Optional.absent(), false, null).currentYear;
     }
-
-    Optional<Contract> contract = wrapperFactory.create(currentUser.get().person)
-        .getCurrentContract();
-
-    Preconditions.checkState(contract.isPresent());
-
-    Optional<VacationsRecap> vr = vacationsService.create(anno, contract.get());
-
-    Preconditions.checkState(vr.isPresent());
-
-    VacationsRecap vacationsRecap = vr.get();
-
-    boolean activeVacationLastYear = true;
-
-    render("@recapVacation", vacationsRecap, activeVacationLastYear);
+    
+    render(vacationSummary);
   }
-
+  
+  
   /**
-   * La situazione dell'employee permessi per l'anno.
-   *
-   * @param anno anno
+   * Confronto vecchio/nuovo algoritmo.
    */
-  public static void permissionCurrentYear(Integer anno) {
+  public static void compareVacations(Integer year, Long officeId) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
 
-    Optional<User> currentUser = Security.getUser();
-    if (!currentUser.isPresent() || currentUser.get().person == null) {
-      flash.error("Accesso negato.");
-      renderTemplate("Application/indexAdmin.html");
+    LocalDate beginYear = new LocalDate(year, 1, 1);
+    LocalDate endYear = new LocalDate(year, 12, 31);
+    DateInterval yearInterval = new DateInterval(beginYear, endYear);
+    
+    List<Person> personList = personDao.list(Optional.<String>absent(),
+        Sets.newHashSet(office), false, beginYear, endYear, true).list();
+    
+    GroupAbsenceType vacationGroup = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
+    
+    List<VacationSituation> vacationSituations = Lists.newArrayList();
+    
+    for (Person person : personList) {
+    
+      for (Contract contract : person.contracts) {
+
+        IWrapperContract cwrContract = wrapperFactory.create(contract);
+        if (DateUtility.intervalIntersection(cwrContract.getContractDateInterval(),
+            yearInterval) == null) {
+
+          //Questo evento andrebbe segnalato... la list dovrebbe caricare
+          // nello heap solo i contratti attivi nel periodo specificato.
+          continue;
+        }
+        
+        try {
+          VacationSituation vacationSituation = absenceService.buildVacationSituation(contract, 
+              year, vacationGroup, Optional.absent(), false, vacationsService);
+          vacationSituations.add(vacationSituation);
+        } catch (Exception ex) {
+          log.info("");
+        }
+      }
     }
-
-    Optional<Contract> contract = wrapperFactory.create(currentUser.get().person)
-        .getCurrentContract();
-
-    Preconditions.checkState(contract.isPresent());
-
-    Optional<VacationsRecap> vr = vacationsService.create(anno, contract.get());
-
-    Preconditions.checkState(vr.isPresent());
-
-    VacationsRecap vacationsRecap = vr.get();
-
-    boolean activePermission = true;
-
-    render("@recapVacation", vacationsRecap, activePermission);
+    
+    render(year, vacationSituations);
   }
+
 
 
 }

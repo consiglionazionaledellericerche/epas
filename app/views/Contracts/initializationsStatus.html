@@ -93,10 +93,6 @@
       <th>&{'person.number'}</th>
       <th>Inizio<br>Contratto</th>
       <th>Data <br>Iniziale</th>
-      <th>Ferie usate<br>anno passato</th>
-      <th>Ferie usate<br>anno corrente</th>
-      <th>Permessi<br>usati</th>
-      <th>Riposi comp.<br>usati</th>
       <th>Residuo<br>anno passato</th>
       <th>Residuo<br>anno corrente</th>
       <th>Modifica</th>
@@ -117,18 +113,6 @@
 
       <td>
           ${contract.value.sourceDateResidual?.format()}
-      </td>
-      <td>
-        ${contract.value.sourceVacationLastYearUsed}
-      </td>
-      <td>
-        ${contract.value.sourceVacationCurrentYearUsed}
-      </td>
-      <td>
-        ${contract.value.sourcePermissionUsed}
-      </td>
-      <td>
-        ${contract.value.sourceRecoveryDayUsed}
       </td>
       <td>
          ${contract.value.sourceRemainingMinutesLastYear?.printHourMinute()}

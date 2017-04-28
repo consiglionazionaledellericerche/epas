@@ -21,6 +21,7 @@
     <th>tipologia</th>
     <th>Usata in Epas</th>
     <th>Gruppi Epas</th>
+    <th>Enumerata</th>
   </tr>
   </thead>
   <tbody>
@@ -36,11 +37,16 @@
       <td>
           ${bothSuperCode.absences.size()}
       </td>      
-        <td>
-          #{if !bothSuperCode.onlyOtherGroup()}
+      <td>
+          #{if !bothSuperCode.absenceType.involvedGroupAbsenceType(false)}
             <i class="fa fa-star" aria-hidden="true"></i>
           #{/if}
-        </td>
+      </td>
+      <td>
+        #{if models.absences.definitions.DefaultAbsenceType.byCode(bothSuperCode.absenceType).present}
+            <i class="fa fa-star" aria-hidden="true"></i>
+        #{/if}
+      </td>
     </tr>
   #{/list}
   </tbody>
@@ -103,16 +109,7 @@
      
       
     
-      <tr 
-        #{if onlyEpasSuperCode.erasable() || !onlyEpasSuperCode.onlyOtherGroup()} class="bg-success"  #{/if}
-        #{if onlyEpasSuperCode.withProblems()}
-          #{if onlyEpasSuperCode.absenceType.expired} 
-           class="bg-warning"
-          #{/if}#{else}
-            class="bg-danger"
-          #{/else}
-        #{/if}      
-      >
+      <tr>
         <td>${onlyEpasSuperCode.code}</td>
         <td>${onlyEpasSuperCode.absenceType.certificateCode}</td>
         <td>${onlyEpasSuperCode.absences.size()}</td>
@@ -140,7 +137,7 @@
         
         <!-- Gruppi epas -->
         <td>
-          #{if !onlyEpasSuperCode.onlyOtherGroup()}
+          #{if !onlyEpasSuperCode.groupEpas()}
             <i class="fa fa-star" aria-hidden="true"></i>
           #{/if}
         </td>

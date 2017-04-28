@@ -35,7 +35,7 @@
            #{list absenceForm.groupsForCategory(category), as:'groupAbsenceType'}
 	         <option value="${groupAbsenceType.id}"
 	          #{if absenceForm.groupSelected.equals(groupAbsenceType)} selected #{/if}> 
-	          ${groupAbsenceType.getChainDescription()}
+	          ${groupAbsenceType.computeChainDescription()}
 	         </option>
   	       #{/list}
   	       </optgroup>

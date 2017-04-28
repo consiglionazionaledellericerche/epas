@@ -7,8 +7,8 @@ import com.google.common.collect.ImmutableSet;
 import java.util.List;
 import java.util.Set;
 
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import manager.configurations.EpasParam.EpasParamValueType.IpList;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
@@ -128,7 +128,26 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
-
+  
+  /**
+   * Tecnici e Ricercatori possono inserirsi le ferie e riposi. 
+   * Con notifica al direttore / responsabile.
+   */
+  TR_VACATIONS("researchers_technologists_vacations",
+      EpasParamCategory.AUTOCERTIFICATION,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  TR_COMPENSATORY("researchers_technologists_compensatory",
+      EpasParamCategory.AUTOCERTIFICATION,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
   /**
    * Permette di abilitare/disabilitare la funzione di autocertificazione per i livelli 1-3 del
    * proprio orario di lavoro.

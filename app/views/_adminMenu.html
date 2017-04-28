@@ -4,7 +4,7 @@
   'Persons.list',
   'Stampings.personStamping',
   'Absences.showGeneralMonthlyAbsences',
-  'VacationsAdmin.list',
+  'Vacations.list',
   'Competences.showCompetences',
   'MealTickets.recapMealTickets',
   'PersonMonths.visualizePeopleTrainingHours',
@@ -16,7 +16,8 @@
   'Certifications.certifications',
   'Contracts.initializationsStatus',
   'Contracts.initializationsMeal',
-  'AbsenceGroups.absenceInitializations'] /}
+  'AbsenceGroups.absenceInitializations',
+  'AbsenceGroups.absenceTroubles'] /}
 
   <li class="dropdown #{if request.action in actions}active#{/if}">
 
@@ -51,7 +52,7 @@
       <i class="fa fa-user-times" aria-hidden="true"></i>
       #{/secure.li}
 
-      #{secure.li @VacationsAdmin.list(session.get("yearSelected"), session.get("officeSelected")) }
+      #{secure.li @Vacations.list(session.get("yearSelected"), session.get("officeSelected")) }
       <i class="fa fa-plane" aria-hidden="true"></i>
       #{/secure.li}
 
