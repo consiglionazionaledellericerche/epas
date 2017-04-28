@@ -233,6 +233,12 @@ public enum DefaultAbsenceType {
   A_91("91", "Riposo compensativo",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, null, null),
+  A_91MS("91", "Riposo compensativo missione sabato",
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      0, null, null, null),
+  A_91MD("91", "Riposo compensativo missione domenica",
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      0, null, null, null),
 
 
   A_PB("PB", "Permesso breve 36 ore anno",

@@ -33,8 +33,7 @@ import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.NotificationManager;
 import manager.PersonDayManager;
-import manager.attestati.dto.internal.CruscottoDipendente;
-import manager.attestati.service.CertificationService;
+import manager.services.absences.AbsenceCertificationService;
 import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
@@ -105,9 +104,9 @@ public class AbsenceGroups extends Controller {
   @Inject
   private static AbsenceComponentDao absenceComponentDao;
   @Inject
-  private static CertificationService certService; 
-  @Inject
   static NotificationManager notificationManager;
+  @Inject
+  static AbsenceCertificationService absenceCertificationService;
 
   /**
    * La lista delle categorie definite.
@@ -714,22 +713,26 @@ public class AbsenceGroups extends Controller {
 
     groupAbsenceType = groupAbsenceType.firstOfChain();
 
-    AbsenceForm categorySwitcher = absenceService
-        .buildForCategorySwitch(person, from, groupAbsenceType);
+    PeriodChain periodChain = absenceService.residual(person, groupAbsenceType, from);
 
-    PeriodChain periodChain = absenceService.residual(person, categorySwitcher.groupSelected, from);
-
-
-    final User currentUser = Security.getUser().get();
     boolean isAdmin = false;
     //se l'user è amministratore visualizzo lo switcher del gruppo
+    final User currentUser = Security.getUser().get();
     if (currentUser.isSystemUser()
         || userDao.getUsersWithRoles(person.office, Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI)
         .contains(currentUser)) {
       isAdmin = true;
     }
-
+    
+    if (groupAbsenceType.automatic) {
+      render(from, groupAbsenceType, periodChain, isAdmin);  //no switcher
+    }
+    
+    AbsenceForm categorySwitcher = absenceService
+        .buildForCategorySwitch(person, from, groupAbsenceType);
+    
     render(from, categorySwitcher, groupAbsenceType, periodChain, isAdmin);
+    
   }
   
   /**
@@ -1083,7 +1086,7 @@ public class AbsenceGroups extends Controller {
    */
   public static void certificationsAbsenceCodes(boolean eraseErasable) throws ExecutionException {
 
-    CodeComparation codeComparation = absenceService.computeCodeComparation();
+    CodeComparation codeComparation = absenceCertificationService.computeCodeComparation();
 
     if (eraseErasable) {
       codeComparation.eraseErasable();
@@ -1158,10 +1161,9 @@ public class AbsenceGroups extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     
-    CruscottoDipendente cruscottoDipendente = certService.getCruscottoDipendente(person, year);
-    
-    CertificationYearSituation yearSituation = new CertificationYearSituation(absenceComponentDao, 
-        person, cruscottoDipendente);
+   
+    CertificationYearSituation yearSituation = absenceCertificationService
+        .buildCertificationYearSituation(person, year);
     
     render(yearSituation, person);
   }
@@ -1175,14 +1177,8 @@ public class AbsenceGroups extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
-    CruscottoDipendente cruscottoDipendente = certService.getCruscottoDipendente(person, year);
-
-    CertificationYearSituation yearSituation = new CertificationYearSituation(absenceComponentDao, 
-        person, cruscottoDipendente);
-
-
     LocalDate updateFrom = LocalDate.now();
-    for (Absence absence : absenceService.certificationAbsencesToPersist((yearSituation))) {
+    for (Absence absence : absenceCertificationService.absencesToPersist(person, year)) {
 
       PersonDay personDay = personDayManager
           .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());

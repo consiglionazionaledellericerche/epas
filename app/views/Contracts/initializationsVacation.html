@@ -1,0 +1,130 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Stato inizializzazioni'  /}
+
+#{set 'moreStyles'}
+<style>
+  td.alignLeft { text-align: left !important; }
+</style>
+#{/set}
+
+#{tabs.initializationsTabs action:'initializationsVacation', office:office /}
+
+<div class="container">
+
+  #{title title:'Inizializzazione Ferie e Permessi Legge ' + office.name /}
+
+  #{alert color:'info'}
+  <p>
+    Elenco dei dipendenti attivi inizializzati.
+  </p>
+  #{/alert}
+  
+  <table class="table table-bordered table-striped table-hover table-condensed center">
+    <thead>
+    <tr>
+      <th>&{'person.name'}</th>
+      <th>&{'person.number'}</th>
+      <th>Inizio<br>Contratto</th>
+      <th>Data <br>Iniziale</th>
+      <th>Ferie usate<br>anno passato</th>
+      <th>Ferie usate<br>anno corrente</th>
+      <th>Permessi<br>usati</th>
+      <th>Modifica</th>
+    </tr>
+    </thead>
+    <tbody>
+    #{list items:correctInitialized, as:'contract'}
+
+    <tr>
+      <td class="alignLeft">
+        ${contract.value.person.fullname}
+      </td>
+       
+      <td>${contract.value.person.number}</td>
+      <td data-order="${contract.value.beginDate}">
+        ${contract.value.beginDate?.format()}
+      </td>
+
+      <td>
+          ${contract.value.sourceDateVacation?.format()}
+      </td>
+      <td>
+        ${contract.value.sourceVacationLastYearUsed}
+      </td>
+      <td>
+        ${contract.value.sourceVacationCurrentYearUsed}
+      </td>
+      <td>
+        ${contract.value.sourcePermissionUsed}
+      </td>
+      <td>
+        <a href="@{updateSourceContractVacation(contract.value.id)}" data-async-modal="#defaultModal">
+          <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+        </a>  
+      </td>
+
+    </tr>
+
+    #{/list}
+    </tbody>
+  </table>
+
+ 
+  #{alert color:'info'}
+    <p>
+      Elenco dei dipendenti attivi non inizializzati.
+    </p>
+  #{/alert}
+  <table class="table table-bordered table-striped table-hover table-condensed center">
+    <thead>
+    <tr>
+      <th>&{'person.name'}</th>
+      <th>&{'person.number'}</th>
+      <th>Inizio<br>Contratto</th>
+      <th>Fine<br>Contratto</th>
+      <th>Inizializzabile Dal</th>
+      <th>Inizializza</th>
+    </tr>
+    </thead>
+    <tbody>
+    #{list items:correctNotInitialized, as:'contract'}
+
+    <tr>
+      <td class="alignLeft">
+        ${contract.value.person.fullname}
+      </td>
+       
+      <td>${contract.value.person.number}</td>
+      <td data-order="${contract.value.beginDate}">
+        ${contract.value.beginDate?.format()}
+      </td>
+
+      <td data-order="${contract.value.endDate}">
+        #{if contract.value.endDate}
+          ${contract.value.endDate.format()}
+        #{/if}
+        #{else}
+          #{if contract.value.isTemporaryMissing}
+            <em class="text-danger">Data da inserire</em>
+          #{/if}
+        #{/else}
+
+      </td>
+      <td>
+        ${contract.dateForInitialization().format()}
+      </td>
+      <td>
+        <a href="@{updateSourceContractVacation(contract.value.id)}" data-async-modal="#defaultModal"><i class="fa fa-plus" aria-hidden="true"></i></a>
+      </td>
+
+    </tr>
+
+    #{/list}
+    </tbody>
+  </table>
+
+
+
+</div>
+

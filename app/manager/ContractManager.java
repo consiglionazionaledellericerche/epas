@@ -337,12 +337,19 @@ public class ContractManager {
    * @param contract contract
    */
   public final void cleanResidualInitialization(final Contract contract) {
+    contract.sourceRemainingMinutesCurrentYear = 0;
+    contract.sourceRemainingMinutesLastYear = 0;
+  }
+  
+  /**
+   * Azzera l'inizializzazione del contratto.
+   *
+   * @param contract contract
+   */
+  public final void cleanVacationInitialization(final Contract contract) {
     contract.sourceVacationLastYearUsed = 0;
     contract.sourceVacationCurrentYearUsed = 0;
     contract.sourcePermissionUsed = 0;
-    contract.sourceRemainingMinutesCurrentYear = 0;
-    contract.sourceRemainingMinutesLastYear = 0;
-    contract.sourceRecoveryDayUsed = 0;
   }
 
   /**
