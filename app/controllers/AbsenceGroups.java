@@ -713,22 +713,26 @@ public class AbsenceGroups extends Controller {
 
     groupAbsenceType = groupAbsenceType.firstOfChain();
 
-    AbsenceForm categorySwitcher = absenceService
-        .buildForCategorySwitch(person, from, groupAbsenceType);
+    PeriodChain periodChain = absenceService.residual(person, groupAbsenceType, from);
 
-    PeriodChain periodChain = absenceService.residual(person, categorySwitcher.groupSelected, from);
-
-
-    final User currentUser = Security.getUser().get();
     boolean isAdmin = false;
     //se l'user è amministratore visualizzo lo switcher del gruppo
+    final User currentUser = Security.getUser().get();
     if (currentUser.isSystemUser()
         || userDao.getUsersWithRoles(person.office, Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI)
         .contains(currentUser)) {
       isAdmin = true;
     }
-
+    
+    if (groupAbsenceType.automatic) {
+      render(from, groupAbsenceType, periodChain, isAdmin);  //no switcher
+    }
+    
+    AbsenceForm categorySwitcher = absenceService
+        .buildForCategorySwitch(person, from, groupAbsenceType);
+    
     render(from, categorySwitcher, groupAbsenceType, periodChain, isAdmin);
+    
   }
   
   /**
