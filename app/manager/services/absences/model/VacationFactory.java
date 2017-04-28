@@ -73,14 +73,14 @@ public class VacationFactory {
     int initializationLastYear = 0;
     int initializationCurrentYear = 0;
     int initializationPermission = 0;
-    if (contract.sourceDateResidual != null) {
-      if (contract.sourceDateResidual.getYear() == year) {
+    if (contract.sourceDateVacation != null) {
+      if (contract.sourceDateVacation.getYear() == year) {
         initializationLastYear = contract.sourceVacationLastYearUsed;
         initializationCurrentYear = contract.sourceVacationCurrentYearUsed;
         initializationPermission = contract.sourcePermissionUsed;
-      } else if (contract.sourceDateResidual.getYear() == year - 1) {
+      } else if (contract.sourceDateVacation.getYear() == year - 1) {
         initializationLastYear = contract.sourceVacationCurrentYearUsed; 
-      } else if (contract.sourceDateResidual.getYear() == year + 1) {
+      } else if (contract.sourceDateVacation.getYear() == year + 1) {
         initializationCurrentYear = contract.sourceVacationLastYearUsed;
       }
     }
@@ -214,7 +214,7 @@ public class VacationFactory {
     }
     
     //Collapse initialization days
-    handleInitialization(periods, initializationDays, contract.sourceDateResidual, group);
+    handleInitialization(periods, initializationDays, contract.sourceDateVacation, group);
     
     return periods;
   }
@@ -252,7 +252,7 @@ public class VacationFactory {
     periods = fixPostPartum(periods, person, year);
     
     //Collapse initialization days
-    handleInitialization(periods, initializationDays, contract.sourceDateResidual, group);
+    handleInitialization(periods, initializationDays, contract.sourceDateVacation, group);
     
     return periods;
   }

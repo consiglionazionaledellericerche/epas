@@ -98,13 +98,13 @@ public class VacationsRecapTempData {
     }
     
     //Recupero informazioni da inizializzazione.
-    if (contract.getSourceDateResidual() != null) {
-      if (contract.getSourceDateResidual().getYear() == year) {
+    if (contract.getSourceDateVacation() != null) {
+      if (contract.getSourceDateVacation().getYear() == year) {
         // Se anno ripilogo uguale all'anno di inizializzazione (caso semplice)
         this.sourceVacationLastYearUsed += contract.getSourceVacationLastYearUsed();
         this.sourceVacationCurrentYearUsed += contract.getSourceVacationCurrentYearUsed();
         this.sourcePermissionUsed += contract.getSourcePermissionUsed();  
-      } else if (contract.getSourceDateResidual().getYear() == year - 1) {
+      } else if (contract.getSourceDateVacation().getYear() == year - 1) {
         // Se anno riepilogo è l'anno successivo a quello di inizializzazione (caso particolare)
         this.sourceVacationLastYearUsed += contract.getSourceVacationCurrentYearUsed();
       }

@@ -848,8 +848,8 @@ public class AbsenceService {
   public void emptyVacationCache(Contract contract) {
     //per ogni anno fino a quello successivo l'attuale
     int year = contract.beginDate.getYear();
-    if (contract.sourceDateResidual != null) {
-      year = contract.sourceDateResidual.getYear() - 1;
+    if (contract.sourceDateVacation != null) {
+      year = contract.sourceDateVacation.getYear() - 1;
     }
     while (true) {
       Cache.set(vacationCacheKey(contract, year, TypeSummary.VACATION), null);
