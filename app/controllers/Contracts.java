@@ -551,7 +551,37 @@ public class Contracts extends Controller {
     IWrapperOffice wrOffice = wrapperFactory.create(contract.person.office);
     IWrapperPerson wrPerson = wrapperFactory.create(contract.person);
 
-    render(contract, wrContract, wrOffice, wrPerson);
+    Integer sourceRemainingMinutesCurrentYear = contract.sourceRemainingMinutesCurrentYear; 
+    Integer sourceRemainingMinutesLastYear = contract.sourceRemainingMinutesLastYear;
+    
+    render(contract, wrContract, wrOffice, wrPerson, 
+        sourceRemainingMinutesCurrentYear, sourceRemainingMinutesLastYear);
+  }
+  
+  /**
+   * Pagina aggiornamento dati iniziali ferie e permessi del contratto.
+   */
+  public static void updateSourceContractVacation(Long contractId) {
+
+    Contract contract = contractDao.getContractById(contractId);
+    notFoundIfNull(contract);
+    rules.checkIfPermitted(contract.person.office);
+
+    IWrapperContract wrContract = wrapperFactory.create(contract);
+    if (contract.sourceDateResidual == null) {
+      contractManager.cleanVacationInitialization(contract);
+    }
+    
+    Integer sourceVacationLastYearUsed = contract.sourceVacationLastYearUsed;
+    Integer sourceVacationCurrentYearUsed = contract.sourceVacationCurrentYearUsed;
+    Integer sourcePermissionUsed = contract.sourcePermissionUsed;
+
+    IWrapperOffice wrOffice = wrapperFactory.create(contract.person.office);
+    IWrapperPerson wrPerson = wrapperFactory.create(contract.person);
+
+    
+    render(contract, wrContract, wrOffice, wrPerson, 
+        sourceVacationLastYearUsed, sourceVacationCurrentYearUsed, sourcePermissionUsed);
   }
   
   /**
@@ -576,16 +606,18 @@ public class Contracts extends Controller {
 
 
   /**
-   * Salva l'inizializzazione.
+   * Salva l'inizializzazione ore.
    *
-   * @param contract           contract.
+   * @param contractId contract.
    * @param sourceDateResidual nuova data inizializzazione.
    * @param confirmedResidual  step di conferma ricevuta.
    */
-  public static void saveResidualSourceContract(@Valid final Contract contract,
-      @Valid final LocalDate sourceDateResidual,
+  public static void saveResidualSourceContract(Long contractId, 
+      @Valid final LocalDate sourceDateResidual, Integer sourceRemainingMinutesCurrentYear, 
+      Integer sourceRemainingMinutesLastYear,
       boolean confirmedResidual) {
 
+    Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
 
     rules.checkIfPermitted(contract.person.office);
@@ -607,7 +639,8 @@ public class Contracts extends Controller {
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors: {}", validation.errorsMap());
-      render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice, sourceDateResidual);
+      render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice, 
+          sourceRemainingMinutesCurrentYear, sourceRemainingMinutesLastYear, sourceDateResidual);
     }
 
     LocalDate recomputeFrom = sourceDateResidual;
@@ -630,6 +663,7 @@ public class Contracts extends Controller {
         days = DateUtility.daysInInterval(new DateInterval(recomputeFrom, recomputeTo));
       }
       render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice,
+          sourceRemainingMinutesCurrentYear, sourceRemainingMinutesLastYear,
           confirmedResidual, removeMandatory, removeUnnecessary,
           recomputeFrom, recomputeTo, days);
     }
@@ -648,12 +682,15 @@ public class Contracts extends Controller {
       }
 
       render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice, sourceDateResidual,
+          sourceRemainingMinutesCurrentYear, sourceRemainingMinutesLastYear,
           confirmedResidual, sourceNew, sourceUpdate, recomputeFrom, recomputeTo, days);
     }
 
     //esecuzione
     if (confirmedResidual) {
       contract.sourceDateResidual = sourceDateResidual;
+      contract.sourceRemainingMinutesCurrentYear = sourceRemainingMinutesCurrentYear;
+      contract.sourceRemainingMinutesLastYear = sourceRemainingMinutesLastYear;
       contractManager.setSourceContractProperly(contract);
       contractManager.properContractUpdate(contract, recomputeFrom, false);
 
@@ -662,9 +699,85 @@ public class Contracts extends Controller {
     initializationsStatus(contract.person.office.id);
 
   }
+  
+  /**
+   * Salva l'inizializzazione ore.
+   */
+  public static void saveVacationSourceContract(Long contractId, 
+      @Valid final LocalDate sourceDateVacation, Integer sourceVacationLastYearUsed,
+      Integer sourceVacationCurrentYearUsed, Integer sourcePermissionUsed,
+      boolean confirmedVacation) {
+
+    Contract contract = contractDao.getContractById(contractId);
+    notFoundIfNull(contract);
+
+    rules.checkIfPermitted(contract.person.office);
+
+    IWrapperContract wrContract = wrapperFactory.create(contract);
+    IWrapperOffice wrOffice = wrapperFactory.create(contract.person.office);
+    IWrapperPerson wrPerson = wrapperFactory.create(contract.person);
+
+    if (sourceDateVacation != null) {
+      validation.future(sourceDateVacation.toDate(),
+          wrContract.dateForInitialization().minusDays(1).toDate())
+          .key("sourceDateVacation").message("validation.after");
+
+      validation.past(sourceDateVacation.toDate(),
+          wrContract.getContractDateInterval().getEnd().toDate())
+          .key("sourceDateVacation").message("validation.before");
+    }
+
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      log.warn("validation errors: {}", validation.errorsMap());
+      render("@updateSourceContractVacation", contract, wrContract, wrPerson, wrOffice, 
+          sourceVacationLastYearUsed, sourceVacationCurrentYearUsed, sourcePermissionUsed, 
+          sourceDateVacation);
+    }
+
+    //simulazione eliminazione inizializzazione.
+    if (sourceDateVacation == null && !confirmedVacation) {
+      contractManager.cleanVacationInitialization(contract);
+      boolean remove = true;
+      confirmedVacation = true;
+      render("@updateSourceContractVacation", contract, wrContract, wrPerson, wrOffice,
+          sourceVacationLastYearUsed, sourceVacationCurrentYearUsed, sourcePermissionUsed, 
+          remove, confirmedVacation);
+    }
+
+    //simulazione nuova inizializzazione
+    if (sourceDateVacation != null && !confirmedVacation) {
+
+      confirmedVacation = true;
+      boolean sourceUpdate = false;
+      if (contract.sourceDateVacation != null) {
+        sourceUpdate = true;
+      }
+      render("@updateSourceContractVacation", contract, wrContract, wrPerson, wrOffice, 
+          sourceDateVacation,
+          sourceVacationLastYearUsed, sourceVacationCurrentYearUsed, sourcePermissionUsed, 
+          confirmedVacation, sourceUpdate);
+    }
+
+    //esecuzione
+    if (confirmedVacation) {
+      contract.sourceDateVacation = sourceDateVacation;
+      contract.sourceVacationLastYearUsed = sourceVacationLastYearUsed;
+      contract.sourceVacationCurrentYearUsed = sourceVacationCurrentYearUsed;
+      contract.sourcePermissionUsed = sourcePermissionUsed;
+      
+      contractManager.setSourceContractProperly(contract);
+      
+      //drop cache vacation
+
+      flash.success("Contratto di %s inizializzato correttamente.", contract.person.fullName());
+    }
+    initializationsVacation(contract.person.office.id);
+
+  }
 
   /**
-   * Salva l'inizializzazione.
+   * Salva l'inizializzazione buoni pasto.
    *
    * @param contract             contract.
    * @param sourceDateMealTicket nuova data inizializzazione.
@@ -739,7 +852,7 @@ public class Contracts extends Controller {
   }
   
   /**
-   * Gestore delle inizializzazioni della sede.
+   * Gestore delle inizializzazioni ore della sede.
    */
   public static void initializationsStatus(Long officeId) {
     
@@ -774,6 +887,38 @@ public class Contracts extends Controller {
     }
     
     render(initializationsMissing, correctInitialized, correctNotInitialized, office);
+  }
+  
+  /**
+   * Gestore delle inizializzazioni ferie della sede.
+   */
+  public static void initializationsVacation(Long officeId) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    
+    rules.checkIfPermitted(office);
+
+    List<IWrapperContract> correctInitialized = Lists.newArrayList();
+    List<IWrapperContract> correctNotInitialized = Lists.newArrayList();
+    
+    //Tutti i dipendenti sotto forma di wrapperPerson
+    for (IWrapperPerson wrPerson : FluentIterable.from(personDao.listFetched(Optional.absent(),
+        ImmutableSet.of(office), false, null, null, false).list())
+        .transform(wrapperFunctionFactory.person()).toList()) {
+      
+      if (!wrPerson.getCurrentContract().isPresent()) {
+        continue;
+      }
+      
+      if (wrPerson.getCurrentContract().get().sourceDateVacation != null) {
+        correctInitialized.add(wrapperFactory.create(wrPerson.getCurrentContract().get()));
+      } else {
+        correctNotInitialized.add(wrapperFactory.create(wrPerson.getCurrentContract().get()));
+      }
+    }
+    
+    render(correctInitialized, correctNotInitialized, office);
   }
 
   /**

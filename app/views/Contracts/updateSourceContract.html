@@ -1,4 +1,4 @@
-#{modalAsync title: 'Inizializza contratto ' + contract.person.fullname }
+#{modalAsync title: 'Inizializza ore contratto ' + contract.person.fullname }
 
 <div id="updateSource">
 
@@ -51,15 +51,11 @@
 	   #{form @Contracts.saveResidualSourceContract(), 'method':'POST', class:'form-horizontal', 
          'data-async':'#updateSource', 'data-async-error':'#updateSource', 'data-spinner':'#defaultSpinner'}
 
-        <input type="hidden" name="contract.id" value="${contract.id}" />
+        <input type="hidden" name="contractId" value="${contract.id}" />
 	
 	    #{f.date 'sourceDateResidual', value:contract.sourceDateResidual?.format(), biglabel:true  /}
-	    #{f.input 'contract.sourceRemainingMinutesLastYear', biglabel:true /}
-	    #{f.input 'contract.sourceRemainingMinutesCurrentYear', biglabel:true  /}
-	    #{f.input 'contract.sourceVacationLastYearUsed', biglabel:true  /}
-	    #{f.input 'contract.sourceVacationCurrentYearUsed', biglabel:true  /}
-	    #{f.input 'contract.sourcePermissionUsed', biglabel:true  /}
-		#{f.input 'contract.sourceRecoveryDayUsed', biglabel:true  /}
+	    #{f.input 'sourceRemainingMinutesLastYear', biglabel:true /}
+	    #{f.input 'sourceRemainingMinutesCurrentYear', biglabel:true  /}
 
 		#{secure.check 'Contracts.saveResidualSourceContract'}
 	      #{b.buttons center:true}
@@ -74,15 +70,11 @@
 	  #{form @Contracts.saveResidualSourceContract(), 'method':'POST', class:'form-horizontal', 
          'data-async':'#page_content', 'data-async-error':'#updateSource', 'data-spinner':'#defaultSpinner'}
 			
-		<input type="hidden" name="contract.id" value="${contract.id}" />
+		<input type="hidden" name="contractId" value="${contract.id}" />
 		#{f.hidden 'confirmedResidual', value:true /}
 		#{f.simpleView 'sourceDateResidual', value:sourceDateResidual.format(), biglabel:true, hidden:true /}
-		#{f.simpleView 'contract.sourceRemainingMinutesLastYear', biglabel:true, hidden:true /}
-		#{f.simpleView 'contract.sourceRemainingMinutesCurrentYear', biglabel:true, hidden:true /}
-		#{f.simpleView 'contract.sourceVacationLastYearUsed', biglabel:true, hidden:true /}
-		#{f.simpleView 'contract.sourceVacationCurrentYearUsed', biglabel:true, hidden:true /}
-		#{f.simpleView 'contract.sourcePermissionUsed', biglabel:true, hidden:true /}
-		#{f.simpleView 'contract.sourceRecoveryDayUsed', biglabel:true, hidden:true /}
+		#{f.simpleView 'sourceRemainingMinutesLastYear', biglabel:true, hidden:true /}
+		#{f.simpleView 'sourceRemainingMinutesCurrentYear', biglabel:true, hidden:true /}
 
 		#{if removeMandatory}
 		  #{alert color:'danger'}
