@@ -26,6 +26,9 @@ import manager.attestati.dto.insert.InserimentoRigaAssenza;
 import manager.attestati.dto.insert.InserimentoRigaBuoniPasto;
 import manager.attestati.dto.insert.InserimentoRigaCompetenza;
 import manager.attestati.dto.insert.InserimentoRigaFormazione;
+import manager.attestati.dto.internal.CruscottoDipendente;
+import manager.attestati.dto.internal.PeriodoDipendente;
+import manager.attestati.dto.internal.StatoAttestatoMese;
 import manager.attestati.dto.show.CodiceAssenza;
 import manager.attestati.dto.show.ListaDipendenti;
 import manager.attestati.dto.show.RispostaAttestati;
@@ -58,9 +61,13 @@ public class CertificationsComunication {
   private static final String API_URL_COMPETENZA = "/rigaCompetenza";
 
   private static final String API_URL_ASSENZE_PER_CONTRATTO = "/contratto/codiciAssenza";
-
-
   //http://attestativ2.rm.cnr.it/api/ext/contratto/codiciAssenza/{CODICE_CONTRATTO}
+  
+  //Attestati api internal
+  private static final String API_URL_INT = "/api/rest";
+  private static final String API_INT_STATO_ATTESTATO_MESE = "/sede/listaDipendenti";
+  private static final String API_INT_PERIODO_DIPENDENTE = "/dipendente/periodo";  // /145872
+  private static final String API_INT_CRUSCOTTO = "/dipendente/stato/cruscotto";   // /11028/2017"
 
   private static final String JSON_CONTENT_TYPE = "application/json";
 
@@ -465,5 +472,101 @@ public class CertificationsComunication {
     }
     return Lists.newArrayList();
   }
+  
+  /**
+   * Preleva la lista sui periodi di attività dei dipendenti in attestati, per sede anno e mese
+   * selezionati.
+   * @param office sede
+   * @param year   anno
+   * @param month  mese
+   * @return i contratti attivi nel mese dipendenti
+   */
+  public List<StatoAttestatoMese> getStatoAttestatoMese(Office office, int year, int month)
+      throws NoSuchFieldException, ExecutionException {
+
+    String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
+
+    final String url = API_URL_INT + API_INT_STATO_ATTESTATO_MESE + "/" + office.codeId
+        + "/" + year + "/" + month;
+
+    WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
+    HttpResponse httpResponse = wsRequest.get();
+
+    // Caso di token non valido
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
+      cacheValues.oauthToken.invalidateAll();
+      log.error("Token Oauth non valido: {}", token);
+      throw new ApiRequestException("Invalid token");
+    }
+
+    StatoAttestatoMese[] statoAttestatiArray = new Gson()
+        .fromJson(httpResponse.getJson(), StatoAttestatoMese[].class);
+
+    log.info("Recuperata lista sullo stato attestati meseper l'ufficio {} -  mese {}/{}",
+        office, month, year);
+
+    return Arrays.asList(statoAttestatiArray);
+  }
+
+
+  /**
+   * Preleva il periodo dipendente con quell'id.
+   * @param periodoId il periodoId
+   * @return periodoDipendente
+   */
+  public PeriodoDipendente getPeriodoDipendente(int periodoId) 
+      throws NoSuchFieldException, ExecutionException {
+
+    String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
+
+    final String url = API_URL_INT + API_INT_PERIODO_DIPENDENTE + "/" + periodoId;
+
+    WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
+    HttpResponse httpResponse = wsRequest.get();
+
+    // Caso di token non valido
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
+      cacheValues.oauthToken.invalidateAll();
+      log.error("Token Oauth non valido: {}", token);
+      throw new ApiRequestException("Invalid token");
+    }
+
+    PeriodoDipendente periodoDipendente = new Gson()
+        .fromJson(httpResponse.getJson(), PeriodoDipendente.class);
+
+    log.info("Recuperato il PeriodoDipendente con id  {}", periodoId);
+
+    return periodoDipendente;
+  }
+  
+  /**
+   * Preleva il cruscotto annuale del dipendente.
+   * @param dipendenteId il dipendenteId
+   * @return cruscottoDipendente
+   */
+  public CruscottoDipendente getCruscotto(int dipendenteId, int year) 
+      throws NoSuchFieldException, ExecutionException {
+
+    String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
+
+    final String url = API_URL_INT + API_INT_CRUSCOTTO + "/" + dipendenteId + "/" + year;
+
+    WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
+    HttpResponse httpResponse = wsRequest.get();
+
+    // Caso di token non valido
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
+      cacheValues.oauthToken.invalidateAll();
+      log.error("Token Oauth non valido: {}", token);
+      throw new ApiRequestException("Invalid token");
+    }
+
+    CruscottoDipendente cruscottoDipendente = new Gson()
+        .fromJson(httpResponse.getJson(), CruscottoDipendente.class);
+
+    log.info("Recuperato il CruscottoDipendente con id  {} e anno {}", dipendenteId, year);
+
+    return cruscottoDipendente;
+  } 
 
 }

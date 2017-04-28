@@ -6,7 +6,8 @@
 
 #{title title:periodChain.person.fullname + ' - Controllo assenze con limiti e completamenti' /}
   
-  #{if isAdmin}
+  
+  #{if isAdmin && categorySwitcher}
     %{ 
      absenceForm = categorySwitcher;
      changeFrom = true;

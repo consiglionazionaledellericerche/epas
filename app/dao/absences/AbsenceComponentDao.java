@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
@@ -12,6 +13,7 @@ import com.mysema.query.jpa.JPQLQueryFactory;
 import dao.DaoBase;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
@@ -30,6 +32,7 @@ import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.query.QAbsence;
+import models.absences.query.QAbsenceTrouble;
 import models.absences.query.QAbsenceType;
 import models.absences.query.QCategoryGroupAbsenceType;
 import models.absences.query.QCategoryTab;
@@ -38,6 +41,8 @@ import models.absences.query.QGroupAbsenceType;
 import models.absences.query.QInitializationGroup;
 import models.absences.query.QJustifiedType;
 import models.absences.query.QTakableAbsenceBehaviour;
+import models.query.QPerson;
+import models.query.QPersonDay;
 
 import org.joda.time.LocalDate;
 
@@ -76,6 +81,19 @@ public class AbsenceComponentDao extends DaoBase {
         .from(absenceType)
         .where(absenceType.code.eq(string).or(absenceType.code.equalsIgnoreCase(string)));
     return Optional.fromNullable(query.singleResult(absenceType));
+  }
+  
+  /**
+   * @return l'absenceType relativo al codice passato come parametro nel campo certification.
+   */
+  public List<AbsenceType> absenceTypesByCertificationCode(String string) {
+
+    QAbsenceType absenceType = QAbsenceType.absenceType;
+    final JPQLQuery query = getQueryFactory()
+        .from(absenceType)
+        .where(absenceType.certificateCode.eq(string)
+            .or(absenceType.certificateCode.equalsIgnoreCase(string)));
+    return query.list(absenceType);
   }
   
   /**
@@ -155,10 +173,10 @@ public class AbsenceComponentDao extends DaoBase {
    * @param name nome
    * @return entity
    */
-  public CategoryGroupAbsenceType categoryByName(String name) {
+  public Optional<CategoryGroupAbsenceType> categoryByName(String name) {
     QCategoryGroupAbsenceType category = QCategoryGroupAbsenceType.categoryGroupAbsenceType;
-    return getQueryFactory().from(category)
-        .where(category.name.eq(name)).singleResult(category);
+    return Optional.fromNullable(getQueryFactory().from(category)
+        .where(category.name.eq(name)).singleResult(category));
   }
   
   /**
@@ -183,10 +201,10 @@ public class AbsenceComponentDao extends DaoBase {
    * @param name nome
    * @return entity
    */
-  public CategoryTab tabByName(String name) {
+  public Optional<CategoryTab> tabByName(String name) { 
     QCategoryTab categoryTab = QCategoryTab.categoryTab;
-    return getQueryFactory().from(categoryTab)
-        .where(categoryTab.name.eq(name)).singleResult(categoryTab);
+    return Optional.fromNullable(getQueryFactory().from(categoryTab)
+        .where(categoryTab.name.eq(name)).singleResult(categoryTab));
   }
   
   /**
@@ -261,13 +279,18 @@ public class AbsenceComponentDao extends DaoBase {
    * Tutti i gruppi.
    * @return entity list
    */
-  public List<GroupAbsenceType> allGroupAbsenceType() {
+  public List<GroupAbsenceType> allGroupAbsenceType(boolean alsoAutomatic) {
     
     QGroupAbsenceType groupAbsenceType = QGroupAbsenceType.groupAbsenceType;
-
+    
+    BooleanBuilder conditions = new BooleanBuilder();
+    if (!alsoAutomatic) {
+      conditions.and(groupAbsenceType.automatic.eq(false));
+    }
     return getQueryFactory().from(groupAbsenceType)
         .leftJoin(groupAbsenceType.category).fetch()
         .leftJoin(groupAbsenceType.previousGroupChecked).fetch()
+        .where(conditions)
         .list(groupAbsenceType);
   }
   
@@ -278,7 +301,7 @@ public class AbsenceComponentDao extends DaoBase {
    */
   public GroupAbsenceType firstGroupOfChain(GroupAbsenceType groupAbsenceType) {
     GroupAbsenceType group = groupAbsenceType;
-    List<GroupAbsenceType> all = allGroupAbsenceType();
+    List<GroupAbsenceType> all = allGroupAbsenceType(true);
     boolean changed = true;
     while (changed) {
       changed = false;
@@ -484,5 +507,51 @@ public class AbsenceComponentDao extends DaoBase {
       types.add(getOrBuildJustifiedType(name));
     }
     return types;
+  }
+  
+  /**
+   * Gli absenceTroubles delle persone passate.
+   * @param people le persone
+   * @return list
+   */
+  public Map<Person, List<Absence>> absenceTroubles(List<Person> people) {
+    
+    QAbsence absence = QAbsence.absence;
+    final JPQLQuery query = getQueryFactory()
+        .from(absence)
+        .leftJoin(absence.troubles, QAbsenceTrouble.absenceTrouble)
+        .leftJoin(absence.personDay, QPersonDay.personDay)
+        .leftJoin(absence.personDay.person, QPerson.person)
+        .where(absence.troubles.isNotEmpty().and(absence.personDay.person.in(people)));
+    List<Absence> absences = query.list(QAbsence.absence);
+    Map<Person, List<Absence>> map = Maps.newHashMap();
+    for (Absence trouble : absences) {
+      List<Absence> personAbsences = map.get(trouble.personDay.person);
+      if (personAbsences == null) {
+        personAbsences = Lists.newArrayList();
+        map.put(trouble.personDay.person, personAbsences);
+      }
+      personAbsences.add(trouble);
+    }
+    return map;
+  }
+
+  /**
+   * Le assenze con quel codice in quel giorno per la persona.
+   * @param person persona 
+   * @param date data
+   * @param code codice
+   * @return list
+   */
+  public List<Absence> findAbsences(Person person, LocalDate date, String code) {
+    QAbsence absence = QAbsence.absence;
+    return getQueryFactory()
+        .from(absence)
+        .leftJoin(absence.personDay, QPersonDay.personDay)
+        .leftJoin(absence.personDay.person, QPerson.person)
+        .where(absence.personDay.person.eq(person)
+            .and(absence.personDay.date.eq(date)
+                .and(absence.absenceType.code.eq(code))))
+        .list(absence);
   }
 } 

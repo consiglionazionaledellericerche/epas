@@ -23,6 +23,7 @@ import models.absences.AmountType;
 import models.absences.GroupAbsenceType;
 import models.absences.InitializationGroup;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
+import models.enumerate.VacationCode;
 
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
@@ -36,6 +37,9 @@ public class AbsencePeriod {
   public LocalDate to;                        // Data fine
   public InitializationGroup initialization;  // Inizializazione period (se presente)
   public SortedMap<LocalDate, DayInPeriod> daysInPeriod = Maps.newTreeMap();
+  
+  //AllPeriods
+  public List<AbsencePeriod> subPeriods;
   
   // Takable
   public AmountType takeAmountType;                // Il tipo di ammontare del periodo
@@ -63,6 +67,16 @@ public class AbsencePeriod {
   
   //Tentativo di inserimento assenza nel periodo
   public Absence attemptedInsertAbsence;
+  
+  //Supporto alla gestione ferie e permessi 
+  //Assenze che hanno provocato una riduzione della quantità 
+  public List<Absence> reducingAbsences = Lists.newArrayList();
+  //Ammontare periodo (per visualizzazione prima della patch fix post partum)
+  public int vacationAmountBeforeFixPostPartum = 0;
+  //Ammontare periodo (per visualizzazione prima della patch inizializzazione)
+  public int vacationAmountBeforeInitializationPatch = 0;
+  //VacationPeriod che ha generato il period
+  public VacationCode vacationCode;
   
   AbsencePeriod(Person person, GroupAbsenceType groupAbsenceType) {
     this.person = person;
@@ -120,11 +134,40 @@ public class AbsencePeriod {
    * @return int
    */
   public int getPeriodTakableAmount() {
-    if (!takableCountBehaviour.equals(TakeCountBehaviour.period)) {
-      // TODO: sumAllPeriod, sumUntilPeriod;
-      return 0;
+    int computedTakableAmounut = computePeriodTakableAmount(takableCountBehaviour, this.from);
+    return computedTakableAmounut;
+  }
+  
+  /**
+   * Calcola l'ammontare in funzione del tipo di conteggio. 
+   * @return int
+   */
+  public int computePeriodTakableAmount(TakeCountBehaviour countBehaviour, LocalDate date) {
+    
+    if (countBehaviour.equals(TakeCountBehaviour.period)) {
+      return this.fixedPeriodTakableAmount;
     }
-    return this.fixedPeriodTakableAmount;
+
+    if (countBehaviour.equals(TakeCountBehaviour.sumAllPeriod)) {
+      int takableAmount = 0;
+      for (AbsencePeriod absencePeriod : this.subPeriods) {
+        takableAmount = takableAmount + absencePeriod.fixedPeriodTakableAmount;
+      }
+      return takableAmount;  
+    }
+
+    if (countBehaviour.equals(TakeCountBehaviour.sumUntilPeriod)) {
+      int takableAmount = 0;
+      for (AbsencePeriod absencePeriod : this.subPeriods) {
+        if (absencePeriod.from.isAfter(date)) {
+          break;
+        }
+        takableAmount = takableAmount + absencePeriod.fixedPeriodTakableAmount;
+      }
+      return takableAmount;  
+    }
+
+    return 0;
   }
   
   /**
@@ -132,25 +175,51 @@ public class AbsencePeriod {
    * @return int
    */
   public int getPeriodTakenAmount() {
+    int computedTakenAmounut = computePeriodTakenAmount(takenCountBehaviour, this.from);
+    return computedTakenAmounut;
+  }
+  
+  /**
+   * Calcola l'ammontare in funzione del tipo di conteggio. 
+   */
+  public int computePeriodTakenAmount(TakeCountBehaviour countBehaviour, LocalDate date) {
     
-    int takenInPeriod = getInitializationTakableUsed();
-    
-    for (TakenAbsence takenAbsence : takenAbsences()) {
-      if (!takenAbsence.beforeInitialization) {
-        takenInPeriod += takenAbsence.getTakenAmount();
+    if (countBehaviour.equals(TakeCountBehaviour.period)) {
+      int takenInPeriod = getInitializationTakableUsed();
+      for (TakenAbsence takenAbsence : takenAbsences()) {
+        if (!takenAbsence.beforeInitialization) {
+          takenInPeriod += takenAbsence.getTakenAmount();
+        }
       }
+      return takenInPeriod;
     }
-    if (!takenCountBehaviour.equals(TakeCountBehaviour.period)) {
-      // TODO: sumAllPeriod, sumUntilPeriod;
-      return 0;
-    } 
-    return takenInPeriod;
+    
+    if (countBehaviour.equals(TakeCountBehaviour.sumAllPeriod) 
+        || countBehaviour.equals(TakeCountBehaviour.sumUntilPeriod)) {
+      int taken = 0;
+      for (AbsencePeriod absencePeriod : this.subPeriods) {
+        if (countBehaviour.equals(TakeCountBehaviour.sumUntilPeriod) 
+            && absencePeriod.from.isAfter(date)) {
+          break;
+        }
+        taken = taken + absencePeriod.getInitializationTakableUsed();
+        for (TakenAbsence takenAbsence : absencePeriod.takenAbsences()) {
+          if (!takenAbsence.beforeInitialization) {
+            taken = taken + takenAbsence.getTakenAmount();
+          }
+        }
+      }
+      return taken;
+    }
+    
+    return 0;
+    
   }
   
   public int getRemainingAmount() {
     return this.getPeriodTakableAmount() - this.getPeriodTakenAmount();
   }
-  
+
   /**
    * Aggiunge al period l'assenza takable nel periodo.
    * @param absence assenza
@@ -158,12 +227,12 @@ public class AbsencePeriod {
    * @return l'assenza takable
    */
   public TakenAbsence buildTakenAbsence(Absence absence, int takenAmount) {
-
+    int periodTakableAmount = this.getPeriodTakableAmount();
     int periodTakenAmount = this.getPeriodTakenAmount();
     TakenAbsence takenAbsence = TakenAbsence.builder()
         .absence(absence)
         .amountType(this.takeAmountType)
-        .periodTakableTotal(this.getPeriodTakableAmount())
+        .periodTakableTotal(periodTakableAmount)
         .periodTakenBefore(periodTakenAmount)
         .takenAmount(takenAmount)
         .build();
@@ -207,7 +276,7 @@ public class AbsencePeriod {
   }
   
   public boolean isComplation() {
-    return this.complationAmountType != null; 
+    return this.complationAmountType != null;
   }
   
   public boolean isComplationUnits() {
@@ -311,8 +380,11 @@ public class AbsencePeriod {
     if (this.isTakableMinutes()) {
       return minutes;
     } else if (this.isTakableUnits()) {
-      return (this.initialization.unitsInput * 100) 
-          + workingTypePercent(minutes, this.initialization.averageWeekTime);
+      int units = (this.initialization.unitsInput * 100);
+      if (minutes > 0) {
+        units = units + workingTypePercent(minutes, this.initialization.averageWeekTime); 
+      }
+      return units; 
     }
     
     return 0;
@@ -362,6 +434,10 @@ public class AbsencePeriod {
   private int workingTypePercentModule(int minutes, int workTime) {
     int workTimePercent = workingTypePercent(minutes, workTime); 
     return workTimePercent % 100;
+  }
+  
+  public String toString() {
+    return from + " " + to + " " + fixedPeriodTakableAmount + takableCodes;  
   }
 }
 

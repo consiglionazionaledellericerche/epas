@@ -89,15 +89,16 @@ Contract= Contratto
 contract.endContract= Terminato Il
 contract.endDate= Fine Contratto
 contract.onCertificate= In attestati
-contract.sourceDateMealTicket= Data inizializzazione
-contract.sourceDateResidual= Data inizializzazione
-contract.sourcePermissionUsed= Giorni di permesso utilizzati anno corrente
-contract.sourceRecoveryDayUsed= Giorni di riposo compensativo effettuati nell'anno corrente
-contract.sourceRemainingMealTicket= Buoni pasto residui
-contract.sourceRemainingMinutesCurrentYear= Residuo anno corrente (in minuti)
-contract.sourceRemainingMinutesLastYear= Residuo anno passato (in minuti)
-contract.sourceVacationCurrentYearUsed= Giorni di ferie utilizzati dell'anno corrente
-contract.sourceVacationLastYearUsed= Giorni di ferie utilizzati dell'anno passato
+sourceDateMealTicket= Data inizializzazione
+sourceDateResidual= Data inizializzazione
+sourceDateVacation= Data inizializzazione
+sourcePermissionUsed= Giorni di permesso utilizzati anno corrente
+sourceRecoveryDayUsed= Giorni di riposo compensativo effettuati nell'anno corrente
+sourceRemainingMealTicket= Buoni pasto residui
+sourceRemainingMinutesCurrentYear= Residuo anno corrente (in minuti)
+sourceRemainingMinutesLastYear= Residuo anno passato (in minuti)
+sourceVacationCurrentYearUsed= Giorni di ferie utilizzati dell'anno corrente
+sourceVacationLastYearUsed= Giorni di ferie utilizzati dell'anno passato
 
 contractStampProfile.fixedworkingtime=Presenza Automatica
 ContractStampProfile= Periodo Presenza Automatica
@@ -343,6 +344,7 @@ edit= Modifica
 
 sourceDateMealTicket=Data Inizializzazione
 sourceDateResidual=Data inizializzazione
+sourceDateVacation=Data inizializzazione
 
 stamping= Timbratura
 stamping.in= Timbratura di ingresso
@@ -492,6 +494,8 @@ AbsenceGroups.showGroups=Gruppi Assenze
 AbsenceGroups.initialization=Assenze Iniziali
 AbsenceGroups.showAbsenceTypes=Codici Assenza
 AbsenceGroups.showCategories=Categorie Assenze
+AbsenceGroups.certificationsAbsenceCodes=Codici Assenza Attestati
+AbsenceGroups.certificationsAbsences=Cruscotto Dipendente Attestati
 Administration.playConfiguration= Informazioni Applicazione
 Administration.utilities= Utilities
 BadgeReaders.list= Sorgenti Timbrature
@@ -548,7 +552,7 @@ Synchronizations.institutes= Sincronizza Sedi
 Synchronizations.people= Sincronizza Personale
 Users.list= Gestione Utenti
 Vacations.show= Ferie
-VacationsAdmin.list= Ferie e Permessi
+Vacations.list= Ferie e Permessi
 WorkingTimes.manageWorkingTime= Gestione Orari di Lavoro
 Competences.activateServices= Gestione Servizi
 
@@ -606,6 +610,8 @@ WORKING_OFF_SITE=Lavoro fuori sede
 ABSENCES_FOR_EMPLOYEE=Assenze visibili ai dipendenti
 RECOMPUTATION_LIMIT=Limite temporale dei ricalcoli (in mesi)
 TR_AUTOCERTIFICATION= Autocertificazione presenze per Tecnologi e Ricercatori
+TR_VACATIONS= Inserimento ferie e permessi per Tecnologi e Ricercatori
+TR_COMPENSATORY= Inserimento riposi compensativi per Tecnologi e Ricercatori
 
 EXPIRY_VACATION_PAST_YEAR=Giorno massimo utilizzo ferie dell'anno precedente
 MONTH_EXPIRY_RECOVERY_DAYS_13=Mese massimo per utilizzo residui dell'anno precedente per i livelli da 1 a 3
@@ -668,8 +674,10 @@ domain.popover= Specificare il dominio sprovvisto del carattere @ (Es. iit.cnr.i
 tr_autocertification.alert= Per poter abilitare la funzione <strong>&{TR_AUTOCERTIFICATION}</strong> &egrave; necessario caricare un documento con l&apos;autorizzazione del proprio direttore.
 tr_autocertification.file= File di Autorizzazione
 
-description.WORKING_OFF_SITE= L&apos;abilitazione del parametro <strong>&{WORKING_OFF_SITE}</strong> permette, se abilitato anche nella configurazione del dipendente, l&apos;inserimento autonomo delle informazioni relative al <strong>Lavoro Fuori Sede</strong>.<br> L&apos;inserimento/modifica/eliminazione di una timbratura o del codice d'assenza 105BP, comporta l'invio di una notifica ai propri amministratori del personale.<br> L&apos;inserimento di queste informazioni &egrave; limitato solamente agli ultimi 2 mesi e non &egrave permesso nei mesi per i quali sono gi&agrave; stati inviati gli attestati di presenza.
+description.WORKING_OFF_SITE= L&apos;abilitazione del parametro <strong>&{WORKING_OFF_SITE}</strong> permette, se abilitato anche nella configurazione del dipendente, l&apos;inserimento autonomo delle informazioni relative al <strong>Lavoro Fuori Sede</strong>.<br> L&apos;inserimento/modifica/eliminazione di una timbratura o del codice d'assenza <strong>105BP</strong>, comporta l'invio di una notifica ai propri amministratori del personale.<br> L&apos;inserimento di queste informazioni &egrave; limitato solamente agli ultimi 2 mesi e non &egrave permesso nei mesi per i quali sono gi&agrave; stati inviati gli attestati di presenza.
 description.TR_AUTOCERTIFICATION= L&apos;abilitazione del parametro <strong>&{TR_AUTOCERTIFICATION}</strong> attiver&agrave; la possibilit&agrave; per i Tecnologi e i Ricercatori di questa sede di autocertificare la propria presenza a lavoro, e dunque di inserire in autonomia le proprie timbrature.<br> L&apos;inserimento di queste informazioni &egrave; limitato solamente agli ultimi 2 mesi e non &egrave permesso nei mesi per i quali sono gi&agrave; stati inviati gli attestati di presenza.
+description.TR_VACATIONS= L&apos;abilitazione del parametro <strong>&{TR_VACATIONS}</strong> attiver&agrave; la possibilit&agrave; per i Tecnologi e i Ricercatori di questa sede di autoinserire i propri giorni di ferie e permessi legge.<br> L&apos;inserimento di queste informazioni &egrave; limitato solamente agli ultimi 2 mesi e non &egrave permesso nei mesi per i quali sono gi&agrave; stati inviati gli attestati di presenza.
+description.TR_COMPENSATORY= L&apos;abilitazione del parametro <strong>&{TR_COMPENSATORY}</strong> attiver&agrave; la possibilit&agrave; per i Tecnologi e i Ricercatori di questa sede di autoinserire i propri giorni di riposo compensativo.<br> L&apos;inserimento di queste informazioni &egrave; limitato solamente agli ultimi 2 mesi e non &egrave permesso nei mesi per i quali sono gi&agrave; stati inviati gli attestati di presenza.
 
 ###########################################################################
 #	COMPONENTE ASSENZE

@@ -1,0 +1,47 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Problemi Assenze'  /}
+
+#{set 'moreStyles'}
+<style>
+  span.badge.badge-danger {
+    background-color: rgb(192, 66, 66); /* rosso scuro */
+  }
+</style>
+#{/set}
+
+<div class="container">
+	#{title title:'Riepilogo problemi assenze persone attive ' + month+'/'+year +  ' - ' + office?.name /}
+</div>
+
+#{stampings.presenceDashboardTabs activeAction:'absenceTroubles' /}
+
+<div class="container">
+
+      <table class="table table-hover table-striped table-bordered">
+	    <tr>
+		  <th>Nome</th>
+		  <th>Problemi</th>
+		</tr>
+	
+	   #{list items:people, as:'person'}
+	   #{if mapTroubles.get(person) }
+	   <tr>
+		 <td>
+		   ${person.fullname}
+		 </td>
+		 <td>
+		   #{list items:mapTroubles.get(person), as:'absence'}
+		    
+		    <a href="@{Stampings.personStamping(person.id, absence.personDay.date.year, absence.personDay.date.monthOfYear)}">
+			<span class="badge badge-danger">${absence.absenceType.code} - ${absence.personDay.date.format()}</span>		     
+			</a>
+		   #{/list}
+	     </td>
+	   </tr>   
+	   #{/if}
+	   #{/list}
+	
+     </table>
+
+</div>
