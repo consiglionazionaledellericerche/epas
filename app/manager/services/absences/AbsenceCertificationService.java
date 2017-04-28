@@ -185,6 +185,13 @@ public class AbsenceCertificationService {
         inEpas, notInEpas);
     patchCompensatoryRest(compensatorySituation, wrPerson);
     
+    //6) permesso personale
+    from = new LocalDate(LocalDate.now().getYear(), 1 ,1);
+    to = new LocalDate(LocalDate.now().getYear(), 12 ,31);
+    buildGenericSituation(situation, person, AbsenceSituationType.PERMESSO_PERSONALI, 
+        DefaultGroup.G_661, to, Optional.of(from), Optional.of(to), 
+        inEpas, notInEpas);
+    
     patchSentCertifications(situation.absenceSituations, wrPerson);
     return situation;
   }
