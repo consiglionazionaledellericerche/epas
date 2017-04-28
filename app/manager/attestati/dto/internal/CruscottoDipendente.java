@@ -203,12 +203,10 @@ public class CruscottoDipendente {
    * @return data
    */
   public static LocalDate formatter(String time) {
-    
     final DateTimeFormatter dtf = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-    //DateTime dt = dtf.parseDateTime(time.substring(0, 23));
     DateTime dt = dtf.parseDateTime(time);
-    DateTime dateTime = dt.toDateTime(DateTimeZone.UTC);
-    LocalDate date = new LocalDate(dateTime);
+    //DateTime dateTime = dt.toDateTime(DateTimeZone.UTC);
+    LocalDate date = new LocalDate(dt);
     return date;
   }
 
