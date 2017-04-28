@@ -204,7 +204,7 @@ public class VacationSituationTest extends UnitTest {
     //un tempo determinato
     Person person = h2Examples.normalEmployee(new LocalDate(2001, 1, 16), Optional.absent());
     Contract contract = person.contracts.get(0);
-    contract.sourceDateResidual = new LocalDate(2016, 10, 31);
+    contract.sourceDateVacation = new LocalDate(2016, 10, 31);
     contract.sourceVacationLastYearUsed = 28;
     contract.sourceVacationCurrentYearUsed = 5;
     contract.sourcePermissionUsed = 4;
