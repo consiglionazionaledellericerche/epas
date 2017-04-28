@@ -32,6 +32,7 @@ import manager.PeriodManager;
 import manager.attestati.dto.internal.clean.ContrattoAttestati;
 import manager.attestati.service.ICertificationService;
 import manager.recaps.recomputation.RecomputeRecap;
+import manager.services.absences.AbsenceService;
 
 import models.Contract;
 import models.ContractStampProfile;
@@ -75,6 +76,8 @@ public class Contracts extends Controller {
   static PeriodManager periodManager;
   @Inject
   static ICertificationService certService;
+  @Inject
+  static AbsenceService absenceService;
 
   /**
    * I contratti del dipendente.
@@ -768,7 +771,7 @@ public class Contracts extends Controller {
       
       contractManager.setSourceContractProperly(contract);
       
-      //drop cache vacation
+      absenceService.emptyVacationCache(contract);
 
       flash.success("Contratto di %s inizializzato correttamente.", contract.person.fullName());
     }
