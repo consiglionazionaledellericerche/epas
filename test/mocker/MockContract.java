@@ -34,6 +34,7 @@ public class MockContract {
     when(contract.getEndDate()).thenReturn(endDate);
     when(contract.getEndContract()).thenReturn(endContract);
     when(contract.getSourceDateResidual()).thenReturn(sourceDateResidual);
+    when(contract.getSourceDateVacation()).thenReturn(sourceDateResidual);
     when(contract.getSourceVacationLastYearUsed()).thenReturn(sourceVacationCurrentYearUsed);
     when(contract.getSourceVacationCurrentYearUsed()).thenReturn(sourceVacationCurrentYearUsed);
     when(contract.getSourcePermissionUsed()).thenReturn(sourcePermissionUsed);
