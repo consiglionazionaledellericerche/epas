@@ -190,6 +190,13 @@ public enum DefaultAbsenceType {
   A_09M("09M", "Permesso visita medica in ore e minuti",
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
       0, null, null, null),
+  A_09BI("09B", "Permesso visita medica completamento giornata da importazione",
+      true, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
+      0, null, null, null),
+  
+  A_631("631", "Permesso visita medica",
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      0, null, null, null),
 
   A_92("92", "Missione",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
@@ -424,10 +431,7 @@ public enum DefaultAbsenceType {
   A_11C9("11C9", "Convalescenza dopo malattia superiore a 9 mesi",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
       0, null, null, null),
-  //TODO: Questo codice in attestati è nel gruppo malattia. Verificare
-  A_631("631", "Permesso visita medica",
-      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
-      0, null, null, null),
+
   
   A_12("12", "malattia primo figlio/a <= 3 anni retribuita 100%",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,

@@ -967,35 +967,96 @@ public class Contracts extends Controller {
   }
   
   /**
-   * Preleva i contratti della sede in attestati.
+   * Import data fine contratti a tempo determinato da attestati.
+   * Imposta la data fine per i soli contratti attivi epas:
+   * - con stessa data inizio
+   * - con data fine nulla
+   * - segnalati come temporary
    * @param officeId sede
-   * @param year anno
-   * @param month mese
    */
-  public static void certificationContracts(Long officeId, Integer year, Integer month) {
+  public static void importCertificationContracts(Long officeId) {
     
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
+    
+    Map<Integer, ContrattoAttestati> contrattiAttestati = null;
+
+    //Doppio tentativo (mese corrente e mese precedente)
     try { 
-
-      Map<Integer, ContrattoAttestati> contrattiAttestati = 
-          certService.getCertificationContracts(office, year, month);
-      
-      for (ContrattoAttestati contrattoAttestati : contrattiAttestati.values()) {
-        log.info("Matricola: {}, DataInizio: {}, DataFine:{}", contrattoAttestati.matricola, 
-            contrattoAttestati.beginContract, contrattoAttestati.endContract);
-      }
-
-      renderText("ok");
-      
+      contrattiAttestati = certService.getCertificationContracts(office, 
+          LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
     } catch (Exception ex) {
-      //TODO: se serve usare Certifications.cleanMessage(Exception ex)
-      log.error("Errore nel recupero delle informazioni dal server di attestati"
-          + " per la sede {}: {}", office, ex);
-      renderText("nok");
+      
+    }
+    try { 
+      if (contrattiAttestati == null || contrattiAttestati.isEmpty()) {
+        contrattiAttestati = certService.getCertificationContracts(office, 
+          LocalDate.now().getYear(), LocalDate.now().getMonthOfYear() - 1);
+      }
+    } catch (Exception ex2) {
     }
     
+    if (contrattiAttestati == null || contrattiAttestati.isEmpty()) {
+      flash.error("Impossibile prelvare l'informazione sulla data presunta fine contratti.");
+      Persons.list(officeId, null);  
+    }
+    
+    //Sistemo i determinati senza data fine
+    for (ContrattoAttestati contrattoAttestati : contrattiAttestati.values()) {
+      if (contrattoAttestati.endContract == null) {
+        continue;
+      }
+      Person person = personDao.getPersonByNumber(contrattoAttestati.matricola);
+      if (person == null) {
+        continue;
+      }
+      log.info("{}", person.fullName());
+      Optional<Contract> currentContract = wrapperFactory.create(person).getCurrentContract();
+      if (!currentContract.isPresent() || currentContract.get().endDate != null) {
+        continue;
+      }
+      if (!currentContract.get().beginDate.equals(contrattoAttestati.beginContract)) {
+        continue;
+      }
+      if (currentContract.get().isTemporaryMissing) {
+        log.info("{} è stato determinato", person.fullName());
+        currentContract.get().endDate = contrattoAttestati.endContract;
+        currentContract.get().save();
+      }
+    }
+
+    //Disabilito quelli non più attivi e tratto i nuovi indeterminati
+    for (IWrapperPerson wrPerson : FluentIterable.from(personDao.listFetched(Optional.absent(),
+        ImmutableSet.of(office), false, null, null, false).list())
+        .transform(wrapperFunctionFactory.person()).toList()) {
+
+      if (!wrPerson.getCurrentContract().isPresent()) {
+        continue;
+      }
+
+      //non più attivi (ex. David Rossi)
+      if (contrattiAttestati.get(wrPerson.getValue().number) == null) {
+        log.info("{} è stato terminato", wrPerson.getValue().fullName());
+        wrPerson.getCurrentContract().get().endDate = LocalDate.now().minusDays(1);
+        wrPerson.getCurrentContract().get().endContract = LocalDate.now().minusDays(1);
+        wrPerson.getCurrentContract().get().save();
+        continue;
+      }
+      
+      //a tempo indeterminato (ex. Patrizia Villani)
+      if (wrPerson.getCurrentContract().get().calculatedEnd() != null) {
+        if (contrattiAttestati.get(wrPerson.getValue().number).endContract == null) {
+          log.info("{} è stato indeterminato", wrPerson.getValue().fullName());
+          wrPerson.getCurrentContract().get().endContract = null;
+          wrPerson.getCurrentContract().get().endDate = null;
+          wrPerson.getCurrentContract().get().save();
+          continue;
+        }
+      }
+    }
+
+    renderText("ok");
   }
 
 }

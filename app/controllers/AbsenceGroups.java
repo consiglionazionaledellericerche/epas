@@ -4,6 +4,7 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -16,6 +17,8 @@ import dao.WorkingTimeTypeDao;
 import dao.absences.AbsenceComponentDao;
 import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
@@ -104,9 +107,11 @@ public class AbsenceGroups extends Controller {
   @Inject
   private static AbsenceComponentDao absenceComponentDao;
   @Inject
-  static NotificationManager notificationManager;
+  private static NotificationManager notificationManager;
   @Inject
-  static AbsenceCertificationService absenceCertificationService;
+  private static AbsenceCertificationService absenceCertificationService;
+  @Inject
+  private static WrapperModelFunctionFactory wrapperFunctionFactory;
 
   /**
    * La lista delle categorie definite.
@@ -1152,6 +1157,33 @@ public class AbsenceGroups extends Controller {
     consistencyGroups();
   }
 
+  /**
+   * Import (e sincronizzazione) assenze da attestati.
+   * @param officeId sede
+   */
+  public static void importCertificationsAbsences(Long officeId) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+  
+    List<IWrapperPerson> people = Lists.newArrayList(); 
+    
+    for (IWrapperPerson wrPerson : FluentIterable.from(personDao.listFetched(Optional.absent(),
+        ImmutableSet.of(office), false, null, null, false).list())
+        .transform(wrapperFunctionFactory.person()).toList()) {
+      
+      if (!wrPerson.getCurrentContract().isPresent()) {
+        continue;
+      }
+      
+      people.add(wrPerson);
+    }
+    
+    int year = LocalDate.now().getYear();
+    
+    render(people, office, year);
+  }
+  
   /** 
    * Le assenze in attestati.
    */
@@ -1171,7 +1203,7 @@ public class AbsenceGroups extends Controller {
   /**
    * Importa le assenze mancanti da attestati.
    */
-  public static void importCertificationsAbsences(Long personId, Integer year) 
+  public static void syncCertificationsAbsences(Long personId, Integer year) 
       throws NoSuchFieldException, ExecutionException {
     
     Person person = personDao.getPersonById(personId);

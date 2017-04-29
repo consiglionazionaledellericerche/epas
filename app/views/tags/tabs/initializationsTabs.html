@@ -9,15 +9,17 @@
        <li #{if _action.equals('initializationsStatus')} class="active" #{/if}>
          <a href="@{Contracts.initializationsStatus(session.get("officeSelected"))}">Inizializzazione Ore</a>
        </li>
-       <li #{if _action.equals('initializationsVacation')} class="active" #{/if}>
-         <a href="@{Contracts.initializationsVacation(session.get("officeSelected"))}">Inizializzazione Ferie e Permessi</a>
-       </li>
        <li #{if _action.equals('initializationsMeal')} class="active" #{/if}>
          <a href="@{Contracts.initializationsMeal(session.get("officeSelected"))}">Inizializzazione Buoni Pasto</a>
        </li>
-       <li #{if _action.equals('AbsenceGroups.absenceInitializations')} class="active" #{/if}>
-           <a href="@{AbsenceGroups.absenceInitializations(session.get("officeSelected"))}">Inizializzazione Assenze</a>
+       <li #{if _action.equals('AbsenceGroups.importCertificationsAbsences')} class="active" #{/if}>
+           <a href="@{AbsenceGroups.importCertificationsAbsences(session.get("officeSelected"))}">Importazione Assenze</a>
        </li>
-
+       <li #{if _action.equals('initializationsVacation')} class="active" #{/if}>
+         <a href="@{Contracts.initializationsVacation(session.get("officeSelected"))}">Inizializzazione Ferie e Permessi</a>
+       </li>
+       <li #{if _action.equals('AbsenceGroups.absenceInitializations')} class="active" #{/if}>
+           <a href="@{AbsenceGroups.absenceInitializations(session.get("officeSelected"))}">Inizializzazione Altre Assenze</a>
+       </li>
   </ul>
 </div>

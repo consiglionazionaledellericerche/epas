@@ -3,23 +3,19 @@ package manager.attestati.dto.internal;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
-import java.util.List;
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
 import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
 
 import manager.attestati.dto.internal.PeriodoDipendente.PeriodoDipendenteDettagli;
 
 import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
 
-import org.assertj.core.util.Lists;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.testng.collections.Sets;
@@ -32,7 +28,7 @@ import org.testng.collections.Sets;
  *
  */
 @ToString
-public class CruscottoDipendente {
+public class CruscottoDipendente implements Serializable {
 
   public int annoSituazione;                          //2017
   
@@ -40,12 +36,12 @@ public class CruscottoDipendente {
   public SituazioneDipendenteAssenze[] situazioneDipendenteAssenze;
   public SituazioneParametriControllo[] situazioneParametriControllo;
 
-  public static class SituazioneDipendenteCompetenze {
+  public static class SituazioneDipendenteCompetenze implements Serializable {
     
   }
   
   @ToString
-  public static class SituazioneDipendenteAssenze {
+  public static class SituazioneDipendenteAssenze implements Serializable {
     
     //public int dipendente.id;
     //public int dipendente.matricola;
@@ -71,7 +67,7 @@ public class CruscottoDipendente {
     
    
     @ToString
-    public static class SituazioneCodiceAssenza {
+    public static class SituazioneCodiceAssenza implements Serializable {
       public int id;                                    //255
       public String codice;                             //92
       public String tipoCodice;                         //ASS       sempre ASS...
@@ -116,7 +112,7 @@ public class CruscottoDipendente {
     }
   }
 
-  public static class SituazioneParametriControllo {
+  public static class SituazioneParametriControllo implements Serializable {
 
     public int id;
     public String descrizione;
