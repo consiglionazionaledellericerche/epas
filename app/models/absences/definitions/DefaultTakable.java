@@ -381,7 +381,7 @@ public enum DefaultTakable {
   
   T_MALATTIA_3_ANNI(AmountType.units,
       ImmutableSet.of(
-          DefaultAbsenceType.A_09B, DefaultAbsenceType.A_111,
+          DefaultAbsenceType.A_09B, DefaultAbsenceType.A_09BI, DefaultAbsenceType.A_111,
           DefaultAbsenceType.A_115, DefaultAbsenceType.A_116,
           DefaultAbsenceType.A_119, DefaultAbsenceType.A_11C,
           DefaultAbsenceType.A_11C5, DefaultAbsenceType.A_11C9,
@@ -389,7 +389,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_11R9, DefaultAbsenceType.A_11S,
           DefaultAbsenceType.A_631), 
       ImmutableSet.of(
-          DefaultAbsenceType.A_09B, DefaultAbsenceType.A_111,
+          DefaultAbsenceType.A_09B, DefaultAbsenceType.A_09BI, DefaultAbsenceType.A_111,
           DefaultAbsenceType.A_115, DefaultAbsenceType.A_116,
           DefaultAbsenceType.A_119, DefaultAbsenceType.A_11C,
           DefaultAbsenceType.A_11C5, DefaultAbsenceType.A_11C9,

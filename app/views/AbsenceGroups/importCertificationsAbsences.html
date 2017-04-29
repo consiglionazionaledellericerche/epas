@@ -1,0 +1,59 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Stato inizializzazioni'  /}
+
+#{set 'moreStyles'}
+<style>
+  td.alignLeft { text-align: left !important; }
+</style>
+#{/set}
+
+#{tabs.initializationsTabs action:'importCertificationsAbsences', office:office /}
+
+<div class="container">
+
+  #{title title:'Importazione e Sincronizzazione Assenze ' + office.name /}
+
+  #{alert color:'info'}
+  <p>
+    Tutti i dipendenti attivi.
+  </p>
+  #{/alert}
+  
+  <table class="table table-bordered table-striped table-hover table-condensed center">
+    <thead>
+    <tr>
+      <th>&{'person.name'}</th>
+      <th>&{'person.number'}</th>
+      <th>Inizio Contratto</th>
+      <th>Importa</th>
+    </tr>
+    </thead>
+    <tbody>
+    #{list items:people, as:'wrPerson'}
+
+    <tr>
+      <td class="alignLeft">
+        ${wrPerson.value.fullname}
+      </td>
+       
+      <td>${wrPerson.value.number}</td>
+      <td data-order="${wrPerson.currentContract.get().beginDate}">
+        ${wrPerson.currentContract.get().beginDate?.format()}
+      </td>
+
+      <td>
+        <a href="@{certificationsAbsences(wrPerson.value.id, year)}"  data-async-modal="#defaultModal">
+          <i class="fa fa-external-link" aria-hidden="true"></i>
+        </a>  
+      </td>
+
+    </tr>
+
+    #{/list}
+    </tbody>
+  </table>
+
+
+</div>
+

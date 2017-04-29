@@ -94,11 +94,11 @@ sourceDateResidual= Data inizializzazione
 sourceDateVacation= Data inizializzazione
 sourcePermissionUsed= Giorni di permesso utilizzati anno corrente
 sourceRecoveryDayUsed= Giorni di riposo compensativo effettuati nell'anno corrente
-sourceRemainingMealTicket= Buoni pasto residui
 sourceRemainingMinutesCurrentYear= Residuo anno corrente (in minuti)
 sourceRemainingMinutesLastYear= Residuo anno passato (in minuti)
 sourceVacationCurrentYearUsed= Giorni di ferie utilizzati dell'anno corrente
 sourceVacationLastYearUsed= Giorni di ferie utilizzati dell'anno passato
+contract.sourceRemainingMealTicket= Buoni pasto residui
 
 contractStampProfile.fixedworkingtime=Presenza Automatica
 ContractStampProfile= Periodo Presenza Automatica

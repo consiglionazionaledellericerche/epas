@@ -255,7 +255,8 @@ public class RequestInit extends Controller {
         "Contracts.initializationsVacation",
         "Contracts.initializationsMeal",
         "AbsenceGroups.absenceInitializations",
-        "AbsenceGroups.absenceTroubles");
+        "AbsenceGroups.absenceTroubles",
+        "AbsenceGroups.importCertificationsAbsences");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
         "Stampings.insertWorkingOffSitePresence",

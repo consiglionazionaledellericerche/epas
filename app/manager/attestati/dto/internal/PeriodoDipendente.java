@@ -1,5 +1,7 @@
 package manager.attestati.dto.internal;
 
+import java.io.Serializable;
+
 /**
  * Json caricato quando si clicca su un nominativo a partire dall'elenco dei dipendenti
  * della sede.
@@ -29,7 +31,7 @@ public class PeriodoDipendente {
   //public boolean datiParttimeAssenti;               //false
   
   
-  public static class PeriodoDipendenteDettagli {
+  public static class PeriodoDipendenteDettagli implements Serializable {
     
     public int id;                                  //id dipendente 
     public int matricola;                         //17162

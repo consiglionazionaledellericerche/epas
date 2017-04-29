@@ -1,57 +1,82 @@
-#{extends 'main.html' /}
-#{set header:'navbar' /}
-#{set title: 'ePAS - Assenze Attestati'  /}
+#{modalAsync title: 'Import e sincronizzazione assenze ' + person.fullname }
 
-<div class="container">
+<div id="cruscotto">
 
 #{alert color:'info'}
- <p>Cruscotto ${person.fullname} anno ${yearSituation.year}.</p>
- <p>Data Inizio <strong>${yearSituation.beginDate.format()}</strong></p>
- <p>#{if yearSituation.endDate} Data Fine <strong>${yearSituation.endDate.format()} #{/if}</strong></p>
+  <p>Cliccando su <strong>Sincronizza</strong> verrano importate le eventuali assenze mancanti importabili automaticamente.</p>
 #{/alert}
 
+<div class="webui-popover-content" id="ok">Assenze importate correttamente</div>
+<div class="webui-popover-content" id="auto">Assenze mancanti importabili automaticamente</div>
+<div class="webui-popover-content" id="manual">Assenza macante da caricare manualmente</div>
+<div class="webui-popover-content" id="notPresent">Assenze non consolidate da caricare su <em>Attestati</em></div>
+<div class="webui-popover-content" id="notPresentSent">Assenza consolidata non presente su <em>Attestati</em></div>
+
+
+<a class="btn btn-warning" data-async="#cruscotto" data-spinner="#modalSpinner"
+   href="@{syncCertificationsAbsences(yearSituation.person.id, yearSituation.year)}">Sincronizza</a>
 
 <table class="table table-bordered table-condensed table-hover"> 
   <thead>
   <tr>
-    <th>Tipo</th>
-    <th>Ok</th>
-    <th>Add</th>
-    <th>Remove</th>
+    <th>Tipologia</th>
+    <th>Presenti</th>
+    <th>Da Aggiungere</th>
+    <th>Non presenti</th>
   </tr>
   </thead>
   <tbody>
   #{list items:yearSituation.absenceSituations, as:'absenceSituation'}
      <tr>
-     <td>${absenceSituation.type}</td>
+     <td>${absenceSituation.type.label}</td>
      
      <td>
      #{list items:absenceSituation.datesPerCodeOk.keySet(), as:'code'}
-     #{list items:absenceSituation.datesPerCodeOk.get(code), as:'date'}
-      <i class="fa fa-check text-success" aria-hidden="true"></i><a href="@{Stampings.personStamping(yearSituation.person.id, date.year, date.monthOfYear)}">${code} ${date.format()}</a><br>
-     #{/list}  
+       #{if !absenceSituation.datesPerCodeOk.get(code).empty}
+       %{ days = absenceSituation.datesPerCodeOk.get(code).size(); }%
+       <!-- label -->
+       <span webui-popover-hover data-url="#ok"><i class="fa fa-check text-success" aria-hidden="true"></i></span> <span webui-popover-hover data-url="#${code}ok${absenceSituation.type}"><strong>${code}</strong> 
+       <em>${absenceSituation.datesPerCodeOk.get(code).size()} #{if days == 1} giorno #{/if}#{else} giorni#{/else}</em></span> <br>
+       <!-- popover content -->
+       <div class="webui-popover-content" id="${code}ok${absenceSituation.type}">
+         #{list items:absenceSituation.datesPerCodeOk.get(code), as:'date'}
+           <a href="@{Stampings.personStamping(yearSituation.person.id, date.year, date.monthOfYear)}">${date.format()}</a><br>
+         #{/list}
+       </div> 
+       #{/if}
      #{/list}
      </td>
      
      <td>
      #{list items:absenceSituation.toAddAutomatically.keySet(), as:'code'}
-     #{list items:absenceSituation.toAddAutomatically.get(code), as:'date'}
-      <i class="fa fa-plus text-warning" aria-hidden="true"></i><a href="@{Stampings.personStamping(yearSituation.person.id, date.year, date.monthOfYear)}">${code} ${date.format()}</a><br>
-     #{/list}  
+       #{if !absenceSituation.toAddAutomatically.get(code).empty}
+       %{ days = absenceSituation.toAddAutomatically.get(code).size(); }%
+       <!-- label -->
+       <span webui-popover-hover data-url="#auto"><i class="fa fa-download text-success" aria-hidden="true"></i></span> <span webui-popover-hover data-url="#${code}auto${absenceSituation.type}"><strong>${code}</strong> 
+       <em>${absenceSituation.toAddAutomatically.get(code).size()} #{if days == 1} giorno #{/if}#{else} giorni#{/else}</em></span> <br>
+       <!-- popover content -->
+       <div class="webui-popover-content" id="${code}auto${absenceSituation.type}">
+         #{list items:absenceSituation.toAddAutomatically.get(code), as:'date'}
+           <a href="@{Stampings.personStamping(yearSituation.person.id, date.year, date.monthOfYear)}">${date.format()}</a><br>
+         #{/list}
+       </div> 
+       #{/if}  
      #{/list}
+     
+     
      #{list items:absenceSituation.toAddManually.keySet(), as:'code'}
      #{list items:absenceSituation.toAddManually.get(code), as:'date'}
-      <i class="fa fa-plus text-danger" aria-hidden="true"></i><a href="@{Stampings.personStamping(yearSituation.person.id, date.year, date.monthOfYear)}">${code} ${date.format()}</a><br>
+      <span webui-popover-hover data-url="#manual"><i class="fa fa-download text-warning" aria-hidden="true"></i></span> <a href="@{Stampings.personStamping(yearSituation.person.id, date.year, date.monthOfYear)}">${code} ${date.format()}</a><br>
      #{/list}  
      #{/list}
      </td>
      
      <td>
      #{list items:absenceSituation.notPresentSent, as:'absence'}
-      <i class="fa fa-times text-danger" aria-hidden="true"></i><a href="@{Stampings.personStamping(yearSituation.person.id, absence.absenceDate.year, absence.absenceDate.monthOfYear)}">${absence.absenceType.code} ${absence.absenceDate.format()}</a><br>
+      <span webui-popover-hover data-url="#notPresentSent"><i class="fa fa-times text-danger" aria-hidden="true"></i></span> <a href="@{Stampings.personStamping(yearSituation.person.id, absence.absenceDate.year, absence.absenceDate.monthOfYear)}">${absence.absenceType.code} ${absence.absenceDate.format()}</a><br>
      #{/list}
      #{list items:absenceSituation.notPresent, as:'absence'}
-      <i class="fa fa-times text-warning" aria-hidden="true"></i><a href="@{Stampings.personStamping(yearSituation.person.id, absence.absenceDate.year, absence.absenceDate.monthOfYear)}">${absence.absenceType.code} ${absence.absenceDate.format()}</a><br>
+      <span webui-popover-hover data-url="#notPresent"><i class="fa fa-upload text-success" aria-hidden="true"></i></span> <a href="@{Stampings.personStamping(yearSituation.person.id, absence.absenceDate.year, absence.absenceDate.monthOfYear)}">${absence.absenceType.code} ${absence.absenceDate.format()}</a><br>
      #{/list}
      </td>
     </tr>
@@ -59,8 +84,6 @@
   </tbody>
 </table>
 
-<a class="btn btn-warning" href="@{AbsenceGroups.importCertificationsAbsences(yearSituation.person.id, yearSituation.year)}">Importa Assenze Importabili Automaticamente</a>
-
-
-
 </div>
+
+#{/modalAsync}
