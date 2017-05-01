@@ -3,6 +3,7 @@ package manager.services.absences.certifications;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,9 +22,8 @@ import org.testng.collections.Sets;
  * @author alessandro
  *
  */
-public class CertificationYearSituation {
+public class CertificationYearSituation implements Serializable {
   
-  public Person person;
   public int year;
   
   public LocalDate beginDate;
@@ -46,14 +46,47 @@ public class CertificationYearSituation {
   }
   
   /**
+   * Se nella situazione ci sono assenza da inserire automaticamente.
+   */
+  public boolean toAddAuto() {
+    for (AbsenceSituation absenceSituation : this.absenceSituations) {
+      for (String code : absenceSituation.toAddAutomatically.keySet()) {
+        if (!absenceSituation.toAddAutomatically.get(code).isEmpty()) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  
+  /**
+   * Se nella situazione ci sono assenza da inserire manualmente.
+   */
+  public boolean toAddManually() {
+    for (AbsenceSituation absenceSituation : this.absenceSituations) {
+      for (String code : absenceSituation.toAddManually.keySet()) {
+        if (!absenceSituation.toAddManually.get(code).isEmpty()) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  
+  /**
+   * Se nella situazione tutte le assenze sono state correttemente importate.
+   */
+  public boolean allImported() {
+    return !toAddAuto() && !toAddManually();    
+  }
+  
+  /**
    * La situazione circa un singolo codice o gruppo.
    * @author alessandro
    *
    */
-  public static class AbsenceSituation {
+  public static class AbsenceSituation implements Serializable {
 
-    public Person person;
-    
     public AbsenceSituationType type;
     
     //le date con assenza epas corretta per quel codice 
@@ -82,10 +115,8 @@ public class CertificationYearSituation {
 
     /**
      * Costruttore absenceSituation.
-     * @param person persona
      */
-    public AbsenceSituation(Person person, AbsenceSituationType type) {
-      this.person = person;
+    public AbsenceSituation(AbsenceSituationType type) {
       this.type = type;
     }
     
