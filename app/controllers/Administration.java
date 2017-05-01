@@ -53,7 +53,6 @@ import models.Role;
 import models.Stamping;
 import models.User;
 import models.UsersRolesOffices;
-import models.WorkingTimeType;
 
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
@@ -179,7 +178,7 @@ public class Administration extends Controller {
     } else {
       // Tutte le persone attive nella finestra speficificata.
       List<Contract> contracts = contractDao
-          .getActiveContractsInPeriod(begin, Optional.fromNullable(end));
+          .getActiveContractsInPeriod(begin, Optional.fromNullable(end), Optional.absent());
       for (Contract contract : contracts) {
         people.add(contract.person);
       }

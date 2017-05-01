@@ -13,9 +13,11 @@ import manager.ContractManager;
 
 import models.Contract;
 import models.ContractWorkingTimeType;
+import models.Office;
 import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
+import org.testng.collections.Lists;
 
 
 /**
@@ -46,72 +48,52 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
    * I contratti attivi che attualmente hanno impostato il WorkingTimeType.
    */
   @Override
-  public List<Contract> getAssociatedActiveContract(Long officeId) {
-
-    List<Contract> contractList = new ArrayList<Contract>();
+  public List<Contract> getAssociatedActiveContract(Office office) {
 
     LocalDate today = new LocalDate();
+    List<Contract> activeContract = contractDao
+        .getActiveContractsInPeriod(today, Optional.fromNullable(today), Optional.of(office));
 
-    List<Contract> activeContract =
-            contractDao.getActiveContractsInPeriod(today, Optional.fromNullable(today));
-
+    List<Contract> list = new ArrayList<Contract>();
     for (Contract contract : activeContract) {
-
-      if (!contract.person.office.id.equals(officeId)) {
-        continue;
-      }
-
       ContractWorkingTimeType current = contractManager
               .getContractWorkingTimeTypeFromDate(contract, today);
-      if (current.workingTimeType.id.equals(value.id)) {
-        contractList.add(contract);
+      if (current.workingTimeType.equals(this.value)) {
+        list.add(contract);
       }
     }
 
-    return contractList;
+    return list;
   }
 
   /**
-   * Ritorna i periodi di orario associati ai contratti attualmente attivi.
+   * Ritorna i periodi con questo tipo orario appartenti a contratti attualmente attivi.
    */
   @Override
-  public List<ContractWorkingTimeType> getAssociatedPeriodInActiveContract(Long officeId) {
-
-    List<ContractWorkingTimeType> cwttList = new ArrayList<ContractWorkingTimeType>();
+  public List<ContractWorkingTimeType> getAssociatedPeriodInActiveContract(Office office) {
 
     LocalDate today = new LocalDate();
+    List<Contract> activeContract = contractDao
+        .getActiveContractsInPeriod(today, Optional.fromNullable(today), Optional.of(office));
 
-    List<Contract> activeContract =
-            contractDao.getActiveContractsInPeriod(today, Optional.fromNullable(today));
-
+    List<ContractWorkingTimeType> list = new ArrayList<ContractWorkingTimeType>();
     for (Contract contract : activeContract) {
-
-      //TODO questa restrizione andrebbe fatta dentro activeContract
-      if (!contract.person.office.id.equals(officeId)) {
-        continue;
-      }
-
       for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
-
-        if (cwtt.workingTimeType.id.equals(value.id)) {
-          cwttList.add(cwtt);
+        if (cwtt.workingTimeType.equals(this.value)) {
+          list.add(cwtt);
         }
       }
     }
 
-    return cwttList;
+    return list;
   }
 
   @Override
   public List<Contract> getAssociatedContract() {
-
-    //TODO
-    //PER la delete quindi per adesso permettiamo l'eliminazione
-    //solo di contratti particolari di office bisogna controllare
-    //che this non sia default ma abbia l'associazione con office
-
-    List<Contract> contractList = contractDao.getContractListByWorkingTimeType(value);
-
-    return contractList;
+    List<Contract> contracts = Lists.newArrayList();
+    for (ContractWorkingTimeType cwtt : this.value.contractWorkingTimeType) {
+      contracts.add(cwtt.contract);
+    }
+    return contracts;
   }
 }
