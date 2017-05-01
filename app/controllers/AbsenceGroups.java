@@ -1211,7 +1211,12 @@ public class AbsenceGroups extends Controller {
 
     LocalDate updateFrom = LocalDate.now();
     for (Absence absence : absenceCertificationService.absencesToPersist(person, year)) {
-
+      JPA.em().flush(); //potrebbero esserci dei doppioni, per sicurezza flusho a ogni assenza.
+      if (!absenceComponentDao
+          .findAbsences(person, absence.getAbsenceDate(), absence.absenceType.code).isEmpty()) {
+        continue;
+      }
+      
       PersonDay personDay = personDayManager
           .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
       absence.personDay = personDay;

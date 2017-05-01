@@ -718,12 +718,8 @@ public class AbsenceCertificationService {
             aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_25P.getCode()).get();
           }
           if (!aux.equals(type.get())) {
-            if (absenceComponentDao.findAbsences(situation.person, date, aux.code).isEmpty()) {
-              absenceToPersist.addAll(absenceService.forceInsert(
-                  situation.person, date, null, aux, allDay, null, null).absencesToPersist);
-            } else {
-              log.info("Assenza presente {} {} {}", situation.person.fullName(), date, aux.code);
-            }
+            absenceToPersist.addAll(absenceService.forceInsert(
+                situation.person, date, null, aux, allDay, null, null).absencesToPersist);
             continue;
           }
 
@@ -740,12 +736,8 @@ public class AbsenceCertificationService {
             aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_661M.getCode()).get();
           }
           if (!aux.equals(type.get())) {
-            if (absenceComponentDao.findAbsences(situation.person, date, aux.code).isEmpty()) {
-              absenceToPersist.addAll(absenceService.forceInsert(situation.person, date, null, 
-                  aux, specified, type.get().replacingTime / 60, 0).absencesToPersist);
-            } else {
-              log.info("Assenza presente {} {} {}", situation.person.fullName(), date, aux.code);
-            }
+            absenceToPersist.addAll(absenceService.forceInsert(situation.person, date, null, 
+                aux, specified, type.get().replacingTime / 60, 0).absencesToPersist);
             continue;
           } 
           
@@ -784,24 +776,16 @@ public class AbsenceCertificationService {
             aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_19M.getCode()).get();
           }
           if (!aux.equals(type.get())) {
-            if (absenceComponentDao.findAbsences(situation.person, date, aux.code).isEmpty()) {
-              absenceToPersist.addAll(absenceService.forceInsert(situation.person, date, null, 
-                  aux, specified, type.get().replacingTime / 60, 0).absencesToPersist);
-            } else {
-              log.info("Assenza presente {} {} {}", situation.person.fullName(), date, aux.code);
-            }
+            absenceToPersist.addAll(absenceService.forceInsert(situation.person, date, null, 
+                aux, specified, type.get().replacingTime / 60, 0).absencesToPersist);
             continue;
           } 
-          
+
           //4) 09 (visita medica). Utilizzo il codice sostitutivo.
           if (code.equals(DefaultAbsenceType.A_09B.getCode())) {
             aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_09BI.getCode()).get();
-            if (absenceComponentDao.findAbsences(situation.person, date, aux.code).isEmpty()) {
-              absenceToPersist.addAll(absenceService.forceInsert(situation.person, date, null, 
+            absenceToPersist.addAll(absenceService.forceInsert(situation.person, date, null, 
                   aux, nothing, 0, 0).absencesToPersist); 
-            } else {
-              log.info("Assenza presente {} {} {}", situation.person.fullName(), date, aux.code);
-            }
             continue;
           }
           
@@ -814,25 +798,15 @@ public class AbsenceCertificationService {
           }
           JustifiedType justifiedType = type.get().justifiedTypesPermitted.iterator().next();
           if (justifiedType.name.equals(JustifiedTypeName.all_day)) {
-            if (absenceComponentDao
-                .findAbsences(situation.person, date, type.get().code).isEmpty()) {
-              absenceToPersist.addAll(absenceService.forceInsert(situation.person, date, null, 
-                  type.get(), justifiedType, 0, 0).absencesToPersist); 
-            } else {
-              log.info("Assenza presente {} {} {}", situation.person.fullName(), date, aux.code);
-            }
+            absenceToPersist.addAll(absenceService.forceInsert(situation.person, date, null, 
+                type.get(), justifiedType, 0, 0).absencesToPersist); 
             continue;
           }
           if (justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
             int hour = type.get().justifiedTime / 60;
             int minute = type.get().justifiedTime % 60;
-            if (absenceComponentDao
-                .findAbsences(situation.person, date, type.get().code).isEmpty()) {
-              absenceToPersist.addAll(absenceService.forceInsert(situation.person, date, null, 
-                  type.get(), justifiedType, hour, minute).absencesToPersist); 
-            } else {
-              log.info("Assenza presente {} {} {}", situation.person.fullName(), date, aux.code);
-            }
+            absenceToPersist.addAll(absenceService.forceInsert(situation.person, date, null, 
+                type.get(), justifiedType, hour, minute).absencesToPersist); 
             continue;
           }
         }

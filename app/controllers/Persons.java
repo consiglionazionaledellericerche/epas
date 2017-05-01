@@ -30,6 +30,7 @@ import manager.OfficeManager;
 import manager.SecureManager;
 import manager.UserManager;
 import manager.configurations.ConfigurationManager;
+import manager.services.absences.AbsenceService;
 
 import models.Contract;
 import models.ContractWorkingTimeType;
@@ -91,6 +92,8 @@ public class Persons extends Controller {
   static ConfigurationManager configurationManager;
   @Inject
   static OfficeDao officeDao;
+  @Inject
+  static AbsenceService absenceService;
 
 
   /**
@@ -341,12 +344,21 @@ public class Persons extends Controller {
     render(person, cwtt, wtt);
   }
 
+  /**
+   * Modifica password.
+   */
   public static void changePassword() {
     User user = Security.getUser().get();
     notFoundIfNull(user);
     render(user);
   }
 
+  /**
+   * Salva la nuova password.
+   * @param vecchiaPassword vecchia password
+   * @param nuovaPassword nuova password
+   * @param confermaPassword ripeti
+   */
   public static void savePassword(@Required String vecchiaPassword,
       @MinSize(5) @Required String nuovaPassword,
       @Required @Equals(value = "nuovaPassword", message = "Le password non corrispondono")
@@ -428,11 +440,22 @@ public class Persons extends Controller {
     if (!confirmed) {
       render("@deleteChild", child);
     }
+    child.delete();
+    JPA.em().flush();
+    
+    //Scan degli errori sulle assenze
+    LocalDate eldest = child.bornDate;
+    person.refresh();
+    for (PersonChildren otherChild : child.person.personChildren) {
+      if (eldest.isAfter(otherChild.bornDate)) {
+        eldest = otherChild.bornDate;
+      }
+    }
+    absenceService.scanner(child.person, eldest);
 
     flash.error("Eliminato %s %s dall'anagrafica dei figli di %s", child.name, child.surname,
         person.getFullname());
-    child.delete();
-
+    
     children(person.id);
   }
 
@@ -457,21 +480,28 @@ public class Persons extends Controller {
       }
     }
     if (Validation.hasErrors()) {
-
       response.status = 400;
-      // flash.error(Web.msgHasErrors());
-
       log.warn("validation errors: {}", validation.errorsMap());
-
       render("@insertChild", child);
     }
 
     rules.checkIfPermitted(child.person.office);
     child.save();
 
+    JPA.em().flush();
+    child.person.refresh();
+    
+    //Scan degli errori sulle assenze
+    LocalDate eldest = child.bornDate;
+    for (PersonChildren otherChild : child.person.personChildren) {
+      if (eldest.isAfter(otherChild.bornDate)) {
+        eldest = otherChild.bornDate;
+      }
+    }
+    absenceService.scanner(child.person, eldest);
+    
     log.info("Aggiunto/Modificato {} {} nell'anagrafica dei figli di {}", child.name, child.surname,
         child.person);
-
     flash.success(Web.msgSaved(PersonChildren.class));
 
     children(child.person.id);

@@ -51,6 +51,7 @@ category=Categoria
 child.bornDate= Data di Nascita
 child.name= Nome
 child.surname= Cognome
+personChildren=Figlio Dipendente
 
 codeBlock=Codice Blocco
 
