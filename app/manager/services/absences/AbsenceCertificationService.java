@@ -561,6 +561,13 @@ public class AbsenceCertificationService {
   
   private void patchPostPartumInitComplete(Person person, Map<String, Set<LocalDate>> mappona,  
       DefaultGroup group, Set<String> codes) {
+    GroupAbsenceType groupAbsenceType = absenceComponentDao
+        .groupAbsenceTypeByName(group.name()).get();
+    for (InitializationGroup initialization : person.initializationGroups) {
+      if (initialization.groupAbsenceType.equals(groupAbsenceType)) {
+        return; //inizializzazione già presente o importata... si cambia solo manualmente.
+      }
+    }
     List<LocalDate> list = Lists.newArrayList();
     for (String code : codes) {
       if (mappona.get(code) != null) {
@@ -571,11 +578,10 @@ public class AbsenceCertificationService {
       return;
     }
     Collections.sort(list);
-    GroupAbsenceType groupAbsenceType = absenceComponentDao
-        .groupAbsenceTypeByName(group.name()).get();
     InitializationGroup initializationGroup = new InitializationGroup(person, groupAbsenceType, 
         list.iterator().next().minusDays(1));
     initializationGroup.unitsInput = group.takable.fixedLimit;
+    initializationGroup.averageWeekTime = 432;
     initializationGroup.save();
   }
   
