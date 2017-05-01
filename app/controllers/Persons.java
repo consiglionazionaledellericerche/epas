@@ -160,10 +160,7 @@ public class Persons extends Controller {
 
     contract.person = person;
 
-    WorkingTimeType wtt =
-        workingTimeTypeDao.workingTypeTypeByDescription("Normale", Optional.<Office>absent());
-
-    if (!contractManager.properContractCreate(contract, wtt, false)) {
+    if (!contractManager.properContractCreate(contract, Optional.absent(), false)) {
       flash.error(
           "Errore durante la creazione del contratto. " + "Assicurarsi di inserire date valide.");
       params.flash(); // add http parameters to the flash scope

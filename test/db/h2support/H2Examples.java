@@ -61,7 +61,7 @@ public class H2Examples {
     if (endContract.isPresent()) {
       contract.endContract = endContract.get();
     }
-    contractManager.properContractCreate(contract, workingTimeType, false);
+    contractManager.properContractCreate(contract, Optional.of(workingTimeType), false);
     return contract;
   }
 

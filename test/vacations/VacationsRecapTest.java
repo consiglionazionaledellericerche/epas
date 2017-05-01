@@ -9,11 +9,6 @@ import manager.ContractManager;
 import manager.services.vacations.VacationsRecap;
 import manager.services.vacations.VacationsRecapBuilder;
 
-import mocker.MockAbsence;
-import mocker.MockAbsenceType;
-import mocker.MockContract;
-import mocker.MockPersonDay;
-
 import models.Contract;
 import models.PersonDay;
 import models.absences.Absence;
@@ -24,6 +19,11 @@ import org.joda.time.LocalDate;
 import org.junit.Test;
 
 import play.test.UnitTest;
+
+import mocker.MockAbsence;
+import mocker.MockAbsenceType;
+import mocker.MockContract;
+import mocker.MockPersonDay;
 
 /**
  * Verifica di base degli algoritmi relativi ai resoconti ferie.
@@ -294,7 +294,7 @@ public class VacationsRecapTest extends UnitTest {
   }
   
   public ContractManager getContractManager() {
-    return new ContractManager(null, null, null, null);
+    return new ContractManager(null, null, null, null, null);
   }
 
   List<Absence> getAbsences(ImmutableList<LocalDate> dates, AbsenceType absenceType) {
