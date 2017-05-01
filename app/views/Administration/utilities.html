@@ -141,5 +141,19 @@
   	#{/b.buttons}
   #{/form}
   #{/panel}
+  
+  <!-- Consistency absence groups -->
+  #{panel title:'Stato gruppi assenze e enumerato', dim:12 }
+  #{alert color:'info'}
+  <p>
+    Visualizza la pagina di stato modellazione assenze.
+  </p>
+  #{/alert}
+  #{form @AbsenceGroups.consistencyGroups(), class:'form-horizontal'}
+  	#{b.buttons center:true}
+  		<button type="submit" class="btn btn-default">Apri</button>
+  	#{/b.buttons}
+  #{/form}
+  #{/panel}
 
 </div>
