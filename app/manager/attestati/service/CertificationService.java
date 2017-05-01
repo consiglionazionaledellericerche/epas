@@ -691,7 +691,7 @@ public class CertificationService implements ICertificationService {
     //Dicembre per gli anni passati, il mese scorso se anno corrente.
     int month = 12;
     if (year == LocalDate.now().getYear()) {
-      month = LocalDate.now().getMonthOfYear() - 1;
+      month = LocalDate.now().getMonthOfYear() - 2;
     }
     
     //prelevare lo stato attuale attestato per il mese attuale della sede della persona
