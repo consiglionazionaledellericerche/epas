@@ -12,7 +12,7 @@
        <li #{if _action.equals('initializationsMeal')} class="active" #{/if}>
          <a href="@{Contracts.initializationsMeal(session.get("officeSelected"))}">Inizializzazione Buoni Pasto</a>
        </li>
-       <li #{if _action.equals('AbsenceGroups.importCertificationsAbsences')} class="active" #{/if}>
+       <li #{if _action.equals('importCertificationsAbsences')} class="active" #{/if}>
            <a href="@{AbsenceGroups.importCertificationsAbsences(session.get("officeSelected"))}">Importazione Assenze</a>
        </li>
        <li #{if _action.equals('initializationsVacation')} class="active" #{/if}>

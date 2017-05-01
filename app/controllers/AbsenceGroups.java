@@ -7,6 +7,7 @@ import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import dao.OfficeDao;
@@ -1011,6 +1012,7 @@ public class AbsenceGroups extends Controller {
     
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
+    rules.checkIfPermitted(office);
     
     //Tutte le persone attive nel mese attuale?
     List<Person> people = personDao.list(Optional.<String>absent(), 
@@ -1158,15 +1160,20 @@ public class AbsenceGroups extends Controller {
   }
 
   /**
-   * Import (e sincronizzazione) assenze da attestati.
+   * Import (e sincronizzazione) assenze da attestati. Le persone devono avere il monte ore
+   * correttamente inizializzato.
    * @param officeId sede
    */
   public static void importCertificationsAbsences(Long officeId) {
     
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
-  
+    rules.checkIfPermitted(office);
+    Person person = null;
     List<IWrapperPerson> people = Lists.newArrayList(); 
+    Map<Integer, Optional<CertificationYearSituation>> certificationsSummary = Maps.newHashMap();
+    
+    int year = LocalDate.now().getYear();
     
     for (IWrapperPerson wrPerson : FluentIterable.from(personDao.listFetched(Optional.absent(),
         ImmutableSet.of(office), false, null, null, false).list())
@@ -1175,13 +1182,25 @@ public class AbsenceGroups extends Controller {
       if (!wrPerson.getCurrentContract().isPresent()) {
         continue;
       }
+      //if (wrapperFactory.create(wrPerson.getCurrentContract().get()).initializationMissing()) {
+      //  continue;
+      //}
       
       people.add(wrPerson);
+      
+      if (person != null && wrPerson.getValue().equals(person)) {
+        //la persona specificata la ricarico
+        CertificationYearSituation yearSituation = absenceCertificationService
+            .buildCertificationYearSituation(person, year, false);
+        certificationsSummary.put(person.number, Optional.of(yearSituation));
+      } else {
+        //prelevo dalla cache la situazione se è già presente.
+        certificationsSummary.put(wrPerson.getValue().number, absenceCertificationService
+            .certificationYearSituationCached(wrPerson.getValue(), year));
+      }
     }
-    
-    int year = LocalDate.now().getYear();
-    
-    render(people, office, year);
+
+    render(people, office, year, certificationsSummary);
   }
   
   /** 
@@ -1192,12 +1211,29 @@ public class AbsenceGroups extends Controller {
     
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    
+    rules.checkIfPermitted(person.office);
    
     CertificationYearSituation yearSituation = absenceCertificationService
-        .buildCertificationYearSituation(person, year);
+        .buildCertificationYearSituation(person, year, false);
     
     render(yearSituation, person);
+  }
+  
+  /**
+   * Ricarica lo stato in cache della situazione import assenze.
+   * @param personId persona
+   */
+  public static void reloadCertificationAbsences(Long personId) {
+    
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    rules.checkIfPermitted(person.office);
+    
+    absenceCertificationService
+    .buildCertificationYearSituation(person, LocalDate.now().getYear(), false);
+
+    importCertificationsAbsences(person.office.id);
+    
   }
   
   /**
@@ -1208,9 +1244,12 @@ public class AbsenceGroups extends Controller {
     
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-
+    rules.checkIfPermitted(person.office);
     LocalDate updateFrom = LocalDate.now();
-    for (Absence absence : absenceCertificationService.absencesToPersist(person, year)) {
+    
+    List<Absence> absences =  absenceCertificationService.absencesToPersist(person, year);
+    
+    for (Absence absence : absences) {
       JPA.em().flush(); //potrebbero esserci dei doppioni, per sicurezza flusho a ogni assenza.
       if (!absenceComponentDao
           .findAbsences(person, absence.getAbsenceDate(), absence.absenceType.code).isEmpty()) {
@@ -1221,7 +1260,6 @@ public class AbsenceGroups extends Controller {
           .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
       absence.personDay = personDay;
       personDay.absences.add(absence);
-      rules.checkIfPermitted(absence);
       absence.save();
       personDay.save();
       if (personDay.date.isBefore(updateFrom)) {
@@ -1232,7 +1270,11 @@ public class AbsenceGroups extends Controller {
     JPA.em().flush();
     consistencyManager.updatePersonSituation(person.id, updateFrom);
     
-    certificationsAbsences(person.id, year);
+    absenceCertificationService.buildCertificationYearSituation(person, year, false);
+    
+    flash.success("Tutti i dati sono stati caricati correttamente.");
+    
+    importCertificationsAbsences(person.office.id);
   }
 
 }
