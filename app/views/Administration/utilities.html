@@ -124,5 +124,22 @@
   	#{/b.buttons}
   #{/form}
   #{/panel}
+  
+  <!-- Import data fine da attestati (e terminazione degli inattivi) -->
+  #{panel title:'Sincronizza data fine con attestati', dim:12 }
+  #{alert color:'info'}
+  <p>
+    Popola il campo data fine contratto nel caso sia da valorizzare. Termina inoltre
+    il contratto di coloro che risultano inattivi (non presenti nello stralcio).
+    Utilizza il primo stralcio disponibile (mese attuale, mese precedende, mese ancora precedente).
+  </p>
+  #{/alert}
+  #{form @Administration.importCertificationContracts(), class:'form-horizontal'}
+  	#{f.selectModel 'office', items:templateUtility.officesAllowed() /}
+  	#{b.buttons center:true}
+  		<button type="submit" class="btn btn-default">Esegui</button>
+  	#{/b.buttons}
+  #{/form}
+  #{/panel}
 
 </div>

@@ -3,6 +3,7 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
+import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
@@ -38,6 +39,7 @@ public class ContractManager {
   private final IWrapperFactory wrapperFactory;
   private final PeriodManager periodManager;
   private final PersonDayInTroubleManager personDayInTroubleManager;
+  private final WorkingTimeTypeDao workingTimeTypeDao;
 
   /**
    * Constructor.
@@ -51,11 +53,13 @@ public class ContractManager {
   public ContractManager(
       final ConsistencyManager consistencyManager,
       final PeriodManager periodManager, final PersonDayInTroubleManager personDayInTroubleManager, 
+      final WorkingTimeTypeDao workingTimeTypeDao,
       final IWrapperFactory wrapperFactory) {
 
     this.consistencyManager = consistencyManager;
     this.periodManager = periodManager;
     this.personDayInTroubleManager = personDayInTroubleManager;
+    this.workingTimeTypeDao = workingTimeTypeDao;
     this.wrapperFactory = wrapperFactory;
   }
 
@@ -119,7 +123,8 @@ public class ContractManager {
    * @param recomputation      se effettuare subito il ricalcolo della persona.
    * @return esito costruzione
    */
-  public final boolean properContractCreate(final Contract contract, final WorkingTimeType wtt, 
+  public final boolean properContractCreate(final Contract contract, 
+      Optional<WorkingTimeType> wtt, 
       boolean recomputation) {
 
     if (!isContractCrossFieldValidationPassed(contract)) {
@@ -136,11 +141,19 @@ public class ContractManager {
     for (VacationPeriod vacationPeriod : contract.getVacationPeriods()) {
       vacationPeriod.save();
     }
+    
+    if (!wtt.isPresent()) {
+      wtt = Optional.fromNullable(workingTimeTypeDao
+          .workingTypeTypeByDescription("Normale", Optional.absent()));
+      if (!wtt.isPresent()) {
+        throw new IllegalStateException();
+      }
+    }
 
     ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
     cwtt.beginDate = contract.getBeginDate();
     cwtt.endDate = contract.calculatedEnd();
-    cwtt.workingTimeType = wtt;
+    cwtt.workingTimeType = wtt.get();
     cwtt.contract = contract;
     cwtt.save();
     contract.contractWorkingTimeType.add(cwtt);
