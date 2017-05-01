@@ -43,18 +43,16 @@ public class SwitchTemplate extends Controller {
     redirect(Router.reverse(action, args).url);
   }
 
-  public static void updateDay(Integer day) throws Throwable {
-
-    String action = session.get("actionSelected");
-    if (action == null) {
-
+  public static void updateDay(Integer day, final String actionSelected) throws Throwable {
+    
+    if (actionSelected == null || session.isEmpty()) {
       flash.error("La sessione è scaduta. Effettuare nuovamente login.");
       Secure.login();
     }
-
+    
     session.put("daySelected", day);
 
-    executeAction(action);
+    executeAction(actionSelected);
 
   }
 
