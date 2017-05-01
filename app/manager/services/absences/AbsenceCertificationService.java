@@ -10,6 +10,7 @@ import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +33,7 @@ import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
+import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultAbsenceType;
@@ -156,6 +158,8 @@ public class AbsenceCertificationService {
         }
       }
     }
+    
+    situation.certificationMap = mappona;
       
     //Inizio a costruire le situazioni
     
@@ -533,6 +537,48 @@ public class AbsenceCertificationService {
     }
   }
   
+  private void patchPostPartumInit(Person person, Map<String, Set<LocalDate>> mappona) {
+    //Complete primo figlio
+    patchPostPartumInitComplete(person, mappona, DefaultGroup.G_23,
+        Sets.newHashSet(DefaultAbsenceType.A_25.getCode(), DefaultAbsenceType.A_25H7.getCode(), 
+            DefaultAbsenceType.A_24.getCode(), DefaultAbsenceType.A_24H7.getCode()));
+    patchPostPartumInitComplete(person, mappona, DefaultGroup.G_25,
+        Sets.newHashSet(DefaultAbsenceType.A_24.getCode(), DefaultAbsenceType.A_24H7.getCode()));
+    //Complete secondo figlio
+    patchPostPartumInitComplete(person, mappona, DefaultGroup.G_232,
+        Sets.newHashSet(DefaultAbsenceType.A_252.getCode(), DefaultAbsenceType.A_252H7.getCode(), 
+            DefaultAbsenceType.A_242.getCode(), DefaultAbsenceType.A_242H7.getCode()));
+    patchPostPartumInitComplete(person, mappona, DefaultGroup.G_252,
+        Sets.newHashSet(DefaultAbsenceType.A_242.getCode(), DefaultAbsenceType.A_242H7.getCode()));
+    //Complete terzo figlio
+    patchPostPartumInitComplete(person, mappona, DefaultGroup.G_233,
+        Sets.newHashSet(DefaultAbsenceType.A_253.getCode(), DefaultAbsenceType.A_253H7.getCode(), 
+            DefaultAbsenceType.A_243.getCode(), DefaultAbsenceType.A_243H7.getCode()));
+    patchPostPartumInitComplete(person, mappona, DefaultGroup.G_253,
+        Sets.newHashSet(DefaultAbsenceType.A_243.getCode(), DefaultAbsenceType.A_243H7.getCode()));
+    
+  }
+  
+  private void patchPostPartumInitComplete(Person person, Map<String, Set<LocalDate>> mappona,  
+      DefaultGroup group, Set<String> codes) {
+    List<LocalDate> list = Lists.newArrayList();
+    for (String code : codes) {
+      if (mappona.get(code) != null) {
+        list.addAll(mappona.get(code));
+      }
+    }
+    if (list.isEmpty()) {
+      return;
+    }
+    Collections.sort(list);
+    GroupAbsenceType groupAbsenceType = absenceComponentDao
+        .groupAbsenceTypeByName(group.name()).get();
+    InitializationGroup initializationGroup = new InitializationGroup(person, groupAbsenceType, 
+        list.iterator().next().minusDays(1));
+    initializationGroup.unitsInput = group.takable.fixedLimit;
+    initializationGroup.save();
+  }
+  
   /**
    * Se in una data ho 23H7 da inserire automaticamente e nella stessa data in epas ho un 23.
    *  - tolgo il 23H7 da inserire automaticamente
@@ -609,6 +655,9 @@ public class AbsenceCertificationService {
   public List<Absence> absencesToPersist(Person person, int year) {
 
     CertificationYearSituation situation = buildCertificationYearSituation(person, year);
+    
+    //patch su inizializzazioni
+    patchPostPartumInit(person, situation.certificationMap);
     
     List<Absence> absenceToPersist = Lists.newArrayList();
     
