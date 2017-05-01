@@ -21,7 +21,6 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -29,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import manager.ContractManager;
 import manager.PeriodManager;
-import manager.attestati.dto.internal.clean.ContrattoAttestati;
 import manager.attestati.service.ICertificationService;
 import manager.recaps.recomputation.RecomputeRecap;
 import manager.services.absences.AbsenceService;
@@ -546,19 +544,30 @@ public class Contracts extends Controller {
     notFoundIfNull(contract);
     rules.checkIfPermitted(contract.person.office);
 
-    IWrapperContract wrContract = wrapperFactory.create(contract);
     if (contract.sourceDateResidual == null) {
       contractManager.cleanResidualInitialization(contract);
     }
 
     IWrapperOffice wrOffice = wrapperFactory.create(contract.person.office);
     IWrapperPerson wrPerson = wrapperFactory.create(contract.person);
-
-    Integer sourceRemainingMinutesCurrentYear = contract.sourceRemainingMinutesCurrentYear; 
-    Integer sourceRemainingMinutesLastYear = contract.sourceRemainingMinutesLastYear;
     
-    render(contract, wrContract, wrOffice, wrPerson, 
-        sourceRemainingMinutesCurrentYear, sourceRemainingMinutesLastYear);
+    Integer hoursCurrentYear = 0;
+    Integer minutesCurrentYear = 0;
+    if (contract.sourceRemainingMinutesCurrentYear != null) {
+      hoursCurrentYear = contract.sourceRemainingMinutesCurrentYear / 60;
+      minutesCurrentYear = contract.sourceRemainingMinutesCurrentYear % 60;
+    }
+    Integer hoursLastYear = 0;
+    Integer minutesLastYear = 0;
+    if (contract.sourceRemainingMinutesLastYear != null) {
+      hoursLastYear = contract.sourceRemainingMinutesLastYear / 60;
+      minutesLastYear = contract.sourceRemainingMinutesLastYear % 60;
+    }
+
+    IWrapperContract wrContract = wrapperFactory.create(contract);    
+    
+    render(contract, wrContract, wrOffice, wrPerson, hoursCurrentYear, minutesCurrentYear,
+        hoursLastYear, minutesLastYear);
   }
   
   /**
@@ -616,8 +625,9 @@ public class Contracts extends Controller {
    * @param confirmedResidual  step di conferma ricevuta.
    */
   public static void saveResidualSourceContract(Long contractId, 
-      @Valid final LocalDate sourceDateResidual, Integer sourceRemainingMinutesCurrentYear, 
-      Integer sourceRemainingMinutesLastYear,
+      @Valid final LocalDate sourceDateResidual, 
+      Integer hoursLastYear, Integer minutesLastYear,
+      Integer hoursCurrentYear, Integer minutesCurrentYear,
       boolean confirmedResidual) {
 
     Contract contract = contractDao.getContractById(contractId);
@@ -643,7 +653,8 @@ public class Contracts extends Controller {
       response.status = 400;
       log.warn("validation errors: {}", validation.errorsMap());
       render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice, 
-          sourceRemainingMinutesCurrentYear, sourceRemainingMinutesLastYear, sourceDateResidual);
+          hoursLastYear, minutesLastYear, hoursCurrentYear, minutesCurrentYear,
+          sourceDateResidual);
     }
 
     LocalDate recomputeFrom = sourceDateResidual;
@@ -666,7 +677,7 @@ public class Contracts extends Controller {
         days = DateUtility.daysInInterval(new DateInterval(recomputeFrom, recomputeTo));
       }
       render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice,
-          sourceRemainingMinutesCurrentYear, sourceRemainingMinutesLastYear,
+          hoursLastYear, minutesLastYear, hoursCurrentYear, minutesCurrentYear,
           confirmedResidual, removeMandatory, removeUnnecessary,
           recomputeFrom, recomputeTo, days);
     }
@@ -685,15 +696,15 @@ public class Contracts extends Controller {
       }
 
       render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice, sourceDateResidual,
-          sourceRemainingMinutesCurrentYear, sourceRemainingMinutesLastYear,
+          hoursLastYear, minutesLastYear, hoursCurrentYear, minutesCurrentYear,
           confirmedResidual, sourceNew, sourceUpdate, recomputeFrom, recomputeTo, days);
     }
 
     //esecuzione
     if (confirmedResidual) {
       contract.sourceDateResidual = sourceDateResidual;
-      contract.sourceRemainingMinutesCurrentYear = sourceRemainingMinutesCurrentYear;
-      contract.sourceRemainingMinutesLastYear = sourceRemainingMinutesLastYear;
+      contract.sourceRemainingMinutesCurrentYear = hoursCurrentYear * 60 + minutesCurrentYear;
+      contract.sourceRemainingMinutesLastYear = hoursLastYear * 60 + minutesLastYear;;
       contractManager.setSourceContractProperly(contract);
       contractManager.properContractUpdate(contract, recomputeFrom, false);
 
