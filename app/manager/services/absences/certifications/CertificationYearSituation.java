@@ -31,6 +31,8 @@ public class CertificationYearSituation {
   
   public List<AbsenceSituation> absenceSituations = Lists.newArrayList();
   
+  public Map<String, Set<LocalDate>> certificationMap = Maps.newHashMap();
+  
   /**
    * La situazione per quel tipo. 
    */
