@@ -1,26 +1,38 @@
-#{extends 'modal.html' /}
-#{set modalHeader:'Cambia Tipo Orario a tutti' /}
+#{modalAsync title: 'Cambia orario ' + wtt.description + ' a tutti' }
 
-<div class="container-fluid center">
 
-	<p class="text-info"> Per ogni dipendente nella finestra temporale specificata</p>
+<div class="container" id="changeAll">
+  #{alert color:'info'}
+    <p>
+      Seleziona il <strong><em>Nuovo tipo orario</em></strong>.
+    </p>
+    <p>  
+      Per ogni dipendente di <strong>${office.name}</strong> e per ogni giorno in cui è presente l'orario <strong>${wtt.description}</strong>,
+      verrà applicato il <strong><em>Nuovo tipo orario</em></strong> selezionato.
+    </p>
+    <p>
+      Non è possibile specificare una data inizio oltre il mese precedente quello attuale.
+      </p>
+    <p>
+      Se si desidera cambiare l'orario definitivamente lasciare vuoto il campo <strong>&{'dateTo'}</strong>
+    </p>
+  #{/alert}
+	
 
-	#{form @WorkingTimes.executeChangeWorkingTimeTypeToAll() ,class:'form-horizontal'}
+	#{form @WorkingTimes.executeChangeWorkingTimeTypeToAll(), class:'form-horizontal',
+	'data-async':'#page_content', 'data-async-error':'#changeAll', 'data-spinner':'#defaultSpinner'}
 	<input type="hidden" name="officeId" value="${office.id}"/>
-	<input type="hidden" name="wttOld.id" value="${wtt.id}" />
+	<input type="hidden" name="wtt.id" value="${wtt.id}" />
 
-	<div class="well">
-		<h4>Converti <strong><em>${wtt.description}</em></strong> in</h4>
-		<div class="panel-body">
-			#{f.selectModel 'wttNew',label:'Nuovo tipo orario',items:wttList /}
-			#{f.date 'dateFrom',label:'Da' /}
-			#{f.date 'dateTo',label:'A' /}
-		</div>
-	</div>
-
-	<button type="submit" class="btn btn-info">Cambia</button>
+    #{f.selectModel 'wttNew',label:'Nuovo tipo orario',items:wttList /}
+	#{f.date 'dateFrom' /}
+	#{f.date 'dateTo' /}
+	
+    #{b.buttons center:true}
+      #{b.submit 'Cambia a tutti'/}
+    #{/b.buttons}
 
 	#{/form}
-	<br>
-	<p>Nel caso di finestra temporale che impatta sul passato questa operazione potrebbe richiedere alcuni minuti.</p>
 </div>
+
+#{/modalAsync}
