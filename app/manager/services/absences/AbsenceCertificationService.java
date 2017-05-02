@@ -316,6 +316,20 @@ public class AbsenceCertificationService {
     absenceSituation.notPresent = absenceNotInAttestati(periodChain.relevantAbsences(true), 
         absenceSituation.datesPerCodeOk, allCodes, from, to);
     
+    //tag child is missing (da migliorare)
+    if (!absenceSituation.datesPerCodeOk.isEmpty() 
+        || !absenceSituation.toAddAutomatically.isEmpty()) {
+      if (group.equals(DefaultGroup.G_23) && periodChain.childIsMissing()) {
+        absenceSituation.firstChildMissing = true;
+      }
+      if (group.equals(DefaultGroup.G_232) && periodChain.childIsMissing()) {
+        absenceSituation.secondChildMissing = true;
+      }
+      if (group.equals(DefaultGroup.G_233) && periodChain.childIsMissing()) {
+        absenceSituation.thirdChildMissing = true;
+      }
+    }
+    
     situation.absenceSituations.add(absenceSituation);
     return absenceSituation;
   }

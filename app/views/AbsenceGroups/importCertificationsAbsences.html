@@ -73,6 +73,16 @@
           #{if situation.allImported()}
            <span popover-hover data-content="Tutte le assenze sono importate correttamente."><i class="fa fa-check text-success" aria-hidden="true"></i></span>
           #{/if}
+          
+          #{if situation.firstChildMissing()}
+            <span popover-hover data-content="Inserire il primo figlio in anagrafica."><i class="fa fa-child text-danger" aria-hidden="true"></i></span>
+          #{/if}
+          #{if situation.secondChildMissing()}
+            <span popover-hover data-content="Inserire il secondo figlio in anagrafica."><i class="fa fa-child text-danger" aria-hidden="true"></i></span>
+          #{/if}
+          #{if situation.thirdChildMissing()}
+            <span popover-hover data-content="Inserire il terzo figlio in anagrafica."><i class="fa fa-child text-danger" aria-hidden="true"></i></span>
+          #{/if}
        #{/if}   
       </td>
       
