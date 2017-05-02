@@ -10,6 +10,7 @@ import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,11 +29,11 @@ import manager.services.absences.certifications.CodeComparation;
 import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.VacationSituation;
 
-import models.Certification;
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
+import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultAbsenceType;
@@ -40,6 +41,8 @@ import models.absences.definitions.DefaultGroup;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
+
+import play.cache.Cache;
 
 /**
  * Servizi di comparazione fra assenze epas e assenze attestati.
@@ -71,33 +74,81 @@ public class AbsenceCertificationService {
   }
   
   /**
+   * Una chiave per il certification year situation.
+   */
+  private String cysKey(Person person, int year) {
+    return "cys-" + "-" + person.id + "-" + year;
+  }
+  
+  /**
+   * Una chiave per il cruscotto.
+   */
+  private String crKey(Person person, int year) {
+    return "cruscotto-" + "-" + person.id + "-" + year;
+  }
+
+  /**
+   * La situatione della persona dalla cache se caricata.
+   * @param person person 
+   * @param year anno
+   */
+  public Optional<CertificationYearSituation> certificationYearSituationCached(Person person, 
+      int year) {
+    return Optional.fromNullable(
+        (CertificationYearSituation)Cache.get(cysKey(person, year)));
+    
+  }
+  
+
+  /**
    * Situazione assenze epas/attestati.
    * @param person persona
    * @param year anno
+   * @param cache prova a prelevare il certification year situation dalla cache
    * @return situazione
    */
-  public CertificationYearSituation buildCertificationYearSituation(Person person, int year) {
+  public CertificationYearSituation buildCertificationYearSituation(Person person, int year, 
+      boolean cache) {
     
-    CruscottoDipendente cruscottoCurrent = null;
-    CruscottoDipendente cruscottoPrev = null;
+    if (cache) {
+      CertificationYearSituation situationCached = (CertificationYearSituation)
+          Cache.get(cysKey(person, year));
+      if (situationCached != null) {
+        return situationCached;
+      }
+    }
     
-    try {
-      cruscottoCurrent = certificationService.getCruscottoDipendente(person, year);
-    } catch (Exception ex) {
-      log.debug("Impossibile prelevare il cruscotto di {} per l'anno {}", person.fullName(), year);
+    CruscottoDipendente cruscottoCurrent = (CruscottoDipendente)Cache.get(crKey(person, year));
+    if (cruscottoCurrent == null) {
+      try {
+        log.info("Il cruscotto di {} anno {} non era cachato.", person.fullName(), year);
+        cruscottoCurrent = certificationService.getCruscottoDipendente(person, year);
+        Cache.add(crKey(person, year), cruscottoCurrent);
+      } catch (Exception ex) {
+        log.info("Impossibile prelevare il cruscotto di {} anno {}", person.fullName(), year);
+        return null;
+      }
+    }
+    
+    if (cruscottoCurrent == null) {
       return null;
     }
-    try {
-      cruscottoPrev = certificationService.getCruscottoDipendente(person, year - 1);
-    } catch (Exception ex) {
-      log.debug("Impossibile prelevare il cruscotto "
-          + "anno precedente di {} per l'anno {}", person.fullName(), year);
-      cruscottoPrev = null;
+    
+    CruscottoDipendente cruscottoPrev = (CruscottoDipendente)Cache.get(crKey(person, year - 1));
+    if (cruscottoPrev == null) {
+      try {
+        log.info("Il cruscotto di {} anno {} non era cachato.", person.fullName(), year - 1);
+        cruscottoPrev = certificationService.getCruscottoDipendente(person, year - 1);
+        Cache.add(crKey(person, year - 1), cruscottoPrev);
+      } catch (Exception ex) {
+        log.info("Impossibile prelevare il cruscotto "
+            + "anno precedente di {} per l'anno {}", person.fullName(), year);
+        cruscottoPrev = null;
+      }
     }
     
     CertificationYearSituation situation = new CertificationYearSituation();
     
-    situation.person = person;
     situation.year = cruscottoCurrent.annoSituazione;
     
     situation.beginDate = new LocalDate(cruscottoCurrent.dipendente.dataAssunzione);
@@ -141,6 +192,8 @@ public class AbsenceCertificationService {
         }
       }
     }
+    
+    situation.certificationMap = mappona;
       
     //Inizio a costruire le situazioni
     
@@ -192,7 +245,18 @@ public class AbsenceCertificationService {
         DefaultGroup.G_661, to, Optional.of(from), Optional.of(to), 
         inEpas, notInEpas);
     
+    //7) tutte le altre assenze dell'anno corrente non rifinite in altra situation
+    buildOtherAbsences(situation, mappona, inEpas, notInEpas);
+    
+    //spostamenti particolari fra liste
+    patchPostPartumH7(person, situation);
+    patchStudy(situation);
     patchSentCertifications(situation.absenceSituations, wrPerson);
+    
+    
+    //metto in cache
+    Cache.safeDelete(cysKey(person, year));
+    Cache.add(cysKey(person, year), situation);
     return situation;
   }
   
@@ -228,7 +292,7 @@ public class AbsenceCertificationService {
       DefaultGroup group, LocalDate recap, Optional<LocalDate> from, Optional<LocalDate> to,
       Map<String, Set<LocalDate>> inEpas, Map<String, Set<LocalDate>> notInEpas) {
     
-    AbsenceSituation absenceSituation = new AbsenceSituation(person, situationType);
+    AbsenceSituation absenceSituation = new AbsenceSituation(situationType);
     List<String> allCodes = Lists.newArrayList();
     Set<DefaultAbsenceType> allType = Sets.newHashSet();
     DefaultGroup currentGroup = group;
@@ -268,6 +332,18 @@ public class AbsenceCertificationService {
     set.addAll(dates);
   }
   
+  private void removeDates(Map<String, Set<LocalDate>> map, String code, Set<LocalDate> dates) {
+    if (dates == null || dates.isEmpty()) {
+      return;
+    }
+    Set<LocalDate> set = map.get(code);
+    if (set == null) {
+      set = Sets.newHashSet();
+      map.put(code, set);
+    }
+    set.removeAll(dates);
+  }
+  
   private void putDatesInterval(Map<String, Set<LocalDate>> map, String code, Set<LocalDate> dates, 
       Optional<LocalDate> from, Optional<LocalDate> to) {
     if (dates == null || dates.isEmpty()) {
@@ -287,6 +363,19 @@ public class AbsenceCertificationService {
       }
       set.add(date);
     }
+  }
+  
+  private Set<LocalDate> datesNotPresent(Map<String, Set<LocalDate>> map, 
+      String code, Set<LocalDate> dates, Integer year) {
+    Set<LocalDate> set = Sets.newHashSet();
+    for (LocalDate date : dates) {
+      if (map.get(code) == null || !map.get(code).contains(date)) {
+        if (date.getYear() == year) {
+          set.add(date);
+        }
+      }
+    }
+    return set;
   }
   
   private boolean absenceIsInEpas(Person person, String code, LocalDate date) {
@@ -335,8 +424,7 @@ public class AbsenceCertificationService {
         wrPerson.getCurrentContract().get(), year, vacationGroup, Optional.absent(), false, null);
     
     //Situazione ferie anno selezionato
-    AbsenceSituation vacationYear = new AbsenceSituation(wrPerson.getValue(), 
-        AbsenceSituationType.FERIE_ANNO_CORRENTE);
+    AbsenceSituation vacationYear = new AbsenceSituation(AbsenceSituationType.FERIE_ANNO_CORRENTE);
     
     final String code32 = DefaultAbsenceType.A_32.getCode();
     final String code31 = DefaultAbsenceType.A_31.getCode();
@@ -351,7 +439,7 @@ public class AbsenceCertificationService {
         Optional.absent(), Optional.absent());
     
     //Situazione ferie anno precedente
-    AbsenceSituation vacationPreviousYear = new AbsenceSituation(wrPerson.getValue(), 
+    AbsenceSituation vacationPreviousYear = new AbsenceSituation(
         AbsenceSituationType.FERIE_ANNO_PRECEDENTE);
     
     putDatesVacation(vacationPreviousYear.datesPerCodeOk, mapInEpas, code32, year - 1);
@@ -368,8 +456,7 @@ public class AbsenceCertificationService {
     }
     
     //Situazione permessi legge anno selezionato
-    AbsenceSituation permissions = new AbsenceSituation(wrPerson.getValue(), 
-        AbsenceSituationType.PERMESSI_LEGGE);
+    AbsenceSituation permissions = new AbsenceSituation(AbsenceSituationType.PERMESSI_LEGGE);
     
     putDatesVacation(permissions.datesPerCodeOk, mapInEpas, code94,  year);
     putDatesVacation(permissions.toAddAutomatically, mapNotInEpas, code94,  year);
@@ -384,6 +471,39 @@ public class AbsenceCertificationService {
 
     return situation;
     
+  }
+  
+  private CertificationYearSituation buildOtherAbsences(CertificationYearSituation situation, 
+      Map<String, Set<LocalDate>> mappona,
+      Map<String, Set<LocalDate>> inEpas, Map<String, Set<LocalDate>> notInEpas) {
+    
+    Map<String, Set<LocalDate>> dispatched = Maps.newHashMap();
+    for (AbsenceSituation absenceSituation : situation.absenceSituations) {
+      for (String code : mappona.keySet()) {
+        putDates(dispatched, code, absenceSituation.datesPerCodeOk.get(code));
+        putDates(dispatched, code, absenceSituation.toAddAutomatically.get(code));
+        putDates(dispatched, code, absenceSituation.toAddManually.get(code));
+      }
+    }
+    Map<String, Set<LocalDate>> datesPerCodeOk = Maps.newHashMap();
+    Map<String, Set<LocalDate>> toAddAutomatically = Maps.newHashMap();
+    for (String code : inEpas.keySet()) {
+      datesPerCodeOk.put(code, datesNotPresent(dispatched, code, inEpas.get(code), situation.year));
+    }
+    for (String code : notInEpas.keySet()) {
+      toAddAutomatically
+      .put(code, datesNotPresent(dispatched, code, notInEpas.get(code), situation.year));
+    }
+    
+    AbsenceSituation absenceSituation = new AbsenceSituation(AbsenceSituationType.ALTRI);
+    absenceSituation.datesPerCodeOk = datesPerCodeOk;
+    absenceSituation.toAddAutomatically = toAddAutomatically;
+    
+    //i remove sono troppo difficili e non servono.
+    
+    situation.absenceSituations.add(absenceSituation);
+    
+    return situation;
   }
   
 
@@ -433,6 +553,117 @@ public class AbsenceCertificationService {
     absenceSituation.toAddManually.put(DefaultAbsenceType.A_91.getCode(), manually);
   }
   
+  
+  /**
+   * Se in una data ho un 89 da inserire automaticamente.
+   *   - tolgo 89 da inserire automaticamente
+   *   - inserisco 89 da inserire manualmente
+   * Se quell'89 è precedente l'inizializzazione
+   *   - tolgo 89 da inserire manualmente
+   */
+  private void patchStudy(CertificationYearSituation situation) {
+    for (AbsenceSituation absenceSituation : situation.absenceSituations) {
+      Set<LocalDate> dates = absenceSituation.toAddAutomatically.get(DefaultAbsenceType.A_89);
+      if (dates == null) {
+        continue;
+      }
+      removeDates(absenceSituation.toAddAutomatically, DefaultAbsenceType.A_89.getCode(), dates);
+      removeDates(absenceSituation.toAddManually, DefaultAbsenceType.A_89.getCode(), dates);
+    }
+  }
+  
+  private void patchPostPartumInit(Person person, Map<String, Set<LocalDate>> mappona) {
+    //Complete primo figlio
+    patchPostPartumInitComplete(person, mappona, DefaultGroup.G_23,
+        Sets.newHashSet(DefaultAbsenceType.A_25.getCode(), DefaultAbsenceType.A_25H7.getCode(), 
+            DefaultAbsenceType.A_24.getCode(), DefaultAbsenceType.A_24H7.getCode()));
+    patchPostPartumInitComplete(person, mappona, DefaultGroup.G_25,
+        Sets.newHashSet(DefaultAbsenceType.A_24.getCode(), DefaultAbsenceType.A_24H7.getCode()));
+    //Complete secondo figlio
+    patchPostPartumInitComplete(person, mappona, DefaultGroup.G_232,
+        Sets.newHashSet(DefaultAbsenceType.A_252.getCode(), DefaultAbsenceType.A_252H7.getCode(), 
+            DefaultAbsenceType.A_242.getCode(), DefaultAbsenceType.A_242H7.getCode()));
+    patchPostPartumInitComplete(person, mappona, DefaultGroup.G_252,
+        Sets.newHashSet(DefaultAbsenceType.A_242.getCode(), DefaultAbsenceType.A_242H7.getCode()));
+    //Complete terzo figlio
+    patchPostPartumInitComplete(person, mappona, DefaultGroup.G_233,
+        Sets.newHashSet(DefaultAbsenceType.A_253.getCode(), DefaultAbsenceType.A_253H7.getCode(), 
+            DefaultAbsenceType.A_243.getCode(), DefaultAbsenceType.A_243H7.getCode()));
+    patchPostPartumInitComplete(person, mappona, DefaultGroup.G_253,
+        Sets.newHashSet(DefaultAbsenceType.A_243.getCode(), DefaultAbsenceType.A_243H7.getCode()));
+    
+  }
+  
+  private void patchPostPartumInitComplete(Person person, Map<String, Set<LocalDate>> mappona,  
+      DefaultGroup group, Set<String> codes) {
+    GroupAbsenceType groupAbsenceType = absenceComponentDao
+        .groupAbsenceTypeByName(group.name()).get();
+    for (InitializationGroup initialization : person.initializationGroups) {
+      if (initialization.groupAbsenceType.equals(groupAbsenceType)) {
+        return; //inizializzazione già presente o importata... si cambia solo manualmente.
+      }
+    }
+    List<LocalDate> list = Lists.newArrayList();
+    for (String code : codes) {
+      if (mappona.get(code) != null) {
+        list.addAll(mappona.get(code));
+      }
+    }
+    if (list.isEmpty()) {
+      return;
+    }
+    Collections.sort(list);
+    InitializationGroup initializationGroup = new InitializationGroup(person, groupAbsenceType, 
+        list.iterator().next().minusDays(1));
+    initializationGroup.unitsInput = group.takable.fixedLimit;
+    initializationGroup.averageWeekTime = 432;
+    initializationGroup.save();
+  }
+  
+  /**
+   * Se in una data ho 23H7 da inserire automaticamente e nella stessa data in epas ho un 23.
+   *  - tolgo il 23H7 da inserire automaticamente
+   *  - tolgo il 23 da codici da rimuovere
+   *  - inserisco il 23H7 ok
+   * @param situation absenceSituation
+   */
+  private void patchPostPartumH7(Person person, CertificationYearSituation situation) {
+    for (AbsenceSituation abSit : situation.absenceSituations) {
+      addAutomaticallyRelax(person, abSit, DefaultAbsenceType.A_23H7, DefaultAbsenceType.A_23);
+      addAutomaticallyRelax(person, abSit, DefaultAbsenceType.A_25H7, DefaultAbsenceType.A_25);
+      addAutomaticallyRelax(person, abSit, DefaultAbsenceType.A_24H7, DefaultAbsenceType.A_24);
+      addAutomaticallyRelax(person, abSit, DefaultAbsenceType.A_232H7, DefaultAbsenceType.A_232);
+      addAutomaticallyRelax(person, abSit, DefaultAbsenceType.A_252H7, DefaultAbsenceType.A_252);
+      addAutomaticallyRelax(person, abSit, DefaultAbsenceType.A_242H7, DefaultAbsenceType.A_242);
+      addAutomaticallyRelax(person, abSit, DefaultAbsenceType.A_233H7, DefaultAbsenceType.A_233);
+      addAutomaticallyRelax(person, abSit, DefaultAbsenceType.A_253H7, DefaultAbsenceType.A_253);
+      addAutomaticallyRelax(person, abSit, DefaultAbsenceType.A_243H7, DefaultAbsenceType.A_243);
+    }
+  }
+  
+  private void addAutomaticallyRelax(Person person, AbsenceSituation absenceSituation, 
+      DefaultAbsenceType missing, DefaultAbsenceType equivalent) {
+    
+    Set<LocalDate> toAddAuto = absenceSituation.toAddAutomatically.get(missing.certificationCode);
+    if (toAddAuto == null) {
+      return;
+    }
+    Set<LocalDate> relaxedDates = Sets.newHashSet();
+    Set<Absence> relaxedAbsences = Sets.newHashSet();
+    for (LocalDate date : toAddAuto) {
+      List<Absence> absences = absenceComponentDao
+          .findAbsences(person, date, equivalent.getCode()); 
+      if (!absences.isEmpty()) {
+        relaxedDates.add(date);
+        relaxedAbsences.addAll(absences);
+      }
+    }
+    putDates(absenceSituation.datesPerCodeOk, missing.certificationCode, relaxedDates);
+    removeDates(absenceSituation.toAddAutomatically, missing.certificationCode, relaxedDates);
+    absenceSituation.notPresent.removeAll(relaxedAbsences);
+    absenceSituation.notPresentSent.removeAll(relaxedAbsences);
+  }
+  
   /**
    * Le assenze non presenti in attestati dei mesi non successivi l'ultimo caricamento le sposto
    * nella lista notPresentSent (da rimuovere).
@@ -464,7 +695,10 @@ public class AbsenceCertificationService {
    */
   public List<Absence> absencesToPersist(Person person, int year) {
 
-    CertificationYearSituation situation = buildCertificationYearSituation(person, year);
+    CertificationYearSituation situation = buildCertificationYearSituation(person, year, false);
+    
+    //patch su inizializzazioni
+    patchPostPartumInit(person, situation.certificationMap);
     
     List<Absence> absenceToPersist = Lists.newArrayList();
     
@@ -472,6 +706,8 @@ public class AbsenceCertificationService {
         .getOrBuildJustifiedType(JustifiedTypeName.all_day);
     JustifiedType specified = absenceComponentDao
         .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
+    JustifiedType nothing = absenceComponentDao
+        .getOrBuildJustifiedType(JustifiedTypeName.nothing);
 
     for (AbsenceSituation absenceSituation : situation.absenceSituations) {
       for (String code : absenceSituation.toAddAutomatically.keySet()) {
@@ -517,11 +753,8 @@ public class AbsenceCertificationService {
             aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_25P.getCode()).get();
           }
           if (!aux.equals(type.get())) {
-            if (absenceComponentDao.findAbsences(situation.person, date, aux.code).isEmpty()) {
-              absenceService.forceInsert(situation.person, date, null, aux, allDay, null, null);
-            } else {
-              log.info("Assenza presente {} {} {}", situation.person.fullName(), date, aux.code);
-            }
+            absenceToPersist.addAll(absenceService.forceInsert(
+                person, date, null, aux, allDay, null, null).absencesToPersist);
             continue;
           }
 
@@ -538,12 +771,8 @@ public class AbsenceCertificationService {
             aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_661M.getCode()).get();
           }
           if (!aux.equals(type.get())) {
-            if (absenceComponentDao.findAbsences(situation.person, date, aux.code).isEmpty()) {
-              absenceToPersist.addAll(absenceService.forceInsert(situation.person, date, null, 
-                  aux, specified, type.get().replacingTime / 60, 0).absencesToPersist);
-            } else {
-              log.info("Assenza presente {} {} {}", situation.person.fullName(), date, aux.code);
-            }
+            absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
+                aux, specified, type.get().replacingTime / 60, 0).absencesToPersist);
             continue;
           } 
           
@@ -582,40 +811,16 @@ public class AbsenceCertificationService {
             aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_19M.getCode()).get();
           }
           if (!aux.equals(type.get())) {
-            if (absenceComponentDao.findAbsences(situation.person, date, aux.code).isEmpty()) {
-              absenceToPersist.addAll(absenceService.forceInsert(situation.person, date, null, 
-                  aux, specified, type.get().replacingTime / 60, 0).absencesToPersist);
-            } else {
-              log.info("Assenza presente {} {} {}", situation.person.fullName(), date, aux.code);
-            }
+            absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
+                aux, specified, type.get().replacingTime / 60, 0).absencesToPersist);
             continue;
           } 
-          
-          //7) 89 (diritto allo studio). Converto i completamenti in assenze a minuti.
-          if (code.equals(DefaultAbsenceType.A_89.getCode())) {
-            //TODO: working time day, ricordarsi che è stata importata da attestati.
-            //all'inizio ogni dipendente ha il tipo orario 7:12, ma potrebbe essere ridotta
-            //quando verrà impostato l'orario corretto.
-            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_89M.getCode()).get();
-            if (absenceComponentDao.findAbsences(situation.person, date, aux.code).isEmpty()) {
-              absenceToPersist.addAll(absenceService.forceInsert(situation.person, date, null, 
-                  aux, specified, 432, 0).absencesToPersist);
-            } else {
-              log.info("Assenza presente {} {} {}", situation.person.fullName(), date, aux.code);
-            }
-            continue;
-          }
-          
-          //8) 09 (visita medica). Stesso ragionamento.
-          if (code.equals(DefaultAbsenceType.A_89.getCode())) {
-            //TODO: vedi 89
-            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_89M.getCode()).get();
-            if (absenceComponentDao.findAbsences(situation.person, date, aux.code).isEmpty()) {
-              absenceToPersist.addAll(absenceService.forceInsert(situation.person, date, null, 
-                  aux, specified, 432, 0).absencesToPersist); 
-            } else {
-              log.info("Assenza presente {} {} {}", situation.person.fullName(), date, aux.code);
-            }
+
+          //4) 09 (visita medica). Utilizzo il codice sostitutivo.
+          if (code.equals(DefaultAbsenceType.A_09B.getCode())) {
+            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_09BI.getCode()).get();
+            absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
+                  aux, nothing, 0, 0).absencesToPersist); 
             continue;
           }
           
@@ -628,29 +833,17 @@ public class AbsenceCertificationService {
           }
           JustifiedType justifiedType = type.get().justifiedTypesPermitted.iterator().next();
           if (justifiedType.name.equals(JustifiedTypeName.all_day)) {
-            if (absenceComponentDao
-                .findAbsences(situation.person, date, type.get().code).isEmpty()) {
-              absenceToPersist.addAll(absenceService.forceInsert(situation.person, date, null, 
-                  type.get(), justifiedType, 0, 0).absencesToPersist); 
-            } else {
-              log.info("Assenza presente {} {} {}", situation.person.fullName(), date, aux.code);
-            }
+            absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
+                type.get(), justifiedType, 0, 0).absencesToPersist); 
             continue;
           }
           if (justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
             int hour = type.get().justifiedTime / 60;
             int minute = type.get().justifiedTime % 60;
-            if (absenceComponentDao
-                .findAbsences(situation.person, date, type.get().code).isEmpty()) {
-              absenceToPersist.addAll(absenceService.forceInsert(situation.person, date, null, 
-                  type.get(), justifiedType, hour, minute).absencesToPersist); 
-            } else {
-              log.info("Assenza presente {} {} {}", situation.person.fullName(), date, aux.code);
-            }
+            absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
+                type.get(), justifiedType, hour, minute).absencesToPersist); 
             continue;
           }
-
-
         }
       }
     }
