@@ -23,7 +23,7 @@ public enum DefaultGroup {
       "", 
       DefaultCategoryType.PERMESSI_PROVVISORI_104, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.month, 
-      DefaultTakable.T_18P, null, null, false, false),
+      DefaultTakable.T_18P, DefaultComplation.C_18P, null, false, false),
   
   G_182("182 - Permesso assistenza secondo parenti/affini disabili L. 104/92 tre gg. mese", 
       "", 
@@ -34,7 +34,7 @@ public enum DefaultGroup {
       "", 
       DefaultCategoryType.PERMESSI_PROVVISORI_104, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.month, 
-      DefaultTakable.T_182P, null, null, false, false),
+      DefaultTakable.T_182P, DefaultComplation.C_182P, null, false, false),
 
   G_19("19 - Permesso per dipendente disabile L. 104/92 tre giorni mese", 
       "", 
@@ -45,7 +45,7 @@ public enum DefaultGroup {
       "", 
       DefaultCategoryType.PERMESSI_PROVVISORI_104, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.month, 
-      DefaultTakable.T_19P, null, null, false, false), 
+      DefaultTakable.T_19P, DefaultComplation.C_19P, null, false, false), 
   
   G_26("26 - Permesso per dipendente disabile L. 104/92 due ore giornaliere", 
       "", 

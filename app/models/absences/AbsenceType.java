@@ -278,6 +278,29 @@ public class AbsenceType extends BaseModel {
   }
   
   /**
+   * I gruppi coinvolti dal tipo assenza nella parte taken.
+   * 
+   * @param onlyProgrammed non filtrare i soli programmati
+   * @return entity set
+   */
+  public Set<GroupAbsenceType> involvedGroupTaken(boolean onlyProgrammed) {
+
+    //TODO: da fare la fetch perchè è usato in tabellone timbrature per ogni codice assenza.
+    
+    Set<GroupAbsenceType> groups = Sets.newHashSet();
+    for (TakableAbsenceBehaviour behaviour : this.takableGroup) {
+      groups.addAll(behaviour.groupAbsenceTypes);
+    }
+    Set<GroupAbsenceType> filteredGroup = Sets.newHashSet();
+    for (GroupAbsenceType groupAbsenceType : groups) {
+      if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.programmed)) {
+        filteredGroup.add(groupAbsenceType);
+      }
+    }
+    return filteredGroup;
+  }
+  
+  /**
    * Se il codice è coinvolto solo in gruppi semplici.
    * @return esito
    */
