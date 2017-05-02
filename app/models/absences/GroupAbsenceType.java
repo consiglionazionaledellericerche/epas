@@ -204,7 +204,8 @@ public class GroupAbsenceType extends BaseModel {
               return Optional.of(false);
             }
           } else {
-            if (!defaultGroup.complation.name().equals(this.complationAbsenceBehaviour.name)) {
+            if (this.complationAbsenceBehaviour == null 
+                || !defaultGroup.complation.name().equals(this.complationAbsenceBehaviour.name)) {
               return Optional.of(false);
             }
           }
