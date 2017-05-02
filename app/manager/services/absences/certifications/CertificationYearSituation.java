@@ -8,14 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import manager.services.absences.model.PeriodChain;
-
-import models.Person;
 import models.absences.Absence;
 import models.absences.definitions.DefaultGroup;
 
 import org.joda.time.LocalDate;
-import org.testng.collections.Sets;
 
 /**
  * Contiene le informazioni per inizializzare le assenze del dipendente da Attestati.
@@ -81,6 +77,42 @@ public class CertificationYearSituation implements Serializable {
   }
   
   /**
+   * Primo figlio mancante.
+   */
+  public boolean firstChildMissing() {
+    for (AbsenceSituation abSit : this.absenceSituations) {
+      if (abSit.firstChildMissing) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  /**
+   * Secondo figlio mancante.
+   */
+  public boolean secondChildMissing() {
+    for (AbsenceSituation abSit : this.absenceSituations) {
+      if (abSit.secondChildMissing) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  /**
+   * Terzo figlio mancante.
+   */
+  public boolean thirdChildMissing() {
+    for (AbsenceSituation abSit : this.absenceSituations) {
+      if (abSit.thirdChildMissing) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  /**
    * La situazione circa un singolo codice o gruppo.
    * @author alessandro
    *
@@ -111,6 +143,10 @@ public class CertificationYearSituation implements Serializable {
     
     //Codici non presenti su epas
     public List<String> absentCodes = Lists.newArrayList();
+    
+    public boolean firstChildMissing = false;
+    public boolean secondChildMissing = false;
+    public boolean thirdChildMissing = false;
 
 
     /**
