@@ -495,6 +495,9 @@ public class Administration extends Controller {
       if (contrattoAttestati.endContract == null) {
         continue;
       }
+      
+      JPAPlugin.closeTx(false);
+      JPAPlugin.startTx(false);     
       Person person = personDao.getPersonByNumber(contrattoAttestati.matricola);
       if (person == null) {
         continue;
