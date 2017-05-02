@@ -129,6 +129,11 @@ public class AbsenceCertificationService {
         return null;
       }
     }
+    
+    if (cruscottoCurrent == null) {
+      return null;
+    }
+    
     CruscottoDipendente cruscottoPrev = (CruscottoDipendente)Cache.get(crKey(person, year - 1));
     if (cruscottoPrev == null) {
       try {
