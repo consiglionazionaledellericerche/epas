@@ -843,7 +843,7 @@ public class Competences extends Controller {
       response.status = 400;
       List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
           new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
-      render("@editShift", type, officePeople, office);
+      render("@editReperibility", type, officePeople, office);
     }
     type.office = office;
     type.save();
