@@ -28,6 +28,7 @@ import lombok.Getter;
 import models.Qualification;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.definitions.DefaultAbsenceType;
+import models.absences.definitions.DefaultGroup;
 import models.base.BaseModel;
 import models.enumerate.QualificationMapping;
 
@@ -277,6 +278,29 @@ public class AbsenceType extends BaseModel {
   }
   
   /**
+   * I gruppi coinvolti dal tipo assenza nella parte taken.
+   * 
+   * @param onlyProgrammed non filtrare i soli programmati
+   * @return entity set
+   */
+  public Set<GroupAbsenceType> involvedGroupTaken(boolean onlyProgrammed) {
+
+    //TODO: da fare la fetch perchè è usato in tabellone timbrature per ogni codice assenza.
+    
+    Set<GroupAbsenceType> groups = Sets.newHashSet();
+    for (TakableAbsenceBehaviour behaviour : this.takableGroup) {
+      groups.addAll(behaviour.groupAbsenceTypes);
+    }
+    Set<GroupAbsenceType> filteredGroup = Sets.newHashSet();
+    for (GroupAbsenceType groupAbsenceType : groups) {
+      if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.programmed)) {
+        filteredGroup.add(groupAbsenceType);
+      }
+    }
+    return filteredGroup;
+  }
+  
+  /**
    * Se il codice è coinvolto solo in gruppi semplici.
    * @return esito
    */
@@ -295,13 +319,13 @@ public class AbsenceType extends BaseModel {
    * @return gruppo
    */
   public GroupAbsenceType defaultTakableGroup() {
-    if (this.code.equals("24")) {
-      System.out.println("");
-    }
     GroupAbsenceType groupSelected = null;
     for (TakableAbsenceBehaviour behaviour : this.takableGroup) {   //o uno o due...
       for (GroupAbsenceType group : behaviour.groupAbsenceTypes) {  //quasi sempre 1
-        if (group.automatic == true) {
+        if (group.automatic == true || group.name.equals(DefaultGroup.FERIE_CNR_DIPENDENTI.name())
+            || group.name.equals(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name()) 
+            || group.name.equals(DefaultGroup.LAVORO_FUORI_SEDE.name())) {
+          //TODO: questi gruppi (anche in groups permitted) vanno taggati
           continue;
         }
         if (groupSelected == null) {

@@ -22,8 +22,8 @@
         #{list items:cwttList, as:'cwtt'}
 		<tr>
 			<td>${cwtt.contract.person.surname} ${cwtt.contract.person.name}</td>
-			<td data-order="cwtt.beginDate">${cwtt.beginDate?.format()}</td>
-			<td data-order="cwtt.endDate">${cwtt.endDate?.format()}</td>
+			<td data-order="${cwtt.beginDate}">${cwtt.beginDate?.format()}</td>
+			<td data-order="${cwtt.endDate}">${cwtt.endDate?.format()}</td>
 		</tr>
 		#{/list}
 	  </tbody>

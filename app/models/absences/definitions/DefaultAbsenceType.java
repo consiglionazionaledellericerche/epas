@@ -56,6 +56,12 @@ public enum DefaultAbsenceType {
   A_18P("18P", "Permesso provvisorio assistenza parenti/affini disabili L. 104/92 intera giornata",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, null, null),
+  A_18PM("18PM", "Permesso provvisorio assistenza parenti/affini disabili L. 104/92 in ore e minuti",
+      true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
+      0, null, null, null),
+  A_18PH7("18P", "Permesso provvisorio assistenza parenti/affini disabili L. 104/92 completamento giornata",
+      false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
+      0, JustifiedTypeName.all_day, null, null),
   
   A_182M("182M", "Permesso assistenza secondo parenti/affini disabili L. 104/92 in ore e minuti",
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
@@ -93,6 +99,12 @@ public enum DefaultAbsenceType {
   A_182P("182P", "Permesso provvisorio assistenza secondo parenti/affini disabili L. 104/92 intera giornata",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, null, null),
+  A_182PM("182PM", "Permesso provvisorio assistenza secondo parenti/affini disabili L. 104/92 in ore e minuti",
+      true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
+      0, null, null, null),
+  A_182PH7("182P", "Permesso provvisorio assistenza secondo parenti/affini disabili L. 104/92 completamento giornata",
+      false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
+      0, JustifiedTypeName.all_day, null, null),
 
   A_19M("19M", "Permesso per dipendente disabile L. 104/92 in ore e minuti",
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
@@ -130,6 +142,12 @@ public enum DefaultAbsenceType {
   A_19P("19P", "Permesso provvisorio per dipendente disabile L. 104/92 intera giornata",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, null, null),
+  A_19PM("19PM", "Permesso provvisorio per dipendente disabile L. 104/92 in ore e minuti",
+      true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
+      0, null, null, null),
+  A_19PH7("19P", "Permesso provvisorio per dipendente disabile L. 104/92 completamento giornata",
+      false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
+      0, JustifiedTypeName.all_day, null, null),
   
   //Il tempo per buono pasto in questo momento è disabilitato. Capire.
   A_26("26", "Permesso per dipendente disabile L. 104/92 due ore giornaliere",
@@ -189,6 +207,13 @@ public enum DefaultAbsenceType {
       0, JustifiedTypeName.all_day, null, null),
   A_09M("09M", "Permesso visita medica in ore e minuti",
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
+      0, null, null, null),
+  A_09BI("09B", "Permesso visita medica completamento giornata da importazione",
+      true, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
+      0, null, null, null),
+  
+  A_631("631", "Permesso visita medica",
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, null, null),
 
   A_92("92", "Missione",
@@ -424,10 +449,7 @@ public enum DefaultAbsenceType {
   A_11C9("11C9", "Convalescenza dopo malattia superiore a 9 mesi",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
       0, null, null, null),
-  //TODO: Questo codice in attestati è nel gruppo malattia. Verificare
-  A_631("631", "Permesso visita medica",
-      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
-      0, null, null, null),
+
   
   A_12("12", "malattia primo figlio/a <= 3 anni retribuita 100%",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
