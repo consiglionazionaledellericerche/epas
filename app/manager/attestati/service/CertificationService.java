@@ -685,36 +685,51 @@ public class CertificationService implements ICertificationService {
   }
   
   @Override
-  public CruscottoDipendente getCruscottoDipendente(Person person, int year) 
+  public CruscottoDipendente getCruscottoDipendente(Person person, int year)
       throws ExecutionException, NoSuchFieldException {
-    
-    //Dicembre per gli anni passati, il mese scorso se anno corrente.
-    int month = 12;
-    if (year == LocalDate.now().getYear()) {
-      month = LocalDate.now().getMonthOfYear() - 2;
-    }
-    
-    //prelevare lo stato attuale attestato per il mese attuale della sede della persona
-    for (StatoAttestatoMese statoAttestatoMese : certificationsComunication
-        .getStatoAttestatoMese(person.office, year, month)) {
-      
-      //processo solo quello della persona passata
-      if (person.number.equals(statoAttestatoMese.dipendente.matricola)) {
-        
-        //scarico il periodo della persona per il dipendente id
-        PeriodoDipendente periodoDipendente = certificationsComunication
-            .getPeriodoDipendente(statoAttestatoMese.id);
-        
-        log.info(periodoDipendente.toString());
 
-        //scarico il cruscotto
-        CruscottoDipendente cruscottoDipendente = certificationsComunication
-            .getCruscotto(periodoDipendente.dipendente.id, year);
-        
-        return cruscottoDipendente;
+    StatoAttestatoMese statoAttestatoMese = null;
+    YearMonth yearMonth = null;
+    while (statoAttestatoMese == null) {
+      
+      if (yearMonth == null) {
+        //first attempt  
+        yearMonth = new YearMonth(LocalDate.now());
+        if (year < LocalDate.now().getYear()) {
+          yearMonth = new YearMonth(year, 12);
+        }
+      } else {
+        //tentativi successivi
+        yearMonth = yearMonth.minusMonths(1);
+        if (yearMonth.getYear() != year) {
+          return null;
+        }
+      }
+      
+      try {
+        for (StatoAttestatoMese item : certificationsComunication
+            .getStatoAttestatoMese(person.office, year, yearMonth.getMonthOfYear())) {
+          if (person.number.equals(item.dipendente.matricola)) {
+            statoAttestatoMese = item;
+          }
+        }
+      } catch (Exception ex) {
+        statoAttestatoMese = null;
       }
     }
-    return null;
+
+    //scarico il periodo della persona per il dipendente id
+    PeriodoDipendente periodoDipendente = certificationsComunication
+        .getPeriodoDipendente(statoAttestatoMese.id);
+
+    log.info(periodoDipendente.toString());
+
+    //scarico il cruscotto
+    CruscottoDipendente cruscottoDipendente = certificationsComunication
+        .getCruscotto(periodoDipendente.dipendente.id, year);
+
+    return cruscottoDipendente;
+
   }
 
 }

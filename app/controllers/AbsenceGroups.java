@@ -1169,7 +1169,6 @@ public class AbsenceGroups extends Controller {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-    Person person = null;
     List<IWrapperPerson> people = Lists.newArrayList(); 
     Map<Integer, Optional<CertificationYearSituation>> certificationsSummary = Maps.newHashMap();
     
@@ -1188,16 +1187,9 @@ public class AbsenceGroups extends Controller {
       
       people.add(wrPerson);
       
-      if (person != null && wrPerson.getValue().equals(person)) {
-        //la persona specificata la ricarico
-        CertificationYearSituation yearSituation = absenceCertificationService
-            .buildCertificationYearSituation(person, year, false);
-        certificationsSummary.put(person.number, Optional.of(yearSituation));
-      } else {
-        //prelevo dalla cache la situazione se è già presente.
-        certificationsSummary.put(wrPerson.getValue().number, absenceCertificationService
-            .certificationYearSituationCached(wrPerson.getValue(), year));
-      }
+      //prelevo dalla cache la situazione se è già presente.
+      certificationsSummary.put(wrPerson.getValue().number, absenceCertificationService
+          .certificationYearSituationCached(wrPerson.getValue(), year));
     }
 
     render(people, office, year, certificationsSummary);
@@ -1229,8 +1221,13 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
     
-    absenceCertificationService
-    .buildCertificationYearSituation(person, LocalDate.now().getYear(), false);
+    CertificationYearSituation yearSituation = absenceCertificationService
+        .buildCertificationYearSituation(person, LocalDate.now().getYear(), false);
+    
+    if (yearSituation == null) {
+      flash.error("Impossibile recuperare la situazione del dipendente"
+          + " all'interno della sede selezionata");
+    }
 
     importCertificationsAbsences(person.office.id);
     
