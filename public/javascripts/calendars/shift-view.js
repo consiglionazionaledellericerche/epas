@@ -26,21 +26,20 @@ jQuery(document).ready(function() {
 	    });
 		console.log("types: "+types );
 	    if (types.length > 1) {
-	    	console
-				userAllowed = true;
+	    		userAllowed = true;
 				shiftCalendar.selectPopup(userAllowed, types, 'shiftView', shiftCalendar, shiftConfGroup);
+		} else {
+			if (types.length == 1) {
+				calendarType = types;
+				shiftConfGroup.calendarChoise = calendarType;
+				userAllowed = true;
+				createCalendarShiftView(userAllowed, calendarType, shiftCalendar, shiftConfGroup);
+				jQuery('h1.title').append(" "+shiftConfGroup.getShiftDescription(types));
 			} else {
-				if (types.length == 1) {
-					calendarType = types;
-	        shiftConfGroup.calendarChoise = calendarType;
-					userAllowed = true;
-					createCalendarShiftView(userAllowed, calendarType, shiftCalendar, shiftConfGroup);
-	        jQuery('h1.title').append(" "+shiftConfGroup.getShiftDescription(types));
-				} else {
-					userAllowed = false;
-					createCalendarShiftView(userAllowed, calendarType, shiftCalendar, shiftConfGroup);			
-				}	
-			}
+				userAllowed = false;
+				createCalendarShiftView(userAllowed, calendarType, shiftCalendar, shiftConfGroup);			
+			}	
+		}
 
 
 	});
