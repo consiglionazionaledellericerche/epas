@@ -44,7 +44,7 @@
 			          <th class="center">Contratti attivi<br>attualmente associati</th>
 			          <th class="center">Periodi associati<br>a contratti attivi</th> 
 			          <th class="center">Contratti<br>associati<br>(storico)</th>
-			          <!-- <th class="center">Cambia orario<br>a tutti</th>  -->
+			          <th class="center">Cambia orario<br>a tutti</th>
 			        </tr>
 				    #{list items:wttAllowedEnabled, as:'wtt'}
 				      <tr>
@@ -60,9 +60,9 @@
 				        <!-- contratti attualmente attivi con wtt -->
 				        <td  class="center">
 				          <a href="@{WorkingTimes.showContract(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
-				            ${wtt.getAssociatedActiveContract(office.id).size()}
+				            ${wtt.getAssociatedActiveContract(office).size()}
 				    	  </a>    
-				    	  #{if wtt.getAssociatedActiveContract(office.id).size() == 0 }
+				    	  #{if wtt.getAssociatedActiveContract(office).size() == 0 }
 				    	    <a href="@{WorkingTimes.toggleWorkingTimeTypeEnabled(wtt.value.id)}">
 				    	      <i data-toggle="tooltip" data-placement="bottom" title="Disattiva tipo orario non associato ad alcun contratto attivo" class="fa fa-power-off"></i>
 				    	    </a>
@@ -72,7 +72,7 @@
 				        <!-- periodi associati a contratti attualmente attivi con wtt -->
 				        <td class="center">
 			                <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
-			                  ${wtt.getAssociatedPeriodInActiveContract(office.id).size()}
+			                  ${wtt.getAssociatedPeriodInActiveContract(office).size()}
 			                </a>
 				        </td>
 				        
@@ -85,13 +85,11 @@
 				    	    </a>
 				    	  #{/if}
 				    	</td>
-				    	<!-- 
-				        <td class="center">
-				          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.value.id, office.id)}" data-modal=".my-modal">
-			                Cambia
-			    	      </a>
-						</td>
-						 -->
+                        <td class="center">
+                          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
+                            Cambia
+                          </a>
+                        </td>
 				      </tr>	
 				    #{/list}
 				</table>
@@ -160,8 +158,7 @@
 			<ul>
 			 <li>Individuare il tipo orario da modificare (es <em>Normale</em>)</li>
 			 <li>Creare un nuovo tipo orario con le modifiche opportune rispetto al tipo orario da modificare (es <em>Normale-mod</em>)</li>
-			 <li>Attribuire il nuovo tipo orario ad ogni dipendente interessato tramite le procedure fornite 
-			 nella sezione amministrativa lista persone e modifica dati dipendente.</li>
+			 <li>Cambiare l'orario <em>Normale</em> a tutti impostando come nuovo valore <em>Normale-mod</em> a partire dalla data desiderata.</li>
 			</ul>
 			
 			<p><strong>Eliminare o disabilitare tipi orario</strong></p>

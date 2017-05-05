@@ -297,6 +297,7 @@ when
     "AbsenceGroups.editAbsenceType", /* per la show... */
     "AbsenceGroups.absenceInitializations",
     "AbsenceGroups.absenceTroubles",
+    "AbsenceGroups.importCertificationsAbsences",
     "BadgeReaders.list",
     "BadgeSystems.list",
     "BadgeSystems.personBadges",
@@ -758,7 +759,11 @@ when
         "AbsenceGroups.initialization",
         "AbsenceGroups.saveInitialization",
         "AbsenceGroups.deleteInitialization",
-
+        "AbsenceGroups.importCertificationsAbsences",
+        "AbsenceGroups.certificationsAbsences",
+        "AbsenceGroups.reloadCertificationAbsences",
+        "AbsenceGroups.syncCertificationsAbsences",
+        
      	"Persons.children",
      	"Persons.editChild",
      	"Persons.saveChild",
@@ -925,6 +930,10 @@ when
         "AbsenceGroups.initialization",
         "AbsenceGroups.saveInitialization",
         "AbsenceGroups.deleteInitialization",
+        "AbsenceGroups.importCertificationsAbsences",
+        "AbsenceGroups.certificationsAbsences",
+        "AbsenceGroups.reloadCertificationAbsences",
+        "AbsenceGroups.syncCertificationsAbsences", 
         
      	"Persons.children",
      	"Persons.editChild",

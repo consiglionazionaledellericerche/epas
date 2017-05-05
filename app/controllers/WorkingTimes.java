@@ -8,6 +8,7 @@ import com.google.common.collect.Sets;
 
 import dao.ContractDao;
 import dao.OfficeDao;
+import dao.PersonDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperWorkingTimeType;
@@ -18,19 +19,21 @@ import helpers.ValidationHelper;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
 
+import lombok.extern.slf4j.Slf4j;
+
 import manager.ContractManager;
+import manager.PeriodManager;
 import manager.WorkingTimeTypeManager;
 
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Office;
+import models.Person;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.dto.HorizontalWorkingTime;
@@ -39,18 +42,17 @@ import models.enumerate.WorkingTimeTypePattern;
 
 import org.joda.time.LocalDate;
 
-import play.Logger;
 import play.cache.Cache;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
-import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import security.SecurityRules;
 
 @With({Resecure.class})
+@Slf4j
 public class WorkingTimes extends Controller {
 
   private static final String VERTICAL_WORKING_TIME_STEP = "vwt";
@@ -72,6 +74,10 @@ public class WorkingTimes extends Controller {
   private static WorkingTimeTypeManager workingTimeTypeManager;
   @Inject
   private static ContractManager contractManager;
+  @Inject
+  private static PersonDao personDao;
+  @Inject
+  private static PeriodManager periodManager;
 
   /**
    * Gestione dei tipi orario.
@@ -136,13 +142,17 @@ public class WorkingTimes extends Controller {
     rules.checkIfPermitted(wtt.office);
     rules.checkIfPermitted(office);
 
-    List<Contract> contractList = wrapperFactory.create(wtt)
-        .getAssociatedActiveContract(officeId);
+    List<Contract> contractList = wrapperFactory.create(wtt).getAssociatedActiveContract(office);
 
     render(wtt, contractList, office);
 
   }
 
+  /**
+   * Mostra i periodi con quel tipo orario appartenenti a contratti attualmente attivi.
+   * @param wttId tipo orario
+   * @param officeId sede
+   */
   public static void showContractWorkingTimeType(Long wttId, Long officeId) {
 
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
@@ -155,15 +165,16 @@ public class WorkingTimes extends Controller {
 
     IWrapperWorkingTimeType wwtt = wrapperFactory.create(wtt);
 
-    List<ContractWorkingTimeType> cwttList = wwtt.getAssociatedPeriodInActiveContract(officeId);
+    List<ContractWorkingTimeType> cwttList = wwtt.getAssociatedPeriodInActiveContract(office);
 
     render(wtt, cwttList, office);
 
   }
+  
   /**
-   *
+   * Inserimento delle informazioni di base tipo orario.
    * @param officeId id ufficio
-   * @param compute
+   * @param compute controllo degli step
    * @param name nome identificativo dell'orario di lavoro
    * @param workingTimeTypePattern tipo di orario di lavoro (orizzontale/verticale).
    */
@@ -359,6 +370,9 @@ public class WorkingTimes extends Controller {
 
   }
 
+  /**
+   * Salvataggio tipo orario.
+   */
   public static void save(@Valid WorkingTimeType wtt, WorkingTimeTypeDay wttd1,
       WorkingTimeTypeDay wttd2, WorkingTimeTypeDay wttd3,
       WorkingTimeTypeDay wttd4, WorkingTimeTypeDay wttd5,
@@ -388,6 +402,10 @@ public class WorkingTimes extends Controller {
 
   }
 
+  /**
+   * Mostra il tipo orario orizzontale.
+   * @param wttId tipo orario.
+   */
   public static void showHorizontal(Long wttId) {
 
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
@@ -407,6 +425,10 @@ public class WorkingTimes extends Controller {
     render(horizontalPattern, office);
   }
 
+  /**
+   * Mostra il tipo orario.
+   * @param wttId tipo orario
+   */
   public static void showWorkingTimeType(Long wttId) {
 
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
@@ -422,6 +444,10 @@ public class WorkingTimes extends Controller {
     render(wtt);
   }
 
+  /**
+   * Elimina un tipo orario (non deve essere associato ad alcun contratto).
+   * @param wttId tipo orario
+   */
   public static void delete(Long wttId) {
 
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
@@ -429,7 +455,7 @@ public class WorkingTimes extends Controller {
     rules.checkIfPermitted(wtt.office);
 
     //Prima di cancellare il tipo orario controllo che non sia associato ad alcun contratto
-    if (contractDao.getAssociatedContract(wtt).size() > 0) {
+    if (wrapperFactory.create(wtt).getAssociatedContract().size() > 0) {
 
       flash.error("Impossibile eliminare il tipo orario selezionato perchè "
           + "associato ad almeno un contratto. Operazione annullata");
@@ -460,7 +486,7 @@ public class WorkingTimes extends Controller {
     IWrapperWorkingTimeType wwtt = wrapperFactory.create(wtt);
 
     //Prima di disattivarlo controllo che non sia associato ad alcun contratto attivo
-    if (wtt.disabled == false && wwtt.getAssociatedActiveContract(wtt.office.id).size() > 0) {
+    if (wtt.disabled == false && wwtt.getAssociatedActiveContract(wtt.office).size() > 0) {
 
       flash.error("Impossibile eliminare il tipo orario selezionato perchè "
           + "attualmente associato ad almeno un contratto attivo.");
@@ -484,24 +510,17 @@ public class WorkingTimes extends Controller {
   }
 
 
+  /**
+   * Modale per il cambia orario a tutti.
+   * @param wttId tipo orario
+   * @param officeId sede
+   */
   public static void changeWorkingTimeTypeToAll(Long wttId, Long officeId) {
 
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
-    if (wtt == null) {
-
-      flash.error(
-          "Impossibile trovare il tipo orario specificato. Riprovare o effettuare una "
-              + "segnalazione.");
-      manageWorkingTime(null);
-    }
-
+    notFoundIfNull(wtt);
     Office office = officeDao.getOfficeById(officeId);
-    if (office == null) {
-
-      flash.error("La sede inerente il cambio di orario è obbligatoria. Operazione annullata.");
-      manageWorkingTime(null);
-    }
-
+    notFoundIfNull(office);
     rules.checkIfPermitted(office);
 
     List<WorkingTimeType> wttList = workingTimeTypeDao.getEnabledWorkingTimeTypeForOffice(office);
@@ -510,304 +529,85 @@ public class WorkingTimes extends Controller {
     render(wtt, wttList, office);
   }
 
+  /**
+   * Esegue il cambia orario a tutti.
+   * @param wtt vecchio tipo
+   * @param wttNew nuovo tipo
+   * @param officeId sede
+   * @param dateFrom data inizio
+   * @param dateTo data fine
+   */
   public static void executeChangeWorkingTimeTypeToAll(
-      WorkingTimeType wttOld, WorkingTimeType wttNew, Long officeId, LocalDate dateFrom,
+      WorkingTimeType wtt, WorkingTimeType wttNew, Long officeId, LocalDate dateFrom,
       LocalDate dateTo) {
 
     Office office = officeDao.getOfficeById(officeId);
-
-    if (dateFrom.isAfter(dateTo)) {
-      flash.error("Intervallo date non Valido");
-      manageWorkingTime(office.id);
+    notFoundIfNull(office);
+    if (wttNew == null || !wttNew.isPersistent()) {
+      validation.addError("wttNew", "Campo obbligatorio.");
     }
-
-    int contractChanges = 0;
-    int contractError = 0;
+    if (dateFrom == null) {
+      validation.addError("dateFrom", "Campo obbligatorio.");
+    } else {
+      validation.future(dateFrom.toDate(), 
+          LocalDate.now().minusMonths(1).dayOfMonth().withMinimumValue().minusDays(1).toDate())
+      .key("dateFrom").message("validation.after");
+      if (dateTo != null && dateFrom.isAfter(dateTo)) {
+        validation.addError("dateTo", "Deve essere sucessivo alla data iniziale");
+      }
+    }
+    if (Validation.hasErrors()) {
+      List<WorkingTimeType> wttList = workingTimeTypeDao.getEnabledWorkingTimeTypeForOffice(office);
+      wttList.remove(wtt);
+      response.status = 400;
+      render("@changeWorkingTimeTypeToAll", office, wttList, wtt, wttNew,  
+          dateFrom, dateTo);
+    }
+    
+    if (wtt.office != null && wttNew.office != null && !wtt.office.id.equals(wttNew.office.id)) {
+      badRequest();
+    }
 
     rules.checkIfPermitted(office);
 
-    //L'operazione deve interessare tipi orario della stessa sede
-    if (wttOld.office != null && wttNew.office != null
-        && !wttOld.office.id.equals(wttNew.office.id)) {
-
-      flash.error(
-          "L'operazione di cambio orario a tutti deve coinvolgere tipi orario definiti per la "
-              + "stessa sede.");
-      manageWorkingTime(office.id);
-    }
-
-    //Prendere tutti i contratti attivi da firstDay ad oggi
-    List<Contract> contractInPeriod =
-        contractDao.getActiveContractsInPeriod(dateFrom, Optional.fromNullable(dateTo));
-    JPAPlugin.closeTx(false);
-    JPAPlugin.startTx(false);
-
-    //Logica aggiornamento contratto
-    for (Contract contract : contractInPeriod) {
-
-      DateInterval contractPeriod = new DateInterval(dateFrom, dateTo);
-
-      try {
-
-        JPAPlugin.startTx(false);
-
-        contract = contractDao.getContractById(contract.id);
-        wttOld = workingTimeTypeDao.getWorkingTimeTypeById(wttOld.id);
-        wttNew = workingTimeTypeDao.getWorkingTimeTypeById(wttNew.id);
-
-        boolean needChanges = false;
-
-        for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
-          if (cwtt.workingTimeType.id.equals(wttOld.id)
-              &&
-              DateUtility.intervalIntersection(
-                  contractPeriod, new DateInterval(cwtt.beginDate, cwtt.endDate)) != null) {
-            needChanges = true;
-          }
-        }
-
-        if (needChanges) {
-
-          Logger.info("need changes %s", contract.person.surname);
-
-          List<ContractWorkingTimeType> newCwttList = new ArrayList<ContractWorkingTimeType>();
-
-          //requires ordinata per beginDate @OrderBy
-          for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
-
-            // FIXME: secondo me la requires che siano ordinati non serve più
-            // verificare.
-
-            DateInterval intersection = DateUtility
-                .intervalIntersection(contractPeriod,
-                    new DateInterval(cwtt.beginDate, cwtt.endDate));
-
-            if (cwtt.workingTimeType.id.equals(wttOld.id) && intersection != null) {
-
-              newCwttList.addAll(splitContractWorkingTimeType(cwtt, intersection, wttNew));
-            } else {
-
-              ContractWorkingTimeType copy = new ContractWorkingTimeType();
-              copy.beginDate = cwtt.beginDate;
-              copy.endDate = cwtt.endDate;
-              copy.workingTimeType = cwtt.workingTimeType;
-              newCwttList.add(copy);
-            }
-          }
-          Logger.info("clean");
-          List<ContractWorkingTimeType> newCwttListClean =
-              cleanContractWorkingTimeType(newCwttList);
-          Logger.info("replace");
-          replaceContractWorkingTimeTypeList(contract, newCwttListClean);
-          Logger.info("recompute");
-
-          contractManager.recomputeContract(
-              contract, Optional.fromNullable(dateFrom), false, false);
-
-          contractChanges++;
-
-        }
-
-        JPAPlugin.closeTx(false);
-
-      } catch (Exception e) {
-
-        contractError++;
-      }
-
-    }
-
-    JPAPlugin.startTx(false);
-    if (contractError == 0) {
-      flash.success("Operazione completata con successo. Correttamente aggiornati %s "
-          + "contratti.", contractChanges);
-    } else {
-      flash.error("Aggiornati correttamente %s contratti. Si sono verificati errori per"
-              + " %s contratti. Riprovare o effettuare una segnalazione.",
-          contractChanges, contractError);
-    }
-
-    //TODO capire quale office deve essere ritornato
-    manageWorkingTime(office.id);
-
-  }
-
-  private static List<ContractWorkingTimeType> splitContractWorkingTimeType(
-      ContractWorkingTimeType cwtt, DateInterval period, WorkingTimeType wttNew) {
-
-    List<ContractWorkingTimeType> newCwttList = new ArrayList<ContractWorkingTimeType>();
-
-    ContractWorkingTimeType first = new ContractWorkingTimeType();
-    first.workingTimeType = cwtt.workingTimeType;
-    ContractWorkingTimeType middle = new ContractWorkingTimeType();
-    middle.workingTimeType = wttNew;
-    ContractWorkingTimeType last = new ContractWorkingTimeType();
-    last.workingTimeType = cwtt.workingTimeType;
-
-    DateInterval cwttInterval = new DateInterval(cwtt.beginDate, cwtt.endDate);
-
-    //caso1 cwtt inizia dopo e finisce prima (interamente contenuto)
-    // Risultato dello split: MIDDLE (new)
-    if (DateUtility.isIntervalIntoAnother(
-        new DateInterval(cwtt.beginDate, cwtt.endDate), period)) {
-
-      middle.beginDate = cwtt.beginDate;
-      middle.endDate = cwtt.endDate;
-
-      newCwttList.add(middle);
-
-      return newCwttList;
-    }
-
-    //caso 2 cwtt inizia prima e finisce prima (o uguale)
-    // Risultato dello split: FIRST (old) MIDDLE (new)
-    if (cwttInterval.getBegin().isBefore(period.getBegin())
-        && !cwttInterval.getEnd().isAfter(period.getEnd())) {
-
-      first.beginDate = cwtt.beginDate;
-      first.endDate = period.getBegin().minusDays(1);
-
-      middle.beginDate = period.getBegin();
-      middle.endDate = cwtt.endDate;
-
-      newCwttList.add(first);
-      newCwttList.add(middle);
-
-      return newCwttList;
-    }
-
-
-    //caso 3 cwtt inizia dopo (o uguale) e finisce dopo
-    // Risultato dello split: MIDDLE (new) LAST (old)
-    if (!cwttInterval.getBegin().isBefore(period.getBegin())
-        && cwttInterval.getEnd().isAfter(period.getEnd())) {
-
-      middle.beginDate = cwtt.beginDate;
-      middle.endDate = period.getEnd();
-
-      last.beginDate = period.getEnd().plusDays(1);
-      last.endDate = cwtt.endDate;
-
-
-      newCwttList.add(middle);
-      newCwttList.add(last);
-
-      return newCwttList;
-
-    }
-
-    //caso 4 cwtt inizia prima e finisce dopo
-    // Risultato dello split: FIRST (old) MIDDLE (new) LAST (old)
-    if (cwttInterval.getBegin().isBefore(period.getBegin())
-        && cwttInterval.getEnd().isAfter(period.getEnd())) {
-
-      first.beginDate = cwtt.beginDate;
-      first.endDate = period.getBegin().minusDays(1);
-
-      middle.beginDate = period.getBegin();
-      middle.endDate = period.getEnd();
-
-      last.beginDate = period.getEnd().plusDays(1);
-      last.endDate = cwtt.endDate;
-
-      newCwttList.add(first);
-      newCwttList.add(middle);
-      newCwttList.add(last);
-
-      return newCwttList;
-
-    }
-
-    return newCwttList;
-
-  }
-
-  /**
-   * Fonde insieme due periodi consecutivi con lo stesso tipo orario.
-   *
-   * @require cwttList ordinato per beginDate
-   */
-  public static List<ContractWorkingTimeType> cleanContractWorkingTimeType(
-      List<ContractWorkingTimeType> cwttList) {
-
-    Collections.sort(cwttList);
-
-    List<ContractWorkingTimeType> cwttListClean = new ArrayList<ContractWorkingTimeType>();
-
-    ContractWorkingTimeType previousCwtt = null;
-
-    boolean hasFusion = true;
-
-    while (hasFusion) {
-
-      hasFusion = false;
-
-      for (ContractWorkingTimeType cwtt : cwttList) {
-
-        if (previousCwtt == null) {
-
-          previousCwtt = cwtt;
+    DateInterval requestInterval = new DateInterval(dateFrom, dateTo);
+    
+    for (Person person : personDao.list(Optional.of(office)).list()) {
+      for (Contract contract : person.contracts) {
+        
+        DateInterval contractInterval = DateUtility
+            .intervalIntersection(contract.periodInterval(), requestInterval);
+        if (contractInterval == null) {
           continue;
         }
-
-        if (!previousCwtt.workingTimeType.id.equals(cwtt.workingTimeType.id)) {
-
-          cwttListClean.add(previousCwtt);
-          previousCwtt = cwtt;
-        } else {
-
-          hasFusion = true;
-
-          //fusione
-          ContractWorkingTimeType cwttClean = new ContractWorkingTimeType();
-          cwttClean.beginDate = previousCwtt.beginDate;
-          cwttClean.endDate = cwtt.endDate;
-          cwttClean.workingTimeType = previousCwtt.workingTimeType;
-          cwttListClean.add(cwttClean);
-
-          previousCwtt = null;
+        ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
+        cwtt.contract = contract;          
+        cwtt.beginDate = contractInterval.getBegin();
+        if (!DateUtility.isInfinity(contractInterval.getEnd())) {
+          cwtt.endDate = contractInterval.getEnd(); //altrimenti null  
+        }
+        cwtt.workingTimeType = wttNew;
+        
+        try {
+          periodManager.updatePeriods(cwtt, true);
+          contract = contractDao.getContractById(contract.id);
+          contract.person.refresh();
+          contractManager.recomputeContract(contract, Optional.of(dateFrom), false, false);
+        } catch (Exception ex) {
+          log.error("La situazione dei contract working time type per la persona {} è compromessa,"
+              + "ripristinare manualmente la situazione da gestisci contratto, ridefinendo le sue "
+              + "date iniziali e finali."); 
         }
       }
-
-      if (previousCwtt != null) {
-
-        cwttListClean.add(previousCwtt);
-      }
-
-      previousCwtt = null;
-      cwttList = cwttListClean;
-      cwttListClean = new ArrayList<ContractWorkingTimeType>();
-
     }
-
-    return cwttList;
+    
+    //redirect (torno alla modifica dell'orario di partenza)
+    if (wtt.office == null) {
+      manageWorkingTime(office.id);
+    } else {
+      manageOfficeWorkingTime(office.id);
+    }
   }
 
-  /**
-   * Elimina gli esistenti ContractWorkingTimeType del contratto e li sostituisce con cwttList.
-   */
-  private static void replaceContractWorkingTimeTypeList(
-      Contract contract, List<ContractWorkingTimeType> cwttList) {
-
-    List<ContractWorkingTimeType> toDelete = new ArrayList<ContractWorkingTimeType>();
-    for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
-      toDelete.add(cwtt);
-    }
-
-    for (ContractWorkingTimeType cwtt : toDelete) {
-      cwtt.delete();
-      contract.contractWorkingTimeType.remove(cwtt);
-      contract.save();
-    }
-
-    for (ContractWorkingTimeType cwtt : cwttList) {
-
-      cwtt.contract = contract;
-      cwtt.save();
-      contract.contractWorkingTimeType.add(cwtt);
-      contract.save();
-    }
-
-  }
 
 }
