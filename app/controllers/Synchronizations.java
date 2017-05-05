@@ -12,7 +12,6 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
-import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
@@ -38,7 +37,6 @@ import models.Office;
 import models.Person;
 import models.Role;
 import models.UsersRolesOffices;
-import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
 
@@ -83,8 +81,6 @@ public class Synchronizations extends Controller {
   static ConfigurationManager configurationManager;
   @Inject
   static ContractManager contractManager;
-  @Inject
-  static WorkingTimeTypeDao workingTimeTypeDao;
   @Inject
   static WrapperModelFunctionFactory wrapperFunctionFactory;
   @Inject
@@ -770,11 +766,8 @@ public class Synchronizations extends Controller {
     }
 
     if (contractInPerseo.isPresent()) {
-      WorkingTimeType normal = workingTimeTypeDao
-          .workingTypeTypeByDescription("Normale", Optional.absent());
-
       // Salvare il contratto.
-      if (!contractManager.properContractCreate(contractInPerseo.get(), normal, false)) {
+      if (!contractManager.properContractCreate(contractInPerseo.get(), Optional.absent(), false)) {
         flash.error("Il contratto non può essere importato a causa di errori");
         people(person.office.id);
       }
@@ -803,9 +796,6 @@ public class Synchronizations extends Controller {
       return Optional.of(ex);
     }
 
-    WorkingTimeType normal = workingTimeTypeDao
-        .workingTypeTypeByDescription("Normale", Optional.absent());
-
     if (perseoDepartmentActiveContractsByPersonPerseoId != null) {
       for (Contract perseoContract : perseoDepartmentActiveContractsByPersonPerseoId.values()) {
         Contract epasContract = 
@@ -814,7 +804,7 @@ public class Synchronizations extends Controller {
           continue;
         }
         // Salvare il contratto.
-        if (!contractManager.properContractCreate(perseoContract, normal, false)) {
+        if (!contractManager.properContractCreate(perseoContract, Optional.absent(), false)) {
           // TODO segnalare il conflitto
         }
       }
