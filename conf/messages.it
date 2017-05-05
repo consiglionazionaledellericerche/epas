@@ -555,6 +555,7 @@ VacationsAdmin.list= Ferie e Permessi
 WorkingTimes.manageWorkingTime= Gestione Orari di Lavoro
 Competences.activateServices= Gestione Servizi
 Shift.handleShifts =Gestisci turni
+Shift.personalShift =Visualizza turno
 
 ########################
 # Enumerati

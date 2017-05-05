@@ -129,6 +129,24 @@ end
 
 /*Fine parte di ruolo supervisore dei turni*/
 
+rule isPersonShift
+when 
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  Person (personShift != null) from currentOperator.person
+  $c: PermissionCheck(action in (
+  	    /*
+     	 * Visualizzazione della propria situazione dei turni
+     	 */
+     	"Shift.personalShift",
+     	"Shift.renderServices",
+     	"Shift.renderIds"
+     	), target == null, granted == false)
+then
+ $c.grant();
+end
+  
+
 rule IsEmployee
 when
   $uro: UsersRolesOffices()
@@ -191,12 +209,6 @@ when
      	"Shift.iCal",
      	"Reperibility.iCal",
      	
-     	/*
-     	 * Visualizzazione della propria situazione dei turni
-     	 */
-     	"Shift.personalShift",
-     	"Shift.renderIds",
-
      	/* Metodi rest */
      	"rest.PersonDays.getDaySituation",
      	"rest.PersonDays.getMonthSituation",

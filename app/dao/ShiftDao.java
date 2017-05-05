@@ -65,6 +65,7 @@ public class ShiftDao extends DaoBase {
     return Optional.fromNullable(query.singleResult(shiftType));
   }
   
+  
   /**
    * @return la lista dei personShiftDay con ShiftType 'type' presenti nel periodo tra 'begin' e
    *     'to'.
@@ -295,6 +296,14 @@ public class ShiftDao extends DaoBase {
         .where(psst.personShift.eq(personShift)
             .and(psst.shiftType.eq(shiftType)));
     return Optional.fromNullable(query.singleResult(psst));
+  }
+  
+  public List<PersonShiftShiftType> getByPersonShiftAndDate(PersonShift personShift, LocalDate date) {
+    final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
+    JPQLQuery query = getQueryFactory().from(psst)
+        .where(psst.personShift.eq(personShift)
+            .and(psst.beginDate.loe(date).andAnyOf(psst.endDate.isNull(), psst.endDate.goe(date))));
+    return query.list(psst);
   }
 }
 

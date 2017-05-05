@@ -25,6 +25,7 @@ import manager.ShiftManager;
 import models.Competence;
 import models.Person;
 import models.PersonShiftDay;
+import models.PersonShiftShiftType;
 import models.ShiftCancelled;
 import models.ShiftCategories;
 import models.ShiftTimeTable;
@@ -568,7 +569,12 @@ public class Shift extends Controller {
         renderJSON(ids);
       }
       if (currentUser.person.personShift != null) {
-        //TODO: implementare un metodo che ritorni i servizi su cui un dipendente è stato associato.
+        List<PersonShiftShiftType> list = shiftDao.getByPersonShiftAndDate(currentUser.person.personShift, LocalDate.now());
+        List<Long> ids = list.stream()
+            .map(i -> new Long(i.shiftType.id))
+            .collect(Collectors.<Long> toList());
+        log.debug("Trovata lista per dipendente turnista!");
+        renderJSON(ids);
       }
       
     }   
@@ -580,13 +586,32 @@ public class Shift extends Controller {
    * @param shiftType l'id del servizio di turno
    */
   public static void renderServices(Long shiftType) {
-    ShiftCategories cat = shiftDao.getShiftCategoryById(shiftType);
-    if (cat == null) {
-      notFound();
+    User currentUser = Security.getUser().get();
+    if (currentUser.person == null) {
+      log.error("agli utenti di sistema non sono associati turni!");
+      renderJSON("");
+    } else {
+      if (currentUser.person.personShift != null) {
+        Optional<ShiftType> type = shiftDao.getShiftTypeById(shiftType);
+        if (type.isPresent()) {
+          List<String> list = Lists.newArrayList();
+          list.add(type.get().type);
+          renderJSON(list);
+        } else {
+          notFound();
+        }        
+      }
+      if (!currentUser.person.shiftCategories.isEmpty()) {
+        ShiftCategories cat = shiftDao.getShiftCategoryById(shiftType);
+        if (cat == null) {
+          notFound();
+        }
+        renderJSON(cat.shiftTypes.stream()
+            .map(i -> new String(i.type))
+            .collect(Collectors.<String> toList()));
+      }
     }
-    renderJSON(cat.shiftTypes.stream()
-        .map(i -> new String(i.type))
-        .collect(Collectors.<String> toList()));
+    
   }
   
   /**
@@ -612,4 +637,6 @@ public class Shift extends Controller {
     } 
     render();
   }
+  
+  
 }

@@ -748,7 +748,7 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
 	console.log("shiftType: "+shiftType);
 	// tipologia di turni da leggere dal DB
 	var tipoTurni = shiftGrpObj.getShiftFromType(shiftType);
-	console.log("tipoTurni: "+tipoTurni);
+	//console.log("tipoTurni: "+tipoTurni);
 
 	var firstYear = 0;
     var loadedYears = new Array();
@@ -976,7 +976,7 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
           			element.addClass('oldEvent');
 			}
 		} // end eventRender
-		});
+	});
 } // FINE createCalendarShiftView();
 
 
