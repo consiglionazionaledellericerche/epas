@@ -922,15 +922,17 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
 								event['shiftType'] = tipoTurno;
 								event['eMail'] = idToEmail[event.id];
 								event['mobile'] = idToMobile[event.id];
+								
 								if (event.cancelled == 'false') {
 									event['start'] = event.start + " " + event.ttStart;
 									event['end'] = event.end + " " + event.ttEnd;
 									event['title'] = event.shiftSlot + ' -- ' + idToName[event.id];
-
 									//event['allDay'] = false; // If true, shows event time in the event title
 									event['cancelled'] = false;
+									event['allDay'] = false;
 									event['personId'] = event.id;
 									event['shiftHour'] = event.ttStart;
+									event['id'] = 'turno-'+event.id+'-'+indexRep;
 								} else {
 									event['title'] = 'Turno ' + tipoTurno + '\n\rANNULLATO';
 									event['start'] = jQuery.fullCalendar.moment(event.start);
@@ -938,12 +940,13 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
 									event['allDay'] = true;
 									event['className'] = "del-event";
 									event['cancelled'] = true;
-								}
-								event['id'] = 'turno-' + event.id + '-' + indexRep;
-								indexRep++;
-
+									event['id'] = 'turno-annullato-'+indexRep;
+								}								
+								
 								jQuery('#calendar').fullCalendar('renderEvent', event, true);
-
+								indexRep++;
+								
+								console.log("evnto caricato start="+event.start+" end="+event.end+ " title="+event.title+ " id="+event.id);
 								// set data.end = data.start for check problem
 //								if (event.end == null) {
 //								event.end = event.start;
@@ -1337,6 +1340,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 									event['cancelled'] = true;
 									event['editable'] = 'false';
 									event['id'] = 'turno-annullato-'+indexRep;
+									
 
 									//events.push(event);
 									jQuery('#calendar').fullCalendar('renderEvent', event, true);
