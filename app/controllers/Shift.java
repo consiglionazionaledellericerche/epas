@@ -567,7 +567,20 @@ public class Shift extends Controller {
 
         log.debug("lista trovata!");
         renderJSON(ids);
-      }
+      }      
+    }   
+    renderJSON("");
+  }  
+  
+  /**
+   * metodo invocato via jquery per leggere i turni di cui fa parte un turnista
+   */
+  public static void renderPersonShiftIds() {
+    User currentUser = Security.getUser().get();
+    if (currentUser.person == null) {
+      log.error("agli utenti di sistema non sono associati turni!");
+      renderJSON("");
+    } else {
       if (currentUser.person.personShift != null) {
         List<PersonShiftShiftType> list = shiftDao.getByPersonShiftAndDate(currentUser.person.personShift, LocalDate.now());
         List<Long> ids = list.stream()
@@ -576,16 +589,39 @@ public class Shift extends Controller {
         log.debug("Trovata lista per dipendente turnista!");
         renderJSON(ids);
       }
-      
-    }   
+    }
     renderJSON("");
-  }  
+  }
   
   /**
    * 
    * @param shiftType l'id del servizio di turno
    */
   public static void renderServices(Long shiftType) {
+    User currentUser = Security.getUser().get();
+    if (currentUser.person == null) {
+      log.error("agli utenti di sistema non sono associati turni!");
+      renderJSON("");
+    } else {
+      
+      if (!currentUser.person.shiftCategories.isEmpty()) {
+        ShiftCategories cat = shiftDao.getShiftCategoryById(shiftType);
+        if (cat == null) {
+          notFound();
+        }
+        renderJSON(cat.shiftTypes.stream()
+            .map(i -> new String(i.type))
+            .collect(Collectors.<String> toList()));
+      }
+    }
+    
+  }
+  
+  /**
+   * 
+   * @param shiftType
+   */
+  public static void renderPersonShiftServices(Long shiftType) {
     User currentUser = Security.getUser().get();
     if (currentUser.person == null) {
       log.error("agli utenti di sistema non sono associati turni!");
@@ -601,17 +637,8 @@ public class Shift extends Controller {
           notFound();
         }        
       }
-      if (!currentUser.person.shiftCategories.isEmpty()) {
-        ShiftCategories cat = shiftDao.getShiftCategoryById(shiftType);
-        if (cat == null) {
-          notFound();
-        }
-        renderJSON(cat.shiftTypes.stream()
-            .map(i -> new String(i.type))
-            .collect(Collectors.<String> toList()));
-      }
+      renderJSON("");
     }
-    
   }
   
   /**
@@ -625,6 +652,19 @@ public class Shift extends Controller {
     }    
     
     renderJSON(ImmutableList.of(cat.description));
+  }
+  
+  /**
+   * ritorna la descrizione dell'attività di turno a cui è associato il turnista.
+   * @param shiftType l'id dell'attività di turno
+   */
+  public static void renderActivityname(Long shiftType) {
+    Optional<ShiftType> type = shiftDao.getShiftTypeById(shiftType);
+    if (!type.isPresent()) {
+      notFound();
+    }    
+    
+    renderJSON(ImmutableList.of(type.get().description));
   }
   
   /**
