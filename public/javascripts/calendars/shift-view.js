@@ -1,3 +1,4 @@
+var Drupal = Drupal || { 'settings': {}, 'behaviors': {}, 'themes': {}, 'locale': {} };
 // crea un calendario per i turni
 var shiftCalendar = new sistCalendar("shift", "view");
 
@@ -14,7 +15,7 @@ jQuery(document).ready(function() {
 		$.each(data, function(index, element) {
 	        types.push(element);
 	    });
-		console.log("types: "+types );
+		//console.log("types: "+types );
 	    if (types.length > 1) {
 	    		userAllowed = true;
 				shiftCalendar.selectPopup(userAllowed, types, 'shiftView', shiftCalendar, shiftConfGroup);
@@ -24,7 +25,7 @@ jQuery(document).ready(function() {
 				shiftConfGroup.calendarChoise = calendarType;
 				userAllowed = true;
 				createCalendarShiftView(userAllowed, calendarType, shiftCalendar, shiftConfGroup);
-				jQuery('h1.title').append(" "+shiftConfGroup.getActivityDescription(types));
+				jQuery('h1.title').append(" "+shiftConfGroup.getShiftDescription(types));
 			} else {
 				userAllowed = false;
 				createCalendarShiftView(userAllowed, calendarType, shiftCalendar, shiftConfGroup);			

@@ -745,9 +745,9 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
 	// prende i colori per visualizzare le persone nel calendario
 	var shiftColor = shiftCalObj.getPersonColor(false);
 	var jollyColor = shiftCalObj.getPersonColor(true);
-	console.log("shiftType: "+shiftType);
+	//console.log("shiftType: "+shiftType);
 	// tipologia di turni da leggere dal DB
-	var tipoTurni = shiftGrpObj.getPersonShiftFromType(shiftType);
+	var tipoTurni = shiftGrpObj.getShiftFromType(shiftType);
 	//console.log("tipoTurni: "+tipoTurni);
 
 	var firstYear = 0;
@@ -828,7 +828,7 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
 
 	/* initialize the external events
 	   -----------------------------------------------------------------*/
-	jQuery(' div.external-event').each(function() {
+	jQuery(' div.external-events').each(function() {
 		// create an Event Object (http://arshaw.com/fullcalendar/docs/event_data/Event_Object/)
 
 		var classAttr = new Array();
@@ -875,21 +875,20 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
 		buttonText: shiftCalObj.buttonText,
 
 		// properties
-		selectable: 	shiftCalObj.selectable,	// highlight multiple days
+		selectable: shiftCalObj.selectable,	// highlight multiple days
 		editable: 	shiftCalObj.editable,
 		droppable: 	shiftCalObj.droppable, 	// this allows things to be dropped onto the calendar !!!
 		firstDay: 	shiftCalObj.firstDay,		// start from monday
 		weekMode: 	shiftCalObj.weekMode,
-		timeFormat: 	shiftCalObj.timeFormat,
+		timeFormat: shiftCalObj.timeFormat,
 
 		// define events to be included
 		eventSources: [
 			{
-				events: function (start, end, callback) {
+				events: function (start, end, timezone, callback) {
+					
 					var currDate = $('#calendar').fullCalendar('getDate').stripTime().format();
 					var currentYear = currDate.substring(0,4);
-					//var currentYear = jQuery.fullCalendar(currDate).format("YYYY");
-					//parseInt(currDate.substring(5,7));
 					firstYear = currentYear.concat(parseInt(currDate.substring(5,7)));
 
 					// build the URI for the json file
@@ -905,19 +904,11 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
 							var tipoTurno = tipoTurni[j];
 
 							uriShiftToGet = shiftCalObj.getUriRestToGetEntity(tipoTurno, uriParam);
-							//console.log('+++uriShiftToGet='+uriShiftToGet);
-
-							//var data = new Array();
-							//data.push('GET');
-							//data.push(uriShiftToGet);
-
-							//var dataJson = JSON.stringify(data);
-
 							// exec the URI call
 							var shiftPerson = _RestJsonCall (uriShiftToGet, 'GET', false, {});
-							//console.log("colore="+shiftToColor[tipoTurno]);
-
+							
 							jQuery.each(shiftPerson, function (i, event) {
+																
 								event['color'] = shiftToColor[tipoTurno];
 								event['shiftType'] = tipoTurno;
 								event['eMail'] = idToEmail[event.id];
@@ -935,53 +926,37 @@ function createCalendarShiftView(allowed, shiftType, shiftCalObj, shiftGrpObj){
 									event['id'] = 'turno-'+event.id+'-'+indexRep;
 								} else {
 									event['title'] = 'Turno ' + tipoTurno + '\n\rANNULLATO';
-									event['start'] = jQuery.fullCalendar.moment(event.start);
-									event['end'] = jQuery.fullCalendar.moment(event.end);
+									event['start'] = event.start;
+									event['end'] = event.end;
 									event['allDay'] = true;
 									event['className'] = "del-event";
 									event['cancelled'] = true;
 									event['id'] = 'turno-annullato-'+indexRep;
 								}								
 								
-								jQuery('#calendar').fullCalendar('renderEvent', event, true);
+								$('#calendar').fullCalendar('renderEvent', event, true);
 								indexRep++;
 								
 								console.log("evnto caricato start="+event.start+" end="+event.end+ " title="+event.title+ " id="+event.id);
-								// set data.end = data.start for check problem
-//								if (event.end == null) {
-//								event.end = event.start;
-//								}
+
 							});
 
 							j++;
 							tipoTurno = '';
 						}
 					}
+					
 				}
 			},
 
-			/*{
-              		url: 'https://www.google.com/calendar/feeds/it.italian%23holiday%40group.v.calendar.google.com/public/basic',
-             		color: 'red',
-              		textColor: 'white'
-         	}*/
+
 			],
 
 			
 			eventClick: function(calEvent, jsEvent, view) {
 				alert(calEvent.title +'\ncolor: '+calEvent.color+' \ntipo turno: '+calEvent.shiftType+'\nemail ' +calEvent.eMail +'\norario: '+calEvent.shiftHour+ '\ninizio ' +jQuery.fullCalendar.moment(calEvent.start).format()+ '\nfine '+jQuery.fullCalendar.moment(calEvent.end).format());
-			}, // end eventClick
+			}
 
-			eventRender: function(event, element) {
-//				var inizio = jQuery.fullCalendar(event.start).format("MM");
-//				var fine = jQuery.fullCalendar(event.end).format("MM");
-//				var currentView = jQuery('#calendar').fullCalendar('getDate').stripTime().format();
-//				var currentViewMonth = jQuery.fullCalendar(currentView).format("MM");
-
-//				if( (inizio != currentViewMonth) && (fine != currentViewMonth) && (!event.id.match(/@google.com/g)) ){
-//				element.addClass('oldEvent');
-//				}
-			} // end eventRender
 	});
 } // FINE createCalendarShiftView();
 
@@ -1159,7 +1134,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 		$('<span>', { text: ' ' }).appendTo("#X");
 		$('<input>', { type: 'radio', id: 'shift', name: 'shift', value: type, checked: 'checked' }).appendTo("#X");
 		$('<span>', { text: ' ' }).appendTo("#X");
-		console.log(type);
+		//console.log(type);
 	});
 
 
@@ -1227,13 +1202,8 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 
 					var currDate = $('#calendar').fullCalendar('getDate').stripTime().format();
 
-					//console.log("currDate: "+currDate);
 					var currentYear = currDate.substring(0,4);
-					//console.log("currentYear: "+currentYear);
-					//var currentYear = jQuery.fullCalendar.formatDate(currDate, "yyyy");
-					//period = currentYear.concat(jQuery.fullCalendar.formatDate(currDate, "MM"));
-
-					// build the URI for the json file
+						// build the URI for the json file
 					var uriParam = currentYear.concat('/01/01/').concat(currentYear.concat('/12/31'));
 					//console.log("uriParam: "+uriParam);
 
@@ -1247,13 +1217,10 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 						while (j < tipoTurni.length) {
 							var tipoTurno = tipoTurni[j];
 
-							//console.log("uriParam: "+uriParam);
 							uriShiftToGet = shiftCalendar.getUriRestToGetEntity(tipoTurno, uriParam);
-							//console.log("++ uriShiftToGet="+uriShiftToGet);
 
 							// exec the URI call
 							var shiftPeriods = _RestJsonCall (uriShiftToGet, 'GET', false, {});
-
 
 							// TURNI
 							var data2 = shiftPeriods;
@@ -1321,7 +1288,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 
 										jQuery('#calendar').fullCalendar('renderEvent', event, true);
 										indexRep++;
-
+										
 										if (event.end == null) {	
 											event.end = event.start;
 										}
@@ -1353,7 +1320,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 									}
 								}
 							});
-
+							
 							j++;
 							//tipoTurno = '';
 						}

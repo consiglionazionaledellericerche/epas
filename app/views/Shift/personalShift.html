@@ -3,10 +3,10 @@
 #{set title: 'ePAS - Gestione dei turni'  /}
 
 #{set 'moreStyles' }
-
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.3.1/fullcalendar.min.css">
+<!-- link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.3.1/fullcalendar.print.css"-->
 #{stylesheet 'calendars/sist_fullcalendar.css'/}
-#{stylesheet 'calendars/shift.css'/}
+#{stylesheet 'calendars/shift.css' /}
 #{stylesheet 'calendars/shiftPDF.css' /}
 #{stylesheet 'calendars/sistorgReportPDF.css' /}
 #{/set}
@@ -45,16 +45,11 @@
 </div>
 
 #{set 'moreScripts'}
-<!-- <script src="../public/javascripts/calendars/jquery-1.7.1.min.js"></script>
-<script src="../public/javascripts/calendars/jquery-ui-1.8.17.custom.min.js"></script>
-<script src="../public/javascripts/calendars/fullcalendar.min.js"></script>
-<script src="../public/javascripts/calendars/gcal.js"></script>
-<script src="../public/javascripts/calendars/sist_calendar_group.js"></script>
-<script src="../public/javascripts/calendars/sist_calendar_conf.js"></script>
-<script src="../public/javascripts/calendars/sist_calendar_create.js"></script> -->
 
+<!--  <script src="../public/javascripts/calendars/jquery-ui-1.8.17.custom.min.js"></script>-->
 <script src="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.3.1/fullcalendar.min.js"></script>
 <script src="//code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+<script src="../public/javascripts/calendars/jquery.json-2.3.js"></script>
 <script src="../public/javascripts/calendars/sist_calendar_group.js"></script>
 <script src="../public/javascripts/calendars/sist_calendar_conf.js"></script>
 <script src="../public/javascripts/calendars/sist_calendar_create.js"></script>

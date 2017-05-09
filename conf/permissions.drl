@@ -139,10 +139,10 @@ when
      	 * Visualizzazione della propria situazione dei turni
      	 */
      	"Shift.personalShift",
-     	"Shift.renderPersonShiftServices",
+     	"Shift.renderServices",
      	"Shift.renderPersonShiftIds",
      	"Shift.personList",
-     	"Shift.renderActivityname",
+     	"Shift.renderShiftname",
      	"Shift.find"
      	), target == null, granted == false)
 then
