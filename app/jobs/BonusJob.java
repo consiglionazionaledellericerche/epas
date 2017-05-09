@@ -27,7 +27,7 @@ import play.jobs.On;
 @SuppressWarnings("rawtypes")
 @Slf4j
 @On("0 0 7 1 * ?") //il primo giorno di ogni mese alle 7.00
-//@On("0 56 10 * * ?") //il primo giorno di ogni mese alle 7.00
+//@On("0 27 15 * * ?") //il primo giorno di ogni mese alle 7.00
 public class BonusJob extends Job {
   
   @Inject
@@ -49,6 +49,10 @@ public class BonusJob extends Job {
     YearMonth yearMonth = new YearMonth(date.getYear(), date.getMonthOfYear());
     List<CompetenceCode> codeList = competenceCodeDao
         .getCompetenceCodeByLimitType(LimitType.onMonthlyPresence);
+    codeList.forEach(item -> {
+      competenceManager.applyBonus(Optional.absent(), item, yearMonth);
+    });
+    codeList = competenceCodeDao.getCompetenceCodeByLimitType(LimitType.entireMonth);
     codeList.forEach(item -> {
       competenceManager.applyBonus(Optional.absent(), item, yearMonth);
     });
