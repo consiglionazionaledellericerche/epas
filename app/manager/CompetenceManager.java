@@ -772,8 +772,14 @@ public class CompetenceManager {
       Optional<PersonCompetenceCodes> pcc = 
           competenceCodeDao.getByPersonAndCodeAndDate(person, item, date);
       if (pcc.isPresent()) {
-        pcc.get().endDate = endMonth;
-        pcc.get().save();
+        
+        if (pcc.get().beginDate.monthOfYear().equals(date.monthOfYear())) {
+          pcc.get().delete();
+        } else {
+          pcc.get().endDate = endMonth;
+          pcc.get().save();
+        }
+
         if (item.code.equals("T1") || item.code.equals("T2") || item.code.equals("T3")) {
           PersonShift personShift = personShiftDayDao.getPersonShiftByPerson(pcc.get().person);
           if (personShift != null) {
