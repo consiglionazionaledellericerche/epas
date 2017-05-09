@@ -41,13 +41,21 @@
 	#{if wrCompetenceCode.value.limitType.equals(models.enumerate.LimitType.onMonthlyPresence)}
 		#{alert color:'warning'}
 			<p>Se sono state effettuate modifiche alle timbrature o alle assenze nelle giornate del mese
-			di &{templateUtility.monthName(compDto.month)}, successive al <strong>1 &{templateUtility.monthName(compDto.month)}</strong>, è possibile effettuare il ricalcolo 
-			della competenza premendo il tasto qui sotto</p>
+			di &{templateUtility.monthName(compDto.month-1)}, successive al <strong>1 &{templateUtility.monthName(compDto.month)}</strong>, è possibile effettuare il ricalcolo 
+			della competenza premendo il tasto qui sotto</p><br>
 		
 		<a class="btn btn-warning offset-col-sm-4" href="@{Competences.recalculateBonus(office.id, wrCompetenceCode.value.id, year, month)}">
       		Ricalcola competenza
     	</a>
     	#{/alert}
+	#{/if}
+	#{if wrCompetenceCode.value.limitType.equals(models.enumerate.LimitType.entireMonth)}
+		#{alert color:'warning'}
+			<p>I codici ad assegnamento mensile come il ${wrCompetenceCode.value.code} possono avere come 
+			massimo valore <strong>${wrCompetenceCode.value.limitValue}</strong>. <br>
+			<u>Il primo giorno di ogni mese</u>, ePAS <strong>in automatico</strong> controlla tutti i dipendenti della sede abilitati alla fruizione 
+			di questo codice e assegna loro il valore ${wrCompetenceCode.value.limitValue}.</p>
+		#{/alert}
 	#{/if}
 	<br>
 	   <table class="table" datatable>
