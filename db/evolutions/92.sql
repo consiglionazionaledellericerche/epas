@@ -23,6 +23,8 @@ ALTER TABLE person_shift DROP COLUMN jolly;
 
 ALTER TABLE person_shift_shift_type ADD COLUMN jolly BOOLEAN;
 
+INSERT INTO roles (name) VALUES ('shiftSupervisor');
+
 UPDATE shift_type SET entrance_tolerance = 0, exit_tolerance = 0, hour_tolerance = 0, break_in_shift = 0, break_in_shift_enabled = false;
 UPDATE person_shift_shift_type SET jolly = false;
 UPDATE shift_time_table SET start_evening = null, end_evening = null, start_evening_lunch_time = null, end_evening_lunch_time = null;
@@ -69,7 +71,7 @@ ALTER TABLE person_shift_shift_type DROP COLUMN jolly;
 ALTER TABLE person_shift ADD COLUMN jolly BOOLEAN;
 
 UPDATE person_shift SET jolly = FALSE;
-
+DELETE FROM roles WHERE name = 'shiftSupervisor';
 
 DROP TABLE persons_shift_categories;
 DROP TABLE persons_shift_categories_history;
