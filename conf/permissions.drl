@@ -83,6 +83,51 @@ then
  $c.grant();
 end
 
+/*Questa parte per il nuovo ruolo supervisore dei turni */
+rule isShiftSupervisor_generic
+when 
+  $uro: UsersRolesOffices()
+  Role(name == Role.SHIFT_SUPERVISOR) from $uro.role
+  $c: PermissionCheck(action in (
+  		"Shift.handleShifts",
+  		"Shift.renderIds", 
+  		"Shift.renderServices",
+  		"Shift.renderShiftname",
+  		"Shift.personList",
+        "Shift.timeTable",
+        "Shift.find",
+        "Shift.update",
+        "Shift.exportMonthAsPDF",
+        "Shift.exportMonthCalAsPDF",
+        "Shift.absence",
+        "Shift.iCal"), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule isShiftSupervisor_inOffice
+when 
+  $uro: UsersRolesOffices()
+  $o: Office( usersRolesOffices contains $uro)
+  Role(name == Role.SHIFT_SUPERVISOR) from $uro.role
+  $c: PermissionCheck(action in (
+  		"Shift.handleShifts",
+  		"Shift.renderIds",
+  		"Shift.renderServices",
+  		"Shift.renderShiftname",
+  		"Shift.personList",
+        "Shift.timeTable",
+        "Shift.find",
+        "Shift.update",
+        "Shift.exportMonthAsPDF",
+        "Shift.exportMonthCalAsPDF",
+        "Shift.absence",
+        "Shift.iCal"), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+/*Fine parte di ruolo supervisore dei turni*/
 
 rule IsEmployee
 when
@@ -145,6 +190,12 @@ when
      	 */
      	"Shift.iCal",
      	"Reperibility.iCal",
+     	
+     	/*
+     	 * Visualizzazione della propria situazione dei turni
+     	 */
+     	"Shift.personalShift",
+     	"Shift.renderIds",
 
      	/* Metodi rest */
      	"rest.PersonDays.getDaySituation",
@@ -791,6 +842,7 @@ when
         "Competences.saveNewCompetenceConfiguration",
         "Competences.insertCompetence",
         "Competences.editCompetence",
+        "Competences.recalculateBonus",
         "Competences.saveCompetence",
         "Competences.addReperibility",
         "Competences.addShift",
@@ -942,6 +994,7 @@ when
         "Competences.saveNewCompetenceConfiguration",
         "Competences.insertCompetence",
         "Competences.editCompetence",
+        "Competences.recalculateBonus",
         "Competences.saveCompetence",
         "Competences.addReperibility",
         "Competences.addShift",
@@ -1299,6 +1352,27 @@ when
         "rest.Absences.insertAbsenceByPerseoId"
 
        ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Azioni via REST per Skynet
+ ******************************************************************************/
+
+rule Skynet
+when
+ AccountRole(this in (AccountRole.ABSENCES_MANAGER)) 
+ $c: PermissionCheck(action in (
+
+        "rest.Absences.absencesInPeriod",
+        "rest.Absences.insertAbsence",
+        "rest.Absences.checkAbsence",
+
+        "rest.Absences.checkAbsenceByPerseoId",
+        "rest.Absences.insertAbsenceByPerseoId"
+
+       ), granted == false)
 then
  $c.grant();
 end

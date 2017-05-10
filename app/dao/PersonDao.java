@@ -596,7 +596,9 @@ public final class PersonDao extends DaoBase {
     condition.and(new QFilters().filterNameFromPerson(QPerson.person, name));
     filterOnlyOnCertificate(condition, onlyOnCertificate);
     filterContract(condition, start, end);
-    filterCompetenceCodeEnabled(condition, compCode);
+    if (start.isPresent()) {
+      filterCompetenceCodeEnabled(condition, compCode, start.get());
+    }    
     filterPersonInCharge(condition, personInCharge);
     filterOnlySynchronized(condition, onlySynchronized);
 
@@ -649,7 +651,9 @@ public final class PersonDao extends DaoBase {
     condition.and(new QFilters().filterNameFromPerson(QPerson.person, name));
     filterOnlyOnCertificate(condition, onlyOnCertificate);
     filterContract(condition, start, end);
-    filterCompetenceCodeEnabled(condition, compCode);
+    if (start.isPresent()) {
+      filterCompetenceCodeEnabled(condition, compCode, start.get());
+    }    
     filterPersonInCharge(condition, personInCharge);
     filterOnlySynchronized(condition, onlySynchronized);
 
@@ -735,11 +739,12 @@ public final class PersonDao extends DaoBase {
    * Filtro su competenza abilitata.
    */
   private void filterCompetenceCodeEnabled(BooleanBuilder condition,
-      Optional<CompetenceCode> compCode) {
+      Optional<CompetenceCode> compCode, LocalDate date) {
 
     if (compCode.isPresent()) {
       final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
-      condition.and(pcc.competenceCode.eq(compCode.get()));
+      condition.and(pcc.competenceCode.eq(compCode.get())).and(pcc.beginDate.loe(date)
+          .andAnyOf(pcc.endDate.goe(date), pcc.endDate.isNull()));
     }
   }
 

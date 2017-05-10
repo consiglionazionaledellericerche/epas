@@ -105,6 +105,17 @@ public class UsersRolesOfficesDao extends DaoBase {
     return urosMap;
 
   }
+  
+  /**
+   * 
+   * @param role il ruolo da ricercare negli Uro
+   * @return quanti sono gli utenti con ruolo role già inseriti nel db.
+   */
+  public long countSupervisors(Role role) {
+    final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
+    final JPQLQuery query = getQueryFactory().from(uro).where(uro.role.eq(role));
+    return query.count();
+  }
 
   public String formatUro(UsersRolesOffices uro) {
     return uro.role.toString() + " - " + uro.office.name;

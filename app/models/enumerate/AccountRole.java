@@ -7,5 +7,7 @@ package models.enumerate;
 public enum AccountRole {
   DEVELOPER,
   ADMIN,
-  RO_ADMIN // Amministratore in sola lettura
+  //Amministratore in sola lettura
+  RO_ADMIN, 
+  ABSENCES_MANAGER
 }

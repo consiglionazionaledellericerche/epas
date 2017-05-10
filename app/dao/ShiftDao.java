@@ -218,6 +218,18 @@ public class ShiftDao extends DaoBase {
   
   /**
    * 
+   * @param person il supervisore di cui si vuol sapere i turni
+   * @return la lista dei turni in cui person è supervisore.
+   */
+  public List<ShiftCategories> getCategoriesBySupervisor(Person person) {
+    final QShiftCategories sc = QShiftCategories.shiftCategories;
+    JPQLQuery query = getQueryFactory().from(sc).where(sc.supervisor.eq(person));
+    return query.list(sc);
+  }
+  
+  
+  /**
+   * 
    * @param sc la categoria di turno 
    * @return la lista dei tipi turno associati alla categoria passata come parametro.
    */

@@ -5,10 +5,13 @@ import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 
-import dao.AbsenceDao;
+import controllers.Charts.ExportFile;
+
 import dao.CompetenceCodeDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
@@ -16,26 +19,59 @@ import dao.wrapper.IWrapperPerson;
 
 import it.cnr.iit.epas.DateUtility;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+import javax.inject.Inject;
+
 import jobs.ChartJob;
 
 import lombok.Getter;
 
+import manager.SecureManager;
 import manager.recaps.charts.RenderResult;
 import manager.recaps.charts.ResultFromFile;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
+import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.services.vacations.IVacationsService;
 import manager.services.vacations.VacationsRecap;
 
 import models.CompetenceCode;
 import models.Contract;
 import models.ContractMonthRecap;
+import models.Office;
 import models.Person;
+import models.User;
 import models.WorkingTimeType;
 import models.absences.Absence;
-import models.absences.AbsenceType;
-import models.enumerate.CheckType;
 import models.exports.PersonOvertime;
+
+import org.apache.commons.compress.archivers.ArchiveException;
+import org.apache.commons.compress.archivers.ArchiveOutputStream;
+import org.apache.commons.compress.archivers.ArchiveStreamFactory;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -55,32 +91,16 @@ import org.slf4j.LoggerFactory;
 
 import play.libs.F;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
 public class ChartsManager {
 
   private static final Logger log = LoggerFactory.getLogger(ChartsManager.class);
   private final CompetenceCodeDao competenceCodeDao;
   private final PersonDao personDao;
-  private final AbsenceDao absenceDao;
   private final IVacationsService vacationsService;
   private final IWrapperFactory wrapperFactory;
-
+  private final PersonStampingRecapFactory stampingsRecapFactory;
+  private final SecureManager secureManager;
+  private final OfficeDao officeDao;
 
   /**
    * Costruttore.
@@ -88,18 +108,20 @@ public class ChartsManager {
    * @param competenceCodeDao competenceCodeDao
    * @param personDao         personDao
    * @param vacationsService  vacationsService
-   * @param absenceDao        absenceDao
    * @param wrapperFactory    wrapperFactory
    */
   @Inject
   public ChartsManager(CompetenceCodeDao competenceCodeDao,
       PersonDao personDao, IVacationsService vacationsService,
-      AbsenceDao absenceDao, IWrapperFactory wrapperFactory) {
+      IWrapperFactory wrapperFactory, PersonStampingRecapFactory stampingsRecapFactory, 
+      SecureManager secureManager, OfficeDao officeDao) {
     this.competenceCodeDao = competenceCodeDao;
     this.personDao = personDao;
-    this.absenceDao = absenceDao;
     this.vacationsService = vacationsService;
     this.wrapperFactory = wrapperFactory;
+    this.stampingsRecapFactory = stampingsRecapFactory;
+    this.secureManager = secureManager;
+    this.officeDao = officeDao;
   }
 
 
@@ -264,8 +286,8 @@ public class ChartsManager {
     out.write("Cognome Nome,");
     for (int i = 1; i <= month; i++) {
       out.append("ore straordinari " + DateUtility.fromIntToStringMonth(i)
-          + ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i)
-          + ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
+      + ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i)
+      + ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
     }
 
     out.append("ore straordinari TOTALI,ore riposi compensativi TOTALI, ore in più TOTALI");
@@ -473,55 +495,55 @@ public class ChartsManager {
    * @return una lista di RenderResult che contengono un riepilogo, assenza per assenza, della
    *     situazione di esse sul db locale.
    */
-  private List<RenderResult> transformInRenderList(Person person, List<ResultFromFile> list,
-      boolean alsoPastYear) {
-
-    Long start = System.nanoTime();
-    List<RenderResult> resultList = Lists.newArrayList();
-    LocalDate dateFrom = null;
-    LocalDate dateTo = list.get(list.size() - 1).dataAssenza;
-    if (alsoPastYear) {
-      dateFrom = list.get(0).dataAssenza;
-    } else {
-      dateFrom = dateTo.withYear(dateTo.getYear())
-          .withMonthOfYear(DateTimeConstants.JANUARY).withDayOfMonth(1);
-    }
-
-    List<Absence> absences = absenceDao.findByPersonAndDate(person,
-        dateFrom, Optional.fromNullable(dateTo), Optional.<AbsenceType>absent()).list();
-
-    list.forEach(item -> {
-      RenderResult result = null;
-      List<Absence> values = absences
-          .stream()
-          .filter(r -> r.personDay.date.isEqual(item.dataAssenza))
-          .collect(Collectors.toList());
-      if (!values.isEmpty()) {
-        Predicate<Absence> a1 = a -> a.absenceType.code.equalsIgnoreCase(item.codice)
-            || a.absenceType.certificateCode.equalsIgnoreCase(item.codice);
-        if (values.stream().anyMatch(a1)) {
-          result = new RenderResult(null, person.number, person.name,
-              person.surname, item.codice, item.dataAssenza, true, "Ok",
-              values.stream().filter(r1 -> r1.absenceType.code.equalsIgnoreCase(item.codice)
-                  || r1.absenceType.certificateCode.equalsIgnoreCase(item.codice))
-              .findFirst().get().absenceType.code, CheckType.SUCCESS);
-        } else {
-          result = new RenderResult(null, person.number, person.name,
-              person.surname, item.codice, item.dataAssenza, false,
-              "Mismatch tra assenza trovata e quella dello schedone",
-              values.stream().findFirst().get().absenceType.code, CheckType.WARNING);
-        }
-      } else {
-        result = new RenderResult(null, person.number, person.name,
-            person.surname, item.codice, item.dataAssenza, false,
-            "Nessuna assenza per il giorno", null, CheckType.DANGER);
-      }
-      resultList.add(result);
-    });
-    Long end = System.nanoTime();
-    log.debug("TEMPO per la persona {}: {} ms", person, (end - start) / 1000000);
-    return resultList;
-  }
+  //  private List<RenderResult> transformInRenderList(Person person, List<ResultFromFile> list,
+  //      boolean alsoPastYear) {
+  //
+  //    Long start = System.nanoTime();
+  //    List<RenderResult> resultList = Lists.newArrayList();
+  //    LocalDate dateFrom = null;
+  //    LocalDate dateTo = list.get(list.size() - 1).dataAssenza;
+  //    if (alsoPastYear) {
+  //      dateFrom = list.get(0).dataAssenza;
+  //    } else {
+  //      dateFrom = dateTo.withYear(dateTo.getYear())
+  //          .withMonthOfYear(DateTimeConstants.JANUARY).withDayOfMonth(1);
+  //    }
+  //
+  //    List<Absence> absences = absenceDao.findByPersonAndDate(person,
+  //        dateFrom, Optional.fromNullable(dateTo), Optional.<AbsenceType>absent()).list();
+  //
+  //    list.forEach(item -> {
+  //      RenderResult result = null;
+  //      List<Absence> values = absences
+  //          .stream()
+  //          .filter(r -> r.personDay.date.isEqual(item.dataAssenza))
+  //          .collect(Collectors.toList());
+  //      if (!values.isEmpty()) {
+  //        Predicate<Absence> a1 = a -> a.absenceType.code.equalsIgnoreCase(item.codice)
+  //            || a.absenceType.certificateCode.equalsIgnoreCase(item.codice);
+  //        if (values.stream().anyMatch(a1)) {
+  //          result = new RenderResult(null, person.number, person.name,
+  //              person.surname, item.codice, item.dataAssenza, true, "Ok",
+  //              values.stream().filter(r1 -> r1.absenceType.code.equalsIgnoreCase(item.codice)
+  //                  || r1.absenceType.certificateCode.equalsIgnoreCase(item.codice))
+  //              .findFirst().get().absenceType.code, CheckType.SUCCESS);
+  //        } else {
+  //          result = new RenderResult(null, person.number, person.name,
+  //              person.surname, item.codice, item.dataAssenza, false,
+  //              "Mismatch tra assenza trovata e quella dello schedone",
+  //              values.stream().findFirst().get().absenceType.code, CheckType.WARNING);
+  //        }
+  //      } else {
+  //        result = new RenderResult(null, person.number, person.name,
+  //            person.surname, item.codice, item.dataAssenza, false,
+  //            "Nessuna assenza per il giorno", null, CheckType.DANGER);
+  //      }
+  //      resultList.add(result);
+  //    });
+  //    Long end = System.nanoTime();
+  //    log.debug("TEMPO per la persona {}: {} ms", person, (end - start) / 1000000);
+  //    return resultList;
+  //  }
 
   @Getter
   public static final class RenderChart {
@@ -536,16 +558,172 @@ public class ChartsManager {
 
   /**
    * 
+   * @param forAll se si richiede la stampa per tutti
+   * @param peopleIds la lista degli id delle persone selezionate per essere esportate
+   * @param beginDate la data di inizio 
+   * @param endDate la data di fine
+   * @param exportFile il formato in cui esportare le informazioni
+   * @return un file contenente tutte le informazioni sulle ore di lavoro rispetto 
+   *     ai parametri passati.
+   * @throws ArchiveException eccezione in creazione dell'archivio
+   * @throws IOException eccezione durante le procedure di input/output
+   */
+  public InputStream buildFile(Office office, boolean forAll, 
+      List<Long> peopleIds, LocalDate beginDate, LocalDate endDate, 
+      ExportFile exportFile) throws ArchiveException, IOException {
+
+    Set<Office> offices = Sets.newHashSet(office);
+    List<Person> personList = Lists.newArrayList();
+    if (!forAll) {
+      personList = peopleIds.stream().map(item -> personDao.getPersonById(item))
+          .collect(Collectors.toList());
+    } else {
+      personList = personDao.list(Optional.<String>absent(), offices, false, LocalDate.now(),
+          LocalDate.now(), true).list();
+    }
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    ZipOutputStream zos = new ZipOutputStream(out);
+    byte[] buffer = new byte[1024];
+
+    File file = null;
+    // controllo che tipo di esportazione devo fare...
+    if (exportFile.equals(ExportFile.CSV)) {
+      
+      for (Person person : personList) {
+        LocalDate tempDate = beginDate;
+        while (!tempDate.isAfter(endDate)) {
+          PersonStampingRecap psDto = stampingsRecapFactory.create(person, 
+              tempDate.getYear(), tempDate.getMonthOfYear(), false);
+          file = createFileCSVToExport(psDto);
+          //preparo lo stream da inviare al chiamante...
+          FileInputStream in = new FileInputStream(file); 
+          try{                       
+            zos.putNextEntry(new ZipEntry(file.getName()));
+            int length;
+            while ((length = in.read(buffer)) > 0) {
+                zos.write(buffer, 0, length);
+            }
+          } catch (IOException ex) {
+            ex.printStackTrace();
+          }
+          in.close();  
+          file.delete();
+          tempDate = tempDate.plusMonths(1);
+        }
+      }
+      zos.closeEntry();
+      zos.close();      
+    } else {      
+      // genero il file excel...
+      file = File.createTempFile("situazioneMensileDa" 
+          + DateUtility.fromIntToStringMonth(beginDate.getMonthOfYear()) + beginDate.getYear() 
+          + "A" + DateUtility.fromIntToStringMonth(endDate.getMonthOfYear()) + endDate.getYear()
+          , ".xls");
+
+      Workbook wb = new HSSFWorkbook();     
+      // scorro la lista delle persone per cui devo fare l'esportazione...
+      for (Person person : personList) {
+        LocalDate tempDate = beginDate;
+        while (!tempDate.isAfter(endDate)) {
+          PersonStampingRecap psDto = stampingsRecapFactory.create(person, 
+              tempDate.getYear(), tempDate.getMonthOfYear(), false);
+          // aggiorno il file aggiungendo un nuovo foglio per ogni persona...
+          file = createFileXLSToExport(psDto, file, wb);
+          tempDate = tempDate.plusMonths(1);
+        }        
+      }     
+      //faccio lo stream da inviare al chiamante...
+      FileInputStream in = new FileInputStream(file); 
+      try{                       
+        zos.putNextEntry(new ZipEntry(file.getName()));
+        int length;
+        while ((length = in.read(buffer)) > 0) {
+            zos.write(buffer, 0, length);
+        }
+      } catch (IOException ex) {
+        ex.printStackTrace();
+      }
+      in.close();  
+      file.delete();
+      zos.closeEntry();
+      zos.close();
+      
+    }
+    return new ByteArrayInputStream(out.toByteArray());
+  }
+
+
+
+  /**
+   * 
+   * @param psDto il personStampingDayRecap da cui partire per prendere le informazioni
+   * @return un file di tipo csv contenente la situazione mensile.
+   * @throws IOException 
+   */
+  private File createFileCSVToExport(PersonStampingRecap psDto) throws IOException {
+    final String newLineseparator = "\n";
+    final Object [] fileHeader = {"Giorno","Ore di lavoro (hh:mm)","Assenza"};
+    FileWriter fileWriter = null;
+    CSVPrinter csvFilePrinter = null;
+    File file = new File("situazione_mensile" 
+    + psDto.person.surname 
+    + '_' + psDto.person.name 
+    + '_' + DateUtility.fromIntToStringMonth(psDto.month) + ".csv");
+    try {
+
+      fileWriter = new FileWriter(file.getName());
+
+      CSVFormat csvFileFormat = CSVFormat.DEFAULT.withRecordSeparator(newLineseparator);
+      csvFilePrinter = new CSVPrinter(fileWriter, csvFileFormat);
+      csvFilePrinter.printRecord(fileHeader);
+
+      for (PersonStampingDayRecap day : psDto.daysRecap) {
+        List<String> record = Lists.newArrayList();
+        record.add(day.personDay.date.toString());
+        record.add(DateUtility.fromMinuteToHourMinute(day.personDay.getTimeAtWork()));
+        if (!day.personDay.absences.isEmpty()) {
+          String code = "";
+          for (Absence abs : day.personDay.absences) {
+            code = code + " " + abs.absenceType.code;                  
+          }
+          record.add(code);                
+        } else {
+          record.add(" ");
+        }   
+        csvFilePrinter.printRecord(record);
+      }
+
+    } catch (Exception ex) {      
+      log.error("Error in CsvFileWriter !!!");
+      ex.printStackTrace();
+
+    } finally {
+      try {
+        fileWriter.flush();
+        fileWriter.close();
+        csvFilePrinter.close();
+      } catch (IOException ex) {
+        log.error("Error while flushing/closing fileWriter/csvPrinter !!!");
+        ex.printStackTrace();
+      }
+    }
+    return file;
+  }
+
+  /**
+   * 
    * @param psDto il personStampingRecap contenente le info sul mese trascorso dalla persona
    * @param file il file in cui caricare le informazioni
    * @return il file contenente la situazione mensile della persona a cui fa riferimento
    *     il personStampingRecap passato come parametro.
    */
-  public File createFileToExport(PersonStampingRecap psDto, File file) {
+  private File createFileXLSToExport(PersonStampingRecap psDto, File file, Workbook wb) {
     try {
       FileOutputStream out = new FileOutputStream(file);
-      Workbook wb = new HSSFWorkbook();
-      Sheet sheet = wb.createSheet();
+
+      Sheet sheet = wb.createSheet(psDto.person.fullName() + "_" 
+          + DateUtility.fromIntToStringMonth(psDto.month) + psDto.year);
+
       CellStyle cs = createHeader(wb);
       Row row = null;
       Cell cell = null;
@@ -571,11 +749,18 @@ public class ChartsManager {
         }
       }
       int rownum = 1;
+      CellStyle cellHoliday = createHoliday(wb);
+      CellStyle cellWorkingDay = createWorkingday(wb);
       for (PersonStampingDayRecap day : psDto.daysRecap) {
         row = sheet.createRow(rownum);
+
         for (int cellnum = 0; cellnum < 3; cellnum++) {
           cell = row.createCell(cellnum);
-          cell = configureDay(day, cell, wb);
+          if (day.personDay.isHoliday) {
+            cell.setCellStyle(cellHoliday);
+          } else {
+            cell.setCellStyle(cellWorkingDay);
+          }
           switch (cellnum) {
             case 0:              
               cell.setCellValue(day.personDay.date.toString());              
@@ -605,13 +790,13 @@ public class ChartsManager {
         wb.write(out);
         wb.close();
         out.close();
-      } catch (IOException e) {
-        log.debug("problema in chiusura stream");
-        e.printStackTrace();
+      } catch (IOException ex) {
+        log.error("problema in chiusura stream");
+        ex.printStackTrace();
       }
-    } catch (FileNotFoundException e) {
-      log.debug("Problema in riconoscimento file");
-      e.printStackTrace();
+    } catch (FileNotFoundException ex) {
+      log.error("Problema in riconoscimento file");
+      ex.printStackTrace();
     }
     return file;
   }
@@ -622,7 +807,7 @@ public class ChartsManager {
    * @return lo stile per una cella di intestazione.
    */
   private CellStyle createHeader(Workbook wb) {
-    
+
     Font font = wb.createFont();
     font.setFontHeightInPoints((short) 12);
     font.setColor( (short)0xc );
@@ -639,7 +824,7 @@ public class ChartsManager {
    * @param wb il workbook su cui applicare lo stile
    * @return lo stile per una cella che identifica un giorno di vacanza.
    */
-  private CellStyle createHoliday(Workbook wb) {
+  private static final CellStyle createHoliday(Workbook wb) {
     CellStyle cs = wb.createCellStyle();
     cs.setFillForegroundColor(IndexedColors.BLUE_GREY.getIndex());
     Font font = wb.createFont();
@@ -648,34 +833,18 @@ public class ChartsManager {
     cs.setFont(font);    
     return cs;
   }
-  
+
   /**
    * 
    * @param wb il workbook su cui applicare lo stile
    * @return lo stile per una cella che identifica un giorno lavorativo.
    */
-  private CellStyle createWorkingday(Workbook wb) {
+  private static final CellStyle createWorkingday(Workbook wb) {
     CellStyle cs = wb.createCellStyle();
     Font font = wb.createFont();
     cs.setAlignment(CellStyle.ALIGN_CENTER);
     cs.setFont(font);
     return cs;
-  }
-  
-  /**
-   * 
-   * @param day il giorno di riferimento
-   * @param cell la cella a cui applicare lo stile
-   * @param wb il workbook a cui la cella appartiene
-   * @return la cella configurata secondo la tipologia di giorno.
-   */
-  private Cell configureDay(PersonStampingDayRecap day, Cell cell, Workbook wb) {
-    if (day.personDay.isHoliday) {
-      cell.setCellStyle(createHoliday(wb));
-    } else {
-      cell.setCellStyle(createWorkingday(wb));
-    }
-    return cell;
   }
 }
 

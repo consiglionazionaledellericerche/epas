@@ -6,26 +6,51 @@
 
 <div class="container">
 
-#{title title:('Export in formato .xls della situazione mensile ') /}
+#{title title:('Export della situazione mensile ') /}
 
 	#{alert color:'info'}
 		<i class="fa fa-info-circle fa-2x" aria-hidden="true"> Info:</i><br><br>
-  		<p>Sarà generato un file Excel in formato .xls contenente la situazione mensile della persona selezionata utilizzabile al fine di avere un riscontro orario per 
-  		la rendicontazione dei progetti.</p>
-  		<p>Usando i menu in alto per anno, mese e sede, sarà possibile ottenere la situazione della persona desiderata nel periodo di interesse.
-  		</p>
-  		<p>Selezionare uno dei nomi presenti nella lista e premere ok.</p>
+  		<p>Una volta scelti i parametri per cui ottenere l'eportazione, verrà generato un file <strong>.zip</strong>
+  		che conterrà o la lista di file <strong>.csv</strong> per i dipendenti selezionati per il periodo selezionato,
+  		oppure un file <strong>.xls</strong> contenente un foglio per ogni mese appartenente all'intervallo specificato
+  		per ogni persona selezionata. </p>
+  		
   	#{/alert}
   	
-  	#{form @Charts.test(), method:'POST', autocomplete:false, class:'form form-horizontal'}
+  	#{form @Charts.exportTimesheetSituation(), method:'POST', autocomplete:false, class:'form form-horizontal'}
   	<input type="hidden" name="month" value="${date.getMonthOfYear()}"/>
   	<input type="hidden" name="year" value="${date.getYear()}"/>
-
-  		#{f.selectModel 'person', items:personList /}
-  		#{b.buttons center:'true'}
+  	<input type="hidden" name="officeId" value="${office.id}"/>
+	
+  	#{f.selectEnum 'exportFile', items:controllers.Charts.ExportFile, 
+		value:exportFile, byEquals:true /}
+	#{f.date 'beginDate'/}
+  	#{f.date 'endDate' /}
+	#{f.booleanRadio 'forAll', label:'Per tutti' /}
+    
+    <div id="single-person" #{if forAll} style="display: none" #{/if}>	
+    #{f.selectModels 'peopleIds',
+  		items:personList, placeholder:'Il personale' /}  	
+  	</div>
+  	#{b.buttons center:'true'}
   		#{b.back /}
   		#{b.ok /}
-  		#{/b.buttons}
+  	#{/b.buttons}
+  	
   	#{/form}
 
 </div>
+
+#{set 'moreScripts'}
+  <script type="text/javascript">
+	$(document).ready(function() {
+					
+		$("input[name='forAll']").change(function(){
+			
+			jQuery( "#single-person" ).toggle(0);
+		
+		});
+		       
+	 });
+	</script>
+#{/set}

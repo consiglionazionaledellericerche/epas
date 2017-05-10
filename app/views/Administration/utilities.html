@@ -72,6 +72,7 @@
     </button>
     #{/form}
   </div>
+  
   #{/panel}
 
   <!-- I day in trouble esistenti -->
@@ -104,6 +105,23 @@
   #{b.buttons center:true}
   <button type="submit" class="btn btn-default">Reimposta dominio email</button>
   #{/b.buttons}
+  #{/form}
+  #{/panel}
+  
+  #{panel title:'Assegna competenza su presenza mensile', dim:12 }
+  #{alert color:'info'}
+  <p>Questa funzionalità permette di ricalcolare e riassegnare le competenze a presenza mensile.<br>
+  	 Se si vuole effettuare il ricalcolo per tutti i dipendenti di tutte le sedi, lasciare vuoto il campo Sede.
+  </p>
+  #{/alert}
+  #{form @Administration.applyBonus(), class:'form-horizontal'}
+  	#{f.selectModel 'office', items:templateUtility.officesAllowed() /}
+  	#{f.selectModel 'code', items:templateUtility.allOnMonthlyPresenceCodes() /}
+  	#{f.input 'month', type:'number', label:'Mese' /}
+  	#{f.input 'year', type:'number', label:'anno' /}
+  	#{b.buttons center:true}
+  		<button type="submit" class="btn btn-default">Ricalcola competenza</button>
+  	#{/b.buttons}
   #{/form}
   #{/panel}
 
