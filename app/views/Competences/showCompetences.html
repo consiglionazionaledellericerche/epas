@@ -3,17 +3,29 @@
 #{set title: 'ePAS - Assegna competenze'  /}
 
 <div class="container">
-  #{title title:'Assegna competenze ' + templateUtility.monthName(compDto.month) + ' ' + compDto.year, color:'primary' /}
 
   #{include './_tabs.html' /}
+  
+  #{title title:'Assegna competenze ' + templateUtility.monthName(compDto.month) + ' ' + compDto.year, color:'primary' /}
 
   #{if servicesInitialized}
   #{alert color:'info'}
-  <p>Per assengnare la competenza individuare il dipendente ed il tipo di competenza nella
-    tabella sottostante e cliccare sul valore attualmente assegnato.
-  <p>
-  <p>I valori per le reperibilità sono espressi in <strong>giorni</strong>,
-    quelli per straordinari e turni in <strong>ore</strong>.</p>
+    <p>
+      Per assengnare la competenza individuare il dipendente ed il tipo di competenza nella
+      tabella sottostante e cliccare sul valore attualmente assegnato.
+    <p>
+    <p>
+      I valori per le reperibilità sono espressi in <strong>giorni</strong>,
+      quelli per straordinari e turni in <strong>ore</strong>.
+    </p>
+    <p>
+      <i class="fa fa-info-circle" aria-hidden="true"></i> Totale competenze <strong>${wrCompetenceCode.value.description} ${wrCompetenceCode.value.code}</strong>
+	    assegnate nel mese di ${templateUtility.monthName(compDto.month)} per <strong>${compDto.office.name}</strong>
+	  <a data-tooltip data-toggle="tooltip" data-placement="right"
+	     title="Per aggiornare questo valore ricaricare la pagina">
+	    <strong>${wrCompetenceCode.totalFromCompetenceCode(compDto.month, compDto.year, compDto.office.id)}</strong>
+	  </a>
+	</p>  
   #{/alert}
   #{/if}
   #{else}
@@ -80,16 +92,10 @@
 
 	  <br>
 	  <br>
-	  #{alert color:'warning'}
-	  Totale competenze <strong>${wrCompetenceCode.value.description} ${wrCompetenceCode.value.code}</strong>
-	    assegnate nel mese per <strong>${compDto.office.name}</strong>
-	  <a data-tooltip data-toggle="tooltip" data-placement="right"
-	     title="Per aggiornare questo valore ricaricare la pagina">
-	    <strong>${wrCompetenceCode.totalFromCompetenceCode(compDto.month, compDto.year, compDto.office.id)}</strong>
-	  </a>
-	  #{/alert}
+
 	  </section>
-  
+
+  *{  
   #{title title:'Riepilogo Straordinari assegnati ' + compDto.year, color:'primary' /}
 
   #{alert color:'info'}
@@ -113,6 +119,9 @@
         </tr>
       </table>
   #{/alert}
+  }*
+  
+  
 </div> <!-- end container-fluid -->
 
 <div id="modalCompetence" class="modal fade container" tabindex="-1"></div>
