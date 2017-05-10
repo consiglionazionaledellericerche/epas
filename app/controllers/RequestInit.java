@@ -183,7 +183,8 @@ public class RequestInit extends Controller {
         "PersonMonths.visualizePeopleTrainingHours",
         "Absences.forceAbsences",
         "Charts.overtimeOnPositiveResidual",
-        "Charts.listForExcelFile");
+        "Charts.listForExcelFile",
+        "Charts.exportTimesheetSituation");
 
 
     final Collection<String> yearSwitcher = ImmutableList.of(
@@ -246,6 +247,7 @@ public class RequestInit extends Controller {
         "Charts.overtimeOnPositiveResidual",
         "Charts.overtimeOnPositiveResidualInYear",
         "Charts.listForExcelFile",
+        "Charts.exportTimesheetSituation",
         "Competences.activateServices");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(

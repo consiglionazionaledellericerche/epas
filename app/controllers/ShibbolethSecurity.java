@@ -71,7 +71,8 @@ public class ShibbolethSecurity extends controllers.shib.Security {
       Cache.set("personId", person.id, Security.CACHE_DURATION);
 
       session.put("username", person.user.username);
-
+      session.put("shibboleth", true);
+      
       flash.success("Benvenuto " + person.name + ' ' + person.surname);
       log.info("Person {} successfully logged in", person.user.username);
       log.trace("Permission list for {} {}: {}",

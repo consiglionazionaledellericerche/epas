@@ -18,6 +18,7 @@ import it.cnr.iit.epas.CompetenceUtility;
 
 import lombok.extern.slf4j.Slf4j;
 
+import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.EmailManager;
 import manager.PersonDayInTroubleManager;
@@ -25,6 +26,7 @@ import manager.PersonDayManager;
 import manager.SecureManager;
 import manager.UserManager;
 
+import models.CompetenceCode;
 import models.Contract;
 import models.Office;
 import models.Person;
@@ -36,6 +38,7 @@ import models.UsersRolesOffices;
 
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import play.Play;
 import play.data.validation.Required;
@@ -83,6 +86,8 @@ public class Administration extends Controller {
   static UserManager userManager;
   @Inject
   static EmailManager emailManager;
+  @Inject
+  static CompetenceManager competenceManager;
 
   /**
    * metodo che inizializza i codici di assenza e gli stampType presenti nel db romano.
@@ -520,6 +525,28 @@ public class Administration extends Controller {
 
     renderText(emails);
 
+  }
+  
+  /**
+   * 
+   * @param office
+   * @param code
+   * @param year
+   * @param month
+   */
+  public static void applyBonus(Office office, CompetenceCode code, int year, int month) {
+    
+    Optional<Office> optOffice = Optional.<Office>absent();
+    if (office.isPersistent()) {
+      optOffice = Optional.fromNullable(office);
+    }
+    YearMonth yearMonth = new YearMonth(year, month);
+    competenceManager.applyBonus(optOffice, code, yearMonth);
+    //consistencyManager.fixPersonSituation(optPerson, Security.getUser(), date, onlyRecap);
+
+    flash.success("Esecuzione terminata");
+
+    utilities();
   }
 
 }

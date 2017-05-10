@@ -218,6 +218,10 @@ MealTicketDecision.FORCED_TRUE=Forzato Si
 MealTicketDecision.FORCED_FALSE=Forzato No
 mealTicketDecision=Valore Buono Pasto
 
+ExportFile.CSV=CSV
+ExportFile.XLS=XLS
+exportFile=Formato per esportazione
+
 block.first=Dal
 block.last=Al
 
@@ -304,6 +308,7 @@ person.birthday=Data di nascita
 person.currentVacationPeriod= Ferie
 person.currentWorkingTimeType= Tipo Orario
 person.email=Email
+person.perseoId=Perseo id
 person.eppn=Eppn (Per login Shibboleth)
 person.isPersonInCharge= Responsabile gruppo di lavoro
 person.name=Nome
@@ -334,10 +339,13 @@ restoreUser= Torna chi eri
 
 roleIds= Ruoli attribuibili
 
-secure.error=Oops! Username o password sconosciuti
-secure.logout=Utente correttamente disconnesso
+secure.error=Oops! Username o password sconosciuti.
+secure.logout=Utente correttamente disconnesso.
+secure.logoutShibboleth=Per completare il logout è necessario chiudere il browser.
 
 serviceDisabled =Servizio disabilitato
+
+shifts =Gestione turni
 
 show= Visualizza
 edit= Modifica
@@ -577,6 +585,7 @@ Vacations.show= Ferie
 VacationsAdmin.list= Ferie e Permessi
 WorkingTimes.manageWorkingTime= Gestione Orari di Lavoro
 Competences.activateServices= Gestione Servizi
+Shift.handleShifts =Gestisci turni
 
 ########################
 # Enumerati
@@ -585,6 +594,7 @@ Competences.activateServices= Gestione Servizi
 AccountRole.DEVELOPER= developer
 AccountRole.ADMIN= Admin
 AccountRole.RO_ADMIN= Admin in sola lettura
+AccountRole.ABSENCES_MANAGER= Gestore assenze
 
 chartType= Tipo di grafico
 ChartTypes.BARS= Grafico a barre
@@ -688,6 +698,7 @@ office.joiningDate.popover= Data di affiliazione della sede
 time.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
 
 person.eppn.popover= Inserire la propria email cnr Es:mario.rossi@cnr.it
+person.perseoId.popover= Il perseoId è utilizzato per il collegamento tra utente e perseo Es:4200
 
 domain.popover= Specificare il dominio sprovvisto del carattere @ (Es. iit.cnr.it)
 

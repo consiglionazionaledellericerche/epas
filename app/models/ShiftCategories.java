@@ -1,5 +1,7 @@
 package models;
 
+import com.google.common.collect.Lists;
+
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -11,9 +13,11 @@ import play.data.validation.Unique;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -49,6 +53,9 @@ public class ShiftCategories extends BaseModel {
   @NotAudited
   @OneToMany(mappedBy = "shiftCategories")
   public List<ShiftType> shiftTypes = new ArrayList<ShiftType>();
+  
+  @ManyToMany
+  public List<Person> manager = Lists.newArrayList();
   
   @Override
   public String toString() {

@@ -10,24 +10,23 @@ import dao.PersonDao;
 
 import helpers.jpa.ModelQuery.SimpleResults;
 
-import it.cnr.iit.epas.DateUtility;
-
 import lombok.extern.slf4j.Slf4j;
 
 import manager.SecureManager;
 import manager.charts.ChartsManager;
 import manager.recaps.charts.RenderResult;
-import manager.recaps.personstamping.PersonStampingRecap;
-import manager.recaps.personstamping.PersonStampingRecapFactory;
 
 import models.CompetenceCode;
 import models.Office;
 import models.Person;
 import models.exports.PersonOvertime;
 
+import org.apache.commons.compress.archivers.ArchiveException;
 import org.joda.time.LocalDate;
 
 import play.Logger;
+import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -36,12 +35,15 @@ import security.SecurityRules;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+
+
 
 @With({Resecure.class})
 @Slf4j
@@ -61,9 +63,13 @@ public class Charts extends Controller {
   static OfficeDao officeDao;
   @Inject
   static CompetenceCodeDao competenceCodeDao;
-  @Inject
-  static PersonStampingRecapFactory stampingsRecapFactory;
 
+  /**
+   * 
+   * @param year
+   * @param month
+   * @param officeId
+   */
   public static void overtimeOnPositiveResidual(Integer year, Integer month, Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
@@ -143,6 +149,11 @@ public class Charts extends Controller {
     render();
   }
 
+  /**
+   * 
+   * @param file
+   * @param officeId
+   */
   public static void checkLastYearAbsences(File file, Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
@@ -223,36 +234,65 @@ public class Charts extends Controller {
    * @param month il mese di riferimento
    */
   public static void listForExcelFile(int year, int month, Long officeId) {
-    
+
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
     Set<Office> set = Sets.newHashSet();
     set.add(office);
     LocalDate date = new LocalDate(year, month, 1);
-
+    boolean forAll = true;
     List<Person> personList = personDao.list(
         Optional.<String>absent(), set, false, date, 
         date.dayOfMonth().withMaximumValue(), true).list();
+    
 
-    render(personList, date, year, month);
+    render(personList, date, office, forAll);
   }
 
 
   /**
-   * ritorna un file in formato excel contenente la situazione mensile esportata a fini
-   * di rendicontazione.
-   * @param person la persona di cui si vuole la situazione mensile
-   * @param year l'anno di riferimento
-   * @param month il mese di riferimento
+   * ritorna l'esportazione dei dati per rendicontazione secondo i parametri passati.
+   * @param peopleIds l'eventuale lista di id dei dipendenti di cui fare l'esportazione
+   * @param exportFile il formato dell'esportazione
+   * @param forAll se per tutti i dipendenti o no
+   * @param beginDate l'eventuale data inizio
+   * @param endDate l'eventuale data fine
+   * @param officeId l'id della sede
    */
-  public static void test(Person person, int year, int month) {   
-    rules.checkIfPermitted(person.office);
-    File file = new File("situazioneMensile" + person.surname
-        + DateUtility.fromIntToStringMonth(month) + year + ".xls");
-    PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
-    file = chartsManager.createFileToExport(psDto, file);
-
+  public static void exportTimesheetSituation(List<Long> peopleIds, @Required ExportFile exportFile, 
+      boolean forAll, @Required LocalDate beginDate, @Required LocalDate endDate, Long officeId) {   
+    Office office = officeDao.getOfficeById(officeId);
+    rules.checkIfPermitted(office);
+    
+    if (beginDate != null && endDate != null && !beginDate.isBefore(endDate)) {
+      Validation.addError("endDate","La data di fine non può precedere la data di inizio!");      
+    }
+    if (Validation.hasErrors()) {      
+      
+      Set<Office> set = Sets.newHashSet(office);
+      LocalDate date = LocalDate.now();
+      List<Person> personList = personDao.list(
+          Optional.<String>absent(), set, false, beginDate, 
+          endDate, true).list();
+      
+      render("@listForExcelFile", office, exportFile,
+          date, personList, forAll, beginDate, endDate);
+    }
+    InputStream file = null;
+    try {
+      file = chartsManager.buildFile(office, forAll, peopleIds, beginDate, endDate, exportFile);
+    } catch ( ArchiveException | IOException ex ) {
+      flash.error("Errore durante l'esportazione del tempo al lavoro");
+      listForExcelFile(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear(), officeId);
+      log.error("Errore durante l'esportazione del tempo al lavoro", ex);
+    }
+    
     renderBinary(file);
+    
+  }
+
+  public enum ExportFile {
+    CSV,XLS;
   }
 }

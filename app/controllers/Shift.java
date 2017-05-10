@@ -5,6 +5,7 @@ import static play.modules.pdf.PDF.renderPDF;
 import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
@@ -58,6 +59,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.inject.Inject;
 
@@ -92,7 +95,7 @@ public class Shift extends Controller {
    * @author arianna
    *
    */
-  @BasicAuth
+  //@BasicAuth
   public static void personList(String type) {
     response.accessControl("*");
 
@@ -123,7 +126,7 @@ public class Shift extends Controller {
    *
    * @author arianna
    */
-  @BasicAuth
+  //@BasicAuth
   public static void timeTable(String type) {
     response.accessControl("*");
 
@@ -147,7 +150,7 @@ public class Shift extends Controller {
    * @author arianna
    * @author dario
    */
-  @BasicAuth
+  //@BasicAuth
   public static void find(
       Integer yearFrom, Integer monthFrom, Integer dayFrom,
       Integer yearTo, Integer monthTo, Integer dayTo, String type) {
@@ -198,7 +201,7 @@ public class Shift extends Controller {
    * @author arianna
    *
    */
-  @BasicAuth
+  //@BasicAuth
   public static void update(
       String type, Integer year, Integer month,
       @As(binder = JsonShiftPeriodsBinder.class) ShiftPeriods body) {
@@ -229,7 +232,7 @@ public class Shift extends Controller {
    *
    * @author arianna
    */
-  @BasicAuth
+  //@BasicAuth
   public static void getInconsistencyTimestamps2Timetable(
       ShiftType shiftType, LocalDate startDate, LocalDate endDate) {
 
@@ -254,7 +257,7 @@ public class Shift extends Controller {
    *
    * @author arianna
    */
-  @BasicAuth
+  //@BasicAuth
   public static void exportMonthAsPDF() {
     int year = params.get("year", Integer.class);
     int month = params.get("month", Integer.class);
@@ -382,7 +385,7 @@ public class Shift extends Controller {
    *
    * @author arianna
    */
-  @BasicAuth
+  //@BasicAuth
   public static void exportMonthCalAsPDF(int year, int month, Long type) {
 
     log.debug("sono nella exportMonthCalAsPDF con shiftCategory={} year={} e month={}",
@@ -535,5 +538,79 @@ public class Shift extends Controller {
     } catch (ValidationException ex) {
       log.error("Validation exception generating ical", ex);
     }
+  }
+  
+  /**
+   * metodo che ritorna la pagina in cui vengono gestiti i turni da parte del responsabile.
+   */
+  public static void handleShifts() {
+   render(); 
+  }
+  
+  /**
+   * 
+   * @return la lista degli id dei servizi per turno di cui la persona loggata è responsabile.
+   */
+  public static void renderIds() {
+    User currentUser = Security.getUser().get();
+    if (currentUser.person == null) {
+      log.error("agli utenti di sistema non sono associati turni!");
+      renderJSON("");
+    } else {
+      //controllo che il richiedente sia un supervisore o un turnista
+      if (!currentUser.person.shiftCategories.isEmpty()) {
+        List<ShiftCategories> list = shiftDao.getCategoriesBySupervisor(currentUser.person);
+
+        List<Long> ids = list.stream()
+                .map(i -> new Long(i.id))
+                .collect(Collectors.<Long> toList());
+
+        log.debug("lista trovata!");
+        renderJSON(ids);
+      }
+      if (currentUser.person.personShift != null) {
+        //TODO: implementare un metodo che ritorni i servizi su cui un dipendente è stato associato.
+      }
+      
+    }   
+    renderJSON("");
+  }  
+  
+  /**
+   * 
+   * @param shiftType l'id del servizio di turno
+   */
+  public static void renderServices(Long shiftType) {
+    ShiftCategories cat = shiftDao.getShiftCategoryById(shiftType);
+    if (cat == null) {
+      notFound();
+    }
+    renderJSON(cat.shiftTypes.stream()
+        .map(i -> new String(i.type))
+        .collect(Collectors.<String> toList()));
+  }
+  
+  /**
+   * ritorna la descrizione del turno passato come parametro.
+   * @param shiftType l'id del servizio di turno
+   */
+  public static void renderShiftname(Long shiftType) {
+    ShiftCategories cat = shiftDao.getShiftCategoryById(shiftType);
+    if (cat == null) {
+      notFound();
+    }    
+    
+    renderJSON(ImmutableList.of(cat.description));
+  }
+  
+  /**
+   * ritorna la pagina di consultazione dei turni del dipendente in turno.
+   */
+  public static void personalShift() {
+    User currentUser = Security.getUser().get();
+    if (currentUser.person == null) {
+      log.error("agli utenti di sistema non sono associati turni!");      
+    } 
+    render();
   }
 }
