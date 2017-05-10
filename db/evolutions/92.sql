@@ -27,8 +27,6 @@ UPDATE shift_type SET entrance_tolerance = 0, exit_tolerance = 0, hour_tolerance
 UPDATE person_shift_shift_type SET jolly = false;
 UPDATE shift_time_table SET start_evening = null, end_evening = null, start_evening_lunch_time = null, end_evening_lunch_time = null;
 
-INSERT INTO roles (name) VALUES ('shiftSupervisor');
-
 CREATE TABLE shift_categories_persons (
 	categories_id BIGINT NOT NULL,
 	manager_id BIGINT NOT NULL,
@@ -49,4 +47,30 @@ CREATE TABLE shift_categories_persons_history (
 );
 
 
+
+# ---!Downs
+
+ALTER TABLE shift_time_table DROP CONSTRAINT shift_time_table_office_id_fkey;
+ALTER TABLE shift_time_table DROP COLUMN office_id;
+
+ALTER TABLE shift_type_history DROP COLUMN hour_tolerance;
+ALTER TABLE shift_type_history DROP COLUMN entrance_tolerance;
+ALTER TABLE shift_type_history DROP COLUMN exit_tolerance;
+ALTER TABLE shift_type_history DROP COLUMN break_in_shift_enabled;
+ALTER TABLE shift_type_history DROP COLUMN break_in_shift;
+
+ALTER TABLE shift_type DROP COLUMN hour_tolerance;
+ALTER TABLE shift_type DROP COLUMN entrance_tolerance;
+ALTER TABLE shift_type DROP COLUMN exit_tolerance;
+ALTER TABLE shift_type DROP COLUMN break_in_shift_enabled;
+ALTER TABLE shift_type DROP COLUMN break_in_shift;
+
+ALTER TABLE person_shift_shift_type DROP COLUMN jolly;
+ALTER TABLE person_shift ADD COLUMN jolly BOOLEAN;
+
+UPDATE person_shift SET jolly = FALSE;
+
+
+DROP TABLE persons_shift_categories;
+DROP TABLE persons_shift_categories_history;
 
