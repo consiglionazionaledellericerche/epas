@@ -80,15 +80,14 @@ public class SecureManager {
   }
 
   /**
-   * @param user L'utente per il quale restituire la lista delle sedi
-   * @return un Set contenente tutti gli uffici sul quale si ha un ruolo qualsiasi.
+   * Metodo usato per individuare sedi e persone amministrate da visualizzare nella navbar.
+   * @param user l'utente
+   * @return set
    */
-  public Set<Office> ownOffices(User user) {
+  public Set<Office> officesForNavbar(User user) {
 
     ImmutableList<String> roles = ImmutableList.of(
-        Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.EMPLOYEE,
-        Role.BADGE_READER, Role.REST_CLIENT, Role.TECHNICAL_ADMIN, Role.SHIFT_MANAGER,
-        Role.REPERIBILITY_MANAGER, Role.TECHNICAL_ADMIN);
+        Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN);
 
     return getOfficeAllowed(user, roles);
   }
