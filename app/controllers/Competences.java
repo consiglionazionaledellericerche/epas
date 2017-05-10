@@ -25,6 +25,9 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
 import helpers.jpa.ModelQuery.SimpleResults;
 
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
@@ -36,7 +39,6 @@ import javax.inject.Inject;
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.SecureManager;
-import manager.competences.CompetenceCodeDTO;
 import manager.competences.ShiftTimeTableDto;
 import manager.recaps.competence.CompetenceRecap;
 import manager.recaps.competence.CompetenceRecapFactory;
@@ -295,15 +297,33 @@ public class Competences extends Controller {
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
-
     rules.checkIfPermitted(office);
-    LocalDate date = new LocalDate(year, month, 1);
-    List<Person> personList = personDao.list(Optional.<String>absent(), Sets.newHashSet(office),
-        false, date, date.dayOfMonth().withMaximumValue(), true).list();
-    Map<Person, List<CompetenceCodeDTO>> map = competenceManager
-        .createMap(personList, date.getYear(), date.getMonthOfYear());
+    
+    DateInterval monthInterval = DateUtility.getMonthInterval(year, month);
+    
+    List<Person> withoutCompetences = Lists.newArrayList();
+    Map<Person, List<PersonCompetenceCodes>> mapEnabledCompetences = Maps.newHashMap();
 
-    render(office, map, date, year, month);
+    for (Person person : personDao.list(Optional.<String>absent(), Sets.newHashSet(office),
+        false, monthInterval.getBegin(), monthInterval.getEnd(), true).list()) {
+      if (person.personCompetenceCodes.isEmpty()) {
+        withoutCompetences.add(person);
+        continue;
+      }
+      for (PersonCompetenceCodes personCompetenceCode : person.personCompetenceCodes) {
+        if (DateUtility
+            .intervalIntersection(personCompetenceCode.periodInterval(), monthInterval) != null) {
+          List<PersonCompetenceCodes> list = mapEnabledCompetences.get(person);
+          if (list == null) {
+            list = Lists.newArrayList();
+            mapEnabledCompetences.put(person, list);
+          }
+          list.add(personCompetenceCode);
+        }
+      }
+    }
+    
+    render(office, mapEnabledCompetences, withoutCompetences, year, month);
   }
 
   /**
