@@ -1,12 +1,12 @@
 package controllers.rest;
 
+import cnr.sync.dto.CompetenceDto;
+import cnr.sync.dto.DayRecap;
+
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-
-import cnr.sync.dto.CompetenceDto;
-import cnr.sync.dto.DayRecap;
 
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
@@ -20,6 +20,10 @@ import helpers.JsonResponse;
 
 import it.cnr.iit.epas.DateInterval;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
 import manager.PersonDayManager;
 
 import models.Competence;
@@ -31,10 +35,6 @@ import org.joda.time.LocalDate;
 
 import play.mvc.Controller;
 import play.mvc.With;
-
-import java.util.List;
-
-import javax.inject.Inject;
 
 @With(Resecure.class)
 public class Persons extends Controller {

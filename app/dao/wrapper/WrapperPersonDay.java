@@ -11,6 +11,8 @@ import dao.PersonDayDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import java.util.List;
+
 import manager.PersonManager;
 
 import models.Contract;
@@ -22,8 +24,6 @@ import models.WorkingTimeTypeDay;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
-import java.util.List;
 
 /**
  * @author alessandro.

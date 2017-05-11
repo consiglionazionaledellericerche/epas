@@ -81,7 +81,7 @@
 	</td>
     <td>
 	  #{list items:category.groupAbsenceTypes, as:'group'}
-	    <span class="label label-default">${group.getChainDescription()}</span> <a href="@{AbsenceGroups.editGroup(group.id)}">Edit</a> <br>
+	    <span class="label label-default">${group.description}</span> <a href="@{AbsenceGroups.editGroup(group.id)}">Edit</a> <br>
 	  #{/list}    
     </td>
   </tr>

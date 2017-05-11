@@ -4,13 +4,13 @@ import com.google.common.collect.FluentIterable;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
+import java.util.List;
+
 import models.User;
 
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.query.AuditEntity;
 import org.hibernate.envers.query.AuditQuery;
-
-import java.util.List;
 
 public class UserHistoryDao {
 

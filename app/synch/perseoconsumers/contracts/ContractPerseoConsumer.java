@@ -20,6 +20,10 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 
 import helpers.rest.ApiRequestException;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
 import lombok.extern.slf4j.Slf4j;
 
 import models.Contract;
@@ -30,11 +34,8 @@ import org.joda.time.LocalDate;
 
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
-import synch.perseoconsumers.PerseoApis;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import synch.perseoconsumers.PerseoApis;
 
 @Slf4j
 public class ContractPerseoConsumer {

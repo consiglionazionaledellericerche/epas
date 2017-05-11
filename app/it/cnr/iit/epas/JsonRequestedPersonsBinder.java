@@ -7,14 +7,7 @@ import com.google.gson.JsonParser;
 
 import dao.PersonDao;
 
-import lombok.extern.slf4j.Slf4j;
-
-import models.Person;
-import models.exports.PersonsList;
-
 import injection.StaticInject;
-import play.data.binding.Global;
-import play.data.binding.TypeBinder;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -22,6 +15,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+
+import lombok.extern.slf4j.Slf4j;
+
+import models.Person;
+import models.exports.PersonsList;
+
+import play.data.binding.Global;
+import play.data.binding.TypeBinder;
 
 
 /**
@@ -81,9 +82,9 @@ public class JsonRequestedPersonsBinder implements TypeBinder<PersonsList> {
 
       return new PersonsList(persons);
 
-    } catch (Exception e) {
-      log.error("Problem during binding List<Person>.", e);
-      throw e;
+    } catch (Exception ex) {
+      log.error("Problem during binding List<Person>.", ex);
+      throw ex;
     }
   }
 

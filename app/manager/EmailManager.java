@@ -55,7 +55,7 @@ public class EmailManager {
       simpleEmail.addTo(to);
       simpleEmail.setSubject(subject);
       simpleEmail.setMsg(message);
-    } catch (EmailException e) {
+    } catch (EmailException ex) {
       log.error("Errore nella generazione dell'emai con oggetto {} da inviare a {}", subject, to);
     }
 

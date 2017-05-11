@@ -7,12 +7,6 @@ import dao.wrapper.IWrapperContract;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import models.base.BaseModel;
-
-import org.joda.time.LocalDate;
-
-import play.data.validation.Required;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -22,11 +16,19 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import models.base.BaseModel;
+
+import org.joda.time.LocalDate;
+
+import play.data.validation.Required;
+
 @Entity
 @Table(
     name = "contract_month_recap",
     uniqueConstraints = {@UniqueConstraint(columnNames = {"year", "month", "contract_id"})})
 public class ContractMonthRecap extends BaseModel {
+
+  private static final long serialVersionUID = 5381901476391668672L;
 
   @Required
   @ManyToOne(fetch = FetchType.LAZY)

@@ -4,12 +4,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import models.Office;
 import models.Role;
 import models.User;
-
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class SecureManager {
 

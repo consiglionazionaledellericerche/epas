@@ -5,7 +5,6 @@ import static play.modules.pdf.PDF.renderPDF;
 import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
@@ -60,7 +59,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import javax.inject.Inject;
 

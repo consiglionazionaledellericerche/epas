@@ -1,5 +1,7 @@
 package security;
 
+import java.util.Properties;
+
 import org.drools.KnowledgeBase;
 import org.drools.KnowledgeBaseFactory;
 import org.drools.builder.KnowledgeBuilder;
@@ -14,8 +16,6 @@ import play.Play;
 import play.Play.Mode;
 import play.PlayPlugin;
 import play.vfs.VirtualFile;
-
-import java.util.Properties;
 
 /**
  * @author marco

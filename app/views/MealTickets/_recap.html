@@ -38,18 +38,23 @@
 	 
 	 #{if recapPrevious != null && recapPrevious.getRemaining() > 0}
 	   <br>
-	   <h2><i class="fa fa-exclamation-triangle text-danger"></i></h2>
-	    <strong>Attenzione!!!</strong> dal contratto precedente 
-	    (terminato in data <strong>${recapPrevious.getContract().getContractDateInterval().getEnd()}</strong>)
+	   #{alert color:'warning'}
+	    <p>
+	    <i class="fa fa-exclamation-triangle text-warning"></i>
+	    <strong>Attenzione!!!</strong> Dal contratto precedente 
+	    terminato in data <strong>${recapPrevious.getContract().calculatedEnd().format()}</strong>
 	    sono rimasti <strong>${recapPrevious.getRemaining()}</strong>
-	    buoni pasto inutilizzati!!!
+	    buoni pasto inutilizzati!
+	    </p>
+	    <p>Se desideri trasferirli al nuovo contratto <a class="btn btn-xs btn-warning" href="@{MealTickets.mealTicketsLegacy(recap.contract.id)}">clicca qui.</a></p>
+	   #{/alert}
+	   
 	    
 	    <table class="table center">
 	      <tr>
 	        <th>Codice Blocco</th>
 	        <th>Buoni<br>Usati</th>
 	        <th>Buoni<br>Rimanenti</th>
-	        <th>Rimozione</th>
 	      </tr>
 	      #{list items:recapPrevious.getBlockMealTicketReceived(), as:'block'}
 	        #{if block.getRemaining() > 0 }
@@ -65,20 +70,13 @@
 		        <td>
 		          <h5 class="text-success"><strong>${block.getRemaining()}</strong></h5>
 		        </td>
-    
-		        <td>
-		        #{form @MealTickets.deletePersonMealTicket() }
-		    	  <input type="hidden" name="codeBlock" value="${block.codeBlock}"/>
-	        	  <button type="submit" class="btn btn-sm btn-danger"><span class="glyphicon glyphicon-trash"></span></button>
-		  		#{/form}
-		        </td>
 		      </tr>
 	        #{/if}
 	      #{/list}
 	    </table>
 	    
 	    <br>
-	    Se desideri trasferirli al nuovo contratto <a href="@{MealTickets.mealTicketsLegacy(recap.contract.id, name, page, max)}">clicca qui.</a>
+	    
 	 #{/if} 
 	 <!-- Recap previous contract -->
    

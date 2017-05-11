@@ -36,7 +36,7 @@
      if (_remainingTroubles || !_absence.troubles.empty) {
        hasTroubles = true;
      }
-     involvedGroups = _absence.absenceType.involvedGroupAbsenceType(true); 
+     involvedGroups = _absence.absenceType.involvedGroupTaken(true); 
      if ( _person && !involvedGroups.empty) {
        hasGroups = true;
      }
@@ -102,7 +102,7 @@
 	            <a href="@{AbsenceGroups.groupStatus('groupAbsenceTypeId':group.id, 'personId':_person.id, 'from':_absence.getAbsenceDate().format())}"> Riepilogo <i class="fa fa-external-link" aria-hidden="true"></i></a><br>
 	            #{secure.check 'AbsenceGroups.edit'}
 	            <span class="fa-stack fa-lg"><i class="fa fa-paper-plane-o fa-stack-1x"></i></span>
-	            <strong class="text-success">In questa data il codice di completamento ${replacing.absenceType.code} verrà inviato ad attestati.</strong>
+	            <strong class="text-success">In questa data il codice di completamento ${replacing.absenceType.certificateCode} verrà inviato ad attestati.</strong>
 	            #{/secure.check}
 	          #{/else}
 	        #{/list}

@@ -24,18 +24,6 @@ import helpers.jpa.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
 import manager.competences.CompetenceCodeDTO;
 import manager.competences.ShiftTimeTableDto;
 import manager.recaps.personstamping.PersonStampingRecap;
@@ -56,23 +44,31 @@ import models.ShiftCategories;
 import models.ShiftTimeTable;
 import models.ShiftType;
 import models.TotalOvertime;
-
 import models.dto.ShiftTypeService;
 import models.dto.TimeTableDto;
-import models.User;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import play.i18n.Messages;
 import play.jobs.Job;
 import play.libs.F.Promise;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class CompetenceManager {
 
@@ -87,8 +83,7 @@ public class CompetenceManager {
   private final PersonReperibilityDayDao reperibilityDao;
   private final PersonStampingRecapFactory stampingsRecapFactory;
   private final PersonShiftDayDao personShiftDayDao;
-  private final ShiftDao shiftDao;
-  private final SecureManager secureManager;
+  
   private final PersonDao personDao;
 
 
@@ -108,7 +103,7 @@ public class CompetenceManager {
       PersonDayDao personDayDao, IWrapperFactory wrapperFactory,
       PersonDayManager personDayManager, PersonReperibilityDayDao reperibilityDao,
       PersonStampingRecapFactory stampingsRecapFactory, PersonShiftDayDao personshiftDayDao,
-      ShiftDao shiftDao, SecureManager secureManager, PersonDao personDao) {
+      SecureManager secureManager, PersonDao personDao) {
 
     this.competenceCodeDao = competenceCodeDao;
     this.officeDao = officeDao;
@@ -118,9 +113,7 @@ public class CompetenceManager {
     this.personDayManager = personDayManager;
     this.reperibilityDao = reperibilityDao;
     this.stampingsRecapFactory = stampingsRecapFactory;   
-    this.personShiftDayDao = personshiftDayDao;
-    this.shiftDao = shiftDao;
-    this.secureManager = secureManager;
+    this.personShiftDayDao = personshiftDayDao;    
     this.personDao = personDao;
   }
 
@@ -393,8 +386,8 @@ public class CompetenceManager {
         }
         break;
       case onMonthlyPresence:
-        PersonStampingRecap psDto = stampingsRecapFactory
-        .create(comp.person, comp.year, comp.month, true);
+        PersonStampingRecap psDto = 
+            stampingsRecapFactory.create(comp.person, comp.year, comp.month, true);
         if (psDto.basedWorkingDays != value) {
           result = Messages.get("CompManager.diffBasedWorkingDay");
         }
@@ -442,8 +435,8 @@ public class CompetenceManager {
         ? reperibilityDao.getReperibilityTypeByOffice(
             office, Optional.fromNullable(false)).size()
             : 0;
-            return numbers * (new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1)
-                .dayOfMonth().getMaximumValue());
+    return numbers * (new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1)
+        .dayOfMonth().getMaximumValue());
   }
 
   /**
@@ -691,8 +684,14 @@ public class CompetenceManager {
       Optional<PersonCompetenceCodes> pcc = 
           competenceCodeDao.getByPersonAndCodeAndDate(person, item, date);
       if (pcc.isPresent()) {
-        pcc.get().endDate = endMonth;
-        pcc.get().save();
+        
+        if (pcc.get().beginDate.monthOfYear().equals(date.monthOfYear())) {
+          pcc.get().delete();
+        } else {
+          pcc.get().endDate = endMonth;
+          pcc.get().save();
+        }
+
         if (item.code.equals("T1") || item.code.equals("T2") || item.code.equals("T3")) {
           PersonShift personShift = personShiftDayDao.getPersonShiftByPerson(pcc.get().person);
           if (personShift != null) {
@@ -933,28 +932,57 @@ public class CompetenceManager {
     Optional<PersonCompetenceCodes> pcc = competenceCodeDao
         .getByPersonAndCodeAndDate(person, code, date);
     if (pcc.isPresent()) {
-      PersonStampingRecap psDto = stampingsRecapFactory
+      
+      switch (code.limitType) {
+        case onMonthlyPresence:
+          PersonStampingRecap psDto = stampingsRecapFactory
           .create(person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true);
-      Optional<Competence> competence = competenceDao
-          .getCompetence(person, yearMonth.getYear(), yearMonth.getMonthOfYear(), code);
-      if (competence.isPresent()) {
-        competence.get().valueApproved = psDto.basedWorkingDays;
-        competence.get().save();
-      } else {
-        Competence comp = new Competence();
-        comp.competenceCode = code;
-        comp.person = person;
-        comp.year = yearMonth.getYear();
-        comp.month = yearMonth.getMonthOfYear();
-        comp.valueApproved = psDto.basedWorkingDays;
-        comp.save();
+          addSpecialCompetence(person, yearMonth, code, Optional.fromNullable(psDto));
+          break;
+        case entireMonth:
+          addSpecialCompetence(person, yearMonth, code, Optional.<PersonStampingRecap>absent());
+          break;
+          default:
+            break;
       }
-      log.debug("Assegnati {} giorni a {}", psDto.basedWorkingDays, person.fullName());
     } else {
       log.warn("La competenza {} non risulta abilitata per il dipendente {} nel mese "
           + "e nell'anno selezionati", code, person.fullName());
     }
   }
+  
+  /**
+   * assegna le competenze speciali (su presenza mensile o assegnano interamente un mese).
+   * @param person la persona a cui assegnare la competenza
+   * @param yearMonth l'anno mese per cui assegnare la competenza
+   * @param code il codice competenza da assegnare
+   * @param psDto (opzionale) se presente serve al calcolo dei giorni di presenza
+   */
+  private void addSpecialCompetence(Person person, YearMonth yearMonth, CompetenceCode code, 
+      Optional<PersonStampingRecap> psDto) {
+    int value = 0;
+    if (psDto.isPresent()) {
+      value = psDto.get().basedWorkingDays;
+    } else {
+      value = code.limitValue;
+    }
+    Optional<Competence> competence = competenceDao
+        .getCompetence(person, yearMonth.getYear(), yearMonth.getMonthOfYear(), code);
+    if (competence.isPresent()) {
+      competence.get().valueApproved = value;
+      competence.get().save();
+    } else {
+      Competence comp = new Competence();
+      comp.competenceCode = code;
+      comp.person = person;
+      comp.year = yearMonth.getYear();
+      comp.month = yearMonth.getMonthOfYear();
+      comp.valueApproved = value;
+      comp.save();
+    }
+    log.debug("Assegnata competenza a {}", person.fullName());
+  }
+
 
   /**
    * crea un personShift a partire dalla persona passata come parametro.

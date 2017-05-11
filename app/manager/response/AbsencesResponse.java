@@ -1,8 +1,7 @@
 package manager.response;
 
-import com.google.common.base.Function;
-
 import com.fasterxml.jackson.annotation.JsonFilter;
+import com.google.common.base.Function;
 
 import helpers.rest.JacksonModule;
 

@@ -8,7 +8,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
@@ -17,6 +16,12 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 
 import helpers.jpa.ModelQuery;
 import helpers.jpa.ModelQuery.SimpleResults;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
 
 import manager.configurations.EpasParam;
 
@@ -27,12 +32,6 @@ import models.enumerate.StampTypes;
 import models.query.QBadgeReader;
 import models.query.QPerson;
 import models.query.QUser;
-
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.persistence.EntityManager;
 
 public class UserDao extends DaoBase {
 

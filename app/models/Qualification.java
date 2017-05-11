@@ -1,18 +1,18 @@
 package models;
 
-import models.absences.AbsenceType;
-import models.base.BaseModel;
-
-import org.hibernate.envers.Audited;
-
-import play.data.validation.Required;
-
 import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import models.absences.AbsenceType;
+import models.base.BaseModel;
+
+import org.hibernate.envers.Audited;
+
+import play.data.validation.Required;
 
 
 /**

@@ -1,10 +1,5 @@
 package models;
 
-import models.base.MutableModel;
-import models.enumerate.NotificationSubject;
-
-import play.data.validation.Required;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -13,6 +8,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+
+import models.base.MutableModel;
+import models.enumerate.NotificationSubject;
+
+import play.data.validation.Required;
 
 /**
  * Notification info and its database mapping.

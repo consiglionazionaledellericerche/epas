@@ -1,10 +1,7 @@
 package models.absences;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
-
-import models.base.BaseModel;
-
-import org.hibernate.envers.Audited;
 
 import java.util.Set;
 
@@ -13,6 +10,11 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import models.absences.definitions.DefaultTab;
+import models.base.BaseModel;
+
+import org.hibernate.envers.Audited;
 
 @Audited
 @Entity
@@ -56,9 +58,29 @@ public class CategoryTab extends BaseModel implements Comparable<CategoryTab> {
   }
   
   /**
+   * Se esiste fra gli enumerati un corrispondente e se è correttamente modellato.
+   * @return absent se la tab non è presente in enum
+   */
+  public Optional<Boolean> matchEnum() {
+    for (DefaultTab defaultTab : DefaultTab.values()) {
+      if (defaultTab.name().equals(this.name)) {
+        if (defaultTab.description.equals(this.description)
+            && defaultTab.priority == this.priority) {
+          return Optional.of(true);
+        } else {
+          return Optional.of(false);
+        }
+      } 
+    }
+    return Optional.absent();
+  }
+  
+  /**
    * To String.
    */
   public String toString() {
     return this.description;
   }
+  
+  
 }

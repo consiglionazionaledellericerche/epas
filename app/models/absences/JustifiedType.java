@@ -2,12 +2,6 @@ package models.absences;
 
 import com.google.common.collect.Lists;
 
-import lombok.Getter;
-
-import models.base.BaseModel;
-
-import org.hibernate.envers.Audited;
-
 import java.util.List;
 import java.util.Set;
 
@@ -18,6 +12,12 @@ import javax.persistence.Enumerated;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import lombok.Getter;
+
+import models.base.BaseModel;
+
+import org.hibernate.envers.Audited;
 
 @Audited
 @Entity

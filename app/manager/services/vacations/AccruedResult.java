@@ -4,11 +4,11 @@ import com.google.common.collect.Lists;
 
 import it.cnr.iit.epas.DateInterval;
 
+import java.util.List;
+
 import lombok.Data;
 
 import models.absences.Absence;
-
-import java.util.List;
 
 /**
  * I giorni maturati nell'intervallo, tenuto conto dei postPartum e del tipo di richiesta

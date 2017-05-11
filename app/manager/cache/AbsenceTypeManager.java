@@ -3,13 +3,17 @@ package manager.cache;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.jpa.impl.JPAQueryFactory;
 
+import java.util.Set;
+
+import javax.persistence.EntityManager;
+
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
+import models.absences.definitions.DefaultGroup;
 import models.absences.query.QAbsenceType;
 import models.absences.query.QGroupAbsenceType;
 import models.enumerate.AbsenceTypeMapping;
@@ -18,10 +22,6 @@ import org.apache.commons.lang.NotImplementedException;
 import org.testng.collections.Sets;
 
 import play.cache.Cache;
-
-import java.util.Set;
-
-import javax.persistence.EntityManager;
 
 public class AbsenceTypeManager {
 
@@ -132,7 +132,7 @@ public class AbsenceTypeManager {
     GroupAbsenceType group = queryFactory.from(groupAbsenceType)
             .leftJoin(groupAbsenceType.takableAbsenceBehaviour)
             .leftJoin(groupAbsenceType.takableAbsenceBehaviour.takableCodes)
-            .where(groupAbsenceType.name.eq(GroupAbsenceType.REDUCING_VACATIONS_NAME))
+            .where(groupAbsenceType.name.eq(DefaultGroup.RIDUCE_FERIE_CNR.name()))
             .singleResult(groupAbsenceType);
     
     if (group != null) {

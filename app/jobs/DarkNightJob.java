@@ -5,6 +5,10 @@ import com.google.common.collect.ImmutableList;
 
 import dao.PersonDao;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ConsistencyManager;
@@ -18,10 +22,6 @@ import org.joda.time.LocalDate;
 import play.Play;
 import play.jobs.Job;
 import play.jobs.On;
-
-import java.util.List;
-
-import javax.inject.Inject;
 
 @SuppressWarnings("rawtypes")
 @Slf4j

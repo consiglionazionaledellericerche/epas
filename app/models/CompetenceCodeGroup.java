@@ -3,15 +3,6 @@ package models;
 
 import com.google.common.collect.Lists;
 
-import models.base.BaseModel;
-import models.enumerate.LimitType;
-import models.enumerate.LimitUnit;
-
-import org.hibernate.envers.Audited;
-
-import play.data.validation.Required;
-import play.data.validation.Unique;
-
 import java.util.List;
 
 import javax.persistence.Column;
@@ -21,6 +12,15 @@ import javax.persistence.Enumerated;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import models.base.BaseModel;
+import models.enumerate.LimitType;
+import models.enumerate.LimitUnit;
+
+import org.hibernate.envers.Audited;
+
+import play.data.validation.Required;
+import play.data.validation.Unique;
 
 
 /**

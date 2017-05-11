@@ -5,6 +5,10 @@ import com.google.common.base.Splitter;
 
 import dao.OfficeDao;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ConfGeneralManager;
@@ -21,10 +25,6 @@ import org.joda.time.LocalTime;
 
 import play.Play;
 import play.jobs.Job;
-
-import java.util.List;
-
-import javax.inject.Inject;
 
 /**
  * @author daniele
