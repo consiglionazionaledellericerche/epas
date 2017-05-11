@@ -12,9 +12,18 @@ import dao.CompetenceDao;
 import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.PersonDayManager;
+import manager.attestati.dto.internal.CruscottoDipendente;
+import manager.attestati.dto.internal.PeriodoDipendente;
+import manager.attestati.dto.internal.StatoAttestatoMese;
+import manager.attestati.dto.internal.clean.ContrattoAttestati;
 import manager.attestati.dto.show.CodiceAssenza;
 import manager.attestati.dto.show.RigaAssenza;
 import manager.attestati.dto.show.RigaCompetenza;
@@ -37,11 +46,6 @@ import org.joda.time.YearMonth;
 import play.libs.WS.HttpResponse;
 import play.mvc.Http;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-
 /**
  * Funzionalità integrazione ePAS - Nuovo Attestati.
  *
@@ -60,6 +64,16 @@ public class CertificationService implements ICertificationService {
   private final CertificationDao certificationDao;
 
 
+  /**
+   * Constructor.
+   * @param certificationsComunication injected.
+   * @param absenceDao injected.
+   * @param competenceDao injected.
+   * @param personMonthRecapDao injected.
+   * @param personDayManager injected.
+   * @param personDayDao injected.
+   * @param certificationDao injected.
+   */
   @Inject
   public CertificationService(CertificationsComunication certificationsComunication,
       AbsenceDao absenceDao, CompetenceDao competenceDao, PersonMonthRecapDao personMonthRecapDao,
@@ -154,7 +168,8 @@ public class CertificationService implements ICertificationService {
   }
 
   /* (non-Javadoc)
-   * @see manager.attestati.service.ICertificationService#buildPersonStaticStatus(models.Person, int, int)
+   * @see manager.attestati.service.ICertificationService#buildPersonStaticStatus(
+   *    models.Person, int, int)
    */
   @Override
   public PersonCertData buildPersonStaticStatus(Person person, int year, int month)
@@ -273,7 +288,8 @@ public class CertificationService implements ICertificationService {
   }
 
   /* (non-Javadoc)
-   * @see manager.attestati.service.ICertificationService#certificationsEquivalent(java.util.Map, java.util.Map)
+   * @see manager.attestati.service.ICertificationService#certificationsEquivalent(
+   *    java.util.Map, java.util.Map)
    */
   @Override
   public boolean certificationsEquivalent(Map<String, Certification> map1,
@@ -301,7 +317,8 @@ public class CertificationService implements ICertificationService {
   }
 
   /* (non-Javadoc)
-   * @see manager.attestati.service.ICertificationService#process(manager.attestati.service.PersonCertData)
+   * @see manager.attestati.service.ICertificationService#process(
+   *    manager.attestati.service.PersonCertData)
    */
   // TODO Questa parte andrebbe resa più semplice perchè per trasmettere le informazioni
   // ad attestati sono costretto ad avere un PersonCertData che è il risultato
@@ -518,7 +535,7 @@ public class CertificationService implements ICertificationService {
   private Map<String, Certification> absences(Person person, int year, int month,
       Map<String, Certification> certifications) {
 
-//    log.info("Persona {}", person);
+    //log.info("Persona {}", person);
 
     List<Absence> absences = absenceDao
         .getAbsencesNotInternalUseInMonth(person, year, month);
@@ -631,45 +648,6 @@ public class CertificationService implements ICertificationService {
   }
 
   /* (non-Javadoc)
-   * @see manager.attestati.service.ICertificationService#emptyAttestati(manager.attestati.service.PersonCertData)
-   */
-  @Override
-  public PersonCertData emptyAttestati(
-      PersonCertData personCertData)
-      throws ExecutionException, NoSuchFieldException {
-
-    if (personCertData.attestatiCertifications != null) {
-      for (Certification certification :
-          personCertData.attestatiCertifications.values()) {
-        if (certification.attestatiId != null
-            || certification.certificationType == CertificationType.MEAL) {
-          removeAttestati(certification);
-        }
-      }
-    }
-
-    if (personCertData.epasCertifications != null) {
-      for (Certification certification : personCertData.epasCertifications.values()) {
-        if (certification.attestatiId != null
-            || certification.certificationType == CertificationType.MEAL) {
-          removeAttestati(certification);
-        }
-      }
-    }
-
-    if (personCertData.actualCertifications != null) {
-      for (Certification certification : personCertData.actualCertifications.values()) {
-        if (certification.attestatiId != null
-            || certification.certificationType == CertificationType.MEAL) {
-          removeAttestati(certification);
-        }
-      }
-    }
-
-    return personCertData;
-  }
-
-  /* (non-Javadoc)
    * @see manager.attestati.service.ICertificationService#absenceCodes()
    */
   @Override
@@ -682,6 +660,76 @@ public class CertificationService implements ICertificationService {
     }
     return map;
   }
+  
+  @Override
+  public Map<Integer, ContrattoAttestati> getCertificationContracts(Office office, int year,
+      int month) throws ExecutionException, NoSuchFieldException {
+    
+    // Pulizia per recuperare il dato sui contratti attivi
+    Map<Integer, ContrattoAttestati> map = Maps.newHashMap();
+    for (StatoAttestatoMese statoAttestatoMese : certificationsComunication
+        .getStatoAttestatoMese(office, year, month)) {
+      
+      LocalDate beginContract = new LocalDate(statoAttestatoMese.dipendente.dataAssunzione);
+      LocalDate endContract = null;
+      if (statoAttestatoMese.dipendente.dataCessazione != null) {
+        endContract = new LocalDate(statoAttestatoMese.dipendente.dataCessazione);
+      }
+      map.put(statoAttestatoMese.dipendente.matricola, ContrattoAttestati.builder()
+          .matricola(statoAttestatoMese.dipendente.matricola)
+          .beginContract(beginContract)
+          .endContract(endContract).build());
+    }
+    return map;
 
+  }
+  
+  @Override
+  public CruscottoDipendente getCruscottoDipendente(Person person, int year)
+      throws ExecutionException, NoSuchFieldException {
+
+    StatoAttestatoMese statoAttestatoMese = null;
+    YearMonth yearMonth = null;
+    while (statoAttestatoMese == null) {
+      
+      if (yearMonth == null) {
+        //first attempt  
+        yearMonth = new YearMonth(LocalDate.now());
+        if (year < LocalDate.now().getYear()) {
+          yearMonth = new YearMonth(year, 12);
+        }
+      } else {
+        //tentativi successivi
+        yearMonth = yearMonth.minusMonths(1);
+        if (yearMonth.getYear() != year) {
+          return null;
+        }
+      }
+      
+      try {
+        for (StatoAttestatoMese item : certificationsComunication
+            .getStatoAttestatoMese(person.office, year, yearMonth.getMonthOfYear())) {
+          if (person.number.equals(item.dipendente.matricola)) {
+            statoAttestatoMese = item;
+          }
+        }
+      } catch (Exception ex) {
+        statoAttestatoMese = null;
+      }
+    }
+
+    //scarico il periodo della persona per il dipendente id
+    PeriodoDipendente periodoDipendente = certificationsComunication
+        .getPeriodoDipendente(statoAttestatoMese.id);
+
+    log.info(periodoDipendente.toString());
+
+    //scarico il cruscotto
+    CruscottoDipendente cruscottoDipendente = certificationsComunication
+        .getCruscotto(periodoDipendente.dipendente.id, year);
+
+    return cruscottoDipendente;
+
+  }
 
 }

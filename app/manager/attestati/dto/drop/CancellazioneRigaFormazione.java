@@ -2,9 +2,9 @@ package manager.attestati.dto.drop;
 
 import com.google.common.collect.Lists;
 
-import models.Certification;
-
 import java.util.List;
+
+import models.Certification;
 
 public class CancellazioneRigaFormazione {
 
@@ -26,7 +26,6 @@ public class CancellazioneRigaFormazione {
   
   /**
    * Constructor.
-   * @param certification
    */
   public CancellazioneRigaFormazione(Certification certification) {
     this.codiceSede = Integer.parseInt(certification.person.office.codeId);

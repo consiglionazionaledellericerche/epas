@@ -48,6 +48,10 @@
   			e deve essere uguale al numero di giorni di presenza a lavoro nel mese per il dipendente.
   		</p>
   	#{/elseif}
+  	#{elseif competence.competenceCode.limitType.equals(models.enumerate.LimitType.entireMonth)}
+  		<p>Questo codice appartiene alle indennità di rischio radiazione ionizzante e viene assegnato su base mensile.
+  		Pertanto il massimo valore assegnabile è <strong>${competence.competenceCode.limitValue}</strong></p>
+  	#{/elseif}
   	#{else}
   		<p>Per questo codice non è stata definita una linea di comportamento nella definizione delle quantità usabili singolarmente
   			o per il proprio gruppo di appartenenza. Rivolgersi all'amministrazione della sede centrale per chiarimenti sui quantitativi

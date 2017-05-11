@@ -4,7 +4,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
@@ -15,8 +14,19 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 
-
 import it.cnr.iit.epas.DateUtility;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+import javax.inject.Inject;
 
 import manager.AbsenceManager;
 import manager.SecureManager;
@@ -28,7 +38,6 @@ import manager.recaps.YearlyAbsencesRecap;
 import models.Office;
 import models.Person;
 import models.PersonDay;
-
 import models.User;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -45,18 +54,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import security.SecurityRules;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
-import javax.inject.Inject;
 
 @With({Resecure.class})
 public class Absences extends Controller {

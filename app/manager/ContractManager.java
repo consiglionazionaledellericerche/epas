@@ -3,11 +3,16 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
+import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+
+import java.util.List;
+
+import javax.inject.Inject;
 
 import models.Contract;
 import models.ContractMonthRecap;
@@ -22,10 +27,6 @@ import org.joda.time.YearMonth;
 
 import play.db.jpa.JPA;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
 
 /**
  * Manager per Contract.
@@ -38,6 +39,7 @@ public class ContractManager {
   private final IWrapperFactory wrapperFactory;
   private final PeriodManager periodManager;
   private final PersonDayInTroubleManager personDayInTroubleManager;
+  private final WorkingTimeTypeDao workingTimeTypeDao;
 
   /**
    * Constructor.
@@ -51,11 +53,13 @@ public class ContractManager {
   public ContractManager(
       final ConsistencyManager consistencyManager,
       final PeriodManager periodManager, final PersonDayInTroubleManager personDayInTroubleManager, 
+      final WorkingTimeTypeDao workingTimeTypeDao,
       final IWrapperFactory wrapperFactory) {
 
     this.consistencyManager = consistencyManager;
     this.periodManager = periodManager;
     this.personDayInTroubleManager = personDayInTroubleManager;
+    this.workingTimeTypeDao = workingTimeTypeDao;
     this.wrapperFactory = wrapperFactory;
   }
 
@@ -119,7 +123,8 @@ public class ContractManager {
    * @param recomputation      se effettuare subito il ricalcolo della persona.
    * @return esito costruzione
    */
-  public final boolean properContractCreate(final Contract contract, final WorkingTimeType wtt, 
+  public final boolean properContractCreate(final Contract contract, 
+      Optional<WorkingTimeType> wtt, 
       boolean recomputation) {
 
     if (!isContractCrossFieldValidationPassed(contract)) {
@@ -136,11 +141,19 @@ public class ContractManager {
     for (VacationPeriod vacationPeriod : contract.getVacationPeriods()) {
       vacationPeriod.save();
     }
+    
+    if (!wtt.isPresent()) {
+      wtt = Optional.fromNullable(workingTimeTypeDao
+          .workingTypeTypeByDescription("Normale", Optional.absent()));
+      if (!wtt.isPresent()) {
+        throw new IllegalStateException();
+      }
+    }
 
     ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
     cwtt.beginDate = contract.getBeginDate();
     cwtt.endDate = contract.calculatedEnd();
-    cwtt.workingTimeType = wtt;
+    cwtt.workingTimeType = wtt.get();
     cwtt.contract = contract;
     cwtt.save();
     contract.contractWorkingTimeType.add(cwtt);
@@ -328,9 +341,6 @@ public class ContractManager {
     if (contract.sourceRemainingMealTicket == null) {
       contract.sourceRemainingMealTicket = 0;
     }
-    if (contract.sourceDateMealTicket == null && contract.sourceDateResidual != null) {
-      contract.sourceDateMealTicket = contract.sourceDateResidual;
-    }
     contract.save();
   }
 
@@ -340,12 +350,19 @@ public class ContractManager {
    * @param contract contract
    */
   public final void cleanResidualInitialization(final Contract contract) {
+    contract.sourceRemainingMinutesCurrentYear = 0;
+    contract.sourceRemainingMinutesLastYear = 0;
+  }
+  
+  /**
+   * Azzera l'inizializzazione del contratto.
+   *
+   * @param contract contract
+   */
+  public final void cleanVacationInitialization(final Contract contract) {
     contract.sourceVacationLastYearUsed = 0;
     contract.sourceVacationCurrentYearUsed = 0;
     contract.sourcePermissionUsed = 0;
-    contract.sourceRemainingMinutesCurrentYear = 0;
-    contract.sourceRemainingMinutesLastYear = 0;
-    contract.sourceRecoveryDayUsed = 0;
   }
 
   /**

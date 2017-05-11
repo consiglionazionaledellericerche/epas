@@ -24,9 +24,7 @@
       <th>Orizzontale</th>
       <th>Contratti attivi<br>attualmente associati<br>(alla data di oggi)</th>
       <th>Periodi associati<br>a contratti attivi</th>
-      <!--
-      <th class="center">Cambia orario<br>a tutti</th>
-       -->
+      <th>Cambia orario<br>a tutti</th>
     </tr>
     #{list items:wttDefault, as:'wtt'}
     <tr>
@@ -47,21 +45,19 @@
       </td>
       <td>
         <a href="@{WorkingTimes.showContract(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
-          ${wtt.getAssociatedActiveContract(office.id).size()}
+          ${wtt.getAssociatedActiveContract(office).size()}
         </a>
       </td>
       <td>
         <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
-          ${wtt.getAssociatedPeriodInActiveContract(office.id).size()}
+          ${wtt.getAssociatedPeriodInActiveContract(office).size()}
         </a>
       </td>
-      <!--
       <td class="center">
-        <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.value.id, office.id)}" data-modal=".my-modal">
+        <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
           Cambia
       </a>
       </td>
-       -->
     </tr>
     #{/list}
   </table>

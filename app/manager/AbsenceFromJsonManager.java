@@ -4,6 +4,11 @@ import com.google.common.base.Optional;
 
 import dao.AbsenceDao;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import models.Person;
 import models.absences.Absence;
 import models.exports.PersonEmailFromJson;
@@ -12,11 +17,6 @@ import models.exports.PersonPeriodAbsenceCode;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
 
 public class AbsenceFromJsonManager {
 

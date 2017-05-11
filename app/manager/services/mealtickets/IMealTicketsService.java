@@ -4,12 +4,12 @@ import com.google.common.base.Optional;
 
 import it.cnr.iit.epas.DateInterval;
 
+import java.util.List;
+
 import models.Contract;
 import models.MealTicket;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
 
 /**
  * Servizio meal tickets.

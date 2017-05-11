@@ -1,0 +1,107 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Stato inizializzazioni'  /}
+
+#{set 'moreStyles'}
+<style>
+  td.alignLeft { text-align: left !important; }
+</style>
+#{/set}
+
+#{tabs.initializationsTabs action:'importCertificationsAbsences', office:office /}
+
+<div class="container">
+
+  #{title title:'Importazione e Sincronizzazione Assenze ' + office.name /}
+
+  #{alert color:'info'}
+  
+  <p>
+    Cliccando su <i class="fa fa-refresh" aria-hidden="true"></i> verrà costruito o aggiornato il riepilogo delle assenze mancanti per il dipendente.
+  </p>
+  
+  <p>
+    Tutte le assenze importabili automaticamente verranno caricate cliccando su <a class="btn btn-xs btn-warning">Importa</a> 
+  </p>
+  <p>
+     Cliccando su <i class="fa fa-search" aria-hidden="true"></i> si aprirà il riepilogo dettagliato delle assenze.
+  </p>
+  #{/alert}
+  
+  <table class="table table-bordered table-striped table-hover table-condensed center">
+    <thead>
+    <tr>
+      <th>&{'person.name'}</th>
+      <th>&{'person.number'}</th>
+      <th>Inizio Contratto</th>
+      <th>Ricarica</th>
+      <th>Esito</th>
+      <th>Importa</th>
+    </tr>
+    </thead>
+    <tbody>
+    #{list items:people, as:'wrPerson'}
+
+    <tr>
+      <td class="alignLeft">
+        ${wrPerson.value.fullname}
+      </td>
+       
+      <td>${wrPerson.value.number}</td>
+      <td data-order="${wrPerson.currentContract.get().beginDate}">
+        ${wrPerson.currentContract.get().beginDate?.format()}
+      </td>
+      
+      <td>
+          <a href="@{reloadCertificationAbsences(wrPerson.value.id)}" data-async="#page_content" data-spinner="#defaultSpinner">
+           <i class="fa fa-refresh" aria-hidden="true"></i>
+          </a>
+      </td>
+      
+      <td>
+       #{if certificationsSummary.get(wrPerson.value.number).present }
+          %{ situation = certificationsSummary.get(wrPerson.value.number).get() }%
+          <a href="@{certificationsAbsences(wrPerson.value.id, year)}"  data-async-modal="#defaultModal">
+            <i class="fa fa-search" aria-hidden="true"></i>
+          </a> 
+          #{if situation.toAddAuto()}
+            <span popover-hover data-content="Assenze mancanti importabili automaticamente."><i class="fa fa-download text-success" aria-hidden="true"></i></span>
+          #{/if}
+          #{if situation.toAddManually()} 
+            <span popover-hover data-content="Assenza macanti da caricare manualmente."><i class="fa fa-download text-warning" aria-hidden="true"></i></span>
+          #{/if}
+          #{if situation.allImported()}
+           <span popover-hover data-content="Tutte le assenze sono importate correttamente."><i class="fa fa-check text-success" aria-hidden="true"></i></span>
+          #{/if}
+          
+          #{if situation.firstChildMissing()}
+            <span popover-hover data-content="Inserire il primo figlio in anagrafica."><i class="fa fa-child text-danger" aria-hidden="true"></i></span>
+          #{/if}
+          #{if situation.secondChildMissing()}
+            <span popover-hover data-content="Inserire il secondo figlio in anagrafica."><i class="fa fa-child text-danger" aria-hidden="true"></i></span>
+          #{/if}
+          #{if situation.thirdChildMissing()}
+            <span popover-hover data-content="Inserire il terzo figlio in anagrafica."><i class="fa fa-child text-danger" aria-hidden="true"></i></span>
+          #{/if}
+       #{/if}   
+      </td>
+      
+      <td>
+      #{if certificationsSummary.get(wrPerson.value.number).present }
+          %{ situation = certificationsSummary.get(wrPerson.value.number).get() }%
+          #{if situation.toAddAuto()}
+            <a class="btn btn-xs btn-warning" data-async="#page_content" data-spinner="#defaultSpinner"
+              href="@{syncCertificationsAbsences(wrPerson.value.id, year)}">Importa</a>
+          #{/if}
+      #{/if}    
+      </td>
+
+    </tr>
+
+    #{/list}
+    </tbody>
+  </table>
+
+
+</div>
+

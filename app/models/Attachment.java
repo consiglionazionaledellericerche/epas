@@ -1,13 +1,5 @@
 package models;
 
-import models.base.MutableModel;
-import models.enumerate.AttachmentType;
-
-import org.hibernate.envers.Audited;
-
-import play.data.validation.Required;
-import play.db.jpa.Blob;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -18,6 +10,14 @@ import javax.persistence.PreRemove;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+
+import models.base.MutableModel;
+import models.enumerate.AttachmentType;
+
+import org.hibernate.envers.Audited;
+
+import play.data.validation.Required;
+import play.db.jpa.Blob;
 
 /**
  * @author daniele

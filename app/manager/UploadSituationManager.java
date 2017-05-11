@@ -9,6 +9,8 @@ import dao.PersonDao;
 import dao.PersonMonthRecapDao;
 import dao.wrapper.IWrapperContractMonthRecap;
 
+import java.util.List;
+
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 
@@ -19,8 +21,6 @@ import models.PersonMonthRecap;
 import models.absences.Absence;
 
 import play.Play;
-
-import java.util.List;
 
 public class UploadSituationManager {
 

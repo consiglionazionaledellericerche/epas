@@ -4,7 +4,7 @@
   'Persons.list',
   'Stampings.personStamping',
   'Absences.showGeneralMonthlyAbsences',
-  'VacationsAdmin.list',
+  'Vacations.list',
   'Competences.showCompetences',
   'MealTickets.recapMealTickets',
   'PersonMonths.visualizePeopleTrainingHours',
@@ -13,7 +13,11 @@
   'MonthRecaps.showRecaps',
   'Charts.checkLastYearAbsences',
   'PrintTags.listPersonForPrintTags',
-  'Certifications.certifications'] /}
+  'Certifications.certifications',
+  'Contracts.initializationsStatus',
+  'Contracts.initializationsMeal',
+  'AbsenceGroups.absenceInitializations',
+  'AbsenceGroups.absenceTroubles'] /}
 
   <li class="dropdown #{if request.action in actions}active#{/if}">
 
@@ -30,6 +34,10 @@
       #{secure.li @Persons.list() }
       <i class="fa fa-users" aria-hidden="true"></i>
       #{/secure.li}
+      #{secure.li @Contracts.initializationsStatus(session.get("officeSelected")) }
+      <i class="fa fa-flag-checkered" aria-hidden="true"></i>
+      #{/secure.li}
+
       #{secure.check 'Stampings.personStamping'}
       <li role="separator" class="divider"></li>
       #{/secure.check}
@@ -44,7 +52,7 @@
       <i class="fa fa-user-times" aria-hidden="true"></i>
       #{/secure.li}
 
-      #{secure.li @VacationsAdmin.list(session.get("yearSelected"), session.get("officeSelected")) }
+      #{secure.li @Vacations.list(session.get("yearSelected"), session.get("officeSelected")) }
       <i class="fa fa-plane" aria-hidden="true"></i>
       #{/secure.li}
 

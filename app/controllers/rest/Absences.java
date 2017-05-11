@@ -1,16 +1,15 @@
 package controllers.rest;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
-
 import cnr.sync.dto.AbsenceAddedRest;
 import cnr.sync.dto.AbsenceRest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
@@ -22,6 +21,10 @@ import dao.wrapper.IWrapperFactory;
 
 import helpers.JsonResponse;
 import helpers.rest.JacksonModule;
+
+import java.util.List;
+
+import javax.inject.Inject;
 
 import manager.AbsenceManager;
 import manager.cache.AbsenceTypeManager;
@@ -42,10 +45,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import security.SecurityRules;
-
-import java.util.List;
-
-import javax.inject.Inject;
 
 @With(Resecure.class)
 public class Absences extends Controller {

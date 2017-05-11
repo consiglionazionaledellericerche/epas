@@ -2,16 +2,16 @@ package models.base;
 
 import it.cnr.iit.epas.DateInterval;
 
-import lombok.Getter;
-import lombok.Setter;
-
-import org.joda.time.LocalDate;
-
 import java.util.Comparator;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import org.joda.time.LocalDate;
 
 @MappedSuperclass
 public abstract class PeriodModel extends BaseModel 

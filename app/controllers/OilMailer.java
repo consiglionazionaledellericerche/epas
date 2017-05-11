@@ -6,6 +6,12 @@ import com.google.common.base.Verify;
 import helpers.OilConfig;
 import helpers.deserializers.InlineStreamHandler;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.zip.GZIPOutputStream;
+
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -16,12 +22,6 @@ import org.apache.commons.mail.EmailAttachment;
 
 import play.mvc.Mailer;
 import play.mvc.Scope;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.zip.GZIPOutputStream;
 
 
 /**

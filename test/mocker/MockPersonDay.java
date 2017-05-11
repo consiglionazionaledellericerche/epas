@@ -3,14 +3,14 @@ package mocker;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import lombok.Builder;
 
 import models.PersonDay;
 import models.Stamping;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
 
 public class MockPersonDay {
   

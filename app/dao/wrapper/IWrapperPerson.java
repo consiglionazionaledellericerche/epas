@@ -2,6 +2,8 @@ package dao.wrapper;
 
 import com.google.common.base.Optional;
 
+import java.util.List;
+
 import models.CertificatedData;
 import models.Competence;
 import models.CompetenceCode;
@@ -14,8 +16,6 @@ import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
-import java.util.List;
 
 /**
  * Oggetto persone con molte funzionalità aggiuntive.
@@ -136,6 +136,11 @@ public interface IWrapperPerson extends IWrapperModel<Person> {
    * @return true se la persona è un tecnico (liv. IV - VIII), false altrimenti
    */
   public boolean isTechnician();
+  
+  /**
+   * L'ultimo invio attestati effettuato tramite ePAS.
+   */ 
+  public Optional<YearMonth> lastUpload();
   
 
 }

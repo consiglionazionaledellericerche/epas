@@ -13,6 +13,9 @@ import injection.StaticInject;
 
 import it.cnr.iit.epas.DateUtility;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+
 import models.absences.JustifiedType;
 import models.base.BaseModel;
 
@@ -31,9 +34,6 @@ import play.db.jpa.GenericModel;
 import play.i18n.Messages;
 import play.libs.Crypto;
 import play.templates.JavaExtensions;
-
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
 
 /**
  * Estensioni vari utilizzabili nei template, principamente formattatori di oggetti.

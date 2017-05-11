@@ -8,9 +8,16 @@ import com.google.common.collect.ImmutableList;
 
 import dao.QualificationDao;
 import dao.RoleDao;
-import dao.WorkingTimeTypeDao;
 
 import helpers.validators.StringIsTime;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Properties;
+
+import javax.inject.Inject;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,7 +31,6 @@ import models.Office;
 import models.Person;
 import models.Role;
 import models.User;
-import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -40,14 +46,6 @@ import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.libs.Codec;
 import play.mvc.Controller;
-
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.List;
-import java.util.Properties;
-
-import javax.inject.Inject;
 
 
 /**
@@ -69,8 +67,6 @@ public class Wizard extends Controller {
   private static OfficeManager officeManager;
   @Inject
   private static QualificationDao qualificationDao;
-  @Inject
-  private static WorkingTimeTypeDao workingTimeTypeDao;
   @Inject
   private static RoleDao roleDao;
   @Inject
@@ -468,10 +464,7 @@ public class Wizard extends Controller {
 
     contract.save();
 
-    WorkingTimeType wtt = workingTimeTypeDao
-        .workingTypeTypeByDescription("Normale", Optional.<Office>absent());
-
-    contractManager.properContractCreate(contract, wtt, true);
+    contractManager.properContractCreate(contract, Optional.absent(), true);
 
     User manager = userManager.createUser(person);
     manager.password = Codec.hexMD5(properties.getProperty("personnelAdminPassword"));

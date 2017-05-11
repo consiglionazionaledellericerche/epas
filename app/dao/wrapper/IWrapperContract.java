@@ -102,6 +102,13 @@ public interface IWrapperContract extends IWrapperModel<Contract> {
   public LocalDate dateForInitialization();
   
   /**
+   * La data di inizializzazione per i buoni pasto. Non è mandatoria, ma è ignorata se precedente
+   * l'inizializzazione del contratto.
+   * @return data
+   */
+  public LocalDate dateForMealInitialization();
+  
+  /**
    * Se il contratto è finito prima che la sede della persona fosse installata in ePAS.
    * @return esito
    */

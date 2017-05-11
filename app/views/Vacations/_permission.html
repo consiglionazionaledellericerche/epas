@@ -1,0 +1,68 @@
+ #{title title:('Situazione Permessi anno ' + year), administration:true /}
+  
+  #{alert color:'info'}
+    <p>Nella cella <strong>&{'vacations.takable'}</strong> per i tempi determinati vengono considerati solo i giorni
+    maturati mentre per i tempi indeterminati vengono considerati i giorni totali rimanenti.</p>
+    #{if isPermissionpermissionsExpired}
+    <p><span class="glyphicon glyphicon-remove" style="color: red;"></span> Questo simbolo indica che il relativo
+    residuo adesso non è più utilizzabile in quanto scaduto.</p>
+    #{/if}
+  #{/alert}
+  
+  <table  class="table table-striped table-hover table-bordered table-condensed center" datatable width="100%">
+	<thead>
+		<tr>
+		    <th rowspan="2">Nome</th>
+		    <th rowspan="2">Totali</th>
+			<th rowspan="2">Maturate</th>
+			<th rowspan="2">Usate</th>
+			<th colspan="2">Rimanenti</th>
+		    <th colspan="2">Limiti Utilizzo</th>
+		</tr>	
+		<tr>
+		    <th>&{'vacations.takable'}
+		    #{if isPermissionpermissionsExpired}
+    			<span class="glyphicon glyphicon-remove" style="color: red;"></span>
+            #{/if}
+		    </th>
+		    <th>Totali</th>
+		    <th>Iniziale</th>
+			<th>Finale</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		#{list items:vacationSituations, as:'vacationSituation'}
+		#{if vacationSituation.permissionsCached.exists}
+		<tr>
+		    <td>
+				<a
+				href="@{Vacations.vacationSummary(vacationSituation.contract.id, vacationSituation.permissionsCached.year, 'PERMISSION')}"
+				data-async-modal="#defaultModal">
+					${vacationSituation.contract.person.fullname}</a>
+			</td>
+			
+			<td>${vacationSituation.permissionsCached.total}</td>
+			<td>${vacationSituation.permissionsCached.accrued}</td>
+			<td>${vacationSituation.permissionsCached.used}</td>
+			
+			<!-- residui totali -->
+			<td>${vacationSituation.permissionsCached.usable}</td>
+  		    <td>${vacationSituation.permissionsCached.usableTotal}</td>
+				
+			<!-- limiti utilizzo -->	
+			<td
+			#{if vacationSituation.permissionsCached.isContractLowerLimit}><em><strong>${vacationSituation.permissionsCached.lowerLimit.format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.permissionsCached.lowerLimit.format()}#{/else}	
+			</td>
+			<td
+			#{if vacationSituation.permissionsCached.isContractUpperLimit}><em><strong>${vacationSituation.permissionsCached.upperLimit.format()}</strong></em>#{/if}
+			#{else} class="text-muted">${vacationSituation.permissionsCached.upperLimit.format()}#{/else}	
+			</td>
+
+		</tr>
+		#{/if}
+		#{/list}
+
+	</tbody>
+  </table>

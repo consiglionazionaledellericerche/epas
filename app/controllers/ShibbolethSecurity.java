@@ -5,6 +5,10 @@ import com.google.common.net.UrlEscapers;
 
 import dao.PersonDao;
 
+import java.util.HashMap;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import models.Person;
@@ -14,10 +18,6 @@ import play.Play;
 import play.Play.Mode;
 import play.cache.Cache;
 import play.mvc.Router;
-
-import java.util.HashMap;
-
-import javax.inject.Inject;
 
 /**
  * Application specific implementation of the Security class, this one just logs when each hook is

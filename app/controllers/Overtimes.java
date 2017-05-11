@@ -15,6 +15,8 @@ import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.JsonRequestedOvertimeBinder;
 import it.cnr.iit.epas.JsonRequestedPersonsBinder;
 
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.OvertimesManager;
@@ -34,8 +36,6 @@ import org.joda.time.YearMonth;
 import play.Logger;
 import play.data.binding.As;
 import play.mvc.Controller;
-
-import javax.inject.Inject;
 
 
 /**

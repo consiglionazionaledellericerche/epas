@@ -6,8 +6,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
-import controllers.Security;
-
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
@@ -16,27 +14,14 @@ import dao.PersonMonthRecapDao;
 import dao.PersonShiftDayDao;
 import dao.RoleDao;
 import dao.ShiftDao;
-
+import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
-
-import dao.UsersRolesOfficesDao;
-
 
 import helpers.BadRequest;
 
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.DateUtility;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.inject.Inject;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,10 +39,8 @@ import models.Role;
 import models.ShiftCancelled;
 import models.ShiftCategories;
 import models.ShiftType;
-import models.User;
 import models.UsersRolesOffices;
 import models.absences.Absence;
-import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.ShiftSlot;
 import models.exports.AbsenceShiftPeriod;
 import models.exports.ShiftPeriod;
@@ -78,7 +61,15 @@ import org.joda.time.LocalTime;
 import play.db.jpa.JPA;
 import play.i18n.Messages;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
+import javax.inject.Inject;
 
 
 /**
@@ -302,8 +293,7 @@ public class ShiftManager {
                 updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, label, str);                 
                 updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thLackTime, Integer.toString(wp.lackOfTime));
 
-                //log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thLackTime,
-                //    inconsistentAbsenceTable.get(person, thLackTime));
+
               }
             }
           } // fine if esistenza timbrature    
@@ -1557,7 +1547,6 @@ public class ShiftManager {
   }
   
   
-
   /***********************************************************************************************/
   /**Sezione di metodi utilizzati al bootstrap per sistemare le situazioni sui turni             */
   /***********************************************************************************************/
@@ -1578,6 +1567,9 @@ public class ShiftManager {
     });
   }
 
+  /* **********************************************************************************/
+  /* Sezione di metodi utilizzati al bootstrap per sistemare le situazioni sui turni  */
+  /* **********************************************************************************/
   // shift day
   public static final class Sd {
     Person mattina;

@@ -1,12 +1,5 @@
 package models.absences;
 
-import models.Person;
-import models.base.BaseModel;
-
-import org.hibernate.envers.Audited;
-import org.joda.time.LocalDate;
-import org.testng.collections.Lists;
-
 import java.util.List;
 
 import javax.persistence.Column;
@@ -15,6 +8,13 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import models.Person;
+import models.base.BaseModel;
+
+import org.hibernate.envers.Audited;
+import org.joda.time.LocalDate;
+import org.testng.collections.Lists;
 
 @Audited
 @Entity

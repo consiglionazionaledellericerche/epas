@@ -2,6 +2,8 @@ package manager.services.vacations;
 
 import it.cnr.iit.epas.DateInterval;
 
+import java.util.List;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,8 +14,6 @@ import models.VacationPeriod;
 import models.absences.Absence;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
 
 /**
  * Raccoglie i dati della richiesta necessari al calcolo per la

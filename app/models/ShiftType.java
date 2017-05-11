@@ -1,5 +1,6 @@
 package models;
 
+
 import lombok.ToString;
 
 import models.base.BaseModel;
@@ -16,6 +17,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
 
 
 @ToString(of= {"type", "description"})

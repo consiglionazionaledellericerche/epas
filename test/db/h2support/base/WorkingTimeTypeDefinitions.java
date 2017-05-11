@@ -1,17 +1,8 @@
 package db.h2support.base;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-
-import models.absences.AmountType;
-import models.absences.GroupAbsenceType;
-import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
-import models.absences.GroupAbsenceType.PeriodType;
-import models.absences.JustifiedType.JustifiedTypeName;
-import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
 
 import java.util.List;
-import java.util.Set;
 
 public class WorkingTimeTypeDefinitions {
 
