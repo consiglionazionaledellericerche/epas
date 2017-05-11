@@ -41,6 +41,7 @@ import net.fortuna.ical4j.model.ValidationException;
 
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.joda.time.LocalDate;
+import org.testng.collections.Lists;
 
 import play.data.binding.As;
 import play.data.validation.Required;
@@ -218,8 +219,8 @@ public class Shift extends Controller {
     log.debug("shiftType={}", shiftType.description);
 
     // save the recived shift periods with type shiftType in the month "month" of the "year" year
-    shiftManager.savePersonShiftDaysFromShiftPeriods(shiftType, year, month, body);
-
+    List<String> list = shiftManager.savePersonShiftDaysFromShiftPeriods(shiftType, year, month, body);
+    renderJSON(list);
   }
 
 
@@ -268,9 +269,9 @@ public class Shift extends Controller {
     final LocalDate lastOfMonth = firstOfMonth.dayOfMonth().withMaximumValue();
 
     Comparator<String> nullSafeStringComparator = Comparator
-            .nullsFirst(String::compareToIgnoreCase); 
-        
-    
+        .nullsFirst(String::compareToIgnoreCase); 
+
+
     //  Used TreeBasedTable becouse of the alphabetical name order (persona, A/B, num. giorni)
     Table<Person, String, Integer> personsShiftsWorkedDays =
         TreeBasedTable.<Person, String, Integer>create(
@@ -281,7 +282,7 @@ public class Shift extends Controller {
     Table<Person, String, List<String>> personsShiftInconsistentAbsences =
         TreeBasedTable.<Person, String, List<String>>create(
             Person.personComparator(), nullSafeStringComparator);
-    
+
     // Contains the number of the effective hours of worked shifts
     Table<Person, String, Integer> totalPersonShiftWorkedTime =
         TreeBasedTable.<Person, String, Integer>create(
@@ -297,7 +298,7 @@ public class Shift extends Controller {
     // Legge i turni associati alla categoria (es: A, B)
     List<ShiftType> shiftTypes =
         ShiftType.find("SELECT st FROM ShiftType st WHERE st.shiftCategories = ?", shiftCategory)
-          .fetch();
+        .fetch();
 
     // for each shift
     for (ShiftType shiftType : shiftTypes) {
@@ -324,7 +325,7 @@ public class Shift extends Controller {
       log.debug("* Num di persone nella personsShiftInconsistentAbsences = {}", 
           personsShiftInconsistentAbsences.rowKeySet().size());
     }
-    
+
 
     log.debug("CALCOLA I MINUTI MANCANTI DA personsShiftInconsistentAbsences E LI METTE "
         + "in totalShiftSumHours");
@@ -447,11 +448,11 @@ public class Shift extends Controller {
     List<Person> personList =
         JPA.em().createQuery(
             "SELECT p FROM PersonShiftShiftType psst JOIN psst.personShift ps JOIN ps.person p "
-            + "WHERE psst.shiftType.type = :type "
-            + "AND (psst.beginDate IS NULL OR psst.beginDate <= now()) "
-            + "AND (psst.endDate IS NULL OR psst.endDate >= now())")
-            .setParameter("type", type)
-            .getResultList();
+                + "WHERE psst.shiftType.type = :type "
+                + "AND (psst.beginDate IS NULL OR psst.beginDate <= now()) "
+                + "AND (psst.endDate IS NULL OR psst.endDate >= now())")
+        .setParameter("type", type)
+        .getResultList();
 
     log.debug("Shift personList called, found {} shift person", personList.size());
 
@@ -498,16 +499,16 @@ public class Shift extends Controller {
     }
 
     ImmutableList<Person> canAccess =
-            ImmutableList.<Person>builder()
-                    .addAll(personDao.getPersonForShift(type))
-                    .add(shiftType.shiftCategories.supervisor).build();
+        ImmutableList.<Person>builder()
+        .addAll(personDao.getPersonForShift(type))
+        .add(shiftType.shiftCategories.supervisor).build();
 
 
     if (!currentUser.isPresent() || currentUser.get().person == null
-            || !canAccess.contains(currentUser.get().person)) {
+        || !canAccess.contains(currentUser.get().person)) {
       log.debug("Accesso all'iCal dei turni non autorizzato: Type = {}, Current User = {}, "
-                      + "canAccess = {}",
-              type, currentUser.get(), canAccess, currentUser.get());
+          + "canAccess = {}",
+          type, currentUser.get(), canAccess, currentUser.get());
       unauthorized();
     }
 
@@ -537,14 +538,14 @@ public class Shift extends Controller {
       log.error("Validation exception generating ical", ex);
     }
   }
-  
+
   /**
    * metodo che ritorna la pagina in cui vengono gestiti i turni da parte del responsabile.
    */
   public static void handleShifts() {
-   render(); 
+    render(); 
   }
-  
+
   /**
    * 
    * @return la lista degli id dei servizi per turno di cui la persona loggata è responsabile.
@@ -560,34 +561,85 @@ public class Shift extends Controller {
         List<ShiftCategories> list = shiftDao.getCategoriesBySupervisor(currentUser.person);
 
         List<Long> ids = list.stream()
-                .map(i -> new Long(i.id))
-                .collect(Collectors.<Long> toList());
+            .map(i -> new Long(i.id))
+            .collect(Collectors.<Long> toList());
 
         log.debug("lista trovata!");
         renderJSON(ids);
-      }
-      if (currentUser.person.personShift != null) {
-        //TODO: implementare un metodo che ritorni i servizi su cui un dipendente è stato associato.
-      }
-      
+      }      
     }   
     renderJSON("");
   }  
-  
+
+  /**
+   * metodo invocato via jquery per leggere i turni di cui fa parte un turnista
+   */
+  public static void renderPersonShiftIds() {
+    User currentUser = Security.getUser().get();
+    if (currentUser.person == null) {
+      log.error("agli utenti di sistema non sono associati turni!");
+      renderJSON("");
+    } else {
+      if (currentUser.person.personShift != null) {
+        List<PersonShiftShiftType> list = shiftDao.getByPersonShiftAndDate(currentUser.person.personShift, LocalDate.now());
+        List<Long> ids = list.stream()
+            .map(i -> new Long(i.shiftType.shiftCategories.id))
+            .collect(Collectors.<Long> toList());
+        log.debug("Trovata lista per dipendente turnista!");
+        renderJSON(ids);
+      }
+    }
+    renderJSON("");
+  }
+
   /**
    * 
    * @param shiftType l'id del servizio di turno
    */
   public static void renderServices(Long shiftType) {
-    ShiftCategories cat = shiftDao.getShiftCategoryById(shiftType);
-    if (cat == null) {
-      notFound();
+    User currentUser = Security.getUser().get();
+    if (currentUser.person == null) {
+      log.error("agli utenti di sistema non sono associati turni!");
+      renderJSON("");
+    } else {
+
+
+      ShiftCategories cat = shiftDao.getShiftCategoryById(shiftType);
+      if (cat == null) {
+        notFound();
+      }
+      renderJSON(cat.shiftTypes.stream()
+          .map(i -> new String(i.type))
+          .collect(Collectors.<String> toList()));
+
     }
-    renderJSON(cat.shiftTypes.stream()
-        .map(i -> new String(i.type))
-        .collect(Collectors.<String> toList()));
+
   }
-  
+
+  /**
+   * 
+   * @param shiftType
+   */
+  public static void renderPersonShiftServices(Long shiftType) {
+    User currentUser = Security.getUser().get();
+    if (currentUser.person == null) {
+      log.error("agli utenti di sistema non sono associati turni!");
+      renderJSON("");
+    } else {
+      if (currentUser.person.personShift != null) {
+        Optional<ShiftType> type = shiftDao.getShiftTypeById(shiftType);
+        if (type.isPresent()) {
+          List<String> list = Lists.newArrayList();
+          list.add(type.get().type);
+          renderJSON(list);
+        } else {
+          notFound();
+        }        
+      }
+      renderJSON("");
+    }
+  }
+
   /**
    * ritorna la descrizione del turno passato come parametro.
    * @param shiftType l'id del servizio di turno
@@ -597,10 +649,23 @@ public class Shift extends Controller {
     if (cat == null) {
       notFound();
     }    
-    
+
     renderJSON(ImmutableList.of(cat.description));
   }
-  
+
+  /**
+   * ritorna la descrizione dell'attività di turno a cui è associato il turnista.
+   * @param shiftType l'id dell'attività di turno
+   */
+  public static void renderActivityname(Long shiftType) {
+    Optional<ShiftType> type = shiftDao.getShiftTypeById(shiftType);
+    if (!type.isPresent()) {
+      notFound();
+    }    
+
+    renderJSON(ImmutableList.of(type.get().description));
+  }
+
   /**
    * ritorna la pagina di consultazione dei turni del dipendente in turno.
    */
@@ -611,4 +676,6 @@ public class Shift extends Controller {
     } 
     render();
   }
+
+
 }

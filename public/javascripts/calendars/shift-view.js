@@ -1,3 +1,4 @@
+var Drupal = Drupal || { 'settings': {}, 'behaviors': {}, 'themes': {}, 'locale': {} };
 // crea un calendario per i turni
 var shiftCalendar = new sistCalendar("shift", "view");
 
@@ -9,38 +10,27 @@ var userAllowed = false;
 
 jQuery(document).ready(function() {
 
-    // read the Group Ids of the user and all roles for the groups          
-//    var gids = Drupal.settings.sistCalendar.gids['node'];
-//    for (var gid in gids) {
-//      groupTypes = shiftConfGroup.getTypes4Group(gid);
-//      for(one in groupTypes){
-//        if($.inArray(groupTypes[one], types) < 0){
-//          types.push(groupTypes[one]);
-//        }
-//      }
-//    }
-	var json = $.getJSON('renderIds', function(data) {
+	var json = $.getJSON('renderPersonShiftIds', function(data) {
 		
 		$.each(data, function(index, element) {
 	        types.push(element);
 	    });
-		console.log("types: "+types );
+		//console.log("types: "+types );
 	    if (types.length > 1) {
-	    	console
-				userAllowed = true;
+	    		userAllowed = true;
 				shiftCalendar.selectPopup(userAllowed, types, 'shiftView', shiftCalendar, shiftConfGroup);
+		} else {
+			if (types.length == 1) {
+				calendarType = types;
+				shiftConfGroup.calendarChoise = calendarType;
+				userAllowed = true;
+				createCalendarShiftView(userAllowed, calendarType, shiftCalendar, shiftConfGroup);
+				jQuery('h1.title').append(" "+shiftConfGroup.getShiftDescription(types));
 			} else {
-				if (types.length == 1) {
-					calendarType = types;
-	        shiftConfGroup.calendarChoise = calendarType;
-					userAllowed = true;
-					createCalendarShiftView(userAllowed, calendarType, shiftCalendar, shiftConfGroup);
-	        jQuery('h1.title').append(" "+shiftConfGroup.getShiftDescription(types));
-				} else {
-					userAllowed = false;
-					createCalendarShiftView(userAllowed, calendarType, shiftCalendar, shiftConfGroup);			
-				}	
-			}
+				userAllowed = false;
+				createCalendarShiftView(userAllowed, calendarType, shiftCalendar, shiftConfGroup);			
+			}	
+		}
 
 
 	});

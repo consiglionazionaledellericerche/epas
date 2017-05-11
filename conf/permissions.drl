@@ -210,7 +210,6 @@ when
      	"Shift.iCal",
      	"Reperibility.iCal",
 
-
      	/* Metodi rest */
      	"rest.PersonDays.getDaySituation",
      	"rest.PersonDays.getMonthSituation",
