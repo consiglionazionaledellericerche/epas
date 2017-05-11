@@ -171,7 +171,27 @@ sistCalendarGroup.prototype = {
 				result = data;
 				}
 			})
-			.error(function (jqXHR, textStatus, errorThrown) {
+			.fail(function (jqXHR, textStatus, errorThrown) {
+	          console.log("error during proxy call= " + textStatus);
+	          
+			});			
+		return result;
+	},
+	
+	getActivityDescription: function (shiftType) {
+		var result;		
+		$.ajax({			
+		    dataType: "json",
+			contentType: "application/json",
+			url: "renderActivityname/"+shiftType,
+			type: "GET",
+			data: {},
+			async: false,
+			success: function(data) {
+				result = data;
+				}
+			})
+			.fail(function (jqXHR, textStatus, errorThrown) {
 	          console.log("error during proxy call= " + textStatus);
 	          
 			});			
@@ -192,7 +212,29 @@ sistCalendarGroup.prototype = {
 				result = data;
 				}
 			})
-			.error(function (jqXHR, textStatus, errorThrown) {
+			.fail(function (jqXHR, textStatus, errorThrown) {
+	          console.log("error during proxy call= " + textStatus);
+	          
+			});			
+		return result;
+
+	},
+	
+	getPersonShiftFromType: function (shiftType) {
+		
+		var result;		
+		$.ajax({			
+		    dataType: "json",
+			contentType: "application/json",
+			url: "renderPersonShiftServices/"+shiftType,
+			type: "GET",
+			data: {},
+			async: false,
+			success: function(data) {
+				result = data;
+				}
+			})
+			.fail(function (jqXHR, textStatus, errorThrown) {
 	          console.log("error during proxy call= " + textStatus);
 	          
 			});			
