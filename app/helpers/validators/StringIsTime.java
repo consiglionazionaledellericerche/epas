@@ -1,8 +1,8 @@
 package helpers.validators;
 
-import play.data.validation.Check;
-
 import java.util.regex.Pattern;
+
+import play.data.validation.Check;
 
 public class StringIsTime extends Check {
 

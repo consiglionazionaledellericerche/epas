@@ -2,54 +2,45 @@
 #{set header:'banner' /}
 #{set title:'ePAS - electronic Personnel Attendance System' /}
 
-#{set 'moreStyles'}
+<div class="container col-md-4 col-md-offset-4 center margin-top-5">
+  <h3>Benvenuto in ePAS</h3>
+</div>
 
-<style>
-	#benvenuto{
-		padding-top: 4em;
-	}
-
-	#webStamping{
-		margin-top: 5em;
-	}
-
-</style>
-
-#{/set}
-
-  <div id="benvenuto" class="container col-md-4 col-md-offset-4 center">
-    <h3>Benvenuto in ePAS</h3>
-  </div>
-
-  <div class="container col-xs-8 col-xs-offset-2
+<div class="container col-xs-8 col-xs-offset-2
   						col-sm-6 col-sm-offset-3 
   						col-md-4 col-md-offset-4
   						col-lg-2 col-lg-offset-5">
-    
-	
-	#{form @authenticate(), id:'formLogin', role:'form'}
 
-		<!-- User e Password -->
-		<input class="form-control" placeholder="Username" type="text" name="username" value="${flash.username}" />
-		<input class="form-control" placeholder="Password" type="password" name="password" value="" />
-	 
-		<!-- Submit -->
-		<input class="btn btn-primary btn-block" type="submit" id="signin" value="&{'secure.signin'}" />
 
-	#{/form}
-	
-	<a href="@{LostPassword.lostPassword()}">Password dimenticata?</a>
+  #{form @authenticate(), id:'formLogin', role:'form'}
 
-	#{if controllers.Security.checkForWebstamping()}
-	<a id="webStamping" class="btn btn-success btn-block" href="@{Clocks.show()}">Timbratura web</a>
-	#{/if}
+  <!-- User e Password -->
+  <input class="form-control margin-top" placeholder="Username" type="text" name="username"
+         value="${flash.username}"/>
+  <input class="form-control margin-top" placeholder="Password" type="password" name="password"
+         value="${flash.password}"/>
 
-	#{if play.Play.configuration.getProperty("shib.login").equals("true")}
-		<div class="center" style="margin-top: 5em">
-			<a class="btn btn-default" href="@{ShibbolethSecurity.login()}">
-				<img class="col-xs-12" alt="Login via Shibboleth" src="@{'/public/images/shibboleth.png'}" />
-			</a>
-		</div>
-	#{/if}
-			 
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" name="remember" #{if flash.remember}checked#{/if}> Remember me
+    </label>
   </div>
+  <!-- Submit -->
+  <input class="btn btn-primary btn-block" type="submit" id="signin" value="&{'secure.signin'}"/>
+  #{/form}
+
+  <a href="@{LostPassword.lostPassword()}">Password dimenticata?</a>
+
+  #{if controllers.Security.checkForWebstamping()}
+  <a class="btn btn-success btn-block margin-top-5" href="@{Clocks.show()}">Timbratura web</a>
+  #{/if}
+
+  #{if play.Play.configuration.getProperty("shib.login").equals("true")}
+  <div class="center" style="margin-top: 5em">
+    <a class="btn btn-default" href="@{ShibbolethSecurity.login()}">
+      <img class="col-xs-12" alt="Login via Shibboleth" src="@{'/public/images/shibboleth.png'}"/>
+    </a>
+  </div>
+  #{/if}
+
+</div>

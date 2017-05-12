@@ -6,14 +6,14 @@ import com.google.common.collect.TreeBasedTable;
 
 import it.cnr.iit.epas.DateUtility;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Classe da utilizzare per il rendering delle assenze annuali effettuate da una persona

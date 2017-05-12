@@ -12,9 +12,12 @@ import dao.CompetenceDao;
 import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
 import dao.PersonShiftDayDao;
+import dao.RoleDao;
 import dao.ShiftDao;
+import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
+
 import helpers.BadRequest;
 
 import it.cnr.iit.epas.CompetenceUtility;
@@ -32,11 +35,12 @@ import models.PersonCompetenceCodes;
 import models.PersonDay;
 import models.PersonShift;
 import models.PersonShiftDay;
+import models.Role;
 import models.ShiftCancelled;
 import models.ShiftCategories;
 import models.ShiftType;
+import models.UsersRolesOffices;
 import models.absences.Absence;
-import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.ShiftSlot;
 import models.exports.AbsenceShiftPeriod;
 import models.exports.ShiftPeriod;
@@ -130,6 +134,11 @@ public class ShiftManager {
   private PersonMonthRecapDao personMonthRecapDao;
   @Inject
   private IWrapperFactory wrapperFactory;
+  @Inject
+  private UsersRolesOfficesDao uroDao;
+  @Inject
+  private RoleDao roleDao;
+
 
   /**
    * Costruisce la tabella delle inconsistenza tra i giorni di turno dati e le timbrature.
@@ -230,10 +239,11 @@ public class ShiftManager {
 
             // legge le coppie di timbrature valide
             List<PairStamping> pairStampings = personDayManager.getValidPairStampings(personDay.get().stampings);
-
+            //FIXME: bisognerebbe prima fare una verifica su quale tipo di tolleranza è presente per l'attività (entrata, uscita, entrambe)
+            // dopo di che in questo caso specifico CREDO debba essere verificata, se presente, la tolleranza sull'entrata
             if ((personDay.get().stampings.size() == 1)
-                && ((personDay.get().stampings.get(0).isIn() && personDay.get().stampings.get(0).date.toLocalTime().isAfter(startShift.plusMinutes(shiftType.tolerance)))
-                    || (personDay.get().stampings.get(0).isOut() && personDay.get().stampings.get(0).date.toLocalTime().isBefore(startShift.plusMinutes(shiftType.tolerance))))) {
+                && ((personDay.get().stampings.get(0).isIn() && personDay.get().stampings.get(0).date.toLocalTime().isAfter(startShift.plusMinutes(shiftType.entranceTolerance)))
+                    || (personDay.get().stampings.get(0).isOut() && personDay.get().stampings.get(0).date.toLocalTime().isBefore(startShift.plusMinutes(shiftType.entranceTolerance))))) {
 
               String stamp = (personDay.get().stampings.get(0).isIn()) ? personDay.get().stampings.get(0).date.toLocalTime().toString("HH:mm").concat("- **:**")
                   : "- **:**".concat(personDay.get().stampings.get(0).date.toLocalTime().toString("HH:mm"));
@@ -283,8 +293,7 @@ public class ShiftManager {
                 updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, label, str);                 
                 updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thLackTime, Integer.toString(wp.lackOfTime));
 
-                //log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thLackTime,
-                //    inconsistentAbsenceTable.get(person, thLackTime));
+
               }
             }
           } // fine if esistenza timbrature    
@@ -395,17 +404,19 @@ public class ShiftManager {
           // calcola gli scostamenti dall'ingresso tenendo conto della tolleranza
           //--------------------------------------------------------------------------------------
           // min di comporto se il turnista è entrato prima
+          //FIXME: anche qui, occorrerebbe testare prima che tipo di tolleranza è attribuita all'attività e, nel caso si tratti
+          // di tolleranza sull'entrata, applicarla.
           if (pairStamping.first.date.toLocalTime().isBefore(startShift)) {
-            if (pairStamping.first.date.toLocalTime().isBefore(startShift.minusMinutes(shiftType.tolerance))) {
-              newLimit = startShift.minusMinutes(shiftType.tolerance);
+            if (pairStamping.first.date.toLocalTime().isBefore(startShift.minusMinutes(shiftType.entranceTolerance))) {
+              newLimit = startShift.minusMinutes(shiftType.entranceTolerance);
               inTolleranceLimit = false;
             } else {
               newLimit = pairStamping.first.date.toLocalTime();
             } 
           } else {
             // è entrato dopo
-            if (pairStamping.first.date.toLocalTime().isAfter(startShift.plusMinutes(shiftType.tolerance))) {
-              newLimit = startShift.plusMinutes(shiftType.tolerance);
+            if (pairStamping.first.date.toLocalTime().isAfter(startShift.plusMinutes(shiftType.entranceTolerance))) {
+              newLimit = startShift.plusMinutes(shiftType.entranceTolerance);
               inTolleranceLimit = false;
             } else {
               newLimit = pairStamping.first.date.toLocalTime();
@@ -418,11 +429,13 @@ public class ShiftManager {
           // calcola gli scostamenti dell'ingresso in pausa pranzo tenendo conto della tolleranza
           //--------------------------------------------------------------------------------------
           // se il turnista è andato a  pranzo prima
+          //FIXME: anche qui occorre controllare che tipo di tolleranza è applicata all'attività e, se si tratta di tolleranza
+          // in entrata, applicarla
           if (pairStamping.second.date.toLocalTime().isBefore(startLunchTime)) {
             //log.debug("vedo uscita per pranzo prima");
 
-            if (startLunchTime.minusMinutes(shiftType.tolerance).isAfter(pairStamping.second.date.toLocalTime())) {
-              newLimit = startLunchTime.minusMinutes(shiftType.tolerance);
+            if (startLunchTime.minusMinutes(shiftType.entranceTolerance).isAfter(pairStamping.second.date.toLocalTime())) {
+              newLimit = startLunchTime.minusMinutes(shiftType.entranceTolerance);
               inTolleranceLimit = false;
             } else {
               newLimit = pairStamping.second.date.toLocalTime();
@@ -433,13 +446,13 @@ public class ShiftManager {
           } else if (pairStamping.second.date.toLocalTime().isBefore(endLunchTime)) {
             // è andato a pranzo dopo
             //log.debug("vedo uscita per pranzo dopo");
-            if (startLunchTime.plusMinutes(shiftType.tolerance).isAfter(pairStamping.second.date.toLocalTime())) {
+            if (startLunchTime.plusMinutes(shiftType.entranceTolerance).isAfter(pairStamping.second.date.toLocalTime())) {
               newLimit = pairStamping.second.date.toLocalTime();
             } else {
-              newLimit = startLunchTime.plusMinutes(shiftType.tolerance);
+              newLimit = startLunchTime.plusMinutes(shiftType.entranceTolerance);
             }
 
-            if (startLunchTime.plusMinutes(shiftType.tolerance).isBefore(pairStamping.second.date.toLocalTime())) {
+            if (startLunchTime.plusMinutes(shiftType.entranceTolerance).isBefore(pairStamping.second.date.toLocalTime())) {
               inTolleranceLimit = false;
             }
 
@@ -470,7 +483,7 @@ public class ShiftManager {
           if (pairStamping.first.date.toLocalTime().isBefore(endLunchTime) && pairStamping.first.date.toLocalTime().isAfter(startLunchTime)) {
             //log.debug("vedo rientro da pranzo prima");
 
-            newLimit = (endLunchTime.minusMinutes(shiftType.tolerance) .isAfter(pairStamping.first.date.toLocalTime())) ? endLunchTime.minusMinutes(shiftType.tolerance) : pairStamping.first.date.toLocalTime();
+            newLimit = (endLunchTime.minusMinutes(shiftType.entranceTolerance) .isAfter(pairStamping.first.date.toLocalTime())) ? endLunchTime.minusMinutes(shiftType.entranceTolerance) : pairStamping.first.date.toLocalTime();
 
             diffEndLunchTime = DateUtility.getDifferenceBetweenLocalTime(newLimit, endLunchTime);
             //log.debug("diffEndLunchTime=getDifferenceBetweenLocalTime({}, {})={}", 
@@ -479,8 +492,8 @@ public class ShiftManager {
             // è rientrato dopo
             //log.debug("vedo rientro da pranzo dopo");
 
-            if (pairStamping.first.date.toLocalTime().isAfter(endLunchTime.plusMinutes(shiftType.tolerance))) {
-              newLimit = endLunchTime.plusMinutes(shiftType.tolerance);
+            if (pairStamping.first.date.toLocalTime().isAfter(endLunchTime.plusMinutes(shiftType.entranceTolerance))) {
+              newLimit = endLunchTime.plusMinutes(shiftType.entranceTolerance);
               inTolleranceLimit = false;
             } else {
               newLimit = pairStamping.first.date.toLocalTime();
@@ -491,12 +504,15 @@ public class ShiftManager {
             //    endLunchTime, newLimit, diffEndLunchTime);
           }
 
-
+          //FIXME: anche in questo caso occorre verificare quale sia la tolleranza applicata e, se si tratta di tolleranza in uscita,
+          // conteggiarla nei calcoli che vengono effettuati.
           // se il turnista è uscito prima del turno
           if (pairStamping.second.date.toLocalTime().isBefore(endShift)) {
             //log.debug("vedo uscita prima della fine turno")
-            if (endShift.minusMinutes(shiftType.tolerance).isAfter(pairStamping.second.date.toLocalTime())) {
-              newLimit = endShift.minusMinutes(shiftType.tolerance);
+            //TODO: verificare che qui l'exitTolerance sia valorizzato e, nel caso, controllare quello
+            // altrimenti non va fatto il controllo di tolleranza sull'uscita
+            if (endShift.minusMinutes(shiftType.exitTolerance).isAfter(pairStamping.second.date.toLocalTime())) {
+              newLimit = endShift.minusMinutes(shiftType.exitTolerance);
               inTolleranceLimit = false;
             } else {
               newLimit = pairStamping.second.date.toLocalTime();
@@ -504,7 +520,7 @@ public class ShiftManager {
           } else {
             //log.debug("vedo uscita dopo la fine turno");
             // il turnista è uscito dopo la fine del turno
-            newLimit = (pairStamping.second.date.toLocalTime().isAfter(endShift.plusMinutes(shiftType.tolerance))) ? endShift.plusMinutes(shiftType.tolerance) : pairStamping.second.date.toLocalTime();
+            newLimit = (pairStamping.second.date.toLocalTime().isAfter(endShift.plusMinutes(shiftType.exitTolerance))) ? endShift.plusMinutes(shiftType.exitTolerance) : pairStamping.second.date.toLocalTime();
           }
           diffEndShift = DateUtility.getDifferenceBetweenLocalTime(endShift, newLimit);
           //log.debug("diffEndShift={}", diffEndShift);
@@ -711,10 +727,12 @@ public class ShiftManager {
     List<ShiftPeriod> shiftPeriods = new ArrayList<ShiftPeriod>();
     ShiftPeriod shiftPeriod = null;
 
+    LocalTime ttStart = new LocalTime(7, 0, 0);
+    LocalTime ttEnd = new LocalTime(12, 0, 0);
 
     for (ShiftCancelled sc : personShiftCancelled) {
       if (shiftPeriod == null || !shiftPeriod.end.plusDays(1).equals(sc.date)) {
-        shiftPeriod = new ShiftPeriod(sc.date, sc.date, sc.type, true);
+        shiftPeriod = new ShiftPeriod(sc.date, sc.date, sc.type, true, ttStart, ttEnd);
         shiftPeriods.add(shiftPeriod);
         log.trace("Creato nuovo shiftPeriod di cancellati, start={}, end={}, type={}",
             shiftPeriod.start, shiftPeriod.end, shiftPeriod.shiftType.type);
@@ -737,8 +755,10 @@ public class ShiftManager {
    * @param month        mese nel quale sono stati lavorati i turni
    * @param shiftPeriods - lista di periodi di turno lavorati e cancellati
    */
-  public void savePersonShiftDaysFromShiftPeriods(
+  public List<String> savePersonShiftDaysFromShiftPeriods(
       ShiftType shiftType, Integer year, Integer month, ShiftPeriods shiftPeriods) {
+    
+    List<String> returnList = Lists.newArrayList();
     //Il mese e l'anno ci servono per "azzerare" eventuale giorni di turno rimasti vuoti
     LocalDate monthToManage = new LocalDate(year, month, 1);
 
@@ -784,8 +804,9 @@ public class ShiftManager {
             String msg =
                 String.format("Assenza incompatibile di %s %s per il giorno %s",
                     shiftPeriod.person.name, shiftPeriod.person.surname, day);
-
-            BadRequest.badRequest(msg);
+            returnList.add(msg);
+            return returnList;
+            //BadRequest.badRequest(msg);
           }
 
           // Salvataggio del giorno di turno
@@ -876,6 +897,8 @@ public class ShiftManager {
             shiftType.description, dateToRemove);
       }
     }
+    returnList.add("ok");
+    return returnList;
   }
 
   /**
@@ -1531,11 +1554,31 @@ public class ShiftManager {
 
     });
   }
-
+  
+  
   /***********************************************************************************************/
   /**Sezione di metodi utilizzati al bootstrap per sistemare le situazioni sui turni             */
   /***********************************************************************************************/
+  
+  public void linkSupervisorToRole() {
+    List<ShiftCategories> list = ShiftCategories.findAll();
+    Role role = roleDao.getRoleByName(Role.SHIFT_SUPERVISOR);
+    list.forEach(item -> {
+      Optional<UsersRolesOffices> optional = uroDao.getUsersRolesOffices(item.supervisor.user, role, item.office);
+      if (!optional.isPresent()) {
+        UsersRolesOffices uro = new UsersRolesOffices();
+        uro.office = item.office;
+        uro.role = role;
+        uro.user = item.supervisor.user;
+        uro.save();
+        log.info("aggiunto ruolo di supervisore turni per {} della sede {}", item.supervisor.fullName(), item.office);
+      }
+    });
+  }
 
+  /* **********************************************************************************/
+  /* Sezione di metodi utilizzati al bootstrap per sistemare le situazioni sui turni  */
+  /* **********************************************************************************/
   // shift day
   public static final class Sd {
     Person mattina;

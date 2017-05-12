@@ -8,6 +8,14 @@ import com.google.common.base.Verify;
 import dao.OfficeDao;
 import dao.PersonDao;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ConsistencyManager;
@@ -32,19 +40,13 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
 
+import play.data.validation.Validation;
 import play.db.jpa.Blob;
 import play.libs.MimeTypes;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 @With({Resecure.class})
 @Slf4j
@@ -81,19 +83,19 @@ public class Configurations extends Controller {
             .targetYearEnd(configuration.getOwner(), configurationDto.validityYear);
       }
       if (configurationDto.validityBegin == null) {
-        validation.addError("configurationDto.validityYear", "anno non ammesso.");
+        Validation.addError("configurationDto.validityYear", "anno non ammesso.");
       }
     }
     if (epasParam.isPeriodic()) {
       //validazione periodo
     }
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       return newConfiguration;
     }
 
     if (epasParam.epasParamValueType.equals(EpasParamValueType.BOOLEAN)) {
       if (configurationDto.booleanNewValue == null) {
-        validation.addError("configurationDto.booleanNewValue", "valore non valido.");
+        Validation.addError("configurationDto.booleanNewValue", "valore non valido.");
       } else {
         newConfiguration = configurationManager.updateBoolean(epasParam,
             configuration.getOwner(), configurationDto.booleanNewValue,
@@ -103,7 +105,7 @@ public class Configurations extends Controller {
     }
     if (epasParam.epasParamValueType.equals(EpasParamValueType.INTEGER)) {
       if (configurationDto.integerNewValue == null) {
-        validation.addError("configurationDto.integerNewValue", "valore non valido.");
+        Validation.addError("configurationDto.integerNewValue", "valore non valido.");
       } else {
         newConfiguration = configurationManager.updateInteger(epasParam,
             configuration.getOwner(), configurationDto.integerNewValue,
@@ -121,12 +123,12 @@ public class Configurations extends Controller {
             Optional.fromNullable(configurationDto.validityBegin),
             Optional.fromNullable(configurationDto.validityEnd), false);
       } else {
-        validation.addError("configurationDto.stringNewValue", "valore non valido.");
+        Validation.addError("configurationDto.stringNewValue", "valore non valido.");
       }
     }
     if (epasParam.epasParamValueType.equals(EpasParamValueType.LOCALDATE)) {
       if (configurationDto.localdateNewValue == null) {
-        validation.addError("configurationDto.localdateNewValue", "valore non valido.");
+        Validation.addError("configurationDto.localdateNewValue", "valore non valido.");
       } else {
         newConfiguration = configurationManager.updateLocalDate(epasParam,
             configuration.getOwner(), configurationDto.localdateNewValue,
@@ -142,7 +144,7 @@ public class Configurations extends Controller {
             Optional.fromNullable(configurationDto.validityBegin),
             Optional.fromNullable(configurationDto.validityEnd), false);
       } else {
-        validation.addError("configurationDto.stringNewValue", "valore non valido.");
+        Validation.addError("configurationDto.stringNewValue", "valore non valido.");
       }
     }
     if (epasParam.epasParamValueType.equals(EpasParamValueType.DAY_MONTH)) {
@@ -155,13 +157,13 @@ public class Configurations extends Controller {
             Optional.fromNullable(configurationDto.validityEnd), false);
 
       } else {
-        validation.addError("configurationDto.stringNewValue", "valore non valido.");
+        Validation.addError("configurationDto.stringNewValue", "valore non valido.");
       }
     }
     if (epasParam.epasParamValueType.equals(EpasParamValueType.MONTH)) {
       if (configurationDto.integerNewValue == null || configurationDto.integerNewValue < 0
           || configurationDto.integerNewValue > 12) {
-        validation.addError("configurationDto.integerNewValue", "valore non valido.");
+        Validation.addError("configurationDto.integerNewValue", "valore non valido.");
       } else {
         newConfiguration = configurationManager.updateMonth(epasParam,
             configuration.getOwner(), configurationDto.integerNewValue,
@@ -178,7 +180,7 @@ public class Configurations extends Controller {
             Optional.fromNullable(configurationDto.validityBegin),
             Optional.fromNullable(configurationDto.validityEnd), false);
       } else {
-        validation.addError("configurationDto.stringNewValue", "valore non valido.");
+        Validation.addError("configurationDto.stringNewValue", "valore non valido.");
       }
     }
     if (epasParam.epasParamValueType.equals(EpasParamValueType.LOCALTIME_INTERVAL)) {
@@ -190,7 +192,7 @@ public class Configurations extends Controller {
             Optional.fromNullable(configurationDto.validityBegin),
             Optional.fromNullable(configurationDto.validityEnd), false);
       } else {
-        validation.addError("configurationDto.stringNewValue",
+        Validation.addError("configurationDto.stringNewValue",
             "valore non valido. Formato accettato HH:mm-HH:mm");
       }
     }
@@ -271,7 +273,7 @@ public class Configurations extends Controller {
     Configuration newConfiguration = (Configuration) compute(configuration,
         configuration.epasParam, configurationDto);
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors: {}", validation.errorsMap());
       render("@edit", configuration, configurationDto);
@@ -356,7 +358,7 @@ public class Configurations extends Controller {
     PersonConfiguration newConfiguration = (PersonConfiguration) compute(configuration,
         configuration.epasParam, configurationDto);
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors: {}", validation.errorsMap());
 

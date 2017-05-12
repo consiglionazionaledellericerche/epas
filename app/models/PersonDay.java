@@ -1,19 +1,5 @@
 package models;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-
-import models.absences.Absence;
-import models.base.BaseModel;
-
-import org.apache.commons.beanutils.BeanUtils;
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
-import org.joda.time.LocalDate;
-
-import play.data.validation.Required;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +14,20 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
+import models.absences.Absence;
+import models.base.BaseModel;
+
+import org.apache.commons.beanutils.BeanUtils;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+import org.joda.time.LocalDate;
+
+import play.data.validation.Required;
 
 
 /**
@@ -236,7 +236,8 @@ public class PersonDay extends BaseModel {
   public String toString() {
     return String.format(
         "PersonDay[%d] - person.id = %d, date = %s, difference = %s, isTicketAvailable = %s, "
-            + "isTicketForcedByAdmin = %s, modificationType = %s, progressive = %s, timeAtWork = %s",
+            + "isTicketForcedByAdmin = %s, modificationType = %s, "
+            + "progressive = %s, timeAtWork = %s",
         id, person.id, date, difference, isTicketAvailable, isTicketForcedByAdmin,
         stampModificationType, progressive, timeAtWork);
   }

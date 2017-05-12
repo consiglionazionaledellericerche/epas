@@ -1,24 +1,14 @@
 package models.absences;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import lombok.Getter;
-
-import models.Qualification;
-import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
-import models.base.BaseModel;
-import models.enumerate.QualificationMapping;
-
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
-import org.hibernate.envers.Audited;
-import org.joda.time.LocalDate;
-
-import play.data.validation.Required;
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 import java.util.Set;
@@ -32,6 +22,22 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
+import lombok.Getter;
+
+import models.Qualification;
+import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
+import models.absences.definitions.DefaultAbsenceType;
+import models.absences.definitions.DefaultGroup;
+import models.base.BaseModel;
+import models.enumerate.QualificationMapping;
+
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+import org.hibernate.envers.Audited;
+import org.joda.time.LocalDate;
+
+import play.data.validation.Required;
 
 @Entity
 @Table(name = "absence_types")
@@ -125,10 +131,33 @@ public class AbsenceType extends BaseModel {
    */
   @Transient
   public boolean isExpired() {
-    if (validTo == null) {
-      return false;
+    boolean newResult = false;
+    LocalDate begin = this.validFrom;
+    LocalDate end = this.validTo;
+    if (begin == null) {
+      begin = new LocalDate(2000, 1, 1); //molto prima di epas...
     }
-    return LocalDate.now().isAfter(validTo);
+    if (end == null) {
+      end = new LocalDate(2100, 1, 1);   //molto dopo di epas...
+    }
+    if (DateUtility.isDateIntoInterval(LocalDate.now(), new DateInterval(begin, end))) {
+      newResult = false;
+    } else {
+      newResult = true;
+    }
+    boolean oldResult = false;
+    if (validTo == null) {
+      oldResult = false;
+    } else {
+      oldResult = LocalDate.now().isAfter(validTo);
+    }
+    
+    if (oldResult != newResult) {
+      throw new IllegalStateException();
+    }
+    
+    return newResult;
+    
   }
 
   @Override
@@ -249,6 +278,29 @@ public class AbsenceType extends BaseModel {
   }
   
   /**
+   * I gruppi coinvolti dal tipo assenza nella parte taken.
+   * 
+   * @param onlyProgrammed non filtrare i soli programmati
+   * @return entity set
+   */
+  public Set<GroupAbsenceType> involvedGroupTaken(boolean onlyProgrammed) {
+
+    //TODO: da fare la fetch perchè è usato in tabellone timbrature per ogni codice assenza.
+    
+    Set<GroupAbsenceType> groups = Sets.newHashSet();
+    for (TakableAbsenceBehaviour behaviour : this.takableGroup) {
+      groups.addAll(behaviour.groupAbsenceTypes);
+    }
+    Set<GroupAbsenceType> filteredGroup = Sets.newHashSet();
+    for (GroupAbsenceType groupAbsenceType : groups) {
+      if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.programmed)) {
+        filteredGroup.add(groupAbsenceType);
+      }
+    }
+    return filteredGroup;
+  }
+  
+  /**
    * Se il codice è coinvolto solo in gruppi semplici.
    * @return esito
    */
@@ -262,4 +314,96 @@ public class AbsenceType extends BaseModel {
     return true;
   }
   
+  /**
+   * Il gruppo con priorità più alta di cui il tipo è takable.
+   * @return gruppo
+   */
+  public GroupAbsenceType defaultTakableGroup() {
+    GroupAbsenceType groupSelected = null;
+    for (TakableAbsenceBehaviour behaviour : this.takableGroup) {   //o uno o due...
+      for (GroupAbsenceType group : behaviour.groupAbsenceTypes) {  //quasi sempre 1
+        if (group.automatic == true || group.name.equals(DefaultGroup.FERIE_CNR_DIPENDENTI.name())
+            || group.name.equals(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name()) 
+            || group.name.equals(DefaultGroup.LAVORO_FUORI_SEDE.name())) {
+          //TODO: questi gruppi (anche in groups permitted) vanno taggati
+          continue;
+        }
+        if (groupSelected == null) {
+          groupSelected = group;
+          continue;
+        }
+        if (groupSelected.priority > group.priority) {
+          groupSelected = group;
+        }
+      }
+    }
+    return groupSelected;
+  }
+  
+  /**
+   * Se esiste fra gli enumerati un corrispondente e se è correttamente modellato.
+   * @return absent se il completamento non è presente in enum
+   */
+  public Optional<Boolean> matchEnum() {
+    for (DefaultAbsenceType defaultType : DefaultAbsenceType.values()) {
+      if (defaultType.getCode().equals(this.code)) {
+        if (defaultType.certificationCode.equals(this.certificateCode)
+            && defaultType.description.equals(this.description)
+            && defaultType.internalUse == this.internalUse
+            && defaultType.justifiedTime.equals(this.justifiedTime)
+            && defaultType.consideredWeekEnd == this.consideredWeekEnd
+            && defaultType.timeForMealTicket == this.timeForMealTicket
+            && defaultType.replacingTime.equals(this.replacingTime)
+            ) {
+          //Tipi permessi
+          if (defaultType.justifiedTypeNamesPermitted.size() 
+              != this.justifiedTypesPermitted.size()) {
+            return Optional.of(false); 
+          }
+          for (JustifiedType justifiedType : this.justifiedTypesPermitted) {
+            if (!defaultType.justifiedTypeNamesPermitted.contains(justifiedType.name)) {
+              return Optional.of(false);
+            }
+          }
+          
+          //replecing type nullable
+          if (defaultType.replacingType == null) {
+            if (this.replacingType != null) {
+              return Optional.of(false);
+            }
+          } else {
+            if (!defaultType.replacingType.equals(this.replacingType.name)) {
+              return Optional.of(false);
+            }
+          }
+          //valid from nullable
+          if (defaultType.validFrom == null) {
+            if (this.validFrom != null) {
+              return Optional.of(false);
+            }
+          } else {
+            if (!defaultType.validFrom.equals(this.validFrom)) {
+              return Optional.of(false);
+            }
+          }
+          //valid to nullable
+          if (defaultType.validTo == null) {
+            if (this.validTo != null) {
+              return Optional.of(false);
+            }
+          } else {
+            if (!defaultType.validTo.equals(this.validTo)) {
+              return Optional.of(false);
+            }
+          }
+          
+          return Optional.of(true);
+        } else {
+          return Optional.of(false);
+        }
+      } 
+    }
+    return Optional.absent();
+  }
+
 }

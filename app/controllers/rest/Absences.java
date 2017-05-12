@@ -1,16 +1,15 @@
 package controllers.rest;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
-
 import cnr.sync.dto.AbsenceAddedRest;
 import cnr.sync.dto.AbsenceRest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
@@ -22,6 +21,10 @@ import dao.wrapper.IWrapperFactory;
 
 import helpers.JsonResponse;
 import helpers.rest.JacksonModule;
+
+import java.util.List;
+
+import javax.inject.Inject;
 
 import manager.AbsenceManager;
 import manager.cache.AbsenceTypeManager;
@@ -40,11 +43,8 @@ import org.joda.time.YearMonth;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
-
-import java.util.List;
-
-import javax.inject.Inject;
 
 @With(Resecure.class)
 public class Absences extends Controller {
@@ -66,6 +66,13 @@ public class Absences extends Controller {
   @Inject
   private static SecurityRules rules;
 
+  /**
+   * Restituisce un Json con la lista delle assenze corrispondenti ai parametri passati.
+   * 
+   * @param email email della persona di cui cercare le assenze
+   * @param begin data di inizio delle assenze da cercare
+   * @param end data di fine della assenze da cercare
+   */
   @BasicAuth
   public static void absencesInPeriod(String email, LocalDate begin, LocalDate end) {
     Person person = personDao.byEmail(email).orNull();
@@ -96,6 +103,17 @@ public class Absences extends Controller {
     renderJSON(absences);
   }
 
+  /**
+   * Inserisce un assenza con il codice specificato in tutti i giorni compresi nel periodo indicato
+   * (saltando i feriali se l'assenza non è prendibile nei giorni feriali).
+   * Restituisce un Json con la lista dei giorni in cui è stata inserita l'assenza ed gli effetti
+   * codici inseriti.
+   * 
+   * @param email email della persona di cui inserire l'assenza
+   * @param absenceCode il codice dell'assenza
+   * @param begin la data di inizio del periodo
+   * @param end la data di fine del periodo
+   */
   @BasicAuth
   public static void insertAbsence(
       String email, String absenceCode, LocalDate begin, LocalDate end) {
@@ -132,6 +150,16 @@ public class Absences extends Controller {
 
   }
 
+  /**
+   * Verifica se è possibile prendere il tipo di assenza passato nel periodo indicato.
+   * La persona viene individuata tramite il suo indirizzo email.
+   * 
+   * @param email email della persona di cui inserire l'assenza
+   * @param absenceCode il codice dell'assenza
+   * @param begin la data di inizio del periodo
+   * @param end la data di fine del periodo
+   * 
+   */
   @BasicAuth
   public static void checkAbsence(String email, String absenceCode, LocalDate begin, LocalDate end) 
       throws JsonProcessingException {
@@ -173,9 +201,21 @@ public class Absences extends Controller {
     }
   }
   
+  /**
+   * Verifica se è possibile prendere il tipo di assenza passato nel periodo indicato.
+   * La persona viene individuata tramite il perseoId.
+   * 
+   * @param personPerseoId perseoId della persona di cui inserire l'assenza
+   * @param absenceCode il codice dell'assenza
+   * @param begin la data di inizio del periodo
+   * @param end la data di fine del periodo
+   * 
+   */
   @BasicAuth
   public static void checkAbsenceByPerseoId(Long personPerseoId, String absenceCode, 
       LocalDate begin, LocalDate end) throws JsonProcessingException {
+    
+    //TODO: questo metodo dovrebbe richiamare il precedente metodo checkAbsence o viceversa.
     
     //Bad request
     if (personPerseoId == null) {
@@ -223,11 +263,11 @@ public class Absences extends Controller {
 
   /**
    * TODO: o tutte o nessuna ?...
+   * 
    * @param personPerseoId il perseoId della persona
    * @param absenceCode l'absenceCode da inserire
    * @param begin la data di inizio dell'assenza
    * @param end la data di fine dell'assenza
-   * @throws JsonProcessingException
    */
   @BasicAuth
   public static void insertAbsenceByPerseoId(Long personPerseoId, String absenceCode, 
@@ -292,5 +332,4 @@ public class Absences extends Controller {
 
   }
 
-  
 }

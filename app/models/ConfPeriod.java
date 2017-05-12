@@ -1,12 +1,5 @@
 package models;
 
-import models.base.BaseModel;
-
-import org.hibernate.envers.Audited;
-import org.joda.time.LocalDate;
-
-import play.data.validation.Required;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -14,6 +7,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+
+import models.base.BaseModel;
+
+import org.hibernate.envers.Audited;
+import org.joda.time.LocalDate;
+
+import play.data.validation.Required;
 
 /**
  * Da eliminare quando è stata applicata la migrazione in tutte le installazioni.
@@ -25,6 +25,8 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "conf_period")
 public class ConfPeriod extends BaseModel {
+
+  private static final long serialVersionUID = 7145180884564880128L;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "office_id")

@@ -4,16 +4,16 @@ import com.google.common.base.Optional;
 
 import dao.wrapper.IWrapperFactory;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
 import manager.PersonDayManager;
 import manager.cache.StampTypeManager;
 import manager.configurations.ConfigurationManager;
 
 import models.Contract;
 import models.PersonDay;
-
-import java.util.List;
-
-import javax.inject.Inject;
 
 
 public class PersonStampingDayRecapFactory {

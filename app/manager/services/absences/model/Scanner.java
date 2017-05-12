@@ -4,6 +4,11 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.PersonDayManager;
@@ -18,18 +23,15 @@ import models.absences.Absence;
 import models.absences.AbsenceTrouble;
 import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.GroupAbsenceType;
+import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.definitions.DefaultGroup;
 
 import org.joda.time.LocalDate;
 
 import play.db.jpa.JPA;
-
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @Slf4j
 public class Scanner {
@@ -105,6 +107,16 @@ public class Scanner {
     while (this.nextGroupToScan != null) {
      
       log.debug("Inizio lo scan del prossimo gruppo {}", this.nextGroupToScan.description);
+      
+      //TODO: FIXME: quando sarà migrata anche la parte dei riposi, togliere questa eccezione.
+      // Oppure taggare quelli che non devono partecipare allo scan, per rendere l'algoritmo
+      // generico.
+      if (this.nextGroupToScan.pattern.equals(GroupAbsenceTypePattern.compensatoryRestCnr) 
+          || this.nextGroupToScan.name.equals(DefaultGroup.RIDUCE_FERIE_CNR.name())) {
+        //prossimo gruppo
+        this.configureNextGroupToScan(iterator);
+        continue;
+      }
       
       PeriodChain periodChain = serviceFactories.buildPeriodChain(person, this.nextGroupToScan, 
           this.currentAbsence.getAbsenceDate(), Lists.newArrayList(), null, 

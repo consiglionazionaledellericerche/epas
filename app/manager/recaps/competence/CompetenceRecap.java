@@ -6,6 +6,8 @@ import com.google.common.collect.Sets;
 import dao.CompetenceDao;
 import dao.PersonDao;
 
+import java.util.List;
+
 import manager.CompetenceManager;
 
 import models.Competence;
@@ -16,8 +18,6 @@ import models.TotalOvertime;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
-import java.util.List;
 
 public class CompetenceRecap {
 

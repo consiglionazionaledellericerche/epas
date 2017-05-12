@@ -3,12 +3,12 @@ package manager.recaps.competence;
 import dao.CompetenceDao;
 import dao.PersonDao;
 
+import javax.inject.Inject;
+
 import manager.CompetenceManager;
 
 import models.CompetenceCode;
 import models.Office;
-
-import javax.inject.Inject;
 
 public class CompetenceRecapFactory {
 

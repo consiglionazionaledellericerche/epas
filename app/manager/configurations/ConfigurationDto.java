@@ -35,7 +35,7 @@ public class ConfigurationDto {
    * Constructor from configuration (contiene i valori del dto iniziale).
    */
   public ConfigurationDto(EpasParam epasParam, LocalDate beginDate, 
-      LocalDate calculatedEnd, Object value ) {
+      LocalDate calculatedEnd, Object value) {
     
     if (epasParam.isGeneral()) {
       this.validityBegin = beginDate;

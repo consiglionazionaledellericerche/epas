@@ -23,6 +23,12 @@ import helpers.validators.StringIsTime;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.NullStringBinder;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ConsistencyManager;
@@ -49,16 +55,12 @@ import org.joda.time.YearMonth;
 
 import play.data.binding.As;
 import play.data.validation.CheckWith;
+import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
+
 import security.SecurityRules;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
 
 
 /**
@@ -221,28 +223,20 @@ public class Stampings extends Controller {
    * @param stamping timbratura
    * @param time     orario
    */
-  public static void save(Long personId, LocalDate date, Stamping stamping,
-      @CheckWith(StringIsTime.class) String time) {
+  public static void save(Long personId, @Required LocalDate date, @Required Stamping stamping,
+      @Required @CheckWith(StringIsTime.class) String time) {
 
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
 
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-
-    // serve per poter discriminare dopo aver fatto la save della timbratura se si
-    // trattava di una nuova timbratura o di una modifica
-    boolean newInsert = !stamping.isPersistent();
-
-    if (date != null && time != null) {
-      stamping.date = stampingManager.deparseStampingDateTime(date, time);
-    }
-
-    validation.valid(stamping);
-
+    
+    validation.required(stamping.way);
+    
     if (Validation.hasErrors()) {
       response.status = 400;
 
-      log.info(validation.errorsMap().toString());
+      log.debug(validation.errorsMap().toString());
       List<HistoryValue<Stamping>> historyStamping = Lists.newArrayList();
       if (stamping.isPersistent()) {
         historyStamping = stampingsHistoryDao.stampings(stamping.id);
@@ -250,6 +244,12 @@ public class Stampings extends Controller {
 
       render("@edit", stamping, person, date, time, historyStamping);
     }
+        
+    stamping.date = stampingManager.deparseStampingDateTime(date, time);
+
+    // serve per poter discriminare dopo aver fatto la save della timbratura se si
+    // trattava di una nuova timbratura o di una modifica
+    boolean newInsert = !stamping.isPersistent();
 
     // Se si tratta di un update ha già tutti i riferimenti al personday
     if (newInsert) {

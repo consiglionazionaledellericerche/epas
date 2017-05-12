@@ -1,12 +1,5 @@
 package models;
 
-import models.base.BaseModel;
-
-import org.hibernate.envers.Audited;
-
-import play.data.validation.Required;
-import play.data.validation.Unique;
-
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -16,6 +9,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+
+import models.base.BaseModel;
+
+import org.hibernate.envers.Audited;
+
+import play.data.validation.Required;
+import play.data.validation.Unique;
 
 
 /**

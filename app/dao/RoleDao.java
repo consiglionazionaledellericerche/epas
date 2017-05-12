@@ -1,17 +1,16 @@
 package dao;
 
 import com.google.inject.Provider;
-
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
-
-import models.Role;
-import models.query.QRole;
 
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+
+import models.Role;
+import models.query.QRole;
 
 /**
  * Dao per l'accesso alle informazioni dei Role.

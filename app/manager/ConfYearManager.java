@@ -3,10 +3,12 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.inject.Provider;
-
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.jpa.impl.JPAQueryFactory;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import models.ConfYear;
 import models.Office;
@@ -16,9 +18,6 @@ import models.query.QConfYear;
 import org.joda.time.LocalDate;
 
 import play.cache.Cache;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 /**
  * Da eliminare quando è stata applicata la migrazione in tutte le installazioni.
@@ -229,7 +228,7 @@ public class ConfYearManager {
               conf.office, year);
       try {
         new LocalDate(year, month, Integer.parseInt(value));
-      } catch (Exception e) {
+      } catch (Exception ex) {
 
         return new MessageResult(
             false,
@@ -244,7 +243,7 @@ public class ConfYearManager {
               conf.office, year);
       try {
         new LocalDate(year, Integer.parseInt(value), day);
-      } catch (Exception e) {
+      } catch (Exception ex) {
         return new MessageResult(
             false,
             Integer.parseInt(value) + "/" + year + " data non valida. "

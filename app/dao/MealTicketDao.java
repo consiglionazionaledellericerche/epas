@@ -3,12 +3,15 @@ package dao;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import it.cnr.iit.epas.DateInterval;
+
+import java.util.List;
+
+import javax.persistence.EntityManager;
 
 import manager.services.mealtickets.MealTicketsServiceImpl.MealTicketOrder;
 
@@ -20,10 +23,6 @@ import models.query.QMealTicket;
 import models.query.QPerson;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
-
-import javax.persistence.EntityManager;
 
 /**
  * DAO per i MealTicket.
@@ -124,22 +123,6 @@ public class MealTicketDao extends DaoBase {
     return date.get(0);
 
     //FIXME trovare un modo di selezionare solo il primo elemento
-  }
-
-  /**
-   * FIXME: utilizzare contractMealTickets con gli opportuni parametri Ritorna la lista dei buoni
-   * pasto associati al contratto ordinata per data di consegna in ordine decrescente (da quelli
-   * consegnati per ultimi a quelli consegnati per primi).
-   */
-  public List<MealTicket> getOrderedMealTicketInContract(Contract contract) {
-    final QMealTicket mealTicket = QMealTicket.mealTicket;
-
-    final JPQLQuery query = getQueryFactory()
-        .from(mealTicket)
-        .where(mealTicket.contract.eq(contract))
-        .orderBy(mealTicket.date.desc());
-
-    return query.list(mealTicket);
   }
 
   /**

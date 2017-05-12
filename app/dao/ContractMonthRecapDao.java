@@ -3,12 +3,16 @@ package dao;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import dao.filter.QFilters;
+
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.EntityManager;
 
 import models.ContractMonthRecap;
 import models.Office;
@@ -17,11 +21,6 @@ import models.query.QContractMonthRecap;
 import models.query.QPerson;
 
 import org.joda.time.YearMonth;
-
-import java.util.List;
-import java.util.Set;
-
-import javax.persistence.EntityManager;
 
 /**
  * DAO per i riepiloghi mensili.

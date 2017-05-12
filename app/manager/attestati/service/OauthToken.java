@@ -1,8 +1,8 @@
 package manager.attestati.service;
 
-import org.joda.time.LocalDateTime;
-
 import java.io.Serializable;
+
+import org.joda.time.LocalDateTime;
 
 /**
  * @author dario.

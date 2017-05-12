@@ -5,14 +5,14 @@ import com.google.inject.Provider;
 
 import com.mysema.query.jpa.JPQLQueryFactory;
 
+import java.util.List;
+
+import javax.persistence.EntityManager;
+
 import models.Certification;
 import models.Person;
 import models.enumerate.CertificationType;
 import models.query.QCertification;
-
-import java.util.List;
-
-import javax.persistence.EntityManager;
 
 /**
  * Dao per l'accesso alle informazioni delle Certification.

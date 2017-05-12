@@ -4,9 +4,14 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.persistence.EntityManager;
 
 import models.Office;
 import models.Role;
@@ -19,12 +24,6 @@ import models.query.QUsersRolesOffices;
 
 import org.testng.collections.Maps;
 import org.testng.collections.Sets;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.persistence.EntityManager;
 
 public class UsersRolesOfficesDao extends DaoBase {
 
@@ -104,6 +103,17 @@ public class UsersRolesOfficesDao extends DaoBase {
 
     return urosMap;
 
+  }
+  
+  /**
+   * 
+   * @param role il ruolo da ricercare negli Uro
+   * @return quanti sono gli utenti con ruolo role già inseriti nel db.
+   */
+  public long countSupervisors(Role role) {
+    final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
+    final JPQLQuery query = getQueryFactory().from(uro).where(uro.role.eq(role));
+    return query.count();
   }
 
   public String formatUro(UsersRolesOffices uro) {
