@@ -893,6 +893,8 @@ when
         "Competences.saveActivityConfiguration",
         "Competences.deletePersonShiftShiftType",
         "Competences.linkTimeTableToShift",
+        "Competences.handlePersonShiftShiftType",
+        "Competences.updatePersonShiftShiftType",
 
         /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
@@ -1059,6 +1061,9 @@ when
         "Competences.saveActivityConfiguration",
         "Competences.deletePersonShiftShiftType",
         "Competences.linkTimeTableToShift",
+        "Competences.handlePersonShiftShiftType",
+        "Competences.updatePersonShiftShiftType",
+        
 
          /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",

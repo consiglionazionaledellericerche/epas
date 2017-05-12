@@ -37,7 +37,7 @@
     <tbody>
 	#{list items:associatedPeopleShift, as:'psst'}
 	<tr>
-		<td>${psst.personShift.person.fullName()}</td>
+		<td><a href="@{Competences.handlePersonShiftShiftType(psst.id)}" data-async-modal="#defaultModal">${psst.personShift.person.fullName()}</a></td>
 		<td>${psst.beginDate}</td>
 		<td>#{if psst.endDate == null}
 				<i>Indeterminato</i>
