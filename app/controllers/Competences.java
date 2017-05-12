@@ -790,18 +790,8 @@ public class Competences extends Controller {
     YearMonth yearMonth = new YearMonth(year, month);
     competenceManager.applyBonus(Optional.fromNullable(office), competenceCode, yearMonth);
 
-    IWrapperCompetenceCode wrCompetenceCode = wrapperFactory.create(competenceCode);
-    List<CompetenceCode> competenceCodeList = competenceDao
-        .activeCompetenceCode(office, new LocalDate(year, month, 1)); 
-
-    CompetenceRecap compDto = competenceRecapFactory
-        .create(office, competenceCode, year, month);
-    boolean servicesInitialized = competenceManager
-        .isServiceForReperibilityInitialized(office, competenceCodeList);
     flash.success("Aggiornati i valori per la competenza %s", competenceCode.code);
-
-    render("@showCompetences", year, month, office,
-        wrCompetenceCode, competenceCodeList, compDto, servicesInitialized);
+    showCompetences(year, month, officeId, competenceCode);
   }
 
   /* ****************************************************************
@@ -1141,35 +1131,30 @@ public class Competences extends Controller {
       render(type, date, office, peopleForShift, associatedPeopleShift);
     }
   }
+  
+  public static void handlePersonShiftShiftType(Long id){
+    PersonShiftShiftType psst = shiftDao.getById(id);
+    notFoundIfNull(psst);
+    rules.checkIfPermitted(psst.personShift.person.office);    
+    render(psst);
+  }
+  
+  public static void updatePersonShiftShiftType(PersonShiftShiftType psst) {
+    rules.checkIfPermitted(psst.personShift.person.office);
+    psst.save();
+    flash.success("Informazioni salvate correttamente");
+    manageShiftType(psst.shiftType.id);
+  }
 
   /**
-<<<<<<< HEAD
    * modifica i parametri dell'attività passata tramite id.
    * @param type l'attività di cui si vogliono modificare i parametri
-=======
-   * metodo che persiste i person_shift_shift_type.
-   * @param peopleIds la lista degli id delle persone da aggiungere/rimuovere
-   * @param type l'attività su cui aggiungere/rimuovere le persone
->>>>>>> refs/remotes/origin/468-integrare-i-calendari-dei-turni-di-sistorg
    */
-
   public static void editActivity(ShiftType type) {
     type.save();
     flash.success("Modificati parametri per l'attività: %s", type.description);
     manageShiftType(type.id);
   }
-
-  //  public static void linkPeopleToShift(List<Long> peopleIds, @Valid ShiftType type) {
-  //    notFoundIfNull(type);
-  //    rules.checkIfPermitted(type.shiftCategories.office);
-  //    if (Validation.hasErrors()) {
-  //      response.status = 400;
-  //      List<PersonShift> peopleForShift = shiftDao.getPeopleForShift(type.shiftCategories.office);
-  //      Office office = type.shiftCategories.office;     
-  //      render("@manageShiftType", type, peopleForShift, peopleIds, office);
-  //    }
-  //    
-  //  }
 
 
   /**
