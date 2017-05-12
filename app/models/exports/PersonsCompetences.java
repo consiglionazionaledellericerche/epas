@@ -1,9 +1,9 @@
 package models.exports;
 
-import models.Competence;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import models.Competence;
 
 /**
  * @author arianna

@@ -81,7 +81,16 @@
 		#{/alert}
 		#{f.input 'type.type' /}
 		#{f.input 'type.description' /}
-		#{f.input 'type.tolerance',type:'number' /}
+		#{if type.entranceTolerance != null && type.exitTolerance == null}
+			#{f.input 'type.entranceTolerance',type:'number' /}
+		#{/if}
+		#{elseif type.entranceTolerance == null && type.exitTolerance != null}
+			#{f.input 'type.exitTolerance', type:'number' /}
+		#{/elseif}
+		#{else}
+			#{f.input 'type.entranceTolerance',type:'number' /}
+			#{f.input 'type.exitTolerance', type:'number' /}
+		#{/else}
 		#{f.input 'type.hourTolerance', type:'number' /}		
   
 	  #{b.buttons center:true}

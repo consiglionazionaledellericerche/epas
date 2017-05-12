@@ -13,6 +13,11 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.configurations.ConfigurationManager;
@@ -28,11 +33,6 @@ import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.LocalDate;
 
 import play.libs.Mail;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 @Slf4j
 public class PersonDayInTroubleManager {

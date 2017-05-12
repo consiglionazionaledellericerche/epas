@@ -4,12 +4,14 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
 
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
+import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
 import dao.PersonShiftDayDao;
@@ -21,16 +23,6 @@ import helpers.jpa.ModelQuery.SimpleResults;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import manager.competences.CompetenceCodeDTO;
 import manager.competences.ShiftTimeTableDto;
@@ -48,16 +40,35 @@ import models.PersonDay;
 import models.PersonReperibilityType;
 import models.PersonShift;
 import models.PersonShiftShiftType;
+import models.ShiftCategories;
 import models.ShiftTimeTable;
 import models.ShiftType;
 import models.TotalOvertime;
+import models.dto.ShiftTypeService;
+import models.dto.TimeTableDto;
+
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import play.i18n.Messages;
+import play.jobs.Job;
+import play.libs.F.Promise;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class CompetenceManager {
 
@@ -72,7 +83,9 @@ public class CompetenceManager {
   private final PersonReperibilityDayDao reperibilityDao;
   private final PersonStampingRecapFactory stampingsRecapFactory;
   private final PersonShiftDayDao personShiftDayDao;
-  private final ShiftDao shiftDao;
+  
+  private final PersonDao personDao;
+
 
   /**
    * Costruttore.
@@ -90,7 +103,8 @@ public class CompetenceManager {
       PersonDayDao personDayDao, IWrapperFactory wrapperFactory,
       PersonDayManager personDayManager, PersonReperibilityDayDao reperibilityDao,
       PersonStampingRecapFactory stampingsRecapFactory, PersonShiftDayDao personshiftDayDao,
-      ShiftDao shiftDao) {
+      SecureManager secureManager, PersonDao personDao) {
+
     this.competenceCodeDao = competenceCodeDao;
     this.officeDao = officeDao;
     this.competenceDao = competenceDao;
@@ -98,10 +112,9 @@ public class CompetenceManager {
     this.wrapperFactory = wrapperFactory;
     this.personDayManager = personDayManager;
     this.reperibilityDao = reperibilityDao;
-
     this.stampingsRecapFactory = stampingsRecapFactory;   
-    this.personShiftDayDao = personshiftDayDao;
-    this.shiftDao = shiftDao;
+    this.personShiftDayDao = personshiftDayDao;    
+    this.personDao = personDao;
   }
 
   public static Predicate<CompetenceCode> isReperibility() {
@@ -373,8 +386,8 @@ public class CompetenceManager {
         }
         break;
       case onMonthlyPresence:
-        PersonStampingRecap psDto = stampingsRecapFactory
-            .create(comp.person, comp.year, comp.month, true);
+        PersonStampingRecap psDto = 
+            stampingsRecapFactory.create(comp.person, comp.year, comp.month, true);
         if (psDto.basedWorkingDays != value) {
           result = Messages.get("CompManager.diffBasedWorkingDay");
         }
@@ -592,10 +605,10 @@ public class CompetenceManager {
    */
   public void persistChanges(Person person, List<CompetenceCode> codeToAdd,
       List<CompetenceCode> codeToRemove, LocalDate date) {
-    
+
     codeToAdd.forEach(item -> {
       List<PersonCompetenceCodes> pccList = competenceCodeDao.listByPersonAndCode(person, item);
-           
+
       if (pccList.isEmpty()) {
         createPersonCompetenceCode(person, date, Optional.<LocalDate>absent(), item);
         if (item.code.equals("T1") || item.code.equals("T2") || item.code.equals("T3")) {
@@ -604,7 +617,7 @@ public class CompetenceManager {
       } else {
         PersonCompetenceCodes temp = null;
         int counter = 0;
-        
+
         boolean found = false;
         while (counter < pccList.size() && found == false) {
           DateInterval interval = null;
@@ -615,7 +628,7 @@ public class CompetenceManager {
             interval = new DateInterval(pccList.get(counter).beginDate, 
                 Optional.<LocalDate>absent());
           }
-          
+
           if (DateUtility.isDateIntoInterval(date, interval)) {
             if (temp == null) {
               pccList.get(counter).endDate = null;
@@ -626,7 +639,7 @@ public class CompetenceManager {
               pccList.get(counter).endDate = temp.beginDate.minusDays(1);
               pccList.get(counter).save();
             }
-            
+
             found = true;
           }
           counter++;
@@ -671,8 +684,14 @@ public class CompetenceManager {
       Optional<PersonCompetenceCodes> pcc = 
           competenceCodeDao.getByPersonAndCodeAndDate(person, item, date);
       if (pcc.isPresent()) {
-        pcc.get().endDate = endMonth;
-        pcc.get().save();
+        
+        if (pcc.get().beginDate.monthOfYear().equals(date.monthOfYear())) {
+          pcc.get().delete();
+        } else {
+          pcc.get().endDate = endMonth;
+          pcc.get().save();
+        }
+
         if (item.code.equals("T1") || item.code.equals("T2") || item.code.equals("T3")) {
           PersonShift personShift = personShiftDayDao.getPersonShiftByPerson(pcc.get().person);
           if (personShift != null) {
@@ -707,7 +726,7 @@ public class CompetenceManager {
     psst.endDate = null;
     psst.save();
   }
-  
+
   /**
    * @param personList la lista di persone attive
    * @param date       la data in cui si richiedono le competenze
@@ -765,6 +784,11 @@ public class CompetenceManager {
     final String stamping_format = "HH:mm";
     List<ShiftTimeTableDto> dtoList = list.stream().map(shiftTimeTable -> {
       ShiftTimeTableDto dto = new ShiftTimeTableDto();
+      if (shiftTimeTable.office != null) {
+        dto.isOfficeTimeTable = true;
+      } else {
+        dto.isOfficeTimeTable = false;
+      }
       dto.id = shiftTimeTable.id;
       dto.endAfternoon = shiftTimeTable.endAfternoon.toString(stamping_format);
       dto.endAfternoonLunchTime = shiftTimeTable.endAfternoonLunchTime.toString(stamping_format);
@@ -775,10 +799,190 @@ public class CompetenceManager {
           .startAfternoonLunchTime.toString(stamping_format);
       dto.startMorning = shiftTimeTable.startMorning.toString(stamping_format);
       dto.startMorningLunchTime = shiftTimeTable.startMorningLunchTime.toString(stamping_format);
+      dto.startEvening = shiftTimeTable.startEvening != null ? shiftTimeTable.startEvening.toString(stamping_format) : "";
+      dto.endEvening = shiftTimeTable.endEvening != null ? shiftTimeTable.endEvening.toString(stamping_format) : "";
+      dto.startEveningLunchTime = shiftTimeTable.startEveningLunchTime != null ? shiftTimeTable.startEveningLunchTime.toString(stamping_format) : "";
+      dto.endEveningLunchTime = shiftTimeTable.endEveningLunchTime != null ? shiftTimeTable.endEveningLunchTime.toString(stamping_format) : "";
       return dto;
     }).collect(Collectors.toList());
     return dtoList;
   }
+  
+  /**
+   * persiste l'attività di turno con tutte le info corredate.
+   * @param service il dto da cui estrarre le informazioni per il salvataggio dell'attività di turno
+   * @param stt la shifttimetable associata all'attività di turno
+   * @param cat il turno a cui associare l'attività
+   */
+  public void persistShiftType(ShiftTypeService service, ShiftTimeTable stt, ShiftCategories cat) {
+    ShiftType st = new ShiftType();
+    st.breakInShift = service.breakInShift;
+    st.breakInShiftEnabled = service.breakInShiftEnabled;
+    st.description = service.description;
+    st.type = service.name;
+    st.shiftTimeTable = stt;
+    switch(service.toleranceType) {
+      case entrance:
+        st.entranceTolerance = service.tolerance;
+        break;
+      case exit:
+        st.exitTolerance = service.tolerance;
+        break;
+      case both:
+        st.entranceTolerance = st.exitTolerance = service.tolerance;
+        break;
+        default:
+          break;
+    }
+    st.hourTolerance = service.hourTolerance;
+    st.shiftCategories = cat;
+    st.save();
+  }
+  
+  /**
+   * crea la timetable da associare al turno.
+   * @param timeTable il dto da cui creare la ShiftTimeTable
+   * @param office la sede a cui associare la timeTable
+   */
+  public void createShiftTimeTable(TimeTableDto timeTable, Office office) {
+    
+    ShiftTimeTable stt = new ShiftTimeTable();
+    stt.office = office;
+    stt.paidMinutes = timeTable.paidMinutes;
+    stt.totalWorkMinutes = timeTable.totalWorkMinutes;
+    stt.startMorning = normalize(timeTable.startMorning);
+    stt.endMorning = normalize(timeTable.endMorning);
+    stt.startAfternoon = normalize(timeTable.startAfternoon);
+    stt.endAfternoon = normalize(timeTable.endAfternoon);
+    if (timeTable.startEvening != null && !timeTable.startEvening.equals("")) {
+      stt.startEvening = normalize(timeTable.startEvening);
+    } else {
+      stt.startEvening = null;
+    }
+    if (timeTable.endEvening != null && !timeTable.endEvening.equals("")) {
+      stt.endEvening = normalize(timeTable.endEvening);
+    } else {
+      stt.endEvening = null;
+    }
+     
+    stt.startMorningLunchTime = normalize(timeTable.startMorningLunchTime);
+    stt.endMorningLunchTime = normalize(timeTable.endMorningLunchTime);
+    stt.startAfternoonLunchTime = normalize(timeTable.startAfternoonLunchTime);
+    stt.endAfternoonLunchTime = normalize(timeTable.endAfternoonLunchTime);
+    if (timeTable.startEveningLunchTime != null && !timeTable.startEveningLunchTime.equals("")) {
+      stt.startEveningLunchTime = normalize(timeTable.startEveningLunchTime);
+    } else {
+      stt.startEveningLunchTime = null;
+    }
+    if (timeTable.endEveningLunchTime != null && !timeTable.endEveningLunchTime.equals("")) {
+      stt.endEveningLunchTime = normalize(timeTable.endEveningLunchTime); 
+    } else {
+      stt.endEveningLunchTime = null; 
+    }
+    
+    stt.save();
+  }
+
+
+  /**
+   * chiama il metodo su ciascuna persona della sede per cui fare i conteggi del codice di
+   *     competenza a presenza mensile.
+   * @param office la sede opzionale per cui fare i conteggi 
+   * @param code il codice di competenza a presenza mensile da conteggiare
+   * @param yearMonth l'anno/mese per cui fare i conteggi
+   */
+  public void applyBonus(Optional<Office> office,  
+      CompetenceCode code, YearMonth yearMonth) {
+
+    Set<Office> offices = office.isPresent() ? Sets.newHashSet(office.get())
+        : Sets.newHashSet(officeDao.getAllOffices());
+    
+    List<Person> personList = Lists.newArrayList();
+
+    final List<Promise<Void>> results = new ArrayList<>();
+    for (Office o : offices) {
+
+      personList = personDao.listForCompetence(Sets.newHashSet(o), yearMonth, code);
+      for (Person p : personList) {
+        results.add(new Job<Void>() {
+
+          @Override
+          public void doJob() {
+            final Person person = Person.findById(p.id);
+            
+            applyBonusPerPerson(person, yearMonth, code);
+            log.debug("Assegnata la competenza {} alla persona ... {}", code, person);
+          }
+        }.now());
+      }     
+
+    }
+    Promise.waitAll(results);
+  }
+  
+  /**
+   * effettua automaticamente l'aggiornamento del valore per la competenza a presenza mensile 
+   *     passata come parametro.
+   * @param person la persona su cui fare i conteggi
+   * @param yearMonth l'anno/mese in cui fare i conteggi
+   * @param code il codice di competenza da riconteggiare
+   */
+  public void applyBonusPerPerson(Person person, YearMonth yearMonth, CompetenceCode code) {
+    LocalDate date = new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(),1);
+    Optional<PersonCompetenceCodes> pcc = competenceCodeDao
+        .getByPersonAndCodeAndDate(person, code, date);
+    if (pcc.isPresent()) {
+      
+      switch (code.limitType) {
+        case onMonthlyPresence:
+          PersonStampingRecap psDto = stampingsRecapFactory
+          .create(person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true);
+          addSpecialCompetence(person, yearMonth, code, Optional.fromNullable(psDto));
+          break;
+        case entireMonth:
+          addSpecialCompetence(person, yearMonth, code, Optional.<PersonStampingRecap>absent());
+          break;
+          default:
+            break;
+      }
+    } else {
+      log.warn("La competenza {} non risulta abilitata per il dipendente {} nel mese "
+          + "e nell'anno selezionati", code, person.fullName());
+    }
+  }
+  
+  /**
+   * assegna le competenze speciali (su presenza mensile o assegnano interamente un mese).
+   * @param person la persona a cui assegnare la competenza
+   * @param yearMonth l'anno mese per cui assegnare la competenza
+   * @param code il codice competenza da assegnare
+   * @param psDto (opzionale) se presente serve al calcolo dei giorni di presenza
+   */
+  private void addSpecialCompetence(Person person, YearMonth yearMonth, CompetenceCode code, 
+      Optional<PersonStampingRecap> psDto) {
+    int value = 0;
+    if (psDto.isPresent()) {
+      value = psDto.get().basedWorkingDays;
+    } else {
+      value = code.limitValue;
+    }
+    Optional<Competence> competence = competenceDao
+        .getCompetence(person, yearMonth.getYear(), yearMonth.getMonthOfYear(), code);
+    if (competence.isPresent()) {
+      competence.get().valueApproved = value;
+      competence.get().save();
+    } else {
+      Competence comp = new Competence();
+      comp.competenceCode = code;
+      comp.person = person;
+      comp.year = yearMonth.getYear();
+      comp.month = yearMonth.getMonthOfYear();
+      comp.valueApproved = value;
+      comp.save();
+    }
+    log.debug("Assegnata competenza a {}", person.fullName());
+  }
+
 
   /**
    * crea un personShift a partire dalla persona passata come parametro.
@@ -813,10 +1017,10 @@ public class CompetenceManager {
     if (dateEnd.isPresent()) {
       newPcc.endDate = dateEnd.get();
     }
-    
+
     newPcc.save();
   }
-  
+
   /**
    * modifica il personcompetencecode con le date passate come parametro.
    * @param pcc il personcompetencecode da modificare
@@ -832,5 +1036,14 @@ public class CompetenceManager {
       pcc.endDate = endDate.get();
     }
     pcc.save();
+  }
+  
+
+  private LocalTime normalize(String time) {
+    time = time.replaceAll(":", "");
+    Integer hour = Integer.parseInt(time.substring(0, 2));
+    Integer minute = Integer.parseInt(time.substring(2, 4));
+    
+    return new LocalTime(hour, minute, 0);
   }
 }

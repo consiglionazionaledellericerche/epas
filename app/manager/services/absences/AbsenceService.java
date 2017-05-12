@@ -12,14 +12,18 @@ import controllers.Security;
 import dao.PersonChildrenDao;
 import dao.absences.AbsenceComponentDao;
 
+import it.cnr.iit.epas.DateUtility;
+
+import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.AbsenceManager;
-import manager.attestati.dto.show.CodiceAssenza;
-import manager.attestati.service.CertificationService;
+import manager.SecureManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
-import manager.services.absences.certifications.CodeComparation;
 import manager.services.absences.errors.AbsenceError;
 import manager.services.absences.errors.CriticalError;
 import manager.services.absences.model.AbsencePeriod;
@@ -28,27 +32,32 @@ import manager.services.absences.model.DayInPeriod.TemplateRow;
 import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.Scanner;
 import manager.services.absences.model.ServiceFactories;
+import manager.services.absences.model.VacationSituation;
+import manager.services.absences.model.VacationSituation.OldVacationSummary;
+import manager.services.absences.model.VacationSituation.VacationSummary;
+import manager.services.absences.model.VacationSituation.VacationSummary.TypeSummary;
+import manager.services.absences.model.VacationSituation.VacationSummaryCached;
+import manager.services.vacations.IVacationsService;
+import manager.services.vacations.VacationsRecap;
 
 import models.Contract;
 import models.Person;
 import models.PersonChildren;
-import models.Role;
 import models.User;
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceType;
 import models.absences.CategoryTab;
 import models.absences.GroupAbsenceType;
-import models.absences.GroupAbsenceType.DefaultGroup;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.definitions.DefaultGroup;
 
 import org.joda.time.LocalDate;
 
-import java.util.List;
-import java.util.Map;
+import play.cache.Cache;
 
 /**
  * Interfaccia epas per il componente assenze.
@@ -63,8 +72,10 @@ public class AbsenceService {
   private final AbsenceComponentDao absenceComponentDao;
   private final PersonChildrenDao personChildrenDao;
   private final ServiceFactories serviceFactories;
-  private final CertificationService certificationService;
-  
+  private final EnumAllineator enumAllineator;
+  private final ConfigurationManager confManager;
+  private final SecureManager secureManager;
+   
   /**
    * Costruttore injection.
    * @param absenceEngineUtility injected
@@ -77,13 +88,17 @@ public class AbsenceService {
       AbsenceEngineUtility absenceEngineUtility,
       ServiceFactories serviceFactories,
       AbsenceComponentDao absenceComponentDao,
-      PersonChildrenDao personChildrenDao, CertificationService certificationService) {
+      PersonChildrenDao personChildrenDao,
+      ConfigurationManager confManager,
+      SecureManager secureManager,
+      EnumAllineator enumAllineator) {
     this.absenceEngineUtility = absenceEngineUtility;
     this.serviceFactories = serviceFactories;
     this.absenceComponentDao = absenceComponentDao;
     this.personChildrenDao = personChildrenDao;
-    this.certificationService = certificationService;
-    
+    this.confManager = confManager;
+    this.secureManager = secureManager;
+    this.enumAllineator = enumAllineator;
   }
   
   /**
@@ -155,7 +170,7 @@ public class AbsenceService {
     } else {
       if (categoryTab != null) {
         groupAbsenceType = categoryTab.firstByPriority()
-            .groupAbsenceTypes.iterator().next();
+            .orderedGroupsInCategory(true).iterator().next();
         Verify.verify(groupsPermitted.contains(groupAbsenceType));
       } else {
         //selezionare missione?
@@ -168,7 +183,7 @@ public class AbsenceService {
         if (groupAbsenceType == null) {
           groupAbsenceType = groupsPermitted.get(0);  
         }
-        categoryTab = absenceComponentDao.categoriesByPriority().iterator().next().tab;  
+        categoryTab = groupAbsenceType.category.tab;  
       }
     }
     
@@ -210,15 +225,11 @@ public class AbsenceService {
     //Inserimento forzato (nessun controllo)
     if (forceInsert) {
       Preconditions.checkNotNull(absenceType);
-      return forceInsert(person, groupAbsenceType, from, to, 
+      return forceInsert(person, from, to, 
           absenceType, justifiedType, hours, minutes);
     }
     
-    if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.vacationsCnr)) {
-      InsertReport insertReport = temporaryInsertVacation(person, 
-          groupAbsenceType, from, to, absenceType, absenceManager);
-      return insertReport;
-    } else if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.compensatoryRestCnr)) {
+    if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.compensatoryRestCnr)) {
       InsertReport insertReport = temporaryInsertCompensatoryRest(person, 
           groupAbsenceType, from, to, null, absenceManager);
       return insertReport;
@@ -339,8 +350,18 @@ public class AbsenceService {
     return insertReport;
   }
   
-  
-  private InsertReport forceInsert(Person person, GroupAbsenceType groupAbsenceType, 
+  /**
+   * Effettua la simulazione dell'inserimento forzato. Genera il report di inserimento.
+   * @param person person
+   * @param from data inizio
+   * @param to data fine
+   * @param absenceType tipo assenza
+   * @param justifiedType giustificativo
+   * @param hours ore
+   * @param minutes minuti
+   * @return insert report
+   */
+  public InsertReport forceInsert(Person person, 
       LocalDate from, LocalDate to, 
       AbsenceType absenceType, JustifiedType justifiedType, 
       Integer hours, Integer minutes) {
@@ -459,24 +480,56 @@ public class AbsenceService {
    * @return list
    */
   public List<GroupAbsenceType> groupsPermitted(Person person, boolean readOnly) {
-    List<GroupAbsenceType> groupsPermitted = absenceComponentDao.allGroupAbsenceType();
+    List<GroupAbsenceType> groupsPermitted = absenceComponentDao.allGroupAbsenceType(false);
     if (readOnly) {
       return groupsPermitted;
     }
+    
+    //Fetch special groups
+    final GroupAbsenceType employeeVacation = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR_DIPENDENTI.name()).get();
+    final GroupAbsenceType employeeCompensatory = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name()).get();
+    final GroupAbsenceType employeeOffseat = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.LAVORO_FUORI_SEDE.name()).get();
+
     final User currentUser = Security.getUser().get();
-    final GroupAbsenceType employee = absenceComponentDao
-        .groupAbsenceTypeByName(DefaultGroup.EMPLOYEE.name()).get();
-    if (!currentUser.isSystemUser()) {
-      if (currentUser.person.id.equals(person.id)
-          && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)) {
-        //verificare... perchè non controllo has personnel admin role on person.office?
-        groupsPermitted = absenceComponentDao.groupsAbsenceTypeByName(
-            Lists.newArrayList(DefaultGroup.EMPLOYEE.name()));
-      }
-    } else {
-      groupsPermitted.remove(employee);
+    final boolean officeWriteAdmin = secureManager
+        .officesWriteAllowed(currentUser).contains(person.office);
+    
+    //Utente di sistema o amministratore della persona
+    if (currentUser.isSystemUser() || officeWriteAdmin) {
+      groupsPermitted.remove(employeeVacation);
+      groupsPermitted.remove(employeeOffseat);
+      groupsPermitted.remove(employeeCompensatory);
+      return groupsPermitted;
     }
-    return groupsPermitted;
+    
+    //Persona stessa non autoamministrata
+    if (currentUser.person.equals(person) && !officeWriteAdmin) {
+      
+      //vedere le configurazioni
+      groupsPermitted = Lists.newArrayList();
+  
+      if ((Boolean)confManager.configValue(person.office, EpasParam.WORKING_OFF_SITE) 
+          && (Boolean)confManager.configValue(person, EpasParam.OFF_SITE_STAMPING)) {
+        groupsPermitted.add(employeeOffseat);
+      }
+
+      if ((Boolean)confManager.configValue(person.office, EpasParam.TR_VACATIONS)
+          && person.qualification.qualification <= 3) {
+        groupsPermitted.add(employeeVacation);  
+      }
+      
+      if ((Boolean)confManager.configValue(person.office, EpasParam.TR_COMPENSATORY)
+          && person.qualification.qualification <= 3) {
+        groupsPermitted.add(employeeCompensatory);  
+      }
+      
+      return groupsPermitted;
+    }
+    
+    return Lists.newArrayList();
   }
   
   @Deprecated
@@ -493,22 +546,6 @@ public class AbsenceService {
             absenceType, Optional.absent(), Optional.absent(), Optional.absent()), 
         groupAbsenceType);
     
-  }
-  
-  @Deprecated
-  private InsertReport temporaryInsertVacation(Person person, GroupAbsenceType groupAbsenceType, 
-      LocalDate from, LocalDate to, AbsenceType absenceType, 
-      AbsenceManager absenceManager) {
-
-    if (absenceType == null || !absenceType.isPersistent()) {
-      absenceType = absenceComponentDao.absenceTypeByCode("FER").get();
-    }
-
-    return insertReportFromOldReport(
-        absenceManager.insertAbsenceSimulation(person, from, Optional.fromNullable(to), 
-            absenceType, Optional.absent(), Optional.absent(), Optional.absent()), 
-        groupAbsenceType);
-
   }
   
   @Deprecated
@@ -657,98 +694,201 @@ public class AbsenceService {
   }
   
   /**
-   * Calcola la comparazione con i codici in attestati.
+   * Allinea la modellazione db assenze con quella degli enumerati.
    */
-  public CodeComparation computeCodeComparation() {
+  public void enumAllineator() {
     
-
-    CodeComparation codeComparation = new CodeComparation();
-
-    try {
-      //Codici di assenza in attestati
-      Map<String, CodiceAssenza> attestatiAbsenceCodes = certificationService.absenceCodes();
-      if (attestatiAbsenceCodes.isEmpty()) {
-        log.info("Impossibile accedere ai codici in attestati");
-        return null;
-      }
-      //Tasformazione in superCodes
-      for (CodiceAssenza codiceAssenza : attestatiAbsenceCodes.values()) {
-        codeComparation.putCodiceAssenza(codiceAssenza);
-      }
-    } catch (Exception ex) {
-      return null;
-    }
-
-    //Codici di assenza epas
-    List<AbsenceType> absenceTypes = AbsenceType.findAll();
-    //Tasformazione in superCodes
-    for (AbsenceType absenceType : absenceTypes) {
-      codeComparation.putAbsenceType(absenceType);
-    }
+    enumAllineator.handleTab(false);
+    enumAllineator.handleCategory(false);
     
-    //Tutte le assenze epas
-    List<Absence> absences = Absence.findAll();
-    //Inserimento in superCodes
-    for (Absence absence : absences) {
-      codeComparation.putAbsence(absence);
-    }
-   
-    
-    codeComparation.setOnlyAttestati();
-    codeComparation.setOnlyEpas();
-    codeComparation.setBoth();
-    
-    return codeComparation;
+    enumAllineator.handleAbsenceTypes(false);
+    enumAllineator.handleComplations(false);
+    enumAllineator.handleTakables(false);
+    enumAllineator.handleGroup(false);
+    enumAllineator.handleCategory(false);
+    enumAllineator.handleTab(false);
   }
   
-  public void theGrassHopperMigration() {
-    
-    //1) Edit riting code -> specifiedMinutes
-    
-    //2) Edit pepe code -> specifiedMinutes
-    
-    //3) Edit Fuori sede code
-    //FUORI SEDE H1 -> absenceTypeMinutes 60
-    //FUORI SEDE H7 -> absenceTypeMinutes 60*7
-    //update person situations
-    
-    //4) Convert Absences
-    // absence 232H2 -> 232M 2 hour
-    // absence 232H3 -> 232M 3 hour
-    // absence 233H2 -> 233M 2 hour
-    // absence 233H3 -> 233M 3 hour
-    // absence 23H3 -> 23M 3 hour
-    // update person situations
-    
-    //5) Edit 26 -> absenceTypeMinutes 120
-    //update person situations (forse nessuno)
-    
-    //6) Convert Absences
-    // 26p2h -> 26
-    
-    //7) Delete code 26p2h
-    
-    //8) Disable superCode.withProblems except for 91MD, 91MS, 91S
-    
-    //9) Create Group G_24 from Definitions (code 24 already exists)
-    
-    //10) Create Group G_242 from Definitions (code 242 already exists)
-    
-    //11) Create Group G_243 from Definitions (code 243 already exists)
-    
-    //12) Create Group G_182 from Definitions (code 182 already exists)
-    
-    //13) Create Group G_18P from Definitions
-    
-    //14) Create Group G_182P from Definitions
-    
-    //15) Create Group G_19P from Definitions
-    
-    //16) Add to group MalattiaDipendente
-    // 11C5
-    // 11C9
-    
-    
+  /**
+   * Inizializza il db.
+   */
+  public void enumInitializator() {
+
+    if (AbsenceType.count() > 0) {
+      return;
+    }
+    enumAllineator.handleTab(true);
+    enumAllineator.handleCategory(true);
+
+    enumAllineator.handleAbsenceTypes(true);
+    enumAllineator.handleComplations(true);
+    enumAllineator.handleTakables(true);
+    enumAllineator.handleGroup(true);
+
+  }
+
+  /**
+   * Situazione riepilogativa della persona.
+   * @param contract contratto
+   * @param year anno situation
+   * @param vacationGroup injected
+   * @param residualDate data per maturazione giorni
+   * @param cache se prelevare i dati dalla cache
+   * @param vacationsService per costruire il vecchio ripilogo da confrontare col nuovo
+   * @return situazione
+   */
+  public VacationSituation buildVacationSituation(Contract contract, int year, 
+      GroupAbsenceType vacationGroup, Optional<LocalDate> residualDate, boolean cache, 
+      IVacationsService vacationsService) {
+
+    VacationSituation situation = new VacationSituation();
+    situation.person = contract.person;
+    situation.contract = contract;
+    situation.year = year;
+
+    if (vacationsService != null) { 
+      Optional<VacationsRecap> vr = vacationsService.create(year, contract);
+      if (vr.isPresent()) {
+        situation.oldLastYear = new OldVacationSummary(vr.get().getVacationsLastYear());
+        situation.oldCurrentYear = new OldVacationSummary(vr.get().getVacationsCurrentYear());
+        situation.oldPermissions = new OldVacationSummary(vr.get().getPermissions());
+      }
+    }
+
+    //La data target per il riepilogo contrattuale
+    LocalDate date = vacationResidualDate(contract, residualDate, year);
+    if (date == null) {
+      return situation;
+    }
+    situation.date = date;
+
+    final String lastYearKey = vacationCacheKey(contract, year - 1, TypeSummary.VACATION);
+    final String currentYearKey = vacationCacheKey(contract, year, TypeSummary.VACATION);
+    final String permissionsKey = vacationCacheKey(contract, year, TypeSummary.PERMISSION);
+
+    //Provo a prelevare la situazione dalla cache
+    if (cache) {
+      situation.lastYearCached = (VacationSummaryCached)Cache.get(lastYearKey);
+      situation.currentYearCached = (VacationSummaryCached)Cache.get(currentYearKey);
+      situation.permissionsCached = (VacationSummaryCached)Cache.get(permissionsKey);
+      if (situation.lastYearCached != null //&& situation.lastYearCached.date.isEqual(date)
+          && situation.currentYearCached != null //&& situation.currentYearCached.date.isEqual(date)
+          && situation.permissionsCached != null //&& situation.permissionsCached.date.isEqual(date)
+          ) {
+        //Tutto correttamente cachato.
+        return situation;
+      } else {
+        log.info("La situazione di {} non era cachata", contract.person.fullName());
+      }
+    }
+    PeriodChain periodChain = residual(contract.person, vacationGroup, date);
+    if (!periodChain.vacationSupportList.get(0).isEmpty()) {
+      situation.lastYear = new VacationSummary(contract, 
+          periodChain.vacationSupportList.get(0).get(0), 
+          year - 1, date, TypeSummary.VACATION);
+    }
+    if (!periodChain.vacationSupportList.get(1).isEmpty()) {
+      situation.currentYear = new VacationSummary(contract, 
+          periodChain.vacationSupportList.get(1).get(0), year, date, TypeSummary.VACATION);
+    }
+    if (!periodChain.vacationSupportList.get(2).isEmpty()) {
+      situation.permissions = new VacationSummary(contract, 
+          periodChain.vacationSupportList.get(2).get(0), year, date, TypeSummary.PERMISSION);
+    }
+
+    if (cache) {
+      situation.lastYearCached = new VacationSummaryCached(situation.lastYear, 
+          contract, year - 1, date, TypeSummary.VACATION);
+      situation.currentYearCached = new VacationSummaryCached(situation.currentYear,
+          contract, year, date, TypeSummary.VACATION);
+      situation.permissionsCached = new VacationSummaryCached(situation.permissions,
+          contract, year, date, TypeSummary.PERMISSION);
+
+      Cache.set(lastYearKey, situation.lastYearCached);
+      Cache.set(currentYearKey, situation.currentYearCached);
+      Cache.set(permissionsKey, situation.permissionsCached);
+    }
+
+    //    try {
+    //      CruscottoDipendente cruscottoDipendente = certService
+    //        .getCruscottoDipendente(person, year);
+    //      CertificationYearSituation yearSituation = 
+    //          new CertificationYearSituation(absenceComponentDao, person, cruscottoDipendente);
+    //      comparedVacation.certLastYear = yearSituation
+    //          .getAbsenceSituation(AbsenceImportType.FERIE_ANNO_PRECEDENTE);
+    //      comparedVacation.certCurrentYear = yearSituation
+    //          .getAbsenceSituation(AbsenceImportType.FERIE_ANNO_CORRENTE);
+    //      comparedVacation.certPermission = yearSituation
+    //          .getAbsenceSituation(AbsenceImportType.PERMESSI_LEGGE);
+    //      
+    //    } catch (Exception e) {
+    //      log.info("Impossibile scaricare l'informazione da attestati di {}", person.fullName());
+    //    }
+    return situation;
+
+  }
+  
+  /**
+   * Elimina i periodi ferie in cache per quella persona a partire dalla data from.
+   * @param person persona 
+   * @param from from
+   */
+  public void emptyVacationCache(Person person, LocalDate from) {
+    for (Contract contract : person.contracts) {
+      if (DateUtility.isDateIntoInterval(from, contract.periodInterval())) {
+        emptyVacationCache(contract);
+      }
+    }
+  }
+  
+  /**
+   * Elimina i riepiloghi ferie in cache per quel contratto.
+   * @param contract cotratto
+   */
+  public void emptyVacationCache(Contract contract) {
+    //per ogni anno fino a quello successivo l'attuale
+    int year = contract.beginDate.getYear();
+    if (contract.sourceDateVacation != null) {
+      year = contract.sourceDateVacation.getYear() - 1;
+    }
+    while (true) {
+      Cache.set(vacationCacheKey(contract, year, TypeSummary.VACATION), null);
+      Cache.set(vacationCacheKey(contract, year, TypeSummary.PERMISSION), null);
+      year++;
+      if (year > LocalDate.now().getYear() + 1) {
+        return;
+      }
+    }
+  }
+  
+  private String vacationCacheKey(Contract contract, int year, TypeSummary type) {
+    return contract.id + "-" + year + "-" + type.name();
+  }
+
+  /**
+   * La data per cui fornire il residuo. Se non l'ho fornita ritorno un default.
+   */
+  private LocalDate vacationResidualDate(Contract contract, 
+      Optional<LocalDate> residualDate, int year) {
+    if (!residualDate.isPresent()) {
+      LocalDate date = LocalDate.now();           
+      if (date.getYear() > year) {
+        date = new LocalDate(year, 12, 31);
+      }
+      if (contract.calculatedEnd() != null
+          && contract.calculatedEnd().getYear() == year 
+          && !DateUtility.isDateIntoInterval(date, contract.periodInterval())) {
+        date = contract.calculatedEnd();
+      }
+      return date;
+    } else {
+      //La data che passo deve essere una data contenuta nell'anno.
+      if (residualDate.get().getYear() != year) {
+        log.info("VacationSummary: anno={} data={}: la data deve appartenere all'anno.");
+        return null;
+      }
+      return residualDate.get();
+    }
   }
   
 }

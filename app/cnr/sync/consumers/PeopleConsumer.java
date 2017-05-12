@@ -1,5 +1,9 @@
 package cnr.sync.consumers;
 
+import cnr.sync.deserializers.PersonDeserializer;
+import cnr.sync.dto.PersonDto;
+import cnr.sync.dto.SimplePersonDto;
+
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
@@ -8,17 +12,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
-import cnr.sync.deserializers.PersonDeserializer;
-import cnr.sync.dto.PersonDto;
-import cnr.sync.dto.SimplePersonDto;
+import java.util.List;
+import java.util.Set;
 
 import models.Person;
 
 import play.Play;
 import play.libs.WS;
-
-import java.util.List;
-import java.util.Set;
 
 public class PeopleConsumer {
 
@@ -27,7 +27,7 @@ public class PeopleConsumer {
       .getProperty("perseo.rest.people");
 
   /**
-   * @param id
+   * @param id l'id della persona da cercare.
    * @return il ListenableFuture contenete la persona prelevata via REST da perseo.
    * @throws IllegalStateException nel caso la persona non si trovata.
    */

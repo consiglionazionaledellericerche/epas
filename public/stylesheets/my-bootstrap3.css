@@ -69,6 +69,22 @@ footer p {
 	margin-bottom: 3em;
 }
 
+.margin-top-4{
+	margin-top: 4em;
+}
+
+.margin-bottom-4{
+	margin-bottom: 4em;
+}
+
+.margin-top-5{
+	margin-top: 5em;
+}
+
+.margin-bottom-5{
+	margin-bottom: 5em;
+}
+
 
 /* Regole per smartphone s2
 ------------------------------------------------------------------------- */
@@ -195,11 +211,6 @@ ul.pagination {
 }
 
 /* CSS template */
-
-#formLogin input {
-	margin-top: 10px;
-	margin-bottom: 10px;
-}
 
 .reloading, .reloading * {
 	background-color: lightgrey !important;
@@ -414,3 +425,13 @@ body.modal-open #wrapper{
 .select2-results {
   max-height: 350px;
 }
+
+button.button-as-link {
+  background:none!important;
+  border:none; 
+  padding:0!important;
+  color:#069;
+  text-decoration:underline;
+  cursor:pointer;
+}
+

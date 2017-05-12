@@ -1,0 +1,85 @@
+#{modalAsync title: 'Inizializza ferie e permessi contratto ' + contract.person.fullname }
+
+<div id="updateSource">
+
+#{alert color:'success'}
+   #{if wrContract.value.sourceDateVacation}
+     <p>
+       Esiste già una inizializzazione definita alla data <strong>${wrContract.value.sourceDateVacation.format()}</strong>
+     </p>
+     <p>  
+       Se si desidera modificare la data e l'inizializzazione esistente scegliere una data uguale o successiva al 
+       <strong>${wrContract.dateForInitialization().format()}</strong> e impostare nuovamente i valori iniziali.
+     </p>
+   #{/if}#{else}
+     <p>
+       Se si desidera definire l'inizializzazione scegliere una data uguale o successiva al 
+       <strong>${wrContract.dateForInitialization().format()}</strong>.
+     </p>
+   #{/else} 
+#{/alert}
+
+     
+
+     #{alert color:'info'}
+	  <p>
+  		  Inserire la situazione della persona alla fine della giornata specificata nel campo <strong>Data Inizializzazione</strong>.<br>
+  	  </p>
+	 #{/alert}
+
+	 #{if contract.sourceDateVacation != null}
+	 #{alert color:'info'}
+	  <p>Per rimuovere l'inizializzazione esistente svuotare il campo <strong>&{'sourceDateVacation'}</strong>.</p>
+	 #{/alert}
+	 #{/if}
+	 
+     <!-- Form di input -->		
+	 #{if !confirmedVacation}
+	   #{form @Contracts.saveVacationSourceContract(), 'method':'POST', class:'form-horizontal', 
+         'data-async':'#updateSource', 'data-async-error':'#updateSource', 'data-spinner':'#defaultSpinner'}
+
+        <input type="hidden" name="contractId" value="${contract.id}" />
+	
+	    #{f.date 'sourceDateVacation', value:contract.sourceDateVacation?.format(), biglabel:true  /}
+	    #{f.input 'sourceVacationLastYearUsed', biglabel:true /}
+	    #{f.input 'sourceVacationCurrentYearUsed', biglabel:true  /}
+	    #{f.input 'sourcePermissionUsed', biglabel:true  /}
+
+		#{secure.check 'Contracts.saveVacationSourceContract'}
+	      #{b.buttons center:true}
+               #{b.submit 'Salva'/}
+             #{/b.buttons}
+		#{/secure.check}
+	  #{/form}	
+	#{/if}
+	<!-- Form di conferma -->
+	#{else}
+
+	  #{form @Contracts.saveVacationSourceContract(), 'method':'POST', class:'form-horizontal', 
+         'data-async':'#page_content', 'data-async-error':'#updateSource', 'data-spinner':'#defaultSpinner'}
+			
+		<input type="hidden" name="contractId" value="${contract.id}" />
+		#{f.hidden 'confirmedVacation', value:true /}
+		#{f.simpleView 'sourceDateVacation', value:sourceDateVacation.format(), biglabel:true, hidden:true /}
+		#{f.simpleView 'sourceVacationLastYearUsed', biglabel:true, hidden:true /}
+		#{f.simpleView 'sourceVacationCurrentYearUsed', biglabel:true, hidden:true /}
+		#{f.simpleView 'sourcePermissionUsed', biglabel:true, hidden:true /}
+
+		#{if sourceUpdate}
+		    #{alert color:'warning'}
+				La definizione di questa inizializzazione sovrascriverà quella esistente 
+				impostata alla data <strong>${contract.sourceDateVacation.format()}</strong><br>
+		    #{/alert} 
+		#{/if}
+		
+		#{b.buttons center:true}
+            #{b.cancel @initializationsVacation(contract.person.office.id) /}
+            #{b.submit 'Conferma'/}
+        #{/b.buttons}
+      #{/form}	  
+	#{/else}
+   
+</div>
+
+#{/modalAsync}        
+

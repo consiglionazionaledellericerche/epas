@@ -2,10 +2,14 @@ package dao;
 
 import com.google.common.base.Optional;
 import com.google.inject.Provider;
-
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
+
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import models.Office;
 import models.Person;
@@ -26,11 +30,6 @@ import models.query.QShiftTimeTable;
 import models.query.QShiftType;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 /**
  * Dao per i turni.
@@ -64,6 +63,7 @@ public class ShiftDao extends DaoBase {
     JPQLQuery query = getQueryFactory().from(shiftType).where(shiftType.id.eq(id));
     return Optional.fromNullable(query.singleResult(shiftType));
   }
+  
   
   /**
    * @return la lista dei personShiftDay con ShiftType 'type' presenti nel periodo tra 'begin' e
@@ -218,6 +218,18 @@ public class ShiftDao extends DaoBase {
   
   /**
    * 
+   * @param person il supervisore di cui si vuol sapere i turni
+   * @return la lista dei turni in cui person è supervisore.
+   */
+  public List<ShiftCategories> getCategoriesBySupervisor(Person person) {
+    final QShiftCategories sc = QShiftCategories.shiftCategories;
+    JPQLQuery query = getQueryFactory().from(sc).where(sc.supervisor.eq(person));
+    return query.list(sc);
+  }
+  
+  
+  /**
+   * 
    * @param sc la categoria di turno 
    * @return la lista dei tipi turno associati alla categoria passata come parametro.
    */
@@ -231,11 +243,13 @@ public class ShiftDao extends DaoBase {
    * 
    * @return la lista di tutti i tipi di turno disponibili in anagrafica.
    */
-  public List<ShiftTimeTable> getAllShifts() {
+  public List<ShiftTimeTable> getAllShifts(Office office) {
     final QShiftTimeTable stt = QShiftTimeTable.shiftTimeTable;
-    JPQLQuery query = getQueryFactory().from(stt);
+    JPQLQuery query = getQueryFactory().from(stt).where(stt.office.isNull().or(stt.office.eq(office)));
     return query.list(stt);
   }
+  
+  
 
   /**
    * 
@@ -285,6 +299,7 @@ public class ShiftDao extends DaoBase {
     return Optional.fromNullable(query.singleResult(psst));
   }
   
+
   /**
    * 
    * @param id
@@ -295,6 +310,21 @@ public class ShiftDao extends DaoBase {
     JPQLQuery query = getQueryFactory().from(psst)
         .where(psst.id.eq(id));
     return query.singleResult(psst);
+  }
+
+  /**
+   * 
+   * @param personShift
+   * @param date
+   * @return la lista delle associazioni persona/attività relative ai parametri passati.
+   */
+  public List<PersonShiftShiftType> getByPersonShiftAndDate(PersonShift personShift, LocalDate date) {
+    final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
+    JPQLQuery query = getQueryFactory().from(psst)
+        .where(psst.personShift.eq(personShift)
+            .and(psst.beginDate.loe(date).andAnyOf(psst.endDate.isNull(), psst.endDate.goe(date))));
+    return query.list(psst);
+
   }
 }
 

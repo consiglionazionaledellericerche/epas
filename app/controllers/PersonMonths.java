@@ -15,6 +15,14 @@ import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+
 import manager.PersonMonthsManager;
 
 import models.Contract;
@@ -28,18 +36,11 @@ import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import security.SecurityRules;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
 
 @With({Resecure.class})
 public class PersonMonths extends Controller {
@@ -153,7 +154,7 @@ public class PersonMonths extends Controller {
       Verify.verify(pm.isEditable());
       checkErrorsInUpdate(value, pm);
 
-      if (validation.hasErrors()) {
+      if (Validation.hasErrors()) {
         LocalDate dateFrom = new LocalDate(year, month, begin);
         LocalDate dateTo = new LocalDate(year, month, end); 
         response.status = 400;
@@ -167,7 +168,7 @@ public class PersonMonths extends Controller {
 
     }
     checkErrors(begin, end, year, month, value);
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
       render("@insertTrainingHours", person, month, year, begin, end, value);
     }
@@ -207,10 +208,6 @@ public class PersonMonths extends Controller {
         dateFrom, dateTo, person, month, year, personMonthSituationId, begin, end, value);
   }
 
-  /**
-   * 
-   * @param personMonthSituationId
-   */
   public static void modifyPeopleTrainingHours(Long personMonthSituationId) {
 
     PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);
@@ -234,7 +231,6 @@ public class PersonMonths extends Controller {
   /**
    * metodo che renderizza la form di conferma cancellazione di ore di formazione.
    *
-   * @param personId           l'id della persona
    * @param personMonthRecapId l'id del personMonthRecap
    */
   public static void deleteTrainingHours(Long personMonthRecapId) {
@@ -247,11 +243,6 @@ public class PersonMonths extends Controller {
     render(pm);
   }
   
-  /**
-   * 
-   * @param personMonthRecapId
-   * @param officeId
-   */
   public static void deletePeopleTrainingHours(Long personMonthRecapId, Long officeId) {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -285,11 +276,6 @@ public class PersonMonths extends Controller {
 
   }
   
-  /**
-   * 
-   * @param personMonthRecapId
-   * @param officeId
-   */
   public static void deletePeopleTrainingHoursConfirmed(Long personMonthRecapId, Long officeId) {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -362,7 +348,7 @@ public class PersonMonths extends Controller {
       Verify.verify(pm.isEditable());
       checkErrorsInUpdate(value, pm);
 
-      if (validation.hasErrors()) {
+      if (Validation.hasErrors()) {
         LocalDate dateFrom = new LocalDate(year, month, begin);
         LocalDate dateTo = new LocalDate(year, month, end); 
         response.status = 400;
@@ -378,7 +364,7 @@ public class PersonMonths extends Controller {
       checkPerson(person);
     }
     
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       List<Person> simplePersonList = personDao.listFetched(Optional.<String>absent(),
           ImmutableSet.of(person.office), false, null, null, false).list();
       response.status = 400;
@@ -402,29 +388,29 @@ public class PersonMonths extends Controller {
    */
   private static void checkErrors(Integer begin, Integer end, Integer year, 
       Integer month, Integer value) {
-    if (!validation.hasErrors()) {
+    if (!Validation.hasErrors()) {
       if (begin == null) {
-        validation.addError("begin", "Richiesto");
+        Validation.addError("begin", "Richiesto");
       }
       if (end == null) {
-        validation.addError("end", "Richiesto");
+        Validation.addError("end", "Richiesto");
       }    
       int endMonth = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue().getDayOfMonth();
       if (begin > endMonth) {
-        validation.addError("begin",
+        Validation.addError("begin",
             "deve appartenere al mese selezionato");
       }
       if (end > endMonth) {
-        validation.addError("end",
+        Validation.addError("end",
             "deve appartenere al mese selezionato");
       }
       if (begin > end) {
-        validation.addError("begin",
+        Validation.addError("begin",
             "inizio intervallo  non valido");
       }
 
       if (value > 24 * (end - begin + 1) && end - begin >= 0) {
-        validation.addError("value",
+        Validation.addError("value",
             "valore troppo alto");
       }
     }
@@ -437,21 +423,20 @@ public class PersonMonths extends Controller {
    * @param pm il personMonthRecap da modificare con le ore passate come parametro
    */
   private static void checkErrorsInUpdate(Integer value, PersonMonthRecap pm) {
-    if (!validation.hasErrors()) {
+    if (!Validation.hasErrors()) {
       if (value > 24 * (pm.toDate.getDayOfMonth() - pm.fromDate.getDayOfMonth() + 1)) {
-        validation.addError("value",
+        Validation.addError("value",
             "valore troppo alto");
       }
     }
   }
 
   /**
-   * aggiunge al validation un controllo sulla presenza della persona passata come parametro
-   * @param person
+   * aggiunge al validation un controllo sulla presenza della persona passata come parametro.
    */
   private static void checkPerson(Person person) {
     if (person == null || person.name == null || person.surname == null) {
-      validation.addError("person", "la persona non può essere nulla");
+      Validation.addError("person", "la persona non può essere nulla");
     }
   }
 

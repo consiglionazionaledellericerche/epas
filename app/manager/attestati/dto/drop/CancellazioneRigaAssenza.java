@@ -2,9 +2,9 @@ package manager.attestati.dto.drop;
 
 import com.google.common.collect.Lists;
 
-import models.Certification;
-
 import java.util.List;
+
+import models.Certification;
 
 public class CancellazioneRigaAssenza {
   
@@ -26,7 +26,6 @@ public class CancellazioneRigaAssenza {
   
   /**
    * Constructor.
-   * @param certification
    */
   public CancellazioneRigaAssenza(Certification certification) {
     this.codiceSede = Integer.parseInt(certification.person.office.codeId);

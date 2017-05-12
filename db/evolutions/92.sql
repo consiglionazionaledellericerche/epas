@@ -1,28 +1,12 @@
 # ---!Ups
 
-ALTER TABLE shift_type ADD COLUMN tolerance INT;
-ALTER TABLE shift_type ADD COLUMN hour_tolerance INT;
 
-ALTER TABLE shift_type_history ADD COLUMN tolerance INT;
-ALTER TABLE shift_type_history ADD COLUMN hour_tolerance INT;
-
-ALTER TABLE person_shift DROP COLUMN jolly;
-
-ALTER TABLE person_shift_shift_type ADD COLUMN jolly BOOLEAN;
-
-UPDATE shift_type SET tolerance = 0, hour_tolerance = 0;
-UPDATE person_shift_shift_type SET jolly = false;
-
+ALTER TABLE group_absence_types ADD COLUMN priority INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE group_absence_types_history ADD COLUMN priority INTEGER;
+UPDATE group_absence_types_history SET priority = 0;
 
 # ---!Downs
 
-ALTER TABLE shift_type_history DROP COLUMN hour_tolerance;
-ALTER TABLE shift_type_history DROP COLUMN tolerance;
+ALTER TABLE group_absence_types DROP COLUMN priority;
+ALTER TABLE group_absence_types_history DROP COLUMN priority;
 
-ALTER TABLE shift_type DROP COLUMN hour_tolerance;
-ALTER TABLE shift_type DROP COLUMN tolerance;
-
-ALTER TABLE person_shift_shift_type DROP COLUMN jolly;
-ALTER TABLE person_shift ADD COLUMN jolly BOOLEAN;
-
-UPDATE person_shift SET jolly = FALSE;

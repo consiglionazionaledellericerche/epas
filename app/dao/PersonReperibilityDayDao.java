@@ -2,10 +2,14 @@ package dao;
 
 import com.google.common.base.Optional;
 import com.google.inject.Provider;
-
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
+
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import models.Office;
 import models.Person;
@@ -17,11 +21,6 @@ import models.query.QPersonReperibilityDay;
 import models.query.QPersonReperibilityType;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 /**
  * Dao per i PersonReperibilityDay.

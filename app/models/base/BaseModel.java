@@ -5,15 +5,15 @@ import com.google.common.base.MoreObjects;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperModel;
 
-import models.Person;
-
-import play.db.jpa.GenericModel;
-
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
+
+import models.Person;
+
+import play.db.jpa.GenericModel;
 
 /**
  * Default base class per sovrascrivere la generazione delle nuove chiavi primarie.

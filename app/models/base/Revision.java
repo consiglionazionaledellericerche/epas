@@ -3,13 +3,6 @@ package models.base;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
-import models.User;
-
-import org.hibernate.envers.RevisionEntity;
-import org.hibernate.envers.RevisionNumber;
-import org.hibernate.envers.RevisionTimestamp;
-import org.joda.time.LocalDateTime;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,6 +11,13 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
+import models.User;
+
+import org.hibernate.envers.RevisionEntity;
+import org.hibernate.envers.RevisionNumber;
+import org.hibernate.envers.RevisionTimestamp;
+import org.joda.time.LocalDateTime;
 
 /**
  * Definisce il mapping con le revisioni envers.

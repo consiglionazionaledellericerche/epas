@@ -1,31 +1,19 @@
 package it.cnr.iit.epas;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-import controllers.Security;
-
 import dao.PersonDao;
-
-import lombok.extern.slf4j.Slf4j;
-
-import models.Person;
-import models.User;
-import models.enumerate.StampTypes;
-import models.exports.StampingFromClient;
-
-import org.joda.time.LocalDateTime;
-
 import injection.StaticInject;
-import play.data.binding.Global;
-import play.data.binding.TypeBinder;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
+import models.enumerate.StampTypes;
+import models.exports.StampingFromClient;
+import org.joda.time.LocalDateTime;
+import play.data.binding.Global;
+import play.data.binding.TypeBinder;
 
 /**
  * @author cristian.
@@ -47,35 +35,13 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
       @SuppressWarnings("rawtypes") Class actualClass, Type genericType) throws Exception {
 
     try {
-      Optional<User> user = Security.getUser();
-      if (!user.isPresent()) {
-        log.info("StampingFromClient: {}, {}, {}, {}, {}",
-            name, annotations, value, actualClass, genericType);
-        log.info("StampingFromClient: l'user non presente");
-        return null;
-      }
-      if (user.get().badgeReader == null) {
-        log.error("L'utente {} utilizzato per l'invio della timbratura"
-            + " non ha una istanza badgeReader valida associata.", user.get().username);
-        return null;
-      }
-
       final JsonObject jsonObject = new JsonParser().parse(value).getAsJsonObject();
 
       log.debug("jsonObject = {}", jsonObject);
 
       StampingFromClient stamping = new StampingFromClient();
 
-      stamping.badgeReader = user.get().badgeReader;
-
-      String matricolaFirma = jsonObject.get("matricolaFirma").getAsString();
-      stamping.numeroBadge = matricolaFirma;
-
-      final Person person = personDao.getPersonByBadgeNumber(matricolaFirma, stamping.badgeReader);
-
-      if (person != null) {
-        stamping.person = person;
-      }
+      stamping.numeroBadge = jsonObject.get("matricolaFirma").getAsString();
 
       final Integer inOut = jsonObject.get("operazione").getAsInt();
       if (inOut != null) {
@@ -118,7 +84,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
       log.debug("Effettuato il binding, stampingFromClient = {}", stamping);
 
       return stamping;
-    } catch (Exception e) {
+    } catch (Exception ex) {
       log.error("Problem during binding StampingFromClient: {}, {}, {}, {}, {}",
           name, annotations, value, actualClass, genericType);
       return null;

@@ -13,6 +13,11 @@ import dao.wrapper.IWrapperPersonDay;
 
 import it.cnr.iit.epas.DateUtility;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.configurations.ConfigurationManager;
@@ -37,11 +42,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -246,31 +246,27 @@ public class PersonDayManager {
     if (!StampTypes.PERMESSO_BREVE.isActive()) {
       return 0;
     }
-
     List<PairStamping> validPairs = computeValidPairStampings(personDay.stampings);
 
-    List<PairStamping> allGapPairs = Lists.newArrayList();
-
+    int gapTime = 0;
     //1) Calcolare tutte le gapPair (fattorizzare col metodo del pranzo)
     PairStamping previous = null;
     for (PairStamping validPair : validPairs) {
       if (previous != null) {
-        if ((previous.second.stampType == null
-            || previous.second.stampType == StampTypes.PERMESSO_BREVE)
-            && (validPair.first.stampType == null
-            || validPair.first.stampType == StampTypes.PERMESSO_BREVE)) {
-
-          allGapPairs.add(new PairStamping(previous.second, validPair.first));
+        Stamping first = previous.second;
+        Stamping second = validPair.first;
+        //almeno una delle due permesso breve
+        if ( (first.stampType != null && first.stampType == StampTypes.PERMESSO_BREVE) 
+            || (second.stampType != null && second.stampType == StampTypes.PERMESSO_BREVE)) {
+          //solo permessi brevi
+          if ( (first.stampType == null || first.stampType == StampTypes.PERMESSO_BREVE)
+              && (second.stampType == null || second.stampType == StampTypes.PERMESSO_BREVE)) {
+            gapTime += new PairStamping(first, second).timeInPair;
+          }
         }
       }
       previous = validPair;
     }
-
-    int gapTime = 0;
-    for (PairStamping gapPair : allGapPairs) {
-      gapTime += gapPair.timeInPair;
-    }
-
     return gapTime;
   }
 

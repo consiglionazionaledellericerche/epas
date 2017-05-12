@@ -13,6 +13,10 @@ import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
 import manager.cache.AbsenceTypeManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
@@ -26,10 +30,6 @@ import models.enumerate.AbsenceTypeMapping;
 
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
-
-import java.util.List;
-
-import javax.inject.Inject;
 
 /**
  * Implementazione di produzione del servizio ferie e permessi.

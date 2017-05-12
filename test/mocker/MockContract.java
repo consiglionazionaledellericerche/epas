@@ -3,6 +3,8 @@ package mocker;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import lombok.Builder;
 
 import manager.ContractManager;
@@ -11,8 +13,6 @@ import models.Contract;
 import models.VacationPeriod;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
 
 public class MockContract {
   
@@ -34,6 +34,7 @@ public class MockContract {
     when(contract.getEndDate()).thenReturn(endDate);
     when(contract.getEndContract()).thenReturn(endContract);
     when(contract.getSourceDateResidual()).thenReturn(sourceDateResidual);
+    when(contract.getSourceDateVacation()).thenReturn(sourceDateResidual);
     when(contract.getSourceVacationLastYearUsed()).thenReturn(sourceVacationCurrentYearUsed);
     when(contract.getSourceVacationCurrentYearUsed()).thenReturn(sourceVacationCurrentYearUsed);
     when(contract.getSourcePermissionUsed()).thenReturn(sourcePermissionUsed);

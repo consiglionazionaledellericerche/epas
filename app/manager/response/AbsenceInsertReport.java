@@ -4,9 +4,9 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 
-import org.joda.time.LocalDate;
-
 import java.util.List;
+
+import org.joda.time.LocalDate;
 
 public class AbsenceInsertReport {
 

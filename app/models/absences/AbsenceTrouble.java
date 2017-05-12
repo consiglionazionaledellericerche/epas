@@ -1,17 +1,17 @@
 package models.absences;
 
-import lombok.Builder;
-
-import models.base.BaseModel;
-
-import org.hibernate.envers.Audited;
-
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import lombok.Builder;
+
+import models.base.BaseModel;
+
+import org.hibernate.envers.Audited;
 
 @Builder
 @Audited

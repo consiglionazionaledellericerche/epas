@@ -6,6 +6,8 @@ import dao.UserDao;
 
 import helpers.Web;
 
+import javax.inject.Inject;
+
 import models.Institute;
 import models.Office;
 import models.UsersRolesOffices;
@@ -17,9 +19,8 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
-import javax.inject.Inject;
+import security.SecurityRules;
 
 @With({Resecure.class})
 public class Administrators extends Controller {

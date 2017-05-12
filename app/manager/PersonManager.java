@@ -12,6 +12,13 @@ import dao.wrapper.IWrapperPersonDay;
 
 import it.cnr.iit.epas.DateUtility;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.persistence.Query;
+
 import models.Contract;
 import models.Person;
 import models.PersonDay;
@@ -20,13 +27,6 @@ import models.absences.AbsenceType;
 import org.joda.time.LocalDate;
 
 import play.db.jpa.JPA;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-import javax.persistence.Query;
 
 public class PersonManager {
 

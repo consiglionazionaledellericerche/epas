@@ -13,16 +13,15 @@ import com.mysema.query.jpa.JPQLQueryFactory;
 import helpers.jpa.ModelQuery;
 import helpers.jpa.ModelQuery.SimpleResults;
 
+import java.util.List;
+import javax.persistence.EntityManager;
+
 import models.Badge;
 import models.BadgeReader;
 import models.BadgeSystem;
 import models.query.QBadge;
 import models.query.QBadgeReader;
 import models.query.QBadgeSystem;
-
-import java.util.List;
-
-import javax.persistence.EntityManager;
 
 /**
  * Dao per l'accesso alle informazioni dei BadgeSystem.

@@ -3,10 +3,13 @@ package dao;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
+
+import java.util.List;
+
+import javax.persistence.EntityManager;
 
 import models.Person;
 import models.PersonDay;
@@ -18,10 +21,6 @@ import models.query.QStamping;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
-import java.util.List;
-
-import javax.persistence.EntityManager;
 
 
 /**

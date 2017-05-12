@@ -2,16 +2,15 @@ package dao;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
+
+import javax.persistence.EntityManager;
 
 import models.StampModificationType;
 import models.Stamping;
 import models.query.QStampModificationType;
 import models.query.QStamping;
-
-import javax.persistence.EntityManager;
 
 /**
  * @author dario.

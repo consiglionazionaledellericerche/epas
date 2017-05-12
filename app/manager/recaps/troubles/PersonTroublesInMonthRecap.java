@@ -5,6 +5,8 @@ import com.google.common.collect.Lists;
 
 import dao.PersonDayInTroubleDao;
 
+import java.util.List;
+
 import manager.PersonManager;
 
 import models.Person;
@@ -12,8 +14,6 @@ import models.PersonDayInTrouble;
 import models.enumerate.Troubles;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
 
 /**
  * Classe che modella il riepilogo delle timbrature mancanti per la persona tramite una lista di

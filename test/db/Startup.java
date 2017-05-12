@@ -2,6 +2,14 @@ package db;
 
 import com.google.common.io.Resources;
 
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import javax.inject.Inject;
+
+import manager.services.absences.AbsenceService;
+
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
@@ -17,10 +25,6 @@ import play.db.jpa.JPA;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.SQLException;
-
 /**
  * Job di creazione del db per i test.
  * 
@@ -30,6 +34,9 @@ import java.sql.SQLException;
 @OnApplicationStart
 public class Startup extends Job<Void> {
 
+  @Inject
+  static AbsenceService absenceService;
+  
   public static class DatasetImport implements Work {
 
     private DatabaseOperation operation;
@@ -68,7 +75,7 @@ public class Startup extends Job<Void> {
         new DatasetImport(
             DatabaseOperation.INSERT,
             Resources.getResource(
-                Startup.class, "data/group-absence-types.xml")));
+                Startup.class, "data/qualifications.xml")));
 
     //competenceCode
     session.doWork(
@@ -99,11 +106,10 @@ public class Startup extends Job<Void> {
             DatabaseOperation.INSERT,
             Resources.getResource(Startup.class, "data/working-time-types.xml")));
 
-
     //lucchesi slim 2016-04
     session.doWork(
         new DatasetImport(
             DatabaseOperation.INSERT,
-            Resources.getResource(Startup.class, "data/lucchesi-situation-2016-04.xml")));
+            Resources.getResource(Startup.class, "data/lucchesi-login-logout.xml")));
   }
 }

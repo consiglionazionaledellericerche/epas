@@ -51,7 +51,7 @@ require:
         - org.springframework.roo -> org.springframework.roo.annotations *
         - org.eclipse.persistence -> eclipselink *
     - asufana -> play-lombok 1.2.3
-    - org.projectlombok -> lombok 1.16.12
+    - org.projectlombok -> lombok 1.16.14
     - com.fatboyindustrial.gson-jodatime-serialisers -> gson-jodatime-serialisers 1.2.0
     - com.fasterxml.jackson.core -> jackson-core 2.7.3
     - com.fasterxml.jackson.core -> jackson-annotations 2.7.3
@@ -63,6 +63,8 @@ require:
     - org.testng -> testng 6.9.10
     - org.apache.poi -> poi 3.14
     - org.graylog2 -> gelfj 1.1.15
+    - org.apache.commons -> commons-csv 1.4
+    - org.apache.commons -> commons-compress 1.13
     
 # My custom repository
 

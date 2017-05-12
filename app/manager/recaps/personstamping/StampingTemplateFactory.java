@@ -1,10 +1,10 @@
 package manager.recaps.personstamping;
 
+import javax.inject.Inject;
+
 import manager.cache.StampTypeManager;
 
 import models.Stamping;
-
-import javax.inject.Inject;
 
 public class StampingTemplateFactory {
 

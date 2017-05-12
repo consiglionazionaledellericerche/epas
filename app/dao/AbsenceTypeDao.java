@@ -9,18 +9,18 @@ import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import com.mysema.query.types.Projections;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.persistence.EntityManager;
+
 import models.Person;
 import models.absences.AbsenceType;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
 
 import org.joda.time.LocalDate;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.persistence.EntityManager;
 
 /**
  * Dao per l'accesso alle informazioni degli AbsenceType.
@@ -178,19 +178,6 @@ public class AbsenceTypeDao extends DaoBase {
         .map(absenceType, absence.count());
   }
   
-  /**
-   * 
-   * @param codesForEmployees lista dei codici di assenza
-   * @return la lista dei codici di assenza usabili dagli impiegati di livello I-III
-   *        per giustificare il proprio orario di lavoro.
-   */
-  public List<AbsenceType> getAbsenceTypeForEmployee(List<String> codesForEmployees) {
-    QAbsenceType absenceType = QAbsenceType.absenceType;
-    return getQueryFactory().from(absenceType)
-        .where(absenceType.code.in(codesForEmployees))
-        .list(absenceType);
-  }
-
   public class AbsenceTypeDto {
     public String code;
     public long count;

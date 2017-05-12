@@ -7,6 +7,9 @@ import com.google.common.collect.Lists;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.PersonDayManager;
@@ -24,9 +27,6 @@ import models.Stamping.WayType;
 import models.WorkingTimeTypeDay;
 
 import org.joda.time.LocalDateTime;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Oggetto che modella il giorno di una persona nelle viste - personStamping - stampings -.

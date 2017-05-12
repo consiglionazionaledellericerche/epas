@@ -103,6 +103,7 @@
     <table class="table">
       <tr>
         <th>Parametro</th>
+        <th>Descrizione
         <th>Valore</th>
       </tr>
       #{list autocertifications, as:'conf'}
@@ -113,17 +114,15 @@
           #{/secure.link}
           <br>
         </td>
+        <td>
+        #{if messages.get('description.' + conf.epasParam)}
+          
+            &{'description.' + conf.epasParam}
+          
+        #{/if}
+        </td>
         <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
       </tr>
-      #{if messages.get('description.' + conf.epasParam)}
-      <tr>
-        <td colspan="2" class="text-warning">
-          #{alert color:'warning'}
-            &{'description.' + conf.epasParam}
-          #{/alert}
-        </td>
-      </tr>
-      #{/if}
       #{/list}
     </table>
 

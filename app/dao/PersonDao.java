@@ -5,7 +5,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Provider;
-
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPASubQuery;
 import com.mysema.query.jpa.JPQLQuery;
@@ -19,6 +18,13 @@ import helpers.jpa.ModelQuery;
 import helpers.jpa.ModelQuery.SimpleResults;
 
 import it.cnr.iit.epas.DateInterval;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import manager.configurations.EpasParam;
 
@@ -47,13 +53,6 @@ import models.query.QWorkingTimeType;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 /**
  * DAO per le person.
@@ -596,7 +595,9 @@ public final class PersonDao extends DaoBase {
     condition.and(new QFilters().filterNameFromPerson(QPerson.person, name));
     filterOnlyOnCertificate(condition, onlyOnCertificate);
     filterContract(condition, start, end);
-    filterCompetenceCodeEnabled(condition, compCode);
+    if (start.isPresent()) {
+      filterCompetenceCodeEnabled(condition, compCode, start.get());
+    }    
     filterPersonInCharge(condition, personInCharge);
     filterOnlySynchronized(condition, onlySynchronized);
 
@@ -649,7 +650,9 @@ public final class PersonDao extends DaoBase {
     condition.and(new QFilters().filterNameFromPerson(QPerson.person, name));
     filterOnlyOnCertificate(condition, onlyOnCertificate);
     filterContract(condition, start, end);
-    filterCompetenceCodeEnabled(condition, compCode);
+    if (start.isPresent()) {
+      filterCompetenceCodeEnabled(condition, compCode, start.get());
+    }    
     filterPersonInCharge(condition, personInCharge);
     filterOnlySynchronized(condition, onlySynchronized);
 
@@ -695,7 +698,7 @@ public final class PersonDao extends DaoBase {
           contract.endDate.isNull().and(contract.endContract.goe(start.get())),
           //entrambe valorizzate ed entrambe successive
           contract.endDate.goe(start.get()).and(contract.endContract.goe(start.get()))
-          );
+      );
     }
   }
 
@@ -735,11 +738,12 @@ public final class PersonDao extends DaoBase {
    * Filtro su competenza abilitata.
    */
   private void filterCompetenceCodeEnabled(BooleanBuilder condition,
-      Optional<CompetenceCode> compCode) {
+      Optional<CompetenceCode> compCode, LocalDate date) {
 
     if (compCode.isPresent()) {
       final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
-      condition.and(pcc.competenceCode.eq(compCode.get()));
+      condition.and(pcc.competenceCode.eq(compCode.get())).and(pcc.beginDate.loe(date)
+          .andAnyOf(pcc.endDate.goe(date), pcc.endDate.isNull()));
     }
   }
 

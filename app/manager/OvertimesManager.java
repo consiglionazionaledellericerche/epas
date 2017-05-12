@@ -6,6 +6,8 @@ import com.google.common.collect.TreeBasedTable;
 
 import dao.CompetenceDao;
 
+import javax.inject.Inject;
+
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
@@ -15,8 +17,6 @@ import models.exports.PersonsList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
 
 public class OvertimesManager {
 

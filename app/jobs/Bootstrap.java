@@ -2,6 +2,12 @@ package jobs;
 
 import com.google.common.io.Resources;
 
+import java.io.IOException;
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 
 import models.Qualification;
@@ -23,12 +29,6 @@ import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.test.Fixtures;
 
-import java.io.IOException;
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
-
 
 /**
  * Carica nel database dell'applicazione i dati iniziali predefiniti nel caso questi non siano già
@@ -41,7 +41,7 @@ import java.util.List;
 public class Bootstrap extends Job<Void> {
 
   static final String JOBS_CONF = "jobs.active";
-
+  
   //Aggiunto qui perché non più presente nella classe Play dalla versione >= 1.4.3
   public static boolean runingInTestMode() {
     return Play.id.matches("test|test-?.*");
@@ -50,11 +50,12 @@ public class Bootstrap extends Job<Void> {
   @Override
   public void doJob() throws IOException {
 
+    
     if (runingInTestMode()) {
       log.info("Application in test mode, default boostrap job not started");
       return;
     }
-
+    
     //in modo da inibire l'esecuzione dei job in base alla configurazione
     if (!"true".equals(Play.configuration.getProperty(JOBS_CONF))) {
       log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
@@ -71,9 +72,6 @@ public class Bootstrap extends Job<Void> {
       session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
           .getResource("../db/import/absence-type-and-qualification-phase2.xml")));
     }
-    
-    
-    log.info("Conclusa migrazione assenze!");
 
     if (User.find("byUsername", "developer").fetch().isEmpty()) {
       Fixtures.loadModels("../db/import/developer.yml");
