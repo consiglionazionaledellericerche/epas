@@ -86,6 +86,7 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.mvc.results.Redirect;
 
 import security.SecurityRules;
 
@@ -789,9 +790,17 @@ public class Competences extends Controller {
     CompetenceCode competenceCode = competenceCodeDao.getCompetenceCodeById(codeId);
     YearMonth yearMonth = new YearMonth(year, month);
     competenceManager.applyBonus(Optional.fromNullable(office), competenceCode, yearMonth);
-
+    IWrapperCompetenceCode wrCompetenceCode = wrapperFactory.create(competenceCode);
+    List<CompetenceCode> competenceCodeList = competenceDao
+        .activeCompetenceCode(office, new LocalDate(year, month, 1)); 
+    
+    CompetenceRecap compDto = competenceRecapFactory
+        .create(office, competenceCode, year, month);
+    boolean servicesInitialized = competenceManager
+        .isServiceForReperibilityInitialized(office, competenceCodeList);
     flash.success("Aggiornati i valori per la competenza %s", competenceCode.code);
-    showCompetences(year, month, officeId, competenceCode);
+    render("@showCompetences", year, month, office,
+        wrCompetenceCode, competenceCodeList, compDto, servicesInitialized);
   }
 
   /* ****************************************************************
