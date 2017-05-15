@@ -100,13 +100,18 @@ public enum DefaultGroup {
       DefaultCategoryType.FERIE_CNR, 1,
       GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, 
       DefaultTakable.T_FERIE_CNR_PROROGA, null, null, false, false),
-
   
   RIPOSI_CNR("91 - Riposo compensativo", 
       "", 
       DefaultCategoryType.RIPOSI_COMPENSATIVI_CNR, 0, 
       GroupAbsenceTypePattern.compensatoryRestCnr, PeriodType.always, 
       DefaultTakable.T_RIPOSI_CNR, null, null, false, false),
+  
+  RIPOSI_CNR_MISSIONE("91MS/91MD - Riposo compensativo recupero missione",
+      "", 
+      DefaultCategoryType.RIPOSI_COMPENSATIVI_CNR, 1, 
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+      DefaultTakable.T_RIPOSI_CNR_MISSIONE, null, null, false, false),
   
   RIPOSI_CNR_DIPENDENTI("91 - Riposo compensativo", 
       "", 
