@@ -1,0 +1,29 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'Test Calendario' /}
+
+#{set 'moreStyles' }
+<link rel="stylesheet"
+      href="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.min.css">
+<link rel="stylesheet" media="print"
+      href="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.print.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.css">
+#{/set}
+
+<div class="container">
+  #{title title:'Test sul calendario' /}
+
+  <div data-calendar
+       data-calendar-source="@{shifts()}"
+       data-calendar-resize="@{changeShift()}"
+       data-calendar-drop="@{changeShift()}"
+       data-calendar-click="#">
+  </div>
+
+</div>
+
+#{set 'moreScripts'}
+<script src="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/locale/it.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"></script>
+#{/set}

@@ -265,6 +265,115 @@ $(function($) {
         hide: null
      }
     });
+
+      $('[data-calendar]', this).each(function() {
+        var $this = $(this);
+        var data = {
+          columnFormat: 'dddd',
+//          contentHeight: 'auto',
+          loading: function(loading) {
+            if (loading) {
+              $this.addClass('reloading');
+              var $spinner = $(
+                '<span class="text-primary" style="position:absolute; z-index: 10"><i class="fa fa-spin fa-spinner fa-2x"></i</span>'
+              );
+              $this.before($spinner);
+              var offset = $spinner.offset();
+              $spinner.offset({
+                top: offset.top + 10,
+                left: offset.left + 10
+              });
+            } else {
+              $this.removeClass('reloading');
+              $this.prev('span.text-primary').remove();
+            }
+          },
+          eventClick: function(event, jsEvent, view) {
+            if (event.url === undefined) {
+              return false;
+            }
+            window.open(event.url,'_self');
+          },
+          //eventRender: function(event, element) {
+             // Questa parte volendo si puo' scrivere generica e specificare i campi in un parametro html
+             // nel caso si voglia mostrare altri campi rispetto ai default
+             // element.find(".fc-content")
+             //        .append("<span>"+ event.start.format()+ "</span>");
+
+            // per usare i tooltip sugli eventi
+            // element.qtip({
+            //    content: event.start.format()
+            // });
+          //},
+          eventSources: []
+        };
+
+        data['eventSources'].push({
+          url: $this.data('calendarSource'),
+          type: 'GET',
+          error: function() {
+            bootbox.alert('there was an error while fetching data!');
+          }
+        });
+        if ($this.data('calendarClick')) {
+          data['dayClick'] = function(date, jsEvent, view) {
+
+            // $(this) si riferisce al <td> associato a date
+            // composizione dell'url con la data
+            var url = $this.data('calendarClick');
+            if (url.indexOf('?') >= 0) {
+              url += '&';
+            } else {
+              url += '?';
+            }
+            url += $.param({
+              dateTime: date.format()
+            });
+            window.open(url,'_self');
+          }
+        }
+        if ($this.data('calendarDrop')) {
+             console.log('passati per la drop');
+          data['eventStartEditable'] = true;
+          data['eventDrop'] = function(event, delta, revertFunc) {
+            var url = $this.data('calendarDrop');
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: { id: event.personId, start: event.start.format('DD/MM/YYYY'), end: event.end.format('DD/MM/YYYY') },
+                error: function(){
+                    revertFunc();
+                },
+                success: function(){
+                    // bootbox.alert('successfully modified');
+                    // Si comunica in qualche modo il corretto salvataggio?
+                }
+                });
+          }
+        }
+        if ($this.data('calendarResize')) {
+          console.log('passati per la resize');
+          data['eventDurationEditable'] = true;
+          data['eventResize'] = function(event, delta, revertFunc) {
+            var url = $this.data('calendarResize');
+            $.ajax({
+                type: 'POST',
+                url: url,
+                // aggiungere a data tutti i parametri che si vogliono passare al metodo del controller
+                data: { id: event.personId, start: event.start.format('DD/MM/YYYY'), end: event.end.format('DD/MM/YYYY') },
+                error: function(){
+                    revertFunc();
+                },
+                success: function(){
+                    // bootbox.alert('successfully modified');
+                    // Si comunica in qualche modo il corretto salvataggio?
+                }
+                });
+          }
+        }
+        $this.fullCalendar(data);
+      });
+
     this.find('[datatable]').DataTable({
       "pageLength": 15,
       "lengthMenu": [
