@@ -131,13 +131,16 @@ public class RequestInit extends Controller {
 
     // office init (l'office selezionato, andrà combinato con la lista persone sopra)
 
-    Long officeId;
+    Long officeId = null;
     if (params.get("officeId") != null) {
       officeId = Long.valueOf(params.get("officeId"));
     } else if (session.get("officeSelected") != null) {
       officeId = Long.valueOf(session.get("officeSelected"));
-    } else {
-      officeId = offices.stream().sorted((o, o1) -> o.name.compareTo(o1.name)).findFirst().get().id;
+    } else if (!offices.isEmpty()) {
+      officeId = offices.stream()
+            .sorted((o, o1) -> o.name.compareTo(o1.name)).findFirst().get().id;        
+    } else if (currentUser.person != null && currentUser.person.office != null) {
+      officeId = currentUser.person.office.id;      
     }
 
     session.put("officeSelected", officeId);
