@@ -1135,10 +1135,7 @@ public class ShiftManager {
       int lackOfMin =
           (totalPersonShiftWorkedTime.contains(
               competence.getPerson(), Messages.get("PDFReport.thLackTime")))
-          ? totalPersonShiftWorkedTime.get(
-              competence.getPerson(),
-              Messages.get("PDFReport.thLackTime"))
-              : 0;
+          ? totalPersonShiftWorkedTime.get(competence.getPerson(), Messages.get("PDFReport.thLackTime")) : 0;
 
               // prende le ore richieste, quelle approvate e i minuti in eccesso
               // che dovranno far parte del calcolo delle ore del mese successivo
@@ -1212,7 +1209,6 @@ public class ShiftManager {
 
       log.debug("Somma i minuti mancanti prendendoli da totalInconsistentAbsences({}, {})",
           person.surname, thLackTime);
-
 
       // check for lack of worked time and summarize the minutes
       if (totalInconsistentAbsences.contains(person, thLackTime)) {
