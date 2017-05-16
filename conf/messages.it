@@ -290,18 +290,19 @@ pagedResults =Sono state trovate <strong>%d</strong> corrispondenze, mostrate da
 passwordSuccessfullyChanged = Password modificata con successo
 password= Password
 
-PDFReport.thAbsences=Assenza
-PDFReport.thBadWorkindDay=Giorno lavorativo non valido
-PDFReport.thAppHour =Num. di ore approvate
 PDFReport.thBadStampings=Timbrature errate
 PDFReport.thDays=Num. di giorni
+PDFReport.thReqHour=Num. di ore spettanti
+PDFReport.thAppHour =Num. di ore approvate
 PDFReport.thExceededMin=Minuti accumulati
+
+PDFReport.thAbsences=Assenza
+PDFReport.thBadWorkindDay=Giorno lavorativo non valido
+PDFReport.thNoStampings=Mancata timbratura
+PDFReport.thMissions=Missione
 PDFReport.thIncompleteTime=Orario incompleto
 PDFReport.thLackTime=Ore mancanti
 PDFReport.thMissingTime=Orario insufficiente
-PDFReport.thMissions=Missione
-PDFReport.thNoStampings=Mancata timbratura
-PDFReport.thReqHour=Num. di ore spettanti
 PDFReport.thWarnStampings=Orario incompleto fuori tolleranza
 
 peopleIds=Persone associabili all'attività
