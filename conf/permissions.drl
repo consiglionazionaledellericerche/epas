@@ -88,19 +88,22 @@ rule isShiftSupervisor_generic
 when 
   $uro: UsersRolesOffices()
   Role(name == Role.SHIFT_SUPERVISOR) from $uro.role
-  $c: PermissionCheck(action in (
-  		"Shift.handleShifts",
-  		"Shift.renderIds", 
-  		"Shift.renderServices",
-  		"Shift.renderShiftname",
-  		"Shift.personList",
-        "Shift.timeTable",
-        "Shift.find",
-        "Shift.update",
-        "Shift.exportMonthAsPDF",
-        "Shift.exportMonthCalAsPDF",
-        "Shift.absence",
-        "Shift.iCal"), target == null, granted == false)
+  $c: PermissionCheck(action.startsWith("Shift.")
+   || action.startsWith("Calendar.")
+/*   action in (
+  *		"Shift.handleShifts",
+  *		"Shift.renderIds",
+  *		"Shift.renderServices",
+  *		"Shift.renderShiftname",
+  *		"Shift.personList",
+  *     "Shift.timeTable",
+  *      "Shift.find",
+  *      "Shift.update",
+  *      "Shift.exportMonthAsPDF",
+  *      "Shift.exportMonthCalAsPDF",
+  *      "Shift.absence",
+  *      "Shift.iCal") */
+        , target == null, granted == false)
 then
  $c.grant();
 end
