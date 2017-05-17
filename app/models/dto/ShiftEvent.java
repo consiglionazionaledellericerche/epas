@@ -2,6 +2,8 @@ package models.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import models.enumerate.ShiftSlot;
+import org.joda.time.LocalDate;
 
 /**
  * @author daniele
@@ -16,12 +18,17 @@ public class ShiftEvent {
   // Il nome della persona del turno?
   private String title;
   private boolean allDay;
-  private String start;
-  private String end;
+  private LocalDate start;
+  // TODO: 17/05/17 implementare un deserializzatore dei LocalDate dal formato YYYY-MM-DD
+  // in modo da poter usare i LocalDate (il fullcalendar ci restituirebbe quel formato per questi parametri)
+  private String start_orig;
+  private LocalDate end;
+  private String end_orig;
   private String url;
   private String color;
   private String backgroundColor;
   private String borderColor;
   private String textColor;
+  private ShiftSlot shiftSlot;
   // TODO: 15/05/17  aggiungere tutti i parametri che possono servire
 }
