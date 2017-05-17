@@ -270,6 +270,7 @@ $(function($) {
         var $this = $(this);
         var data = {
           columnFormat: 'dddd',
+          fixedWeekCount: false,
 //          contentHeight: 'auto',
           loading: function(loading) {
             if (loading) {
@@ -289,31 +290,49 @@ $(function($) {
             }
           },
           eventClick: function(event, jsEvent, view) {
+            	  new PNotify({
+            		  title: "dramma",
+            		  text: "dramma",
+            		  type: "drammissimo",
+            		  remove: true
+            	  });
             if (event.url === undefined) {
               return false;
             }
             window.open(event.url,'_self');
           },
-          //eventRender: function(event, element) {
-             // Questa parte volendo si puo' scrivere generica e specificare i campi in un parametro html
-             // nel caso si voglia mostrare altri campi rispetto ai default
-             // element.find(".fc-content")
-             //        .append("<span>"+ event.start.format()+ "</span>");
-
-            // per usare i tooltip sugli eventi
-            // element.qtip({
-            //    content: event.start.format()
-            // });
-          //},
+//          eventRender: function(event, element) {
+////              Questa parte volendo si puo' scrivere generica e specificare i campi in un parametro html
+////              nel caso si voglia mostrare altri campi rispetto ai default
+//              element.find(".fc-content")
+//                     .append("<span>"+ event.start.format()+ "</span>");
+//
+////             per usare i tooltip sugli eventi
+//             element.qtip({
+//                content: event.start.format()
+//             });
+//          },
           eventSources: []
         };
 
         data['eventSources'].push({
-          url: $this.data('calendarSource'),
-          type: 'GET',
-          error: function() {
-            bootbox.alert('there was an error while fetching data!');
-          }
+            events: function(start, end, timezone, callback) {
+                $.ajax({
+                    url: $this.data('calendarSource'),
+                    type: 'GET',
+                    data: {
+                        start: start.format('DD/MM/YYYY'),
+                        end: end.subtract(1,'days').format('DD/MM/YYYY')
+                    },
+                    success: function(response) {
+                      callback(response);
+                    },
+                 error: function() {
+                   alert('there was an error while fetching data!');
+                   callback();
+                 }
+                });
+            }
         });
         if ($this.data('calendarClick')) {
           data['dayClick'] = function(date, jsEvent, view) {
@@ -333,14 +352,18 @@ $(function($) {
           }
         }
         if ($this.data('calendarDrop')) {
-             console.log('passati per la drop');
           data['eventStartEditable'] = true;
           data['eventDrop'] = function(event, delta, revertFunc) {
             var url = $this.data('calendarDrop');
             $.ajax({
                 type: 'POST',
                 url: url,
-                data: { id: event.personId, start: event.start.format('DD/MM/YYYY'), end: event.end.format('DD/MM/YYYY') },
+                data: { id: event.personId,
+                 start: event.start.format('DD/MM/YYYY'),
+                 end: event.end ? event.end.format('DD/MM/YYYY') : null,
+                 originalStart: event.start_orig,
+                 originalEnd: event.end_orig
+                 },
                 error: function(){
                     revertFunc();
                 },
@@ -352,7 +375,6 @@ $(function($) {
           }
         }
         if ($this.data('calendarResize')) {
-          console.log('passati per la resize');
           data['eventDurationEditable'] = true;
           data['eventResize'] = function(event, delta, revertFunc) {
             var url = $this.data('calendarResize');
@@ -360,7 +382,12 @@ $(function($) {
                 type: 'POST',
                 url: url,
                 // aggiungere a data tutti i parametri che si vogliono passare al metodo del controller
-                data: { id: event.personId, start: event.start.format('DD/MM/YYYY'), end: event.end.format('DD/MM/YYYY') },
+                data: { id: event.personId,
+                 start: event.start.format('DD/MM/YYYY'),
+                 end: event.end ? event.end.format('DD/MM/YYYY') : null,
+                 originalStart: event.start_orig,
+                 originalEnd: event.end_orig
+                 },
                 error: function(){
                     revertFunc();
                 },
