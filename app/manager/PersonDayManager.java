@@ -697,8 +697,6 @@ public class PersonDayManager {
     final boolean isFixedTimeAtWork = pd.isFixedTimeAtWork();
     final boolean isHoliday = personDay.isHoliday;
     final boolean isEnoughHourlyAbsences = isEnoughHourlyAbsences(pd);
-    final boolean noAbsences = personDay.absences.isEmpty();
-    final int workingTime = pd.getWorkingTimeTypeDay().get().getWorkingTime();
 
     // PRESENZA AUTOMATICA
     if (isFixedTimeAtWork && !allValidStampings) {

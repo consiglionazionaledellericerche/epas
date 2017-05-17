@@ -13,11 +13,13 @@
 <div class="container">
   #{title title:'Test sul calendario' /}
 
-  <div data-calendar
-       data-calendar-source="@{shifts()}"
+  <div data-calendar data-calendar-source="@{shifts()}"
+       #{secure.check 'Calendar.changeShift'}
        data-calendar-resize="@{changeShift()}"
        data-calendar-drop="@{changeShift()}"
-       data-calendar-click="#">
+       data-calendar-click="#"
+       #{/secure.check}
+  >
   </div>
 
 </div>
