@@ -56,6 +56,7 @@ public class Calendar extends Controller {
             .toEvents(
                 shiftDao.getPersonShiftDaysByPeriodAndType(start, end, type, personShift.person))));
 
+    // Usato il jackson per facilitare la serializzazione dei LocalDate
     renderJSON(mapper.writeValueAsString(events));
   }
 

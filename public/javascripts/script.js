@@ -321,8 +321,8 @@ $(function($) {
                     url: $this.data('calendarSource'),
                     type: 'GET',
                     data: {
-                        start: start.format('DD/MM/YYYY'),
-                        end: end.subtract(1,'days').format('DD/MM/YYYY')
+                        start: start.format(),
+                        end: end.subtract(1,'days').format()
                     },
                     success: function(response) {
                       callback(response);
@@ -359,8 +359,8 @@ $(function($) {
                 type: 'POST',
                 url: url,
                 data: { id: event.personId,
-                 start: event.start.format('DD/MM/YYYY'),
-                 end: event.end ? event.end.format('DD/MM/YYYY') : null,
+                 start: event.start.format(),
+                 end: event.end ? event.end.format() : null,
                  originalStart: event.start_orig,
                  originalEnd: event.end_orig
                  },
@@ -368,6 +368,8 @@ $(function($) {
                     revertFunc();
                 },
                 success: function(){
+                  event.start_orig = event.start.format();
+                  event.end_orig = event.end.format();
                     // bootbox.alert('successfully modified');
                     // Si comunica in qualche modo il corretto salvataggio?
                 }
@@ -383,8 +385,8 @@ $(function($) {
                 url: url,
                 // aggiungere a data tutti i parametri che si vogliono passare al metodo del controller
                 data: { id: event.personId,
-                 start: event.start.format('DD/MM/YYYY'),
-                 end: event.end ? event.end.format('DD/MM/YYYY') : null,
+                 start: event.start.format(),
+                 end: event.end ? event.end.format : null,
                  originalStart: event.start_orig,
                  originalEnd: event.end_orig
                  },
@@ -392,6 +394,8 @@ $(function($) {
                     revertFunc();
                 },
                 success: function(){
+                  event.start_orig = event.start.format();
+                  event.end_orig = event.end.format();
                     // bootbox.alert('successfully modified');
                     // Si comunica in qualche modo il corretto salvataggio?
                 }

@@ -19,11 +19,9 @@ public class ShiftEvent {
   private String title;
   private boolean allDay;
   private LocalDate start;
-  // TODO: 17/05/17 implementare un deserializzatore dei LocalDate dal formato YYYY-MM-DD
-  // in modo da poter usare i LocalDate (il fullcalendar ci restituirebbe quel formato per questi parametri)
-  private String start_orig;
+  private LocalDate start_orig;
   private LocalDate end;
-  private String end_orig;
+  private LocalDate end_orig;
   private String url;
   private String color;
   private String backgroundColor;

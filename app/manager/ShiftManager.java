@@ -785,15 +785,18 @@ public class ShiftManager {
             .personId(day.personShift.person.id)
             .title(day.personShift.person.fullName())
             .start(day.date)
-            .start_orig(day.date.toString("dd/MM/yyyy"))
+//            .start_orig(day.date.toString("dd/MM/yyyy"))
+            .start_orig(day.date)
             .end(day.date)
-            .end_orig(day.date.toString("dd/MM/yyyy"))
+            .end_orig(day.date)
+//            .end_orig(day.date.toString("dd/MM/yyyy"))
             .build();
 
         events.add(event);
       } else {
         event.setEnd(day.date);
-        event.setEnd_orig(day.date.toString("dd/MM/yyyy"));
+//        event.setEnd_orig(day.date.toString("dd/MM/yyyy"));
+        event.setEnd_orig(day.date);
       }
     }
     return events;
