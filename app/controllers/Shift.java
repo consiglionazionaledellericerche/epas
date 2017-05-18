@@ -353,10 +353,10 @@ public class Shift extends Controller {
 
     List<String> thInconsistence =
         Arrays.asList(
-            Messages.get("PDFReport.thAbsences"), Messages.get("PDFReport.thNoStampings"),
-            Messages.get("PDFReport.thBadWorkindDay"),
-            Messages.get("PDFReport.thMissingTime"), Messages.get("PDFReport.thBadStampings"),
-            Messages.get("PDFReport.thMissions"), Messages.get("PDFReport.thIncompleteTime"),
+            Messages.get("PDFReport.thAbsences"), Messages.get("PDFReport.thMissions"),
+            Messages.get("PDFReport.thNoStampings"), Messages.get("PDFReport.thBadWorkindDay"),       
+             Messages.get("PDFReport.thBadStampings"), Messages.get("PDFReport.thMissingTime"),
+             Messages.get("PDFReport.thIncompleteTime"),
             Messages.get("PDFReport.thWarnStampings"));
     List<String> thShift =
         Arrays.asList(
