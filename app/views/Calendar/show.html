@@ -12,14 +12,22 @@
 
 <div class="container">
   #{title title:'Test sul calendario' /}
+  <div class="row">
+    <div class="col-sm-6 col-sm-offset-3">
+    #{form action:@Calendar.show(), method:'POST', class:'form form-horizontal auto-submit', onChange:'this.form.submit()' } 
+    	#{f.selectModel 'activity', items:activities, value: activitySelected /}
+    #{/form}
+  </div>
+  </div>
 
-  <div data-calendar data-calendar-source="@{shifts()}"
+ 
+  <div class="row" data-calendar data-calendar-source="@{shifts()}"
        #{secure.check 'Calendar.changeShift'}
        data-calendar-resize="@{changeShift()}"
        data-calendar-drop="@{changeShift()}"
        data-calendar-click="#"
        #{/secure.check}
-  >
+  > 
   </div>
 
 </div>
@@ -28,4 +36,5 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/locale/it.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"></script>
+#{script 'calendars/newCalendar.js' /}
 #{/set}

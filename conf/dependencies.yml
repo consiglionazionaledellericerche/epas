@@ -65,6 +65,7 @@ require:
     - org.graylog2 -> gelfj 1.1.15
     - org.apache.commons -> commons-csv 1.4
     - org.apache.commons -> commons-compress 1.13
+    - org.biojava -> jcolorbrewer 5.2
     
 # My custom repository
 
