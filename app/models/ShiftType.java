@@ -70,6 +70,10 @@ public class ShiftType extends BaseModel {
   @JoinColumn(name = "shift_categories_id")
   public ShiftCategories shiftCategories;
   
+  @Override
+  public String toString() {
+    return this.shiftCategories.description + " - " + this.type;
+  }
   
   public enum ToleranceType {
     entrance("entrance"),

@@ -18,6 +18,8 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.DateUtility;
+
+import java.awt.Color;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -55,6 +57,8 @@ import net.fortuna.ical4j.model.property.CalScale;
 import net.fortuna.ical4j.model.property.ProdId;
 import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.Version;
+
+import org.jcolorbrewer.ColorBrewer;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import play.db.jpa.JPA;
@@ -128,6 +132,8 @@ public class ShiftManager {
   private UsersRolesOfficesDao uroDao;
   @Inject
   private RoleDao roleDao;
+  
+  private static String[] colors = {"#fcf8e3", "#1fa789", "#36b719","#ca0b3d", "pink", "dark-blue", "cyano"};
 
 
   /**
@@ -762,45 +768,7 @@ public class ShiftManager {
     return shiftPeriods;
   }
 
-  /**
-   * @param days I giorni di turno
-   * @return Una lista di DTO per popolare gli eventi del calendario
-   *
-   * Questo metodo crea degli oggetti aggregati, ma solo nel caso gli venga passata una lista di
-   * turni di una sola persona e ordinati per data.
-   */
-  public List<ShiftEvent> toEvents(List<PersonShiftDay> days) {
-
-    ShiftEvent event = null;
-    List<ShiftEvent> events = new ArrayList<>();
-
-    for (PersonShiftDay day : days) {
-      if (event == null
-          || !event.getEnd().plusDays(1).equals(day.date)
-          || !(event.getShiftSlot() == day.getShiftSlot())) {
-
-        event = ShiftEvent.builder()
-            .allDay(true)
-            .shiftSlot(day.shiftSlot)
-            .personId(day.personShift.person.id)
-            .title(day.personShift.person.fullName())
-            .start(day.date)
-//            .start_orig(day.date.toString("dd/MM/yyyy"))
-            .start_orig(day.date)
-            .end(day.date)
-            .end_orig(day.date)
-//            .end_orig(day.date.toString("dd/MM/yyyy"))
-            .build();
-
-        events.add(event);
-      } else {
-        event.setEnd(day.date);
-//        event.setEnd_orig(day.date.toString("dd/MM/yyyy"));
-        event.setEnd_orig(day.date);
-      }
-    }
-    return events;
-  }
+  
 
   /**
    * @param personShiftCancelled lista dei turni cancellati.
