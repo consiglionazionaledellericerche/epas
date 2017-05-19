@@ -99,7 +99,13 @@ $( document ).ready(function() {
                  originalStart: event.start_orig,
                  originalEnd: event.end_orig || event.start_orig
                  },
-                error: function(){
+                error: function(response){
+              	  new PNotify({
+            		  title: "dramma",
+            		  text: response.responseText,
+            		  type: "error",
+            		  remove: true
+            	  });
                     revertFunc();
                 },
                 success: function(){

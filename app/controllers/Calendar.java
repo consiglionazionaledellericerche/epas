@@ -20,6 +20,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.With;
 
 import java.awt.Color;
@@ -122,6 +123,7 @@ public class Calendar extends Controller {
     log.debug(
         "CHIAMATA LA MODIFICA DEL TURNO: personId {} - start-orig {} "
             + "- end-orig{} - start {} - end {}", id, originalStart, originalEnd, start, end);
-    //    response.status = StatusCode.BAD_REQUEST;
+        response.status = Http.StatusCode.BAD_REQUEST;
+        renderText("erroraccio");
   }
 }
