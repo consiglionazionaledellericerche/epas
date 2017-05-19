@@ -24,9 +24,9 @@ public class ShiftEvent {
   private LocalDate end;
   private String url;
   private String className;
-  //private boolean editable;
-//  private boolean startEditable;
-//  private boolean durationEditable;
+//  private boolean editable;
+  private boolean startEditable;
+  private boolean durationEditable;
 //  private boolean resourceEditable;
 //  private String rendering;
 //  private boolean overlap;
@@ -51,14 +51,14 @@ public class ShiftEvent {
   public void extendTitle(ShiftType type) {
     switch (shiftSlot) {
       case MORNING:
-        this.title = this.title + "\n" 
-            + type.shiftTimeTable.startMorning.toString(timeFormatted) + " - " 
-            + type.shiftTimeTable.endMorning.toString(timeFormatted);
+        this.title =  
+              type.shiftTimeTable.startMorning.toString(timeFormatted) + " - " 
+            + type.shiftTimeTable.endMorning.toString(timeFormatted) + "\n" + this.title;
         break;
       case AFTERNOON:
-        this.title = this.title + "\n" 
-            + type.shiftTimeTable.startAfternoon.toString(timeFormatted) + " - " 
-            + type.shiftTimeTable.endAfternoon.toString(timeFormatted);
+        this.title =  
+              type.shiftTimeTable.startAfternoon.toString(timeFormatted) + " - " 
+            + type.shiftTimeTable.endAfternoon.toString(timeFormatted) + "\n" + this.title;
         break;
         default:
           break;

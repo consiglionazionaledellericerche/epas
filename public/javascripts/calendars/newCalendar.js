@@ -4,6 +4,7 @@ $( document ).ready(function() {
         var data = {
           columnFormat: 'dddd',
           fixedWeekCount: false,
+          droppable: true,
 //          contentHeight: 'auto',
           loading: function(loading) {
             if (loading) {
@@ -34,17 +35,21 @@ $( document ).ready(function() {
             }
             window.open(event.url,'_self');
           },
-//          eventRender: function(event, element) {
-////              Questa parte volendo si puo' scrivere generica e specificare i campi in un parametro html
-////              nel caso si voglia mostrare altri campi rispetto ai default
+          drop: function( date, jsEvent, ui, resourceId ) {
+              alert("Dropped on " + date.format());
+          },
+          eventRender: function(event, element) {
+//              Questa parte volendo si puo' scrivere generica e specificare i campi in un parametro html
+//              nel caso si voglia mostrare altri campi rispetto ai default
 //              element.find(".fc-content")
 //                     .append("<span>"+ event.start.format()+ "</span>");
-//
-////             per usare i tooltip sugli eventi
-//             element.qtip({
-//                content: event.start.format()
-//             });
-//          },
+        	  
+//             per usare i tooltip sugli eventi
+             element.qtip({
+                content: event.shiftSlot + ' ' + event.personId
+                
+             });
+          },
           eventSources: []
         };
 
@@ -84,10 +89,10 @@ $( document ).ready(function() {
             window.open(url,'_self');
           }
         }
-        if ($this.data('calendarDrop')) {
+        if ($this.data('calendar-drop')) {
           data['eventStartEditable'] = true;
           data['eventDrop'] = function(event, delta, revertFunc) {
-            var url = $this.data('calendarDrop');
+            var url = $this.data('calendar-drop');
             $.ajax({
                 type: 'POST',
                 url: url,
@@ -117,10 +122,10 @@ $( document ).ready(function() {
                 });
           }
         }
-        if ($this.data('calendarResize')) {
+        if ($this.data('calendar-resize')) {
           data['eventDurationEditable'] = true;
           data['eventResize'] = function(event, delta, revertFunc) {
-            var url = $this.data('calendarResize');
+            var url = $this.data('calendar-resize');
 
             $.ajax({
                 type: 'POST',
@@ -151,6 +156,11 @@ $( document ).ready(function() {
         }
         $this.fullCalendar(data);
       });
+	
+	$('[data-draggable]').draggable({
+	    revert: true,      // immediately snap back to original position
+	    revertDuration: 0  //
+	});
 
 });
 

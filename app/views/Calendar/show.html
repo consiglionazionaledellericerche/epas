@@ -17,9 +17,14 @@
     #{form action:@Calendar.show(), method:'POST', class:'form form-horizontal auto-submit', onChange:'this.form.submit()' } 
     	#{f.selectModel 'activity', items:activities, value: activitySelected /}
     #{/form}
+  	</div>
   </div>
+ 
+  <div class="jumbotron" >
+  	#{list people, as:'person'}
+  	 <div id="${person.id}" data-draggable data-event='{"title": "${person.fullname}"}'>${person.fullname}</div>
+  	#{/list}
   </div>
-
  
   <div class="row" data-calendar data-calendar-source="@{shifts()}"
        #{secure.check 'Calendar.changeShift'}
@@ -33,8 +38,10 @@
 </div>
 
 #{set 'moreScripts'}
+<script src="//code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/locale/it.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"></script>
+
 #{script 'calendars/newCalendar.js' /}
 #{/set}
