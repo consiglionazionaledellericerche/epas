@@ -69,15 +69,27 @@ public class Calendar extends Controller {
     int index = 0;
     ColorBrewer sequentialPalettes = ColorBrewer.valueOf("RdYlBu");
 
-    
+
     Color[] myGradient = sequentialPalettes.getColorPalette(11);
     for (PersonShift person : people) {
 
       ShiftEvent event = null;
       for (PersonShiftDay day : shiftDao.getPersonShiftDaysByPeriodAndType(start, end, type, person.person)) {
-        if (event == null
-            || !event.getEnd_orig().plusDays(1).equals(day.date)
-            || !(event.getShiftSlot() == day.getShiftSlot())) {
+
+        /*
+         * Per quanto riguarda gli eventi 'allDay':
+         * Il fullcalendar considera i giorni unici con data di fine evento = null.
+         * A causa di ciò, gli eventi su più giorni hanno come data di fine il giorno successivo all'effettiva
+         * data di terminazione dell'evento.
+         */
+        if (event == null || !(event.getShiftSlot() == day.getShiftSlot()) 
+            || (event.getEnd() == null && !event.getStart().plusDays(1).equals(day.date))
+            || (event.getEnd() != null && !event.getEnd().plusDays(1).equals(day.date))) {
+          
+          // Incrementiamo la fine di un giorno per essere coerenti con la gestione delle date del fullcalendar
+          if(event != null && event.getEnd() != null) {
+            event.setEnd(event.getEnd().plusDays(1));
+          }
 
           event = ShiftEvent.builder()
               .allDay(true)
@@ -86,17 +98,16 @@ public class Calendar extends Controller {
               .title(person.person.fullName())
               .start(day.date)
               .start_orig(day.date)
-              .end(day.date)
-              .end_orig(day.date)
               .color("#"+Integer.toHexString(myGradient[index].getRGB() & 0xffffff))
               .build();
+
           event.extendTitle(type);
           events.add(event);
         } else {
-          event.setEnd(day.date.plusDays(1));
+          event.setEnd(day.date);
           event.setEnd_orig(day.date);
         }
-       
+
       }
       index++;
 
