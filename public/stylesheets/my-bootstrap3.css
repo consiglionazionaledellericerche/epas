@@ -435,3 +435,7 @@ button.button-as-link {
   cursor:pointer;
 }
 
+/* Serve per gli elementi fullcalendar: titolo su più linee */
+.fc-month-view span.fc-title {
+	white-space: normal;
+}
