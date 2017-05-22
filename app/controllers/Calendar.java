@@ -80,9 +80,11 @@ public class Calendar extends Controller {
 
         /**
          * Per quanto riguarda gli eventi 'allDay':
-         * Il fullcalendar considera i giorni unici con data di fine evento = null.
-         * A causa di ciò, gli eventi su più giorni hanno come data di fine il
-         * giorno successivo all'effettiva data di terminazione dell'evento.
+         *
+         * La convensione del fullcalendar è quella di avere il parametro end = null
+         * nel caso di eventi su un singolo giorno, mentre nel caso di evento su più giorni il
+         * parametro end assume il valore del giorno successivo alla fine effettiva
+         * (perchè ne imposta l'orario alla mezzanotte).
          */
         if (event == null || event.getShiftSlot() != day.getShiftSlot()
             || event.getEnd() == null && !event.getStart().plusDays(1).equals(day.date)
@@ -137,9 +139,11 @@ public class Calendar extends Controller {
 
       /**
        * Per quanto riguarda gli eventi 'allDay':
-       * Il fullcalendar considera i giorni unici con data di fine evento = null.
-       * A causa di ciò, gli eventi su più giorni hanno come data di fine il
-       * giorno successivo all'effettiva data di terminazione dell'evento.
+       *
+       * La convensione del fullcalendar è quella di avere il parametro end = null
+       * nel caso di eventi su un singolo giorno, mentre nel caso di evento su più giorni il
+       * parametro end assume il valore del giorno successivo alla fine effettiva
+       * (perchè ne imposta l'orario alla mezzanotte).
        */
       if (event == null
           || event.getEnd() == null && !event.getStart().plusDays(1).equals(abs.personDay.date)
@@ -163,12 +167,16 @@ public class Calendar extends Controller {
     return events;
   }
 
-  public static void changeShift(long id, LocalDate originalStart, LocalDate originalEnd,
+  public static void changeShift(long personId, LocalDate originalStart, LocalDate originalEnd,
       LocalDate start, LocalDate end) {
     log.debug(
         "CHIAMATA LA MODIFICA DEL TURNO: personId {} - start-orig {} "
-            + "- end-orig{} - start {} - end {}", id, originalStart, originalEnd, start, end);
+            + "- end-orig{} - start {} - end {}", personId, originalStart, originalEnd, start, end);
     //        response.status = Http.StatusCode.BAD_REQUEST;
     //        renderText("erroraccio");
+  }
+
+  public static void newShift(long personId, LocalDate date) {
+    log.debug("CHIAMATA LA CREAZIONE DEL TURNO: personId {} - day {}" , personId, date);
   }
 }
