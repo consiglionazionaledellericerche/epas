@@ -2,14 +2,12 @@ package models;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
 import models.base.BaseModel;
 
 
@@ -29,13 +27,13 @@ public class PersonShift extends BaseModel {
   public List<PersonShiftShiftType> personShiftShiftTypes;
 
   @OneToMany(mappedBy = "personShift")
-  public List<PersonShiftDay> personShiftDays = new ArrayList<PersonShiftDay>();
-  
+  public List<PersonShiftDay> personShiftDays = new ArrayList<>();
+
   public boolean disabled;
-  
+
   @Override
   public String toString() {
-    return this.person.name + " " + this.person.surname;
+    return person.name + " " + person.surname;
   }
 
 }

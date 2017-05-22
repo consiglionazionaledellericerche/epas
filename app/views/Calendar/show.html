@@ -10,31 +10,49 @@
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.css">
 #{/set}
 
-<div class="container">
-  #{title title:'Test sul calendario' /}
-  <div class="row">
-    <div class="col-sm-6 col-sm-offset-3">
-    #{form action:@Calendar.show(), method:'POST', class:'form form-horizontal auto-submit', onChange:'this.form.submit()' } 
-    	#{f.selectModel 'activity', items:activities, value: activitySelected /}
-    #{/form}
-  	</div>
-  </div>
- 
-  <div class="jumbotron" >
-  	#{list people, as:'person'}
-  	 <div id="${person.id}" data-draggable data-event='{"title": "${person.fullname}"}'>${person.fullname}</div>
-  	#{/list}
-  </div>
- 
-  <div class="row" data-calendar data-calendar-source="@{shifts()}"
-       #{secure.check 'Calendar.changeShift'}
-       data-calendar-resize="@{changeShift()}"
-       data-calendar-drop="@{changeShift()}"
-       data-calendar-click="#"
-       #{/secure.check}
-  > 
-  </div>
 
+#{title title:'Test sul calendario' /}
+<div class="row">
+  <div class="col-sm-6 col-sm-offset-3">
+    #{form action:@Calendar.show(), method:'POST', class:'form form-horizontal auto-submit',
+    onChange:'this.form.submit()' }
+    #{f.selectModel 'activity', items:activities, value: activitySelected /}
+    #{/form}
+  </div>
+</div>
+
+<div class="well col-md-2">
+  <ul class="list-group">
+    #{list people, as:'person'}
+    <li class="list-group-item" id="${person.id}"
+        data-draggable
+        data-event='{"title": "${person.fullname}",
+                     "allDay": "true",
+                     "personId" : "${person.id}",
+                     "color": "purple" }'>
+      ${person.fullname}
+    </li>
+    <br>
+    #{/list}
+  </ul>
+</div>
+
+*{
+'{"title": "${person.fullname}",
+"allDay": "true",
+"startEditable" : "true",
+"durationEditable" : "true",
+"personId" : "${person.id}",
+"color": "purple" }'
+
+}*
+<div class="col-lg-8 col-md-10" data-calendar data-calendar-source="@{shifts()}"
+     #{secure.check 'Calendar.changeShift'}
+data-calendar-resize="@{changeShift()}"
+data-calendar-drop="@{changeShift()}"
+data-calendar-external-drop="@{newShift()}"
+data-calendar-click="#"
+#{/secure.check}>
 </div>
 
 #{set 'moreScripts'}

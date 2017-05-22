@@ -35,9 +35,6 @@ $( document ).ready(function() {
             }
             window.open(event.url,'_self');
           },
-          drop: function( date, jsEvent, ui, resourceId ) {
-              alert("Dropped on " + date.format());
-          },
           eventRender: function(event, element) {
 //              Questa parte volendo si puo' scrivere generica e specificare i campi in un parametro html
 //              nel caso si voglia mostrare altri campi rispetto ai default
@@ -96,7 +93,7 @@ $( document ).ready(function() {
             $.ajax({
                 type: 'POST',
                 url: url,
-                data: { id: event.personId,
+                data: { personId: event.personId,
                  start: event.start.format(),
                  // Restituiamo un giorno in meno di modo che, lato server, siamo in grado di gestire la
                  // terminazione dell'evento con la corretta data di fine dell'evento stesso
@@ -126,12 +123,12 @@ $( document ).ready(function() {
           data['eventDurationEditable'] = true;
           data['eventResize'] = function(event, delta, revertFunc) {
             var url = $this.data('calendar-resize');
-
+            console.log(JSON.stringify(event));
             $.ajax({
                 type: 'POST',
                 url: url,
                 // aggiungere a data tutti i parametri che si vogliono passare al metodo del controller
-                data: { id: event.personId,
+                data: { personId: event.personId,
                  start: event.start.format(),
                  // Restituiamo un giorno in meno di modo che, lato server, siamo in grado di gestire la
                  // terminazione dell'evento con la corretta data di fine dell'evento stesso
@@ -151,7 +148,29 @@ $( document ).ready(function() {
                     // bootbox.alert('successfully modified');
                     // Si comunica in qualche modo il corretto salvataggio?
                 }
-                });
+            });
+          }
+        }
+        // Viene chiamata dopo che si trascina un evento esterno sul calendario
+        if ($this.data('calendar-external-drop')) {
+          data['eventReceive'] = function(event) {
+            var url = $this.data('calendar-external-drop');
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: {
+                   personId: event.personId,
+                   date: event.start.format(),
+                   },
+                error: function(){
+                   // Non essendoci la revertFunc() eliminiamo il nuovo evento
+                   $this.fullCalendar('removeEvents', event._id);
+                },
+                success: function(){
+                  event.start_orig = event.start.format();
+//                  event.end_orig = event.end ? event.end.clone().subtract(1,'days').format() : null;
+                }
+             });
           }
         }
         $this.fullCalendar(data);
