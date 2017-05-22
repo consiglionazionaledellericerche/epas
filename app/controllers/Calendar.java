@@ -21,6 +21,7 @@ import models.User;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.dto.ShiftEvent;
+import models.enumerate.ShiftSlot;
 import org.jcolorbrewer.ColorBrewer;
 import org.joda.time.LocalDate;
 import play.mvc.Controller;
@@ -60,7 +61,8 @@ public class Calendar extends Controller {
   }
 
   public static void shifts(LocalDate start, LocalDate end) throws JsonProcessingException {
-
+    // TODO: 22/05/17 forse conviene passarlo tramite javascript per evitare alcuni problemi
+    // (più pagine su turni diversi)
     final ShiftType type = shiftDao.
         getShiftTypeById(Long.parseLong(session.get("currentShiftActivity"))).orNull();
 
@@ -169,6 +171,7 @@ public class Calendar extends Controller {
 
   public static void changeShift(long personId, LocalDate originalStart, LocalDate originalEnd,
       LocalDate start, LocalDate end) {
+    // TODO: 22/05/17 Mi sa tanto che è necessario avere lo ShiftType anche qui..... 
     log.debug(
         "CHIAMATA LA MODIFICA DEL TURNO: personId {} - start-orig {} "
             + "- end-orig{} - start {} - end {}", personId, originalStart, originalEnd, start, end);
@@ -176,7 +179,9 @@ public class Calendar extends Controller {
     //        renderText("erroraccio");
   }
 
-  public static void newShift(long personId, LocalDate date) {
-    log.debug("CHIAMATA LA CREAZIONE DEL TURNO: personId {} - day {}" , personId, date);
+  public static void newShift(long personId, LocalDate date, ShiftSlot shiftSlot,
+      ShiftType shiftType) {
+    log.debug("CHIAMATA LA CREAZIONE DEL TURNO: personId {} - day {} - slot {} - shiftType {}",
+        personId, date, shiftSlot, shiftType);
   }
 }
