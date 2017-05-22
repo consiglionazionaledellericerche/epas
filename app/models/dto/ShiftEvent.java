@@ -21,28 +21,20 @@ public class ShiftEvent {
   private LocalDate end;
   private String url;
   private String className;
-  //  private boolean editable;
   private boolean startEditable;
   private boolean durationEditable;
-  //  private boolean resourceEditable;
-//  private String rendering;
-//  private boolean overlap;
   private String color;
   private String backgroundColor;
   private String borderColor;
   private String textColor;
 
-  // Campi 
-  // id della persona su epas ?
   private long personId;
-  // Il nome della persona del turno?
-
+  private ShiftSlot shiftSlot;
+  // Campi extra che servono per riuscire a passare indietro al server (dal calendario),
+  // le vecchie date al quale fa riferimento l'evento in seguito a una sua modifica
   private LocalDate start_orig;
-
   private LocalDate end_orig;
 
-  private ShiftSlot shiftSlot;
-  // TODO: 15/05/17  aggiungere tutti i parametri che possono servire
   private static String timeFormatted = "HH:mm";
 
   public void extendTitle(ShiftType type) {
@@ -60,7 +52,6 @@ public class ShiftEvent {
       default:
         break;
     }
-
   }
 
 }
