@@ -58,7 +58,7 @@ public class Calendar extends Controller {
     render(activities, activitySelected, people);
   }
 
-  public static void shifts(ShiftType shiftType, LocalDate start, LocalDate end)
+  public static void events(ShiftType shiftType, LocalDate start, LocalDate end)
       throws JsonProcessingException {
 
     // TODO: 23/05/17 Lo shiftType dev'essere valido e l'utente deve avere i permessi per lavorarci
@@ -72,51 +72,58 @@ public class Calendar extends Controller {
 
     Color[] myGradient = sequentialPalettes.getColorPalette(11);
     for (PersonShift person : people) {
-
-      ShiftEvent event = null;
-      for (PersonShiftDay day : shiftDao
-          .getPersonShiftDaysByPeriodAndType(start, end, shiftType, person.person)) {
-
-        /**
-         * Per quanto riguarda gli eventi 'allDay':
-         *
-         * La convensione del fullcalendar è quella di avere il parametro end = null
-         * nel caso di eventi su un singolo giorno, mentre nel caso di evento su più giorni il
-         * parametro end assume il valore del giorno successivo alla fine effettiva
-         * (perchè ne imposta l'orario alla mezzanotte).
-         */
-        if (event == null || event.getShiftSlot() != day.getShiftSlot()
-            || event.getEnd() == null && !event.getStart().plusDays(1).equals(day.date)
-            || event.getEnd() != null && !event.getEnd().equals(day.date)) {
-
-          event = ShiftEvent.builder()
-              .allDay(true)
-              .shiftSlot(day.shiftSlot)
-              .personId(person.person.id)
-              .title(person.person.fullName())
-              .start(day.date)
-              .start_orig(day.date)
-              .color("#" + Integer.toHexString(myGradient[index].getRGB() & 0xffffff))
-              .textColor("black")
-              .borderColor("black")
-              .build();
-
-          event.extendTitle(shiftType);
-          events.add(event);
-        } else {
-          event.setEnd(day.date.plusDays(1));
-          event.setEnd_orig(day.date);
-        }
-
-      }
-      index++;
-
+      final String color = "#" + Integer.toHexString(myGradient[index].getRGB() & 0xffffff);
+      events.addAll(shiftEvents(shiftType, person.person, start, end, color));
       events.addAll(absenceEvents(person.person, start, end));
+      index++;
+    }
+    events.addAll(shiftCancelledEvent(shiftType, start, end));
+    // Usato il jackson per facilitare la serializzazione dei LocalDate
+    renderJSON(mapper.writeValueAsString(events));
+  }
+
+  private static List<ShiftEvent> shiftEvents(ShiftType shiftType, Person person, LocalDate start,
+      LocalDate end, String color) {
+
+    final List<ShiftEvent> shiftEvents = new ArrayList<>();
+    ShiftEvent event = null;
+    for (PersonShiftDay day : shiftDao
+        .getPersonShiftDaysByPeriodAndType(start, end, shiftType, person)) {
+
+      /**
+       * Per quanto riguarda gli eventi 'allDay':
+       *
+       * La convensione del fullcalendar è quella di avere il parametro end = null
+       * nel caso di eventi su un singolo giorno, mentre nel caso di evento su più giorni il
+       * parametro end assume il valore del giorno successivo alla fine effettiva
+       * (perchè ne imposta l'orario alla mezzanotte).
+       */
+      if (event == null || event.getShiftSlot() != day.getShiftSlot()
+          || event.getEnd() == null && !event.getStart().plusDays(1).equals(day.date)
+          || event.getEnd() != null && !event.getEnd().equals(day.date)) {
+
+        event = ShiftEvent.builder()
+            .allDay(true)
+            .shiftSlot(day.shiftSlot)
+            .personId(person.id)
+            .title(person.fullName())
+            .start(day.date)
+            .start_orig(day.date)
+            .color(color)
+            .textColor("black")
+            .borderColor("black")
+            .build();
+
+        event.extendTitle(shiftType);
+        shiftEvents.add(event);
+      } else {
+        event.setEnd(day.date.plusDays(1));
+        event.setEnd_orig(day.date);
+      }
 
     }
 
-    // Usato il jackson per facilitare la serializzazione dei LocalDate
-    renderJSON(mapper.writeValueAsString(events));
+    return shiftEvents;
   }
 
   private static List<ShiftEvent> absenceEvents(Person person, LocalDate start, LocalDate end) {
@@ -162,6 +169,20 @@ public class Calendar extends Controller {
     }
 
     return events;
+  }
+
+  private static List<ShiftEvent> shiftCancelledEvent(ShiftType shiftType, LocalDate start,
+      LocalDate end) {
+
+    return shiftDao.getShiftCancelledByPeriodAndType(start, end, shiftType).stream()
+        .map(shiftCancelled -> {
+          return ShiftEvent.builder()
+              .allDay(true)
+              .start(shiftCancelled.date)
+              .rendering("background")
+              .color("red")
+              .build();
+        }).collect(Collectors.toList());
   }
 
   public static void changeShift(ShiftType shiftType, long personId, LocalDate originalStart,

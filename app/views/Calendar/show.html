@@ -50,7 +50,7 @@
 <!-- Calendario-->
 <div class="col-lg-8 col-sm-10"
      data-calendar
-     data-calendar-source="@{shifts()}"
+     data-calendar-source="@{events()}"
      #{secure.check 'Calendar.changeShift'}
      data-calendar-resize="@{changeShift()}"
      data-calendar-drop="@{changeShift()}"
