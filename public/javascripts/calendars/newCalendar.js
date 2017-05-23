@@ -47,10 +47,12 @@ $(document).ready(function() {
     };
     data['eventSources'].push({
       events: function(start, end, timezone, callback) {
+        var shiftType = $('#activity').val();
         $.ajax({
           url: $this.data('calendarSource'),
           type: 'GET',
           data: {
+            'shiftType.id': shiftType,
             start: start.format(),
             end: end.subtract(1, 'days').format()
           },
@@ -80,12 +82,14 @@ $(document).ready(function() {
     }
     if ($this.data('calendar-drop')) {
       data['eventStartEditable'] = true;
+      var shiftType = $('#activity').val();
       data['eventDrop'] = function(event, delta, revertFunc) {
         var url = $this.data('calendar-drop');
         $.ajax({
           type: 'POST',
           url: url,
           data: {
+            'shiftType.id': shiftType,
             personId: event.personId,
             start: event.start.format(),
             // Restituiamo un giorno in meno di modo che, lato server, siamo in grado di gestire la
@@ -114,11 +118,13 @@ $(document).ready(function() {
       data['eventDurationEditable'] = true;
       data['eventResize'] = function(event, delta, revertFunc) {
         var url = $this.data('calendar-resize');
+        var shiftType = $('#activity').val();
         $.ajax({
           type: 'POST',
           url: url,
           // aggiungere a data tutti i parametri che si vogliono passare al metodo del controller
           data: {
+            'shiftType.id': shiftType,
             personId: event.personId,
             start: event.start.format(),
             // Restituiamo un giorno in meno di modo che, lato server, siamo in grado di gestire la

@@ -42,7 +42,6 @@ public class Calendar extends Controller {
   @Inject
   static AbsenceDao absenceDao;
 
-
   public static void show(ShiftType activity) {
     User currentUser = Security.getUser().get();
 
@@ -51,7 +50,6 @@ public class Calendar extends Controller {
         .collect(Collectors.toList());
 
     final ShiftType activitySelected = activity.id != null ? activity : activities.get(0);
-    session.put("currentShiftActivity", activitySelected.id);
 
     List<Person> people = activitySelected.personShiftShiftTypes.stream()
         .map(personShiftShiftType -> personShiftShiftType.personShift.person)
@@ -60,14 +58,13 @@ public class Calendar extends Controller {
     render(activities, activitySelected, people);
   }
 
-  public static void shifts(LocalDate start, LocalDate end) throws JsonProcessingException {
-    // TODO: 22/05/17 forse conviene passarlo tramite javascript per evitare alcuni problemi
-    // (più pagine su turni diversi)
-    final ShiftType type = shiftDao.
-        getShiftTypeById(Long.parseLong(session.get("currentShiftActivity"))).orNull();
+  public static void shifts(ShiftType shiftType, LocalDate start, LocalDate end)
+      throws JsonProcessingException {
+
+    // TODO: 23/05/17 Lo shiftType dev'essere valido e l'utente deve avere i permessi per lavorarci
 
     List<ShiftEvent> events = new ArrayList<>();
-    List<PersonShift> people = type.personShiftShiftTypes.stream()
+    List<PersonShift> people = shiftType.personShiftShiftTypes.stream()
         .map(personShiftShiftType -> personShiftShiftType.personShift).collect(Collectors.toList());
 
     int index = 0;
@@ -78,7 +75,7 @@ public class Calendar extends Controller {
 
       ShiftEvent event = null;
       for (PersonShiftDay day : shiftDao
-          .getPersonShiftDaysByPeriodAndType(start, end, type, person.person)) {
+          .getPersonShiftDaysByPeriodAndType(start, end, shiftType, person.person)) {
 
         /**
          * Per quanto riguarda gli eventi 'allDay':
@@ -102,11 +99,9 @@ public class Calendar extends Controller {
               .color("#" + Integer.toHexString(myGradient[index].getRGB() & 0xffffff))
               .textColor("black")
               .borderColor("black")
-              .durationEditable(true)
-              .startEditable(true)
               .build();
 
-          event.extendTitle(type);
+          event.extendTitle(shiftType);
           events.add(event);
         } else {
           event.setEnd(day.date.plusDays(1));
@@ -169,12 +164,14 @@ public class Calendar extends Controller {
     return events;
   }
 
-  public static void changeShift(long personId, LocalDate originalStart, LocalDate originalEnd,
-      LocalDate start, LocalDate end) {
-    // TODO: 22/05/17 Mi sa tanto che è necessario avere lo ShiftType anche qui..... 
+  public static void changeShift(ShiftType shiftType, long personId, LocalDate originalStart,
+      LocalDate originalEnd, LocalDate start, LocalDate end) {
+
+    // TODO: 23/05/17 Lo shiftType dev'essere valido e l'utente deve avere i permessi per lavorarci
     log.debug(
-        "CHIAMATA LA MODIFICA DEL TURNO: personId {} - start-orig {} "
-            + "- end-orig{} - start {} - end {}", personId, originalStart, originalEnd, start, end);
+        "CHIAMATA LA MODIFICA DEL TURNO: shiftType {} -personId {} - start-orig {} "
+            + "- end-orig{} - start {} - end {}", shiftType, personId, originalStart, originalEnd,
+        start, end);
     //        response.status = Http.StatusCode.BAD_REQUEST;
     //        renderText("erroraccio");
   }
