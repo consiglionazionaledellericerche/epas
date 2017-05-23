@@ -105,6 +105,7 @@ public class Calendar extends Controller {
         event = ShiftEvent.builder()
             .allDay(true)
             .shiftSlot(day.shiftSlot)
+            .className("removable")
             .personId(person.id)
             .title(person.fullName())
             .start(day.date)
@@ -201,5 +202,11 @@ public class Calendar extends Controller {
       ShiftType shiftType) {
     log.debug("CHIAMATA LA CREAZIONE DEL TURNO: personId {} - day {} - slot {} - shiftType {}",
         personId, date, shiftSlot, shiftType);
+  }
+
+  public static void removeShift(ShiftType shiftType, long personId, LocalDate start,
+      LocalDate end) {
+    log.debug("CHIAMATA LA REMOVESHIFT: {} {} {} {}", shiftType, personId, start, end);
+
   }
 }

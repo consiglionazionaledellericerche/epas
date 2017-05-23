@@ -34,13 +34,42 @@ $(document).ready(function() {
         window.open(event.url, '_self');
       },
       eventRender: function(event, element) {
-        //              Questa parte volendo si puo' scrivere generica e specificare i campi in un parametro html
-        //              nel caso si voglia mostrare altri campi rispetto ai default
-        //              element.find(".fc-content")
-        //                     .append("<span>"+ event.start.format()+ "</span>");
-        //             per usare i tooltip sugli eventi
+        // Aggiunge l'icona per la rimozione dell'evento nel caso sia impostata la classe removable
+        // nell'evento
+        if ($.inArray("removable", event.className) != -1) {
+          element.prepend("<button type='button' class='close' aria-label='Close'><span aria-hidden='true'>&times;</span></button>");
+          element.find(".close").click(function() {
+            if ($this.data('calendar-event-remove')) {
+              var url = $this.data('calendar-event-remove');
+              // Recupero il valore dell'attuale ShiftType selezionato dalla select
+              var shiftType = $('#activity').val();
+              $.ajax({
+                type: 'POST',
+                url: url,
+                data: {
+                  'shiftType.id': shiftType,
+                  personId: event.personId,
+                  start: event.start.format(),
+                  end: event.end ? event.end.clone().subtract(1, 'days').format() : event.start.format()
+                },
+                error: function() {},
+                success: function() {
+                  //            console.log(JSON.stringify(event));
+                }
+              });
+            }
+            $this.fullCalendar('removeEvents', event._id);
+          });
+        }
+        // per usare i tooltip sugli eventi
         element.qtip({
-          content: event.shiftSlot + ' ' + event.personId
+          content: event.shiftSlot + ' ' + event.personId,
+          show: {
+            event: 'click'
+          },
+          style: {
+            classes: 'qtip-bootstrap'
+          }
         });
       },
       eventSources: []
@@ -169,7 +198,7 @@ $(document).ready(function() {
           success: function() {
             event.shiftSlot = shiftSlot;
             event.start_orig = event.start.format();
-//            console.log(JSON.stringify(event));
+            //            console.log(JSON.stringify(event));
           }
         });
       }
