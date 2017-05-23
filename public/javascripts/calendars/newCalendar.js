@@ -5,7 +5,6 @@ $(document).ready(function() {
       columnFormat: 'dddd',
       fixedWeekCount: false,
       droppable: true,
-      //          contentHeight: 'auto',
       loading: function(loading) {
         if (loading) {
           $this.addClass('reloading');
@@ -21,17 +20,24 @@ $(document).ready(function() {
           $this.prev('span.text-primary').remove();
         }
       },
-      eventClick: function(event, jsEvent, view) {
-        new PNotify({
-          title: "dramma",
-          text: "dramma",
-          type: "success",
-          remove: true
+      //      eventClick: function(event, jsEvent, view) {
+      //        new PNotify({
+      //          title: "dramma",
+      //          text: "dramma",
+      //          type: "success",
+      //          remove: true
+      //        });
+      //        if (event.url === undefined) {
+      //          return false;
+      //        }
+      //        window.open(event.url, '_self');
+      //      },
+      dayRender: function( date, cell ) {
+        cell.hover(function() {
+          cell.prepend("<i class='fa fa-trash' aria-hidden='true'></i>");
+        },function() {
+          cell.find( "i" ).remove();
         });
-        if (event.url === undefined) {
-          return false;
-        }
-        window.open(event.url, '_self');
       },
       eventRender: function(event, element) {
         // Aggiunge l'icona per la rimozione dell'evento nel caso sia impostata la classe removable
@@ -54,7 +60,7 @@ $(document).ready(function() {
                 },
                 error: function() {},
                 success: function() {
-                  //            console.log(JSON.stringify(event));
+                  // console.log(JSON.stringify(event));
                 }
               });
             }
@@ -95,18 +101,34 @@ $(document).ready(function() {
         });
       }
     });
-    if ($this.data('calendarClick')) {
+    if ($this.data('calendar-click')) {
       data['dayClick'] = function(date, jsEvent, view) {
-        var url = $this.data('calendarClick');
-        if (url.indexOf('?') >= 0) {
-          url += '&';
-        } else {
-          url += '?';
-        }
-        url += $.param({
-          dateTime: date.format()
+         $('#dialog-form').data('date', date).dialog('open');
+        var url = $this.data('calendar-click');
+        var shiftType = $('#activity').val();
+        $.ajax({
+          type: 'POST',
+          url: url,
+          // aggiungere a data tutti i parametri che si vogliono passare al metodo del controller
+          data: {
+            'shiftType.id': shiftType,
+            date: date.format()
+          },
+          error: function() {
+            revertFunc();
+          },
+          success: function() {}
         });
-        window.open(url, '_self');
+        //        chiamata sincrona
+        //        if (url.indexOf('?') >= 0) {
+        //          url += '&';
+        //        } else {
+        //          url += '?';
+        //        }
+        //        url += $.param({
+        //          date: date.format()
+        //        });
+        //        window.open(url, '_self');
       }
     }
     if ($this.data('calendar-drop')) {

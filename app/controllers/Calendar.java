@@ -209,4 +209,8 @@ public class Calendar extends Controller {
     log.debug("CHIAMATA LA REMOVESHIFT: {} {} {} {}", shiftType, personId, start, end);
 
   }
+
+  public static void cancelShift(ShiftType shiftType, LocalDate date) {
+    log.debug("CHIAMATA LA CANCELSHIFT: {} {}", shiftType, date);
+  }
 }
