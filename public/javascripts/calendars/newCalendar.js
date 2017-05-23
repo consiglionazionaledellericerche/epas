@@ -22,10 +22,12 @@ $( document ).ready(function() {
               $this.prev('span.text-primary').remove();
             }
           },
+          
           eventClick: function(event, jsEvent, view) {
+        	  msg = "personId =" + event.personId + "\n"+ "shiftSlot =" + event.shiftSlot + "\n"+ "cancelled =" + event.cancelled;
             	  new PNotify({
             		  title: "dramma",
-            		  text: "dramma",
+            		  text: msg,
             		  type: "success",
             		  remove: true
             	  });
@@ -51,7 +53,7 @@ $( document ).ready(function() {
         data['eventSources'].push({
             events: function(start, end, timezone, callback) {
                 $.ajax({
-                    url: $this.data('calendarSource'),
+                    url: $this.data('calendar-source'),
                     type: 'GET',
                     data: {
                         start: start.format(),
@@ -67,12 +69,13 @@ $( document ).ready(function() {
                 });
             }
         });
-        if ($this.data('calendarClick')) {
+        
+        // EVENT CLICK
+        if ($this.data('calendar-click')) {
           data['dayClick'] = function(date, jsEvent, view) {
-
             // $(this) si riferisce al <td> associato a date
             // composizione dell'url con la data
-            var url = $this.data('calendarClick');
+            var url = $this.data('calendar-click');
             if (url.indexOf('?') >= 0) {
               url += '&';
             } else {
@@ -84,21 +87,25 @@ $( document ).ready(function() {
             window.open(url,'_self');
           }
         }
-        if ($this.data('calendarDrop')) {
+        
+        // EVENT DROP
+        if ($this.data('calendar-drop')) {
           data['eventStartEditable'] = true;
           data['eventDrop'] = function(event, delta, revertFunc) {
-            var url = $this.data('calendarDrop');
+            var url = $this.data('calendar-drop');
             $.ajax({
                 type: 'POST',
                 url: url,
-                data: { id: event.personId,
-                 start: event.start.format(),
-                 // Restituiamo un giorno in meno di modo che, lato server, siamo in grado di gestire la
-                 // terminazione dell'evento con la corretta data di fine dell'evento stesso
-                 end: event.end ? event.end.clone().subtract(1,'days').format() : event.start.format(),
-                 originalStart: event.start_orig,
-                 originalEnd: event.end_orig || event.start_orig
-                 },
+                data: { 
+                	cancelled: event.cancelled,
+                	personId: event.personId,
+                	start: event.start.format(),
+                	// Restituiamo un giorno in meno di modo che, lato server, siamo in grado di gestire la
+                	// terminazione dell'evento con la corretta data di fine dell'evento stesso
+                	end: event.end ? event.end.clone().subtract(1,'days').format() : event.start.format(),
+                	originalStart: event.start_orig,
+                	originalEnd: event.end_orig || event.start_orig
+                },
                 error: function(response){
               	  new PNotify({
             		  title: "dramma",
@@ -106,7 +113,7 @@ $( document ).ready(function() {
             		  type: "error",
             		  remove: true
             	  });
-                    revertFunc();
+                  revertFunc();
                 },
                 success: function(){
                   event.start_orig = event.start.format();
@@ -114,27 +121,31 @@ $( document ).ready(function() {
                     // bootbox.alert('successfully modified');
                     // Si comunica in qualche modo il corretto salvataggio?
                 }
-                });
+             });
           }
         }
-        if ($this.data('calendarResize')) {
+        
+        // EVENT RESIZE
+        if ($this.data('calendar-resize')) {
           data['eventDurationEditable'] = true;
-          data['eventResize'] = function(event, delta, revertFunc) {
+          data['event-resize'] = function(event, delta, revertFunc) {
             var url = $this.data('calendarResize');
 
             $.ajax({
                 type: 'POST',
                 url: url,
                 // aggiungere a data tutti i parametri che si vogliono passare al metodo del controller
-                data: { id: event.personId,
-                 start: event.start.format(),
-                 // Restituiamo un giorno in meno di modo che, lato server, siamo in grado di gestire la
-                 // terminazione dell'evento con la corretta data di fine dell'evento stesso
-                 end: event.end ? event.end.clone().subtract(1,'days').format() : event.start.format(),
-                 originalStart: event.start_orig,
-                 // La data di fine, in caso di evento su singolo giorno, è nulla.
-                 // Pertanto la impostiamo allo stesso valore della data di inizio dell'evento stesso
-                 originalEnd: event.end_orig || event.start_orig
+                data: { 
+                	cancelled: event.cancelled,
+                	personId: event.personId,
+                	start: event.start.format(),
+                	// Restituiamo un giorno in meno di modo che, lato server, siamo in grado di gestire la
+                	// terminazione dell'evento con la corretta data di fine dell'evento stesso
+                	end: event.end ? event.end.clone().subtract(1,'days').format() : event.start.format(),
+                	originalStart: event.start_orig,
+                	// La data di fine, in caso di evento su singolo giorno, è nulla.
+                	// Pertanto la impostiamo allo stesso valore della data di inizio dell'evento stesso
+                	originalEnd: event.end_orig || event.start_orig
                  },
                 error: function(){
                     revertFunc();
@@ -146,7 +157,7 @@ $( document ).ready(function() {
                     // bootbox.alert('successfully modified');
                     // Si comunica in qualche modo il corretto salvataggio?
                 }
-                });
+             });
           }
         }
         $this.fullCalendar(data);

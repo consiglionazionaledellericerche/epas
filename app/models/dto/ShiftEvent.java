@@ -40,8 +40,9 @@ public class ShiftEvent {
   private long personId;
   // Il nome della persona del turno?
  
+  private boolean cancelled;
+  
   private LocalDate start_orig;
-
   private LocalDate end_orig;
  
   private ShiftSlot shiftSlot;
@@ -64,6 +65,12 @@ public class ShiftEvent {
           break;
     }
     
+  }
+  
+  // TODO: a regime vedere se farne una unica 
+  // per tutti gli eventi
+  public void setCancelledTitle (ShiftType type) {
+    this.title = "Turno " + type.type + "\nANNULLATO";
   }
   
 }
