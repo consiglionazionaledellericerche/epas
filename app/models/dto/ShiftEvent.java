@@ -1,5 +1,7 @@
 package models.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Builder;
 import lombok.Data;
 import models.ShiftType;
@@ -12,6 +14,7 @@ import org.joda.time.LocalDate;
  */
 @Data
 @Builder
+@JsonInclude(Include.NON_NULL)
 public class ShiftEvent {
 
   // Campi di default dell'eventObject fullcalendar
@@ -21,13 +24,21 @@ public class ShiftEvent {
   private LocalDate end;
   private String url;
   private String className;
-  private boolean startEditable;
-  private boolean durationEditable;
+  // Usata la classe Boolean per poter lasciare i valori null in modo che
+  // non vengano serializzati nel Json
+  private Boolean editable;
+  private Boolean startEditable;
+  private Boolean durationEditable;
+  private Boolean resourceEditable;
+  private Boolean overlap;
+  private String rendering;
+  private String constraint;
   private String color;
   private String backgroundColor;
   private String borderColor;
   private String textColor;
 
+  // CAMPI CUSTOM
   private long personId;
   private ShiftSlot shiftSlot;
   // Campi extra che servono per riuscire a passare indietro al server (dal calendario),
