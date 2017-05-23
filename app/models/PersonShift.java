@@ -12,7 +12,6 @@ import javax.persistence.Table;
 
 import models.base.BaseModel;
 
-
 @Entity
 @Table(name = "person_shift")
 public class PersonShift extends BaseModel {
@@ -29,13 +28,13 @@ public class PersonShift extends BaseModel {
   public List<PersonShiftShiftType> personShiftShiftTypes;
 
   @OneToMany(mappedBy = "personShift")
-  public List<PersonShiftDay> personShiftDays = new ArrayList<PersonShiftDay>();
-  
+  public List<PersonShiftDay> personShiftDays = new ArrayList<>();
+
   public boolean disabled;
-  
+
   @Override
   public String toString() {
-    return this.person.name + " " + this.person.surname;
+    return person.name + " " + person.surname;
   }
 
 }
