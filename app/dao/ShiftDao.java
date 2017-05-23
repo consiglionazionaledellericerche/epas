@@ -28,6 +28,7 @@ import models.query.QShiftCancelled;
 import models.query.QShiftCategories;
 import models.query.QShiftTimeTable;
 import models.query.QShiftType;
+import play.db.jpa.JPA;
 
 import org.joda.time.LocalDate;
 
@@ -98,6 +99,8 @@ public class ShiftDao extends DaoBase {
 
 
   /**
+   * @author arianna
+   * 
    * @return la lista dei turni cancellati relativi al tipo 'type' nel periodo compreso tra 'from'
    *     e 'to'.
    */
@@ -125,6 +128,15 @@ public class ShiftDao extends DaoBase {
   public Long deleteShiftCancelled(ShiftType type, LocalDate day) {
     final QShiftCancelled sc = QShiftCancelled.shiftCancelled;
     return getQueryFactory().delete(sc).where(sc.date.eq(day).and(sc.type.eq(type))).execute();
+  }
+  
+  /**
+   * @return il quantitativo di shiftCancelled effettivamente cancellati.
+   */
+  public Long deletePersonShiftDay(PersonShiftDay personShiftDay) {  
+
+    final QPersonShiftDay sc = QPersonShiftDay.personShiftDay;
+    return getQueryFactory().delete(sc).where(sc.date.eq(personShiftDay.date).and(sc.shiftType.eq(personShiftDay.shiftType).and(sc.personShift.person.eq(personShiftDay.personShift.person)))).execute();
   }
 
 
