@@ -21,7 +21,7 @@
     </div>
 </div>
 <!-- Menu laterare-->
-<div class="col-md-2 well well-lg">
+<div class="col-sm-2 well well-lg">
     <ul class="list-group">
         #{list people, as:'person'}
         <li class="list-group-item" id="${person.id}"
@@ -48,7 +48,7 @@
 </div>
 
 <!-- Calendario-->
-<div class="col-lg-8 col-md-10"
+<div class="col-lg-8 col-sm-10"
      data-calendar
      data-calendar-source="@{shifts()}"
      #{secure.check 'Calendar.changeShift'}
