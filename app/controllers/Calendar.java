@@ -4,41 +4,50 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 
+
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonShiftDayDao;
+import com.google.common.collect.ImmutableList;
+import dao.AbsenceDao;
 import dao.ShiftDao;
+
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
+
 import manager.PersonDayManager;
 import manager.ShiftManager;
 import dao.wrapper.IWrapperPersonDay;
 import models.Person;
 import models.PersonDay;
+
+import models.Person;
+
 import models.PersonShift;
 import models.PersonShiftDay;
 import models.ShiftCancelled;
 import models.ShiftType;
 import models.User;
+import models.absences.Absence;
+import models.absences.JustifiedType.JustifiedTypeName;
 import models.dto.ShiftEvent;
 import models.exports.ShiftPeriod;
-
 import org.apache.poi.ss.formula.functions.Now;
+import models.enumerate.ShiftSlot;
 import org.jcolorbrewer.ColorBrewer;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
-
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
-
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 /**
  * @author arianna
@@ -63,10 +72,10 @@ public class Calendar extends Controller {
   static ObjectMapper mapper;
   @Inject
   private static IWrapperFactory wrapperFactory;
-
+  @Inject
+  static AbsenceDao absenceDao;
 
   public static void show(ShiftType activity) {
-    // log.debug("Id attività: {}", activity.id);
     User currentUser = Security.getUser().get();
 
     List<ShiftType> activities = currentUser.person.shiftCategories.stream()
@@ -74,75 +83,157 @@ public class Calendar extends Controller {
         .collect(Collectors.toList());
 
     final ShiftType activitySelected = activity.id != null ? activity : activities.get(0);
-    session.put("currentShiftActivity", activitySelected.id);
 
-    render(activities, activitySelected);
+    List<Person> people = activitySelected.personShiftShiftTypes.stream()
+        .map(personShiftShiftType -> personShiftShiftType.personShift.person)
+        .collect(Collectors.toList());
+
+    render(activities, activitySelected, people);
   }
+
 
   /*
    * Carica i turni dal database per essere visualizzati nel calendario
    */
-  public static void loadShifts(LocalDate start, LocalDate end) throws JsonProcessingException {
+  public static void events(ShiftType shiftType, LocalDate start, LocalDate end)
+      throws JsonProcessingException {
 
-    final ShiftType type = ShiftType.findById(Long.parseLong(session.get("currentShiftActivity")));
+    // TODO: 23/05/17 Lo shiftType dev'essere valido e l'utente deve avere i permessi per lavorarci
 
     List<ShiftEvent> events = new ArrayList<>();
-    //final AtomicInteger count = new AtomicInteger();
-    
-    List<PersonShift> people = type.personShiftShiftTypes.stream()
+
+    List<PersonShift> people = shiftType.personShiftShiftTypes.stream()
         .map(personShiftShiftType -> personShiftShiftType.personShift).collect(Collectors.toList());
 
     int index = 0;
-    ColorBrewer sequentialPalettes = ColorBrewer.valueOf("RdYlBu");
+
+    ColorBrewer sequentialPalettes = ColorBrewer.valueOf("YlOrBr");
     Color[] myGradient = sequentialPalettes.getColorPalette(11);
     
     // prende i turni associati alle persone attive in quel turno
     for (PersonShift person : people) {
+      final String color = "#" + Integer.toHexString(myGradient[index].getRGB() & 0xffffff);
+      events.addAll(shiftEvents(shiftType, person.person, start, end, color));
+      events.addAll(absenceEvents(person.person, start, end));
 
-      ShiftEvent event = null;
-      for (PersonShiftDay day : shiftDao.getPersonShiftDaysByPeriodAndType(start, end, type, person.person)) {
-
-        /*
-         * Per quanto riguarda gli eventi 'allDay':
-         * Il fullcalendar considera i giorni unici con data di fine evento = null.
-         * A causa di ciò, gli eventi su più giorni hanno come data di fine il giorno successivo all'effettiva
-         * data di terminazione dell'evento.
-         */
-        if (event == null || !(event.getShiftSlot() == day.getShiftSlot()) 
-            || (event.getEnd() == null && !event.getStart().plusDays(1).equals(day.date))
-            || (event.getEnd() != null && !event.getEnd().plusDays(1).equals(day.date))) {
-          
-          // Incrementiamo la fine di un giorno per essere coerenti con la gestione delle date del fullcalendar
-          if(event != null && event.getEnd() != null) {
-            event.setEnd(event.getEnd().plusDays(1));
-          }
-
-          event = ShiftEvent.builder()
-              .cancelled(false)
-              .allDay(true)
-              .shiftSlot(day.shiftSlot)
-              .personId(person.person.id)
-              .title(person.person.fullName())
-              .start(day.date)
-              .start_orig(day.date)
-              .color("#"+Integer.toHexString(myGradient[index].getRGB() & 0xffffff))
-              .build();
-
-          event.extendTitle(type);
-          events.add(event);
-        } else {
-          event.setEnd(day.date);
-          event.setEnd_orig(day.date);
-        }
-
-      }
-      
       index++;
     }
     
-    // prende i turni cancellati
+    events.addAll(shiftCancelledEvent(shiftType, start, end));
+    
+    // Usato il jackson per facilitare la serializzazione dei LocalDate
+    renderJSON(mapper.writeValueAsString(events));
+  }
+
+  
+  /*
+   * Carica la lista dei turni di un certo tipo associati ad una determinata persona in
+   * un intervallo di tempo
+   * 
+   * @param ShiftType shiftType: tipo di turno
+   * @param Person person: persona associata ai turni
+   * @param LocalDate start: data inizio intervallo di tempo
+   * @param LocalDate end: data fine intervallo di tempo
+   * 
+   * @output List<ShiftEvent>: lista di eventi 
+   */
+  private static List<ShiftEvent> shiftEvents(ShiftType shiftType, Person person, LocalDate start,
+      LocalDate end, String color) {
+
+    final List<ShiftEvent> shiftEvents = new ArrayList<>();
     ShiftEvent event = null;
-    for (ShiftCancelled day : shiftDao.getShiftCancelledByPeriodAndType(start, end, type)) {
+    for (PersonShiftDay day : shiftDao
+        .getPersonShiftDaysByPeriodAndType(start, end, shiftType, person)) {
+
+      /**
+       * Per quanto riguarda gli eventi 'allDay':
+       *
+       * La convensione del fullcalendar è quella di avere il parametro end = null
+       * nel caso di eventi su un singolo giorno, mentre nel caso di evento su più giorni il
+       * parametro end assume il valore del giorno successivo alla fine effettiva
+       * (perchè ne imposta l'orario alla mezzanotte).
+       */
+      if (event == null || event.getShiftSlot() != day.getShiftSlot()
+          || event.getEnd() == null && !event.getStart().plusDays(1).equals(day.date)
+          || event.getEnd() != null && !event.getEnd().equals(day.date)) {
+
+        event = ShiftEvent.builder()
+            .allDay(true)
+            .shiftSlot(day.shiftSlot)
+            .className("removable")
+            .personId(person.id)
+            .title(person.fullName())
+            .start(day.date)
+            .start_orig(day.date)
+            .color(color)
+            .textColor("black")
+            .borderColor("black")
+            .build();
+
+        event.extendTitle(shiftType);
+        shiftEvents.add(event);
+      } else {
+        event.setEnd(day.date.plusDays(1));
+        event.setEnd_orig(day.date);
+      }
+
+    }
+
+    return shiftEvents;
+  }
+
+  private static List<ShiftEvent> absenceEvents(Person person, LocalDate start, LocalDate end) {
+
+    final List<JustifiedTypeName> types = ImmutableList
+        .of(JustifiedTypeName.all_day, JustifiedTypeName.assign_all_day);
+
+    List<Absence> absences = absenceDao
+        .findByPersonAndDate(person, start, Optional.fromNullable(end), Optional.absent()).list()
+        .stream()
+        .filter(absence -> types.contains(absence.justifiedType.name))
+        .sorted(Comparator.comparing(ab -> ab.personDay.date)).collect(Collectors.toList());
+    List<ShiftEvent> events = new ArrayList<>();
+    ShiftEvent event = null;
+
+    for (Absence abs : absences) {
+
+      /**
+       * Per quanto riguarda gli eventi 'allDay':
+       *
+       * La convensione del fullcalendar è quella di avere il parametro end = null
+       * nel caso di eventi su un singolo giorno, mentre nel caso di evento su più giorni il
+       * parametro end assume il valore del giorno successivo alla fine effettiva
+       * (perchè ne imposta l'orario alla mezzanotte).
+       */
+      if (event == null
+          || event.getEnd() == null && !event.getStart().plusDays(1).equals(abs.personDay.date)
+          || event.getEnd() != null && !event.getEnd().equals(abs.personDay.date)) {
+        event = ShiftEvent.builder()
+            .allDay(true)
+            .title("Assenza di " + abs.personDay.person.fullName())
+            .start(abs.personDay.date)
+            .durationEditable(false)
+            .startEditable(false)
+            //.color("#"+Integer.toHexString(myGradient[index].getRGB() & 0xffffff))
+            .build();
+
+        events.add(event);
+      } else {
+        event.setEnd(abs.personDay.date.plusDays(1));
+      }
+
+    }
+
+    return events;
+  }
+
+  private static List<ShiftEvent> shiftCancelledEvent(ShiftType shiftType, LocalDate start,
+      LocalDate end) {
+
+    List<ShiftEvent> events = new ArrayList<>();
+    
+    ShiftEvent event = null;
+    for (ShiftCancelled day : shiftDao.getShiftCancelledByPeriodAndType(start, end, shiftType)) {
       if (event == null || !event.getEnd().plusDays(1).equals(day.date)) {
         
         // Incrementiamo la fine di un giorno per essere coerenti con la gestione delle date del fullcalendar
@@ -155,29 +246,43 @@ public class Calendar extends Controller {
             .allDay(true)
             .start(day.date)
             .start_orig(day.date)
-            .color("#"+Integer.toHexString(myGradient[index].getRGB() & 0xffffff))
+            .rendering("background")
+            .color("red")
             .build();
 
-        event.setCancelledTitle(type);
+        event.setCancelledTitle(shiftType);
         events.add(event);
       } else {
         event.setEnd(day.date);
         event.setEnd_orig(day.date);
       }
     }
-
-    // Usato il jackson per facilitare la serializzazione dei LocalDate
-    renderJSON(mapper.writeValueAsString(events));
+    
+    
+    /*return shiftDao.getShiftCancelledByPeriodAndType(start, end, shiftType).stream()
+        .map(shiftCancelled -> {
+          return ShiftEvent.builder()
+              .allDay(true)
+              .start(shiftCancelled.date)
+              .rendering("background")
+              .color("red")
+              .build();
+        }).collect(Collectors.toList());*/
+    
+    return events;
+    
   }
-
+  
   
   /*
    * Chiamata dal fullCalendar dei turni per ogni evento di drop o resize di un turno sul calendario.
    * Controlla se i nuovi turni possono essere salvati ed eventualmente li salva
    * 
    */
-  public static void changeShift(boolean cancelled, long personId, LocalDate originalStart, LocalDate originalEnd,
-      LocalDate start, LocalDate end) {
+  public static void changeShift(ShiftType shiftType, boolean cancelled, long personId, LocalDate originalStart,
+      LocalDate originalEnd, LocalDate start, LocalDate end) {
+
+    // TODO: 23/05/17 Lo shiftType dev'essere valido e l'utente deve avere i permessi per lavorarci
     log.debug(
         "CHIAMATA LA MODIFICA DEL TURNO: cancelled {} - personId {} - start-orig {} "
             + "- end-orig{} - start {} - end {}", cancelled, personId, originalStart, originalEnd, start, end);
@@ -398,5 +503,21 @@ public class Calendar extends Controller {
           date, type.description);
      }
    }
+  }
+
+  public static void newShift(long personId, LocalDate date, ShiftSlot shiftSlot,
+      ShiftType shiftType) {
+    log.debug("CHIAMATA LA CREAZIONE DEL TURNO: personId {} - day {} - slot {} - shiftType {}",
+        personId, date, shiftSlot, shiftType);
+  }
+
+  public static void removeShift(ShiftType shiftType, long personId, LocalDate start,
+      LocalDate end) {
+    log.debug("CHIAMATA LA REMOVESHIFT: {} {} {} {}", shiftType, personId, start, end);
+
+  }
+
+  public static void cancelShift(ShiftType shiftType, LocalDate date) {
+    log.debug("CHIAMATA LA CANCELSHIFT: {} {}", shiftType, date);
   }
 }

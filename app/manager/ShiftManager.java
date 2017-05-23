@@ -1,10 +1,25 @@
 package manager;
 
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.inject.Inject;
+
+import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
+
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
@@ -18,16 +33,6 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.DateUtility;
-
-import java.awt.Color;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.services.PairStamping;
 import models.CertificatedData;
@@ -44,7 +49,6 @@ import models.ShiftCategories;
 import models.ShiftType;
 import models.UsersRolesOffices;
 import models.absences.Absence;
-import models.dto.ShiftEvent;
 import models.enumerate.ShiftSlot;
 import models.exports.AbsenceShiftPeriod;
 import models.exports.ShiftPeriod;
@@ -57,10 +61,6 @@ import net.fortuna.ical4j.model.property.CalScale;
 import net.fortuna.ical4j.model.property.ProdId;
 import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.Version;
-
-import org.jcolorbrewer.ColorBrewer;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 import play.db.jpa.JPA;
 import play.i18n.Messages;
 

@@ -1435,6 +1435,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 				if (copiedEventObject.end == null) {copiedEventObject.end = copiedEventObject.start;}		
 				var month = parseInt(copiedEventObject.start.stripTime().format().substring(5,7));
 				//console.log("month: "+month);
+				
 				/* Qui va messo un controllo che prende da epas se per il mese in cui si vuole cambiare la configurazione dei turni
 				 * sono già stati inviati gli attestati. La logica è che la modifica alla configurazione dei turni deve essere possibile
 				 * solo se le info sui turni non sono già state inviate ad attestati.
@@ -1464,7 +1465,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 						}
 
 						// check for absences
-						if (val.id.toString().match(/assenza/g) && val.personId.toString() == copiedEventObject.personId.toString()) {
+/*						if (val.id.toString().match(/assenza/g) && val.personId.toString() == copiedEventObject.personId.toString()) {
 							if ((valStart == cEOStart) || (cEOStart >= valStart && cEOStart <= valEnd)) {
 								alert("ERRORE! \nIl turnista e' in ferie!!!");
 								jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
@@ -1481,7 +1482,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 									jQuery('#calendar').fullCalendar('removeEvents', copiedEventObject.id);
 								}
 							}
-						}
+						}*/
 
 						// Check that the jolly person doesn't cover two or more shifts
 						if ( (valStart <= cEOStart) && (cEOStart <= valEnd) && (cEOEnd <= valEnd) && (cEOEnd >= valStart) && (val.personId == copiedEventObject.personId) && (val.shiftType != copiedEventObject.shiftType)  && (!copiedEventObject.id.toString().match(/annullato/g))) {
@@ -1766,17 +1767,16 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 					alert ('ERRORE!\nNon e possibile modificare i turni del mese precedente a quello visualizzato.');
 					revertFunc();
 				} else {
-					// check if absences and shift  of a certain person overlap
+/*					// check if absences and shift  of a certain person overlap
 					var obj = $('#calendar').fullCalendar('clientEvents');
-					//ar eventStart = $.fullCalendar.formatDate(event.start, "yyyy-MM-dd");
-					//var eventEnd = $.fullCalendar.formatDate(event.end, "yyyy-MM-dd");
+
 					var eventStart = $.fullCalendar.moment(event.start).format("YYYY-MM-DD");
 					var eventEnd = $.fullCalendar.moment(event.end).format("YYYY-MM-DD");
+					
 					jQuery.each(obj, function(i, val) {
-						//var valStart = $.fullCalendar.formatDate(val.start, "yyyy-MM-dd");
-						//var valEnd = $.fullCalendar.formatDate(val.end, "yyyy-MM-dd");
 						var valStart = $.fullCalendar.moment(val.start).format("YYYY-MM-DD");
 						var valEnd = $.fullCalendar.moment(val.end).format("YYYY-MM-DD");
+						
 						if ((eventEnd >= valStart) && (eventStart < valStart) && (val.id.toString() != event.id.toString())) {
 							if (val.id.toString().match(/turno/g) && (val.shiftType.toString() == event.shiftType.toString())) {
 								if (val.shiftHour.toString() === event.shiftHour.toString()) {
@@ -1792,7 +1792,7 @@ function createCalendarShiftAdmin(allowed, shiftType, shiftCalObj, shiftGrpObj) 
 								revertFunc();
 							}
 						}
-					});
+					});*/
 				}
 			}, // end eventResize
 
