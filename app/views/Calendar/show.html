@@ -29,6 +29,7 @@
             data-event='{"title": "${person.fullname}",
                      "allDay": "true",
                      "personId" : "${person.id}",
+                     "className": "removable",
                      "color": "purple" }'>
             ${person.fullname}
         </li>
@@ -56,7 +57,7 @@
      data-calendar-drop="@{changeShift()}"
      data-calendar-external-drop="@{newShift()}"
      data-calendar-event-remove="@{removeShift()}"
-     data-calendar-click="#"
+     data-calendar-click="@{cancelShift()}"
      #{/secure.check}>
 </div>
 
