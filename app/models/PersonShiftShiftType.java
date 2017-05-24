@@ -5,6 +5,9 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import com.google.common.collect.Range;
 
 import models.base.BaseModel;
 
@@ -42,6 +45,20 @@ public class PersonShiftShiftType extends BaseModel {
 
   @Column(name = "end_date")
   public LocalDate endDate;
-  
+
   public boolean jolly;
+
+  @Transient
+  public Range<LocalDate> dateRange() {
+    if (beginDate == null && endDate == null) {
+      return Range.all();
+    }
+    if (beginDate == null) {
+      return Range.atMost(endDate);
+    }
+    if (endDate == null) {
+      return Range.atLeast(beginDate);
+    }
+    return Range.closed(beginDate, endDate);
+  }
 }

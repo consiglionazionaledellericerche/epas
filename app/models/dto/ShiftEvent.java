@@ -39,35 +39,11 @@ public class ShiftEvent {
   private String textColor;
 
   // CAMPI CUSTOM
-  private long personId;
+  private long personShiftDayId;
   private Boolean cancelled;
   private ShiftSlot shiftSlot;
   
-  // Campi extra che servono per riuscire a passare indietro al server (dal calendario),
-  // le vecchie date al quale fa riferimento l'evento in seguito a una sua modifica
-  private LocalDate start_orig;
-  private LocalDate end_orig;
-
-  private static String timeFormatted = "HH:mm";
-
-  public void extendTitle(ShiftType type) {
-    switch (shiftSlot) {
-      case MORNING:
-        title =
-            type.shiftTimeTable.startMorning.toString(timeFormatted) + " - "
-                + type.shiftTimeTable.endMorning.toString(timeFormatted) + "\n" + title;
-        break;
-      case AFTERNOON:
-        title =
-            type.shiftTimeTable.startAfternoon.toString(timeFormatted) + " - "
-                + type.shiftTimeTable.endAfternoon.toString(timeFormatted) + "\n" + title;
-        break;
-      default:
-        break;
-    }
-  }
-
-  
+     
   // TODO: a regime vedere se farne una unica 
   // per tutti gli eventi
   public void setCancelledTitle (ShiftType type) {
