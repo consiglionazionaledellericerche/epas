@@ -8,6 +8,13 @@
 <link rel="stylesheet" media="print"
       href="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.print.css">
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.css">
+*{
+<style>
+.fc-highlight { /* when user is selecting cells */
+	background: red;
+	opacity: .3;
+}
+</style>}*
 #{/set}
 
 <!-- Switcher delle attività di turno-->
@@ -28,8 +35,8 @@
             data-draggable
             data-event='{"title": "${person.fullname}",
                      "allDay": "true",
+                     "url": "@{deletePersonShiftDayId()}",
                      "personId" : "${person.id}",
-                     "className": "removable",
                      "color": "purple" }'>
             ${person.fullname}
         </li>
@@ -53,11 +60,10 @@
      data-calendar
      data-calendar-source="@{events()}"
      #{secure.check 'Calendar.changeShift'}
-     data-calendar-resize="@{changeShift()}"
-     data-calendar-drop="@{changeShift()}"
-     data-calendar-external-drop="@{newShift()}"
-     data-calendar-event-remove="@{removeShift()}"
-     data-calendar-click="@{cancelShift()}"
+     	data-calendar-drop="@{changeShift()}"
+     	data-calendar-external-drop="@{newShift()}"
+     	data-calendar-click="@{cancelShift()}"
+     	data-calendar-date=${date}
      #{/secure.check}>
 </div>
 

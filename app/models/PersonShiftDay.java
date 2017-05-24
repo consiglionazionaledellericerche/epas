@@ -7,6 +7,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import models.base.BaseModel;
 import models.enumerate.ShiftSlot;
@@ -42,5 +43,25 @@ public class PersonShiftDay extends BaseModel {
 
   public void setShiftSlot(ShiftSlot shiftSlot) {
     this.shiftSlot = shiftSlot;
+  }
+  
+  
+  
+  @Transient
+  public String getSlotTime(){
+    String timeFormatted = "HH:mm";
+    switch (shiftSlot) {
+      case MORNING:
+        return 
+            shiftType.shiftTimeTable.startMorning.toString(timeFormatted) + " - "
+                + shiftType.shiftTimeTable.endMorning.toString(timeFormatted);
+        
+      case AFTERNOON:
+        return shiftType.shiftTimeTable.startAfternoon.toString(timeFormatted) + " - "
+                + shiftType.shiftTimeTable.endAfternoon.toString(timeFormatted);
+        
+      default:
+        return null;
+    }
   }
 }
