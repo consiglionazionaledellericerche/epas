@@ -82,22 +82,13 @@ public class Calendar extends Controller {
         .collect(Collectors.toList());
 
     final ShiftType activitySelected = activity.id != null ? activity : activities.get(0);
-    Integer year = Integer.valueOf(session.get("yearSelected"));
-    Integer month = Integer.valueOf(session.get("monthSelected"));
-    Integer day = Integer.valueOf(session.get("daySelected"));
-    final LocalDate date ;
-    if (year != null && month != null && day != null) {
-      date = new LocalDate(year, month, day); 
-    } else {
-      date = LocalDate.now();
-    }   
     
     List<Person> people = activitySelected.personShiftShiftTypes.stream()
-        .filter(personShiftShiftType -> personShiftShiftType.dateRange().contains(date))
+        .filter(personShiftShiftType -> personShiftShiftType.dateRange().contains(LocalDate.now()))
         .map(personShiftShiftType -> personShiftShiftType.personShift.person )
         .collect(Collectors.toList());
 
-    render(activities, activitySelected, people, date);
+    render(activities, activitySelected, people);
   }
 
 
@@ -111,24 +102,23 @@ public class Calendar extends Controller {
 
     List<ShiftEvent> events = new ArrayList<>();
 
-    List<PersonShift> people = shiftType.personShiftShiftTypes.stream()
-        .map(personShiftShiftType -> personShiftShiftType.personShift).collect(Collectors.toList());
+    List<Person> people = shiftType.personShiftShiftTypes.stream()
+        .filter(personShiftShiftType -> personShiftShiftType.dateRange().contains(start))
+        .map(personShiftShiftType -> personShiftShiftType.personShift.person )
+        .collect(Collectors.toList());
 
     int index = 0;
 
     ColorBrewer sequentialPalettes = ColorBrewer.valueOf("YlOrBr");
     Color[] myGradient = sequentialPalettes.getColorPalette(11);
-
+    
     // prende i turni associati alle persone attive in quel turno
-    for (PersonShift person : people) {
+    for (Person person : people) {
       final String color = "#" + Integer.toHexString(myGradient[index].getRGB() & 0xffffff);
-      events.addAll(shiftEvents(shiftType, person.person, start, end, color));
-      events.addAll(absenceEvents(person.person, start, end));
-
+      events.addAll(shiftEvents(shiftType, person, start, end, color));
+      events.addAll(absenceEvents(person, start, end));
       index++;
     }
-
-    events.addAll(shiftCancelledEvent(shiftType, start, end));
 
     // Usato il jackson per facilitare la serializzazione dei LocalDate
     renderJSON(mapper.writeValueAsString(events));
@@ -159,7 +149,7 @@ public class Calendar extends Controller {
               .title(shiftDay.getSlotTime() + '\n' + person.fullName())
               .start(shiftDay.date)
               .color(color)
-              .url(Router.reverse("Calendar.deletePersonShiftDayId").url)
+              .className("removable")
               .textColor("black")
               .borderColor("black")
               .build();
@@ -167,7 +157,7 @@ public class Calendar extends Controller {
         }).collect(Collectors.toList());
   }
   
-  public static void deletePersonShiftDayId(PersonShiftDay psd) {
+  public static void deleteShift(PersonShiftDay psd) {
     log.debug("lol");
     notFoundIfNull(psd);
     response.status = Http.StatusCode.BAD_REQUEST;
@@ -222,50 +212,6 @@ public class Calendar extends Controller {
     return events;
   }
 
-  private static List<ShiftEvent> shiftCancelledEvent(ShiftType shiftType, LocalDate start,
-      LocalDate end) {
-
-    List<ShiftEvent> events = new ArrayList<>();
-
-    ShiftEvent event = null;
-    for (ShiftCancelled day : shiftDao.getShiftCancelledByPeriodAndType(start, end, shiftType)) {
-      if (event == null || !event.getEnd().plusDays(1).equals(day.date)) {
-
-        // Incrementiamo la fine di un giorno per essere coerenti con la gestione delle date del fullcalendar
-        if(event != null && event.getEnd() != null) {
-          event.setEnd(event.getEnd().plusDays(1));
-        }
-
-        event = ShiftEvent.builder()
-            .cancelled(true)
-            .allDay(true)
-            .start(day.date)
-            .rendering("background")
-            .color("red")
-            .build();
-
-        event.setCancelledTitle(shiftType);
-        events.add(event);
-      } else {
-        event.setEnd(day.date);
-
-      }
-    }
-
-
-    /*return shiftDao.getShiftCancelledByPeriodAndType(start, end, shiftType).stream()
-        .map(shiftCancelled -> {
-          return ShiftEvent.builder()
-              .allDay(true)
-              .start(shiftCancelled.date)
-              .rendering("background")
-              .color("red")
-              .build();
-        }).collect(Collectors.toList());*/
-
-    return events;
-
-  }
 
 
   /*
@@ -437,65 +383,6 @@ public class Calendar extends Controller {
     return msg;
   }
 
-
-  /*
-   * Cancella una lista di personShiftDays dal DB
-   */
-  private static void cancShifts(List<PersonShiftDay> personShiftDays) {
-    for (PersonShiftDay personShiftDay: personShiftDays) {
-      shiftDao.deletePersonShiftDay(personShiftDay);
-      log.info("Cancellato PersonShiftDay = {} con {}\n",
-          personShiftDay, personShiftDay.personShift.person);
-    }
-  }
-
-
-  /*
-   * Cancella una lista di personShiftDays dal DB
-   */
-  private static void cancDeletedShifts(LocalDate start, LocalDate end, ShiftType type) {
-    LocalDate day = start;
-    while (day.isBefore(end.plusDays(1))) {
-      long cancelled = shiftDao.deleteShiftCancelled(type, day);
-      if (cancelled == 1) {
-        log.info("Rimosso turno cancellato di tipo {} del giorno {}",
-            type.description, day);
-      }
-    }
-  }
-
-
-  /*
-   * Salva una lista di personShiftDays dal DB
-   */
-  private static void saveShifts(List<PersonShiftDay> personShiftDays) {
-    for (PersonShiftDay personShiftDay: personShiftDays) {
-      personShiftDay.save();
-      log.info("Aggiornato PersonShiftDay = {} con {}\n",
-          personShiftDay, personShiftDay.personShift.person);
-    }
-
-  }
-
-
-  /*
-   * Crea e salva una lista di CancelledShift dal DB
-   */
-  private static void saveDeletedShifts(LocalDate start, LocalDate end, ShiftType type) {
-    LocalDate day = start;
-    while (day.isBefore(end.plusDays(1))) {
-      for (LocalDate date = start; !date.isAfter(end); date.plusDays(1)) {
-        ShiftCancelled shiftCancelled = new ShiftCancelled();
-        shiftCancelled.date = date;
-        shiftCancelled.type = type;
-
-        shiftCancelled.save();
-        log.debug("Creato un nuovo ShiftCancelled per day = {}, shiftType = {}",
-            date, type.description);
-      }
-    }
-  }
-
   public static void newShift(long personId, LocalDate date, ShiftSlot shiftSlot,
       ShiftType shiftType) {
     log.debug("CHIAMATA LA CREAZIONE DEL TURNO: personId {} - day {} - slot {} - shiftType {}",
@@ -507,13 +394,5 @@ public class Calendar extends Controller {
     renderJSON(new Random().nextLong());
   }
 
-  public static void removeShift(ShiftType shiftType, long personId, LocalDate start,
-      LocalDate end) {
-    log.debug("CHIAMATA LA REMOVESHIFT: {} {} {} {}", shiftType, personId, start, end);
 
-  }
-
-  public static void cancelShift(ShiftType shiftType, LocalDate date) {
-    log.debug("CHIAMATA LA CANCELSHIFT: {} {}", shiftType, date);
-  }
 }
