@@ -6,6 +6,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -13,6 +14,9 @@ import models.base.BaseModel;
 import models.enumerate.ShiftSlot;
 
 import org.joda.time.LocalDate;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "person_shift_days")
@@ -44,6 +48,10 @@ public class PersonShiftDay extends BaseModel {
   public void setShiftSlot(ShiftSlot shiftSlot) {
     this.shiftSlot = shiftSlot;
   }
+  
+  //  Nuova relazione con gli errori associati ai personShiftDay
+  @OneToMany(mappedBy = "personShiftDay")
+  public List<PersonShiftDayInTrouble> troubles = new ArrayList<>();
   
   
   
