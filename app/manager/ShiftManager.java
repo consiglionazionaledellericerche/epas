@@ -50,6 +50,7 @@ import models.ShiftType;
 import models.UsersRolesOffices;
 import models.absences.Absence;
 import models.enumerate.ShiftSlot;
+import models.enumerate.Troubles;
 import models.exports.AbsenceShiftPeriod;
 import models.exports.ShiftPeriod;
 import models.exports.ShiftPeriods;
@@ -217,7 +218,7 @@ public class ShiftManager {
               updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thAbsences, personDay.get().date.toString("dd MMM"));
             }
 
-          } else if (personDay.get().stampings.isEmpty()) {
+          } else if (personDay.get().hasError(Troubles.NO_ABS_NO_STAMP)) {//else if (personDay.get().stampings.isEmpty()) {
             // check no stampings
             //-----------------------------
             log.info("Il turno di {} {} e' incompatibile con la sue mancate timbrature nel "
