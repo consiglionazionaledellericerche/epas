@@ -750,11 +750,11 @@ public class PersonDayManager {
    */
   public boolean isValidDay(PersonDay personDay, IWrapperPersonDay pd) {
     if (// non deve essere festivo
-        !personDay.isHoliday
+        personDay.isHoliday
         // le assenze non devono essere giornaliere 
-        && !isAllDayAbsences(personDay)
+        || isAllDayAbsences(personDay)
         // Il tempo a lavoro non è almeno la metà di quello previsto
-        && personDay.timeAtWork < (pd.getWorkingTimeTypeDay().get().getWorkingTime() / 2)) {
+        || personDay.timeAtWork < (pd.getWorkingTimeTypeDay().get().getWorkingTime() / 2)) {
       return false;
     }
     return true;

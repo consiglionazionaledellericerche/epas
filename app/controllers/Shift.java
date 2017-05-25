@@ -142,6 +142,7 @@ public class Shift extends Controller {
     render(shiftTimeTable);
 
   }
+  
 
   /**
    * Get shifts from the DB and render to the sistorg portal calendar.
@@ -272,7 +273,7 @@ public class Shift extends Controller {
         .nullsFirst(String::compareToIgnoreCase); 
 
 
-    //  Used TreeBasedTable becouse of the alphabetical name order (persona, A/B, num. giorni)
+    //  Used TreeBasedTable because of the alphabetical name order (persona, A/B, num. giorni)
     Table<Person, String, Integer> personsShiftsWorkedDays =
         TreeBasedTable.<Person, String, Integer>create(
             Person.personComparator(), nullSafeStringComparator);
@@ -280,8 +281,7 @@ public class Shift extends Controller {
     // crea la tabella per registrare le assenze e le timbrature inconsistenti con i turni trovati
     // (person, [thAbsences, thNoStampings, thBadStampings], <giorni/fasce orarie inconsistenti>)
     Table<Person, String, List<String>> personsShiftInconsistentAbsences =
-        TreeBasedTable.<Person, String, List<String>>create(
-            Person.personComparator(), nullSafeStringComparator);
+        TreeBasedTable.<Person, String, List<String>>create(Person.personComparator(), nullSafeStringComparator);
 
     // Contains the number of the effective hours of worked shifts
     Table<Person, String, Integer> totalPersonShiftWorkedTime =
@@ -313,15 +313,11 @@ public class Shift extends Controller {
       log.debug("CALCOLA IL NUM DI GIORNI EFFETTUATI NEL TURNO PER OGNI PERSONA");
       // conta e memorizza i giorni di turno per ogni persona
       shiftManager.countPersonsShiftsDays(personsShiftDays, personsShiftsWorkedDays);
-      log.debug("* Num di persone nella personsShiftsWorkedDays = {}", 
-          personsShiftsWorkedDays.rowKeySet().size());
-
+      log.debug("* Num di persone nella personsShiftsWorkedDays = {}", personsShiftsWorkedDays.rowKeySet().size());
 
       // Memorizzo le inconsistenze del turno
-      log.debug("Chiamo la getShiftInconsistencyTimestampTable PER TROVARE LE INCONSISTENZE "
-          + "del turno %s e memorizzarle", type);
-      shiftManager.getShiftInconsistencyTimestampTable(
-          personsShiftDays, personsShiftInconsistentAbsences, shiftType);
+      log.debug("Chiamo la getShiftInconsistencyTimestampTable PER TROVARE LE INCONSISTENZE del turno %s e memorizzarle", type);
+      shiftManager.getShiftInconsistencyTimestampTable(personsShiftDays, personsShiftInconsistentAbsences, shiftType);
       log.debug("* Num di persone nella personsShiftInconsistentAbsences = {}", 
           personsShiftInconsistentAbsences.rowKeySet().size());
     }
@@ -331,7 +327,8 @@ public class Shift extends Controller {
         + "in totalShiftSumHours");
 
 
-    // Calcola i giorni totali di turno effettuati e le eventuali ore mancanti
+    // Calcola i giorni totali di turno effettuati e le eventuali ore mancanti e li mette in 
+    // personsShiftInconsistentAbsences
     totalPersonShiftWorkedTime =
         shiftManager.calcShiftWorkedDaysAndLackTime(
             personsShiftsWorkedDays, personsShiftInconsistentAbsences);
@@ -356,9 +353,10 @@ public class Shift extends Controller {
 
     List<String> thInconsistence =
         Arrays.asList(
-            Messages.get("PDFReport.thAbsences"), Messages.get("PDFReport.thNoStampings"),
-            Messages.get("PDFReport.thMissingTime"), Messages.get("PDFReport.thBadStampings"),
-            Messages.get("PDFReport.thMissions"), Messages.get("PDFReport.thIncompleteTime"),
+            Messages.get("PDFReport.thAbsences"), Messages.get("PDFReport.thMissions"),
+            Messages.get("PDFReport.thNoStampings"), Messages.get("PDFReport.thBadWorkindDay"),       
+             Messages.get("PDFReport.thBadStampings"), Messages.get("PDFReport.thMissingTime"),
+             Messages.get("PDFReport.thIncompleteTime"),
             Messages.get("PDFReport.thWarnStampings"));
     List<String> thShift =
         Arrays.asList(
@@ -379,7 +377,7 @@ public class Shift extends Controller {
 
 
   /**
-   * Crea il file PDF con il calendario mensile dei turni di tipo 'A, B' per il mese
+   * Crea il file PDF corrispondente al calendario mensile dei turni di tipo 'A, B' per il mese
    * 'month' dell'anno 'year'. (portale sistorg).
    *
    * @author arianna
