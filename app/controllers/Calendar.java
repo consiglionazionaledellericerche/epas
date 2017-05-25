@@ -45,6 +45,8 @@ import org.apache.poi.ss.formula.functions.Now;
 import models.enumerate.ShiftSlot;
 import org.jcolorbrewer.ColorBrewer;
 import org.joda.time.LocalDate;
+import org.joda.time.ReadablePeriod;
+
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
@@ -287,8 +289,6 @@ public class Calendar extends Controller {
         "CHIAMATA LA MODIFICA DEL TURNO: cancelled {} - personId {} - start-orig {} "
             + "- end-orig{} - start {} - end {}", cancelled, personId, originalStart, originalEnd, start, end);
     
-    final ShiftType type = ShiftType.findById(Long.parseLong(session.get("currentShiftActivity")));
-    
     final Person person = personDao.getPersonById(personId);
     if (person == null) {
       badRequest("Parametri mancanti: person = {} " + person);
@@ -296,38 +296,24 @@ public class Calendar extends Controller {
     
     List<String> errors = new ArrayList<>();
 
-    // se il turno è cancellato non può essere sovrapposto a turni esistenti
-    if (cancelled) {
-      LocalDate day = start;
-      while (day.isBefore(end.plusDays(1))) {
-        List<PersonShiftDay> newDays = shiftDao.getShiftDaysByPeriodAndType(day, day, type);
-        if (!newDays.isEmpty()) {
-          String msg = "Turno già esistente nel giorno " + day.toString("dd MMM") + "\n";
-          errors.add(msg);
-        }  
-      }
-      
-      // se non ci sono stati errori cancella i turni vecchi e salva i nuovi
-      if (errors.isEmpty()) {
-        cancDeletedShifts(start, end, type);
-        saveDeletedShifts(start, end, type);
-      } else {
-        String error = errors.toString();
-        response.status = Http.StatusCode.BAD_REQUEST;
-        renderText(error);
-      }
-      
-    } else {
 
-      List<PersonShiftDay> newEvents = new ArrayList<>();
-      List<PersonShiftDay> oldEvents = new ArrayList<>();
-      
-      // per ogni turno che voglio modificare controllo se è compatibile con la nuova data
-      oldEvents = shiftDao.getPersonShiftDaysByPeriodAndType(originalStart, originalEnd, type, person);
-      LocalDate currDate = originalStart;
-      while (currDate.isBefore(originalEnd.plusDays(1))) {
+    List<PersonShiftDay> newEvents = new ArrayList<>();
+    List<PersonShiftDay> oldEvents = new ArrayList<>();
+    
+    // prende le date dei vecchi eventi
+    LocalDate oldDate = originalStart;
+    List<LocalDate> oldDates = new ArrayList<>();
+    while (oldDate.isBefore(originalEnd.plusDays(1))) {
+      oldDates.add(oldDate);
+    }
+    
+    LocalDate currDate = start;
+    while (currDate.isBefore(end.plusDays(1))) {
+  
+      // controllo il nuovo evento solo se è una nuova posizione nel calendario
+      if (!oldDates.contains(currDate)) {
         // TODO: è unico vero?
-        PersonShiftDay oldEvent = shiftDao.getPersonShiftDaysByPeriodAndType(currDate, currDate, type, person).get(0);
+        PersonShiftDay oldEvent = shiftDao.getPersonShiftDaysByPeriodAndType(currDate, currDate, shiftType, person).get(0);
    
         List<String> messages = new ArrayList<>();
         messages = checkShiftDay(oldEvent, currDate);
@@ -338,19 +324,20 @@ public class Calendar extends Controller {
            oldEvent.date = currDate;
            newEvents.add(oldEvent);
         }
-      } 
-      
-      // se non ci sono stati errori cancella i turni vecchi e salva i nuovi
-      if (errors.isEmpty()) {
-        cancShifts(oldEvents);
-        saveShifts(newEvents);
-      } else {
-        String error = errors.toString();
-        response.status = Http.StatusCode.BAD_REQUEST;
-        renderText(error);
       }
-      
+        
+    } 
+    
+    // se non ci sono stati errori cancella i turni vecchi e salva i nuovi
+    if (errors.isEmpty()) {
+      cancShifts(oldEvents);
+      saveShifts(newEvents);
+    } else {
+      String error = errors.toString();
+      response.status = Http.StatusCode.BAD_REQUEST;
+      renderText(error);
     }
+      
   }
   
   
@@ -487,23 +474,7 @@ public class Calendar extends Controller {
   }
   
   
-  /*
-   * Crea e salva una lista di CancelledShift dal DB
-   */
-  private static void saveDeletedShifts(LocalDate start, LocalDate end, ShiftType type) {
-    LocalDate day = start;
-    while (day.isBefore(end.plusDays(1))) {
-    for (LocalDate date = start; !date.isAfter(end); date.plusDays(1)) {
-      ShiftCancelled shiftCancelled = new ShiftCancelled();
-      shiftCancelled.date = date;
-      shiftCancelled.type = type;
 
-      shiftCancelled.save();
-      log.debug("Creato un nuovo ShiftCancelled per day = {}, shiftType = {}",
-          date, type.description);
-     }
-   }
-  }
 
   public static void newShift(long personId, LocalDate date, ShiftSlot shiftSlot,
       ShiftType shiftType) {
