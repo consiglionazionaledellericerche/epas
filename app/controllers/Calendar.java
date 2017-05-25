@@ -33,7 +33,6 @@ import models.enumerate.ShiftSlot;
 
 import org.jcolorbrewer.ColorBrewer;
 import org.joda.time.LocalDate;
-
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Router;
@@ -222,7 +221,12 @@ public class Calendar extends Controller {
   public static void changeShift(long personShiftDayId, LocalDate newDate) {
 
     // TODO: 23/05/17 Lo shiftType dev'essere valido e l'utente deve avere i permessi per lavorarci
+
     log.debug("Chiamato metodo changeShift: personShiftDayId {} - newDate {} ", personShiftDayId, newDate);
+  
+      
+    List<String> errors = new ArrayList<>();
+
 
     //    final ShiftType type = ShiftType.findById(Long.parseLong(session.get("currentShiftActivity")));
     //    
@@ -288,6 +292,50 @@ public class Calendar extends Controller {
     //      }
     //      
     //    }
+//=======
+//
+//    List<PersonShiftDay> newEvents = new ArrayList<>();
+//    List<PersonShiftDay> oldEvents = new ArrayList<>();
+//    
+//    // prende le date dei vecchi eventi
+//    LocalDate oldDate = originalStart;
+//    List<LocalDate> oldDates = new ArrayList<>();
+//    while (oldDate.isBefore(originalEnd.plusDays(1))) {
+//      oldDates.add(oldDate);
+//    }
+//    
+//    LocalDate currDate = start;
+//    while (currDate.isBefore(end.plusDays(1))) {
+//  
+//      // controllo il nuovo evento solo se è una nuova posizione nel calendario
+//      if (!oldDates.contains(currDate)) {
+//        // TODO: è unico vero?
+//        PersonShiftDay oldEvent = shiftDao.getPersonShiftDaysByPeriodAndType(currDate, currDate, shiftType, person).get(0);
+//   
+//        List<String> messages = new ArrayList<>();
+//        messages = checkShiftDay(oldEvent, currDate);
+//        if (!messages.isEmpty()) {
+//          errors.addAll(messages);
+//        } else if (errors.isEmpty()) {   
+//           // se non ci sono stati errori salvo il nuovo evento
+//           oldEvent.date = currDate;
+//           newEvents.add(oldEvent);
+//        }
+//      }
+//        
+//    } 
+//    
+//    // se non ci sono stati errori cancella i turni vecchi e salva i nuovi
+//    if (errors.isEmpty()) {
+//      cancShifts(oldEvents);
+//      saveShifts(newEvents);
+//    } else {
+//      String error = errors.toString();
+//      response.status = Http.StatusCode.BAD_REQUEST;
+//      renderText(error);
+//    }
+//      
+//>>>>>>> refs/heads/calendar-refactor
   }
 
 
@@ -380,8 +428,39 @@ public class Calendar extends Controller {
       }
     }
 
+    
     return msg;
   }
+  
+  
+  /*
+   * Cancella una lista di personShiftDays dal DB
+   */
+  private static void cancShifts(List<PersonShiftDay> personShiftDays) {
+    for (PersonShiftDay personShiftDay: personShiftDays) {
+      shiftDao.deletePersonShiftDay(personShiftDay);
+      log.info("Cancellato PersonShiftDay = {} con {}\n",
+          personShiftDay, personShiftDay.personShift.person);
+    }
+  }
+  
+  
+  /*
+   * Cancella una lista di personShiftDays dal DB
+   */
+  private static void cancDeletedShifts(LocalDate start, LocalDate end, ShiftType type) {
+    LocalDate day = start;
+    while (day.isBefore(end.plusDays(1))) {
+      long cancelled = shiftDao.deleteShiftCancelled(type, day);
+      if (cancelled == 1) {
+        log.info("Rimosso turno cancellato di tipo {} del giorno {}",
+            type.description, day);
+      }
+    }
+  }
+  
+  
+
 
   public static void newShift(long personId, LocalDate date, ShiftSlot shiftSlot,
       ShiftType shiftType) {
