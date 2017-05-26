@@ -15,11 +15,9 @@ import dao.PersonShiftDayDao;
 import dao.ShiftDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -35,7 +33,6 @@ import models.absences.JustifiedType.JustifiedTypeName;
 import models.dto.ShiftEvent;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
-import org.jcolorbrewer.ColorBrewer;
 import org.joda.time.LocalDate;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -96,21 +93,21 @@ public class Calendar extends Controller {
       people = new ArrayList<>();
     }
 
-  List<ShiftEvent> eventPeople = new ArrayList<>();
+    List<ShiftEvent> eventPeople = new ArrayList<>();
     int index = 0;
 
-    for(Person person: people) {
+    for (Person person : people) {
       final ShiftEvent event = ShiftEvent.builder()
           .allDay(true)
           .title(person.fullName())
           .personId(person.id)
-          .color(EventColor.values()[index%EventColor.values().length].backgroundColor)
-          .textColor(EventColor.values()[index%EventColor.values().length].textColor)
+          .color(EventColor.values()[index % EventColor.values().length].backgroundColor)
+          .textColor(EventColor.values()[index % EventColor.values().length].textColor)
           .className("removable")
           .build();
 
       eventPeople.add(event);
-        index++;
+      index++;
     }
 
     render(eventPeople);
@@ -135,11 +132,9 @@ public class Calendar extends Controller {
 
     int index = 0;
 
-
-
     // prende i turni associati alle persone attive in quel turno
     for (Person person : people) {
-      EventColor color = EventColor.values()[index%EventColor.values().length];
+      EventColor color = EventColor.values()[index % EventColor.values().length];
 
       events.addAll(shiftEvents(shiftType, person, start, end, color));
       events.addAll(absenceEvents(person, start, end));
