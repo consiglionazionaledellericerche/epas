@@ -305,6 +305,17 @@ PDFReport.thLackTime=Ore mancanti
 PDFReport.thMissingTime=Orario insufficiente
 PDFReport.thWarnStampings=Orario incompleto fuori tolleranza
 
+calendar.ShiftToubles.PERSON_IS_ABSENT=Il turnista è assente nel giorno %d
+calendar.ShiftToubles.NOT_ENOUGH_WORKING_TIME=Orario incompleto nel giorno %d
+
+calendar.Troubles.NO_ABS_NO_STAMP=Timbrature assenti nel giorno %d
+calendar.Troubles.UNCOUPLED_WORKING=Timbrature disaccoppiate nel giorno %d
+calendar.Troubles.NOT_ENOUGH_WORKTIME=Tempo di lavoro insufficiente il %d
+
+calendar.CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED=Slot del turno già assegnato il %d
+calendar.CalendarShiftTroubles.PERSON_SHIFT_ASSIGNED.La persona è già in turno il %d
+
+
 peopleIds=Persone associabili all'attività
 
 person.badgeNumber=Numero Badge
