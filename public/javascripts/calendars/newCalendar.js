@@ -149,3 +149,8 @@ $(document).ready(function() {
     revertDuration: 0 
   });
 });
+
+function getCurrentViewDate(input) {
+  var currentViewDate = $('[data-calendar]').fullCalendar('getView').intervalStart.format();
+  $(input).val(currentViewDate);
+}

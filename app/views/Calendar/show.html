@@ -8,15 +8,15 @@
 <link rel="stylesheet" media="print"
       href="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.print.css">
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.css">
-
 #{/set}
 
 <!-- Switcher delle attività di turno-->
 #{title title:'Test sul calendario' /}
 <div class="row">
     <div class="col-sm-6 col-sm-offset-3">
-        #{form action:@Calendar.show(), method:'POST', class:'form form-horizontal auto-submit',
-        onChange:'this.form.submit()' }
+        #{form action:@Calendar.show(), method:'POST', class:'form form-horizontal',
+        onChange:"getCurrentViewDate('#date'); this.submit();" }
+        #{f.hidden 'date' /}
         #{f.selectModel 'activity', items:activities, value: activitySelected /}
         #{/form}
     </div>
@@ -56,6 +56,7 @@
      	data-calendar-drop="@{changeShift()}"
      	data-calendar-external-drop="@{newShift()}"
      	data-calendar-event-remove="@{deleteShift()}"
+      data-calendar-date="${currentDate}"
      #{/secure.check}>
 </div>
 
