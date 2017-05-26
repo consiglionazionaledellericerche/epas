@@ -255,94 +255,47 @@ public class ShiftManager {
 
         } else {
           log.debug("E' un giorno valido!");
-          // check for mission 
-          //--------------------------------------------------
-          if (personDayManager.isOnMission(personDay.get())) {
-            // check for missions
-            log.info("Il turno di {} {} e' coincidente con una missione il giorno {}", person.name,
-                person.surname, personShiftDay.date);
-            updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thMissions,
-                personDay.get().date.toString("dd MMM"));
-          } else {
-            // check consistent stampings
-            //----------------------------
+          // check consistent stampings
+          //----------------------------
 
+          // get the working time parameters in the shift period (worked and missed time during the shift period )
 
-            /*// legge le coppie di timbrature valide
-            List<PairStamping> pairStampings = personDayManager.getValidPairStampings(personDay.get().stampings);
->>>>>>> refs/heads/453-nuovo-sistema-di-gestione-turni-in-epas
-            //FIXME: bisognerebbe prima fare una verifica su quale tipo di tolleranza è presente per l'attività (entrata, uscita, entrambe)
-            // dopo di che in questo caso specifico CREDO debba essere verificata, se presente, la tolleranza sull'entrata
-            if ((personDay.get().stampings.size() == 1)
-                && (
-                (personDay.get().stampings.get(0).isIn() && personDay.get().stampings.get(0).date
-                    .toLocalTime().isAfter(startShift.plusMinutes(shiftType.entranceTolerance)))
-                    || (personDay.get().stampings.get(0).isOut() && personDay.get().stampings
-                    .get(0).date.toLocalTime()
-                    .isBefore(startShift.plusMinutes(shiftType.entranceTolerance))))) {
+          WorkedParameters wp = checkShiftWorkedMins(personDay, shiftType, startShift, startLunchTime ,endLunchTime, endShift);
+          
+          if (!wp.stampingOk) {
+            String lackOfTime = competenceUtility.calcStringShiftHoursFromMinutes(wp.lackOfTime);
+            String workedTime = competenceUtility.calcStringShiftHoursFromMinutes(wp.workedTime);
+            String label;
 
-              String stamp =
-                  (personDay.get().stampings.get(0).isIn()) ? personDay.get().stampings.get(0).date
-                      .toLocalTime().toString("HH:mm").concat("- **:**")
-                      : "- **:**".concat(
-                          personDay.get().stampings.get(0).date.toLocalTime().toString("HH:mm"));
+            log.debug("lackOfTime = {} workedTime = {}", lackOfTime, workedTime);
+            // get the global tollerance for this shift type
+            int globalTollerancePerShift = shiftType.hourTolerance;
 
-              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thBadStampings,
-                  personDay.get().date.toString("dd MMM").concat(" -> ").concat(stamp));
-              log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", personDay.get().person,
-                  thBadStampings, inconsistentAbsenceTable.get(person, thBadStampings));
+            // check if the difference between the worked hours in the shift periods is more
+            // than the tollerance
+            if (wp.lackOfTime > globalTollerancePerShift) {
 
-            } else if (pairStampings.isEmpty()) {
-              // there are no stampings
-              log.info("Il turno di {} {} e' incompatibile con la sue  timbrature disallineate nel"
-                  + " giorno {}", person.name, person.surname, personDay.get().date);
+              log.info("lackOfTime > globalTollerancePerShift = {} > {}", wp.lackOfTime, globalTollerancePerShift);
+              log.info("Il turno di {} {} nel giorno {} non e' stato completato - "
+                  + "timbrature: {} ", person.name, person.surname, personDay.get().date, wp.stampings);
 
-              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thBadStampings,
-                  personDay.get().date.toString("dd MMM").concat(" -> timbrature disaccoppiate"));
-              log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thBadStampings,
-                  inconsistentAbsenceTable.get(person, thBadStampings));
+              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thMissingTime, personShiftDay.date.toString("dd MMM").concat(" -> ").concat(wp.stampings).concat("(").concat(workedTime).concat(" ore lavorate)"));
+              log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thMissingTime, inconsistentAbsenceTable.get(person, thMissingTime));
 
-            } else {*/
-              // get the working time parameters in the shift period (worked and missed time during the shift period )
+            } else if (wp.lackOfTime != 0) {
 
-              WorkedParameters wp = checkShiftWorkedMins(personDay, shiftType, startShift, startLunchTime ,endLunchTime, endShift);
-              
-              if (!wp.stampingOk) {
-                String lackOfTime = competenceUtility.calcStringShiftHoursFromMinutes(wp.lackOfTime);
-                String workedTime = competenceUtility.calcStringShiftHoursFromMinutes(wp.workedTime);
-                String label;
-  
-                log.debug("lackOfTime = {} workedTime = {}", lackOfTime, workedTime);
-                // get the global tollerance for this shift type
-                int globalTollerancePerShift = shiftType.hourTolerance;
-  
-                // check if the difference between the worked hours in the shift periods is more
-                // than the tollerance
-                if (wp.lackOfTime > globalTollerancePerShift) {
-  
-                  log.info("lackOfTime > globalTollerancePerShift = {} > {}", wp.lackOfTime, globalTollerancePerShift);
-                  log.info("Il turno di {} {} nel giorno {} non e' stato completato - "
-                      + "timbrature: {} ", person.name, person.surname, personDay.get().date, wp.stampings);
-  
-                  updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thMissingTime, personShiftDay.date.toString("dd MMM").concat(" -> ").concat(wp.stampings).concat("(").concat(workedTime).concat(" ore lavorate)"));
-                  log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thMissingTime, inconsistentAbsenceTable.get(person, thMissingTime));
-  
-                } else if (wp.lackOfTime != 0) {
-  
-                  log.info("Il turno di {} {} nel giorno {} non e'stato completato per meno di 2"
-                      + " ore ({} minuti ({})) - CONTROLLARE PERMESSO timbrature: {}",
-                      person.name, person.surname, personDay.get().date, wp.lackOfTime,
-                      lackOfTime, wp.stampings);
-                  log.info("Timbrature nella tolleranza dei 15 min. = {}", wp.inTolerance);
-  
-                  label = (wp.inTolerance) ? thIncompleteTime : thWarnStampings;
-                  String str = personShiftDay.date.toString("dd MMM").concat(" -> ").concat(wp.stampings).concat("(").concat(lackOfTime).concat(" ore mancanti)");
-                  updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, label, str);                 
-                  updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thLackTime, Integer.toString(wp.lackOfTime));
-                }
+              log.info("Il turno di {} {} nel giorno {} non e'stato completato per meno di 2"
+                  + " ore ({} minuti ({})) - CONTROLLARE PERMESSO timbrature: {}",
+                  person.name, person.surname, personDay.get().date, wp.lackOfTime,
+                  lackOfTime, wp.stampings);
+              log.info("Timbrature nella tolleranza dei 15 min. = {}", wp.inTolerance);
 
-              }
-            //}
+              label = (wp.inTolerance) ? thIncompleteTime : thWarnStampings;
+              String str = personShiftDay.date.toString("dd MMM").concat(" -> ").concat(wp.stampings).concat("(").concat(lackOfTime).concat(" ore mancanti)");
+              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, label, str);                 
+              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thLackTime, Integer.toString(wp.lackOfTime));
+            }
+
           } // fine if esistenza timbrature    
         } // fine check of working days
       } // fine personDay is present
