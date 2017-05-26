@@ -171,8 +171,8 @@ public class Calendar extends Controller {
               .start(shiftDay.date)
               .color(color.backgroundColor)
               .textColor(color.textColor)
-              .className("removable")
               .borderColor(color.borderColor)
+              .className("removable")
               .build();
 
         }).collect(Collectors.toList());
