@@ -10,6 +10,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import models.base.BaseModel;
 import models.enumerate.ShiftTroubles;
+import models.enumerate.Troubles;
+
 import org.hibernate.envers.Audited;
 
 @Entity
@@ -29,4 +31,10 @@ public class PersonShiftDayInTrouble extends BaseModel {
 
   @Column(name = "email_sent")
   public boolean emailSent;
+  
+  public PersonShiftDayInTrouble(PersonShiftDay pd, ShiftTroubles cause) {
+    this.personShiftDay = pd;
+    this.cause = cause;
+    this.emailSent = false;
+  }
 }
