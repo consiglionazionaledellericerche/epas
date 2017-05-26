@@ -39,15 +39,7 @@ public class ShiftEvent {
   private String textColor;
 
   // CAMPI CUSTOM
-  private long personShiftDayId;
-  private Boolean cancelled;
+  private Long personShiftDayId;
+  private Long personId;
   private ShiftSlot shiftSlot;
-  
-     
-  // TODO: a regime vedere se farne una unica 
-  // per tutti gli eventi
-  public void setCancelledTitle (ShiftType type) {
-    this.title = "Turno " + type.type + "\nANNULLATO";
-  }
-  
 }

@@ -3,7 +3,11 @@ package controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Range;
 import dao.AbsenceDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -15,6 +19,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -28,6 +33,7 @@ import models.User;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.dto.ShiftEvent;
+import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
 import org.jcolorbrewer.ColorBrewer;
 import org.joda.time.LocalDate;
@@ -66,20 +72,49 @@ public class Calendar extends Controller {
     User currentUser = Security.getUser().get();
     final LocalDate currentDate = Optional.fromNullable(date).or(LocalDate.now());
 
-    List<ShiftType> activities = currentUser.person.shiftCategories.stream()
+    final List<ShiftType> activities = currentUser.person.shiftCategories.stream()
         .flatMap(shiftCategories -> shiftCategories.shiftTypes.stream())
+        .sorted(Comparator.comparing(o -> o.type))
         .collect(Collectors.toList());
 
     final ShiftType activitySelected = activity.id != null ? activity : activities.get(0);
 
-    List<Person> people = activitySelected.personShiftShiftTypes.stream()
-        .filter(personShiftShiftType -> personShiftShiftType.dateRange().contains(currentDate))
-        .map(personShiftShiftType -> personShiftShiftType.personShift.person)
-        .collect(Collectors.toList());
-
-    render(activities, activitySelected, people, currentDate);
+    render(activities, activitySelected, currentDate);
   }
 
+  public static void shiftPeople(ShiftType activity, LocalDate start, LocalDate end) {
+
+    final List<Person> people;
+    if (activity.isPersistent() && start != null && end != null) {
+      people = activity.personShiftShiftTypes.stream()
+          .filter(personShiftShiftType -> personShiftShiftType.dateRange().isConnected(
+              Range.closed(start, end)))
+          .map(personShiftShiftType -> personShiftShiftType.personShift.person)
+          .sorted(Person.personComparator())
+          .collect(Collectors.toList());
+    } else {
+      people = new ArrayList<>();
+    }
+
+  List<ShiftEvent> eventPeople = new ArrayList<>();
+    int index = 0;
+
+    for(Person person: people) {
+      final ShiftEvent event = ShiftEvent.builder()
+          .allDay(true)
+          .title(person.fullName())
+          .personId(person.id)
+          .color(EventColor.values()[index%EventColor.values().length].backgroundColor)
+          .textColor(EventColor.values()[index%EventColor.values().length].textColor)
+          .className("removable")
+          .build();
+
+      eventPeople.add(event);
+        index++;
+    }
+
+    render(eventPeople);
+  }
 
   /*
    * Carica i turni dal database per essere visualizzati nel calendario
@@ -92,18 +127,20 @@ public class Calendar extends Controller {
     List<ShiftEvent> events = new ArrayList<>();
 
     List<Person> people = shiftType.personShiftShiftTypes.stream()
-        .filter(personShiftShiftType -> personShiftShiftType.dateRange().contains(start))
+        .filter(personShiftShiftType -> personShiftShiftType.dateRange().isConnected(
+            Range.closed(start, end)))
         .map(personShiftShiftType -> personShiftShiftType.personShift.person)
+        .sorted(Person.personComparator())
         .collect(Collectors.toList());
 
     int index = 0;
 
-    ColorBrewer sequentialPalettes = ColorBrewer.valueOf("YlOrBr");
-    Color[] myGradient = sequentialPalettes.getColorPalette(11);
+
 
     // prende i turni associati alle persone attive in quel turno
     for (Person person : people) {
-      final String color = "#" + Integer.toHexString(myGradient[index].getRGB() & 0xffffff);
+      EventColor color = EventColor.values()[index%EventColor.values().length];
+
       events.addAll(shiftEvents(shiftType, person, start, end, color));
       events.addAll(absenceEvents(person, start, end));
       index++;
@@ -117,16 +154,16 @@ public class Calendar extends Controller {
   /*
    * Carica la lista dei turni di un certo tipo associati ad una determinata persona in
    * un intervallo di tempo
-   * 
+   *
    * @param ShiftType shiftType: tipo di turno
    * @param Person person: persona associata ai turni
    * @param LocalDate start: data inizio intervallo di tempo
    * @param LocalDate end: data fine intervallo di tempo
-   * 
-   * @output List<ShiftEvent>: lista di eventi 
+   *
+   * @output List<ShiftEvent>: lista di eventi
    */
   private static List<ShiftEvent> shiftEvents(ShiftType shiftType, Person person, LocalDate start,
-      LocalDate end, String color) {
+      LocalDate end, EventColor color) {
 
     return shiftDao.getPersonShiftDaysByPeriodAndType(start, end, shiftType, person).stream()
         .map(shiftDay -> {
@@ -137,10 +174,10 @@ public class Calendar extends Controller {
               .personShiftDayId(shiftDay.id)
               .title(shiftDay.getSlotTime() + '\n' + person.fullName())
               .start(shiftDay.date)
-              .color(color)
+              .color(color.backgroundColor)
+              .textColor(color.textColor)
               .className("removable")
-              .textColor("black")
-              .borderColor("black")
+              .borderColor(color.borderColor)
               .build();
 
         }).collect(Collectors.toList());
@@ -205,7 +242,7 @@ public class Calendar extends Controller {
   /*
    * Chiamata dal fullCalendar dei turni per ogni evento di drop o resize di un turno sul calendario.
    * Controlla se i nuovi turni possono essere salvati ed eventualmente li salva
-   * 
+   *
    */
   public static void changeShift(long personShiftDayId, LocalDate newDate) {
 
@@ -217,12 +254,12 @@ public class Calendar extends Controller {
     List<String> errors = new ArrayList<>();
 
     //    final ShiftType type = ShiftType.findById(Long.parseLong(session.get("currentShiftActivity")));
-    //    
+    //
     //    final Person person = personDao.getPersonById(personId);
     //    if (person == null) {
     //      badRequest("Parametri mancanti: person = {} " + person);
     //    }
-    //    
+    //
     //    List<String> errors = new ArrayList<>();
     //
     //    // se il turno è cancellato non può essere sovrapposto a turni esistenti
@@ -233,9 +270,9 @@ public class Calendar extends Controller {
     //        if (!newDays.isEmpty()) {
     //          String msg = "Turno già esistente nel giorno " + day.toString("dd MMM") + "\n";
     //          errors.add(msg);
-    //        }  
+    //        }
     //      }
-    //      
+    //
     //      // se non ci sono stati errori cancella i turni vecchi e salva i nuovi
     //      if (errors.isEmpty()) {
     //        cancDeletedShifts(start, end, type);
@@ -245,30 +282,30 @@ public class Calendar extends Controller {
     //        response.status = Http.StatusCode.BAD_REQUEST;
     //        renderText(error);
     //      }
-    //      
+    //
     //    } else {
     //
     //      List<PersonShiftDay> newEvents = new ArrayList<>();
     //      List<PersonShiftDay> oldEvents = new ArrayList<>();
-    //      
+    //
     //      // per ogni turno che voglio modificare controllo se è compatibile con la nuova data
     //      oldEvents = shiftDao.getPersonShiftDaysByPeriodAndType(originalStart, originalEnd, type, person);
     //      LocalDate currDate = originalStart;
     //      while (currDate.isBefore(originalEnd.plusDays(1))) {
     //        // TODO: è unico vero?
     //        PersonShiftDay oldEvent = shiftDao.getPersonShiftDaysByPeriodAndType(currDate, currDate, type, person).get(0);
-    //   
+    //
     //        List<String> messages = new ArrayList<>();
     //        messages = checkShiftDay(oldEvent, currDate);
     //        if (!messages.isEmpty()) {
     //          errors.addAll(messages);
-    //        } else if (errors.isEmpty()) {   
+    //        } else if (errors.isEmpty()) {
     //           // se non ci sono stati errori salvo il nuovo evento
     //           oldEvent.date = currDate;
     //           newEvents.add(oldEvent);
     //        }
-    //      } 
-    //      
+    //      }
+    //
     //      // se non ci sono stati errori cancella i turni vecchi e salva i nuovi
     //      if (errors.isEmpty()) {
     //        cancShifts(oldEvents);
@@ -278,41 +315,41 @@ public class Calendar extends Controller {
     //        response.status = Http.StatusCode.BAD_REQUEST;
     //        renderText(error);
     //      }
-    //      
+    //
     //    }
 //=======
 //
 //    List<PersonShiftDay> newEvents = new ArrayList<>();
 //    List<PersonShiftDay> oldEvents = new ArrayList<>();
-//    
+//
 //    // prende le date dei vecchi eventi
 //    LocalDate oldDate = originalStart;
 //    List<LocalDate> oldDates = new ArrayList<>();
 //    while (oldDate.isBefore(originalEnd.plusDays(1))) {
 //      oldDates.add(oldDate);
 //    }
-//    
+//
 //    LocalDate currDate = start;
 //    while (currDate.isBefore(end.plusDays(1))) {
-//  
+//
 //      // controllo il nuovo evento solo se è una nuova posizione nel calendario
 //      if (!oldDates.contains(currDate)) {
 //        // TODO: è unico vero?
 //        PersonShiftDay oldEvent = shiftDao.getPersonShiftDaysByPeriodAndType(currDate, currDate, shiftType, person).get(0);
-//   
+//
 //        List<String> messages = new ArrayList<>();
 //        messages = checkShiftDay(oldEvent, currDate);
 //        if (!messages.isEmpty()) {
 //          errors.addAll(messages);
-//        } else if (errors.isEmpty()) {   
+//        } else if (errors.isEmpty()) {
 //           // se non ci sono stati errori salvo il nuovo evento
 //           oldEvent.date = currDate;
 //           newEvents.add(oldEvent);
 //        }
 //      }
-//        
-//    } 
-//    
+//
+//    }
+//
 //    // se non ci sono stati errori cancella i turni vecchi e salva i nuovi
 //    if (errors.isEmpty()) {
 //      cancShifts(oldEvents);
@@ -322,14 +359,14 @@ public class Calendar extends Controller {
 //      response.status = Http.StatusCode.BAD_REQUEST;
 //      renderText(error);
 //    }
-//      
+//
 //>>>>>>> refs/heads/calendar-refactor
   }
 
 
   /*
-   * Controlla la compatibilità nello spostamento di un turno in un determinato giorno 
-   * 
+   * Controlla la compatibilità nello spostamento di un turno in un determinato giorno
+   *
    * @param PersonShiftDay shift: turno da controllare
    * @param LocalDate newDate: data nella quale spostare il turno
    */
@@ -359,8 +396,8 @@ public class Calendar extends Controller {
 
   /*
    * Controlla la compatibilità del giorno di turno con le presenze
-   * e l'orraio di lavoro nel giorno passato come parametro 
-   * 
+   * e l'orraio di lavoro nel giorno passato come parametro
+   *
    * @param PersonShiftDay day - giorno di turno
    */
   public static String checkShiftDayWhithPresence(PersonShiftDay shift, LocalDate date) {
@@ -371,8 +408,8 @@ public class Calendar extends Controller {
     // se c'è qualche timbratura o assenza in quel giorno
     if (personDay.isPresent()) {
 
-      // controlla che il nuovo turno non coincida con un giorno di assenza del turnista 
-      // ASSENZA o MISSIONE ???????? 
+      // controlla che il nuovo turno non coincida con un giorno di assenza del turnista
+      // ASSENZA o MISSIONE ????????
       if (personDayManager.isAllDayAbsences(personDay.get())) {
         msg = "Il turno di " + shift.personShift.person.getFullname() + " nel giorno " + shift.date
             .toString("dd MMM") + " coincide con un suo giorno di assenza";
@@ -407,7 +444,7 @@ public class Calendar extends Controller {
       msg = "Il turno è già ANNULLATO nel giorno " + shift.date.toString("dd MMM");
     }
 
-    // per ogni turno esitente in quel periodo di quel tipo 
+    // per ogni turno esitente in quel periodo di quel tipo
     for (PersonShiftDay registeredDay : personShiftDayDao
         .getPersonShiftDayByTypeAndPeriod(shift.date, shift.date, shift.shiftType)) {
       //controlla che il turno in quello slot sia già stato assegnato ad un'altra persona
@@ -451,17 +488,23 @@ public class Calendar extends Controller {
     }
   }
 
-
   public static void newShift(long personId, LocalDate date, ShiftSlot shiftSlot,
       ShiftType shiftType) {
     log.debug("CHIAMATA LA CREAZIONE DEL TURNO: personId {} - day {} - slot {} - shiftType {}",
         personId, date, shiftSlot, shiftType);
     // TODO: creare il personShiftDay se rispetta tutti i canoni e le condizioni di possibile esistenza
-    // TODO: ricordarsi di controllare se la persona è attiva sull'attività al momento della creazione del 
+    // TODO: ricordarsi di controllare se la persona è attiva sull'attività al momento della creazione del
     // personshiftDay
     // TODO: vediamo se la renderJSON è il metodo migliore per ritornare l'id del personShiftDay creato
     renderJSON(new Random().nextLong());
   }
 
+  public LoadingCache<Person, EventColor> eventColor = CacheBuilder.newBuilder()
+      .build(new CacheLoader<Person, EventColor>() {
+        @Override
+        public EventColor load(Person person) throws Exception {
+          return null;
+        }
+      });
 
 }
