@@ -18,7 +18,7 @@ import dao.wrapper.IWrapperPersonDay;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.PersonDayManager;
-
+import manager.ShiftManager2;
 import models.Person;
 import models.PersonDay;
 import models.PersonShift;
@@ -30,9 +30,13 @@ import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.dto.ShiftEvent;
 import models.enumerate.ShiftSlot;
+import models.enumerate.Troubles;
 
 import org.jcolorbrewer.ColorBrewer;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
+
+import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Router;
@@ -67,6 +71,8 @@ public class Calendar extends Controller {
   @Inject
   private static PersonDayManager personDayManager;
   @Inject
+  private static ShiftManager2 shiftManager2;
+  @Inject
   static ObjectMapper mapper;
   @Inject
   private static IWrapperFactory wrapperFactory;
@@ -91,6 +97,19 @@ public class Calendar extends Controller {
   }
 
 
+  /*
+   * Calvella un turno dal Database
+   */
+  public static void deleteShift(PersonShiftDay psd) {
+    log.debug("lol");
+    notFoundIfNull(psd);
+    response.status = Http.StatusCode.BAD_REQUEST;
+    renderText("Un messaggio qualsiasi");
+    //psd.delete();
+    
+  }
+
+  
   /*
    * Carica i turni dal database per essere visualizzati nel calendario
    */
@@ -156,15 +175,6 @@ public class Calendar extends Controller {
         }).collect(Collectors.toList());
   }
   
-  public static void deleteShift(PersonShiftDay psd) {
-    log.debug("lol");
-    notFoundIfNull(psd);
-    response.status = Http.StatusCode.BAD_REQUEST;
-    renderText("Un messaggio qualsiasi");
-    //psd.delete();
-    
-  }
-
   private static List<ShiftEvent> absenceEvents(Person person, LocalDate start, LocalDate end) {
 
     final List<JustifiedTypeName> types = ImmutableList
@@ -214,253 +224,64 @@ public class Calendar extends Controller {
 
 
   /*
-   * Chiamata dal fullCalendar dei turni per ogni evento di drop o resize di un turno sul calendario.
-   * Controlla se i nuovi turni possono essere salvati ed eventualmente li salva
+   * Chiamata dal fullCalendar dei turni per ogni evento di drop di un turno sul calendario.
+   * Controlla se il turno passato come parametro può essere salvato in un dato giorno 
+   * ed eventualmente lo salva.
    * 
+   * @param long personShiftDayId: id del persnShiftDay da controllare
+   * @param LocalDate newDate: giorno nel quale salvare il turno
+   * 
+   * @out String messages: eventuali messaggi di errore
    */
   public static void changeShift(long personShiftDayId, LocalDate newDate) {
 
     // TODO: 23/05/17 Lo shiftType dev'essere valido e l'utente deve avere i permessi per lavorarci
 
     log.debug("Chiamato metodo changeShift: personShiftDayId {} - newDate {} ", personShiftDayId, newDate);
-  
+   
+    List<String> errors = new ArrayList<>();
+    String messages = "";
+ 
+    // legge il turno da spostare
+    PersonShiftDay oldShift = shiftDao.getPersonShiftDayById(personShiftDayId);
+
+    // controlla se può essere spostato nella nuova data
+    errors = shiftManager2.checkShiftDay(oldShift, newDate);
+    if (errors.isEmpty()) {
+      //salva il nuovo turno
+      PersonShiftDay newShift = oldShift;
+      newShift.date = newDate;
+      newShift.save();
+      log.info("Aggiornato PersonShiftDay = {} con {}\n",
+          oldShift, newShift);
       
-    List<String> errors = new ArrayList<>();
+      // cancella quello vecchio
+      shiftDao.deletePersonShiftDay(oldShift);
 
-
-    //    final ShiftType type = ShiftType.findById(Long.parseLong(session.get("currentShiftActivity")));
-    //    
-    //    final Person person = personDao.getPersonById(personId);
-    //    if (person == null) {
-    //      badRequest("Parametri mancanti: person = {} " + person);
-    //    }
-    //    
-    //    List<String> errors = new ArrayList<>();
-    //
-    //    // se il turno è cancellato non può essere sovrapposto a turni esistenti
-    //    if (cancelled) {
-    //      LocalDate day = start;
-    //      while (day.isBefore(end.plusDays(1))) {
-    //        List<PersonShiftDay> newDays = shiftDao.getShiftDaysByPeriodAndType(day, day, type);
-    //        if (!newDays.isEmpty()) {
-    //          String msg = "Turno già esistente nel giorno " + day.toString("dd MMM") + "\n";
-    //          errors.add(msg);
-    //        }  
-    //      }
-    //      
-    //      // se non ci sono stati errori cancella i turni vecchi e salva i nuovi
-    //      if (errors.isEmpty()) {
-    //        cancDeletedShifts(start, end, type);
-    //        saveDeletedShifts(start, end, type);
-    //      } else {
-    //        String error = errors.toString();
-    //        response.status = Http.StatusCode.BAD_REQUEST;
-    //        renderText(error);
-    //      }
-    //      
-    //    } else {
-    //
-    //      List<PersonShiftDay> newEvents = new ArrayList<>();
-    //      List<PersonShiftDay> oldEvents = new ArrayList<>();
-    //      
-    //      // per ogni turno che voglio modificare controllo se è compatibile con la nuova data
-    //      oldEvents = shiftDao.getPersonShiftDaysByPeriodAndType(originalStart, originalEnd, type, person);
-    //      LocalDate currDate = originalStart;
-    //      while (currDate.isBefore(originalEnd.plusDays(1))) {
-    //        // TODO: è unico vero?
-    //        PersonShiftDay oldEvent = shiftDao.getPersonShiftDaysByPeriodAndType(currDate, currDate, type, person).get(0);
-    //   
-    //        List<String> messages = new ArrayList<>();
-    //        messages = checkShiftDay(oldEvent, currDate);
-    //        if (!messages.isEmpty()) {
-    //          errors.addAll(messages);
-    //        } else if (errors.isEmpty()) {   
-    //           // se non ci sono stati errori salvo il nuovo evento
-    //           oldEvent.date = currDate;
-    //           newEvents.add(oldEvent);
-    //        }
-    //      } 
-    //      
-    //      // se non ci sono stati errori cancella i turni vecchi e salva i nuovi
-    //      if (errors.isEmpty()) {
-    //        cancShifts(oldEvents);
-    //        saveShifts(newEvents);
-    //      } else {
-    //        String error = errors.toString();
-    //        response.status = Http.StatusCode.BAD_REQUEST;
-    //        renderText(error);
-    //      }
-    //      
-    //    }
-//=======
-//
-//    List<PersonShiftDay> newEvents = new ArrayList<>();
-//    List<PersonShiftDay> oldEvents = new ArrayList<>();
-//    
-//    // prende le date dei vecchi eventi
-//    LocalDate oldDate = originalStart;
-//    List<LocalDate> oldDates = new ArrayList<>();
-//    while (oldDate.isBefore(originalEnd.plusDays(1))) {
-//      oldDates.add(oldDate);
-//    }
-//    
-//    LocalDate currDate = start;
-//    while (currDate.isBefore(end.plusDays(1))) {
-//  
-//      // controllo il nuovo evento solo se è una nuova posizione nel calendario
-//      if (!oldDates.contains(currDate)) {
-//        // TODO: è unico vero?
-//        PersonShiftDay oldEvent = shiftDao.getPersonShiftDaysByPeriodAndType(currDate, currDate, shiftType, person).get(0);
-//   
-//        List<String> messages = new ArrayList<>();
-//        messages = checkShiftDay(oldEvent, currDate);
-//        if (!messages.isEmpty()) {
-//          errors.addAll(messages);
-//        } else if (errors.isEmpty()) {   
-//           // se non ci sono stati errori salvo il nuovo evento
-//           oldEvent.date = currDate;
-//           newEvents.add(oldEvent);
-//        }
-//      }
-//        
-//    } 
-//    
-//    // se non ci sono stati errori cancella i turni vecchi e salva i nuovi
-//    if (errors.isEmpty()) {
-//      cancShifts(oldEvents);
-//      saveShifts(newEvents);
-//    } else {
-//      String error = errors.toString();
-//      response.status = Http.StatusCode.BAD_REQUEST;
-//      renderText(error);
-//    }
-//      
-//>>>>>>> refs/heads/calendar-refactor
-  }
-
-
-  /*
-   * Controlla la compatibilità nello spostamento di un turno in un determinato giorno 
-   * 
-   * @param PersonShiftDay shift: turno da controllare
-   * @param LocalDate newDate: data nella quale spostare il turno
-   */
-  public static List<String> checkShiftDay(PersonShiftDay shift, LocalDate newDate) {
-    String message = "";
-    List<String> errors = new ArrayList<>();
-
-    // TODO: controlla che i turni che voglio modificare non siano già stati inviati a Roma
-    if (false) {
-
-    } else {
-      // controlla la compatibilità con le presenze della persona e
-      // gli altri turni presenti nel giorno di destinazione
-      message = checkShiftDayWhithShiftDays(shift, newDate);
-      if (!message.isEmpty()) {
-        errors.add(message);
-      } 
-      message = checkShiftDayWhithPresence(shift, newDate);
-      if (!message.isEmpty()) {
-        errors.add(message);
-      } 
-    }
-
-    return errors;
-  }
-
-
-  /*
-   * Controlla la compatibilità del giorno di turno con le presenze
-   * e l'orraio di lavoro nel giorno passato come parametro 
-   * 
-   * @param PersonShiftDay day - giorno di turno
-   */
-  public static String checkShiftDayWhithPresence(PersonShiftDay shift, LocalDate date) {
-
-    Optional<PersonDay> personDay = personDayDao.getPersonDay(shift.personShift.person, date);
-    String msg = "";
-
-    // se c'è qualche timbratura o assenza in quel giorno
-    if (personDay.isPresent()) {
-
-      // controlla che il nuovo turno non coincida con un giorno di assenza del turnista 
-      // ASSENZA o MISSIONE ???????? 
-      if (personDayManager.isAllDayAbsences(personDay.get())) {      
-        msg = "Il turno di "+ shift.personShift.person.getFullname() +" nel giorno " + shift.date.toString("dd MMM") + " coincide con un suo giorno di assenza";
-      } else if (!LocalDate.now().isBefore(shift.date)) {
-        // non sono nel futuro controllo le timbrature
-        // controlla se non è una giornata valida di lavoro
-        // (??????????) MESSAGGI DIVERSI SE 1 TIMBRATURA 0 timbrature o diaccoppiate ecc
-        IWrapperPersonDay wrPersonDay = wrapperFactory.create(personDay.get());
-        if (!personDayManager.isValidDay(personDay.get(), wrPersonDay)) {
-          msg = "Giornata lavorativa non valida il" + shift.date.toString("dd MMM");
-        } else {
-
-          // TODO: controlla la compatibilità tra le timbrature e il turno
-        }
-      } 
-    }
-    return msg;
-  }
-
-  /*
-   * Controlla che un turno assegnato possa essere spostato alla data passata come parametro:
-   * Nella data non ci devono essere:
-   * - turni annullati di quel tipo
-   * - turni associati alla stessa persona in slot diversi
-   * - turni associati ad altra persona nello stesso slot
-   */
-  public static String checkShiftDayWhithShiftDays(PersonShiftDay shift, LocalDate date) {
-    String msg = "";
-
-    // controlla che non coincida con un turno annullato esistente
-    if (shiftDao.getShiftCancelled(shift.date, shift.shiftType) != null) {
-      msg = "Il turno è già ANNULLATO nel giorno " + shift.date.toString("dd MMM");
-    }
-
-    // per ogni turno esitente in quel periodo di quel tipo 
-    for (PersonShiftDay registeredDay : personShiftDayDao.getPersonShiftDayByTypeAndPeriod(shift.date, shift.date, shift.shiftType)) {
-      //controlla che il turno in quello slot sia già stato assegnato ad un'altra persona
-      if (registeredDay.shiftSlot.equals(shift.shiftSlot) && !registeredDay.personShift.person.equals(shift.personShift.person)) {
-        msg = "Turno già esistente il " + shift.date.toString("dd MMM");
-      } else if (registeredDay.personShift.person.equals(shift.personShift.person) && !registeredDay.shiftSlot.equals(shift.shiftSlot)) {
-        msg = registeredDay.personShift.person.getFullname() + " è già in turno il giorno " + shift.date.toString("dd MMM");
+    } else {      
+      // restituisce il messaggi per gli errori
+      for (String errCode: errors) {
+        String msg = "calendar.".concat(errCode);
+        messages.concat(Messages.get(msg)).concat("<br />");
       }
+      
+      response.status = Http.StatusCode.BAD_REQUEST;
+      renderText(messages);
     }
 
-    
-    return msg;
   }
-  
+
+
   
   /*
-   * Cancella una lista di personShiftDays dal DB
+   * Cancella un personShiftDays dal DB
    */
-  private static void cancShifts(List<PersonShiftDay> personShiftDays) {
-    for (PersonShiftDay personShiftDay: personShiftDays) {
+  private static void cancShifts(PersonShiftDay personShiftDay) {  
       shiftDao.deletePersonShiftDay(personShiftDay);
       log.info("Cancellato PersonShiftDay = {} con {}\n",
           personShiftDay, personShiftDay.personShift.person);
-    }
   }
   
-  
-  /*
-   * Cancella una lista di personShiftDays dal DB
-   */
-  private static void cancDeletedShifts(LocalDate start, LocalDate end, ShiftType type) {
-    LocalDate day = start;
-    while (day.isBefore(end.plusDays(1))) {
-      long cancelled = shiftDao.deleteShiftCancelled(type, day);
-      if (cancelled == 1) {
-        log.info("Rimosso turno cancellato di tipo {} del giorno {}",
-            type.description, day);
-      }
-    }
-  }
-  
-  
-
 
   public static void newShift(long personId, LocalDate date, ShiftSlot shiftSlot,
       ShiftType shiftType) {
@@ -470,7 +291,36 @@ public class Calendar extends Controller {
     // TODO: ricordarsi di controllare se la persona è attiva sull'attività al momento della creazione del 
     // personshiftDay
     // TODO: vediamo se la renderJSON è il metodo migliore per ritornare l'id del personShiftDay creato
-    renderJSON(new Random().nextLong());
+    
+    String color = ""; //TODO:
+    
+    // crea il personShiftDay
+    PersonShiftDay personShiftDay = new PersonShiftDay();
+    personShiftDay.date = date;
+    personShiftDay.shiftType = shiftType;
+    personShiftDay.setShiftSlot(shiftSlot);
+    personShiftDay.personShift = shiftDao.getPersonShiftByPersonAndType(personId, shiftType.type);
+    
+    // controlla che possa essere salvato nel giorno
+    List<String> errors = shiftManager2.checkShiftDay(personShiftDay, date);
+    
+
+    // contruisce l'evento
+    //TODO: con gli errori? e poi li prendi nel calendario? (messaggi o errCode?) Oppure?
+    ShiftEvent event = ShiftEvent.builder()
+        .allDay(true)
+        .shiftSlot(personShiftDay.shiftSlot)
+        .personShiftDayId(personShiftDay.id)
+        .title(personShiftDay.getSlotTime() + '\n' + personShiftDay.personShift.person.fullName())
+        .start(personShiftDay.date)
+        .color(color)
+        // TODO: .error()
+        .className("removable")
+        .textColor("black")
+        .borderColor("black")
+        .build();
+    
+     //renderJSON(mapper.writeValueAsString(event));
   }
 
 
