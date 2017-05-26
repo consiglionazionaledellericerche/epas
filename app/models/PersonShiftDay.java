@@ -1,5 +1,7 @@
 package models;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -9,16 +11,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
 import models.base.BaseModel;
 import models.enumerate.ShiftSlot;
-
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import org.joda.time.LocalDate;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
+@Audited
 @Table(name = "person_shift_days")
 public class PersonShiftDay extends BaseModel {
 
@@ -39,35 +39,34 @@ public class PersonShiftDay extends BaseModel {
 
   @ManyToOne
   @JoinColumn(name = "person_shift_id", nullable = false)
+  @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
   public PersonShift personShift;
 
   public ShiftSlot getShiftSlot() {
-    return this.shiftSlot;
+    return shiftSlot;
   }
 
   public void setShiftSlot(ShiftSlot shiftSlot) {
     this.shiftSlot = shiftSlot;
   }
-  
+
   //  Nuova relazione con gli errori associati ai personShiftDay
   @OneToMany(mappedBy = "personShiftDay")
   public List<PersonShiftDayInTrouble> troubles = new ArrayList<>();
-  
-  
-  
+
+
   @Transient
-  public String getSlotTime(){
+  public String getSlotTime() {
     String timeFormatted = "HH:mm";
     switch (shiftSlot) {
       case MORNING:
-        return 
-            shiftType.shiftTimeTable.startMorning.toString(timeFormatted) + " - "
-                + shiftType.shiftTimeTable.endMorning.toString(timeFormatted);
-        
+        return shiftType.shiftTimeTable.startMorning.toString(timeFormatted) + " - "
+            + shiftType.shiftTimeTable.endMorning.toString(timeFormatted);
+
       case AFTERNOON:
         return shiftType.shiftTimeTable.startAfternoon.toString(timeFormatted) + " - "
-                + shiftType.shiftTimeTable.endAfternoon.toString(timeFormatted);
-        
+            + shiftType.shiftTimeTable.endAfternoon.toString(timeFormatted);
+
       default:
         return null;
     }
