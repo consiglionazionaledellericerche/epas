@@ -1,8 +1,9 @@
 <ul class="list-group">
   #{list eventPeople, as:'person'}
-  <li class="list-group-item" id="${person.personId}"
+  <li class="list-group-item ${person.className}" id="${person.personId}"
       data-draggable
-      data-event="${person.serialize()}">
+      data-event="${person.serialize()}" style="color: ${person.eventColor.textColor};
+       	background-color: ${person.eventColor.backgroundColor}">
     ${person.title}
   </li>
   <br>

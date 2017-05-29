@@ -21,33 +21,8 @@
         #{/form}
     </div>
 </div>
-<!-- Menu laterare-->
-<div class="col-sm-2 well well-lg" data-render-load="@{shiftPeople()}">
-   *{ <ul class="list-group">
-        #{list people, as:'person'}
-        <li class="list-group-item" id="${person.id}"
-            data-draggable
-            data-event='{"title": "${person.fullname}",
-                     "allDay": "true",
-                     "personId" : "${person.id}",
-                     "color": "purple" }'>
-            ${person.fullname}
-        </li>
-        <br>
-        #{/list}
-    </ul>
-    <h4>&{'shiftSlot'}</h4>
-    <hr>
-    #{list models.enumerate.ShiftSlot}
-    <div class="radio">
-        <label>
-            <input type="radio" name="shiftSlot" id="shiftSlot" value="${_}" #{ifnot _isLast}checked#{/ifnot}>
-            ${_.label()}
-        </label>
-    </div>
-    #{/list}
-  }*
-</div>
+<!-- Menu laterale-->
+<div class="col-sm-2 well well-lg" data-render-load="@{shiftPeople()}"></div>
 
 <!-- Calendario-->
 <div class="col-lg-8 col-sm-10"
