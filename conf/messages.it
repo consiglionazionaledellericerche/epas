@@ -291,20 +291,15 @@ passwordSuccessfullyChanged = Password modificata con successo
 password= Password
 
 PDFReport.thBadStampings=Timbrature errate
-PDFReport.thDays=Num. di giorni
-PDFReport.thReqHour=Num. di ore spettanti
-PDFReport.thAppHour =Num. di ore approvate
-PDFReport.thExceededMin=Minuti accumulati
-
 PDFReport.thAbsences=Assenza
 PDFReport.thBadWorkindDay=Giorno lavorativo non valido
 PDFReport.thNoStampings=Mancata timbratura
 PDFReport.thMissions=Missione
 PDFReport.thIncompleteTime=Orario incompleto
-PDFReport.thLackTime=Ore mancanti
 PDFReport.thMissingTime=Orario insufficiente
 PDFReport.thWarnStampings=Orario incompleto fuori tolleranza
 
+# CALENDARIO SHIFT
 calendar.ShiftToubles.PERSON_IS_ABSENT=Il turnista è assente nel giorno %d
 calendar.ShiftToubles.NOT_ENOUGH_WORKING_TIME=Orario incompleto nel giorno %d
 
@@ -314,6 +309,18 @@ calendar.Troubles.NOT_ENOUGH_WORKTIME=Tempo di lavoro insufficiente il %d
 
 calendar.CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED=Slot del turno già assegnato il %d
 calendar.CalendarShiftTroubles.PERSON_SHIFT_ASSIGNED.La persona è già in turno il %d
+
+PDFReport.thDays=Num. di giorni
+PDFReport.thReqHour=Num. di ore spettanti
+PDFReport.thLackTime=Ore mancanti
+PDFReport.thAppHour =Num. di ore approvate
+PDFReport.thExceededMin=Minuti accumulati
+
+PDFReport.ShiftToubles.PERSON_IS_ABSENT=Assenza
+PDFReport.Troubles.NOT_ENOUGH_WORKTIME=Giorno lavorativo non valido
+PDFReport.Troubles.NO_ABS_NO_STAMP=Mancata timbratura
+PDFReport.UNCOUPLED_WORKING=Timbrature errate
+PDFReport.NOT_ENOUGH_WORKTIME==Orario incompleto
 
 
 peopleIds=Persone associabili all'attività
