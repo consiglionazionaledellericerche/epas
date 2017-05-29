@@ -1,0 +1,22 @@
+<ul class="list-group">
+  #{list eventPeople, as:'person'}
+  <li class="list-group-item ${person.className}" id="${person.personId}"
+      data-draggable
+      data-event="${person.serialize()}" style="color: ${person.eventColor.textColor};
+       	background-color: ${person.eventColor.backgroundColor}">
+    ${person.title}
+  </li>
+  <br>
+  #{/list}
+  #{else}<em class="text-muted">Nessuna Persona assegnabile per questa attività nel periodo selezionato</em>#{/else}
+</ul>
+<h4>&{'shiftSlot'}</h4>
+<hr>
+#{list models.enumerate.ShiftSlot}
+<div class="radio">
+  <label>
+    <input type="radio" name="shiftSlot" id="shiftSlot" value="${_}" #{ifnot _isLast}checked#{/ifnot}>
+    ${_.label()}
+  </label>
+</div>
+#{/list}

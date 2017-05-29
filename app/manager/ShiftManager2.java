@@ -216,7 +216,7 @@ public class ShiftManager2 {
         //errCode = registeredDay.personShift.person.getFullname() + " è già in turno il giorno " + shift.date.toString("dd MMM");
       } else if (!registeredDay.shiftSlot.equals(shift.shiftSlot) && !registeredDay.troubles.isEmpty()) {
         errCode = ShiftTroubles.PROBLEMS_ON_OTHER_SLOT.toString();
-      }   
+      }                                    
     }
 
     return errCode;
