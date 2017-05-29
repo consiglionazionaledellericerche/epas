@@ -37,13 +37,7 @@
       <!-- Colonna Assenze-->
       <td class="assenza default-single">
         #{list items:dayRecap.personDay.absences, as:'absence'}
-    		<span webui-popover-hover data-url="#${absence.id}">
-	    		${absence.absenceType.code}#{if absence.justifiedMinutes} ${absence.justifiedMinutes}min #{/if}
-	  		</span>
-
-        <div class="webui-popover-content" id="${absence.id}">
-          <strong>${absence.absenceType.code}</strong> ${absence.absenceType.description}
-        </div>
+    		#{include './personStampingComponents/_absenceRendering.html' /}
         #{/list}
       </td>
       <!--Colonna tempo a lavoro-->
