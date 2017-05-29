@@ -118,11 +118,14 @@ public class RequestInit extends Controller {
     // Popolamento del dropdown degli anni
     List<Integer> years = Lists.newArrayList();
     int minYear = LocalDate.now().getYear();
-
     for (Office office : offices) {
       if (office.beginDate.getYear() < minYear) {
         minYear = office.beginDate.getYear();
       }
+    }
+    // Oltre alle sedi amminisitrate anche gli anni della propria sede per le viste dipendente.
+    if (user.get().person != null && user.get().person.office != null) {
+      minYear = user.get().person.office.beginDate.getYear();
     }
     for (int i = minYear; i <= LocalDate.now().getYear(); i++) {
       years.add(i);
