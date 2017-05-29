@@ -65,6 +65,16 @@ public class ShiftDao extends DaoBase {
     return Optional.fromNullable(query.singleResult(shiftType));
   }
   
+  /**
+   * 
+   * @param id l'id della timeTable che si intende ritornare
+   * @return la timeTable per i turni da associare al servizio.
+   */
+  public PersonShiftDay getPersonShiftDayById(Long id) {
+    final QPersonShiftDay psd = QPersonShiftDay.personShiftDay;
+    JPQLQuery query = getQueryFactory().from(psd).where(psd.id.eq(id));
+    return query.singleResult(psd);
+  }
   
   /**
    * @return la lista dei personShiftDay con ShiftType 'type' presenti nel periodo tra 'begin' e
@@ -131,7 +141,7 @@ public class ShiftDao extends DaoBase {
   }
   
   /**
-   * @return il quantitativo di shiftCancelled effettivamente cancellati.
+   * @return il quantitativo di turni effettivamente cancellati.
    */
   public Long deletePersonShiftDay(PersonShiftDay personShiftDay) {  
 
@@ -177,7 +187,7 @@ public class ShiftDao extends DaoBase {
    * @param id l'id del personShift
    * @return il personShift associato all'id passato come parametro.
    */
-  public PersonShift gerPersonShiftById(Long id) {
+  public PersonShift getPersonShiftById(Long id) {
     final QPersonShift ps = QPersonShift.personShift;
     JPQLQuery query = getQueryFactory().from(ps).where(ps.id.eq(id));
     return query.singleResult(ps);        
