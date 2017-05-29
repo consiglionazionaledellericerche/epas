@@ -6,6 +6,7 @@ package models.enumerate;
  */
 public enum EventColor {
 
+
   ORANGE("#FFB847", "#FFAA24", "#633E05"),
   ACQUA_GREEN("#6CC8B9", "#158673", "#06322B"),
   ONE("#B1D13D", "#09822D", "black"),
