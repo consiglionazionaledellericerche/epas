@@ -101,9 +101,10 @@ public class Calendar extends Controller {
           .allDay(true)
           .title(person.fullName())
           .personId(person.id)
+          .eventColor(EventColor.values()[index % EventColor.values().length])
           .color(EventColor.values()[index % EventColor.values().length].backgroundColor)
           .textColor(EventColor.values()[index % EventColor.values().length].textColor)
-          .className("removable")
+          .className("removable event-orange")
           .build();
 
       eventPeople.add(event);
@@ -220,7 +221,10 @@ public class Calendar extends Controller {
             .durationEditable(false)
             .editable(false)
             .startEditable(false)
-            //.color("#"+Integer.toHexString(myGradient[index].getRGB() & 0xffffff))
+            .color(EventColor.RED.backgroundColor)
+            .textColor(EventColor.RED.textColor)
+            .borderColor(EventColor.RED.borderColor)
+            
             .build();
 
         events.add(event);

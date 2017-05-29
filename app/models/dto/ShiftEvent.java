@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Builder;
 import lombok.Data;
 import models.ShiftType;
+import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
 import org.joda.time.LocalDate;
 
@@ -42,4 +43,5 @@ public class ShiftEvent {
   private Long personShiftDayId;
   private Long personId;
   private ShiftSlot shiftSlot;
+  private EventColor eventColor;
 }

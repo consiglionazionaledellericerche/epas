@@ -7,11 +7,12 @@ package models.enumerate;
 public enum EventColor {
 
 
-  ORANGE("#FFB847", "#FFAA24", "#633E05"),
-  ACQUA_GREEN("#6CC8B9", "#158673", "#06322B"),
-  ONE("#B1D13D", "#09822D", "black"),
-  TWO("#41718E", "#1A159F", "white"),
-  THREE("#FFDC47", "#4B4705", "#4B4705");
+  ORANGE("#ffe5ad", "#ffcd61", "#966700"),
+  GREEN("#dff0d8", "#b9e098", "#3c763d"),
+  LIGHTPURPLE("#e5cee6", "#a77ca9", "#8a518e"),
+  BLUE("#d9edf7", "#bce8f1", "#31708f"),
+  YELLOW("#fcf8e3", "#f5d89c", "#8a6d3b"),
+  RED("#f2dede", "#ebccd1", "#a94442"); // da usare per le assenze e basta
 
 
   public final String backgroundColor;
