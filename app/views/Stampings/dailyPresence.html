@@ -37,6 +37,7 @@
       <!-- Colonna Assenze-->
       <td class="assenza default-single">
         #{list items:dayRecap.personDay.absences, as:'absence'}
+            %{ absenceRenderingNoLink = true; }%
     		#{include './personStampingComponents/_absenceRendering.html' /}
         #{/list}
       </td>
