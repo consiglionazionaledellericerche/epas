@@ -33,7 +33,6 @@ import models.dto.ShiftEvent;
 import models.enumerate.ShiftSlot;
 import models.enumerate.Troubles;
 
-import org.jcolorbrewer.ColorBrewer;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 
