@@ -16,7 +16,7 @@
   #{form action:@findCodeBlock(), class:'form-horizontal', method:'GET',
           'data-reload':'#results', autocomplete:'off'}
    
-    #{p.text 'code', 'data-autochange':true, value:code, autofocus:true,
+    #{f.input 'code', 'data-autochange':true, value:code, autofocus:true,
             placeholder:'search'.label() /}
   #{/form}
   
