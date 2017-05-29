@@ -290,6 +290,7 @@ public class TemplateUtility {
     // e vanno spostati nel secureManager.
     Optional<User> user = Security.getUser();
     if (user.isPresent()) {
+      roles.add(roleDao.getRoleByName(Role.SEAT_SUPERVISOR));
       roles.add(roleDao.getRoleByName(Role.TECHNICAL_ADMIN));
       roles.add(roleDao.getRoleByName(Role.PERSONNEL_ADMIN));
       roles.add(roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI));

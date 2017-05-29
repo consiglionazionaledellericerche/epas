@@ -43,39 +43,30 @@ public class WrapperOffice implements IWrapperOffice {
     return this.value.getBeginDate();
   }
 
+
+  /**
+   * I Responsabili Sede dell'office (di norma 1).
+   */
+  public List<UsersRolesOffices> getSeatSupervisor() {
+    Role role = roleDao.getRoleByName(Role.SEAT_SUPERVISOR);
+    return filterUros(role);
+  }
+  
   /**
    * Gli amministratori tecnici dell'office.
    */
   public List<UsersRolesOffices> getTechnicalAdmins() {
-
-    Role roleAdmin = roleDao.getRoleByName(Role.TECHNICAL_ADMIN);
-    List<UsersRolesOffices> uroList = Lists.newArrayList();
-    for (UsersRolesOffices uro : this.value.usersRolesOffices) {
-
-      if (uro.office.id.equals(this.value.id) && uro.role.id.equals(roleAdmin.id)
-          && uro.user.person != null) {
-        uroList.add(uro);
-      }
-    }
-    return uroList;
+    Role role = roleDao.getRoleByName(Role.TECHNICAL_ADMIN);
+    return filterUros(role);
   }
-
 
   /**
    * Gli amministratori dell'office.
    */
   public List<UsersRolesOffices> getPersonnelAdmins() {
 
-    Role roleAdmin = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
-    List<UsersRolesOffices> uroList = Lists.newArrayList();
-    for (UsersRolesOffices uro : this.value.usersRolesOffices) {
-
-      if (uro.office.id.equals(this.value.id) && uro.role.id.equals(roleAdmin.id)
-          && uro.user.person != null) {
-        uroList.add(uro);
-      }
-    }
-    return uroList;
+    Role role = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
+    return filterUros(role);
   }
 
   /**
@@ -83,16 +74,8 @@ public class WrapperOffice implements IWrapperOffice {
    */
   public List<UsersRolesOffices> getMiniAdmins() {
 
-    Role roleAdminMini = roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
-    List<UsersRolesOffices> uroList = Lists.newArrayList();
-    for (UsersRolesOffices uro : this.value.usersRolesOffices) {
-
-      if (uro.office.id.equals(this.value.id) && uro.role.id.equals(roleAdminMini.id)
-          && uro.user.person != null) {
-        uroList.add(uro);
-      }
-    }
-    return uroList;
+    Role role = roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
+    return filterUros(role);
   }
 
   /**
@@ -185,6 +168,18 @@ public class WrapperOffice implements IWrapperOffice {
       return false;
     }
     return true;
+  }
+  
+  private List<UsersRolesOffices> filterUros(Role role) {
+    List<UsersRolesOffices> uroList = Lists.newArrayList();
+    for (UsersRolesOffices uro : this.value.usersRolesOffices) {
+
+      if (uro.office.id.equals(this.value.id) && uro.role.id.equals(role.id)
+          && uro.user.person != null) {
+        uroList.add(uro);
+      }
+    }
+    return uroList;
   }
 
 }

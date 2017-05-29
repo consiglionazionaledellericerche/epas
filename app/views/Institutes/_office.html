@@ -15,7 +15,14 @@
 
 <br>
 
-<div class="list-group-item-text">
+<div class="list-group-item-text bg-info">
+  <strong><i class="fa fa-user-circle" aria-hidden="true"></i> Responsabile Sede </strong>
+  #{list items:seat.usersRolesOffices, as:'uro'}
+  #{if uro.role.name.equals('seatSupervisor') && uro.user.person }
+  <span class="label label-primary">${uro.user.person.fullname}</span>
+  #{/if}
+  #{/list}
+  <br>
   <strong><i class="fa fa-shield"></i> Amministratore Tecnico </strong>
   #{list items:seat.usersRolesOffices, as:'uro'}
   #{if uro.role.name.equals('technicalAdmin') && uro.user.person }
