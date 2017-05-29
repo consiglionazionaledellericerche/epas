@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Builder;
 import lombok.Data;
 import models.ShiftType;
+import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
 import org.joda.time.LocalDate;
 
@@ -39,15 +40,8 @@ public class ShiftEvent {
   private String textColor;
 
   // CAMPI CUSTOM
-  private long personShiftDayId;
-  private Boolean cancelled;
+  private Long personShiftDayId;
+  private Long personId;
   private ShiftSlot shiftSlot;
-  
-     
-  // TODO: a regime vedere se farne una unica 
-  // per tutti gli eventi
-  public void setCancelledTitle (ShiftType type) {
-    this.title = "Turno " + type.type + "\nANNULLATO";
-  }
-  
+  private EventColor eventColor;
 }

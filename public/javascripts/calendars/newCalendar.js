@@ -21,6 +21,18 @@ $(document).ready(function() {
           $this.prev('span.text-primary').remove();
         }
       },
+      viewRender: function (view, element) {
+        var data = {
+         'activity.id': $('#activity').val(),
+         start: view.start.format(),
+         end: view.end.subtract(1, 'days').format()
+        };
+        // Caricamento asincrono delle persone in base al periodo
+        $('[data-render-load]').each(function() {
+            var url = $(this).data('render-load');
+            $(this).load(url,data);
+        });
+      },
       eventSources: []
     };
     if ($this.data('calendar-date')) {
@@ -137,6 +149,7 @@ $(document).ready(function() {
           },
           success: function(response) {
             console.log(JSON.stringify(response));
+            event.shiftSlot = shiftSlot;
             event.personShiftDayId = response;
           }
         });
@@ -144,8 +157,16 @@ $(document).ready(function() {
     }
     $this.fullCalendar(data);
   });
+
+});
+
+$(document).ajaxComplete(function(){
   $('[data-draggable]').draggable({
     revert: true, // immediately snap back to original position
-    revertDuration: 0 
+    revertDuration: 0
   });
-});
+})
+function getCurrentViewDate(input) {
+  var currentViewDate = $('[data-calendar]').fullCalendar( 'getDate' ).format();
+  $(input).val(currentViewDate);
+}
