@@ -76,11 +76,7 @@ public class Calendar extends Controller {
   @Inject
   static ShiftDao shiftDao;
   @Inject
-  private static PersonDao personDao;
-  @Inject
   private static PersonDayDao personDayDao;
-  @Inject
-  private static PersonShiftDayDao personShiftDayDao;
   @Inject
   private static PersonDayManager personDayManager;
   @Inject
@@ -142,6 +138,7 @@ public class Calendar extends Controller {
     render(eventPeople);
   }
 
+  
   /*
    * Calvella un turno dal Database
    */
@@ -374,25 +371,32 @@ public class Calendar extends Controller {
     // controlla che possa essere salvato nel giorno
     List<String> errors = shiftManager2.checkShiftDay(personShiftDay, date);
     
-
-    // contruisce l'evento
-    //TODO: con gli errori? e poi li prendi nel calendario? (messaggi o errCode?) Oppure?
-    ShiftEvent event = ShiftEvent.builder()
-        .allDay(true)
-        .shiftSlot(personShiftDay.shiftSlot)
-        .personShiftDayId(personShiftDay.id)
-        .title(personShiftDay.getSlotTime() + '\n' + personShiftDay.personShift.person.fullName())
-        .start(personShiftDay.date)
-        .color(color)
-        // TODO: .error()
-        .className("removable")
-        .textColor("black")
-        .borderColor("black")
-        .build();
-    
+    if (errors.isEmpty()) {
+      // contruisce l'evento
+      //TODO: con gli errori? e poi li prendi nel calendario? (messaggi o errCode?) Oppure?
+      ShiftEvent event = ShiftEvent.builder()
+          .allDay(true)
+          .shiftSlot(personShiftDay.shiftSlot)
+          .personShiftDayId(personShiftDay.id)
+          .title(personShiftDay.getSlotTime() + '\n' + personShiftDay.personShift.person.fullName())
+          .start(personShiftDay.date)
+          .color(color)
+          // TODO: .error()
+          .className("removable")
+          .textColor("black")
+          .borderColor("black")
+          .build();
+      
+      // salva il personShiftDay
+      
+      
+      // aggiorna le competenze
+      // calcolate come? prendendole dal ShiftTimetable o calcolandole dall'orario?
+    }
      //renderJSON(mapper.writeValueAsString(event));
   }
 
+  
   public LoadingCache<Person, EventColor> eventColor = CacheBuilder.newBuilder()
       .build(new CacheLoader<Person, EventColor>() {
         @Override
@@ -401,4 +405,23 @@ public class Calendar extends Controller {
         }
       });
 
+  
+  /**
+   * Crea il file PDF con il resoconto mensile dei turni dello IIT il mese 'month'
+   * dell'anno 'year' (portale sistorg).
+   *
+   * @author arianna
+   */
+  //@BasicAuth
+  public static void exportMonthAsPDF(int year, int month, Long shiftCategoryId) {
+    
+    log.debug("sono nella exportMonthAsPDF con shiftCategory={} year={} e month={}",
+        shiftCategoryId, year, month);
+    
+    // legge inizio e fine mese
+    final LocalDate firstOfMonth = new LocalDate(year, month, 1);
+    final LocalDate lastOfMonth = firstOfMonth.dayOfMonth().withMaximumValue();
+    
+    
+  }
 }
