@@ -1,0 +1,51 @@
+*{
+ arg (required) field attribute
+ label (optional) default to arg.name
+ description (optional) default to null
+ required (optional) default to false
+ biglabel (optional) più spazio per i label
+}*
+
+#{field _arg}
+  
+  %{
+    if (_body) {
+      _body.setProperty('field', field)
+    }
+  }%
+  ${_arg}
+  ${field.value}
+  
+  <div class='form-group has-feedback 
+    #{if field.error} has-error #{/if} 
+    #{elseif field.value} has-success
+    #{/elseif}
+    '>
+		
+		<label 
+		  for="${field.id}" 
+		  class="control-label #{if _biglabel}col-sm-5#{/if}#{else}col-sm-3#{/else}">
+		
+		  #{if _label}&{_label}#{/if} 
+		  #{else}&{field.name}#{/else}
+		  #{if _required}*#{/if}
+		</label>
+		
+		<div class="#{if _biglabel}col-sm-4#{/if}#{else}col-sm-6#{/else}">
+			#{doBody /}
+			#{if field.error}
+			  <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
+			  <span class="help-block">&{field.error}</span>
+			#{/if} 
+			#{elseif field.value}
+			  <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
+			#{/elseif}
+			
+			
+		</div>
+	    
+	    #{if _description}
+	      <div class="col-sm-3">&{field.name+'.description'}</div>
+	    #{/if}
+  </div>
+#{/field}
