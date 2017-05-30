@@ -44,4 +44,6 @@ public class ShiftEvent {
   private Long personId;
   private ShiftSlot shiftSlot;
   private EventColor eventColor;
+  private String email;
+  private String mobile;
 }

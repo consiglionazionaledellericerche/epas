@@ -1,26 +1,12 @@
 package manager;
 
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.inject.Inject;
-
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
-import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.PersonDayDao;
@@ -31,10 +17,14 @@ import dao.ShiftDao;
 import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
+
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.DateUtility;
+
 import lombok.extern.slf4j.Slf4j;
+
 import manager.services.PairStamping;
+
 import models.CertificatedData;
 import models.Competence;
 import models.CompetenceCode;
@@ -48,14 +38,11 @@ import models.ShiftCancelled;
 import models.ShiftCategories;
 import models.ShiftType;
 import models.UsersRolesOffices;
-import models.absences.Absence;
 import models.enumerate.CalendarShiftTroubles;
 import models.enumerate.ShiftSlot;
 import models.enumerate.ShiftTroubles;
 import models.enumerate.Troubles;
-import models.exports.AbsenceShiftPeriod;
-import models.exports.ShiftPeriod;
-import models.exports.ShiftPeriods;
+
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Date;
 import net.fortuna.ical4j.model.DateTime;
@@ -64,8 +51,19 @@ import net.fortuna.ical4j.model.property.CalScale;
 import net.fortuna.ical4j.model.property.ProdId;
 import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.Version;
-import play.db.jpa.JPA;
+
+import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
+
 import play.i18n.Messages;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
+
+import javax.inject.Inject;
 
 
 /**
@@ -119,8 +117,6 @@ public class ShiftManager2 {
   @Inject
   private static PersonDayDao personDayDao;
   @Inject
-  private AbsenceDao absenceDao;
-  @Inject
   private ShiftDao shiftDao;
   @Inject
   private CompetenceUtility competenceUtility;
@@ -150,7 +146,7 @@ public class ShiftManager2 {
 
     // TODO: controlla che i turni che voglio modificare non siano già stati inviati a Roma
     if (false) {
-
+      
     } else {
       // controlla la compatibilità con le presenze della persona e
       // gli altri turni presenti nel giorno di destinazione
