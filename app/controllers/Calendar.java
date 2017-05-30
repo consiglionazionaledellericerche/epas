@@ -8,6 +8,9 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Range;
+
+import com.beust.jcommander.internal.Maps;
+
 import dao.AbsenceDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -44,6 +47,7 @@ import play.mvc.With;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -129,12 +133,15 @@ public class Calendar extends Controller {
           .color(EventColor.values()[index % EventColor.values().length].backgroundColor)
           .textColor(EventColor.values()[index % EventColor.values().length].textColor)
           .className("removable event-orange")
+          .mobile(person.mobile)
+          .email(person.email)
           .build();
 
       eventPeople.add(event);
       index++;
     }
 
+    
     render(eventPeople);
   }
 
