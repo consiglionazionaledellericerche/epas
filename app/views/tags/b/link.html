@@ -3,25 +3,28 @@ color: default
 title: titolo
 fa: optional fontawesome code
 popover: testo del popover
+disabled
 }*
 <a href="${_arg}" 
    class="btn 
-          btn-#{if _color}${_color}#{/if}#{else}default#{/else} 
+          btn-#{if _color}${_color}#{/if}#{else}default#{/else}
+          #{if _disabled} disabled #{/if} 
           ${_class != null ? (' '+_class) : ''}"
+        
           
-   #{if _popover} webui-popover-hover data-content="&{_popover}" #{/if}      
-   
    #{if _modal} data-async-modal="${_modal}"#{/if} 
    ${helpers.Web.serialize(_attrs, "arg", "class", "fa").raw()}>
    
-   #{if _fa}
-     <i class="fa fa-${_fa}"></i>
-     <span class="hidden-xs"> 
-   #{/if}
+   <div #{if _popover} webui-popover-hover data-content="&{_popover}" #{/if}>
+
+     <!-- ICON -->   
+	 #{if _fa}<i class="fa fa-${_fa}"></i> #{/if}
+	 
+	 <!-- TEXT -->
+	 <span #{if _fa}class="hidden-xs" #{/if}> 
+	   #{doBody/}
+	   *{ #{if _title}${_title}#{/if} }*
+	 </span>
+   </div>
    
-   #{doBody/}
-     
-   #{if _fa}</span>#{/if}
-   
-   #{if _title}${_title}#{/if}
 </a>
