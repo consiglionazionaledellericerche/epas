@@ -231,14 +231,11 @@ public class Stampings extends Controller {
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     
-    //validation.required(stamping.way);
     if (stamping.way == null) {
       validation.addError("stamping.way", "Obbligatorio");
     }
     if (Validation.hasErrors()) {
       response.status = 400;
-
-      validation.valid(time);
       
       List<HistoryValue<Stamping>> historyStamping = Lists.newArrayList();
       if (stamping.isPersistent()) {
