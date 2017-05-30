@@ -1,5 +1,7 @@
 package controllers;
 
+import com.google.common.base.Optional;
+
 import com.mysema.query.SearchResults;
 
 import dao.NotificationDao;
@@ -30,21 +32,21 @@ public class Notifications extends Controller {
   /**
    * Show current user archiveds notifications.
    */
-  public static void archiveds() {
+  public static void archiveds(String message) {
     final SearchResults<Notification> notifications = notificationDao
-        .listFor(Security.getUser().get(), true)
+        .listFor(Security.getUser().get(), Optional.fromNullable(message), true)
         .listResults();
-    render(notifications);
+    render(notifications, message);
   }
 
   /**
    * Show current user notifications.
    */
-  public static void list() {
+  public static void list(String message) {
     final SearchResults<Notification> notifications = notificationDao
-        .listFor(Security.getUser().get(), false)
+        .listFor(Security.getUser().get(), Optional.fromNullable(message), false)
         .listResults();
-    render("@archiveds", notifications);
+    render("@archiveds", notifications, message);
   }
 
   /**
@@ -52,7 +54,7 @@ public class Notifications extends Controller {
    */
   public static void notifications() {
     final SearchResults<Notification> notifications =
-        notificationDao.listUnreadFor(Security.getUser().get()).listResults();
+        notificationDao.listUnreadFor(Security.getUser().get(), Optional.absent()).listResults();
     render(notifications);
   }
 
@@ -83,6 +85,6 @@ public class Notifications extends Controller {
 
     notification.read = true;
     notification.save();
-    list();
+    list(null);
   }
 }

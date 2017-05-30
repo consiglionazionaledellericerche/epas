@@ -120,7 +120,7 @@ public class TemplateUtility {
           @Override
           public ModelQuery.SimpleResults<Notification> get() {
             return notificationDao.listUnreadFor(
-                Security.getUser().get());
+                Security.getUser().get(), Optional.absent());
           }
         });
 
@@ -128,7 +128,7 @@ public class TemplateUtility {
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
           @Override
           public ModelQuery.SimpleResults<Notification> get() {
-            return notificationDao.listFor(Security.getUser().get(), true);
+            return notificationDao.listFor(Security.getUser().get(), Optional.absent(), true);
           }
         });
   }

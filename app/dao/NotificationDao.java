@@ -1,6 +1,9 @@
 package dao;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
+
+import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
 import helpers.jpa.ModelQuery;
@@ -30,10 +33,17 @@ public class NotificationDao {
    * @param operator operator which is the the notification recipient
    * @return SimpleResults object containing the Notification list
    */
-  public ModelQuery.SimpleResults<Notification> listUnreadFor(User operator) {
+  public ModelQuery.SimpleResults<Notification> listUnreadFor(User operator, 
+      Optional<String> message) {
     final QNotification qn = QNotification.notification;
+    final BooleanBuilder condition = new BooleanBuilder()
+        .and(qn.recipient.eq(operator))
+        .and(qn.read.isFalse());
+    if (message.isPresent()) {
+      condition.and(qn.message.toLowerCase().contains(message.get().toLowerCase()));
+    }
     return ModelQuery.wrap(queryFactory.from(qn)
-        .where(qn.recipient.eq(operator), qn.read.isFalse())
+        .where(condition)
         .orderBy(qn.createdAt.desc()), qn);
   }
 
@@ -45,10 +55,17 @@ public class NotificationDao {
    * @param archived specify if it returns only archived Notification or not
    * @return SimpleResults object containing the Notification list
    */
-  public ModelQuery.SimpleResults<Notification> listFor(User operator, boolean archived) {
+  public ModelQuery.SimpleResults<Notification> listFor(User operator, Optional<String> message, 
+      boolean archived) {
     final QNotification qn = QNotification.notification;
+    final BooleanBuilder condition = new BooleanBuilder()
+        .and(qn.recipient.eq(operator))
+        .and(qn.read.eq(archived));
+    if (message.isPresent()) {
+      condition.and(qn.message.toLowerCase().contains(message.get().toLowerCase()));
+    }
     return ModelQuery.wrap(queryFactory.from(qn)
-        .where(qn.recipient.eq(operator), qn.read.eq(archived))
+        .where(condition)
         .orderBy(qn.createdAt.desc()), qn);
   }
 }
