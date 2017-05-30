@@ -54,10 +54,11 @@ when
   $c: PermissionCheck(action in (
      	"Application.index",
      	"Version.showVersion",
+     	"Notifications.filter",
      	"Notifications.list",
-     	"Notifications.archiveds",
      	"Notifications.readAndRedirect",
-     	"Notifications.read") 
+     	"Notifications.read",
+     	"Notifications.readAll") 
       || action.startsWith("SwitchTemplate."), 
       target == null, granted == false)
 then
