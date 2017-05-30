@@ -3,6 +3,7 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -12,6 +13,7 @@ import helpers.TemplateDataInjector;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -28,6 +30,7 @@ import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http;
+import play.mvc.Router;
 import play.mvc.With;
 
 
@@ -95,8 +98,8 @@ public class RequestInit extends Controller {
 
     session.put("daySelected", day);
 
-    // Tutti gli uffici sui quali si ha almeno un ruolo (qualsiasi)
-    Set<Office> offices = secureManager.ownOffices(currentUser);
+    // Tutti gli uffici sui quali si ha ruolo di amministrazione (tecnico e personale)
+    Set<Office> offices = secureManager.officesForNavbar(currentUser);
 
     // person init //////////////////////////////////////////////////////////////
     Long personId;
@@ -115,11 +118,14 @@ public class RequestInit extends Controller {
     // Popolamento del dropdown degli anni
     List<Integer> years = Lists.newArrayList();
     int minYear = LocalDate.now().getYear();
-
     for (Office office : offices) {
       if (office.beginDate.getYear() < minYear) {
         minYear = office.beginDate.getYear();
       }
+    }
+    // Oltre alle sedi amminisitrate anche gli anni della propria sede per le viste dipendente.
+    if (user.get().person != null && user.get().person.office != null) {
+      minYear = user.get().person.office.beginDate.getYear();
     }
     for (int i = minYear; i <= LocalDate.now().getYear(); i++) {
       years.add(i);
@@ -128,25 +134,29 @@ public class RequestInit extends Controller {
 
     // office init (l'office selezionato, andrà combinato con la lista persone sopra)
 
-    Long officeId;
+    Long officeId = null;
     if (params.get("officeId") != null) {
       officeId = Long.valueOf(params.get("officeId"));
     } else if (session.get("officeSelected") != null) {
       officeId = Long.valueOf(session.get("officeSelected"));
-    } else {
-      officeId = offices.stream().sorted((o, o1) -> o.name.compareTo(o1.name)).findFirst().get().id;
+    } else if (!offices.isEmpty()) {
+      officeId = offices.stream()
+            .sorted((o, o1) -> o.name.compareTo(o1.name)).findFirst().get().id;        
+    } else if (currentUser.person != null && currentUser.person.office != null) {
+      officeId = currentUser.person.office.id;      
     }
 
     session.put("officeSelected", officeId);
 
     //TODO: Da offices rimuovo la sede di cui ho solo il ruolo employee
 
-    computeActionSelected(currentUser, offices, year, month);
+    computeActionSelected(currentUser, offices, year, month, day, personId, officeId);
     renderArgs.put("currentData", new CurrentData(year, month, day, personId, officeId));
   }
 
   private static void computeActionSelected(
-      User user, Set<Office> offices, Integer year, Integer month) {
+      User user, Set<Office> offices, Integer year, Integer month, Integer day, 
+      Long personId, Long officeId) {
 
     final String currentAction = Http.Request.current().action;
 
@@ -180,7 +190,6 @@ public class RequestInit extends Controller {
         "Certifications.processAll",
         "Certifications.emptyCertifications",
         "PersonMonths.visualizePeopleTrainingHours",
-        "Absences.forceAbsences",
         "Charts.overtimeOnPositiveResidual",
         "Charts.listForExcelFile",
         "Charts.exportTimesheetSituation",
@@ -216,7 +225,6 @@ public class RequestInit extends Controller {
         "MealTickets.personMealTickets",
         "MealTickets.editPersonMealTickets",
         "MealTickets.recapPersonMealTickets",
-        "Absences.forceAbsences",
         "AbsenceGroups.certificationsAbsences");
 
     final Collection<String> officeSwitcher = ImmutableList.of(
@@ -324,6 +332,22 @@ public class RequestInit extends Controller {
       List<PersonDao.PersonLite> persons = personDao.liteList(offices, year, month);
       renderArgs.put("navPersons", persons);
       renderArgs.put("switchPerson", true);
+      //Patch: caso in cui richiedo una operazione con switch person (ex il tabellone timbrature) 
+      //su me stesso, ma la mia sede non appartiene alle sedi che amministro
+      //OSS: le action switch person sono tutte in sola lettura quindi il redirect è poco rischioso
+      if (!offices.isEmpty() && user.person != null && user.person.id.equals(personId)) {
+        if (!offices.contains(user.person.office)) {
+          Long personSelected = persons.iterator().next().id;
+          session.put("personSelected", personSelected);
+          Map<String, Object> args = Maps.newHashMap();
+          args.put("year", year);
+          args.put("month", month);
+          args.put("day", day);
+          args.put("personId", personSelected);
+          args.put("officeId", officeId);
+          redirect(Router.reverse(currentAction, args).url);
+        }
+      }
     }
     if (officeSwitcher.contains(currentAction)) {
 

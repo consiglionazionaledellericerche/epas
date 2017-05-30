@@ -63,18 +63,18 @@ public enum DefaultGroup {
       "", 
       DefaultCategoryType.PERMESSI_PERSONALI, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.year, 
-      DefaultTakable.T_661, DefaultComplation.C_661, null, false, false),
+      DefaultTakable.T_661, DefaultComplation.C_661, null, false, true),
   G_89("89 - Permesso diritto allo studio 150 ore anno", 
       "", 
       DefaultCategoryType.PERMESSI_PERSONALI, 1,
       GroupAbsenceTypePattern.programmed, PeriodType.year, 
-      DefaultTakable.T_89, DefaultComplation.C_89, null, false, false),
+      DefaultTakable.T_89, DefaultComplation.C_89, null, false, true),
   
   G_09("09 - Permesso orario visita medica", 
       "", 
       DefaultCategoryType.VISITA_MEDICA, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.always, 
-      DefaultTakable.T_09, DefaultComplation.C_09, null, false, false),
+      DefaultTakable.T_09, DefaultComplation.C_09, null, false, true),
   G_631("631 - Permesso giornaliero visita medica", 
       "", 
       DefaultCategoryType.VISITA_MEDICA, 1,
@@ -100,13 +100,18 @@ public enum DefaultGroup {
       DefaultCategoryType.FERIE_CNR, 1,
       GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, 
       DefaultTakable.T_FERIE_CNR_PROROGA, null, null, false, false),
-
   
   RIPOSI_CNR("91 - Riposo compensativo", 
       "", 
       DefaultCategoryType.RIPOSI_COMPENSATIVI_CNR, 0, 
       GroupAbsenceTypePattern.compensatoryRestCnr, PeriodType.always, 
       DefaultTakable.T_RIPOSI_CNR, null, null, false, false),
+  
+  RIPOSI_CNR_MISSIONE("91MS/91MD - Riposo compensativo recupero missione",
+      "", 
+      DefaultCategoryType.RIPOSI_COMPENSATIVI_CNR, 1, 
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+      DefaultTakable.T_RIPOSI_CNR_MISSIONE, null, null, false, false),
   
   RIPOSI_CNR_DIPENDENTI("91 - Riposo compensativo", 
       "", 
@@ -251,7 +256,7 @@ public enum DefaultGroup {
       "", 
       DefaultCategoryType.CODICI_AUTOMATICI, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.year, 
-      DefaultTakable.T_PB, null, null, true, false);
+      DefaultTakable.T_PB, null, null, true, true);
 
   public String description;
   public String chainDescription;
