@@ -1,0 +1,51 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+
+%{ 
+  title = messages.get('notification.all');
+  if (filter.equals(dao.NotificationDao.NotificationFilter.TO_READ)) {
+    title = messages.get('notification.toRead');
+  }
+  if (filter.equals(dao.NotificationDao.NotificationFilter.ARCHIVED)) {
+    title = messages.get('notification.archived');
+  }
+}%  
+#{set title:title /}
+
+<div class="container">
+  
+  #{title title:title /}
+  
+  <div class="row" style="margin-bottom:20px">
+    <div class="col-sm-9">
+    #{form action:@Notifications.filter(), method:'POST', autocomplete:false, class:'form-inline auto-submit'}
+      #{ff.fselectEnum 'filter', items:dao.NotificationDao.NotificationFilter.values(), value:filter, byEquals:'true', sronly:true /}
+      #{ff.finput 'message', sronly:true, placeholder:'Filtra testo', faicon:'filter' /}
+      #{b.submit '', fa:'search', color:'primary', popover:'notification.show'/}
+    #{/form}    
+    </div>
+    <div class="col-sm-3">
+    #{if filter.equals(dao.NotificationDao.NotificationFilter.TO_READ) && !unReadNotifications.empty}
+      #{form action:@Notifications.readAll(), method:'POST', autocomplete:false, class:'form-inline auto-submit'}
+        #{f.hidden filter, value:filter /}
+        #{f.hidden message, value:message /}
+        #{b.submit 'Archivia tutte (' + unReadNotifications.total + ')', fa:'check-circle', class:'pull-right', color:'warning', popover:'notification.show'/}
+      #{/form}
+    #{/if}  
+    </div>
+  </div>
+    
+  #{paginate notifications, 'data-remote':'#notifications'}
+   <ul class="list-group">
+     #{list items:notifications.results, as:'notification'}
+       #{include './_notification.html' /}
+     #{/list}
+   </ul>
+  #{/paginate}
+  
+  
+</div>
+
+
+
+

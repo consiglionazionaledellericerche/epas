@@ -13,6 +13,7 @@ import dao.CompetenceCodeDao;
 import dao.MemoizedCollection;
 import dao.MemoizedResults;
 import dao.NotificationDao;
+import dao.NotificationDao.NotificationFilter;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.QualificationDao;
@@ -119,8 +120,8 @@ public class TemplateUtility {
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
           @Override
           public ModelQuery.SimpleResults<Notification> get() {
-            return notificationDao.listUnreadFor(
-                Security.getUser().get(), Optional.absent());
+            return notificationDao.listFor(Security.getUser().get(), Optional.absent(),
+                Optional.of(NotificationFilter.TO_READ));
           }
         });
 
@@ -128,7 +129,8 @@ public class TemplateUtility {
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
           @Override
           public ModelQuery.SimpleResults<Notification> get() {
-            return notificationDao.listFor(Security.getUser().get(), Optional.absent(), true);
+            return notificationDao.listFor(Security.getUser().get(), Optional.absent(), 
+                Optional.of(NotificationFilter.ARCHIVED));
           }
         });
   }
