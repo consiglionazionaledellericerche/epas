@@ -1125,14 +1125,17 @@ public class PersonDayManager {
   /**
    * Restituisce la quantita' in minuti del'orario dovuto alle timbrature valide in un giono,
    * che facciano parte della finestra temporale specificata.
+   * Il metodo viene utilizzato nel calcolo del tempo a lavoro nei casi di finestre di ingresso/uscita
+   * specificate per quanto riguarda l'apertura/chiususa sede e nel caso di calcolo del tempo a lavoro
+   * all'internod di una fascia di turno.
    *
    * @param validPairs coppie valide di timbrature per il tempo a lavoro
-   * @param startWork  inizio finestra
-   * @param endWork    fine finestra
+   * @param start  inizio finestra
+   * @param end    fine finestra
    * @return minuti
    */
-  private int workingMinutes(List<PairStamping> validPairs,
-      LocalTime startWork, LocalTime endWork) {
+  public int workingMinutes(List<PairStamping> validPairs,
+      LocalTime start, LocalTime end) {
 
     int workingMinutes = 0;
 
@@ -1140,17 +1143,17 @@ public class PersonDayManager {
     for (PairStamping validPair : validPairs) {
       LocalTime consideredStart = new LocalTime(validPair.first.date);
       LocalTime consideredEnd = new LocalTime(validPair.second.date);
-      if (consideredEnd.isBefore(startWork)) {
+      if (consideredEnd.isBefore(start)) {
         continue;
       }
-      if (consideredStart.isAfter(endWork)) {
+      if (consideredStart.isAfter(end)) {
         continue;
       }
-      if (consideredStart.isBefore(startWork)) {
-        consideredStart = startWork;
+      if (consideredStart.isBefore(start)) {
+        consideredStart = start;
       }
-      if (consideredEnd.isAfter(endWork)) {
-        consideredEnd = endWork;
+      if (consideredEnd.isAfter(end)) {
+        consideredEnd = end;
       }
       workingMinutes += DateUtility.toMinute(consideredEnd) - DateUtility.toMinute(consideredStart);
     }
