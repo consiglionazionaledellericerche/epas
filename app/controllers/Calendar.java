@@ -21,6 +21,7 @@ import manager.ShiftManager2;
 import models.Person;
 import models.PersonDay;
 import models.PersonShiftDay;
+import models.PersonShiftShiftType;
 import models.ShiftType;
 import models.User;
 import models.absences.Absence;
@@ -75,24 +76,15 @@ public class Calendar extends Controller {
 
   public static void shiftPeople(ShiftType activity, LocalDate start, LocalDate end) {
 
-    final List<Person> people;
-    if (activity.isPersistent() && start != null && end != null) {
-      people = activity.personShiftShiftTypes.stream()
-          .filter(personShiftShiftType -> personShiftShiftType.dateRange().isConnected(
-              Range.closed(start, end)))
-          .map(personShiftShiftType -> personShiftShiftType.personShift.person)
-          .sorted(Person.personComparator())
-          .collect(Collectors.toList());
-    } else {
-      people = new ArrayList<>();
-    }
+    final List<PersonShiftShiftType> people = shiftWorkers(activity, start, end);
 
     List<ShiftEvent> eventPeople = new ArrayList<>();
     int index = 0;
 
-    for (Person person : people) {
+    for (PersonShiftShiftType personShift : people) {
       // lenght-1 viene fatto per scludere l'ultimo valore che è dedicato alle assenze
       final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
+      final Person person = personShift.personShift.person;
 
       final ShiftEvent event = ShiftEvent.builder()
           .allDay(true)
@@ -102,16 +94,27 @@ public class Calendar extends Controller {
           .color(eventColor.backgroundColor)
           .textColor(eventColor.textColor)
           .borderColor(eventColor.borderColor)
-          .className("removable event-orange")
+          .className("removable")
           .mobile(person.mobile)
           .email(person.email)
+          .jolly(personShift.jolly)
           .build();
 
       eventPeople.add(event);
       index++;
     }
 
-    render(eventPeople);
+    final List<ShiftEvent> shiftWorkers = eventPeople.stream()
+        .filter(shiftEvent -> !shiftEvent.getJolly()).sorted(
+            Comparator.comparing(ShiftEvent::getTitle))
+        .collect(Collectors.toList());
+
+    final List<ShiftEvent> jolly = eventPeople.stream()
+        .filter(shiftEvent -> shiftEvent.getJolly()).sorted(
+            Comparator.comparing(ShiftEvent::getTitle))
+        .collect(Collectors.toList());
+
+    render(shiftWorkers, jolly);
   }
 
 
@@ -138,17 +141,13 @@ public class Calendar extends Controller {
 
     List<ShiftEvent> events = new ArrayList<>();
 
-    List<Person> people = shiftType.personShiftShiftTypes.stream()
-        .filter(personShiftShiftType -> personShiftShiftType.dateRange().isConnected(
-            Range.closed(start, end)))
-        .map(personShiftShiftType -> personShiftShiftType.personShift.person)
-        .sorted(Person.personComparator())
-        .collect(Collectors.toList());
+    List<PersonShiftShiftType> people = shiftWorkers(shiftType, start, end);
 
     int index = 0;
 
     // prende i turni associati alle persone attive in quel turno
-    for (Person person : people) {
+    for (PersonShiftShiftType personShift : people) {
+      final Person person = personShift.personShift.person;
       final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
       events.addAll(shiftEvents(shiftType, person, start, end, eventColor));
       events.addAll(absenceEvents(person, start, end));
@@ -323,48 +322,48 @@ public class Calendar extends Controller {
   public static void newShift(long personId, LocalDate date, ShiftSlot shiftSlot,
       ShiftType shiftType) {
 
-    log.debug("CHIAMATA LA CREAZIONE DEL TURNO: personId {} - day {} - slot {} - shiftType {}",
-        personId, date, shiftSlot, shiftType);
-    // TODO: creare il personShiftDay se rispetta tutti i canoni e le condizioni di possibile esistenza
-    // TODO: ricordarsi di controllare se la persona è attiva sull'attività al momento della creazione del
-    // personshiftDay
-    // TODO: vediamo se la renderJSON è il metodo migliore per ritornare l'id del personShiftDay creato
-
-    String color = ""; //TODO:
-
-    // crea il personShiftDay
-    PersonShiftDay personShiftDay = new PersonShiftDay();
-    personShiftDay.date = date;
-    personShiftDay.shiftType = shiftType;
-    personShiftDay.setShiftSlot(shiftSlot);
-    personShiftDay.personShift = shiftDao.getPersonShiftByPersonAndType(personId, shiftType.type);
-
-    // controlla che possa essere salvato nel giorno
-    List<String> errors = shiftManager2.checkShiftDay(personShiftDay, date);
-
-    if (errors.isEmpty()) {
-      // contruisce l'evento
-      //TODO: con gli errori? e poi li prendi nel calendario? (messaggi o errCode?) Oppure?
-      ShiftEvent event = ShiftEvent.builder()
-          .allDay(true)
-          .shiftSlot(personShiftDay.shiftSlot)
-          .personShiftDayId(personShiftDay.id)
-          .title(personShiftDay.getSlotTime() + '\n' + personShiftDay.personShift.person.fullName())
-          .start(personShiftDay.date)
-          .color(color)
-          // TODO: .error()
-          .className("removable")
-          .textColor("black")
-          .borderColor("black")
-          .build();
-
-      /**
-       * salva il personShiftDay
-       *
-       * aggiorna le competenze
-       * calcolate come? prendendole dal ShiftTimetable o calcolandole dall'orario?
-       */
-    }
+//    log.debug("CHIAMATA LA CREAZIONE DEL TURNO: personId {} - day {} - slot {} - shiftType {}",
+//        personId, date, shiftSlot, shiftType);
+//    // TODO: creare il personShiftDay se rispetta tutti i canoni e le condizioni di possibile esistenza
+//    // TODO: ricordarsi di controllare se la persona è attiva sull'attività al momento della creazione del
+//    // personshiftDay
+//    // TODO: vediamo se la renderJSON è il metodo migliore per ritornare l'id del personShiftDay creato
+//
+//    String color = ""; //TODO:
+//
+//    // crea il personShiftDay
+//    PersonShiftDay personShiftDay = new PersonShiftDay();
+//    personShiftDay.date = date;
+//    personShiftDay.shiftType = shiftType;
+//    personShiftDay.setShiftSlot(shiftSlot);
+//    personShiftDay.personShift = shiftDao.getPersonShiftByPersonAndType(personId, shiftType.type);
+//
+//    // controlla che possa essere salvato nel giorno
+//    List<String> errors = shiftManager2.checkShiftDay(personShiftDay, date);
+//
+//    if (errors.isEmpty()) {
+//      // contruisce l'evento
+//      //TODO: con gli errori? e poi li prendi nel calendario? (messaggi o errCode?) Oppure?
+//      ShiftEvent event = ShiftEvent.builder()
+//          .allDay(true)
+//          .shiftSlot(personShiftDay.shiftSlot)
+//          .personShiftDayId(personShiftDay.id)
+//          .title(personShiftDay.getSlotTime() + '\n' + personShiftDay.personShift.person.fullName())
+//          .start(personShiftDay.date)
+//          .color(color)
+//          // TODO: .error()
+//          .className("removable")
+//          .textColor("black")
+//          .borderColor("black")
+//          .build();
+//
+//      /**
+//       * salva il personShiftDay
+//       *
+//       * aggiorna le competenze
+//       * calcolate come? prendendole dal ShiftTimetable o calcolandole dall'orario?
+//       */
+//    }
 //    renderJSON(mapper.writeValueAsString(event));
   }
 
@@ -383,7 +382,17 @@ public class Calendar extends Controller {
     // legge inizio e fine mese
     final LocalDate firstOfMonth = new LocalDate(year, month, 1);
     final LocalDate lastOfMonth = firstOfMonth.dayOfMonth().withMaximumValue();
+  }
 
-
+  private static List<PersonShiftShiftType> shiftWorkers(ShiftType activity, LocalDate start,
+      LocalDate end) {
+    if (activity.isPersistent() && start != null && end != null) {
+      return activity.personShiftShiftTypes.stream()
+          .filter(personShiftShiftType -> personShiftShiftType.dateRange().isConnected(
+              Range.closed(start, end)))
+          .collect(Collectors.toList());
+    } else {
+      return new ArrayList<>();
+    }
   }
 }
