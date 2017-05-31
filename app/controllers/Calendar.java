@@ -322,6 +322,7 @@ public class Calendar extends Controller {
 
   public static void newShift(long personId, LocalDate date, ShiftSlot shiftSlot,
       ShiftType shiftType) {
+
     log.debug("CHIAMATA LA CREAZIONE DEL TURNO: personId {} - day {} - slot {} - shiftType {}",
         personId, date, shiftSlot, shiftType);
     // TODO: creare il personShiftDay se rispetta tutti i canoni e le condizioni di possibile esistenza
@@ -357,12 +358,14 @@ public class Calendar extends Controller {
           .borderColor("black")
           .build();
 
-      // salva il personShiftDay
-
-      // aggiorna le competenze
-      // calcolate come? prendendole dal ShiftTimetable o calcolandole dall'orario?
+      /**
+       * salva il personShiftDay
+       *
+       * aggiorna le competenze
+       * calcolate come? prendendole dal ShiftTimetable o calcolandole dall'orario?
+       */
     }
-    //renderJSON(mapper.writeValueAsString(event));
+//    renderJSON(mapper.writeValueAsString(event));
   }
 
   /**

@@ -148,9 +148,10 @@ $(document).ready(function() {
             $this.fullCalendar('removeEvents', event._id);
           },
           success: function(response) {
-            console.log(JSON.stringify(response));
-            event.shiftSlot = shiftSlot;
-            event.personShiftDayId = response;
+            $this.fullCalendar( 'refetchEvents' );
+//            console.log(JSON.stringify(response));
+//            event.shiftSlot = shiftSlot;
+//            event.personShiftDayId = response;
           }
         });
       }
