@@ -168,7 +168,7 @@ public class UserDao extends DaoBase {
   }
 
   /**
-   * Ritorna true se l'user è di sistema oppure è amministatore del personale o tecnico.
+   * Ritorna true se l'user è di sistema oppure è amministatore: responsabile, personale, tecnico.
    * @param user user
    * @return esito
    */
@@ -176,7 +176,8 @@ public class UserDao extends DaoBase {
     Preconditions.checkNotNull(user);
 
     return user.isSystemUser()
-        || user.hasRoles(Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN) ;
+        || user.hasRoles(Role.SEAT_SUPERVISOR, Role.PERSONNEL_ADMIN, 
+            Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN) ;
   }
 
   /**

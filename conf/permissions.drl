@@ -502,6 +502,36 @@ then
  $c.grant();
 end
 
+/*******************************************************************************
+ * Azioni utente con ruolo SEAT_SUPERVISOR
+ ******************************************************************************/
+rule RoleSeatSuperVisor_Generic
+when
+ $uro: UsersRolesOffices()
+ Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
+ $c: PermissionCheck(action in (
+
+        "Stampings.personStamping"
+
+        ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule RoleSeatSuperVisor_inOffice
+when
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
+ Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
+ $c: PermissionCheck(action in (
+ 
+        "Stampings.personStamping"
+
+        ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
 
 /*******************************************************************************
  * Azioni utente con ruolo almeno PERSONNEL_ADMIN_MINI
