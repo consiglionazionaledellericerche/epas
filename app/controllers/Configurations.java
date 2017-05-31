@@ -23,6 +23,7 @@ import manager.PeriodManager;
 import manager.configurations.ConfigurationDto;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
+import manager.configurations.EpasParam.EpasParamCategory;
 import manager.configurations.EpasParam.EpasParamValueType;
 import manager.configurations.EpasParam.EpasParamValueType.IpList;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
@@ -205,12 +206,16 @@ public class Configurations extends Controller {
    *
    * @param officeId l'id della sede di cui visualizzare le configurazioni.
    */
-  public static void show(Long officeId) {
+  public static void show(Long officeId, EpasParamCategory paramCategory) {
 
     final Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
 
     rules.checkIfPermitted(office);
+    
+    if (paramCategory == null) {
+      paramCategory = EpasParam.EpasParamCategory.GENERAL;
+    }
 
     final List<Configuration> configurations = configurationManager
         .getOfficeConfigurationsByDate(office, LocalDate.now());
@@ -236,7 +241,7 @@ public class Configurations extends Controller {
         .filter(attachment -> attachment.type == AttachmentType.TR_AUTOCERTIFICATION).findFirst()
         .orElse(null);
 
-    render(office, generals, yearlies, periodics, autocertifications, autocert);
+    render(office, paramCategory, generals, yearlies, periodics, autocertifications, autocert);
   }
 
   /**
@@ -301,8 +306,8 @@ public class Configurations extends Controller {
         configuration.epasParam.recomputationTypes, recomputeRecap.recomputeFrom);
 
     flash.success("Parametro aggiornato correttamente.");
-
-    show(configuration.office.id);
+    
+    show(configuration.office.id, configuration.epasParam.category);
   }
 
   /**
@@ -419,7 +424,7 @@ public class Configurations extends Controller {
     attachment.office = office;
     attachment.save();
 
-    show(officeId);
+    show(officeId, EpasParam.EpasParamCategory.AUTOCERTIFICATION);
   }
 
   public static void removeAttachment(Long attachmentId) {
@@ -434,7 +439,7 @@ public class Configurations extends Controller {
 
     attachment.delete();
 
-    show(officeId);
+    show(officeId, EpasParam.EpasParamCategory.AUTOCERTIFICATION);
   }
 
   public static void getAttachment(Long attachmentId) {
