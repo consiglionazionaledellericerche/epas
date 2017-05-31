@@ -103,11 +103,14 @@ public class Calendar extends Controller {
           .textColor(eventColor.textColor)
           .borderColor(eventColor.borderColor)
           .className("removable event-orange")
+          .mobile(person.mobile)
+          .email(person.email)
           .build();
 
       eventPeople.add(event);
       index++;
     }
+
 
     render(eventPeople);
   }
