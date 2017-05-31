@@ -28,7 +28,9 @@
     #{if filter.equals(dao.NotificationDao.NotificationFilter.TO_READ) && !unReadNotifications.empty}
       #{form action:@Notifications.readAll(), method:'POST', autocomplete:false, class:'form-inline auto-submit'}
         #{f.hidden filter, value:filter /}
-        #{f.hidden message, value:message /}
+        #{if message}
+          #{f.hidden message, value:message /}
+        #{/if}  
         #{b.submit 'Archivia tutte (' + unReadNotifications.total + ')', fa:'check-circle', class:'pull-right', color:'warning', popover:'notification.show'/}
       #{/form}
     #{/if}  
