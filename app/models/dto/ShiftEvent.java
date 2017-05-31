@@ -7,6 +7,10 @@ import lombok.Data;
 import models.ShiftType;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.joda.time.LocalDate;
 
 /**
@@ -44,4 +48,5 @@ public class ShiftEvent {
   private Long personId;
   private ShiftSlot shiftSlot;
   private EventColor eventColor;
+  private List<String> errors= new ArrayList<>();
 }

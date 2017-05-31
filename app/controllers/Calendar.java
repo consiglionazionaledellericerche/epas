@@ -31,6 +31,7 @@ import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.dto.ShiftEvent;
 import models.enumerate.ShiftSlot;
+import models.enumerate.ShiftTroubles;
 import models.enumerate.Troubles;
 
 import org.joda.time.LocalDate;
@@ -57,6 +58,7 @@ import models.User;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.dto.ShiftEvent;
+import models.enumerate.CalendarShiftTroubles;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
 import org.joda.time.LocalDate;
@@ -218,7 +220,9 @@ public class Calendar extends Controller {
   }
 
 
-
+  /*
+   * Carica le assenze di una persona in un certo periodo per essere visualizzate nel calendario
+   */
   private static List<ShiftEvent> absenceEvents(Person person, LocalDate start, LocalDate end) {
 
     final List<JustifiedTypeName> types = ImmutableList
@@ -272,94 +276,66 @@ public class Calendar extends Controller {
   /*
    * Chiamata dal fullCalendar dei turni per ogni evento di drop di un turno sul calendario.
    * Controlla se il turno passato come parametro può essere salvato in un dato giorno 
-   * ed eventualmente lo salva.
+   * ed eventualmente lo salva, altrimenti restituisce un errore
    * 
    * @param long personShiftDayId: id del persnShiftDay da controllare
    * @param LocalDate newDate: giorno nel quale salvare il turno
    * 
-   * @out String messages: eventuali messaggi di errore
+   * @out error 409 con messaggio di ShiftTroubles.PERSON_IS_ABSENT, CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED,
+   *                                   CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED
    */
-  public static void changeShift(long personShiftDayId, LocalDate newDate) {
+  public static void changeShift(long personShiftDayId, LocalDate newDate) throws JsonProcessingException {
 
     // TODO: 23/05/17 Lo shiftType dev'essere valido e l'utente deve avere i permessi per lavorarci
 
     log.debug("Chiamato metodo changeShift: personShiftDayId {} - newDate {} ", personShiftDayId, newDate);
    
-    List<String> errors = new ArrayList<>();
-    String messages = "";
+    String message = "";
  
     // legge il turno da spostare
     PersonShiftDay oldShift = shiftDao.getPersonShiftDayById(personShiftDayId);
 
-    // controlla se può essere spostato nella nuova data
-    errors = shiftManager2.checkShiftDay(oldShift, newDate);
-    if (errors.isEmpty()) {
+    // controlla gli eventuali errori di consitenza nel calendario
+    List<String> errors = ShiftManager2.checkShiftEvent(oldShift, newDate);
+    if (((errors.isEmpty()) || errors.contains(ShiftTroubles.PROBLEMS_ON_OTHER_SLOT.toString()))) {
       //salva il nuovo turno
-      PersonShiftDay newShift = oldShift;
-      newShift.date = newDate;
-      newShift.save();
-      log.info("Aggiornato PersonShiftDay = {} con {}\n",
-          oldShift, newShift);
+      oldShift.date = newDate;
+      // oldShift.troubles
+      oldShift.save();
+      log.info("Aggiornato PersonShiftDay con {}\n",
+          oldShift);
       
-      // cancella quello vecchio
-      shiftDao.deletePersonShiftDay(oldShift);
-
+      // restituisco l'evento
+      ShiftEvent event = ShiftEvent.builder()
+          .shiftSlot(oldShift.shiftSlot)
+          .personShiftDayId(oldShift.id)
+          .title(oldShift.getSlotTime() + '\n' + oldShift.personShift.person.fullName())
+          .errors(errors)
+          .build();
+ 
+      renderJSON(mapper.writeValueAsString(event));
+      
     } else {      
-      // restituisce il messaggi per gli errori
-      for (String errCode: errors) {
-        String msg = "calendar.".concat(errCode);
-        messages.concat(Messages.get(msg)).concat("<br />");
+      // prende il messaggi di errore
+      for (String error: errors) {
+        message.concat(Messages.get(error));
       }
+      response.status = 409;
+      renderText(message);
+
     }
-  }
-
-
-  /*
-   * Controlla la compatibilità del giorno di turno con le presenze
-   * e l'orraio di lavoro nel giorno passato come parametro
-   *
-   * @param PersonShiftDay day - giorno di turno
-   */
-  public static String checkShiftDayWhithPresence(PersonShiftDay shift, LocalDate date) {
-
-    Optional<PersonDay> personDay = personDayDao.getPersonDay(shift.personShift.person, date);
-    String msg = "";
-
-    // se c'è qualche timbratura o assenza in quel giorno
-    if (personDay.isPresent()) {
-
-      // controlla che il nuovo turno non coincida con un giorno di assenza del turnista
-      // ASSENZA o MISSIONE ????????
-      if (personDayManager.isAllDayAbsences(personDay.get())) {
-        msg = "Il turno di " + shift.personShift.person.getFullname() + " nel giorno " + shift.date
-            .toString("dd MMM") + " coincide con un suo giorno di assenza";
-      } else if (!LocalDate.now().isBefore(shift.date)) {
-        // non sono nel futuro controllo le timbrature
-        // controlla se non è una giornata valida di lavoro
-        // (??????????) MESSAGGI DIVERSI SE 1 TIMBRATURA 0 timbrature o diaccoppiate ecc
-        IWrapperPersonDay wrPersonDay = wrapperFactory.create(personDay.get());
-        if (!personDayManager.isValidDay(personDay.get(), wrPersonDay)) {
-          msg = "Giornata lavorativa non valida il" + shift.date.toString("dd MMM");
-        } else {
-
-          // TODO: controlla la compatibilità tra le timbrature e il turno
-        }
-      }
-    }
-    return msg;
   }
 
 
   public static void newShift(long personId, LocalDate date, ShiftSlot shiftSlot,
-      ShiftType shiftType) {
+      ShiftType shiftType) throws JsonProcessingException {
     log.debug("CHIAMATA LA CREAZIONE DEL TURNO: personId {} - day {} - slot {} - shiftType {}",
         personId, date, shiftSlot, shiftType);
-    // TODO: creare il personShiftDay se rispetta tutti i canoni e le condizioni di possibile esistenza
     // TODO: ricordarsi di controllare se la persona è attiva sull'attività al momento della creazione del
     // personshiftDay
-    // TODO: vediamo se la renderJSON è il metodo migliore per ritornare l'id del personShiftDay creato
     
     String color = ""; //TODO:
+    String message = "";
     
     // crea il personShiftDay
     PersonShiftDay personShiftDay = new PersonShiftDay();
@@ -370,30 +346,27 @@ public class Calendar extends Controller {
     
     // controlla che possa essere salvato nel giorno
     List<String> errors = shiftManager2.checkShiftDay(personShiftDay, date);
-    
     if (errors.isEmpty()) {
+      personShiftDay.save();
+      
       // contruisce l'evento
       //TODO: con gli errori? e poi li prendi nel calendario? (messaggi o errCode?) Oppure?
       ShiftEvent event = ShiftEvent.builder()
-          .allDay(true)
           .shiftSlot(personShiftDay.shiftSlot)
           .personShiftDayId(personShiftDay.id)
           .title(personShiftDay.getSlotTime() + '\n' + personShiftDay.personShift.person.fullName())
-          .start(personShiftDay.date)
-          .color(color)
-          // TODO: .error()
-          .className("removable")
-          .textColor("black")
-          .borderColor("black")
+          .errors(errors)
           .build();
-      
-      // salva il personShiftDay
-      
-      
-      // aggiorna le competenze
-      // calcolate come? prendendole dal ShiftTimetable o calcolandole dall'orario?
+    
+      renderJSON(mapper.writeValueAsString(event));
+    } else {
+      response.status = 409;
+      // prende il messaggi di errore
+      for (String error: errors) {
+        message.concat(Messages.get(error));
+      }
+      renderText(message);
     }
-     //renderJSON(mapper.writeValueAsString(event));
   }
 
   

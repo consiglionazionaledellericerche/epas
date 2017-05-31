@@ -167,12 +167,36 @@ public class ShiftManager2 {
     return errors;
   }
   
+  /*
+   * Controlla la compatibilità degli eventi nel calendario:
+   * assenze e sovrapposizione di turno
+   */
+  public static List<String> checkShiftEvent(PersonShiftDay shift, LocalDate newDate) {
+    List<String> errors = new ArrayList<>();
+    
+    // controlla se può essere spostato nella nuova data
+    String absenceError = checkShiftDayCompatibilityWhithAllDayPresence(shift, newDate);
+    String overlapError = checkShiftDayWhithShiftDays(shift, newDate);
+      
+    // prende il messaggio di errore
+    if (!absenceError.isEmpty()) errors.add(absenceError);
+    if (!overlapError.isEmpty()) errors.add(overlapError);
+
+    return errors;
+  }
+  
   
   /*
    * Controlla la compatibilità del giorno di turno con le presenze
-   * e l'orraio di lavoro nel giorno passato come parametro 
+   * e l'orraio di lavoro in turno nel giorno passato come parametro 
    * 
-   * @param PersonShiftDay day - giorno di turno
+   * @param PersonShiftDay day -  turno
+   * @param LocalDate date - giorno in cui fare i controlli
+   * 
+   * @return String:  ShiftTroubles.PERSON_IS_ABSENT, Troubles.NO_ABS_NO_STAMP,
+   *                    ShiftTroubles.IN_PROGRESS, Troubles.UNCOUPLED_WORKING,
+   *                    Troubles.NOT_ENOUGH_WORKTIME, 
+   *                    + quelli di checkShiftDayCompatibilityWhithSlot
    */
   public static String checkShiftDayWhithPresence(PersonShiftDay shift, LocalDate date) {
 
@@ -201,6 +225,9 @@ public class ShiftManager2 {
    * - turni associati alla stessa persona in slot diversi
    * - turni associati ad altra persona nello stesso slot
    * - turno dello slot complementare non valido
+   * 
+   * @return CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED, CalendarShiftTroubles.PERSON_SHIFT_ASSIGNED,
+   *        ShiftTroubles.PROBLEMS_ON_OTHER_SLOT
    */
   public static String checkShiftDayWhithShiftDays(PersonShiftDay shift, LocalDate date) {
     String errCode = "";
@@ -222,6 +249,24 @@ public class ShiftManager2 {
     return errCode;
   }
   
+  /*
+   * Controlla se il PersonShiftDay è compatibile con la presenza in Istituto in un determinato giorno:
+   * - assenza o missione
+   * 
+   * @return ShiftTroubles.PERSON_IS_ABSENT, ""
+   */
+  public static String checkShiftDayCompatibilityWhithAllDayPresence(PersonShiftDay shift, LocalDate date) {
+    String errCode = "";
+    Optional<PersonDay> personDay = personDayDao.getPersonDay(shift.personShift.person, date);
+    
+    // controlla che il nuovo turno non coincida con un giorno di assenza del turnista 
+    if (personDayManager.isAllDayAbsences(personDay.get())) {      
+      errCode = ShiftTroubles.PERSON_IS_ABSENT.toString();
+      //errCode = "Il turno di "+ shift.personShift.person.getFullname() +" nel giorno " + shift.date.toString("dd MMM") + " coincide con un suo giorno di assenza";
+    }  
+    return errCode;
+   }
+  
   
   /*
    * Controlla se il PersonShiftDay è compatibile con la presenza in Istituto in un determinato giorno:
@@ -229,6 +274,8 @@ public class ShiftManager2 {
    * - mancata timbratura
    * - timbrature disaccoppiate
    * - tempo di lavoro insufficiente 
+   * 
+   * @return String: 
    */
   public static String checkShiftDayCompatibilityWhithPresence(PersonShiftDay shift, Optional<PersonDay> personDay) {
     String errCode = "";

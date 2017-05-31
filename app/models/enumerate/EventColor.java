@@ -8,6 +8,7 @@ public enum EventColor {
 
 
   ORANGE("#ffe5ad", "#ffcd61", "#966700"),
+  SUPER_RED("red","black","white"),
   GREEN("#dff0d8", "#b9e098", "#3c763d"),
   LIGHTPURPLE("#e5cee6", "#a77ca9", "#8a518e"),
   BLUE("#d9edf7", "#bce8f1", "#31708f"),
