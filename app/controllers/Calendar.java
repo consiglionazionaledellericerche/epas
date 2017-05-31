@@ -150,7 +150,6 @@ public class Calendar extends Controller {
     // prende i turni associati alle persone attive in quel turno
     for (Person person : people) {
       final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
-
       events.addAll(shiftEvents(shiftType, person, start, end, eventColor));
       events.addAll(absenceEvents(person, start, end));
       index++;
@@ -199,11 +198,7 @@ public class Calendar extends Controller {
     final List<JustifiedTypeName> types = ImmutableList
         .of(JustifiedTypeName.all_day, JustifiedTypeName.assign_all_day);
 
-    List<Absence> absences = absenceDao
-        .findByPersonAndDate(person, start, Optional.fromNullable(end), Optional.absent()).list()
-        .stream()
-        .filter(absence -> types.contains(absence.justifiedType.name))
-        .sorted(Comparator.comparing(ab -> ab.personDay.date)).collect(Collectors.toList());
+    List<Absence> absences = absenceDao.filteredByTypes(person, start, end, types);
     List<ShiftEvent> events = new ArrayList<>();
     ShiftEvent event = null;
 
@@ -220,6 +215,7 @@ public class Calendar extends Controller {
       if (event == null
           || event.getEnd() == null && !event.getStart().plusDays(1).equals(abs.personDay.date)
           || event.getEnd() != null && !event.getEnd().equals(abs.personDay.date)) {
+
         event = ShiftEvent.builder()
             .allDay(true)
             .title("Assenza di " + abs.personDay.person.fullName())
@@ -238,7 +234,6 @@ public class Calendar extends Controller {
       }
 
     }
-
     return events;
   }
 
