@@ -3,9 +3,9 @@ $(document).ready(function() {
     var $this = $(this);
     var data = {
       columnFormat: 'dddd',
-      selectable: true,
       fixedWeekCount: false,
       droppable: true,
+      eventOrder: "editable,title",
       loading: function(loading) {
         if (loading) {
           $this.addClass('reloading');
