@@ -1,6 +1,7 @@
 package controllers;
 
 import com.google.common.base.Optional;
+
 import com.mysema.query.SearchResults;
 
 import dao.OfficeDao;
@@ -31,16 +32,22 @@ public class Institutes extends Controller {
 
   public static void index() {
     flash.keep();
-    list(null);
+    list(null, null, null);
   }
 
-  public static void list(String name) {
+  /**
+   * Lista degli istituti.
+   * @param instituteName filtro nome istituto
+   * @param officeName filtro sede
+   */
+  public static void list(String instituteName, String officeName, String codes) {
 
-    SearchResults<?> results = officeDao.institutes(Optional.<String>fromNullable(name),
+    SearchResults<?> results = officeDao.institutes(Optional.<String>fromNullable(instituteName),
+        Optional.<String>fromNullable(officeName), Optional.<String>fromNullable(codes),
         Security.getUser().get(), roleDao.getRoleByName(Role.TECHNICAL_ADMIN))
         .listResults();
 
-    render(results, name);
+    render(results, instituteName);
   }
 
   public static void edit(Long id) {

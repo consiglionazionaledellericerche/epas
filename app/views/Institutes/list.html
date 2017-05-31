@@ -3,22 +3,29 @@
 #{set title: 'ePAS - Gestione sedi'  /}
 
 <div class="container">
-
-  #{form action:@Institutes.list(), class:'form-inline', method:'GET',
-  'data-reload':'#results', autocomplete:'off'}
-
+  
   <div class="row">
-    #{f.searchInput 'name' /}
+	  <div class="col-md-9">
+	  #{form action:@Institutes.list(), class:'form-inline', method:'GET',
+	  'data-reload':'#results', autocomplete:'off'}
+	  
+	    #{ff.finput 'instituteName', sronly:true, placeholder:'Filtra nome istituto', faicon:'university' /}
+	    #{ff.finput 'officeName', sronly:true, placeholder:'Filtra nome sede', faicon:'cogs' /}
+	    #{ff.finput 'codes', sronly:true, placeholder:'Filtra codici', faicon:'barcode' /}
+	    
+	  #{/form}
+	  </div>
+	  <div class="col-md-3">
+	        #{secure.check 'Institutes.blank'}
+	        #{b.actions}
+	          <a class="btn btn-success" href="@{blank()}" data-async-modal="#modalEditInstitute">
+	          <i class="fa fa-plus"></i> &{'Institutes.blank'}
+	          </a>
+	        #{/b.actions}
+	     #{/secure.check}
+	  </div>
   </div>
-  #{/form}
-  <br>
-  #{secure.check 'Institutes.blank'}
-  #{b.actions}
-  <a class="btn btn-success" href="@{blank()}" data-async-modal="#modalEditInstitute">
-    <i class="fa fa-plus"></i> &{'Institutes.blank'}
-  </a>
-  #{/b.actions}
-  #{/secure.check}
+  
 
   <div id="instituteList"> <!-- per il risultato della modale asincrona -->
 
