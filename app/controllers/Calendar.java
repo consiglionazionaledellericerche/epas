@@ -3,52 +3,21 @@ package controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Range;
 import dao.AbsenceDao;
-import dao.PersonDao;
 import dao.PersonDayDao;
-import dao.PersonShiftDayDao;
 import dao.ShiftDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
-
-import lombok.extern.slf4j.Slf4j;
-
-import manager.PersonDayManager;
-import manager.ShiftManager2;
-import models.Person;
-import models.PersonDay;
-import models.PersonShift;
-import models.PersonShiftDay;
-import models.ShiftCancelled;
-import models.ShiftType;
-import models.User;
-import models.absences.Absence;
-import models.absences.JustifiedType.JustifiedTypeName;
-import models.dto.ShiftEvent;
-import models.enumerate.ShiftSlot;
-import models.enumerate.Troubles;
-
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
-
-import play.i18n.Messages;
-import play.mvc.Controller;
-import play.mvc.Http;
-import play.mvc.Router;
-import play.mvc.With;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayManager;
+import manager.ShiftManager2;
 import models.Person;
 import models.PersonDay;
 import models.PersonShiftDay;
@@ -60,6 +29,7 @@ import models.dto.ShiftEvent;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
 import org.joda.time.LocalDate;
+import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
@@ -121,13 +91,17 @@ public class Calendar extends Controller {
     int index = 0;
 
     for (Person person : people) {
+      // lenght-1 viene fatto per scludere l'ultimo valore che è dedicato alle assenze
+      final EventColor eventColor = EventColor.values()[index % (EventColor.values().length-1)];
+
       final ShiftEvent event = ShiftEvent.builder()
           .allDay(true)
           .title(person.fullName())
           .personId(person.id)
-          .eventColor(EventColor.values()[index % EventColor.values().length])
-          .color(EventColor.values()[index % EventColor.values().length].backgroundColor)
-          .textColor(EventColor.values()[index % EventColor.values().length].textColor)
+          .eventColor(eventColor)
+          .color(eventColor.backgroundColor)
+          .textColor(eventColor.textColor)
+          .borderColor(eventColor.borderColor)
           .className("removable event-orange")
           .build();
 
@@ -138,7 +112,7 @@ public class Calendar extends Controller {
     render(eventPeople);
   }
 
-  
+
   /*
    * Calvella un turno dal Database
    */
@@ -148,10 +122,10 @@ public class Calendar extends Controller {
     response.status = Http.StatusCode.BAD_REQUEST;
     renderText("Un messaggio qualsiasi");
     //psd.delete();
-    
+
   }
 
-  
+
   /*
    * Carica i turni dal database per essere visualizzati nel calendario
    */
@@ -173,9 +147,9 @@ public class Calendar extends Controller {
 
     // prende i turni associati alle persone attive in quel turno
     for (Person person : people) {
-      EventColor color = EventColor.values()[index % EventColor.values().length];
+      final EventColor eventColor = EventColor.values()[index % (EventColor.values().length-1)];
 
-      events.addAll(shiftEvents(shiftType, person, start, end, color));
+      events.addAll(shiftEvents(shiftType, person, start, end, eventColor));
       events.addAll(absenceEvents(person, start, end));
       index++;
     }
@@ -208,15 +182,14 @@ public class Calendar extends Controller {
               .personShiftDayId(shiftDay.id)
               .title(shiftDay.getSlotTime() + '\n' + person.fullName())
               .start(shiftDay.date)
+              .editable(true)
               .color(color.backgroundColor)
               .textColor(color.textColor)
               .borderColor(color.borderColor)
               .className("removable")
               .build();
-
         }).collect(Collectors.toList());
   }
-
 
 
   private static List<ShiftEvent> absenceEvents(Person person, LocalDate start, LocalDate end) {
@@ -237,7 +210,7 @@ public class Calendar extends Controller {
       /**
        * Per quanto riguarda gli eventi 'allDay':
        *
-       * La convensione del fullcalendar è quella di avere il parametro end = null
+       * La convenzione del fullcalendar è quella di avere il parametro end = null
        * nel caso di eventi su un singolo giorno, mentre nel caso di evento su più giorni il
        * parametro end assume il valore del giorno successivo alla fine effettiva
        * (perchè ne imposta l'orario alla mezzanotte).
@@ -255,7 +228,6 @@ public class Calendar extends Controller {
             .color(EventColor.RED.backgroundColor)
             .textColor(EventColor.RED.textColor)
             .borderColor(EventColor.RED.borderColor)
-            
             .build();
 
         events.add(event);
@@ -283,11 +255,12 @@ public class Calendar extends Controller {
 
     // TODO: 23/05/17 Lo shiftType dev'essere valido e l'utente deve avere i permessi per lavorarci
 
-    log.debug("Chiamato metodo changeShift: personShiftDayId {} - newDate {} ", personShiftDayId, newDate);
-   
+    log.debug("Chiamato metodo changeShift: personShiftDayId {} - newDate {} ", personShiftDayId,
+        newDate);
+
     List<String> errors = new ArrayList<>();
     String messages = "";
- 
+
     // legge il turno da spostare
     PersonShiftDay oldShift = shiftDao.getPersonShiftDayById(personShiftDayId);
 
@@ -300,13 +273,13 @@ public class Calendar extends Controller {
       newShift.save();
       log.info("Aggiornato PersonShiftDay = {} con {}\n",
           oldShift, newShift);
-      
+
       // cancella quello vecchio
       shiftDao.deletePersonShiftDay(oldShift);
 
-    } else {      
+    } else {
       // restituisce il messaggi per gli errori
-      for (String errCode: errors) {
+      for (String errCode : errors) {
         String msg = "calendar.".concat(errCode);
         messages.concat(Messages.get(msg)).concat("<br />");
       }
@@ -358,19 +331,19 @@ public class Calendar extends Controller {
     // TODO: ricordarsi di controllare se la persona è attiva sull'attività al momento della creazione del
     // personshiftDay
     // TODO: vediamo se la renderJSON è il metodo migliore per ritornare l'id del personShiftDay creato
-    
+
     String color = ""; //TODO:
-    
+
     // crea il personShiftDay
     PersonShiftDay personShiftDay = new PersonShiftDay();
     personShiftDay.date = date;
     personShiftDay.shiftType = shiftType;
     personShiftDay.setShiftSlot(shiftSlot);
     personShiftDay.personShift = shiftDao.getPersonShiftByPersonAndType(personId, shiftType.type);
-    
+
     // controlla che possa essere salvato nel giorno
     List<String> errors = shiftManager2.checkShiftDay(personShiftDay, date);
-    
+
     if (errors.isEmpty()) {
       // contruisce l'evento
       //TODO: con gli errori? e poi li prendi nel calendario? (messaggi o errCode?) Oppure?
@@ -386,26 +359,15 @@ public class Calendar extends Controller {
           .textColor("black")
           .borderColor("black")
           .build();
-      
+
       // salva il personShiftDay
-      
-      
+
       // aggiorna le competenze
       // calcolate come? prendendole dal ShiftTimetable o calcolandole dall'orario?
     }
-     //renderJSON(mapper.writeValueAsString(event));
+    //renderJSON(mapper.writeValueAsString(event));
   }
 
-  
-  public LoadingCache<Person, EventColor> eventColor = CacheBuilder.newBuilder()
-      .build(new CacheLoader<Person, EventColor>() {
-        @Override
-        public EventColor load(Person person) throws Exception {
-          return null;
-        }
-      });
-
-  
   /**
    * Crea il file PDF con il resoconto mensile dei turni dello IIT il mese 'month'
    * dell'anno 'year' (portale sistorg).
@@ -414,14 +376,14 @@ public class Calendar extends Controller {
    */
   //@BasicAuth
   public static void exportMonthAsPDF(int year, int month, Long shiftCategoryId) {
-    
+
     log.debug("sono nella exportMonthAsPDF con shiftCategory={} year={} e month={}",
         shiftCategoryId, year, month);
-    
+
     // legge inizio e fine mese
     final LocalDate firstOfMonth = new LocalDate(year, month, 1);
     final LocalDate lastOfMonth = firstOfMonth.dayOfMonth().withMaximumValue();
-    
-    
+
+
   }
 }
