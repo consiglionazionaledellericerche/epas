@@ -92,7 +92,7 @@ public class Calendar extends Controller {
 
     for (Person person : people) {
       // lenght-1 viene fatto per scludere l'ultimo valore che è dedicato alle assenze
-      final EventColor eventColor = EventColor.values()[index % (EventColor.values().length-1)];
+      final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
 
       final ShiftEvent event = ShiftEvent.builder()
           .allDay(true)
@@ -110,7 +110,6 @@ public class Calendar extends Controller {
       eventPeople.add(event);
       index++;
     }
-
 
     render(eventPeople);
   }
@@ -150,7 +149,7 @@ public class Calendar extends Controller {
 
     // prende i turni associati alle persone attive in quel turno
     for (Person person : people) {
-      final EventColor eventColor = EventColor.values()[index % (EventColor.values().length-1)];
+      final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
 
       events.addAll(shiftEvents(shiftType, person, start, end, eventColor));
       events.addAll(absenceEvents(person, start, end));

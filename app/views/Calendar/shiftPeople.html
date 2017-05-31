@@ -2,7 +2,7 @@
   #{list eventPeople, as:'person'}
   <li class="list-group-item ${person.className}" id="${person.personId}"
       data-draggable
-      data-event="${person.serialize()}"
+      data-event="${person.toJson()}"
       style="color: ${person.eventColor.textColor};
        	     background-color: ${person.eventColor.backgroundColor};
        	     border-color: ${person.eventColor.borderColor}"
