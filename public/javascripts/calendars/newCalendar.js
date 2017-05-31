@@ -107,6 +107,7 @@ $(document).ready(function() {
             newDate: event.start.format()
           },
           error: function(response) {
+        	  console.log(JSON.stringify(response));
             new PNotify({
               title: "dramma",
               text: response.responseText,
@@ -143,14 +144,23 @@ $(document).ready(function() {
             shiftSlot: shiftSlot,
             'shiftType.id': shiftType
           },
-          error: function() {
+          error: function(response) {
+        	var errors = new Array();
+        	errors = response.errors;
             // Non essendoci la revertFunc() eliminiamo il nuovo evento in caso di 'errore' (turno non inseribile)
             $this.fullCalendar('removeEvents', event._id);
+            new PNotify({
+                title: "Errore",
+                text: errors.join(),
+                type: "error",
+                remove: true
+              });
           },
           success: function(response) {
-            console.log(JSON.stringify(response));
             event.shiftSlot = shiftSlot;
-            event.personShiftDayId = response;
+            event.title = response.title;
+            event.personShiftDayId = response.personShiftDayId;
+            $this.fullCalendar('updateEvent', event);
           }
         });
       }

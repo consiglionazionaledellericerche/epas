@@ -253,7 +253,4 @@ public class TemplateExtensions extends JavaExtensions {
     return WordUtils.capitalize(LocalDate.now().withDayOfWeek(day).dayOfWeek().getAsText());
   }
 
-  public static String serialize(Object object) {
-    return new Gson().toJson(object);
-  }
 }
