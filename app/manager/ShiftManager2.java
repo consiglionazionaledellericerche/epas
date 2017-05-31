@@ -202,13 +202,18 @@ public class ShiftManager2 {
     // esegue i controlli
     if (personDay.isPresent()) {
       // controlla che sia compatibile con le presenze
-      errCode = checkShiftDayCompatibilityWhithPresence(shift, personDay);
+      errCode = checkShiftDayCompatibilityWithPresence(shift);
       if (!errCode.isEmpty()) {
         return errCode;
       } else {
         // controlla che le ore lavorate siano compatibili con lo slot del turno 
-        errCode = checkShiftDayCompatibilityWhithSlot(shift, personDay);
+        errCode = checkShiftDayCompatibilityWithSlot(shift);
       }
+    } else {
+      errCode = ShiftTroubles.FUTURE_DAY.toString();
+      PersonShiftDayInTrouble trouble = 
+          new PersonShiftDayInTrouble(shift, ShiftTroubles.FUTURE_DAY);
+      trouble.save();
     }
     return errCode;
   }
@@ -277,12 +282,18 @@ public class ShiftManager2 {
    * 
    * @return String: 
    */
-  public static String checkShiftDayCompatibilityWhithPresence(PersonShiftDay shift,
-      Optional<PersonDay> personDay) {
+  public static String checkShiftDayCompatibilityWithPresence(PersonShiftDay shift) {
     String errCode = "";
     LocalTime startShift =
         (shift.shiftSlot.equals(ShiftSlot.MORNING)) ? shift.shiftType.shiftTimeTable.startMorning
             : shift.shiftType.shiftTimeTable.startAfternoon;
+    Optional<PersonDay> personDay = personDayDao.getPersonDay(shift.personShift.person, shift.date);
+    if (!personDay.isPresent()) {
+      errCode = ShiftTroubles.FUTURE_DAY.toString();
+      PersonShiftDayInTrouble trouble = new PersonShiftDayInTrouble(shift, ShiftTroubles.FUTURE_DAY);
+      trouble.save();
+      return errCode;
+    }
 
     // controlla che il nuovo turno non coincida con un giorno di assenza del turnista 
     if (personDayManager.isAllDayAbsences(personDay.get())) {
@@ -333,12 +344,18 @@ public class ShiftManager2 {
   /*
    * Controlla se il PersonShiftDay è compatibile con gli orari effettuati e lo slot assegnato
    */
-  public static String checkShiftDayCompatibilityWhithSlot(PersonShiftDay shift,
-      Optional<PersonDay> personDay) {
+  public static String checkShiftDayCompatibilityWithSlot(PersonShiftDay shift) {
     String errCode = "";
     ShiftTimeTable timeTable = shift.shiftType.shiftTimeTable;
     final LocalTime begin;
     final LocalTime end;
+    Optional<PersonDay> personDay = personDayDao.getPersonDay(shift.personShift.person, shift.date);
+    if (!personDay.isPresent()) {
+      errCode = ShiftTroubles.FUTURE_DAY.toString();
+      PersonShiftDayInTrouble trouble = new PersonShiftDayInTrouble(shift, ShiftTroubles.FUTURE_DAY);
+      trouble.save();
+      return errCode;
+    }
     List<Stamping> stampings = personDay.get().getStampings();
     // controlla se non sono nel futuro ed è un giorno valido
     IWrapperPersonDay wrPersonDay = wrapperFactory.create(personDay.get());
