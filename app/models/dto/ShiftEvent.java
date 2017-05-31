@@ -46,4 +46,5 @@ public class ShiftEvent {
   private EventColor eventColor;
   private String email;
   private String mobile;
+  private Boolean jolly; // serve unicamente per differenziare gli eventi esterni
 }

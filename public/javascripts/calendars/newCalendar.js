@@ -2,6 +2,7 @@ $(document).ready(function() {
   $('[data-calendar]', this).each(function() {
     var $this = $(this);
     var data = {
+      height: 'auto',
       columnFormat: 'dddd',
       fixedWeekCount: false,
       droppable: true,
