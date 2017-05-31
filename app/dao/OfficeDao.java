@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
@@ -118,21 +119,30 @@ public class OfficeDao extends DaoBase {
   /**
    * Gli istituti che contengono sede sulle quali l'user ha il ruolo role.
    */
-  public SimpleResults<Institute> institutes(Optional<String> name, User user, Role role) {
+  public SimpleResults<Institute> institutes(Optional<String> instituteName,
+      Optional<String> officeName, Optional<String> codes, User user, Role role) {
 
     final QInstitute institute = QInstitute.institute;
     final QOffice office = QOffice.office;
     final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
 
     final BooleanBuilder condition = new BooleanBuilder();
-    if (name.isPresent()) {
-      condition.and(matchInstituteName(institute, name.get()));
+    if (instituteName.isPresent()) {
+      condition.and(matchInstituteName(institute, instituteName.get()));
+    }
+    if (officeName.isPresent()) {
+      condition.and(matchOfficeName(office, officeName.get()));
+    }
+    if (codes.isPresent()) {
+      condition.and(office.code.eq(codes.get()).or(office.codeId.eq(codes.get())));
     }
 
     if (user.isSystemUser()) {
       final JPQLQuery query = getQueryFactory()
           .from(institute)
-          .where(condition);
+          .rightJoin(institute.seats, office)
+          .where(condition)
+          .distinct();
       return ModelQuery.wrap(query, institute);
     }
 
