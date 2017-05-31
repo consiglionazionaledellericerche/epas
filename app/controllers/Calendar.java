@@ -26,6 +26,7 @@ import models.ShiftType;
 import models.User;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.dto.PNotifyObject;
 import models.dto.ShiftEvent;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
@@ -33,6 +34,7 @@ import org.joda.time.LocalDate;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Http;
+import play.mvc.Http.StatusCode;
 import play.mvc.With;
 
 /**
@@ -322,49 +324,62 @@ public class Calendar extends Controller {
   public static void newShift(long personId, LocalDate date, ShiftSlot shiftSlot,
       ShiftType shiftType) {
 
-//    log.debug("CHIAMATA LA CREAZIONE DEL TURNO: personId {} - day {} - slot {} - shiftType {}",
-//        personId, date, shiftSlot, shiftType);
-//    // TODO: creare il personShiftDay se rispetta tutti i canoni e le condizioni di possibile esistenza
-//    // TODO: ricordarsi di controllare se la persona è attiva sull'attività al momento della creazione del
-//    // personshiftDay
-//    // TODO: vediamo se la renderJSON è il metodo migliore per ritornare l'id del personShiftDay creato
+    // Esempio per passare gli errori da renderizzare direttamente col PNotify
+//    final PNotifyObject message = PNotifyObject.builder()
+//        .title("Prova")
+//        .hide(true)
+//        .text("testo di prova")
+//        .delay(2000)
+//        .type("info").build();
 //
-//    String color = ""; //TODO:
-//
-//    // crea il personShiftDay
-//    PersonShiftDay personShiftDay = new PersonShiftDay();
-//    personShiftDay.date = date;
-//    personShiftDay.shiftType = shiftType;
-//    personShiftDay.setShiftSlot(shiftSlot);
-//    personShiftDay.personShift = shiftDao.getPersonShiftByPersonAndType(personId, shiftType.type);
-//
-//    // controlla che possa essere salvato nel giorno
-//    List<String> errors = shiftManager2.checkShiftDay(personShiftDay, date);
-//
-//    if (errors.isEmpty()) {
-//      // contruisce l'evento
-//      //TODO: con gli errori? e poi li prendi nel calendario? (messaggi o errCode?) Oppure?
-//      ShiftEvent event = ShiftEvent.builder()
-//          .allDay(true)
-//          .shiftSlot(personShiftDay.shiftSlot)
-//          .personShiftDayId(personShiftDay.id)
-//          .title(personShiftDay.getSlotTime() + '\n' + personShiftDay.personShift.person.fullName())
-//          .start(personShiftDay.date)
-//          .color(color)
-//          // TODO: .error()
-//          .className("removable")
-//          .textColor("black")
-//          .borderColor("black")
-//          .build();
-//
-//      /**
-//       * salva il personShiftDay
-//       *
-//       * aggiorna le competenze
-//       * calcolate come? prendendole dal ShiftTimetable o calcolandole dall'orario?
-//       */
-//    }
-//    renderJSON(mapper.writeValueAsString(event));
+//    response.status = StatusCode.BAD_REQUEST;
+//    renderJSON(message);
+
+    log.debug("CHIAMATA LA CREAZIONE DEL TURNO: personId {} - day {} - slot {} - shiftType {}",
+        personId, date, shiftSlot, shiftType);
+    // TODO: creare il personShiftDay se rispetta tutti i canoni e le condizioni di possibile esistenza
+    // TODO: ricordarsi di controllare se la persona è attiva sull'attività al momento della creazione del
+    // personshiftDay
+    // TODO: vediamo se la renderJSON è il metodo migliore per ritornare l'id del personShiftDay creato
+
+    String color = ""; //TODO:
+
+    // crea il personShiftDay
+    PersonShiftDay personShiftDay = new PersonShiftDay();
+    personShiftDay.date = date;
+    personShiftDay.shiftType = shiftType;
+    personShiftDay.setShiftSlot(shiftSlot);
+    personShiftDay.personShift = shiftDao.getPersonShiftByPersonAndType(personId, shiftType.type);
+
+    // controlla che possa essere salvato nel giorno
+    List<String> errors = shiftManager2.checkShiftDay(personShiftDay, date);
+
+    if (errors.isEmpty()) {
+      // contruisce l'evento
+      //TODO: con gli errori? e poi li prendi nel calendario? (messaggi o errCode?) Oppure?
+      ShiftEvent event = ShiftEvent.builder()
+          .allDay(true)
+          .shiftSlot(personShiftDay.shiftSlot)
+          .personShiftDayId(personShiftDay.id)
+          .title(personShiftDay.getSlotTime() + '\n' + personShiftDay.personShift.person.fullName())
+          .start(personShiftDay.date)
+          .color(color)
+          // TODO: .error()
+          .className("removable")
+          .textColor("black")
+          .borderColor("black")
+          .build();
+
+      /**
+       * salva il personShiftDay
+       *
+       * aggiorna le competenze
+       * calcolate come? prendendole dal ShiftTimetable o calcolandole dall'orario?
+       */
+    } else {
+      response.status = StatusCode.BAD_REQUEST;
+      renderJSON(errors);
+    }
   }
 
   /**
