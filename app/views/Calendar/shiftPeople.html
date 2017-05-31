@@ -2,11 +2,12 @@
   #{list shiftWorkers, as:'person'}
     <li class="list-group-item ${person.className}" id="${person.personId}"
       data-draggable
-      data-event="${person.toJson()}"
-      style="color: ${person.eventColor.textColor};
+
+      data-event="${person.toJson()}" style="color: ${person.eventColor.textColor};
        	     background-color: ${person.eventColor.backgroundColor};
        	     border-color: ${person.eventColor.borderColor}"
              webui-popover-hover data-content="Telefono: ${person.mobile} <br> email: ${person.email}">
+             
     ${person.title}
     </li>
   <br>
