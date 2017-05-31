@@ -9,35 +9,6 @@ import dao.AbsenceDao;
 import dao.PersonDayDao;
 import dao.ShiftDao;
 import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPersonDay;
-
-import lombok.extern.slf4j.Slf4j;
-
-import manager.PersonDayManager;
-import manager.ShiftManager2;
-import models.Person;
-import models.PersonDay;
-import models.PersonShift;
-import models.PersonShiftDay;
-import models.ShiftCancelled;
-import models.ShiftType;
-import models.User;
-import models.absences.Absence;
-import models.absences.JustifiedType.JustifiedTypeName;
-import models.dto.ShiftEvent;
-import models.enumerate.ShiftSlot;
-import models.enumerate.ShiftTroubles;
-import models.enumerate.Troubles;
-
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
-
-import play.i18n.Messages;
-import play.mvc.Controller;
-import play.mvc.Http;
-import play.mvc.Router;
-import play.mvc.With;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -47,23 +18,20 @@ import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayManager;
 import manager.ShiftManager2;
 import models.Person;
-import models.PersonDay;
 import models.PersonShiftDay;
 import models.PersonShiftShiftType;
 import models.ShiftType;
 import models.User;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
-import models.dto.PNotifyObject;
 import models.dto.ShiftEvent;
-import models.enumerate.CalendarShiftTroubles;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
+import models.enumerate.ShiftTroubles;
 import org.joda.time.LocalDate;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Http;
-import play.mvc.Http.StatusCode;
 import play.mvc.With;
 
 /**
@@ -281,7 +249,8 @@ public class Calendar extends Controller {
    * @out error 409 con messaggio di ShiftTroubles.PERSON_IS_ABSENT, CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED,
    *                                   CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED
    */
-  public static void changeShift(long personShiftDayId, LocalDate newDate) throws JsonProcessingException {
+  public static void changeShift(long personShiftDayId, LocalDate newDate)
+      throws JsonProcessingException {
 
     // TODO: 23/05/17 Lo shiftType dev'essere valido e l'utente deve avere i permessi per lavorarci
 
@@ -294,7 +263,7 @@ public class Calendar extends Controller {
 
     // controlla gli eventuali errori di consitenza nel calendario
     List<String> errors = ShiftManager2.checkShiftEvent(oldShift, newDate);
-    if (((errors.isEmpty()) || errors.contains(ShiftTroubles.PROBLEMS_ON_OTHER_SLOT.toString()))) {
+    if (errors.isEmpty() || errors.contains(ShiftTroubles.PROBLEMS_ON_OTHER_SLOT.toString())) {
       //salva il nuovo turno
 
       oldShift.date = newDate;
@@ -315,7 +284,7 @@ public class Calendar extends Controller {
 
     } else {
       // prende il messaggi di errore
-      for (String error: errors) {
+      for (String error : errors) {
         message.concat(Messages.get(error));
       }
       response.status = 409;
@@ -353,7 +322,7 @@ public class Calendar extends Controller {
     personShiftDay.personShift = shiftDao.getPersonShiftByPersonAndType(personId, shiftType.type);
 
     // controlla che possa essere salvato nel giorno
-    List<String> errors = shiftManager2.checkShiftDay(personShiftDay, date);
+    List<String> errors = ShiftManager2.checkShiftDay(personShiftDay, date);
     if (errors.isEmpty()) {
       personShiftDay.save();
 
@@ -370,7 +339,7 @@ public class Calendar extends Controller {
     } else {
       response.status = 409;
       // prende il messaggi di errore
-      for (String error: errors) {
+      for (String error : errors) {
         message.concat(Messages.get(error));
       }
       renderText(message);
