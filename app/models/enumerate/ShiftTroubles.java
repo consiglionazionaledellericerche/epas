@@ -2,6 +2,9 @@ package models.enumerate;
 
 public enum ShiftTroubles {
 
+  FUTURE_DAY,
+  NOT_COMPLETE_SHIFT,
+  OUT_OF_STAMPING_TOLERANCE,
   NOT_ENOUGH_WORKING_TIME,
   PROBLEMS_ON_OTHER_SLOT,
   PERSON_IS_ABSENT,
