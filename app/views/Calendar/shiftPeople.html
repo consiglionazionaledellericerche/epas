@@ -5,7 +5,8 @@
       data-event="${person.serialize()}"
       style="color: ${person.eventColor.textColor};
        	     background-color: ${person.eventColor.backgroundColor};
-       	     border-color: ${person.eventColor.borderColor}">
+       	     border-color: ${person.eventColor.borderColor}"
+             webui-popover-hover data-content="Telefono: ${person.mobile} <br> email: ${person.email}">
     ${person.title}
   </li>
   <br>
