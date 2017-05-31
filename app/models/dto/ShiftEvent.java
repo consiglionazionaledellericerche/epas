@@ -49,4 +49,7 @@ public class ShiftEvent {
   private ShiftSlot shiftSlot;
   private EventColor eventColor;
   private List<String> errors= new ArrayList<>();
+  private String email;
+  private String mobile;
+  private Boolean jolly; // serve unicamente per differenziare gli eventi esterni
 }

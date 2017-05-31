@@ -2,10 +2,11 @@ $(document).ready(function() {
   $('[data-calendar]', this).each(function() {
     var $this = $(this);
     var data = {
+      height: 'auto',
       columnFormat: 'dddd',
-      selectable: true,
       fixedWeekCount: false,
       droppable: true,
+      eventOrder: "editable,title",
       loading: function(loading) {
         if (loading) {
           $this.addClass('reloading');
@@ -175,6 +176,7 @@ $(document).ajaxComplete(function(){
     revert: true, // immediately snap back to original position
     revertDuration: 0
   });
+  $(this).initepas();
 })
 function getCurrentViewDate(input) {
   var currentViewDate = $('[data-calendar]').fullCalendar( 'getDate' ).format();

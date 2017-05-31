@@ -3,15 +3,10 @@ package controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Range;
 import dao.AbsenceDao;
-import dao.PersonDao;
 import dao.PersonDayDao;
-import dao.PersonShiftDayDao;
 import dao.ShiftDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
@@ -42,17 +37,19 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Router;
 import play.mvc.With;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayManager;
+import manager.ShiftManager2;
 import models.Person;
 import models.PersonDay;
 import models.PersonShiftDay;
+import models.PersonShiftShiftType;
 import models.ShiftType;
 import models.User;
 import models.absences.Absence;
@@ -62,6 +59,7 @@ import models.enumerate.CalendarShiftTroubles;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
 import org.joda.time.LocalDate;
+import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
@@ -107,40 +105,48 @@ public class Calendar extends Controller {
 
   public static void shiftPeople(ShiftType activity, LocalDate start, LocalDate end) {
 
-    final List<Person> people;
-    if (activity.isPersistent() && start != null && end != null) {
-      people = activity.personShiftShiftTypes.stream()
-          .filter(personShiftShiftType -> personShiftShiftType.dateRange().isConnected(
-              Range.closed(start, end)))
-          .map(personShiftShiftType -> personShiftShiftType.personShift.person)
-          .sorted(Person.personComparator())
-          .collect(Collectors.toList());
-    } else {
-      people = new ArrayList<>();
-    }
+    final List<PersonShiftShiftType> people = shiftWorkers(activity, start, end);
 
     List<ShiftEvent> eventPeople = new ArrayList<>();
     int index = 0;
 
-    for (Person person : people) {
+    for (PersonShiftShiftType personShift : people) {
+      // lenght-1 viene fatto per scludere l'ultimo valore che è dedicato alle assenze
+      final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
+      final Person person = personShift.personShift.person;
+
       final ShiftEvent event = ShiftEvent.builder()
           .allDay(true)
           .title(person.fullName())
           .personId(person.id)
-          .eventColor(EventColor.values()[index % EventColor.values().length])
-          .color(EventColor.values()[index % EventColor.values().length].backgroundColor)
-          .textColor(EventColor.values()[index % EventColor.values().length].textColor)
-          .className("removable event-orange")
+          .eventColor(eventColor)
+          .color(eventColor.backgroundColor)
+          .textColor(eventColor.textColor)
+          .borderColor(eventColor.borderColor)
+          .className("removable")
+          .mobile(person.mobile)
+          .email(person.email)
+          .jolly(personShift.jolly)
           .build();
 
       eventPeople.add(event);
       index++;
     }
 
-    render(eventPeople);
+    final List<ShiftEvent> shiftWorkers = eventPeople.stream()
+        .filter(shiftEvent -> !shiftEvent.getJolly()).sorted(
+            Comparator.comparing(ShiftEvent::getTitle))
+        .collect(Collectors.toList());
+
+    final List<ShiftEvent> jolly = eventPeople.stream()
+        .filter(shiftEvent -> shiftEvent.getJolly()).sorted(
+            Comparator.comparing(ShiftEvent::getTitle))
+        .collect(Collectors.toList());
+
+    render(shiftWorkers, jolly);
   }
 
-  
+
   /*
    * Calvella un turno dal Database
    */
@@ -150,10 +156,10 @@ public class Calendar extends Controller {
     response.status = Http.StatusCode.BAD_REQUEST;
     renderText("Un messaggio qualsiasi");
     //psd.delete();
-    
+
   }
 
-  
+
   /*
    * Carica i turni dal database per essere visualizzati nel calendario
    */
@@ -164,20 +170,15 @@ public class Calendar extends Controller {
 
     List<ShiftEvent> events = new ArrayList<>();
 
-    List<Person> people = shiftType.personShiftShiftTypes.stream()
-        .filter(personShiftShiftType -> personShiftShiftType.dateRange().isConnected(
-            Range.closed(start, end)))
-        .map(personShiftShiftType -> personShiftShiftType.personShift.person)
-        .sorted(Person.personComparator())
-        .collect(Collectors.toList());
+    List<PersonShiftShiftType> people = shiftWorkers(shiftType, start, end);
 
     int index = 0;
 
     // prende i turni associati alle persone attive in quel turno
-    for (Person person : people) {
-      EventColor color = EventColor.values()[index % EventColor.values().length];
-
-      events.addAll(shiftEvents(shiftType, person, start, end, color));
+    for (PersonShiftShiftType personShift : people) {
+      final Person person = personShift.personShift.person;
+      final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
+      events.addAll(shiftEvents(shiftType, person, start, end, eventColor));
       events.addAll(absenceEvents(person, start, end));
       index++;
     }
@@ -210,15 +211,14 @@ public class Calendar extends Controller {
               .personShiftDayId(shiftDay.id)
               .title(shiftDay.getSlotTime() + '\n' + person.fullName())
               .start(shiftDay.date)
+              .editable(true)
               .color(color.backgroundColor)
               .textColor(color.textColor)
               .borderColor(color.borderColor)
               .className("removable")
               .build();
-
         }).collect(Collectors.toList());
   }
-
 
   /*
    * Carica le assenze di una persona in un certo periodo per essere visualizzate nel calendario
@@ -228,11 +228,7 @@ public class Calendar extends Controller {
     final List<JustifiedTypeName> types = ImmutableList
         .of(JustifiedTypeName.all_day, JustifiedTypeName.assign_all_day);
 
-    List<Absence> absences = absenceDao
-        .findByPersonAndDate(person, start, Optional.fromNullable(end), Optional.absent()).list()
-        .stream()
-        .filter(absence -> types.contains(absence.justifiedType.name))
-        .sorted(Comparator.comparing(ab -> ab.personDay.date)).collect(Collectors.toList());
+    List<Absence> absences = absenceDao.filteredByTypes(person, start, end, types);
     List<ShiftEvent> events = new ArrayList<>();
     ShiftEvent event = null;
 
@@ -241,7 +237,7 @@ public class Calendar extends Controller {
       /**
        * Per quanto riguarda gli eventi 'allDay':
        *
-       * La convensione del fullcalendar è quella di avere il parametro end = null
+       * La convenzione del fullcalendar è quella di avere il parametro end = null
        * nel caso di eventi su un singolo giorno, mentre nel caso di evento su più giorni il
        * parametro end assume il valore del giorno successivo alla fine effettiva
        * (perchè ne imposta l'orario alla mezzanotte).
@@ -249,6 +245,7 @@ public class Calendar extends Controller {
       if (event == null
           || event.getEnd() == null && !event.getStart().plusDays(1).equals(abs.personDay.date)
           || event.getEnd() != null && !event.getEnd().equals(abs.personDay.date)) {
+
         event = ShiftEvent.builder()
             .allDay(true)
             .title("Assenza di " + abs.personDay.person.fullName())
@@ -259,7 +256,6 @@ public class Calendar extends Controller {
             .color(EventColor.RED.backgroundColor)
             .textColor(EventColor.RED.textColor)
             .borderColor(EventColor.RED.borderColor)
-            
             .build();
 
         events.add(event);
@@ -268,7 +264,6 @@ public class Calendar extends Controller {
       }
 
     }
-
     return events;
   }
 
@@ -288,10 +283,10 @@ public class Calendar extends Controller {
 
     // TODO: 23/05/17 Lo shiftType dev'essere valido e l'utente deve avere i permessi per lavorarci
 
-    log.debug("Chiamato metodo changeShift: personShiftDayId {} - newDate {} ", personShiftDayId, newDate);
-   
+    log.debug("Chiamato metodo changeShift: personShiftDayId {} - newDate {} ", personShiftDayId,
+        newDate);
     String message = "";
- 
+
     // legge il turno da spostare
     PersonShiftDay oldShift = shiftDao.getPersonShiftDayById(personShiftDayId);
 
@@ -299,8 +294,9 @@ public class Calendar extends Controller {
     List<String> errors = ShiftManager2.checkShiftEvent(oldShift, newDate);
     if (((errors.isEmpty()) || errors.contains(ShiftTroubles.PROBLEMS_ON_OTHER_SLOT.toString()))) {
       //salva il nuovo turno
+
       oldShift.date = newDate;
-      // oldShift.troubles
+      //oldShift.troubles
       oldShift.save();
       log.info("Aggiornato PersonShiftDay con {}\n",
           oldShift);
@@ -322,7 +318,6 @@ public class Calendar extends Controller {
       }
       response.status = 409;
       renderText(message);
-
     }
   }
 
@@ -369,16 +364,6 @@ public class Calendar extends Controller {
     }
   }
 
-  
-  public LoadingCache<Person, EventColor> eventColor = CacheBuilder.newBuilder()
-      .build(new CacheLoader<Person, EventColor>() {
-        @Override
-        public EventColor load(Person person) throws Exception {
-          return null;
-        }
-      });
-
-  
   /**
    * Crea il file PDF con il resoconto mensile dei turni dello IIT il mese 'month'
    * dell'anno 'year' (portale sistorg).
@@ -387,14 +372,25 @@ public class Calendar extends Controller {
    */
   //@BasicAuth
   public static void exportMonthAsPDF(int year, int month, Long shiftCategoryId) {
-    
+
     log.debug("sono nella exportMonthAsPDF con shiftCategory={} year={} e month={}",
         shiftCategoryId, year, month);
-    
+
     // legge inizio e fine mese
     final LocalDate firstOfMonth = new LocalDate(year, month, 1);
     final LocalDate lastOfMonth = firstOfMonth.dayOfMonth().withMaximumValue();
-    
-    
+  }
+
+  
+  private static List<PersonShiftShiftType> shiftWorkers(ShiftType activity, LocalDate start,
+      LocalDate end) {
+    if (activity.isPersistent() && start != null && end != null) {
+      return activity.personShiftShiftTypes.stream()
+          .filter(personShiftShiftType -> personShiftShiftType.dateRange().isConnected(
+              Range.closed(start, end)))
+          .collect(Collectors.toList());
+    } else {
+      return new ArrayList<>();
+    }
   }
 }

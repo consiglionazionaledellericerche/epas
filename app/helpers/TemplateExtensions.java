@@ -252,5 +252,5 @@ public class TemplateExtensions extends JavaExtensions {
   public static String dayOfWeek(Integer day) {
     return WordUtils.capitalize(LocalDate.now().withDayOfWeek(day).dayOfWeek().getAsText());
   }
-
+  
 }
