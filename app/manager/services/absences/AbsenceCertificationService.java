@@ -545,6 +545,9 @@ public class AbsenceCertificationService {
   }
   
   private void patchCompensatoryRest(AbsenceSituation absenceSituation, IWrapperPerson wrPerson) {
+    //??: se su attestati vi è distinzione fra riposo compensativo effettivo (91) e recuperi per
+    // lavoro festivo (91F), questa patch che sposta le assenza importabili automaticamente
+    // in importabili manualmente non serve più.
     Set<LocalDate> dates = absenceSituation
         .toAddAutomatically.get(DefaultAbsenceType.A_91.getCode()); 
     if (dates == null || dates.isEmpty()) {

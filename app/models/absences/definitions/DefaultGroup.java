@@ -107,11 +107,11 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.compensatoryRestCnr, PeriodType.always, 
       DefaultTakable.T_RIPOSI_CNR, null, null, false, false),
   
-  RIPOSI_CNR_MISSIONE("91MS/91MD - Riposo compensativo recupero missione",
+  RIPOSI_CNR_FESTIVO("91F - Riposo compensativo recupero giornata lavorativa festiva",
       "", 
       DefaultCategoryType.RIPOSI_COMPENSATIVI_CNR, 1, 
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
-      DefaultTakable.T_RIPOSI_CNR_MISSIONE, null, null, false, false),
+      DefaultTakable.T_RIPOSI_CNR_FESTIVO, null, null, false, false),
   
   RIPOSI_CNR_DIPENDENTI("91 - Riposo compensativo", 
       "", 
