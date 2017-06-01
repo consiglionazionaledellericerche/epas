@@ -47,7 +47,7 @@ public class Institutes extends Controller {
         Security.getUser().get(), roleDao.getRoleByName(Role.TECHNICAL_ADMIN))
         .listResults();
 
-    render(results, instituteName);
+    render(results);
   }
 
   public static void edit(Long id) {
