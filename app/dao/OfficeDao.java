@@ -127,13 +127,13 @@ public class OfficeDao extends DaoBase {
     final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
 
     final BooleanBuilder condition = new BooleanBuilder();
-    if (instituteName.isPresent()) {
+    if (instituteName.isPresent() && !instituteName.get().isEmpty()) {
       condition.and(matchInstituteName(institute, instituteName.get()));
     }
-    if (officeName.isPresent()) {
+    if (officeName.isPresent() && !officeName.get().isEmpty()) {
       condition.and(matchOfficeName(office, officeName.get()));
     }
-    if (codes.isPresent()) {
+    if (codes.isPresent() && !codes.get().isEmpty()) {
       condition.and(office.code.eq(codes.get()).or(office.codeId.eq(codes.get())));
     }
 
