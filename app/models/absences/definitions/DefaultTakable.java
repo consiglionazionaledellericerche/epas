@@ -136,9 +136,9 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_91), 
       -1, null),
   
-  T_RIPOSI_CNR_MISSIONE(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_91MS, DefaultAbsenceType.A_91MD), 
-      ImmutableSet.of(DefaultAbsenceType.A_91MS, DefaultAbsenceType.A_91MD), 
+  T_RIPOSI_CNR_FESTIVO(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_91F), 
+      ImmutableSet.of(DefaultAbsenceType.A_91F), 
       -1, null),
   
   T_LAVORO_FUORI_SEDE(AmountType.units, 
@@ -443,9 +443,9 @@ public enum DefaultTakable {
   
   T_RIPOSI_CNR_ATTESTATI(AmountType.units, 
       ImmutableSet.of(
-          DefaultAbsenceType.A_91, DefaultAbsenceType.A_91MS, DefaultAbsenceType.A_91MD), 
+          DefaultAbsenceType.A_91, DefaultAbsenceType.A_91F), 
       ImmutableSet.of(
-          DefaultAbsenceType.A_91, DefaultAbsenceType.A_91MS, DefaultAbsenceType.A_91MD), 
+          DefaultAbsenceType.A_91, DefaultAbsenceType.A_91F), 
       -1, null);
 
 
