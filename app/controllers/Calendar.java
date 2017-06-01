@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Range;
+
+import com.beust.jcommander.internal.Lists;
+
 import dao.AbsenceDao;
 import dao.PersonDayDao;
 import dao.ShiftDao;
@@ -24,6 +27,7 @@ import models.ShiftType;
 import models.User;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.dto.PNotifyObject;
 import models.dto.ShiftEvent;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
@@ -32,6 +36,7 @@ import org.joda.time.LocalDate;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Http;
+import play.mvc.Http.StatusCode;
 import play.mvc.With;
 
 /**
@@ -301,15 +306,15 @@ public class Calendar extends Controller {
     // personshiftDay
 
     // Esempio per passare gli errori da renderizzare direttamente col PNotify
-//    final PNotifyObject message = PNotifyObject.builder()
-//        .title("Prova")
-//        .hide(true)
-//        .text("testo di prova")
-//        .delay(2000)
-//        .type("info").build();
-//
-//    response.status = StatusCode.BAD_REQUEST;
-//    renderJSON(message);
+    //    final PNotifyObject message = PNotifyObject.builder()
+    //        .title("Prova")
+    //        .hide(true)
+    //        .text("testo di prova")
+    //        .delay(2000)
+    //        .type("info").build();
+    //
+    //    response.status = StatusCode.BAD_REQUEST;
+    //    renderJSON(message);
 
     String color = ""; //TODO:
     String message = "";
@@ -337,12 +342,19 @@ public class Calendar extends Controller {
 
       renderJSON(mapper.writeValueAsString(event));
     } else {
-      response.status = 409;
-      // prende il messaggi di errore
+      List<PNotifyObject> notes = Lists.newArrayList();      
       for (String error : errors) {
-        message.concat(Messages.get(error));
+        final PNotifyObject note = PNotifyObject.builder()
+            .title("Errore")
+            .hide(true)
+            .text(error)
+            .delay(2000)
+            .type("error").build();
+        notes.add(note);
+
       }
-      renderText(message);
+      response.status = StatusCode.BAD_REQUEST;
+      renderJSON(mapper.writeValueAsString(notes));
     }
   }
 
