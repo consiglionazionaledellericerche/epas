@@ -10,34 +10,35 @@ $(document).ready(function() {
       loading: function(loading) {
         if (loading) {
           $this.addClass('reloading');
-          var $spinner = $('<span class="text-primary" style="position:absolute; z-index: 10"><i class="fa fa-spin fa-spinner fa-2x"></i</span>');
+          var $spinner = $('<span class="text-primary" style="position:absolute; z-index: 10"><i class="fa fa-spin fa-spinner fa-3x"></i</span>');
           $this.before($spinner);
-          var offset = $spinner.offset();
+          var pos = $this.offset();
+          var centerX = pos.left + $this.width() / 2;
           $spinner.offset({
-            top: offset.top + 10,
-            left: offset.left + 10
+            top: pos.top + 180,
+            left: centerX
           });
         } else {
           $this.removeClass('reloading');
           $this.prev('span.text-primary').remove();
         }
       },
-      viewRender: function (view, element) {
+      viewRender: function(view, element) {
         var data = {
-         'activity.id': $('#activity').val(),
-         start: view.start.format(),
-         end: view.end.subtract(1, 'days').format()
+          'activity.id': $('#activity').val(),
+          start: view.start.format(),
+          end: view.end.subtract(1, 'days').format()
         };
         // Caricamento asincrono delle persone in base al periodo
         $('[data-render-load]').each(function() {
-            var url = $(this).data('render-load');
-            $(this).load(url,data);
+          var url = $(this).data('render-load');
+          $(this).load(url, data);
         });
       },
       eventSources: []
     };
     if ($this.data('calendar-date')) {
-        data['defaultDate'] = $this.data('calendar-date');
+      data['defaultDate'] = $this.data('calendar-date');
     }
     data['eventSources'].push({
       events: function(start, end, timezone, callback) {
@@ -93,6 +94,33 @@ $(document).ready(function() {
             });
             $this.fullCalendar('removeEvents', event._id);
           });
+        }
+        if (event.errors) {
+          var div = $("<div></div>", {
+            "class": "webui-popover-content"
+          });
+          event.errors.forEach(function(item) {
+            div.append(item + '<br>');
+          });
+          var icon = $("<i></i>", {
+            "class": "fa fa-exclamation-triangle",
+            "aria-hidden": true,
+            "data-title": "Errori sul turno"
+          });
+          icon.webuiPopover({
+            placement: 'auto',
+            trigger: 'hover',
+            type: 'html',
+            style: 'alert',
+            animation: 'pop',
+            dismissible: true,
+            delay: {
+              show: null,
+              hide: null
+            }
+          });
+          element.prepend(div);
+          element.prepend(icon);
         }
       }
     }
@@ -151,27 +179,23 @@ $(document).ready(function() {
             $this.fullCalendar('removeEvents', event._id);
           },
           success: function(response) {
-            $this.fullCalendar( 'refetchEvents' );
-//            console.log(JSON.stringify(response));
-//            event.shiftSlot = shiftSlot;
-//            event.personShiftDayId = response;
+            $this.fullCalendar('refetchEvents');
           }
         });
       }
     }
     $this.fullCalendar(data);
   });
-
 });
-
-$(document).ajaxComplete(function(){
+$(document).ajaxComplete(function() {
   $('[data-draggable]').draggable({
     revert: true, // immediately snap back to original position
     revertDuration: 0
   });
   $(this).initepas();
-})
+});
+
 function getCurrentViewDate(input) {
-  var currentViewDate = $('[data-calendar]').fullCalendar( 'getDate' ).format();
+  var currentViewDate = $('[data-calendar]').fullCalendar('getDate').format();
   $(input).val(currentViewDate);
 }

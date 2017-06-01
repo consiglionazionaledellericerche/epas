@@ -10,6 +10,7 @@ import dao.PersonDayDao;
 import dao.ShiftDao;
 import dao.wrapper.IWrapperFactory;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -174,8 +175,7 @@ public class Calendar extends Controller {
 
     return shiftDao.getPersonShiftDaysByPeriodAndType(start, end, shiftType, person).stream()
         .map(shiftDay -> {
-
-          return ShiftEvent.builder()
+          final ShiftEvent event = ShiftEvent.builder()
               .allDay(true)
               .shiftSlot(shiftDay.shiftSlot)
               .personShiftDayId(shiftDay.id)
@@ -185,8 +185,20 @@ public class Calendar extends Controller {
               .color(color.backgroundColor)
               .textColor(color.textColor)
               .borderColor(color.borderColor)
+              // FIXME esempio da cancellare in favore dell'if sottostante
+              .errors(Arrays.stream(ShiftTroubles.values())
+                  .map(trouble -> Messages.get(trouble.toString())).collect(
+                      Collectors.toList()))
               .className("removable")
               .build();
+
+//          if (!shiftDay.troubles.isEmpty()) {
+//            final List<String> troubles = shiftDay.troubles.stream()
+//                .map(trouble -> Messages.get(trouble.cause)).collect(Collectors.toList());
+//            event.setErrors(troubles);
+//          }
+
+          return event;
         }).collect(Collectors.toList());
   }
 
