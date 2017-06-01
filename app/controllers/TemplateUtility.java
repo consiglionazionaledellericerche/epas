@@ -13,6 +13,7 @@ import dao.CompetenceCodeDao;
 import dao.MemoizedCollection;
 import dao.MemoizedResults;
 import dao.NotificationDao;
+import dao.NotificationDao.NotificationFilter;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.QualificationDao;
@@ -119,8 +120,8 @@ public class TemplateUtility {
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
           @Override
           public ModelQuery.SimpleResults<Notification> get() {
-            return notificationDao.listUnreadFor(
-                Security.getUser().get());
+            return notificationDao.listFor(Security.getUser().get(), Optional.absent(),
+                Optional.of(NotificationFilter.TO_READ));
           }
         });
 
@@ -128,7 +129,8 @@ public class TemplateUtility {
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
           @Override
           public ModelQuery.SimpleResults<Notification> get() {
-            return notificationDao.listFor(Security.getUser().get(), true);
+            return notificationDao.listFor(Security.getUser().get(), Optional.absent(), 
+                Optional.of(NotificationFilter.ARCHIVED));
           }
         });
   }
@@ -290,6 +292,7 @@ public class TemplateUtility {
     // e vanno spostati nel secureManager.
     Optional<User> user = Security.getUser();
     if (user.isPresent()) {
+      roles.add(roleDao.getRoleByName(Role.SEAT_SUPERVISOR));
       roles.add(roleDao.getRoleByName(Role.TECHNICAL_ADMIN));
       roles.add(roleDao.getRoleByName(Role.PERSONNEL_ADMIN));
       roles.add(roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI));

@@ -17,7 +17,7 @@
           'data-reload':'#results', autocomplete:'off'}
           
     #{f.hidden 'officeId', value:office.id /}
-    #{p.text 'code', 'data-autochange':true, value:code, autofocus:true,
+    #{f.input 'code', 'data-autochange':true, value:code, autofocus:true,
             placeholder:'search'.label() /}
             
   #{/form}

@@ -1,8 +1,11 @@
 package controllers;
 
+import com.google.common.base.Optional;
+
 import com.mysema.query.SearchResults;
 
 import dao.NotificationDao;
+import dao.NotificationDao.NotificationFilter;
 
 import javax.inject.Inject;
 
@@ -21,39 +24,36 @@ import security.SecurityRules;
  */
 @With(Resecure.class)
 public class Notifications extends Controller {
-
+  
   @Inject
   static NotificationDao notificationDao;
   @Inject
   static SecurityRules rules;
-
+  
   /**
-   * Show current user archiveds notifications.
+   * Applica i parametri per filtrare le notifiche.
+   * @param message se definito filtra sul testo del messaggio
+   * @param filter filtra per notifiche da leggere o archiviate
    */
-  public static void archiveds() {
-    final SearchResults<Notification> notifications = notificationDao
-        .listFor(Security.getUser().get(), true)
-        .listResults();
-    render(notifications);
+  public static void filter(String message, NotificationFilter filter) {
+    list(message, filter);
   }
-
+  
   /**
-   * Show current user notifications.
+   * Visualizza le notifiche dell'operatore corrente.
    */
-  public static void list() {
+  public static void list(String message, NotificationFilter filter) {
+    if (filter == null) {
+      filter = NotificationFilter.ALL;
+    }
     final SearchResults<Notification> notifications = notificationDao
-        .listFor(Security.getUser().get(), false)
-        .listResults();
-    render("@archiveds", notifications);
-  }
-
-  /**
-   * Show current unread user notifications. ajax only
-   */
-  public static void notifications() {
-    final SearchResults<Notification> notifications =
-        notificationDao.listUnreadFor(Security.getUser().get()).listResults();
-    render(notifications);
+        .listFor(Security.getUser().get(), Optional.fromNullable(message), 
+            Optional.of(filter)).listResults();
+    
+    final SearchResults<Notification> unReadNotifications = notificationDao
+        .listFor(Security.getUser().get(), Optional.fromNullable(message), 
+            Optional.of(NotificationFilter.TO_READ)).listResults();
+    render(notifications, unReadNotifications, message, filter);
   }
 
   /**
@@ -76,13 +76,33 @@ public class Notifications extends Controller {
    *
    * @param id id of the Notification to read
    */
-  public static void read(Long id) {
+  public static void read(Long id, String message, NotificationFilter filter) {
     final Notification notification = Notification.findById(id);
     notFoundIfNull(notification);
     rules.checkIfPermitted(notification);
 
     notification.read = true;
     notification.save();
-    list();
+    list(message, filter);
+  }
+  
+  /**
+   * Questa chiamata si assume che sia sempre POST+ajax.
+   *
+   */
+  public static void readAll(String message, NotificationFilter filter) {
+    
+    rules.checkIfPermitted();
+
+    for (Notification notification : notificationDao.listAllFor(Security.getUser().get(), 
+        Optional.fromNullable(message), Optional.of(filter))) {
+      if (notification.read) {
+        continue;
+      }
+      notification.read = true;
+      notification.save();
+    }
+
+    list(message, filter);
   }
 }
