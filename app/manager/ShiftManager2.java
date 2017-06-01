@@ -145,11 +145,11 @@ public class ShiftManager2 {
     } else {
       // controlla la compatibilità con le presenze della persona e
       // gli altri turni presenti nel giorno di destinazione
-      errCode = checkShiftDayWhithShiftDays(shift, newDate);
+      errCode = checkShiftDayWithShiftDays(shift, newDate);
       if (!errCode.isEmpty()) {
         errors.add(errCode);
       }
-      errCode = checkShiftDayWhithPresence(shift, newDate);
+      errCode = checkShiftDayWithPresence(shift, newDate);
       if (!errCode.isEmpty()) {
         errors.add(errCode);
       }
@@ -167,7 +167,7 @@ public class ShiftManager2 {
 
     // controlla se può essere spostato nella nuova data
     String absenceError = checkShiftDayCompatibilityWhithAllDayPresence(shift, newDate);
-    String overlapError = checkShiftDayWhithShiftDays(shift, newDate);
+    String overlapError = checkShiftDayWithShiftDays(shift, newDate);
 
     // prende il messaggio di errore
     if (!absenceError.isEmpty()) {
@@ -193,7 +193,7 @@ public class ShiftManager2 {
    *                    Troubles.NOT_ENOUGH_WORKTIME, 
    *                    + quelli di checkShiftDayCompatibilityWhithSlot
    */
-  public static String checkShiftDayWhithPresence(PersonShiftDay shift, LocalDate date) {
+  public static String checkShiftDayWithPresence(PersonShiftDay shift, LocalDate date) {
 
     Optional<PersonDay> personDay = personDayDao.getPersonDay(shift.personShift.person, date);
     String errCode = "";
@@ -229,15 +229,16 @@ public class ShiftManager2 {
    * @return CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED, CalendarShiftTroubles.PERSON_SHIFT_ASSIGNED,
    *        ShiftTroubles.PROBLEMS_ON_OTHER_SLOT
    */
-  public static String checkShiftDayWhithShiftDays(PersonShiftDay shift, LocalDate date) {
+  public static String checkShiftDayWithShiftDays(PersonShiftDay shift, LocalDate date) {
     String errCode = "";
-
+    
     // per ogni turno esitente in quel periodo di quel tipo 
     for (PersonShiftDay registeredDay : personShiftDayDao
         .getPersonShiftDayByTypeAndPeriod(shift.date, shift.date, shift.shiftType)) {
       //controlla che il turno in quello slot sia già stato assegnato ad un'altra persona
       if (registeredDay.shiftSlot.equals(shift.shiftSlot) && !registeredDay.personShift.person
           .equals(shift.personShift.person)) {
+        
         errCode = CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED.toString();
         //errCode = "Turno già esistente il " + shift.date.toString("dd MMM");
       } else if (registeredDay.personShift.person.equals(shift.personShift.person)
