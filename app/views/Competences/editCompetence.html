@@ -1,46 +1,132 @@
 #{modalAsync id:'modalCompetence',
-title:'Inserisci il quantitativo per la competenza ' + competence.competenceCode.code}
+title:competence.person.fullname + ' - ' + competence.competenceCode.description + ' ' + competence.competenceCode.code}
 
-<div class="col-sm-2"></div>
-<div id="competenceData" class="col-sm-8">
-#{if competence.competenceCode.disabled}
+<div id="competenceData">
+  
+  
+  
+  #{if competence.competenceCode.disabled}
 	#{alert color:'danger', textcolor:'dark'}
-	<p>Il codice di competenza <strong>${competence.competenceCode.code} - ${competence.competenceCode.description}</strong> risulta 
-	disabilitato. Non è possibile inserire ulteriori quantitativi per questo codice. <br>
-	Per poter inserire nuovi quantitativi occorre prima far abilitare prima il codice.</p>	
+	  <p>
+	    Il codice di competenza <strong>${competence.competenceCode.code} - ${competence.competenceCode.description}</strong> 
+	    risulta disabilitato. Non è possibile inserire ulteriori quantitativi per questo codice. In caso di necessità effettuare una segnalazione.<br>
+	  </p>	
 	#{/alert}
-#{/if}
-#{else}
-#{include './_tutorialCodes.html' /}
-  #{form action:@saveCompetence(), method:'POST', autocomplete:false,
-  class:'form form-horizontal', 'data-async':'#page_content',
-  'data-async-error':'#competenceData','data-spinner':'#defaultSpinner'}
-  #{f.hidden 'officeId', value:office.id /}
-	#{if psDto != null}
-		#{list items:psDto.contractMonths, as:'mese'}
-			Tempo per straordinari: <strong>${mese.value.progressivoFinalePositivoMese.toHourTime()}</strong> ore - 
-			Residuo mensile: <strong>${mese.value.progressivoFinaleMese.toHourTime()}</strong> ore - 
-			Residuo annuale: <strong>${mese.value.remainingMinutesCurrentYear.toHourTime()}</strong> ore
-		#{/list}
-	#{/if}
-  	<br>
-  	<br>
-
-	#{f.input 'valueApproved',type:'number', value:competence?.valueApproved, required:true /}
-	#{if competence?.persistent}
-    	#{f.hidden 'competence.id', value:competence.id /}
-    	
-  	#{/if}
-  	#{else}
-  		#{f.hidden 'competence.month', value:month /}
-    	#{f.hidden 'competence.year', value:year /}
-    	#{f.hidden 'competence.person', value:person /}    	
-  	#{/else}
-	#{b.buttons center:true}
-		#{b.submit 'Modifica'/}
-	#{/b.buttons}
+  #{/if}
+  #{else}
+  
+    #{alert color:'info'}
+      <p>Inserisci il nuovo valore per la competenza <strong>${competence.competenceCode.code} 
+      ${competence.competenceCode.description}</strong> per <strong>${competence.person.fullname}</strong>.</p>
+    #{/alert}
+    
+    #{alert color:'warning'}
+      <!-- Suggerimenti -->
+      #{if competence.competenceCode.code.equals('S1')}
+  		#{if psDto != null}
+  		  <p><strong>Suggerimenti</strong></p>
+  		  <p>
+			#{list items:psDto.contractMonths, as:'mese'}
+				<table class="table table-condensed">
+				  <tr>
+				    <td>
+				      <em>Tempo per straordinari</em>
+				      <i class="fa fa-question-circle" aria-hidden="true" webui-popover-hover 
+				           data-content="<strong>Tempo per straordinari</strong> La somma di tutte le differenze positive nel mese.<br> 
+				                   <strong>Differenze positive</strong> Giorni in cui il dipendente ha svolto più ore di quelle <br>previste dal piano orario giornaliero."></i>
+				    </td>
+				    <td>
+				      <strong>${mese.value.progressivoFinalePositivoMese.toHourTime()}</strong>
+				      <a href="@{Stampings.personStamping(competence.person.id, competence.year, competence.month)}">
+				        <i class="fa fa-search" aria-hidden="true" webui-popover-hover data-content="Visualizza Presenze"></i></a>
+				    </td>
+				  </tr>
+				  <tr>
+				    <td>
+				      <em>Progressivo a fine mese</em>
+				      <i class="fa fa-question-circle" aria-hidden="true" webui-popover-hover 
+    				       data-content="<strong>Progressivo a fine mese</strong> Il saldo fra le differenze positive e negative nel mese. <br>
+				                   <strong>Differenze positive/negative</strong> Giorni in cui il dipendente ha svolto più ore/meno ore di quelle <br>previste dal piano orario giornaliero."></i>
+				    </td>
+				    <td>
+                      <strong>${mese.value.progressivoFinaleMese.toHourTime()}</strong>
+				    </td>
+				  </tr>
+				  <tr>
+				    <td><em>Residuo monte ore anno corrente</em></td>
+				    <td><strong>${mese.value.remainingMinutesCurrentYear.toHourTime()}</strong></td>
+				  </tr>
+				</table>
+			#{/list}
+		  <p>	 
+		#{/if}
+	  #{/if}	
 	  
-  #{/form}
-#{/else}
+    <!-- Limiti -->
+    <p><strong>Limiti</strong></p>	  
+	#{if competence.competenceCode.code.equals('S1') || competence.competenceCode.code.equals('S2')}
+  	  <p>
+  	    Massimo annuale per persona <strong class="text-danger">${competence.competenceCode.competenceCodeGroup.limitValue} ore</strong>
+  	  </p>	
+	#{/if}
+  	#{elseif competence.competenceCode.code.equals('207')}
+  		<p>Valore massimo assegnabile <strong class="text-danger">12 giorni</strong></p>
+  		<p>Se contestualmente non viene assegnato alcun codice <strong>208</strong> il valore massimo assegnabile diventa <strong class="text-danger">${competence.competenceCode.competenceCodeGroup.limitValue} giorni</strong> 
+  				
+  		</p>
+  	#{/elseif}
+  	#{elseif competence.competenceCode.code.equals('208')}
+  		<p>
+  		  Valore massimo assegnabile <strong class="text-danger">${competence.competenceCode.limitValue} giorni</strong> 
+  		</p>
+  	#{/elseif}
+  	#{elseif competence.competenceCode.code.equals('T1') || competence.competenceCode.code.equals('T2')}
+  		<p>Valore massimo assegnabile <strong class="text-danger">${competence.competenceCode.limitValue} ore</strong></p>
+  	#{/elseif}
+  	#{elseif competence.competenceCode.competenceCodeGroup != null && 
+  	competence.competenceCode.competenceCodeGroup.label.equals('Gruppo Ind.tà rischio')}
+  		<p>Questo codice appartiene al gruppo delle indennità di rischio.<br>
+  			Il quantitativo da assegnare per questo codice è espresso in <strong>giorni</strong>
+  			e deve essere uguale al numero di giorni di presenza a lavoro nel mese per il dipendente.
+  		</p>
+  	#{/elseif}
+  	#{elseif competence.competenceCode.limitType.equals(models.enumerate.LimitType.entireMonth)}
+  		<p>Questo codice appartiene alle indennità di rischio radiazione ionizzante e viene assegnato su base mensile.
+  		Il massimo valore assegnabile è <strong>${competence.competenceCode.limitValue}</strong></p>
+  	#{/elseif}
+  	#{else}
+  		<p>Per questo codice non è stata definita una linea di comportamento nella definizione delle quantità usabili singolarmente
+  			o per il proprio gruppo di appartenenza. Rivolgersi all'amministrazione della sede centrale per chiarimenti sui quantitativi
+  			da poter inserire. 
+  		</p>
+  	#{/else}
+    #{/alert}
+  
+
+	  #{form action:@saveCompetence(), method:'POST', autocomplete:false,
+	    class:'form form-horizontal', 'data-async':'#page_content',
+	    'data-async-error':'#competenceData','data-spinner':'#defaultSpinner'}
+	    
+	    #{f.hidden 'officeId', value:office.id /}
+
+		#{f.input 'valueApproved',type:'number', value:competence?.valueApproved, required:true /}
+		
+		#{if competence?.persistent}
+	    	#{f.hidden 'competence.id', value:competence.id /}
+	  	#{/if}
+	  	#{else}
+	  		#{f.hidden 'competence.month', value:month /}
+	    	#{f.hidden 'competence.year', value:year /}
+	    	#{f.hidden 'competence.person', value:person /}    	
+	  	#{/else}
+		#{b.buttons center:true}
+			#{b.submit 'Modifica'/}
+		#{/b.buttons}
+		  
+	  #{/form}
+	  
+	  
+	  
+  #{/else}
 </div>
 #{/modalAsync}
