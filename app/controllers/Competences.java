@@ -779,18 +779,9 @@ public class Competences extends Controller {
     YearMonth yearMonth = new YearMonth(year, month);
     competenceManager.applyBonus(Optional.fromNullable(office), competenceCode, yearMonth);
     
-    IWrapperCompetenceCode wrCompetenceCode = wrapperFactory.create(competenceCode);
-    List<CompetenceCode> competenceCodeList = competenceDao
-        .activeCompetenceCode(office, new LocalDate(year, month, 1)); 
-    
-    CompetenceRecap compDto = competenceRecapFactory
-        .create(office, competenceCode, year, month);
-    boolean servicesInitialized = competenceManager
-        .isServiceForReperibilityInitialized(office, competenceCodeList);
     flash.success("Aggiornati i valori per la competenza %s", competenceCode.code);
 
-    render("@showCompetences", year, month, office,
-        wrCompetenceCode, competenceCodeList, compDto, servicesInitialized);
+    showCompetences(year, month, office.id, competenceCode.id);
   }
 
   /* ****************************************************************
