@@ -15,14 +15,12 @@
  il risultato per i soli contratti a tempo determinato.
  </p>
  #{/alert}  
-   #{if onlyDefined}
-     <a class="btn btn-primary" href="@{Competences.approvedCompetenceInYear(year, !onlyDefined, office.id)}">Tutti</a> 
-   #{/if}
-   #{else}
-     <a class="btn btn-primary" href="@{Competences.approvedCompetenceInYear(year, !onlyDefined, office.id)}">Solo Determinati</a>
-   #{/else} 
+ 
+ <a class="btn btn-primary" #{if !onlyDefined} disabled="disabled"#{/if} href="@{Competences.approvedCompetenceInYear(year, false, office.id)}">Tutti</a> 
+ <a class="btn btn-primary" #{if onlyDefined} disabled="disabled"#{/if} href="@{Competences.approvedCompetenceInYear(year, true, office.id)}">Solo Determinati</a>
+ 
 
-  <table class="table">
+  <table class="table table-bordered table-hover table-condensed">
     <tr>
       <th></th>
       #{list items:totalValueAssigned.keySet(), as:'code'}
@@ -30,7 +28,7 @@
       #{/list}
     </tr>
     
-    <tr class="warning">
+    <tr class="info">
       <td><strong>Totale</strong></td>
       #{list items:totalValueAssigned.keySet(), as:'code'}
       <td><strong>${totalValueAssigned.get(code)}</strong></td>
