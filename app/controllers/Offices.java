@@ -66,7 +66,7 @@ public class Offices extends Controller {
     //la lista di institutes su cui si ha technical admin in almeno un office
 
     SearchResults<?> results = officeDao.institutes(
-        Optional.<String>fromNullable(name),
+        Optional.<String>fromNullable(name), Optional.absent(), Optional.absent(),
         Security.getUser().get(), roleDao.getRoleByName(Role.TECHNICAL_ADMIN))
         .listResults();
 

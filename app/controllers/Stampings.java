@@ -36,7 +36,6 @@ import manager.NotificationManager;
 import manager.PersonDayManager;
 import manager.SecureManager;
 import manager.StampingManager;
-import manager.configurations.EpasParam;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
@@ -231,12 +230,12 @@ public class Stampings extends Controller {
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     
-    validation.required(stamping.way);
-    
+    if (stamping.way == null) {
+      validation.addError("stamping.way", "Obbligatorio");
+    }
     if (Validation.hasErrors()) {
       response.status = 400;
-
-      log.debug(validation.errorsMap().toString());
+      
       List<HistoryValue<Stamping>> historyStamping = Lists.newArrayList();
       if (stamping.isPersistent()) {
         historyStamping = stampingsHistoryDao.stampings(stamping.id);
@@ -278,20 +277,17 @@ public class Stampings extends Controller {
 
     flash.success(Web.msgSaved(Stampings.class));
 
+    notificationManager
+    .notificationStampingPolicy(currentUser, stamping, newInsert, !newInsert, false);
+    
+    //redirection stuff
     if (!currentUser.isSystemUser() && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)
         && currentUser.person.id.equals(person.id)) {
-
-      if (!(currentUser.person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")
-          && currentUser.person.qualification.qualification <= 3)) {
-        notificationManager.notifyStamping(stamping,
-            newInsert ? NotificationManager.CRUD.CREATE : NotificationManager.CRUD.UPDATE);
-      }
       stampings(date.getYear(), date.getMonthOfYear());
     }
-
     personStamping(person.id, date.getYear(), date.getMonthOfYear());
   }
-
+  
 
   /**
    * Elimina la timbratura.
@@ -315,17 +311,13 @@ public class Stampings extends Controller {
 
     flash.success("Timbratura rimossa correttamente.");
 
+    notificationManager.notificationStampingPolicy(currentUser, stamping, false, false, true);
+    
+    //redirection stuff
     if (!currentUser.isSystemUser() && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)
         && currentUser.person.id.equals(personDay.person.id)) {
-
-      if (!(currentUser.person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")
-          && currentUser.person.qualification.qualification <= 3)) {
-        notificationManager.notifyStamping(stamping, NotificationManager.CRUD.DELETE);
-      }
-
       Stampings.stampings(personDay.date.getYear(), personDay.date.getMonthOfYear());
     }
-
     personStamping(personDay.person.id, personDay.date.getYear(),
         personDay.date.getMonthOfYear());
   }

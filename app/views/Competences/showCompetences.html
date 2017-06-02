@@ -52,14 +52,26 @@
     
 	#{if wrCompetenceCode.value.limitType.equals(models.enumerate.LimitType.onMonthlyPresence)}
 		#{alert color:'warning'}
-			<p>Se sono state effettuate modifiche alle timbrature o alle assenze nelle giornate del mese
-			di &{templateUtility.monthName(compDto.month)}, successive al <strong>1 &{templateUtility.monthName(compDto.month)}</strong>, è possibile effettuare il ricalcolo 
-			della competenza premendo il tasto qui sotto</p>
+			<p><i class="fa fa-exclamation" aria-hidden="true"></i> <u><strong>ATTENZIONE</strong></u> <br>I primi 3 giorni di ogni mese, il sistema in automatico verifica i giorni di presenza a lavoro relativi al mese precedente 
+			di ciascun dipendente abilitato al codice ${wrCompetenceCode.value.code} - ${wrCompetenceCode.value.description} e compila 
+			automaticamente i valori da attribuire per la competenza per ciascun dipendente.<br>
+			Se sono state effettuate modifiche alle timbrature o alle assenze nelle giornate del mese
+			di &{templateUtility.monthName(compDto.month)}, successivamente al <strong>3 &{templateUtility.monthName(compDto.month+1)}</strong>, è possibile effettuare il ricalcolo 
+			della competenza premendo il tasto qui sotto</p><br>
 		
 		<a class="btn btn-warning offset-col-sm-4" href="@{Competences.recalculateBonus(office.id, wrCompetenceCode.value.id, year, month)}">
       		Ricalcola competenza
     	</a>
     	#{/alert}
+	#{/if}
+	#{if wrCompetenceCode.value.limitType.equals(models.enumerate.LimitType.entireMonth)}
+		#{alert color:'warning'}
+			<p><i class="fa fa-exclamation" aria-hidden="true"></i> <u><strong>ATTENZIONE</strong></u> <br>
+			I codici ad assegnamento mensile come il ${wrCompetenceCode.value.code} possono avere come 
+			massimo valore <strong>${wrCompetenceCode.value.limitValue}</strong>. <br>
+			<u>Il primo giorno di ogni mese</u>, ePAS <strong>in automatico</strong> controlla tutti i dipendenti della sede abilitati alla fruizione 
+			di questo codice e assegna loro il valore ${wrCompetenceCode.value.limitValue}.</p>
+		#{/alert}
 	#{/if}
 	<br>
 	   <table class="table" datatable>
