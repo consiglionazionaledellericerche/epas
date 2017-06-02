@@ -43,6 +43,25 @@
 
 	<div class="col-sm-offset-2 col-sm-8" id="uroList">
 
+	<h4>Responsabile sede</h4>    
+    #{if wrOffice.seatSupervisor.empty }
+      <div class="alert alert-danger">
+        Non è stato ancora impostato alcun responsabile sede!
+      </div>
+    #{/if}
+    #{else}
+	    <ul class="list-group">
+	       #{list items:wrOffice.seatSupervisor, as:'userRole'}
+	         <li class="list-group-item clearfix">
+						 <span class="label label-primary"> ${userRole.user.person.fullname}</span>
+             <a class="label label-badge label-danger pull-right" href="@{Administrators.delete(userRole.id)}" webui-popover-hover data-content="Revoca Ruolo" >
+               <i class="fa fa-trash"></i> Rimuovi
+             </a>
+	          </li>
+	       #{/list}
+	    </ul>
+    #{/else}
+
 	<h4>Amministratore tecnico</h4>    
     #{if wrOffice.technicalAdmins.empty }
       <div class="alert alert-danger">

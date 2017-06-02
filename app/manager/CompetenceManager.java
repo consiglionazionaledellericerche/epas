@@ -744,8 +744,14 @@ public class CompetenceManager {
       Optional<PersonCompetenceCodes> pcc = 
           competenceCodeDao.getByPersonAndCodeAndDate(person, item, date);
       if (pcc.isPresent()) {
-        pcc.get().endDate = endMonth;
-        pcc.get().save();
+        
+        if (pcc.get().beginDate.monthOfYear().equals(date.monthOfYear())) {
+          pcc.get().delete();
+        } else {
+          pcc.get().endDate = endMonth;
+          pcc.get().save();
+        }
+
         if (item.code.equals("T1") || item.code.equals("T2") || item.code.equals("T3")) {
           PersonShift personShift = personShiftDayDao.getPersonShiftByPerson(pcc.get().person);
           if (personShift != null) {
@@ -908,28 +914,57 @@ public class CompetenceManager {
     Optional<PersonCompetenceCodes> pcc = competenceCodeDao
         .getByPersonAndCodeAndDate(person, code, date);
     if (pcc.isPresent()) {
-      PersonStampingRecap psDto = stampingsRecapFactory
+      
+      switch (code.limitType) {
+        case onMonthlyPresence:
+          PersonStampingRecap psDto = stampingsRecapFactory
           .create(person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true);
-      Optional<Competence> competence = competenceDao
-          .getCompetence(person, yearMonth.getYear(), yearMonth.getMonthOfYear(), code);
-      if (competence.isPresent()) {
-        competence.get().valueApproved = psDto.basedWorkingDays;
-        competence.get().save();
-      } else {
-        Competence comp = new Competence();
-        comp.competenceCode = code;
-        comp.person = person;
-        comp.year = yearMonth.getYear();
-        comp.month = yearMonth.getMonthOfYear();
-        comp.valueApproved = psDto.basedWorkingDays;
-        comp.save();
+          addSpecialCompetence(person, yearMonth, code, Optional.fromNullable(psDto));
+          break;
+        case entireMonth:
+          addSpecialCompetence(person, yearMonth, code, Optional.<PersonStampingRecap>absent());
+          break;
+          default:
+            break;
       }
-      log.debug("Assegnati {} giorni a {}", psDto.basedWorkingDays, person.fullName());
     } else {
       log.warn("La competenza {} non risulta abilitata per il dipendente {} nel mese "
           + "e nell'anno selezionati", code, person.fullName());
     }
   }
+  
+  /**
+   * assegna le competenze speciali (su presenza mensile o assegnano interamente un mese).
+   * @param person la persona a cui assegnare la competenza
+   * @param yearMonth l'anno mese per cui assegnare la competenza
+   * @param code il codice competenza da assegnare
+   * @param psDto (opzionale) se presente serve al calcolo dei giorni di presenza
+   */
+  private void addSpecialCompetence(Person person, YearMonth yearMonth, CompetenceCode code, 
+      Optional<PersonStampingRecap> psDto) {
+    int value = 0;
+    if (psDto.isPresent()) {
+      value = psDto.get().basedWorkingDays;
+    } else {
+      value = code.limitValue;
+    }
+    Optional<Competence> competence = competenceDao
+        .getCompetence(person, yearMonth.getYear(), yearMonth.getMonthOfYear(), code);
+    if (competence.isPresent()) {
+      competence.get().valueApproved = value;
+      competence.get().save();
+    } else {
+      Competence comp = new Competence();
+      comp.competenceCode = code;
+      comp.person = person;
+      comp.year = yearMonth.getYear();
+      comp.month = yearMonth.getMonthOfYear();
+      comp.valueApproved = value;
+      comp.save();
+    }
+    log.debug("Assegnata competenza a {}", person.fullName());
+  }
+
 
   /**
    * crea un personShift a partire dalla persona passata come parametro.

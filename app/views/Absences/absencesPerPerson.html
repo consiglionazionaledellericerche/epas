@@ -68,7 +68,8 @@
           <td>
 		  #{list items:month.getValue().get(col), as:'absence'}
 		    #{if absence}
-		      #{absences.absence-popover absence:absence /}
+		      %{ absenceRenderingNoLink = true; }%
+		      #{include './../Stampings/personStampingComponents/_absenceRendering.html' /}
 		    #{/if}
 		  #{/list}    
 		  </td>
