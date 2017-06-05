@@ -521,30 +521,22 @@ public class PersonDayManager {
   public void updateDifference(PersonDay personDay, WorkingTimeTypeDay wttd,
       boolean fixedTimeAtWork) {
 
+    //TODO: per pulizia i wttd festivi dovrebbero avere il campo wttd.workingTime == 0
+    // Implementare la modifica dei piani ferie di default. 
+    int plannedWorkingTime = wttd.workingTime;
+    if (personDay.isHoliday) {
+      plannedWorkingTime = 0;
+    }
+    
+    //TODO FIXEDTIME indagare come mai si richiede anche il time at work == 0 
+    // (dovrebbe esserlo sempre per i fixed).
     //persona fixed
     if (fixedTimeAtWork && personDay.getTimeAtWork() == 0) {
       personDay.setDifference(0);
       return;
     }
 
-    //festivo
-    if (personDay.isHoliday()) {
-      if (personDay.isAcceptedHolidayWorkingTime()) {
-        personDay.setDifference(personDay.getTimeAtWork());
-      } else {
-        personDay.setDifference(0);
-      }
-      return;
-    }
-
-    //assenze giornaliere
-    if (isAllDayAbsences(personDay)) {
-      personDay.setDifference(0);
-      return;
-    }
-
-    //feriale
-    personDay.setDifference(personDay.getTimeAtWork() - wttd.workingTime);
+    personDay.setDifference(personDay.getTimeAtWork() - plannedWorkingTime);
   }
 
 
