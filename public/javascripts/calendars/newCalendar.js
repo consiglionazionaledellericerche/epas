@@ -173,8 +173,11 @@ $(document).ready(function() {
             'shiftType.id': shiftType
           },
           error: function(response) {
+        	  response.responseJSON.forEach(function(item){
+        		  new PNotify(item);
+        	 });
             // Passare un JSON serializzato a partire da un PNotifyObject definito lato Java
-            new PNotify(response.responseJSON);
+//            new PNotify(response.responseJSON);
             // Non essendoci la revertFunc() eliminiamo il nuovo evento in caso di 'errore' (turno non inseribile)
             $this.fullCalendar('removeEvents', event._id);
           },

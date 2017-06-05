@@ -36,6 +36,8 @@ public class QShiftCategories extends EntityPathBase<ShiftCategories> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
+    public final ListPath<models.Person, QPerson> manager = this.<models.Person, QPerson>createList("manager", models.Person.class, QPerson.class, PathInits.DIRECT2);
+
     public final QOffice office;
 
     //inherited
