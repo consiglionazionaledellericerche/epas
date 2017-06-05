@@ -322,68 +322,64 @@ public class PersonDayManager {
 
     for (Absence abs : personDay.getAbsences()) {
 
-      if (abs.justifiedType != null) {
+      Preconditions.checkNotNull(abs.justifiedType);
 
-        if (abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
-          cleanTimeAtWork(personDay);
-          personDay.setTimeAtWork(wttd.workingTime);
-          return personDay;
-        }
+      if (abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
+        cleanTimeAtWork(personDay);
+        personDay.setTimeAtWork(wttd.workingTime);
+        return personDay;
+      }
 
-        //Questo e' il caso del codice 105BP che garantisce sia l'orario di lavoro
-        // che il buono pasto
-        // TODO: se è il 105BP perchè non controllo direttamente il codice? Mistero della fede.
-        if (abs.justifiedType.name == JustifiedTypeName.assign_all_day) {
-          cleanTimeAtWork(personDay);
-          setTicketStatusIfNotForced(personDay, true);
-          personDay.setTimeAtWork(wttd.workingTime);
-          return personDay;
-        }
+      //Questo e' il caso del codice 105BP che garantisce sia l'orario di lavoro
+      // che il buono pasto
+      // TODO: se è il 105BP perchè non controllo direttamente il codice? Mistero della fede.
+      if (abs.justifiedType.name == JustifiedTypeName.assign_all_day) {
+        cleanTimeAtWork(personDay);
+        setTicketStatusIfNotForced(personDay, true);
+        personDay.setTimeAtWork(wttd.workingTime);
+        return personDay;
+      }
 
-        // Caso di assenza giornaliera.
-        if (abs.justifiedType.name == JustifiedTypeName.all_day) {
-          cleanTimeAtWork(personDay);
-          setTicketStatusIfNotForced(personDay, false);
-          personDay.setTimeAtWork(0);
-          return personDay;
-        }
+      // Caso di assenza giornaliera.
+      if (abs.justifiedType.name == JustifiedTypeName.all_day) {
+        cleanTimeAtWork(personDay);
+        setTicketStatusIfNotForced(personDay, false);
+        personDay.setTimeAtWork(0);
+        return personDay;
+      }
 
-        // Mezza giornata giustificata.
-        if (abs.justifiedType.name == JustifiedTypeName.half_day) {
+      // Mezza giornata giustificata.
+      if (abs.justifiedType.name == JustifiedTypeName.half_day) {
+        personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
+            + (wttd.workingTime / 2));
+        continue;
+      }
+
+      // #######
+      //  Assenze non giornaliere da cumulare ....
+
+      // Giustificativi grana minuti
+      if (abs.justifiedType.name == JustifiedTypeName.specified_minutes) {
+
+        if (abs.absenceType.timeForMealTicket) {
+          personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal()
+              + abs.justifiedMinutes);
+        } else {
           personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
-              + (wttd.workingTime / 2));
-          continue;
+              + abs.justifiedMinutes);
         }
+        continue;
+      }
 
-        // #######
-        //  Assenze non giornaliere da cumulare ....
-
-        // Giustificativi grana minuti
-        if (abs.justifiedType.name == JustifiedTypeName.specified_minutes) {
-
-          if (abs.absenceType.timeForMealTicket) {
-            personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal()
-                + abs.justifiedMinutes);
-          } else {
-            personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
-                + abs.justifiedMinutes);
-          }
-          continue;
+      // Giustificativi grana ore (discriminare per calcolo buono o no)
+      if (abs.justifiedType.name == JustifiedTypeName.absence_type_minutes) {
+        if (abs.absenceType.timeForMealTicket) {
+          personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal()
+              + abs.absenceType.justifiedTime);
+        } else {
+          personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
+              + abs.absenceType.justifiedTime);
         }
-
-        // Giustificativi grana ore (discriminare per calcolo buono o no)
-        if (abs.justifiedType.name == JustifiedTypeName.absence_type_minutes) {
-          if (abs.absenceType.timeForMealTicket) {
-            personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal()
-                + abs.absenceType.justifiedTime);
-          } else {
-            personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
-                + abs.absenceType.justifiedTime);
-          }
-          continue;
-        }
-
-
         continue;
       }
     }
