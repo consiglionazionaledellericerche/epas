@@ -42,14 +42,6 @@ public class PersonShiftDay extends BaseModel {
   @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
   public PersonShift personShift;
 
-  public ShiftSlot getShiftSlot() {
-    return shiftSlot;
-  }
-
-  public void setShiftSlot(ShiftSlot shiftSlot) {
-    this.shiftSlot = shiftSlot;
-  }
-
   //  Nuova relazione con gli errori associati ai personShiftDay
   @OneToMany(mappedBy = "personShiftDay")
   public List<PersonShiftDayInTrouble> troubles = new ArrayList<>();
