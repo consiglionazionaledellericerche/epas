@@ -48,7 +48,7 @@ public class ShiftEvent {
   private Long personId;
   private ShiftSlot shiftSlot;
   private EventColor eventColor;
-  private List<String> errors;
+  private String error;
   private String email;
   private String mobile;
   private Boolean jolly; // serve unicamente per differenziare gli eventi esterni

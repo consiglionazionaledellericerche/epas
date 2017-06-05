@@ -1,26 +1,20 @@
 package controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Range;
 
 import com.beust.jcommander.internal.Lists;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dao.AbsenceDao;
-import dao.PersonDayDao;
 import dao.ShiftDao;
-import dao.wrapper.IWrapperFactory;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
-import manager.PersonDayManager;
+
 import manager.ShiftManager2;
+
 import models.Person;
 import models.PersonShiftDay;
 import models.PersonShiftShiftType;
@@ -33,12 +27,20 @@ import models.dto.ShiftEvent;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
 import models.enumerate.ShiftTroubles;
+
 import org.joda.time.LocalDate;
-import play.i18n.Messages;
+
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Http.StatusCode;
 import play.mvc.With;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 /**
  * @author arianna
@@ -52,15 +54,9 @@ public class Calendar extends Controller {
   @Inject
   static ShiftDao shiftDao;
   @Inject
-  private static PersonDayDao personDayDao;
-  @Inject
-  private static PersonDayManager personDayManager;
-  @Inject
-  private static ShiftManager2 shiftManager2;
+  static ShiftManager2 shiftManager2;
   @Inject
   static ObjectMapper mapper;
-  @Inject
-  private static IWrapperFactory wrapperFactory;
   @Inject
   static AbsenceDao absenceDao;
 
@@ -164,7 +160,7 @@ public class Calendar extends Controller {
   }
 
 
-  /*
+  /**
    * Carica la lista dei turni di un certo tipo associati ad una determinata persona in
    * un intervallo di tempo
    *
@@ -191,17 +187,15 @@ public class Calendar extends Controller {
               .textColor(color.textColor)
               .borderColor(color.borderColor)
               // FIXME esempio da cancellare in favore dell'if sottostante
-              .errors(Arrays.stream(ShiftTroubles.values())
-                  .map(trouble -> Messages.get(trouble.toString())).collect(
-                      Collectors.toList()))
+              .error("")
               .className("removable")
               .build();
 
-//          if (!shiftDay.troubles.isEmpty()) {
-//            final List<String> troubles = shiftDay.troubles.stream()
-//                .map(trouble -> Messages.get(trouble.cause)).collect(Collectors.toList());
-//            event.setErrors(troubles);
-//          }
+          //          if (!shiftDay.troubles.isEmpty()) {
+          //            final List<String> troubles = shiftDay.troubles.stream()
+          //                .map(trouble -> Messages.get(trouble.cause)).collect(Collectors.toList());
+          //            event.setErrors(troubles);
+          //          }
 
           return event;
         }).collect(Collectors.toList());
@@ -255,7 +249,7 @@ public class Calendar extends Controller {
   }
 
 
-  /*
+  /**
    * Chiamata dal fullCalendar dei turni per ogni evento di drop di un turno sul calendario.
    * Controlla se il turno passato come parametro può essere salvato in un dato giorno 
    * ed eventualmente lo salva, altrimenti restituisce un errore
@@ -273,13 +267,19 @@ public class Calendar extends Controller {
 
     log.debug("Chiamato metodo changeShift: personShiftDayId {} - newDate {} ", personShiftDayId,
         newDate);
-    String message = "";
-
+    
     // legge il turno da spostare
     PersonShiftDay oldShift = shiftDao.getPersonShiftDayById(personShiftDayId);
 
     // controlla gli eventuali errori di consitenza nel calendario
-    List<String> errors = ShiftManager2.checkShiftEvent(oldShift, newDate);
+    //List<String> errors = ShiftManager2.checkShiftEvent(oldShift, newDate);
+    PersonShiftDay day = new PersonShiftDay();
+    day.date = newDate;
+    day.personShift = oldShift.personShift;
+    day.shiftSlot = oldShift.shiftSlot;
+    day.shiftType = oldShift.shiftType;
+    
+    String errors = shiftManager2.shiftPermitted(day);
     if (errors.isEmpty() || errors.contains(ShiftTroubles.PROBLEMS_ON_OTHER_SLOT.toString())) {
       //salva il nuovo turno
 
@@ -294,18 +294,15 @@ public class Calendar extends Controller {
           .shiftSlot(oldShift.shiftSlot)
           .personShiftDayId(oldShift.id)
           .title(oldShift.getSlotTime() + '\n' + oldShift.personShift.person.fullName())
-          .errors(errors)
+          .error(errors)
           .build();
 
       renderJSON(mapper.writeValueAsString(event));
 
     } else {
-      // prende il messaggi di errore
-      for (String error : errors) {
-        message.concat(Messages.get(error));
-      }
+      // prende il messaggi di errore      
       response.status = 409;
-      renderText(message);
+      renderText(errors);
     }
   }
 
@@ -317,57 +314,42 @@ public class Calendar extends Controller {
     // TODO: ricordarsi di controllare se la persona è attiva sull'attività al momento della creazione del
     // personshiftDay
 
-    // Esempio per passare gli errori da renderizzare direttamente col PNotify
-    //    final PNotifyObject message = PNotifyObject.builder()
-    //        .title("Prova")
-    //        .hide(true)
-    //        .text("testo di prova")
-    //        .delay(2000)
-    //        .type("info").build();
-    //
-    //    response.status = StatusCode.BAD_REQUEST;
-    //    renderJSON(message);
-
-    String color = ""; //TODO:
-    String message = "";
-
     // crea il personShiftDay
     PersonShiftDay personShiftDay = new PersonShiftDay();
     personShiftDay.date = date;
     personShiftDay.shiftType = shiftType;
-    personShiftDay.setShiftSlot(shiftSlot);
+    personShiftDay.shiftSlot = shiftSlot;
     personShiftDay.personShift = shiftDao.getPersonShiftByPersonAndType(personId, shiftType.type);
 
+    String error = shiftManager2.shiftPermitted(personShiftDay);
+    List<PNotifyObject> notes = Lists.newArrayList(); 
+
     // controlla che possa essere salvato nel giorno
-    List<String> errors = ShiftManager2.checkShiftDay(personShiftDay, date);
-    if (errors.isEmpty()) {
+    //    List<String> errors = ShiftManager2.checkShiftDay(personShiftDay, date);
+    //    List<String> errors = ImmutableList.of("dramma 1", " dramma 2");
+    if (error.equals("")) {
       personShiftDay.save();
+      final PNotifyObject note = PNotifyObject.builder()
+          .title("Direi bene")
+          .hide(true)
+          .text(error)
+          .delay(2000)
+          .type("success").build();
+      notes.add(note);     
 
-      // contruisce l'evento
-      //TODO: con gli errori? e poi li prendi nel calendario? (messaggi o errCode?) Oppure?
-      ShiftEvent event = ShiftEvent.builder()
-          .shiftSlot(personShiftDay.shiftSlot)
-          .personShiftDayId(personShiftDay.id)
-          .title(personShiftDay.getSlotTime() + '\n' + personShiftDay.personShift.person.fullName())
-          .errors(errors)
-          .build();
-
-      renderJSON(mapper.writeValueAsString(event));
     } else {
-      List<PNotifyObject> notes = Lists.newArrayList();      
-      for (String error : errors) {
-        final PNotifyObject note = PNotifyObject.builder()
-            .title("Errore")
-            .hide(true)
-            .text(error)
-            .delay(2000)
-            .type("error").build();
-        notes.add(note);
 
-      }
+      final PNotifyObject note = PNotifyObject.builder()
+          .title("Errore")
+          .hide(true)
+          .text(error)
+          .delay(2000)
+          .type("error").build();
+      notes.add(note);
       response.status = StatusCode.BAD_REQUEST;
-      renderJSON(mapper.writeValueAsString(notes));
+
     }
+    renderJSON(notes);
   }
 
   /**

@@ -65,7 +65,7 @@ public class PersonShiftDayDao extends DaoBase {
 
     JPQLQuery query =
         getQueryFactory().from(personShiftDay)
-          .where(personShiftDay.date.between(from, to)
+          .where(personShiftDay.date.goe(from).and(personShiftDay.date.loe(to))
             .and(personShiftDay.shiftType.eq(type))).orderBy(personShiftDay.date.asc());
     return query.list(personShiftDay);
   }
