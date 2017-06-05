@@ -61,8 +61,20 @@ $(document).ready(function() {
         });
       }
     });
+    data['eventSources'].push({
+        // TODO usare un apiKey valida, questa è la mia!
+        googleCalendarApiKey: 'AIzaSyCKz2wojkoujmgrtriDHiFpqQcweS3siR4',
+//        googleCalendarApiKey: 'AIzaSyAEoRhKv77jIyoqHb0VDNWbPdD_BDuEnFk',
+        googleCalendarId: 'it.italian#holiday@group.v.calendar.google.com',
+        rendering: 'background',
+        className: 'holiday',
+    });
     if ($this.data('calendar-event-remove')) {
       data['eventRender'] = function(event, element) {
+        // Per visualizzare il titolo anche sugli eventi renderizzati come background (festività)
+        if(event.source.rendering === 'background'){
+           element.append("<em>" + event.title + "</em>");
+        }
         if ($.inArray("removable", event.className) != -1) {
           var url = $this.data('calendar-event-remove');
           // Aggiunge l'icona per la rimozione dell'evento nel caso sia impostata la classe removable

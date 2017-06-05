@@ -4,10 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
-
-import com.beust.jcommander.internal.Lists;
-
 import dao.AbsenceDao;
 import dao.PersonDayDao;
 import dao.ShiftDao;
@@ -354,7 +352,7 @@ public class Calendar extends Controller {
 
       renderJSON(mapper.writeValueAsString(event));
     } else {
-      List<PNotifyObject> notes = Lists.newArrayList();      
+      List<PNotifyObject> notes = Lists.newArrayList();
       for (String error : errors) {
         final PNotifyObject note = PNotifyObject.builder()
             .title("Errore")
