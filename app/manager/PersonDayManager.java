@@ -134,7 +134,9 @@ public class PersonDayManager {
     setTicketStatusIfNotForced(pd, false);
 
     pd.setStampModificationType(null);
-    pd.setDecurted(0);
+    pd.setDecurtedMeal(0);
+    pd.setOnHoliday(0);
+    pd.setOutOpening(0);
     pd.setStampingsTime(0);
     pd.setJustifiedTimeMeal(0);
     pd.setJustifiedTimeNoMeal(0);
