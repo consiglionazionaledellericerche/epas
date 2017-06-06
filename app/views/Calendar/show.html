@@ -22,10 +22,10 @@
     </div>
 </div>
 <!-- Menu laterale-->
-<div class="col-sm-2 well well-lg" data-render-load="@{shiftPeople()}"></div>
+<div class="col-md-2 well well-lg" data-render-load="@{shiftPeople()}"></div>
 
 <!-- Calendario-->
-<div class="col-lg-8 col-sm-10"
+<div class="col-md-8"
      data-calendar
      data-calendar-source="@{events()}"
      #{secure.check 'Calendar.changeShift'}
@@ -35,6 +35,8 @@
       data-calendar-date="${currentDate}"
      #{/secure.check}>
 </div>
+
+<div class="col-md-2 well well-lg" data-render-load="@{recap()}"></div>
 
 #{set 'moreScripts'}
 <script src="//code.jquery.com/ui/1.12.0/jquery-ui.js"></script>

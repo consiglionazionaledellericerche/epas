@@ -27,6 +27,7 @@ import models.dto.ShiftEvent;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -127,7 +128,7 @@ public class Calendar extends Controller {
           .title("Ok")
           .hide(true)
           .text(Web.msgDeleted(PersonShiftDay.class))
-          .type("info").build();
+          .type("success").build();
     }
 
     renderJSON(message);
@@ -203,11 +204,9 @@ public class Calendar extends Controller {
   }
 
   /**
-   *
    * @param person Persona della quale recuperare le assenze
    * @param start data iniziale del periodo
    * @param end data finale del periodo
-   *
    * @return Una lista di DTO che modellano le assenze di quella persona nell'intervallo specificato
    * da renderizzare nel fullcalendar.
    */
@@ -288,6 +287,7 @@ public class Calendar extends Controller {
     } else {
       //salva il turno modificato
       shift.save();
+      shiftManager2.checkShiftValid(shift);
 
       message = PNotifyObject.builder()
           .title("Ok")
@@ -323,6 +323,8 @@ public class Calendar extends Controller {
     } else {
       personShiftDay.save();
 
+      shiftManager2.checkShiftValid(personShiftDay);
+
       message = PNotifyObject.builder()
           .title("Ok")
           .hide(true)
@@ -332,21 +334,13 @@ public class Calendar extends Controller {
     renderJSON(message);
   }
 
-  /**
-   * Crea il file PDF con il resoconto mensile dei turni dello IIT il mese 'month'
-   * dell'anno 'year' (portale sistorg).
-   *
-   * @author arianna
-   */
-  //@BasicAuth
-  public static void exportMonthAsPDF(int year, int month, Long shiftCategoryId) {
+  public static void recap(ShiftType activity, LocalDate intervalStart) {
+    final YearMonth yearMonth = new YearMonth(intervalStart);
 
-    log.debug("sono nella exportMonthAsPDF con shiftCategory={} year={} e month={}",
-        shiftCategoryId, year, month);
-
-    // legge inizio e fine mese
-    final LocalDate firstOfMonth = new LocalDate(year, month, 1);
-    final LocalDate lastOfMonth = firstOfMonth.dayOfMonth().withMaximumValue();
+    List<String> items = new ArrayList<>();
+    items.add(activity.toString());
+    items.add(intervalStart.toString());
+    render(items);
   }
 
   /**
