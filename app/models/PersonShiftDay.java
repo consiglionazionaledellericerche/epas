@@ -2,6 +2,7 @@ package models;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -43,7 +44,7 @@ public class PersonShiftDay extends BaseModel {
   public PersonShift personShift;
 
   //  Nuova relazione con gli errori associati ai personShiftDay
-  @OneToMany(mappedBy = "personShiftDay")
+  @OneToMany(mappedBy = "personShiftDay", cascade = CascadeType.REMOVE)
   public List<PersonShiftDayInTrouble> troubles = new ArrayList<>();
 
 

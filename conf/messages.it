@@ -304,6 +304,8 @@ PDFReport.thMissingTime=Orario insufficiente
 PDFReport.thWarnStampings=Orario incompleto fuori tolleranza
 
 # CALENDARIO SHIFT
+
+shift.alreadyInShift= Il dipendente è già in turno sull'attività %s
 calendar.ShiftToubles.PERSON_IS_ABSENT=Il turnista è assente nel giorno %d
 calendar.ShiftToubles.NOT_ENOUGH_WORKING_TIME=Orario incompleto nel giorno %d
 
