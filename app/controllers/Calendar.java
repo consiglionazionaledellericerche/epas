@@ -1,20 +1,20 @@
 package controllers;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Range;
-
-import com.beust.jcommander.internal.Lists;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Range;
 import dao.AbsenceDao;
 import dao.ShiftDao;
-
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-
 import manager.ShiftManager2;
-
 import models.Person;
 import models.PersonShiftDay;
 import models.PersonShiftShiftType;
@@ -27,20 +27,11 @@ import models.dto.ShiftEvent;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
 import models.enumerate.ShiftTroubles;
-
 import org.joda.time.LocalDate;
-
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Http.StatusCode;
 import play.mvc.With;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 /**
  * @author arianna
@@ -168,7 +159,6 @@ public class Calendar extends Controller {
    * @param Person person: persona associata ai turni
    * @param LocalDate start: data inizio intervallo di tempo
    * @param LocalDate end: data fine intervallo di tempo
-   *
    * @output List<ShiftEvent>: lista di eventi
    */
   private static List<ShiftEvent> shiftEvents(ShiftType shiftType, Person person, LocalDate start,
@@ -251,14 +241,13 @@ public class Calendar extends Controller {
 
   /**
    * Chiamata dal fullCalendar dei turni per ogni evento di drop di un turno sul calendario.
-   * Controlla se il turno passato come parametro può essere salvato in un dato giorno 
+   * Controlla se il turno passato come parametro può essere salvato in un dato giorno
    * ed eventualmente lo salva, altrimenti restituisce un errore
-   * 
+   *
    * @param long personShiftDayId: id del persnShiftDay da controllare
    * @param LocalDate newDate: giorno nel quale salvare il turno
-   * 
    * @out error 409 con messaggio di ShiftTroubles.PERSON_IS_ABSENT, CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED,
-   *                                   CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED
+   * CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED
    */
   public static void changeShift(long personShiftDayId, LocalDate newDate)
       throws JsonProcessingException {
@@ -267,7 +256,7 @@ public class Calendar extends Controller {
 
     log.debug("Chiamato metodo changeShift: personShiftDayId {} - newDate {} ", personShiftDayId,
         newDate);
-    
+
     // legge il turno da spostare
     PersonShiftDay oldShift = shiftDao.getPersonShiftDayById(personShiftDayId);
 
@@ -278,7 +267,7 @@ public class Calendar extends Controller {
     day.personShift = oldShift.personShift;
     day.shiftSlot = oldShift.shiftSlot;
     day.shiftType = oldShift.shiftType;
-    
+
     String errors = shiftManager2.shiftPermitted(day);
     if (errors.isEmpty() || errors.contains(ShiftTroubles.PROBLEMS_ON_OTHER_SLOT.toString())) {
       //salva il nuovo turno
@@ -300,7 +289,7 @@ public class Calendar extends Controller {
       renderJSON(mapper.writeValueAsString(event));
 
     } else {
-      // prende il messaggi di errore      
+      // prende il messaggi di errore
       response.status = 409;
       renderText(errors);
     }
@@ -322,7 +311,7 @@ public class Calendar extends Controller {
     personShiftDay.personShift = shiftDao.getPersonShiftByPersonAndType(personId, shiftType.type);
 
     String error = shiftManager2.shiftPermitted(personShiftDay);
-    List<PNotifyObject> notes = Lists.newArrayList(); 
+    List<PNotifyObject> notes = Lists.newArrayList();
 
     // controlla che possa essere salvato nel giorno
     //    List<String> errors = ShiftManager2.checkShiftDay(personShiftDay, date);
@@ -335,7 +324,7 @@ public class Calendar extends Controller {
           .text(error)
           .delay(2000)
           .type("success").build();
-      notes.add(note);     
+      notes.add(note);
 
     } else {
 
@@ -346,6 +335,7 @@ public class Calendar extends Controller {
           .delay(2000)
           .type("error").build();
       notes.add(note);
+
       response.status = StatusCode.BAD_REQUEST;
 
     }
