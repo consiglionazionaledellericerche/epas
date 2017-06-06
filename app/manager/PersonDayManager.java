@@ -403,9 +403,14 @@ public class PersonDayManager {
     // Minuti effettivi decurtati della fascia istituto
     int stampingTimeInOpening = workingMinutes(validPairs, startWork, endWork);
 
-    // Imposto il tempo a lavoro come somma di tutte le poste calcolate.
-    personDay.setTimeAtWork(stampingTimeInOpening + personDay.getJustifiedTimeMeal()
-        + personDay.getJustifiedTimeNoMeal());
+    //Il tempo a lavoro calcolato
+    int computedTimeAtWork = stampingTimeInOpening //nei festivi è 0
+        + personDay.getJustifiedTimeMeal()
+        + personDay.getJustifiedTimeNoMeal()
+        + personDay.getApprovedOnHoliday()
+        + personDay.getApprovedOutOpening();
+        
+    personDay.setTimeAtWork(computedTimeAtWork);
 
     // Se è festa ho finito ...
     if (personDay.isHoliday()) {
