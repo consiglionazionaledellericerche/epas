@@ -358,34 +358,24 @@ public class PersonDayManager {
       return personDay;
     }
     
+    //Giustificativi a grana minuti nel giorno
     for (Absence abs : personDay.getAbsences()) {
 
-      // #######
-      //  Assenze non giornaliere da cumulare ....
-
-      // Giustificativi grana minuti
-      if (abs.justifiedType.name == JustifiedTypeName.specified_minutes) {
-
-        if (abs.absenceType.timeForMealTicket) {
-          personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal()
-              + abs.justifiedMinutes);
-        } else {
-          personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
-              + abs.justifiedMinutes);
-        }
+      //Numero di minuti giustificati
+      int justifiedMinutes = 0;
+      if (abs.justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
+        justifiedMinutes = abs.justifiedMinutes;
+      } else if (abs.justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
+        justifiedMinutes = abs.absenceType.justifiedTime;
+      } else {
         continue;
       }
 
-      // Giustificativi grana ore (discriminare per calcolo buono o no)
-      if (abs.justifiedType.name == JustifiedTypeName.absence_type_minutes) {
-        if (abs.absenceType.timeForMealTicket) {
-          personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal()
-              + abs.absenceType.justifiedTime);
-        } else {
-          personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
-              + abs.absenceType.justifiedTime);
-        }
-        continue;
+      //Assegnamento in funzione se contribuiscono o meno al buono pasto
+      if (abs.absenceType.timeForMealTicket) {
+        personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal() + justifiedMinutes);
+      } else {
+        personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal() + justifiedMinutes);
       }
     }
 
