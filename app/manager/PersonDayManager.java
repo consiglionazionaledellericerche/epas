@@ -523,19 +523,17 @@ public class PersonDayManager {
   public void updateDifference(PersonDay personDay, WorkingTimeTypeDay wttd,
       boolean fixedTimeAtWork) {
 
+    // Patch fixed: la differenza è sempre 0
+    if (fixedTimeAtWork) {
+      personDay.setDifference(0);
+      return;
+    }
+    
     //TODO: per pulizia i wttd festivi dovrebbero avere il campo wttd.workingTime == 0
     // Implementare la modifica dei piani ferie di default. 
     int plannedWorkingTime = wttd.workingTime;
     if (personDay.isHoliday) {
       plannedWorkingTime = 0;
-    }
-    
-    //TODO FIXEDTIME indagare come mai si richiede anche il time at work == 0 
-    // (dovrebbe esserlo sempre per i fixed).
-    //persona fixed
-    if (fixedTimeAtWork && personDay.getTimeAtWork() == 0) {
-      personDay.setDifference(0);
-      return;
     }
 
     personDay.setDifference(personDay.getTimeAtWork() - plannedWorkingTime);
@@ -558,39 +556,6 @@ public class PersonDayManager {
     personDay.setProgressive(personDay.getDifference()
         + previousForProgressive.get().getProgressive());
 
-  }
-
-  /**
-   * Popola il campo isTicketAvailable.
-   *
-   * @param personDay       personDay
-   * @param wttd            wttd
-   * @param fixedTimeAtWork fixedTimeAtWork
-   * @return personDay
-   */
-  public PersonDay updateTicketAvailable(PersonDay personDay, WorkingTimeTypeDay wttd,
-      boolean fixedTimeAtWork) {
-
-    //caso forced by admin
-    if (personDay.isTicketForcedByAdmin()) {
-      return personDay;
-    }
-
-    //caso persone fixed
-    if (fixedTimeAtWork) {
-      if (personDay.isHoliday()) {
-        personDay.setTicketAvailable(false);
-      } else if (!personDay.isHoliday() && !isAllDayAbsences(personDay)) {
-        personDay.setTicketAvailable(true);
-      } else if (!personDay.isHoliday() && isAllDayAbsences(personDay)) {
-        personDay.setTicketAvailable(false);
-      }
-      return personDay;
-    }
-
-    //caso persone normali
-    personDay.setTicketAvailable(personDay.isTicketAvailable() && wttd.mealTicketEnabled());
-    return personDay;
   }
 
   /**
@@ -659,9 +624,6 @@ public class PersonDayManager {
     updateDifference(personDay, wttd, fixed);
 
     updateProgressive(personDay, previousForProgressive);
-
-    updateTicketAvailable(personDay, wttd, fixed);
-
   }
 
 
