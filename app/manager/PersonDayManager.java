@@ -73,21 +73,34 @@ public class PersonDayManager {
   }
 
   /**
-   * Se nel giorno vi è una assenza giornaliera.
-   *
-   * @return esito
+   * Se nel giorno vi è una assenza che assegna l'intera giornata.
    */
-  public boolean isAllDayAbsences(PersonDay pd) {
-
-    for (Absence abs : pd.absences) {
-
-      if (abs.justifiedType.name == JustifiedTypeName.all_day
-          || abs.justifiedType.name == JustifiedTypeName.assign_all_day) {
+  public boolean containsAssignAllDay(PersonDay personDay) {
+    for (Absence abs : personDay.absences) {
+      if (abs.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) { 
         return true;
       }
-
     }
     return false;
+  }
+  
+  /**
+   * Se nel giorno vi è una assenza che giustifica l'intera giornata.
+   */
+  public boolean containsAllDay(PersonDay personDay) {
+    for (Absence abs : personDay.absences) {
+      if (abs.justifiedType.name.equals(JustifiedTypeName.all_day)) { 
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  /**
+   * Se nel giorno vi è una che assegna o giustifica l'intera giornata.
+   */
+  public boolean isAllDayAbsences(PersonDay personDay) {
+    return containsAllDay(personDay) || containsAssignAllDay(personDay);
   }
 
   /**
