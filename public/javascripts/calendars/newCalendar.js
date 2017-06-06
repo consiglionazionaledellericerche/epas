@@ -27,7 +27,8 @@ $(document).ready(function() {
         var data = {
           'activity.id': $('#activity').val(),
           start: view.start.format(),
-          end: view.end.subtract(1, 'days').format()
+          end: view.end.subtract(1, 'days').format(),
+          intervalStart: view.intervalStart.format()
         };
         // Caricamento asincrono delle persone in base al periodo
         $('[data-render-load]').each(function() {
@@ -97,7 +98,7 @@ $(document).ready(function() {
           });
         }
         // Rendering dei problemi sui turni tramite un popover
-        if (event.errors) {
+        if (event.troubles) {
           var div = $("<div></div>", {
             "class": "webui-popover-content"
           });
