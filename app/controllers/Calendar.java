@@ -184,7 +184,6 @@ public class Calendar extends Controller {
               .personShiftDayId(shiftDay.id)
               .title(shiftDay.getSlotTime() + '\n' + person.fullName())
               .start(shiftDay.date)
-              .editable(true)
               .color(color.backgroundColor)
               .textColor(color.textColor)
               .borderColor(color.borderColor)
