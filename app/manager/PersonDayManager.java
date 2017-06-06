@@ -73,34 +73,34 @@ public class PersonDayManager {
   }
 
   /**
-   * Se nel giorno vi è una assenza che assegna l'intera giornata.
+   * Assenza che assegna l'intera giornata.
    */
-  public boolean containsAssignAllDay(PersonDay personDay) {
-    for (Absence abs : personDay.absences) {
-      if (abs.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) { 
-        return true;
+  public Optional<Absence> getAssignAllDay(PersonDay personDay) {
+    for (Absence absence : personDay.absences) {
+      if (absence.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) { 
+        return Optional.of(absence);
       }
     }
-    return false;
+    return Optional.absent();
   }
   
   /**
-   * Se nel giorno vi è una assenza che giustifica l'intera giornata.
+   * Assenza che giustifica l'intera giornata.
    */
-  public boolean containsAllDay(PersonDay personDay) {
-    for (Absence abs : personDay.absences) {
-      if (abs.justifiedType.name.equals(JustifiedTypeName.all_day)) { 
-        return true;
+  public Optional<Absence> getAllDay(PersonDay personDay) {
+    for (Absence absence : personDay.absences) {
+      if (absence.justifiedType.name.equals(JustifiedTypeName.all_day)) { 
+        return Optional.of(absence);
       }
     }
-    return false;
+    return Optional.absent();
   }
   
   /**
    * Se nel giorno vi è una che assegna o giustifica l'intera giornata.
    */
   public boolean isAllDayAbsences(PersonDay personDay) {
-    return containsAllDay(personDay) || containsAssignAllDay(personDay);
+    return getAllDay(personDay).isPresent() || getAssignAllDay(personDay).isPresent();
   }
 
   /**
