@@ -320,9 +320,12 @@ public class PersonDayManager {
     // Pulizia stato personDay.
     cleanTimeAtWork(personDay);
 
+    //Preconditions
     for (Absence abs : personDay.getAbsences()) {
-
       Preconditions.checkNotNull(abs.justifiedType);
+    }
+    
+    for (Absence abs : personDay.getAbsences()) {
 
       if (abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
         cleanTimeAtWork(personDay);
