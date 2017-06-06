@@ -409,28 +409,23 @@ public class PersonDayManager {
   private PersonDay mealTicketHandler(PersonDay personDay, WorkingTimeTypeDay wttd, 
       int stampingTimeInOpening, LocalTime startLunch, LocalTime endLunch, 
       Optional<Stamping> exitingNow) {
-   
-    // Se è festa ho finito ...
+
+    // Buono pasto forzato
+    if (personDay.isTicketForcedByAdmin) {
+      return personDay;
+    }
+    
+    // Giorno festivo: default false
     if (personDay.isHoliday()) {
       setTicketStatusIfNotForced(personDay, false);
       return personDay;
     }
 
-    // Se il buono pasto non è previsto dall'orario ho finito ...
+    // Il tipo orario non prevede il buono: default false
     if (!wttd.mealTicketEnabled()) {
       setTicketStatusIfNotForced(personDay, false);
       return personDay;
     }
-
-    // Se il buono pasto è forzato a no non effettuo ulteriori calcoli e ho finito ...
-    if (personDay.isTicketForcedByAdmin && !personDay.isTicketAvailable) {
-      return personDay;
-    }
-
-    // #######################################################################################
-    // IL PRANZO E' SERVITOOOOO????
-    // Questa parte determina se il buono pasto è ottenuto e la eventuale quantità decurtata
-    // dal tempo a lavoro.
 
     // 1) Calcolo del tempo passato in pausa pranzo dalle timbrature.
     List<PairStamping> gapLunchPairs = 
