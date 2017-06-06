@@ -61,23 +61,24 @@ $(document).ready(function() {
         });
       }
     });
+    // Festività dal calendario Google
     data['eventSources'].push({
-        googleCalendarApiKey: 'AIzaSyDxn95GcuRQ8VqsDiu72LlebkplabI1ppM', // egovernment.cnr@gmail.com
-        googleCalendarId: 'it.italian#holiday@group.v.calendar.google.com',
-        rendering: 'background',
-        className: 'holiday',
+      googleCalendarApiKey: 'AIzaSyDxn95GcuRQ8VqsDiu72LlebkplabI1ppM', // egovernment.cnr@gmail.com
+      googleCalendarId: 'it.italian#holiday@group.v.calendar.google.com',
+      rendering: 'background',
+      className: 'holiday',
     });
     if ($this.data('calendar-event-remove')) {
       data['eventRender'] = function(event, element) {
         // Per visualizzare il titolo anche sugli eventi renderizzati come background (festività)
-        if(event.source.rendering === 'background'){
-           element.append("<em>" + event.title + "</em>");
+        if (event.source && event.source.rendering === 'background') {
+          element.append("<em>" + event.title + "</em>");
         }
         if ($.inArray("removable", event.className) != -1) {
           var url = $this.data('calendar-event-remove');
           // Aggiunge l'icona per la rimozione dell'evento nel caso sia impostata la classe removable
           // nell'evento
-          element.prepend("<button type='button' class='close' aria-label='Close'><span aria-hidden='true'>&times;</span></button>");
+          element.prepend("<button type='button' class='close' data-tooltip title='Rimuovi Turno' aria-label='Close'><span aria-hidden='true'>&times;</span></button>");
           element.find(".close").click(function() {
             $.ajax({
               type: 'POST',
@@ -86,30 +87,21 @@ $(document).ready(function() {
                 'psd.id': event.personShiftDayId
               },
               error: function(response) {
-                new PNotify({
-                  title: "dramma",
-                  text: response.responseText,
-                  type: "error",
-                  remove: true
-                });
+                new PNotify(response.responseJSON);
               },
               success: function(response) {
-                new PNotify({
-                  title: "Ok",
-                  text: response.responseText,
-                  type: "success",
-                  remove: true
-                });
+                new PNotify(response);
+                $this.fullCalendar('removeEvents', event._id);
               }
             });
-            $this.fullCalendar('removeEvents', event._id);
           });
         }
+        // Rendering dei problemi sui turni tramite un popover
         if (event.errors) {
           var div = $("<div></div>", {
             "class": "webui-popover-content"
           });
-          event.errors.forEach(function(item) {
+          event.troubles.forEach(function(item) {
             div.append(item + '<br>');
           });
           var icon = $("<i></i>", {
@@ -146,21 +138,13 @@ $(document).ready(function() {
             newDate: event.start.format()
           },
           error: function(response) {
-            new PNotify({
-              title: "dramma",
-              text: response.responseText,
-              type: "error",
-              remove: true
-            });
+            // Passare un JSON serializzato a partire da un PNotifyObject definito lato Java
+            new PNotify(response.responseJSON);
             revertFunc();
           },
           success: function(response) {
-            new PNotify({
-              title: "Ok",
-              text: response.responseText,
-              type: "success",
-              remove: true
-            });
+            new PNotify(response);
+            $this.fullCalendar('refetchEvents');
           }
         });
       }
@@ -183,15 +167,13 @@ $(document).ready(function() {
             'shiftType.id': shiftType
           },
           error: function(response) {
-        	  response.responseJSON.forEach(function(item){
-        		  new PNotify(item);
-        	 });
             // Passare un JSON serializzato a partire da un PNotifyObject definito lato Java
-//            new PNotify(response.responseJSON);
+            new PNotify(response.responseJSON);
             // Non essendoci la revertFunc() eliminiamo il nuovo evento in caso di 'errore' (turno non inseribile)
             $this.fullCalendar('removeEvents', event._id);
           },
           success: function(response) {
+            new PNotify(response);
             $this.fullCalendar('refetchEvents');
           }
         });
