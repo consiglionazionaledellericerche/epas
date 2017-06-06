@@ -503,12 +503,12 @@ public class PersonDayManager {
     
     if (personDay.isHoliday || getAllDay(personDay).isPresent()) {
       personDay.setTimeAtWork(0);
-      personDay.setTicketForcedByAdmin(false);
+      setTicketStatusIfNotForced(personDay, false);
       return personDay;
     }
     
     personDay.setTimeAtWork(wttd.workingTime);
-    personDay.setTicketForcedByAdmin(true);
+    setTicketStatusIfNotForced(personDay, true);
     
     return personDay;
   }
@@ -536,7 +536,11 @@ public class PersonDayManager {
       plannedWorkingTime = 0;
     }
 
-    personDay.setDifference(personDay.getTimeAtWork() - plannedWorkingTime);
+    if (isAllDayAbsences(personDay)) {
+      personDay.setDifference(0);
+    } else {
+      personDay.setDifference(personDay.getTimeAtWork() - plannedWorkingTime);
+    }
   }
 
 
