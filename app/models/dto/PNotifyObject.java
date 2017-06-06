@@ -27,7 +27,7 @@ public class PNotifyObject {
   private String animate_speed; // "slow", "normal", or "fast". Respectively, 400ms, 250ms, 100ms.
   private Boolean shadow; // Display a drop shadow.
   private Boolean hide; // After a delay, remove the notice.
-  private int delay = 8000; // Delay in milliseconds before the notice is removed.
+  private Integer delay; // Delay in milliseconds before the notice is removed.
   private Boolean mouse_reset; // Reset the hide timer if the mouse moves over the notice.
   private Boolean remove; // Remove the notice's elements from the DOM after it is removed.
   private Boolean insert_brs; // Change new lines to br tags.
