@@ -325,23 +325,16 @@ public class PersonDayManager {
       Preconditions.checkNotNull(abs.justifiedType);
     }
     
+    //Caso assenza che assegna l'intera giornata ex 103, 103BP, 105BP
     for (Absence abs : personDay.getAbsences()) {
-
-      if (abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
-        cleanTimeAtWork(personDay);
+      if (abs.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) {
         personDay.setTimeAtWork(wttd.workingTime);
+        setTicketStatusIfNotForced(personDay, abs.absenceType.timeForMealTicket);
         return personDay;
       }
-
-      //Questo e' il caso del codice 105BP che garantisce sia l'orario di lavoro
-      // che il buono pasto
-      // TODO: se è il 105BP perchè non controllo direttamente il codice? Mistero della fede.
-      if (abs.justifiedType.name == JustifiedTypeName.assign_all_day) {
-        cleanTimeAtWork(personDay);
-        setTicketStatusIfNotForced(personDay, true);
-        personDay.setTimeAtWork(wttd.workingTime);
-        return personDay;
-      }
+    }
+    
+    for (Absence abs : personDay.getAbsences()) {
 
       // Caso di assenza giornaliera.
       if (abs.justifiedType.name == JustifiedTypeName.all_day) {
