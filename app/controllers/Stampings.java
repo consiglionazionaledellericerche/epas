@@ -507,11 +507,11 @@ public class Stampings extends Controller {
 
     rules.checkIfPermitted(pd.person.office);
 
-    pd.acceptedHolidayWorkingTime = !pd.acceptedHolidayWorkingTime;
-    if (!pd.acceptedHolidayWorkingTime) {
-      pd.isTicketForcedByAdmin = false;
-    }
-    pd.save();
+//    pd.acceptedHolidayWorkingTime = !pd.acceptedHolidayWorkingTime;
+//    if (!pd.acceptedHolidayWorkingTime) {
+//      pd.isTicketForcedByAdmin = false;
+//    }
+//    pd.save();
 
     consistencyManager.updatePersonSituation(pd.person.id, pd.date);
 
