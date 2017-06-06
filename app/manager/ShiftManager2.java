@@ -60,30 +60,39 @@ public class ShiftManager2 {
   private static final String codShiftHolyday = "T3";
   private static final String codShift = "T1";
 
+  private final PersonDayManager personDayManager;
+  private final PersonShiftDayDao personShiftDayDao;
+  private final PersonDayDao personDayDao;
+  private final ShiftDao shiftDao;
+  private final CompetenceUtility competenceUtility;
+  private final CompetenceCodeDao competenceCodeDao;
+  private final CompetenceDao competenceDao;
+  private final IWrapperFactory wrapperFactory;
+  private final UsersRolesOfficesDao uroDao;
+  private final RoleDao roleDao;
+  private final PersonShiftDayInTroubleDao troubleDao;
+  private final PersonMonthRecapDao personMonthRecapDao;
+
   @Inject
-  private static PersonDayManager personDayManager;
-  @Inject
-  private PersonShiftDayDao personShiftDayDao;
-  @Inject
-  private static PersonDayDao personDayDao;
-  @Inject
-  private ShiftDao shiftDao;
-  @Inject
-  private CompetenceUtility competenceUtility;
-  @Inject
-  private CompetenceCodeDao competenceCodeDao;
-  @Inject
-  private CompetenceDao competenceDao;
-  @Inject
-  private static IWrapperFactory wrapperFactory;
-  @Inject
-  private UsersRolesOfficesDao uroDao;
-  @Inject
-  private RoleDao roleDao;
-  @Inject
-  private PersonShiftDayInTroubleDao troubleDao;
-  @Inject
-  private PersonMonthRecapDao personMonthRecapDao;
+  public ShiftManager2(PersonDayManager personDayManager, PersonShiftDayDao personShiftDayDao,
+      PersonDayDao personDayDao, ShiftDao shiftDao,
+      CompetenceUtility competenceUtility, CompetenceCodeDao competenceCodeDao,
+      CompetenceDao competenceDao, IWrapperFactory wrapperFactory, UsersRolesOfficesDao uroDao,
+      RoleDao roleDao, PersonShiftDayInTroubleDao troubleDao,
+      PersonMonthRecapDao personMonthRecapDao) {
+    this.personDayManager = personDayManager;
+    this.personShiftDayDao = personShiftDayDao;
+    this.personDayDao = personDayDao;
+    this.shiftDao = shiftDao;
+    this.competenceUtility = competenceUtility;
+    this.competenceCodeDao = competenceCodeDao;
+    this.competenceDao = competenceDao;
+    this.wrapperFactory = wrapperFactory;
+    this.uroDao = uroDao;
+    this.roleDao = roleDao;
+    this.troubleDao = troubleDao;
+    this.personMonthRecapDao = personMonthRecapDao;
+  }
 
 
   /**
@@ -93,7 +102,7 @@ public class ShiftManager2 {
    *
    * @return ShiftTroubles.PERSON_IS_ABSENT, ""
    */
-  public static String checkShiftDayCompatibilityWhithAllDayPresence(PersonShiftDay shift,
+  public String checkShiftDayCompatibilityWhithAllDayPresence(PersonShiftDay shift,
       LocalDate date) {
     String errCode = "";
     Optional<PersonDay> personDay = personDayDao.getPersonDay(shift.personShift.person, date);
@@ -116,7 +125,7 @@ public class ShiftManager2 {
    *
    * @return String:
    */
-  public static String checkShiftDayCompatibilityWithPresence(PersonShiftDay shift) {
+  public String checkShiftDayCompatibilityWithPresence(PersonShiftDay shift) {
     String errCode = "";
     LocalTime startShift =
         (shift.shiftSlot.equals(ShiftSlot.MORNING)) ? shift.shiftType.shiftTimeTable.startMorning
@@ -413,40 +422,49 @@ public class ShiftManager2 {
 
     /**
      * 0. Verificare se la persona è segnata in quell'attività in quel giorno
+     *    return shift.personInactive
      * 1. La Persona non deve essere già in un turno per quel giorno
      * 2. La Persona non deve avere assenze giornaliere.
      * 3. Il Turno per quello slot non sia già presente    
      */
-    CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("T1");
-    String errCode = null;
-    Optional<PersonCompetenceCodes> pcc = competenceCodeDao
-        .getByPersonAndCodeAndDate(personShiftDay.personShift.person, code, personShiftDay.date);
-    if (!pcc.isPresent()) {
-      errCode = ShiftTroubles.PERSON_NOT_ASSIGNED.toString();
-      return Optional.fromNullable(errCode);
+
+//     Verifica se la persona è attiva in quell'attività in quel giorno
+//     return shift.personInactive
+    final boolean isActive = personShiftDay.shiftType.personShiftShiftTypes.stream().anyMatch(
+        personShiftShiftType -> personShiftShiftType.personShift.equals(personShiftDay.personShift)
+            && personShiftShiftType.dateRange().contains(personShiftDay.date));
+    if (!isActive) {
+      return Optional.of(Messages.get("shift.personInactive"));
+    }
+
+    // Verifica che la persona non abbia altri turni nello stesso giorno (anche su altre attività)
+    // TODO: 06/06/17 Verificare se questo vincolo va bene o deve esistere solo per 2 turni sulla stessa attività
+    final Optional<PersonShiftDay> personShift = personShiftDayDao
+        .byPersonAndDate(personShiftDay.personShift.person, personShiftDay.date);
+
+    if (personShift.isPresent()) {
+      return Optional.of(Messages.get("shift.alreadyInShift", personShift.get().shiftType));
+    }
+
+    final Optional<PersonDay> personDay = personDayDao
+        .getPersonDay(personShiftDay.personShift.person, personShiftDay.date);
+
+    if (personDay.isPresent() && personDayManager.isAllDayAbsences(personDay.get())) {
+      return Optional.of(Messages.get("shift.absenceInDay"));
     }
 
     List<PersonShiftDay> list = personShiftDayDao
         .getPersonShiftDayByTypeAndPeriod(personShiftDay.date, personShiftDay.date,
             personShiftDay.shiftType);
+
     for (PersonShiftDay registeredDay : list) {
       //controlla che il turno in quello slot sia già stato assegnato ad un'altra persona
-      if (registeredDay.shiftSlot == personShiftDay.shiftSlot
-          && !registeredDay.personShift.person.equals(personShiftDay.personShift.person)) {
-
-        //errCode = CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED.toString();
-        errCode = "Turno già esistente il " + personShiftDay.date.toString("dd MMM");
-      } else if (registeredDay.personShift.person.equals(personShiftDay.personShift.person)
-          && registeredDay.shiftSlot != personShiftDay.shiftSlot) {
-        //errCode = CalendarShiftTroubles.PERSON_SHIFT_ASSIGNED.toString();
-        errCode = registeredDay.personShift.person.getFullname()
-            + " è già in turno il giorno " + personShiftDay.date.toString("dd MMM");
-      } else if (registeredDay.shiftSlot != personShiftDay.shiftSlot
-          && !registeredDay.troubles.isEmpty()) {
-        errCode = ShiftTroubles.PROBLEMS_ON_OTHER_SLOT.toString();
+      if (registeredDay.shiftSlot == personShiftDay.shiftSlot) {
+        return Optional.of(Messages
+            .get("shift.slotAlreadyAssigned", registeredDay.personShift.person.fullName()));
       }
     }
-    return Optional.fromNullable(errCode);
+    return Optional.absent();
   }
 
 
@@ -511,9 +529,8 @@ public class ShiftManager2 {
     Optional<PersonDay> personDay =
         personDayDao.getPersonDay(personShiftDay.personShift.person, personShiftDay.date);
     if (!personDay.isPresent()) {
-      PersonShiftDayInTrouble trouble =
-          new PersonShiftDayInTrouble(personShiftDay, ShiftTroubles.FUTURE_DAY);
-      trouble.save();
+      setShiftTrouble(personShiftDay, ShiftTroubles.FUTURE_DAY);
+      return;
     }
     List<Stamping> stampings = personDay.get().getStampings();
     // controlla se non sono nel futuro ed è un giorno valido
