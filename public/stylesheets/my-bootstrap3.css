@@ -439,6 +439,12 @@ button.button-as-link {
 .fc-month-view span.fc-title {
 	white-space: normal;
 }
+/* Colore di rendering delle festività sul calendario */
+.fc-bgevent.holiday {
+    background-color: #ffd2d2;
+    color: black;
+    opacity: .7;
+}
 
 /* Tema Alert per il webui-popover*/
 
