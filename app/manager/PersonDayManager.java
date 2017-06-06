@@ -401,10 +401,10 @@ public class PersonDayManager {
     personDay.setStampingsTime(stampingMinutes(validPairs));
 
     // Minuti effettivi decurtati della fascia istituto
-    int workingMinutesInValidPairs = workingMinutes(validPairs, startWork, endWork);
+    int stampingTimeInOpening = workingMinutes(validPairs, startWork, endWork);
 
     // Imposto il tempo a lavoro come somma di tutte le poste calcolate.
-    personDay.setTimeAtWork(workingMinutesInValidPairs + personDay.getJustifiedTimeMeal()
+    personDay.setTimeAtWork(stampingTimeInOpening + personDay.getJustifiedTimeMeal()
         + personDay.getJustifiedTimeNoMeal());
 
     // Se è festa ho finito ...
@@ -463,7 +463,7 @@ public class PersonDayManager {
     //3) Decisioni
 
     int mealTicketTime = wttd.mealTicketTime;            //6 ore
-    int mealTicketsMinutes = workingMinutesInValidPairs + personDay.getJustifiedTimeMeal();
+    int mealTicketsMinutes = stampingTimeInOpening + personDay.getJustifiedTimeMeal();
 
     // Non ho eseguito il tempo minimo per buono pasto.
     if (mealTicketsMinutes - missingTime < mealTicketTime) {
@@ -497,10 +497,10 @@ public class PersonDayManager {
     // IL BUONO PASTO E' STATO ATTRIBUITO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     setTicketStatusIfNotForced(personDay, true);
-    personDay.setDecurted(null);
+    personDay.setDecurtedMeal(null);
     if (workingTimeDecurted < mealTicketsMinutes) {
 
-      personDay.setDecurted(missingTime);
+      personDay.setDecurtedMeal(missingTime);
     }
 
     personDay.setTimeAtWork(workingTimeDecurted + personDay.getJustifiedTimeNoMeal());
