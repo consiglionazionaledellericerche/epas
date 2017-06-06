@@ -19,7 +19,10 @@
   #{if dayRecap.personDay.isHoliday && dayRecap.personDay.timeAtWork > 0 }
     #{secure.check 'Stampings.toggleWorkingHoliday', target: dayRecap.personDay.person.office}
       <a href="@{Stampings.toggleWorkingHoliday(dayRecap.personDay.id)}">
-        #{if dayRecap.personDay.acceptedHolidayWorkingTime } Disabilita#{/if}
+        
+        *{ Indicare graficamente l'orario festivo }*
+        
+        #{if dayRecap.personDay.approvedOnHoliday > 0 } Disabilita#{/if}
         #{else} Abilita#{/else}
       </a>
     #{/secure.check}
@@ -49,7 +52,7 @@
     <br>Giustificato da assenze che concorrono al calcolo del buono pasto: <strong>${dayRecap.personDay.justifiedTimeMeal.printHourMinute()}</strong>
   #{/if}
   #{if dayRecap.personDay?.decurtedMeal > 0}
-    <br>Sottratto per pausa pranzo assente o troppo breve: <strong>${dayRecap.personDay.decurted.printHourMinute()}</strong>
+    <br>Sottratto per pausa pranzo assente o troppo breve: <strong>${dayRecap.personDay.decurtedMeal.printHourMinute()}</strong>
   #{/if}
 </div>
 <!-- difference -->
