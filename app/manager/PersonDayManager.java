@@ -320,7 +320,6 @@ public class PersonDayManager {
     // Pulizia stato personDay.
     setTicketStatusIfNotForced(personDay, false);
     personDay.setStampModificationType(null);     //Target personDay: p(-30), e(<30), f(now), d(fix)
-    personDay.setDecurtedMeal(0);
     personDay.setOnHoliday(0);
     personDay.setOutOpening(0);
     personDay.setStampingsTime(0);
@@ -396,8 +395,12 @@ public class PersonDayManager {
         
     personDay.setTimeAtWork(computedTimeAtWork);
 
-    mealTicketHandler(personDay, wttd, stampingTimeInOpening, startLunch, endLunch, exitingNow);
+    mealTicketHandlerAndDecurtedMeal(personDay, wttd, stampingTimeInOpening, 
+        startLunch, endLunch, exitingNow);
     
+    //Applica l'eventuale decurtazione
+    personDay.setTimeAtWork(personDay.getTimeAtWork() - personDay.getDecurtedMeal());
+ 
     return personDay;
   }
   
@@ -406,10 +409,13 @@ public class PersonDayManager {
    * 1) Non ci sono assenze giornaliere.
    * 2) La persona non ha la timbratura automatica.
    */
-  private PersonDay mealTicketHandler(PersonDay personDay, WorkingTimeTypeDay wttd, 
+  private PersonDay mealTicketHandlerAndDecurtedMeal(PersonDay personDay, WorkingTimeTypeDay wttd, 
       int stampingTimeInOpening, LocalTime startLunch, LocalTime endLunch, 
       Optional<Stamping> exitingNow) {
 
+    // Reset
+    personDay.setDecurtedMeal(0);
+    
     // Buono pasto forzato
     if (personDay.isTicketForcedByAdmin) {
       return personDay;
@@ -453,9 +459,9 @@ public class PersonDayManager {
 
     //2) Calcolo l'eventuale differenza tra la pausa fatta e la pausa minima
     int minBreakTicketTime = wttd.breakTicketTime;    //30 minuti
-    int missingTime = minBreakTicketTime - effectiveTimeSpent;
-    if (missingTime < 0) {
-      missingTime = 0;
+    int toCut = minBreakTicketTime - effectiveTimeSpent;
+    if (toCut < 0) {
+      toCut = 0;
     }
 
     //3) Decisioni
@@ -466,7 +472,7 @@ public class PersonDayManager {
         + personDay.getJustifiedTimeMeal();
 
     // Non ho eseguito il tempo minimo per buono pasto.
-    if (mealTicketsMinutes - missingTime < mealTicketTime) {
+    if (mealTicketsMinutes - toCut < mealTicketTime) {
       setTicketStatusIfNotForced(personDay, false);
       return personDay;
     }
@@ -478,33 +484,14 @@ public class PersonDayManager {
       return personDay;
     }
 
-    // Calcolo tempo decurtato per pausa troppo breve.
-    int workingTimeDecurted = mealTicketsMinutes;
-    if (missingTime > 0) {
-      workingTimeDecurted = mealTicketsMinutes - missingTime;
-    }
-
-    // Decidere quando verrà il momento di fare i conti con gianvito...
-    //if( !isGianvitoConditionSatisfied(workingTimeDecurted, justifiedTimeAtWork,
-    //  pd.getValue().date, pd.getPersonDayContract().get(),
-    //  pd.getWorkingTimeTypeDay().get()) ){
-    //
-    //  setIsTickeAvailable(pd, false);
-    //  return workTime + justifiedTimeAtWork;
-    //}
-
-    // #########
-    // IL BUONO PASTO E' STATO ATTRIBUITO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+    // Il buono pasto è stato maturato
     setTicketStatusIfNotForced(personDay, true);
-    personDay.setDecurtedMeal(null);
-    if (workingTimeDecurted < mealTicketsMinutes) {
-
-      personDay.setDecurtedMeal(missingTime);
+    
+    // Assegnamento tempo decurtato per pausa troppo breve.
+    if (toCut > 0) {
+      personDay.setDecurtedMeal(toCut);
     }
 
-    personDay.setTimeAtWork(workingTimeDecurted + personDay.getJustifiedTimeNoMeal());
-    
     return personDay;
   }
   
