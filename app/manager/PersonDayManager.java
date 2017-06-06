@@ -339,21 +339,18 @@ public class PersonDayManager {
     }
     
     //Caso assenza che assegna l'intera giornata ex 103, 103BP, 105BP
-    for (Absence abs : personDay.getAbsences()) {
-      if (abs.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) {
-        personDay.setTimeAtWork(wttd.workingTime);
-        setTicketStatusIfNotForced(personDay, abs.absenceType.timeForMealTicket);
-        return personDay;
-      }
+    Optional<Absence> assignAllDay = getAssignAllDay(personDay);
+    if (assignAllDay.isPresent()) {
+      personDay.setTimeAtWork(wttd.workingTime);
+      setTicketStatusIfNotForced(personDay, assignAllDay.get().absenceType.timeForMealTicket);
+      return personDay;
     }
-    
+      
     //Caso assenza giornaliera
-    for (Absence abs : personDay.getAbsences()) {
-      if (abs.justifiedType.name == JustifiedTypeName.all_day) {
-        personDay.setTimeAtWork(0);
-        setTicketStatusIfNotForced(personDay, false);
-        return personDay;
-      }
+    if (getAllDay(personDay).isPresent()) {
+      personDay.setTimeAtWork(0);
+      setTicketStatusIfNotForced(personDay, false);
+      return personDay;
     }
     
     for (Absence abs : personDay.getAbsences()) {
