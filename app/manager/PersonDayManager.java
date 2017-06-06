@@ -342,6 +342,24 @@ public class PersonDayManager {
     if (fixedTimeAtWork) {
       return updateTimeAtWorkFixed(personDay, wttd);
     }
+    
+    // Gli invarianti del calcolo.
+    //
+    //   1)       Tempo timbrature -> Tempo fra coppie ritenute valide.
+    //   2) Tempo dentro la fascia -> N.B nei giorni di festa è zero
+    //   3)     Tempo fuori fascia -> Tempo timbrature - Tempo dentro fascia
+    //   4)         Tempo di festa -> Tempo timbrature giorno di festa
+    
+    List<PairStamping> validPairs = getValidPairStampings(personDay.stampings, exitingNow);
+    personDay.setStampingsTime(stampingMinutes(validPairs));
+    int stampingTimeInOpening = workingMinutes(validPairs, startWork, endWork);
+    
+    if (personDay.isHoliday) {
+      stampingTimeInOpening = 0;
+      personDay.setOnHoliday(personDay.getStampingsTime());
+    } else {
+      personDay.setOutOpening(personDay.getStampingsTime() - stampingTimeInOpening);  
+    }
 
     //Caso assenza che assegna l'intera giornata ex 103, 103BP, 105BP
     Optional<Absence> assignAllDay = getAssignAllDay(personDay);
@@ -378,15 +396,6 @@ public class PersonDayManager {
         personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal() + justifiedMinutes);
       }
     }
-
-    //Le coppie valide
-    List<PairStamping> validPairs = getValidPairStampings(personDay.stampings, exitingNow);
-
-    // Minuti derivanti dalle timbrature
-    personDay.setStampingsTime(stampingMinutes(validPairs));
-
-    // Minuti effettivi decurtati della fascia istituto
-    int stampingTimeInOpening = workingMinutes(validPairs, startWork, endWork);
 
     //Il tempo a lavoro calcolato
     int computedTimeAtWork = stampingTimeInOpening //nei festivi è 0
