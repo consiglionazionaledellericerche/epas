@@ -62,9 +62,7 @@ $(document).ready(function() {
       }
     });
     data['eventSources'].push({
-        // TODO usare un apiKey valida, questa è la mia!
-        googleCalendarApiKey: 'AIzaSyCKz2wojkoujmgrtriDHiFpqQcweS3siR4',
-//        googleCalendarApiKey: 'AIzaSyAEoRhKv77jIyoqHb0VDNWbPdD_BDuEnFk',
+        googleCalendarApiKey: 'AIzaSyDxn95GcuRQ8VqsDiu72LlebkplabI1ppM', // egovernment.cnr@gmail.com
         googleCalendarId: 'it.italian#holiday@group.v.calendar.google.com',
         rendering: 'background',
         className: 'holiday',
