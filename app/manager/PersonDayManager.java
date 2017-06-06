@@ -330,14 +330,19 @@ public class PersonDayManager {
       boolean fixedTimeAtWork, LocalTime startLunch, LocalTime endLunch,
       LocalTime startWork, LocalTime endWork, Optional<Stamping> exitingNow) {
 
-    // Pulizia stato personDay.
-    cleanTimeAtWork(personDay);
-
     //Preconditions
     for (Absence abs : personDay.getAbsences()) {
       Preconditions.checkNotNull(abs.justifiedType);
     }
     
+    // Pulizia stato personDay.
+    cleanTimeAtWork(personDay);
+    
+    // Patch persone fixed
+    if (fixedTimeAtWork) {
+      return updateTimeAtWorkFixed(personDay, wttd);
+    }
+
     //Caso assenza che assegna l'intera giornata ex 103, 103BP, 105BP
     Optional<Absence> assignAllDay = getAssignAllDay(personDay);
     if (assignAllDay.isPresent()) {
@@ -382,16 +387,6 @@ public class PersonDayManager {
         }
         continue;
       }
-    }
-
-    // Se hanno il tempo di lavoro fissato non calcolo niente
-    if (fixedTimeAtWork) {
-
-      if (personDay.isHoliday()) {
-        return personDay;
-      }
-      personDay.setTimeAtWork(wttd.workingTime);
-      return personDay;
     }
 
     //Le coppie valide
@@ -509,6 +504,24 @@ public class PersonDayManager {
     }
 
     personDay.setTimeAtWork(workingTimeDecurted + personDay.getJustifiedTimeNoMeal());
+    return personDay;
+  }
+  
+  /**
+   * Le persone fixed hanno una gestione particolare per quanto riguarda tempo a lavoro e 
+   * buono pasto. 
+   */
+  private PersonDay updateTimeAtWorkFixed(PersonDay personDay, WorkingTimeTypeDay wttd) {
+    
+    if (personDay.isHoliday || getAllDay(personDay).isPresent()) {
+      personDay.setTimeAtWork(0);
+      personDay.setTicketForcedByAdmin(false);
+      return personDay;
+    }
+    
+    personDay.setTimeAtWork(wttd.workingTime);
+    personDay.setTicketForcedByAdmin(true);
+    
     return personDay;
   }
 
