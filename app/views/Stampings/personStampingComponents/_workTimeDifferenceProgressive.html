@@ -48,7 +48,7 @@
   #{if dayRecap.personDay?.justifiedTimeMeal > 0}
     <br>Giustificato da assenze che concorrono al calcolo del buono pasto: <strong>${dayRecap.personDay.justifiedTimeMeal.printHourMinute()}</strong>
   #{/if}
-  #{if dayRecap.personDay?.decurted > 0}
+  #{if dayRecap.personDay?.decurtedMeal > 0}
     <br>Sottratto per pausa pranzo assente o troppo breve: <strong>${dayRecap.personDay.decurted.printHourMinute()}</strong>
   #{/if}
 </div>
