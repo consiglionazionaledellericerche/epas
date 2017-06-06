@@ -6,7 +6,7 @@ $(document).ready(function() {
       columnFormat: 'dddd',
       fixedWeekCount: false,
       droppable: true,
-      eventOrder: "editable,title",
+      eventOrder: "editable, title",
       loading: function(loading) {
         if (loading) {
           $this.addClass('reloading');
