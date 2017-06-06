@@ -406,6 +406,20 @@ public class PersonDayManager {
         
     personDay.setTimeAtWork(computedTimeAtWork);
 
+    mealTicketHandler(personDay, wttd, stampingTimeInOpening, startLunch, endLunch, exitingNow);
+    
+    return personDay;
+  }
+  
+  /**
+   * Algoritmo del calcolo buono pasto. Una volta accertato che:
+   * 1) Non ci sono assenze giornaliere.
+   * 2) La persona non ha la timbratura automatica.
+   */
+  private PersonDay mealTicketHandler(PersonDay personDay, WorkingTimeTypeDay wttd, 
+      int stampingTimeInOpening, LocalTime startLunch, LocalTime endLunch, 
+      Optional<Stamping> exitingNow) {
+   
     // Se è festa ho finito ...
     if (personDay.isHoliday()) {
       setTicketStatusIfNotForced(personDay, false);
@@ -503,6 +517,7 @@ public class PersonDayManager {
     }
 
     personDay.setTimeAtWork(workingTimeDecurted + personDay.getJustifiedTimeNoMeal());
+    
     return personDay;
   }
   
