@@ -4,10 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import dao.AbsenceDao;
 import dao.ShiftDao;
+import helpers.Web;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -26,11 +26,9 @@ import models.dto.PNotifyObject;
 import models.dto.ShiftEvent;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
-import models.enumerate.ShiftTroubles;
 import org.joda.time.LocalDate;
+import play.i18n.Messages;
 import play.mvc.Controller;
-import play.mvc.Http;
-import play.mvc.Http.StatusCode;
 import play.mvc.With;
 
 /**
@@ -109,17 +107,30 @@ public class Calendar extends Controller {
     render(shiftWorkers, jolly);
   }
 
-
-  /*
-   * Calvella un turno dal Database
+  /**
+   * Effettua l'eliminazione di un turno
+   *
+   * @param psd Turno da eliminare
    */
   public static void deleteShift(PersonShiftDay psd) {
-    log.debug("lol");
-    notFoundIfNull(psd);
-    response.status = Http.StatusCode.BAD_REQUEST;
-    renderText("Un messaggio qualsiasi");
-    //psd.delete();
+    // TODO: 06/06/17 verificare i permessi sul turno specificato
+    final PNotifyObject message;
+    if (psd == null) {
+      message = PNotifyObject.builder()
+          .title("Error")
+          .hide(true)
+          .text(Messages.get("notFound"))
+          .type("error").build();
+    } else {
+      psd.delete();
+      message = PNotifyObject.builder()
+          .title("Ok")
+          .hide(true)
+          .text(Web.msgDeleted(PersonShiftDay.class))
+          .type("info").build();
+    }
 
+    renderJSON(message);
   }
 
 
@@ -150,16 +161,16 @@ public class Calendar extends Controller {
     renderJSON(mapper.writeValueAsString(events));
   }
 
-
   /**
    * Carica la lista dei turni di un certo tipo associati ad una determinata persona in
    * un intervallo di tempo
    *
-   * @param ShiftType shiftType: tipo di turno
-   * @param Person person: persona associata ai turni
-   * @param LocalDate start: data inizio intervallo di tempo
-   * @param LocalDate end: data fine intervallo di tempo
-   * @output List<ShiftEvent>: lista di eventi
+   * @param shiftType attività di turno
+   * @param person persona associata ai turni
+   * @param start data inizio intervallo di tempo
+   * @param end data fine intervallo di tempo
+   * @param color colore da utilizzare per il rendering degli eventi restituiti
+   * @return Una lista di DTO da serializzare in Json per renderizzarli nel fullcalendar.
    */
   private static List<ShiftEvent> shiftEvents(ShiftType shiftType, Person person, LocalDate start,
       LocalDate end, EventColor color) {
@@ -176,23 +187,29 @@ public class Calendar extends Controller {
               .color(color.backgroundColor)
               .textColor(color.textColor)
               .borderColor(color.borderColor)
-              // FIXME esempio da cancellare in favore dell'if sottostante
-              .error("")
               .className("removable")
               .build();
 
-          //          if (!shiftDay.troubles.isEmpty()) {
-          //            final List<String> troubles = shiftDay.troubles.stream()
-          //                .map(trouble -> Messages.get(trouble.cause)).collect(Collectors.toList());
-          //            event.setErrors(troubles);
-          //          }
+          if (!shiftDay.troubles.isEmpty()) {
+            final List<String> troubles = shiftDay.troubles.stream()
+                .map(trouble -> Messages
+                    .get(trouble.cause.getClass().getSimpleName() + "." + trouble.cause.name()))
+                .collect(Collectors.toList());
+            event.setTroubles(troubles);
+          }
 
           return event;
         }).collect(Collectors.toList());
   }
 
-  /*
-   * Carica le assenze di una persona in un certo periodo per essere visualizzate nel calendario
+  /**
+   *
+   * @param person Persona della quale recuperare le assenze
+   * @param start data iniziale del periodo
+   * @param end data finale del periodo
+   *
+   * @return Una lista di DTO che modellano le assenze di quella persona nell'intervallo specificato
+   * da renderizzare nel fullcalendar.
    */
   private static List<ShiftEvent> absenceEvents(Person person, LocalDate start, LocalDate end) {
 
@@ -249,97 +266,70 @@ public class Calendar extends Controller {
    * @out error 409 con messaggio di ShiftTroubles.PERSON_IS_ABSENT, CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED,
    * CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED
    */
-  public static void changeShift(long personShiftDayId, LocalDate newDate)
-      throws JsonProcessingException {
+  public static void changeShift(long personShiftDayId, LocalDate newDate) {
 
     // TODO: 23/05/17 Lo shiftType dev'essere valido e l'utente deve avere i permessi per lavorarci
 
-    log.debug("Chiamato metodo changeShift: personShiftDayId {} - newDate {} ", personShiftDayId,
-        newDate);
+    final PersonShiftDay shift = shiftDao.getPersonShiftDayById(personShiftDayId);
 
-    // legge il turno da spostare
-    PersonShiftDay oldShift = shiftDao.getPersonShiftDayById(personShiftDayId);
+    shift.date = newDate;
 
     // controlla gli eventuali errori di consitenza nel calendario
-    //List<String> errors = ShiftManager2.checkShiftEvent(oldShift, newDate);
-    PersonShiftDay day = new PersonShiftDay();
-    day.date = newDate;
-    day.personShift = oldShift.personShift;
-    day.shiftSlot = oldShift.shiftSlot;
-    day.shiftType = oldShift.shiftType;
+    Optional<String> error = shiftManager2.shiftPermitted(shift);
+    final PNotifyObject message;
+    if (error.isPresent()) {
+      message = PNotifyObject.builder()
+          .title("Errore")
+          .hide(true)
+          .text(error.get())
+          .type("error").build();
 
-    String errors = shiftManager2.shiftPermitted(day);
-    if (errors.isEmpty() || errors.contains(ShiftTroubles.PROBLEMS_ON_OTHER_SLOT.toString())) {
-      //salva il nuovo turno
-
-      oldShift.date = newDate;
-      //oldShift.troubles
-      oldShift.save();
-      log.info("Aggiornato PersonShiftDay con {}\n",
-          oldShift);
-
-      // restituisco l'evento
-      ShiftEvent event = ShiftEvent.builder()
-          .shiftSlot(oldShift.shiftSlot)
-          .personShiftDayId(oldShift.id)
-          .title(oldShift.getSlotTime() + '\n' + oldShift.personShift.person.fullName())
-          .error(errors)
-          .build();
-
-      renderJSON(mapper.writeValueAsString(event));
-
-    } else {
-      // prende il messaggi di errore
       response.status = 409;
-      renderText(errors);
+    } else {
+      //salva il turno modificato
+      shift.save();
+
+      message = PNotifyObject.builder()
+          .title("Ok")
+          .hide(true)
+          .text(Web.msgModified(PersonShiftDay.class))
+          .type("success").build();
     }
+    renderJSON(message);
   }
 
 
   public static void newShift(long personId, LocalDate date, ShiftSlot shiftSlot,
-      ShiftType shiftType) throws JsonProcessingException {
-    log.debug("CHIAMATA LA CREAZIONE DEL TURNO: personId {} - day {} - slot {} - shiftType {}",
-        personId, date, shiftSlot, shiftType);
-    // TODO: ricordarsi di controllare se la persona è attiva sull'attività al momento della creazione del
-    // personshiftDay
+      ShiftType shiftType) {
 
-    // crea il personShiftDay
+    // TODO: 06/06/17 controlli sui permessi 
     PersonShiftDay personShiftDay = new PersonShiftDay();
     personShiftDay.date = date;
     personShiftDay.shiftType = shiftType;
     personShiftDay.shiftSlot = shiftSlot;
     personShiftDay.personShift = shiftDao.getPersonShiftByPersonAndType(personId, shiftType.type);
+    // TODO: 06/06/17 verificare che il personshift sia valido prima di assegnarlo e proseguire 
+    Optional<String> error = shiftManager2.shiftPermitted(personShiftDay);
+    final PNotifyObject message;
 
-    String error = shiftManager2.shiftPermitted(personShiftDay);
-    List<PNotifyObject> notes = Lists.newArrayList();
+    if (error.isPresent()) {
+      response.status = 409;
 
-    // controlla che possa essere salvato nel giorno
-    //    List<String> errors = ShiftManager2.checkShiftDay(personShiftDay, date);
-    //    List<String> errors = ImmutableList.of("dramma 1", " dramma 2");
-    if (error.equals("")) {
-      personShiftDay.save();
-      final PNotifyObject note = PNotifyObject.builder()
-          .title("Direi bene")
-          .hide(true)
-          .text(error)
-          .delay(2000)
-          .type("success").build();
-      notes.add(note);
-
-    } else {
-
-      final PNotifyObject note = PNotifyObject.builder()
+      message = PNotifyObject.builder()
           .title("Errore")
           .hide(true)
-          .text(error)
-          .delay(2000)
+          .text(error.get())
           .type("error").build();
-      notes.add(note);
+    } else {
+      personShiftDay.save();
 
-      response.status = StatusCode.BAD_REQUEST;
-
+      message = PNotifyObject.builder()
+          .title("Ok")
+          .hide(true)
+          .text(Web.msgCreated(PersonShiftDay.class))
+          .type("success").build();
     }
-    renderJSON(notes);
+    renderJSON(message);
   }
 
   /**
@@ -359,7 +349,13 @@ public class Calendar extends Controller {
     final LocalDate lastOfMonth = firstOfMonth.dayOfMonth().withMaximumValue();
   }
 
-
+  /**
+   * @param activity attività di turno
+   * @param start data di inizio del periodo
+   * @param end data di fine del periodo
+   * @return La lista di tutte le persone abilitate su quell'attività nell'intervallo di tempo
+   * specificato.
+   */
   private static List<PersonShiftShiftType> shiftWorkers(ShiftType activity, LocalDate start,
       LocalDate end) {
     if (activity.isPersistent() && start != null && end != null) {
