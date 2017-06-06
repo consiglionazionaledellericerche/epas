@@ -461,7 +461,9 @@ public class PersonDayManager {
     //3) Decisioni
 
     int mealTicketTime = wttd.mealTicketTime;            //6 ore
-    int mealTicketsMinutes = stampingTimeInOpening + personDay.getJustifiedTimeMeal();
+    int mealTicketsMinutes = stampingTimeInOpening 
+        + personDay.getApprovedOutOpening() 
+        + personDay.getJustifiedTimeMeal();
 
     // Non ho eseguito il tempo minimo per buono pasto.
     if (mealTicketsMinutes - missingTime < mealTicketTime) {
