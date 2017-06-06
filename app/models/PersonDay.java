@@ -69,13 +69,13 @@ public class PersonDay extends BaseModel {
    * Tempo lavorato al di fuori della fascia apertura/chiusura.
    */
   @Column(name = "out_opening")
-  public Integer outOpening;
+  public Integer outOpening = 0;
   
   /**
    * Tempo lavorato al di fuori della fascia apertura/chiusura ed approvato.
    */
   @Column(name = "approved_out_opening")
-  public Integer approvedOutOpening;
+  public Integer approvedOutOpening = 0;
 
   /**
    * Tempo giustificato da assenze che non contribuiscono al tempo per buono pasto.
@@ -115,13 +115,13 @@ public class PersonDay extends BaseModel {
    * Tempo lavorato in un giorno di festa.
    */
   @Column(name = "on_holiday")
-  public Integer onHoliday;
+  public Integer onHoliday = 0;
   
   /**
    * Tempo lavorato in un giorni di festa ed approvato.
    */
   @Column(name = "approved_on_holiday")
-  public Integer approvedOnHoliday;
+  public Integer approvedOnHoliday = 0;
 
   @OneToMany(mappedBy = "personDay", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
   @OrderBy("date ASC")
