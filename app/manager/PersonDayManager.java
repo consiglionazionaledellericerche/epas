@@ -334,15 +334,16 @@ public class PersonDayManager {
       }
     }
     
+    //Caso assenza giornaliera
     for (Absence abs : personDay.getAbsences()) {
-
-      // Caso di assenza giornaliera.
       if (abs.justifiedType.name == JustifiedTypeName.all_day) {
-        cleanTimeAtWork(personDay);
-        setTicketStatusIfNotForced(personDay, false);
         personDay.setTimeAtWork(0);
+        setTicketStatusIfNotForced(personDay, false);
         return personDay;
       }
+    }
+    
+    for (Absence abs : personDay.getAbsences()) {
 
       // Mezza giornata giustificata.
       if (abs.justifiedType.name == JustifiedTypeName.half_day) {
