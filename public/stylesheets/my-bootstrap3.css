@@ -441,9 +441,11 @@ button.button-as-link {
 }
 /* Colore di rendering delle festività sul calendario */
 .fc-bgevent.holiday {
-    background-color: #ffd2d2;
-    color: black;
+    background-color: #f2dede;
+    color: #353535;
     opacity: .7;
+    text-align: center;
+    padding-top: .6em;
 }
 
 /* Tema Alert per il webui-popover*/
