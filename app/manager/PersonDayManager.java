@@ -345,13 +345,6 @@ public class PersonDayManager {
     
     for (Absence abs : personDay.getAbsences()) {
 
-      // Mezza giornata giustificata.
-      if (abs.justifiedType.name == JustifiedTypeName.half_day) {
-        personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
-            + (wttd.workingTime / 2));
-        continue;
-      }
-
       // #######
       //  Assenze non giornaliere da cumulare ....
 
