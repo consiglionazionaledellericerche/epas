@@ -353,6 +353,8 @@ personUser= Utente associato ad una persona
 
 PersonMonths.insertPeopleTrainingHours= Inserisci ore di formazione
 
+personShiftDay= Turno
+
 peopleGroupId= Persone del gruppo di Lavoro
 
 psst.beginDate =Data inizio
