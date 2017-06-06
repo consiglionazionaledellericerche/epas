@@ -79,20 +79,44 @@ $(document).ready(function() {
           var url = $this.data('calendar-event-remove');
           // Aggiunge l'icona per la rimozione dell'evento nel caso sia impostata la classe removable
           // nell'evento
-          element.prepend("<button type='button' class='close' data-tooltip title='Rimuovi Turno' aria-label='Close'><span aria-hidden='true'>&times;</span></button>");
-          element.find(".close").click(function() {
-            $.ajax({
-              type: 'POST',
-              url: url,
-              data: {
-                'psd.id': event.personShiftDayId
-              },
-              error: function(response) {
-                new PNotify(response.responseJSON);
-              },
-              success: function(response) {
-                new PNotify(response);
-                $this.fullCalendar('removeEvents', event._id);
+          var button = $("<button></button>", {
+            "type": "button",
+            "class": "close",
+            "data-tooltip": "",
+            "title": "Rimuovi Turno",
+            "aria-label": "Close"
+          });
+          button.append("<span aria-hidden='true'>&times;</span>");
+          element.prepend(button);
+          button.click(function() {
+            $.confirm({
+              title: 'Eliminare questo turno?' ,
+              content: event.start.format() + ' - ' + event.title,
+              backgroundDismiss: true,
+              buttons: {
+                confirm: {
+                  text: 'Elimina <i class="fa fa-trash-o" aria-hidden="true"></i>',
+                  btnClass: 'btn-red',
+                  action: function() {
+                    $.ajax({
+                      type: 'POST',
+                      url: url,
+                      data: {
+                        'psd.id': event.personShiftDayId
+                      },
+                      error: function(response) {
+                        new PNotify(response.responseJSON);
+                      },
+                      success: function(response) {
+                        new PNotify(response);
+                        $this.fullCalendar('removeEvents', event._id);
+                      }
+                    });
+                  }
+                },
+                cancel: {
+                  text: 'Annulla'
+                }
               }
             });
           });
