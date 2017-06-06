@@ -140,24 +140,6 @@ public class PersonDayManager {
   }
 
   /**
-   * Pulisce la parte di calcolo del tempo al lavoro.
-   */
-  private void cleanTimeAtWork(PersonDay pd) {
-
-    setTicketStatusIfNotForced(pd, false);
-
-    pd.setStampModificationType(null);
-    pd.setDecurtedMeal(0);
-    pd.setOnHoliday(0);
-    pd.setOutOpening(0);
-    pd.setStampingsTime(0);
-    pd.setJustifiedTimeMeal(0);
-    pd.setJustifiedTimeNoMeal(0);
-    pd.setTimeAtWork(0);
-  }
-
-
-  /**
    * La condizione del lavoro minimo pomeridiano è soddisfatta?.
    */
   private boolean isAfternoonThresholdConditionSatisfied(List<PairStamping> validPairs,
@@ -336,7 +318,15 @@ public class PersonDayManager {
     }
     
     // Pulizia stato personDay.
-    cleanTimeAtWork(personDay);
+    setTicketStatusIfNotForced(personDay, false);
+    personDay.setStampModificationType(null);     //Target personDay: p(-30), e(<30), f(now), d(fix)
+    personDay.setDecurtedMeal(0);
+    personDay.setOnHoliday(0);
+    personDay.setOutOpening(0);
+    personDay.setStampingsTime(0);
+    personDay.setJustifiedTimeMeal(0);
+    personDay.setJustifiedTimeNoMeal(0);
+    personDay.setTimeAtWork(0);
     
     // Patch persone fixed
     if (fixedTimeAtWork) {
