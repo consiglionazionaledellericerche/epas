@@ -1,7 +1,7 @@
 package models;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.collect.Sets;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,7 +12,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
 import models.base.BaseModel;
 import models.enumerate.ShiftSlot;
 import org.hibernate.envers.Audited;
@@ -45,8 +44,8 @@ public class PersonShiftDay extends BaseModel {
   public PersonShift personShift;
 
   //  Nuova relazione con gli errori associati ai personShiftDay
-  @OneToMany(mappedBy = "personShiftDay", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-  public List<PersonShiftDayInTrouble> troubles = new ArrayList<>();
+  @OneToMany(mappedBy = "personShiftDay", cascade = CascadeType.REMOVE)
+  public Set<PersonShiftDayInTrouble> troubles = Sets.newHashSet();
 
 
   @Transient
