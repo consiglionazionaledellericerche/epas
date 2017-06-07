@@ -1,25 +1,11 @@
 package manager;
 
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.inject.Inject;
-
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
-
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
@@ -33,6 +19,14 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.DateUtility;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.services.PairStamping;
 import models.CertificatedData;
@@ -62,6 +56,8 @@ import net.fortuna.ical4j.model.property.CalScale;
 import net.fortuna.ical4j.model.property.ProdId;
 import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.Version;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 import play.db.jpa.JPA;
 import play.i18n.Messages;
 
@@ -75,11 +71,12 @@ import play.i18n.Messages;
 public class ShiftManager {
 
   private class WorkedParameters {
+
     private boolean stampingOk;     // se ci sono problemi sulle timbrature
-    private int workedTime;			// minuti lavorati in turno
-    private int lackOfTime;			// minuti mancanti al completamento del turno
-    private boolean inTolerance;	// esistenza di timbrature fuori della tolleranza
-    private String stampings;		// lista delle timbrature
+    private int workedTime;      // minuti lavorati in turno
+    private int lackOfTime;      // minuti mancanti al completamento del turno
+    private boolean inTolerance;  // esistenza di timbrature fuori della tolleranza
+    private String stampings;    // lista delle timbrature
 
   }
 
@@ -134,8 +131,9 @@ public class ShiftManager {
   private UsersRolesOfficesDao uroDao;
   @Inject
   private RoleDao roleDao;
-  
-  private static String[] colors = {"#fcf8e3", "#1fa789", "#36b719","#ca0b3d", "pink", "dark-blue", "cyano"};
+
+  private static String[] colors = {"#fcf8e3", "#1fa789", "#36b719", "#ca0b3d", "pink", "dark-blue",
+      "cyano"};
 
 
   /**
@@ -211,14 +209,19 @@ public class ShiftManager {
 
             if (personDayManager.isOnMission(personDay.get())) {
               // check for missions
-              log.info("Il turno di {} {} e' coincidente con una missione il giorno {}", person.name, person.surname, personShiftDay.date);
-              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thMissions, personDay.get().date.toString("dd MMM"));
+              log.info("Il turno di {} {} e' coincidente con una missione il giorno {}",
+                  person.name, person.surname, personShiftDay.date);
+              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thMissions,
+                  personDay.get().date.toString("dd MMM"));
             } else {
-              log.info("Il turno di {} {} e' incompatibile con la sua assenza nel giorno {}", person.name, person.surname, personShiftDay.date);
-              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thAbsences, personDay.get().date.toString("dd MMM"));
+              log.info("Il turno di {} {} e' incompatibile con la sua assenza nel giorno {}",
+                  person.name, person.surname, personShiftDay.date);
+              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thAbsences,
+                  personDay.get().date.toString("dd MMM"));
             }
 
-          } else if (personDay.get().hasError(Troubles.NO_ABS_NO_STAMP)) {//else if (personDay.get().stampings.isEmpty()) {
+          } else if (personDay.get().hasError(
+              Troubles.NO_ABS_NO_STAMP)) {//else if (personDay.get().stampings.isEmpty()) {
             // check no stampings
             //-----------------------------
             log.info("Il turno di {} {} e' incompatibile con la sue mancate timbrature nel "
@@ -229,22 +232,31 @@ public class ShiftManager {
             //log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thNoStampings, 
             //      inconsistentAbsenceTable.get(person, thNoStampings));
           } else if ((personDay.get().stampings.size() == 1)
-              && ((personDay.get().stampings.get(0).isIn() && personDay.get().stampings.get(0).date.toLocalTime().isAfter(startShift.plusMinutes(shiftType.entranceTolerance)))
-                  || (personDay.get().stampings.get(0).isOut() && personDay.get().stampings.get(0).date.toLocalTime().isBefore(startShift.plusMinutes(shiftType.entranceTolerance))))) {
+              && ((personDay.get().stampings.get(0).isIn() && personDay.get().stampings.get(0).date
+              .toLocalTime().isAfter(startShift.plusMinutes(shiftType.entranceTolerance)))
+              || (personDay.get().stampings.get(0).isOut() && personDay.get().stampings.get(0).date
+              .toLocalTime().isBefore(startShift.plusMinutes(shiftType.entranceTolerance))))) {
 
-            String stamp = (personDay.get().stampings.get(0).isIn()) ? personDay.get().stampings.get(0).date.toLocalTime().toString("HH:mm").concat("- **:**")
-                : "- **:**".concat(personDay.get().stampings.get(0).date.toLocalTime().toString("HH:mm"));
+            String stamp =
+                (personDay.get().stampings.get(0).isIn()) ? personDay.get().stampings.get(0).date
+                    .toLocalTime().toString("HH:mm").concat("- **:**")
+                    : "- **:**".concat(
+                        personDay.get().stampings.get(0).date.toLocalTime().toString("HH:mm"));
 
-            updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thBadStampings, personDay.get().date.toString("dd MMM").concat(" -> ").concat(stamp));
-            log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", personDay.get().person, thBadStampings, inconsistentAbsenceTable.get(person, thBadStampings));
+            updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thBadStampings,
+                personDay.get().date.toString("dd MMM").concat(" -> ").concat(stamp));
+            log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", personDay.get().person,
+                thBadStampings, inconsistentAbsenceTable.get(person, thBadStampings));
 
           } else if (personDayManager.getValidPairStampings(personDay.get().stampings).isEmpty()) {
             // there are no stampings
             log.info("Il turno di {} {} e' incompatibile con la sue  timbrature disallineate nel"
                 + " giorno {}", person.name, person.surname, personDay.get().date);
 
-            updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thBadStampings, personDay.get().date.toString("dd MMM").concat(" -> timbrature disaccoppiate"));
-            log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thBadStampings, inconsistentAbsenceTable.get(person, thBadStampings));
+            updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thBadStampings,
+                personDay.get().date.toString("dd MMM").concat(" -> timbrature disaccoppiate"));
+            log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thBadStampings,
+                inconsistentAbsenceTable.get(person, thBadStampings));
 
           } else {
             log.info("La giornata lavorativa di {} {} per il giorno {} non è valida", person.name,
@@ -260,8 +272,9 @@ public class ShiftManager {
 
           // get the working time parameters in the shift period (worked and missed time during the shift period )
 
-          WorkedParameters wp = checkShiftWorkedMins(personDay, shiftType, startShift, startLunchTime ,endLunchTime, endShift);
-          
+          WorkedParameters wp = checkShiftWorkedMins(personDay, shiftType, startShift,
+              startLunchTime, endLunchTime, endShift);
+
           if (!wp.stampingOk) {
             String lackOfTime = competenceUtility.calcStringShiftHoursFromMinutes(wp.lackOfTime);
             String workedTime = competenceUtility.calcStringShiftHoursFromMinutes(wp.workedTime);
@@ -275,25 +288,32 @@ public class ShiftManager {
             // than the tollerance
             if (wp.lackOfTime > globalTollerancePerShift) {
 
-              log.info("lackOfTime > globalTollerancePerShift = {} > {}", wp.lackOfTime, globalTollerancePerShift);
+              log.info("lackOfTime > globalTollerancePerShift = {} > {}", wp.lackOfTime,
+                  globalTollerancePerShift);
               log.info("Il turno di {} {} nel giorno {} non e' stato completato - "
-                  + "timbrature: {} ", person.name, person.surname, personDay.get().date, wp.stampings);
+                      + "timbrature: {} ", person.name, person.surname, personDay.get().date,
+                  wp.stampings);
 
-              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thMissingTime, personShiftDay.date.toString("dd MMM").concat(" -> ").concat(wp.stampings).concat("(").concat(workedTime).concat(" ore lavorate)"));
-              log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thMissingTime, inconsistentAbsenceTable.get(person, thMissingTime));
+              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thMissingTime,
+                  personShiftDay.date.toString("dd MMM").concat(" -> ").concat(wp.stampings)
+                      .concat("(").concat(workedTime).concat(" ore lavorate)"));
+              log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thMissingTime,
+                  inconsistentAbsenceTable.get(person, thMissingTime));
 
             } else if (wp.lackOfTime != 0) {
 
               log.info("Il turno di {} {} nel giorno {} non e'stato completato per meno di 2"
-                  + " ore ({} minuti ({})) - CONTROLLARE PERMESSO timbrature: {}",
+                      + " ore ({} minuti ({})) - CONTROLLARE PERMESSO timbrature: {}",
                   person.name, person.surname, personDay.get().date, wp.lackOfTime,
                   lackOfTime, wp.stampings);
               log.info("Timbrature nella tolleranza dei 15 min. = {}", wp.inTolerance);
 
               label = (wp.inTolerance) ? thIncompleteTime : thWarnStampings;
-              String str = personShiftDay.date.toString("dd MMM").concat(" -> ").concat(wp.stampings).concat("(").concat(lackOfTime).concat(" ore mancanti)");
-              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, label, str);                 
-              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thLackTime, Integer.toString(wp.lackOfTime));
+              String str = personShiftDay.date.toString("dd MMM").concat(" -> ")
+                  .concat(wp.stampings).concat("(").concat(lackOfTime).concat(" ore mancanti)");
+              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, label, str);
+              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thLackTime,
+                  Integer.toString(wp.lackOfTime));
             }
 
           } // fine if esistenza timbrature    
@@ -329,17 +349,16 @@ public class ShiftManager {
    * 
    */
 
-  WorkedParameters checkShiftWorkedMins (Optional<PersonDay> personDay, 
-      ShiftType shiftType, LocalTime startShift, LocalTime startLunchTime, 
+  WorkedParameters checkShiftWorkedMins(Optional<PersonDay> personDay,
+      ShiftType shiftType, LocalTime startShift, LocalTime startLunchTime,
       LocalTime endLunchTime, LocalTime endShift) {
-
 
     WorkedParameters wp = new WorkedParameters();
     wp.stampingOk = true;
-    
+
     int restoredMin = 0;
     int workingMinutes = 0;
-    
+
     // ingressi  e uscite nella tolleranza dei 15 min
     boolean inTolleranceLimit = true;
     String stampings = "";
@@ -376,7 +395,7 @@ public class ShiftManager {
     // se non ha coperto interamente i due intervalli, controlla se il tempo mancante al
     // completamento del turno sia <= 2 ore
     if (!okBeforeLunch || !okAfterLunch) {
-      
+
       wp.stampingOk = false;
 
       LocalTime lowLimit;
@@ -388,8 +407,10 @@ public class ShiftManager {
       int diffStartLunchTime = 0;
       int diffEndLunchTime = 0;
       int diffEndShift = 0;
-      
-      log.info("Il turno di {} nel giorno {} non e' stato completato o c'e' stata una uscita fuori pausa pranzo - orario {}", person, personDay.get().date, strStamp);
+
+      log.info(
+          "Il turno di {} nel giorno {} non e' stato completato o c'e' stata una uscita fuori pausa pranzo - orario {}",
+          person, personDay.get().date, strStamp);
 
       // per ogni coppia di timbrature
       for (PairStamping pairStamping : pairStampings) {
@@ -410,8 +431,8 @@ public class ShiftManager {
 
           // conta le ore lavorate in turno prima di pranzo   
           workingMinutes += DateUtility.getDifferenceBetweenLocalTime(lowLimit, upLimit);
-          log.debug("N.1 - ss={} -- slt={} lowLimit={} upLimit={} workingMinutes={}", startShift, startLunchTime, lowLimit, upLimit, workingMinutes);
-
+          log.debug("N.1 - ss={} -- slt={} lowLimit={} upLimit={} workingMinutes={}", startShift,
+              startLunchTime, lowLimit, upLimit, workingMinutes);
 
           // calcola gli scostamenti dall'ingresso tenendo conto della tolleranza
           //--------------------------------------------------------------------------------------
@@ -496,7 +517,8 @@ public class ShiftManager {
                   .toLocalTime() : endShift;
 
           workingMinutes += DateUtility.getDifferenceBetweenLocalTime(lowLimit, upLimit);
-          log.debug("N.2 - elt={} --- es={}  slowLimit={} upLimit={} workingMinutes={}", endLunchTime, endShift, lowLimit, upLimit, workingMinutes);
+          log.debug("N.2 - elt={} --- es={}  slowLimit={} upLimit={} workingMinutes={}",
+              endLunchTime, endShift, lowLimit, upLimit, workingMinutes);
 
           // calcola gli scostamenti dalla seconda fascia del turno tenendo conto della tolleranza
           // --------------------------------------------------------------------------
@@ -747,7 +769,6 @@ public class ShiftManager {
     return shiftPeriods;
   }
 
-  
 
   /**
    * @param personShiftCancelled lista dei turni cancellati.
@@ -1043,9 +1064,9 @@ public class ShiftManager {
                 ? shiftCompetence.get().exceededMins
                 : apprHoursAndExcMins[1];
 
-        shiftCompetence.get().setValueApproved(apprHours);
-        shiftCompetence.get().setValueRequested(reqHours);
-        shiftCompetence.get().setExceededMin(exceededMins);
+        shiftCompetence.get().valueApproved = apprHours;
+        shiftCompetence.get().valueRequested = reqHours;
+        shiftCompetence.get().exceededMins = exceededMins;
         shiftCompetence.get().save();
 
         log.debug("Aggiornata competenza di {} {}: valueRequested={}, valueApproved={}, "
@@ -1057,9 +1078,9 @@ public class ShiftManager {
       } else {
         // insert a new competence with the requested hours an reason
         Competence competence = new Competence(person, competenceCode, year, month);
-        competence.setValueApproved(apprHoursAndExcMins[0]);
-        competence.setExceededMin(apprHoursAndExcMins[1]);
-        competence.setValueRequested(reqHours);
+        competence.valueApproved = apprHoursAndExcMins[0];
+        competence.exceededMins = apprHoursAndExcMins[1];
+        competence.valueRequested = reqHours;
         competence.save();
 
         savedCompetences.add(competence);
@@ -1126,7 +1147,6 @@ public class ShiftManager {
 
     }
   }
-  
 
 
   /**
@@ -1157,19 +1177,19 @@ public class ShiftManager {
 
       // Prende i giorni di turno lavorati e le eventuali ora mancanti
       int numOfDays =
-          totalPersonShiftWorkedTime.get(competence.getPerson(), Messages.get("PDFReport.thDays"));
+          totalPersonShiftWorkedTime.get(competence.person, Messages.get("PDFReport.thDays"));
       int lackOfMin =
           (totalPersonShiftWorkedTime.contains(
-              competence.getPerson(), Messages.get("PDFReport.thLackTime")))
+              competence.person, Messages.get("PDFReport.thLackTime")))
 
-          ? totalPersonShiftWorkedTime.get(competence.getPerson(), Messages.get("PDFReport.thLackTime")) : 0;
-
+              ? totalPersonShiftWorkedTime
+              .get(competence.person, Messages.get("PDFReport.thLackTime")) : 0;
 
       // prende le ore richieste, quelle approvate e i minuti in eccesso
       // che dovranno far parte del calcolo delle ore del mese successivo
-      BigDecimal reqHours = competence.getValueRequested();
-      int numOfApprovedHours = competence.getValueApproved();
-      int exceededMins = competence.getExceededMin();
+      BigDecimal reqHours = competence.valueRequested;
+      int numOfApprovedHours = competence.valueApproved;
+      int exceededMins = competence.exceededMins;
 
       log.debug("In totalShiftInfo memorizzo (person {}) giorni={}, ore richieste={}, "
               + "ore approvate={}, min accumulati={}", competence.person, numOfDays,
@@ -1351,8 +1371,8 @@ public class ShiftManager {
     // get the old exceede mins in the DB
     oldExceedMins =
         ((myCompetence == null)
-            || ((myCompetence != null) && myCompetence.getExceededMin() == null))
-            ? 0 : myCompetence.getExceededMin();
+            || ((myCompetence != null) && myCompetence.exceededMins == null))
+            ? 0 : myCompetence.exceededMins;
 
     log.debug("oldExceedMins in the DB={}", oldExceedMins);
 

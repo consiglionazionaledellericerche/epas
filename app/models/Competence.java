@@ -1,17 +1,13 @@
 package models;
 
 import java.math.BigDecimal;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 import lombok.ToString;
-
 import models.base.BaseModel;
-
 import play.data.validation.Required;
 
 
@@ -53,9 +49,9 @@ public class Competence extends BaseModel {
 
   public String reason;
 
+
   public Competence(
       Person person, CompetenceCode competenceCode, int year, int month) {
-    super();
     this.person = person;
     this.competenceCode = competenceCode;
     this.year = year;
@@ -64,71 +60,14 @@ public class Competence extends BaseModel {
 
   public Competence(
       Person person, CompetenceCode competenceCode, int year, int month, int value, String reason) {
-    super();
     this.person = person;
     this.competenceCode = competenceCode;
     this.year = year;
     this.month = month;
-    this.valueApproved = value;
+    valueApproved = value;
     this.reason = reason;
   }
 
   public Competence() {
-    super();
   }
-
-  public int getYear() {
-    return year;
-  }
-
-  public void setYear(int year) {
-    this.year = year;
-  }
-
-  public int getMonth() {
-    return month;
-  }
-
-  public void setMonth(int month) {
-    this.month = month;
-  }
-
-  public Person getPerson() {
-    return this.person;
-  }
-
-  public int getValueApproved() {
-    return valueApproved;
-  }
-
-  public void setValueApproved(int valueApproved) {
-    this.valueApproved = valueApproved;
-  }
-
-  public void setValueApproved(int valueApproved, String reason) {
-    this.valueApproved = valueApproved;
-    this.reason = reason;
-  }
-
-  public Integer getExceededMin() {
-    return exceededMins;
-  }
-
-  public void setExceededMin(Integer min) {
-    this.exceededMins = min;
-  }
-
-  public BigDecimal getValueRequested() {
-    return valueRequested;
-  }
-
-  public void setValueRequested(BigDecimal valueRequested) {
-    this.valueRequested = valueRequested;
-  }
-
-  public String getReason() {
-    return reason;
-  }
-
-
 }
