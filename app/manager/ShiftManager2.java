@@ -2,7 +2,6 @@ package manager;
 
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import com.google.common.collect.Table;
@@ -165,7 +164,7 @@ public class ShiftManager2 {
           // (?)DA RIVEDERE CONTROLLI
           log.info("Il turno di {} e' incompatibile con la sola timbratura nel giorno {}"
               + "giorno {}", shift.personShift.person.getFullname(), personDay.get().date);
-          
+
         } else if (personDay.get().hasError(Troubles.UNCOUPLED_WORKING)) {
           // there are no stampings
           log.info("Il turno di {} e' incompatibile con le timbraure disaccoppiate nel "
@@ -193,7 +192,7 @@ public class ShiftManager2 {
    * I minuti eccedenti sono memorizzati nella competenza per i mesi successivi.
    *
    * @param personsShiftHours contiene per ogni persona il numero dei giorni in turno lavorati
-   *     (thDays) e gli eventuali minuti non lavorati (thLackTime)
+   * (thDays) e gli eventuali minuti non lavorati (thLackTime)
    * @param year anno di riferimento dei turni
    * @param month mese di riferimento dei turni
    * @return la lista delle competenze corrispondenti ai turni lavorati
@@ -474,21 +473,15 @@ public class ShiftManager2 {
    * @param cause la causa da aggiungere ai problemi
    */
   public void setShiftTrouble(final PersonShiftDay shift, ShiftTroubles cause) {
-    for (PersonShiftDayInTrouble pdt : shift.troubles) {
-      if (pdt.cause == cause) {
-        // Se esiste gia' non faccio nulla
-        return;
-      }
-    }
 
-    // Se non esiste lo creo
     PersonShiftDayInTrouble trouble = new PersonShiftDayInTrouble(shift, cause);
-//    trouble.save();
-    shift.troubles.add(trouble);
-    shift.save();
 
-    log.info("Nuovo PersonDayInTrouble {} - {} - {}",
-        shift.personShift.person.getFullname(), shift.date, cause);
+    if (!shift.troubles.contains(trouble)) {
+      trouble.save();
+      shift.troubles.add(trouble);
+      log.info("Nuovo personShiftDayInTrouble {} - {} - {}",
+          shift.personShift.person.getFullname(), shift.date, cause);
+    }
   }
 
   /**
@@ -498,11 +491,10 @@ public class ShiftManager2 {
    * @param cause la causa da rimuovere dai problemi
    */
   public void fixShiftTrouble(final PersonShiftDay shift, ShiftTroubles cause) {
-    Iterables.removeIf(shift.troubles, pdt -> {
-      if (pdt.cause == cause) {
-        pdt.delete();
-
-        log.info("Rimosso PersonDayInTrouble {} - {} - {}",
+    shift.troubles.removeIf(trouble -> {
+      if (trouble.cause == cause) {
+        trouble.delete();
+        log.info("Rimosso personShiftDayInTrouble {} - {} - {}",
             shift.personShift.person.getFullname(), shift.date, cause);
         return true;
       }
@@ -555,7 +547,7 @@ public class ShiftManager2 {
         //TODO ???
       }
     }
-    
+
   }
 
   /**
@@ -595,11 +587,11 @@ public class ShiftManager2 {
    * @param timeTable la timetable contenente i dati su cui basare i calcoli
    * @param stampings la lista di timbrature da vagliare nel periodo begin-end
    * @return l'eventuale codice di errore derivante dai controlli effettuati sulle timbrature e il
-   *     tempo in turno.
+   * tempo in turno.
    */
   private void getShiftSituation(PersonShiftDay shift, LocalTime begin,
       LocalTime end, ShiftTimeTable timeTable, List<Stamping> stampings) {
-    
+
     LocalTime beginWithTolerance;
     LocalTime endWithTolerance;
     if (shift.shiftType.entranceTolerance != 0) {
@@ -616,14 +608,14 @@ public class ShiftManager2 {
     List<PairStamping> pairStampings = personDayManager
         .getValidPairStampings(stampings);
     //l'ingresso è successivo alla soglia di tolleranza sull'ingresso in turno
-    
+
     if (pairStampings.get(0).first.date.toLocalTime()
         .isAfter(begin.plusMinutes(shift.shiftType.hourTolerance))) {
       setShiftTrouble(shift, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
     } else {
       fixShiftTrouble(shift, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
     }
-    
+
     if (Range.open(beginWithTolerance, begin.plusMinutes(shift.shiftType.hourTolerance))
         .contains(pairStampings.get(0).first.date.toLocalTime())) {
       setShiftTrouble(shift, ShiftTroubles.NOT_COMPLETE_SHIFT);
@@ -668,8 +660,8 @@ public class ShiftManager2 {
    * @param begin l'ora di inizio del turno
    * @param end l'ora di fine del turno
    * @return la lista di coppie di timbrature di uscita/entrata appartenenti all'intervallo di turno
-   *     che vanno considerate per controllare se il tempo trascorso in pausa eccede quello previsto
-   *     dalla configurazione di turno.
+   * che vanno considerate per controllare se il tempo trascorso in pausa eccede quello previsto
+   * dalla configurazione di turno.
    */
   private List<PairStamping> getBreakPairStampings(List<PairStamping> pairStampings,
       LocalTime begin, LocalTime end) {
