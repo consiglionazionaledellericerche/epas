@@ -5,6 +5,7 @@ $(document).ready(function() {
       height: 'auto',
       columnFormat: 'dddd',
       fixedWeekCount: false,
+//      showNonCurrentDates: false, // evita di renderizzare i giorni al di fuori del mese corrente
       droppable: true,
       eventOrder: "editable, title",
       loading: function(loading) {
@@ -109,7 +110,7 @@ $(document).ready(function() {
                       },
                       success: function(response) {
                         new PNotify(response);
-                        $this.fullCalendar('removeEvents', event._id);
+                        $this.fullCalendar('render');
                       }
                     });
                   }
@@ -169,7 +170,7 @@ $(document).ready(function() {
           },
           success: function(response) {
             new PNotify(response);
-            $this.fullCalendar('refetchEvents');
+            $this.fullCalendar('render');
           }
         });
       }
@@ -199,7 +200,7 @@ $(document).ready(function() {
           },
           success: function(response) {
             new PNotify(response);
-            $this.fullCalendar('refetchEvents');
+            $this.fullCalendar('render');
           }
         });
       }

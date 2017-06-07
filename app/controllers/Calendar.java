@@ -4,13 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Range;
 import dao.AbsenceDao;
 import dao.ShiftDao;
 import helpers.Web;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -67,7 +67,7 @@ public class Calendar extends Controller {
 
   public static void shiftPeople(ShiftType activity, LocalDate start, LocalDate end) {
 
-    final List<PersonShiftShiftType> people = shiftWorkers(activity, start, end);
+    final List<PersonShiftShiftType> people = shiftManager2.shiftWorkers(activity, start, end);
 
     List<ShiftEvent> eventPeople = new ArrayList<>();
     int index = 0;
@@ -145,7 +145,7 @@ public class Calendar extends Controller {
 
     List<ShiftEvent> events = new ArrayList<>();
 
-    List<PersonShiftShiftType> people = shiftWorkers(shiftType, start, end);
+    List<PersonShiftShiftType> people = shiftManager2.shiftWorkers(shiftType, start, end);
 
     int index = 0;
 
@@ -337,28 +337,12 @@ public class Calendar extends Controller {
   public static void recap(ShiftType activity, LocalDate intervalStart) {
     final YearMonth yearMonth = new YearMonth(intervalStart);
 
-    List<String> items = new ArrayList<>();
-    items.add(activity.toString());
-    items.add(intervalStart.toString());
-    render(items);
+    Map<Person, Integer> shiftsCompetences = shiftManager2
+        .calculateActivityShiftCompetences(activity, yearMonth);
+
+    // TODO: 07/06/17 se ci sono delle competenze approvate è bene riportare anche quelle
+    // per visualizzare eventuali discrepanze
+    render(shiftsCompetences);
   }
 
-  /**
-   * @param activity attività di turno
-   * @param start data di inizio del periodo
-   * @param end data di fine del periodo
-   * @return La lista di tutte le persone abilitate su quell'attività nell'intervallo di tempo
-   * specificato.
-   */
-  private static List<PersonShiftShiftType> shiftWorkers(ShiftType activity, LocalDate start,
-      LocalDate end) {
-    if (activity.isPersistent() && start != null && end != null) {
-      return activity.personShiftShiftTypes.stream()
-          .filter(personShiftShiftType -> personShiftShiftType.dateRange().isConnected(
-              Range.closed(start, end)))
-          .collect(Collectors.toList());
-    } else {
-      return new ArrayList<>();
-    }
-  }
 }

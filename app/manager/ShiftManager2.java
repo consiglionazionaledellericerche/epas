@@ -587,7 +587,7 @@ public class ShiftManager2 {
 
     // Vengono filtrati perchè sui giorni futuri non si possono fare calcoli
     personShiftDayDao.getPersonShiftDayByTypeAndPeriod(monthBegin, monthEnd, activity).stream()
-        .filter(personShiftDay -> personShiftDay.date.isAfter(LocalDate.now()))
+        .filter(personShiftDay -> !personShiftDay.date.isAfter(LocalDate.now()))
         .forEach(shift -> {
           final Person person = shift.personShift.person;
           Integer totalMinutes = shiftCompetences.get(person);

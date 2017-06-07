@@ -2,7 +2,6 @@ package models;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -10,10 +9,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
+import javax.persistence.Transient;
 import models.base.BaseModel;
-
+import models.enumerate.ShiftSlot;
 import org.joda.time.LocalTime;
+import org.joda.time.Minutes;
 
 @Entity
 @Table(name = "shift_time_table")
@@ -39,10 +39,10 @@ public class ShiftTimeTable extends BaseModel {
   // end time of afternoon shift
   @Column(name = "end_afternoon", columnDefinition = "VARCHAR")
   public LocalTime endAfternoon;
-  
+
   @Column(name = "start_evening", columnDefinition = "VARCHAR")
   public LocalTime startEvening;
-  
+
   @Column(name = "end_evening", columnDefinition = "VARCHAR")
   public LocalTime endEvening;
 
@@ -61,7 +61,7 @@ public class ShiftTimeTable extends BaseModel {
   // end time for the lunch break
   @Column(name = "end_afternoon_lunch_time", columnDefinition = "VARCHAR")
   public LocalTime endAfternoonLunchTime;
-  
+
   // start time for the lunch break
   @Column(name = "start_evening_lunch_time", columnDefinition = "VARCHAR")
   public LocalTime startEveningLunchTime;
@@ -77,9 +77,25 @@ public class ShiftTimeTable extends BaseModel {
   // Paid minuts per shift
   @Column(name = "paid_minutes")
   public Integer paidMinutes;
-  
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "office_id")
   public Office office;
+
+  /**
+   * @param slot lo Slot del quale calcolare la durata
+   * @return la durata in minuti dello slot richiesto.
+   */
+  @Transient
+  public int getSlotDuration(ShiftSlot slot) {
+    switch (slot) {
+      case MORNING:
+        return Minutes.minutesBetween(startMorning, endMorning).getMinutes();
+      case AFTERNOON:
+        return Minutes.minutesBetween(startAfternoon, endAfternoon).getMinutes();
+      default:
+        return 0;
+    }
+  }
 
 }
