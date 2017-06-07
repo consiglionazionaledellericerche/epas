@@ -132,10 +132,10 @@ public class ShiftManager2 {
             : shift.shiftType.shiftTimeTable.startAfternoon;
     Optional<PersonDay> personDay = personDayDao.getPersonDay(shift.personShift.person, shift.date);
     if (!personDay.isPresent()) {
-      errCode = ShiftTroubles.FUTURE_DAY.toString();
-      PersonShiftDayInTrouble trouble =
-          new PersonShiftDayInTrouble(shift, ShiftTroubles.FUTURE_DAY);
-      trouble.save();
+//      errCode = ShiftTroubles.FUTURE_DAY.toString();
+//      PersonShiftDayInTrouble trouble =
+//          new PersonShiftDayInTrouble(shift, ShiftTroubles.FUTURE_DAY);
+//      trouble.save();
       return errCode;
     }
 
@@ -528,35 +528,34 @@ public class ShiftManager2 {
     final LocalTime end;
     Optional<PersonDay> personDay =
         personDayDao.getPersonDay(personShiftDay.personShift.person, personShiftDay.date);
-    if (!personDay.isPresent()) {
-      setShiftTrouble(personShiftDay, ShiftTroubles.FUTURE_DAY);
-      return;
-    }
-    List<Stamping> stampings = personDay.get().getStampings();
-    // controlla se non sono nel futuro ed è un giorno valido
-    IWrapperPersonDay wrPersonDay = wrapperFactory.create(personDay.get());
-    if (!LocalDate.now().isBefore(personShiftDay.date) && personDayManager
-        .isValidDay(personDay.get(), wrPersonDay)) {
+    if (personDay.isPresent()) {
+      List<Stamping> stampings = personDay.get().getStampings();
+      // controlla se non sono nel futuro ed è un giorno valido
+      IWrapperPersonDay wrPersonDay = wrapperFactory.create(personDay.get());
+      if (!LocalDate.now().isBefore(personShiftDay.date) && personDayManager
+          .isValidDay(personDay.get(), wrPersonDay)) {
 
-      switch (personShiftDay.shiftSlot) {
-        case MORNING:
-          begin = timeTable.startMorning;
-          end = timeTable.endMorning;
-          getShiftSituation(personShiftDay, begin, end, timeTable, stampings);
-          break;
+        switch (personShiftDay.shiftSlot) {
+          case MORNING:
+            begin = timeTable.startMorning;
+            end = timeTable.endMorning;
+            getShiftSituation(personShiftDay, begin, end, timeTable, stampings);
+            break;
 
-        case AFTERNOON:
-          begin = timeTable.startAfternoon;
-          end = timeTable.endAfternoon;
-          getShiftSituation(personShiftDay, begin, end, timeTable, stampings);
-          break;
-        //TODO: case EVENING??
-        default:
-          break;
+          case AFTERNOON:
+            begin = timeTable.startAfternoon;
+            end = timeTable.endAfternoon;
+            getShiftSituation(personShiftDay, begin, end, timeTable, stampings);
+            break;
+          //TODO: case EVENING??
+          default:
+            break;
+        }
+      } else {
+        //TODO ???
       }
-    } else {
-      //TODO ???
     }
+    
   }
 
   /**

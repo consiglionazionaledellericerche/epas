@@ -669,6 +669,14 @@ StampTypes.PERMESSO_BREVE= Permesso breve (36 ore anno)
 ShiftSlot.MORNING = Mattina
 ShiftSlot.AFTERNOON = Pomeriggio
 
+ShiftTroubles.PERSON_NOT_ASSIGNED =
+ShiftTroubles.NOT_COMPLETE_SHIFT = Turno non completato
+ShiftTroubles.OUT_OF_STAMPING_TOLERANCE = Fuori dalla tolleranza per le timbrature
+ShiftTroubles.NOT_ENOUGH_WORKING_TIME = Tempo a lavoro insufficiente
+ShiftTroubles.PROBLEMS_ON_OTHER_SLOT = Problemi sull'altro slot
+ShiftTroubles.PERSON_IS_ABSENT = Dipendente assente nella data
+ShiftTroubles.EXCEEDED_BREAKTIME = Eccesso di pausa
+
 # Parametri di configurazione
 
 WEB_STAMPING_ALLOWED=Autorizzazione timbratura via web
