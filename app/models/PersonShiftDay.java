@@ -12,6 +12,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
 import models.base.BaseModel;
 import models.enumerate.ShiftSlot;
 import org.hibernate.envers.Audited;
@@ -44,7 +45,7 @@ public class PersonShiftDay extends BaseModel {
   public PersonShift personShift;
 
   //  Nuova relazione con gli errori associati ai personShiftDay
-  @OneToMany(mappedBy = "personShiftDay", cascade = CascadeType.REMOVE)
+  @OneToMany(mappedBy = "personShiftDay", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
   public List<PersonShiftDayInTrouble> troubles = new ArrayList<>();
 
 
