@@ -14,6 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import models.base.BaseModel;
 import models.enumerate.ShiftSlot;
+import models.enumerate.ShiftTroubles;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.joda.time.LocalDate;
@@ -63,5 +64,10 @@ public class PersonShiftDay extends BaseModel {
       default:
         return null;
     }
+  }
+
+  @Transient
+  public boolean hasError(ShiftTroubles trouble) {
+    return troubles.stream().anyMatch(error -> error.cause == trouble);
   }
 }

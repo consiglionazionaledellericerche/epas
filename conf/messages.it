@@ -670,7 +670,7 @@ ShiftSlot.MORNING = Mattina
 ShiftSlot.AFTERNOON = Pomeriggio
 
 shift.absenceInDay = La persona nel giorno selezionato è assente
-shift.alreadyInShift = già in turno per la attività %s 
+shift.alreadyInShift = Già in turno per l'attività %s
 shift.slotAlreadyAssigned = Slot già assegnato a %s
 shift.personInactive = Persona non attiva sul turno
 ShiftTroubles.PERSON_NOT_ASSIGNED =
