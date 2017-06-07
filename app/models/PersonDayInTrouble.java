@@ -25,7 +25,7 @@ public class PersonDayInTrouble extends BaseModel {
 
   public boolean emailSent;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne
   @JoinColumn(name = "personday_id", nullable = false, updatable = false)
   public PersonDay personDay;
 

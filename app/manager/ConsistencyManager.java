@@ -342,6 +342,7 @@ public class ConsistencyManager {
 
     // TODO: 06/06/17 Inserire i controlli di validità sugli eventuali turni della persona nel periodo specificato
     // Possibilmente con un Job asincrono.
+    
     log.trace("... ricalcolo dei riepiloghi conclusa.");
   }
 
