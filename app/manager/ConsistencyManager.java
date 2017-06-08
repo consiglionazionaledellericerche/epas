@@ -348,7 +348,7 @@ public class ConsistencyManager {
     }
         
     // (6) Controllo se per quel giorno person ha anche un turno associato ed effettuo, i ricalcoli
-    Optional<PersonShiftDay> psd = personShiftDayDao.byPersonAndDate(person, date);
+    Optional<PersonShiftDay> psd = personShiftDayDao.byPersonAndDate(person, from);
     if (psd.isPresent()) {
       shiftManager2.checkShiftValid(psd.get());
     }
