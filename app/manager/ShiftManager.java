@@ -1293,8 +1293,8 @@ public class ShiftManager {
 
     // legge i giorni di turno del tipo 'type' da inizio a fine mese
     List<PersonShiftDay> personShiftDays =
-        personShiftDayDao.getPersonShiftDayByTypeAndPeriod(firstOfMonth, firstOfMonth.dayOfMonth()
-            .withMaximumValue(), shiftType);
+        personShiftDayDao.byTypeInPeriod(firstOfMonth, firstOfMonth.dayOfMonth()
+            .withMaximumValue(), shiftType,Optional.absent());
 
     // li inserisce nel calendario
     for (PersonShiftDay personShiftDay : personShiftDays) {
