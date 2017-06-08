@@ -504,6 +504,17 @@ public class ShiftManager2 {
   }
 
   /**
+   * rimuove tutti i troubles dalla lista.
+   * @param shift il personShiftDay su cui agire
+   */
+  public void fixAllTrouble(final PersonShiftDay shift) {
+    shift.refresh();
+    
+    shift.troubles.stream().forEach(trouble -> trouble.delete());
+    shift.save();
+  }
+  
+  /**
    * Verifica che il turno in questione sia valido e persiste nei Troubles
    * gli eventuali errori (li rimuove nel caso siano risolti).
    *
@@ -525,8 +536,21 @@ public class ShiftManager2 {
       List<Stamping> stampings = personDay.get().getStampings();
       // controlla se non sono nel futuro ed è un giorno valido
       IWrapperPersonDay wrPersonDay = wrapperFactory.create(personDay.get());
-      if (!LocalDate.now().isBefore(personShiftDay.date) && personDayManager
-          .isValidDay(personDay.get(), wrPersonDay)) {
+
+      if (personDayManager.isAllDayAbsences(personDay.get())) {
+        fixAllTrouble(personShiftDay);
+        setShiftTrouble(personShiftDay, ShiftTroubles.PERSON_IS_ABSENT);
+        return;
+      }
+      if (personDay.get().isHoliday 
+          || personDay.get().timeAtWork 
+          < wrPersonDay.getWorkingTimeTypeDay().get().getWorkingTime() / 2) {
+        fixAllTrouble(personShiftDay);
+        setShiftTrouble(personShiftDay, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
+        return;
+      }
+      
+      if (!LocalDate.now().isBefore(personShiftDay.date)) {
 
         switch (personShiftDay.shiftSlot) {
           case MORNING:
@@ -545,7 +569,9 @@ public class ShiftManager2 {
             break;
         }
       } else {
-        //TODO ???
+        return;
+        //TODO che fare in caso di giorno futuro? per ora lasciamo inserire il turno senza
+        // aggiungere alcun errore alla lista dei troubles.
       }
     }
 
