@@ -337,12 +337,16 @@ public class Calendar extends Controller {
   public static void recap(ShiftType activity, LocalDate intervalStart) {
     final YearMonth yearMonth = new YearMonth(intervalStart);
 
-    Map<Person, Integer> shiftsCompetences = shiftManager2
+    Map<Person, Integer> shiftsCalculatedCompetences = shiftManager2
         .calculateActivityShiftCompetences(activity, yearMonth);
+
+    // FIXME trovare un modo per poter recuperare le competenze approvate su questa attività
+    Map<Person, Integer> approvedShiftCompetences = shiftManager2
+        .getApprovedShifts(activity, yearMonth);
 
     // TODO: 07/06/17 se ci sono delle competenze approvate è bene riportare anche quelle
     // per visualizzare eventuali discrepanze
-    render(shiftsCompetences);
+    render(shiftsCalculatedCompetences);
   }
 
 }
