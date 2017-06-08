@@ -63,14 +63,14 @@ public class ShiftManager2 {
   private final PersonShiftDayDao personShiftDayDao;
   private final PersonDayDao personDayDao;
   private final ShiftDao shiftDao;
-  
+
   private final CompetenceCodeDao competenceCodeDao;
-  
+
   private final IWrapperFactory wrapperFactory;
   private final UsersRolesOfficesDao uroDao;
   private final RoleDao roleDao;
   private final PersonShiftDayInTroubleDao troubleDao;
-  
+
 
   @Inject
   public ShiftManager2(PersonDayManager personDayManager, PersonShiftDayDao personShiftDayDao,
@@ -83,14 +83,14 @@ public class ShiftManager2 {
     this.personShiftDayDao = personShiftDayDao;
     this.personDayDao = personDayDao;
     this.shiftDao = shiftDao;
-    
+
     this.competenceCodeDao = competenceCodeDao;
-    
+
     this.wrapperFactory = wrapperFactory;
     this.uroDao = uroDao;
     this.roleDao = roleDao;
     this.troubleDao = troubleDao;
-    
+
   }
 
 
@@ -427,7 +427,7 @@ public class ShiftManager2 {
     //Verifica se la persona è attiva in quell'attività in quel giorno
     final boolean isActive = personShiftDay.shiftType.personShiftShiftTypes.stream().anyMatch(
         personShiftShiftType -> personShiftShiftType.personShift.equals(personShiftDay.personShift)
-        && personShiftShiftType.dateRange().contains(personShiftDay.date));
+            && personShiftShiftType.dateRange().contains(personShiftDay.date));
     if (!isActive) {
       return Optional.of(Messages.get("shift.personInactive"));
     }
@@ -474,7 +474,7 @@ public class ShiftManager2 {
     PersonShiftDayInTrouble trouble = new PersonShiftDayInTrouble(shift, cause);
 
     if (!shift.troubles.contains(trouble)) {
-      
+
       shift.troubles.add(trouble);
       trouble.save();
       log.info("Nuovo personShiftDayInTrouble {} - {} - {}",
@@ -492,7 +492,7 @@ public class ShiftManager2 {
     shift.refresh();
 
     shift.troubles.removeIf(trouble -> {
-      if (trouble.cause == cause) {                
+      if (trouble.cause == cause) {
         trouble.delete();
         shift.save();
         log.info("Rimosso personShiftDayInTrouble {} - {} - {}",
@@ -540,7 +540,7 @@ public class ShiftManager2 {
             end = timeTable.endAfternoon;
             getShiftSituation(personShiftDay, begin, end, timeTable, stampings);
             break;
-            //TODO: case EVENING??
+          //TODO: case EVENING??
           default:
             break;
         }
@@ -580,31 +580,25 @@ public class ShiftManager2 {
    * @return Restituisce una mappa con i minuti di turno maturati per ogni persona.
    */
   public Map<Person, Integer> calculateActivityShiftCompetences(ShiftType activity,
-      YearMonth yearMonth) {
+      LocalDate from, LocalDate to) {
 
-    final LocalDate monthBegin = yearMonth.toLocalDate(1);
-    final LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
     final LocalDate today = LocalDate.now();
     final LocalDate lastDay;
 
-    if (monthEnd.isAfter(today)) {
+    if (to.isAfter(today)) {
       lastDay = today;
     } else {
-      lastDay = monthEnd;
+      lastDay = to;
     }
 
     final Map<Person, Integer> shiftCompetences = new HashMap<>();
 
+    personShiftDayDao.byTypeInPeriod(from, lastDay, activity, Optional.absent())
+        .stream().map(shift -> shift.personShift.person).distinct().forEach(person -> {
 
-    personShiftDayDao.byTypeInPeriod(monthBegin, lastDay, activity, Optional.absent())
-        .stream()
-        .map(shift -> shift.personShift.person).distinct().forEach(person -> {
-      
-          int competences = 
-              calculatePersonShiftCompetencesInPeriod(activity, person, monthBegin,lastDay);
-          shiftCompetences.put(person, competences);
-
-        });
+      int competences = calculatePersonShiftCompetencesInPeriod(activity, person, from, lastDay);
+      shiftCompetences.put(person, competences);
+    });
 
     return shiftCompetences;
   }
@@ -616,11 +610,10 @@ public class ShiftManager2 {
    * @param from data iniziale
    * @param to data finale
    * @return il numero di minuti di competenza maturati in base ai turni effettuati nel periodo
-   *     selezionato (di norma serve calcolarli su un intero mese al massimo).
+   * selezionato (di norma serve calcolarli su un intero mese al massimo).
    */
   public int calculatePersonShiftCompetencesInPeriod(ShiftType activity, Person person,
-      LocalDate from,
-      LocalDate to) {
+      LocalDate from, LocalDate to) {
 
     // TODO: 08/06/17 Sicuramente vanno differenziati per tipo di competenza.....
     // c'è sono da capire qual'è la discriminante
@@ -643,7 +636,7 @@ public class ShiftManager2 {
     return shiftCompetences;
   }
 
-  public Map<Person,Integer> getApprovedShifts(ShiftType activity, YearMonth yearMonth) {
+  public Map<Person, Integer> getApprovedShifts(ShiftType activity, YearMonth yearMonth) {
 
     // FIXME dramma! le competenze approvate sono completamente trasversali alle attività di turno!
     // e mo?
@@ -652,13 +645,12 @@ public class ShiftManager2 {
   }
 
 
-
   /**
    * @param activity attività di turno
    * @param start data di inizio del periodo
    * @param end data di fine del periodo
    * @return La lista di tutte le persone abilitate su quell'attività nell'intervallo di tempo
-   *     specificato.
+   * specificato.
    */
   public List<PersonShiftShiftType> shiftWorkers(ShiftType activity, LocalDate start,
       LocalDate end) {
@@ -680,7 +672,7 @@ public class ShiftManager2 {
    * @param timeTable la timetable contenente i dati su cui basare i calcoli
    * @param stampings la lista di timbrature da vagliare nel periodo begin-end
    * @return l'eventuale codice di errore derivante dai controlli effettuati sulle timbrature e il
-   *     tempo in turno.
+   * tempo in turno.
    */
   private void getShiftSituation(PersonShiftDay shift, LocalTime begin,
       LocalTime end, ShiftTimeTable timeTable, List<Stamping> stampings) {
@@ -704,10 +696,9 @@ public class ShiftManager2 {
     int timeInShift = personDayManager.workingMinutes(pairStampings, begin, end);
 
     List<PairStamping> validPair = pairStampings.stream().filter(pair -> Range.open(begin, end)
-          .isConnected(Range.open(pair.first.date.toLocalTime(), pair.second.date.toLocalTime())))
+        .isConnected(Range.open(pair.first.date.toLocalTime(), pair.second.date.toLocalTime())))
         .collect(Collectors.toList());
-    
-        
+
     //verifico se la tolleranza oraria è presente...
     if (shift.shiftType.hourTolerance != 0) {
       //l'ingresso è successivo alla soglia di tolleranza sull'ingresso in turno
@@ -748,14 +739,12 @@ public class ShiftManager2 {
       fixShiftTrouble(shift, ShiftTroubles.OUT_OF_STAMPING_TOLERANCE);
     }
 
-
     //Controlli sul tempo a lavoro in turno...
     if (timeInShift < timeTable.paidMinutes - shift.shiftType.hourTolerance) {
       setShiftTrouble(shift, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
     } else {
       fixShiftTrouble(shift, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
     }
-
 
     // controlli sull'eventuale pausa in turno abilitata...
     if (shift.shiftType.breakInShiftEnabled) {
@@ -779,8 +768,8 @@ public class ShiftManager2 {
    * @param begin l'ora di inizio del turno
    * @param end l'ora di fine del turno
    * @return la lista di coppie di timbrature di uscita/entrata appartenenti all'intervallo di turno
-   *     che vanno considerate per controllare se il tempo trascorso in pausa eccede quello previsto
-   *     dalla configurazione di turno.
+   * che vanno considerate per controllare se il tempo trascorso in pausa eccede quello previsto
+   * dalla configurazione di turno.
    */
   private List<PairStamping> getBreakPairStampings(List<PairStamping> pairStampings,
       LocalTime begin, LocalTime end) {

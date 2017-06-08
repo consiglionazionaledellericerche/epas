@@ -27,7 +27,6 @@ import models.dto.ShiftEvent;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -334,15 +333,15 @@ public class Calendar extends Controller {
     renderJSON(message);
   }
 
-  public static void recap(ShiftType activity, LocalDate intervalStart) {
-    final YearMonth yearMonth = new YearMonth(intervalStart);
+  public static void recap(ShiftType activity, LocalDate start, LocalDate end) {
+//    final YearMonth yearMonth = new YearMonth(start);
 
     Map<Person, Integer> shiftsCalculatedCompetences = shiftManager2
-        .calculateActivityShiftCompetences(activity, yearMonth);
+        .calculateActivityShiftCompetences(activity, start, end);
 
     // FIXME trovare un modo per poter recuperare le competenze approvate su questa attività
-    Map<Person, Integer> approvedShiftCompetences = shiftManager2
-        .getApprovedShifts(activity, yearMonth);
+//    Map<Person, Integer> approvedShiftCompetences = shiftManager2
+//        .getApprovedShifts(activity, yearMonth);
 
     // TODO: 07/06/17 se ci sono delle competenze approvate è bene riportare anche quelle
     // per visualizzare eventuali discrepanze
