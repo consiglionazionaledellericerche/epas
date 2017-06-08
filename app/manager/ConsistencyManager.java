@@ -9,6 +9,7 @@ import com.google.common.collect.Sets;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
+import dao.PersonShiftDayDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
@@ -37,6 +38,7 @@ import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.PersonShiftDay;
 import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
@@ -70,8 +72,10 @@ public class ConsistencyManager {
   private final PersonDayInTroubleManager personDayInTroubleManager;
   private final IWrapperFactory wrapperFactory;
   private final PersonDayDao personDayDao;
+  private final PersonShiftDayDao personShiftDayDao;
   private final StampTypeManager stampTypeManager;
   private final ConfigurationManager configurationManager;
+  private final ShiftManager2 shiftManager2;
   private final AbsenceService absenceService;
   private final AbsenceComponentDao absenceComponentDao;
 
@@ -96,13 +100,14 @@ public class ConsistencyManager {
       OfficeDao officeDao,
       PersonDao personDao,
       PersonDayDao personDayDao,
+      PersonShiftDayDao personShiftDayDao,
 
       PersonDayManager personDayManager,
       ContractMonthRecapManager contractMonthRecapManager,
       PersonDayInTroubleManager personDayInTroubleManager,
       ConfigurationManager configurationManager,
       StampTypeManager stampTypeManager,
-
+      ShiftManager2 shiftManager2,
       AbsenceService absenceService,
       AbsenceComponentDao absenceComponentDao,
 
@@ -120,6 +125,8 @@ public class ConsistencyManager {
     this.wrapperFactory = wrapperFactory;
     this.personDayDao = personDayDao;
     this.stampTypeManager = stampTypeManager;
+    this.personShiftDayDao = personShiftDayDao;
+    this.shiftManager2 = shiftManager2;
   }
 
   /**
@@ -339,9 +346,12 @@ public class ConsistencyManager {
         }
       }.now();
     }
-
-    // TODO: 06/06/17 Inserire i controlli di validità sugli eventuali turni della persona nel periodo specificato
-    // Possibilmente con un Job asincrono.
+        
+    // (6) Controllo se per quel giorno person ha anche un turno associato ed effettuo, i ricalcoli
+    Optional<PersonShiftDay> psd = personShiftDayDao.byPersonAndDate(person, date);
+    if (psd.isPresent()) {
+      shiftManager2.checkShiftValid(psd.get());
+    }
     
     log.trace("... ricalcolo dei riepiloghi conclusa.");
   }
