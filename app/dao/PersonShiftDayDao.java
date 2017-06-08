@@ -2,6 +2,7 @@ package dao;
 
 import com.google.common.base.Optional;
 import com.google.inject.Provider;
+import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import java.util.List;
@@ -48,20 +49,23 @@ public class PersonShiftDayDao extends DaoBase {
 
   /**
    * @return la lista dei personShiftDay presenti nel periodo compreso tra 'from' e 'to' aventi lo
-   * shiftType 'type'.
-   *
-   * <p> PersonShiftDay.find("SELECT psd FROM PersonShiftDay psd WHERE date BETWEEN ? AND ? AND
-   * psd.shiftType = ? ORDER by date", firstOfMonth, lastOfMonth, shiftType).fetch(); </p>
+   * shiftType 'type'. Se specificato filtra sulla persona richiesta.
    */
-  public List<PersonShiftDay> getPersonShiftDayByTypeAndPeriod(
-      LocalDate from, LocalDate to, ShiftType type) {
+  public List<PersonShiftDay> byTypeInPeriod(
+      LocalDate from, LocalDate to, ShiftType type, Optional<Person> person) {
     final QPersonShiftDay personShiftDay = QPersonShiftDay.personShiftDay;
 
-    JPQLQuery query =
-        getQueryFactory().from(personShiftDay)
-            .where(personShiftDay.date.goe(from).and(personShiftDay.date.loe(to))
-                .and(personShiftDay.shiftType.eq(type))).orderBy(personShiftDay.date.asc());
-    return query.list(personShiftDay);
+    final BooleanBuilder condition = new BooleanBuilder()
+        .and(personShiftDay.date.goe(from))
+        .and(personShiftDay.date.loe(to))
+        .and(personShiftDay.shiftType.eq(type));
+
+    if (person.isPresent()) {
+      condition.and(personShiftDay.personShift.person.eq(person.get()));
+    }
+    
+    return getQueryFactory().from(personShiftDay)
+        .where(condition).orderBy(personShiftDay.date.asc()).list(personShiftDay);
   }
 
   /**

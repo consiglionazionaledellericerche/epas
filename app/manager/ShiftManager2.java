@@ -449,8 +449,8 @@ public class ShiftManager2 {
     }
 
     List<PersonShiftDay> list = personShiftDayDao
-        .getPersonShiftDayByTypeAndPeriod(personShiftDay.date, personShiftDay.date,
-            personShiftDay.shiftType);
+        .byTypeInPeriod(personShiftDay.date, personShiftDay.date,
+            personShiftDay.shiftType, Optional.absent());
 
     for (PersonShiftDay registeredDay : list) {
       //controlla che il turno in quello slot sia già stato assegnato ad un'altra persona
@@ -578,49 +578,74 @@ public class ShiftManager2 {
   public Map<Person, Integer> calculateActivityShiftCompetences(ShiftType activity,
       YearMonth yearMonth) {
 
-    // FIXME effettuare il calcolo una persona alla volta con il metodo calculatePersonShiftCompetences()
-    // ed effettuare il loop utilizzando quello
     final LocalDate monthBegin = yearMonth.toLocalDate(1);
     final LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+    final LocalDate today = LocalDate.now();
+    final LocalDate lastDay;
+
+    if (monthEnd.isAfter(today)) {
+      lastDay = today;
+    } else {
+      lastDay = monthEnd;
+    }
 
     final Map<Person, Integer> shiftCompetences = new HashMap<>();
 
-    // Vengono filtrati perchè sui giorni futuri non si possono fare calcoli
-    personShiftDayDao.getPersonShiftDayByTypeAndPeriod(monthBegin, monthEnd, activity).stream()
-    .filter(personShiftDay -> !personShiftDay.date.isAfter(LocalDate.now()))
-    .forEach(shift -> {
-      final Person person = shift.personShift.person;
-      Integer totalMinutes = shiftCompetences.get(person);
-      Integer shiftMinutes;
 
-      // Nessun errore sul turno (mi aspetto che lo stato del turno sia aggiornato)
-      if (shift.troubles.isEmpty()) {
-        shiftMinutes = shift.shiftType.shiftTimeTable.getSlotDuration(shift.shiftSlot);
-      } else if (shift.troubles.size() == 1 && shift
-          .hasError(ShiftTroubles.NOT_COMPLETE_SHIFT)) {
-        // Il turno vale comunque ma con un'ora in meno
-        shiftMinutes =
-            shift.shiftType.shiftTimeTable.getSlotDuration(shift.shiftSlot) - SIXTY_MINUTES;
-      } else {
-        shiftMinutes = 0;
-      }
+    personShiftDayDao.byTypeInPeriod(monthBegin, lastDay, activity, Optional.absent()).stream()
+        .map(shift -> shift.personShift.person).distinct().forEach(person -> {
+      int competences = calculatePersonShiftCompetencesInPeriod(activity, person, monthBegin,
+          lastDay);
+      shiftCompetences.put(person, competences);
 
-      if (totalMinutes == null) {
-        totalMinutes = shiftMinutes;
-      } else {
-        totalMinutes += shiftMinutes;
-      }
-      shiftCompetences.put(shift.personShift.person, totalMinutes);
+
     });
 
     return shiftCompetences;
   }
 
-  //
-  //  public void calculatePersonShiftCompetences(ShiftType activity,
-  //      Person person, YearMonth yearMonth) {
-  //
-  //  }
+
+  /**
+   * @param activity attività di turno
+   * @param person Persona sulla quale effettuare i calcoli
+   * @param from data iniziale
+   * @param to data finale
+   * @return il numero di minuti di competenza maturati in base ai turni effettuati nel periodo
+   * selezionato (di norma serve calcolarli su un intero mese al massimo).
+   */
+  public int calculatePersonShiftCompetencesInPeriod(ShiftType activity, Person person,
+      LocalDate from,
+      LocalDate to) {
+
+    // TODO: 08/06/17 Sicuramente vanno differenziati per tipo di competenza.....
+    // c'è sono da capire qual'è la discriminante
+    int shiftCompetences = 0;
+    final List<PersonShiftDay> shifts = personShiftDayDao
+        .byTypeInPeriod(from, to, activity, Optional.of(person));
+
+    // I conteggi funzionano nel caso lo stato dei turni sia aggiornato
+    for (PersonShiftDay shift : shifts) {
+      // Nessun errore sul turno
+      if (shift.troubles.isEmpty()) {
+        shiftCompetences += shift.shiftType.shiftTimeTable.paidMinutes;
+      } else if (shift.troubles.size() == 1 && shift
+          .hasError(ShiftTroubles.NOT_COMPLETE_SHIFT)) {
+        // Il turno vale comunque ma con un'ora in meno
+        shiftCompetences += shift.shiftType.shiftTimeTable.paidMinutes - SIXTY_MINUTES;
+      }
+    }
+
+    return shiftCompetences;
+  }
+
+  public Map<Person,Integer> getApprovedShifts(ShiftType activity, YearMonth yearMonth) {
+
+    // FIXME dramma! le competenze approvate sono completamente trasversali alle attività di turno!
+    // e mo?
+
+    return new HashMap<>();
+  }
+
 
 
   /**
@@ -793,4 +818,5 @@ public class ShiftManager2 {
     }
     return gapPairs;
   }
+
 }
