@@ -5,11 +5,11 @@ $(document).ready(function() {
       height: 'auto',
       columnFormat: 'dddd',
       fixedWeekCount: false,
-//      showNonCurrentDates: false, // evita di renderizzare i giorni al di fuori del mese corrente
+      showNonCurrentDates: false, // evita di renderizzare i giorni al di fuori del mese corrente
       droppable: true,
       eventOrder: "editable, title",
-      loading: function(loading) {
-        if (loading) {
+      loading: function(isLoading, view) {
+        if (isLoading) {
           $this.addClass('reloading');
           var $spinner = $('<span class="text-primary" style="position:absolute; z-index: 10"><i class="fa fa-spin fa-spinner fa-3x"></i</span>');
           $this.before($spinner);
@@ -22,20 +22,18 @@ $(document).ready(function() {
         } else {
           $this.removeClass('reloading');
           $this.prev('span.text-primary').remove();
+          // Quando finisce di caricare gli eventi effettuo le chiamate per il caricamento degli
+          // elementi esterni (persone e riepiloghi)
+          var data = {
+            'activity.id': $('#activity').val(),
+            start: view.start.format(),
+            end: view.end.clone().subtract(1, 'days').format()
+          };
+          $('[data-render-load]').each(function() {
+            var url = $(this).data('render-load');
+            $(this).load(url, data);
+          });
         }
-      },
-      viewRender: function(view, element) {
-        var data = {
-          'activity.id': $('#activity').val(),
-          start: view.start.format(),
-          end: view.end.subtract(1, 'days').format(),
-          intervalStart: view.intervalStart.format()
-        };
-        // Caricamento asincrono delle persone in base al periodo
-        $('[data-render-load]').each(function() {
-          var url = $(this).data('render-load');
-          $(this).load(url, data);
-        });
       },
       eventSources: []
     };
@@ -51,7 +49,7 @@ $(document).ready(function() {
           data: {
             'shiftType.id': shiftType,
             start: start.format(),
-            end: end.subtract(1, 'days').format()
+            end: end.clone().subtract(1, 'days').format()
           },
           success: function(response) {
             callback(response);
@@ -91,7 +89,7 @@ $(document).ready(function() {
           element.prepend(button);
           button.click(function() {
             $.confirm({
-              title: 'Eliminare questo turno?' ,
+              title: 'Eliminare questo turno?',
               content: event.start.format() + ' - ' + event.title,
               backgroundDismiss: true,
               buttons: {
@@ -110,7 +108,7 @@ $(document).ready(function() {
                       },
                       success: function(response) {
                         new PNotify(response);
-                        $this.fullCalendar('render');
+                        $this.fullCalendar('refetchEvents');
                       }
                     });
                   }
@@ -170,7 +168,7 @@ $(document).ready(function() {
           },
           success: function(response) {
             new PNotify(response);
-            $this.fullCalendar('render');
+            $this.fullCalendar('refetchEvents');
           }
         });
       }
@@ -200,7 +198,7 @@ $(document).ready(function() {
           },
           success: function(response) {
             new PNotify(response);
-            $this.fullCalendar('render');
+            $this.fullCalendar('refetchEvents');
           }
         });
       }
