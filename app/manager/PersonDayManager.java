@@ -378,12 +378,20 @@ public class PersonDayManager {
         continue;
       }
 
-      //Assegnamento in funzione se contribuiscono o meno al buono pasto
+      //Assenza festiva
+      if (personDay.isHoliday) {
+        personDay.setOnHoliday(personDay.getOnHoliday() + justifiedMinutes);
+        continue;
+      } 
+      
+      //Assegnamento se contribuisce al buono pasto
       if (abs.absenceType.timeForMealTicket) {
         personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal() + justifiedMinutes);
-      } else {
-        personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal() + justifiedMinutes);
+        continue;
       }
+      
+      personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal() + justifiedMinutes);
+      
     }
 
     //Il tempo a lavoro calcolato
@@ -398,8 +406,12 @@ public class PersonDayManager {
     mealTicketHandlerAndDecurtedMeal(personDay, wttd, stampingTimeInOpening, 
         startLunch, endLunch, exitingNow);
     
-    //Applica l'eventuale decurtazione
-    personDay.setTimeAtWork(personDay.getTimeAtWork() - personDay.getDecurtedMeal());
+    //Applica l'eventuale decurtazione (solo se non ci sono assenze che contribuiscono al buono)
+    if (personDay.getJustifiedTimeMeal() > 0) {
+      //personDay.setTimeAtWork(personDay.getTimeAtWork() - personDay.getDecurtedMeal());
+    } else {
+      personDay.setTimeAtWork(personDay.getTimeAtWork() - personDay.getDecurtedMeal());
+    }
  
     return personDay;
   }
