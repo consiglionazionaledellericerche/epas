@@ -9,11 +9,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import models.base.BaseModel;
-import models.enumerate.ShiftSlot;
 import org.joda.time.LocalTime;
-import org.joda.time.Minutes;
 
 @Entity
 @Table(name = "shift_time_table")
@@ -81,21 +78,4 @@ public class ShiftTimeTable extends BaseModel {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "office_id")
   public Office office;
-
-  /**
-   * @param slot lo Slot del quale calcolare la durata
-   * @return la durata in minuti dello slot richiesto.
-   */
-  @Transient
-  public int getSlotDuration(ShiftSlot slot) {
-    switch (slot) {
-      case MORNING:
-        return Minutes.minutesBetween(startMorning, endMorning).getMinutes();
-      case AFTERNOON:
-        return Minutes.minutesBetween(startAfternoon, endAfternoon).getMinutes();
-      default:
-        return 0;
-    }
-  }
-
 }
