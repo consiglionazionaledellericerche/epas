@@ -1125,9 +1125,9 @@ public class PersonDayManager {
   /**
    * Restituisce la quantita' in minuti del'orario dovuto alle timbrature valide in un giono,
    * che facciano parte della finestra temporale specificata.
-   * Il metodo viene utilizzato nel calcolo del tempo a lavoro nei casi di finestre di ingresso/uscita
-   * specificate per quanto riguarda l'apertura/chiususa sede e nel caso di calcolo del tempo a lavoro
-   * all'internod di una fascia di turno.
+   * Il metodo viene utilizzato nel calcolo del tempo a lavoro nei casi di finestre di 
+   * ingresso/uscita specificate per quanto riguarda l'apertura/chiususa sede e nel caso 
+   * di calcolo del tempo a lavoro all'interno di una fascia di turno.
    *
    * @param validPairs coppie valide di timbrature per il tempo a lavoro
    * @param start  inizio finestra

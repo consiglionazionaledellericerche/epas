@@ -63,14 +63,14 @@ public class ShiftManager2 {
   private final PersonShiftDayDao personShiftDayDao;
   private final PersonDayDao personDayDao;
   private final ShiftDao shiftDao;
-  private final CompetenceUtility competenceUtility;
+  
   private final CompetenceCodeDao competenceCodeDao;
-  private final CompetenceDao competenceDao;
+  
   private final IWrapperFactory wrapperFactory;
   private final UsersRolesOfficesDao uroDao;
   private final RoleDao roleDao;
   private final PersonShiftDayInTroubleDao troubleDao;
-  private final PersonMonthRecapDao personMonthRecapDao;
+  
 
   @Inject
   public ShiftManager2(PersonDayManager personDayManager, PersonShiftDayDao personShiftDayDao,
@@ -83,14 +83,14 @@ public class ShiftManager2 {
     this.personShiftDayDao = personShiftDayDao;
     this.personDayDao = personDayDao;
     this.shiftDao = shiftDao;
-    this.competenceUtility = competenceUtility;
+    
     this.competenceCodeDao = competenceCodeDao;
-    this.competenceDao = competenceDao;
+    
     this.wrapperFactory = wrapperFactory;
     this.uroDao = uroDao;
     this.roleDao = roleDao;
     this.troubleDao = troubleDao;
-    this.personMonthRecapDao = personMonthRecapDao;
+    
   }
 
 
@@ -474,8 +474,9 @@ public class ShiftManager2 {
     PersonShiftDayInTrouble trouble = new PersonShiftDayInTrouble(shift, cause);
 
     if (!shift.troubles.contains(trouble)) {
-      trouble.save();
+      
       shift.troubles.add(trouble);
+      trouble.save();
       log.info("Nuovo personShiftDayInTrouble {} - {} - {}",
           shift.personShift.person.getFullname(), shift.date, cause);
     }
@@ -488,9 +489,12 @@ public class ShiftManager2 {
    * @param cause la causa da rimuovere dai problemi
    */
   public void fixShiftTrouble(final PersonShiftDay shift, ShiftTroubles cause) {
+    shift.refresh();
+
     shift.troubles.removeIf(trouble -> {
-      if (trouble.cause == cause) {
+      if (trouble.cause == cause) {                
         trouble.delete();
+        shift.save();
         log.info("Rimosso personShiftDayInTrouble {} - {} - {}",
             shift.personShift.person.getFullname(), shift.date, cause);
         return true;
@@ -592,14 +596,15 @@ public class ShiftManager2 {
     final Map<Person, Integer> shiftCompetences = new HashMap<>();
 
 
-    personShiftDayDao.byTypeInPeriod(monthBegin, lastDay, activity, Optional.absent()).stream()
+    personShiftDayDao.byTypeInPeriod(monthBegin, lastDay, activity, Optional.absent())
+        .stream()
         .map(shift -> shift.personShift.person).distinct().forEach(person -> {
-      int competences = calculatePersonShiftCompetencesInPeriod(activity, person, monthBegin,
-          lastDay);
-      shiftCompetences.put(person, competences);
+      
+          int competences = 
+              calculatePersonShiftCompetencesInPeriod(activity, person, monthBegin,lastDay);
+          shiftCompetences.put(person, competences);
 
-
-    });
+        });
 
     return shiftCompetences;
   }
@@ -611,7 +616,7 @@ public class ShiftManager2 {
    * @param from data iniziale
    * @param to data finale
    * @return il numero di minuti di competenza maturati in base ai turni effettuati nel periodo
-   * selezionato (di norma serve calcolarli su un intero mese al massimo).
+   *     selezionato (di norma serve calcolarli su un intero mese al massimo).
    */
   public int calculatePersonShiftCompetencesInPeriod(ShiftType activity, Person person,
       LocalDate from,
@@ -698,10 +703,15 @@ public class ShiftManager2 {
 
     int timeInShift = personDayManager.workingMinutes(pairStampings, begin, end);
 
+    List<PairStamping> validPair = pairStampings.stream().filter(pair -> Range.open(begin, end)
+          .isConnected(Range.open(pair.first.date.toLocalTime(), pair.second.date.toLocalTime())))
+        .collect(Collectors.toList());
+    
+        
     //verifico se la tolleranza oraria è presente...
     if (shift.shiftType.hourTolerance != 0) {
       //l'ingresso è successivo alla soglia di tolleranza sull'ingresso in turno
-      if (pairStampings.get(0).first.date.toLocalTime()
+      if (validPair.get(0).first.date.toLocalTime()
           .isAfter(begin.plusMinutes(shift.shiftType.hourTolerance))) {
         setShiftTrouble(shift, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
       } else {
@@ -715,7 +725,7 @@ public class ShiftManager2 {
         fixShiftTrouble(shift, ShiftTroubles.NOT_COMPLETE_SHIFT);
       }
       // il tempo in turno è compreso tra il tempo pagato per turno e la tolleranza oraria
-      if (Range.open(timeTable.paidMinutes, timeTable.paidMinutes - shift.shiftType.hourTolerance)
+      if (Range.open(timeTable.paidMinutes - shift.shiftType.hourTolerance, timeTable.paidMinutes)
           .contains(timeInShift)) {
         setShiftTrouble(shift, ShiftTroubles.NOT_COMPLETE_SHIFT);
       } else {
@@ -723,22 +733,22 @@ public class ShiftManager2 {
       }
 
     } else {
-      if (pairStampings.get(0).first.date.toLocalTime().isAfter(beginWithTolerance)) {
+      if (validPair.get(0).first.date.toLocalTime().isAfter(beginWithTolerance)) {
         setShiftTrouble(shift, ShiftTroubles.NOT_COMPLETE_SHIFT);
       } else {
         fixShiftTrouble(shift, ShiftTroubles.NOT_COMPLETE_SHIFT);
       }
     }
-    
+
     //l'uscita è precedente alla soglia di tolleranza sull'uscita dal turno
-    if (pairStampings.get(pairStampings.size() - 1).second.date.toLocalTime()
+    if (validPair.get(validPair.size() - 1).second.date.toLocalTime()
         .isBefore(endWithTolerance)) {
       setShiftTrouble(shift, ShiftTroubles.OUT_OF_STAMPING_TOLERANCE);
     } else {
       fixShiftTrouble(shift, ShiftTroubles.OUT_OF_STAMPING_TOLERANCE);
     }
-    
-    
+
+
     //Controlli sul tempo a lavoro in turno...
     if (timeInShift < timeTable.paidMinutes - shift.shiftType.hourTolerance) {
       setShiftTrouble(shift, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
