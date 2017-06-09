@@ -36,7 +36,7 @@ CREATE TABLE shift_type_month (
 	year_month TEXT NOT NULL,
 	shift_type_id BIGINT NOT NULL REFERENCES shift_type(id),
 	approved boolean,
-	CONSTRAINT only_one_in_a_month UNIQUE(year_month, shift_type_id)
+	CONSTRAINT unique_in_a_month UNIQUE(year_month, shift_type_id)
 );
 
 CREATE TABLE shift_type_month_history (

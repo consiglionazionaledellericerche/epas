@@ -44,6 +44,8 @@ public class QShiftType extends EntityPathBase<ShiftType> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
+    public final SetPath<models.ShiftTypeMonth, QShiftTypeMonth> monthsStatus = this.<models.ShiftTypeMonth, QShiftTypeMonth>createSet("monthsStatus", models.ShiftTypeMonth.class, QShiftTypeMonth.class, PathInits.DIRECT2);
+
     //inherited
     public final BooleanPath persistent = _super.persistent;
 

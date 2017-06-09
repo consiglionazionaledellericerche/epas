@@ -511,6 +511,7 @@ public class ShiftManager2 {
     shift.refresh();
     
     shift.troubles.stream().forEach(trouble -> trouble.delete());
+    shift.troubles.clear();
     shift.save();
   }
   
