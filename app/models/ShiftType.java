@@ -1,7 +1,9 @@
 package models;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -41,15 +43,15 @@ public class ShiftType extends BaseModel {
 
   @NotAudited
   @OneToMany(mappedBy = "shiftType")
-  public List<PersonShiftShiftType> personShiftShiftTypes = new ArrayList<PersonShiftShiftType>();
+  public List<PersonShiftShiftType> personShiftShiftTypes = new ArrayList<>();
 
   @NotAudited
   @OneToMany(mappedBy = "shiftType")
-  public List<PersonShiftDay> personShiftDays = new ArrayList<PersonShiftDay>();
+  public List<PersonShiftDay> personShiftDays = new ArrayList<>();
 
   @NotAudited
   @OneToMany(mappedBy = "type")
-  public List<ShiftCancelled> shiftCancelled = new ArrayList<ShiftCancelled>();
+  public List<ShiftCancelled> shiftCancelled = new ArrayList<>();
 
   @NotAudited
   @ManyToOne
@@ -61,9 +63,12 @@ public class ShiftType extends BaseModel {
   @JoinColumn(name = "shift_categories_id")
   public ShiftCategories shiftCategories;
 
+  @OneToMany(mappedBy = "shiftType")
+  public Set<ShiftTypeMonth> monthsStatus = new HashSet<>();
+
   @Override
   public String toString() {
-    return this.shiftCategories.description + " - " + this.type;
+    return shiftCategories.description + " - " + type;
   }
 
   public enum ToleranceType {
@@ -78,7 +83,7 @@ public class ShiftType extends BaseModel {
     }
 
     public String getDescription() {
-      return this.description;
+      return description;
     }
   }
 

@@ -28,8 +28,34 @@ CREATE TABLE person_shift_day_in_trouble_history (
   PRIMARY KEY (id, _revision)
 );
 
+CREATE TABLE shift_type_month (
+	id BIGSERIAL PRIMARY KEY,
+	version INTEGER,
+	created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+	year_month TEXT NOT NULL,
+	shift_type_id BIGINT NOT NULL REFERENCES shift_type(id),
+	approved boolean,
+	CONSTRAINT only_one_in_a_month UNIQUE(year_month, shift_type_id)
+);
+
+CREATE TABLE shift_type_month_history (
+  id BIGINT,
+  _revision INTEGER NOT NULL REFERENCES revinfo(rev),
+  _revision_type SMALLINT,
+  version INTEGER,
+	year_month TEXT,
+	shift_type_id BIGINT,
+	approved boolean,
+  PRIMARY KEY (id, _revision)
+);
+
+SELECT id FROM shift_type
+
 # ---!Downs
 
 DROP TABLE person_shift_days_history;
 DROP TABLE person_shift_day_in_trouble_history;
 DROP TABLE person_shift_day_in_trouble;
+DROP TABLE shift_type_month;
+DROP TABLE shift_type_month_history;
