@@ -20,6 +20,11 @@ import play.db.jpa.GenericModel;
  *
  * @author marco
  */
+@org.hibernate.annotations.TypeDefs({
+  @org.hibernate.annotations.TypeDef(name = "YearMonth",
+          defaultForType = org.joda.time.YearMonth.class,
+          typeClass = org.jadira.usertype.dateandtime.joda.PersistentYearMonthAsString.class)}
+)
 @MappedSuperclass
 public abstract class BaseModel extends GenericModel {
 
