@@ -51,5 +51,5 @@ public class ShiftEvent {
   private List<String> troubles;
   private String email;
   private String mobile;
-  private Boolean jolly; // serve unicamente per differenziare gli eventi esterni
+  private int position; // utilizzato per dare un'ordinamento agli eventi
 }

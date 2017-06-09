@@ -71,8 +71,10 @@ public class Calendar extends Controller {
 
     final List<PersonShiftShiftType> people = shiftManager2.shiftWorkers(activity, start, end);
 
-    List<ShiftEvent> eventPeople = new ArrayList<>();
     int index = 0;
+
+    final List<ShiftEvent> shiftWorkers = new ArrayList<>();
+    final List<ShiftEvent> jolly = new ArrayList<>();
 
     for (PersonShiftShiftType personShift : people) {
       // lenght-1 viene fatto per scludere l'ultimo valore che è dedicato alle assenze
@@ -90,22 +92,18 @@ public class Calendar extends Controller {
           .className("removable")
           .mobile(person.mobile)
           .email(person.email)
-          .jolly(personShift.jolly)
           .build();
 
-      eventPeople.add(event);
+      if (personShift.jolly) {
+        jolly.add(event);
+      } else {
+        shiftWorkers.add(event);
+      }
       index++;
     }
 
-    final List<ShiftEvent> shiftWorkers = eventPeople.stream()
-        .filter(shiftEvent -> !shiftEvent.getJolly()).sorted(
-            Comparator.comparing(ShiftEvent::getTitle))
-        .collect(Collectors.toList());
-
-    final List<ShiftEvent> jolly = eventPeople.stream()
-        .filter(shiftEvent -> shiftEvent.getJolly()).sorted(
-            Comparator.comparing(ShiftEvent::getTitle))
-        .collect(Collectors.toList());
+    shiftWorkers.sort(Comparator.comparing(ShiftEvent::getTitle));
+    jolly.sort(Comparator.comparing(ShiftEvent::getTitle));
 
     render(shiftWorkers, jolly);
   }
@@ -190,7 +188,7 @@ public class Calendar extends Controller {
               .personShiftDayId(shiftDay.id)
               .title(shiftDay.getSlotTime() + '\n' + person.fullName())
               .start(shiftDay.date)
-              .editable(true)
+              .position(shiftDay.shiftSlot.ordinal() + 1) // ordinati in base allo slot
               .durationEditable(false)
               .color(color.backgroundColor)
               .textColor(color.textColor)
@@ -245,7 +243,6 @@ public class Calendar extends Controller {
             .title("Assenza di " + abs.personDay.person.fullName())
             .start(abs.personDay.date)
             .editable(false)
-            .startEditable(false)
             .color(EventColor.RED.backgroundColor)
             .textColor(EventColor.RED.textColor)
             .borderColor(EventColor.RED.borderColor)
