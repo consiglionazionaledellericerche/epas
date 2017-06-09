@@ -50,7 +50,7 @@ public class PersonShiftDay extends BaseModel {
   public PersonShift personShift;
 
   //  Nuova relazione con gli errori associati ai personShiftDay
-  @OneToMany(mappedBy = "personShiftDay", cascade = CascadeType.REMOVE)
+  @OneToMany(mappedBy = "personShiftDay", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
   public Set<PersonShiftDayInTrouble> troubles = Sets.newHashSet();
 
 
