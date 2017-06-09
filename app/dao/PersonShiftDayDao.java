@@ -17,6 +17,8 @@ import models.enumerate.ShiftSlot;
 import models.query.QPersonShift;
 import models.query.QPersonShiftDay;
 import models.query.QShiftCategories;
+
+import org.bouncycastle.jce.provider.asymmetric.ec.KeyAgreement.DHwithSHA1KDF;
 import org.joda.time.LocalDate;
 
 /**
@@ -114,5 +116,11 @@ public class PersonShiftDayDao extends DaoBase {
     final QPersonShiftDay shiftDay = QPersonShiftDay.personShiftDay;
     return getQueryFactory().from(shiftDay)
         .where(shiftDay.personShift.person.eq(person).and(shiftDay.date.eq(date))).count();
+  }
+  
+  public List<PersonShiftDay> listByDateAndActivity(LocalDate date, ShiftType activity) {
+    final QPersonShiftDay shiftDay = QPersonShiftDay.personShiftDay;
+    return getQueryFactory().from(shiftDay)
+        .where(shiftDay.date.eq(date).and(shiftDay.shiftType.eq(activity))).list(shiftDay);
   }
 }
