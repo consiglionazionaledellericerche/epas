@@ -29,6 +29,7 @@
 <div class="col-md-8"
      data-calendar
      data-calendar-source="@{events()}"
+     *{#{secure.check 'Calendar.changeShift', target: currentDate}}*
      #{secure.check 'Calendar.changeShift'}
      	data-calendar-drop="@{changeShift()}"
      	data-calendar-external-drop="@{newShift()}"
