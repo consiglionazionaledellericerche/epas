@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import dao.AbsenceDao;
+import dao.PersonShiftDayDao;
 import dao.ShiftDao;
 import helpers.Web;
 import java.util.ArrayList;
@@ -48,6 +49,8 @@ public class Calendar extends Controller {
   static ObjectMapper mapper;
   @Inject
   static AbsenceDao absenceDao;
+  @Inject
+  static PersonShiftDayDao dayDao;
 
   public static void show(ShiftType activity, LocalDate date) {
 
@@ -123,6 +126,10 @@ public class Calendar extends Controller {
           .type("error").build();
     } else {
       psd.delete();
+//      List<PersonShiftDay> otherSlot = dayDao.listByDateAndActivity(psd.date, psd.shiftType);
+//      for (PersonShiftDay slot : otherSlot) {
+//        shiftManager2.checkShiftDayValid(slot.date, slot.shiftType);
+//      }
       message = PNotifyObject.builder()
           .title("Ok")
           .hide(true)
@@ -321,7 +328,7 @@ public class Calendar extends Controller {
           .type("error").build();
     } else {
       personShiftDay.save();
-
+      
       shiftManager2.checkShiftValid(personShiftDay);
 
       message = PNotifyObject.builder()
