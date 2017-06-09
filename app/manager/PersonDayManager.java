@@ -406,9 +406,9 @@ public class PersonDayManager {
     mealTicketHandlerAndDecurtedMeal(personDay, wttd, stampingTimeInOpening, 
         startLunch, endLunch, exitingNow);
     
-    //Applica l'eventuale decurtazione (solo se non ci sono assenze che contribuiscono al buono)
+    //Gestione decurtazione. Si applica solo se non ci sono assenze orarie che maturano il buono.
     if (personDay.getJustifiedTimeMeal() > 0) {
-      //personDay.setTimeAtWork(personDay.getTimeAtWork() - personDay.getDecurtedMeal());
+      personDay.setDecurtedMeal(0);
     } else {
       personDay.setTimeAtWork(personDay.getTimeAtWork() - personDay.getDecurtedMeal());
     }
