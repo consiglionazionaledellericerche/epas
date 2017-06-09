@@ -1,16 +1,23 @@
 package models;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 @Entity
 @Audited
@@ -41,15 +48,15 @@ public class ShiftType extends BaseModel {
 
   @NotAudited
   @OneToMany(mappedBy = "shiftType")
-  public List<PersonShiftShiftType> personShiftShiftTypes = new ArrayList<PersonShiftShiftType>();
+  public List<PersonShiftShiftType> personShiftShiftTypes = new ArrayList<>();
 
   @NotAudited
   @OneToMany(mappedBy = "shiftType")
-  public List<PersonShiftDay> personShiftDays = new ArrayList<PersonShiftDay>();
+  public List<PersonShiftDay> personShiftDays = new ArrayList<>();
 
   @NotAudited
   @OneToMany(mappedBy = "type")
-  public List<ShiftCancelled> shiftCancelled = new ArrayList<ShiftCancelled>();
+  public List<ShiftCancelled> shiftCancelled = new ArrayList<>();
 
   @NotAudited
   @ManyToOne
@@ -61,9 +68,12 @@ public class ShiftType extends BaseModel {
   @JoinColumn(name = "shift_categories_id")
   public ShiftCategories shiftCategories;
 
+  @OneToMany(mappedBy = "shiftType", cascade = CascadeType.REMOVE)
+  public Set<ShiftTypeMonth> monthsStatus = new HashSet<>();
+
   @Override
   public String toString() {
-    return this.shiftCategories.description + " - " + this.type;
+    return shiftCategories.description + " - " + type;
   }
 
   public enum ToleranceType {
@@ -78,7 +88,24 @@ public class ShiftType extends BaseModel {
     }
 
     public String getDescription() {
-      return this.description;
+      return description;
+    }
+  }
+
+  @Transient
+  public Optional<ShiftTypeMonth> monthStatusByDate(LocalDate date) {
+    final YearMonth requestedMonth = new YearMonth(date);
+    return monthsStatus.stream()
+        .filter(shiftTypeMonth -> shiftTypeMonth.yearMonth.equals(requestedMonth)).findFirst();
+  }
+
+  @Transient
+  public boolean approvedOn(LocalDate date) {
+    Optional<ShiftTypeMonth> monthStatus = monthStatusByDate(date);
+    if (monthStatus.isPresent()) {
+      return monthStatus.get().approved;
+    } else {
+      return false;
     }
   }
 

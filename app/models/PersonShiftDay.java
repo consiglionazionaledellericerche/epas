@@ -1,6 +1,7 @@
 package models;
 
 import com.google.common.collect.Sets;
+import java.util.Optional;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -10,6 +11,9 @@ import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.PostPersist;
+import javax.persistence.PostRemove;
+import javax.persistence.PostUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import models.base.BaseModel;
@@ -18,6 +22,7 @@ import models.enumerate.ShiftTroubles;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 @Entity
 @Audited
@@ -69,5 +74,20 @@ public class PersonShiftDay extends BaseModel {
   @Transient
   public boolean hasError(ShiftTroubles trouble) {
     return troubles.stream().anyMatch(error -> error.cause == trouble);
+  }
+
+  @PostPersist
+  @PostUpdate
+  @PostRemove
+  private void onChange() {
+    final Optional<ShiftTypeMonth> monthStatus = shiftType.monthStatusByDate(date);
+    if (monthStatus.isPresent()) {
+      monthStatus.get().save();
+    } else {
+      ShiftTypeMonth newStatus = new ShiftTypeMonth();
+      newStatus.yearMonth = new YearMonth(date);
+      newStatus.shiftType = shiftType;
+      newStatus.save();
+    }
   }
 }

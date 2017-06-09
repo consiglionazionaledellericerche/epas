@@ -43,7 +43,7 @@ public class QPersonShiftDay extends EntityPathBase<PersonShiftDay> {
 
     public final QShiftType shiftType;
 
-    public final ListPath<models.PersonShiftDayInTrouble, QPersonShiftDayInTrouble> troubles = this.<models.PersonShiftDayInTrouble, QPersonShiftDayInTrouble>createList("troubles", models.PersonShiftDayInTrouble.class, QPersonShiftDayInTrouble.class, PathInits.DIRECT2);
+    public final SetPath<models.PersonShiftDayInTrouble, QPersonShiftDayInTrouble> troubles = this.<models.PersonShiftDayInTrouble, QPersonShiftDayInTrouble>createSet("troubles", models.PersonShiftDayInTrouble.class, QPersonShiftDayInTrouble.class, PathInits.DIRECT2);
 
     public QPersonShiftDay(String variable) {
         this(PersonShiftDay.class, forVariable(variable), INITS);
