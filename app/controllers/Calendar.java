@@ -325,7 +325,7 @@ public class Calendar extends Controller {
           .type("error").build();
     } else {
       personShiftDay.save();
-      
+
       shiftManager2.checkShiftValid(personShiftDay);
 
       message = PNotifyObject.builder()
