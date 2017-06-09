@@ -490,31 +490,30 @@ public class ShiftManager2 {
    */
   public void fixShiftTrouble(final PersonShiftDay shift, ShiftTroubles cause) {
     shift.refresh();
+    java.util.Optional<PersonShiftDayInTrouble> psdit = shift.troubles.stream()
+        .filter(trouble -> trouble.cause == cause).findFirst();
 
-    shift.troubles.removeIf(trouble -> {
-      if (trouble.cause == cause) {
-        trouble.delete();
-        shift.save();
-        log.info("Rimosso personShiftDayInTrouble {} - {} - {}",
-            shift.personShift.person.getFullname(), shift.date, cause);
-        return true;
-      }
-      return false;
-    });
+    if (psdit.isPresent()) {
+      shift.troubles.remove(psdit.get());
+      psdit.get().delete();
+      log.info("Rimosso personShiftDayInTrouble {} - {} - {}",
+          shift.personShift.person.getFullname(), shift.date, cause);
+    }
   }
 
   /**
    * rimuove tutti i troubles dalla lista.
+   *
    * @param shift il personShiftDay su cui agire
    */
   public void fixAllTrouble(final PersonShiftDay shift) {
     shift.refresh();
-    
+
     shift.troubles.stream().forEach(trouble -> trouble.delete());
     shift.troubles.clear();
     shift.save();
   }
-  
+
   /**
    * Verifica che il turno in questione sia valido e persiste nei Troubles
    * gli eventuali errori (li rimuove nel caso siano risolti).
@@ -543,14 +542,14 @@ public class ShiftManager2 {
         setShiftTrouble(personShiftDay, ShiftTroubles.PERSON_IS_ABSENT);
         return;
       }
-      if (personDay.get().isHoliday 
-          || personDay.get().timeAtWork 
+      if (personDay.get().isHoliday
+          || personDay.get().timeAtWork
           < wrPersonDay.getWorkingTimeTypeDay().get().getWorkingTime() / 2) {
         fixAllTrouble(personShiftDay);
         setShiftTrouble(personShiftDay, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
         return;
       }
-      
+
       if (!LocalDate.now().isBefore(personShiftDay.date)) {
 
         switch (personShiftDay.shiftSlot) {
