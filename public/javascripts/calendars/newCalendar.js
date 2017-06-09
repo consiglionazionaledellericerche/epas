@@ -7,7 +7,7 @@ $(document).ready(function() {
       fixedWeekCount: false,
       showNonCurrentDates: false, // evita di renderizzare i giorni al di fuori del mese corrente
       droppable: true,
-      eventOrder: "editable, title",
+      eventOrder: "position",
       loading: function(isLoading, view) {
         if (isLoading) {
           $this.addClass('reloading');
@@ -151,7 +151,7 @@ $(document).ready(function() {
       }
     }
     if ($this.data('calendar-drop')) {
-      data['eventStartEditable'] = true;
+      data.editable = true;
       data['eventDrop'] = function(event, delta, revertFunc) {
         var url = $this.data('calendar-drop');
         $.ajax({
