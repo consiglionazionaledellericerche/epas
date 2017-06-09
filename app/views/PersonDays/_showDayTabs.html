@@ -16,10 +16,10 @@
   #{/else}
 	
  	
-  #{secure.check 'Stampings.forceMealTicket'}
+  #{secure.check 'PersonDays.forceMealTicket'}
 	#{if personDay && !personDay.future}
-	  <li #{if actionSelected == 'Stampings.forceMealTicket'} class="active" #{/if}>
-	    <a href="@{Stampings.forceMealTicket(personDay.id)}" data-async="#showDay">Buono Pasto</a>
+	  <li #{if actionSelected == 'PersonDays.forceMealTicket'} class="active" #{/if}>
+	    <a href="@{PersonDays.forceMealTicket(personDay.id)}" data-async="#showDay">Buono Pasto</a>
 	  </li>
 	#{/if} #{else}
 	  <li class="disabled"><a href="#">Buoni Pasto</a></li>
@@ -28,10 +28,10 @@
 	
 	
   #{if personDay && personDay.isHoliday}	
-    #{secure.check 'Stampings.toggleWorkingHoliday'}
+    #{secure.check 'PersonDays.toggleWorkingHoliday'}
       #{if !personDay.future}
-	  <li #{if actionSelected == 'Stampings.toggleWorkingHoliday'} class="active"#{/if}>
-	    <a href="@{Stampings.toggleWorkingHoliday(personDay.id)}" data-async="#showDay">Lavoro Festivo</a>
+	  <li #{if actionSelected == 'PersonDays.toggleWorkingHoliday'} class="active"#{/if}>
+	    <a href="@{PersonDays.toggleWorkingHoliday(personDay.id)}" data-async="#showDay">Lavoro Festivo</a>
 	  </li>
 	  #{/if} #{else}
 	    <li class="disabled"><a href="#">Lavoro Festivo</a></li>
