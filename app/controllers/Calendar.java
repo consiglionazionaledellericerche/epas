@@ -20,6 +20,7 @@ import models.Person;
 import models.PersonShiftDay;
 import models.PersonShiftShiftType;
 import models.ShiftType;
+import models.ShiftTypeMonth;
 import models.User;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
@@ -31,6 +32,7 @@ import org.joda.time.LocalDate;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 
 /**
  * @author arianna
@@ -41,6 +43,8 @@ import play.mvc.With;
 @Slf4j
 public class Calendar extends Controller {
 
+  @Inject
+  static SecurityRules rules;
   @Inject
   static ShiftDao shiftDao;
   @Inject
@@ -63,6 +67,8 @@ public class Calendar extends Controller {
         .collect(Collectors.toList());
 
     final ShiftType activitySelected = activity.id != null ? activity : activities.get(0);
+
+    rules.checkIfPermitted(activitySelected);
 
     render(activities, activitySelected, currentDate);
   }
@@ -325,7 +331,7 @@ public class Calendar extends Controller {
           .type("error").build();
     } else {
       personShiftDay.save();
-      
+
       shiftManager2.checkShiftValid(personShiftDay);
 
       message = PNotifyObject.builder()
@@ -338,8 +344,6 @@ public class Calendar extends Controller {
   }
 
   public static void recap(ShiftType activity, LocalDate start, LocalDate end) {
-//    final YearMonth yearMonth = new YearMonth(start);
-
     Map<Person, Integer> shiftsCalculatedCompetences = shiftManager2
         .calculateActivityShiftCompetences(activity, start, end);
 
@@ -350,6 +354,12 @@ public class Calendar extends Controller {
     // TODO: 07/06/17 se ci sono delle competenze approvate è bene riportare anche quelle
     // per visualizzare eventuali discrepanze
     render(shiftsCalculatedCompetences);
+  }
+
+  public static boolean editable(ShiftType activity, LocalDate start) {
+    // TODO Aggiungere controllo sulla validità dei parametri
+    final ShiftTypeMonth shiftTypeMonth = activity.monthStatusByDate(start).orElse(null);
+    return rules.check(activity) && rules.check(shiftTypeMonth);
   }
 
 }

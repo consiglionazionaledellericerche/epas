@@ -24,14 +24,30 @@ $(document).ready(function() {
           $this.prev('span.text-primary').remove();
           // Quando finisce di caricare gli eventi effettuo le chiamate per il caricamento degli
           // elementi esterni (persone e riepiloghi)
+          var activity = $('#activity').val();
           var data = {
-            'activity.id': $('#activity').val(),
+            'activity.id': activity,
             start: view.start.format(),
             end: view.end.clone().subtract(1, 'days').format()
           };
           $('[data-render-load]').each(function() {
             var url = $(this).data('render-load');
             $(this).load(url, data);
+          });
+          // Verifica con una chiamata ajax se la modifica degli eventi dev'essere permessa per
+          // quel mese
+          $.ajax({
+            url: $this.data('calendar-editable'),
+            type: 'GET',
+            data: {
+              'activity.id': activity,
+              start: view.start.format(),
+            },
+            success: function(response) {
+              var isEditable = response === 'true';
+              $this.fullCalendar('option', 'editable', isEditable);
+              // si potrebbero anche disabilitare le callback per sicurezza
+            }
           });
         }
       },
@@ -44,7 +60,7 @@ $(document).ready(function() {
       events: function(start, end, timezone, callback) {
         var shiftType = $('#activity').val();
         $.ajax({
-          url: $this.data('calendarSource'),
+          url: $this.data('calendar-source'),
           type: 'GET',
           data: {
             'shiftType.id': shiftType,
@@ -74,7 +90,8 @@ $(document).ready(function() {
         if (event.source && event.source.rendering === 'background') {
           element.append("<em>" + event.title + "</em>");
         }
-        if ($.inArray("removable", event.className) != -1) {
+        var isEditable = $this.fullCalendar('option', 'editable');
+        if (isEditable && $.inArray("removable", event.className) != -1) {
           var url = $this.data('calendar-event-remove');
           // Aggiunge l'icona per la rimozione dell'evento nel caso sia impostata la classe removable
           // nell'evento
@@ -151,7 +168,6 @@ $(document).ready(function() {
       }
     }
     if ($this.data('calendar-drop')) {
-      data.editable = true;
       data['eventDrop'] = function(event, delta, revertFunc) {
         var url = $this.data('calendar-drop');
         $.ajax({
