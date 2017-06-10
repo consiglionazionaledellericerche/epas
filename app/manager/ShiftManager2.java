@@ -43,6 +43,7 @@ import models.enumerate.ShiftTroubles;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
+import play.db.jpa.GenericModel;
 import play.i18n.Messages;
 
 
@@ -427,7 +428,7 @@ public class ShiftManager2 {
     //Verifica se la persona è attiva in quell'attività in quel giorno
     final boolean isActive = personShiftDay.shiftType.personShiftShiftTypes.stream().anyMatch(
         personShiftShiftType -> personShiftShiftType.personShift.equals(personShiftDay.personShift)
-        && personShiftShiftType.dateRange().contains(personShiftDay.date));
+            && personShiftShiftType.dateRange().contains(personShiftDay.date));
     if (!isActive) {
       return Optional.of(Messages.get("shift.personInactive"));
     }
@@ -470,12 +471,12 @@ public class ShiftManager2 {
    * @param cause la causa da aggiungere ai problemi
    */
   public void setShiftTrouble(final PersonShiftDay shift, ShiftTroubles cause) {
-    shift.refresh();
-    PersonShiftDayInTrouble trouble = new PersonShiftDayInTrouble(shift, cause);
+
+    final PersonShiftDayInTrouble trouble = new PersonShiftDayInTrouble(shift, cause);
 
     if (!shift.troubles.contains(trouble)) {
       trouble.save();
-      shift.save();
+      shift.troubles.add(trouble);
       log.info("Nuovo personShiftDayInTrouble {} - {} - {}",
           shift.personShift.person.getFullname(), shift.date, cause);
     }
@@ -506,9 +507,7 @@ public class ShiftManager2 {
    * @param shift il personShiftDay su cui agire
    */
   public void fixAllTrouble(final PersonShiftDay shift) {
-    shift.refresh();
-
-    shift.troubles.stream().forEach(trouble -> trouble.delete());
+    shift.troubles.forEach(GenericModel::delete);
     shift.troubles.clear();
     shift.save();
   }
@@ -563,7 +562,7 @@ public class ShiftManager2 {
             end = timeTable.endAfternoon;
             getShiftSituation(personShiftDay, begin, end, timeTable, stampings);
             break;
-            //TODO: case EVENING??
+          //TODO: case EVENING??
           default:
             break;
         }
@@ -592,6 +591,7 @@ public class ShiftManager2 {
 
   /**
    * controlla se ci sono problemi sugli altri slot presenti per quel giorno nel turno.
+   *
    * @param dayList la lista dei personShiftDays
    */
   private void checkProblemsOnOtherSlot(List<PersonShiftDay> dayList) {
@@ -611,21 +611,23 @@ public class ShiftManager2 {
     final PersonShiftDay slot = slotWithProblem;
     if (slot != null) {
       dayList.stream().filter(shift -> shift != slot)
-      .forEach(shift -> setShiftTrouble(shift, ShiftTroubles.PROBLEMS_ON_OTHER_SLOT));
+          .forEach(shift -> setShiftTrouble(shift, ShiftTroubles.PROBLEMS_ON_OTHER_SLOT));
     } else {
       dayList.stream()
-        .forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.PROBLEMS_ON_OTHER_SLOT));
+          .forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.PROBLEMS_ON_OTHER_SLOT));
     }
   }
 
   /**
    * Controlla se, verificati gli slot che DEVONO essere presenti per avere un turno completo,
    * la lista dei personShiftDay ne contiene in egual numero.
+   *
    * @param activity l'attività di turno
    * @param dayList la lista dei personShiftDays
    */
   private void checkShiftIncomplete(ShiftType activity, List<PersonShiftDay> dayList) {
     class Slot {
+
       boolean morning = false;
       boolean afternoon = false;
       boolean evening = false;
@@ -650,19 +652,19 @@ public class ShiftManager2 {
     if (((activity.shiftTimeTable.startMorning != null)
         && (!activity.shiftTimeTable.startMorning.equals("")))
         && ((activity.shiftTimeTable.endMorning != null)
-            || (!activity.shiftTimeTable.endMorning.equals("")))) {
+        || (!activity.shiftTimeTable.endMorning.equals("")))) {
       slot.morning = true;
     }
     if (((activity.shiftTimeTable.startAfternoon != null)
         && (!activity.shiftTimeTable.startAfternoon.equals("")))
         && ((activity.shiftTimeTable.endAfternoon != null)
-            && (!activity.shiftTimeTable.endAfternoon.equals("")))) {
+        && (!activity.shiftTimeTable.endAfternoon.equals("")))) {
       slot.afternoon = true;
     }
     if (((activity.shiftTimeTable.startEvening != null)
         && (!activity.shiftTimeTable.startEvening.equals("")))
         && ((activity.shiftTimeTable.endEvening != null)
-            && (!activity.shiftTimeTable.endEvening.equals("")))) {
+        && (!activity.shiftTimeTable.endEvening.equals("")))) {
       slot.evening = true;
     }
     if (slot.howManySlot() > dayList.size()) {
@@ -698,10 +700,10 @@ public class ShiftManager2 {
     personShiftDayDao.byTypeInPeriod(from, lastDay, activity, Optional.absent())
         .stream().map(shift -> shift.personShift.person).distinct().forEach(person -> {
 
-          int competences =
-              calculatePersonShiftCompetencesInPeriod(activity, person, from, lastDay);
-          shiftCompetences.put(person, competences);
-        });
+      int competences =
+          calculatePersonShiftCompetencesInPeriod(activity, person, from, lastDay);
+      shiftCompetences.put(person, competences);
+    });
 
     return shiftCompetences;
   }
@@ -713,7 +715,7 @@ public class ShiftManager2 {
    * @param from data iniziale
    * @param to data finale
    * @return il numero di minuti di competenza maturati in base ai turni effettuati nel periodo
-   *     selezionato (di norma serve calcolarli su un intero mese al massimo).
+   * selezionato (di norma serve calcolarli su un intero mese al massimo).
    */
   public int calculatePersonShiftCompetencesInPeriod(ShiftType activity, Person person,
       LocalDate from, LocalDate to) {
@@ -753,7 +755,7 @@ public class ShiftManager2 {
    * @param start data di inizio del periodo
    * @param end data di fine del periodo
    * @return La lista di tutte le persone abilitate su quell'attività nell'intervallo di tempo
-   *     specificato.
+   * specificato.
    */
   public List<PersonShiftShiftType> shiftWorkers(ShiftType activity, LocalDate start,
       LocalDate end) {
@@ -775,7 +777,7 @@ public class ShiftManager2 {
    * @param timeTable la timetable contenente i dati su cui basare i calcoli
    * @param stampings la lista di timbrature da vagliare nel periodo begin-end
    * @return l'eventuale codice di errore derivante dai controlli effettuati sulle timbrature e il
-   *     tempo in turno.
+   * tempo in turno.
    */
   private void getShiftSituation(PersonShiftDay shift, LocalTime begin,
       LocalTime end, ShiftTimeTable timeTable, List<Stamping> stampings) {
@@ -871,8 +873,8 @@ public class ShiftManager2 {
    * @param begin l'ora di inizio del turno
    * @param end l'ora di fine del turno
    * @return la lista di coppie di timbrature di uscita/entrata appartenenti all'intervallo di turno
-   *     che vanno considerate per controllare se il tempo trascorso in pausa eccede quello previsto
-   *     dalla configurazione di turno.
+   * che vanno considerate per controllare se il tempo trascorso in pausa eccede quello previsto
+   * dalla configurazione di turno.
    */
   private List<PairStamping> getBreakPairStampings(List<PairStamping> pairStampings,
       LocalTime begin, LocalTime end) {

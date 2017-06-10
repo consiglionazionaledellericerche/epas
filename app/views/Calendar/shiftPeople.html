@@ -1,7 +1,9 @@
 <ul class="list-group">
   #{list shiftWorkers, as:'person'}
     <li class="list-group-item ${person.className}" id="${person.personId}"
+      *{#{secure.check 'Calendar.changeShift', target: currentDate}}*
       data-draggable
+      *{#{/secure.check}}*
       data-event="${person.toJson()}" style="color: ${person.eventColor.textColor};
        	     background-color: ${person.eventColor.backgroundColor};
        	     border-color: ${person.eventColor.borderColor}"
