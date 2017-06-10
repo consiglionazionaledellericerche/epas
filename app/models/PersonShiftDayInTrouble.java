@@ -35,6 +35,5 @@ public class PersonShiftDayInTrouble extends BaseModel {
   public PersonShiftDayInTrouble(PersonShiftDay pd, ShiftTroubles cause) {
     personShiftDay = pd;
     this.cause = cause;
-    emailSent = false;
   }
 }

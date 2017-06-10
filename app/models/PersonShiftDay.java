@@ -11,9 +11,9 @@ import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.PostPersist;
-import javax.persistence.PostRemove;
-import javax.persistence.PostUpdate;
+import javax.persistence.PrePersist;
+import javax.persistence.PreRemove;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import models.base.BaseModel;
@@ -22,7 +22,9 @@ import models.enumerate.ShiftTroubles;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
+import play.jobs.Job;
 
 @Entity
 @Audited
@@ -50,9 +52,8 @@ public class PersonShiftDay extends BaseModel {
   public PersonShift personShift;
 
   //  Nuova relazione con gli errori associati ai personShiftDay
-  @OneToMany(mappedBy = "personShiftDay", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+  @OneToMany(mappedBy = "personShiftDay", cascade = CascadeType.REMOVE)
   public Set<PersonShiftDayInTrouble> troubles = Sets.newHashSet();
-
 
   @Transient
   public String getSlotTime() {
@@ -76,18 +77,32 @@ public class PersonShiftDay extends BaseModel {
     return troubles.stream().anyMatch(error -> error.cause == trouble);
   }
 
-  @PostPersist
-  @PostUpdate
-  @PostRemove
+  @PrePersist
+  @PreRemove
+  @PreUpdate
   private void onChange() {
-    final Optional<ShiftTypeMonth> monthStatus = shiftType.monthStatusByDate(date);
-    if (monthStatus.isPresent()) {
-      monthStatus.get().save();
-    } else {
-      ShiftTypeMonth newStatus = new ShiftTypeMonth();
-      newStatus.yearMonth = new YearMonth(date);
-      newStatus.shiftType = shiftType;
-      newStatus.save();
-    }
+    // FIXME il Job evita il loop di chiamate di questo metodo.
+    // Capire il motivo delle chiamate multiple.
+    final long shiftTypeId = shiftType.id;
+    final LocalDate day = date;
+    new Job<Void>() {
+
+      @Override
+      public void doJob() {
+        final ShiftType activity = ShiftType.findById(shiftTypeId);
+        final Optional<ShiftTypeMonth> monthStatus = activity.monthStatusByDate(day);
+        ShiftTypeMonth newStatus;
+
+        if (monthStatus.isPresent()) {
+          newStatus = monthStatus.get();
+          newStatus.updatedAt = LocalDateTime.now();
+        } else {
+          newStatus = new ShiftTypeMonth();
+          newStatus.yearMonth = new YearMonth(day);
+          newStatus.shiftType = activity;
+        }
+        newStatus.save();
+      }
+    }.now();
   }
 }
