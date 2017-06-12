@@ -945,7 +945,10 @@ public class ShiftManager2 {
   }
 
   /**
-   * Attribuisce le competenze ai dipendenti coinvolti su una cerca attività nel mese specificato.
+   * Effettua i calcoli delle competenze relative ai turni sulle attività approvate per le persone
+   * coinvolte in una certa attività e un determinato mese.
+   *
+   * Da utilizzare in seguito ad ogni approvazione/disapprovazione dei turni.
    *
    * @param shiftTypeMonth lo stato dell'attività di turno in un determinato mese.
    */
@@ -985,16 +988,27 @@ public class ShiftManager2 {
     involvedShiftPeople.forEach(person -> {
 
       // Verifico che per le person coinvolte ci siano o no eventuali residui dai mesi precedenti
-
       Competence lastShiftCompetence = competenceDao
           .getLastPersonCompetenceInYear(person, year, month, shiftCode);
 
+      log.debug("{} minuti di avanzo nella competenza di {} del {}-{}",
+          lastShiftCompetence.exceededMins, person, lastShiftCompetence.month,
+          lastShiftCompetence.year);
+
       // TODO: 12/06/17 sicuramente andranno differenziate tra T1 e T2
-      int totalShiftMinutes = totalPeopleCompetences.get(person) + lastShiftCompetence.exceededMins;
+      final Integer personCompetenceMinutes = totalPeopleCompetences.get(person);
+
+      int totalShiftMinutes;
+      if (personCompetenceMinutes != null) {
+        totalShiftMinutes = personCompetenceMinutes + lastShiftCompetence.exceededMins;
+      } else {
+        // se non c'è il valore nella Map<Person, integer> significa che non c'è nessuna attività
+        // approvata e lo setto a 0
+        totalShiftMinutes = 0;
+      }
 
       Optional<Competence> shiftCompetence =
           competenceDao.getCompetence(person, year, month, shiftCode);
-      // Sovrascrivo la competenza esistente
 
       Competence newCompetence = shiftCompetence.or(new Competence(person, shiftCode, year, month));
       newCompetence.valueApproved = totalShiftMinutes / 60;

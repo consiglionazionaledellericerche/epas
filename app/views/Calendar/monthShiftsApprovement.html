@@ -19,7 +19,7 @@
 
   #{b.buttons center:true}
     #{b.submit 'Conferma'/}
-    #{b.cancel @show(shiftTypeMonth.shiftType.id, shiftTypeMonth.yearMonth.toLocalDate(1).toString()) /}
+    #{b.cancel @show('id':shiftTypeMonth.shiftType.id, shiftTypeMonth.yearMonth.toLocalDate(1).toString()) /}
   #{/b.buttons}
 
 #{/form}
