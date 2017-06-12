@@ -44,9 +44,9 @@
   
   #{if handleHolidayWork}
     <small><em>Questo giorno festivo contiene ore lavorate <br>che possono essere approvate dall'amministratore.</em></small><br>
-    #{secure.check 'PersonDays.toggleWorkingHoliday', target: personDay.person.office}
-        <a class="" href="@{PersonDays.toggleWorkingHoliday(personDay.id)}"  data-async-modal="#defaultModal">
-          <i class="fa fa-pencil-square-o" aria-hidden="true"></i> Gestisci Lavoro Festivo
+    #{secure.check 'PersonDays.workingHoliday', target: personDay.person.office}
+        <a hide-popover-on-click href="@{PersonDays.workingHoliday(personDay.id)}"  data-async-modal="#defaultModal">
+          <i class="fa fa-pencil-square-o" aria-hidden="true"></i> <small>Gestisci Lavoro Festivo</small>
         </a><br>
     #{/secure.check}
     <br>

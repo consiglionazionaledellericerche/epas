@@ -19,7 +19,6 @@ import javax.inject.Inject;
 
 import manager.ConsistencyManager;
 
-import models.Person;
 import models.PersonDay;
 import models.Stamping;
 import models.absences.Absence;
@@ -52,68 +51,57 @@ public class PersonDays extends Controller {
   @Inject
   static SecurityRules rules;
 
-  //  /**
-  //   * La presenza festiva nell'anno.
-  //   *
-  //   * @param year anno
-  //   */
-  //  public static void holidaySituation(int year) {
-  //
-  //    List<Person> simplePersonList = personDao.list(
-  //        Optional.<String>absent(),
-  //        secureManager.officesReadAllowed(Security.getUser().get()),
-  //        false, new LocalDate(year, 1, 1),
-  //        new LocalDate(year, 12, 31), false).list();
-  //
-  //    List<IWrapperPerson> personList = FluentIterable
-  //        .from(simplePersonList)
-  //        .transform(wrapperFunctionFactory.person()).toList();
-  //    render(personList, year);
-  //  }
-  //
-  //  /**
-  //   * La presenza festiva della persona nell'anno.
-  //   *
-  //   * @param personId persona
-  //   * @param year     anno
-  //   */
-  //  public static void personHolidaySituation(Long personId, int year) {
-  //
-  //    Person per = personDao.getPersonById(personId);
-  //    Preconditions.checkNotNull(per);
-  //
-  //    rules.checkIfPermitted(per.office);
-  //
-  //    IWrapperPerson person = wrapperFactory.create(per);
-  //
-  //    render(person, year);
-  //  }
-
-
   /**
    * Abilita / disabilita l'orario festivo.
    *
    * @param personDayId giorno
    */
-  public static void toggleWorkingHoliday(Long personDayId) {
+  public static void workingHoliday(Long personDayId) {
 
     PersonDay personDay = personDayDao.getPersonDayById(personDayId);
     Preconditions.checkNotNull(personDay);
     Preconditions.checkNotNull(personDay.isPersistent());
 
     rules.checkIfPermitted(personDay.person.office);
+    
+    Integer hours = 0;
+    Integer minutes = 0;
+    if (personDay.approvedOnHoliday > 0) {
+      hours = personDay.approvedOnHoliday / 60;
+      minutes = personDay.approvedOnHoliday % 60;
+    }
 
-    //    pd.acceptedHolidayWorkingTime = !pd.acceptedHolidayWorkingTime;
-    //    if (!pd.acceptedHolidayWorkingTime) {
-    //      pd.isTicketForcedByAdmin = false;
-    //    }
-    //    pd.save();
-
+    render(personDay, hours, minutes);
+  }
+  
+  /**
+   * Action di approvazione del lavoro festivo.
+   */
+  public static void approveWorkingHoliday(Long personDayId, Integer hours, Integer minutes) {
+    
+    PersonDay personDay = personDayDao.getPersonDayById(personDayId);
+    Preconditions.checkNotNull(personDay);
+    Preconditions.checkNotNull(personDay.isPersistent());
+    Preconditions.checkNotNull(hours);
+    Preconditions.checkNotNull(minutes);
+    
+    rules.checkIfPermitted(personDay.person.office);
+    
+    Integer approvedMinutes = (hours * 60) + minutes;
+    if (approvedMinutes < 0 || approvedMinutes > personDay.onHoliday) {
+      validation.addError("hours", "Valore non consentito.");
+      validation.addError("minutes", "Valore non consentito.");
+      response.status = 400;
+      render("@workingHoliday", personDay, hours, minutes);
+    }
+     
+    personDay.setApprovedOnHoliday(approvedMinutes);
+    
     consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
-
-    Person person = personDay.person;
-
-    render(person, personDay);
+    
+    flash.success("Ore festive approvate correttamente.");
+    Stampings.personStamping(personDay.person.id, personDay.date.getYear(), 
+        personDay.date.getMonthOfYear());
   }
 
   /**
