@@ -1,0 +1,29 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'Approvazione Turni' /}
+#{title title:'Approvazione Turni per il mese di ' +  shiftTypeMonth.yearMonth /}
+
+<div class="container">
+
+  <div class="list-group">
+    #{list shiftsCalculatedCompetences.entrySet()}
+    <li class="list-group-item">
+      ${_.getKey().fullname} - ${_.getValue().printHourMinute()}
+    </li>
+    #{/list}
+  </div>
+
+#{form action:@approveShiftsInMonth(), method:'POST', class:'form form-horizontal' }
+  #{f.hidden 'shiftTypeMonthId', value: shiftTypeMonth.id /}
+  #{f.hidden 'version', value: shiftTypeMonth.version /}
+
+  #{b.buttons center:true}
+    #{b.submit 'Conferma'/}
+    #{b.cancel @show(shiftTypeMonth.shiftType.id, shiftTypeMonth.yearMonth.toLocalDate(1).toString()) /}
+  #{/b.buttons}
+
+#{/form}
+
+</div>
+
+
