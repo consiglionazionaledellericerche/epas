@@ -181,31 +181,6 @@ ul.pagination {
 	text-align: center;
 }
 
-.table-form, .table-form td {
-	border: none !important;
-}
-
-.table-form td.lab {
-	text-align: right;
-	padding-right: 30px;
-}
-
-.table-form input[type=radio] {
-	margin-right: 10px;
-}
-
-.table-form label {
-	padding-right: 3px;
-}
-
-.table-form input.input-sm {
-	max-width: 60px;
-}
-
-.table-form input.input-md {
-	max-width: 80px;
-}
-
 .table-xeditable, .table-xeditable td {
 	border: none !important;
 }
