@@ -1,5 +1,5 @@
 #{list shiftsCalculatedCompetences.entrySet()}
-  ${_.getKey().fullname} - ${_.getValue().printHourMinute()} <br>
+  ${_.getKey().fullname} - ${_.getValue().printHourMinute()}<br>
 #{/list}
 
 #{secure.check 'Calendar.approveShiftsInMonth'}

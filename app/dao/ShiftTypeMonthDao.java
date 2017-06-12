@@ -11,7 +11,6 @@ import models.Person;
 import models.ShiftType;
 import models.ShiftTypeMonth;
 import models.query.QPersonShiftDay;
-import models.query.QShiftType;
 import models.query.QShiftTypeMonth;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -65,6 +64,6 @@ public class ShiftTypeMonthDao extends DaoBase {
         .where(psd.personShift.person.in(people)
             .and(psd.date.goe(monthBegin))
             .and(psd.date.loe(monthEnd))
-            .and(stm.yearMonth.eq(month).and(stm.approved.isTrue()))).list(stm);
+            .and(stm.yearMonth.eq(month).and(stm.approved.isTrue()))).distinct().list(stm);
   }
 }
