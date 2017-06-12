@@ -596,7 +596,7 @@ public class ShiftManager2 {
     List<PersonShiftDay> dayList = shiftDao.getShiftDaysByPeriodAndType(date, date, activity);
     checkShiftIncomplete(activity, dayList);
     checkProblemsOnOtherSlot(dayList);
-    
+
   }
 
   /**
