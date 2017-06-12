@@ -55,18 +55,16 @@ public class ShiftTypeMonthDao extends DaoBase {
   public List<ShiftTypeMonth> approvedInMonthRelatedWith(YearMonth month, List<Person> people) {
 
     final QShiftTypeMonth stm = QShiftTypeMonth.shiftTypeMonth;
-    final QShiftType st = QShiftType.shiftType;
     final QPersonShiftDay psd = QPersonShiftDay.personShiftDay;
 
     final LocalDate monthBegin = month.toLocalDate(1);
     final LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
 
     return getQueryFactory().from(psd)
-        .leftJoin(psd.shiftType, st)
-        .leftJoin(stm.shiftType, st)
+        .leftJoin(psd.shiftType.monthsStatus, stm)
         .where(psd.personShift.person.in(people)
             .and(psd.date.goe(monthBegin))
             .and(psd.date.loe(monthEnd))
-            .and(stm.yearMonth.eq(month).and(stm.approved))).list(stm);
+            .and(stm.yearMonth.eq(month).and(stm.approved.isTrue()))).list(stm);
   }
 }
