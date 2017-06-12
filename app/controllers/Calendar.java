@@ -63,6 +63,7 @@ public class Calendar extends Controller {
 
   /**
    * ritorna alla view le info necessarie per creare il calendario.
+   *
    * @param activity l'attività
    * @param date la data
    */
@@ -85,6 +86,7 @@ public class Calendar extends Controller {
 
   /**
    * ritorna la lista di persone associate all'attività nel periodo passato come parametro.
+   *
    * @param activity l'attività di cui ritornare la lista di personale associato
    * @param start la data di inizio da considerare
    * @param end la data di fine da considerare
@@ -146,10 +148,8 @@ public class Calendar extends Controller {
           .type("error").build();
     } else {
       psd.delete();
-      List<PersonShiftDay> otherSlot = dayDao.listByDateAndActivity(psd.date, psd.shiftType);
-      for (PersonShiftDay slot : otherSlot) {
-        shiftManager2.checkShiftDayValid(slot.date, slot.shiftType);
-      }
+      shiftManager2.checkShiftDayValid(psd.date, psd.shiftType);
+
       message = PNotifyObject.builder()
           .title("Ok")
           .hide(true)
@@ -235,7 +235,7 @@ public class Calendar extends Controller {
    * @param start data iniziale del periodo
    * @param end data finale del periodo
    * @return Una lista di DTO che modellano le assenze di quella persona nell'intervallo specificato
-   *     da renderizzare nel fullcalendar.
+   * da renderizzare nel fullcalendar.
    */
   private static List<ShiftEvent> absenceEvents(Person person, LocalDate start, LocalDate end) {
 
@@ -287,8 +287,7 @@ public class Calendar extends Controller {
    *
    * @param personShiftDayId id del persnShiftDay da controllare
    * @param newDate giorno nel quale salvare il turno
-   * @out error 409 con messaggio di ShiftTroubles.PERSON_IS_ABSENT,
-   *     CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED
+   * @out error 409 con messaggio di ShiftTroubles.PERSON_IS_ABSENT, CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED
    */
   public static void changeShift(long personShiftDayId, LocalDate newDate) {
 
@@ -313,10 +312,8 @@ public class Calendar extends Controller {
       //salva il turno modificato
       shift.save();
       shiftManager2.checkShiftValid(shift);
-      List<PersonShiftDay> otherSlot = dayDao.listByDateAndActivity(oldDate, shift.shiftType);
-      for (PersonShiftDay slot : otherSlot) {
-        shiftManager2.checkShiftDayValid(slot.date, slot.shiftType);
-      }
+      shiftManager2.checkShiftDayValid(shift.date, shift.shiftType);
+
       message = PNotifyObject.builder()
           .title("Ok")
           .hide(true)
@@ -329,6 +326,7 @@ public class Calendar extends Controller {
 
   /**
    * inserisce un nuovo slot di turno per l'attività al turnista passati come parametro.
+   *
    * @param personId l'id della persona in turno
    * @param date la data in cui inserire il turno
    * @param shiftSlot lo slot di turno (mattina/pomeriggio)
