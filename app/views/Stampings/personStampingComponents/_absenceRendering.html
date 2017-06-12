@@ -17,7 +17,7 @@
 	        #{include './_absenceLabel.html' /}
 	      #{/if}
 	      #{else}
-		      #{secure.link @AbsenceGroups.edit(absence.id), target: absence, 'data-async-modal':'#modalAbsence'}
+		      #{secure.link @AbsenceGroups.edit(absence.id), target: absence, 'data-async-modal':'#modalAbsence', 'hide-popover-on-click':true}
 				#{include './_absenceLabel.html' /}
 			  #{/secure.link}
 		  #{/else}

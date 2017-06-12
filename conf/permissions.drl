@@ -824,7 +824,8 @@ when
        	"Stampings.edit",
      	"Stampings.save",
      	"Stampings.delete",
-     	"PersonDays.toggleWorkingHoliday",
+     	"PersonDays.workingHoliday",
+     	"PersonDays.approveWorkingHoliday",
      	"PersonDays.forceMealTicket",
 
      	/* Vecchio permesso editCompetence */
@@ -988,7 +989,8 @@ when
        	"Stampings.edit",
      	"Stampings.save",
      	"Stampings.delete",
-     	"PersonDays.toggleWorkingHoliday",
+     	"PersonDays.workingHoliday",
+     	"PersonDays.approveWorkingHoliday",
      	"PersonDays.forceMealTicket",
 
      	/* Vecchio permesso editCompetence */

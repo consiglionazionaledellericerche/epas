@@ -28,10 +28,10 @@
 	
 	
   #{if personDay && personDay.isHoliday}	
-    #{secure.check 'PersonDays.toggleWorkingHoliday'}
+    #{secure.check 'PersonDays.workingHoliday'}
       #{if !personDay.future}
-	  <li #{if actionSelected == 'PersonDays.toggleWorkingHoliday'} class="active"#{/if}>
-	    <a href="@{PersonDays.toggleWorkingHoliday(personDay.id)}" data-async="#showDay">Lavoro Festivo</a>
+	  <li #{if actionSelected == 'PersonDays.workingHoliday'} class="active"#{/if}>
+	    <a href="@{PersonDays.workingHoliday(personDay.id)}" data-async="#showDay">Lavoro Festivo</a>
 	  </li>
 	  #{/if} #{else}
 	    <li class="disabled"><a href="#">Lavoro Festivo</a></li>
