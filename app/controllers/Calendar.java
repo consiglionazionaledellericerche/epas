@@ -61,6 +61,11 @@ public class Calendar extends Controller {
   static ShiftTypeMonthDao shiftTypeMonthDao;
 
 
+  /**
+   * ritorna alla view le info necessarie per creare il calendario.
+   * @param activity l'attività
+   * @param date la data
+   */
   public static void show(ShiftType activity, LocalDate date) {
 
     User currentUser = Security.getUser().get();
@@ -78,6 +83,12 @@ public class Calendar extends Controller {
     render(activities, activitySelected, currentDate);
   }
 
+  /**
+   * ritorna la lista di persone associate all'attività nel periodo passato come parametro.
+   * @param activity l'attività di cui ritornare la lista di personale associato
+   * @param start la data di inizio da considerare
+   * @param end la data di fine da considerare
+   */
   public static void shiftPeople(ShiftType activity, LocalDate start, LocalDate end) {
 
     final List<PersonShiftShiftType> people = shiftManager2.shiftWorkers(activity, start, end);
@@ -120,7 +131,7 @@ public class Calendar extends Controller {
   }
 
   /**
-   * Effettua l'eliminazione di un turno
+   * Effettua l'eliminazione di un turno.
    *
    * @param psd Turno da eliminare
    */
@@ -135,10 +146,10 @@ public class Calendar extends Controller {
           .type("error").build();
     } else {
       psd.delete();
-//      List<PersonShiftDay> otherSlot = dayDao.listByDateAndActivity(psd.date, psd.shiftType);
-//      for (PersonShiftDay slot : otherSlot) {
-//        shiftManager2.checkShiftDayValid(slot.date, slot.shiftType);
-//      }
+      List<PersonShiftDay> otherSlot = dayDao.listByDateAndActivity(psd.date, psd.shiftType);
+      for (PersonShiftDay slot : otherSlot) {
+        shiftManager2.checkShiftDayValid(slot.date, slot.shiftType);
+      }
       message = PNotifyObject.builder()
           .title("Ok")
           .hide(true)
@@ -224,7 +235,7 @@ public class Calendar extends Controller {
    * @param start data iniziale del periodo
    * @param end data finale del periodo
    * @return Una lista di DTO che modellano le assenze di quella persona nell'intervallo specificato
-   * da renderizzare nel fullcalendar.
+   *     da renderizzare nel fullcalendar.
    */
   private static List<ShiftEvent> absenceEvents(Person person, LocalDate start, LocalDate end) {
 
@@ -274,17 +285,17 @@ public class Calendar extends Controller {
    * Controlla se il turno passato come parametro può essere salvato in un dato giorno
    * ed eventualmente lo salva, altrimenti restituisce un errore
    *
-   * @param long personShiftDayId: id del persnShiftDay da controllare
-   * @param LocalDate newDate: giorno nel quale salvare il turno
-   * @out error 409 con messaggio di ShiftTroubles.PERSON_IS_ABSENT, CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED,
-   * CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED
+   * @param personShiftDayId id del persnShiftDay da controllare
+   * @param newDate giorno nel quale salvare il turno
+   * @out error 409 con messaggio di ShiftTroubles.PERSON_IS_ABSENT,
+   *     CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED
    */
   public static void changeShift(long personShiftDayId, LocalDate newDate) {
 
     // TODO: 23/05/17 Lo shiftType dev'essere valido e l'utente deve avere i permessi per lavorarci
 
     final PersonShiftDay shift = shiftDao.getPersonShiftDayById(personShiftDayId);
-
+    LocalDate oldDate = shift.date;
     shift.date = newDate;
 
     // controlla gli eventuali errori di consitenza nel calendario
@@ -302,7 +313,10 @@ public class Calendar extends Controller {
       //salva il turno modificato
       shift.save();
       shiftManager2.checkShiftValid(shift);
-
+      List<PersonShiftDay> otherSlot = dayDao.listByDateAndActivity(oldDate, shift.shiftType);
+      for (PersonShiftDay slot : otherSlot) {
+        shiftManager2.checkShiftDayValid(slot.date, slot.shiftType);
+      }
       message = PNotifyObject.builder()
           .title("Ok")
           .hide(true)
@@ -313,6 +327,13 @@ public class Calendar extends Controller {
   }
 
 
+  /**
+   * inserisce un nuovo slot di turno per l'attività al turnista passati come parametro.
+   * @param personId l'id della persona in turno
+   * @param date la data in cui inserire il turno
+   * @param shiftSlot lo slot di turno (mattina/pomeriggio)
+   * @param shiftType l'attività su cui inserire il turnista
+   */
   public static void newShift(long personId, LocalDate date, ShiftSlot shiftSlot,
       ShiftType shiftType) {
 
@@ -348,6 +369,12 @@ public class Calendar extends Controller {
     renderJSON(message);
   }
 
+  /**
+   *
+   * @param activity
+   * @param start
+   * @param end
+   */
   public static void recap(ShiftType activity, LocalDate start, LocalDate end) {
     Map<Person, Integer> shiftsCalculatedCompetences = shiftManager2
         .calculateActivityShiftCompetences(activity, start, end);
@@ -361,13 +388,18 @@ public class Calendar extends Controller {
     render(shiftsCalculatedCompetences);
   }
 
+  /**
+   *
+   * @param activity
+   * @param start
+   * @return
+   */
   public static boolean editable(@Valid ShiftType activity, @Required LocalDate start) {
     // TODO Aggiungere validatori sullo ShiftType
 
     if (Validation.hasErrors()) {
       return false;
     }
-
     final ShiftTypeMonth shiftTypeMonth = activity.monthStatusByDate(start).orElse(null);
     return rules.check(activity) && rules.check(shiftTypeMonth);
   }
