@@ -10,6 +10,7 @@ import javax.persistence.Version;
 import models.base.MutableModel;
 import org.hibernate.envers.Audited;
 import org.joda.time.YearMonth;
+import play.data.validation.Required;
 
 /**
  * @author daniele
@@ -26,9 +27,11 @@ public class ShiftTypeMonth extends MutableModel {
   @Version
   public Integer version;
 
+  @Required
   @Column(name = "year_month", nullable = false)
   public YearMonth yearMonth;
 
+  @Required
   @ManyToOne
   @JoinColumn(name = "shift_type_id", nullable = false)
   public ShiftType shiftType;
