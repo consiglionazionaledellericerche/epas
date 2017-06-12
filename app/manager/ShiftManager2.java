@@ -476,7 +476,8 @@ public class ShiftManager2 {
 
     if (!shift.troubles.contains(trouble)) {
       trouble.save();
-      shift.troubles.add(trouble);
+      //shift.troubles.add(trouble);
+      //shift.save();
       log.info("Nuovo personShiftDayInTrouble {} - {} - {}",
           shift.personShift.person.getFullname(), shift.date, cause);
     }
@@ -585,8 +586,9 @@ public class ShiftManager2 {
    */
   public void checkShiftDayValid(LocalDate date, ShiftType activity) {
     List<PersonShiftDay> dayList = shiftDao.getShiftDaysByPeriodAndType(date, date, activity);
-    checkProblemsOnOtherSlot(dayList);
     checkShiftIncomplete(activity, dayList);
+    checkProblemsOnOtherSlot(dayList);
+    
   }
 
   /**
