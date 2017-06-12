@@ -25,6 +25,18 @@
 	  <li class="disabled"><a href="#">Buoni Pasto</a></li>
 	#{/else}
   #{/secure.check}
+  
+  #{if personDay && !personDay.isHoliday}	
+    #{secure.check 'PersonDays.workingOutOpening'}
+      #{if !personDay.future}
+	  <li #{if actionSelected == 'PersonDays.workingOutOpening'} class="active"#{/if}>
+	    <a href="@{PersonDays.workingOutOpening(personDay.id)}" data-async="#showDay">Lavoro fuori apertura</a>
+	  </li>
+	  #{/if} #{else}
+	    <li class="disabled"><a href="#">Lavoro fuori apertura</a></li>
+	  #{/else}
+    #{/secure.check}
+  #{/if}  
 	
 	
   #{if personDay && personDay.isHoliday}	

@@ -8,22 +8,22 @@
   #{alert color:'info'}
    <p>
      Per il giorno <strong>${personDay.date.format()}</strong> 
-     #{if personDay.onHoliday == 0}
-       non risultano ore festive lavorate da approvare. 
+     #{if personDay.outOpening == 0}
+       non risultano ore lavorate fuori apertura da approvare. 
      #{/if} #{else}
-       è possibile approvare fino a un massimo di <strong>${personDay.onHoliday.printHourMinute()}</strong> di lavoro festivo.
+       è possibile approvare fino a un massimo di <strong>${personDay.outOpening.printHourMinute()}</strong> di lavoro fuori apertura.
      #{/else}
    <p>
    <p>
-     #{if personDay.approvedOnHoliday > 0}
-       Lavoro festivo già approvato: <strong>${personDay.approvedOnHoliday.printHourMinute()}</strong>
+     #{if personDay.approvedOutOpening > 0}
+       Lavoro fuori apertura già approvato: <strong>${personDay.approvedOutOpening.printHourMinute()}</strong>
      #{/if}#{else}
-       Il lavoro festivo per questo giorno non è ancora stato approvato.
+       Il lavoro fuori apertura per questo giorno non è ancora stato approvato.
      #{/else}
    </p>
   #{/alert}
   
-  #{form action:@PersonDays.approveWorkingHoliday(), method:'POST', autocomplete:false, class:'form-horizontal',
+  #{form action:@PersonDays.approveWorkingOutOpening(), method:'POST', autocomplete:false, class:'form-horizontal',
      'data-async':'#page_content', 'data-async-error':'#showDay', 'data-spinner':'#defaultSpinner'}
   
     #{f.hidden 'personDayId', value:personDay.id /}

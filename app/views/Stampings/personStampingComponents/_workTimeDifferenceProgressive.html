@@ -1,8 +1,9 @@
 %{
   personDay = dayRecap.personDay;
   showWorkTime = personDay.past || personDay.today;
-  showWithPopover = personDay.timeAtWork > 0 || personDay.onHoliday > 0;
+  showWithPopover = personDay.timeAtWork > 0 || personDay.onHoliday > 0 || personDay.outOpening > 0;
   handleHolidayWork = personDay.onHoliday;
+  handleOutOpeningWork = personDay.outOpening;
 }%
 
 
@@ -17,7 +18,7 @@
         <em class="text-primary">${personDay.timeAtWork.printHourMinute()}</em>
       #{/if} 
       #{else}
-        #{if handleHolidayWork}
+        #{if handleHolidayWork || handleOutOpeningWork}
 	      <span class="text-warning">${personDay.timeAtWork.printHourMinute()}</span>
 	    #{/if}
 	    #{else}
@@ -46,13 +47,24 @@
     <small><em>Questo giorno festivo contiene ore lavorate <br>che possono essere approvate dall'amministratore.</em></small><br>
     #{secure.check 'PersonDays.workingHoliday', target: personDay.person.office}
         <a hide-popover-on-click href="@{PersonDays.workingHoliday(personDay.id)}"  data-async-modal="#defaultModal">
-          <i class="fa fa-pencil-square-o" aria-hidden="true"></i> <small>Gestisci Lavoro Festivo</small>
+          <i class="fa fa-pencil-square-o" aria-hidden="true"></i> <small>Gestisci lavoro festivo</small>
         </a><br>
     #{/secure.check}
     <br>
   #{/if} 
   
-  Tempo a lavoro totale: <strong>${dayRecap.personDay.timeAtWork.printHourMinute()}</strong>
+  #{if handleOutOpeningWork}
+    <small><em>Questo giorno contiene ore lavorate fuori fascia di apertura/chiusura sede <br>che possono essere approvate dall'amministratore.</em></small><br>
+    #{secure.check 'PersonDays.workingOutOpening', target: personDay.person.office}
+        <a hide-popover-on-click href="@{PersonDays.workingOutOpening(personDay.id)}"  
+           data-async-modal="#defaultModal">
+          <i class="fa fa-pencil-square-o" aria-hidden="true"></i> <small>Gestisci lavoro fuori apertura</small>
+        </a><br>
+    #{/secure.check}
+    <br>
+  #{/if} 
+  
+  Tempo a lavoro totale calcolato: <strong>${dayRecap.personDay.timeAtWork.printHourMinute()}</strong>
   
   #{if dayRecap.fixedWorkingTimeCode}
     <br><em>${dayRecap.fixedWorkingTimeCode.description}</em>
@@ -73,13 +85,21 @@
   #{if dayRecap.personDay?.decurtedMeal > 0}
     <br>Sottratto per pausa pranzo assente o troppo breve: <strong>${dayRecap.personDay.decurtedMeal.printHourMinute()}</strong>
   #{/if}
-    #{if dayRecap.personDay.decurtedWork > 0}
-    <br>Sottratto perchè al di fuori della finestra orario: <strong>${dayRecap.personDay.decurtedWork.printHourMinute()}</strong>
-  #{/if}
   
   #{if dayRecap.personDay.onHoliday > 0}
     <br>Tempo a lavoro festivo: <strong>${dayRecap.personDay.onHoliday.printHourMinute()}</strong>
     <br>Tempo a lavoro festivo approvato: <strong>${dayRecap.personDay.approvedOnHoliday.printHourMinute()}</strong>
+    #{if dayRecap.personDay.decurtedWorkOnHoliday > 0}
+      <br>Tempo a lavoro festivo non approvato: <strong class="text-danger">${dayRecap.personDay.decurtedWorkOnHoliday.printHourMinute()}</strong>
+    #{/if}
+  #{/if}
+  
+  #{if dayRecap.personDay.outOpening > 0}
+    <br>Tempo a lavoro fuori apertura: <strong>${dayRecap.personDay.outOpening.printHourMinute()}</strong>
+    <br>Tempo a lavoro fuori apertura approvato: <strong>${dayRecap.personDay.approvedOutOpening.printHourMinute()}</strong>
+    #{if dayRecap.personDay.decurtedWork > 0}
+      <br>Tempo a lavoro fuori apertura non approvato: <strong class="text-danger">${dayRecap.personDay.decurtedWork.printHourMinute()}</strong>
+    #{/if}
   #{/if}
   
 </div>
