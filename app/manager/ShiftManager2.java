@@ -894,8 +894,8 @@ public class ShiftManager2 {
    * @param begin l'ora di inizio del turno
    * @param end l'ora di fine del turno
    * @return la lista di coppie di timbrature di uscita/entrata appartenenti all'intervallo di turno
-   * che vanno considerate per controllare se il tempo trascorso in pausa eccede quello previsto
-   * dalla configurazione di turno.
+   *     che vanno considerate per controllare se il tempo trascorso in pausa eccede quello previsto
+   *     dalla configurazione di turno.
    */
   private List<PairStamping> getBreakPairStampings(List<PairStamping> pairStampings,
       LocalTime begin, LocalTime end) {

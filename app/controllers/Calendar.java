@@ -235,7 +235,7 @@ public class Calendar extends Controller {
    * @param start data iniziale del periodo
    * @param end data finale del periodo
    * @return Una lista di DTO che modellano le assenze di quella persona nell'intervallo specificato
-   * da renderizzare nel fullcalendar.
+   *     da renderizzare nel fullcalendar.
    */
   private static List<ShiftEvent> absenceEvents(Person person, LocalDate start, LocalDate end) {
 
@@ -287,7 +287,8 @@ public class Calendar extends Controller {
    *
    * @param personShiftDayId id del persnShiftDay da controllare
    * @param newDate giorno nel quale salvare il turno
-   * @out error 409 con messaggio di ShiftTroubles.PERSON_IS_ABSENT, CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED
+   *     error 409 con messaggio di ShiftTroubles.PERSON_IS_ABSENT, 
+   *     CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED
    */
   public static void changeShift(long personShiftDayId, LocalDate newDate) {
 
