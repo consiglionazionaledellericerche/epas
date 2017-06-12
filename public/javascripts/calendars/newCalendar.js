@@ -26,7 +26,7 @@ $(document).ready(function() {
           // elementi esterni (persone e riepiloghi)
           var activity = $('#activity').val();
           var data = {
-            'activity.id': activity,
+            activityId: activity,
             start: view.start.format(),
             end: view.end.clone().subtract(1, 'days').format()
           };
@@ -40,8 +40,8 @@ $(document).ready(function() {
             url: $this.data('calendar-editable'),
             type: 'GET',
             data: {
-              'activity.id': activity,
-              start: view.start.format(),
+              activityId: activity,
+              start: view.start.format()
             },
             success: function(response) {
               var isEditable = response === 'true';
@@ -58,12 +58,12 @@ $(document).ready(function() {
     }
     data['eventSources'].push({
       events: function(start, end, timezone, callback) {
-        var shiftType = $('#activity').val();
+        var activity = $('#activity').val();
         $.ajax({
           url: $this.data('calendar-source'),
           type: 'GET',
           data: {
-            'shiftType.id': shiftType,
+            activityId: activity,
             start: start.format(),
             end: end.clone().subtract(1, 'days').format()
           },
@@ -196,7 +196,7 @@ $(document).ready(function() {
         // Recupero il valore del radiobutton relativo allo slot per passarlo al controller
         var shiftSlot = $('input[name="shiftSlot"]:checked').val();
         // Recupero il valore dell'attuale ShiftType selezionato dalla select
-        var shiftType = $('#activity').val();
+        var activity = $('#activity').val();
         $.ajax({
           type: 'POST',
           url: url,
@@ -204,7 +204,7 @@ $(document).ready(function() {
             personId: event.personId,
             date: event.start.format(),
             shiftSlot: shiftSlot,
-            'shiftType.id': shiftType
+            activityId: activity
           },
           error: function(response) {
             // Passare un JSON serializzato a partire da un PNotifyObject definito lato Java

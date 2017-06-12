@@ -31,7 +31,6 @@ import models.enumerate.ShiftSlot;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import play.data.validation.Required;
-import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Controller;
@@ -67,17 +66,22 @@ public class Calendar extends Controller {
    * @param activity l'attività
    * @param date la data
    */
-  public static void show(ShiftType activity, LocalDate date) {
+  public static void show(long activityId, LocalDate date) {
 
     User currentUser = Security.getUser().get();
     final LocalDate currentDate = Optional.fromNullable(date).or(LocalDate.now());
+
+    Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
+
+    // TODO: 12/06/17 da spostare in un metodo da implementare sul templateutility che restituisca
+    // le attività di turno gestibili in base al ruolo dell'utente loggato
 
     final List<ShiftType> activities = currentUser.person.shiftCategories.stream()
         .flatMap(shiftCategories -> shiftCategories.shiftTypes.stream())
         .sorted(Comparator.comparing(o -> o.type))
         .collect(Collectors.toList());
 
-    final ShiftType activitySelected = activity.id != null ? activity : activities.get(0);
+    final ShiftType activitySelected = activity.isPresent() ? activity.get() : activities.get(0);
 
     rules.checkIfPermitted(activitySelected);
 
@@ -91,45 +95,49 @@ public class Calendar extends Controller {
    * @param start la data di inizio da considerare
    * @param end la data di fine da considerare
    */
-  public static void shiftPeople(ShiftType activity, LocalDate start, LocalDate end) {
+  public static void shiftPeople(long activityId, LocalDate start, LocalDate end) {
 
-    final List<PersonShiftShiftType> people = shiftManager2.shiftWorkers(activity, start, end);
+    Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
+    if (activity.isPresent()) {
+      final List<PersonShiftShiftType> people = shiftManager2
+          .shiftWorkers(activity.get(), start, end);
 
-    int index = 0;
+      int index = 0;
 
-    final List<ShiftEvent> shiftWorkers = new ArrayList<>();
-    final List<ShiftEvent> jolly = new ArrayList<>();
+      final List<ShiftEvent> shiftWorkers = new ArrayList<>();
+      final List<ShiftEvent> jolly = new ArrayList<>();
 
-    for (PersonShiftShiftType personShift : people) {
-      // lenght-1 viene fatto per scludere l'ultimo valore che è dedicato alle assenze
-      final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
-      final Person person = personShift.personShift.person;
+      for (PersonShiftShiftType personShift : people) {
+        // lenght-1 viene fatto per scludere l'ultimo valore che è dedicato alle assenze
+        final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
+        final Person person = personShift.personShift.person;
 
-      final ShiftEvent event = ShiftEvent.builder()
-          .allDay(true)
-          .title(person.fullName())
-          .personId(person.id)
-          .eventColor(eventColor)
-          .color(eventColor.backgroundColor)
-          .textColor(eventColor.textColor)
-          .borderColor(eventColor.borderColor)
-          .className("removable")
-          .mobile(person.mobile)
-          .email(person.email)
-          .build();
+        final ShiftEvent event = ShiftEvent.builder()
+            .allDay(true)
+            .title(person.fullName())
+            .personId(person.id)
+            .eventColor(eventColor)
+            .color(eventColor.backgroundColor)
+            .textColor(eventColor.textColor)
+            .borderColor(eventColor.borderColor)
+            .className("removable")
+            .mobile(person.mobile)
+            .email(person.email)
+            .build();
 
-      if (personShift.jolly) {
-        jolly.add(event);
-      } else {
-        shiftWorkers.add(event);
+        if (personShift.jolly) {
+          jolly.add(event);
+        } else {
+          shiftWorkers.add(event);
+        }
+        index++;
       }
-      index++;
+
+      shiftWorkers.sort(Comparator.comparing(ShiftEvent::getTitle));
+      jolly.sort(Comparator.comparing(ShiftEvent::getTitle));
+
+      render(shiftWorkers, jolly);
     }
-
-    shiftWorkers.sort(Comparator.comparing(ShiftEvent::getTitle));
-    jolly.sort(Comparator.comparing(ShiftEvent::getTitle));
-
-    render(shiftWorkers, jolly);
   }
 
   /**
@@ -164,24 +172,26 @@ public class Calendar extends Controller {
   /*
    * Carica i turni dal database per essere visualizzati nel calendario
    */
-  public static void events(ShiftType shiftType, LocalDate start, LocalDate end)
+  public static void events(long activityId, LocalDate start, LocalDate end)
       throws JsonProcessingException {
 
     // TODO: 23/05/17 Lo shiftType dev'essere valido e l'utente deve avere i permessi per lavorarci
 
     List<ShiftEvent> events = new ArrayList<>();
+    Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
+    if (activity.isPresent()) {
+      List<PersonShiftShiftType> people = shiftManager2.shiftWorkers(activity.get(), start, end);
 
-    List<PersonShiftShiftType> people = shiftManager2.shiftWorkers(shiftType, start, end);
+      int index = 0;
 
-    int index = 0;
-
-    // prende i turni associati alle persone attive in quel turno
-    for (PersonShiftShiftType personShift : people) {
-      final Person person = personShift.personShift.person;
-      final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
-      events.addAll(shiftEvents(shiftType, person, start, end, eventColor));
-      events.addAll(absenceEvents(person, start, end));
-      index++;
+      // prende i turni associati alle persone attive in quel turno
+      for (PersonShiftShiftType personShift : people) {
+        final Person person = personShift.personShift.person;
+        final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
+        events.addAll(shiftEvents(activity.get(), person, start, end, eventColor));
+        events.addAll(absenceEvents(person, start, end));
+        index++;
+      }
     }
 
     // Usato il jackson per facilitare la serializzazione dei LocalDate
@@ -333,14 +343,21 @@ public class Calendar extends Controller {
    * @param shiftType l'attività su cui inserire il turnista
    */
   public static void newShift(long personId, LocalDate date, ShiftSlot shiftSlot,
-      ShiftType shiftType) {
+      long activityId) {
+
+    Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
+
+    if (!activity.isPresent()) {
+      // TODO: 12/06/17
+    }
 
     // TODO: 06/06/17 controlli sui permessi 
     PersonShiftDay personShiftDay = new PersonShiftDay();
     personShiftDay.date = date;
-    personShiftDay.shiftType = shiftType;
+    personShiftDay.shiftType = activity.get();
     personShiftDay.shiftSlot = shiftSlot;
-    personShiftDay.personShift = shiftDao.getPersonShiftByPersonAndType(personId, shiftType.type);
+    personShiftDay.personShift = shiftDao
+        .getPersonShiftByPersonAndType(personId, personShiftDay.shiftType.type);
     // TODO: 06/06/17 verificare che il personshift sia valido prima di assegnarlo e proseguire 
     Optional<String> error = shiftManager2.shiftPermitted(personShiftDay);
     final PNotifyObject message;
@@ -373,9 +390,18 @@ public class Calendar extends Controller {
    * @param start
    * @param end
    */
-  public static void recap(ShiftType activity, LocalDate start, LocalDate end) {
+  public static void recap(long activityId, LocalDate start, LocalDate end) {
+    Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
+
+    if (!activity.isPresent()) {
+      // TODO: 12/06/17
+    }
+
     Map<Person, Integer> shiftsCalculatedCompetences = shiftManager2
-        .calculateActivityShiftCompetences(activity, start, end);
+        .calculateActivityShiftCompetences(activity.get(), start, end);
+
+    final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao
+        .byShiftTypeAndDate(activity.get(), start).orNull();
 
     // FIXME trovare un modo per poter recuperare le competenze approvate su questa attività
 //    Map<Person, Integer> approvedShiftCompetences = shiftManager2
@@ -383,7 +409,7 @@ public class Calendar extends Controller {
 
     // TODO: 07/06/17 se ci sono delle competenze approvate è bene riportare anche quelle
     // per visualizzare eventuali discrepanze
-    render(shiftsCalculatedCompetences);
+    render(shiftsCalculatedCompetences, shiftTypeMonth, activityId, start);
   }
 
   /**
@@ -392,24 +418,35 @@ public class Calendar extends Controller {
    * @param start
    * @return
    */
-  public static boolean editable(@Valid ShiftType activity, @Required LocalDate start) {
+  public static boolean editable(long activityId, @Required LocalDate start) {
     // TODO Aggiungere validatori sullo ShiftType
+
+    Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
+
+    if (!activity.isPresent()) {
+      // TODO: 12/06/17
+    }
 
     if (Validation.hasErrors()) {
       return false;
     }
-    final ShiftTypeMonth shiftTypeMonth = activity.monthStatusByDate(start).orElse(null);
-    return rules.check(activity) && rules.check(shiftTypeMonth);
+
+    final ShiftTypeMonth shiftTypeMonth = activity.get().monthStatusByDate(start).orElse(null);
+    return rules.check(activity.get()) && rules.check(shiftTypeMonth);
   }
 
-  public static void monthShiftsApprovement(@Valid ShiftType activity, @Required LocalDate date) {
+  public static void monthShiftsApprovement(long activityId, @Required LocalDate date) {
     if (Validation.hasErrors()) {
       // TODO: 12/06/17
     }
+
+    ShiftType shiftType = shiftDao.getShiftTypeById(activityId).orNull();
+    notFoundIfNull(shiftType);
+
     final YearMonth monthToApprove = new YearMonth(date);
 
     final Optional<ShiftTypeMonth> monthStatus = shiftTypeMonthDao
-        .byShiftTypeAndDate(activity, date);
+        .byShiftTypeAndDate(shiftType, date);
 
     final ShiftTypeMonth shiftTypeMonth;
     // Nel caso non ci sia ancora uno stato del mese persistito ne creo uno nuovo che mi serve in
@@ -418,7 +455,7 @@ public class Calendar extends Controller {
       shiftTypeMonth = monthStatus.get();
     } else {
       shiftTypeMonth = new ShiftTypeMonth();
-      shiftTypeMonth.shiftType = activity;
+      shiftTypeMonth.shiftType = shiftType;
       shiftTypeMonth.yearMonth = monthToApprove;
       shiftTypeMonth.save();
     }
@@ -427,16 +464,19 @@ public class Calendar extends Controller {
     final LocalDate monthEnd = monthbegin.dayOfMonth().withMaximumValue();
 
     final Map<Person, Integer> shiftsCalculatedCompetences = shiftManager2
-        .calculateActivityShiftCompetences(activity, monthbegin, monthEnd);
+        .calculateActivityShiftCompetences(shiftType, monthbegin, monthEnd);
 
     render(shiftTypeMonth, shiftsCalculatedCompetences);
   }
 
-  public static void approveShiftsInMonth(long version, @Valid ShiftTypeMonth shiftTypeMonth) {
+  public static void approveShiftsInMonth(long version, long shiftTypeMonthId) {
 
-    if (Validation.hasErrors()) {
+    Optional<ShiftTypeMonth> optionalShiftTypeMonth = shiftTypeMonthDao.byId(shiftTypeMonthId);
+
+    if (!optionalShiftTypeMonth.isPresent()) {
       // TODO: 12/06/17
     }
+    final ShiftTypeMonth shiftTypeMonth = optionalShiftTypeMonth.get();
 
     // Verifico che tra la richiesta del riepilogo e l'approvazione definitiva dei turni non ci siano
     // state modifiche in modo da evitare che il supervisore validi una situazione diversa da quella
@@ -445,7 +485,7 @@ public class Calendar extends Controller {
       flash.error("I turni sono stati cambiati rispetto al riepilogo mostrato. "
           + "Il nuovo riepilogo è stato ricalcolato");
       flash.keep();
-      monthShiftsApprovement(shiftTypeMonth.shiftType, shiftTypeMonth.yearMonth.toLocalDate(1));
+      monthShiftsApprovement(shiftTypeMonth.shiftType.id, shiftTypeMonth.yearMonth.toLocalDate(1));
     }
 
     shiftManager2.assignShiftCompetences(shiftTypeMonth);
@@ -454,6 +494,11 @@ public class Calendar extends Controller {
     shiftTypeMonth.approved = true;
     shiftTypeMonth.save();
 
+    show(shiftTypeMonth.shiftType.id, shiftTypeMonth.yearMonth.toLocalDate(1));
+  }
+
+  public static void removeApprovation(long shiftTypeMonthId) {
+    // TODO: 12/06/17
   }
 
 }
