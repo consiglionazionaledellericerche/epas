@@ -17,7 +17,7 @@ import org.hibernate.envers.Audited;
 @Audited
 @Table(name = "person_shift_day_in_trouble", uniqueConstraints = @UniqueConstraint(columnNames = {
     "person_shift_day_id", "cause"}))
-@EqualsAndHashCode(of = {"personShiftDay", "cause"})
+@EqualsAndHashCode(callSuper = false, of = {"personShiftDay", "cause"})
 public class PersonShiftDayInTrouble extends BaseModel {
 
   private static final long serialVersionUID = -5497453685568298051L;
