@@ -201,6 +201,15 @@ public class PersonDay extends BaseModel {
 
     return this.outOpening - this.approvedOutOpening;
   }
+  
+  /**
+   * Orario decurtato perchè effettuato in un giorno di festa.
+   */
+  @Transient
+  public int getDecurtedWorkOnHoliday() {
+
+    return this.onHoliday - this.approvedOnHoliday;
+  }
 
   /**
    * Il tempo assegnabile è quello a lavoro meno i giustificativi.

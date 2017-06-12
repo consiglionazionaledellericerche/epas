@@ -103,6 +103,59 @@ public class PersonDays extends Controller {
     Stampings.personStamping(personDay.person.id, personDay.date.getYear(), 
         personDay.date.getMonthOfYear());
   }
+  
+  /**
+   * Abilita / disabilita l'orario lavorato fuori fascia apertura / chiusura.
+   *
+   * @param personDayId giorno
+   */
+  public static void workingOutOpening(Long personDayId) {
+
+    PersonDay personDay = personDayDao.getPersonDayById(personDayId);
+    Preconditions.checkNotNull(personDay);
+    Preconditions.checkNotNull(personDay.isPersistent());
+
+    rules.checkIfPermitted(personDay.person.office);
+    
+    Integer hours = 0;
+    Integer minutes = 0;
+    if (personDay.approvedOutOpening > 0) {
+      hours = personDay.approvedOutOpening / 60;
+      minutes = personDay.approvedOutOpening % 60;
+    }
+
+    render(personDay, hours, minutes);
+  }
+  
+  /**
+   * Action di approvazione del lavoro fuori fascia.
+   */
+  public static void approveWorkingOutOpening(Long personDayId, Integer hours, Integer minutes) {
+    
+    PersonDay personDay = personDayDao.getPersonDayById(personDayId);
+    Preconditions.checkNotNull(personDay);
+    Preconditions.checkNotNull(personDay.isPersistent());
+    Preconditions.checkNotNull(hours);
+    Preconditions.checkNotNull(minutes);
+    
+    rules.checkIfPermitted(personDay.person.office);
+    
+    Integer approvedMinutes = (hours * 60) + minutes;
+    if (approvedMinutes < 0 || approvedMinutes > personDay.outOpening) {
+      validation.addError("hours", "Valore non consentito.");
+      validation.addError("minutes", "Valore non consentito.");
+      response.status = 400;
+      render("@workingOutOpening", personDay, hours, minutes);
+    }
+     
+    personDay.setApprovedOutOpening(approvedMinutes);
+    
+    consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
+    
+    flash.success("Ore approvate correttamente.");
+    Stampings.personStamping(personDay.person.id, personDay.date.getYear(), 
+        personDay.date.getMonthOfYear());
+  }
 
   /**
    * Forza la decisione sul buono pasto di un giorno specifico per un dipendente.
