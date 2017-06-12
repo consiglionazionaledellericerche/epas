@@ -43,6 +43,7 @@ import models.enumerate.ShiftTroubles;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
+import play.db.jpa.GenericModel;
 import play.i18n.Messages;
 
 
@@ -470,12 +471,12 @@ public class ShiftManager2 {
    * @param cause la causa da aggiungere ai problemi
    */
   public void setShiftTrouble(final PersonShiftDay shift, ShiftTroubles cause) {
-    shift.refresh();
-    PersonShiftDayInTrouble trouble = new PersonShiftDayInTrouble(shift, cause);
+
+    final PersonShiftDayInTrouble trouble = new PersonShiftDayInTrouble(shift, cause);
 
     if (!shift.troubles.contains(trouble)) {
       trouble.save();
-      shift.save();
+      shift.troubles.add(trouble);
       log.info("Nuovo personShiftDayInTrouble {} - {} - {}",
           shift.personShift.person.getFullname(), shift.date, cause);
     }
@@ -506,9 +507,7 @@ public class ShiftManager2 {
    * @param shift il personShiftDay su cui agire
    */
   public void fixAllTrouble(final PersonShiftDay shift) {
-    shift.refresh();
-
-    shift.troubles.stream().forEach(trouble -> trouble.delete());
+    shift.troubles.forEach(GenericModel::delete);
     shift.troubles.clear();
     shift.save();
   }

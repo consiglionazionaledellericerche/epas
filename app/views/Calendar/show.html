@@ -29,13 +29,11 @@
 <div class="col-md-8"
      data-calendar
      data-calendar-source="@{events()}"
-     *{#{secure.check 'Calendar.changeShift', target: currentDate}}*
-     #{secure.check 'Calendar.changeShift'}
-     	data-calendar-drop="@{changeShift()}"
-     	data-calendar-external-drop="@{newShift()}"
-     	data-calendar-event-remove="@{deleteShift()}"
-      data-calendar-date="${currentDate}"
-     #{/secure.check}>
+     data-calendar-drop="@{changeShift()}"
+     data-calendar-external-drop="@{newShift()}"
+     data-calendar-event-remove="@{deleteShift()}"
+     data-calendar-editable="@{editable()}"
+     data-calendar-date="${currentDate}">
 </div>
 
 <div class="col-md-2 well well-lg" data-render-load="@{recap()}"></div>
