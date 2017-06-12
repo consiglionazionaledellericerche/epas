@@ -2,6 +2,7 @@ package manager;
 
 
 import com.google.common.base.Optional;
+import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import dao.CompetenceCodeDao;
@@ -12,6 +13,7 @@ import dao.PersonShiftDayDao;
 import dao.PersonShiftDayInTroubleDao;
 import dao.RoleDao;
 import dao.ShiftDao;
+import dao.ShiftTypeMonthDao;
 import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.services.PairStamping;
+import models.Competence;
 import models.CompetenceCode;
 import models.Person;
 import models.PersonCompetenceCodes;
@@ -37,6 +40,7 @@ import models.Role;
 import models.ShiftCategories;
 import models.ShiftTimeTable;
 import models.ShiftType;
+import models.ShiftTypeMonth;
 import models.Stamping;
 import models.UsersRolesOffices;
 import models.enumerate.ShiftTroubles;
@@ -66,11 +70,13 @@ public class ShiftManager2 {
   private final ShiftDao shiftDao;
 
   private final CompetenceCodeDao competenceCodeDao;
+  private final CompetenceDao competenceDao;
 
   private final IWrapperFactory wrapperFactory;
   private final UsersRolesOfficesDao uroDao;
   private final RoleDao roleDao;
   private final PersonShiftDayInTroubleDao troubleDao;
+  private final ShiftTypeMonthDao shiftTypeMonthDao;
 
 
   @Inject
@@ -79,19 +85,21 @@ public class ShiftManager2 {
       CompetenceUtility competenceUtility, CompetenceCodeDao competenceCodeDao,
       CompetenceDao competenceDao, IWrapperFactory wrapperFactory, UsersRolesOfficesDao uroDao,
       RoleDao roleDao, PersonShiftDayInTroubleDao troubleDao,
-      PersonMonthRecapDao personMonthRecapDao) {
+      PersonMonthRecapDao personMonthRecapDao, ShiftTypeMonthDao shiftTypeMonthDao) {
+
     this.personDayManager = personDayManager;
     this.personShiftDayDao = personShiftDayDao;
     this.personDayDao = personDayDao;
     this.shiftDao = shiftDao;
 
     this.competenceCodeDao = competenceCodeDao;
-
+    this.competenceDao = competenceDao;
     this.wrapperFactory = wrapperFactory;
     this.uroDao = uroDao;
     this.roleDao = roleDao;
     this.troubleDao = troubleDao;
 
+    this.shiftTypeMonthDao = shiftTypeMonthDao;
   }
 
 
@@ -697,8 +705,7 @@ public class ShiftManager2 {
 
     final Map<Person, Integer> shiftCompetences = new HashMap<>();
 
-    personShiftDayDao.byTypeInPeriod(from, lastDay, activity, Optional.absent())
-        .stream().map(shift -> shift.personShift.person).distinct().forEach(person -> {
+    involvedShiftWorkers(activity, from, lastDay).forEach(person -> {
 
       int competences =
           calculatePersonShiftCompetencesInPeriod(activity, person, from, lastDay);
@@ -706,6 +713,18 @@ public class ShiftManager2 {
     });
 
     return shiftCompetences;
+  }
+
+  /**
+   * @param activity attività di turno
+   * @param from data di inizio
+   * @param to data di fine
+   * @return Una lista di persone che sono effettivamente coinvolte nei turni in un determinato
+   * periodo (Dipendenti con i turni schedulati in quel periodo).
+   */
+  private List<Person> involvedShiftWorkers(ShiftType activity, LocalDate from, LocalDate to) {
+    return personShiftDayDao.byTypeInPeriod(from, to, activity, Optional.absent())
+        .stream().map(shift -> shift.personShift.person).distinct().collect(Collectors.toList());
   }
 
 
@@ -923,4 +942,65 @@ public class ShiftManager2 {
     return gapPairs;
   }
 
+  /**
+   * Attribuisce le competenze ai dipendenti coinvolti su una cerca attività nel mese specificato.
+   *
+   * @param shiftTypeMonth lo stato dell'attività di turno in un determinato mese.
+   */
+  public void assignShiftCompetences(ShiftTypeMonth shiftTypeMonth) {
+
+    Verify.verifyNotNull(shiftTypeMonth);
+
+    final LocalDate monthBegin = shiftTypeMonth.yearMonth.toLocalDate(1);
+    final LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+    final int year = shiftTypeMonth.yearMonth.getYear();
+    final int month = shiftTypeMonth.yearMonth.getMonthOfYear();
+
+    final List<Person> involvedShiftPeople = involvedShiftWorkers(shiftTypeMonth.shiftType,
+        monthBegin, monthEnd);
+
+    Map<Person, Integer> totalPeopleCompetences = new HashMap<>();
+
+    // Recupero tutte le attività approvate in quel mese
+    shiftTypeMonthDao.approvedInMonthRelatedWith(shiftTypeMonth.yearMonth, involvedShiftPeople)
+        .forEach(monthStatus -> {
+          // Per ogni attività calcolo le competenze di ogni persona coinvolta
+          calculateActivityShiftCompetences(monthStatus.shiftType, monthBegin, monthEnd)
+              .forEach((person, competences) -> {
+                // Somma algebrica delle competenze delle persone derivanti da ogni attività sulla
+                // quale ha svolto i turni
+                Integer otherCompetences = totalPeopleCompetences.get(person);
+                if (otherCompetences == null) {
+                  totalPeopleCompetences.put(person, competences);
+                } else {
+                  totalPeopleCompetences.put(person, competences + otherCompetences);
+                }
+              });
+        });
+
+    CompetenceCode shiftCode = competenceCodeDao.getCompetenceCodeByCode(codShift);
+
+    involvedShiftPeople.forEach(person -> {
+
+      // Verifico che per le person coinvolte ci siano o no eventuali residui dai mesi precedenti
+
+      Competence lastShiftCompetence = competenceDao
+          .getLastPersonCompetenceInYear(person, year, month, shiftCode);
+
+      // TODO: 12/06/17 sicuramente andranno differenziate tra T1 e T2
+      int totalShiftMinutes = totalPeopleCompetences.get(person) + lastShiftCompetence.exceededMins;
+
+      Optional<Competence> shiftCompetence =
+          competenceDao.getCompetence(person, year, month, shiftCode);
+      // Sovrascrivo la competenza esistente
+
+      Competence newCompetence = shiftCompetence.or(new Competence(person, shiftCode, year, month));
+      newCompetence.valueApproved = totalShiftMinutes / 60;
+      newCompetence.exceededMins = totalShiftMinutes % 60;
+//      newCompetence.valueRequested = ; e qui cosa ci va?
+
+      newCompetence.save();
+    });
+
+  }
 }

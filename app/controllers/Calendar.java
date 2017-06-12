@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import dao.AbsenceDao;
-import dao.PersonShiftDayDao;
 import dao.ShiftDao;
+import dao.ShiftTypeMonthDao;
 import helpers.Web;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -29,6 +29,10 @@ import models.dto.ShiftEvent;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
+import play.data.validation.Required;
+import play.data.validation.Valid;
+import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -54,7 +58,8 @@ public class Calendar extends Controller {
   @Inject
   static AbsenceDao absenceDao;
   @Inject
-  static PersonShiftDayDao dayDao;
+  static ShiftTypeMonthDao shiftTypeMonthDao;
+
 
   public static void show(ShiftType activity, LocalDate date) {
 
@@ -356,10 +361,69 @@ public class Calendar extends Controller {
     render(shiftsCalculatedCompetences);
   }
 
-  public static boolean editable(ShiftType activity, LocalDate start) {
-    // TODO Aggiungere controllo sulla validità dei parametri
+  public static boolean editable(@Valid ShiftType activity, @Required LocalDate start) {
+    // TODO Aggiungere validatori sullo ShiftType
+
+    if (Validation.hasErrors()) {
+      return false;
+    }
+
     final ShiftTypeMonth shiftTypeMonth = activity.monthStatusByDate(start).orElse(null);
     return rules.check(activity) && rules.check(shiftTypeMonth);
+  }
+
+  public static void monthShiftsApprovement(@Valid ShiftType activity, @Required LocalDate date) {
+    if (Validation.hasErrors()) {
+      // TODO: 12/06/17
+    }
+    final YearMonth monthToApprove = new YearMonth(date);
+
+    final Optional<ShiftTypeMonth> monthStatus = shiftTypeMonthDao
+        .byShiftTypeAndDate(activity, date);
+
+    final ShiftTypeMonth shiftTypeMonth;
+    // Nel caso non ci sia ancora uno stato del mese persistito ne creo uno nuovo che mi serve in
+    // fase di conferma
+    if (monthStatus.isPresent()) {
+      shiftTypeMonth = monthStatus.get();
+    } else {
+      shiftTypeMonth = new ShiftTypeMonth();
+      shiftTypeMonth.shiftType = activity;
+      shiftTypeMonth.yearMonth = monthToApprove;
+      shiftTypeMonth.save();
+    }
+
+    final LocalDate monthbegin = monthToApprove.toLocalDate(1);
+    final LocalDate monthEnd = monthbegin.dayOfMonth().withMaximumValue();
+
+    final Map<Person, Integer> shiftsCalculatedCompetences = shiftManager2
+        .calculateActivityShiftCompetences(activity, monthbegin, monthEnd);
+
+    render(shiftTypeMonth, shiftsCalculatedCompetences);
+  }
+
+  public static void approveShiftsInMonth(long version, @Valid ShiftTypeMonth shiftTypeMonth) {
+
+    if (Validation.hasErrors()) {
+      // TODO: 12/06/17
+    }
+
+    // Verifico che tra la richiesta del riepilogo e l'approvazione definitiva dei turni non ci siano
+    // state modifiche in modo da evitare che il supervisore validi una situazione diversa da quella
+    // che si aspetta
+    if (shiftTypeMonth.version != version) {
+      flash.error("I turni sono stati cambiati rispetto al riepilogo mostrato. "
+          + "Il nuovo riepilogo è stato ricalcolato");
+      flash.keep();
+      monthShiftsApprovement(shiftTypeMonth.shiftType, shiftTypeMonth.yearMonth.toLocalDate(1));
+    }
+
+    shiftManager2.assignShiftCompetences(shiftTypeMonth);
+    // TODO: 12/06/17 chiamare il metodo che attribuisce le competenze in questo mese per le persone
+    // coinvolte nei turni dell'attività di turno specificata
+    shiftTypeMonth.approved = true;
+    shiftTypeMonth.save();
+
   }
 
 }
