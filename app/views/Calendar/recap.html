@@ -1,3 +1,18 @@
 #{list shiftsCalculatedCompetences.entrySet()}
   ${_.getKey().fullname} - ${_.getValue().printHourMinute()} <br>
 #{/list}
+
+#{secure.check 'Calendar.approveShiftsInMonth'}
+  <br>
+  #{if shiftTypeMonth?.approved}
+    <em class="text-muted">Le competenze per questo mese sono già state approvate</em>
+    #{b.link @removeApprovation(shiftTypeMonth.id) }
+      &{'calendar.removeApprovation'}
+    #{/b.link}
+  #{/if}
+  #{else}
+   #{b.link @monthShiftsApprovement(activityId, start.toString()) }
+    &{'calendar.approve'}
+   #{/b.link}
+  #{/else}
+#{/secure.check}
