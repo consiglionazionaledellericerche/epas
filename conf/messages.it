@@ -47,6 +47,12 @@ endDate=Data Fine
 from=Da
 to=A
 
+calendar.competencesApproved = Le competenze per questo mese sono state approvate
+calendar.competencesToBeApproved = Le competenze per questo mese sono da approvare
+calendar.removeApprovation= Rimuovi approvazione
+calendar.approve= Approva competenze
+
+
 category=Categoria
 
 child.bornDate= Data di Nascita
