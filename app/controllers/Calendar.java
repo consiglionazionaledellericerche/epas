@@ -321,6 +321,8 @@ public class Calendar extends Controller {
     } else {
       //salva il turno modificato
       shift.save();
+      // TODO da spostare nel ShiftEventsListener
+      shiftManager2.checkShiftDayValid(oldDate, shift.shiftType);
 
       message = PNotifyObject.builder()
           .title("Ok")
