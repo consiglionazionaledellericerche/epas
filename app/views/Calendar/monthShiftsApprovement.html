@@ -4,9 +4,8 @@
 
 
 <div class="container">
-  #{title title:'Approvazione Turni per il mese di ' + shiftTypeMonth.yearMonth +
-  ' nell attività di turno ' + shiftTypeMonth.shiftType /}
   #{if shiftTypeMonth?.approved}
+  #{title title:'Revoca delle competenze del mese di ' +  shiftTypeMonth.yearMonth + ' nell attività ' + shiftTypeMonth.shiftType /}
   #{alert color:'warning', dismissible: true}
   <p>
     Le competenze per il mese ${shiftTypeMonth.yearMonth} risultano già approvate.
@@ -18,6 +17,7 @@
   #{/alert}
   #{/if}
   #{else}
+  #{title title:'Approvazione delle competenze del mese di ' +  shiftTypeMonth.yearMonth + ' nell attività ' + shiftTypeMonth.shiftType /}
   #{alert color:'info', dismissible: true}
   <p>
     Le competenze per il mese ${shiftTypeMonth.yearMonth} risultano da approvare.
