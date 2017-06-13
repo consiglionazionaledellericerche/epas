@@ -7,6 +7,7 @@ import com.google.gdata.util.common.base.Preconditions;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import models.Contract;
@@ -48,9 +49,9 @@ public class MealTicketStaticUtility {
       }
 
       //Stesso blocco
-      Long previous = Long.parseLong(previousMealTicket.code) + 1;
-      Long actual = Long.parseLong(mealTicket.code);
-      if (previous.equals(actual) && previousMealTicket.contract.equals(mealTicket.contract)
+      BigDecimal previous = new BigDecimal(previousMealTicket.code).add(BigDecimal.ONE);
+      BigDecimal actual = new BigDecimal(mealTicket.code);
+      if (previous.compareTo(actual) == 0 && previousMealTicket.contract.equals(mealTicket.contract)
           && previousMealTicket.returned == mealTicket.returned) {
         currentBlock.getMealTickets().add(mealTicket);
       } else {
