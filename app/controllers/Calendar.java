@@ -157,7 +157,6 @@ public class Calendar extends Controller {
           .type("error").build();
     } else {
       psd.delete();
-      shiftManager2.checkShiftDayValid(psd.date, psd.shiftType);
 
       message = PNotifyObject.builder()
           .title("Ok")
@@ -322,8 +321,6 @@ public class Calendar extends Controller {
     } else {
       //salva il turno modificato
       shift.save();
-      shiftManager2.checkShiftValid(shift);
-      shiftManager2.checkShiftDayValid(shift.date, shift.shiftType);
 
       message = PNotifyObject.builder()
           .title("Ok")
@@ -373,8 +370,6 @@ public class Calendar extends Controller {
           .type("error").build();
     } else {
       personShiftDay.save();
-
-      shiftManager2.checkShiftValid(personShiftDay);
 
       message = PNotifyObject.builder()
           .title("Ok")
