@@ -1,29 +1,68 @@
 #{extends 'main.html' /}
 #{set header:'navbar' /}
 #{set title: 'Approvazione Turni' /}
-#{title title:'Approvazione Turni per il mese di ' +  shiftTypeMonth.yearMonth /}
+
 
 <div class="container">
-
-  <div class="list-group">
+  #{title title:'Approvazione Turni per il mese di ' + shiftTypeMonth.yearMonth +
+  ' nell attività di turno ' + shiftTypeMonth.shiftType /}
+  #{if shiftTypeMonth?.approved}
+  #{alert color:'warning', dismissible: true}
+  <p>
+    Le competenze per il mese ${shiftTypeMonth.yearMonth} risultano già approvate.
+    La rimozione dell'approvazione comporterà un ricalcolo delle competenze assegnate ai turnisti
+    di questa attività.
+    Inoltre una volta rimossa l'approvazione sarà nuovamente possibile effettuare le modifiche
+    sui turni del calendario.
+  </p>
+  #{/alert}
+  #{/if}
+  #{else}
+  #{alert color:'info', dismissible: true}
+  <p>
+    Le competenze per il mese ${shiftTypeMonth.yearMonth} risultano da approvare.
+    L'approvazione comporterà l'assegnamento delle competenze riportate qui sotto ai turnisti di
+    questa attività.<br>
+    Una volta approvate, non sarà possibile apportare ulteriori modifiche ai turni dal calendario
+    salvo annullamento dell'approvazione.
+  </p>
+  #{/alert}
+  #{/else}
+  <ul class="list-group">
     #{list shiftsCalculatedCompetences.entrySet()}
     <li class="list-group-item">
-      ${_.getKey().fullname} - ${_.getValue().printHourMinute()}
+      <h4 class="list-group-item-heading">${_.getKey().fullname}</h4>
+      <p class="list-group-item-text">Competenze maturate in questo mese <span class="label label-success">${_.getValue().printHourMinute()}</span></p>
+      <p class="list-group-item-text">Residuo dai mesi precedenti <span class="label label-default">
+        ${residualCompetences.get(_.getKey()).printHourMinute()}</span></p>
     </li>
     #{/list}
-  </div>
+  </ul>
 
-#{form action:@approveShiftsInMonth(), method:'POST', class:'form form-horizontal' }
-  #{f.hidden 'shiftTypeMonthId', value: shiftTypeMonth.id /}
-  #{f.hidden 'version', value: shiftTypeMonth.version /}
+  #{if shiftTypeMonth?.approved}
+    #{form action:@removeApprovation(), method:'POST', class:'form form-horizontal' }
+    #{f.hidden 'shiftTypeMonthId', value: shiftTypeMonth.id /}
+    #{f.hidden 'version', value: shiftTypeMonth.version /}
 
-  #{b.buttons center:true}
-    #{b.submit 'Conferma'/}
-    #{b.cancel @show('id':shiftTypeMonth.shiftType.id, shiftTypeMonth.yearMonth.toLocalDate(1).toString()) /}
-  #{/b.buttons}
+    #{b.buttons center:true}
+      #{b.submit 'Rimuovi approvazione' /}
+      #{b.cancel @show('id':shiftTypeMonth.shiftType.id, shiftTypeMonth.yearMonth.toLocalDate(1).toString()) /}
+    #{/b.buttons}
 
-#{/form}
+    #{/form}
+  #{/if}
+  #{else}
+    #{form action:@approveShiftsInMonth(), method:'POST', class:'form form-horizontal' }
+      #{f.hidden 'shiftTypeMonthId', value: shiftTypeMonth.id /}
+      #{f.hidden 'version', value: shiftTypeMonth.version /}
 
+      #{b.buttons center:true}
+        #{b.submit 'Approva competenze' /}
+        #{b.cancel @show('id':shiftTypeMonth.shiftType.id, shiftTypeMonth.yearMonth.toLocalDate(1).toString()) /}
+      #{/b.buttons}
+
+    #{/form}
+  #{/else}
 </div>
 
 

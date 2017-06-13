@@ -462,7 +462,12 @@ public class Calendar extends Controller {
     final Map<Person, Integer> shiftsCalculatedCompetences = shiftManager2
         .calculateActivityShiftCompetences(shiftType, monthbegin, monthEnd);
 
-    render(shiftTypeMonth, shiftsCalculatedCompetences);
+    final List<Person> people = shiftManager2.involvedShiftWorkers(shiftType, monthbegin, monthEnd);
+
+    final Map<Person, Integer> residualCompetences = shiftManager2
+        .residualCompetences(people, monthToApprove);
+
+    render(shiftTypeMonth, shiftsCalculatedCompetences, residualCompetences);
   }
 
   public static void approveShiftsInMonth(long version, long shiftTypeMonthId) {
@@ -474,6 +479,7 @@ public class Calendar extends Controller {
     }
     final ShiftTypeMonth shiftTypeMonth = optionalShiftTypeMonth.get();
 
+    Map<String, Object> args = new HashMap<>();
     // Verifico che tra la richiesta del riepilogo e l'approvazione definitiva dei turni non ci siano
     // state modifiche in modo da evitare che il supervisore validi una situazione diversa da quella
     // che si aspetta
@@ -481,17 +487,18 @@ public class Calendar extends Controller {
       flash.error("I turni sono stati cambiati rispetto al riepilogo mostrato. "
           + "Il nuovo riepilogo è stato ricalcolato");
       flash.keep();
-      monthShiftsApprovement(shiftTypeMonth.shiftType.id, shiftTypeMonth.yearMonth.toLocalDate(1));
+      args.put("date", shiftTypeMonth.yearMonth.toLocalDate(1).toString());
+      args.put("activityId", shiftTypeMonth.shiftType.id);
+      redirect(Router.reverse("Calendar.monthShiftsApprovement", args).url);
     }
 
     shiftTypeMonth.approved = true;
     shiftTypeMonth.save();
     // FIXME: 12/06/17 converrebbe automatizzare il ricalcolo in seguito ad ogni cambio di stato
-    // del ShiftTypeMonth (approved false -> true p viceversa)
+    // del ShiftTypeMonth (approved false->true e viceversa)
     // effettua il ricalcolo delle competenze
     shiftManager2.assignShiftCompetences(shiftTypeMonth);
 
-    Map<String, Object> args = new HashMap<>();
     args.put("date", shiftTypeMonth.yearMonth.toLocalDate(1).toString());
     args.put("activity.id", shiftTypeMonth.shiftType.id);
     redirect(Router.reverse("Calendar.show", args).url);
