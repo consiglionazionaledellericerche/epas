@@ -1018,12 +1018,16 @@ public class ShiftManager2 {
 
       // Verifico che per le person coinvolte ci siano o no eventuali residui dai mesi precedenti
       int lastShiftCompetence = getPersonResidualShiftCompetence(person, shiftTypeMonth.yearMonth);
-
-      log.debug("{} minuti di residuo nella competenza di {} del {}", lastShiftCompetence, person,
-          shiftTypeMonth.yearMonth);
+      Integer calculatedCompetences = totalPeopleCompetences.get(person);
 
       // TODO: 12/06/17 sicuramente andranno differenziate tra T1 e T2
-      int totalShiftMinutes = totalPeopleCompetences.get(person) + lastShiftCompetence;
+      int totalShiftMinutes;
+      if (calculatedCompetences != null) {
+        totalShiftMinutes = calculatedCompetences +
+            lastShiftCompetence;
+      } else {
+        totalShiftMinutes = lastShiftCompetence;
+      }
 
       Optional<Competence> shiftCompetence = competenceDao
           .getCompetence(person, year, month, shiftCode);
