@@ -1016,6 +1016,8 @@ public class ShiftManager2 {
 //      newCompetence.valueRequested = ; e qui cosa ci va?
 
       newCompetence.save();
+
+      log.info("Salvata {}", newCompetence);
     });
 
   }

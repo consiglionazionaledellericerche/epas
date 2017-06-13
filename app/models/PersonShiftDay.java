@@ -1,7 +1,7 @@
 package models;
 
 import com.google.common.collect.Sets;
-import java.util.Optional;
+import events.EntityEvents;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -11,9 +11,9 @@ import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
-import javax.persistence.PreRemove;
-import javax.persistence.PreUpdate;
+import javax.persistence.PostPersist;
+import javax.persistence.PostRemove;
+import javax.persistence.PostUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import models.base.BaseModel;
@@ -22,9 +22,6 @@ import models.enumerate.ShiftTroubles;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.joda.time.YearMonth;
-import play.jobs.Job;
 
 @Entity
 @Audited
@@ -77,32 +74,12 @@ public class PersonShiftDay extends BaseModel {
     return troubles.stream().anyMatch(error -> error.cause == trouble);
   }
 
-  @PrePersist
-  @PreRemove
-  @PreUpdate
-  private void onChange() {
-    // FIXME il Job evita il loop di chiamate di questo metodo.
-    // Capire il motivo delle chiamate multiple.
-    final long shiftTypeId = shiftType.id;
-    final LocalDate day = date;
-    new Job<Void>() {
-
-      @Override
-      public void doJob() {
-        final ShiftType activity = ShiftType.findById(shiftTypeId);
-        final Optional<ShiftTypeMonth> monthStatus = activity.monthStatusByDate(day);
-        ShiftTypeMonth newStatus;
-
-        if (monthStatus.isPresent()) {
-          newStatus = monthStatus.get();
-          newStatus.updatedAt = LocalDateTime.now();
-        } else {
-          newStatus = new ShiftTypeMonth();
-          newStatus.yearMonth = new YearMonth(day);
-          newStatus.shiftType = activity;
-        }
-        newStatus.save();
-      }
-    }.now();
+  @PostUpdate
+  @PostPersist
+  @PostRemove
+  public void changed() {
+    EntityEvents.changed(this);
   }
+
+
 }

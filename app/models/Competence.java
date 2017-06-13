@@ -70,4 +70,11 @@ public class Competence extends BaseModel {
 
   public Competence() {
   }
+
+  @Override
+  public String toString() {
+    return String.format("Competenza %s nel mese %s-%s per %s: %s", competenceCode, month, year,
+        person, valueApproved);
+  }
+
 }
