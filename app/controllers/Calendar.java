@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.ShiftManager2;
 import models.Person;
+import models.PersonShift;
 import models.PersonShiftDay;
 import models.PersonShiftShiftType;
 import models.ShiftType;
@@ -29,12 +30,15 @@ import models.dto.PNotifyObject;
 import models.dto.ShiftEvent;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
+
+import org.apache.ivy.util.Message;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Router;
 import play.mvc.With;
 import security.SecurityRules;
@@ -100,6 +104,7 @@ public class Calendar extends Controller {
 
     Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
     if (activity.isPresent()) {
+      rules.checkIfPermitted(activity.get());
       final List<PersonShiftShiftType> people = shiftManager2
           .shiftWorkers(activity.get(), start, end);
 
@@ -147,7 +152,6 @@ public class Calendar extends Controller {
    * @param psd Turno da eliminare
    */
   public static void deleteShift(PersonShiftDay psd) {
-    // TODO: 06/06/17 verificare i permessi sul turno specificato
     final PNotifyObject message;
     if (psd == null) {
       message = PNotifyObject.builder()
@@ -155,14 +159,25 @@ public class Calendar extends Controller {
           .hide(true)
           .text(Messages.get("notFound"))
           .type("error").build();
+      response.status = Http.StatusCode.NOT_FOUND;
     } else {
-      psd.delete();
+      if (!rules.check(psd.shiftType)) {
+        message = PNotifyObject.builder()
+            .title("Forbidden")
+            .hide(true)
+            .text(Messages.get("forbidden"))
+            .type("error").build();
+        response.status = Http.StatusCode.FORBIDDEN;
+      } else {
 
-      message = PNotifyObject.builder()
-          .title("Ok")
-          .hide(true)
-          .text(Web.msgDeleted(PersonShiftDay.class))
-          .type("success").build();
+        psd.delete();
+
+        message = PNotifyObject.builder()
+            .title("Ok")
+            .hide(true)
+            .text(Web.msgDeleted(PersonShiftDay.class))
+            .type("success").build();
+      }
     }
 
     renderJSON(message);
@@ -175,11 +190,10 @@ public class Calendar extends Controller {
   public static void events(long activityId, LocalDate start, LocalDate end)
       throws JsonProcessingException {
 
-    // TODO: 23/05/17 Lo shiftType dev'essere valido e l'utente deve avere i permessi per lavorarci
-
     List<ShiftEvent> events = new ArrayList<>();
     Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
-    if (activity.isPresent()) {
+    if (activity.isPresent() && rules.check(activity.get())) {
+      
       List<PersonShiftShiftType> people = shiftManager2.shiftWorkers(activity.get(), start, end);
 
       int index = 0;
@@ -302,35 +316,54 @@ public class Calendar extends Controller {
    */
   public static void changeShift(long personShiftDayId, LocalDate newDate) {
 
-    // TODO: 23/05/17 Lo shiftType dev'essere valido e l'utente deve avere i permessi per lavorarci
-
-    final PersonShiftDay shift = shiftDao.getPersonShiftDayById(personShiftDayId);
-    LocalDate oldDate = shift.date;
-    shift.date = newDate;
-
-    // controlla gli eventuali errori di consitenza nel calendario
-    Optional<String> error = shiftManager2.shiftPermitted(shift);
     final PNotifyObject message;
-    if (error.isPresent()) {
+    final PersonShiftDay shift = shiftDao.getPersonShiftDayById(personShiftDayId);
+    if (shift == null) {
       message = PNotifyObject.builder()
-          .title("Errore")
+          .title("Error")
           .hide(true)
-          .text(error.get())
+          .text(Messages.get("notFound"))
           .type("error").build();
-
-      response.status = 409;
+      response.status = Http.StatusCode.NOT_FOUND;
     } else {
-      //salva il turno modificato
-      shift.save();
-      // TODO da spostare nel ShiftEventsListener
-      shiftManager2.checkShiftDayValid(oldDate, shift.shiftType);
+      if (!rules.check(shift.shiftType)) {
+        message = PNotifyObject.builder()
+            .title("Forbidden")
+            .hide(true)
+            .text(Messages.get("forbidden"))
+            .type("error").build();
+        response.status = Http.StatusCode.FORBIDDEN;
+      } else {
+        LocalDate oldDate = shift.date;
+        shift.date = newDate;
 
-      message = PNotifyObject.builder()
-          .title("Ok")
-          .hide(true)
-          .text(Web.msgModified(PersonShiftDay.class))
-          .type("success").build();
+        // controlla gli eventuali errori di consitenza nel calendario
+        Optional<String> error = shiftManager2.shiftPermitted(shift);
+        
+        if (error.isPresent()) {
+          message = PNotifyObject.builder()
+              .title("Errore")
+              .hide(true)
+              .text(error.get())
+              .type("error").build();
+
+          response.status = 409;
+        } else {
+          //salva il turno modificato
+          shift.save();
+          // TODO da spostare nel ShiftEventsListener
+          shiftManager2.checkShiftDayValid(oldDate, shift.shiftType);
+
+          message = PNotifyObject.builder()
+              .title("Ok")
+              .hide(true)
+              .text(Web.msgModified(PersonShiftDay.class))
+              .type("success").build();
+        }
+      }
+      
     }
+    
     renderJSON(message);
   }
 
@@ -345,40 +378,58 @@ public class Calendar extends Controller {
    */
   public static void newShift(long personId, LocalDate date, ShiftSlot shiftSlot,
       long activityId) {
-
+    final PNotifyObject message;
     Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
 
     if (!activity.isPresent()) {
-      // TODO: 12/06/17
-    }
-
-    // TODO: 06/06/17 controlli sui permessi 
-    PersonShiftDay personShiftDay = new PersonShiftDay();
-    personShiftDay.date = date;
-    personShiftDay.shiftType = activity.get();
-    personShiftDay.shiftSlot = shiftSlot;
-    personShiftDay.personShift = shiftDao
-        .getPersonShiftByPersonAndType(personId, personShiftDay.shiftType.type);
-    // TODO: 06/06/17 verificare che il personshift sia valido prima di assegnarlo e proseguire 
-    Optional<String> error = shiftManager2.shiftPermitted(personShiftDay);
-    final PNotifyObject message;
-
-    if (error.isPresent()) {
-      response.status = 409;
-
       message = PNotifyObject.builder()
-          .title("Errore")
+          .title("Error")
           .hide(true)
-          .text(error.get())
+          .text(Messages.get("notFound"))
           .type("error").build();
+      response.status = Http.StatusCode.NOT_FOUND;
     } else {
-      personShiftDay.save();
+      if (rules.check(activity)) {
+        message = PNotifyObject.builder()
+            .title("Forbidden")
+            .hide(true)
+            .text(Messages.get("forbidden"))
+            .type("error").build();
+        response.status = Http.StatusCode.FORBIDDEN;
+      } else {
+        Optional<String> error;
+        PersonShiftDay personShiftDay = new PersonShiftDay();
+        personShiftDay.date = date;
+        personShiftDay.shiftType = activity.get();
+        personShiftDay.shiftSlot = shiftSlot;
+        PersonShift personShift = shiftDao
+            .getPersonShiftByPersonAndType(personId, personShiftDay.shiftType.type);
+        if (personShift == null) {
+          error = Optional.of(Messages.get("notFound"));
+        } else {
+          personShiftDay.personShift = personShift;
+          error = shiftManager2.shiftPermitted(personShiftDay);
+        }       
+        
+        if (error.isPresent()) {
+          response.status = 409;
 
-      message = PNotifyObject.builder()
-          .title("Ok")
-          .hide(true)
-          .text(Web.msgCreated(PersonShiftDay.class))
-          .type("success").build();
+          message = PNotifyObject.builder()
+              .title("Errore")
+              .hide(true)
+              .text(error.get())
+              .type("error").build();
+        } else {
+          personShiftDay.save();
+
+          message = PNotifyObject.builder()
+              .title("Ok")
+              .hide(true)
+              .text(Web.msgCreated(PersonShiftDay.class))
+              .type("success").build();
+        }
+      }
+
     }
     renderJSON(message);
   }
@@ -392,23 +443,18 @@ public class Calendar extends Controller {
   public static void recap(long activityId, LocalDate start, LocalDate end) {
     Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
 
-    if (!activity.isPresent()) {
-      // TODO: 12/06/17
+    if (activity.isPresent()) {
+      rules.checkIfPermitted(activity.get());
+      Map<Person, Integer> shiftsCalculatedCompetences = shiftManager2
+          .calculateActivityShiftCompetences(activity.get(), start, end);
+
+      final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao
+          .byShiftTypeAndDate(activity.get(), start).orNull();
+
+      render(shiftsCalculatedCompetences, shiftTypeMonth, activityId, start);
     }
 
-    Map<Person, Integer> shiftsCalculatedCompetences = shiftManager2
-        .calculateActivityShiftCompetences(activity.get(), start, end);
 
-    final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao
-        .byShiftTypeAndDate(activity.get(), start).orNull();
-
-    // FIXME trovare un modo per poter recuperare le competenze approvate su questa attività
-//    Map<Person, Integer> approvedShiftCompetences = shiftManager2
-//        .getApprovedShifts(activity, yearMonth);
-
-    // TODO: 07/06/17 se ci sono delle competenze approvate è bene riportare anche quelle
-    // per visualizzare eventuali discrepanze
-    render(shiftsCalculatedCompetences, shiftTypeMonth, activityId, start);
   }
 
   /**
@@ -516,7 +562,7 @@ public class Calendar extends Controller {
     }
 
     final ShiftTypeMonth shiftTypeMonth = optionalShiftTypeMonth.get();
-
+    rules.checkIfPermitted(shiftTypeMonth);
     shiftTypeMonth.approved = false;
     shiftTypeMonth.save();
 
