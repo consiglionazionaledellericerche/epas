@@ -6,15 +6,10 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
-
 import controllers.Security;
-
 import java.util.Map;
-
 import models.User;
-
 import org.drools.KnowledgeBase;
-
 import play.mvc.Http;
 
 /**
@@ -58,7 +53,10 @@ public class SecurityModule implements Module {
 
   @Provides
   public Optional<User> currentOperator() {
-    return Security.getUser();
+    if (Http.Request.current() != null) {
+      return Security.getUser();
+    }
+    return Optional.absent();
   }
 
   @Override
