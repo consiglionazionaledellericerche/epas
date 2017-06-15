@@ -10,6 +10,7 @@ import dao.ShiftTypeMonthDao;
 import helpers.Web;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,6 +35,7 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Controller;
+import play.mvc.Router;
 import play.mvc.With;
 import security.SecurityRules;
 
@@ -66,12 +68,11 @@ public class Calendar extends Controller {
    * @param activity l'attività
    * @param date la data
    */
-  public static void show(long activityId, LocalDate date) {
-
+  public static void show(ShiftType activity, LocalDate date) {
+    // FIXME: 12/06/17 il passaggio del solo id faciliterebbe il redict dagli altro controller
+    // ma va sistemato nella vista in modo che passi l'id con un nome adatto
     User currentUser = Security.getUser().get();
     final LocalDate currentDate = Optional.fromNullable(date).or(LocalDate.now());
-
-    Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
 
     // TODO: 12/06/17 da spostare in un metodo da implementare sul templateutility che restituisca
     // le attività di turno gestibili in base al ruolo dell'utente loggato
@@ -81,7 +82,7 @@ public class Calendar extends Controller {
         .sorted(Comparator.comparing(o -> o.type))
         .collect(Collectors.toList());
 
-    final ShiftType activitySelected = activity.isPresent() ? activity.get() : activities.get(0);
+    final ShiftType activitySelected = activity.id != null ? activity : activities.get(0);
 
     rules.checkIfPermitted(activitySelected);
 
@@ -156,7 +157,6 @@ public class Calendar extends Controller {
           .type("error").build();
     } else {
       psd.delete();
-      shiftManager2.checkShiftDayValid(psd.date, psd.shiftType);
 
       message = PNotifyObject.builder()
           .title("Ok")
@@ -322,8 +322,8 @@ public class Calendar extends Controller {
     } else {
       //salva il turno modificato
       shift.save();
-      shiftManager2.checkShiftValid(shift);
-      shiftManager2.checkShiftDayValid(shift.date, shift.shiftType);
+      // TODO da spostare nel ShiftEventsListener
+      shiftManager2.checkShiftDayValid(oldDate, shift.shiftType);
 
       message = PNotifyObject.builder()
           .title("Ok")
@@ -373,8 +373,6 @@ public class Calendar extends Controller {
           .type("error").build();
     } else {
       personShiftDay.save();
-
-      shiftManager2.checkShiftValid(personShiftDay);
 
       message = PNotifyObject.builder()
           .title("Ok")
@@ -467,7 +465,12 @@ public class Calendar extends Controller {
     final Map<Person, Integer> shiftsCalculatedCompetences = shiftManager2
         .calculateActivityShiftCompetences(shiftType, monthbegin, monthEnd);
 
-    render(shiftTypeMonth, shiftsCalculatedCompetences);
+    final List<Person> people = shiftManager2.involvedShiftWorkers(shiftType, monthbegin, monthEnd);
+
+    final Map<Person, Integer> residualCompetences = shiftManager2
+        .residualCompetences(people, monthToApprove);
+
+    render(shiftTypeMonth, shiftsCalculatedCompetences, residualCompetences);
   }
 
   public static void approveShiftsInMonth(long version, long shiftTypeMonthId) {
@@ -479,6 +482,7 @@ public class Calendar extends Controller {
     }
     final ShiftTypeMonth shiftTypeMonth = optionalShiftTypeMonth.get();
 
+    Map<String, Object> args = new HashMap<>();
     // Verifico che tra la richiesta del riepilogo e l'approvazione definitiva dei turni non ci siano
     // state modifiche in modo da evitare che il supervisore validi una situazione diversa da quella
     // che si aspetta
@@ -486,20 +490,44 @@ public class Calendar extends Controller {
       flash.error("I turni sono stati cambiati rispetto al riepilogo mostrato. "
           + "Il nuovo riepilogo è stato ricalcolato");
       flash.keep();
-      monthShiftsApprovement(shiftTypeMonth.shiftType.id, shiftTypeMonth.yearMonth.toLocalDate(1));
+      args.put("date", shiftTypeMonth.yearMonth.toLocalDate(1).toString());
+      args.put("activityId", shiftTypeMonth.shiftType.id);
+      redirect(Router.reverse("Calendar.monthShiftsApprovement", args).url);
     }
 
-    shiftManager2.assignShiftCompetences(shiftTypeMonth);
-    // TODO: 12/06/17 chiamare il metodo che attribuisce le competenze in questo mese per le persone
-    // coinvolte nei turni dell'attività di turno specificata
     shiftTypeMonth.approved = true;
     shiftTypeMonth.save();
+    // FIXME: 12/06/17 converrebbe automatizzare il ricalcolo in seguito ad ogni cambio di stato
+    // del ShiftTypeMonth (approved false->true e viceversa)
+    // effettua il ricalcolo delle competenze
+    shiftManager2.assignShiftCompetences(shiftTypeMonth);
 
-    show(shiftTypeMonth.shiftType.id, shiftTypeMonth.yearMonth.toLocalDate(1));
+    args.put("date", shiftTypeMonth.yearMonth.toLocalDate(1).toString());
+    args.put("activity.id", shiftTypeMonth.shiftType.id);
+    redirect(Router.reverse("Calendar.show", args).url);
   }
 
   public static void removeApprovation(long shiftTypeMonthId) {
-    // TODO: 12/06/17
+
+    Optional<ShiftTypeMonth> optionalShiftTypeMonth = shiftTypeMonthDao.byId(shiftTypeMonthId);
+
+    if (!optionalShiftTypeMonth.isPresent()) {
+      // TODO: 12/06/17
+    }
+
+    final ShiftTypeMonth shiftTypeMonth = optionalShiftTypeMonth.get();
+
+    shiftTypeMonth.approved = false;
+    shiftTypeMonth.save();
+
+    // effettua il ricalcolo delle competenze
+    shiftManager2.assignShiftCompetences(shiftTypeMonth);
+
+    // FIXME: 12/06/17 un modo più bellino?
+    Map<String, Object> args = new HashMap<>();
+    args.put("date", shiftTypeMonth.yearMonth.toLocalDate(1).toString());
+    args.put("activity.id", shiftTypeMonth.shiftType.id);
+    redirect(Router.reverse("Calendar.show", args).url);
   }
 
 }

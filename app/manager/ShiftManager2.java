@@ -482,10 +482,9 @@ public class ShiftManager2 {
 
     final PersonShiftDayInTrouble trouble = new PersonShiftDayInTrouble(shift, cause);
 
-    if (!shift.troubles.contains(trouble)) {
+    if (!shift.hasError(trouble.cause)) {
       trouble.save();
-      //shift.troubles.add(trouble);
-      //shift.save();
+      shift.troubles.add(trouble);
       log.info("Nuovo personShiftDayInTrouble {} - {} - {}",
           shift.personShift.person.getFullname(), shift.date, cause);
     }
@@ -709,12 +708,33 @@ public class ShiftManager2 {
 
     involvedShiftWorkers(activity, from, lastDay).forEach(person -> {
 
-      int competences =
-          calculatePersonShiftCompetencesInPeriod(activity, person, from, lastDay);
+      int competences = calculatePersonShiftCompetencesInPeriod(activity, person, from, lastDay);
       shiftCompetences.put(person, competences);
     });
 
     return shiftCompetences;
+  }
+
+
+  /**
+   * Recupera le eventuali competenze residue relative ai turnisti nel mese più recente rispetto
+   * a quello specificato.
+   *
+   * @param people la lista dei turnisti.
+   * @param yearMonth il mese a partire dal quale effettuare il controllo
+   * @return una mappa contenente per ogni turnista i residui al mese più recente antecedente quello
+   * specificato.
+   */
+  public Map<Person, Integer> residualCompetences(List<Person> people, YearMonth yearMonth) {
+
+    final Map<Person, Integer> residualShiftCompetences = new HashMap<>();
+
+    people.forEach(person -> {
+      int competences = getPersonResidualShiftCompetence(person, yearMonth);
+      residualShiftCompetences.put(person, competences);
+    });
+
+    return residualShiftCompetences;
   }
 
   /**
@@ -724,7 +744,7 @@ public class ShiftManager2 {
    * @return Una lista di persone che sono effettivamente coinvolte nei turni in un determinato
    * periodo (Dipendenti con i turni schedulati in quel periodo).
    */
-  private List<Person> involvedShiftWorkers(ShiftType activity, LocalDate from, LocalDate to) {
+  public List<Person> involvedShiftWorkers(ShiftType activity, LocalDate from, LocalDate to) {
     return personShiftDayDao.byTypeInPeriod(from, to, activity, Optional.absent())
         .stream().map(shift -> shift.personShift.person).distinct().collect(Collectors.toList());
   }
@@ -762,14 +782,26 @@ public class ShiftManager2 {
     return shiftCompetences;
   }
 
-  public Map<Person, Integer> getApprovedShifts(ShiftType activity, YearMonth yearMonth) {
+  /**
+   * @param person Person della quale recuperare il residuo dei turni dai mesi precedenti
+   * @param yearMonth Mese rispetto al quale verificare i residui
+   * @return restituisce il residuo delle competenze di turno dal mese più recente antecedente
+   * quello specificato dal parametro yearMonth della persona richiesta.
+   */
+  public int getPersonResidualShiftCompetence(Person person, YearMonth yearMonth) {
 
-    // FIXME dramma! le competenze approvate sono completamente trasversali alle attività di turno!
-    // e mo?
+    CompetenceCode shiftCode = competenceCodeDao.getCompetenceCodeByCode(codShift);
 
-    return new HashMap<>();
+    Competence lastShiftCompetence = competenceDao.getLastPersonCompetenceInYear(person,
+        yearMonth.getYear(), yearMonth.getMonthOfYear(), shiftCode);
+
+    int residualCompetence = 0;
+
+    if (lastShiftCompetence != null) {
+      residualCompetence = lastShiftCompetence.exceededMins;
+    }
+    return residualCompetence;
   }
-
 
   /**
    * @param activity attività di turno
@@ -945,7 +977,10 @@ public class ShiftManager2 {
   }
 
   /**
-   * Attribuisce le competenze ai dipendenti coinvolti su una cerca attività nel mese specificato.
+   * Effettua i calcoli delle competenze relative ai turni sulle attività approvate per le persone
+   * coinvolte in una certa attività e un determinato mese.
+   *
+   * Da utilizzare in seguito ad ogni approvazione/disapprovazione dei turni.
    *
    * @param shiftTypeMonth lo stato dell'attività di turno in un determinato mese.
    */
@@ -962,22 +997,19 @@ public class ShiftManager2 {
         monthBegin, monthEnd);
 
     Map<Person, Integer> totalPeopleCompetences = new HashMap<>();
+    Map<Person, Integer> residualCompetences = new HashMap<>();
 
     // Recupero tutte le attività approvate in quel mese
     shiftTypeMonthDao.approvedInMonthRelatedWith(shiftTypeMonth.yearMonth, involvedShiftPeople)
         .forEach(monthStatus -> {
           // Per ogni attività calcolo le competenze di ogni persona coinvolta
-          calculateActivityShiftCompetences(monthStatus.shiftType, monthBegin, monthEnd)
-              .forEach((person, competences) -> {
-                // Somma algebrica delle competenze delle persone derivanti da ogni attività sulla
-                // quale ha svolto i turni
-                Integer otherCompetences = totalPeopleCompetences.get(person);
-                if (otherCompetences == null) {
-                  totalPeopleCompetences.put(person, competences);
-                } else {
-                  totalPeopleCompetences.put(person, competences + otherCompetences);
-                }
-              });
+          involvedShiftPeople.forEach(person -> {
+            int activityCompetence = calculatePersonShiftCompetencesInPeriod(monthStatus.shiftType,
+                person, monthBegin, monthEnd);
+            // Somma algebrica delle competenze delle persone derivanti da ogni attività sulla
+            // quale ha svolto i turni
+            totalPeopleCompetences.merge(person, activityCompetence, (a, b) -> b + a);
+          });
         });
 
     CompetenceCode shiftCode = competenceCodeDao.getCompetenceCodeByCode(codShift);
@@ -985,16 +1017,20 @@ public class ShiftManager2 {
     involvedShiftPeople.forEach(person -> {
 
       // Verifico che per le person coinvolte ci siano o no eventuali residui dai mesi precedenti
-
-      Competence lastShiftCompetence = competenceDao
-          .getLastPersonCompetenceInYear(person, year, month, shiftCode);
+      int lastShiftCompetence = getPersonResidualShiftCompetence(person, shiftTypeMonth.yearMonth);
+      Integer calculatedCompetences = totalPeopleCompetences.get(person);
 
       // TODO: 12/06/17 sicuramente andranno differenziate tra T1 e T2
-      int totalShiftMinutes = totalPeopleCompetences.get(person) + lastShiftCompetence.exceededMins;
+      int totalShiftMinutes;
+      if (calculatedCompetences != null) {
+        totalShiftMinutes = calculatedCompetences +
+            lastShiftCompetence;
+      } else {
+        totalShiftMinutes = lastShiftCompetence;
+      }
 
-      Optional<Competence> shiftCompetence =
-          competenceDao.getCompetence(person, year, month, shiftCode);
-      // Sovrascrivo la competenza esistente
+      Optional<Competence> shiftCompetence = competenceDao
+          .getCompetence(person, year, month, shiftCode);
 
       Competence newCompetence = shiftCompetence.or(new Competence(person, shiftCode, year, month));
       newCompetence.valueApproved = totalShiftMinutes / 60;
@@ -1002,7 +1038,10 @@ public class ShiftManager2 {
 //      newCompetence.valueRequested = ; e qui cosa ci va?
 
       newCompetence.save();
+
+      log.info("Salvata {}", newCompetence);
     });
 
   }
+
 }

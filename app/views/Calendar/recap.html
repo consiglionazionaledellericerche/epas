@@ -1,18 +1,37 @@
-#{list shiftsCalculatedCompetences.entrySet()}
-  ${_.getKey().fullname} - ${_.getValue().printHourMinute()} <br>
-#{/list}
+<ul class="list-group">
+  #{list shiftsCalculatedCompetences.entrySet()}
+  <li class="list-group-item
+    #{if shiftTypeMonth?.approved}list-group-item-warning#{/if}
+    #{else}list-group-item-info#{/else}">
+    ${_.getKey().fullname} <span class="badge">${_.getValue().printHourMinute()}</span>
+  </li>
+  #{/list}
+</ul>
 
-#{secure.check 'Calendar.approveShiftsInMonth'}
-  <br>
-  #{if shiftTypeMonth?.approved}
-    <em class="text-muted">Le competenze per questo mese sono già state approvate</em>
-    #{b.link @removeApprovation(shiftTypeMonth.id) }
-      &{'calendar.removeApprovation'}
-    #{/b.link}
-  #{/if}
-  #{else}
-   #{b.link @monthShiftsApprovement(activityId, start.toString()) }
-    &{'calendar.approve'}
-   #{/b.link}
-  #{/else}
+
+
+<br>
+#{if shiftTypeMonth?.approved}
+<div>
+  <em class="text-muted">&{'calendar.competencesApproved'}</em>
+</div>
+<br>
+#{secure.check 'Calendar.monthShiftsApprovement'}
+#{b.link @monthShiftsApprovement(activityId, start.toString()),class: 'btn-sm', color:'warning', fa:
+'thumbs-o-down' }
+  &{'calendar.removeApprovation'}
+#{/b.link}
 #{/secure.check}
+#{/if}
+#{else}
+<div>
+  <em class="text-muted">&{'calendar.competencesToBeApproved'}</em>
+</div>
+<br>
+#{secure.check 'Calendar.monthShiftsApprovement'}
+#{b.link @monthShiftsApprovement(activityId, start.toString()),class: 'btn-sm', color:'info', fa:
+'thumbs-o-up' }
+&{'calendar.approve'}
+#{/b.link}
+#{/secure.check}
+#{/else}
