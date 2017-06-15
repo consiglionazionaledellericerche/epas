@@ -155,6 +155,22 @@ then
  $c.grant();
 end
 
+rule canEditShiftTypeMonth
+when
+  $uro: UsersRolesOffices(role.name == Role.SHIFT_SUPERVISOR)
+  $p: Person(!shiftCategories.isEmpty()) from currentOperator.person
+  $sc: ShiftCategories() from $p.shiftCategories
+  $st: ShiftType() from $sc.shiftTypes
+  $target: ShiftTypeMonth(shiftType == $st)
+  
+  $c: PermissionCheck(action in ("Calendar.monthShiftsApprovement",
+  								 "Calendar.approveShiftsInMonth",
+  								 "Calendar.removeApprovation"),
+  target == $target, granted == false)
+then
+ $c.grant();
+end
+
 
 
 /*Fine parte di ruolo supervisore dei turni*/
