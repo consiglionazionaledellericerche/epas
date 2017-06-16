@@ -26,11 +26,8 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
 import helpers.jpa.ModelQuery.SimpleResults;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.FileInputStream;
 import java.io.IOException;
-
 
 import java.util.List;
 import java.util.Map;
@@ -39,7 +36,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-
+import lombok.extern.slf4j.Slf4j;
 
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
@@ -71,12 +68,10 @@ import models.ShiftTimeTable;
 import models.ShiftType;
 import models.TotalOvertime;
 import models.User;
+import models.UsersRolesOffices;
 
 import models.dto.ShiftTypeService;
 import models.dto.TimeTableDto;
-
-import models.UsersRolesOffices;
-
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -86,11 +81,8 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import play.mvc.results.Redirect;
 
 import security.SecurityRules;
-
-
 
 
 @Slf4j
@@ -898,12 +890,13 @@ public class Competences extends Controller {
 
     cat.office = office;
     cat.save();
-    Role role = roleDao.getRoleByName(Role.SHIFT_SUPERVISOR);
-    UsersRolesOffices uro = new UsersRolesOffices();
-    uro.office = office;
-    uro.role = role;
-    uro.user = cat.supervisor.user;
-    uro.save();
+//    
+//    Role role = roleDao.getRoleByName(Role.SHIFT_SUPERVISOR);
+//    UsersRolesOffices uro = new UsersRolesOffices();
+//    uro.office = office;
+//    uro.role = role;
+//    uro.user = cat.supervisor.user;
+//    uro.save();
     flash.success("Nuovo servizio %s inserito correttamente per la sede %s",
         cat.description, cat.office);
     activateServices(cat.office.id);
@@ -998,6 +991,7 @@ public class Competences extends Controller {
   public static void editShift(Long shiftCategoryId) {
     ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
     Office office = cat.office;
+    
     rules.checkIfPermitted(office);
     Map<ShiftType, List<PersonShiftShiftType>> map = Maps.newHashMap();
     List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),

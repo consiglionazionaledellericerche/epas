@@ -447,6 +447,7 @@ timeTable.endEveningLunchTime =fine pranzo
 cat.description =Descrizione
 cat.office =Sede
 cat.supervisor =Supervisore servizio
+cat.manager =Gestori dei turni
 
 uro.office=Sede
 uro.role= Ruolo
