@@ -7,6 +7,8 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
+import injection.StaticInject;
+
 import it.cnr.iit.epas.DateInterval;
 
 import java.util.List;
@@ -38,15 +40,18 @@ public class MealTicketDao extends DaoBase {
 
   /**
    * @param code codice del buono pasto
-   * @return il mealTicket corrispondente al codice code passato come parametro.
+   * @param office la sede della persona a cui si vuole attribuire il codice del buono pasto
+   * @return il mealTicket corrispondente al codice code e alla sede office passati come parametro.
    */
-  public MealTicket getMealTicketByCode(String code) {
+  
+  public MealTicket getMealTicketByCodeAndOffice(String code, Office office) {
 
     QMealTicket mealTicket = QMealTicket.mealTicket;
 
     final JPQLQuery query = getQueryFactory()
         .from(mealTicket)
-        .where(mealTicket.code.eq(code));
+        .where(mealTicket.code.eq(code)
+            .and(mealTicket.admin.office.eq(office)));
 
     return query.singleResult(mealTicket);
   }
