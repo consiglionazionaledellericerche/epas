@@ -41,6 +41,7 @@ import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
+
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -67,6 +68,7 @@ public class MealTickets extends Controller {
   private static MealTicketDao mealTicketDao;
   @Inject
   private static ContractMonthRecapDao contractMonthRecapDao;
+  
 
   /**
    * Riepilogo buoni pasto dipendente.
@@ -280,18 +282,16 @@ public class MealTickets extends Controller {
 
 
     List<MealTicket> ticketToAddOrdered = Lists.newArrayList();
-    ticketToAddOrdered.addAll(mealTicketService
-        .buildBlockMealTicket(codeBlock, ticketNumberFrom, ticketNumberTo, expireDate));
+    ticketToAddOrdered.addAll(mealTicketService.buildBlockMealTicket(codeBlock, 
+        ticketNumberFrom, ticketNumberTo, expireDate, admin, deliveryDate, person));
 
     List<MealTicket> ticketsError = Lists.newArrayList();
 
     //Controllo esistenza
     for (MealTicket mealTicket : ticketToAddOrdered) {
-
-      MealTicket exist = mealTicketDao.getMealTicketByCode(mealTicket.code);
-      if (exist != null) {
-
-        ticketsError.add(exist);
+      
+      if (!validation.valid(mealTicket).ok) {
+        ticketsError.add(mealTicket);
       }
     }
     if (!ticketsError.isEmpty()) {
@@ -306,9 +306,8 @@ public class MealTickets extends Controller {
 
     //Persistenza
     for (MealTicket mealTicket : ticketToAddOrdered) {
-      mealTicket.date = deliveryDate;
-      mealTicket.contract = contractDao.getContract(mealTicket.date, person);
-      mealTicket.admin = admin.person;
+      
+      
       mealTicket.save();
 
       contractUpdated.add(mealTicket.contract);

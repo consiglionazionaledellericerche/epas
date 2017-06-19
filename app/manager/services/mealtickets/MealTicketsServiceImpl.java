@@ -4,10 +4,13 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
+import dao.ContractDao;
 import dao.MealTicketDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
+
+import helpers.validators.MealTicketInOffice;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
@@ -15,6 +18,7 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.swing.SpringLayout.Constraints;
 
 import manager.ConsistencyManager;
 import manager.configurations.ConfigurationManager;
@@ -23,10 +27,16 @@ import manager.configurations.EpasParam;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.MealTicket;
+import models.Person;
 import models.PersonDay;
+import models.User;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
+
+import play.data.validation.Validation;
+import play.data.validation.Validation.ValidationResult;
+import play.data.validation.Validation.Validator;
 
 /**
  * Implementazione di produzione del servizio meal tickets.
@@ -42,6 +52,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
   private ConsistencyManager consistencyManager;
   private MealTicketRecapBuilder mealTicketRecapBuilder;
   private ConfigurationManager configurationManager;
+  private ContractDao contractDao;
 
   /**
    * Costrutture.
@@ -58,7 +69,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
       ConsistencyManager consistencyManager,
       ConfigurationManager configurationManager,
       MealTicketRecapBuilder mealTicketRecapBuilder,
-      IWrapperFactory wrapperFactory) {
+      IWrapperFactory wrapperFactory, ContractDao contractDao) {
 
     this.personDao = personDao;
     this.mealTicketDao = mealTicketDao;
@@ -66,6 +77,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     this.configurationManager = configurationManager;
     this.mealTicketRecapBuilder = mealTicketRecapBuilder;
     this.wrapperFactory = wrapperFactory;
+    this.contractDao = contractDao;
   }
 
   @Override
@@ -142,7 +154,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
    */
   @Override
   public List<MealTicket> buildBlockMealTicket(Long codeBlock, Integer first, Integer last,
-      LocalDate expireDate) {
+      LocalDate expireDate, User admin, LocalDate deliveryDate, Person person) {
 
     List<MealTicket> mealTicketList = Lists.newArrayList();
 
@@ -152,12 +164,16 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
       mealTicket.expireDate = expireDate;
       mealTicket.block = codeBlock;
       mealTicket.number = i;
+      mealTicket.admin = admin.person;
+      mealTicket.date = deliveryDate;
+      mealTicket.contract = contractDao.getContract(mealTicket.date, person);
 
       if (i < 10) {
         mealTicket.code = codeBlock + "0" + i;
       } else {
         mealTicket.code = "" + codeBlock + i;
       }
+      
       mealTicketList.add(mealTicket);
     }
 

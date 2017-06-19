@@ -2,6 +2,8 @@ package models;
 
 import com.google.common.base.MoreObjects;
 
+import helpers.validators.MealTicketInOffice;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -16,6 +18,7 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
+import play.data.validation.CheckWith;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 
@@ -44,7 +47,7 @@ public class MealTicket extends BaseModel {
 
   public Integer number;
 
-  @Unique
+  @CheckWith(MealTicketInOffice.class)
   public String code; /* concatenzazione block + number */
 
   @Required
