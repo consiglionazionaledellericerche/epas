@@ -40,18 +40,16 @@ public class MealTicketDao extends DaoBase {
 
   /**
    * @param code codice del buono pasto
-   * @param office la sede della persona a cui si vuole attribuire il codice del buono pasto
    * @return il mealTicket corrispondente al codice code e alla sede office passati come parametro.
    */
   
-  public MealTicket getMealTicketByCodeAndOffice(String code, Office office) {
+  public MealTicket getMealTicketByCode(String code) {
 
     QMealTicket mealTicket = QMealTicket.mealTicket;
 
     final JPQLQuery query = getQueryFactory()
         .from(mealTicket)
-        .where(mealTicket.code.eq(code)
-            .and(mealTicket.admin.office.eq(office)));
+        .where(mealTicket.code.eq(code));
 
     return query.singleResult(mealTicket);
   }

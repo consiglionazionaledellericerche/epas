@@ -1,5 +1,5 @@
 # ---!Ups
-
+ALTER TABLE meal_ticket DROP CONSTRAINT "code_unique_key";
 ALTER TABLE meal_ticket_history ADD COLUMN office_id BIGINT;
 
 ALTER TABLE meal_ticket ADD COLUMN office_id BIGINT;
@@ -17,7 +17,7 @@ ALTER TABLE meal_ticket ALTER COLUMN office_id SET NOT NULL;
 
 # ---!Downs
 
-
+ALTER TABLE meal_ticket ADD CONSTRAINT "code_unique_key" UNIQUE (code);
 ALTER TABLE meal_ticket DROP CONSTRAINT code_office_id;
 ALTER TABLE meal_ticket DROP CONSTRAINT "mealticket_officefk";
 ALTER TABLE meal_ticket DROP COLUMN office_id;

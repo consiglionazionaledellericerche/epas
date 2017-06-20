@@ -10,15 +10,8 @@ import dao.PersonDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 
-import helpers.validators.MealTicketInOffice;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.swing.SpringLayout.Constraints;
 
 import manager.ConsistencyManager;
 import manager.configurations.ConfigurationManager;
@@ -27,16 +20,15 @@ import manager.configurations.EpasParam;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.MealTicket;
-import models.Person;
+import models.Office;
 import models.PersonDay;
-import models.User;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
-import play.data.validation.Validation;
-import play.data.validation.Validation.ValidationResult;
-import play.data.validation.Validation.Validator;
+import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * Implementazione di produzione del servizio meal tickets.
@@ -154,7 +146,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
    */
   @Override
   public List<MealTicket> buildBlockMealTicket(Long codeBlock, Integer first, Integer last,
-      LocalDate expireDate, User admin, LocalDate deliveryDate, Person person) {
+      LocalDate expireDate, Office office) {
 
     List<MealTicket> mealTicketList = Lists.newArrayList();
 
@@ -163,10 +155,9 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
       MealTicket mealTicket = new MealTicket();
       mealTicket.expireDate = expireDate;
       mealTicket.block = codeBlock;
+      mealTicket.office = office;
       mealTicket.number = i;
-      mealTicket.admin = admin.person;
-      mealTicket.date = deliveryDate;
-      mealTicket.contract = contractDao.getContract(mealTicket.date, person);
+
 
       if (i < 10) {
         mealTicket.code = codeBlock + "0" + i;
