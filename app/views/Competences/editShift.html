@@ -19,7 +19,7 @@ title:(Action + ' servizio per turno')}
   
   #{f.view 'cat.office', value:office /}
   #{f.selectModel 'cat.supervisor', items: officePeople, required:true /}
-  #{f.selectModels 'cat.manager', items: officePeople /}
+  #{f.selectModels 'cat.manager.id', items: officePeople /}
   #{if !nuovo}
   
   #{alert color:'info'}
