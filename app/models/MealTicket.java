@@ -20,7 +20,7 @@ import org.joda.time.LocalDate;
 
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
-import play.data.validation.Unique;
+
 
 @Audited
 @Entity
@@ -47,7 +47,7 @@ public class MealTicket extends BaseModel {
 
   public Integer number;
 
-  @CheckWith(MealTicketInOffice.class)
+  //@CheckWith(MealTicketInOffice.class)
   public String code; /* concatenzazione block + number */
 
   @Required
@@ -60,6 +60,10 @@ public class MealTicket extends BaseModel {
   public LocalDate expireDate;
   
   public boolean returned = false;
+  
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @JoinColumn(name = "office_id", nullable = false)
+  public Office office;
 
   @Transient
   public Boolean used = null;
