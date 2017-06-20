@@ -890,13 +890,8 @@ public class Competences extends Controller {
 
     cat.office = office;
     cat.save();
-//    
-//    Role role = roleDao.getRoleByName(Role.SHIFT_SUPERVISOR);
-//    UsersRolesOffices uro = new UsersRolesOffices();
-//    uro.office = office;
-//    uro.role = role;
-//    uro.user = cat.supervisor.user;
-//    uro.save();
+    
+    
     flash.success("Nuovo servizio %s inserito correttamente per la sede %s",
         cat.description, cat.office);
     activateServices(cat.office.id);

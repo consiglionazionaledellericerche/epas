@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -56,7 +57,7 @@ public class ShiftCategories extends BaseModel {
   @OneToMany(mappedBy = "shiftCategories")
   public List<ShiftType> shiftTypes = new ArrayList<ShiftType>();
   
-  @ManyToMany
+  @ManyToMany(cascade = CascadeType.PERSIST)
   public List<Person> manager = Lists.newArrayList();
   
   @Override
