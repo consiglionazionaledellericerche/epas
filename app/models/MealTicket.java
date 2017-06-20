@@ -2,8 +2,6 @@ package models;
 
 import com.google.common.base.MoreObjects;
 
-import helpers.validators.MealTicketInOffice;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,6 +9,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import models.base.BaseModel;
 
@@ -18,13 +17,14 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
-import play.data.validation.CheckWith;
 import play.data.validation.Required;
+import play.data.validation.Unique;
 
 
 @Audited
 @Entity
-@Table(name = "meal_ticket")
+@Table(name = "meal_ticket", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"code", "office_id"})})
 public class MealTicket extends BaseModel {
 
   private static final long serialVersionUID = -963204680918650598L;
@@ -48,6 +48,7 @@ public class MealTicket extends BaseModel {
   public Integer number;
 
   //@CheckWith(MealTicketInOffice.class)
+  @Unique(value = "code, office")
   public String code; /* concatenzazione block + number */
 
   @Required

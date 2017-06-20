@@ -217,6 +217,7 @@ mealTicket.forcedAquired= Buono Pasto maturato (forzato dall'amministratore)
 mealTicket.forcedNotAquired= Buono Pasto non maturato (forzato dall'amministratore)
 mealTicket.notYetAquired= Buono Pasto non ancora maturato
 mealTicket=Buono Pasto
+mealTicket.error= Il blocco è già stato assegnato a un dipendente della propria sede
 modifierType= Calcolo Orario
 
 MealTicketDecision.COMPUTED=Calcolato
