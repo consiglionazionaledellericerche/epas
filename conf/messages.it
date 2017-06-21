@@ -235,6 +235,8 @@ ExportFile.CSV=CSV
 ExportFile.XLS=XLS
 exportFile=Formato per esportazione
 
+forbidden= Operazione non permessa
+
 block.first=Dal
 block.last=Al
 

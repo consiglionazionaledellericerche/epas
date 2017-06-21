@@ -805,7 +805,7 @@ public class ShiftManager2 {
 
     int residualCompetence = 0;
 
-    if (lastShiftCompetence != null) {
+    if (lastShiftCompetence != null && lastShiftCompetence.exceededMins != null) {
       residualCompetence = lastShiftCompetence.exceededMins;
     }
     return residualCompetence;

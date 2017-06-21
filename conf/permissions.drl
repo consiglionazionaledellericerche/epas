@@ -134,39 +134,44 @@ end
 
 rule shiftSupervisorCanManageShiftType
 when
-  $uro: UsersRolesOffices(role.name == Role.SHIFT_SUPERVISOR)
   $p: Person(!shiftCategories.isEmpty()) from currentOperator.person
   $sc: ShiftCategories() from $p.shiftCategories
   $st: ShiftType() from $sc.shiftTypes
-  $c: PermissionCheck(action.startsWith("Calendar."), target == $st, granted == false)
+  $c: PermissionCheck(action in ("Calendar.show",
+                                 "Calendar.shiftPeople",
+                                 "Calendar.deleteShift",
+                                 "Calendar.events",
+                                 "Calendar.changeShift",
+                                 "Calendar.newShift",
+                                 "Calendar.recap",
+                                 "Calendar.editable",
+                                 "Calendar.monthShiftsApprovement"), target == $st, granted == false)
 then
  $c.grant();
 end
 
-rule canEditNonApprovedMonths
+rule canManageShiftMonth
 when
-  $uro: UsersRolesOffices(role.name == Role.SHIFT_SUPERVISOR)
   $p: Person(!shiftCategories.isEmpty()) from currentOperator.person
   $sc: ShiftCategories() from $p.shiftCategories
   $st: ShiftType() from $sc.shiftTypes
   $target: ShiftTypeMonth((!approved && shiftType == $st) || this == null)
-  $c: PermissionCheck(action.startsWith("Calendar."), target == $target, granted == false)
+  $c: PermissionCheck(action in ("Calendar.deleteShift",
+  								               "Calendar.changeShift",
+  								               "Calendar.newShift",
+  								               "Calendar.editable"), target == $target, granted == false)
 then
  $c.grant();
 end
 
 rule canEditShiftTypeMonth
 when
-  $uro: UsersRolesOffices(role.name == Role.SHIFT_SUPERVISOR)
   $p: Person(!shiftCategories.isEmpty()) from currentOperator.person
   $sc: ShiftCategories() from $p.shiftCategories
   $st: ShiftType() from $sc.shiftTypes
   $target: ShiftTypeMonth(shiftType == $st)
-  
-  $c: PermissionCheck(action in ("Calendar.monthShiftsApprovement",
-  								 "Calendar.approveShiftsInMonth",
-  								 "Calendar.removeApprovation"),
-  target == $target, granted == false)
+  $c: PermissionCheck(action in ("Calendar.approveShiftsInMonth",
+  								               "Calendar.removeApprovation"), target == $target, granted == false)
 then
  $c.grant();
 end
