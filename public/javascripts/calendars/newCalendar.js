@@ -20,22 +20,9 @@ $(document).ready(function() {
             left: centerX
           });
         } else {
-          $this.removeClass('reloading');
-          $this.prev('span.text-primary').remove();
-          // Quando finisce di caricare gli eventi effettuo le chiamate per il caricamento degli
-          // elementi esterni (persone e riepiloghi)
-          var activity = $('#activity').val();
-          var data = {
-            activityId: activity,
-            start: view.start.format(),
-            end: view.end.clone().subtract(1, 'days').format()
-          };
-          $('[data-render-load]').each(function() {
-            var url = $(this).data('render-load');
-            $(this).load(url, data);
-          });
-          // Verifica con una chiamata ajax se la modifica degli eventi dev'essere permessa per
-          // quel mese
+         var activity = $('#activity').val();
+         // Verifica con una chiamata ajax se la modifica degli eventi dev'essere permessa per
+         // quel mese
           $.ajax({
             url: $this.data('calendar-editable'),
             type: 'GET',
@@ -48,6 +35,19 @@ $(document).ready(function() {
               $this.fullCalendar('option', 'editable', isEditable);
               // si potrebbero anche disabilitare le callback per sicurezza
             }
+          });
+          $this.removeClass('reloading');
+          $this.prev('span.text-primary').remove();
+          // Quando finisce di caricare gli eventi effettuo le chiamate per il caricamento degli
+          // elementi esterni (persone e riepiloghi)
+          var data = {
+            activityId: activity,
+            start: view.start.format(),
+            end: view.end.clone().subtract(1, 'days').format()
+          };
+          $('[data-render-load]').each(function() {
+            var url = $(this).data('render-load');
+            $(this).load(url, data);
           });
         }
       },
