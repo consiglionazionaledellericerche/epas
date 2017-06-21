@@ -20,6 +20,7 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
 import org.joda.time.ReadablePeriod;
+import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.PeriodFormatter;
@@ -242,15 +243,19 @@ public class TemplateExtensions extends JavaExtensions {
    * @return stringa formattata
    */
   public static String printHourMinute(Integer minutes) {
-    if (minutes > 0) {
-      return DateUtility.fromMinuteToHourMinute(minutes);
-    } else {
-      return DateUtility.fromMinuteToHourMinute(minutes);
-    }
+    return DateUtility.fromMinuteToHourMinute(minutes);
   }
 
   public static String dayOfWeek(Integer day) {
     return WordUtils.capitalize(LocalDate.now().withDayOfWeek(day).dayOfWeek().getAsText());
   }
-  
+
+  /**
+   * @param month Yearmoth da formattare
+   * @return La Stringa in formato Mese(nome) Anno
+   */
+  public static String asText(YearMonth month) {
+    return WordUtils.capitalize(month.monthOfYear().getAsText()) + " " + month.getYear();
+  }
+
 }
