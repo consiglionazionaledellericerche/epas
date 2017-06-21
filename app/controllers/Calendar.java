@@ -30,8 +30,6 @@ import models.dto.PNotifyObject;
 import models.dto.ShiftEvent;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
-
-import org.apache.ivy.util.Message;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import play.data.validation.Required;
@@ -193,7 +191,7 @@ public class Calendar extends Controller {
     List<ShiftEvent> events = new ArrayList<>();
     Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
     if (activity.isPresent() && rules.check(activity.get())) {
-      
+
       List<PersonShiftShiftType> people = shiftManager2.shiftWorkers(activity.get(), start, end);
 
       int index = 0;
@@ -259,7 +257,7 @@ public class Calendar extends Controller {
    * @param start data iniziale del periodo
    * @param end data finale del periodo
    * @return Una lista di DTO che modellano le assenze di quella persona nell'intervallo specificato
-   *     da renderizzare nel fullcalendar.
+   * da renderizzare nel fullcalendar.
    */
   private static List<ShiftEvent> absenceEvents(Person person, LocalDate start, LocalDate end) {
 
@@ -310,9 +308,8 @@ public class Calendar extends Controller {
    * ed eventualmente lo salva, altrimenti restituisce un errore
    *
    * @param personShiftDayId id del persnShiftDay da controllare
-   * @param newDate giorno nel quale salvare il turno
-   *     error 409 con messaggio di ShiftTroubles.PERSON_IS_ABSENT, 
-   *     CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED
+   * @param newDate giorno nel quale salvare il turno error 409 con messaggio di
+   * ShiftTroubles.PERSON_IS_ABSENT, CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED
    */
   public static void changeShift(long personShiftDayId, LocalDate newDate) {
 
@@ -339,7 +336,7 @@ public class Calendar extends Controller {
 
         // controlla gli eventuali errori di consitenza nel calendario
         Optional<String> error = shiftManager2.shiftPermitted(shift);
-        
+
         if (error.isPresent()) {
           message = PNotifyObject.builder()
               .title("Errore")
@@ -361,9 +358,9 @@ public class Calendar extends Controller {
               .type("success").build();
         }
       }
-      
+
     }
-    
+
     renderJSON(message);
   }
 
@@ -409,8 +406,8 @@ public class Calendar extends Controller {
         } else {
           personShiftDay.personShift = personShift;
           error = shiftManager2.shiftPermitted(personShiftDay);
-        }       
-        
+        }
+
         if (error.isPresent()) {
           response.status = 409;
 
@@ -507,16 +504,31 @@ public class Calendar extends Controller {
 
     final LocalDate monthbegin = monthToApprove.toLocalDate(1);
     final LocalDate monthEnd = monthbegin.dayOfMonth().withMaximumValue();
+    final LocalDate today = LocalDate.now();
 
-    final Map<Person, Integer> shiftsCalculatedCompetences = shiftManager2
-        .calculateActivityShiftCompetences(shiftType, monthbegin, monthEnd);
+    final LocalDate lastDay;
 
-    final List<Person> people = shiftManager2.involvedShiftWorkers(shiftType, monthbegin, monthEnd);
+    if (monthEnd.isAfter(today)) {
+      lastDay = today;
+    } else {
+      lastDay = monthEnd;
+    }
 
-    final Map<Person, Integer> residualCompetences = shiftManager2
-        .residualCompetences(people, monthToApprove);
+    final List<Person> people = shiftManager2.involvedShiftWorkers(shiftType, monthbegin, lastDay);
 
-    render(shiftTypeMonth, shiftsCalculatedCompetences, residualCompetences);
+    final Map<Person, Integer> shiftsCalculatedCompetences = new HashMap<>();
+    final Map<Person, Boolean> peopleTrouble = new HashMap<>();
+
+    people.forEach(person -> {
+      int competences = shiftManager2.calculatePersonShiftCompetencesInPeriod(shiftType, person,
+          monthbegin, lastDay);
+      shiftsCalculatedCompetences.put(person, competences);
+
+      boolean haveTrouble = shiftManager2.allValidShifts(shiftType, person, monthbegin, lastDay);
+      peopleTrouble.put(person, haveTrouble);
+    });
+
+    render(shiftTypeMonth, shiftsCalculatedCompetences, peopleTrouble);
   }
 
   public static void approveShiftsInMonth(long version, long shiftTypeMonthId) {

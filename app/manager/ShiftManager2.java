@@ -782,6 +782,14 @@ public class ShiftManager2 {
     return shiftCompetences;
   }
 
+  public boolean allValidShifts(ShiftType activity, Person person, LocalDate from, LocalDate to) {
+
+    final List<PersonShiftDay> shifts = personShiftDayDao
+        .byTypeInPeriod(from, to, activity, Optional.of(person));
+
+    return shifts.stream().allMatch(personShiftDay -> personShiftDay.troubles.isEmpty());
+  }
+
   /**
    * @param person Person della quale recuperare il residuo dei turni dai mesi precedenti
    * @param yearMonth Mese rispetto al quale verificare i residui
@@ -926,8 +934,8 @@ public class ShiftManager2 {
    * @param begin l'ora di inizio del turno
    * @param end l'ora di fine del turno
    * @return la lista di coppie di timbrature di uscita/entrata appartenenti all'intervallo di turno
-   *     che vanno considerate per controllare se il tempo trascorso in pausa eccede quello previsto
-   *     dalla configurazione di turno.
+   * che vanno considerate per controllare se il tempo trascorso in pausa eccede quello previsto
+   * dalla configurazione di turno.
    */
   private List<PairStamping> getBreakPairStampings(List<PairStamping> pairStampings,
       LocalTime begin, LocalTime end) {
