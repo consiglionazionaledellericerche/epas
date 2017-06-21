@@ -1,16 +1,14 @@
 <h3>Ore di turno valide</h3>
+<br>
 <ul class="list-group">
   #{list shiftsCalculatedCompetences.entrySet()}
-  <li class="list-group-item
+  <li class="list-group-item clearfix
     #{if shiftTypeMonth?.approved}list-group-item-warning#{/if}
     #{else}list-group-item-info#{/else}">
-    ${_.getKey().fullname} <span class="badge">${_.getValue().printHourMinute()}</span>
+    ${_.getKey().fullname} <span class="label label-info pull-right">${_.getValue().printHourMinute()}</span>
   </li>
   #{/list}
 </ul>
-
-
-
 <br>
 #{if shiftTypeMonth?.approved}
 <div>

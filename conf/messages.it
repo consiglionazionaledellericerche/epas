@@ -51,6 +51,8 @@ calendar.competencesApproved = Le competenze per questo mese sono state approvat
 calendar.competencesToBeApproved = Le competenze per questo mese sono da approvare
 calendar.removeApprovation= Rimuovi approvazione
 calendar.approve= Approva competenze
+calendar.allValidShifts= Tutti i turni risultano validi
+calendar.notAllValidShifts= Uno o più turni risultano non validi
 
 
 category=Categoria
