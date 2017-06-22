@@ -1,4 +1,4 @@
-#{modalAsync id:'modalStamping', title:('Gestione Del Giorno') }
+#{modalAsync id:'modalStamping', title:('Gestione Del Giorno ' + personDay.date.format()) }
  
  
  <div class="container-fluid" id="showDay">
@@ -28,7 +28,7 @@
     
     #{f.hidden 'confirmed', value:confirmed /}
 	
-	#{f.selectEnum 'mealTicketDecision', items:controllers.Stampings.MealTicketDecision, 
+	#{f.selectEnum 'mealTicketDecision', items:controllers.PersonDays.MealTicketDecision, 
 		value:mealTicketDecision, byEquals:true /}
 	
 	    

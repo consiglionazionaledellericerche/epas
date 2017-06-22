@@ -8,6 +8,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 
@@ -20,11 +21,17 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 
 import it.cnr.iit.epas.CompetenceUtility;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -46,6 +53,7 @@ import manager.attestati.service.CertificationService;
 
 import models.CompetenceCode;
 import models.Contract;
+import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
 import models.PersonDay;
@@ -612,6 +620,45 @@ public class Administration extends Controller {
         defined, terminatedInactive, terminatedNewContract, updateOldContract);
     
     utilities();
+  }
+  
+  /**
+   * Un metodo da sviluppare per l'export della situazione delle
+   * persone attive formato csv.
+   * nome, contract.id, monte ore anno passato, monte ore anno corrente, buoni pasto residui.
+   * alla fine del mese precedente.
+   */
+  public static void exportDifferences() throws IOException {
+    
+    SortedMap<Long, ContractMonthRecap> map = Maps.newTreeMap();
+    
+    List<ContractMonthRecap> list = ContractMonthRecap.findAll();
+    for (ContractMonthRecap cmr : list) {
+      if (cmr.year != LocalDate.now().minusMonths(1).getYear()) {
+        continue;
+      }
+      if (cmr.month != LocalDate.now().minusMonths(1).getMonthOfYear()) {
+        continue;
+      }
+      
+      map.put(cmr.contract.id, cmr);
+    }
+    
+    File tempFile = File.createTempFile("cmr-situation-temp", ".csv");
+    FileInputStream inputStream = new FileInputStream(tempFile);
+    BufferedWriter out = new BufferedWriter(new FileWriter(tempFile, true));
+    for (ContractMonthRecap cmr : map.values()) {
+      
+      out.write(cmr.contract.person.fullName()
+          + "," + cmr.contract.id 
+          + "," + cmr.remainingMinutesLastYear
+          + "," + cmr.remainingMinutesCurrentYear
+          + "," + cmr.remainingMealTickets);
+      out.newLine();
+    }
+    out.close();
+
+    renderBinary(inputStream, "cmr-situation-506.csv");
   }
 
 }

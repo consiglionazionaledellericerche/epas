@@ -215,10 +215,9 @@ public class PersonDayDao extends DaoBase {
 
     if (year.isPresent() && month.isPresent()) {
       LocalDate monthBegin = new LocalDate(year.get(), month.get(), 1);
-      LocalDate monthEnd = monthBegin.monthOfYear().withMaximumValue();
+      LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
       condition.and(personDay.date.between(monthBegin, monthEnd));
-    }
-    if (year.isPresent() || !month.isPresent()) {
+    } else if (year.isPresent() && !month.isPresent()) {
       LocalDate yearBegin = new LocalDate(year.get(), 1, 1);
       LocalDate yearEnd = new LocalDate(year.get(), 12, 31);
       condition.and(personDay.date.between(yearBegin, yearEnd));

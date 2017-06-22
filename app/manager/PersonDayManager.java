@@ -73,21 +73,34 @@ public class PersonDayManager {
   }
 
   /**
-   * Se nel giorno vi è una assenza giornaliera.
-   *
-   * @return esito
+   * Assenza che assegna l'intera giornata.
    */
-  public boolean isAllDayAbsences(PersonDay pd) {
-
-    for (Absence abs : pd.absences) {
-
-      if (abs.justifiedType.name == JustifiedTypeName.all_day
-          || abs.justifiedType.name == JustifiedTypeName.assign_all_day) {
-        return true;
+  public Optional<Absence> getAssignAllDay(PersonDay personDay) {
+    for (Absence absence : personDay.absences) {
+      if (absence.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) { 
+        return Optional.of(absence);
       }
-
     }
-    return false;
+    return Optional.absent();
+  }
+  
+  /**
+   * Assenza che giustifica l'intera giornata.
+   */
+  public Optional<Absence> getAllDay(PersonDay personDay) {
+    for (Absence absence : personDay.absences) {
+      if (absence.justifiedType.name.equals(JustifiedTypeName.all_day)) { 
+        return Optional.of(absence);
+      }
+    }
+    return Optional.absent();
+  }
+  
+  /**
+   * Se nel giorno vi è una che assegna o giustifica l'intera giornata.
+   */
+  public boolean isAllDayAbsences(PersonDay personDay) {
+    return getAllDay(personDay).isPresent() || getAssignAllDay(personDay).isPresent();
   }
 
   /**
@@ -125,22 +138,6 @@ public class PersonDayManager {
       return pd.getValue().absences.size() >= 1;
     }
   }
-
-  /**
-   * Pulisce la parte di calcolo del tempo al lavoro.
-   */
-  private void cleanTimeAtWork(PersonDay pd) {
-
-    setTicketStatusIfNotForced(pd, false);
-
-    pd.setStampModificationType(null);
-    pd.setDecurted(0);
-    pd.setStampingsTime(0);
-    pd.setJustifiedTimeMeal(0);
-    pd.setJustifiedTimeNoMeal(0);
-    pd.setTimeAtWork(0);
-  }
-
 
   /**
    * La condizione del lavoro minimo pomeridiano è soddisfatta?.
@@ -315,121 +312,138 @@ public class PersonDayManager {
       boolean fixedTimeAtWork, LocalTime startLunch, LocalTime endLunch,
       LocalTime startWork, LocalTime endWork, Optional<Stamping> exitingNow) {
 
-    // Pulizia stato personDay.
-    cleanTimeAtWork(personDay);
-
+    //Preconditions
     for (Absence abs : personDay.getAbsences()) {
-
-      if (abs.justifiedType != null) {
-
-        if (abs.absenceType.code.equals(AbsenceTypeMapping.TELELAVORO.getCode())) {
-          cleanTimeAtWork(personDay);
-          personDay.setTimeAtWork(wttd.workingTime);
-          return personDay;
-        }
-
-        //Questo e' il caso del codice 105BP che garantisce sia l'orario di lavoro
-        // che il buono pasto
-        // TODO: se è il 105BP perchè non controllo direttamente il codice? Mistero della fede.
-        if (abs.justifiedType.name == JustifiedTypeName.assign_all_day) {
-          cleanTimeAtWork(personDay);
-          setTicketStatusIfNotForced(personDay, true);
-          personDay.setTimeAtWork(wttd.workingTime);
-          return personDay;
-        }
-
-        // Caso di assenza giornaliera.
-        if (abs.justifiedType.name == JustifiedTypeName.all_day) {
-          cleanTimeAtWork(personDay);
-          setTicketStatusIfNotForced(personDay, false);
-          personDay.setTimeAtWork(0);
-          return personDay;
-        }
-
-        // Mezza giornata giustificata.
-        if (abs.justifiedType.name == JustifiedTypeName.half_day) {
-          personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
-              + (wttd.workingTime / 2));
-          continue;
-        }
-
-        // #######
-        //  Assenze non giornaliere da cumulare ....
-
-        // Giustificativi grana minuti
-        if (abs.justifiedType.name == JustifiedTypeName.specified_minutes) {
-
-          if (abs.absenceType.timeForMealTicket) {
-            personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal()
-                + abs.justifiedMinutes);
-          } else {
-            personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
-                + abs.justifiedMinutes);
-          }
-          continue;
-        }
-
-        // Giustificativi grana ore (discriminare per calcolo buono o no)
-        if (abs.justifiedType.name == JustifiedTypeName.absence_type_minutes) {
-          if (abs.absenceType.timeForMealTicket) {
-            personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal()
-                + abs.absenceType.justifiedTime);
-          } else {
-            personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal()
-                + abs.absenceType.justifiedTime);
-          }
-          continue;
-        }
-
-
-        continue;
-      }
+      Preconditions.checkNotNull(abs.justifiedType);
+    }
+    
+    // Pulizia stato personDay.
+    setTicketStatusIfNotForced(personDay, false);
+    personDay.setStampModificationType(null);     //Target personDay: p(-30), e(<30), f(now), d(fix)
+    personDay.setOnHoliday(0);
+    personDay.setOutOpening(0);
+    personDay.setStampingsTime(0);
+    personDay.setJustifiedTimeMeal(0);
+    personDay.setJustifiedTimeNoMeal(0);
+    personDay.setTimeAtWork(0);
+    
+    // Patch persone fixed
+    if (fixedTimeAtWork) {
+      return updateTimeAtWorkFixed(personDay, wttd);
+    }
+    
+    // Gli invarianti del calcolo.
+    //
+    //   1)       Tempo timbrature -> Tempo fra coppie ritenute valide.
+    //   2) Tempo dentro la fascia -> N.B nei giorni di festa è zero
+    //   3)     Tempo fuori fascia -> Tempo timbrature - Tempo dentro fascia
+    //   4)         Tempo di festa -> Tempo timbrature giorno di festa
+    
+    List<PairStamping> validPairs = getValidPairStampings(personDay.stampings, exitingNow);
+    personDay.setStampingsTime(stampingMinutes(validPairs));
+    int stampingTimeInOpening = workingMinutes(validPairs, startWork, endWork);
+    
+    if (personDay.isHoliday) {
+      stampingTimeInOpening = 0;
+      personDay.setOnHoliday(personDay.getStampingsTime());
+    } else {
+      personDay.setOutOpening(personDay.getStampingsTime() - stampingTimeInOpening);  
     }
 
-    // Se hanno il tempo di lavoro fissato non calcolo niente
-    if (fixedTimeAtWork) {
-
-      if (personDay.isHoliday()) {
-        return personDay;
-      }
+    //Caso assenza che assegna l'intera giornata ex 103, 103BP, 105BP
+    Optional<Absence> assignAllDay = getAssignAllDay(personDay);
+    if (assignAllDay.isPresent()) {
       personDay.setTimeAtWork(wttd.workingTime);
+      setTicketStatusIfNotForced(personDay, assignAllDay.get().absenceType.timeForMealTicket);
       return personDay;
     }
+      
+    //Caso assenza giornaliera
+    if (getAllDay(personDay).isPresent()) {
+      personDay.setTimeAtWork(0);
+      setTicketStatusIfNotForced(personDay, false);
+      return personDay;
+    }
+    
+    //Giustificativi a grana minuti nel giorno
+    for (Absence abs : personDay.getAbsences()) {
 
-    //Le coppie valide
-    List<PairStamping> validPairs = getValidPairStampings(personDay.stampings, exitingNow);
+      //Numero di minuti giustificati
+      int justifiedMinutes = 0;
+      if (abs.justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
+        justifiedMinutes = abs.justifiedMinutes;
+      } else if (abs.justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
+        justifiedMinutes = abs.absenceType.justifiedTime;
+      } else {
+        continue;
+      }
 
-    // Minuti derivanti dalle timbrature
-    personDay.setStampingsTime(stampingMinutes(validPairs));
+      //Assenza festiva
+      if (personDay.isHoliday) {
+        personDay.setOnHoliday(personDay.getOnHoliday() + justifiedMinutes);
+        continue;
+      } 
+      
+      //Assegnamento se contribuisce al buono pasto
+      if (abs.absenceType.timeForMealTicket) {
+        personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal() + justifiedMinutes);
+        continue;
+      }
+      
+      personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal() + justifiedMinutes);
+      
+    }
 
-    // Minuti effettivi decurtati della fascia istituto
-    int workingMinutesInValidPairs = workingMinutes(validPairs, startWork, endWork);
+    //Il tempo a lavoro calcolato
+    int computedTimeAtWork = stampingTimeInOpening //nei festivi è 0
+        + personDay.getJustifiedTimeMeal()
+        + personDay.getJustifiedTimeNoMeal()
+        + personDay.getApprovedOnHoliday()
+        + personDay.getApprovedOutOpening();
+        
+    personDay.setTimeAtWork(computedTimeAtWork);
 
-    // Imposto il tempo a lavoro come somma di tutte le poste calcolate.
-    personDay.setTimeAtWork(workingMinutesInValidPairs + personDay.getJustifiedTimeMeal()
-        + personDay.getJustifiedTimeNoMeal());
+    mealTicketHandlerAndDecurtedMeal(personDay, wttd, stampingTimeInOpening, 
+        startLunch, endLunch, exitingNow);
+    
+    //Gestione decurtazione. Si applica solo se non ci sono assenze orarie che maturano il buono.
+    if (personDay.getJustifiedTimeMeal() > 0) {
+      personDay.setDecurtedMeal(0);
+    } else {
+      personDay.setTimeAtWork(personDay.getTimeAtWork() - personDay.getDecurtedMeal());
+    }
+ 
+    return personDay;
+  }
+  
+  /**
+   * Algoritmo del calcolo buono pasto. Una volta accertato che:
+   * 1) Non ci sono assenze giornaliere.
+   * 2) La persona non ha la timbratura automatica.
+   */
+  private PersonDay mealTicketHandlerAndDecurtedMeal(PersonDay personDay, WorkingTimeTypeDay wttd, 
+      int stampingTimeInOpening, LocalTime startLunch, LocalTime endLunch, 
+      Optional<Stamping> exitingNow) {
 
-    // Se è festa ho finito ...
+    // Reset
+    personDay.setDecurtedMeal(0);
+    
+    // Buono pasto forzato
+    if (personDay.isTicketForcedByAdmin) {
+      return personDay;
+    }
+    
+    // Giorno festivo: default false
     if (personDay.isHoliday()) {
       setTicketStatusIfNotForced(personDay, false);
       return personDay;
     }
 
-    // Se il buono pasto non è previsto dall'orario ho finito ...
+    // Il tipo orario non prevede il buono: default false
     if (!wttd.mealTicketEnabled()) {
       setTicketStatusIfNotForced(personDay, false);
       return personDay;
     }
-
-    // Se il buono pasto è forzato a no non effettuo ulteriori calcoli e ho finito ...
-    if (personDay.isTicketForcedByAdmin && !personDay.isTicketAvailable) {
-      return personDay;
-    }
-
-    // #######################################################################################
-    // IL PRANZO E' SERVITOOOOO????
-    // Questa parte determina se il buono pasto è ottenuto e la eventuale quantità decurtata
-    // dal tempo a lavoro.
 
     // 1) Calcolo del tempo passato in pausa pranzo dalle timbrature.
     List<PairStamping> gapLunchPairs = 
@@ -457,18 +471,20 @@ public class PersonDayManager {
 
     //2) Calcolo l'eventuale differenza tra la pausa fatta e la pausa minima
     int minBreakTicketTime = wttd.breakTicketTime;    //30 minuti
-    int missingTime = minBreakTicketTime - effectiveTimeSpent;
-    if (missingTime < 0) {
-      missingTime = 0;
+    int toCut = minBreakTicketTime - effectiveTimeSpent;
+    if (toCut < 0) {
+      toCut = 0;
     }
 
     //3) Decisioni
 
     int mealTicketTime = wttd.mealTicketTime;            //6 ore
-    int mealTicketsMinutes = workingMinutesInValidPairs + personDay.getJustifiedTimeMeal();
+    int mealTicketsMinutes = stampingTimeInOpening 
+        + personDay.getApprovedOutOpening() 
+        + personDay.getJustifiedTimeMeal();
 
     // Non ho eseguito il tempo minimo per buono pasto.
-    if (mealTicketsMinutes - missingTime < mealTicketTime) {
+    if (mealTicketsMinutes - toCut < mealTicketTime) {
       setTicketStatusIfNotForced(personDay, false);
       return personDay;
     }
@@ -480,32 +496,32 @@ public class PersonDayManager {
       return personDay;
     }
 
-    // Calcolo tempo decurtato per pausa troppo breve.
-    int workingTimeDecurted = mealTicketsMinutes;
-    if (missingTime > 0) {
-      workingTimeDecurted = mealTicketsMinutes - missingTime;
-    }
-
-    // Decidere quando verrà il momento di fare i conti con gianvito...
-    //if( !isGianvitoConditionSatisfied(workingTimeDecurted, justifiedTimeAtWork,
-    //  pd.getValue().date, pd.getPersonDayContract().get(),
-    //  pd.getWorkingTimeTypeDay().get()) ){
-    //
-    //  setIsTickeAvailable(pd, false);
-    //  return workTime + justifiedTimeAtWork;
-    //}
-
-    // #########
-    // IL BUONO PASTO E' STATO ATTRIBUITO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+    // Il buono pasto è stato maturato
     setTicketStatusIfNotForced(personDay, true);
-    personDay.setDecurted(null);
-    if (workingTimeDecurted < mealTicketsMinutes) {
-
-      personDay.setDecurted(missingTime);
+    
+    // Assegnamento tempo decurtato per pausa troppo breve.
+    if (toCut > 0) {
+      personDay.setDecurtedMeal(toCut);
     }
 
-    personDay.setTimeAtWork(workingTimeDecurted + personDay.getJustifiedTimeNoMeal());
+    return personDay;
+  }
+  
+  /**
+   * Le persone fixed hanno una gestione particolare per quanto riguarda tempo a lavoro e 
+   * buono pasto. 
+   */
+  private PersonDay updateTimeAtWorkFixed(PersonDay personDay, WorkingTimeTypeDay wttd) {
+    
+    if (personDay.isHoliday || getAllDay(personDay).isPresent()) {
+      personDay.setTimeAtWork(0);
+      setTicketStatusIfNotForced(personDay, false);
+      return personDay;
+    }
+    
+    personDay.setTimeAtWork(wttd.workingTime);
+    setTicketStatusIfNotForced(personDay, true);
+    
     return personDay;
   }
 
@@ -519,30 +535,24 @@ public class PersonDayManager {
   public void updateDifference(PersonDay personDay, WorkingTimeTypeDay wttd,
       boolean fixedTimeAtWork) {
 
-    //persona fixed
-    if (fixedTimeAtWork && personDay.getTimeAtWork() == 0) {
+    // Patch fixed: la differenza è sempre 0
+    if (fixedTimeAtWork) {
       personDay.setDifference(0);
       return;
     }
-
-    //festivo
-    if (personDay.isHoliday()) {
-      if (personDay.isAcceptedHolidayWorkingTime()) {
-        personDay.setDifference(personDay.getTimeAtWork());
-      } else {
-        personDay.setDifference(0);
-      }
-      return;
+    
+    //TODO: per pulizia i wttd festivi dovrebbero avere il campo wttd.workingTime == 0
+    // Implementare la modifica dei piani ferie di default. 
+    int plannedWorkingTime = wttd.workingTime;
+    if (personDay.isHoliday) {
+      plannedWorkingTime = 0;
     }
 
-    //assenze giornaliere
     if (isAllDayAbsences(personDay)) {
       personDay.setDifference(0);
-      return;
+    } else {
+      personDay.setDifference(personDay.getTimeAtWork() - plannedWorkingTime);
     }
-
-    //feriale
-    personDay.setDifference(personDay.getTimeAtWork() - wttd.workingTime);
   }
 
 
@@ -562,39 +572,6 @@ public class PersonDayManager {
     personDay.setProgressive(personDay.getDifference()
         + previousForProgressive.get().getProgressive());
 
-  }
-
-  /**
-   * Popola il campo isTicketAvailable.
-   *
-   * @param personDay       personDay
-   * @param wttd            wttd
-   * @param fixedTimeAtWork fixedTimeAtWork
-   * @return personDay
-   */
-  public PersonDay updateTicketAvailable(PersonDay personDay, WorkingTimeTypeDay wttd,
-      boolean fixedTimeAtWork) {
-
-    //caso forced by admin
-    if (personDay.isTicketForcedByAdmin()) {
-      return personDay;
-    }
-
-    //caso persone fixed
-    if (fixedTimeAtWork) {
-      if (personDay.isHoliday()) {
-        personDay.setTicketAvailable(false);
-      } else if (!personDay.isHoliday() && !isAllDayAbsences(personDay)) {
-        personDay.setTicketAvailable(true);
-      } else if (!personDay.isHoliday() && isAllDayAbsences(personDay)) {
-        personDay.setTicketAvailable(false);
-      }
-      return personDay;
-    }
-
-    //caso persone normali
-    personDay.setTicketAvailable(personDay.isTicketAvailable() && wttd.mealTicketEnabled());
-    return personDay;
   }
 
   /**
@@ -663,9 +640,6 @@ public class PersonDayManager {
     updateDifference(personDay, wttd, fixed);
 
     updateProgressive(personDay, previousForProgressive);
-
-    updateTicketAvailable(personDay, wttd, fixed);
-
   }
 
 

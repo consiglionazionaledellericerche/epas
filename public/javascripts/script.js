@@ -225,6 +225,7 @@ $(function($) {
       dropdownCssClass: "switcher",
     });
     $(':input[select2]', this).select2({
+    	width: 'resolve',
       allowClear: true,
       theme: "bootstrap",
       placeholder: "Seleziona un valore",
@@ -265,12 +266,36 @@ $(function($) {
         hide: null
      }
     });
+    //Attributo da inserire all'anchor se si vuole far scomparire il popover dopo il click
+    $('a[hide-popover-on-click]').click(function(){
+    	var $a = $(this);
+    	//popover direttamente collegato all'anchor
+    	var target = $a.attr('data-target');
+    	if (!target) {
+    		//popover collegato in uno dei figli
+    		target = $a.children("[data-target]:first").attr('data-target');
+    		if (!target) {
+    			//popover collegato a uno dei padri
+    			target = $a.closest(".webui-popover").attr('id');	
+    		}
+    	}
+    	$('[data-target="'+target+'"]').webuiPopover('hide');
+    });
+
+
     this.find('[datatable]').DataTable({
       "pageLength": 15,
       "lengthMenu": [
         [10,15,20, 25, 50, 100, -1],
         [10,15,20, 25, 50, 100, "Tutti"]
       ],
+      "language": {
+        "url": "/public/i18n/DataTablesItalian.json"
+      }
+    });
+    
+    this.find('[datatable-nopaging]').DataTable({
+   	  paging: false,
       "language": {
         "url": "/public/i18n/DataTablesItalian.json"
       }
