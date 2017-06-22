@@ -13,12 +13,6 @@ alter table person_days_history add column approved_on_holiday integer not null 
 alter table person_days rename column decurted to decurted_meal;
 alter table person_days_history rename column decurted to decurted_meal;
 
--- Comparing values (per verificare la consistenza)
-alter table person_days add column old_difference integer;
-alter table person_days add column old_progressive integer;
-update person_days set old_difference = difference;
-update person_days set old_progressive = progressive;
-
 -- Riparo l'inconsistenza (prima del 2015) sull'approvazione lavoro festivo 
 -- nei giorni non festivi. Il parametro settato a true in quel caso è inutile.
 update person_days set accepted_holiday_working_time = false where is_holiday = false;
