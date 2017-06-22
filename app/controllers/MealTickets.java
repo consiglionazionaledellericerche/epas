@@ -15,6 +15,8 @@ import dao.wrapper.IWrapperFactory;
 
 import it.cnr.iit.epas.DateInterval;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.List;
 import java.util.Set;
 
@@ -41,11 +43,13 @@ import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
+import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import security.SecurityRules;
 
+@Slf4j
 @With({Resecure.class})
 public class MealTickets extends Controller {
 
@@ -67,6 +71,7 @@ public class MealTickets extends Controller {
   private static MealTicketDao mealTicketDao;
   @Inject
   private static ContractMonthRecapDao contractMonthRecapDao;
+
 
   /**
    * Riepilogo buoni pasto dipendente.
@@ -234,7 +239,8 @@ public class MealTickets extends Controller {
           mealTicketsTransfered, contract.person.name, contract.person.surname);
     }
 
-    MealTickets.recapPersonMealTickets(contract.person.id);
+    MealTickets.recapMealTickets(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear(),
+        contract.person.office.id);
   }
 
   /**
@@ -270,42 +276,44 @@ public class MealTickets extends Controller {
     }
 
     if (Validation.hasErrors()) {
-      response.status = 400;
 
       render("@personMealTickets", person, recap, codeBlock, ticketNumberFrom, ticketNumberTo,
           deliveryDate, expireDate, admin);
     }
 
     //Controllo dei parametri
-
-
-    List<MealTicket> ticketToAddOrdered = Lists.newArrayList();
-    ticketToAddOrdered.addAll(mealTicketService
-        .buildBlockMealTicket(codeBlock, ticketNumberFrom, ticketNumberTo, expireDate));
-
-    List<MealTicket> ticketsError = Lists.newArrayList();
-
-    //Controllo esistenza
-    for (MealTicket mealTicket : ticketToAddOrdered) {
-
-      MealTicket exist = mealTicketDao.getMealTicketByCode(mealTicket.code);
-      if (exist != null) {
-
-        ticketsError.add(exist);
-      }
-    }
-    if (!ticketsError.isEmpty()) {
-
-      List<BlockMealTicket> blocksError = MealTicketStaticUtility
-          .getBlockMealTicketFromOrderedList(ticketsError, Optional.<DateInterval>absent());
+    Office office = person.office;
+    if (office == null) {
+      flash.error("dramma");
       render("@personMealTickets", person, recap, codeBlock, ticketNumberFrom, ticketNumberTo,
-          deliveryDate, expireDate, admin, blocksError);
+          deliveryDate, expireDate, admin);
+    }
+    
+    List<MealTicket> ticketToAddOrdered = Lists.newArrayList();
+    ticketToAddOrdered.addAll(mealTicketService.buildBlockMealTicket(codeBlock, 
+        ticketNumberFrom, ticketNumberTo, expireDate, office));
+    
+    ticketToAddOrdered.forEach(ticket -> {
+      validation.valid(ticket);          
+      
+    });
+    if (Validation.hasErrors()) {
+      
+      Validation.errors().forEach(error -> {
+        if (error.getKey().equals(".code")) {
+          flash.error(Messages.get("mealTicket.error"));
+          render("@personMealTickets", person, recap, codeBlock, ticketNumberFrom, ticketNumberTo,
+              deliveryDate, expireDate, admin);
+        }
+      });
+      
     }
 
     Set<Contract> contractUpdated = Sets.newHashSet();
 
     //Persistenza
     for (MealTicket mealTicket : ticketToAddOrdered) {
+
       mealTicket.date = deliveryDate;
       mealTicket.contract = contractDao.getContract(mealTicket.date, person);
       mealTicket.admin = admin.person;

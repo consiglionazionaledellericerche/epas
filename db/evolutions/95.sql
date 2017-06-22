@@ -81,3 +81,4 @@ alter table person_days drop column out_opening;
 alter table person_days_history drop column out_opening;
 alter table person_days drop column approved_out_opening;
 alter table person_days_history drop column approved_out_opening;
+

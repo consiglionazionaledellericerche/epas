@@ -7,6 +7,8 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 
+import injection.StaticInject;
+
 import it.cnr.iit.epas.DateInterval;
 
 import java.util.List;
@@ -38,8 +40,9 @@ public class MealTicketDao extends DaoBase {
 
   /**
    * @param code codice del buono pasto
-   * @return il mealTicket corrispondente al codice code passato come parametro.
+   * @return il mealTicket corrispondente al codice code e alla sede office passati come parametro.
    */
+  
   public MealTicket getMealTicketByCode(String code) {
 
     QMealTicket mealTicket = QMealTicket.mealTicket;

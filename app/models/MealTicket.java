@@ -9,6 +9,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import models.base.BaseModel;
 
@@ -19,9 +20,11 @@ import org.joda.time.LocalDate;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 
+
 @Audited
 @Entity
-@Table(name = "meal_ticket")
+@Table(name = "meal_ticket", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"code", "office_id"})})
 public class MealTicket extends BaseModel {
 
   private static final long serialVersionUID = -963204680918650598L;
@@ -44,7 +47,8 @@ public class MealTicket extends BaseModel {
 
   public Integer number;
 
-  @Unique
+  //@CheckWith(MealTicketInOffice.class)
+  @Unique(value = "code, office")
   public String code; /* concatenzazione block + number */
 
   @Required
@@ -57,6 +61,10 @@ public class MealTicket extends BaseModel {
   public LocalDate expireDate;
   
   public boolean returned = false;
+  
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @JoinColumn(name = "office_id", nullable = false)
+  public Office office;
 
   @Transient
   public Boolean used = null;
