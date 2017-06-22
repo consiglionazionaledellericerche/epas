@@ -1,0 +1,64 @@
+*{
+ arg (required) field attribute
+ label (optional) default to arg.name
+ description (optional) default to null
+ required (optional) default to false
+ 
+ sronly
+ faicon
+}*
+
+#{field _arg}
+  
+  %{
+    if (_body) {
+      _body.setProperty('field', field)
+    }
+    
+  }%
+  
+  <!-- BOOTSTRAP FORM-GROUP (field container) -->    
+  <div class='form-group has-feedback 
+               #{if field.error} has-error #{/if} 
+               *{ #{elseif field.value} has-success #{/elseif} }*
+               '>
+    
+	<!-- LABEL (visualizzato o screen-reader-only) -->
+	%{
+	  computedLabel = _label;
+	  if (_label == null) {
+	    computedLabel = field.name;
+	  }  
+	}%
+	
+	<label class="control-label #{if _sronly}sr-only#{/if}" 
+	       for="${field.id}">
+	    #{if !_sronly} 
+		  &{computedLabel} #{if _required}*#{/if}
+		#{/if} 
+	</label>
+	
+	<!-- Input group -->
+	#{if _faicon}
+	  <div class="input-group">
+	    <span class="input-group-addon"><i class="fa fa-${_faicon}" aria-hidden="true"></i></span>
+	    #{doBody /}	
+	  </div>
+	#{/if}#{else}
+	  #{doBody /}
+	#{/else}
+		
+	<!-- Error (success) validations -->	
+    #{if field.error}
+	  <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
+	  <span class="help-block">&{field.error}</span>
+	#{/if} 
+	
+	*{ #{elseif field.value}
+	  <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
+	#{/elseif}
+	}*
+			
+ 
+  </div>
+#{/field}

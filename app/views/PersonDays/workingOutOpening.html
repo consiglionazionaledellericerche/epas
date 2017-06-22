@@ -1,0 +1,40 @@
+#{modalAsync id:'modalStamping', title:('Gestione Del Giorno ' + personDay.date.format())   }
+
+<div class="container-fluid" id="showDay">
+  
+  %{ person = personDay.person; }%
+  #{include './_showDayTabs.html' /} 
+  
+  #{alert color:'info'}
+   <p>
+     Per il giorno <strong>${personDay.date.format()}</strong> 
+     #{if personDay.outOpening == 0}
+       non risultano ore lavorate fuori apertura da approvare. 
+     #{/if} #{else}
+       è possibile approvare fino a un massimo di <strong>${personDay.outOpening.printHourMinute()}</strong> di lavoro fuori apertura.
+     #{/else}
+   <p>
+   <p>
+     #{if personDay.approvedOutOpening > 0}
+       Lavoro fuori apertura già approvato: <strong>${personDay.approvedOutOpening.printHourMinute()}</strong>
+     #{/if}#{else}
+       Il lavoro fuori apertura per questo giorno non è ancora stato approvato.
+     #{/else}
+   </p>
+  #{/alert}
+  
+  #{form action:@PersonDays.approveWorkingOutOpening(), method:'POST', autocomplete:false, class:'form-horizontal',
+     'data-async':'#page_content', 'data-async-error':'#showDay', 'data-spinner':'#defaultSpinner'}
+  
+    #{f.hidden 'personDayId', value:personDay.id /}
+    #{f.input 'hours', type:'number' /}
+	#{f.input 'minutes', type:'number' /}
+    
+    #{b.buttons center:true}
+      #{b.submit 'Salva'/}
+    #{/b.buttons}
+  #{/form}
+ 
+</div>
+
+#{/modalAsync}

@@ -19,6 +19,7 @@ import org.hibernate.envers.NotAudited;
 @Table(name = "roles")
 public class Role extends BaseModel {
 
+  public static final String SEAT_SUPERVISOR = "seatSupervisor";
   public static final String PERSONNEL_ADMIN = "personnelAdmin";
   public static final String PERSONNEL_ADMIN_MINI = "personnelAdminMini";
   public static final String EMPLOYEE = "employee";
@@ -37,6 +38,9 @@ public class Role extends BaseModel {
 
   @Override
   public String toString() {
+    if (name.equals(Role.SEAT_SUPERVISOR)) {
+      return "Responsabile Sede";
+    }
     if (name.equals(Role.PERSONNEL_ADMIN)) {
       return "Amministratore Personale";
     }

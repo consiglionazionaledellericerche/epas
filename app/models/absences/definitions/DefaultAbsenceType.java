@@ -258,10 +258,7 @@ public enum DefaultAbsenceType {
   A_91("91", "Riposo compensativo",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, null, null),
-  A_91MS("91", "Riposo compensativo missione sabato",
-      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
-      0, null, null, null),
-  A_91MD("91", "Riposo compensativo missione domenica",
+  A_91F("91F", "Riposo compensativo recupero giornata lavorativa festiva",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, null, null),
 
@@ -271,7 +268,7 @@ public enum DefaultAbsenceType {
       0, null, null, null),
 
   A_105BP("105BP", "Lavoro Fuori Sede - Intera Giornata",
-      false, ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, false,
+      false, ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, true,
       0, null, null, null),
   
   A_23("23", "Astensione facoltativa post partum 100% primo figlio intera giornata",

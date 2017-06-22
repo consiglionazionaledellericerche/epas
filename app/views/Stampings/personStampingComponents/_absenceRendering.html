@@ -1,0 +1,25 @@
+    <!-- Calcolo dei gruppi coinvolti -->
+    %{ 
+      involvedGroups = absence.absenceType.involvedGroupAbsenceType(true);  
+    }%
+    
+    <!-- Assenza da non visualizzare perchè è un rimpiazzamento corretto -->
+    #{if absence.isReplacing(involvedGroups) && !absence.isOrphanReplacing(involvedGroups) }#{/if}
+    #{else}
+          
+        <!-- Assenza da visualizzare -->
+        
+          <!-- Costruzione contenuto popover -->
+	      #{absences.absence-popover absence:absence, person:absence.personDay.person, noLabel:true /}
+
+          <!-- Label -->
+	      #{if absenceRenderingNoLink}
+	        #{include './_absenceLabel.html' /}
+	      #{/if}
+	      #{else}
+		      #{secure.link @AbsenceGroups.edit(absence.id), target: absence, 'data-async-modal':'#modalAbsence', 'hide-popover-on-click':true}
+				#{include './_absenceLabel.html' /}
+			  #{/secure.link}
+		  #{/else}
+    
+    #{/else}

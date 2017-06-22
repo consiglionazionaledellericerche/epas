@@ -509,34 +509,6 @@ public class CompetenceManager {
     return servicesInitialized;
   }
 
-  /**
-   * @param personList la lista di persone
-   * @param year       l'anno
-   * @param month      il mese
-   * @return la mappa contenente per ogni persona la propria situazione in termini di codici di
-   *     competenza abilitati.
-   */
-  public Map<Person, List<CompetenceCodeDTO>> createMap(
-      List<Person> personList, int year, int month) {
-    LocalDate date = new LocalDate(year, month, 1);
-    Map<Person, List<CompetenceCodeDTO>> map = Maps.newHashMap();
-    for (Person person : personList) {
-      List<CompetenceCodeDTO> codeList = Lists.newArrayList();
-      List<PersonCompetenceCodes> pmrList = competenceCodeDao
-          .listByPerson(person, Optional.fromNullable(date));
-      if (!pmrList.isEmpty()) {
-        for (PersonCompetenceCodes pcc : pmrList) {
-          CompetenceCodeDTO dto = new CompetenceCodeDTO();
-          dto.code = pcc.competenceCode;
-          dto.beginDate = pcc.beginDate;
-          dto.endDate = pcc.endDate;
-          codeList.add(dto);
-        }
-      }
-      map.put(person, codeList);
-    }
-    return map;
-  }
 
   /**
    * @param pccList     la lista di PersonCompetenceCodes di partenza

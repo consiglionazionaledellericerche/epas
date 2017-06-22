@@ -121,7 +121,7 @@ public class AbsenceCertificationService {
     CruscottoDipendente cruscottoCurrent = (CruscottoDipendente)Cache.get(crKey(person, year));
     if (cruscottoCurrent == null) {
       try {
-        log.info("Il cruscotto di {} anno {} non era cachato.", person.fullName(), year);
+        log.debug("Il cruscotto di {} anno {} non era cachato.", person.fullName(), year);
         cruscottoCurrent = certificationService.getCruscottoDipendente(person, year);
         Cache.add(crKey(person, year), cruscottoCurrent);
       } catch (Exception ex) {
@@ -137,7 +137,7 @@ public class AbsenceCertificationService {
     CruscottoDipendente cruscottoPrev = (CruscottoDipendente)Cache.get(crKey(person, year - 1));
     if (cruscottoPrev == null) {
       try {
-        log.info("Il cruscotto di {} anno {} non era cachato.", person.fullName(), year - 1);
+        log.debug("Il cruscotto di {} anno {} non era cachato.", person.fullName(), year - 1);
         cruscottoPrev = certificationService.getCruscottoDipendente(person, year - 1);
         Cache.add(crKey(person, year - 1), cruscottoPrev);
       } catch (Exception ex) {
@@ -545,6 +545,9 @@ public class AbsenceCertificationService {
   }
   
   private void patchCompensatoryRest(AbsenceSituation absenceSituation, IWrapperPerson wrPerson) {
+    //??: se su attestati vi è distinzione fra riposo compensativo effettivo (91) e recuperi per
+    // lavoro festivo (91F), questa patch che sposta le assenza importabili automaticamente
+    // in importabili manualmente non serve più.
     Set<LocalDate> dates = absenceSituation
         .toAddAutomatically.get(DefaultAbsenceType.A_91.getCode()); 
     if (dates == null || dates.isEmpty()) {

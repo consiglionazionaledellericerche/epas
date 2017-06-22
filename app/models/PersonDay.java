@@ -65,6 +65,18 @@ public class PersonDay extends BaseModel {
    */
   @Column(name = "stamping_time")
   public Integer stampingsTime = 0;
+  
+  /**
+   * Tempo lavorato al di fuori della fascia apertura/chiusura.
+   */
+  @Column(name = "out_opening")
+  public Integer outOpening = 0;
+  
+  /**
+   * Tempo lavorato al di fuori della fascia apertura/chiusura ed approvato.
+   */
+  @Column(name = "approved_out_opening")
+  public Integer approvedOutOpening = 0;
 
   /**
    * Tempo giustificato da assenze che non contribuiscono al tempo per buono pasto.
@@ -85,7 +97,8 @@ public class PersonDay extends BaseModel {
   /**
    * Minuti tolti per pausa pranzo breve.
    */
-  public Integer decurted = 0;
+  @Column(name = "decurted_meal")
+  public Integer decurtedMeal = 0;
 
   @Column(name = "is_ticket_available")
   public boolean isTicketAvailable;
@@ -93,14 +106,23 @@ public class PersonDay extends BaseModel {
   @Column(name = "is_ticket_forced_by_admin")
   public boolean isTicketForcedByAdmin;
 
-  @Column(name = "accepted_holiday_working_time")
-  public boolean acceptedHolidayWorkingTime;
-
   @Column(name = "is_working_in_another_place")
   public boolean isWorkingInAnotherPlace;
 
   @Column(name = "is_holiday")
   public boolean isHoliday;
+  
+  /**
+   * Tempo lavorato in un giorno di festa.
+   */
+  @Column(name = "on_holiday")
+  public Integer onHoliday = 0;
+  
+  /**
+   * Tempo lavorato in un giorni di festa ed approvato.
+   */
+  @Column(name = "approved_on_holiday")
+  public Integer approvedOnHoliday = 0;
 
   @OneToMany(mappedBy = "personDay", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
   @OrderBy("date ASC")
@@ -173,37 +195,21 @@ public class PersonDay extends BaseModel {
   }
 
   /**
-   * Nel caso di orario effettuato fuori dalla finestra dell'orario sede.
-   * <p>
-   * TODO: vedere se aggiungere una colonna invece di calcolare questo invariante.
-   *
-   * timeAtWork = StampingTime - decurtedWork - decurtedMeal + justifiedTimeMeal +
-   * justifiedTimeNoMeal
-   *
-   * decurtedWork = StampingTime - timeAtWork - decurtedMeal + justifiedTimeMeal +
-   * justifiedTimeNoMeal
-   * </p>
+   * Orario decurtato perchè effettuato fuori dalla fascia di apertura/chiusura.
    */
   @Transient
   public int getDecurtedWork() {
 
-    if (stampingsTime == null || this.timeAtWork == null) {
-      return 0;
-    }
+    return this.outOpening - this.approvedOutOpening;
+  }
+  
+  /**
+   * Orario decurtato perchè effettuato in un giorno di festa.
+   */
+  @Transient
+  public int getDecurtedWorkOnHoliday() {
 
-    int decurtedWork = stampingsTime - this.timeAtWork;
-
-    if (decurted != null) {
-      decurtedWork -= this.decurted;
-    }
-    if (justifiedTimeMeal != null) {
-      decurtedWork += this.justifiedTimeMeal;
-    }
-    if (justifiedTimeNoMeal != null) {
-      decurtedWork += this.justifiedTimeNoMeal;
-    }
-
-    return decurtedWork;
+    return this.onHoliday - this.approvedOnHoliday;
   }
 
   /**

@@ -250,7 +250,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   public List<PersonConfiguration> personConfigurations = Lists.newArrayList();
   
 
-  @ManyToMany(mappedBy="manager")
+  @ManyToMany(mappedBy="managers")
   public List<ShiftCategories> categories = Lists.newArrayList(); 
 
   @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)

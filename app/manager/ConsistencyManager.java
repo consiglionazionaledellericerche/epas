@@ -438,9 +438,6 @@ public class ConsistencyManager {
 
     personDayManager.updateProgressive(pd.getValue(), pd.getPreviousForProgressive());
 
-    personDayManager.updateTicketAvailable(pd.getValue(), pd.getWorkingTimeTypeDay().get(),
-        pd.isFixedTimeAtWork());
-
     //Gestione permessi brevi 36 ore anno
     int timeShortPermission = personDayManager.shortPermissionTime(pd.getValue());
     Absence shortPermission = null;

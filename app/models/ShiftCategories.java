@@ -57,8 +57,8 @@ public class ShiftCategories extends BaseModel {
   @OneToMany(mappedBy = "shiftCategories")
   public List<ShiftType> shiftTypes = new ArrayList<ShiftType>();
   
-  @ManyToMany(cascade = CascadeType.PERSIST)
-  public List<Person> manager = Lists.newArrayList();
+  @ManyToMany
+  public List<Person> managers = Lists.newArrayList();
   
   @Override
   public String toString() {

@@ -98,7 +98,7 @@ public class Wizard extends Controller {
     if (officeCount > 0) {
       flash.error("Impossibile accedere alla procedura di Wizard se è già presente un Ufficio"
           + " nel sistema");
-      Institutes.list(null);
+      Institutes.list(null, null, null);
     }
 
     double percent = 0;

@@ -99,6 +99,7 @@ public class Synchronizations extends Controller {
     }
 
     List<Institute> institutes = officeDao.institutes(Optional.<String>absent(),
+        Optional.<String>absent(), Optional.absent(),
         Security.getUser().get(), roleDao.getRoleByName(Role.TECHNICAL_ADMIN)).list();
 
     Map<Long, Institute> epasInstituteByPerseoId = Maps.newHashMap();
@@ -123,6 +124,7 @@ public class Synchronizations extends Controller {
   public static void oldInstitutes() {
 
     List<Institute> institutes = officeDao.institutes(Optional.<String>absent(),
+        Optional.<String>absent(), Optional.absent(),
         Security.getUser().get(), roleDao.getRoleByName(Role.TECHNICAL_ADMIN)).list();
 
     Map<String, Institute> perseoInstitutesByCds = null;

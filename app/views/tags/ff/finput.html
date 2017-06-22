@@ -1,0 +1,24 @@
+#{ff.fedit _arg, label:_label, feedback:'true', sronly:_sronly, faicon:_faicon}
+<input 
+       class="form-control ${_class}" 
+       
+       id="${field.id}" 
+       
+       name="${field.name}"
+       
+       type="${_type == null ? 'text' : _type}"
+       
+       value="${_value == null ? field.value : _value}"
+       
+       #{if _placeholder} placeholder="${_placeholder}"#{/if}
+
+       #{if _popover} popover data-content='&{field.name+'.popover'}'#{/if}
+
+       #{if _disabled} disabled #{/if}
+
+       #{if _readonly} readonly="readonly" #{/if}
+       
+  ${helpers.Web.serialize(_attrs, "arg", "value", "label", "type","placeholder", "disabled", "readonly").raw()}>
+
+
+#{/ff.fedit}

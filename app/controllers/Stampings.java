@@ -36,7 +36,6 @@ import manager.NotificationManager;
 import manager.PersonDayManager;
 import manager.SecureManager;
 import manager.StampingManager;
-import manager.configurations.EpasParam;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
@@ -68,7 +67,6 @@ import security.SecurityRules;
  *
  * @author alessandro
  */
-@Slf4j
 @With({Resecure.class})
 public class Stampings extends Controller {
 
@@ -231,12 +229,12 @@ public class Stampings extends Controller {
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     
-    validation.required(stamping.way);
-    
+    if (stamping.way == null) {
+      validation.addError("stamping.way", "Obbligatorio");
+    }
     if (Validation.hasErrors()) {
       response.status = 400;
-
-      log.debug(validation.errorsMap().toString());
+      
       List<HistoryValue<Stamping>> historyStamping = Lists.newArrayList();
       if (stamping.isPersistent()) {
         historyStamping = stampingsHistoryDao.stampings(stamping.id);
@@ -278,20 +276,17 @@ public class Stampings extends Controller {
 
     flash.success(Web.msgSaved(Stampings.class));
 
+    notificationManager
+    .notificationStampingPolicy(currentUser, stamping, newInsert, !newInsert, false);
+    
+    //redirection stuff
     if (!currentUser.isSystemUser() && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)
         && currentUser.person.id.equals(person.id)) {
-
-      if (!(currentUser.person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")
-          && currentUser.person.qualification.qualification <= 3)) {
-        notificationManager.notifyStamping(stamping,
-            newInsert ? NotificationManager.CRUD.CREATE : NotificationManager.CRUD.UPDATE);
-      }
       stampings(date.getYear(), date.getMonthOfYear());
     }
-
     personStamping(person.id, date.getYear(), date.getMonthOfYear());
   }
-
+  
 
   /**
    * Elimina la timbratura.
@@ -315,17 +310,13 @@ public class Stampings extends Controller {
 
     flash.success("Timbratura rimossa correttamente.");
 
+    notificationManager.notificationStampingPolicy(currentUser, stamping, false, false, true);
+    
+    //redirection stuff
     if (!currentUser.isSystemUser() && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)
         && currentUser.person.id.equals(personDay.person.id)) {
-
-      if (!(currentUser.person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")
-          && currentUser.person.qualification.qualification <= 3)) {
-        notificationManager.notifyStamping(stamping, NotificationManager.CRUD.DELETE);
-      }
-
       Stampings.stampings(personDay.date.getYear(), personDay.date.getMonthOfYear());
     }
-
     personStamping(personDay.person.id, personDay.date.getYear(),
         personDay.date.getMonthOfYear());
   }
@@ -463,125 +454,5 @@ public class Stampings extends Controller {
     render("@dailyPresence", date, numberOfInOut, showLink, daysRecap, groupView);
   }
 
-  /**
-   * La presenza festiva nell'anno.
-   *
-   * @param year anno
-   */
-  public static void holidaySituation(int year) {
-
-    List<Person> simplePersonList = personDao.list(
-        Optional.<String>absent(),
-        secureManager.officesReadAllowed(Security.getUser().get()),
-        false, new LocalDate(year, 1, 1),
-        new LocalDate(year, 12, 31), false).list();
-
-    List<IWrapperPerson> personList = FluentIterable
-        .from(simplePersonList)
-        .transform(wrapperFunctionFactory.person()).toList();
-    render(personList, year);
-  }
-
-  /**
-   * La presenza festiva della persona nell'anno.
-   *
-   * @param personId persona
-   * @param year     anno
-   */
-  public static void personHolidaySituation(Long personId, int year) {
-
-    Person per = personDao.getPersonById(personId);
-    Preconditions.checkNotNull(per);
-
-    rules.checkIfPermitted(per.office);
-
-    IWrapperPerson person = wrapperFactory.create(per);
-
-    render(person, year);
-  }
-
-
-  /**
-   * Abilita / disabilita l'orario festivo.
-   *
-   * @param personDayId giorno
-   */
-  public static void toggleWorkingHoliday(Long personDayId) {
-
-    PersonDay pd = personDayDao.getPersonDayById(personDayId);
-    Preconditions.checkNotNull(pd);
-    Preconditions.checkNotNull(pd.isPersistent());
-    Preconditions.checkState(pd.isHoliday && pd.timeAtWork > 0);
-
-    rules.checkIfPermitted(pd.person.office);
-
-    pd.acceptedHolidayWorkingTime = !pd.acceptedHolidayWorkingTime;
-    if (!pd.acceptedHolidayWorkingTime) {
-      pd.isTicketForcedByAdmin = false;
-    }
-    pd.save();
-
-    consistencyManager.updatePersonSituation(pd.person.id, pd.date);
-
-    flash.success("Operazione completata. Per concludere l'operazione di ricalcolo "
-        + "sui mesi successivi o sui riepiloghi mensili potrebbero occorrere alcuni secondi. "
-        + "Ricaricare la pagina.");
-
-    Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
-  }
-
-  /**
-   * Forza la decisione sul buono pasto di un giorno specifico per un dipendente.
-   */
-  public static void forceMealTicket(Long personDayId, boolean confirmed,
-      MealTicketDecision mealTicketDecision) {
-
-    PersonDay personDay = personDayDao.getPersonDayById(personDayId);
-    Preconditions.checkNotNull(personDay);
-    Preconditions.checkNotNull(personDay.isPersistent());
-
-    rules.checkIfPermitted(personDay.person.office);
-
-    if (!confirmed) {
-      confirmed = true;
-
-      mealTicketDecision = MealTicketDecision.COMPUTED;
-
-      if (personDay.isTicketForcedByAdmin) {
-        if (personDay.isTicketAvailable) {
-          mealTicketDecision = MealTicketDecision.FORCED_TRUE;
-        } else {
-          mealTicketDecision = MealTicketDecision.FORCED_FALSE;
-        }
-      }
-
-      render(personDay, confirmed, mealTicketDecision);
-    }
-
-    if (mealTicketDecision.equals(MealTicketDecision.COMPUTED)) {
-      personDay.isTicketForcedByAdmin = false;
-    } else {
-      personDay.isTicketForcedByAdmin = true;
-      if (mealTicketDecision.equals(MealTicketDecision.FORCED_FALSE)) {
-        personDay.isTicketAvailable = false;
-      }
-      if (mealTicketDecision.equals(MealTicketDecision.FORCED_TRUE)) {
-        personDay.isTicketAvailable = true;
-      }
-    }
-
-    personDay.save();
-    consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
-
-    flash.success("Buono Pasto impostato correttamente.");
-
-    Stampings.personStamping(personDay.person.id, personDay.date.getYear(),
-        personDay.date.getMonthOfYear());
-
-  }
-
-  public enum MealTicketDecision {
-    COMPUTED, FORCED_TRUE, FORCED_FALSE;
-  }
 }
 

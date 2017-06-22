@@ -1,0 +1,28 @@
+*{ATTENZIONE! i popover bootstrap non sono compatibili con la select2, non usarli contemporaneamente!!}*
+
+*{ 
+   name = per forzare il nome del parametro
+}*
+
+#{ff.fedit _arg, label:_label, sronly:_sronly, faicon:_faicon}
+  %{
+    value = _attrs.containsKey('value') ? _value : field.value
+    name = field.name + '.id';
+    if (_name) {
+      name = _name
+    }
+  }%
+  <select class="form-control ${_class}" name="${name}" id="${field.id}"#{ifnot _select2} select2#{/ifnot}#{if _disabled} disabled#{/if}#{if _popover} popover data-content='&{field.name+'.popover'}'#{/if} >
+    #{if _personalizeItems}
+      #{doBody /}
+    #{/if}
+    #{else}
+	    <option></option>
+	    #{list _items}
+	      <option value="${_.id}"#{if value?.id == _.id} selected#{/if}>
+	        ${_.label()}  
+	      </option>
+	    #{/list}
+	 #{/else}   
+  </select>
+#{/ff.fedit}

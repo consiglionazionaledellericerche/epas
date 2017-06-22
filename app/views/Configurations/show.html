@@ -3,21 +3,36 @@
 #{set title: 'ePAS - Parametri di configurazione' /}
 
 <div class="container">
-
+  
+  %{
+    if (paramCategory.equals(manager.configurations.EpasParam.EpasParamCategory.GENERAL)) {
+      generalActive = true;
+    }
+    if (paramCategory.equals(manager.configurations.EpasParam.EpasParamCategory.YEARLY)) {
+      yearlyActive = true;
+    }
+    if (paramCategory.equals(manager.configurations.EpasParam.EpasParamCategory.PERIODIC)) {
+      periodicActive = true;
+    }
+    if (paramCategory.equals(manager.configurations.EpasParam.EpasParamCategory.AUTOCERTIFICATION)) {
+      autocertificationActive = true;
+    }
+  }%
+  
   #{title title:('Parametri configurazione ' + office.name), administration:true /}
 
   #{tabList}
-  #{tabItem id:'general', title:'Generali', active:true /}
-  #{tabItem id:'yearly', title:'Annuali' /}
-  #{tabItem id:'periodic', title:'Periodici' /}
-  #{tabItem id:'autocertifications', title:'Autocertificazioni' /}
+  #{tabItem id:'GENERAL', title:'Generali', active:generalActive /}
+  #{tabItem id:'YEARLY', title:'Annuali', active:yearlyActive /}
+  #{tabItem id:'PERIODIC', title:'Periodici', active:periodicActive /}
+  #{tabItem id:'AUTOCERTIFICATION', title:'Autocertificazioni', active:autocertificationActive /}
   #{/tabList}
 
   <br>
 
   #{tabContent}
 
-  #{tabContentItem id:'general', active:true}
+  #{tabContentItem id:'GENERAL', active:generalActive}
   <div id="editGeneral">
     #{alert color:'info'}
     <p>Elenco dei parametri generali di configurazione per la sede
@@ -41,7 +56,7 @@
   </div>
   #{/tabContentItem}
 
-  #{tabContentItem id:'yearly'}
+  #{tabContentItem id:'YEARLY', active:yearlyActive}
   <div id="editYearly">
     #{alert color:'info'}
     <p>Elenco dei parametri di configurazione a cadenza annuale per la sede
@@ -65,7 +80,7 @@
   </div>
   #{/tabContentItem}
 
-  #{tabContentItem id:'periodic'}
+  #{tabContentItem id:'PERIODIC', active:periodicActive}
   <div id="editPeriodic">
     #{alert color:'info'}
     <p>Elenco dei parametri di configurazione a cadenza periodica per la sede
@@ -93,7 +108,7 @@
   </div>
   #{/tabContentItem}
 
-  #{tabContentItem id:'autocertifications'}
+  #{tabContentItem id:'AUTOCERTIFICATION', active:autocertificationActive}
   <div id="editAutocertifications">
     #{alert color:'info'}
     Elenco dei parametri di configurazione per l'abilitazione delle Autocertificazioni per la sede

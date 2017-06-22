@@ -6,6 +6,9 @@ import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
+
+import controllers.Security;
+
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.PersonDayDao;
@@ -21,6 +24,7 @@ import dao.wrapper.IWrapperPersonDay;
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +47,7 @@ import models.ShiftTimeTable;
 import models.ShiftType;
 import models.ShiftTypeMonth;
 import models.Stamping;
+import models.User;
 import models.UsersRolesOffices;
 import models.enumerate.ShiftTroubles;
 import org.joda.time.LocalDate;
@@ -103,6 +108,41 @@ public class ShiftManager2 {
     this.shiftTypeMonthDao = shiftTypeMonthDao;
   }
 
+  /**
+   * 
+   * @return la lista delle attività associate all'utente che ne fa richiesta.
+   */
+  public List<ShiftType> getUserActivities() {
+    List<ShiftType> activities = Lists.newArrayList();
+    User currentUser = Security.getUser().get();
+    Person person = currentUser.person;
+    if (person != null) {
+      if (!person.shiftCategories.isEmpty()) {
+        activities.addAll(person.shiftCategories.stream()
+            .flatMap(shiftCategories -> shiftCategories.shiftTypes.stream())
+            .sorted(Comparator.comparing(o -> o.type))
+            .collect(Collectors.toList()));
+        
+      }
+      if (!person.categories.isEmpty()) {
+        activities.addAll(person.categories.stream()
+            .flatMap(shiftCategories -> shiftCategories.shiftTypes.stream())
+            .sorted(Comparator.comparing(o -> o.type))
+            .collect(Collectors.toList()));
+      }
+      if (person.personShift != null) {
+        activities.addAll(person.personShift.personShiftShiftTypes.stream()
+            .map(psst -> psst.shiftType)
+            .sorted(Comparator.comparing(o -> o.type))
+            .collect(Collectors.toList()));
+      }
+    } else {
+      if (currentUser.isSystemUser()) {
+        activities.addAll(ShiftType.findAll());
+      }
+    }
+    return activities.stream().distinct().collect(Collectors.toList());
+  }
 
   /**
    * Controlla se il PersonShiftDay è compatibile con la presenza in Istituto in

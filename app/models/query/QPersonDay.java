@@ -28,11 +28,13 @@ public class QPersonDay extends EntityPathBase<PersonDay> {
 
     public final ListPath<models.absences.Absence, models.absences.query.QAbsence> absences = this.<models.absences.Absence, models.absences.query.QAbsence>createList("absences", models.absences.Absence.class, models.absences.query.QAbsence.class, PathInits.DIRECT2);
 
-    public final BooleanPath acceptedHolidayWorkingTime = createBoolean("acceptedHolidayWorkingTime");
+    public final NumberPath<Integer> approvedOnHoliday = createNumber("approvedOnHoliday", Integer.class);
+
+    public final NumberPath<Integer> approvedOutOpening = createNumber("approvedOutOpening", Integer.class);
 
     public final DatePath<org.joda.time.LocalDate> date = createDate("date", org.joda.time.LocalDate.class);
 
-    public final NumberPath<Integer> decurted = createNumber("decurted", Integer.class);
+    public final NumberPath<Integer> decurtedMeal = createNumber("decurtedMeal", Integer.class);
 
     public final NumberPath<Integer> difference = createNumber("difference", Integer.class);
 
@@ -55,6 +57,10 @@ public class QPersonDay extends EntityPathBase<PersonDay> {
     public final NumberPath<Integer> justifiedTimeMeal = createNumber("justifiedTimeMeal", Integer.class);
 
     public final NumberPath<Integer> justifiedTimeNoMeal = createNumber("justifiedTimeNoMeal", Integer.class);
+
+    public final NumberPath<Integer> onHoliday = createNumber("onHoliday", Integer.class);
+
+    public final NumberPath<Integer> outOpening = createNumber("outOpening", Integer.class);
 
     public final BooleanPath past = createBoolean("past");
 

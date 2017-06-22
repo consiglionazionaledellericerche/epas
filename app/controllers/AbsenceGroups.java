@@ -65,7 +65,6 @@ import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
-import models.absences.definitions.DefaultGroup;
 import models.enumerate.QualificationMapping;
 
 import org.joda.time.LocalDate;
@@ -667,11 +666,8 @@ public class AbsenceGroups extends Controller {
         absence.save();
         personDay.save();
         
-        if (groupAbsenceType.name.equals(DefaultGroup.FERIE_CNR_DIPENDENTI.name()) 
-            || groupAbsenceType.name.equals(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name())
-            || groupAbsenceType.name.equals(DefaultGroup.LAVORO_FUORI_SEDE.name())) {
-          notificationManager.notifyAbsence(absence, NotificationManager.CRUD.CREATE);
-        }
+        notificationManager.notificationAbsencePolicy(Security.getUser().get(), 
+            absence, groupAbsenceType, true);
         
       }
       if (!insertReport.reperibilityShiftDate().isEmpty()) {

@@ -176,7 +176,7 @@ public class PersonStampingDayRecap {
 
     // ##### Giorno festivo
 
-    if (personDay.isHoliday() && !personDay.acceptedHolidayWorkingTime
+    if (personDay.isHoliday() && personDay.getApprovedOnHoliday() <= 0
         && !personDay.isTicketForcedByAdmin) {
       mealTicket = null;
       return;

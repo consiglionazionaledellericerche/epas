@@ -5,6 +5,8 @@ import com.google.common.base.Optional;
 import java.util.List;
 
 import models.Office;
+import models.Role;
+import models.UsersRolesOffices;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -52,5 +54,25 @@ public interface IWrapperOffice extends IWrapperModel<Office> {
    * @return esito
    */
   public boolean isYearMonthUploadable(YearMonth yearMonth);
+  
+  /**
+   * La lista dei responsabile sede. 
+   */
+  public List<UsersRolesOffices> getSeatSupervisor();
+  
+  /**
+   * Gli amministratori tecnici dell'office.
+   */
+  public List<UsersRolesOffices> getTechnicalAdmins();
+
+  /**
+   * Gli amministratori dell'office.
+   */
+  public List<UsersRolesOffices> getPersonnelAdmins();
+
+  /**
+   * I mini amministratori dell'office.
+   */
+  public List<UsersRolesOffices> getMiniAdmins();
 
 }
