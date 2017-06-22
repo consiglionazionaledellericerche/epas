@@ -59,14 +59,13 @@ public class PersonDaysTest extends UnitTest {
         startLunch, endLunch, startWork, endWork);
     personDayManager.updateDifference(personDay, normalDay(), false);
     personDayManager.updateProgressive(personDay, Optional.fromNullable(previousForProgressive));
-    personDayManager.updateTicketAvailable(personDay, normalDay(), false);
     
     org.assertj.core.api.Assertions.assertThat(
         personDay.getTimeAtWork()).isEqualTo(390);   //6:30 ore
     org.assertj.core.api.Assertions.assertThat(
         personDay.getStampingsTime()).isEqualTo(420);//7:00 ore     
     org.assertj.core.api.Assertions.assertThat(
-        personDay.getDecurted()).isEqualTo(30);      //30 minuti
+        personDay.getDecurtedMeal()).isEqualTo(30);      //30 minuti
     org.assertj.core.api.Assertions.assertThat(personDay.getDifference()).isEqualTo(-42);
     org.assertj.core.api.Assertions.assertThat(personDay.getProgressive()).isEqualTo(18);
     org.assertj.core.api.Assertions.assertThat(personDay.isTicketAvailable).isEqualTo(true);
@@ -91,14 +90,13 @@ public class PersonDaysTest extends UnitTest {
     
     personDayManager.updateTimeAtWork(personDay, normalDay(), false, 
         startLunch, endLunch, startWork, endWork);
-    personDayManager.updateTicketAvailable(personDay, normalDay(), false);
     
     org.assertj.core.api.Assertions.assertThat(
         personDay.getTimeAtWork()).isEqualTo(420);   //7:00 ore
     org.assertj.core.api.Assertions.assertThat(
         personDay.getStampingsTime()).isEqualTo(420);//7:00 ore     
     org.assertj.core.api.Assertions.assertThat(
-        personDay.getDecurted()).isEqualTo(null);      //00 minuti
+        personDay.getDecurtedMeal()).isEqualTo(0);      //00 minuti
     org.assertj.core.api.Assertions.assertThat(
         personDay.isTicketAvailable).isEqualTo(true);
     
@@ -169,14 +167,13 @@ public class PersonDaysTest extends UnitTest {
     
     personDayManager.updateTimeAtWork(personDay, normalDay(), false, 
         startLunch, endLunch, startWork, endWork);
-    personDayManager.updateTicketAvailable(personDay, normalDay(), false);
     
     org.assertj.core.api.Assertions.assertThat(
         personDay.getTimeAtWork()).isEqualTo(420);     //7:00 ore
     org.assertj.core.api.Assertions.assertThat(
         personDay.getStampingsTime()).isEqualTo(420);  //7:00 ore     
     org.assertj.core.api.Assertions.assertThat(
-        personDay.getDecurted()).isEqualTo(null);      //00 minuti
+        personDay.getDecurtedMeal()).isEqualTo(0);      //00 minuti
     org.assertj.core.api.Assertions.assertThat(
         personDay.isTicketAvailable).isEqualTo(true);
     
@@ -194,14 +191,13 @@ public class PersonDaysTest extends UnitTest {
     
     personDayManager.updateTimeAtWork(personDay, normalDay(), false, 
         startLunch, endLunch, startWork, endWork);
-    personDayManager.updateTicketAvailable(personDay, normalDay(), false);
     
     org.assertj.core.api.Assertions.assertThat(
         personDay.getTimeAtWork()).isEqualTo(420);     //7:00 ore
     org.assertj.core.api.Assertions.assertThat(
         personDay.getStampingsTime()).isEqualTo(420);  //7:00 ore     
     org.assertj.core.api.Assertions.assertThat(
-        personDay.getDecurted()).isEqualTo(null);      //00 minuti
+        personDay.getDecurtedMeal()).isEqualTo(0);      //00 minuti
     org.assertj.core.api.Assertions.assertThat(
         personDay.isTicketAvailable).isEqualTo(true);
     
@@ -374,7 +370,7 @@ public class PersonDaysTest extends UnitTest {
     org.assertj.core.api.Assertions.assertThat(
         personDay.getStampingsTime()).isEqualTo(420);//7:00 ore     
     org.assertj.core.api.Assertions.assertThat(
-        personDay.getDecurted()).isEqualTo(30);      //30 minuti
+        personDay.getDecurtedMeal()).isEqualTo(30);      //30 minuti
     org.assertj.core.api.Assertions.assertThat(
         personDay.getDifference()).isEqualTo(-42);
     org.assertj.core.api.Assertions.assertThat(

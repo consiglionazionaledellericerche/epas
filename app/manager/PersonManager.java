@@ -194,9 +194,7 @@ public class PersonManager {
         .getHolidayWorkingTime(person, year, month);
     int value = 0;
     for (PersonDay pd : pdList) {
-      if (!pd.acceptedHolidayWorkingTime) {
-        value += pd.timeAtWork;
-      }
+      value += pd.getOnHoliday() - pd.getApprovedOnHoliday() ;
     }
     return value;
   }
@@ -216,9 +214,7 @@ public class PersonManager {
         .getHolidayWorkingTime(person, year, month);
     int value = 0;
     for (PersonDay pd : pdList) {
-      if (pd.acceptedHolidayWorkingTime) {
-        value += pd.timeAtWork;
-      }
+      value += pd.getApprovedOnHoliday();
     }
     return value;
   }
