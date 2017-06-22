@@ -3,6 +3,7 @@ package manager;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import dao.CompetenceCodeDao;
@@ -395,7 +396,7 @@ public class ShiftManager2 {
   /***********************************************************************************************/
 
   public void linkSupervisorToRole() {
-    List<ShiftCategories> list = ShiftCategories.findAll();
+    List<ShiftCategories> list = GenericModel.findAll();
     Role role = roleDao.getRoleByName(Role.SHIFT_SUPERVISOR);
     list.forEach(item -> {
       Optional<UsersRolesOffices> optional = uroDao
@@ -580,7 +581,6 @@ public class ShiftManager2 {
         // aggiungere alcun errore alla lista dei troubles.
       }
     }
-    checkShiftDayValid(personShiftDay.date, personShiftDay.shiftType);
   }
 
   /**
@@ -592,95 +592,33 @@ public class ShiftManager2 {
    * @param date la data in cui ricercare i personshiftday dell'attività activity
    */
   public void checkShiftDayValid(LocalDate date, ShiftType activity) {
-    List<PersonShiftDay> dayList = shiftDao.getShiftDaysByPeriodAndType(date, date, activity);
-    checkShiftIncomplete(activity, dayList);
-    checkProblemsOnOtherSlot(dayList);
+    List<PersonShiftDay> shifts = shiftDao.getShiftDaysByPeriodAndType(date, date, activity);
 
-  }
+    // 1. Controllo che siano coperti tutti gli slot
+    int slotNumber = activity.shiftTimeTable.slotCount();
 
-  /**
-   * controlla se ci sono problemi sugli altri slot presenti per quel giorno nel turno.
-   *
-   * @param dayList la lista dei personShiftDays
-   */
-  private void checkProblemsOnOtherSlot(List<PersonShiftDay> dayList) {
-    PersonShiftDay slotWithProblem = null;
-    for (PersonShiftDay pd : dayList) {
-
-      if (pd.troubles.isEmpty()) {
-        continue;
-      }
-      for (PersonShiftDayInTrouble trouble : pd.troubles) {
-        if (trouble.cause != ShiftTroubles.NOT_COMPLETED_SHIFT) {
-          slotWithProblem = pd;
-          continue;
-        }
-      }
-    }
-    final PersonShiftDay slot = slotWithProblem;
-    if (slot != null) {
-      dayList.stream().filter(shift -> shift != slot)
-          .forEach(shift -> setShiftTrouble(shift, ShiftTroubles.PROBLEMS_ON_OTHER_SLOT));
+    if (slotNumber > shifts.size()) {
+      shifts.forEach(shift -> setShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
     } else {
-      dayList.stream()
-          .forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.PROBLEMS_ON_OTHER_SLOT));
-    }
-  }
-
-  /**
-   * Controlla se, verificati gli slot che DEVONO essere presenti per avere un turno completo,
-   * la lista dei personShiftDay ne contiene in egual numero.
-   *
-   * @param activity l'attività di turno
-   * @param dayList la lista dei personShiftDays
-   */
-  private void checkShiftIncomplete(ShiftType activity, List<PersonShiftDay> dayList) {
-    class Slot {
-
-      boolean morning = false;
-      boolean afternoon = false;
-      boolean evening = false;
-
-      int howManySlot() {
-        int counter = 0;
-        if (morning) {
-          counter++;
-        }
-        if (afternoon) {
-          counter++;
-        }
-        if (evening) {
-          counter++;
-        }
-        return counter;
-      }
+      shifts.forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
     }
 
-    Slot slot = new Slot();
+    // 2. Verifica che gli slot siano tutti validi e setta PROBLEMS_ON_OTHER_SLOT su quelli da
+    // invalidare a causa degli altri turni non rispettati
+    ImmutableList<ShiftTroubles> invalidatingTroubles = ImmutableList.of(
+        ShiftTroubles.OUT_OF_STAMPING_TOLERANCE, ShiftTroubles.NOT_ENOUGH_WORKING_TIME,
+        ShiftTroubles.EXCEEDED_BREAKTIME, ShiftTroubles.PERSON_IS_ABSENT);
 
-    if (((activity.shiftTimeTable.startMorning != null)
-        && (!activity.shiftTimeTable.startMorning.equals("")))
-        && ((activity.shiftTimeTable.endMorning != null)
-        || (!activity.shiftTimeTable.endMorning.equals("")))) {
-      slot.morning = true;
-    }
-    if (((activity.shiftTimeTable.startAfternoon != null)
-        && (!activity.shiftTimeTable.startAfternoon.equals("")))
-        && ((activity.shiftTimeTable.endAfternoon != null)
-        && (!activity.shiftTimeTable.endAfternoon.equals("")))) {
-      slot.afternoon = true;
-    }
-    if (((activity.shiftTimeTable.startEvening != null)
-        && (!activity.shiftTimeTable.startEvening.equals("")))
-        && ((activity.shiftTimeTable.endEvening != null)
-        && (!activity.shiftTimeTable.endEvening.equals("")))) {
-      slot.evening = true;
-    }
-    if (slot.howManySlot() > dayList.size()) {
-      dayList.stream().forEach(shift -> setShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
-    } else {
-      dayList.stream().forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
-    }
+    List<PersonShiftDay> shiftsWithTroubles = shifts.stream()
+        .filter(shift -> {
+          return shift.hasOneOfErrors(invalidatingTroubles);
+        }).collect(Collectors.toList());
+
+    shiftsWithTroubles
+        .forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.PROBLEMS_ON_OTHER_SLOT));
+
+    shifts.removeAll(shiftsWithTroubles);
+    shifts.forEach(shift -> setShiftTrouble(shift, ShiftTroubles.PROBLEMS_ON_OTHER_SLOT));
   }
 
   /**

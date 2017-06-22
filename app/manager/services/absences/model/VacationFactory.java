@@ -352,6 +352,7 @@ public class VacationFactory {
 
     LocalDate beginPostPartum = periods.get(0).from;
     LocalDate endPostPartum = periods.get(periods.size() - 1).to;
+    // FIXME a volte il ritorno del dao è absent e schianta la get()
     GroupAbsenceType reducingGroup = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.RIDUCE_FERIE_CNR.name()).get();
     periods.get(0).reducingAbsences = absenceComponentDao.orderedAbsences(person, 
