@@ -7,10 +7,15 @@ public enum VacationCode {
   CODE_25_4("25+4", 25, 4),
   CODE_21_4("21+4", 21, 4),
 
-  // Relativi ai part-time verticali su 3 giorni
+  // Part time verticale 2 giorni
+  CODE_11_2("11+2", 11, 2),
+  CODE_10_2("10+2", 10, 2),
+  
+  // Part-time verticali 3 giorni
   CODE_16_2("16+2", 16, 2),
   CODE_17_2("17+2", 17, 2),
 
+  // Part time verticale 4 giorni
   CODE_22_3("22+3", 22, 3),
   CODE_21_3("21+3", 21, 3),
 

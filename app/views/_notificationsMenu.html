@@ -1,5 +1,7 @@
 #{if templateUtility.notifications.count > 0 || templateUtility.archivedNotifications.count > 0}
 <li class="dropdown" id="notifications">
+
+  <!-- Drop down menu (campana + numero di notifiche da leggere) -->
   <a class="dropdown-toggle" data-toggle="dropdown" href="#">
     <i class="fa fa-bell fa-fw"></i>
     #{if templateUtility.notifications.count > 0}
@@ -7,18 +9,23 @@
     #{/if}
     <b class="caret"></b>
   </a>
+  
+  <!-- Drop down -->
   <ul class="dropdown-menu">
+    <!-- Notifiche da leggere (in ordine dalla più recente) -->
     #{list items:templateUtility.notifications.partialList, as:'notification'}
     <li>
-      <a #{if notification.redirect}href="@{Notifications.readAndRedirect(notification.id)}"#{/if}
-        #{else}href="@{Notifications.read(notification.id)}" data-async="#notifications"#{/else}>
-      <i class="fa fa-comment fa-fw"></i> ${notification.message}
-        <span class="label label-info label-badge">
-          <time datetime="${notification.createdAt}"
-            title="${notification.createdAt.format()}">${notification.createdAt.toDate().since()}
-          </time>
-        </span>
-      </a>
+          <a #{if notification.redirect}href="@{Notifications.readAndRedirect(notification.id)}"#{/if}
+             #{else}href="@{Notifications.read(notification.id)}" data-async="#notifications"#{/else}>
+             
+             ${notification.message}
+             <span class="label label-primary label-badge hidden-xs">
+               <time datetime="${notification.createdAt}"
+                title="${notification.createdAt.format()}">${notification.createdAt.toDate().since()}
+               </time>
+             </span>
+          </a>
+      
     </li>
     #{if notification_isLast}
     <li class="divider"></li>
@@ -27,16 +34,16 @@
     #{secure.check 'Notifications.list'}
     #{if templateUtility.notifications.count > 0}
     <li>
-      <a href="@{Notifications.list()}">
-        <i class="fa fa-bell fa-fw"></i> &{'notification.list'}
+      <a href="@{Notifications.list(null, dao.NotificationDao.NotificationFilter.TO_READ)}">
+        <i class="fa fa-bell fa-fw"></i> &{'notification.toRead'}
           <span class="label label-danger label-badge">${templateUtility.notifications.count}</span>
       </a>
     </li>
     #{/if}
     #{if templateUtility.archivedNotifications.count > 0}
     <li>
-      <a href="@{Notifications.archiveds()}">
-        <i class="fa fa-bell-o fa-fw"></i> &{'notification.archiveds'}
+      <a href="@{Notifications.list(null, dao.NotificationDao.NotificationFilter.ARCHIVED)}">
+        <i class="fa fa-bell-o fa-fw"></i> &{'notification.archived'}
           <span class="label label-default label-badge">${templateUtility.archivedNotifications.count}</span>
       </a>
     </li>

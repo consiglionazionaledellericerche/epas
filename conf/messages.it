@@ -154,6 +154,8 @@ VacationCode.CODE_25_4= 25+4
 VacationCode.CODE_21_4= 21+4
 VacationCode.CODE_16_2= 16+2
 VacationCode.CODE_17_2= 17+2
+VacationCode.CODE_11_2= 11+2
+VacationCode.CODE_10_2= 10+2
 VacationCode.CODE_22_3= 22+3
 VacationCode.CODE_21_3= 21+3
 VacationCode.CODE_30_4= 30+4
@@ -224,6 +226,7 @@ mealTicket.forcedAquired= Buono Pasto maturato (forzato dall'amministratore)
 mealTicket.forcedNotAquired= Buono Pasto non maturato (forzato dall'amministratore)
 mealTicket.notYetAquired= Buono Pasto non ancora maturato
 mealTicket=Buono Pasto
+mealTicket.error= Il blocco è già stato assegnato a un dipendente della propria sede
 modifierType= Calcolo Orario
 
 MealTicketDecision.COMPUTED=Calcolato
@@ -270,10 +273,15 @@ newUser= Nuovo Utente
 notify.error =Attenzione
 notify.success =Ok
 
-notification.list= Notifiche da leggere
-notification.archiveds= Notifiche archiviate
-notification.archive= Archivia Notifica
+notification.all= Tutte le notifiche
+notification.toRead= Notifiche da leggere
+notification.archived= Notifiche lette
+notification.archive= Archivia
+notification.archiveAll= Archivia Tutte
 notification.show= Visualizza Dettaglio
+NotificationFilter.ALL= Tutte le notifiche
+NotificationFilter.ARCHIVED= Notifiche lette
+NotificationFilter.TO_READ= Notifiche da leggere
 
 nuovaPassword= Nuova Password
 confermaPassword= Ripeti Password

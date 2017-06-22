@@ -73,16 +73,13 @@ public class Calendar extends Controller {
   public static void show(ShiftType activity, LocalDate date) {
     // FIXME: 12/06/17 il passaggio del solo id faciliterebbe il redict dagli altri controller
     // ma va sistemato nella vista in modo che passi l'id con un nome adatto
-    User currentUser = Security.getUser().get();
+    
     final LocalDate currentDate = Optional.fromNullable(date).or(LocalDate.now());
 
     // TODO: 12/06/17 da spostare in un metodo da implementare sul templateutility che restituisca
     // le attività di turno gestibili in base al ruolo dell'utente loggato
 
-    final List<ShiftType> activities = currentUser.person.shiftCategories.stream()
-        .flatMap(shiftCategories -> shiftCategories.shiftTypes.stream())
-        .sorted(Comparator.comparing(o -> o.type))
-        .collect(Collectors.toList());
+    final List<ShiftType> activities = shiftManager2.getUserActivities();
 
     final ShiftType activitySelected = activity.id != null ? activity : activities.get(0);
 

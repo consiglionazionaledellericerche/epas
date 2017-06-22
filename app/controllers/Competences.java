@@ -26,6 +26,9 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
 import helpers.jpa.ModelQuery.SimpleResults;
 
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 
@@ -41,7 +44,6 @@ import lombok.extern.slf4j.Slf4j;
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.SecureManager;
-import manager.competences.CompetenceCodeDTO;
 import manager.competences.ShiftTimeTableDto;
 import manager.recaps.competence.CompetenceRecap;
 import manager.recaps.competence.CompetenceRecapFactory;
@@ -312,15 +314,34 @@ public class Competences extends Controller {
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
-
     rules.checkIfPermitted(office);
-    LocalDate date = new LocalDate(year, month, 1);
-    List<Person> personList = personDao.list(Optional.<String>absent(), Sets.newHashSet(office),
-        false, date, date.dayOfMonth().withMaximumValue(), true).list();
-    Map<Person, List<CompetenceCodeDTO>> map = competenceManager
-        .createMap(personList, date.getYear(), date.getMonthOfYear());
+    
+    DateInterval monthInterval = DateUtility.getMonthInterval(year, month);
+    
+    List<Person> withoutCompetences = Lists.newArrayList();
+    Map<Person, List<PersonCompetenceCodes>> mapEnabledCompetences = Maps.newHashMap();
 
-    render(office, map, date, year, month);
+    for (Person person : personDao.list(Optional.<String>absent(), Sets.newHashSet(office),
+        false, monthInterval.getBegin(), monthInterval.getEnd(), true).list()) {
+      boolean hasCompetence = false;
+      for (PersonCompetenceCodes personCompetenceCode : person.personCompetenceCodes) {
+        if (DateUtility
+            .intervalIntersection(personCompetenceCode.periodInterval(), monthInterval) != null) {
+          List<PersonCompetenceCodes> list = mapEnabledCompetences.get(person);
+          if (list == null) {
+            list = Lists.newArrayList();
+            mapEnabledCompetences.put(person, list);
+          }
+          hasCompetence = true;
+          list.add(personCompetenceCode);
+        }
+      }
+      if (!hasCompetence) {
+        withoutCompetences.add(person);
+      }
+    }
+    
+    render(office, mapEnabledCompetences, withoutCompetences, year, month);
   }
 
   /**
@@ -433,48 +454,53 @@ public class Competences extends Controller {
   /**
    * Competenze assegnate nel mese nell'officeId col codice specificato.
    *
-   * @param year           year
-   * @param month          month
-   * @param officeId       officeId
-   * @param competenceCode filtro competenceCode
+   * @param year             year
+   * @param month            month
+   * @param officeId         officeId
+   * @param competenceCodeId filtro competenceCode
    */
   public static void showCompetences(Integer year, Integer month, Long officeId,
-      CompetenceCode competenceCode) {
+      Long competenceCodeId) {
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
-
     rules.checkIfPermitted(office);
-    boolean servicesInitialized = true;
-    //Redirect in caso di mese futuro
+    
+    //Redirect in caso di mese futuro 
     LocalDate today = LocalDate.now();
     if (today.getYear() == year && month > today.getMonthOfYear()) {
       flash.error("Impossibile accedere a situazione futura, "
           + "redirect automatico a mese attuale");
-      showCompetences(year, today.getMonthOfYear(), officeId, competenceCode);
+      showCompetences(year, today.getMonthOfYear(), officeId, competenceCodeId);
     }
-    //La lista dei codici competenceCode da visualizzare nella select
-    // Ovvero: I codici attualmente attivi per almeno un dipendente di quell'office
+    
+    //Competenze con almeno un dipendente abilitato nel mese
     List<CompetenceCode> competenceCodeList = competenceDao
         .activeCompetenceCode(office, new LocalDate(year, month, 1));
     if (competenceCodeList.isEmpty()) {
-      flash.error("Per visualizzare la sezione Competenze è necessario "
-          + "abilitare almeno un codice competenza ad un dipendente.");
-      Competences.enabledCompetences(year, month, officeId);
+      render(year, month, competenceCodeList);
     }
+    
+    //Il competence code selezionato
+    CompetenceCode competenceCode = competenceCodeList.iterator().next();
+    if (competenceCodeId != null) {
+      competenceCode = competenceCodeDao.getCompetenceCodeById(competenceCodeId);
+      notFoundIfNull(competenceCode);
+      if (!competenceCodeList.contains(competenceCode)) {
+        competenceCode = competenceCodeList.iterator().next();
+      }
+    }
+    
     // genero un controllo sul fatto che esistano servizi attivi per cui la reperibilità
     // può essere utilizzata
-    servicesInitialized = competenceManager
-        .isServiceForReperibilityInitialized(office, competenceCodeList);
-    if (competenceCode == null || !competenceCode.isPersistent()) {
-      competenceCode = competenceCodeList.get(0);
-      notFoundIfNull(competenceCode);
-    }
+    boolean servicesInitialized = true;
+    servicesInitialized = competenceManager.isServiceForReperibilityInitialized(office, 
+        competenceCodeList);
 
     IWrapperCompetenceCode wrCompetenceCode = wrapperFactory.create(competenceCode);
-
-    CompetenceRecap compDto = competenceRecapFactory
-        .create(office, competenceCode, year, month);
+    //FIXME: in questo compDto ci sarebbe molto da discutere, vengono create le competenze mancanti
+    // al momento che l'utente visita la pagina, e questo genera un problema di concorrenza.
+    CompetenceRecap compDto = competenceRecapFactory.create(office, competenceCode, year, month);
 
     render(year, month, office, competenceCodeList, wrCompetenceCode, compDto, servicesInitialized);
 
@@ -550,7 +576,6 @@ public class Competences extends Controller {
       render("@editCompetence", competence, office);
     }
 
-
     competenceManager.saveCompetence(competence, valueApproved);
     if (competence.competenceCode.code.equalsIgnoreCase("S1")
         || competence.competenceCode.code.equalsIgnoreCase("S2")
@@ -561,21 +586,12 @@ public class Competences extends Controller {
     }
     int month = competence.month;
     int year = competence.year;
-    IWrapperCompetenceCode wrCompetenceCode = wrapperFactory.create(competence.competenceCode);
-    List<CompetenceCode> competenceCodeList = competenceDao
-        .activeCompetenceCode(office, new LocalDate(year, month, 1));
-    List<Competence> compList = competenceDao.getCompetencesInOffice(year, month,
-        Lists.newArrayList(competence.competenceCode.code), office, false);
-    flash.success("Aggiornato correttamente il valore della competenza");
+    
+    flash.success("Competenza %s di %s aggiornata correttamente", competence.competenceCode.code, 
+        competence.person.fullName());
 
-    CompetenceRecap compDto = competenceRecapFactory
-        .create(office, competence.competenceCode, year, month);
-    boolean servicesInitialized = competenceManager
-        .isServiceForReperibilityInitialized(office, competenceCodeList);
-
-
-    render("@showCompetences", year, month, office,
-        wrCompetenceCode, competenceCodeList, compList, compDto, servicesInitialized);
+    showCompetences(year, month, office.id, competence.competenceCode.id);
+    
   }
 
   /**
@@ -624,6 +640,7 @@ public class Competences extends Controller {
    * Report. Esporta in formato .csv la situazione annuale degli straordinari
    */
   public static void exportCompetences() {
+    rules.checkIfPermitted();
     render();
   }
 
@@ -782,17 +799,12 @@ public class Competences extends Controller {
     CompetenceCode competenceCode = competenceCodeDao.getCompetenceCodeById(codeId);
     YearMonth yearMonth = new YearMonth(year, month);
     competenceManager.applyBonus(Optional.fromNullable(office), competenceCode, yearMonth);
-    IWrapperCompetenceCode wrCompetenceCode = wrapperFactory.create(competenceCode);
-    List<CompetenceCode> competenceCodeList = competenceDao
-        .activeCompetenceCode(office, new LocalDate(year, month, 1)); 
     
-    CompetenceRecap compDto = competenceRecapFactory
-        .create(office, competenceCode, year, month);
-    boolean servicesInitialized = competenceManager
-        .isServiceForReperibilityInitialized(office, competenceCodeList);
     flash.success("Aggiornati i valori per la competenza %s", competenceCode.code);
-    render("@showCompetences", year, month, office,
-        wrCompetenceCode, competenceCodeList, compDto, servicesInitialized);
+
+    showCompetences(year, month, office.id, competenceCode.id);
+
+
   }
 
   /* ****************************************************************

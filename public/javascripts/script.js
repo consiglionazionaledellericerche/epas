@@ -1,119 +1,110 @@
 /* Author:
  */
 $(function($) {
-	
-	/**
-	 * Opposto di serialize(). Dall'url ai form params.
-	 */
-	$.queryParams = function(url) {
-		if (url.indexOf('#') !== -1) {
-			url = url.substring(0, url.indexOf('#'));
-		}
-		return (function(a) {
-			if (a == "") return {};
-			var b = {};
-			for (var i = 0; i < a.length; ++i) {
-				var p=a[i].split('=');
-				if (p.length != 2) continue;
-				b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
-			}
-			return b;
-		})(url.substring(url.indexOf('?') +1).split('&'));
-	};
-	
-	/**
-	 * Author: Alessandro
-	 * Se si vuole utilizzare il caricamento async da <a> anzichè <form>.
-	 * Aggiungere all'ancora l'attributo data-async="#divTarget" ed eventualmente il data-spinner.
-	 * TODO: implementare async-error
-	 */
-	$(document.body).on('click', 'a[data-async]', function(e) {
-		var $body = $('body');
-		var $flashDiv = $body.find('#flashDiv');
-		if ($flashDiv) {
-		  $flashDiv.remove();
-		}
-		var $a = $(this);
-		var target = $a.data('async');
-		var $target = $(target);
-		var contentType = "application/x-www-form-urlencoded; charset=UTF-8";
-		var url = $a.attr('href')
-		var formData = $.queryParams(url);
-
-		var spinner = $a.data('spinner');
-		var $spinner = $(spinner);
-		$spinner.removeClass('hidden');
-		$spinner.addClass('visible');
-		
-		url = url.substring(0, url.indexOf('?'));
-		method = 'get';
-
-		// TODO: chiamata ajax simile alla versione form. 
-		$.ajax({
-			type: method,
-			url: url,
-			data: formData,
-			contentType: contentType
-		}).done(function(data, status) {
-			$target.replaceWith($(target, data));
-			$('body').initepas();
-		}).fail(function(xhr, status, error) {
-			if (xhr.status == 400) {
-				var $res = $(errorTarget, xhr.responseText);
-				var $etarget = errorTarget ? $(errorTarget) : $form;
-				$etarget.html($res.html()).parent().initepas();
-			} else {
-				//bootbox.alert('Si è verificato un errore: '+ error);
-			} // else segnala l'errore in qualche modo.
-		}).always(function() {
-			$spinner.removeClass('visible');
-			$spinner.addClass('hidden');
-		});
-		e.preventDefault();
-	});
-	
-//	$(document.body).on('change', 'form[disable-onchange'), function(e) {
-//		var $form = $(this);
-//		//TODO tutti se sono più di uno
-//    	$form.find('button').attr('disabled', 'disabled');
-//	}
-	/**
-	 * Author: Marco
-	 * form ajax attivate con l'attributo data-async:
-	 *   data-async deve contenere il target per le risposte di successo;
-	 *   data-async-error deve contenere il target per gli errori.
-	 */
-	$(document.body).on('submit', 'form[data-async]', function(e) {
-		var $form = $(this);
-		var target = $form.data('async');
-		var errorTarget = $form.data('async-error');
-		var $target = $(target);
-		//patch per multipart (blob)
-		var contentType = "application/x-www-form-urlencoded; charset=UTF-8";
-		var formData = $form.serialize();
-		if ($form.attr('enctype') === 'multipart/form-data') {
-			contentType = false;
-			formData = new FormData($form[0]) //IE9? issue stackoverflow 20795449
-		}
-
-        //spinner
-		var spinner = $form.data('spinner');
-		var $spinner = $(spinner);
-		$spinner.removeClass('hidden');
-		$spinner.addClass('visible');
-		
-		//se presente l'attributo data-related disabilita
-		//tutte le form della pagina con lo stesso identificativo
-		if ($form.data('related')) {
-		  $("form").each(function() {
-			related = $(this).data('related');
-			if (related === $form.data('related')) {
-			  $button = $(this).find('button');
-			  $button.attr('disabled', 'disabled');
-			}
-  		  });
-		}
-		
+  /**
+   * Opposto di serialize(). Dall'url ai form params.
+   */
+  $.queryParams = function(url) {
+    if (url.indexOf('#') !== -1) {
+      url = url.substring(0, url.indexOf('#'));
+    }
+    return (function(a) {
+      if (a == "") return {};
+      var b = {};
+      for (var i = 0; i < a.length; ++i) {
+        var p = a[i].split('=');
+        if (p.length != 2) continue;
+        b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
+      }
+      return b;
+    })(url.substring(url.indexOf('?') + 1).split('&'));
+  };
+  /**
+   * Author: Alessandro
+   * Se si vuole utilizzare il caricamento async da <a> anzichè <form>.
+   * Aggiungere all'ancora l'attributo data-async="#divTarget" ed eventualmente il data-spinner.
+   * TODO: implementare async-error
+   */
+  $(document.body).on('click', 'a[data-async]', function(e) {
+    var $body = $('body');
+    var $flashDiv = $body.find('#flashDiv');
+    if ($flashDiv) {
+      $flashDiv.remove();
+    }
+    var $a = $(this);
+    var target = $a.data('async');
+    var $target = $(target);
+    var contentType = "application/x-www-form-urlencoded; charset=UTF-8";
+    var url = $a.attr('href')
+    var formData = $.queryParams(url);
+    var spinner = $a.data('spinner');
+    var $spinner = $(spinner);
+    $spinner.removeClass('hidden');
+    $spinner.addClass('visible');
+    url = url.substring(0, url.indexOf('?'));
+    method = 'get';
+    // TODO: chiamata ajax simile alla versione form. 
+    $.ajax({
+      type: method,
+      url: url,
+      data: formData,
+      contentType: contentType
+    }).done(function(data, status) {
+      $target.replaceWith($(target, data));
+      $('body').initepas();
+    }).fail(function(xhr, status, error) {
+      if (xhr.status == 400) {
+        var $res = $(errorTarget, xhr.responseText);
+        var $etarget = errorTarget ? $(errorTarget) : $form;
+        $etarget.html($res.html()).parent().initepas();
+      } else {
+        //bootbox.alert('Si è verificato un errore: '+ error);
+      } // else segnala l'errore in qualche modo.
+    }).always(function() {
+      $spinner.removeClass('visible');
+      $spinner.addClass('hidden');
+    });
+    e.preventDefault();
+  });
+  //	$(document.body).on('change', 'form[disable-onchange'), function(e) {
+  //		var $form = $(this);
+  //		//TODO tutti se sono più di uno
+  //    	$form.find('button').attr('disabled', 'disabled');
+  //	}
+  /**
+   * Author: Marco
+   * form ajax attivate con l'attributo data-async:
+   *   data-async deve contenere il target per le risposte di successo;
+   *   data-async-error deve contenere il target per gli errori.
+   */
+  $(document.body).on('submit', 'form[data-async]', function(e) {
+    var $form = $(this);
+    var target = $form.data('async');
+    var errorTarget = $form.data('async-error');
+    var $target = $(target);
+    //patch per multipart (blob)
+    var contentType = "application/x-www-form-urlencoded; charset=UTF-8";
+    var formData = $form.serialize();
+    if ($form.attr('enctype') === 'multipart/form-data') {
+      contentType = false;
+      formData = new FormData($form[0]) //IE9? issue stackoverflow 20795449
+    }
+    //spinner
+    var spinner = $form.data('spinner');
+    var $spinner = $(spinner);
+    $spinner.removeClass('hidden');
+    $spinner.addClass('visible');
+    //se presente l'attributo data-related disabilita
+    //tutte le form della pagina con lo stesso identificativo
+    if ($form.data('related')) {
+      $("form").each(function() {
+        related = $(this).data('related');
+        if (related === $form.data('related')) {
+          $button = $(this).find('button');
+          $button.attr('disabled', 'disabled');
+        }
+      });
+    }
     //        $form.find(':input').prop("readonly", true);
     //        var bgcolor = $form.css('background-color');
     //        $form.css('backround-color', '#e0e0e0');
@@ -127,7 +118,6 @@ $(function($) {
       // TODO: verificare se occorre fare unwrap
       $('body').initepas();
       // disattiva la modale sopra (se c'è).
-      
       $form.parents('.modal').modal('hide');
     }).fail(function(xhr, status, error) {
       if (xhr.status == 400) {
@@ -145,30 +135,27 @@ $(function($) {
     });
     e.preventDefault();
   });
-
   /**
    * Per impostare il tag da visualizzare quando ricarica la pagina.
    */
   $(document.body).on('submit', 'form[data-anchor]', function(e) {
-	    e.preventDefault();
-	    var $form = $(this);
-	    var url = $form.attr('action') + $form.data('anchor');
-	    $form.removeAttr('data-anchor');
-	    $form.attr('action', url).submit();
+    e.preventDefault();
+    var $form = $(this);
+    var url = $form.attr('action') + $form.data('anchor');
+    $form.removeAttr('data-anchor');
+    $form.attr('action', url).submit();
   });
-  
   PNotify.prototype.options.styling = "fontawesome";
-
   /**
    * Author: Marco
    */
   $(document.body).on('click', 'a[data-async-modal]', function(e) {
-	var $body = $('body');
-	var $flashDiv = $body.find('#flashDiv');
-	if ($flashDiv) {
-	  $flashDiv.remove();
-	}
-	var $this = $(this);
+    var $body = $('body');
+    var $flashDiv = $body.find('#flashDiv');
+    if ($flashDiv) {
+      $flashDiv.remove();
+    }
+    var $this = $(this);
     var $modal = $($this.data('async-modal'));
     var url = $this.attr('href');
     $body.modalmanager('loading');
@@ -192,39 +179,37 @@ $(function($) {
   }
   $(document.body).on('hide.bs.collapse', 'section,div', toggleChevron);
   $(document.body).on('show.bs.collapse', 'section,div', toggleChevron);
-
   //  <div class="panel panel-info" id="notifications" data-load-async="@{Application.test()}">
   //  <div class="panel-heading">
   //  <i class="fa fa-spin fa-spinner fa-2x"></i> Caricamento test in corso...
   //  </div>
   //</div>  
   $('[data-load-async]', this).each(function() {
-      var $this = $(this);
-      $this.load($this.data('loadAsync'), function() {
-        $this.initepas();
-      });
+    var $this = $(this);
+    $this.load($this.data('loadAsync'), function() {
+      $this.initepas();
+    });
   });
-  
-  $.fn.initepas = function() {	    
-	$('[data-notify]', this).each(function() {
-	  var $this = $(this);
-	  var title = $this.data('notify')
-	  var text = $this.text();
-	  var type = $this.data('notify-type');
-	  new PNotify({
-		  title: title,
-		  text: text,
-		  type: type,
-		  remove: true
-	  });
-	});  
-
+  $.fn.initepas = function() {
+    $('[data-notify]', this).each(function() {
+      var $this = $(this);
+      var title = $this.data('notify')
+      var text = $this.text();
+      var type = $this.data('notify-type');
+      new PNotify({
+        title: title,
+        text: text,
+        type: type,
+        remove: true
+      });
+    });
     $(':input[data-switcher]', this).select2({
       width: 'resolve',
       containerCssClass: "switcher",
       dropdownCssClass: "switcher",
     });
     $(':input[select2]', this).select2({
+      width: 'resolve',
       allowClear: true,
       theme: "bootstrap",
       placeholder: "Seleziona un valore",
@@ -232,8 +217,6 @@ $(function($) {
     $(':input[select2Table]', this).select2({
       minimumResultsForSearch: 25
     });
-    
-    
     $('[popover]').popover({
       trigger: "focus",
       placement: 'right auto',
@@ -244,63 +227,83 @@ $(function($) {
       placement: 'right auto',
       container: 'body'
     });
-    $('[popover-hover-2]').popover({	/*per non avere il cambio di sfondo */
-        trigger: "hover",
-        placement: 'top auto',
-        container: 'body'
-      });
+    $('[popover-hover-2]').popover({ /*per non avere il cambio di sfondo */
+      trigger: "hover",
+      placement: 'top auto',
+      container: 'body'
+    });
     /**
      * Esempio utilizzo <div webui-popover-over data-url="#id"
      * https://github.com/sandywalker/webui-popover
      **/
     $('[webui-popover-hover]').webuiPopover({
-     placement:'auto',
-     trigger:'hover',
-     type:'html',
-     //style:'inverse',
-     animation:'pop',
-     dismissible:true,
-     delay: {//show and hide delay time of the popover, works only when trigger is 'hover',the value can be number or object
+      placement: 'auto',
+      trigger: 'hover',
+      type: 'html',
+      //style:'inverse',
+      animation: 'pop',
+      dismissible: true,
+      delay: { //show and hide delay time of the popover, works only when trigger is 'hover',the value can be number or object
         show: null,
         hide: null
-     }
+      }
     });
-
-      
+    //Attributo da inserire all'anchor se si vuole far scomparire il popover dopo il click
+    $('a[hide-popover-on-click]').click(function() {
+      var $a = $(this);
+      //popover direttamente collegato all'anchor
+      var target = $a.attr('data-target');
+      if (!target) {
+        //popover collegato in uno dei figli
+        target = $a.children("[data-target]:first").attr('data-target');
+        if (!target) {
+          //popover collegato a uno dei padri
+          target = $a.closest(".webui-popover").attr('id');
+        }
+      }
+      $('[data-target="' + target + '"]').webuiPopover('hide');
+    });
     this.find('[datatable]').DataTable({
       "pageLength": 15,
       "lengthMenu": [
-        [10,15,20, 25, 50, 100, -1],
-        [10,15,20, 25, 50, 100, "Tutti"]
+        [10, 15, 20, 25, 50, 100, -1],
+        [10, 15, 20, 25, 50, 100, "Tutti"]
       ],
       "language": {
         "url": "/public/i18n/DataTablesItalian.json"
       }
     });
-    
+    this.find('[datatable-nopaging]').DataTable({
+      paging: false,
+      "language": {
+        "url": "/public/i18n/DataTablesItalian.json"
+      }
+    });
     this.find('[datatable-small]').DataTable({
-        "pageLength": 10,
-        "lengthMenu": [
-          [10,15,20, 25, 50, 100, -1],
-          [10,15,20, 25, 50, 100, "Tutti"]
-        ],
-        "language": {
-          "url": "/public/i18n/DataTablesItalian.json"
-        }
-      });
-    
+      "pageLength": 10,
+      "lengthMenu": [
+        [10, 15, 20, 25, 50, 100, -1],
+        [10, 15, 20, 25, 50, 100, "Tutti"]
+      ],
+      "language": {
+        "url": "/public/i18n/DataTablesItalian.json"
+      }
+    });
     //i buoni pasto hanno bisogno di un doppio ordinamento... per quello hanno una regola speciale.
     this.find('[datatable-mealTicket]').DataTable({
-    	"order":[[2,"desc"],[0,"desc"]],
-        "pageLength": 10,
-        "lengthMenu": [
-          [10,15,20, 25, 50, 100, -1],
-          [10,15,20, 25, 50, 100, "Tutti"]
-        ],
-        "language": {
-          "url": "/public/i18n/DataTablesItalian.json"
-        }
-      });
+      "order": [
+        [2, "desc"],
+        [0, "desc"]
+      ],
+      "pageLength": 10,
+      "lengthMenu": [
+        [10, 15, 20, 25, 50, 100, -1],
+        [10, 15, 20, 25, 50, 100, "Tutti"]
+      ],
+      "language": {
+        "url": "/public/i18n/DataTablesItalian.json"
+      }
+    });
     //Datatables. Se imposto lo scrollX devo ricordarmi di non avere
     //il plugin responsive abilitato sulla tabella(sono incompatibili)
     this.find('.datatable-test').DataTable({
@@ -373,9 +376,7 @@ $(function($) {
       var selector = $form.data('reload');
       var $target = $(selector);
       $target.addClass('reloading');
-      var $spinner = $(
-        '<span class="text-primary" style="position:absolute; z-index: 10"><i class="fa fa-spin fa-spinner fa-2x"></i></span>'
-      ).prependTo($target);
+      var $spinner = $('<span class="text-primary" style="position:absolute; z-index: 10"><i class="fa fa-spin fa-spinner fa-2x"></i></span>').prependTo($target);
       var offset = $spinner.offset();
       $spinner.offset({
         top: offset.top + 1,
@@ -417,7 +418,6 @@ $(function($) {
   } /* fine initepas() */
   $('body').initepas();
 }); /* fine on document load */
-
 function generateUserName(name, surname, username) {
   var name = name.val().replace(/\W/g, '').toLowerCase();
   var surname = surname.val().replace(/\W/g, '').toLowerCase();

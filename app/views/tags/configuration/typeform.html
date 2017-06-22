@@ -6,41 +6,41 @@
   #{if !_confirmed}
     <!-- input period -->
     #{if configuration.epasParam.yearly }
-      #{p.text 'configurationDto.validityYear', type:'number', value:_configurationDto.validityYear /}
-      #{p.booleanRadio 'configurationDto.toTheEnd', value:_configurationDto.toTheEnd /}
+      #{f.input 'configurationDto.validityYear', type:'number', value:_configurationDto.validityYear /}
+      #{f.booleanRadio 'configurationDto.toTheEnd', value:_configurationDto.toTheEnd /}
     #{/if}
     #{if configuration.epasParam.periodic }
-      #{p.date 'configurationDto.validityBegin', value:_configurationDto.validityBegin?.format(), required:true /}
-	  #{p.date 'configurationDto.validityEnd', value:_configurationDto.validityEnd?.format() /}
+      #{f.date 'configurationDto.validityBegin', value:_configurationDto.validityBegin?.format(), required:true /}
+	  #{f.date 'configurationDto.validityEnd', value:_configurationDto.validityEnd?.format() /}
     #{/if}
     
     <!-- input value -->
 	#{if _configuration.epasParam.epasParamValueType.equals(manager.configurations.EpasParam.EpasParamValueType.BOOLEAN) }
-	  #{p.booleanRadio 'configurationDto.booleanNewValue', value:_configurationDto.booleanNewValue /}
+	  #{f.booleanRadio 'configurationDto.booleanNewValue', value:_configurationDto.booleanNewValue /}
 	#{/if}
 	#{if _configuration.epasParam.epasParamValueType.equals(manager.configurations.EpasParam.EpasParamValueType.INTEGER) }
-	  #{p.text 'configurationDto.integerNewValue', type:'number', value:_configurationDto.integerNewValue /}
+	  #{f.input 'configurationDto.integerNewValue', type:'number', value:_configurationDto.integerNewValue /}
 	#{/if}
 	#{if _configuration.epasParam.epasParamValueType.equals(manager.configurations.EpasParam.EpasParamValueType.IP_LIST) }
-	  #{p.textarea 'configurationDto.stringNewValue', value:_configurationDto.stringNewValue /}
+	  #{f.textArea 'configurationDto.stringNewValue', value:_configurationDto.stringNewValue /}
 	#{/if}
 	#{if _configuration.epasParam.epasParamValueType.equals(manager.configurations.EpasParam.EpasParamValueType.LOCALDATE) }
-	  #{p.date 'configurationDto.localdateNewValue', value:_configurationDto.localdateNewValue?.format() /}
+	  #{f.date 'configurationDto.localdateNewValue', value:_configurationDto.localdateNewValue?.format() /}
 	#{/if}
 	#{if _configuration.epasParam.epasParamValueType.equals(manager.configurations.EpasParam.EpasParamValueType.EMAIL) }
-	  #{p.text 'configurationDto.stringNewValue', value:_configurationDto.stringNewValue /}
+	  #{f.input 'configurationDto.stringNewValue', value:_configurationDto.stringNewValue /}
 	#{/if}
 	#{if _configuration.epasParam.epasParamValueType.equals(manager.configurations.EpasParam.EpasParamValueType.DAY_MONTH) }
-	  #{p.text 'configurationDto.stringNewValue', value:_configurationDto.stringNewValue /}
+	  #{f.input 'configurationDto.stringNewValue', value:_configurationDto.stringNewValue /}
 	#{/if}
 	#{if _configuration.epasParam.epasParamValueType.equals(manager.configurations.EpasParam.EpasParamValueType.MONTH) }
-	  #{p.text 'configurationDto.integerNewValue', value:_configurationDto.integerNewValue /}
+	  #{f.input 'configurationDto.integerNewValue', value:_configurationDto.integerNewValue /}
 	#{/if}
 	#{if _configuration.epasParam.epasParamValueType.equals(manager.configurations.EpasParam.EpasParamValueType.LOCALTIME) }
-	  #{p.text 'configurationDto.stringNewValue', value:_configurationDto.stringNewValue /}
+	  #{f.input 'configurationDto.stringNewValue', value:_configurationDto.stringNewValue /}
 	#{/if}
 	#{if _configuration.epasParam.epasParamValueType.equals(manager.configurations.EpasParam.EpasParamValueType.LOCALTIME_INTERVAL) }
-	  #{p.text 'configurationDto.stringNewValue', value:_configurationDto.stringNewValue /}
+	  #{f.input 'configurationDto.stringNewValue', value:_configurationDto.stringNewValue /}
 	#{/if}
     
 	

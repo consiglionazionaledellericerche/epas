@@ -56,10 +56,11 @@ when
   $c: PermissionCheck(action in (
      	"Application.index",
      	"Version.showVersion",
+     	"Notifications.filter",
      	"Notifications.list",
-     	"Notifications.archiveds",
      	"Notifications.readAndRedirect",
-     	"Notifications.read") 
+     	"Notifications.read",
+     	"Notifications.readAll") 
       || action.startsWith("SwitchTemplate."), 
       target == null, granted == false)
 then
@@ -88,49 +89,23 @@ end
 /*Questa parte per il nuovo ruolo supervisore dei turni */
 rule isShiftSupervisor_generic
 when 
-  $uro: UsersRolesOffices()
-  Role(name == Role.SHIFT_SUPERVISOR) from $uro.role
-  $c: PermissionCheck(action.startsWith("Shift.")
-   || action.startsWith("Calendar.")
-/*   action in (
-  *		"Shift.handleShifts",
-  *		"Shift.renderIds",
-  *		"Shift.renderServices",
-  *		"Shift.renderShiftname",
-  *		"Shift.personList",
-  *     "Shift.timeTable",
-  *      "Shift.find",
-  *      "Shift.update",
-  *      "Shift.exportMonthAsPDF",
-  *      "Shift.exportMonthCalAsPDF",
-  *      "Shift.absence",
-  *      "Shift.iCal") */
+  Person(!shiftCategories.isEmpty()) from currentOperator.person	
+  $c: PermissionCheck(action in ("Calendar.show",
+                                 "Calendar.shiftPeople",
+                                 "Calendar.deleteShift",
+                                 "Calendar.events",
+                                 "Calendar.changeShift",
+                                 "Calendar.newShift",
+                                 "Calendar.recap",
+                                 "Calendar.editable",
+                                 "Calendar.monthShiftsApprovement",
+                                 "Calendar.approveShiftsInMonth",
+  								 "Calendar.removeApprovation") 
         , target == null, granted == false)
 then
  $c.grant();
 end
 
-rule isShiftSupervisor_inOffice
-when 
-  $uro: UsersRolesOffices()
-  $o: Office( usersRolesOffices contains $uro)
-  Role(name == Role.SHIFT_SUPERVISOR) from $uro.role
-  $c: PermissionCheck(action in (
-  		"Shift.handleShifts",
-  		"Shift.renderIds",
-  		"Shift.renderServices",
-  		"Shift.renderShiftname",
-  		"Shift.personList",
-        "Shift.timeTable",
-        "Shift.find",
-        "Shift.update",
-        "Shift.exportMonthAsPDF",
-        "Shift.exportMonthCalAsPDF",
-        "Shift.absence",
-        "Shift.iCal"), target == $o, granted == false)
-then
- $c.grant();
-end
 
 rule shiftSupervisorCanManageShiftType
 when
@@ -157,9 +132,10 @@ when
   $st: ShiftType() from $sc.shiftTypes
   $target: ShiftTypeMonth((!approved && shiftType == $st) || this == null)
   $c: PermissionCheck(action in ("Calendar.deleteShift",
-  								               "Calendar.changeShift",
-  								               "Calendar.newShift",
-  								               "Calendar.editable"), target == $target, granted == false)
+  								 "Calendar.changeShift",
+  								 "Calendar.newShift",
+  								 "Calendar.editable")
+  , target == $target, granted == false)
 then
  $c.grant();
 end
@@ -171,7 +147,8 @@ when
   $st: ShiftType() from $sc.shiftTypes
   $target: ShiftTypeMonth(shiftType == $st)
   $c: PermissionCheck(action in ("Calendar.approveShiftsInMonth",
-  								               "Calendar.removeApprovation"), target == $target, granted == false)
+  								 "Calendar.removeApprovation")
+  , target == $target, granted == false)
 then
  $c.grant();
 end
@@ -179,6 +156,61 @@ end
 
 
 /*Fine parte di ruolo supervisore dei turni*/
+
+
+/*Inizio parte gestori dei turni*/
+
+rule isShiftManager_generic
+when 
+  Person(!categories.isEmpty()) from currentOperator.person	
+  $c: PermissionCheck(action in ("Calendar.show",
+                                 "Calendar.shiftPeople",
+                                 "Calendar.deleteShift",
+                                 "Calendar.events",
+                                 "Calendar.changeShift",
+                                 "Calendar.newShift",
+                                 "Calendar.recap",
+                                 "Calendar.editable") 
+        , target == null, granted == false)
+then
+ $c.grant();
+end
+
+
+rule shiftManagerCanManageShiftType
+when
+  $p: Person(!categories.isEmpty()) from currentOperator.person
+  $sc: ShiftCategories() from $p.categories
+  $st: ShiftType() from $sc.shiftTypes
+  $c: PermissionCheck(action in ("Calendar.show",
+                                 "Calendar.shiftPeople",
+                                 "Calendar.deleteShift",
+                                 "Calendar.events",
+                                 "Calendar.changeShift",
+                                 "Calendar.newShift",
+                                 "Calendar.recap",
+                                 "Calendar.editable")
+  , target == $st, granted == false)
+then
+ $c.grant();
+end
+
+rule shiftManagercanManageShiftMonth
+when
+  $p: Person(!categories.isEmpty()) from currentOperator.person
+  $sc: ShiftCategories() from $p.categories
+  $st: ShiftType() from $sc.shiftTypes
+  $target: ShiftTypeMonth((!approved && shiftType == $st) || this == null)
+  $c: PermissionCheck(action in ("Calendar.deleteShift",
+  								 "Calendar.changeShift",
+  								 "Calendar.newShift",
+  								 "Calendar.editable")
+  , target == $target, granted == false)
+then
+ $c.grant();
+end
+
+/*Fine parte dei gestori dei turni*/
 
 rule isPersonShift
 when 
@@ -447,7 +479,7 @@ when
     "MealTickets.returnedMealTickets",
     "MonthRecaps.customRecap",
     "MonthRecaps.showRecaps",
-    "PersonDayHistory.personDayHistory",
+    "PersonDays.personDayHistory",
     "PersonMonths.visualizePeopleTrainingHours",
     "Persons.children",
     "Persons.edit",
@@ -618,6 +650,36 @@ then
  $c.grant();
 end
 
+/*******************************************************************************
+ * Azioni utente con ruolo SEAT_SUPERVISOR
+ ******************************************************************************/
+rule RoleSeatSuperVisor_Generic
+when
+ $uro: UsersRolesOffices()
+ Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
+ $c: PermissionCheck(action in (
+
+        "Stampings.personStamping"
+
+        ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule RoleSeatSuperVisor_inOffice
+when
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
+ Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
+ $c: PermissionCheck(action in (
+ 
+        "Stampings.personStamping"
+
+        ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
 
 /*******************************************************************************
  * Azioni utente con ruolo almeno PERSONNEL_ADMIN_MINI
@@ -662,10 +724,7 @@ when
         "Persons.showCurrentVacation",
         "Persons.showCurrentContractWorkingTimeType",
 
-        "PersonDayHistory.personDayHistory",
-
-        "Stampings.holidaySituation",
-        "Stampings.personHolidaySituation",
+        "PersonDays.personDayHistory",
 
         /* Vecchio permesso viewPersonDay */
         "Absences.manageAttachmentsPerPerson",
@@ -749,9 +808,6 @@ when
        "MealTickets.editPersonMealTickets",
        "MealTickets.returnedMealTickets",
        "MealTickets.findCodeBlock",
-
-       "Stampings.holidaySituation",
-       "Stampings.personHolidaySituation",
 
        /* Vecchio permesso viewPersonDay */
    	    "Absences.absenceInPeriod",
@@ -916,8 +972,11 @@ when
        	"Stampings.edit",
      	"Stampings.save",
      	"Stampings.delete",
-     	"Stampings.toggleWorkingHoliday",
-     	"Stampings.forceMealTicket",
+     	"PersonDays.workingHoliday",
+     	"PersonDays.approveWorkingHoliday",
+     	"PersonDays.workingOutOpening",
+     	"PersonDays.approveWorkingOutOpening",
+     	"PersonDays.forceMealTicket",
 
      	/* Vecchio permesso editCompetence */
         "Competences.saveOvertime",
@@ -1085,8 +1144,11 @@ when
        	"Stampings.edit",
      	"Stampings.save",
      	"Stampings.delete",
-     	"Stampings.toggleWorkingHoliday",
-     	"Stampings.forceMealTicket",
+     	"PersonDays.workingHoliday",
+     	"PersonDays.approveWorkingHoliday",
+     	"PersonDays.workingOutOpening",
+     	"PersonDays.approveWorkingOutOpening",
+     	"PersonDays.forceMealTicket",
 
      	/* Vecchio permesso editCompetence */
         "Competences.saveOvertime",

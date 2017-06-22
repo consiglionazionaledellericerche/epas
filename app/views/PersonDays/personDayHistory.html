@@ -1,7 +1,14 @@
-#{modalAsync id:'modalStamping', title:('Gestione Del Giorno') }
+%{
+  title = 'Gestione Del Giorno ';
+  if (personDay) {
+    title = title + personDay?.date.format();
+  }
+}%
+
+#{modalAsync id:'modalStamping',  title:title }
 
 <div class="container-fluid" id="showDay">
-  #{include 'Stampings/_showDayTabs.html' /}
+  #{include './_showDayTabs.html' /}
   
   #{if found}	  
     #{accordionGroup 'info'}

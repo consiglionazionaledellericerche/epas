@@ -3,13 +3,14 @@ package manager.services.mealtickets;
 import com.google.common.base.Optional;
 
 import it.cnr.iit.epas.DateInterval;
-
 import java.util.List;
-
 import models.Contract;
 import models.MealTicket;
+import models.Office;
 
 import org.joda.time.LocalDate;
+
+
 
 /**
  * Servizio meal tickets.
@@ -41,7 +42,7 @@ public interface IMealTicketsService {
    * @return la lista dei buoni
    */
   List<MealTicket> buildBlockMealTicket(Long codeBlock, Integer first, Integer last,
-      LocalDate expireDate);
+      LocalDate expireDate, Office office);
 
   /**
    * Verifica che nel contratto precedente a contract siano avanzati dei buoni pasto assegnati. In
