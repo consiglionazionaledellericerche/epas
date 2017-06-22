@@ -4,57 +4,59 @@
 
 <div class="container">
 
-	#{title title:'Competenze abilitate nel mese di ' + templateUtility.monthName(month) + ' ' + year + ' ' + ' per ' + office.name, color:'primary' /}
+  #{title title:'Competenze abilitate nel mese di ' + templateUtility.monthName(month) + ' ' + year + ' ' + ' per ' + office.name, color:'primary' /}
 
-	#{include './_tabs.html' /}
+  #{include './_tabs.html' /}
 
   #{alert color:'info'}
-  <p>Cliccando sul nome del dipendente è possibile attivare o disattivare la possibilità di attribuire ogni specifica competenza.</p>
+  <p>Elenco di tutte le competenze abilitate ai dipendenti di <strong>${office.name}</strong></p>
+  <p>Per modificare la configurazione dei dipentendi cliccare sul loro nome.</p>
   #{/alert}
 
-  <table class="table table-condensed table-hover table-bordered center" datatable >
-		<thead>
-		<tr>
-			<th>Nome</th>
-			<th>Competenze Abilitate</th>
-		</tr>
-		</thead>
-		<tbody>
+  <table class="table table-condensed table-hover table-bordered center" datatable-nopaging >
+	<thead>
+	  <tr>
+		<th>Nome</th>
+		<th>Competenza</th>
+		<th>Descrizione</th>
+		<th>Abilitata Dal</th>
+		<th>Al</th>
+   	  </tr>
+	</thead>
+	<tbody>
 
-    #{list items:map.entrySet(), as:'key'}
-    <tr>
-      <td>
-			#{secure.link @Competences.updatePersonCompetence(key.getKey().id, year, month), 'data-async-modal':'#updateCompetenceModal' }
-        ${key.getKey().fullName()}
+    #{list items:mapEnabledCompetences.values(), as:'personCompetenceCodes'}
+      #{list items:personCompetenceCodes, as:'personCompetenceCode'}
+      
+       <tr>
+         <td>
+			#{secure.link @Competences.updatePersonCompetence(personCompetenceCode.person.id, year, month), 'data-async-modal':'#defaultModal' }
+               ${personCompetenceCode.person.fullName()}
 			#{/secure.link}
- 	  </td>
- 	  <td>
- 	   #{list items:key.getValue(), as:'dto'}
-			#{if dto.endDate != null && dto.endDate.getMonthOfYear() == date.getMonthOfYear() && dto.endDate.getYear() == date.getYear() &&
-				dto.beginDate.getMonthOfYear() == date.getMonthOfYear() && dto.beginDate.getYear() == date.getYear()}
-				<span class="label label-info" webui-popover-hover data-content="&{'beginEndCompetenceCode'}">${dto.code.code} - ${dto.code.description}</span>
-			#{/if}
- 	       	#{elseif dto.endDate != null && dto.endDate.getMonthOfYear() == date.getMonthOfYear() && dto.endDate.getYear() == date.getYear()}
- 	       		<span class="label label-warning" webui-popover-hover data-content="&{'endCompetenceCode'}">${dto.code.code} - ${dto.code.description}</span>
- 	       	#{/elseif}
- 	       	#{elseif dto.beginDate.getMonthOfYear() == date.getMonthOfYear() && dto.beginDate.getYear() == date.getYear()}
- 	       		<span class="label label-success" webui-popover-hover data-content="&{'beginCompetenceCode'}">${dto.code.code} - ${dto.code.description}</span>
- 	       	#{/elseif}
- 	       	#{else}
- 	       		<span class="label label-primary" webui-popover-hover data-content="Attivo da: ${dto.beginDate.format()}">${dto.code.code} - ${dto.code.description}</span>
- 	       	#{/else}
-
-       #{/list}
-       </td>
-
+ 	     </td>
+ 	     <td>${personCompetenceCode.competenceCode.code}</td>
+ 	     <td>${personCompetenceCode.competenceCode.description}</td>
+ 	     <td>${personCompetenceCode.beginDate.format()}</td>
+ 	     <td>${personCompetenceCode.endDate?.format()}</td>
+        </tr>
+      #{/list}
     #{/list}
-    </tr>
-  </tbody>
+    #{list items:withoutCompetences, as:'person'}
+      <tr>
+         <td>
+			#{secure.link @Competences.updatePersonCompetence(person.id, year, month), 'data-async-modal':'#defaultModal' }
+               ${person.fullName()}
+			#{/secure.link}
+ 	     </td>
+ 	     <td></td>
+ 	     <td><em>Nessuna competenza abilitata nel mese</em></td>
+ 	     <td></td>
+ 	     <td></td>
+      </tr>
+    #{/list}
+    
+    </tbody>
   </table>
 
 </div>
-
-
-<div id="updateCompetenceModal" class="modal fade container" tabindex="-1"></div>
-
 

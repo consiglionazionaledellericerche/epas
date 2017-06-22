@@ -331,7 +331,7 @@ when
     "MealTickets.returnedMealTickets",
     "MonthRecaps.customRecap",
     "MonthRecaps.showRecaps",
-    "PersonDayHistory.personDayHistory",
+    "PersonDays.personDayHistory",
     "PersonMonths.visualizePeopleTrainingHours",
     "Persons.children",
     "Persons.edit",
@@ -576,10 +576,7 @@ when
         "Persons.showCurrentVacation",
         "Persons.showCurrentContractWorkingTimeType",
 
-        "PersonDayHistory.personDayHistory",
-
-        "Stampings.holidaySituation",
-        "Stampings.personHolidaySituation",
+        "PersonDays.personDayHistory",
 
         /* Vecchio permesso viewPersonDay */
         "Absences.manageAttachmentsPerPerson",
@@ -663,9 +660,6 @@ when
        "MealTickets.editPersonMealTickets",
        "MealTickets.returnedMealTickets",
        "MealTickets.findCodeBlock",
-
-       "Stampings.holidaySituation",
-       "Stampings.personHolidaySituation",
 
        /* Vecchio permesso viewPersonDay */
    	    "Absences.absenceInPeriod",
@@ -830,8 +824,11 @@ when
        	"Stampings.edit",
      	"Stampings.save",
      	"Stampings.delete",
-     	"Stampings.toggleWorkingHoliday",
-     	"Stampings.forceMealTicket",
+     	"PersonDays.workingHoliday",
+     	"PersonDays.approveWorkingHoliday",
+     	"PersonDays.workingOutOpening",
+     	"PersonDays.approveWorkingOutOpening",
+     	"PersonDays.forceMealTicket",
 
      	/* Vecchio permesso editCompetence */
         "Competences.saveOvertime",
@@ -994,8 +991,11 @@ when
        	"Stampings.edit",
      	"Stampings.save",
      	"Stampings.delete",
-     	"Stampings.toggleWorkingHoliday",
-     	"Stampings.forceMealTicket",
+     	"PersonDays.workingHoliday",
+     	"PersonDays.approveWorkingHoliday",
+     	"PersonDays.workingOutOpening",
+     	"PersonDays.approveWorkingOutOpening",
+     	"PersonDays.forceMealTicket",
 
      	/* Vecchio permesso editCompetence */
         "Competences.saveOvertime",

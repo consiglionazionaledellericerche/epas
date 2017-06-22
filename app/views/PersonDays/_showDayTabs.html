@@ -1,0 +1,55 @@
+<ul class="nav nav-tabs">
+  
+  *{ 
+    Tabs cliccabili
+    Storico: sempre
+    Buono pasto: person day presente e solo nel passato o giorno attuale
+    Lavoro festivo: person day presente e festivo solo nel passato 
+  }*
+
+  #{if personDay}
+    <li #{if actionSelected == 'PersonDays.personDayHistory'} class="active"#{/if}>
+	  <a href="@{PersonDays.personDayHistory(personDay.id)}" data-async="#showDay">Storia Del Giorno</a>
+	</li>
+  #{/if}#{else}
+    <li><a class="active">Storia Del Giorno</a></li>
+  #{/else}
+	
+ 	
+  #{secure.check 'PersonDays.forceMealTicket'}
+	#{if personDay && !personDay.future}
+	  <li #{if actionSelected == 'PersonDays.forceMealTicket'} class="active" #{/if}>
+	    <a href="@{PersonDays.forceMealTicket(personDay.id)}" data-async="#showDay">Buono Pasto</a>
+	  </li>
+	#{/if} #{else}
+	  <li class="disabled"><a href="#">Buoni Pasto</a></li>
+	#{/else}
+  #{/secure.check}
+  
+  #{if personDay && !personDay.isHoliday}	
+    #{secure.check 'PersonDays.workingOutOpening'}
+      #{if !personDay.future}
+	  <li #{if actionSelected == 'PersonDays.workingOutOpening'} class="active"#{/if}>
+	    <a href="@{PersonDays.workingOutOpening(personDay.id)}" data-async="#showDay">Lavoro fuori apertura</a>
+	  </li>
+	  #{/if} #{else}
+	    <li class="disabled"><a href="#">Lavoro fuori apertura</a></li>
+	  #{/else}
+    #{/secure.check}
+  #{/if}  
+	
+	
+  #{if personDay && personDay.isHoliday}	
+    #{secure.check 'PersonDays.workingHoliday'}
+      #{if !personDay.future}
+	  <li #{if actionSelected == 'PersonDays.workingHoliday'} class="active"#{/if}>
+	    <a href="@{PersonDays.workingHoliday(personDay.id)}" data-async="#showDay">Lavoro Festivo</a>
+	  </li>
+	  #{/if} #{else}
+	    <li class="disabled"><a href="#">Lavoro Festivo</a></li>
+	  #{/else}
+    #{/secure.check}
+  #{/if}  
+  
+</ul>
+<br>

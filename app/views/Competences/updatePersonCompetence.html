@@ -1,11 +1,16 @@
 #{modalAsync id:'modalCompetenceCode', title: 'Abilita competenze per ' + person.fullname + ' nel mese di ' + templateUtility.monthName(month) + ' ' + year}
-<div id="updateCompetenceModal" class="col-xs-8 col-xs-offset-2">
+<div id="updateCompetenceModal">
 	#{alert color:'info'}
-		Cliccando all'interno della finestra sottostante, selezionare le competenze che si intendono assegnare al 
-		dipendente o eventualmente rimuovere quelle in precedenza assegnate e non più valide.<br>
-		In caso di assegnamento di una nuova competenza, verrà impostata come data di inizio validità <strong>il primo giorno
-		di questo mese</strong>.<br>
-		In caso di rimozione di una competenza, verrà impostata come data di fine validità <strong>l'ultimo giorno di questo mese</strong>.
+	 <p>
+	   <strong>Aggiunta</strong>
+	   <br>
+	   Le nuove competenze selezionate saranno utilizzabili dal dipendente a partire da <em>${templateUtility.monthName(month)} ${year}</em>.
+	 </p>
+	 
+	 <p>
+	   <strong>Rimozione</strong><br>
+	   Le competenze presenti deselezionate non saranno più utilizzabili a partire dal mese successivo a <em>${templateUtility.monthName(month)} ${year}</em>.
+	 </p>
 		
 	#{/alert}
 	#{if certificationsSent}
@@ -17,22 +22,19 @@
 	#{/alert}
 	#{/if}
   #{form action:@Competences.saveNewCompetenceConfiguration(), method:'POST', autocomplete:false,
-  class:'form form-horizontal', 'data-async':'#page_content',
-  'data-async-error':'#updateCompetenceModal'}
+    class:'form form-horizontal', 'data-async':'#page_content',
+    'data-async-error':'#updateCompetenceModal'}
 
-  #{f.selectModels 'codeListIds',
-  items:templateUtility.allCodeList(), placeholder:'I codici di competenza' /}
-  
-
-  #{if person?.persistent}
-    	#{f.hidden 'personId', value:person.id /}
-  #{/if}  
-  #{f.hidden 'year', value:year /}
-  #{f.hidden 'month', value:month /}
-  #{b.buttons center:true}
-  		#{b.submit 'Ok'/}
-  #{/b.buttons}
-
+    #{f.selectModels 'codeListIds', items:templateUtility.allCodeList(), placeholder:'I codici di competenza' /}
+    
+    #{f.hidden 'personId', value:person.id /}
+    #{f.hidden 'year', value:year /}
+    #{f.hidden 'month', value:month /}
+    
+    #{b.buttons center:true}
+  	  #{b.submit 'Ok'/}
+    #{/b.buttons}
   #{/form}
 </div>
+
 #{/modalAsync}
