@@ -225,6 +225,7 @@ $(function($) {
       dropdownCssClass: "switcher",
     });
     $(':input[select2]', this).select2({
+    	width: 'resolve',
       allowClear: true,
       theme: "bootstrap",
       placeholder: "Seleziona un valore",
@@ -271,6 +272,13 @@ $(function($) {
         [10,15,20, 25, 50, 100, -1],
         [10,15,20, 25, 50, 100, "Tutti"]
       ],
+      "language": {
+        "url": "/public/i18n/DataTablesItalian.json"
+      }
+    });
+    
+    this.find('[datatable-nopaging]').DataTable({
+   	  paging: false,
       "language": {
         "url": "/public/i18n/DataTablesItalian.json"
       }
