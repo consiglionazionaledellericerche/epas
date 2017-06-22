@@ -112,7 +112,7 @@ public class Calendar extends Controller {
       final List<ShiftEvent> jolly = new ArrayList<>();
 
       for (PersonShiftShiftType personShift : people) {
-        // lenght-1 viene fatto per scludere l'ultimo valore che è dedicato alle assenze
+        // lenght-1 viene fatto per escludere l'ultimo valore che è dedicato alle assenze
         final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
         final Person person = personShift.personShift.person;
 
@@ -465,8 +465,6 @@ public class Calendar extends Controller {
 
       render(shiftsCalculatedCompetences, shiftTypeMonth, activityId, start);
     }
-
-
   }
 
   /**

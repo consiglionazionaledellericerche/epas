@@ -9,6 +9,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import models.base.BaseModel;
 import org.joda.time.LocalTime;
 
@@ -19,7 +20,7 @@ public class ShiftTimeTable extends BaseModel {
   private static final long serialVersionUID = -7869931573320174606L;
 
   @OneToMany(mappedBy = "shiftTimeTable")
-  public List<ShiftType> shiftTypes = new ArrayList<ShiftType>();
+  public List<ShiftType> shiftTypes = new ArrayList<>();
 
   // start time of morning shift
   @Column(name = "start_morning", columnDefinition = "VARCHAR")
@@ -78,4 +79,19 @@ public class ShiftTimeTable extends BaseModel {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "office_id")
   public Office office;
+
+  @Transient
+  public int slotCount() {
+    int slots = 0;
+    if (startMorning != null && endMorning != null) {
+      slots++;
+    }
+    if (startAfternoon != null && endAfternoon != null) {
+      slots++;
+    }
+    if (startEvening != null && endEvening != null) {
+      slots++;
+    }
+    return slots;
+  }
 }
