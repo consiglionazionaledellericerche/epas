@@ -2,6 +2,7 @@ package models;
 
 import com.google.common.collect.Sets;
 import events.EntityEvents;
+import java.util.Collection;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -72,6 +73,11 @@ public class PersonShiftDay extends BaseModel {
   @Transient
   public boolean hasError(ShiftTroubles trouble) {
     return troubles.stream().anyMatch(error -> error.cause == trouble);
+  }
+
+  @Transient
+  public boolean hasOneOfErrors(Collection<ShiftTroubles> troubles) {
+    return troubles.stream().anyMatch(troubles::contains);
   }
 
   @PostUpdate
