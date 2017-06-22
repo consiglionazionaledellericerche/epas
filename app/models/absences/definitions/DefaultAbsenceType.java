@@ -268,7 +268,7 @@ public enum DefaultAbsenceType {
       0, null, null, null),
 
   A_105BP("105BP", "Lavoro Fuori Sede - Intera Giornata",
-      false, ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, false,
+      false, ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, true,
       0, null, null, null),
   
   A_23("23", "Astensione facoltativa post partum 100% primo figlio intera giornata",
