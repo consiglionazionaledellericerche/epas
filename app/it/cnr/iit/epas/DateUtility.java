@@ -289,7 +289,17 @@ public class DateUtility {
   public static DateInterval getYearInterval(int year) {
     return new DateInterval(new LocalDate(year, 1, 1), new LocalDate(year, 12, 31));
   }
-
+  
+  /**
+   * L'intervallo del mese.
+   * @param year anno
+   * @param month mese
+   * @return intervallo
+   */
+  public static DateInterval getMonthInterval(int year, int month) {
+    return new DateInterval(new LocalDate(year, month, 1), 
+        new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
+  }
 
   /**
    * @param monthNumber mese da formattare.
