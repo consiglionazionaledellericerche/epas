@@ -1,11 +1,12 @@
 # ---!Ups
 
-alter table person_days add column out_opening integer not null default -1;
+alter table person_days add column out_opening integer not null default 0;
 -- imposta il valore del lavoro fuori fascia ripetendo il calcolo java
 update person_days set out_opening = subquery.case
-from (select id, CASE 
+from (select id, CASE
          WHEN stamping_time IS NULL THEN 0 
-         WHEN time_at_work IS NULL THEN 0 
+         WHEN time_at_work IS NULL THEN 0
+         WHEN stamping_time - time_at_work < 0 THEN 0  -- presenze automatiche
          ELSE stamping_time 
               - time_at_work 
               - coalesce(decurted, 0) 
@@ -13,8 +14,17 @@ from (select id, CASE
               - coalesce(justified_time_no_meal, 0) 
          END from person_days) AS subquery
 where person_days.id = subquery.id ;
--- TODO imposta il valore dello storico
-alter table person_days_history add column out_opening integer not null default -1;
+
+-- Query che popola il campo out_opening dell'ultima revisione pari al valore corrente in person_days
+alter table person_days_history add column out_opening integer not null default 0;
+update person_days_history set out_opening = subquery.out_to_history 
+from
+  ( select distinct on (pd.id) 
+      pd.id as pdid, pdh._revision as pdhr, 
+      pdh._revision_type, pd.out_opening as out_to_history, pdh.out_opening, pdh.id 
+    from person_days pd left outer join person_days_history pdh on pd.id = pdh.id 
+    order by pd.id, pdh._revision desc ) as subquery
+where person_days_history.id = subquery.pdid and person_days_history._revision = subquery.pdhr;
 
 
 alter table person_days add column approved_out_opening integer not null default 0;
