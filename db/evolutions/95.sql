@@ -1,7 +1,22 @@
 # ---!Ups
 
 alter table person_days add column out_opening integer not null default -1;
+-- imposta il valore del lavoro fuori fascia ripetendo il calcolo java
+update person_days set out_opening = subquery.case
+from (select id, CASE 
+         WHEN stamping_time IS NULL THEN 0 
+         WHEN time_at_work IS NULL THEN 0 
+         ELSE stamping_time 
+              - time_at_work 
+              - coalesce(decurted, 0) 
+              - coalesce(justified_time_meal, 0) 
+              - coalesce(justified_time_no_meal, 0) 
+         END from person_days) AS subquery
+where person_days.id = subquery.id ;
+-- TODO imposta il valore dello storico
 alter table person_days_history add column out_opening integer not null default -1;
+
+
 alter table person_days add column approved_out_opening integer not null default 0;
 alter table person_days_history add column approved_out_opening integer not null default 0;
 
