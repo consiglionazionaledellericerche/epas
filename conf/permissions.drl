@@ -23,6 +23,8 @@ import models.Qualification;
 import models.Role;
 import models.ShiftCategories;
 import models.ShiftType;
+import models.PersonShiftShiftType;
+import models.PersonShift;
 import models.ShiftTypeMonth;
 import models.Stamping;
 import models.UsersRolesOffices;
@@ -212,24 +214,37 @@ end
 
 /*Fine parte dei gestori dei turni*/
 
-rule isPersonShift
+rule isPersonShift_general
 when 
   $uro: UsersRolesOffices()
   Role(name == Role.EMPLOYEE) from $uro.role
   Person (personShift != null) from currentOperator.person
   $c: PermissionCheck(action in (
-  	    /*
-     	 * Visualizzazione della propria situazione dei turni
-     	 */
-     	"Shift.personalShift",
-     	"Shift.renderServices",
-     	"Shift.renderPersonShiftIds",
-     	"Shift.personList",
-     	"Shift.renderShiftname",
-     	"Shift.find"
+     	"Calendar.show",
+     	"Calendar.shiftPeople",
+       "Calendar.events",
+       "Calendar.recap",
+       "Calendar.editable"
      	), target == null, granted == false)
 then
  $c.grant();
+end
+
+rule isPersonShift_shiftType
+when
+	$p: Person (personShift != null) from currentOperator.person
+	$ps: PersonShift() from $p.personShift
+	$psst: PersonShiftShiftType() from $ps.personShiftShiftTypes
+	$st: ShiftType() from $psst.shiftType
+	$c: PermissionCheck(action in (
+       "Calendar.show",
+       "Calendar.shiftPeople",
+       "Calendar.events",
+       "Calendar.recap",
+       "Calendar.editable"
+       ), target == $st, granted == false)
+then
+$c.grant();
 end
 
 
@@ -305,7 +320,6 @@ when
      	/*Possibilità di inviare report*/
      	"ReportCentre.generateReport",
      	"ReportCentre.sendProblem"
-
 
        ), target == null, granted == false)
 then

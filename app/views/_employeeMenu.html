@@ -71,7 +71,7 @@
       #{/secure.li}
       
       #{if currentUser.person != null && currentUser.person.personShift != null}
-       	#{secure.li @Shift.personalShift() }
+       	#{secure.li @Calendar.show() }
       		<i class="fa fa-calendar-check-o" aria-hidden="true"></i>
       	#{/secure.li}
       #{/if}
