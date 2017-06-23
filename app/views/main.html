@@ -84,7 +84,8 @@
         
         *{Ruoli di sistema e gestori dei turni}*
         #{if currentUser.roles.contains(models.enumerate.AccountRole.DEVELOPER) 
-        	|| currentUser.roles.contains(models.enumerate.AccountRole.ADMIN) || !currentUser.person.shiftCategories.empty}
+        	|| currentUser.roles.contains(models.enumerate.AccountRole.ADMIN) || !currentUser.person.shiftCategories.empty
+        	|| !currentUser.person.categories.empty}
           #{include './_shiftMenu.html' /}
         #{/if}
 
