@@ -2,21 +2,29 @@ package controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+
 import dao.AbsenceDao;
 import dao.ShiftDao;
 import dao.ShiftTypeMonthDao;
+
 import helpers.Web;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
+
 import manager.ShiftManager2;
+
 import models.Person;
 import models.PersonShiftDay;
 import models.PersonShiftShiftType;
@@ -28,8 +36,10 @@ import models.dto.PNotifyObject;
 import models.dto.ShiftEvent;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
+
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
+
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.i18n.Messages;
@@ -37,7 +47,9 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Router;
 import play.mvc.With;
+
 import security.SecurityRules;
+
 
 /**
  * @author arianna
@@ -73,9 +85,6 @@ public class Calendar extends Controller {
     // ma va sistemato nella vista in modo che passi l'id con un nome adatto
 
     final LocalDate currentDate = Optional.fromNullable(date).or(LocalDate.now());
-
-    // TODO: 12/06/17 da spostare in un metodo da implementare sul templateutility che restituisca
-    // le attività di turno gestibili in base al ruolo dell'utente loggato
 
     final List<ShiftType> activities = shiftManager2.getUserActivities();
 
