@@ -100,7 +100,7 @@ when
                                  "Calendar.editable",
                                  "Calendar.monthShiftsApprovement",
                                  "Calendar.approveShiftsInMonth",
-  								 "Calendar.removeApprovation") 
+  								               "Calendar.removeApprovation")
         , target == null, granted == false)
 then
  $c.grant();

@@ -18,12 +18,10 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.ShiftManager2;
 import models.Person;
-import models.PersonShift;
 import models.PersonShiftDay;
 import models.PersonShiftShiftType;
 import models.ShiftType;
 import models.ShiftTypeMonth;
-import models.User;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.dto.PNotifyObject;
@@ -73,7 +71,7 @@ public class Calendar extends Controller {
   public static void show(ShiftType activity, LocalDate date) {
     // FIXME: 12/06/17 il passaggio del solo id faciliterebbe il redict dagli altri controller
     // ma va sistemato nella vista in modo che passi l'id con un nome adatto
-    
+
     final LocalDate currentDate = Optional.fromNullable(date).or(LocalDate.now());
 
     // TODO: 12/06/17 da spostare in un metodo da implementare sul templateutility che restituisca
@@ -391,14 +389,13 @@ public class Calendar extends Controller {
         personShiftDay.date = date;
         personShiftDay.shiftType = activity.get();
         personShiftDay.shiftSlot = shiftSlot;
-        PersonShift personShift = shiftDao
+        personShiftDay.personShift = shiftDao
             .getPersonShiftByPersonAndType(personId, personShiftDay.shiftType.type);
         Optional<String> error;
-        if (personShift == null) {
-          error = Optional.of(Messages.get("notFound"));
-        } else {
-          personShiftDay.personShift = personShift;
+        if (validation.valid(personShiftDay).ok) {
           error = shiftManager2.shiftPermitted(personShiftDay);
+        } else {
+          error = Optional.of(Messages.get("validation.invalid"));
         }
 
         if (error.isPresent()) {
@@ -453,14 +450,15 @@ public class Calendar extends Controller {
     Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
 
     if (activity.isPresent()) {
+      ShiftType shiftType = activity.get();
       rules.checkIfPermitted(activity.get());
       Map<Person, Integer> shiftsCalculatedCompetences = shiftManager2
-          .calculateActivityShiftCompetences(activity.get(), start, end);
+          .calculateActivityShiftCompetences(shiftType, start, end);
 
       final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao
-          .byShiftTypeAndDate(activity.get(), start).orNull();
+          .byShiftTypeAndDate(shiftType, start).orNull();
 
-      render(shiftsCalculatedCompetences, shiftTypeMonth, activityId, start);
+      render(shiftsCalculatedCompetences, shiftTypeMonth, shiftType, start);
     }
   }
 

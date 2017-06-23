@@ -15,8 +15,9 @@
   <em class="text-muted">&{'calendar.competencesApproved'}</em>
 </div>
 <br>
-#{secure.check 'Calendar.monthShiftsApprovement', target:shiftTypeMonth}
-#{b.link @monthShiftsApprovement(activityId, start.toString()),class: 'btn-sm', color:'warning', fa:
+#{secure.check 'Calendar.monthShiftsApprovement', target: shiftType }
+#{b.link @monthShiftsApprovement(shiftType.id, start.toString()),class: 'btn-sm', color:'warning',
+fa:
 'thumbs-o-down' }
   &{'calendar.removeApprovation'}
 #{/b.link}
@@ -27,8 +28,8 @@
   <em class="text-muted">&{'calendar.competencesToBeApproved'}</em>
 </div>
 <br>
-#{secure.check 'Calendar.monthShiftsApprovement', target:shiftTypeMonth}
-#{b.link @monthShiftsApprovement(activityId, start.toString()),class: 'btn-sm', color:'info', fa:
+#{secure.check 'Calendar.monthShiftsApprovement', target: shiftType  }
+#{b.link @monthShiftsApprovement(shiftType.id, start.toString()),class: 'btn-sm', color:'info', fa:
 'thumbs-o-up' }
 &{'calendar.approve'}
 #{/b.link}
