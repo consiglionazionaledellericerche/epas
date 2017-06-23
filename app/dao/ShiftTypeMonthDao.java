@@ -7,10 +7,12 @@ import com.mysema.query.jpa.JPQLQueryFactory;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import models.Office;
 import models.Person;
 import models.ShiftType;
 import models.ShiftTypeMonth;
 import models.query.QPersonShiftDay;
+import models.query.QShiftCategories;
 import models.query.QShiftTypeMonth;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -65,5 +67,15 @@ public class ShiftTypeMonthDao extends DaoBase {
             .and(psd.date.goe(monthBegin))
             .and(psd.date.loe(monthEnd))
             .and(stm.yearMonth.eq(month).and(stm.approved.isTrue()))).distinct().list(stm);
+  }
+
+  public List<ShiftTypeMonth> byOfficeInMonth(Office office, YearMonth month) {
+    final QShiftTypeMonth stm = QShiftTypeMonth.shiftTypeMonth;
+    final QShiftCategories sc = QShiftCategories.shiftCategories;
+
+    return getQueryFactory().from(stm)
+        .leftJoin(stm.shiftType.shiftCategories, sc)
+        .where(stm.yearMonth.eq(month).and(sc.office.eq(office))).distinct().list(stm);
+
   }
 }
