@@ -23,6 +23,7 @@ import models.enumerate.ShiftTroubles;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.joda.time.LocalDate;
+import play.data.validation.Required;
 
 @Entity
 @Audited
@@ -32,18 +33,21 @@ public class PersonShiftDay extends BaseModel {
   private static final long serialVersionUID = -2441219908198684741L;
 
   // morning or afternoon slot
-  @Column(name = "shift_slot")
+  @Required(message = "calendar.slot")
+  @Column(name = "shift_slot", nullable = false)
   @Enumerated(EnumType.STRING)
   public ShiftSlot shiftSlot;
 
   // shift date
-
+  @Required
   public LocalDate date;
 
+  @Required
   @ManyToOne
-  @JoinColumn(name = "shift_type_id")
+  @JoinColumn(name = "shift_type_id", nullable = false)
   public ShiftType shiftType;
 
+  @Required
   @ManyToOne
   @JoinColumn(name = "person_shift_id", nullable = false)
   @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)

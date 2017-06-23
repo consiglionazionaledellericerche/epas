@@ -265,8 +265,7 @@ name=Nome
 noResultFound=Nessuna corrispondenza trovata.
 note= Note
 
-noShiftWorkers= Nessun Turnista assegnabile per questa attività nel periodo selezionato
-noJolly= Nessuna persona è configurata come Jolly nel periodo attuale
+
 
 newUser= Nuovo Utente
 
@@ -701,6 +700,9 @@ ShiftTroubles.PROBLEMS_ON_OTHER_SLOT = Problemi sull'altro slot
 ShiftTroubles.PERSON_IS_ABSENT = Dipendente assente nella data
 ShiftTroubles.EXCEEDED_BREAKTIME = Eccesso di pausa
 ShiftTroubles.SHIFT_INCOMPLETED = Turno incompleto, manca almeno uno slot
+
+shifts.noShiftWorkers= Nessun Turnista assegnabile per questa attività nel periodo selezionato
+shifts.noJolly= Nessuna persona è configurata come Jolly nel periodo attuale
 
 # Parametri di configurazione
 
