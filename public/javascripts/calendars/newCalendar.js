@@ -1,4 +1,11 @@
 $(document).ready(function() {
+
+  // Salva il valore del radiobutton in modo da poterlo risettare ad ogni reload
+  $(document.body).on('change', 'input[name="shiftSlot"]', function (e) {
+    localStorage.setItem('shiftSlot', $(this).val());
+  });
+
+  // Calendario dei turni
   $('[data-calendar]', this).each(function() {
     var $this = $(this);
     var data = {
@@ -223,11 +230,32 @@ $(document).ready(function() {
   });
 });
 $(document).ajaxComplete(function() {
+  // Rende trascinabili gli eventi esterni sul calendario
   $('[data-draggable]').draggable({
     revert: true, // immediately snap back to original position
     revertDuration: 0
   });
-  $(this).initepas();
+
+  $('[webui-popover-hover]').webuiPopover({
+      placement: 'auto',
+      trigger: 'hover',
+      type: 'html',
+      //style:'inverse',
+      animation: 'pop',
+      dismissible: true,
+      delay: { //show and hide delay time of the popover, works only when trigger is 'hover',the value can be number or object
+        show: null,
+        hide: null
+      }
+  });
+
+  var radioValue = localStorage.getItem('shiftSlot');
+
+  $('input[name="shiftSlot"][value='+ radioValue +']').each(function() {
+    console.log("trovato radio button");
+    $(this).prop("checked", true);
+  });
+
 });
 
 function getCurrentViewDate(input) {
