@@ -1,10 +1,8 @@
 $(document).ready(function() {
-
   // Salva il valore del radiobutton in modo da poterlo risettare ad ogni reload
-  $(document.body).on('change', 'input[name="shiftSlot"]', function (e) {
+  $(document.body).on('change', 'input[name="shiftSlot"]', function(e) {
     localStorage.setItem('shiftSlot', $(this).val());
   });
-
   // Calendario dei turni
   $('[data-calendar]', this).each(function() {
     var $this = $(this);
@@ -27,9 +25,9 @@ $(document).ready(function() {
             left: centerX
           });
         } else {
-         var activity = $('#activity').val();
-         // Verifica con una chiamata ajax se la modifica degli eventi dev'essere permessa per
-         // quel mese
+          var activity = $('#activity').val();
+          // Verifica con una chiamata ajax se la modifica degli eventi dev'essere permessa per
+          // quel mese
           $.ajax({
             url: $this.data('calendar-editable'),
             type: 'GET',
@@ -229,33 +227,34 @@ $(document).ready(function() {
     $this.fullCalendar(data);
   });
 });
-$(document).ajaxComplete(function() {
-  // Rende trascinabili gli eventi esterni sul calendario
-  $('[data-draggable]').draggable({
-    revert: true, // immediately snap back to original position
-    revertDuration: 0
-  });
-
+$(document).ajaxStop(function() {
+  var calendarEditable = $('[data-calendar]').fullCalendar('option', 'editable');
+  // Rende trascinabili gli eventi esterni sul calendario se il calendario è modificabile
+  if (calendarEditable) {
+    $('[data-draggable]').each(function() {
+      $(this).css('cursor', 'pointer');
+      $(this).draggable({
+        revert: true, // immediately snap back to original position
+        revertDuration: 0
+      });
+    });
+  }
   $('[webui-popover-hover]').webuiPopover({
-      placement: 'auto',
-      trigger: 'hover',
-      type: 'html',
-      //style:'inverse',
-      animation: 'pop',
-      dismissible: true,
-      delay: { //show and hide delay time of the popover, works only when trigger is 'hover',the value can be number or object
-        show: null,
-        hide: null
-      }
+    placement: 'auto',
+    trigger: 'hover',
+    type: 'html',
+    //style:'inverse',
+    animation: 'pop',
+    dismissible: true,
+    delay: { //show and hide delay time of the popover, works only when trigger is 'hover',the value can be number or object
+      show: null,
+      hide: null
+    }
   });
-
+  // Recupera il valore dal LocalStorage del browser
   var radioValue = localStorage.getItem('shiftSlot');
-
-  $('input[name="shiftSlot"][value='+ radioValue +']').each(function() {
-    console.log("trovato radio button");
-    $(this).prop("checked", true);
-  });
-
+  // Imposta il valore del radioButton corrispondente
+  $('input[name="shiftSlot"][value=' + radioValue + ']').prop("checked", true);
 });
 
 function getCurrentViewDate(input) {
