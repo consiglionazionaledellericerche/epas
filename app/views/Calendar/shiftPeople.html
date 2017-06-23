@@ -1,3 +1,4 @@
+<h4>Turnisti</h4><br>
 <ul class="list-group">
   #{list shiftWorkers, as:'person'}
     <li class="list-group-item ${person.className}" id="${person.personId}"
@@ -11,7 +12,7 @@
   <br>
   #{/list}
   #{else}
-    <em class="text-muted">&{'noShiftWorkers'}</em>
+    <em class="text-muted">&{'shifts.noShiftWorkers'}</em>
   #{/else}
   <hr>
   <h4>Jolly</h4>
@@ -28,7 +29,7 @@
   <br>
   #{/list}
   #{else}
-    <em class="text-muted">&{'noJolly'}</em>
+    <em class="text-muted">&{'shifts.noJolly'}</em>
   #{/else}
 </ul>
 <h4>&{'shiftSlot'}</h4>
@@ -36,7 +37,7 @@
 #{list models.enumerate.ShiftSlot}
 <div class="radio">
   <label>
-    <input type="radio" name="shiftSlot" id="shiftSlot" value="${_}" #{ifnot _isLast}checked#{/ifnot}>
+    <input type="radio" name="shiftSlot" id="shiftSlot" value="${_}">
     ${_.label()}
   </label>
 </div>
