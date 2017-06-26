@@ -142,6 +142,7 @@ public class ShiftManager2 {
     return errCode;
   }
 
+
   /**
    * popola la tabella PersonShift andando a cercare nel db tutte le persone che son già
    * state abilitate a usufruire dell'indennità di turno.
@@ -201,7 +202,8 @@ public class ShiftManager2 {
     }
 
     // Verifica che la persona non abbia altri turni nello stesso giorno (anche su altre attività)
-    // TODO: 06/06/17 Verificare se questo vincolo va bene o deve esistere solo per 2 turni
+    // TODO: 06/06/17 Verificare se questo vincolo va bene o deve esistere solo per 2
+    // turni
     // sulla stessa attività
     final Optional<PersonShiftDay> personShift = personShiftDayDao
         .byPersonAndDate(personShiftDay.personShift.person, personShiftDay.date);
@@ -511,7 +513,7 @@ public class ShiftManager2 {
    * @param people la lista dei turnisti.
    * @param yearMonth il mese a partire dal quale effettuare il controllo
    * @return una mappa contenente per ogni turnista i residui al mese più recente antecedente quello
-   * specificato.
+   *     specificato.
    */
   public Map<Person, Integer> residualCompetences(List<Person> people, YearMonth yearMonth) {
 
@@ -530,7 +532,7 @@ public class ShiftManager2 {
    * @param from data di inizio
    * @param to data di fine
    * @return Una lista di persone che sono effettivamente coinvolte nei turni in un determinato
-   * periodo (Dipendenti con i turni schedulati in quel periodo).
+   *     periodo (Dipendenti con i turni schedulati in quel periodo).
    */
   public List<Person> involvedShiftWorkers(ShiftType activity, LocalDate from, LocalDate to) {
     return personShiftDayDao.byTypeInPeriod(from, to, activity, Optional.absent())
@@ -544,7 +546,7 @@ public class ShiftManager2 {
    * @param from data iniziale
    * @param to data finale
    * @return il numero di minuti di competenza maturati in base ai turni effettuati nel periodo
-   * selezionato (di norma serve calcolarli su un intero mese al massimo).
+   *     selezionato (di norma serve calcolarli su un intero mese al massimo).
    */
   public int calculatePersonShiftCompetencesInPeriod(ShiftType activity, Person person,
       LocalDate from, LocalDate to) {
@@ -590,7 +592,7 @@ public class ShiftManager2 {
    * @param person Person della quale recuperare il residuo dei turni dai mesi precedenti
    * @param yearMonth Mese rispetto al quale verificare i residui
    * @return restituisce il residuo delle competenze di turno dal mese più recente antecedente
-   * quello specificato dal parametro yearMonth della persona richiesta.
+   *     quello specificato dal parametro yearMonth della persona richiesta.
    */
   public int getPersonResidualShiftCompetence(Person person, YearMonth yearMonth) {
 
@@ -612,7 +614,7 @@ public class ShiftManager2 {
    * @param start data di inizio del periodo
    * @param end data di fine del periodo
    * @return La lista di tutte le persone abilitate su quell'attività nell'intervallo di tempo
-   * specificato.
+   *     specificato.
    */
   public List<PersonShiftShiftType> shiftWorkers(ShiftType activity, LocalDate start,
       LocalDate end) {
@@ -631,8 +633,8 @@ public class ShiftManager2 {
    * @param begin l'ora di inizio del turno
    * @param end l'ora di fine del turno
    * @return la lista di coppie di timbrature di uscita/entrata appartenenti all'intervallo di turno
-   * che vanno considerate per controllare se il tempo trascorso in pausa eccede quello previsto
-   * dalla configurazione di turno.
+   *     che vanno considerate per controllare se il tempo trascorso in pausa eccede quello previsto
+   *     dalla configurazione di turno.
    */
   private List<PairStamping> getBreakPairStampings(List<PairStamping> pairStampings,
       LocalTime begin, LocalTime end) {
