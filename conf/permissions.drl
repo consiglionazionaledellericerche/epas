@@ -223,9 +223,7 @@ when
      	"Calendar.show",
      	"Calendar.shiftPeople",
        "Calendar.events",
-       "Calendar.recap",
-       "Calendar.editable"
-     	), target == null, granted == false)
+       "Calendar.recap"	), target == null, granted == false)
 then
  $c.grant();
 end
@@ -240,9 +238,7 @@ when
        "Calendar.show",
        "Calendar.shiftPeople",
        "Calendar.events",
-       "Calendar.recap",
-       "Calendar.editable"
-       ), target == $st, granted == false)
+       "Calendar.recap"), target == $st, granted == false)
 then
 $c.grant();
 end
