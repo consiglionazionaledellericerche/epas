@@ -120,8 +120,8 @@ ALTER TABLE person_shift ADD COLUMN jolly BOOLEAN;
 
 UPDATE person_shift SET jolly = FALSE;
 
-DROP TABLE persons_shift_categories;
-DROP TABLE persons_shift_categories_history;
+DROP TABLE shift_categories_persons;
+DROP TABLE shift_categories_persons_history;
 
 DROP TABLE person_shift_days_history;
 DROP TABLE person_shift_day_in_trouble_history;
