@@ -12,11 +12,8 @@ import dao.CompetenceDao;
 import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
 import dao.PersonShiftDayDao;
-import dao.PersonShiftDayInTroubleDao;
-import dao.RoleDao;
 import dao.ShiftDao;
 import dao.ShiftTypeMonthDao;
-import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
 import it.cnr.iit.epas.CompetenceUtility;
@@ -24,6 +21,7 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -42,13 +40,11 @@ import models.PersonShiftShiftType;
 import models.ShiftTimeTable;
 import models.ShiftType;
 import models.ShiftTypeMonth;
-import models.Stamping;
 import models.User;
 import models.enumerate.ShiftTroubles;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
-import play.db.jpa.GenericModel;
 import play.i18n.Messages;
 
 
@@ -69,14 +65,9 @@ public class ShiftManager2 {
   private final PersonShiftDayDao personShiftDayDao;
   private final PersonDayDao personDayDao;
   private final ShiftDao shiftDao;
-
   private final CompetenceCodeDao competenceCodeDao;
   private final CompetenceDao competenceDao;
-
   private final IWrapperFactory wrapperFactory;
-  private final UsersRolesOfficesDao uroDao;
-  private final RoleDao roleDao;
-  private final PersonShiftDayInTroubleDao troubleDao;
   private final ShiftTypeMonthDao shiftTypeMonthDao;
 
 
@@ -84,22 +75,16 @@ public class ShiftManager2 {
   public ShiftManager2(PersonDayManager personDayManager, PersonShiftDayDao personShiftDayDao,
       PersonDayDao personDayDao, ShiftDao shiftDao,
       CompetenceUtility competenceUtility, CompetenceCodeDao competenceCodeDao,
-      CompetenceDao competenceDao, IWrapperFactory wrapperFactory, UsersRolesOfficesDao uroDao,
-      RoleDao roleDao, PersonShiftDayInTroubleDao troubleDao,
+      CompetenceDao competenceDao, IWrapperFactory wrapperFactory,
       PersonMonthRecapDao personMonthRecapDao, ShiftTypeMonthDao shiftTypeMonthDao) {
 
     this.personDayManager = personDayManager;
     this.personShiftDayDao = personShiftDayDao;
     this.personDayDao = personDayDao;
     this.shiftDao = shiftDao;
-
     this.competenceCodeDao = competenceCodeDao;
     this.competenceDao = competenceDao;
     this.wrapperFactory = wrapperFactory;
-    this.uroDao = uroDao;
-    this.roleDao = roleDao;
-    this.troubleDao = troubleDao;
-
     this.shiftTypeMonthDao = shiftTypeMonthDao;
   }
 
@@ -216,7 +201,8 @@ public class ShiftManager2 {
     }
 
     // Verifica che la persona non abbia altri turni nello stesso giorno (anche su altre attività)
-    // TODO: 06/06/17 Verificare se questo vincolo va bene o deve esistere solo per 2 turni sulla stessa attività
+    // TODO: 06/06/17 Verificare se questo vincolo va bene o deve esistere solo per 2 turni
+    // sulla stessa attività
     final Optional<PersonShiftDay> personShift = personShiftDayDao
         .byPersonAndDate(personShiftDay.personShift.person, personShiftDay.date);
 
@@ -284,17 +270,6 @@ public class ShiftManager2 {
   }
 
   /**
-   * rimuove tutti i troubles dalla lista.
-   *
-   * @param shift il personShiftDay su cui agire
-   */
-  public void fixAllTrouble(final PersonShiftDay shift) {
-    shift.troubles.forEach(GenericModel::delete);
-    shift.troubles.clear();
-    shift.save();
-  }
-
-  /**
    * Verifica che il turno in questione sia valido e persiste nei Troubles
    * gli eventuali errori (li rimuove nel caso siano risolti).
    *
@@ -307,54 +282,156 @@ public class ShiftManager2 {
      * 2. Controlli sul tempo a lavoro (Soglie, copertura orario, pause durante il turno etc...)
      * 3. 
      */
-    ShiftTimeTable timeTable = personShiftDay.shiftType.shiftTimeTable;
-    final LocalTime begin;
-    final LocalTime end;
-    Optional<PersonDay> personDay =
+    ShiftType shiftType = personShiftDay.shiftType;
+    ShiftTimeTable timeTable = shiftType.shiftTimeTable;
+    final LocalDate today = LocalDate.now();
+
+    Optional<PersonDay> optionalPersonDay =
         personDayDao.getPersonDay(personShiftDay.personShift.person, personShiftDay.date);
-    if (personDay.isPresent()) {
-      List<Stamping> stampings = personDay.get().getStampings();
+
+    if (optionalPersonDay.isPresent()) {
+      final PersonDay personDay = optionalPersonDay.get();
       // controlla se non sono nel futuro ed è un giorno valido
-      IWrapperPersonDay wrPersonDay = wrapperFactory.create(personDay.get());
+      IWrapperPersonDay wrPersonDay = wrapperFactory.create(personDay);
 
-      if (personDayManager.isAllDayAbsences(personDay.get())) {
-        fixAllTrouble(personShiftDay);
+      // 1. Controllo sulle assenze
+      if (personDayManager.isAllDayAbsences(personDay)) {
         setShiftTrouble(personShiftDay, ShiftTroubles.PERSON_IS_ABSENT);
-        return;
-      }
-      if (personDay.get().isHoliday
-          || personDay.get().timeAtWork
-          < wrPersonDay.getWorkingTimeTypeDay().get().getWorkingTime() / 2) {
-        fixAllTrouble(personShiftDay);
-        setShiftTrouble(personShiftDay, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
-        return;
+      } else {
+        fixShiftTrouble(personShiftDay, ShiftTroubles.PERSON_IS_ABSENT);
       }
 
-      if (!LocalDate.now().isBefore(personShiftDay.date)) {
+      final LocalTime begin;
+      final LocalTime end;
+      // Nelle date passate posso effettuare i controlli sul tempo a lavoro
+      if (personShiftDay.date.isBefore(today)) {
 
         switch (personShiftDay.shiftSlot) {
           case MORNING:
             begin = timeTable.startMorning;
             end = timeTable.endMorning;
-            getShiftSituation(personShiftDay, begin, end, timeTable, stampings);
             break;
 
           case AFTERNOON:
             begin = timeTable.startAfternoon;
             end = timeTable.endAfternoon;
-            getShiftSituation(personShiftDay, begin, end, timeTable, stampings);
             break;
           //TODO: case EVENING??
           default:
-            break;
+            begin = null;
+            end = null;
+        }
+
+        //Controlli sulle timbrature...
+        List<PairStamping> validPairStampings = personDayManager
+            .getValidPairStampings(personDay.stampings);
+
+        // Le coppie che si sovrappongono anche solo per un minuto con la finestra del turno
+        List<PairStamping> relatedPairs = validPairStampings.stream()
+            .filter(pair -> Range.open(begin, end).isConnected(
+                Range.open(pair.first.date.toLocalTime(), pair.second.date.toLocalTime())))
+            .collect(Collectors.toList());
+
+        // Se ci sono timbrature valide..
+        if (begin != null && end != null && !relatedPairs.isEmpty()) {
+
+          // Conteggio dei minuti di pausa fatti durante il turno
+          Iterator<PairStamping> iterator = relatedPairs.iterator();
+          PairStamping previousPair = iterator.next();
+          PairStamping nextPair;
+          int totalBreakMinutes = 0;
+
+          while (iterator.hasNext()) {
+            nextPair = iterator.next();
+            totalBreakMinutes += DateUtility.toMinute(nextPair.first.date) - DateUtility
+                .toMinute(previousPair.second.date);
+            previousPair = nextPair;
+          }
+
+          // controlli sull'eventuale pausa in turno abilitata...
+          if (shiftType.breakInShiftEnabled) {
+            if (totalBreakMinutes > shiftType.breakInShift) {
+              setShiftTrouble(personShiftDay, ShiftTroubles.EXCEEDED_BREAKTIME);
+            } else {
+              fixShiftTrouble(personShiftDay, ShiftTroubles.EXCEEDED_BREAKTIME);
+            }
+          } else {
+            if (totalBreakMinutes > 0) {
+              setShiftTrouble(personShiftDay, ShiftTroubles.EXCEEDED_BREAKTIME);
+            } else {
+              fixShiftTrouble(personShiftDay, ShiftTroubles.EXCEEDED_BREAKTIME);
+            }
+          }
+
+          LocalTime beginWithTolerance = begin.plusMinutes(shiftType.entranceTolerance);
+          LocalTime endWithTolerance = end.minusMinutes(shiftType.exitTolerance);
+
+          int timeInShift = personDayManager.workingMinutes(validPairStampings, begin, end);
+          //verifico se la tolleranza oraria è presente...
+
+          if (shiftType.hourTolerance != 0) {
+            //l'ingresso è successivo alla soglia di tolleranza sull'ingresso in turno
+            if (relatedPairs.get(0).first.date.toLocalTime()
+                .isAfter(begin.plusHours(shiftType.hourTolerance))) {
+              setShiftTrouble(personShiftDay, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
+            } else {
+              fixShiftTrouble(personShiftDay, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
+            }
+            //la timbratura di ingresso è compresa tra la tolleranza e la tolleranza oraria sul turno
+            if (Range.open(beginWithTolerance, begin.plusHours(shiftType.hourTolerance))
+                .contains(relatedPairs.get(0).first.date.toLocalTime())) {
+              setShiftTrouble(personShiftDay, ShiftTroubles.NOT_COMPLETED_SHIFT);
+            } else {
+              fixShiftTrouble(personShiftDay, ShiftTroubles.NOT_COMPLETED_SHIFT);
+            }
+            // il tempo in turno è compreso tra il tempo pagato per turno e la tolleranza oraria
+            if (Range
+                .open(timeTable.paidMinutes - shiftType.hourTolerance, timeTable.paidMinutes)
+                .contains(timeInShift)) {
+              setShiftTrouble(personShiftDay, ShiftTroubles.NOT_COMPLETED_SHIFT);
+            } else {
+              fixShiftTrouble(personShiftDay, ShiftTroubles.NOT_COMPLETED_SHIFT);
+            }
+
+          } else {
+            if (relatedPairs.get(0).first.date.toLocalTime().isAfter(beginWithTolerance)) {
+              setShiftTrouble(personShiftDay, ShiftTroubles.NOT_COMPLETED_SHIFT);
+            } else {
+              fixShiftTrouble(personShiftDay, ShiftTroubles.NOT_COMPLETED_SHIFT);
+            }
+          }
+
+          //l'uscita è precedente alla soglia di tolleranza sull'uscita dal turno
+          if (relatedPairs.get(relatedPairs.size() - 1).second.date.toLocalTime()
+              .isBefore(endWithTolerance)) {
+            setShiftTrouble(personShiftDay, ShiftTroubles.OUT_OF_STAMPING_TOLERANCE);
+          } else {
+            fixShiftTrouble(personShiftDay, ShiftTroubles.OUT_OF_STAMPING_TOLERANCE);
+          }
+
+          //Controlli sul tempo a lavoro in turno...
+          if (timeInShift < timeTable.paidMinutes - shiftType.hourTolerance) {
+            setShiftTrouble(personShiftDay, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
+          } else {
+            fixShiftTrouble(personShiftDay, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
+          }
+
         }
       } else {
-        return;
-        //TODO che fare in caso di giorno futuro? per ora lasciamo inserire il turno senza
-        // aggiungere alcun errore alla lista dei troubles.
+        // Non ci sono abbastanza timbrature o non è possibile identificare lo slot del turno
+        setShiftTrouble(personShiftDay, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
+      }
+
+    } else {
+      // E' una data passata senza nessuna informazione per quel giorno
+      if (personShiftDay.date.isBefore(today)) {
+        setShiftTrouble(personShiftDay, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
+      } else {
+        fixShiftTrouble(personShiftDay, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
       }
     }
   }
+
 
   /**
    * Verifica che i turni di un'attività in un determinato giorno siano tutti validi
@@ -493,6 +570,14 @@ public class ShiftManager2 {
     return shiftCompetences;
   }
 
+  /**
+   * @param activity attività di turno
+   * @param person Persona
+   * @param from data iniziale
+   * @param to data finale
+   * @return true se per tutti i turni dell'attività,persona e periodo specificati non contengono
+   * problemi, false altrimenti.
+   */
   public boolean allValidShifts(ShiftType activity, Person person, LocalDate from, LocalDate to) {
 
     final List<PersonShiftDay> shifts = personShiftDayDao
@@ -539,105 +624,6 @@ public class ShiftManager2 {
     } else {
       return new ArrayList<>();
     }
-  }
-
-
-  /**
-   * @param shift il personShiftDay di cui si vuole verificare la validità
-   * @param begin l'ora di inizio del turno
-   * @param end l'ora di fine del turno
-   * @param timeTable la timetable contenente i dati su cui basare i calcoli
-   * @param stampings la lista di timbrature da vagliare nel periodo begin-end
-   * @return l'eventuale codice di errore derivante dai controlli effettuati sulle timbrature e il
-   * tempo in turno.
-   */
-  private void getShiftSituation(PersonShiftDay shift, LocalTime begin,
-      LocalTime end, ShiftTimeTable timeTable, List<Stamping> stampings) {
-
-    LocalTime beginWithTolerance;
-    LocalTime endWithTolerance;
-    if (shift.shiftType.entranceTolerance != 0) {
-      beginWithTolerance = begin.plusMinutes(shift.shiftType.entranceTolerance);
-    } else {
-      beginWithTolerance = begin;
-    }
-    if (shift.shiftType.exitTolerance != 0) {
-      endWithTolerance = end.minusMinutes(shift.shiftType.exitTolerance);
-    } else {
-      endWithTolerance = end;
-    }
-    //Controlli sulle timbrature...
-    List<PairStamping> pairStampings = personDayManager
-        .getValidPairStampings(stampings);
-
-    int timeInShift = personDayManager.workingMinutes(pairStampings, begin, end);
-
-    List<PairStamping> validPair = pairStampings.stream().filter(pair -> Range.open(begin, end)
-        .isConnected(Range.open(pair.first.date.toLocalTime(), pair.second.date.toLocalTime())))
-        .collect(Collectors.toList());
-
-    //verifico se la tolleranza oraria è presente...
-    if (shift.shiftType.hourTolerance != 0) {
-      //l'ingresso è successivo alla soglia di tolleranza sull'ingresso in turno
-      if (validPair.get(0).first.date.toLocalTime()
-          .isAfter(begin.plusMinutes(shift.shiftType.hourTolerance))) {
-        setShiftTrouble(shift, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
-      } else {
-        fixShiftTrouble(shift, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
-      }
-      //la timbratura di ingresso è compresa tra la tolleranza e la tolleranza oraria sul turno
-      if (Range.open(beginWithTolerance, begin.plusMinutes(shift.shiftType.hourTolerance))
-          .contains(pairStampings.get(0).first.date.toLocalTime())) {
-        setShiftTrouble(shift, ShiftTroubles.NOT_COMPLETED_SHIFT);
-      } else {
-        fixShiftTrouble(shift, ShiftTroubles.NOT_COMPLETED_SHIFT);
-      }
-      // il tempo in turno è compreso tra il tempo pagato per turno e la tolleranza oraria
-      if (Range.open(timeTable.paidMinutes - shift.shiftType.hourTolerance, timeTable.paidMinutes)
-          .contains(timeInShift)) {
-        setShiftTrouble(shift, ShiftTroubles.NOT_COMPLETED_SHIFT);
-      } else {
-        fixShiftTrouble(shift, ShiftTroubles.NOT_COMPLETED_SHIFT);
-      }
-
-    } else {
-      if (validPair.get(0).first.date.toLocalTime().isAfter(beginWithTolerance)) {
-        setShiftTrouble(shift, ShiftTroubles.NOT_COMPLETED_SHIFT);
-      } else {
-        fixShiftTrouble(shift, ShiftTroubles.NOT_COMPLETED_SHIFT);
-      }
-    }
-
-    //l'uscita è precedente alla soglia di tolleranza sull'uscita dal turno
-    if (validPair.get(validPair.size() - 1).second.date.toLocalTime()
-        .isBefore(endWithTolerance)) {
-      setShiftTrouble(shift, ShiftTroubles.OUT_OF_STAMPING_TOLERANCE);
-    } else {
-      fixShiftTrouble(shift, ShiftTroubles.OUT_OF_STAMPING_TOLERANCE);
-    }
-
-    //Controlli sul tempo a lavoro in turno...
-    if (timeInShift < timeTable.paidMinutes - shift.shiftType.hourTolerance) {
-      setShiftTrouble(shift, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
-    } else {
-      fixShiftTrouble(shift, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
-    }
-
-    // controlli sull'eventuale pausa in turno abilitata...
-    if (shift.shiftType.breakInShiftEnabled) {
-      List<PairStamping> gapBreakInShift =
-          getBreakPairStampings(pairStampings, beginWithTolerance, endWithTolerance);
-      int maxTime = 0;
-      for (PairStamping pair : gapBreakInShift) {
-        maxTime = pair.timeInPair;
-      }
-      if (maxTime > shift.shiftType.breakInShift) {
-        setShiftTrouble(shift, ShiftTroubles.EXCEEDED_BREAKTIME);
-      } else {
-        fixShiftTrouble(shift, ShiftTroubles.EXCEEDED_BREAKTIME);
-      }
-    }
-
   }
 
   /**
@@ -742,8 +728,7 @@ public class ShiftManager2 {
       // TODO: 12/06/17 sicuramente andranno differenziate tra T1 e T2
       int totalShiftMinutes;
       if (calculatedCompetences != null) {
-        totalShiftMinutes = calculatedCompetences +
-            lastShiftCompetence;
+        totalShiftMinutes = calculatedCompetences + lastShiftCompetence;
       } else {
         totalShiftMinutes = lastShiftCompetence;
       }
@@ -754,7 +739,7 @@ public class ShiftManager2 {
       Competence newCompetence = shiftCompetence.or(new Competence(person, shiftCode, year, month));
       newCompetence.valueApproved = totalShiftMinutes / 60;
       newCompetence.exceededMins = totalShiftMinutes % 60;
-//      newCompetence.valueRequested = ; e qui cosa ci va?
+      // newCompetence.valueRequested = ; e qui cosa ci va?
 
       newCompetence.save();
 
