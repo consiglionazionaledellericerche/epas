@@ -57,7 +57,6 @@ import security.SecurityRules;
  * @since 15/05/17.
  */
 @With(Resecure.class)
-@Slf4j
 public class Calendar extends Controller {
 
   @Inject
@@ -98,7 +97,7 @@ public class Calendar extends Controller {
   /**
    * ritorna la lista di persone associate all'attività nel periodo passato come parametro.
    *
-   * @param activity l'attività di cui ritornare la lista di personale associato
+   * @param activityId l'id dell'attività di cui ritornare la lista di personale associato
    * @param start la data di inizio da considerare
    * @param end la data di fine da considerare
    */
@@ -189,8 +188,12 @@ public class Calendar extends Controller {
   }
 
 
-  /*
-   * Carica i turni dal database per essere visualizzati nel calendario
+  /**
+   * ritorna la lista di eventi presenti per l'attività nel periodo start/end.
+   * @param activityId l'id dell'attività da ricercare
+   * @param start la data di inizio del periodo
+   * @param end la data di fine del periodo
+   * @throws JsonProcessingException eccezione in caso di errore di creazione del json
    */
   public static void events(long activityId, LocalDate start, LocalDate end)
       throws JsonProcessingException {
@@ -264,7 +267,7 @@ public class Calendar extends Controller {
    * @param start data iniziale del periodo
    * @param end data finale del periodo
    * @return Una lista di DTO che modellano le assenze di quella persona nell'intervallo specificato
-   * da renderizzare nel fullcalendar.
+   *     da renderizzare nel fullcalendar.
    */
   private static List<ShiftEvent> absenceEvents(Person person, LocalDate start, LocalDate end) {
 
@@ -316,7 +319,7 @@ public class Calendar extends Controller {
    *
    * @param personShiftDayId id del persnShiftDay da controllare
    * @param newDate giorno nel quale salvare il turno error 409 con messaggio di
-   * ShiftTroubles.PERSON_IS_ABSENT, CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED
+   *     ShiftTroubles.PERSON_IS_ABSENT, CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED
    */
   public static void changeShift(long personShiftDayId, LocalDate newDate) {
 
@@ -471,12 +474,7 @@ public class Calendar extends Controller {
     }
   }
 
-  /**
-   *
-   * @param activity
-   * @param start
-   * @return
-   */
+
   /**
    * @param activityId id dell'attività da verificare
    * @param start data relativa al mese da controllare
@@ -496,6 +494,11 @@ public class Calendar extends Controller {
     return rules.check(activity.get()) && rules.check(shiftTypeMonth);
   }
 
+  /**
+   * ritorna informazioni alla vista relative ai turnisti e alle ore già approvate/pagate di turno.
+   * @param activityId l'id dell'attività per cui ricercare le approvazioni
+   * @param date la data da cui ricercare le approvazioni
+   */
   public static void monthShiftsApprovement(long activityId, @Required LocalDate date) {
     if (Validation.hasErrors()) {
       notFound();
@@ -552,6 +555,11 @@ public class Calendar extends Controller {
     render(shiftTypeMonth, shiftsCalculatedCompetences, peopleTrouble);
   }
 
+  /**
+   * approva le quantità orarie dei turni nel mese.
+   * @param version la versione da verificare
+   * @param shiftTypeMonthId l'id dello shiftTypeMonth da controllare
+   */
   public static void approveShiftsInMonth(long version, long shiftTypeMonthId) {
 
     ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao.byId(shiftTypeMonthId).orNull();
@@ -560,9 +568,9 @@ public class Calendar extends Controller {
     rules.checkIfPermitted(shiftTypeMonth);
 
     Map<String, Object> args = new HashMap<>();
-    // Verifico che tra la richiesta del riepilogo e l'approvazione definitiva dei turni non ci siano
-    // state modifiche in modo da evitare che il supervisore validi una situazione diversa da quella
-    // che si aspetta
+    // Check tra la richiesta del riepilogo e l'approvazione definitiva dei turni: non ci devono
+    // essere state modifiche in modo da evitare che il supervisore validi una situazione diversa 
+    // da quella che si aspetta
     if (shiftTypeMonth.version != version) {
       flash.error("I turni sono stati cambiati rispetto al riepilogo mostrato. "
           + "Il nuovo riepilogo è stato ricalcolato");
@@ -584,6 +592,10 @@ public class Calendar extends Controller {
     redirect(Router.reverse("Calendar.show", args).url);
   }
 
+  /**
+   * permette la rimozione dell'approvazione per le ore di turno.
+   * @param shiftTypeMonthId l'id dello shiftTypeMonth contenente le info su approvazione turno
+   */
   public static void removeApprovation(long shiftTypeMonthId) {
 
     ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao.byId(shiftTypeMonthId).orNull();
