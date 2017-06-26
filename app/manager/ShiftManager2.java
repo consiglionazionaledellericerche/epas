@@ -6,9 +6,7 @@ import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
-
 import controllers.Security;
-
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.PersonDayDao;
@@ -41,14 +39,11 @@ import models.PersonShift;
 import models.PersonShiftDay;
 import models.PersonShiftDayInTrouble;
 import models.PersonShiftShiftType;
-import models.Role;
-import models.ShiftCategories;
 import models.ShiftTimeTable;
 import models.ShiftType;
 import models.ShiftTypeMonth;
 import models.Stamping;
 import models.User;
-import models.UsersRolesOffices;
 import models.enumerate.ShiftTroubles;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
@@ -109,7 +104,6 @@ public class ShiftManager2 {
   }
 
   /**
-   * 
    * @return la lista delle attività associate all'utente che ne fa richiesta.
    */
   public List<ShiftType> getUserActivities() {
@@ -122,7 +116,7 @@ public class ShiftManager2 {
             .flatMap(shiftCategories -> shiftCategories.shiftTypes.stream())
             .sorted(Comparator.comparing(o -> o.type))
             .collect(Collectors.toList()));
-        
+
       }
       if (!person.categories.isEmpty()) {
         activities.addAll(person.categories.stream()
@@ -163,7 +157,6 @@ public class ShiftManager2 {
     return errCode;
   }
 
-  
 
   /**
    * popola la tabella PersonShift andando a cercare nel db tutte le persone che son già
@@ -193,27 +186,6 @@ public class ShiftManager2 {
     });
   }
 
-  /***********************************************************************************************/
-  /**Sezione di metodi utilizzati al bootstrap per sistemare le situazioni sui turni             */
-  /***********************************************************************************************/
-
-  public void linkSupervisorToRole() {
-    List<ShiftCategories> list = GenericModel.findAll();
-    Role role = roleDao.getRoleByName(Role.SHIFT_SUPERVISOR);
-    list.forEach(item -> {
-      Optional<UsersRolesOffices> optional = uroDao
-          .getUsersRolesOffices(item.supervisor.user, role, item.office);
-      if (!optional.isPresent()) {
-        UsersRolesOffices uro = new UsersRolesOffices();
-        uro.office = item.office;
-        uro.role = role;
-        uro.user = item.supervisor.user;
-        uro.save();
-        log.info("aggiunto ruolo di supervisore turni per {} della sede {}",
-            item.supervisor.fullName(), item.office);
-      }
-    });
-  }
 
   /* **********************************************************************************/
   /* Sezione di metodi utilizzati al bootstrap per sistemare le situazioni sui turni  */
