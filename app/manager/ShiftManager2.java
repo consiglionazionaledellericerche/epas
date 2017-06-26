@@ -284,8 +284,8 @@ public class ShiftManager2 {
      * 2. Controlli sul tempo a lavoro (Soglie, copertura orario, pause durante il turno etc...)
      * 3. 
      */
-    ShiftType shiftType = personShiftDay.shiftType;
-    ShiftTimeTable timeTable = shiftType.shiftTimeTable;
+    final ShiftType shiftType = Verify.verifyNotNull(personShiftDay.shiftType);
+    final ShiftTimeTable timeTable = Verify.verifyNotNull(shiftType.shiftTimeTable);
     final LocalDate today = LocalDate.now();
 
     Optional<PersonDay> optionalPersonDay =
@@ -296,7 +296,7 @@ public class ShiftManager2 {
       // controlla se non sono nel futuro ed è un giorno valido
       IWrapperPersonDay wrPersonDay = wrapperFactory.create(personDay);
 
-      // 1. Controllo sulle assenze
+      // 1. Controlli sulle assenze
       if (personDayManager.isAllDayAbsences(personDay)) {
         setShiftTrouble(personShiftDay, ShiftTroubles.PERSON_IS_ABSENT);
       } else {
@@ -324,14 +324,14 @@ public class ShiftManager2 {
             end = null;
         }
 
-        //Controlli sulle timbrature...
+        // 2.Controlli sulle timbrature...
         List<PairStamping> validPairStampings = personDayManager
             .getValidPairStampings(personDay.stampings);
 
         // Le coppie che si sovrappongono anche solo per un minuto con la finestra del turno
         List<PairStamping> relatedPairs = validPairStampings.stream()
-            .filter(pair -> Range.open(begin, end).isConnected(
-                Range.open(pair.first.date.toLocalTime(), pair.second.date.toLocalTime())))
+            .filter(pair -> Range.closed(begin, end).isConnected(
+                Range.closed(pair.first.date.toLocalTime(), pair.second.date.toLocalTime())))
             .collect(Collectors.toList());
 
         // Se ci sono timbrature valide..
@@ -367,39 +367,38 @@ public class ShiftManager2 {
 
           LocalTime beginWithTolerance = begin.plusMinutes(shiftType.entranceTolerance);
           LocalTime endWithTolerance = end.minusMinutes(shiftType.exitTolerance);
+          final LocalTime hourToleranceThreshold = begin.plusMinutes(shiftType.hourTolerance);
 
           int timeInShift = personDayManager.workingMinutes(validPairStampings, begin, end);
-          //verifico se la tolleranza oraria è presente...
 
-          if (shiftType.hourTolerance != 0) {
+          //verifico se la tolleranza oraria è presente...
+          if (shiftType.hourTolerance > 0) {
+
+            //la timbratura di ingresso è compresa tra la tolleranza e la tolleranza oraria
+            // sul turno e il tempo a lavoro è sufficiente per coprire il tempo minimo di turno
+            if (Range.closed(beginWithTolerance, hourToleranceThreshold)
+                .contains(relatedPairs.get(0).first.date.toLocalTime()) &&
+                Range.closed(timeTable.paidMinutes - shiftType.hourTolerance,
+                    timeTable.paidMinutes).contains(timeInShift)) {
+              setShiftTrouble(personShiftDay, ShiftTroubles.NOT_COMPLETED_SHIFT);
+            } else {
+              fixShiftTrouble(personShiftDay, ShiftTroubles.NOT_COMPLETED_SHIFT);
+            }
+
             //l'ingresso è successivo alla soglia di tolleranza sull'ingresso in turno
-            if (relatedPairs.get(0).first.date.toLocalTime()
-                .isAfter(begin.plusHours(shiftType.hourTolerance))) {
+            if (relatedPairs.get(0).first.date.toLocalTime().isAfter(hourToleranceThreshold)) {
               setShiftTrouble(personShiftDay, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
             } else {
               fixShiftTrouble(personShiftDay, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
             }
-            //la timbratura di ingresso è compresa tra la tolleranza e la tolleranza oraria sul turno
-            if (Range.open(beginWithTolerance, begin.plusHours(shiftType.hourTolerance))
-                .contains(relatedPairs.get(0).first.date.toLocalTime())) {
-              setShiftTrouble(personShiftDay, ShiftTroubles.NOT_COMPLETED_SHIFT);
-            } else {
-              fixShiftTrouble(personShiftDay, ShiftTroubles.NOT_COMPLETED_SHIFT);
-            }
-            // il tempo in turno è compreso tra il tempo pagato per turno e la tolleranza oraria
-            if (Range
-                .open(timeTable.paidMinutes - shiftType.hourTolerance, timeTable.paidMinutes)
-                .contains(timeInShift)) {
-              setShiftTrouble(personShiftDay, ShiftTroubles.NOT_COMPLETED_SHIFT);
-            } else {
-              fixShiftTrouble(personShiftDay, ShiftTroubles.NOT_COMPLETED_SHIFT);
-            }
-
           } else {
-            if (relatedPairs.get(0).first.date.toLocalTime().isAfter(beginWithTolerance)) {
-              setShiftTrouble(personShiftDay, ShiftTroubles.NOT_COMPLETED_SHIFT);
+            // la prima timbratura è oltre la tolleranza in ingresso o il tempo a lavoro
+            // non è sufficiente
+            if (relatedPairs.get(0).first.date.toLocalTime().isAfter(beginWithTolerance) ||
+                timeInShift < timeTable.paidMinutes) {
+              setShiftTrouble(personShiftDay, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
             } else {
-              fixShiftTrouble(personShiftDay, ShiftTroubles.NOT_COMPLETED_SHIFT);
+              fixShiftTrouble(personShiftDay, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
             }
           }
 
@@ -410,14 +409,6 @@ public class ShiftManager2 {
           } else {
             fixShiftTrouble(personShiftDay, ShiftTroubles.OUT_OF_STAMPING_TOLERANCE);
           }
-
-          //Controlli sul tempo a lavoro in turno...
-          if (timeInShift < timeTable.paidMinutes - shiftType.hourTolerance) {
-            setShiftTrouble(personShiftDay, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
-          } else {
-            fixShiftTrouble(personShiftDay, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
-          }
-
         }
       } else {
         // Non ci sono abbastanza timbrature o non è possibile identificare lo slot del turno
@@ -513,7 +504,7 @@ public class ShiftManager2 {
    * @param people la lista dei turnisti.
    * @param yearMonth il mese a partire dal quale effettuare il controllo
    * @return una mappa contenente per ogni turnista i residui al mese più recente antecedente quello
-   *     specificato.
+   * specificato.
    */
   public Map<Person, Integer> residualCompetences(List<Person> people, YearMonth yearMonth) {
 
@@ -532,7 +523,7 @@ public class ShiftManager2 {
    * @param from data di inizio
    * @param to data di fine
    * @return Una lista di persone che sono effettivamente coinvolte nei turni in un determinato
-   *     periodo (Dipendenti con i turni schedulati in quel periodo).
+   * periodo (Dipendenti con i turni schedulati in quel periodo).
    */
   public List<Person> involvedShiftWorkers(ShiftType activity, LocalDate from, LocalDate to) {
     return personShiftDayDao.byTypeInPeriod(from, to, activity, Optional.absent())
@@ -546,7 +537,7 @@ public class ShiftManager2 {
    * @param from data iniziale
    * @param to data finale
    * @return il numero di minuti di competenza maturati in base ai turni effettuati nel periodo
-   *     selezionato (di norma serve calcolarli su un intero mese al massimo).
+   * selezionato (di norma serve calcolarli su un intero mese al massimo).
    */
   public int calculatePersonShiftCompetencesInPeriod(ShiftType activity, Person person,
       LocalDate from, LocalDate to) {
@@ -592,7 +583,7 @@ public class ShiftManager2 {
    * @param person Person della quale recuperare il residuo dei turni dai mesi precedenti
    * @param yearMonth Mese rispetto al quale verificare i residui
    * @return restituisce il residuo delle competenze di turno dal mese più recente antecedente
-   *     quello specificato dal parametro yearMonth della persona richiesta.
+   * quello specificato dal parametro yearMonth della persona richiesta.
    */
   public int getPersonResidualShiftCompetence(Person person, YearMonth yearMonth) {
 
@@ -614,7 +605,7 @@ public class ShiftManager2 {
    * @param start data di inizio del periodo
    * @param end data di fine del periodo
    * @return La lista di tutte le persone abilitate su quell'attività nell'intervallo di tempo
-   *     specificato.
+   * specificato.
    */
   public List<PersonShiftShiftType> shiftWorkers(ShiftType activity, LocalDate start,
       LocalDate end) {
@@ -628,60 +619,60 @@ public class ShiftManager2 {
     }
   }
 
-  /**
-   * @param pairStampings la lista di coppie valide di entrata/uscita
-   * @param begin l'ora di inizio del turno
-   * @param end l'ora di fine del turno
-   * @return la lista di coppie di timbrature di uscita/entrata appartenenti all'intervallo di turno
-   *     che vanno considerate per controllare se il tempo trascorso in pausa eccede quello previsto
-   *     dalla configurazione di turno.
-   */
-  private List<PairStamping> getBreakPairStampings(List<PairStamping> pairStampings,
-      LocalTime begin, LocalTime end) {
-    List<PairStamping> allGapPairs = Lists.newArrayList();
-    PairStamping previous = null;
-    for (PairStamping validPair : pairStampings) {
-      if (previous != null) {
-        if ((previous.second.stampType == null
-            || previous.second.stampType.isGapLunchPairs())
-            && (validPair.first.stampType == null
-            || validPair.first.stampType.isGapLunchPairs())) {
-
-          allGapPairs.add(new PairStamping(previous.second, validPair.first));
-        }
-      }
-      previous = validPair;
-    }
-    List<PairStamping> gapPairs = Lists.newArrayList();
-    for (PairStamping gapPair : allGapPairs) {
-      LocalTime first = gapPair.first.date.toLocalTime();
-      LocalTime second = gapPair.second.date.toLocalTime();
-
-      boolean isInIntoBreakTime = !first.isBefore(begin) && !first.isAfter(end);
-      boolean isOutIntoBreakTime = !second.isBefore(begin) && !second.isAfter(end);
-
-      if (!isInIntoBreakTime && !isOutIntoBreakTime) {
-        if (second.isBefore(begin) || first.isAfter(end)) {
-          continue;
-        }
-      }
-
-      LocalTime inForCompute = gapPair.first.date.toLocalTime();
-      LocalTime outForCompute = gapPair.second.date.toLocalTime();
-      if (!isInIntoBreakTime) {
-        inForCompute = begin;
-      }
-      if (!isOutIntoBreakTime) {
-        outForCompute = end;
-      }
-      int timeInPair = 0;
-      timeInPair -= DateUtility.toMinute(inForCompute);
-      timeInPair += DateUtility.toMinute(outForCompute);
-      gapPair.timeInPair = timeInPair;
-      gapPairs.add(gapPair);
-    }
-    return gapPairs;
-  }
+//  /**
+//   * @param pairStampings la lista di coppie valide di entrata/uscita
+//   * @param begin l'ora di inizio del turno
+//   * @param end l'ora di fine del turno
+//   * @return la lista di coppie di timbrature di uscita/entrata appartenenti all'intervallo di turno
+//   * che vanno considerate per controllare se il tempo trascorso in pausa eccede quello previsto
+//   * dalla configurazione di turno.
+//   */
+//  private List<PairStamping> getBreakPairStampings(List<PairStamping> pairStampings,
+//      LocalTime begin, LocalTime end) {
+//    List<PairStamping> allGapPairs = Lists.newArrayList();
+//    PairStamping previous = null;
+//    for (PairStamping validPair : pairStampings) {
+//      if (previous != null) {
+//        if ((previous.second.stampType == null
+//            || previous.second.stampType.isGapLunchPairs())
+//            && (validPair.first.stampType == null
+//            || validPair.first.stampType.isGapLunchPairs())) {
+//
+//          allGapPairs.add(new PairStamping(previous.second, validPair.first));
+//        }
+//      }
+//      previous = validPair;
+//    }
+//    List<PairStamping> gapPairs = Lists.newArrayList();
+//    for (PairStamping gapPair : allGapPairs) {
+//      LocalTime first = gapPair.first.date.toLocalTime();
+//      LocalTime second = gapPair.second.date.toLocalTime();
+//
+//      boolean isInIntoBreakTime = !first.isBefore(begin) && !first.isAfter(end);
+//      boolean isOutIntoBreakTime = !second.isBefore(begin) && !second.isAfter(end);
+//
+//      if (!isInIntoBreakTime && !isOutIntoBreakTime) {
+//        if (second.isBefore(begin) || first.isAfter(end)) {
+//          continue;
+//        }
+//      }
+//
+//      LocalTime inForCompute = gapPair.first.date.toLocalTime();
+//      LocalTime outForCompute = gapPair.second.date.toLocalTime();
+//      if (!isInIntoBreakTime) {
+//        inForCompute = begin;
+//      }
+//      if (!isOutIntoBreakTime) {
+//        outForCompute = end;
+//      }
+//      int timeInPair = 0;
+//      timeInPair -= DateUtility.toMinute(inForCompute);
+//      timeInPair += DateUtility.toMinute(outForCompute);
+//      gapPair.timeInPair = timeInPair;
+//      gapPairs.add(gapPair);
+//    }
+//    return gapPairs;
+//  }
 
   /**
    * Effettua i calcoli delle competenze relative ai turni sulle attività approvate per le persone
