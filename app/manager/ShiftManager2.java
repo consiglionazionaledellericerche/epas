@@ -394,8 +394,7 @@ public class ShiftManager2 {
           } else {
             // la prima timbratura è oltre la tolleranza in ingresso o il tempo a lavoro
             // non è sufficiente
-            if (relatedPairs.get(0).first.date.toLocalTime().isAfter(beginWithTolerance) ||
-                timeInShift < timeTable.paidMinutes) {
+            if (timeInShift < timeTable.paidMinutes) {
               setShiftTrouble(personShiftDay, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
             } else {
               fixShiftTrouble(personShiftDay, ShiftTroubles.NOT_ENOUGH_WORKING_TIME);
@@ -404,7 +403,9 @@ public class ShiftManager2 {
 
           //l'uscita è precedente alla soglia di tolleranza sull'uscita dal turno
           if (relatedPairs.get(relatedPairs.size() - 1).second.date.toLocalTime()
-              .isBefore(endWithTolerance)) {
+              .isBefore(endWithTolerance)
+              || shiftType.hourTolerance < shiftType.entranceTolerance &&
+              relatedPairs.get(0).first.date.toLocalTime().isAfter(beginWithTolerance)) {
             setShiftTrouble(personShiftDay, ShiftTroubles.OUT_OF_STAMPING_TOLERANCE);
           } else {
             fixShiftTrouble(personShiftDay, ShiftTroubles.OUT_OF_STAMPING_TOLERANCE);
@@ -457,11 +458,15 @@ public class ShiftManager2 {
           return shift.hasOneOfErrors(invalidatingTroubles);
         }).collect(Collectors.toList());
 
-    shiftsWithTroubles
-        .forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.PROBLEMS_ON_OTHER_SLOT));
+    if (shiftsWithTroubles.isEmpty()) {
+      shifts.forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.PROBLEMS_ON_OTHER_SLOT));
+    } else {
+      shiftsWithTroubles
+          .forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.PROBLEMS_ON_OTHER_SLOT));
 
-    shifts.removeAll(shiftsWithTroubles);
-    shifts.forEach(shift -> setShiftTrouble(shift, ShiftTroubles.PROBLEMS_ON_OTHER_SLOT));
+      shifts.removeAll(shiftsWithTroubles);
+      shifts.forEach(shift -> setShiftTrouble(shift, ShiftTroubles.PROBLEMS_ON_OTHER_SLOT));
+    }
   }
 
   /**
@@ -553,8 +558,7 @@ public class ShiftManager2 {
       // Nessun errore sul turno
       if (shift.troubles.isEmpty()) {
         shiftCompetences += shift.shiftType.shiftTimeTable.paidMinutes;
-      } else if (shift.troubles.size() == 1 && shift
-          .hasError(ShiftTroubles.NOT_COMPLETED_SHIFT)) {
+      } else if (shift.troubles.size() == 1 && shift.hasError(ShiftTroubles.NOT_COMPLETED_SHIFT)) {
         // Il turno vale comunque ma con un'ora in meno
         shiftCompetences += shift.shiftType.shiftTimeTable.paidMinutes - SIXTY_MINUTES;
       }

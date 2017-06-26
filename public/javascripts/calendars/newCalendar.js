@@ -147,9 +147,16 @@ $(document).ready(function() {
           var div = $("<div></div>", {
             "class": "webui-popover-content"
           });
-          event.troubles.forEach(function(item) {
-            div.append(item + '<br>');
+          var ul = $("<ul></ul>", {
+            "style": "padding: 0 0 0 10px; margin: 0;"
           });
+
+          event.troubles.forEach(function(item) {
+           var li = $("<li></li>");
+            li.append("<small>" + item + "</small>");
+            ul.append(li);
+          });
+          div.append(ul);
           var icon = $("<i></i>", {
             "class": "fa fa-exclamation-triangle",
             "aria-hidden": true,

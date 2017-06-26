@@ -80,8 +80,10 @@ public class PersonShiftDay extends BaseModel {
   }
 
   @Transient
-  public boolean hasOneOfErrors(Collection<ShiftTroubles> troubles) {
-    return troubles.stream().anyMatch(troubles::contains);
+  public boolean hasOneOfErrors(Collection<ShiftTroubles> shiftTroubles) {
+    return troubles.stream().anyMatch(trouble -> {
+      return shiftTroubles.contains(trouble.cause);
+    });
   }
 
   @PostUpdate
