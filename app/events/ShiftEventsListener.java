@@ -25,14 +25,14 @@ public class ShiftEventsListener {
 
   private final ShiftTypeMonthDao shiftTypeMonthDao;
   private final ShiftDao shiftDao;
-  private final ShiftManager2 shiftManager;
+  private final ShiftManager2 shiftManager2;
 
   @Inject
   public ShiftEventsListener(EventBus bus, ShiftTypeMonthDao shiftTypeMonthDao,
-      ShiftDao shiftDao, ShiftManager2 shiftManager) {
+      ShiftDao shiftDao, ShiftManager2 shiftManager2) {
     this.shiftDao = shiftDao;
     this.shiftTypeMonthDao = shiftTypeMonthDao;
-    this.shiftManager = shiftManager;
+    this.shiftManager2 = shiftManager2;
     bus.register(this);
   }
 
@@ -74,10 +74,10 @@ public class ShiftEventsListener {
         // Ricalcoli sul turno
         if (isPersistent) {
           final PersonShiftDay personShiftDay = shiftDao.getPersonShiftDayById(shiftId);
-          shiftManager.checkShiftValid(personShiftDay);
+          shiftManager2.checkShiftValid(personShiftDay);
         }
         // Ricalcoli sul giorno
-        shiftManager.checkShiftDayValid(date, shiftType.get());
+        shiftManager2.checkShiftDayValid(date, shiftType.get());
       }
     }.now();
   }
