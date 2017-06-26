@@ -5,7 +5,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -15,24 +14,19 @@ import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.IWrapperPersonDay;
-
 import it.cnr.iit.epas.DateInterval;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-
 import javax.inject.Inject;
-
 import manager.cache.StampTypeManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import manager.configurations.EpasParam.RecomputationType;
 import manager.services.absences.AbsenceService;
-
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
@@ -49,14 +43,12 @@ import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultGroup;
 import models.base.IPropertiesInPeriodOwner;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import play.db.jpa.JPA;
 import play.jobs.Job;
 import play.libs.F.Promise;
@@ -83,17 +75,17 @@ public class ConsistencyManager {
   /**
    * Constructor.
    *
-   * @param secureManager             secureManager
-   * @param officeDao                 officeDao
-   * @param personDao                 personDao
-   * @param personDayDao              personDayDao
-   * @param personDayManager          personDayManager
+   * @param secureManager secureManager
+   * @param officeDao officeDao
+   * @param personDao personDao
+   * @param personDayDao personDayDao
+   * @param personDayManager personDayManager
    * @param contractMonthRecapManager contractMonthRecapManager
    * @param personDayInTroubleManager personDayInTroubleManager
-   * @param configurationManager      configurationManager
-   * @param stampTypeManager          stampTypeManager
-   * @param absenceService            absenceService
-   * @param wrapperFactory            wrapperFactory
+   * @param configurationManager configurationManager
+   * @param stampTypeManager stampTypeManager
+   * @param absenceService absenceService
+   * @param wrapperFactory wrapperFactory
    */
   @Inject
   public ConsistencyManager(SecureManager secureManager,
@@ -132,9 +124,9 @@ public class ConsistencyManager {
   /**
    * Ricalcolo della situazione di una persona (o tutte) dal mese e anno specificati ad oggi.
    *
-   * @param person    persona (se absent tutte)
-   * @param user      utente loggato
-   * @param fromDate  dalla data
+   * @param person persona (se absent tutte)
+   * @param user utente loggato
+   * @param fromDate dalla data
    * @param onlyRecap se si vuole aggiornare solo i riepiloghi
    */
   public void fixPersonSituation(Optional<Person> person, Optional<User> user, LocalDate fromDate,
@@ -156,24 +148,24 @@ public class ConsistencyManager {
 
     final List<Promise<Void>> results = new ArrayList<>();
     for (Person p : personList) {
-      
+
       results.add(new Job<Void>() {
-        
+
         @Override
         public void doJob() {
           final Person person = Person.findById(p.id);
-          
+
           if (onlyRecap) {
             updatePersonRecaps(person.id, fromDate);
           } else {
             updatePersonSituation(person.id, fromDate);
           }
-          
+
           personDayInTroubleManager.cleanPersonDayInTrouble(person);
           log.debug("Elaborata la persona ... {}", person);
         }
       }.now());
-      
+
     }
     Promise.waitAll(results);
     log.info("Conclusa procedura FixPersonsSituation con parametri!");
@@ -183,7 +175,7 @@ public class ConsistencyManager {
    * Ricalcola i riepiloghi mensili del contratto a partire dalla data from.
    *
    * @param personId id della persona
-   * @param from     data dalla quale effettuare i ricalcoli
+   * @param from data dalla quale effettuare i ricalcoli
    */
   public void updatePersonRecaps(Long personId, LocalDate from) {
     updatePersonSituationEngine(personId, from, Optional.<LocalDate>absent(), true);
@@ -193,7 +185,7 @@ public class ConsistencyManager {
    * Aggiorna la situazione della persona a partire dalla data from.
    *
    * @param personId id della persona
-   * @param from     data dalla quale effettuare i ricalcoli
+   * @param from data dalla quale effettuare i ricalcoli
    */
   public void updatePersonSituation(Long personId, LocalDate from) {
     updatePersonSituationEngine(personId, from, Optional.<LocalDate>absent(), false);
@@ -203,7 +195,7 @@ public class ConsistencyManager {
    * Aggiorna la situazione del contratto a partire dalla data from.
    *
    * @param contract contract
-   * @param from     la data da cui far partire l'aggiornamento.
+   * @param from la data da cui far partire l'aggiornamento.
    */
   public void updateContractSituation(Contract contract, LocalDate from) {
 
@@ -215,7 +207,7 @@ public class ConsistencyManager {
    * Ricalcola i riepiloghi mensili del contratto a partire dalla data from.
    *
    * @param contract contract
-   * @param from     la data da cui far partire l'aggiornamento.
+   * @param from la data da cui far partire l'aggiornamento.
    */
   public void updateContractRecaps(Contract contract, LocalDate from) {
 
@@ -330,7 +322,7 @@ public class ConsistencyManager {
 
     // (4) Scan degli errori sulle assenze
     absenceService.scanner(person, from);
-    
+
     // (5) Empty vacation cache and async recomputation
     absenceService.emptyVacationCache(person, from);
     Optional<Contract> contract = wrPerson.getCurrentContract();
@@ -341,18 +333,18 @@ public class ConsistencyManager {
           Contract currentContract = Contract.findById(contract.get().id);
           GroupAbsenceType vacationGroup = absenceComponentDao
               .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
-          absenceService.buildVacationSituation(currentContract, LocalDate.now().getYear(), 
+          absenceService.buildVacationSituation(currentContract, LocalDate.now().getYear(),
               vacationGroup, Optional.absent(), true, null);
         }
       }.now();
     }
-        
+
     // (6) Controllo se per quel giorno person ha anche un turno associato ed effettuo, i ricalcoli
     Optional<PersonShiftDay> psd = personShiftDayDao.byPersonAndDate(person, from);
     if (psd.isPresent()) {
       shiftManager2.checkShiftValid(psd.get());
     }
-    
+
     log.trace("... ricalcolo dei riepiloghi conclusa.");
   }
 
@@ -535,7 +527,6 @@ public class ConsistencyManager {
         enterStamp.markedByAdmin = false;
 
         enterStamp.stampModificationType = smtMidnight;
-
 
         enterStamp.note =
             "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo "
