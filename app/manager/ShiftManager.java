@@ -37,11 +37,9 @@ import models.PersonCompetenceCodes;
 import models.PersonDay;
 import models.PersonShift;
 import models.PersonShiftDay;
-import models.Role;
 import models.ShiftCancelled;
 import models.ShiftCategories;
 import models.ShiftType;
-import models.UsersRolesOffices;
 import models.absences.Absence;
 import models.enumerate.ShiftSlot;
 import models.enumerate.Troubles;
@@ -1294,7 +1292,7 @@ public class ShiftManager {
     // legge i giorni di turno del tipo 'type' da inizio a fine mese
     List<PersonShiftDay> personShiftDays =
         personShiftDayDao.byTypeInPeriod(firstOfMonth, firstOfMonth.dayOfMonth()
-            .withMaximumValue(), shiftType,Optional.absent());
+            .withMaximumValue(), shiftType, Optional.absent());
 
     // li inserisce nel calendario
     for (PersonShiftDay personShiftDay : personShiftDays) {
@@ -1592,28 +1590,6 @@ public class ShiftManager {
             item.person.name, item.person.surname);
       }
 
-    });
-  }
-
-  /***********************************************************************************************/
-  /**Sezione di metodi utilizzati al bootstrap per sistemare le situazioni sui turni             */
-  /***********************************************************************************************/
-
-  public void linkSupervisorToRole() {
-    List<ShiftCategories> list = ShiftCategories.findAll();
-    Role role = roleDao.getRoleByName(Role.SHIFT_SUPERVISOR);
-    list.forEach(item -> {
-      Optional<UsersRolesOffices> optional = uroDao
-          .getUsersRolesOffices(item.supervisor.user, role, item.office);
-      if (!optional.isPresent()) {
-        UsersRolesOffices uro = new UsersRolesOffices();
-        uro.office = item.office;
-        uro.role = role;
-        uro.user = item.supervisor.user;
-        uro.save();
-        log.info("aggiunto ruolo di supervisore turni per {} della sede {}",
-            item.supervisor.fullName(), item.office);
-      }
     });
   }
 
