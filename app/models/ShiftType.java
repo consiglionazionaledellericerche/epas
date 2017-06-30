@@ -33,18 +33,24 @@ public class ShiftType extends BaseModel {
 
   @Column(name = "entrance_tolerance")
   public int entranceTolerance;
+  
+  @Column(name = "entrance_max_tolerance")
+  public int entranceMaxTolerance;
 
   @Column(name = "exit_tolerance")
   public int exitTolerance;
-
-  @Column(name = "hour_tolerance")
-  public int hourTolerance;
-
-  @Column(name = "break_in_shift_enabled")
-  public boolean breakInShiftEnabled;
+  
+  @Column(name = "exit_max_tolerance")
+  public int exitMaxTolerance;
+  
+  @Column(name = "max_tolerance_allowed")
+  public int maxToleranceAllowed;
 
   @Column(name = "break_in_shift")
   public int breakInShift;
+  
+  @Column(name = "break_max_in_shift")
+  public int breakMaxInShift;
 
   @NotAudited
   @OneToMany(mappedBy = "shiftType")

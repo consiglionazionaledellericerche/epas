@@ -1,0 +1,88 @@
+		#{f.hidden 'shiftCategoryId', value:cat.id /}
+		#{title title:'Riepilogo' /}
+		
+		#{alert color:'info'}
+			Configurazione attività di turno (1)			
+		#{/alert}	
+		
+		#{f.view 'Nome attività', value:sts.name /}
+		#{f.view 'Descrizione attività', value:sts.description /}
+		#{f.view 'Minuti di tolleranza per timbratura', value:sts.tolerance /}
+		#{if sts.toleranceType.equals('ToleranceType.entrance')}
+			#{f.view 'Tolleranza applicata', value:'in ingresso' /}
+		#{/if}
+		#{elseif sts.toleranceType.equals('ToleranceType.exit')}
+			#{f.view 'Tolleranza applicata', value:'in uscita' /}
+		#{/elseif}
+		#{else}
+			#{f.view 'Tolleranza applicata', value:'in ingresso e uscita' /}
+		#{/else}
+		#{f.view 'Minuti di tolleranza per turno', value:sts.hourTolerance /}
+		#{if sts.maxTolerance != 0}
+			#{f.view 'Tolleranza massima consentita', value: sts.maxTolerance /}
+		#{/if}
+		#{if sts.breakInShiftEnabled}
+			#{f.view 'Pausa in turno abilitata', value:'sì' /}
+		#{/if}
+		#{else}
+			#{f.view 'Pausa in turno abilitata', value:'no' /}
+		#{/else}
+		#{f.view 'Durata pausa in turno', value:sts.breakInShift /}		
+		
+		#{alert color:'info'}
+			Configurazione timetable (2)
+		#{/alert}
+		<div class="row">
+			
+	  		<div class="col-sm-6">
+				#{f.view 'Inizio turno mattina', value:stt.startMorning /}
+			</div>
+	  		<div class="col-sm-6">
+			#{f.view 'Fine turno mattina', value:stt.endMorning /}
+			</div>
+		</div>
+		<div class="row">
+			
+		  	<div class="col-sm-6">
+			#{f.view 'Inizio turno pomeriggio', value:stt.startAfternoon /}
+			</div>
+	  		<div class="col-sm-6">
+			#{f.view 'Fine turno pomeriggio', value:stt.endAfternoon /}
+			</div>
+		</div>
+		<div class="row">
+			
+		  	<div class="col-sm-6">
+			#{f.view 'Inizio turno notturno', value:stt.startEvening /}
+			</div>
+	  		<div class="col-sm-6">
+			#{f.view 'Fine turno notturno', value:stt.endEvening /}
+			</div>
+		</div>
+		<div class="row">
+			
+		  	<div class="col-sm-6">
+			#{f.view 'Inizio pausa pranzo turno mattina', value:stt.startMorningLunchTime /}
+			</div>
+	  		<div class="col-sm-6">
+			#{f.view 'Fine pausa pranzo turno mattina', value:stt.endMorningLunchTime /}
+			</div>
+		</div>
+		<div class="row">
+			
+		  	<div class="col-sm-6">
+			#{f.view 'Inizio pausa pranzo turno pomeriggio', value:stt.startAfternoonLunchTime /}
+			</div>
+	  		<div class="col-sm-6">
+			#{f.view 'Fine pausa pranzo turno pomeriggio', value:stt.endAfternoonLunchTime /}
+			</div>
+		</div>
+		<div class="row">
+			
+		  	<div class="col-sm-6">
+			#{f.view 'Inizio pausa pranzo turno notturno', value:stt.startEveningLunchTime /}
+			</div>
+	  		<div class="col-sm-6">
+			#{f.view 'Fine pausa pranzo turno notturno', value:stt.endEveningLunchTime /}
+			</div>
+		</div>

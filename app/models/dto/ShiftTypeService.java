@@ -14,14 +14,18 @@ public class ShiftTypeService {
   @Required
   public String description;
   
-  @Required
-  public int tolerance = 0;
-  @Required
-  public int hourTolerance = 0;
+  
+  public int entranceTolerance = 0;
+  public int entranceMaxTolerance = 0;
+  public int exitTolerance = 0;
+  public int exitMaxTolerance = 0;
+  public int breakInShift;
+  public int breakMaxInShift;
+     
+  public Integer maxTolerance;
+  
   public ToleranceType toleranceType;
   
-  public boolean breakInShiftEnabled = false;
-  public int breakInShift;
   
   public ShiftTimeTable timeTable;
 }

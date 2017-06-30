@@ -1,0 +1,47 @@
+	#{f.hidden 'shiftCategoryId', value:cat.id /}
+		#{title title:'Organizzazione del lavoro in turni - Creazione attività per turno' /}
+	
+	
+		#{alert color:'info'}
+			Specificare nome e descrizione per l'attività relativa a <strong>${cat.description}</strong><br>
+			E selezionare la tipologia di turno da applicare tra quelle proposte in tabella.		
+		#{/alert}	
+	
+		#{f.input 'sts.name', popover:'true',required:'true'/}
+		#{f.input 'sts.description', value:type?.description, popover:'true', required:'true'/}
+		#{if breakInRange == false}
+			#{f.input 'sts.entranceTolerance', type:'number', popover:'true', required:'true'/}
+			#{f.input 'sts.exitTolerance', type:'number', popover:'true', required:'true'/}
+			#{f.input 'sts.breakInShift', type:'number', popover:'true', required:'true'/}			
+			
+		#{/if}
+		#{else}
+			#{alert color:'warning'}
+				Dal momento che è stata scelta una timetable con pausa pranzo contenuta all'interno degli orari degli slot
+				di turno, specificando la tolleranza da applicare alle timbrature di ingresso e uscita dal turno, 
+				si specificherà automaticamente la stessa tolleranza anche per le timbrature che determinano
+				la pausa pranzo stessa.
+				Inoltre sarà possibile specificare una tolleranza totale
+			#{/alert}
+			<div class="row">
+			
+	  		<div class="col-sm-6">#{f.input 'sts.entranceTolerance', type:'number', popover:'true', required:'true'/}</div>
+	  		<div class="col-sm-6">#{f.input 'sts.entranceMaxTolerance', type:'number', popover:'true'/}</div>
+			</div>
+			
+			<div class="row">
+			
+	  		<div class="col-sm-6">#{f.input 'sts.exitTolerance', type:'number', popover:'true', required:'true'/}</div>
+	  		<div class="col-sm-6">#{f.input 'sts.exitMaxTolerance', type:'number', popover:'true'/}</div>
+			</div>
+			
+			<div class="row">
+			
+	  		<div class="col-sm-6">#{f.input 'sts.breakInShift', type:'number', popover:'true', required:'true'/}</div>
+	  		<div class="col-sm-6">#{f.input 'sts.breakMaxInShift', type:'number', popover:'true'/}</div>							
+			</div>
+			#{f.input 'sts.maxTolerance', type:'number', popover:'true'/}
+			
+		#{/else}
+		
+
