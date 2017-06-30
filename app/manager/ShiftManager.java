@@ -280,39 +280,39 @@ public class ShiftManager {
 
             log.debug("lackOfTime = {} workedTime = {}", lackOfTime, workedTime);
             // get the global tollerance for this shift type
-            int globalTollerancePerShift = shiftType.hourTolerance;
+            //int globalTollerancePerShift = shiftType.hourTolerance;
 
             // check if the difference between the worked hours in the shift periods is more
             // than the tollerance
-            if (wp.lackOfTime > globalTollerancePerShift) {
-
-              log.info("lackOfTime > globalTollerancePerShift = {} > {}", wp.lackOfTime,
-                  globalTollerancePerShift);
-              log.info("Il turno di {} {} nel giorno {} non e' stato completato - "
-                      + "timbrature: {} ", person.name, person.surname, personDay.get().date,
-                  wp.stampings);
-
-              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thMissingTime,
-                  personShiftDay.date.toString("dd MMM").concat(" -> ").concat(wp.stampings)
-                      .concat("(").concat(workedTime).concat(" ore lavorate)"));
-              log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thMissingTime,
-                  inconsistentAbsenceTable.get(person, thMissingTime));
-
-            } else if (wp.lackOfTime != 0) {
-
-              log.info("Il turno di {} {} nel giorno {} non e'stato completato per meno di 2"
-                      + " ore ({} minuti ({})) - CONTROLLARE PERMESSO timbrature: {}",
-                  person.name, person.surname, personDay.get().date, wp.lackOfTime,
-                  lackOfTime, wp.stampings);
-              log.info("Timbrature nella tolleranza dei 15 min. = {}", wp.inTolerance);
-
-              label = (wp.inTolerance) ? thIncompleteTime : thWarnStampings;
-              String str = personShiftDay.date.toString("dd MMM").concat(" -> ")
-                  .concat(wp.stampings).concat("(").concat(lackOfTime).concat(" ore mancanti)");
-              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, label, str);
-              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thLackTime,
-                  Integer.toString(wp.lackOfTime));
-            }
+//            if (wp.lackOfTime > globalTollerancePerShift) {
+//
+//              log.info("lackOfTime > globalTollerancePerShift = {} > {}", wp.lackOfTime,
+//                  globalTollerancePerShift);
+//              log.info("Il turno di {} {} nel giorno {} non e' stato completato - "
+//                      + "timbrature: {} ", person.name, person.surname, personDay.get().date,
+//                  wp.stampings);
+//
+//              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thMissingTime,
+//                  personShiftDay.date.toString("dd MMM").concat(" -> ").concat(wp.stampings)
+//                      .concat("(").concat(workedTime).concat(" ore lavorate)"));
+//              log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thMissingTime,
+//                  inconsistentAbsenceTable.get(person, thMissingTime));
+//
+//            } else if (wp.lackOfTime != 0) {
+//
+//              log.info("Il turno di {} {} nel giorno {} non e'stato completato per meno di 2"
+//                      + " ore ({} minuti ({})) - CONTROLLARE PERMESSO timbrature: {}",
+//                  person.name, person.surname, personDay.get().date, wp.lackOfTime,
+//                  lackOfTime, wp.stampings);
+//              log.info("Timbrature nella tolleranza dei 15 min. = {}", wp.inTolerance);
+//
+//              label = (wp.inTolerance) ? thIncompleteTime : thWarnStampings;
+//              String str = personShiftDay.date.toString("dd MMM").concat(" -> ")
+//                  .concat(wp.stampings).concat("(").concat(lackOfTime).concat(" ore mancanti)");
+//              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, label, str);
+//              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thLackTime,
+//                  Integer.toString(wp.lackOfTime));
+//            }
 
           } // fine if esistenza timbrature    
         } // fine check of working days

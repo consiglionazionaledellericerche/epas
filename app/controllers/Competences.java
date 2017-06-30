@@ -5,6 +5,7 @@ import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
@@ -1057,37 +1058,19 @@ public class Competences extends Controller {
         + cat.description + Security.getUser().get().username;
     if (step == 0) {
       // ritorno il dto per creare l'attività
-      if (sts == null) {
-        sts = new ShiftTypeService();
-      }       
-      step++;
-      render(cat, sts, step);
-    }
-    if (step == 1) {
-
-      if (sts.toleranceType == null) {
-        Validation.addError("sts.toleranceType", "specificare un valore!");
-        render("@configureShift",step, cat, sts);
-      }
-      //metto in cache la struttura dell'attività e ritorno il dto per creare la timetable
-      List<ShiftTypeService> list = Lists.newArrayList();
-      list.add(sts);
-      step++;
-      Cache.safeAdd(key, list, "5mn");
-
+             
       List<ShiftTimeTableDto>  dtoList = competenceManager
           .convertFromShiftTimeTable(shiftDao.getAllShifts(cat.office));
 
-      render(dtoList, cat, sts, step); 
+      step++;
+      render(dtoList, cat, sts, step);
     }
-    if (step == 2) {
+    if (step == 1) {
+      boolean breakInRange = false;
       if (shift == null) {
         flash.error("selezionare una timetable!");
         List<ShiftTimeTable> shiftList = shiftDao.getAllShifts(cat.office);        
         List<ShiftTimeTableDto>  dtoList = competenceManager.convertFromShiftTimeTable(shiftList);
-        List<ShiftTypeService> list = Cache.get(key, List.class);
-        sts = list.get(0);
-        Cache.safeAdd(key, list, "5mn");
 
         render("@configureShift", dtoList, cat, sts, step);
       }
@@ -1098,11 +1081,33 @@ public class Competences extends Controller {
       list2.add(stt);
       step++;
       Cache.safeAdd(key2, list2, "5mn");
-      List<ShiftTypeService> list = Cache.get(key, List.class);
-      sts = list.get(0);
-      Cache.safeAdd(key, list, "5mn");
+      if (sts == null) {
+        sts = new ShiftTypeService();
+        if (Range.closed(stt.startMorning, stt.endMorning)
+            .encloses(Range.closed(stt.startMorningLunchTime, stt.endMorningLunchTime))) {
+          //ritornare un'informazione per far visualizzare diversamente la costruzione della form
+          breakInRange = true;
+        }
+      }
 
-      render(stt, step, sts, cat);
+      render(stt, step, sts, cat, breakInRange);
+
+    }
+    if (step == 2) {
+      if (sts.toleranceType == null) {
+        Validation.addError("sts.toleranceType", "specificare un valore!");
+        render("@configureShift",step, cat, sts);
+      }
+      //metto in cache la struttura dell'attività e ritorno il dto per creare la timetable
+      List<ShiftTypeService> list = Lists.newArrayList();
+      list.add(sts);
+      step++;
+      Cache.safeAdd(key, list, "5mn");
+      List<ShiftTimeTable> list2 = Cache.get(key2, List.class);
+      ShiftTimeTable stt = list2.get(0);
+      Cache.safeAdd(key2, list2, "5mn");
+      
+      render(cat, sts, step, stt); 
 
     }
     if (step == 3) {
