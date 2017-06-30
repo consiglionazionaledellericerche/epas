@@ -29,6 +29,7 @@ import models.dto.ShiftEvent;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -45,6 +46,7 @@ import security.SecurityRules;
  * @author daniele
  * @since 15/05/17.
  */
+@Slf4j
 @With(Resecure.class)
 public class Calendar extends Controller {
 
@@ -179,6 +181,7 @@ public class Calendar extends Controller {
 
   /**
    * ritorna la lista di eventi presenti per l'attività nel periodo start/end.
+   *
    * @param activityId l'id dell'attività da ricercare
    * @param start la data di inizio del periodo
    * @param end la data di fine del periodo
@@ -226,12 +229,11 @@ public class Calendar extends Controller {
     return shiftDao.getPersonShiftDaysByPeriodAndType(start, end, shiftType, person).stream()
         .map(shiftDay -> {
           final ShiftEvent event = ShiftEvent.builder()
-              .allDay(true)
               .shiftSlot(shiftDay.shiftSlot)
               .personShiftDayId(shiftDay.id)
-              .title(shiftDay.getSlotTime() + '\n' + person.fullName())
-              .start(shiftDay.date)
-              .position(shiftDay.shiftSlot.ordinal() + 1) // ordinati in base allo slot
+              .title(person.fullName())
+              .start(shiftDay.date.toLocalDateTime(shiftDay.slotBegin()))
+              .end(shiftDay.date.toLocalDateTime(shiftDay.slotEnd()))
               .durationEditable(false)
               .color(color.backgroundColor)
               .textColor(color.textColor)
@@ -256,7 +258,7 @@ public class Calendar extends Controller {
    * @param start data iniziale del periodo
    * @param end data finale del periodo
    * @return Una lista di DTO che modellano le assenze di quella persona nell'intervallo specificato
-   *     da renderizzare nel fullcalendar.
+   * da renderizzare nel fullcalendar.
    */
   private static List<ShiftEvent> absenceEvents(Person person, LocalDate start, LocalDate end) {
 
@@ -278,13 +280,14 @@ public class Calendar extends Controller {
        * (perchè ne imposta l'orario alla mezzanotte).
        */
       if (event == null
-          || event.getEnd() == null && !event.getStart().plusDays(1).equals(abs.personDay.date)
-          || event.getEnd() != null && !event.getEnd().equals(abs.personDay.date)) {
+          || event.getEnd() == null && !event.getStart().toLocalDate().plusDays(1)
+          .equals(abs.personDay.date)
+          || event.getEnd() != null && !event.getEnd().toLocalDate().equals(abs.personDay.date)) {
 
         event = ShiftEvent.builder()
             .allDay(true)
             .title("Assenza di " + abs.personDay.person.fullName())
-            .start(abs.personDay.date)
+            .start(abs.personDay.date.toLocalDateTime(LocalTime.MIDNIGHT))
             .editable(false)
             .color(EventColor.RED.backgroundColor)
             .textColor(EventColor.RED.textColor)
@@ -293,7 +296,7 @@ public class Calendar extends Controller {
 
         events.add(event);
       } else {
-        event.setEnd(abs.personDay.date.plusDays(1));
+        event.setEnd(abs.personDay.date.plusDays(1).toLocalDateTime(LocalTime.MIDNIGHT));
       }
 
     }
@@ -308,7 +311,7 @@ public class Calendar extends Controller {
    *
    * @param personShiftDayId id del persnShiftDay da controllare
    * @param newDate giorno nel quale salvare il turno error 409 con messaggio di
-   *     ShiftTroubles.PERSON_IS_ABSENT, CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED
+   * ShiftTroubles.PERSON_IS_ABSENT, CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED
    */
   public static void changeShift(long personShiftDayId, LocalDate newDate) {
 
@@ -485,6 +488,7 @@ public class Calendar extends Controller {
 
   /**
    * ritorna informazioni alla vista relative ai turnisti e alle ore già approvate/pagate di turno.
+   *
    * @param activityId l'id dell'attività per cui ricercare le approvazioni
    * @param date la data da cui ricercare le approvazioni
    */
@@ -546,6 +550,7 @@ public class Calendar extends Controller {
 
   /**
    * approva le quantità orarie dei turni nel mese.
+   *
    * @param version la versione da verificare
    * @param shiftTypeMonthId l'id dello shiftTypeMonth da controllare
    */
@@ -583,6 +588,7 @@ public class Calendar extends Controller {
 
   /**
    * permette la rimozione dell'approvazione per le ore di turno.
+   *
    * @param shiftTypeMonthId l'id dello shiftTypeMonth contenente le info su approvazione turno
    */
   public static void removeApprovation(long shiftTypeMonthId) {
