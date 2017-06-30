@@ -789,24 +789,19 @@ public class CompetenceManager {
   public void persistShiftType(ShiftTypeService service, ShiftTimeTable stt, ShiftCategories cat) {
     ShiftType st = new ShiftType();
     st.breakInShift = service.breakInShift;
-    st.breakInShiftEnabled = service.breakInShiftEnabled;
+    
     st.description = service.description;
     st.type = service.name;
     st.shiftTimeTable = stt;
-    switch(service.toleranceType) {
-      case entrance:
-        st.entranceTolerance = service.tolerance;
-        break;
-      case exit:
-        st.exitTolerance = service.tolerance;
-        break;
-      case both:
-        st.entranceTolerance = st.exitTolerance = service.tolerance;
-        break;
-        default:
-          break;
-    }
-    st.hourTolerance = service.hourTolerance;
+    
+    st.breakInShift = service.breakInShift;    
+    st.breakMaxInShift = service.breakMaxInShift;
+    st.entranceMaxTolerance = service.entranceMaxTolerance;
+    st.entranceTolerance = service.entranceTolerance;
+    st.exitTolerance = service.exitTolerance;
+    st.exitMaxTolerance = service.exitMaxTolerance;
+    
+    st.maxToleranceAllowed = service.maxTolerance;
     st.shiftCategories = cat;
     st.save();
   }
