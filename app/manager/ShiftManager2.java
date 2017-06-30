@@ -288,6 +288,9 @@ public class ShiftManager2 {
     final ShiftTimeTable timeTable = Verify.verifyNotNull(shiftType.shiftTimeTable);
     final LocalDate today = LocalDate.now();
 
+    log.debug("Ricalcoli sul turno di {} in data {}", personShiftDay.personShift.person,
+        personShiftDay.date);
+
     Optional<PersonDay> optionalPersonDay =
         personDayDao.getPersonDay(personShiftDay.personShift.person, personShiftDay.date);
 
@@ -436,6 +439,8 @@ public class ShiftManager2 {
    * @param date la data in cui ricercare i personshiftday dell'attività activity
    */
   public void checkShiftDayValid(LocalDate date, ShiftType activity) {
+
+    log.debug("Ricalcolo del giorno di turno {} - {}", activity, date);
     List<PersonShiftDay> shifts = shiftDao.getShiftDaysByPeriodAndType(date, date, activity);
 
     // 1. Controllo che siano coperti tutti gli slot
