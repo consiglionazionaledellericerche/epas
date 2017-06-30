@@ -2,16 +2,12 @@ package models.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.List;
 import lombok.Builder;
 import lombok.Data;
-import models.ShiftType;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 /**
  * @author daniele
@@ -25,8 +21,8 @@ public class ShiftEvent {
   // Campi di default dell'eventObject fullcalendar
   private String title;
   private boolean allDay;
-  private LocalDate start;
-  private LocalDate end;
+  private LocalDateTime start;
+  private LocalDateTime end;
   private String url;
   private String className;
   // Usata la classe Boolean per poter lasciare i valori null in modo che
@@ -51,5 +47,4 @@ public class ShiftEvent {
   private List<String> troubles;
   private String email;
   private String mobile;
-  private int position; // utilizzato per dare un'ordinamento agli eventi
 }

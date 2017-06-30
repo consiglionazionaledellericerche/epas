@@ -469,3 +469,7 @@ button.button-as-link {
 .webui-popover-alert.left-bottom > .webui-arrow:after {
   border-left-color: #f2dede;
 }
+
+.fc-month-view .fc-time{
+   display : none;
+}

@@ -6,17 +6,17 @@ $(document).ready(function() {
   // Calendario dei turni
   $('[data-calendar]', this).each(function() {
     var $this = $(this);
+    var $dateFormat = 'YYYY-MM-DD';
     var data = {
       height: 'auto',
       columnFormat: 'dddd',
       fixedWeekCount: false,
       showNonCurrentDates: false, // evita di renderizzare i giorni al di fuori del mese corrente
       droppable: true,
-      eventOrder: "position",
       loading: function(isLoading, view) {
         if (isLoading) {
           $this.addClass('reloading');
-          var $spinner = $('<span class="text-primary" style="position:absolute; z-index: 10"><i class="fa fa-spin fa-spinner fa-3x"></i</span>');
+          var $spinner = $('<span class="text-primary" style="position:absolute; z-index: 10"><i class="fa fa-spin fa-spinner fa-3x"></i></span>');
           $this.before($spinner);
           var pos = $this.offset();
           var centerX = pos.left + $this.width() / 2;
@@ -95,6 +95,9 @@ $(document).ready(function() {
         if (event.source && event.source.rendering === 'background') {
           element.append("<em>" + event.title + "</em>");
         }
+        if (!event.allDay) {
+           element.prepend("<div>" + event.start.format('HH:mm') + " - " + event.end.format('HH:mm') + "</div>");
+        }
         var isEditable = $this.fullCalendar('option', 'editable');
         if (isEditable && $.inArray("removable", event.className) != -1) {
           var url = $this.data('calendar-event-remove');
@@ -112,7 +115,7 @@ $(document).ready(function() {
           button.click(function() {
             $.confirm({
               title: 'Eliminare questo turno?',
-              content: event.start.format() + ' - ' + event.title,
+              content: event.start.format($dateFormat) + ' - ' + event.title,
               backgroundDismiss: true,
               buttons: {
                 confirm: {
@@ -187,7 +190,7 @@ $(document).ready(function() {
           url: url,
           data: {
             personShiftDayId: event.personShiftDayId,
-            newDate: event.start.format()
+            newDate: event.start.format($dateFormat)
           },
           error: function(response) {
             // Passare un JSON serializzato a partire da un PNotifyObject definito lato Java
@@ -214,7 +217,7 @@ $(document).ready(function() {
           url: url,
           data: {
             personId: event.personId,
-            date: event.start.format(),
+            date: event.start.format($dateFormat),
             shiftSlot: shiftSlot,
             activityId: activity
           },
@@ -241,7 +244,7 @@ $(document).ajaxStop(function() {
     $('[data-draggable]').each(function() {
       $(this).css('cursor', 'pointer');
       $(this).draggable({
-        revert: true, // immediately snap back to original position
+        revert: true,
         revertDuration: 0
       });
     });
@@ -250,10 +253,9 @@ $(document).ajaxStop(function() {
     placement: 'auto',
     trigger: 'hover',
     type: 'html',
-    //style:'inverse',
     animation: 'pop',
     dismissible: true,
-    delay: { //show and hide delay time of the popover, works only when trigger is 'hover',the value can be number or object
+    delay: {
       show: null,
       hide: null
     }
