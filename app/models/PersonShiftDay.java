@@ -23,6 +23,7 @@ import models.enumerate.ShiftTroubles;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 import play.data.validation.Required;
 
 @Entity
@@ -58,17 +59,24 @@ public class PersonShiftDay extends BaseModel {
   public Set<PersonShiftDayInTrouble> troubles = Sets.newHashSet();
 
   @Transient
-  public String getSlotTime() {
-    String timeFormatted = "HH:mm";
+  public LocalTime slotBegin() {
     switch (shiftSlot) {
       case MORNING:
-        return shiftType.shiftTimeTable.startMorning.toString(timeFormatted) + " - "
-            + shiftType.shiftTimeTable.endMorning.toString(timeFormatted);
-
+        return shiftType.shiftTimeTable.startMorning;
       case AFTERNOON:
-        return shiftType.shiftTimeTable.startAfternoon.toString(timeFormatted) + " - "
-            + shiftType.shiftTimeTable.endAfternoon.toString(timeFormatted);
+        return shiftType.shiftTimeTable.startAfternoon;
+      default:
+        return null;
+    }
+  }
 
+  @Transient
+  public LocalTime slotEnd() {
+    switch (shiftSlot) {
+      case MORNING:
+        return shiftType.shiftTimeTable.endMorning;
+      case AFTERNOON:
+        return shiftType.shiftTimeTable.endAfternoon;
       default:
         return null;
     }
