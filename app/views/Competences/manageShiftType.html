@@ -91,7 +91,10 @@
 			#{f.input 'type.entranceTolerance',type:'number' /}
 			#{f.input 'type.exitTolerance', type:'number' /}
 		#{/else}
-		#{f.input 'type.hourTolerance', type:'number' /}		
+		#{f.input 'type.hourTolerance', type:'number' /}	
+		#{if type.maxToleranceAllowed != 0}
+			#{f.input 'type.maxTolerance', type:'number' /}
+		#{/if}
   
 	  #{b.buttons center:true}
 	  		#{b.submit 'Ok'/}

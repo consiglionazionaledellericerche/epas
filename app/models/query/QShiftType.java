@@ -28,21 +28,25 @@ public class QShiftType extends EntityPathBase<ShiftType> {
 
     public final NumberPath<Integer> breakInShift = createNumber("breakInShift", Integer.class);
 
-    public final BooleanPath breakInShiftEnabled = createBoolean("breakInShiftEnabled");
+    public final NumberPath<Integer> breakMaxInShift = createNumber("breakMaxInShift", Integer.class);
 
     public final StringPath description = createString("description");
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final NumberPath<Integer> entranceMaxTolerance = createNumber("entranceMaxTolerance", Integer.class);
+
     public final NumberPath<Integer> entranceTolerance = createNumber("entranceTolerance", Integer.class);
+
+    public final NumberPath<Integer> exitMaxTolerance = createNumber("exitMaxTolerance", Integer.class);
 
     public final NumberPath<Integer> exitTolerance = createNumber("exitTolerance", Integer.class);
 
-    public final NumberPath<Integer> hourTolerance = createNumber("hourTolerance", Integer.class);
-
     //inherited
     public final NumberPath<Long> id = _super.id;
+
+    public final NumberPath<Integer> maxToleranceAllowed = createNumber("maxToleranceAllowed", Integer.class);
 
     public final SetPath<models.ShiftTypeMonth, QShiftTypeMonth> monthsStatus = this.<models.ShiftTypeMonth, QShiftTypeMonth>createSet("monthsStatus", models.ShiftTypeMonth.class, QShiftTypeMonth.class, PathInits.DIRECT2);
 
