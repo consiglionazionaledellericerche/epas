@@ -6,6 +6,7 @@ import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import dao.ShiftDao;
 import dao.ShiftTypeMonthDao;
+import dao.history.HistoricalDao;
 import lombok.extern.slf4j.Slf4j;
 import manager.ShiftManager2;
 import models.PersonShiftDay;
@@ -43,9 +44,6 @@ public class ShiftEventsListener {
     final long shiftId = shift.id;
     final LocalDate date = shift.date;
 
-    // FIXME piuttosto che fare questo controllo converrebbe inviare gli eventi su 2 bus separati
-    final boolean isPersistent = shift.isPersistent();
-
     // Il Job evita le chiamate ricorsive (il motivo non l'ho ancora capito)
     // FIXME le modifiche fatte dal job non hanno un utente nell'history
     new Job<Void>() {
@@ -56,6 +54,23 @@ public class ShiftEventsListener {
 
         // Aggiornamento dello ShiftTypeMonth
         if (shiftType.isPresent()) {
+
+          PersonShiftDay psd = PersonShiftDay.findById(shiftId);
+          // Ricalcoli sul turno
+          if (psd != null && psd.isPersistent()) {
+            shiftManager2.checkShiftValid(psd);
+          }
+
+          // Ricalcoli sui giorni coinvolti dalle modifiche
+          HistoricalDao.lastRevisionsOf(PersonShiftDay.class, shiftId)
+              .stream().limit(2).map(historyValue -> {
+            PersonShiftDay pd = (PersonShiftDay) historyValue.value;
+            return pd.date;
+          }).filter(localDate -> localDate != null).distinct()
+              .forEach(localDate -> {
+                shiftManager2.checkShiftDayValid(localDate, shiftType.get());
+              });
+
           final Optional<ShiftTypeMonth> monthStatus = shiftTypeMonthDao
               .byShiftTypeAndDate(shiftType.get(), date);
 
@@ -71,13 +86,6 @@ public class ShiftEventsListener {
           }
           newStatus.save();
         }
-        // Ricalcoli sul turno
-        if (isPersistent) {
-          final PersonShiftDay personShiftDay = shiftDao.getPersonShiftDayById(shiftId);
-          shiftManager2.checkShiftValid(personShiftDay);
-        }
-        // Ricalcoli sul giorno
-        shiftManager2.checkShiftDayValid(date, shiftType.get());
       }
     }.now();
   }

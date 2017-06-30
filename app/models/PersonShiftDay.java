@@ -101,5 +101,4 @@ public class PersonShiftDay extends BaseModel {
     EntityEvents.changed(this);
   }
 
-
 }

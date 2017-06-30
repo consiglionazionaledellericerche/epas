@@ -330,7 +330,6 @@ public class Calendar extends Controller {
       response.status = Http.StatusCode.NOT_FOUND;
     } else {
       if (rules.check(shift.shiftType) && rules.check(shiftTypeMonth)) {
-        LocalDate oldDate = shift.date;
         shift.date = newDate;
 
         // controlla gli eventuali errori di consitenza nel calendario
@@ -347,8 +346,6 @@ public class Calendar extends Controller {
         } else {
           //salva il turno modificato
           shift.save();
-          // TODO da spostare nel ShiftEventsListener
-          shiftManager2.checkShiftDayValid(oldDate, shift.shiftType);
 
           message = PNotifyObject.builder()
               .title("Ok")
