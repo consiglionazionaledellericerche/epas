@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import dao.ShiftDao;
 import dao.ShiftTypeMonthDao;
 import dao.history.HistoricalDao;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import manager.ShiftManager2;
 import models.PersonShiftDay;
@@ -66,7 +67,7 @@ public class ShiftEventsListener {
               .stream().limit(2).map(historyValue -> {
             PersonShiftDay pd = (PersonShiftDay) historyValue.value;
             return pd.date;
-          }).filter(localDate -> localDate != null).distinct()
+          }).filter(Objects::nonNull).distinct()
               .forEach(localDate -> {
                 shiftManager2.checkShiftDayValid(localDate, shiftType.get());
               });
