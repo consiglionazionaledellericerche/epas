@@ -397,6 +397,8 @@ public class ShiftManager2 {
           // TODO al momento il significato del campo shiftType.maxToleranceAllowed è diverso
           // (minuti di tolleranza) e qui lo uso in modo improprio...
           if (exceededThresholds > shiftType.maxToleranceAllowed) {
+            // FIXME probabilmente conviene persistere il valore di exceededThresholds nel
+            // PersonShiftDay in modo da usarlo nella fase di calcolo delle competenze
             shiftTroubles.add(ShiftTroubles.TOO_MANY_EXCEEDED_THRESHOLDS);
           }
 //          int timeInShift = personDayManager.workingMinutes(validPairStampings, begin, end);
