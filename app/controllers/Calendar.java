@@ -539,7 +539,7 @@ public class Calendar extends Controller {
       lastDay = monthEnd;
     }
 
-    final List<Person> people = shiftManager2.involvedShiftWorkers(shiftType, monthbegin, lastDay);
+    final List<Person> people = shiftManager2.involvedShiftWorkers(shiftType, monthbegin, monthEnd);
 
     final Map<Person, Integer> shiftsCalculatedCompetences = new HashMap<>();
     final Map<Person, Boolean> peopleTrouble = new HashMap<>();
@@ -549,7 +549,7 @@ public class Calendar extends Controller {
           monthbegin, lastDay);
       shiftsCalculatedCompetences.put(person, competences);
 
-      boolean haveTrouble = shiftManager2.allValidShifts(shiftType, person, monthbegin, lastDay);
+      boolean haveTrouble = shiftManager2.allValidShifts(shiftType, person, monthbegin, monthEnd);
       peopleTrouble.put(person, haveTrouble);
     });
 
