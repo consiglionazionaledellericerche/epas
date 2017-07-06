@@ -81,6 +81,30 @@ public class PersonShiftDay extends BaseModel {
         return null;
     }
   }
+  
+  @Transient
+  public LocalTime lunchTimeBegin() {
+    switch (shiftSlot) {
+      case MORNING:
+        return shiftType.shiftTimeTable.startMorningLunchTime;
+      case AFTERNOON:
+        return shiftType.shiftTimeTable.startAfternoonLunchTime;
+      default:
+        return null;
+    }
+  }
+  
+  @Transient
+  public LocalTime lunchTimeEnd() {
+    switch (shiftSlot) {
+      case MORNING:
+        return shiftType.shiftTimeTable.endMorningLunchTime;
+      case AFTERNOON:
+        return shiftType.shiftTimeTable.endAfternoonLunchTime;
+      default:
+        return null;
+    }
+  }
 
   @Transient
   public boolean hasError(ShiftTroubles trouble) {
