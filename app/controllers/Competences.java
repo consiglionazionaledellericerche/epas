@@ -30,16 +30,6 @@ import helpers.jpa.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
 
 import manager.CompetenceManager;
@@ -65,14 +55,11 @@ import models.PersonCompetenceCodes;
 import models.PersonReperibilityType;
 import models.PersonShift;
 import models.PersonShiftShiftType;
-import models.Role;
 import models.ShiftCategories;
 import models.ShiftTimeTable;
 import models.ShiftType;
 import models.TotalOvertime;
 import models.User;
-import models.UsersRolesOffices;
-
 import models.dto.ShiftTypeService;
 import models.dto.TimeTableDto;
 
@@ -86,6 +73,15 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import security.SecurityRules;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 
 @Slf4j
@@ -1032,7 +1028,7 @@ public class Competences extends Controller {
    * @param officeId l'id della sede a cui associare la nuova timetable
    */
   public static void saveTimeTable(@Valid TimeTableDto timeTable, Long officeId) {
-    if(Validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
       List<Office> officeList = officeDao.getAllOffices();
       render("@configureShiftTimeTable", timeTable, officeList);

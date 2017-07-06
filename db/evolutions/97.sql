@@ -101,6 +101,9 @@ CREATE TABLE shift_type_month_history (
   PRIMARY KEY (id, _revision, _revision_type)
 );
 
+INSERT INTO person_shift_days_history (id, _revision, _revision_type, "date", person_shift_id, shift_type_id, shift_slot)
+  SELECT id, r.rev, 0, "date", person_shift_id, shift_type_id, shift_slot FROM person_shift_days,
+    (SELECT MAX(rev) AS rev FROM revinfo) AS r;
 
 # ---!Downs
 

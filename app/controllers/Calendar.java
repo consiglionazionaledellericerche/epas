@@ -10,18 +10,23 @@ import dao.AbsenceDao;
 import dao.ShiftDao;
 import dao.ShiftTypeMonthDao;
 
+import helpers.StripedLock;
 import helpers.Web;
 
-import lombok.extern.slf4j.Slf4j;
-
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+
+
+import lombok.extern.slf4j.Slf4j;
 
 import manager.ShiftManager2;
 
@@ -57,8 +62,8 @@ import security.SecurityRules;
  * @author daniele
  * @since 15/05/17.
  */
-@Slf4j
 @With(Resecure.class)
+@Slf4j
 public class Calendar extends Controller {
 
   @Inject
@@ -73,6 +78,8 @@ public class Calendar extends Controller {
   static AbsenceDao absenceDao;
   @Inject
   static ShiftTypeMonthDao shiftTypeMonthDao;
+  @Inject
+  static StripedLock lock;
 
 
   /**
@@ -197,26 +204,46 @@ public class Calendar extends Controller {
    * @param start la data di inizio del periodo
    * @param end la data di fine del periodo
    * @throws JsonProcessingException eccezione in caso di errore di creazione del json
+   * @throws InterruptedException 
    */
   public static void events(long activityId, LocalDate start, LocalDate end)
-      throws JsonProcessingException {
-
+      throws JsonProcessingException, InterruptedException {
+    log.debug("Start: {}", start);
+    log.debug("End: {}", end);
     List<ShiftEvent> events = new ArrayList<>();
     Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
     if (activity.isPresent() && rules.check(activity.get())) {
+      
+      final Map.Entry<ShiftType, YearMonth> lockKey = new AbstractMap
+          .SimpleEntry<>(activity.get(), new YearMonth(start));
+      
+      final Lock loocketto = lock.get(lockKey);
+      try {
+        loocketto.tryLock(4, TimeUnit.SECONDS);
+        
+        log.info("CALENDAR ACQUISITO LOCK SULLA RISORSA {}", lockKey);
+      } 
+     
+      catch (IllegalMonitorStateException ex) {
+        log.error("Attesa scaduta sul lock per la risorsa {}: {}",lockKey, ex.getMessage() );
+      } finally {
+        log.info("Pillio i personday");
+        List<PersonShiftShiftType> people = shiftManager2.shiftWorkers(activity.get(), start, end);
 
-      List<PersonShiftShiftType> people = shiftManager2.shiftWorkers(activity.get(), start, end);
+        int index = 0;
 
-      int index = 0;
+        // prende i turni associati alle persone attive in quel turno
+        for (PersonShiftShiftType personShift : people) {
+          final Person person = personShift.personShift.person;
+          final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
+          events.addAll(shiftEvents(activity.get(), person, start, end, eventColor));
+          events.addAll(absenceEvents(person, start, end));
+          index++;
+        }
 
-      // prende i turni associati alle persone attive in quel turno
-      for (PersonShiftShiftType personShift : people) {
-        final Person person = personShift.personShift.person;
-        final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
-        events.addAll(shiftEvents(activity.get(), person, start, end, eventColor));
-        events.addAll(absenceEvents(person, start, end));
-        index++;
+        loocketto.unlock();
       }
+
     }
 
     // Usato il jackson per facilitare la serializzazione dei LocalDate

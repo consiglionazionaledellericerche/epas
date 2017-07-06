@@ -19,6 +19,9 @@ import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
+import play.data.validation.Max;
+import play.data.validation.Min;
+
 @Entity
 @Audited
 @Table(name = "shift_type")
@@ -43,6 +46,8 @@ public class ShiftType extends BaseModel {
   @Column(name = "exit_max_tolerance")
   public int exitMaxTolerance;
   
+  @Max(3)
+  @Min(0)
   @Column(name = "max_tolerance_allowed")
   public int maxToleranceAllowed;
 
