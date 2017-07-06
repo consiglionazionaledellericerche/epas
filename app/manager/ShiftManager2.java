@@ -335,8 +335,8 @@ public class ShiftManager2 {
           if (entranceStamping.isAfter(entranceMaxThreshold)) {
             // Ingresso fuori dalla tolleranza massima (turno non valido)
             shiftTroubles.add(ShiftTroubles.MAX_ENTRANCE_TOLERANCE_EXCEEDED);
-          } else if (entranceStamping.isAfter(entranceThreshold) &&
-              !entranceStamping.isAfter(entranceMaxThreshold)) {
+          } else if (entranceStamping.isAfter(entranceThreshold) 
+              && !entranceStamping.isAfter(entranceMaxThreshold)) {
             exceededThresholds++;
             // Ingresso tra la tolleranza minima e quella massima (turno decurtato di 1 ora)
             shiftTroubles.add(ShiftTroubles.MIN_ENTRANCE_TOLERANCE_EXCEEDED);
@@ -358,17 +358,27 @@ public class ShiftManager2 {
             shiftTroubles.add(ShiftTroubles.MIN_EXIT_TOLERANCE_EXCEEDED);
           }
 
-          // TODO da cosa dovrei capire se in un turno è prevista la pausa pranzo o no?
+          
           RangeSet<LocalTime> rangeSet = TreeRangeSet.create();
           shiftPairs.forEach(pairStamping -> {
             rangeSet.add(Range.closed(pairStamping.first.date.toLocalTime(), pairStamping.second
                 .date.toLocalTime()));
           });
 
-          // TODO completare questa parte relativa alla pausa pranzo
-          //          final LocalTime lunchBreakBegin = ...
-          //          final LocalTime lunchBreakEnd = ....
-          //
+          /*
+           *  L'unico modo per capire se la pausa pranzo è contenuta nel turno è guardare 
+           *  la timetable associata all'attività
+           */
+          final LocalTime lunchBreakStart = personShiftDay.lunchTimeBegin();
+          final LocalTime lunchBreakEnd = personShiftDay.lunchTimeEnd();
+          
+          if (Range.open(slotBegin, slotEnd)
+              .encloses(Range.closed(lunchBreakStart, lunchBreakEnd))) {
+            //TODO: la pausa pranzo è compresa all'interno dello slot...
+          } else {
+            //TODO: la pausa pranzo sta al di fuori del turno
+          }
+          
           //          rangeSet.remove(Range.closed(lunchBreakBegin,lunchBreakEnd));
 
           // Conteggio dei minuti di pausa fatti durante il turno
