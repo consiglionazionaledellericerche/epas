@@ -114,6 +114,10 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
   @NotAudited
   @OneToMany(mappedBy = "office")
   public List<Attachment> attachments = Lists.newArrayList();
+  
+  @NotAudited
+  @OneToMany(mappedBy = "office")
+  public List<MealTicket> tickets = Lists.newArrayList();
 
   @Transient
   private Boolean isEditable = null;

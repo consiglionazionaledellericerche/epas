@@ -57,6 +57,8 @@ public class QGroupAbsenceType extends EntityPathBase<GroupAbsenceType> {
 
     public final SetPath<GroupAbsenceType, QGroupAbsenceType> previousGroupChecked = this.<GroupAbsenceType, QGroupAbsenceType>createSet("previousGroupChecked", GroupAbsenceType.class, QGroupAbsenceType.class, PathInits.DIRECT2);
 
+    public final NumberPath<Integer> priority = createNumber("priority", Integer.class);
+
     public final QTakableAbsenceBehaviour takableAbsenceBehaviour;
 
     public QGroupAbsenceType(String variable) {
