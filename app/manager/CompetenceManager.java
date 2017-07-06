@@ -507,7 +507,8 @@ public class CompetenceManager {
     }).collect(Collectors.toList());
     List<Competence> peopleMonthList = competenceDao.getCompetencesInOffice(comp.year,
         comp.month, groupCodes, comp.person.office, false);
-    int peopleSum = peopleMonthList.stream().mapToInt(i -> i.valueApproved).sum();
+    int peopleSum = peopleMonthList.stream()
+        .filter(competence -> competence.id != comp.id).mapToInt(i -> i.valueApproved).sum();
     if (peopleSum + value > maxDays) {
       return false;
     }
