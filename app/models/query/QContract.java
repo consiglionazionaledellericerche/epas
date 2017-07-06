@@ -65,6 +65,8 @@ public class QContract extends EntityPathBase<Contract> {
 
     public final DatePath<org.joda.time.LocalDate> sourceDateResidual = createDate("sourceDateResidual", org.joda.time.LocalDate.class);
 
+    public final DatePath<org.joda.time.LocalDate> sourceDateVacation = createDate("sourceDateVacation", org.joda.time.LocalDate.class);
+
     public final NumberPath<Integer> sourcePermissionUsed = createNumber("sourcePermissionUsed", Integer.class);
 
     public final NumberPath<Integer> sourceRecoveryDayUsed = createNumber("sourceRecoveryDayUsed", Integer.class);
