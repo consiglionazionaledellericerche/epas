@@ -16,32 +16,30 @@
 			
 		#{/if}
 		#{else}
-			#{alert color:'warning'}
-				Dal momento che è stata scelta una timetable con pausa pranzo contenuta all'interno degli orari degli slot
-				di turno, specificando la tolleranza da applicare alle timbrature di ingresso e uscita dal turno, 
-				si specificherà automaticamente la stessa tolleranza anche per le timbrature che determinano
-				la pausa pranzo stessa.
-				Inoltre sarà possibile specificare una tolleranza totale
-			#{/alert}
+			#{alert color: 'danger'}
 			<div class="row">
 			
 	  		<div class="col-sm-6">#{f.input 'sts.entranceTolerance', type:'number', popover:'true', required:'true'/}</div>
 	  		<div class="col-sm-6">#{f.input 'sts.entranceMaxTolerance', type:'number', popover:'true'/}</div>
 			</div>
-			
+			#{/alert}
+			#{alert color: 'danger'}
 			<div class="row">
 			
 	  		<div class="col-sm-6">#{f.input 'sts.exitTolerance', type:'number', popover:'true', required:'true'/}</div>
 	  		<div class="col-sm-6">#{f.input 'sts.exitMaxTolerance', type:'number', popover:'true'/}</div>
 			</div>
-			
+			#{/alert}
+			#{alert color: 'warning'}
 			<div class="row">
 			
 	  		<div class="col-sm-6">#{f.input 'sts.breakInShift', type:'number', popover:'true', required:'true'/}</div>
 	  		<div class="col-sm-6">#{f.input 'sts.breakMaxInShift', type:'number', popover:'true'/}</div>							
 			</div>
-			#{f.input 'sts.maxTolerance', type:'number', popover:'true'/}
-			
+			#{/alert}
+			#{alert color: 'success'}
+				#{f.input 'sts.maxTolerance', type:'number', popover:'true'/}
+			#{/alert}
 		#{/else}
 		
 

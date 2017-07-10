@@ -30,6 +30,15 @@ import helpers.jpa.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.CompetenceManager;
@@ -73,16 +82,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import security.SecurityRules;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
 
 @Slf4j
 @With({Resecure.class})
@@ -1044,7 +1043,7 @@ public class Competences extends Controller {
    * @param shiftCategoryId l'id del servzio da configurare
    */
   public static void configureShift(Long shiftCategoryId, int step, 
-      ShiftTypeService sts, Long shift) {
+      @Valid ShiftTypeService sts, Long shift) {
     ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
     notFoundIfNull(cat);
     rules.checkIfPermitted(cat.office);
@@ -1090,8 +1089,24 @@ public class Competences extends Controller {
 
     }
     if (step == 2) {
-      if (sts.toleranceType == null) {
-        Validation.addError("sts.toleranceType", "specificare un valore!");
+//      if (sts.maxTolerance > 3) {
+//        Validation.addError("sts.maxTolerance", 
+//            "Non si possono concedere più di 3 tolleranze sforabili");
+//        render("@configureShift",step, cat, sts);
+//      }
+      if (sts.breakInShift > sts.breakMaxInShift) {
+        Validation.addError("sts.breakInShift", 
+            "La soglia minima non può essere superiore a quella massima");
+        render("@configureShift",step, cat, sts);
+      }
+      if (sts.entranceTolerance > sts.entranceMaxTolerance) {
+        Validation.addError("sts.entranceTolerance", 
+            "La soglia minima non può essere superiore a quella massima");
+        render("@configureShift",step, cat, sts);
+      }
+      if (sts.exitTolerance > sts.exitMaxTolerance) {
+        Validation.addError("sts.exitTolerance", 
+            "La soglia minima non può essere superiore a quella massima");
         render("@configureShift",step, cat, sts);
       }
       //metto in cache la struttura dell'attività e ritorno il dto per creare la timetable

@@ -46,6 +46,7 @@ public class ShiftType extends BaseModel {
   @Column(name = "exit_max_tolerance")
   public int exitMaxTolerance;
   
+  //quantità massima di tolleranze concesse all'interno dell'attività
   @Max(3)
   @Min(0)
   @Column(name = "max_tolerance_allowed")

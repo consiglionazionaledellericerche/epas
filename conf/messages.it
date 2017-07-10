@@ -437,7 +437,7 @@ sts.breakInShiftEnabled = Abilitare una pausa internamente al turno?
 sts.breakInShift =Durata della pausa, se presente (in minuti)
 sts.breakMaxInShift =Durata della pausa massima, se presente (in minuti) 
 sts.toleranceType =Quando applicare la tolleranza
-sts.maxTolerance =Tolleranza massima (minuti)
+sts.maxTolerance =Quantità massima di tolleranze sforabili
 timeTable.startMorning =inizio turno
 timeTable.endMorning =fine turno
 timeTable.startAfternoon =inizio turno
@@ -449,9 +449,14 @@ timeTable.totalWorkMinutes =Tempo di turno (in minuti)
 
 type.type =Nome
 type.description =Descrizione
-type.entranceTolerance =Tolleranza in ingresso (minuti)
-type.exitTolerance =Tolleranza in uscita (minuti)
+type.entranceTolerance =Tolleranza minima in ingresso (minuti)
+type.entranceMaxTolerance =Tolleranza massima in ingresso (minuti)
+type.exitTolerance =Tolleranza minima in uscita (minuti)
+type.exitMaxTolerance =Tolleranza massima in uscita (minuti)
 type.hourTolerance =Tolleranza per turno (minuti)
+type.breakInShift = Tolleranza minima per pausa pranzo
+type.breakMaxInShift =Tolleranza massima per pausa pranzo
+type.maxToleranceAllowed =Numero massimo di tolleranze sforabili
 
 timeTable.startMorningLunchTime =inizio pranzo
 timeTable.endMorningLunchTime =fine pranzo
@@ -697,7 +702,7 @@ shift.absenceInDay = La persona nel giorno selezionato è assente
 shift.alreadyInShift = Già in turno per l'attività %s
 shift.slotAlreadyAssigned = Slot già assegnato a %s
 shift.personInactive = Persona non attiva sul turno
-ShiftTroubles.PERSON_NOT_ASSIGNED =
+ShiftTroubles.PERSON_NOT_ASSIGNED = Persona non assegnata al turno
 ShiftTroubles.NOT_COMPLETED_SHIFT = Turno valido ma non completo (un\'ora in meno)
 ShiftTroubles.OUT_OF_STAMPING_TOLERANCE = Fuori dalla tolleranza per le timbrature
 ShiftTroubles.NOT_ENOUGH_WORKING_TIME = Tempo a lavoro insufficiente
@@ -705,6 +710,16 @@ ShiftTroubles.PROBLEMS_ON_OTHER_SLOT = Problemi sull'altro slot
 ShiftTroubles.PERSON_IS_ABSENT = Dipendente assente nella data
 ShiftTroubles.EXCEEDED_BREAKTIME = Eccesso di pausa
 ShiftTroubles.SHIFT_INCOMPLETED = Turno incompleto, manca almeno uno slot
+ShiftTroubles.MIN_ENTRANCE_TOLERANCE_EXCEEDED = Ecceduta la tolleranza minima in ingresso
+ShiftTroubles.MAX_ENTRANCE_TOLERANCE_EXCEEDED = Ecceduta la tolleranza massima in ingresso
+ShiftTroubles.MIN_EXIT_TOLERANCE_EXCEEDED = Ecceduta la tolleranza minima in uscita
+ShiftTroubles.MAX_EXIT_TOLERANCE_EXCEEDED = Ecceduta la tolleranza massima in uscita
+ShiftTroubles.MIN_BREAK_TOLERANCE_EXCEEDED = Ecceduta la tolleranza minima per pausa pranzo
+ShiftTroubles.MAX_BREAK_TOLERANCE_EXCEEDED = Ecceduta la tolleranza massima per pausa pranzo
+ShiftTroubles.TOO_MANY_EXCEEDED_THRESHOLDS = Ecceduto il numero massimo di tolleranze violabili
+ShiftTroubles.FUTURE_DAY = Giorno futuro, calcoli non effettuabili
+
+
 
 shifts.noShiftWorkers= Nessun Turnista assegnabile per questa attività nel periodo selezionato
 shifts.noJolly= Nessuna persona è configurata come Jolly nel periodo attuale
@@ -785,11 +800,17 @@ person.perseoId.popover= Il perseoId è utilizzato per il collegamento tra utent
 domain.popover= Specificare il dominio sprovvisto del carattere @ (Es. iit.cnr.it)
 
 sts.tolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare alle timbrature per inserirle o meno nel turno. Inserire 0 se non si vuole tolleranza.
-sts.maxTolerance.popover= Specificare la massima tolleranza possibile per le timbrature di ingresso/uscita dal turno e uscita/ingresso pausa pranzo
+sts.maxTolerance.popover= Quante tolleranze è possibile sforare per vedere comunque riconosciuto il turno (seppure in orario ridotto)
 sts.hourTolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare sull&apos;attività di turno per determinare se un turno è valido o no.
 sts.name.popover = Il nome da attribuire all&apos;attività sul turno
 sts.description.popover= Una descrizione dell&apos;attività
 sts.breakInShiftEnabled.popover =Se da regolamento dei turni è prevista una pausa all&#39;interno del turno diversa dalla pausa pranzo cliccare sì, no altrimenti.
+sts.entranceTolerance.popover = Tolleranza entro la quale la timbratura di ingresso concorre comunque al conteggio intero del tempo in turno 
+sts.entranceMaxTolerance.popover = Tolleranza entro la quale la timbratura di ingresso concorre comunque al conteggio del tempo in turno, ma in quantità ridotta
+sts.exitTolerance.popover = Tolleranza entro la quale la timbratura di uscita concorre comunque al conteggio intero del tempo in turno 
+sts.exitMaxTolerance.popover = Tolleranza entro la quale la timbratura di uscita concorre comunque al conteggio del tempo in turno, ma in quantità ridotta
+sts.breakInShift.popover = Tolleranza entro la quale la timbratura di pausa pranzo concorre comunque al conteggio intero del tempo in turno 
+sts.breakMaxInShift.popover = Tolleranza entro la quale la timbratura di pausa pranzo concorre comunque al conteggio del tempo in turno, ma in quantità ridotta
 
 ###########################################################################
 #	Messaggi utilizzati nelle viste

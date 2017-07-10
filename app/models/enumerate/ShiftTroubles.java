@@ -28,7 +28,9 @@ public enum ShiftTroubles {
   // turno incompleto a causa della mancanza di uno slot
   SHIFT_INCOMPLETED,
   // la persona è assente nel giorno
-  PERSON_IS_ABSENT;
+  PERSON_IS_ABSENT, 
+  // Giorno futuro
+  FUTURE_DAY;
 
   /**
    * @return la lista degli errori che sono specifici di un singolo turno (non include quelli
@@ -44,7 +46,9 @@ public enum ShiftTroubles {
         MAX_BREAK_TOLERANCE_EXCEEDED,
         TOO_MANY_EXCEEDED_THRESHOLDS,
         NOT_ENOUGH_WORKING_TIME,
-        PERSON_IS_ABSENT);
+        PERSON_IS_ABSENT,
+        FUTURE_DAY,
+        PERSON_NOT_ASSIGNED);
   }
 
   /**
@@ -57,7 +61,11 @@ public enum ShiftTroubles {
         MAX_BREAK_TOLERANCE_EXCEEDED,
         TOO_MANY_EXCEEDED_THRESHOLDS,
         NOT_ENOUGH_WORKING_TIME,
-        PERSON_IS_ABSENT);
+        PERSON_IS_ABSENT,
+        PERSON_NOT_ASSIGNED,
+        FUTURE_DAY,
+        PROBLEMS_ON_OTHER_SLOT,
+        SHIFT_INCOMPLETED);
   }
 
 }

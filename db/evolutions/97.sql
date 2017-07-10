@@ -27,9 +27,12 @@ ALTER TABLE person_shift DROP COLUMN jolly;
 
 ALTER TABLE person_shift_shift_type ADD COLUMN jolly BOOLEAN;
 
+ALTER TABLE person_shift_days ADD COLUMN exceeded_thresholds INT;
+
 UPDATE shift_type SET max_tolerance_allowed = 0, entrance_tolerance = 0, entrance_max_tolerance = 0, exit_tolerance = 0, exit_max_tolerance = 0, break_max_in_shift = 0, break_in_shift = 0;
 UPDATE person_shift_shift_type SET jolly = false;
 UPDATE shift_time_table SET start_evening = null, end_evening = null, start_evening_lunch_time = null, end_evening_lunch_time = null;
+UPDATE person_shift_days SET exceeded_thresholds = 0;
 
 CREATE TABLE shift_categories_persons (
 	categories_id BIGINT NOT NULL,
@@ -56,7 +59,8 @@ CREATE TABLE person_shift_days_history(
   "date" DATE,
   person_shift_id BIGINT,
   shift_type_id BIGINT,
-  shift_slot TEXT, 
+  shift_slot TEXT,
+  exceeded_thresholds INT,
   
   PRIMARY KEY (id, _revision, _revision_type)
 );
@@ -128,6 +132,8 @@ ALTER TABLE shift_type DROP COLUMN max_tolerance_allowed;
 
 ALTER TABLE person_shift_shift_type DROP COLUMN jolly;
 ALTER TABLE person_shift ADD COLUMN jolly BOOLEAN;
+
+ALTER TABLE person_shift_days DROP COLUMN exceeded_thresholds;
 
 UPDATE person_shift SET jolly = FALSE;
 
