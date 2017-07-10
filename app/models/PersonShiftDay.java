@@ -1,7 +1,6 @@
 package models;
 
 import com.google.common.collect.Sets;
-import events.EntityEvents;
 import java.util.Collection;
 import java.util.Set;
 import javax.persistence.CascadeType;
@@ -12,9 +11,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.PostPersist;
-import javax.persistence.PostRemove;
-import javax.persistence.PostUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import models.base.BaseModel;
@@ -25,6 +21,7 @@ import org.hibernate.envers.RelationTargetAuditMode;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import play.data.validation.Required;
+import play.db.jpa.JPABase;
 
 @Entity
 @Audited
@@ -81,7 +78,7 @@ public class PersonShiftDay extends BaseModel {
         return null;
     }
   }
-  
+
   @Transient
   public LocalTime lunchTimeBegin() {
     switch (shiftSlot) {
@@ -93,7 +90,7 @@ public class PersonShiftDay extends BaseModel {
         return null;
     }
   }
-  
+
   @Transient
   public LocalTime lunchTimeEnd() {
     switch (shiftSlot) {
@@ -118,11 +115,10 @@ public class PersonShiftDay extends BaseModel {
     });
   }
 
-  @PostUpdate
-  @PostPersist
-  @PostRemove
-  public void changed() {
-    EntityEvents.changed(this);
+  @Override
+  @Deprecated
+  public <T extends JPABase> T save() {
+    return super.save();
   }
 
 }

@@ -17,8 +17,6 @@ import models.enumerate.ShiftSlot;
 import models.query.QPersonShift;
 import models.query.QPersonShiftDay;
 import models.query.QShiftCategories;
-
-import org.bouncycastle.jce.provider.asymmetric.ec.KeyAgreement.DHwithSHA1KDF;
 import org.joda.time.LocalDate;
 
 /**
@@ -27,6 +25,7 @@ import org.joda.time.LocalDate;
  * @author dario
  */
 public class PersonShiftDayDao extends DaoBase {
+
 
   @Inject
   PersonShiftDayDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
@@ -65,7 +64,7 @@ public class PersonShiftDayDao extends DaoBase {
     if (person.isPresent()) {
       condition.and(personShiftDay.personShift.person.eq(person.get()));
     }
-    
+
     return getQueryFactory().from(personShiftDay)
         .where(condition).orderBy(personShiftDay.date.asc()).list(personShiftDay);
   }
@@ -117,10 +116,11 @@ public class PersonShiftDayDao extends DaoBase {
     return getQueryFactory().from(shiftDay)
         .where(shiftDay.personShift.person.eq(person).and(shiftDay.date.eq(date))).count();
   }
-  
+
   public List<PersonShiftDay> listByDateAndActivity(LocalDate date, ShiftType activity) {
     final QPersonShiftDay shiftDay = QPersonShiftDay.personShiftDay;
     return getQueryFactory().from(shiftDay)
         .where(shiftDay.date.eq(date).and(shiftDay.shiftType.eq(activity))).list(shiftDay);
   }
+
 }
