@@ -2,34 +2,21 @@ package controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-
 import dao.AbsenceDao;
 import dao.ShiftDao;
 import dao.ShiftTypeMonthDao;
-
-import helpers.StripedLock;
 import helpers.Web;
-
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
-
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.ShiftManager2;
-
 import models.Person;
 import models.PersonShiftDay;
 import models.PersonShiftShiftType;
@@ -41,11 +28,9 @@ import models.dto.PNotifyObject;
 import models.dto.ShiftEvent;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
-
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.i18n.Messages;
@@ -53,7 +38,6 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Router;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 
@@ -78,8 +62,6 @@ public class Calendar extends Controller {
   static AbsenceDao absenceDao;
   @Inject
   static ShiftTypeMonthDao shiftTypeMonthDao;
-  @Inject
-  static StripedLock lock;
 
 
   /**
@@ -89,7 +71,7 @@ public class Calendar extends Controller {
    * @param date la data
    */
   public static void show(ShiftType activity, LocalDate date) {
-    // FIXME: 12/06/17 il passaggio del solo id faciliterebbe il redict dagli altri controller
+    // FIXME: 12/06/17 il passaggio del solo id faciliterebbe il redirect dagli altri controller
     // ma va sistemato nella vista in modo che passi l'id con un nome adatto
 
     final LocalDate currentDate = Optional.fromNullable(date).or(LocalDate.now());
@@ -204,46 +186,26 @@ public class Calendar extends Controller {
    * @param start la data di inizio del periodo
    * @param end la data di fine del periodo
    * @throws JsonProcessingException eccezione in caso di errore di creazione del json
-   * @throws InterruptedException 
    */
   public static void events(long activityId, LocalDate start, LocalDate end)
-      throws JsonProcessingException, InterruptedException {
-    log.debug("Start: {}", start);
-    log.debug("End: {}", end);
+      throws JsonProcessingException {
+
     List<ShiftEvent> events = new ArrayList<>();
     Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
     if (activity.isPresent() && rules.check(activity.get())) {
-      
-      final Map.Entry<ShiftType, YearMonth> lockKey = new AbstractMap
-          .SimpleEntry<>(activity.get(), new YearMonth(start));
-      
-      final Lock loocketto = lock.get(lockKey);
-      try {
-        loocketto.tryLock(4, TimeUnit.SECONDS);
-        
-        log.info("CALENDAR ACQUISITO LOCK SULLA RISORSA {}", lockKey);
-      } 
-     
-      catch (IllegalMonitorStateException ex) {
-        log.error("Attesa scaduta sul lock per la risorsa {}: {}",lockKey, ex.getMessage() );
-      } finally {
-        log.info("Pillio i personday");
-        List<PersonShiftShiftType> people = shiftManager2.shiftWorkers(activity.get(), start, end);
 
-        int index = 0;
+      List<PersonShiftShiftType> people = shiftManager2.shiftWorkers(activity.get(), start, end);
 
-        // prende i turni associati alle persone attive in quel turno
-        for (PersonShiftShiftType personShift : people) {
-          final Person person = personShift.personShift.person;
-          final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
-          events.addAll(shiftEvents(activity.get(), person, start, end, eventColor));
-          events.addAll(absenceEvents(person, start, end));
-          index++;
-        }
+      int index = 0;
 
-        loocketto.unlock();
+      // prende i turni associati alle persone attive in quel turno
+      for (PersonShiftShiftType personShift : people) {
+        final Person person = personShift.personShift.person;
+        final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
+        events.addAll(shiftEvents(activity.get(), person, start, end, eventColor));
+        events.addAll(absenceEvents(person, start, end));
+        index++;
       }
-
     }
 
     // Usato il jackson per facilitare la serializzazione dei LocalDate
@@ -383,7 +345,7 @@ public class Calendar extends Controller {
           response.status = 409;
         } else {
           //salva il turno modificato
-          shift.save();
+          shiftManager2.save(shift);
 
           message = PNotifyObject.builder()
               .title("Ok")
@@ -447,7 +409,7 @@ public class Calendar extends Controller {
               .type("error").build();
 
         } else {
-          personShiftDay.save();
+          shiftManager2.save(personShiftDay);
 
           message = PNotifyObject.builder()
               .title("Ok")

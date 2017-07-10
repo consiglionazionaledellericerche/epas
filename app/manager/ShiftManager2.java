@@ -15,6 +15,7 @@ import dao.PersonMonthRecapDao;
 import dao.PersonShiftDayDao;
 import dao.ShiftDao;
 import dao.ShiftTypeMonthDao;
+import dao.history.HistoricalDao;
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +44,7 @@ import models.ShiftTypeMonth;
 import models.User;
 import models.enumerate.ShiftTroubles;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
 import play.i18n.Messages;
@@ -192,7 +195,7 @@ public class ShiftManager2 {
     //Verifica se la persona è attiva in quell'attività in quel giorno
     final boolean isActive = personShiftDay.shiftType.personShiftShiftTypes.stream().anyMatch(
         personShiftShiftType -> personShiftShiftType.personShift.equals(personShiftDay.personShift)
-        && personShiftShiftType.dateRange().contains(personShiftDay.date));
+            && personShiftShiftType.dateRange().contains(personShiftDay.date));
     if (!isActive) {
       return Optional.of(Messages.get("shift.personInactive"));
     }
@@ -300,10 +303,8 @@ public class ShiftManager2 {
         shiftTroubles.add(ShiftTroubles.PERSON_IS_ABSENT);
       }
 
-
       // Nelle date passate posso effettuare i controlli sul tempo a lavoro
       if (personShiftDay.date.isBefore(today)) {
-
 
         final LocalTime slotBegin = personShiftDay.slotBegin();
         final LocalTime slotEnd = personShiftDay.slotEnd();
@@ -335,7 +336,7 @@ public class ShiftManager2 {
           if (entranceStamping.isAfter(entranceMaxThreshold)) {
             // Ingresso fuori dalla tolleranza massima (turno non valido)
             shiftTroubles.add(ShiftTroubles.MAX_ENTRANCE_TOLERANCE_EXCEEDED);
-          } else if (entranceStamping.isAfter(entranceThreshold) 
+          } else if (entranceStamping.isAfter(entranceThreshold)
               && !entranceStamping.isAfter(entranceMaxThreshold)) {
             exceededThresholds++;
             // Ingresso tra la tolleranza minima e quella massima (turno decurtato di 1 ora)
@@ -358,7 +359,6 @@ public class ShiftManager2 {
             shiftTroubles.add(ShiftTroubles.MIN_EXIT_TOLERANCE_EXCEEDED);
           }
 
-          
           RangeSet<LocalTime> rangeSet = TreeRangeSet.create();
           shiftPairs.forEach(pairStamping -> {
             rangeSet.add(Range.closed(pairStamping.first.date.toLocalTime(), pairStamping.second
@@ -371,14 +371,14 @@ public class ShiftManager2 {
            */
           final LocalTime lunchBreakStart = personShiftDay.lunchTimeBegin();
           final LocalTime lunchBreakEnd = personShiftDay.lunchTimeEnd();
-          
+
           if (Range.open(slotBegin, slotEnd)
               .encloses(Range.closed(lunchBreakStart, lunchBreakEnd))) {
             //TODO: la pausa pranzo è compresa all'interno dello slot...
           } else {
             //TODO: la pausa pranzo sta al di fuori del turno
           }
-          
+
           //          rangeSet.remove(Range.closed(lunchBreakBegin,lunchBreakEnd));
 
           // Conteggio dei minuti di pausa fatti durante il turno
@@ -392,7 +392,6 @@ public class ShiftManager2 {
                 .toMinute(previousPair.upperEndpoint());
             previousPair = nextPair;
           }
-
 
           // La pausa fatta durante il turno supera quella permessa (turno non valido)
           if (totalBreakMinutes > shiftType.breakMaxInShift) {
@@ -441,7 +440,6 @@ public class ShiftManager2 {
   }
 
 
-
   /**
    * Verifica che i turni di un'attività in un determinato giorno siano tutti validi
    * inserisce l'errore PROBLEMS_ON_OTHER_SLOT sugli altri turni se uno dei turni
@@ -451,7 +449,6 @@ public class ShiftManager2 {
    * @param date la data in cui ricercare i personshiftday dell'attività activity
    */
   public void checkShiftDayValid(LocalDate date, ShiftType activity) {
-
 
     log.debug("Ricalcolo del giorno di turno {} - {}", activity, date);
     List<PersonShiftDay> shifts = shiftDao.getShiftDaysByPeriodAndType(date, date, activity);
@@ -478,7 +475,7 @@ public class ShiftManager2 {
       shifts.forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.PROBLEMS_ON_OTHER_SLOT));
     } else {
       shiftsWithTroubles
-      .forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.PROBLEMS_ON_OTHER_SLOT));
+          .forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.PROBLEMS_ON_OTHER_SLOT));
 
       shifts.removeAll(shiftsWithTroubles);
       shifts.forEach(shift -> setShiftTrouble(shift, ShiftTroubles.PROBLEMS_ON_OTHER_SLOT));
@@ -558,7 +555,7 @@ public class ShiftManager2 {
    * @param from data iniziale
    * @param to data finale
    * @return il numero di minuti di competenza maturati in base ai turni effettuati nel periodo
-   *     selezionato (di norma serve calcolarli su un intero mese al massimo).
+   * selezionato (di norma serve calcolarli su un intero mese al massimo).
    */
   public int calculatePersonShiftCompetencesInPeriod(ShiftType activity, Person person,
       LocalDate from, LocalDate to) {
@@ -593,7 +590,7 @@ public class ShiftManager2 {
    * @param from data iniziale
    * @param to data finale
    * @return true se per tutti i turni dell'attività,persona e periodo specificati non contengono
-   *     problemi, false altrimenti.
+   * problemi, false altrimenti.
    */
   public boolean allValidShifts(ShiftType activity, Person person, LocalDate from, LocalDate to) {
 
@@ -607,7 +604,7 @@ public class ShiftManager2 {
    * @param person Person della quale recuperare il residuo dei turni dai mesi precedenti
    * @param yearMonth Mese rispetto al quale verificare i residui
    * @return restituisce il residuo delle competenze di turno dal mese più recente antecedente
-   *     quello specificato dal parametro yearMonth della persona richiesta.
+   * quello specificato dal parametro yearMonth della persona richiesta.
    */
   public int getPersonResidualShiftCompetence(Person person, YearMonth yearMonth) {
 
@@ -629,7 +626,7 @@ public class ShiftManager2 {
    * @param start data di inizio del periodo
    * @param end data di fine del periodo
    * @return La lista di tutte le persone abilitate su quell'attività nell'intervallo di tempo
-   *     specificato.
+   * specificato.
    */
   public List<PersonShiftShiftType> shiftWorkers(ShiftType activity, LocalDate start,
       LocalDate end) {
@@ -643,72 +640,69 @@ public class ShiftManager2 {
     }
   }
 
+  //  /**
+  //   * @param pairStampings la lista di coppie valide di entrata/uscita
+  //   * @param begin l'ora di inizio del turno
+  //   * @param end l'ora di fine del turno
+  //   * @return la lista di coppie di timbrature di uscita/entrata appartenenti all'intervallo di turno
+  //   * che vanno considerate per controllare se il tempo trascorso in pausa eccede quello previsto
+  //   * dalla configurazione di turno.
+  //   */
+  //  private List<PairStamping> getBreakPairStampings(List<PairStamping> pairStampings,
+  //      LocalTime begin, LocalTime end) {
+  //    List<PairStamping> allGapPairs = Lists.newArrayList();
+  //    PairStamping previous = null;
+  //    for (PairStamping validPair : pairStampings) {
+  //      if (previous != null) {
+  //        if ((previous.second.stampType == null
+  //            || previous.second.stampType.isGapLunchPairs())
+  //            && (validPair.first.stampType == null
+  //            || validPair.first.stampType.isGapLunchPairs())) {
+  //
+  //          allGapPairs.add(new PairStamping(previous.second, validPair.first));
+  //        }
+  //      }
+  //      previous = validPair;
+  //    }
+  //    List<PairStamping> gapPairs = Lists.newArrayList();
+  //    for (PairStamping gapPair : allGapPairs) {
+  //      LocalTime first = gapPair.first.date.toLocalTime();
+  //      LocalTime second = gapPair.second.date.toLocalTime();
+  //
+  //      boolean isInIntoBreakTime = !first.isBefore(begin) && !first.isAfter(end);
+  //      boolean isOutIntoBreakTime = !second.isBefore(begin) && !second.isAfter(end);
+  //
+  //      if (!isInIntoBreakTime && !isOutIntoBreakTime) {
+  //        if (second.isBefore(begin) || first.isAfter(end)) {
+  //          continue;
+  //        }
+  //      }
+  //
+  //      LocalTime inForCompute = gapPair.first.date.toLocalTime();
+  //      LocalTime outForCompute = gapPair.second.date.toLocalTime();
+  //      if (!isInIntoBreakTime) {
+  //        inForCompute = begin;
+  //      }
+  //      if (!isOutIntoBreakTime) {
+  //        outForCompute = end;
+  //      }
+  //      int timeInPair = 0;
+  //      timeInPair -= DateUtility.toMinute(inForCompute);
+  //      timeInPair += DateUtility.toMinute(outForCompute);
+  //      gapPair.timeInPair = timeInPair;
+  //      gapPairs.add(gapPair);
+  //    }
+  //    return gapPairs;
+  //  }
 
-
-
-    //  /**
-    //   * @param pairStampings la lista di coppie valide di entrata/uscita
-    //   * @param begin l'ora di inizio del turno
-    //   * @param end l'ora di fine del turno
-    //   * @return la lista di coppie di timbrature di uscita/entrata appartenenti all'intervallo di turno
-    //   * che vanno considerate per controllare se il tempo trascorso in pausa eccede quello previsto
-    //   * dalla configurazione di turno.
-    //   */
-    //  private List<PairStamping> getBreakPairStampings(List<PairStamping> pairStampings,
-    //      LocalTime begin, LocalTime end) {
-    //    List<PairStamping> allGapPairs = Lists.newArrayList();
-    //    PairStamping previous = null;
-    //    for (PairStamping validPair : pairStampings) {
-    //      if (previous != null) {
-    //        if ((previous.second.stampType == null
-    //            || previous.second.stampType.isGapLunchPairs())
-    //            && (validPair.first.stampType == null
-    //            || validPair.first.stampType.isGapLunchPairs())) {
-    //
-    //          allGapPairs.add(new PairStamping(previous.second, validPair.first));
-    //        }
-    //      }
-    //      previous = validPair;
-    //    }
-    //    List<PairStamping> gapPairs = Lists.newArrayList();
-    //    for (PairStamping gapPair : allGapPairs) {
-    //      LocalTime first = gapPair.first.date.toLocalTime();
-    //      LocalTime second = gapPair.second.date.toLocalTime();
-    //
-    //      boolean isInIntoBreakTime = !first.isBefore(begin) && !first.isAfter(end);
-    //      boolean isOutIntoBreakTime = !second.isBefore(begin) && !second.isAfter(end);
-    //
-    //      if (!isInIntoBreakTime && !isOutIntoBreakTime) {
-    //        if (second.isBefore(begin) || first.isAfter(end)) {
-    //          continue;
-    //        }
-    //      }
-    //
-    //      LocalTime inForCompute = gapPair.first.date.toLocalTime();
-    //      LocalTime outForCompute = gapPair.second.date.toLocalTime();
-    //      if (!isInIntoBreakTime) {
-    //        inForCompute = begin;
-    //      }
-    //      if (!isOutIntoBreakTime) {
-    //        outForCompute = end;
-    //      }
-    //      int timeInPair = 0;
-    //      timeInPair -= DateUtility.toMinute(inForCompute);
-    //      timeInPair += DateUtility.toMinute(outForCompute);
-    //      gapPair.timeInPair = timeInPair;
-    //      gapPairs.add(gapPair);
-    //    }
-    //    return gapPairs;
-    //  }
-
-    /**
-     * Effettua i calcoli delle competenze relative ai turni sulle attività approvate per le persone
-     * coinvolte in una certa attività e un determinato mese.   *
-     * Da utilizzare in seguito ad ogni approvazione/disapprovazione dei turni.
-     *
-     * @param shiftTypeMonth lo stato dell'attività di turno in un determinato mese.
-     */
-    public void assignShiftCompetences(ShiftTypeMonth shiftTypeMonth) {
+  /**
+   * Effettua i calcoli delle competenze relative ai turni sulle attività approvate per le persone
+   * coinvolte in una certa attività e un determinato mese.   *
+   * Da utilizzare in seguito ad ogni approvazione/disapprovazione dei turni.
+   *
+   * @param shiftTypeMonth lo stato dell'attività di turno in un determinato mese.
+   */
+  public void assignShiftCompetences(ShiftTypeMonth shiftTypeMonth) {
 
     Verify.verifyNotNull(shiftTypeMonth);
 
@@ -725,16 +719,16 @@ public class ShiftManager2 {
 
     // Recupero tutte le attività approvate in quel mese
     shiftTypeMonthDao.approvedInMonthRelatedWith(shiftTypeMonth.yearMonth, involvedShiftPeople)
-    .forEach(monthStatus -> {
-      // Per ogni attività calcolo le competenze di ogni persona coinvolta
-      involvedShiftPeople.forEach(person -> {
-        int activityCompetence = calculatePersonShiftCompetencesInPeriod(monthStatus.shiftType,
-            person, monthBegin, monthEnd);
-        // Somma algebrica delle competenze delle persone derivanti da ogni attività sulla
-        // quale ha svolto i turni
-        totalPeopleCompetences.merge(person, activityCompetence, (a, b) -> b + a);
-      });
-    });
+        .forEach(monthStatus -> {
+          // Per ogni attività calcolo le competenze di ogni persona coinvolta
+          involvedShiftPeople.forEach(person -> {
+            int activityCompetence = calculatePersonShiftCompetencesInPeriod(monthStatus.shiftType,
+                person, monthBegin, monthEnd);
+            // Somma algebrica delle competenze delle persone derivanti da ogni attività sulla
+            // quale ha svolto i turni
+            totalPeopleCompetences.merge(person, activityCompetence, (a, b) -> b + a);
+          });
+        });
 
     CompetenceCode shiftCode = competenceCodeDao.getCompetenceCodeByCode(codShift);
 
@@ -765,6 +759,47 @@ public class ShiftManager2 {
       log.info("Salvata {}", newCompetence);
     });
 
+  }
+
+  public void save(PersonShiftDay personShiftDay) {
+
+    Verify.verifyNotNull(personShiftDay).save();
+
+    final LocalDate date = personShiftDay.date;
+
+    final ShiftType shiftType = personShiftDay.shiftType;
+
+    // Aggiornamento dello ShiftTypeMonth
+    if (shiftType != null) {
+
+      // Ricalcoli sul turno
+      if (personShiftDay.isPersistent()) {
+        checkShiftValid(personShiftDay);
+      }
+
+      // Ricalcoli sui giorni coinvolti dalle modifiche
+      HistoricalDao.lastRevisionsOf(PersonShiftDay.class, personShiftDay.id)
+          .stream().limit(2).map(historyValue -> {
+        PersonShiftDay pd = (PersonShiftDay) historyValue.value;
+        return pd.date;
+      }).filter(Objects::nonNull).distinct()
+          .forEach(localDate -> {
+            checkShiftDayValid(localDate, shiftType);
+          });
+
+      // Aggiornamento del relativo ShiftTypeMonth (per incrementare il campo version)
+      ShiftTypeMonth newStatus = shiftType.monthStatusByDate(personShiftDay.date)
+          .orElse(new ShiftTypeMonth());
+
+      if (newStatus.shiftType != null) {
+        newStatus.updatedAt = LocalDateTime.now();
+      } else {
+        newStatus.yearMonth = new YearMonth(date);
+        newStatus.shiftType = shiftType;
+      }
+      newStatus.save();
+
+    }
   }
 
 }
