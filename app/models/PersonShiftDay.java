@@ -54,6 +54,12 @@ public class PersonShiftDay extends BaseModel {
   //  Nuova relazione con gli errori associati ai personShiftDay
   @OneToMany(mappedBy = "personShiftDay", cascade = CascadeType.REMOVE)
   public Set<PersonShiftDayInTrouble> troubles = Sets.newHashSet();
+  
+  /**
+   * numero di soglie (minime) superate.
+   */
+  @Column(name = "exceeded_thresholds")
+  public int exceededThresholds;
 
   @Transient
   public LocalTime slotBegin() {
@@ -119,6 +125,12 @@ public class PersonShiftDay extends BaseModel {
   @Deprecated
   public <T extends JPABase> T save() {
     return super.save();
+  }
+  
+  @Override
+  @Deprecated
+  public <T extends JPABase> T delete() {
+    return super.delete();
   }
 
 }

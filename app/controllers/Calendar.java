@@ -158,7 +158,7 @@ public class Calendar extends Controller {
 
       if (rules.check(psd.shiftType) && rules.check(shiftTypeMonth)) {
 
-        psd.delete();
+        shiftManager2.delete(psd);
 
         message = PNotifyObject.builder()
             .title("Ok")

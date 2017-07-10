@@ -7,26 +7,17 @@
 		
 		#{f.view 'Nome attività', value:sts.name /}
 		#{f.view 'Descrizione attività', value:sts.description /}
-		#{f.view 'Minuti di tolleranza per timbratura', value:sts.tolerance /}
-		#{if sts.toleranceType.equals('ToleranceType.entrance')}
-			#{f.view 'Tolleranza applicata', value:'in ingresso' /}
-		#{/if}
-		#{elseif sts.toleranceType.equals('ToleranceType.exit')}
-			#{f.view 'Tolleranza applicata', value:'in uscita' /}
-		#{/elseif}
-		#{else}
-			#{f.view 'Tolleranza applicata', value:'in ingresso e uscita' /}
-		#{/else}
-		#{f.view 'Minuti di tolleranza per turno', value:sts.hourTolerance /}
+		#{f.view 'Tolleranza minima per timbratura in ingresso', value:sts.entranceTolerance /}
+		#{f.view 'Tolleranza massima per timbratura in ingresso', value:sts.entranceMaxTolerance /}
+		#{f.view 'Tolleranza minima per timbratura in uscita', value:sts.exitTolerance /}
+		#{f.view 'Tolleranza massima per timbratura in uscita', value:sts.exitMaxTolerance /}
+		#{f.view 'Tolleranza minima per timbratura per pausa pranzo', value:sts.breakInShift /}
+		#{f.view 'Tolleranza massima per timbratura per pausa pranzo', value:sts.breakMaxInShift /}
+		
 		#{if sts.maxTolerance != 0}
-			#{f.view 'Tolleranza massima consentita', value: sts.maxTolerance /}
+			#{f.view 'Numero massimo di tolleranze violabili', value: sts.maxTolerance /}
 		#{/if}
-		#{if sts.breakInShiftEnabled}
-			#{f.view 'Pausa in turno abilitata', value:'sì' /}
-		#{/if}
-		#{else}
-			#{f.view 'Pausa in turno abilitata', value:'no' /}
-		#{/else}
+		
 		#{f.view 'Durata pausa in turno', value:sts.breakInShift /}		
 		
 		#{alert color:'info'}

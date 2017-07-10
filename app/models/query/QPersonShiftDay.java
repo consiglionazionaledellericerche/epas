@@ -31,6 +31,8 @@ public class QPersonShiftDay extends EntityPathBase<PersonShiftDay> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final NumberPath<Integer> exceededThresholds = createNumber("exceededThresholds", Integer.class);
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 
