@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -440,7 +441,8 @@ public class ShiftManager2 {
     });
 
     shiftErrors.forEach(trouble -> fixShiftTrouble(personShiftDay, trouble));
-    
+    personShiftDay.exceededThresholds = exceededThresholds;
+    personShiftDay.save();
 
   }
 
@@ -499,20 +501,11 @@ public class ShiftManager2 {
   public Map<Person, Integer> calculateActivityShiftCompetences(ShiftType activity,
       LocalDate from, LocalDate to) {
 
-    final LocalDate today = LocalDate.now();
-    final LocalDate lastDay;
-
-    if (to.isAfter(today)) {
-      lastDay = today;
-    } else {
-      lastDay = to;
-    }
-
     final Map<Person, Integer> shiftCompetences = new HashMap<>();
 
-    involvedShiftWorkers(activity, from, lastDay).forEach(person -> {
+    involvedShiftWorkers(activity, from, to).forEach(person -> {
 
-      int competences = calculatePersonShiftCompetencesInPeriod(activity, person, from, lastDay);
+      int competences = calculatePersonShiftCompetencesInPeriod(activity, person, from, to);
       shiftCompetences.put(person, competences);
     });
 
@@ -595,12 +588,14 @@ public class ShiftManager2 {
    * @return true se per tutti i turni dell'attività,persona e periodo specificati non contengono
    *     problemi, false altrimenti.
    */
-  public boolean allValidShifts(ShiftType activity, Person person, LocalDate from, LocalDate to) {
+  public List<ShiftTroubles> allValidShifts(ShiftType activity, Person person, LocalDate from, LocalDate to) {
 
-    final List<PersonShiftDay> shifts = personShiftDayDao
-        .byTypeInPeriod(from, to, activity, Optional.of(person));
+    return personShiftDayDao.byTypeInPeriod(from, to, activity, Optional.of(person)).stream()
+        .map(shift -> shift.troubles)
+        .flatMap(troubles ->   troubles.stream())
+        .map(trouble -> trouble.cause)
+        .distinct().collect(Collectors.toList());
 
-    return shifts.stream().allMatch(personShiftDay -> personShiftDay.troubles.isEmpty());
   }
 
   /**
