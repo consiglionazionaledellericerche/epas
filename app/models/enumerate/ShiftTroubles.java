@@ -1,7 +1,10 @@
 package models.enumerate;
 
 import com.google.common.collect.Lists;
+
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public enum ShiftTroubles {
 
@@ -67,5 +70,16 @@ public enum ShiftTroubles {
         PROBLEMS_ON_OTHER_SLOT,
         SHIFT_INCOMPLETED);
   }
+  
+  /**
+   * @return la lista degli errori che invalidano il turno.
+   */
+  public static List<ShiftTroubles> warningTroubles() {
+    List<ShiftTroubles> troubles = Arrays.stream(values()).collect(Collectors.toList());
+    troubles.removeAll(invalidatingTroubles());
+    return troubles;
+  }
+  
+  
 
 }

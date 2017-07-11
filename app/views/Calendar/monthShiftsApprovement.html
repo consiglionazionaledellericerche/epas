@@ -35,15 +35,20 @@
     <li class="list-group-item">
       <h4 class="list-group-item-heading">
         ${_.getKey().fullname}
-        #{if peopleTrouble.get(_.getKey())}
-        <span class="text-success pull-right">
-          <i class="fa fa-check" aria-hidden="true"></i> &{'calendar.allValidShifts'}
-        </span>
-        #{/if}
-        #{else}
+        #{if peopleTrouble.get(_.getKey()).removeAll(models.enumerate.ShiftTroubles.invalidatingTroubles())}
         <span class="text-danger pull-right">
           <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
           &{'calendar.notAllValidShifts'}
+        </span>
+        #{/if}
+        #{elseif peopleTrouble.get(_.getKey()).removeAll(models.enumerate.ShiftTroubles.warningTroubles())}
+        <span class="text-warning pull-right">
+          <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> &{'calendar.warningShifts'}
+        </span>
+        #{/elseif}
+        #{else}
+        <span class="text-success pull-right">
+          <i class="fa fa-check" aria-hidden="true"></i> &{'calendar.allValidShifts'}
         </span>
         #{/else}
       </h4>

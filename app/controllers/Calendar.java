@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import manager.ShiftManager2;
 import models.Person;
 import models.PersonShiftDay;
+import models.PersonShiftDayInTrouble;
 import models.PersonShiftShiftType;
 import models.ShiftType;
 import models.ShiftTypeMonth;
@@ -28,6 +29,8 @@ import models.dto.PNotifyObject;
 import models.dto.ShiftEvent;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
+import models.enumerate.ShiftTroubles;
+
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
@@ -531,15 +534,15 @@ public class Calendar extends Controller {
     final List<Person> people = shiftManager2.involvedShiftWorkers(shiftType, monthbegin, monthEnd);
 
     final Map<Person, Integer> shiftsCalculatedCompetences = new HashMap<>();
-    final Map<Person, Boolean> peopleTrouble = new HashMap<>();
+    final Map<Person, List<ShiftTroubles>> peopleTrouble = new HashMap<>();
 
     people.forEach(person -> {
       int competences = shiftManager2.calculatePersonShiftCompetencesInPeriod(shiftType, person,
           monthbegin, lastDay);
       shiftsCalculatedCompetences.put(person, competences);
 
-      boolean haveTrouble = shiftManager2.allValidShifts(shiftType, person, monthbegin, monthEnd);
-      peopleTrouble.put(person, haveTrouble);
+      List<ShiftTroubles> shiftsTroubles = shiftManager2.allValidShifts(shiftType, person, monthbegin, monthEnd);
+      peopleTrouble.put(person, shiftsTroubles);
     });
 
     render(shiftTypeMonth, shiftsCalculatedCompetences, peopleTrouble);
