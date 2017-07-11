@@ -4,21 +4,27 @@
 		#{alert color:'info'}
 			Configurazione attività di turno (1)			
 		#{/alert}	
+		<div class="row">
+			<div class="col-sm-6">#{f.view 'Nome attività', value:type.type /}</div>
+			<div class="col-sm-6">#{f.view 'Descrizione attività', value:type.description /}</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-6">#{f.view 'Tolleranza minima per timbratura in ingresso', value:type.entranceTolerance + ' minuti' /}</div>
+			<div class="col-sm-6">#{f.view 'Tolleranza massima per timbratura in ingresso', value:type.entranceMaxTolerance + ' minuti' /}</div>
+		</div>
 		
-		#{f.view 'Nome attività', value:sts.name /}
-		#{f.view 'Descrizione attività', value:sts.description /}
-		#{f.view 'Tolleranza minima per timbratura in ingresso', value:sts.entranceTolerance /}
-		#{f.view 'Tolleranza massima per timbratura in ingresso', value:sts.entranceMaxTolerance /}
-		#{f.view 'Tolleranza minima per timbratura in uscita', value:sts.exitTolerance /}
-		#{f.view 'Tolleranza massima per timbratura in uscita', value:sts.exitMaxTolerance /}
-		#{f.view 'Tolleranza minima per timbratura per pausa pranzo', value:sts.breakInShift /}
-		#{f.view 'Tolleranza massima per timbratura per pausa pranzo', value:sts.breakMaxInShift /}
+		<div class="row">
+			<div class="col-sm-6">#{f.view 'Tolleranza minima per timbratura in uscita', value:type.exitTolerance + ' minuti' /}</div>
+			<div class="col-sm-6">#{f.view 'Tolleranza massima per timbratura in uscita', value:type.exitMaxTolerance + ' minuti' /}</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-6">#{f.view 'Tolleranza minima per timbratura per pausa pranzo', value:type.breakInShift + ' minuti' /}</div>
+			<div class="col-sm-6">#{f.view 'Tolleranza massima per timbratura per pausa pranzo', value:type.breakMaxInShift + ' minuti' /}</div>
+		</div>
 		
-		#{if sts.maxTolerance != 0}
-			#{f.view 'Numero massimo di tolleranze violabili', value: sts.maxTolerance /}
+		#{if type.maxToleranceAllowed != 0}
+			#{f.view 'Numero massimo di tolleranze violabili', value: type.maxToleranceAllowed /}
 		#{/if}
-		
-		#{f.view 'Durata pausa in turno', value:sts.breakInShift /}		
 		
 		#{alert color:'info'}
 			Configurazione timetable (2)

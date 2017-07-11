@@ -786,12 +786,12 @@ public class CompetenceManager {
    * @param stt la shifttimetable associata all'attività di turno
    * @param cat il turno a cui associare l'attività
    */
-  public void persistShiftType(ShiftTypeService service, ShiftTimeTable stt, ShiftCategories cat) {
+  public void persistShiftType(ShiftType service, ShiftTimeTable stt, ShiftCategories cat) {
     ShiftType st = new ShiftType();
     st.breakInShift = service.breakInShift;
     
     st.description = service.description;
-    st.type = service.name;
+    st.type = service.type;
     st.shiftTimeTable = stt;
     
     st.breakInShift = service.breakInShift;    
@@ -801,7 +801,7 @@ public class CompetenceManager {
     st.exitTolerance = service.exitTolerance;
     st.exitMaxTolerance = service.exitMaxTolerance;
     
-    st.maxToleranceAllowed = service.maxTolerance;
+    st.maxToleranceAllowed = service.maxToleranceAllowed;
     st.shiftCategories = cat;
     st.save();
   }
