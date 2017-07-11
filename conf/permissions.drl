@@ -91,7 +91,10 @@ end
 /*Questa parte per il nuovo ruolo supervisore dei turni */
 rule isShiftSupervisor_generic
 when 
-  Person(!shiftCategories.isEmpty()) from currentOperator.person	
+  
+  $p: Person(!shiftCategories.isEmpty()) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $c: PermissionCheck(action in ("Calendar.show",
                                  "Calendar.shiftPeople",
                                  "Calendar.deleteShift",
@@ -112,6 +115,8 @@ end
 rule shiftSupervisorCanManageShiftType
 when
   $p: Person(!shiftCategories.isEmpty()) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $sc: ShiftCategories() from $p.shiftCategories
   $st: ShiftType() from $sc.shiftTypes
   $c: PermissionCheck(action in ("Calendar.show",
@@ -130,6 +135,8 @@ end
 rule canManageShiftMonth
 when
   $p: Person(!shiftCategories.isEmpty()) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $sc: ShiftCategories() from $p.shiftCategories
   $st: ShiftType() from $sc.shiftTypes
   $target: ShiftTypeMonth((!approved && shiftType == $st) || this == null)
@@ -145,6 +152,8 @@ end
 rule canEditShiftTypeMonth
 when
   $p: Person(!shiftCategories.isEmpty()) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $sc: ShiftCategories() from $p.shiftCategories
   $st: ShiftType() from $sc.shiftTypes
   $target: ShiftTypeMonth(shiftType == $st)
@@ -164,7 +173,9 @@ end
 
 rule isShiftManager_generic
 when 
-  Person(!categories.isEmpty()) from currentOperator.person	
+  $p: Person(!categories.isEmpty()) from currentOperator.person	
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $c: PermissionCheck(action in ("Calendar.show",
                                  "Calendar.shiftPeople",
                                  "Calendar.deleteShift",
@@ -182,6 +193,8 @@ end
 rule shiftManagerCanManageShiftType
 when
   $p: Person(!categories.isEmpty()) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $sc: ShiftCategories() from $p.categories
   $st: ShiftType() from $sc.shiftTypes
   $c: PermissionCheck(action in ("Calendar.show",
@@ -200,6 +213,8 @@ end
 rule shiftManagercanManageShiftMonth
 when
   $p: Person(!categories.isEmpty()) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $sc: ShiftCategories() from $p.categories
   $st: ShiftType() from $sc.shiftTypes
   $target: ShiftTypeMonth((!approved && shiftType == $st) || this == null)
@@ -218,7 +233,9 @@ rule isPersonShift_general
 when 
   $uro: UsersRolesOffices()
   Role(name == Role.EMPLOYEE) from $uro.role
-  Person (personShift != null) from currentOperator.person
+  $p: Person (personShift != null) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $c: PermissionCheck(action in (
      	"Calendar.show",
      	"Calendar.shiftPeople",
@@ -231,6 +248,8 @@ end
 rule isPersonShift_shiftType
 when
 	$p: Person (personShift != null) from currentOperator.person
+	$o: Office() from $p.office
+  	Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
 	$ps: PersonShift() from $p.personShift
 	$psst: PersonShiftShiftType() from $ps.personShiftShiftTypes
 	$st: ShiftType() from $psst.shiftType
