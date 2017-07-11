@@ -425,20 +425,10 @@ ticketNumberFrom=Dal Numero
 ticketNumberTo=Al Numero
 time= Orario
 
-sts.name =Nome attività
-sts.description =Descrizione
+type.type =Nome attività
+type.description =Descrizione
 type.office =Sede
-sts.supervisor =Supervisore servizio
-sts.entranceTolerance =Tolleranza in ingresso (minuti)
-sts.entranceMaxTolerance =Tolleranza massima in ingresso (minuti)
-sts.exitTolerance =Tolleranza in uscita (minuti)
-sts.exitMaxTolerance =Tolleranza massima in uscita (minuti)
-sts.hourTolerance =Tolleranza per turno (minuti)
-sts.breakInShiftEnabled = Abilitare una pausa internamente al turno?
-sts.breakInShift =Durata della pausa, se presente (in minuti)
-sts.breakMaxInShift =Durata della pausa massima, se presente (in minuti) 
-sts.toleranceType =Quando applicare la tolleranza
-sts.maxTolerance =Quantità massima di tolleranze sforabili
+
 timeTable.startMorning =inizio turno
 timeTable.endMorning =fine turno
 timeTable.startAfternoon =inizio turno
@@ -801,18 +791,17 @@ person.perseoId.popover= Il perseoId è utilizzato per il collegamento tra utent
 
 domain.popover= Specificare il dominio sprovvisto del carattere @ (Es. iit.cnr.it)
 
-sts.tolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare alle timbrature per inserirle o meno nel turno. Inserire 0 se non si vuole tolleranza.
-sts.maxTolerance.popover= Quante tolleranze è possibile sforare per vedere comunque riconosciuto il turno (seppure in orario ridotto)
-sts.hourTolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare sull&apos;attività di turno per determinare se un turno è valido o no.
-sts.name.popover = Il nome da attribuire all&apos;attività sul turno
-sts.description.popover= Una descrizione dell&apos;attività
-sts.breakInShiftEnabled.popover =Se da regolamento dei turni è prevista una pausa all&#39;interno del turno diversa dalla pausa pranzo cliccare sì, no altrimenti.
-sts.entranceTolerance.popover = Tolleranza entro la quale la timbratura di ingresso concorre comunque al conteggio intero del tempo in turno 
-sts.entranceMaxTolerance.popover = Tolleranza entro la quale la timbratura di ingresso concorre comunque al conteggio del tempo in turno, ma in quantità ridotta
-sts.exitTolerance.popover = Tolleranza entro la quale la timbratura di uscita concorre comunque al conteggio intero del tempo in turno 
-sts.exitMaxTolerance.popover = Tolleranza entro la quale la timbratura di uscita concorre comunque al conteggio del tempo in turno, ma in quantità ridotta
-sts.breakInShift.popover = Tolleranza entro la quale la timbratura di pausa pranzo concorre comunque al conteggio intero del tempo in turno 
-sts.breakMaxInShift.popover = Tolleranza entro la quale la timbratura di pausa pranzo concorre comunque al conteggio del tempo in turno, ma in quantità ridotta
+type.tolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare alle timbrature per inserirle o meno nel turno. Inserire 0 se non si vuole tolleranza.
+type.maxToleranceAllowed.popover= Quante tolleranze è possibile sforare per vedere comunque riconosciuto il turno (seppure in orario ridotto)
+type.type.popover = Il nome da attribuire all&apos;attività sul turno
+type.description.popover= Una descrizione dell&apos;attività
+type.breakInShiftEnabled.popover =Se da regolamento dei turni è prevista una pausa all&#39;interno del turno diversa dalla pausa pranzo cliccare sì, no altrimenti.
+type.entranceTolerance.popover = Tolleranza entro la quale la timbratura di ingresso concorre comunque al conteggio intero del tempo in turno 
+type.entranceMaxTolerance.popover = Tolleranza entro la quale la timbratura di ingresso concorre comunque al conteggio del tempo in turno, ma in quantità ridotta
+type.exitTolerance.popover = Tolleranza entro la quale la timbratura di uscita concorre comunque al conteggio intero del tempo in turno 
+type.exitMaxTolerance.popover = Tolleranza entro la quale la timbratura di uscita concorre comunque al conteggio del tempo in turno, ma in quantità ridotta
+type.breakInShift.popover = Tolleranza entro la quale la timbratura di pausa pranzo concorre comunque al conteggio intero del tempo in turno 
+type.breakMaxInShift.popover = Tolleranza entro la quale la timbratura di pausa pranzo concorre comunque al conteggio del tempo in turno, ma in quantità ridotta
 
 ###########################################################################
 #	Messaggi utilizzati nelle viste

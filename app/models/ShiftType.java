@@ -21,6 +21,7 @@ import org.joda.time.YearMonth;
 
 import play.data.validation.Max;
 import play.data.validation.Min;
+import play.data.validation.Required;
 
 @Entity
 @Audited
@@ -29,20 +30,24 @@ public class ShiftType extends BaseModel {
 
   private static final long serialVersionUID = 3156856871540530483L;
 
-
+  
   public String type;
-
+  
   public String description;
 
+  @Min(0)
   @Column(name = "entrance_tolerance")
   public int entranceTolerance;
   
+  @Min(0)
   @Column(name = "entrance_max_tolerance")
   public int entranceMaxTolerance;
 
+  @Min(0)
   @Column(name = "exit_tolerance")
   public int exitTolerance;
   
+  @Min(0)
   @Column(name = "exit_max_tolerance")
   public int exitMaxTolerance;
   
@@ -52,9 +57,11 @@ public class ShiftType extends BaseModel {
   @Column(name = "max_tolerance_allowed")
   public int maxToleranceAllowed;
 
+  @Min(0)
   @Column(name = "break_in_shift")
   public int breakInShift;
   
+  @Min(0)
   @Column(name = "break_max_in_shift")
   public int breakMaxInShift;
 

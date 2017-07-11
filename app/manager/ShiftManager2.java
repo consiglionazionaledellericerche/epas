@@ -7,7 +7,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
+
 import controllers.Security;
+
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.PersonDayDao;
@@ -16,8 +18,10 @@ import dao.PersonShiftDayDao;
 import dao.ShiftDao;
 import dao.ShiftTypeMonthDao;
 import dao.history.HistoricalDao;
+
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.DateUtility;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -25,11 +29,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
+
 import manager.services.PairStamping;
+
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
@@ -39,15 +46,16 @@ import models.PersonShift;
 import models.PersonShiftDay;
 import models.PersonShiftDayInTrouble;
 import models.PersonShiftShiftType;
-import models.ShiftTimeTable;
 import models.ShiftType;
 import models.ShiftTypeMonth;
 import models.User;
 import models.enumerate.ShiftTroubles;
+
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
+
 import play.i18n.Messages;
 
 
@@ -403,7 +411,6 @@ public class ShiftManager2 {
             shiftTroubles.add(ShiftTroubles.MAX_BREAK_TOLERANCE_EXCEEDED);
           } else if (totalBreakMinutes > shiftType.breakInShift
               && totalBreakMinutes <= shiftType.breakMaxInShift) {
-            // La pausa fatta è compresa tra la tolleranza minima e quella massima permessa (turno decurtato di 1 ora)
             exceededThresholds++;
             shiftTroubles.add(ShiftTroubles.MIN_BREAK_TOLERANCE_EXCEEDED);
 
@@ -520,7 +527,7 @@ public class ShiftManager2 {
    * @param people la lista dei turnisti.
    * @param yearMonth il mese a partire dal quale effettuare il controllo
    * @return una mappa contenente per ogni turnista i residui al mese più recente antecedente quello
-   * specificato.
+   *     specificato.
    */
   public Map<Person, Integer> residualCompetences(List<Person> people, YearMonth yearMonth) {
 
@@ -539,7 +546,7 @@ public class ShiftManager2 {
    * @param from data di inizio
    * @param to data di fine
    * @return Una lista di persone che sono effettivamente coinvolte nei turni in un determinato
-   * periodo (Dipendenti con i turni schedulati in quel periodo).
+   *     periodo (Dipendenti con i turni schedulati in quel periodo).
    */
   public List<Person> involvedShiftWorkers(ShiftType activity, LocalDate from, LocalDate to) {
     return personShiftDayDao.byTypeInPeriod(from, to, activity, Optional.absent())
@@ -553,7 +560,7 @@ public class ShiftManager2 {
    * @param from data iniziale
    * @param to data finale
    * @return il numero di minuti di competenza maturati in base ai turni effettuati nel periodo
-   * selezionato (di norma serve calcolarli su un intero mese al massimo).
+   *     selezionato (di norma serve calcolarli su un intero mese al massimo).
    */
   public int calculatePersonShiftCompetencesInPeriod(ShiftType activity, Person person,
       LocalDate from, LocalDate to) {
@@ -571,7 +578,8 @@ public class ShiftManager2 {
       if (!shift.hasOneOfErrors(ShiftTroubles.invalidatingTroubles())) {
         shiftCompetences += paidMinutes - (shift.exceededThresholds * SIXTY_MINUTES);
         log.info("Competenza calcolata sul turno di {}-{}: {}", 
-            person.fullName(), shift.date, paidMinutes - (shift.exceededThresholds * SIXTY_MINUTES));
+            person.fullName(), shift.date, paidMinutes 
+            - (shift.exceededThresholds * SIXTY_MINUTES));
       }
       
     }
@@ -588,7 +596,8 @@ public class ShiftManager2 {
    * @return true se per tutti i turni dell'attività,persona e periodo specificati non contengono
    *     problemi, false altrimenti.
    */
-  public List<ShiftTroubles> allValidShifts(ShiftType activity, Person person, LocalDate from, LocalDate to) {
+  public List<ShiftTroubles> allValidShifts(ShiftType activity, 
+      Person person, LocalDate from, LocalDate to) {
 
     return personShiftDayDao.byTypeInPeriod(from, to, activity, Optional.of(person)).stream()
         .map(shift -> shift.troubles)
@@ -642,7 +651,8 @@ public class ShiftManager2 {
   //   * @param pairStampings la lista di coppie valide di entrata/uscita
   //   * @param begin l'ora di inizio del turno
   //   * @param end l'ora di fine del turno
-  //   * @return la lista di coppie di timbrature di uscita/entrata appartenenti all'intervallo di turno
+  //   * @return la lista di coppie di timbrature di uscita/entrata appartenenti 
+  //   * all'intervallo di turno
   //   * che vanno considerate per controllare se il tempo trascorso in pausa eccede quello previsto
   //   * dalla configurazione di turno.
   //   */
@@ -768,6 +778,10 @@ public class ShiftManager2 {
     recalculate(personShiftDay);
   }
   
+  /**
+   * cancella il personShiftDay.
+   * @param personShiftDay il personShiftDay da cancellare
+   */
   public void delete(PersonShiftDay personShiftDay) {
     
     Verify.verifyNotNull(personShiftDay).delete();
@@ -789,8 +803,11 @@ public class ShiftManager2 {
       // Ricalcoli sui giorni coinvolti dalle modifiche
       checkShiftDayValid(personShiftDay.date, shiftType);
       
-      // Recupera la data precedente dallo storico e verifica se c'è stato un cambio di date sul turno.
-      // In tal caso effettua il ricalcolo anche sul giorno precedente (spostamento di un turno da un giorno all'altro)
+      /*
+       *  Recupera la data precedente dallo storico e verifica se c'è stato un 
+       *  cambio di date sul turno. In tal caso effettua il ricalcolo anche 
+       *  sul giorno precedente (spostamento di un turno da un giorno all'altro)
+       */
       HistoricalDao.lastRevisionsOf(PersonShiftDay.class, personShiftDay.id)
           .stream().limit(1).map(historyValue -> {
             PersonShiftDay pd = (PersonShiftDay) historyValue.value;
