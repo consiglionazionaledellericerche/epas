@@ -9,8 +9,7 @@ import dao.absences.AbsenceComponentDao;
 import java.util.List;
 import java.util.Set;
 
-import lombok.extern.slf4j.Slf4j;
-
+import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.CategoryGroupAbsenceType;
 import models.absences.CategoryTab;
@@ -28,8 +27,6 @@ import models.absences.definitions.DefaultTakable;
 
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
-
-import play.db.jpa.JPA;
 
 public class EnumAllineator {
   
@@ -52,28 +49,7 @@ public class EnumAllineator {
       if (initialization || !absenceComponentDao
           .absenceTypeByCode(defaultAbsenceType.getCode()).isPresent()) {
         //creazione entity a partire dall'enumerato
-        AbsenceType absenceType = new AbsenceType();
-        absenceType.code = defaultAbsenceType.getCode();
-        absenceType.description = defaultAbsenceType.description;
-        absenceType.certificateCode = defaultAbsenceType.certificationCode;
-        absenceType.internalUse = defaultAbsenceType.internalUse;
-        for (JustifiedTypeName justifiedName : defaultAbsenceType.justifiedTypeNamesPermitted) {
-          absenceType.justifiedTypesPermitted.add(absenceComponentDao
-              .getOrBuildJustifiedType(justifiedName));
-        }
-        absenceType.justifiedTime = defaultAbsenceType.justifiedTime;
-        absenceType.consideredWeekEnd = defaultAbsenceType.consideredWeekEnd;
-        absenceType.timeForMealTicket = defaultAbsenceType.timeForMealTicket;
-        absenceType.replacingTime = defaultAbsenceType.replacingTime;
-        if (defaultAbsenceType.replacingType != null) {
-          absenceType.replacingType = absenceComponentDao
-              .getOrBuildJustifiedType(defaultAbsenceType.replacingType);
-        } else {
-          absenceType.replacingType = null;
-        }
-        absenceType.validFrom = defaultAbsenceType.validFrom;
-        absenceType.validTo = defaultAbsenceType.validTo;
-        absenceType.save();
+        buildAbsenceType(defaultAbsenceType);
       }
     }
     
@@ -458,5 +434,63 @@ public class EnumAllineator {
     return edited;
   }
   
+  /**
+   * Contenitore di patch specifiche per la generazione di gruppi partendo da situazioni 
+   * o codici pregressi.
+   */
+  public void patchGroupsProduction() {
+    
+    //1) Assemblea a grana ore e minuti 
+    // Creare il tipo a minuti 0M e convertire tutte le assenze orarie precedenti a grana oraria. 
+    // Una volta creato il codice 0M la patch non deve più essere applicata.
+    if (!absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_0M.getCode()).isPresent()) {
+      AbsenceType m = this.buildAbsenceType(DefaultAbsenceType.A_0M);
+      List<Absence> absences = absenceComponentDao.absences(Lists.newArrayList(
+          DefaultAbsenceType.A_01.getCode(), DefaultAbsenceType.A_02.getCode(),
+          DefaultAbsenceType.A_03.getCode(), DefaultAbsenceType.A_04.getCode(),
+          DefaultAbsenceType.A_05.getCode(), DefaultAbsenceType.A_06.getCode(),
+          DefaultAbsenceType.A_07.getCode(), DefaultAbsenceType.A_08.getCode()));
+      for (Absence absence : absences) {
+        //convertire tutti i 01... in 0M
+        absence.justifiedMinutes = absence.absenceType.justifiedTime;
+        absence.justifiedType = absenceComponentDao
+            .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
+        absence.absenceType = m;
+        absence.save();
+      }
+    }
+  }
+  
+  /**
+   * Costruisce un'absenceType a partire dall'enumerato.
+   * @return entity costruita
+   */
+  public AbsenceType buildAbsenceType(DefaultAbsenceType defaultAbsenceType) {
+
+    AbsenceType absenceType = new AbsenceType();
+    absenceType.code = defaultAbsenceType.getCode();
+    absenceType.description = defaultAbsenceType.description;
+    absenceType.certificateCode = defaultAbsenceType.certificationCode;
+    absenceType.internalUse = defaultAbsenceType.internalUse;
+    for (JustifiedTypeName justifiedName : defaultAbsenceType.justifiedTypeNamesPermitted) {
+      absenceType.justifiedTypesPermitted.add(absenceComponentDao
+          .getOrBuildJustifiedType(justifiedName));
+    }
+    absenceType.justifiedTime = defaultAbsenceType.justifiedTime;
+    absenceType.consideredWeekEnd = defaultAbsenceType.consideredWeekEnd;
+    absenceType.timeForMealTicket = defaultAbsenceType.timeForMealTicket;
+    absenceType.replacingTime = defaultAbsenceType.replacingTime;
+    if (defaultAbsenceType.replacingType != null) {
+      absenceType.replacingType = absenceComponentDao
+          .getOrBuildJustifiedType(defaultAbsenceType.replacingType);
+    } else {
+      absenceType.replacingType = null;
+    }
+    absenceType.validFrom = defaultAbsenceType.validFrom;
+    absenceType.validTo = defaultAbsenceType.validTo;
+    absenceType.save();
+    return absenceType;
+  }
+
       
 }
