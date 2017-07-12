@@ -61,7 +61,7 @@
   </p>
   #{/alert}
 
-  #{if unApprovedActivities && !unApprovedActivities.empty}
+  #{if enabledCalendar && unApprovedActivities && !unApprovedActivities.empty}
     #{alert color:'danger'}
       <h4>
         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
