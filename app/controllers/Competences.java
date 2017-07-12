@@ -461,7 +461,7 @@ public class Competences extends Controller {
     List<CompetenceCode> competenceCodeList = competenceDao
         .activeCompetenceCode(office, new LocalDate(year, month, 1));
     if (competenceCodeList.isEmpty()) {
-      render(year, month, competenceCodeList);
+      render(year, month, office, competenceCodeList);
     }
     
     //Il competence code selezionato
