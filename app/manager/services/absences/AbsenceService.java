@@ -698,6 +698,8 @@ public class AbsenceService {
    */
   public void enumAllineator() {
     
+    enumAllineator.patchGroupsProduction();
+    
     enumAllineator.handleTab(false);
     enumAllineator.handleCategory(false);
     
@@ -707,6 +709,7 @@ public class AbsenceService {
     enumAllineator.handleGroup(false);
     enumAllineator.handleCategory(false);
     enumAllineator.handleTab(false);
+    
   }
   
   /**
