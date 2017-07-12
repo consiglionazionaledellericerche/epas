@@ -554,4 +554,18 @@ public class AbsenceComponentDao extends DaoBase {
                 .and(absence.absenceType.code.eq(code))))
         .list(absence);
   }
+
+  /**
+   * Le assenze con quei codici.
+   * @param codes codici
+   * @return la lista di assenze con quei codici.
+   */
+  public List<Absence> absences(List<String> codes) {
+    QAbsence absence = QAbsence.absence;
+    return getQueryFactory()
+        .from(absence)
+        .leftJoin(absence.personDay, QPersonDay.personDay)
+        .where(absence.absenceType.code.in(codes))
+        .list(absence);
+  }
 } 
