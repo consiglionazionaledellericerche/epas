@@ -11,6 +11,7 @@ import dao.ShiftTypeMonthDao;
 import dao.wrapper.IWrapperFactory;
 import helpers.CacheValues;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.attestati.service.ICertificationService;
 import manager.attestati.service.PersonCertData;
+import manager.configurations.EpasParam;
 import models.Office;
 import models.Person;
 import models.ShiftTypeMonth;
@@ -142,12 +144,22 @@ public class Certifications extends Controller {
     final Set<Integer> matchNumbers = Sets.newHashSet(matricoleEpas);
     matchNumbers.retainAll(matricoleAttestati);
 
-    final List<ShiftTypeMonth> unApprovedActivities = shiftTypeMonthDao
-        .byOfficeInMonth(office, monthToUpload.get()).stream()
-        .filter(shiftTypeMonth -> !shiftTypeMonth.approved).collect(Collectors.toList());
+    // Controlli sull'abilitazione del calendario turni
+    final boolean enabledCalendar = office.configurations.stream()
+        .anyMatch(configuration -> configuration.epasParam == EpasParam.ENABLE_CALENDARSHIFT
+            && "true".equals(configuration.fieldValue));
+
+    final List<ShiftTypeMonth> unApprovedActivities;
+
+    if (enabledCalendar) {
+      unApprovedActivities = shiftTypeMonthDao.byOfficeInMonth(office, monthToUpload.get()).stream()
+          .filter(shiftTypeMonth -> !shiftTypeMonth.approved).collect(Collectors.toList());
+    } else {
+      unApprovedActivities = new ArrayList<>();
+    }
 
     render(office, validYear, validMonth, people, notInEpas, notInAttestati, matchNumbers,
-        process, unApprovedActivities);
+        process, unApprovedActivities, enabledCalendar);
   }
 
   /**
