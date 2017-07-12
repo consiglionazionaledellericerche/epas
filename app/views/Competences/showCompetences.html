@@ -4,126 +4,132 @@
 
 <div class="container">
 
-  #{title title:'Assegna competenze ' + templateUtility.monthName(compDto.month) + ' ' + compDto.year, color:'primary' /}
+  #{title title:'Assegna competenze ' + templateUtility.monthName(month) + ' ' + year, color:'primary' /}
 
   #{include './_tabs.html' /}
   
-  #{if !servicesInitialized}
-    #{alert color:'danger'}
-      <p>Nella lista delle competenze attive compare anche la reperibilità. Per permettere al sistema ePAS di effettuare i corretti controlli
-      sui giorni disponibili per tale competenza, è necessario attivare i servizi per cui la reperibilità è stata richiesta cliccando <a href="@{activateServices(office.id)}">qui</a>
-      </p>
-    #{/alert}
-  #{/if}
-    
-    #{form action:@showCompetences(), class:'form-inline auto-submit', method:'GET' }
-	<input type="hidden" name="year" value="${compDto.year}"/>
-    <input type="hidden" name="month" value="${compDto.month}"/>
-    <input type="hidden" name="officeId" value="${compDto.office.id}"/>
-	<input type="hidden" name="codeId" value="${wrCompetenceCode.value.id}"/>
-	
-	    #{ff.fselectModel 'competenceCodeId', name:'competenceCodeId', label:'Codice', items:competenceCodeList,
-    	    value:wrCompetenceCode.value, sronly:true, faicon:'money' /}
- 
-   #{/form}
-   #{alert color:'warning'}
-      <p>
-        <i class="fa fa-line-chart" aria-hidden="true"></i> ${compDto.office.name} <br>
-        Totale competenza ${wrCompetenceCode.value.code}
-	    assegnata nel mese <strong class="text-danger">${wrCompetenceCode.totalFromCompetenceCode(compDto.month, compDto.year, compDto.office.id)}</strong>
-	    
-	    #{if wrCompetenceCode.value.code.equals("S1") 
-	      || wrCompetenceCode.value.code.equals("S2")
-	      || wrCompetenceCode.value.code.equals("S3")}
-		  		
-	            <br>Totale ore di S1 + S2 + S3 pagate nel mese <strong class="text-danger">${compDto.totaleOreStraordinarioMensile}</strong>
-	            <br>Totale ore di S1 + S2 + S3 pagate nell'anno <strong class="text-danger">${compDto.totaleOreStraordinarioAnnuale}</strong> 
-	              su un monte ore totale di <strong class="text-success">${compDto.totaleMonteOre}</strong>
-	    #{/if}
-	 </p>  
-   #{/alert}
-    
-	#{if wrCompetenceCode.value.limitType.equals(models.enumerate.LimitType.onMonthlyPresence)}
-		#{alert color:'warning'}
-			<p><i class="fa fa-exclamation" aria-hidden="true"></i> <u><strong>ATTENZIONE</strong></u> <br>I primi 3 giorni di ogni mese, il sistema in automatico verifica i giorni di presenza a lavoro relativi al mese precedente 
-			di ciascun dipendente abilitato al codice ${wrCompetenceCode.value.code} - ${wrCompetenceCode.value.description} e compila 
-			automaticamente i valori da attribuire per la competenza per ciascun dipendente.<br>
-			Se sono state effettuate modifiche alle timbrature o alle assenze nelle giornate del mese
-			di &{templateUtility.monthName(compDto.month)}, successivamente al <strong>3 &{templateUtility.monthName(compDto.month+1)}</strong>, è possibile effettuare il ricalcolo 
-			della competenza premendo il tasto qui sotto</p><br>
-		
-		<a class="btn btn-warning offset-col-sm-4" href="@{Competences.recalculateBonus(office.id, wrCompetenceCode.value.id, year, month)}">
-      		Ricalcola competenza
-    	</a>
-    	#{/alert}
-	#{/if}
-	#{if wrCompetenceCode.value.limitType.equals(models.enumerate.LimitType.entireMonth)}
-		#{alert color:'warning'}
-			<p><i class="fa fa-exclamation" aria-hidden="true"></i> <u><strong>ATTENZIONE</strong></u> <br>
-			I codici ad assegnamento mensile come il ${wrCompetenceCode.value.code} possono avere come 
-			massimo valore <strong>${wrCompetenceCode.value.limitValue}</strong>. <br>
-			<u>Il primo giorno di ogni mese</u>, ePAS <strong>in automatico</strong> controlla tutti i dipendenti della sede abilitati alla fruizione 
-			di questo codice e assegna loro il valore ${wrCompetenceCode.value.limitValue}.</p>
-		#{/alert}
-	#{/if}
-	   <table class="table" datatable-nopaging>
-      	  <thead>
-      		<tr>
-        		<th>Nome e cognome</th>
-        		<th>Competenza</th>
-        		*{ <th>${wrCompetenceCode.value.description} ${wrCompetenceCode.value.code}</th> }*
-        		<th>
-        		  Valore
-        		  <i class="fa fa-info-circle" aria-hidden="true" webui-popover-hover data-content="I valori per le reperibilità sono espressi in <strong>giorni</strong>, quelli per straordinari e turni in <strong>ore</strong>."></i>
-              	</th>
-        		<th>Modifica</th> 
-      		</tr>
-      	  </thead>
-      	  <tbody>
-      	  #{list items:compDto.compList, as:'competence'}
-      		<tr>
-			  <td>${competence.person.fullname}</td>
-			  <td>${competence.competenceCode.code}</td>
-			  <td>
-				#{if competence.id == null}
-                  #{secure.link @Competences.insertCompetence(competence.person.id, competence.competenceCode.id, competence.month, competence.year), 'data-async-modal':'#defaultModal'}
-                    <em>Inserisci</em>
-                  #{/secure.link}
-				#{/if}
-				#{else}
-                  
-                    #{if competence.valueApproved != 0}
-                      ${competence.valueApproved}
-                    #{/if} #{else}
-                      <em>Nessun valore inserito</em>
-                    #{/else}
-                  
-				#{/else}
-			  </td>
-				
-			  <td>
-			  #{secure.link @Competences.editCompetence(competence.id), 'data-async-modal':'#defaultModal'}
-			    <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
-			  #{/secure.link}
-			  </td>
-			</tr>
-      	  #{/list}
-      	  </tbody>
-       </table>
-
-	  <br>
-	  <br>
-
-
-  *{  
-  #{title title:'Riepilogo Straordinari assegnati ' + compDto.year, color:'primary' /}
-
-  #{alert color:'info'}
-  <h4><strong>Riepilogo straordinari ${compDto.office.name}</strong></h4>
-
- 
-  #{/alert}
-  }*
+  #{if compDto}
   
+	  #{if !servicesInitialized}
+	    #{alert color:'danger'}
+	      <p>Nella lista delle competenze attive compare anche la reperibilità. Per permettere al sistema ePAS di effettuare i corretti controlli
+	      sui giorni disponibili per tale competenza, è necessario attivare i servizi per cui la reperibilità è stata richiesta cliccando <a href="@{activateServices(office.id)}">qui</a>
+	      </p>
+	    #{/alert}
+	  #{/if}
+	    
+	    #{form action:@showCompetences(), class:'form-inline auto-submit', method:'GET' }
+		<input type="hidden" name="year" value="${year}"/>
+	    <input type="hidden" name="month" value="${month}"/>
+	    <input type="hidden" name="officeId" value="${office.id}"/>
+		<input type="hidden" name="codeId" value="${wrCompetenceCode.value.id}"/>
+		
+		    #{ff.fselectModel 'competenceCodeId', name:'competenceCodeId', label:'Codice', items:competenceCodeList,
+	    	    value:wrCompetenceCode.value, sronly:true, faicon:'money' /}
+	 
+	   #{/form}
+	   #{alert color:'warning'}
+	      <p>
+	        <i class="fa fa-line-chart" aria-hidden="true"></i> ${compDto.office.name} <br>
+	        Totale competenza ${wrCompetenceCode.value.code}
+		    assegnata nel mese <strong class="text-danger">${wrCompetenceCode.totalFromCompetenceCode(compDto.month, compDto.year, compDto.office.id)}</strong>
+		    
+		    #{if wrCompetenceCode.value.code.equals("S1") 
+		      || wrCompetenceCode.value.code.equals("S2")
+		      || wrCompetenceCode.value.code.equals("S3")}
+			  		
+		            <br>Totale ore di S1 + S2 + S3 pagate nel mese <strong class="text-danger">${compDto.totaleOreStraordinarioMensile}</strong>
+		            <br>Totale ore di S1 + S2 + S3 pagate nell'anno <strong class="text-danger">${compDto.totaleOreStraordinarioAnnuale}</strong> 
+		              su un monte ore totale di <strong class="text-success">${compDto.totaleMonteOre}</strong>
+		    #{/if}
+		 </p>  
+	   #{/alert}
+	    
+		#{if wrCompetenceCode.value.limitType.equals(models.enumerate.LimitType.onMonthlyPresence)}
+			#{alert color:'warning'}
+				<p><i class="fa fa-exclamation" aria-hidden="true"></i> <u><strong>ATTENZIONE</strong></u> <br>I primi 3 giorni di ogni mese, il sistema in automatico verifica i giorni di presenza a lavoro relativi al mese precedente 
+				di ciascun dipendente abilitato al codice ${wrCompetenceCode.value.code} - ${wrCompetenceCode.value.description} e compila 
+				automaticamente i valori da attribuire per la competenza per ciascun dipendente.<br>
+				Se sono state effettuate modifiche alle timbrature o alle assenze nelle giornate del mese
+				di &{templateUtility.monthName(compDto.month)}, successivamente al <strong>3 &{templateUtility.monthName(compDto.month+1)}</strong>, è possibile effettuare il ricalcolo 
+				della competenza premendo il tasto qui sotto</p><br>
+			
+			<a class="btn btn-warning offset-col-sm-4" href="@{Competences.recalculateBonus(office.id, wrCompetenceCode.value.id, year, month)}">
+	      		Ricalcola competenza
+	    	</a>
+	    	#{/alert}
+		#{/if}
+		#{if wrCompetenceCode.value.limitType.equals(models.enumerate.LimitType.entireMonth)}
+			#{alert color:'warning'}
+				<p><i class="fa fa-exclamation" aria-hidden="true"></i> <u><strong>ATTENZIONE</strong></u> <br>
+				I codici ad assegnamento mensile come il ${wrCompetenceCode.value.code} possono avere come 
+				massimo valore <strong>${wrCompetenceCode.value.limitValue}</strong>. <br>
+				<u>Il primo giorno di ogni mese</u>, ePAS <strong>in automatico</strong> controlla tutti i dipendenti della sede abilitati alla fruizione 
+				di questo codice e assegna loro il valore ${wrCompetenceCode.value.limitValue}.</p>
+			#{/alert}
+		#{/if}
+		   <table class="table" datatable-nopaging>
+	      	  <thead>
+	      		<tr>
+	        		<th>Nome e cognome</th>
+	        		<th>Competenza</th>
+	        		*{ <th>${wrCompetenceCode.value.description} ${wrCompetenceCode.value.code}</th> }*
+	        		<th>
+	        		  Valore
+	        		  <i class="fa fa-info-circle" aria-hidden="true" webui-popover-hover data-content="I valori per le reperibilità sono espressi in <strong>giorni</strong>, quelli per straordinari e turni in <strong>ore</strong>."></i>
+	              	</th>
+	        		<th>Modifica</th> 
+	      		</tr>
+	      	  </thead>
+	      	  <tbody>
+	      	  #{list items:compDto.compList, as:'competence'}
+	      		<tr>
+				  <td>${competence.person.fullname}</td>
+				  <td>${competence.competenceCode.code}</td>
+				  <td>
+					#{if competence.id == null}
+	                  #{secure.link @Competences.insertCompetence(competence.person.id, competence.competenceCode.id, competence.month, competence.year), 'data-async-modal':'#defaultModal'}
+	                    <em>Inserisci</em>
+	                  #{/secure.link}
+					#{/if}
+					#{else}
+	                  
+	                    #{if competence.valueApproved != 0}
+	                      ${competence.valueApproved}
+	                    #{/if} #{else}
+	                      <em>Nessun valore inserito</em>
+	                    #{/else}
+	                  
+					#{/else}
+				  </td>
+					
+				  <td>
+				  #{secure.link @Competences.editCompetence(competence.id), 'data-async-modal':'#defaultModal'}
+				    <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+				  #{/secure.link}
+				  </td>
+				</tr>
+	      	  #{/list}
+	      	  </tbody>
+	       </table>
+	
+		  <br>
+		  <br>
+	
+	
+	  *{  
+	  #{title title:'Riepilogo Straordinari assegnati ' + compDto.year, color:'primary' /}
+	
+	  #{alert color:'info'}
+	  <h4><strong>Riepilogo straordinari ${compDto.office.name}</strong></h4>
+	
+	 
+	  #{/alert}
+	  }*
+  #{/if}#{else}
+  #{alert color:'warning'}
+   <p>Nessuna competenza abilitata.</p>
+  #{/alert}
+  #{/else}
   
 </div> <!-- end container-fluid -->
