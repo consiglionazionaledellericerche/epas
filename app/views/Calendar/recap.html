@@ -1,0 +1,37 @@
+<h3>Ore di turno valide</h3>
+<br>
+<ul class="list-group">
+  #{list shiftsCalculatedCompetences.entrySet()}
+  <li class="list-group-item clearfix
+    #{if shiftTypeMonth?.approved}list-group-item-warning#{/if}
+    #{else}list-group-item-info#{/else}">
+    ${_.getKey().fullname} <span class="label label-info pull-right">${_.getValue().printHourMinute()}</span>
+  </li>
+  #{/list}
+</ul>
+<br>
+#{if shiftTypeMonth?.approved}
+<div>
+  <em class="text-muted">&{'calendar.competencesApproved'}</em>
+</div>
+<br>
+#{secure.check 'Calendar.monthShiftsApprovement', target: shiftType }
+#{b.link @monthShiftsApprovement(shiftType.id, start.toString()),class: 'btn-sm', color:'warning',
+fa:
+'thumbs-o-down' }
+  &{'calendar.removeApprovation'}
+#{/b.link}
+#{/secure.check}
+#{/if}
+#{else}
+<div>
+  <em class="text-muted">&{'calendar.competencesToBeApproved'}</em>
+</div>
+<br>
+#{secure.check 'Calendar.monthShiftsApprovement', target: shiftType  }
+#{b.link @monthShiftsApprovement(shiftType.id, start.toString()),class: 'btn-sm', color:'info', fa:
+'thumbs-o-up' }
+&{'calendar.approve'}
+#{/b.link}
+#{/secure.check}
+#{/else}

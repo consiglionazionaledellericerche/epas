@@ -12,6 +12,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 import models.Person;
+import models.PersonDay;
 import models.PersonDayInTrouble;
 import models.enumerate.Troubles;
 import models.query.QPersonDayInTrouble;
@@ -50,5 +51,19 @@ public class PersonDayInTroubleDao extends DaoBase {
     final JPQLQuery query = getQueryFactory().from(pdit).where(conditions);
 
     return query.list(pdit);
+  }
+  
+  /**
+   * 
+   * @param pd il personDay per cui si ricerca il trouble
+   * @param trouble la causa per cui si ricerca il trouble
+   * @return il personDayInTrouble, se esiste, relativo ai parametri passati al metodo.
+   */
+  public Optional<PersonDayInTrouble> getPersonDayInTroubleByType(PersonDay pd, Troubles trouble) {
+    QPersonDayInTrouble pdit = QPersonDayInTrouble.personDayInTrouble;
+    final JPQLQuery query = getQueryFactory()
+        .from(pdit)
+        .where(pdit.personDay.eq(pd).and(pdit.cause.eq(trouble)));
+    return Optional.fromNullable(query.singleResult(pdit));
   }
 }

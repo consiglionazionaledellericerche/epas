@@ -1,18 +1,18 @@
 package models.base;
 
 import com.google.common.base.MoreObjects;
-
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperModel;
-
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
-
 import models.Person;
-
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
+import org.jadira.usertype.dateandtime.joda.PersistentYearMonthAsString;
+import org.joda.time.YearMonth;
 import play.db.jpa.GenericModel;
 
 /**
@@ -20,6 +20,8 @@ import play.db.jpa.GenericModel;
  *
  * @author marco
  */
+@TypeDefs(@TypeDef(name = "YearMonth", defaultForType = YearMonth.class,
+    typeClass = PersistentYearMonthAsString.class))
 @MappedSuperclass
 public abstract class BaseModel extends GenericModel {
 
@@ -36,23 +38,24 @@ public abstract class BaseModel extends GenericModel {
 
   @Transient
   public String getLabel() {
-    return this.toString();
+    return toString();
   }
 
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this).add("id", id).toString();
   }
-  
+
   /**
    * Costruisce una istanza del wrapper se esiste.
+   *
    * @param wrapperFactory wrapperFactory
-   * @return wrapper model 
+   * @return wrapper model
    */
   @Transient
   public IWrapperModel getWrapper(IWrapperFactory wrapperFactory) {
     if (this instanceof Person) {
-      return wrapperFactory.create((Person)this);
+      return wrapperFactory.create((Person) this);
     }
     return null;
   }

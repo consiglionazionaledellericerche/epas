@@ -31,6 +31,8 @@ public class QPersonShiftDay extends EntityPathBase<PersonShiftDay> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final NumberPath<Integer> exceededThresholds = createNumber("exceededThresholds", Integer.class);
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 
@@ -42,6 +44,8 @@ public class QPersonShiftDay extends EntityPathBase<PersonShiftDay> {
     public final EnumPath<models.enumerate.ShiftSlot> shiftSlot = createEnum("shiftSlot", models.enumerate.ShiftSlot.class);
 
     public final QShiftType shiftType;
+
+    public final SetPath<models.PersonShiftDayInTrouble, QPersonShiftDayInTrouble> troubles = this.<models.PersonShiftDayInTrouble, QPersonShiftDayInTrouble>createSet("troubles", models.PersonShiftDayInTrouble.class, QPersonShiftDayInTrouble.class, PathInits.DIRECT2);
 
     public QPersonShiftDay(String variable) {
         this(PersonShiftDay.class, forVariable(variable), INITS);

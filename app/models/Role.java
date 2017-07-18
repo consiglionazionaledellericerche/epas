@@ -1,16 +1,12 @@
 package models;
 
 import com.google.common.collect.Lists;
-
 import java.util.List;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
 import models.base.BaseModel;
-
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
@@ -32,39 +28,39 @@ public class Role extends BaseModel {
   public String name;
 
   @NotAudited
-  @OneToMany(mappedBy = "role", cascade = {CascadeType.REMOVE}, orphanRemoval = true)
+  @OneToMany(mappedBy = "role", cascade = CascadeType.REMOVE, orphanRemoval = true)
   public List<UsersRolesOffices> usersRolesOffices = Lists.newArrayList();
 
   @Override
   public String toString() {
-    if (name.equals(Role.SEAT_SUPERVISOR)) {
+    if (name.equals(SEAT_SUPERVISOR)) {
       return "Responsabile Sede";
     }
-    if (name.equals(Role.PERSONNEL_ADMIN)) {
+    if (name.equals(PERSONNEL_ADMIN)) {
       return "Amministratore Personale";
     }
-    if (name.equals(Role.PERSONNEL_ADMIN_MINI)) {
+    if (name.equals(PERSONNEL_ADMIN_MINI)) {
       return "Amministratore Personale Sola lettura";
     }
-    if (name.equals(Role.TECHNICAL_ADMIN)) {
+    if (name.equals(TECHNICAL_ADMIN)) {
       return "Amministratore Tecnico";
     }
-    if (name.equals(Role.EMPLOYEE)) {
+    if (name.equals(EMPLOYEE)) {
       return "Dipendente";
     }
-    if (name.equals(Role.REPERIBILITY_MANAGER)) {
+    if (name.equals(REPERIBILITY_MANAGER)) {
       return "Gestore reperibilità";
     }
-    if (name.equals(Role.SHIFT_MANAGER)) {
+    if (name.equals(SHIFT_MANAGER)) {
       return "Gestore turni";
     }
-    if (name.equals(Role.BADGE_READER)) {
+    if (name.equals(BADGE_READER)) {
       return "Lettore di badge";
     }
-    if (name.equals(Role.REST_CLIENT)) {
+    if (name.equals(REST_CLIENT)) {
       return "Client rest";
     }
-    return this.name;
+    return name;
   }
 
 }

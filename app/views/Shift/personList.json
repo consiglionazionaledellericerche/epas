@@ -1,12 +1,12 @@
 [
-  	#{list personList, as:'person'}
+  	#{list personList, as:'psst'}
   		{
-  			"id" : ${person.id},
-  			"email" : "${person.email}",
-  			"name" : "${person.name}",
-  			"surname" : "${person.surname}",
-  			"mobile": "${person.mobile}",
-  			"jolly": ${person.personShift.jolly}
-  		}${person_isLast ? '' : ','}	
+  			"id" : ${psst.personShift.person.id},
+  			"email" : "${psst.personShift.person.email}",
+  			"name" : "${psst.personShift.person.name}",
+  			"surname" : "${psst.personShift.person.surname}",
+  			"mobile": "${psst.personShift.person.mobile}",
+  			"jolly": ${psst.jolly}
+  		}${psst_isLast ? '' : ','}	
   	#{/list}
 ]

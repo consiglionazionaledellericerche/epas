@@ -2,14 +2,15 @@ package models;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
+import javax.persistence.Transient;
 import models.base.BaseModel;
-
 import org.joda.time.LocalTime;
 
 @Entity
@@ -19,7 +20,7 @@ public class ShiftTimeTable extends BaseModel {
   private static final long serialVersionUID = -7869931573320174606L;
 
   @OneToMany(mappedBy = "shiftTimeTable")
-  public List<ShiftType> shiftTypes = new ArrayList<ShiftType>();
+  public List<ShiftType> shiftTypes = new ArrayList<>();
 
   // start time of morning shift
   @Column(name = "start_morning", columnDefinition = "VARCHAR")
@@ -37,6 +38,12 @@ public class ShiftTimeTable extends BaseModel {
   @Column(name = "end_afternoon", columnDefinition = "VARCHAR")
   public LocalTime endAfternoon;
 
+  @Column(name = "start_evening", columnDefinition = "VARCHAR")
+  public LocalTime startEvening;
+
+  @Column(name = "end_evening", columnDefinition = "VARCHAR")
+  public LocalTime endEvening;
+
   // start time for morning lunch break
   @Column(name = "start_morning_lunch_time", columnDefinition = "VARCHAR")
   public LocalTime startMorningLunchTime;
@@ -53,6 +60,14 @@ public class ShiftTimeTable extends BaseModel {
   @Column(name = "end_afternoon_lunch_time", columnDefinition = "VARCHAR")
   public LocalTime endAfternoonLunchTime;
 
+  // start time for the lunch break
+  @Column(name = "start_evening_lunch_time", columnDefinition = "VARCHAR")
+  public LocalTime startEveningLunchTime;
+
+  // end time for the lunch break
+  @Column(name = "end_evening_lunch_time", columnDefinition = "VARCHAR")
+  public LocalTime endEveningLunchTime;
+
   // total amount of working minutes
   @Column(name = "total_working_minutes")
   public Integer totalWorkMinutes;
@@ -61,4 +76,22 @@ public class ShiftTimeTable extends BaseModel {
   @Column(name = "paid_minutes")
   public Integer paidMinutes;
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "office_id")
+  public Office office;
+
+  @Transient
+  public int slotCount() {
+    int slots = 0;
+    if (startMorning != null && endMorning != null) {
+      slots++;
+    }
+    if (startAfternoon != null && endAfternoon != null) {
+      slots++;
+    }
+    if (startEvening != null && endEvening != null) {
+      slots++;
+    }
+    return slots;
+  }
 }
