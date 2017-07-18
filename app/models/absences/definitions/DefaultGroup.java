@@ -69,7 +69,11 @@ public enum DefaultGroup {
       DefaultCategoryType.PERMESSI_PERSONALI, 1,
       GroupAbsenceTypePattern.programmed, PeriodType.year, 
       DefaultTakable.T_89, DefaultComplation.C_89, null, false, true),
-  
+  G_0("0 - Assemblea", 
+      "", 
+      DefaultCategoryType.ALTRI_CODICI, 0,
+      GroupAbsenceTypePattern.programmed, PeriodType.always, 
+      DefaultTakable.T_0, DefaultComplation.C_0, null, false, true),
   G_09("09 - Permesso orario visita medica", 
       "", 
       DefaultCategoryType.VISITA_MEDICA, 0,
