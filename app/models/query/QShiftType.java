@@ -26,13 +26,29 @@ public class QShiftType extends EntityPathBase<ShiftType> {
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
+    public final NumberPath<Integer> breakInShift = createNumber("breakInShift", Integer.class);
+
+    public final NumberPath<Integer> breakMaxInShift = createNumber("breakMaxInShift", Integer.class);
+
     public final StringPath description = createString("description");
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final NumberPath<Integer> entranceMaxTolerance = createNumber("entranceMaxTolerance", Integer.class);
+
+    public final NumberPath<Integer> entranceTolerance = createNumber("entranceTolerance", Integer.class);
+
+    public final NumberPath<Integer> exitMaxTolerance = createNumber("exitMaxTolerance", Integer.class);
+
+    public final NumberPath<Integer> exitTolerance = createNumber("exitTolerance", Integer.class);
+
     //inherited
     public final NumberPath<Long> id = _super.id;
+
+    public final NumberPath<Integer> maxToleranceAllowed = createNumber("maxToleranceAllowed", Integer.class);
+
+    public final SetPath<models.ShiftTypeMonth, QShiftTypeMonth> monthsStatus = this.<models.ShiftTypeMonth, QShiftTypeMonth>createSet("monthsStatus", models.ShiftTypeMonth.class, QShiftTypeMonth.class, PathInits.DIRECT2);
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
@@ -68,7 +84,7 @@ public class QShiftType extends EntityPathBase<ShiftType> {
     public QShiftType(Class<? extends ShiftType> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
         this.shiftCategories = inits.isInitialized("shiftCategories") ? new QShiftCategories(forProperty("shiftCategories"), inits.get("shiftCategories")) : null;
-        this.shiftTimeTable = inits.isInitialized("shiftTimeTable") ? new QShiftTimeTable(forProperty("shiftTimeTable")) : null;
+        this.shiftTimeTable = inits.isInitialized("shiftTimeTable") ? new QShiftTimeTable(forProperty("shiftTimeTable"), inits.get("shiftTimeTable")) : null;
     }
 
 }

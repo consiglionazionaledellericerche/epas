@@ -75,6 +75,7 @@ public class PersonDayManager {
   /**
    * Assenza che assegna l'intera giornata.
    */
+
   public Optional<Absence> getAssignAllDay(PersonDay personDay) {
     for (Absence absence : personDay.absences) {
       if (absence.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) { 
@@ -101,8 +102,9 @@ public class PersonDayManager {
    */
   public boolean isAllDayAbsences(PersonDay personDay) {
     return getAllDay(personDay).isPresent() || getAssignAllDay(personDay).isPresent();
-  }
 
+  }
+  
   /**
    * Se le assenze orarie giustificano abbanstanza per ritenere il dipendente a lavoro.
    *
@@ -678,8 +680,6 @@ public class PersonDayManager {
     final boolean isFixedTimeAtWork = pd.isFixedTimeAtWork();
     final boolean isHoliday = personDay.isHoliday;
     final boolean isEnoughHourlyAbsences = isEnoughHourlyAbsences(pd);
-    final boolean noAbsences = personDay.absences.isEmpty();
-    final int workingTime = pd.getWorkingTimeTypeDay().get().getWorkingTime();
 
     // PRESENZA AUTOMATICA
     if (isFixedTimeAtWork && !allValidStampings) {
@@ -712,26 +712,37 @@ public class PersonDayManager {
       personDayInTroubleManager.fixTrouble(personDay, Troubles.UNCOUPLED_HOLIDAY);
     }
 
-
     // ### CASO 4 Tempo a lavoro (di timbrature + assenze) non sufficiente
     // Per i livelli 4-8 dev'essere almeno la metà del tempo a lavoro
-
-    // Non ha la timbratura automatica
-    if (!isFixedTimeAtWork
-        // E' di livello 4-8
-        && personDay.person.qualification.qualification > 3
-        // non deve essere festivo
-        && !personDay.isHoliday
-        // le assenze non devono essere giornaliere 
-        && !isAllDayAbsences
-        // Il tempo a lavoro non è almeno la metà di quello previsto
-        && personDay.timeAtWork < (workingTime / 2)) {
-      personDayInTroubleManager.setTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);
-    } else {
-      personDayInTroubleManager.fixTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);
+    if (!isFixedTimeAtWork && personDay.person.qualification.qualification > 3) {
+      if (!isValidDay(personDay, pd)) {
+        personDayInTroubleManager.setTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);
+      } else {
+        personDayInTroubleManager.fixTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);
+      }
     }
+    
   }
 
+  /**
+   * 
+   * @param personDay il personDay relativo alla persona e al giorno di interesse
+   * @param pd il wrapper contenente i metodi di utilità
+   * @return true se è un giorno valido rispetto a tempo a lavoro, festivo, assenze ecc...
+   *     false altrimenti.
+   */
+  public boolean isValidDay(PersonDay personDay, IWrapperPersonDay pd) {
+    if (// non deve essere festivo
+        personDay.isHoliday
+        // le assenze non devono essere giornaliere 
+        || isAllDayAbsences(personDay)
+        // Il tempo a lavoro non è almeno la metà di quello previsto
+        || personDay.timeAtWork < (pd.getWorkingTimeTypeDay().get().getWorkingTime() / 2)) {
+      return false;
+    }
+    return true;
+  }
+  
   /**
    * Calcola le coppie di stampings valide al fine del calcolo del time at work. <br>
    *
@@ -1097,14 +1108,17 @@ public class PersonDayManager {
   /**
    * Restituisce la quantita' in minuti del'orario dovuto alle timbrature valide in un giono,
    * che facciano parte della finestra temporale specificata.
+   * Il metodo viene utilizzato nel calcolo del tempo a lavoro nei casi di finestre di 
+   * ingresso/uscita specificate per quanto riguarda l'apertura/chiususa sede e nel caso 
+   * di calcolo del tempo a lavoro all'interno di una fascia di turno.
    *
    * @param validPairs coppie valide di timbrature per il tempo a lavoro
-   * @param startWork  inizio finestra
-   * @param endWork    fine finestra
+   * @param start  inizio finestra
+   * @param end    fine finestra
    * @return minuti
    */
-  private int workingMinutes(List<PairStamping> validPairs,
-      LocalTime startWork, LocalTime endWork) {
+  public int workingMinutes(List<PairStamping> validPairs,
+      LocalTime start, LocalTime end) {
 
     int workingMinutes = 0;
 
@@ -1112,17 +1126,17 @@ public class PersonDayManager {
     for (PairStamping validPair : validPairs) {
       LocalTime consideredStart = new LocalTime(validPair.first.date);
       LocalTime consideredEnd = new LocalTime(validPair.second.date);
-      if (consideredEnd.isBefore(startWork)) {
+      if (consideredEnd.isBefore(start)) {
         continue;
       }
-      if (consideredStart.isAfter(endWork)) {
+      if (consideredStart.isAfter(end)) {
         continue;
       }
-      if (consideredStart.isBefore(startWork)) {
-        consideredStart = startWork;
+      if (consideredStart.isBefore(start)) {
+        consideredStart = start;
       }
-      if (consideredEnd.isAfter(endWork)) {
-        consideredEnd = endWork;
+      if (consideredEnd.isAfter(end)) {
+        consideredEnd = end;
       }
       workingMinutes += DateUtility.toMinute(consideredEnd) - DateUtility.toMinute(consideredStart);
     }

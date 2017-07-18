@@ -127,6 +127,6 @@ public class User extends BaseModel {
    */
   public boolean hasRoles(String... args) {
     return usersRolesOffices.stream()
-        .filter(uro -> Arrays.asList(args).contains(uro.role.name)).findAny().isPresent();
+        .anyMatch(uro -> Arrays.asList(args).contains(uro.role.name));
   }
 }

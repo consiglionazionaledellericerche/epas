@@ -1,0 +1,70 @@
+	#{f.hidden 'shiftCategoryId', value:cat.id /}
+		#{title title:'Organizzazione del lavoro in turni - Creazione attività per turno' /}
+	
+	
+		#{alert color:'info'}
+			Specificare nome e descrizione per l'attività relativa a <strong>${cat.description}</strong><br>
+			E selezionare la tipologia di turno da applicare tra quelle proposte in tabella.		
+		#{/alert}	
+	
+		#{f.input 'type.type', popover:'true',required:'true'/}
+		#{f.input 'type.description', value:type?.description, popover:'true', required:'true'/}
+		#{if breakInRange == false}
+			#{f.input 'type.entranceTolerance', type:'number', popover:'true', required:'true'/}
+			#{f.input 'type.entranceMaxTolerance', type:'number', popover:'true', required:'true'/}
+			
+			#{f.booleanRadio 'enableExitTolerance', label:'Abilita tolleranza anche in uscita' /}
+			
+			<div id="horizontal-mealticket" #{if !enableExitTolerance} style="display: none" #{/if}>
+				#{f.input 'type.exitTolerance', type:'number', popover:'true', required:'true'/}
+				#{f.input 'type.exitMaxTolerance', type:'number', popover:'true', required:'true'/}
+			</div>
+			
+			#{alert color: 'warning'}
+				Nel caso si voglia abilitare una pausa all'interno del turno, è sufficiente specificare la durata 
+				di tale pausa in questo campo. Lasciare zero se non deve esserci alcuna pausa all'interno del turno.
+			#{/alert}
+			#{f.input 'type.breakMaxInShift', type:'number', required:'true'/}			
+			
+		#{/if}
+		#{else}
+			#{f.hidden 'breakInRange', value:breakInRange /}
+			#{alert color: 'danger'}
+			<div class="row">
+			
+	  		<div class="col-sm-6">#{f.input 'type.entranceTolerance', type:'number', popover:'true', required:'true'/}</div>
+	  		<div class="col-sm-6">#{f.input 'type.entranceMaxTolerance', type:'number', popover:'true'/}</div>
+			</div>
+			#{/alert}
+			#{alert color: 'danger'}
+			<div class="row">
+			
+	  		<div class="col-sm-6">#{f.input 'type.exitTolerance', type:'number', popover:'true', required:'true'/}</div>
+	  		<div class="col-sm-6">#{f.input 'type.exitMaxTolerance', type:'number', popover:'true'/}</div>
+			</div>
+			#{/alert}
+			#{alert color: 'warning'}
+			<div class="row">
+			
+	  		<div class="col-sm-6">#{f.input 'type.breakInShift', type:'number', popover:'true', required:'true'/}</div>
+	  		<div class="col-sm-6">#{f.input 'type.breakMaxInShift', type:'number', popover:'true'/}</div>							
+			</div>
+			#{/alert}
+			#{alert color: 'success'}
+				#{f.input 'type.maxToleranceAllowed', type:'number', popover:'true'/}
+			#{/alert}
+		#{/else}
+		
+#{set 'moreScripts'}
+  <script type="text/javascript">
+	$(document).ready(function() {
+	
+		$("input[name='enableExitTolerance']").change(function(){
+			
+			jQuery( "#horizontal-mealticket" ).toggle(0);
+		
+		});
+
+	 });
+	</script>
+#{/set}

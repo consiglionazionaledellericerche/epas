@@ -4,26 +4,19 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import dao.CompetenceCodeDao;
 import dao.PersonDao;
-
 import injection.StaticInject;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
 import models.exports.PersonsCompetences;
-
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
@@ -51,7 +44,7 @@ public class JsonRequestedOvertimeBinder implements TypeBinder<PersonsCompetence
   @Override
   public Object bind(
       String name, Annotation[] annotations, String value, Class actualClass, Type genericType)
-          throws Exception {
+      throws Exception {
 
     log.debug("binding ReperibilityCompetence: {}, {}, {}, {}, {}",
         name, annotations, value, actualClass, genericType);
@@ -81,8 +74,8 @@ public class JsonRequestedOvertimeBinder implements TypeBinder<PersonsCompetence
 
         CompetenceCode competenceCode = competenceCodeDao.getCompetenceCodeByCode("S1");
         Competence competence = new Competence(person, competenceCode, 0, 0);
-        competence.setValueApproved(
-            jsonObject.get("ore").getAsInt(), jsonObject.get("motivazione").getAsString());
+        competence.valueApproved = jsonObject.get("ore").getAsInt();
+        competence.reason = jsonObject.get("motivazione").getAsString();
 
         log.debug("Letto ore = {} e motivazione = {}",
             jsonObject.get("ore").getAsInt(), jsonObject.get("motivazione").getAsString());
