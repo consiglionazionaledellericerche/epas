@@ -1043,7 +1043,7 @@ public class Competences extends Controller {
    * @param shiftCategoryId l'id del servzio da configurare
    */
   public static void configureShift(Long shiftCategoryId, int step, 
-      @Valid ShiftType type, Long shift) {
+      @Valid ShiftType type, Long shift, boolean breakInRange, boolean enableExitTolerance) {
     ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
     notFoundIfNull(cat);
     rules.checkIfPermitted(cat.office);
@@ -1053,21 +1053,21 @@ public class Competences extends Controller {
         + cat.description + Security.getUser().get().username;
     if (step == 0) {
       // ritorno il dto per creare l'attività
-
+      breakInRange = false;
       List<ShiftTimeTableDto>  dtoList = competenceManager
           .convertFromShiftTimeTable(shiftDao.getAllShifts(cat.office));
 
       step++;
-      render(dtoList, cat, type, step);
+      render(dtoList, cat, type, step, breakInRange, enableExitTolerance);
     }
     if (step == 1) {
-      boolean breakInRange = false;
+      
       if (shift == null) {
         flash.error("selezionare una timetable!");
         List<ShiftTimeTable> shiftList = shiftDao.getAllShifts(cat.office);        
         List<ShiftTimeTableDto>  dtoList = competenceManager.convertFromShiftTimeTable(shiftList);
 
-        render("@configureShift", dtoList, cat, type, step);
+        render("@configureShift", dtoList, cat, type, step, breakInRange, enableExitTolerance);
       }
       //metto in cache anche il dto della timetable e ritorno entrambi i dto per chiedere conferma 
       //all'utente di validare la attività e la timetable associata.
@@ -1075,17 +1075,17 @@ public class Competences extends Controller {
       ShiftTimeTable stt = shiftDao.getShiftTimeTableById(shift);
       list2.add(stt);
       step++;
-      Cache.safeAdd(key2, list2, "5mn");
-
+      Cache.safeAdd(key2, list2, "10mn");
+      enableExitTolerance = false;
       //type = new ShiftType();
       if (Range.closed(stt.startMorning, stt.endMorning)
           .encloses(Range.closed(stt.startMorningLunchTime, stt.endMorningLunchTime))) {
         //ritornare un'informazione per far visualizzare diversamente la costruzione della form
         breakInRange = true;
+        
       }
 
-
-      render(stt, step, type, cat, breakInRange);
+      render(stt, step, type, cat, breakInRange, enableExitTolerance);
 
     }
     if (step == 2) {
@@ -1094,26 +1094,38 @@ public class Competences extends Controller {
           || type.entranceTolerance > type.entranceMaxTolerance 
           || type.exitTolerance > type.exitMaxTolerance) {
         flash.error("Le soglie minime non possono essere superiori a quelle massime");
-        render("@configureShift",step, cat, type);
+        
+        render("@configureShift",step, cat, type, breakInRange, enableExitTolerance);
       }
       
       //metto in cache la struttura dell'attività e ritorno il dto per creare la timetable
       List<ShiftType> list = Lists.newArrayList();
       list.add(type);
-      step++;
-      Cache.safeAdd(key, list, "5mn");
+      
+      Cache.safeAdd(key, list, "10mn");
       List<ShiftTimeTable> list2 = Cache.get(key2, List.class);
+      if (list2 == null) {
+        flash.error("Scaduta sessione di creazione dell'attività di turno.");
+        step = 0;
+        render(cat, type, step, breakInRange);
+      }
+      step++;
       ShiftTimeTable stt = list2.get(0);
-      Cache.safeAdd(key2, list2, "5mn");
+      Cache.safeAdd(key2, list2, "10mn");
 
-      render(cat, type, step, stt); 
+      render(cat, type, step, stt, breakInRange); 
 
     }
     if (step == 3) {
       //effettuo la creazione dell'attività 
-      List<ShiftType> list = Cache.get(key, List.class);
-      ShiftType service = list.get(0);
+      List<ShiftType> list = Cache.get(key, List.class);      
       List<ShiftTimeTable> list2 = Cache.get(key2, List.class);
+      if (list == null || list2 == null) {
+        flash.error("Scaduta sessione di creazione dell'attività di turno.");
+        step = 0;
+        render(cat, type, step, breakInRange, enableExitTolerance);
+      }
+      ShiftType service = list.get(0);
       ShiftTimeTable stt = list2.get(0);
       competenceManager.persistShiftType(service, stt, cat);
       Cache.clear();

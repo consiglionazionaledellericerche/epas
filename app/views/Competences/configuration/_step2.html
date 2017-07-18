@@ -11,11 +11,24 @@
 		#{f.input 'type.description', value:type?.description, popover:'true', required:'true'/}
 		#{if breakInRange == false}
 			#{f.input 'type.entranceTolerance', type:'number', popover:'true', required:'true'/}
-			#{f.input 'type.exitTolerance', type:'number', popover:'true', required:'true'/}
-			#{f.input 'type.breakInShift', type:'number', popover:'true', required:'true'/}			
+			#{f.input 'type.entranceMaxTolerance', type:'number', popover:'true', required:'true'/}
+			
+			#{f.booleanRadio 'enableExitTolerance', label:'Abilita tolleranza anche in uscita' /}
+			
+			<div id="horizontal-mealticket" #{if !enableExitTolerance} style="display: none" #{/if}>
+				#{f.input 'type.exitTolerance', type:'number', popover:'true', required:'true'/}
+				#{f.input 'type.exitMaxTolerance', type:'number', popover:'true', required:'true'/}
+			</div>
+			
+			#{alert color: 'warning'}
+				Nel caso si voglia abilitare una pausa all'interno del turno, è sufficiente specificare la durata 
+				di tale pausa in questo campo. Lasciare zero se non deve esserci alcuna pausa all'interno del turno.
+			#{/alert}
+			#{f.input 'type.breakMaxInShift', type:'number', required:'true'/}			
 			
 		#{/if}
 		#{else}
+			#{f.hidden 'breakInRange', value:breakInRange /}
 			#{alert color: 'danger'}
 			<div class="row">
 			
@@ -42,4 +55,16 @@
 			#{/alert}
 		#{/else}
 		
+#{set 'moreScripts'}
+  <script type="text/javascript">
+	$(document).ready(function() {
+	
+		$("input[name='enableExitTolerance']").change(function(){
+			
+			jQuery( "#horizontal-mealticket" ).toggle(0);
+		
+		});
 
+	 });
+	</script>
+#{/set}
