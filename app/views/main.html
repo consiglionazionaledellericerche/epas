@@ -83,7 +83,7 @@
         #{/if}
         
         *{Ruoli di sistema e gestori dei turni}*
-        #{secure.check 'Calendar.show'}
+        #{secure.check 'Calendar.editable'}
           #{include './_shiftMenu.html' /}
         #{/secure.check}
 
