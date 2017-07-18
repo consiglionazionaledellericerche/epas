@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
@@ -787,22 +788,38 @@ public class CompetenceManager {
    * @param cat il turno a cui associare l'attività
    */
   public void persistShiftType(ShiftType service, ShiftTimeTable stt, ShiftCategories cat) {
-    ShiftType st = new ShiftType();
-    st.breakInShift = service.breakInShift;
+    ShiftType st = new ShiftType();    
     
     st.description = service.description;
     st.type = service.type;
     st.shiftTimeTable = stt;
-    
-    st.breakInShift = service.breakInShift;    
-    st.breakMaxInShift = service.breakMaxInShift;
-    st.entranceMaxTolerance = service.entranceMaxTolerance;
-    st.entranceTolerance = service.entranceTolerance;
-    st.exitTolerance = service.exitTolerance;
-    st.exitMaxTolerance = service.exitMaxTolerance;
-    
-    st.maxToleranceAllowed = service.maxToleranceAllowed;
     st.shiftCategories = cat;
+    if (Range.closed(stt.startMorning, stt.endMorning)
+          .encloses(Range.closed(stt.startMorningLunchTime, stt.endMorningLunchTime))) {
+      st.breakInShift = service.breakInShift;
+      st.breakMaxInShift = service.breakMaxInShift;      
+      st.exitTolerance = service.exitTolerance;
+      st.exitMaxTolerance = service.exitMaxTolerance;      
+      st.entranceMaxTolerance = service.entranceMaxTolerance;
+      st.entranceTolerance = service.entranceTolerance;
+      st.maxToleranceAllowed = service.maxToleranceAllowed;
+      
+    } else {
+      
+      if (service.exitTolerance != 0 || service.exitMaxTolerance != 0) {
+        st.exitMaxTolerance = service.exitMaxTolerance;
+        st.exitTolerance = service.exitTolerance;
+        st.maxToleranceAllowed = 2;
+      } else {
+        st.exitTolerance = 0;
+        st.exitMaxTolerance = 0;
+        st.maxToleranceAllowed = 1;
+      }      
+      st.breakInShift = service.breakMaxInShift;
+      st.entranceTolerance = service.entranceMaxTolerance;
+      st.entranceMaxTolerance = service.entranceMaxTolerance;
+    }   
+    
     st.save();
   }
   

@@ -2,7 +2,7 @@
 		#{title title:'Riepilogo' /}
 		
 		#{alert color:'info'}
-			Configurazione attività di turno (1)			
+			<strong>Configurazione attività di turno (1)</strong>			
 		#{/alert}	
 		<div class="row">
 			<div class="col-sm-6">#{f.view 'Nome attività', value:type.type /}</div>
@@ -14,11 +14,15 @@
 		</div>
 		
 		<div class="row">
+			#{if type.exitTolerance != 0 || type.exitMaxTolerance != 0 }                
 			<div class="col-sm-6">#{f.view 'Tolleranza minima per timbratura in uscita', value:type.exitTolerance + ' minuti' /}</div>
 			<div class="col-sm-6">#{f.view 'Tolleranza massima per timbratura in uscita', value:type.exitMaxTolerance + ' minuti' /}</div>
+			#{/if}
 		</div>
 		<div class="row">
+			#{if type.breakInShift != 0}
 			<div class="col-sm-6">#{f.view 'Tolleranza minima per timbratura per pausa pranzo', value:type.breakInShift + ' minuti' /}</div>
+			#{/if}
 			<div class="col-sm-6">#{f.view 'Tolleranza massima per timbratura per pausa pranzo', value:type.breakMaxInShift + ' minuti' /}</div>
 		</div>
 		
@@ -27,7 +31,7 @@
 		#{/if}
 		
 		#{alert color:'info'}
-			Configurazione timetable (2)
+			<strong>Configurazione timetable (2)</strong>
 		#{/alert}
 		<div class="row">
 			
