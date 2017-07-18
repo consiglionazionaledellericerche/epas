@@ -4,40 +4,33 @@ import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import controllers.RequestInit.CurrentData;
-
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.ShiftTypeMonthDao;
 import dao.wrapper.IWrapperFactory;
-
 import helpers.CacheValues;
-
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.attestati.service.ICertificationService;
 import manager.attestati.service.PersonCertData;
-
+import manager.configurations.EpasParam;
 import models.Office;
 import models.Person;
-
+import models.ShiftTypeMonth;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.cache.Cache;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 /**
@@ -54,6 +47,8 @@ public class Certifications extends Controller {
   @Inject
   static OfficeDao officeDao;
   @Inject
+  static ShiftTypeMonthDao shiftTypeMonthDao;
+  @Inject
   static IWrapperFactory factory;
   @Inject
   static PersonDao personDao;
@@ -68,8 +63,8 @@ public class Certifications extends Controller {
    * Pagina principale nuovo invio attestati.
    *
    * @param officeId sede
-   * @param year     anno
-   * @param month    mese
+   * @param year anno
+   * @param month mese
    */
   public static void certifications(Long officeId, Integer year, Integer month) {
 
@@ -124,14 +119,14 @@ public class Certifications extends Controller {
     try {
       matricoleAttestati = cacheValues.attestatiSerialNumbers.get(cacheKey);
     } catch (Exception ex) {
-      flash.error("Errore di connessione al server di Attestati - %s", 
+      flash.error("Errore di connessione al server di Attestati - %s",
           cleanMessage(ex).getMessage());
       log.error("Errore durante la connessione al server di attestati: {}", ex.getMessage());
       render(office, validYear, validMonth);
     }
 
     if (matricoleAttestati.isEmpty()) {
-      flash.error("Nessuna matricola presente per il mese %s/%s.\r\n" 
+      flash.error("Nessuna matricola presente per il mese %s/%s.\r\n"
           + "Effettuare lo stralcio sul server di Attestati", validMonth, validYear);
       render(office, validYear, validMonth);
     }
@@ -149,7 +144,22 @@ public class Certifications extends Controller {
     final Set<Integer> matchNumbers = Sets.newHashSet(matricoleEpas);
     matchNumbers.retainAll(matricoleAttestati);
 
-    render(office, validYear, validMonth, people, notInEpas, notInAttestati, matchNumbers, process);
+    // Controlli sull'abilitazione del calendario turni
+    final boolean enabledCalendar = office.configurations.stream()
+        .anyMatch(configuration -> configuration.epasParam == EpasParam.ENABLE_CALENDARSHIFT
+            && "true".equals(configuration.fieldValue));
+
+    final List<ShiftTypeMonth> unApprovedActivities;
+
+    if (enabledCalendar) {
+      unApprovedActivities = shiftTypeMonthDao.byOfficeInMonth(office, monthToUpload.get()).stream()
+          .filter(shiftTypeMonth -> !shiftTypeMonth.approved).collect(Collectors.toList());
+    } else {
+      unApprovedActivities = new ArrayList<>();
+    }
+
+    render(office, validYear, validMonth, people, notInEpas, notInAttestati, matchNumbers,
+        process, unApprovedActivities, enabledCalendar);
   }
 
   /**
@@ -160,8 +170,8 @@ public class Certifications extends Controller {
    * La soluzione fa abbastanza schifo...trovarne una migliore
    *
    * @param officeId id Ufficio
-   * @param year     anno
-   * @param month    mese.
+   * @param year anno
+   * @param month mese.
    */
   public static void processAll(Long officeId, Integer year, Integer month) {
 
@@ -175,8 +185,8 @@ public class Certifications extends Controller {
    * ricalcolo con le interrogazioni ad attestati
    *
    * @param officeId id del'ufficio
-   * @param year     anno
-   * @param month    mese.
+   * @param year anno
+   * @param month mese.
    */
   public static void clearCacheValues(Long officeId, Integer year, Integer month) {
     final Office office = officeDao.getOfficeById(officeId);
@@ -196,19 +206,20 @@ public class Certifications extends Controller {
 
     personDao.list(Optional.absent(), Sets.newHashSet(Lists.newArrayList(office)),
         false, monthBegin, monthEnd, true).list().forEach(person -> {
-          final Map.Entry<Person, YearMonth> personKey = new AbstractMap
-              .SimpleEntry<>(person, yearMonth);
-          cacheValues.personStatus.invalidate(personKey);
-        });
+      final Map.Entry<Person, YearMonth> personKey = new AbstractMap
+          .SimpleEntry<>(person, yearMonth);
+      cacheValues.personStatus.invalidate(personKey);
+    });
     log.info("Svuotati tutti i valori dalla cache: ufficio {} - mese {}/{}", office, month, year);
     certifications(officeId, year, month);
   }
 
   /**
    * PersonStatus.
+   *
    * @param personId id della persona
-   * @param year     anno
-   * @param month    mese
+   * @param year anno
+   * @param month mese
    */
   public static void personStatus(Long personId, int year, int month) {
 
@@ -250,7 +261,7 @@ public class Certifications extends Controller {
     try {
       renderText(certService.absenceCodes());
     } catch (Exception ex) {
-      renderText("Impossibile recuperare i codici dal server di attestati\r\n" 
+      renderText("Impossibile recuperare i codici dal server di attestati\r\n"
           + cleanMessage(ex).getMessage());
     }
   }
@@ -259,8 +270,8 @@ public class Certifications extends Controller {
    * Effettua l'invio dei dati ad attestati e l'elaborazione di una persona
    *
    * @param personId id della persona
-   * @param year     anno
-   * @param month    mese.
+   * @param year anno
+   * @param month mese.
    */
   public static void process(Long personId, int year, int month, boolean redirect) {
 
@@ -272,7 +283,7 @@ public class Certifications extends Controller {
     try {
       // Costruisco lo status generale
       // Non uso la cache qui per evitare eventuali stati incongruenti durante l'invio
-      previousCertData = certService.buildPersonStaticStatus(person,year,month);
+      previousCertData = certService.buildPersonStaticStatus(person, year, month);
     } catch (Exception ex) {
       log.error("Errore nel recupero delle informazioni dal server di attestati"
           + " per la persona {}: {}", person, cleanMessage(ex).getMessage());
@@ -285,7 +296,7 @@ public class Certifications extends Controller {
       try {
         personCertData = certService.process(previousCertData);
       } catch (ExecutionException | NoSuchFieldException ex) {
-        log.error("Errore nell'invio delle informazioni al server di attestati " 
+        log.error("Errore nell'invio delle informazioni al server di attestati "
             + "per la persona {}: {}", person, cleanMessage(ex).getMessage());
       }
     }
@@ -325,6 +336,7 @@ public class Certifications extends Controller {
 
   /**
    * CleanMessage.
+   *
    * @param ex eccezione
    * @return L'ultimo elemento Throwable di una concatenazione di eccezioni
    */

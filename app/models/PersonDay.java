@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import models.absences.Absence;
 import models.base.BaseModel;
+import models.enumerate.Troubles;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.hibernate.envers.Audited;
@@ -236,6 +237,11 @@ public class PersonDay extends BaseModel {
     } catch (InvocationTargetException ite) {
       log.error("Errore sulla chiamata del metodo");
     }
+  }
+  
+  @Transient
+  public boolean hasError(Troubles trouble) {
+    return this.troubles.stream().anyMatch(error -> error.cause == trouble);
   }
 
   @Override

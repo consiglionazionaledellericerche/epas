@@ -35,6 +35,8 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final DatePath<org.joda.time.LocalDate> birthday = createDate("birthday", org.joda.time.LocalDate.class);
 
+    public final ListPath<models.ShiftCategories, QShiftCategories> categories = this.<models.ShiftCategories, QShiftCategories>createList("categories", models.ShiftCategories.class, QShiftCategories.class, PathInits.DIRECT2);
+
     public final ListPath<models.CertificatedData, QCertificatedData> certificatedData = this.<models.CertificatedData, QCertificatedData>createList("certificatedData", models.CertificatedData.class, QCertificatedData.class, PathInits.DIRECT2);
 
     public final ListPath<models.Certification, QCertification> certifications = this.<models.Certification, QCertification>createList("certifications", models.Certification.class, QCertification.class, PathInits.DIRECT2);

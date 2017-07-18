@@ -1,0 +1,57 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione dei turni'  /}
+
+#{set 'moreStyles' }
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.3.1/fullcalendar.min.css">
+<!-- link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.3.1/fullcalendar.print.css"-->
+#{stylesheet 'calendars/sist_fullcalendar.css'/}
+#{stylesheet 'calendars/shift.css' /}
+#{stylesheet 'calendars/shiftPDF.css' /}
+#{stylesheet 'calendars/sistorgReportPDF.css' /}
+#{/set}
+
+<div class="container">
+<h1 id="page-title" class="title">Calendario dei turni</h1>
+<div id="popup-overlay" style="visibility: hidden;"></div>
+
+<div id="loading" style="margin: 0 auto;"><img src="".$base_url."/sites/default/files/images/gears3.gif"><b> Loading...</b></img></div>
+
+<div id="wrap">
+
+      <div id="cal-nav-button">
+              <input type="button" id="prev" name="prev" value="&#9668;" /> <input type="button" id="next" name="next" value="&#9658;" /> <input type="button" id="oggi" name="oggi" value="oggi" />
+      </div>
+
+<div id="external-events"></div>
+
+      <div class="funzioni">
+
+              <span class="titolo-funzioni"> Gestione turni</span>
+              <ul class="funzioni">
+              <li id="salva">Salva turni mensili</li>
+              </ul>
+
+              <span class="titolo-funzioni"> Report periodici</span>
+              <ul class="funzioni">
+              <li id="pdf-report-mese">Report mensile</li>
+              <li id="pdf-cal-mese">Calendario mensile</li>
+              </ul>
+      </div>
+
+      <div id="calendar"></div>
+      <div style="clear:left"></div>
+</div>
+</div>
+
+#{set 'moreScripts'}
+
+<!--  <script src="../public/javascripts/calendars/jquery-ui-1.8.17.custom.min.js"></script>-->
+<script src="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.3.1/fullcalendar.min.js"></script>
+<script src="//code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+<script src="../public/javascripts/calendars/sist_calendar_group.js"></script>
+<script src="../public/javascripts/calendars/sist_calendar_conf.js"></script>
+<script src="../public/javascripts/calendars/sist_calendar_create.js"></script>
+
+<script src="../public/javascripts/calendars/shift-admin.js"></script>
+#{/set}

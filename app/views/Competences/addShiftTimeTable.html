@@ -1,0 +1,50 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestisci ' + cat.description /}
+<div class="container">
+
+#{title title:'Organizzazione del lavoro in turni - Configurazione timetable' /}
+#{alert color:'info'}
+		E' necessario associare all'attività <strong>${sts.description}</strong> una timetable tra quelle proposte o, in alternativa, 
+		definirne una propria tramite il pulsante sotto.	
+#{/alert}	
+	<table class="table table-hover table-striped table-bordered">
+	<tr>
+		<th>Seleziona</th>
+		<th>Inizio turno mattina</th>
+		<th>Fine turno mattina</th>
+		<th>Inizio turno pomeriggio</th>
+		<th>Fine turno pomeriggio</th>
+		<th>Info aggiuntive</th>
+	</tr>
+	#{list items:dtoList, as:'key'}
+		<tr>
+			<td><input type="radio" name="shift" value="${key.id}"> </td>
+			<td>${key.startMorning}</td>
+			<td>${key.endMorning}</td>
+			<td>${key.startAfternoon}</td>
+			<td>${key.endAfternoon}</td>
+			<td><i class="fa fa-info-circle" aria-hidden="true" webui-popover-hover data-url="#shift-${key.id}" data-placement="right"  data-title="Info turno">
+		 	  	</i>
+		 	</td>
+				<div class="webui-popover-content" id="shift-${key.id}">  			
+		  			Inizio pausa pranzo turno mattina: <strong>${key.startMorningLunchTime}</strong><br>
+		  			Fine pausa pranzo turno mattina: <strong>${key.endMorningLunchTime}</strong><br>
+					Inizio pausa pranzo turno pomeriggio: <strong>${key.startAfternoonLunchTime}</strong><br>
+					Fine pausa pranzo turno pomeriggio: <strong>${key.endAfternoonLunchTime}</strong><br>			  
+				</div> 	  
+			
+		</tr>
+	#{/list}
+	</table>
+	
+	<div class="text-center">
+     	<a class="btn btn-success" href="@{Competences.configureShiftTimeTable(cat.id, sts)}" data-async-modal="#modalActivateService">
+     		<span class="glyphicon glyphicon-plus"></span> Crea nuova timetable per ${sts.name}
+		 	</a>
+	</div>
+</div>
+
+
+
+<div id="modalActivateService" class="modal fade container" tabindex="-1"></div>

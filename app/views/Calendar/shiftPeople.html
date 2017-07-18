@@ -1,0 +1,44 @@
+<h4>Turnisti</h4><br>
+<ul class="list-group">
+  #{list shiftWorkers, as:'person'}
+    <li class="list-group-item ${person.className}" id="${person.personId}"
+      data-draggable
+      data-event="${person.toJson()}" style="color: ${person.eventColor.textColor};
+       	     background-color: ${person.eventColor.backgroundColor};
+       	     border-color: ${person.eventColor.borderColor}"
+             webui-popover-hover data-content="Telefono: ${person.mobile} <br> email: ${person.email}">
+    ${person.title}
+    </li>
+  <br>
+  #{/list}
+  #{else}
+    <em class="text-muted">&{'shifts.noShiftWorkers'}</em>
+  #{/else}
+  <hr>
+  <h4>Jolly</h4>
+  #{list jolly, as:'person'}
+    <li class="list-group-item ${person.className}" id="${person.personId}"
+      data-draggable
+      data-event="${person.toJson()}"
+      style="color: ${person.eventColor.textColor};
+       	     background-color: ${person.eventColor.backgroundColor};
+       	     border-color: ${person.eventColor.borderColor}"
+             webui-popover-hover data-content="Telefono: ${person.mobile} <br> email: ${person.email}">
+    ${person.title}
+    </li>
+  <br>
+  #{/list}
+  #{else}
+    <em class="text-muted">&{'shifts.noJolly'}</em>
+  #{/else}
+</ul>
+<h4>&{'shiftSlot'}</h4>
+<hr>
+#{list models.enumerate.ShiftSlot}
+<div class="radio">
+  <label>
+    <input type="radio" name="shiftSlot" id="shiftSlot" value="${_}">
+    ${_.label()}
+  </label>
+</div>
+#{/list}

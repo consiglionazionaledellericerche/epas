@@ -7,16 +7,12 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
-
 import controllers.Resecure.BasicAuth;
-
 import dao.AbsenceDao;
 import dao.PersonDao;
 import dao.PersonShiftDayDao;
 import dao.ShiftDao;
-
 import it.cnr.iit.epas.JsonShiftPeriodsBinder;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,16 +21,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-
+import java.util.stream.Collectors;
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.ShiftManager;
-
 import models.Competence;
 import models.Person;
 import models.PersonShiftDay;
+import models.PersonShiftShiftType;
 import models.ShiftCancelled;
 import models.ShiftCategories;
 import models.ShiftTimeTable;
@@ -44,14 +38,12 @@ import models.absences.Absence;
 import models.exports.AbsenceShiftPeriod;
 import models.exports.ShiftPeriod;
 import models.exports.ShiftPeriods;
-
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.ValidationException;
-
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.joda.time.LocalDate;
-
+import org.testng.collections.Lists;
 import play.data.binding.As;
 import play.data.validation.Required;
 import play.db.jpa.JPA;
@@ -89,9 +81,8 @@ public class Shift extends Controller {
    * Restituisce la lista delle persone in un determinato turno.
    *
    * @author arianna
-   *
    */
-  @BasicAuth
+  //@BasicAuth
   public static void personList(String type) {
     response.accessControl("*");
 
@@ -102,16 +93,18 @@ public class Shift extends Controller {
 
     log.debug("Cerco Turnisti di tipo {}", shiftType.type);
 
-    final List<Person> personList = personDao.getPersonForShift(type);
+    //final List<Person> personList = personDao.getPersonForShift(type);
+    final List<PersonShiftShiftType> personList = shiftDao
+        .getAssociatedPeopleToShift(shiftType, Optional.fromNullable(LocalDate.now()));
 
     log.debug("Shift personList called, found {} shift person", personList.size());
 
-    if (log.isTraceEnabled()) {
-      for (Person p : personList) {
-        log.trace("name={} surname={} id={} jolly={}",
-            p.name, p.surname, p.id, p.personShift.jolly);
-      }
-    }
+    /*if (log.isTraceEnabled()) {
+      for (PersonShiftShiftType p : personList) {
+       log.trace("name={} surname={} id={} jolly={}",
+            p.personShift.person.name, p.personShift.person.surname, p.personShift.person.id, p.jolly);
+       }
+    }*/
     render(personList);
   }
 
@@ -121,7 +114,7 @@ public class Shift extends Controller {
    *
    * @author arianna
    */
-  @BasicAuth
+  //@BasicAuth
   public static void timeTable(String type) {
     response.accessControl("*");
 
@@ -139,13 +132,14 @@ public class Shift extends Controller {
 
   }
 
+
   /**
    * Get shifts from the DB and render to the sistorg portal calendar.
    *
    * @author arianna
    * @author dario
    */
-  @BasicAuth
+  //@BasicAuth
   public static void find(
       Integer yearFrom, Integer monthFrom, Integer dayFrom,
       Integer yearTo, Integer monthTo, Integer dayTo, String type) {
@@ -194,9 +188,8 @@ public class Shift extends Controller {
    * Update working shifts in the DB that have been red from the sistorg portal calendar.
    *
    * @author arianna
-   *
    */
-  @BasicAuth
+  //@BasicAuth
   public static void update(
       String type, Integer year, Integer month,
       @As(binder = JsonShiftPeriodsBinder.class) ShiftPeriods body) {
@@ -215,8 +208,9 @@ public class Shift extends Controller {
     log.debug("shiftType={}", shiftType.description);
 
     // save the recived shift periods with type shiftType in the month "month" of the "year" year
-    shiftManager.savePersonShiftDaysFromShiftPeriods(shiftType, year, month, body);
-
+    List<String> list = shiftManager
+        .savePersonShiftDaysFromShiftPeriods(shiftType, year, month, body);
+    renderJSON(list);
   }
 
 
@@ -227,7 +221,7 @@ public class Shift extends Controller {
    *
    * @author arianna
    */
-  @BasicAuth
+  //@BasicAuth
   public static void getInconsistencyTimestamps2Timetable(
       ShiftType shiftType, LocalDate startDate, LocalDate endDate) {
 
@@ -237,10 +231,11 @@ public class Shift extends Controller {
 
     // seleziona le persone nel turno 'shiftType' da inizio a fine mese
     List<PersonShiftDay> personShiftDays =
-        personShiftDayDao.getPersonShiftDayByTypeAndPeriod(startDate, endDate, shiftType);
+        personShiftDayDao.byTypeInPeriod(startDate, endDate, shiftType, Optional.absent());
 
     //inconsistentAbsence = CompetenceUtility.getShiftInconsistencyTimestampTable(personShiftDays);
-    shiftManager.getShiftInconsistencyTimestampTable(personShiftDays, inconsistentAbsence);
+    shiftManager
+        .getShiftInconsistencyTimestampTable(personShiftDays, inconsistentAbsence, shiftType);
 
     //return inconsistentAbsence;
   }
@@ -252,7 +247,7 @@ public class Shift extends Controller {
    *
    * @author arianna
    */
-  @BasicAuth
+  //@BasicAuth
   public static void exportMonthAsPDF() {
     int year = params.get("year", Integer.class);
     int month = params.get("month", Integer.class);
@@ -265,10 +260,9 @@ public class Shift extends Controller {
     final LocalDate lastOfMonth = firstOfMonth.dayOfMonth().withMaximumValue();
 
     Comparator<String> nullSafeStringComparator = Comparator
-            .nullsFirst(String::compareToIgnoreCase); 
-        
-    
-    //  Used TreeBasedTable becouse of the alphabetical name order (persona, A/B, num. giorni)
+        .nullsFirst(String::compareToIgnoreCase);
+
+    //  Used TreeBasedTable because of the alphabetical name order (persona, A/B, num. giorni)
     Table<Person, String, Integer> personsShiftsWorkedDays =
         TreeBasedTable.<Person, String, Integer>create(
             Person.personComparator(), nullSafeStringComparator);
@@ -276,9 +270,9 @@ public class Shift extends Controller {
     // crea la tabella per registrare le assenze e le timbrature inconsistenti con i turni trovati
     // (person, [thAbsences, thNoStampings, thBadStampings], <giorni/fasce orarie inconsistenti>)
     Table<Person, String, List<String>> personsShiftInconsistentAbsences =
-        TreeBasedTable.<Person, String, List<String>>create(
-            Person.personComparator(), nullSafeStringComparator);
-    
+        TreeBasedTable.<Person, String, List<String>>create(Person.personComparator(),
+            nullSafeStringComparator);
+
     // Contains the number of the effective hours of worked shifts
     Table<Person, String, Integer> totalPersonShiftWorkedTime =
         TreeBasedTable.<Person, String, Integer>create(
@@ -294,7 +288,7 @@ public class Shift extends Controller {
     // Legge i turni associati alla categoria (es: A, B)
     List<ShiftType> shiftTypes =
         ShiftType.find("SELECT st FROM ShiftType st WHERE st.shiftCategories = ?", shiftCategory)
-          .fetch();
+            .fetch();
 
     // for each shift
     for (ShiftType shiftType : shiftTypes) {
@@ -304,30 +298,30 @@ public class Shift extends Controller {
       // seleziona i giorni di turno di tutte le persone associate al turno 'shiftType'
       // da inizio a fine mese
       List<PersonShiftDay> personsShiftDays =
-          personShiftDayDao.getPersonShiftDayByTypeAndPeriod(firstOfMonth, lastOfMonth, shiftType);
+          personShiftDayDao.byTypeInPeriod(firstOfMonth, lastOfMonth, shiftType, Optional.absent());
 
       log.debug("CALCOLA IL NUM DI GIORNI EFFETTUATI NEL TURNO PER OGNI PERSONA");
       // conta e memorizza i giorni di turno per ogni persona
       shiftManager.countPersonsShiftsDays(personsShiftDays, personsShiftsWorkedDays);
-      log.debug("* Num di persone nella personsShiftsWorkedDays = {}", 
+      log.debug("* Num di persone nella personsShiftsWorkedDays = {}",
           personsShiftsWorkedDays.rowKeySet().size());
 
-
       // Memorizzo le inconsistenze del turno
-      log.debug("Chiamo la getShiftInconsistencyTimestampTable PER TROVARE LE INCONSISTENZE "
-          + "del turno %s e memorizzarle", type);
-      shiftManager.getShiftInconsistencyTimestampTable(
-          personsShiftDays, personsShiftInconsistentAbsences);
-      log.debug("* Num di persone nella personsShiftInconsistentAbsences = {}", 
+      log.debug(
+          "Chiamo la getShiftInconsistencyTimestampTable PER TROVARE LE INCONSISTENZE del turno %s e memorizzarle",
+          type);
+      shiftManager
+          .getShiftInconsistencyTimestampTable(personsShiftDays, personsShiftInconsistentAbsences,
+              shiftType);
+      log.debug("* Num di persone nella personsShiftInconsistentAbsences = {}",
           personsShiftInconsistentAbsences.rowKeySet().size());
     }
-    
 
     log.debug("CALCOLA I MINUTI MANCANTI DA personsShiftInconsistentAbsences E LI METTE "
         + "in totalShiftSumHours");
 
-
-    // Calcola i giorni totali di turno effettuati e le eventuali ore mancanti
+    // Calcola i giorni totali di turno effettuati e le eventuali ore mancanti e li mette in
+    // personsShiftInconsistentAbsences
     totalPersonShiftWorkedTime =
         shiftManager.calcShiftWorkedDaysAndLackTime(
             personsShiftsWorkedDays, personsShiftInconsistentAbsences);
@@ -337,7 +331,6 @@ public class Shift extends Controller {
 
     List<Competence> savedCompetences =
         shiftManager.updateDbShiftCompetences(totalPersonShiftWorkedTime, year, month);
-
 
     // Contains for each person the numer of days and hours of worked shift
     Table<Person, String, String> totalShiftInfo =
@@ -352,9 +345,10 @@ public class Shift extends Controller {
 
     List<String> thInconsistence =
         Arrays.asList(
-            Messages.get("PDFReport.thAbsences"), Messages.get("PDFReport.thNoStampings"),
-            Messages.get("PDFReport.thMissingTime"), Messages.get("PDFReport.thBadStampings"),
-            Messages.get("PDFReport.thMissions"), Messages.get("PDFReport.thIncompleteTime"),
+            Messages.get("PDFReport.thAbsences"), Messages.get("PDFReport.thMissions"),
+            Messages.get("PDFReport.thNoStampings"), Messages.get("PDFReport.thBadWorkindDay"),
+            Messages.get("PDFReport.thBadStampings"), Messages.get("PDFReport.thMissingTime"),
+            Messages.get("PDFReport.thIncompleteTime"),
             Messages.get("PDFReport.thWarnStampings"));
     List<String> thShift =
         Arrays.asList(
@@ -375,12 +369,12 @@ public class Shift extends Controller {
 
 
   /**
-   * Crea il file PDF con il calendario mensile dei turni di tipo 'A, B' per il mese
+   * Crea il file PDF corrispondente al calendario mensile dei turni di tipo 'A, B' per il mese
    * 'month' dell'anno 'year'. (portale sistorg).
    *
    * @author arianna
    */
-  @BasicAuth
+  //@BasicAuth
   public static void exportMonthCalAsPDF(int year, int month, Long type) {
 
     log.debug("sono nella exportMonthCalAsPDF con shiftCategory={} year={} e month={}",
@@ -400,7 +394,6 @@ public class Shift extends Controller {
     //  (persona turno mattina, persona turno pomeriggio)
     Table<String, Integer, ShiftManager.Sd> shiftCalendar =
         HashBasedTable.<String, Integer, ShiftManager.Sd>create();
-
 
     // prende il primo giorno del mese
     LocalDate firstOfMonth = new LocalDate(year, month, 1);
@@ -426,7 +419,6 @@ public class Shift extends Controller {
    * tempo.
    *
    * @author arianna
-   *
    */
   @BasicAuth
   public static void absence(
@@ -444,9 +436,9 @@ public class Shift extends Controller {
     List<Person> personList =
         JPA.em().createQuery(
             "SELECT p FROM PersonShiftShiftType psst JOIN psst.personShift ps JOIN ps.person p "
-            + "WHERE psst.shiftType.type = :type "
-            + "AND (psst.beginDate IS NULL OR psst.beginDate <= now()) "
-            + "AND (psst.endDate IS NULL OR psst.endDate >= now())")
+                + "WHERE psst.shiftType.type = :type "
+                + "AND (psst.beginDate IS NULL OR psst.beginDate <= now()) "
+                + "AND (psst.endDate IS NULL OR psst.endDate >= now())")
             .setParameter("type", type)
             .getResultList();
 
@@ -495,16 +487,15 @@ public class Shift extends Controller {
     }
 
     ImmutableList<Person> canAccess =
-            ImmutableList.<Person>builder()
-                    .addAll(personDao.getPersonForShift(type))
-                    .add(shiftType.shiftCategories.supervisor).build();
-
+        ImmutableList.<Person>builder()
+            .addAll(personDao.getPersonForShift(type))
+            .add(shiftType.shiftCategories.supervisor).build();
 
     if (!currentUser.isPresent() || currentUser.get().person == null
-            || !canAccess.contains(currentUser.get().person)) {
+        || !canAccess.contains(currentUser.get().person)) {
       log.debug("Accesso all'iCal dei turni non autorizzato: Type = {}, Current User = {}, "
-                      + "canAccess = {}",
-              type, currentUser.get(), canAccess, currentUser.get());
+              + "canAccess = {}",
+          type, currentUser.get(), canAccess, currentUser.get());
       unauthorized();
     }
 
@@ -534,4 +525,7 @@ public class Shift extends Controller {
       log.error("Validation exception generating ical", ex);
     }
   }
+
+
+
 }

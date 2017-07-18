@@ -410,3 +410,66 @@ button.button-as-link {
   cursor:pointer;
 }
 
+/* Serve per gli elementi fullcalendar: titolo su più linee */
+.fc-month-view span.fc-title {
+	white-space: normal;
+}
+/* Colore di rendering delle festività sul calendario */
+.fc-bgevent.holiday {
+    background-color: #fff7e0;
+    color: #353535;
+    opacity: .7;
+    text-align: center;
+    padding-top: .6em;
+}
+
+/* Tema Alert per il webui-popover*/
+
+.webui-popover-alert {
+  border-color: #ebccd1;
+  background-color: #f2dede;
+  color: #a94442;
+}
+.webui-popover-alert .webui-popover-title {
+  background: #e2abab;
+  border-bottom: 1px solid #ebccd1;
+  color: #8c2624;
+  text-shadow: 0 0 3px #f2dede;
+}
+
+.webui-popover-alert.top > .webui-arrow,
+.webui-popover-alert.top-left > .webui-arrow,
+.webui-popover-alert.top-right > .webui-arrow,
+.webui-popover-alert.top > .webui-arrow:after,
+.webui-popover-alert.top-left > .webui-arrow:after,
+.webui-popover-alert.top-right > .webui-arrow:after {
+  border-top-color: #f2dede;
+}
+.webui-popover-alert.right > .webui-arrow,
+.webui-popover-alert.right-top > .webui-arrow,
+.webui-popover-alert.right-bottom > .webui-arrow,
+.webui-popover-alert.right > .webui-arrow:after,
+.webui-popover-alert.right-top > .webui-arrow:after,
+.webui-popover-alert.right-bottom > .webui-arrow:after {
+  border-right-color: #f2dede;
+}
+.webui-popover-alert.bottom > .webui-arrow,
+.webui-popover-alert.bottom-left > .webui-arrow,
+.webui-popover-alert.bottom-right > .webui-arrow,
+.webui-popover-alert.bottom > .webui-arrow:after,
+.webui-popover-alert.bottom-left > .webui-arrow:after,
+.webui-popover-alert.bottom-right > .webui-arrow:after {
+  border-bottom-color: #f2dede;
+}
+.webui-popover-alert.left > .webui-arrow,
+.webui-popover-alert.left-top > .webui-arrow,
+.webui-popover-alert.left-bottom > .webui-arrow,
+.webui-popover-alert.left > .webui-arrow:after,
+.webui-popover-alert.left-top > .webui-arrow:after,
+.webui-popover-alert.left-bottom > .webui-arrow:after {
+  border-left-color: #f2dede;
+}
+
+.fc-month-view .fc-time{
+   display : none;
+}
