@@ -1,3 +1,4 @@
+activity =Attività di turno
 ADD= Inserimento
 
 administrations= Amministrazione
@@ -45,6 +46,15 @@ beginDate=Data Inizio
 endDate=Data Fine
 from=Da
 to=A
+
+calendar.competencesApproved = Le competenze per questo mese sono state approvate
+calendar.competencesToBeApproved = Le competenze per questo mese sono da approvare
+calendar.removeApprovation= Rimuovi approvazione
+calendar.approve= Approva competenze
+calendar.allValidShifts= Tutti i turni risultano validi
+calendar.notAllValidShifts= Uno o più turni risultano non validi
+calendar.warningShifts= Alcuni turni hanno riduzioni d'orario
+
 
 category=Categoria
 
@@ -229,6 +239,8 @@ ExportFile.CSV=CSV
 ExportFile.XLS=XLS
 exportFile=Formato per esportazione
 
+forbidden= Operazione non permessa
+
 block.first=Dal
 block.last=Al
 
@@ -253,6 +265,8 @@ Month.9=Settembre
 name=Nome
 noResultFound=Nessuna corrispondenza trovata.
 note= Note
+
+
 
 newUser= Nuovo Utente
 
@@ -298,18 +312,40 @@ pagedResults =Sono state trovate <strong>%d</strong> corrispondenze, mostrate da
 passwordSuccessfullyChanged = Password modificata con successo
 password= Password
 
-PDFReport.thAbsences=Assenza
-PDFReport.thAppHour =Num. di ore approvate
 PDFReport.thBadStampings=Timbrature errate
-PDFReport.thDays=Num. di giorni
-PDFReport.thExceededMin=Minuti accumulati
-PDFReport.thIncompleteTime=Orario incompleto
-PDFReport.thLackTime=Ore mancanti
-PDFReport.thMissingTime=Orario insufficiente
-PDFReport.thMissions=Missione
+PDFReport.thAbsences=Assenza
+PDFReport.thBadWorkindDay=Giorno lavorativo non valido
 PDFReport.thNoStampings=Mancata timbratura
-PDFReport.thReqHour=Num. di ore spettanti
+PDFReport.thMissions=Missione
+PDFReport.thIncompleteTime=Orario incompleto
+PDFReport.thMissingTime=Orario insufficiente
 PDFReport.thWarnStampings=Orario incompleto fuori tolleranza
+
+# CALENDARIO SHIFT
+
+shift.alreadyInShift= Il dipendente è già in turno sull'attività %s
+calendar.ShiftToubles.PERSON_IS_ABSENT=Il turnista è assente nel giorno %d
+calendar.ShiftToubles.NOT_ENOUGH_WORKING_TIME=Orario incompleto nel giorno %d
+
+calendar.Troubles.NO_ABS_NO_STAMP=Timbrature assenti nel giorno %d
+calendar.Troubles.UNCOUPLED_WORKING=Timbrature disaccoppiate nel giorno %d
+calendar.Troubles.NOT_ENOUGH_WORKTIME=Tempo di lavoro insufficiente il %d
+
+calendar.CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED=Slot del turno già assegnato il %d
+calendar.CalendarShiftTroubles.PERSON_SHIFT_ASSIGNED.La persona è già in turno il %d
+
+PDFReport.thDays=Num. di giorni
+PDFReport.thReqHour=Num. di ore spettanti
+PDFReport.thLackTime=Ore mancanti
+PDFReport.thAppHour =Num. di ore approvate
+PDFReport.thExceededMin=Minuti accumulati
+
+PDFReport.ShiftToubles.PERSON_IS_ABSENT=Assenza
+PDFReport.Troubles.NOT_ENOUGH_WORKTIME=Giorno lavorativo non valido
+PDFReport.Troubles.NO_ABS_NO_STAMP=Mancata timbratura
+PDFReport.UNCOUPLED_WORKING=Timbrature errate
+PDFReport.NOT_ENOUGH_WORKTIME==Orario incompleto
+
 
 peopleIds=Persone associabili all'attività
 
@@ -337,7 +373,14 @@ personUser= Utente associato ad una persona
 
 PersonMonths.insertPeopleTrainingHours= Inserisci ore di formazione
 
+personShiftDay= Turno
+
 peopleGroupId= Persone del gruppo di Lavoro
+
+psst.beginDate =Data inizio
+psst.endDate =Data fine
+psst.jolly =Jolly
+
 qualification=Livello
 
 recapMealTickets=Riepilogo Buoni Pasto
@@ -351,6 +394,9 @@ secure.logout=Utente correttamente disconnesso.
 secure.logoutShibboleth=Per completare il logout è necessario chiudere il browser.
 
 serviceDisabled =Servizio disabilitato
+
+shifts =Gestione turni
+shiftSlot= Fascia Turno
 
 show= Visualizza
 edit= Modifica
@@ -382,11 +428,38 @@ time= Orario
 type.type =Nome attività
 type.description =Descrizione
 type.office =Sede
-type.supervisor =Supervisore servizio
+
+timeTable.startMorning =inizio turno
+timeTable.endMorning =fine turno
+timeTable.startAfternoon =inizio turno
+timeTable.endAfternoon =fine turno
+timeTable.startEvening =inizio turno
+timeTable.endEvening =fine turno
+timeTable.paidMinutes =Quantità retribuita (in minuti)
+timeTable.totalWorkMinutes =Tempo di turno (in minuti)
+
+type.type =Nome
+type.description =Descrizione
+type.entranceTolerance =Tolleranza minima in ingresso (minuti)
+type.entranceMaxTolerance =Tolleranza massima in ingresso (minuti)
+type.exitTolerance =Tolleranza minima in uscita (minuti)
+type.exitMaxTolerance =Tolleranza massima in uscita (minuti)
+type.hourTolerance =Tolleranza per turno (minuti)
+type.breakInShift = Tolleranza minima per pausa pranzo
+type.breakMaxInShift =Tolleranza massima per pausa pranzo
+type.maxToleranceAllowed =Numero massimo di tolleranze sforabili
+
+timeTable.startMorningLunchTime =inizio pranzo
+timeTable.endMorningLunchTime =fine pranzo
+timeTable.startAfternoonLunchTime =inizio pranzo
+timeTable.endAfternoonLunchTime =fine pranzo
+timeTable.startEveningLunchTime =inizio pranzo
+timeTable.endEveningLunchTime =fine pranzo
 
 cat.description =Descrizione
 cat.office =Sede
 cat.supervisor =Supervisore servizio
+cat.manager =Gestori dei turni
 
 uro.office=Sede
 uro.role= Ruolo
@@ -568,6 +641,9 @@ Vacations.show= Ferie
 Vacations.list= Ferie e Permessi
 WorkingTimes.manageWorkingTime= Gestione Orari di Lavoro
 Competences.activateServices= Gestione Servizi
+Shift.handleShifts =Gestisci turni
+Calendar.show =Gestisci turni
+Shift.personalShift =Visualizza turno
 
 ########################
 # Enumerati
@@ -610,6 +686,34 @@ StampTypes.PAUSA_PRANZO= Pausa Pranzo
 StampTypes.LAVORO_FUORI_SEDE= Lavoro fuori sede
 StampTypes.PERMESSO_BREVE= Permesso breve (36 ore anno)
 
+ShiftSlot.MORNING = Mattina
+ShiftSlot.AFTERNOON = Pomeriggio
+
+shift.absenceInDay = La persona nel giorno selezionato è assente
+shift.alreadyInShift = Già in turno per l'attività %s
+shift.slotAlreadyAssigned = Slot già assegnato a %s
+shift.personInactive = Persona non attiva sul turno
+ShiftTroubles.PERSON_NOT_ASSIGNED = Persona non assegnata al turno
+ShiftTroubles.NOT_COMPLETED_SHIFT = Turno valido ma non completo (un\'ora in meno)
+ShiftTroubles.OUT_OF_STAMPING_TOLERANCE = Fuori dalla tolleranza per le timbrature
+ShiftTroubles.NOT_ENOUGH_WORKING_TIME = Tempo a lavoro insufficiente
+ShiftTroubles.PROBLEMS_ON_OTHER_SLOT = Problemi sull'altro slot
+ShiftTroubles.PERSON_IS_ABSENT = Dipendente assente nella data
+ShiftTroubles.EXCEEDED_BREAKTIME = Eccesso di pausa
+ShiftTroubles.SHIFT_INCOMPLETED = Turno incompleto, manca almeno uno slot
+ShiftTroubles.MIN_ENTRANCE_TOLERANCE_EXCEEDED = Ecceduta la tolleranza minima in ingresso
+ShiftTroubles.MAX_ENTRANCE_TOLERANCE_EXCEEDED = Ecceduta la tolleranza massima in ingresso
+ShiftTroubles.MIN_EXIT_TOLERANCE_EXCEEDED = Ecceduta la tolleranza minima in uscita
+ShiftTroubles.MAX_EXIT_TOLERANCE_EXCEEDED = Ecceduta la tolleranza massima in uscita
+ShiftTroubles.MIN_BREAK_TOLERANCE_EXCEEDED = Ecceduta la tolleranza minima per pausa pranzo
+ShiftTroubles.MAX_BREAK_TOLERANCE_EXCEEDED = Ecceduta la tolleranza massima per pausa pranzo
+ShiftTroubles.TOO_MANY_EXCEEDED_THRESHOLDS = Ecceduto il numero massimo di tolleranze violabili
+ShiftTroubles.FUTURE_DAY = Giorno futuro, calcoli non effettuabili
+
+
+
+shifts.noShiftWorkers= Nessun Turnista assegnabile per questa attività nel periodo selezionato
+shifts.noJolly= Nessuna persona è configurata come Jolly nel periodo attuale
 
 # Parametri di configurazione
 
@@ -625,6 +729,7 @@ RECOMPUTATION_LIMIT=Limite temporale dei ricalcoli (in mesi)
 TR_AUTOCERTIFICATION= Autocertificazione presenze per Tecnologi e Ricercatori
 TR_VACATIONS= Inserimento ferie e permessi per Tecnologi e Ricercatori
 TR_COMPENSATORY= Inserimento riposi compensativi per Tecnologi e Ricercatori
+ENABLE_CALENDARSHIFT= Abilitazione gestione calendario turni
 
 EXPIRY_VACATION_PAST_YEAR=Giorno massimo utilizzo ferie dell'anno precedente
 MONTH_EXPIRY_RECOVERY_DAYS_13=Mese massimo per utilizzo residui dell'anno precedente per i livelli da 1 a 3
@@ -654,6 +759,12 @@ configurationDto.stringNewValue=Nuovo Valore
 configurationDto.integerNewValue=Nuovo Valore
 configurationDto.localdateNewValue=Nuovo Valore
 
+whichTolerance =Quando applicare la tolleranza
+
+ToleranceType.entrance= Solo Ingresso
+ToleranceType.exit= Solo Uscita
+ToleranceType.both= Entrambe
+
 WayType.in= Ingresso
 WayType.out= Uscita
 
@@ -679,6 +790,18 @@ person.eppn.popover= Inserire la propria email cnr Es:mario.rossi@cnr.it
 person.perseoId.popover= Il perseoId è utilizzato per il collegamento tra utente e perseo Es:4200
 
 domain.popover= Specificare il dominio sprovvisto del carattere @ (Es. iit.cnr.it)
+
+type.tolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare alle timbrature per inserirle o meno nel turno. Inserire 0 se non si vuole tolleranza.
+type.maxToleranceAllowed.popover= Quante tolleranze è possibile sforare per vedere comunque riconosciuto il turno (seppure in orario ridotto)
+type.type.popover = Il nome da attribuire all&apos;attività sul turno
+type.description.popover= Una descrizione dell&apos;attività
+type.breakInShiftEnabled.popover =Se da regolamento dei turni è prevista una pausa all&#39;interno del turno diversa dalla pausa pranzo cliccare sì, no altrimenti.
+type.entranceTolerance.popover = Tolleranza entro la quale la timbratura di ingresso concorre comunque al conteggio intero del tempo in turno 
+type.entranceMaxTolerance.popover = Tolleranza entro la quale la timbratura di ingresso concorre comunque al conteggio del tempo in turno, ma in quantità ridotta
+type.exitTolerance.popover = Tolleranza entro la quale la timbratura di uscita concorre comunque al conteggio intero del tempo in turno 
+type.exitMaxTolerance.popover = Tolleranza entro la quale la timbratura di uscita concorre comunque al conteggio del tempo in turno, ma in quantità ridotta
+type.breakInShift.popover = Tolleranza entro la quale la timbratura di pausa pranzo concorre comunque al conteggio intero del tempo in turno 
+type.breakMaxInShift.popover = Tolleranza entro la quale la timbratura di pausa pranzo concorre comunque al conteggio del tempo in turno, ma in quantità ridotta
 
 ###########################################################################
 #	Messaggi utilizzati nelle viste

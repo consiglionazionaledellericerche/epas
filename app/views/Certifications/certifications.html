@@ -61,6 +61,23 @@
   </p>
   #{/alert}
 
+  #{if enabledCalendar && unApprovedActivities && !unApprovedActivities.empty}
+    #{alert color:'danger'}
+      <h4>
+        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+        Attenzione, i turni di alcune attività risultano non ancora approvati:
+      </h4>
+    <ul>
+      #{list unApprovedActivities}
+      <li>
+        <strong>${_.shiftType}</strong> -
+        Supervisore: <strong>${_.shiftType.shiftCategories.supervisor}</strong>
+      </li>
+      #{/list}
+    </ul>
+    #{/alert}
+  #{/if}
+
   #{if matchNumbers && !matchNumbers.empty} *{ se è injettato è stata ottenuta
   l'autenticazione }*
   #{if !notInEpas.empty}

@@ -3,18 +3,14 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
-
 import dao.CompetenceDao;
-
 import javax.inject.Inject;
-
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
 import models.PersonHourForOvertime;
 import models.exports.PersonsCompetences;
 import models.exports.PersonsList;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +25,8 @@ public class OvertimesManager {
   }
 
   /**
-   * @return la tabella contenente la struttura di persona-reason della 
-   *        competenza-codice competenza.
+   * @return la tabella contenente la struttura di persona-reason della competenza-codice
+   * competenza.
    */
   public Table<String, String, Integer> buildMonthForExport(
       PersonsList body, CompetenceCode code, int year, int month) {
@@ -47,7 +43,7 @@ public class OvertimesManager {
 
         overtimesMonth.put(
             person.surname + " " + person.name, competence.get().reason != null
-            ? competence.get().reason : "", competence.get().valueApproved);
+                ? competence.get().reason : "", competence.get().valueApproved);
         log.debug("Inserita riga person={} reason={} and valueApproved={}",
             new Object[]{person, competence.get().reason, competence.get().valueApproved});
       }
@@ -63,14 +59,15 @@ public class OvertimesManager {
           competenceDao.getCompetence(competence.person, year, month, competence.competenceCode);
       if (oldCompetence.isPresent()) {
         // update the requested hours
-        oldCompetence.get().setValueApproved(competence.getValueApproved(), competence.getReason());
+        oldCompetence.get().valueApproved = competence.valueApproved;
+        oldCompetence.get().reason = competence.reason;
         oldCompetence.get().save();
 
         log.debug("Aggiornata competenza {}", oldCompetence);
       } else {
         // insert a new competence with the requested hours an reason
-        competence.setYear(year);
-        competence.setMonth(month);
+        competence.year = year;
+        competence.month = month;
         competence.save();
 
         log.debug("Creata competenza {}", competence);

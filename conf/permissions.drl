@@ -21,7 +21,11 @@ import models.PersonConfiguration;
 import models.PersonDay;
 import models.Qualification;
 import models.Role;
+import models.ShiftCategories;
 import models.ShiftType;
+import models.PersonShiftShiftType;
+import models.PersonShift;
+import models.ShiftTypeMonth;
 import models.Stamping;
 import models.UsersRolesOffices;
 import security.PermissionCheck;
@@ -82,6 +86,180 @@ when
   		"Absences.absencesVisibleForEmployee"), granted == false, target == null)
 then
  $c.grant();
+end
+
+/*Questa parte per il nuovo ruolo supervisore dei turni */
+rule isShiftSupervisor_generic
+when 
+  
+  $p: Person(!shiftCategories.isEmpty()) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  $c: PermissionCheck(action in ("Calendar.show",
+                                 "Calendar.shiftPeople",
+                                 "Calendar.deleteShift",
+                                 "Calendar.events",
+                                 "Calendar.changeShift",
+                                 "Calendar.newShift",
+                                 "Calendar.recap",
+                                 "Calendar.editable",
+                                 "Calendar.monthShiftsApprovement",
+                                 "Calendar.approveShiftsInMonth",
+  								               "Calendar.removeApprovation")
+        , target == null, granted == false)
+then
+ $c.grant();
+end
+
+
+rule shiftSupervisorCanManageShiftType
+when
+  $p: Person(!shiftCategories.isEmpty()) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  $sc: ShiftCategories() from $p.shiftCategories
+  $st: ShiftType() from $sc.shiftTypes
+  $c: PermissionCheck(action in ("Calendar.show",
+                                 "Calendar.shiftPeople",
+                                 "Calendar.deleteShift",
+                                 "Calendar.events",
+                                 "Calendar.changeShift",
+                                 "Calendar.newShift",
+                                 "Calendar.recap",
+                                 "Calendar.editable",
+                                 "Calendar.monthShiftsApprovement"), target == $st, granted == false)
+then
+ $c.grant();
+end
+
+rule canManageShiftMonth
+when
+  $p: Person(!shiftCategories.isEmpty()) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  $sc: ShiftCategories() from $p.shiftCategories
+  $st: ShiftType() from $sc.shiftTypes
+  $target: ShiftTypeMonth((!approved && shiftType == $st) || this == null)
+  $c: PermissionCheck(action in ("Calendar.deleteShift",
+  								 "Calendar.changeShift",
+  								 "Calendar.newShift",
+  								 "Calendar.editable")
+  , target == $target, granted == false)
+then
+ $c.grant();
+end
+
+rule canEditShiftTypeMonth
+when
+  $p: Person(!shiftCategories.isEmpty()) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  $sc: ShiftCategories() from $p.shiftCategories
+  $st: ShiftType() from $sc.shiftTypes
+  $target: ShiftTypeMonth(shiftType == $st)
+  $c: PermissionCheck(action in ("Calendar.approveShiftsInMonth",
+  								 "Calendar.removeApprovation")
+  , target == $target, granted == false)
+then
+ $c.grant();
+end
+
+
+
+/*Fine parte di ruolo supervisore dei turni*/
+
+
+/*Inizio parte gestori dei turni*/
+
+rule isShiftManager_generic
+when 
+  $p: Person(!categories.isEmpty()) from currentOperator.person	
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  $c: PermissionCheck(action in ("Calendar.show",
+                                 "Calendar.shiftPeople",
+                                 "Calendar.deleteShift",
+                                 "Calendar.events",
+                                 "Calendar.changeShift",
+                                 "Calendar.newShift",
+                                 "Calendar.recap",
+                                 "Calendar.editable") 
+        , target == null, granted == false)
+then
+ $c.grant();
+end
+
+
+rule shiftManagerCanManageShiftType
+when
+  $p: Person(!categories.isEmpty()) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  $sc: ShiftCategories() from $p.categories
+  $st: ShiftType() from $sc.shiftTypes
+  $c: PermissionCheck(action in ("Calendar.show",
+                                 "Calendar.shiftPeople",
+                                 "Calendar.deleteShift",
+                                 "Calendar.events",
+                                 "Calendar.changeShift",
+                                 "Calendar.newShift",
+                                 "Calendar.recap",
+                                 "Calendar.editable")
+  , target == $st, granted == false)
+then
+ $c.grant();
+end
+
+rule shiftManagercanManageShiftMonth
+when
+  $p: Person(!categories.isEmpty()) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  $sc: ShiftCategories() from $p.categories
+  $st: ShiftType() from $sc.shiftTypes
+  $target: ShiftTypeMonth((!approved && shiftType == $st) || this == null)
+  $c: PermissionCheck(action in ("Calendar.deleteShift",
+  								 "Calendar.changeShift",
+  								 "Calendar.newShift",
+  								 "Calendar.editable")
+  , target == $target, granted == false)
+then
+ $c.grant();
+end
+
+/*Fine parte dei gestori dei turni*/
+
+rule isPersonShift_general
+when 
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $p: Person (personShift != null) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  $c: PermissionCheck(action in (
+     	"Calendar.show",
+     	"Calendar.shiftPeople",
+       "Calendar.events",
+       "Calendar.recap"	), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule isPersonShift_shiftType
+when
+	$p: Person (personShift != null) from currentOperator.person
+	$o: Office() from $p.office
+  	Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+	$ps: PersonShift() from $p.personShift
+	$psst: PersonShiftShiftType() from $ps.personShiftShiftTypes
+	$st: ShiftType() from $psst.shiftType
+	$c: PermissionCheck(action in (
+       "Calendar.show",
+       "Calendar.shiftPeople",
+       "Calendar.events",
+       "Calendar.recap"), target == $st, granted == false)
+then
+$c.grant();
 end
 
 
@@ -157,7 +335,6 @@ when
      	/*Possibilità di inviare report*/
      	"ReportCentre.generateReport",
      	"ReportCentre.sendProblem"
-
 
        ), target == null, granted == false)
 then
@@ -850,8 +1027,13 @@ when
         "Competences.saveShift",
         "Competences.configureShift",
         "Competences.manageShiftType",
+        "Competences.editActivity",
         "Competences.linkPeopleToShift",
+        "Competences.saveActivityConfiguration",
+        "Competences.deletePersonShiftShiftType",
         "Competences.linkTimeTableToShift",
+        "Competences.handlePersonShiftShiftType",
+        "Competences.updatePersonShiftShiftType",
 
         /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
@@ -1016,8 +1198,14 @@ when
         "Competences.saveShift",
         "Competences.configureShift",
         "Competences.manageShiftType",
+        "Competences.editActivity",
         "Competences.linkPeopleToShift",
+        "Competences.saveActivityConfiguration",
+        "Competences.deletePersonShiftShiftType",
         "Competences.linkTimeTableToShift",
+        "Competences.handlePersonShiftShiftType",
+        "Competences.updatePersonShiftShiftType",
+        
 
          /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",

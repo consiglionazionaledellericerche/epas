@@ -37,6 +37,14 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
+  
+  ENABLE_CALENDARSHIFT("enable_calendar_shift",
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
 
   OFF_SITE_STAMPING("off_site_stamping",
       EpasParamCategory.GENERAL,
@@ -244,6 +252,7 @@ public enum EpasParam {
       Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS,
           RecomputationType.RESIDUAL_MEALTICKETS),
       Office.class);
+  
 
   public final String name;
   public final EpasParamCategory category;

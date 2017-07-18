@@ -5,6 +5,7 @@ import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
@@ -15,6 +16,7 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonMonthRecapDao;
 import dao.PersonReperibilityDayDao;
+import dao.RoleDao;
 import dao.ShiftDao;
 import dao.wrapper.IWrapperCompetenceCode;
 import dao.wrapper.IWrapperContract;
@@ -33,8 +35,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+
+import lombok.extern.slf4j.Slf4j;
 
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
@@ -64,10 +69,13 @@ import models.ShiftTimeTable;
 import models.ShiftType;
 import models.TotalOvertime;
 import models.User;
+import models.dto.ShiftTypeService;
+import models.dto.TimeTableDto;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
+import play.cache.Cache;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -75,9 +83,12 @@ import play.mvc.With;
 
 import security.SecurityRules;
 
-
+@Slf4j
 @With({Resecure.class})
 public class Competences extends Controller {
+
+  private static final String SHIFT_TYPE_SERVICE_STEP = "sts";
+  private static final String TIME_TABLE_STEP = "time";
 
   @Inject
   private static CompetenceRecapFactory competenceRecapFactory;
@@ -113,6 +124,8 @@ public class Competences extends Controller {
   private static PersonMonthRecapDao pmrDao;
   @Inject
   private static ShiftDao shiftDao;
+  @Inject
+  private static RoleDao roleDao;
 
 
   /**
@@ -298,9 +311,9 @@ public class Competences extends Controller {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-    
+
     DateInterval monthInterval = DateUtility.getMonthInterval(year, month);
-    
+
     List<Person> withoutCompetences = Lists.newArrayList();
     Map<Person, List<PersonCompetenceCodes>> mapEnabledCompetences = Maps.newHashMap();
 
@@ -323,7 +336,7 @@ public class Competences extends Controller {
         withoutCompetences.add(person);
       }
     }
-    
+
     render(office, mapEnabledCompetences, withoutCompetences, year, month);
   }
 
@@ -374,7 +387,7 @@ public class Competences extends Controller {
         .listByPerson(person, Optional.fromNullable(date));
     List<CompetenceCode> codeToAdd = competenceManager.codeToSave(pccList, codeListIds);
     List<CompetenceCode> codeToRemove = competenceManager.codeToDelete(pccList, codeListIds);
-    
+
     competenceManager.persistChanges(person, codeToAdd, codeToRemove, date);
 
     flash.success(String.format("Aggiornate con successo le competenze per %s",
@@ -414,7 +427,7 @@ public class Competences extends Controller {
       flash.error("Nessun contratto attivo nel mese.");
       Stampings.stampings(year, month);
     }
-    
+
     List<PersonCompetenceCodes> pccList = competenceCodeDao
         .listByPerson(person, Optional.fromNullable(LocalDate.now()
             .withMonthOfYear(month).withYear(year)));
@@ -422,7 +435,7 @@ public class Competences extends Controller {
     for (PersonCompetenceCodes pcc : pccList) {
       codeListIds.add(pcc.competenceCode);
     }
-    
+
     List<Competence> competenceList = competenceDao.getCompetences(Optional.fromNullable(person), 
         year, Optional.fromNullable(month), codeListIds);
     Map<CompetenceCode, String> map = competenceManager.createMapForCompetences(competenceList);
@@ -448,7 +461,7 @@ public class Competences extends Controller {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-    
+
     //Redirect in caso di mese futuro 
     LocalDate today = LocalDate.now();
     if (today.getYear() == year && month > today.getMonthOfYear()) {
@@ -456,14 +469,14 @@ public class Competences extends Controller {
           + "redirect automatico a mese attuale");
       showCompetences(year, today.getMonthOfYear(), officeId, competenceCodeId);
     }
-    
+
     //Competenze con almeno un dipendente abilitato nel mese
     List<CompetenceCode> competenceCodeList = competenceDao
         .activeCompetenceCode(office, new LocalDate(year, month, 1));
     if (competenceCodeList.isEmpty()) {
       render(year, month, office, competenceCodeList);
     }
-    
+
     //Il competence code selezionato
     CompetenceCode competenceCode = competenceCodeList.iterator().next();
     if (competenceCodeId != null) {
@@ -473,7 +486,7 @@ public class Competences extends Controller {
         competenceCode = competenceCodeList.iterator().next();
       }
     }
-    
+
     // genero un controllo sul fatto che esistano servizi attivi per cui la reperibilità
     // può essere utilizzata
     boolean servicesInitialized = true;
@@ -490,7 +503,11 @@ public class Competences extends Controller {
   }
 
   /**
+<<<<<<< HEAD
+   * @param personId l'id della persona
+=======
    * @param personId     l'id della persona
+>>>>>>> refs/remotes/origin/468-integrare-i-calendari-dei-turni-di-sistorg
    * @param competenceId l'id della competenza
    * @param month        il mese
    * @param year         l'anno ritorna la form di inserimento di un codice di competenza per una
@@ -565,12 +582,12 @@ public class Competences extends Controller {
     }
     int month = competence.month;
     int year = competence.year;
-    
+
     flash.success("Competenza %s di %s aggiornata correttamente", competence.competenceCode.code, 
         competence.person.fullName());
 
     showCompetences(year, month, office.id, competence.competenceCode.id);
-    
+
   }
 
   /**
@@ -660,7 +677,7 @@ public class Competences extends Controller {
     notFoundIfNull(office);
 
     rules.checkIfPermitted(office);
-    
+
     Set<Person> personSet = Sets.newTreeSet(Person.personComparator());
 
     Map<CompetenceCode, Integer> totalValueAssigned = Maps.newHashMap();
@@ -778,10 +795,12 @@ public class Competences extends Controller {
     CompetenceCode competenceCode = competenceCodeDao.getCompetenceCodeById(codeId);
     YearMonth yearMonth = new YearMonth(year, month);
     competenceManager.applyBonus(Optional.fromNullable(office), competenceCode, yearMonth);
-    
+
     flash.success("Aggiornati i valori per la competenza %s", competenceCode.code);
 
     showCompetences(year, month, office.id, competenceCode.id);
+
+
   }
 
   /* ****************************************************************
@@ -876,8 +895,11 @@ public class Competences extends Controller {
           new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
       render("@editShift", cat, officePeople, office);
     }
+
     cat.office = office;
     cat.save();
+
+
     flash.success("Nuovo servizio %s inserito correttamente per la sede %s",
         cat.description, cat.office);
     activateServices(cat.office.id);
@@ -972,6 +994,7 @@ public class Competences extends Controller {
   public static void editShift(Long shiftCategoryId) {
     ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
     Office office = cat.office;
+
     rules.checkIfPermitted(office);
     Map<ShiftType, List<PersonShiftShiftType>> map = Maps.newHashMap();
     List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
@@ -985,27 +1008,140 @@ public class Competences extends Controller {
     render(cat, officePeople, office, map, nuovo);
   }
 
+
+  /**
+   * metodo che ritorna la form di creazione di una nuova timetable.
+   */
+  public static void configureShiftTimeTable() {
+
+    List<Office> officeList = officeDao.getAllOffices();    
+
+    TimeTableDto timeTable = new TimeTableDto();
+    render(timeTable, officeList);
+
+  }
+
+  /**
+   * form che salva la nuova timetable e la associa alla sede passata come parametro.
+   * @param timeTable la timetable da creare
+   * @param officeId l'id della sede a cui associare la nuova timetable
+   */
+  public static void saveTimeTable(@Valid TimeTableDto timeTable, Long officeId) {
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      List<Office> officeList = officeDao.getAllOffices();
+      render("@configureShiftTimeTable", timeTable, officeList);
+    }
+    Office office = officeDao.getOfficeById(officeId);
+    competenceManager.createShiftTimeTable(timeTable, office);
+    flash.success("Creata nuova timetable");
+    manageCompetenceCode();
+  }
+
   /**
    * metodo che ritorna al template le informazioni per poter configurare correttamente il turno.
    * @param shiftCategoryId l'id del servzio da configurare
    */
-  public static void configureShift(Long shiftCategoryId) {
+  public static void configureShift(Long shiftCategoryId, int step, 
+      @Valid ShiftType type, Long shift, boolean breakInRange, boolean enableExitTolerance) {
     ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
     notFoundIfNull(cat);
     rules.checkIfPermitted(cat.office);
-    ShiftType type = new ShiftType();
-    List<ShiftTimeTable> shiftList = shiftDao.getAllShifts();
-    List<ShiftTimeTableDto> dtoList = competenceManager.convertFromShiftTimeTable(shiftList);
-    render(dtoList, cat, shiftList, type);
+    final String key = SHIFT_TYPE_SERVICE_STEP 
+        + cat.description + Security.getUser().get().username;
+    final String key2 = TIME_TABLE_STEP 
+        + cat.description + Security.getUser().get().username;
+    if (step == 0) {
+      // ritorno il dto per creare l'attività
+      breakInRange = false;
+      List<ShiftTimeTableDto>  dtoList = competenceManager
+          .convertFromShiftTimeTable(shiftDao.getAllShifts(cat.office));
+
+      step++;
+      render(dtoList, cat, type, step, breakInRange, enableExitTolerance);
+    }
+    if (step == 1) {
+      
+      if (shift == null) {
+        flash.error("selezionare una timetable!");
+        List<ShiftTimeTable> shiftList = shiftDao.getAllShifts(cat.office);        
+        List<ShiftTimeTableDto>  dtoList = competenceManager.convertFromShiftTimeTable(shiftList);
+
+        render("@configureShift", dtoList, cat, type, step, breakInRange, enableExitTolerance);
+      }
+      //metto in cache anche il dto della timetable e ritorno entrambi i dto per chiedere conferma 
+      //all'utente di validare la attività e la timetable associata.
+      List<ShiftTimeTable> list2 = Lists.newArrayList();
+      ShiftTimeTable stt = shiftDao.getShiftTimeTableById(shift);
+      list2.add(stt);
+      step++;
+      Cache.safeAdd(key2, list2, "10mn");
+      enableExitTolerance = false;
+      //type = new ShiftType();
+      if (Range.closed(stt.startMorning, stt.endMorning)
+          .encloses(Range.closed(stt.startMorningLunchTime, stt.endMorningLunchTime))) {
+        //ritornare un'informazione per far visualizzare diversamente la costruzione della form
+        breakInRange = true;
+        
+      }
+
+      render(stt, step, type, cat, breakInRange, enableExitTolerance);
+
+    }
+    if (step == 2) {
+
+      if (type.breakInShift > type.breakMaxInShift 
+          || type.entranceTolerance > type.entranceMaxTolerance 
+          || type.exitTolerance > type.exitMaxTolerance) {
+        flash.error("Le soglie minime non possono essere superiori a quelle massime");
+        
+        render("@configureShift",step, cat, type, breakInRange, enableExitTolerance);
+      }
+      
+      //metto in cache la struttura dell'attività e ritorno il dto per creare la timetable
+      List<ShiftType> list = Lists.newArrayList();
+      list.add(type);
+      
+      Cache.safeAdd(key, list, "10mn");
+      List<ShiftTimeTable> list2 = Cache.get(key2, List.class);
+      if (list2 == null) {
+        flash.error("Scaduta sessione di creazione dell'attività di turno.");
+        step = 0;
+        render(cat, type, step, breakInRange);
+      }
+      step++;
+      ShiftTimeTable stt = list2.get(0);
+      Cache.safeAdd(key2, list2, "10mn");
+
+      render(cat, type, step, stt, breakInRange); 
+
+    }
+    if (step == 3) {
+      //effettuo la creazione dell'attività 
+      List<ShiftType> list = Cache.get(key, List.class);      
+      List<ShiftTimeTable> list2 = Cache.get(key2, List.class);
+      if (list == null || list2 == null) {
+        flash.error("Scaduta sessione di creazione dell'attività di turno.");
+        step = 0;
+        render(cat, type, step, breakInRange, enableExitTolerance);
+      }
+      ShiftType service = list.get(0);
+      ShiftTimeTable stt = list2.get(0);
+      competenceManager.persistShiftType(service, stt, cat);
+      Cache.clear();
+      flash.success("Attività salvata correttamente!");
+      activateServices(cat.office.id);
+    }
+
   }
-  
+
   /**
    * metodo che ritorna al template le informazioni sull'attività passata come parametro.
    * @param shiftTypeId l'id dell'attività da configurare
    */
   public static void manageShiftType(Long shiftTypeId) {
     Optional<ShiftType> shiftType = shiftDao.getShiftTypeById(shiftTypeId);
-    
+
     if (!shiftType.isPresent()) {
       flash.error("Si cerca di caricare un'attività inesistente! Verificare l'id");
       activateServices(new Long(session.get("officeSelected")));
@@ -1014,66 +1150,139 @@ public class Competences extends Controller {
       ShiftType type = shiftType.get();
       Office office = officeDao.getOfficeById(type.shiftCategories.office.id);
       List<PersonShift> peopleForShift = shiftDao.getPeopleForShift(office);
-      List<PersonShift> peopleIds = Lists.newArrayList();
+
       List<PersonShiftShiftType> associatedPeopleShift = shiftDao
           .getAssociatedPeopleToShift(type, Optional.fromNullable(LocalDate.now()));
-      for (PersonShiftShiftType psst : associatedPeopleShift) {
-        peopleIds.add(psst.personShift);
-      }
-      render(peopleIds,type, office, peopleForShift);
+      LocalDate date = LocalDate.now();
+      render(type, date, office, peopleForShift, associatedPeopleShift);
     }
   }
-  
+
+  public static void handlePersonShiftShiftType(Long id){
+    PersonShiftShiftType psst = shiftDao.getById(id);
+    notFoundIfNull(psst);
+    rules.checkIfPermitted(psst.personShift.person.office);    
+    render(psst);
+  }
+
+  public static void updatePersonShiftShiftType(PersonShiftShiftType psst) {
+    rules.checkIfPermitted(psst.personShift.person.office);
+    psst.save();
+    flash.success("Informazioni salvate correttamente");
+    manageShiftType(psst.shiftType.id);
+  }
+
   /**
-   * metodo che persiste i person_shift_shift_type.
-   * @param peopleIds la lista degli id delle persone da aggiungere/rimuovere
-   * @param type l'attività su cui aggiungere/rimuovere le persone
+   * modifica i parametri dell'attività passata tramite id.
+   * @param type l'attività di cui si vogliono modificare i parametri
    */
-  public static void linkPeopleToShift(List<Long> peopleIds, @Valid ShiftType type) {
-    notFoundIfNull(type);
-    rules.checkIfPermitted(type.shiftCategories.office);
+  public static void editActivity(ShiftType type) {
+    type.save();
+    flash.success("Modificati parametri per l'attività: %s", type.description);
+    manageShiftType(type.id);
+  }
+
+
+  /**
+   * ritorna la form di inserimento del personale da assegnare all'attività passata come parametro.
+   * @param typeId l'id della attività a cui assegnare personale
+   */
+  public static void linkPeopleToShift(Long typeId) {
+    Optional<ShiftType> type = shiftDao.getShiftTypeById(typeId);
+    if (!type.isPresent()) {
+      flash.error("Attività non presente. Verificare l'identificativo");
+      activateServices(new Long(session.get("officeSelected")));
+    }
+
+    rules.checkIfPermitted(type.get().shiftCategories.office);
     if (Validation.hasErrors()) {
       response.status = 400;
-      List<PersonShift> peopleForShift = shiftDao.getPeopleForShift(type.shiftCategories.office);
-      Office office = type.shiftCategories.office;     
-      render("@manageShiftType", type, peopleForShift, peopleIds, office);
+      List<PersonShift> peopleForShift = 
+          shiftDao.getPeopleForShift(type.get().shiftCategories.office);
+      Office office = type.get().shiftCategories.office;     
+      render("@manageShiftType", type, peopleForShift, office);
     }
-    type.save();
-    List<PersonShiftShiftType> psstList = shiftDao.getAssociatedPeopleToShift(type, 
+    type.get().save();
+    List<PersonShiftShiftType> psstList = shiftDao.getAssociatedPeopleToShift(type.get(), 
         Optional.fromNullable(LocalDate.now()));
-    List<PersonShift> peopleToAdd = competenceManager.peopleToAdd(psstList, peopleIds);
-    List<PersonShift> peoleToRemove = competenceManager.peopleToDelete(psstList, peopleIds);
-    competenceManager.persistPersonShiftShiftType(peopleToAdd, type,peoleToRemove);
-    flash.success("Aggiornata lista di persone appartenenti all'attività di turno %s", 
-        type.description);
-    activateServices(type.shiftCategories.office.id);
+    List<PersonShift> peopleForShift = 
+        shiftDao.getPeopleForShift(type.get().shiftCategories.office);
+
+    List<PersonShift> available = peopleForShift.stream()
+        .filter(e -> (psstList.stream()
+            .filter(d -> d.personShift.equals(e))
+            .count()) < 1)
+        .collect(Collectors.toList());
+    ShiftType activity = type.get();
+    render(available, activity);
   }
-  
+
+
   /**
-   * metodo che associa il servizio, all'attività e alla timetable associata.
-   * @param shift l'id della timetable da associare al turno
-   * @param cat il servizio per cui si vuol definire l'attività
-   * @param type l'attività da linkare al servizio
+   * metodo che associa la persona all'attività.
+   * @param person la persona in turno che deve prendere parte a un'attività
+   * @param activity l'attività in turno in cui inserire la persona
+   * @param beginDate la data di inizio partecipazione della persona all'attività in turno
+   * @param jolly true se la persona può partecipare ai diversi turni in attività 
+   *     (mattina e pomeriggio di solito), false altrimenti
    */
+  public static void saveActivityConfiguration(PersonShift person, ShiftType activity, 
+      LocalDate beginDate, boolean jolly) {
+    notFoundIfNull(person);
+    rules.checkIfPermitted(person.person.office);
+    competenceManager.persistPersonShiftShiftType(person, beginDate, activity, jolly);
+    flash.success("Aggiunto %s all'attività", person.person.fullName());
+    manageShiftType(activity.id);
+  }
+
+  /**
+   * rimuove una persona da una attività applicando la data di terminazione al periodo.
+   * @param personShiftShiftTypeId l'id del personShiftShiftType da eliminare
+   * @param confirmed booleano che determina se siamo alla prima chiamata del metodo o 
+   *     alla conferma della rimozione
+   */
+  public static void deletePersonShiftShiftType(Long personShiftShiftTypeId, 
+      @Valid LocalDate endDate, boolean confirmed) {
+    final PersonShiftShiftType psst = shiftDao.getById(personShiftShiftTypeId);
+    notFoundIfNull(psst);
+    rules.checkIfPermitted(psst.shiftType.shiftCategories.office);
+    if (!confirmed) {
+      confirmed = true;
+      render("@deletePersonShiftShiftType", psst, confirmed);
+    }
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      render("@deletePersonShiftShiftType", psst, confirmed);
+    }
+    psst.endDate = endDate;
+    psst.save();
+
+    flash.success("Terminata esperienza per %s nell'attività %s in data %s", 
+        psst.personShift.person.fullName(), psst.shiftType.description, psst.endDate);
+    manageShiftType(psst.shiftType.id);
+  }
+
   public static void linkTimeTableToShift(Long shift, ShiftCategories cat, @Valid ShiftType type) {
-    
+
     notFoundIfNull(cat);
     rules.checkIfPermitted(cat.office);
     ShiftTimeTable timeTable = shiftDao.getShiftTimeTableById(shift);
     notFoundIfNull(timeTable);  
-    
+
     if (Validation.hasErrors()) {
       response.status = 400;
-      List<ShiftTimeTable> shiftList = shiftDao.getAllShifts();
+      List<ShiftTimeTable> shiftList = shiftDao.getAllShifts(cat.office);
       List<ShiftTimeTableDto> dtoList = competenceManager.convertFromShiftTimeTable(shiftList);
       render("@configureShift", shiftList, dtoList, cat, type);
+
     }
     type.shiftCategories = cat;
-    type.shiftCategories = cat;
+    //type.shiftCategories = cat;
     type.shiftTimeTable = timeTable;
     type.save();
-    
+
     flash.success("Configurato correttamente il servizio %s", cat.description);
     activateServices(cat.office.id);
+
   }
 }

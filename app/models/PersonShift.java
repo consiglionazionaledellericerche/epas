@@ -12,14 +12,11 @@ import javax.persistence.Table;
 
 import models.base.BaseModel;
 
-
 @Entity
 @Table(name = "person_shift")
 public class PersonShift extends BaseModel {
 
   private static final long serialVersionUID = 651448817233184716L;
-
-  public boolean jolly;
 
   public String description;
 
@@ -31,13 +28,13 @@ public class PersonShift extends BaseModel {
   public List<PersonShiftShiftType> personShiftShiftTypes;
 
   @OneToMany(mappedBy = "personShift")
-  public List<PersonShiftDay> personShiftDays = new ArrayList<PersonShiftDay>();
-  
+  public List<PersonShiftDay> personShiftDays = new ArrayList<>();
+
   public boolean disabled;
-  
+
   @Override
   public String toString() {
-    return this.person.name + " " + this.person.surname;
+    return person.name + " " + person.surname;
   }
 
 }

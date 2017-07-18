@@ -1,0 +1,26 @@
+#{modalAsync id:'defaultModal',  
+title:('Gestisci associazione di '+psst.personShift.person.fullName()+ ' alla attività '+psst.shiftType.type )}
+<div id="absenceCodeData">
+	#{alert color:'info'}
+		Selezionare la persona da aggiungere all'attività. Specificare la data di adesione all'attività e se
+		la persona deve essere un jolly oppure no.
+	#{/alert}
+  #{form action:@Competences.updatePersonShiftShiftType(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#absenceCodeData'}
+  
+  	#{if psst.persistent}
+    	#{f.hidden 'psst.id'/}
+	#{/if}
+
+  	#{f.date 'psst.beginDate' /}
+  	#{f.date 'psst.endDate' /}
+  	
+    #{f.booleanRadio 'psst.jolly' /}
+
+	#{b.buttons center:true}
+		#{b.submit 'Salva'/}
+	#{/b.buttons}
+  #{/form}
+</div>
+#{/modalAsync}
