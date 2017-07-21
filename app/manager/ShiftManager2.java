@@ -509,10 +509,19 @@ public class ShiftManager2 {
       LocalDate from, LocalDate to) {
 
     final Map<Person, Integer> shiftCompetences = new HashMap<>();
+    
+    final LocalDate today = LocalDate.now();
 
+    final LocalDate lastDay;
+
+    if (to.isAfter(today)) {
+      lastDay = today;
+    } else {
+      lastDay = to;
+    }
     involvedShiftWorkers(activity, from, to).forEach(person -> {
 
-      int competences = calculatePersonShiftCompetencesInPeriod(activity, person, from, to);
+      int competences = calculatePersonShiftCompetencesInPeriod(activity, person, from, lastDay);
       shiftCompetences.put(person, competences);
     });
 
@@ -718,7 +727,17 @@ public class ShiftManager2 {
     final LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
     final int year = shiftTypeMonth.yearMonth.getYear();
     final int month = shiftTypeMonth.yearMonth.getMonthOfYear();
+    
+    final LocalDate today = LocalDate.now();
 
+    final LocalDate lastDay;
+
+    if (monthEnd.isAfter(today)) {
+      lastDay = today;
+    } else {
+      lastDay = monthEnd;
+    }
+    
     final List<Person> involvedShiftPeople = involvedShiftWorkers(shiftTypeMonth.shiftType,
         monthBegin, monthEnd);
 
@@ -730,10 +749,10 @@ public class ShiftManager2 {
           // Per ogni attività calcolo le competenze di ogni persona coinvolta
           involvedShiftPeople.forEach(person -> {
             int activityCompetence = calculatePersonShiftCompetencesInPeriod(monthStatus.shiftType,
-                person, monthBegin, monthEnd);
+                person, monthBegin, lastDay);
             // Somma algebrica delle competenze delle persone derivanti da ogni attività sulla
             // quale ha svolto i turni
-            totalPeopleCompetences.merge(person, activityCompetence, (a, b) -> b + a);
+            totalPeopleCompetences.merge(person, activityCompetence, (previousValue, newValue) -> newValue + previousValue);
           });
         });
 
