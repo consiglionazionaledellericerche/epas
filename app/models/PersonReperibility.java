@@ -11,6 +11,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import com.google.common.collect.Range;
 
 import lombok.ToString;
 
@@ -59,5 +62,19 @@ public class PersonReperibility extends BaseModel {
 
 
   public String note;
+  
+  @Transient
+  public Range<LocalDate> dateRange() {
+    if (startDate == null && endDate == null) {
+      return Range.all();
+    }
+    if (startDate == null) {
+      return Range.atMost(endDate);
+    }
+    if (endDate == null) {
+      return Range.atLeast(startDate);
+    }
+    return Range.closed(startDate, endDate);
+  }
 
 }

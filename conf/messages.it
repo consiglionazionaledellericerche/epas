@@ -643,6 +643,7 @@ WorkingTimes.manageWorkingTime= Gestione Orari di Lavoro
 Competences.activateServices= Gestione Servizi
 Shift.handleShifts =Gestisci turni
 Calendar.show =Gestisci turni
+ReperibilityCalendar.show =Gestisci reperibilità
 Shift.personalShift =Visualizza turno
 
 ########################

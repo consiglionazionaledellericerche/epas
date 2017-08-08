@@ -16,9 +16,12 @@ import models.Person;
 import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
+import models.PersonShiftDay;
+import models.ShiftType;
 import models.query.QPersonReperibility;
 import models.query.QPersonReperibilityDay;
 import models.query.QPersonReperibilityType;
+import models.query.QPersonShiftDay;
 
 import org.joda.time.LocalDate;
 
@@ -92,6 +95,22 @@ public class PersonReperibilityDayDao extends DaoBase {
         getQueryFactory().delete(prd)
           .where(prd.reperibilityType.eq(type).and(prd.date.eq(day))).execute();
     return deleted;
+  }
+  
+  /**
+   * @return la lista dei 'personReperibilityDay' della persona 'person' di tipo 'type' presenti nel
+   *     periodo tra 'begin' e 'to'.
+   */
+  public List<PersonReperibilityDay> getPersonReperibilityDaysByPeriodAndType(
+      LocalDate begin, LocalDate to, PersonReperibilityType type, Person person) {
+    final QPersonReperibilityDay prd = QPersonReperibilityDay.personReperibilityDay;
+    JPQLQuery query = getQueryFactory().from(prd)
+            .where(prd.date.between(begin, to)
+                    .and(prd.reperibilityType.eq(type))
+                    .and(prd.personReperibility.person.eq(person))
+            )
+            .orderBy(prd.date.asc());
+    return query.list(prd);
   }
 
   //***************************************************************/
@@ -175,6 +194,17 @@ public class PersonReperibilityDayDao extends DaoBase {
     QPersonReperibility pr = QPersonReperibility.personReperibility;
     JPQLQuery query = getQueryFactory().from(pr).where(pr.personReperibilityType.eq(type));
     return query.list(pr);
+  }
+  
+  /**
+   * 
+   * @param id l'id dell'attività di reperibilità
+   * @return l'attività di reperibilità associata all'id passato come parametro se presente.
+   */
+  public Optional<PersonReperibility> getPersonReperibilityById(Long id) {
+    QPersonReperibility pr = QPersonReperibility.personReperibility;
+    JPQLQuery query = getQueryFactory().from(pr).where(pr.id.eq(id));
+    return Optional.fromNullable(query.singleResult(pr));
   }
 
 
