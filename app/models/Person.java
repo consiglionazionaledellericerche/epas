@@ -153,6 +153,9 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
    */
   @OneToMany(mappedBy = "supervisor")
   public List<ShiftCategories> shiftCategories = Lists.newArrayList();
+  
+  @OneToMany(mappedBy = "supervisor")
+  public List<PersonReperibilityType> reperibilityTypes = Lists.newArrayList();
 
   @Getter
   @NotAudited

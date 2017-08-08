@@ -53,6 +53,6 @@ public class PersonReperibilityType extends BaseModel {
 
   @Override
   public String toString() {
-    return String.format("PersonReperibilityType[%d] - description = %s", id, description);
+    return this.description;
   }
 }
