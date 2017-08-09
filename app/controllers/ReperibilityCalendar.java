@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dao.AbsenceDao;
 import dao.PersonReperibilityDayDao;
-
+import dao.ReperibilityTypeMonthDao;
 import helpers.Web;
 
 import lombok.extern.slf4j.Slf4j;
@@ -17,9 +17,11 @@ import manager.ReperibilityManager2;
 
 import models.Person;
 import models.PersonReperibility;
+import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
 import models.PersonShiftDay;
 import models.PersonShiftShiftType;
+import models.ReperibilityTypeMonth;
 import models.ShiftType;
 import models.ShiftTypeMonth;
 import models.absences.Absence;
@@ -64,6 +66,8 @@ public class ReperibilityCalendar extends Controller {
   static AbsenceDao absenceDao;
   @Inject
   static ObjectMapper mapper;
+  @Inject
+  static ReperibilityTypeMonthDao reperibilityTypeMonthDao;
   /**
    * ritorna alla view le info necessarie per creare il calendario.
    *
@@ -82,7 +86,7 @@ public class ReperibilityCalendar extends Controller {
 
     render(reperibilities, reperibilitySelected, currentDate);
   }
-  
+
   /**
    * ritorna la lista di persone associate alla reperibilità nel periodo passato come parametro.
    *
@@ -98,22 +102,22 @@ public class ReperibilityCalendar extends Controller {
       final List<PersonReperibility> people = reperibilityManager2.reperibilityWorkers(reperibility,start, end);
       int index = 0;
       final List<ReperibilityEvent> reperibilityWorkers = new ArrayList<>();
-      
+
       for (PersonReperibility personReperibility : people) {
         final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
         final Person person = personReperibility.person;
         final ReperibilityEvent event = ReperibilityEvent.builder()
-          .allDay(true)
-          .title(person.fullName())
-          .personId(person.id)
-          .eventColor(eventColor)
-          .color(eventColor.backgroundColor)
-          .textColor(eventColor.textColor)
-          .borderColor(eventColor.borderColor)
-          .className("removable")
-          .mobile(person.mobile)
-          .email(person.email)
-          .build();
+            .allDay(true)
+            .title(person.fullName())
+            .personId(person.id)
+            .eventColor(eventColor)
+            .color(eventColor.backgroundColor)
+            .textColor(eventColor.textColor)
+            .borderColor(eventColor.borderColor)
+            .className("removable")
+            .mobile(person.mobile)
+            .email(person.email)
+            .build();
         reperibilityWorkers.add(event);
         index++;
       }
@@ -122,7 +126,7 @@ public class ReperibilityCalendar extends Controller {
     }
 
   }
-  
+
   /**
    * ritorna la lista di eventi presenti per l'attività nel periodo start/end.
    *
@@ -155,7 +159,7 @@ public class ReperibilityCalendar extends Controller {
     // Usato il jackson per facilitare la serializzazione dei LocalDate
     renderJSON(mapper.writeValueAsString(events));
   }
-  
+
   /**
    * Chiamata dal fullCalendar dei turni per ogni evento di drop di un turno sul calendario.
    * Controlla se il turno passato come parametro può essere salvato in un dato giorno
@@ -167,58 +171,58 @@ public class ReperibilityCalendar extends Controller {
    */
   public static void changeReperibility(long personShiftDayId, LocalDate newDate) {
 
-//    final PNotifyObject message;
-//    final PersonShiftDay shift = shiftDao.getPersonShiftDayById(personShiftDayId);
-//
-//    final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao.byShiftTypeAndDate(shift
-//        .shiftType, newDate).orNull();
-//
-//    if (shift == null) {
-//      message = PNotifyObject.builder()
-//          .title("Error")
-//          .hide(true)
-//          .text(Messages.get("notFound"))
-//          .type("error").build();
-//      response.status = Http.StatusCode.NOT_FOUND;
-//    } else {
-//      if (rules.check(shift.shiftType) && rules.check(shiftTypeMonth)) {
-//        shift.date = newDate;
-//
-//        // controlla gli eventuali errori di consitenza nel calendario
-//        Optional<String> error = shiftManager2.shiftPermitted(shift);
-//
-//        if (error.isPresent()) {
-//          message = PNotifyObject.builder()
-//              .title("Errore")
-//              .hide(true)
-//              .text(error.get())
-//              .type("error").build();
-//
-//          response.status = 409;
-//        } else {
-//          //salva il turno modificato
-//          shiftManager2.save(shift);
-//
-//          message = PNotifyObject.builder()
-//              .title("Ok")
-//              .hide(true)
-//              .text(Web.msgModified(PersonShiftDay.class))
-//              .type("success").build();
-//        }
-//      } else {
-//        message = PNotifyObject.builder()
-//            .title("Forbidden")
-//            .hide(true)
-//            .text(Messages.get("forbidden"))
-//            .type("error").build();
-//        response.status = Http.StatusCode.FORBIDDEN;
-//      }
-//
-//    }
-//
-//    renderJSON(message);
+    //    final PNotifyObject message;
+    //    final PersonShiftDay shift = shiftDao.getPersonShiftDayById(personShiftDayId);
+    //
+    //    final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao.byShiftTypeAndDate(shift
+    //        .shiftType, newDate).orNull();
+    //
+    //    if (shift == null) {
+    //      message = PNotifyObject.builder()
+    //          .title("Error")
+    //          .hide(true)
+    //          .text(Messages.get("notFound"))
+    //          .type("error").build();
+    //      response.status = Http.StatusCode.NOT_FOUND;
+    //    } else {
+    //      if (rules.check(shift.shiftType) && rules.check(shiftTypeMonth)) {
+    //        shift.date = newDate;
+    //
+    //        // controlla gli eventuali errori di consitenza nel calendario
+    //        Optional<String> error = shiftManager2.shiftPermitted(shift);
+    //
+    //        if (error.isPresent()) {
+    //          message = PNotifyObject.builder()
+    //              .title("Errore")
+    //              .hide(true)
+    //              .text(error.get())
+    //              .type("error").build();
+    //
+    //          response.status = 409;
+    //        } else {
+    //          //salva il turno modificato
+    //          shiftManager2.save(shift);
+    //
+    //          message = PNotifyObject.builder()
+    //              .title("Ok")
+    //              .hide(true)
+    //              .text(Web.msgModified(PersonShiftDay.class))
+    //              .type("success").build();
+    //        }
+    //      } else {
+    //        message = PNotifyObject.builder()
+    //            .title("Forbidden")
+    //            .hide(true)
+    //            .text(Messages.get("forbidden"))
+    //            .type("error").build();
+    //        response.status = Http.StatusCode.FORBIDDEN;
+    //      }
+    //
+    //    }
+    //
+    //    renderJSON(message);
   }
-  
+
   /**
    * inserisce un nuovo slot di turno per l'attività al turnista passati come parametro.
    *
@@ -229,107 +233,108 @@ public class ReperibilityCalendar extends Controller {
    */
   public static void newReperibility(long personId, LocalDate date, ShiftSlot shiftSlot, long activityId) {
 
-//    final PNotifyObject message;
-//    Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
-//
-//    final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao.byShiftTypeAndDate(activity.get(), date)
-//        .orNull();
-//
-//    if (activity.isPresent()) {
-//      if (rules.check(activity.get()) && rules.check(shiftTypeMonth)) {
-//        PersonShiftDay personShiftDay = new PersonShiftDay();
-//        personShiftDay.date = date;
-//        personShiftDay.shiftType = activity.get();
-//        personShiftDay.shiftSlot = shiftSlot;
-//        personShiftDay.personShift = shiftDao
-//            .getPersonShiftByPersonAndType(personId, personShiftDay.shiftType.type);
-//        Optional<String> error;
-//        if (validation.valid(personShiftDay).ok) {
-//          error = shiftManager2.shiftPermitted(personShiftDay);
-//        } else {
-//          error = Optional.of(Messages.get("validation.invalid"));
-//        }
-//
-//        if (error.isPresent()) {
-//          response.status = 409;
-//
-//          message = PNotifyObject.builder()
-//              .title("Errore")
-//              .hide(true)
-//              .text(error.get())
-//              .type("error").build();
-//
-//        } else {
-//          shiftManager2.save(personShiftDay);
-//
-//          message = PNotifyObject.builder()
-//              .title("Ok")
-//              .hide(true)
-//              .text(Web.msgCreated(PersonShiftDay.class))
-//              .type("success").build();
-//        }
-//
-//      } else {  // Le Drools non danno il grant
-//        message = PNotifyObject.builder()
-//            .title("Forbidden")
-//            .hide(true)
-//            .text(Messages.get("forbidden"))
-//            .type("error").build();
-//        response.status = Http.StatusCode.FORBIDDEN;
-//      }
-//
-//    } else { // Lo ShiftType specificato non esiste
-//      message = PNotifyObject.builder()
-//          .title("Error")
-//          .hide(true)
-//          .text(Messages.get("notFound"))
-//          .type("error").build();
-//      response.status = Http.StatusCode.NOT_FOUND;
-//    }
-//
-//    renderJSON(message);
+    //    final PNotifyObject message;
+    //    Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
+    //
+    //    final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao.byShiftTypeAndDate(activity.get(), date)
+    //        .orNull();
+    //
+    //    if (activity.isPresent()) {
+    //      if (rules.check(activity.get()) && rules.check(shiftTypeMonth)) {
+    //        PersonShiftDay personShiftDay = new PersonShiftDay();
+    //        personShiftDay.date = date;
+    //        personShiftDay.shiftType = activity.get();
+    //        personShiftDay.shiftSlot = shiftSlot;
+    //        personShiftDay.personShift = shiftDao
+    //            .getPersonShiftByPersonAndType(personId, personShiftDay.shiftType.type);
+    //        Optional<String> error;
+    //        if (validation.valid(personShiftDay).ok) {
+    //          error = shiftManager2.shiftPermitted(personShiftDay);
+    //        } else {
+    //          error = Optional.of(Messages.get("validation.invalid"));
+    //        }
+    //
+    //        if (error.isPresent()) {
+    //          response.status = 409;
+    //
+    //          message = PNotifyObject.builder()
+    //              .title("Errore")
+    //              .hide(true)
+    //              .text(error.get())
+    //              .type("error").build();
+    //
+    //        } else {
+    //          shiftManager2.save(personShiftDay);
+    //
+    //          message = PNotifyObject.builder()
+    //              .title("Ok")
+    //              .hide(true)
+    //              .text(Web.msgCreated(PersonShiftDay.class))
+    //              .type("success").build();
+    //        }
+    //
+    //      } else {  // Le Drools non danno il grant
+    //        message = PNotifyObject.builder()
+    //            .title("Forbidden")
+    //            .hide(true)
+    //            .text(Messages.get("forbidden"))
+    //            .type("error").build();
+    //        response.status = Http.StatusCode.FORBIDDEN;
+    //      }
+    //
+    //    } else { // Lo ShiftType specificato non esiste
+    //      message = PNotifyObject.builder()
+    //          .title("Error")
+    //          .hide(true)
+    //          .text(Messages.get("notFound"))
+    //          .type("error").build();
+    //      response.status = Http.StatusCode.NOT_FOUND;
+    //    }
+    //
+    //    renderJSON(message);
   }
-  
+
   /**
    * Effettua l'eliminazione di un turno.
    *
    * @param psd Turno da eliminare
    */
-  public static void deleteReperibility(PersonShiftDay psd) {
-//    final PNotifyObject message;
-//    if (psd == null) {
-//      message = PNotifyObject.builder()
-//          .title("Error")
-//          .hide(true)
-//          .text(Messages.get("notFound"))
-//          .type("error").build();
-//      response.status = Http.StatusCode.NOT_FOUND;
-//    } else {
-//      final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao.byShiftTypeAndDate(psd.shiftType,
-//          psd.date).orNull();
-//
-//      if (rules.check(psd.shiftType) && rules.check(shiftTypeMonth)) {
-//
-//        shiftManager2.delete(psd);
-//
-//        message = PNotifyObject.builder()
-//            .title("Ok")
-//            .hide(true)
-//            .text(Web.msgDeleted(PersonShiftDay.class))
-//            .type("success").build();
-//      } else {
-//        message = PNotifyObject.builder()
-//            .title("Forbidden")
-//            .hide(true)
-//            .text(Messages.get("forbidden"))
-//            .type("error").build();
-//        response.status = Http.StatusCode.FORBIDDEN;
-//      }
-//    }
-//
-//    renderJSON(message);
+  public static void deleteReperibility(PersonReperibilityDay prd) {
+    final PNotifyObject message;
+    if (prd == null) {
+      message = PNotifyObject.builder()
+          .title("Error")
+          .hide(true)
+          .text(Messages.get("notFound"))
+          .type("error").build();
+      response.status = Http.StatusCode.NOT_FOUND;
+    } else {
+      final ReperibilityTypeMonth reperibilityTypeMonth = 
+          reperibilityTypeMonthDao.byReperibilityTypeAndDate(prd.reperibilityType, 
+              prd.date).orNull();
+              
+      if (rules.check(prd.reperibilityType) && rules.check(reperibilityTypeMonth)) {
+
+        reperibilityManager2.delete(prd);
+
+        message = PNotifyObject.builder()
+            .title("Ok")
+            .hide(true)
+            .text(Web.msgDeleted(PersonShiftDay.class))
+            .type("success").build();
+      } else {
+        message = PNotifyObject.builder()
+            .title("Forbidden")
+            .hide(true)
+            .text(Messages.get("forbidden"))
+            .type("error").build();
+        response.status = Http.StatusCode.FORBIDDEN;
+      }
+    }
+    //
+    renderJSON(message);
   }
-  
+
   /**
    * @param activityId id dell'attività da verificare
    * @param start data relativa al mese da controllare
@@ -337,19 +342,19 @@ public class ReperibilityCalendar extends Controller {
    */
   public static boolean editable(long activityId, @Required LocalDate start) {
 
-//    Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
-//
-//    if (Validation.hasErrors() || !activity.isPresent()) {
-//      return false;
-//    }
-//
-//    final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao
-//        .byShiftTypeAndDate(activity.get(), start).orNull();
-//
-//    return rules.check(activity.get()) && rules.check(shiftTypeMonth);
+    //    Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
+    //
+    //    if (Validation.hasErrors() || !activity.isPresent()) {
+    //      return false;
+    //    }
+    //
+    //    final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao
+    //        .byShiftTypeAndDate(activity.get(), start).orNull();
+    //
+    //    return rules.check(activity.get()) && rules.check(shiftTypeMonth);
     return false;
   }
-  
+
   /**
    * Calcola le ore di turno effettuate in quel periodo per ciascuna persona dell'attività
    * specificata
@@ -359,21 +364,21 @@ public class ReperibilityCalendar extends Controller {
    * @param end data finale.
    */
   public static void recap(long activityId, LocalDate start, LocalDate end) {
-//    Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
-//
-//    if (activity.isPresent()) {
-//      ShiftType shiftType = activity.get();
-//      rules.checkIfPermitted(activity.get());
-//      Map<Person, Integer> shiftsCalculatedCompetences = shiftManager2
-//          .calculateActivityShiftCompetences(shiftType, start, end);
-//
-//      final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao
-//          .byShiftTypeAndDate(shiftType, start).orNull();
-//
-//      render(shiftsCalculatedCompetences, shiftTypeMonth, shiftType, start);
-//    }
+    //    Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
+    //
+    //    if (activity.isPresent()) {
+    //      ShiftType shiftType = activity.get();
+    //      rules.checkIfPermitted(activity.get());
+    //      Map<Person, Integer> shiftsCalculatedCompetences = shiftManager2
+    //          .calculateActivityShiftCompetences(shiftType, start, end);
+    //
+    //      final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao
+    //          .byShiftTypeAndDate(shiftType, start).orNull();
+    //
+    //      render(shiftsCalculatedCompetences, shiftTypeMonth, shiftType, start);
+    //    }
   }
-  
+
   /**
    * @param person Persona della quale recuperare le assenze
    * @param start data iniziale del periodo
@@ -423,7 +428,7 @@ public class ReperibilityCalendar extends Controller {
     }
     return events;
   }
-  
+
   /**
    * Carica la lista delle reperibilità di un certo tipo associati ad una determinata persona in
    * un intervallo di tempo
@@ -441,7 +446,7 @@ public class ReperibilityCalendar extends Controller {
     return reperibilityDao.getPersonReperibilityDaysByPeriodAndType(start, end, reperibility, person).stream()
         .map(personReperibilityDay -> {
           final ReperibilityEvent event = ReperibilityEvent.builder()
-              
+
               .personReperibilityDayId(personReperibilityDay.id)
               .title(person.fullName())
               .start(personReperibilityDay.date)

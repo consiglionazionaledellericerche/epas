@@ -36,6 +36,8 @@ public class QPersonReperibilityType extends EntityPathBase<PersonReperibilityTy
     //inherited
     public final NumberPath<Long> id = _super.id;
 
+    public final SetPath<models.ReperibilityTypeMonth, QReperibilityTypeMonth> monthsStatus = this.<models.ReperibilityTypeMonth, QReperibilityTypeMonth>createSet("monthsStatus", models.ReperibilityTypeMonth.class, QReperibilityTypeMonth.class, PathInits.DIRECT2);
+
     public final QOffice office;
 
     //inherited
