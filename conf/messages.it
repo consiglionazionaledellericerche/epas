@@ -386,6 +386,8 @@ qualification=Livello
 recapMealTickets=Riepilogo Buoni Pasto
 report=Descrizione problema
 restoreUser= Torna chi eri
+reperibility =Servizio di reperibilità
+reperibility.noReperibilityWorkers =Nessun Reperibile assegnabile per questa attività nel periodo selezionato
 
 roleIds= Ruoli attribuibili
 

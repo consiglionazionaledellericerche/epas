@@ -1,18 +1,25 @@
 package models;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import play.data.validation.Required;
 import play.data.validation.Unique;
@@ -50,9 +57,30 @@ public class PersonReperibilityType extends BaseModel {
   @NotNull
   public Office office; 
  
+  @OneToMany(mappedBy = "personReperibilityType", cascade = CascadeType.REMOVE)
+  public Set<ReperibilityTypeMonth> monthsStatus = new HashSet<>();
 
   @Override
   public String toString() {
     return this.description;
+  }
+  
+  
+  @Transient
+  public Optional<ReperibilityTypeMonth> monthStatusByDate(LocalDate date) {
+    final YearMonth requestedMonth = new YearMonth(date);
+    return monthsStatus.stream()
+        .filter(reperibilityTypeMonth -> reperibilityTypeMonth
+            .yearMonth.equals(requestedMonth)).findFirst();
+  }
+
+  @Transient
+  public boolean approvedOn(LocalDate date) {
+    Optional<ReperibilityTypeMonth> monthStatus = monthStatusByDate(date);
+    if (monthStatus.isPresent()) {
+      return monthStatus.get().approved;
+    } else {
+      return false;
+    }
   }
 }
