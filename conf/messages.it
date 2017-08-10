@@ -675,6 +675,11 @@ LimitUnit.month =Mese
 LimitDescription.daysOfMonth =Giorni del mese
 LimitDescription.daysOfYear =Giorni dell'anno
 
+reperibility.personInactive = Persona non attiva sulla reperibilità
+reperibility.alreadyInReperibility = Già in reperibilità per l'attività %s
+reperibility.absenceInDay = La persona nel giorno selezionato è assente
+reperibility.dayAlreadyAssigned = Giorno già assegnato a %s
+
 StampTypes.MOTIVI_DI_SERVIZIO= Motivi di Servizio
 StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE= Motivi di Servizio Fuori Sede
 StampTypes.VISITA_MEDICA= Visita Medica
@@ -691,6 +696,7 @@ StampTypes.PERMESSO_BREVE= Permesso breve (36 ore anno)
 
 ShiftSlot.MORNING = Mattina
 ShiftSlot.AFTERNOON = Pomeriggio
+
 
 shift.absenceInDay = La persona nel giorno selezionato è assente
 shift.alreadyInShift = Già in turno per l'attività %s

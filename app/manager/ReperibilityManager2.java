@@ -1,13 +1,17 @@
 package manager;
+import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 
 import controllers.Security;
+import dao.PersonDayDao;
+import dao.PersonReperibilityDayDao;
 import dao.history.HistoricalDao;
 import lombok.extern.slf4j.Slf4j;
 
 import models.Person;
+import models.PersonDay;
 import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
@@ -17,6 +21,7 @@ import models.ReperibilityTypeMonth;
 import models.ShiftType;
 import models.ShiftTypeMonth;
 import models.User;
+import play.i18n.Messages;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -28,6 +33,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 /**
  * Gestiore delle operazioni sulla reperibilità ePAS.
  *
@@ -36,6 +43,17 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ReperibilityManager2 {
 
+  private final PersonReperibilityDayDao reperibilityDayDao;
+  private final PersonDayDao personDayDao;
+  private final PersonDayManager personDayManager;
+
+  @Inject
+  public ReperibilityManager2(PersonReperibilityDayDao reperibilityDayDao, 
+      PersonDayDao personDayDao, PersonDayManager personDayManager) {
+    this.reperibilityDayDao = reperibilityDayDao;
+    this.personDayDao = personDayDao;
+    this.personDayManager = personDayManager;
+  }
   /**
    * 
    * @return la lista delle attività di reperibilità visibili all'utente che ne fa la richiesta.
@@ -91,8 +109,18 @@ public class ReperibilityManager2 {
   }
 
   /**
-   * cancella il personShiftDay.
-   * @param personShiftDay il personShiftDay da cancellare
+   * salva il personReperibilityDay ed effettua i ricalcoli.
+   * @param personReperibilityDay il personReperibilityDay da salvare
+   */
+  public void save(PersonReperibilityDay personReperibilityDay) {
+
+    Verify.verifyNotNull(personReperibilityDay).save();
+    recalculate(personReperibilityDay);
+  }
+  
+  /**
+   * cancella il personReperibilityDay.
+   * @param personReperibilityDay il personReperibilityDay da cancellare
    */
   public void delete(PersonReperibilityDay personReperibilityDay) {
 
@@ -105,7 +133,7 @@ public class ReperibilityManager2 {
 
     final PersonReperibilityType reperibilityType = personReperibilityDay.reperibilityType;
 
-    // Aggiornamento dello ShiftTypeMonth
+    // Aggiornamento del ReperibilityTypeMonth
     if (reperibilityType != null) {
 
       //FIXME: servono questi due controlli???
@@ -149,6 +177,59 @@ public class ReperibilityManager2 {
     }
   }
 
+  /**
+   * Verifica se un turno puo' essere inserito senza violare le regole dei turni
+   *
+   * @param personShiftDay il personShiftDay da inserire
+   * @return l'eventuale stringa contenente l'errore evidenziato in fase di inserimento del turno.
+   */
+  public Optional<String> reperibilityPermitted(PersonReperibilityDay personReperibilityDay) {
+
+    /**
+     * 0. Verificare se la persona è segnata in quell'attività in quel giorno
+     *    return shift.personInactive
+     * 1. La Persona non deve essere già reperibile per quel giorno
+     * 2. La Persona non deve avere assenze giornaliere.
+     * 3. La reperibilità non sia già presente  
+     * 4. Controllare anche il quantitativo di giorni di reperibilità feriale e festiva massimi?  
+     */
+
+    //Verifica se la persona è attiva in quell'attività in quel giorno
+    final boolean isActive = personReperibilityDay.personReperibility.dateRange()
+        .contains(personReperibilityDay.date);
+    if (!isActive) {
+      return Optional.of(Messages.get("reperibility.personInactive"));
+    }
+
+    // Verifica che la persona non abbia altre reperibilità nello stesso giorno 
+    final Optional<PersonReperibilityDay> personReperibility = reperibilityDayDao
+        .getPersonReperibilityDay(personReperibilityDay.personReperibility.person, personReperibilityDay.date);
+
+    if (personReperibility.isPresent()) {
+      return Optional.of(Messages.get("reperibility.alreadyInReperibility", personReperibility.get().reperibilityType));
+    }
+
+    // verifica che la persona non sia assente nel giorno
+    final Optional<PersonDay> personDay = personDayDao
+        .getPersonDay(personReperibilityDay.personReperibility.person, personReperibilityDay.date);
+
+    if (personDay.isPresent() && personDayManager.isAllDayAbsences(personDay.get())) {
+      return Optional.of(Messages.get("reperibility.absenceInDay"));
+    }
+
+    List<PersonReperibilityDay> list = reperibilityDayDao
+        .getPersonReperibilityDayFromPeriodAndType(personReperibilityDay.date, personReperibilityDay.date,
+            personReperibilityDay.reperibilityType, Optional.absent());
+
+    //controlla che la reperibilità nel giorno sia già stata assegnata ad un'altra persona
+    if (!list.isEmpty()) {
+      return Optional.of(Messages
+          .get("reperibility.dayAlreadyAssigned", personReperibilityDay.personReperibility.person.fullName()));
+    }
+
+    return Optional.absent();
+  }
+
   public void checkReperibilityValid(PersonReperibilityDay personReperibilityDay) {
     /*
      * 0. Dev'essere una reperibilità persistente.
@@ -158,7 +239,7 @@ public class ReperibilityManager2 {
      */
     //TODO: va implementato davvero?
   }
-  
+
   public void checkReperibilityDayValid(LocalDate date, PersonReperibilityType type) {
     //TODO: va implementato davvero?
   }

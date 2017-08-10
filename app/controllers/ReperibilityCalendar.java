@@ -231,67 +231,61 @@ public class ReperibilityCalendar extends Controller {
    * @param shiftSlot lo slot di turno (mattina/pomeriggio)
    * @param activityId l'id dell'attività su cui inserire il turnista
    */
-  public static void newReperibility(long personId, LocalDate date, ShiftSlot shiftSlot, long activityId) {
+  public static void newReperibility(long personId, LocalDate date, long reperibilityId) {
 
-    //    final PNotifyObject message;
-    //    Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
-    //
-    //    final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao.byShiftTypeAndDate(activity.get(), date)
-    //        .orNull();
-    //
-    //    if (activity.isPresent()) {
-    //      if (rules.check(activity.get()) && rules.check(shiftTypeMonth)) {
-    //        PersonShiftDay personShiftDay = new PersonShiftDay();
-    //        personShiftDay.date = date;
-    //        personShiftDay.shiftType = activity.get();
-    //        personShiftDay.shiftSlot = shiftSlot;
-    //        personShiftDay.personShift = shiftDao
-    //            .getPersonShiftByPersonAndType(personId, personShiftDay.shiftType.type);
-    //        Optional<String> error;
-    //        if (validation.valid(personShiftDay).ok) {
-    //          error = shiftManager2.shiftPermitted(personShiftDay);
-    //        } else {
-    //          error = Optional.of(Messages.get("validation.invalid"));
-    //        }
-    //
-    //        if (error.isPresent()) {
-    //          response.status = 409;
-    //
-    //          message = PNotifyObject.builder()
-    //              .title("Errore")
-    //              .hide(true)
-    //              .text(error.get())
-    //              .type("error").build();
-    //
-    //        } else {
-    //          shiftManager2.save(personShiftDay);
-    //
-    //          message = PNotifyObject.builder()
-    //              .title("Ok")
-    //              .hide(true)
-    //              .text(Web.msgCreated(PersonShiftDay.class))
-    //              .type("success").build();
-    //        }
-    //
-    //      } else {  // Le Drools non danno il grant
-    //        message = PNotifyObject.builder()
-    //            .title("Forbidden")
-    //            .hide(true)
-    //            .text(Messages.get("forbidden"))
-    //            .type("error").build();
-    //        response.status = Http.StatusCode.FORBIDDEN;
-    //      }
-    //
-    //    } else { // Lo ShiftType specificato non esiste
-    //      message = PNotifyObject.builder()
-    //          .title("Error")
-    //          .hide(true)
-    //          .text(Messages.get("notFound"))
-    //          .type("error").build();
-    //      response.status = Http.StatusCode.NOT_FOUND;
-    //    }
-    //
-    //    renderJSON(message);
+    final PNotifyObject message;
+    PersonReperibilityType reperibilityType = reperibilityDao.getPersonReperibilityTypeById(reperibilityId);
+    final ReperibilityTypeMonth reperibilityTypeMonth = 
+        reperibilityTypeMonthDao.byReperibilityTypeAndDate(reperibilityType, date).orNull();
+    if (reperibilityType != null) {
+      if (rules.check(reperibilityType) && rules.check(reperibilityTypeMonth)) {
+        PersonReperibilityDay personReperibilityDay = new PersonReperibilityDay();
+        personReperibilityDay.date = date;
+        personReperibilityDay.reperibilityType = reperibilityType;
+        Optional<String> error;
+        if (validation.valid(personReperibilityDay).ok) {
+          error = reperibilityManager2.reperibilityPermitted(personReperibilityDay);
+        } else {
+          error = Optional.of(Messages.get("validation.invalid"));
+        }
+        if (error.isPresent()) {
+          response.status = 409;
+
+          message = PNotifyObject.builder()
+              .title("Errore")
+              .hide(true)
+              .text(error.get())
+              .type("error").build();
+
+        } else {
+          reperibilityManager2.save(personReperibilityDay);
+
+          message = PNotifyObject.builder()
+              .title("Ok")
+              .hide(true)
+              .text(Web.msgCreated(PersonShiftDay.class))
+              .type("success").build();
+        }
+
+      } else {  // Le Drools non danno il grant
+        message = PNotifyObject.builder()
+            .title("Forbidden")
+            .hide(true)
+            .text(Messages.get("forbidden"))
+            .type("error").build();
+        response.status = Http.StatusCode.FORBIDDEN;
+      }
+
+    } else { // Il ReperibilityType specificato non esiste
+      message = PNotifyObject.builder()
+          .title("Error")
+          .hide(true)
+          .text(Messages.get("notFound"))
+          .type("error").build();
+      response.status = Http.StatusCode.NOT_FOUND;
+    }
+
+    renderJSON(message);           
   }
 
   /**
@@ -312,7 +306,7 @@ public class ReperibilityCalendar extends Controller {
       final ReperibilityTypeMonth reperibilityTypeMonth = 
           reperibilityTypeMonthDao.byReperibilityTypeAndDate(prd.reperibilityType, 
               prd.date).orNull();
-              
+
       if (rules.check(prd.reperibilityType) && rules.check(reperibilityTypeMonth)) {
 
         reperibilityManager2.delete(prd);
@@ -340,19 +334,17 @@ public class ReperibilityCalendar extends Controller {
    * @param start data relativa al mese da controllare
    * @return true se l'attività è modificabile nella data richiesta, false altrimenti.
    */
-  public static boolean editable(long activityId, @Required LocalDate start) {
+  public static boolean editable(long reperibilityId, @Required LocalDate start) {
 
-    //    Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
-    //
-    //    if (Validation.hasErrors() || !activity.isPresent()) {
-    //      return false;
-    //    }
-    //
-    //    final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao
-    //        .byShiftTypeAndDate(activity.get(), start).orNull();
-    //
-    //    return rules.check(activity.get()) && rules.check(shiftTypeMonth);
-    return false;
+    PersonReperibilityType reperibilityType = reperibilityDao.getPersonReperibilityTypeById(reperibilityId);
+    if (reperibilityType == null || Validation.hasErrors()) {
+      return false;
+    }
+    final ReperibilityTypeMonth reperibilityTypeMonth = 
+        reperibilityTypeMonthDao.byReperibilityTypeAndDate(reperibilityType, start).orNull();
+
+    return rules.check(reperibilityType) && rules.check(reperibilityTypeMonth);
+
   }
 
   /**
