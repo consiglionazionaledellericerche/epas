@@ -118,7 +118,8 @@ public class PersonReperibilityDayDao extends DaoBase {
    * @param personReperibilityDayId l'id del giorno di reperibilità
    * @return il personReperibilityDay, se esiste, associato all'id passato come parametro.
    */
-  public Optional<PersonReperibilityDay> getPersonReperibilityDayById(long personReperibilityDayId) {
+  public Optional<PersonReperibilityDay> getPersonReperibilityDayById(
+      long personReperibilityDayId) {
     final QPersonReperibilityDay prd = QPersonReperibilityDay.personReperibilityDay;
     JPQLQuery query = getQueryFactory().from(prd).where(prd.id.eq(personReperibilityDayId));
     return Optional.fromNullable(query.singleResult(prd));
@@ -216,6 +217,22 @@ public class PersonReperibilityDayDao extends DaoBase {
     QPersonReperibility pr = QPersonReperibility.personReperibility;
     JPQLQuery query = getQueryFactory().from(pr).where(pr.id.eq(id));
     return Optional.fromNullable(query.singleResult(pr));
+  }
+  
+  /**
+   * 
+   * @param type il tipo di reperibilità 
+   * @param from la data da cui cercare
+   * @param to la data entro cui cercare
+   * @return la lista di personReperibility associati ai parametri passati.
+   */
+  public List<PersonReperibility> byTypeAndPeriod(PersonReperibilityType type, 
+      LocalDate from, LocalDate to) {
+    QPersonReperibility pr = QPersonReperibility.personReperibility;
+    JPQLQuery query = getQueryFactory()
+        .from(pr).where(pr.personReperibilityType.eq(type)
+            .and(pr.startDate.loe(from).andAnyOf(pr.endDate.isNull(), pr.endDate.goe(to))));
+    return query.list(pr);
   }
 
 

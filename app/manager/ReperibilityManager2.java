@@ -1,15 +1,31 @@
 package manager;
+
 import com.google.common.base.Optional;
+
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 
 import controllers.Security;
+
+import dao.CompetenceCodeDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
 import dao.history.HistoricalDao;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 
+import models.CompetenceCode;
 import models.Person;
 import models.PersonDay;
 import models.PersonReperibility;
@@ -21,19 +37,13 @@ import models.ReperibilityTypeMonth;
 import models.ShiftType;
 import models.ShiftTypeMonth;
 import models.User;
-import play.i18n.Messages;
+import models.enumerate.ShiftTroubles;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
+import play.i18n.Messages;
 
 /**
  * Gestiore delle operazioni sulla reperibilità ePAS.
@@ -43,17 +53,24 @@ import javax.inject.Inject;
 @Slf4j
 public class ReperibilityManager2 {
 
+  private static final String REPERIBILITY_WORKDAYS = "207";
+  private static final String REPERIBILITY_HOLIDAYS = "208";
+
   private final PersonReperibilityDayDao reperibilityDayDao;
   private final PersonDayDao personDayDao;
   private final PersonDayManager personDayManager;
+  private final CompetenceCodeDao competenceCodeDao;
 
   @Inject
   public ReperibilityManager2(PersonReperibilityDayDao reperibilityDayDao, 
-      PersonDayDao personDayDao, PersonDayManager personDayManager) {
+      PersonDayDao personDayDao, PersonDayManager personDayManager, 
+      CompetenceCodeDao competenceCodeDao) {
     this.reperibilityDayDao = reperibilityDayDao;
     this.personDayDao = personDayDao;
     this.personDayManager = personDayManager;
+    this.competenceCodeDao = competenceCodeDao;
   }
+  
   /**
    * 
    * @return la lista delle attività di reperibilità visibili all'utente che ne fa la richiesta.
@@ -117,7 +134,7 @@ public class ReperibilityManager2 {
     Verify.verifyNotNull(personReperibilityDay).save();
     recalculate(personReperibilityDay);
   }
-  
+
   /**
    * cancella il personReperibilityDay.
    * @param personReperibilityDay il personReperibilityDay da cancellare
@@ -151,15 +168,15 @@ public class ReperibilityManager2 {
        *  sul giorno precedente (spostamento di un turno da un giorno all'altro)
        */
       HistoricalDao.lastRevisionsOf(PersonReperibilityDay.class, personReperibilityDay.id)
-      .stream().limit(1).map(historyValue -> {
-        PersonReperibilityDay pd = (PersonReperibilityDay) historyValue.value;
-        return pd.date;
-      }).filter(Objects::nonNull).distinct()
-      .forEach(localDate -> {
-        if (!localDate.equals(personReperibilityDay.date)) {
-          checkReperibilityDayValid(localDate, reperibilityType);
-        }
-      });
+          .stream().limit(1).map(historyValue -> {
+            PersonReperibilityDay pd = (PersonReperibilityDay) historyValue.value;
+            return pd.date;
+          }).filter(Objects::nonNull).distinct()
+          .forEach(localDate -> {
+            if (!localDate.equals(personReperibilityDay.date)) {
+              checkReperibilityDayValid(localDate, reperibilityType);
+            }
+          });
 
       // Aggiornamento del relativo ReperibilityTypeMonth (per incrementare il campo version)
       ReperibilityTypeMonth newStatus = 
@@ -180,7 +197,7 @@ public class ReperibilityManager2 {
   /**
    * Verifica se un turno puo' essere inserito senza violare le regole dei turni
    *
-   * @param personShiftDay il personShiftDay da inserire
+   * @param personReperibilityDay il personShiftDay da inserire
    * @return l'eventuale stringa contenente l'errore evidenziato in fase di inserimento del turno.
    */
   public Optional<String> reperibilityPermitted(PersonReperibilityDay personReperibilityDay) {
@@ -203,10 +220,12 @@ public class ReperibilityManager2 {
 
     // Verifica che la persona non abbia altre reperibilità nello stesso giorno 
     final Optional<PersonReperibilityDay> personReperibility = reperibilityDayDao
-        .getPersonReperibilityDay(personReperibilityDay.personReperibility.person, personReperibilityDay.date);
+        .getPersonReperibilityDay(
+            personReperibilityDay.personReperibility.person, personReperibilityDay.date);
 
     if (personReperibility.isPresent()) {
-      return Optional.of(Messages.get("reperibility.alreadyInReperibility", personReperibility.get().reperibilityType));
+      return Optional.of(Messages.get("reperibility.alreadyInReperibility", 
+          personReperibility.get().reperibilityType));
     }
 
     // verifica che la persona non sia assente nel giorno
@@ -218,13 +237,15 @@ public class ReperibilityManager2 {
     }
 
     List<PersonReperibilityDay> list = reperibilityDayDao
-        .getPersonReperibilityDayFromPeriodAndType(personReperibilityDay.date, personReperibilityDay.date,
+        .getPersonReperibilityDayFromPeriodAndType(
+            personReperibilityDay.date, personReperibilityDay.date,
             personReperibilityDay.reperibilityType, Optional.absent());
 
     //controlla che la reperibilità nel giorno sia già stata assegnata ad un'altra persona
     if (!list.isEmpty()) {
       return Optional.of(Messages
-          .get("reperibility.dayAlreadyAssigned", personReperibilityDay.personReperibility.person.fullName()));
+          .get("reperibility.dayAlreadyAssigned", 
+              personReperibilityDay.personReperibility.person.fullName()));
     }
 
     return Optional.absent();
@@ -242,5 +263,112 @@ public class ReperibilityManager2 {
 
   public void checkReperibilityDayValid(LocalDate date, PersonReperibilityType type) {
     //TODO: va implementato davvero?
+  }
+
+  /**
+   *
+   * @param reperibility attività sulla quale effettuare i calcoli
+   * @param from data di inizio da cui calcolare
+   * @param to data di fine
+   * @return Restituisce una mappa con i giorni di reperibilità maturati per ogni persona.
+   */
+  public Map<Person, Integer> calculateReperibilityWorkDaysCompetences(
+      PersonReperibilityType reperibility, LocalDate from, LocalDate to) {
+
+    final Map<Person, Integer> reperibilityWorkDaysCompetences = new HashMap<>();
+
+
+    final LocalDate today = LocalDate.now();
+
+    final LocalDate lastDay;
+
+    if (to.isAfter(today)) {
+      lastDay = today;
+    } else {
+      lastDay = to;
+    }
+    CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode(REPERIBILITY_WORKDAYS);
+    involvedReperibilityWorkers(reperibility, from, to).forEach(person -> {
+
+      int competences = 
+          calculatePersonReperibilityCompetencesInPeriod(reperibility, person, from, lastDay, code);
+      reperibilityWorkDaysCompetences.put(person, competences);
+    });
+
+    return reperibilityWorkDaysCompetences;
+  }
+
+  /**
+   * @param reperibility attività di reperibilità
+   * @param from data di inizio
+   * @param to data di fine
+   * @return Una lista di persone che sono effettivamente coinvolte in reperibilità in un 
+   *     determinato periodo (Dipendenti con le reperibilità attive in quel periodo).
+   */
+  public List<Person> involvedReperibilityWorkers(PersonReperibilityType reperibility, 
+      LocalDate from, LocalDate to) {
+    return reperibilityDayDao.byTypeAndPeriod(reperibility, from, to)
+        .stream().map(rep -> rep.person).distinct().collect(Collectors.toList());
+  }
+
+  /**
+   * @param reperibility attività di turno
+   * @param person Persona sulla quale effettuare i calcoli
+   * @param from data iniziale
+   * @param to data finale
+   * @return il numero di giorni di competenza maturati in base alle reperibilità effettuate
+   *     nel periodo selezionato (di norma serve calcolarli su un intero mese al massimo).
+   */
+  public int calculatePersonReperibilityCompetencesInPeriod(
+      PersonReperibilityType reperibility, Person person, 
+      LocalDate from, LocalDate to, CompetenceCode code) {
+
+    // TODO: 08/06/17 Sicuramente vanno differenziati per tipo di competenza.....
+    // c'è sono da capire qual'è la discriminante
+    int reperibilityCompetences = 0;
+    final List<PersonReperibilityDay> reperibilities = reperibilityDayDao
+        .getPersonReperibilityDaysByPeriodAndType(from, to, reperibility, person);
+
+    if (code.codeToPresence.equalsIgnoreCase(REPERIBILITY_WORKDAYS)) {
+      reperibilityCompetences = (int) reperibilities.stream()
+          .filter(rep -> !personDayManager.isHoliday(person, rep.date)).count();
+    } else {
+      reperibilityCompetences = (int) reperibilities.stream()
+          .filter(rep -> personDayManager.isHoliday(person, rep.date)).count();
+    }
+
+    return reperibilityCompetences;
+  }
+
+  /**
+   * 
+   * @param reperibility il tipo di reperibilità 
+   * @param start la data di inizio da cui conteggiare
+   * @param end la data di fine entro cui conteggiare
+   * @return la mappa contenente i giorni di reperibilità festiva per ogni dipendente reperibile.
+   */
+  public Map<Person, Integer> calculateReperibilityHolidaysCompetences(
+      PersonReperibilityType reperibility, LocalDate start, LocalDate end) {
+
+    final Map<Person, Integer> reperibilityHolidaysCompetences = new HashMap<>();
+
+    final LocalDate today = LocalDate.now();
+
+    final LocalDate lastDay;
+
+    if (end.isAfter(today)) {
+      lastDay = today;
+    } else {
+      lastDay = end;
+    }
+    CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode(REPERIBILITY_HOLIDAYS);
+    involvedReperibilityWorkers(reperibility, start, end).forEach(person -> {
+
+      int competences = calculatePersonReperibilityCompetencesInPeriod(reperibility, 
+          person, start, lastDay, code);
+      reperibilityHolidaysCompetences.put(person, competences);
+    });
+
+    return reperibilityHolidaysCompetences;
   }
 }
