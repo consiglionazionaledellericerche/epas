@@ -1,10 +1,10 @@
 package controllers;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 
 import dao.AbsenceDao;
 import dao.PersonDao;
@@ -12,6 +12,14 @@ import dao.PersonReperibilityDayDao;
 import dao.ReperibilityTypeMonthDao;
 import helpers.Web;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ReperibilityManager2;
@@ -32,9 +40,11 @@ import models.dto.ReperibilityEvent;
 import models.dto.ShiftEvent;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
+import models.enumerate.ShiftTroubles;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
+import org.joda.time.YearMonth;
 
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -45,13 +55,6 @@ import play.mvc.With;
 
 import security.SecurityRules;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 @With(Resecure.class)
 @Slf4j
@@ -71,10 +74,11 @@ public class ReperibilityCalendar extends Controller {
   static ReperibilityTypeMonthDao reperibilityTypeMonthDao;
   @Inject
   static PersonDao personDao;
+  
   /**
    * ritorna alla view le info necessarie per creare il calendario.
    *
-   * @param activity l'attività
+   * @param reperibility l'attività
    * @param date la data
    */
   public static void show(PersonReperibilityType reperibility, LocalDate date) {
@@ -83,7 +87,8 @@ public class ReperibilityCalendar extends Controller {
 
     final List<PersonReperibilityType> reperibilities = reperibilityManager2.getUserActivities();
 
-    final PersonReperibilityType reperibilitySelected = reperibility.id != null ? reperibility : reperibilities.get(0);
+    final PersonReperibilityType reperibilitySelected = 
+        reperibility.id != null ? reperibility : reperibilities.get(0);
 
     rules.checkIfPermitted(reperibilitySelected);
 
@@ -93,16 +98,18 @@ public class ReperibilityCalendar extends Controller {
   /**
    * ritorna la lista di persone associate alla reperibilità nel periodo passato come parametro.
    *
-   * @param activityId l'id dell'attività di cui ritornare la lista di personale associato
+   * @param reperibilityId l'id dell'attività di cui ritornare la lista di personale associato
    * @param start la data di inizio da considerare
    * @param end la data di fine da considerare
    */
   public static void reperibilityPeople(long reperibilityId, LocalDate start, LocalDate end) {
 
-    PersonReperibilityType reperibility = reperibilityDao.getPersonReperibilityTypeById(reperibilityId);
+    PersonReperibilityType reperibility = 
+        reperibilityDao.getPersonReperibilityTypeById(reperibilityId);
     if (reperibility != null) {
       rules.checkIfPermitted(reperibility);
-      final List<PersonReperibility> people = reperibilityManager2.reperibilityWorkers(reperibility,start, end);
+      final List<PersonReperibility> people = 
+          reperibilityManager2.reperibilityWorkers(reperibility,start, end);
       int index = 0;
       final List<ReperibilityEvent> reperibilityWorkers = new ArrayList<>();
 
@@ -142,10 +149,12 @@ public class ReperibilityCalendar extends Controller {
       throws JsonProcessingException {
 
     List<ReperibilityEvent> events = new ArrayList<>();
-    PersonReperibilityType reperibility = reperibilityDao.getPersonReperibilityTypeById(reperibilityId);
+    PersonReperibilityType reperibility = 
+        reperibilityDao.getPersonReperibilityTypeById(reperibilityId);
     if (reperibility != null && rules.check(reperibility)) {
 
-      List<PersonReperibility> people = reperibilityManager2.reperibilityWorkers(reperibility, start, end);
+      List<PersonReperibility> people = 
+          reperibilityManager2.reperibilityWorkers(reperibility, start, end);
 
       int index = 0;
 
@@ -168,17 +177,18 @@ public class ReperibilityCalendar extends Controller {
    * Controlla se il turno passato come parametro può essere salvato in un dato giorno
    * ed eventualmente lo salva, altrimenti restituisce un errore
    *
-   * @param personShiftDayId id del persnShiftDay da controllare
+   * @param personReperibilityDayId id del persnShiftDay da controllare
    * @param newDate giorno nel quale salvare il turno error 409 con messaggio di
-   * ShiftTroubles.PERSON_IS_ABSENT, CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED
    */
   public static void changeReperibility(long personReperibilityDayId, LocalDate newDate) {
 
     final PNotifyObject message;
-    final Optional<PersonReperibilityDay> prd = reperibilityDao.getPersonReperibilityDayById(personReperibilityDayId);
+    final Optional<PersonReperibilityDay> prd = 
+        reperibilityDao.getPersonReperibilityDayById(personReperibilityDayId);
     if (prd.isPresent()) {
       final ReperibilityTypeMonth reperibilityTypeMonth = 
-          reperibilityTypeMonthDao.byReperibilityTypeAndDate(prd.get().reperibilityType, newDate).orNull();
+          reperibilityTypeMonthDao.byReperibilityTypeAndDate(
+              prd.get().reperibilityType, newDate).orNull();
       if (rules.check(prd.get().reperibilityType) && rules.check(reperibilityTypeMonth)) {
         prd.get().date = newDate;
         Optional<String> error = reperibilityManager2.reperibilityPermitted(prd.get());
@@ -226,13 +236,13 @@ public class ReperibilityCalendar extends Controller {
    *
    * @param personId l'id della persona in turno
    * @param date la data in cui inserire il turno
-   * @param shiftSlot lo slot di turno (mattina/pomeriggio)
-   * @param activityId l'id dell'attività su cui inserire il turnista
+   * @param reperibilityId l'id dell'attività su cui inserire il reperibilie
    */
   public static void newReperibility(long personId, LocalDate date, long reperibilityId) {
 
     final PNotifyObject message;
-    PersonReperibilityType reperibilityType = reperibilityDao.getPersonReperibilityTypeById(reperibilityId);
+    PersonReperibilityType reperibilityType = 
+        reperibilityDao.getPersonReperibilityTypeById(reperibilityId);
     final ReperibilityTypeMonth reperibilityTypeMonth = 
         reperibilityTypeMonthDao.byReperibilityTypeAndDate(reperibilityType, date).orNull();
     if (reperibilityType != null) {
@@ -275,7 +285,7 @@ public class ReperibilityCalendar extends Controller {
                 .type("success").build();
           }
         }
-        
+
 
       } else {  // Le Drools non danno il grant
         message = PNotifyObject.builder()
@@ -301,7 +311,7 @@ public class ReperibilityCalendar extends Controller {
   /**
    * Effettua l'eliminazione di un turno.
    *
-   * @param psd Turno da eliminare
+   * @param prd Reperibilità da eliminare
    */
   public static void deleteReperibility(PersonReperibilityDay prd) {
     final PNotifyObject message;
@@ -340,13 +350,14 @@ public class ReperibilityCalendar extends Controller {
   }
 
   /**
-   * @param activityId id dell'attività da verificare
+   * @param reperibilityId id dell'attività da verificare
    * @param start data relativa al mese da controllare
    * @return true se l'attività è modificabile nella data richiesta, false altrimenti.
    */
   public static boolean editable(long reperibilityId, @Required LocalDate start) {
 
-    PersonReperibilityType reperibilityType = reperibilityDao.getPersonReperibilityTypeById(reperibilityId);
+    PersonReperibilityType reperibilityType = 
+        reperibilityDao.getPersonReperibilityTypeById(reperibilityId);
     if (reperibilityType == null || Validation.hasErrors()) {
       return false;
     }
@@ -361,24 +372,28 @@ public class ReperibilityCalendar extends Controller {
    * Calcola le ore di turno effettuate in quel periodo per ciascuna persona dell'attività
    * specificata
    *
-   * @param activityId id dell'attività di turno
+   * @param reperibilityId id dell'attività di reperibilità
    * @param start data iniziale
    * @param end data finale.
    */
-  public static void recap(long activityId, LocalDate start, LocalDate end) {
-    //    Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
-    //
-    //    if (activity.isPresent()) {
-    //      ShiftType shiftType = activity.get();
-    //      rules.checkIfPermitted(activity.get());
-    //      Map<Person, Integer> shiftsCalculatedCompetences = shiftManager2
-    //          .calculateActivityShiftCompetences(shiftType, start, end);
-    //
-    //      final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao
-    //          .byShiftTypeAndDate(shiftType, start).orNull();
-    //
-    //      render(shiftsCalculatedCompetences, shiftTypeMonth, shiftType, start);
-    //    }
+  public static void recap(long reperibilityId, LocalDate start, LocalDate end) {
+    PersonReperibilityType reperibility = 
+        reperibilityDao.getPersonReperibilityTypeById(reperibilityId);
+
+    if (reperibility != null) {
+
+      rules.checkIfPermitted(reperibility);
+      Map<Person, Integer> workDaysReperibilityCalculatedCompetences = reperibilityManager2
+          .calculateReperibilityWorkDaysCompetences(reperibility, start, end);
+      Map<Person, Integer> holidaysReperibilityCalculatedCompetences = 
+          reperibilityManager2.calculateReperibilityHolidaysCompetences(reperibility, start, end);
+
+      final ReperibilityTypeMonth reperibilityTypeMonth = reperibilityTypeMonthDao
+          .byReperibilityTypeAndDate(reperibility, start).orNull();
+
+      render(workDaysReperibilityCalculatedCompetences, holidaysReperibilityCalculatedCompetences,
+          reperibilityTypeMonth, reperibility, start);
+    }
   }
 
   /**
@@ -386,9 +401,10 @@ public class ReperibilityCalendar extends Controller {
    * @param start data iniziale del periodo
    * @param end data finale del periodo
    * @return Una lista di DTO che modellano le assenze di quella persona nell'intervallo specificato
-   * da renderizzare nel fullcalendar.
+   *     da renderizzare nel fullcalendar.
    */
-  private static List<ReperibilityEvent> absenceEvents(Person person, LocalDate start, LocalDate end) {
+  private static List<ReperibilityEvent> absenceEvents(Person person, 
+      LocalDate start, LocalDate end) {
 
     final List<JustifiedTypeName> types = ImmutableList
         .of(JustifiedTypeName.all_day, JustifiedTypeName.assign_all_day);
@@ -445,7 +461,8 @@ public class ReperibilityCalendar extends Controller {
   private static List<ReperibilityEvent> reperibilityEvents(PersonReperibilityType reperibility, 
       Person person, LocalDate start, LocalDate end, EventColor color) {
 
-    return reperibilityDao.getPersonReperibilityDaysByPeriodAndType(start, end, reperibility, person).stream()
+    return reperibilityDao.getPersonReperibilityDaysByPeriodAndType(start, 
+        end, reperibility, person).stream()
         .map(personReperibilityDay -> {
           final ReperibilityEvent event = ReperibilityEvent.builder()
 
@@ -462,5 +479,67 @@ public class ReperibilityCalendar extends Controller {
 
           return event;
         }).collect(Collectors.toList());
+  }
+  
+  /**
+   * ritorna informazioni alla vista relative ai turnisti e alle ore già approvate/pagate di turno.
+   *
+   * @param activityId l'id dell'attività per cui ricercare le approvazioni
+   * @param date la data da cui ricercare le approvazioni
+   */
+  public static void monthReperibilityApprovement(long activityId, @Required LocalDate date) {
+    if (Validation.hasErrors()) {
+      notFound();
+    }
+//TODO: da implementare questa parte
+//    ShiftType shiftType = shiftDao.getShiftTypeById(activityId).orNull();
+//    notFoundIfNull(shiftType);
+//
+//    rules.checkIfPermitted(shiftType);
+//
+//    final YearMonth monthToApprove = new YearMonth(date);
+//
+//    final Optional<ShiftTypeMonth> monthStatus = shiftTypeMonthDao
+//        .byShiftTypeAndDate(shiftType, date);
+//
+//    final ShiftTypeMonth shiftTypeMonth;
+//    // Nel caso non ci sia ancora uno stato del mese persistito ne creo uno nuovo che mi serve in
+//    // fase di conferma
+//    if (monthStatus.isPresent()) {
+//      shiftTypeMonth = monthStatus.get();
+//    } else {
+//      shiftTypeMonth = new ShiftTypeMonth();
+//      shiftTypeMonth.shiftType = shiftType;
+//      shiftTypeMonth.yearMonth = monthToApprove;
+//      shiftTypeMonth.save();
+//    }
+//
+//    final LocalDate monthbegin = monthToApprove.toLocalDate(1);
+//    final LocalDate monthEnd = monthbegin.dayOfMonth().withMaximumValue();
+//    final LocalDate today = LocalDate.now();
+//
+//    final LocalDate lastDay;
+//
+//    if (monthEnd.isAfter(today)) {
+//      lastDay = today;
+//    } else {
+//      lastDay = monthEnd;
+//    }
+//
+//    final List<Person> people = shiftManager2.involvedShiftWorkers(shiftType, monthbegin, monthEnd);
+//
+//    final Map<Person, Integer> shiftsCalculatedCompetences = new HashMap<>();
+//    final Map<Person, List<ShiftTroubles>> peopleTrouble = new HashMap<>();
+//
+//    people.forEach(person -> {
+//      int competences = shiftManager2.calculatePersonShiftCompetencesInPeriod(shiftType, person,
+//          monthbegin, lastDay);
+//      shiftsCalculatedCompetences.put(person, competences);
+//
+//      List<ShiftTroubles> shiftsTroubles = shiftManager2.allValidShifts(shiftType, person, monthbegin, monthEnd);
+//      peopleTrouble.put(person, shiftsTroubles);
+//    });
+//
+//    render(shiftTypeMonth, shiftsCalculatedCompetences, peopleTrouble);
   }
 }
