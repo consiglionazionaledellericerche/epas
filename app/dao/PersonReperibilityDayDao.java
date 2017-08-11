@@ -112,6 +112,17 @@ public class PersonReperibilityDayDao extends DaoBase {
             .orderBy(prd.date.asc());
     return query.list(prd);
   }
+  
+  /**
+   * 
+   * @param personReperibilityDayId l'id del giorno di reperibilità
+   * @return il personReperibilityDay, se esiste, associato all'id passato come parametro.
+   */
+  public Optional<PersonReperibilityDay> getPersonReperibilityDayById(long personReperibilityDayId) {
+    final QPersonReperibilityDay prd = QPersonReperibilityDay.personReperibilityDay;
+    JPQLQuery query = getQueryFactory().from(prd).where(prd.id.eq(personReperibilityDayId));
+    return Optional.fromNullable(query.singleResult(prd));
+  }
 
   //***************************************************************/
   // Query DAO relative al personReperibilityType                **/

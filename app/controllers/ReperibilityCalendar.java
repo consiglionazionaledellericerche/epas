@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dao.AbsenceDao;
+import dao.PersonDao;
 import dao.PersonReperibilityDayDao;
 import dao.ReperibilityTypeMonthDao;
 import helpers.Web;
@@ -68,6 +69,8 @@ public class ReperibilityCalendar extends Controller {
   static ObjectMapper mapper;
   @Inject
   static ReperibilityTypeMonthDao reperibilityTypeMonthDao;
+  @Inject
+  static PersonDao personDao;
   /**
    * ritorna alla view le info necessarie per creare il calendario.
    *
@@ -169,58 +172,53 @@ public class ReperibilityCalendar extends Controller {
    * @param newDate giorno nel quale salvare il turno error 409 con messaggio di
    * ShiftTroubles.PERSON_IS_ABSENT, CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED
    */
-  public static void changeReperibility(long personShiftDayId, LocalDate newDate) {
+  public static void changeReperibility(long personReperibilityDayId, LocalDate newDate) {
 
-    //    final PNotifyObject message;
-    //    final PersonShiftDay shift = shiftDao.getPersonShiftDayById(personShiftDayId);
-    //
-    //    final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao.byShiftTypeAndDate(shift
-    //        .shiftType, newDate).orNull();
-    //
-    //    if (shift == null) {
-    //      message = PNotifyObject.builder()
-    //          .title("Error")
-    //          .hide(true)
-    //          .text(Messages.get("notFound"))
-    //          .type("error").build();
-    //      response.status = Http.StatusCode.NOT_FOUND;
-    //    } else {
-    //      if (rules.check(shift.shiftType) && rules.check(shiftTypeMonth)) {
-    //        shift.date = newDate;
-    //
-    //        // controlla gli eventuali errori di consitenza nel calendario
-    //        Optional<String> error = shiftManager2.shiftPermitted(shift);
-    //
-    //        if (error.isPresent()) {
-    //          message = PNotifyObject.builder()
-    //              .title("Errore")
-    //              .hide(true)
-    //              .text(error.get())
-    //              .type("error").build();
-    //
-    //          response.status = 409;
-    //        } else {
-    //          //salva il turno modificato
-    //          shiftManager2.save(shift);
-    //
-    //          message = PNotifyObject.builder()
-    //              .title("Ok")
-    //              .hide(true)
-    //              .text(Web.msgModified(PersonShiftDay.class))
-    //              .type("success").build();
-    //        }
-    //      } else {
-    //        message = PNotifyObject.builder()
-    //            .title("Forbidden")
-    //            .hide(true)
-    //            .text(Messages.get("forbidden"))
-    //            .type("error").build();
-    //        response.status = Http.StatusCode.FORBIDDEN;
-    //      }
-    //
-    //    }
-    //
-    //    renderJSON(message);
+    final PNotifyObject message;
+    final Optional<PersonReperibilityDay> prd = reperibilityDao.getPersonReperibilityDayById(personReperibilityDayId);
+    if (prd.isPresent()) {
+      final ReperibilityTypeMonth reperibilityTypeMonth = 
+          reperibilityTypeMonthDao.byReperibilityTypeAndDate(prd.get().reperibilityType, newDate).orNull();
+      if (rules.check(prd.get().reperibilityType) && rules.check(reperibilityTypeMonth)) {
+        prd.get().date = newDate;
+        Optional<String> error = reperibilityManager2.reperibilityPermitted(prd.get());
+        if (error.isPresent()) {
+          message = PNotifyObject.builder()
+              .title("Errore")
+              .hide(true)
+              .text(error.get())
+              .type("error").build();
+
+          response.status = 409;
+        } else {
+          //salva il turno modificato
+          reperibilityManager2.save(prd.get());
+
+          message = PNotifyObject.builder()
+              .title("Ok")
+              .hide(true)
+              .text(Web.msgModified(PersonShiftDay.class))
+              .type("success").build();
+        }
+      } else {
+        message = PNotifyObject.builder()
+            .title("Forbidden")
+            .hide(true)
+            .text(Messages.get("forbidden"))
+            .type("error").build();
+        response.status = Http.StatusCode.FORBIDDEN;
+      }
+
+    } else {
+      message = PNotifyObject.builder()
+          .title("Error")
+          .hide(true)
+          .text(Messages.get("notFound"))
+          .type("error").build();
+      response.status = Http.StatusCode.NOT_FOUND;
+    }
+
+    renderJSON(message);
   }
 
   /**
@@ -239,33 +237,45 @@ public class ReperibilityCalendar extends Controller {
         reperibilityTypeMonthDao.byReperibilityTypeAndDate(reperibilityType, date).orNull();
     if (reperibilityType != null) {
       if (rules.check(reperibilityType) && rules.check(reperibilityTypeMonth)) {
-        PersonReperibilityDay personReperibilityDay = new PersonReperibilityDay();
-        personReperibilityDay.date = date;
-        personReperibilityDay.reperibilityType = reperibilityType;
-        Optional<String> error;
-        if (validation.valid(personReperibilityDay).ok) {
-          error = reperibilityManager2.reperibilityPermitted(personReperibilityDay);
-        } else {
-          error = Optional.of(Messages.get("validation.invalid"));
-        }
-        if (error.isPresent()) {
-          response.status = 409;
-
+        Person person = personDao.getPersonById(personId);
+        if (person == null) {
           message = PNotifyObject.builder()
-              .title("Errore")
+              .title("Error")
               .hide(true)
-              .text(error.get())
+              .text(Messages.get("notFound"))
               .type("error").build();
-
+          response.status = Http.StatusCode.NOT_FOUND;
         } else {
-          reperibilityManager2.save(personReperibilityDay);
+          PersonReperibilityDay personReperibilityDay = new PersonReperibilityDay();
+          personReperibilityDay.date = date;
+          personReperibilityDay.reperibilityType = reperibilityType;
+          personReperibilityDay.personReperibility = person.reperibility;
+          Optional<String> error;
+          if (validation.valid(personReperibilityDay).ok) {
+            error = reperibilityManager2.reperibilityPermitted(personReperibilityDay);
+          } else {
+            error = Optional.of(Messages.get("validation.invalid"));
+          }
+          if (error.isPresent()) {
+            response.status = 409;
 
-          message = PNotifyObject.builder()
-              .title("Ok")
-              .hide(true)
-              .text(Web.msgCreated(PersonShiftDay.class))
-              .type("success").build();
+            message = PNotifyObject.builder()
+                .title("Errore")
+                .hide(true)
+                .text(error.get())
+                .type("error").build();
+
+          } else {
+            reperibilityManager2.save(personReperibilityDay);
+
+            message = PNotifyObject.builder()
+                .title("Ok")
+                .hide(true)
+                .text(Web.msgCreated(PersonReperibilityDay.class))
+                .type("success").build();
+          }
         }
+        
 
       } else {  // Le Drools non danno il grant
         message = PNotifyObject.builder()
