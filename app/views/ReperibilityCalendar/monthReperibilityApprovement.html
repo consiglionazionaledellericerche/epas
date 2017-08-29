@@ -1,83 +1,95 @@
 #{extends 'main.html' /}
 #{set header:'navbar' /}
-#{set title: 'Approvazione Turni' /}
+#{set title: 'Approvazione Reperibilità' /}
 
 
 <div class="container">
-  #{if shiftTypeMonth?.approved}
+  #{if reperibilityTypeMonth?.approved}
   #{title title: 'Revoca competenze' /}
-  <h2>${shiftTypeMonth.yearMonth.asText()} - ${shiftTypeMonth.shiftType}</h2>
+  <h2>${reperibilityTypeMonth.yearMonth.asText()} - ${reperibilityTypeMonth.personReperibilityType}</h2>
   #{alert color:'warning', dismissible: true}
   <p>
-    Le competenze per il mese ${shiftTypeMonth.yearMonth.asText()} risultano già approvate.
-    La rimozione dell'approvazione comporterà un ricalcolo delle competenze assegnate ai turnisti
+    Le competenze per il mese ${reperibilityTypeMonth.yearMonth.asText()} risultano già approvate.
+    La rimozione dell'approvazione comporterà un ricalcolo delle competenze assegnate ai reperibili
     di questa attività.
     Inoltre una volta rimossa l'approvazione sarà nuovamente possibile effettuare le modifiche
-    sui turni del calendario.
+    sulle reperibilità del calendario.
   </p>
   #{/alert}
   #{/if}
   #{else}
   #{title title: 'Approvazione competenze' /}
-  <h2>${shiftTypeMonth.yearMonth.asText()} - ${shiftTypeMonth.shiftType}</h2>
+  <h2>${reperibilityTypeMonth.yearMonth.asText()} - ${reperibilityTypeMonth.personReperibilityType}</h2>
   #{alert color:'info', dismissible: true}
   <p>
-    Le competenze per il mese ${shiftTypeMonth.yearMonth.asText()} risultano da approvare.
-    L'approvazione comporterà l'assegnamento delle competenze riportate qui sotto ai turnisti di
+    Le competenze per il mese ${reperibilityTypeMonth.yearMonth.asText()} risultano da approvare.
+    L'approvazione comporterà l'assegnamento delle competenze riportate qui sotto ai reperibili di
     questa attività.<br>
-    Una volta approvate, non sarà possibile apportare ulteriori modifiche ai turni dal calendario
+    Una volta approvate, non sarà possibile apportare ulteriori modifiche alle reperibilità dal calendario
     salvo annullamento dell'approvazione.
   </p>
   #{/alert}
   #{/else}
-  <ul class="list-group">
-    #{list shiftsCalculatedCompetences.entrySet()}
+  <div class="col-sm-6">
+  	<h4>Reperibilità feriali</h4>
+  	<ul class="list-group">
+    #{list reperibilityWorkDaysCalculatedCompetences.entrySet()}
     <li class="list-group-item">
       <h4 class="list-group-item-heading">
         ${_.getKey().fullname}
-        #{if peopleTrouble.get(_.getKey()).removeAll(models.enumerate.ShiftTroubles.invalidatingTroubles())}
-        <span class="text-danger pull-right">
-          <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-          &{'calendar.notAllValidShifts'}
-        </span>
-        #{/if}
-        #{elseif peopleTrouble.get(_.getKey()).removeAll(models.enumerate.ShiftTroubles.warningTroubles())}
-        <span class="text-warning pull-right">
-          <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> &{'calendar.warningShifts'}
-        </span>
-        #{/elseif}
-        #{else}
         <span class="text-success pull-right">
-          <i class="fa fa-check" aria-hidden="true"></i> &{'calendar.allValidShifts'}
+          <i class="fa fa-check" aria-hidden="true"></i> &{'reperibilityCalendar.allValidReperibility'}
         </span>
-        #{/else}
+ 
       </h4>
       <p class="list-group-item-text">Competenze maturate in questo mese <span
-          class="label label-info">${_.getValue().printHourMinute()}</span></p>
+          class="label label-info">${_.getValue()}</span></p>
     </li>
     #{/list}
   </ul>
+  </div>
+  <div class="col-sm-6">
+  	<h4>Reperibilità festive</h4>
+  	<ul class="list-group">
+    #{list reperibilityHolidaysCalculatedCompetences.entrySet()}
+    <li class="list-group-item">
+      <h4 class="list-group-item-heading">
+        ${_.getKey().fullname}
+        <span class="text-success pull-right">
+          <i class="fa fa-check" aria-hidden="true"></i> &{'reperibilityCalendar.allValidReperibility'}
+        </span>
+ 
+      </h4>
+      <p class="list-group-item-text">Competenze maturate in questo mese <span
+          class="label label-info">${_.getValue()}</span></p>
+    </li>
+    #{/list}
+  </ul>
+  </div>
+  
+  
+    
 
-  #{if shiftTypeMonth?.approved}
+  #{if reperibilityTypeMonth?.approved}
     #{form action:@removeApprovation(), method:'POST', class:'form form-horizontal' }
-    #{f.hidden 'shiftTypeMonthId', value: shiftTypeMonth.id /}
-    #{f.hidden 'version', value: shiftTypeMonth.version /}
+    #{f.hidden 'reperibilityTypeMonthId', value: reperibilityTypeMonth.id /}
+    #{f.hidden 'version', value: reperibilityTypeMonth.version /}
 
     #{b.buttons center:true}
       #{b.submit 'Rimuovi approvazione' /}
-      #{b.cancel @show('id':shiftTypeMonth.shiftType.id, shiftTypeMonth.yearMonth.toLocalDate(1).toString()) /}
+      #{b.cancel @show('id':reperibilityTypeMonth.personReperibilityType.id, reperibilityTypeMonth.yearMonth.toLocalDate(1).toString()) /}
     #{/b.buttons}
 
     #{/form}
   #{/if}
   #{else}
-    #{form action:@approveShiftsInMonth(), method:'POST', class:'form form-horizontal' }
-      #{f.hidden 'shiftTypeMonthId', value: shiftTypeMonth.id /}
-      #{f.hidden 'version', value: shiftTypeMonth.version /}
+    #{form action:@approveReperibilityInMonth(), method:'POST', class:'form form-horizontal' }
+      #{f.hidden 'reperibilityTypeMonthId', value: reperibilityTypeMonth.id /}
+      #{f.hidden 'version', value: reperibilityTypeMonth.version /}
 
       #{b.buttons center:true}
         #{b.submit 'Approva competenze' /}
-        #{b.cancel @show('id':shiftTypeMonth.shiftType.id, shiftTypeMonth.yearMonth.toLocalDate(1).toString()) /}
+        #{b.cancel @show('id':reperibilityTypeMonth.personReperibilityType.id, reperibilityTypeMonth.yearMonth.toLocalDate(1).toString()) /}
       #{/b.buttons}
 
     #{/form}
