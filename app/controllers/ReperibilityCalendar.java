@@ -7,6 +7,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 
 import dao.AbsenceDao;
+import dao.CompetenceCodeDao;
 import dao.PersonDao;
 import dao.PersonReperibilityDayDao;
 import dao.ReperibilityTypeMonthDao;
@@ -24,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import manager.ReperibilityManager2;
 
+import models.CompetenceCode;
 import models.Person;
 import models.PersonReperibility;
 import models.PersonReperibilityDay;
@@ -51,6 +53,7 @@ import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Http;
+import play.mvc.Router;
 import play.mvc.With;
 
 import security.SecurityRules;
@@ -59,6 +62,9 @@ import security.SecurityRules;
 @With(Resecure.class)
 @Slf4j
 public class ReperibilityCalendar extends Controller {
+
+  private static final String REPERIBILITY_WORKDAYS = "207";
+  private static final String REPERIBILITY_HOLIDAYS = "208";
 
   @Inject
   static SecurityRules rules;
@@ -74,7 +80,9 @@ public class ReperibilityCalendar extends Controller {
   static ReperibilityTypeMonthDao reperibilityTypeMonthDao;
   @Inject
   static PersonDao personDao;
-  
+  @Inject
+  static CompetenceCodeDao competenceCodeDao;
+
   /**
    * ritorna alla view le info necessarie per creare il calendario.
    *
@@ -480,66 +488,123 @@ public class ReperibilityCalendar extends Controller {
           return event;
         }).collect(Collectors.toList());
   }
-  
+
   /**
    * ritorna informazioni alla vista relative ai turnisti e alle ore già approvate/pagate di turno.
    *
    * @param activityId l'id dell'attività per cui ricercare le approvazioni
    * @param date la data da cui ricercare le approvazioni
    */
-  public static void monthReperibilityApprovement(long activityId, @Required LocalDate date) {
+  public static void monthReperibilityApprovement(long reperibilityId, @Required LocalDate date) {
     if (Validation.hasErrors()) {
       notFound();
     }
-//TODO: da implementare questa parte
-//    ShiftType shiftType = shiftDao.getShiftTypeById(activityId).orNull();
-//    notFoundIfNull(shiftType);
-//
-//    rules.checkIfPermitted(shiftType);
-//
-//    final YearMonth monthToApprove = new YearMonth(date);
-//
-//    final Optional<ShiftTypeMonth> monthStatus = shiftTypeMonthDao
-//        .byShiftTypeAndDate(shiftType, date);
-//
-//    final ShiftTypeMonth shiftTypeMonth;
-//    // Nel caso non ci sia ancora uno stato del mese persistito ne creo uno nuovo che mi serve in
-//    // fase di conferma
-//    if (monthStatus.isPresent()) {
-//      shiftTypeMonth = monthStatus.get();
-//    } else {
-//      shiftTypeMonth = new ShiftTypeMonth();
-//      shiftTypeMonth.shiftType = shiftType;
-//      shiftTypeMonth.yearMonth = monthToApprove;
-//      shiftTypeMonth.save();
-//    }
-//
-//    final LocalDate monthbegin = monthToApprove.toLocalDate(1);
-//    final LocalDate monthEnd = monthbegin.dayOfMonth().withMaximumValue();
-//    final LocalDate today = LocalDate.now();
-//
-//    final LocalDate lastDay;
-//
-//    if (monthEnd.isAfter(today)) {
-//      lastDay = today;
-//    } else {
-//      lastDay = monthEnd;
-//    }
-//
-//    final List<Person> people = shiftManager2.involvedShiftWorkers(shiftType, monthbegin, monthEnd);
-//
-//    final Map<Person, Integer> shiftsCalculatedCompetences = new HashMap<>();
-//    final Map<Person, List<ShiftTroubles>> peopleTrouble = new HashMap<>();
-//
-//    people.forEach(person -> {
-//      int competences = shiftManager2.calculatePersonShiftCompetencesInPeriod(shiftType, person,
-//          monthbegin, lastDay);
-//      shiftsCalculatedCompetences.put(person, competences);
-//
-//      List<ShiftTroubles> shiftsTroubles = shiftManager2.allValidShifts(shiftType, person, monthbegin, monthEnd);
-//      peopleTrouble.put(person, shiftsTroubles);
-//    });
-//
-//    render(shiftTypeMonth, shiftsCalculatedCompetences, peopleTrouble);
+
+    PersonReperibilityType reperibility = 
+        reperibilityDao.getPersonReperibilityTypeById(reperibilityId);
+    notFoundIfNull(reperibility);
+    rules.checkIfPermitted(reperibility);
+    final YearMonth monthToApprove = new YearMonth(date);
+
+    final Optional<ReperibilityTypeMonth> monthStatus = 
+        reperibilityTypeMonthDao.byReperibilityTypeAndDate(reperibility, date);
+    final ReperibilityTypeMonth reperibilityTypeMonth;
+    if (monthStatus.isPresent()) {
+      reperibilityTypeMonth = monthStatus.get();
+    } else {
+      reperibilityTypeMonth = new ReperibilityTypeMonth();
+      reperibilityTypeMonth.personReperibilityType = reperibility;
+      reperibilityTypeMonth.yearMonth = monthToApprove;
+      reperibilityTypeMonth.save();
+    }
+    final LocalDate monthbegin = monthToApprove.toLocalDate(1);
+    final LocalDate monthEnd = monthbegin.dayOfMonth().withMaximumValue();
+    final LocalDate today = LocalDate.now();
+
+    final LocalDate lastDay;
+
+    if (monthEnd.isAfter(today)) {
+      lastDay = today;
+    } else {
+      lastDay = monthEnd;
+    }
+
+    final List<Person> people = reperibilityManager2
+        .involvedReperibilityWorkers(reperibility, monthbegin, monthEnd);
+    final Map<Person, Integer> reperibilityWorkDaysCalculatedCompetences = new HashMap<>();
+    final Map<Person, Integer> reperibilityHolidaysCalculatedCompetences = new HashMap<>();
+    CompetenceCode workDayReperibility = competenceCodeDao.getCompetenceCodeByCode(REPERIBILITY_WORKDAYS);
+    CompetenceCode holidayReperibility = competenceCodeDao.getCompetenceCodeByCode(REPERIBILITY_HOLIDAYS);
+    people.forEach(person -> {
+      int workDaysCompetences = reperibilityManager2
+          .calculatePersonReperibilityCompetencesInPeriod(reperibility, person,
+              monthbegin, lastDay, workDayReperibility);
+      reperibilityWorkDaysCalculatedCompetences.put(person, workDaysCompetences);
+      int holidayCompetences = reperibilityManager2
+          .calculatePersonReperibilityCompetencesInPeriod(reperibility, person,
+              monthbegin, lastDay, holidayReperibility);
+      reperibilityHolidaysCalculatedCompetences.put(person, holidayCompetences);
+    });
+
+    render(reperibilityTypeMonth, reperibilityWorkDaysCalculatedCompetences, 
+        reperibilityHolidaysCalculatedCompetences);
+
+  }
+
+
+  /**
+   * approva le quantità giornaliere di reperibilità nel mese.
+   *
+   * @param version la versione da verificare
+   * @param reperibilityTypeMonthId l'id del reperibilityTypeMonth da controllare
+   */
+  public static void approveReperibilityInMonth(long version, long reperibilityTypeMonthId) {
+
+    ReperibilityTypeMonth reperibilityTypeMonth = 
+        reperibilityTypeMonthDao.byId(reperibilityTypeMonthId).orNull();
+    notFoundIfNull(reperibilityTypeMonth);
+    rules.checkIfPermitted(reperibilityTypeMonth);
+    Map<String, Object> args = new HashMap<>();
+    if (reperibilityTypeMonth.version != version) {
+      flash.error("Le reperibilità sono cambiate rispetto al riepilogo mostrato."
+          + "Il nuovo riepilogo è stato ricalcolato");
+      flash.keep();
+      args.put("date", reperibilityTypeMonth.yearMonth.toLocalDate(1).toString());
+      args.put("reperibilityId", reperibilityTypeMonth.personReperibilityType.id);
+      redirect(Router.reverse("ReperibilityCalendar.monthReperibilityApprovement",args).url);
+    }
+    reperibilityTypeMonth.approved = true;
+    reperibilityTypeMonth.save();
+    //TODO: completare questo metodo nel reperibility manager
+    reperibilityManager2.assignReperibilityCompetences(reperibilityTypeMonth);
+    args.put("date", reperibilityTypeMonth.yearMonth.toLocalDate(1).toString());
+    args.put("activity.id", reperibilityTypeMonth.personReperibilityType.id);
+    redirect(Router.reverse("Calendar.show", args).url);
+
+  }
+
+  /**
+   * permette la rimozione dell'approvazione per le ore di turno.
+   *
+   * @param shiftTypeMonthId l'id dello shiftTypeMonth contenente le info su approvazione turno
+   */
+  public static void removeApprovation(long reperibilityTypeMonthId) {
+
+    //    ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao.byId(shiftTypeMonthId).orNull();
+    //    notFoundIfNull(shiftTypeMonth);
+    //
+    //    rules.checkIfPermitted(shiftTypeMonth);
+    //
+    //    shiftTypeMonth.approved = false;
+    //    shiftTypeMonth.save();
+    //
+    //    // effettua il ricalcolo delle competenze
+    //    shiftManager2.assignShiftCompetences(shiftTypeMonth);
+    //
+    //    // FIXME: 12/06/17 un modo più bellino?
+    //    Map<String, Object> args = new HashMap<>();
+    //    args.put("date", shiftTypeMonth.yearMonth.toLocalDate(1).toString());
+    //    args.put("activity.id", shiftTypeMonth.shiftType.id);
+    //    redirect(Router.reverse("Calendar.show", args).url);
   }
 }

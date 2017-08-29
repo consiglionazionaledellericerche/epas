@@ -388,6 +388,7 @@ report=Descrizione problema
 restoreUser= Torna chi eri
 reperibility =Servizio di reperibilità
 reperibility.noReperibilityWorkers =Nessun Reperibile assegnabile per questa attività nel periodo selezionato
+reperibilityCalendar.allValidReperibility= Tutti le reperibilità risultano valide
 
 roleIds= Ruoli attribuibili
 

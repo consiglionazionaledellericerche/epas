@@ -371,4 +371,11 @@ public class ReperibilityManager2 {
 
     return reperibilityHolidaysCompetences;
   }
+
+  public void assignReperibilityCompetences(ReperibilityTypeMonth reperibilityTypeMonth) {
+    // TODO Auto-generated method stub
+    
+  }
+
+
 }
