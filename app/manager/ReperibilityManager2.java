@@ -41,6 +41,8 @@ import models.ReperibilityTypeMonth;
 import models.ShiftType;
 import models.ShiftTypeMonth;
 import models.User;
+import models.dto.HolidaysReperibilityDto;
+import models.dto.WorkDaysReperibilityDto;
 import models.enumerate.ShiftTroubles;
 
 import org.joda.time.LocalDate;
@@ -185,14 +187,14 @@ public class ReperibilityManager2 {
        *  sul giorno precedente (spostamento di un turno da un giorno all'altro)
        */
       HistoricalDao.lastRevisionsOf(PersonReperibilityDay.class, personReperibilityDay.id)
-          .stream().limit(1).map(historyValue -> {
-            PersonReperibilityDay pd = (PersonReperibilityDay) historyValue.value;
-            return pd.date;
-          }).filter(Objects::nonNull).distinct().forEach(localDate -> {
-            if (!localDate.equals(personReperibilityDay.date)) {
-              checkReperibilityDayValid(localDate, reperibilityType);
-            }
-          });
+      .stream().limit(1).map(historyValue -> {
+        PersonReperibilityDay pd = (PersonReperibilityDay) historyValue.value;
+        return pd.date;
+      }).filter(Objects::nonNull).distinct().forEach(localDate -> {
+        if (!localDate.equals(personReperibilityDay.date)) {
+          checkReperibilityDayValid(localDate, reperibilityType);
+        }
+      });
 
       // Aggiornamento del relativo ReperibilityTypeMonth (per incrementare il campo version)
       ReperibilityTypeMonth newStatus = 
@@ -267,8 +269,8 @@ public class ReperibilityManager2 {
     return Optional.absent();
   }
 
- 
-  
+
+
   public void checkReperibilityValid(PersonReperibilityDay personReperibilityDay) {
     /*
      * 0. Dev'essere una reperibilità persistente.
@@ -390,9 +392,9 @@ public class ReperibilityManager2 {
     return reperibilityHolidaysCompetences;
   }
 
-  
 
-  
+
+
   /**
    * Effettua i calcoli delle competenze relative alle reperibilità sulle attività approvate 
    * per le persone coinvolte in una certa attività e un determinato mese. 
@@ -402,7 +404,7 @@ public class ReperibilityManager2 {
    */
   public void assignReperibilityCompetences(ReperibilityTypeMonth reperibilityTypeMonth) {
     Verify.verifyNotNull(reperibilityTypeMonth);
-
+    //stabilisco le date di inizio e fine periodo da considerare per i calcoli
     final LocalDate monthBegin = reperibilityTypeMonth.yearMonth.toLocalDate(1);
     final LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
     final int year = reperibilityTypeMonth.yearMonth.getYear();
@@ -417,53 +419,49 @@ public class ReperibilityManager2 {
     } else {
       lastDay = monthEnd;
     }
-
+    //cerco le persone reperibili nel periodo di interesse
     final List<Person> involvedReperibilityPeople = involvedReperibilityWorkers(
         reperibilityTypeMonth.personReperibilityType, monthBegin, monthEnd);
-
-    Map<Person, Integer> totalPeopleWorkdaysCompetences = new HashMap<>();
-    Map<Person, Integer> totalPeopleHolidaysCompetences = new HashMap<>();
     CompetenceCode reperibilityHoliday = competenceCodeDao
         .getCompetenceCodeByCode(REPERIBILITY_HOLIDAYS);
     CompetenceCode reperibilityWorkdays = competenceCodeDao
         .getCompetenceCodeByCode(REPERIBILITY_WORKDAYS);
-    // Recupero tutte le attività approvate in quel mese
-    reperibilityTypeMonthDao.approvedInMonthRelatedWith(
-        reperibilityTypeMonth.yearMonth, involvedReperibilityPeople).forEach(monthStatus -> {
-          // Per ogni attività calcolo le competenze di ogni persona coinvolta
-          involvedReperibilityPeople.forEach(person -> {
-            int workdaysCompetence = 
-                calculatePersonReperibilityCompetencesInPeriod(monthStatus.personReperibilityType,
-                    person, monthBegin, lastDay, reperibilityWorkdays);
-            int holidaysCompetence = 
-                calculatePersonReperibilityCompetencesInPeriod(monthStatus.personReperibilityType,
-                    person, monthBegin, lastDay, reperibilityHoliday);
-            // Somma algebrica delle competenze delle persone derivanti da ogni attività sulla
-            // quale ha svolto la reperibilità
-            totalPeopleWorkdaysCompetences.merge(person, workdaysCompetence, 
-                (previousValue, newValue) -> newValue + previousValue);
-            totalPeopleHolidaysCompetences.merge(person, holidaysCompetence, 
-                (previousValue, newValue) -> newValue + previousValue);
-          });
-        });
-
+    //per ogni persona approvo le reperibilità feriali e festive 
     involvedReperibilityPeople.forEach(person ->  {
+      WorkDaysReperibilityDto dto = new WorkDaysReperibilityDto();
+      dto.person = person;
+      dto.workdaysReperibility = calculatePersonReperibilityCompetencesInPeriod(
+          reperibilityTypeMonth.personReperibilityType, person, 
+          monthBegin, lastDay, reperibilityWorkdays);
+      dto.workdaysPeriods = getReperibilityPeriod(person, monthBegin, monthEnd, 
+          reperibilityTypeMonth.personReperibilityType, false);
+      
+      HolidaysReperibilityDto dto2 = new HolidaysReperibilityDto();
+      dto2.person = person;
+      dto2.holidaysReperibility = calculatePersonReperibilityCompetencesInPeriod(
+          reperibilityTypeMonth.personReperibilityType, person, 
+          monthBegin, lastDay, reperibilityHoliday);
+      dto2.holidaysPeriods = getReperibilityPeriod(person, monthBegin, monthEnd, 
+          reperibilityTypeMonth.personReperibilityType, true);
+
       Optional<Competence> reperibilityHolidayCompetence = competenceDao
           .getCompetence(person, year, month, reperibilityHoliday);
 
       Competence holidayCompetence = reperibilityHolidayCompetence
           .or(new Competence(person, reperibilityHoliday, year, month));
-      holidayCompetence.valueApproved = totalPeopleWorkdaysCompetences.get(person);
+      holidayCompetence.valueApproved = dto2.holidaysReperibility;
+      holidayCompetence.reason = getReperibilityDates(dto2.holidaysPeriods);
       holidayCompetence.save();
 
       log.info("Salvata {}", holidayCompetence);
 
       Optional<Competence> reperibilityWorkdaysCompetence = competenceDao
-          .getCompetence(person, year, month, reperibilityHoliday);
+          .getCompetence(person, year, month, reperibilityWorkdays);
 
       Competence workdayCompetence = reperibilityWorkdaysCompetence
-          .or(new Competence(person, reperibilityHoliday, year, month));
-      workdayCompetence.valueApproved = totalPeopleWorkdaysCompetences.get(person);
+          .or(new Competence(person, reperibilityWorkdays, year, month));
+      workdayCompetence.valueApproved = dto.workdaysReperibility;
+      workdayCompetence.reason = getReperibilityDates(dto.workdaysPeriods);
       workdayCompetence.save();
 
       log.info("Salvata {}", workdayCompetence);
@@ -484,10 +482,10 @@ public class ReperibilityManager2 {
    */
   public List<Range<LocalDate>> getReperibilityPeriod(Person person, LocalDate begin, 
       LocalDate end, PersonReperibilityType type, boolean holidays) {
-    
+
     List<PersonReperibilityDay> days = ReperibilityCalendar.reperibilityDao
         .getPersonReperibilityDaysByPeriodAndType(begin, end, type, person);
-  
+
     List<PersonReperibilityDay> newList = null;
     if (holidays) {
       newList = days.stream().filter(
@@ -502,7 +500,7 @@ public class ReperibilityManager2 {
     LocalDate first = newList.get(0).date;
     List<Range<LocalDate>> list = Lists.newArrayList();
     Range<LocalDate> range = null;
-    
+
     for (PersonReperibilityDay day : newList) {
       if (first.equals(day.date)) {
         range = Range.closed(day.date, day.date);
@@ -519,5 +517,22 @@ public class ReperibilityManager2 {
     return list;
   }
 
+  /**
+   * 
+   * @param list la lista dei periodi di reperibilità all'interno del mese
+   * @return la stringa formattata contenente le date dei giorni di reperibilità effettuati.
+   */
+  private String getReperibilityDates(List<Range<LocalDate>> list) {
+    String str = "";
+    if (list == null || list.isEmpty()) {
+      return str;
+    }
+    for (Range<LocalDate> range : list) {
+      str = str + range.lowerEndpoint().getDayOfMonth() 
+          + "-" + range.upperEndpoint().getDayOfMonth() + "/" 
+          + range.lowerEndpoint().monthOfYear().getAsText() + " ";
+    }
+    return str;
+  }
 
 }
