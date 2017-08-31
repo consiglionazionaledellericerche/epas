@@ -6,11 +6,14 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 
+import controllers.ReperibilityCalendar;
 import controllers.Security;
 
 import dao.CompetenceCodeDao;
+import dao.CompetenceDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
+import dao.ReperibilityTypeMonthDao;
 import dao.history.HistoricalDao;
 
 import java.util.ArrayList;
@@ -25,6 +28,7 @@ import javax.inject.Inject;
 
 import lombok.extern.slf4j.Slf4j;
 
+import models.Competence;
 import models.CompetenceCode;
 import models.Person;
 import models.PersonDay;
@@ -50,6 +54,14 @@ import play.i18n.Messages;
  *
  * @author dario
  */
+/**
+ * @author darietto
+ *
+ */
+/**
+ * @author darietto
+ *
+ */
 @Slf4j
 public class ReperibilityManager2 {
 
@@ -60,17 +72,22 @@ public class ReperibilityManager2 {
   private final PersonDayDao personDayDao;
   private final PersonDayManager personDayManager;
   private final CompetenceCodeDao competenceCodeDao;
+  private final ReperibilityTypeMonthDao reperibilityTypeMonthDao;
+  private final CompetenceDao competenceDao;
 
   @Inject
   public ReperibilityManager2(PersonReperibilityDayDao reperibilityDayDao, 
       PersonDayDao personDayDao, PersonDayManager personDayManager, 
-      CompetenceCodeDao competenceCodeDao) {
+      CompetenceCodeDao competenceCodeDao, ReperibilityTypeMonthDao reperibilityTypeMonthDao,
+      CompetenceDao competenceDao) {
     this.reperibilityDayDao = reperibilityDayDao;
     this.personDayDao = personDayDao;
     this.personDayManager = personDayManager;
     this.competenceCodeDao = competenceCodeDao;
+    this.reperibilityTypeMonthDao = reperibilityTypeMonthDao;
+    this.competenceDao = competenceDao;
   }
-  
+
   /**
    * 
    * @return la lista delle attività di reperibilità visibili all'utente che ne fa la richiesta.
@@ -171,8 +188,7 @@ public class ReperibilityManager2 {
           .stream().limit(1).map(historyValue -> {
             PersonReperibilityDay pd = (PersonReperibilityDay) historyValue.value;
             return pd.date;
-          }).filter(Objects::nonNull).distinct()
-          .forEach(localDate -> {
+          }).filter(Objects::nonNull).distinct().forEach(localDate -> {
             if (!localDate.equals(personReperibilityDay.date)) {
               checkReperibilityDayValid(localDate, reperibilityType);
             }
@@ -251,6 +267,8 @@ public class ReperibilityManager2 {
     return Optional.absent();
   }
 
+ 
+  
   public void checkReperibilityValid(PersonReperibilityDay personReperibilityDay) {
     /*
      * 0. Dev'essere una reperibilità persistente.
@@ -372,9 +390,133 @@ public class ReperibilityManager2 {
     return reperibilityHolidaysCompetences;
   }
 
+  
+
+  
+  /**
+   * Effettua i calcoli delle competenze relative alle reperibilità sulle attività approvate 
+   * per le persone coinvolte in una certa attività e un determinato mese. 
+   * Da utilizzare in seguito ad ogni approvazione/disapprovazione delle reperibilità.
+   *
+   * @param reperibilityTypeMonth lo stato dell'attività di reperibilità in un determinato mese
+   */
   public void assignReperibilityCompetences(ReperibilityTypeMonth reperibilityTypeMonth) {
-    // TODO Auto-generated method stub
+    Verify.verifyNotNull(reperibilityTypeMonth);
+
+    final LocalDate monthBegin = reperibilityTypeMonth.yearMonth.toLocalDate(1);
+    final LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+    final int year = reperibilityTypeMonth.yearMonth.getYear();
+    final int month = reperibilityTypeMonth.yearMonth.getMonthOfYear();
+
+    final LocalDate today = LocalDate.now();
+
+    final LocalDate lastDay;
+
+    if (monthEnd.isAfter(today)) {
+      lastDay = today;
+    } else {
+      lastDay = monthEnd;
+    }
+
+    final List<Person> involvedReperibilityPeople = involvedReperibilityWorkers(
+        reperibilityTypeMonth.personReperibilityType, monthBegin, monthEnd);
+
+    Map<Person, Integer> totalPeopleWorkdaysCompetences = new HashMap<>();
+    Map<Person, Integer> totalPeopleHolidaysCompetences = new HashMap<>();
+    CompetenceCode reperibilityHoliday = competenceCodeDao
+        .getCompetenceCodeByCode(REPERIBILITY_HOLIDAYS);
+    CompetenceCode reperibilityWorkdays = competenceCodeDao
+        .getCompetenceCodeByCode(REPERIBILITY_WORKDAYS);
+    // Recupero tutte le attività approvate in quel mese
+    reperibilityTypeMonthDao.approvedInMonthRelatedWith(
+        reperibilityTypeMonth.yearMonth, involvedReperibilityPeople).forEach(monthStatus -> {
+          // Per ogni attività calcolo le competenze di ogni persona coinvolta
+          involvedReperibilityPeople.forEach(person -> {
+            int workdaysCompetence = 
+                calculatePersonReperibilityCompetencesInPeriod(monthStatus.personReperibilityType,
+                    person, monthBegin, lastDay, reperibilityWorkdays);
+            int holidaysCompetence = 
+                calculatePersonReperibilityCompetencesInPeriod(monthStatus.personReperibilityType,
+                    person, monthBegin, lastDay, reperibilityHoliday);
+            // Somma algebrica delle competenze delle persone derivanti da ogni attività sulla
+            // quale ha svolto la reperibilità
+            totalPeopleWorkdaysCompetences.merge(person, workdaysCompetence, 
+                (previousValue, newValue) -> newValue + previousValue);
+            totalPeopleHolidaysCompetences.merge(person, holidaysCompetence, 
+                (previousValue, newValue) -> newValue + previousValue);
+          });
+        });
+
+    involvedReperibilityPeople.forEach(person ->  {
+      Optional<Competence> reperibilityHolidayCompetence = competenceDao
+          .getCompetence(person, year, month, reperibilityHoliday);
+
+      Competence holidayCompetence = reperibilityHolidayCompetence
+          .or(new Competence(person, reperibilityHoliday, year, month));
+      holidayCompetence.valueApproved = totalPeopleWorkdaysCompetences.get(person);
+      holidayCompetence.save();
+
+      log.info("Salvata {}", holidayCompetence);
+
+      Optional<Competence> reperibilityWorkdaysCompetence = competenceDao
+          .getCompetence(person, year, month, reperibilityHoliday);
+
+      Competence workdayCompetence = reperibilityWorkdaysCompetence
+          .or(new Competence(person, reperibilityHoliday, year, month));
+      workdayCompetence.valueApproved = totalPeopleWorkdaysCompetences.get(person);
+      workdayCompetence.save();
+
+      log.info("Salvata {}", workdayCompetence);
+    });
+
+
+
+  }
+
+  /**
+   * 
+   * @param person il reperibile
+   * @param begin la data da cui cercare i giorni di reperibilità
+   * @param end la data entro cui cercare i giorni di reperibilità
+   * @param type l'attività su cui è reperibile il dipendente
+   * @param holidays true se occcorre filtrare sui giorni false se occorre filtrare sui feriali
+   * @return la lista dei range di date in cui un dipendente è stato reperibile.
+   */
+  public List<Range<LocalDate>> getReperibilityPeriod(Person person, LocalDate begin, 
+      LocalDate end, PersonReperibilityType type, boolean holidays) {
     
+    List<PersonReperibilityDay> days = ReperibilityCalendar.reperibilityDao
+        .getPersonReperibilityDaysByPeriodAndType(begin, end, type, person);
+  
+    List<PersonReperibilityDay> newList = null;
+    if (holidays) {
+      newList = days.stream().filter(
+          day -> personDayManager.isHoliday(person, day.date)).collect(Collectors.toList());
+    } else {
+      newList = days.stream().filter(
+          day -> !personDayManager.isHoliday(person, day.date)).collect(Collectors.toList());
+    }
+    if (newList.isEmpty()) {
+      return null;
+    }
+    LocalDate first = newList.get(0).date;
+    List<Range<LocalDate>> list = Lists.newArrayList();
+    Range<LocalDate> range = null;
+    
+    for (PersonReperibilityDay day : newList) {
+      if (first.equals(day.date)) {
+        range = Range.closed(day.date, day.date);
+      } else {
+        if (day.date.equals(range.upperEndpoint().plusDays(1))) {
+          range = Range.closed(range.lowerEndpoint(), day.date);
+        } else {
+          list.add(range);
+          range = Range.closed(day.date, day.date);
+        }
+      }
+    }
+    list.add(range);
+    return list;
   }
 
 
