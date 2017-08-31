@@ -552,7 +552,7 @@ public class ReperibilityCalendar extends Controller {
         competenceCodeDao.getCompetenceCodeByCode(REPERIBILITY_HOLIDAYS);
     people.forEach(person -> {
       WorkDaysReperibilityDto dto = new WorkDaysReperibilityDto();
-      
+
       dto.person = person;
       dto.workdaysReperibility = reperibilityManager2
           .calculatePersonReperibilityCompetencesInPeriod(reperibility, person,
@@ -566,7 +566,7 @@ public class ReperibilityCalendar extends Controller {
               monthbegin, lastDay, holidayReperibility);
       dtoHoliday.holidaysPeriods = reperibilityManager2
           .getReperibilityPeriod(person, monthbegin, monthEnd, reperibility, true);
-      
+
       listWorkdaysRep.add(dto);
       listHolidaysRep.add(dtoHoliday);
     });
@@ -603,32 +603,28 @@ public class ReperibilityCalendar extends Controller {
     reperibilityManager2.assignReperibilityCompetences(reperibilityTypeMonth);
     args.put("date", reperibilityTypeMonth.yearMonth.toLocalDate(1).toString());
     args.put("activity.id", reperibilityTypeMonth.personReperibilityType.id);
-    redirect(Router.reverse("Calendar.show", args).url);
+    redirect(Router.reverse("ReperibilityCalendar.show", args).url);
 
   }
 
   /**
-   * permette la rimozione dell'approvazione per le ore di turno.
+   * permette la rimozione dell'approvazione per i giorni di reperibilità.
    *
-   * @param shiftTypeMonthId l'id dello shiftTypeMonth contenente le info su approvazione turno
+   * @param reperibilityTypeMonthId l'id del reperibilityTypeMonth contenente le info 
+   *     su approvazione della reperibilità
    */
   public static void removeApprovation(long reperibilityTypeMonthId) {
 
-    //    ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao.byId(shiftTypeMonthId).orNull();
-    //    notFoundIfNull(shiftTypeMonth);
-    //
-    //    rules.checkIfPermitted(shiftTypeMonth);
-    //
-    //    shiftTypeMonth.approved = false;
-    //    shiftTypeMonth.save();
-    //
-    //    // effettua il ricalcolo delle competenze
-    //    shiftManager2.assignShiftCompetences(shiftTypeMonth);
-    //
-    //    // FIXME: 12/06/17 un modo più bellino?
-    //    Map<String, Object> args = new HashMap<>();
-    //    args.put("date", shiftTypeMonth.yearMonth.toLocalDate(1).toString());
-    //    args.put("activity.id", shiftTypeMonth.shiftType.id);
-    //    redirect(Router.reverse("Calendar.show", args).url);
+    ReperibilityTypeMonth reperibilityTypeMonth = 
+        reperibilityTypeMonthDao.byId(reperibilityTypeMonthId).orNull();
+    notFoundIfNull(reperibilityTypeMonth);
+    rules.checkIfPermitted(reperibilityTypeMonth);
+    reperibilityTypeMonth.approved = false;
+    reperibilityTypeMonth.save();
+
+    Map<String, Object> args = new HashMap<>();
+    args.put("date", reperibilityTypeMonth.yearMonth.toLocalDate(1).toString());
+    args.put("activity.id", reperibilityTypeMonth.personReperibilityType.id);
+    redirect(Router.reverse("ReperibilityCalendar.show", args).url);
   }
 }
