@@ -16,8 +16,8 @@
   #{list holidaysReperibilityCalculatedCompetences.entrySet()}
   <li class="list-group-item clearfix
     #{if reperibilityTypeMonth?.approved}list-group-item-warning#{/if}
-    #{else}list-group-item-info#{/else}">
-    ${_.getKey().fullname} <span class="label label-info pull-right">${_.getValue()}</span>
+    #{else}list-group-item-danger#{/else}">
+    ${_.getKey().fullname} <span class="label label-danger pull-right">${_.getValue()}</span>
   </li>
   #{/list}
 </ul>

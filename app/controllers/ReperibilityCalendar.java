@@ -21,8 +21,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.xml.ws.Holder;
+
 import lombok.extern.slf4j.Slf4j;
 
+import manager.PersonDayManager;
 import manager.ReperibilityManager2;
 
 import models.CompetenceCode;
@@ -37,15 +40,20 @@ import models.ShiftType;
 import models.ShiftTypeMonth;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.dto.HolidaysReperibilityDto;
 import models.dto.PNotifyObject;
+import models.dto.WorkDaysReperibilityDto;
 import models.dto.ReperibilityEvent;
 import models.dto.ShiftEvent;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
 import models.enumerate.ShiftTroubles;
 
+import org.assertj.core.util.Lists;
+import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
+import org.joda.time.Period;
 import org.joda.time.YearMonth;
 
 import play.data.validation.Required;
@@ -71,6 +79,7 @@ public class ReperibilityCalendar extends Controller {
   @Inject
   static ReperibilityManager2 reperibilityManager2;
   @Inject
+  public
   static PersonReperibilityDayDao reperibilityDao;
   @Inject
   static AbsenceDao absenceDao;
@@ -82,6 +91,9 @@ public class ReperibilityCalendar extends Controller {
   static PersonDao personDao;
   @Inject
   static CompetenceCodeDao competenceCodeDao;
+  @Inject
+  public
+  static PersonDayManager personDayManager;
 
   /**
    * ritorna alla view le info necessarie per creare il calendario.
@@ -492,7 +504,7 @@ public class ReperibilityCalendar extends Controller {
   /**
    * ritorna informazioni alla vista relative ai turnisti e alle ore già approvate/pagate di turno.
    *
-   * @param activityId l'id dell'attività per cui ricercare le approvazioni
+   * @param reperibilityId l'id dell'attività per cui ricercare le approvazioni
    * @param date la data da cui ricercare le approvazioni
    */
   public static void monthReperibilityApprovement(long reperibilityId, @Required LocalDate date) {
@@ -528,26 +540,38 @@ public class ReperibilityCalendar extends Controller {
     } else {
       lastDay = monthEnd;
     }
-
+    List<WorkDaysReperibilityDto> listWorkdaysRep = Lists.newArrayList();
+    List<HolidaysReperibilityDto> listHolidaysRep = Lists.newArrayList();
     final List<Person> people = reperibilityManager2
         .involvedReperibilityWorkers(reperibility, monthbegin, monthEnd);
     final Map<Person, Integer> reperibilityWorkDaysCalculatedCompetences = new HashMap<>();
     final Map<Person, Integer> reperibilityHolidaysCalculatedCompetences = new HashMap<>();
-    CompetenceCode workDayReperibility = competenceCodeDao.getCompetenceCodeByCode(REPERIBILITY_WORKDAYS);
-    CompetenceCode holidayReperibility = competenceCodeDao.getCompetenceCodeByCode(REPERIBILITY_HOLIDAYS);
+    CompetenceCode workDayReperibility = 
+        competenceCodeDao.getCompetenceCodeByCode(REPERIBILITY_WORKDAYS);
+    CompetenceCode holidayReperibility = 
+        competenceCodeDao.getCompetenceCodeByCode(REPERIBILITY_HOLIDAYS);
     people.forEach(person -> {
-      int workDaysCompetences = reperibilityManager2
+      WorkDaysReperibilityDto dto = new WorkDaysReperibilityDto();
+      
+      dto.person = person;
+      dto.workdaysReperibility = reperibilityManager2
           .calculatePersonReperibilityCompetencesInPeriod(reperibility, person,
               monthbegin, lastDay, workDayReperibility);
-      reperibilityWorkDaysCalculatedCompetences.put(person, workDaysCompetences);
-      int holidayCompetences = reperibilityManager2
+      dto.workdaysPeriods = reperibilityManager2
+          .getReperibilityPeriod(person, monthbegin, monthEnd, reperibility, false);
+      HolidaysReperibilityDto dtoHoliday = new HolidaysReperibilityDto();
+      dtoHoliday.person = person;
+      dtoHoliday.holidaysReperibility = reperibilityManager2
           .calculatePersonReperibilityCompetencesInPeriod(reperibility, person,
               monthbegin, lastDay, holidayReperibility);
-      reperibilityHolidaysCalculatedCompetences.put(person, holidayCompetences);
+      dtoHoliday.holidaysPeriods = reperibilityManager2
+          .getReperibilityPeriod(person, monthbegin, monthEnd, reperibility, true);
+      
+      listWorkdaysRep.add(dto);
+      listHolidaysRep.add(dtoHoliday);
     });
-
-    render(reperibilityTypeMonth, reperibilityWorkDaysCalculatedCompetences, 
-        reperibilityHolidaysCalculatedCompetences);
+    //TODO: nella render ritornare una lista di dto alla vista
+    render(reperibilityTypeMonth, listWorkdaysRep, listHolidaysRep);
 
   }
 

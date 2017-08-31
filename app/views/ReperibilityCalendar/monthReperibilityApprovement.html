@@ -30,43 +30,47 @@
   </p>
   #{/alert}
   #{/else}
-  <div class="col-sm-6">
-  	<h4>Reperibilità feriali</h4>
-  	<ul class="list-group">
-    #{list reperibilityWorkDaysCalculatedCompetences.entrySet()}
-    <li class="list-group-item">
-      <h4 class="list-group-item-heading">
-        ${_.getKey().fullname}
-        <span class="text-success pull-right">
-          <i class="fa fa-check" aria-hidden="true"></i> &{'reperibilityCalendar.allValidReperibility'}
-        </span>
- 
-      </h4>
-      <p class="list-group-item-text">Competenze maturate in questo mese <span
-          class="label label-info">${_.getValue()}</span></p>
-    </li>
-    #{/list}
-  </ul>
-  </div>
-  <div class="col-sm-6">
-  	<h4>Reperibilità festive</h4>
-  	<ul class="list-group">
-    #{list reperibilityHolidaysCalculatedCompetences.entrySet()}
-    <li class="list-group-item">
-      <h4 class="list-group-item-heading">
-        ${_.getKey().fullname}
-        <span class="text-success pull-right">
-          <i class="fa fa-check" aria-hidden="true"></i> &{'reperibilityCalendar.allValidReperibility'}
-        </span>
- 
-      </h4>
-      <p class="list-group-item-text">Competenze maturate in questo mese <span
-          class="label label-info">${_.getValue()}</span></p>
-    </li>
-    #{/list}
-  </ul>
-  </div>
   
+<div class="col-sm-6">
+  	<span class="text-success">
+  	<h4>Reperibilità feriali</h4>
+  	</span>
+  	<ul class="list-group">
+    #{list items:listWorkdaysRep, as:'item'}
+    <li class="list-group-item">
+      <h4 class="list-group-item-heading">
+        ${item.person.fullname}
+
+      </h4>
+      <p class="list-group-item-text">Competenze maturate: <span
+          class="label label-success">${item.workdaysReperibility}</span>
+          #{list items:item.workdaysPeriods, as:'item2'}
+          	${item2.lowerEndpoint().getDayOfMonth()}-${item2.upperEndpoint().getDayOfMonth()}/${item2.lowerEndpoint().monthOfYear().getAsText()}
+          #{/list}</p>
+    </li>
+    #{/list}
+  </ul>
+  </div>
+  <div class="col-sm-6">
+  	<span class="text-danger">
+  	<h4>Reperibilità festive</h4>
+  	</span>
+  	<ul class="list-group">
+    #{list items:listHolidaysRep, as:'item'}
+    <li class="list-group-item">
+      <h4 class="list-group-item-heading">
+        ${item.person.fullname}
+ 
+      </h4>
+      <p class="list-group-item-text">Competenze maturate: <span
+          class="label label-danger">${item.holidaysReperibility}</span>
+          #{list items:item.holidaysPeriods, as:'item2'}
+          	${item2.lowerEndpoint().getDayOfMonth()}-${item2.upperEndpoint().getDayOfMonth()}/${item2.lowerEndpoint().monthOfYear().getAsText()}
+          #{/list}</p>
+    </li>
+    #{/list}
+  </ul>
+  </div>
   
     
 
