@@ -187,14 +187,14 @@ public class ReperibilityManager2 {
        *  sul giorno precedente (spostamento di un turno da un giorno all'altro)
        */
       HistoricalDao.lastRevisionsOf(PersonReperibilityDay.class, personReperibilityDay.id)
-      .stream().limit(1).map(historyValue -> {
-        PersonReperibilityDay pd = (PersonReperibilityDay) historyValue.value;
-        return pd.date;
-      }).filter(Objects::nonNull).distinct().forEach(localDate -> {
-        if (!localDate.equals(personReperibilityDay.date)) {
-          checkReperibilityDayValid(localDate, reperibilityType);
-        }
-      });
+          .stream().limit(1).map(historyValue -> {
+            PersonReperibilityDay pd = (PersonReperibilityDay) historyValue.value;
+            return pd.date;
+          }).filter(Objects::nonNull).distinct().forEach(localDate -> {
+            if (!localDate.equals(personReperibilityDay.date)) {
+              checkReperibilityDayValid(localDate, reperibilityType);
+            }
+          });
 
       // Aggiornamento del relativo ReperibilityTypeMonth (per incrementare il campo version)
       ReperibilityTypeMonth newStatus = 
