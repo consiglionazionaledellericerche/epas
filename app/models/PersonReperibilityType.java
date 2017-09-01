@@ -9,11 +9,14 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+
+import com.google.common.collect.Lists;
 
 import models.base.BaseModel;
 
@@ -59,6 +62,9 @@ public class PersonReperibilityType extends BaseModel {
  
   @OneToMany(mappedBy = "personReperibilityType", cascade = CascadeType.REMOVE)
   public Set<ReperibilityTypeMonth> monthsStatus = new HashSet<>();
+  
+  @ManyToMany
+  public List<Person> managers = Lists.newArrayList();
 
   @Override
   public String toString() {

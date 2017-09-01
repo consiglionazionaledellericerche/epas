@@ -253,8 +253,11 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   public List<PersonConfiguration> personConfigurations = Lists.newArrayList();
   
 
-  @ManyToMany(mappedBy="managers")
+  @ManyToMany(mappedBy = "managers")
   public List<ShiftCategories> categories = Lists.newArrayList(); 
+  
+  @ManyToMany(mappedBy = "managers")
+  public List<PersonReperibilityType> reperibilities = Lists.newArrayList(); 
 
   @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
   public Set<InitializationGroup> initializationGroups;

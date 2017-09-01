@@ -26,7 +26,27 @@ INSERT INTO person_reperibility_days_history (id, _revision, _revision_type, "da
   SELECT id, r.rev, 0, "date", holiday_day, person_reperibility_id, reperibility_type FROM person_reperibility_days,
     (SELECT MAX(rev) AS rev FROM revinfo) AS r;
     
+CREATE TABLE person_reperibility_types_persons (
+	reperibilities_id BIGINT NOT NULL,
+	managers_id BIGINT NOT NULL,
+	FOREIGN KEY (reperibilities_id) REFERENCES person_reperibility_types (id),
+	FOREIGN KEY (managers_id) REFERENCES persons (id)
+);
+
+CREATE TABLE person_reperibility_types_persons_history (
+	
+    _revision INTEGER NOT NULL REFERENCES revinfo(rev),
+    _revision_type SMALLINT NOT NULL,
+
+    reperibilities_id BIGINT,
+    managers_id BIGINT,
+    
+    PRIMARY KEY (_revision, _revision_type, reperibilities_id, managers_id)
+);
+    
 # ---!Downs
 
 DROP TABLE reperibility_type_month;
 DROP TABLE reperibility_type_month_history;
+DROP TABLE person_reperibility_types_persons;
+DROP TABLE person_reperibility_types_persons_history;
