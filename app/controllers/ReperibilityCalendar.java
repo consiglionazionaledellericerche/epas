@@ -42,9 +42,9 @@ import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.dto.HolidaysReperibilityDto;
 import models.dto.PNotifyObject;
-import models.dto.WorkDaysReperibilityDto;
 import models.dto.ReperibilityEvent;
-import models.dto.ShiftEvent;
+import models.dto.WorkDaysReperibilityDto;
+
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
 import models.enumerate.ShiftTroubles;
@@ -79,7 +79,6 @@ public class ReperibilityCalendar extends Controller {
   @Inject
   static ReperibilityManager2 reperibilityManager2;
   @Inject
-  public
   static PersonReperibilityDayDao reperibilityDao;
   @Inject
   static AbsenceDao absenceDao;
@@ -92,7 +91,6 @@ public class ReperibilityCalendar extends Controller {
   @Inject
   static CompetenceCodeDao competenceCodeDao;
   @Inject
-  public
   static PersonDayManager personDayManager;
 
   /**
