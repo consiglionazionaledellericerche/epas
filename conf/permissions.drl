@@ -28,6 +28,9 @@ import models.PersonShift;
 import models.ShiftTypeMonth;
 import models.Stamping;
 import models.UsersRolesOffices;
+import models.PersonReperibility;
+import models.PersonReperibilityType;
+import models.ReperibilityTypeMonth;
 import security.PermissionCheck;
 
 global models.User currentOperator;
@@ -105,7 +108,7 @@ when
                                  "Calendar.editable",
                                  "Calendar.monthShiftsApprovement",
                                  "Calendar.approveShiftsInMonth",
-  								               "Calendar.removeApprovation")
+  								 "Calendar.removeApprovation")
         , target == null, granted == false)
 then
  $c.grant();
@@ -229,6 +232,150 @@ end
 
 /*Fine parte dei gestori dei turni*/
 
+
+
+/*Questa parte per il nuovo ruolo supervisore della reperibilità */
+rule isReperibilitySupervisor_generic
+when 
+  
+  $p: Person(!reperibilityTypes.isEmpty()) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  $c: PermissionCheck(action in ("ReperibilityCalendar.show",
+                                 "ReperibilityCalendar.reperibilityPeople",
+                                 "ReperibilityCalendar.deleteReperibility",
+                                 "ReperibilityCalendar.events",
+                                 "ReperibilityCalendar.changeReperibility",
+                                 "ReperibilityCalendar.newReperibility",
+                                 "ReperibilityCalendar.recap",
+                                 "ReperibilityCalendar.editable",
+                                 "ReperibilityCalendar.monthReperibilityApprovement",
+                                 "ReperibilityCalendar.approveReperibilityInMonth",
+  								 "ReperibilityCalendar.removeApprovation")
+        , target == null, granted == false)
+then
+ $c.grant();
+end
+
+
+rule reperibilitySupervisorCanManagePersonReperibilityType
+when
+  $p: Person(!reperibilityTypes.isEmpty()) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  $prt: PersonReperibilityType() from $p.reperibilityTypes
+  //$st: ShiftType() from $sc.shiftTypes
+  $c: PermissionCheck(action in ("ReperibilityCalendar.show",
+                                 "ReperibilityCalendar.reperibilityPeople",
+                                 "ReperibilityCalendar.deleteReperibility",
+                                 "ReperibilityCalendar.events",
+                                 "ReperibilityCalendar.changeReperibility",
+                                 "ReperibilityCalendar.newReperibility",
+                                 "ReperibilityCalendar.recap",
+                                 "ReperibilityCalendar.editable",
+                                 "ReperibilityCalendar.monthReperibilityApprovement"), 
+          target == $prt, granted == false)
+then
+ $c.grant();
+end
+
+rule canManageReperibilityMonth
+when
+  $p: Person(!reperibilityTypes.isEmpty()) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  $prt: PersonReperibilityType() from $p.reperibilityTypes
+  //$st: ShiftType() from $sc.shiftTypes
+  $target: ReperibilityTypeMonth((!approved && personReperibilityType == $prt) || this == null)
+  $c: PermissionCheck(action in ("ReperibilityCalendar.deleteReperibility",
+  								 "ReperibilityCalendar.changeReperibility",
+  								 "ReperibilityCalendar.newReperibility",
+  								 "ReperibilityCalendar.editable")
+  , target == $target, granted == false)
+then
+ $c.grant();
+end
+
+rule canEditReperibilityTypeMonth
+when
+  $p: Person(!reperibilityTypes.isEmpty()) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  $prt: PersonReperibilityType() from $p.reperibilityTypes
+  //$st: ShiftType() from $sc.shiftTypes
+  $target: ReperibilityTypeMonth(personReperibilityType == $prt)
+  $c: PermissionCheck(action in ("ReperibilityCalendar.approveReperibilityInMonth",
+  								 "ReperibilityCalendar.removeApprovation")
+  , target == $target, granted == false)
+then
+ $c.grant();
+end
+
+
+
+/*Fine parte di ruolo supervisore delle reperibilità*/
+
+
+/*Inizio parte gestori delle reperibilità*/
+
+rule isReperibilityManager_generic
+when 
+  $p: Person(!reperibilities.isEmpty()) from currentOperator.person	
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  $c: PermissionCheck(action in ("ReperibilityCalendar.show",
+                                 "ReperibilityCalendar.reperibilityPeople",
+                                 "ReperibilityCalendar.deleteReperibility",
+                                 "ReperibilityCalendar.events",
+                                 "ReperibilityCalendar.changeReperibility",
+                                 "ReperibilityCalendar.newReperibility",
+                                 "ReperibilityCalendar.recap",
+                                 "ReperibilityCalendar.editable") 
+        , target == null, granted == false)
+then
+ $c.grant();
+end
+
+
+rule reperibilityManagerCanManagePersonReperibilityType
+when
+  $p: Person(!reperibilities.isEmpty()) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  $prt: PersonReperibilityType() from $p.reperibilities
+  //$st: ShiftType() from $sc.shiftTypes
+  $c: PermissionCheck(action in ("ReperibilityCalendar.show",
+                                 "ReperibilityCalendar.reperibilityPeople",
+                                 "ReperibilityCalendar.deleteReperibility",
+                                 "ReperibilityCalendar.events",
+                                 "ReperibilityCalendar.changeReperibility",
+                                 "ReperibilityCalendar.newReperibility",
+                                 "ReperibilityCalendar.recap",
+                                 "ReperibilityCalendar.editable")
+  , target == $prt, granted == false)
+then
+ $c.grant();
+end
+
+rule reperibilityManagercanManageReperibilityMonth
+when
+  $p: Person(!reperibilities.isEmpty()) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  $prt: PersonReperibilityType() from $p.reperibilities
+  //$st: ShiftType() from $sc.shiftTypes
+  $target: ReperibilityTypeMonth((!approved && personReperibilityType == $prt) || this == null)
+  $c: PermissionCheck(action in ("ReperibilityCalendar.deleteReperibility",
+  								 "ReperibilityCalendar.changeReperibility",
+  								 "ReperibilityCalendar.newReperibility",
+  								 "ReperibilityCalendar.editable")
+  , target == $target, granted == false)
+then
+ $c.grant();
+end
+
+/*Fine parte dei gestori delle reperibilità*/
+
 rule isPersonShift_general
 when 
   $uro: UsersRolesOffices()
@@ -258,6 +405,41 @@ when
        "Calendar.shiftPeople",
        "Calendar.events",
        "Calendar.recap"), target == $st, granted == false)
+then
+$c.grant();
+end
+
+/*Ruolo per vedere il calendario per i reperibili*/
+
+rule isAvailable_general
+when 
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $p: Person (reperibility != null) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  $c: PermissionCheck(action in (
+     	"ReperibilityCalendar.show",
+     	"ReperibilityCalendar.reperibilityPeople",
+       	"ReperibilityCalendar.events",
+       	"ReperibilityCalendar.recap"	), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule isAvailable_personReperibilityType
+when
+	$p: Person (reperibility != null) from currentOperator.person
+	$o: Office() from $p.office
+  	Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+	$pr: PersonReperibility() from $p.reperibility
+	$prt: PersonReperibilityType() from $pr.personReperibilityType
+	//$st: ShiftType() from $psst.shiftType
+	$c: PermissionCheck(action in (
+       "ReperibilityCalendar.show",
+       "ReperibilityCalendar.reperibilityPeople",
+       "ReperibilityCalendar.events",
+       "ReperibilityCalendar.recap"), target == $prt, granted == false)
 then
 $c.grant();
 end

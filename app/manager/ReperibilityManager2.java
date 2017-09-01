@@ -56,14 +56,7 @@ import play.i18n.Messages;
  *
  * @author dario
  */
-/**
- * @author darietto
- *
- */
-/**
- * @author darietto
- *
- */
+
 @Slf4j
 public class ReperibilityManager2 {
 
@@ -74,20 +67,22 @@ public class ReperibilityManager2 {
   private final PersonDayDao personDayDao;
   private final PersonDayManager personDayManager;
   private final CompetenceCodeDao competenceCodeDao;
-  private final ReperibilityTypeMonthDao reperibilityTypeMonthDao;
+  
   private final CompetenceDao competenceDao;
+  private final PersonReperibilityDayDao reperibilityDao;
+
 
   @Inject
   public ReperibilityManager2(PersonReperibilityDayDao reperibilityDayDao, 
       PersonDayDao personDayDao, PersonDayManager personDayManager, 
-      CompetenceCodeDao competenceCodeDao, ReperibilityTypeMonthDao reperibilityTypeMonthDao,
-      CompetenceDao competenceDao) {
+      CompetenceCodeDao competenceCodeDao, CompetenceDao competenceDao, 
+      PersonReperibilityDayDao reperibilityDao) {
     this.reperibilityDayDao = reperibilityDayDao;
     this.personDayDao = personDayDao;
     this.personDayManager = personDayManager;
-    this.competenceCodeDao = competenceCodeDao;
-    this.reperibilityTypeMonthDao = reperibilityTypeMonthDao;
+    this.competenceCodeDao = competenceCodeDao;    
     this.competenceDao = competenceDao;
+    this.reperibilityDao = reperibilityDao;
   }
 
   /**
@@ -106,13 +101,12 @@ public class ReperibilityManager2 {
             .collect(Collectors.toList()));
 
       }
-      //FIXME: non si è stabilito ancora se ci devono essere anche qui i gestori come nei turni
-      //      if (!person.categories.isEmpty()) {
-      //        activities.addAll(person.categories.stream()
-      //            .flatMap(shiftCategories -> shiftCategories.shiftTypes.stream())
-      //            .sorted(Comparator.comparing(o -> o.type))
-      //            .collect(Collectors.toList()));
-      //      }
+
+      if (!person.reperibilities.isEmpty()) {
+        activities.addAll(person.reperibilities.stream()
+            
+            .collect(Collectors.toList()));
+      }
       if (person.reperibility != null) {
         activities.add(person.reperibility.personReperibilityType);
       }
@@ -435,7 +429,7 @@ public class ReperibilityManager2 {
           monthBegin, lastDay, reperibilityWorkdays);
       dto.workdaysPeriods = getReperibilityPeriod(person, monthBegin, monthEnd, 
           reperibilityTypeMonth.personReperibilityType, false);
-      
+
       HolidaysReperibilityDto dto2 = new HolidaysReperibilityDto();
       dto2.person = person;
       dto2.holidaysReperibility = calculatePersonReperibilityCompetencesInPeriod(
@@ -483,7 +477,7 @@ public class ReperibilityManager2 {
   public List<Range<LocalDate>> getReperibilityPeriod(Person person, LocalDate begin, 
       LocalDate end, PersonReperibilityType type, boolean holidays) {
 
-    List<PersonReperibilityDay> days = ReperibilityCalendar.reperibilityDao
+    List<PersonReperibilityDay> days = reperibilityDao
         .getPersonReperibilityDaysByPeriodAndType(begin, end, type, person);
 
     List<PersonReperibilityDay> newList = null;
