@@ -386,6 +386,9 @@ qualification=Livello
 recapMealTickets=Riepilogo Buoni Pasto
 report=Descrizione problema
 restoreUser= Torna chi eri
+reperibility =Servizio di reperibilità
+reperibility.noReperibilityWorkers =Nessun Reperibile assegnabile per questa attività nel periodo selezionato
+reperibilityCalendar.allValidReperibility= Tutti le reperibilità risultano valide
 
 roleIds= Ruoli attribuibili
 
@@ -428,6 +431,8 @@ time= Orario
 type.type =Nome attività
 type.description =Descrizione
 type.office =Sede
+type.supervisor =Supervisore servizio
+type.managers =Gestori reperibilità
 
 timeTable.startMorning =inizio turno
 timeTable.endMorning =fine turno
@@ -643,6 +648,7 @@ WorkingTimes.manageWorkingTime= Gestione Orari di Lavoro
 Competences.activateServices= Gestione Servizi
 Shift.handleShifts =Gestisci turni
 Calendar.show =Gestisci turni
+ReperibilityCalendar.show =Gestisci reperibilità
 Shift.personalShift =Visualizza turno
 
 ########################
@@ -672,6 +678,11 @@ LimitUnit.month =Mese
 LimitDescription.daysOfMonth =Giorni del mese
 LimitDescription.daysOfYear =Giorni dell'anno
 
+reperibility.personInactive = Persona non attiva sulla reperibilità
+reperibility.alreadyInReperibility = Già in reperibilità per l'attività %s
+reperibility.absenceInDay = La persona nel giorno selezionato è assente
+reperibility.dayAlreadyAssigned = Giorno già assegnato a %s
+
 StampTypes.MOTIVI_DI_SERVIZIO= Motivi di Servizio
 StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE= Motivi di Servizio Fuori Sede
 StampTypes.VISITA_MEDICA= Visita Medica
@@ -688,6 +699,7 @@ StampTypes.PERMESSO_BREVE= Permesso breve (36 ore anno)
 
 ShiftSlot.MORNING = Mattina
 ShiftSlot.AFTERNOON = Pomeriggio
+
 
 shift.absenceInDay = La persona nel giorno selezionato è assente
 shift.alreadyInShift = Già in turno per l'attività %s
@@ -729,7 +741,7 @@ RECOMPUTATION_LIMIT=Limite temporale dei ricalcoli (in mesi)
 TR_AUTOCERTIFICATION= Autocertificazione presenze per Tecnologi e Ricercatori
 TR_VACATIONS= Inserimento ferie e permessi per Tecnologi e Ricercatori
 TR_COMPENSATORY= Inserimento riposi compensativi per Tecnologi e Ricercatori
-ENABLE_CALENDARSHIFT= Abilitazione gestione calendario turni
+ENABLE_CALENDARSHIFT= Abilitazione gestione calendario turni e reperibilità
 
 EXPIRY_VACATION_PAST_YEAR=Giorno massimo utilizzo ferie dell'anno precedente
 MONTH_EXPIRY_RECOVERY_DAYS_13=Mese massimo per utilizzo residui dell'anno precedente per i livelli da 1 a 3

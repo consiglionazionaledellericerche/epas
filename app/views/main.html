@@ -82,10 +82,15 @@
           #{include './_adminMenu.html' /}
         #{/if}
         
-        *{Ruoli di sistema e gestori dei turni}*
-        #{secure.check 'Calendar.editable'}
+        *{Ruoli di sistema e gestori dei turni e delle repribilità}*
+        #{if currentUser.roles.contains(models.enumerate.AccountRole.DEVELOPER) 
+        	|| currentUser.roles.contains(models.enumerate.AccountRole.ADMIN)
+        	|| !currentUser.person.shiftCategories.empty
+        	|| !currentUser.person.reperibilityTypes.empty
+        	|| !currentUser.person.reperibilities.empty
+        	|| !currentUser.person.categories.empty}
           #{include './_shiftMenu.html' /}
-        #{/secure.check}
+        #{/if}
 
         *{ Ruoli di sistema e amministratori delle sedi }*
         #{if !currentUser.roles.empty || currentUser.hasRoles(models.Role.PERSONNEL_ADMIN,models.Role.PERSONNEL_ADMIN_MINI,models.Role.TECHNICAL_ADMIN) }
