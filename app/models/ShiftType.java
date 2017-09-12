@@ -34,6 +34,9 @@ public class ShiftType extends BaseModel {
   public String type;
   
   public String description;
+  
+  @Column(name = "enable_holidays")
+  public boolean enableHolidays;
 
   @Min(0)
   @Column(name = "entrance_tolerance")

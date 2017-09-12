@@ -580,7 +580,16 @@ public class ShiftManager2 {
     int paidMinutes = activity.shiftTimeTable.paidMinutes;
     final List<PersonShiftDay> shifts = personShiftDayDao
         .byTypeInPeriod(from, to, activity, Optional.of(person));
-
+    
+    //Proviamo a filtrarli...
+    List<PersonDay> list = shifts.stream().map(day -> { 
+      return personDayDao.getPersonDay(day.personShift.person, day.date).orNull();
+    }).collect(Collectors.toList());
+    
+    for (PersonDay pd : list) {
+      
+        
+    }
     // I conteggi funzionano nel caso lo stato dei turni sia aggiornato
     for (PersonShiftDay shift : shifts) {
       // Nessun errore sul turno
@@ -656,62 +665,6 @@ public class ShiftManager2 {
     }
   }
 
-  //  /**
-  //   * @param pairStampings la lista di coppie valide di entrata/uscita
-  //   * @param begin l'ora di inizio del turno
-  //   * @param end l'ora di fine del turno
-  //   * @return la lista di coppie di timbrature di uscita/entrata appartenenti 
-  //   * all'intervallo di turno
-  //   * che vanno considerate per controllare se il tempo trascorso in pausa eccede quello previsto
-  //   * dalla configurazione di turno.
-  //   */
-  //  private List<PairStamping> getBreakPairStampings(List<PairStamping> pairStampings,
-  //      LocalTime begin, LocalTime end) {
-  //    List<PairStamping> allGapPairs = Lists.newArrayList();
-  //    PairStamping previous = null;
-  //    for (PairStamping validPair : pairStampings) {
-  //      if (previous != null) {
-  //        if ((previous.second.stampType == null
-  //            || previous.second.stampType.isGapLunchPairs())
-  //            && (validPair.first.stampType == null
-  //            || validPair.first.stampType.isGapLunchPairs())) {
-  //
-  //          allGapPairs.add(new PairStamping(previous.second, validPair.first));
-  //        }
-  //      }
-  //      previous = validPair;
-  //    }
-  //    List<PairStamping> gapPairs = Lists.newArrayList();
-  //    for (PairStamping gapPair : allGapPairs) {
-  //      LocalTime first = gapPair.first.date.toLocalTime();
-  //      LocalTime second = gapPair.second.date.toLocalTime();
-  //
-  //      boolean isInIntoBreakTime = !first.isBefore(begin) && !first.isAfter(end);
-  //      boolean isOutIntoBreakTime = !second.isBefore(begin) && !second.isAfter(end);
-  //
-  //      if (!isInIntoBreakTime && !isOutIntoBreakTime) {
-  //        if (second.isBefore(begin) || first.isAfter(end)) {
-  //          continue;
-  //        }
-  //      }
-  //
-  //      LocalTime inForCompute = gapPair.first.date.toLocalTime();
-  //      LocalTime outForCompute = gapPair.second.date.toLocalTime();
-  //      if (!isInIntoBreakTime) {
-  //        inForCompute = begin;
-  //      }
-  //      if (!isOutIntoBreakTime) {
-  //        outForCompute = end;
-  //      }
-  //      int timeInPair = 0;
-  //      timeInPair -= DateUtility.toMinute(inForCompute);
-  //      timeInPair += DateUtility.toMinute(outForCompute);
-  //      gapPair.timeInPair = timeInPair;
-  //      gapPairs.add(gapPair);
-  //    }
-  //    return gapPairs;
-  //  }
-
   /**
    * Effettua i calcoli delle competenze relative ai turni sulle attività approvate per le persone
    * coinvolte in una certa attività e un determinato mese.   *
@@ -752,41 +705,64 @@ public class ShiftManager2 {
                 person, monthBegin, lastDay);
             // Somma algebrica delle competenze delle persone derivanti da ogni attività sulla
             // quale ha svolto i turni
-            totalPeopleCompetences.merge(person, activityCompetence, (previousValue, newValue) -> newValue + previousValue);
+            totalPeopleCompetences.merge(person, activityCompetence, 
+                (previousValue, newValue) -> newValue + previousValue);
           });
         });
-
+    
+    //TODO: separare i codici di competenza, andando a ricercare anche i turni notturni e festivi
     CompetenceCode shiftCode = competenceCodeDao.getCompetenceCodeByCode(codShift);
+    CompetenceCode nightCode = competenceCodeDao.getCompetenceCodeByCode(codShiftNight);
+    CompetenceCode holidayCode = competenceCodeDao.getCompetenceCodeByCode(codShiftHolyday);
+    
 
     involvedShiftPeople.forEach(person -> {
-
-      // Verifico che per le person coinvolte ci siano o no eventuali residui dai mesi precedenti
-      int lastShiftCompetence = getPersonResidualShiftCompetence(person, shiftTypeMonth.yearMonth);
       Integer calculatedCompetences = totalPeopleCompetences.get(person);
+      saveCompetence(person, shiftTypeMonth, shiftCode, calculatedCompetences);
+      // Verifico che per le person coinvolte ci siano o no eventuali residui dai mesi precedenti
+      
 
-      // TODO: 12/06/17 sicuramente andranno differenziate tra T1 e T2
-      int totalShiftMinutes;
-      if (calculatedCompetences != null) {
-        totalShiftMinutes = calculatedCompetences + lastShiftCompetence;
-      } else {
-        totalShiftMinutes = lastShiftCompetence;
-      }
-
-      Optional<Competence> shiftCompetence = competenceDao
-          .getCompetence(person, year, month, shiftCode);
-
-      Competence newCompetence = shiftCompetence.or(new Competence(person, shiftCode, year, month));
-      newCompetence.valueApproved = totalShiftMinutes / 60;
-      newCompetence.exceededMins = totalShiftMinutes % 60;
-      // newCompetence.valueRequested = ; e qui cosa ci va?
-
-      newCompetence.save();
-
-      log.info("Salvata {}", newCompetence);
+      
     });
 
   }
 
+  /**
+   * 
+   * @param person il dipendente per cui si vuole salvare la competenza
+   * @param shiftTypeMonth il pregresso se presente con l'informazione se è già stato approvato 
+   *     o meno
+   * @param shiftCode il codice di competenza
+   * @param calculatedCompetences la quantità di competenza calcolata
+   */
+  private void saveCompetence(Person person, ShiftTypeMonth shiftTypeMonth, 
+      CompetenceCode shiftCode, Integer calculatedCompetences) {
+    int lastShiftCompetence = getPersonResidualShiftCompetence(person, shiftTypeMonth.yearMonth);
+    //
+
+    // TODO: 12/06/17 sicuramente andranno differenziate tra T1 e T2
+    int totalShiftMinutes;
+    if (calculatedCompetences != null) {
+      totalShiftMinutes = calculatedCompetences + lastShiftCompetence;
+    } else {
+      totalShiftMinutes = lastShiftCompetence;
+    }
+
+    Optional<Competence> shiftCompetence = competenceDao
+        .getCompetence(person, shiftTypeMonth.yearMonth.getYear(), 
+            shiftTypeMonth.yearMonth.getMonthOfYear(), shiftCode);
+
+    Competence newCompetence = 
+        shiftCompetence.or(new Competence(person, shiftCode, shiftTypeMonth.yearMonth.getYear(), 
+            shiftTypeMonth.yearMonth.getMonthOfYear()));
+    newCompetence.valueApproved = totalShiftMinutes / 60;
+    newCompetence.exceededMins = totalShiftMinutes % 60;
+    // newCompetence.valueRequested = ; e qui cosa ci va?
+
+    newCompetence.save();
+    log.info("Salvata {}", newCompetence);
+  }
+  
   /**
    * salva il personShiftDay ed effettua i ricalcoli.
    * @param personShiftDay il personshiftDay da salvare

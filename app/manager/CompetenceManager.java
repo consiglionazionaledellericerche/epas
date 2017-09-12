@@ -793,6 +793,7 @@ public class CompetenceManager {
     
     st.description = service.description;
     st.type = service.type;
+    st.enableHolidays = service.enableHolidays;
     st.shiftTimeTable = stt;
     st.shiftCategories = cat;
     if (Range.closed(stt.startMorning, stt.endMorning)
