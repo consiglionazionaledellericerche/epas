@@ -226,6 +226,17 @@ public class ShiftManager2 {
     if (personDay.isPresent() && personDayManager.isAllDayAbsences(personDay.get())) {
       return Optional.of(Messages.get("shift.absenceInDay"));
     }
+    
+    //Controllo che sia abilitato il turno festivo
+    CompetenceCode holidayCode = competenceCodeDao.getCompetenceCodeByCode(codShiftHolyday);
+        
+    final boolean isHolidayShiftEnabled = 
+        personShiftDay.personShift.person.personCompetenceCodes
+        .stream().anyMatch(pcc -> pcc.competenceCode.equals(holidayCode) 
+            && !pcc.beginDate.isAfter(personShiftDay.date));
+    if (personDay.isPresent() && personDay.get().isHoliday && !isHolidayShiftEnabled) {
+      return Optional.of(Messages.get("shift.holidayShiftNotEnabled"));
+    }
 
     List<PersonShiftDay> list = personShiftDayDao
         .byTypeInPeriod(personShiftDay.date, personShiftDay.date,
@@ -506,7 +517,7 @@ public class ShiftManager2 {
    * @return Restituisce una mappa con i minuti di turno maturati per ogni persona.
    */
   public Map<Person, Integer> calculateActivityShiftCompetences(ShiftType activity,
-      LocalDate from, LocalDate to) {
+      LocalDate from, LocalDate to, boolean holiday) {
 
     final Map<Person, Integer> shiftCompetences = new HashMap<>();
     
@@ -520,8 +531,15 @@ public class ShiftManager2 {
       lastDay = to;
     }
     involvedShiftWorkers(activity, from, to).forEach(person -> {
-
-      int competences = calculatePersonShiftCompetencesInPeriod(activity, person, from, lastDay);
+      int competences = 0;
+      if (holiday) {
+        competences = 
+            calculatePersonShiftCompetencesInPeriod(activity, person, from, lastDay, true);
+      } else {
+        competences = 
+            calculatePersonShiftCompetencesInPeriod(activity, person, from, lastDay, false);
+      }
+       
       shiftCompetences.put(person, competences);
     });
 
@@ -572,7 +590,7 @@ public class ShiftManager2 {
    *     selezionato (di norma serve calcolarli su un intero mese al massimo).
    */
   public int calculatePersonShiftCompetencesInPeriod(ShiftType activity, Person person,
-      LocalDate from, LocalDate to) {
+      LocalDate from, LocalDate to, boolean holiday) {
 
     // TODO: 08/06/17 Sicuramente vanno differenziati per tipo di competenza.....
     // c'è sono da capire qual'è la discriminante
@@ -580,18 +598,21 @@ public class ShiftManager2 {
     int paidMinutes = activity.shiftTimeTable.paidMinutes;
     final List<PersonShiftDay> shifts = personShiftDayDao
         .byTypeInPeriod(from, to, activity, Optional.of(person));
-    
+    List<PersonShiftDay> list = Lists.newArrayList();
     //Proviamo a filtrarli...
-    List<PersonDay> list = shifts.stream().map(day -> { 
-      return personDayDao.getPersonDay(day.personShift.person, day.date).orNull();
-    }).collect(Collectors.toList());
-    
-    for (PersonDay pd : list) {
-      
-        
+    if (holiday) {
+      list = shifts.stream().filter(day -> { 
+        return personDayManager.isHoliday(day.personShift.person, day.date);
+      }).collect(Collectors.toList());
+    } else {
+      list = shifts.stream().filter(day -> { 
+        return !personDayManager.isHoliday(day.personShift.person, day.date);
+      }).collect(Collectors.toList());
     }
+       
+
     // I conteggi funzionano nel caso lo stato dei turni sia aggiornato
-    for (PersonShiftDay shift : shifts) {
+    for (PersonShiftDay shift : list) {
       // Nessun errore sul turno
       if (!shift.hasOneOfErrors(ShiftTroubles.invalidatingTroubles())) {
         shiftCompetences += paidMinutes - (shift.exceededThresholds * SIXTY_MINUTES);
@@ -695,17 +716,24 @@ public class ShiftManager2 {
         monthBegin, monthEnd);
 
     Map<Person, Integer> totalPeopleCompetences = new HashMap<>();
+    Map<Person, Integer> totalHolidayPeopleCompetences = new HashMap<>();
     
     // Recupero tutte le attività approvate in quel mese
     shiftTypeMonthDao.approvedInMonthRelatedWith(shiftTypeMonth.yearMonth, involvedShiftPeople)
         .forEach(monthStatus -> {
           // Per ogni attività calcolo le competenze di ogni persona coinvolta
           involvedShiftPeople.forEach(person -> {
-            int activityCompetence = calculatePersonShiftCompetencesInPeriod(monthStatus.shiftType,
-                person, monthBegin, lastDay);
+            int activityCompetence = 0;
+            activityCompetence = calculatePersonShiftCompetencesInPeriod(monthStatus.shiftType,
+                person, monthBegin, lastDay, false);
             // Somma algebrica delle competenze delle persone derivanti da ogni attività sulla
             // quale ha svolto i turni
             totalPeopleCompetences.merge(person, activityCompetence, 
+                (previousValue, newValue) -> newValue + previousValue);
+            
+            activityCompetence = calculatePersonShiftCompetencesInPeriod(monthStatus.shiftType,
+                person, monthBegin, lastDay, true);
+            totalHolidayPeopleCompetences.merge(person, activityCompetence, 
                 (previousValue, newValue) -> newValue + previousValue);
           });
         });
@@ -717,11 +745,13 @@ public class ShiftManager2 {
     
 
     involvedShiftPeople.forEach(person -> {
-      Integer calculatedCompetences = totalPeopleCompetences.get(person);
+      Integer calculatedCompetences = null;
+      calculatedCompetences = totalPeopleCompetences.get(person);
       saveCompetence(person, shiftTypeMonth, shiftCode, calculatedCompetences);
       // Verifico che per le person coinvolte ci siano o no eventuali residui dai mesi precedenti
       
-
+      calculatedCompetences = totalHolidayPeopleCompetences.get(person);
+      saveCompetence(person, shiftTypeMonth, holidayCode, calculatedCompetences);
       
     });
 

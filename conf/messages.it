@@ -694,6 +694,7 @@ shift.absenceInDay = La persona nel giorno selezionato è assente
 shift.alreadyInShift = Già in turno per l'attività %s
 shift.slotAlreadyAssigned = Slot già assegnato a %s
 shift.personInactive = Persona non attiva sul turno
+shift.holidayShiftNotEnabled = La persona non ha abilitato il turno festivo
 ShiftTroubles.PERSON_NOT_ASSIGNED = Persona non assegnata al turno
 ShiftTroubles.NOT_COMPLETED_SHIFT = Turno valido ma non completo (un\'ora in meno)
 ShiftTroubles.OUT_OF_STAMPING_TOLERANCE = Fuori dalla tolleranza per le timbrature
