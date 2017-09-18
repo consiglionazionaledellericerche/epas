@@ -14,6 +14,7 @@ import models.PersonShiftDay;
 import models.ShiftCategories;
 import models.ShiftType;
 import models.enumerate.ShiftSlot;
+import models.query.QPersonDay;
 import models.query.QPersonShift;
 import models.query.QPersonShiftDay;
 import models.query.QShiftCategories;
@@ -50,7 +51,7 @@ public class PersonShiftDayDao extends DaoBase {
 
   /**
    * @return la lista dei personShiftDay presenti nel periodo compreso tra 'from' e 'to' aventi lo
-   * shiftType 'type'. Se specificato filtra sulla persona richiesta.
+   *     shiftType 'type'. Se specificato filtra sulla persona richiesta.
    */
   public List<PersonShiftDay> byTypeInPeriod(
       LocalDate from, LocalDate to, ShiftType type, Optional<Person> person) {
@@ -68,10 +69,10 @@ public class PersonShiftDayDao extends DaoBase {
     return getQueryFactory().from(personShiftDay)
         .where(condition).orderBy(personShiftDay.date.asc()).list(personShiftDay);
   }
-
+  
   /**
    * @return il personShiftDay relativo al tipo 'shiftType' nel giorno 'date' con lo slot
-   * 'shiftSlot'.
+   *     'shiftSlot'.
    */
   public PersonShiftDay getPersonShiftDayByTypeDateAndSlot(
       ShiftType shiftType, LocalDate date, ShiftSlot shiftSlot) {
