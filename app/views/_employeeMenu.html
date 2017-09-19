@@ -75,6 +75,12 @@
       		<i class="fa fa-calendar-check-o" aria-hidden="true"></i>
       	#{/secure.li}
       #{/if}
+      
+      #{if currentUser.person != null && templateUtility.isAvailable(currentUser.person)}
+      	#{secure.li @ReperibilityCalendar.show()}
+      		<i class="fa fa-calendar-check-o" aria-hidden="true"></i>
+      	#{/secure.li}
+      #{/if}
 
       #{secure.li @PersonMonths.trainingHours(session.get("yearSelected")) }
       <i class="fa fa-graduation-cap" aria-hidden="true"></i>

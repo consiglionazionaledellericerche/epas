@@ -8,16 +8,7 @@
 			<div class="col-sm-6">#{f.view 'Nome attività', value:type.type /}</div>
 			<div class="col-sm-6">#{f.view 'Descrizione attività', value:type.description /}</div>
 		</div>
-		<div class="row">
-			<div class="col-sm-6"> 
-			#{if type.enableHolidays}
-				#{f.view 'Turni abilitati anche nei festivi', value:'Sì' /}
-			#{/if}
-			#{else}
-				#{f.view 'Turni abilitati anche nei festivi', value:'No' /}
-			#{/else}
-		</div>
-		</div>
+
 		<div class="row">
 			<div class="col-sm-6">#{f.view 'Tolleranza minima per timbratura in ingresso', value:type.entranceTolerance + ' minuti' /}</div>
 			<div class="col-sm-6">#{f.view 'Tolleranza massima per timbratura in ingresso', value:type.entranceMaxTolerance + ' minuti' /}</div>
