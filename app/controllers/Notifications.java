@@ -16,6 +16,8 @@ import play.mvc.With;
 
 import security.SecurityRules;
 
+import java.util.List;
+
 /**
  * Controller to manage notifications.
  *
@@ -93,9 +95,9 @@ public class Notifications extends Controller {
   public static void readAll(String message, NotificationFilter filter) {
     
     rules.checkIfPermitted();
-
-    for (Notification notification : notificationDao.listAllFor(Security.getUser().get(), 
-        Optional.fromNullable(message), Optional.of(filter))) {
+    List<Notification> list = notificationDao.listAllFor(Security.getUser().get(), 
+        Optional.fromNullable(message), Optional.fromNullable(filter));
+    for (Notification notification : list) {
       if (notification.read) {
         continue;
       }
