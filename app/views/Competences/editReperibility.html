@@ -17,6 +17,7 @@ title:(Action + ' servizio per reperibilità')}
   
   #{f.view 'type.office', value:office /}
   #{f.selectModel 'type.supervisor', items: officePeople, required:true /}
+  #{f.selectMultipleModel 'type.managers', values: officePeople /}
 
 	#{b.buttons center:true}
 

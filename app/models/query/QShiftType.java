@@ -32,8 +32,6 @@ public class QShiftType extends EntityPathBase<ShiftType> {
 
     public final StringPath description = createString("description");
 
-    public final BooleanPath enableHolidays = createBoolean("enableHolidays");
-
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 

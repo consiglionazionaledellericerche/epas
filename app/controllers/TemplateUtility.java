@@ -69,6 +69,9 @@ import synch.diagnostic.SynchDiagnostic;
  * @author alessandro
  */
 public class TemplateUtility {
+  
+  private final String WORKDAYS_REP = "207";
+  private final String HOLIDAYS_REP = "208";
 
   private final SecureManager secureManager;
   private final OfficeDao officeDao;
@@ -96,7 +99,8 @@ public class TemplateUtility {
       RoleDao roleDao, BadgeReaderDao badgeReaderDao, WorkingTimeTypeDao workingTimeTypeDao,
       IWrapperFactory wrapperFactory, BadgeSystemDao badgeSystemDao,
       SynchDiagnostic synchDiagnostic, ConfigurationManager configurationManager,
-      CompetenceCodeDao competenceCodeDao, ShiftDao shiftDao, AbsenceComponentDao absenceComponentDao,
+      CompetenceCodeDao competenceCodeDao, ShiftDao shiftDao, 
+      AbsenceComponentDao absenceComponentDao,
       NotificationDao notificationDao, UserDao userDao) {
 
     this.secureManager = secureManager;
@@ -567,5 +571,18 @@ public class TemplateUtility {
       // Empty URL
       return "#";
     }
+  }
+  
+  /**
+   * 
+   * @param person la persona di cui si intende sapere se è reperibile
+   * @return se la persona è reperibile in data odierna.
+   */
+  public boolean isAvailable(Person person) {
+    return person.personCompetenceCodes.stream()
+        .anyMatch(comp -> !comp.beginDate.isAfter(LocalDate.now()) 
+            && (comp.competenceCode.code.equalsIgnoreCase(WORKDAYS_REP) 
+            || comp.competenceCode.code.equalsIgnoreCase(HOLIDAYS_REP)));
+    
   }
 }
