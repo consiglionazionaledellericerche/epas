@@ -773,10 +773,14 @@ public class CompetenceManager {
           .startAfternoonLunchTime.toString(stamping_format);
       dto.startMorning = shiftTimeTable.startMorning.toString(stamping_format);
       dto.startMorningLunchTime = shiftTimeTable.startMorningLunchTime.toString(stamping_format);
-      dto.startEvening = shiftTimeTable.startEvening != null ? shiftTimeTable.startEvening.toString(stamping_format) : "";
-      dto.endEvening = shiftTimeTable.endEvening != null ? shiftTimeTable.endEvening.toString(stamping_format) : "";
-      dto.startEveningLunchTime = shiftTimeTable.startEveningLunchTime != null ? shiftTimeTable.startEveningLunchTime.toString(stamping_format) : "";
-      dto.endEveningLunchTime = shiftTimeTable.endEveningLunchTime != null ? shiftTimeTable.endEveningLunchTime.toString(stamping_format) : "";
+      dto.startEvening = shiftTimeTable.startEvening != null 
+          ? shiftTimeTable.startEvening.toString(stamping_format) : "";
+      dto.endEvening = shiftTimeTable.endEvening != null 
+          ? shiftTimeTable.endEvening.toString(stamping_format) : "";
+      dto.startEveningLunchTime = shiftTimeTable.startEveningLunchTime != null 
+          ? shiftTimeTable.startEveningLunchTime.toString(stamping_format) : "";
+      dto.endEveningLunchTime = shiftTimeTable.endEveningLunchTime != null 
+          ? shiftTimeTable.endEveningLunchTime.toString(stamping_format) : "";
       return dto;
     }).collect(Collectors.toList());
     return dtoList;
@@ -921,14 +925,14 @@ public class CompetenceManager {
       switch (code.limitType) {
         case onMonthlyPresence:
           PersonStampingRecap psDto = stampingsRecapFactory
-          .create(person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true);
+              .create(person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true);
           addSpecialCompetence(person, yearMonth, code, Optional.fromNullable(psDto));
           break;
         case entireMonth:
           addSpecialCompetence(person, yearMonth, code, Optional.<PersonStampingRecap>absent());
           break;
-          default:
-            break;
+        default:
+          break;
       }
     } else {
       log.warn("La competenza {} non risulta abilitata per il dipendente {} nel mese "

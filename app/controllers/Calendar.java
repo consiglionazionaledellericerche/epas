@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import dao.AbsenceDao;
+import dao.CompetenceCodeDao;
 import dao.ShiftDao;
 import dao.ShiftTypeMonthDao;
 import helpers.Web;
@@ -13,11 +14,15 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.ShiftManager2;
+
+import models.CompetenceCode;
 import models.Person;
+import models.PersonCompetenceCodes;
 import models.PersonShiftDay;
 import models.PersonShiftDayInTrouble;
 import models.PersonShiftShiftType;
@@ -65,8 +70,10 @@ public class Calendar extends Controller {
   static AbsenceDao absenceDao;
   @Inject
   static ShiftTypeMonthDao shiftTypeMonthDao;
+  @Inject
+  static CompetenceCodeDao competenceCodeDao;
 
-
+  private static String nighCode = "T3";
   /**
    * ritorna alla view le info necessarie per creare il calendario.
    *
@@ -399,7 +406,12 @@ public class Calendar extends Controller {
         if (validation.valid(personShiftDay).ok) {
           error = shiftManager2.shiftPermitted(personShiftDay);
         } else {
-          error = Optional.of(Messages.get("validation.invalid"));
+          if (shiftSlot == null) {
+            error = Optional.of(Messages.get("shift.notSlotSpecified"));
+          } else {
+            error = Optional.of(Messages.get("validation.invalid"));
+          }
+          
         }
 
         if (error.isPresent()) {
@@ -457,12 +469,26 @@ public class Calendar extends Controller {
       ShiftType shiftType = activity.get();
       rules.checkIfPermitted(activity.get());
       Map<Person, Integer> shiftsCalculatedCompetences = shiftManager2
-          .calculateActivityShiftCompetences(shiftType, start, end);
+          .calculateActivityShiftCompetences(shiftType, start, end, false);
+      Map<Person, Integer> holidayShifts = null;
+      Set<Person> people = shiftsCalculatedCompetences.keySet();
+      CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode(nighCode);
+      List<PersonCompetenceCodes> list = people.stream()
+          .flatMap(p -> p.personCompetenceCodes.stream()
+              .filter(c -> c.competenceCode.equals(code) 
+                  && !c.beginDate.isAfter(start)))
+          .collect(Collectors.toList());
+      
+      if (!list.isEmpty()) {
+        holidayShifts = 
+            shiftManager2.calculateActivityShiftCompetences(shiftType, start, end, true);
+      }
+      
 
       final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao
           .byShiftTypeAndDate(shiftType, start).orNull();
 
-      render(shiftsCalculatedCompetences, shiftTypeMonth, shiftType, start);
+      render(shiftsCalculatedCompetences, holidayShifts, shiftTypeMonth, shiftType, start);
     }
   }
 
@@ -534,18 +560,24 @@ public class Calendar extends Controller {
     final List<Person> people = shiftManager2.involvedShiftWorkers(shiftType, monthbegin, monthEnd);
 
     final Map<Person, Integer> shiftsCalculatedCompetences = new HashMap<>();
+    final Map<Person, Integer> holidayShiftsCalculatedCompetences = new HashMap<>();
     final Map<Person, List<ShiftTroubles>> peopleTrouble = new HashMap<>();
 
     people.forEach(person -> {
-      int competences = shiftManager2.calculatePersonShiftCompetencesInPeriod(shiftType, person,
-          monthbegin, lastDay);
+      int competences = 0;
+      competences = shiftManager2.calculatePersonShiftCompetencesInPeriod(shiftType, person,
+          monthbegin, lastDay, false);
       shiftsCalculatedCompetences.put(person, competences);
-
-      List<ShiftTroubles> shiftsTroubles = shiftManager2.allValidShifts(shiftType, person, monthbegin, monthEnd);
+      competences = shiftManager2.calculatePersonShiftCompetencesInPeriod(shiftType, person, 
+          monthbegin, lastDay, true);
+      holidayShiftsCalculatedCompetences.put(person, competences);
+      List<ShiftTroubles> shiftsTroubles = 
+          shiftManager2.allValidShifts(shiftType, person, monthbegin, monthEnd);
       peopleTrouble.put(person, shiftsTroubles);
     });
 
-    render(shiftTypeMonth, shiftsCalculatedCompetences, peopleTrouble);
+    render(shiftTypeMonth, shiftsCalculatedCompetences, 
+        holidayShiftsCalculatedCompetences, peopleTrouble);
   }
 
   /**

@@ -1,4 +1,4 @@
-<h3>Ore di turno valide</h3>
+<h3>Ore di turno feriale valide</h3>
 <br>
 <ul class="list-group">
   #{list shiftsCalculatedCompetences.entrySet()}
@@ -10,6 +10,19 @@
   #{/list}
 </ul>
 <br>
+#{if holidayShifts != null }
+<h3>Ore di turno festivo valide</h3>
+<ul class="list-group">
+  #{list holidayShifts.entrySet()}
+  <li class="list-group-item clearfix
+    #{if shiftTypeMonth?.approved}list-group-item-warning#{/if}
+    #{else}list-group-item-danger#{/else}">
+    ${_.getKey().fullname} <span class="label label-danger pull-right">${_.getValue().printHourMinute()}</span>
+  </li>
+  #{/list}
+</ul>
+<br>
+#{/if}
 #{if shiftTypeMonth?.approved}
 <div>
   <em class="text-muted">&{'calendar.competencesApproved'}</em>
