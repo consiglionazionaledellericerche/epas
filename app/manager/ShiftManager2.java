@@ -234,7 +234,9 @@ public class ShiftManager2 {
         personShiftDay.personShift.person.personCompetenceCodes
         .stream().anyMatch(pcc -> pcc.competenceCode.equals(holidayCode) 
             && !pcc.beginDate.isAfter(personShiftDay.date));
-    if (personDay.isPresent() && personDay.get().isHoliday && !isHolidayShiftEnabled) {
+
+    if (personDayManager.isHoliday(personShiftDay.personShift.person, personShiftDay.date) 
+        && !isHolidayShiftEnabled) {
       return Optional.of(Messages.get("shift.holidayShiftNotEnabled"));
     }
 
