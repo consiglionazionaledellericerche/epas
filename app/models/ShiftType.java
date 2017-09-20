@@ -34,7 +34,7 @@ public class ShiftType extends BaseModel {
   public String type;
   
   public String description;
-
+  
   @Min(0)
   @Column(name = "entrance_tolerance")
   public int entranceTolerance;

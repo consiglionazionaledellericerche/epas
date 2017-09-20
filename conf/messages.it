@@ -705,6 +705,8 @@ shift.absenceInDay = La persona nel giorno selezionato è assente
 shift.alreadyInShift = Già in turno per l'attività %s
 shift.slotAlreadyAssigned = Slot già assegnato a %s
 shift.personInactive = Persona non attiva sul turno
+shift.holidayShiftNotEnabled = La persona non ha abilitato il turno festivo
+shift.notSlotSpecified = Specificare uno slot da assegnare
 ShiftTroubles.PERSON_NOT_ASSIGNED = Persona non assegnata al turno
 ShiftTroubles.NOT_COMPLETED_SHIFT = Turno valido ma non completo (un\'ora in meno)
 ShiftTroubles.OUT_OF_STAMPING_TOLERANCE = Fuori dalla tolleranza per le timbrature
@@ -814,6 +816,7 @@ type.exitTolerance.popover = Tolleranza entro la quale la timbratura di uscita c
 type.exitMaxTolerance.popover = Tolleranza entro la quale la timbratura di uscita concorre comunque al conteggio del tempo in turno, ma in quantità ridotta
 type.breakInShift.popover = Tolleranza entro la quale la timbratura di pausa pranzo concorre comunque al conteggio intero del tempo in turno 
 type.breakMaxInShift.popover = Tolleranza entro la quale la timbratura di pausa pranzo concorre comunque al conteggio del tempo in turno, ma in quantità ridotta
+type.enableHolidays.popover = Abilita l&#39;inserimento (e il conteggio) di turni anche nei giorni festivi
 
 ###########################################################################
 #	Messaggi utilizzati nelle viste
