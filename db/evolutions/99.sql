@@ -50,29 +50,3 @@ DROP TABLE reperibility_type_month;
 DROP TABLE reperibility_type_month_history;
 DROP TABLE person_reperibility_types_persons;
 DROP TABLE person_reperibility_types_persons_history;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
