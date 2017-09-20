@@ -406,7 +406,12 @@ public class Calendar extends Controller {
         if (validation.valid(personShiftDay).ok) {
           error = shiftManager2.shiftPermitted(personShiftDay);
         } else {
-          error = Optional.of(Messages.get("validation.invalid"));
+          if (shiftSlot == null) {
+            error = Optional.of(Messages.get("shift.notSlotSpecified"));
+          } else {
+            error = Optional.of(Messages.get("validation.invalid"));
+          }
+          
         }
 
         if (error.isPresent()) {
