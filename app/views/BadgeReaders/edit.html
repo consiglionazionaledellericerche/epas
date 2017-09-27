@@ -12,6 +12,7 @@
 #{tabList}
   #{tabItem id:'info', title:'Riepilogo', active:true /}
 	#{tabItem id:'badgeSystems', title:'badgeSystems' /}
+	#{tabItem id:'zones', title:'Gestisci zone' /}
 	#{tabItem id:'delete', title:'Elimina'/}
 #{/tabList}
 	<br>
@@ -92,6 +93,18 @@
 		#{/paginate}
 	</section>
 
+
+	#{/tabContentItem}
+	
+	#{tabContentItem id:'zones', active:true}
+		<br>
+		
+			#{alert color:'warning'}
+				In questa sezione è possibile specificare varie zone di timbratura affinchè si permetta di definire
+				un comportamento del sistema ePAS in modo tale che una timbratura di uscita da una zona e una successiva
+				timbratura di ingresso presso un'altra zona, se effettuate entro un tempo definito, consentano al
+				sistema di non conteggiare il tempo intercorso tra le due timbrature.
+			#{/alert}
 
 	#{/tabContentItem}
 
