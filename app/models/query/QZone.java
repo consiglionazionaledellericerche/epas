@@ -41,6 +41,10 @@ public class QZone extends EntityPathBase<Zone> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    public final ListPath<models.ZoneToZones, QZoneToZones> zoneLinkedAsMaster = this.<models.ZoneToZones, QZoneToZones>createList("zoneLinkedAsMaster", models.ZoneToZones.class, QZoneToZones.class, PathInits.DIRECT2);
+
+    public final ListPath<models.ZoneToZones, QZoneToZones> zoneLinkedAsSlave = this.<models.ZoneToZones, QZoneToZones>createList("zoneLinkedAsSlave", models.ZoneToZones.class, QZoneToZones.class, PathInits.DIRECT2);
+
     public QZone(String variable) {
         this(Zone.class, forVariable(variable), INITS);
     }

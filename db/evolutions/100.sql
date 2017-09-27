@@ -40,8 +40,8 @@ CREATE TABLE zone_to_zones (
 
 # ---!Downs
 
---DROP TABLE zones_history;
 DROP CONSTRAINT name_unique;
-DROP TABLE zones;
---DROP TABLE zone_to_zones_history;
 DROP TABLE zone_to_zones;
+DROP TABLE zones;
+--DROP TABLE zones_history;
+--DROP TABLE zone_to_zones_history;

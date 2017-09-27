@@ -15,8 +15,6 @@ import javax.validation.constraints.NotNull;
 
 import models.base.BaseModel;
 
-import org.hibernate.envers.Audited;
-
 import play.data.validation.Unique;
 
 
@@ -24,6 +22,8 @@ import play.data.validation.Unique;
 @Table(name = "zones")
 //@Audited
 public class Zone extends BaseModel {
+
+  private static final long serialVersionUID = 2466096445310199806L;
 
   @Unique
   @NotNull
@@ -37,8 +37,8 @@ public class Zone extends BaseModel {
   public BadgeReader badgeReader;
   
   @OneToMany(mappedBy = "zone")
-  public List<ZoneToZones> zoneLinked = Lists.newArrayList();
+  public List<ZoneToZones> zoneLinkedAsMaster = Lists.newArrayList();
   
-  @OneToMany(mappedBy = "zone")
-  public List<ZoneToZones> zoneLinked2 = Lists.newArrayList();
+  @OneToMany(mappedBy = "zoneLinked")
+  public List<ZoneToZones> zoneLinkedAsSlave = Lists.newArrayList();
 }
