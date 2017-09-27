@@ -1,22 +1,22 @@
 package models;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.hibernate.envers.Audited;
+import models.base.BaseModel;
 
 import play.data.validation.Required;
-import play.db.jpa.Model;
 
 
 
 @Entity
 @Table(name = "zone_to_zones")
 //@Audited
-public class ZoneToZones extends Model {
+public class ZoneToZones extends BaseModel {
+
+  private static final long serialVersionUID = 1252197401101094698L;
 
   @Required
   @ManyToOne
