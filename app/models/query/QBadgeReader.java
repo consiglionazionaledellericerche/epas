@@ -49,6 +49,8 @@ public class QBadgeReader extends EntityPathBase<BadgeReader> {
 
     public final QUser user;
 
+    public final ListPath<models.Zone, QZone> zones = this.<models.Zone, QZone>createList("zones", models.Zone.class, QZone.class, PathInits.DIRECT2);
+
     public QBadgeReader(String variable) {
         this(BadgeReader.class, forVariable(variable), INITS);
     }

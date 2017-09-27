@@ -20,6 +20,7 @@ import models.base.BaseModel;
 import net.sf.oval.constraint.NotNull;
 
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import play.data.validation.Required;
 import play.data.validation.Unique;
@@ -55,6 +56,10 @@ public class BadgeReader extends BaseModel {
 
   @ManyToMany
   public List<BadgeSystem> badgeSystems = Lists.newArrayList();
+  
+  @OneToMany(mappedBy = "badgeReader")
+  @NotAudited
+  public List<Zone> zones = Lists.newArrayList();
 
 
   public boolean enabled = true;
