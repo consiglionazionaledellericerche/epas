@@ -37,7 +37,7 @@ public class QZoneToZones extends EntityPathBase<ZoneToZones> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
-    public final QZone zone;
+    public final QZone zoneBase;
 
     public final QZone zoneLinked;
 
@@ -59,7 +59,7 @@ public class QZoneToZones extends EntityPathBase<ZoneToZones> {
 
     public QZoneToZones(Class<? extends ZoneToZones> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.zone = inits.isInitialized("zone") ? new QZone(forProperty("zone"), inits.get("zone")) : null;
+        this.zoneBase = inits.isInitialized("zoneBase") ? new QZone(forProperty("zoneBase"), inits.get("zoneBase")) : null;
         this.zoneLinked = inits.isInitialized("zoneLinked") ? new QZone(forProperty("zoneLinked"), inits.get("zoneLinked")) : null;
     }
 

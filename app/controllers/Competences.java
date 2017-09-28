@@ -503,11 +503,7 @@ public class Competences extends Controller {
   }
 
   /**
-<<<<<<< HEAD
    * @param personId l'id della persona
-=======
-   * @param personId     l'id della persona
->>>>>>> refs/remotes/origin/468-integrare-i-calendari-dei-turni-di-sistorg
    * @param competenceId l'id della competenza
    * @param month        il mese
    * @param year         l'anno ritorna la form di inserimento di un codice di competenza per una

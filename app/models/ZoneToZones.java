@@ -7,6 +7,7 @@ import javax.persistence.Table;
 
 import models.base.BaseModel;
 
+import play.data.validation.Min;
 import play.data.validation.Required;
 
 
@@ -20,21 +21,22 @@ public class ZoneToZones extends BaseModel {
 
   @Required
   @ManyToOne
-  @JoinColumn(name = "zone_id", insertable = false, updatable = false)
-  public Zone zone;
+  @JoinColumn(name = "zone_base_id", updatable = false)
+  public Zone zoneBase;
   
   @Required
   @ManyToOne
-  @JoinColumn(name = "zone_id", insertable = false, updatable = false)
+  @JoinColumn(name = "zone_linked_id", updatable = false)
   public Zone zoneLinked;
   
   @Required
+  @Min(0)
   public int delay;  
 
   @Override
   public String toString() {
     return String.format(
         "Zone[%d] - zone.name = %s, zoneLinked.name= %s, delay = %d",
-         id, zone.name, zoneLinked.name, delay);
+         id, zoneBase.name, zoneLinked.name, delay);
   }
 }
