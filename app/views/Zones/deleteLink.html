@@ -1,0 +1,25 @@
+#{modalAsync title:'Rimuovi Collegamento '}
+<div class="text-center">
+  #{alert color:'danger'}
+  <p>Conferma eliminazione del collegamento <strong>${link.zoneBase.name}</strong> - <strong>${link.zoneLinked.name}</strong>
+     con tolleranza <strong>${link.delay} minuti</strong>.<br>
+	</p><br>
+
+  #{form action:@deleteLink(), method:'POST', autocomplete:false,
+  class:'form form-horizontal' }
+
+  #{f.hidden 'linkId', value:link.id /}
+  #{f.hidden 'confirmed', value:confirmed /}
+  
+
+  <div class="container-fluid center">
+    <input class="btn btn-danger" type="submit" value="Elimina"/>
+  </div>
+  #{/form}
+
+
+  #{/alert}
+
+
+</div>
+#{/modalAsync}
