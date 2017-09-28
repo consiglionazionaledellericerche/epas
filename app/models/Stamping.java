@@ -76,6 +76,15 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
    */
   @Column(name = "marked_by_employee")
   public boolean markedByEmployee;
+  
+  /**
+   * questo nuovo campo si è reso necessario per la sede centrale per capire da quale lettore 
+   * proviene la timbratura così da poter applicare un algoritmo che giustifichi le timbrature 
+   * di uscita/ingresso consecutive dei dipendenti se provenienti da lettori diversi e appartenenti 
+   * a un collegamento definito.e all'interno della tolleranza definita per quel collegamento.
+   */
+  @Column(name = "stamping_zone")
+  public String stampingZone;
   /**
    * true, cella bianca; false, cella gialla.
    */

@@ -145,6 +145,9 @@ public class StampingManager {
     stamping.markedByAdmin = stampingFromClient.markedByAdmin;
     stamping.way = stampingFromClient.inOut == 0 ? WayType.in : WayType.out;
     stamping.stampType = stampingFromClient.stampType;
+    stamping.stampingZone = 
+        (stampingFromClient.zona != null && !stampingFromClient.zona.equals("")) 
+        ? stampingFromClient.zona : null;
     stamping.save();
 
     log.info("Inserita timbratura {} per {} (matricola = {}) ",
