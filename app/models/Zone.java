@@ -36,9 +36,15 @@ public class Zone extends BaseModel {
   @Nullable
   public BadgeReader badgeReader;
   
-  @OneToMany(mappedBy = "zone")
+  @OneToMany(mappedBy = "zoneBase")
   public List<ZoneToZones> zoneLinkedAsMaster = Lists.newArrayList();
   
   @OneToMany(mappedBy = "zoneLinked")
   public List<ZoneToZones> zoneLinkedAsSlave = Lists.newArrayList();
+  
+  @Override
+  public String toString() {
+    return String.format(
+        "Zone[%d] - %s", id, this.name);
+  }
 }
