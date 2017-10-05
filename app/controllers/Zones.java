@@ -23,10 +23,14 @@ import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import security.SecurityRules;
+
 
 @With({Resecure.class})
 public class Zones extends Controller {
   
+  @Inject
+  private static SecurityRules rules;
   @Inject
   private static BadgeReaderDao badgeReaderDao;
   @Inject
@@ -38,10 +42,12 @@ public class Zones extends Controller {
    */
   public static void insertZone(long badgeReaderId) {
     BadgeReader reader = badgeReaderDao.byId(badgeReaderId);
+    
     if (reader == null) {
       flash.error("Non esiste una sorgente timbratura con id: %s", badgeReaderId);
       render();
     }
+    rules.checkIfPermitted(reader.user.owner);
     Zone zone = new Zone();
     render(zone, reader);
   }
@@ -54,6 +60,7 @@ public class Zones extends Controller {
     BadgeReader reader = badgeReaderDao.byId(readerId);
     notFoundIfNull(reader);
     notFoundIfNull(zone);
+    rules.checkIfPermitted(reader.user.owner);
     zone.badgeReader = reader;
     zone.save();
     flash.success("Nuova zona %s - %s salvata con successo", zone.name, zone.description);
@@ -67,6 +74,7 @@ public class Zones extends Controller {
   public static void linkZones(long badgeReaderId) {
     BadgeReader reader = badgeReaderDao.byId(badgeReaderId);
     notFoundIfNull(reader);
+    rules.checkIfPermitted(reader.user.owner);
     List<Zone> fromList = zoneDao.getByBadgeReader(reader);
     List<Zone> toList = zoneDao.getByBadgeReader(reader);
     ZoneToZones link = new ZoneToZones();
@@ -80,7 +88,7 @@ public class Zones extends Controller {
    */
   public static void saveLinks(@Valid ZoneToZones link) {
     notFoundIfNull(link);
-    
+    rules.checkIfPermitted(link.zoneBase.badgeReader.user.owner);
     if (Validation.hasErrors()) {
       response.status = 400;
       List<Zone> fromList = zoneDao.getByBadgeReader(link.zoneBase.badgeReader);
@@ -110,13 +118,14 @@ public class Zones extends Controller {
   }
   
   /**
-   * 
-   * @param linkId
-   * @param confirmed
+   * il metodo che elimina un collegamento tra zone.
+   * @param linkId l'id del collegamento da eliminare
+   * @param confirmed il booleano che mi identifica se devo confermare o meno la cancellazione
    */
   public static void deleteLink(long linkId, boolean confirmed) {
     ZoneToZones link = zoneDao.getLinkById(linkId);
     notFoundIfNull(link);
+    rules.checkIfPermitted(link.zoneBase.badgeReader.user.owner);
     if (!confirmed) {
       confirmed = true;
       render("@deleteLink", link, confirmed);

@@ -54,6 +54,8 @@ public class QPersonDay extends EntityPathBase<PersonDay> {
 
     public final BooleanPath isWorkingInAnotherPlace = createBoolean("isWorkingInAnotherPlace");
 
+    public final NumberPath<Integer> justifiedTimeBetweenZones = createNumber("justifiedTimeBetweenZones", Integer.class);
+
     public final NumberPath<Integer> justifiedTimeMeal = createNumber("justifiedTimeMeal", Integer.class);
 
     public final NumberPath<Integer> justifiedTimeNoMeal = createNumber("justifiedTimeNoMeal", Integer.class);

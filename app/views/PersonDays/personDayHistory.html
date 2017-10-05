@@ -26,6 +26,7 @@
 		      <th>&{'modification.date'}</th>
 		      <th>&{'done.by'}</th>
 		      <th>&{'modification.type'}</th>
+		      <th>&{'zone'}</th>
 		    </tr>
 		
 		    #{list items:historyStamping, as:'stamping'}
@@ -43,6 +44,9 @@
 					</span>
 					</td>
 		      <td class="${stamping.type}">&{stamping.type}</td>
+		      <td>#{if stamping.value.stampingZone != null}${stamping.value.stampingZone}#{/if}
+		      		#{else}<i>Non definito</i>#{/else}</td>
+		      
 		    </tr>
 					#{if stamping.revision?.owner?.badgeReader}
 					<div class="webui-popover-content" id="${stamping.revision.id}">

@@ -65,6 +65,8 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
           stamping.markedByAdmin = true;
         }
       }
+      
+      stamping.zona = jsonObject.get("terminale").getAsString();
 
       Integer anno = jsonObject.get("anno").getAsInt();
       Integer mese = jsonObject.get("mese").getAsInt();
