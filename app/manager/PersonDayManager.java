@@ -413,11 +413,10 @@ public class PersonDayManager {
             .map(z -> z.zoneLinkedAsMaster.stream().findAny().orElse(null)))       
         .collect(Collectors.toList());
     
-    if (!link.isEmpty() && validPairs.size() > 1) {
-      
-      justifiedTimeBetweenZones = justifiedTimeBetweenZones(validPairs);
-      personDay.setJustifiedTimeBetweenZones(justifiedTimeBetweenZones);
+    if (!link.isEmpty() && validPairs.size() > 1) {      
+      justifiedTimeBetweenZones = justifiedTimeBetweenZones(validPairs);      
     }
+    personDay.setJustifiedTimeBetweenZones(justifiedTimeBetweenZones);
     
     //Il tempo a lavoro calcolato
     int computedTimeAtWork = stampingTimeInOpening //nei festivi è 0
