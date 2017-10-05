@@ -544,6 +544,10 @@ workingTimeTypePattern=Tipo Orario
 
 vwt.name= Nome orario
 
+zone =Zona di timbratura
+zone.name =Nome della zona di timbratura
+zone.description =Descrizione
+
 ###########################
 # Messaggi di validazione
 ###########################

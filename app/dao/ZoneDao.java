@@ -66,4 +66,21 @@ public class ZoneDao extends DaoBase {
     JPQLQuery query = getQueryFactory().from(zones).where(zones.id.eq(id));
     return query.singleResult(zones);
   }
+  
+  /**
+   * 
+   * @param name1 il nome della prima zona
+   * @param name2 il nome della seconda zona
+   * @return il link, se esiste, tra le zone passate come parametro.
+   */
+  public Optional<ZoneToZones> getByLinkNames(String name1, String name2) {
+    final QZoneToZones zones = QZoneToZones.zoneToZones;
+    JPQLQuery query = getQueryFactory()
+        .from(zones)
+        .where(zones.zoneBase.name.likeIgnoreCase(name1)
+            .and(zones.zoneLinked.name.likeIgnoreCase(name2))
+            .or(zones.zoneBase.name.likeIgnoreCase(name2)
+                .and(zones.zoneLinked.name.likeIgnoreCase(name1))));
+    return Optional.fromNullable(query.singleResult(zones));
+  }
 }

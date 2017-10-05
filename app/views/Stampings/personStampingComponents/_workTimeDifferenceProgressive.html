@@ -73,6 +73,11 @@
   #{if dayRecap.personDay?.stampingsTime > 0}
     <br>Da timbrature: <strong>${dayRecap.personDay.stampingsTime.printHourMinute()}</strong>
   #{/if}
+  
+  #{if dayRecap.personDay?.justifiedTimeBetweenZones > 0}
+  	<br>Giustificato per passaggio da zone riconosciute come collegamento: 
+  	<strong>${dayRecap.personDay.justifiedTimeBetweenZones.printHourMinute()}</strong>
+  #{/if}
 
   #{if dayRecap.personDay?.justifiedTimeNoMeal > 0}
     <br>Giustificato da assenze: <strong>${dayRecap.personDay.justifiedTimeNoMeal.printHourMinute()}</strong>

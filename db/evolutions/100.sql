@@ -36,6 +36,12 @@ CREATE TABLE zone_to_zones_history (
     PRIMARY KEY (id, _revision, _revision_type)
 );
 
+ALTER TABLE stampings ADD COLUMN stamping_zone TEXT;
+ALTER TABLE stampings_history ADD COLUMN stamping_zone TEXT;
+
+ALTER TABLE person_days ADD COLUMN justified_time_between_zones INTEGER;
+ALTER TABLE person_days_history ADD COLUMN justified_time_between_zones INTEGER;
+
 # ---!Downs
 
 DROP CONSTRAINT name_unique;
@@ -43,3 +49,7 @@ DROP TABLE zone_to_zones;
 DROP TABLE zones;
 DROP TABLE zones_history;
 DROP TABLE zone_to_zones_history;
+ALTER TABLE stampings_history DROP COLUMN stamping_zone;
+ALTER TABLE stmpings DROP COLUMN stamping_zone;
+ALTER TABLE person_days_history DROP COLUMN justified_time_between_zones;
+ALTER TABLE person_days DROP COLUMN justified_time_between_zones;
