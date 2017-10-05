@@ -26,7 +26,9 @@
 		      <th>&{'modification.date'}</th>
 		      <th>&{'done.by'}</th>
 		      <th>&{'modification.type'}</th>
-		      <th>&{'zone'}</th>
+		      #{if zoneDefined}
+		      	<th>&{'zone'}</th>
+		      #{/if}
 		    </tr>
 		
 		    #{list items:historyStamping, as:'stamping'}
@@ -44,8 +46,11 @@
 					</span>
 					</td>
 		      <td class="${stamping.type}">&{stamping.type}</td>
+		      #{if zoneDefined}
 		      <td>#{if stamping.value.stampingZone != null}${stamping.value.stampingZone}#{/if}
-		      		#{else}<i>Non definito</i>#{/else}</td>
+		      		#{else}<i>Non definito</i>#{/else}
+		      </td>
+		      #{/if}
 		      
 		    </tr>
 					#{if stamping.revision?.owner?.badgeReader}
