@@ -15,8 +15,6 @@ import dao.wrapper.IWrapperFactory;
 
 import it.cnr.iit.epas.DateInterval;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.List;
 import java.util.Set;
 
@@ -49,7 +47,6 @@ import play.mvc.With;
 
 import security.SecurityRules;
 
-@Slf4j
 @With({Resecure.class})
 public class MealTickets extends Controller {
 
