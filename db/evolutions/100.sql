@@ -44,7 +44,7 @@ ALTER TABLE person_days_history ADD COLUMN justified_time_between_zones INTEGER;
 
 # ---!Downs
 
-DROP CONSTRAINT name_unique;
+ALTER TABLE zones DROP CONSTRAINT name_zone_unique;
 DROP TABLE zone_to_zones;
 DROP TABLE zones;
 DROP TABLE zones_history;
