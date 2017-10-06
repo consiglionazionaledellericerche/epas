@@ -30,7 +30,7 @@ public class ZoneToZones extends BaseModel {
   public Zone zoneLinked;
   
   @Required
-  @Min(0)
+  @Min(1)
   public int delay;  
 
   @Override

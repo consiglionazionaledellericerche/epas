@@ -26,7 +26,6 @@ import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import manager.services.PairStamping;
 
-import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
@@ -34,7 +33,6 @@ import models.PersonShiftDay;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.WorkingTimeTypeDay;
-import models.Zone;
 import models.ZoneToZones;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
@@ -269,10 +267,10 @@ public class PersonDayManager {
         Stamping first = previous.second;
         Stamping second = validPair.first;
         //almeno una delle due permesso breve
-        if ( (first.stampType != null && first.stampType == StampTypes.PERMESSO_BREVE) 
+        if ((first.stampType != null && first.stampType == StampTypes.PERMESSO_BREVE) 
             || (second.stampType != null && second.stampType == StampTypes.PERMESSO_BREVE)) {
           //solo permessi brevi
-          if ( (first.stampType == null || first.stampType == StampTypes.PERMESSO_BREVE)
+          if ((first.stampType == null || first.stampType == StampTypes.PERMESSO_BREVE)
               && (second.stampType == null || second.stampType == StampTypes.PERMESSO_BREVE)) {
             gapTime += new PairStamping(first, second).timeInPair;
           }
@@ -408,15 +406,12 @@ public class PersonDayManager {
     
     int justifiedTimeBetweenZones = 0;
     
-    List<ZoneToZones> link = personDay.person.badges.stream()
-        .<ZoneToZones>flatMap(b -> b.badgeReader.zones.stream()
-            .map(z -> z.zoneLinkedAsMaster.stream().findAny().orElse(null)))       
-        .collect(Collectors.toList());
+    List<ZoneToZones> link = personDay.person.getZones();
     
     if (!link.isEmpty() && validPairs.size() > 1) {      
-      justifiedTimeBetweenZones = justifiedTimeBetweenZones(validPairs);      
+      justifiedTimeBetweenZones = justifiedTimeBetweenZones(validPairs);
     }
-    personDay.setJustifiedTimeBetweenZones(justifiedTimeBetweenZones);
+    personDay.setJustifiedTimeBetweenZones(justifiedTimeBetweenZones);    
     
     //Il tempo a lavoro calcolato
     int computedTimeAtWork = stampingTimeInOpening //nei festivi è 0
@@ -574,11 +569,11 @@ public class PersonDayManager {
         if (zoneToZones.isPresent()) {
           if (DateUtility.toMinute(next.first.date) - DateUtility.toMinute(pair.second.date) 
               < zoneToZones.get().delay) {
-            timeToJustify = timeToJustify 
-                + (DateUtility.toMinute(next.first.date) 
+            timeToJustify +=  
+                (DateUtility.toMinute(next.first.date) 
                     - DateUtility.toMinute(pair.second.date));
           } else {
-            timeToJustify = timeToJustify + zoneToZones.get().delay;
+            timeToJustify += zoneToZones.get().delay;
           }
           
         }

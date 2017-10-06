@@ -1,8 +1,5 @@
 package controllers;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
-
 import dao.BadgeReaderDao;
 import dao.ZoneDao;
 
@@ -10,13 +7,12 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 import models.BadgeReader;
-import models.Person;
 import models.Zone;
 import models.ZoneToZones;
-
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -25,7 +21,7 @@ import play.mvc.With;
 
 import security.SecurityRules;
 
-
+@Slf4j
 @With({Resecure.class})
 public class Zones extends Controller {
   
@@ -71,15 +67,17 @@ public class Zones extends Controller {
    * ritorna la form per collegare le zone.
    * @param badgeReaderId l'id del badgereader che preleva timbrature dalle zone.
    */
-  public static void linkZones(long badgeReaderId) {
+  public static void linkZones(long badgeReaderId, ZoneToZones link) {
     BadgeReader reader = badgeReaderDao.byId(badgeReaderId);
     notFoundIfNull(reader);
     rules.checkIfPermitted(reader.user.owner);
-    List<Zone> fromList = zoneDao.getByBadgeReader(reader);
-    List<Zone> toList = zoneDao.getByBadgeReader(reader);
-    ZoneToZones link = new ZoneToZones();
+    List<Zone> zones = reader.zones;
+    if (link == null) {
+      link = new ZoneToZones();
+    }
+    log.info("Link = {}", link);
     List<ZoneToZones> list = zoneDao.getZonesByBadgeReader(reader);
-    render(fromList, toList, link, reader, list);
+    render(zones, link, reader, list);
   }
   
   /**
@@ -91,16 +89,19 @@ public class Zones extends Controller {
     rules.checkIfPermitted(link.zoneBase.badgeReader.user.owner);
     if (Validation.hasErrors()) {
       response.status = 400;
-      List<Zone> fromList = zoneDao.getByBadgeReader(link.zoneBase.badgeReader);
-      List<Zone> toList = zoneDao.getByBadgeReader(link.zoneBase.badgeReader);
+      List<Zone> zones = link.zoneBase.badgeReader.zones;
       List<ZoneToZones> list = zoneDao.getZonesByBadgeReader(link.zoneBase.badgeReader);
       BadgeReader reader = link.zoneBase.badgeReader;
-      render("@linkZones", fromList, toList, list, link, reader);
+      render("@linkZones", zones, list, link, reader);
     }
     //controllo che il link non sia tra le stesse zone
     if (link.zoneBase == link.zoneLinked) {
       flash.error("Il collegamento tra una zona e se stessa non è possibile.");
-      linkZones(link.zoneBase.badgeReader.id);
+      List<Zone> zones = link.zoneBase.badgeReader.zones;      
+      val reader = link.zoneBase.badgeReader;
+      List<ZoneToZones> list = zoneDao.getZonesByBadgeReader(reader);      
+      render("@linkZones", zones, link, reader, list);
+      linkZones(link.zoneBase.badgeReader.id, link);
     }
     //controllo che non esista già il collegamento tra le zone in entrambi i sensi
     List<ZoneToZones> list = zoneDao.getZonesByBadgeReader(link.zoneBase.badgeReader);
@@ -109,12 +110,12 @@ public class Zones extends Controller {
             || (l.zoneBase == link.zoneLinked && l.zoneLinked == link.zoneBase));
     if (found) {
       flash.error("Esiste già un collegamento tra le zone selezionate!");
-      linkZones(link.zoneBase.badgeReader.id);
+      linkZones(link.zoneBase.badgeReader.id, link);
     }
     
     link.save();
     flash.success("Collegamento salvato correttamente");
-    linkZones(link.zoneBase.badgeReader.id);
+    linkZones(link.zoneBase.badgeReader.id, null);
   }
   
   /**
@@ -139,6 +140,6 @@ public class Zones extends Controller {
 
     flash.success("Eliminato collegamento tra %s e %s ", 
         link.zoneBase.name, link.zoneLinked.name);
-    linkZones(link.zoneBase.badgeReader.id);
+    linkZones(link.zoneBase.badgeReader.id, null);
   }
 }

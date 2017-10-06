@@ -3,44 +3,23 @@ package dao;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
-
-import dao.wrapper.IWrapperFactory;
 
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
 import models.BadgeReader;
-import models.Zone;
 import models.ZoneToZones;
-import models.query.QZone;
 import models.query.QZoneToZones;
 
 
 public class ZoneDao extends DaoBase {
-  
-  private final IWrapperFactory factory;
 
   @Inject
-  ZoneDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp,
-      IWrapperFactory factory) {
+  ZoneDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
     super(queryFactory, emp);
-    this.factory = factory;
-  }
-  
-  /**
-   * 
-   * @param reader il lettore badge per cui si vogliono le zone associate
-   * @return la lista di tutte le zone di timbratura associate al badge reader passato 
-   *     come parametro.
-   */
-  public List<Zone> getByBadgeReader(BadgeReader reader) {
-    final QZone zone = QZone.zone;
-    JPQLQuery query = getQueryFactory().from(zone).where(zone.badgeReader.eq(reader));
-    return query.list(zone);
   }
   
   /**

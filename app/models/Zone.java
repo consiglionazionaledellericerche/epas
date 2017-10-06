@@ -42,6 +42,14 @@ public class Zone extends BaseModel {
   @OneToMany(mappedBy = "zoneLinked")
   public List<ZoneToZones> zoneLinkedAsSlave = Lists.newArrayList();
   
+  /* Utilizzata nelle select html per mostrare questa zona.
+   * @see models.base.BaseModel#getLabel()
+   */
+  @Override
+  public String getLabel() {
+    return name;
+  }
+  
   @Override
   public String toString() {
     return String.format(
