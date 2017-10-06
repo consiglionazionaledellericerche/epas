@@ -1,7 +1,6 @@
 package models;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.Range;
 
 import it.cnr.iit.epas.NullStringBinder;
 
@@ -20,7 +19,6 @@ import models.base.BaseModel;
 import models.enumerate.StampTypes;
 
 import org.hibernate.envers.Audited;
-import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
 

@@ -2,7 +2,6 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -28,8 +27,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
-
-import lombok.extern.slf4j.Slf4j;
 
 import manager.ConsistencyManager;
 import manager.NotificationManager;
@@ -230,7 +227,7 @@ public class Stampings extends Controller {
     notFoundIfNull(person);
     
     if (stamping.way == null) {
-      validation.addError("stamping.way", "Obbligatorio");
+      Validation.addError("stamping.way", "Obbligatorio");
     }
     if (Validation.hasErrors()) {
       response.status = 400;
