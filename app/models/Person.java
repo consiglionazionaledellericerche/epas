@@ -153,7 +153,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
    */
   @OneToMany(mappedBy = "supervisor")
   public List<ShiftCategories> shiftCategories = Lists.newArrayList();
-  
+
   @OneToMany(mappedBy = "supervisor")
   public List<PersonReperibilityType> reperibilityTypes = Lists.newArrayList();
 
@@ -173,7 +173,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
    */
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public List<PersonDay> personDays = Lists.newArrayList();
-  
+
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public List<CertificatedData> certificatedData = Lists.newArrayList();
 
@@ -251,11 +251,11 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
    */
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public List<PersonConfiguration> personConfigurations = Lists.newArrayList();
-  
+
 
   @ManyToMany(mappedBy = "managers")
   public List<ShiftCategories> categories = Lists.newArrayList(); 
-  
+
   @ManyToMany(mappedBy = "managers")
   public List<PersonReperibilityType> reperibilities = Lists.newArrayList(); 
 
@@ -362,4 +362,12 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     return true;
   }
 
+  /**
+   * @return la lista delle ZoneToZones associate ai badge della persona.
+   */
+  public List<ZoneToZones> getZones() {
+    return badges.stream().<ZoneToZones>flatMap(b -> b.badgeReader.zones.stream()
+        .map(z -> z.zoneLinkedAsMaster.stream().findAny().orElse(null)))       
+        .collect(Collectors.toList());
+  }
 }

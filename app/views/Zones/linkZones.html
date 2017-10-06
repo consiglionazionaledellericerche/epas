@@ -21,9 +21,9 @@ pertanto non è necessario specificare due diversi collegamenti per lo stesso tr
 #{form action:@saveLinks(), method:'POST', autocomplete:false,
   class:'form form-horizontal'}
   
-<div class="col-sm-4">#{f.selectModel 'link.zoneBase', items:fromList, required:true /}</div>
+<div class="col-sm-4">#{f.selectModel 'link.zoneBase', items:zones, required:true /}</div>
 <div class="col-sm-4">#{f.input 'link.delay', type:'number' /}</div>
-<div class="col-sm-4">#{f.selectModel 'link.zoneLinked', items:toList, required:true /}</div>
+<div class="col-sm-4">#{f.selectModel 'link.zoneLinked', items:zones, required:true /}</div>
 <div class="col-sm-12"><br></div>
 #{b.buttons center:true}
   	#{b.save /}
