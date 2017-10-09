@@ -24,6 +24,7 @@ import models.Office;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
+import models.Zone;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,8 +95,10 @@ public class BadgeReaders extends Controller {
 
     SearchResults<?> results = badgeSystemDao.badgeSystems(Optional.<String>absent(),
         Optional.fromNullable(badgeReader)).listResults();
+    
+    List<Zone> zoneList = badgeReader.zones;
 
-    render(badgeReader, results);
+    render(badgeReader, results, zoneList);
 
   }
 
@@ -170,8 +173,7 @@ public class BadgeReaders extends Controller {
       render("@edit", badgeReader);
     }
 
-    Codec codec = new Codec();
-    user.password = codec.hexMD5(newPass);
+    user.password = Codec.hexMD5(newPass);
     user.save();
 
     flash.success(Web.msgSaved(BadgeReader.class));
@@ -193,7 +195,7 @@ public class BadgeReaders extends Controller {
     }
     if (user.password.length() < 5) {
       response.status = 400;
-      validation.addError("user.password", "almeno 5 caratteri");
+      Validation.addError("user.password", "almeno 5 caratteri");
       render("@blank", badgeReader, office, user);
     }
 
@@ -201,7 +203,7 @@ public class BadgeReaders extends Controller {
 
     badgeReader.user = user;
     badgeReader.user.owner = office;
-    badgeReader.user.password = new Codec().hexMD5(badgeReader.user.password);
+    badgeReader.user.password = Codec.hexMD5(badgeReader.user.password);
     badgeReader.user.save();
     badgeReader.save();
 

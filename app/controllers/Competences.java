@@ -39,8 +39,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import lombok.extern.slf4j.Slf4j;
-
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.SecureManager;
@@ -69,7 +67,6 @@ import models.ShiftTimeTable;
 import models.ShiftType;
 import models.TotalOvertime;
 import models.User;
-import models.dto.ShiftTypeService;
 import models.dto.TimeTableDto;
 
 import org.joda.time.LocalDate;
@@ -83,7 +80,6 @@ import play.mvc.With;
 
 import security.SecurityRules;
 
-@Slf4j
 @With({Resecure.class})
 public class Competences extends Controller {
 
@@ -503,11 +499,7 @@ public class Competences extends Controller {
   }
 
   /**
-<<<<<<< HEAD
    * @param personId l'id della persona
-=======
-   * @param personId     l'id della persona
->>>>>>> refs/remotes/origin/468-integrare-i-calendari-dei-turni-di-sistorg
    * @param competenceId l'id della competenza
    * @param month        il mese
    * @param year         l'anno ritorna la form di inserimento di un codice di competenza per una

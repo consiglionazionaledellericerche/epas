@@ -47,6 +47,8 @@ public class QStamping extends EntityPathBase<Stamping> {
 
     public final QPersonDay personDay;
 
+    public final StringPath stampingZone = createString("stampingZone");
+
     public final QStampModificationType stampModificationType;
 
     public final EnumPath<models.enumerate.StampTypes> stampType = createEnum("stampType", models.enumerate.StampTypes.class);

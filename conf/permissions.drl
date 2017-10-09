@@ -751,7 +751,7 @@ when
 
 		"BadgeReaders.save",
 		"BadgeReaders.edit",
-	    "BadgeReaders.updateInfo",
+		"BadgeReaders.updateInfo",
 	    "BadgeReaders.changePassword",
 		"BadgeReaders.joinBadgeSystems",
 		"BadgeReaders.saveBadgeSystems",
@@ -778,6 +778,12 @@ when
   		"Users.disable",
   		"Users.disabledList",
   		"Users.enable",
+  		
+  		"Zones.insertZone",
+  		"Zones.linkZones",
+  		"Zones.save",
+  		"Zones.saveLinks",
+  		"Zones.deleteLink",
 
 		"Administrators.blank",
 		"Administrators.save",
@@ -854,7 +860,13 @@ when
 	   "BadgeSystems.deleteBadge",
 	   "BadgeSystems.joinPersonNumbers",
   	   "BadgeSystems.joinOldBadgeNumbers",
-  	   "BadgeSystems.delete"
+  	   "BadgeSystems.delete",
+  	   
+  	   "Zones.insertZone",
+  	   "Zones.linkZones",
+  	   "Zones.save",
+  	   "Zones.saveLinks",
+  	   "Zones.deleteLink"
 
        ), target == $o, granted == false)
 then

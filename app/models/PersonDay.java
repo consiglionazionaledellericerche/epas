@@ -89,6 +89,12 @@ public class PersonDay extends BaseModel {
    */
   @Column(name = "justified_time_meal")
   public Integer justifiedTimeMeal = 0;
+  
+  /**
+   * Tempo giustificato per uscita/ingresso da zone diverse opportunamente definite.
+   */
+  @Column(name = "justified_time_between_zones")
+  public Integer justifiedTimeBetweenZones = 0;
 
   public Integer difference = 0;
 

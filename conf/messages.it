@@ -213,6 +213,9 @@ invalid.time=Formato del tempo errato.
 
 includeStampingDetails= Includi dettagli timbrature
 link.denied= Permessi insufficenti
+link.zoneBase =Zona di partenza
+link.delay =Tolleranza
+link.zoneLinked =Zona di arrivo
 logout= Esci
 lunchPauseEnd= Fine pausa pranzo
 lunchPauseStart= Inizio pausa pranzo
@@ -540,6 +543,10 @@ WorkingTimeTypePattern.VERTICAL = Orario Verticale
 workingTimeTypePattern=Tipo Orario
 
 vwt.name= Nome orario
+
+zone =Zona di timbratura
+zone.name =Nome della zona di timbratura
+zone.description =Descrizione
 
 ###########################
 # Messaggi di validazione

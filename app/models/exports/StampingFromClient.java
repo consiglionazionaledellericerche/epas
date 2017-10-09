@@ -19,5 +19,6 @@ public class StampingFromClient {
   public Person person;
   public boolean markedByAdmin;
   public LocalDateTime dateTime;
+  public String zona;
 
 }
