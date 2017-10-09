@@ -14,6 +14,7 @@ import dao.history.StampingHistoryDao;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -21,6 +22,7 @@ import manager.ConsistencyManager;
 
 import models.PersonDay;
 import models.Stamping;
+import models.ZoneToZones;
 import models.absences.Absence;
 
 import play.mvc.Controller;
@@ -266,6 +268,14 @@ public class PersonDays extends Controller {
           .stampings(stampingId);
       historyStampingsList.add(historyStamping);
     }
-    render(historyStampingsList, historyAbsencesList, personDay, found);
+    boolean zoneDefined = false;
+    List<ZoneToZones> link = personDay.person.badges.stream()
+        .<ZoneToZones>flatMap(b -> b.badgeReader.zones.stream()
+            .map(z -> z.zoneLinkedAsMaster.stream().findAny().orElse(null)))       
+        .collect(Collectors.toList());
+    if (!link.isEmpty()) {
+      zoneDefined = true;
+    }
+    render(historyStampingsList, historyAbsencesList, personDay, found, zoneDefined);
   }
 }

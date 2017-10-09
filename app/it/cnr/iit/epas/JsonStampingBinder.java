@@ -3,15 +3,19 @@ package it.cnr.iit.epas;
 import com.google.common.base.Strings;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import dao.PersonDao;
+
 import injection.StaticInject;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
+
 import models.enumerate.StampTypes;
 import models.exports.StampingFromClient;
+
 import org.joda.time.LocalDateTime;
+
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
@@ -22,9 +26,6 @@ import play.data.binding.TypeBinder;
 @Global
 @StaticInject
 public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
-
-  @Inject
-  private static PersonDao personDao;
 
   /**
    * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[],
@@ -65,6 +66,13 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
           stamping.markedByAdmin = true;
         }
       }
+      
+      if (jsonObject.get("terminale") != null) {
+        stamping.zona = jsonObject.get("terminale").getAsString();
+      } else {
+        stamping.zona = null;
+      }
+      
 
       Integer anno = jsonObject.get("anno").getAsInt();
       Integer mese = jsonObject.get("mese").getAsInt();

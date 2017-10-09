@@ -9,6 +9,7 @@ import com.google.inject.Inject;
 import dao.PersonDayDao;
 import dao.PersonShiftDayDao;
 import dao.WorkingTimeTypeDao;
+import dao.ZoneDao;
 import dao.wrapper.IWrapperPersonDay;
 
 import it.cnr.iit.epas.DateUtility;
@@ -32,12 +33,14 @@ import models.PersonShiftDay;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.WorkingTimeTypeDay;
+import models.ZoneToZones;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.StampTypes;
 import models.enumerate.Troubles;
 
+import org.assertj.core.util.Strings;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
@@ -52,6 +55,7 @@ public class PersonDayManager {
   private final PersonShiftDayDao personShiftDayDao;
   private final PersonDayDao personDayDao;
   private final WorkingTimeTypeDao workingTimeTypeDao;
+  private final ZoneDao zoneDao;
 
   /**
    * Costruttore.
@@ -63,13 +67,14 @@ public class PersonDayManager {
   @Inject
   public PersonDayManager(ConfigurationManager configurationManager,
       PersonDayInTroubleManager personDayInTroubleManager, PersonDayDao personDayDao,
-      PersonShiftDayDao personShiftDayDao, WorkingTimeTypeDao workingTimeTypeDao) {
+      PersonShiftDayDao personShiftDayDao, WorkingTimeTypeDao workingTimeTypeDao, ZoneDao zoneDao) {
 
     this.configurationManager = configurationManager;
     this.personDayInTroubleManager = personDayInTroubleManager;
     this.personShiftDayDao = personShiftDayDao;
     this.personDayDao = personDayDao;
     this.workingTimeTypeDao = workingTimeTypeDao;
+    this.zoneDao = zoneDao;
   }
 
   /**
@@ -262,10 +267,10 @@ public class PersonDayManager {
         Stamping first = previous.second;
         Stamping second = validPair.first;
         //almeno una delle due permesso breve
-        if ( (first.stampType != null && first.stampType == StampTypes.PERMESSO_BREVE) 
+        if ((first.stampType != null && first.stampType == StampTypes.PERMESSO_BREVE) 
             || (second.stampType != null && second.stampType == StampTypes.PERMESSO_BREVE)) {
           //solo permessi brevi
-          if ( (first.stampType == null || first.stampType == StampTypes.PERMESSO_BREVE)
+          if ((first.stampType == null || first.stampType == StampTypes.PERMESSO_BREVE)
               && (second.stampType == null || second.stampType == StampTypes.PERMESSO_BREVE)) {
             gapTime += new PairStamping(first, second).timeInPair;
           }
@@ -342,9 +347,10 @@ public class PersonDayManager {
     //   4)         Tempo di festa -> Tempo timbrature giorno di festa
     
     List<PairStamping> validPairs = getValidPairStampings(personDay.stampings, exitingNow);
+
     personDay.setStampingsTime(stampingMinutes(validPairs));
     int stampingTimeInOpening = workingMinutes(validPairs, startWork, endWork);
-    
+        
     if (personDay.isHoliday) {
       stampingTimeInOpening = 0;
       personDay.setOnHoliday(personDay.getStampingsTime());
@@ -396,12 +402,28 @@ public class PersonDayManager {
       
     }
 
+    /*Qui inizia il pezzo aggiunto che controlla la provenienza delle timbrature*/
+    
+    int justifiedTimeBetweenZones = 0;
+    
+    List<ZoneToZones> link = personDay.person.getZones();
+    
+    if (!link.isEmpty() && validPairs.size() > 1) {      
+      justifiedTimeBetweenZones = justifiedTimeBetweenZones(validPairs);
+    }
+    personDay.setJustifiedTimeBetweenZones(justifiedTimeBetweenZones);    
+    
     //Il tempo a lavoro calcolato
     int computedTimeAtWork = stampingTimeInOpening //nei festivi è 0
         + personDay.getJustifiedTimeMeal()
         + personDay.getJustifiedTimeNoMeal()
         + personDay.getApprovedOnHoliday()
-        + personDay.getApprovedOutOpening();
+        + personDay.getApprovedOutOpening()
+        + personDay.getJustifiedTimeBetweenZones();
+    
+    
+    //TODO: il tempo ricavato deve essere persistito sul personDay su un nuovo campo
+    // così posso sfruttare quel campo nel tabellone timbrature
         
     personDay.setTimeAtWork(computedTimeAtWork);
 
@@ -525,6 +547,40 @@ public class PersonDayManager {
     setTicketStatusIfNotForced(personDay, true);
     
     return personDay;
+  }
+  
+  /**
+   * 
+   * @param validPairs la lista di coppie di timbrature valide 
+   * @return il quantitativo che viene giustificato timbrando uscita/ingresso su zone 
+   *     appartenenti a un link.
+   */
+  private int justifiedTimeBetweenZones(List<PairStamping> validPairs) {
+    int timeToJustify = 0;
+    PairStamping pair = validPairs.get(0);
+    for (int i = 1; i < validPairs.size(); i++) {
+      PairStamping next = validPairs.get(i);
+      if (next != null && !Strings.isNullOrEmpty(pair.second.stampingZone) 
+          && !Strings.isNullOrEmpty(next.first.stampingZone)
+          && !pair.second.stampingZone.equals(next.first.stampingZone)) {
+        
+        Optional<ZoneToZones> zoneToZones = 
+            zoneDao.getByLinkNames(pair.second.stampingZone, next.first.stampingZone);
+        if (zoneToZones.isPresent()) {
+          if (DateUtility.toMinute(next.first.date) - DateUtility.toMinute(pair.second.date) 
+              < zoneToZones.get().delay) {
+            timeToJustify +=  
+                (DateUtility.toMinute(next.first.date) 
+                    - DateUtility.toMinute(pair.second.date));
+          } else {
+            timeToJustify += zoneToZones.get().delay;
+          }
+          
+        }
+      }
+      pair = next;
+    }
+    return timeToJustify;
   }
 
   /**
