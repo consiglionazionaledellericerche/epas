@@ -279,4 +279,26 @@ public class CompetenceCodeDao extends DaoBase {
         .where(pcc.competenceCode.in(codesList).and(condition));
     return query.list(pcc);
   }
+  
+  /**
+   * 
+   * @param codesList la lista dei codici di assenza da ricercare
+   * @param date la data (opzionale) che deve essere contenuta nel periodo di possesso di una 
+   *     certa competenza
+   * @return la lista delle persone con abilitate le competenze passate nella lista come parametro.
+   */
+  public List<PersonCompetenceCodes> listByCodesAndOffice(List<CompetenceCode> codesList, 
+      Office office, Optional<LocalDate> date) {
+    final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
+    final BooleanBuilder condition = new BooleanBuilder();
+    if (date.isPresent()) {
+      condition.and(pcc.beginDate.loe(date.get().dayOfMonth().withMaximumValue())
+          .andAnyOf(pcc.endDate.isNull(), 
+              pcc.endDate.goe(date.get().dayOfMonth().withMaximumValue())));
+    }
+    final JPQLQuery query = getQueryFactory().from(pcc)
+        .where(pcc.competenceCode.in(codesList).and(pcc.person.office.eq(office)).and(condition));
+    return query.list(pcc);
+  }
+  
 }
