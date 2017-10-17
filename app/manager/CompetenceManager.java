@@ -38,6 +38,7 @@ import models.Office;
 import models.Person;
 import models.PersonCompetenceCodes;
 import models.PersonDay;
+import models.PersonReperibility;
 import models.PersonReperibilityType;
 import models.PersonShift;
 import models.PersonShiftShiftType;
@@ -699,6 +700,22 @@ public class CompetenceManager {
     psst.personShift = person;
     psst.endDate = null;
     psst.save();
+  }
+  
+  /**
+   * persiste il personReperibility con i parametri passati al metodo.
+   * @param person la persona in reperibilità da associare all'attività
+   * @param beginDate la data di inizio partecipazione all'attività in reperibilità
+   * @param type l'attività su cui far aderire la persona
+   */
+  public void persistPersonReperibilityType(Person person, LocalDate beginDate, 
+      PersonReperibilityType type) {
+    PersonReperibility rep = new PersonReperibility();
+    rep.person = person;
+    rep.startDate = beginDate;
+    rep.personReperibilityType = type;
+    rep.save();
+    
   }
 
   /**

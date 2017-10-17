@@ -40,7 +40,8 @@
     		<thead>
     		<tr>
       			<th>Servizio</th>
-      			<th>Eventuale supervisore</th>
+      			<th>Supervisore</th>
+      			<th>Gestisci persone</th>
       			<th>Elimina</th>
     		</tr>
     		</thead>
@@ -52,6 +53,11 @@
         			${prt.description}
       			#{/secure.link}
     		<td>${prt.supervisor}</td>
+    		<td>
+    			#{secure.link @Competences.manageReperibility(prt.id)}	    	  	
+	        		<i class="fa fa-calendar" aria-hidden="true"></i> Gestisci
+	        	#{/secure.link}
+	        </td>
     		<td>
       			#{secure.check 'Competences.evaluateReperibility'}
       			#{if prt.disabled}

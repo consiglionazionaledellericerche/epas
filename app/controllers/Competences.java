@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -59,6 +60,7 @@ import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonCompetenceCodes;
+import models.PersonReperibility;
 import models.PersonReperibilityType;
 import models.PersonShift;
 import models.PersonShiftShiftType;
@@ -1254,6 +1256,12 @@ public class Competences extends Controller {
     manageShiftType(psst.shiftType.id);
   }
 
+  /**
+   * assegna la timetable al turno.
+   * @param shift l'id del turno
+   * @param cat il servizio a cui associare il turno
+   * @param type l'attività di turno
+   */
   public static void linkTimeTableToShift(Long shift, ShiftCategories cat, @Valid ShiftType type) {
 
     notFoundIfNull(cat);
@@ -1276,5 +1284,106 @@ public class Competences extends Controller {
     flash.success("Configurato correttamente il servizio %s", cat.description);
     activateServices(cat.office.id);
 
+  }
+  
+  /**
+   * genera la form di assegnamento delle persone al servizio di reperibilità.
+   * @param reperibilityTypeId l'id del servizio di reperibilità
+   */
+  public static void manageReperibility(Long reperibilityTypeId) {
+    PersonReperibilityType type = reperibilityDao.getPersonReperibilityTypeById(reperibilityTypeId);
+    notFoundIfNull(type);
+    rules.checkIfPermitted(type.office);
+    List<PersonReperibility> people = type.personReperibilities.stream()
+        .filter(pr -> !pr.startDate.isAfter(LocalDate.now()) 
+            && (pr.endDate == null || pr.endDate.isAfter(LocalDate.now())))
+        .collect(Collectors.toList());
+    LocalDate date = LocalDate.now();
+    render(people, type, date);
+  }
+  
+  /**
+   * ritorna la form di gestione del personale afferente all'attività di reperibilità.
+   * @param reperibilityTypeId l'id dell'attività di reperibilità
+   */
+  public static void linkPeopleToReperibility(Long reperibilityTypeId) {
+    PersonReperibilityType type = reperibilityDao.getPersonReperibilityTypeById(reperibilityTypeId);
+    if (type == null) {
+      flash.error("Attività non presente. Verificare l'identificativo");
+      activateServices(new Long(session.get("officeSelected")));
+    }
+
+    rules.checkIfPermitted(type.office);
+    List<PersonReperibility> people = type.personReperibilities.stream()
+        .filter(pr -> pr.startDate.isBefore(LocalDate.now()) 
+            && (pr.endDate == null || pr.endDate.isAfter(LocalDate.now())))
+        .collect(Collectors.toList());
+    
+    if (Validation.hasErrors()) {
+      response.status = 400;     
+      LocalDate date = LocalDate.now();
+      render("@manageReperibility", type, date, people);
+    }
+    type.save();
+    List<PersonReperibility> personAssociated = 
+        reperibilityDao.byOffice(type.office);
+    
+    List<CompetenceCode> codeList = Lists.newArrayList();
+    codeList.add(competenceCodeDao.getCompetenceCodeByCode("207"));
+    codeList.add(competenceCodeDao.getCompetenceCodeByCode("208"));
+    List<Person> available = competenceCodeDao
+        .listByCodesAndOffice(codeList, type.office,Optional.fromNullable(LocalDate.now()))
+        .stream().filter(e -> (personAssociated.stream()
+            .noneMatch(d -> d.person.equals(e.person))))        
+        .map(pcc -> pcc.person).distinct()
+        .filter(p -> p.office.equals(type.office)).collect(Collectors.toList());
+    
+    render(available, type);
+  }
+  
+  /**
+   * impone una data di terminazione nell'associazione tra persona e attività.
+   * 
+   * @param personReperibilityId l'id della persona associata all'attività
+   * @param endDate data di fine esperienza
+   * @param confirmed true se confermato, false se siamo alla prima fase di accesso al metodo
+   */
+  public static void deletePersonReperibility(Long personReperibilityId,
+      @Valid LocalDate endDate, boolean confirmed) {
+    final Optional<PersonReperibility> personReperibility = 
+        reperibilityDao.getPersonReperibilityById(personReperibilityId);
+    notFoundIfNull(personReperibility.get());
+    rules.checkIfPermitted(personReperibility.get().personReperibilityType.office);
+    PersonReperibility per = personReperibility.get();
+    if (!confirmed) {
+      confirmed = true;
+      render("@deletePersonReperibility", per, confirmed);
+    }
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      render("@deletePersonReperibility", per, confirmed);
+    }
+    per.endDate = endDate;
+    per.save();
+
+    flash.success("Terminata esperienza per %s nell'attività %s in data %s", 
+        per.person.fullName(), per.personReperibilityType.description, per.endDate);
+    manageReperibility(per.personReperibilityType.id);
+  }
+  
+  /**
+   * salva l'associazione persona-attività di reperibilità.
+   * @param type l'attività di reperibilità
+   * @param person la persona da associare all'attività in reperibilità
+   * @param beginDate la data di inizio appartenenza all'attività
+   */
+  public static void saveReperibilityConfiguration(PersonReperibilityType type, 
+      Person person, LocalDate beginDate) {
+    notFoundIfNull(person);
+    rules.checkIfPermitted(person.office);
+    notFoundIfNull(type);
+    competenceManager.persistPersonReperibilityType(person, beginDate, type);
+    flash.success("Aggiunto %s all'attività", person.fullName());
+    manageReperibility(type.id);
   }
 }
