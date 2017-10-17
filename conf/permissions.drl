@@ -1228,6 +1228,9 @@ when
         "Competences.linkTimeTableToShift",
         "Competences.handlePersonShiftShiftType",
         "Competences.updatePersonShiftShiftType",
+        "Competences.linkPeopleToReperibility",
+        "Competences.deletePersonReperibility",
+        "Competences.saveReperibilityConfiguration",
 
         /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
@@ -1399,6 +1402,9 @@ when
         "Competences.linkTimeTableToShift",
         "Competences.handlePersonShiftShiftType",
         "Competences.updatePersonShiftShiftType",
+        "Competences.linkPeopleToReperibility",
+        "Competences.deletePersonReperibility",
+        "Competences.saveReperibilityConfiguration",
         
 
          /* Vecchio permesso uploadSituation */
