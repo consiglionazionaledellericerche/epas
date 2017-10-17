@@ -5,10 +5,13 @@ import com.google.common.collect.Lists;
 
 import java.util.List;
 
+import lombok.val;
+
 import manager.PersonDayManager;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import manager.services.PairStamping;
 
+import models.Person;
 import models.PersonDay;
 import models.Stamping;
 import models.Stamping.WayType;
@@ -44,16 +47,17 @@ public class PersonDaysTest extends UnitTest {
    */
   @Test
   public void test() {
-
-    PersonDay personDay = new PersonDay(null, second);
+    val person = new Person();
+    
+    PersonDay personDay = new PersonDay(person, second);
     
     List<Stamping> stampings = Lists.newArrayList();
     stampings.add(stampings(personDay, 9, 30, WayType.in, null));
     stampings.add(stampings(personDay, 16, 30, WayType.out, null));
     
     personDay.setStampings(stampings);
-    
-    PersonDay previousForProgressive = new PersonDay(null, first, 0, 0, 60);
+        
+    PersonDay previousForProgressive = new PersonDay(person, first, 0, 0, 60);
     
     personDayManager.updateTimeAtWork(personDay, normalDay(), false, 
         startLunch, endLunch, startWork, endWork);
@@ -77,8 +81,8 @@ public class PersonDaysTest extends UnitTest {
    */
   @Test
   public void tagliaferriIsHungry() {
-        
-    PersonDay personDay = new PersonDay(null, second);
+    val person = new Person();
+    PersonDay personDay = new PersonDay(person, second);
     List<Stamping> stampings = Lists.newArrayList();
     stampings.add(stampings(personDay, 8, 30, WayType.in, null));
     stampings.add(stampings(personDay, 11, 30, WayType.out, null));
@@ -155,7 +159,8 @@ public class PersonDaysTest extends UnitTest {
     org.assertj.core.api.Assertions.assertThat(
         StampTypes.PAUSA_PRANZO.isGapLunchPairs()).isEqualTo(true);
     
-    PersonDay personDay = new PersonDay(null, second);
+    val person = new Person();
+    PersonDay personDay = new PersonDay(person, second);
     List<Stamping> stampings = Lists.newArrayList();
     stampings.add(stampings(personDay, 8, 30, WayType.in, null));
     stampings.add(stampings(personDay, 11, 30, WayType.out, null));
@@ -179,7 +184,7 @@ public class PersonDaysTest extends UnitTest {
     
     // # anche le coppie che hanno due causali diverse ma che hanno il parametro gapLunchPairs true
     
-    personDay = new PersonDay(null, second);
+    personDay = new PersonDay(person, second);
     stampings = Lists.newArrayList();
     stampings.add(stampings(personDay, 8, 30, WayType.in, null));
     stampings.add(stampings(personDay, 11, 30, WayType.out, StampTypes.PAUSA_PRANZO));
@@ -349,10 +354,12 @@ public class PersonDaysTest extends UnitTest {
   @Test
   public void estimatedTimeAtWorkToday() {
     
-    PersonDay previousForProgressive = new PersonDay(null, first, 0, 0, 60);
+    val person = new Person();
+    PersonDay previousForProgressive = new PersonDay(person, first, 0, 0, 60);
 
+    
     //Caso base una timbratura di ingresso
-    PersonDay personDay = new PersonDay(null, second);
+    PersonDay personDay = new PersonDay(person, second);
     
     List<Stamping> stampings = Lists.newArrayList();
     stampings.add(stampings(personDay, 9, 30, WayType.in, null));
@@ -379,7 +386,7 @@ public class PersonDaysTest extends UnitTest {
         personDay.isTicketAvailable).isEqualTo(true);
     
     //Caso con uscita per pranzo
-    personDay = new PersonDay(null, second);
+    personDay = new PersonDay(person, second);
     stampings = Lists.newArrayList();
     stampings.add(stampings(personDay, 9, 00, WayType.in, null));       //4 ore mattina
     stampings.add(stampings(personDay, 13, 00, WayType.out, null));     //pausa pranzo 1 ora
