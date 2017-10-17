@@ -65,7 +65,7 @@
 	  	  #{list items:monthRecapList, as:'recap'}
 	  	  <tr>
 	  	    <td>
-	  	       <a href="@{MealTickets.personMealTickets(recap.contract.person.id)}">
+	  	       <a href="@{MealTickets.personMealTickets(recap.contract.person.id, year, month)}">
 		  	      ${recap.contract.person.surname} ${recap.contract.person.name}</a>
 	  	    </td> 
 	  	    
