@@ -83,6 +83,8 @@
         #{/if}
         
         *{Ruoli di sistema e gestori dei turni e delle repribilità}*
+        #{if !currentUser.roles.contains(models.enumerate.AccountRole.RO_ADMIN)}
+        
         #{if currentUser.roles.contains(models.enumerate.AccountRole.DEVELOPER) 
         	|| currentUser.roles.contains(models.enumerate.AccountRole.ADMIN)
         	|| !currentUser.person.shiftCategories.empty
@@ -91,7 +93,7 @@
         	|| !currentUser.person.categories.empty}
           #{include './_shiftMenu.html' /}
         #{/if}
-
+		#{/if}
         *{ Ruoli di sistema e amministratori delle sedi }*
         #{if !currentUser.roles.empty || currentUser.hasRoles(models.Role.PERSONNEL_ADMIN,models.Role.PERSONNEL_ADMIN_MINI,models.Role.TECHNICAL_ADMIN) }
           #{include './_configMenu.html' /}
