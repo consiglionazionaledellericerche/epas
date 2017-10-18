@@ -87,7 +87,8 @@ public class SecureManager {
   public Set<Office> officesForNavbar(User user) {
 
     ImmutableList<String> roles = ImmutableList.of(
-        Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN);
+        Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN,
+        Role.SEAT_SUPERVISOR);
 
     return getOfficeAllowed(user, roles);
   }
