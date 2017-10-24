@@ -15,7 +15,6 @@ import manager.CompetenceManager;
 import models.CompetenceCode;
 import models.enumerate.LimitType;
 
-import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 import play.Play;
