@@ -89,7 +89,7 @@ public class PersonDayManager {
     }
     return Optional.absent();
   }
-  
+
   /**
    * Assenza che giustifica l'intera giornata.
    */
@@ -101,7 +101,7 @@ public class PersonDayManager {
     }
     return Optional.absent();
   }
-  
+
   /**
    * Se nel giorno vi è una che assegna o giustifica l'intera giornata.
    */
@@ -109,7 +109,7 @@ public class PersonDayManager {
     return getAllDay(personDay).isPresent() || getAssignAllDay(personDay).isPresent();
 
   }
-  
+
   /**
    * Se le assenze orarie giustificano abbanstanza per ritenere il dipendente a lavoro.
    *
@@ -323,7 +323,7 @@ public class PersonDayManager {
     for (Absence abs : personDay.getAbsences()) {
       Preconditions.checkNotNull(abs.justifiedType);
     }
-    
+
     // Pulizia stato personDay.
     setTicketStatusIfNotForced(personDay, false);
     personDay.setStampModificationType(null);     //Target personDay: p(-30), e(<30), f(now), d(fix)
@@ -333,24 +333,24 @@ public class PersonDayManager {
     personDay.setJustifiedTimeMeal(0);
     personDay.setJustifiedTimeNoMeal(0);
     personDay.setTimeAtWork(0);
-    
+
     // Patch persone fixed
     if (fixedTimeAtWork) {
       return updateTimeAtWorkFixed(personDay, wttd);
     }
-    
+
     // Gli invarianti del calcolo.
     //
     //   1)       Tempo timbrature -> Tempo fra coppie ritenute valide.
     //   2) Tempo dentro la fascia -> N.B nei giorni di festa è zero
     //   3)     Tempo fuori fascia -> Tempo timbrature - Tempo dentro fascia
     //   4)         Tempo di festa -> Tempo timbrature giorno di festa
-    
+
     List<PairStamping> validPairs = getValidPairStampings(personDay.stampings, exitingNow);
 
     personDay.setStampingsTime(stampingMinutes(validPairs));
     int stampingTimeInOpening = workingMinutes(validPairs, startWork, endWork);
-        
+
     if (personDay.isHoliday) {
       stampingTimeInOpening = 0;
       personDay.setOnHoliday(personDay.getStampingsTime());
@@ -365,14 +365,14 @@ public class PersonDayManager {
       setTicketStatusIfNotForced(personDay, assignAllDay.get().absenceType.timeForMealTicket);
       return personDay;
     }
-      
+
     //Caso assenza giornaliera
     if (getAllDay(personDay).isPresent()) {
       personDay.setTimeAtWork(0);
       setTicketStatusIfNotForced(personDay, false);
       return personDay;
     }
-    
+
     //Giustificativi a grana minuti nel giorno
     for (Absence abs : personDay.getAbsences()) {
 
@@ -391,28 +391,28 @@ public class PersonDayManager {
         personDay.setOnHoliday(personDay.getOnHoliday() + justifiedMinutes);
         continue;
       } 
-      
+
       //Assegnamento se contribuisce al buono pasto
       if (abs.absenceType.timeForMealTicket) {
         personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal() + justifiedMinutes);
         continue;
       }
-      
+
       personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal() + justifiedMinutes);
-      
+
     }
 
     /*Qui inizia il pezzo aggiunto che controlla la provenienza delle timbrature*/
-    
+
     int justifiedTimeBetweenZones = 0;
-    
+
     List<ZoneToZones> link = personDay.person.getZones();
-    
+
     if (!link.isEmpty() && validPairs.size() > 1) {      
       justifiedTimeBetweenZones = justifiedTimeBetweenZones(validPairs);
     }
     personDay.setJustifiedTimeBetweenZones(justifiedTimeBetweenZones);    
-    
+
     //Il tempo a lavoro calcolato
     int computedTimeAtWork = stampingTimeInOpening //nei festivi è 0
         + personDay.getJustifiedTimeMeal()
@@ -420,26 +420,26 @@ public class PersonDayManager {
         + personDay.getApprovedOnHoliday()
         + personDay.getApprovedOutOpening()
         + personDay.getJustifiedTimeBetweenZones();
-    
-    
+
+
     //TODO: il tempo ricavato deve essere persistito sul personDay su un nuovo campo
     // così posso sfruttare quel campo nel tabellone timbrature
-        
+
     personDay.setTimeAtWork(computedTimeAtWork);
 
     mealTicketHandlerAndDecurtedMeal(personDay, wttd, stampingTimeInOpening, 
         startLunch, endLunch, exitingNow);
-    
+
     //Gestione decurtazione. Si applica solo se non ci sono assenze orarie che maturano il buono.
     if (personDay.getJustifiedTimeMeal() > 0) {
       personDay.setDecurtedMeal(0);
     } else {
       personDay.setTimeAtWork(personDay.getTimeAtWork() - personDay.getDecurtedMeal());
     }
- 
+
     return personDay;
   }
-  
+
   /**
    * Algoritmo del calcolo buono pasto. Una volta accertato che:
    * 1) Non ci sono assenze giornaliere.
@@ -451,12 +451,12 @@ public class PersonDayManager {
 
     // Reset
     personDay.setDecurtedMeal(0);
-    
+
     // Buono pasto forzato
     if (personDay.isTicketForcedByAdmin) {
       return personDay;
     }
-    
+
     // Giorno festivo: default false
     if (personDay.isHoliday()) {
       setTicketStatusIfNotForced(personDay, false);
@@ -522,7 +522,7 @@ public class PersonDayManager {
 
     // Il buono pasto è stato maturato
     setTicketStatusIfNotForced(personDay, true);
-    
+
     // Assegnamento tempo decurtato per pausa troppo breve.
     if (toCut > 0) {
       personDay.setDecurtedMeal(toCut);
@@ -530,25 +530,25 @@ public class PersonDayManager {
 
     return personDay;
   }
-  
+
   /**
    * Le persone fixed hanno una gestione particolare per quanto riguarda tempo a lavoro e 
    * buono pasto. 
    */
   private PersonDay updateTimeAtWorkFixed(PersonDay personDay, WorkingTimeTypeDay wttd) {
-    
+
     if (personDay.isHoliday || getAllDay(personDay).isPresent()) {
       personDay.setTimeAtWork(0);
       setTicketStatusIfNotForced(personDay, false);
       return personDay;
     }
-    
+
     personDay.setTimeAtWork(wttd.workingTime);
     setTicketStatusIfNotForced(personDay, true);
-    
+
     return personDay;
   }
-  
+
   /**
    * 
    * @param validPairs la lista di coppie di timbrature valide 
@@ -563,7 +563,7 @@ public class PersonDayManager {
       if (next != null && !Strings.isNullOrEmpty(pair.second.stampingZone) 
           && !Strings.isNullOrEmpty(next.first.stampingZone)
           && !pair.second.stampingZone.equals(next.first.stampingZone)) {
-        
+
         Optional<ZoneToZones> zoneToZones = 
             zoneDao.getByLinkNames(pair.second.stampingZone, next.first.stampingZone);
         if (zoneToZones.isPresent()) {
@@ -575,7 +575,7 @@ public class PersonDayManager {
           } else {
             timeToJustify += zoneToZones.get().delay;
           }
-          
+
         }
       }
       pair = next;
@@ -598,7 +598,7 @@ public class PersonDayManager {
       personDay.setDifference(0);
       return;
     }
-    
+
     //TODO: per pulizia i wttd festivi dovrebbero avere il campo wttd.workingTime == 0
     // Implementare la modifica dei piani ferie di default. 
     int plannedWorkingTime = wttd.workingTime;
@@ -722,7 +722,7 @@ public class PersonDayManager {
       personDay.troubles.clear();
 
       log.info("Eliminati tutti i PersonDaysinTrouble relativi al giorno {} della persona {}"
-              + " perchè precedente a sourceContract({})",
+          + " perchè precedente a sourceContract({})",
           personDay.date, personDay.person.fullName(),
           pd.getPersonDayContract().get().sourceDateResidual);
       return;
@@ -770,14 +770,16 @@ public class PersonDayManager {
 
     // ### CASO 4 Tempo a lavoro (di timbrature + assenze) non sufficiente
     // Per i livelli 4-8 dev'essere almeno la metà del tempo a lavoro
-    if (!isFixedTimeAtWork && personDay.person.qualification.qualification > 3) {
-      if (!isValidDay(personDay, pd)) {
-        personDayInTroubleManager.setTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);
-      } else {
-        personDayInTroubleManager.fixTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);
-      }
+    if (personDay.person.qualification.qualification > 3
+        && isAllDayAbsences == false && personDay.isHoliday == false
+        && personDay.timeAtWork < (pd.getWorkingTimeTypeDay().get().getWorkingTime() / 2)) {
+      personDayInTroubleManager.setTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);
+      
+    } else {
+      personDayInTroubleManager.fixTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);
+      
     }
-    
+
   }
 
   /**
@@ -798,7 +800,7 @@ public class PersonDayManager {
     }
     return true;
   }
-  
+
   /**
    * Calcola le coppie di stampings valide al fine del calcolo del time at work. <br>
    *
