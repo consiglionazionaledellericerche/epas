@@ -2,6 +2,8 @@ package jobs;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+
 import lombok.extern.slf4j.Slf4j;
 import models.ShiftType;
 import models.ShiftTypeMonth;
@@ -16,7 +18,7 @@ import play.jobs.OnApplicationStart;
  */
 @Slf4j
 @OnApplicationStart(async = true)
-public class ShiftMonthStatus extends Job {
+public class ShiftMonthStatus extends Job<Void> {
 
   /**
    * Crea gli ShiftTypeMonth per ogni attività di turno (shiftType) nel pregresso.
@@ -28,11 +30,14 @@ public class ShiftMonthStatus extends Job {
 
     shiftTypes.forEach(activity -> {
       if (activity.monthsStatus.isEmpty()) {
-        final LocalDate oldestShift = activity.personShiftDays.stream()
+        final Optional<LocalDate> oldestShift = activity.personShiftDays.stream()
             .min(Comparator.comparing(shift -> shift.date))
-            .map(personShiftDay -> personShiftDay.date).get();
-
-        YearMonth month = new YearMonth(oldestShift);
+            .map(personShiftDay -> personShiftDay.date);
+        if (!oldestShift.isPresent()) {
+          log.info("activita {} senza personShiftDays, monthStatus non creato.", activity);
+          return;
+        }
+        YearMonth month = new YearMonth(oldestShift.get());
         do {
 
           ShiftTypeMonth monthStatus = new ShiftTypeMonth();
