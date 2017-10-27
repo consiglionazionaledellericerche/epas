@@ -553,7 +553,7 @@ public class ChartsManager {
    * @throws ArchiveException eccezione in creazione dell'archivio
    * @throws IOException eccezione durante le procedure di input/output
    */
-  public InputStream buildFile(Office office, boolean forAll, 
+  public InputStream buildFile(Office office, boolean forAll, boolean onlyMission,
       List<Long> peopleIds, LocalDate beginDate, LocalDate endDate, 
       ExportFile exportFile) throws ArchiveException, IOException {
 
@@ -613,7 +613,7 @@ public class ChartsManager {
           PersonStampingRecap psDto = stampingsRecapFactory.create(person, 
               tempDate.getYear(), tempDate.getMonthOfYear(), false);
           // aggiorno il file aggiungendo un nuovo foglio per ogni persona...
-          file = createFileXlsToExport(psDto, file, wb);
+          file = createFileXlsToExport(psDto, file, wb, onlyMission);
           tempDate = tempDate.plusMonths(1);
         }        
       }     
@@ -700,7 +700,8 @@ public class ChartsManager {
    * @return il file contenente la situazione mensile della persona a cui fa riferimento
    *     il personStampingRecap passato come parametro.
    */
-  private File createFileXlsToExport(PersonStampingRecap psDto, File file, Workbook wb) {
+  private File createFileXlsToExport(PersonStampingRecap psDto, 
+      File file, Workbook wb, boolean onlyMission) {
     try {
       FileOutputStream out = new FileOutputStream(file);
 
@@ -754,6 +755,7 @@ public class ChartsManager {
             case 2:
               if (!day.personDay.absences.isEmpty()) {
                 String code = "";
+                
                 for (Absence abs : day.personDay.absences) {
                   code = code + " " + abs.absenceType.code;                  
                 }
