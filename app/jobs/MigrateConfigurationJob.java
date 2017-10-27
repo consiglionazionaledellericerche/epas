@@ -31,7 +31,7 @@ import play.jobs.Job;
  * @since 14/07/16.
  */
 @Slf4j
-public class migrateConfigurationJob extends Job<Void> {
+public class MigrateConfigurationJob extends Job<Void> {
 
   // La migrateConfiguration và rimossa (e con lei anche tabelle e compagnia inerenti la vecchia
   // gestione delle configurazioni) appena verrà effettuato l'aggiornamento dell'ise.
