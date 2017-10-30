@@ -750,16 +750,30 @@ public class ChartsManager {
               cell.setCellValue(day.personDay.date.toString());              
               break;
             case 1:
-              cell.setCellValue(DateUtility.fromMinuteToHourMinute(day.personDay.getTimeAtWork()));
+              cell.setCellValue(
+                  DateUtility.fromMinuteToHourMinute(day.personDay.getStampingsTime()));
               break;
             case 2:
               if (!day.personDay.absences.isEmpty()) {
                 String code = "";
-                
-                for (Absence abs : day.personDay.absences) {
-                  code = code + " " + abs.absenceType.code;                  
+                if (onlyMission) {
+                  code = 
+                      day.personDay.absences.stream()
+                      .filter(ab -> ab.absenceType.code.contains("92"))
+                      .findFirst().isPresent() ? day.personDay.absences.stream()
+                          .filter(ab -> ab.absenceType.code.contains("92"))
+                          .findFirst().get().absenceType.code : null;
+                } else {
+                  for (Absence abs : day.personDay.absences) {
+                    code = code + " " + abs.absenceType.code;                  
+                  }
                 }
-                cell.setCellValue(code);                
+                
+                cell.setCellValue(code);
+                if (onlyMission && code != null && code.equals("92")) {
+                  cell = row.getCell(1);
+                  cell.setCellValue(DateUtility.fromMinuteToHourMinute(day.wttd.get().workingTime));
+                }
               } else {
                 cell.setCellValue(" ");
               }              
