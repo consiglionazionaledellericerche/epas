@@ -43,11 +43,13 @@ import jobs.ChartJob;
 
 import lombok.Getter;
 
+import manager.PersonDayManager;
 import manager.recaps.charts.RenderResult;
 import manager.recaps.charts.ResultFromFile;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
+import manager.services.PairStamping;
 import manager.services.vacations.IVacationsService;
 import manager.services.vacations.VacationsRecap;
 
@@ -56,6 +58,8 @@ import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
+import models.PersonDay;
+import models.Stamping;
 import models.WorkingTimeType;
 import models.absences.Absence;
 import models.exports.PersonOvertime;
@@ -89,6 +93,7 @@ public class ChartsManager {
   private final IVacationsService vacationsService;
   private final IWrapperFactory wrapperFactory;
   private final PersonStampingRecapFactory stampingsRecapFactory;
+  private final PersonDayManager personDayManager;
 
   /**
    * Costruttore.
@@ -101,12 +106,14 @@ public class ChartsManager {
   @Inject
   public ChartsManager(CompetenceCodeDao competenceCodeDao,
       PersonDao personDao, IVacationsService vacationsService,
-      IWrapperFactory wrapperFactory, PersonStampingRecapFactory stampingsRecapFactory) {
+      IWrapperFactory wrapperFactory, PersonStampingRecapFactory stampingsRecapFactory,
+      PersonDayManager personDayManager) {
     this.competenceCodeDao = competenceCodeDao;
     this.personDao = personDao;
     this.vacationsService = vacationsService;
     this.wrapperFactory = wrapperFactory;
     this.stampingsRecapFactory = stampingsRecapFactory;
+    this.personDayManager = personDayManager;
   }
 
 
@@ -271,8 +278,8 @@ public class ChartsManager {
     out.write("Cognome Nome,");
     for (int i = 1; i <= month; i++) {
       out.append("ore straordinari " + DateUtility.fromIntToStringMonth(i)
-          + ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i)
-          + ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
+      + ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i)
+      + ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
     }
 
     out.append("ore straordinari TOTALI,ore riposi compensativi TOTALI, ore in più TOTALI");
@@ -573,7 +580,7 @@ public class ChartsManager {
     File file = null;
     // controllo che tipo di esportazione devo fare...
     if (exportFile.equals(ExportFile.CSV)) {
-      
+
       for (Person person : personList) {
         LocalDate tempDate = beginDate;
         while (!tempDate.isAfter(endDate)) {
@@ -632,7 +639,7 @@ public class ChartsManager {
       file.delete();
       zos.closeEntry();
       zos.close();
-      
+
     }
     return new ByteArrayInputStream(out.toByteArray());
   }
@@ -714,19 +721,25 @@ public class ChartsManager {
 
       row = sheet.createRow(0);
       row.setHeightInPoints(30);
-      for (int i = 0; i < 3; i++) {
+      for (int i = 0; i < 5; i++) {
         sheet.setColumnWidth((short) (i), (short) ((50 * 8) / ((double) 1 / 20)));
         cell = row.createCell(i);
         cell.setCellStyle(cs);
         switch (i) {
           case 0:            
-            cell.setCellValue("Giorno");
+            cell.setCellValue("Data");
             break;
           case 1:
-            cell.setCellValue("Ore di lavoro (hh:mm)");
+            cell.setCellValue("Lavoro da timbrature (hh:mm)");
             break;
           case 2:
-            cell.setCellValue("Assenza");
+            cell.setCellValue("Lavoro fuori sede (hh:mm)");
+            break;
+          case 3:
+            cell.setCellValue("Lavoro effettivo (hh:mm)");
+            break;
+          case 4: 
+            cell.setCellValue("Assenza");            
             break;
           default:
             break;
@@ -738,7 +751,7 @@ public class ChartsManager {
       for (PersonStampingDayRecap day : psDto.daysRecap) {
         row = sheet.createRow(rownum);
 
-        for (int cellnum = 0; cellnum < 3; cellnum++) {
+        for (int cellnum = 0; cellnum < 5; cellnum++) {
           cell = row.createCell(cellnum);
           if (day.personDay.isHoliday) {
             cell.setCellStyle(cellHoliday);
@@ -754,29 +767,29 @@ public class ChartsManager {
                   DateUtility.fromMinuteToHourMinute(day.personDay.getStampingsTime()));
               break;
             case 2:
+              cell.setCellValue(
+                  DateUtility.fromMinuteToHourMinute(getOutOfOfficeTime(day.personDay)));
+              break;
+            case 3:
+              cell.setCellValue(
+                  DateUtility.fromMinuteToHourMinute(day.personDay.getTimeAtWork()));
+              break;
+            case 4:
               if (!day.personDay.absences.isEmpty()) {
                 String code = "";
-                if (onlyMission) {
-                  code = 
-                      day.personDay.absences.stream()
-                      .filter(ab -> ab.absenceType.code.contains("92"))
-                      .findFirst().isPresent() ? day.personDay.absences.stream()
-                          .filter(ab -> ab.absenceType.code.contains("92"))
-                          .findFirst().get().absenceType.code : null;
-                } else {
-                  for (Absence abs : day.personDay.absences) {
-                    code = code + " " + abs.absenceType.code;                  
-                  }
+
+                for (Absence abs : day.personDay.absences) {
+                  code = code + " " + abs.absenceType.code;                  
                 }
-                
+
                 cell.setCellValue(code);
-                if (onlyMission && code != null && code.equals("92")) {
-                  cell = row.getCell(1);
+                if (onlyMission && code != null && code.trim().equals("92")) {
+                  cell = row.getCell(3);
                   cell.setCellValue(DateUtility.fromMinuteToHourMinute(day.wttd.get().workingTime));
                 }
               } else {
                 cell.setCellValue(" ");
-              }              
+              }  
               break;
             default:
               break;
@@ -844,6 +857,28 @@ public class ChartsManager {
     cs.setAlignment(CellStyle.ALIGN_CENTER);
     cs.setFont(font);
     return cs;
+  }
+
+  /**
+   * 
+   * @param pd il personday
+   * @return il tempo a lavoro derivante dalle timbrature identificate come lavoro fuori sede.
+   */
+  private int getOutOfOfficeTime(PersonDay pd) {
+    List<Stamping> stampings = 
+        pd.stampings.stream()
+        .filter(st -> st.stampType != null && (st.stampType.getIdentifier().equals("sf") 
+        || st.stampType.getIdentifier().equals("lfs")))
+        .collect(Collectors.toList());
+    if (stampings.isEmpty()) {
+      return 0;
+    } else {
+      List<PairStamping> valid = personDayManager.getValidPairStampings(stampings);
+      return valid.stream()
+          .mapToInt(pair -> DateUtility.toMinute(pair.second.date) 
+              - DateUtility.toMinute(pair.first.date)).sum();
+    }   
+
   }
 }
 
