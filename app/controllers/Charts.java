@@ -231,12 +231,13 @@ public class Charts extends Controller {
     set.add(office);
     LocalDate date = new LocalDate(year, month, 1);
     boolean forAll = true;
+    boolean onlyMission = true;
     List<Person> personList = personDao.list(
         Optional.<String>absent(), set, false, date, 
         date.dayOfMonth().withMaximumValue(), true).list();
     
 
-    render(personList, date, office, forAll);
+    render(personList, date, office, forAll, onlyMission);
   }
 
 
