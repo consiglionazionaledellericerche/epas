@@ -805,6 +805,8 @@ office.code.popover= Codice univoco della sede (per l&#39;IIT di Pisa è 044000)
 office.codeId.popover= Id univoco della Sede. Serve per l&#39;invio degli attestati a Roma (per l&#39;IIT di Pisa è &quot;223400&quot;)
 office.joiningDate.popover= Data di affiliazione della sede
 
+onlyMission.popover= Se sì, ogni giorno di missione viene segnato con tempo a lavoro = tempo di lavoro assegnato al dipendente. Se no, con tempo a lavoro = 0
+
 time.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
 
 person.eppn.popover= Inserire la propria email cnr Es:mario.rossi@cnr.it
