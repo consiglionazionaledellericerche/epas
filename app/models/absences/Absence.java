@@ -67,6 +67,10 @@ public class Absence extends BaseModel {
   @OneToMany(mappedBy = "absence", cascade = {CascadeType.REMOVE})
   public Set<AbsenceTrouble> troubles = Sets.newHashSet();
   
+  //Nuovo campo per la gestione delle missioni in caso di modifica delle date
+  @Column(name = "external_identifier")
+  public Long externalIdentifier;
+  
   @Override
   public String toString() {
     if (personDay == null) {
