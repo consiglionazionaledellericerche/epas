@@ -6,16 +6,26 @@ import com.google.inject.Inject;
 import controllers.Security;
 
 import dao.PersonDao;
+import dao.UserDao;
 
 import lombok.extern.slf4j.Slf4j;
 
+import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
 
 import models.Person;
+import models.PersonDay;
 import models.User;
+import models.absences.Absence;
+import models.absences.AbsenceType;
+import models.absences.CategoryTab;
+import models.absences.GroupAbsenceType;
+import models.absences.JustifiedType;
 import models.exports.MissionFromClient;
 import models.exports.StampingFromClient;
+
+import play.db.jpa.JPA;
 
 
 
@@ -25,13 +35,23 @@ public class MissionManager {
   private final PersonDao personDao;
   private final AbsenceService absenceService;
   private final AbsenceManager absenceManager;
+  private final PersonDayManager personDayManager;
+  private final ConsistencyManager consistencyManager;
+  private final NotificationManager notificationManager;
+  private final UserDao userDao;
   
   @Inject
   public MissionManager(PersonDao personDao, AbsenceService absenceService, 
-      AbsenceManager absenceManager) {
+      AbsenceManager absenceManager, PersonDayManager personDayManager,
+      ConsistencyManager consistencyManager, NotificationManager notificationManager,
+      UserDao userDao) {
     this.personDao = personDao;
     this.absenceService = absenceService;
     this.absenceManager = absenceManager;
+    this.personDayManager = personDayManager;
+    this.consistencyManager = consistencyManager;
+    this.notificationManager = notificationManager;
+    this.userDao = userDao;
   }
 
   /**
@@ -69,9 +89,44 @@ public class MissionManager {
    */
   public boolean createMissionFromClient(MissionFromClient body, boolean recompute) {
     
-    //TODO: recuperare le info che mancano per chiamare questa funzionalità correttamente
-//    InsertReport insertReport = absenceService.insert(person, groupAbsenceType, from, to,
-//        absenceType, justifiedType, hours, minutes, forceInsert, absenceManager);
+    CategoryTab categoryTab = null;
+    GroupAbsenceType groupAbsenceType = null;
+    AbsenceType absenceType = null;
+    JustifiedType justifiedType = null;
+    Integer hours = null;
+    Integer minutes = null;
+    AbsenceForm absenceForm =
+        absenceService.buildAbsenceForm(body.person, body.dataInizio, categoryTab, body.dataFine,
+             groupAbsenceType, false, absenceType, justifiedType, hours, minutes, false);
+    
+    InsertReport insertReport = 
+        absenceService.insert(body.person, absenceForm.groupSelected, body.dataInizio, 
+            body.dataFine, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected, 
+            hours, minutes, false, absenceManager);
+    if (insertReport.criticalErrors.isEmpty() || insertReport.warningsPreviousVersion.isEmpty()) {
+      for (Absence absence : insertReport.absencesToPersist) {
+        PersonDay personDay = personDayManager
+            .getOrCreateAndPersistPersonDay(body.person, absence.getAbsenceDate());
+        absence.personDay = personDay;
+        personDay.absences.add(absence);
+        absence.save();
+        personDay.save();
+        
+        final User currentUser = Security.getUser().get();
+        notificationManager.notificationAbsencePolicy(currentUser, 
+            absence, absenceForm.groupSelected, true);
+        
+      }
+      if (!insertReport.reperibilityShiftDate().isEmpty()) {
+        absenceManager
+        .sendReperibilityShiftEmail(body.person, insertReport.reperibilityShiftDate());
+        log.info("Inserite assenze con reperibilità e turni {} {}. Le email sono disabilitate.",
+            body.person.fullName(), insertReport.reperibilityShiftDate());
+      }
+      JPA.em().flush();
+      consistencyManager.updatePersonSituation(body.person.id, body.dataFine);
+      return true;
+    }
     return false;
   }
 }

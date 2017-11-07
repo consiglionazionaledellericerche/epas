@@ -34,8 +34,7 @@ public class Missions extends Controller {
   private static MissionManager missionManager;
   
   
-  //@BasicAuth
-  @NoCheck
+  @BasicAuth
   public static void amqpreceiver(@As(binder = JsonMissionBinder.class) MissionFromClient body) {
     log.info("Arrivato messaggio da {} ", body);
     // Malformed Json (400)

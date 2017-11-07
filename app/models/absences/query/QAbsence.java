@@ -35,6 +35,8 @@ public class QAbsence extends EntityPathBase<Absence> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final NumberPath<Long> externalIdentifier = createNumber("externalIdentifier", Long.class);
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 
