@@ -10,6 +10,7 @@ import com.google.inject.Inject;
 import controllers.Security;
 
 import dao.PersonChildrenDao;
+import dao.UserDao;
 import dao.absences.AbsenceComponentDao;
 
 import it.cnr.iit.epas.DateUtility;
@@ -75,6 +76,8 @@ public class AbsenceService {
   private final EnumAllineator enumAllineator;
   private final ConfigurationManager confManager;
   private final SecureManager secureManager;
+  //TODO: da togliere
+  private final UserDao userDao;
    
   /**
    * Costruttore injection.
@@ -91,7 +94,8 @@ public class AbsenceService {
       PersonChildrenDao personChildrenDao,
       ConfigurationManager confManager,
       SecureManager secureManager,
-      EnumAllineator enumAllineator) {
+      EnumAllineator enumAllineator,
+      UserDao userDao) {
     this.absenceEngineUtility = absenceEngineUtility;
     this.serviceFactories = serviceFactories;
     this.absenceComponentDao = absenceComponentDao;
@@ -99,6 +103,7 @@ public class AbsenceService {
     this.confManager = confManager;
     this.secureManager = secureManager;
     this.enumAllineator = enumAllineator;
+    this.userDao = userDao;
   }
   
   /**
@@ -493,7 +498,8 @@ public class AbsenceService {
     final GroupAbsenceType employeeOffseat = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.LAVORO_FUORI_SEDE.name()).get();
 
-    final User currentUser = Security.getUser().get();
+    //final User currentUser = Security.getUser().get();
+    final User currentUser = userDao.byUsername("missioni");
     final boolean officeWriteAdmin = secureManager
         .officesWriteAllowed(currentUser).contains(person.office);
     

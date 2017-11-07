@@ -1946,6 +1946,22 @@ then
  $c.grant();
 end
 
+/*******************************************************************************
+ * Azioni via REST per client Missioni
+ ******************************************************************************/
+
+rule ManageMissions
+when
+ AccountRole(this in (AccountRole.MISSIONS_MANAGER))
+ $c: PermissionCheck(action in (
+
+        "rest.Missions.amqpreceiver"
+
+       ), target == null, granted == false)
+then
+ $c.grant();
+end
+
 /*
  * Permessi sulle proprie notifiche
  */

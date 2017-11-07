@@ -1,12 +1,12 @@
 package it.cnr.iit.epas;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import injection.StaticInject;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -60,7 +60,7 @@ public class JsonMissionBinder implements TypeBinder<MissionFromClient> {
    * @return la sottostringa contenente la data nel formato yyyy-mm-dd.
    */
   private String getDateFromJson(String string) {
-    String date = string.substring(0, 9);
+    String date = string.substring(0, 10);
     return date;
   }
 }

@@ -666,6 +666,7 @@ AccountRole.DEVELOPER= developer
 AccountRole.ADMIN= Admin
 AccountRole.RO_ADMIN= Admin in sola lettura
 AccountRole.ABSENCES_MANAGER= Gestore assenze
+AccountRole.MISSIONS_MANAGER= Gestore missioni
 
 chartType= Tipo di grafico
 ChartTypes.BARS= Grafico a barre
