@@ -42,15 +42,27 @@ public class Missions extends Controller {
       JsonResponse.badRequest();
     }
 
-    // Badge number not present (404)
+    // person not present (404)
     if (!missionManager.linkToPerson(body).isPresent()) {
       JsonResponse.notFound();
     }
 
-    // Stamping already present (409)
-    if (!missionManager.createMissionFromClient(body, true)) {
-      JsonResponse.conflict();
+    switch (body.tipoMissione) {
+      case "ORDINE":
+        if (!missionManager.createMissionFromClient(body, true)) {
+          JsonResponse.conflict();
+        }
+        break;
+      case "RIMBORSO":
+        if (!missionManager.manageMissionFromClient(body, true)) {
+          JsonResponse.notFound();
+        }
+        break;
+      default: 
+        break;
     }
+    // Mission already present (409)
+    
 
     // Success (200)
     JsonResponse.ok();

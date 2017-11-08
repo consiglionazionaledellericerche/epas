@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 
 import controllers.Security;
 
+import dao.AbsenceDao;
 import dao.PersonDao;
 import dao.UserDao;
 
@@ -25,7 +26,13 @@ import models.absences.JustifiedType;
 import models.exports.MissionFromClient;
 import models.exports.StampingFromClient;
 
+import org.joda.time.LocalDate;
+import org.testng.collections.Lists;
+
 import play.db.jpa.JPA;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 
@@ -38,20 +45,20 @@ public class MissionManager {
   private final PersonDayManager personDayManager;
   private final ConsistencyManager consistencyManager;
   private final NotificationManager notificationManager;
-  private final UserDao userDao;
-  
+  private final AbsenceDao absenceDao;
+    
   @Inject
   public MissionManager(PersonDao personDao, AbsenceService absenceService, 
       AbsenceManager absenceManager, PersonDayManager personDayManager,
       ConsistencyManager consistencyManager, NotificationManager notificationManager,
-      UserDao userDao) {
+      AbsenceDao absenceDao) {
     this.personDao = personDao;
     this.absenceService = absenceService;
     this.absenceManager = absenceManager;
     this.personDayManager = personDayManager;
     this.consistencyManager = consistencyManager;
     this.notificationManager = notificationManager;
-    this.userDao = userDao;
+    this.absenceDao = absenceDao;
   }
 
   /**
@@ -108,6 +115,7 @@ public class MissionManager {
         PersonDay personDay = personDayManager
             .getOrCreateAndPersistPersonDay(body.person, absence.getAbsenceDate());
         absence.personDay = personDay;
+        absence.externalIdentifier = body.id;
         personDay.absences.add(absence);
         absence.save();
         personDay.save();
@@ -128,5 +136,34 @@ public class MissionManager {
       return true;
     }
     return false;
+  }
+  
+  
+  public boolean manageMissionFromClient(MissionFromClient body, boolean recompute) {
+    if (body.idOrdine == null) {
+      return false;
+    }
+    List<Absence> missions = absenceDao.absencesPersistedByMissions(body.idOrdine);
+    if (missions.isEmpty()) {
+      return false;
+    }
+    List<LocalDate> dates = Lists.newArrayList();
+    LocalDate current = body.dataInizio;
+    while (!current.isAfter(body.dataFine)) {
+      dates.add(current);
+      current = current.plusDays(1);
+    }
+    List<Absence> toRemove = missions.stream()
+        .filter(abs -> !dates.contains(abs.personDay.date)).collect(Collectors.toList());
+    for (Absence abs : toRemove) {
+      abs.delete();
+      log.debug("rimossa assenza {} del {}", abs.absenceType.code, abs.personDay.date);
+    }
+    List<LocalDate> toAdd = dates.stream()
+        .filter(date -> (missions.stream()
+            .filter(abs -> !abs.personDay.date.isEqual(date))
+            .count()) < 1).collect(Collectors.toList());
+    log.debug("puppare");
+    return true;
   }
 }
