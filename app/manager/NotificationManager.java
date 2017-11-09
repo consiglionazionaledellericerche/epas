@@ -154,7 +154,7 @@ public class NotificationManager {
    * @param groupAbsenceType gruppo di inserimento
    */
   public void notificationAbsencePolicy(User currentUser, Absence absence, 
-      GroupAbsenceType groupAbsenceType, boolean insert) {
+      GroupAbsenceType groupAbsenceType, boolean insert, boolean update, boolean delete) {
     
     //Se l'user che ha fatto l'inserimento è utente di sistema esco
     if (currentUser.isSystemUser() && !currentUser.roles.contains(AccountRole.MISSIONS_MANAGER)) {
@@ -171,7 +171,19 @@ public class NotificationManager {
         || groupAbsenceType.name.equals(DefaultGroup.MISSIONE.name())
         || groupAbsenceType.name.equals(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name())
         || groupAbsenceType.name.equals(DefaultGroup.LAVORO_FUORI_SEDE.name())) {
-      notifyAbsence(absence, currentUser, NotificationManager.CRUD.CREATE);
+      if (insert) {
+        notifyAbsence(absence, currentUser, NotificationManager.CRUD.CREATE);
+        return;
+      }
+      if (update) {
+        notifyAbsence(absence, currentUser, NotificationManager.CRUD.UPDATE);
+        return;
+      }
+      if (delete) {
+        notifyAbsence(absence, currentUser, NotificationManager.CRUD.DELETE);
+        return;
+      }
+      //notifyAbsence(absence, currentUser, NotificationManager.CRUD.CREATE);
     }
   }
 

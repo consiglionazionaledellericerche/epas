@@ -667,7 +667,7 @@ public class AbsenceGroups extends Controller {
         personDay.save();
         
         notificationManager.notificationAbsencePolicy(Security.getUser().get(), 
-            absence, groupAbsenceType, true);
+            absence, groupAbsenceType, true, false, false);
         
       }
       if (!insertReport.reperibilityShiftDate().isEmpty()) {
