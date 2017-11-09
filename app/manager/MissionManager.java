@@ -9,6 +9,9 @@ import dao.AbsenceDao;
 import dao.PersonDao;
 import dao.UserDao;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.services.absences.AbsenceForm;
@@ -31,14 +34,12 @@ import org.testng.collections.Lists;
 
 import play.db.jpa.JPA;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 
 
 @Slf4j
 public class MissionManager {
-  
+
   private final PersonDao personDao;
   private final AbsenceService absenceService;
   private final AbsenceManager absenceManager;
@@ -46,7 +47,7 @@ public class MissionManager {
   private final ConsistencyManager consistencyManager;
   private final NotificationManager notificationManager;
   private final AbsenceDao absenceDao;
-    
+
   @Inject
   public MissionManager(PersonDao personDao, AbsenceService absenceService, 
       AbsenceManager absenceManager, PersonDayManager personDayManager,
@@ -73,7 +74,7 @@ public class MissionManager {
       log.error("Impossibile recuperare l'utente che ha inviato la missione: {}", mission);
       return Optional.absent();
     }
-    
+
     final Optional<Person> person = Optional.fromNullable(personDao
         .getPersonByNumber(mission.matricola));
 
@@ -83,7 +84,7 @@ public class MissionManager {
       log.warn("Non e' stato possibile recuperare la persona a cui si riferisce la missione,"
           + " matricola={}. Controllare il database.", mission.matricola);
     }
-   
+
     return person;
   }
 
@@ -95,20 +96,68 @@ public class MissionManager {
    *     false altrimenti.
    */
   public boolean createMissionFromClient(MissionFromClient body, boolean recompute) {
+
+
+    AbsenceForm absenceForm = buildAbsenceForm(body);
+
+    if (insertMission(body, absenceForm, null, null, body.dataInizio, body.dataFine)) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * 
+   * @param body il dto contenente i dati della missione
+   * @param recompute se deve essere effettuato il ricalcolo
+   * @return true se la gestione della missione è andata a buon fine, false altrimenti.
+   */
+  public boolean manageMissionFromClient(MissionFromClient body, boolean recompute) {
+    if (body.idOrdine == null) {
+      return false;
+    }
+    List<Absence> missions = absenceDao.absencesPersistedByMissions(body.idOrdine);
+    if (missions.isEmpty()) {
+      return false;
+    }
+    AbsenceForm absenceForm = buildAbsenceForm(body);
     
-    CategoryTab categoryTab = null;
-    GroupAbsenceType groupAbsenceType = null;
-    AbsenceType absenceType = null;
-    JustifiedType justifiedType = null;
-    Integer hours = null;
-    Integer minutes = null;
-    AbsenceForm absenceForm =
-        absenceService.buildAbsenceForm(body.person, body.dataInizio, categoryTab, body.dataFine,
-             groupAbsenceType, false, absenceType, justifiedType, hours, minutes, false);
+    List<LocalDate> dates = Lists.newArrayList();
+    LocalDate current = body.dataInizio;
+    while (!current.isAfter(body.dataFine)) {
+      dates.add(current);
+      current = current.plusDays(1);
+    }
+    List<Absence> toRemove = missions.stream()
+        .filter(abs -> !dates.contains(abs.personDay.date)).collect(Collectors.toList());
+    List<LocalDate> toAdd = dates.stream()
+        .filter(date -> (missions.stream()
+            .filter(abs -> !abs.personDay.date.isEqual(date))
+            .count()) < 1).collect(Collectors.toList());
+    for (Absence abs : toRemove) {
+      abs.delete();
+      final User currentUser = Security.getUser().get();
+      notificationManager.notificationAbsencePolicy(currentUser, 
+          abs, absenceForm.groupSelected, false, true, false);
+      log.debug("rimossa assenza {} del {}", abs.absenceType.code, abs.personDay.date);
+    }
     
+    boolean result = false;
+    for (LocalDate date : toAdd) {
+      result = insertMission(body, absenceForm, null, null, date, date);
+    }
+    if (result) {
+      return true;
+    }
+    return false;
+  }
+  
+  
+  private boolean insertMission(MissionFromClient body, AbsenceForm absenceForm, 
+      Integer hours, Integer minutes, LocalDate from, LocalDate to) {
     InsertReport insertReport = 
-        absenceService.insert(body.person, absenceForm.groupSelected, body.dataInizio, 
-            body.dataFine, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected, 
+        absenceService.insert(body.person, absenceForm.groupSelected, from, 
+            to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected, 
             hours, minutes, false, absenceManager);
     if (insertReport.criticalErrors.isEmpty() || insertReport.warningsPreviousVersion.isEmpty()) {
       for (Absence absence : insertReport.absencesToPersist) {
@@ -119,11 +168,11 @@ public class MissionManager {
         personDay.absences.add(absence);
         absence.save();
         personDay.save();
-        
+
         final User currentUser = Security.getUser().get();
         notificationManager.notificationAbsencePolicy(currentUser, 
-            absence, absenceForm.groupSelected, true);
-        
+            absence, absenceForm.groupSelected, true, false, false);
+
       }
       if (!insertReport.reperibilityShiftDate().isEmpty()) {
         absenceManager
@@ -135,35 +184,21 @@ public class MissionManager {
       consistencyManager.updatePersonSituation(body.person.id, body.dataFine);
       return true;
     }
+
+    log.debug("puppare");
     return false;
   }
   
-  
-  public boolean manageMissionFromClient(MissionFromClient body, boolean recompute) {
-    if (body.idOrdine == null) {
-      return false;
-    }
-    List<Absence> missions = absenceDao.absencesPersistedByMissions(body.idOrdine);
-    if (missions.isEmpty()) {
-      return false;
-    }
-    List<LocalDate> dates = Lists.newArrayList();
-    LocalDate current = body.dataInizio;
-    while (!current.isAfter(body.dataFine)) {
-      dates.add(current);
-      current = current.plusDays(1);
-    }
-    List<Absence> toRemove = missions.stream()
-        .filter(abs -> !dates.contains(abs.personDay.date)).collect(Collectors.toList());
-    for (Absence abs : toRemove) {
-      abs.delete();
-      log.debug("rimossa assenza {} del {}", abs.absenceType.code, abs.personDay.date);
-    }
-    List<LocalDate> toAdd = dates.stream()
-        .filter(date -> (missions.stream()
-            .filter(abs -> !abs.personDay.date.isEqual(date))
-            .count()) < 1).collect(Collectors.toList());
-    log.debug("puppare");
-    return true;
+  private AbsenceForm buildAbsenceForm(MissionFromClient body) {
+    CategoryTab categoryTab = null;
+    GroupAbsenceType groupAbsenceType = null;
+    AbsenceType absenceType = null;
+    JustifiedType justifiedType = null;
+    Integer hours = null;
+    Integer minutes = null;
+    AbsenceForm absenceForm =
+        absenceService.buildAbsenceForm(body.person, body.dataInizio, categoryTab, body.dataFine,
+            groupAbsenceType, false, absenceType, justifiedType, hours, minutes, false);
+    return absenceForm;
   }
 }
