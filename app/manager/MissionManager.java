@@ -130,10 +130,12 @@ public class MissionManager {
     }
     List<Absence> toRemove = missions.stream()
         .filter(abs -> !dates.contains(abs.personDay.date)).collect(Collectors.toList());
+    List<LocalDate> missionsDate = missions.stream()
+        .map(a -> a.personDay.date).collect(Collectors.toList());
     List<LocalDate> toAdd = dates.stream()
-        .filter(date -> (missions.stream()
-            .filter(abs -> !abs.personDay.date.isEqual(date))
-            .count()) < 1).collect(Collectors.toList());
+        .filter(p -> !missionsDate.contains(p)).collect(Collectors.toList());
+        
+
     for (Absence abs : toRemove) {
       abs.delete();
       final User currentUser = Security.getUser().get();
@@ -164,7 +166,11 @@ public class MissionManager {
         PersonDay personDay = personDayManager
             .getOrCreateAndPersistPersonDay(body.person, absence.getAbsenceDate());
         absence.personDay = personDay;
-        absence.externalIdentifier = body.id;
+        if (body.idOrdine != null) {
+          absence.externalIdentifier = body.idOrdine;
+        } else {
+          absence.externalIdentifier = body.id;
+        }        
         personDay.absences.add(absence);
         absence.save();
         personDay.save();
