@@ -680,8 +680,10 @@ public class AbsenceManager {
           if (absence.absenceFile.exists()) {
             absence.absenceFile.getFile().delete();
           }
+          
           absence.delete();
           pd.absences.remove(absence);
+          pd.workingTimeInMission = 0;
           pd.isTicketForcedByAdmin = false;
           deleted++;
           pd.save();

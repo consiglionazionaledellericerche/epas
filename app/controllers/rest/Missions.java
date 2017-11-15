@@ -38,7 +38,7 @@ public class Missions extends Controller {
   public static void amqpreceiver(@As(binder = JsonMissionBinder.class) MissionFromClient body) {
     log.info("Arrivato messaggio da {} ", body);
     // Malformed Json (400)
-    if (body == null) {
+    if (body == null || body.dataInizio == null || body.dataFine == null) {
       JsonResponse.badRequest();
     }
 

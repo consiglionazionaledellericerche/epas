@@ -6,7 +6,8 @@
   #{tabItem id:'editAbs', title:'Riepilogo', active:true /}
 	#{secure.check 'Absences.addAttach'}
     #{tabItem id:'attach', title:'Allegato' /}
-  #{/secure.check}
+  	#{/secure.check}
+  	#{tabItem id:'overtimeMission', title:'Ore in più in missione' /}
   #{tabItem id:'deleteAbs', title:'Elimina' /}
 #{/tabList}
 
@@ -75,7 +76,29 @@
 	  #{/if}  
   #{/tabContentItem} 
   #{/secure.check}
-
+  
+  #{tabContentItem id:'overtimeMission'}
+	  <div class="alert alert-info center">
+		   <p>In caso di preventiva documentazione, è possibile aggiungere all'assenza
+		   con codice ${absence.absenceType.code} del <strong>${absence.personDay.date.format()}</strong>
+		   le ore di straordinario in missione,
+		   specificando nei campi sottostanti la quantità oraria e la motivazione. 
+	       </p>	       
+	  </div>
+	  #{form action:@Absences.overtimeMission(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal', 'data-async':'#page_content',
+		    'data-async-error':'#absenceData', enctype:'multipart/form-data'}
+		    #{if absence.persistent}
+		    #{f.hidden 'absenceId', value: absence.id /}
+		    #{/if}
+	  		#{f.input 'hours', type:'number' /}
+	  		#{f.input 'minutes', type:'number' /}
+	     	#{b.buttons center:true}   
+	      		#{b.submit 'Salva', color:'primary', fa:'check' /}
+	    	#{/b.buttons}
+	    	
+	  #{/form}
+  #{/tabContentItem} 
   #{tabContentItem id:'deleteAbs'}
 	  <div class="alert alert-danger center">
 		   <p>Cliccando su elimina si elimineranno tutte le assenze con codice ${absence.absenceType.code} 
