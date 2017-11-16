@@ -5,9 +5,11 @@
 #{tabList}
   #{tabItem id:'editAbs', title:'Riepilogo', active:true /}
 	#{secure.check 'Absences.addAttach'}
-    #{tabItem id:'attach', title:'Allegato' /}
+    	#{tabItem id:'attach', title:'Allegato' /}
   	#{/secure.check}
-  	#{tabItem id:'overtimeMission', title:'Ore in più in missione' /}
+  	#{secure.check 'Absences.overtimeMission', target:absence.absenceType}
+  		#{tabItem id:'overtimeMission', title:'Ore in più in missione' /}
+  	#{/secure.check}
   #{tabItem id:'deleteAbs', title:'Elimina' /}
 #{/tabList}
 
@@ -76,7 +78,7 @@
 	  #{/if}  
   #{/tabContentItem} 
   #{/secure.check}
-  
+  #{secure.check 'Absences.overtimeMission', target:absence.absenceType}
   #{tabContentItem id:'overtimeMission'}
 	  <div class="alert alert-info center">
 		   <p>In caso di preventiva documentazione, è possibile aggiungere all'assenza
@@ -99,6 +101,7 @@
 	    	
 	  #{/form}
   #{/tabContentItem} 
+  #{/secure.check}
   #{tabContentItem id:'deleteAbs'}
 	  <div class="alert alert-danger center">
 		   <p>Cliccando su elimina si elimineranno tutte le assenze con codice ${absence.absenceType.code} 
