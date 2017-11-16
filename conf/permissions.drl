@@ -1786,6 +1786,18 @@ then
  $c.grant();
 end
 
+/**************************************************************************************************
+ * L'amministratore del personale può visualizzare la scheda di inserimento ore in più in missione
+ **************************************************************************************************/
+rule overtimeInMission
+when
+ UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
+ $abt: AbsenceType(code == "92")
+ $c: PermissionCheck(action == "Absences.overtimeMission", target == $abt, granted == false )
+then
+ System.out.println("PUPPAREEEEEEEE: " + $abt.code);
+ $c.grant();
+end
 
 
 /*******************************************************************************
