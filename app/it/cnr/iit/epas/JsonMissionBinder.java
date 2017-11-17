@@ -26,7 +26,7 @@ public class JsonMissionBinder implements TypeBinder<MissionFromClient> {
   @Override
   public Object bind(String name, Annotation[] annotations, String value,
       @SuppressWarnings("rawtypes") Class actualClass, Type genericType) throws Exception {
-    log.debug("eccoci");
+    
     try {
       final JsonObject jsonObject = new JsonParser().parse(value).getAsJsonObject();
       log.debug("jsonObject = {}", jsonObject);
@@ -44,7 +44,7 @@ public class JsonMissionBinder implements TypeBinder<MissionFromClient> {
         mission.idOrdine = jsonObject.get("id_ordine").getAsLong();
       }
       
-      log.debug("Effettuato il binding, MissionFromClient = {}", mission);
+      log.info("Effettuato il binding, MissionFromClient = {}", mission);
       return mission;
     } catch (Exception ex) {
       log.error("Problem during binding MissionFromClient: {}, {}, {}, {}, {}",

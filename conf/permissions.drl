@@ -12,6 +12,7 @@ import models.enumerate.AccountRole;
 import models.enumerate.AttachmentType;
 import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.JustifiedType;
 import models.Attachment;
 import models.Configuration;
 import models.Notification;
@@ -1190,6 +1191,7 @@ when
      	"AbsenceGroups.delete",
      	"Absences.addAttach",
      	"Absences.removeAttach",
+     	"Absences.overtimeMission",
 
         "Stampings.blank",
        	"Stampings.edit",
@@ -1366,6 +1368,7 @@ when
         /* Vecchio permesso editPersonDay */
      	"Absences.addAttach",
      	"Absences.removeAttach",
+     	"Absences.overtimeMission",
 
        	"Stampings.blank",
        	"Stampings.edit",
@@ -1792,10 +1795,10 @@ end
 rule overtimeInMission
 when
  UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
- $abt: AbsenceType(code == "92")
+ $abt: AbsenceType(code == "92") 
  $c: PermissionCheck(action == "Absences.overtimeMission", target == $abt, granted == false )
 then
- System.out.println("PUPPAREEEEEEEE: " + $abt.code);
+ System.out.println("PUPPAREEEEEEEE: " + $abt);
  $c.grant();
 end
 

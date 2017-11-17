@@ -61,8 +61,6 @@ public class Missions extends Controller {
       default: 
         break;
     }
-    // Mission already present (409)
-    
 
     // Success (200)
     JsonResponse.ok();

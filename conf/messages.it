@@ -919,6 +919,7 @@ assign_all_day=Assegna l'intera giornata lavorativa
 specified_minutes=Specificare ore e minuti
 all_day_limit=Niente ma scala una giornata dal limite
 specified_minutes_limit=Niente ma scala i minuti dal limite
+complete_day_and_add_overtime=Completa il giorno e permette ore in più
 
 nothing=Niente
 minutes=Minuti
