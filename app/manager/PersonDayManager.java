@@ -107,9 +107,9 @@ public class PersonDayManager {
    * @param personDay il personDay in cui cercare l'assenza
    * @return Assenza che giustifica il tempo che manca al raggiungimento dell'orario di lavoro.
    */
-  public Optional<Absence> getMissingTime(PersonDay personDay) {
+  public Optional<Absence> getCompleteDayAndAddOvertime(PersonDay personDay) {
     for (Absence absence : personDay.absences) {
-      if (absence.justifiedType.name.equals(JustifiedTypeName.missing_time)) {
+      if (absence.justifiedType.name.equals(JustifiedTypeName.complete_day_and_add_overtime)) {
         return Optional.of(absence);
       }
     }
@@ -443,7 +443,7 @@ public class PersonDayManager {
     personDay.setTimeAtWork(computedTimeAtWork);
     
     // Il caso di assenze a giustificazione "quello che manca"
-    if (getMissingTime(personDay).isPresent()) {      
+    if (getCompleteDayAndAddOvertime(personDay).isPresent()) {      
       int missingTime = wttd.workingTime - personDay.getTimeAtWork();
       personDay.setTimeAtWork(computedTimeAtWork + missingTime);      
     }

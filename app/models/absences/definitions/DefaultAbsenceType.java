@@ -245,11 +245,9 @@ public enum DefaultAbsenceType {
       0, null, null, null),
 
   A_92("92", "Missione",
-      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
+      false, ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, true, false,
       0, null, null, null),
-  A_92TEST("92", "Nuova Missione",
-      false, ImmutableSet.of(JustifiedTypeName.missing_time), 0, true, false,
-      0, null, null, null),
+
   A_92H1("92H1", "Missione 1 ora",
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 60, true, true,
       0, null, null, null),

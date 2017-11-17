@@ -23,6 +23,7 @@ import models.absences.AbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
+import models.absences.query.QJustifiedType;
 import models.exports.FrequentAbsenceCode;
 import models.query.QPersonDay;
 import org.joda.time.LocalDate;
@@ -51,8 +52,10 @@ public class AbsenceDao extends DaoBase {
 
     final QAbsence absence = QAbsence.absence;
     final QAbsenceType absenceType = QAbsenceType.absenceType;
+    final QJustifiedType justifiedType = QJustifiedType.justifiedType;
     final JPQLQuery query = getQueryFactory().from(absence)
         .join(absence.absenceType, absenceType).fetch()
+        .join(absence.justifiedType, justifiedType).fetch()
         .where(absence.id.eq(id));
     return query.singleResult(absence);
   }
@@ -361,8 +364,9 @@ public class AbsenceDao extends DaoBase {
   public List<Absence> absencesPersistedByMissions(long externalId) {
     final QAbsence absence = QAbsence.absence;
     
-    return getQueryFactory().from(absence)
-        .where(absence.externalIdentifier.eq(externalId))
-        .orderBy(absence.personDay.date.asc()).list(absence);
+    return getQueryFactory().from(absence)    
+        .where(absence.externalIdentifier.eq(externalId)).list(absence);
   }
+  
+
 }

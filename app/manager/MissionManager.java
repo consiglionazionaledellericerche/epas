@@ -62,6 +62,7 @@ public class MissionManager {
     this.absenceDao = absenceDao;
   }
 
+    
   /**
    * 
    * @param mission il dto creato dal json arrivato dal listener
@@ -101,6 +102,7 @@ public class MissionManager {
     AbsenceForm absenceForm = buildAbsenceForm(body);
 
     if (insertMission(body, absenceForm, null, null, body.dataInizio, body.dataFine)) {
+      recalculate(body, Optional.<List<Absence>>absent());
       return true;
     }
     return false;
@@ -133,8 +135,7 @@ public class MissionManager {
     List<LocalDate> missionsDate = missions.stream()
         .map(a -> a.personDay.date).collect(Collectors.toList());
     List<LocalDate> toAdd = dates.stream()
-        .filter(p -> !missionsDate.contains(p)).collect(Collectors.toList());
-        
+        .filter(p -> !missionsDate.contains(p)).collect(Collectors.toList());        
 
     for (Absence abs : toRemove) {
       abs.delete();
@@ -148,6 +149,7 @@ public class MissionManager {
     for (LocalDate date : toAdd) {
       result = insertMission(body, absenceForm, null, null, date, date);
     }
+    recalculate(body, Optional.fromNullable(missions));
     if (result) {
       return true;
     }
@@ -187,11 +189,9 @@ public class MissionManager {
             body.person.fullName(), insertReport.reperibilityShiftDate());
       }
       JPA.em().flush();
-      consistencyManager.updatePersonSituation(body.person.id, body.dataFine);
       return true;
     }
-
-    log.debug("puppare");
+    
     return false;
   }
   
@@ -206,5 +206,22 @@ public class MissionManager {
         absenceService.buildAbsenceForm(body.person, body.dataInizio, categoryTab, body.dataFine,
             groupAbsenceType, false, absenceType, justifiedType, hours, minutes, false);
     return absenceForm;
+  }
+  
+  /**
+   * ricalcola la situazione del dipendente.
+   * @param body il dto contenente le info dell'ordine/rimborso di missione
+   */
+  private void recalculate(MissionFromClient body, Optional<List<Absence>> missions) {
+    LocalDate begin = body.dataInizio;
+    if (missions.isPresent()) {
+      
+      for (Absence abs : missions.get()) {
+        if (abs.personDay.date.isBefore(begin)) {
+          begin = abs.personDay.date;
+        }
+      }
+    }
+    consistencyManager.updatePersonSituation(body.person.id, begin);
   }
 }
