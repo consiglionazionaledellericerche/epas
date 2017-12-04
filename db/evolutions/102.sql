@@ -9,6 +9,8 @@ disabled, expire_date, office_owner_id )
 select nextval('seq_users'), null, md5('missioni'), null, 'missioni',false, null, null;
 INSERT INTO user_roles select id,'MISSIONS_MANAGER' from users WHERE username = 'missioni';
 
+ALTER TABLE person_reperibility_days ALTER id SET DEFAULT nextval('seq_person_reperibility_days'::regclass);
+
 # ---!Downs
 
 ALTER TABLE absences_history DROP COLUMN external_identifier;
