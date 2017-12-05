@@ -449,7 +449,7 @@ public class PersonDayManager {
     }
 
     //Controllo se ho del tempo aggiuntivo dovuto al lavoro in missione da sommare al tempo a lavoro
-    if (personDay.getWorkingTimeInMission() != 0) {
+    if (personDay.getWorkingTimeInMission() != null && personDay.getWorkingTimeInMission() != 0) {
       personDay.setTimeAtWork(personDay.getTimeAtWork() + personDay.getWorkingTimeInMission());
     }
     mealTicketHandlerAndDecurtedMeal(personDay, wttd, stampingTimeInOpening, 
