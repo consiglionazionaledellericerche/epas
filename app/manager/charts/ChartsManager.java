@@ -739,7 +739,7 @@ public class ChartsManager {
             cell.setCellValue("Lavoro effettivo (hh:mm)");
             break;
           case 4: 
-            cell.setCellValue("Assenza");            
+            cell.setCellValue("Ore giustificate da assenza");   
             break;
           default:
             break;
@@ -777,12 +777,18 @@ public class ChartsManager {
             case 4:
               if (!day.personDay.absences.isEmpty()) {
                 String code = "";
-
+                String justifiedHours = "";
                 for (Absence abs : day.personDay.absences) {
-                  code = code + " " + abs.absenceType.code;                  
+                  code = code + " " + abs.absenceType.code;
+                  justifiedHours = abs.justifiedTime() != 0 
+                      ? justifiedHours + abs.justifiedTime() : "";
                 }
 
-                cell.setCellValue(code);
+                if (!justifiedHours.equals("")) {
+                  cell.setCellValue(
+                      DateUtility.fromMinuteToHourMinute(new Integer(justifiedHours)));
+                }
+                
                 if (onlyMission && code != null && code.trim().equals("92")) {
                   cell = row.getCell(3);
                   cell.setCellValue(DateUtility.fromMinuteToHourMinute(day.wttd.get().workingTime));
@@ -791,6 +797,8 @@ public class ChartsManager {
                 cell.setCellValue(" ");
               }  
               break;
+            case 5:
+
             default:
               break;
           }          
@@ -868,7 +876,7 @@ public class ChartsManager {
     List<Stamping> stampings = 
         pd.stampings.stream()
         .filter(st -> st.stampType != null && (st.stampType.getIdentifier().equals("sf") 
-        || st.stampType.getIdentifier().equals("lfs")))
+            || st.stampType.getIdentifier().equals("lfs")))
         .collect(Collectors.toList());
     if (stampings.isEmpty()) {
       return 0;
