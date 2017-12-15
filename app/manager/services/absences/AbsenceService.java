@@ -499,7 +499,7 @@ public class AbsenceService {
         .groupAbsenceTypeByName(DefaultGroup.LAVORO_FUORI_SEDE.name()).get();
 
     //final User currentUser = Security.getUser().get();
-    final User currentUser = userDao.byUsername("missioni");
+    final User currentUser = userDao.byUsername("app.missioni");
     final boolean officeWriteAdmin = secureManager
         .officesWriteAllowed(currentUser).contains(person.office);
     
