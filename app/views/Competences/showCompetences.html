@@ -51,7 +51,7 @@
 				di ciascun dipendente abilitato al codice ${wrCompetenceCode.value.code} - ${wrCompetenceCode.value.description} e compila 
 				automaticamente i valori da attribuire per la competenza per ciascun dipendente.<br>
 				Se sono state effettuate modifiche alle timbrature o alle assenze nelle giornate del mese
-				di &{templateUtility.monthName(compDto.month)}, successivamente al <strong>3 &{templateUtility.monthName(compDto.month+1)}</strong>, è possibile effettuare il ricalcolo 
+				di &{templateUtility.monthName(compDto.month)}, è possibile effettuare il ricalcolo 
 				della competenza premendo il tasto qui sotto</p><br>
 			
 			<a class="btn btn-warning offset-col-sm-4" href="@{Competences.recalculateBonus(office.id, wrCompetenceCode.value.id, year, month)}">
