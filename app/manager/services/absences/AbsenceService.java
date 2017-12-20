@@ -55,6 +55,7 @@ import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultGroup;
+import models.enumerate.AccountRole;
 
 import org.joda.time.LocalDate;
 
@@ -499,7 +500,9 @@ public class AbsenceService {
         .groupAbsenceTypeByName(DefaultGroup.LAVORO_FUORI_SEDE.name()).get();
 
     //final User currentUser = Security.getUser().get();
-    final User currentUser = userDao.byUsername("app.missioni");
+    //final User currentUser = userDao.byUsername("app.missioni");
+    final User currentUser = userDao.getSystemUserByRole(AccountRole.MISSIONS_MANAGER);
+     
     final boolean officeWriteAdmin = secureManager
         .officesWriteAllowed(currentUser).contains(person.office);
     
