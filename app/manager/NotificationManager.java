@@ -13,6 +13,7 @@ import models.User;
 import models.absences.Absence;
 import models.absences.GroupAbsenceType;
 import models.absences.definitions.DefaultGroup;
+import models.enumerate.AccountRole;
 import models.enumerate.NotificationSubject;
 
 /**
@@ -75,7 +76,7 @@ public class NotificationManager {
   /**
    * Gestore delle notifiche per le assenze.
    */
-  private void notifyAbsence(Absence absence, CRUD operation) {
+  private void notifyAbsence(Absence absence, User currentUser, CRUD operation) {
     Verify.verifyNotNull(absence);
     final Person person = absence.personDay.person;
     final String template;
@@ -88,7 +89,13 @@ public class NotificationManager {
     } else {
       template = null;
     }
-    final String message = String.format(template, person.fullName(),
+    String modifier = "";
+    if (currentUser.roles.contains(AccountRole.MISSIONS_MANAGER)) {
+      modifier = currentUser.username;
+    } else {
+      modifier = person.fullName();
+    }
+    final String message = String.format(template, modifier,
         absence.personDay.date.toString(DF), absence.absenceType.code);
 
     person.office.usersRolesOffices.stream()
@@ -147,22 +154,36 @@ public class NotificationManager {
    * @param groupAbsenceType gruppo di inserimento
    */
   public void notificationAbsencePolicy(User currentUser, Absence absence, 
-      GroupAbsenceType groupAbsenceType, boolean insert) {
+      GroupAbsenceType groupAbsenceType, boolean insert, boolean update, boolean delete) {
     
     //Se l'user che ha fatto l'inserimento è utente di sistema esco
-    if (currentUser.isSystemUser()) {
+    if (currentUser.isSystemUser() && !currentUser.roles.contains(AccountRole.MISSIONS_MANAGER)) {
       return;
     }
     
     //Se l'user che ha fatto l'inserimento è amministratore di se stesso esco
-    if (secureManager.officesWriteAllowed(currentUser).contains(currentUser.person.office)) {
+    if (currentUser.person != null 
+        && secureManager.officesWriteAllowed(currentUser).contains(currentUser.person.office)) {
       return;
     }
     
     if (groupAbsenceType.name.equals(DefaultGroup.FERIE_CNR_DIPENDENTI.name()) 
+        || groupAbsenceType.name.equals(DefaultGroup.MISSIONE.name())
         || groupAbsenceType.name.equals(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name())
         || groupAbsenceType.name.equals(DefaultGroup.LAVORO_FUORI_SEDE.name())) {
-      notifyAbsence(absence, NotificationManager.CRUD.CREATE);
+      if (insert) {
+        notifyAbsence(absence, currentUser, NotificationManager.CRUD.CREATE);
+        return;
+      }
+      if (update) {
+        notifyAbsence(absence, currentUser, NotificationManager.CRUD.UPDATE);
+        return;
+      }
+      if (delete) {
+        notifyAbsence(absence, currentUser, NotificationManager.CRUD.DELETE);
+        return;
+      }
+      //notifyAbsence(absence, currentUser, NotificationManager.CRUD.CREATE);
     }
   }
 

@@ -35,6 +35,8 @@ public class JustifiedType extends BaseModel {
     missing_time,
     half_day,
     all_day,
+    
+    complete_day_and_add_overtime,
 
     assign_all_day,
 

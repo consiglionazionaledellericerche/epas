@@ -101,6 +101,20 @@ public class PersonDayManager {
     }
     return Optional.absent();
   }
+  
+  /**
+   * 
+   * @param personDay il personDay in cui cercare l'assenza
+   * @return Assenza che giustifica il tempo che manca al raggiungimento dell'orario di lavoro.
+   */
+  public Optional<Absence> getCompleteDayAndAddOvertime(PersonDay personDay) {
+    for (Absence absence : personDay.absences) {
+      if (absence.justifiedType.name.equals(JustifiedTypeName.complete_day_and_add_overtime)) {
+        return Optional.of(absence);
+      }
+    }
+    return Optional.absent();
+  }
 
   /**
    * Se nel giorno vi è una che assegna o giustifica l'intera giornata.
@@ -420,13 +434,24 @@ public class PersonDayManager {
         + personDay.getApprovedOnHoliday()
         + personDay.getApprovedOutOpening()
         + personDay.getJustifiedTimeBetweenZones();
+        
 
 
     //TODO: il tempo ricavato deve essere persistito sul personDay su un nuovo campo
     // così posso sfruttare quel campo nel tabellone timbrature
 
     personDay.setTimeAtWork(computedTimeAtWork);
+    
+    // Il caso di assenze a giustificazione "quello che manca"
+    if (getCompleteDayAndAddOvertime(personDay).isPresent()) {      
+      int missingTime = wttd.workingTime - personDay.getTimeAtWork();
+      personDay.setTimeAtWork(computedTimeAtWork + missingTime);      
+    }
 
+    //Controllo se ho del tempo aggiuntivo dovuto al lavoro in missione da sommare al tempo a lavoro
+    if (personDay.getWorkingTimeInMission() != null && personDay.getWorkingTimeInMission() != 0) {
+      personDay.setTimeAtWork(personDay.getTimeAtWork() + personDay.getWorkingTimeInMission());
+    }
     mealTicketHandlerAndDecurtedMeal(personDay, wttd, stampingTimeInOpening, 
         startLunch, endLunch, exitingNow);
 

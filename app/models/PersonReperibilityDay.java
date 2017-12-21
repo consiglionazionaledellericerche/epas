@@ -13,6 +13,7 @@ import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
+import play.db.jpa.JPABase;
 
 
 /**
@@ -45,4 +46,16 @@ public class PersonReperibilityDay extends BaseModel {
   @ManyToOne
   @JoinColumn(name = "reperibility_type")
   public PersonReperibilityType reperibilityType;
+  
+  @Override
+  @Deprecated
+  public <T extends JPABase> T save() {
+    return super.save();
+  }
+  
+  @Override
+  @Deprecated
+  public <T extends JPABase> T delete() {
+    return super.delete();
+  }
 }
