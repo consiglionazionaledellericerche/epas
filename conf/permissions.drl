@@ -12,6 +12,7 @@ import models.enumerate.AccountRole;
 import models.enumerate.AttachmentType;
 import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.JustifiedType;
 import models.Attachment;
 import models.Configuration;
 import models.Notification;
@@ -1190,6 +1191,7 @@ when
      	"AbsenceGroups.delete",
      	"Absences.addAttach",
      	"Absences.removeAttach",
+     	"Absences.overtimeMission",
 
         "Stampings.blank",
        	"Stampings.edit",
@@ -1366,6 +1368,7 @@ when
         /* Vecchio permesso editPersonDay */
      	"Absences.addAttach",
      	"Absences.removeAttach",
+     	"Absences.overtimeMission",
 
        	"Stampings.blank",
        	"Stampings.edit",
@@ -1786,6 +1789,20 @@ then
  $c.grant();
 end
 
+/**************************************************************************************************
+ * L'amministratore del personale può visualizzare la scheda di inserimento ore in più in missione
+ **************************************************************************************************/
+rule overtimeInMission
+when
+ UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
+ $abt: AbsenceType(code == "92") 
+ $c: PermissionCheck(action == "Absences.overtimeMission", target == $abt, granted == false )
+then
+ System.out.println("PUPPAREEEEEEEE: " + $abt);
+ $c.grant();
+end
+
+
 /*******************************************************************************
  * Azioni utente con ruolo BADGE_READER
  ******************************************************************************/
@@ -1940,6 +1957,22 @@ when
         "Reperibility.exportYearAsPDF",
         "Reperibility.exportMonthAsPDF",
         "Reperibility.iCal"
+
+       ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Azioni via REST per client Missioni
+ ******************************************************************************/
+
+rule ManageMissions
+when
+ AccountRole(this in (AccountRole.MISSIONS_MANAGER))
+ $c: PermissionCheck(action in (
+
+        "rest.Missions.amqpreceiver"
 
        ), target == null, granted == false)
 then
