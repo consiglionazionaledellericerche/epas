@@ -999,6 +999,8 @@ public class CompetenceManager {
     personShift = personShiftDayDao.getPersonShiftByPerson(person);
     if (personShift != null) {
       log.info("L'utente {} è già presente in tabella person_shift", person.fullName());
+      personShift.disabled = false;
+      personShift.save();
     } else {
       personShift = new PersonShift();
       personShift.person = person;
