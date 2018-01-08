@@ -11,10 +11,11 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import models.base.BaseModel;
+import models.base.PeriodModel;
 
 @Entity
 @Table(name = "person_shift")
-public class PersonShift extends BaseModel {
+public class PersonShift extends PeriodModel {
 
   private static final long serialVersionUID = 651448817233184716L;
 
@@ -22,7 +23,7 @@ public class PersonShift extends BaseModel {
 
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "person_id", unique = true, nullable = false, updatable = false)
-  public Person person;
+  public Person person; 
 
   @OneToMany(mappedBy = "personShift")
   public List<PersonShiftShiftType> personShiftShiftTypes;
