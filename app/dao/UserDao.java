@@ -32,6 +32,7 @@ import models.enumerate.AccountRole;
 import models.enumerate.StampTypes;
 import models.query.QBadgeReader;
 import models.query.QPerson;
+import models.query.QRole;
 import models.query.QUser;
 
 public class UserDao extends DaoBase {
@@ -223,7 +224,8 @@ public class UserDao extends DaoBase {
    */
   public User getSystemUserByRole(AccountRole accountRole) {
     final QUser user = QUser.user;
-    JPQLQuery query = getQueryFactory().from(user).where(user.roles.contains(accountRole)).limit(1);
+        
+    JPQLQuery query = getQueryFactory().from(user).where(user.roles.any().eq(accountRole)).limit(1);
     return query.singleResult(user);
   }
 
