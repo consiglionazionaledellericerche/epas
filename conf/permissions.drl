@@ -381,7 +381,7 @@ rule isPersonShift_general
 when 
   $uro: UsersRolesOffices()
   Role(name == Role.EMPLOYEE) from $uro.role
-  $p: Person (personShift != null) from currentOperator.person
+  $p: Person (personShifts.size() > 0) from currentOperator.person
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $c: PermissionCheck(action in (
@@ -395,10 +395,10 @@ end
 
 rule isPersonShift_shiftType
 when
-	$p: Person (personShift != null) from currentOperator.person
+	$p: Person (personShifts.size() > 0) from currentOperator.person
 	$o: Office() from $p.office
   	Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
-	$ps: PersonShift() from $p.personShift
+	$ps: PersonShift() from $p.personShifts
 	$psst: PersonShiftShiftType() from $ps.personShiftShiftTypes
 	$st: ShiftType() from $psst.shiftType
 	$c: PermissionCheck(action in (

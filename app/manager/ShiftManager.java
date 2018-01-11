@@ -839,7 +839,8 @@ public class ShiftManager {
         if (!shiftPeriod.cancelled) {
           //La persona deve essere tra i turnisti
           log.debug("---Prende il personShift di {}", shiftPeriod.person);
-          PersonShift personShift = personShiftDayDao.getPersonShiftByPerson(shiftPeriod.person);
+          PersonShift personShift = 
+              personShiftDayDao.getPersonShiftByPerson(shiftPeriod.person, day);
           if (personShift == null) {
             throw new IllegalArgumentException(
                 String.format("Person %s is not a shift person", shiftPeriod.person));
@@ -1580,7 +1581,7 @@ public class ShiftManager {
     List<PersonCompetenceCodes> shiftPeople = competenceCodeDao
         .listByCodes(codeList, Optional.fromNullable(LocalDate.now()));
     shiftPeople.forEach(item -> {
-      if (personShiftDayDao.getPersonShiftByPerson(item.person) == null) {
+      if (personShiftDayDao.getPersonShiftByPerson(item.person, LocalDate.now()) == null) {
         PersonShift personShift = new PersonShift();
         personShift.description = "turni di " + item.person.fullName();
         personShift.person = item.person;

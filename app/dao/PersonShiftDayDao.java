@@ -35,7 +35,7 @@ public class PersonShiftDayDao extends DaoBase {
 
   /**
    * @return il personShiftDay relativo alla persona person nel caso in cui in data date fosse in
-   * turno Null altrimenti.
+   *     turno Null altrimenti.
    */
   public Optional<PersonShiftDay> getPersonShiftDay(Person person, LocalDate date) {
     final QPersonShiftDay personShiftDay = QPersonShiftDay.personShiftDay;
@@ -88,10 +88,22 @@ public class PersonShiftDayDao extends DaoBase {
   /**
    * @return il personShift associato alla persona passata come parametro.
    */
-  public PersonShift getPersonShiftByPerson(Person person) {
+  public PersonShift getPersonShiftByPerson(Person person, LocalDate date) {
     final QPersonShift personShift = QPersonShift.personShift;
-    JPQLQuery query = getQueryFactory().from(personShift).where(personShift.person.eq(person));
+    JPQLQuery query = getQueryFactory().from(personShift).where(personShift.person.eq(person)
+        .and(personShift.beginDate.loe(date)
+            .andAnyOf(personShift.endDate.goe(date), personShift.endDate.isNull())));
     return query.singleResult(personShift);
+  }
+  
+  /**
+   * 
+   * @return la lista dei personShift disabilitati.
+   */
+  public List<PersonShift> getDisabled() {
+    final QPersonShift personShift = QPersonShift.personShift;
+    JPQLQuery query = getQueryFactory().from(personShift).where(personShift.disabled.eq(true));
+    return query.list(personShift);
   }
 
   /**
@@ -103,6 +115,12 @@ public class PersonShiftDayDao extends DaoBase {
     return query.list(shift);
   }
 
+  /**
+   * 
+   * @param person
+   * @param date
+   * @return
+   */
   public Optional<PersonShiftDay> byPersonAndDate(Person person, LocalDate date) {
     final QPersonShiftDay shiftDay = QPersonShiftDay.personShiftDay;
 

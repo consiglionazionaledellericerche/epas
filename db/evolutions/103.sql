@@ -1,8 +1,9 @@
 # ---!Ups
 
-ALTER TABLE person_shifts ADD COLUMN begin_date DATE;
-ALTER TABLE person_shifts ADD COLUMN end_date DATE;
+ALTER TABLE person_shift ADD COLUMN begin_date DATE;
+ALTER TABLE person_shift ADD COLUMN end_date DATE;
+
 # ---!Downs
 
-ALTER TABLE person_shifts DROP COLUMN begin_date;
-ALTER TABLE person_shifts DROP COLUMN end_date;
+ALTER TABLE person_shift DROP COLUMN begin_date;
+ALTER TABLE person_shift DROP COLUMN end_date;
