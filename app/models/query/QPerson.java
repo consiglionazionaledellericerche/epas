@@ -101,7 +101,7 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final ListPath<models.PersonMonthRecap, QPersonMonthRecap> personMonths = this.<models.PersonMonthRecap, QPersonMonthRecap>createList("personMonths", models.PersonMonthRecap.class, QPersonMonthRecap.class, PathInits.DIRECT2);
 
-    public final QPersonShift personShift;
+    public final ListPath<models.PersonShift, QPersonShift> personShifts = this.<models.PersonShift, QPersonShift>createList("personShifts", models.PersonShift.class, QPersonShift.class, PathInits.DIRECT2);
 
     public final QQualification qualification;
 
@@ -144,7 +144,6 @@ public class QPerson extends EntityPathBase<Person> {
         this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
         this.personHourForOvertime = inits.isInitialized("personHourForOvertime") ? new QPersonHourForOvertime(forProperty("personHourForOvertime"), inits.get("personHourForOvertime")) : null;
         this.personInCharge = inits.isInitialized("personInCharge") ? new QPerson(forProperty("personInCharge"), inits.get("personInCharge")) : null;
-        this.personShift = inits.isInitialized("personShift") ? new QPersonShift(forProperty("personShift"), inits.get("personShift")) : null;
         this.qualification = inits.isInitialized("qualification") ? new QQualification(forProperty("qualification")) : null;
         this.reperibility = inits.isInitialized("reperibility") ? new QPersonReperibility(forProperty("reperibility"), inits.get("reperibility")) : null;
         this.user = inits.isInitialized("user") ? new QUser(forProperty("user"), inits.get("user")) : null;
