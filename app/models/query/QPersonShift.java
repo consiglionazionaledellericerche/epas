@@ -24,11 +24,17 @@ public class QPersonShift extends EntityPathBase<PersonShift> {
 
     public static final QPersonShift personShift = new QPersonShift("personShift");
 
-    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
+    public final models.base.query.QPeriodModel _super = new models.base.query.QPeriodModel(this);
+
+    //inherited
+    public final DatePath<org.joda.time.LocalDate> beginDate = _super.beginDate;
 
     public final StringPath description = createString("description");
 
     public final BooleanPath disabled = createBoolean("disabled");
+
+    //inherited
+    public final DatePath<org.joda.time.LocalDate> endDate = _super.endDate;
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;

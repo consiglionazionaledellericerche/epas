@@ -210,8 +210,9 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @OneToOne(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public PersonReperibility reperibility;
 
-  @OneToOne(mappedBy = "person")
-  public PersonShift personShift;
+  @NotAudited
+  @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
+  public List<PersonShift> personShifts = Lists.newArrayList();
 
   @ManyToOne
   @JoinColumn(name = "qualification_id")
