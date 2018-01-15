@@ -180,78 +180,78 @@ public class CompetenceUtility {
    * exceeded_min  nel caso in cui ci sia stato un arrotondamento per difetto delle ore approvate
    * rispetto a quelle richieste.
    */
-  public void updateExceedeMinInCompetenceTable() {
-    int year = 2015;
-    int month = 3;  // Mese attuale del quale dobbiamo ancora fare il pdf
-
-    int exceddedMin;
-
-    CompetenceCode competenceCode =
-        CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", codShift)
-            .first();
-    List<Person> personList;
-
-    QCompetence com = QCompetence.competence;
-    QPerson person = QPerson.person;
-    QPersonShiftShiftType personShiftShiftType = QPersonShiftShiftType.personShiftShiftType;
-
-    personList = queryFactory.from(person)
-        .join(person.personShift.personShiftShiftTypes, personShiftShiftType)
-        .where(
-            personShiftShiftType.shiftType.type.in(ImmutableSet.of("A", "B"))
-        ).list(person);
-
-    for (Person p : personList) {
-
-      final JPQLQuery query = queryFactory.query();
-
-      // leggo l'ultima competenza con il numero delle ore approvate
-      // diverso da quello richieste
-      final Competence myCompetence = query
-          .from(com)
-          .where(
-              com.person.eq(p)
-                  .and(com.year.eq(year))
-                  .and(com.month.lt(month))
-                  .and(com.competenceCode.eq(competenceCode))
-                  .and(com.valueApproved.ne(0))
-                  .and(com.valueRequested.ne(BigDecimal.ZERO))
-                  .and(com.valueRequested.intValue().ne(com.valueApproved)
-                      .or(com.valueRequested.floor().ne(com.valueRequested)))
-          )
-          .orderBy(com.year.desc(), com.month.desc())
-          .limit(1)
-          .uniqueResult(com);
-
-      // calcolo i minuti in eccesso non ancora remunerati
-      if (myCompetence == null) {
-        // we are at the first case, so the person has its fist 0.5 hour to accumulate
-        log.debug("myCompetence is null");
-        exceddedMin = 0;
-      } else if (myCompetence.valueRequested.setScale(0, RoundingMode.UP).intValue()
-          <= myCompetence.valueApproved) {
-        log.debug("La query sulle competenze ha trovato {} e "
-                + "myCompetence.valueRequested.ROUND_CEILING={} "
-                + "<= myCompetence.valueApproved=%d",
-            myCompetence.toString(), BigDecimal.ROUND_CEILING,
-            myCompetence.valueApproved);
-        // Last rounding was on ceiling, so we round to floor
-        //valueApproved = requestedHours.setScale(0, RoundingMode.DOWN).intValue();
-        exceddedMin = 0;
-      } else {
-        log.debug("La query sulle competenze ha trovato {}", myCompetence.toString());
-        // we round to ceiling
-        //valueApproved = requestedHours.setScale(0, RoundingMode.UP).intValue();
-        exceddedMin = 30;
-      }
-
-      Competence lastCompetence = getLastCompetence(p, year, month, competenceCode);
-      // aggiorno la competenza con i minuti in eccesso calcolati
-      lastCompetence.exceededMins = exceddedMin;
-      lastCompetence.save();
-    }
-
-  }
+//  public void updateExceedeMinInCompetenceTable() {
+//    int year = 2015;
+//    int month = 3;  // Mese attuale del quale dobbiamo ancora fare il pdf
+//
+//    int exceddedMin;
+//
+//    CompetenceCode competenceCode =
+//        CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", codShift)
+//            .first();
+//    List<Person> personList;
+//
+//    QCompetence com = QCompetence.competence;
+//    QPerson person = QPerson.person;
+//    QPersonShiftShiftType personShiftShiftType = QPersonShiftShiftType.personShiftShiftType;
+//
+//    personList = queryFactory.from(person)
+//        .join(person.personShift.personShiftShiftTypes, personShiftShiftType)
+//        .where(
+//            personShiftShiftType.shiftType.type.in(ImmutableSet.of("A", "B"))
+//        ).list(person);
+//
+//    for (Person p : personList) {
+//
+//      final JPQLQuery query = queryFactory.query();
+//
+//      // leggo l'ultima competenza con il numero delle ore approvate
+//      // diverso da quello richieste
+//      final Competence myCompetence = query
+//          .from(com)
+//          .where(
+//              com.person.eq(p)
+//                  .and(com.year.eq(year))
+//                  .and(com.month.lt(month))
+//                  .and(com.competenceCode.eq(competenceCode))
+//                  .and(com.valueApproved.ne(0))
+//                  .and(com.valueRequested.ne(BigDecimal.ZERO))
+//                  .and(com.valueRequested.intValue().ne(com.valueApproved)
+//                      .or(com.valueRequested.floor().ne(com.valueRequested)))
+//          )
+//          .orderBy(com.year.desc(), com.month.desc())
+//          .limit(1)
+//          .uniqueResult(com);
+//
+//      // calcolo i minuti in eccesso non ancora remunerati
+//      if (myCompetence == null) {
+//        // we are at the first case, so the person has its fist 0.5 hour to accumulate
+//        log.debug("myCompetence is null");
+//        exceddedMin = 0;
+//      } else if (myCompetence.valueRequested.setScale(0, RoundingMode.UP).intValue()
+//          <= myCompetence.valueApproved) {
+//        log.debug("La query sulle competenze ha trovato {} e "
+//                + "myCompetence.valueRequested.ROUND_CEILING={} "
+//                + "<= myCompetence.valueApproved=%d",
+//            myCompetence.toString(), BigDecimal.ROUND_CEILING,
+//            myCompetence.valueApproved);
+//        // Last rounding was on ceiling, so we round to floor
+//        //valueApproved = requestedHours.setScale(0, RoundingMode.DOWN).intValue();
+//        exceddedMin = 0;
+//      } else {
+//        log.debug("La query sulle competenze ha trovato {}", myCompetence.toString());
+//        // we round to ceiling
+//        //valueApproved = requestedHours.setScale(0, RoundingMode.UP).intValue();
+//        exceddedMin = 30;
+//      }
+//
+//      Competence lastCompetence = getLastCompetence(p, year, month, competenceCode);
+//      // aggiorno la competenza con i minuti in eccesso calcolati
+//      lastCompetence.exceededMins = exceddedMin;
+//      lastCompetence.save();
+//    }
+//
+//  }
 
 
   private Competence getLastCompetence(

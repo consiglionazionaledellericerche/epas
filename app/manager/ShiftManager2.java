@@ -117,8 +117,11 @@ public class ShiftManager2 {
             .sorted(Comparator.comparing(o -> o.type))
             .collect(Collectors.toList()));
       }
-      if (person.personShift != null) {
-        activities.addAll(person.personShift.personShiftShiftTypes.stream()
+      if (!person.personShifts.isEmpty()) {
+        activities.addAll(person.personShifts.stream()
+            .filter(ps -> !ps.beginDate.isAfter(LocalDate.now()) 
+                && (ps.endDate == null || !ps.endDate.isBefore(LocalDate.now())))
+            .flatMap(ps -> ps.personShiftShiftTypes.stream())
             .map(psst -> psst.shiftType)
             .sorted(Comparator.comparing(o -> o.type))
             .collect(Collectors.toList()));
@@ -166,7 +169,7 @@ public class ShiftManager2 {
     List<PersonCompetenceCodes> shiftPeople = competenceCodeDao
         .listByCodes(codeList, Optional.fromNullable(LocalDate.now()));
     shiftPeople.forEach(item -> {
-      if (personShiftDayDao.getPersonShiftByPerson(item.person) == null) {
+      if (personShiftDayDao.getPersonShiftByPerson(item.person, LocalDate.now()) == null) {
         PersonShift personShift = new PersonShift();
         personShift.description = "turni di " + item.person.fullName();
         personShift.person = item.person;
