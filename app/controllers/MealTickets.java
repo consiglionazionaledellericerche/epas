@@ -135,12 +135,17 @@ public class MealTickets extends Controller {
    *
    * @param personId persona
    */
-  public static void personMealTickets(Long personId, int year, int month) {
+  public static void personMealTickets(Long personId, Integer year, Integer month) {
 
     Person person = personDao.getPersonById(personId);
     Preconditions.checkArgument(person.isPersistent());
     rules.checkIfPermitted(person.office);
 
+    if (year == null || month == null) {
+      year = LocalDate.now().getYear();
+      month = LocalDate.now().getMonthOfYear();
+    }
+    
     //Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
     
     Optional<Contract> contractInMonth = 
