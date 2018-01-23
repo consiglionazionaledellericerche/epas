@@ -12,8 +12,8 @@ INSERT INTO users (id, expire_recovery_token, password, recovery_token, username
 disabled, expire_date, office_owner_id ) 
 select nextval('seq_users'), null, md5('Doh5aule'), null, 'app.missioni',false, null, null;
 
-INSERT INTO users_history (id, _revision, _revision_type)
-SELECT id, (SELECT MAX(rev) AS rev FROM revinfo), 0 FROM users WHERE username = 'app.missioni';
+INSERT INTO users_history (id, _revision, _revision_type, expire_recovery_token, password, recovery_token, username, disabled, expire_date, office_owner_id)
+SELECT id, (SELECT MAX(rev) AS rev FROM revinfo), 0, expire_recovery_token, password, recovery_token, username, disabled, expire_date, office_owner_id FROM users WHERE username = 'app.missioni';
 
 INSERT INTO revinfo (revtstmp) VALUES (EXTRACT(EPOCH FROM NOW())::BIGINT*1000);
 
