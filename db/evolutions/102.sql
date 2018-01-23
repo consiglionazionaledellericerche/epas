@@ -15,7 +15,12 @@ select nextval('seq_users'), null, md5('Doh5aule'), null, 'app.missioni',false, 
 INSERT INTO users_history (id, _revision, _revision_type)
 SELECT id, (SELECT MAX(rev) AS rev FROM revinfo), 0 FROM users WHERE username = 'app.missioni';
 
+INSERT INTO revinfo (revtstmp) VALUES (EXTRACT(EPOCH FROM NOW())::BIGINT*1000);
+
 INSERT INTO user_roles select id,'MISSIONS_MANAGER' from users WHERE username = 'app.missioni';
+
+INSERT INTO user_roles_history (_revision, _revision_type, user_id, roles)
+SELECT (SELECT MAX(rev) AS rev FROM revinfo), 0, user_id, roles FROM user_roles WHERE roles = 'MISSIONS_MANAGER';
 
 ALTER TABLE person_reperibility_days ALTER id SET DEFAULT nextval('seq_person_reperibility_days'::regclass);
 
@@ -25,9 +30,15 @@ ALTER TABLE absences_history DROP COLUMN external_identifier;
 ALTER TABLE absences DROP COLUMN external_identifier;
 ALTER TABLE person_days_history DROP COLUMN working_time_in_mission;
 ALTER TABLE person_days DROP COLUMN working_time_in_mission;
-DELETE FROM user_roles where roles = 'MISSIONS_MANAGER';
+
+DELETE FROM users where username = 'app.missioni';
 INSERT INTO revinfo (revtstmp) VALUES (EXTRACT(EPOCH FROM NOW())::BIGINT*1000);
 INSERT INTO users_history (id, _revision, _revision_type)
 SELECT id, (SELECT MAX (rev) AS rev FROM revinfo), 2 FROM users_history WHERE username = 'app.missioni';
-DELETE FROM users where username = 'app.missioni';
+
+DELETE FROM user_roles WHERE roles = 'MISSIONS_MANAGER';
+INSERT INTO revinfo (revtstmp) VALUES (EXTRACT(EPOCH FROM NOW())::BIGINT*1000);
+INSER INTO user_roles_history (_revision, _revision_type, user_id, roles)
+SELECT (SELECT MAX (rev) AS rev FROM revinfo), 2, user_id, roles  FROM user_roles_history WHERE roles = 'MISSIONS_MANAGER';
+
 
