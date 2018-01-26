@@ -58,6 +58,11 @@ public class Missions extends Controller {
           JsonResponse.notFound();
         }
         break;
+      case "ANNULLAMENTO":
+        if (!missionManager.deleteMissionFromClient(body, true)) {
+          JsonResponse.badRequest();
+        }
+        break;
       default: 
         break;
     }

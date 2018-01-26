@@ -98,7 +98,6 @@ public class MissionManager {
    */
   public boolean createMissionFromClient(MissionFromClient body, boolean recompute) {
 
-
     AbsenceForm absenceForm = buildAbsenceForm(body);
 
     if (insertMission(body, absenceForm, null, null, body.dataInizio, body.dataFine)) {
@@ -124,12 +123,7 @@ public class MissionManager {
     }
     AbsenceForm absenceForm = buildAbsenceForm(body);
     
-    List<LocalDate> dates = Lists.newArrayList();
-    LocalDate current = body.dataInizio;
-    while (!current.isAfter(body.dataFine)) {
-      dates.add(current);
-      current = current.plusDays(1);
-    }
+    List<LocalDate> dates = datesToCompute(body);
     List<Absence> toRemove = missions.stream()
         .filter(abs -> !dates.contains(abs.personDay.date)).collect(Collectors.toList());
     List<LocalDate> missionsDate = missions.stream()
@@ -137,12 +131,8 @@ public class MissionManager {
     List<LocalDate> toAdd = dates.stream()
         .filter(p -> !missionsDate.contains(p)).collect(Collectors.toList());        
 
-    for (Absence abs : toRemove) {
-      abs.delete();
-      final User currentUser = Security.getUser().get();
-      notificationManager.notificationAbsencePolicy(currentUser, 
-          abs, absenceForm.groupSelected, false, true, false);
-      log.debug("rimossa assenza {} del {}", abs.absenceType.code, abs.personDay.date);
+    if (!performDeleteMission(toRemove, absenceForm)) {
+      return false;
     }
     
     boolean result = false;
@@ -156,7 +146,50 @@ public class MissionManager {
     return false;
   }
   
+  /**
+   * 
+   * @param body il dto contenente i dati della missione
+   * @param recompute se devono essere effettuati i ricalcoli
+   * @return true se la missione viene cancellata, false altrimenti.
+   */
+  public boolean deleteMissionFromClient(MissionFromClient body, boolean recompute) {
+    List<Absence> missions = absenceDao.absencesPersistedByMissions(body.idOrdine);
+    if (missions.isEmpty()) {
+      return false;
+    }
+    AbsenceForm absenceForm = buildAbsenceForm(body);
+    if (!performDeleteMission(missions, absenceForm)) {
+      return false;
+    }
+    recalculate(body, Optional.fromNullable(missions));
+    return true;
+  }
   
+  /**
+   * 
+   * @param body il dto contenente i dati della missione
+   * @return la lista delle date da considerare per gestire la missione.
+   */
+  private List<LocalDate> datesToCompute(MissionFromClient body) {
+    List<LocalDate> dates = Lists.newArrayList();
+    LocalDate current = body.dataInizio;
+    while (!current.isAfter(body.dataFine)) {
+      dates.add(current);
+      current = current.plusDays(1);
+    }
+    return dates;
+  }
+  
+  /**
+   * 
+   * @param body il dto contenente le informazioni della missione
+   * @param absenceForm l'absenceForm relativo alla missione
+   * @param hours le ore 
+   * @param minutes i minuti
+   * @param from la data di inizio da cui inserire la missione
+   * @param to la data di fine fino a cui inserire la missione
+   * @return true se la missione è stata inserita, false altrimenti.
+   */
   private boolean insertMission(MissionFromClient body, AbsenceForm absenceForm, 
       Integer hours, Integer minutes, LocalDate from, LocalDate to) {
     InsertReport insertReport = 
@@ -180,6 +213,8 @@ public class MissionManager {
         final User currentUser = Security.getUser().get();
         notificationManager.notificationAbsencePolicy(currentUser, 
             absence, absenceForm.groupSelected, true, false, false);
+        log.info("inserita assenza {} del {} per {}", absence.absenceType.code, 
+            absence.personDay.date, absence.personDay.person.fullName());
 
       }
       if (!insertReport.reperibilityShiftDate().isEmpty()) {
@@ -192,6 +227,26 @@ public class MissionManager {
       return true;
     }
     
+    return false;
+  }
+  
+  /**
+   * 
+   * @param missions la lista delle assenze da cancellare
+   * @param absenceForm l'absenceForm per notificare la cancellazione dell'assenza
+   * @return true se la cancellazione è andata a buon fine, false altrimenti.
+   */
+  private boolean performDeleteMission(List<Absence> missions, AbsenceForm absenceForm) {
+    for (Absence abs : missions) {
+      abs.delete();
+      final User currentUser = Security.getUser().get();
+      notificationManager.notificationAbsencePolicy(currentUser, 
+          abs, absenceForm.groupSelected, false, true, false);
+      log.info("rimossa assenza {} del {}", abs.absenceType.code, abs.personDay.date);
+      return true;
+    }
+    log.error("errore in fase di cancellazione della missione del {} di {}", 
+        missions.get(0).personDay.date, missions.get(0).personDay.person.fullName());
     return false;
   }
   
