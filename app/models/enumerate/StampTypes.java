@@ -101,5 +101,12 @@ public enum StampTypes {
     }
     return false;
   }
+  
+  /**
+   * @return true se la timbratura corrisponde ad un timbrature per lavoro effettuato fuori sede
+   */
+  public boolean isOffSiteWork() {
+    return this == MOTIVI_DI_SERVIZIO_FUORI_SEDE || this == LAVORO_FUORI_SEDE;
+  }
 
 }

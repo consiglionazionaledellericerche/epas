@@ -1215,10 +1215,10 @@ public class PersonDayManager {
       if (consideredStart.isAfter(end)) {
         continue;
       }
-      if (consideredStart.isBefore(start)) {
+      if (consideredStart.isBefore(start) && !validPair.first.isOffSiteWork()) {
         consideredStart = start;
       }
-      if (consideredEnd.isAfter(end)) {
+      if (consideredEnd.isAfter(end) && !validPair.second.isOffSiteWork()) {
         consideredEnd = end;
       }
       workingMinutes += DateUtility.toMinute(consideredEnd) - DateUtility.toMinute(consideredStart);
