@@ -113,6 +113,14 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   }
   
 
+  /**
+   * @return @see StampTypes::isOffSiteWork
+   */
+  @Transient
+  public boolean isOffSiteWork() {
+    return stampType != null && stampType.isOffSiteWork();
+  }
+  
   // costruttore di default implicitamente utilizzato dal play(controllers)
   Stamping() {
   }
