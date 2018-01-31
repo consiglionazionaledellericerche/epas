@@ -22,6 +22,8 @@ import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.query.QAbsence;
+import models.absences.query.QAbsenceType;
+import models.absences.query.QJustifiedType;
 import models.exports.FrequentAbsenceCode;
 import models.query.QPersonDay;
 import org.joda.time.LocalDate;
@@ -49,16 +51,19 @@ public class AbsenceDao extends DaoBase {
   public Absence getAbsenceById(Long id) {
 
     final QAbsence absence = QAbsence.absence;
-
+    final QAbsenceType absenceType = QAbsenceType.absenceType;
+    final QJustifiedType justifiedType = QJustifiedType.justifiedType;
     final JPQLQuery query = getQueryFactory().from(absence)
+        .join(absence.absenceType, absenceType).fetch()
+        .join(absence.justifiedType, justifiedType).fetch()
         .where(absence.id.eq(id));
     return query.singleResult(absence);
   }
 
   /**
    * @return la lista di assenze di una persona tra due date se e solo se il campo dateTo isPresent.
-   * In caso non sia valorizzato, verrano ritornate le assenze relative a un solo giorno. Se il
-   * booleano forAttachment è true, si cercano gli allegati relativi a un certo periodo.
+   *     In caso non sia valorizzato, verrano ritornate le assenze relative a un solo giorno. Se il
+   *     booleano forAttachment è true, si cercano gli allegati relativi a un certo periodo.
    */
   public List<Absence> getAbsencesInPeriod(Optional<Person> person,
       LocalDate dateFrom, Optional<LocalDate> dateTo, boolean forAttachment) {
@@ -142,8 +147,8 @@ public class AbsenceDao extends DaoBase {
 
   /**
    * @return il quantitativo di assenze presenti in un certo periodo temporale delimitato da begin e
-   * end che non appartengono alla lista di codici passata come parametro nella lista di stringhe
-   * absenceCode.
+   *     end che non appartengono alla lista di codici passata come parametro nella lista
+   *     di stringhe absenceCode.
    */
   public Long howManyAbsenceInPeriodNotInList(
       LocalDate begin, LocalDate end, List<String> absenceCode) {
@@ -187,7 +192,7 @@ public class AbsenceDao extends DaoBase {
 
   /**
    * @return la lista delle assenze contenenti un tipo di assenza con uso interno = false relative a
-   * una persona nel periodo compreso tra begin e end ordinate per per data.
+   *     una persona nel periodo compreso tra begin e end ordinate per per data.
    */
   public List<Absence> getAbsenceWithNotInternalUseInMonth(
       Person person, LocalDate begin, LocalDate end) {
@@ -230,7 +235,7 @@ public class AbsenceDao extends DaoBase {
    * person in modo da non effettuare ulteriori select.
    *
    * @return la lista delle assenze che non sono di tipo internalUse effettuate in questo mese dalla
-   * persona relativa a questo personMonth.
+   *     persona relativa a questo personMonth.
    */
   public List<Absence> getAbsencesNotInternalUseInMonth(
       Person person, Integer year, Integer month) {
@@ -242,7 +247,7 @@ public class AbsenceDao extends DaoBase {
 
   /**
    * @return la lista di assenze effettuate dalle persone presenti nella lista personList nel
-   * periodo temporale compreso tra from e to.
+   *     periodo temporale compreso tra from e to.
    */
   public List<Absence> getAbsenceForPersonListInPeriod(
       List<Person> personList, LocalDate from, LocalDate to) {
@@ -259,7 +264,7 @@ public class AbsenceDao extends DaoBase {
 
   /**
    * @return la lista di assenze effettuate dal titolare del contratto del tipo ab nell'intervallo
-   * temporale inter.
+   *     temporale inter.
    */
   public List<Absence> getAbsenceDays(DateInterval inter, Contract contract, AbsenceType ab) {
 
@@ -281,7 +286,7 @@ public class AbsenceDao extends DaoBase {
 
   /**
    * @return la lista dei frequentAbsenceCode, ovvero dei codici di assenza più frequentemente usati
-   * nel periodo compreso tra 'dateFrom' e 'dateTo'.
+   *     nel periodo compreso tra 'dateFrom' e 'dateTo'.
    */
   public List<FrequentAbsenceCode> getFrequentAbsenceCodeForAbsenceFromJson(
       LocalDate dateFrom, LocalDate dateTo) {
@@ -328,6 +333,14 @@ public class AbsenceDao extends DaoBase {
         new LocalDate(year, 1, 1), Optional.of(new LocalDate(year, 12, 31)), false);
   }
 
+  /**
+   * 
+   * @param person la persona di cui si vogliono le assenze
+   * @param start la data di inizio da cui cercare
+   * @param end la data di fine fino a cui cercare
+   * @param types i tipi di assenza
+   * @return la lista di assenze filtrata per persona, data inizio, data fine.
+   */
   public List<Absence> filteredByTypes(Person person, LocalDate start, LocalDate end,
       Collection<JustifiedTypeName> types) {
     final QAbsence absence = QAbsence.absence;
@@ -341,4 +354,19 @@ public class AbsenceDao extends DaoBase {
         .orderBy(personDay.date.asc()).list(absence);
 
   }
+  
+  /**
+   * 
+   * @param externalId l'identificativo esterno fornito dal client missioni in fase di persistenza
+   *     dell'assenza sul db
+   * @return la lista di assenze che hanno come identificativo l'id passato come parametro.
+   */
+  public List<Absence> absencesPersistedByMissions(long externalId) {
+    final QAbsence absence = QAbsence.absence;
+    
+    return getQueryFactory().from(absence)    
+        .where(absence.externalIdentifier.eq(externalId)).list(absence);
+  }
+  
+
 }

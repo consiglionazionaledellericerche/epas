@@ -520,15 +520,16 @@ public final class PersonDao extends DaoBase {
    * @param type il tipo di turno
    * @return la lista di persone che hanno come tipo turno quello passato come parametro.
    */
-  public List<Person> getPersonForShift(String type) {
+  public List<Person> getPersonForShift(String type, LocalDate date) {
 
     final QPerson person = QPerson.person;
     final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
     final QPersonShift ps = QPersonShift.personShift;
 
-    final JPQLQuery query = getQueryFactory().from(person).leftJoin(person.personShift, ps)
+    final JPQLQuery query = getQueryFactory().from(person).leftJoin(person.personShifts, ps)
         .leftJoin(ps.personShiftShiftTypes, psst)
         .where(psst.shiftType.type.eq(type)
+            .and(ps.beginDate.loe(date).andAnyOf(ps.endDate.isNull(), ps.endDate.goe(date)))
             .and(psst.beginDate.isNull().or(psst.beginDate.loe(LocalDate.now()))
                 .and(psst.endDate.isNull().or(psst.endDate.goe(LocalDate.now())))));
     return query.list(person);
@@ -637,7 +638,6 @@ public final class PersonDao extends DaoBase {
         .leftJoin(person.reperibility, QPersonReperibility.personReperibility).fetch()
         .leftJoin(
             person.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime).fetch()
-        .leftJoin(person.personShift, QPersonShift.personShift).fetch()
         .leftJoin(person.qualification).fetch()
         // order by
         .orderBy(person.surname.asc(), person.name.asc())

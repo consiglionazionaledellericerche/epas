@@ -29,6 +29,7 @@ import java.util.zip.ZipOutputStream;
 import javax.inject.Inject;
 
 import manager.AbsenceManager;
+import manager.ConsistencyManager;
 import manager.SecureManager;
 import manager.YearlyAbsencesManager;
 import manager.configurations.ConfigurationManager;
@@ -49,6 +50,7 @@ import org.joda.time.YearMonth;
 
 import play.Logger;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -76,6 +78,8 @@ public class Absences extends Controller {
   private static PersonDayDao personDayDao;
   @Inject
   private static ConfigurationManager confManager;
+  @Inject
+  private static ConsistencyManager consistencyManager;
 
   /**
    * Le assenze della persona nel mese.
@@ -143,6 +147,33 @@ public class Absences extends Controller {
     Stampings.personStamping(absence.personDay.person.id,
         absence.personDay.date.getYear(), absence.personDay.date.getMonthOfYear());
 
+  }
+  
+  /**
+   * aggiunge al tempo a lavoro il quantitativo di ore e minuti inserito per quel giorno.
+   * @param absenceId l'identificativo dell'assenza
+   * @param hours le ore da salvare
+   * @param minutes i minuti da salvare
+   */
+  public static void overtimeMission(Long absenceId, Integer hours, Integer minutes) {
+    //TODO: va completata la business logic di questo metodo!!!
+    Absence absence = absenceDao.getAbsenceById(absenceId);
+    Verify.verify(absence.isPersistent(), "Assenza specificata inesistente!");
+    rules.checkIfPermitted(absence.personDay.person.office);
+    if (hours == null || minutes == null) {
+      flash.error("Quantità non corrette di ore e minuti.");
+      Stampings.personStamping(absence.personDay.person.id,
+          absence.personDay.date.getYear(), absence.personDay.date.getMonthOfYear());
+    }
+
+    
+    int overtimeMission = hours * 60 + minutes;
+    absence.personDay.setWorkingTimeInMission(overtimeMission);
+    absence.personDay.save();
+    consistencyManager.updatePersonSituation(absence.personDay.person.id, absence.personDay.date);
+    flash.success("Ore in più in missione salvate correttamente");
+    Stampings.personStamping(absence.personDay.person.id,
+        absence.personDay.date.getYear(), absence.personDay.date.getMonthOfYear());
   }
 
   /**

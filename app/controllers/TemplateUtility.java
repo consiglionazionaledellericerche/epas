@@ -244,9 +244,9 @@ public class TemplateUtility {
     return competenceCodeDao.allCodesContainingGroupCodes(group);
   }
   
-  public List<PersonShift> allPersonShiftByOffice(Office office) {
-    return shiftDao.getPeopleForShift(office);
-  }
+//  public List<PersonShift> allPersonShiftByOffice(Office office) {
+//    return shiftDao.getPeopleForShift(office);
+//  }
   
   public List<CompetenceCode> allOnMonthlyPresenceCodes() {
     return competenceCodeDao.getCompetenceCodeByLimitType(LimitType.onMonthlyPresence);

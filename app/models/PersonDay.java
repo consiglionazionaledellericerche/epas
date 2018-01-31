@@ -95,6 +95,13 @@ public class PersonDay extends BaseModel {
    */
   @Column(name = "justified_time_between_zones")
   public Integer justifiedTimeBetweenZones = 0;
+  
+  /**
+   * Tempo di lavoro in missione. Si può aggiungere in fase di modifica del codice missione 
+   * dal tabellone timbrature.
+   */
+  @Column(name = "working_time_in_mission")
+  public Integer workingTimeInMission = 0;
 
   public Integer difference = 0;
 

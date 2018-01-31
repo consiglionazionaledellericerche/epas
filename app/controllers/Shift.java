@@ -488,7 +488,9 @@ public class Shift extends Controller {
 
     ImmutableList<Person> canAccess =
         ImmutableList.<Person>builder()
-            .addAll(personDao.getPersonForShift(type))
+            .addAll(personDao.getPersonForShift(type, 
+                LocalDate.now().withYear(year).monthOfYear().withMinimumValue()
+                .dayOfMonth().withMinimumValue()))
             .add(shiftType.shiftCategories.supervisor).build();
 
     if (!currentUser.isPresent() || currentUser.get().person == null

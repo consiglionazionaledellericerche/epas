@@ -1143,7 +1143,7 @@ public class Competences extends Controller {
       rules.checkIfPermitted(shiftType.get().shiftCategories.office);
       ShiftType type = shiftType.get();
       Office office = officeDao.getOfficeById(type.shiftCategories.office.id);
-      List<PersonShift> peopleForShift = shiftDao.getPeopleForShift(office);
+      List<PersonShift> peopleForShift = shiftDao.getPeopleForShift(office, LocalDate.now());
 
       List<PersonShiftShiftType> associatedPeopleShift = shiftDao
           .getAssociatedPeopleToShift(type, Optional.fromNullable(LocalDate.now()));
@@ -1192,7 +1192,7 @@ public class Competences extends Controller {
     if (Validation.hasErrors()) {
       response.status = 400;
       List<PersonShift> peopleForShift = 
-          shiftDao.getPeopleForShift(type.get().shiftCategories.office);
+          shiftDao.getPeopleForShift(type.get().shiftCategories.office, LocalDate.now());
       Office office = type.get().shiftCategories.office;     
       render("@manageShiftType", type, peopleForShift, office);
     }
@@ -1200,7 +1200,7 @@ public class Competences extends Controller {
     List<PersonShiftShiftType> psstList = shiftDao.getAssociatedPeopleToShift(type.get(), 
         Optional.fromNullable(LocalDate.now()));
     List<PersonShift> peopleForShift = 
-        shiftDao.getPeopleForShift(type.get().shiftCategories.office);
+        shiftDao.getPeopleForShift(type.get().shiftCategories.office, LocalDate.now());
 
     List<PersonShift> available = peopleForShift.stream()
         .filter(e -> (psstList.stream()

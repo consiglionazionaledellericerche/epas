@@ -146,7 +146,10 @@ public class ShiftDao extends DaoBase {
   public Long deletePersonShiftDay(PersonShiftDay personShiftDay) {  
 
     final QPersonShiftDay sc = QPersonShiftDay.personShiftDay;
-    return getQueryFactory().delete(sc).where(sc.date.eq(personShiftDay.date).and(sc.shiftType.eq(personShiftDay.shiftType).and(sc.personShift.person.eq(personShiftDay.personShift.person)))).execute();
+    return getQueryFactory().delete(sc)
+        .where(sc.date.eq(personShiftDay.date)
+            .and(sc.shiftType.eq(personShiftDay.shiftType)
+                .and(sc.personShift.person.eq(personShiftDay.personShift.person)))).execute();
   }
 
 
@@ -172,12 +175,13 @@ public class ShiftDao extends DaoBase {
    * @return la lista dei personShift con persone che appartengono all'ufficio 
    *     passato come parametro. 
    */
-  public List<PersonShift> getPeopleForShift(Office office) {
+  public List<PersonShift> getPeopleForShift(Office office, LocalDate date) {
     final QPersonShift ps = QPersonShift.personShift;
     final QPerson person = QPerson.person;
     JPQLQuery query = getQueryFactory().from(person)
-        .leftJoin(person.personShift, ps).fetchAll()
+        .leftJoin(person.personShifts, ps).fetchAll()
         .where(person.office.eq(office)
+            .and(ps.beginDate.loe(date).andAnyOf(ps.endDate.isNull(), ps.endDate.goe(date)))
             .and(person.eq(ps.person).and(ps.disabled.eq(false))));
     return query.list(ps);
   }
