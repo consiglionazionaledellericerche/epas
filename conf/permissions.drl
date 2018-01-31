@@ -12,6 +12,7 @@ import models.enumerate.AccountRole;
 import models.enumerate.AttachmentType;
 import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.JustifiedType;
 import models.Attachment;
 import models.Configuration;
 import models.Notification;
@@ -380,7 +381,7 @@ rule isPersonShift_general
 when 
   $uro: UsersRolesOffices()
   Role(name == Role.EMPLOYEE) from $uro.role
-  $p: Person (personShift != null) from currentOperator.person
+  $p: Person (personShifts.size() > 0) from currentOperator.person
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $c: PermissionCheck(action in (
@@ -394,10 +395,10 @@ end
 
 rule isPersonShift_shiftType
 when
-	$p: Person (personShift != null) from currentOperator.person
+	$p: Person (personShifts.size() > 0) from currentOperator.person
 	$o: Office() from $p.office
   	Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
-	$ps: PersonShift() from $p.personShift
+	$ps: PersonShift() from $p.personShifts
 	$psst: PersonShiftShiftType() from $ps.personShiftShiftTypes
 	$st: ShiftType() from $psst.shiftType
 	$c: PermissionCheck(action in (
@@ -1190,6 +1191,7 @@ when
      	"AbsenceGroups.delete",
      	"Absences.addAttach",
      	"Absences.removeAttach",
+     	"Absences.overtimeMission",
 
         "Stampings.blank",
        	"Stampings.edit",
@@ -1366,6 +1368,7 @@ when
         /* Vecchio permesso editPersonDay */
      	"Absences.addAttach",
      	"Absences.removeAttach",
+     	"Absences.overtimeMission",
 
        	"Stampings.blank",
        	"Stampings.edit",
@@ -1786,6 +1789,20 @@ then
  $c.grant();
 end
 
+/**************************************************************************************************
+ * L'amministratore del personale può visualizzare la scheda di inserimento ore in più in missione
+ **************************************************************************************************/
+rule overtimeInMission
+when
+ UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
+ $abt: AbsenceType(code == "92") 
+ $c: PermissionCheck(action == "Absences.overtimeMission", target == $abt, granted == false )
+then
+ System.out.println("PUPPAREEEEEEEE: " + $abt);
+ $c.grant();
+end
+
+
 /*******************************************************************************
  * Azioni utente con ruolo BADGE_READER
  ******************************************************************************/
@@ -1940,6 +1957,22 @@ when
         "Reperibility.exportYearAsPDF",
         "Reperibility.exportMonthAsPDF",
         "Reperibility.iCal"
+
+       ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Azioni via REST per client Missioni
+ ******************************************************************************/
+
+rule ManageMissions
+when
+ AccountRole(this in (AccountRole.MISSIONS_MANAGER))
+ $c: PermissionCheck(action in (
+
+        "rest.Missions.amqpreceiver"
 
        ), target == null, granted == false)
 then

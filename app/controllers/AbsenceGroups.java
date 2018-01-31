@@ -10,6 +10,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+import dao.AbsenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.QualificationDao;
@@ -112,6 +113,8 @@ public class AbsenceGroups extends Controller {
   private static AbsenceCertificationService absenceCertificationService;
   @Inject
   private static WrapperModelFunctionFactory wrapperFunctionFactory;
+  @Inject
+  private static AbsenceDao absenceDao;
 
   /**
    * La lista delle categorie definite.
@@ -667,7 +670,7 @@ public class AbsenceGroups extends Controller {
         personDay.save();
         
         notificationManager.notificationAbsencePolicy(Security.getUser().get(), 
-            absence, groupAbsenceType, true);
+            absence, groupAbsenceType, true, false, false);
         
       }
       if (!insertReport.reperibilityShiftDate().isEmpty()) {
@@ -940,7 +943,7 @@ public class AbsenceGroups extends Controller {
    */
   public static void edit(final long absenceId) {
 
-    final Absence absence = Absence.findById(absenceId);
+    final Absence absence = absenceDao.getAbsenceById(absenceId);
 
     notFoundIfNull(absence);
 
@@ -950,6 +953,7 @@ public class AbsenceGroups extends Controller {
 
     LocalDate dateFrom = absence.personDay.date;
     LocalDate dateTo = absence.personDay.date;
+    log.debug("Code: {}", absence.absenceType);
 
     render(absence, dateFrom, dateTo, historyAbsence);
   }

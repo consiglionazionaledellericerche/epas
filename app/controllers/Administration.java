@@ -152,10 +152,10 @@ public class Administration extends Controller {
   /**
    * metodo che ritorna un controllo sui minuti in eccesso nella tabella delle competenze.
    */
-  public static void updateExceedeMinInCompetenceTable() {
-    competenceUtility.updateExceedeMinInCompetenceTable();
-    renderText("OK");
-  }
+//  public static void updateExceedeMinInCompetenceTable() {
+//    competenceUtility.updateExceedeMinInCompetenceTable();
+//    renderText("OK");
+//  }
 
   /**
    * metodo che cancella tutte le timbrature disaccoppiate nell'arco temporale specificato.
