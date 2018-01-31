@@ -777,24 +777,20 @@ public class ChartsManager {
             case 4:
               if (!day.personDay.absences.isEmpty()) {
                 String code = "";
-                String justifiedHours = "";
+                int justifiedTime = 0;
                 for (Absence abs : day.personDay.absences) {
                   code = code + " " + abs.absenceType.code;
-                  justifiedHours = abs.justifiedTime() != 0 
-                      ? justifiedHours + abs.justifiedTime() : "";
+                  justifiedTime += abs.justifiedTime();
                 }
-
-                if (!justifiedHours.equals("")) {
-                  cell.setCellValue(
-                      DateUtility.fromMinuteToHourMinute(new Integer(justifiedHours)));
-                }
+                cell.setCellValue(
+                    DateUtility.fromMinuteToHourMinute(justifiedTime));
                 
                 if (onlyMission && code != null && code.trim().equals("92")) {
                   cell = row.getCell(3);
                   cell.setCellValue(DateUtility.fromMinuteToHourMinute(day.wttd.get().workingTime));
                 }
               } else {
-                cell.setCellValue(" ");
+                cell.setCellValue("00:00");
               }  
               break;
             case 5:
