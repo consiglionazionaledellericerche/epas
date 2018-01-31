@@ -231,12 +231,13 @@ public class Charts extends Controller {
     set.add(office);
     LocalDate date = new LocalDate(year, month, 1);
     boolean forAll = true;
+    boolean onlyMission = true;
     List<Person> personList = personDao.list(
         Optional.<String>absent(), set, false, date, 
         date.dayOfMonth().withMaximumValue(), true).list();
     
 
-    render(personList, date, office, forAll);
+    render(personList, date, office, forAll, onlyMission);
   }
 
 
@@ -250,8 +251,8 @@ public class Charts extends Controller {
    * @param officeId l'id della sede
    */
   public static void exportTimesheetSituation(List<Long> peopleIds, 
-      @Required ExportFile exportFile, boolean forAll, @Required LocalDate beginDate, 
-      @Required LocalDate endDate, Long officeId) {   
+      @Required ExportFile exportFile, boolean forAll, boolean onlyMission,
+      @Required LocalDate beginDate, @Required LocalDate endDate, Long officeId) {   
     Office office = officeDao.getOfficeById(officeId);
     rules.checkIfPermitted(office);
     
@@ -271,7 +272,8 @@ public class Charts extends Controller {
     }
     InputStream file = null;
     try {
-      file = chartsManager.buildFile(office, forAll, peopleIds, beginDate, endDate, exportFile);
+      file = chartsManager
+          .buildFile(office, forAll, onlyMission, peopleIds, beginDate, endDate, exportFile);
     } catch ( ArchiveException | IOException ex ) {
       flash.error("Errore durante l'esportazione del tempo al lavoro");
       listForExcelFile(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear(), officeId);
