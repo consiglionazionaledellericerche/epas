@@ -7,17 +7,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
-
 import controllers.Charts.ExportFile;
-
 import dao.CompetenceCodeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
-
 import it.cnr.iit.epas.DateUtility;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -34,15 +30,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
 import javax.inject.Inject;
-
 import jobs.ChartJob;
-
 import lombok.Getter;
-
+import lombok.RequiredArgsConstructor;
 import manager.PersonDayManager;
 import manager.recaps.charts.RenderResult;
 import manager.recaps.charts.ResultFromFile;
@@ -52,7 +46,6 @@ import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.services.PairStamping;
 import manager.services.vacations.IVacationsService;
 import manager.services.vacations.VacationsRecap;
-
 import models.CompetenceCode;
 import models.Contract;
 import models.ContractMonthRecap;
@@ -63,7 +56,6 @@ import models.Stamping;
 import models.WorkingTimeType;
 import models.absences.Absence;
 import models.exports.PersonOvertime;
-
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -82,7 +74,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import play.libs.F;
 
 public class ChartsManager {
@@ -481,62 +472,6 @@ public class ChartsManager {
     return map;
   }
 
-  /**
-   * @param person la persona di cui si cercano le assenze.
-   * @param list   la lista delle assenze con data che si vuol verificare.
-   * @return una lista di RenderResult che contengono un riepilogo, assenza per assenza, della
-   *     situazione di esse sul db locale.
-   */
-  //  private List<RenderResult> transformInRenderList(Person person, List<ResultFromFile> list,
-  //      boolean alsoPastYear) {
-  //
-  //    Long start = System.nanoTime();
-  //    List<RenderResult> resultList = Lists.newArrayList();
-  //    LocalDate dateFrom = null;
-  //    LocalDate dateTo = list.get(list.size() - 1).dataAssenza;
-  //    if (alsoPastYear) {
-  //      dateFrom = list.get(0).dataAssenza;
-  //    } else {
-  //      dateFrom = dateTo.withYear(dateTo.getYear())
-  //          .withMonthOfYear(DateTimeConstants.JANUARY).withDayOfMonth(1);
-  //    }
-  //
-  //    List<Absence> absences = absenceDao.findByPersonAndDate(person,
-  //        dateFrom, Optional.fromNullable(dateTo), Optional.<AbsenceType>absent()).list();
-  //
-  //    list.forEach(item -> {
-  //      RenderResult result = null;
-  //      List<Absence> values = absences
-  //          .stream()
-  //          .filter(r -> r.personDay.date.isEqual(item.dataAssenza))
-  //          .collect(Collectors.toList());
-  //      if (!values.isEmpty()) {
-  //        Predicate<Absence> a1 = a -> a.absenceType.code.equalsIgnoreCase(item.codice)
-  //            || a.absenceType.certificateCode.equalsIgnoreCase(item.codice);
-  //        if (values.stream().anyMatch(a1)) {
-  //          result = new RenderResult(null, person.number, person.name,
-  //              person.surname, item.codice, item.dataAssenza, true, "Ok",
-  //              values.stream().filter(r1 -> r1.absenceType.code.equalsIgnoreCase(item.codice)
-  //                  || r1.absenceType.certificateCode.equalsIgnoreCase(item.codice))
-  //              .findFirst().get().absenceType.code, CheckType.SUCCESS);
-  //        } else {
-  //          result = new RenderResult(null, person.number, person.name,
-  //              person.surname, item.codice, item.dataAssenza, false,
-  //              "Mismatch tra assenza trovata e quella dello schedone",
-  //              values.stream().findFirst().get().absenceType.code, CheckType.WARNING);
-  //        }
-  //      } else {
-  //        result = new RenderResult(null, person.number, person.name,
-  //            person.surname, item.codice, item.dataAssenza, false,
-  //            "Nessuna assenza per il giorno", null, CheckType.DANGER);
-  //      }
-  //      resultList.add(result);
-  //    });
-  //    Long end = System.nanoTime();
-  //    log.debug("TEMPO per la persona {}: {} ms", person, (end - start) / 1000000);
-  //    return resultList;
-  //  }
-
   @Getter
   public static final class RenderChart {
     public List<PersonOvertime> personOvertime;
@@ -586,7 +521,7 @@ public class ChartsManager {
         while (!tempDate.isAfter(endDate)) {
           PersonStampingRecap psDto = stampingsRecapFactory.create(person, 
               tempDate.getYear(), tempDate.getMonthOfYear(), false);
-          file = createFileCsvToExport(psDto);
+          file = createFileCsvToExport(psDto, onlyMission);
           //preparo lo stream da inviare al chiamante...
           FileInputStream in = new FileInputStream(file); 
           try {                       
@@ -645,15 +580,30 @@ public class ChartsManager {
   }
 
 
-
+  @RequiredArgsConstructor
+  public enum PersonStampingDayRecapHeader {
+    Data("Data"),
+    Lavoro_da_timbrature("Lavoro da timbrature (hh:mm)"),
+    Lavoro_fuori_sede("Lavoro fuori sede (hh:mm)"),
+    Lavoro_effettivo("Lavoro effettivo (hh:mm)"),
+    Ore_giustificate_da_assenza("Ore giustificate da assenza");
+    
+    @Getter
+    private final String description;
+    
+    public static List<String> getLabels() {
+      return Stream.of(values()).map(v -> v.description).collect(Collectors.toList());
+    }
+  }
+  
   /**
    * 
    * @param psDto il personStampingDayRecap da cui partire per prendere le informazioni
    * @return un file di tipo csv contenente la situazione mensile.
    */
-  private File createFileCsvToExport(PersonStampingRecap psDto) throws IOException {
+  private File createFileCsvToExport(PersonStampingRecap psDto, boolean onlyMission) throws IOException {
     final String newLineseparator = "\n";
-    final Object [] fileHeader = {"Giorno","Ore di lavoro (hh:mm)","Assenza"};
+    //final Object [] fileHeader = {"Giorno","Ore di lavoro (hh:mm)","Assenza"};
     FileWriter fileWriter = null;
     CSVPrinter csvFilePrinter = null;
     File file = new File("situazione_mensile" + psDto.person.surname 
@@ -665,21 +615,30 @@ public class ChartsManager {
 
       CSVFormat csvFileFormat = CSVFormat.DEFAULT.withRecordSeparator(newLineseparator);
       csvFilePrinter = new CSVPrinter(fileWriter, csvFileFormat);
-      csvFilePrinter.printRecord(fileHeader);
+      csvFilePrinter.printRecord(PersonStampingDayRecapHeader.getLabels());
 
       for (PersonStampingDayRecap day : psDto.daysRecap) {
         List<String> record = Lists.newArrayList();
         record.add(day.personDay.date.toString());
-        record.add(DateUtility.fromMinuteToHourMinute(day.personDay.getTimeAtWork()));
-        if (!day.personDay.absences.isEmpty()) {
-          String code = "";
-          for (Absence abs : day.personDay.absences) {
-            code = code + " " + abs.absenceType.code;                  
-          }
-          record.add(code);                
+        record.add(DateUtility.fromMinuteToHourMinute(day.personDay.getStampingsTime()));
+        record.add(DateUtility.fromMinuteToHourMinute(getOutOfOfficeTime(day.personDay)));
+        
+        java.util.Optional<Absence> mission = 
+            day.personDay.absences.stream()
+              .filter(a -> a.absenceType != null && a.absenceType.code != null && a.absenceType.code.equals("92")).findFirst();
+        
+        if (onlyMission && mission.isPresent()) {
+          record.add(DateUtility.fromMinuteToHourMinute(day.wttd.get().workingTime));
         } else {
-          record.add(" ");
-        }   
+          record.add(DateUtility.fromMinuteToHourMinute(day.personDay.getTimeAtWork()));
+        }
+        
+        int justifiedTime = 0;
+        for (Absence abs : day.personDay.absences) {
+          justifiedTime += abs.justifiedTime();
+        }
+        record.add(DateUtility.fromMinuteToHourMinute(justifiedTime));
+           
         csvFilePrinter.printRecord(record);
       }
 
@@ -727,19 +686,19 @@ public class ChartsManager {
         cell.setCellStyle(cs);
         switch (i) {
           case 0:            
-            cell.setCellValue("Data");
+            cell.setCellValue(PersonStampingDayRecapHeader.Data.getDescription());
             break;
           case 1:
-            cell.setCellValue("Lavoro da timbrature (hh:mm)");
+            cell.setCellValue(PersonStampingDayRecapHeader.Lavoro_da_timbrature.getDescription());
             break;
           case 2:
-            cell.setCellValue("Lavoro fuori sede (hh:mm)");
+            cell.setCellValue(PersonStampingDayRecapHeader.Lavoro_fuori_sede.getDescription());
             break;
           case 3:
-            cell.setCellValue("Lavoro effettivo (hh:mm)");
+            cell.setCellValue(PersonStampingDayRecapHeader.Lavoro_effettivo.getDescription());
             break;
           case 4: 
-            cell.setCellValue("Ore giustificate da assenza");   
+            cell.setCellValue(PersonStampingDayRecapHeader.Ore_giustificate_da_assenza.getDescription());   
             break;
           default:
             break;
