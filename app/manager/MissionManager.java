@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import controllers.Security;
 
 import dao.AbsenceDao;
+import dao.AbsenceTypeDao;
 import dao.PersonDao;
 import dao.UserDao;
 
@@ -26,10 +27,18 @@ import models.absences.AbsenceType;
 import models.absences.CategoryTab;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
+import models.absences.JustifiedType.JustifiedTypeName;
 import models.exports.MissionFromClient;
 import models.exports.StampingFromClient;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
+import org.joda.time.Duration;
+import org.joda.time.Interval;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
+import org.joda.time.Period;
 import org.testng.collections.Lists;
 
 import play.db.jpa.JPA;
@@ -47,12 +56,13 @@ public class MissionManager {
   private final ConsistencyManager consistencyManager;
   private final NotificationManager notificationManager;
   private final AbsenceDao absenceDao;
+  private final AbsenceTypeDao absenceTypeDao;
 
   @Inject
   public MissionManager(PersonDao personDao, AbsenceService absenceService, 
       AbsenceManager absenceManager, PersonDayManager personDayManager,
       ConsistencyManager consistencyManager, NotificationManager notificationManager,
-      AbsenceDao absenceDao) {
+      AbsenceDao absenceDao, AbsenceTypeDao absenceTypeDao) {
     this.personDao = personDao;
     this.absenceService = absenceService;
     this.absenceManager = absenceManager;
@@ -60,6 +70,7 @@ public class MissionManager {
     this.consistencyManager = consistencyManager;
     this.notificationManager = notificationManager;
     this.absenceDao = absenceDao;
+    this.absenceTypeDao = absenceTypeDao;
   }
 
     
@@ -137,7 +148,8 @@ public class MissionManager {
     
     boolean result = false;
     for (LocalDate date : toAdd) {
-      result = insertMission(body, absenceForm, null, null, date, date);
+      result = insertMission(body, absenceForm, null, null, 
+          date.toLocalDateTime(LocalTime.MIDNIGHT), date.toLocalDateTime(LocalTime.MIDNIGHT));
     }
     recalculate(body, Optional.fromNullable(missions));
     if (result) {
@@ -172,7 +184,7 @@ public class MissionManager {
    */
   private List<LocalDate> datesToCompute(MissionFromClient body) {
     List<LocalDate> dates = Lists.newArrayList();
-    LocalDate current = body.dataInizio;
+    LocalDate current = body.dataInizio.toLocalDate();
     while (!current.isAfter(body.dataFine)) {
       dates.add(current);
       current = current.plusDays(1);
@@ -191,10 +203,37 @@ public class MissionManager {
    * @return true se la missione è stata inserita, false altrimenti.
    */
   private boolean insertMission(MissionFromClient body, AbsenceForm absenceForm, 
-      Integer hours, Integer minutes, LocalDate from, LocalDate to) {
+      Integer hours, Integer minutes, LocalDateTime from, LocalDateTime to) {
+    
+    AbsenceType mission = null;
+    
+    CategoryTab tab = absenceForm.categoryTabSelected;
+    GroupAbsenceType type = absenceForm.groupSelected;
+    JustifiedType justifiedType = absenceForm.justifiedTypeSelected;
+    if (from.toLocalDate().isEqual(to.toLocalDate())) {
+       
+      int localHours = to.getHourOfDay() - from.getHourOfDay();
+      int localMinutes = to.getMinuteOfHour() - from.getMinuteOfHour();
+      if (localMinutes < 0) {
+        localHours = localHours - 1;
+      }
+      
+      if (localMinutes > DateTimeConstants.MINUTES_PER_HOUR / 2) {
+        localHours = localHours + 1;
+      }
+      
+      mission = selectMissionHour(localHours);
+            
+    }
+    if (mission == null) {
+      mission = absenceForm.absenceTypeSelected;
+    }
+    absenceForm =
+        absenceService.buildAbsenceForm(body.person, from.toLocalDate(), tab,
+            to.toLocalDate(), type, false, mission, justifiedType, hours, minutes, false);
     InsertReport insertReport = 
-        absenceService.insert(body.person, absenceForm.groupSelected, from, 
-            to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected, 
+        absenceService.insert(body.person, absenceForm.groupSelected, from.toLocalDate(), 
+            to.toLocalDate(), mission, absenceForm.justifiedTypeSelected, 
             hours, minutes, false, absenceManager);
     if (insertReport.criticalErrors.isEmpty() || insertReport.warningsPreviousVersion.isEmpty()) {
       for (Absence absence : insertReport.absencesToPersist) {
@@ -258,7 +297,8 @@ public class MissionManager {
     Integer hours = null;
     Integer minutes = null;
     AbsenceForm absenceForm =
-        absenceService.buildAbsenceForm(body.person, body.dataInizio, categoryTab, body.dataFine,
+        absenceService.buildAbsenceForm(body.person, body.dataInizio.toLocalDate(), 
+            categoryTab, body.dataFine.toLocalDate(),
             groupAbsenceType, false, absenceType, justifiedType, hours, minutes, false);
     return absenceForm;
   }
@@ -268,7 +308,7 @@ public class MissionManager {
    * @param body il dto contenente le info dell'ordine/rimborso di missione
    */
   private void recalculate(MissionFromClient body, Optional<List<Absence>> missions) {
-    LocalDate begin = body.dataInizio;
+    LocalDate begin = body.dataInizio.toLocalDate();
     if (missions.isPresent()) {
       
       for (Absence abs : missions.get()) {
@@ -278,5 +318,41 @@ public class MissionManager {
       }
     }
     consistencyManager.updatePersonSituation(body.person.id, begin);
+  }
+  
+  /**
+   * 
+   * @param hours le ore da considerare per cercare il codice di assenza giusto
+   * @return il codice d'assenza corretto sulla base della quantità oraria passata come parametro.
+   */
+  private AbsenceType selectMissionHour(int hours) {
+    AbsenceType missionHours = null;
+    switch (hours) {
+      case 1:
+        missionHours = absenceTypeDao.getAbsenceTypeByCode("92h1").get();
+        break;
+      case 2:
+        missionHours = absenceTypeDao.getAbsenceTypeByCode("92h2").get();
+        break;
+      case 3:
+        missionHours = absenceTypeDao.getAbsenceTypeByCode("92h3").get();
+        break;
+      case 4:
+        missionHours = absenceTypeDao.getAbsenceTypeByCode("92h4").get();
+        break;
+      case 5:
+        missionHours = absenceTypeDao.getAbsenceTypeByCode("92h5").get();
+        break;
+      case 6:
+        missionHours = absenceTypeDao.getAbsenceTypeByCode("92h6").get();
+        break;
+      case 7:
+        missionHours = absenceTypeDao.getAbsenceTypeByCode("92h7").get();
+        break;
+      default:
+        missionHours = absenceTypeDao.getAbsenceTypeByCode("92").get();
+        break;
+    }
+    return missionHours;
   }
 }

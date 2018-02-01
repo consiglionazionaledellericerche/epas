@@ -14,6 +14,7 @@ import models.exports.MissionFromClient;
 import models.exports.StampingFromClient;
 
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
@@ -36,8 +37,9 @@ public class JsonMissionBinder implements TypeBinder<MissionFromClient> {
       mission.id = jsonObject.get("id").getAsLong();
       mission.matricola = jsonObject.get("matricola").getAsInt();
       mission.dataInizio = 
-          new LocalDate(getDateFromJson(jsonObject.get("data_inizio").getAsString()));
-      mission.dataFine = new LocalDate(getDateFromJson(jsonObject.get("data_fine").getAsString()));
+          LocalDateTime.parse(getDateFromJson(jsonObject.get("data_inizio").getAsString()));
+      mission.dataFine = 
+          LocalDateTime.parse(getDateFromJson(jsonObject.get("data_fine").getAsString()));
       if (jsonObject.get("id_ordine").isJsonNull()) {
         mission.idOrdine = null;
       } else {
@@ -60,7 +62,7 @@ public class JsonMissionBinder implements TypeBinder<MissionFromClient> {
    * @return la sottostringa contenente la data nel formato yyyy-mm-dd.
    */
   private String getDateFromJson(String string) {
-    String date = string.substring(0, 10);
+    String date = string.substring(0, 19);
     return date;
   }
 }
