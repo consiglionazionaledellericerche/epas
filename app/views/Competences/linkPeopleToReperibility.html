@@ -6,7 +6,7 @@ title:('Aggiungi persona alla attività: '+type.description )}
 	#{/alert}
   #{form action:@Competences.saveReperibilityConfiguration(), method:'POST', autocomplete:false,
   class:'form form-horizontal', 'data-async':'#page_content',
-  'data-async-error':'#absenceCodeData'}
+  'data-async-error':'#absenceCodeData','data-spinner':'#defaultSpinner'}
   
   	#{if type.persistent}
     	#{f.hidden 'type.id'/}
