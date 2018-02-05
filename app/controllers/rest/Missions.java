@@ -41,6 +41,11 @@ public class Missions extends Controller {
     if (body == null || body.dataInizio == null || body.dataFine == null) {
       JsonResponse.badRequest();
     }
+    
+    if (body.dataInizio.isAfter(body.dataFine)) {
+      JsonResponse.badRequest();
+      return;
+    }
 
     // person not present (404)
     if (!missionManager.linkToPerson(body).isPresent()) {
