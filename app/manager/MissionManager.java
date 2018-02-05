@@ -206,7 +206,7 @@ public class MissionManager {
       Integer hours, Integer minutes, LocalDateTime from, LocalDateTime to) {
     
     AbsenceType mission = null;
-    
+
     CategoryTab tab = absenceForm.categoryTabSelected;
     GroupAbsenceType type = absenceForm.groupSelected;
     JustifiedType justifiedType = absenceForm.justifiedTypeSelected;
@@ -276,17 +276,29 @@ public class MissionManager {
    * @return true se la cancellazione è andata a buon fine, false altrimenti.
    */
   private boolean performDeleteMission(List<Absence> missions, AbsenceForm absenceForm) {
+    boolean result = false;
     for (Absence abs : missions) {
-      abs.delete();
+      result = atomicRemoval(abs, result);
       final User currentUser = Security.getUser().get();
       notificationManager.notificationAbsencePolicy(currentUser, 
           abs, absenceForm.groupSelected, false, true, false);
       log.info("rimossa assenza {} del {}", abs.absenceType.code, abs.personDay.date);
+      
+    }
+    if (result) {
       return true;
     }
-    log.error("errore in fase di cancellazione della missione del {} di {}", 
-        missions.get(0).personDay.date, missions.get(0).personDay.person.fullName());
+    log.error("Errore in rimozione della missione {}");
     return false;
+  }
+  
+  
+  private boolean atomicRemoval(Absence abs, boolean result) {
+    abs.delete();
+    abs.personDay.absences.remove(abs);
+    abs.personDay.save();
+    result = true;
+    return result;
   }
   
   private AbsenceForm buildAbsenceForm(MissionFromClient body) {
@@ -302,6 +314,7 @@ public class MissionManager {
             groupAbsenceType, false, absenceType, justifiedType, hours, minutes, false);
     return absenceForm;
   }
+
   
   /**
    * ricalcola la situazione del dipendente.
