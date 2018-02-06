@@ -1382,6 +1382,27 @@ public class Competences extends Controller {
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
     notFoundIfNull(type);
+    if (beginDate == null) {
+      Validation.addError("beginDate", "inserire una data di inizio!");
+    }
+    if (!person.isPersistent()) {
+      Validation.addError("person", "selezionare una persona!");
+    }
+    if (Validation.hasErrors()) {
+      List<PersonReperibility> personAssociated = 
+          reperibilityDao.byOffice(type.office);
+      List<CompetenceCode> codeList = Lists.newArrayList();
+      codeList.add(competenceCodeDao.getCompetenceCodeByCode("207"));
+      codeList.add(competenceCodeDao.getCompetenceCodeByCode("208"));
+      List<Person> available = competenceCodeDao
+          .listByCodesAndOffice(codeList, type.office,Optional.fromNullable(LocalDate.now()))
+          .stream().filter(e -> (personAssociated.stream()
+              .noneMatch(d -> d.person.equals(e.person))))        
+          .map(pcc -> pcc.person).distinct()
+          .filter(p -> p.office.equals(type.office)).collect(Collectors.toList());
+      response.status = 400;
+      render("@linkPeopleToReperibility", type, available);
+    }
     competenceManager.persistPersonReperibilityType(person, beginDate, type);
     flash.success("Aggiunto %s all'attività", person.fullName());
     manageReperibility(type.id);
