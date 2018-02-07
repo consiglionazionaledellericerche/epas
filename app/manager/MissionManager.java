@@ -13,6 +13,8 @@ import dao.UserDao;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.persistence.PersistenceException;
+
 import lombok.extern.slf4j.Slf4j;
 
 import manager.services.absences.AbsenceForm;
@@ -288,16 +290,22 @@ public class MissionManager {
     if (result) {
       return true;
     }
-    log.error("Errore in rimozione della missione {}");
+    log.error("Errore in rimozione della missione}");
     return false;
   }
   
   
   private boolean atomicRemoval(Absence abs, boolean result) {
-    abs.delete();
-    abs.personDay.absences.remove(abs);
-    abs.personDay.save();
-    result = true;
+    try {
+      abs.delete();
+      abs.personDay.absences.remove(abs);
+      abs.personDay.save();
+      result = true;
+    } catch (Exception ex) {
+      result = false;
+      throw new PersistenceException("Error in removing absence");
+    }
+    
     return result;
   }
   
