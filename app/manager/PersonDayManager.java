@@ -123,6 +123,15 @@ public class PersonDayManager {
     return getAllDay(personDay).isPresent() || getAssignAllDay(personDay).isPresent();
 
   }
+  
+  /**
+   * 
+   * @param personDay il personday da verificare
+   * @return se nel giorno vi è un'assenza a completamento giornaliero.
+   */
+  public boolean isCompleteDayAndAddOvertimeAbsence(PersonDay personDay) {
+    return getCompleteDayAndAddOvertime(personDay).isPresent();
+  }
 
   /**
    * Se le assenze orarie giustificano abbanstanza per ritenere il dipendente a lavoro.
@@ -761,6 +770,8 @@ public class PersonDayManager {
     final boolean isFixedTimeAtWork = pd.isFixedTimeAtWork();
     final boolean isHoliday = personDay.isHoliday;
     final boolean isEnoughHourlyAbsences = isEnoughHourlyAbsences(pd);
+    final boolean isCompleteDayAndAddOvertimeAbsence = 
+        isCompleteDayAndAddOvertimeAbsence(personDay);
 
     // PRESENZA AUTOMATICA
     if (isFixedTimeAtWork && !allValidStampings) {
@@ -771,23 +782,25 @@ public class PersonDayManager {
 
     // CASI STANDARD
 
-    // ### CASO 1: no festa + no assenze giornaliere + no timbrature + (qualcosa capire cosa)
+    // ### CASO 1: no festa + no assenze giornaliere + no timbrature + no assenze a completamento
     if (!isFixedTimeAtWork && !isHoliday && !isAllDayAbsences && noStampings
-        && !isEnoughHourlyAbsences) {
+        && !isEnoughHourlyAbsences && !isCompleteDayAndAddOvertimeAbsence) {
       personDayInTroubleManager.setTrouble(personDay, Troubles.NO_ABS_NO_STAMP);
     } else {
       personDayInTroubleManager.fixTrouble(personDay, Troubles.NO_ABS_NO_STAMP);
     }
 
     // ### CASO 2: no festa + no assenze giornaliere + timbrature disaccoppiate
-    if (!isFixedTimeAtWork && !isHoliday && !isAllDayAbsences && !allValidStampings) {
+    if (!isFixedTimeAtWork && !isHoliday && !isAllDayAbsences && !allValidStampings
+        && !isCompleteDayAndAddOvertimeAbsence) {
       personDayInTroubleManager.setTrouble(personDay, Troubles.UNCOUPLED_WORKING);
     } else {
       personDayInTroubleManager.fixTrouble(personDay, Troubles.UNCOUPLED_WORKING);
     }
 
     // ### CASO 3 festa + no assenze giornaliere + timbrature disaccoppiate
-    if (!isFixedTimeAtWork && isHoliday && !isAllDayAbsences && !allValidStampings) {
+    if (!isFixedTimeAtWork && isHoliday && !isAllDayAbsences && !allValidStampings 
+        && ! isCompleteDayAndAddOvertimeAbsence) {
       personDayInTroubleManager.setTrouble(personDay, Troubles.UNCOUPLED_HOLIDAY);
     } else {
       personDayInTroubleManager.fixTrouble(personDay, Troubles.UNCOUPLED_HOLIDAY);
