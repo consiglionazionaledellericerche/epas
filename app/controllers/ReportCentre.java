@@ -58,10 +58,15 @@ public class ReportCentre extends Controller {
         .fromJson(new InputStreamReader(request.body), ReportData.class);
 
     final Optional<User> currentUser = Security.getUser();
-    ReportMailer.feedback(data, session, currentUser);
-    if ("true".equals(Play.configuration.getProperty("oil.enabled")) && currentUser.isPresent()
-        && userDao.hasAdminRoles(currentUser.get())) {
-      OilMailer.sendFeedbackToOil(data, session, currentUser.get());
+    
+    if ("true".equals(Play.configuration.getProperty("oil.enabled")) && currentUser.isPresent()) {
+      if (userDao.hasAdminRoles(currentUser.get())) {
+        OilMailer.sendFeedbackToOil(data, session, currentUser.get());  
+      } else {
+        ReportMailer.feedback(data, session, currentUser);  
+      }
+    } else {
+      ReportMailer.feedback(data, session, currentUser);
     }
   }
 
