@@ -1,6 +1,7 @@
 package manager.charts;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
@@ -586,7 +587,8 @@ public class ChartsManager {
     Lavoro_da_timbrature("Lavoro da timbrature (hh:mm)"),
     Lavoro_fuori_sede("Lavoro fuori sede (hh:mm)"),
     Lavoro_effettivo("Lavoro effettivo (hh:mm)"),
-    Ore_giustificate_da_assenza("Ore giustificate da assenza");
+    Ore_giustificate_da_assenza("Ore giustificate da assenza"),
+    Codici_di_assenza_che_giustificano_ore("Codici di assenza che giustificano ore");
     
     @Getter
     private final String description;
@@ -638,7 +640,11 @@ public class ChartsManager {
           justifiedTime += abs.justifiedTime();
         }
         record.add(DateUtility.fromMinuteToHourMinute(justifiedTime));
-           
+        //Lista dei codici che giustificano ore al lavoro, concatenati da ;
+        record.add(Joiner.on(";").join(day.personDay.absences.stream().filter(a -> a.justifiedTime() > 0)
+            .map(a -> a.absenceType.code)
+            .collect(Collectors.toList())));
+        
         csvFilePrinter.printRecord(record);
       }
 
@@ -680,7 +686,7 @@ public class ChartsManager {
 
       row = sheet.createRow(0);
       row.setHeightInPoints(30);
-      for (int i = 0; i < 5; i++) {
+      for (int i = 0; i < 6; i++) {
         sheet.setColumnWidth((short) (i), (short) ((50 * 8) / ((double) 1 / 20)));
         cell = row.createCell(i);
         cell.setCellStyle(cs);
@@ -700,6 +706,8 @@ public class ChartsManager {
           case 4: 
             cell.setCellValue(PersonStampingDayRecapHeader.Ore_giustificate_da_assenza.getDescription());   
             break;
+          case 5:
+            cell.setCellValue(PersonStampingDayRecapHeader.Codici_di_assenza_che_giustificano_ore.getDescription());
           default:
             break;
         }
@@ -710,7 +718,7 @@ public class ChartsManager {
       for (PersonStampingDayRecap day : psDto.daysRecap) {
         row = sheet.createRow(rownum);
 
-        for (int cellnum = 0; cellnum < 5; cellnum++) {
+        for (int cellnum = 0; cellnum < 6; cellnum++) {
           cell = row.createCell(cellnum);
           if (day.personDay.isHoliday) {
             cell.setCellStyle(cellHoliday);
@@ -753,7 +761,9 @@ public class ChartsManager {
               }  
               break;
             case 5:
-
+              cell.setCellValue(Joiner.on(";").join(day.personDay.absences.stream().filter(a -> a.justifiedTime() > 0)
+                  .map(a -> a.absenceType.code)
+                  .collect(Collectors.toList())));
             default:
               break;
           }          
