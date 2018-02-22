@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 import javax.inject.Inject;
-
+import lombok.extern.slf4j.Slf4j;
 import models.User;
 import models.exports.ReportData;
 
@@ -26,6 +26,7 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 
+@Slf4j
 public class ReportCentre extends Controller {
 
   @Inject
@@ -58,10 +59,18 @@ public class ReportCentre extends Controller {
         .fromJson(new InputStreamReader(request.body), ReportData.class);
 
     final Optional<User> currentUser = Security.getUser();
-    ReportMailer.feedback(data, session, currentUser);
-    if ("true".equals(Play.configuration.getProperty("oil.enabled")) && currentUser.isPresent()
-        && userDao.hasAdminRoles(currentUser.get())) {
-      OilMailer.sendFeedbackToOil(data, session, currentUser.get());
+    
+    if ("true".equals(Play.configuration.getProperty("oil.enabled")) && currentUser.isPresent()) {
+      if (userDao.hasAdminRoles(currentUser.get())) {
+        OilMailer.sendFeedbackToOil(data, session, currentUser.get());
+        log.info("Inviata segnalazione ad OIL. Utente {}. Categoria: '{}'. Url: {}. "
+            + "Note: {}", currentUser.get().username, OilConfig.categoryMap().get(data.getCategory()), 
+            data.getUrl(), data.getNote());
+      } else {
+        ReportMailer.feedback(data, session, currentUser);  
+      }
+    } else {
+      ReportMailer.feedback(data, session, currentUser);
     }
   }
 
