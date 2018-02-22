@@ -91,15 +91,14 @@ public class ChartsManager {
    * Costruttore.
    *
    * @param competenceCodeDao competenceCodeDao
-   * @param personDao         personDao
-   * @param vacationsService  vacationsService
-   * @param wrapperFactory    wrapperFactory
+   * @param personDao personDao
+   * @param vacationsService vacationsService
+   * @param wrapperFactory wrapperFactory
    */
   @Inject
-  public ChartsManager(CompetenceCodeDao competenceCodeDao,
-      PersonDao personDao, IVacationsService vacationsService,
-      IWrapperFactory wrapperFactory, PersonStampingRecapFactory stampingsRecapFactory,
-      PersonDayManager personDayManager) {
+  public ChartsManager(CompetenceCodeDao competenceCodeDao, PersonDao personDao,
+      IVacationsService vacationsService, IWrapperFactory wrapperFactory,
+      PersonStampingRecapFactory stampingsRecapFactory, PersonDayManager personDayManager) {
     this.competenceCodeDao = competenceCodeDao;
     this.personDao = personDao;
     this.vacationsService = vacationsService;
@@ -111,7 +110,7 @@ public class ChartsManager {
 
   /**
    * @return la lista dei competenceCode che comprende tutti i codici di straordinario presenti in
-   *     anagrafica.
+   *         anagrafica.
    */
   public List<CompetenceCode> populateOvertimeCodeList() {
     List<CompetenceCode> codeList = Lists.newArrayList();
@@ -127,36 +126,34 @@ public class ChartsManager {
   /**
    * @return la lista dei personOvertime.
    */
-  public List<PersonOvertime> populatePersonOvertimeList(
-      List<Person> personList, List<CompetenceCode> codeList, int year, int month) {
+  public List<PersonOvertime> populatePersonOvertimeList(List<Person> personList,
+      List<CompetenceCode> codeList, int year, int month) {
     List<PersonOvertime> poList = Lists.newArrayList();
     List<Person> noOvertimePeople = Lists.newArrayList();
     for (Person p : personList) {
       if (p.surname.equals("Baesso")) {
         log.debug("eccoci");
       }
-      //      PersonDay pd = personDayDao.getOrBuildPersonDay(p, new LocalDate(year, month, 1));
-      //      int workingTime = wrapperFactory.create(pd).getWorkingTimeTypeDay().get().workingTime;
+      // PersonDay pd = personDayDao.getOrBuildPersonDay(p, new LocalDate(year, month, 1));
+      // int workingTime = wrapperFactory.create(pd).getWorkingTimeTypeDay().get().workingTime;
       PersonOvertime po = new PersonOvertime();
-      List<Contract> monthContracts = wrapperFactory
-          .create(p).orderedMonthContracts(year, month);
+      List<Contract> monthContracts = wrapperFactory.create(p).orderedMonthContracts(year, month);
       for (Contract contract : monthContracts) {
         IWrapperContract wrContract = wrapperFactory.create(contract);
         Optional<ContractMonthRecap> recap =
             wrContract.getContractMonthRecap(new YearMonth(year, month));
         if (recap.isPresent() && recap.get().getStraordinarioMinuti() != 0) {
-          po.overtimeHour = recap.get().getStraordinarioMinuti() 
-              / DateTimeConstants.MINUTES_PER_HOUR;
-          po.positiveHourForOvertime = 
-              (recap.get().getPositiveResidualInMonth())
-              / DateTimeConstants.MINUTES_PER_HOUR;
+          po.overtimeHour =
+              recap.get().getStraordinarioMinuti() / DateTimeConstants.MINUTES_PER_HOUR;
+          po.positiveHourForOvertime =
+              (recap.get().getPositiveResidualInMonth()) / DateTimeConstants.MINUTES_PER_HOUR;
           po.month = month;
           po.year = year;
           po.name = p.name;
-          po.surname = p.surname;      
+          po.surname = p.surname;
           poList.add(po);
         } else {
-          log.debug("{} pur avendo ore in più non ha usufruito di straordinari questo mese", 
+          log.debug("{} pur avendo ore in più non ha usufruito di straordinari questo mese",
               p.fullName());
           noOvertimePeople.add(p);
         }
@@ -171,34 +168,33 @@ public class ChartsManager {
 
   /**
    * @return la lista dei personOvertime con i valori su base annuale.
-   */ 
-  public List<PersonOvertime> populatePersonOvertimeListInYear(
-      List<Person> personList, List<CompetenceCode> codeList, int year) {
+   */
+  public List<PersonOvertime> populatePersonOvertimeListInYear(List<Person> personList,
+      List<CompetenceCode> codeList, int year) {
 
     List<PersonOvertime> poList = Lists.newArrayList();
     for (Person p : personList) {
 
       PersonOvertime po = new PersonOvertime();
-      List<Contract> yearContracts = wrapperFactory
-          .create(p).orderedYearContracts(year);
-      for (Contract contract: yearContracts) {
+      List<Contract> yearContracts = wrapperFactory.create(p).orderedYearContracts(year);
+      for (Contract contract : yearContracts) {
         IWrapperContract wrContract = wrapperFactory.create(contract);
         for (int i = 1; i < 13; i++) {
           int month = i;
           Optional<ContractMonthRecap> recap =
               wrContract.getContractMonthRecap(new YearMonth(year, month));
           if (recap.isPresent() && recap.get().getStraordinarioMinuti() != 0) {
-            po.overtimeHour = po.overtimeHour 
+            po.overtimeHour = po.overtimeHour
                 + recap.get().getStraordinarioMinuti() / DateTimeConstants.MINUTES_PER_HOUR;
-            po.positiveHourForOvertime = po.positiveHourForOvertime 
+            po.positiveHourForOvertime = po.positiveHourForOvertime
                 + (recap.get().getPositiveResidualInMonth()) / DateTimeConstants.MINUTES_PER_HOUR;
             po.year = year;
             po.name = p.name;
-            po.surname = p.surname;      
+            po.surname = p.surname;
 
-          }    
+          }
         }
-        if (po.overtimeHour != 0) {          
+        if (po.overtimeHour != 0) {
           poList.add(po);
         } else {
           log.debug("Il dipendente {} non ha effettuato ore di straordinario "
@@ -246,8 +242,8 @@ public class ChartsManager {
 
   /**
    * @return il file contenente la situazione di ore in più, ore di straordinario e riposi
-   *     compensativi per ciascuna persona della lista passata come parametro 
-   *     relativa all'anno year.
+   *         compensativi per ciascuna persona della lista passata come parametro relativa all'anno
+   *         year.
    */
 
   public FileInputStream export(Integer year, List<Person> personList) throws IOException {
@@ -269,9 +265,9 @@ public class ChartsManager {
     }
     out.write("Cognome Nome,");
     for (int i = 1; i <= month; i++) {
-      out.append("ore straordinari " + DateUtility.fromIntToStringMonth(i)
-      + ',' + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i)
-      + ',' + "ore in più " + DateUtility.fromIntToStringMonth(i) + ',');
+      out.append("ore straordinari " + DateUtility.fromIntToStringMonth(i) + ','
+          + "ore riposi compensativi " + DateUtility.fromIntToStringMonth(i) + ',' + "ore in più "
+          + DateUtility.fromIntToStringMonth(i) + ',');
     }
 
     out.append("ore straordinari TOTALI,ore riposi compensativi TOTALI, ore in più TOTALI");
@@ -307,17 +303,17 @@ public class ChartsManager {
             Optional<ContractMonthRecap> recap = contr.getContractMonthRecap(actual);
             if (recap.isPresent()) {
               situazione = situazione
-                  + (new Integer(recap.get().straordinariMinuti / 60).toString())
-                  + ',' + (new Integer(recap.get().riposiCompensativiMinuti / 60).toString())
-                  + ',' + (new Integer((recap.get().getPositiveResidualInMonth()
-                      + recap.get().straordinariMinuti) / 60).toString())
+                  + (new Integer(recap.get().straordinariMinuti / 60).toString()) + ','
+                  + (new Integer(recap.get().riposiCompensativiMinuti / 60).toString()) + ','
+                  + (new Integer(
+                      (recap.get().getPositiveResidualInMonth() + recap.get().straordinariMinuti)
+                          / 60).toString())
                   + ',';
               totalOvertime = totalOvertime + new Integer(recap.get().straordinariMinuti / 60);
               totalCompensatoryRest =
                   totalCompensatoryRest + new Integer(recap.get().riposiCompensativiMinuti / 60);
-              totalPlusHours =
-                  totalPlusHours + new Integer((recap.get().getPositiveResidualInMonth()
-                      + recap.get().straordinariMinuti) / 60);
+              totalPlusHours = totalPlusHours + new Integer(
+                  (recap.get().getPositiveResidualInMonth() + recap.get().straordinariMinuti) / 60);
             } else {
               situazione = situazione + ("0" + ',' + "0" + ',' + "0");
             }
@@ -342,7 +338,7 @@ public class ChartsManager {
 
   /**
    * @return la situazione in termini di ferie usate anno corrente e passato, permessi usati e
-   *        residuo per la persona passata come parametro.
+   *         residuo per la persona passata come parametro.
    */
   public FileInputStream exportDataSituation(Person person) throws IOException {
     File tempFile = File.createTempFile("esportazioneSituazioneFinale" + person.surname, ".csv");
@@ -361,13 +357,13 @@ public class ChartsManager {
 
     Preconditions.checkState(contract.isPresent());
 
-    Optional<VacationsRecap> vr = vacationsService.create(LocalDate.now().getYear(),
-        contract.get());
+    Optional<VacationsRecap> vr =
+        vacationsService.create(LocalDate.now().getYear(), contract.get());
 
     Preconditions.checkState(vr.isPresent());
 
-    Optional<ContractMonthRecap> recap = wrapperFactory.create(contract.get())
-        .getContractMonthRecap(new YearMonth(LocalDate.now()));
+    Optional<ContractMonthRecap> recap =
+        wrapperFactory.create(contract.get()).getContractMonthRecap(new YearMonth(LocalDate.now()));
 
     if (!recap.isPresent()) {
       out.close();
@@ -406,7 +402,7 @@ public class ChartsManager {
   /**
    * @param file file daparsare per il recupero delle informazioni sulle assenze
    * @return una mappa con chiave le matricole dei dipendenti e con valori le liste di oggetti di
-   *        tipo ResultFromFile che contengono l'assenza e la data in cui l'assenza è stata presa.
+   *         tipo ResultFromFile che contengono l'assenza e la data in cui l'assenza è stata presa.
    */
   private Map<Integer, List<ResultFromFile>> createMap(File file) {
     if (file == null) {
@@ -488,17 +484,17 @@ public class ChartsManager {
    * 
    * @param forAll se si richiede la stampa per tutti
    * @param peopleIds la lista degli id delle persone selezionate per essere esportate
-   * @param beginDate la data di inizio 
+   * @param beginDate la data di inizio
    * @param endDate la data di fine
    * @param exportFile il formato in cui esportare le informazioni
-   * @return un file contenente tutte le informazioni sulle ore di lavoro rispetto 
-   *     ai parametri passati.
+   * @return un file contenente tutte le informazioni sulle ore di lavoro rispetto ai parametri
+   *         passati.
    * @throws ArchiveException eccezione in creazione dell'archivio
    * @throws IOException eccezione durante le procedure di input/output
    */
   public InputStream buildFile(Office office, boolean forAll, boolean onlyMission,
-      List<Long> peopleIds, LocalDate beginDate, LocalDate endDate, 
-      ExportFile exportFile) throws ArchiveException, IOException {
+      List<Long> peopleIds, LocalDate beginDate, LocalDate endDate, ExportFile exportFile)
+      throws ArchiveException, IOException {
 
     Set<Office> offices = Sets.newHashSet(office);
     List<Person> personList = Lists.newArrayList();
@@ -506,8 +502,9 @@ public class ChartsManager {
       personList = peopleIds.stream().map(item -> personDao.getPersonById(item))
           .collect(Collectors.toList());
     } else {
-      personList = personDao.list(Optional.<String>absent(), offices, false, LocalDate.now(),
-          LocalDate.now(), true).list();
+      personList = personDao
+          .list(Optional.<String>absent(), offices, false, LocalDate.now(), LocalDate.now(), true)
+          .list();
     }
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     ZipOutputStream zos = new ZipOutputStream(out);
@@ -520,12 +517,12 @@ public class ChartsManager {
       for (Person person : personList) {
         LocalDate tempDate = beginDate;
         while (!tempDate.isAfter(endDate)) {
-          PersonStampingRecap psDto = stampingsRecapFactory.create(person, 
-              tempDate.getYear(), tempDate.getMonthOfYear(), false);
+          PersonStampingRecap psDto = stampingsRecapFactory.create(person, tempDate.getYear(),
+              tempDate.getMonthOfYear(), false);
           file = createFileCsvToExport(psDto, onlyMission);
-          //preparo lo stream da inviare al chiamante...
-          FileInputStream in = new FileInputStream(file); 
-          try {                       
+          // preparo lo stream da inviare al chiamante...
+          FileInputStream in = new FileInputStream(file);
+          try {
             zos.putNextEntry(new ZipEntry(file.getName()));
             int length;
             while ((length = in.read(buffer)) > 0) {
@@ -534,34 +531,35 @@ public class ChartsManager {
           } catch (IOException ex) {
             ex.printStackTrace();
           }
-          in.close();  
+          in.close();
           file.delete();
           tempDate = tempDate.plusMonths(1);
         }
       }
       zos.closeEntry();
-      zos.close();      
-    } else {      
+      zos.close();
+    } else {
       // genero il file excel...
-      file = File.createTempFile("situazioneMensileDa" 
-          + DateUtility.fromIntToStringMonth(beginDate.getMonthOfYear()) + beginDate.getYear() 
-          + "A" + DateUtility.fromIntToStringMonth(endDate.getMonthOfYear()) + endDate.getYear(), 
+      file = File.createTempFile(
+          "situazioneMensileDa" + DateUtility.fromIntToStringMonth(beginDate.getMonthOfYear())
+              + beginDate.getYear() + "A"
+              + DateUtility.fromIntToStringMonth(endDate.getMonthOfYear()) + endDate.getYear(),
           ".xls");
 
-      Workbook wb = new HSSFWorkbook();     
+      Workbook wb = new HSSFWorkbook();
       // scorro la lista delle persone per cui devo fare l'esportazione...
       for (Person person : personList) {
         LocalDate tempDate = beginDate;
         while (!tempDate.isAfter(endDate)) {
-          PersonStampingRecap psDto = stampingsRecapFactory.create(person, 
-              tempDate.getYear(), tempDate.getMonthOfYear(), false);
+          PersonStampingRecap psDto = stampingsRecapFactory.create(person, tempDate.getYear(),
+              tempDate.getMonthOfYear(), false);
           // aggiorno il file aggiungendo un nuovo foglio per ogni persona...
           file = createFileXlsToExport(psDto, file, wb, onlyMission);
           tempDate = tempDate.plusMonths(1);
-        }        
-      }     
-      //faccio lo stream da inviare al chiamante...
-      FileInputStream in = new FileInputStream(file); 
+        }
+      }
+      // faccio lo stream da inviare al chiamante...
+      FileInputStream in = new FileInputStream(file);
       try {
         zos.putNextEntry(new ZipEntry(file.getName()));
         int length;
@@ -571,7 +569,7 @@ public class ChartsManager {
       } catch (IOException ex) {
         ex.printStackTrace();
       }
-      in.close();  
+      in.close();
       file.delete();
       zos.closeEntry();
       zos.close();
@@ -583,34 +581,33 @@ public class ChartsManager {
 
   @RequiredArgsConstructor
   public enum PersonStampingDayRecapHeader {
-    Data("Data"),
-    Lavoro_da_timbrature("Lavoro da timbrature (hh:mm)"),
-    Lavoro_fuori_sede("Lavoro fuori sede (hh:mm)"),
-    Lavoro_effettivo("Lavoro effettivo (hh:mm)"),
-    Ore_giustificate_da_assenza("Ore giustificate da assenza"),
-    Codici_di_assenza_che_giustificano_ore("Codici di assenza che giustificano ore");
-    
+    Data("Data"), Lavoro_da_timbrature("Lavoro da timbrature (hh:mm)"), Lavoro_fuori_sede(
+        "Lavoro fuori sede (hh:mm)"), Lavoro_effettivo(
+            "Lavoro effettivo (hh:mm)"), Ore_giustificate_da_assenza(
+                "Ore giustificate da assenza"), Codici_di_assenza_che_giustificano_ore(
+                    "Codici di assenza che giustificano ore");
+
     @Getter
     private final String description;
-    
+
     public static List<String> getLabels() {
       return Stream.of(values()).map(v -> v.description).collect(Collectors.toList());
     }
   }
-  
+
   /**
    * 
    * @param psDto il personStampingDayRecap da cui partire per prendere le informazioni
    * @return un file di tipo csv contenente la situazione mensile.
    */
-  private File createFileCsvToExport(PersonStampingRecap psDto, boolean onlyMission) throws IOException {
+  private File createFileCsvToExport(PersonStampingRecap psDto, boolean onlyMission)
+      throws IOException {
     final String newLineseparator = "\n";
-    //final Object [] fileHeader = {"Giorno","Ore di lavoro (hh:mm)","Assenza"};
+    // final Object [] fileHeader = {"Giorno","Ore di lavoro (hh:mm)","Assenza"};
     FileWriter fileWriter = null;
     CSVPrinter csvFilePrinter = null;
-    File file = new File("situazione_mensile" + psDto.person.surname 
-        + '_' + psDto.person.name 
-        + '_' + DateUtility.fromIntToStringMonth(psDto.month) + ".csv");
+    File file = new File("situazione_mensile" + psDto.person.surname + '_' + psDto.person.name + '_'
+        + DateUtility.fromIntToStringMonth(psDto.month) + ".csv");
     try {
 
       fileWriter = new FileWriter(file.getName());
@@ -624,31 +621,31 @@ public class ChartsManager {
         record.add(day.personDay.date.toString());
         record.add(DateUtility.fromMinuteToHourMinute(day.personDay.getStampingsTime()));
         record.add(DateUtility.fromMinuteToHourMinute(getOutOfOfficeTime(day.personDay)));
-        
-        java.util.Optional<Absence> mission = 
-            day.personDay.absences.stream()
-              .filter(a -> a.absenceType != null && a.absenceType.code != null && a.absenceType.code.equals("92")).findFirst();
-        
+
+        java.util.Optional<Absence> mission =
+            day.personDay.absences.stream().filter(a -> a.absenceType != null
+                && a.absenceType.code != null && a.absenceType.code.equals("92")).findFirst();
+
         if (onlyMission && mission.isPresent()) {
           record.add(DateUtility.fromMinuteToHourMinute(day.wttd.get().workingTime));
         } else {
           record.add(DateUtility.fromMinuteToHourMinute(day.personDay.getTimeAtWork()));
         }
-        
+
         int justifiedTime = 0;
         for (Absence abs : day.personDay.absences) {
           justifiedTime += abs.justifiedTime();
         }
         record.add(DateUtility.fromMinuteToHourMinute(justifiedTime));
-        //Lista dei codici che giustificano ore al lavoro, concatenati da ;
-        record.add(Joiner.on(";").join(day.personDay.absences.stream().filter(a -> a.justifiedTime() > 0)
-            .map(a -> a.absenceType.code)
-            .collect(Collectors.toList())));
-        
+        // Lista dei codici che giustificano ore al lavoro, concatenati da ;
+        record.add(
+            Joiner.on(";").join(day.personDay.absences.stream().filter(a -> a.justifiedTime() > 0)
+                .map(a -> a.absenceType.code).collect(Collectors.toList())));
+
         csvFilePrinter.printRecord(record);
       }
 
-    } catch (Exception ex) {      
+    } catch (Exception ex) {
       log.error("Error in CsvFileWriter !!!");
       ex.printStackTrace();
 
@@ -669,15 +666,15 @@ public class ChartsManager {
    * 
    * @param psDto il personStampingRecap contenente le info sul mese trascorso dalla persona
    * @param file il file in cui caricare le informazioni
-   * @return il file contenente la situazione mensile della persona a cui fa riferimento
-   *     il personStampingRecap passato come parametro.
+   * @return il file contenente la situazione mensile della persona a cui fa riferimento il
+   *         personStampingRecap passato come parametro.
    */
-  private File createFileXlsToExport(PersonStampingRecap psDto, 
-      File file, Workbook wb, boolean onlyMission) {
+  private File createFileXlsToExport(PersonStampingRecap psDto, File file, Workbook wb,
+      boolean onlyMission) {
     try {
       FileOutputStream out = new FileOutputStream(file);
 
-      Sheet sheet = wb.createSheet(psDto.person.fullName() + "_" 
+      Sheet sheet = wb.createSheet(psDto.person.fullName() + "_"
           + DateUtility.fromIntToStringMonth(psDto.month) + psDto.year);
 
       CellStyle cs = createHeader(wb);
@@ -691,7 +688,7 @@ public class ChartsManager {
         cell = row.createCell(i);
         cell.setCellStyle(cs);
         switch (i) {
-          case 0:            
+          case 0:
             cell.setCellValue(PersonStampingDayRecapHeader.Data.getDescription());
             break;
           case 1:
@@ -703,11 +700,14 @@ public class ChartsManager {
           case 3:
             cell.setCellValue(PersonStampingDayRecapHeader.Lavoro_effettivo.getDescription());
             break;
-          case 4: 
-            cell.setCellValue(PersonStampingDayRecapHeader.Ore_giustificate_da_assenza.getDescription());   
+          case 4:
+            cell.setCellValue(
+                PersonStampingDayRecapHeader.Ore_giustificate_da_assenza.getDescription());
             break;
           case 5:
-            cell.setCellValue(PersonStampingDayRecapHeader.Codici_di_assenza_che_giustificano_ore.getDescription());
+            cell.setCellValue(PersonStampingDayRecapHeader.Codici_di_assenza_che_giustificano_ore
+                .getDescription());
+            break;
           default:
             break;
         }
@@ -726,8 +726,8 @@ public class ChartsManager {
             cell.setCellStyle(cellWorkingDay);
           }
           switch (cellnum) {
-            case 0:              
-              cell.setCellValue(day.personDay.date.toString());              
+            case 0:
+              cell.setCellValue(day.personDay.date.toString());
               break;
             case 1:
               cell.setCellValue(
@@ -738,8 +738,7 @@ public class ChartsManager {
                   DateUtility.fromMinuteToHourMinute(getOutOfOfficeTime(day.personDay)));
               break;
             case 3:
-              cell.setCellValue(
-                  DateUtility.fromMinuteToHourMinute(day.personDay.getTimeAtWork()));
+              cell.setCellValue(DateUtility.fromMinuteToHourMinute(day.personDay.getTimeAtWork()));
               break;
             case 4:
               if (!day.personDay.absences.isEmpty()) {
@@ -749,24 +748,23 @@ public class ChartsManager {
                   code = code + " " + abs.absenceType.code;
                   justifiedTime += abs.justifiedTime();
                 }
-                cell.setCellValue(
-                    DateUtility.fromMinuteToHourMinute(justifiedTime));
-                
+                cell.setCellValue(DateUtility.fromMinuteToHourMinute(justifiedTime));
+
                 if (onlyMission && code != null && code.trim().equals("92")) {
                   cell = row.getCell(3);
                   cell.setCellValue(DateUtility.fromMinuteToHourMinute(day.wttd.get().workingTime));
                 }
               } else {
                 cell.setCellValue("00:00");
-              }  
+              }
               break;
             case 5:
-              cell.setCellValue(Joiner.on(";").join(day.personDay.absences.stream().filter(a -> a.justifiedTime() > 0)
-                  .map(a -> a.absenceType.code)
-                  .collect(Collectors.toList())));
+              cell.setCellValue(Joiner.on(";")
+                  .join(day.personDay.absences.stream().filter(a -> a.justifiedTime() > 0)
+                      .map(a -> a.absenceType.code).collect(Collectors.toList())));
             default:
               break;
-          }          
+          }
         }
         rownum++;
       }
@@ -795,7 +793,7 @@ public class ChartsManager {
 
     Font font = wb.createFont();
     font.setFontHeightInPoints((short) 12);
-    font.setColor( (short)0xc );
+    font.setColor((short) 0xc);
     font.setBoldweight(Font.BOLDWEIGHT_BOLD);
     CellStyle cs = wb.createCellStyle();
     cs.setFont(font);
@@ -815,7 +813,7 @@ public class ChartsManager {
     Font font = wb.createFont();
     font.setColor(Font.COLOR_RED);
     cs.setAlignment(CellStyle.ALIGN_CENTER);
-    cs.setFont(font);    
+    cs.setFont(font);
     return cs;
   }
 
@@ -838,22 +836,20 @@ public class ChartsManager {
    * @return il tempo a lavoro derivante dalle timbrature identificate come lavoro fuori sede.
    */
   private int getOutOfOfficeTime(PersonDay pd) {
-    List<Stamping> stampings = 
-        pd.stampings.stream()
-        .filter(st -> st.stampType != null && (st.stampType.getIdentifier().equals("sf") 
+    List<Stamping> stampings = pd.stampings.stream()
+        .filter(st -> st.stampType != null && (st.stampType.getIdentifier().equals("sf")
             || st.stampType.getIdentifier().equals("lfs")))
         .collect(Collectors.toList());
     if (stampings.isEmpty()) {
       return 0;
     } else {
       List<PairStamping> valid = personDayManager.getValidPairStampings(stampings);
-      return valid.stream()
-          .mapToInt(pair -> DateUtility.toMinute(pair.second.date) 
-              - DateUtility.toMinute(pair.first.date)).sum();
-    }   
+      return valid.stream().mapToInt(
+          pair -> DateUtility.toMinute(pair.second.date) - DateUtility.toMinute(pair.first.date))
+          .sum();
+    }
 
   }
 }
-
 
 
