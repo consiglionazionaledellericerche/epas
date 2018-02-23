@@ -8,7 +8,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
-
 import dao.CertificationDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
@@ -16,30 +15,23 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonMonthRecapDao;
 import dao.PersonReperibilityDayDao;
-import dao.RoleDao;
 import dao.ShiftDao;
 import dao.wrapper.IWrapperCompetenceCode;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
-
 import helpers.Web;
 import helpers.jpa.ModelQuery.SimpleResults;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import javax.inject.Inject;
-
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.SecureManager;
@@ -50,7 +42,6 @@ import manager.recaps.competence.PersonMonthCompetenceRecap;
 import manager.recaps.competence.PersonMonthCompetenceRecapFactory;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
-
 import models.CertificatedData;
 import models.Certification;
 import models.Competence;
@@ -70,16 +61,13 @@ import models.ShiftType;
 import models.TotalOvertime;
 import models.User;
 import models.dto.TimeTableDto;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.cache.Cache;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 @With({Resecure.class})
@@ -122,8 +110,6 @@ public class Competences extends Controller {
   private static PersonMonthRecapDao pmrDao;
   @Inject
   private static ShiftDao shiftDao;
-  @Inject
-  private static RoleDao roleDao;
 
 
   /**
