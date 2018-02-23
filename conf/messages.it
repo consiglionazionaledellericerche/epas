@@ -752,6 +752,7 @@ TR_AUTOCERTIFICATION= Autocertificazione presenze per Tecnologi e Ricercatori
 TR_VACATIONS= Inserimento ferie e permessi per Tecnologi e Ricercatori
 TR_COMPENSATORY= Inserimento riposi compensativi per Tecnologi e Ricercatori
 ENABLE_CALENDARSHIFT= Abilitazione gestione calendario turni e reperibilità
+ENABLE_MISSIONS_INTEGRATION= Abilitazione integrazione con piattaforma Missioni
 
 EXPIRY_VACATION_PAST_YEAR=Giorno massimo utilizzo ferie dell'anno precedente
 MONTH_EXPIRY_RECOVERY_DAYS_13=Mese massimo per utilizzo residui dell'anno precedente per i livelli da 1 a 3
