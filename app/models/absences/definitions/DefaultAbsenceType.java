@@ -1277,7 +1277,16 @@ public enum DefaultAbsenceType {
   
   A_NC("NC", "Giorno non conteggiato ai fini del tempo a lavoro",
       true, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      0, null, null, null),
+  
+  A_35R("35R", "dottorato di ricerca retribuito",
+      true, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      0, null, null, null),
+  
+  A_62("62", "distacco sindacale",
+      true, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, null, null);
+  
 
   public String certificationCode;
   public String description;
