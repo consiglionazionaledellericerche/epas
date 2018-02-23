@@ -45,6 +45,14 @@ public enum EpasParam {
       EpasParamValueType.formatValue(true),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
+  
+  ENABLE_MISSIONS_INTEGRATION("enable_mission_integration",
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
 
   OFF_SITE_STAMPING("off_site_stamping",
       EpasParamCategory.GENERAL,
