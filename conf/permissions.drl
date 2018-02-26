@@ -702,6 +702,7 @@ when
     "PrintTags.showTag",
     "Stampings.dailyPresence",
     "Stampings.missingStamping",
+    "Stampings.stampingsByAdmin",
     "Stampings.personStamping",
     "Vacations.list",
     "Vacations.vacationSummary",
@@ -924,6 +925,7 @@ when
  		"MonthRecaps.show",
 
  		"Stampings.missingStamping",
+ 		"Stampings.stampingsByAdmin",
         "Stampings.dailyPresence",
         "Stampings.mealTicketSituation",
 
@@ -1069,7 +1071,8 @@ when
         "Stampings.personStamping",
         "Stampings.dailyPresence",
         "Stampings.missingStamping",
-
+		"Stampings.stampingsByAdmin",
+		
         "Vacations.list",
         "Vacations.vacationSummary",
 
