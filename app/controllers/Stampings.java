@@ -1,6 +1,7 @@
 package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -23,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
 import manager.NotificationManager;
 import manager.PersonDayManager;
@@ -56,7 +56,6 @@ import security.SecurityRules;
  *
  * @author alessandro
  */
-@Slf4j
 @With({Resecure.class})
 public class Stampings extends Controller {
 
@@ -398,8 +397,7 @@ public class Stampings extends Controller {
     rules.checkIfPermitted(office);
 
     List<Stamping> stampingsByAdmin = stampingDao.adminStamping(new YearMonth(year, month), office);
-    log.warn("Trovate {} timbrature inserite/modificate dall'admin nel mese di {}/{}", 
-        stampingsByAdmin.size(), month, year);
+     
     if (pdf) {
       renderPDF("/Stampings/stampingsByAdminPDF.html", 
           month, year, office, offices, stampingsByAdmin);

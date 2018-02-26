@@ -644,6 +644,7 @@ PrintTags.showTag= Stampa Cartellino Presenze
 Stampings.dailyPresence= Presenza Giornaliera
 Stampings.dailyPresenceForPersonInCharge= Presenza giornaliera gruppo
 Stampings.missingStamping= Riepilogo problemi sui giorni
+Stampings.stampingsByAdmin= Timbrature da amministratore
 Stampings.personStamping= Timbrature
 Stampings.stampings= Situazione Mensile
 Synchronizations.institutes= Sincronizza Sedi
