@@ -1,0 +1,38 @@
+<div class="container">
+	#{title title: 'Timbrature inserite dall\'amministratore del mese ' + month + '/' + year +  ' - ' + office?.name /}
+</div>
+
+
+<div class="container">
+
+#{if !stampingsByAdmin.isEmpty()}
+      <table class="table table-hover table-striped table-bordered">
+	    <tr>
+		  <th style="min-width: 300px;">Nome</th>
+		  <th>Timbratura</th>
+		  <th>Note</th>
+		</tr>
+		
+	   #{list items:stampingsByAdmin, as:'stamping'}	   
+	   <tr>
+		 <td>
+		   ${stamping.personDay.person.fullname}
+		 </td>
+		 
+		 <td>
+		   <span class="badge badge-danger">${stamping.date.toDate().format()}</span>
+		   <span class="badge badge-danger">${stamping.date.toLocalTime().format()}</span>
+	     </td>
+	     
+	     <td>
+	     	${stamping.note}
+	     </td>
+
+	   </tr>     
+	   #{/list}
+	
+     </table>
+ #{/if} #{else}
+ 	<div class="alert alert-warning" role="alert">Non ci sono timbrature inserite/modificate dall'amministratore per questo mese</div>
+ #{/else}
+</div>
