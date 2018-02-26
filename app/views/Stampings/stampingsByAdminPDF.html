@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <style type="text/css">
+    table {
+    border: 1px solid black;
+    background-color: #EAEAEA;
+    font-size: 75%;
+    }
+
+    table th,td {
+    background-color: #EAEAEA;
+    border: 1px solid #757575;
+    width: 12%;
+    }
+
+    #tabelleRiassuntive{
+    margin-top: 7em;
+    }
+
+    #stampingsDetailsTitle {
+    margin-top: 4em;
+    }
+
+    td.emptycell {
+    background: white;
+    padding-top: 1em;
+    }
+
+  </style>
+</head>
+
+<body>
+
+#{include './_stampingsByAdmin.html' /}
+
+<p style="text-align: right;margin-top:6em;">
+  Visto il ${new org.joda.time.LocalDate().toDate().format()}
+  <br><br>
+  Firma
+  <br><br>
+  _____________________________
+</p>
+
+</body>
+</html>
