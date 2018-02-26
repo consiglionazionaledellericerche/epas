@@ -1,5 +1,11 @@
 #{extends 'main.html' /}
 #{set header:'navbar' /}
-#{set title: 'ePAS - Timbrature mancanti'  /}
+#{set title: 'ePAS - Timbrature inseriti dall'amministratore'  /}
+
+<div class="container">
+	<div class="page-header">
+	  <a href="@{Stampings.stampingsByAdmin(year:year,month:month,officeId:office.id,pdf:true)}" class="btn btn-success pull-right">Genera PDF</a>
+	</div>
+</div>
 
 #{include './_stampingsByAdmin.html' /}

@@ -401,7 +401,8 @@ public class Stampings extends Controller {
     log.warn("Trovate {} timbrature inserite/modificate dall'admin nel mese di {}/{}", 
         stampingsByAdmin.size(), month, year);
     if (pdf) {
-      renderPDF("./stampingsByAdminPDF.html", month, year, office, offices, stampingsByAdmin);
+      renderPDF("/Stampings/stampingsByAdminPDF.html", 
+          month, year, office, offices, stampingsByAdmin);
     } else {
       render(month, year, office, offices, stampingsByAdmin);
     }
