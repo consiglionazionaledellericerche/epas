@@ -18,6 +18,7 @@ import javax.persistence.UniqueConstraint;
 
 import models.base.BaseModel;
 
+import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
