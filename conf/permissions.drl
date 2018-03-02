@@ -1121,8 +1121,6 @@ when
         "Persons.save",
      	"Persons.insertUsername",
      	"Persons.updateUsername",
-        "Persons.deletePerson",
-     	"Persons.deletePersonConfirmed",
      	"Configurations.personShow",
      	"Configurations.personEdit",
      	"Configurations.personUpdate",
@@ -1305,8 +1303,6 @@ when
         "Persons.save",
      	"Persons.insertUsername",
      	"Persons.updateUsername",
-        "Persons.deletePerson",
-     	"Persons.deletePersonConfirmed",
 
      	"Configurations.personShow",
      	"Configurations.personEdit",
