@@ -63,7 +63,7 @@ public class Missions extends Controller {
           + "la sede {} cui appartiene il destinatario {} "
           + "ha l'integrazione con Missioni disabilitata",
           office.get().name, body.person.fullName());
-      JsonResponse.notFound();
+      JsonResponse.ok();
     }
     
     // Malformed Json (400)
