@@ -54,10 +54,16 @@ source_date_residual, source_permission_used, source_recovery_day_used, source_r
 source_remaining_minutes_last_year, source_vacation_current_year_used, source_vacation_last_year_used, source_remaining_meal_ticket,
 source_by_admin, source_date_meal_ticket, perseo_id, is_temporary, source_date_vacation FROM contracts;
 
+DELETE FROM vacation_periods_history;
+
+INSERT INTO vacation_periods_history (id, _revision, _revision_type, begin_date, end_date, contract_id, vacation_code)
+SELECT id, (SELECT MAX(rev) AS rev FROM revinfo), 0, begin_date, end_date, contract_id, vacation_code
+FROM vacation_periods;
+
 
 # ---!Downs
 
 DROP TABLE competences_history;
 DROP TABLE contracts_history;
-DROP TABLE vacation_periods_history;
+
 
