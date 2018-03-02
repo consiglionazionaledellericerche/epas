@@ -59,7 +59,7 @@ DELETE FROM vacation_periods_history;
 INSERT INTO vacation_periods_history (id, _revision, _revision_type, begin_date, end_date, contract_id, vacation_code)
 SELECT id, (SELECT MAX(rev) AS rev FROM revinfo), 0, begin_date, end_date, contract_id, vacation_code
 FROM vacation_periods;
-
+--
 
 # ---!Downs
 
