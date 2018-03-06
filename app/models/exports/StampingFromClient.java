@@ -1,9 +1,7 @@
 package models.exports;
 
-import models.BadgeReader;
 import models.Person;
 import models.enumerate.StampTypes;
-
 import org.joda.time.LocalDateTime;
 
 /**
@@ -20,5 +18,5 @@ public class StampingFromClient {
   public boolean markedByAdmin;
   public LocalDateTime dateTime;
   public String zona;
-
+  public String note;
 }
