@@ -8,6 +8,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.ToString;
 import models.base.BaseModel;
+
+import org.hibernate.envers.Audited;
+
 import play.data.validation.Required;
 
 
@@ -22,6 +25,7 @@ import play.data.validation.Required;
 @ToString
 @Entity
 @Table(name = "competences")
+@Audited
 public class Competence extends BaseModel {
 
   private static final long serialVersionUID = -36737525666037452L;
