@@ -1,10 +1,11 @@
 package controllers;
 
+import static play.modules.pdf.PDF.renderPDF;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -15,19 +16,14 @@ import dao.history.StampingHistoryDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
-
 import helpers.Web;
 import helpers.validators.StringIsTime;
-
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.NullStringBinder;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
 import javax.inject.Inject;
-
 import manager.ConsistencyManager;
 import manager.NotificationManager;
 import manager.PersonDayManager;
@@ -38,24 +34,20 @@ import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.recaps.troubles.PersonTroublesInMonthRecap;
 import manager.recaps.troubles.PersonTroublesInMonthRecapFactory;
-
 import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.Role;
 import models.Stamping;
 import models.User;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.data.binding.As;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 
@@ -386,6 +378,36 @@ public class Stampings extends Controller {
     render(month, year, office, offices, missingStampings);
   }
 
+  /**
+   * Lista delle timbrature inserite in un mese dall'amministratore.
+   * 
+   * @param year anno 
+   * @param month mese 
+   * @param officeId ufficio di riferimento
+   */
+  public static void stampingsByAdmin(
+      final int year, final int month, final Long officeId, boolean pdf) {
+    Set<Office> offices = secureManager
+        .officesReadAllowed(Security.getUser().get());
+    if (offices.isEmpty()) {
+      forbidden();
+    }
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+
+    List<Stamping> stampingsByAdmin = stampingDao.adminStamping(new YearMonth(year, month), office);
+     
+    if (pdf) {
+      renderPDF("/Stampings/stampingsByAdminPDF.html", 
+          month, year, office, offices, stampingsByAdmin);
+    } else {
+      render(month, year, office, offices, stampingsByAdmin);
+    }
+  }
+  
+  
+  
   /**
    * Presenza giornaliera dei dipendenti visibili all'amministratore.
    *
