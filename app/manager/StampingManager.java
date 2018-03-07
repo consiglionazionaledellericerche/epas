@@ -148,8 +148,10 @@ public class StampingManager {
     stamping.stampingZone = 
         (stampingFromClient.zona != null && !stampingFromClient.zona.equals("")) 
         ? stampingFromClient.zona : null;
+    stamping.note = stampingFromClient.note;
+    
     stamping.save();
-
+    
     log.info("Inserita timbratura {} per {} (matricola = {}) ",
         stamping.getLabel(), person, person.number);
 
