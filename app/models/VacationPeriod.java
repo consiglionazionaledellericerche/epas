@@ -18,6 +18,8 @@ import models.base.IPropertyInPeriod;
 import models.base.PropertyInPeriod;
 import models.enumerate.VacationCode;
 
+import org.hibernate.envers.Audited;
+
 import play.data.validation.Required;
 
 /**
@@ -27,6 +29,7 @@ import play.data.validation.Required;
  */
 @Entity
 @Table(name = "vacation_periods")
+@Audited
 public class VacationPeriod extends PropertyInPeriod implements IPropertyInPeriod {
 
   private static final long serialVersionUID = 7082224747753675170L;
