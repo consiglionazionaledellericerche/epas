@@ -451,16 +451,6 @@ public class PersonDayManager {
 
     personDay.setTimeAtWork(computedTimeAtWork);
     
-    // Il caso di assenze a giustificazione "quello che manca"
-    if (getCompleteDayAndAddOvertime(personDay).isPresent()) {      
-      int missingTime = wttd.workingTime - personDay.getTimeAtWork();
-      personDay.setTimeAtWork(computedTimeAtWork + missingTime);      
-    }
-
-    //Controllo se ho del tempo aggiuntivo dovuto al lavoro in missione da sommare al tempo a lavoro
-    if (personDay.getWorkingTimeInMission() != null && personDay.getWorkingTimeInMission() != 0) {
-      personDay.setTimeAtWork(personDay.getTimeAtWork() + personDay.getWorkingTimeInMission());
-    }
     mealTicketHandlerAndDecurtedMeal(personDay, wttd, stampingTimeInOpening, 
         startLunch, endLunch, exitingNow);
 
@@ -469,6 +459,31 @@ public class PersonDayManager {
       personDay.setDecurtedMeal(0);
     } else {
       personDay.setTimeAtWork(personDay.getTimeAtWork() - personDay.getDecurtedMeal());
+    }
+    
+    // Il caso di assenze a giustificazione "quello che manca"
+    if (getCompleteDayAndAddOvertime(personDay).isPresent()) {      
+      int missingTime = wttd.workingTime - personDay.getTimeAtWork() - personDay.getDecurtedMeal();
+      if (personDay.isHoliday) {
+        //Nel caso "quello che manca", tipicamente per le missioni non si permette l'attivazione
+        //delle ore da timbrature nel festivo perché gestite tramite le ore aggiuntive in missione.
+        //Quindi si azzerano le ore onHoliday.
+        personDay.setOnHoliday(0);
+        //Il tempo a lavoro nei festivi è già impostato a 0.
+        //personDay.setTimeAtWork(0);
+      } else {
+        if (missingTime < 0) {
+          personDay.setTimeAtWork(personDay.getTimeAtWork());
+        } else {
+          //Time at work è quelle delle timbrature meno la pausa pranzo
+          personDay.setTimeAtWork(computedTimeAtWork + missingTime);
+        }        
+      }            
+    }
+
+    //Controllo se ho del tempo aggiuntivo dovuto al lavoro in missione da sommare al tempo a lavoro
+    if (personDay.getWorkingTimeInMission() != null && personDay.getWorkingTimeInMission() != 0) {
+      personDay.setTimeAtWork(personDay.getTimeAtWork() + personDay.getWorkingTimeInMission());
     }
 
     return personDay;
