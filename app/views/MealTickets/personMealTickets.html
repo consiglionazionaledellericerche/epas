@@ -28,7 +28,7 @@
     'data-async':'#page_content', 'data-async-error':'#insertMeal', 'data-spinner':'#defaultSpinner' }
     <input type="hidden" name="personId" value="${recap.contract.person.id}"/>
 	#{f.view 'office', value:person.office?.name /}
-    #{f.input 'codeBlock', type:'number', required:'true' /}
+    #{f.input 'codeBlock', type:'text', required:'true' /}
 
     #{f.input 'ticketNumberFrom', type:'number', required:'true' /}
     #{f.input 'ticketNumberTo', type:'number', required:'true' /}

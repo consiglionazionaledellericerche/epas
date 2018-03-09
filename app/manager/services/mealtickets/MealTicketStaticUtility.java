@@ -83,7 +83,7 @@ public class MealTicketStaticUtility {
       Contract contract, int first, int last) {
 
     List<MealTicket> mealTickets = Lists.newArrayList();
-    Long codeBlock = null;
+    String codeBlock = null;
     //Controllo di consistenza.
     for (MealTicket mealTicket : blockMealTicketsOrdered) {
       if (codeBlock == null) {
