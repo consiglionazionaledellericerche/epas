@@ -140,7 +140,7 @@ public class OfficeDao extends DaoBase {
     if (user.isSystemUser()) {
       final JPQLQuery query = getQueryFactory()
           .from(institute)
-          .rightJoin(institute.seats, office)
+          .leftJoin(institute.seats, office)
           .where(condition)
           .distinct();
       return ModelQuery.wrap(query, institute);
@@ -148,8 +148,8 @@ public class OfficeDao extends DaoBase {
 
     final JPQLQuery query = getQueryFactory()
         .from(institute)
-        .rightJoin(institute.seats, office)
-        .rightJoin(office.usersRolesOffices, uro)
+        .leftJoin(institute.seats, office)
+        .leftJoin(office.usersRolesOffices, uro)
         .where(condition.and(uro.user.eq(user).and(uro.role.eq(role))))
         .distinct();
 
