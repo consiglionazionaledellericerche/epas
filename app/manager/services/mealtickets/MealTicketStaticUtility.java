@@ -49,8 +49,10 @@ public class MealTicketStaticUtility {
       }
 
       //Stesso blocco
-      BigDecimal previous = new BigDecimal(previousMealTicket.code).add(BigDecimal.ONE);
-      BigDecimal actual = new BigDecimal(mealTicket.code);
+      
+      BigDecimal previous = new BigDecimal(
+          previousMealTicket.code.replace(previousMealTicket.block,"")).add(BigDecimal.ONE);  
+      BigDecimal actual = new BigDecimal(mealTicket.code.replace(mealTicket.block,""));
       if (previous.compareTo(actual) == 0 && previousMealTicket.contract.equals(mealTicket.contract)
           && previousMealTicket.returned == mealTicket.returned) {
         currentBlock.getMealTickets().add(mealTicket);
