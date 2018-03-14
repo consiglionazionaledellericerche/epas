@@ -88,7 +88,7 @@ public enum DefaultTakable {
   T_0(AmountType.minutes, 
       ImmutableSet.of(DefaultAbsenceType.A_0M), 
       ImmutableSet.of(DefaultAbsenceType.A_0M), 
-      -1, null),
+      600, null),
   T_09(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_09M), 
       ImmutableSet.of(DefaultAbsenceType.A_09M), 
