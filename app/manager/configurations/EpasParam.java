@@ -351,7 +351,7 @@ public enum EpasParam {
     public static final String DAY_MONTH_SEPARATOR = "/";
     public static final String LOCALTIME_INTERVAL_SEPARATOR = "-";
     public static final String LOCALTIME_FORMATTER = "HH:mm";
-    public static final String IP_LIST_SEPARATOR = ", ";
+    public static final String IP_LIST_SEPARATOR = ",";
 
     /**
      * Converte il tipo primitivo nella formattazione string.
@@ -392,7 +392,7 @@ public enum EpasParam {
       }
 
       if (value instanceof IpList) {
-        return Joiner.on(IP_LIST_SEPARATOR).join(((IpList) value).ipList);
+        return Joiner.on(IP_LIST_SEPARATOR + "\n").join(((IpList) value).ipList);
       }
 
       return null;
@@ -403,7 +403,7 @@ public enum EpasParam {
      */
     public static Object parseValue(final EpasParamValueType type, final String value) {
       try {
-        switch(type) {
+        switch (type) {
           case LOCALDATE:
             return new LocalDate(value);
           case LOCALTIME:
@@ -428,7 +428,9 @@ public enum EpasParam {
           case EMAIL:
             return value;
           case IP_LIST:
-            return new IpList(Splitter.on(IP_LIST_SEPARATOR).splitToList(value));
+            return new IpList(
+                Splitter.on(IP_LIST_SEPARATOR)
+                .trimResults().omitEmptyStrings().splitToList(value.trim()));
           case INTEGER:
             return new Integer(value);
           case BOOLEAN:
@@ -442,6 +444,9 @@ public enum EpasParam {
   }
 
   /**
+   * Verifica la lista dei cds non abilitati a visualizzare la 
+   * "Presenze automatica".
+   * 
    * @return la lista dei cds che non sono abilitati a visualizzare la 
    *     "Presenza automatica" sui contratti dei dipendenti.
    */
