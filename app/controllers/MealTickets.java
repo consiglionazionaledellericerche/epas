@@ -266,7 +266,7 @@ public class MealTickets extends Controller {
    * @param deliveryDate     data consegna
    * @param expireDate       data scadenza
    */
-  public static void submitPersonMealTicket(Long personId, @Required Long codeBlock,
+  public static void submitPersonMealTicket(Long personId, @Required String codeBlock,
       @Required @Min(1) @Max(99) Integer ticketNumberFrom,
       @Required @Min(1) @Max(99) Integer ticketNumberTo,
       @Valid @Required LocalDate deliveryDate, @Valid @Required LocalDate expireDate) {
@@ -351,7 +351,7 @@ public class MealTickets extends Controller {
    * @param last       al
    * @param undo       se voglio annullare la restituzione
    */
-  public static void returnPersonCodeBlock(Long contractId, Long codeBlock, int first, int last,
+  public static void returnPersonCodeBlock(Long contractId, String codeBlock, int first, int last,
       boolean undo) {
 
     Contract contract = contractDao.getContractById(contractId);
@@ -380,7 +380,7 @@ public class MealTickets extends Controller {
    * @param undo       se voglio annullare la restituzione
    * @param confirmed  conferma
    */
-  public static void performReturnPersonCodeBlock(Long contractId, Long codeBlock,
+  public static void performReturnPersonCodeBlock(Long contractId, String codeBlock,
       int first, int last, boolean undo, boolean confirmed) {
 
     Contract contract = contractDao.getContractById(contractId);
@@ -440,7 +440,7 @@ public class MealTickets extends Controller {
    * @param first      dal
    * @param last       al
    */
-  public static void deletePersonCodeBlock(Long contractId, Long codeBlock, int first, int last) {
+  public static void deletePersonCodeBlock(Long contractId, String codeBlock, int first, int last) {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
@@ -467,7 +467,7 @@ public class MealTickets extends Controller {
    * @param last       al
    * @param confirmed  conferma
    */
-  public static void performDeletePersonCodeBlock(Long contractId, Long codeBlock,
+  public static void performDeletePersonCodeBlock(Long contractId, String codeBlock,
       int first, int last, boolean confirmed) {
 
     Contract contract = contractDao.getContractById(contractId);
