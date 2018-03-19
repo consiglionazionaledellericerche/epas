@@ -4,7 +4,6 @@ public enum VacationCode {
 
   CODE_28_4("28+4", 28, 4),
   CODE_26_4("26+4", 26, 4),
-  CODE_25_4("25+4", 25, 4),
   CODE_21_4("21+4", 21, 4),
 
   // Part time verticale 2 giorni
