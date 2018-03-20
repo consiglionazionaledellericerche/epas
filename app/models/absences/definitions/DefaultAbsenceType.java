@@ -153,6 +153,9 @@ public enum DefaultAbsenceType {
   A_26("26", "Permesso per dipendente disabile L. 104/92 due ore giornaliere",
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 120, false, false,
       0, null, null, null),
+  A_26BP("26", "Permesso per dipendente disabile L. 104/92 due ore giornaliere con buono pasto",
+      false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 120, false, true,
+      0, null, null, null),
   
   A_C17("C17", "Congedo assistenza figlio disabile L. 104/92",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
