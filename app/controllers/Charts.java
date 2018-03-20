@@ -143,6 +143,9 @@ public class Charts extends Controller {
     render();
   }
 
+  /**
+   * Controllo dello schedone.
+   */
   public static void checkLastYearAbsences(File file, Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);

@@ -581,11 +581,13 @@ public class ChartsManager {
 
   @RequiredArgsConstructor
   public enum PersonStampingDayRecapHeader {
-    Data("Data"), Lavoro_da_timbrature("Lavoro da timbrature (hh:mm)"), Lavoro_fuori_sede(
-        "Lavoro fuori sede (hh:mm)"), Lavoro_effettivo(
-            "Lavoro effettivo (hh:mm)"), Ore_giustificate_da_assenza(
-                "Ore giustificate da assenza"), Codici_di_assenza_che_giustificano_ore(
-                    "Codici di assenza che giustificano ore");
+    Data("Data"), 
+    Lavoro_da_timbrature("Lavoro da timbrature (hh:mm)"), 
+    Lavoro_fuori_sede("Lavoro fuori sede (hh:mm)"), 
+    Lavoro_effettivo("Lavoro effettivo (hh:mm)"), 
+    Ore_giustificate_da_assenza("Ore giustificate da assenza"), 
+    Codici_di_assenza_che_giustificano_ore("Codici di assenza che giustificano ore"),
+    Codici_di_assenza("Tutti i codici di assenza");
 
     @Getter
     private final String description;
@@ -596,7 +598,7 @@ public class ChartsManager {
   }
 
   /**
-   * 
+   * Crea il file csv con la situazione mensile.
    * @param psDto il personStampingDayRecap da cui partire per prendere le informazioni
    * @return un file di tipo csv contenente la situazione mensile.
    */
@@ -642,6 +644,11 @@ public class ChartsManager {
             Joiner.on(";").join(day.personDay.absences.stream().filter(a -> a.justifiedTime() > 0)
                 .map(a -> a.absenceType.code).collect(Collectors.toList())));
 
+        // Lista di tutti i codici di assenza ;
+        record.add(
+            Joiner.on(";").join(day.personDay.absences.stream()
+                .map(a -> a.absenceType.code).collect(Collectors.toList())));
+
         csvFilePrinter.printRecord(record);
       }
 
@@ -683,7 +690,7 @@ public class ChartsManager {
 
       row = sheet.createRow(0);
       row.setHeightInPoints(30);
-      for (int i = 0; i < 6; i++) {
+      for (int i = 0; i < 7; i++) {
         sheet.setColumnWidth((short) (i), (short) ((50 * 8) / ((double) 1 / 20)));
         cell = row.createCell(i);
         cell.setCellStyle(cs);
@@ -708,6 +715,10 @@ public class ChartsManager {
             cell.setCellValue(PersonStampingDayRecapHeader.Codici_di_assenza_che_giustificano_ore
                 .getDescription());
             break;
+          case 6:
+            cell.setCellValue(PersonStampingDayRecapHeader.Codici_di_assenza
+                .getDescription());            
+            break;
           default:
             break;
         }
@@ -718,7 +729,7 @@ public class ChartsManager {
       for (PersonStampingDayRecap day : psDto.daysRecap) {
         row = sheet.createRow(rownum);
 
-        for (int cellnum = 0; cellnum < 6; cellnum++) {
+        for (int cellnum = 0; cellnum < 7; cellnum++) {
           cell = row.createCell(cellnum);
           if (day.personDay.isHoliday) {
             cell.setCellStyle(cellHoliday);
@@ -762,6 +773,12 @@ public class ChartsManager {
               cell.setCellValue(Joiner.on(";")
                   .join(day.personDay.absences.stream().filter(a -> a.justifiedTime() > 0)
                       .map(a -> a.absenceType.code).collect(Collectors.toList())));
+              break;
+            case 6:
+              cell.setCellValue(Joiner.on(";")
+                  .join(day.personDay.absences.stream()
+                      .map(a -> a.absenceType.code).collect(Collectors.toList())));              
+              break;
             default:
               break;
           }
