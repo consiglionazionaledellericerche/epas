@@ -28,6 +28,8 @@ DB_PORT=${DB_PORT:-5432}
 DB_NAME=${DB_NAME:-epas}
 DB_USER=${DB_USER:-postgres}
 
+EVOLUTIONS_ENABLED=${EVOLUTIONS_ENABLED:-true}
+
 if [ -z "${DB_PASS}" ]; then
 	DB_USER_PASS=$DB_USER
 else
@@ -82,6 +84,8 @@ sed 's#{{DB_PORT}}#'"${DB_PORT}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{DB_NAME}}#'"${DB_NAME}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{DB_USER_PASS}}#'"${DB_USER_PASS}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{PROTOCOL}}#'"${PROTOCOL}"'#' -i ${APP_HOME}/conf/prod.conf
+
+sed 's#{{EVOLUTIONS_ENABLED}}#'"${EVOLUTIONS_ENABLED}"'#' -i ${APP_HOME}/conf/prod.conf
 
 ### Impostazione server smtp
 
