@@ -195,9 +195,13 @@ sed 's#{{SKIP_IP_CHECK}}#'"${SKIP_IP_CHECK}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{EPAS_SHIB_LOGIN}}#'"${EPAS_SHIB_LOGIN}"'#' -i ${APP_HOME}/conf/prod.conf
 
 appRun () {
-  echo "Applico eventuali evoluzioni al database..."
-  sudo -u ${user} -H play evolutions:apply --%prod
-  echo ".... evoluzioni terminate"
+  if [ "$EVOLUTIONS_ENABLED" = "true" ]; 
+    echo "Applico eventuali evoluzioni al database..."
+    sudo -u ${user} -H play evolutions:apply --%prod
+    echo ".... evoluzioni terminate"
+  else  
+    echo "Evoluzioni disabilitate dalla configurazione: EVOLUTIONS_ENABLED=$EVOLUTIONS_ENABLED"; 
+  fi
   
   echo "Avvio ${APP}..."
   sudo -u ${user} -H play run --%prod -Dprecompiled=true -Duser.country=IT -Duser.language=it
