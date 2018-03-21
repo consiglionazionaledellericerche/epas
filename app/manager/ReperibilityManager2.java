@@ -107,8 +107,10 @@ public class ReperibilityManager2 {
             
             .collect(Collectors.toList()));
       }
-      if (person.reperibility != null) {
-        activities.add(person.reperibility.personReperibilityType);
+      if (!person.reperibility.isEmpty()) {
+        for (PersonReperibility rep : person.reperibility) {
+          activities.add(rep.personReperibilityType);
+        }        
       }
     } else {
       if (currentUser.isSystemUser()) {

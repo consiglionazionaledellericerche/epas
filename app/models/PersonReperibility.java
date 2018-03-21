@@ -39,10 +39,10 @@ public class PersonReperibility extends BaseModel {
 
   private static final long serialVersionUID = 7543768807724174894L;
 
-  @Unique
+  //@Unique
+  @ManyToOne
   @Required
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "person_id", unique = true)
+  @JoinColumn(name = "person_id")
   public Person person;
 
   @Column(name = "start_date")
@@ -55,7 +55,6 @@ public class PersonReperibility extends BaseModel {
   @ManyToOne
   @JoinColumn(name = "person_reperibility_type_id")
   public PersonReperibilityType personReperibilityType;
-
 
   @OneToMany(mappedBy = "personReperibility", cascade = {CascadeType.REMOVE})
   public List<PersonReperibilityDay> personReperibilityDays;
