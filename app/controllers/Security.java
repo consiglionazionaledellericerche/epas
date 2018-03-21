@@ -97,7 +97,7 @@ public class Security extends Secure.Security {
     final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
         .split(Http.Request.current().remoteAddress));
 
-    log.info("Remote addresses = {}", addresses);
+    log.debug("Remote addresses = {}", addresses);
     return !officeManager.getOfficesWithAllowedIp(addresses).isEmpty();
   }
 
