@@ -217,7 +217,9 @@ public class ReperibilityManager {
           log.trace("Aggiorno il personReperibilityDay = {}", personReperibilityDay);
         }
 
-        //personReperibilityDay.personReperibility = reperibilityPeriod.person.reperibility;
+        personReperibilityDay.personReperibility = 
+            personReperibilityDayDao
+            .getPersonReperibilityByPersonAndType(reperibilityPeriod.person, reperibilityType);
         personReperibilityDay.date = day;
         personReperibilityDay.reperibilityType = reperibilityPeriod.reperibilityType;
         //XXX: manca ancora l'impostazione dell'eventuale holidayDay, ovvero se si tratta
