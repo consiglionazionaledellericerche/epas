@@ -1312,7 +1312,7 @@ public class Competences extends Controller {
     }
     type.save();
     List<PersonReperibility> personAssociated = 
-        reperibilityDao.byOffice(type.office);
+        reperibilityDao.byOffice(type.office, LocalDate.now());
     
     List<CompetenceCode> codeList = Lists.newArrayList();
     codeList.add(competenceCodeDao.getCompetenceCodeByCode("207"));
@@ -1376,7 +1376,7 @@ public class Competences extends Controller {
     }
     if (Validation.hasErrors()) {
       List<PersonReperibility> personAssociated = 
-          reperibilityDao.byOffice(type.office);
+          reperibilityDao.byOffice(type.office, LocalDate.now());
       List<CompetenceCode> codeList = Lists.newArrayList();
       codeList.add(competenceCodeDao.getCompetenceCodeByCode("207"));
       codeList.add(competenceCodeDao.getCompetenceCodeByCode("208"));

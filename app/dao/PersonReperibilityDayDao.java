@@ -240,9 +240,11 @@ public class PersonReperibilityDayDao extends DaoBase {
    * @param office
    * @return
    */
-  public List<PersonReperibility> byOffice(Office office) {
+  public List<PersonReperibility> byOffice(Office office, LocalDate date) {
     QPersonReperibility pr = QPersonReperibility.personReperibility;
-    JPQLQuery query = getQueryFactory().from(pr).where(pr.person.office.eq(office));
+    JPQLQuery query = getQueryFactory().from(pr)
+        .where(pr.person.office.eq(office)
+            .and(pr.startDate.loe(date).andAnyOf(pr.endDate.isNull(), pr.endDate.goe(date))));
     return query.list(pr);
   }
 
