@@ -226,9 +226,10 @@ public class ReperibilityManager2 {
      */
 
     //Verifica se la persona è attiva in quell'attività in quel giorno
-    final boolean isActive = personReperibilityDay.personReperibility.dateRange()
-        .contains(personReperibilityDay.date);
-    if (!isActive) {
+    Optional<PersonReperibility> rep = reperibilityDao
+        .byPersonDateAndType(personReperibilityDay.personReperibility.person, 
+            personReperibilityDay.date, personReperibilityDay.reperibilityType);
+    if (!rep.isPresent()) {
       return Optional.of(Messages.get("reperibility.personInactive"));
     }
 
@@ -265,8 +266,7 @@ public class ReperibilityManager2 {
     return Optional.absent();
   }
 
-
-
+  
   public void checkReperibilityValid(PersonReperibilityDay personReperibilityDay) {
     /*
      * 0. Dev'essere una reperibilità persistente.
