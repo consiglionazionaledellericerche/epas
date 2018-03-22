@@ -135,26 +135,21 @@ public class MealTickets extends Controller {
    *
    * @param personId persona
    */
-  public static void personMealTickets(Long personId, Integer year, Integer month) {
-
-    Person person = personDao.getPersonById(personId);
-    Preconditions.checkArgument(person.isPersistent());
-    rules.checkIfPermitted(person.office);
+  public static void personMealTickets(Long contractId, Integer year, Integer month) {
+    
+    Contract contract = contractDao.getContractById(contractId);
+    
+    Preconditions.checkState(contract.isPersistent());
+    Preconditions.checkArgument(contract.person.isPersistent());
+    rules.checkIfPermitted(contract.person.office);
 
     if (year == null || month == null) {
       year = LocalDate.now().getYear();
       month = LocalDate.now().getMonthOfYear();
     }
-    
-    //Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
-    
-    Optional<Contract> contractInMonth = 
-        wrapperFactory.create(person).getFirstContractInMonth(year, month);
-    //Preconditions.checkState(contract.isPresent());
-    Preconditions.checkState(contractInMonth.isPresent());
 
     // riepilogo contratto corrente
-    MealTicketRecap recap = mealTicketService.create(contractInMonth.get()).orNull();
+    MealTicketRecap recap = mealTicketService.create(contract).orNull();
     Preconditions.checkNotNull(recap);
 
     LocalDate deliveryDate = LocalDate.now();
@@ -163,9 +158,9 @@ public class MealTickets extends Controller {
     Integer ticketNumberFrom = 1;
     Integer ticketNumberTo = 22;
 
-    LocalDate expireDate = mealTicketDao.getFurtherExpireDateInOffice(person.office);
+    LocalDate expireDate = mealTicketDao.getFurtherExpireDateInOffice(contract.person.office);
     User admin = Security.getUser().get();
-
+    Person person = contract.person;
     render(person, recap, deliveryDate, admin, expireDate, 
         today, ticketNumberFrom, ticketNumberTo, year, month);
   }
@@ -173,58 +168,49 @@ public class MealTickets extends Controller {
   /**
    * Riepilogo contratto corrente e precedente dei buoni pasto consegnati alla persona.
    */
-  public static void recapPersonMealTickets(Long personId, int year, int month) {
+  public static void recapPersonMealTickets(Long contractId, int year, int month) {
 
-    Person person = personDao.getPersonById(personId);
-    Preconditions.checkArgument(person.isPersistent());
-    rules.checkIfPermitted(person.office);
+    Contract contract = contractDao.getContractById(contractId);
+    Preconditions.checkState(contract.isPersistent());
+    Preconditions.checkArgument(contract.person.isPersistent());
+    rules.checkIfPermitted(contract.person.office);
 
     MealTicketRecap recap;
     MealTicketRecap recapPrevious = null; // TODO: nella vista usare direttamente optional
 
-//    Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
-//    Preconditions.checkState(contract.isPresent());
-    Optional<Contract> contractInMonth = 
-        wrapperFactory.create(person).getFirstContractInMonth(year, month);
-    Preconditions.checkState(contractInMonth.isPresent());
-
     // riepilogo contratto corrente
-    Optional<MealTicketRecap> currentRecap = mealTicketService.create(contractInMonth.get());
+    Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract);
     Preconditions.checkState(currentRecap.isPresent());
     recap = currentRecap.get();
 
     //riepilogo contratto precedente
-    Contract previousContract = personDao.getPreviousPersonContract(contractInMonth.get());
+    Contract previousContract = personDao.getPreviousPersonContract(contract);
     if (previousContract != null) {
       Optional<MealTicketRecap> previousRecap = mealTicketService.create(previousContract);
       if (previousRecap.isPresent()) {
         recapPrevious = previousRecap.get();
       }
     }
-
+    Person person = contract.person;
     render(person, recap, recapPrevious, year, month);
   }
 
   /**
    * Form per la rimozione/riconsegna dei buoni consegnati al dipendente.
    */
-  public static void editPersonMealTickets(Long personId, int year, int month) {
+  public static void editPersonMealTickets(Long contractId, int year, int month) {
 
-    Person person = personDao.getPersonById(personId);
-    Preconditions.checkArgument(person.isPersistent());
-    rules.checkIfPermitted(person.office);
-
-//    Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
-//    Preconditions.checkState(contract.isPresent());
-    Optional<Contract> contractInMonth = 
-        wrapperFactory.create(person).getFirstContractInMonth(year, month);
-    Preconditions.checkState(contractInMonth.isPresent());
+    Contract contract = contractDao.getContractById(contractId);
+    //Person person = personDao.getPersonById(personId);
+    Preconditions.checkState(contract.isPersistent());
+    Preconditions.checkArgument(contract.person.isPersistent());
+    rules.checkIfPermitted(contract.person.office);
 
     // riepilogo contratto corrente
-    Optional<MealTicketRecap> currentRecap = mealTicketService.create(contractInMonth.get());
+    Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract);
     Preconditions.checkState(currentRecap.isPresent());
     MealTicketRecap recap = currentRecap.get();
-
+    Person person = contract.person;
     render(person, recap, year, month);
   }
 
@@ -266,21 +252,24 @@ public class MealTickets extends Controller {
    * @param deliveryDate     data consegna
    * @param expireDate       data scadenza
    */
-  public static void submitPersonMealTicket(Long personId, @Required String codeBlock,
+  public static void submitPersonMealTicket(Long contractId, @Required String codeBlock,
       @Required @Min(1) @Max(99) Integer ticketNumberFrom,
       @Required @Min(1) @Max(99) Integer ticketNumberTo,
       @Valid @Required LocalDate deliveryDate, @Valid @Required LocalDate expireDate) {
 
-    Person person = personDao.getPersonById(personId);
-    notFoundIfNull(person);
-    rules.checkIfPermitted(person.office);
+    Contract contract = contractDao.getContractById(contractId);
+    Person person = contract.person;
+    notFoundIfNull(contract.person);
+    
+    rules.checkIfPermitted(contract.person.office);
+    Preconditions.checkState(contract.isPersistent());
     User admin = Security.getUser().get();
 
     MealTicketRecap recap;
-    Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
-    Preconditions.checkState(contract.isPresent());
+    //Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
+    
     // riepilogo contratto corrente
-    Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract.get());
+    Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract);
     Preconditions.checkState(currentRecap.isPresent());
     recap = currentRecap.get();
 
@@ -289,7 +278,7 @@ public class MealTickets extends Controller {
     }
 
     if (Validation.hasErrors()) {
-
+      
       render("@personMealTickets", person, recap, codeBlock, ticketNumberFrom, ticketNumberTo,
           deliveryDate, expireDate, admin);
     }
@@ -339,7 +328,7 @@ public class MealTickets extends Controller {
 
     flash.success("Il blocco inserito è stato salvato correttamente.");
 
-    personMealTickets(person.id, deliveryDate.getYear(), deliveryDate.getMonthOfYear());
+    personMealTickets(contract.id, deliveryDate.getYear(), deliveryDate.getMonthOfYear());
   }
 
   /**
@@ -427,7 +416,7 @@ public class MealTickets extends Controller {
 
     flash.success("%d buoni riconsegnati correttamente.", blockPortionToReturn.size());
     //TODO: provvisorio ci vanno anno e mese da cui sono partito per fare la modifica
-    editPersonMealTickets(contract.person.id, Integer.parseInt(session.get("yearSelected")), 
+    editPersonMealTickets(contract.id, Integer.parseInt(session.get("yearSelected")), 
         Integer.parseInt(session.get("monthSelected")));
   }
 
@@ -511,7 +500,7 @@ public class MealTickets extends Controller {
 
     flash.success("Blocco di %d buoni rimosso correttamente.", deleted);
     //TODO: provvisorio ci vanno anno e mese da cui sono partito per fare la modifica
-    editPersonMealTickets(contract.person.id, Integer.parseInt(session.get("yearSelected")), 
+    editPersonMealTickets(contract.id, Integer.parseInt(session.get("yearSelected")), 
         Integer.parseInt(session.get("monthSelected")));
   }
 
