@@ -188,6 +188,15 @@ public class ContractMonthRecap extends BaseModel {
     return this.progressivoFinalePositivoMese;
   }
 
+  @Transient
+  public boolean expireInMonth() {
+    if (this.contract.endDate != null 
+        && this.contract.endDate.isBefore(
+            new LocalDate(year, month,1).dayOfMonth().withMaximumValue())) {
+      return true;
+    }
+    return false;
+  }
   /**
    * Clean dell'oggetto persistito pre ricomputazione.
    */

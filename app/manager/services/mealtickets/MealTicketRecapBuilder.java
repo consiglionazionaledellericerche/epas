@@ -42,7 +42,7 @@ public class MealTicketRecapBuilder {
     MealTicketRecap mealTicketRecap = new MealTicketRecap();
     
     mealTicketRecap.setContract(contract);
-
+    
     mealTicketRecap.setMealTicketInterval(
         new DateInterval(mealTicketInterval.getBegin(), LocalDate.now()));
 
