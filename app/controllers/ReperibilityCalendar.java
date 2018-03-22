@@ -277,7 +277,8 @@ public class ReperibilityCalendar extends Controller {
           PersonReperibilityDay personReperibilityDay = new PersonReperibilityDay();
           personReperibilityDay.date = date;
           personReperibilityDay.reperibilityType = reperibilityType;
-          personReperibilityDay.personReperibility = person.reperibility;
+          personReperibilityDay.personReperibility = 
+              reperibilityDao.getPersonReperibilityByPersonAndType(person, reperibilityType);
           Optional<String> error;
           if (validation.valid(personReperibilityDay).ok) {
             error = reperibilityManager2.reperibilityPermitted(personReperibilityDay);

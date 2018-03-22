@@ -240,10 +240,28 @@ public class PersonReperibilityDayDao extends DaoBase {
    * @param office
    * @return
    */
-  public List<PersonReperibility> byOffice(Office office) {
+  public List<PersonReperibility> byOffice(Office office, LocalDate date) {
     QPersonReperibility pr = QPersonReperibility.personReperibility;
-    JPQLQuery query = getQueryFactory().from(pr).where(pr.person.office.eq(office));
+    JPQLQuery query = getQueryFactory().from(pr)
+        .where(pr.person.office.eq(office)
+            .and(pr.startDate.loe(date).andAnyOf(pr.endDate.isNull(), pr.endDate.goe(date))));
     return query.list(pr);
+  }
+  
+  /**
+   * 
+   * @param person la persona di cui si vuole l'attività associata
+   * @param date la data da verificare se è presente nel periodo per cui è associato all'attività
+   * @param type il tipo di attività
+   * @return l'attività associata alla persona nella data specificata.
+   */
+  public Optional<PersonReperibility> byPersonDateAndType(Person person, 
+      LocalDate date, PersonReperibilityType type) {
+    QPersonReperibility pr = QPersonReperibility.personReperibility;
+    JPQLQuery query = getQueryFactory().from(pr)
+        .where(pr.person.eq(person).and(pr.personReperibilityType.eq(type)
+            .and(pr.startDate.loe(date).andAnyOf(pr.endDate.isNull(), pr.endDate.goe(date)))));
+    return Optional.fromNullable(query.singleResult(pr));
   }
 
 }
