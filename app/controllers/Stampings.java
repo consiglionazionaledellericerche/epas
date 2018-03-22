@@ -1,7 +1,6 @@
 package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -24,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
+import lombok.val;
 import manager.ConsistencyManager;
 import manager.NotificationManager;
 import manager.PersonDayManager;
@@ -249,24 +249,38 @@ public class Stampings extends Controller {
     rules.checkIfPermitted(stamping);
 
     final User currentUser = Security.getUser().get();
+    
+    val alreadyPresentStamping = stampingDao.getStamping(stamping.date, person, stamping.way);
+    //Se la timbratura allo stesso orario e con lo stesso verso non è già presente o è una modifica
+    //alla timbratura esistente allora creo/modifico la timbratura.
+    if (!alreadyPresentStamping.isPresent() || alreadyPresentStamping.get().id.equals(stamping.id)) {
 
-    if (!currentUser.isSystemUser()) {
-      if (currentUser.hasRoles(Role.PERSONNEL_ADMIN)) {
-        stamping.markedByEmployee = false;
-        stamping.markedByAdmin = true;
+      if (!currentUser.isSystemUser()) {
+        if (currentUser.hasRoles(Role.PERSONNEL_ADMIN)) {
+          stamping.markedByEmployee = false;
+          stamping.markedByAdmin = true;
+        } else {
+          stamping.markedByEmployee = true;
+          stamping.markedByAdmin = false;
+        }
+      }
+      stamping.save();
+
+      consistencyManager.updatePersonSituation(stamping.personDay.person.id, stamping.personDay.date);
+
+      flash.success(Web.msgSaved(Stampings.class));
+
+      notificationManager
+      .notificationStampingPolicy(currentUser, stamping, newInsert, !newInsert, false);
+    } else {
+      if ((stamping.stampType != null && !stamping.stampType.equals(alreadyPresentStamping.get().stampType)) ||
+          (stamping.stampType == null && alreadyPresentStamping.get().stampType != null)) {
+        flash.error("Timbratura già presente ma con causale diversa, modificare la timbratura presente.");  
       } else {
-        stamping.markedByEmployee = true;
-        stamping.markedByAdmin = false;
+        flash.error("Timbratura ignorata perché già presente.");
       }
     }
-    stamping.save();
-
-    consistencyManager.updatePersonSituation(stamping.personDay.person.id, stamping.personDay.date);
-
-    flash.success(Web.msgSaved(Stampings.class));
-
-    notificationManager
-    .notificationStampingPolicy(currentUser, stamping, newInsert, !newInsert, false);
+    
     
     //redirection stuff
     if (!currentUser.isSystemUser() && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)

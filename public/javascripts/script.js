@@ -1,6 +1,24 @@
 /* Author:
  */
 $(function($) {
+	
+	/**
+	 * evita i doppi invii sulle submit delle form.
+	 */
+	$(document.body).on('submit', 'form:not(.js-allow-double-submission,[data-reload])', function (e) {
+		var $form = $(this)
+		if ($form.data('submitted') === true) {
+	      e.preventDefault();
+	    } else {
+	      $form.data('submitted', true);
+	      $(':input', $form).prop('readOnly', true);
+	      $(":button[type='submit']").prop('disabled',true);	      
+	      $('a', $form).disable(true);
+	      $('.btn', $form).addClass('disabled');
+	    }
+	    return true;
+	  });
+	  
   /**
    * Opposto di serialize(). Dall'url ai form params.
    */

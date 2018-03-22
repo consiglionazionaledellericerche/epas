@@ -1,5 +1,6 @@
 package dao;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.mysema.query.jpa.JPQLQuery;
@@ -7,11 +8,14 @@ import com.mysema.query.jpa.JPQLQueryFactory;
 import java.util.List;
 import javax.persistence.EntityManager;
 import models.Office;
+import models.Person;
 import models.StampModificationType;
 import models.Stamping;
+import models.Stamping.WayType;
 import models.query.QPerson;
 import models.query.QStampModificationType;
 import models.query.QStamping;
+import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
 
 /**
@@ -26,6 +30,23 @@ public class StampingDao extends DaoBase {
     super(queryFactory, emp);
   }
 
+  /**
+   * Ritorna la prima (eventuale) timbratura che corrisponde ai dati passati.
+   * 
+   * @param dateTime data della timbratura
+   * @param person persona a cui si riferisce
+   * @param way verso.
+   * @return la prima timbratura (ordinando per id decrescente) trovata, oppure Optional::absent
+   */
+  public Optional<Stamping> getStamping(LocalDateTime dateTime, Person person, WayType way) {
+    final QStamping stamping = QStamping.stamping;
+    final JPQLQuery query = getQueryFactory().from(stamping)
+        .where(stamping.date.eq(dateTime).and(stamping.personDay.person.eq(person)).and(stamping.way.eq(way)))
+        .orderBy(stamping.id.desc())
+        .limit(1);
+    return Optional.fromNullable(query.singleResult(stamping));
+  }
+  
   /**
    * Preleva una timbratura tramite il suo id.
    * 
