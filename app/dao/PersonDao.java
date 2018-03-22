@@ -505,13 +505,15 @@ public final class PersonDao extends DaoBase {
   public List<Person> getPersonForReperibility(Long type) {
 
     final QPerson person = QPerson.person;
+    final QPersonReperibility rep = QPersonReperibility.personReperibility;
 
     final JPQLQuery query = getQueryFactory().from(person)
-        .where(person.reperibility.personReperibilityType.id.eq(type)
-            .and(person.reperibility.startDate.isNull()
-                .or(person.reperibility.startDate.loe(LocalDate.now())
-                    .and(person.reperibility.endDate.isNull()
-                        .or(person.reperibility.endDate.goe(LocalDate.now()))))));
+        .leftJoin(person.reperibility, rep)
+        .where(rep.personReperibilityType.id.eq(type)
+            .and(rep.startDate.isNull()
+                .or(rep.startDate.loe(LocalDate.now())
+                    .and(rep.endDate.isNull()
+                        .or(rep.endDate.goe(LocalDate.now()))))));
     return query.list(person);
 
   }
