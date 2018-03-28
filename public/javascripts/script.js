@@ -13,7 +13,8 @@ $(function($) {
 	      $form.data('submitted', true);
 	      $(':input', $form).prop('readOnly', true);
 	      $(":button[type='submit']").prop('disabled',true);	      
-	      $('a', $form).disable(true);
+	      //Non funziona nelle modali di inserimento assenze
+	      //$('a', $form).disable(true); 
 	      $('.btn', $form).addClass('disabled');
 	    }
 	    return true;
