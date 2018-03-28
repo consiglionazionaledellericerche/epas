@@ -44,7 +44,7 @@ title:(Action + ' servizio per turno')}
   #{/list}
   </table>
   #{/if}
-  
+    #{secure.check 'Competences.saveShift'}
 	#{b.buttons center:true}
 
   		#{if cat?.persistent}
@@ -55,6 +55,7 @@ title:(Action + ' servizio per turno')}
   		#{/else}
 
   	#{/b.buttons}
+  	#{/secure.check}
   #{/form}
 </div>
 </div>
