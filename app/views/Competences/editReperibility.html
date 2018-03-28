@@ -18,9 +18,9 @@ title:(Action + ' servizio per reperibilità')}
   #{f.view 'type.office', value:office /}
   #{f.selectModel 'type.supervisor', items: officePeople, required:true /}
   #{f.selectMultipleModel 'type.managers', values: officePeople /}
-
+	#{secure.check 'Competences.saveReperibility'}
 	#{b.buttons center:true}
-
+	
   		#{if type?.persistent}
     		#{b.submit 'Aggiorna'/}
   		#{/if}
@@ -29,6 +29,7 @@ title:(Action + ' servizio per reperibilità')}
   		#{/else}
 
   	#{/b.buttons}
+  	#{/secure.check}
   #{/form}
 </div>
 #{/modalAsync}
