@@ -123,7 +123,7 @@ public class PersonDaysTest extends UnitTest {
     //coppia valida con dentro una timbratura di servizio ok
     PersonDay personDay = new PersonDay(null, second);
     List<Stamping> stamps = Lists.newArrayList();
-    stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE));
+    stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.LAVORO_FUORI_SEDE));
     stamps.add(stampings(personDay, 15, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO));
     stamps.add(stampings(personDay, 19, 30, WayType.out, null));
     personDayManager.setValidPairStampings(personDay.stampings);
@@ -132,7 +132,7 @@ public class PersonDaysTest extends UnitTest {
     //coppia valida con dentro timbrature di servizio con ordine sparso ok 
     personDay = new PersonDay(null, second);
     stamps = Lists.newArrayList();
-    stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE));
+    stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.LAVORO_FUORI_SEDE));
     stamps.add(stampings(personDay, 14, 30, WayType.out, StampTypes.MOTIVI_DI_SERVIZIO));
     stamps.add(stampings(personDay, 15, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO));
     stamps.add(stampings(personDay, 16, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO));
@@ -143,7 +143,7 @@ public class PersonDaysTest extends UnitTest {
     //coppia non valida 
     personDay = new PersonDay(null, second);
     stamps = Lists.newArrayList();
-    stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE));
+    stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.LAVORO_FUORI_SEDE));
     stamps.add(stampings(personDay, 15, 30, WayType.in, null));
     stamps.add(stampings(personDay, 19, 30, WayType.out, null));
     personDayManager.setValidPairStampings(personDay.stampings);

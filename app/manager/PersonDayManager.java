@@ -967,8 +967,8 @@ public class PersonDayManager {
         LocalDateTime outTime = validPair.second.date;
         LocalDateTime inTime = validPair.first.date;
         if (stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime)) {
-          if (validPair.second.stampType == StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE
-              || validPair.first.stampType == StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE) {
+          if (validPair.second.stampType == StampTypes.LAVORO_FUORI_SEDE
+              || validPair.first.stampType == StampTypes.LAVORO_FUORI_SEDE) {
             belongToValidPairOutsite = true;
           } else {
             belongToValidPairNotOutsite = true;
