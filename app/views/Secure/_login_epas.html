@@ -1,0 +1,27 @@
+<div id="login-form" style="display:${shibAuthEnabled? 'none' : 'auto'}; padding: 0 em 1em">						
+  #{form @authenticate(), id:'login-form', role:'form'}
+    <!-- User e Password -->
+    <label>Username in ePAS</label>
+    <input class="form-control margin-bottom" placeholder="Username"
+  	  type="text" name="username" value="${flash.username}" />
+	
+    <label>Password in ePAS</label>
+    <input class="form-control" placeholder="Password"
+	  type="password" name="password" value="${flash.password}" />
+
+    <div class="checkbox">
+	  <label> 
+	    <input type="checkbox" name="remember" #{if flash.remember}checked#{/if}>
+		  Remember me
+	  </label>
+    </div>
+				
+    <!-- Submit -->
+    <input class="btn btn-primary btn-block" type="submit"
+	  id="signin" value="&{'secure.signin'}" />
+	 
+  #{/form}
+   
+  <a href="@{LostPassword.lostPassword()}">Password dimenticata?</a>
+  
+</div>
