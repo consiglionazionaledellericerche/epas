@@ -595,6 +595,7 @@ AbsenceGroups.showAbsenceTypes=Codici Assenza
 AbsenceGroups.showCategories=Categorie Assenze
 AbsenceGroups.certificationsAbsenceCodes=Codici Assenza Attestati
 AbsenceGroups.certificationsAbsences=Cruscotto Dipendente Attestati
+Administration.internalSearch=Ricerca
 Administration.playConfiguration= Informazioni Applicazione
 Administration.utilities= Utilities
 BadgeReaders.list= Sorgenti Timbrature
