@@ -99,7 +99,7 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   public List<ShiftCategories> shiftCategories = Lists.newArrayList();
 
-  @NotAudited
+  
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   public List<UsersRolesOffices> usersRolesOffices = Lists.newArrayList();
 
