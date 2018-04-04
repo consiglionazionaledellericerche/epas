@@ -1,13 +1,19 @@
 # ---!Ups
 
-INSERT INTO stampings_history (id, _revision, _revision_type, date, marked_by_admin, note, way, personday_id,
-stamp_modification_type_id, marked_by_employee, stamp_type, stamping_zone)
-SELECT id, (SELECT MAX(rev) AS rev FROM revinfo), 1, date, marked_by_admin, note, way, personday_id,
-stamp_modification_type_id, marked_by_employee, 'LAVORO_FUORI_SEDE', stamping_zone
-FROM stampings WHERE stamp_type = 'MOTIVI_DI_SERVIZIO_FUORI_SEDE';
+CREATE TABLE users_roles_offices_history (
+	id BIGINT NOT NULL,
+  	_revision INTEGER NOT NULL REFERENCES revinfo(rev),
+  	_revision_type SMALLINT NOT NULL,
+	office_id BIGINT,
+	role_id BIGINT,
+	user_id BIGINT,
+  	PRIMARY KEY (id, _revision, _revision_type)
+	);
 
-UPDATE stampings
-SET stamp_type = 'LAVORO_FUORI_SEDE'
-WHERE stamp_type = 'MOTIVI_DI_SERVIZIO_FUORI_SEDE';
+INSERT INTO users_roles_offices_history (id, _revision, _revision_type, office_id, role_id, user_id)
+SELECT id, (SELECT MAX(rev) AS rev FROM revinfo), 0, office_id, role_id, user_id FROM users_roles_offices;
 
 # ---!Downs
+
+DROP TABLE users_roles_offices_history;
+
