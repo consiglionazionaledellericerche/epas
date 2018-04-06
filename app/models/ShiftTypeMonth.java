@@ -24,9 +24,6 @@ public class ShiftTypeMonth extends MutableModel {
 
   private static final long serialVersionUID = 4745667554574561506L;
 
-  @Version
-  public Integer version;
-
   @Required
   @Column(name = "year_month", nullable = false)
   public YearMonth yearMonth;
