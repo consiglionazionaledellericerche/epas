@@ -40,7 +40,9 @@
 	      <th>Inizio<br>Contratto</th>
 	      <th>Fine<br>Contratto</th>
 	      <th>Inizializzabile Dal</th>
+	      #{secure.check 'Contracts.updateSourceContract'}
 	      <th>Inizializza</th>
+	      #{/secure.check}
 	    </tr>
 	    </thead>
 	    <tbody>
@@ -69,10 +71,13 @@
 	      <td>
 	          ${contract.dateForInitialization().format()}
 	      </td>
+	      #{secure.check 'Contracts.updateSourceContract'}
 	      <td>
+	      
 	        <a href="@{updateSourceContract(contract.value.id)}" data-async-modal="#defaultModal"><i class="fa fa-plus" aria-hidden="true"></i></a>
+	      
 	      </td>
-	
+		  #{/secure.check}
 	    </tr>
 	
 	    #{/list}
@@ -95,7 +100,9 @@
       <th>Data <br>Iniziale</th>
       <th>Residuo<br>anno passato</th>
       <th>Residuo<br>anno corrente</th>
+      #{secure.check 'Contracts.updateSourceContract'}
       <th>Modifica</th>
+      #{/secure.check}
     </tr>
     </thead>
     <tbody>
@@ -120,12 +127,15 @@
       <td>
         ${contract.value.sourceRemainingMinutesCurrentYear?.printHourMinute()}
       </td>
+       #{secure.check 'Contracts.updateSourceContract'}
       <td>
+     
         <a href="@{updateSourceContract(contract.value.id)}" data-async-modal="#defaultModal"><a href="@{updateSourceContract(contract.value.id)}" data-async-modal="#defaultModal">
           <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
         </a>  
+      
       </td>
-
+	  #{/secure.check}
     </tr>
 
     #{/list}
@@ -146,7 +156,9 @@
       <th>Inizio<br>Contratto</th>
       <th>Fine<br>Contratto</th>
       <th>Inizializzabile Dal</th>
+      #{secure.check 'Contracts.updateSourceContract'}
       <th>Inizializza</th>
+      #{/secure.check}
     </tr>
     </thead>
     <tbody>
@@ -176,10 +188,13 @@
       <td>
         ${contract.dateForInitialization().format()}
       </td>
+      #{secure.check 'Contracts.updateSourceContract'}
       <td>
+      
         <a href="@{updateSourceContract(contract.value.id)}" data-async-modal="#defaultModal"><i class="fa fa-plus" aria-hidden="true"></i></a>
+     
       </td>
-
+	   #{/secure.check}
     </tr>
 
     #{/list}

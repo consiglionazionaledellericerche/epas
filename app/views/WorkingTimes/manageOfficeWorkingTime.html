@@ -44,7 +44,9 @@
 			          <th class="center">Contratti attivi<br>attualmente associati</th>
 			          <th class="center">Periodi associati<br>a contratti attivi</th> 
 			          <th class="center">Contratti<br>associati<br>(storico)</th>
+			          #{secure.check 'WorkingTimes.changeWorkingTimeTypeToAll'}
 			          <th class="center">Cambia orario<br>a tutti</th>
+			          #{/secure.check}
 			        </tr>
 				    #{list items:wttAllowedEnabled, as:'wtt'}
 				      <tr>
@@ -63,9 +65,11 @@
 				            ${wtt.getAssociatedActiveContract(office).size()}
 				    	  </a>    
 				    	  #{if wtt.getAssociatedActiveContract(office).size() == 0 }
+				    	    #{secure.check 'WorkingTimes.toggleWorkingTimeTypeEnabled'}
 				    	    <a href="@{WorkingTimes.toggleWorkingTimeTypeEnabled(wtt.value.id)}">
 				    	      <i data-toggle="tooltip" data-placement="bottom" title="Disattiva tipo orario non associato ad alcun contratto attivo" class="fa fa-power-off"></i>
 				    	    </a>
+				    	    #{/secure.check}
 				    	  #{/if }
 				        </td>
 				        
@@ -80,16 +84,20 @@
 				        <td class="center">
 				          ${wtt.getAssociatedContract().size()}
 				          #{if wtt.getAssociatedContract().size() == 0 }
+				            #{secure.check 'WorkingTimes.toggleWorkingTimeTypeEnabled'}
 				    	    <a href="@{WorkingTimes.delete(wtt.value.id)}">
 				    	      <i data-toggle="tooltip" data-placement="bottom" title="Elimina tipo orario non associato ad alcun contratto" class="fa fa-trash-o"></i>
 				    	    </a>
+				    	    #{/secure.check}
 				    	  #{/if}
 				    	</td>
+				    	#{secure.check 'WorkingTimes.changeWorkingTimeTypeToAll'}
                         <td class="center">
                           <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
                             Cambia
                           </a>
                         </td>
+                        #{/secure.check}
 				      </tr>	
 				    #{/list}
 				</table>
