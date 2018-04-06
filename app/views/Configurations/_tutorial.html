@@ -138,6 +138,12 @@
       due timbrature fittizie (uscita/ingresso) a mezzanotte in modo che sia possibile considerare il tempo nel calcolo delle ore lavorate.</em>
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.HOUR_START_WORK_LAST_MISSION_DAY) }
+      <p>Tramite questo parametro è possibile specificare l'orario di inizio dell'attività lavorativa in sede.
+      Questo parametro è propedeutico alla integrazione di ePAS con il sistema Missioni, infatti serve per stabilire da che ora inizia l'attività
+      lavorativa in sede per poter calcolare correttamente le ore di lavoro che un dipendente nell'ultimo giorno di missione deve fare. </p>
+    #{/if}
+    
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.LUNCH_INTERVAL) }
       <p>Tramite questo parametro è possibile specificare la finestra temporale all'interno della quale cercare le uscite per pranzo.</p>
     #{/if}

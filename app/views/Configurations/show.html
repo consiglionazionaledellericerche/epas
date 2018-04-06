@@ -97,7 +97,10 @@
       #{list periodics, as:'conf'}
       <tr>
         <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
-          &{conf.epasParam}#{/secure.link}
+          &{conf.epasParam}#{/secure.link} 
+          #{if conf.epasParam.equals(manager.configurations.EpasParam.HOUR_START_WORK_LAST_MISSION_DAY)}
+           <p style="color:red;">New! <i class="fa fa-check"></i></p>
+          #{/if}
         </td>
         <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
         <td>${conf.beginDate.format()}</td>
