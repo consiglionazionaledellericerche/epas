@@ -100,7 +100,8 @@ public class MissionManager {
 
 
     AbsenceForm absenceForm = buildAbsenceForm(body);
-
+    LocalDate begin = body.dataInizio;
+    LocalDate end = body.dataFine;
     if (insertMission(body, absenceForm, null, null, body.dataInizio, body.dataFine)) {
       recalculate(body, Optional.<List<Absence>>absent());
       return true;

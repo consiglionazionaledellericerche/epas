@@ -765,6 +765,7 @@ MAX_RECOVERY_DAYS_49=Numero massimo di giorni di recupero in un anno per i livel
 
 DAY_OF_PATRON=Festa del Patrono
 HOUR_MAX_TO_CALCULATE_WORKTIME=Limite orario massimo per timbratura notturna 	
+HOUR_START_WORK_LAST_MISSION_DAY=Ora di inizio attività lavorativa in sede per ultimo giorno missione
 LUNCH_INTERVAL=Intervallo in cui ricercare le pause per pranzo
 WORK_INTERVAL=Intervallo apertura / chiusura istituto
 
