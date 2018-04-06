@@ -63,7 +63,7 @@ public class User extends BaseModel {
   @Enumerated(EnumType.STRING)
   public Set<AccountRole> roles = Sets.newHashSet();
 
-  @NotAudited
+  
   @OneToMany(mappedBy = "user", cascade = {CascadeType.REMOVE})
   public List<UsersRolesOffices> usersRolesOffices = new ArrayList<UsersRolesOffices>();
 

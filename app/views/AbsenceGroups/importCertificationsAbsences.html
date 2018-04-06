@@ -19,10 +19,11 @@
   <p>
     Cliccando su <i class="fa fa-refresh" aria-hidden="true"></i> verrà costruito o aggiornato il riepilogo delle assenze mancanti per il dipendente.
   </p>
-  
+  #{secure.check 'AbsenceGroups.reloadCertificationAbsences'}
   <p>
     Tutte le assenze importabili automaticamente verranno caricate cliccando su <a class="btn btn-xs btn-warning">Importa</a> 
   </p>
+  #{/secure.check}
   <p>
      Cliccando su <i class="fa fa-search" aria-hidden="true"></i> si aprirà il riepilogo dettagliato delle assenze.
   </p>
@@ -34,7 +35,9 @@
       <th>&{'person.name'}</th>
       <th>&{'person.number'}</th>
       <th>Inizio Contratto</th>
+      #{secure.check 'AbsenceGroups.reloadCertificationAbsences'}
       <th>Ricarica</th>
+      #{/secure.check}
       <th>Esito</th>
       <th>Importa</th>
     </tr>
@@ -51,13 +54,15 @@
       <td data-order="${wrPerson.currentContract.get().beginDate}">
         ${wrPerson.currentContract.get().beginDate?.format()}
       </td>
-      
+      #{secure.check 'AbsenceGroups.reloadCertificationAbsences'}
       <td>
+      
           <a href="@{reloadCertificationAbsences(wrPerson.value.id)}" data-async="#page_content" data-spinner="#defaultSpinner">
            <i class="fa fa-refresh" aria-hidden="true"></i>
           </a>
-      </td>
       
+      </td>
+      #{/secure.check}
       <td>
        #{if certificationsSummary.get(wrPerson.value.number).present }
           %{ situation = certificationsSummary.get(wrPerson.value.number).get() }%

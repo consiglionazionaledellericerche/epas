@@ -126,6 +126,23 @@ public class Administration extends Controller {
 
     render(personList);
   }
+  
+  /**
+   * ritorna la/le persona/e che corrispondono ai criteri indicati.
+   */
+  public static void internalSearch(String name) {
+    
+    
+    List<Person> simplePersonList = personDao.listFetched(Optional.fromNullable(name),
+        null, false, null, null, false).list();
+
+    List<IWrapperPerson> personList = FluentIterable.from(simplePersonList)
+        .transform(wrapperFunctionFactory.person()).toList();
+          
+    render(personList);
+    
+    
+  }
 
   /**
    * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
