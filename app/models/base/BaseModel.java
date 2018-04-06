@@ -1,5 +1,6 @@
 package models.base;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperModel;
@@ -8,9 +9,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
+import javax.persistence.Version;
 import models.Person;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
+import org.hibernate.envers.NotAudited;
 import org.jadira.usertype.dateandtime.joda.PersistentYearMonthAsString;
 import org.joda.time.YearMonth;
 import play.db.jpa.GenericModel;
@@ -30,6 +33,11 @@ public abstract class BaseModel extends GenericModel {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   public Long id;
+
+  @JsonIgnore
+  @NotAudited
+  @Version
+  public Integer version;
 
   @Transient
   public Long getId() {
