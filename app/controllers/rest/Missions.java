@@ -59,6 +59,11 @@ public class Missions extends Controller {
       JsonResponse.badRequest();
       return;
     }
+    
+    // person not present (404)
+    if (!missionManager.linkToPerson(body).isPresent()) {
+      JsonResponse.notFound();
+    }
 
     //log.info("Arrivato {} ", body.toString());
     Optional<Office> office = officeDao.byCodeId(body.codiceSede + "");
@@ -73,11 +78,6 @@ public class Missions extends Controller {
       JsonResponse.ok();
     }    
 
-    // person not present (404)
-    if (!missionManager.linkToPerson(body).isPresent()) {
-      JsonResponse.notFound();
-    }
-    
     switch (body.tipoMissione) {
       case "ORDINE":
         if (!missionManager.createMissionFromClient(body, true)) {
