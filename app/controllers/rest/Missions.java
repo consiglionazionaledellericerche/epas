@@ -48,13 +48,25 @@ public class Missions extends Controller {
    */
   @BasicAuth
   public static void amqpreceiver(@As(binder = JsonMissionBinder.class) MissionFromClient body) {
-    //log.info("Arrivato {} ", body.toString());
-    Optional<Office> office = officeDao.byCodeId(body.codiceSede + "");
+
+    log.info("Arrivato messaggio da {} ", body);
+    // Malformed Json (400)
+    if (body == null || body.dataInizio == null || body.dataFine == null) {
+      JsonResponse.badRequest();
+    }
+    
+    if (body.dataInizio.isAfter(body.dataFine)) {
+      JsonResponse.badRequest();
+      return;
+    }
     
     // person not present (404)
     if (!missionManager.linkToPerson(body).isPresent()) {
       JsonResponse.notFound();
     }
+
+    //log.info("Arrivato {} ", body.toString());
+    Optional<Office> office = officeDao.byCodeId(body.codiceSede + "");
     
     // Check if integration ePAS-Missions is enabled
     if (!(Boolean)configurationManager
@@ -64,13 +76,8 @@ public class Missions extends Controller {
           + "ha l'integrazione con Missioni disabilitata",
           office.get().name, body.person.fullName());
       JsonResponse.ok();
-    }
-    
-    // Malformed Json (400)
-    if (body == null || body.dataInizio == null || body.dataFine == null) {
-      JsonResponse.badRequest();
-    }
-    
+    }    
+
     switch (body.tipoMissione) {
       case "ORDINE":
         if (!missionManager.createMissionFromClient(body, true)) {
@@ -80,6 +87,11 @@ public class Missions extends Controller {
       case "RIMBORSO":
         if (!missionManager.manageMissionFromClient(body, true)) {
           JsonResponse.notFound();
+        }
+        break;
+      case "ANNULLAMENTO":
+        if (!missionManager.deleteMissionFromClient(body, true)) {
+          JsonResponse.badRequest();
         }
         break;
       default: 
