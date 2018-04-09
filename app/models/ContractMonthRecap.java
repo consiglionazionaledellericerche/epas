@@ -1,12 +1,9 @@
 package models;
 
 import com.google.common.base.Optional;
-
 import dao.wrapper.IWrapperContract;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -15,11 +12,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-
 import models.base.BaseModel;
-
 import org.joda.time.LocalDate;
-
 import play.data.validation.Required;
 
 @Entity
@@ -194,6 +188,15 @@ public class ContractMonthRecap extends BaseModel {
     return this.progressivoFinalePositivoMese;
   }
 
+  @Transient
+  public boolean expireInMonth() {
+    if (this.contract.endDate != null 
+        && this.contract.endDate.isBefore(
+            new LocalDate(year, month,1).dayOfMonth().withMaximumValue())) {
+      return true;
+    }
+    return false;
+  }
   /**
    * Clean dell'oggetto persistito pre ricomputazione.
    */

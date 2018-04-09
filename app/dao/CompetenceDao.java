@@ -22,6 +22,7 @@ import models.query.QCompetenceCode;
 import models.query.QPerson;
 import models.query.QPersonCompetenceCodes;
 import models.query.QPersonHourForOvertime;
+import models.query.QPersonReperibility;
 import models.query.QPersonReperibilityType;
 import models.query.QTotalOvertime;
 import org.joda.time.LocalDate;
@@ -233,17 +234,19 @@ public class CompetenceDao extends DaoBase {
 
   /**
    * @return la lista di competenze relative all'anno year, al mese month e al codice code di
-   * persone che hanno reperibilità di tipo type associata.
+   *     persone che hanno reperibilità di tipo type associata.
    */
   public List<Competence> getCompetenceInReperibility(
       PersonReperibilityType type, int year, int month, CompetenceCode code) {
     final QCompetence competence = QCompetence.competence;
     final QPerson person = QPerson.person;
     final QPersonReperibilityType prt = QPersonReperibilityType.personReperibilityType;
+    final QPersonReperibility rep = QPersonReperibility.personReperibility;
 
     JPQLQuery query = getQueryFactory().from(competence)
         .leftJoin(competence.person, person)
-        .leftJoin(person.reperibility.personReperibilityType, prt)
+        .leftJoin(person.reperibility, rep)
+        .leftJoin(rep.personReperibilityType, prt)
         .where(prt.eq(type)
             .and(competence.year.eq(year)
                 .and(competence.month.eq(month)

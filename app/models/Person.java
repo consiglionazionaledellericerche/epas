@@ -207,8 +207,8 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @OneToOne(mappedBy = "person")
   public PersonHourForOvertime personHourForOvertime;
 
-  @OneToOne(mappedBy = "person", cascade = {CascadeType.REMOVE})
-  public PersonReperibility reperibility;
+  @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
+  public Set<PersonReperibility> reperibility = Sets.newHashSet();
 
   @NotAudited
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})

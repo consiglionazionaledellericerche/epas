@@ -5,24 +5,19 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
-
 import dao.OfficeDao;
 import dao.UsersRolesOfficesDao;
-
 import java.util.List;
 import java.util.Set;
-
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType;
 import manager.configurations.EpasParam.EpasParamValueType.IpList;
-
 import models.Configuration;
 import models.Office;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
-
 import play.Play;
 
 public class OfficeManager {
@@ -33,6 +28,10 @@ public class OfficeManager {
   private final ConfigurationManager configurationManager;
   private final OfficeDao officeDao;
 
+  /**
+   * Default constructor.
+   * 
+   */
   @Inject
   public OfficeManager(
       UsersRolesOfficesDao usersRolesOfficesDao,
@@ -48,7 +47,8 @@ public class OfficeManager {
    */
   public boolean setUro(User user, Office office, Role role) {
 
-    Optional<UsersRolesOffices> uro = usersRolesOfficesDao.getUsersRolesOffices(user, role, office);
+    Optional<UsersRolesOffices> uro = 
+        usersRolesOfficesDao.getUsersRolesOffices(user, role, office);
 
     if (!uro.isPresent()) {
 

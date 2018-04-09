@@ -145,7 +145,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
    * @return la lista dei buoni
    */
   @Override
-  public List<MealTicket> buildBlockMealTicket(Long codeBlock, Integer first, Integer last,
+  public List<MealTicket> buildBlockMealTicket(String codeBlock, Integer first, Integer last,
       LocalDate expireDate, Office office) {
 
     List<MealTicket> mealTicketList = Lists.newArrayList();

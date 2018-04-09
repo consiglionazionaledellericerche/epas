@@ -20,4 +20,6 @@ public class MissionFromClient {
   public LocalDateTime dataInizio;
   public LocalDateTime dataFine;
   public Long idOrdine;
+  
+  
 }

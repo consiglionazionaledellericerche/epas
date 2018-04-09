@@ -27,7 +27,7 @@ public class Role extends BaseModel {
   private static final long serialVersionUID = 6717202212924325368L;
   public String name;
 
-  @NotAudited
+  
   @OneToMany(mappedBy = "role", cascade = CascadeType.REMOVE, orphanRemoval = true)
   public List<UsersRolesOffices> usersRolesOffices = Lists.newArrayList();
 

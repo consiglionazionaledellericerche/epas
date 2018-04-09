@@ -8,7 +8,6 @@ import dao.PersonDao;
 import helpers.JsonResponse;
 import it.cnr.iit.epas.JsonStampingBinder;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.StampingManager;
 import manager.cache.AbsenceTypeManager;
@@ -22,7 +21,6 @@ import security.SecurityRules;
 
 
 @With(Resecure.class)
-@Slf4j
 public class StampingsFromClient extends Controller {
 
   @Inject

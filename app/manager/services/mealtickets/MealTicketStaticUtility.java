@@ -7,12 +7,15 @@ import com.google.gdata.util.common.base.Preconditions;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.math.BigDecimal;
 import java.util.List;
 
 import models.Contract;
 import models.MealTicket;
 
+@Slf4j
 public class MealTicketStaticUtility {
 
   /**
@@ -31,7 +34,8 @@ public class MealTicketStaticUtility {
     List<BlockMealTicket> blockList = Lists.newArrayList();
     BlockMealTicket currentBlock = null;
     MealTicket previousMealTicket = null;
-
+    int previousBlockLength;
+    String previousCode;
     for (MealTicket mealTicket : mealTicketListOrdered) {
 
       if (interval.isPresent()
@@ -49,8 +53,14 @@ public class MealTicketStaticUtility {
       }
 
       //Stesso blocco
-      BigDecimal previous = new BigDecimal(previousMealTicket.code).add(BigDecimal.ONE);
-      BigDecimal actual = new BigDecimal(mealTicket.code);
+
+      previousBlockLength = previousMealTicket.block.length();
+      previousCode = 
+          previousMealTicket.code.substring(previousBlockLength, previousMealTicket.code.length());
+      int actualBlockLength = mealTicket.block.length();
+      String actualCode = mealTicket.code.substring(actualBlockLength, mealTicket.code.length());
+      BigDecimal previous = new BigDecimal(previousCode).add(BigDecimal.ONE);  
+      BigDecimal actual = new BigDecimal(actualCode);
       if (previous.compareTo(actual) == 0 && previousMealTicket.contract.equals(mealTicket.contract)
           && previousMealTicket.returned == mealTicket.returned) {
         currentBlock.getMealTickets().add(mealTicket);
@@ -83,7 +93,7 @@ public class MealTicketStaticUtility {
       Contract contract, int first, int last) {
 
     List<MealTicket> mealTickets = Lists.newArrayList();
-    Long codeBlock = null;
+    String codeBlock = null;
     //Controllo di consistenza.
     for (MealTicket mealTicket : blockMealTicketsOrdered) {
       if (codeBlock == null) {

@@ -26,10 +26,10 @@ import org.joda.time.LocalDate;
 public class BlockMealTicket {
 
   private Contract contract;
-  private Long codeBlock;
+  private String codeBlock;
   private List<MealTicket> mealTickets;
 
-  protected BlockMealTicket(Long codeBlock) {
+  protected BlockMealTicket(String codeBlock) {
 
     this.codeBlock = codeBlock;
     this.mealTickets = Lists.newArrayList();
