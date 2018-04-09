@@ -20,6 +20,8 @@ import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
 /**
+ * Classe per il binding delle timbrature ricevute via Json.
+ * 
  * @author cristian.
  */
 @Slf4j
@@ -28,6 +30,8 @@ import play.data.binding.TypeBinder;
 public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
   /**
+   * Binding dal Json in un DTO con le info della timbratura.
+   * 
    * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[],
    * java.lang.String, java.lang.Class, java.lang.reflect.Type)
    */
@@ -73,7 +77,6 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
         stamping.zona = null;
       }
       
-
       Integer anno = jsonObject.get("anno").getAsInt();
       Integer mese = jsonObject.get("mese").getAsInt();
       Integer giorno = jsonObject.get("giorno").getAsInt();
@@ -88,7 +91,10 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
             name, annotations, value, actualClass, genericType);
         return null;
       }
-
+      if (jsonObject.get("note") != null) {
+        stamping.note =  jsonObject.get("note").getAsString();  
+      }
+            
       log.debug("Effettuato il binding, stampingFromClient = {}", stamping);
 
       return stamping;

@@ -107,7 +107,7 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final ListPath<models.PersonReperibilityType, QPersonReperibilityType> reperibilities = this.<models.PersonReperibilityType, QPersonReperibilityType>createList("reperibilities", models.PersonReperibilityType.class, QPersonReperibilityType.class, PathInits.DIRECT2);
 
-    public final QPersonReperibility reperibility;
+    public final SetPath<models.PersonReperibility, QPersonReperibility> reperibility = this.<models.PersonReperibility, QPersonReperibility>createSet("reperibility", models.PersonReperibility.class, QPersonReperibility.class, PathInits.DIRECT2);
 
     public final ListPath<models.PersonReperibilityType, QPersonReperibilityType> reperibilityTypes = this.<models.PersonReperibilityType, QPersonReperibilityType>createList("reperibilityTypes", models.PersonReperibilityType.class, QPersonReperibilityType.class, PathInits.DIRECT2);
 
@@ -145,7 +145,6 @@ public class QPerson extends EntityPathBase<Person> {
         this.personHourForOvertime = inits.isInitialized("personHourForOvertime") ? new QPersonHourForOvertime(forProperty("personHourForOvertime"), inits.get("personHourForOvertime")) : null;
         this.personInCharge = inits.isInitialized("personInCharge") ? new QPerson(forProperty("personInCharge"), inits.get("personInCharge")) : null;
         this.qualification = inits.isInitialized("qualification") ? new QQualification(forProperty("qualification")) : null;
-        this.reperibility = inits.isInitialized("reperibility") ? new QPersonReperibility(forProperty("reperibility"), inits.get("reperibility")) : null;
         this.user = inits.isInitialized("user") ? new QUser(forProperty("user"), inits.get("user")) : null;
     }
 

@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
 
 import models.base.BaseModel;
 
+import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
 import play.data.validation.Required;
@@ -24,18 +25,19 @@ import play.data.validation.Unique;
  */
 @Entity
 @Table(name = "users_roles_offices")
+@Audited
 public class UsersRolesOffices extends BaseModel {
 
   private static final long serialVersionUID = -1403683534643592790L;
 
-  @NotAudited
+  
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
   @Required
   @NotNull
   public User user;
 
-  @NotAudited
+  
   @ManyToOne
   @JoinColumn(name = "office_id")
   @Required
@@ -43,7 +45,7 @@ public class UsersRolesOffices extends BaseModel {
   @Unique("user office role")
   public Office office;
 
-  @NotAudited
+  
   @ManyToOne
   @JoinColumn(name = "role_id")
   @Required

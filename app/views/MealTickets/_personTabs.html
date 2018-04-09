@@ -2,9 +2,9 @@
 
 <div id="container-nav-tabs">
   <ul class="nav nav-tabs">
-    #{secure.li @MealTickets.personMealTickets(currentData.personId, year, month) /}
-    #{secure.li @MealTickets.editPersonMealTickets(currentData.personId, year, month) /}
-    #{secure.li @MealTickets.recapPersonMealTickets(currentData.personId, year, month) /}
+    #{secure.li @MealTickets.personMealTickets(recap.contract.id, year, month) /}
+    #{secure.li @MealTickets.editPersonMealTickets(recap.contract.id, year, month) /}
+    #{secure.li @MealTickets.recapPersonMealTickets(recap.contract.id, year, month) /}
   </ul>
 </div>
 <br>

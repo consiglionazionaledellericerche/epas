@@ -659,6 +659,7 @@ when
     "AbsenceGroups.absenceInitializations",
     "AbsenceGroups.absenceTroubles",
     "AbsenceGroups.importCertificationsAbsences",
+    "AbsenceGroups.groupStatus",
     "BadgeReaders.list",
     "BadgeSystems.list",
     "BadgeSystems.personBadges",
@@ -667,12 +668,14 @@ when
     "Charts.overtimeOnPositiveResidual",
     "Charts.overtimeOnPositiveResidualInYear",
     "Competences.activateServices",
-    "Competences.addService",
+    //"Competences.addService",
     "Competences.approvedCompetenceInYear",
     "Competences.enabledCompetences",
     "Competences.manageCompetenceCode",
     "Competences.showCompetences",
     "Competences.totalOvertimeHours",
+    "Competences.editReperibility",
+    "Competences.editShift",
     "Configurations.personShow",
     "Configurations.show",
     "Contracts.edit",
@@ -702,6 +705,7 @@ when
     "PrintTags.showTag",
     "Stampings.dailyPresence",
     "Stampings.missingStamping",
+    "Stampings.stampingsByAdmin",
     "Stampings.personStamping",
     "Vacations.list",
     "Vacations.vacationSummary",
@@ -924,6 +928,7 @@ when
  		"MonthRecaps.show",
 
  		"Stampings.missingStamping",
+ 		"Stampings.stampingsByAdmin",
         "Stampings.dailyPresence",
         "Stampings.mealTicketSituation",
 
@@ -1069,7 +1074,8 @@ when
         "Stampings.personStamping",
         "Stampings.dailyPresence",
         "Stampings.missingStamping",
-
+		"Stampings.stampingsByAdmin",
+		
         "Vacations.list",
         "Vacations.vacationSummary",
 
@@ -1121,8 +1127,6 @@ when
         "Persons.save",
      	"Persons.insertUsername",
      	"Persons.updateUsername",
-        "Persons.deletePerson",
-     	"Persons.deletePersonConfirmed",
      	"Configurations.personShow",
      	"Configurations.personEdit",
      	"Configurations.personUpdate",
@@ -1305,8 +1309,6 @@ when
         "Persons.save",
      	"Persons.insertUsername",
      	"Persons.updateUsername",
-        "Persons.deletePerson",
-     	"Persons.deletePersonConfirmed",
 
      	"Configurations.personShow",
      	"Configurations.personEdit",

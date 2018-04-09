@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import manager.OfficeManager;
 import models.User;
 import play.mvc.Http;
+import play.mvc.Util;
 import play.utils.Java;
 
 @Slf4j
@@ -90,11 +91,13 @@ public class Security extends Secure.Security {
    * @return Vero se c'è almeno un istituto abilitato dall'ip contenuto nella richiesta HTTP
    * ricevuta, false altrimenti.
    */
+  @Util
   public static boolean checkForWebstamping() {
 
     final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
         .split(Http.Request.current().remoteAddress));
 
+    log.debug("Remote addresses = {}", addresses);
     return !officeManager.getOfficesWithAllowedIp(addresses).isEmpty();
   }
 

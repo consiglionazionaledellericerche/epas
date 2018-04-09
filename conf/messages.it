@@ -401,6 +401,7 @@ secure.logoutShibboleth=Per completare il logout è necessario chiudere il brows
 
 serviceDisabled =Servizio disabilitato
 
+calendars =Calendari
 shifts =Gestione turni
 shiftSlot= Fascia Turno
 
@@ -594,6 +595,7 @@ AbsenceGroups.showAbsenceTypes=Codici Assenza
 AbsenceGroups.showCategories=Categorie Assenze
 AbsenceGroups.certificationsAbsenceCodes=Codici Assenza Attestati
 AbsenceGroups.certificationsAbsences=Cruscotto Dipendente Attestati
+Administration.internalSearch=Ricerca
 Administration.playConfiguration= Informazioni Applicazione
 Administration.utilities= Utilities
 BadgeReaders.list= Sorgenti Timbrature
@@ -644,6 +646,7 @@ PrintTags.showTag= Stampa Cartellino Presenze
 Stampings.dailyPresence= Presenza Giornaliera
 Stampings.dailyPresenceForPersonInCharge= Presenza giornaliera gruppo
 Stampings.missingStamping= Riepilogo problemi sui giorni
+Stampings.stampingsByAdmin= Timbrature da amministratore
 Stampings.personStamping= Timbrature
 Stampings.stampings= Situazione Mensile
 Synchronizations.institutes= Sincronizza Sedi
@@ -752,6 +755,7 @@ TR_AUTOCERTIFICATION= Autocertificazione presenze per Tecnologi e Ricercatori
 TR_VACATIONS= Inserimento ferie e permessi per Tecnologi e Ricercatori
 TR_COMPENSATORY= Inserimento riposi compensativi per Tecnologi e Ricercatori
 ENABLE_CALENDARSHIFT= Abilitazione gestione calendario turni e reperibilità
+ENABLE_MISSIONS_INTEGRATION= Abilitazione integrazione con piattaforma Missioni
 
 EXPIRY_VACATION_PAST_YEAR=Giorno massimo utilizzo ferie dell'anno precedente
 MONTH_EXPIRY_RECOVERY_DAYS_13=Mese massimo per utilizzo residui dell'anno precedente per i livelli da 1 a 3
@@ -805,6 +809,8 @@ lunchPauseEnd.popover= Inserire l&#39;orario nel formato hh:mm
 office.code.popover= Codice univoco della sede (per l&#39;IIT di Pisa è 044000)
 office.codeId.popover= Id univoco della Sede. Serve per l&#39;invio degli attestati a Roma (per l&#39;IIT di Pisa è &quot;223400&quot;)
 office.joiningDate.popover= Data di affiliazione della sede
+
+onlyMission.popover= Se sì, ogni giorno di missione viene segnato con tempo a lavoro = tempo di lavoro assegnato al dipendente. Se no, con tempo a lavoro = 0
 
 time.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
 

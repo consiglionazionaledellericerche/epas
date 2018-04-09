@@ -153,6 +153,9 @@ public enum DefaultAbsenceType {
   A_26("26", "Permesso per dipendente disabile L. 104/92 due ore giornaliere",
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 120, false, false,
       0, null, null, null),
+  A_26BP("26", "Permesso per dipendente disabile L. 104/92 due ore giornaliere con buono pasto",
+      false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 120, false, true,
+      0, null, null, null),
   
   A_C17("C17", "Congedo assistenza figlio disabile L. 104/92",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
@@ -1277,7 +1280,16 @@ public enum DefaultAbsenceType {
   
   A_NC("NC", "Giorno non conteggiato ai fini del tempo a lavoro",
       true, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      0, null, null, null),
+  
+  A_35R("35R", "dottorato di ricerca retribuito",
+      true, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      0, null, null, null),
+  
+  A_62("62", "distacco sindacale",
+      true, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, null, null);
+  
 
   public String certificationCode;
   public String description;

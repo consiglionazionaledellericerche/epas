@@ -27,6 +27,7 @@ import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
 
+import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
@@ -36,6 +37,7 @@ import play.data.validation.Required;
 
 @Entity
 @Table(name = "contracts")
+@Audited
 public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -4472102414284745470L;
@@ -106,6 +108,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   public List<VacationPeriod> vacationPeriods = Lists.newArrayList();
 
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
+  @NotAudited
   public List<ContractMonthRecap> contractMonthRecaps = Lists.newArrayList();
 
   //data di termine contratto in casi di licenziamento, pensione, morte, ecc ecc...

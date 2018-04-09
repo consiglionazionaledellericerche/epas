@@ -27,7 +27,7 @@ import org.joda.time.LocalDate;
 public class MealTicketRecap {
 
   private Contract contract;
-
+  
   private LocalDate dateExpire = null;
   private LocalDate dateRunOut = null;
 
