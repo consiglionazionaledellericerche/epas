@@ -1,11 +1,8 @@
 package models;
 
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import it.cnr.iit.epas.NullStringBinder;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -13,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -28,22 +24,16 @@ import javax.persistence.OrderBy;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.persistence.Version;
-
 import lombok.Getter;
-
 import manager.configurations.EpasParam;
-
 import models.absences.InitializationGroup;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
-
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 import org.joda.time.ReadablePartial;
-
 import play.data.binding.As;
 import play.data.validation.Email;
 import play.data.validation.Required;
@@ -68,9 +58,6 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   @Column(name = "perseo_id")
   public Long perseoId;
-
-  @Version
-  public Integer version;
 
   @Required
   public String name;
@@ -322,6 +309,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   }
 
   /**
+   * Comparatore di persone per fullname e poi id.
    * @return un Comparator che compara per fullname poi id.
    */
   public static Comparator<Person> personComparator() {
@@ -364,6 +352,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   }
 
   /**
+   * Associazione tra le zone.
    * @return la lista delle ZoneToZones associate ai badge della persona.
    */
   public List<ZoneToZones> getZones() {

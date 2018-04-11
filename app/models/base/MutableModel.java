@@ -4,14 +4,13 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
-
 import org.joda.time.LocalDateTime;
 
 @MappedSuperclass
 public abstract class MutableModel extends BaseModel {
 
   private static final long serialVersionUID = 4890911962768274977L;
-
+  
   @Column(name = "created_at")
   public LocalDateTime createdAt;
 
