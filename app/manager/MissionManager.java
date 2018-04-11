@@ -7,9 +7,14 @@ import controllers.Security;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.UserDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
 
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,13 +22,19 @@ import javax.persistence.PersistenceException;
 
 import lombok.extern.slf4j.Slf4j;
 
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
 
+import models.ContractWorkingTimeType;
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.User;
+import models.WorkingTimeType;
+import models.WorkingTimeTypeDay;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.CategoryTab;
@@ -40,6 +51,7 @@ import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
+import org.joda.time.Minutes;
 import org.joda.time.Period;
 import org.testng.collections.Lists;
 
@@ -59,12 +71,17 @@ public class MissionManager {
   private final NotificationManager notificationManager;
   private final AbsenceDao absenceDao;
   private final AbsenceTypeDao absenceTypeDao;
+  private final ConfigurationManager configurationManager;
+  private final OfficeDao officeDao;
+  private final IWrapperFactory wrapperFactory;
 
   @Inject
   public MissionManager(PersonDao personDao, AbsenceService absenceService, 
       AbsenceManager absenceManager, PersonDayManager personDayManager,
       ConsistencyManager consistencyManager, NotificationManager notificationManager,
-      AbsenceDao absenceDao, AbsenceTypeDao absenceTypeDao) {
+      AbsenceDao absenceDao, AbsenceTypeDao absenceTypeDao, 
+      ConfigurationManager configurationManager, OfficeDao officeDao, 
+      IWrapperFactory wrapperFactory) {
     this.personDao = personDao;
     this.absenceService = absenceService;
     this.absenceManager = absenceManager;
@@ -73,11 +90,15 @@ public class MissionManager {
     this.notificationManager = notificationManager;
     this.absenceDao = absenceDao;
     this.absenceTypeDao = absenceTypeDao;
+    this.configurationManager = configurationManager;
+    this.officeDao = officeDao;
+    this.wrapperFactory = wrapperFactory;
   }
 
     
   /**
-   * 
+   * Metodo che verifica se al numero di matricola passato come parametro nel dto corrisponde
+   * effettivamente una persona in anagrafica.
    * @param mission il dto creato dal json arrivato dal listener
    * @return la person, se esiste, associata alla matricola contenuta nel dto.
    */
@@ -103,7 +124,7 @@ public class MissionManager {
   }
 
   /**
-   * 
+   * Metodo che crea la missione a partire dai dati del dto inviato da Missioni.
    * @param body il dto ricavato dal json arrivato dal listener
    * @param recompute se deve essere avviato il ricalcolo
    * @return true se riesce a inserire la missione con i parametri esplicitati nel body, 
@@ -112,17 +133,71 @@ public class MissionManager {
   public boolean createMissionFromClient(MissionFromClient body, boolean recompute) {
 
     AbsenceForm absenceForm = buildAbsenceForm(body);
-    LocalDate begin = body.dataInizio;
-    LocalDate end = body.dataFine;
-    if (insertMission(body, absenceForm, null, null, body.dataInizio, body.dataFine)) {
-      recalculate(body, Optional.<List<Absence>>absent());
-      return true;
+    //controllo che la missione sia su più giorni
+    if (body.dataFine.toLocalDate().isAfter(body.dataInizio.toLocalDate())) {
+            
+      Optional<Office> office = officeDao.byCodeId(body.codiceSede + "");
+      if (!office.isPresent()) {
+        log.warn("Sede di lavoro associata a {} non trovata!", body.person.fullName());
+        return false;
+      }
+      //verifico il parametro di ora inizio lavoro in sede
+      LocalTime beginWorkHour = (LocalTime)configurationManager
+          .configValue(office.get(), EpasParam.HOUR_START_WORK_LAST_MISSION_DAY, LocalDate.now());
+      if (beginWorkHour == null) {
+        log.warn("Il parametro di inizio orario di lavoro per ultimo giorno di missione "
+            + "non è valorizzato per la sede {}", office.get().name);
+        return false;
+      }
+      //WorkingTimeTypeDay day = getFromDayOfMission(body, body.dataFine.toLocalDate());
+      LocalDateTime beginMission = body.dataInizio;
+      LocalDateTime secondLast = body.dataFine.minusDays(1).withHourOfDay(23).withMinuteOfHour(59);
+      LocalDateTime beginWork = body.dataFine
+          .withTime(beginWorkHour.getHourOfDay(), beginWorkHour.getMinuteOfHour(), 0, 0);
+      boolean check1 = insertMission(body, absenceForm, null, null, beginMission, secondLast);
+      boolean check2 = insertMission(body, absenceForm, null, null, beginWork, body.dataFine);
+      if (check1 && check2) {
+        recalculate(body, Optional.<List<Absence>>absent());
+        return true;
+      }
+      
+    } else {
+      if (insertMission(body, absenceForm, null, null, body.dataInizio, body.dataFine)) {
+        recalculate(body, Optional.<List<Absence>>absent());
+        return true;
+      }
     }
+    
     return false;
   }
-
+  
   /**
-   * 
+   * Metodo di utilità.
+   * @param body il dto proveniente da Missioni
+   * @param end l'ultimo giorno di missione
+   * @return il workingTimeTypeDay dell'ultimo giorno di missione.
+   */
+  private WorkingTimeTypeDay getFromDayOfMission(MissionFromClient body, LocalDate end) {
+    IWrapperPerson wrappedPerson = wrapperFactory.create(body.person);  
+    Optional<ContractWorkingTimeType> cwtt = wrappedPerson.getCurrentContractWorkingTimeType();
+    WorkingTimeTypeDay dayNumber = null;
+    if (cwtt.isPresent()) {
+      WorkingTimeType wtt = cwtt.get().workingTimeType;
+      int day = end.getDayOfWeek();
+      
+      for (WorkingTimeTypeDay wttd : wtt.workingTimeTypeDays) {
+        if (wttd.dayOfWeek == day) {
+          dayNumber = wttd;
+        }
+      }
+    }
+    return dayNumber;
+  }
+  
+  
+  /**
+   * Metodo che ricontrolla le date della missione dopo le info pervenute da Missioni in occasione
+   * del rimborso.
    * @param body il dto contenente i dati della missione
    * @param recompute se deve essere effettuato il ricalcolo
    * @return true se la gestione della missione è andata a buon fine, false altrimenti.
@@ -162,7 +237,7 @@ public class MissionManager {
   }
   
   /**
-   * 
+   * Metodo che cancella una missione inviata precedentemente da Missioni.
    * @param body il dto contenente i dati della missione
    * @param recompute se devono essere effettuati i ricalcoli
    * @return true se la missione viene cancellata, false altrimenti.
@@ -181,7 +256,7 @@ public class MissionManager {
   }
   
   /**
-   * 
+   * Metodo privato che ritorna la lista delle date su cui fare i controlli.
    * @param body il dto contenente i dati della missione
    * @return la lista delle date da considerare per gestire la missione.
    */
@@ -196,7 +271,7 @@ public class MissionManager {
   }
   
   /**
-   * 
+   * Metodo privato che inserisce i giorni di missione.
    * @param body il dto contenente le informazioni della missione
    * @param absenceForm l'absenceForm relativo alla missione
    * @param hours le ore 
@@ -213,19 +288,25 @@ public class MissionManager {
     CategoryTab tab = absenceForm.categoryTabSelected;
     GroupAbsenceType type = absenceForm.groupSelected;
     JustifiedType justifiedType = absenceForm.justifiedTypeSelected;
+    Integer localHours = hours;
+    Integer localMinutes = minutes;
     if (from.toLocalDate().isEqual(to.toLocalDate())) {
        
-      int localHours = to.getHourOfDay() - from.getHourOfDay();
-      int localMinutes = to.getMinuteOfHour() - from.getMinuteOfHour();
-      if (localMinutes < 0) {
-        localHours = localHours - 1;
-      }
-      
-      if (localMinutes > DateTimeConstants.MINUTES_PER_HOUR / 2) {
-        localHours = localHours + 1;
-      }
-      
-      mission = selectMissionHour(localHours);
+      localHours = to.getHourOfDay() - from.getHourOfDay();
+      localMinutes = to.getMinuteOfHour() - from.getMinuteOfHour();
+//      if (localMinutes < 0) {
+//        localHours = localHours - 1;
+//      }
+//      
+//      if (localMinutes > DateTimeConstants.MINUTES_PER_HOUR / 2) {
+//        localHours = localHours + 1;
+//      }
+      int day = getFromDayOfMission(body, to.toLocalDate()).dayOfWeek;
+      if (day == DateTimeConstants.SATURDAY || day == DateTimeConstants.SUNDAY) {
+        mission = absenceTypeDao.getAbsenceTypeByCode("92").get();
+      } else {
+        mission = absenceTypeDao.getAbsenceTypeByCode("92M").get();
+      }      
             
     }
     if (mission == null) {
@@ -233,11 +314,11 @@ public class MissionManager {
     }
     absenceForm =
         absenceService.buildAbsenceForm(body.person, from.toLocalDate(), tab,
-            to.toLocalDate(), type, false, mission, justifiedType, hours, minutes, false);
+            to.toLocalDate(), type, false, mission, justifiedType, localHours, localMinutes, false);
     InsertReport insertReport = 
         absenceService.insert(body.person, absenceForm.groupSelected, from.toLocalDate(), 
             to.toLocalDate(), mission, absenceForm.justifiedTypeSelected, 
-            hours, minutes, false, absenceManager);
+            localHours, localMinutes, false, absenceManager);
     if (insertReport.criticalErrors.isEmpty() || insertReport.warningsPreviousVersion.isEmpty()) {
       for (Absence absence : insertReport.absencesToPersist) {
         PersonDay personDay = personDayManager
@@ -273,7 +354,7 @@ public class MissionManager {
   }
   
   /**
-   * 
+   * Metodo che si occupa di cancellare i singoli giorni di missione.
    * @param missions la lista delle assenze da cancellare
    * @param absenceForm l'absenceForm per notificare la cancellazione dell'assenza
    * @return true se la cancellazione è andata a buon fine, false altrimenti.
@@ -295,7 +376,12 @@ public class MissionManager {
     return false;
   }
   
-  
+  /**
+   * Metodo che cancella dal personDay l'assenza.
+   * @param abs l'assenza (missione) da cancellare
+   * @param result se la rimozione precedente è andata a buon fine
+   * @return true se l'assenza è stata cancellata, false altrimenti.
+   */
   private boolean atomicRemoval(Absence abs, boolean result) {
     try {
       abs.delete();
@@ -343,7 +429,7 @@ public class MissionManager {
   }
   
   /**
-   * 
+   * Metodo privato che conteggia quante ore devono essere date di missione (o intera giornata).
    * @param hours le ore da considerare per cercare il codice di assenza giusto
    * @return il codice d'assenza corretto sulla base della quantità oraria passata come parametro.
    */
