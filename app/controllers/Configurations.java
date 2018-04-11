@@ -240,8 +240,10 @@ public class Configurations extends Controller {
     final Attachment autocert = office.attachments.stream()
         .filter(attachment -> attachment.type == AttachmentType.TR_AUTOCERTIFICATION).findFirst()
         .orElse(null);
-
-    render(office, paramCategory, generals, yearlies, periodics, autocertifications, autocert);
+    LocalDate date = LocalDate.now();
+    LocalDate limitShow = new LocalDate(2018,6,1);
+    render(office, paramCategory, generals, yearlies, 
+        periodics, autocertifications, autocert, limitShow, date);
   }
 
   /**

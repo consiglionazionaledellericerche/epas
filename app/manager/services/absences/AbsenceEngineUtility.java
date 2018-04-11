@@ -75,12 +75,14 @@ public class AbsenceEngineUtility {
     final JustifiedTypeName specifiedMinutesVar = JustifiedTypeName.specified_minutes;
     JustifiedTypeName allDayVar = null;
     JustifiedTypeName halfDayVar = null;
+    JustifiedTypeName completeDayAddOvertimeVar = null;
 
     //Map<Integer, Integer> specificMinutesFinded = Maps.newHashMap(); //(minute, count)
     //boolean specificMinutesDenied = false;
-    Integer allDayFinded = 0;
-    Integer halfDayFinded = 0;
-    Integer specifiedMinutesFinded = 0;
+    Integer allDayFound = 0;
+    Integer halfDayFound = 0;
+    Integer specifiedMinutesFound = 0;
+    Integer completeDayAddOvertimeFound = 0;
 
     if (groupAbsenceType.takableAbsenceBehaviour == null) {
       return justifiedTypes;
@@ -89,15 +91,19 @@ public class AbsenceEngineUtility {
     for (AbsenceType absenceType : groupAbsenceType.takableAbsenceBehaviour.takableCodes) {
       for (JustifiedType justifiedType : absenceType.justifiedTypesPermitted) { 
         if (justifiedType.getName().equals(JustifiedTypeName.all_day)) {
-          allDayFinded++;
+          allDayFound++;
           allDayVar = justifiedType.getName();
         }
+        if (justifiedType.getName().equals(JustifiedTypeName.complete_day_and_add_overtime)) {
+          completeDayAddOvertimeFound++;
+          completeDayAddOvertimeVar = justifiedType.getName();
+        }
         if (justifiedType.getName().equals(JustifiedTypeName.half_day)) {
-          halfDayFinded++;
+          halfDayFound++;
           halfDayVar = justifiedType.getName();
         }
         if (justifiedType.getName().equals(JustifiedTypeName.specified_minutes)) {
-          specifiedMinutesFinded++;
+          specifiedMinutesFound++;
         }
         if (justifiedType.getName().equals(JustifiedTypeName.absence_type_minutes)) {
           return Lists.newArrayList();
@@ -105,13 +111,16 @@ public class AbsenceEngineUtility {
       }
     }
     
-    if (allDayFinded == 1) {
+    if (allDayFound == 1) {
       justifiedTypes.add(allDayVar);
     }
-    if (halfDayFinded == 1) {
+    if (completeDayAddOvertimeFound == 1) {
+      justifiedTypes.add(completeDayAddOvertimeVar);
+    }
+    if (halfDayFound == 1) {
       justifiedTypes.add(halfDayVar);
     }
-    if (specifiedMinutesFinded == 1) { //&& specificMinutesDenied == false) {
+    if (specifiedMinutesFound == 1) { //&& specificMinutesDenied == false) {
       justifiedTypes.add(specifiedMinutesVar);
     }
     
@@ -254,6 +263,16 @@ public class AbsenceEngineUtility {
         }
       }
     }
+    if (absence.getJustifiedType().getName()
+        .equals(JustifiedTypeName.complete_day_and_add_overtime)) {
+      for (AbsenceType absenceType : absencePeriod.takableCodes) { 
+        if (absenceType.justifiedTypesPermitted.contains(absence.getJustifiedType())) {
+          absence.absenceType = absenceType;
+          return absence;
+        }
+      }
+    }
+
     if (absence.getJustifiedType().getName().equals(JustifiedTypeName.specified_minutes)) {
       
       AbsenceType specifiedMinutes = null;

@@ -99,10 +99,9 @@ public enum DefaultTakable {
       -1, null),
 
   T_MISSIONE(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_92, 
-          DefaultAbsenceType.A_92M), 
-      ImmutableSet.of(DefaultAbsenceType.A_92, 
-          DefaultAbsenceType.A_92M), 
+      ImmutableSet.of(DefaultAbsenceType.A_92M,DefaultAbsenceType.A_92 
+          ), 
+      ImmutableSet.of(DefaultAbsenceType.A_92M, DefaultAbsenceType.A_92), 
       -1, null),
 
   T_FERIE_CNR(AmountType.units, 
