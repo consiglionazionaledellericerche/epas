@@ -27,8 +27,7 @@ public enum StampTypes {
    */
 
   MOTIVI_DI_SERVIZIO("s", "motiviDiServizio", "Motivi di servizio", false, true),
-  MOTIVI_DI_SERVIZIO_FUORI_SEDE("sf", "servizioFuoriSede", "Motivi di Servizio Fuori Sede", 
-      false, true),
+  
   LAVORO_FUORI_SEDE("lfs", "lavoroFuoriSede", "Lavoro fuori sede", true, true),
   PAUSA_PRANZO("pr", "pausaPranzo", "Pausa Pranzo", true, true),
   
@@ -106,7 +105,7 @@ public enum StampTypes {
    * @return true se la timbratura corrisponde ad un timbrature per lavoro effettuato fuori sede
    */
   public boolean isOffSiteWork() {
-    return this == MOTIVI_DI_SERVIZIO_FUORI_SEDE || this == LAVORO_FUORI_SEDE;
+    return this == LAVORO_FUORI_SEDE;
   }
 
 }
