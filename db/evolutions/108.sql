@@ -136,4 +136,3 @@ ALTER TABLE working_time_type_days DROP COLUMN version;
 ALTER TABLE working_time_types DROP COLUMN version;
 ALTER TABLE zone_to_zones DROP COLUMN version;
 ALTER TABLE zones DROP COLUMN version;
-

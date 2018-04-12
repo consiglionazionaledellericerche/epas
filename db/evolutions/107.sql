@@ -16,4 +16,3 @@ SELECT id, (SELECT MAX(rev) AS rev FROM revinfo), 0, office_id, role_id, user_id
 # ---!Downs
 
 DROP TABLE users_roles_offices_history;
-
