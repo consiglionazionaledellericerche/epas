@@ -49,6 +49,9 @@ public class QCompetence extends EntityPathBase<Competence> {
 
     public final NumberPath<java.math.BigDecimal> valueRequested = createNumber("valueRequested", java.math.BigDecimal.class);
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public final NumberPath<Integer> year = createNumber("year", Integer.class);
 
     public QCompetence(String variable) {

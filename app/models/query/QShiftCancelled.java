@@ -39,6 +39,9 @@ public class QShiftCancelled extends EntityPathBase<ShiftCancelled> {
 
     public final QShiftType type;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QShiftCancelled(String variable) {
         this(ShiftCancelled.class, forVariable(variable), INITS);
     }

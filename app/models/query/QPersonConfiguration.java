@@ -47,6 +47,9 @@ public class QPersonConfiguration extends EntityPathBase<PersonConfiguration> {
 
     public final QPerson person;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QPersonConfiguration(String variable) {
         this(PersonConfiguration.class, forVariable(variable), INITS);
     }

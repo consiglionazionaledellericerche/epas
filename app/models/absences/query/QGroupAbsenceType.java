@@ -61,6 +61,9 @@ public class QGroupAbsenceType extends EntityPathBase<GroupAbsenceType> {
 
     public final QTakableAbsenceBehaviour takableAbsenceBehaviour;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QGroupAbsenceType(String variable) {
         this(GroupAbsenceType.class, forVariable(variable), INITS);
     }

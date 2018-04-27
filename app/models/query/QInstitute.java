@@ -49,6 +49,9 @@ public class QInstitute extends EntityPathBase<Institute> {
     //inherited
     public final DateTimePath<org.joda.time.LocalDateTime> updatedAt = _super.updatedAt;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QInstitute(String variable) {
         super(Institute.class, forVariable(variable));
     }

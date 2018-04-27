@@ -6,6 +6,7 @@ Action = (stamping != null && stamping.persistent) ? 'Modifica' : 'Nuova'
 #{if stamping}
   #{tabList}
     #{tabItem id:'edit', title:'Modifica', active:true /}
+    #{tabItem id:'offsite', title:'Fuori sede' /}
     #{tabItem id:'delete', title:'Elimina' /}
   #{/tabList}
   <br>
@@ -16,6 +17,7 @@ Action = (stamping != null && stamping.persistent) ? 'Modifica' : 'Nuova'
   <!-- Inserimento / Modifica Timbratura -->
   #{tabContentItem id:'edit', active:true}
 	<div id="stampingData">
+	
 	  #{form action:@save(), method:'POST', autocomplete:false, 'data-async':'#page_content',
 	    class:'form form-horizontal', 'data-async-error':'#stampingData', 'data-spinner':'#defaultSpinner'}
 	
@@ -64,10 +66,30 @@ Action = (stamping != null && stamping.persistent) ? 'Modifica' : 'Nuova'
 	  #{/b.buttons}
 	
 	  #{/form}
-	
+	 
 	</div>
   #{/tabContentItem}
-
+  
+  #{tabContentItem id:'offsite'}
+  	#{form action:@save(), method:'POST', autocomplete:false, 'data-async':'#page_content',
+	    class:'form form-horizontal', 'data-async-error':'#stampingData', 'data-spinner':'#defaultSpinner'}
+	
+	#{if stamping?.persistent}
+		#{alert color:'info',center:true}
+		  Modifica i dati della timbratura delle ore ${stamping.formattedHour()}
+		#{/alert}
+		<!-- storico ?? -->
+	#{/if}
+	#{else}
+	   #{alert color:'info',center:true}
+	      Inserisci i dati della nuova timbratura
+	   #{/alert}
+	#{/else}
+	
+	
+	#{/form}
+  #{/tabContentItem}	
+  
   <!-- Elimina Timbratura -->
   #{tabContentItem id:'delete'}
 	#{if stamping?.persistent}

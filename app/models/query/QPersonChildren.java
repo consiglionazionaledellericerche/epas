@@ -43,6 +43,9 @@ public class QPersonChildren extends EntityPathBase<PersonChildren> {
 
     public final StringPath surname = createString("surname");
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QPersonChildren(String variable) {
         this(PersonChildren.class, forVariable(variable), INITS);
     }
