@@ -39,6 +39,9 @@ public class QPersonHourForOvertime extends EntityPathBase<PersonHourForOvertime
 
     public final QPerson person;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QPersonHourForOvertime(String variable) {
         this(PersonHourForOvertime.class, forVariable(variable), INITS);
     }

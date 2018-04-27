@@ -51,6 +51,9 @@ public class QAttachment extends EntityPathBase<Attachment> {
     //inherited
     public final DateTimePath<org.joda.time.LocalDateTime> updatedAt = _super.updatedAt;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QAttachment(String variable) {
         this(Attachment.class, forVariable(variable), INITS);
     }

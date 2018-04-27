@@ -61,6 +61,9 @@ public class QInitializationGroup extends EntityPathBase<InitializationGroup> {
 
     public final NumberPath<Integer> vacationYear = createNumber("vacationYear", Integer.class);
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QInitializationGroup(String variable) {
         this(InitializationGroup.class, forVariable(variable), INITS);
     }

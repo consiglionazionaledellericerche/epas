@@ -57,6 +57,9 @@ public class QUser extends EntityPathBase<User> {
 
     public final ListPath<models.UsersRolesOffices, QUsersRolesOffices> usersRolesOffices = this.<models.UsersRolesOffices, QUsersRolesOffices>createList("usersRolesOffices", models.UsersRolesOffices.class, QUsersRolesOffices.class, PathInits.DIRECT2);
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QUser(String variable) {
         this(User.class, forVariable(variable), INITS);
     }

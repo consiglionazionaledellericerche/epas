@@ -45,6 +45,9 @@ public class QCategoryGroupAbsenceType extends EntityPathBase<CategoryGroupAbsen
 
     public final QCategoryTab tab;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QCategoryGroupAbsenceType(String variable) {
         this(CategoryGroupAbsenceType.class, forVariable(variable), INITS);
     }

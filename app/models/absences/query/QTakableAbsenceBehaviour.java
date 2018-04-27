@@ -47,6 +47,9 @@ public class QTakableAbsenceBehaviour extends EntityPathBase<TakableAbsenceBehav
 
     public final SetPath<models.absences.AbsenceType, QAbsenceType> takenCodes = this.<models.absences.AbsenceType, QAbsenceType>createSet("takenCodes", models.absences.AbsenceType.class, QAbsenceType.class, PathInits.DIRECT2);
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QTakableAbsenceBehaviour(String variable) {
         super(TakableAbsenceBehaviour.class, forVariable(variable));
     }

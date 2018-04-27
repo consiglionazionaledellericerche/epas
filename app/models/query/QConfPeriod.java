@@ -45,6 +45,9 @@ public class QConfPeriod extends EntityPathBase<ConfPeriod> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QConfPeriod(String variable) {
         this(ConfPeriod.class, forVariable(variable), INITS);
     }

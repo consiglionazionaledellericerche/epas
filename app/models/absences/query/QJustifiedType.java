@@ -39,6 +39,9 @@ public class QJustifiedType extends EntityPathBase<JustifiedType> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QJustifiedType(String variable) {
         super(JustifiedType.class, forVariable(variable));
     }

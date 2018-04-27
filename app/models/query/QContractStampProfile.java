@@ -45,6 +45,9 @@ public class QContractStampProfile extends EntityPathBase<ContractStampProfile> 
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QContractStampProfile(String variable) {
         this(ContractStampProfile.class, forVariable(variable), INITS);
     }

@@ -37,6 +37,9 @@ public class QZoneToZones extends EntityPathBase<ZoneToZones> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public final QZone zoneBase;
 
     public final QZone zoneLinked;

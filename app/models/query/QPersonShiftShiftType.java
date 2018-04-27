@@ -45,6 +45,9 @@ public class QPersonShiftShiftType extends EntityPathBase<PersonShiftShiftType> 
 
     public final QShiftType shiftType;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QPersonShiftShiftType(String variable) {
         this(PersonShiftShiftType.class, forVariable(variable), INITS);
     }

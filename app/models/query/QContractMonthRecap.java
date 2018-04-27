@@ -89,6 +89,9 @@ public class QContractMonthRecap extends EntityPathBase<ContractMonthRecap> {
 
     public final NumberPath<Integer> straordinariMinutiS3Print = createNumber("straordinariMinutiS3Print", Integer.class);
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public final NumberPath<Integer> year = createNumber("year", Integer.class);
 
     public QContractMonthRecap(String variable) {

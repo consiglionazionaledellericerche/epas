@@ -45,6 +45,9 @@ public class QPersonCompetenceCodes extends EntityPathBase<PersonCompetenceCodes
 
     public final QPerson person;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QPersonCompetenceCodes(String variable) {
         this(PersonCompetenceCodes.class, forVariable(variable), INITS);
     }
