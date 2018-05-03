@@ -39,20 +39,21 @@
 
 	#{/panel}
 
-		#{panel title:'Altre informazioni', color:'primary'}
-				#{f.input 'person.telephone'/}
-				#{f.date 'person.birthday',view:'year'/}
-				#{secure.check 'Persons.updatePerseoId'}
-          #{f.input 'person.perseoId', popover: true/}
-        #{/secure.check}
-				#{f.input 'person.eppn', popover: true/}        
-	<div class="col-sm-6 col-sm-offset-3">
-		#{alert color:'info'}
-		<p>Il campo opzionale <strong>Eppn</strong> viene utilizzato per il login shibboleth quando
-			attivo.</p>
-		#{/alert}
-	</div>
+	#{panel title:'Altre informazioni', color:'primary'}
+		#{f.input 'person.telephone'/}
+		#{f.date 'person.birthday',view:'year'/}
+		#{secure.check 'Persons.updatePerseoId'}
+       		#{f.input 'person.perseoId', popover: true/}
+       	#{/secure.check}
 
+   		#{f.input 'person.eppn', popover: true, disabled:!controllers.Resecure.check('Persons.updateEppn', person) /} 
+		        
+		<div class="col-sm-6 col-sm-offset-3">
+			#{alert color:'info'}
+			<p>Il campo opzionale <strong>Eppn</strong> viene utilizzato per il login shibboleth quando
+				attivo.</p>
+			#{/alert}
+		</div>
 
 	#{/panel}
 

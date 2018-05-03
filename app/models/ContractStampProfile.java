@@ -10,9 +10,10 @@ import javax.persistence.Table;
 
 import models.base.IPropertiesInPeriodOwner;
 import models.base.PropertyInPeriod;
-
+import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
+@Audited
 @Entity
 @Table(name = "contract_stamp_profiles")
 public class ContractStampProfile extends PropertyInPeriod {
