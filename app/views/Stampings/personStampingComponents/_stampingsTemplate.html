@@ -44,11 +44,11 @@
     #{/if}
     #{/list}
 
-    #{secure.check 'Stampings.blank', target: person}
-      #{secure.check 'Stampings.blank', target: yearMonth }
+    #{secure.check 'Stampings.insert', target: person}
+      #{secure.check 'Stampings.insert', target: yearMonth }
       <td class="inserisciTimbratura default-single">
         #{if !dayRecap.personDay.future}
-          <a href="@{Stampings.blank(dayRecap.personDay.person.id, dayRecap.personDay.date.format())}" data-async-modal="#modalStamping">
+          <a href="@{Stampings.insert(dayRecap.personDay.person.id, dayRecap.personDay.date.format())}" data-async-modal="#modalStamping">
         		+++
       		</a>
       	#{/if}
