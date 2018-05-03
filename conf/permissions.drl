@@ -582,7 +582,7 @@ rule PersonnelAdmin_onPerson
 when
   $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
   $o: Office() from $uro.office
-  $c: PermissionCheck($o.persons contains target, granted == false)
+  $c: PermissionCheck($o.persons contains target, granted == false, action not in ("Persons.updateEppn"))
 then
  $c.grant();
 end
