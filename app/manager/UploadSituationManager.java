@@ -32,7 +32,7 @@ public class UploadSituationManager {
   private AbsenceDao absenceDao;
   private CompetenceDao competenceDao;
   private PersonMonthRecapDao personMonthRecapDao;
-  private static PersonStampingRecapFactory stampingsRecapFactory;
+  private PersonStampingRecapFactory stampingsRecapFactory;
   
   /**
    * Generatore del file da carica su attestati con le assenze/compentenze del personale.
