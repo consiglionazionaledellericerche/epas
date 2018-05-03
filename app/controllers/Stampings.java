@@ -204,12 +204,12 @@ public class Stampings extends Controller {
     
     List<StampTypes> offsite = Lists.newArrayList();
     offsite.add(StampTypes.LAVORO_FUORI_SEDE);
-    boolean disableInsert = false;
+    boolean disableInsert = true;
     User user = Security.getUser().get();
     if (user.person != null) {
       if (person.office.checkConf(EpasParam.WORKING_OFF_SITE, "true") 
           && person.checkConf(EpasParam.OFF_SITE_STAMPING, "true")) {
-        disableInsert = true;
+        disableInsert = false;
       }
     }    
     
@@ -268,7 +268,6 @@ public class Stampings extends Controller {
 
       render("@edit", stamping, person, date, time, historyStamping);
     }
-        
     stamping.date = stampingManager.deparseStampingDateTime(date, time);
 
     // serve per poter discriminare dopo aver fatto la save della timbratura se si
@@ -282,44 +281,15 @@ public class Stampings extends Controller {
       // non è usato il costruttore con la add, quindi aggiungiamo qui a mano:
       personDay.stampings.add(stamping);
     }
-
+        
     rules.checkIfPermitted(stamping);
-
     final User currentUser = Security.getUser().get();
-    
-    val alreadyPresentStamping = stampingDao.getStamping(stamping.date, person, stamping.way);
-    //Se la timbratura allo stesso orario e con lo stesso verso non è già presente o è una modifica
-    //alla timbratura esistente allora creo/modifico la timbratura.
-    if (!alreadyPresentStamping.isPresent() 
-        || alreadyPresentStamping.get().id.equals(stamping.id)) {
-
-      if (!currentUser.isSystemUser()) {
-        if (currentUser.hasRoles(Role.PERSONNEL_ADMIN)) {
-          stamping.markedByEmployee = false;
-          stamping.markedByAdmin = true;
-        } else {
-          stamping.markedByEmployee = true;
-          stamping.markedByAdmin = false;
-        }
-      }
-      stamping.save();
-
-      consistencyManager
-      .updatePersonSituation(stamping.personDay.person.id, stamping.personDay.date);
-
-      flash.success(Web.msgSaved(Stampings.class));
-
-      notificationManager
-      .notificationStampingPolicy(currentUser, stamping, newInsert, !newInsert, false);
+    String result = stampingManager
+        .persistStamping(stamping, date, time, person, currentUser, newInsert);
+    if (!Strings.isStringEmpty(result)) {
+      flash.error(result);
     } else {
-      if ((stamping.stampType != null 
-          && !stamping.stampType.equals(alreadyPresentStamping.get().stampType)) 
-          || (stamping.stampType == null && alreadyPresentStamping.get().stampType != null)) {
-        flash.error("Timbratura già presente ma con causale diversa, "
-            + "modificare la timbratura presente.");  
-      } else {
-        flash.error("Timbratura ignorata perché già presente.");
-      }
+      flash.success(Web.msgSaved(Stampings.class));
     }
     
     
@@ -348,9 +318,6 @@ public class Stampings extends Controller {
     if (stamping.way == null) {
       Validation.addError("stamping.way", "Obbligatorio");
     }
-    if (Strings.isStringEmpty(stamping.note)) {
-      Validation.addError("stamping.note", "Obbligatorio");
-    }
     if (Strings.isStringEmpty(stamping.reason)) {
       Validation.addError("stamping.reason", "Obbligatorio");
     }
@@ -371,9 +338,39 @@ public class Stampings extends Controller {
       }
       render("@insert", stamping, person, date, time, disableInsert, offsite);
     }
+    stamping.date = stampingManager.deparseStampingDateTime(date, time);
+
+    // serve per poter discriminare dopo aver fatto la save della timbratura se si
+    // trattava di una nuova timbratura o di una modifica
+    boolean newInsert = !stamping.isPersistent();
+
+    // Se si tratta di un update ha già tutti i riferimenti al personday
+    if (newInsert) {
+      final PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(person, date);
+      stamping.personDay = personDay;
+      // non è usato il costruttore con la add, quindi aggiungiamo qui a mano:
+      personDay.stampings.add(stamping);
+    }
+    
+    rules.checkIfPermitted(stamping);
+    final User currentUser = Security.getUser().get();
+    
+    String result = stampingManager
+        .persistStamping(stamping, date, time, person, currentUser, newInsert);
+    if (!Strings.isStringEmpty(result)) {
+      flash.error(result);
+    } else {
+      flash.success(Web.msgSaved(Stampings.class));
+    }
+    if (!currentUser.isSystemUser() && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)
+        && currentUser.person.id.equals(person.id)) {
+      stampings(date.getYear(), date.getMonthOfYear());
+    }
+    personStamping(person.id, date.getYear(), date.getMonthOfYear());
   }
   
 
+  
   /**
    * Elimina la timbratura.
    *

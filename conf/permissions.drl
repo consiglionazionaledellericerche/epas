@@ -1198,8 +1198,10 @@ when
      	"Absences.overtimeMission",
 
         "Stampings.insert",
+        "Stampings.insertOffsite",
        	"Stampings.edit",
      	"Stampings.save",
+     	"Stampings.saveOffSite",
      	"Stampings.delete",
      	"PersonDays.workingHoliday",
      	"PersonDays.approveWorkingHoliday",
@@ -1373,8 +1375,10 @@ when
      	"Absences.overtimeMission",
 
        	"Stampings.insert",
+       	"Stampings.insertOffsite",
        	"Stampings.edit",
      	"Stampings.save",
+     	"Stampings.saveOffSite",
      	"Stampings.delete",
      	"PersonDays.workingHoliday",
      	"PersonDays.approveWorkingHoliday",
@@ -1563,8 +1567,9 @@ when
  PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
  $c: PermissionCheck(action in (
     "Stampings.insert",
+    "Stampings.insertOffsite",
     "Stampings.edit",
-    "Stampings.save",
+    "Stampings.saveOffSite",
     "Stampings.delete",
     "AbsenceGroups.insert",
     "AbsenceGroups.edit",
@@ -1584,7 +1589,7 @@ when
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
  PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
- $c: PermissionCheck(action in ("AbsenceGroups.insert","Stampings.insert"), target == $p, granted == false)
+ $c: PermissionCheck(action in ("AbsenceGroups.insert","Stampings.insert", "Stampings.insertOffsite", "Stampings.saveOffSite"), target == $p, granted == false)
 then
  $c.grant();
 end
@@ -1598,7 +1603,7 @@ when
  $p: Person() from currentOperator.person
  $o: Office() from $p.office
  $target: Stamping(UserDao.getAllowedStampTypes(currentOperator).contains(stampType), this.getOwner() == $p)
- $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), target == $target, granted == false)
+ $c: PermissionCheck(action in ("Stampings.edit", "Stampings.saveOffSite", "Stampings.delete"), target == $target, granted == false)
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
  PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
@@ -1637,7 +1642,11 @@ when
  $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
- $c: PermissionCheck(action in ("Stampings.insert", "Stampings.edit", "Stampings.save" , "Stampings.delete" ), target == null, granted == false)
+ $c: PermissionCheck(action in ("Stampings.insert", 
+ 							"Stampings.insertOffsite", 
+ 							"Stampings.edit", 
+ 							"Stampings.saveOffSite" , 
+ 							"Stampings.delete" ), target == null, granted == false)
 then
  $c.grant();
 end
@@ -1666,7 +1675,7 @@ when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
  $target: YearMonth()
- $c: PermissionCheck(action in("AbsenceGroups.insert", "Stampings.insert"), target == $target, granted == false)
+ $c: PermissionCheck(action in("AbsenceGroups.insert", "Stampings.insert", "Stampings.insertOffsite"), target == $target, granted == false)
  /** non più indietro di 2 mesi fa e solo nei mesi non ancora inviati sugli attestati **/
  eval($target.isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target))
 then
