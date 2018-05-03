@@ -179,7 +179,7 @@ public class UserDao extends DaoBase {
 
     return user.isSystemUser()
         || user.hasRoles(Role.SEAT_SUPERVISOR, Role.PERSONNEL_ADMIN, 
-            Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN) ;
+            Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN);
   }
 
   /**

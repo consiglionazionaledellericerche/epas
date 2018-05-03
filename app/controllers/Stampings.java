@@ -5,6 +5,9 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
+import com.beust.jcommander.Strings;
+
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -29,6 +32,7 @@ import manager.NotificationManager;
 import manager.PersonDayManager;
 import manager.SecureManager;
 import manager.StampingManager;
+import manager.configurations.EpasParam;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
@@ -40,6 +44,8 @@ import models.PersonDay;
 import models.Role;
 import models.Stamping;
 import models.User;
+import models.enumerate.StampTypes;
+
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import play.data.binding.As;
@@ -91,6 +97,7 @@ public class Stampings extends Controller {
   static NotificationManager notificationManager;
   @Inject
   static UserDao userDao;
+
 
   /**
    * Tabellone timbrature dipendente.
@@ -181,6 +188,36 @@ public class Stampings extends Controller {
   }
 
   /**
+   * Restituisce la form compilata secondo la modalità di chi fa la richiesta.
+   * @param personId l'id della persona
+   * @param date la data in cui si vuole inserire la timbratura
+   */
+  public static void insert(Long personId, LocalDate date) {
+    
+    final Person person = personDao.getPersonById(personId);
+
+    notFoundIfNull(person);
+
+    Preconditions.checkState(!date.isAfter(LocalDate.now()));
+
+    rules.checkIfPermitted(person);
+    
+    List<StampTypes> offsite = Lists.newArrayList();
+    offsite.add(StampTypes.LAVORO_FUORI_SEDE);
+    boolean disableInsert = false;
+    User user = Security.getUser().get();
+    if (user.person != null) {
+      if (person.office.checkConf(EpasParam.WORKING_OFF_SITE, "true") 
+          && person.checkConf(EpasParam.OFF_SITE_STAMPING, "true")) {
+        disableInsert = true;
+      }
+    }    
+    
+    render(person, date, disableInsert, offsite);
+  }
+
+  
+  /**
    * Modifica timbratura dall'amministratore.
    *
    * @param stampingId ID timbratura
@@ -253,7 +290,8 @@ public class Stampings extends Controller {
     val alreadyPresentStamping = stampingDao.getStamping(stamping.date, person, stamping.way);
     //Se la timbratura allo stesso orario e con lo stesso verso non è già presente o è una modifica
     //alla timbratura esistente allora creo/modifico la timbratura.
-    if (!alreadyPresentStamping.isPresent() || alreadyPresentStamping.get().id.equals(stamping.id)) {
+    if (!alreadyPresentStamping.isPresent() 
+        || alreadyPresentStamping.get().id.equals(stamping.id)) {
 
       if (!currentUser.isSystemUser()) {
         if (currentUser.hasRoles(Role.PERSONNEL_ADMIN)) {
@@ -266,16 +304,19 @@ public class Stampings extends Controller {
       }
       stamping.save();
 
-      consistencyManager.updatePersonSituation(stamping.personDay.person.id, stamping.personDay.date);
+      consistencyManager
+      .updatePersonSituation(stamping.personDay.person.id, stamping.personDay.date);
 
       flash.success(Web.msgSaved(Stampings.class));
 
       notificationManager
       .notificationStampingPolicy(currentUser, stamping, newInsert, !newInsert, false);
     } else {
-      if ((stamping.stampType != null && !stamping.stampType.equals(alreadyPresentStamping.get().stampType)) ||
-          (stamping.stampType == null && alreadyPresentStamping.get().stampType != null)) {
-        flash.error("Timbratura già presente ma con causale diversa, modificare la timbratura presente.");  
+      if ((stamping.stampType != null 
+          && !stamping.stampType.equals(alreadyPresentStamping.get().stampType)) 
+          || (stamping.stampType == null && alreadyPresentStamping.get().stampType != null)) {
+        flash.error("Timbratura già presente ma con causale diversa, "
+            + "modificare la timbratura presente.");  
       } else {
         flash.error("Timbratura ignorata perché già presente.");
       }
@@ -288,6 +329,48 @@ public class Stampings extends Controller {
       stampings(date.getYear(), date.getMonthOfYear());
     }
     personStamping(person.id, date.getYear(), date.getMonthOfYear());
+  }
+  
+  /**
+   * Metodo che permette il salvataggio della timbratura per lavoro fuori sede.
+   * @param personId l'id della persona
+   * @param date la data per cui si vuole salvare la timbratura
+   * @param stamping la timbratura da salvare
+   * @param time l'orario della timbratura
+   */
+  public static void saveOffSite(Long personId, @Required LocalDate date, 
+      @Required Stamping stamping, @Required @CheckWith(StringIsTime.class) String time) {
+    Preconditions.checkState(!date.isAfter(LocalDate.now()));
+
+    final Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    
+    if (stamping.way == null) {
+      Validation.addError("stamping.way", "Obbligatorio");
+    }
+    if (Strings.isStringEmpty(stamping.note)) {
+      Validation.addError("stamping.note", "Obbligatorio");
+    }
+    if (Strings.isStringEmpty(stamping.reason)) {
+      Validation.addError("stamping.reason", "Obbligatorio");
+    }
+    if (Strings.isStringEmpty(stamping.place)) {
+      Validation.addError("stamping.place", "Obbligatorio");
+    }
+    if (Validation.hasErrors()) {
+      response.status = 400;     
+      List<StampTypes> offsite = Lists.newArrayList();
+      offsite.add(StampTypes.LAVORO_FUORI_SEDE);
+      boolean disableInsert = false;
+      User user = Security.getUser().get();
+      if (user.person != null) {
+        if (person.office.checkConf(EpasParam.WORKING_OFF_SITE, "true") 
+            && person.checkConf(EpasParam.OFF_SITE_STAMPING, "true")) {
+          disableInsert = true;
+        }
+      }
+      render("@insert", stamping, person, date, time, disableInsert, offsite);
+    }
   }
   
 

@@ -1,0 +1,86 @@
+#{modalAsync id:'modalStamping', title:('Inserisci timbratura del ' + date.format() + ' per ' + person.fullname)}
+
+#{if disableInsert}
+	#{tabList}
+		#{tabItemDisabled id:'insert', title:'Inserisci timbratura' /} 
+	    #{tabItem id:'insertOffsite', title:'Fuori sede', active:true /}  		 		    
+	#{/tabList}
+#{/if}
+#{else}
+	#{tabList}
+  		#{tabItem id:'insert', title:'Inserisci timbratura', active:true /}
+  		#{tabItem id:'insertOffsite', title:'Fuori sede' /}    
+	#{/tabList}
+#{/else}
+
+<br>
+
+
+#{tabContent}
+
+  <!-- Inserimento / Modifica Timbratura -->
+  #{tabContentItem id:'insert', active: !disableInsert}
+	<div id="stampingData">
+	
+	  #{form action:@save(), method:'POST', autocomplete:false, 'data-async':'#page_content',
+	    class:'form form-horizontal', 'data-async-error':'#stampingData', 'data-spinner':'#defaultSpinner'}
+	
+	  <!-- Alert message -->
+	 
+	  #{alert color:'info',center:true}
+	    Inserisci i dati della nuova timbratura
+	  #{/alert}
+	 
+	
+	  <!-- Fields -->
+	  #{include './personStampingComponents/_coreStampings.html' /}
+	
+	  #{set stampTypes: templateUtility.stampTypes /}
+	  #{if stampTypes.size() == 1}
+	    #{f.view messages.get('stamping.stampType'), value: stampTypes[0]/}
+	    #{f.hidden 'stamping.stampType', value:stampTypes[0] /}
+	  #{/if}
+	  #{else}
+	    #{f.selectEnum 'stamping.stampType', items:stampTypes /}
+	  #{/else}
+	
+	  #{f.input 'stamping.note' /}
+
+      <!-- Buttons -->	
+	  #{b.buttons center:true}
+	     #{b.submit 'Inserisci'/}
+	  #{/b.buttons}
+	
+	  #{/form}
+	 
+	</div>
+  #{/tabContentItem}
+  
+  #{tabContentItem id:'insertOffsite', active: disableInsert}
+  <div id="stampingData">
+  	#{form action:@saveOffSite(), method:'POST', autocomplete:false, 'data-async':'#page_content',
+	    class:'form form-horizontal', 'data-async-error':'#stampingData', 'data-spinner':'#defaultSpinner'}
+	
+	   #{alert color:'warning',center:true}
+	      Inserisci i dati della nuova timbratura per lavoro fuori sede
+	   #{/alert}
+	   #{include './personStampingComponents/_coreStampings.html' /}
+	   #{f.view messages.get('stamping.stampType'), value: offsite[0]/}
+	   #{f.hidden 'stamping.stampType', value:offsite[0] /}	   
+	   #{f.input 'stamping.note' /}
+	   #{f.input 'stamping.place' /}
+	   #{f.input 'stamping.reason' /}
+	
+	      <!-- Buttons -->	
+	  #{b.buttons center:true}
+	     #{b.submit 'Inserisci'/}
+	  #{/b.buttons}
+	
+	#{/form}
+	</div>
+  #{/tabContentItem}  
+  
+
+#{/tabContent}
+
+#{/modalAsync}
