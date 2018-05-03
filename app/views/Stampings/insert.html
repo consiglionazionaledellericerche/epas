@@ -1,16 +1,15 @@
 #{modalAsync id:'modalStamping', title:('Inserisci timbratura del ' + date.format() + ' per ' + person.fullname)}
 
-#{if disableInsert}
+
 	#{tabList}
-	    #{tabItem id:'insertOffsite', title:'Fuori sede', active:true /}  		 		    
+		#{secure.check 'Stampings.save'}
+  			#{tabItem id:'insert', title:'Inserisci timbratura', active:true /}
+  		#{/secure.check}
+  		#{secure.check 'Stampings.saveOffSite'}
+  			#{tabItem id:'insertOffsite', title:'Fuori sede' /}
+  		#{/secure.check}    
 	#{/tabList}
-#{/if}
-#{else}
-	#{tabList}
-  		#{tabItem id:'insert', title:'Inserisci timbratura', active:true /}
-  		#{tabItem id:'insertOffsite', title:'Fuori sede' /}    
-	#{/tabList}
-#{/else}
+
 
 <br>
 
@@ -18,7 +17,7 @@
 #{tabContent}
 
   <!-- Inserimento / Modifica Timbratura -->
-  #{tabContentItem id:'insert', active: !disableInsert}
+  #{tabContentItem id:'insert', active: disableInsert}
 	<div id="stampingData">
 	
 	  #{form action:@save(), method:'POST', autocomplete:false, 'data-async':'#page_content',
@@ -55,7 +54,7 @@
 	</div>
   #{/tabContentItem}
   
-  #{tabContentItem id:'insertOffsite', active: disableInsert}
+  #{tabContentItem id:'insertOffsite', active: !disableInsert}
   <div id="stampingDataOffSite">
   	#{form action:@saveOffSite(), method:'POST', autocomplete:false, 'data-async':'#page_content',
 	    class:'form form-horizontal', 'data-async-error':'#stampingDataOffSite', 'data-spinner':'#defaultSpinner'}
