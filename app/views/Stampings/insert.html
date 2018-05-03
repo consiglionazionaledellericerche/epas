@@ -2,7 +2,6 @@
 
 #{if disableInsert}
 	#{tabList}
-		#{tabItemDisabled id:'insert', title:'Inserisci timbratura' /} 
 	    #{tabItem id:'insertOffsite', title:'Fuori sede', active:true /}  		 		    
 	#{/tabList}
 #{/if}
@@ -57,9 +56,9 @@
   #{/tabContentItem}
   
   #{tabContentItem id:'insertOffsite', active: disableInsert}
-  <div id="stampingData">
+  <div id="stampingDataOffSite">
   	#{form action:@saveOffSite(), method:'POST', autocomplete:false, 'data-async':'#page_content',
-	    class:'form form-horizontal', 'data-async-error':'#stampingData', 'data-spinner':'#defaultSpinner'}
+	    class:'form form-horizontal', 'data-async-error':'#stampingDataOffSite', 'data-spinner':'#defaultSpinner'}
 	
 	   #{alert color:'warning',center:true}
 	      Inserisci i dati della nuova timbratura per lavoro fuori sede
@@ -67,10 +66,9 @@
 	   #{include './personStampingComponents/_coreStampings.html' /}
 	   #{f.view messages.get('stamping.stampType'), value: offsite[0]/}
 	   #{f.hidden 'stamping.stampType', value:offsite[0] /}	   
-	   #{f.input 'stamping.note' /}
-	   #{f.input 'stamping.place' /}
-	   #{f.input 'stamping.reason' /}
-	
+	   #{f.input 'stamping.place', required:true /}
+	   #{f.input 'stamping.reason', required:true /}
+	   #{f.input 'stamping.note' /}	
 	      <!-- Buttons -->	
 	  #{b.buttons center:true}
 	     #{b.submit 'Inserisci'/}
