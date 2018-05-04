@@ -1,7 +1,4 @@
-%{
-Action = (stamping != null && stamping.persistent) ? 'Modifica' : 'Nuova'
-}%
-#{modalAsync id:'modalStamping', title:(Action + ' timbratura del ' + date.format() + ' per ' + person.fullname)}
+#{modalAsync id:'modalStamping', title:('Modifica timbratura fuori sede del ' + date.format() + ' per ' + person.fullname)}
 
 #{if stamping}
   #{tabList}
@@ -17,21 +14,17 @@ Action = (stamping != null && stamping.persistent) ? 'Modifica' : 'Nuova'
   #{tabContentItem id:'edit', active:true}
 	<div id="stampingData">
 	
-	  #{form action:@save(), method:'POST', autocomplete:false, 'data-async':'#page_content',
+	  #{form action:@saveOffSite(), method:'POST', autocomplete:false, 'data-async':'#page_content',
 	    class:'form form-horizontal', 'data-async-error':'#stampingData', 'data-spinner':'#defaultSpinner'}
 	
 	  <!-- Alert message -->
-	  #{if stamping?.persistent}
-		#{alert color:'info',center:true}
-		  Modifica i dati della timbratura delle ore ${stamping.formattedHour()}
-		#{/alert}
+	  
+	  #{alert color:'warning',center:true}
+		  Modifica i dati della timbratura fuori sede delle ore ${stamping.formattedHour()}
+	  #{/alert}
 		<!-- storico ?? -->
-	  #{/if}
-	  #{else}
-	    #{alert color:'info',center:true}
-	      Inserisci i dati della nuova timbratura
-	    #{/alert}
-	  #{/else}
+	 
+	 
 	
 	  <!-- Fields -->
 	  #{f.hidden 'personId', value:person.id /}
@@ -52,7 +45,10 @@ Action = (stamping != null && stamping.persistent) ? 'Modifica' : 'Nuova'
 	  #{else}
 	    #{f.selectEnum 'stamping.stampType', items:stampTypes /}
 	  #{/else}
-
+	  
+	  #{f.input 'stamping.place', required:true /}
+	  #{f.input 'stamping.reason', required:true /}
+	
 	  #{f.input 'stamping.note' /}
 
       <!-- Buttons -->	
@@ -69,6 +65,7 @@ Action = (stamping != null && stamping.persistent) ? 'Modifica' : 'Nuova'
 	</div>
   #{/tabContentItem}
   
+  
   <!-- Elimina Timbratura -->
   #{tabContentItem id:'delete'}
 	#{if stamping?.persistent}
@@ -80,7 +77,8 @@ Action = (stamping != null && stamping.persistent) ? 'Modifica' : 'Nuova'
 	  #{f.view 'Dipendente', value:stamping.personDay.person.fullname /}
 	  #{f.view 'Inserita il', value:state.formattedRevisionDate() /}
 	  #{f.view 'Inserita da', value:state.formattedOwner() /}
-
+	  #{f.view 'Per il luogo', value:stamping.place /}
+	  #{f.view 'Con motivazione', value:stamping.reason /}
 	  #{/if}
 	  #{/list}
 	</form>
