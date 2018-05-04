@@ -39,7 +39,7 @@ public enum StampTypes {
   MOTIVI_PERSONALI("mp", "motiviPersonali", "Motivi personali", false, false),
   REPERIBILITA("r", "reperibilita", "Reperibilità ", false, false),
   INTRAMOENIA("i", "intramoenia", "Intramoenia", false, false),
-  GUARDIA_MEDICA("gm", "guardiaMedica", "Guardia Medica" ,false, false),
+  GUARDIA_MEDICA("gm", "guardiaMedica", "Guardia Medica",false, false),
   PERMESSO_BREVE("pb", "permessoBreve", "Permesso Breve", false, true);
 
   private String identifier;
@@ -88,7 +88,9 @@ public enum StampTypes {
    * @return la lista degli stamptypes attivi.
    */
   public static List<StampTypes> onlyActive() {
-    return Arrays.stream(values()).filter(StampTypes::isActive).collect(Collectors.toList());
+    return Arrays.stream(values())
+        .filter(StampTypes::isActive)
+        .filter(StampTypes::isNotOffSiteWork).collect(Collectors.toList());
   }
 
   /**
@@ -106,6 +108,14 @@ public enum StampTypes {
    */
   public boolean isOffSiteWork() {
     return this == LAVORO_FUORI_SEDE;
+  }
+  
+  /**
+   * 
+   * @return
+   */
+  public boolean isNotOffSiteWork() {
+    return this != LAVORO_FUORI_SEDE;
   }
 
 }

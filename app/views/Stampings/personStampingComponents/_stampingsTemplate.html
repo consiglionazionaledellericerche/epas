@@ -38,7 +38,9 @@
       #{/if}
       #{list items:stampingTemplate.stampModificationTypes, as:'smt'}
         <p><strong>${smt.code}</strong> ${smt.description}</p>
-      #{/list}
+      #{/list}      
+      #{if stampingTemplate.stamping.place}<strong>Luogo: </strong><em>${stampingTemplate.stamping.place}</em></p>#{/if}
+      #{if stampingTemplate.stamping.reason}<strong>Motivazione: </strong><em>${stampingTemplate.stamping.reason}</em></p>#{/if}
       #{if stampingTemplate.stamping.note}<strong>note: </strong><em>${stampingTemplate.stamping.note}</em></p>#{/if}
       </div>
     #{/if}

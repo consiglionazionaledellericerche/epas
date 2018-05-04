@@ -1200,6 +1200,7 @@ when
         "Stampings.insert",
         "Stampings.insertOffsite",
        	"Stampings.edit",
+       	"Stampings.editOffSite",
      	"Stampings.save",
      	"Stampings.saveOffSite",
      	"Stampings.delete",
@@ -1377,6 +1378,7 @@ when
        	"Stampings.insert",
        	"Stampings.insertOffsite",
        	"Stampings.edit",
+       	"Stampings.editOffSite",
      	"Stampings.save",
      	"Stampings.saveOffSite",
      	"Stampings.delete",
@@ -1569,6 +1571,7 @@ when
     "Stampings.insert",
     "Stampings.insertOffsite",
     "Stampings.edit",
+    "Stampings.editOffSite",
     "Stampings.saveOffSite",
     "Stampings.delete",
     "AbsenceGroups.insert",
@@ -1589,7 +1592,7 @@ when
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
  PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
- $c: PermissionCheck(action in ("AbsenceGroups.insert","Stampings.insert", "Stampings.insertOffsite", "Stampings.saveOffSite"), target == $p, granted == false)
+ $c: PermissionCheck(action in ("AbsenceGroups.insert","Stampings.insert", "Stampings.insertOffsite", "Stampings.edit", "Stampings.editOffSite", "Stampings.saveOffSite"), target == $p, granted == false)
 then
  $c.grant();
 end
@@ -1603,7 +1606,7 @@ when
  $p: Person() from currentOperator.person
  $o: Office() from $p.office
  $target: Stamping(UserDao.getAllowedStampTypes(currentOperator).contains(stampType), this.getOwner() == $p)
- $c: PermissionCheck(action in ("Stampings.edit", "Stampings.saveOffSite", "Stampings.delete"), target == $target, granted == false)
+ $c: PermissionCheck(action in ("Stampings.edit", "Stampings.editOffSite", "Stampings.saveOffSite", "Stampings.delete"), target == $target, granted == false)
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
  PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
@@ -1644,7 +1647,8 @@ when
  Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
  $c: PermissionCheck(action in ("Stampings.insert", 
  							"Stampings.insertOffsite", 
- 							"Stampings.edit", 
+ 							"Stampings.edit",
+ 							"Stampings.editOffSite", 
  							"Stampings.saveOffSite" , 
  							"Stampings.delete" ), target == null, granted == false)
 then

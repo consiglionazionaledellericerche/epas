@@ -235,6 +235,9 @@ public class Stampings extends Controller {
 
     final Person person = stamping.personDay.person;
     final LocalDate date = stamping.personDay.date;
+    if (stamping.isOffSiteWork()) {
+      render("@editOffSite", stamping,person, date, historyStamping);
+    }
 
     render(stamping, person, date, historyStamping);
   }
