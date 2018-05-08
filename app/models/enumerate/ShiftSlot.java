@@ -5,7 +5,8 @@ package models.enumerate;
  */
 public enum ShiftSlot {
   MORNING("mattina"),
-  AFTERNOON("pomeriggio");
+  AFTERNOON("pomeriggio"),
+  EVENING("sera");
 
   private String name;
 

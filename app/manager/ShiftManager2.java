@@ -46,9 +46,11 @@ import models.PersonShift;
 import models.PersonShiftDay;
 import models.PersonShiftDayInTrouble;
 import models.PersonShiftShiftType;
+import models.ShiftTimeTable;
 import models.ShiftType;
 import models.ShiftTypeMonth;
 import models.User;
+import models.enumerate.ShiftSlot;
 import models.enumerate.ShiftTroubles;
 
 import org.joda.time.LocalDate;
@@ -864,6 +866,23 @@ public class ShiftManager2 {
     }
   }
   
-  
+  /**
+   * Metodo che ritorna il giusto numero di slot associati all'attività.
+   * @param timeTable la timetable relativa all'attività
+   * @return la lista degli slot di turno attivi sulla timetable passata come parametro.
+   */
+  public List<ShiftSlot> getSlotsFromTimeTable(ShiftTimeTable timeTable) {
+    List<ShiftSlot> list = Lists.newArrayList();
+    if (timeTable.startMorning != null && timeTable.endMorning != null) {
+      list.add(ShiftSlot.MORNING);
+    }
+    if (timeTable.startAfternoon != null && timeTable.endAfternoon != null) {
+      list.add(ShiftSlot.AFTERNOON);
+    }
+    if (timeTable.startEvening != null && timeTable.endEvening != null) {
+      list.add(ShiftSlot.EVENING);
+    }
+    return list;
+  }
 
 }
