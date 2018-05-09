@@ -68,6 +68,8 @@ public class PersonShiftDay extends BaseModel {
         return shiftType.shiftTimeTable.startMorning;
       case AFTERNOON:
         return shiftType.shiftTimeTable.startAfternoon;
+      case EVENING:
+        return shiftType.shiftTimeTable.startEvening;
       default:
         return null;
     }
@@ -80,6 +82,8 @@ public class PersonShiftDay extends BaseModel {
         return shiftType.shiftTimeTable.endMorning;
       case AFTERNOON:
         return shiftType.shiftTimeTable.endAfternoon;
+      case EVENING:
+        return shiftType.shiftTimeTable.endEvening;
       default:
         return null;
     }
@@ -92,6 +96,8 @@ public class PersonShiftDay extends BaseModel {
         return shiftType.shiftTimeTable.startMorningLunchTime;
       case AFTERNOON:
         return shiftType.shiftTimeTable.startAfternoonLunchTime;
+      case EVENING:
+        return shiftType.shiftTimeTable.startEveningLunchTime;
       default:
         return null;
     }
@@ -104,6 +110,8 @@ public class PersonShiftDay extends BaseModel {
         return shiftType.shiftTimeTable.endMorningLunchTime;
       case AFTERNOON:
         return shiftType.shiftTimeTable.endAfternoonLunchTime;
+      case EVENING:
+        return shiftType.shiftTimeTable.endEveningLunchTime;
       default:
         return null;
     }
