@@ -4,15 +4,24 @@ import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.inject.Inject;
 import controllers.Security;
+import controllers.Stampings;
+
 import dao.PersonDao;
 import dao.PersonDayDao;
+import dao.StampingDao;
+
+import helpers.Web;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingDayRecapFactory;
 import models.Person;
 import models.PersonDay;
+import models.Role;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
@@ -29,6 +38,8 @@ public class StampingManager {
   private final PersonDayManager personDayManager;
   private final PersonStampingDayRecapFactory stampingDayRecapFactory;
   private final ConsistencyManager consistencyManager;
+  private final StampingDao stampingDao;
+  private final NotificationManager notificationManager;
 
   /**
    * @param personDayDao il dao per cercare i personday
@@ -42,13 +53,16 @@ public class StampingManager {
       PersonDao personDao,
       PersonDayManager personDayManager,
       PersonStampingDayRecapFactory stampingDayRecapFactory,
-      ConsistencyManager consistencyManager) {
+      ConsistencyManager consistencyManager, StampingDao stampingDao,
+      NotificationManager notificationManager) {
 
     this.personDayDao = personDayDao;
     this.personDao = personDao;
     this.personDayManager = personDayManager;
     this.stampingDayRecapFactory = stampingDayRecapFactory;
     this.consistencyManager = consistencyManager;
+    this.stampingDao = stampingDao;
+    this.notificationManager = notificationManager;
   }
 
 
@@ -118,6 +132,56 @@ public class StampingManager {
     return max;
   }
 
+  /**
+   * Metodo che salva la timbratura.
+   * @param stamping la timbratura da persistere
+   * @param date la data della timbratura
+   * @param time l'orario della timbratura
+   * @param person la persona a cui associare la timbratura
+   * @return la stringa contenente un messaggio di errore se il salvataggio non è andato a
+   *     buon fine, stringa vuota altrimenti.
+   */
+  public String persistStamping(Stamping stamping, LocalDate date, String time, 
+      Person person, User currentUser, boolean newInsert) {
+    String result = "";
+    
+    val alreadyPresentStamping = stampingDao.getStamping(stamping.date, person, stamping.way);
+    //Se la timbratura allo stesso orario e con lo stesso verso non è già presente o è una modifica
+    //alla timbratura esistente allora creo/modifico la timbratura.
+    if (!alreadyPresentStamping.isPresent() 
+        || alreadyPresentStamping.get().id.equals(stamping.id)) {
+
+      if (!currentUser.isSystemUser()) {
+        if (currentUser.hasRoles(Role.PERSONNEL_ADMIN)) {
+          stamping.markedByEmployee = false;
+          stamping.markedByAdmin = true;
+        } else {
+          stamping.markedByEmployee = true;
+          stamping.markedByAdmin = false;
+        }
+      }
+      stamping.save();
+
+      consistencyManager
+      .updatePersonSituation(stamping.personDay.person.id, stamping.personDay.date);
+      
+      notificationManager
+      .notificationStampingPolicy(currentUser, stamping, newInsert, !newInsert, false);
+    } else {
+      if ((stamping.stampType != null 
+          && !stamping.stampType.equals(alreadyPresentStamping.get().stampType)) 
+          || (stamping.stampType == null && alreadyPresentStamping.get().stampType != null)) {
+        result = "Timbratura già presente ma con causale diversa, "
+            + "modificare la timbratura presente.";  
+      } else {
+        result = "Timbratura ignorata perché già presente.";
+      }
+    }
+    
+    return result;
+  }
+  
+  
   /**
    * Stamping dal formato del client al formato ePAS.
    */

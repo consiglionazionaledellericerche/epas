@@ -36,6 +36,9 @@ public class QMutableModel extends EntityPathBase<MutableModel> {
 
     public final DateTimePath<org.joda.time.LocalDateTime> updatedAt = createDateTime("updatedAt", org.joda.time.LocalDateTime.class);
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QMutableModel(String variable) {
         super(MutableModel.class, forVariable(variable));
     }

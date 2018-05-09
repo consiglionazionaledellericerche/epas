@@ -47,6 +47,9 @@ public class QPersonReperibility extends EntityPathBase<PersonReperibility> {
 
     public final DatePath<org.joda.time.LocalDate> startDate = createDate("startDate", org.joda.time.LocalDate.class);
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QPersonReperibility(String variable) {
         this(PersonReperibility.class, forVariable(variable), INITS);
     }

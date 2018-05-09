@@ -85,6 +85,9 @@ public class QPersonDay extends EntityPathBase<PersonDay> {
 
     public final ListPath<models.PersonDayInTrouble, QPersonDayInTrouble> troubles = this.<models.PersonDayInTrouble, QPersonDayInTrouble>createList("troubles", models.PersonDayInTrouble.class, QPersonDayInTrouble.class, PathInits.DIRECT2);
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public final NumberPath<Integer> workingTimeInMission = createNumber("workingTimeInMission", Integer.class);
 
     public QPersonDay(String variable) {

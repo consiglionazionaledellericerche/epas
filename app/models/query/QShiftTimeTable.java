@@ -67,6 +67,9 @@ public class QShiftTimeTable extends EntityPathBase<ShiftTimeTable> {
 
     public final NumberPath<Integer> totalWorkMinutes = createNumber("totalWorkMinutes", Integer.class);
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QShiftTimeTable(String variable) {
         this(ShiftTimeTable.class, forVariable(variable), INITS);
     }

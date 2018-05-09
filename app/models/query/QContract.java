@@ -83,6 +83,9 @@ public class QContract extends EntityPathBase<Contract> {
 
     public final ListPath<models.VacationPeriod, QVacationPeriod> vacationPeriods = this.<models.VacationPeriod, QVacationPeriod>createList("vacationPeriods", models.VacationPeriod.class, QVacationPeriod.class, PathInits.DIRECT2);
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QContract(String variable) {
         this(Contract.class, forVariable(variable), INITS);
     }

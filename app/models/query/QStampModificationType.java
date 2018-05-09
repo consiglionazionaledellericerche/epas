@@ -41,6 +41,9 @@ public class QStampModificationType extends EntityPathBase<StampModificationType
 
     public final SetPath<models.Stamping, QStamping> stampings = this.<models.Stamping, QStamping>createSet("stampings", models.Stamping.class, QStamping.class, PathInits.DIRECT2);
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QStampModificationType(String variable) {
         super(StampModificationType.class, forVariable(variable));
     }

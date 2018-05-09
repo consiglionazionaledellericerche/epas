@@ -43,6 +43,9 @@ public class QContractWorkingTimeType extends EntityPathBase<ContractWorkingTime
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public final QWorkingTimeType workingTimeType;
 
     public QContractWorkingTimeType(String variable) {

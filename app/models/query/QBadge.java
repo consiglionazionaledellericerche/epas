@@ -43,6 +43,9 @@ public class QBadge extends EntityPathBase<Badge> {
 
     public final QPerson person;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QBadge(String variable) {
         this(Badge.class, forVariable(variable), INITS);
     }
