@@ -37,14 +37,9 @@
 	  #{f.input 'time', popover:'true', value:stamping?.isPersistent() ? stamping?.formattedHour() : time, required:true/}
 	  #{f.radioEnum 'stamping.way', items:models.Stamping.WayType, required:true /}
 	
-	  #{set stampTypes: templateUtility.stampTypes /}
-	  #{if stampTypes.size() == 1}
-	    #{f.view messages.get('stamping.stampType'), value: stampTypes[0]/}
-	    #{f.hidden 'stamping.stampType', value:stampTypes[0] /}
-	  #{/if}
-	  #{else}
-	    #{f.selectEnum 'stamping.stampType', items:stampTypes /}
-	  #{/else}
+	  
+	  #{f.view messages.get('stamping.stampType'), value:stamping.stampType /}
+	  #{f.hidden 'stamping.stampType', value:stamping.stampType /}
 	  
 	  #{f.input 'stamping.place', required:true /}
 	  #{f.input 'stamping.reason', required:true /}

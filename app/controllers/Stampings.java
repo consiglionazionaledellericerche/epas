@@ -204,16 +204,20 @@ public class Stampings extends Controller {
     
     List<StampTypes> offsite = Lists.newArrayList();
     offsite.add(StampTypes.LAVORO_FUORI_SEDE);
-    boolean disableInsert = true;
+    boolean insertOffsite = false;
+    boolean insertNormal = true;
+    
     User user = Security.getUser().get();
-    if (user.person != null) {
+    
+    if (user.person != null && user.person.equals(person)) {
       if (person.office.checkConf(EpasParam.WORKING_OFF_SITE, "true") 
           && person.checkConf(EpasParam.OFF_SITE_STAMPING, "true")) {
-        disableInsert = false;
+        insertOffsite = true;
+        insertNormal = false;
       }
-    }    
+    } 
     
-    render(person, date, disableInsert, offsite);
+    render(person, date, offsite, insertOffsite, insertNormal);
   }
 
   

@@ -17,7 +17,7 @@
 #{tabContent}
 
   <!-- Inserimento / Modifica Timbratura -->
-  #{tabContentItem id:'insert', active: disableInsert}
+  #{tabContentItem id:'insert', active: insertNormal}
 	<div id="stampingData">
 	
 	  #{form action:@save(), method:'POST', autocomplete:false, 'data-async':'#page_content',
@@ -54,7 +54,7 @@
 	</div>
   #{/tabContentItem}
   
-  #{tabContentItem id:'insertOffsite', active: !disableInsert}
+  #{tabContentItem id:'insertOffsite', active: insertOffsite}
   <div id="stampingDataOffSite">
   	#{form action:@saveOffSite(), method:'POST', autocomplete:false, 'data-async':'#page_content',
 	    class:'form form-horizontal', 'data-async-error':'#stampingDataOffSite', 'data-spinner':'#defaultSpinner'}
