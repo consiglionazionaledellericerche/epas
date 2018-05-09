@@ -710,6 +710,7 @@ StampTypes.PERMESSO_BREVE= Permesso breve (36 ore anno)
 
 ShiftSlot.MORNING = Mattina
 ShiftSlot.AFTERNOON = Pomeriggio
+ShiftSlot.EVENING = Sera
 
 
 shift.absenceInDay = La persona nel giorno selezionato è assente
