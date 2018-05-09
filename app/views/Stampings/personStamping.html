@@ -22,8 +22,8 @@
       <th class="group-right">${i}<sup>a</sup> <br/>uscita</th>
       #{/list}
 
-      #{secure.check 'Stampings.blank', target: person}
-        #{secure.check 'Stampings.blank', target: yearMonth }
+      #{secure.check 'Stampings.insert', target: person}
+        #{secure.check 'Stampings.insert', target: yearMonth }
         <th class="group-single">Inserisci<br>timbratura</th>
         #{/secure.check}
       #{/secure.check}

@@ -36,6 +36,9 @@ public class QPeriodModel extends EntityPathBase<PeriodModel> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QPeriodModel(String variable) {
         super(PeriodModel.class, forVariable(variable));
     }

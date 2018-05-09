@@ -1,0 +1,83 @@
+#{modalAsync id:'modalStamping', title:('Inserisci timbratura del ' + date.format() + ' per ' + person.fullname)}
+
+
+	#{tabList}
+		#{secure.check 'Stampings.save'}
+  			#{tabItem id:'insert', title:'Inserisci timbratura', active:true /}
+  		#{/secure.check}
+  		#{secure.check 'Stampings.saveOffSite'}
+  			#{tabItem id:'insertOffsite', title:'Fuori sede' /}
+  		#{/secure.check}    
+	#{/tabList}
+
+
+<br>
+
+
+#{tabContent}
+
+  <!-- Inserimento / Modifica Timbratura -->
+  #{tabContentItem id:'insert', active: insertNormal}
+	<div id="stampingData">
+	
+	  #{form action:@save(), method:'POST', autocomplete:false, 'data-async':'#page_content',
+	    class:'form form-horizontal', 'data-async-error':'#stampingData', 'data-spinner':'#defaultSpinner'}
+	
+	  <!-- Alert message -->
+	 
+	  #{alert color:'info',center:true}
+	    Inserisci i dati della nuova timbratura
+	  #{/alert}
+	 
+	
+	  <!-- Fields -->
+	  #{include './personStampingComponents/_coreStampings.html' /}
+	
+	  #{set stampTypes: templateUtility.stampTypes /}
+	  #{if stampTypes.size() == 1}
+	    #{f.view messages.get('stamping.stampType'), value: stampTypes[0]/}
+	    #{f.hidden 'stamping.stampType', value:stampTypes[0] /}
+	  #{/if}
+	  #{else}
+	    #{f.selectEnum 'stamping.stampType', items:stampTypes /}
+	  #{/else}
+	
+	  #{f.input 'stamping.note' /}
+
+      <!-- Buttons -->	
+	  #{b.buttons center:true}
+	     #{b.submit 'Inserisci'/}
+	  #{/b.buttons}
+	
+	  #{/form}
+	 
+	</div>
+  #{/tabContentItem}
+  
+  #{tabContentItem id:'insertOffsite', active: insertOffsite}
+  <div id="stampingDataOffSite">
+  	#{form action:@saveOffSite(), method:'POST', autocomplete:false, 'data-async':'#page_content',
+	    class:'form form-horizontal', 'data-async-error':'#stampingDataOffSite', 'data-spinner':'#defaultSpinner'}
+	
+	   #{alert color:'warning',center:true}
+	      Inserisci i dati della nuova timbratura per lavoro fuori sede
+	   #{/alert}
+	   #{include './personStampingComponents/_coreStampings.html' /}
+	   #{f.view messages.get('stamping.stampType'), value: offsite[0]/}
+	   #{f.hidden 'stamping.stampType', value:offsite[0] /}	   
+	   #{f.input 'stamping.place', required:true /}
+	   #{f.input 'stamping.reason', required:true /}
+	   #{f.input 'stamping.note' /}	
+	      <!-- Buttons -->	
+	  #{b.buttons center:true}
+	     #{b.submit 'Inserisci'/}
+	  #{/b.buttons}
+	
+	#{/form}
+	</div>
+  #{/tabContentItem}  
+  
+
+#{/tabContent}
+
+#{/modalAsync}

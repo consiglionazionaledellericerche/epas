@@ -59,6 +59,9 @@ public class QWorkingTimeTypeDay extends EntityPathBase<WorkingTimeTypeDay> {
 
     public final NumberPath<Integer> timeSlotExitTo = createNumber("timeSlotExitTo", Integer.class);
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public final NumberPath<Integer> workingTime = createNumber("workingTime", Integer.class);
 
     public final QWorkingTimeType workingTimeType;

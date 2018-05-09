@@ -43,6 +43,9 @@ public class QCategoryTab extends EntityPathBase<CategoryTab> {
 
     public final NumberPath<Integer> priority = createNumber("priority", Integer.class);
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QCategoryTab(String variable) {
         super(CategoryTab.class, forVariable(variable));
     }

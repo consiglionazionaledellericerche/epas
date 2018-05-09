@@ -43,6 +43,9 @@ public class QComplationAbsenceBehaviour extends EntityPathBase<ComplationAbsenc
 
     public final SetPath<models.absences.AbsenceType, QAbsenceType> replacingCodes = this.<models.absences.AbsenceType, QAbsenceType>createSet("replacingCodes", models.absences.AbsenceType.class, QAbsenceType.class, PathInits.DIRECT2);
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QComplationAbsenceBehaviour(String variable) {
         super(ComplationAbsenceBehaviour.class, forVariable(variable));
     }

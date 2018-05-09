@@ -38,6 +38,9 @@ public class QPropertyInPeriod extends EntityPathBase<PropertyInPeriod> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QPropertyInPeriod(String variable) {
         super(PropertyInPeriod.class, forVariable(variable));
     }

@@ -65,6 +65,9 @@ public class QShiftType extends EntityPathBase<ShiftType> {
 
     public final StringPath type = createString("type");
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QShiftType(String variable) {
         this(ShiftType.class, forVariable(variable), INITS);
     }

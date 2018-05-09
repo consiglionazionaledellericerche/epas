@@ -71,6 +71,9 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
     public final DatePath<org.joda.time.LocalDate> validTo = createDate("validTo", org.joda.time.LocalDate.class);
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QAbsenceType(String variable) {
         this(AbsenceType.class, forVariable(variable), INITS);
     }

@@ -47,6 +47,9 @@ public class QCertification extends EntityPathBase<Certification> {
 
     public final StringPath problems = createString("problems");
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public final StringPath warnings = createString("warnings");
 
     public final NumberPath<Integer> year = createNumber("year", Integer.class);

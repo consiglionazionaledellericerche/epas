@@ -37,6 +37,9 @@ public class QRole extends EntityPathBase<Role> {
 
     public final ListPath<models.UsersRolesOffices, QUsersRolesOffices> usersRolesOffices = this.<models.UsersRolesOffices, QUsersRolesOffices>createList("usersRolesOffices", models.UsersRolesOffices.class, QUsersRolesOffices.class, PathInits.DIRECT2);
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QRole(String variable) {
         super(Role.class, forVariable(variable));
     }
