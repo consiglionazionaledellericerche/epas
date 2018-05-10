@@ -1,14 +1,14 @@
 #{modalAsync id:'modalCompetence',
-title:competence.person.fullname + ' - ' + competence.competenceCode.description + ' ' + competence.competenceCode.code}
+title:person.fullname + ' - ' + code.description + ' ' + code.code}
 
 <div id="competenceData">
   
   
   
-  #{if competence.competenceCode.disabled}
+  #{if code.disabled}
 	#{alert color:'danger', textcolor:'dark'}
 	  <p>
-	    Il codice di competenza <strong>${competence.competenceCode.code} - ${competence.competenceCode.description}</strong> 
+	    Il codice di competenza <strong>${code.code} - ${code.description}</strong> 
 	    risulta disabilitato. Non è possibile inserire ulteriori quantitativi per questo codice. In caso di necessità effettuare una segnalazione.<br>
 	  </p>	
 	#{/alert}
@@ -16,13 +16,13 @@ title:competence.person.fullname + ' - ' + competence.competenceCode.description
   #{else}
   
     #{alert color:'info'}
-      <p>Inserisci il nuovo valore per la competenza <strong>${competence.competenceCode.code} 
-      ${competence.competenceCode.description}</strong> per <strong>${competence.person.fullname}</strong>.</p>
+      <p>Inserisci il nuovo valore per la competenza <strong>${code.code} 
+      ${code.description}</strong> per <strong>${person.fullname}</strong>.</p>
     #{/alert}
     
     #{alert color:'warning'}
       <!-- Suggerimenti -->
-      #{if competence.competenceCode.code.equals('S1')}
+      #{if code.code.equals('S1')}
   		#{if psDto != null}
   		  <p><strong>Suggerimenti</strong></p>
   		  <p>
@@ -37,7 +37,7 @@ title:competence.person.fullname + ' - ' + competence.competenceCode.description
 				    </td>
 				    <td>
 				      <strong>${mese.value.progressivoFinalePositivoMese.toHourTime()}</strong>
-				      <a href="@{Stampings.personStamping(competence.person.id, competence.year, competence.month)}">
+				      <a href="@{Stampings.personStamping(person.id, year, month)}">
 				        <i class="fa fa-search" aria-hidden="true" webui-popover-hover data-content="Visualizza Presenze"></i></a>
 				    </td>
 				  </tr>
@@ -64,35 +64,36 @@ title:competence.person.fullname + ' - ' + competence.competenceCode.description
 	  
     <!-- Limiti -->
     <p><strong>Limiti</strong></p>	  
-	#{if competence.competenceCode.code.equals('S1') || competence.competenceCode.code.equals('S2')}
+	#{if code.code.equals('S1') || code.code.equals('S2')}
   	  <p>
-  	    Massimo annuale per persona <strong class="text-danger">${competence.competenceCode.competenceCodeGroup.limitValue} ore</strong>
+  	    Massimo annuale per persona <strong class="text-danger">${code.competenceCodeGroup.limitValue} ore</strong>
   	  </p>	
 	#{/if}
-  	#{elseif competence.competenceCode.code.equals('207')}
+  	#{elseif code.code.equals('207')}
   		<p>Valore massimo assegnabile <strong class="text-danger">12 giorni</strong></p>
-  		<p>Se contestualmente non viene assegnato alcun codice <strong>208</strong> il valore massimo assegnabile diventa <strong class="text-danger">${competence.competenceCode.competenceCodeGroup.limitValue} giorni</strong> 
+  		<p>Se contestualmente non viene assegnato alcun codice <strong>208</strong> il valore massimo assegnabile diventa 
+  		<strong class="text-danger">${code.competenceCodeGroup.limitValue} giorni</strong> 
   				
   		</p>
   	#{/elseif}
-  	#{elseif competence.competenceCode.code.equals('208')}
+  	#{elseif code.code.equals('208')}
   		<p>
-  		  Valore massimo assegnabile <strong class="text-danger">${competence.competenceCode.limitValue} giorni</strong>
+  		  Valore massimo assegnabile <strong class="text-danger">${code.limitValue} giorni</strong>
   		</p>
   	#{/elseif}
-  	#{elseif competence.competenceCode.code.equals('T1') || competence.competenceCode.code.equals('T2')}
-  		<p>Valore massimo assegnabile <strong class="text-danger">${competence.competenceCode.limitValue} ore</strong></p>
+  	#{elseif code.code.equals('T1') || code.code.equals('T2')}
+  		<p>Valore massimo assegnabile <strong class="text-danger">${code.limitValue} ore</strong></p>
   	#{/elseif}
-  	#{elseif competence.competenceCode.competenceCodeGroup != null && 
-  	competence.competenceCode.competenceCodeGroup.label.equals('Gruppo Ind.tà rischio')}
+  	#{elseif code.competenceCodeGroup != null && 
+  	code.competenceCodeGroup.label.equals('Gruppo Ind.tà rischio')}
   		<p>Questo codice appartiene al gruppo delle indennità di rischio.<br>
   			Il quantitativo da assegnare per questo codice è espresso in <strong>giorni</strong>
   			e deve essere uguale al numero di giorni di presenza a lavoro nel mese per il dipendente.
   		</p>
   	#{/elseif}
-  	#{elseif competence.competenceCode.limitType.equals(models.enumerate.LimitType.entireMonth)}
+  	#{elseif code.limitType.equals(models.enumerate.LimitType.entireMonth)}
   		<p>Questo codice appartiene alle indennità di rischio radiazione ionizzante e viene assegnato su base mensile.
-  		Il massimo valore assegnabile è <strong>${competence.competenceCode.limitValue}</strong></p>
+  		Il massimo valore assegnabile è <strong>${code.limitValue}</strong></p>
   	#{/elseif}
   	#{else}
   		<p>Per questo codice non è stata definita una linea di comportamento nella definizione delle quantità usabili singolarmente
@@ -108,7 +109,7 @@ title:competence.person.fullname + ' - ' + competence.competenceCode.description
 	    'data-async-error':'#competenceData','data-spinner':'#defaultSpinner'}
 	    
 	    #{f.hidden 'officeId', value:office.id /}
-
+		#{f.hidden 'personId', value:person.id /}
 		#{f.input 'valueApproved',type:'number', value:competence?.valueApproved, required:true /}
 		
 		#{if competence?.persistent}
@@ -117,7 +118,8 @@ title:competence.person.fullname + ' - ' + competence.competenceCode.description
 	  	#{else}
 	  		#{f.hidden 'competence.month', value:month /}
 	    	#{f.hidden 'competence.year', value:year /}
-	    	#{f.hidden 'competence.person', value:person /}    	
+	    	#{f.hidden 'competence.person.id', value:person.id /}  
+	    	#{f.hidden 'competence.competenceCode.id', value:code.id /}  	
 	  	#{/else}
 		#{b.buttons center:true}
 			#{b.submit 'Modifica'/}
