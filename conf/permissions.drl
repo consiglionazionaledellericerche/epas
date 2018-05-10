@@ -887,7 +887,9 @@ when
  Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
  $c: PermissionCheck(action in (
 
-        "Stampings.personStamping"
+        "Stampings.personStamping",
+        "Vacations.list",
+        "Vacations.vacationSummary"
 
         ), target == null, granted == false)
 then
@@ -901,7 +903,9 @@ when
  Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
  $c: PermissionCheck(action in (
  
-        "Stampings.personStamping"
+        "Stampings.personStamping",
+        "Vacations.list",
+        "Vacations.vacationSummary"
 
         ), target == $o, granted == false)
 then
