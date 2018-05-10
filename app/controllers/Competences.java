@@ -64,6 +64,7 @@ import models.dto.TimeTableDto;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import play.cache.Cache;
+import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -511,19 +512,31 @@ public class Competences extends Controller {
   /**
    * genera la form di inserimento per le competenze.
    *
-   * @param competenceId l'id della competenza da aggiornare.
+   * @param personId l'id della persona
+   * @param competenceCodeId l'id del codice di competenza
+   * @param year l'anno
+   * @param month il mese
    */
-  public static void editCompetence(Long competenceId) {
-    Competence competence = competenceDao.getCompetenceById(competenceId);
-    notFoundIfNull(competence);
-    Office office = competence.person.office;
-    if (competence.competenceCode.code.equals("S1")) {
-      PersonStampingRecap psDto = stampingsRecapFactory.create(competence.person,
-          competence.year, competence.month, true);
-      render(competence, psDto, office);
+  public static void editCompetence(long personId, long competenceCodeId, int year, int month) {
+    
+    Person person = personDao.getPersonById(personId);
+    CompetenceCode code = competenceCodeDao.getCompetenceCodeById(competenceCodeId);
+    Optional<Competence> comp = competenceDao.getCompetence(person, year, month, code);
+    Competence competence = new Competence();
+    if (comp.isPresent()) {
+      competence = comp.get();
+    }
+    
+    notFoundIfNull(code);
+    notFoundIfNull(person);
+    Office office = person.office;
+    if (code.code.equals("S1")) {
+      PersonStampingRecap psDto = stampingsRecapFactory.create(person,
+          year, month, true);
+      render(person, code, year, month, psDto, office, competence);
     }
 
-    render(competence, office);
+    render(person, code, year, month, office, competence);
   }
 
   /**
@@ -531,9 +544,10 @@ public class Competences extends Controller {
    *
    * @param competence la competenza relativa alla persona
    */
-  public static void saveCompetence(Integer valueApproved, @Valid Competence competence) {
+  public static void saveCompetence(Integer valueApproved, @Required Competence competence) {
 
     notFoundIfNull(competence);
+    
     Office office = competence.person.office;
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
