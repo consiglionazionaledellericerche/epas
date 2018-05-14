@@ -212,6 +212,12 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
       DefaultTakable.T_CONGEDO_MATRIMONIO, null, null, false, false),
   
+  G_441("441 - Permesso esami",
+      "",
+      DefaultCategoryType.PERMESSO_ESAMI, 0,
+      GroupAbsenceTypePattern.programmed, PeriodType.year,
+      DefaultTakable.T_441, null, null, false, false),
+  
 
   
   G_ALTRI_CODICI("Altri Codici", 
