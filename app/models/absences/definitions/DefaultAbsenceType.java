@@ -766,9 +766,7 @@ public enum DefaultAbsenceType {
    A_62S50V("62S50V", "dist. sind.a temp. det. p. t. 50% vert.",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, null, null),
-   A_79("79", "concorso interno",
-       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
-       0, null, null, null),
+   
    A_ES_L133("ES-L133", "esonero servizio art.72 L.133/08",
        false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
        0, null, null, null),
