@@ -88,9 +88,7 @@
 				  <td>${competence.competenceCode.code}</td>
 				  <td>
 					#{if competence.id == null}
-	                  #{secure.link @Competences.insertCompetence(competence.person.id, competence.competenceCode.id, competence.month, competence.year), 'data-async-modal':'#defaultModal'}
-	                    <em>Inserisci</em>
-	                  #{/secure.link}
+	                  <em>Nessun valore inserito</em>
 					#{/if}
 					#{else}
 	                  
@@ -104,7 +102,8 @@
 				  </td>
 					
 				  <td>
-				  #{secure.link @Competences.editCompetence(competence.id), 'data-async-modal':'#defaultModal'}
+				  #{secure.link @Competences.editCompetence(competence.person.id, competence.competenceCode.id, 
+				  competence.year, competence.month), 'data-async-modal':'#defaultModal'}
 				    <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
 				  #{/secure.link}
 				  </td>
