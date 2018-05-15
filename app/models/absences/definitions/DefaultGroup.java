@@ -264,17 +264,17 @@ public enum DefaultGroup {
   
   G_PRIMO_LUTTO("Permessi primo lutto",
       "",
-      DefaultCategoryType.PERMESSI_LUTTO, 0,
+      DefaultCategoryType.PERMESSO_PRIMO_LUTTO, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.year,
       DefaultTakable.T_681, null, null, true, true),
-  G_SECONDO_LUTTO("Permessi secondo lutto",
+  G_SECONDO_LUTTO("Permesso secondo lutto",
       "",
-      DefaultCategoryType.PERMESSI_LUTTO, 0,
+      DefaultCategoryType.PERMESSO_SECONDO_LUTTO, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.year,
       DefaultTakable.T_682, null, null, true, true),
-  G_TERZO_LUTTO("Permessi terzo lutto",
+  G_TERZO_LUTTO("Permesso terzo lutto",
       "",
-      DefaultCategoryType.PERMESSI_LUTTO, 0,
+      DefaultCategoryType.PERMESSO_TERZO_LUTTO, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.year,
       DefaultTakable.T_683, null, null, true, true);
 
