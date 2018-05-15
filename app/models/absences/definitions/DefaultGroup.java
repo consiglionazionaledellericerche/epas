@@ -262,21 +262,21 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.programmed, PeriodType.year, 
       DefaultTakable.T_PB, null, null, true, true),
   
-  G_PRIMO_LUTTO("Permessi primo lutto",
+  G_681("681 - Permesso primo lutto",
       "",
       DefaultCategoryType.PERMESSO_PRIMO_LUTTO, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.year,
-      DefaultTakable.T_681, null, null, true, true),
-  G_SECONDO_LUTTO("Permesso secondo lutto",
+      DefaultTakable.T_681, null, null, false, false),
+  G_682("682 - Permesso secondo lutto",
       "",
       DefaultCategoryType.PERMESSO_SECONDO_LUTTO, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.year,
-      DefaultTakable.T_682, null, null, true, true),
-  G_TERZO_LUTTO("Permesso terzo lutto",
+      DefaultTakable.T_682, null, null, false, false),
+  G_683("683 - Permesso terzo lutto",
       "",
       DefaultCategoryType.PERMESSO_TERZO_LUTTO, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.year,
-      DefaultTakable.T_683, null, null, true, true);
+      DefaultTakable.T_683, null, null, false, false);
 
   public String description;
   public String chainDescription;
