@@ -37,6 +37,10 @@ public enum DefaultCategoryType {
   CONGEDO_MATRIMONIO("Congedo per matrimonio", 12, 
       DefaultTab.CONGEDI_PARENTALI),
   
+  PERMESSO_PRIMO_LUTTO("Permesso per primo lutto", 12, DefaultTab.ALTRI_CODICI),
+  PERMESSO_SECONDO_LUTTO("Permesso per secondo lutto", 12, DefaultTab.ALTRI_CODICI),
+  PERMESSO_TERZO_LUTTO("Permesso per terzo lutto", 12, DefaultTab.ALTRI_CODICI),
+  
   PERMESSI_PERSONALI("Permessi Personali", 12, DefaultTab.FERIE_PERMESSI_RIPOSI),
 
   ALTRI_CODICI("Altri Codici", 16, DefaultTab.ALTRI_CODICI),
