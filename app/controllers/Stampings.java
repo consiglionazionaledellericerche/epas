@@ -345,6 +345,7 @@ public class Stampings extends Controller {
       }
       render("@insert", stamping, person, date, time, disableInsert, offsite);
     }
+    
     stamping.date = stampingManager.deparseStampingDateTime(date, time);
 
     // serve per poter discriminare dopo aver fatto la save della timbratura se si
