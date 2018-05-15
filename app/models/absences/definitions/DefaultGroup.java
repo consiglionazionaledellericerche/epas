@@ -260,7 +260,23 @@ public enum DefaultGroup {
       "", 
       DefaultCategoryType.CODICI_AUTOMATICI, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.year, 
-      DefaultTakable.T_PB, null, null, true, true);
+      DefaultTakable.T_PB, null, null, true, true),
+  
+  G_PRIMO_LUTTO("Permessi primo lutto",
+      "",
+      DefaultCategoryType.PERMESSI_LUTTO, 0,
+      GroupAbsenceTypePattern.programmed, PeriodType.year,
+      DefaultTakable.T_681, null, null, true, true),
+  G_SECONDO_LUTTO("Permessi secondo lutto",
+      "",
+      DefaultCategoryType.PERMESSI_LUTTO, 0,
+      GroupAbsenceTypePattern.programmed, PeriodType.year,
+      DefaultTakable.T_682, null, null, true, true),
+  G_TERZO_LUTTO("Permessi terzo lutto",
+      "",
+      DefaultCategoryType.PERMESSI_LUTTO, 0,
+      GroupAbsenceTypePattern.programmed, PeriodType.year,
+      DefaultTakable.T_683, null, null, true, true);
 
   public String description;
   public String chainDescription;
