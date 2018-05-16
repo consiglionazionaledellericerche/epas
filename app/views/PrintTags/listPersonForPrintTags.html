@@ -21,11 +21,15 @@
   #{/alert}
 
   #{form @PrintTags.showTag(), method:'POST', autocomplete:false, class:'form form-horizontal'}
-  <input type="hidden" name="month" value="${date.getMonthOfYear()}"/>
-  <input type="hidden" name="year" value="${date.getYear()}"/>
-
+  	<input type="hidden" name="month" value="${date.getMonthOfYear()}"/>
+  	<input type="hidden" name="year" value="${date.getYear()}"/>
+  	<input type="hidden" name="officeId" value="${office.id}"/>
+  #{f.booleanRadio 'forAll', label:'Per tutti' /}
+  <div id="single-person" #{if forAll} style="display: none" #{/if}>	
   #{f.selectModel 'person', items:personList /}
+  </div>
   #{f.checkbox 'includeStampingDetails' /}
+  
   #{b.buttons center:'true'}
   #{b.back /}
   #{b.ok /}
@@ -34,3 +38,17 @@
   #{/panel}
 
 </div>
+
+#{set 'moreScripts'}
+  <script type="text/javascript">
+	$(document).ready(function() {
+					
+		$("input[name='forAll']").change(function(){
+			
+			jQuery( "#single-person" ).toggle(0);
+		
+		});
+		       
+	 });
+	</script>
+#{/set}
