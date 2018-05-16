@@ -23,6 +23,7 @@ import models.PersonDay;
 import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
+import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.enumerate.StampTypes;
 
@@ -61,6 +62,7 @@ public class PersonStampingRecap {
   public Set<StampModificationType> stampModificationTypeSet = Sets.newHashSet();
   public Set<StampTypes> stampTypeSet = Sets.newHashSet();
   public Map<AbsenceType, Integer> absenceCodeMap = new HashMap<AbsenceType, Integer>();
+  public List<Absence> absenceList = Lists.newArrayList();
 
   //I riepiloghi mensili (uno per ogni contratto attivo nel mese)
   public List<IWrapperContractMonthRecap> contractMonths = Lists.newArrayList();
@@ -187,6 +189,7 @@ public class PersonStampingRecap {
 
     this.basedWorkingDays = personManager.basedWorkingDays(personDays, monthContracts, end);
     this.absenceCodeMap = personManager.countAbsenceCodes(totalPersonDays);
+    this.absenceList = personManager.listAbsenceCodes(totalPersonDays);
 
   }
 }
