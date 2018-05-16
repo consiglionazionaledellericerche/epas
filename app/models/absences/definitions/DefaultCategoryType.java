@@ -42,7 +42,8 @@ public enum DefaultCategoryType {
   PERMESSO_TERZO_LUTTO("Permesso per terzo lutto", 12, DefaultTab.ALTRI_CODICI),
   
   PERMESSI_PERSONALI("Permessi Personali", 12, DefaultTab.FERIE_PERMESSI_RIPOSI),
-
+  PERMESSO_ESAMI("Permesso esami", 12, DefaultTab.ALTRI_CODICI),
+ 
   ALTRI_CODICI("Altri Codici", 16, DefaultTab.ALTRI_CODICI),
   ASPETTATIVA("Codici Aspettativa", 17, DefaultTab.ALTRI_CODICI),
   PUBBLICA_FUNZIOINE("Pubblica Funzione", 18, DefaultTab.ALTRI_CODICI),
