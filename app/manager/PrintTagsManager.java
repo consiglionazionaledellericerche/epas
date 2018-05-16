@@ -24,22 +24,25 @@ public class PrintTagsManager {
 
   private static final Logger log = LoggerFactory.getLogger(PrintTagsManager.class);
   private final StampingHistoryDao stampingHistoryDao;
-  
+
   @Inject
   public PrintTagsManager(StampingHistoryDao stampingHistoryDao) {
     this.stampingHistoryDao = stampingHistoryDao;
   }
-  
-  public List<List<HistoryValue<Stamping>>> getHistoricalList(PersonStampingRecap psDto, 
-      boolean includeStampingDetails) {
+
+  /**
+   * Metodo che ritorna le informazioni sullo storico delle timbrature del dipendente.
+   * @param psDto il person stamping recap delle timbrature del dipendente
+   * @return la lista di liste contenente le informazioni sullo storico delle timbrature.
+   */
+  public List<List<HistoryValue<Stamping>>> getHistoricalList(PersonStampingRecap psDto) {
     List<List<HistoryValue<Stamping>>> historyStampingsList = Lists.newArrayList();
-    if (includeStampingDetails) {
-      for (PersonStampingDayRecap day : psDto.daysRecap) {
-        if (!day.ignoreDay) {
-          for (Stamping stamping : day.personDay.stampings) {
-            if (stamping.markedByAdmin) {
-              historyStampingsList.add(stampingHistoryDao.stampings(stamping.id));
-            }
+
+    for (PersonStampingDayRecap day : psDto.daysRecap) {
+      if (!day.ignoreDay) {
+        for (Stamping stamping : day.personDay.stampings) {
+          if (stamping.markedByAdmin) {
+            historyStampingsList.add(stampingHistoryDao.stampings(stamping.id));
           }
         }
       }
