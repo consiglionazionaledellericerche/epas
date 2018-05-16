@@ -86,13 +86,14 @@ public class PrintTags extends Controller {
           .historyStampingsList(historyStampingsList)
           .build();
       list.add(info);
-      renderPDF(psDto, includeStampingDetails, historyStampingsList);
+      renderPDF(psDto, includeStampingDetails, historyStampingsList, list);
     } else {
       LocalDate date = new LocalDate(year, month, 1);
       List<Person> personList = personDao.list(
           Optional.<String>absent(),
           secureManager.officesReadAllowed(Security.getUser().get()),
           false, date, date.dayOfMonth().withMaximumValue(), true).list();
+      
     }
     
   }
