@@ -280,6 +280,10 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_123, DefaultAbsenceType.A_133, DefaultAbsenceType.A_143),
       ImmutableSet.of(DefaultAbsenceType.A_123, DefaultAbsenceType.A_133, DefaultAbsenceType.A_143),
       -1, null),
+  T_441(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_441),
+      ImmutableSet.of(DefaultAbsenceType.A_441),
+      8, null),
 
   T_ALTRI(AmountType.units, 
       ImmutableSet.of(
@@ -318,14 +322,16 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_33, DefaultAbsenceType.A_33B, DefaultAbsenceType.A_33C,
           DefaultAbsenceType.A_34, DefaultAbsenceType.A_38, DefaultAbsenceType.A_39,
           
+
           DefaultAbsenceType.A_681, DefaultAbsenceType.A_682, DefaultAbsenceType.A_683, 
           DefaultAbsenceType.A_441, DefaultAbsenceType.A_6N,
+
           DefaultAbsenceType.A_67, DefaultAbsenceType.A_80, 
           DefaultAbsenceType.A_81, DefaultAbsenceType.A_82,
           DefaultAbsenceType.A_83, DefaultAbsenceType.A_84, 
           DefaultAbsenceType.A_85, DefaultAbsenceType.A_86,
           DefaultAbsenceType.A_87,DefaultAbsenceType.A_662,
-          DefaultAbsenceType.A_62S50V, DefaultAbsenceType.A_79, DefaultAbsenceType.A_ES_L133,
+          DefaultAbsenceType.A_62S50V, DefaultAbsenceType.A_ES_L133,
           DefaultAbsenceType.A_99, DefaultAbsenceType.A_65, DefaultAbsenceType.A_61,
           DefaultAbsenceType.A_16, DefaultAbsenceType.A_42, DefaultAbsenceType.A_93,
           DefaultAbsenceType.A_417,
@@ -365,7 +371,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_83, DefaultAbsenceType.A_84, 
           DefaultAbsenceType.A_85, DefaultAbsenceType.A_86,
           DefaultAbsenceType.A_87, DefaultAbsenceType.A_662,
-          DefaultAbsenceType.A_62S50V, DefaultAbsenceType.A_79, DefaultAbsenceType.A_ES_L133,
+          DefaultAbsenceType.A_62S50V, DefaultAbsenceType.A_ES_L133,
           DefaultAbsenceType.A_99, DefaultAbsenceType.A_65, DefaultAbsenceType.A_61,
           DefaultAbsenceType.A_16, DefaultAbsenceType.A_42, DefaultAbsenceType.A_93,
           DefaultAbsenceType.A_417,
