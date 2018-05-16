@@ -322,8 +322,10 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_33, DefaultAbsenceType.A_33B, DefaultAbsenceType.A_33C,
           DefaultAbsenceType.A_34, DefaultAbsenceType.A_38, DefaultAbsenceType.A_39,
           
-          DefaultAbsenceType.A_681, DefaultAbsenceType.A_691, 
-          DefaultAbsenceType.A_441, DefaultAbsenceType.A_6N, 
+
+          DefaultAbsenceType.A_681, DefaultAbsenceType.A_682, DefaultAbsenceType.A_683, 
+          DefaultAbsenceType.A_441, DefaultAbsenceType.A_6N,
+
           DefaultAbsenceType.A_67, DefaultAbsenceType.A_80, 
           DefaultAbsenceType.A_81, DefaultAbsenceType.A_82,
           DefaultAbsenceType.A_83, DefaultAbsenceType.A_84, 
@@ -362,7 +364,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_OA6, DefaultAbsenceType.A_OA7,
           DefaultAbsenceType.A_33, DefaultAbsenceType.A_33B, DefaultAbsenceType.A_33C,
           DefaultAbsenceType.A_34, DefaultAbsenceType.A_38, DefaultAbsenceType.A_39,
-          DefaultAbsenceType.A_681, DefaultAbsenceType.A_691, 
+          DefaultAbsenceType.A_681, DefaultAbsenceType.A_682, DefaultAbsenceType.A_683, 
           DefaultAbsenceType.A_441, DefaultAbsenceType.A_6N,
           DefaultAbsenceType.A_67, DefaultAbsenceType.A_80, 
           DefaultAbsenceType.A_81, DefaultAbsenceType.A_82,
@@ -382,6 +384,19 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_45), 
       ImmutableSet.of(DefaultAbsenceType.A_45), 
       -1, null),
+  
+  T_681(AmountType.units,
+      ImmutableSet.of(DefaultAbsenceType.A_681),
+      ImmutableSet.of(DefaultAbsenceType.A_681),
+      3, null),
+  T_682(AmountType.units,
+      ImmutableSet.of(DefaultAbsenceType.A_682),
+      ImmutableSet.of(DefaultAbsenceType.A_682),
+      3, null),
+  T_683(AmountType.units,
+      ImmutableSet.of(DefaultAbsenceType.A_683),
+      ImmutableSet.of(DefaultAbsenceType.A_683),
+      3, null),
   
   T_CONGEDI_PRENATALI(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_20, DefaultAbsenceType.A_21), 
