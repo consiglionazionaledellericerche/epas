@@ -2,10 +2,10 @@ package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
 
+import cnr.sync.dto.DayRecap;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-
-import cnr.sync.dto.DayRecap;
 
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -16,6 +16,8 @@ import dao.wrapper.IWrapperFactory;
 import java.util.List;
 
 import javax.inject.Inject;
+
+import lombok.extern.slf4j.Slf4j;
 
 import manager.PrintTagsManager;
 import manager.SecureManager;
@@ -39,6 +41,7 @@ import play.mvc.With;
 
 import security.SecurityRules;
 
+@Slf4j
 @With({Resecure.class})
 public class PrintTags extends Controller {
 
@@ -73,29 +76,48 @@ public class PrintTags extends Controller {
     }
     Office office = officeDao.getOfficeById(officeId);
     rules.checkIfPermitted(office);
-    List<PrintTagsInfo> list = Lists.newArrayList();
+    List<PrintTagsInfo> dtoList = Lists.newArrayList();
     if (!forAll) {
       PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
 
       List<List<HistoryValue<Stamping>>> historyStampingsList = Lists.newArrayList();
-      historyStampingsList = printTagsManager.getHistoricalList(psDto, includeStampingDetails);
+      if (includeStampingDetails) {
+        historyStampingsList = printTagsManager.getHistoricalList(psDto);
+      }      
       PrintTagsInfo info = PrintTagsInfo.builder()
           .psDto(psDto)
           .person(person)
           .includeStampingDetails(includeStampingDetails)
           .historyStampingsList(historyStampingsList)
           .build();
-      list.add(info);
-      renderPDF(psDto, includeStampingDetails, historyStampingsList, list);
+      log.debug("Inserito nella lista: {}", info.person.fullName());
+      dtoList.add(info);
+      
     } else {
       LocalDate date = new LocalDate(year, month, 1);
       List<Person> personList = personDao.list(
           Optional.<String>absent(),
           secureManager.officesReadAllowed(Security.getUser().get()),
           false, date, date.dayOfMonth().withMaximumValue(), true).list();
-      
+      for (Person p : personList) {
+        PersonStampingRecap psDto = stampingsRecapFactory.create(p, year, month, false);
+        log.debug("Creato il person stamping recap per {}", psDto.person.fullName());
+        List<List<HistoryValue<Stamping>>> historyStampingsList = Lists.newArrayList();
+        if (includeStampingDetails) {
+          historyStampingsList = printTagsManager.getHistoricalList(psDto);
+        }        
+        PrintTagsInfo info = PrintTagsInfo.builder()
+            .psDto(psDto)
+            .person(p)
+            .includeStampingDetails(includeStampingDetails)
+            .historyStampingsList(historyStampingsList)
+            .build();
+        log.debug("Creato il PrintTagsInfo per {}", info.person.fullName());
+        dtoList.add(info);
+        log.debug("Inserito nella lista: {}", info.person.fullName());
+      }
     }
-    
+    renderPDF(dtoList);
   }
 
   /**
