@@ -74,6 +74,7 @@ public class Calendar extends Controller {
   static CompetenceCodeDao competenceCodeDao;
 
   private static String nighCode = "T3";
+  
   /**
    * ritorna alla view le info necessarie per creare il calendario.
    *
