@@ -77,48 +77,38 @@ public class PrintTags extends Controller {
     Office office = officeDao.getOfficeById(officeId);
     rules.checkIfPermitted(office);
     List<PrintTagsInfo> dtoList = Lists.newArrayList();
+    List<Person> personList = Lists.newArrayList();
+    LocalDate date = new LocalDate(year, month, 1);
     if (!forAll) {
-      PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
-
-      List<List<HistoryValue<Stamping>>> historyStampingsList = Lists.newArrayList();
-      if (includeStampingDetails) {
-        historyStampingsList = printTagsManager.getHistoricalList(psDto);
-      }      
-      PrintTagsInfo info = PrintTagsInfo.builder()
-          .psDto(psDto)
-          .person(person)
-          .includeStampingDetails(includeStampingDetails)
-          .historyStampingsList(historyStampingsList)
-          .build();
-      log.debug("Inserito nella lista: {}", info.person.fullName());
-      dtoList.add(info);
-      
+      personList.add(person);
     } else {
-      LocalDate date = new LocalDate(year, month, 1);
-      List<Person> personList = personDao.list(
+      personList = personDao.list(
           Optional.<String>absent(),
           secureManager.officesReadAllowed(Security.getUser().get()),
           false, date, date.dayOfMonth().withMaximumValue(), true).list();
-      for (Person p : personList) {
-        PersonStampingRecap psDto = stampingsRecapFactory.create(p, year, month, false);
-        log.debug("Creato il person stamping recap per {}", psDto.person.fullName());
-        List<List<HistoryValue<Stamping>>> historyStampingsList = Lists.newArrayList();
-        if (includeStampingDetails) {
-          historyStampingsList = printTagsManager.getHistoricalList(psDto);
-        }        
-        PrintTagsInfo info = PrintTagsInfo.builder()
-            .psDto(psDto)
-            .person(p)
-            .includeStampingDetails(includeStampingDetails)
-            .historyStampingsList(historyStampingsList)
-            .build();
-        log.debug("Creato il PrintTagsInfo per {}", info.person.fullName());
-        dtoList.add(info);
-        log.debug("Inserito nella lista: {}", info.person.fullName());
-      }
+    }
+
+    for (Person p : personList) {
+      PersonStampingRecap psDto = stampingsRecapFactory.create(p, year, month, false);
+      log.debug("Creato il person stamping recap per {}", psDto.person.fullName());
+      List<List<HistoryValue<Stamping>>> historyStampingsList = Lists.newArrayList();
+      if (includeStampingDetails) {
+        historyStampingsList = printTagsManager.getHistoricalList(psDto);
+      }        
+      PrintTagsInfo info = PrintTagsInfo.builder()
+          .psDto(psDto)
+          .person(p)
+          .includeStampingDetails(includeStampingDetails)
+          .historyStampingsList(historyStampingsList)
+          .build();
+      log.debug("Creato il PrintTagsInfo per {}", info.person.fullName());
+      dtoList.add(info);
+      log.debug("Inserito nella lista: {}", info.person.fullName());
     }
     renderPDF(dtoList);
   }
+
+
 
   /**
    * restituisce il template contenente la lista di persone attive per cui stampare il 
