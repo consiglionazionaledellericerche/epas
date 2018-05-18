@@ -15,6 +15,7 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.persistence.Query;
@@ -22,8 +23,10 @@ import javax.persistence.Query;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
+import models.absences.Absence;
 import models.absences.AbsenceType;
 
+import org.assertj.core.util.Lists;
 import org.joda.time.LocalDate;
 
 import play.db.jpa.JPA;
@@ -105,6 +108,21 @@ public class PersonManager {
         });
 
     return absenceCodeMap;
+  }
+  
+  /**
+   * 
+   * @param personDays
+   * @return
+   */
+  public List<Absence> listAbsenceCodes(List<PersonDay> personDays) {
+    final List<Absence> list = Lists.newArrayList();
+    personDays.stream().flatMap(personDay -> personDay.absences.stream()
+        .<Absence>map(absence -> absence)).forEach(absence -> {          
+          list.add(absence);
+        });
+        
+    return list;
   }
 
 

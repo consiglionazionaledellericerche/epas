@@ -98,7 +98,7 @@
       <i class="fa fa-pie-chart" aria-hidden="true"></i>
       #{/secure.li}
 
-      #{secure.li @PrintTags.listPersonForPrintTags(session.get("yearSelected"), session.get("monthSelected")) }
+      #{secure.li @PrintTags.listPersonForPrintTags(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected")) }
       <i class="fa fa-print" aria-hidden="true"></i>
       #{/secure.li}
 
