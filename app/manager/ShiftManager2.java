@@ -107,24 +107,24 @@ public class ShiftManager2 {
     Person person = currentUser.person;
     if (person != null) {
       if (!person.shiftCategories.isEmpty()) {
-        activities.addAll(person.shiftCategories.stream()
+        activities.addAll(person.shiftCategories.stream().filter(st -> !st.disabled)
             .flatMap(shiftCategories -> shiftCategories.shiftTypes.stream())
             .sorted(Comparator.comparing(o -> o.type))
             .collect(Collectors.toList()));
 
       }
       if (!person.categories.isEmpty()) {
-        activities.addAll(person.categories.stream()
+        activities.addAll(person.categories.stream().filter(st -> !st.disabled)
             .flatMap(shiftCategories -> shiftCategories.shiftTypes.stream())
             .sorted(Comparator.comparing(o -> o.type))
             .collect(Collectors.toList()));
       }
       if (!person.personShifts.isEmpty()) {
-        activities.addAll(person.personShifts.stream()
+        activities.addAll(person.personShifts.stream().filter(ps -> !ps.disabled)
             .filter(ps -> !ps.beginDate.isAfter(LocalDate.now()) 
                 && (ps.endDate == null || !ps.endDate.isBefore(LocalDate.now())))
             .flatMap(ps -> ps.personShiftShiftTypes.stream())
-            .map(psst -> psst.shiftType)
+            .map(psst -> psst.shiftType).filter(sc -> !sc.shiftCategories.disabled)
             .sorted(Comparator.comparing(o -> o.type))
             .collect(Collectors.toList()));
       }
