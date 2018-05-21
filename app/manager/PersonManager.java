@@ -111,9 +111,10 @@ public class PersonManager {
   }
   
   /**
-   * 
-   * @param personDays
-   * @return
+   * Metodo utile per il calcolo dei codici di assenza presenti in un certo arco temporale
+   *     derivante dalla lista dei personday.
+   * @param personDays la lista dei personDay
+   * @return la lista dei codici di assenza presenti nella lista dei personDay.
    */
   public List<Absence> listAbsenceCodes(List<PersonDay> personDays) {
     final List<Absence> list = Lists.newArrayList();
@@ -127,7 +128,13 @@ public class PersonManager {
 
 
   /**
-   * @return il numero di giorni lavorati in sede.
+   * Metodo che determina quanti giorni di lavoro in sede sono stati effettuati. Controlla anche
+   *     che tra questi giorni non ci siano giorni di lavoro FUORI SEDE che vengono sottratti
+   *     dal conteggio.
+   * @param personDays la lista dei personDay
+   * @param contracts la lista dei contratti
+   * @param end la data di fine
+   * @return la lista dei giorni di lavoro IN SEDE derivanti dai parametri passati.
    */
   public int basedWorkingDays(List<PersonDay> personDays,
       List<Contract> contracts, LocalDate end) {
@@ -155,7 +162,8 @@ public class PersonManager {
       if (fixed && !personDayManager.isAllDayAbsences(pd)) {
         basedDays++;
       } else if (!fixed && pd.stampings.size() > 0
-          && !personDayManager.isAllDayAbsences(pd)) {
+          && !personDayManager.isAllDayAbsences(pd) 
+          && personDayManager.enoughTimeInSeat(pd.stampings, day)) {
         basedDays++;
       }
 
