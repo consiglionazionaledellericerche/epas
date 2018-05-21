@@ -1,0 +1,32 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Gestione codice d\'assenza' /}
+
+ <div class="container">
+    #{form @AbsenceGroups.saveContractualClause(),class:'form-horizontal'}
+
+    #{alert color:'info'}
+      <p>
+ 	    #{if contractualClause?.isPersistent()}
+ 		  Modifica dati per l'istituto contrattuale <strong>${contractualClause.name}</strong>
+ 	    #{/if}#{else}
+ 		  Nuovo istituto contrattuale.
+   	    #{/else}
+ 	  </p>
+      #{/alert}
+
+        <input type="hidden" name="categoryTab.id" value="${contractualClause?.id}">
+ 	
+ 		#{f.input 'contractualClause.name', required:'true', value:contractualClause?.name /}
+ 		#{f.input 'contractualClause.description' /} 
+ 		#{f.date 'contractualClause.beginDate' /}
+		#{f.date 'contractualClause.endDate' /}
+		
+        <div class="container center">
+            <a class="btn btn-default" href="@{AbsenceGroups.showCategories()}">Torna alle Categorie</a>
+	        <input class="btn btn-primary" type="submit" value="Ok">
+	        <a class="btn btn-danger" href="@{AbsenceGroups.deleteContractualClause(contractualClause.id)}">Elimina</a>
+        </div>
+   #{/form}
+
+</div>

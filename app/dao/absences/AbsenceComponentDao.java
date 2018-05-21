@@ -25,6 +25,7 @@ import models.absences.AbsenceType;
 import models.absences.CategoryGroupAbsenceType;
 import models.absences.CategoryTab;
 import models.absences.ComplationAbsenceBehaviour;
+import models.absences.ContractualClause;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.InitializationGroup;
@@ -37,6 +38,7 @@ import models.absences.query.QAbsenceType;
 import models.absences.query.QCategoryGroupAbsenceType;
 import models.absences.query.QCategoryTab;
 import models.absences.query.QComplationAbsenceBehaviour;
+import models.absences.query.QContractualClause;
 import models.absences.query.QGroupAbsenceType;
 import models.absences.query.QInitializationGroup;
 import models.absences.query.QJustifiedType;
@@ -60,8 +62,8 @@ public class AbsenceComponentDao extends DaoBase {
   }
 
   
-  
   /**
+   * AbsenceType per id.
    * @return l'absenceType relativo all'id passato come parametro.
    */
   public Optional<AbsenceType> absenceTypeById(Long id) {
@@ -72,6 +74,7 @@ public class AbsenceComponentDao extends DaoBase {
   }
 
   /**
+   * AbsenceType per campo code.
    * @return l'absenceType relativo al codice passato come parametro.
    */
   public Optional<AbsenceType> absenceTypeByCode(String string) {
@@ -84,6 +87,7 @@ public class AbsenceComponentDao extends DaoBase {
   }
   
   /**
+   * AbsenceType per campo certification.
    * @return l'absenceType relativo al codice passato come parametro nel campo certification.
    */
   public List<AbsenceType> absenceTypesByCertificationCode(String string) {
@@ -205,6 +209,27 @@ public class AbsenceComponentDao extends DaoBase {
     QCategoryTab categoryTab = QCategoryTab.categoryTab;
     return Optional.fromNullable(getQueryFactory().from(categoryTab)
         .where(categoryTab.name.eq(name)).singleResult(categoryTab));
+  }
+  
+  /**
+   * Lista degli istituti contrattuali.
+   * 
+   * @param onlyEnabled se non presente o uguale a false mostra solo gli 
+   *     istituti contrattuali attivi alla data corrente.
+   *     
+   * @return la lista degli istituti contrattuali.
+   */
+  public List<ContractualClause> contractualClauses(Optional<Boolean> onlyEnabled) {
+    QContractualClause contractualClause = QContractualClause.contractualClause;
+    BooleanBuilder condition = new BooleanBuilder();
+    if (onlyEnabled.or(true)) {      
+      condition.and(
+            contractualClause.beginDate.loe(LocalDate.now()))
+              .and(contractualClause.endDate.isNull()
+                  .or(contractualClause.beginDate.goe(LocalDate.now())));
+    }
+    return getQueryFactory().from(contractualClause).where(condition)
+        .orderBy(contractualClause.name.desc()).list(contractualClause);
   }
   
   /**

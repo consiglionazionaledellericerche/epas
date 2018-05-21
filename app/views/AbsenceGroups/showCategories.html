@@ -8,7 +8,49 @@
 #{title title:'Categorie gruppi assenze' /}
   
 #{accordionGroup 'absence_group_configuration'}
-  	
+
+  #{secure.check 'AbsenceGroups.manageDocumentation'}
+  #{accordionItem 'tab_configuration', parent:'absence_group_configuration', 
+		title:'Configurazione gli istituti contrattuali', open:true, color:'info'}
+	  
+	  <div class="row text-center">
+		#{secure.link @AbsenceGroups.insertContractualClause(), class:'btn btn-primary',fa:'plus' }
+			Nuovo istituto contrattuale
+		#{/secure.link}
+	  </div>
+  
+	  <table class="table table-bordered" datatable> 
+	   <thead>
+	 	<tr>
+	 	  <th>Nome</th>
+	 	  <th>Descrizione</th>
+	 	  <th>Dal</th>
+	 	  <th>Al</th>
+	 	  <th>Categorie</th>
+	 	</tr>
+	   </thead>
+	   <tbody>
+		 #{list items:contractualClauses, as:'contractualClause'}
+		  <tr>
+		    <td>
+		      <span class="label label-danger">${contractualClause.name}</span>
+		      <a href="@{AbsenceGroups.editContractualClause(contractualClause.id)}">Edit</a>
+		    </td>
+		    <td>${contractualClause.description}</td>
+		    <td>${contractualClause.beginDate?.format()}</td>
+		    <td>${contractualClause.endDate?.format()}</td>
+		    <td>
+			  #{list items:contractualClause.categoryGroupAbsenceTypes, as:'category'}
+			    <span class="label label-success">${category.name}</span> <br>
+			  #{/list}    
+		    </td>
+		  </tr>
+		 #{/list}
+	 </tbody>
+	 </table>
+  #{/accordionItem}  
+  #{/secure.check}
+    	
   #{secure.check 'AbsenceGroups.tabs'}
   #{accordionItem 'tab_configuration', parent:'absence_group_configuration', 
 		title:'Configurazione delle tab delle assenze', open:true, color:'info'}
