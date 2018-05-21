@@ -60,6 +60,7 @@ import models.absences.AmountType;
 import models.absences.CategoryGroupAbsenceType;
 import models.absences.CategoryTab;
 import models.absences.ComplationAbsenceBehaviour;
+import models.absences.ContractualClause;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.InitializationGroup;
@@ -123,25 +124,65 @@ public class AbsenceGroups extends Controller {
 
     List<CategoryGroupAbsenceType> categories = CategoryGroupAbsenceType.findAll();
     List<CategoryTab> categoryTabs = CategoryTab.findAll();
+    List<ContractualClause> contractualClauses = 
+        absenceComponentDao.contractualClauses(Optional.of(true));
 
-    //    if (categoryTabs.isEmpty()) {
-    //      int count = 1;
-    //      for (AbsenceInsertTab absenceInsertTab : AbsenceInsertTab.values()) {
-    //        CategoryTab categoryTab = new CategoryTab();
-    //        categoryTab.name = absenceInsertTab.name();
-    //        categoryTab.priority = count;
-    //        if (AbsenceInsertTab.defaultTab() == absenceInsertTab) {
-    //          categoryTab.isDefault = true;
-    //        }
-    //        categoryTab.save();
-    //        count++;
-    //      }
-    //      categoryTabs = CategoryTab.findAll();
-    //    }
-
-    render(categories, categoryTabs);
+    render(categories, categoryTabs, contractualClauses);
   }
 
+  /**
+   * Nuovo istituto contrattuale.
+   */
+  public static void insertContractualClause() {
+    ContractualClause contractualClause = new ContractualClause();
+    render("@editContractualClause", contractualClause);    
+  }
+
+  /**
+   * Modifica dell'istituto contrattuale.
+   *
+   * @param contractualClauseId id
+   */
+  public static void editContractualClause(Long contractualClauseId) {
+    ContractualClause contractualClause = ContractualClause.findById(contractualClauseId);
+    notFoundIfNull(contractualClause);
+    render(contractualClause);
+  }
+  
+  /**
+   * Salva l'istituto contrattuale.
+   *
+   * @param contractualClause istituto contrattuale
+   */
+  public static void saveContractualClause(@Valid ContractualClause contractualClause) {
+
+    if (Validation.hasErrors()) {
+      flash.error("Correggere gli errori indicati");
+      render("@editContractualClause", contractualClause);
+    }
+    contractualClause.save();
+    flash.success("Operazione eseguita.");
+    editContractualClause(contractualClause.id);
+  }
+
+  /**
+   * Rimuove l'istituto contrattuale.
+   *
+   * @param contractualClauseId tab
+   */
+  public static void deleteContractualClause(Long contractualClauseId) {
+    ContractualClause contractualClause = ContractualClause.findById(contractualClauseId);
+    notFoundIfNull(contractualClause);
+    if (!contractualClause.categoryGroupAbsenceTypes.isEmpty()) {
+      flash.error("Non è possibile eliminare un istituto contrattuale associato "
+          + "a categorie di tipi di assenza.");
+      editContractualClause(contractualClauseId);
+    }
+    contractualClause.delete();
+    flash.success("Operazione effettuata.");
+    showCategories();
+  }
+  
   /**
    * Nuova tab.
    */
