@@ -3,7 +3,7 @@ package models.absences;
 import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
-import models.base.BaseModel;
+import models.base.PeriodModel;
 import org.apache.commons.compress.utils.Lists;
 import org.hibernate.envers.Audited;
 
@@ -17,7 +17,7 @@ import org.hibernate.envers.Audited;
  */
 @Audited
 @Entity
-public class ContractualClause extends BaseModel {
+public class ContractualClause extends PeriodModel {
 
   private static final long serialVersionUID = -1933483982513717538L;
 
