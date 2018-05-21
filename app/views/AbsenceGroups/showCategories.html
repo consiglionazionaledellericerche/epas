@@ -7,89 +7,92 @@
 
 #{title title:'Categorie gruppi assenze' /}
   
-  #{alert color:'info'}
-   <p>Tabs per l'inserimento di assenze.</p>
-  #{/alert}
+#{accordionGroup 'absence_group_configuration'}
+  	
+  #{secure.check 'AbsenceGroups.tabs'}
+  #{accordionItem 'tab_configuration', parent:'absence_group_configuration', 
+		title:'Configurazione delle tab delle assenze', open:true, color:'info'}
+	  
+	  <div class="row text-center">
+		#{secure.link @AbsenceGroups.insertCategoryTab(), class:'btn btn-primary',fa:'plus' }
+			Nuova tab
+		#{/secure.link}
+	  </div>
   
-  <div class="row text-center">
-	#{secure.link @AbsenceGroups.insertCategoryTab(), class:'btn btn-primary',fa:'plus' }
-		Nuova tab
-	#{/secure.link}
-  </div>
-  
-  <table class="table table-bordered" datatable> 
-   <thead>
- 	<tr>
- 	  <th>Nome</th>
- 	  <th>Descrizione</th>
- 	  <th>Priorità</th>
- 	  <th>Default</th>
- 	  <th>Categorie</th>
- 	</tr>
-   </thead>
-   <tbody>
- #{list items:categoryTabs, as:'categoryTab'}
-  <tr>
-    <td>
-      <span class="label label-danger">${categoryTab.name}</span>
-      <a href="@{AbsenceGroups.editCategoryTab(categoryTab.id)}">Edit</a>
-    </td>
-    <td>${categoryTab.description}</td>
-    <td>${categoryTab.priority}</td>
-    <td>${categoryTab.isDefault}</td>
-    <td>
-	  #{list items:categoryTab.categoryGroupAbsenceTypes, as:'category'}
-	    <span class="label label-success">${category.name}</span> <br>
-	  #{/list}    
-    </td>
-  </tr>
- #{/list}
- </tbody>
- </table>
-
- #{alert color:'info'}
-  <p>Categorie</p>
- #{/alert}
+	  <table class="table table-bordered" datatable> 
+	   <thead>
+	 	<tr>
+	 	  <th>Nome</th>
+	 	  <th>Descrizione</th>
+	 	  <th>Priorità</th>
+	 	  <th>Default</th>
+	 	  <th>Categorie</th>
+	 	</tr>
+	   </thead>
+	   <tbody>
+		 #{list items:categoryTabs, as:'categoryTab'}
+		  <tr>
+		    <td>
+		      <span class="label label-danger">${categoryTab.name}</span>
+		      <a href="@{AbsenceGroups.editCategoryTab(categoryTab.id)}">Edit</a>
+		    </td>
+		    <td>${categoryTab.description}</td>
+		    <td>${categoryTab.priority}</td>
+		    <td>${categoryTab.isDefault}</td>
+		    <td>
+			  #{list items:categoryTab.categoryGroupAbsenceTypes, as:'category'}
+			    <span class="label label-success">${category.name}</span> <br>
+			  #{/list}    
+		    </td>
+		  </tr>
+		 #{/list}
+	 </tbody>
+	 </table>
+  #{/accordionItem}
+  #{/secure.check}
  
-   <div class="row text-center">
-	#{secure.link @AbsenceGroups.insertCategoryGroupAbsenceType(), class:'btn btn-primary',fa:'plus' }
-		Nuova Categoria
-	#{/secure.link}
-  </div>
+  #{accordionItem 'category_configuration', parent:'absence_group_configuration', 
+  	title:'Configurazione delle categorie di gruppi di assenza', open:true, color:'info'}
  
- <table class="table table-bordered" datatable> 
-   <thead>
- 	<tr>
- 	  <th>Nome</th>
- 	  <th>Descrizione</th>
- 	  <th>Priorità</th>
- 	  <th>Tab</th>
- 	  <th>Gruppi</th>
- 	</tr>
-   </thead>
-   <tbody>
- #{list items:categories, as:'category'}
-  <tr>
-    <td>
-      <span class="label label-success">${category.name}</span>
-      <a href="@{AbsenceGroups.editCategoryGroupAbsenceType(category.id)}">Edit</a>
-    </td>
-    <td>${category.description}</td>
-    <td>${category.priority}</td>
-    <td>
-      <span class="label label-danger">${category.tab}</span> <br>
-	</td>
-    <td>
-	  #{list items:category.groupAbsenceTypes, as:'group'}
-	    <span class="label label-default">${group.description}</span> <a href="@{AbsenceGroups.editGroup(group.id)}">Edit</a> <br>
-	  #{/list}    
-    </td>
-  </tr>
- #{/list}
- </tbody>
- </table>
-
-  
+     <div class="row text-center">
+		#{secure.link @AbsenceGroups.insertCategoryGroupAbsenceType(), class:'btn btn-primary',fa:'plus' }
+			Nuova Categoria
+		#{/secure.link}
+	 </div>
+ 
+	 <table class="table table-bordered" datatable> 
+	   <thead>
+	 	<tr>
+	 	  <th>Nome</th>
+	 	  <th>Descrizione</th>
+	 	  <th>Priorità</th>
+	 	  <th>Tab</th>
+	 	  <th>Gruppi</th>
+	 	</tr>
+	   </thead>
+	   <tbody>
+	 #{list items:categories, as:'category'}
+	  <tr>
+	    <td>
+	      <span class="label label-success">${category.name}</span>
+	      <a href="@{AbsenceGroups.editCategoryGroupAbsenceType(category.id)}">Edit</a>
+	    </td>
+	    <td>${category.description}</td>
+	    <td>${category.priority}</td>
+	    <td>
+	      <span class="label label-danger">${category.tab}</span> <br>
+		</td>
+	    <td>
+		  #{list items:category.groupAbsenceTypes, as:'group'}
+		    <span class="label label-default">${group.description}</span> <a href="@{AbsenceGroups.editGroup(group.id)}">Edit</a> <br>
+		  #{/list}    
+	    </td>
+	  </tr>
+	 #{/list}
+	 </tbody>
+	 </table>
+  #{/accordionItem}
+#{/accordionGroup}
 </div>
 
 

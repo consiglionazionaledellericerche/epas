@@ -19,19 +19,6 @@ CREATE TABLE contractual_clauses_history (
 	end_date DATE,
 	PRIMARY KEY (id, _revision, _revision_type)
 );
-	
-CREATE TABLE contractual_clauses_group_absence_types (
-	contractual_clauses_id BIGINT NOT NULL REFERENCES contractual_clauses(id),
-	group_absence_types_id BIGINT NOT NULL REFERENCES group_absence_types(id)
-);
-
-CREATE TABLE contractual_clauses_group_absence_types_history (
-    _revision INTEGER NOT NULL REFERENCES revinfo(rev),
-    _revision_type SMALLINT NOT NULL,
-	contractual_clauses_id BIGINT NOT NULL REFERENCES contractual_clauses(id),
-	group_absence_types_id BIGINT NOT NULL REFERENCES group_absence_types(id),    
-    PRIMARY KEY (contractual_clauses_id, group_absence_types_id, _revision, _revision_type)
-);
 
 CREATE TABLE contractual_references (
 	id BIGSERIAL PRIMARY KEY,
@@ -66,6 +53,9 @@ CREATE TABLE contractual_clauses_contractual_references_history (
     PRIMARY KEY (contractual_clauses_id, contractual_references_id, _revision, _revision_type)
 );
 
+ALTER TABLE category_group_absence_types ADD COLUMN contractual_clause_id BIGINT REFERENCES contractual_clauses(id);
+ALTER TABLE category_group_absence_types_history ADD COLUMN contractual_clause_id BIGINT;
+
 ALTER TABLE absence_types ADD COLUMN documentation TEXT;
 ALTER TABLE absence_types_history ADD COLUMN documentation TEXT;
 
@@ -74,9 +64,7 @@ ALTER TABLE absence_types_history ADD COLUMN documentation TEXT;
 ALTER TABLE absence_types_history DROP COLUMN documentation;
 ALTER TABLE absence_types DROP COLUMN documentation;
 
-DROP TABLE contractual_clause_group_absence_types_history;
+DROP TABLE contractual_clause_contractual_references_history;
 DROP TABLE contractual_clause_contractual_references;
-DROP TABLE contractual_clause_group_absence_types_history;
-DROP TABLE contractual_clause_group_absence_types;
 DROP TABLE contractual_clauses_history;
 DROP TABLE contractual_clauses;

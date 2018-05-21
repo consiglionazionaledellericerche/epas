@@ -11,7 +11,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -87,10 +86,7 @@ public class GroupAbsenceType extends BaseModel {
   
   @Column
   public boolean initializable = false;
-  
-  @ManyToMany(mappedBy = "groupAbsenceTypes")
-  public Set<ContractualClause> contractualClauses = Sets.newHashSet();
-  
+    
   /**
    * Label.
    * @return label
