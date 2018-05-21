@@ -2,29 +2,24 @@ package models.absences;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-
+import com.google.common.collect.Sets;
 import it.cnr.iit.epas.DateInterval;
-
 import java.util.Set;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
 import lombok.Getter;
-
 import models.absences.definitions.DefaultGroup;
 import models.base.BaseModel;
-
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
-
 import play.data.validation.Required;
 
 @Audited
@@ -85,13 +80,16 @@ public class GroupAbsenceType extends BaseModel {
   public GroupAbsenceType nextGroupToCheck;
 
   @OneToMany(mappedBy = "nextGroupToCheck", fetch = FetchType.LAZY)
-  public Set<GroupAbsenceType> previousGroupChecked;
+  public Set<GroupAbsenceType> previousGroupChecked = Sets.newHashSet();
 
   @Column
   public boolean automatic = false;
   
   @Column
   public boolean initializable = false;
+  
+  @ManyToMany(mappedBy = "groupAbsenceTypes")
+  public Set<ContractualClause> contractualClauses = Sets.newHashSet();
   
   /**
    * Label.
