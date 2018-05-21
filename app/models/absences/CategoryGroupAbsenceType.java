@@ -3,12 +3,9 @@ package models.absences;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -17,10 +14,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
 import models.absences.definitions.DefaultCategoryType;
 import models.base.BaseModel;
-
 import org.assertj.core.util.Lists;
 import org.hibernate.envers.Audited;
 
@@ -47,7 +42,11 @@ public class CategoryGroupAbsenceType extends BaseModel
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "category_tab_id")
   public CategoryTab tab;
-  
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "contractual_clause_id")
+  public ContractualClause contractualClause;
+
   @Override
   public int compareTo(CategoryGroupAbsenceType obj) {
     return name.compareTo(obj.name);

@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import models.base.PeriodModel;
@@ -44,22 +45,9 @@ public class ContractualClause extends PeriodModel {
    */
   public String description;
 
-  /**
-   * Lista dei gruppi di codici di assenza legati a questi istituto contrattuale.
-   * Collegare solamente i GroupAbsenceType che NON hanno un "previousGroupChecked".
-   * In pratica si collegano solo gli inizi delle eventuali catene di gruppi di codici 
-   * perché il resto della catena è collegato implicitamente.
-   * <p>
-   * Es. si collega Gruppo codice 23 che ha come gruppo successivo il Gruppo dei codici 25
-   * e a sua volta il gruppo dei codici 24.
-   * </p>  
-   */
-  @ManyToMany
-  @JoinTable(name = "contractual_clauses_group_absence_types",
-      joinColumns = @JoinColumn(name = "contractual_clauses_id"), 
-      inverseJoinColumns = @JoinColumn(name = "group_absence_types_id"))
-  public Set<GroupAbsenceType> groupAbsenceTypes = Sets.newHashSet();
-
+  @OneToMany(mappedBy = "contractualClause")
+  public Set<CategoryGroupAbsenceType> categoryGroupAbsenceTypes = Sets.newHashSet();
+  
   /**
    * Eventuali allegati o url di documentazione online.
    */
