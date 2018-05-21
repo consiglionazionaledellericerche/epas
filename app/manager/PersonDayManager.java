@@ -1314,5 +1314,40 @@ public class PersonDayManager {
     //tempo a lavoro
     return workingTimeTypeDay.get().holiday;
   }
+  
+  /**
+   * Metodo che controlla se si è trascorso abbastanza tempo in sede per essere considerati 
+   *    presenti.
+   * @param stampings la lista delle timbrature
+   * @return true se il tempo trascorso in sede è sufficiente, false altrimenti.
+   */
+  public boolean enoughTimeInSeat(List<Stamping> stampings, IWrapperPersonDay day) {
+    if (stampings.isEmpty()) {
+      return false;
+    }
+    final List<Stamping> orderedStampings = ImmutableList
+        .copyOf(stampings.stream().sorted().collect(Collectors.toList()));
+    List<PairStamping> pairStampings = computeValidPairStampings(orderedStampings);
+    boolean enough = false;
+    int timeInSeat = 0;
+    int timeOffSeat = 0;
+    if (pairStampings.isEmpty()) {
+      return false;
+    }
+    for (PairStamping pair : pairStampings) {
+      if ((pair.first.stampType != null 
+          && pair.first.stampType.equals(StampTypes.LAVORO_FUORI_SEDE)) 
+          || (pair.second.stampType != null 
+          && pair.second.stampType.equals(StampTypes.LAVORO_FUORI_SEDE))) {
+        timeOffSeat += pair.timeInPair;
+      } else {
+        timeInSeat += pair.timeInPair;
+      }
+    }
+    if (timeInSeat >= day.getWorkingTimeTypeDay().get().workingTime / 2) {
+      enough = true;
+    }
+    return enough;
+  }
 
 }
