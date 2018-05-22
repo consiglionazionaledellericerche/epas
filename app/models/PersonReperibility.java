@@ -1,5 +1,6 @@
 package models;
 
+import java.util.Comparator;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -61,7 +62,7 @@ public class PersonReperibility extends BaseModel {
 
 
   public String note;
-  
+
   @Transient
   public Range<LocalDate> dateRange() {
     if (startDate == null && endDate == null) {
@@ -76,4 +77,18 @@ public class PersonReperibility extends BaseModel {
     return Range.closed(startDate, endDate);
   }
 
+  public static Comparator<PersonReperibility> PersonReperibilityComparator 
+      = new Comparator<PersonReperibility>() {
+
+        public int compare(PersonReperibility pr1, PersonReperibility pr2) {
+
+            String fruitName1 = pr1.personReperibilityType.description.toUpperCase();
+            String fruitName2 = pr2.personReperibilityType.description.toUpperCase();
+
+
+            return fruitName1.compareTo(fruitName2);
+        }
+
+
+      };
 }
