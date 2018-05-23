@@ -59,6 +59,7 @@ import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.PersonReperibility;
+import models.PersonShiftShiftType;
 import models.Role;
 import models.Stamping;
 import models.User;
@@ -514,6 +515,23 @@ public class Administration extends Controller {
       }      
     }
     log.info("Terminata esecuzione");
+    renderText("Ok");
+  }
+  
+  /**
+   * Metodo di normalizzazione degli elementi presenti nella lista delle persone assegnate a una 
+   * certa attività di turno. Rimuove tutte le occorrenze con data di inizio e fine nulle.
+   */
+  public static void normalizationShifts() {
+    List<PersonShiftShiftType> psstList = PersonShiftShiftType.findAll();
+    log.info("Recupero tutte le associazioni tra persone e attività di turno.");
+    for (PersonShiftShiftType psst : psstList) {
+      if (psst.beginDate == null && psst.endDate == null) {
+        log.info("Rimuovo l'occorrenza di {} sull'attività {} perchè ha date nulle", 
+            psst.personShift.person.fullName(), psst.shiftType.description);
+        psst.delete();
+      }
+    }    
     renderText("Ok");
   }
   
