@@ -1295,7 +1295,7 @@ public class Competences extends Controller {
     notFoundIfNull(type);
     rules.checkIfPermitted(type.office);
     List<PersonReperibility> people = type.personReperibilities.stream()
-        .filter(pr -> !pr.startDate.isAfter(LocalDate.now()) 
+        .filter(pr -> pr.startDate != null 
             && (pr.endDate == null || pr.endDate.isAfter(LocalDate.now())))
         .collect(Collectors.toList());
     LocalDate date = LocalDate.now();
@@ -1315,7 +1315,7 @@ public class Competences extends Controller {
 
     rules.checkIfPermitted(type.office);
     List<PersonReperibility> people = type.personReperibilities.stream()
-        .filter(pr -> pr.startDate.isBefore(LocalDate.now()) 
+        .filter(pr -> pr.startDate != null 
             && (pr.endDate == null || pr.endDate.isAfter(LocalDate.now())))
         .collect(Collectors.toList());
     

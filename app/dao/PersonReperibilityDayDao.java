@@ -44,6 +44,9 @@ public class PersonReperibilityDayDao extends DaoBase {
   //*********************************************************/
 
   /**
+   * Metodo che ritorna, se esiste, il personreperibilityday che risponde ai parametri passati.
+   * @param person la persona
+   * @param date la data
    * @return un personReperibilityDay nel caso in cui la persona person in data date fosse
    *     reperibile. Null altrimenti.
    */
@@ -58,6 +61,9 @@ public class PersonReperibilityDayDao extends DaoBase {
 
 
   /**
+   * Metodo che ritorna il giorno di reperibilità associato al tipo e alla data passati.
+   * @param type il tipo di reperibilità
+   * @param date la data
    * @return il personReperibilityDay relativo al tipo e alla data passati come parametro.
    */
   public PersonReperibilityDay getPersonReperibilityDayByTypeAndDate(
@@ -209,7 +215,7 @@ public class PersonReperibilityDayDao extends DaoBase {
   }
   
   /**
-   * 
+   * Ritorna, se esiste, il personReperibility corrispondente all'id passato come parametro.
    * @param id l'id dell'attività di reperibilità
    * @return l'attività di reperibilità associata all'id passato come parametro se presente.
    */
@@ -220,7 +226,8 @@ public class PersonReperibilityDayDao extends DaoBase {
   }
   
   /**
-   * 
+   * Metodo che ricerca la lista dei PersonReperibility che rispondono al tipo e al periodo
+   *     passati come parametro.
    * @param type il tipo di reperibilità 
    * @param from la data da cui cercare
    * @param to la data entro cui cercare
@@ -236,20 +243,21 @@ public class PersonReperibilityDayDao extends DaoBase {
   }
 
   /**
-   * 
-   * @param office
-   * @return
+   * Metodo che ritorna la lista delle persone reperibili per la sede alla data.
+   * @param office la sede per cui si stanno cercando i reperibili
+   * @param date la data in cui stiamo stiamo facendo la richiesta
+   * @return la lista di PersonReperibility per i parametri passati.
    */
   public List<PersonReperibility> byOffice(Office office, LocalDate date) {
     QPersonReperibility pr = QPersonReperibility.personReperibility;
     JPQLQuery query = getQueryFactory().from(pr)
         .where(pr.person.office.eq(office)
-            .and(pr.startDate.loe(date).andAnyOf(pr.endDate.isNull(), pr.endDate.goe(date))));
+            .and(pr.startDate.isNotNull().andAnyOf(pr.endDate.isNull(), pr.endDate.goe(date))));
     return query.list(pr);
   }
   
   /**
-   * 
+   * Metodo di ricerca che ritorna, se esiste, l'attività associata ai parametri specificati.
    * @param person la persona di cui si vuole l'attività associata
    * @param date la data da verificare se è presente nel periodo per cui è associato all'attività
    * @param type il tipo di attività
@@ -263,5 +271,6 @@ public class PersonReperibilityDayDao extends DaoBase {
             .and(pr.startDate.loe(date).andAnyOf(pr.endDate.isNull(), pr.endDate.goe(date)))));
     return Optional.fromNullable(query.singleResult(pr));
   }
-
+  
+ 
 }
