@@ -82,11 +82,11 @@ public class PersonReperibility extends BaseModel {
 
         public int compare(PersonReperibility pr1, PersonReperibility pr2) {
 
-            String fruitName1 = pr1.personReperibilityType.description.toUpperCase();
-            String fruitName2 = pr2.personReperibilityType.description.toUpperCase();
+            String prName1 = pr1.personReperibilityType.description.toUpperCase();
+            String prName2 = pr2.personReperibilityType.description.toUpperCase();
 
 
-            return fruitName1.compareTo(fruitName2);
+            return prName1.compareTo(prName2);
         }
 
 
