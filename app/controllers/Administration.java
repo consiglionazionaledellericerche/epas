@@ -27,6 +27,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -57,6 +58,7 @@ import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.PersonReperibility;
 import models.Role;
 import models.Stamping;
 import models.User;
@@ -452,6 +454,76 @@ public class Administration extends Controller {
 
   }
   
+  /**
+   * normalizza le date dei personReperibilities nel caso in cui ci fossero dei problemi 
+   * con più date che per la stessa persona, sullo stesso tipo di reperibilità, 
+   * presentano endDate = null.
+   */
+  public static void normalizationReperibilities() {
+    
+    Map<Person, List<PersonReperibility>> map = Maps.newHashMap();
+    List<PersonReperibility> list = PersonReperibility.findAll();
+    List<PersonReperibility> repList = null;
+    log.info("Inizio la normalizzazione delle date...");
+    log.info("Creo la mappa persona-personreperibility");
+    for (PersonReperibility pr : list) {
+      if (pr.startDate != null && pr.endDate == null) {
+        if (!map.containsKey(pr.person)) {
+          repList = Lists.newArrayList();                  
+        } else {
+          repList = map.get(pr.person);                  
+        }
+        repList.add(pr);
+        map.put(pr.person, repList);
+      }      
+    }
+    log.info("Valuto la mappa per controllare le date dei personreperibilities");
+    for (Map.Entry<Person, List<PersonReperibility>> entry : map.entrySet()) {
+     
+      if (entry.getValue().size() > 1) {
+        List<PersonReperibility> multipleReps = entry.getValue();
+        log.info("Ordino le person reperibilities");
+        Collections.sort(multipleReps, PersonReperibility.PersonReperibilityComparator);       
+        PersonReperibility pr = null;
+        log.info("Controllo le personreperibilities");
+        for (PersonReperibility rep : multipleReps) {
+          if (pr == null) {
+            pr = rep;
+            continue;
+          }
+          if (rep.personReperibilityType.equals(pr.personReperibilityType)) {
+            log.warn("Ho due person reperibilities relativi allo stesso tipo");
+            if (rep.startDate != null && pr.startDate != null 
+                && rep.endDate == null && pr.endDate == null) {
+              log.warn("Sono nel caso di due person reperibilities con data fine nulla "
+                  + "per lo stesso tipo");
+              if (rep.startDate.isBefore(pr.startDate)) {
+                log.info("Cancello quello più futuro di {} con data {}", pr.person, pr.startDate);
+                pr.delete();                
+              } else {
+                log.info("Cancello quello più futuro di {} con data {}", 
+                    rep.person, rep.startDate);
+                rep.delete();
+              }
+            }
+          } else {
+            continue;
+          }
+        }
+        
+      }      
+    }
+    log.info("Terminata esecuzione");
+    renderText("Ok");
+  }
+  
+  /**
+   * Metodo che applica le competenze a presenza mensile/giornaliera.
+   * @param office la sede 
+   * @param code il codice di assenza
+   * @param year l'anno
+   * @param month il mese
+   */
   public static void applyBonus(Office office, CompetenceCode code, int year, int month) {
     
     Optional<Office> optOffice = Optional.<Office>absent();
