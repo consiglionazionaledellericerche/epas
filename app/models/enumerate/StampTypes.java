@@ -27,7 +27,8 @@ public enum StampTypes {
    */
 
   MOTIVI_DI_SERVIZIO("s", "motiviDiServizio", "Motivi di servizio", false, true),
-  
+  MOTIVI_DI_SERVIZIO_FUORI_SEDE("sf", "servizioFuoriSede", "Motivi di Servizio Fuori Sede",
+      false, false),
   LAVORO_FUORI_SEDE("lfs", "lavoroFuoriSede", "Lavoro fuori sede", true, true),
   PAUSA_PRANZO("pr", "pausaPranzo", "Pausa Pranzo", true, true),
   
