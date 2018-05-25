@@ -1224,6 +1224,27 @@ public class Competences extends Controller {
       LocalDate beginDate, boolean jolly) {
     notFoundIfNull(person);
     rules.checkIfPermitted(person.person.office);
+    if (beginDate == null) {
+      Validation.addError("beginDate", "inserire una data di inizio!");
+    }
+    
+    if (!person.isPersistent()) {
+      Validation.addError("person", "selezionare una persona!");
+    }
+    if (Validation.hasErrors()) {
+      List<PersonShiftShiftType> psstList = shiftDao.getAssociatedPeopleToShift(activity, 
+          Optional.fromNullable(LocalDate.now()));
+      List<PersonShift> peopleForShift = 
+          shiftDao.getPeopleForShift(activity.shiftCategories.office, LocalDate.now());
+
+      List<PersonShift> available = peopleForShift.stream()
+          .filter(e -> (psstList.stream()
+              .filter(d -> d.personShift.equals(e))
+              .count()) < 1)
+          .collect(Collectors.toList());
+      response.status = 400;
+      render("@linkPeopleToShift", activity, available);
+    }
     competenceManager.persistPersonShiftShiftType(person, beginDate, activity, jolly);
     flash.success("Aggiunto %s all'attività", person.person.fullName());
     manageShiftType(activity.id);
@@ -1295,7 +1316,7 @@ public class Competences extends Controller {
     notFoundIfNull(type);
     rules.checkIfPermitted(type.office);
     List<PersonReperibility> people = type.personReperibilities.stream()
-        .filter(pr -> !pr.startDate.isAfter(LocalDate.now()) 
+        .filter(pr -> pr.startDate != null 
             && (pr.endDate == null || pr.endDate.isAfter(LocalDate.now())))
         .collect(Collectors.toList());
     LocalDate date = LocalDate.now();
@@ -1315,7 +1336,7 @@ public class Competences extends Controller {
 
     rules.checkIfPermitted(type.office);
     List<PersonReperibility> people = type.personReperibilities.stream()
-        .filter(pr -> pr.startDate.isBefore(LocalDate.now()) 
+        .filter(pr -> pr.startDate != null 
             && (pr.endDate == null || pr.endDate.isAfter(LocalDate.now())))
         .collect(Collectors.toList());
     
