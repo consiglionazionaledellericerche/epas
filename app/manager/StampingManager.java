@@ -3,20 +3,24 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.inject.Inject;
+
 import controllers.Security;
 import controllers.Stampings;
 
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPersonDay;
 
 import helpers.Web;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingDayRecapFactory;
 import models.Person;
@@ -30,6 +34,8 @@ import models.exports.StampingFromClient;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
+import play.i18n.Messages;
+
 @Slf4j
 public class StampingManager {
 
@@ -40,6 +46,7 @@ public class StampingManager {
   private final ConsistencyManager consistencyManager;
   private final StampingDao stampingDao;
   private final NotificationManager notificationManager;
+  private final IWrapperFactory wrapperFactory;
 
   /**
    * @param personDayDao il dao per cercare i personday
@@ -54,7 +61,7 @@ public class StampingManager {
       PersonDayManager personDayManager,
       PersonStampingDayRecapFactory stampingDayRecapFactory,
       ConsistencyManager consistencyManager, StampingDao stampingDao,
-      NotificationManager notificationManager) {
+      NotificationManager notificationManager, IWrapperFactory wrapperFactory) {
 
     this.personDayDao = personDayDao;
     this.personDao = personDao;
@@ -63,29 +70,33 @@ public class StampingManager {
     this.consistencyManager = consistencyManager;
     this.stampingDao = stampingDao;
     this.notificationManager = notificationManager;
+    this.wrapperFactory = wrapperFactory;
   }
 
 
+  
   /**
-   * @param pd il personday
-   * @param stamping la timbratura
-   * @return true se esiste una timbratura nel personday uguale a quella passata.
+   * Metodo che verifica se la timbratura precedente a quella che si vuole inserire è con 
+   *     causale lavoro fuori sede per permettere al chiamante di inserire una timbratura
+   *     "fittizia" di fine lavoro fuori sede un minuto prima di quella che si sta inserendo
+   *     nel caso in cui la precedente e l'attuale abbiano lo stesso verso (ingresso).
+   * @param personDay il personDay a cui si vuole associare la timbratura
+   * @param stampingFromClient il dto creato a partire dalla timbratura ricevuta dal client
+   * @return true se la timbratura precedente a quella che si sta per inserire è con causale
+   *     Lavoro fuori sede ed è dello stesso verso, false altrimenti.
    */
-  private static boolean checkDuplicateStamping(
-      PersonDay pd, StampingFromClient stamping) {
-
-    for (Stamping stamp : pd.stampings) {
-
-      if (stamp.date.isEqual(stamping.dateTime)) {
-        return true;
-      }
-      if (stamp.date.isEqual(stamping.dateTime.minusMinutes(1))
-          && (stamp.isIn() && stamping.inOut == 0
-          || stamp.isOut() && stamping.inOut == 1)) {
-        return true;
-      }
+  private boolean checkOffSite(PersonDay personDay, StampingFromClient stampingFromClient) {
+    IWrapperPersonDay wrPersonDay = wrapperFactory.create(personDay);
+    Stamping stamp = wrPersonDay.getLastStamping(); 
+    if (stamp == null) {
+      return false;
     }
-
+    if (stamp.stampType != null && stamp.stampType.equals(StampTypes.LAVORO_FUORI_SEDE)
+        && stamp.way.equals(WayType.in)
+        && stampingFromClient.stampType == null
+        && stampingFromClient.inOut == 0) {
+      return true;
+    }
     return false;
   }
 
@@ -197,17 +208,32 @@ public class StampingManager {
         stampingFromClient.person, stampingFromClient.dateTime.toLocalDate());
 
     // Check stamping duplicata
-    if (checkDuplicateStamping(personDay, stampingFromClient)) {
+    WayType way = stampingFromClient.inOut == 0 ? WayType.in : WayType.out;
+    if (stampingDao.getStamping(stampingFromClient.dateTime, person, way).isPresent()) {
       log.info("Timbratura delle {} già presente per {} (matricola = {}) ",
           stampingFromClient.dateTime, person, person.number);
       return false;
+    }
+
+    //controllo se la precedente timbratura è per lavoro fuori sede e di ingresso
+    if (checkOffSite(personDay, stampingFromClient)) {
+      log.info("Il sistema inserisce una timbratura in automatico per {} "
+          + "per fine lavoro fuori sede alle ore {}.", 
+          person.fullName(), stampingFromClient.dateTime.minusMinutes(1));
+      Stamping stamping = new Stamping(personDay, stampingFromClient.dateTime.minusMinutes(1));
+      stamping.date = stampingFromClient.dateTime.minusMinutes(1);
+      stamping.markedByAdmin = stampingFromClient.markedByAdmin;
+      stamping.way = WayType.out;
+      stamping.stampType = StampTypes.LAVORO_FUORI_SEDE;      
+      stamping.note = Messages.get("stampingNote");
+      stamping.save();
     }
 
     //Creazione stamping e inserimento
     Stamping stamping = new Stamping(personDay, stampingFromClient.dateTime);
     stamping.date = stampingFromClient.dateTime;
     stamping.markedByAdmin = stampingFromClient.markedByAdmin;
-    stamping.way = stampingFromClient.inOut == 0 ? WayType.in : WayType.out;
+    stamping.way = way;
     stamping.stampType = stampingFromClient.stampType;
     stamping.stampingZone = 
         (stampingFromClient.zona != null && !stampingFromClient.zona.equals("")) 
