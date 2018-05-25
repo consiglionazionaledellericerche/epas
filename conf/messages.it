@@ -422,6 +422,8 @@ stamping.stampType= Causale Timbratura
 stamping.stampModificationType= Modifiche Timbratura
 stamping.way= Verso Timbratura
 
+stampingNote= Timbratura inserita automaticamente dal sistema per chiudere l'attività di lavoro fuori sede.
+
 stampings= Timbratura
 stampType= Causale
 
