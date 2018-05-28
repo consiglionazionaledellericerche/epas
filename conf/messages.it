@@ -55,8 +55,13 @@ calendar.allValidShifts= Tutti i turni risultano validi
 calendar.notAllValidShifts= Uno o più turni risultano non validi
 calendar.warningShifts= Alcuni turni hanno riduzioni d'orario
 
-
 category=Categoria
+
+categoryGroupAbsenceTypes =Categorie di gruppi di assenza
+
+categoryTab.name =nome
+categoryTab.description =descrizione
+categoryTab.priority =priorità
 
 child.bornDate= Data di Nascita
 child.name= Nome
@@ -100,6 +105,20 @@ Contract= Contratto
 contract.endContract= Terminato Il
 contract.endDate= Fine Contratto
 contract.onCertificate= In attestati
+
+contractualClause =Istituto contrattuale
+contractualClause.name =nome
+contractualClause.description =descrizione
+contractualClause.context =contesto
+contractualClause.context =contesto
+contractualClause.beginDate =data di inizio
+contractualClause.endDate =data di fine
+contractualClause.categoryGroupAbsenceTypes =Categorie di gruppi di assenza
+
+ContractualClauseContext.ABSENCE =assenze
+ContractualClauseContext.ABSENCE_AND_PRESENCE =assenze e presenze
+ContractualClauseContext.PRESENCE =presenze
+
 sourceDateMealTicket= Data inizializzazione
 sourceDateResidual= Data inizializzazione
 sourceDateVacation= Data inizializzazione

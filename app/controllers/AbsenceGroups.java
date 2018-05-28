@@ -9,7 +9,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import dao.AbsenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -21,19 +20,17 @@ import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
-
+import helpers.jpa.JpaReferenceBinder;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
+import lombok.val;
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.NotificationManager;
@@ -46,7 +43,6 @@ import manager.services.absences.certifications.CertificationYearSituation;
 import manager.services.absences.certifications.CodeComparation;
 import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.PeriodChain;
-
 import models.Office;
 import models.Person;
 import models.PersonDay;
@@ -60,24 +56,22 @@ import models.absences.AmountType;
 import models.absences.CategoryGroupAbsenceType;
 import models.absences.CategoryTab;
 import models.absences.ComplationAbsenceBehaviour;
-import models.absences.ContractualClause;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
+import models.contractual.ContractualClause;
 import models.enumerate.QualificationMapping;
-
 import org.joda.time.LocalDate;
-
+import play.data.binding.As;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 @Slf4j
@@ -146,7 +140,8 @@ public class AbsenceGroups extends Controller {
   public static void editContractualClause(Long contractualClauseId) {
     ContractualClause contractualClause = ContractualClause.findById(contractualClauseId);
     notFoundIfNull(contractualClause);
-    render(contractualClause);
+    val categoryGroupAbsenceTypes = contractualClause.categoryGroupAbsenceTypes;
+    render(contractualClause, categoryGroupAbsenceTypes);
   }
   
   /**
@@ -154,11 +149,23 @@ public class AbsenceGroups extends Controller {
    *
    * @param contractualClause istituto contrattuale
    */
-  public static void saveContractualClause(@Valid ContractualClause contractualClause) {
+  public static void saveContractualClause(@Valid ContractualClause contractualClause, 
+      @As(binder = JpaReferenceBinder.class)
+      Collection<CategoryGroupAbsenceType> categoryGroupAbsenceTypes) {
 
     if (Validation.hasErrors()) {
       flash.error("Correggere gli errori indicati");
-      render("@editContractualClause", contractualClause);
+      render("@editContractualClause", contractualClause, categoryGroupAbsenceTypes);
+    }
+    contractualClause.categoryGroupAbsenceTypes.stream().forEach(cgat -> {
+      cgat.contractualClause = null;
+      cgat.save();
+    });;
+    if (categoryGroupAbsenceTypes != null) {
+      categoryGroupAbsenceTypes.stream().forEach(cgat -> { 
+        cgat.contractualClause = contractualClause;
+        cgat.save();
+      }); 
     }
     contractualClause.save();
     flash.success("Operazione eseguita.");

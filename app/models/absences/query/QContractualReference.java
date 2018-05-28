@@ -1,13 +1,11 @@
 package models.absences.query;
 
 import static com.mysema.query.types.PathMetadataFactory.*;
-import models.absences.ContractualReference;
-
-
 import com.mysema.query.types.path.*;
 
 import com.mysema.query.types.PathMetadata;
 import javax.annotation.Generated;
+import models.contractual.ContractualReference;
 import com.mysema.query.types.Path;
 import com.mysema.query.types.path.PathInits;
 
@@ -24,7 +22,7 @@ public class QContractualReference extends EntityPathBase<ContractualReference> 
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
-    public final ListPath<models.absences.ContractualClause, QContractualClause> contractualClauses = this.<models.absences.ContractualClause, QContractualClause>createList("contractualClauses", models.absences.ContractualClause.class, QContractualClause.class, PathInits.DIRECT2);
+    public final ListPath<models.contractual.ContractualClause, QContractualClause> contractualClauses = this.<models.contractual.ContractualClause, QContractualClause>createList("contractualClauses", models.contractual.ContractualClause.class, QContractualClause.class, PathInits.DIRECT2);
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;

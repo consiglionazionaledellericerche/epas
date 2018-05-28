@@ -15,12 +15,19 @@
  	  </p>
       #{/alert}
 
-        <input type="hidden" name="categoryTab.id" value="${contractualClause?.id}">
+        <input type="hidden" name="contractualClause.id" value="${contractualClause?.id}">
  	
  		#{f.input 'contractualClause.name', required:'true', value:contractualClause?.name /}
- 		#{f.input 'contractualClause.description' /} 
- 		#{f.date 'contractualClause.beginDate' /}
+ 		#{f.textArea 'contractualClause.description', rows:12, class:'wysiswyg' /}
+ 		#{f.selectEnum 'contractualClause.context', items:models.enumerate.ContractualClauseContext, 
+ 			value:contractualClause.context, required:true /}
+ 		 
+ 		#{f.date 'contractualClause.beginDate', required:true /}
 		#{f.date 'contractualClause.endDate' /}
+		
+	    #{f.selectModels 'categoryGroupAbsenceTypes',	    	
+	    	items:templateUtility.allCategoryGroupAbsenceTypes(),
+	    	values:categoryGroupAbsenceTypes /}
 		
         <div class="container center">
             <a class="btn btn-default" href="@{AbsenceGroups.showCategories()}">Torna alle Categorie</a>

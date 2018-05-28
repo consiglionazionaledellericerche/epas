@@ -1,13 +1,11 @@
 package models.absences.query;
 
 import static com.mysema.query.types.PathMetadataFactory.*;
-import models.absences.ContractualClause;
-
-
 import com.mysema.query.types.path.*;
 
 import com.mysema.query.types.PathMetadata;
 import javax.annotation.Generated;
+import models.contractual.ContractualClause;
 import com.mysema.query.types.Path;
 import com.mysema.query.types.path.PathInits;
 
@@ -29,7 +27,7 @@ public class QContractualClause extends EntityPathBase<ContractualClause> {
 
     public final SetPath<models.absences.CategoryGroupAbsenceType, QCategoryGroupAbsenceType> categoryGroupAbsenceTypes = this.<models.absences.CategoryGroupAbsenceType, QCategoryGroupAbsenceType>createSet("categoryGroupAbsenceTypes", models.absences.CategoryGroupAbsenceType.class, QCategoryGroupAbsenceType.class, PathInits.DIRECT2);
 
-    public final SetPath<models.absences.ContractualReference, QContractualReference> contractualReferences = this.<models.absences.ContractualReference, QContractualReference>createSet("contractualReferences", models.absences.ContractualReference.class, QContractualReference.class, PathInits.DIRECT2);
+    public final SetPath<models.contractual.ContractualReference, QContractualReference> contractualReferences = this.<models.contractual.ContractualReference, QContractualReference>createSet("contractualReferences", models.contractual.ContractualReference.class, QContractualReference.class, PathInits.DIRECT2);
 
     public final StringPath description = createString("description");
 

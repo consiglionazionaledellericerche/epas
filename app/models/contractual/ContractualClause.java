@@ -1,15 +1,20 @@
-package models.absences;
+package models.contractual;
 
 import com.google.common.collect.Sets;
 import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import models.absences.CategoryGroupAbsenceType;
 import models.base.PeriodModel;
+import models.enumerate.ContractualClauseContext;
 import org.hibernate.envers.Audited;
 import play.data.validation.Required;
 import play.data.validation.Unique;
@@ -45,6 +50,11 @@ public class ContractualClause extends PeriodModel {
    */
   public String description;
 
+  @NotNull
+  @Required
+  @Enumerated(EnumType.STRING)
+  public ContractualClauseContext context;
+  
   @OneToMany(mappedBy = "contractualClause")
   public Set<CategoryGroupAbsenceType> categoryGroupAbsenceTypes = Sets.newHashSet();
   

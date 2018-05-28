@@ -11,7 +11,7 @@
 
   #{secure.check 'AbsenceGroups.manageDocumentation'}
   #{accordionItem 'tab_configuration', parent:'absence_group_configuration', 
-		title:'Configurazione gli istituti contrattuali', open:true, color:'info'}
+		title:'Configurazione degli istituti contrattuali', open:true, color:'info'}
 	  
 	  <div class="row text-center">
 		#{secure.link @AbsenceGroups.insertContractualClause(), class:'btn btn-primary',fa:'plus' }
@@ -22,27 +22,34 @@
 	  <table class="table table-bordered" datatable> 
 	   <thead>
 	 	<tr>
-	 	  <th>Nome</th>
-	 	  <th>Descrizione</th>
+	 	  <th width="20%">Nome</th>
 	 	  <th>Dal</th>
 	 	  <th>Al</th>
 	 	  <th>Categorie</th>
+	 	  <th>Contesto</th>
+	 	  <th>Azioni</th>
 	 	</tr>
 	   </thead>
 	   <tbody>
 		 #{list items:contractualClauses, as:'contractualClause'}
 		  <tr>
 		    <td>
-		      <span class="label label-danger">${contractualClause.name}</span>
-		      <a href="@{AbsenceGroups.editContractualClause(contractualClause.id)}">Edit</a>
+		      ${contractualClause.name}		      
 		    </td>
-		    <td>${contractualClause.description}</td>
 		    <td>${contractualClause.beginDate?.format()}</td>
 		    <td>${contractualClause.endDate?.format()}</td>
 		    <td>
 			  #{list items:contractualClause.categoryGroupAbsenceTypes, as:'category'}
 			    <span class="label label-success">${category.name}</span> <br>
 			  #{/list}    
+		    </td>
+		    <td>
+		       ${contractualClause.context.label()}
+		    </td>
+		    <td>
+		    	#{secure.link @AbsenceGroups.editContractualClause(contractualClause.id), class:'btn btn-primary btn-sm'}
+		    		<i class="fa fa-pencil-square-o"></i> Modifica		    			    	
+		    	#{/secure.link}
 		    </td>
 		  </tr>
 		 #{/list}
@@ -69,6 +76,7 @@
 	 	  <th>Priorità</th>
 	 	  <th>Default</th>
 	 	  <th>Categorie</th>
+	 	  <th>Azioni</th>
 	 	</tr>
 	   </thead>
 	   <tbody>
@@ -76,7 +84,7 @@
 		  <tr>
 		    <td>
 		      <span class="label label-danger">${categoryTab.name}</span>
-		      <a href="@{AbsenceGroups.editCategoryTab(categoryTab.id)}">Edit</a>
+		      
 		    </td>
 		    <td>${categoryTab.description}</td>
 		    <td>${categoryTab.priority}</td>
@@ -85,6 +93,11 @@
 			  #{list items:categoryTab.categoryGroupAbsenceTypes, as:'category'}
 			    <span class="label label-success">${category.name}</span> <br>
 			  #{/list}    
+		    </td>
+		    <td>
+		    	#{secure.link @AbsenceGroups.editCategoryTab(categoryTab.id), class:'btn btn-primary btn-sm'}
+		    		<i class="fa fa-pencil-square-o"></i> Modifica		    		
+		    	#{/secure.link}
 		    </td>
 		  </tr>
 		 #{/list}
@@ -117,7 +130,9 @@
 	  <tr>
 	    <td>
 	      <span class="label label-success">${category.name}</span>
-	      <a href="@{AbsenceGroups.editCategoryGroupAbsenceType(category.id)}">Edit</a>
+	      #{secure.link @AbsenceGroups.editCategoryGroupAbsenceType(category.id), class:'btn btn-primary btn-xs'}
+	      	<i class="fa fa-pencil-square-o"></i> Modifica
+	      #{/secure.link}	      
 	    </td>
 	    <td>${category.description}</td>
 	    <td>${category.priority}</td>
@@ -126,8 +141,12 @@
 		</td>
 	    <td>
 		  #{list items:category.groupAbsenceTypes, as:'group'}
-		    <span class="label label-default">${group.description}</span> <a href="@{AbsenceGroups.editGroup(group.id)}">Edit</a> <br>
-		  #{/list}    
+		  	<div>		  	
+			    <span class="label label-default">${group.description}</span> 
+			    <a href="@{AbsenceGroups.editGroup(group.id)}"class="btn btn-primary btn-xs">
+			    <i class="fa fa-pencil-square-o"></i> Modifica</a>
+		    </div>
+		  #{/list}
 	    </td>
 	  </tr>
 	 #{/list}
@@ -136,6 +155,3 @@
   #{/accordionItem}
 #{/accordionGroup}
 </div>
-
-
- 

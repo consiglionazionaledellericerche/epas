@@ -4,6 +4,7 @@ CREATE TABLE contractual_clauses (
 	id BIGSERIAL PRIMARY KEY,
 	name TEXT UNIQUE NOT NULL,
 	description TEXT,
+	context TEXT NOT NULL,
 	begin_date DATE NOT NULL default NOW(),
 	end_date DATE,
 	version INT DEFAULT 0
@@ -15,6 +16,7 @@ CREATE TABLE contractual_clauses_history (
   	_revision_type SMALLINT NOT NULL,
 	name TEXT,
 	description TEXT,
+	context TEXT,
 	begin_date DATE,
 	end_date DATE,
 	PRIMARY KEY (id, _revision, _revision_type)
@@ -64,7 +66,10 @@ ALTER TABLE absence_types_history ADD COLUMN documentation TEXT;
 ALTER TABLE absence_types_history DROP COLUMN documentation;
 ALTER TABLE absence_types DROP COLUMN documentation;
 
-DROP TABLE contractual_clause_contractual_references_history;
-DROP TABLE contractual_clause_contractual_references;
+ALTER TABLE category_group_absence_types DROP COLUMN contractual_clause_id;
+ALTER TABLE category_group_absence_types_history DROP COLUMN contractual_clause_id;
+
+DROP TABLE contractual_clauses_contractual_references_history;
+DROP TABLE contractual_clauses_contractual_references;
 DROP TABLE contractual_clauses_history;
 DROP TABLE contractual_clauses;
