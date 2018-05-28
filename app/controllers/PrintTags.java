@@ -74,10 +74,20 @@ public class PrintTags extends Controller {
       flash.error("Selezionare una persona dall'elenco del personale.");
       listPersonForPrintTags(year, month, officeId);
     }
-    Office office = officeDao.getOfficeById(officeId);
+
+    //conrtrollo chi ha chiamato questa funzionalità: se la persona per stampare il proprio 
+    //cartellino o l'amministratore del personale.
+    Office office = null;
+    if (officeId == null) {
+      office = person.office;
+    } else {
+      office = officeDao.getOfficeById(officeId);
+    }
+
     rules.checkIfPermitted(office);
     List<PrintTagsInfo> dtoList = Lists.newArrayList();
     List<Person> personList = Lists.newArrayList();
+
     LocalDate date = new LocalDate(year, month, 1);
     if (!forAll) {
       personList.add(person);

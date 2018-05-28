@@ -256,9 +256,9 @@
   </tr>
   #{list stampHistory, as:'history'}
   <tr>
-    <td>${histiry.value?.date.format()}</td>
+    <td>${history.value?.date.format()}</td>
     <td>${history.formattedRevisionDate()}</td>
-    <td>&{history.type}</td>
+    <td>${history.type}</td>
     <td>${history.formattedOwner()}</td>
     <td>${history.value?.way.label()}</td>
     <td>${history.value?.stampType.label()}</td>
