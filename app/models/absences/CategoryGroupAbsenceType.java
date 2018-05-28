@@ -16,6 +16,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import models.absences.definitions.DefaultCategoryType;
 import models.base.BaseModel;
+import models.contractual.ContractualClause;
 import org.assertj.core.util.Lists;
 import org.hibernate.envers.Audited;
 

@@ -1,4 +1,4 @@
-package models.absences;
+package models.contractual;
 
 import com.beust.jcommander.internal.Lists;
 import java.util.List;

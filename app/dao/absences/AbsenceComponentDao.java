@@ -25,7 +25,6 @@ import models.absences.AbsenceType;
 import models.absences.CategoryGroupAbsenceType;
 import models.absences.CategoryTab;
 import models.absences.ComplationAbsenceBehaviour;
-import models.absences.ContractualClause;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.InitializationGroup;
@@ -43,6 +42,7 @@ import models.absences.query.QGroupAbsenceType;
 import models.absences.query.QInitializationGroup;
 import models.absences.query.QJustifiedType;
 import models.absences.query.QTakableAbsenceBehaviour;
+import models.contractual.ContractualClause;
 import models.query.QPerson;
 import models.query.QPersonDay;
 
