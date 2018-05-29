@@ -58,10 +58,19 @@
   <div id="stampingDataOffSite">
   	#{form action:@saveOffSite(), method:'POST', autocomplete:false, 'data-async':'#page_content',
 	    class:'form form-horizontal', 'data-async-error':'#stampingDataOffSite', 'data-spinner':'#defaultSpinner'}
-	
+	   #{if autocertification}	
 	   #{alert color:'warning',center:true}
-	      Inserisci i dati della nuova timbratura per lavoro fuori sede
+	      <p>Il sottoscritto <strong>DICHIARA</strong> di essere consapevole delle sanzioni penali previste dall'art. 76 
+	      del D.P.R. n.445/2000 nel caso di dichiarazioni mendaci e di falsità negli atti ed a conoscenza che i dati 
+	      forniti con autocertificazione saranno soggetti ad eventuale controllo da parte dell'Amministrazione, 
+	      ai sensi degli articoli 46 e 47 del D.P.R. n.445/2000.</p>
 	   #{/alert}
+	   #{/if}
+	   #{else}
+	   #{alert color:'warning',center:true}
+	   Inserisci i dati per la timbratura fuori sede.
+	   #{/alert}
+	   #{/else}
 	   #{include './personStampingComponents/_coreStampings.html' /}
 	   #{f.view messages.get('stamping.stampType'), value: offsite[0]/}
 	   #{f.hidden 'stamping.stampType', value:offsite[0] /}	   
