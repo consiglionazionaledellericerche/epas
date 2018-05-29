@@ -1,5 +1,6 @@
 package dao;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
@@ -23,19 +24,24 @@ public class ContractualClauseDao extends DaoBase {
   }
 
   /**
-   * Tutti gli istituti contrattuali.
+   * Lista degli istituti contrattuali.
+   * 
+   * @param onlyEnabled se non presente o uguale a false mostra solo gli 
+   *     istituti contrattuali attivi alla data corrente.
+   *     
    * @return la lista degli istituti contrattuali.
    */
-  public List<ContractualClause> all(boolean includeInactive) {
+  public List<ContractualClause> all(Optional<Boolean> onlyEnabled) {
     QContractualClause contractualClause = QContractualClause.contractualClause;
     BooleanBuilder condition = new BooleanBuilder();
-    if (!includeInactive) {
-      condition.and(contractualClause.beginDate.before(LocalDate.now()));
+    if (onlyEnabled.or(true)) {      
       condition.and(
-          contractualClause.endDate.isNull().or(contractualClause.endDate.after(LocalDate.now())));
+            contractualClause.beginDate.loe(LocalDate.now()))
+              .and(contractualClause.endDate.isNull()
+                  .or(contractualClause.beginDate.goe(LocalDate.now())));
     }
-    return getQueryFactory().from(contractualClause)
-        .where(condition)
-        .orderBy(contractualClause.name.asc()).list(contractualClause);
+    return getQueryFactory().from(contractualClause).where(condition)
+        .orderBy(contractualClause.name.desc()).list(contractualClause);
   }
+
 }

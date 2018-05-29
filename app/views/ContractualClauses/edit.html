@@ -1,9 +1,9 @@
 #{extends 'main.html' /}
 #{set header:'navbar' /}
-#{set title:'ePAS - Gestione codice d\'assenza' /}
+#{set title:'ePAS - Istituti contrattuali' /}
 
  <div class="container">
-    #{form @AbsenceGroups.saveContractualClause(),class:'form-horizontal'}
+    #{form @save(),class:'form-horizontal'}
 
     #{alert color:'info'}
       <p>
@@ -30,9 +30,9 @@
 	    	values:categoryGroupAbsenceTypes /}
 		
         <div class="container center">
-            <a class="btn btn-default" href="@{AbsenceGroups.showCategories()}">Torna alle Categorie</a>
+            <a class="btn btn-default" href="@{list()}">Torna alla lista</a>
 	        <input class="btn btn-primary" type="submit" value="Ok">
-	        <a class="btn btn-danger" href="@{AbsenceGroups.deleteContractualClause(contractualClause.id)}">Elimina</a>
+	        <a class="btn btn-danger" href="@{delete(contractualClause.id)}">Elimina</a>
         </div>
    #{/form}
 

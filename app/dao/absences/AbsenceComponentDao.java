@@ -5,20 +5,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
-
 import dao.DaoBase;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-
 import javax.persistence.EntityManager;
-
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -37,17 +32,13 @@ import models.absences.query.QAbsenceType;
 import models.absences.query.QCategoryGroupAbsenceType;
 import models.absences.query.QCategoryTab;
 import models.absences.query.QComplationAbsenceBehaviour;
-import models.absences.query.QContractualClause;
 import models.absences.query.QGroupAbsenceType;
 import models.absences.query.QInitializationGroup;
 import models.absences.query.QJustifiedType;
 import models.absences.query.QTakableAbsenceBehaviour;
-import models.contractual.ContractualClause;
 import models.query.QPerson;
 import models.query.QPersonDay;
-
 import org.joda.time.LocalDate;
-
 import play.db.jpa.JPA;
 
 /**
@@ -209,27 +200,6 @@ public class AbsenceComponentDao extends DaoBase {
     QCategoryTab categoryTab = QCategoryTab.categoryTab;
     return Optional.fromNullable(getQueryFactory().from(categoryTab)
         .where(categoryTab.name.eq(name)).singleResult(categoryTab));
-  }
-  
-  /**
-   * Lista degli istituti contrattuali.
-   * 
-   * @param onlyEnabled se non presente o uguale a false mostra solo gli 
-   *     istituti contrattuali attivi alla data corrente.
-   *     
-   * @return la lista degli istituti contrattuali.
-   */
-  public List<ContractualClause> contractualClauses(Optional<Boolean> onlyEnabled) {
-    QContractualClause contractualClause = QContractualClause.contractualClause;
-    BooleanBuilder condition = new BooleanBuilder();
-    if (onlyEnabled.or(true)) {      
-      condition.and(
-            contractualClause.beginDate.loe(LocalDate.now()))
-              .and(contractualClause.endDate.isNull()
-                  .or(contractualClause.beginDate.goe(LocalDate.now())));
-    }
-    return getQueryFactory().from(contractualClause).where(condition)
-        .orderBy(contractualClause.name.desc()).list(contractualClause);
   }
   
   /**

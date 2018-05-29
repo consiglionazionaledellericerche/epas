@@ -20,17 +20,14 @@ import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
-import helpers.jpa.JpaReferenceBinder;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.NotificationManager;
@@ -62,10 +59,8 @@ import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
-import models.contractual.ContractualClause;
 import models.enumerate.QualificationMapping;
 import org.joda.time.LocalDate;
-import play.data.binding.As;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -118,78 +113,9 @@ public class AbsenceGroups extends Controller {
 
     List<CategoryGroupAbsenceType> categories = CategoryGroupAbsenceType.findAll();
     List<CategoryTab> categoryTabs = CategoryTab.findAll();
-    List<ContractualClause> contractualClauses = 
-        absenceComponentDao.contractualClauses(Optional.of(true));
-
-    render(categories, categoryTabs, contractualClauses);
+    render(categories, categoryTabs);
   }
 
-  /**
-   * Nuovo istituto contrattuale.
-   */
-  public static void insertContractualClause() {
-    ContractualClause contractualClause = new ContractualClause();
-    render("@editContractualClause", contractualClause);    
-  }
-
-  /**
-   * Modifica dell'istituto contrattuale.
-   *
-   * @param contractualClauseId id
-   */
-  public static void editContractualClause(Long contractualClauseId) {
-    ContractualClause contractualClause = ContractualClause.findById(contractualClauseId);
-    notFoundIfNull(contractualClause);
-    val categoryGroupAbsenceTypes = contractualClause.categoryGroupAbsenceTypes;
-    render(contractualClause, categoryGroupAbsenceTypes);
-  }
-  
-  /**
-   * Salva l'istituto contrattuale.
-   *
-   * @param contractualClause istituto contrattuale
-   */
-  public static void saveContractualClause(@Valid ContractualClause contractualClause, 
-      @As(binder = JpaReferenceBinder.class)
-      Collection<CategoryGroupAbsenceType> categoryGroupAbsenceTypes) {
-
-    if (Validation.hasErrors()) {
-      flash.error("Correggere gli errori indicati");
-      render("@editContractualClause", contractualClause, categoryGroupAbsenceTypes);
-    }
-    contractualClause.categoryGroupAbsenceTypes.stream().forEach(cgat -> {
-      cgat.contractualClause = null;
-      cgat.save();
-    });;
-    if (categoryGroupAbsenceTypes != null) {
-      categoryGroupAbsenceTypes.stream().forEach(cgat -> { 
-        cgat.contractualClause = contractualClause;
-        cgat.save();
-      }); 
-    }
-    contractualClause.save();
-    flash.success("Operazione eseguita.");
-    editContractualClause(contractualClause.id);
-  }
-
-  /**
-   * Rimuove l'istituto contrattuale.
-   *
-   * @param contractualClauseId tab
-   */
-  public static void deleteContractualClause(Long contractualClauseId) {
-    ContractualClause contractualClause = ContractualClause.findById(contractualClauseId);
-    notFoundIfNull(contractualClause);
-    if (!contractualClause.categoryGroupAbsenceTypes.isEmpty()) {
-      flash.error("Non è possibile eliminare un istituto contrattuale associato "
-          + "a categorie di tipi di assenza.");
-      editContractualClause(contractualClauseId);
-    }
-    contractualClause.delete();
-    flash.success("Operazione effettuata.");
-    showCategories();
-  }
-  
   /**
    * Nuova tab.
    */
