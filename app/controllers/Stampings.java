@@ -206,6 +206,7 @@ public class Stampings extends Controller {
     offsite.add(StampTypes.LAVORO_FUORI_SEDE);
     boolean insertOffsite = false;
     boolean insertNormal = true;
+    boolean autocertification = false;
     
     User user = Security.getUser().get();
     
@@ -214,10 +215,11 @@ public class Stampings extends Controller {
           && person.checkConf(EpasParam.OFF_SITE_STAMPING, "true")) {
         insertOffsite = true;
         insertNormal = false;
+        autocertification = true;
       }
     } 
     
-    render(person, date, offsite, insertOffsite, insertNormal);
+    render(person, date, offsite, insertOffsite, insertNormal, autocertification);
   }
 
   
