@@ -50,7 +50,6 @@ import org.joda.time.YearMonth;
 
 import play.Logger;
 import play.data.validation.Required;
-import play.data.validation.Validation;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
