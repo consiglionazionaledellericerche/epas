@@ -71,6 +71,9 @@ public class Absence extends BaseModel {
   @Column(name = "external_identifier")
   public Long externalIdentifier;
   
+  @Column(name = "note")
+  public String note;
+  
   @Override
   public String toString() {
     if (personDay == null) {
