@@ -1,0 +1,62 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Istituti contrattuali'  /}
+
+<div class="container">
+
+
+#{title title:'Istituti contrattuali e riferimenti normativi' /}
+  
+#{accordionGroup 'contractual_clauses_and_references'}
+
+  #{secure.check 'ContractualClauses.manage'}
+  #{accordionItem 'contractual_clauses', parent:'contractual_clauses_and_references', 
+		title:'Configurazione degli istituti contrattuali', open:true, color:'info'}
+	  
+	  <div class="row text-center">
+		#{secure.link @blank(), class:'btn btn-primary',fa:'plus' }
+			Nuovo istituto contrattuale
+		#{/secure.link}
+	  </div>
+  
+	  <table class="table table-bordered" datatable> 
+	   <thead>
+	 	<tr>
+	 	  <th width="20%">Nome</th>
+	 	  <th>Dal</th>
+	 	  <th>Al</th>
+	 	  <th>Categorie</th>
+	 	  <th>Contesto</th>
+	 	  <th>Azioni</th>
+	 	</tr>
+	   </thead>
+	   <tbody>
+		 #{list items:contractualClauses, as:'contractualClause'}
+		  <tr>
+		    <td>
+		      ${contractualClause.name}		      
+		    </td>
+		    <td>${contractualClause.beginDate?.format()}</td>
+		    <td>${contractualClause.endDate?.format()}</td>
+		    <td>
+			  #{list items:contractualClause.categoryGroupAbsenceTypes, as:'category'}
+			    <span class="label label-success">${category.name}</span> <br>
+			  #{/list}    
+		    </td>
+		    <td>
+		       ${contractualClause.context.label()}
+		    </td>
+		    <td>
+		    	#{secure.link @edit(contractualClause.id), class:'btn btn-primary btn-sm'}
+		    		<i class="fa fa-pencil-square-o"></i> Modifica		    			    	
+		    	#{/secure.link}
+		    </td>
+		  </tr>
+		 #{/list}
+	 </tbody>
+	 </table>
+  #{/accordionItem}  
+  #{/secure.check}
+    	
+#{/accordionGroup}
+</div>

@@ -66,7 +66,7 @@ public class AbsenceFromJson extends Controller {
     if (yearFrom != null && monthFrom != null && dayFrom != null) {
       dateFrom = new LocalDate(yearFrom, monthFrom, dayFrom);
     } else {
-      dateFrom = new LocalDate(yearFrom, monthFrom , dayFrom);
+      dateFrom = new LocalDate(yearFrom, monthFrom, dayFrom);
     }
     if (yearTo != null && monthTo != null && dayTo != null) {
       dateTo = new LocalDate(yearTo, monthTo, dayTo);
