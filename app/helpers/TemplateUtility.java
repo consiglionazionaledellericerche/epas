@@ -11,6 +11,7 @@ import dao.BadgeReaderDao;
 import dao.BadgeSystemDao;
 import dao.CategoryGroupAbsenceTypeDao;
 import dao.CompetenceCodeDao;
+import dao.ContractualReferenceDao;
 import dao.MemoizedCollection;
 import dao.MemoizedResults;
 import dao.NotificationDao;
@@ -51,6 +52,7 @@ import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.CategoryGroupAbsenceType;
 import models.absences.GroupAbsenceType;
+import models.contractual.ContractualReference;
 import models.enumerate.LimitType;
 import models.enumerate.StampTypes;
 import org.joda.time.LocalDate;
@@ -78,6 +80,7 @@ public class TemplateUtility {
   private final IWrapperFactory wrapperFactory;
   private final BadgeSystemDao badgeSystemDao;
   private final CategoryGroupAbsenceTypeDao categoryGroupAbsenceTypeDao;
+  private final ContractualReferenceDao contractualReferenceDao;
   private final SynchDiagnostic synchDiagnostic;
   private final ConfigurationManager configurationManager;
   private final CompetenceCodeDao competenceCodeDao;
@@ -94,7 +97,8 @@ public class TemplateUtility {
       CompetenceCodeDao competenceCodeDao, ShiftDao shiftDao, 
       AbsenceComponentDao absenceComponentDao,
       NotificationDao notificationDao, UserDao userDao,
-      CategoryGroupAbsenceTypeDao categoryGroupAbsenceTypeDao) {
+      CategoryGroupAbsenceTypeDao categoryGroupAbsenceTypeDao,
+      ContractualReferenceDao contractualReferenceDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -111,6 +115,7 @@ public class TemplateUtility {
     this.competenceCodeDao = competenceCodeDao;
     this.userDao = userDao;
     this.categoryGroupAbsenceTypeDao = categoryGroupAbsenceTypeDao;
+    this.contractualReferenceDao = contractualReferenceDao;
     
     notifications = MemoizedResults
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
@@ -242,6 +247,10 @@ public class TemplateUtility {
 
   public List<CategoryGroupAbsenceType> allCategoryGroupAbsenceTypes() {
     return categoryGroupAbsenceTypeDao.all();
+  }
+  
+  public List<ContractualReference> allContractualReferences() {
+    return contractualReferenceDao.all(Optional.of(false));
   }
   
   /**

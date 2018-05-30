@@ -5,10 +5,12 @@ import dao.ContractualClauseDao;
 import helpers.jpa.JpaReferenceBinder;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import javax.inject.Inject;
 import lombok.val;
 import models.absences.CategoryGroupAbsenceType;
 import models.contractual.ContractualClause;
+import models.contractual.ContractualReference;
 import play.data.binding.As;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -29,7 +31,18 @@ public class ContractualClauses extends Controller {
         contractualClauseDao.all(Optional.of(true));
     render(contractualClauses);
   }
-  
+
+  /**
+   * Visualizzazione dell'istituto contrattuale.
+   *
+   * @param id id
+   */
+  public static void show(Long id) {
+    ContractualClause contractualClause = ContractualClause.findById(id);
+    notFoundIfNull(contractualClause);
+    render(contractualClause);
+  }
+
   /**
    * Nuovo istituto contrattuale.
    */
@@ -47,7 +60,8 @@ public class ContractualClauses extends Controller {
     ContractualClause contractualClause = ContractualClause.findById(contractualClauseId);
     notFoundIfNull(contractualClause);
     val categoryGroupAbsenceTypes = contractualClause.categoryGroupAbsenceTypes;
-    render(contractualClause, categoryGroupAbsenceTypes);
+    val contractualReferences = contractualClause.contractualReferences;
+    render(contractualClause, categoryGroupAbsenceTypes, contractualReferences);
   }
   
   /**
@@ -57,12 +71,17 @@ public class ContractualClauses extends Controller {
    */
   public static void save(@Valid ContractualClause contractualClause, 
       @As(binder = JpaReferenceBinder.class)
-      Collection<CategoryGroupAbsenceType> categoryGroupAbsenceTypes) {
+      Collection<CategoryGroupAbsenceType> categoryGroupAbsenceTypes,
+      @As(binder = JpaReferenceBinder.class)
+      Set<ContractualReference> contractualReferences) {
 
     if (Validation.hasErrors()) {
       flash.error("Correggere gli errori indicati");
-      render("@editContractualClause", contractualClause, categoryGroupAbsenceTypes);
+      render("@edit", contractualClause, categoryGroupAbsenceTypes, 
+          contractualReferences);
     }
+    contractualClause.contractualReferences = contractualReferences;
+    contractualClause.save();
     contractualClause.categoryGroupAbsenceTypes.stream().forEach(cgat -> {
       cgat.contractualClause = null;
       cgat.save();
@@ -73,7 +92,6 @@ public class ContractualClauses extends Controller {
         cgat.save();
       }); 
     }
-    contractualClause.save();
     flash.success("Operazione eseguita.");
     edit(contractualClause.id);
   }

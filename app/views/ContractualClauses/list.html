@@ -5,7 +5,7 @@
 <div class="container">
 
 
-#{title title:'Istituti contrattuali e riferimenti normativi' /}
+#{title title:'Istituti contrattuali' /}
   
 #{accordionGroup 'contractual_clauses_and_references'}
 
@@ -47,6 +47,9 @@
 		       ${contractualClause.context.label()}
 		    </td>
 		    <td>
+				#{secure.link @show(contractualClause.id), class:'btn btn-default btn-sm'}
+		    		<i class="fa fa-eye"></i> Mostra		    	
+		    	#{/secure.link}		    
 		    	#{secure.link @edit(contractualClause.id), class:'btn btn-primary btn-sm'}
 		    		<i class="fa fa-pencil-square-o"></i> Modifica		    			    	
 		    	#{/secure.link}

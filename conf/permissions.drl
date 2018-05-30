@@ -685,6 +685,9 @@ when
     "Contracts.initializationsStatus",
     "Contracts.initializationsVacation",
     "Contracts.initializationsMeal",
+    "ContractualReferences.list",
+    "ContractualClauses.list",
+    "ContractualClauses.show",
     "Institutes.list",
     "MealTickets.editPersonMealTickets",
     "MealTickets.findCodeBlock",
@@ -2008,4 +2011,24 @@ when
   $c: PermissionCheck(target == $n, granted == false)
 then
   $c.grant();
+end
+
+/* 
+ * Permessi per la gestione della normativa contrattuale
+*/
+rule ContractualReferences
+when
+ AccountRole(this in (AccountRole.CONTRACTUAL_MANAGER)) 
+ $c: PermissionCheck(action in (
+
+        "ContractualReferences.list", "ContractualReferences.blank",
+        "ContractualReferences.edit", "ContractualReferences.save",
+		"ContractualReferences.delete", "ContractualReferences.manage",
+		
+        "ContractualClauses.list", "ContractualClauses.blank",
+        "ContractualClauses.edit", "ContractualClauses.save",
+		"ContractualClauses.delete", "ContractualClauses.manage")
+		, granted == false)
+then
+ $c.grant();
 end

@@ -1,11 +1,13 @@
-package models.absences.query;
+package models.contractual.query;
 
 import static com.mysema.query.types.PathMetadataFactory.*;
+import models.contractual.ContractualReference;
+
+
 import com.mysema.query.types.path.*;
 
 import com.mysema.query.types.PathMetadata;
 import javax.annotation.Generated;
-import models.contractual.ContractualReference;
 import com.mysema.query.types.Path;
 import com.mysema.query.types.path.PathInits;
 
@@ -16,13 +18,19 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QContractualReference extends EntityPathBase<ContractualReference> {
 
-    private static final long serialVersionUID = 412010129L;
+    private static final long serialVersionUID = 1586832865L;
 
     public static final QContractualReference contractualReference = new QContractualReference("contractualReference");
 
-    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
+    public final models.base.query.QPeriodModel _super = new models.base.query.QPeriodModel(this);
+
+    //inherited
+    public final DatePath<org.joda.time.LocalDate> beginDate = _super.beginDate;
 
     public final ListPath<models.contractual.ContractualClause, QContractualClause> contractualClauses = this.<models.contractual.ContractualClause, QContractualClause>createList("contractualClauses", models.contractual.ContractualClause.class, QContractualClause.class, PathInits.DIRECT2);
+
+    //inherited
+    public final DatePath<org.joda.time.LocalDate> endDate = _super.endDate;
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
