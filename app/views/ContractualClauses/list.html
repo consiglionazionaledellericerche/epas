@@ -47,12 +47,16 @@
 		       ${contractualClause.context.label()}
 		    </td>
 		    <td>
-				#{secure.link @show(contractualClause.id), class:'btn btn-default btn-sm'}
-		    		<i class="fa fa-eye"></i> Mostra		    	
-		    	#{/secure.link}		    
-		    	#{secure.link @edit(contractualClause.id), class:'btn btn-primary btn-sm'}
-		    		<i class="fa fa-pencil-square-o"></i> Modifica		    			    	
-		    	#{/secure.link}
+				#{secure.check 'ContractualClauses.show'}
+					#{b.link @show(contractualClause.id), class:'btn btn-default btn-sm'}
+		    		<i class="fa fa-book"></i> Mostra		    	
+		    		#{/b.link}
+		    	#{/secure.check}		    
+		    	#{secure.check 'ContractualClauses.edit'}
+		    		#{b.link @edit(contractualClause.id), class:'btn btn-primary btn-sm'}
+		    			<i class="fa fa-pencil-square-o"></i> Modifica
+		    		#{/b.link}		    			    	
+		    	#{/secure.check}
 		    </td>
 		  </tr>
 		 #{/list}
