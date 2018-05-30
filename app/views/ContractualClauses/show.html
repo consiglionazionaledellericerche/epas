@@ -2,11 +2,11 @@
 #{set header:'navbar' /}
 #{set title:'ePAS - Istituti contrattuali' /}
 
- <div class="container">
+<div class="container">
 	#{include './_show.html' /}
 
 	#{secure.check 'ContractualClauses.manage'}
-		#{b.buttons}
+		#{b.buttons center:true}
             <a class="btn btn-default" href="@{list()}">Torna alla lista</a>
 	        <a class="btn btn-primary" href="@{edit(contractualClause.id)}"><i class="fa fa-pencil-square-o"></i> Modifica</a>	
 		#{/b.buttons}

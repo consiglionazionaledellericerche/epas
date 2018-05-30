@@ -93,7 +93,7 @@ public class ContractualClauses extends Controller {
       }); 
     }
     flash.success("Operazione eseguita.");
-    edit(contractualClause.id);
+    show(contractualClause.id);
   }
 
   /**
