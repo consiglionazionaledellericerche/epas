@@ -2027,6 +2027,7 @@ when
 		
         "ContractualClauses.list", "ContractualClauses.blank",
         "ContractualClauses.edit", "ContractualClauses.save",
+        "ContractualClauses.show",
 		"ContractualClauses.delete", "ContractualClauses.manage")
 		, granted == false)
 then
