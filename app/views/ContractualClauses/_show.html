@@ -1,0 +1,92 @@
+
+	<h2>Istituto contrattuale</h2>	 		
+ 	#{accordionGroup 'contractualClause'}
+ 		#{accordionItem 'generalInfo', title:'Informazioni Generali', open:true, parent:'contractualClause', color:'primary'}
+ 		<div class="form-horizontal">
+	 		#{f.view 'contractualClause.name' /}
+	 		#{f.view 'contractualClause.beginDate' /}
+	 		#{f.view 'contractualClause.endDate' /}
+	 		#{f.view 'contractualClause.context' /}
+ 		</div>
+ 		#{/accordionItem}
+ 		 		
+ 		#{accordionItem 'description', title:'Descrizione', open:true, parent:'contractualClause', color:'primary'}
+ 			${contractualClause.description?.raw()}	
+ 		#{/accordionItem}
+ 	
+		#{accordionItem 'categoryGroupAbsenceTypes', title: messages.get('contractualClause.categoryGroupAbsenceTypes'), 
+			open:false, parent:'contractualClause', color:'success'}
+
+			#{if contractualClause.categoryGroupAbsenceTypes.empty}
+				<div class="alert alert-warning">
+					Non sono presenti categorie di assenze per questo istituto
+				</div>
+			#{/if} #{else}
+				<table class="table table-bordered" datatable>
+					<thead>
+						<tr>
+							<td>&{'categoryGroupAbsenceType.name'}</td>
+							<td>&{'categoryGroupAbsenceType.description'}</td>
+						</tr>
+					</thead>
+					<tbody>
+						#{list items:contractualClause.categoryGroupAbsenceTypes, as:'item'}
+							<tr>
+								<td>${item.name}</td>
+								<td>${item.description}</td>
+								<td>
+								  #{list items:item.groupAbsenceTypes, as:'group'}
+								  	<div>		  	
+									    <span class="label label-default">${group.description}</span>
+									    #{secure.link @AbsenceGroups.editGroup(group.id), class:'btn btn-primary btn-xs'}
+									    	<i class="fa fa-pencil-square-o"></i> Modifica</a>	
+									    #{/secure.link} 								    
+								    </div>
+								  #{/list}							
+								</td>
+							</tr>
+						#{/list}
+						<tr>
+					</tbody>
+				</table>
+			#{/else}
+		#{/accordionItem}
+		#{accordionItem 'contractualReferences', title:messages.get('contractualClause.contractualReferences'), 
+			open:false, parent:'contractualClause', color:'success'}
+			#{if contractualClause.contractualReferences.empty}
+				<div class="alert alert-warning">
+					Non sono presenti riferimenti normativo/contrattuali per questo istituto
+				</div>
+			#{/if} #{else}
+				<table class="table table-bordered" datatable>
+					<thead>
+						<tr>
+							<td>&{'contractualReference.name'}</td>
+							<td>&{'contractualReference.url'}</td>
+							<td>&{'contractualReference.file'}</td>
+						</tr>
+					</thead>
+					<tbody>
+						#{list items:contractualClause.contractualReferences, as:'item'}
+							<tr>
+								<td>${item.name}</td>
+								<td>
+									#{if item.url != null}
+										<a href="${item.url}">${item.url}</a>
+									#{/if}
+								</td>
+								<td>
+									#{if item.length > 0}
+					        			<i class="fa fa-download"></i> 
+					        			<a href="@{ContractualReferences.getFile(item.id)}">${item.filename}</a>
+					        		#{/if}							
+								</td>
+							</tr>
+						#{/list}
+						<tr>
+					</tbody>
+				</table>
+			#{/else}			
+		#{/accordionItem}
+
+ 	#{/accordionGroup}

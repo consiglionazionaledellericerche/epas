@@ -7,8 +7,8 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import java.util.List;
 import javax.persistence.EntityManager;
-import models.absences.query.QContractualClause;
 import models.contractual.ContractualClause;
+import models.contractual.query.QContractualClause;
 import org.joda.time.LocalDate;
 
 /**

@@ -28,6 +28,11 @@
 	    #{f.selectModels 'categoryGroupAbsenceTypes',	    	
 	    	items:templateUtility.allCategoryGroupAbsenceTypes(),
 	    	values:categoryGroupAbsenceTypes /}
+
+	    #{f.selectModels 'contractualReferences',	    	
+	    	label:'contractualClause.contractualReferences',
+	    	items:templateUtility.allContractualReferences(),
+	    	values:contractualReferences /}
 		
         <div class="container center">
             <a class="btn btn-default" href="@{list()}">Torna alla lista</a>

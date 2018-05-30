@@ -1,11 +1,13 @@
-package models.absences.query;
+package models.contractual.query;
 
 import static com.mysema.query.types.PathMetadataFactory.*;
+import models.contractual.ContractualClause;
+
+
 import com.mysema.query.types.path.*;
 
 import com.mysema.query.types.PathMetadata;
 import javax.annotation.Generated;
-import models.contractual.ContractualClause;
 import com.mysema.query.types.Path;
 import com.mysema.query.types.path.PathInits;
 
@@ -16,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QContractualClause extends EntityPathBase<ContractualClause> {
 
-    private static final long serialVersionUID = -1252213783L;
+    private static final long serialVersionUID = 1014177433L;
 
     public static final QContractualClause contractualClause = new QContractualClause("contractualClause");
 
@@ -25,7 +27,9 @@ public class QContractualClause extends EntityPathBase<ContractualClause> {
     //inherited
     public final DatePath<org.joda.time.LocalDate> beginDate = _super.beginDate;
 
-    public final SetPath<models.absences.CategoryGroupAbsenceType, QCategoryGroupAbsenceType> categoryGroupAbsenceTypes = this.<models.absences.CategoryGroupAbsenceType, QCategoryGroupAbsenceType>createSet("categoryGroupAbsenceTypes", models.absences.CategoryGroupAbsenceType.class, QCategoryGroupAbsenceType.class, PathInits.DIRECT2);
+    public final SetPath<models.absences.CategoryGroupAbsenceType, models.absences.query.QCategoryGroupAbsenceType> categoryGroupAbsenceTypes = this.<models.absences.CategoryGroupAbsenceType, models.absences.query.QCategoryGroupAbsenceType>createSet("categoryGroupAbsenceTypes", models.absences.CategoryGroupAbsenceType.class, models.absences.query.QCategoryGroupAbsenceType.class, PathInits.DIRECT2);
+
+    public final EnumPath<models.enumerate.ContractualClauseContext> context = createEnum("context", models.enumerate.ContractualClauseContext.class);
 
     public final SetPath<models.contractual.ContractualReference, QContractualReference> contractualReferences = this.<models.contractual.ContractualReference, QContractualReference>createSet("contractualReferences", models.contractual.ContractualReference.class, QContractualReference.class, PathInits.DIRECT2);
 
