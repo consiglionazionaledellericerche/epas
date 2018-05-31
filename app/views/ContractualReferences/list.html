@@ -1,0 +1,62 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Riferimenti normativi/contrattuali'  /}
+
+<div class="container">
+
+
+#{title title:'Riferimenti normativi/contrattuali' /}
+  
+#{accordionGroup 'contractual_clauses_and_references'}
+
+  #{secure.check 'ContractualClauses.manage'}
+  #{accordionItem 'contractual_references', parent:'contractual_clauses_and_references', 
+		title:'Gestione dei riferimenti normativo/contrattuali', open:true, color:'info'}
+	  
+	  <div class="row text-center">
+		#{secure.link @blank(), class:'btn btn-primary',fa:'plus' }
+			Nuovo riferimento normativo/contrattuale
+		#{/secure.link}
+	  </div>
+  
+	  <table class="table table-bordered" datatable> 
+	   <thead>
+	 	<tr>
+	 	  <th width="20%">Nome</th>
+	 	  <th>Dal</th>
+	 	  <th>Al</th>
+	 	  <th>Istituti contrattuali</th>
+	 	  <th>File</th>
+	 	  <th>Azioni</th>
+	 	</tr>
+	   </thead>
+	   <tbody>
+		 #{list items:contractualReferences, as:'contractualReference'}
+		  <tr>
+		    <td>
+		      ${contractualReference.name}		      
+		    </td>
+		    <td>${contractualReference.beginDate?.format()}</td>
+		    <td>${contractualReference.endDate?.format()}</td>
+		    <td>
+			  #{list items:contractualReference.contractualClauses, as:'contractualClause'}
+			    <span class="label label-success">${contractualClause.name}</span> <br>
+			  #{/list}    
+		    </td>
+		    <td>
+		       ${contractualReference.filename}
+		    </td>
+		    <td>
+		    	#{secure.link @edit(contractualReference.id), class:'btn btn-primary btn-sm'}
+		    		<i class="fa fa-pencil-square-o"></i> Modifica		    			    	
+		    	#{/secure.link}
+		    </td>
+		  </tr>
+		 #{/list}
+	 </tbody>
+	 </table>
+  #{/accordionItem}  
+  #{/secure.check}
+    	
+#{/accordionGroup}
+</div>

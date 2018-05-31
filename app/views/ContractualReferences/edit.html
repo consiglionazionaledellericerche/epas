@@ -1,0 +1,46 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Riferimenti normativo/contrattuali' /}
+
+ <div class="container">
+    #{form @save(),class:'form-horizontal', method:'POST', enctype:'multipart/form-data'}
+
+    #{alert color:'info'}
+      <p>
+ 	    #{if contractualReference?.isPersistent()}
+ 		  Modifica dati per il riferimento normativo/contrattuale <strong>${contractualReference.name}</strong>
+ 	    #{/if}#{else}
+ 		  Nuovo riferimento normativo/contrattuale.
+   	    #{/else}
+ 	  </p>
+      #{/alert}
+
+        <input type="hidden" name="contractualReference.id" value="${contractualReference?.id}">
+ 	
+ 		#{f.input 'contractualReference.name', required:'true', value:contractualReference?.name /}
+ 		#{f.input 'contractualReference.url' /}
+        
+        
+        #{if contractualReference.length > 0}
+        	#{f.edit 'file'}
+        		<i class="fa fa-download"></i> <a href="@{getFile(contractualReference.id)}">${contractualReference.filename}</a>
+		        <a class="label label-badge label-danger" href="@{deleteFile(contractualReference.id)}" 
+		        	webui-popover-hover data-content="Rimuovi File">
+		          <i class="fa fa-trash"></i> &{'crud.delete'}
+		        </a>
+		    #{/f.edit}
+        #{/if} #{else}
+        	#{f.input 'file', type: 'file' /}	
+        #{/else}
+         		 
+ 		#{f.date 'contractualReference.beginDate', required:true /}
+		#{f.date 'contractualReference.endDate' /}
+				
+        <div class="container center">
+            <a class="btn btn-default" href="@{list()}">Torna alla lista</a>
+	        <input class="btn btn-primary" type="submit" value="Ok">
+	        <a class="btn btn-danger" href="@{delete(contractualReference.id)}">Elimina</a>
+        </div>
+   #{/form}
+
+</div>

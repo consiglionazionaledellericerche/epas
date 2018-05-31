@@ -1,7 +1,6 @@
 /* Author:
  */
 $(function($) {
-	
 	/* Gestione tab di autenticazione */
     $('#login-idp-link').click(function(e) {
 		$("#login-idp").delay(100).fadeIn(100);
@@ -199,11 +198,29 @@ $(function($) {
     });
     e.preventDefault();
   });
+  
   bootbox.setDefaults({
     locale: 'it',
     className: 'bootbox_modal'
   });
 
+  /**
+   * conferma sulle form.
+   */
+  $(document.body).on('click', 'input[data-confirm], button[data-confirm], a[data-confirm]', function (e) {
+    var $button = $(this)
+    var confirm = $button.data('confirm')
+    if (confirm) {
+      bootbox.confirm(confirm, function (result) {
+        if (result) {
+          $button.data('confirm', '').trigger('click')
+        }
+      })
+      e.preventDefault()
+      e.stopPropagation()
+    }
+  });
+  
   function toggleChevron(e) {
     var $fa = $(e.target).prev('.panel-heading').find('i.fa');
     if (e.type == "hide") {
@@ -214,6 +231,8 @@ $(function($) {
   }
   $(document.body).on('hide.bs.collapse', 'section,div', toggleChevron);
   $(document.body).on('show.bs.collapse', 'section,div', toggleChevron);
+  
+  
   //  <div class="panel panel-info" id="notifications" data-load-async="@{Application.test()}">
   //  <div class="panel-heading">
   //  <i class="fa fa-spin fa-spinner fa-2x"></i> Caricamento test in corso...
@@ -226,6 +245,25 @@ $(function($) {
     });
   });
   $.fn.initepas = function() {
+	  
+   this.find('textarea').trumbowyg({
+       lang: 'it',
+       autogrow: true,
+       btns: [
+         ['viewHTML'],
+         ['undo', 'redo'], // Only supported in Blink browsers
+         ['formatting'],
+         ['strong', 'em', 'del'],
+         ['superscript', 'subscript'],
+         ['link'],
+         ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'],
+         ['unorderedList', 'orderedList'],
+         ['horizontalRule'],
+         ['removeformat'],
+         ['fullscreen']    	   
+       ]
+   });
+	  
     $('[data-notify]', this).each(function() {
       var $this = $(this);
       var title = $this.data('notify')
@@ -453,6 +491,7 @@ $(function($) {
   } /* fine initepas() */
   $('body').initepas();
 }); /* fine on document load */
+
 function generateUserName(name, surname, username) {
   var name = name.val().replace(/\W/g, '').toLowerCase();
   var surname = surname.val().replace(/\W/g, '').toLowerCase();
