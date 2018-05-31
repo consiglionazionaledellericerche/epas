@@ -4,20 +4,15 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
-
 import dao.OfficeDao;
 import dao.PersonDao;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.ConsistencyManager;
 import manager.PeriodManager;
 import manager.configurations.ConfigurationDto;
@@ -28,7 +23,6 @@ import manager.configurations.EpasParam.EpasParamValueType;
 import manager.configurations.EpasParam.EpasParamValueType.IpList;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import manager.recaps.recomputation.RecomputeRecap;
-
 import models.Attachment;
 import models.Configuration;
 import models.Office;
@@ -36,17 +30,14 @@ import models.Person;
 import models.PersonConfiguration;
 import models.base.IPropertyInPeriod;
 import models.enumerate.AttachmentType;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
-
 import play.data.validation.Validation;
 import play.db.jpa.Blob;
 import play.libs.MimeTypes;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 @With({Resecure.class})
@@ -405,6 +396,12 @@ public class Configurations extends Controller {
     personShow(configuration.person.id);
   }
 
+  /**
+   * Aggiorna il file allegato.
+   * @param officeId id dell'ufficio a cui associare l'allegato.
+   * @param file file allegato.
+   * @throws FileNotFoundException in casi di problemi con il file allegato.
+   */
   public static void uploadAttachment(Long officeId, File file) throws FileNotFoundException {
 
     final Office office = officeDao.getOfficeById(officeId);

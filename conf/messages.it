@@ -55,8 +55,13 @@ calendar.allValidShifts= Tutti i turni risultano validi
 calendar.notAllValidShifts= Uno o più turni risultano non validi
 calendar.warningShifts= Alcuni turni hanno riduzioni d'orario
 
-
 category=Categoria
+
+categoryGroupAbsenceTypes =Categorie di gruppi di assenza
+
+categoryTab.name =nome
+categoryTab.description =descrizione
+categoryTab.priority =priorità
 
 child.bornDate= Data di Nascita
 child.name= Nome
@@ -100,6 +105,30 @@ Contract= Contratto
 contract.endContract= Terminato Il
 contract.endDate= Fine Contratto
 contract.onCertificate= In attestati
+
+contractualClause =Istituto contrattuale
+contractualClause.name =nome
+contractualClause.description =descrizione
+contractualClause.context =contesto
+contractualClause.beginDate =data di inizio
+contractualClause.endDate =data di fine
+contractualClause.categoryGroupAbsenceTypes =Categorie di gruppi di assenza
+contractualClause.contractualReferences =Riferimenti contrattuali
+
+ContractualClauses.list =Istituti contrattuali
+
+ContractualClauseContext.ABSENCE =assenze
+ContractualClauseContext.ABSENCE_AND_PRESENCE =assenze e presenze
+ContractualClauseContext.PRESENCE =presenze
+
+contractualReference.name =nome
+contractualReference.url =indirizzo web
+contractualReference.beginDate =data di inizio
+contractualReference.endDate =data di fine
+contractualReference.file =Allegato
+
+ContractualReferences.list =Riferimenti normativi
+
 sourceDateMealTicket= Data inizializzazione
 sourceDateResidual= Data inizializzazione
 sourceDateVacation= Data inizializzazione
@@ -385,6 +414,8 @@ psst.endDate =Data fine
 psst.jolly =Jolly
 
 qualification=Livello
+
+regulations =Normativa
 
 recapMealTickets=Riepilogo Buoni Pasto
 report=Descrizione problema
@@ -674,6 +705,7 @@ AccountRole.ADMIN= Admin
 AccountRole.RO_ADMIN= Admin in sola lettura
 AccountRole.ABSENCES_MANAGER= Gestore assenze
 AccountRole.MISSIONS_MANAGER= Gestore missioni
+AccountRole.CONTRACTUAL_MANAGER =Gestore normativa
 
 chartType= Tipo di grafico
 ChartTypes.BARS= Grafico a barre

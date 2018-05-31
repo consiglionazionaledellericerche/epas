@@ -9,7 +9,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import dao.AbsenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -21,19 +20,14 @@ import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.NotificationManager;
@@ -46,7 +40,6 @@ import manager.services.absences.certifications.CertificationYearSituation;
 import manager.services.absences.certifications.CodeComparation;
 import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.PeriodChain;
-
 import models.Office;
 import models.Person;
 import models.PersonDay;
@@ -67,16 +60,13 @@ import models.absences.JustifiedType;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
 import models.enumerate.QualificationMapping;
-
 import org.joda.time.LocalDate;
-
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 @Slf4j
@@ -123,22 +113,6 @@ public class AbsenceGroups extends Controller {
 
     List<CategoryGroupAbsenceType> categories = CategoryGroupAbsenceType.findAll();
     List<CategoryTab> categoryTabs = CategoryTab.findAll();
-
-    //    if (categoryTabs.isEmpty()) {
-    //      int count = 1;
-    //      for (AbsenceInsertTab absenceInsertTab : AbsenceInsertTab.values()) {
-    //        CategoryTab categoryTab = new CategoryTab();
-    //        categoryTab.name = absenceInsertTab.name();
-    //        categoryTab.priority = count;
-    //        if (AbsenceInsertTab.defaultTab() == absenceInsertTab) {
-    //          categoryTab.isDefault = true;
-    //        }
-    //        categoryTab.save();
-    //        count++;
-    //      }
-    //      categoryTabs = CategoryTab.findAll();
-    //    }
-
     render(categories, categoryTabs);
   }
 

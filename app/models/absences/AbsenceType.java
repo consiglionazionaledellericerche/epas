@@ -111,6 +111,12 @@ public class AbsenceType extends BaseModel {
   @ManyToMany(mappedBy = "replacingCodes")
   public Set<ComplationAbsenceBehaviour> replacingGroup = Sets.newHashSet();
   
+  /**
+   * Eventuale documentazione specifica del codice da mostrare ai dipendenti ed
+   * agli amministratori del personale.
+   */
+  public String documentation; 
+  
   // Metodi
   
   /**

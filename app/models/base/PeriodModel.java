@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import org.joda.time.LocalDate;
+import play.data.validation.Required;
 
 @MappedSuperclass
 public abstract class PeriodModel extends BaseModel 
@@ -22,6 +23,7 @@ public abstract class PeriodModel extends BaseModel
   @Getter
   @Setter
   @NotNull
+  @Required
   @Column(name = "begin_date")
   public LocalDate beginDate;
 
