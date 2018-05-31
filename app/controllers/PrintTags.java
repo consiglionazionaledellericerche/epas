@@ -79,12 +79,14 @@ public class PrintTags extends Controller {
     //cartellino o l'amministratore del personale.
     Office office = null;
     if (officeId == null) {
-      office = person.office;
+      //office = person.office;
+      rules.checkIfPermitted(person);
     } else {
       office = officeDao.getOfficeById(officeId);
+      rules.checkIfPermitted(office);
     }
 
-    rules.checkIfPermitted(office);
+    
     List<PrintTagsInfo> dtoList = Lists.newArrayList();
     List<Person> personList = Lists.newArrayList();
 
