@@ -17,7 +17,7 @@
 #{tabContent}
 
   <!-- Inserimento / Modifica Timbratura -->
-  #{tabContentItem id:'insert', active: insertNormal}
+  #{tabContentItem id:'insert', active: insertNormal | autocertification}
 	<div id="stampingData">
 	
 	  #{form action:@save(), method:'POST', autocomplete:false, 'data-async':'#page_content',

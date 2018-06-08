@@ -215,10 +215,19 @@ public class Stampings extends Controller {
           && person.checkConf(EpasParam.OFF_SITE_STAMPING, "true")) {
         insertOffsite = true;
         insertNormal = false;
-        autocertification = true;
+        
       }
     } 
     
+    if (user.person != null && user.person.equals(person)) {
+      if (person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")) {
+        autocertification = true;
+      }
+    }
+    
+    if (autocertification && insertOffsite) {
+      insertOffsite = false;
+    }
     render(person, date, offsite, insertOffsite, insertNormal, autocertification);
   }
 
