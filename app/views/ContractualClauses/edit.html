@@ -18,7 +18,12 @@
         <input type="hidden" name="contractualClause.id" value="${contractualClause?.id}">
  	
  		#{f.input 'contractualClause.name', required:'true', value:contractualClause?.name /}
- 		#{f.textArea 'contractualClause.description', rows:12, class:'wysiswyg' /}
+ 		#{f.textArea 'contractualClause.fruitionTime', rows:4, class:'wysiswyg' /}
+		#{f.textArea 'contractualClause.howToRequest', rows:4, class:'wysiswyg' /}
+		#{f.textArea 'contractualClause.supportingDocumentation', rows:4, class:'wysiswyg' /}
+ 		#{f.textArea 'contractualClause.legalAndEconomic', rows:4, class:'wysiswyg' /}
+		#{f.textArea 'contractualClause.otherInfos', rows:4, class:'wysiswyg' /}
+		
  		#{f.selectEnum 'contractualClause.context', items:models.enumerate.ContractualClauseContext, 
  			value:contractualClause.context, required:true /}
  		 

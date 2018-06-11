@@ -2,7 +2,7 @@ package models.contractual;
 
 import com.google.common.collect.Sets;
 import java.util.Set;
-import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -46,9 +46,34 @@ public class ContractualClause extends PeriodModel {
   public String name;
 
   /**
-   * Descrizione completa dell'articolo contrattuale o dei rifermenti normativi. 
+   * Tempi di fruizione.
    */
-  public String description;
+  @Column(name = "fruition_time")
+  public String fruitionTime;
+  
+  /**
+   * Caratteristiche Giuridico Economiche.
+   */
+  @Column(name = "legal_and_economic")
+  public String legalAndEconomic;  
+  
+  /**
+   * Documentazione giustificativa. 
+   */
+  @Column(name = "supporting_documentation")
+  public String supportingDocumentation;
+  
+  /**
+   * Modalità di richiesta. 
+   */
+  @Column(name = "how_to_request")
+  public String howToRequest;
+
+  /**
+   * Altre informazioni. 
+   */
+  @Column(name = "other_infos")
+  public String otherInfos;
 
   @NotNull
   @Required
