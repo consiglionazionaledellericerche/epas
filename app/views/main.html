@@ -80,7 +80,9 @@
         #{/if}
 
         *{Ruoli di Sistema, Amministratore del personale, Amministratore del personale in sola lettura}*
-        #{if !currentUser.roles.empty || currentUser.hasRoles(models.Role.PERSONNEL_ADMIN, models.Role.PERSONNEL_ADMIN_MINI, models.Role.SEAT_SUPERVISOR) }
+        #{if currentUser.roles.contains(models.enumerate.AccountRole.ADMIN) 
+        	|| currentUser.roles.contains(models.enumerate.AccountRole.DEVELOPER)
+        	|| currentUser.hasRoles(models.Role.PERSONNEL_ADMIN, models.Role.PERSONNEL_ADMIN_MINI, models.Role.SEAT_SUPERVISOR) }
           #{include './_adminMenu.html' /}
         #{/if}
         
@@ -96,8 +98,11 @@
           #{include './_shiftMenu.html' /}
         #{/if}
 		#{/if}
+		
         *{ Ruoli di sistema e amministratori delle sedi }*
-        #{if !currentUser.roles.empty || currentUser.hasRoles(models.Role.PERSONNEL_ADMIN,models.Role.PERSONNEL_ADMIN_MINI,models.Role.TECHNICAL_ADMIN) }
+        #{if currentUser.roles.contains(models.enumerate.AccountRole.ADMIN) 
+        	|| currentUser.roles.contains(models.enumerate.AccountRole.DEVELOPER) 
+        	|| currentUser.hasRoles(models.Role.PERSONNEL_ADMIN,models.Role.PERSONNEL_ADMIN_MINI,models.Role.TECHNICAL_ADMIN) }
           #{include './_configMenu.html' /}
         #{/if}
 
