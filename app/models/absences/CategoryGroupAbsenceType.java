@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.stream.Collectors;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -103,6 +104,18 @@ public class CategoryGroupAbsenceType extends BaseModel
     }
     
     return Optional.absent();
+  }
+  
+  /**
+   * Calcola la lista di tutti i codici prendibili in ogni groupAbsenceType di questa
+   * categoria.
+   * @return la lista di tutti i codici prendibili in questa categoria.
+   */
+  @Transient
+  public Set<AbsenceType> getAbsenceTypes() {
+    return groupAbsenceTypes.stream()
+        .flatMap(gat -> gat.takableAbsenceBehaviour.takableCodes.stream())
+        .collect(Collectors.toSet());
   }
   
   /**

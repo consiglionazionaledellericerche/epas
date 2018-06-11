@@ -108,12 +108,17 @@ contract.onCertificate= In attestati
 
 contractualClause =Istituto contrattuale
 contractualClause.name =nome
-contractualClause.description =descrizione
 contractualClause.context =contesto
 contractualClause.beginDate =data di inizio
 contractualClause.endDate =data di fine
 contractualClause.categoryGroupAbsenceTypes =Categorie di gruppi di assenza
 contractualClause.contractualReferences =Riferimenti contrattuali
+contractualClause.fruitionTime =Tempi di fruizione
+contractualClause.howToRequest =Modalità di richiesta
+contractualClause.supportingDocumentation =Documentazione giustificativa
+contractualClause.legalAndEconomic =Caratteristiche giuridico economiche
+contractualClause.otherInfos =Altre informazioni
+contractualClause.validity =validità temporale
 
 ContractualClauses.list =Istituti contrattuali
 
@@ -949,6 +954,8 @@ categoryGroupAbsenceType.name=Nome
 categoryGroupAbsenceType.description=Descrizione
 categoryGroupAbsenceType.priority=Priorità
 categoryGroupAbsenceType.tab=Tab
+categoryGroupAbsenceType.groupAbsenceTypes =Gruppi di assenze
+categoryGroupAbsenceType.absenceTypes =Tipi di assenza
 
 justifiedType=Tempo giustificato
 
