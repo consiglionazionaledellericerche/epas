@@ -2,20 +2,62 @@
 	<h2>Istituto contrattuale</h2>	 		
  	#{accordionGroup 'contractualClause'}
  		#{accordionItem 'generalInfo', title:'Informazioni Generali', open:true, parent:'contractualClause', color:'primary'}
- 		<div class="form-horizontal">
-	 		#{f.view 'contractualClause.name' /}
-	 		#{f.view 'contractualClause.beginDate' /}
-	 		#{f.view 'contractualClause.endDate' /}
-	 		#{f.view 'contractualClause.context' /}
- 		</div>
+			<div class="form-horizontal">			
+		  		#{f.view 'contractualClause.name' /}
+		  		#{f.view 'contractualClause.validity', bodyonly:true, value:true}
+		  			dal ${contractualClause.beginDate.format()} 
+		  			#{if contractualClause.endDate} al ${contractualClause.endDate.format()}#{/if}
+		  		#{/f.view}
+			</div>
  		#{/accordionItem}
  		 		
- 		#{accordionItem 'description', title:'Descrizione', open:true, parent:'contractualClause', color:'primary'}
- 			${contractualClause.description?.raw()}	
+		#{accordionItem 'fruitionTime', title:'contractualClause.fruitionTime'.label(), 
+				open:false, parent:'contractualClause', color:'primary'}
+ 			#{if contractualClause.fruitionTime}
+ 				${contractualClause.fruitionTime?.raw()}
+ 			#{/if} #{else}
+ 				<div class="alert alert-warning">Tempi di fruizione non presenti.</div>
+ 			#{/else}	
  		#{/accordionItem}
- 	
+
+		#{accordionItem 'howToRequest', title:'contractualClause.howToRequest'.label(), 
+				open:false, parent:'contractualClause', color:'primary'}
+ 			#{if contractualClause.howToRequest}
+ 				${contractualClause.howToRequest?.raw()}
+ 			#{/if} #{else}
+ 				<div class="alert alert-warning">Non sono previste modalità particolari di richiesta.</div>
+ 			#{/else}	
+ 		#{/accordionItem}
+ 	 	
+		#{accordionItem 'supportingDocumentation', title:'contractualClause.supportingDocumentation'.label(), 
+				open:false, parent:'contractualClause', color:'primary'}
+ 			#{if contractualClause.supportingDocumentation}
+ 				${contractualClause.supportingDocumentation?.raw()}
+ 			#{/if} #{else}
+ 				<div class="alert alert-warning">Documentazione giustificativa non prevista.</div>
+ 			#{/else}
+ 		#{/accordionItem}
+ 	 	
+		#{accordionItem 'legalAndEconomic', title:'contractualClause.legalAndEconomic'.label(), 
+				open:false, parent:'contractualClause', color:'primary'}
+ 			#{if contractualClause.legalAndEconomic}
+ 				${contractualClause.legalAndEconomic?.raw()}
+ 			#{/if} #{else}
+ 				<div class="alert alert-warning">Caratteristiche/giuridico economiche non presenti.</div>
+ 			#{/else}
+ 		#{/accordionItem}
+ 	 	 	 	
+		#{accordionItem 'otherInfos', title:'contractualClause.otherInfos'.label(), 
+				open:false, parent:'contractualClause', color:'primary'}
+ 			#{if contractualClause.otherInfos}
+ 				${contractualClause.otherInfos?.raw()}
+ 			#{/if} #{else}
+ 				<div class="alert alert-warning">Non sono presenti altre informazioni.</div>
+ 			#{/else}
+ 		#{/accordionItem}
+ 	 	 	 	
 		#{accordionItem 'categoryGroupAbsenceTypes', title: messages.get('contractualClause.categoryGroupAbsenceTypes'), 
-			open:false, parent:'contractualClause', color:'success'}
+			open:true, parent:'contractualClause', color:'success'}
 
 			#{if contractualClause.categoryGroupAbsenceTypes.empty}
 				<div class="alert alert-warning">
@@ -25,24 +67,31 @@
 				<table class="table table-bordered" datatable>
 					<thead>
 						<tr>
-							<td>&{'categoryGroupAbsenceType.name'}</td>
 							<td>&{'categoryGroupAbsenceType.description'}</td>
+							<td>&{'categoryGroupAbsenceType.groupAbsenceTypes'}
+							<td>&{'categoryGroupAbsenceType.absenceTypes'}
 						</tr>
 					</thead>
 					<tbody>
 						#{list items:contractualClause.categoryGroupAbsenceTypes, as:'item'}
 							<tr>
-								<td>${item.name}</td>
 								<td>${item.description}</td>
 								<td>
 								  #{list items:item.groupAbsenceTypes, as:'group'}
-								  	<div>		  	
-									    <span class="label label-default">${group.description}</span>
-									    #{secure.link @AbsenceGroups.editGroup(group.id), class:'btn btn-primary btn-xs'}
-									    	<i class="fa fa-pencil-square-o"></i> Modifica</a>	
-									    #{/secure.link} 								    
+								  	<div>
+									    #{secure.link @AbsenceGroups.editGroup(group.id), class:'btn btn-default btn-xs'}
+									    	${group.description}
+									    #{/secure.link}
 								    </div>
-								  #{/list}							
+								  #{/list}
+								</td>
+								<td>
+									#{list items:item.absenceTypes, as:'absenceType'}
+										<div>
+											<span class="label label-primary">${absenceType.code} - ${absenceType.description}</span>
+											#{include './_absenceTypePopover.html' /}
+										</div>
+									#{/list}
 								</td>
 							</tr>
 						#{/list}
