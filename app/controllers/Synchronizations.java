@@ -262,6 +262,11 @@ public class Synchronizations extends Controller {
       seat.institute = institute.get();
     }
 
+    // TODO: spostare in un creator epas che venga utilizzato anche nelle crud
+    // (finchè non spariranno).
+    seat.beginDate = new LocalDate(LocalDate.now().getYear() - 1, 12, 31);
+    periodManager.updatePropertiesInPeriodOwner(seat);
+
     //Salvataggio sede
     validation.valid(seat);
     if (Validation.hasErrors()) {
@@ -273,10 +278,6 @@ public class Synchronizations extends Controller {
       institutes();
     }
 
-    // TODO: spostare in un creator epas che venga utilizzato anche nelle crud
-    // (finchè non spariranno).
-    seat.beginDate = new LocalDate(LocalDate.now().getYear() - 1, 12, 31);
-    periodManager.updatePropertiesInPeriodOwner(seat);
     seat.save();
 
     // Configurazione iniziale di default ...
