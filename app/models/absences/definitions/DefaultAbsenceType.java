@@ -256,6 +256,9 @@ public enum DefaultAbsenceType {
   A_92("92", "Missione",
       false, ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, true, false,
       0, null, null, null),
+  A_92E("92E", "Missione all'estero",
+      false, ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, true, false,
+      0, null, null, null),
 
   A_92H1("92H1", "Missione 1 ora",
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 60, true, true,
@@ -1296,7 +1299,18 @@ public enum DefaultAbsenceType {
   
   A_62("62", "distacco sindacale",
       true, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      0, null, null, null),
+  
+  A_96("96", "sosp.ne cautelare e/o dal servizio",
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      0, null, null, null),
+  A_96A("96A", "sospensione dal lavoro",
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      0, null, null, null),
+  A_96B("96B", "sospensione dal servizio",
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, null, null);
+  
   
 
   public String certificationCode;
