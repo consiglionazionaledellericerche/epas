@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
 import manager.NotificationManager;
 import manager.PersonDayManager;
@@ -62,6 +63,7 @@ import security.SecurityRules;
  *
  * @author alessandro
  */
+@Slf4j
 @With({Resecure.class})
 public class Stampings extends Controller {
 
@@ -211,13 +213,11 @@ public class Stampings extends Controller {
     User user = Security.getUser().get();
     
     if (user.person != null && user.person.equals(person)) {
-      if (person.office.checkConf(EpasParam.WORKING_OFF_SITE, "true") 
-          && person.checkConf(EpasParam.OFF_SITE_STAMPING, "true")) {
+      if (UserDao.getAllowedStampTypes(user).contains(StampTypes.LAVORO_FUORI_SEDE)) {
         insertOffsite = true;
-        insertNormal = false;
-        
+        insertNormal = false;        
       }
-    } 
+    }
     
     if (user.person != null && user.person.equals(person)) {
       if (person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")) {
@@ -356,7 +356,7 @@ public class Stampings extends Controller {
       }
       render("@insert", stamping, person, date, time, disableInsert, offsite);
     }
-    
+        
     stamping.date = stampingManager.deparseStampingDateTime(date, time);
 
     // serve per poter discriminare dopo aver fatto la save della timbratura se si
@@ -370,8 +370,10 @@ public class Stampings extends Controller {
       // non è usato il costruttore con la add, quindi aggiungiamo qui a mano:
       personDay.stampings.add(stamping);
     }
-    
+    log.info("inizio salvataggio della timbratura fuori sede, person = {}", person);
     rules.checkIfPermitted(stamping);
+    log.info("dopo permessi -> salvataggio della timbratura fuori sede, person = {}", person);
+    
     final User currentUser = Security.getUser().get();
     
     String result = stampingManager
