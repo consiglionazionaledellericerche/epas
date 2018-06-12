@@ -13,6 +13,9 @@ import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import helpers.jpa.ModelQuery;
 import helpers.jpa.ModelQuery.SimpleResults;
+
+import lombok.val;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -184,17 +187,21 @@ public class UserDao extends DaoBase {
   public static List<StampTypes> getAllowedStampTypes(final User user) {
 
     if ((user.isSystemUser()
-        || user.hasRoles(Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN))
-        || (user.person.qualification.qualification <= 3 
+        || user.hasRoles(Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN))) {
+      return StampTypes.onlyActive();
+    }
+    val stampTypes = Lists.<StampTypes>newArrayList();
+    if ((user.person.qualification.qualification <= 3 
         && user.person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true"))) {
 
-      return StampTypes.onlyActive();
-    } else if (user.person.office.checkConf(EpasParam.WORKING_OFF_SITE, "true") 
+      stampTypes.addAll(StampTypes.onlyActiveWithoutOffSiteWork());
+    } 
+    if (user.person.office.checkConf(EpasParam.WORKING_OFF_SITE, "true") 
         && user.person.checkConf(EpasParam.OFF_SITE_STAMPING, "true")) {
-      return ImmutableList.of(StampTypes.LAVORO_FUORI_SEDE);
+      stampTypes.add(StampTypes.LAVORO_FUORI_SEDE);
     }
 
-    return Lists.newArrayList();
+    return stampTypes;
   }
   
   /**
