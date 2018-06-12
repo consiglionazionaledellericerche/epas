@@ -11,20 +11,14 @@ import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
-
 import helpers.jpa.ModelQuery;
 import helpers.jpa.ModelQuery.SimpleResults;
-
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import javax.persistence.EntityManager;
-
 import manager.configurations.EpasParam;
-
 import models.Office;
 import models.Role;
 import models.User;
@@ -32,7 +26,6 @@ import models.enumerate.AccountRole;
 import models.enumerate.StampTypes;
 import models.query.QBadgeReader;
 import models.query.QPerson;
-import models.query.QRole;
 import models.query.QUser;
 
 public class UserDao extends DaoBase {
