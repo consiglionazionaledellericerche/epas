@@ -321,8 +321,8 @@ public enum DefaultAbsenceType {
   A_23H7("23H7", "Astensione facoltativa post partum 100% primo figlio completamento giornata",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
       0, JustifiedTypeName.all_day, null, null),
-  A_23U("23U", "Astensione facoltativa post partum 100% primo figlio intera giornata altro genitore",
-      true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, true, false,
+  A_23U("23U", "Astensione facoltativa post partum 100% primo figlio intera giornata "
+      + "altro genitore", true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, true, false,
       0, null, null, null),
 
   A_25("25", "Astensione facoltativa post partum 30% primo figlio intera giornata",
@@ -344,11 +344,11 @@ public enum DefaultAbsenceType {
   A_24M("24M", "Astensione facoltativa post partum non retrib. primo figlio in ore e minuti",
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
       0, null, null, null),
-  A_24H7("24H7", "Astensione facoltativa post partum non retrib. primo figlio completamento giornata",
-      false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
+  A_24H7("24H7", "Astensione facoltativa post partum non retrib. primo figlio completamento "
+      + "giornata", false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
       0, JustifiedTypeName.all_day, null, null),
-  A_24U("24U", "Astensione facoltativa post partum non retrib. primo figlio intera giornata altro genitore",
-      true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, false, false,
+  A_24U("24U", "Astensione facoltativa post partum non retrib. primo figlio intera giornata altro "
+      + "genitore", true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, false, false,
       0, null, null, null),
 
   A_232("232", "Astensione facoltativa post partum 100% secondo figlio intera giornata",
@@ -360,8 +360,8 @@ public enum DefaultAbsenceType {
   A_232H7("232H7", "Astensione facoltativa post partum 100% secondo figlio completamento giornata",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
       0, JustifiedTypeName.all_day, null, null),
-  A_232U("232U", "Astensione facoltativa post partum 100% secondo figlio intera giornata altro genitore",
-      true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, true, false,
+  A_232U("232U", "Astensione facoltativa post partum 100% secondo figlio intera giornata "
+      + "altro genitore", true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, true, false,
       0, null, null, null),
   
   A_252M("252M", "Astensione facoltativa post partum 30% secondo figlio in ore e minuti",
@@ -373,8 +373,8 @@ public enum DefaultAbsenceType {
   A_252H7("252H7", "Astensione facoltativa post partum 30% secondo figlio completamento giornata",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
       0, JustifiedTypeName.all_day, null, null),
-  A_252U("252U", "Astensione facoltativa post partum 30% secondo figlio intera giornata altro genitore",
-      true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, true, false,
+  A_252U("252U", "Astensione facoltativa post partum 30% secondo figlio intera giornata "
+      + "altro genitore", true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, true, false,
       0, null, null, null),
 
   A_242("242", "Astensione facoltativa post partum non retrib. secondo figlio intera giornata",
@@ -383,11 +383,11 @@ public enum DefaultAbsenceType {
   A_242M("242M", "Astensione facoltativa post partum non retrib. secondo figlio in ore e minuti",
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
       0, null, null, null),
-  A_242H7("242H7", "Astensione facoltativa post partum non retrib. secondo figlio completamento giornata",
-      false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
+  A_242H7("242H7", "Astensione facoltativa post partum non retrib. secondo figlio completamento "
+      + "giornata", false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
       0, JustifiedTypeName.all_day, null, null),
-  A_242U("242U", "Astensione facoltativa post partum non retrib. secondo figlio intera giornata altro genitore",
-      true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, false, false,
+  A_242U("242U", "Astensione facoltativa post partum non retrib. secondo figlio intera giornata "
+      + "altro genitore", true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, false, false,
       0, null, null, null),
 
   A_233("233", "Astensione facoltativa post partum 100% terzo figlio intera giornata",
@@ -399,8 +399,8 @@ public enum DefaultAbsenceType {
   A_233H7("233H7", "Astensione facoltativa post partum 100% terzo figlio completamento giornata",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
       0, JustifiedTypeName.all_day, null, null),
-  A_233U("233U", "Astensione facoltativa post partum 100% terzo figlio intera giornata altro genitore",
-      true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, true, false,
+  A_233U("233U", "Astensione facoltativa post partum 100% terzo figlio intera giornata "
+      + "altro genitore", true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, true, false,
       0, null, null, null),
 
   A_253("253", "Astensione facoltativa post partum 30% terzo figlio intera giornata",
@@ -412,8 +412,8 @@ public enum DefaultAbsenceType {
   A_253H7("253H7", "Astensione facoltativa post partum 30% terzo figlio completamento giornata",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
       0, JustifiedTypeName.all_day, null, null),
-  A_253U("253U", "Astensione facoltativa post partum 30% terzo figlio intera giornata altro genitore",
-      true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, true, false,
+  A_253U("253U", "Astensione facoltativa post partum 30% terzo figlio intera giornata "
+      + "altro genitore", true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, true, false,
       0, null, null, null),
 
   A_243("243", "Astensione facoltativa post partum non retrib. terzo figlio intera giornata",
@@ -423,11 +423,11 @@ public enum DefaultAbsenceType {
   A_243M("243M", "Astensione facoltativa post partum non retrib. terzo figlio in ore e minuti",
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
       0, null, null, null),
-  A_243H7("243H7", "Astensione facoltativa post partum non retrib. terzo figlio completamento giornata",
-      false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
+  A_243H7("243H7", "Astensione facoltativa post partum non retrib. terzo figlio completamento "
+      + "giornata", false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
       0, JustifiedTypeName.all_day, null, null),
-  A_243U("243U", "Astensione facoltativa post partum non retrib. terzo figlio intera giornata altro genitore",
-      true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, false, false,
+  A_243U("243U", "Astensione facoltativa post partum non retrib. terzo figlio intera giornata "
+      + "altro genitore", true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, false, false,
       0, null, null, null),
       
   A_25P("25P", "Prolungamento astensione facoltativa post partum 30% intera giornata",
@@ -1299,6 +1299,10 @@ public enum DefaultAbsenceType {
   
   A_62("62", "distacco sindacale",
       true, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      0, null, null, null),
+  
+  A_50("50", "aspettativa per ricongiungimento familiare all'estero",
+      true, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
       0, null, null, null),
   
   A_96("96", "sosp.ne cautelare e/o dal servizio",
