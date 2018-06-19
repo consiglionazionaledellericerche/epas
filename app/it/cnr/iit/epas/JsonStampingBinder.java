@@ -4,6 +4,8 @@ import com.google.common.base.Strings;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import helpers.JsonResponse;
+
 import injection.StaticInject;
 
 import java.lang.annotation.Annotation;
@@ -45,9 +47,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
       log.debug("jsonObject = {}", jsonObject);
 
       StampingFromClient stamping = new StampingFromClient();
-
-      stamping.numeroBadge = jsonObject.get("matricolaFirma").getAsString();
-
+      
       final Integer inOut = jsonObject.get("operazione").getAsInt();
       if (inOut != null) {
         stamping.inOut = inOut;
@@ -94,6 +94,12 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
       if (jsonObject.get("note") != null) {
         stamping.note =  jsonObject.get("note").getAsString();  
       }
+      
+      if (!jsonObject.has("matricolaFirma")) {
+        jsonObject.addProperty("matricolaFirma", "");
+      }
+
+      stamping.numeroBadge = jsonObject.get("matricolaFirma").getAsString();
             
       log.debug("Effettuato il binding, stampingFromClient = {}", stamping);
 
