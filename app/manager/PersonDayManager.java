@@ -586,7 +586,9 @@ public class PersonDayManager {
    */
   private PersonDay updateTimeAtWorkFixed(PersonDay personDay, WorkingTimeTypeDay wttd) {
 
-    if (personDay.isHoliday || getAllDay(personDay).isPresent()) {
+    if (personDay.isHoliday || getAllDay(personDay).isPresent() 
+        || getAssignAllDay(personDay).isPresent() 
+        || getCompleteDayAndAddOvertime(personDay).isPresent()) {
       personDay.setTimeAtWork(0);
       setTicketStatusIfNotForced(personDay, false);
       return personDay;
