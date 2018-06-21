@@ -3,21 +3,13 @@ package it.cnr.iit.epas;
 import com.google.common.base.Strings;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-import helpers.JsonResponse;
-
 import injection.StaticInject;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-
 import lombok.extern.slf4j.Slf4j;
-
 import models.enumerate.StampTypes;
 import models.exports.StampingFromClient;
-
 import org.joda.time.LocalDateTime;
-
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
@@ -95,12 +87,12 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
         stamping.note =  jsonObject.get("note").getAsString();  
       }
       
-      if (!jsonObject.has("matricolaFirma")) {
-        jsonObject.addProperty("matricolaFirma", "");
+      if (jsonObject.has("matricolaFirma") && !jsonObject.get("matricolaFirma").isJsonNull()) {
+        stamping.numeroBadge = jsonObject.get("matricolaFirma").getAsString();        
+      } else {
+        log.warn("Matricola non trovata per la timbratura {}", jsonObject);
       }
 
-      stamping.numeroBadge = jsonObject.get("matricolaFirma").getAsString();
-            
       log.debug("Effettuato il binding, stampingFromClient = {}", stamping);
 
       return stamping;
