@@ -1,0 +1,24 @@
+#{accordionGroup 'monthRecaps'}
+
+#{accordionItem ('accordion_contract_recap'+mese.contract.value.id), parent:'monthRecaps',
+title:('Riepilogo riposi compensativi da recuperare'), open:true, color:'warning'}
+
+<table class="table table-bordered table-condensed">
+  <tr>
+    <th width="40">Assenza in data</th>
+    <th width="40">Scadenza per recupero assenza</th>
+	<th width="200">Variazioni orarie per recupero</th>
+	<th width="80">Aggiungi variazione oraria</th>
+  </tr>
+  #{list items:psDto.absencesToRecoverList, as:'entry'}
+  <tr>
+  	<td>${entry.personDay.date}</td>
+    <td>${entry.expireRecoverDate}</td>     
+	<td>${entry.timeVariations}</td>	
+	<td></td>
+  </tr>
+  #{/list}
+</table>
+
+#{/accordionItem}
+#{/accordionGroup}

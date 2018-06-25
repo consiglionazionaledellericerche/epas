@@ -35,6 +35,8 @@ public class QAbsence extends EntityPathBase<Absence> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final DatePath<org.joda.time.LocalDate> expireRecoverDate = createDate("expireRecoverDate", org.joda.time.LocalDate.class);
+
     public final NumberPath<Long> externalIdentifier = createNumber("externalIdentifier", Long.class);
 
     //inherited
@@ -50,6 +52,10 @@ public class QAbsence extends EntityPathBase<Absence> {
     public final BooleanPath persistent = _super.persistent;
 
     public final models.query.QPersonDay personDay;
+
+    public final NumberPath<Integer> timeToRecover = createNumber("timeToRecover", Integer.class);
+
+    public final SetPath<models.TimeVariation, models.query.QTimeVariation> timeVariations = this.<models.TimeVariation, models.query.QTimeVariation>createSet("timeVariations", models.TimeVariation.class, models.query.QTimeVariation.class, PathInits.DIRECT2);
 
     public final SetPath<models.absences.AbsenceTrouble, QAbsenceTrouble> troubles = this.<models.absences.AbsenceTrouble, QAbsenceTrouble>createSet("troubles", models.absences.AbsenceTrouble.class, QAbsenceTrouble.class, PathInits.DIRECT2);
 

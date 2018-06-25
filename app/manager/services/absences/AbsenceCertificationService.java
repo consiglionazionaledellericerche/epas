@@ -220,8 +220,8 @@ public class AbsenceCertificationService {
         inEpas, notInEpas);
     
     //4) riduce ferie
-    from = new LocalDate(LocalDate.now().getYear(), 1 ,1);
-    to = new LocalDate(LocalDate.now().getYear(), 12 ,31);
+    from = new LocalDate(LocalDate.now().getYear(), 1, 1);
+    to = new LocalDate(LocalDate.now().getYear(), 12, 31);
     buildGenericSituation(situation, person, AbsenceSituationType.RIDUCE_FERIE_ANNO_CORRENTE, 
         DefaultGroup.RIDUCE_FERIE_CNR, to, Optional.of(from), Optional.of(to), 
         inEpas, notInEpas);
@@ -239,8 +239,8 @@ public class AbsenceCertificationService {
     patchCompensatoryRest(compensatorySituation, wrPerson);
     
     //6) permesso personale
-    from = new LocalDate(LocalDate.now().getYear(), 1 ,1);
-    to = new LocalDate(LocalDate.now().getYear(), 12 ,31);
+    from = new LocalDate(LocalDate.now().getYear(), 1, 1);
+    to = new LocalDate(LocalDate.now().getYear(), 12, 31);
     buildGenericSituation(situation, person, AbsenceSituationType.PERMESSO_PERSONALI, 
         DefaultGroup.G_661, to, Optional.of(from), Optional.of(to), 
         inEpas, notInEpas);
@@ -458,7 +458,7 @@ public class AbsenceCertificationService {
     
     putDatesVacation(vacationPreviousYear.datesPerCodeOk, mapInEpas, code32, year - 1);
     putDatesVacation(vacationPreviousYear.datesPerCodeOk, mapInEpas, code31, year);
-    putDatesVacation(vacationPreviousYear.datesPerCodeOk, mapInEpas ,code37, year);
+    putDatesVacation(vacationPreviousYear.datesPerCodeOk, mapInEpas, code37, year);
     putDatesVacation(vacationPreviousYear.toAddAutomatically, mapNotInEpas, code32,  year - 1);
     putDatesVacation(vacationPreviousYear.toAddAutomatically, mapNotInEpas, code31,  year);
     putDatesVacation(vacationPreviousYear.toAddAutomatically, mapNotInEpas,code37,  year);
