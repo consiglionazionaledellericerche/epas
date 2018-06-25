@@ -1,6 +1,5 @@
 package manager;
 
-
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;

@@ -46,6 +46,7 @@ beginDate=Data Inizio
 endDate=Data Fine
 from=Da
 to=A
+recoveryDate=Da recuperare entro
 
 calendar.competencesApproved = Le competenze per questo mese sono state approvate
 calendar.competencesToBeApproved = Le competenze per questo mese sono da approvare

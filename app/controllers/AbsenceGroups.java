@@ -18,6 +18,7 @@ import dao.WorkingTimeTypeDao;
 import dao.absences.AbsenceComponentDao;
 import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
+import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 import it.cnr.iit.epas.DateInterval;
@@ -40,6 +41,8 @@ import manager.services.absences.certifications.CertificationYearSituation;
 import manager.services.absences.certifications.CodeComparation;
 import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.PeriodChain;
+
+import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonDay;
@@ -47,6 +50,7 @@ import models.Qualification;
 import models.Role;
 import models.User;
 import models.WorkingTimeType;
+import models.WorkingTimeTypeDay;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
@@ -105,6 +109,8 @@ public class AbsenceGroups extends Controller {
   private static WrapperModelFunctionFactory wrapperFunctionFactory;
   @Inject
   private static AbsenceDao absenceDao;
+  @Inject
+  private static IWrapperFactory wrapperFactory;
 
   /**
    * La lista delle categorie definite.
@@ -507,7 +513,7 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(from);
     
     AbsenceForm absenceForm = absenceService.buildAbsenceForm(person, from, null,
-            null, null, true, null, null, null, null, false);
+            null, null, null, true, null, null, null, null, false);
     
     //La lista di tutti i codici takable... con associato il gruppo con maggiore priorità.
     Set<AbsenceType> allTakable = Sets.newHashSet();
@@ -542,8 +548,8 @@ public class AbsenceGroups extends Controller {
    */
   public static void insert(
       Long personId, LocalDate from, CategoryTab categoryTab,                      //tab
-      LocalDate to, GroupAbsenceType groupAbsenceType, boolean switchGroup, //group
-      AbsenceType absenceType, JustifiedType justifiedType,                 //confGroup 
+      LocalDate to, LocalDate recoveryDate, GroupAbsenceType groupAbsenceType,
+      boolean switchGroup, AbsenceType absenceType, JustifiedType justifiedType,   //confGroup 
       Integer hours, Integer minutes, boolean forceInsert) {
 
     Person person = personDao.getPersonById(personId);
@@ -554,11 +560,12 @@ public class AbsenceGroups extends Controller {
 
     AbsenceForm absenceForm =
         absenceService.buildAbsenceForm(person, from, categoryTab,
-            to, groupAbsenceType, switchGroup, absenceType, justifiedType, hours, minutes, false);
+            to, recoveryDate, groupAbsenceType, switchGroup, absenceType, 
+            justifiedType, hours, minutes, false);
 
     InsertReport insertReport = absenceService.insert(person,
         absenceForm.groupSelected,
-        absenceForm.from, absenceForm.to,
+        absenceForm.from, absenceForm.to, absenceForm.recoveryDate,
         absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
         absenceForm.hours, absenceForm.minutes, forceInsert, absenceManager);
     render(absenceForm, insertReport, forceInsert);
@@ -590,11 +597,11 @@ public class AbsenceGroups extends Controller {
     
     AbsenceForm absenceForm =
         absenceService.buildAbsenceForm(person, from, null,
-            null, groupAbsenceType, false, absenceType, null, null, null, false);
+            null, null, groupAbsenceType, false, absenceType, null, null, null, false);
 
     InsertReport insertReport = absenceService.insert(person,
         absenceForm.groupSelected,
-        absenceForm.from, absenceForm.to,
+        absenceForm.from, absenceForm.to, absenceForm.recoveryDate,
         absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
         absenceForm.hours, absenceForm.minutes, false, absenceManager);
     
@@ -614,7 +621,7 @@ public class AbsenceGroups extends Controller {
    * @param minutes          minuti
    * @param forceInsert      forza inserimento
    */
-  public static void save(Long personId, LocalDate from, LocalDate to,
+  public static void save(Long personId, LocalDate from, LocalDate to, LocalDate recoveryDate,
       GroupAbsenceType groupAbsenceType, AbsenceType absenceType,
       JustifiedType justifiedType, Integer hours, Integer minutes, boolean forceInsert) {
 
@@ -630,7 +637,7 @@ public class AbsenceGroups extends Controller {
     }
 
     InsertReport insertReport = absenceService.insert(person, groupAbsenceType, from, to,
-        absenceType, justifiedType, hours, minutes, forceInsert, absenceManager);
+        recoveryDate, absenceType, justifiedType, hours, minutes, forceInsert, absenceManager);
 
     //Persistenza
     if (!insertReport.absencesToPersist.isEmpty()) {
@@ -638,6 +645,9 @@ public class AbsenceGroups extends Controller {
         PersonDay personDay = personDayManager
             .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
         absence.personDay = personDay;
+        if (recoveryDate != null) {
+          absence = absenceManager.handleRecoveryAbsence(absence, person, recoveryDate);
+        }
         personDay.absences.add(absence);
         rules.checkIfPermitted(absence);
         absence.save();

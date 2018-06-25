@@ -71,6 +71,9 @@
 	#{/secure.link}
 	}*
     #{include './personStampingComponents/_alerts.html' /}
+    #{if psDto.absenceToRecoverYet}
+    	#{include './personStampingComponents/_absencesRecap.html' /}
+    #{/if}
     #{include './personStampingComponents/_contractsRecap.html' /}
   </div>
 

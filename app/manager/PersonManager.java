@@ -25,6 +25,7 @@ import models.Person;
 import models.PersonDay;
 import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.JustifiedType.JustifiedTypeName;
 
 import org.assertj.core.util.Lists;
 import org.joda.time.LocalDate;
@@ -220,7 +221,7 @@ public class PersonManager {
         .getHolidayWorkingTime(person, year, month);
     int value = 0;
     for (PersonDay pd : pdList) {
-      value += pd.getOnHoliday() - pd.getApprovedOnHoliday() ;
+      value += pd.getOnHoliday() - pd.getApprovedOnHoliday();
     }
     return value;
   }
@@ -262,6 +263,31 @@ public class PersonManager {
       value += pd.timeAtWork;
     }
     return value;
+  }
+  
+  /**
+   * Metodo che ritorna la lista delle assenze di tipo recover_time non ancora evase nell'arco 
+   * temporale compreso tra from e to.
+   * @param person la persona di cui si cercano le assenze
+   * @param from la data da cui si cercano le assenze
+   * @param to la data fino a cui si cercano le assenze
+   * @param justifiedTypeName il tipo di giustificativo 
+   * @return la lista di assenze di tipo recovery_time presenti nei parametri specificati
+   */
+  public List<Absence> absencesToRecover(Person person, LocalDate from, 
+      LocalDate to, JustifiedTypeName justifiedTypeName) {
+    List<Absence> absencesToRecover = Lists.newArrayList();
+    List<Absence> absences = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), 
+        Optional.absent(), from, to, Optional.fromNullable(justifiedTypeName), 
+        false, false);
+    for (Absence abs : absences) {
+      int sum = abs.timeVariations.stream().mapToInt(o -> o.timeVariation).sum();
+      if (sum < abs.timeToRecover) {
+        absencesToRecover.add(abs);
+      }
+    }
+        
+    return absencesToRecover;
   }
 
 }

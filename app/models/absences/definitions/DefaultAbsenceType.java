@@ -302,6 +302,10 @@ public enum DefaultAbsenceType {
   A_91F("91F", "Riposo compensativo recupero giornata lavorativa festiva",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, null, null),
+  
+  A_91CE("91CE", "Riposo compensativo per chiusura ente", false, 
+      ImmutableSet.of(JustifiedTypeName.recover_time), 0,
+      false, false, 0, null, null, null),
 
 
   A_PB("PB", "Permesso breve 36 ore anno",
