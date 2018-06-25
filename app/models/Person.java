@@ -261,6 +261,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   }
 
   /**
+   * Nome completo della persona.
    * @return il nome completo.
    */
   public String getFullname() {
@@ -323,6 +324,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   }
 
   /**
+   * Controlla il valore del parametro indicato.
    * @param param Parametro di configurazione da controllare.
    * @param value valore atteso
    * @return true se la persona contiene il parametro di configurazione specificato con il valore
@@ -359,5 +361,14 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     return badges.stream().<ZoneToZones>flatMap(b -> b.badgeReader.zones.stream()
         .map(z -> z.zoneLinkedAsMaster.stream().findAny().orElse(null)))       
         .collect(Collectors.toList());
+  }
+  
+  /**
+   * Verifica se è un livello I-III.
+   * @return true se è un livello I-III, false altrimenti.
+   */
+  @Transient
+  public boolean isTopQualification() {
+    return qualification != null && qualification.isTopQualification();
   }
 }
