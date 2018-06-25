@@ -817,6 +817,19 @@ DAYS=Ricalcoli giornalieri.
 RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
 RESIDUAL_MEALTICKETS=Ricalcoli mensili sul residuo buoni pasto.
 
+ENABLE_VACATION_REQUEST =Flusso di richiesta ferie attivato
+ENABLE_COMPENSATORY_REST_REQUEST =Flusso di richiesta riposo compensativo attivato
+
+VACATION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione ferie per i livelli I-III da parte del Responsabile Sede  
+VACATION_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione ferie per i livelli IV-VIII da parte del Responsabile Sede 
+VACATION_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione ferie per i livelli I-III da parte del Responsabile gruppo di lavoro 
+VACATION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED= Richiesta approvazione ferie per i livelli IV-VIII da parte del Responsabile gruppo di lavoro
+
+COMPENSATORY_REST_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione riposi compensativi per i livelli I-III da parte del Responsabile Sede
+COMPENSATORY_REST_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione riposi compensativi per i livelli IV-VIII da parte del Responsabile Sede
+COMPENSATORY_REST_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione riposi compensativi per i livelli I-III da parte del Responsabile gruppo di lavoro
+COMPENSATORY_REST_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione riposi compensativi per i livelli IV-VIII da parte del Responsabile gruppo di lavoro
+
 configurationDto.validityYear=Anno
 configurationDto.toTheEnd=Anche Per gli anni successivi
 configurationDto.validityBegin=Validità Inizio

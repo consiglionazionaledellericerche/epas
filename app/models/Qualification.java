@@ -6,7 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
+import javax.persistence.Transient;
 import models.absences.AbsenceType;
 import models.base.BaseModel;
 
@@ -39,6 +39,16 @@ public class Qualification extends BaseModel {
   @Required
   public String description;
 
+  /**
+   * I livelli I-III.
+   * 
+   * @return
+   */
+  @Transient
+  public boolean isTopQualification() {
+    return qualification <= 3;
+  }
+  
   @Override
   public String getLabel() {
     return this.description;
