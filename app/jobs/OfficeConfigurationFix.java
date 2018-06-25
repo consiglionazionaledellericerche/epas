@@ -15,6 +15,9 @@ import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 
 /**
+ * Job per aggiornare le configurazioni degli uffici con gli eventuali nuovi
+ * paramtri di configurazione.
+ * 
  * @author daniele
  * @since 30/06/16.
  */
