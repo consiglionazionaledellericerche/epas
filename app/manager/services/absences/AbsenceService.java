@@ -487,6 +487,8 @@ public class AbsenceService {
    */
   public List<GroupAbsenceType> groupsPermitted(Person person, boolean readOnly) {
     List<GroupAbsenceType> groupsPermitted = absenceComponentDao.allGroupAbsenceType(false);
+    log.info("Configurazione groupsPermitted, readOnly = {}, groupsPermitted = {}", 
+        readOnly, groupsPermitted);
     if (readOnly) {
       return groupsPermitted;
     }
@@ -499,12 +501,15 @@ public class AbsenceService {
     final GroupAbsenceType employeeOffseat = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.LAVORO_FUORI_SEDE.name()).get();
 
-    //final User currentUser = Security.getUser().get();
+    final User currentUser = Security.getUser().get();
     //final User currentUser = userDao.byUsername("app.missioni");
-    final User currentUser = userDao.getSystemUserByRole(AccountRole.MISSIONS_MANAGER);
+    //final User currentUser = userDao.getSystemUserByRole(AccountRole.MISSIONS_MANAGER);
      
     final boolean officeWriteAdmin = secureManager
         .officesWriteAllowed(currentUser).contains(person.office);
+    
+    log.info("officeWriteAdmin = {}, officeWriteAllowed = {}", 
+          officeWriteAdmin, secureManager.officesWriteAllowed(currentUser));
     
     //Utente di sistema o amministratore della persona
     if (currentUser.isSystemUser() || officeWriteAdmin) {
@@ -516,7 +521,7 @@ public class AbsenceService {
     
     //Persona stessa non autoamministrata
     if (currentUser.person.equals(person) && !officeWriteAdmin) {
-      
+      log.info("configurazione gruppi per persona, officeWriteAdmin = {}", officeWriteAdmin);
       //vedere le configurazioni
       groupsPermitted = Lists.newArrayList();
   
@@ -534,7 +539,7 @@ public class AbsenceService {
           && person.qualification.qualification <= 3) {
         groupsPermitted.add(employeeCompensatory);  
       }
-      
+      log.info("groupPermitted = {}", groupsPermitted);
       return groupsPermitted;
     }
     
