@@ -27,6 +27,7 @@ import models.Stamping;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.dto.AbsenceToRecoverDto;
 import models.enumerate.StampTypes;
 
 import org.joda.time.LocalDate;
@@ -71,7 +72,7 @@ public class PersonStampingRecap {
   
   //Le informazioni su eventuali assenze a recupero (es.: 91CE)
   public boolean absenceToRecoverYet = false;
-  public List<Absence> absencesToRecoverList = Lists.newArrayList();
+  public List<AbsenceToRecoverDto> absencesToRecoverList = Lists.newArrayList();
 
   //Template
   public int numberOfInOut = 0;
@@ -197,11 +198,11 @@ public class PersonStampingRecap {
     this.absenceCodeMap = personManager.countAbsenceCodes(totalPersonDays);
     this.absenceList = personManager.listAbsenceCodes(totalPersonDays);
     LocalDate from = person.office.getBeginDate();
-    
-    this.absencesToRecoverList = 
-        personManager.absencesToRecover(person, from, 
-            LocalDate.now(), JustifiedTypeName.recover_time);
-    if (this.absencesToRecoverList.isEmpty()) {
+    List<Absence> list = personManager.absencesToRecover(person, from, 
+        LocalDate.now(), JustifiedTypeName.recover_time);
+    this.absencesToRecoverList = personManager.dtoList(list);
+        
+    if (list.isEmpty()) {
       this.absenceToRecoverYet = false;
     } else {
       this.absenceToRecoverYet = true;

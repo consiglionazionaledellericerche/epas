@@ -94,11 +94,7 @@ public class AbsenceForm {
     } else {
       this.to = from;
     }
-    if (recoveryDate == null) {
-      this.recoveryDate = null;
-    } else {
-      this.recoveryDate = recoveryDate;
-    }
+    
     this.groupsPermitted = groupsPermitted;
     
     //calcolo delle tab visibili
@@ -171,6 +167,12 @@ public class AbsenceForm {
       this.justifiedTypeSelected = this.justifiedTypes.iterator().next();
     }
 
+    if (this.justifiedTypeSelected.name.equals(JustifiedTypeName.recover_time)) {
+      this.recoveryDate = from.plusDays(1);
+    } else {
+      this.recoveryDate = null;
+    }
+    
     if (minutes != null) {
       this.minutes = minutes;
     }

@@ -201,10 +201,10 @@ public class AbsenceManager {
    */
   public AbsenceInsertReport insertAbsenceSimulation(
       Person person, LocalDate dateFrom, Optional<LocalDate> dateTo, 
-      Optional<LocalDate> recoveryDate, AbsenceType absenceType, Optional<Blob> file, 
+      AbsenceType absenceType, Optional<Blob> file, 
       Optional<String> mealTicket, Optional<Integer> justifiedMinutes) {
 
-    return insertAbsence(person, dateFrom, dateTo, recoveryDate, 
+    return insertAbsence(person, dateFrom, dateTo,  
         absenceType, file, mealTicket, justifiedMinutes,
         true, false);
   }
@@ -218,7 +218,7 @@ public class AbsenceManager {
       Optional<LocalDate> recoveryDate, AbsenceType absenceType, Optional<Blob> file, 
       Optional<String> mealTicket, Optional<Integer> justifiedMinutes) {
 
-    return insertAbsence(person, dateFrom, dateTo, recoveryDate, 
+    return insertAbsence(person, dateFrom, dateTo, 
         absenceType, file, mealTicket, justifiedMinutes,
         false, true);
   }
@@ -234,14 +234,14 @@ public class AbsenceManager {
       Optional<LocalDate> recoveryDate, AbsenceType absenceType, Optional<Blob> file, 
       Optional<String> mealTicket, Optional<Integer> justifiedMinutes) {
 
-    return insertAbsence(person, dateFrom, dateTo, recoveryDate, 
+    return insertAbsence(person, dateFrom, dateTo,  
         absenceType, file, mealTicket, justifiedMinutes,
         false, false);
   }
 
   private AbsenceInsertReport insertAbsence(
       Person person, LocalDate dateFrom, Optional<LocalDate> dateTo, 
-      Optional<LocalDate> recoveryDate, AbsenceType absenceType, Optional<Blob> file, 
+      AbsenceType absenceType, Optional<Blob> file, 
       Optional<String> mealTicket, Optional<Integer> justifiedMinutes, 
       boolean onlySimulation, boolean recompute) {
 
@@ -664,7 +664,12 @@ public class AbsenceManager {
     if (wtt.isPresent()) {
       java.util.Optional<WorkingTimeTypeDay> wttd = wtt.get().workingTimeTypeDays.stream()
           .filter(w -> w.dayOfWeek == absence.getAbsenceDate().getDayOfWeek()).findFirst();
-      absence.timeToRecover = wttd.get().workingTime;
+      if (wttd.isPresent()) {
+        absence.timeToRecover = wttd.get().workingTime;
+      } else {
+        absence.timeToRecover = 432;
+      }
+      
     }
     return absence;
   }

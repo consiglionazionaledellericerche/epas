@@ -61,6 +61,7 @@ import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
+import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
 import models.enumerate.QualificationMapping;
@@ -565,7 +566,7 @@ public class AbsenceGroups extends Controller {
 
     InsertReport insertReport = absenceService.insert(person,
         absenceForm.groupSelected,
-        absenceForm.from, absenceForm.to, absenceForm.recoveryDate,
+        absenceForm.from, absenceForm.to,
         absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
         absenceForm.hours, absenceForm.minutes, forceInsert, absenceManager);
     render(absenceForm, insertReport, forceInsert);
@@ -601,7 +602,7 @@ public class AbsenceGroups extends Controller {
 
     InsertReport insertReport = absenceService.insert(person,
         absenceForm.groupSelected,
-        absenceForm.from, absenceForm.to, absenceForm.recoveryDate,
+        absenceForm.from, absenceForm.to, 
         absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
         absenceForm.hours, absenceForm.minutes, false, absenceManager);
     
@@ -637,7 +638,7 @@ public class AbsenceGroups extends Controller {
     }
 
     InsertReport insertReport = absenceService.insert(person, groupAbsenceType, from, to,
-        recoveryDate, absenceType, justifiedType, hours, minutes, forceInsert, absenceManager);
+        absenceType, justifiedType, hours, minutes, forceInsert, absenceManager);
 
     //Persistenza
     if (!insertReport.absencesToPersist.isEmpty()) {
@@ -645,9 +646,12 @@ public class AbsenceGroups extends Controller {
         PersonDay personDay = personDayManager
             .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
         absence.personDay = personDay;
-        if (recoveryDate != null) {
+        if (justifiedType.name.equals(JustifiedTypeName.recover_time)) {
+          if (recoveryDate == null) {
+            
+          }
           absence = absenceManager.handleRecoveryAbsence(absence, person, recoveryDate);
-        }
+        }        
         personDay.absences.add(absence);
         rules.checkIfPermitted(absence);
         absence.save();

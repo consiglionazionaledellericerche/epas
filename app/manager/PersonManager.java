@@ -26,6 +26,7 @@ import models.PersonDay;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.dto.AbsenceToRecoverDto;
 
 import org.assertj.core.util.Lists;
 import org.joda.time.LocalDate;
@@ -287,6 +288,24 @@ public class PersonManager {
       }
     }
         
+    return absencesToRecover;
+  }
+  
+  /**
+   * Metodo di utilità per trasformare una lista di assenze in lista di dto per il template.
+   * @param list lista di assenze a giustificazione recover_time
+   * @return la lista di dto da ritornare alla vista.
+   */
+  public List<AbsenceToRecoverDto> dtoList(List<Absence> list) {
+    List<AbsenceToRecoverDto> absencesToRecover = Lists.newArrayList();
+    for (Absence abs : list) {
+      AbsenceToRecoverDto abr = new AbsenceToRecoverDto();
+      abr.quantityRecovered = abs.timeVariations.stream().mapToInt(o -> o.timeVariation).sum();
+      abr.quantityToRecover = abs.timeToRecover;
+      abr.absenceDate = abs.personDay.date;
+      abr.recoverDate = abs.expireRecoverDate;
+      absencesToRecover.add(abr);
+    }
     return absencesToRecover;
   }
 

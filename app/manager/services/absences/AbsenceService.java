@@ -205,7 +205,7 @@ public class AbsenceService {
     
     //TODO: Preconditions se groupAbsenceType presente verificare che permesso per la persona
     
-    return new AbsenceForm(person, from, to, recoveryDate,groupAbsenceType, absenceType, 
+    return new AbsenceForm(person, from, to, recoveryDate, groupAbsenceType, absenceType, 
         justifiedType, hours, minutes, groupsPermitted,
         absenceComponentDao, absenceEngineUtility);
   }
@@ -224,7 +224,7 @@ public class AbsenceService {
    * @return insert report
    */
   public InsertReport insert(Person person, GroupAbsenceType groupAbsenceType, 
-      LocalDate from, LocalDate to, LocalDate recoveryDate,
+      LocalDate from, LocalDate to, 
       AbsenceType absenceType, JustifiedType justifiedType, 
       Integer hours, Integer minutes, boolean forceInsert, AbsenceManager absenceManager) {
     
@@ -237,7 +237,7 @@ public class AbsenceService {
     
     if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.compensatoryRestCnr)) {
       InsertReport insertReport = temporaryInsertCompensatoryRest(person, 
-          groupAbsenceType, from, to, recoveryDate, null, absenceManager);
+          groupAbsenceType, from, to, null, absenceManager);
       return insertReport;
     } 
     
@@ -543,7 +543,7 @@ public class AbsenceService {
   
   @Deprecated
   private InsertReport temporaryInsertCompensatoryRest(Person person, 
-      GroupAbsenceType groupAbsenceType, LocalDate from, LocalDate to, LocalDate recoveryDate,
+      GroupAbsenceType groupAbsenceType, LocalDate from, LocalDate to, 
       AbsenceType absenceType, AbsenceManager absenceManager) {
     
     if (absenceType == null || !absenceType.isPersistent()) {
@@ -552,7 +552,7 @@ public class AbsenceService {
 
     return insertReportFromOldReport(
         absenceManager.insertAbsenceSimulation(person, from, Optional.fromNullable(to), 
-            Optional.fromNullable(recoveryDate), absenceType, Optional.absent(), 
+             absenceType, Optional.absent(), 
             Optional.absent(), Optional.absent()), groupAbsenceType);
     
   }
