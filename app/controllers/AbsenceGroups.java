@@ -647,9 +647,7 @@ public class AbsenceGroups extends Controller {
             .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
         absence.personDay = personDay;
         if (justifiedType.name.equals(JustifiedTypeName.recover_time)) {
-          if (recoveryDate == null) {
-            
-          }
+
           absence = absenceManager.handleRecoveryAbsence(absence, person, recoveryDate);
         }        
         personDay.absences.add(absence);

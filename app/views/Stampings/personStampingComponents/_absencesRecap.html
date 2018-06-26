@@ -5,23 +5,25 @@ title:('Riepilogo riposi compensativi da recuperare'), open:true, color:'warning
 
 <table class="table table-bordered table-condensed">
   <tr>
-    <th width="40">Assenza in data</th>
-    <th width="40">Scadenza per recupero assenza</th>
+    <th width="40">Assenza</th>
+    <th width="40">Scadenza per <br> recupero assenza</th>
 	<th width="200">Situazione recupero</th>
 	<th width="80">Aggiungi variazione oraria</th>
   </tr>
   #{list items:psDto.absencesToRecoverList, as:'entry'}
   <tr>
-  	<td>${entry.code} - ${entry.absenceDate}</td>
-    <td>${entry.recoverDate}</td>     
+  	<td>${entry.absence.absenceType.code} <br> ${entry.absenceDate.format()}</td>
+    <td><strong>${entry.recoverDate.format()}</strong></td>     
 	<td>
 		<div class="progress">
-  		<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="${entry.quantityRecovered/entry.quantityToRecover*100}" aria-valuemin="0" aria-valuemax="100" style="width: 40%">
-    	<span class="sr-only">${entry.quantityRecovered/entry.quantityToRecover*100}% Completato</span>
+  		<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="${entry.percentage}" 
+  			aria-valuemin="0" aria-valuemax="100" style="width: ${entry.percentage}%">    	
   		</div>
 		</div>
 	</td>	
-	<td></td>
+	<td>
+		<a href="@{TimeVariations.addVariation(entry.absence.id)}" data-async-modal="#defaultModal"><i class="fa fa-plus" aria-hidden="true"></i></a>
+	</td>
   </tr>
   #{/list}
 </table>
