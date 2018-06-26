@@ -100,7 +100,7 @@ public class VacationInsertTest extends UnitTest {
     LocalDate today = new LocalDate(2015, 8, 24);
     
     InsertReport insertReport = absenceService.insert(person, vacationGroup, today, null, 
-        null, absenceType, allDay, null, null, false, null);
+        absenceType, allDay, null, null, false, null);
     
     assertEquals(insertReport.howManySuccess(), 1);
   }

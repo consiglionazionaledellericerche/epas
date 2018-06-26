@@ -236,7 +236,7 @@ public class MissionManager {
             justifiedType, hours, minutes, false);
     InsertReport insertReport = 
         absenceService.insert(body.person, absenceForm.groupSelected, from.toLocalDate(), 
-            to.toLocalDate(), null, mission, absenceForm.justifiedTypeSelected, 
+            to.toLocalDate(), mission, absenceForm.justifiedTypeSelected, 
             hours, minutes, false, absenceManager);
     if (insertReport.criticalErrors.isEmpty() || insertReport.warningsPreviousVersion.isEmpty()) {
       for (Absence absence : insertReport.absencesToPersist) {

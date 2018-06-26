@@ -190,7 +190,7 @@ public class Absences extends Controller {
           absenceManager
             .insertAbsenceSimulation(
                 person.get(), begin, Optional.fromNullable(end),
-                Optional.absent(), absenceTypeManager.getAbsenceType(absenceCode),
+                absenceTypeManager.getAbsenceType(absenceCode),
                 Optional.<Blob>absent(), Optional.<String>absent(),
                 Optional.<Integer>absent());
 
@@ -253,7 +253,7 @@ public class Absences extends Controller {
     }
 
     AbsenceInsertReport air = absenceManager.insertAbsenceSimulation(
-            person, begin, Optional.fromNullable(end), Optional.absent(), absenceType.get(),
+            person, begin, Optional.fromNullable(end), absenceType.get(),
             Optional.<Blob>absent(), Optional.<String>absent(), Optional.<Integer>absent());
 
     renderJSON(mapper.writer(JacksonModule.filterProviderFor(SimpleBeanPropertyFilter
