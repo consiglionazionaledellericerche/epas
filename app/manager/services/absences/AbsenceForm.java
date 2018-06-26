@@ -167,10 +167,14 @@ public class AbsenceForm {
       this.justifiedTypeSelected = this.justifiedTypes.iterator().next();
     }
 
+    
     if (this.justifiedTypeSelected.name.equals(JustifiedTypeName.recover_time)) {
       this.recoveryDate = from.plusDays(1);
     } else {
       this.recoveryDate = null;
+    }
+    if (recoveryDate != null) {
+      this.recoveryDate = recoveryDate;
     }
     
     if (minutes != null) {

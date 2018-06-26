@@ -300,10 +300,13 @@ public class PersonManager {
     List<AbsenceToRecoverDto> absencesToRecover = Lists.newArrayList();
     for (Absence abs : list) {
       AbsenceToRecoverDto abr = new AbsenceToRecoverDto();
-      abr.quantityRecovered = abs.timeVariations.stream().mapToInt(o -> o.timeVariation).sum();
+      abr.absence = abs;
+      int timeRecovered = abs.timeVariations.stream().mapToInt(o -> o.timeVariation).sum(); 
+      abr.quantityRecovered = timeRecovered;
       abr.quantityToRecover = abs.timeToRecover;
       abr.absenceDate = abs.personDay.date;
       abr.recoverDate = abs.expireRecoverDate;
+      abr.percentage = (timeRecovered / abs.timeToRecover);
       absencesToRecover.add(abr);
     }
     return absencesToRecover;
