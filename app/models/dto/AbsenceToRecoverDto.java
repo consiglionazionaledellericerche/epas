@@ -11,6 +11,6 @@ public class AbsenceToRecoverDto {
   public LocalDate recoverDate;
   public int quantityRecovered;
   public int quantityToRecover;
-  public double percentage;
+  public float percentage;
 
 }

@@ -306,7 +306,8 @@ public class PersonManager {
       abr.quantityToRecover = abs.timeToRecover;
       abr.absenceDate = abs.personDay.date;
       abr.recoverDate = abs.expireRecoverDate;
-      abr.percentage = (timeRecovered / abs.timeToRecover);
+      float division = (timeRecovered / (float) abs.timeToRecover);
+      abr.percentage = Math.round(division * 100);
       absencesToRecover.add(abr);
     }
     return absencesToRecover;
