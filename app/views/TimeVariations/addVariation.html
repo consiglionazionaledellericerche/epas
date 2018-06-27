@@ -20,6 +20,19 @@ title:'Recupero orario per assenza ' + absence.absenceType.code
              #{/b.buttons}
 		#{/secure.check}
 	#{/form}
+	<div class="col-md-8 col-md-offset-2">
+	#{alert color:'warning', center:center}
+  		Variazioni di orario già effettuate per l'assenza
+    #{/alert}
+    <ul class="list-group">
+    	#{list items:absence.timeVariations, as:'tv'}
+  		<li class="list-group-item">
+    	<span class="badge">${tv.dateVariation.format()}</span>
+    	${(int)(tv.timeVariation / 60)} ore e ${tv.timeVariation % 60} minuti
+  		</li>
+  		#{/list}
+	</ul>	
+  	</div>
 </div>
 
 #{/modalAsync}
