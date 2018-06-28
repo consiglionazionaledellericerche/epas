@@ -564,7 +564,10 @@ public class AbsenceGroups extends Controller {
         absenceForm.from, absenceForm.to,
         absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
         absenceForm.hours, absenceForm.minutes, forceInsert, absenceManager);
-    render(absenceForm, insertReport, forceInsert);
+    if (recoveryDate != null && !recoveryDate.isAfter(to)) {
+      Validation.addError("recoveryDate", "Deve essere successiva alla data di fine");
+    }
+    render(absenceForm, insertReport, forceInsert, recoveryDate);
 
   }
   

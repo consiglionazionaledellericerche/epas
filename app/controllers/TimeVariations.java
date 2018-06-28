@@ -1,6 +1,9 @@
 package controllers;
 
+import com.google.common.base.Optional;
+
 import dao.AbsenceDao;
+import dao.TimeVariationDao;
 
 import javax.inject.Inject;
 
@@ -24,7 +27,7 @@ import security.SecurityRules;
 @Slf4j
 @With({Resecure.class})
 public class TimeVariations extends Controller {
-  
+
   @Inject
   private static AbsenceDao absenceDao;
   @Inject
@@ -33,6 +36,8 @@ public class TimeVariations extends Controller {
   private static TimeVariationManager timeVariationManager;
   @Inject
   private static ConsistencyManager consistencyManager;
+  @Inject
+  private static TimeVariationDao timeVariationDao;
 
   /**
    * Action che abilita la finestra di assegnamento di una variazione.
@@ -42,9 +47,13 @@ public class TimeVariations extends Controller {
     final Absence absence = absenceDao.getAbsenceById(absenceId);
     notFoundIfNull(absence);
     rules.checkIfPermitted(absence.personDay.person);
-    render(absence);
+    int totalTimeRecovered = absence.timeVariations.stream().mapToInt(i -> i.timeVariation).sum();
+    int difference = absence.timeToRecover - totalTimeRecovered;
+    int hours = difference / 60;
+    int minutes = difference % 60;
+    render(absence, hours, minutes);
   }
-  
+
   /**
    * Metodo che permette il salvataggio della variazione oraria da associare ai 91CE presi in 
    * precedenza.
@@ -56,6 +65,12 @@ public class TimeVariations extends Controller {
     final Absence absence = absenceDao.getAbsenceById(absenceId);
     notFoundIfNull(absence);
     rules.checkIfPermitted(absence.personDay.person);
+    if (absence.personDay.date.isAfter(LocalDate.now())) {
+      flash.error("Non si può recuperare un'assenza %s - %s prima che questa sia sopraggiunta", 
+          absence.absenceType.code, absence.absenceType.description);
+      Stampings.personStamping(absence.personDay.person.id, 
+          LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
+    }
     TimeVariation timeVariation = timeVariationManager.create(absence, hours, minutes);
     
     timeVariation.save();
@@ -64,5 +79,24 @@ public class TimeVariations extends Controller {
         absence.absenceType.code, absence.personDay.date);
     Stampings.personStamping(absence.personDay.person.id, 
         LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
+  }
+
+  /**
+   * Metodo che rimuove la variazione oraria corrispondente all'id passato come parametro.
+   * @param timeVariationId l'id della variazione oraria
+   */
+  public static void removeVariation(long timeVariationId) {
+    final TimeVariation timeVariation = timeVariationDao.getById(timeVariationId);
+    notFoundIfNull(timeVariation);
+    rules.checkIfPermitted(timeVariation.absence.personDay.person);
+
+    Absence absence = timeVariation.absence;
+    timeVariation.delete();
+    consistencyManager.updatePersonSituation(absence.personDay.person.id, LocalDate.now());
+    flash.success("Rimossa variazione oraria per il %s del giorno %s", 
+        absence.absenceType.code, absence.personDay.date);
+    Stampings.personStamping(absence.personDay.person.id, 
+        LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
+
   }
 }

@@ -8,12 +8,14 @@ title:('Riepilogo riposi compensativi da recuperare'), open:true, color:'warning
     <th width="40">Assenza</th>
     <th width="40">Scadenza per <br> recupero assenza</th>
 	<th width="200">Situazione recupero</th>
+	#{secure.check 'TimeVariations.addVariation'}
 	<th width="80">Aggiungi variazione oraria</th>
+	#{/secure.check}
   </tr>
   #{list items:psDto.absencesToRecoverList, as:'entry'}
   <tr>
   	<td>${entry.absence.absenceType.code} <br> ${entry.absenceDate.format()}</td>
-    <td><strong>${entry.recoverDate.format()}</strong></td>     
+    <td><span class="badge">${entry.recoverDate.format()}</span></td>     
 	<td>
 		<div class="progress">
   		<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="${entry.percentage}" 
@@ -22,9 +24,11 @@ title:('Riepilogo riposi compensativi da recuperare'), open:true, color:'warning
   		</div>
 		</div>
 	</td>	
+	#{secure.check 'TimeVariations.addVariation'}
 	<td>
 		<a href="@{TimeVariations.addVariation(entry.absence.id)}" data-async-modal="#defaultModal"><i class="fa fa-plus" aria-hidden="true"></i></a>
 	</td>
+	#{/secure.check}
   </tr>
   #{/list}
 </table>

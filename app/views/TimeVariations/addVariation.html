@@ -7,11 +7,12 @@ title:'Recupero orario per assenza ' + absence.absenceType.code
   		class:'form form-horizontal', 'data-async':'#page_content',
   		'data-async-error':'#variation'}
 		#{alert color:'info',center:true} 
-			Inserisci ore e minuti con cui intendi recuperare l'assenza 
+			Inserisci ore e minuti con cui intendi recuperare l'assenza. <br>Il sistema in automatico ti propone il tempo che 
+			manca, in ore e minuti, al completamento della giornata di riposo compensativo chiusura ente 91CE 
 		#{/alert} 
 		#{f.hidden 'absenceId', value:absence.id /}
-	    #{f.input 'hours', type:number  /}
-	    #{f.input 'minutes', type:number  /}
+	    #{f.input 'hours', type:number, value:hours  /}
+	    #{f.input 'minutes', type:number, value:minutes  /}
 	    
 
 		#{secure.check 'TimeVariations.saveVariation'}
@@ -22,22 +23,33 @@ title:'Recupero orario per assenza ' + absence.absenceType.code
 	#{/form}
 	<div class="col-md-8 col-md-offset-2">
 	#{if absence.timeVariations.isEmpty()}
-		#{alert color:'info', center:center}
+		#{alert color:'info', center:true}
   			Non sono ancora state associate variazioni di orario all'assenza.
     	#{/alert}
 	#{/if}
 	#{else}
-		#{alert color:'warning', center:center}
+		#{alert color:'warning', center:true}
   			Variazioni di orario già effettuate per l'assenza.
     	#{/alert}
-    	<ul class="list-group">
+    	<table class="table">
+    	  	<tr>
+  				<th>Data variazione</th>
+  				<th>Quantità</th>
+  				<th>Elimina</th>  	
+  			</tr>
     		#{list items:absence.timeVariations, as:'tv'}
-  			<li class="list-group-item">
-    		<span class="badge">${tv.dateVariation.format()}</span>
-    		${(int)(tv.timeVariation / 60)} ore e ${tv.timeVariation % 60} minuti
-  			</li>
+  			<tr>
+  			<td><span class="badge">${tv.dateVariation.format()}</span></td>
+  			<td>${(int)(tv.timeVariation / 60)} ore e ${tv.timeVariation % 60} minuti</td>
+  			<td>
+      			#{secure.link @TimeVariations.removeVariation(tv.id)}
+					Rimuovi
+      			#{/secure.link}
+  			</td>
+  			</tr>
   			#{/list}
-		</ul>	
+			
+		</table>
 	#{/else}
 	
   	</div>

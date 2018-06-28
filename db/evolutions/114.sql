@@ -28,7 +28,7 @@ CREATE TABLE time_variations_history (
   	_revision_type SMALLINT NOT NULL,
 	date_variation DATE,
 	time_variation INT,
-	absence_id BIGINT NOT NULL REFERENCES absences(id),
+	absence_id BIGINT,
 	PRIMARY KEY (id, _revision, _revision_type)
 );
 

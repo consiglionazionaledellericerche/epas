@@ -1,5 +1,6 @@
 package dao;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -39,5 +40,17 @@ public class TimeVariationDao extends DaoBase {
             .and(timeVariation.dateVariation.between(begin, end)));
     return query.list(timeVariation);
         
+  }
+  
+  /**
+   * Metodo che ritorna la variazione oraria recuperata tramite l'id.
+   * @param timeVariationId l'identificativo della variazione oraria
+   * @return la variazione oraria associata all'id passato come parametro.
+   */
+  public TimeVariation getById(long timeVariationId) {
+    final QTimeVariation timeVariation = QTimeVariation.timeVariation1;
+    final JPQLQuery query = getQueryFactory().from(timeVariation)
+        .where(timeVariation.id.eq(timeVariationId));
+    return query.singleResult(timeVariation);
   }
 }
