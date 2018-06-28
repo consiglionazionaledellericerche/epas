@@ -182,7 +182,7 @@ public class AbsenceManager {
     }
 
     Optional<ContractMonthRecap> recap = contractMonthRecapManager.computeResidualModule(cmr,
-        previousMonthRecap, yearMonth, dateForRecap, otherCompensatoryRest);
+        previousMonthRecap, yearMonth, dateForRecap, otherCompensatoryRest, Optional.absent());
 
     if (recap.isPresent()) {
       int residualMinutes = recap.get().remainingMinutesCurrentYear

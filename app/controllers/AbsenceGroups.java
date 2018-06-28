@@ -18,7 +18,6 @@ import dao.WorkingTimeTypeDao;
 import dao.absences.AbsenceComponentDao;
 import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
-import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 import it.cnr.iit.epas.DateInterval;
@@ -42,7 +41,6 @@ import manager.services.absences.certifications.CodeComparation;
 import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.PeriodChain;
 
-import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonDay;
@@ -50,7 +48,6 @@ import models.Qualification;
 import models.Role;
 import models.User;
 import models.WorkingTimeType;
-import models.WorkingTimeTypeDay;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
@@ -110,8 +107,6 @@ public class AbsenceGroups extends Controller {
   private static WrapperModelFunctionFactory wrapperFunctionFactory;
   @Inject
   private static AbsenceDao absenceDao;
-  @Inject
-  private static IWrapperFactory wrapperFactory;
 
   /**
    * La lista delle categorie definite.
