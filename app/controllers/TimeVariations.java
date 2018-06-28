@@ -1,8 +1,15 @@
 package controllers;
 
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.base.Verify;
+import com.google.common.collect.FluentIterable;
+
+import controllers.JsonExport.PersonInfo;
 
 import dao.AbsenceDao;
+import dao.PersonDao;
 import dao.TimeVariationDao;
 
 import javax.inject.Inject;
@@ -12,8 +19,12 @@ import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
 import manager.TimeVariationManager;
 
+import models.Person;
 import models.TimeVariation;
+import models.User;
 import models.absences.Absence;
+import models.absences.JustifiedType.JustifiedTypeName;
+import models.dto.AbsenceToRecoverDto;
 
 import org.joda.time.LocalDate;
 
@@ -21,6 +32,8 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import security.SecurityRules;
+
+import java.util.List;
 
 
 
@@ -38,6 +51,8 @@ public class TimeVariations extends Controller {
   private static ConsistencyManager consistencyManager;
   @Inject
   private static TimeVariationDao timeVariationDao;
+  @Inject
+  private static PersonDao personDao;
 
   /**
    * Action che abilita la finestra di assegnamento di una variazione.
@@ -98,5 +113,44 @@ public class TimeVariations extends Controller {
     Stampings.personStamping(absence.personDay.person.id, 
         LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
 
+  }
+  
+  public static void show(long officeId) {
+    
+  }
+  
+  /**
+   * Metodo che ritorna la situazione di una persona.
+   */
+  public static void personShow() {
+    
+    Optional<User> user = Security.getUser();
+    Verify.verify(user.isPresent());
+    Verify.verifyNotNull(user.get().person);
+
+    Person person = user.get().person;
+    
+    LocalDate date = person.office.beginDate;
+    List<Absence> absenceList = absenceDao.getAbsenceByCodeInPeriod(
+        Optional.fromNullable(person), Optional.absent(), date, LocalDate.now(), 
+        Optional.fromNullable(JustifiedTypeName.recover_time), false, true);
+    List<AbsenceToRecoverDto> dtoList =
+        FluentIterable.from(absenceList).transform(
+            new Function<Absence, AbsenceToRecoverDto>() {
+              @Override
+              public AbsenceToRecoverDto apply(Absence absence) {
+                return new AbsenceToRecoverDto(
+                absence, absence.personDay.date, absence.expireRecoverDate,
+                absence.timeToRecover,
+                absence.timeVariations.stream().mapToInt(i -> i.timeVariation).sum(),
+                Math.round(absence.timeVariations.stream().mapToInt(i -> i.timeVariation).sum() 
+                    / (float) absence.timeToRecover * 100)
+                );
+              }
+            }
+       ).toList();
+    
+    render(dtoList, person);
+    
   }
 }

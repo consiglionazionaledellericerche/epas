@@ -51,7 +51,11 @@
       #{secure.li @Absences.showGeneralMonthlyAbsences(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected")) }
       <i class="fa fa-user-times" aria-hidden="true"></i>
       #{/secure.li}
-
+      
+      #{secure.li @TimeVariations.show(session.get("officeSelected"))}
+	  <i class="fa fa-search-plus" aria-hidden="true"></i>
+      #{/secure.li}
+      
       #{secure.li @Vacations.list(session.get("yearSelected"), session.get("officeSelected")) }
       <i class="fa fa-plane" aria-hidden="true"></i>
       #{/secure.li}
