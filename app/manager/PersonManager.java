@@ -1,6 +1,8 @@
 package manager;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
 
 import dao.AbsenceDao;
@@ -297,19 +299,23 @@ public class PersonManager {
    * @return la lista di dto da ritornare alla vista.
    */
   public List<AbsenceToRecoverDto> dtoList(List<Absence> list) {
-    List<AbsenceToRecoverDto> absencesToRecover = Lists.newArrayList();
-    for (Absence abs : list) {
-      AbsenceToRecoverDto abr = new AbsenceToRecoverDto();
-      abr.absence = abs;
-      int timeRecovered = abs.timeVariations.stream().mapToInt(o -> o.timeVariation).sum(); 
-      abr.quantityRecovered = timeRecovered;
-      abr.quantityToRecover = abs.timeToRecover;
-      abr.absenceDate = abs.personDay.date;
-      abr.recoverDate = abs.expireRecoverDate;
-      float division = (timeRecovered / (float) abs.timeToRecover);
-      abr.percentage = Math.round(division * 100);
-      absencesToRecover.add(abr);
-    }
+
+    List<AbsenceToRecoverDto> absencesToRecover =
+        FluentIterable.from(list).transform(
+            new Function<Absence, AbsenceToRecoverDto>() {
+              @Override
+              public AbsenceToRecoverDto apply(Absence absence) {
+                return new AbsenceToRecoverDto(
+                absence, absence.personDay.date, absence.expireRecoverDate,
+                absence.timeToRecover,
+                absence.timeVariations.stream().mapToInt(i -> i.timeVariation).sum(),
+                Math.round(absence.timeVariations.stream().mapToInt(i -> i.timeVariation).sum() 
+                / (float) absence.timeToRecover * 100)
+                );
+              }
+            }
+       ).toList();
+
     return absencesToRecover;
   }
 

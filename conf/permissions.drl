@@ -465,6 +465,9 @@ when
 
      	/* Assenze annuali */
      	"Absences.absencesPerPerson",
+     	
+     	/* Gestione riposi compensativi per chiusura ente*/
+     	"TimeVariations.personShow",
 
      	/* Ferie */
      	"Vacations.show",
