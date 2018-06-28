@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import lombok.extern.slf4j.Slf4j;
 
+import manager.ConsistencyManager;
 import manager.TimeVariationManager;
 
 import models.TimeVariation;
@@ -30,6 +31,8 @@ public class TimeVariations extends Controller {
   static SecurityRules rules;
   @Inject
   private static TimeVariationManager timeVariationManager;
+  @Inject
+  private static ConsistencyManager consistencyManager;
 
   /**
    * Action che abilita la finestra di assegnamento di una variazione.
@@ -56,6 +59,7 @@ public class TimeVariations extends Controller {
     TimeVariation timeVariation = timeVariationManager.create(absence, hours, minutes);
     
     timeVariation.save();
+    consistencyManager.updatePersonSituation(absence.personDay.person.id, LocalDate.now());
     flash.success("Aggiornato recupero ore per assenza %s in data %s", 
         absence.absenceType.code, absence.personDay.date);
     Stampings.personStamping(absence.personDay.person.id, 

@@ -93,6 +93,9 @@ public class ContractMonthRecap extends BaseModel {
 
   @Column(name = "s_rc_min")
   public int riposiCompensativiMinutiPrint = 0;    //per il template
+  
+  @Column(name = "s_91ce_min")
+  public int riposiCompensativiChiusuraEnteMinutiPrint = 0;    //per il template
 
   @Column(name = "s_ol")
   public int oreLavorate = 0;                // riepilogo per il template
@@ -114,7 +117,15 @@ public class ContractMonthRecap extends BaseModel {
   public int riposiCompensativiMinutiImputatoAnnoCorrente = 0;
   @Column(name = "d_rc_pfp")
   public int riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese = 0;
+  
+  @Column(name = "d_91ce_ap")
+  public int riposiCompensativiChiusuraEnteMinutiImputatoAnnoPassato = 0;
+  @Column(name = "d_91ce_ac")
+  public int riposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente = 0;
+  @Column(name = "d_91ce_pfp")
+  public int riposiCompensativiChiusuraEnteMinutiImputatoProgressivoFinalePositivoMese = 0;
 
+  
   @Column(name = "d_r_ap")
   public Integer remainingMinutesLastYear = 0;
 
@@ -135,6 +146,9 @@ public class ContractMonthRecap extends BaseModel {
   @Transient
   public int riposiCompensativiMinuti = 0;    //absences  (di appoggio deducibile dalle imputazioni)
   // in charts è usato... capire cosa contiene alla fine e fixare
+  
+  @Transient
+  public int riposiCompensativiChiusuraEnteMinuti = 0;
 
   //person day  // (di appoggio deducibile dalle imputazioni)
   @Transient
@@ -232,6 +246,9 @@ public class ContractMonthRecap extends BaseModel {
     this.riposiCompensativiMinutiImputatoAnnoPassato = 0;
     this.riposiCompensativiMinutiImputatoAnnoCorrente = 0;
     this.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese = 0;
+    this.riposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente = 0;
+    this.riposiCompensativiChiusuraEnteMinutiImputatoAnnoPassato = 0;
+    this.riposiCompensativiChiusuraEnteMinutiImputatoProgressivoFinalePositivoMese = 0;
     this.remainingMinutesLastYear = 0;
     this.remainingMinutesCurrentYear = 0;
     this.remainingMealTickets = 0;

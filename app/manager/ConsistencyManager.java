@@ -5,10 +5,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
+import dao.AbsenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonShiftDayDao;
+import dao.TimeVariationDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
@@ -20,6 +23,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 import manager.cache.StampTypeManager;
 import manager.configurations.ConfigurationManager;
@@ -37,6 +42,7 @@ import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
 import models.Stamping.WayType;
+import models.TimeVariation;
 import models.User;
 import models.absences.Absence;
 import models.absences.GroupAbsenceType;
@@ -70,6 +76,8 @@ public class ConsistencyManager {
   private final ShiftManager2 shiftManager2;
   private final AbsenceService absenceService;
   private final AbsenceComponentDao absenceComponentDao;
+  private final TimeVariationDao timeVariationDao;
+  private final AbsenceDao absenceDao;
 
 
   /**
@@ -102,8 +110,8 @@ public class ConsistencyManager {
       ShiftManager2 shiftManager2,
       AbsenceService absenceService,
       AbsenceComponentDao absenceComponentDao,
-
-      IWrapperFactory wrapperFactory) {
+      TimeVariationDao timeVariationDao,
+      IWrapperFactory wrapperFactory, AbsenceDao absenceDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -119,6 +127,8 @@ public class ConsistencyManager {
     this.stampTypeManager = stampTypeManager;
     this.personShiftDayDao = personShiftDayDao;
     this.shiftManager2 = shiftManager2;
+    this.timeVariationDao = timeVariationDao;
+    this.absenceDao = absenceDao;
   }
 
   /**
@@ -555,8 +565,16 @@ public class ConsistencyManager {
           log.error("No vacation period {}", contract.toString());
           continue;
         }
-
-        populateContractMonthRecap(wrContract, Optional.fromNullable(yearMonthFrom));
+        LocalDate begin = new LocalDate(yearMonthFrom.getYear(), yearMonthFrom.getMonthOfYear(), 1);
+        LocalDate end = begin.dayOfMonth().withMaximumValue();
+        List<Absence> absences = absenceDao.absenceInPeriod(person, begin, end, "91CE");
+        List<TimeVariation> list = absences.stream()
+            .flatMap(abs -> abs.timeVariations.stream()
+                .filter(tv -> !tv.dateVariation.isBefore(begin) 
+                    && !tv.dateVariation.isAfter(end)))
+            .collect(Collectors.toList());
+            
+        populateContractMonthRecap(wrContract, Optional.fromNullable(yearMonthFrom), list);
       }
     }
   }
@@ -591,7 +609,7 @@ public class ConsistencyManager {
    * la stessa procedura dall'inizio del contratto. (Capire se questo caso si verifica mai).
    */
   private void populateContractMonthRecap(IWrapperContract contract,
-      Optional<YearMonth> yearMonthFrom) {
+      Optional<YearMonth> yearMonthFrom, List<TimeVariation> timeVariationList) {
 
     // Conterrà il riepilogo precedente di quello da costruire all'iterazione n.
     Optional<ContractMonthRecap> previousMonthRecap = Optional.<ContractMonthRecap>absent();
@@ -616,7 +634,7 @@ public class ConsistencyManager {
       if (!previousMonthRecap.isPresent()) {
         // Ho chiesto un mese specifico ma non ho il riepilogo precedente
         // per costruirlo. Soluzione: costruisco tutti i riepiloghi del contratto.
-        populateContractMonthRecap(contract, Optional.<YearMonth>absent());
+        populateContractMonthRecap(contract, Optional.<YearMonth>absent(), timeVariationList);
       }
     } else if (contract.getValue().sourceDateResidual != null
         && yearMonthToCompute.isEqual(new YearMonth(contract.getValue().sourceDateResidual))) {
@@ -642,12 +660,14 @@ public class ConsistencyManager {
       LocalDate lastDayInYearMonth =
           new LocalDate(yearMonthToCompute.getYear(), yearMonthToCompute.getMonthOfYear(), 1)
               .dayOfMonth().withMaximumValue();
-
+      
       // (2) RESIDUI
       List<Absence> otherCompensatoryRest = Lists.newArrayList();
+      
       Optional<ContractMonthRecap> recap =
           contractMonthRecapManager.computeResidualModule(currentMonthRecap, previousMonthRecap,
-              yearMonthToCompute, lastDayInYearMonth, otherCompensatoryRest);
+              yearMonthToCompute, lastDayInYearMonth, otherCompensatoryRest, 
+              Optional.fromNullable(timeVariationList));
 
       recap.get().save();
       contract.getValue().contractMonthRecaps.add(recap.get());
@@ -705,7 +725,7 @@ public class ConsistencyManager {
     // Informazioni relative ai residui
     List<Absence> otherCompensatoryRest = Lists.newArrayList();
     contractMonthRecapManager.computeResidualModule(cmr, Optional.<ContractMonthRecap>absent(),
-        yearMonthToCompute, new LocalDate().minusDays(1), otherCompensatoryRest);
+        yearMonthToCompute, new LocalDate().minusDays(1), otherCompensatoryRest, Optional.absent());
 
     cmr.save();
 
