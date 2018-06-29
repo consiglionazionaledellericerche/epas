@@ -835,6 +835,10 @@ public enum DefaultAbsenceType {
   A_54VVH7("54VVH7", "comp. congedo donne vittime di violenza",               
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true /*festivo capire*/, false,    
       0, null, null, null),
+  A_58("58", "aspett. per funz. pubb. non retr.",               
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true /*festivo capire*/, false,    
+      0, null, null, null),
+  
   
   A_95046("95046", "perm. funz. pubb. giunte provin. 6 h",
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 360, false, false,
