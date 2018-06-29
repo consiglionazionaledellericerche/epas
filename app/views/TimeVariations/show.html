@@ -5,7 +5,12 @@
 <div class="container">
 #{title title:'Situazione riposi compensativi per chiusura ente ' + office.name, administration:true /}
 
-
+	#{if map.isEmpty()}
+		#{alert color:'info', center:true}
+  			Non sono state inserite assenze di tipo 91CE per nessuno dei dipendenti della sede <strong>${office.name}</strong>.
+    	#{/alert}
+	#{/if}
+	#{else}
 	<table class="table table-striped table-hover" width="100%" datatable>
 		<thead>
 			<tr>
@@ -61,4 +66,5 @@
 		</tbody>
 
 	</table>
+	#{/else}
 </div>
