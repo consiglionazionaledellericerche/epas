@@ -1,24 +1,29 @@
 package controllers;
 
 import com.google.common.base.Function;
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
-
-import controllers.JsonExport.PersonInfo;
+import com.google.common.collect.Sets;
 
 import dao.AbsenceDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.TimeVariationDao;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ConsistencyManager;
+import manager.PersonManager;
 import manager.TimeVariationManager;
 
+import models.Office;
 import models.Person;
 import models.TimeVariation;
 import models.User;
@@ -27,15 +32,12 @@ import models.absences.JustifiedType.JustifiedTypeName;
 import models.dto.AbsenceToRecoverDto;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import play.mvc.Controller;
 import play.mvc.With;
 
 import security.SecurityRules;
-
-import java.util.List;
-
-
 
 @Slf4j
 @With({Resecure.class})
@@ -51,6 +53,10 @@ public class TimeVariations extends Controller {
   private static ConsistencyManager consistencyManager;
   @Inject
   private static TimeVariationDao timeVariationDao;
+  @Inject
+  private static OfficeDao officeDao;
+  @Inject
+  private static PersonManager personManager;
   @Inject
   private static PersonDao personDao;
 
@@ -115,8 +121,21 @@ public class TimeVariations extends Controller {
 
   }
   
+  /**
+   * Metodo che genera il template per la visualizzazione della situazione dei 91CE dei
+   * dipendenti di una sede.
+   * @param officeId l'id della sede di cui visualizzare i dipendenti
+   */
   public static void show(long officeId) {
-    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    Set<Office> offices = Sets.newHashSet();
+    offices.add(office);
+    List<Person> personList = personDao.getActivePersonInMonth(offices, 
+        new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
+    Map<Person, List<AbsenceToRecoverDto>> map = timeVariationManager.createMap(personList, office);
+    render(map, office);
   }
   
   /**
@@ -134,22 +153,8 @@ public class TimeVariations extends Controller {
     List<Absence> absenceList = absenceDao.getAbsenceByCodeInPeriod(
         Optional.fromNullable(person), Optional.absent(), date, LocalDate.now(), 
         Optional.fromNullable(JustifiedTypeName.recover_time), false, true);
-    List<AbsenceToRecoverDto> dtoList =
-        FluentIterable.from(absenceList).transform(
-            new Function<Absence, AbsenceToRecoverDto>() {
-              @Override
-              public AbsenceToRecoverDto apply(Absence absence) {
-                return new AbsenceToRecoverDto(
-                absence, absence.personDay.date, absence.expireRecoverDate,
-                absence.timeToRecover,
-                absence.timeVariations.stream().mapToInt(i -> i.timeVariation).sum(),
-                Math.round(absence.timeVariations.stream().mapToInt(i -> i.timeVariation).sum() 
-                    / (float) absence.timeToRecover * 100)
-                );
-              }
-            }
-       ).toList();
-    
+    List<AbsenceToRecoverDto> dtoList = personManager.dtoList(absenceList);
+     
     render(dtoList, person);
     
   }
