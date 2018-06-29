@@ -80,3 +80,4 @@ DROP TABLE contractual_clauses_contractual_references_history;
 DROP TABLE contractual_clauses_contractual_references;
 DROP TABLE contractual_clauses_history;
 DROP TABLE contractual_clauses;
+
