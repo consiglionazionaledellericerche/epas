@@ -1,0 +1,43 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set absenceRequestTypeLabel: messages.get('AbsenceRequestType.' + type.toString() + 'S') /}
+#{set title:('ePAS - ' + absenceRequestTypeLabel) /}
+
+#{switcher year:true, month:true /}
+
+#{set breadcrumbs:[(absenceRequestTypeLabel):null] /}
+
+<div class="container">
+  #{breadcrumbs breadcrumbs /}
+
+  #{title title:absenceRequestTypeLabel.capitalize(), administration:true /} 
+ 
+  #{b.buttons center:true}
+  		<a class="btn btn-success" href="@{AbsenceRequests.blank('person':person, 'type':type)}">
+    		<i class="fa fa-plus"></i> &{'AbsenceRequestType.' + type + '.blank'}
+  		</a>
+  #{/b.buttons}
+ 
+  <table  class="table table-striped table-hover table-bordered table-condensed center" datatable width="100%">
+	<thead>
+		<tr>
+		    <th width="15%">&{'absenceRequest.type'}</th>
+			<th>&{'absenceRequest.description'}
+		    <th width="15%">&{'absenceRequest.startAt'}</th>
+			<th width="15%">&{'absenceRequest.endTo'}</th>
+		</tr>	
+	</thead>
+
+	<tbody>
+		#{list items:results.list(), as:'item'}
+			<tr>
+				<td>&{item.type}</td>
+				<td>&{item.description}</td>
+				<td>${item.startAt.format()}</td>	    
+				<td>${item.endAt.format()}</td>
+				<td>
+			</tr>
+		#{/list}
+	</tbody>
+  </table>
+</div>

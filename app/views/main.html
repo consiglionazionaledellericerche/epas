@@ -79,6 +79,11 @@
           #{include './_employeeMenu.html' /}
         #{/if}
 
+        *{ Ruolo Dipendente }*
+        #{if currentUser.hasRoles(models.Role.EMPLOYEE) }
+          #{include './_workflowsMenu.html' /}
+        #{/if}
+
         *{Ruoli di Sistema, Amministratore del personale, Amministratore del personale in sola lettura}*
         #{if currentUser.roles.contains(models.enumerate.AccountRole.ADMIN) 
         	|| currentUser.roles.contains(models.enumerate.AccountRole.DEVELOPER)

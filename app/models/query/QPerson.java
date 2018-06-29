@@ -57,6 +57,8 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final StringPath fax = createString("fax");
 
+    public final StringPath fullname = createString("fullname");
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 
@@ -123,6 +125,8 @@ public class QPerson extends EntityPathBase<Person> {
     public final NumberPath<Integer> version = _super.version;
 
     public final BooleanPath wantEmail = createBoolean("wantEmail");
+
+    public final ListPath<models.ZoneToZones, QZoneToZones> zones = this.<models.ZoneToZones, QZoneToZones>createList("zones", models.ZoneToZones.class, QZoneToZones.class, PathInits.DIRECT2);
 
     public QPerson(String variable) {
         this(Person.class, forVariable(variable), INITS);

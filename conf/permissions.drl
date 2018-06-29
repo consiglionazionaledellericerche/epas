@@ -466,6 +466,16 @@ when
      	/* Assenze annuali */
      	"Absences.absencesPerPerson",
 
+		/* Richieste di assenza */
+		"AbsenceRequests.blank",
+		"AbsenceRequests.edit",
+		"AbsenceRequests.save",
+		"AbsenceRequests.list",
+		"AbsenceRequests.delete",
+		"AbsenceRequests.vacations",
+		"AbsenceRequests.compensatoryRests",
+		"AbsenceRequests.shortTermPermits",
+		
      	/* Ferie */
      	"Vacations.show",
      	"Vacations.personVacationSummary",
