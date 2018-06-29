@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import play.data.binding.Global;
@@ -12,10 +13,10 @@ import play.data.binding.types.DateBinder;
 
 @Slf4j
 @Global
-public class LocalDateBinder implements TypeBinder<LocalDate> {
+public class LocalDateTimeBinder implements TypeBinder<LocalDateTime> {
 
   private static final DateBinder DATE_BINDER = new DateBinder();
-  private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("YYYY-MM-dd");
+  private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("YYYY-MM-dd hh:mm");
 
   @SuppressWarnings("rawtypes")
   @Override
@@ -27,9 +28,9 @@ public class LocalDateBinder implements TypeBinder<LocalDate> {
     try {
       return LocalDate.parse(value, dtf);
     } catch (Exception ignored) {
-      log.error("Exception during LocalDate binding", ignored);
+      log.error("Exception during LocalDateTime binding", ignored);
     }
 
-    return new LocalDate(DATE_BINDER.bind(name, annotations, value, actualClass, genericType));
+    return new LocalDateTime(DATE_BINDER.bind(name, annotations, value, actualClass, genericType));
   }
 }

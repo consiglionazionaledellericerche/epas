@@ -33,21 +33,29 @@ public class QContractualClause extends EntityPathBase<ContractualClause> {
 
     public final SetPath<models.contractual.ContractualReference, QContractualReference> contractualReferences = this.<models.contractual.ContractualReference, QContractualReference>createSet("contractualReferences", models.contractual.ContractualReference.class, QContractualReference.class, PathInits.DIRECT2);
 
-    public final StringPath description = createString("description");
-
     //inherited
     public final DatePath<org.joda.time.LocalDate> endDate = _super.endDate;
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final StringPath fruitionTime = createString("fruitionTime");
+
+    public final StringPath howToRequest = createString("howToRequest");
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 
+    public final StringPath legalAndEconomic = createString("legalAndEconomic");
+
     public final StringPath name = createString("name");
+
+    public final StringPath otherInfos = createString("otherInfos");
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
+
+    public final StringPath supportingDocumentation = createString("supportingDocumentation");
 
     //inherited
     public final NumberPath<Integer> version = _super.version;

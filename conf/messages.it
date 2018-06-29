@@ -1,3 +1,9 @@
+absenceRequest.endTo =Fine
+absenceRequest.description =Descrizione
+absenceRequest.person =Dipendente
+absenceRequest.startAt =Inizio
+absenceRequest.type =Tipologia
+
 activity =Attività di turno
 ADD= Inserimento
 
@@ -662,6 +668,23 @@ Contracts.updateContractVacationPeriod= Piani Ferie
 Contracts.updateContractWorkingTimeType= Tipo Orario
 Contracts.updateSourceContract= Inizializzazione
 Contracts.initializationsStatus=Dati Iniziali
+
+AbsenceRequests.vacations =Richieste di ferie
+AbsenceRequests.compensatoryRests =Riposi compensativi
+AbsenceRequests.shortTermPermit =Riposi compensativi
+
+AbsenceRequestType.VACATION_REQUEST =richiesta di ferie
+AbsenceRequestType.VACATION_REQUESTS =richieste ferie
+AbsenceRequestType.VACATION_REQUEST.blank =nuova richiesta ferie
+
+AbsenceRequestType.COMPENSATORY_REST =riposo compensativo
+AbsenceRequestType.COMPENSATORY_RESTS =riposi compensativi
+AbsenceRequestType.COMPENSATORY_REST.blank =nuova richista riposo compensativi
+
+AbsenceRequestType.SHORT_TERM_PERMIT =permesso breve
+AbsenceRequestType.SHORT_TERM_PERMITS =permessi breve
+AbsenceRequestType.SHORT_TERM_PERMIT.blank =nuova richiesta permesso breve
+
 Institutes.list= Sedi e Amministratori
 MealTickets.editPersonMealTickets= Modifica Buoni Consegnati
 MealTickets.findCodeBlock= Ricerca Buoni Pasto

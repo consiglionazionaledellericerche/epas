@@ -13,13 +13,13 @@ import org.joda.time.LocalDate;
  * @author cristian
  *
  */
-public class AbsenceRequestsManager {
+public class AbsenceRequestManager {
 
 
   private ConfigurationManager configurationManager;
   
   @Inject
-  public AbsenceRequestsManager(ConfigurationManager configurationManager) {
+  public AbsenceRequestManager(ConfigurationManager configurationManager) {
     this.configurationManager = configurationManager;
   }
   
