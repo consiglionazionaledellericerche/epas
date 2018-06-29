@@ -1,0 +1,49 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Istituti contrattuali' /}
+
+ <div class="container">
+    #{form @save(),class:'form-horizontal'}
+
+    #{alert color:'info'}
+      <p>
+ 	    #{if contractualClause?.isPersistent()}
+ 		  Modifica dati per l'istituto contrattuale <strong>${contractualClause.name}</strong>
+ 	    #{/if}#{else}
+ 		  Nuovo istituto contrattuale.
+   	    #{/else}
+ 	  </p>
+      #{/alert}
+
+        <input type="hidden" name="contractualClause.id" value="${contractualClause?.id}">
+ 	
+ 		#{f.input 'contractualClause.name', required:'true', value:contractualClause?.name /}
+ 		#{f.textArea 'contractualClause.fruitionTime', rows:4, class:'wysiswyg' /}
+		#{f.textArea 'contractualClause.howToRequest', rows:4, class:'wysiswyg' /}
+		#{f.textArea 'contractualClause.supportingDocumentation', rows:4, class:'wysiswyg' /}
+ 		#{f.textArea 'contractualClause.legalAndEconomic', rows:4, class:'wysiswyg' /}
+		#{f.textArea 'contractualClause.otherInfos', rows:4, class:'wysiswyg' /}
+		
+ 		#{f.selectEnum 'contractualClause.context', items:models.enumerate.ContractualClauseContext, 
+ 			value:contractualClause.context, required:true /}
+ 		 
+ 		#{f.date 'contractualClause.beginDate', required:true /}
+		#{f.date 'contractualClause.endDate' /}
+		
+	    #{f.selectModels 'categoryGroupAbsenceTypes',	    	
+	    	items:templateUtility.allCategoryGroupAbsenceTypes(),
+	    	values:categoryGroupAbsenceTypes /}
+
+	    #{f.selectModels 'contractualReferences',	    	
+	    	label:'contractualClause.contractualReferences',
+	    	items:templateUtility.allContractualReferences(),
+	    	values:contractualReferences /}
+		
+        <div class="container center">
+            <a class="btn btn-default" href="@{list()}">Torna alla lista</a>
+	        <input class="btn btn-primary" type="submit" value="Ok">
+	        <a class="btn btn-danger" href="@{delete(contractualClause.id)}">Elimina</a>
+        </div>
+   #{/form}
+
+</div>

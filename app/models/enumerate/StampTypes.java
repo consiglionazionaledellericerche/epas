@@ -90,10 +90,17 @@ public enum StampTypes {
    */
   public static List<StampTypes> onlyActive() {
     return Arrays.stream(values())
-        .filter(StampTypes::isActive)
-        .filter(StampTypes::isNotOffSiteWork).collect(Collectors.toList());
+        .filter(StampTypes::isActive).collect(Collectors.toList());
   }
 
+  /**
+   * Lista delle stampTypes attive ma senza il lavoro fuori sede.
+   * @return lista delle stampTypes attive ma senza il lavoro fuori sede.
+   */
+  public static List<StampTypes> onlyActiveWithoutOffSiteWork() {
+    return onlyActive().stream().filter(StampTypes::isNotOffSiteWork).collect(Collectors.toList());
+  }
+  
   /**
    * @return true se la causale passata come parametro è attiva. False altrimenti
    */

@@ -1,5 +1,6 @@
 package models.exports;
 
+import lombok.ToString;
 import models.Person;
 import models.enumerate.StampTypes;
 import org.joda.time.LocalDateTime;
@@ -9,6 +10,7 @@ import org.joda.time.LocalDateTime;
  *
  * @author cristian
  */
+@ToString
 public class StampingFromClient {
 
   public String numeroBadge;

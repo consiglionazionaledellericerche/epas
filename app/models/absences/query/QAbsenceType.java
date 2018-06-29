@@ -38,6 +38,8 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
     public final StringPath description = createString("description");
 
+    public final StringPath documentation = createString("documentation");
+
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 

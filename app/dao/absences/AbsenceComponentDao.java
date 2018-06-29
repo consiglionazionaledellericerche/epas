@@ -5,20 +5,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
-
 import dao.DaoBase;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-
 import javax.persistence.EntityManager;
-
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -43,9 +38,7 @@ import models.absences.query.QJustifiedType;
 import models.absences.query.QTakableAbsenceBehaviour;
 import models.query.QPerson;
 import models.query.QPersonDay;
-
 import org.joda.time.LocalDate;
-
 import play.db.jpa.JPA;
 
 /**
@@ -60,8 +53,8 @@ public class AbsenceComponentDao extends DaoBase {
   }
 
   
-  
   /**
+   * AbsenceType per id.
    * @return l'absenceType relativo all'id passato come parametro.
    */
   public Optional<AbsenceType> absenceTypeById(Long id) {
@@ -72,6 +65,7 @@ public class AbsenceComponentDao extends DaoBase {
   }
 
   /**
+   * AbsenceType per campo code.
    * @return l'absenceType relativo al codice passato come parametro.
    */
   public Optional<AbsenceType> absenceTypeByCode(String string) {
@@ -84,6 +78,7 @@ public class AbsenceComponentDao extends DaoBase {
   }
   
   /**
+   * AbsenceType per campo certification.
    * @return l'absenceType relativo al codice passato come parametro nel campo certification.
    */
   public List<AbsenceType> absenceTypesByCertificationCode(String string) {
