@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ListaDipendenti {
 
-  public int codiceSede;
+  public String codiceSede;
   public int anno;
   public int mese;
   public List<Matricola> dipendenti = Lists.newArrayList();

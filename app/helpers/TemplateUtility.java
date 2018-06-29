@@ -1,15 +1,17 @@
-package controllers;
+package helpers;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
+import controllers.Security;
 import dao.AbsenceTypeDao;
 import dao.BadgeReaderDao;
 import dao.BadgeSystemDao;
+import dao.CategoryGroupAbsenceTypeDao;
 import dao.CompetenceCodeDao;
+import dao.ContractualReferenceDao;
 import dao.MemoizedCollection;
 import dao.MemoizedResults;
 import dao.NotificationDao;
@@ -23,22 +25,16 @@ import dao.UserDao;
 import dao.WorkingTimeTypeDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
-
 import helpers.jpa.ModelQuery;
-
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
-
 import manager.SecureManager;
 import manager.attestati.service.AttestatiApis;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
-
 import models.BadgeReader;
 import models.BadgeSystem;
 import models.CompetenceCode;
@@ -47,7 +43,6 @@ import models.Institute;
 import models.Notification;
 import models.Office;
 import models.Person;
-import models.PersonShift;
 import models.Qualification;
 import models.Role;
 import models.User;
@@ -55,12 +50,12 @@ import models.UsersRolesOffices;
 import models.WorkingTimeType;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
+import models.absences.CategoryGroupAbsenceType;
 import models.absences.GroupAbsenceType;
+import models.contractual.ContractualReference;
 import models.enumerate.LimitType;
 import models.enumerate.StampTypes;
-
 import org.joda.time.LocalDate;
-
 import synch.diagnostic.SynchDiagnostic;
 
 /**
@@ -84,14 +79,14 @@ public class TemplateUtility {
   private final WorkingTimeTypeDao workingTimeTypeDao;
   private final IWrapperFactory wrapperFactory;
   private final BadgeSystemDao badgeSystemDao;
+  private final CategoryGroupAbsenceTypeDao categoryGroupAbsenceTypeDao;
+  private final ContractualReferenceDao contractualReferenceDao;
   private final SynchDiagnostic synchDiagnostic;
   private final ConfigurationManager configurationManager;
   private final CompetenceCodeDao competenceCodeDao;
-  private final ShiftDao shiftDao;
   private final MemoizedCollection<Notification> notifications;
   private final MemoizedCollection<Notification> archivedNotifications;
-  private final AbsenceComponentDao absenceComponentDao;
-
+  
   @Inject
   public TemplateUtility(
       SecureManager secureManager, OfficeDao officeDao, PersonDao personDao,
@@ -101,7 +96,9 @@ public class TemplateUtility {
       SynchDiagnostic synchDiagnostic, ConfigurationManager configurationManager,
       CompetenceCodeDao competenceCodeDao, ShiftDao shiftDao, 
       AbsenceComponentDao absenceComponentDao,
-      NotificationDao notificationDao, UserDao userDao) {
+      NotificationDao notificationDao, UserDao userDao,
+      CategoryGroupAbsenceTypeDao categoryGroupAbsenceTypeDao,
+      ContractualReferenceDao contractualReferenceDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -116,10 +113,10 @@ public class TemplateUtility {
     this.synchDiagnostic = synchDiagnostic;
     this.configurationManager = configurationManager;
     this.competenceCodeDao = competenceCodeDao;
-    this.shiftDao = shiftDao;
     this.userDao = userDao;
-    this.absenceComponentDao = absenceComponentDao;
-
+    this.categoryGroupAbsenceTypeDao = categoryGroupAbsenceTypeDao;
+    this.contractualReferenceDao = contractualReferenceDao;
+    
     notifications = MemoizedResults
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
           @Override
@@ -243,16 +240,19 @@ public class TemplateUtility {
   public List<CompetenceCode> allCodesContainingGroupCodes(CompetenceCodeGroup group) {
     return competenceCodeDao.allCodesContainingGroupCodes(group);
   }
-  
-//  public List<PersonShift> allPersonShiftByOffice(Office office) {
-//    return shiftDao.getPeopleForShift(office);
-//  }
-  
+    
   public List<CompetenceCode> allOnMonthlyPresenceCodes() {
     return competenceCodeDao.getCompetenceCodeByLimitType(LimitType.onMonthlyPresence);
   }
 
-   
+  public List<CategoryGroupAbsenceType> allCategoryGroupAbsenceTypes() {
+    return categoryGroupAbsenceTypeDao.all();
+  }
+  
+  public List<ContractualReference> allContractualReferences() {
+    return contractualReferenceDao.all(Optional.of(false));
+  }
+  
   /**
    * Gli user associati a tutte le persone appartenenti all'istituto.
    */

@@ -262,6 +262,11 @@ public class Synchronizations extends Controller {
       seat.institute = institute.get();
     }
 
+    // TODO: spostare in un creator epas che venga utilizzato anche nelle crud
+    // (finchè non spariranno).
+    seat.beginDate = new LocalDate(LocalDate.now().getYear() - 1, 12, 31);
+    periodManager.updatePropertiesInPeriodOwner(seat);
+
     //Salvataggio sede
     validation.valid(seat);
     if (Validation.hasErrors()) {
@@ -273,10 +278,6 @@ public class Synchronizations extends Controller {
       institutes();
     }
 
-    // TODO: spostare in un creator epas che venga utilizzato anche nelle crud
-    // (finchè non spariranno).
-    seat.beginDate = new LocalDate(LocalDate.now().getYear() - 1, 12, 31);
-    periodManager.updatePropertiesInPeriodOwner(seat);
     seat.save();
 
     // Configurazione iniziale di default ...
@@ -495,6 +496,9 @@ public class Synchronizations extends Controller {
       }
 
       personInPerseo.get().office = office.get();
+      personInPerseo.get().beginDate = 
+          LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
+
       validation.valid(personInPerseo.get());
       if (Validation.hasErrors()) {
         // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
@@ -523,7 +527,6 @@ public class Synchronizations extends Controller {
   private static Optional<Person> personCreator(Person person) {
 
     try {
-      person.beginDate = LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
       person.user = userManager.createUser(person);
       person.save();
 
@@ -574,7 +577,8 @@ public class Synchronizations extends Controller {
 
         // join dell'office (in automatico ancora non c'è...)
         perseoPerson.office = office;
-
+        perseoPerson.beginDate = 
+            LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
         validation.valid(perseoPerson);
         if (Validation.hasErrors()) {
           // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!

@@ -305,6 +305,9 @@ public class StampingManager {
           + " non ha una istanza badgeReader valida associata.", user.get().username);
       return Optional.absent();
     }
+    if (stamping.numeroBadge == null) {
+      return Optional.absent();
+    }
     final Optional<Person> person = Optional.fromNullable(personDao
         .getPersonByBadgeNumber(stamping.numeroBadge, user.get().badgeReader));
 
