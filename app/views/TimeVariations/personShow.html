@@ -37,7 +37,7 @@
 	</td>	
 	
 	<td>
-		${(int)((entry.quantityToRecover - entry.quantityRecovered) / 60)} ore e ${(entry.quantityToRecover - entry.quantityRecovered) % 60} minuti
+		${(int)((entry.quantityRecovered - entry.quantityToRecover) / 60)} ore e ${(entry.quantityRecovered - entry.quantityToRecover) % 60} minuti
 	</td>
 	<td>${entry.absence.expireRecoverDate.format()}</td>
 	
