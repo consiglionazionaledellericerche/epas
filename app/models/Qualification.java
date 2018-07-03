@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import models.absences.AbsenceType;
 import models.base.BaseModel;
@@ -49,4 +50,5 @@ public class Qualification extends BaseModel {
     return getLabel();
   }
 
+  
 }
