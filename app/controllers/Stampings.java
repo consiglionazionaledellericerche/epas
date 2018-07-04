@@ -211,7 +211,11 @@ public class Stampings extends Controller {
     boolean autocertification = false;
     
     User user = Security.getUser().get();
-    
+    if (user.isSystemUser()) {
+      render(person, date, offsite, insertOffsite, insertNormal, autocertification);
+    }
+    IWrapperPerson wrperson = wrapperFactory
+        .create(Security.getUser().get().person);
     if (user.person != null && user.person.equals(person)) {
       if (UserDao.getAllowedStampTypes(user).contains(StampTypes.LAVORO_FUORI_SEDE)) {
         insertOffsite = true;
@@ -219,13 +223,14 @@ public class Stampings extends Controller {
       }
     }
     
-    if (user.person != null && user.person.equals(person)) {
+    if (user.person != null && user.person.equals(person) 
+        && !wrperson.isTechnician()) {
       if (person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")) {
         autocertification = true;
       }
     }
     
-    if (autocertification && insertOffsite) {
+    if (autocertification == true  && insertOffsite == true) {
       insertOffsite = false;
     }
     render(person, date, offsite, insertOffsite, insertNormal, autocertification);
