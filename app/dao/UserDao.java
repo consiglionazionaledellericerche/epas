@@ -186,11 +186,14 @@ public class UserDao extends DaoBase {
    */
   public static List<StampTypes> getAllowedStampTypes(final User user) {
 
-    if ((user.isSystemUser()
-        || user.hasRoles(Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN))) {
+    if (user.isSystemUser()){
       return StampTypes.onlyActive();
     }
     val stampTypes = Lists.<StampTypes>newArrayList();
+    if (user.hasRoles(Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, 
+        Role.TECHNICAL_ADMIN)) {
+      stampTypes.addAll(StampTypes.onlyActiveWithoutOffSiteWork());
+    }
     if ((user.person.qualification.qualification <= 3 
         && user.person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true"))) {
 
