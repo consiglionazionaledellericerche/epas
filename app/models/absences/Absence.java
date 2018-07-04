@@ -72,6 +72,7 @@ public class Absence extends BaseModel {
   @Column(name = "external_identifier")
   public Long externalIdentifier;
   
+
   //Nuovi campi per la possibilità di inserire le decurtazioni di tempo per i 91s
   @Column(name = "expire_recover_date")
   public LocalDate expireRecoverDate;
@@ -82,6 +83,10 @@ public class Absence extends BaseModel {
   @Audited
   @OneToMany(mappedBy = "absence", cascade = {CascadeType.ALL})
   public Set<TimeVariation> timeVariations = Sets.newHashSet();
+
+  @Column(name = "note")
+  public String note;
+
   
   @Override
   public String toString() {

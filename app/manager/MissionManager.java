@@ -41,6 +41,8 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.joda.time.Period;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.testng.collections.Lists;
 
 import play.db.jpa.JPA;
@@ -75,7 +77,9 @@ public class MissionManager {
     this.absenceTypeDao = absenceTypeDao;
   }
 
-    
+  private static final DateTimeFormatter DT_FORMATTER =
+      DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss");
+  
   /**
    * 
    * @param mission il dto creato dal json arrivato dal listener
@@ -247,7 +251,9 @@ public class MissionManager {
           absence.externalIdentifier = body.idOrdine;
         } else {
           absence.externalIdentifier = body.id;
-        }        
+        }
+        absence.note = "Inizio: " + DT_FORMATTER.print(body.dataInizio)
+            + System.lineSeparator() + "Fine: " + DT_FORMATTER.print(body.dataFine);
         personDay.absences.add(absence);
         absence.save();
         personDay.save();

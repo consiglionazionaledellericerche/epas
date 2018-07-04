@@ -165,6 +165,10 @@ public class PersonManager {
 
       if (fixed && !personDayManager.isAllDayAbsences(pd)) {
         basedDays++;
+      } else if (!fixed && pd.stampings.size() > 0 
+          && !personDayManager.isAllDayAbsences(pd) 
+          && pd.person.qualification.qualification < 4) {
+        basedDays++;
       } else if (!fixed && pd.stampings.size() > 0
           && !personDayManager.isAllDayAbsences(pd) 
           && personDayManager.enoughTimeInSeat(pd.stampings, day)) {
