@@ -37,7 +37,7 @@ public class PeriodChain {
   public List<Absence> previousInserts = Lists.newArrayList();
 
   //Assenze coinvolte nella catena (compresi i nuovi inserimenti) assegnate ad un periodo
-  public Set<Absence> involvedAbsences = Sets.newHashSet() ; 
+  public Set<Absence> involvedAbsences = Sets.newHashSet(); 
   //le assenze non assegnate ad alcun periodo perchè sono uscito in modo critico causa errori
   public Set<Absence> orphanAbsences = Sets.newHashSet();  
   

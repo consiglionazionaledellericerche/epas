@@ -15,6 +15,7 @@ import dao.PersonShiftDayDao;
 import dao.WorkingTimeTypeDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,8 @@ import models.Person;
 import models.PersonDay;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
+import models.WorkingTimeType;
+import models.WorkingTimeTypeDay;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
@@ -179,7 +182,7 @@ public class AbsenceManager {
     }
 
     Optional<ContractMonthRecap> recap = contractMonthRecapManager.computeResidualModule(cmr,
-        previousMonthRecap, yearMonth, dateForRecap, otherCompensatoryRest);
+        previousMonthRecap, yearMonth, dateForRecap, otherCompensatoryRest, Optional.absent());
 
     if (recap.isPresent()) {
       int residualMinutes = recap.get().remainingMinutesCurrentYear
@@ -197,11 +200,12 @@ public class AbsenceManager {
    * person situation - no invio email per conflitto reperibilità
    */
   public AbsenceInsertReport insertAbsenceSimulation(
-      Person person, LocalDate dateFrom, Optional<LocalDate> dateTo,
-      AbsenceType absenceType, Optional<Blob> file, Optional<String> mealTicket,
-      Optional<Integer> justifiedMinutes) {
+      Person person, LocalDate dateFrom, Optional<LocalDate> dateTo, 
+      AbsenceType absenceType, Optional<Blob> file, 
+      Optional<String> mealTicket, Optional<Integer> justifiedMinutes) {
 
-    return insertAbsence(person, dateFrom, dateTo, absenceType, file, mealTicket, justifiedMinutes,
+    return insertAbsence(person, dateFrom, dateTo,  
+        absenceType, file, mealTicket, justifiedMinutes,
         true, false);
   }
 
@@ -210,11 +214,12 @@ public class AbsenceManager {
    * email per conflitto reperibilità
    */
   public AbsenceInsertReport insertAbsenceRecompute(
-      Person person, LocalDate dateFrom, Optional<LocalDate> dateTo,
-      AbsenceType absenceType, Optional<Blob> file, Optional<String> mealTicket,
-      Optional<Integer> justifiedMinutes) {
+      Person person, LocalDate dateFrom, Optional<LocalDate> dateTo, 
+      Optional<LocalDate> recoveryDate, AbsenceType absenceType, Optional<Blob> file, 
+      Optional<String> mealTicket, Optional<Integer> justifiedMinutes) {
 
-    return insertAbsence(person, dateFrom, dateTo, absenceType, file, mealTicket, justifiedMinutes,
+    return insertAbsence(person, dateFrom, dateTo, 
+        absenceType, file, mealTicket, justifiedMinutes,
         false, true);
   }
 
@@ -225,18 +230,20 @@ public class AbsenceManager {
    * reperibilità
    */
   public AbsenceInsertReport insertAbsenceNotRecompute(
-      Person person, LocalDate dateFrom, Optional<LocalDate> dateTo,
-      AbsenceType absenceType, Optional<Blob> file, Optional<String> mealTicket,
-      Optional<Integer> justifiedMinutes) {
+      Person person, LocalDate dateFrom, Optional<LocalDate> dateTo, 
+      Optional<LocalDate> recoveryDate, AbsenceType absenceType, Optional<Blob> file, 
+      Optional<String> mealTicket, Optional<Integer> justifiedMinutes) {
 
-    return insertAbsence(person, dateFrom, dateTo, absenceType, file, mealTicket, justifiedMinutes,
+    return insertAbsence(person, dateFrom, dateTo,  
+        absenceType, file, mealTicket, justifiedMinutes,
         false, false);
   }
 
   private AbsenceInsertReport insertAbsence(
-      Person person, LocalDate dateFrom, Optional<LocalDate> dateTo,
-      AbsenceType absenceType, Optional<Blob> file, Optional<String> mealTicket,
-      Optional<Integer> justifiedMinutes, boolean onlySimulation, boolean recompute) {
+      Person person, LocalDate dateFrom, Optional<LocalDate> dateTo, 
+      AbsenceType absenceType, Optional<Blob> file, 
+      Optional<String> mealTicket, Optional<Integer> justifiedMinutes, 
+      boolean onlySimulation, boolean recompute) {
 
     Preconditions.checkNotNull(person);
     Preconditions.checkNotNull(absenceType);
@@ -641,6 +648,30 @@ public class AbsenceManager {
       pd.save();
       return;
     }
+  }
+  
+  /**
+   * Metodo di utilità per popolare correttamente i cmapi dell'absence.
+   * @param absence l'assenza
+   * @param person la persona
+   * @param recoveryDate la data entro cui recuperare il riposo compensativo CE
+   * @return l'assenza con aggiunti i campi utili per i riposi compensativi a recupero.
+   */
+  public Absence handleRecoveryAbsence(Absence absence, Person person, LocalDate recoveryDate) {
+    absence.expireRecoverDate = recoveryDate;
+    IWrapperPerson wrPerson = wrapperFactory.create(person);
+    Optional<WorkingTimeType> wtt = wrPerson.getCurrentWorkingTimeType();
+    if (wtt.isPresent()) {
+      java.util.Optional<WorkingTimeTypeDay> wttd = wtt.get().workingTimeTypeDays.stream()
+          .filter(w -> w.dayOfWeek == absence.getAbsenceDate().getDayOfWeek()).findFirst();
+      if (wttd.isPresent()) {
+        absence.timeToRecover = wttd.get().workingTime;
+      } else {
+        absence.timeToRecover = 432;
+      }
+      
+    }
+    return absence;
   }
 
   /**
