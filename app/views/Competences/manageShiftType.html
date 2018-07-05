@@ -12,7 +12,8 @@
 
   	#{tabList}
   		#{tabItem id:'people', title:'Persone associate', active:true /} 
-  		#{tabItem id:'activity', title:'Attività' /}  		 		
+  		#{tabItem id:'activity', title:'Attività' /} 
+  		#{tabItem id:'timeTable', title:'Orario turno' /} 		 		
   	#{/tabList}
   	
   	#{tabContent}
@@ -126,6 +127,26 @@
 		#{/form}
 
 	#{/tabContentItem}
+	
+	#{tabContentItem id:'timeTable'}
+		<br>
+		<div class="col-sm-6 col-sm-offset-3">
+		#{alert color: 'info'}
+		Orario turno mattina: <strong>${type.shiftTimeTable.startMorning.format()} - ${type.shiftTimeTable.endMorning.format()}</strong>
+		#{/alert}
+		
+		#{alert color: 'info'}
+		Orario turno pomeriggio: <strong>${type.shiftTimeTable.startAfternoon.format()} - ${type.shiftTimeTable.endAfternoon.format()}</strong>
+		#{/alert}
+		
+		#{if type.shiftTimeTable.startEvening != null}
+			#{alert color: 'info'}
+			Orario turno sera: <strong>${type.shiftTimeTable.startEvening.format()} - ${type.shiftTimeTable.endEvening.format()}</strong>
+			#{/alert}		
+		#{/if}
+		</div>
+	#{/tabContentItem}
+	
 	#{/tabContent}
 </div>
 
