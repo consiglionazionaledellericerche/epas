@@ -23,7 +23,7 @@ public class ShibbolethTest extends FunctionalTest {
   @Test
   public void testShibbolethAuthentication() {
     assertThat(
-        Person.find("SELECT p FROM Person p where email = ?" , "cristian.lucchesi@iit.cnr.it")
+        Person.find("SELECT p FROM Person p where email = ?", "cristian.lucchesi@iit.cnr.it")
           .first(),
         IsNull.notNullValue());
     // Set up the mock shibboleth attributes that

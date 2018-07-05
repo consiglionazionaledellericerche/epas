@@ -47,6 +47,9 @@ public class AbsenceForm {
   // switch date
   public LocalDate from;
   public LocalDate to;
+  
+  //for those absences who need future recovery of time
+  public LocalDate recoveryDate;
 
   //automatic choice
   public boolean automaticChoiceExists;
@@ -78,7 +81,7 @@ public class AbsenceForm {
    * @param absenceEngineUtility inj
    */
   protected AbsenceForm(Person person, LocalDate from, LocalDate to, 
-      GroupAbsenceType groupAbsenceType, 
+      LocalDate recoveryDate, GroupAbsenceType groupAbsenceType, 
       AbsenceType absenceType, JustifiedType justifiedType, 
       Integer hours, Integer minutes, List<GroupAbsenceType> groupsPermitted,
       AbsenceComponentDao absenceComponentDao, AbsenceEngineUtility absenceEngineUtility) {   
@@ -91,6 +94,7 @@ public class AbsenceForm {
     } else {
       this.to = from;
     }
+    
     this.groupsPermitted = groupsPermitted;
     
     //calcolo delle tab visibili
@@ -163,6 +167,16 @@ public class AbsenceForm {
       this.justifiedTypeSelected = this.justifiedTypes.iterator().next();
     }
 
+    
+    if (this.justifiedTypeSelected.name.equals(JustifiedTypeName.recover_time)) {
+      this.recoveryDate = from.plusDays(1);
+    } else {
+      this.recoveryDate = null;
+    }
+    if (recoveryDate != null) {
+      this.recoveryDate = recoveryDate;
+    }
+    
     if (minutes != null) {
       this.minutes = minutes;
     }

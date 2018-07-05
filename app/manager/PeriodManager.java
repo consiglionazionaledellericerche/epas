@@ -55,7 +55,7 @@ public class PeriodManager {
     //copia dei periodi ordinata
     List<IPropertyInPeriod> originals = Lists.newArrayList();
     for (IPropertyInPeriod originalPeriod :
-          propertyInPeriod.getOwner().periods(propertyInPeriod.getType()) ) {
+          propertyInPeriod.getOwner().periods(propertyInPeriod.getType())) {
       originals.add(originalPeriod);
     }
     Collections.sort(originals);

@@ -52,6 +52,7 @@ beginDate=Data Inizio
 endDate=Data Fine
 from=Da
 to=A
+recoveryDate=Da recuperare entro
 
 calendar.competencesApproved = Le competenze per questo mese sono state approvate
 calendar.competencesToBeApproved = Le competenze per questo mese sono da approvare
@@ -714,6 +715,8 @@ Stampings.personStamping= Timbrature
 Stampings.stampings= Situazione Mensile
 Synchronizations.institutes= Sincronizza Sedi
 Synchronizations.people= Sincronizza Personale
+TimeVariations.show= Riposi compensativi chiusura ente
+TimeVariations.personShow= Riposi compensativi chiusura ente
 Users.list= Gestione Utenti
 Vacations.show= Ferie
 Vacations.list= Ferie e Permessi

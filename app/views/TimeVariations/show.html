@@ -1,0 +1,70 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Situazione riposi compensativi chiusura ente'  /}
+
+<div class="container">
+#{title title:'Situazione riposi compensativi per chiusura ente ' + office.name, administration:true /}
+
+	#{if map.isEmpty()}
+		#{alert color:'info', center:true}
+  			Non sono state inserite assenze di tipo 91CE per nessuno dei dipendenti della sede <strong>${office.name}</strong>.
+    	#{/alert}
+	#{/if}
+	#{else}
+	<table class="table table-striped table-hover" width="100%" datatable>
+		<thead>
+			<tr>
+				<th class="col-md-4">Nome</th>
+				<th class="center">Riposi per chiusura ente</th>
+			</tr>
+		</thead>
+		<tbody>
+			#{list items:map.entrySet(), as:'key'}				
+		
+			<tr>
+				<td class="warning">${key.getKey().surname} ${key.getKey().name}</td>
+				
+				<td class="center">	
+				<table class="table">
+					<tr>
+						<th>Assenza</th>
+						<th>Lista dei recuperi</th>
+						<th>Situazione recupero</th>
+						<th>Scadenza recupero</th>
+					</tr>
+					#{list items:key.getValue(), as:'dto'}
+					<tr>
+					  	<td>${dto.absence.absenceType.code} <br> ${dto.absenceDate.format()}</td>
+					    <td>
+					    <ul class="list-group">
+					    #{list items:dto.absence.timeVariations, as:'tv'}
+					  		<li class="list-group-item">   
+					  		<span class="badge">${(int)(tv.timeVariation / 60)} ore e ${tv.timeVariation % 60} minuti</span> 
+					    	${tv.dateVariation.format()}
+					  		</li>
+					  	#{/list}
+						</ul>
+					    
+					    </td>     
+						<td>
+							<div class="progress">
+					  		<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="${dto.percentage}" 
+					  			aria-valuemin="0" aria-valuemax="100" style="width: ${dto.percentage}%">   
+					  			${dto.percentage}% 	
+					  		</div>
+							</div>
+						</td>	
+						<td>${dto.absence.expireRecoverDate.format()}</td>
+					
+				  	</tr>
+					#{/list}	
+					</table>
+				</td>				
+			</tr>
+
+			#{/list}
+		</tbody>
+
+	</table>
+	#{/else}
+</div>

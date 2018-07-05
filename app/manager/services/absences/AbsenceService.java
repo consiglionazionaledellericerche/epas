@@ -125,7 +125,7 @@ public class AbsenceService {
           .groupAbsenceTypes.iterator().next();
     }
     
-    AbsenceForm form = buildAbsenceForm(person, date, null, null, 
+    AbsenceForm form = buildAbsenceForm(person, date, null, null, null, 
         groupAbsenceType, true, null, null, null, null, true);
     
     return form;
@@ -149,8 +149,8 @@ public class AbsenceService {
    */
   public AbsenceForm buildAbsenceForm(
       Person person, LocalDate from, CategoryTab categoryTab,                            //tab 
-      LocalDate to, GroupAbsenceType groupAbsenceType,  boolean switchGroup,             //group
-      AbsenceType absenceType, JustifiedType justifiedType,                              //reconf 
+      LocalDate to, LocalDate recoveryDate, GroupAbsenceType groupAbsenceType,  
+      boolean switchGroup, AbsenceType absenceType, JustifiedType justifiedType,         //reconf 
       Integer hours, Integer minutes, boolean readOnly) {
     
     //clean entities
@@ -205,13 +205,13 @@ public class AbsenceService {
     
     //TODO: Preconditions se groupAbsenceType presente verificare che permesso per la persona
     
-    return new AbsenceForm(person, from, to, groupAbsenceType, absenceType, 
+    return new AbsenceForm(person, from, to, recoveryDate, groupAbsenceType, absenceType, 
         justifiedType, hours, minutes, groupsPermitted,
         absenceComponentDao, absenceEngineUtility);
   }
   
   /**
-   * Effettua la simuzione dell'inserimento. Genera il report di inserimento.
+   * Effettua la simulazione dell'inserimento. Genera il report di inserimento.
    * @param person person
    * @param groupAbsenceType gruppo
    * @param from data inizio
@@ -487,6 +487,8 @@ public class AbsenceService {
    */
   public List<GroupAbsenceType> groupsPermitted(Person person, boolean readOnly) {
     List<GroupAbsenceType> groupsPermitted = absenceComponentDao.allGroupAbsenceType(false);
+    log.info("Configurazione groupsPermitted, readOnly = {}, groupsPermitted = {}", 
+        readOnly, groupsPermitted);
     if (readOnly) {
       return groupsPermitted;
     }
@@ -499,12 +501,15 @@ public class AbsenceService {
     final GroupAbsenceType employeeOffseat = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.LAVORO_FUORI_SEDE.name()).get();
 
-    //final User currentUser = Security.getUser().get();
+    final User currentUser = Security.getUser().get();
     //final User currentUser = userDao.byUsername("app.missioni");
-    final User currentUser = userDao.getSystemUserByRole(AccountRole.MISSIONS_MANAGER);
+    //final User currentUser = userDao.getSystemUserByRole(AccountRole.MISSIONS_MANAGER);
      
     final boolean officeWriteAdmin = secureManager
         .officesWriteAllowed(currentUser).contains(person.office);
+    
+    log.info("officeWriteAdmin = {}, officeWriteAllowed = {}", 
+          officeWriteAdmin, secureManager.officesWriteAllowed(currentUser));
     
     //Utente di sistema o amministratore della persona
     if (currentUser.isSystemUser() || officeWriteAdmin) {
@@ -516,7 +521,7 @@ public class AbsenceService {
     
     //Persona stessa non autoamministrata
     if (currentUser.person.equals(person) && !officeWriteAdmin) {
-      
+      log.info("configurazione gruppi per persona, officeWriteAdmin = {}", officeWriteAdmin);
       //vedere le configurazioni
       groupsPermitted = Lists.newArrayList();
   
@@ -534,7 +539,7 @@ public class AbsenceService {
           && person.qualification.qualification <= 3) {
         groupsPermitted.add(employeeCompensatory);  
       }
-      
+      log.info("groupPermitted = {}", groupsPermitted);
       return groupsPermitted;
     }
     
@@ -543,8 +548,8 @@ public class AbsenceService {
   
   @Deprecated
   private InsertReport temporaryInsertCompensatoryRest(Person person, 
-      GroupAbsenceType groupAbsenceType, LocalDate from, LocalDate to, AbsenceType absenceType, 
-      AbsenceManager absenceManager) {
+      GroupAbsenceType groupAbsenceType, LocalDate from, LocalDate to, 
+      AbsenceType absenceType, AbsenceManager absenceManager) {
     
     if (absenceType == null || !absenceType.isPersistent()) {
       absenceType = absenceComponentDao.absenceTypeByCode("91").get();
@@ -552,8 +557,8 @@ public class AbsenceService {
 
     return insertReportFromOldReport(
         absenceManager.insertAbsenceSimulation(person, from, Optional.fromNullable(to), 
-            absenceType, Optional.absent(), Optional.absent(), Optional.absent()), 
-        groupAbsenceType);
+             absenceType, Optional.absent(), 
+            Optional.absent(), Optional.absent()), groupAbsenceType);
     
   }
   
