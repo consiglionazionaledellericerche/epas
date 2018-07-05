@@ -81,6 +81,9 @@
 	      <strong>Tempo Specificato</strong>
 	       ${_absence.justifiedTime().printHourMinute()}
 	    #{/if}
+	#{if _absence.note != null}    
+	<strong>Note</strong> ${_absence.note}<br>
+	#{/if}
    <br>
 
    #{if hasTroubles || hasGroups } </li> #{/if}

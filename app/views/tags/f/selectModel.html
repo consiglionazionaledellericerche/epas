@@ -5,7 +5,7 @@
    inputName = per forzare il nome del parametro
 }*
 
-#{f.edit _arg, label:_label}
+#{f.edit _arg, label:_label, required:_required}
   %{
     value = _attrs.containsKey('value') ? _value : field.value
     name = field.name + '.id';

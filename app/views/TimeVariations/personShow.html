@@ -1,0 +1,50 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Situazione riposi compensativi chiusura ente'  /}
+
+<div class="container">
+#{title title:'Situazione riposi compensativi per chiusura ente ' + person.fullname /}
+
+<table class="table">
+<tr>
+<th>Assenza</th>
+<th>Lista dei recuperi</th>
+<th>Situazione recupero</th>
+<th>Tempo mancante</th>
+<th>Scadenza recupero</th>
+</tr>
+#{list items:dtoList, as:'entry'}
+<tr>
+  	<td>${entry.absence.absenceType.code} <br> ${entry.absenceDate.format()}</td>
+    <td>
+    <ul class="list-group">
+    #{list items:entry.absence.timeVariations, as:'tv'}
+  		<li class="list-group-item">   
+  		<span class="badge">${(int)(tv.timeVariation / 60)} ore e ${tv.timeVariation % 60} minuti</span> 
+    	${tv.dateVariation.format()}
+  		</li>
+  	#{/list}
+	</ul>
+    
+    </td>     
+	<td>
+		<div class="progress">
+  		<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="${entry.percentage}" 
+  			aria-valuemin="0" aria-valuemax="100" style="width: ${entry.percentage}%">   
+  			${entry.percentage}% 	
+  		</div>
+		</div>
+	</td>	
+	
+	<td>
+		${(int)((entry.quantityRecovered - entry.quantityToRecover) / 60)} ore e ${(entry.quantityRecovered - entry.quantityToRecover) % 60} minuti
+	</td>
+	<td>${entry.absence.expireRecoverDate.format()}</td>
+	
+  </tr>
+  #{/list}
+</table>
+
+
+
+</div>

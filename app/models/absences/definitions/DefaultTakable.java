@@ -147,6 +147,11 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_91F), 
       -1, null),
   
+  T_RIPOSI_CHIUSURA_ENTE(AmountType.units,
+      ImmutableSet.of(DefaultAbsenceType.A_91CE),
+      ImmutableSet.of(DefaultAbsenceType.A_91CE),
+      -1, null),
+  
   T_LAVORO_FUORI_SEDE(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_105BP), 
       ImmutableSet.of(DefaultAbsenceType.A_105BP), 
@@ -424,11 +429,11 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_9599B, 
           DefaultAbsenceType.A_9591, DefaultAbsenceType.A_9599, DefaultAbsenceType.A_95041E,
           DefaultAbsenceType.A_9505, DefaultAbsenceType.A_95042E, DefaultAbsenceType.A_95043E, 
-          DefaultAbsenceType.A_9504, DefaultAbsenceType.A_95053), 
+          DefaultAbsenceType.A_9504, DefaultAbsenceType.A_95053, DefaultAbsenceType.A_58), 
       ImmutableSet.of(DefaultAbsenceType.A_9599B,
           DefaultAbsenceType.A_9591, DefaultAbsenceType.A_9599, DefaultAbsenceType.A_95041E,
           DefaultAbsenceType.A_9505, DefaultAbsenceType.A_95042E, DefaultAbsenceType.A_95043E, 
-          DefaultAbsenceType.A_9504, DefaultAbsenceType.A_95053), 
+          DefaultAbsenceType.A_9504, DefaultAbsenceType.A_95053, DefaultAbsenceType.A_58), 
       -1, null),
   
   T_MALATTIA_3_ANNI(AmountType.units,
@@ -482,9 +487,9 @@ public enum DefaultTakable {
   
   T_RIPOSI_CNR_ATTESTATI(AmountType.units, 
       ImmutableSet.of(
-          DefaultAbsenceType.A_91, DefaultAbsenceType.A_91F), 
+          DefaultAbsenceType.A_91, DefaultAbsenceType.A_91F, DefaultAbsenceType.A_91CE), 
       ImmutableSet.of(
-          DefaultAbsenceType.A_91, DefaultAbsenceType.A_91F), 
+          DefaultAbsenceType.A_91, DefaultAbsenceType.A_91F, DefaultAbsenceType.A_91CE), 
       -1, null);
 
 

@@ -105,7 +105,7 @@ public class StampingsFromClient extends Controller {
     }
 
     absenceManager.insertAbsenceRecompute(body.person, body.date,
-        Optional.fromNullable(body.date),
+        Optional.fromNullable(body.date), Optional.absent(),
         abt, Optional.absent(), Optional.absent(), justifiedMinutes);
 
     renderText("ok");
@@ -130,7 +130,7 @@ public class StampingsFromClient extends Controller {
     }
 
     absenceManager.insertAbsenceNotRecompute(body.person, body.date,
-        Optional.fromNullable(body.date),
+        Optional.fromNullable(body.date), Optional.absent(),
         abt, Optional.absent(), Optional.absent(), justifiedMinutes);
 
     renderText("ok");

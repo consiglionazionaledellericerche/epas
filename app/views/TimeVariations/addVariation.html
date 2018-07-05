@@ -1,0 +1,58 @@
+#{modalAsync id:'modalVariation', button:'Salva',
+title:'Recupero orario per assenza ' + absence.absenceType.code
++ ' per ' + absence.personDay.person.fullname }
+
+<div id="variation">
+	#{form action:@TimeVariations.saveVariation(), method:'POST', autocomplete:false,
+  		class:'form form-horizontal', 'data-async':'#page_content',
+  		'data-async-error':'#variation'}
+		#{alert color:'info',center:true} 
+			Inserisci ore e minuti con cui intendi recuperare l'assenza. <br>Il sistema in automatico ti propone il tempo che 
+			manca, in ore e minuti, al completamento della giornata di riposo compensativo chiusura ente 91CE 
+		#{/alert} 
+		#{f.hidden 'absenceId', value:absence.id /}
+	    #{f.input 'hours', type:number, value:hours  /}
+	    #{f.input 'minutes', type:number, value:minutes  /}
+	    
+
+		#{secure.check 'TimeVariations.saveVariation'}
+	      #{b.buttons center:true}
+               #{b.submit 'Salva'/}
+             #{/b.buttons}
+		#{/secure.check}
+	#{/form}
+	<div class="col-md-8 col-md-offset-2">
+	#{if absence.timeVariations.isEmpty()}
+		#{alert color:'info', center:true}
+  			Non sono ancora state associate variazioni di orario all'assenza.
+    	#{/alert}
+	#{/if}
+	#{else}
+		#{alert color:'warning', center:true}
+  			Variazioni di orario già effettuate per l'assenza.
+    	#{/alert}
+    	<table class="table">
+    	  	<tr>
+  				<th>Data variazione</th>
+  				<th>Quantità</th>
+  				<th>Elimina</th>  	
+  			</tr>
+    		#{list items:absence.timeVariations, as:'tv'}
+  			<tr>
+  			<td><span class="badge">${tv.dateVariation.format()}</span></td>
+  			<td>${(int)(tv.timeVariation / 60)} ore e ${tv.timeVariation % 60} minuti</td>
+  			<td>
+      			#{secure.link @TimeVariations.removeVariation(tv.id)}
+					Rimuovi
+      			#{/secure.link}
+  			</td>
+  			</tr>
+  			#{/list}
+			
+		</table>
+	#{/else}
+	
+  	</div>
+</div>
+
+#{/modalAsync}

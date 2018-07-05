@@ -95,13 +95,15 @@ public class PersonDayManager {
    */
   public Optional<Absence> getAllDay(PersonDay personDay) {
     for (Absence absence : personDay.absences) {
-      if (absence.justifiedType.name.equals(JustifiedTypeName.all_day)) { 
+      if (absence.justifiedType.name.equals(JustifiedTypeName.all_day)
+          || absence.justifiedType.name.equals(JustifiedTypeName.recover_time)) { 
         return Optional.of(absence);
       }
     }
     return Optional.absent();
   }
   
+ 
   /**
    * 
    * @param personDay il personDay in cui cercare l'assenza
@@ -395,7 +397,7 @@ public class PersonDayManager {
       setTicketStatusIfNotForced(personDay, false);
       return personDay;
     }
-
+    
     //Giustificativi a grana minuti nel giorno
     for (Absence abs : personDay.getAbsences()) {
 

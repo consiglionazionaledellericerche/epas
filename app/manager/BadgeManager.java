@@ -31,7 +31,7 @@ public class BadgeManager {
       String code = badge.code;
       Integer number = Integer.parseInt(code);
       badge.code = number + "";
-      if (!code.equals(number + "") ) {
+      if (!code.equals(number + "")) {
         if (persist) {
           badge.save();
           log.info("Normalizzato e persistito badge.code: da {} a {}", code, number);

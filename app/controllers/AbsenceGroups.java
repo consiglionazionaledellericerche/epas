@@ -40,6 +40,7 @@ import manager.services.absences.certifications.CertificationYearSituation;
 import manager.services.absences.certifications.CodeComparation;
 import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.PeriodChain;
+
 import models.Office;
 import models.Person;
 import models.PersonDay;
@@ -57,6 +58,7 @@ import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
+import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
 import models.enumerate.QualificationMapping;
@@ -507,7 +509,7 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(from);
     
     AbsenceForm absenceForm = absenceService.buildAbsenceForm(person, from, null,
-            null, null, true, null, null, null, null, false);
+            null, null, null, true, null, null, null, null, false);
     
     //La lista di tutti i codici takable... con associato il gruppo con maggiore priorità.
     Set<AbsenceType> allTakable = Sets.newHashSet();
@@ -542,8 +544,8 @@ public class AbsenceGroups extends Controller {
    */
   public static void insert(
       Long personId, LocalDate from, CategoryTab categoryTab,                      //tab
-      LocalDate to, GroupAbsenceType groupAbsenceType, boolean switchGroup, //group
-      AbsenceType absenceType, JustifiedType justifiedType,                 //confGroup 
+      LocalDate to, LocalDate recoveryDate, GroupAbsenceType groupAbsenceType,
+      boolean switchGroup, AbsenceType absenceType, JustifiedType justifiedType,   //confGroup 
       Integer hours, Integer minutes, boolean forceInsert) {
 
     Person person = personDao.getPersonById(personId);
@@ -554,14 +556,18 @@ public class AbsenceGroups extends Controller {
 
     AbsenceForm absenceForm =
         absenceService.buildAbsenceForm(person, from, categoryTab,
-            to, groupAbsenceType, switchGroup, absenceType, justifiedType, hours, minutes, false);
+            to, recoveryDate, groupAbsenceType, switchGroup, absenceType, 
+            justifiedType, hours, minutes, false);
 
     InsertReport insertReport = absenceService.insert(person,
         absenceForm.groupSelected,
         absenceForm.from, absenceForm.to,
         absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
         absenceForm.hours, absenceForm.minutes, forceInsert, absenceManager);
-    render(absenceForm, insertReport, forceInsert);
+    if (recoveryDate != null && !recoveryDate.isAfter(to)) {
+      Validation.addError("recoveryDate", "Deve essere successiva alla data di fine");
+    }
+    render(absenceForm, insertReport, forceInsert, recoveryDate);
 
   }
   
@@ -590,11 +596,11 @@ public class AbsenceGroups extends Controller {
     
     AbsenceForm absenceForm =
         absenceService.buildAbsenceForm(person, from, null,
-            null, groupAbsenceType, false, absenceType, null, null, null, false);
+            null, null, groupAbsenceType, false, absenceType, null, null, null, false);
 
     InsertReport insertReport = absenceService.insert(person,
         absenceForm.groupSelected,
-        absenceForm.from, absenceForm.to,
+        absenceForm.from, absenceForm.to, 
         absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
         absenceForm.hours, absenceForm.minutes, false, absenceManager);
     
@@ -614,7 +620,7 @@ public class AbsenceGroups extends Controller {
    * @param minutes          minuti
    * @param forceInsert      forza inserimento
    */
-  public static void save(Long personId, LocalDate from, LocalDate to,
+  public static void save(Long personId, LocalDate from, LocalDate to, LocalDate recoveryDate,
       GroupAbsenceType groupAbsenceType, AbsenceType absenceType,
       JustifiedType justifiedType, Integer hours, Integer minutes, boolean forceInsert) {
 
@@ -638,6 +644,10 @@ public class AbsenceGroups extends Controller {
         PersonDay personDay = personDayManager
             .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
         absence.personDay = personDay;
+        if (justifiedType.name.equals(JustifiedTypeName.recover_time)) {
+
+          absence = absenceManager.handleRecoveryAbsence(absence, person, recoveryDate);
+        }        
         personDay.absences.add(absence);
         rules.checkIfPermitted(absence);
         absence.save();
