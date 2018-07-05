@@ -465,6 +465,9 @@ when
 
      	/* Assenze annuali */
      	"Absences.absencesPerPerson",
+     	
+     	/* Gestione riposi compensativi per chiusura ente*/
+     	"TimeVariations.personShow",
 
      	/* Ferie */
      	"Vacations.show",
@@ -1211,6 +1214,10 @@ when
      	"Stampings.save",
      	"Stampings.saveOffSite",
      	"Stampings.delete",
+     	"TimeVariations.addVariation",
+     	"TimeVariations.saveVariation",
+     	"TimeVariations.removeVariation",
+     	"TimeVariations.show",
      	"PersonDays.workingHoliday",
      	"PersonDays.approveWorkingHoliday",
      	"PersonDays.workingOutOpening",
@@ -1389,6 +1396,10 @@ when
      	"Stampings.save",
      	"Stampings.saveOffSite",
      	"Stampings.delete",
+     	"TimeVariations.addVariation",
+     	"TimeVariations.saveVariation",
+     	"TimeVariations.removeVariation",
+     	"TimeVariations.show",
      	"PersonDays.workingHoliday",
      	"PersonDays.approveWorkingHoliday",
      	"PersonDays.workingOutOpening",

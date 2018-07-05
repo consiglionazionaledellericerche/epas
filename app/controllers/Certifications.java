@@ -206,10 +206,10 @@ public class Certifications extends Controller {
 
     personDao.list(Optional.absent(), Sets.newHashSet(Lists.newArrayList(office)),
         false, monthBegin, monthEnd, true).list().forEach(person -> {
-      final Map.Entry<Person, YearMonth> personKey = new AbstractMap
-          .SimpleEntry<>(person, yearMonth);
-      cacheValues.personStatus.invalidate(personKey);
-    });
+          final Map.Entry<Person, YearMonth> personKey = new AbstractMap
+              .SimpleEntry<>(person, yearMonth);
+          cacheValues.personStatus.invalidate(personKey);
+        });
     log.info("Svuotati tutti i valori dalla cache: ufficio {} - mese {}/{}", office, month, year);
     certifications(officeId, year, month);
   }

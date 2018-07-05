@@ -51,7 +51,7 @@ public class SynchDiagnostic {
     
     if (!epasInstitute.cds.equals(perseoInstitute.cds) 
         || !epasInstitute.name.equals(perseoInstitute.name) 
-        || !epasInstitute.code.equals(perseoInstitute.code) ) {
+        || !epasInstitute.code.equals(perseoInstitute.code)) {
       
       return false;
     }
@@ -123,7 +123,7 @@ public class SynchDiagnostic {
     //Stesso istituto ...
     if (epasOffice.institute.perseoId == null 
         || perseoOffice.institute.perseoId == null 
-        || epasOffice.institute.perseoId != perseoOffice.institute.perseoId ) {
+        || epasOffice.institute.perseoId != perseoOffice.institute.perseoId) {
       return false;
     }
     
@@ -169,7 +169,7 @@ public class SynchDiagnostic {
     if (!epasPerson.name.equals(perseoPerson.name) 
         || !epasPerson.surname.equals(perseoPerson.surname) 
         || !epasPerson.number.equals(perseoPerson.number)
-        || !epasPerson.qualification.equals(perseoPerson.qualification) ) {
+        || !epasPerson.qualification.equals(perseoPerson.qualification)) {
 
       return false;
     }
@@ -177,7 +177,7 @@ public class SynchDiagnostic {
     //Stessa sede ...
     if (epasPerson.office.perseoId == null 
         || perseoPerson.perseoOfficeId == null 
-        || epasPerson.office.perseoId != perseoPerson.perseoOfficeId ) {
+        || epasPerson.office.perseoId != perseoPerson.perseoOfficeId) {
       return false;
     }
     
