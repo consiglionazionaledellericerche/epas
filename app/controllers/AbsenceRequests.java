@@ -64,11 +64,17 @@ public class AbsenceRequests extends Controller {
     Verify.verifyNotNull(type);
 
     val person = Security.getUser().get().person; 
-    val fromDate = LocalDateTime.now();
+    val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
+    log.debug("Prelevo le richieste di assenze di tipo {} per {} a partire da {}", 
+        type, person, fromDate);
+    
+    val config = absenceRequestManager.getConfiguration(type, person);
     val results = absenceRequestDao.findByPersonAndDate(person, fromDate, Optional.absent(), type);
-    render(results, type);
+    val onlyOwn = true;
+    render(config, results, type, onlyOwn);
   }
 
+  
 
   /**
    * Form per la richiesta di assenza da parte del dipendente. 
@@ -108,7 +114,7 @@ public class AbsenceRequests extends Controller {
    * 
    * @param id id della richiesta di assenza da modificare.
    */
-  public static void edit(int id) {
+  public static void edit(long id) {
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     notFoundIfNull(absenceRequest);
     rules.checkIfPermitted(absenceRequest);
@@ -126,7 +132,7 @@ public class AbsenceRequests extends Controller {
       render("@edit", absenceRequest);
       return;
     }
-    log.info("AbsenceRequest.startAt = {}", absenceRequest.startAt);
+    log.debug("AbsenceRequest.startAt = {}", absenceRequest.startAt);
     
     if (!Security.getUser().get().person.equals(absenceRequest.person)) {
       //TODO verificare se è l'utente corrente ha i permessi di inserire le richieste di assenza
@@ -138,6 +144,11 @@ public class AbsenceRequests extends Controller {
 
     notFoundIfNull(absenceRequest.person);      
     absenceRequestManager.configure(absenceRequest);
+    
+    if (absenceRequest.endTo == null) {
+      absenceRequest.endTo = absenceRequest.startAt;
+    }
+    
     absenceRequest.save();
     list(absenceRequest.type);
   }  
@@ -148,11 +159,12 @@ public class AbsenceRequests extends Controller {
    * 
    * @param id id della richiesta di assenza da modificare.
    */
-  public static void delete(int id) {
+  public static void delete(long id) {
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     notFoundIfNull(absenceRequest);
     rules.checkIfPermitted(absenceRequest);
-    
-    todo();
+    flash.success(Web.msgDeleted(AbsenceRequest.class));
+    absenceRequest.delete();
+    list(absenceRequest.type);
   }
 }

@@ -46,9 +46,11 @@ public class AbsenceRequestDao extends DaoBase {
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
 
     BooleanBuilder conditions = new BooleanBuilder(absenceRequest.person.eq(person)
-        .and(absenceRequest.startAt.between(fromDate, toDate.or(fromDate))
-        .and(absenceRequest.type.eq(absenceRequestType))));
-
+        .and(absenceRequest.startAt.after(fromDate))
+        .and(absenceRequest.type.eq(absenceRequestType)));
+    if (toDate.isPresent()) {
+      conditions.and(absenceRequest.endTo.before(toDate.get()));
+    }
     return ModelQuery.wrap(getQueryFactory().from(absenceRequest)
           .where(conditions), absenceRequest);
   }

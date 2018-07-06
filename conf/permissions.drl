@@ -32,6 +32,9 @@ import models.UsersRolesOffices;
 import models.PersonReperibility;
 import models.PersonReperibilityType;
 import models.ReperibilityTypeMonth;
+
+import models.flows.AbsenceRequest;
+
 import security.PermissionCheck;
 
 global models.User currentOperator;
@@ -536,6 +539,17 @@ when
 then
  $c.grant();
 end
+
+rule EmployCanEditOrDeleteAbsenceRequest
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  AbsenceRequest(person == currentOperator.person, ownerCanEditOrDelete())
+  $c: PermissionCheck( action in ("AbsenceRequests.edit" ,
+    "AbsenceRequests.save", "AbsenceRequests.delete" ), granted == false)
+then
+  $c.grant();
+end
+
 
 rule personInCharge
 when

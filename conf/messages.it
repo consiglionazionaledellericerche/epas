@@ -1,8 +1,16 @@
+absenceRequest =richiesta di assenza
+
 absenceRequest.endTo =Fine
 absenceRequest.description =Descrizione
 absenceRequest.person =Dipendente
 absenceRequest.startAt =Inizio
 absenceRequest.type =Tipologia
+absenceRequest.officeHeadApproved =Approvazione responsabile di sede
+absenceRequest.managerApproved =Approvazione responsabile di gruppo
+absenceRequest.administrativeApproved =Approvazione del amministrativo
+absenceRequest.officeApprovalRequired =Richiesta approvazione del responsabile di gruppo
+absenceRequest.managerApprovalRequired =Richiesta approvazione del responsabile di gruppo
+absenceRequest.administrativeApprovalRequired =Richiesta approvazione del amministrativo
 
 activity =Attività di turno
 ADD= Inserimento
