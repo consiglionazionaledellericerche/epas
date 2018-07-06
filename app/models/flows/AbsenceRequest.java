@@ -9,6 +9,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import lombok.ToString;
 import models.Person;
@@ -108,6 +109,25 @@ public class AbsenceRequest extends MutableModel {
   @OneToMany(mappedBy = "absenceRequest")
   public List<AbsenceRequestEvent> events = Lists.newArrayList();
   
+  @Transient
+  public LocalDate startAtAsDate() {
+    return startAt != null ? startAt.toLocalDate() : null;
+  }
   
+  @Transient
+  public LocalDate endToAsDate() {
+    return endTo != null ? endTo.toLocalDate() : null;
+  }
   
+  /**
+   * Se non sono state già rilasciate approvazioni necessarie allora il possessore 
+   * può cancellare o modificare la richiesta.
+   * @return true se la richiesta di permesso è ancora modificabile o cancellabile.
+   */
+  @Transient
+  public boolean ownerCanEditOrDelete() {
+    return (officeHeadApproved == null || !officeHeadApprovalRequired) 
+        && (managerApproved == null || !managerApprovalRequired
+        && (administrativeApproved == null || !administrativeApprovalRequired));
+  }
 }

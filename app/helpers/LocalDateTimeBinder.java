@@ -16,8 +16,9 @@ import play.data.binding.types.DateBinder;
 public class LocalDateTimeBinder implements TypeBinder<LocalDateTime> {
 
   private static final DateBinder DATE_BINDER = new DateBinder();
-  private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("YYYY-MM-dd hh:mm");
-
+  private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/YYYY hh:mm");
+  private static final DateTimeFormatter df = DateTimeFormat.forPattern("dd/MM/YYYY");
+  
   @SuppressWarnings("rawtypes")
   @Override
   public Object bind(String name, Annotation[] annotations, String value,
@@ -26,11 +27,18 @@ public class LocalDateTimeBinder implements TypeBinder<LocalDateTime> {
       return null;
     }
     try {
-      return LocalDate.parse(value, dtf);
+      if (value.length() == 10) {
+        return LocalDate.parse(value, df).toDateTimeAtStartOfDay().toLocalDateTime();        
+      }
+      return LocalDateTime.parse(value, dtf);
     } catch (Exception ignored) {
       log.error("Exception during LocalDateTime binding", ignored);
     }
 
     return new LocalDateTime(DATE_BINDER.bind(name, annotations, value, actualClass, genericType));
+  }
+  
+  public static void main(String[] args) {
+    LocalDateTime.parse("03/07/2018 01:00", dtf);
   }
 }
