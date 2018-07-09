@@ -1,5 +1,6 @@
 package controllers;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import dao.AbsenceRequestDao;
@@ -85,11 +86,11 @@ public class AbsenceRequests extends Controller {
    */
   public static void blank(Optional<Long> personId, LocalDate from, AbsenceRequestType type) {
     Verify.verifyNotNull(type);
-
+    
     Person person;
-    //TODO: verificare che l'utente corrente possa inserire richieste di assenza per altri utenti
     if (personId.isPresent()) {
-      person = personDao.getPersonById(personId.get());  
+      rules.check("AbsenceRequests.blank4OtherPerson");
+      person = personDao.getPersonById(personId.get());      
     } else {
       if (Security.getUser().isPresent() && Security.getUser().get().person != null) {
         person = Security.getUser().get().person;
@@ -98,9 +99,16 @@ public class AbsenceRequests extends Controller {
         list(type);
         return;
       }
-    }    
+    }
     notFoundIfNull(person);
-
+    
+    val configurationProblems = absenceRequestManager.checkconfiguration(type, person); 
+    if (!configurationProblems.isEmpty()) {
+      flash.error(Joiner.on(" ").join(configurationProblems));
+      list(type);
+      return;
+    }
+    
     val absenceRequest = new AbsenceRequest();
     absenceRequest.type = type;
     absenceRequest.person = person;

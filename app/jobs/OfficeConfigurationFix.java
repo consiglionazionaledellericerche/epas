@@ -34,7 +34,7 @@ public class OfficeConfigurationFix extends Job<Void> {
     //in modo da inibire l'esecuzione dei job in base alla configurazione
     if (!"true".equals(Play.configuration.getProperty(Bootstrap.JOBS_CONF))) {
       log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
-      return;
+      //return;
     }
 
     List<Office> offices = Office.findAll();

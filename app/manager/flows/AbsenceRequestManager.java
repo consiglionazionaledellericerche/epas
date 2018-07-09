@@ -1,14 +1,21 @@
 package manager.flows;
 
 import com.google.common.base.Verify;
+import dao.RoleDao;
+import dao.UsersRolesOfficesDao;
+import java.util.List;
 import javax.inject.Inject;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.configurations.ConfigurationManager;
 import models.Person;
+import models.Role;
 import models.flows.AbsenceRequest;
 import models.flows.enumerate.AbsenceRequestType;
+import org.apache.commons.compress.utils.Lists;
 import org.joda.time.LocalDate;
 
 /**
@@ -17,13 +24,17 @@ import org.joda.time.LocalDate;
  * @author cristian
  *
  */
+@Slf4j
 public class AbsenceRequestManager {
 
 
   private ConfigurationManager configurationManager;
-  
+  private UsersRolesOfficesDao uroDao;
+  private RoleDao roleDao;
+
   @Data
   @RequiredArgsConstructor
+  @ToString
   public class AbsenceRequestConfiguration {
     final Person person;
     final AbsenceRequestType type;
@@ -32,12 +43,63 @@ public class AbsenceRequestManager {
     boolean administrativeApprovalRequired;
     boolean allDay;
   }
-  
+
+  /**
+   * Inizializzazione con injection dei vari componenti necessari.
+   * 
+   * @param configurationManager Manager delle configurazioni
+   * @param uroDao UsersRolesOfficesDao
+   * @param roleDao RoleDao
+   */
   @Inject
-  public AbsenceRequestManager(ConfigurationManager configurationManager) {
+  public AbsenceRequestManager(ConfigurationManager configurationManager,
+      UsersRolesOfficesDao uroDao, RoleDao roleDao) {
     this.configurationManager = configurationManager;
+    this.uroDao = uroDao;
+    this.roleDao = roleDao;
   }
-  
+
+  /**
+   * Verifica che gruppi ed eventuali responsabile di sede siano presenti per
+   * poter richiedere il tipo di assenza. 
+   * 
+   * @param requestType il tipo di assenza da controllare
+   * @param person la persona per cui controllare il tipo di assenza
+   * @return la lista degli eventuali problemi riscontrati.
+   */
+  public List<String> checkconfiguration(AbsenceRequestType requestType, Person person) {
+    Verify.verifyNotNull(requestType);
+    Verify.verifyNotNull(person);
+    
+    val problems = Lists.<String>newArrayList();
+    val config = getConfiguration(requestType, person);
+       
+    if (config.isManagerApprovalRequired() && person.personInCharge == null) {
+      problems.add(
+          String.format("Approvazione del responsabile richiesta. "
+              + "Il dipendente %s non ha impostato nessun responsabile.", person.getFullname())); 
+    }
+    
+    if (config.isAdministrativeApprovalRequired() 
+        && uroDao.getUsersWithRoleOnOffice(
+            roleDao.getRoleByName(Role.PERSONNEL_ADMIN), person.office).isEmpty()) {
+      problems.add(
+          String.format("Approvazione dell'amministratore del personale richiesta. "
+              + "L'ufficio %s non ha impostato nessun amministratore del personale.",
+              person.office.getName())); 
+    }
+    
+    if (config.isOfficeHeadApprovalRequired() 
+        && uroDao.getUsersWithRoleOnOffice(
+            roleDao.getRoleByName(Role.SEAT_SUPERVISOR), person.office).isEmpty()) {
+      problems.add(
+          String.format("Approvazione del responsabile di sede richiesta. "
+              + "L'ufficio %s non ha impostato nessun responsabile di sede.",
+              person.office.getName())); 
+    }
+    return problems;
+  }
+
   /**
    * Verifica quali sono le approvazioni richiesta per questo tipo di assenza
    * per questa persona.
@@ -50,7 +112,7 @@ public class AbsenceRequestManager {
   public AbsenceRequestConfiguration getConfiguration(
       AbsenceRequestType requestType, Person person) {
     val absenceRequestConfiguration = new AbsenceRequestConfiguration(person, requestType);
-    
+
     if (requestType.alwaysSkipAdministrativeApproval) {
       absenceRequestConfiguration.administrativeApprovalRequired = false;
     } else {
@@ -69,7 +131,7 @@ public class AbsenceRequestManager {
                 LocalDate.now());  
       }
     }
-    
+
     if (requestType.alwaysSkipManagerApproval) {
       absenceRequestConfiguration.managerApprovalRequired = false;
     } else {
@@ -109,7 +171,7 @@ public class AbsenceRequestManager {
     absenceRequestConfiguration.allDay = requestType.allDay;
     return absenceRequestConfiguration;
   } 
-  
+
   /**
    * Imposta nella richiesta di assenza i tipi di approvazione necessari
    * in funzione del tipo di assenza e della configurazione specifica della
@@ -127,5 +189,5 @@ public class AbsenceRequestManager {
     absenceRequest.managerApprovalRequired = config.managerApprovalRequired;
     absenceRequest.administrativeApprovalRequired = config.administrativeApprovalRequired;
   }
-  
+
 }
