@@ -28,7 +28,8 @@ import play.db.jpa.Blob;
  * @author cristian
  *
  */
-@ToString
+@ToString(of = {"type", "person", "startAt", "endTo", 
+                "managerApproved", "administrativeApproved", "officeHeadApproved"})
 @Audited
 @Entity
 @Table(name = "absence_requests")

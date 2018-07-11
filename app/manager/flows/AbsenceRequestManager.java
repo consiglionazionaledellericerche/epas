@@ -260,7 +260,7 @@ public class AbsenceRequestManager {
           absenceRequest.person.user, roleDao.getRoleByName(Role.PERSONNEL_ADMIN),
           absenceRequest.person.office).isPresent()) {
         return Optional.of(
-            String.format("L'evento {} non può essere eseguito da {} perché non ha"
+            String.format("L'evento %s non può essere eseguito da %s perché non ha"
                 + " il ruolo di amministratore del personale.", eventType, approver.getFullname()));
       }
     }
@@ -279,7 +279,7 @@ public class AbsenceRequestManager {
           absenceRequest.person.user, roleDao.getRoleByName(Role.SEAT_SUPERVISOR),
           absenceRequest.person.office).isPresent()) {
         return Optional.of(
-            String.format("L'evento {} non può essere eseguito da {} perché non ha"
+            String.format("L'evento %s non può essere eseguito da %s perché non ha"
                 + " il ruolo di responsabile di sede.", eventType, approver.getFullname()));
       }
       
@@ -398,7 +398,7 @@ public class AbsenceRequestManager {
   }
 
   /**
-   * Effettuta l'inserimento dell'assenza.
+   * Effettua l'inserimento dell'assenza.
    * 
    * @param absenceRequest la richiesta di assenza da cui prelevare i
    *     dati per l'inserimento. 
@@ -409,6 +409,10 @@ public class AbsenceRequestManager {
     absenceRequest.flowEnded = true;
     absenceRequest.save();
     log.info("Flusso relativo a {} terminato. Inserimento in corso delle assenze.", absenceRequest);
-    return null;
+    InsertReport insertReport = new InsertReport();
+    //notificationManager.notifyAbsenceOnAbsenceRequestCompleted(
+    //  Lists.newArrayList(), absenceRequest.person, roleDao.getRoleByName(Role.PERSONNEL_ADMIN));
+    
+    return insertReport;
   }
 }
