@@ -46,6 +46,8 @@ public class QAbsence extends EntityPathBase<Absence> {
 
     public final QJustifiedType justifiedType;
 
+    public final StringPath note = createString("note");
+
     public final models.query.QPerson owner;
 
     //inherited
