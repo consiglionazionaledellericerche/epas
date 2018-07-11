@@ -3,6 +3,7 @@ package manager;
 import com.google.common.base.Verify;
 import com.google.inject.Inject;
 import helpers.TemplateExtensions;
+import java.util.List;
 import manager.configurations.EpasParam;
 
 import models.Notification;
@@ -18,6 +19,8 @@ import models.enumerate.NotificationSubject;
 import models.flows.AbsenceRequest;
 
 /**
+ * Genera le notifiche da inviare agl utenti.
+ * 
  * @author daniele
  * @since 23/06/16.
  */
@@ -33,7 +36,12 @@ public class NotificationManager {
   private static final String DTF = "dd/MM/YYYY - HH:mm";
   private static final String DF = "dd/MM/YYYY";
 
-  public enum CRUD {
+  /**
+   * Tipi di operazioni sulle entity.
+   * @author cristian
+   *
+   */
+  public enum Crud {
     CREATE,
     READ,
     UPDATE,
@@ -43,15 +51,15 @@ public class NotificationManager {
   /**
    * Gestore delle notifiche per le timbrature.
    */
-  private void notifyStamping(Stamping stamping, CRUD operation) {
+  private void notifyStamping(Stamping stamping, Crud operation) {
     Verify.verifyNotNull(stamping);
     final Person person = stamping.personDay.person;
     final String template;
-    if (CRUD.CREATE == operation) {
+    if (Crud.CREATE == operation) {
       template = "%s ha inserito una nuova timbratura: %s";
-    } else if (CRUD.UPDATE == operation) {
+    } else if (Crud.UPDATE == operation) {
       template = "%s ha modificato una timbratura: %s";
-    } else if (CRUD.DELETE == operation) {
+    } else if (Crud.DELETE == operation) {
       template = "%s ha eliminato una timbratura: %s";
     } else {
       template = null;
@@ -62,7 +70,7 @@ public class NotificationManager {
         .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
             || uro.role.name.equals(Role.SEAT_SUPERVISOR))
         .map(uro -> uro.user).forEach(user -> {
-          if (operation != CRUD.DELETE) {
+          if (operation != Crud.DELETE) {
             Notification.builder().destination(user).message(message)
             .subject(NotificationSubject.STAMPING, stamping.id).create();
           } else {
@@ -77,15 +85,15 @@ public class NotificationManager {
   /**
    * Gestore delle notifiche per le assenze.
    */
-  private void notifyAbsence(Absence absence, User currentUser, CRUD operation) {
+  private void notifyAbsence(Absence absence, User currentUser, Crud operation) {
     Verify.verifyNotNull(absence);
     final Person person = absence.personDay.person;
     final String template;
-    if (CRUD.CREATE == operation) {
+    if (Crud.CREATE == operation) {
       template = "%s ha inserito una nuova assenza: %s - %s";
-    } else if (CRUD.UPDATE == operation) {
+    } else if (Crud.UPDATE == operation) {
       template = "%s ha modificato un'assenza: %s - %s";
-    } else if (CRUD.DELETE == operation) {
+    } else if (Crud.DELETE == operation) {
       template = "%s ha eliminato un'assenza: %s - %s";
     } else {
       template = null;
@@ -135,15 +143,15 @@ public class NotificationManager {
     //negli altri casi notifica agli amministratori del personale ed al responsabile sede
 
     if (insert) {
-      notifyStamping(stamping, NotificationManager.CRUD.CREATE);
+      notifyStamping(stamping, NotificationManager.Crud.CREATE);
       return;
     }
     if (update) {
-      notifyStamping(stamping, NotificationManager.CRUD.UPDATE);
+      notifyStamping(stamping, NotificationManager.Crud.UPDATE);
       return;
     }
     if (delete) {
-      notifyStamping(stamping, NotificationManager.CRUD.DELETE);
+      notifyStamping(stamping, NotificationManager.Crud.DELETE);
       return;
     }
   }
@@ -173,15 +181,15 @@ public class NotificationManager {
         || groupAbsenceType.name.equals(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name())
         || groupAbsenceType.name.equals(DefaultGroup.LAVORO_FUORI_SEDE.name())) {
       if (insert) {
-        notifyAbsence(absence, currentUser, NotificationManager.CRUD.CREATE);
+        notifyAbsence(absence, currentUser, NotificationManager.Crud.CREATE);
         return;
       }
       if (update) {
-        notifyAbsence(absence, currentUser, NotificationManager.CRUD.UPDATE);
+        notifyAbsence(absence, currentUser, NotificationManager.Crud.UPDATE);
         return;
       }
       if (delete) {
-        notifyAbsence(absence, currentUser, NotificationManager.CRUD.DELETE);
+        notifyAbsence(absence, currentUser, NotificationManager.Crud.DELETE);
         return;
       }
       //notifyAbsence(absence, currentUser, NotificationManager.CRUD.CREATE);
@@ -216,6 +224,34 @@ public class NotificationManager {
     Notification.builder().destination(absenceRequest.person.user).message(message)
       .subject(NotificationSubject.ABSENCE_REQUEST, absenceRequest.id).create();
 
+  }
+
+  /**
+   * Gestore delle notifiche per le assenze inserite in seguito all'approvazione
+   * di un richiesta di assenza.
+   */
+  public void notifyAbsenceOnAbsenceRequestCompleted(
+      List<Absence> absences, Person person, Role role) {    
+    Verify.verify(!absences.isEmpty());
+    Verify.verifyNotNull(person);
+    Verify.verifyNotNull(role);
+    
+    final StringBuffer message = 
+        new StringBuffer(
+            String.format(
+                "Flusso di richiesta assenza terminato, inserita una nuova assenza per %s.", 
+                person.getFullname()));
+    
+    absences.forEach(a -> {
+      message.append(String.format(" %s - %s.", a.absenceType.code, a.personDay.date.toString(DF)));
+    });
+
+    person.office.usersRolesOffices.stream()
+        .filter(uro -> uro.role.name.equals(role.name))
+        .map(uro -> uro.user).forEach(user -> {
+          Notification.builder().destination(user).message(message.toString())
+          .subject(NotificationSubject.ABSENCE, absences.stream().findFirst().get().id).create();
+        });
   }
 
 }

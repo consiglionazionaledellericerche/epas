@@ -567,7 +567,8 @@ when
 			"AbsenceRequests.delete",
 			"AbsenceRequests.vacations",
 			"AbsenceRequests.compensatoryRests",
-			"AbsenceRequests.shortTermPermits"
+			"AbsenceRequests.shortTermPermits",
+			"AbsenceRequests.managerApproval"
 		), granted == false)
 then
   $c.grant();
@@ -942,7 +943,8 @@ when
 		"AbsenceRequests.delete",
 		"AbsenceRequests.vacations",
 		"AbsenceRequests.compensatoryRests",
-		"AbsenceRequests.shortTermPermits"
+		"AbsenceRequests.shortTermPermits",
+		"AbsenceRequests.officeHeadApproval"
         ), target == null, granted == false)
 then
  $c.grant();

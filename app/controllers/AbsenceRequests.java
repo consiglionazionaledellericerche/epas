@@ -221,7 +221,6 @@ public class AbsenceRequests extends Controller {
 
     //Avvia il flusso se necessario.
     if (isNewRequest || !absenceRequest.flowStarted) {
-      log.info("absenceRequest.person = {}", absenceRequest.person);
       absenceRequestManager.executeEvent(
           absenceRequest, absenceRequest.person, 
           AbsenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());      
@@ -230,7 +229,40 @@ public class AbsenceRequests extends Controller {
     list(absenceRequest.type);
   }
 
-
+  /**
+   * Approvazione richiesta assenza da parte del responsabile di gruppo.
+   * @param id id della richiesta di assenza.
+   */
+  public static void managerApproval(long id) {
+    
+    AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
+    val currentPerson = Security.getUser().get().person;
+    absenceRequestManager.executeEvent(
+        absenceRequest, currentPerson, 
+        AbsenceRequestEventType.MANAGER_APPROVAL, Optional.absent());
+    log.info("{} approvata dal responsabile di gruppo {}.",
+            absenceRequest, currentPerson.getFullname());
+    list(absenceRequest.type);
+  }
+  
+  /**
+   * Approvazione richiesta assenza da parte del responsabile di sede.
+   * @param id id della richiesta di assenza.
+   */
+  public static void officeHeadApproval(long id) {
+    
+    AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
+    val currentPerson = Security.getUser().get().person;
+    absenceRequestManager.executeEvent(
+        absenceRequest, currentPerson, 
+        AbsenceRequestEventType.OFFICE_HEAD_APPROVAL, Optional.absent());
+    log.info("{} approvata dal responsabile di sede {}.",
+            absenceRequest, currentPerson.getFullname());
+    
+    absenceRequestManager.checkAndCompleteFlow(absenceRequest);
+    list(absenceRequest.type);
+  }
+  
   /**
    * Form di modifica di una richiesta di assenza.
    * 
@@ -240,8 +272,10 @@ public class AbsenceRequests extends Controller {
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     notFoundIfNull(absenceRequest);
     rules.checkIfPermitted(absenceRequest);
+    absenceRequestManager.executeEvent(
+        absenceRequest, Security.getUser().get().person, 
+        AbsenceRequestEventType.DELETE, Optional.absent());
     flash.success(Web.msgDeleted(AbsenceRequest.class));
-    absenceRequest.delete();
     list(absenceRequest.type);
   }
 }
