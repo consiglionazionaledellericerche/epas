@@ -129,11 +129,6 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @Nullable
   public Person personInCharge;
 
-  /**
-   * questo campo booleano serve a stabilire se una persona è un responsabile o no.
-   */
-  @Column(name = "is_person_in_charge")
-  public boolean isPersonInCharge;
 
   /**
    * relazione con i turni.

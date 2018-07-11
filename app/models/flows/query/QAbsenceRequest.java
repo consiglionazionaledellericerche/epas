@@ -35,8 +35,6 @@ public class QAbsenceRequest extends EntityPathBase<AbsenceRequest> {
     //inherited
     public final DateTimePath<org.joda.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final StringPath description = createString("description");
-
     public final DateTimePath<org.joda.time.LocalDateTime> endTo = createDateTime("endTo", org.joda.time.LocalDateTime.class);
 
     //inherited
@@ -44,12 +42,18 @@ public class QAbsenceRequest extends EntityPathBase<AbsenceRequest> {
 
     public final ListPath<models.flows.AbsenceRequestEvent, QAbsenceRequestEvent> events = this.<models.flows.AbsenceRequestEvent, QAbsenceRequestEvent>createList("events", models.flows.AbsenceRequestEvent.class, QAbsenceRequestEvent.class, PathInits.DIRECT2);
 
+    public final BooleanPath flowEnded = createBoolean("flowEnded");
+
+    public final BooleanPath flowStarted = createBoolean("flowStarted");
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 
     public final BooleanPath managerApprovalRequired = createBoolean("managerApprovalRequired");
 
     public final DatePath<org.joda.time.LocalDate> managerApproved = createDate("managerApproved", org.joda.time.LocalDate.class);
+
+    public final StringPath note = createString("note");
 
     public final BooleanPath officeHeadApprovalRequired = createBoolean("officeHeadApprovalRequired");
 
