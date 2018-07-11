@@ -1,7 +1,7 @@
 absenceRequest =richiesta di assenza
 
 absenceRequest.endTo =Fine
-absenceRequest.note =Note
+absenceRequest.note =Note informative
 absenceRequest.person =Dipendente
 absenceRequest.startAt =Inizio
 absenceRequest.type =Tipologia
