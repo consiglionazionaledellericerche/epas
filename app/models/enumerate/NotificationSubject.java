@@ -36,13 +36,9 @@ public enum NotificationSubject {
    */
   ABSENCE,
   /**
-   * Notifiche per le richieste di ferie. 
+   * Notifiche per i flussi di lavoro. 
    */
-  VACATION_REQUEST,
-  /**
-   * Notifiche per le richieste di riposo compensativo. 
-   */
-  COMPENSATORY_REST_REQUEST;
+  ABSENCE_REQUEST;
 
   private String toUrl(String action, Map<String, Object> params) {
     if (params == null) {
@@ -52,6 +48,11 @@ public enum NotificationSubject {
     }
   }
 
+  /**
+   * Url della show dell'oggetto riferito nella notifica.
+   * @param referenceId id dell'oggetto
+   * @return url con la show dell'oggetto
+   */
   public String toUrl(Long referenceId) {
     final Map<String, Object> params = Maps.newHashMap();
     switch (this) {
@@ -79,6 +80,10 @@ public enum NotificationSubject {
         params.put("year", absence.personDay.date.getYear());
         params.put("personId", absence.personDay.person.id);
         return toUrl("Stampings.personStamping", params);
+      case ABSENCE_REQUEST:
+        params.put("id", referenceId);
+        return toUrl("AbsenceRequests.show", params);
+        
       // case SYSTEM:
       default:
         throw new IllegalStateException("unknown target: " + this.name());

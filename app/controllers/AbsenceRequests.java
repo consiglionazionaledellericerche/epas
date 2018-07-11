@@ -12,6 +12,7 @@ import lombok.val;
 import manager.flows.AbsenceRequestManager;
 import models.Person;
 import models.flows.AbsenceRequest;
+import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -64,7 +65,16 @@ public class AbsenceRequests extends Controller {
   public static void list(AbsenceRequestType type) {
     Verify.verifyNotNull(type);
 
-    val person = Security.getUser().get().person; 
+    val currentUser = Security.getUser().get(); 
+    if (currentUser.person == null) {
+      flash.error("L'utente corrente non ha associata una persona, non può vedere le proprie "
+          + "richieste di assenza");
+      Application.index();
+      return;
+    } 
+    val person = currentUser.person;  
+    
+     
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
     log.debug("Prelevo le richieste di assenze di tipo {} per {} a partire da {}", 
         type, person, fromDate);
@@ -154,12 +164,18 @@ public class AbsenceRequests extends Controller {
     if (absenceRequest.endTo == null) {
       absenceRequest.endTo = absenceRequest.startAt;
     }
-    
-    absenceRequest.flowStarted = true;
-    
+       
+    boolean isNewRequest = !absenceRequest.isPersistent();
     absenceRequest.save();
-    //Avvia il flusso.
-    //absenceRequestManager.checkFlow(absenceRequest);
+
+    //Avvia il flusso se necessario.
+    if (isNewRequest || !absenceRequest.flowStarted) {
+      log.info("absenceRequest.person = {}", absenceRequest.person);
+      absenceRequestManager.executeEvent(
+          absenceRequest, absenceRequest.person, 
+          AbsenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());      
+    } 
+
     list(absenceRequest.type);
   }
 
