@@ -11,10 +11,13 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.Person;
 import models.Role;
+import models.UsersRolesOffices;
 import models.flows.AbsenceRequest;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.query.QAbsenceRequest;
 import org.joda.time.LocalDateTime;
+
+import java.util.List;
 
 /**
  * Dao per l'accesso alle richiesta di assenza.
@@ -38,7 +41,7 @@ public class AbsenceRequestDao extends DaoBase {
    * @param absenceRequestType Il tipo di richiesta di assenza specifico
    * @return La lista delle richieste di assenze sull'intervallo e la persona specificati.
    */
-  public ModelQuery.SimpleResults<AbsenceRequest> findByPersonAndDate(Person person,
+  public List<AbsenceRequest> findByPersonAndDate(Person person,
       LocalDateTime fromDate, Optional<LocalDateTime> toDate, 
       AbsenceRequestType absenceRequestType) {
 
@@ -53,68 +56,93 @@ public class AbsenceRequestDao extends DaoBase {
     if (toDate.isPresent()) {
       conditions.and(absenceRequest.endTo.before(toDate.get()));
     }
-    return ModelQuery.wrap(getQueryFactory().from(absenceRequest)
-          .where(conditions), absenceRequest);
+    JPQLQuery query = getQueryFactory().from(absenceRequest)
+        .where(conditions);
+    return query.list(absenceRequest);
   }
- 
+
   /**
    * Lista di richieste da approvare per ruolo, data e tipo.
    * 
-   * @param role il ruolo per cui si cercano le richieste
+   * @param uros la lista degli user_role_office associati alla persona pr cui si cercano le 
+   *     richieste da approvare.
    * @param fromDate la data da cui cercare
    * @param toDate (opzionale) la data entro cui cercare
    * @param absenceRequestType il tipo di richiesta da cercare
    * @return La lista delle richieste di assenza da approvare per il ruolo passato. 
    */
-  public ModelQuery.SimpleResults<AbsenceRequest> findRequestsToApprove(Role role,
+  public List<AbsenceRequest> findRequestsToApprove(
+      List<UsersRolesOffices> uros,
       LocalDateTime fromDate, Optional<LocalDateTime> toDate, 
       AbsenceRequestType absenceRequestType) {
 
-    Preconditions.checkNotNull(role);
     Preconditions.checkNotNull(fromDate);
-    
+
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
-    BooleanBuilder conditions = new BooleanBuilder(absenceRequest.startAt.after(fromDate))
+
+    BooleanBuilder conditions = new BooleanBuilder();
+
+    for (UsersRolesOffices uro : uros) {
+      if (uro.role.name.equals(Role.PERSONNEL_ADMIN)) {
+        personnelAdminQuery(conditions);
+      } else if (uro.role.name.equals(Role.SEAT_SUPERVISOR)) {
+        seatSupervisorQuery(conditions);
+      } else if (uro.role.name.equals(Role.GROUP_MANAGER)) {
+        managerQuery(conditions);
+      }
+    }
+    conditions.and(absenceRequest.startAt.after(fromDate))
         .and(absenceRequest.type.eq(absenceRequestType));
     if (toDate.isPresent()) {
       conditions.and(absenceRequest.endTo.before(toDate.get()));
     }
-    JPQLQuery query = null;
-    if (role.name.equals(Role.PERSONNEL_ADMIN)) {
-      query = personnelAdminQuery();
-    } else if (role.name.equals(Role.SEAT_SUPERVISOR)) {
-      query = seatSupervisorQuery();
+    JPQLQuery query = getQueryFactory()
+        .from(absenceRequest).where(conditions);
+    return query.list(absenceRequest);
+  }
+
+  private void seatSupervisorQuery(BooleanBuilder condition) {
+    
+    final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
+    if (condition.hasValue()) {
+      condition.or(condition.and(absenceRequest.officeHeadApprovalRequired.isTrue()
+          .and(absenceRequest.officeHeadApproved.isNull()
+              .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse())))));
     } else {
-      query = managerQuery();
+      condition.and(absenceRequest.officeHeadApprovalRequired.isTrue()
+          .and(absenceRequest.officeHeadApproved.isNull()
+              .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse()))));
     }
     
-    return ModelQuery.wrap(query.where(conditions), absenceRequest);
   }
-  
-  private JPQLQuery seatSupervisorQuery() {
+
+  private void personnelAdminQuery(BooleanBuilder condition) {
+
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
-    final JPQLQuery query = getQueryFactory().from(absenceRequest)
-        .where(absenceRequest.officeHeadApprovalRequired.isTrue()
-            .and(absenceRequest.officeHeadApproved.isNull()
-                .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse()))));
-    return query;
+    if (condition.hasValue()) {
+      condition.or(absenceRequest.administrativeApprovalRequired.isTrue()
+          .and(absenceRequest.administrativeApproved.isNull()
+              .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse()))));
+    } else {
+      condition.and(absenceRequest.administrativeApprovalRequired.isTrue()
+          .and(absenceRequest.administrativeApproved.isNull()
+              .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse()))));
+    }
+    
   }
-  
-  private JPQLQuery personnelAdminQuery() {
+
+  private void managerQuery(BooleanBuilder condition) {
+
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
-    final JPQLQuery query = getQueryFactory().from(absenceRequest)
-        .where(absenceRequest.administrativeApprovalRequired.isTrue()
-            .and(absenceRequest.administrativeApproved.isNull()
-                .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse()))));
-    return query;
-  }
-  
-  private JPQLQuery managerQuery() {
-    final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
-    final JPQLQuery query = getQueryFactory().from(absenceRequest)
-        .where(absenceRequest.managerApprovalRequired.isTrue()
-            .and(absenceRequest.managerApproved.isNull()
-                .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse()))));
-    return query;
+    if (condition.hasValue()) {
+      condition.or(absenceRequest.managerApprovalRequired.isTrue()
+          .and(absenceRequest.managerApproved.isNull()
+              .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse()))));
+    } else {
+      condition.and(absenceRequest.managerApprovalRequired.isTrue()
+          .and(absenceRequest.managerApproved.isNull()
+              .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse()))));
+    }
+    
   }
 }
