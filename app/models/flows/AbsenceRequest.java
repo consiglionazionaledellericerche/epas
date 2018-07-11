@@ -131,6 +131,21 @@ public class AbsenceRequest extends MutableModel {
     return endTo != null ? endTo.toLocalDate() : null;
   }
   
+  @Transient
+  public boolean isManagerApproved() {
+    return managerApproved != null;
+  }
+  
+  @Transient
+  public boolean isAdministrativeApproved() {
+    return administrativeApproved != null;
+  }
+  
+  @Transient
+  public boolean isOfficeHeadApproved() {
+    return officeHeadApproved != null;
+  }
+  
   /**
    * Se non sono state già rilasciate approvazioni necessarie allora il possessore 
    * può cancellare o modificare la richiesta.

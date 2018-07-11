@@ -2,7 +2,7 @@ package manager;
 
 import com.google.common.base.Verify;
 import com.google.inject.Inject;
-
+import helpers.TemplateExtensions;
 import manager.configurations.EpasParam;
 
 import models.Notification;
@@ -15,6 +15,7 @@ import models.absences.GroupAbsenceType;
 import models.absences.definitions.DefaultGroup;
 import models.enumerate.AccountRole;
 import models.enumerate.NotificationSubject;
+import models.flows.AbsenceRequest;
 
 /**
  * @author daniele
@@ -187,5 +188,34 @@ public class NotificationManager {
     }
   }
 
+  /**
+   * Notifica che una richiesta di assenza è stata rifiutata da uno degli 
+   * approvatori del flusso.
+   * 
+   * @param absenceRequest la richiesta di assenza
+   * @param refuser la persona che ha rifiutato la richiesta di assenza.
+   */
+  public void notificationAbsenceRequestRefused(
+      AbsenceRequest absenceRequest, Person refuser) {
+    
+    Verify.verifyNotNull(absenceRequest);
+    Verify.verifyNotNull(refuser);
+      
+    final String message = 
+        String.format("La richiesta di assenza di tipo \"%s\" dal {} al {} "
+            + "è stata rifiutata da %s",
+            TemplateExtensions.label(absenceRequest.type),
+            absenceRequest.type.isAllDay() 
+              ? TemplateExtensions.format(absenceRequest.startAtAsDate()) 
+                  : TemplateExtensions.format(absenceRequest.startAt),
+            absenceRequest.type.isAllDay() 
+              ? TemplateExtensions.format(absenceRequest.endToAsDate()) 
+                   : TemplateExtensions.format(absenceRequest.endTo),
+            refuser.getFullname());
+
+    Notification.builder().destination(absenceRequest.person.user).message(message)
+      .subject(NotificationSubject.ABSENCE_REQUEST, absenceRequest.id).create();
+
+  }
 
 }

@@ -1,5 +1,6 @@
 package manager.flows;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
@@ -8,11 +9,16 @@ import javax.inject.Inject;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
+import manager.services.absences.AbsenceService.InsertReport;
 import models.Person;
 import models.Role;
 import models.flows.AbsenceRequest;
+import models.flows.AbsenceRequestEvent;
+import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
 import org.apache.commons.compress.utils.Lists;
 import org.joda.time.LocalDate;
@@ -23,13 +29,15 @@ import org.joda.time.LocalDate;
  * @author cristian
  *
  */
+@Slf4j
 public class AbsenceRequestManager {
 
 
   private ConfigurationManager configurationManager;
   private UsersRolesOfficesDao uroDao;
   private RoleDao roleDao;
-
+  private NotificationManager notificationManager;
+    
   @Data
   @RequiredArgsConstructor
   @ToString
@@ -189,20 +197,218 @@ public class AbsenceRequestManager {
   }
 
   /**
-   * Approvazione di una richista di assenza.
+   * Rimuove tutte le eventuali approvazioni ed impostata il flusso come
+   * da avviare.
+   * 
+   * @param absenceRequest la richiesta di assenza
+   */
+  public void resetFlow(AbsenceRequest absenceRequest) {
+    absenceRequest.flowStarted = false;
+    absenceRequest.managerApproved = null;
+    absenceRequest.administrativeApproved = null;
+    absenceRequest.officeHeadApproved = null;
+  }
+  
+  /**
+   * Verifica se il tipo di evento è eseguibile dall'utente indicato.
+   * 
    * @param absenceRequest la richiesta di assenza. 
    * @param approver la persona che effettua l'approvazione.
-   * @return la lista di eventuali problemi riscontrati durante l'approvazione.
+   * @param eventType il tipo di evento.
+   * @return l'eventuale problema riscontrati durante l'approvazione.
    */
-  public List<String> approval(AbsenceRequest absenceRequest, Person approver) {
-    List<String> problems = Lists.newArrayList();
-    if (absenceRequest.managerApprovalRequired && absenceRequest.managerApproved == null) {
-      if (!absenceRequest.person.personInCharge.equals(approver)) {
-        problems.add(
-            String.format("Questa richiesta non può essere approvata dal responsabile"
-                + " di gruppo {}", approver.getFullname()));
+  public Optional<String> checkAbsenceRequestEvent(
+      AbsenceRequest absenceRequest, Person approver, AbsenceRequestEventType eventType) {
+    
+    if (eventType == AbsenceRequestEventType.STARTING_APPROVAL_FLOW) {
+      if (!absenceRequest.person.equals(approver)) {
+        return Optional.of("Il flusso può essere avviato solamente dal diretto interessato.");
+      }
+      if (absenceRequest.flowStarted) {
+        return Optional.of("Flusso già avviato, impossibile avviarlo di nuovo.");
       }
     }
-    return problems;
+    
+    if (eventType == AbsenceRequestEventType.MANAGER_APPROVAL 
+        || eventType == AbsenceRequestEventType.MANAGER_REFUSAL) {
+      if (!absenceRequest.managerApprovalRequired) {
+        return Optional.of("Questa richiesta di assenza non prevede approvazione/rifiuto "
+            + "da parte del responsabile di gruppo.");
+      }
+      if (absenceRequest.isManagerApproved()) {
+        return Optional.of("Questa richiesta di assenza è già stata approvata "
+            + "da parte del responsabile di gruppo.");
+      }
+      if (!absenceRequest.person.personInCharge.equals(approver)) {
+        return Optional.of(
+            String.format("L'evento {} non può essere eseguito dal responsabile"
+                + " di gruppo {}", eventType, approver.getFullname()));
+      }
+    }
+
+    if (eventType == AbsenceRequestEventType.ADMINISTRATIVE_APPROVAL 
+        || eventType == AbsenceRequestEventType.ADMINISTRATIVE_REFUSAL) {
+      if (!absenceRequest.administrativeApprovalRequired) {
+        return Optional.of("Questa richiesta di assenza non prevede approvazione/rifiuto "
+            + "da parte dell'amministrazione del personale.");
+      }
+      if (absenceRequest.isAdministrativeApproved()) {
+        return Optional.of("Questa richiesta di assenza è già stata approvata "
+            + "da parte dell'amministrazione del personale.");
+      }
+      if (!uroDao.getUsersRolesOffices(
+          absenceRequest.person.user, roleDao.getRoleByName(Role.PERSONNEL_ADMIN),
+          absenceRequest.person.office).isPresent()) {
+        return Optional.of(
+            String.format("L'evento {} non può essere eseguito da {} perché non ha"
+                + " il ruolo di amministratore del personale.", eventType, approver.getFullname()));
+      }
+    }
+
+    if (eventType == AbsenceRequestEventType.OFFICE_HEAD_APPROVAL 
+        || eventType == AbsenceRequestEventType.OFFICE_HEAD_REFUSAL) {
+      if (!absenceRequest.officeHeadApprovalRequired) {
+        return Optional.of("Questa richiesta di assenza non prevede approvazione/rifiuto "
+            + "da parte del responsabile di sede.");
+      }
+      if (absenceRequest.isOfficeHeadApproved()) {
+        return Optional.of("Questa richiesta di assenza è già stata approvata "
+            + "da parte del responsabile di sede.");
+      }
+      if (!uroDao.getUsersRolesOffices(
+          absenceRequest.person.user, roleDao.getRoleByName(Role.SEAT_SUPERVISOR),
+          absenceRequest.person.office).isPresent()) {
+        return Optional.of(
+            String.format("L'evento {} non può essere eseguito da {} perché non ha"
+                + " il ruolo di responsabile di sede.", eventType, approver.getFullname()));
+      }
+      
+    }
+    
+    return Optional.absent();
+  }
+  
+  /**
+   * Approvazione di una richiesta di assenza.
+   * 
+   * @param absenceRequest la richiesta di assenza. 
+   * @param person la persona che effettua l'approvazione.
+   * @param eventType il tipo di evento.
+   * @param note eventuali note da aggiungere all'evento generato.
+   * @return l'eventuale problema riscontrati durante l'approvazione.
+   */
+  public Optional<String> executeEvent(
+      AbsenceRequest absenceRequest, Person person, 
+      AbsenceRequestEventType eventType, Optional<String> note) {
+
+    val problem = checkAbsenceRequestEvent(absenceRequest, person, eventType);
+    if (problem.isPresent()) {
+      log.warn("Impossibile inserire la richiesta di assenza {}. Problema: {}", 
+          absenceRequest, problem.get());
+      return problem;
+    }
+    
+    switch (eventType) {
+      case STARTING_APPROVAL_FLOW:
+        absenceRequest.flowStarted = true;
+        break;
+        
+      case MANAGER_APPROVAL:
+        absenceRequest.managerApproved = LocalDate.now();
+        break;
+        
+      case MANAGER_REFUSAL:
+        //si riparte dall'inizio del flusso.
+        resetFlow(absenceRequest);
+        notificationManager.notificationAbsenceRequestRefused(absenceRequest, person);
+        break;
+
+      case ADMINISTRATIVE_APPROVAL:
+        absenceRequest.administrativeApproved = LocalDate.now();
+        break;
+        
+      case ADMINISTRATIVE_REFUSAL:
+        //si riparte dall'inizio del flusso.
+        resetFlow(absenceRequest);
+        notificationManager.notificationAbsenceRequestRefused(absenceRequest, person);
+        break;
+        
+      case OFFICE_HEAD_APPROVAL:
+        absenceRequest.officeHeadApproved = LocalDate.now();
+        break;
+      
+      case OFFICE_HEAD_REFUSAL:
+        //si riparte dall'inizio del flusso.
+        resetFlow(absenceRequest);
+        notificationManager.notificationAbsenceRequestRefused(absenceRequest, person);
+        break;
+        
+      case COMPLETE:
+        completeFlow(absenceRequest);
+        break;
+
+      case DELETE:
+        absenceRequest.flowEnded = true;
+        break;
+
+      default:
+        throw new IllegalStateException(
+            String.format("Evento di richiesta assenza %s non previsto", eventType));
+    }
+    
+    val event = AbsenceRequestEvent.builder()
+        .absenceRequest(absenceRequest).owner(person.user).eventType(eventType)
+        .description(note.orNull())
+        .build();
+    event.save();
+    
+    log.info("Costruito evento per richiesta di assenza {}", event);
+    absenceRequest.save();
+    
+    return Optional.absent();
+  }
+  
+  /**
+   * Un flusso è completato se tutte le approvazioni richieste sono state
+   * impostate.
+   * 
+   * @param absenceRequest la richiesta da verificare 
+   * @return true se è completato, false altrimenti.
+   */
+  public boolean isFullyApproved(AbsenceRequest absenceRequest) {
+    return (!absenceRequest.managerApprovalRequired || absenceRequest.isManagerApproved()) 
+        && (!absenceRequest.administrativeApprovalRequired 
+            || absenceRequest.isAdministrativeApproved())
+        && (!absenceRequest.officeHeadApprovalRequired || absenceRequest.isOfficeHeadApproved());
+  }
+
+  /**
+   * Controlla se una richiesta di assenza può essere terminata con successo,
+   * in caso positivo effettua l'inserimento delle assenze.
+   * 
+   * @param absenceRequest la richiesta da verificare e da utilizzare per i dati
+   *     dell'inserimento assenza.
+   * @return un report con l'inserimento dell'assenze se è stato possibile farlo.
+   */
+  public Optional<InsertReport> checkAndCompleteFlow(AbsenceRequest absenceRequest) {
+    if (isFullyApproved(absenceRequest) && !absenceRequest.flowEnded) {
+      return Optional.of(completeFlow(absenceRequest));
+    }
+    return Optional.absent();
+  }
+
+  /**
+   * Effettuta l'inserimento dell'assenza.
+   * 
+   * @param absenceRequest la richiesta di assenza da cui prelevare i
+   *     dati per l'inserimento. 
+   * @return il report con i codici di assenza inseriti.
+   */
+  private InsertReport completeFlow(AbsenceRequest absenceRequest) {
+    //TODO
+    absenceRequest.flowEnded = true;
+    absenceRequest.save();
+    log.info("Flusso relativo a {} terminato. Inserimento in corso delle assenze.", absenceRequest);
+    return null;
   }
 }

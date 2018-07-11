@@ -9,6 +9,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.ToString;
 import models.User;
 import models.base.BaseModel;
@@ -16,6 +17,7 @@ import models.flows.enumerate.AbsenceRequestEventType;
 import org.joda.time.LocalDateTime;
 import play.data.validation.Required;
 
+@Builder
 @ToString
 @Entity
 @Table(name = "absence_request_events")
@@ -38,8 +40,6 @@ public class AbsenceRequestEvent extends BaseModel {
   @ManyToOne
   public User owner;
   
-  @Required
-  @NotNull
   public String description;
   
   @Required
