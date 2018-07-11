@@ -4,11 +4,13 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
+import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import helpers.jpa.ModelQuery;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.Person;
+import models.Role;
 import models.flows.AbsenceRequest;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.query.QAbsenceRequest;
@@ -55,4 +57,64 @@ public class AbsenceRequestDao extends DaoBase {
           .where(conditions), absenceRequest);
   }
  
+  /**
+   * Lista di richieste da approvare per ruolo, data e tipo.
+   * 
+   * @param role il ruolo per cui si cercano le richieste
+   * @param fromDate la data da cui cercare
+   * @param toDate (opzionale) la data entro cui cercare
+   * @param absenceRequestType il tipo di richiesta da cercare
+   * @return La lista delle richieste di assenza da approvare per il ruolo passato. 
+   */
+  public ModelQuery.SimpleResults<AbsenceRequest> findRequestsToApprove(Role role,
+      LocalDateTime fromDate, Optional<LocalDateTime> toDate, 
+      AbsenceRequestType absenceRequestType) {
+
+    Preconditions.checkNotNull(role);
+    Preconditions.checkNotNull(fromDate);
+    
+    final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
+    BooleanBuilder conditions = new BooleanBuilder(absenceRequest.startAt.after(fromDate))
+        .and(absenceRequest.type.eq(absenceRequestType));
+    if (toDate.isPresent()) {
+      conditions.and(absenceRequest.endTo.before(toDate.get()));
+    }
+    JPQLQuery query = null;
+    if (role.name.equals(Role.PERSONNEL_ADMIN)) {
+      query = personnelAdminQuery();
+    } else if (role.name.equals(Role.SEAT_SUPERVISOR)) {
+      query = seatSupervisorQuery();
+    } else {
+      query = managerQuery();
+    }
+    
+    return ModelQuery.wrap(query.where(conditions), absenceRequest);
+  }
+  
+  private JPQLQuery seatSupervisorQuery() {
+    final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
+    final JPQLQuery query = getQueryFactory().from(absenceRequest)
+        .where(absenceRequest.officeHeadApprovalRequired.isTrue()
+            .and(absenceRequest.officeHeadApproved.isNull()
+                .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse()))));
+    return query;
+  }
+  
+  private JPQLQuery personnelAdminQuery() {
+    final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
+    final JPQLQuery query = getQueryFactory().from(absenceRequest)
+        .where(absenceRequest.administrativeApprovalRequired.isTrue()
+            .and(absenceRequest.administrativeApproved.isNull()
+                .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse()))));
+    return query;
+  }
+  
+  private JPQLQuery managerQuery() {
+    final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
+    final JPQLQuery query = getQueryFactory().from(absenceRequest)
+        .where(absenceRequest.managerApprovalRequired.isTrue()
+            .and(absenceRequest.managerApproved.isNull()
+                .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse()))));
+    return query;
+  }
 }

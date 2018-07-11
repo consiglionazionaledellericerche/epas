@@ -678,9 +678,13 @@ Contracts.updateContractWorkingTimeType= Tipo Orario
 Contracts.updateSourceContract= Inizializzazione
 Contracts.initializationsStatus=Dati Iniziali
 
-AbsenceRequests.vacations =Richieste di ferie
-AbsenceRequests.compensatoryRests =Riposi compensativi
-AbsenceRequests.shortTermPermit =Riposi compensativi
+AbsenceRequests.vacations =Mie richieste di ferie
+AbsenceRequests.compensatoryRests =Miei riposi compensativi
+AbsenceRequests.shortTermPermit =Miei permessi brevi
+AbsenceRequests.vacationsToApprove =Flussi di richieste di ferie
+AbsenceRequests.compensatoryRestsToApprove =Flussi di riposi compensativi
+AbsenceRequests.shortTermPermitToApprove =Flussi di permessi brevi
+
 
 AbsenceRequestType.VACATION_REQUEST =richiesta di ferie
 AbsenceRequestType.VACATION_REQUESTS =richieste ferie
