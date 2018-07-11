@@ -1,7 +1,7 @@
 absenceRequest =richiesta di assenza
 
 absenceRequest.endTo =Fine
-absenceRequest.description =Descrizione
+absenceRequest.note =Note informative
 absenceRequest.person =Dipendente
 absenceRequest.startAt =Inizio
 absenceRequest.type =Tipologia
@@ -687,11 +687,13 @@ AbsenceRequests.shortTermPermitToApprove =Flussi di permessi brevi
 
 
 AbsenceRequestType.VACATION_REQUEST =richiesta di ferie
-AbsenceRequestType.VACATION_REQUESTS =richieste ferie
+AbsenceRequestType.VACATION_REQUESTS =mie richieste ferie
+AbsenceRequestType.VACATION_REQUEST_TO_APPROVE =richieste ferie da approvare
 AbsenceRequestType.VACATION_REQUEST.blank =nuova richiesta ferie
 
 AbsenceRequestType.COMPENSATORY_REST =riposo compensativo
-AbsenceRequestType.COMPENSATORY_RESTS =riposi compensativi
+AbsenceRequestType.COMPENSATORY_RESTS =miei riposi compensativi
+AbsenceRequestType.COMPENSATORY_REST_TO_APPROVE =riposi compensativi da approvare
 AbsenceRequestType.COMPENSATORY_REST.blank =nuova richista riposo compensativi
 
 AbsenceRequestType.SHORT_TERM_PERMIT =permesso breve

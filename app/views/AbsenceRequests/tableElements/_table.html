@@ -28,10 +28,10 @@
 	</thead>
 
 	<tbody>
-		#{list items:results.list(), as:'item'}
+		#{list items:results, as:'item'}
 			<tr>
 				#{if !onlyOwn}
-					<td>#{f.value 'item.person.fullname' /}</td>
+					<td>#{f.value 'item.person.fullname', value:item.person.fullname /}</td>
 				#{/if}
 								
 				<td>#{f.value 'item.startAt', value:config.allDay ? item.startAtAsDate().format() : item.startAt.format() /}</td>	    
