@@ -52,9 +52,27 @@ CREATE TABLE absence_request_events (
 	version INT DEFAULT 0
 );
 
+INSERT INTO roles (name, version) VALUES ('groupManager', 0); 
+
+INSERT INTO roles_history (id, _revision, _revision_type, name) 
+SELECT id, (SELECT MAX(rev) AS rev FROM revinfo), 0, name  FROM roles WHERE name = 'groupManager';
+
+INSERT INTO users_roles_offices (office_id, role_id, user_id, version)
+SELECT office_id, (SELECT id FROM roles WHERE name = 'groupManager'), user_id, 0 
+FROM persons WHERE is_person_in_charge = true;
+
+INSERT INTO users_roles_offices_history (id, _revision, _revision_type, office_id, role_id, user_id)
+SELECT uro.id, (SELECT MAX(rev) AS rev FROM revinfo), 0, uro.office_id, uro.role_id, uro.user_id FROM users_roles_offices uro
+LEFT JOIN roles r ON r.id = uro.role_id WHERE r.name = 'groupManager'; 
+
+ALTER TABLE persons_history DROP COLUMN is_person_in_charge;
+ALTER TABLE persons DROP COLUMN is_person_in_charge;
+
 
 # ---!Downs
 
 DROP TABLE absence_request_events;
 DROP TABLE absence_requests_history;
 DROP TABLE absence_requests;
+
+

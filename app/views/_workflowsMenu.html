@@ -27,6 +27,17 @@
       #{secure.li @AbsenceRequests.compensatoryRests()}
         <i class="fa fa-bath" aria-hidden="true"></i>
       #{/secure.li}
+      
+      <li class="divider"></li>
+      
+	  #{secure.li @AbsenceRequests.vacationsToApprove()}
+        <i class="fa fa-plane" aria-hidden="true"></i>
+      #{/secure.li}
+
+      #{secure.li @AbsenceRequests.compensatoryRestsToApprove()}
+        <i class="fa fa-bath" aria-hidden="true"></i>
+      #{/secure.li}
+            
 
     </ul>
     *{ end items }*
