@@ -6,7 +6,7 @@ CREATE TABLE absence_requests (
 	person_id BIGINT NOT NULL REFERENCES persons(id),
 	start_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 	end_to TIMESTAMP WITHOUT TIME ZONE,
-	description TEXT,
+	note TEXT,
 	attachment TEXT,
 	manager_approved DATE,
 	administrative_approved DATE,
@@ -14,6 +14,8 @@ CREATE TABLE absence_requests (
 	manager_approval_required BOOLEAN DEFAULT TRUE,
 	administrative_approval_required BOOLEAN DEFAULT TRUE,
 	office_head_approval_required BOOLEAN DEFAULT TRUE,
+	flow_started BOOLEAN DEFAULT FALSE,
+	flow_ended BOOLEAN DEFAULT FALSE,
 	created_at TIMESTAMP WITHOUT TIME ZONE,
 	updated_at TIMESTAMP WITHOUT TIME ZONE,
 	version INT DEFAULT 0
@@ -27,7 +29,7 @@ CREATE TABLE absence_requests_history (
 	person_id BIGINT,
 	start_at TIMESTAMP WITHOUT TIME ZONE,
 	end_to TIMESTAMP WITHOUT TIME ZONE,
-	description TEXT,
+	note TEXT,
 	attachment TEXT,
 	manager_approved DATE,
 	administrative_approved DATE,
@@ -35,6 +37,8 @@ CREATE TABLE absence_requests_history (
 	manager_approval_required BOOLEAN,
 	administrative_approval_required BOOLEAN,
 	office_head_approval_required BOOLEAN,
+	flow_started BOOLEAN,
+	flow_ended BOOLEAN,
 	PRIMARY KEY (id, _revision, _revision_type)
 );
 

@@ -143,9 +143,7 @@ public class AbsenceRequests extends Controller {
     log.debug("AbsenceRequest.startAt = {}", absenceRequest.startAt);
     
     if (!Security.getUser().get().person.equals(absenceRequest.person)) {
-      //TODO verificare se è l'utente corrente ha i permessi di inserire le richieste di assenza
-      //non sue
-      forbidden();
+      rules.check("AbsenceRequests.blank4OtherPerson");
     } else {
       absenceRequest.person = Security.getUser().get().person;
     }
@@ -157,9 +155,13 @@ public class AbsenceRequests extends Controller {
       absenceRequest.endTo = absenceRequest.startAt;
     }
     
+    absenceRequest.flowStarted = true;
+    
     absenceRequest.save();
+    //Avvia il flusso.
+    //absenceRequestManager.checkFlow(absenceRequest);
     list(absenceRequest.type);
-  }  
+  }
 
 
   /**

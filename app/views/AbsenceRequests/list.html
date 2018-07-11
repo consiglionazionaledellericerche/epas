@@ -44,7 +44,7 @@
 			#{if approvalRequired}
 				<th colspan="${approvalsRequired}">Approvazione</th>
 			#{/if}
-			<th #{if approvalRequired}rowspan="2"#{/if}>&{'absenceRequest.description'}</th>
+			<th #{if approvalRequired}rowspan="2"#{/if}>&{'absenceRequest.note'}</th>
 			<th #{if approvalRequired}rowspan="2"#{/if}>Azioni</th>
 				
 		</tr>			
@@ -82,7 +82,7 @@
 				#{if config.administrativeApprovalRequired}
 					<td>#{f.value 'item.administrativeApproved' /}</td>
 				#{/if}
-				<td>&{item.description}</td>
+				<td>${item.note}</td>
 				<td>
 					#{secure.check 'AbsenceRequests.edit', target:item}
 						#{b.edit @edit(item.id) /}

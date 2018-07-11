@@ -4,9 +4,9 @@
 	#{f.hidden 'absenceRequest.id' /}
 	#{f.hidden 'absenceRequest.person.id' /}
 	#{f.hidden 'absenceRequest.type' /}
-	#{f.date 'absenceRequest.startAt', required:true /}
+	#{f.date 'absenceRequest.startAt', required:true, value:absenceRequest.startAt?.format() /}
 	#{f.date 'absenceRequest.endTo' /}
-	#{f.input 'absenceRequest.description' /}
+	#{f.input 'absenceRequest.note' /}
 	
 	#{b.buttons}
 		#{b.save @save() /}

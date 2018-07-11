@@ -34,7 +34,15 @@ public enum NotificationSubject {
   /*
    * Notifiche relative alle assenze inserite o modificate
    */
-  ABSENCE;
+  ABSENCE,
+  /**
+   * Notifiche per le richieste di ferie. 
+   */
+  VACATION_REQUEST,
+  /**
+   * Notifiche per le richieste di riposo compensativo. 
+   */
+  COMPENSATORY_REST_REQUEST;
 
   private String toUrl(String action, Map<String, Object> params) {
     if (params == null) {
