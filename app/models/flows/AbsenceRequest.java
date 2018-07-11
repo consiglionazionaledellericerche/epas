@@ -60,7 +60,7 @@ public class AbsenceRequest extends MutableModel {
   /**
    * Descrizione facoltativa della richiesta.
    */
-  public String description;
+  public String note;
   
   /**
    * Eventuale allegato alla richiesta.
@@ -109,6 +109,18 @@ public class AbsenceRequest extends MutableModel {
   @OneToMany(mappedBy = "absenceRequest")
   public List<AbsenceRequestEvent> events = Lists.newArrayList();
   
+  /**
+   * Se il flusso è avviato.
+   */
+  @Column(name = "flow_started")
+  public boolean flowStarted = false; 
+
+  /**
+   * Se il flusso è terminato.
+   */
+  @Column(name = "flow_ended")
+  public boolean flowEnded = false;
+  
   @Transient
   public LocalDate startAtAsDate() {
     return startAt != null ? startAt.toLocalDate() : null;
@@ -126,7 +138,7 @@ public class AbsenceRequest extends MutableModel {
    */
   @Transient
   public boolean ownerCanEditOrDelete() {
-    return (officeHeadApproved == null || !officeHeadApprovalRequired) 
+    return !flowStarted && (officeHeadApproved == null || !officeHeadApprovalRequired) 
         && (managerApproved == null || !managerApprovalRequired
         && (administrativeApproved == null || !administrativeApprovalRequired));
   }

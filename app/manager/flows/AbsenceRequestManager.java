@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.configurations.ConfigurationManager;
 import models.Person;
@@ -24,7 +23,6 @@ import org.joda.time.LocalDate;
  * @author cristian
  *
  */
-@Slf4j
 public class AbsenceRequestManager {
 
 
@@ -190,4 +188,21 @@ public class AbsenceRequestManager {
     absenceRequest.administrativeApprovalRequired = config.administrativeApprovalRequired;
   }
 
+  /**
+   * Approvazione di una richista di assenza.
+   * @param absenceRequest la richiesta di assenza. 
+   * @param approver la persona che effettua l'approvazione.
+   * @return la lista di eventuali problemi riscontrati durante l'approvazione.
+   */
+  public List<String> approval(AbsenceRequest absenceRequest, Person approver) {
+    List<String> problems = Lists.newArrayList();
+    if (absenceRequest.managerApprovalRequired && absenceRequest.managerApproved == null) {
+      if (!absenceRequest.person.personInCharge.equals(approver)) {
+        problems.add(
+            String.format("Questa richiesta non può essere approvata dal responsabile"
+                + " di gruppo {}", approver.getFullname()));
+      }
+    }
+    return problems;
+  }
 }

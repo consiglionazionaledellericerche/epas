@@ -1,9 +1,15 @@
 package models.flows.enumerate;
 
 import com.google.common.base.Optional;
+import java.util.function.Function;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import manager.configurations.EpasParam;
+import manager.flows.AbsenceRequestCheck;
+import manager.flows.AbsenceRequestExecutor;
+import manager.flows.VacationRequestExecutor;
+import manager.services.absences.AbsenceService.InsertReport;
+import models.flows.AbsenceRequest;
 
 /**
  * Tipologie implementate di richiesta di assenza.
@@ -54,4 +60,5 @@ public enum AbsenceRequestType {
   public final Optional<EpasParam> managerApprovalRequiredTechnicianLevel;
   public final Optional<EpasParam> administrativeApprovalRequiredTopLevel;
   public final Optional<EpasParam> administrativeApprovalRequiredTechnicianLevel;
+  
 }
