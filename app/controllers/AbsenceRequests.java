@@ -6,6 +6,7 @@ import com.google.common.base.Verify;
 import dao.AbsenceRequestDao;
 import dao.PersonDao;
 import dao.RoleDao;
+import dao.UsersRolesOfficesDao;
 
 import helpers.Web;
 import helpers.jpa.ModelQuery.SimpleResults;
@@ -16,6 +17,7 @@ import lombok.val;
 import manager.flows.AbsenceRequestManager;
 import models.Person;
 import models.Role;
+import models.UsersRolesOffices;
 import models.flows.AbsenceRequest;
 import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
@@ -27,6 +29,8 @@ import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
+
+import java.util.List;
 
 /**
  * Controller per la gestione delle richieste di assenza dei dipendenti.
@@ -52,6 +56,9 @@ public class AbsenceRequests extends Controller {
   
   @Inject  
   static RoleDao roleDao;
+  
+  @Inject
+  static UsersRolesOfficesDao uroDao;
   
   public static void vacations() {
     list(AbsenceRequestType.VACATION_REQUEST);
@@ -92,15 +99,15 @@ public class AbsenceRequests extends Controller {
       Application.index();
       return;
     } 
-    val person = currentUser.person;  
-    
+    val person = currentUser.person;    
      
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
     log.debug("Prelevo le richieste di assenze di tipo {} per {} a partire da {}", 
         type, person, fromDate);
     
     val config = absenceRequestManager.getConfiguration(type, person);
-    val results = absenceRequestDao.findByPersonAndDate(person, fromDate, Optional.absent(), type);
+    List<AbsenceRequest> results = absenceRequestDao
+        .findByPersonAndDate(person, fromDate, Optional.absent(), type);
     val onlyOwn = true;
     
     render(config, results, type, onlyOwn);
@@ -116,20 +123,12 @@ public class AbsenceRequests extends Controller {
 
     val person = Security.getUser().get().person; 
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
-    log.debug("Prelevo le richieste di assenze di tipo {} per {} a partire da {}", 
-        type, person, fromDate);   
+    log.debug("Prelevo le richieste da approvare di assenze di tipo {} a partire da {}", 
+        type, fromDate);   
     
-    Role role = null;
-    if (person.user.hasRoles(Role.GROUP_MANAGER)) {
-      role = roleDao.getRoleByName(Role.GROUP_MANAGER);
-    }
-    if (person.user.hasRoles(Role.PERSONNEL_ADMIN)) {      
-      role = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);      
-    }
-    if (person.user.hasRoles(Role.SEAT_SUPERVISOR)) {
-      role = roleDao.getRoleByName(Role.SEAT_SUPERVISOR);      
-    }
-    val results = absenceRequestDao.findRequestsToApprove(role, fromDate, Optional.absent(), type);
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.user);
+    List<AbsenceRequest> results = absenceRequestDao
+        .findRequestsToApprove(roleList, fromDate, Optional.absent(), type);
     val config = absenceRequestManager.getConfiguration(type, person);  
     val onlyOwn = false;
     

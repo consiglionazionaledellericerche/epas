@@ -1,6 +1,6 @@
 #{extends 'main.html' /}
 #{set header:'navbar' /}
-#{set absenceRequestTypeLabel: messages.get('AbsenceRequestType.' + type.toString() + 'S') /}
+#{set absenceRequestTypeLabel: messages.get('AbsenceRequestType.' + type.toString() + '_TO_APPROVE') /}
 #{set title:('ePAS - ' + absenceRequestTypeLabel) /}
 
 #{switcher year:true, month:true /}
@@ -26,11 +26,6 @@
 
   #{title title:absenceRequestTypeLabel.capitalize(), administration:true /} 
  
-  #{b.buttons center:true}
-  		<a class="btn btn-success" href="@{AbsenceRequests.blank('person':person, 'type':type)}">
-    		<i class="fa fa-plus"></i> &{'AbsenceRequestType.' + type + '.blank'}
-  		</a>
-  #{/b.buttons}
  
 #{include './tableElements/_table.html' /}
 </div>
