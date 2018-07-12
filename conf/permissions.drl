@@ -570,7 +570,9 @@ when
 			"AbsenceRequests.compensatoryRests",
 			"AbsenceRequests.shortTermPermits",
 			"AbsenceRequests.managerApproval",
-			"AbsenceRequests.show"
+			"AbsenceRequests.show",
+			"AbsenceRequests.approval",
+			"AbsenceRequests.disapproval"
 		), granted == false)
 then
   $c.grant();
@@ -947,7 +949,9 @@ when
 		"AbsenceRequests.compensatoryRests",
 		"AbsenceRequests.shortTermPermits",
 		"AbsenceRequests.officeHeadApproval",
-		"AbsenceRequests.show"
+		"AbsenceRequests.show",
+		"AbsenceRequests.approval",
+		"AbsenceRequests.disapproval"
         ), target == null, granted == false)
 then
  $c.grant();
@@ -974,7 +978,9 @@ when
 		"AbsenceRequests.vacations",
 		"AbsenceRequests.compensatoryRests",
 		"AbsenceRequests.shortTermPermits",
-		"AbsenceRequests.show"
+		"AbsenceRequests.show",
+		"AbsenceRequests.approval",
+		"AbsenceRequests.disapproval"
 
         ), target == $o, granted == false)
 then

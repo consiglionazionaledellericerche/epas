@@ -9,20 +9,38 @@
 
 <div class="container">
 
-
-#{f.value 'absenceRequest.person.fullname', value:absenceRequest.person.fullname /}
-#{f.value 'absenceRequest.type', value:absenceRequest.type /}
+<br>
+ #{alert color:'info'}
+    <p>Elenco degli stati di approvazione della <strong>#{f.value 'absenceRequest.type', value:absenceRequest.type /}</strong>
+    per <strong>#{f.value 'absenceRequest.person.fullname', value:absenceRequest.person.fullname /}</strong>:</p>
+ #{/alert}
+<table class="table table-striped">
+<tr>
+	<th>Richiedente</th>
+	<th>Tipo evento</th>
+	<th>Descrizione</th>
+</tr>
 #{list items:absenceRequest.events, as:'item'}
-	#{f.value 'item.description', value:item.description /}
-	#{f.value 'item.eventType', value:item.eventType /}
+<tr>
+	<td>#{f.value 'item.owner.person.fullname', value:item.owner.person.fullname /}</td>
+	<td>#{f.value 'item.eventType', value:item.eventType /}</td>
+	<td>#{f.value 'item.description', value:item.description /}</td>
+</tr>
 #{/list}
+</table>
 
-
-
-	#{secure.check 'AbsenceRequests.edit', target:item}
-		#{b.edit @edit(item.id) /}
-	#{/secure.check}
-	#{secure.check 'AbsenceRequests.delete', target:item}
-		#{b.delete @delete(item.id) /}
-	#{/secure.check}
+	#{b.buttons center:true}  
+		#{secure.check 'AbsenceRequests.edit', target:item}
+			#{b.edit @edit(item.id) /}
+		#{/secure.check}
+		#{secure.check 'AbsenceRequests.delete', target:item}
+			#{b.delete @delete(item.id) /}
+		#{/secure.check}
+		#{secure.check 'AbsenceRequests.approval', target:item}
+			#{b.save @approval(item.id) /}
+		#{/secure.check}
+		#{secure.check 'AbsenceRequests.disapproval', target:item}
+			#{b.disable @disapproval(item.id) /}
+		#{/secure.check}
+	#{/b.buttons}
 </div>

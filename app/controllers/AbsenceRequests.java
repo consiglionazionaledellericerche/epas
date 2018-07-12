@@ -233,7 +233,36 @@ public class AbsenceRequests extends Controller {
    * dispatcher per poter chiamare il corretto metodo tra gli "approval" qui sotto
    * La stessa logica dovrà essere fatta per i "disapproval".
    */
+  /**
+   * Metodo dispatcher che chiama il corretto metodo per approvare la richiesta.
+   * @param id l'id della richiesta da approvare
+   */
+  public static void approval(long id) {
 
+    AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
+    if (absenceRequest.managerApprovalRequired && absenceRequest.managerApproved == null
+        && Security.getUser().get().hasRoles(Role.GROUP_MANAGER)) {
+      //caso di approvazione da parte del responsabile di gruppo.
+      managerApproval(id);
+    }
+    if (absenceRequest.administrativeApprovalRequired 
+        && absenceRequest.administrativeApproved == null
+        && Security.getUser().get().hasRoles(Role.PERSONNEL_ADMIN)) {
+      //caso di approvazione da parte dell'amministratore del personale
+      personnelAdministratorApproval(id);
+    }
+    if (absenceRequest.officeHeadApprovalRequired && absenceRequest.officeHeadApproved == null 
+        && Security.getUser().get().hasRoles(Role.SEAT_SUPERVISOR)) {
+      //caso di approvazione da parte del responsabile di sede
+      officeHeadApproval(id);
+    }
+    render("@show", absenceRequest);
+  }
+
+  public static void disapproval(long id) {
+    
+  }
+  
   /**
    * Approvazione richiesta assenza da parte del responsabile di gruppo.
    * @param id id della richiesta di assenza.
@@ -262,6 +291,23 @@ public class AbsenceRequests extends Controller {
         absenceRequest, currentPerson, 
         AbsenceRequestEventType.OFFICE_HEAD_APPROVAL, Optional.absent());
     log.info("{} approvata dal responsabile di sede {}.",
+            absenceRequest, currentPerson.getFullname());
+    
+    absenceRequestManager.checkAndCompleteFlow(absenceRequest);
+    list(absenceRequest.type);
+  }
+  
+  /**
+   * Approvazione della richiesta di assenza da parte dell'amministratore del personale.
+   * @param id l'id della richiesta di assenza.
+   */
+  public static void personnelAdministratorApproval(long id) {
+    AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
+    val currentPerson = Security.getUser().get().person;
+    absenceRequestManager.executeEvent(
+        absenceRequest, currentPerson, 
+        AbsenceRequestEventType.ADMINISTRATIVE_APPROVAL, Optional.absent());
+    log.info("{} approvata dall'amministratore del personale {}.",
             absenceRequest, currentPerson.getFullname());
     
     absenceRequestManager.checkAndCompleteFlow(absenceRequest);
