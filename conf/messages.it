@@ -11,6 +11,8 @@ absenceRequest.administrativeApproved =Approvazione del amministrativo
 absenceRequest.officeApprovalRequired =Richiesta approvazione del responsabile di gruppo
 absenceRequest.managerApprovalRequired =Richiesta approvazione del responsabile di gruppo
 absenceRequest.administrativeApprovalRequired =Richiesta approvazione del amministrativo
+AbsenceRequests.approval=Approva
+AbsenceRequests.disapproval=Disapprova
 
 AbsenceRequestEventType.STARTING_APPROVAL_FLOW=Inizio approvazione richiesta
 AbsenceRequestEventType.MANAGER_APPROVAL=Richiesta approvata dal responsabile del gruppo di lavoro
