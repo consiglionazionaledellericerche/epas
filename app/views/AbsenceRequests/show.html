@@ -1,0 +1,28 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set absenceRequestTypeLabel: Visualizza flusso /}
+#{set title:('ePAS - ' + absenceRequestTypeLabel) /}
+
+#{set breadcrumbs:['Flussi di lavoro':@AbsenceRequests.list(), 
+  (absenceRequest.type):null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+<div class="container">
+
+
+#{f.value 'absenceRequest.person.fullname', value:absenceRequest.person.fullname /}
+#{f.value 'absenceRequest.type', value:absenceRequest.type /}
+#{list items:absenceRequest.events, as:'item'}
+	#{f.value 'item.description', value:item.description /}
+	#{f.value 'item.eventType', value:item.eventType /}
+#{/list}
+
+
+
+	#{secure.check 'AbsenceRequests.edit', target:item}
+		#{b.edit @edit(item.id) /}
+	#{/secure.check}
+	#{secure.check 'AbsenceRequests.delete', target:item}
+		#{b.delete @delete(item.id) /}
+	#{/secure.check}
+</div>

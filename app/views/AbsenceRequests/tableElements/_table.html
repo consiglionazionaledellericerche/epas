@@ -10,7 +10,7 @@
 				<th colspan="${approvalsRequired}">Approvazione</th>
 			#{/if}
 			<th #{if approvalRequired}rowspan="2"#{/if}>&{'absenceRequest.note'}</th>
-			<th #{if approvalRequired}rowspan="2"#{/if}>Azioni</th>
+			<th #{if approvalRequired}rowspan="2"#{/if}>Visualizza</th>
 				
 		</tr>			
 		#{if approvalRequired}
@@ -48,12 +48,9 @@
 				#{/if}
 				<td>${item.note}</td>
 				<td>
-					#{secure.check 'AbsenceRequests.edit', target:item}
-						#{b.edit @edit(item.id) /}
-					#{/secure.check}
-					#{secure.check 'AbsenceRequests.delete', target:item}
-						#{b.delete @delete(item.id) /}
-					#{/secure.check}
+				#{secure.link @AbsenceRequests.show(item.id)}	    	  	
+	        	<i class="fa fa-eye" aria-hidden="true"></i> Visualizza
+	        	#{/secure.link}
 				</td>
 			</tr>
 		#{/list}
