@@ -227,6 +227,12 @@ public class AbsenceRequests extends Controller {
 
     list(absenceRequest.type);
   }
+  
+  /*
+   * Qui da inserire il metodo approval da far chiamare sul template che poi servirà da 
+   * dispatcher per poter chiamare il corretto metodo tra gli "approval" qui sotto
+   * La stessa logica dovrà essere fatta per i "disapproval".
+   */
 
   /**
    * Approvazione richiesta assenza da parte del responsabile di gruppo.
@@ -276,5 +282,17 @@ public class AbsenceRequests extends Controller {
         AbsenceRequestEventType.DELETE, Optional.absent());
     flash.success(Web.msgDeleted(AbsenceRequest.class));
     list(absenceRequest.type);
+  }
+  
+  /**
+   * Mostra al template la richiesta.
+   * @param id l'id della richiesta da visualizzare
+   */
+  public static void show(long id) {
+    AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
+    notFoundIfNull(absenceRequest);
+    rules.checkIfPermitted(absenceRequest);
+    
+    render(absenceRequest);
   }
 }
