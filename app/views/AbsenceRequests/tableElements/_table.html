@@ -38,7 +38,7 @@
 				<td>#{f.value 'item.endTo', value:config.allDay ? item.endToAsDate().format() : item.endTo.format() /}</td>
 				
 				#{if config.officeHeadApprovalRequired}
-					<td>#{f.value 'item.officeHeadApproved', value:officeHeadApproved /}</td>
+					<td>#{f.value 'item.officeHeadApproved', value:item.officeHeadApproved /}</td>
 				#{/if}
 				#{if config.managerApprovalRequired}
 					<td>#{f.value 'item.managerApproved', value:item.managerApproved /}</td>

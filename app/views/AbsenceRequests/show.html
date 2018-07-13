@@ -27,7 +27,13 @@
 	<th>Descrizione</th>
 </tr>
 #{list items:absenceRequest.events, as:'item'}
-<tr>
+<tr #{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.MANAGER_REFUSAL) 
+	|| item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.ADMINISTRATIVE_REFUSAL)
+	|| item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.OFFICE_HEAD_REFUSAL))} class="danger" #{/if}
+	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.MANAGER_APPROVAL) 
+	|| item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.ADMINISTRATIVE_APPROVAL)
+	|| item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.OFFICE_HEAD_APPROVAL))} class="success" #{/if}	
+	>
 	<td>#{f.value 'item.owner.person.fullname', value:item.owner.person.fullname /}</td>
 	<td>#{f.value 'item.eventType', value:item.eventType /}</td>
 	<td>#{f.value 'item.description', value:item.description /}</td>
