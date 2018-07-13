@@ -17,6 +17,7 @@ import lombok.val;
 import manager.flows.AbsenceRequestManager;
 import models.Person;
 import models.Role;
+import models.User;
 import models.UsersRolesOffices;
 import models.flows.AbsenceRequest;
 import models.flows.enumerate.AbsenceRequestEventType;
@@ -228,11 +229,7 @@ public class AbsenceRequests extends Controller {
     list(absenceRequest.type);
   }
   
-  /*
-   * Qui da inserire il metodo approval da far chiamare sul template che poi servirà da 
-   * dispatcher per poter chiamare il corretto metodo tra gli "approval" qui sotto
-   * La stessa logica dovrà essere fatta per i "disapproval".
-   */
+
   /**
    * Metodo dispatcher che chiama il corretto metodo per approvare la richiesta.
    * @param id l'id della richiesta da approvare
@@ -243,76 +240,52 @@ public class AbsenceRequests extends Controller {
     if (absenceRequest.managerApprovalRequired && absenceRequest.managerApproved == null
         && Security.getUser().get().hasRoles(Role.GROUP_MANAGER)) {
       //caso di approvazione da parte del responsabile di gruppo.
-      managerApproval(id);
+      absenceRequestManager.managerApproval(id);
     }
     if (absenceRequest.administrativeApprovalRequired 
         && absenceRequest.administrativeApproved == null
         && Security.getUser().get().hasRoles(Role.PERSONNEL_ADMIN)) {
       //caso di approvazione da parte dell'amministratore del personale
-      personnelAdministratorApproval(id);
+      absenceRequestManager.personnelAdministratorApproval(id);
     }
     if (absenceRequest.officeHeadApprovalRequired && absenceRequest.officeHeadApproved == null 
         && Security.getUser().get().hasRoles(Role.SEAT_SUPERVISOR)) {
       //caso di approvazione da parte del responsabile di sede
-      officeHeadApproval(id);
+      absenceRequestManager.officeHeadApproval(id);
     }
+    flash.success("Operazione conclusa correttamente");
     render("@show", absenceRequest);
   }
 
+  /**
+   * Dispatcher che instrada al corretto metodo l'operazione da fare sulla richiesta a 
+   *     seconda dei parametri.
+   * @param id l'id della richiesta di assenza
+   */
   public static void disapproval(long id) {
-    
-  }
-  
-  /**
-   * Approvazione richiesta assenza da parte del responsabile di gruppo.
-   * @param id id della richiesta di assenza.
-   */
-  public static void managerApproval(long id) {
-    
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
-    val currentPerson = Security.getUser().get().person;
-    absenceRequestManager.executeEvent(
-        absenceRequest, currentPerson, 
-        AbsenceRequestEventType.MANAGER_APPROVAL, Optional.absent());
-    log.info("{} approvata dal responsabile di gruppo {}.",
-            absenceRequest, currentPerson.getFullname());
-    list(absenceRequest.type);
+    if (absenceRequest.managerApprovalRequired && absenceRequest.managerApproved == null
+        && Security.getUser().get().hasRoles(Role.GROUP_MANAGER)) {
+      //caso di approvazione da parte del responsabile di gruppo.
+      absenceRequestManager.managerDisapproval(id);
+      render("@show", absenceRequest);
+    }
+    if (absenceRequest.administrativeApprovalRequired 
+        && absenceRequest.administrativeApproved == null
+        && Security.getUser().get().hasRoles(Role.PERSONNEL_ADMIN)) {
+      //caso di approvazione da parte dell'amministratore del personale
+      absenceRequestManager.personnelAdministratorDisapproval(id);
+      render("@show", absenceRequest);
+    }
+    if (absenceRequest.officeHeadApprovalRequired && absenceRequest.officeHeadApproved == null 
+        && Security.getUser().get().hasRoles(Role.SEAT_SUPERVISOR)) {
+      //caso di approvazione da parte del responsabile di sede
+      absenceRequestManager.officeHeadDisapproval(id);
+      render("@show", absenceRequest);
+    }
+    render("@show", absenceRequest);
   }
-  
-  /**
-   * Approvazione richiesta assenza da parte del responsabile di sede.
-   * @param id id della richiesta di assenza.
-   */
-  public static void officeHeadApproval(long id) {
-    
-    AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
-    val currentPerson = Security.getUser().get().person;
-    absenceRequestManager.executeEvent(
-        absenceRequest, currentPerson, 
-        AbsenceRequestEventType.OFFICE_HEAD_APPROVAL, Optional.absent());
-    log.info("{} approvata dal responsabile di sede {}.",
-            absenceRequest, currentPerson.getFullname());
-    
-    absenceRequestManager.checkAndCompleteFlow(absenceRequest);
-    list(absenceRequest.type);
-  }
-  
-  /**
-   * Approvazione della richiesta di assenza da parte dell'amministratore del personale.
-   * @param id l'id della richiesta di assenza.
-   */
-  public static void personnelAdministratorApproval(long id) {
-    AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
-    val currentPerson = Security.getUser().get().person;
-    absenceRequestManager.executeEvent(
-        absenceRequest, currentPerson, 
-        AbsenceRequestEventType.ADMINISTRATIVE_APPROVAL, Optional.absent());
-    log.info("{} approvata dall'amministratore del personale {}.",
-            absenceRequest, currentPerson.getFullname());
-    
-    absenceRequestManager.checkAndCompleteFlow(absenceRequest);
-    list(absenceRequest.type);
-  }
+   
   
   /**
    * Form di modifica di una richiesta di assenza.
@@ -334,11 +307,11 @@ public class AbsenceRequests extends Controller {
    * Mostra al template la richiesta.
    * @param id l'id della richiesta da visualizzare
    */
-  public static void show(long id) {
+  public static void show(long id, AbsenceRequestType type) {
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     notFoundIfNull(absenceRequest);
     rules.checkIfPermitted(absenceRequest);
-    
-    render(absenceRequest);
+    User user = Security.getUser().get();
+    render(absenceRequest, type, user);
   }
 }

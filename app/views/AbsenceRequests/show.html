@@ -1,13 +1,19 @@
 #{extends 'main.html' /}
 #{set header:'navbar' /}
-#{set absenceRequestTypeLabel: Visualizza flusso /}
+#{set absenceRequestTypeLabel: 'Visualizza flusso' /}
 #{set title:('ePAS - ' + absenceRequestTypeLabel) /}
 
-#{set breadcrumbs:['Flussi di lavoro':@AbsenceRequests.list(), 
-  (absenceRequest.type):null] /}
+#{if absenceRequest.person != user.person }
+#{set breadcrumbs:['Richieste assenza':@AbsenceRequests.listToApprove(absenceRequest.type), ('Visualizza'):null] /}
+#{/if}
+#{else}
+#{set breadcrumbs:['Mie richieste':@AbsenceRequests.list(absenceRequest.type), ('Visualizza'):null] /}
+#{/else}
+
 #{breadcrumbs breadcrumbs, noHome:true, container:true /}
 
 <div class="container">
+ 
 
 <br>
  #{alert color:'info'}
@@ -30,17 +36,17 @@
 </table>
 
 	#{b.buttons center:true}  
-		#{secure.check 'AbsenceRequests.edit', target:item}
-			#{b.edit @edit(item.id) /}
+		#{secure.check 'AbsenceRequests.edit', target:absenceRequest}
+			#{b.link @edit(absenceRequest.id), color:'primary', title:'Modifica'/}			
 		#{/secure.check}
-		#{secure.check 'AbsenceRequests.delete', target:item}
-			#{b.delete @delete(item.id) /}
+		#{secure.check 'AbsenceRequests.delete', target:absenceRequest}
+			#{b.link @delete(absenceRequest.id), color:'danger', title:'Elimina'/}			
 		#{/secure.check}
-		#{secure.check 'AbsenceRequests.approval', target:item}
-			#{b.save @approval(item.id) /}
+		#{secure.check 'AbsenceRequests.approval', target:absenceRequest}
+			#{b.link @approval(absenceRequest.id), color:'success', title:'Approva'/}
 		#{/secure.check}
-		#{secure.check 'AbsenceRequests.disapproval', target:item}
-			#{b.disable @disapproval(item.id) /}
+		#{secure.check 'AbsenceRequests.disapproval', target:absenceRequest}
+			#{b.link @disapproval(absenceRequest.id), color:'warning', title:'Rifiuta'/}			
 		#{/secure.check}
 	#{/b.buttons}
 </div>

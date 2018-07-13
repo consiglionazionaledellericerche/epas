@@ -48,7 +48,7 @@
 				#{/if}
 				<td>${item.note}</td>
 				<td>
-				#{secure.link @AbsenceRequests.show(item.id)}	    	  	
+				#{secure.link @AbsenceRequests.show(item.id, type)}	    	  	
 	        	<i class="fa fa-eye" aria-hidden="true"></i> Visualizza
 	        	#{/secure.link}
 				</td>
