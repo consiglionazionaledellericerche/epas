@@ -62,10 +62,11 @@ public class AbsenceRequestManager {
    */
   @Inject
   public AbsenceRequestManager(ConfigurationManager configurationManager,
-      UsersRolesOfficesDao uroDao, RoleDao roleDao) {
+      UsersRolesOfficesDao uroDao, RoleDao roleDao, NotificationManager notificationManager) {
     this.configurationManager = configurationManager;
     this.uroDao = uroDao;
     this.roleDao = roleDao;
+    this.notificationManager = notificationManager;
   }
 
   /**
@@ -279,7 +280,7 @@ public class AbsenceRequestManager {
             + "da parte del responsabile di sede.");
       }
       if (!uroDao.getUsersRolesOffices(
-          absenceRequest.person.user, roleDao.getRoleByName(Role.SEAT_SUPERVISOR),
+          approver.user, roleDao.getRoleByName(Role.SEAT_SUPERVISOR),
           absenceRequest.person.office).isPresent()) {
         return Optional.of(
             String.format("L'evento %s non può essere eseguito da %s perché non ha"
@@ -367,7 +368,7 @@ public class AbsenceRequestManager {
     
     log.info("Costruito evento per richiesta di assenza {}", event);
     absenceRequest.save();
-    
+    checkAndCompleteFlow(absenceRequest);
     return Optional.absent();
   }
   
@@ -446,9 +447,7 @@ public class AbsenceRequestManager {
         absenceRequest, currentPerson, 
         AbsenceRequestEventType.OFFICE_HEAD_APPROVAL, Optional.absent());
     log.info("{} approvata dal responsabile di sede {}.",
-            absenceRequest, currentPerson.getFullname());
-    
-    checkAndCompleteFlow(absenceRequest);
+            absenceRequest, currentPerson.getFullname());   
     
   }
   
@@ -463,9 +462,7 @@ public class AbsenceRequestManager {
         absenceRequest, currentPerson, 
         AbsenceRequestEventType.ADMINISTRATIVE_APPROVAL, Optional.absent());
     log.info("{} approvata dall'amministratore del personale {}.",
-            absenceRequest, currentPerson.getFullname());
-    
-    checkAndCompleteFlow(absenceRequest);
+            absenceRequest, currentPerson.getFullname());   
     
   }
   
@@ -477,6 +474,7 @@ public class AbsenceRequestManager {
     
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     val currentPerson = Security.getUser().get().person;
+//    absenceRequest.events.get(0).eventType.name().equals(AbsenceRequestEventType.ADMINISTRATIVE_APPROVAL.)
     executeEvent(
         absenceRequest, currentPerson, 
         AbsenceRequestEventType.MANAGER_REFUSAL, Optional.absent());
@@ -497,9 +495,7 @@ public class AbsenceRequestManager {
         absenceRequest, currentPerson, 
         AbsenceRequestEventType.OFFICE_HEAD_REFUSAL, Optional.absent());
     log.info("{} disapprovata dal responsabile di sede {}.",
-            absenceRequest, currentPerson.getFullname());
-    
-    checkAndCompleteFlow(absenceRequest);
+            absenceRequest, currentPerson.getFullname());   
     
   }
   
@@ -514,9 +510,7 @@ public class AbsenceRequestManager {
         absenceRequest, currentPerson, 
         AbsenceRequestEventType.ADMINISTRATIVE_REFUSAL, Optional.absent());
     log.info("{} disapprovata dall'amministratore del personale {}.",
-            absenceRequest, currentPerson.getFullname());
-    
-    checkAndCompleteFlow(absenceRequest);
+            absenceRequest, currentPerson.getFullname());    
     
   }
 }

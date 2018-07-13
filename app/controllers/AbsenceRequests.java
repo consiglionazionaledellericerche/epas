@@ -237,24 +237,25 @@ public class AbsenceRequests extends Controller {
   public static void approval(long id) {
 
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
+    User user = Security.getUser().get(); 
     if (absenceRequest.managerApprovalRequired && absenceRequest.managerApproved == null
-        && Security.getUser().get().hasRoles(Role.GROUP_MANAGER)) {
+        && user.hasRoles(Role.GROUP_MANAGER)) {
       //caso di approvazione da parte del responsabile di gruppo.
       absenceRequestManager.managerApproval(id);
     }
     if (absenceRequest.administrativeApprovalRequired 
         && absenceRequest.administrativeApproved == null
-        && Security.getUser().get().hasRoles(Role.PERSONNEL_ADMIN)) {
+        && user.hasRoles(Role.PERSONNEL_ADMIN)) {
       //caso di approvazione da parte dell'amministratore del personale
       absenceRequestManager.personnelAdministratorApproval(id);
     }
     if (absenceRequest.officeHeadApprovalRequired && absenceRequest.officeHeadApproved == null 
-        && Security.getUser().get().hasRoles(Role.SEAT_SUPERVISOR)) {
+        && user.hasRoles(Role.SEAT_SUPERVISOR)) {
       //caso di approvazione da parte del responsabile di sede
       absenceRequestManager.officeHeadApproval(id);
     }
     flash.success("Operazione conclusa correttamente");
-    render("@show", absenceRequest);
+    render("@show", absenceRequest, user);
   }
 
   /**
@@ -264,26 +265,30 @@ public class AbsenceRequests extends Controller {
    */
   public static void disapproval(long id) {
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
+    User user = Security.getUser().get(); 
     if (absenceRequest.managerApprovalRequired && absenceRequest.managerApproved == null
-        && Security.getUser().get().hasRoles(Role.GROUP_MANAGER)) {
+        && user.hasRoles(Role.GROUP_MANAGER)) {
       //caso di approvazione da parte del responsabile di gruppo.
       absenceRequestManager.managerDisapproval(id);
-      render("@show", absenceRequest);
+      flash.error("Richiesta respinta");
+      render("@show", absenceRequest, user);
     }
     if (absenceRequest.administrativeApprovalRequired 
         && absenceRequest.administrativeApproved == null
-        && Security.getUser().get().hasRoles(Role.PERSONNEL_ADMIN)) {
+        && user.hasRoles(Role.PERSONNEL_ADMIN)) {
       //caso di approvazione da parte dell'amministratore del personale
       absenceRequestManager.personnelAdministratorDisapproval(id);
-      render("@show", absenceRequest);
+      flash.error("Richiesta respinta");
+      render("@show", absenceRequest, user);
     }
     if (absenceRequest.officeHeadApprovalRequired && absenceRequest.officeHeadApproved == null 
-        && Security.getUser().get().hasRoles(Role.SEAT_SUPERVISOR)) {
+        && user.hasRoles(Role.SEAT_SUPERVISOR)) {
       //caso di approvazione da parte del responsabile di sede
       absenceRequestManager.officeHeadDisapproval(id);
-      render("@show", absenceRequest);
+      flash.error("Richiesta respinta");
+      render("@show", absenceRequest, user);
     }
-    render("@show", absenceRequest);
+    render("@show", absenceRequest, user);
   }
    
   

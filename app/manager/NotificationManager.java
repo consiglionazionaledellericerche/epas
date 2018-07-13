@@ -210,7 +210,7 @@ public class NotificationManager {
     Verify.verifyNotNull(refuser);
       
     final String message = 
-        String.format("La richiesta di assenza di tipo \"%s\" dal {} al {} "
+        String.format("La richiesta di assenza di tipo \"%s\" dal %s al %s "
             + "è stata rifiutata da %s",
             TemplateExtensions.label(absenceRequest.type),
             absenceRequest.type.isAllDay() 
