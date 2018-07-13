@@ -2,6 +2,9 @@ package manager.flows;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
+
+import controllers.Security;
+
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
 import java.util.List;
@@ -414,5 +417,106 @@ public class AbsenceRequestManager {
     //  Lists.newArrayList(), absenceRequest.person, roleDao.getRoleByName(Role.PERSONNEL_ADMIN));
     
     return insertReport;
+  }
+  
+  /**
+   * Approvazione richiesta assenza da parte del responsabile di gruppo.
+   * @param id id della richiesta di assenza.
+   */
+  public void managerApproval(long id) {
+    
+    AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
+    val currentPerson = Security.getUser().get().person;
+    executeEvent(
+        absenceRequest, currentPerson, 
+        AbsenceRequestEventType.MANAGER_APPROVAL, Optional.absent());
+    log.info("{} approvata dal responsabile di gruppo {}.",
+            absenceRequest, currentPerson.getFullname());
+  }
+  
+  /**
+   * Approvazione richiesta assenza da parte del responsabile di sede.
+   * @param id id della richiesta di assenza.
+   */
+  public void officeHeadApproval(long id) {
+    
+    AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
+    val currentPerson = Security.getUser().get().person;
+    executeEvent(
+        absenceRequest, currentPerson, 
+        AbsenceRequestEventType.OFFICE_HEAD_APPROVAL, Optional.absent());
+    log.info("{} approvata dal responsabile di sede {}.",
+            absenceRequest, currentPerson.getFullname());
+    
+    checkAndCompleteFlow(absenceRequest);
+    
+  }
+  
+  /**
+   * Approvazione della richiesta di assenza da parte dell'amministratore del personale.
+   * @param id l'id della richiesta di assenza.
+   */
+  public void personnelAdministratorApproval(long id) {
+    AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
+    val currentPerson = Security.getUser().get().person;
+    executeEvent(
+        absenceRequest, currentPerson, 
+        AbsenceRequestEventType.ADMINISTRATIVE_APPROVAL, Optional.absent());
+    log.info("{} approvata dall'amministratore del personale {}.",
+            absenceRequest, currentPerson.getFullname());
+    
+    checkAndCompleteFlow(absenceRequest);
+    
+  }
+  
+  /**
+   * Metodo che permette la disapprovazione della richiesta.
+   * @param id l'identificativo della richiesta di assenza
+   */
+  public void managerDisapproval(long id) {
+    
+    AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
+    val currentPerson = Security.getUser().get().person;
+    executeEvent(
+        absenceRequest, currentPerson, 
+        AbsenceRequestEventType.MANAGER_REFUSAL, Optional.absent());
+    log.info("{} disapprovata dal responsabile di gruppo {}.",
+            absenceRequest, currentPerson.getFullname());
+    
+  }
+  
+  /**
+   * Approvazione richiesta assenza da parte del responsabile di sede.
+   * @param id id della richiesta di assenza.
+   */
+  public void officeHeadDisapproval(long id) {
+    
+    AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
+    val currentPerson = Security.getUser().get().person;
+    executeEvent(
+        absenceRequest, currentPerson, 
+        AbsenceRequestEventType.OFFICE_HEAD_REFUSAL, Optional.absent());
+    log.info("{} disapprovata dal responsabile di sede {}.",
+            absenceRequest, currentPerson.getFullname());
+    
+    checkAndCompleteFlow(absenceRequest);
+    
+  }
+  
+  /**
+   * Approvazione della richiesta di assenza da parte dell'amministratore del personale.
+   * @param id l'id della richiesta di assenza.
+   */
+  public void personnelAdministratorDisapproval(long id) {
+    AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
+    val currentPerson = Security.getUser().get().person;
+    executeEvent(
+        absenceRequest, currentPerson, 
+        AbsenceRequestEventType.ADMINISTRATIVE_REFUSAL, Optional.absent());
+    log.info("{} disapprovata dall'amministratore del personale {}.",
+            absenceRequest, currentPerson.getFullname());
+    
+    checkAndCompleteFlow(absenceRequest);
+    
   }
 }

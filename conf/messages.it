@@ -24,6 +24,8 @@ AbsenceRequestEventType.OFFICE_HEAD_REFUSAL=Richiesta respinta dal responsabile 
 AbsenceRequestEventType.COMPLETE=Richiesta completata
 AbsenceRequestEventType.DELETE=Richiesta cancellata
 AbsenceRequestEventType.EXPIRING=Richiesta scaduta
+AbsenceRequestType.VACATION_REQUEST_TO_APPROVE=Ferie da approvare
+AbsenceRequestType.COMPENSATORY_REST_TO_APPROVE=Riposi compensativi da approvare
 
 
 activity =Attività di turno
@@ -701,11 +703,11 @@ AbsenceRequests.shortTermPermitToApprove =Flussi di permessi brevi
 
 
 AbsenceRequestType.VACATION_REQUEST =richiesta di ferie
-AbsenceRequestType.VACATION_REQUESTS =richieste ferie
+AbsenceRequestType.VACATION_REQUESTS = Mie richieste ferie
 AbsenceRequestType.VACATION_REQUEST.blank =nuova richiesta ferie
 
 AbsenceRequestType.COMPENSATORY_REST =riposo compensativo
-AbsenceRequestType.COMPENSATORY_RESTS =riposi compensativi
+AbsenceRequestType.COMPENSATORY_RESTS =Miei riposi compensativi
 AbsenceRequestType.COMPENSATORY_REST.blank =nuova richista riposo compensativi
 
 AbsenceRequestType.SHORT_TERM_PERMIT =permesso breve
