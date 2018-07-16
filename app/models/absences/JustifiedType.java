@@ -34,13 +34,13 @@ public class JustifiedType extends BaseModel {
     absence_type_minutes,
     half_day,
     all_day,
+    all_day_percentage, // giustifica un giorno, scala una percentuale (ex. 661G)
 
     // il tempo giustificato è specificato nell'assenza.
-    // in questi casi nel campo justifiedTime può essere riportato il tempo minimo. 
     specified_minutes,
     missing_time,
     
-    // il tempo specificato viene adeguato per non sforare gli straordinari (ex. 661M)
+    // il tempo specificato viene adeguato per non sforare gli straordinari (ex. nuovo 661M)
     specified_minutes_no_overtime,
     
     // assegna il tempo a lavoro come timbrature (ex telelavoro)
@@ -49,7 +49,7 @@ public class JustifiedType extends BaseModel {
     // scala una giornata dal limite (ex. congedi altro coniuge)
     all_day_limit,
         
-    // i minuti specificati scalano dal limite e non dal tempo a lavoro
+    // i minuti specificati scalano dal limite e non dal tempo a lavoro (ex. permessi brevi)
     specified_minutes_limit,
     
     

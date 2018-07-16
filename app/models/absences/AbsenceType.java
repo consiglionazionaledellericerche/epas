@@ -368,6 +368,8 @@ public class AbsenceType extends BaseModel {
             && defaultType.consideredWeekEnd == this.consideredWeekEnd
             && defaultType.timeForMealTicket == this.timeForMealTicket
             && defaultType.replacingTime.equals(this.replacingTime)
+            && defaultType.minimumTime.equals(this.minimumTime)
+            && defaultType.percentageTime.equals(this.percentageTime)
             ) {
           //Tipi permessi
           if (defaultType.justifiedTypeNamesPermitted.size() 

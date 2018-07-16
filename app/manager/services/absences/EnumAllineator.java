@@ -6,9 +6,6 @@ import com.google.inject.Inject;
 
 import dao.absences.AbsenceComponentDao;
 
-import java.util.List;
-import java.util.Set;
-
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.CategoryGroupAbsenceType;
@@ -27,6 +24,9 @@ import models.absences.definitions.DefaultTakable;
 
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
+
+import java.util.List;
+import java.util.Set;
 
 public class EnumAllineator {
   
@@ -78,6 +78,8 @@ public class EnumAllineator {
         } else {
           absenceType.replacingType = null;
         }
+        absenceType.minimumTime = defaultAbsenceType.get().minimumTime;
+        absenceType.percentageTime = defaultAbsenceType.get().percentageTime;
         absenceType.validFrom = defaultAbsenceType.get().validFrom;
         absenceType.validTo = defaultAbsenceType.get().validTo;
         absenceType.save();
@@ -486,6 +488,8 @@ public class EnumAllineator {
     } else {
       absenceType.replacingType = null;
     }
+    absenceType.minimumTime = defaultAbsenceType.minimumTime;
+    absenceType.percentageTime = defaultAbsenceType.percentageTime;
     absenceType.validFrom = defaultAbsenceType.validFrom;
     absenceType.validTo = defaultAbsenceType.validTo;
     absenceType.save();

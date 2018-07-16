@@ -785,7 +785,7 @@ public class AbsenceCertificationService {
               || code.equals(DefaultAbsenceType.A_661H7.getCode())
               || code.equals(DefaultAbsenceType.A_661H8.getCode())
               || code.equals(DefaultAbsenceType.A_661H9.getCode())) {
-            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_661M.getCode()).get();
+            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_661MO.getCode()).get();
           }
           if (!aux.equals(type.get())) {
             absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
