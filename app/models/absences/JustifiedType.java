@@ -2,6 +2,12 @@ package models.absences;
 
 import com.google.common.collect.Lists;
 
+import lombok.Getter;
+
+import models.base.BaseModel;
+
+import org.hibernate.envers.Audited;
+
 import java.util.List;
 import java.util.Set;
 
@@ -12,12 +18,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
-import lombok.Getter;
-
-import models.base.BaseModel;
-
-import org.hibernate.envers.Audited;
 
 @Audited
 @Entity
@@ -30,20 +30,32 @@ public class JustifiedType extends BaseModel {
 
     nothing,
 
+    // il tempo giustificato è definito dal tipo di assenza
     absence_type_minutes,
-    specified_minutes,
-    missing_time,
     half_day,
     all_day,
-    
-    complete_day_and_add_overtime,
-    recover_time,
 
+    // il tempo giustificato è specificato nell'assenza.
+    // in questi casi nel campo justifiedTime può essere riportato il tempo minimo. 
+    specified_minutes,
+    missing_time,
+    
+    // il tempo specificato viene adeguato per non sforare gli straordinari (ex. 661M)
+    specified_minutes_no_overtime,
+    
+    // assegna il tempo a lavoro come timbrature (ex telelavoro)
     assign_all_day,
 
+    // scala una giornata dal limite (ex. congedi altro coniuge)
     all_day_limit,
-    absence_type_limit,
-    specified_minutes_limit;
+        
+    // i minuti specificati scalano dal limite e non dal tempo a lavoro
+    specified_minutes_limit,
+    
+    
+    // altri (documentare)
+    complete_day_and_add_overtime,
+    recover_time;
 
   }
 
