@@ -41,7 +41,7 @@ public class JustifiedType extends BaseModel {
     missing_time,
     
     // il tempo specificato viene adeguato per non sforare gli straordinari (ex. nuovo 661M)
-    specified_minutes_no_overtime,
+    // specified_minutes_no_overtime,
     
     // assegna il tempo a lavoro come timbrature (ex telelavoro)
     assign_all_day,
