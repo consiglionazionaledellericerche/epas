@@ -433,41 +433,15 @@ public class ConsistencyManager {
 
     personDayManager.updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(),
         pd.isFixedTimeAtWork(), lunchInterval.from, lunchInterval.to, workInterval.from,
-        workInterval.to);
+        workInterval.to, Optional.absent());
 
     personDayManager.updateDifference(pd.getValue(), pd.getWorkingTimeTypeDay().get(),
-        pd.isFixedTimeAtWork());
+        pd.isFixedTimeAtWork(), lunchInterval.from, lunchInterval.to, workInterval.from,
+        workInterval.to, Optional.absent());
 
     personDayManager.updateProgressive(pd.getValue(), pd.getPreviousForProgressive());
 
-    //Gestione permessi brevi 36 ore anno
-    int timeShortPermission = personDayManager.shortPermissionTime(pd.getValue());
-    Absence shortPermission = null;
-    for (Absence absence : pd.getValue().absences) {
-      if (absence.absenceType.code.equals("PB")) {
-        shortPermission = absence;
-      }
-    }
-
-    if (timeShortPermission == 0 && shortPermission != null) {
-      //delete
-      shortPermission.delete();
-      pd.getValue().absences.remove(shortPermission);
-    } else if (timeShortPermission > 0 && shortPermission == null) {
-      //create
-      shortPermission = new Absence();
-      shortPermission.personDay = pd.getValue();
-      shortPermission.absenceType = absenceComponentDao.absenceTypeByCode("PB").get();
-      shortPermission.justifiedType = absenceComponentDao
-          .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes_limit);
-      shortPermission.justifiedMinutes = timeShortPermission;
-      shortPermission.save();
-      pd.getValue().absences.add(shortPermission);
-    } else if (timeShortPermission > 0 && shortPermission != null) {
-      //edit
-      shortPermission.justifiedMinutes = timeShortPermission;
-      shortPermission.save();
-    }
+    personDayManager.handleShortPermission(pd);
 
     // controllo problemi strutturali del person day
     if (pd.getValue().date.isBefore(LocalDate.now())) {
@@ -476,6 +450,8 @@ public class ConsistencyManager {
 
     pd.getValue().save();
   }
+  
+ 
 
   /**
    * Se al giorno precedente l'ultima timbratura è una entrata disaccoppiata e nel giorno attuale vi
