@@ -68,7 +68,7 @@ public enum DefaultComplation {
       ImmutableSet.of(DefaultAbsenceType.A_19PH7)),
 
   C_661(AmountType.minutes, 
-      ImmutableSet.of(DefaultAbsenceType.A_661MO), 
+      ImmutableSet.of(DefaultAbsenceType.A_661MO, DefaultAbsenceType.A_661M), 
       ImmutableSet.of(DefaultAbsenceType.A_661H1, 
           DefaultAbsenceType.A_661H2, 
           DefaultAbsenceType.A_661H3, 

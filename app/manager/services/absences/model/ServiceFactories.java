@@ -405,8 +405,8 @@ public class ServiceFactories {
     boolean isComplation = false;
     boolean isReplacing = false;
     if (absencePeriod.isTakable()) {
-      isTaken = absencePeriod.takenCodes.contains(absence.absenceType);   // no insert
-      //isTaken = absencePeriod.takableCodes.contains(absence.getAbsenceType()); // insert
+      isTaken = absencePeriod.takenCodes.contains(absence.absenceType) 
+        || absencePeriod.takableCodes.contains(absence.getAbsenceType());
     }
     if (absencePeriod.isComplation()) {
       isReplacing = absencePeriod.replacingCodesDesc.values()
