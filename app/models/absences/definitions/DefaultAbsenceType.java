@@ -170,7 +170,7 @@ public enum DefaultAbsenceType {
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, null, null),
   
-  A_661M("661M", "Permesso orario per motivi personali in ore e minuti",
+  A_661MO("661MO", "Permesso orario per motivi personali in ore e minuti",
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
       0, null, null, null),
   A_661H1("661H1", "Permesso orario per motivi personali completamento 1 ora",

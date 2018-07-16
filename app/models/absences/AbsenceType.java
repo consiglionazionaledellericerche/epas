@@ -80,6 +80,14 @@ public class AbsenceType extends BaseModel {
   public Integer justifiedTime;
   
   @Getter
+  @Column(name = "minimum_time")
+  public Integer minimumTime;
+  
+  @Getter
+  @Column(name = "percentage_time")
+  public Integer percentageTime;
+  
+  @Getter
   @ManyToMany
   @JoinTable(name = "absence_types_justified_types", 
       joinColumns = { @JoinColumn(name = "absence_types_id") }, 
