@@ -10,19 +10,6 @@ import com.google.common.collect.Sets;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import java.util.List;
-import java.util.Set;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import lombok.Getter;
 
 import models.Qualification;
@@ -38,6 +25,19 @@ import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
+
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
 @Table(name = "absence_types")
@@ -86,6 +86,10 @@ public class AbsenceType extends BaseModel {
   @Getter
   @Column(name = "percentage_time")
   public Integer percentageTime;
+  
+  @Getter
+  @Column(name = "no_overtime")
+  public boolean noOvertime;
   
   @Getter
   @ManyToMany
@@ -370,6 +374,7 @@ public class AbsenceType extends BaseModel {
             && defaultType.replacingTime.equals(this.replacingTime)
             && defaultType.minimumTime.equals(this.minimumTime)
             && defaultType.percentageTime.equals(this.percentageTime)
+            && defaultType.noOvertime == this.noOvertime
             ) {
           //Tipi permessi
           if (defaultType.justifiedTypeNamesPermitted.size() 
