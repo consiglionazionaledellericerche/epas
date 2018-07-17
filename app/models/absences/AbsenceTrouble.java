@@ -46,8 +46,7 @@ public class AbsenceTrouble extends BaseModel {
     
     //Gruppo
     LimitExceeded(false),
-    TwoComplationSameDay(false),
-    CompromisedTwoComplation(false),               //data compromessa
+    CompromisedTwoComplation(false),           //due completamenti nello stesso giorno
     CompromisedTakableComplationGroup(false),  //assenze successive
     
     //Figli

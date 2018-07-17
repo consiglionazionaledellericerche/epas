@@ -310,12 +310,12 @@ public class AbsenceEngineUtility {
    * @param replacingCodesDesc lista popolata
    * @param errorsBox errori popolati
    */
-  public void setReplacingCodesDesc(final AmountType complationAmountType, 
-      final Set<AbsenceType> replacingCodes, final LocalDate date,
-      SortedMap<Integer, AbsenceType> replacingCodesDesc, 
+  public void setReplacingCodesDesc(
+      final AmountType complationAmountType,
+      final Set<AbsenceType> replacingCodes, 
+      final LocalDate date,
+      SortedMap<Integer, List<AbsenceType>> replacingCodesDesc,  // campi valorizzati dal metodo 
       ErrorsBox errorsBox) {
-    
-    //replacingCodesDesc = Maps.newTreeMap(Collections.reverseOrder());          
     
     for (AbsenceType absenceType : replacingCodes) {
       int amount = replacingAmount(absenceType, complationAmountType);
@@ -325,27 +325,43 @@ public class AbsenceEngineUtility {
         continue;
       }
       if (replacingCodesDesc.get(amount) != null) {
-        AbsenceType conflictingType = replacingCodesDesc.get(amount);
-        errorsBox.addCriticalError(date, absenceType, conflictingType, 
-            CriticalProblem.ConflictingReplacingAmount);
-        continue;
+        List<AbsenceType> amountAbsenceType = replacingCodesDesc.get(amount);
+        if (amountAbsenceType == null) {
+          amountAbsenceType = Lists.newArrayList();
+          replacingCodesDesc.put(amount, amountAbsenceType);
+        }
+        for (AbsenceType potentialConflicting : amountAbsenceType) {
+          if (DateUtility.intervalIntersection(
+              absenceType.validity(), potentialConflicting.validity()) != null) {
+            errorsBox.addCriticalError(date, absenceType, potentialConflicting, 
+                CriticalProblem.ConflictingReplacingAmount);
+            continue;
+          }
+        }
+        amountAbsenceType.add(absenceType);
       }
-      replacingCodesDesc.put(amount, absenceType);
     }
   }
   
   /**
    * Quale rimpiazzamento inserire se aggiungo il complationAmount al period nella data. 
+   * I codici sono ordinati in modo decrescente in modo da testare per primi quelli col valore
+   * più alto.
    * @return tipo del rimpiazzamento
    */
   public Optional<AbsenceType> whichReplacingCode(
-      SortedMap<Integer, AbsenceType> replacingCodesDesc, 
+      SortedMap<Integer, List<AbsenceType>> replacingCodesDesc, 
       LocalDate date, int complationAmount) {
     
     for (Integer replacingTime : replacingCodesDesc.keySet()) {
       int amountToCompare = replacingTime;
       if (amountToCompare <= complationAmount) {
-        return Optional.of(replacingCodesDesc.get(replacingTime));
+        // Il rimpiazzamento è corretto solo se non è scaduto alla data.
+        for (AbsenceType absenceType : replacingCodesDesc.get(amountToCompare)) {
+          if (!absenceType.isExpired(date)) {
+            return Optional.of(absenceType);
+          }  
+        }
       }
     }
     
