@@ -354,6 +354,11 @@ public class AbsenceRequestManager {
       case DELETE:
         absenceRequest.flowEnded = true;
         break;
+      case EPAS_REFUSAL:
+        resetFlow(absenceRequest);
+        //TODO: bisogna notificare alla persona che ha fatto la richiesta dell'assenza
+        notificationManager.notificationAbsenceRequestRefused(absenceRequest, person);
+        break;
 
       default:
         throw new IllegalStateException(
