@@ -11,12 +11,6 @@ import dao.absences.AbsenceComponentDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
-
 import manager.PersonDayManager;
 import manager.services.absences.AbsenceEngineUtility;
 import manager.services.absences.errors.CriticalError.CriticalProblem;
@@ -27,6 +21,7 @@ import models.Person;
 import models.PersonChildren;
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
+import models.absences.AbsenceType;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
@@ -37,6 +32,12 @@ import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 
 import org.joda.time.LocalDate;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
 
 public class ServiceFactories {
 
@@ -251,7 +252,7 @@ public class ServiceFactories {
           insertAbsenceInPeriod(periodChain, absencePeriod, absenceToInsert);
 
       // Se la situazione non è compromessa eseguo lo scan dei rimpiazzamenti
-      if (!absencePeriod.containsCriticalErrors() && !absencePeriod.compromisedTwoComplation) {
+      if (!absencePeriod.containsCriticalErrors() && !absencePeriod.isCompromisedComplation()) {
         absencePeriod.computeCorrectReplacingInPeriod(absenceEngineUtility);
       }
       
@@ -381,10 +382,13 @@ public class ServiceFactories {
       // i codici di rimpiazzamento li preparo ordinati per ammontare di rimpiazzamento
       absenceEngineUtility.setReplacingCodesDesc(
           absencePeriod.complationAmountType, complationBehaviour.getReplacingCodes(), date, //final
-          absencePeriod.replacingCodesDesc, absencePeriod.errorsBox);                   //edit
+          absencePeriod.replacingCodesDesc, absencePeriod.errorsBox);                        //edit
       // genero la mappa inversa
       for (Integer amount : absencePeriod.replacingCodesDesc.keySet()) {
-        absencePeriod.replacingTimes.put(absencePeriod.replacingCodesDesc.get(amount), amount);
+        List<AbsenceType> absenceTypes = absencePeriod.replacingCodesDesc.get(amount);
+        for (AbsenceType absenceType : absenceTypes) {
+          absencePeriod.replacingTimes.put(absenceType, amount);          
+        }
       }
     }
     
@@ -457,7 +461,10 @@ public class ServiceFactories {
     }
 
     if (isComplation) {
-      if (absencePeriod.compromisedTwoComplation) {
+
+      if (absencePeriod.isCompromisedComplation()) {
+        // TODO: devo aggiungere all'assenza gli errori di completamento riscontrati nel periodo
+        // fino a quel punto
         absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.CompromisedTwoComplation);
       }
       int complationAmount = absenceEngineUtility.absenceJustifiedAmount(absencePeriod.person, 
@@ -469,13 +476,12 @@ public class ServiceFactories {
         return;
       }
       absencePeriod.addComplationAbsence(absence);
-      if (absencePeriod.compromisedTwoComplation) {
-        absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.CompromisedTwoComplation);
-      }
     }
 
     if (isReplacing) {
-      if (absencePeriod.compromisedTwoComplation) {
+      if (absencePeriod.isCompromisedComplation()) {
+        // TODO: devo aggiungere all'assenza gli errori di completamento riscontrati nel periodo
+        // fino a quel punto
         absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.CompromisedTwoComplation);
       }
       absencePeriod.addReplacingAbsence(absence);

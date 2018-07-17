@@ -84,6 +84,10 @@ public class AbsenceType extends BaseModel {
   public Integer minimumTime;
   
   @Getter
+  @Column(name = "maximum_time")
+  public Integer maximumTime;
+  
+  @Getter
   @Column(name = "percentage_time")
   public Integer percentageTime;
   
@@ -143,39 +147,32 @@ public class AbsenceType extends BaseModel {
     return description;
   }
   
+  
+  /**
+   * La validità.
+   * @return dateInterval
+   */
+  @Transient
+  public DateInterval validity() {
+    return new DateInterval(this.validFrom, this.validTo);
+  }
+  
   /**
    * Se il codice è scaduto.
    * @return esito
    */
   @Transient
   public boolean isExpired() {
-    boolean newResult = false;
-    LocalDate begin = this.validFrom;
-    LocalDate end = this.validTo;
-    if (begin == null) {
-      begin = new LocalDate(2000, 1, 1); //molto prima di epas...
-    }
-    if (end == null) {
-      end = new LocalDate(2100, 1, 1);   //molto dopo di epas...
-    }
-    if (DateUtility.isDateIntoInterval(LocalDate.now(), new DateInterval(begin, end))) {
-      newResult = false;
-    } else {
-      newResult = true;
-    }
-    boolean oldResult = false;
-    if (validTo == null) {
-      oldResult = false;
-    } else {
-      oldResult = LocalDate.now().isAfter(validTo);
-    }
-    
-    if (oldResult != newResult) {
-      throw new IllegalStateException();
-    }
-    
-    return newResult;
-    
+    return isExpired(LocalDate.now());
+  }
+  
+  /**
+   * Se il codice è scaduto alla data.
+   * @return esito
+   */
+  @Transient
+  public boolean isExpired(LocalDate date) {
+    return !DateUtility.isDateIntoInterval(date, validity());
   }
 
   @Override
@@ -373,6 +370,7 @@ public class AbsenceType extends BaseModel {
             && defaultType.timeForMealTicket == this.timeForMealTicket
             && defaultType.replacingTime.equals(this.replacingTime)
             && defaultType.minimumTime.equals(this.minimumTime)
+            && defaultType.maximumTime.equals(this.maximumTime)
             && defaultType.percentageTime.equals(this.percentageTime)
             && defaultType.noOvertime == this.noOvertime
             ) {

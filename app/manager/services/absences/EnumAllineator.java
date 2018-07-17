@@ -79,6 +79,7 @@ public class EnumAllineator {
           absenceType.replacingType = null;
         }
         absenceType.minimumTime = defaultAbsenceType.get().minimumTime;
+        absenceType.maximumTime = defaultAbsenceType.get().maximumTime;
         absenceType.percentageTime = defaultAbsenceType.get().percentageTime;
         absenceType.noOvertime = defaultAbsenceType.get().noOvertime;
         absenceType.validFrom = defaultAbsenceType.get().validFrom;
@@ -490,6 +491,7 @@ public class EnumAllineator {
       absenceType.replacingType = null;
     }
     absenceType.minimumTime = defaultAbsenceType.minimumTime;
+    absenceType.maximumTime = defaultAbsenceType.maximumTime;
     absenceType.percentageTime = defaultAbsenceType.percentageTime;
     absenceType.noOvertime = defaultAbsenceType.noOvertime;
     absenceType.validFrom = defaultAbsenceType.validFrom;
