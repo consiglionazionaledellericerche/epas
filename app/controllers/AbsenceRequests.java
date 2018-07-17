@@ -7,18 +7,32 @@ import dao.AbsenceRequestDao;
 import dao.PersonDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
+import dao.absences.AbsenceComponentDao;
 
 import helpers.Web;
 import helpers.jpa.ModelQuery.SimpleResults;
 
 import javax.inject.Inject;
+
+import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+
+import manager.AbsenceManager;
 import manager.flows.AbsenceRequestManager;
+import manager.services.absences.AbsenceForm;
+import manager.services.absences.AbsenceService;
+import manager.services.absences.AbsenceService.InsertReport;
+
 import models.Person;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
+import models.absences.AbsenceType;
+import models.absences.CategoryTab;
+import models.absences.GroupAbsenceType;
+import models.absences.definitions.DefaultTab;
 import models.flows.AbsenceRequest;
 import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
@@ -31,7 +45,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import java.util.List;
+
 
 /**
  * Controller per la gestione delle richieste di assenza dei dipendenti.
@@ -60,6 +74,18 @@ public class AbsenceRequests extends Controller {
   
   @Inject
   static UsersRolesOfficesDao uroDao;
+  
+  @Inject
+  static AbsenceService absenceService;
+  
+  @Inject
+  static AbsenceManager absenceManager;
+  
+  @Inject
+  static AbsenceComponentDao absenceDao;
+  
+  private static final String FERIE_CNR = "FERIE_CNR";
+  private static final String RIPOSI_CNR = "RIPOSI_CNR";
   
   public static void vacations() {
     list(AbsenceRequestType.VACATION_REQUEST);
@@ -215,7 +241,35 @@ public class AbsenceRequests extends Controller {
     if (absenceRequest.endTo == null) {
       absenceRequest.endTo = absenceRequest.startAt;
     }
-       
+    //TODO: verificare l'inserimento dell'assenza... 
+    Optional<GroupAbsenceType> group = null;
+
+    GroupAbsenceType groupAbsenceType = null;
+    AbsenceType absenceType = null;
+    switch (absenceRequest.type) {
+      case VACATION_REQUEST:
+        group = absenceDao.groupAbsenceTypeByName(FERIE_CNR);
+        if (group.isPresent()) {
+          groupAbsenceType = group.get();
+        }        
+        break;
+      case COMPENSATORY_REST:
+        group = absenceDao.groupAbsenceTypeByName(RIPOSI_CNR);
+        if (group.isPresent()) {
+          groupAbsenceType = group.get();
+        }
+        break;
+      default: 
+        log.error("Caso {} di richiesta non trattato", absenceRequest.type);
+        break;
+    }
+    AbsenceForm absenceForm =
+        absenceService.buildAbsenceForm(absenceRequest.person, absenceRequest.startAtAsDate(), null,
+            absenceRequest.endToAsDate(), null, groupAbsenceType, false, absenceType, 
+            null, null, null, false);
+    InsertReport insertReport = absenceService.insert(absenceRequest.person, groupAbsenceType, 
+        absenceRequest.startAtAsDate(), absenceRequest.endToAsDate(),
+        absenceType, null, null, null, false, absenceManager);
     boolean isNewRequest = !absenceRequest.isPersistent();
     absenceRequest.save();
 
@@ -238,6 +292,7 @@ public class AbsenceRequests extends Controller {
 
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     User user = Security.getUser().get(); 
+    //verifico se posso inserire l'assenza
     if (absenceRequest.managerApprovalRequired && absenceRequest.managerApproved == null
         && user.hasRoles(Role.GROUP_MANAGER)) {
       //caso di approvazione da parte del responsabile di gruppo.
