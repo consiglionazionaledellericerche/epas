@@ -324,22 +324,22 @@ public class AbsenceEngineUtility {
             CriticalProblem.IncalcolableReplacingAmount);
         continue;
       }
-      if (replacingCodesDesc.get(amount) != null) {
-        List<AbsenceType> amountAbsenceType = replacingCodesDesc.get(amount);
-        if (amountAbsenceType == null) {
-          amountAbsenceType = Lists.newArrayList();
-          replacingCodesDesc.put(amount, amountAbsenceType);
-        }
-        for (AbsenceType potentialConflicting : amountAbsenceType) {
-          if (DateUtility.intervalIntersection(
-              absenceType.validity(), potentialConflicting.validity()) != null) {
-            errorsBox.addCriticalError(date, absenceType, potentialConflicting, 
-                CriticalProblem.ConflictingReplacingAmount);
-            continue;
-          }
-        }
-        amountAbsenceType.add(absenceType);
+
+      List<AbsenceType> amountAbsenceType = replacingCodesDesc.get(amount);
+      if (amountAbsenceType == null) {
+        amountAbsenceType = Lists.newArrayList();
+        replacingCodesDesc.put(amount, amountAbsenceType);
       }
+      for (AbsenceType potentialConflicting : amountAbsenceType) {
+        if (DateUtility.intervalIntersection(
+            absenceType.validity(), potentialConflicting.validity()) != null) {
+          errorsBox.addCriticalError(date, absenceType, potentialConflicting, 
+              CriticalProblem.ConflictingReplacingAmount);
+          continue;
+        }
+      }
+      amountAbsenceType.add(absenceType);
+
     }
   }
   

@@ -413,8 +413,7 @@ public class ServiceFactories {
         || absencePeriod.takableCodes.contains(absence.getAbsenceType());
     }
     if (absencePeriod.isComplation()) {
-      isReplacing = absencePeriod.replacingCodesDesc.values()
-          .contains(absence.getAbsenceType());
+      isReplacing = absencePeriod.replacingTimes.keySet().contains(absence.getAbsenceType());
       isComplation = absencePeriod.complationCodes.contains(absence.getAbsenceType());
     }
     if (!isTaken && !isComplation && !isReplacing) {
