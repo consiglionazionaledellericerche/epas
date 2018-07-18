@@ -39,10 +39,11 @@ public class AbsenceTrouble extends BaseModel {
     TwoSameCodeSameDay(false),
     AllDayAlreadyExists(false),
     NotOnHoliday(false),
-    DailyAmountExceeded(false),
     IncompatibilyTypeSameDay(false),
     WeekEndContinuityBroken(false),
     UngrantedAbsence(false),
+    MinimumTimeViolated(false),
+    MaximumTimeExceed(false),
     
     //Gruppo
     LimitExceeded(false),
