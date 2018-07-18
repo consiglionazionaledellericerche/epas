@@ -10,12 +10,9 @@ import com.google.inject.Inject;
 import controllers.Security;
 
 import dao.PersonChildrenDao;
-import dao.UserDao;
 import dao.absences.AbsenceComponentDao;
 
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -55,11 +52,12 @@ import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultGroup;
-import models.enumerate.AccountRole;
 
 import org.joda.time.LocalDate;
 
 import play.cache.Cache;
+
+import java.util.List;
 
 /**
  * Interfaccia epas per il componente assenze.
@@ -77,8 +75,6 @@ public class AbsenceService {
   private final EnumAllineator enumAllineator;
   private final ConfigurationManager confManager;
   private final SecureManager secureManager;
-  //TODO: da togliere
-  private final UserDao userDao;
    
   /**
    * Costruttore injection.
@@ -95,8 +91,7 @@ public class AbsenceService {
       PersonChildrenDao personChildrenDao,
       ConfigurationManager confManager,
       SecureManager secureManager,
-      EnumAllineator enumAllineator,
-      UserDao userDao) {
+      EnumAllineator enumAllineator) {
     this.absenceEngineUtility = absenceEngineUtility;
     this.serviceFactories = serviceFactories;
     this.absenceComponentDao = absenceComponentDao;
@@ -104,7 +99,6 @@ public class AbsenceService {
     this.confManager = confManager;
     this.secureManager = secureManager;
     this.enumAllineator = enumAllineator;
-    this.userDao = userDao;
   }
   
   /**
