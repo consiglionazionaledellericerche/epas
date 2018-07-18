@@ -19,21 +19,28 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import manager.AbsenceManager;
+import manager.ConsistencyManager;
 import manager.NotificationManager;
+import manager.PersonDayManager;
 import manager.configurations.ConfigurationManager;
 import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
 import models.Person;
+import models.PersonDay;
 import models.Role;
+import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
+import models.absences.JustifiedType.JustifiedTypeName;
 import models.flows.AbsenceRequest;
 import models.flows.AbsenceRequestEvent;
 import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
 import org.apache.commons.compress.utils.Lists;
 import org.joda.time.LocalDate;
+
+import play.db.jpa.JPA;
 
 /**
  * Operazioni sulle richiesta di assenza.
@@ -52,7 +59,9 @@ public class AbsenceRequestManager {
   private AbsenceService absenceService;
   private AbsenceManager absenceManager;
   private AbsenceComponentDao absenceDao;
-    
+  private PersonDayManager personDayManager;
+  private ConsistencyManager consistencyManager;
+
   @Data
   @RequiredArgsConstructor
   @ToString
@@ -76,7 +85,7 @@ public class AbsenceRequestManager {
   public AbsenceRequestManager(ConfigurationManager configurationManager,
       UsersRolesOfficesDao uroDao, RoleDao roleDao, NotificationManager notificationManager,
       AbsenceService absenceService, AbsenceManager absenceManager, 
-      AbsenceComponentDao absenceDao) {
+      AbsenceComponentDao absenceDao, PersonDayManager personDayManager, ConsistencyManager consistencyManager) {
     this.configurationManager = configurationManager;
     this.uroDao = uroDao;
     this.roleDao = roleDao;
@@ -84,8 +93,10 @@ public class AbsenceRequestManager {
     this.absenceService = absenceService;
     this.absenceManager = absenceManager;
     this.absenceDao = absenceDao;
+    this.personDayManager = personDayManager;
+    this.consistencyManager = consistencyManager;
   }
-  
+
   private static final String FERIE_CNR = "FERIE_CNR";
   private static final String RIPOSI_CNR = "RIPOSI_CNR";
 
@@ -100,16 +111,16 @@ public class AbsenceRequestManager {
   public List<String> checkconfiguration(AbsenceRequestType requestType, Person person) {
     Verify.verifyNotNull(requestType);
     Verify.verifyNotNull(person);
-    
+
     val problems = Lists.<String>newArrayList();
     val config = getConfiguration(requestType, person);
-       
+
     if (config.isManagerApprovalRequired() && person.personInCharge == null) {
       problems.add(
           String.format("Approvazione del responsabile richiesta. "
               + "Il dipendente %s non ha impostato nessun responsabile.", person.getFullname())); 
     }
-    
+
     if (config.isAdministrativeApprovalRequired() 
         && uroDao.getUsersWithRoleOnOffice(
             roleDao.getRoleByName(Role.PERSONNEL_ADMIN), person.office).isEmpty()) {
@@ -118,7 +129,7 @@ public class AbsenceRequestManager {
               + "L'ufficio %s non ha impostato nessun amministratore del personale.",
               person.office.getName())); 
     }
-    
+
     if (config.isOfficeHeadApprovalRequired() 
         && uroDao.getUsersWithRoleOnOffice(
             roleDao.getRoleByName(Role.SEAT_SUPERVISOR), person.office).isEmpty()) {
@@ -232,7 +243,7 @@ public class AbsenceRequestManager {
     absenceRequest.administrativeApproved = null;
     absenceRequest.officeHeadApproved = null;
   }
-  
+
   /**
    * Verifica se il tipo di evento è eseguibile dall'utente indicato.
    * 
@@ -243,7 +254,7 @@ public class AbsenceRequestManager {
    */
   public Optional<String> checkAbsenceRequestEvent(
       AbsenceRequest absenceRequest, Person approver, AbsenceRequestEventType eventType) {
-    
+
     if (eventType == AbsenceRequestEventType.STARTING_APPROVAL_FLOW) {
       if (!absenceRequest.person.equals(approver)) {
         return Optional.of("Il flusso può essere avviato solamente dal diretto interessato.");
@@ -252,7 +263,7 @@ public class AbsenceRequestManager {
         return Optional.of("Flusso già avviato, impossibile avviarlo di nuovo.");
       }
     }
-    
+
     if (eventType == AbsenceRequestEventType.MANAGER_APPROVAL 
         || eventType == AbsenceRequestEventType.MANAGER_REFUSAL) {
       if (!absenceRequest.managerApprovalRequired) {
@@ -306,12 +317,12 @@ public class AbsenceRequestManager {
             String.format("L'evento %s non può essere eseguito da %s perché non ha"
                 + " il ruolo di responsabile di sede.", eventType, approver.getFullname()));
       }
-      
+
     }
-    
+
     return Optional.absent();
   }
-  
+
   /**
    * Approvazione di una richiesta di assenza.
    * 
@@ -331,16 +342,16 @@ public class AbsenceRequestManager {
           absenceRequest, problem.get());
       return problem;
     }
-    
+
     switch (eventType) {
       case STARTING_APPROVAL_FLOW:
         absenceRequest.flowStarted = true;
         break;
-        
+
       case MANAGER_APPROVAL:
         absenceRequest.managerApproved = LocalDate.now();
         break;
-        
+
       case MANAGER_REFUSAL:
         //si riparte dall'inizio del flusso.
         resetFlow(absenceRequest);
@@ -350,23 +361,23 @@ public class AbsenceRequestManager {
       case ADMINISTRATIVE_APPROVAL:
         absenceRequest.administrativeApproved = LocalDate.now();
         break;
-        
+
       case ADMINISTRATIVE_REFUSAL:
         //si riparte dall'inizio del flusso.
         resetFlow(absenceRequest);
         notificationManager.notificationAbsenceRequestRefused(absenceRequest, person);
         break;
-        
+
       case OFFICE_HEAD_APPROVAL:
         absenceRequest.officeHeadApproved = LocalDate.now();
         break;
-      
+
       case OFFICE_HEAD_REFUSAL:
         //si riparte dall'inizio del flusso.
         resetFlow(absenceRequest);
         notificationManager.notificationAbsenceRequestRefused(absenceRequest, person);
         break;
-        
+
       case COMPLETE:
         completeFlow(absenceRequest);
         break;
@@ -384,19 +395,19 @@ public class AbsenceRequestManager {
         throw new IllegalStateException(
             String.format("Evento di richiesta assenza %s non previsto", eventType));
     }
-    
+
     val event = AbsenceRequestEvent.builder()
         .absenceRequest(absenceRequest).owner(person.user).eventType(eventType)
         .description(note.orNull())
         .build();
     event.save();
-    
+
     log.info("Costruito evento per richiesta di assenza {}", event);
     absenceRequest.save();
     checkAndCompleteFlow(absenceRequest);
     return Optional.absent();
   }
-  
+
   /**
    * Un flusso è completato se tutte le approvazioni richieste sono state
    * impostate.
@@ -449,46 +460,69 @@ public class AbsenceRequestManager {
         absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected, 
         null, null, false, absenceManager);
     if (insertReport.criticalErrors.isEmpty()) {
+      for (Absence absence : insertReport.absencesToPersist) {
+        PersonDay personDay = personDayManager
+            .getOrCreateAndPersistPersonDay(absenceRequest.person, absence.getAbsenceDate());
+        absence.personDay = personDay;
+        if (absenceForm.justifiedTypeSelected.name.equals(JustifiedTypeName.recover_time)) {
+
+          absence = absenceManager.handleRecoveryAbsence(absence, absenceRequest.person, null);
+        }        
+        personDay.absences.add(absence);
+        absence.save();
+        personDay.save();
+
+        notificationManager.notificationAbsencePolicy(Security.getUser().get(), 
+            absence, groupAbsenceType, true, false, false);
+      }
+      if (!insertReport.reperibilityShiftDate().isEmpty()) {
+        absenceManager.sendReperibilityShiftEmail(absenceRequest.person, 
+            insertReport.reperibilityShiftDate());
+        log.info("Inserite assenze con reperibilità e turni {} {}. Le email sono disabilitate.",
+            absenceRequest.person.fullName(), insertReport.reperibilityShiftDate());
+      }
+      JPA.em().flush();
+      consistencyManager.updatePersonSituation(absenceRequest.person.id, absenceForm.from);
       
     }
-    
+
     //notificationManager.notifyAbsenceOnAbsenceRequestCompleted(
     //  Lists.newArrayList(), absenceRequest.person, roleDao.getRoleByName(Role.PERSONNEL_ADMIN));
-    
+
     return insertReport;
   }
-  
+
   /**
    * Approvazione richiesta assenza da parte del responsabile di gruppo.
    * @param id id della richiesta di assenza.
    */
   public void managerApproval(long id) {
-    
+
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     val currentPerson = Security.getUser().get().person;
     executeEvent(
         absenceRequest, currentPerson, 
         AbsenceRequestEventType.MANAGER_APPROVAL, Optional.absent());
     log.info("{} approvata dal responsabile di gruppo {}.",
-            absenceRequest, currentPerson.getFullname());
+        absenceRequest, currentPerson.getFullname());
   }
-  
+
   /**
    * Approvazione richiesta assenza da parte del responsabile di sede.
    * @param id id della richiesta di assenza.
    */
   public void officeHeadApproval(long id) {
-    
+
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     val currentPerson = Security.getUser().get().person;
     executeEvent(
         absenceRequest, currentPerson, 
         AbsenceRequestEventType.OFFICE_HEAD_APPROVAL, Optional.absent());
     log.info("{} approvata dal responsabile di sede {}.",
-            absenceRequest, currentPerson.getFullname());   
-    
+        absenceRequest, currentPerson.getFullname());   
+
   }
-  
+
   /**
    * Approvazione della richiesta di assenza da parte dell'amministratore del personale.
    * @param id l'id della richiesta di assenza.
@@ -500,42 +534,42 @@ public class AbsenceRequestManager {
         absenceRequest, currentPerson, 
         AbsenceRequestEventType.ADMINISTRATIVE_APPROVAL, Optional.absent());
     log.info("{} approvata dall'amministratore del personale {}.",
-            absenceRequest, currentPerson.getFullname());   
-    
+        absenceRequest, currentPerson.getFullname());   
+
   }
-  
+
   /**
    * Metodo che permette la disapprovazione della richiesta.
    * @param id l'identificativo della richiesta di assenza
    */
   public void managerDisapproval(long id) {
-    
+
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     val currentPerson = Security.getUser().get().person;
     executeEvent(
         absenceRequest, currentPerson, 
         AbsenceRequestEventType.MANAGER_REFUSAL, Optional.absent());
     log.info("{} disapprovata dal responsabile di gruppo {}.",
-            absenceRequest, currentPerson.getFullname());
-    
+        absenceRequest, currentPerson.getFullname());
+
   }
-  
+
   /**
    * Approvazione richiesta assenza da parte del responsabile di sede.
    * @param id id della richiesta di assenza.
    */
   public void officeHeadDisapproval(long id) {
-    
+
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     val currentPerson = Security.getUser().get().person;
     executeEvent(
         absenceRequest, currentPerson, 
         AbsenceRequestEventType.OFFICE_HEAD_REFUSAL, Optional.absent());
     log.info("{} disapprovata dal responsabile di sede {}.",
-            absenceRequest, currentPerson.getFullname());   
-    
+        absenceRequest, currentPerson.getFullname());   
+
   }
-  
+
   /**
    * Approvazione della richiesta di assenza da parte dell'amministratore del personale.
    * @param id l'id della richiesta di assenza.
@@ -547,10 +581,10 @@ public class AbsenceRequestManager {
         absenceRequest, currentPerson, 
         AbsenceRequestEventType.ADMINISTRATIVE_REFUSAL, Optional.absent());
     log.info("{} disapprovata dall'amministratore del personale {}.",
-            absenceRequest, currentPerson.getFullname());    
-    
+        absenceRequest, currentPerson.getFullname());    
+
   }
-  
+
   /**
    * Metodo che ritorna il gruppo di assenze per inoltrare la richiesta.
    * @param absenceRequest la richiesta d'assenza
