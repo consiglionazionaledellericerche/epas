@@ -635,14 +635,10 @@ public class ServiceFactories {
 
     // Violazione mimino e massimo
     if (absence.justifiedMinutes != null) {
-      AbsenceType absenceType = absence.absenceType;
-      if (absenceType.minimumTime != null && absenceType.minimumTime 
-          > absence.justifiedMinutes) {
+      if (absence.violateMinimumTime()) {
         genericErrors.addAbsenceError(absence, AbsenceProblem.MinimumTimeViolated, absence);
       }
-
-      if (absenceType.maximumTime != null && absenceType.maximumTime 
-          < absence.justifiedMinutes) {
+      if (absence.violateMaximumTime()) {
         genericErrors.addAbsenceError(absence, AbsenceProblem.MaximumTimeExceed, absence);
       }
     }

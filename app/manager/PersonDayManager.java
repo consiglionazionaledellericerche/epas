@@ -653,12 +653,21 @@ public class PersonDayManager {
     
     // Decurtazione straordinari
     
+    // in ogni caso nessun straordinario 
+    for (Absence absence : personDay.absences) {
+      if (absence.absenceType.isNoOvertime()) {
+        personDay.setDifference(0);
+        return;
+      }
+    }
+
+    // riduce l'assenza per impedire lo straordinario
     boolean recompute = false;
     for (Absence absence : personDay.absences) {
       if (personDay.difference <= 0) {
         continue;
       }
-      if (!absence.absenceType.noOvertime) {
+      if (!absence.absenceType.isReduceOvertime()) {
         continue;
       }
       if (absence.justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
@@ -1357,7 +1366,7 @@ public class PersonDayManager {
     List<PairStamping> pairStampings = computeValidPairStampings(orderedStampings);
     boolean enough = false;
     int timeInSeat = 0;
-    int timeOffSeat = 0;
+    //int timeOffSeat = 0;
     if (pairStampings.isEmpty()) {
       return false;
     }
@@ -1366,7 +1375,7 @@ public class PersonDayManager {
           && pair.first.stampType.equals(StampTypes.LAVORO_FUORI_SEDE)) 
           || (pair.second.stampType != null 
           && pair.second.stampType.equals(StampTypes.LAVORO_FUORI_SEDE))) {
-        timeOffSeat += pair.timeInPair;
+        //timeOffSeat += pair.timeInPair;
       } else {
         timeInSeat += pair.timeInPair;
       }

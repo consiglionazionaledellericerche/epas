@@ -13,8 +13,11 @@ import it.cnr.iit.epas.DateUtility;
 import lombok.Getter;
 
 import models.Qualification;
+import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
+import models.absences.JustifiedBehaviour.JustifiedBehaviourName;
 import models.absences.definitions.DefaultAbsenceType;
+import models.absences.definitions.DefaultAbsenceType.Behaviour;
 import models.absences.definitions.DefaultGroup;
 import models.base.BaseModel;
 import models.enumerate.QualificationMapping;
@@ -80,27 +83,14 @@ public class AbsenceType extends BaseModel {
   public Integer justifiedTime;
   
   @Getter
-  @Column(name = "minimum_time")
-  public Integer minimumTime;
-  
-  @Getter
-  @Column(name = "maximum_time")
-  public Integer maximumTime;
-  
-  @Getter
-  @Column(name = "percentage_time")
-  public Integer percentageTime;
-  
-  @Getter
-  @Column(name = "no_overtime")
-  public boolean noOvertime;
-  
-  @Getter
   @ManyToMany
   @JoinTable(name = "absence_types_justified_types", 
       joinColumns = { @JoinColumn(name = "absence_types_id") }, 
       inverseJoinColumns = { @JoinColumn(name = "justified_types_id") })
   public Set<JustifiedType> justifiedTypesPermitted = Sets.newHashSet();
+  
+  @OneToMany(mappedBy = "absenceType")
+  public Set<AbsenceTypeJustifiedBehaviour> justifiedBehaviours = Sets.newHashSet();
   
   @Getter
   @Column(name = "replacing_time")
@@ -230,6 +220,24 @@ public class AbsenceType extends BaseModel {
   public boolean isNothingPermitted() {
     for (JustifiedType justifiedType: this.justifiedTypesPermitted) {
       if (justifiedType.name.equals(JustifiedType.JustifiedTypeName.nothing)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  public boolean isNoOvertime() {
+    for (AbsenceTypeJustifiedBehaviour behaviour : this.justifiedBehaviours) {
+      if (behaviour.justifiedBehaviour.name.equals(JustifiedBehaviourName.no_overtime)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  public boolean isReduceOvertime() {
+    for (AbsenceTypeJustifiedBehaviour behaviour : this.justifiedBehaviours) {
+      if (behaviour.justifiedBehaviour.name.equals(JustifiedBehaviourName.reduce_overtime)) {
         return true;
       }
     }
@@ -369,10 +377,6 @@ public class AbsenceType extends BaseModel {
             && defaultType.consideredWeekEnd == this.consideredWeekEnd
             && defaultType.timeForMealTicket == this.timeForMealTicket
             && defaultType.replacingTime.equals(this.replacingTime)
-            && safeEqual(defaultType.minimumTime, this.minimumTime)
-            && safeEqual(defaultType.maximumTime, this.maximumTime)
-            && defaultType.percentageTime.equals(this.percentageTime)
-            && defaultType.noOvertime == this.noOvertime
             ) {
           //Tipi permessi
           if (defaultType.justifiedTypeNamesPermitted.size() 
@@ -381,6 +385,24 @@ public class AbsenceType extends BaseModel {
           }
           for (JustifiedType justifiedType : this.justifiedTypesPermitted) {
             if (!defaultType.justifiedTypeNamesPermitted.contains(justifiedType.name)) {
+              return Optional.of(false);
+            }
+          }
+          
+          //Behaviours
+          if (defaultType.behaviour.size() 
+              != this.justifiedBehaviours.size()) {
+            return Optional.of(false); 
+          }
+          for (AbsenceTypeJustifiedBehaviour behaviour : this.justifiedBehaviours) {
+            boolean equal = false;
+            for (Behaviour defaultBehaviour : defaultType.behaviour) { 
+              if (defaultBehaviour.name.equals(behaviour.justifiedBehaviour.name) 
+                  && safeEqual(defaultBehaviour.data, behaviour.data)) {
+                equal = true;
+              }
+            }
+            if (!equal) {
               return Optional.of(false);
             }
           }
@@ -425,7 +447,7 @@ public class AbsenceType extends BaseModel {
     return Optional.absent();
   }
   
-  private boolean safeEqual(Integer a, Integer b) {
+  public static boolean safeEqual(Integer a, Integer b) {
     if (a == null && b == null) {
       return true;
     }
