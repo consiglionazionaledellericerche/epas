@@ -369,8 +369,8 @@ public class AbsenceType extends BaseModel {
             && defaultType.consideredWeekEnd == this.consideredWeekEnd
             && defaultType.timeForMealTicket == this.timeForMealTicket
             && defaultType.replacingTime.equals(this.replacingTime)
-            && defaultType.minimumTime.equals(this.minimumTime)
-            && defaultType.maximumTime.equals(this.maximumTime)
+            && safeEqual(defaultType.minimumTime, this.minimumTime)
+            && safeEqual(defaultType.maximumTime, this.maximumTime)
             && defaultType.percentageTime.equals(this.percentageTime)
             && defaultType.noOvertime == this.noOvertime
             ) {
@@ -424,5 +424,15 @@ public class AbsenceType extends BaseModel {
     }
     return Optional.absent();
   }
-
+  
+  private boolean safeEqual(Integer a, Integer b) {
+    if (a == null && b == null) {
+      return true;
+    }
+    if (a != null && b != null && a.equals(b)) {
+      return true;
+    }
+    return false;
+  } 
+  
 }

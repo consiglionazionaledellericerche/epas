@@ -633,6 +633,20 @@ public class ServiceFactories {
       genericErrors.addAbsenceError(absence, AbsenceProblem.AllDayAlreadyExists, oldAbsence);
     }
 
+    // Violazione mimino e massimo
+    if (absence.justifiedMinutes != null) {
+      AbsenceType absenceType = absence.absenceType;
+      if (absenceType.minimumTime != null && absenceType.minimumTime 
+          > absence.justifiedMinutes) {
+        genericErrors.addAbsenceError(absence, AbsenceProblem.MinimumTimeViolated, absence);
+      }
+
+      if (absenceType.maximumTime != null && absenceType.maximumTime 
+          < absence.justifiedMinutes) {
+        genericErrors.addAbsenceError(absence, AbsenceProblem.MaximumTimeExceed, absence);
+      }
+    }
+
 
     //TODO:
     // Strange weekend
