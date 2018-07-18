@@ -4,6 +4,7 @@
 	#{f.hidden 'absenceRequest.id' /}
 	#{f.hidden 'absenceRequest.person.id' /}
 	#{f.hidden 'absenceRequest.type' /}
+	#{f.hidden 'persist', value:persist /}
 	#{f.date 'absenceRequest.startAt', required:true, value:absenceRequest.startAt?.format() /}
 	#{f.date 'absenceRequest.endTo' /}
 	#{f.input 'absenceRequest.note' /}
