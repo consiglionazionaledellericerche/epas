@@ -75,6 +75,14 @@ public class QContractMonthRecap extends EntityPathBase<ContractMonthRecap> {
 
     public final NumberPath<Integer> remainingMinutesLastYear = createNumber("remainingMinutesLastYear", Integer.class);
 
+    public final NumberPath<Integer> riposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente = createNumber("riposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente", Integer.class);
+
+    public final NumberPath<Integer> riposiCompensativiChiusuraEnteMinutiImputatoAnnoPassato = createNumber("riposiCompensativiChiusuraEnteMinutiImputatoAnnoPassato", Integer.class);
+
+    public final NumberPath<Integer> riposiCompensativiChiusuraEnteMinutiImputatoProgressivoFinalePositivoMese = createNumber("riposiCompensativiChiusuraEnteMinutiImputatoProgressivoFinalePositivoMese", Integer.class);
+
+    public final NumberPath<Integer> riposiCompensativiChiusuraEnteMinutiPrint = createNumber("riposiCompensativiChiusuraEnteMinutiPrint", Integer.class);
+
     public final NumberPath<Integer> riposiCompensativiMinutiImputatoAnnoCorrente = createNumber("riposiCompensativiMinutiImputatoAnnoCorrente", Integer.class);
 
     public final NumberPath<Integer> riposiCompensativiMinutiImputatoAnnoPassato = createNumber("riposiCompensativiMinutiImputatoAnnoPassato", Integer.class);

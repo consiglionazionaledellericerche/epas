@@ -21,6 +21,8 @@ import lombok.Getter;
 import models.Person;
 import models.PersonDay;
 import models.TimeVariation;
+import models.absences.AbsenceTrouble.AbsenceProblem;
+import models.absences.JustifiedBehaviour.JustifiedBehaviourName;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.base.BaseModel;
 
@@ -271,5 +273,27 @@ public class Absence extends BaseModel {
    */
   public String getCode() {
     return absenceType.code;
+  }
+  
+  public boolean violateMinimumTime() {
+    for (AbsenceTypeJustifiedBehaviour behaviour : this.absenceType.justifiedBehaviours) {
+      if (behaviour.justifiedBehaviour.name.equals(JustifiedBehaviourName.minimumTime)) {
+        if (behaviour.data > this.justifiedMinutes) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  
+  public boolean violateMaximumTime() {
+    for (AbsenceTypeJustifiedBehaviour behaviour : this.absenceType.justifiedBehaviours) {
+      if (behaviour.justifiedBehaviour.name.equals(JustifiedBehaviourName.maximumTime)) {
+        if (behaviour.data < this.justifiedMinutes) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }

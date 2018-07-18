@@ -427,7 +427,7 @@ public class AbsenceEngineUtility {
       map = Maps.newHashMap();
     }
     for (Absence absence : absences) {
-      Set<Absence> set = map.get(absence);
+      Set<Absence> set = map.get(absence.getAbsenceDate());
       if (set == null) {
         set = Sets.newHashSet();
         map.put(absence.getAbsenceDate(), set);
