@@ -225,25 +225,21 @@ public class AbsenceType extends BaseModel {
     }
     return false;
   }
-  
-  public boolean isNoOvertime() {
-    for (AbsenceTypeJustifiedBehaviour behaviour : this.justifiedBehaviours) {
-      if (behaviour.justifiedBehaviour.name.equals(JustifiedBehaviourName.no_overtime)) {
-        return true;
+
+  /**
+   * Se il tipo ha quel comportamento.
+   * @param behaviourName comportamento
+   * @return il payload del comportamento se esiste
+   */
+  public Optional<AbsenceTypeJustifiedBehaviour> getBehaviour(JustifiedBehaviourName behaviour) {
+    for (AbsenceTypeJustifiedBehaviour entity : this.justifiedBehaviours) {
+      if (entity.justifiedBehaviour.name.equals(behaviour)) {
+        return Optional.of(entity);
       }
     }
-    return false;
+    return Optional.absent();
   }
-  
-  public boolean isReduceOvertime() {
-    for (AbsenceTypeJustifiedBehaviour behaviour : this.justifiedBehaviours) {
-      if (behaviour.justifiedBehaviour.name.equals(JustifiedBehaviourName.reduce_overtime)) {
-        return true;
-      }
-    }
-    return false;
-  }
-  
+
   /**
    * Se il codice di assenza è utilizzabile per tutte le qualifiche del mapping.
    * @param mapping mapping

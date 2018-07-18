@@ -580,7 +580,7 @@ public class AbsenceCertificationService {
    */
   private void patchStudy(CertificationYearSituation situation) {
     for (AbsenceSituation absenceSituation : situation.absenceSituations) {
-      Set<LocalDate> dates = absenceSituation.toAddAutomatically.get(DefaultAbsenceType.A_89);
+      Set<LocalDate> dates = absenceSituation.toAddAutomatically.get(DefaultAbsenceType.A_89.getCode());
       if (dates == null) {
         continue;
       }

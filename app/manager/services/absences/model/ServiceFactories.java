@@ -439,14 +439,19 @@ public class ServiceFactories {
     } 
 
     if (isTaken) {
-      int takenAmount = absenceEngineUtility
-          .absenceJustifiedAmount(absencePeriod.person, absence, absencePeriod.takeAmountType);
+      
+      int takenAmount = absenceEngineUtility.absenceJustifiedAmount(absencePeriod.person,
+          absence, absencePeriod.takeAmountType);
+      
       if (takenAmount < 0) {
         absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.ImplementationProblem);
         absencePeriod.errorsBox.addCriticalError(absence, 
             CriticalProblem.IncalcolableJustifiedAmount);
         return;
       }
+      
+      takenAmount = absenceEngineUtility.takenBehaviouralFixes(absence, takenAmount);
+      
       TakenAbsence takenAbsence = absencePeriod.buildTakenAbsence(absence, takenAmount);
       if (!takenAbsence.canAddTakenAbsence()) {
         absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.LimitExceeded);
