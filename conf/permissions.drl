@@ -493,6 +493,8 @@ when
 		"AbsenceRequests.compensatoryRests",
 		"AbsenceRequests.shortTermPermits",
 		"AbsenceRequests.show",
+		"AbsenceRequests.flush",
+		
 		
      	/* Ferie */
      	"Vacations.show",

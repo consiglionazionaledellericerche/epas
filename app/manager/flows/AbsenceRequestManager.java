@@ -5,8 +5,11 @@ import com.google.common.base.Verify;
 
 import controllers.Security;
 
+import dao.AbsenceDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
+import dao.absences.AbsenceComponentDao;
+
 import java.util.List;
 import javax.inject.Inject;
 import lombok.Data;
@@ -14,11 +17,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+
+import manager.AbsenceManager;
 import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
+import manager.services.absences.AbsenceForm;
+import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
 import models.Person;
 import models.Role;
+import models.absences.AbsenceType;
+import models.absences.GroupAbsenceType;
 import models.flows.AbsenceRequest;
 import models.flows.AbsenceRequestEvent;
 import models.flows.enumerate.AbsenceRequestEventType;
@@ -40,6 +49,9 @@ public class AbsenceRequestManager {
   private UsersRolesOfficesDao uroDao;
   private RoleDao roleDao;
   private NotificationManager notificationManager;
+  private AbsenceService absenceService;
+  private AbsenceManager absenceManager;
+  private AbsenceComponentDao absenceDao;
     
   @Data
   @RequiredArgsConstructor
@@ -62,12 +74,20 @@ public class AbsenceRequestManager {
    */
   @Inject
   public AbsenceRequestManager(ConfigurationManager configurationManager,
-      UsersRolesOfficesDao uroDao, RoleDao roleDao, NotificationManager notificationManager) {
+      UsersRolesOfficesDao uroDao, RoleDao roleDao, NotificationManager notificationManager,
+      AbsenceService absenceService, AbsenceManager absenceManager, 
+      AbsenceComponentDao absenceDao) {
     this.configurationManager = configurationManager;
     this.uroDao = uroDao;
     this.roleDao = roleDao;
     this.notificationManager = notificationManager;
+    this.absenceService = absenceService;
+    this.absenceManager = absenceManager;
+    this.absenceDao = absenceDao;
   }
+  
+  private static final String FERIE_CNR = "FERIE_CNR";
+  private static final String RIPOSI_CNR = "RIPOSI_CNR";
 
   /**
    * Verifica che gruppi ed eventuali responsabile di sede siano presenti per
@@ -418,7 +438,20 @@ public class AbsenceRequestManager {
     absenceRequest.flowEnded = true;
     absenceRequest.save();
     log.info("Flusso relativo a {} terminato. Inserimento in corso delle assenze.", absenceRequest);
-    InsertReport insertReport = new InsertReport();
+    GroupAbsenceType groupAbsenceType = getGroupAbsenceType(absenceRequest);
+    AbsenceType absenceType = null;
+    AbsenceForm absenceForm =
+        absenceService.buildAbsenceForm(absenceRequest.person, absenceRequest.startAtAsDate(), null,
+            absenceRequest.endToAsDate(), null, groupAbsenceType, false, absenceType, 
+            null, null, null, false, true);
+    InsertReport insertReport = absenceService.insert(absenceRequest.person, 
+        absenceForm.groupSelected, absenceForm.from, absenceForm.to,
+        absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected, 
+        null, null, false, absenceManager);
+    if (insertReport.criticalErrors.isEmpty()) {
+      
+    }
+    
     //notificationManager.notifyAbsenceOnAbsenceRequestCompleted(
     //  Lists.newArrayList(), absenceRequest.person, roleDao.getRoleByName(Role.PERSONNEL_ADMIN));
     
@@ -479,7 +512,6 @@ public class AbsenceRequestManager {
     
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     val currentPerson = Security.getUser().get().person;
-//    absenceRequest.events.get(0).eventType.name().equals(AbsenceRequestEventType.ADMINISTRATIVE_APPROVAL.)
     executeEvent(
         absenceRequest, currentPerson, 
         AbsenceRequestEventType.MANAGER_REFUSAL, Optional.absent());
@@ -517,5 +549,34 @@ public class AbsenceRequestManager {
     log.info("{} disapprovata dall'amministratore del personale {}.",
             absenceRequest, currentPerson.getFullname());    
     
+  }
+  
+  /**
+   * Metodo che ritorna il gruppo di assenze per inoltrare la richiesta.
+   * @param absenceRequest la richiesta d'assenza
+   * @return il gruppo di assenza corretto rispetto alla richiesta di assenza.
+   */
+  public GroupAbsenceType getGroupAbsenceType(AbsenceRequest absenceRequest) {
+    Optional<GroupAbsenceType> group = null;
+
+    GroupAbsenceType groupAbsenceType = null;
+    switch (absenceRequest.type) {
+      case VACATION_REQUEST:
+        group = absenceDao.groupAbsenceTypeByName(FERIE_CNR);
+        if (group.isPresent()) {
+          groupAbsenceType = group.get();
+        }        
+        break;
+      case COMPENSATORY_REST:
+        group = absenceDao.groupAbsenceTypeByName(RIPOSI_CNR);
+        if (group.isPresent()) {
+          groupAbsenceType = group.get();
+        }
+        break;
+      default: 
+        log.error("Caso {} di richiesta non trattato", absenceRequest.type);
+        break;
+    }
+    return groupAbsenceType;
   }
 }
