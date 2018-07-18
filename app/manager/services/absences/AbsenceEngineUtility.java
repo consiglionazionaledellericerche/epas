@@ -8,11 +8,6 @@ import com.google.inject.Inject;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-
 import manager.services.absences.errors.CriticalError.CriticalProblem;
 import manager.services.absences.errors.ErrorsBox;
 import manager.services.absences.model.AbsencePeriod;
@@ -22,10 +17,12 @@ import models.ContractWorkingTimeType;
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.AbsenceTypeJustifiedBehaviour;
 import models.absences.AmountType;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
+import models.absences.JustifiedBehaviour.JustifiedBehaviourName;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
@@ -33,6 +30,11 @@ import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
 
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
 
 public class AbsenceEngineUtility {
   
@@ -170,6 +172,15 @@ public class AbsenceEngineUtility {
     } else {
       return amount;
     }
+  }
+  
+  public Integer takenBehaviouralFixes(Absence absence, Integer amount) {
+    Optional<AbsenceTypeJustifiedBehaviour> percentageTaken = 
+        absence.absenceType.getBehaviour(JustifiedBehaviourName.takenPercentageTime);
+    if (percentageTaken.isPresent() && percentageTaken.get().getData() != null) {
+      return amount * percentageTaken.get().getData() / 1000;
+    }
+    return amount;
   }
   
   /**

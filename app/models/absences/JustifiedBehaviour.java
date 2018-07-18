@@ -27,7 +27,7 @@ public class JustifiedBehaviour extends BaseModel {
   public enum JustifiedBehaviourName {
     minimumTime,
     maximumTime,
-    percentageTime,
+    takenPercentageTime,
     no_overtime,
     reduce_overtime;
   }

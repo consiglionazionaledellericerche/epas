@@ -9,9 +9,9 @@ import models.absences.AmountType;
 public class ComplationAbsence {
   public Absence absence;
 
-  public AmountType amountType;
-  public int residualComplationBefore = 0;
-  public int consumedComplation = 0;
-  public int residualComplationAfter = 0;
+  public AmountType amountType;             // = 0;
+  public int residualComplationBefore;      // = 0;
+  public int consumedComplation;            // = 0;
+  public int residualComplationAfter;       // = 0;    
 
 }

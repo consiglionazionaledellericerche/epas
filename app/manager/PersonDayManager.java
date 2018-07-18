@@ -31,6 +31,7 @@ import models.Stamping.WayType;
 import models.WorkingTimeTypeDay;
 import models.ZoneToZones;
 import models.absences.Absence;
+import models.absences.JustifiedBehaviour.JustifiedBehaviourName;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.StampTypes;
@@ -655,7 +656,7 @@ public class PersonDayManager {
     
     // in ogni caso nessun straordinario 
     for (Absence absence : personDay.absences) {
-      if (absence.absenceType.isNoOvertime()) {
+      if (absence.absenceType.getBehaviour(JustifiedBehaviourName.no_overtime).isPresent()) {
         personDay.setDifference(0);
         return;
       }
@@ -667,7 +668,7 @@ public class PersonDayManager {
       if (personDay.difference <= 0) {
         continue;
       }
-      if (!absence.absenceType.isReduceOvertime()) {
+      if (!absence.absenceType.getBehaviour(JustifiedBehaviourName.reduce_overtime).isPresent()) {
         continue;
       }
       if (absence.justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {

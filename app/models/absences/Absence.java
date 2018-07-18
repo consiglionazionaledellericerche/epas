@@ -1,7 +1,24 @@
 package models.absences;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
+import lombok.Getter;
+
+import models.Person;
+import models.PersonDay;
+import models.TimeVariation;
+import models.absences.JustifiedBehaviour.JustifiedBehaviourName;
+import models.absences.JustifiedType.JustifiedTypeName;
+import models.base.BaseModel;
+
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
+
+import play.db.jpa.Blob;
 
 import java.util.List;
 import java.util.Set;
@@ -15,23 +32,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
-import lombok.Getter;
-
-import models.Person;
-import models.PersonDay;
-import models.TimeVariation;
-import models.absences.AbsenceTrouble.AbsenceProblem;
-import models.absences.JustifiedBehaviour.JustifiedBehaviourName;
-import models.absences.JustifiedType.JustifiedTypeName;
-import models.base.BaseModel;
-
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-
-import play.db.jpa.Blob;
 
 @Audited
 @Entity
@@ -276,23 +276,19 @@ public class Absence extends BaseModel {
   }
   
   public boolean violateMinimumTime() {
-    for (AbsenceTypeJustifiedBehaviour behaviour : this.absenceType.justifiedBehaviours) {
-      if (behaviour.justifiedBehaviour.name.equals(JustifiedBehaviourName.minimumTime)) {
-        if (behaviour.data > this.justifiedMinutes) {
-          return true;
-        }
-      }
+    Optional<AbsenceTypeJustifiedBehaviour> behaviour = 
+        this.absenceType.getBehaviour(JustifiedBehaviourName.minimumTime);
+    if (behaviour.isPresent()) {
+      return behaviour.get().getData() > this.justifiedMinutes;
     }
     return false;
   }
   
   public boolean violateMaximumTime() {
-    for (AbsenceTypeJustifiedBehaviour behaviour : this.absenceType.justifiedBehaviours) {
-      if (behaviour.justifiedBehaviour.name.equals(JustifiedBehaviourName.maximumTime)) {
-        if (behaviour.data < this.justifiedMinutes) {
-          return true;
-        }
-      }
+    Optional<AbsenceTypeJustifiedBehaviour> behaviour = 
+        this.absenceType.getBehaviour(JustifiedBehaviourName.maximumTime);
+    if (behaviour.isPresent()) {
+      return behaviour.get().getData() < this.justifiedMinutes;
     }
     return false;
   }
