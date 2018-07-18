@@ -8,7 +8,15 @@
 	#{f.date 'absenceRequest.endTo' /}
 	#{f.input 'absenceRequest.note' /}
 	
-	#{b.buttons}
+	#{if !persist}
+	#{b.buttons center:true}
 		#{b.save @save() /}
 	#{/b.buttons}
+	#{/if}
+	#{else}
+	#{b.buttons center:true}
+		#{b.link @flush(absenceRequest.type, absenceRequest.person.id), color:'warning', title:'Ripristina'/}
+		#{b.save @save() /}
+	#{/b.buttons}	
+	#{/else}
 #{/form}
