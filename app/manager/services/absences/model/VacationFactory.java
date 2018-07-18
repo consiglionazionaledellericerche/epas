@@ -403,12 +403,14 @@ public class VacationFactory {
     LocalDate secondYearStart = contract.beginDate.plusYears(1);
     for (AbsencePeriod period : periods) {
 
-      // caso di splitted
+      // casi non interessati
       if (!DateUtility.isDateIntoInterval(secondYearStart.minusDays(1), 
           new DateInterval(period.from, period.to))) {
         fixed.add(period);
+        continue;
       }
 
+      // caso di splitted, chiudo il periodo all'ultimo giorno del primo anno.
       period.to = secondYearStart.plusDays(1);
       fixed.add(period);
       
@@ -416,7 +418,7 @@ public class VacationFactory {
         continue;
       }
       
-      // Creo il period aggiuntivo con amount 0 (default)
+      // creo il period aggiuntivo con amount 0 (default)
       AbsencePeriod splitted = new AbsencePeriod(contract.person, group);
       splitted.from = secondYearStart;
       splitted.to = period.to;
