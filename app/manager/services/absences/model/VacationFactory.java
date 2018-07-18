@@ -171,6 +171,9 @@ public class VacationFactory {
     //Fix dei giorni post partum
     periods = fixPostPartum(periods, person, year);
     
+    //Split del primo anno di contratto
+    periods = fixFirstYear(person, group, contract, periods);
+    
     if (periods.isEmpty()) {
       return periods;
     }
@@ -250,6 +253,9 @@ public class VacationFactory {
     
     //Fix dei giorni post partum
     periods = fixPostPartum(periods, person, year);
+    
+    //Split del primo anno di contratto
+    periods = fixFirstYear(person, group, contract, periods);
     
     //Collapse initialization days
     handleInitialization(periods, initializationDays, contract.sourceDateVacation, group);
@@ -380,6 +386,50 @@ public class VacationFactory {
 
     return periods;
 
+  }
+  
+  /**
+   * Splitta i periodi che ricadono a cavallo del primo anno di contratto.
+   * E' importante applicare questo fix per ultimo (dopo lucky, unlucki, postPartum...).
+   * @param person
+   * @param group
+   * @param contract
+   * @param periods
+   * @return
+   */
+  private List<AbsencePeriod> fixFirstYear(Person person, GroupAbsenceType group, Contract contract,
+      List<AbsencePeriod> periods) {
+    List<AbsencePeriod> fixed = Lists.newArrayList();
+    LocalDate secondYearStart = contract.beginDate.plusYears(1);
+    for (AbsencePeriod period : periods) {
+
+      // caso di splitted
+      if (!DateUtility.isDateIntoInterval(secondYearStart.minusDays(1), 
+          new DateInterval(period.from, period.to))) {
+        fixed.add(period);
+      }
+
+      period.to = secondYearStart.plusDays(1);
+      fixed.add(period);
+      
+      if (secondYearStart.isAfter(period.to)) {
+        continue;
+      }
+      
+      // Creo il period aggiuntivo con amount 0 (default)
+      AbsencePeriod splitted = new AbsencePeriod(contract.person, group);
+      splitted.from = secondYearStart;
+      splitted.to = period.to;
+      splitted.takeAmountType = AmountType.units;
+      splitted.takableCountBehaviour = TakeCountBehaviour.sumAllPeriod;
+      splitted.takenCountBehaviour = TakeCountBehaviour.sumAllPeriod;
+      splitted.takableCodes = period.takableCodes;
+      splitted.takenCodes = period.takenCodes;
+      fixed.add(splitted);
+    }
+    
+    return fixed;
+    
   }
 
   private List<AbsencePeriod> periodsFromProgression(Person person, Contract contract, 
