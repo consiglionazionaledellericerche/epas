@@ -8,6 +8,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
@@ -108,6 +109,7 @@ public class AbsenceRequest extends MutableModel {
   
   @NotAudited
   @OneToMany(mappedBy = "absenceRequest")
+  @OrderBy("createdAt DESC")
   public List<AbsenceRequestEvent> events = Lists.newArrayList();
   
   /**
