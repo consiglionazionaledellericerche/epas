@@ -45,7 +45,7 @@ public class AbsencePeriod {
   // Takable
   public AmountType takeAmountType;                // Il tipo di ammontare del periodo
   public TakeCountBehaviour takableCountBehaviour; // Come contare il tetto totale
-  public int fixedPeriodTakableAmount = 0;         // Il tetto massimo
+  private int fixedPeriodTakableAmount = 0;         // Il tetto massimo
   public TakeCountBehaviour takenCountBehaviour;   // Come contare il tetto consumato
   public Set<AbsenceType> takableCodes;            // I tipi assenza prendibili del periodo
   public Set<AbsenceType> takenCodes;              // I tipi di assenza consumati del periodo
@@ -122,6 +122,10 @@ public class AbsencePeriod {
     } else {
       this.fixedPeriodTakableAmount = amount;  
     }
+  }
+  
+  public Integer getFixedPeriodTakableAmount() {
+    return this.fixedPeriodTakableAmount;
   }
 
   private List<TakenAbsence> takenAbsences() {
