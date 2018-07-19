@@ -435,7 +435,7 @@ public class AbsenceCertificationService {
     GroupAbsenceType vacationGroup = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
     VacationSituation vacationSituation = absenceService.buildVacationSituation(
-        wrPerson.getCurrentContract().get(), year, vacationGroup, Optional.absent(), false, null);
+        wrPerson.getCurrentContract().get(), year, vacationGroup, Optional.absent(), false);
     
     //Situazione ferie anno selezionato
     AbsenceSituation vacationYear = new AbsenceSituation(AbsenceSituationType.FERIE_ANNO_CORRENTE);

@@ -1,5 +1,21 @@
 package manager;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
+import org.joda.time.YearMonth;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -11,21 +27,12 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonShiftDayDao;
-import dao.TimeVariationDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.IWrapperPersonDay;
 import it.cnr.iit.epas.DateInterval;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 import manager.cache.StampTypeManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
@@ -46,15 +53,8 @@ import models.TimeVariation;
 import models.User;
 import models.absences.Absence;
 import models.absences.GroupAbsenceType;
-import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultGroup;
 import models.base.IPropertiesInPeriodOwner;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.joda.time.LocalTime;
-import org.joda.time.YearMonth;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import play.db.jpa.JPA;
 import play.jobs.Job;
 import play.libs.F.Promise;
@@ -76,7 +76,6 @@ public class ConsistencyManager {
   private final ShiftManager2 shiftManager2;
   private final AbsenceService absenceService;
   private final AbsenceComponentDao absenceComponentDao;
-  private final TimeVariationDao timeVariationDao;
   private final AbsenceDao absenceDao;
 
 
@@ -110,7 +109,6 @@ public class ConsistencyManager {
       ShiftManager2 shiftManager2,
       AbsenceService absenceService,
       AbsenceComponentDao absenceComponentDao,
-      TimeVariationDao timeVariationDao,
       IWrapperFactory wrapperFactory, AbsenceDao absenceDao) {
 
     this.secureManager = secureManager;
@@ -127,7 +125,6 @@ public class ConsistencyManager {
     this.stampTypeManager = stampTypeManager;
     this.personShiftDayDao = personShiftDayDao;
     this.shiftManager2 = shiftManager2;
-    this.timeVariationDao = timeVariationDao;
     this.absenceDao = absenceDao;
   }
 
@@ -344,7 +341,7 @@ public class ConsistencyManager {
           GroupAbsenceType vacationGroup = absenceComponentDao
               .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
           absenceService.buildVacationSituation(currentContract, LocalDate.now().getYear(),
-              vacationGroup, Optional.absent(), true, null);
+              vacationGroup, Optional.absent(), true);
         }
       }.now();
     }
