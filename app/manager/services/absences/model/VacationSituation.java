@@ -256,8 +256,8 @@ public class VacationSituation {
       if (expired()) {
         return 0;
       }
-      if (absencePeriod.takableCountBehaviour.equals(TakeCountBehaviour.sumUntilPeriod)) {
-        return accrued() - used(); 
+      if (date.isBefore(contract.beginDate.plusYears(1))) {
+        return accrued() - used();
       } else {
         return total() - used();
       }

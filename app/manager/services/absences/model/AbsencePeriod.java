@@ -45,7 +45,7 @@ public class AbsencePeriod {
   // Takable
   public AmountType takeAmountType;                // Il tipo di ammontare del periodo
   public TakeCountBehaviour takableCountBehaviour; // Come contare il tetto totale
-  private int fixedPeriodTakableAmount = 0;        // Il tetto massimo
+  public int fixedPeriodTakableAmount = 0;         // Il tetto massimo
   public TakeCountBehaviour takenCountBehaviour;   // Come contare il tetto consumato
   public Set<AbsenceType> takableCodes;            // I tipi assenza prendibili del periodo
   public Set<AbsenceType> takenCodes;              // I tipi di assenza consumati del periodo
@@ -78,6 +78,8 @@ public class AbsencePeriod {
   public int vacationAmountBeforeInitializationPatch = 0;
   //VacationPeriod che ha generato il period
   public VacationCode vacationCode;
+  // Se il period è stato splittato perchè a cavallo del primo anno contratto
+  public AbsencePeriod splittedWith;
   
   AbsencePeriod(Person person, GroupAbsenceType groupAbsenceType) {
     this.person = person;
