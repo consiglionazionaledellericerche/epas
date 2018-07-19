@@ -146,6 +146,8 @@ public class ServiceFactories {
           allPersistedAbsences, groupPersistedAbsences);
     }
 
+    completePeriodChain(periodChain);
+    
     return periodChain;
   }
 
@@ -660,6 +662,16 @@ public class ServiceFactories {
     return genericErrors;
   }
 
+  /**
+   * Azioni da compiere alla fine della costruzione della periodChain.
+   */
+  private void completePeriodChain(PeriodChain periodChain) {
+    
+    if (periodChain.groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.vacationsCnr)) {
+      vacationFactory.removeAccruedFirstYear(periodChain);
+    }  
+    
+  }
 
 
 }
