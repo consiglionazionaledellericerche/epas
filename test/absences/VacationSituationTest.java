@@ -109,13 +109,48 @@ public class VacationSituationTest extends UnitTest {
     assertEquals(vacationSituation2.currentYear.total(), 21);
     assertEquals(vacationSituation2.currentYear.used(), 1);
     assertEquals(vacationSituation2.currentYear.usableTotal(), 20);
-    assertEquals(vacationSituation2.currentYear.usable(), 17);
+    assertEquals(vacationSituation2.currentYear.usable(), 20);   // con la vecchia politica era 17
     
     assertFalse(vacationSituation2.permissions.expired());
     assertEquals(vacationSituation2.permissions.total(), 3);
     assertEquals(vacationSituation2.permissions.used(), 1);
     assertEquals(vacationSituation2.permissions.usableTotal(), 2);
     assertEquals(vacationSituation2.permissions.usable(), 2);
+  }
+  
+  /**
+   * Si assicura che fino al primo anno di contratto il dipendente può usufruire soltanto delle
+   * ferie maturate.
+   * Dal secondo anno può usufruire di tutte le ferie.
+   */
+  @Test
+  public void onlyAccruedUntilFirstContractYear() {
+    
+    absenceService.enumInitializator();
+
+    GroupAbsenceType vacationGroup = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
+
+    final LocalDate contractBegin = new LocalDate(2017, 7, 1);
+
+    Person person = h2Examples.normalEmployee(contractBegin, Optional.absent());
+
+    // riepilogo all'ultimo giorno del primo anno, posso prendere solo quelle maturate
+    LocalDate today = contractBegin.plusYears(1).minusDays(1);
+    VacationSituation vacationSituation = absenceService.buildVacationSituation(
+        person.contracts.get(0), 2018, vacationGroup, Optional.of(today), false, null);
+
+    assertEquals(vacationSituation.currentYear.total(), 26);
+    assertEquals(vacationSituation.currentYear.usable(), 13);
+
+    // riepilogo al primo giorno del secondo anno, posso prenderle tutte
+    today = contractBegin.plusYears(1);
+    vacationSituation = absenceService.buildVacationSituation(
+        person.contracts.get(0), 2018, vacationGroup, Optional.of(today), false, null);
+    
+    assertEquals(vacationSituation.currentYear.total(), 26);
+    assertEquals(vacationSituation.currentYear.usable(), 26);
+
   }
   
   /**

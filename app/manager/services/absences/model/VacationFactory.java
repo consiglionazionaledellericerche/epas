@@ -403,6 +403,7 @@ public class VacationFactory {
     for (AbsencePeriod period : periods) {
 
       if (!period.from.isBefore(secondYearStart)) {
+        fixed.add(period);
         continue;
       }
 
@@ -452,42 +453,40 @@ public class VacationFactory {
    */
   public void removeAccruedFirstYear(PeriodChain chain) {
     for (List<AbsencePeriod> periods : chain.vacationSupportList) {
-      for (AbsencePeriod period : periods) {
-        
-        AbsencePeriod splittedWith = null;
-        for (AbsencePeriod subPeriod : period.subPeriods) {
-          if (subPeriod.splittedWith == null) {
-            continue;
-          }
-          splittedWith = subPeriod.splittedWith;
+      AbsencePeriod splittedWith = null;
 
-          // ripristino la validità
-          subPeriod.to = splittedWith.to;
-          
-          // ricopio i dayInPeriod
-          for (DayInPeriod dayInPeriod : splittedWith.daysInPeriod.values()) {
-            subPeriod.daysInPeriod.put(dayInPeriod.getDate(), dayInPeriod);
-          }
-          
-          // assegno l'inizializzazione se è ricaduta proprio nel periodo splitted
-          // (trasferendo l'intero postPonedAmount)
-          if (splittedWith.initialization != null && DateUtility
-              .isDateIntoInterval(splittedWith.initialization.date, splittedWith.periodInterval())) {
+      for (AbsencePeriod subPeriod : periods) {
+        if (subPeriod.splittedWith == null) {
+          continue;
+        }
+        splittedWith = subPeriod.splittedWith;
 
-            // qualche verifica per assicurarmi che non perdo nessuna informazione ...
-            Preconditions.checkState(subPeriod.initialization.unitsInput == 0);
-            Preconditions.checkState(subPeriod.fixedPeriodTakableAmount == 0);
-            Preconditions.checkState(splittedWith.vacationAmountBeforeFixPostPartum == 0);
-            Preconditions.checkState(splittedWith.vacationAmountBeforeInitializationPatch == 0);
-            
-            subPeriod.initialization = subPeriod.splittedWith.initialization;
-            subPeriod.setFixedPeriodTakableAmount(splittedWith.fixedPeriodTakableAmount);
-          }
+        // ripristino la validità
+        subPeriod.to = splittedWith.to;
+
+        // ricopio i dayInPeriod
+        for (DayInPeriod dayInPeriod : splittedWith.daysInPeriod.values()) {
+          subPeriod.daysInPeriod.put(dayInPeriod.getDate(), dayInPeriod);
         }
-        if (splittedWith != null) {
-          period.subPeriods.remove(splittedWith);
+
+        // assegno l'inizializzazione se è ricaduta proprio nel periodo splitted
+        // (trasferendo l'intero postPonedAmount)
+        if (splittedWith.initialization != null && DateUtility
+            .isDateIntoInterval(splittedWith.initialization.date, splittedWith.periodInterval())) {
+
+          // qualche verifica per assicurarmi che non perdo nessuna informazione ...
+          Preconditions.checkState(subPeriod.initialization.unitsInput == 0);
+          Preconditions.checkState(subPeriod.getFixedPeriodTakableAmount() == 0);
+          Preconditions.checkState(splittedWith.vacationAmountBeforeFixPostPartum == 0);
+          Preconditions.checkState(splittedWith.vacationAmountBeforeInitializationPatch == 0);
+
+          subPeriod.initialization = subPeriod.splittedWith.initialization;
+          subPeriod.setFixedPeriodTakableAmount(splittedWith.getFixedPeriodTakableAmount());
         }
-        
+      }
+      if (splittedWith != null) {
+        periods.remove(splittedWith);
+        splittedWith = null;
       }
     }
   }
