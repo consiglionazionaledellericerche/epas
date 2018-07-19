@@ -1,23 +1,20 @@
 package manager.services.absences.model;
 
-import com.google.common.collect.Lists;
-
-import it.cnr.iit.epas.DateUtility;
-
 import java.io.Serializable;
 import java.util.List;
 
-import manager.services.absences.model.VacationSituation.VacationSummary.TypeSummary;
-import manager.services.vacations.VacationsTypeResult;
+import org.joda.time.LocalDate;
 
+import com.google.common.collect.Lists;
+
+import it.cnr.iit.epas.DateUtility;
+import manager.services.absences.model.VacationSituation.VacationSummary.TypeSummary;
 import models.Contract;
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 import models.absences.definitions.DefaultAbsenceType;
-
-import org.joda.time.LocalDate;
 
 /**
  * Contiene lo stato ferie annuale di un contratto.
@@ -38,10 +35,6 @@ public class VacationSituation {
   public VacationSummaryCached lastYearCached;
   public VacationSummaryCached currentYearCached;
   public VacationSummaryCached permissionsCached;
-  
-  public OldVacationSummary oldLastYear;
-  public OldVacationSummary oldCurrentYear;
-  public OldVacationSummary oldPermissions;
    
   /**
    * I giorni rimanenti totali.
@@ -59,135 +52,7 @@ public class VacationSituation {
     }
     return totalRemaining;
   }
- 
-  /**
-   * Confronto anno passato.
-   */
-  public boolean epasEquivalent(OldVacationSummary old, VacationSummary summary) {
-
-    if (old == null || old.result == null || summary == null) {
-      return true;
-    }
-    if (old.total() != summary.total()) {
-      return false;
-    }
-    if (old.postPartum() != summary.postPartum().size()) {
-      return false;
-    }
-    if (old.accrued() != summary.accrued()) {
-      return false;
-    }
-    if (!old.lowerLimit().isEqual(summary.lowerLimit())) {
-      return false;
-    }
-    if (!old.upperLimit().isEqual(summary.upperLimit())) {
-      return false;
-    }
-    if (old.used() != summary.used()) {
-      return false;
-    }
-    if (old.usableTotal() != summary.usableTotal()) {
-      return false;
-    }
-    //    if (old.usable() != summary.usable()) {
-    //     return false;
-    //    }
-    return true;
-  }
   
-  public boolean epasLastYearEquivalent() {
-    return epasEquivalent(oldLastYear, lastYear);
-  }
-  
-  public boolean epasCurrentYearEquivalent() {
-    return epasEquivalent(oldCurrentYear, currentYear);
-  }
-  
-  public boolean epasPermissionEquivalent() {
-    return epasEquivalent(oldPermissions, permissions);
-  }
-  
-  //att
-  
-  //  /**
-  //   * Totali attestati, anno passato. 
-  //   */
-  //  public int attestatiLastYearTotal() {
-  //    if (certLastYear == null) {
-  //      return -1;
-  //    }
-  //    return certLastYear.totalUsable;
-  //  }
-  //
-  //  /**
-  //   * Totali attestati, anno corrente. 
-  //   */
-  //  public int attestatiCurrentYearTotal() {
-  //    if (certCurrentYear == null) {
-  //      return -1;
-  //    }
-  //    return certCurrentYear.totalUsable;
-  //  }
-  //
-  //  /**
-  //   * Totali attestati, permessi. 
-  //   */
-  //  public int attestatiPermissionTotal() {
-  //    if (certPermission == null) {
-  //      return -1;
-  //    }
-  //    return certPermission.totalUsable;
-  //  }
-  
-  public static class OldVacationSummary {
-    public VacationsTypeResult result;
-    
-    public OldVacationSummary(VacationsTypeResult result) {
-      this.result = result;
-    }
-    
-    public int total() {
-      return result.getTotal();
-    }
-    
-    public int postPartum() {
-      return result.getTotalResult().getPostPartum().size();
-    }
-    
-    public int accrued() {
-      return result.getAccrued();
-    }
-    
-    public boolean isContractLowerLimit() {
-      return result.isContractLowerLimit();
-    }
-    
-    public LocalDate lowerLimit() {
-      return result.getLowerLimit();
-    }
-    
-    public boolean isContractUpperLimit() {
-      return result.isContractUpperLimit();
-    }
-    
-    public LocalDate upperLimit() {
-      return result.getUpperLimit();
-    }
-    
-    public int used() {
-      return result.getUsed();
-    }
-    
-    public int usable() { 
-      return result.getNotYetUsedTakeable();
-    }
-    
-    public int usableTotal() { 
-      return result.getNotYetUsedTotal();
-    }
-    
-  }
-
   
   public static class VacationSummary {
     
