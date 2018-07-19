@@ -129,11 +129,13 @@ public class AbsenceRequests extends Controller {
     
     val config = absenceRequestManager.getConfiguration(type, person);
     List<AbsenceRequest> results = absenceRequestDao
-        .findByPersonAndDate(person, fromDate, Optional.absent(), type);
+        .findByPersonAndDate(person, fromDate, Optional.absent(), type, true);
+    List<AbsenceRequest> closed = absenceRequestDao
+        .findByPersonAndDate(person, fromDate, Optional.absent(), type, false);
     val onlyOwn = true;
     boolean persist = false;
     
-    render(config, results, type, onlyOwn, persist);
+    render(config, results, type, onlyOwn, persist, closed);
   }
   
   /**
