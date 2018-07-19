@@ -2,6 +2,8 @@ package manager.services.absences.model;
 
 import com.google.common.collect.Lists;
 
+import it.cnr.iit.epas.DateUtility;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -399,6 +401,14 @@ public class VacationSituation {
         days = days + period.periodInterval().dayInInterval();
       }
       return days;
+    }
+    
+    public LocalDate contractEndFirstYearInPeriod(AbsencePeriod period) {
+      if (DateUtility
+          .isDateIntoInterval(contract.beginDate.plusYears(1), period.periodInterval())) {
+        return contract.beginDate.plusYears(1);
+      }
+      return null;
     }
     
     /**
