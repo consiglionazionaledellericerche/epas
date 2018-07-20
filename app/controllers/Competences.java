@@ -563,7 +563,9 @@ public class Competences extends Controller {
     if (Validation.hasErrors()) {
 
       response.status = 400;
-      render("@editCompetence", competence, office);
+      Person person = competence.person;
+      CompetenceCode code = competence.competenceCode;
+      render("@editCompetence", competence, office, person, code);
     }
 
     competenceManager.saveCompetence(competence, valueApproved);
