@@ -348,16 +348,15 @@ public class ServiceFactories {
       absencePeriod.setFixedPeriodTakableAmount(takableBehaviour.getFixedLimit());
       if (takableBehaviour.getTakableAmountAdjustment() != null) {
         
-        Optional<Integer> adjustment = absenceEngineUtility.takableAmountAdjustment(
+        Integer adjustment = absenceEngineUtility.takableAmountAdjustment(absencePeriod, date,
             takableBehaviour.getFixedLimit(), takableBehaviour.getTakableAmountAdjustment(), 
             absencePeriod.periodInterval(), person.getContracts());
         
-        if (!adjustment.isPresent()) {
-          absencePeriod.errorsBox.addCriticalError(date, CriticalProblem.IncalcolableAdjustment);
+        if (absencePeriod.containsCriticalErrors()) {
           return absencePeriod;
         }
-        
-        absencePeriod.setFixedPeriodTakableAmount(adjustment.get());
+      
+        absencePeriod.setFixedPeriodTakableAmount(adjustment);
 
       }
       if (absencePeriod.initialization != null 
