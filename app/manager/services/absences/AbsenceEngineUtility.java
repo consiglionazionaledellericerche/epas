@@ -460,7 +460,6 @@ public class AbsenceEngineUtility {
       int fixed, TakeAmountAdjustment adjustment, DateInterval periodInterval, 
       List<Contract> contracts) {
     
-    Preconditions.checkState(adjustment.equals(TakeAmountAdjustment.workingTimeAndWorkingPeriodPercent));
     boolean workTimeAdjustment = adjustment.workTime;
     boolean periodAdjustment = adjustment.periodTime;
     
