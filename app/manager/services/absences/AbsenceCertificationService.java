@@ -786,13 +786,31 @@ public class AbsenceCertificationService {
               || code.equals(DefaultAbsenceType.A_661H8.getCode())
               || code.equals(DefaultAbsenceType.A_661H9.getCode())) {
             aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_661MO.getCode()).get();
+            if (aux.isExpired(date)) {
+              aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_661M.getCode()).get();
+            }
           }
           if (!aux.equals(type.get())) {
             absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
                 aux, specified, type.get().replacingTime / 60, 0).absencesToPersist);
             continue;
           } 
-          
+
+          //2) I 631H* li faccio diventare 631M
+          if (code.equals(DefaultAbsenceType.A_631H1.getCode()) 
+              || code.equals(DefaultAbsenceType.A_631H2.getCode())
+              || code.equals(DefaultAbsenceType.A_631H3.getCode())
+              || code.equals(DefaultAbsenceType.A_631H4.getCode())
+              || code.equals(DefaultAbsenceType.A_631H5.getCode())
+              || code.equals(DefaultAbsenceType.A_631H6.getCode())) {
+            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_631M.getCode()).get();
+          }
+          if (!aux.equals(type.get())) {
+            absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
+                aux, specified, type.get().replacingTime / 60, 0).absencesToPersist);
+            continue;
+          } 
+
           //3) I 18H* 19H* 182H* li faccio diventare 18M, 19M, 182M
           if (code.equals(DefaultAbsenceType.A_18H1.getCode()) 
               || code.equals(DefaultAbsenceType.A_18H2.getCode())

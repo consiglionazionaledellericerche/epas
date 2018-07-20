@@ -1,17 +1,24 @@
 package manager.services.absences;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+
+import org.joda.time.LocalDate;
+import org.testng.collections.Lists;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import manager.services.absences.errors.CriticalError.CriticalProblem;
 import manager.services.absences.errors.ErrorsBox;
 import manager.services.absences.model.AbsencePeriod;
-
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Person;
@@ -27,14 +34,6 @@ import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
-
-import org.joda.time.LocalDate;
-import org.testng.collections.Lists;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
 
 public class AbsenceEngineUtility {
   
@@ -457,20 +456,42 @@ public class AbsenceEngineUtility {
    * @param contracts i contratti del dipendente
    * @return valora aggiustato (absent se impossibile calcolarlo)
    */
-  public Optional<Integer> takableAmountAdjustment(int fixed, TakeAmountAdjustment adjustment, 
-      DateInterval periodInterval, List<Contract> contracts) {
+  public Integer takableAmountAdjustment(AbsencePeriod absencePeriod, LocalDate date, 
+      int fixed, TakeAmountAdjustment adjustment, DateInterval periodInterval, 
+      List<Contract> contracts) {
     
-    boolean workTimeAdjustment = false;
-    if (adjustment == TakeAmountAdjustment.workingTimeAndWorkingPeriodPercent) {
-      workTimeAdjustment = true;
-    }
+    Preconditions.checkState(adjustment.equals(TakeAmountAdjustment.workingTimeAndWorkingPeriodPercent));
+    boolean workTimeAdjustment = adjustment.workTime;
+    boolean periodAdjustment = adjustment.periodTime;
     
     if (!periodInterval.isClosed()) {
-      return Optional.absent();
+      // Se si verificherà capire la casistica
+      absencePeriod.errorsBox.addCriticalError(date, CriticalProblem.IncalcolableAdjustment);
+      return null;
     }
     
-    int periodDays = DateUtility.daysInInterval(periodInterval);
-    
+    // I giorni del periodo da considerare per la riduzione sono: 
+    // periodAdjustment -> l'intero periodo
+    // !periodAdjustment -> i giorni di contratto attivi nel periodo 
+    //                      (*) in tal caso la somma di tutte le cwttPercent sarà 100%
+    int periodDays = 0;
+    if (periodAdjustment) {
+      periodDays = DateUtility.daysInInterval(periodInterval);
+    } else {
+      for (Contract contract : contracts) {
+        if (DateUtility.intervalIntersection(contract.periodInterval(), periodInterval) == null) {
+          continue;
+        }
+        for (ContractWorkingTimeType cwtt : contract.getContractWorkingTimeTypeOrderedList()) {
+          DateInterval cwttInterval = 
+              DateUtility.intervalIntersection(cwtt.periodInterval(), periodInterval); 
+          if (cwttInterval != null) {
+            periodDays += cwttInterval.dayInInterval();
+          }
+        }
+      }  
+    }
+        
     Double totalAssigned = new Double(0);
     
     //Ricerca dei periodi di attività
@@ -491,7 +512,7 @@ public class AbsenceEngineUtility {
         int cwttDays = DateUtility.daysInInterval(cwttInverval);
 
         //Incidenza cwtt sul periodo totale (in giorni)
-        Double cwttPercent = ((double)cwttDays * 100) / periodDays;
+        Double cwttPercent = ((double)cwttDays * 100) / periodDays; // (*)
         
         //Adeguamento sull'incidenza del periodo
         Double cwttAssigned = (cwttPercent * fixed) / 100;
@@ -505,8 +526,7 @@ public class AbsenceEngineUtility {
       }
     }
     
-    return Optional.of(totalAssigned.intValue());
+    return totalAssigned.intValue();
   }
-  
-      
+    
 }

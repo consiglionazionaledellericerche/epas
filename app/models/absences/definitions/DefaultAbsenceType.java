@@ -216,6 +216,40 @@ public enum DefaultAbsenceType {
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
       540, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), null, new LocalDate(2018, 6, 30)),
 
+  
+  A_631M("631M", "Permesso orario visita medica in ore e minuti",
+      true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false, 
+      0, null, 
+      Sets.newHashSet(new Behaviour(JustifiedBehaviourName.maximumTime, 360)), 
+      new LocalDate(2018, 7, 1), null),
+  A_631H1("631H1", "Permesso orario visita medica completamento 1 ora",
+      false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
+      60, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), new LocalDate(2018, 7, 1), null),
+  A_631H2("631H2", "Permesso orario visita medica completamento 2 ore",
+      false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
+      120, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), new LocalDate(2018, 7, 1), null),
+  A_631H3("631H3", "Permesso orario visita medica completamento 3 ore",
+      false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
+      180, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), new LocalDate(2018, 7, 1), null),
+  A_631H4("631H4", "Permesso orario visita medica completamento 4 ore",
+      false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
+      240, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), new LocalDate(2018, 7, 1), null),
+  A_631H5("631H5", "Permesso orario visita medica completamento 5 ore",
+      false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
+      300, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), new LocalDate(2018, 7, 1), null),
+  A_631H6("631H6", "Permesso orario visita medica completamento 6 ore",
+      false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
+      360, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), new LocalDate(2018, 7, 1), null),
+  A_631G("631G", "Permesso visita medica intera giornata",
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      0, null, Sets.newHashSet(), new LocalDate(2018, 7, 1), null),
+  // il vecchio codice, capire se andrà contato nel gruppo
+  A_631("631", "Permesso visita medica",
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      0, null, Sets.newHashSet(), null, new LocalDate(2018, 6, 30)),
+  
+  
+  
   A_89("89", "Permesso diritto allo studio completamento giornata",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
       0, JustifiedTypeName.all_day, Sets.newHashSet(), null, null),
@@ -264,9 +298,7 @@ public enum DefaultAbsenceType {
       true, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
       0, null, Sets.newHashSet(), null, null),
   
-  A_631("631", "Permesso visita medica",
-      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
-      0, null, Sets.newHashSet(), null, null),
+
 
   A_92("92", "Missione",
       false, ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, true, false,
