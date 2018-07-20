@@ -1308,13 +1308,15 @@ public enum DefaultAbsenceType {
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 120, false, false,
       0, null, null, null),
   
-  A_417("417", "Riposo compensativo missione Antartide",
+
+  A_407("407", "Ferie missione Antartide anno precedente",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, null, null),
-  A_406("406", "Ferie missione Antartide anno precedente",
+  
+  A_418("418", "Riposo compensativo missione Antartide",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, null, null),
-  A_407("407", "Ferie missione Antartide anno corrente",
+  A_408("408", "Ferie missione Antartide anno corrente",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, null, null),
   
