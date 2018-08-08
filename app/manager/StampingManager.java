@@ -175,7 +175,7 @@ public class StampingManager {
 
       consistencyManager
       .updatePersonSituation(stamping.personDay.person.id, stamping.personDay.date);
-      
+
       notificationManager
       .notificationStampingPolicy(currentUser, stamping, newInsert, !newInsert, false);
     } else {
