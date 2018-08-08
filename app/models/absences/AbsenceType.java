@@ -10,6 +10,25 @@ import com.google.common.collect.Sets;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import lombok.Getter;
+
+import models.Qualification;
+import models.absences.AbsenceTrouble.AbsenceProblem;
+import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
+import models.absences.JustifiedBehaviour.JustifiedBehaviourName;
+import models.absences.definitions.DefaultAbsenceType;
+import models.absences.definitions.DefaultAbsenceType.Behaviour;
+import models.absences.definitions.DefaultGroup;
+import models.base.BaseModel;
+import models.enumerate.QualificationMapping;
+
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+import org.hibernate.envers.Audited;
+import org.joda.time.LocalDate;
+
+import play.data.validation.Required;
+
 import java.util.List;
 import java.util.Set;
 
@@ -22,22 +41,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
-import lombok.Getter;
-
-import models.Qualification;
-import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
-import models.absences.definitions.DefaultAbsenceType;
-import models.absences.definitions.DefaultGroup;
-import models.base.BaseModel;
-import models.enumerate.QualificationMapping;
-
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
-import org.hibernate.envers.Audited;
-import org.joda.time.LocalDate;
-
-import play.data.validation.Required;
 
 @Entity
 @Table(name = "absence_types")
@@ -86,6 +89,9 @@ public class AbsenceType extends BaseModel {
       inverseJoinColumns = { @JoinColumn(name = "justified_types_id") })
   public Set<JustifiedType> justifiedTypesPermitted = Sets.newHashSet();
   
+  @OneToMany(mappedBy = "absenceType")
+  public Set<AbsenceTypeJustifiedBehaviour> justifiedBehaviours = Sets.newHashSet();
+  
   @Getter
   @Column(name = "replacing_time")
   public Integer replacingTime;
@@ -131,39 +137,32 @@ public class AbsenceType extends BaseModel {
     return description;
   }
   
+  
+  /**
+   * La validità.
+   * @return dateInterval
+   */
+  @Transient
+  public DateInterval validity() {
+    return new DateInterval(this.validFrom, this.validTo);
+  }
+  
   /**
    * Se il codice è scaduto.
    * @return esito
    */
   @Transient
   public boolean isExpired() {
-    boolean newResult = false;
-    LocalDate begin = this.validFrom;
-    LocalDate end = this.validTo;
-    if (begin == null) {
-      begin = new LocalDate(2000, 1, 1); //molto prima di epas...
-    }
-    if (end == null) {
-      end = new LocalDate(2100, 1, 1);   //molto dopo di epas...
-    }
-    if (DateUtility.isDateIntoInterval(LocalDate.now(), new DateInterval(begin, end))) {
-      newResult = false;
-    } else {
-      newResult = true;
-    }
-    boolean oldResult = false;
-    if (validTo == null) {
-      oldResult = false;
-    } else {
-      oldResult = LocalDate.now().isAfter(validTo);
-    }
-    
-    if (oldResult != newResult) {
-      throw new IllegalStateException();
-    }
-    
-    return newResult;
-    
+    return isExpired(LocalDate.now());
+  }
+  
+  /**
+   * Se il codice è scaduto alla data.
+   * @return esito
+   */
+  @Transient
+  public boolean isExpired(LocalDate date) {
+    return !DateUtility.isDateIntoInterval(date, validity());
   }
 
   @Override
@@ -226,7 +225,21 @@ public class AbsenceType extends BaseModel {
     }
     return false;
   }
-  
+
+  /**
+   * Se il tipo ha quel comportamento.
+   * @param behaviourName comportamento
+   * @return il payload del comportamento se esiste
+   */
+  public Optional<AbsenceTypeJustifiedBehaviour> getBehaviour(JustifiedBehaviourName behaviour) {
+    for (AbsenceTypeJustifiedBehaviour entity : this.justifiedBehaviours) {
+      if (entity.justifiedBehaviour.name.equals(behaviour)) {
+        return Optional.of(entity);
+      }
+    }
+    return Optional.absent();
+  }
+
   /**
    * Se il codice di assenza è utilizzabile per tutte le qualifiche del mapping.
    * @param mapping mapping
@@ -372,6 +385,24 @@ public class AbsenceType extends BaseModel {
             }
           }
           
+          //Behaviours
+          if (defaultType.behaviour.size() 
+              != this.justifiedBehaviours.size()) {
+            return Optional.of(false); 
+          }
+          for (AbsenceTypeJustifiedBehaviour behaviour : this.justifiedBehaviours) {
+            boolean equal = false;
+            for (Behaviour defaultBehaviour : defaultType.behaviour) { 
+              if (defaultBehaviour.name.equals(behaviour.justifiedBehaviour.name) 
+                  && safeEqual(defaultBehaviour.data, behaviour.data)) {
+                equal = true;
+              }
+            }
+            if (!equal) {
+              return Optional.of(false);
+            }
+          }
+          
           //replecing type nullable
           if (defaultType.replacingType == null) {
             if (this.replacingType != null) {
@@ -411,5 +442,15 @@ public class AbsenceType extends BaseModel {
     }
     return Optional.absent();
   }
-
+  
+  public static boolean safeEqual(Integer a, Integer b) {
+    if (a == null && b == null) {
+      return true;
+    }
+    if (a != null && b != null && a.equals(b)) {
+      return true;
+    }
+    return false;
+  } 
+  
 }

@@ -39,15 +39,15 @@ public class AbsenceTrouble extends BaseModel {
     TwoSameCodeSameDay(false),
     AllDayAlreadyExists(false),
     NotOnHoliday(false),
-    DailyAmountExceeded(false),
     IncompatibilyTypeSameDay(false),
     WeekEndContinuityBroken(false),
     UngrantedAbsence(false),
+    MinimumTimeViolated(false),
+    MaximumTimeExceed(false),
     
     //Gruppo
     LimitExceeded(false),
-    TwoComplationSameDay(false),
-    CompromisedTwoComplation(false),               //data compromessa
+    CompromisedTwoComplation(false),           //due completamenti nello stesso giorno
     CompromisedTakableComplationGroup(false),  //assenze successive
     
     //Figli

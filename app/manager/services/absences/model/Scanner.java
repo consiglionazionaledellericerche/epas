@@ -258,7 +258,7 @@ public class Scanner {
     }
     
     for (AbsencePeriod absencePeriod : periodChain.periods) {
-      if (absencePeriod.compromisedTwoComplation) {
+      if (absencePeriod.isCompromisedComplation()) {
         continue;
       }
       

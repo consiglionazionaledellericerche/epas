@@ -103,6 +103,15 @@ public class ErrorsBox {
 
     log.trace("Aggiunto errore critico alla mappa {}", criticalProblem);
   }
+  
+  public boolean containsAbsenceProblem(AbsenceProblem absenceProblem) {
+    for (Map<AbsenceProblem, AbsenceError>  map : absenceErrorsSuperMap.values()) {
+      if (map.containsKey(absenceProblem)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   public void addCriticalError(LocalDate date, CriticalProblem criticalProblem) {
     addCriticalErrorIntoMap(date, null, null, null, criticalProblem);

@@ -7,17 +7,12 @@ import com.google.common.collect.Maps;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-
 import manager.services.absences.AbsenceEngineUtility;
 import manager.services.absences.errors.ErrorsBox;
 
 import models.Person;
 import models.absences.Absence;
+import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.GroupAbsenceType;
@@ -27,6 +22,12 @@ import models.enumerate.VacationCode;
 
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
 
 public class AbsencePeriod {
   
@@ -44,7 +45,7 @@ public class AbsencePeriod {
   // Takable
   public AmountType takeAmountType;                // Il tipo di ammontare del periodo
   public TakeCountBehaviour takableCountBehaviour; // Come contare il tetto totale
-  private int fixedPeriodTakableAmount = 0;        // Il tetto massimo
+  private int fixedPeriodTakableAmount = 0;         // Il tetto massimo
   public TakeCountBehaviour takenCountBehaviour;   // Come contare il tetto consumato
   public Set<AbsenceType> takableCodes;            // I tipi assenza prendibili del periodo
   public Set<AbsenceType> takenCodes;              // I tipi di assenza consumati del periodo
@@ -52,14 +53,14 @@ public class AbsencePeriod {
   
   // Complation
   public AmountType complationAmountType;                      // Tipo di ammontare completamento
-  //I codici di rimpiazzamento ordinati per il loro tempo di completamento (decrescente)
-  public SortedMap<Integer, AbsenceType> replacingCodesDesc = 
+  
+  // I codici di rimpiazzamento ordinati per il loro tempo di completamento (decrescente)
+  public SortedMap<Integer, List<AbsenceType>> replacingCodesDesc = 
       Maps.newTreeMap(Collections.reverseOrder());              
                                                                                     
   //I tempi di rimpiazzamento per ogni assenza
   public Map<AbsenceType, Integer> replacingTimes = Maps.newHashMap();              
   public Set<AbsenceType> complationCodes;                             // Codici di completamento
-  public boolean compromisedTwoComplation = false;
   
   //Errori del periodo
   public ErrorsBox errorsBox = new ErrorsBox();
@@ -77,6 +78,8 @@ public class AbsencePeriod {
   public int vacationAmountBeforeInitializationPatch = 0;
   //VacationPeriod che ha generato il period
   public VacationCode vacationCode;
+  // Se il period è stato splittato perchè a cavallo del primo anno contratto
+  public AbsencePeriod splittedWith;
   
   AbsencePeriod(Person person, GroupAbsenceType groupAbsenceType) {
     this.person = person;
@@ -119,6 +122,10 @@ public class AbsencePeriod {
     } else {
       this.fixedPeriodTakableAmount = amount;  
     }
+  }
+  
+  public Integer getFixedPeriodTakableAmount() {
+    return this.fixedPeriodTakableAmount;
   }
 
   private List<TakenAbsence> takenAbsences() {
@@ -255,7 +262,7 @@ public class AbsencePeriod {
   public void addComplationAbsence(Absence absence) {
     DayInPeriod dayInPeriod = getDayInPeriod(absence.getAbsenceDate());
     if (!dayInPeriod.getExistentComplations().isEmpty()) {
-      this.compromisedTwoComplation = true;
+      this.errorsBox.addAbsenceError(absence, AbsenceProblem.CompromisedTwoComplation);
     }
     dayInPeriod.getExistentComplations().add(absence);
   }
@@ -361,6 +368,10 @@ public class AbsencePeriod {
   
   public boolean containsCriticalErrors() {
     return ErrorsBox.boxesContainsCriticalErrors(Lists.newArrayList(this.errorsBox));
+  }
+  
+  public boolean isCompromisedComplation() {
+    return errorsBox.containsAbsenceProblem(AbsenceProblem.CompromisedTwoComplation);
   }
   
   /**

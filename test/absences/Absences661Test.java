@@ -80,7 +80,7 @@ public class Absences661Test extends UnitTest {
     assertEquals(periodChain.periods.get(0).getPeriodTakableAmount(), 1080);
     
     //creare le assenze da considerare
-    Absence absence1 = h2AbsenceSupport.absenceInstance(DefaultAbsenceType.A_661M, 
+    Absence absence1 = h2AbsenceSupport.absenceInstance(DefaultAbsenceType.A_661MO, 
         FERIAL_1_2016, Optional.of(JustifiedTypeName.specified_minutes), 80);
     Absence absence2 = h2AbsenceSupport.absenceInstance(DefaultAbsenceType.A_661H1, 
         FERIAL_1_2016, Optional.of(JustifiedTypeName.nothing), 0);
@@ -88,7 +88,7 @@ public class Absences661Test extends UnitTest {
     List<Absence> groupPersistedAbsences = Lists.newArrayList(absence1, absence2);
     
     //creare la assenza da inserire
-    Absence toInsert = h2AbsenceSupport.absenceInstance(DefaultAbsenceType.A_661M, 
+    Absence toInsert = h2AbsenceSupport.absenceInstance(DefaultAbsenceType.A_661MO, 
         FERIAL_3_2016, Optional.of(JustifiedTypeName.specified_minutes), 40);
     
     serviceFactories.buildPeriodChainPhase2(periodChain, toInsert, 
