@@ -43,7 +43,7 @@ public class UserManager {
   }
 
   /**
-   * Return generated token for the recovery password procedure
+   * Return generated token for the recovery password procedure.
    *
    * @param person person for which to generate the token.
    */
@@ -69,7 +69,7 @@ public class UserManager {
   public String generateUserName(final String name, final String surname) {
 
     final String username;
-    final String standardUsername = CharMatcher.WHITESPACE.removeFrom(
+    final String standardUsername = CharMatcher.whitespace().removeFrom(
         Joiner.on(".").skipNulls().join(name.replaceAll("\\W", ""), surname.replaceAll("\\W", ""))
             .toLowerCase());
 

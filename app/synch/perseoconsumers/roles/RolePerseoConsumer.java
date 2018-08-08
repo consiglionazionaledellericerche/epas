@@ -9,6 +9,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
@@ -110,7 +111,7 @@ public class RolePerseoConsumer {
           throw new ApiRequestException(error);
         }
       }
-    });
+    }, MoreExecutors.directExecutor());
   }
 
   /**

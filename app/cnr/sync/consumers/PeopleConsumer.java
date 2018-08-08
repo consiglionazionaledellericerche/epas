@@ -8,6 +8,7 @@ import com.google.common.base.Function;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -43,7 +44,7 @@ public class PeopleConsumer {
         }
         return new Gson().fromJson(response.getJson(), PersonDto.class);
       }
-    });
+    }, MoreExecutors.directExecutor());
   }
 
   public ListenableFuture<List<SimplePersonDto>> getPeople() throws IllegalStateException {
@@ -61,7 +62,7 @@ public class PeopleConsumer {
             new TypeToken<List<SimplePersonDto>>() {
             }.getType());
       }
-    });
+    }, MoreExecutors.directExecutor());
   }
 
   public ListenableFuture<Set<Person>> seatPeople(String code) throws IllegalStateException {
@@ -84,7 +85,7 @@ public class PeopleConsumer {
         return gson.create().fromJson(response.getJson(), new TypeToken<Set<Person>>() {
         }.getType());
       }
-    });
+    }, MoreExecutors.directExecutor());
   }
 
 }
