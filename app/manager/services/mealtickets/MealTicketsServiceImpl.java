@@ -44,7 +44,6 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
   private ConsistencyManager consistencyManager;
   private MealTicketRecapBuilder mealTicketRecapBuilder;
   private ConfigurationManager configurationManager;
-  private ContractDao contractDao;
 
   /**
    * Costrutture.
@@ -61,7 +60,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
       ConsistencyManager consistencyManager,
       ConfigurationManager configurationManager,
       MealTicketRecapBuilder mealTicketRecapBuilder,
-      IWrapperFactory wrapperFactory, ContractDao contractDao) {
+      IWrapperFactory wrapperFactory) {
 
     this.personDao = personDao;
     this.mealTicketDao = mealTicketDao;
@@ -69,7 +68,6 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     this.configurationManager = configurationManager;
     this.mealTicketRecapBuilder = mealTicketRecapBuilder;
     this.wrapperFactory = wrapperFactory;
-    this.contractDao = contractDao;
   }
 
   @Override

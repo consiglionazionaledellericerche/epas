@@ -76,8 +76,9 @@ public enum DefaultTakable {
       -1, null),
 
   T_661(AmountType.minutes, 
-      ImmutableSet.of(DefaultAbsenceType.A_661M), 
-      ImmutableSet.of(DefaultAbsenceType.A_661M), 
+      ImmutableSet.of(DefaultAbsenceType.A_661MO, DefaultAbsenceType.A_661M, 
+          DefaultAbsenceType.A_661G), // taken (scala dal limite per lo storico)
+      ImmutableSet.of(DefaultAbsenceType.A_661M, DefaultAbsenceType.A_661G),  // takable
       1080, TakeAmountAdjustment.workingTimeAndWorkingPeriodPercent),
 
   T_89(AmountType.minutes, 
@@ -93,10 +94,15 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_09M), 
       ImmutableSet.of(DefaultAbsenceType.A_09M), 
       -1, null),
-  T_631(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_631), 
-      ImmutableSet.of(DefaultAbsenceType.A_631), 
-      -1, null),
+  
+  
+  T_631(AmountType.minutes, 
+      ImmutableSet.of(DefaultAbsenceType.A_631, // capire se considerare il vecchio 631 
+          DefaultAbsenceType.A_631G, 
+          DefaultAbsenceType.A_631M), 
+      ImmutableSet.of(DefaultAbsenceType.A_631G,
+          DefaultAbsenceType.A_631M), 
+      1080, TakeAmountAdjustment.workingTimePercent), // si riduce solo se partTime
 
   T_MISSIONE(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_92,

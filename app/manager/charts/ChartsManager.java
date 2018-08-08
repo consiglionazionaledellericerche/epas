@@ -1,20 +1,5 @@
 package manager.charts;
 
-import com.google.common.base.CharMatcher;
-import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.gdata.util.common.base.Preconditions;
-import controllers.Charts.ExportFile;
-import dao.CompetenceCodeDao;
-import dao.PersonDao;
-import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPerson;
-import it.cnr.iit.epas.DateUtility;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -34,29 +19,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
 import javax.inject.Inject;
-import jobs.ChartJob;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import manager.PersonDayManager;
-import manager.recaps.charts.RenderResult;
-import manager.recaps.charts.ResultFromFile;
-import manager.recaps.personstamping.PersonStampingDayRecap;
-import manager.recaps.personstamping.PersonStampingRecap;
-import manager.recaps.personstamping.PersonStampingRecapFactory;
-import manager.services.PairStamping;
-import manager.services.vacations.IVacationsService;
-import manager.services.vacations.VacationsRecap;
-import models.CompetenceCode;
-import models.Contract;
-import models.ContractMonthRecap;
-import models.Office;
-import models.Person;
-import models.PersonDay;
-import models.Stamping;
-import models.WorkingTimeType;
-import models.absences.Absence;
-import models.exports.PersonOvertime;
+
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -75,6 +40,48 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.gdata.util.common.base.Preconditions;
+
+import controllers.Charts.ExportFile;
+import dao.CompetenceCodeDao;
+import dao.PersonDao;
+import dao.absences.AbsenceComponentDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
+import it.cnr.iit.epas.DateUtility;
+import jobs.ChartJob;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import manager.PersonDayManager;
+import manager.recaps.charts.RenderResult;
+import manager.recaps.charts.ResultFromFile;
+import manager.recaps.personstamping.PersonStampingDayRecap;
+import manager.recaps.personstamping.PersonStampingRecap;
+import manager.recaps.personstamping.PersonStampingRecapFactory;
+import manager.services.PairStamping;
+import manager.services.absences.AbsenceService;
+import manager.services.absences.model.VacationSituation;
+import models.CompetenceCode;
+import models.Contract;
+import models.ContractMonthRecap;
+import models.Office;
+import models.Person;
+import models.PersonDay;
+import models.Stamping;
+import models.WorkingTimeType;
+import models.absences.Absence;
+import models.absences.GroupAbsenceType;
+import models.absences.definitions.DefaultGroup;
+import models.exports.PersonOvertime;
 import play.libs.F;
 
 public class ChartsManager {
@@ -82,10 +89,11 @@ public class ChartsManager {
   private static final Logger log = LoggerFactory.getLogger(ChartsManager.class);
   private final CompetenceCodeDao competenceCodeDao;
   private final PersonDao personDao;
-  private final IVacationsService vacationsService;
   private final IWrapperFactory wrapperFactory;
   private final PersonStampingRecapFactory stampingsRecapFactory;
   private final PersonDayManager personDayManager;
+  private final AbsenceService absenceService;
+  private final AbsenceComponentDao absenceComponentDao;
 
   /**
    * Costruttore.
@@ -97,14 +105,16 @@ public class ChartsManager {
    */
   @Inject
   public ChartsManager(CompetenceCodeDao competenceCodeDao, PersonDao personDao,
-      IVacationsService vacationsService, IWrapperFactory wrapperFactory,
-      PersonStampingRecapFactory stampingsRecapFactory, PersonDayManager personDayManager) {
+      IWrapperFactory wrapperFactory, PersonStampingRecapFactory stampingsRecapFactory,
+      PersonDayManager personDayManager, AbsenceService absenceService, 
+      AbsenceComponentDao absenceComponentDao) {
     this.competenceCodeDao = competenceCodeDao;
     this.personDao = personDao;
-    this.vacationsService = vacationsService;
     this.wrapperFactory = wrapperFactory;
     this.stampingsRecapFactory = stampingsRecapFactory;
     this.personDayManager = personDayManager;
+    this.absenceService = absenceService;
+    this.absenceComponentDao = absenceComponentDao;
   }
 
 
@@ -357,10 +367,11 @@ public class ChartsManager {
 
     Preconditions.checkState(contract.isPresent());
 
-    Optional<VacationsRecap> vr =
-        vacationsService.create(LocalDate.now().getYear(), contract.get());
-
-    Preconditions.checkState(vr.isPresent());
+    GroupAbsenceType vacationGroup = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
+    
+    VacationSituation vacationSituation = absenceService.buildVacationSituation(contract.get(), 
+        LocalDate.now().getYear(), vacationGroup, Optional.absent(), false);
 
     Optional<ContractMonthRecap> recap =
         wrapperFactory.create(contract.get()).getContractMonthRecap(new YearMonth(LocalDate.now()));
@@ -376,9 +387,10 @@ public class ChartsManager {
 
     out.append(person.surname + ' ' + person.name + ',');
 
-    out.append(new Integer(vr.get().getVacationsCurrentYear().getUsed()).toString() + ','
-        + new Integer(vr.get().getVacationsLastYear().getUsed()).toString() + ','
-        + new Integer(vr.get().getPermissions().getUsed()).toString() + ','
+    out.append(new Integer(vacationSituation.currentYear.used()).toString() + ','
+        + new Integer(vacationSituation.lastYear != null 
+        ? vacationSituation.lastYear.used() : 0).toString() + ','
+        + new Integer(vacationSituation.currentYear.used()).toString() + ','
         + new Integer(recap.get().remainingMinutesCurrentYear).toString() + ','
         + new Integer(recap.get().remainingMinutesLastYear).toString() + ',');
 

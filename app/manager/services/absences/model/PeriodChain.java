@@ -108,7 +108,9 @@ public class PeriodChain {
         absenceTypes.addAll(absencePeriod.takableCodes);
       }
       if (absencePeriod.isComplation()) {
-        absenceTypes.addAll(absencePeriod.replacingCodesDesc.values());
+        for (List<AbsenceType> replacings : absencePeriod.replacingCodesDesc.values()) {
+          absenceTypes.addAll(replacings);
+        }
         absenceTypes.addAll(absencePeriod.complationCodes);
       }
     }

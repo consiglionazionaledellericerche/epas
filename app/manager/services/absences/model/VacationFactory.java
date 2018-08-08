@@ -2,15 +2,13 @@ package manager.services.absences.model;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
 
 import dao.absences.AbsenceComponentDao;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.List;
-import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,6 +30,9 @@ import models.absences.definitions.DefaultGroup;
 
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
+
+import java.util.List;
+import java.util.Set;
 
 @Slf4j
 public class VacationFactory {
@@ -171,12 +172,13 @@ public class VacationFactory {
     //Fix dei giorni post partum
     periods = fixPostPartum(periods, person, year);
     
+    //Split del primo anno di contratto
+    periods = handleAccruedFirstYear(person, group, contract, periods);
+    
     if (periods.isEmpty()) {
       return periods;
     }
     
-
-
     //Ferie usabili entro 31/8
     Set<AbsenceType> takable = subSetCode(codes, DefaultAbsenceType.A_31);
     Set<AbsenceType> taken = subSetCode(codes, DefaultAbsenceType.A_31);
@@ -250,6 +252,9 @@ public class VacationFactory {
     
     //Fix dei giorni post partum
     periods = fixPostPartum(periods, person, year);
+
+    //Split del primo anno di contratto
+    periods = handleAccruedFirstYear(person, group, contract, periods);
     
     //Collapse initialization days
     handleInitialization(periods, initializationDays, contract.sourceDateVacation, group);
@@ -381,6 +386,110 @@ public class VacationFactory {
     return periods;
 
   }
+  
+  /**
+   * Splitta i periodi che ricadono a cavallo del primo anno di contratto.
+   * E' importante applicare questo gestore dopo i fix ma prima della inizializzazione!
+   * @param person
+   * @param group
+   * @param contract
+   * @param periods
+   * @return
+   */
+  private List<AbsencePeriod> handleAccruedFirstYear(Person person, GroupAbsenceType group, 
+      Contract contract, List<AbsencePeriod> periods) {
+    List<AbsencePeriod> fixed = Lists.newArrayList();
+    LocalDate secondYearStart = contract.beginDate.plusYears(1);
+    for (AbsencePeriod period : periods) {
+
+      if (!period.from.isBefore(secondYearStart)) {
+        fixed.add(period);
+        continue;
+      }
+
+      // split 
+      if (DateUtility.isDateIntoInterval(secondYearStart.minusDays(1), 
+          new DateInterval(period.from, period.to))) {
+        
+        // creo il period aggiuntivo con amount 0 (default)
+        AbsencePeriod splitted = new AbsencePeriod(contract.person, group);
+        splitted.from = secondYearStart;
+        splitted.to = period.to;
+
+        // chiudo il periodo all'ultimo giorno del primo anno.
+        period.to = secondYearStart.minusDays(1);
+        period.takableCountBehaviour = TakeCountBehaviour.sumUntilPeriod;
+        period.takenCountBehaviour = TakeCountBehaviour.sumUntilPeriod;
+        fixed.add(period);
+        
+        if (secondYearStart.isAfter(splitted.to)) {
+          continue;
+        }
+        
+        splitted.takeAmountType = AmountType.units;
+        splitted.takableCountBehaviour = TakeCountBehaviour.sumAllPeriod;
+        splitted.takenCountBehaviour = TakeCountBehaviour.sumAllPeriod;
+        splitted.takableCodes = period.takableCodes;
+        splitted.takenCodes = period.takenCodes;
+        
+        fixed.add(splitted);
+        period.splittedWith = splitted;
+        continue;
+      } 
+        
+      // completamente precedente
+      period.takableCountBehaviour = TakeCountBehaviour.sumUntilPeriod;
+      period.takenCountBehaviour = TakeCountBehaviour.sumUntilPeriod;
+      fixed.add(period);
+      
+    }
+    
+    return fixed;
+  }
+  
+  /**
+   * Quando ho completato le computazioni potrò rimuovere il period fittizio.
+   * Motivo: il VacationSituation non è compatibile con la presenza del periodo fittizio.
+   */
+  public void removeAccruedFirstYear(PeriodChain chain) {
+    for (List<AbsencePeriod> periods : chain.vacationSupportList) {
+      AbsencePeriod splittedWith = null;
+
+      for (AbsencePeriod subPeriod : periods) {
+        if (subPeriod.splittedWith == null) {
+          continue;
+        }
+        splittedWith = subPeriod.splittedWith;
+
+        // ripristino la validità
+        subPeriod.to = splittedWith.to;
+
+        // ricopio i dayInPeriod
+        for (DayInPeriod dayInPeriod : splittedWith.daysInPeriod.values()) {
+          subPeriod.daysInPeriod.put(dayInPeriod.getDate(), dayInPeriod);
+        }
+
+        // assegno l'inizializzazione se è ricaduta proprio nel periodo splitted
+        // (trasferendo l'intero postPonedAmount)
+        if (splittedWith.initialization != null && DateUtility
+            .isDateIntoInterval(splittedWith.initialization.date, splittedWith.periodInterval())) {
+
+          // qualche verifica per assicurarmi che non perdo nessuna informazione ...
+          Preconditions.checkState(subPeriod.initialization.unitsInput == 0);
+          Preconditions.checkState(subPeriod.getFixedPeriodTakableAmount() == 0);
+          Preconditions.checkState(splittedWith.vacationAmountBeforeFixPostPartum == 0);
+          Preconditions.checkState(splittedWith.vacationAmountBeforeInitializationPatch == 0);
+
+          subPeriod.initialization = subPeriod.splittedWith.initialization;
+          subPeriod.setFixedPeriodTakableAmount(splittedWith.getFixedPeriodTakableAmount());
+        }
+      }
+      if (splittedWith != null) {
+        periods.remove(splittedWith);
+        splittedWith = null;
+      }
+    }
+  }
 
   private List<AbsencePeriod> periodsFromProgression(Person person, Contract contract, 
       GroupAbsenceType group,  LocalDate beginDate, YearProgression yearProgression,
@@ -467,14 +576,9 @@ public class VacationFactory {
     
     AbsencePeriod absencePeriod = new AbsencePeriod(person, group);
     absencePeriod.takeAmountType = AmountType.units;
-    if (contract.endDate == null) {
-      absencePeriod.takableCountBehaviour = TakeCountBehaviour.sumAllPeriod;
-      absencePeriod.takenCountBehaviour = TakeCountBehaviour.sumAllPeriod;
-    } else {
-      absencePeriod.takableCountBehaviour = TakeCountBehaviour.sumUntilPeriod; //TD
-      absencePeriod.takenCountBehaviour = TakeCountBehaviour.sumUntilPeriod;
-    }
-        
+    absencePeriod.takableCountBehaviour = TakeCountBehaviour.sumAllPeriod;
+    absencePeriod.takenCountBehaviour = TakeCountBehaviour.sumAllPeriod;
+       
     absencePeriod.from = begin;
     absencePeriod.to = end;
     //mi assicuro di non eccedere in ogni caso la lunghezza del contratto.
