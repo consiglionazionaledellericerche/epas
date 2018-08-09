@@ -144,7 +144,7 @@ public class AbsenceType extends BaseModel {
    */
   @Transient
   public DateInterval validity() {
-    return new DateInterval(this.validFrom, this.validTo);
+    return DateInterval.withBegin(this.validFrom, Optional.of(this.validTo));
   }
   
   /**

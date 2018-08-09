@@ -3,27 +3,35 @@ package it.cnr.iit.epas;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
+import lombok.NoArgsConstructor;
+
 import org.joda.time.LocalDate;
 
+@NoArgsConstructor
 public class DateInterval {
 
   private LocalDate begin;
   private LocalDate end;
 
   /**
-   * Costruttore con end optional.
+   * Un DateInterval con begin obbligatorio.
+   * @param begin
+   * @param end
+   * @return
    */
-  public DateInterval(LocalDate begin, Optional<LocalDate> end) {
+  public static DateInterval withBegin(LocalDate begin, Optional<LocalDate> end) {
+    DateInterval dateInterval = new DateInterval();
     Preconditions.checkArgument(begin != null);
-    this.begin = begin;
+    dateInterval.begin = begin;
     if (end.isPresent()) {
       Preconditions.checkArgument(!begin.isAfter(end.get()));
-      this.end = end.get();
+      dateInterval.end = end.get();
     } else {
-      this.end = DateUtility.setInfinity();
+      dateInterval.end = DateUtility.setInfinity();
     }
+    return dateInterval;
   }
-
+  
   /**
    * Costruttore.
    */
