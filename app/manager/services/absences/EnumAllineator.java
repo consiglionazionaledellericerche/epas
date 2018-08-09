@@ -86,6 +86,7 @@ public class EnumAllineator {
         absenceType.save();
         updateBehaviourSet(absenceType, absenceType.justifiedBehaviours, 
             defaultAbsenceType.get().behaviour);
+        absenceType.save();
       } else {
         //gli absenceType che non sono enumerati li tolgo dai gruppi.
         for (TakableAbsenceBehaviour takable : absenceType.takableGroup) {
@@ -449,7 +450,7 @@ public class EnumAllineator {
       Set<AbsenceTypeJustifiedBehaviour> entitySet, Set<Behaviour> newEnumSet) {
     
     boolean edited = false;
-    
+
     //Eliminare quelli non più contenuti
     List<AbsenceTypeJustifiedBehaviour> toRemove = Lists.newArrayList();
     for (AbsenceTypeJustifiedBehaviour behaviour : entitySet) {
@@ -466,6 +467,7 @@ public class EnumAllineator {
     }
     for (AbsenceTypeJustifiedBehaviour behaviour : toRemove) {
       entitySet.remove(behaviour);
+      behaviour.delete();
       edited = true;
     }
     

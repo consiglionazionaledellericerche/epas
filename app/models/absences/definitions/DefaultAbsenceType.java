@@ -186,7 +186,7 @@ public enum DefaultAbsenceType {
   A_661G("661G", "Permesso orario per motivi personali intera giornata",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null,
-      Sets.newHashSet(new Behaviour(JustifiedBehaviourName.takenPercentageTime, 833)),
+      Sets.newHashSet(new Behaviour(JustifiedBehaviourName.takenPercentageTime, 834)),
       null, null),
   A_661H1("661H1", "Permesso orario per motivi personali completamento 1 ora",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
