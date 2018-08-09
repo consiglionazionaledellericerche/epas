@@ -1,11 +1,11 @@
 package it.cnr.iit.epas;
 
+import org.joda.time.LocalDate;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 import lombok.NoArgsConstructor;
-
-import org.joda.time.LocalDate;
 
 @NoArgsConstructor
 public class DateInterval {
@@ -33,7 +33,48 @@ public class DateInterval {
   }
   
   /**
-   * Costruttore.
+   * Costruisce il dateInterval. <br>
+   * - Se begin è null viene impostata MIN_DATE. <br>
+   * - Se end è null viene impostata MAX_DATE. <br>
+   * Se begin è successiva a end vengono invertite.
+   * @param begin
+   * @param end
+   * @return
+   */
+  public static DateInterval build(LocalDate begin, LocalDate end) {
+
+    if (begin == null && end == null) {
+      begin = new LocalDate(0, 1, 1);
+      end = DateUtility.setInfinity();
+    } else if (begin == null) {
+      begin = new LocalDate(0, 1, 1);
+    } else if (end == null) {
+      end = DateUtility.setInfinity();
+    }
+
+    //Non applico il riferimento ma costruisco nuovi oggetti
+    LocalDate beginCopy = new LocalDate(begin);
+    LocalDate endCopy = new LocalDate(end);
+
+    DateInterval dateInterval = new DateInterval();
+    
+    if (begin.isAfter(end)) {
+      dateInterval.begin = endCopy;
+      dateInterval.end = beginCopy;
+    } else {
+      dateInterval.begin = beginCopy;
+      dateInterval.end = endCopy;
+    }
+    
+    return dateInterval;
+  }
+
+  
+  /**
+   * Questo costruttore è confondente. <br>
+   * Sia date1 che date2 quando nulle vengono sostituite con MAX_DATE. <br>
+   * se date1 è null e date2 è valorizzato, crea un intorno [date2, MAX_DATE]
+   * il chè non è molto intuitivo.
    */
   public DateInterval(LocalDate date1, LocalDate date2) {
 
