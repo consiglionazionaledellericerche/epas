@@ -310,6 +310,9 @@ public class AbsenceType extends BaseModel {
     for (TakableAbsenceBehaviour behaviour : this.takableGroup) {
       groups.addAll(behaviour.groupAbsenceTypes);
     }
+    for (TakableAbsenceBehaviour behaviour : this.takenGroup) {
+      groups.addAll(behaviour.groupAbsenceTypes);
+    }
     Set<GroupAbsenceType> filteredGroup = Sets.newHashSet();
     for (GroupAbsenceType groupAbsenceType : groups) {
       if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.programmed)) {
