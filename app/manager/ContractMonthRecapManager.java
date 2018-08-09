@@ -361,7 +361,7 @@ public class ContractMonthRecapManager {
     DateInterval contractIntervalForMealTicket =
         wrapperFactory.create(contract).getContractDatabaseIntervalForMealTicket();
     DateInterval mealTicketIntervalInOffice =
-        new DateInterval(dateStartMealTicketInOffice, Optional.<LocalDate>absent());
+        DateInterval.withBegin(dateStartMealTicketInOffice, Optional.<LocalDate>absent());
 
     DateInterval validDataForMealTickets = null;
     if (monthInterval != null) {
