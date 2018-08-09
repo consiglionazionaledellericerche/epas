@@ -3,9 +3,9 @@ package jobs;
 import java.util.List;
 import java.util.Set;
 
-import com.beust.jcommander.internal.Lists;
-import com.beust.jcommander.internal.Sets;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
 import dao.absences.AbsenceComponentDao;
