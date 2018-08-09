@@ -81,6 +81,18 @@
 	      <strong>Tempo Specificato</strong>
 	       ${_absence.justifiedTime().printHourMinute()}
 	    #{/if}
+	  
+	  *{ comportamenti particolari }*
+	  #{if !_absence.absenceType.justifiedBehaviours.empty}
+      <br><strong>Comportamenti speciali</strong><br>
+      #{list items:_absence.absenceType.justifiedBehaviours, as:'justifiedBehaviour'}
+        &{justifiedBehaviour.justifiedBehaviour.name} 
+        #{if justifiedBehaviour.data}
+          ${justifiedBehaviour.printData()}
+        #{/if}<br>
+      #{/list}<br> 
+    #{/if}
+	    
 	#{if _absence.note != null}    
 	<strong>Note</strong> ${_absence.note}<br>
 	#{/if}

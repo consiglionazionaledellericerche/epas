@@ -996,6 +996,10 @@ TakeAmountAdjustment.workingPeriodPercent=Percentuale periodo lavorato
 TakeAmountAdjustment.workingTimeAndWorkingPeriodPercent=Percentuale tipo orario e periodo lavorato
 AmountType.minutes=Minuti
 AmountType.units=Giorni
+no_overtime=No straordinari assegnabili 
+minimumTime=Quantità minima 
+maximumTime=Quantità massima
+takenPercentageTime=Consumo dal monte disponibile (in caso di orario normale)
 
 initializationGroup.hoursInput =Ore Utilizzate
 initializationGroup.minutesInput =Minuti Utilizzati
