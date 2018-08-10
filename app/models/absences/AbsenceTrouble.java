@@ -57,15 +57,24 @@ public class AbsenceTrouble extends BaseModel {
     ImplementationProblem(true),
     
     //Warnings
-    ForceInsert(false),
-    InReperibility(false),
-    InShift(false),
-    InReperibilityOrShift(false);
+    ForceInsert(false, true),
+    InReperibility(false, true),
+    InShift(false, true),
+    InReperibilityOrShift(false, true),
+    Migration661(false, true);
 
     public boolean isImplementationProblem;
     
+    public boolean isWarning = false;
+    
+    private AbsenceProblem(boolean isImplementationProblem, boolean isWarning) {
+      this.isImplementationProblem = isImplementationProblem;
+      this.isWarning = isWarning;
+    }
+    
     private AbsenceProblem(boolean isImplementationProblem) {
       this.isImplementationProblem = isImplementationProblem;
+      this.isWarning = false;
     }
 
   }

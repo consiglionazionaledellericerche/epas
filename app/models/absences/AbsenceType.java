@@ -144,7 +144,7 @@ public class AbsenceType extends BaseModel {
    */
   @Transient
   public DateInterval validity() {
-    return new DateInterval(this.validFrom, this.validTo);
+    return DateInterval.build(this.validFrom, this.validTo);
   }
   
   /**
@@ -308,6 +308,9 @@ public class AbsenceType extends BaseModel {
     
     Set<GroupAbsenceType> groups = Sets.newHashSet();
     for (TakableAbsenceBehaviour behaviour : this.takableGroup) {
+      groups.addAll(behaviour.groupAbsenceTypes);
+    }
+    for (TakableAbsenceBehaviour behaviour : this.takenGroup) {
       groups.addAll(behaviour.groupAbsenceTypes);
     }
     Set<GroupAbsenceType> filteredGroup = Sets.newHashSet();

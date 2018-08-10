@@ -996,6 +996,10 @@ TakeAmountAdjustment.workingPeriodPercent=Percentuale periodo lavorato
 TakeAmountAdjustment.workingTimeAndWorkingPeriodPercent=Percentuale tipo orario e periodo lavorato
 AmountType.minutes=Minuti
 AmountType.units=Giorni
+no_overtime=No straordinari assegnabili 
+minimumTime=Quantità minima 
+maximumTime=Quantità massima
+takenPercentageTime=Consumo dal monte disponibile (in caso di orario normale)
 
 initializationGroup.hoursInput =Ore Utilizzate
 initializationGroup.minutesInput =Minuti Utilizzati
@@ -1015,6 +1019,9 @@ InReperibilityOrShift=In Turno o Reperibilità
 InShift=In Turno
 ForceInsert=Inserimento forzato
 IgnoredBeforeInitialization=Precedente l'inizializzazione
+Migration661=In questa data il codice non dovrebbe essere uguale o superiore alle 6 ore
+MinimumTimeViolated=Quantità minima richiesta non soddisfatta
+MaximumTimeExceed=Quantità massima giornaliera superata
 
 child1_0_3=Primo figlio 0-3 anni
 child1_0_6=Primo figlio 0-6 anni

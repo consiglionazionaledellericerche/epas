@@ -259,6 +259,12 @@ public class ErrorsBox {
           allProblems.add(absenceError.absenceProblem);
         }
       }
+      Map<AbsenceProblem, AbsenceError> absenceWarnings = errorsBox.absenceWarningsSuperMap.get(absence);
+      if (absenceWarnings != null) {
+        for (AbsenceError absenceError : absenceWarnings.values()) {
+          allProblems.add(absenceError.absenceProblem);
+        }
+      }
     }
     return allProblems;
   }
