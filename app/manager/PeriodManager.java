@@ -377,7 +377,7 @@ public class PeriodManager {
     if (recomputeRecap.recomputeFrom != null
         && !recomputeRecap.recomputeFrom.isAfter(LocalDate.now())) {
       recomputeRecap.days = DateUtility.daysInInterval(
-          new DateInterval(recomputeRecap.recomputeFrom, recomputeRecap.recomputeTo));
+          DateInterval.withBegin(recomputeRecap.recomputeFrom, recomputeRecap.recomputeTo));
     } else {
       recomputeRecap.days = 0;
     }

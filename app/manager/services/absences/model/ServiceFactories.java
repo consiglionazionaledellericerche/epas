@@ -1,21 +1,25 @@
 package manager.services.absences.model;
 
-import com.google.common.base.Optional;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.joda.time.LocalDate;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import dao.PersonReperibilityDayDao;
 import dao.PersonShiftDayDao;
 import dao.absences.AbsenceComponentDao;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import manager.PersonDayManager;
 import manager.services.absences.AbsenceEngineUtility;
 import manager.services.absences.errors.CriticalError.CriticalProblem;
 import manager.services.absences.errors.ErrorsBox;
-
 import models.Contract;
 import models.Person;
 import models.PersonChildren;
@@ -30,14 +34,7 @@ import models.absences.InitializationGroup;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
-
-import org.joda.time.LocalDate;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
+import models.absences.definitions.DefaultAbsenceType;
 
 public class ServiceFactories {
 
@@ -648,7 +645,13 @@ public class ServiceFactories {
         genericErrors.addAbsenceError(absence, AbsenceProblem.MaximumTimeExceed, absence);
       }
     }
-
+    
+    if (absence.absenceType.code.equals(DefaultAbsenceType.A_661MO.getCode())
+        && DateUtility.isDateIntoInterval(absence.personDay.date, DateUtility.getYearInterval(2018)) 
+        && absence.justifiedMinutes != null 
+        && absence.justifiedMinutes >= 360) {
+      genericErrors.addAbsenceWarning(absence, AbsenceProblem.Migration661);
+    }
 
     //TODO:
     // Strange weekend

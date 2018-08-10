@@ -1,6 +1,15 @@
 
 package controllers;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+
+import javax.inject.Inject;
+
+import org.joda.time.LocalDate;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
@@ -9,6 +18,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
 import dao.AbsenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -18,15 +28,12 @@ import dao.WorkingTimeTypeDao;
 import dao.absences.AbsenceComponentDao;
 import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
+import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
+import dao.wrapper.IWrapperPersonDay;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
@@ -40,7 +47,6 @@ import manager.services.absences.certifications.CertificationYearSituation;
 import manager.services.absences.certifications.CodeComparation;
 import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.PeriodChain;
-
 import models.Office;
 import models.Person;
 import models.PersonDay;
@@ -48,6 +54,7 @@ import models.Qualification;
 import models.Role;
 import models.User;
 import models.WorkingTimeType;
+import models.WorkingTimeTypeDay;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
@@ -61,14 +68,16 @@ import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
+import models.absences.definitions.DefaultAbsenceType;
 import models.enumerate.QualificationMapping;
-import org.joda.time.LocalDate;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.db.jpa.JPA;
+import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.mvc.results.Redirect;
 import security.SecurityRules;
 
 @Slf4j
@@ -107,6 +116,8 @@ public class AbsenceGroups extends Controller {
   private static WrapperModelFunctionFactory wrapperFunctionFactory;
   @Inject
   private static AbsenceDao absenceDao;
+  @Inject
+  private static IWrapperFactory wrapperFactory;
 
   /**
    * La lista delle categorie definite.
@@ -1141,6 +1152,77 @@ public class AbsenceGroups extends Controller {
     //    }
 
     consistencyGroups();
+  }
+  
+  /**
+   * Migra tutti i 661MO presi nel 2018, in accordo alle nuove normative.
+   * Una volta che sarà applicato a Roma sarà possibile cancellarlo ...
+   */
+  @SuppressWarnings("deprecation")
+  public static void migration661M() {
+    List<Absence> absences = absenceComponentDao
+        .absences(Lists.newArrayList(DefaultAbsenceType.A_661MO.getCode()));
+    
+    DateInterval yearInterval = DateUtility.getYearInterval(2018);
+    
+    Set<Person> toUpdate = Sets.newHashSet();
+    
+    Set<Person> toScan = Sets.newHashSet();
+    
+    JustifiedType allDay = absenceComponentDao.getOrBuildJustifiedType(JustifiedTypeName.all_day);
+    Optional<AbsenceType> a661G = absenceComponentDao
+        .absenceTypeByCode(DefaultAbsenceType.A_661G.getCode());
+    
+    // tutte le assenze 661MO
+    for (Absence absence : absences) {
+      
+      // utilizzate dal 1/1/2018 al 31/12/2018
+      if (!DateUtility.isDateIntoInterval(absence.personDay.getDate(), yearInterval)) {
+        continue;
+      }
+      
+      IWrapperPersonDay wPersonDay = wrapperFactory.create(absence.personDay);  
+      
+      Optional<WorkingTimeTypeDay>  wttd = wPersonDay.getWorkingTimeTypeDay();
+      
+      if (!wttd.isPresent()) {
+        continue;
+      }
+      
+      // di 7:12 quando la persona ha un orario 7:12
+      if (wttd.get().workingTime == 432 && absence.justifiedMinutes == 432) {
+
+        // sono convertite in 661G
+        absence.justifiedMinutes = null;
+        absence.justifiedType = allDay;
+        absence.absenceType = a661G.get();
+        absence.save();
+        toUpdate.add(absence.personDay.person);
+        continue;
+      }
+      
+      // non di 7:12 ma di un valore uguale o superiore a 6 ore
+      if (absence.justifiedMinutes > 300) {
+        
+        // saranno inserite in uno stato di warning
+        toScan.add(absence.personDay.person);
+      }
+      
+    }
+    
+    JPAPlugin.closeTx(false);
+    JPAPlugin.startTx(false);
+    
+    if (!toUpdate.isEmpty()) {
+      for (Person person : toUpdate) {
+        consistencyManager.updatePersonSituation(person.id, yearInterval.getBegin());
+      }
+      for (Person person : toScan) {
+        consistencyManager.updatePersonSituation(person.id, yearInterval.getBegin());
+      }
+    }
+    
+    renderText("Migrazione completata.");
   }
 
   /**

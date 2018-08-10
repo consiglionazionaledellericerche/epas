@@ -1,31 +1,80 @@
 package it.cnr.iit.epas;
 
+import org.joda.time.LocalDate;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
-import org.joda.time.LocalDate;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 public class DateInterval {
 
   private LocalDate begin;
   private LocalDate end;
 
   /**
-   * Costruttore con end optional.
+   * Un DateInterval con begin obbligatorio.
+   * @param begin
+   * @param end
+   * @return
    */
-  public DateInterval(LocalDate begin, Optional<LocalDate> end) {
+  public static DateInterval withBegin(LocalDate begin, Optional<LocalDate> end) {
+    DateInterval dateInterval = new DateInterval();
     Preconditions.checkArgument(begin != null);
-    this.begin = begin;
+    dateInterval.begin = begin;
     if (end.isPresent()) {
       Preconditions.checkArgument(!begin.isAfter(end.get()));
-      this.end = end.get();
+      dateInterval.end = end.get();
     } else {
-      this.end = DateUtility.setInfinity();
+      dateInterval.end = DateUtility.setInfinity();
     }
+    return dateInterval;
+  }
+  
+  /**
+   * Costruisce il dateInterval. <br>
+   * - Se begin è null viene impostata MIN_DATE. <br>
+   * - Se end è null viene impostata MAX_DATE. <br>
+   * Se begin è successiva a end vengono invertite.
+   * @param begin
+   * @param end
+   * @return
+   */
+  public static DateInterval build(LocalDate begin, LocalDate end) {
+
+    if (begin == null && end == null) {
+      begin = new LocalDate(0, 1, 1);
+      end = DateUtility.setInfinity();
+    } else if (begin == null) {
+      begin = new LocalDate(0, 1, 1);
+    } else if (end == null) {
+      end = DateUtility.setInfinity();
+    }
+
+    //Non applico il riferimento ma costruisco nuovi oggetti
+    LocalDate beginCopy = new LocalDate(begin);
+    LocalDate endCopy = new LocalDate(end);
+
+    DateInterval dateInterval = new DateInterval();
+    
+    if (begin.isAfter(end)) {
+      dateInterval.begin = endCopy;
+      dateInterval.end = beginCopy;
+    } else {
+      dateInterval.begin = beginCopy;
+      dateInterval.end = endCopy;
+    }
+    
+    return dateInterval;
   }
 
+  
   /**
-   * Costruttore.
+   * Questo costruttore è confondente. <br>
+   * Sia date1 che date2 quando nulle vengono sostituite con MAX_DATE. <br>
+   * se date1 è null e date2 è valorizzato, crea un intorno [date2, MAX_DATE]
+   * il chè non è molto intuitivo.
    */
   public DateInterval(LocalDate date1, LocalDate date2) {
 
