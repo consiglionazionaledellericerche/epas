@@ -44,6 +44,7 @@ public class AbsenceTrouble extends BaseModel {
     UngrantedAbsence(false),
     MinimumTimeViolated(false),
     MaximumTimeExceed(false),
+    Expired(false),
     
     //Gruppo
     LimitExceeded(false),
