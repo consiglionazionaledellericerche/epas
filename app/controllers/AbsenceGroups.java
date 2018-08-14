@@ -1202,7 +1202,7 @@ public class AbsenceGroups extends Controller {
       }
       
       // di 7:00 quando la persona ha un orario 7:12
-      if (wttd.get().workingTime == 420 && absence.justifiedMinutes == 432) {
+      if (wttd.get().workingTime == 432 && absence.justifiedMinutes == 420) {
 
         // sono convertite in 661G
         absence.justifiedMinutes = null;
