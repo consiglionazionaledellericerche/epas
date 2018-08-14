@@ -99,7 +99,8 @@ public enum DefaultTakable {
   T_631(AmountType.minutes, 
       ImmutableSet.of(DefaultAbsenceType.A_631, // capire se considerare il vecchio 631 
           DefaultAbsenceType.A_631G, 
-          DefaultAbsenceType.A_631M), 
+          DefaultAbsenceType.A_631M,
+          DefaultAbsenceType.A_09M), 
       ImmutableSet.of(DefaultAbsenceType.A_631G,
           DefaultAbsenceType.A_631M), 
       1080, TakeAmountAdjustment.workingTimePercent), // si riduce solo se partTime
