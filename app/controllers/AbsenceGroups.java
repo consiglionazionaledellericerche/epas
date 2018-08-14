@@ -1201,6 +1201,18 @@ public class AbsenceGroups extends Controller {
         continue;
       }
       
+      // di 7:00 quando la persona ha un orario 7:12
+      if (wttd.get().workingTime == 420 && absence.justifiedMinutes == 432) {
+
+        // sono convertite in 661G
+        absence.justifiedMinutes = null;
+        absence.justifiedType = allDay;
+        absence.absenceType = a661G.get();
+        absence.save();
+        toUpdate.add(absence.personDay.person);
+        continue;
+      }
+      
       // non di 7:12 ma di un valore uguale o superiore a 6 ore
       if (absence.justifiedMinutes > 300) {
         
