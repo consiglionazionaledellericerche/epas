@@ -293,7 +293,7 @@ public enum DefaultAbsenceType {
       0, JustifiedTypeName.all_day, Sets.newHashSet(), null, null),
   A_09M("09M", "Permesso visita medica in ore e minuti",
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
-      0, null, Sets.newHashSet(), null, null),
+      0, null, Sets.newHashSet(), null, new LocalDate(2018, 8, 15)),
   A_09BI("09B", "Permesso visita medica completamento giornata da importazione",
       true, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
       0, null, Sets.newHashSet(), null, null),
