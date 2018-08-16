@@ -811,6 +811,7 @@ when
  Role(name == Role.TECHNICAL_ADMIN) from $uro.role
  $c: PermissionCheck(action in (
 
+		"Configurations.show",
         "Users.edit",
         "Users.show",
         "Users.addRole",
@@ -909,6 +910,7 @@ when
  Role(name == Role.TECHNICAL_ADMIN) from $uro.role
  $c: PermissionCheck(action in (
 
+	   "Configurations.show",
  	   "Institutes.edit",
  	   "Institutes.save",
 	   "Institutes.delete",
@@ -957,6 +959,36 @@ when
   	   "Zones.deleteLink"
 
        ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+/*Con queste due regole si permette all'amministratore tecnico di accedere alla schermata delle configurazioni
+  e di poter modificare solo due parametri: l'abilitazione alla timbratura web e la specifica degli indirizzi ip.*/
+rule TechnicalAdmin_CanModifyConf
+when 
+ $uro: UsersRolesOffices()
+ Role(name == Role.TECHNICAL_ADMIN) from $uro.role
+ $c: PermissionCheck(action in (
+		"Configurations.show",
+		"Configurations.edit",
+		"Configurations.update"
+		
+        ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule CanModifySpecificParameter
+when 
+ $uro: UsersRolesOffices()
+ $target: Configuration(office == $uro.office, epasParam in(EpasParam.ADDRESSES_ALLOWED, EpasParam.WEB_STAMPING_ALLOWED))
+ $c: PermissionCheck(action in (
+		"Configurations.show",
+		"Configurations.edit",
+		"Configurations.update"
+
+        ), target == $target, granted == false)
 then
  $c.grant();
 end

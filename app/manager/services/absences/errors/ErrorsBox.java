@@ -103,6 +103,15 @@ public class ErrorsBox {
 
     log.trace("Aggiunto errore critico alla mappa {}", criticalProblem);
   }
+  
+  public boolean containsAbsenceProblem(AbsenceProblem absenceProblem) {
+    for (Map<AbsenceProblem, AbsenceError>  map : absenceErrorsSuperMap.values()) {
+      if (map.containsKey(absenceProblem)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   public void addCriticalError(LocalDate date, CriticalProblem criticalProblem) {
     addCriticalErrorIntoMap(date, null, null, null, criticalProblem);
@@ -247,6 +256,12 @@ public class ErrorsBox {
           .absenceErrorsSuperMap.get(absence);
       if (absenceErrors != null) {
         for (AbsenceError absenceError : absenceErrors.values()) {
+          allProblems.add(absenceError.absenceProblem);
+        }
+      }
+      Map<AbsenceProblem, AbsenceError> absenceWarnings = errorsBox.absenceWarningsSuperMap.get(absence);
+      if (absenceWarnings != null) {
+        for (AbsenceError absenceError : absenceWarnings.values()) {
           allProblems.add(absenceError.absenceProblem);
         }
       }

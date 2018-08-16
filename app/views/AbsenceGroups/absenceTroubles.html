@@ -34,8 +34,8 @@
 		   #{list items:mapTroubles.get(person), as:'absence'}
 		    
 		    <a href="@{Stampings.personStamping(person.id, absence.personDay.date.year, absence.personDay.date.monthOfYear)}">
-			<span class="badge badge-danger">${absence.absenceType.code} - ${absence.personDay.date.format()}</span>		     
-			</a>
+			  <strong><span class="text-danger">${absence.absenceType.code}</span></strong> 	     
+			  </a> <small>${absence.personDay.date.format()}</small>
 		   #{/list}
 	     </td>
 	   </tr>   

@@ -1,32 +1,31 @@
 package manager.services.absences.model;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
-import dao.PersonReperibilityDayDao;
-import dao.PersonShiftDayDao;
-import dao.absences.AbsenceComponentDao;
-
-import it.cnr.iit.epas.DateInterval;
-import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.joda.time.LocalDate;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
+import dao.PersonReperibilityDayDao;
+import dao.PersonShiftDayDao;
+import dao.absences.AbsenceComponentDao;
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 import manager.PersonDayManager;
 import manager.services.absences.AbsenceEngineUtility;
 import manager.services.absences.errors.CriticalError.CriticalProblem;
 import manager.services.absences.errors.ErrorsBox;
-
 import models.Contract;
 import models.Person;
 import models.PersonChildren;
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
+import models.absences.AbsenceType;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
@@ -35,8 +34,7 @@ import models.absences.InitializationGroup;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
-
-import org.joda.time.LocalDate;
+import models.absences.definitions.DefaultAbsenceType;
 
 public class ServiceFactories {
 
@@ -145,6 +143,8 @@ public class ServiceFactories {
           allPersistedAbsences, groupPersistedAbsences);
     }
 
+    completePeriodChain(periodChain);
+    
     return periodChain;
   }
 
@@ -251,7 +251,7 @@ public class ServiceFactories {
           insertAbsenceInPeriod(periodChain, absencePeriod, absenceToInsert);
 
       // Se la situazione non è compromessa eseguo lo scan dei rimpiazzamenti
-      if (!absencePeriod.containsCriticalErrors() && !absencePeriod.compromisedTwoComplation) {
+      if (!absencePeriod.containsCriticalErrors() && !absencePeriod.isCompromisedComplation()) {
         absencePeriod.computeCorrectReplacingInPeriod(absenceEngineUtility);
       }
       
@@ -345,16 +345,15 @@ public class ServiceFactories {
       absencePeriod.setFixedPeriodTakableAmount(takableBehaviour.getFixedLimit());
       if (takableBehaviour.getTakableAmountAdjustment() != null) {
         
-        Optional<Integer> adjustment = absenceEngineUtility.takableAmountAdjustment(
+        Integer adjustment = absenceEngineUtility.takableAmountAdjustment(absencePeriod, date,
             takableBehaviour.getFixedLimit(), takableBehaviour.getTakableAmountAdjustment(), 
             absencePeriod.periodInterval(), person.getContracts());
         
-        if (!adjustment.isPresent()) {
-          absencePeriod.errorsBox.addCriticalError(date, CriticalProblem.IncalcolableAdjustment);
+        if (absencePeriod.containsCriticalErrors()) {
           return absencePeriod;
         }
-        
-        absencePeriod.setFixedPeriodTakableAmount(adjustment.get());
+      
+        absencePeriod.setFixedPeriodTakableAmount(adjustment);
 
       }
       if (absencePeriod.initialization != null 
@@ -381,10 +380,13 @@ public class ServiceFactories {
       // i codici di rimpiazzamento li preparo ordinati per ammontare di rimpiazzamento
       absenceEngineUtility.setReplacingCodesDesc(
           absencePeriod.complationAmountType, complationBehaviour.getReplacingCodes(), date, //final
-          absencePeriod.replacingCodesDesc, absencePeriod.errorsBox);                   //edit
+          absencePeriod.replacingCodesDesc, absencePeriod.errorsBox);                        //edit
       // genero la mappa inversa
       for (Integer amount : absencePeriod.replacingCodesDesc.keySet()) {
-        absencePeriod.replacingTimes.put(absencePeriod.replacingCodesDesc.get(amount), amount);
+        List<AbsenceType> absenceTypes = absencePeriod.replacingCodesDesc.get(amount);
+        for (AbsenceType absenceType : absenceTypes) {
+          absencePeriod.replacingTimes.put(absenceType, amount);          
+        }
       }
     }
     
@@ -405,12 +407,11 @@ public class ServiceFactories {
     boolean isComplation = false;
     boolean isReplacing = false;
     if (absencePeriod.isTakable()) {
-      isTaken = absencePeriod.takenCodes.contains(absence.absenceType);   // no insert
-      //isTaken = absencePeriod.takableCodes.contains(absence.getAbsenceType()); // insert
+      isTaken = absencePeriod.takenCodes.contains(absence.absenceType) 
+        || absencePeriod.takableCodes.contains(absence.getAbsenceType());
     }
     if (absencePeriod.isComplation()) {
-      isReplacing = absencePeriod.replacingCodesDesc.values()
-          .contains(absence.getAbsenceType());
+      isReplacing = absencePeriod.replacingTimes.keySet().contains(absence.getAbsenceType());
       isComplation = absencePeriod.complationCodes.contains(absence.getAbsenceType());
     }
     if (!isTaken && !isComplation && !isReplacing) {
@@ -436,14 +437,19 @@ public class ServiceFactories {
     } 
 
     if (isTaken) {
-      int takenAmount = absenceEngineUtility
-          .absenceJustifiedAmount(absencePeriod.person, absence, absencePeriod.takeAmountType);
+      
+      int takenAmount = absenceEngineUtility.absenceJustifiedAmount(absencePeriod.person,
+          absence, absencePeriod.takeAmountType);
+      
       if (takenAmount < 0) {
         absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.ImplementationProblem);
         absencePeriod.errorsBox.addCriticalError(absence, 
             CriticalProblem.IncalcolableJustifiedAmount);
         return;
       }
+      
+      takenAmount = absenceEngineUtility.takenBehaviouralFixes(absence, takenAmount);
+      
       TakenAbsence takenAbsence = absencePeriod.buildTakenAbsence(absence, takenAmount);
       if (!takenAbsence.canAddTakenAbsence()) {
         absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.LimitExceeded);
@@ -457,7 +463,10 @@ public class ServiceFactories {
     }
 
     if (isComplation) {
-      if (absencePeriod.compromisedTwoComplation) {
+
+      if (absencePeriod.isCompromisedComplation()) {
+        // TODO: devo aggiungere all'assenza gli errori di completamento riscontrati nel periodo
+        // fino a quel punto
         absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.CompromisedTwoComplation);
       }
       int complationAmount = absenceEngineUtility.absenceJustifiedAmount(absencePeriod.person, 
@@ -469,13 +478,12 @@ public class ServiceFactories {
         return;
       }
       absencePeriod.addComplationAbsence(absence);
-      if (absencePeriod.compromisedTwoComplation) {
-        absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.CompromisedTwoComplation);
-      }
     }
 
     if (isReplacing) {
-      if (absencePeriod.compromisedTwoComplation) {
+      if (absencePeriod.isCompromisedComplation()) {
+        // TODO: devo aggiungere all'assenza gli errori di completamento riscontrati nel periodo
+        // fino a quel punto
         absencePeriod.errorsBox.addAbsenceError(absence, AbsenceProblem.CompromisedTwoComplation);
       }
       absencePeriod.addReplacingAbsence(absence);
@@ -628,6 +636,22 @@ public class ServiceFactories {
       genericErrors.addAbsenceError(absence, AbsenceProblem.AllDayAlreadyExists, oldAbsence);
     }
 
+    // Violazione mimino e massimo
+    if (absence.justifiedMinutes != null) {
+      if (absence.violateMinimumTime()) {
+        genericErrors.addAbsenceError(absence, AbsenceProblem.MinimumTimeViolated, absence);
+      }
+      if (absence.violateMaximumTime()) {
+        genericErrors.addAbsenceError(absence, AbsenceProblem.MaximumTimeExceed, absence);
+      }
+    }
+    
+    if (absence.absenceType.code.equals(DefaultAbsenceType.A_661MO.getCode())
+        && DateUtility.isDateIntoInterval(absence.getAbsenceDate(), DateUtility.getYearInterval(2018)) 
+        && absence.justifiedMinutes != null 
+        && absence.justifiedMinutes >= 360) {
+      genericErrors.addAbsenceWarning(absence, AbsenceProblem.Migration661);
+    }
 
     //TODO:
     // Strange weekend
@@ -640,6 +664,16 @@ public class ServiceFactories {
     return genericErrors;
   }
 
+  /**
+   * Azioni da compiere alla fine della costruzione della periodChain.
+   */
+  private void completePeriodChain(PeriodChain periodChain) {
+    
+    if (periodChain.groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.vacationsCnr)) {
+      vacationFactory.removeAccruedFirstYear(periodChain);
+    }  
+    
+  }
 
 
 }
