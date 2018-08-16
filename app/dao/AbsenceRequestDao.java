@@ -43,7 +43,7 @@ public class AbsenceRequestDao extends DaoBase {
    */
   public List<AbsenceRequest> findByPersonAndDate(Person person,
       LocalDateTime fromDate, Optional<LocalDateTime> toDate, 
-      AbsenceRequestType absenceRequestType) {
+      AbsenceRequestType absenceRequestType, boolean active) {
 
     Preconditions.checkNotNull(person);
     Preconditions.checkNotNull(fromDate);
@@ -55,6 +55,11 @@ public class AbsenceRequestDao extends DaoBase {
         .and(absenceRequest.type.eq(absenceRequestType)));
     if (toDate.isPresent()) {
       conditions.and(absenceRequest.endTo.before(toDate.get()));
+    }
+    if (active) {
+      conditions.and(absenceRequest.flowEnded.eq(false));
+    } else {
+      conditions.and(absenceRequest.flowEnded.eq(true));
     }
     JPQLQuery query = getQueryFactory().from(absenceRequest)
         .where(conditions);
