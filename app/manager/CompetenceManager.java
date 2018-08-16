@@ -613,7 +613,7 @@ public class CompetenceManager {
             interval = new DateInterval(pccList.get(counter).beginDate, 
                 pccList.get(counter).endDate);
           } else {
-            interval = new DateInterval(pccList.get(counter).beginDate, 
+            interval = DateInterval.withBegin(pccList.get(counter).beginDate, 
                 Optional.<LocalDate>absent());
           }
 

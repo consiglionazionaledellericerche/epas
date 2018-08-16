@@ -22,6 +22,13 @@
    
      <!-- Riepilogo Residui -->
      #{tabContentItem id:'infoTot', active:true}
+     
+     <div class="col-md-12">
+     #{alert color:'info'}
+       <i class="fa fa-info-circle"></i> Per il primo anno di contratto il dipendente potrà usufruire dei soli giorni maturati.
+     #{/alert}
+     </div>
+     
 	 
 		 <div class="col-md-6 col-md-offset-3">
 		   <table class="table">
@@ -37,35 +44,18 @@
 		       <td><strong>Usate</strong></td>
 		       <td>${vacationSummary.used()}</td>
 		     </tr>
+		     <tr>
+           <td><strong>&{'vacations.takable'}</strong></td>
+           <td>${vacationSummary.usable()} <i class="fa fa-info-circle"></i></td>
+         </tr>
+         <tr>
+           <td><strong>Limite Massimo Utilizzo</strong></td>
+           <td>${vacationSummary.upperLimit().format()}</td>
+         </tr>
 		   </table>
 	   </div>
 	   
-	   <div class="col-md-12">
-	   #{alert color:'info'}
-	   <p>Le assenze <strong>&{'vacations.takable'}</strong> sono le assenze maturate che il dipendente può effettivamente utilizzare in questo
-	   momento.</p>
-	      <p>Le assenze <strong>Rimanenti</strong> sono tutte le assenze (maturate e non) residue per il dipendente.</p>
-	   #{/alert}
-	   </div>
-	   
-	   <div class="col-md-6 col-md-offset-3">
-		   <table class="table">
-		     <tr>
-		       <td><strong>&{'vacations.takable'}</strong></td>
-		       <td>${vacationSummary.usable()}</td>
-		     </tr>
-		     <tr>
-		       <td><strong>Rimanenti</strong></td>
-		       <td>${vacationSummary.usableTotal()}</td>
-		     </tr>
-		     <tr>
-		       <td><strong>Limite Massimo Utilizzo</strong></td>
-		       <td>${vacationSummary.upperLimit().format()}</td>
-		     </tr>
-		   </table>
-	   </div>
-	   
-	   
+   
     #{/tabContentItem}
     
     <!-- Riepilogo Giorni utilizzati -->
@@ -233,8 +223,15 @@
 	         *{ <td>${period.to.format()}</td> }*
 	         <td>
 	          ${vacationSummary.subAmountBeforeFixedPostPartum(period)}
+	          #{if vacationSummary.contractEndFirstYearInPeriod(period)}
+              <span class="text-success"><i class="fa fa-info-circle" 
+                 popover-hover data-content="Dal ${vacationSummary.contractEndFirstYearInPeriod(period).format()} potrai usufruire anticipatamente di tutti i giorni maturati fino alla fine di questo anno."></i>
+               </span>
+            #{/if}
 	         </td>
-	         <td><strong>${vacationSummary.subTotalAmount(period)}</strong></td>
+	         <td>
+	           <strong>${vacationSummary.subTotalAmount(period)}</strong>
+	         </td>
 	         <td>${period.periodInterval().dayInInterval()} (${vacationSummary.subDayProgression(period)})</td>
 	         #{if !vacationSummary.postPartum().empty}
 	         <td>
@@ -243,7 +240,7 @@
 	             (${vacationSummary.subDayPostPartumProgression(period)})
 	             #{if vacationSummary.subDayToFixPostPartum(period) > 0}
 	             <span class="text-warning"><i class="fa fa-exclamation-triangle" 
-                                 popover-hover data-content="Utilizzando ulteriori ${vacationSummary.subDayToFixPostPartum(period)} giorni di riduzione si perderà il diritto ad utilizzare i ${vacationSummary.subAmountBeforeFixedPostPartum(period)} giorni maturati in questo periodo."></i>
+                 popover-hover data-content="Utilizzando ulteriori ${vacationSummary.subDayToFixPostPartum(period)} giorni di riduzione si perderà il diritto ad utilizzare i ${vacationSummary.subAmountBeforeFixedPostPartum(period)} giorni maturati in questo periodo."></i>
 	             </span>
 	             #{/if}
 	           #{/if}

@@ -563,7 +563,9 @@ public class Competences extends Controller {
     if (Validation.hasErrors()) {
 
       response.status = 400;
-      render("@editCompetence", competence, office);
+      Person person = competence.person;
+      CompetenceCode code = competence.competenceCode;
+      render("@editCompetence", competence, office, person, code);
     }
 
     competenceManager.saveCompetence(competence, valueApproved);
@@ -1152,13 +1154,21 @@ public class Competences extends Controller {
     }
   }
 
-  public static void handlePersonShiftShiftType(Long id){
+  /**
+   * Ritorna la form di associazione tra persona e turno.
+   * @param id identificativo dell'associazione tra persona e turno
+   */
+  public static void handlePersonShiftShiftType(Long id) {
     PersonShiftShiftType psst = shiftDao.getById(id);
     notFoundIfNull(psst);
     rules.checkIfPermitted(psst.personShift.person.office);    
     render(psst);
   }
 
+  /**
+   * metodo per il salvataggio dell'associazione.
+   * @param psst l'oggetto associazione tra persona e turno.
+   */
   public static void updatePersonShiftShiftType(PersonShiftShiftType psst) {
     rules.checkIfPermitted(psst.personShift.person.office);
     psst.save();

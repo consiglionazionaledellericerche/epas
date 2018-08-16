@@ -1,5 +1,10 @@
 package manager.services.absences;
 
+import java.util.List;
+
+import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
@@ -8,17 +13,10 @@ import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
 
 import controllers.Security;
-
 import dao.PersonChildrenDao;
-import dao.UserDao;
 import dao.absences.AbsenceComponentDao;
-
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.List;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.AbsenceManager;
 import manager.SecureManager;
 import manager.configurations.ConfigurationManager;
@@ -34,14 +32,11 @@ import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.Scanner;
 import manager.services.absences.model.ServiceFactories;
 import manager.services.absences.model.VacationSituation;
-import manager.services.absences.model.VacationSituation.OldVacationSummary;
 import manager.services.absences.model.VacationSituation.VacationSummary;
 import manager.services.absences.model.VacationSituation.VacationSummary.TypeSummary;
 import manager.services.absences.model.VacationSituation.VacationSummaryCached;
-import manager.services.vacations.IVacationsService;
-import manager.services.vacations.VacationsRecap;
-
 import models.Contract;
+import models.Office;
 import models.Person;
 import models.PersonChildren;
 import models.User;
@@ -55,10 +50,6 @@ import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultGroup;
-import models.enumerate.AccountRole;
-
-import org.joda.time.LocalDate;
-
 import play.cache.Cache;
 
 /**
@@ -77,8 +68,7 @@ public class AbsenceService {
   private final EnumAllineator enumAllineator;
   private final ConfigurationManager confManager;
   private final SecureManager secureManager;
-  //TODO: da togliere
-  private final UserDao userDao;
+  private final ConfigurationManager configurationManager;
    
   /**
    * Costruttore injection.
@@ -89,14 +79,15 @@ public class AbsenceService {
    */
   @Inject
   public AbsenceService(
+      ConfigurationManager configurationManager,
       AbsenceEngineUtility absenceEngineUtility,
       ServiceFactories serviceFactories,
       AbsenceComponentDao absenceComponentDao,
       PersonChildrenDao personChildrenDao,
       ConfigurationManager confManager,
       SecureManager secureManager,
-      EnumAllineator enumAllineator,
-      UserDao userDao) {
+      EnumAllineator enumAllineator) {
+    this.configurationManager = configurationManager;
     this.absenceEngineUtility = absenceEngineUtility;
     this.serviceFactories = serviceFactories;
     this.absenceComponentDao = absenceComponentDao;
@@ -104,7 +95,6 @@ public class AbsenceService {
     this.confManager = confManager;
     this.secureManager = secureManager;
     this.enumAllineator = enumAllineator;
-    this.userDao = userDao;
   }
   
   /**
@@ -755,22 +745,12 @@ public class AbsenceService {
    * @return situazione
    */
   public VacationSituation buildVacationSituation(Contract contract, int year, 
-      GroupAbsenceType vacationGroup, Optional<LocalDate> residualDate, boolean cache, 
-      IVacationsService vacationsService) {
+      GroupAbsenceType vacationGroup, Optional<LocalDate> residualDate, boolean cache) {
 
     VacationSituation situation = new VacationSituation();
     situation.person = contract.person;
     situation.contract = contract;
     situation.year = year;
-
-    if (vacationsService != null) { 
-      Optional<VacationsRecap> vr = vacationsService.create(year, contract);
-      if (vr.isPresent()) {
-        situation.oldLastYear = new OldVacationSummary(vr.get().getVacationsLastYear());
-        situation.oldCurrentYear = new OldVacationSummary(vr.get().getVacationsCurrentYear());
-        situation.oldPermissions = new OldVacationSummary(vr.get().getPermissions());
-      }
-    }
 
     //La data target per il riepilogo contrattuale
     LocalDate date = vacationResidualDate(contract, residualDate, year);
@@ -907,5 +887,35 @@ public class AbsenceService {
       return residualDate.get();
     }
   }
-  
+
+  private LocalDate vacationsLastYearExpireDate(int year, Office office) {
+
+    MonthDay dayMonthExpiryVacationPastYear = (MonthDay)configurationManager
+        .configValue(office, EpasParam.EXPIRY_VACATION_PAST_YEAR, year); 
+
+    LocalDate expireDate = LocalDate.now()
+        .withYear(year)
+        .withMonthOfYear(dayMonthExpiryVacationPastYear.getMonthOfYear())
+        .withDayOfMonth(dayMonthExpiryVacationPastYear.getDayOfMonth());
+
+    return expireDate;
+  }
+
+  /**
+   * Se sono scadute le ferie per l'anno passato.
+   * @param year anno
+   * @param office data scadenza
+   * @return esito
+   */
+  public boolean isVacationsLastYearExpired(int year, Office office) {
+    LocalDate today = LocalDate.now();
+
+    LocalDate expireDate = vacationsLastYearExpireDate(year, office);
+    if (year < today.getYear()) {        //query anni passati
+      return true;
+    } else if (year == today.getYear() && today.isAfter(expireDate)) {    //query anno attuale
+      return true;
+    }
+    return false;
+  }
 }

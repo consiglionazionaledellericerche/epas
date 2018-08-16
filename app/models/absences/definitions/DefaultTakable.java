@@ -76,8 +76,9 @@ public enum DefaultTakable {
       -1, null),
 
   T_661(AmountType.minutes, 
-      ImmutableSet.of(DefaultAbsenceType.A_661M), 
-      ImmutableSet.of(DefaultAbsenceType.A_661M), 
+      ImmutableSet.of(DefaultAbsenceType.A_661MO, DefaultAbsenceType.A_661M, 
+          DefaultAbsenceType.A_661G), // taken (scala dal limite per lo storico)
+      ImmutableSet.of(DefaultAbsenceType.A_661M, DefaultAbsenceType.A_661G),  // takable
       1080, TakeAmountAdjustment.workingTimeAndWorkingPeriodPercent),
 
   T_89(AmountType.minutes, 
@@ -93,10 +94,15 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_09M), 
       ImmutableSet.of(DefaultAbsenceType.A_09M), 
       -1, null),
-  T_631(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_631), 
-      ImmutableSet.of(DefaultAbsenceType.A_631), 
-      -1, null),
+  
+  
+  T_631(AmountType.minutes, 
+      ImmutableSet.of(DefaultAbsenceType.A_631, // capire se considerare il vecchio 631 
+          DefaultAbsenceType.A_631G, 
+          DefaultAbsenceType.A_631M), 
+      ImmutableSet.of(DefaultAbsenceType.A_631G,
+          DefaultAbsenceType.A_631M), 
+      1080, TakeAmountAdjustment.workingTimePercent), // si riduce solo se partTime
 
   T_MISSIONE(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_92,
@@ -341,8 +347,8 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_62S50V, DefaultAbsenceType.A_ES_L133,
           DefaultAbsenceType.A_99, DefaultAbsenceType.A_65, DefaultAbsenceType.A_61,
           DefaultAbsenceType.A_16, DefaultAbsenceType.A_42, DefaultAbsenceType.A_93,
-          DefaultAbsenceType.A_417,
-          DefaultAbsenceType.A_406,
+          DefaultAbsenceType.A_418,
+          DefaultAbsenceType.A_408,
           DefaultAbsenceType.A_407, DefaultAbsenceType.A_50,
           DefaultAbsenceType.A_NC, DefaultAbsenceType.A_62, DefaultAbsenceType.A_35R,
           DefaultAbsenceType.A_96, DefaultAbsenceType.A_96A, DefaultAbsenceType.A_96B),
@@ -382,8 +388,8 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_62S50V, DefaultAbsenceType.A_ES_L133,
           DefaultAbsenceType.A_99, DefaultAbsenceType.A_65, DefaultAbsenceType.A_61,
           DefaultAbsenceType.A_16, DefaultAbsenceType.A_42, DefaultAbsenceType.A_93,
-          DefaultAbsenceType.A_417,
-          DefaultAbsenceType.A_406,
+          DefaultAbsenceType.A_418,
+          DefaultAbsenceType.A_408,
           DefaultAbsenceType.A_407, DefaultAbsenceType.A_50,
           DefaultAbsenceType.A_NC, DefaultAbsenceType.A_62, DefaultAbsenceType.A_35R,
           DefaultAbsenceType.A_96, DefaultAbsenceType.A_96A, DefaultAbsenceType.A_96B),
@@ -429,11 +435,17 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_9599B, 
           DefaultAbsenceType.A_9591, DefaultAbsenceType.A_9599, DefaultAbsenceType.A_95041E,
           DefaultAbsenceType.A_9505, DefaultAbsenceType.A_95042E, DefaultAbsenceType.A_95043E, 
-          DefaultAbsenceType.A_9504, DefaultAbsenceType.A_95053, DefaultAbsenceType.A_58), 
+          DefaultAbsenceType.A_9504, DefaultAbsenceType.A_95053, DefaultAbsenceType.A_58,
+          DefaultAbsenceType.A_95051S, DefaultAbsenceType.A_95052S, DefaultAbsenceType.A_95053S,
+          DefaultAbsenceType.A_95054S, DefaultAbsenceType.A_95055S, DefaultAbsenceType.A_95056S,
+          DefaultAbsenceType.A_95057S),       
       ImmutableSet.of(DefaultAbsenceType.A_9599B,
           DefaultAbsenceType.A_9591, DefaultAbsenceType.A_9599, DefaultAbsenceType.A_95041E,
           DefaultAbsenceType.A_9505, DefaultAbsenceType.A_95042E, DefaultAbsenceType.A_95043E, 
-          DefaultAbsenceType.A_9504, DefaultAbsenceType.A_95053, DefaultAbsenceType.A_58), 
+          DefaultAbsenceType.A_9504, DefaultAbsenceType.A_95053, DefaultAbsenceType.A_58,
+          DefaultAbsenceType.A_95051S, DefaultAbsenceType.A_95052S, DefaultAbsenceType.A_95053S,
+          DefaultAbsenceType.A_95054S, DefaultAbsenceType.A_95055S, DefaultAbsenceType.A_95056S,
+          DefaultAbsenceType.A_95057S), 
       -1, null),
   
   T_MALATTIA_3_ANNI(AmountType.units,

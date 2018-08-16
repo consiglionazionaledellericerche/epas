@@ -40,7 +40,7 @@ public class PersonDaysTest extends UnitTest {
   public static StampTypes serviceST = StampTypes.MOTIVI_DI_SERVIZIO;
   
   public static PersonDayManager personDayManager = new PersonDayManager(
-      null, null, null, null, null, null);
+      null, null, null, null, null, null, null);
   
   /**
    * Test su un giorno Normale.
@@ -60,8 +60,9 @@ public class PersonDaysTest extends UnitTest {
     PersonDay previousForProgressive = new PersonDay(person, first, 0, 0, 60);
     
     personDayManager.updateTimeAtWork(personDay, normalDay(), false, 
-        startLunch, endLunch, startWork, endWork);
-    personDayManager.updateDifference(personDay, normalDay(), false);
+        startLunch, endLunch, startWork, endWork, Optional.absent());
+    personDayManager.updateDifference(personDay, normalDay(), false,
+        startLunch, endLunch, startWork, endWork, Optional.absent());
     personDayManager.updateProgressive(personDay, Optional.fromNullable(previousForProgressive));
     
     org.assertj.core.api.Assertions.assertThat(
@@ -93,7 +94,7 @@ public class PersonDaysTest extends UnitTest {
     personDay.setStampings(stampings);
     
     personDayManager.updateTimeAtWork(personDay, normalDay(), false, 
-        startLunch, endLunch, startWork, endWork);
+        startLunch, endLunch, startWork, endWork, Optional.absent());
     
     org.assertj.core.api.Assertions.assertThat(
         personDay.getTimeAtWork()).isEqualTo(420);   //7:00 ore
@@ -171,7 +172,7 @@ public class PersonDaysTest extends UnitTest {
     personDay.setStampings(stampings);
     
     personDayManager.updateTimeAtWork(personDay, normalDay(), false, 
-        startLunch, endLunch, startWork, endWork);
+        startLunch, endLunch, startWork, endWork, Optional.absent());
     
     org.assertj.core.api.Assertions.assertThat(
         personDay.getTimeAtWork()).isEqualTo(420);     //7:00 ore
@@ -195,7 +196,7 @@ public class PersonDaysTest extends UnitTest {
     personDay.setStampings(stampings);
     
     personDayManager.updateTimeAtWork(personDay, normalDay(), false, 
-        startLunch, endLunch, startWork, endWork);
+        startLunch, endLunch, startWork, endWork, Optional.absent());
     
     org.assertj.core.api.Assertions.assertThat(
         personDay.getTimeAtWork()).isEqualTo(420);     //7:00 ore

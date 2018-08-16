@@ -1,32 +1,28 @@
 package absences;
 
+import java.util.List;
+
+import org.joda.time.LocalDate;
+import org.junit.Test;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import dao.absences.AbsenceComponentDao;
-
 import db.h2support.H2Examples;
 import db.h2support.base.H2AbsenceSupport;
-
 import injection.StaticInject;
-
-import java.util.List;
-
+import manager.services.absences.AbsenceEngineUtility;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.ServiceFactories;
-
 import models.Person;
 import models.absences.Absence;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
-
-import org.joda.time.LocalDate;
-import org.junit.Test;
-
 import play.test.UnitTest;
 
 
@@ -42,6 +38,9 @@ public class Absences661Test extends UnitTest {
   public static final LocalDate FERIAL_1_2016 = new LocalDate(2016, 11, 7); //lun
   public static final LocalDate FERIAL_2_2016 = new LocalDate(2016, 11, 8); //mar
   public static final LocalDate FERIAL_3_2016 = new LocalDate(2016, 11, 9); //mer
+  
+  public static final LocalDate BEGIN_2018 = new LocalDate(2018, 1, 1);
+  public static final LocalDate FERIAL_1_2018 = new LocalDate(2018, 8, 6); //lun
   
   @Inject 
   private static H2Examples h2Examples;
@@ -80,7 +79,7 @@ public class Absences661Test extends UnitTest {
     assertEquals(periodChain.periods.get(0).getPeriodTakableAmount(), 1080);
     
     //creare le assenze da considerare
-    Absence absence1 = h2AbsenceSupport.absenceInstance(DefaultAbsenceType.A_661M, 
+    Absence absence1 = h2AbsenceSupport.absenceInstance(DefaultAbsenceType.A_661MO, 
         FERIAL_1_2016, Optional.of(JustifiedTypeName.specified_minutes), 80);
     Absence absence2 = h2AbsenceSupport.absenceInstance(DefaultAbsenceType.A_661H1, 
         FERIAL_1_2016, Optional.of(JustifiedTypeName.nothing), 0);
@@ -88,7 +87,7 @@ public class Absences661Test extends UnitTest {
     List<Absence> groupPersistedAbsences = Lists.newArrayList(absence1, absence2);
     
     //creare la assenza da inserire
-    Absence toInsert = h2AbsenceSupport.absenceInstance(DefaultAbsenceType.A_661M, 
+    Absence toInsert = h2AbsenceSupport.absenceInstance(DefaultAbsenceType.A_661MO, 
         FERIAL_3_2016, Optional.of(JustifiedTypeName.specified_minutes), 40);
     
     serviceFactories.buildPeriodChainPhase2(periodChain, toInsert, 
@@ -158,6 +157,35 @@ public class Absences661Test extends UnitTest {
     //Si parte dai 542 di prima ottenuti lavorando 184 giorni, ridotti al 50 % 
     assertEquals(periodChain.periods.get(0).getPeriodTakableAmount(), 271);
 
+    
+  }
+  
+  /**
+   * Quando il mio orario di lavoro è 7:12 la conversione del 661G deve essere 6 ore.
+   */
+  @Test
+  public void sixHourRule() {
+    
+    absenceService.enumInitializator();
+    
+    //creare la persona con orario normale (7:12)
+    Person person = h2Examples.normalEmployee(BEGIN_2016, Optional.absent());
+    
+    // persisto una assenza di tipo 661G
+    h2AbsenceSupport.absence(DefaultAbsenceType.A_661G, FERIAL_1_2018, Optional.absent(), 0, person);
+    
+    // eseguo lo scanner
+    absenceService.scanner(person, BEGIN_2018);
+    
+    //fetch del gruppo
+    GroupAbsenceType group661 = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_661.name()).get();
+    
+    // calcolo la situazione residuale
+    PeriodChain residual = absenceService.residual(person, group661, BEGIN_2018);
+
+    // le ore consumate devono essere 360
+    assertEquals(residual.periods.iterator().next().getPeriodTakenAmount(), 360);
     
   }
   
