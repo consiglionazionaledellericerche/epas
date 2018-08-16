@@ -15,6 +15,7 @@ public enum AbsenceRequestEventType {
   OFFICE_HEAD_APPROVAL,
   OFFICE_HEAD_REFUSAL,
   COMPLETE,
+  EPAS_REFUSAL,
   DELETE,
   EXPIRING;
 }

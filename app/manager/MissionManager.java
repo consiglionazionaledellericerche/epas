@@ -237,7 +237,7 @@ public class MissionManager {
     absenceForm =
         absenceService.buildAbsenceForm(body.person, from.toLocalDate(), tab,
             to.toLocalDate(), null, type, false, mission, 
-            justifiedType, hours, minutes, false);
+            justifiedType, hours, minutes, false, false);
     InsertReport insertReport = 
         absenceService.insert(body.person, absenceForm.groupSelected, from.toLocalDate(), 
             to.toLocalDate(), mission, absenceForm.justifiedTypeSelected, 
@@ -326,7 +326,7 @@ public class MissionManager {
     AbsenceForm absenceForm =
         absenceService.buildAbsenceForm(body.person, body.dataInizio.toLocalDate(), 
             categoryTab, body.dataFine.toLocalDate(), null, 
-            groupAbsenceType, false, absenceType, justifiedType, hours, minutes, false);
+            groupAbsenceType, false, absenceType, justifiedType, hours, minutes, false, false);
     return absenceForm;
   }
 

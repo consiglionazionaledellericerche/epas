@@ -520,7 +520,7 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(from);
     
     AbsenceForm absenceForm = absenceService.buildAbsenceForm(person, from, null,
-            null, null, null, true, null, null, null, null, false);
+            null, null, null, true, null, null, null, null, false, false);
     
     //La lista di tutti i codici takable... con associato il gruppo con maggiore priorità.
     Set<AbsenceType> allTakable = Sets.newHashSet();
@@ -568,7 +568,7 @@ public class AbsenceGroups extends Controller {
     AbsenceForm absenceForm =
         absenceService.buildAbsenceForm(person, from, categoryTab,
             to, recoveryDate, groupAbsenceType, switchGroup, absenceType, 
-            justifiedType, hours, minutes, false);
+            justifiedType, hours, minutes, false, false);
 
     InsertReport insertReport = absenceService.insert(person,
         absenceForm.groupSelected,
@@ -607,7 +607,7 @@ public class AbsenceGroups extends Controller {
     
     AbsenceForm absenceForm =
         absenceService.buildAbsenceForm(person, from, null,
-            null, null, groupAbsenceType, false, absenceType, null, null, null, false);
+            null, null, groupAbsenceType, false, absenceType, null, null, null, false, false);
 
     InsertReport insertReport = absenceService.insert(person,
         absenceForm.groupSelected,
