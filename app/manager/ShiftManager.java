@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import javax.inject.Inject;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.services.PairStamping;
 import models.CertificatedData;
@@ -923,13 +924,9 @@ public class ShiftManager {
       LocalDate dateToRemove = new LocalDate(year, month, dayToRemove);
       log.trace("Eseguo la cancellazione del giorno {}", dateToRemove);
 
-      int cancelled =
-          JPA.em().createQuery(
-              "DELETE FROM PersonShiftDay WHERE shiftType = :shiftType AND date = :dateToRemove)")
-              .setParameter("shiftType", shiftType)
-              .setParameter("dateToRemove", dateToRemove)
-              .executeUpdate();
-      if (cancelled == 1) {
+      val personShiftDayToDelete = personShiftDayDao.byTypeAndDate(shiftType, dateToRemove);
+      if (personShiftDayToDelete.isPresent()) {
+        personShiftDayToDelete.get().delete();
         log.info("Rimosso turno di tipo {} del giorno {}", shiftType.description, dateToRemove);
       }
     }
