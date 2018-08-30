@@ -38,6 +38,7 @@ import models.PersonReperibilityType;
 import models.PersonShiftDay;
 import models.PersonShiftShiftType;
 import models.ReperibilityTypeMonth;
+import models.Role;
 import models.ShiftType;
 import models.ShiftTypeMonth;
 import models.User;
@@ -96,21 +97,23 @@ public class ReperibilityManager2 {
     if (person != null) {
       if (!person.reperibilityTypes.isEmpty()) {
         activities.addAll(person.reperibilityTypes.stream()
-
             .sorted(Comparator.comparing(o -> o.description))
             .collect(Collectors.toList()));
-
       }
-
       if (!person.reperibilities.isEmpty()) {
-        activities.addAll(person.reperibilities.stream()
-            
+        activities.addAll(person.reperibilities.stream()            
             .collect(Collectors.toList()));
       }
       if (!person.reperibility.isEmpty()) {
         for (PersonReperibility rep : person.reperibility) {
           activities.add(rep.personReperibilityType);
         }        
+      }
+      if (currentUser.hasRoles(Role.PERSONNEL_ADMIN)) {
+        activities.addAll(currentUser.usersRolesOffices.stream()
+            .flatMap(uro -> uro.office.personReperibilityTypes.stream().filter(prt -> !prt.disabled)
+                .sorted(Comparator.comparing(o -> o.description)))
+                .collect(Collectors.toList()));
       }
     } else {
       if (currentUser.isSystemUser()) {
