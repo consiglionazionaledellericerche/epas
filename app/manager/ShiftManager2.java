@@ -46,6 +46,7 @@ import models.PersonShift;
 import models.PersonShiftDay;
 import models.PersonShiftDayInTrouble;
 import models.PersonShiftShiftType;
+import models.Role;
 import models.ShiftTimeTable;
 import models.ShiftType;
 import models.ShiftTypeMonth;
@@ -127,6 +128,13 @@ public class ShiftManager2 {
             .map(psst -> psst.shiftType).filter(sc -> !sc.shiftCategories.disabled)
             .sorted(Comparator.comparing(o -> o.type))
             .collect(Collectors.toList()));
+      }
+      if (currentUser.hasRoles(Role.PERSONNEL_ADMIN)) {
+        activities.addAll(currentUser.usersRolesOffices.stream()
+            .flatMap(uro -> uro.office.shiftCategories.stream().filter(st -> !st.disabled)
+                .flatMap(shiftCategories -> shiftCategories.shiftTypes.stream())
+                .sorted(Comparator.comparing(o -> o.type)))
+                .collect(Collectors.toList()));
       }
     } else {
       if (currentUser.isSystemUser()) {
