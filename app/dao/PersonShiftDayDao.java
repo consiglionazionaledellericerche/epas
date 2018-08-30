@@ -129,6 +129,20 @@ public class PersonShiftDayDao extends DaoBase {
         .singleResult(shiftDay));
   }
 
+  /**
+   *
+   * @param shiftType
+   * @param person
+   * @return
+   */
+  public Optional<PersonShiftDay> byTypeAndDate(ShiftType shiftType, LocalDate date) {
+    final QPersonShiftDay shiftDay = QPersonShiftDay.personShiftDay;
+
+    return Optional.fromNullable(getQueryFactory().from(shiftDay)
+        .where(shiftDay.shiftType.eq(shiftType).and(shiftDay.date.eq(date)))
+        .singleResult(shiftDay));
+  }
+  
   public long countByPersonAndDate(Person person, LocalDate date) {
 
     final QPersonShiftDay shiftDay = QPersonShiftDay.personShiftDay;
