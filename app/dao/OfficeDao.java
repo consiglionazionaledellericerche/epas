@@ -225,5 +225,11 @@ public class OfficeDao extends DaoBase {
     final JPQLQuery query = queryFactory.from(institute).where(institute.id.eq(id));
     return Optional.fromNullable(query.singleResult(institute));
   }
+  
+  public List<Office> byInstitute(Institute institute) {
+    final QOffice office = QOffice.office;
+    final JPQLQuery query = queryFactory.from(office).where(office.institute.eq(institute));
+    return query.list(office);
+  }
 
 }
