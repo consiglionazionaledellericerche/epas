@@ -279,6 +279,14 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_11R9,
           DefaultAbsenceType.A_11S), 
       -1, null),
+  
+  T_VISITE_MEDICHE_TERAPIE(AmountType.units,
+      ImmutableSet.of(DefaultAbsenceType.A_111VM, 
+      DefaultAbsenceType.A_119VM, 
+      DefaultAbsenceType.A_115VM),
+      ImmutableSet.of(DefaultAbsenceType.A_111VM, 
+      DefaultAbsenceType.A_119VM, 
+      DefaultAbsenceType.A_115VM), -1, null),
 
   T_MALATTIA_FIGLIO_1(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_12, DefaultAbsenceType.A_13, DefaultAbsenceType.A_14), 
