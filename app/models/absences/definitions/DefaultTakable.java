@@ -484,7 +484,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_54L230, DefaultAbsenceType.A_50,
           //DefaultAbsenceType.A_34,
           //DefaultAbsenceType.A_17C,
-          DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C17), 
+          DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C18), 
       ImmutableSet.of(
           DefaultAbsenceType.A_24, DefaultAbsenceType.A_24H7,
           DefaultAbsenceType.A_25, DefaultAbsenceType.A_25H7,
@@ -495,7 +495,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_54L230, DefaultAbsenceType.A_50,
           //DefaultAbsenceType.A_34,
           //DefaultAbsenceType.A_17C,
-          DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C17), 
+          DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C18), 
       -1, null),
   
   T_RIPOSI_CNR_ATTESTATI(AmountType.units, 
