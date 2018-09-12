@@ -20,7 +20,7 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 
 import javax.inject.Inject;
-
+import lombok.extern.slf4j.Slf4j;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
@@ -36,6 +36,7 @@ import play.mvc.With;
 
 import security.SecurityRules;
 
+@Slf4j
 @With(Resecure.class)
 public class PersonDays extends Controller {
 
@@ -54,6 +55,9 @@ public class PersonDays extends Controller {
    */
   @BasicAuth
   public static void getDaySituation(String email, LocalDate date) {
+    if (email == null || date == null) {
+      notFound();
+    }
     Person person = personDao.byEmail(email).orNull();
 
     if (person == null) {
@@ -79,15 +83,16 @@ public class PersonDays extends Controller {
    */
   @BasicAuth
   public static void getMonthSituation(String email, int month, int year) {
+    if (email == null || month == 0 || year == 0) {
+      notFound();
+    }
     Person person = personDao.byEmail(email).orNull();
+    
     if (person == null) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
               + "mail cnr che serve per la ricerca.");
     }
-    if (Security.getUser().get().person.id != person.id) {
-      JsonResponse.badRequest("Le informazioni richieste non sono relative"
-              + " alla persona loggata");
-    }
+
     /**
      * TODO: capire perchè mi dà granted all'utilizzo del metodo nonostante
      * la drools (probabilmente scritta male, da capire meglio).
