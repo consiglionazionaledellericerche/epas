@@ -7,6 +7,7 @@ import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
 import controllers.Security;
+import injection.AutoRegister;
 import java.util.Map;
 import models.User;
 import org.drools.KnowledgeBase;
@@ -17,6 +18,7 @@ import play.mvc.Http;
  *
  * @author marco
  */
+@AutoRegister
 public class SecurityModule implements Module {
 
   public static final String REMOTE_ADDRESS = "request.remoteAddress";
