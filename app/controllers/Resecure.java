@@ -16,7 +16,7 @@ import security.SecurityRules;
  *
  * @author marco
  */
-@With({RequestInit.class, LogEnhancer.class})
+@With({RequestInit.class, LogEnhancer.class, Metrics.class})
 public class Resecure extends Controller {
 
   public static final String OFFICE_COUNT = "officeCount";
