@@ -2,38 +2,26 @@ package controllers.rest;
 
 import cnr.sync.dto.PersonDayDto;
 import cnr.sync.dto.PersonMonthDto;
-
 import com.google.common.base.Optional;
-
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
-import controllers.Security;
-
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperFactory;
-
 import helpers.JsonResponse;
-
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
-
 import javax.inject.Inject;
-
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
 import models.absences.Absence;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 @With(Resecure.class)
@@ -54,6 +42,9 @@ public class PersonDays extends Controller {
    */
   @BasicAuth
   public static void getDaySituation(String email, LocalDate date) {
+    if (email == null || date == null) {
+      notFound();
+    }
     Person person = personDao.byEmail(email).orNull();
 
     if (person == null) {
@@ -79,15 +70,16 @@ public class PersonDays extends Controller {
    */
   @BasicAuth
   public static void getMonthSituation(String email, int month, int year) {
+    if (email == null || month == 0 || year == 0) {
+      notFound();
+    }
     Person person = personDao.byEmail(email).orNull();
+    
     if (person == null) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
               + "mail cnr che serve per la ricerca.");
     }
-    if (Security.getUser().get().person.id != person.id) {
-      JsonResponse.badRequest("Le informazioni richieste non sono relative"
-              + " alla persona loggata");
-    }
+
     /**
      * TODO: capire perchè mi dà granted all'utilizzo del metodo nonostante
      * la drools (probabilmente scritta male, da capire meglio).
