@@ -534,7 +534,6 @@ when
        ), target == null, granted == false)
 then
  $c.grant();
- System.out.println("PermissionCheck = " + $c);
 end
 
 rule personInCharge
