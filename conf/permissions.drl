@@ -92,6 +92,19 @@ then
  $c.grant();
 end
 
+/*
+ *	Azioni eseguibili dagli impiegati per visualizzare la propria situazione via REST.
+ */
+rule canEmployeeAccessOwnRestInfo
+when
+  $p: Person() from currentOperator.person
+  $c: PermissionCheck(action in (
+  		"rest.PersonDays.getMonthSituation", "rest.PersonDays.getDaySituation"), 
+  		granted == false, target == $p)
+then
+ $c.grant();
+end
+
 /*Questa parte per il nuovo ruolo supervisore dei turni */
 rule isShiftSupervisor_generic
 when 
