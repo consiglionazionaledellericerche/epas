@@ -61,7 +61,6 @@ public class Clocks extends Controller {
 
   @NoCheck
   public static void show() {
-    long begin = System.currentTimeMillis();
     LocalDate data = new LocalDate();
 
     final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
@@ -82,9 +81,7 @@ public class Clocks extends Controller {
 
     List<Person> personList =
         personDao.list(Optional.<String>absent(), offices, false, data, data, true).list();
-    long end = System.currentTimeMillis();
-    long duration = end-begin;
-    log.info("Caricata la schermata di timbratura web in {} millisecondi", duration);
+    
     render(data, personList);
   }
 
@@ -182,7 +179,7 @@ public class Clocks extends Controller {
 
     final User user = Security.getUser().get();
     
-    log.info("Chiamato inserimento timbratura web per {}", user.person.fullName());
+    log.debug("Chiamato inserimento timbratura web per {}", user.person.fullName());
     final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
         .split(Http.Request.current().remoteAddress));
 
