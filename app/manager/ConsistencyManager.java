@@ -264,7 +264,6 @@ public class ConsistencyManager {
     final Person person = personDao.fetchPersonForComputation(personId, Optional.fromNullable(from),
         Optional.<LocalDate>absent());
     
-    log.info("Lanciato Consistency Manager per {}", person.getFullname());
     log.debug("Lanciato aggiornamento situazione {} da {} a oggi", person.getFullname(), from);
 
     if (person.qualification == null) {
