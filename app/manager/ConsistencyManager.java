@@ -326,14 +326,11 @@ public class ConsistencyManager {
 
       log.trace("... ricalcolo dei giorni lavorativi conclusa.");
     }
-    
-    
-    // (3) Ricalcolo dei residui per mese
         
+    // (3) Ricalcolo dei residui per mese        
     populateContractMonthRecapByPerson(person, new YearMonth(from));
 
     // (4) Scan degli errori sulle assenze
-    log.info("Iniziato scanner assenze");
     absenceService.scanner(person, from);
     
     // (5) Empty vacation cache and async recomputation
