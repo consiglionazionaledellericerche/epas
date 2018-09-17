@@ -10,7 +10,7 @@ import dao.OfficeDao;
 import dao.PersonDao;
 
 import it.cnr.iit.epas.NullStringBinder;
-
+import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Set;
 
@@ -42,6 +42,7 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
 
+@Slf4j
 @With(Resecure.class)
 public class Clocks extends Controller {
 
@@ -60,7 +61,7 @@ public class Clocks extends Controller {
 
   @NoCheck
   public static void show() {
-
+    long begin = System.currentTimeMillis();
     LocalDate data = new LocalDate();
 
     final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
@@ -81,6 +82,9 @@ public class Clocks extends Controller {
 
     List<Person> personList =
         personDao.list(Optional.<String>absent(), offices, false, data, data, true).list();
+    long end = System.currentTimeMillis();
+    long duration = end-begin;
+    log.info("Caricata la schermata di timbratura web in {} millisecondi", duration);
     render(data, personList);
   }
 
@@ -125,8 +129,9 @@ public class Clocks extends Controller {
   public static void daySituation() {
     // Se non e' presente lo user in sessione non posso accedere al metodo per via della resecure,
     // Quindi non dovrebbe mai accadere di avere a questo punto uno user null.
+    long begin = System.currentTimeMillis();
     User user = Security.getUser().orNull();
-
+    log.info("Richiesta daySituation della timbratura web per {}", user.person.fullName());
     final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
         .split(Http.Request.current().remoteAddress));
 
@@ -147,6 +152,10 @@ public class Clocks extends Controller {
 
     PersonStampingDayRecap dayRecap = stampingDayRecapFactory
         .create(personDay, numberOfInOut, true, Optional.<List<Contract>>absent());
+    long end = System.currentTimeMillis();
+    long duration = end-begin;
+    log.info("Fine richiesta daySituation della timbratura web per {}. Eseguita in: {} millisecondi", 
+        user.person.fullName(), duration);
 
     render(user, dayRecap, numberOfInOut);
 
@@ -176,7 +185,8 @@ public class Clocks extends Controller {
       @As(binder = NullStringBinder.class) String note) {
 
     final User user = Security.getUser().get();
-
+    
+    log.info("Chiamato inserimento timbratura web per {}", user.person.fullName());
     final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
         .split(Http.Request.current().remoteAddress));
 
