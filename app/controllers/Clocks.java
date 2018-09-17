@@ -128,7 +128,6 @@ public class Clocks extends Controller {
     // Quindi non dovrebbe mai accadere di avere a questo punto uno user null.
     
     User user = Security.getUser().orNull();
-    log.info("Richiesta daySituation della timbratura web per {}", user.person.fullName());
     final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
         .split(Http.Request.current().remoteAddress));
 
@@ -178,8 +177,7 @@ public class Clocks extends Controller {
       @As(binder = NullStringBinder.class) String note) {
 
     final User user = Security.getUser().get();
-    
-    log.debug("Chiamato inserimento timbratura web per {}", user.person.fullName());
+        
     final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
         .split(Http.Request.current().remoteAddress));
 
