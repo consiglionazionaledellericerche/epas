@@ -8,9 +8,9 @@ import play.mvc.With;
 
 /**
  * Accesso alle metriche in stile Prometheus.
- *
+ * 
  * @author marco
- *
+ # @see https://github.com/besmartbeopen/play1-base
  */
 @With(MetricsProbe.class)
 public class Metrics extends Controller {

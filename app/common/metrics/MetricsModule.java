@@ -27,9 +27,9 @@ import play.db.jpa.JPA;
 
 /**
  * Configurazione del sistema di metriche.
- *
+ * 
  * @author marco
- *
+ # @see https://github.com/besmartbeopen/play1-base
  */
 @AutoRegister
 public class MetricsModule extends AbstractModule {

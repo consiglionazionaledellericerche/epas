@@ -21,7 +21,7 @@ import play.mvc.Controller;
  * Supporto alla sonda per le metriche sulle azioni dei controller.
  *
  * @author marco
- *
+ # @see https://github.com/besmartbeopen/play1-base
  */
 @StaticInject
 @Slf4j
