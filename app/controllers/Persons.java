@@ -113,7 +113,6 @@ public class Persons extends Controller {
 
     rules.checkIfPermitted(office);
 
-    log.info("Office selected = {}", office);
     List<Person> simplePersonList = personDao.listFetched(Optional.fromNullable(name),
         ImmutableSet.of(office), false, null, null, false).list();
 
