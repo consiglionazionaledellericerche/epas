@@ -15,12 +15,14 @@ import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
+import injection.AutoRegister;
 
-//import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 /**
+ * Impostazioni del mapper Jackson.
  * @author marco
  */
+@AutoRegister
 public class JacksonModule implements Module {
 
   public static final String FILTER = "filter";
@@ -33,6 +35,10 @@ public class JacksonModule implements Module {
             filter);
   }
 
+  /**
+   * Configura l'objectMapper e lo restiuisce.
+   * @return l'objectMapper configurato opportunamente.
+   */
   @Provides
   public ObjectMapper getObjectMapper() {
     ObjectMapper mapper = new ObjectMapper();

@@ -5,9 +5,7 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-
-import java.util.concurrent.locks.Lock;
+import injection.AutoRegister;
 
 /**
  * Fornisce l'accesso singleton ai lock dell'applicazione.
@@ -15,6 +13,7 @@ import java.util.concurrent.locks.Lock;
  * @author cristian
  *
  */
+@AutoRegister
 public class LockModule implements Module {
  
   private static int LOCK_POOL_SIZE = 1024;
