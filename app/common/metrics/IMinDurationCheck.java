@@ -7,7 +7,7 @@ import java.util.function.Predicate;
  * deve essere in nanosecondi.
  *
  * @author marco
- *
+ # @see https://github.com/besmartbeopen/play1-base
  */
 public interface IMinDurationCheck extends Predicate<Long> {
 }

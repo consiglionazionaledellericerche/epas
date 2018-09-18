@@ -14,7 +14,7 @@ import play.jobs.OnApplicationStart;
  * Avvia il calcolo delle metriche registrando tutte quelle configurate.
  *
  * @author marco
- *
+ * @see https://github.com/besmartbeopen/play1-base
  */
 @OnApplicationStart
 @Slf4j
