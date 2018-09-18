@@ -3,6 +3,7 @@ package dao;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
@@ -191,7 +192,7 @@ public final class PersonDao extends DaoBase {
         // Expression
         person);
 
-    fetchContracts(Optional.<Person>absent(), Optional.fromNullable(start),
+    fetchContracts(Sets.newHashSet(result.list()), Optional.fromNullable(start),
         Optional.fromNullable(end));
 
     return result;
@@ -767,7 +768,8 @@ public final class PersonDao extends DaoBase {
 
     Person person = query.singleResult(qperson);
 
-    fetchContracts(Optional.fromNullable(person), begin, end);
+    fetchContracts(Sets.newHashSet(person), begin, end);
+    
     // Fetch dei buoni pasto (non necessaria, una query)
     // Fetch dei personday
 
@@ -781,7 +783,7 @@ public final class PersonDao extends DaoBase {
    * Fetch di tutti dati dei contratti attivi nella finestra temporale specificata. Si può filtrare
    * su una specifica persona.
    */
-  private void fetchContracts(Optional<Person> person, Optional<LocalDate> start,
+  private void fetchContracts(Set<Person> person, Optional<LocalDate> start,
       Optional<LocalDate> end) {
 
 
@@ -792,8 +794,8 @@ public final class PersonDao extends DaoBase {
     QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
 
     final BooleanBuilder condition = new BooleanBuilder();
-    if (person.isPresent()) {
-      condition.and(contract.person.eq(person.get()));
+    if (!person.isEmpty()) {
+      condition.and(contract.person.in(person));
     }
     filterContract(condition, start, end);
 
@@ -812,10 +814,10 @@ public final class PersonDao extends DaoBase {
     // TODO 2: in realtà questo è opinabile. Anche i Set
     // sono semanticamente corretti. Decidere.
 
-    if (person.isPresent()) {
+    if (!person.isEmpty()) {
       // Fetch dei tipi orario associati ai contratti (verificare l'utilità)
       JPQLQuery query3 = getQueryFactory().from(cwtt).leftJoin(cwtt.workingTimeType, wtt).fetch()
-          .where(cwtt.contract.in(contracts)).distinct();
+          .where(cwtt.contract.in(contracts).and(cwtt.contract.person.in(person))).distinct();
       query3.list(cwtt);
     }
   }
