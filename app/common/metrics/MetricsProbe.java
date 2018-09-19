@@ -10,8 +10,8 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import models.User;
 import play.mvc.After;
 import play.mvc.Before;
@@ -53,7 +53,7 @@ public class MetricsProbe extends Controller {
     if (sample == null) {
       log.debug("no timer-probe on {}", request.action);
     } else {
-      val t = sample.stop(Timer.builder("http.requests")
+      val t = sample.stop(Timer.builder("http.server.requests")
           .description(null)
           .tag("action", request.action)
           //.publishPercentileHistogram(true)
