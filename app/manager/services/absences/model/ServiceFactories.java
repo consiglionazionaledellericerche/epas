@@ -652,6 +652,10 @@ public class ServiceFactories {
         && absence.justifiedMinutes >= 360) {
       genericErrors.addAbsenceWarning(absence, AbsenceProblem.Migration661);
     }
+    
+    if (absence.absenceType.isExpired(absence.getAbsenceDate())) {
+      genericErrors.addAbsenceError(absence, AbsenceProblem.Expired, absence);
+    }
 
     //TODO:
     // Strange weekend

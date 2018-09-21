@@ -589,7 +589,7 @@ public enum EpasParam {
     val cds = ImmutableSet.copyOf(
         Play.configuration.getProperty("permission.revoke.contract.stamp_profile.cds", "000")
           .split(","));
-    log.debug("revokedCds4StampProfilePermission = {}", cds);    
+    log.trace("revokedCds4StampProfilePermission = {}", cds);    
     return cds;
   }
 

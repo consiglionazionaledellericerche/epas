@@ -3,18 +3,18 @@ package helpers;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-
 import dao.PersonDao;
-
+import injection.AutoRegister;
 import lombok.extern.slf4j.Slf4j;
-
 import manager.attestati.service.CertificationService;
 import manager.attestati.service.CertificationsComunication;
 import manager.attestati.service.ICertificationService;
 
 /**
+ * Modulo per la gestione dei valori nella cache.
  * @author daniele.
  */
+@AutoRegister
 @Slf4j
 public class CacheModule extends AbstractModule {
   

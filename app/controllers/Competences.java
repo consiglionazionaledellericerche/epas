@@ -830,8 +830,9 @@ public class Competences extends Controller {
   public static void addReperibility(Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
+    List<Office> linkedOffices = officeDao.byInstitute(office.institute);
     rules.checkIfPermitted(office);
-    List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
+    List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(linkedOffices),
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
 
     render("@editReperibility", officePeople, office);
@@ -845,8 +846,9 @@ public class Competences extends Controller {
   public static void addShift(Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
+    List<Office> linkedOffices = officeDao.byInstitute(office.institute);
     rules.checkIfPermitted(office);
-    List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
+    List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(linkedOffices),
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
     boolean nuovo = true;
     render("@editShift", officePeople, office, nuovo);
@@ -942,8 +944,9 @@ public class Competences extends Controller {
   public static void editReperibility(Long reperibilityTypeId) {
     PersonReperibilityType type = reperibilityDao.getPersonReperibilityTypeById(reperibilityTypeId);
     Office office = type.office;
+    List<Office> linkedOffices = officeDao.byInstitute(office.institute);
     rules.checkIfPermitted(office);
-    List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
+    List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(linkedOffices),
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
 
     render(type, officePeople, office);
@@ -990,10 +993,10 @@ public class Competences extends Controller {
   public static void editShift(Long shiftCategoryId) {
     ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
     Office office = cat.office;
-
+    List<Office> linkedOffices = officeDao.byInstitute(office.institute);
     rules.checkIfPermitted(office);
     Map<ShiftType, List<PersonShiftShiftType>> map = Maps.newHashMap();
-    List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
+    List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(linkedOffices),
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
     cat.shiftTypes.forEach(item -> {
       List<PersonShiftShiftType> psstList = shiftDao

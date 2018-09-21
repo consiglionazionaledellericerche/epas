@@ -1,7 +1,9 @@
 package manager.services.mealtickets;
 
 import com.google.inject.AbstractModule;
+import injection.AutoRegister;
 
+@AutoRegister
 public class MealTicketsModule extends AbstractModule {
   
   @Override 
