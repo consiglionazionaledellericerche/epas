@@ -52,7 +52,10 @@ CREATE TABLE absence_request_events (
 	version INT DEFAULT 0
 );
 
-INSERT INTO roles (name, version) VALUES ('groupManager', 0); 
+INSERT INTO roles (name, version) VALUES ('groupManager', 0);
+
+-- Creo una nouva reviosione
+INSERT INTO revinfo (revtstmp) VALUES (EXTRACT(EPOCH FROM NOW())::BIGINT*1000);
 
 INSERT INTO roles_history (id, _revision, _revision_type, name) 
 SELECT id, (SELECT MAX(rev) AS rev FROM revinfo), 0, name  FROM roles WHERE name = 'groupManager';
@@ -74,4 +77,7 @@ ALTER TABLE persons DROP COLUMN is_person_in_charge;
 DROP TABLE absence_request_events;
 DROP TABLE absence_requests_history;
 DROP TABLE absence_requests;
+
+ALTER TABLE persons ADD COLUMN is_person_in_charge BOOLEAN DEFAULT FALSE;
+ALTER TABLE persons_history ADD COLUMN is_person_in_charge BOOLEAN DEFAULT FALSE;
 
