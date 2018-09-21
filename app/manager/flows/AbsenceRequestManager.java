@@ -118,7 +118,7 @@ public class AbsenceRequestManager {
     if (config.isManagerApprovalRequired() && person.personInCharge == null) {
       problems.add(
           String.format("Approvazione del responsabile richiesta. "
-              + "Il dipendente %s non ha impostato nessun responsabile.", person.getFullname())); 
+              + "Il dipendente %s non ha impostato nessun responsabile. Contattare l'ufficio del personale.", person.getFullname())); 
     }
 
     if (config.isAdministrativeApprovalRequired() 
@@ -126,7 +126,7 @@ public class AbsenceRequestManager {
             roleDao.getRoleByName(Role.PERSONNEL_ADMIN), person.office).isEmpty()) {
       problems.add(
           String.format("Approvazione dell'amministratore del personale richiesta. "
-              + "L'ufficio %s non ha impostato nessun amministratore del personale.",
+              + "L'ufficio %s non ha impostato nessun amministratore del personale. Contattare l'ufficio del personale.",
               person.office.getName())); 
     }
 
@@ -135,7 +135,7 @@ public class AbsenceRequestManager {
             roleDao.getRoleByName(Role.SEAT_SUPERVISOR), person.office).isEmpty()) {
       problems.add(
           String.format("Approvazione del responsabile di sede richiesta. "
-              + "L'ufficio %s non ha impostato nessun responsabile di sede.",
+              + "L'ufficio %s non ha impostato nessun responsabile di sede. Contattare l'ufficio del personale.",
               person.office.getName())); 
     }
     return problems;
