@@ -657,7 +657,8 @@ public class PersonDayManager {
     // in ogni caso nessun straordinario 
     for (Absence absence : personDay.absences) {
       if (absence.absenceType.getBehaviour(JustifiedBehaviourName.no_overtime).isPresent()) {
-        personDay.setDifference(0);
+        personDay.setDifference(Math.min(personDay.getDifference(), 0));
+        personDay.setTimeAtWork(Math.min(personDay.getTimeAtWork(), plannedWorkingTime));
         return;
       }
     }

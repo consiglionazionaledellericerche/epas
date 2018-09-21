@@ -95,6 +95,19 @@ then
  $c.grant();
 end
 
+/*
+ *	Azioni eseguibili dagli impiegati per visualizzare la propria situazione via REST.
+ */
+rule canEmployeeAccessOwnRestInfo
+when
+  $p: Person() from currentOperator.person
+  $c: PermissionCheck(action in (
+  		"rest.PersonDays.getMonthSituation", "rest.PersonDays.getDaySituation"), 
+  		granted == false, target == $p)
+then
+ $c.grant();
+end
+
 /*Questa parte per il nuovo ruolo supervisore dei turni */
 rule isShiftSupervisor_generic
 when 
@@ -268,7 +281,6 @@ when
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilityTypes
-  //$st: ShiftType() from $sc.shiftTypes
   $c: PermissionCheck(action in ("ReperibilityCalendar.show",
                                  "ReperibilityCalendar.reperibilityPeople",
                                  "ReperibilityCalendar.deleteReperibility",
@@ -289,7 +301,6 @@ when
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilityTypes
-  //$st: ShiftType() from $sc.shiftTypes
   $target: ReperibilityTypeMonth((!approved && personReperibilityType == $prt) || this == null)
   $c: PermissionCheck(action in ("ReperibilityCalendar.deleteReperibility",
   								 "ReperibilityCalendar.changeReperibility",
@@ -306,7 +317,6 @@ when
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilityTypes
-  //$st: ShiftType() from $sc.shiftTypes
   $target: ReperibilityTypeMonth(personReperibilityType == $prt)
   $c: PermissionCheck(action in ("ReperibilityCalendar.approveReperibilityInMonth",
   								 "ReperibilityCalendar.removeApprovation")
@@ -347,7 +357,6 @@ when
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilities
-  //$st: ShiftType() from $sc.shiftTypes
   $c: PermissionCheck(action in ("ReperibilityCalendar.show",
                                  "ReperibilityCalendar.reperibilityPeople",
                                  "ReperibilityCalendar.deleteReperibility",
@@ -367,7 +376,6 @@ when
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilities
-  //$st: ShiftType() from $sc.shiftTypes
   $target: ReperibilityTypeMonth((!approved && personReperibilityType == $prt) || this == null)
   $c: PermissionCheck(action in ("ReperibilityCalendar.deleteReperibility",
   								 "ReperibilityCalendar.changeReperibility",
@@ -413,6 +421,8 @@ then
 $c.grant();
 end
 
+
+
 /*Ruolo per vedere il calendario per i reperibili*/
 
 rule isAvailable_general
@@ -438,7 +448,6 @@ when
   	Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
 	$pr: PersonReperibility() from $p.reperibility
 	$prt: PersonReperibilityType() from $pr.personReperibilityType
-	//$st: ShiftType() from $psst.shiftType
 	$c: PermissionCheck(action in (
        "ReperibilityCalendar.show",
        "ReperibilityCalendar.reperibilityPeople",
@@ -1985,7 +1994,6 @@ when
  $abt: AbsenceType(code == "92") 
  $c: PermissionCheck(action == "Absences.overtimeMission", target == $abt, granted == false )
 then
- System.out.println("PUPPAREEEEEEEE: " + $abt);
  $c.grant();
 end
 

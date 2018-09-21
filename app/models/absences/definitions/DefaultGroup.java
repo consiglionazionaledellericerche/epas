@@ -135,6 +135,12 @@ public enum DefaultGroup {
       DefaultCategoryType.MALATTIA_DIPENDENTE, 0,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
       DefaultTakable.T_MALATTIA, null, null, false, false),
+  
+  VISITA_MEDICA_TERAPIE("Codici visita medica per terapie", 
+      "", 
+      DefaultCategoryType.VISITA_MEDICA_TERAPIE, 0,
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+      DefaultTakable.T_VISITE_MEDICHE_TERAPIE, null, null, false, false),
     
   MALATTIA_FIGLIO_1("12/13/14 - Malattia primo figlio", 
       "", 

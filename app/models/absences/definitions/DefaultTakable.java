@@ -99,7 +99,8 @@ public enum DefaultTakable {
   T_631(AmountType.minutes, 
       ImmutableSet.of(DefaultAbsenceType.A_631, // capire se considerare il vecchio 631 
           DefaultAbsenceType.A_631G, 
-          DefaultAbsenceType.A_631M), 
+          DefaultAbsenceType.A_631M,
+          DefaultAbsenceType.A_09M), 
       ImmutableSet.of(DefaultAbsenceType.A_631G,
           DefaultAbsenceType.A_631M), 
       1080, TakeAmountAdjustment.workingTimePercent), // si riduce solo se partTime
@@ -278,6 +279,14 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_11R9,
           DefaultAbsenceType.A_11S), 
       -1, null),
+  
+  T_VISITE_MEDICHE_TERAPIE(AmountType.units,
+      ImmutableSet.of(DefaultAbsenceType.A_111VM, 
+      DefaultAbsenceType.A_119VM, 
+      DefaultAbsenceType.A_115VM),
+      ImmutableSet.of(DefaultAbsenceType.A_111VM, 
+      DefaultAbsenceType.A_119VM, 
+      DefaultAbsenceType.A_115VM), -1, null),
 
   T_MALATTIA_FIGLIO_1(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_12, DefaultAbsenceType.A_13, DefaultAbsenceType.A_14), 
@@ -483,7 +492,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_54L230, DefaultAbsenceType.A_50,
           //DefaultAbsenceType.A_34,
           //DefaultAbsenceType.A_17C,
-          DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C17), 
+          DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C18), 
       ImmutableSet.of(
           DefaultAbsenceType.A_24, DefaultAbsenceType.A_24H7,
           DefaultAbsenceType.A_25, DefaultAbsenceType.A_25H7,
@@ -494,7 +503,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_54L230, DefaultAbsenceType.A_50,
           //DefaultAbsenceType.A_34,
           //DefaultAbsenceType.A_17C,
-          DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C17), 
+          DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C18), 
       -1, null),
   
   T_RIPOSI_CNR_ATTESTATI(AmountType.units, 
