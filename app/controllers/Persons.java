@@ -517,32 +517,40 @@ public class Persons extends Controller {
     render(people, person);
   }
 
-
+  /**
+   * TODO: da rivedere con la nuova implementazione dei gruppi
+   * @param peopleGroupId
+   * @param personId
+   */
   public static void confirmGroup(@Required List<Long> peopleGroupId, Long personId) {
     Person person = personDao.getPersonById(personId);
     Person p = null;
     for (Long id : peopleGroupId) {
-      p = personDao.getPersonById(id);
-      p.personInCharge = person;
-      p.save();
-      person.people.add(p);
+//      p = personDao.getPersonById(id);
+//      p.personInCharge = person;
+//      p.save();
+//      person.people.add(p);
     }
     person.save();
     flash.success("Aggiunte persone al gruppo di %s %s", person.name, person.surname);
     workGroup(person.id);
   }
 
+  /**
+   * TODO: da rivedere con la nuova implementazione dei gruppi
+   * @param pId
+   */
   public static void removePersonFromGroup(Long pId) {
 
     Person person = personDao.getPersonById(pId);
-    Person supervisor = personDao.getPersonInCharge(person);
-    person.personInCharge = null;
+//    Person supervisor = personDao.getPersonInCharge(person);
+//    person.personInCharge = null;
 
-    supervisor.save();
-    person.save();
-    flash.success("Rimosso %s %s dal gruppo di %s %s", person.name, person.surname, supervisor.name,
-        supervisor.surname);
-    workGroup(supervisor.id);
+//    supervisor.save();
+//    person.save();
+//    flash.success("Rimosso %s %s dal gruppo di %s %s", person.name, person.surname, supervisor.name,
+//        supervisor.surname);
+//    workGroup(supervisor.id);
   }
 
 }

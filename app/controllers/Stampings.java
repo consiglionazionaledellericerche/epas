@@ -568,7 +568,7 @@ public class Stampings extends Controller {
 
   /**
    * La presenza giornaliera del responsabile gruppo.
-   *
+   * TODO: da rivedere con la nuova implementazione dei gruppi   
    * @param year  anno
    * @param month mese
    * @param day   giorno
@@ -579,18 +579,18 @@ public class Stampings extends Controller {
 
     final User user = Security.getUser().get();
 
-    List<Person> people = user.person.people;
-    int numberOfInOut = stampingManager.maxNumberOfStampingsInMonth(date, people);
-
-    List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
-
-    daysRecap = stampingManager.populatePersonStampingDayRecapList(people, date, numberOfInOut);
+//    List<Person> people = user.person.people;
+//    int numberOfInOut = stampingManager.maxNumberOfStampingsInMonth(date, people);
+//
+//    List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
+//
+//    daysRecap = stampingManager.populatePersonStampingDayRecapList(people, date, numberOfInOut);
 
     //Per dire al template generico di non visualizzare i link di modifica e la tab di controllo
     boolean showLink = false;
     boolean groupView = true;
 
-    render("@dailyPresence", date, numberOfInOut, showLink, daysRecap, groupView);
+    render("@dailyPresence", date, /*numberOfInOut,*/ showLink, /*daysRecap,*/ groupView);
   }
 
 }

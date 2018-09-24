@@ -115,11 +115,11 @@ public class AbsenceRequestManager {
     val problems = Lists.<String>newArrayList();
     val config = getConfiguration(requestType, person);
 
-    if (config.isManagerApprovalRequired() && person.personInCharge == null) {
-      problems.add(
-          String.format("Approvazione del responsabile richiesta. "
-              + "Il dipendente %s non ha impostato nessun responsabile. Contattare l'ufficio del personale.", person.getFullname())); 
-    }
+//    if (config.isManagerApprovalRequired() && person.personInCharge == null) {
+//      problems.add(
+//          String.format("Approvazione del responsabile richiesta. "
+//              + "Il dipendente %s non ha impostato nessun responsabile. Contattare l'ufficio del personale.", person.getFullname())); 
+//    }
 
     if (config.isAdministrativeApprovalRequired() 
         && uroDao.getUsersWithRoleOnOffice(
@@ -274,11 +274,11 @@ public class AbsenceRequestManager {
         return Optional.of("Questa richiesta di assenza è già stata approvata "
             + "da parte del responsabile di gruppo.");
       }
-      if (!absenceRequest.person.personInCharge.equals(approver)) {
-        return Optional.of(
-            String.format("L'evento {} non può essere eseguito dal responsabile"
-                + " di gruppo {}", eventType, approver.getFullname()));
-      }
+//      if (!absenceRequest.person.personInCharge.equals(approver)) {
+//        return Optional.of(
+//            String.format("L'evento {} non può essere eseguito dal responsabile"
+//                + " di gruppo {}", eventType, approver.getFullname()));
+//      }
     }
 
     if (eventType == AbsenceRequestEventType.ADMINISTRATIVE_APPROVAL 
