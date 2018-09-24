@@ -59,14 +59,16 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final StringPath fullname = createString("fullname");
 
+    public final ListPath<models.flows.Group, models.flows.query.QGroup> groups = this.<models.flows.Group, models.flows.query.QGroup>createList("groups", models.flows.Group.class, models.flows.query.QGroup.class, PathInits.DIRECT2);
+
+    public final ListPath<models.flows.Group, models.flows.query.QGroup> groupsPeople = this.<models.flows.Group, models.flows.query.QGroup>createList("groupsPeople", models.flows.Group.class, models.flows.query.QGroup.class, PathInits.DIRECT2);
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 
     public final NumberPath<Integer> iId = createNumber("iId", Integer.class);
 
     public final SetPath<models.absences.InitializationGroup, models.absences.query.QInitializationGroup> initializationGroups = this.<models.absences.InitializationGroup, models.absences.query.QInitializationGroup>createSet("initializationGroups", models.absences.InitializationGroup.class, models.absences.query.QInitializationGroup.class, PathInits.DIRECT2);
-
-    public final BooleanPath isPersonInCharge = createBoolean("isPersonInCharge");
 
     public final ListPath<models.MealTicket, QMealTicket> mealTicketsAdmin = this.<models.MealTicket, QMealTicket>createList("mealTicketsAdmin", models.MealTicket.class, QMealTicket.class, PathInits.DIRECT2);
 
@@ -82,8 +84,6 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final StringPath othersSurnames = createString("othersSurnames");
 
-    public final ListPath<Person, QPerson> people = this.<Person, QPerson>createList("people", Person.class, QPerson.class, PathInits.DIRECT2);
-
     public final NumberPath<Long> perseoId = createNumber("perseoId", Long.class);
 
     //inherited
@@ -98,8 +98,6 @@ public class QPerson extends EntityPathBase<Person> {
     public final ListPath<models.PersonDay, QPersonDay> personDays = this.<models.PersonDay, QPersonDay>createList("personDays", models.PersonDay.class, QPersonDay.class, PathInits.DIRECT2);
 
     public final QPersonHourForOvertime personHourForOvertime;
-
-    public final QPerson personInCharge;
 
     public final ListPath<models.PersonMonthRecap, QPersonMonthRecap> personMonths = this.<models.PersonMonthRecap, QPersonMonthRecap>createList("personMonths", models.PersonMonthRecap.class, QPersonMonthRecap.class, PathInits.DIRECT2);
 
@@ -148,7 +146,6 @@ public class QPerson extends EntityPathBase<Person> {
         super(type, metadata, inits);
         this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
         this.personHourForOvertime = inits.isInitialized("personHourForOvertime") ? new QPersonHourForOvertime(forProperty("personHourForOvertime"), inits.get("personHourForOvertime")) : null;
-        this.personInCharge = inits.isInitialized("personInCharge") ? new QPerson(forProperty("personInCharge"), inits.get("personInCharge")) : null;
         this.qualification = inits.isInitialized("qualification") ? new QQualification(forProperty("qualification")) : null;
         this.user = inits.isInitialized("user") ? new QUser(forProperty("user"), inits.get("user")) : null;
     }

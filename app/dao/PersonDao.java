@@ -540,13 +540,14 @@ public final class PersonDao extends DaoBase {
 
 
   /**
+   * TODO: rivedere con la nuova implementazione dei gruppi
    * @return il responsabile per la persona passata come parametro.
    */
-  public Person getPersonInCharge(Person person) {
-    final QPerson qperson = QPerson.person;
-    final JPQLQuery query = getQueryFactory().from(qperson).where(qperson.people.contains(person));
-    return query.singleResult(qperson);
-  }
+//  public Person getPersonInCharge(Person person) {
+//    final QPerson qperson = QPerson.person;
+//    final JPQLQuery query = getQueryFactory().from(qperson).where(qperson.people.contains(person));
+//    return query.singleResult(qperson);
+//  }
 
   /**
    * Le persone attive della sede con il vecchio campo person.badgeNumber popolato.
@@ -602,7 +603,7 @@ public final class PersonDao extends DaoBase {
     if (start.isPresent()) {
       filterCompetenceCodeEnabled(condition, compCode, start.get());
     }    
-    filterPersonInCharge(condition, personInCharge);
+    //filterPersonInCharge(condition, personInCharge);
     filterOnlySynchronized(condition, onlySynchronized);
 
     return injectedQuery.where(condition);
@@ -656,7 +657,7 @@ public final class PersonDao extends DaoBase {
     if (start.isPresent()) {
       filterCompetenceCodeEnabled(condition, compCode, start.get());
     }    
-    filterPersonInCharge(condition, personInCharge);
+    //filterPersonInCharge(condition, personInCharge);
     filterOnlySynchronized(condition, onlySynchronized);
 
     return query.where(condition);
@@ -722,12 +723,17 @@ public final class PersonDao extends DaoBase {
     }
   }
 
-  private void filterPersonInCharge(BooleanBuilder condition, Optional<Person> personInCharge) {
-    if (personInCharge.isPresent()) {
-      final QPerson person = QPerson.person;
-      condition.and(person.personInCharge.eq(personInCharge.get()));
-    }
-  }
+  /**
+   * TODO: rivedere con la nuova implementazione dei gruppi
+   * @param condition
+   * @param personInCharge
+   */
+//  private void filterPersonInCharge(BooleanBuilder condition, Optional<Person> personInCharge) {
+//    if (personInCharge.isPresent()) {
+//      final QPerson person = QPerson.person;
+//      condition.and(person.personInCharge.eq(personInCharge.get()));
+//    }
+//  }
 
   private void filterOnlySynchronized(BooleanBuilder condition, boolean value) {
     if (value == true) {

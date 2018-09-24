@@ -30,6 +30,7 @@ import models.absences.InitializationGroup;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
+import models.flows.Group;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
@@ -117,21 +118,17 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   public boolean wantEmail;
 
   /**
-   * i successivi due campi servono per la nuova relazione tra Person e Person relativa ai
-   * responsabili.
+   * nuova relazione tra Person e Groups relativa ai responsabili e ai gruppi.
    */
-  @OneToMany(mappedBy = "personInCharge")
-  @OrderBy("surname")
-  public List<Person> people = Lists.newArrayList();
+  @ManyToMany(mappedBy = "people")
+  public List<Group> groups = Lists.newArrayList();
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "person_in_charge")
-  @Nullable
-  public Person personInCharge;
+  @OneToMany(mappedBy="manager")
+  public List<Group> groupsPeople = Lists.newArrayList();
 
 
   /**
-   * relazione con i turni.
+   * relazione con i turni e le reperibilità.
    */
   @OneToMany(mappedBy = "supervisor")
   public List<ShiftCategories> shiftCategories = Lists.newArrayList();
