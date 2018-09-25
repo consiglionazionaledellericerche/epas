@@ -104,6 +104,13 @@
         #{/if}
 		#{/if}
 		
+		*{Ruolo di responsabile di gruppo di lavoro}*
+		#{if currentUser.roles.contains(models.enumerate.AccountRole.DEVELOPER)
+			|| currentUser.roles.contains(models.enumerate.AccountRole.ADMIN)
+			|| currentUser.hasRoles(models.Role.GROUP_MANAGER)}
+		  #{include './groupMenu.html' /}	
+		#{/if}
+		
         *{ Ruoli di sistema e amministratori delle sedi }*
         #{if currentUser.roles.contains(models.enumerate.AccountRole.ADMIN) 
         	|| currentUser.roles.contains(models.enumerate.AccountRole.DEVELOPER) 

@@ -1,7 +1,9 @@
 package manager;
 
+import java.util.List;
 import javax.inject.Inject;
 import com.google.common.base.Optional;
+import dao.GroupDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
 import lombok.extern.slf4j.Slf4j;
@@ -15,11 +17,13 @@ public class GroupManager {
 
   private final RoleDao roleDao;
   private final UsersRolesOfficesDao uroDao;
+  private final GroupDao groupDao;
 
   @Inject
-  public GroupManager(RoleDao roleDao, UsersRolesOfficesDao uroDao) {
+  public GroupManager(RoleDao roleDao, UsersRolesOfficesDao uroDao, GroupDao groupDao) {
     this.roleDao = roleDao;
     this.uroDao = uroDao;
+    this.groupDao = groupDao;
   }
 
   /**
@@ -30,8 +34,12 @@ public class GroupManager {
    * @param uro l'user role office da creare
    */
   public void createManager(Office office, Group group, UsersRolesOffices uro) {
-
     Role role = roleDao.getRoleByName(Role.GROUP_MANAGER);
+    Optional<UsersRolesOffices> uroPresent = 
+        uroDao.getUsersRolesOffices(group.manager.user, role, group.manager.office);
+    if (uroPresent.isPresent()) {
+      return;
+    }
     uro.office = office;
     uro.role = role;
     uro.user = group.manager.user;
@@ -47,6 +55,12 @@ public class GroupManager {
    */
   public boolean deleteManager(Group group) {
     Role role = roleDao.getRoleByName(Role.GROUP_MANAGER);
+    List<Group> managerGroups = groupDao.groupsByManager(Optional.fromNullable(group.manager));
+    if (managerGroups.size() > 1) {
+      log.debug("Non elimino il ruolo perchè {} ha almeno un altro gruppo su cui è responsabile", 
+          group.manager.fullName());
+      return true;
+    }
     Optional<UsersRolesOffices> uro = 
         uroDao.getUsersRolesOffices(group.manager.user, role, group.manager.office);
     if (uro.isPresent()) {

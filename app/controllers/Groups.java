@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
+import org.testng.collections.Lists;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import dao.GroupDao;
@@ -45,6 +46,11 @@ public class Groups extends Controller {
   @Inject
   private static GroupManager groupManager;
 
+  /**
+   * Metodo che crea il gruppo.
+   * @param group il gruppo da creare
+   * @param office la sede su cui crearlo
+   */
   public static void createGroup(@Valid Group group, Office office) {
 
     if (Validation.hasErrors()) {
@@ -63,6 +69,10 @@ public class Groups extends Controller {
     showGroups(office.id);
   }
 
+  /**
+   * Metodo che cancella il gruppo.
+   * @param groupId id del gruppo da cancellare
+   */
   public static void deleteGroup(long groupId) {
     final Group group = Group.findById(groupId);
     notFoundIfNull(group);
@@ -81,6 +91,10 @@ public class Groups extends Controller {
     showGroups(group.manager.office.id);
   }
 
+  /**
+   * Metodo che mostra i gruppi appartenenti a una sede.
+   * @param officeId l'id della sede di cui vedere i gruppi
+   */
   public static void showGroups(Long officeId) {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -89,6 +103,10 @@ public class Groups extends Controller {
     render(groups, office);
   }
 
+  /**
+   * Metodo che permette la modifica del gruppo.
+   * @param groupId id del gruppo da modificare
+   */
   public static void edit(long groupId) {
     Group group = Group.findById(groupId);
     notFoundIfNull(group);
@@ -97,10 +115,30 @@ public class Groups extends Controller {
     render(group, office);
   }
 
+  /**
+   * Metodo che permette l'apertura della pagina di creazione del gruppo.
+   * @param officeId l'id della sede su cui creare il gruppo
+   */
   public static void blank(long officeId) {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
     render("@edit", office);
   }
+  
+//  public static void manageGroup() {
+//    User currentUser = Security.getUser().get();
+//    List<Group> managerGroups = Lists.newArrayList();
+//    if (currentUser.isSystemUser()) {
+//      managerGroups = groupDao.groupsByManager(Optional.<Person>absent());
+//    }
+//    if (!currentUser.hasRoles(Role.GROUP_MANAGER)) {
+//      flash.error("L'utente non dispone dei diritti per accedere alla funzionalità");
+//      Application.index();
+//    }
+//    //TODO: fare la regola drools per accedere alla funzionalità
+//    rules.checkIfPermitted();
+//    managerGroups = groupDao.groupsByManager(Optional.fromNullable(currentUser.person));
+//    render(managerGroups);
+//  }
 }
