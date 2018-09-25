@@ -269,6 +269,7 @@ group.name =Nome gruppo
 group.description =Descrizione
 group.manager =Responsabile
 group.people =Afferenti al gruppo
+group.sendFlowsEmail =Mail al responsabile per flussi di approvazione
 
 history.back= Indietro
 history.type= Operazione
