@@ -46,6 +46,8 @@ public class QGroup extends EntityPathBase<Group> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    public final BooleanPath sendFlowsEmail = createBoolean("sendFlowsEmail");
+
     //inherited
     public final DateTimePath<org.joda.time.LocalDateTime> updatedAt = _super.updatedAt;
 

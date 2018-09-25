@@ -585,4 +585,16 @@ public class TemplateUtility {
             || comp.competenceCode.code.equalsIgnoreCase(HOLIDAYS_REP)));
     
   }
+  
+  /**
+   * 
+   * @param office la sede per cui si ricercano le persone
+   * @return la lista di persone della sede abili a far parte di un gruppo.
+   */
+  public List<Person> peopleForGroups(Office office) {
+    List<Person> people = personDao.list(Optional.<String>absent(), 
+        Sets.newHashSet(office), false, LocalDate.now().dayOfMonth().withMinimumValue(), 
+        LocalDate.now().dayOfMonth().withMaximumValue(), true).list();
+    return people;
+  }
 }

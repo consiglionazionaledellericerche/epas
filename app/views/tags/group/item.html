@@ -7,7 +7,7 @@ edit: se voglio il link a edit
   <i class="fa fa-users"></i>
   #{if _edit}
   #{secure.check 'Groups.edit', target:_item.manager.office}
-  <a class="list-group-item-heading" href="@{edit(_item.id)}">
+  <a class="list-group-item-heading" href="@{edit(_item.id)}" data-async-modal="#modalInsertBadgeReader">
     #{/secure.check}
     ${_item.name}</a>
   #{/if}
@@ -19,13 +19,13 @@ edit: se voglio il link a edit
 
   <p>
     <strong><i class="fa fa-star"></i> Responsabile</strong>
-    <span class="label label-primary">${_item.manager.fullname()}</span>
+    <span class="label label-primary">${_item.manager.getFullname()}</span>
   </p>
 
   <p>
     <strong><i class="fa fa-list-ul"></i> Appartenenti al gruppo</strong>
     #{list items:_item.people, as:'person'}
-    <span class="label label-primary">${person.fullname()}</span>
+    <span class="label label-primary">${person.getFullname()}</span>
     #{/list}
   </p>
 

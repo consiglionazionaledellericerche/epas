@@ -4,6 +4,7 @@ CREATE TABLE groups (
 	id BIGSERIAL PRIMARY KEY,
 	name TEXT,
 	description TEXT,
+	send_flows_email BOOLEAN DEFAULT FALSE,
 	manager BIGINT NOT NULL REFERENCES persons(id),
 	created_at TIMESTAMP WITHOUT TIME ZONE,
 	updated_at TIMESTAMP WITHOUT TIME ZONE,
@@ -16,7 +17,8 @@ CREATE TABLE groups_history (
   	_revision_type SMALLINT NOT NULL,
 	name TEXT,
 	description TEXT,
-	manager BIGINT NOT NULL REFERENCES persons(id),
+	send_flows_email BOOLEAN,
+	manager BIGINT,
 	PRIMARY KEY (id, _revision, _revision_type)
 );
 
