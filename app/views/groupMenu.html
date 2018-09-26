@@ -6,7 +6,7 @@
     		</a>
     	<ul class="dropdown-menu">
  	  #{secure.li @Groups.showGroups(session.get("officeSelected")) }
-        <i class="fa fa-calendar-check-o" aria-hidden="true"></i>
+        <i class="fa fa-home" aria-hidden="true"></i>
       #{/secure.li}
       #{secure.li @Stampings.dailyPresenceForPersonInCharge(session.get("yearSelected"), session.get("monthSelected"), session.get("daySelected")) }
         <i class="fa fa-calendar-check-o" aria-hidden="true"></i>

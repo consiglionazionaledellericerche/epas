@@ -10,7 +10,9 @@
   #{form action:@createGroup(), method:'POST', autocomplete:false,
   class:'form form-horizontal', 'data-async':'#page_content',
   'data-async-error':'#groupData'}
-
+  #{if group?.persistent}
+    #{f.hidden 'group.id', value: group.id /}
+  #{/if}
   #{f.input 'group.name', required:true /}
   #{f.input 'group.description' /}
   #{f.hidden 'office.id' /}  

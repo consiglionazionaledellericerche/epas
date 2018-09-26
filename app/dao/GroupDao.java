@@ -29,9 +29,14 @@ public class GroupDao extends DaoBase {
    * @param office la sede di cui si richiedono i gruppi
    * @return la lista dei gruppi i cui responsabili appartengono alla sede passata come parametro.
    */
-  public List<Group> groupsByOffice(Office office) {
+  public List<Group> groupsByOffice(Office office, Optional<Person> manager) {
     final QGroup group = QGroup.group;
+    BooleanBuilder condition = new BooleanBuilder();
     final JPQLQuery query = getQueryFactory().from(group).where(group.manager.office.eq(office));
+    if (manager.isPresent()) {
+      condition.and(group.manager.eq(manager.get()));
+    }
+    query.where(condition);
     return query.list(group);
   }
   
