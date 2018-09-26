@@ -39,12 +39,27 @@
     		<i class="fa fa-plus"></i> &{'AbsenceRequestType.' + type + '.blank'}
   		</a>
   	#{/b.buttons}
- 
-  	#{include './tableElements/_table.html' /}
+ 	#{if results.isEmpty()}
+ 		#{alert color:'info'}
+ 		<p>Al momento non ci sono flussi di richiesta assenza in esecuzione.</p>
+ 		#{/alert}
+ 	#{/if}
+ 	#{else}
+ 		#{include './tableElements/_table.html' /}
+ 	#{/else}
+  	
   #{/tabContentItem}
 
   #{tabContentItem id:'nonAttivo'}
-  	#{include './tableElements/_closedTable.html' /}
+  	#{if closed.isEmpty()}
+  		#{alert color:'info'}
+ 		<p>Al momento non ci sono flussi di richiesta assenza conclusi.</p>
+ 		#{/alert}
+  	#{/if}
+  	#{else}
+  		#{include './tableElements/_closedTable.html' /}
+  	#{/else}
+  	
   #{/tabContentItem}
  
   #{/tabContent}

@@ -239,7 +239,7 @@ public class AbsenceRequests extends Controller {
     if (absenceRequest.endTo == null) {
       absenceRequest.endTo = absenceRequest.startAt;
     }
-    //TODO: verificare l'inserimento dell'assenza... 
+ 
     GroupAbsenceType groupAbsenceType = absenceRequestManager.getGroupAbsenceType(absenceRequest);
     AbsenceType absenceType = null;
     AbsenceForm absenceForm =
@@ -256,13 +256,17 @@ public class AbsenceRequests extends Controller {
     } else {
       boolean isNewRequest = !absenceRequest.isPersistent();
       absenceRequest.save();
-
+      
       //Avvia il flusso se necessario.
       if (isNewRequest || !absenceRequest.flowStarted) {
         absenceRequestManager.executeEvent(
             absenceRequest, absenceRequest.person, 
             AbsenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());      
       } 
+      
+      if (absenceRequest.person.user.hasRoles(Role.SEAT_SUPERVISOR)) {
+        approval(absenceRequest.id);
+      }
 
       list(absenceRequest.type);
     }
