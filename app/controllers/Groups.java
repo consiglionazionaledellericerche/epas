@@ -62,8 +62,7 @@ public class Groups extends Controller {
     log.debug("Salvato nuovo gruppo di lavoro: {}", group.name);
     UsersRolesOffices uro = new UsersRolesOffices();
     groupManager.createManager(office, group, uro);
-    log.debug("Creato nuovo ruolo {} per il responsabile di gruppo {}", 
-        uro.role.name, group.manager.fullName());
+    
     flash.success("Nuovo gruppo  di lavoro %s salvato correttamente.",
         group.name);
     showGroups(office.id);
@@ -99,7 +98,18 @@ public class Groups extends Controller {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-    List<Group> groups = groupDao.groupsByOffice(office);
+    User user = Security.getUser().get();
+    List<Group> groups = null;
+    if (user.isSystemUser()) {
+      groups = groupDao.groupsByOffice(office, Optional.<Person>absent());
+    }
+    if (user.hasRoles(Role.PERSONNEL_ADMIN)) {
+      groups = groupDao.groupsByOffice(office, Optional.<Person>absent());
+    }
+    if (user.hasRoles(Role.GROUP_MANAGER)) {
+      groups = groupDao.groupsByOffice(office, Optional.fromNullable(user.person));
+    }
+     
     render(groups, office);
   }
 

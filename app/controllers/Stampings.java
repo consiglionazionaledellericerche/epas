@@ -7,12 +7,14 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import com.beust.jcommander.Strings;
-
+import dao.GroupDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
+import dao.RoleDao;
 import dao.StampingDao;
 import dao.UserDao;
+import dao.UsersRolesOfficesDao;
 import dao.history.HistoryValue;
 import dao.history.StampingHistoryDao;
 import dao.wrapper.IWrapperFactory;
@@ -25,6 +27,7 @@ import it.cnr.iit.epas.NullStringBinder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +48,7 @@ import models.PersonDay;
 import models.Role;
 import models.Stamping;
 import models.User;
+import models.UsersRolesOffices;
 import models.enumerate.StampTypes;
 
 import org.joda.time.LocalDate;
@@ -99,6 +103,12 @@ public class Stampings extends Controller {
   static NotificationManager notificationManager;
   @Inject
   static UserDao userDao;
+  @Inject
+  static UsersRolesOfficesDao uroDao;
+  @Inject
+  static RoleDao roleDao;
+  @Inject
+  static GroupDao groupDao;
 
 
   /**
@@ -578,19 +588,30 @@ public class Stampings extends Controller {
     LocalDate date = new LocalDate(year, month, day);
 
     final User user = Security.getUser().get();
+    Role role = roleDao.getRoleByName(Role.GROUP_MANAGER);
+    Optional<UsersRolesOffices> uro = uroDao.getUsersRolesOffices(user, role, user.person.office);
+    List<Person> people = Lists.newArrayList();
+    if (uro.isPresent()) {
+      
+      people = groupDao.groupsByManager(Optional.fromNullable(user.person))
+          .stream().flatMap(g -> g.people.stream().distinct()).collect(Collectors.toList()); 
+    } else {
+      flash.error("{} non sono presenti gruppi associati alla tua persona. "
+          + "Rivolgiti all'amministratore del personale", user.person.fullName());
+      stampings(year, month);
+    }
+    
+    int numberOfInOut = stampingManager.maxNumberOfStampingsInMonth(date, people);
 
-//    List<Person> people = user.person.people;
-//    int numberOfInOut = stampingManager.maxNumberOfStampingsInMonth(date, people);
-//
-//    List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
-//
-//    daysRecap = stampingManager.populatePersonStampingDayRecapList(people, date, numberOfInOut);
+    List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 
+    daysRecap = stampingManager.populatePersonStampingDayRecapList(people, date, numberOfInOut);
+    Office office = user.person.office;
     //Per dire al template generico di non visualizzare i link di modifica e la tab di controllo
     boolean showLink = false;
     boolean groupView = true;
 
-    render("@dailyPresence", date, /*numberOfInOut,*/ showLink, /*daysRecap,*/ groupView);
+    render("@dailyPresence", date, numberOfInOut, showLink, daysRecap, groupView, office);
   }
 
 }

@@ -34,6 +34,7 @@ import models.PersonReperibilityType;
 import models.ReperibilityTypeMonth;
 
 import models.flows.AbsenceRequest;
+import models.flows.Group;
 
 import security.PermissionCheck;
 
@@ -580,6 +581,8 @@ when
   $c: PermissionCheck( action in (
   			"Stampings.dailyPresenceForPersonInCharge" ,
     		"Competences.monthlyOvertime",
+    		"Groups.showGroups",
+    		"Groups.edit",
     		"AbsenceRequests.blank",
 			"AbsenceRequests.edit",
 			"AbsenceRequests.save",
@@ -596,6 +599,19 @@ when
 			"AbsenceRequests.approval",
 			"AbsenceRequests.disapproval"
 		), target==null, granted == false)
+then
+  $c.grant();
+end
+
+rule personInChargeInOffice
+when
+  $uro: UsersRolesOffices(role.name == Role.GROUP_MANAGER)
+  $o: Office( usersRolesOffices contains $uro)
+  $c: PermissionCheck( action in (
+  			"Stampings.dailyPresenceForPersonInCharge" ,
+    		"Competences.monthlyOvertime",
+    		"Groups.showGroups",
+    		"Groups.edit"), target==$o, granted==false)
 then
   $c.grant();
 end
@@ -1345,7 +1361,6 @@ when
      	"Persons.insertChild",
      	"Persons.deleteChild",
 
-     	"Persons.workGroup",
      	"Persons.confirmGroup",
      	"Persons.removePersonFromGroup",
 
@@ -1471,7 +1486,14 @@ when
         "PersonMonths.save",
         "PersonMonths.saveTrainingHours",
         "Charts.listForExcelFile",
-        "Charts.exportTimesheetSituation"
+        "Charts.exportTimesheetSituation",
+        
+        /*Permesso relativo alla gestione dei gruppi*/
+        "Groups.createGroup",
+        "Groups.blank",
+        "Groups.edit",
+        "Groups.deleteGroup",
+        "Groups.showGroups"
 
         ), target == null, granted == false)
 then
@@ -1534,7 +1556,6 @@ when
      	"Persons.insertChild",
      	"Persons.deleteChild",
 
-     	"Persons.workGroup",
      	"Persons.confirmGroup",
      	"Persons.removePersonFromGroup",
 
@@ -1649,7 +1670,14 @@ when
         "PersonMonths.save",
         "PersonMonths.saveTrainingHours",
         "Charts.listForExcelFile",
-        "Charts.exportTimesheetSituation"
+        "Charts.exportTimesheetSituation",
+        
+        /*Permesso relativo alla gestione dei gruppi*/
+        "Groups.createGroup",
+        "Groups.blank",
+        "Groups.edit",
+        "Groups.deleteGroup",
+        "Groups.showGroups"
 
        ), target == $o, granted == false)
 then
