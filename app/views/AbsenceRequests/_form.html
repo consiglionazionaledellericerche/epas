@@ -1,3 +1,10 @@
+#{alert color: 'info' }
+<p>Compila il form sottostante per inviare una richiesta di assenza.
+Specifica:<br>
+  - la data di inizio<br>
+  - la data di fine <br>
+  - eventuali note che intendi comunicare a chi deve approvare la richiesta</p>
+#{/alert}
 #{form action:@save(), method:'POST', autocomplete:false,
 	class:'form form-horizontal' }
                         
@@ -8,7 +15,9 @@
 	#{f.date 'absenceRequest.startAt', required:true, value:absenceRequest.startAt?.format() /}
 	#{f.date 'absenceRequest.endTo' /}
 	#{f.input 'absenceRequest.note' /}
-	
+	<div class="container"> 
+   	#{include './_report.html' /}
+	</div>
 	#{if !persist}
 	#{b.buttons center:true}
 		#{b.save @save() /}
@@ -16,8 +25,8 @@
 	#{/if}
 	#{else}
 	#{b.buttons center:true}
-		#{b.link @flush(absenceRequest.type, absenceRequest.person.id), color:'warning', title:'Ripristina'/}
-		#{b.save @save() /}
+		#{b.link @flush(absenceRequest.type, absenceRequest.person.id), color:'warning', title:'Annulla'/}
+		#{b.submit 'Conferma' /}
 	#{/b.buttons}	
 	#{/else}
 #{/form}

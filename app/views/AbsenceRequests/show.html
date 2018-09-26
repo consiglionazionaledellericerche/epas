@@ -13,18 +13,25 @@
 #{breadcrumbs breadcrumbs, noHome:true, container:true /}
 
 <div class="container">
- 
+
+#{title title: 'Richiesta per il/i giorno/i '+ absenceRequest.startAt.toLocalDate().format() + ' - ' + absenceRequest.endTo.toLocalDate().format() /}
 
 <br>
  #{alert color:'info'}
     <p>Elenco degli stati di approvazione della <strong>#{f.value 'absenceRequest.type', value:absenceRequest.type /}</strong>
     per <strong>#{f.value 'absenceRequest.person.fullname', value:absenceRequest.person.fullname /}</strong>:</p>
  #{/alert}
+ #{alert color:'warning'}
+ 	<p>La richiesta è per i giorni da <strong>${absenceRequest.startAt.toLocalDate().format()}</strong> 
+ 	   a <strong>${absenceRequest.endTo.toLocalDate().format()}</strong>
+ 	</p>
+ #{/alert}
 <table class="table table-striped">
 <tr>
-	<th>Richiedente</th>
+	<th>Autore</th>
 	<th>Tipo evento</th>
 	<th>Descrizione</th>
+	
 </tr>
 #{list items:absenceRequest.events, as:'item'}
 <tr #{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.MANAGER_REFUSAL) 
