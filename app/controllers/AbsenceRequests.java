@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import manager.AbsenceManager;
+import manager.NotificationManager;
 import manager.flows.AbsenceRequestManager;
 import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceService;
@@ -80,6 +81,9 @@ public class AbsenceRequests extends Controller {
   
   @Inject
   static AbsenceManager absenceManager;
+  
+  @Inject
+  static NotificationManager notificationManager;
  
  
   public static void vacations() {
@@ -261,13 +265,16 @@ public class AbsenceRequests extends Controller {
       if (isNewRequest || !absenceRequest.flowStarted) {
         absenceRequestManager.executeEvent(
             absenceRequest, absenceRequest.person, 
-            AbsenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());      
+            AbsenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
+        //invio la notifica al primo che deve validare la mia richiesta 
+        notificationManager
+        .notificationAbsenceRequestPolicy(absenceRequest.person.user, absenceRequest, true);
       } 
       
       if (absenceRequest.person.user.hasRoles(Role.SEAT_SUPERVISOR)) {
         approval(absenceRequest.id);
       }
-
+      flash.success("Operazione effettuata correttamente");
       list(absenceRequest.type);
     }
     
@@ -313,6 +320,7 @@ public class AbsenceRequests extends Controller {
       //caso di approvazione da parte del responsabile di sede
       absenceRequestManager.officeHeadApproval(id);
     }
+    notificationManager.notificationAbsenceRequestPolicy(user, absenceRequest, true);
     flash.success("Operazione conclusa correttamente");
     render("@show", absenceRequest, user);
   }
