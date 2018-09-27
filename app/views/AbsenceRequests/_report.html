@@ -1,5 +1,7 @@
 #{if insertReport }
-   
+   #{alert color:'info'}
+   	Con i dati inseriti, si otterrebbe il seguente risultato:
+   #{/alert}
      #{if !insertReport.warningsPreviousVersion.empty}
       #{alert color:'danger'}
        <p><strong>Elenco degli errori riscontrati</strong></p>

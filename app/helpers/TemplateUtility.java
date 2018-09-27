@@ -87,6 +87,7 @@ public class TemplateUtility {
   private final MemoizedCollection<Notification> notifications;
   private final MemoizedCollection<Notification> archivedNotifications;
   
+  
   @Inject
   public TemplateUtility(
       SecureManager secureManager, OfficeDao officeDao, PersonDao personDao,
@@ -134,6 +135,7 @@ public class TemplateUtility {
                 Optional.of(NotificationFilter.ARCHIVED));
           }
         });
+    
   }
 
 
