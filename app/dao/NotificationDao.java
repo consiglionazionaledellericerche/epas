@@ -13,6 +13,9 @@ import java.util.List;
 
 import models.Notification;
 import models.User;
+import models.enumerate.NotificationSubject;
+import models.flows.AbsenceRequest;
+import models.flows.AbsenceRequestEvent;
 import models.query.QNotification;
 
 /**
@@ -26,6 +29,7 @@ public class NotificationDao {
     ALL, TO_READ, ARCHIVED;
   }
   
+  
   private final JPQLQueryFactory queryFactory;
 
   @Inject
@@ -34,7 +38,7 @@ public class NotificationDao {
   }
   
   private JPQLQuery notifications(User operator, Optional<String> message, 
-      Optional<NotificationFilter> filter) {
+      Optional<NotificationFilter> filter, Optional<NotificationSubject> subject) {
     
     final QNotification qn = QNotification.notification;
     final BooleanBuilder condition = new BooleanBuilder().and(qn.recipient.eq(operator));
@@ -48,6 +52,11 @@ public class NotificationDao {
     }
     if (message.isPresent()) {
       condition.and(qn.message.toLowerCase().contains(message.get().toLowerCase()));
+    }
+    if (subject.isPresent()) {
+      if (subject.get().equals(NotificationSubject.ABSENCE_REQUEST)) {
+        condition.and(qn.subject.eq(NotificationSubject.ABSENCE_REQUEST));
+      }
     }
     
     return queryFactory.from(qn)
@@ -65,9 +74,9 @@ public class NotificationDao {
    * @return SimpleResults object containing the Notification list
    */
   public ModelQuery.SimpleResults<Notification> listFor(User operator, Optional<String> message, 
-      Optional<NotificationFilter> filter) {
+      Optional<NotificationFilter> filter, Optional<NotificationSubject> subject) {
     final QNotification qn = QNotification.notification;
-    return ModelQuery.wrap(notifications(operator, message, filter), qn);
+    return ModelQuery.wrap(notifications(operator, message, filter, subject), qn);
   }
   
   /**
@@ -77,8 +86,9 @@ public class NotificationDao {
    * @param filter specify if it returns ALL, TO_READ, ARCHIVED Notification
    */
   public List<Notification> listAllFor(User operator, Optional<String> message, 
-      Optional<NotificationFilter> filter) {
+      Optional<NotificationFilter> filter, Optional<NotificationSubject> subject) {
     final QNotification qn = QNotification.notification;
-    return notifications(operator, message, filter).list(qn);
-  }
+    return notifications(operator, message, filter, subject).list(qn);
+  } 
+  
 }

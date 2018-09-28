@@ -10,7 +10,10 @@
 
     *{ responsività dropDown }*
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-		<i class="fa fa-recycle fa-fw"></i>         
+		<i class="fa fa-recycle fa-fw"></i>  
+		    #{if templateUtility.absenceRequestNotifications.count > 0}
+      			<span class="label label-danger label-badge">${templateUtility.absenceRequestNotifications.count}</span>
+    		#{/if}       
 	     <!-- visualizza l'username -->
 	     <div class="visible-lg-inline visible-xs-inline"> Flussi di lavoro
 	        <span class="caret"></span>
@@ -32,6 +35,7 @@
       
 	  #{secure.li @AbsenceRequests.vacationsToApprove()}
         <i class="fa fa-plane" aria-hidden="true"></i>
+        
       #{/secure.li}
 
       #{secure.li @AbsenceRequests.compensatoryRestsToApprove()}
