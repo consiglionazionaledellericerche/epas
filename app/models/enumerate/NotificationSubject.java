@@ -6,7 +6,7 @@ import java.util.Map;
 
 import models.Stamping;
 import models.absences.Absence;
-
+import models.flows.AbsenceRequest;
 import play.mvc.Router;
 
 /**
@@ -81,7 +81,8 @@ public enum NotificationSubject {
         params.put("personId", absence.personDay.person.id);
         return toUrl("Stampings.personStamping", params);
       case ABSENCE_REQUEST:
-        //params.put("id", referenceId);
+        final AbsenceRequest absenceRequest = AbsenceRequest.findById(referenceId);
+        params.put("type", absenceRequest.type);
         return toUrl("AbsenceRequests.listToApprove", params);
         
       // case SYSTEM:
