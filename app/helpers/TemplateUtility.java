@@ -54,6 +54,7 @@ import models.absences.CategoryGroupAbsenceType;
 import models.absences.GroupAbsenceType;
 import models.contractual.ContractualReference;
 import models.enumerate.LimitType;
+import models.enumerate.NotificationSubject;
 import models.enumerate.StampTypes;
 import org.joda.time.LocalDate;
 import synch.diagnostic.SynchDiagnostic;
@@ -86,6 +87,7 @@ public class TemplateUtility {
   private final CompetenceCodeDao competenceCodeDao;
   private final MemoizedCollection<Notification> notifications;
   private final MemoizedCollection<Notification> archivedNotifications;
+  private final MemoizedCollection<Notification> absenceRequestNotifications;
   
   
   @Inject
@@ -123,7 +125,7 @@ public class TemplateUtility {
           @Override
           public ModelQuery.SimpleResults<Notification> get() {
             return notificationDao.listFor(Security.getUser().get(), Optional.absent(),
-                Optional.of(NotificationFilter.TO_READ));
+                Optional.of(NotificationFilter.TO_READ), Optional.absent());
           }
         });
 
@@ -132,9 +134,18 @@ public class TemplateUtility {
           @Override
           public ModelQuery.SimpleResults<Notification> get() {
             return notificationDao.listFor(Security.getUser().get(), Optional.absent(), 
-                Optional.of(NotificationFilter.ARCHIVED));
+                Optional.of(NotificationFilter.ARCHIVED), Optional.absent());
           }
         });
+    
+    absenceRequestNotifications = MemoizedResults.memoize(
+        new Supplier<ModelQuery.SimpleResults<Notification>>() {
+      @Override
+      public ModelQuery.SimpleResults<Notification> get() {
+        return notificationDao.listFor(Security.getUser().get(), Optional.absent(), 
+            Optional.of(NotificationFilter.TO_READ), Optional.of(NotificationSubject.ABSENCE_REQUEST));
+      }
+    });
     
   }
 
