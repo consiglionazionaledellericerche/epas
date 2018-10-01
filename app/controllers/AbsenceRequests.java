@@ -269,6 +269,7 @@ public class AbsenceRequests extends Controller {
         //invio la notifica al primo che deve validare la mia richiesta 
         notificationManager
         .notificationAbsenceRequestPolicy(absenceRequest.person.user, absenceRequest, true);
+        //TODO: devo anche mandare una mail con la stessa logica presente nel notificationManager.
       } 
       
       if (absenceRequest.person.user.hasRoles(Role.SEAT_SUPERVISOR)) {
