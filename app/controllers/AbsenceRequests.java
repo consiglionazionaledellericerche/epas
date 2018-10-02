@@ -158,10 +158,12 @@ public class AbsenceRequests extends Controller {
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.user);
     List<AbsenceRequest> results = absenceRequestDao
         .findRequestsToApprove(roleList, fromDate, Optional.absent(), type);
+    List<AbsenceRequest> approvedResults = absenceRequestDao
+        .findRequestsApproved(roleList, fromDate, Optional.absent(), type);
     val config = absenceRequestManager.getConfiguration(type, person);  
     val onlyOwn = false;
     
-    render(config, results, type, onlyOwn);
+    render(config, results, type, onlyOwn, approvedResults);
   }
 
   
@@ -224,7 +226,29 @@ public class AbsenceRequests extends Controller {
    */
   public static void save(@Required @Valid AbsenceRequest absenceRequest, boolean persist) {
 
+    if (absenceRequest.startAt == null || absenceRequest.endTo == null) {
+      Validation.addError("absenceRequest.startAt", 
+          "Entrambi i campi data devono essere valorizzati");
+      Validation.addError("absenceRequest.endTo", 
+          "Entrambi i campi data devono essere valorizzati");
+      response.status = 400;
+      render("@edit", absenceRequest);
+    }
+    if (absenceRequest.startAt.isAfter(absenceRequest.endTo)) {
+      Validation.addError("absenceRequest.startAt", 
+          "La data di inizio non può essere successiva alla data di fine");      
+    }
+    //verifico che non esista già una richiesta (non rifiutata) 
+    //di assenza che interessa i giorni richiesti
+    if (!absenceRequestManager.checkAbsenceRequest(absenceRequest)) {
+      Validation.addError("absenceRequest.startAt", "Esiste già una richiesta in questa data");
+      Validation.addError("absenceRequest.endTo", "Esiste già una richiesta in questa data");
+      response.status = 400;
+      render("@edit", absenceRequest);
+    }
+    
     if (Validation.hasErrors()) {
+      response.status = 400;
       flash.error(Web.msgHasErrors());
       render("@edit", absenceRequest);
       return;
