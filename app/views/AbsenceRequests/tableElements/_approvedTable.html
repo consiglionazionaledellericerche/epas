@@ -30,7 +30,7 @@
 	</thead>
 
 	<tbody>
-		#{list items:results, as:'item'}
+		#{list items:approvedResults, as:'item'}
 			<tr>
 				#{if !onlyOwn}
 					<td>#{f.value 'item.person.fullname', value:item.person.fullname /}</td>

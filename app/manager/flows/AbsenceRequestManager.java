@@ -6,10 +6,12 @@ import com.google.common.base.Verify;
 import controllers.Security;
 
 import dao.AbsenceDao;
+import dao.AbsenceRequestDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
 import dao.absences.AbsenceComponentDao;
-
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import javax.inject.Inject;
 import lombok.Data;
@@ -61,6 +63,7 @@ public class AbsenceRequestManager {
   private AbsenceComponentDao absenceDao;
   private PersonDayManager personDayManager;
   private ConsistencyManager consistencyManager;
+  private AbsenceRequestDao absenceRequestDao;
 
   @Data
   @RequiredArgsConstructor
@@ -85,7 +88,8 @@ public class AbsenceRequestManager {
   public AbsenceRequestManager(ConfigurationManager configurationManager,
       UsersRolesOfficesDao uroDao, RoleDao roleDao, NotificationManager notificationManager,
       AbsenceService absenceService, AbsenceManager absenceManager, 
-      AbsenceComponentDao absenceDao, PersonDayManager personDayManager, ConsistencyManager consistencyManager) {
+      AbsenceComponentDao absenceDao, PersonDayManager personDayManager, 
+      ConsistencyManager consistencyManager, AbsenceRequestDao absenceRequestDao) {
     this.configurationManager = configurationManager;
     this.uroDao = uroDao;
     this.roleDao = roleDao;
@@ -95,6 +99,7 @@ public class AbsenceRequestManager {
     this.absenceDao = absenceDao;
     this.personDayManager = personDayManager;
     this.consistencyManager = consistencyManager;
+    this.absenceRequestDao = absenceRequestDao;
   }
 
   private static final String FERIE_CNR = "FERIE_CNR";
@@ -115,18 +120,13 @@ public class AbsenceRequestManager {
     val problems = Lists.<String>newArrayList();
     val config = getConfiguration(requestType, person);
 
-//    if (config.isManagerApprovalRequired() && person.personInCharge == null) {
-//      problems.add(
-//          String.format("Approvazione del responsabile richiesta. "
-//              + "Il dipendente %s non ha impostato nessun responsabile. Contattare l'ufficio del personale.", person.getFullname())); 
-//    }
-
     if (config.isAdministrativeApprovalRequired() 
         && uroDao.getUsersWithRoleOnOffice(
             roleDao.getRoleByName(Role.PERSONNEL_ADMIN), person.office).isEmpty()) {
       problems.add(
           String.format("Approvazione dell'amministratore del personale richiesta. "
-              + "L'ufficio %s non ha impostato nessun amministratore del personale. Contattare l'ufficio del personale.",
+              + "L'ufficio %s non ha impostato nessun amministratore del personale. "
+              + "Contattare l'ufficio del personale.",
               person.office.getName())); 
     }
 
@@ -135,7 +135,8 @@ public class AbsenceRequestManager {
             roleDao.getRoleByName(Role.SEAT_SUPERVISOR), person.office).isEmpty()) {
       problems.add(
           String.format("Approvazione del responsabile di sede richiesta. "
-              + "L'ufficio %s non ha impostato nessun responsabile di sede. Contattare l'ufficio del personale.",
+              + "L'ufficio %s non ha impostato nessun responsabile di sede. "
+              + "Contattare l'ufficio del personale.",
               person.office.getName())); 
     }
     return problems;
@@ -274,11 +275,7 @@ public class AbsenceRequestManager {
         return Optional.of("Questa richiesta di assenza è già stata approvata "
             + "da parte del responsabile di gruppo.");
       }
-//      if (!absenceRequest.person.personInCharge.equals(approver)) {
-//        return Optional.of(
-//            String.format("L'evento {} non può essere eseguito dal responsabile"
-//                + " di gruppo {}", eventType, approver.getFullname()));
-//      }
+
     }
 
     if (eventType == AbsenceRequestEventType.ADMINISTRATIVE_APPROVAL 
@@ -612,5 +609,26 @@ public class AbsenceRequestManager {
         break;
     }
     return groupAbsenceType;
+  }
+  
+  /**
+   * Verifica che non esistano richieste d'assenza con le stesse date già in process per 
+   *     l'utente che ha fatto la richiesta.
+   * @param absenceRequest la richiesta d'assenza da verificare
+   * @return true se la richiesta d'assenza è ammissibile, false altrimenti.
+   */
+  public boolean checkAbsenceRequest(AbsenceRequest absenceRequest) {
+    List<AbsenceRequest> existingList = absenceRequestDao.existingAbsenceRequests(absenceRequest);
+    for (AbsenceRequest ar : existingList) {
+      DateInterval interval = new DateInterval(ar.startAt.toLocalDate(), ar.endTo.toLocalDate());
+      if (DateUtility.isDateIntoInterval(absenceRequest.startAtAsDate(), interval)
+          || DateUtility.isDateIntoInterval(absenceRequest.endToAsDate(), interval)
+          || DateUtility.intervalIntersection(
+              new DateInterval(absenceRequest.startAtAsDate(), 
+                  absenceRequest.endToAsDate()), interval) != null) {
+        return false;
+      } 
+    }  
+    return true;  
   }
 }
