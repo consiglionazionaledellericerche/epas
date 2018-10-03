@@ -95,10 +95,7 @@ public class TemplateUtility {
   private final AbsenceRequestDao absenceRequestDao;
   private final UsersRolesOfficesDao uroDao;
   
-  private final int compensatoryRestRequests;
-  private final int vacationRequests;
-  
-  
+   
   
   @Inject
   public TemplateUtility(
@@ -149,18 +146,35 @@ public class TemplateUtility {
             return notificationDao.listFor(Security.getUser().get(), Optional.absent(), 
                 Optional.of(NotificationFilter.ARCHIVED), Optional.absent());
           }
-        });
-
-    compensatoryRestRequests = absenceRequestDao
+        });    
+    
+    
+  }
+  
+  /**
+   * Metodo di utilità per far comparire il badge con la quantità di richieste di riposi 
+   *     compensativi da approvare nel template.
+   * @return la quantità di riposi compensativi da approvare.
+   */
+  public final int compensatoryRestRequests() {
+    int compensatoryRestRequests = absenceRequestDao
         .findRequestsToApprove(uroDao.getUsersRolesOfficesByUser(Security.getUser().get()), 
             LocalDateTime.now().minusMonths(1), 
             Optional.absent(), AbsenceRequestType.COMPENSATORY_REST).size();
-    
-    vacationRequests = absenceRequestDao
+    return compensatoryRestRequests;
+  }
+  
+  /**
+   * Metodo di utiiltà per far comparire il badge con la quantità di richieste ferie da approvare 
+   *     nel template.
+   * @return la quantità di richieste ferie da approvare.
+   */
+  public final int vacationRequests() {
+    int vacationRequests = absenceRequestDao
         .findRequestsToApprove(uroDao.getUsersRolesOfficesByUser(Security.getUser().get()), 
             LocalDateTime.now().minusMonths(1), 
             Optional.absent(), AbsenceRequestType.VACATION_REQUEST).size();
-    
+    return vacationRequests;
   }
 
 

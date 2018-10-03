@@ -1,10 +1,13 @@
 package manager;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Verify;
 import com.google.inject.Inject;
 import dao.RoleDao;
 import helpers.TemplateExtensions;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+
 import manager.configurations.EpasParam;
 
 import models.Notification;
@@ -18,6 +21,13 @@ import models.absences.definitions.DefaultGroup;
 import models.enumerate.AccountRole;
 import models.enumerate.NotificationSubject;
 import models.flows.AbsenceRequest;
+import models.flows.enumerate.AbsenceRequestType;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.SimpleEmail;
+
+import play.Play;
+import play.i18n.Messages;
+import play.libs.Mail;
 
 /**
  * Genera le notifiche da inviare agl utenti.
@@ -25,6 +35,7 @@ import models.flows.AbsenceRequest;
  * @author daniele
  * @since 23/06/16.
  */
+@Slf4j
 public class NotificationManager {
 
   private SecureManager secureManager;
@@ -38,6 +49,10 @@ public class NotificationManager {
 
   private static final String DTF = "dd/MM/YYYY - HH:mm";
   private static final String DF = "dd/MM/YYYY";
+  
+  private static final String BASE_URL = Play.configuration.getProperty("application.baseUrl");
+  private static final String VACATIONS_PATH = "absencerequest/vacationstoapprove";
+  private static final String COMPENSATORY_REST_PATH = "absencerequest/compensatoryresttoapprove";
 
   /**
    * Tipi di operazioni sulle entity.
@@ -70,19 +85,19 @@ public class NotificationManager {
     final String message = String.format(template, person.fullName(), stamping.date.toString(DTF));
 
     person.office.usersRolesOffices.stream()
-    .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
+        .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
         || uro.role.name.equals(Role.SEAT_SUPERVISOR))
-    .map(uro -> uro.user).forEach(user -> {
-      if (operation != Crud.DELETE) {
-        Notification.builder().destination(user).message(message)
-        .subject(NotificationSubject.STAMPING, stamping.id).create();
-      } else {
-        // per la notifica delle delete niente redirect altrimenti tocca
-        // andare a prelevare l'entity dallo storico
-        Notification.builder().destination(user).message(message)
+        .map(uro -> uro.user).forEach(user -> {
+          if (operation != Crud.DELETE) {
+            Notification.builder().destination(user).message(message)
+            .subject(NotificationSubject.STAMPING, stamping.id).create();
+          } else {
+            // per la notifica delle delete niente redirect altrimenti tocca
+            // andare a prelevare l'entity dallo storico
+            Notification.builder().destination(user).message(message)
         .subject(NotificationSubject.STAMPING).create();
-      }
-    });
+          }
+        });
   }
 
   /**
@@ -111,19 +126,18 @@ public class NotificationManager {
         absence.personDay.date.toString(DF), absence.absenceType.code);
 
     person.office.usersRolesOffices.stream()
-    .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
-        || uro.role.name.equals(Role.SEAT_SUPERVISOR))
-    .map(uro -> uro.user).forEach(user -> {
-      Notification.builder().destination(user).message(message)
-      .subject(NotificationSubject.ABSENCE, absence.id).create();
-    });
+        .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
+            || uro.role.name.equals(Role.SEAT_SUPERVISOR))
+        .map(uro -> uro.user).forEach(user -> {
+          Notification.builder().destination(user).message(message)
+          .subject(NotificationSubject.ABSENCE, absence.id).create();
+        });
   }
 
   /**
-   * 
-   * @param absenceRequest
-   * @param user
-   * @param operation
+   * Il metodo che si occupa di generare la corretta notifica al giusto utente.
+   * @param absenceRequest la richiesta di assenza da notificare
+   * @param operation l'operazione da notificare
    */
   private void notifyAbsenceRequest(AbsenceRequest absenceRequest, Crud operation) {
     Verify.verifyNotNull(absenceRequest);
@@ -138,31 +152,52 @@ public class NotificationManager {
     } else {
       template = null;
     }
-    final String message = String.format(template, person.fullName(), absenceRequest.startAt.toString(DF));
+    final String message = 
+        String.format(template, person.fullName(), absenceRequest.startAt.toString(DF));
+
+    final Role roleDestination = getProperRole(absenceRequest); 
+    if (roleDestination == null) {
+      log.warn("Non si è trovato il ruolo a cui inviare la notifica per la richiesta d'assenza di "
+          + "{} di tipo {} con date {}, {}", 
+          absenceRequest.person, absenceRequest.type, absenceRequest.startAt, absenceRequest.endTo);
+      return;
+    }
+    person.office.usersRolesOffices.stream()
+        .filter(uro -> uro.role.equals(roleDestination))
+          .map(uro -> uro.user).forEach(user -> {
+            Notification.builder().destination(user).message(message)
+            .subject(NotificationSubject.ABSENCE_REQUEST, absenceRequest.id).create();
+          });
+  }
+
+  /**
+   * Metodo privato che ritorna il ruolo a cui inviare la notifica della richiesta d'assenza.
+   * @param absenceRequest la richiesta d'assenza
+   * @return il ruolo a cui inviare la notifica della richiesta di assenza.
+   */
+  private Role getProperRole(AbsenceRequest absenceRequest) {
     Role role = null;
-    
+
     if (absenceRequest.managerApprovalRequired && absenceRequest.managerApproved == null) {
       role = roleDao.getRoleByName(Role.GROUP_MANAGER);
     }
-    if (absenceRequest.administrativeApprovalRequired && absenceRequest.administrativeApproved == null
+    if (absenceRequest.administrativeApprovalRequired 
+        && absenceRequest.administrativeApproved == null
         && (absenceRequest.managerApproved != null || !absenceRequest.managerApprovalRequired)) {
       role = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
     }
     if (absenceRequest.officeHeadApprovalRequired && absenceRequest.officeHeadApproved == null 
-        && ((!absenceRequest.managerApprovalRequired && !absenceRequest.administrativeApprovalRequired) 
-            || (absenceRequest.managerApproved != null && !absenceRequest.administrativeApprovalRequired)
-            || (absenceRequest.managerApproved != null && absenceRequest.administrativeApproved != null)
-            || (!absenceRequest.managerApprovalRequired && absenceRequest.administrativeApproved != null))) {
+        && ((!absenceRequest.managerApprovalRequired 
+            && !absenceRequest.administrativeApprovalRequired) 
+            || (absenceRequest.managerApproved != null 
+            && !absenceRequest.administrativeApprovalRequired)
+            || (absenceRequest.managerApproved != null 
+            && absenceRequest.administrativeApproved != null)
+            || (!absenceRequest.managerApprovalRequired 
+                && absenceRequest.administrativeApproved != null))) {
       role = roleDao.getRoleByName(Role.SEAT_SUPERVISOR);
     }
-    //TODO: capire se la notifica di completamento flusso può essere inviata al dipendente che ha
-    //fatto la richiesta o no...che adesso è sufficiente che guardi nel suo cartellino.
-    final Role roleDestination = role; 
-    person.office.usersRolesOffices.stream()
-    .filter(uro -> uro.role.equals(roleDestination)).map(uro -> uro.user).forEach(user -> {
-      Notification.builder().destination(user).message(message)
-      .subject(NotificationSubject.ABSENCE_REQUEST, absenceRequest.id).create();
-    });
+    return role;
   }
 
   /**
@@ -241,7 +276,7 @@ public class NotificationManager {
         notifyAbsence(absence, currentUser, NotificationManager.Crud.DELETE);
         return;
       }
-      //notifyAbsence(absence, currentUser, NotificationManager.CRUD.CREATE);
+
     }
   }
 
@@ -296,13 +331,13 @@ public class NotificationManager {
     });
 
     person.office.usersRolesOffices.stream()
-    .filter(uro -> uro.role.name.equals(role.name))
-    .map(uro -> uro.user).forEach(user -> {
-      Notification.builder().destination(user).message(message.toString())
-      .subject(NotificationSubject.ABSENCE, absences.stream().findFirst().get().id).create();
-    });
+        .filter(uro -> uro.role.name.equals(role.name))
+          .map(uro -> uro.user).forEach(user -> {
+            Notification.builder().destination(user).message(message.toString())
+            .subject(NotificationSubject.ABSENCE, absences.stream().findFirst().get().id).create();
+          });
   }
-  
+
   /**
    * Il metodo che fa partire la notifica al giusto livello della catena.
    * @param currentUser l'utente che fa la richiesta
@@ -319,5 +354,100 @@ public class NotificationManager {
       return;
     }
   }
+  
+  /**
+   * Metodo pubblico che chiama l'invio delle email ai destinatari all'approvazione della richiesta
+   *     d'assenza.
+   * @param currentUser l'utente corrente che esegue la chiamata
+   * @param absenceRequest la richiesta d'assenza da processare
+   * @param insert se stiamo facendo un inserimento di una nuova richiesta d'assenza
+   */
+  public void sendEmailAbsenceRequestPolicy(User currentUser, 
+      AbsenceRequest absenceRequest, boolean insert) {
+    if (currentUser.isSystemUser()) {
+      return;
+    }
+    if (insert) {
+      sendEmailAbsenceRequest(absenceRequest);
+    }
+  }
 
+  /**
+   * Metodo che invia la mail all'utente responsabile dell'approvazione.
+   * @param absenceRequest la richiesta d'assenza
+   * @param currentUser l'utente a cui inviare la mail
+   */
+  private void sendEmailAbsenceRequest(AbsenceRequest absenceRequest) {
+
+    Verify.verifyNotNull(absenceRequest);
+    final Person person = absenceRequest.person;
+    SimpleEmail simpleEmail = new SimpleEmail();
+    final Role roleDestination = getProperRole(absenceRequest); 
+    if (roleDestination == null) {
+      log.warn("Non si è trovato il ruolo a cui inviare la mail per la richiesta d'assenza di "
+          + "{} di tipo {} con date {}, {}", 
+          absenceRequest.person, absenceRequest.type, absenceRequest.startAt, absenceRequest.endTo);
+      return;
+    }
+    person.office.usersRolesOffices.stream()
+        .filter(uro -> uro.role.equals(roleDestination))
+          .map(uro -> uro.user).forEach(user -> {
+            try {
+              simpleEmail.addTo(user.person.email);
+            } catch (EmailException e) {
+              e.printStackTrace();
+            }
+            simpleEmail.setSubject("ePas Approvazione flusso");
+            try {
+              simpleEmail.setMsg(createAbsenceRequestEmail(absenceRequest, user));
+            } catch (EmailException e) {
+              e.printStackTrace();
+            }
+            Mail.send(simpleEmail);
+          });
+    
+  }
+
+  /**
+   * Metodo che compone il corpo della mail da inviare.
+   * @param absenceRequest la richiesta d'assenza
+   * @param user l'utente a cui inviare la mail
+   * @return il corpo della mail da inviare all'utente responsabile dell'approvazione.
+   */
+  private String createAbsenceRequestEmail(AbsenceRequest absenceRequest, User user) {
+    final String dateFormatter = "dd/MM/YYYY";
+    String requestType = "";
+    if (absenceRequest.type == AbsenceRequestType.COMPENSATORY_REST) {
+      requestType = Messages.get("AbsenceRequestType.COMPENSATORY_REST");
+    } else {
+      requestType = Messages.get("AbsenceRequestType.VACATION_REQUEST");
+    }
+    final StringBuilder message = new StringBuilder()
+        .append(String.format("Gentile %s,\r\n", user.person.fullName()));
+    message.append(String.format("\r\nLe è stata notificata la richiesta di : %s",
+        absenceRequest.person.fullName()));
+    message.append(String.format("\r\n per una assenza di tipo: %s", requestType));
+    if (absenceRequest.startAt.isEqual(absenceRequest.endTo)) {
+      message.append(String.format("\r\n per il giorno: %s", 
+          absenceRequest.startAt.toLocalDate().toString(dateFormatter)));
+    } else {
+      message.append(String.format("\r\n dal: %s", 
+          absenceRequest.startAt.toLocalDate().toString(dateFormatter)));
+      message.append(String.format("  al: %s", 
+          absenceRequest.endTo.toLocalDate().toString(dateFormatter)));
+    }
+    String baseUrl = BASE_URL;
+    if (!baseUrl.endsWith("/")) {
+      baseUrl = baseUrl + "/";
+    }
+    if (absenceRequest.type == AbsenceRequestType.COMPENSATORY_REST) {
+      baseUrl = baseUrl + COMPENSATORY_REST_PATH;
+    }
+    if (absenceRequest.type == AbsenceRequestType.VACATION_REQUEST) {
+      baseUrl = baseUrl + VACATIONS_PATH;
+    }    
+    message.append(String.format("\r\n Verifica cliccando sul link seguente: %s", baseUrl));
+    
+    return message.toString();
+  }
 }
