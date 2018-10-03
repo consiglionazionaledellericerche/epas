@@ -26,7 +26,8 @@ AbsenceRequestEventType.DELETE=Richiesta cancellata
 AbsenceRequestEventType.EXPIRING=Richiesta scaduta
 AbsenceRequestType.VACATION_REQUEST_TO_APPROVE=Ferie da approvare
 AbsenceRequestType.COMPENSATORY_REST_TO_APPROVE=Riposi compensativi da approvare
-
+AbsenceRequestType.VACATION_REQUEST=Ferie
+AbsenceRequestType.COMPENSATORY_REST=Riposo compensativo
 
 activity =Attività di turno
 ADD= Inserimento

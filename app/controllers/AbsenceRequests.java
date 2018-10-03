@@ -69,23 +69,23 @@ public class AbsenceRequests extends Controller {
 
   @Inject
   static SecurityRules rules;
-  
+
   @Inject  
   static RoleDao roleDao;
-  
+
   @Inject
   static UsersRolesOfficesDao uroDao;
-  
+
   @Inject
   static AbsenceService absenceService;
-  
+
   @Inject
   static AbsenceManager absenceManager;
-  
+
   @Inject
   static NotificationManager notificationManager;
- 
- 
+
+
   public static void vacations() {
     list(AbsenceRequestType.VACATION_REQUEST);
   }
@@ -97,7 +97,7 @@ public class AbsenceRequests extends Controller {
   public static void shortTermPermit() {
     list(AbsenceRequestType.SHORT_TERM_PERMIT);
   }
-  
+
   public static void vacationsToApprove() {
     listToApprove(AbsenceRequestType.VACATION_REQUEST);
   }
@@ -126,11 +126,11 @@ public class AbsenceRequests extends Controller {
       return;
     } 
     val person = currentUser.person;    
-     
+
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
     log.debug("Prelevo le richieste di assenze di tipo {} per {} a partire da {}", 
         type, person, fromDate);
-    
+
     val config = absenceRequestManager.getConfiguration(type, person);
     List<AbsenceRequest> results = absenceRequestDao
         .findByPersonAndDate(person, fromDate, Optional.absent(), type, true);
@@ -138,10 +138,10 @@ public class AbsenceRequests extends Controller {
         .findByPersonAndDate(person, fromDate, Optional.absent(), type, false);
     val onlyOwn = true;
     boolean persist = false;
-    
+
     render(config, results, type, onlyOwn, persist, closed);
   }
-  
+
   /**
    * Lista delle richieste di assenza da approvare da parte dell'utente corrente. 
    * @param type tipo opzionale di tipo di richiesta di assenza.
@@ -154,7 +154,7 @@ public class AbsenceRequests extends Controller {
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
     log.debug("Prelevo le richieste da approvare di assenze di tipo {} a partire da {}", 
         type, fromDate);   
-    
+
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.user);
     List<AbsenceRequest> results = absenceRequestDao
         .findRequestsToApprove(roleList, fromDate, Optional.absent(), type);
@@ -162,11 +162,11 @@ public class AbsenceRequests extends Controller {
         .findRequestsApproved(roleList, fromDate, Optional.absent(), type);
     val config = absenceRequestManager.getConfiguration(type, person);  
     val onlyOwn = false;
-    
+
     render(config, results, type, onlyOwn, approvedResults);
   }
 
-  
+
 
   /**
    * Form per la richiesta di assenza da parte del dipendente. 
@@ -177,7 +177,7 @@ public class AbsenceRequests extends Controller {
    */
   public static void blank(Optional<Long> personId, LocalDate from, AbsenceRequestType type) {
     Verify.verifyNotNull(type);
-    
+
     Person person;
     if (personId.isPresent()) {
       rules.check("AbsenceRequests.blank4OtherPerson");
@@ -192,17 +192,18 @@ public class AbsenceRequests extends Controller {
       }
     }
     notFoundIfNull(person);
-    
+
     val configurationProblems = absenceRequestManager.checkconfiguration(type, person); 
     if (!configurationProblems.isEmpty()) {
       flash.error(Joiner.on(" ").join(configurationProblems));
       list(type);
       return;
     }
-    
+
     val absenceRequest = new AbsenceRequest();
     absenceRequest.type = type;
     absenceRequest.person = person;
+    absenceRequest.startAt = absenceRequest.endTo = LocalDateTime.now();
     boolean persist = false;
     render("@edit", absenceRequest, persist);
 
@@ -211,21 +212,13 @@ public class AbsenceRequests extends Controller {
   /**
    * Form di modifica di una richiesta di assenza.
    * 
-   * @param id id della richiesta di assenza da modificare.
+   * @param absenceRequest richiesta di assenza da modificare.
+   *     TODO: spostare qui dentro la logica del ricontrollo ogni volta che viene modificato un 
+   *     parametro nella richiesta sulla form e mantenere la persistenza solo nella @save()
    */
-  public static void edit(long id) {
-    AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
-    notFoundIfNull(absenceRequest);
-    rules.checkIfPermitted(absenceRequest);
-    
-    render(absenceRequest);
-  }
-  
-  /**
-   * Salvataggio di una richiesta di assenza.
-   */
-  public static void save(@Required @Valid AbsenceRequest absenceRequest, boolean persist) {
+  public static void edit(AbsenceRequest absenceRequest) {
 
+    rules.checkIfPermitted(absenceRequest);
     if (absenceRequest.startAt == null || absenceRequest.endTo == null) {
       Validation.addError("absenceRequest.startAt", 
           "Entrambi i campi data devono essere valorizzati");
@@ -246,28 +239,13 @@ public class AbsenceRequests extends Controller {
       response.status = 400;
       render("@edit", absenceRequest);
     }
-    
+
     if (Validation.hasErrors()) {
       response.status = 400;
       flash.error(Web.msgHasErrors());
       render("@edit", absenceRequest);
       return;
     }
-    log.debug("AbsenceRequest.startAt = {}", absenceRequest.startAt);
-    
-    if (!Security.getUser().get().person.equals(absenceRequest.person)) {
-      rules.check("AbsenceRequests.blank4OtherPerson");
-    } else {
-      absenceRequest.person = Security.getUser().get().person;
-    }
-
-    notFoundIfNull(absenceRequest.person);      
-    absenceRequestManager.configure(absenceRequest);
-    
-    if (absenceRequest.endTo == null) {
-      absenceRequest.endTo = absenceRequest.startAt;
-    }
- 
     GroupAbsenceType groupAbsenceType = absenceRequestManager.getGroupAbsenceType(absenceRequest);
     AbsenceType absenceType = null;
     AbsenceForm absenceForm =
@@ -278,44 +256,66 @@ public class AbsenceRequests extends Controller {
         absenceForm.groupSelected, absenceForm.from, absenceForm.to,
         absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected, 
         null, null, false, absenceManager);
-    if (!persist) {
-      persist = true;
-      render("@edit", persist, absenceRequest, insertReport, absenceForm);
-    } else {
-      boolean isNewRequest = !absenceRequest.isPersistent();
-      absenceRequest.save();
-      
-      //Avvia il flusso se necessario.
-      if (isNewRequest || !absenceRequest.flowStarted) {
-        absenceRequestManager.executeEvent(
-            absenceRequest, absenceRequest.person, 
-            AbsenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
-        //invio la notifica al primo che deve validare la mia richiesta 
-        notificationManager
-        .notificationAbsenceRequestPolicy(absenceRequest.person.user, absenceRequest, true);
-        //TODO: devo anche mandare una mail con la stessa logica presente nel notificationManager.
-      } 
-      
-      if (absenceRequest.person.user.hasRoles(Role.SEAT_SUPERVISOR)) {
-        approval(absenceRequest.id);
-      }
-      flash.success("Operazione effettuata correttamente");
-      list(absenceRequest.type);
-    }
-    
+    render(absenceRequest, insertReport, absenceForm);
   }
-  
+
+  /**
+   * Salvataggio di una richiesta di assenza.
+   */
+  public static void save(@Required @Valid AbsenceRequest absenceRequest, boolean persist) {
+
+
+    log.debug("AbsenceRequest.startAt = {}", absenceRequest.startAt);
+
+    if (!Security.getUser().get().person.equals(absenceRequest.person)) {
+      rules.check("AbsenceRequests.blank4OtherPerson");
+    } else {
+      absenceRequest.person = Security.getUser().get().person;
+    }
+
+    notFoundIfNull(absenceRequest.person);      
+    absenceRequestManager.configure(absenceRequest);
+
+    if (absenceRequest.endTo == null) {
+      absenceRequest.endTo = absenceRequest.startAt;
+    }
+
+    boolean isNewRequest = !absenceRequest.isPersistent();
+    absenceRequest.save();
+
+    //Avvia il flusso se necessario.
+    if (isNewRequest || !absenceRequest.flowStarted) {
+      absenceRequestManager.executeEvent(
+          absenceRequest, absenceRequest.person, 
+          AbsenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
+      //invio la notifica al primo che deve validare la mia richiesta 
+      notificationManager
+      .notificationAbsenceRequestPolicy(absenceRequest.person.user, absenceRequest, true);
+      
+      notificationManager
+      .sendEmailAbsenceRequestPolicy(absenceRequest.person.user, absenceRequest, true);
+    } 
+
+    if (absenceRequest.person.user.hasRoles(Role.SEAT_SUPERVISOR)) {
+      approval(absenceRequest.id);
+    }
+    flash.success("Operazione effettuata correttamente");
+    list(absenceRequest.type);
+  }
+
+  //  }
+
   /**
    * Metodo che "pulisce" la richiesta di assenza in caso di errori prima della conferma.
    * @param type il tipo di richiesta di assenza
    */
   public static void flush(AbsenceRequestType type, long personId) {
-       
+
     AbsenceRequest absenceRequest = new AbsenceRequest();
     absenceRequest.type = type;
     Person person = personDao.getPersonById(personId);
     absenceRequest.person = person;
-    
+
     boolean persist = false;
     render("@edit", absenceRequest, persist);
   }
@@ -382,8 +382,8 @@ public class AbsenceRequests extends Controller {
     }
     render("@show", absenceRequest, user);
   }
-   
-  
+
+
   /**
    * Form di modifica di una richiesta di assenza.
    * 
@@ -399,7 +399,7 @@ public class AbsenceRequests extends Controller {
     flash.success(Web.msgDeleted(AbsenceRequest.class));
     list(absenceRequest.type);
   }
-  
+
   /**
    * Mostra al template la richiesta.
    * @param id l'id della richiesta da visualizzare

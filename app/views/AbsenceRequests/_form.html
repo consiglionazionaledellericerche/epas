@@ -3,10 +3,12 @@
 Specifica:<br>
   - la data di inizio<br>
   - la data di fine <br>
-  - eventuali note che intendi comunicare a chi deve approvare la richiesta</p>
+  
+Ogni volta che cambierai il campo relativo alle date, il sistema <strong>automaticamente</strong> calcolerà l'esito della richiesta,
+riportando cosa verrebbe inserito e come al completamento del flusso.  </p>
 #{/alert}
-#{form action:@save(), method:'POST', autocomplete:false,
-	class:'form form-horizontal' }
+#{form action:@edit(), method:'POST', autocomplete:false,
+	class:'form form-horizontal auto-submit', 'data-spinner':'#modalSpinner' }
                         
 	#{f.hidden 'absenceRequest.id' /}
 	#{f.hidden 'absenceRequest.person.id' /}
@@ -14,19 +16,28 @@ Specifica:<br>
 	#{f.hidden 'persist', value:persist /}
 	#{f.date 'absenceRequest.startAt', required:true, value:absenceRequest.startAt?.format() /}
 	#{f.date 'absenceRequest.endTo' /}
-	#{f.input 'absenceRequest.note' /}
+	
 	<div class="container"> 
    	#{include './_report.html' /}
 	</div>
-	#{if !persist}
-	#{b.buttons center:true}
-		#{b.save @save() /}
-	#{/b.buttons}
-	#{/if}
-	#{else}
-	#{b.buttons center:true}
-		#{b.link @flush(absenceRequest.type, absenceRequest.person.id), color:'warning', title:'Annulla'/}
-		#{b.submit 'Conferma' /}
-	#{/b.buttons}	
-	#{/else}
+	
 #{/form}
+
+
+
+#{form action:@save(), method:'POST', autocomplete:false, class:'form form-horizontal',
+	  'data-async':'#page_content', 'data-spinner':'#defaultSpinner'}
+	  
+	#{f.hidden 'absenceRequest.id' /}
+	#{f.hidden 'absenceRequest.person.id' /}
+	#{f.hidden 'absenceRequest.type' /}
+	#{f.hidden 'persist', value:persist /}
+	#{f.hidden 'absenceRequest.startAt', value:absenceRequest.startAt?.format() /}
+	#{f.hidden 'absenceRequest.endTo', value:absenceRequest.endTo?.format() /}
+	#{f.hidden 'absenceRequest.note' /}
+      
+            
+	#{b.buttons center:true}
+         #{b.submit 'Inserisci'/}
+    #{/b.buttons}
+#{/form}	  
