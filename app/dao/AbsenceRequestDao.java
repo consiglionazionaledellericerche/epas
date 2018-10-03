@@ -2,6 +2,7 @@ package dao;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
@@ -104,6 +105,12 @@ public class AbsenceRequestDao extends DaoBase {
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
 
     BooleanBuilder conditions = new BooleanBuilder();
+    
+    if (uros.stream().noneMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER) 
+        || uro.role.name.equals(Role.PERSONNEL_ADMIN)
+        || uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      return Lists.newArrayList();
+    }
 
     for (UsersRolesOffices uro : uros) {
       if (uro.role.name.equals(Role.PERSONNEL_ADMIN)) {
@@ -112,7 +119,7 @@ public class AbsenceRequestDao extends DaoBase {
         seatSupervisorQuery(conditions);
       } else if (uro.role.name.equals(Role.GROUP_MANAGER)) {
         managerQuery(conditions);
-      }
+      } 
     }
     conditions.and(absenceRequest.startAt.after(fromDate))
       .and(absenceRequest.type.eq(absenceRequestType));
