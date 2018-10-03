@@ -157,8 +157,9 @@ public class TemplateUtility {
    * @return la quantità di riposi compensativi da approvare.
    */
   public final int compensatoryRestRequests() {
+    User user = Security.getUser().get();
     int compensatoryRestRequests = absenceRequestDao
-        .findRequestsToApprove(uroDao.getUsersRolesOfficesByUser(Security.getUser().get()), 
+        .findRequestsToApprove(uroDao.getUsersRolesOfficesByUser(user), 
             LocalDateTime.now().minusMonths(1), 
             Optional.absent(), AbsenceRequestType.COMPENSATORY_REST).size();
     return compensatoryRestRequests;
@@ -170,8 +171,10 @@ public class TemplateUtility {
    * @return la quantità di richieste ferie da approvare.
    */
   public final int vacationRequests() {
+    User user = Security.getUser().get();
+
     int vacationRequests = absenceRequestDao
-        .findRequestsToApprove(uroDao.getUsersRolesOfficesByUser(Security.getUser().get()), 
+        .findRequestsToApprove(uroDao.getUsersRolesOfficesByUser(user), 
             LocalDateTime.now().minusMonths(1), 
             Optional.absent(), AbsenceRequestType.VACATION_REQUEST).size();
     return vacationRequests;

@@ -5,7 +5,7 @@ Specifica:<br>
   - la data di fine <br>
   
 Ogni volta che cambierai il campo relativo alle date, il sistema <strong>automaticamente</strong> calcolerà l'esito della richiesta,
-riportando cosa verrebbe inserito e come al completamento del flusso.  </p>
+riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 #{/alert}
 #{form action:@edit(), method:'POST', autocomplete:false,
 	class:'form form-horizontal auto-submit', 'data-spinner':'#modalSpinner' }
@@ -17,7 +17,7 @@ riportando cosa verrebbe inserito e come al completamento del flusso.  </p>
 	#{f.date 'absenceRequest.startAt', required:true, value:absenceRequest.startAt?.format() /}
 	#{f.date 'absenceRequest.endTo' /}
 	
-	<div class="container"> 
+	<div class="container-fluid"> 
    	#{include './_report.html' /}
 	</div>
 	

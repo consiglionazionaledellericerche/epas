@@ -205,7 +205,17 @@ public class AbsenceRequests extends Controller {
     absenceRequest.person = person;
     absenceRequest.startAt = absenceRequest.endTo = LocalDateTime.now();
     boolean persist = false;
-    render("@edit", absenceRequest, persist);
+    GroupAbsenceType groupAbsenceType = absenceRequestManager.getGroupAbsenceType(absenceRequest);
+    AbsenceType absenceType = null;
+    AbsenceForm absenceForm =
+        absenceService.buildAbsenceForm(absenceRequest.person, absenceRequest.startAtAsDate(), null,
+            absenceRequest.endToAsDate(), null, groupAbsenceType, false, absenceType, 
+            null, null, null, false, true);
+    InsertReport insertReport = absenceService.insert(absenceRequest.person, 
+        absenceForm.groupSelected, absenceForm.from, absenceForm.to,
+        absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected, 
+        null, null, false, absenceManager);
+    render("@edit", absenceRequest, persist, insertReport);
 
   }
 
