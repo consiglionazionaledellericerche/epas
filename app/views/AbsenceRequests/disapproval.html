@@ -3,7 +3,7 @@
 <div class="container-fluid">
 
 #{alert color:'warning'}
-Specifica una motivazione per cui la richiesta di assenza inoltrata deve essere respinta. 
+<p class=center>Specifica una motivazione per cui la richiesta di assenza inoltrata deve essere respinta.</p> 
 #{/alert}
 #{form action:@disapproval(absenceRequest.id, disapproval), method:'POST', class:'form form-horizontal'}
 #{f.input 'reason'/}

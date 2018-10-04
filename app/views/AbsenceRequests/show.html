@@ -23,8 +23,8 @@
  #{/alert}
  <div class="container-fluid center color:info">
  
- 	#{f.view 'absenceRequest.startAt', value:absenceRequest.startAt?.format() /}<br>
-	#{f.view 'absenceRequest.endTo', value:absenceRequest.endTo?.format() /}
+ 	#{f.view 'absenceRequest.startAt', value:absenceRequest.startAt?.format("dd/MM/yyyy") /}<br>
+	#{f.view 'absenceRequest.endTo', value:absenceRequest.endTo?.format("dd/MM/yyyy") /}
 </div>	
 <table class="table table-striped">
 <tr>

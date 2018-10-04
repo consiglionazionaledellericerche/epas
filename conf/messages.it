@@ -396,7 +396,7 @@ PDFReport.thIncompleteTime=Orario incompleto
 PDFReport.thMissingTime=Orario insufficiente
 PDFReport.thWarnStampings=Orario incompleto fuori tolleranza
 
-# CALENDARIO SHIFT
+################### CALENDARIO SHIFT #################################################
 
 shift.alreadyInShift= Il dipendente è già in turno sull'attività %s
 calendar.ShiftToubles.PERSON_IS_ABSENT=Il turnista è assente nel giorno %d
@@ -421,6 +421,7 @@ PDFReport.Troubles.NO_ABS_NO_STAMP=Mancata timbratura
 PDFReport.UNCOUPLED_WORKING=Timbrature errate
 PDFReport.NOT_ENOUGH_WORKTIME==Orario incompleto
 
+#######################################################################################
 
 peopleIds=Persone associabili all'attività
 
@@ -457,6 +458,8 @@ psst.endDate =Data fine
 psst.jolly =Jolly
 
 qualification=Livello
+
+reason=Motivazione
 
 regulations =Normativa
 
