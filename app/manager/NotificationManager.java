@@ -126,12 +126,12 @@ public class NotificationManager {
         absence.personDay.date.toString(DF), absence.absenceType.code);
 
     person.office.usersRolesOffices.stream()
-    .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
+        .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
         || uro.role.name.equals(Role.SEAT_SUPERVISOR))
-    .map(uro -> uro.user).forEach(user -> {
-      Notification.builder().destination(user).message(message)
-      .subject(NotificationSubject.ABSENCE, absence.id).create();
-    });
+        .map(uro -> uro.user).forEach(user -> {
+          Notification.builder().destination(user).message(message)
+          .subject(NotificationSubject.ABSENCE, absence.id).create();
+        });
   }
 
   /**
@@ -157,17 +157,17 @@ public class NotificationManager {
 
     final Role roleDestination = getProperRole(absenceRequest); 
     if (roleDestination == null) {
-      log.warn("Non si è trovato il ruolo a cui inviare la notifica per la richiesta d'assenza di "
+      log.info("Non si è trovato il ruolo a cui inviare la notifica per la richiesta d'assenza di "
           + "{} di tipo {} con date {}, {}", 
           absenceRequest.person, absenceRequest.type, absenceRequest.startAt, absenceRequest.endTo);
       return;
     }
     person.office.usersRolesOffices.stream()
-    .filter(uro -> uro.role.equals(roleDestination))
-    .map(uro -> uro.user).forEach(user -> {
-      Notification.builder().destination(user).message(message)
-      .subject(NotificationSubject.ABSENCE_REQUEST, absenceRequest.id).create();
-    });
+        .filter(uro -> uro.role.equals(roleDestination))
+          .map(uro -> uro.user).forEach(user -> {
+            Notification.builder().destination(user).message(message)
+            .subject(NotificationSubject.ABSENCE_REQUEST, absenceRequest.id).create();
+          });
   }
 
   /**
@@ -309,6 +309,36 @@ public class NotificationManager {
     .subject(NotificationSubject.ABSENCE_REQUEST, absenceRequest.id).create();
 
   }
+  
+  /**
+   * Notifica che una richiesta di assenza è stata approvata da uno degli 
+   * approvatori del flusso.
+   * 
+   * @param absenceRequest la richiesta di assenza
+   * @param approver la persona che ha rifiutato la richiesta di assenza.
+   */
+  public void notificationAbsenceRequestApproved(
+      AbsenceRequest absenceRequest, Person approver) {
+
+    Verify.verifyNotNull(absenceRequest);
+    Verify.verifyNotNull(approver);
+
+    final String message = 
+        String.format("La richiesta di assenza di tipo \"%s\" dal %s al %s "
+            + "è stata accettata da %s",
+            TemplateExtensions.label(absenceRequest.type),
+            absenceRequest.type.isAllDay() 
+            ? TemplateExtensions.format(absenceRequest.startAtAsDate()) 
+                : TemplateExtensions.format(absenceRequest.startAt),
+                absenceRequest.type.isAllDay() 
+                ? TemplateExtensions.format(absenceRequest.endToAsDate()) 
+                    : TemplateExtensions.format(absenceRequest.endTo),
+                    approver.getFullname());
+
+    Notification.builder().destination(absenceRequest.person.user).message(message)
+    .subject(NotificationSubject.ABSENCE_REQUEST, absenceRequest.id).create();
+
+  }
 
   /**
    * Gestore delle notifiche per le assenze inserite in seguito all'approvazione
@@ -331,11 +361,11 @@ public class NotificationManager {
     });
 
     person.office.usersRolesOffices.stream()
-    .filter(uro -> uro.role.name.equals(role.name))
-    .map(uro -> uro.user).forEach(user -> {
-      Notification.builder().destination(user).message(message.toString())
-      .subject(NotificationSubject.ABSENCE, absences.stream().findFirst().get().id).create();
-    });
+        .filter(uro -> uro.role.name.equals(role.name))
+          .map(uro -> uro.user).forEach(user -> {
+            Notification.builder().destination(user).message(message.toString())
+            .subject(NotificationSubject.ABSENCE, absences.stream().findFirst().get().id).create();
+          });
   }
 
   /**
@@ -390,21 +420,21 @@ public class NotificationManager {
       return;
     }
     person.office.usersRolesOffices.stream()
-    .filter(uro -> uro.role.equals(roleDestination))
-    .map(uro -> uro.user).forEach(user -> {
-      try {
-        simpleEmail.addTo(user.person.email);
-      } catch (EmailException e) {
-        e.printStackTrace();
-      }
-      simpleEmail.setSubject("ePas Approvazione flusso");
-      try {
-        simpleEmail.setMsg(createAbsenceRequestEmail(absenceRequest, user));
-      } catch (EmailException e) {
-        e.printStackTrace();
-      }
-      Mail.send(simpleEmail);
-    });
+        .filter(uro -> uro.role.equals(roleDestination))
+          .map(uro -> uro.user).forEach(user -> {
+            try {
+              simpleEmail.addTo(user.person.email);
+            } catch (EmailException e) {
+              e.printStackTrace();
+            }
+            simpleEmail.setSubject("ePas Approvazione flusso");
+            try {
+              simpleEmail.setMsg(createAbsenceRequestEmail(absenceRequest, user));
+            } catch (EmailException e) {
+              e.printStackTrace();
+            }
+            Mail.send(simpleEmail);
+          });
 
   }
 
