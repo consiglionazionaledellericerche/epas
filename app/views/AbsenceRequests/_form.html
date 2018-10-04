@@ -14,8 +14,8 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 	#{f.hidden 'absenceRequest.person.id' /}
 	#{f.hidden 'absenceRequest.type' /}
 	#{f.hidden 'persist', value:persist /}
-	#{f.date 'absenceRequest.startAt', required:true, value:absenceRequest.startAt?.format() /}
-	#{f.date 'absenceRequest.endTo' /}
+	#{f.date 'absenceRequest.startAt', required:true, value:absenceRequest.startAt?.format("dd/MM/yyyy") /}
+	#{f.date 'absenceRequest.endTo', value:absenceRequest.endTo?.format("dd/MM/yyyy") /}
 	
 	<div class="container-fluid"> 
    	#{include './_report.html' /}
