@@ -204,7 +204,7 @@ public class AbsenceRequests extends Controller {
     absenceRequest.type = type;
     absenceRequest.person = person;
     absenceRequest.startAt = absenceRequest.endTo = LocalDateTime.now();
-    boolean persist = false;
+    boolean insertable = true;
     GroupAbsenceType groupAbsenceType = absenceRequestManager.getGroupAbsenceType(absenceRequest);
     AbsenceType absenceType = null;
     AbsenceForm absenceForm =
@@ -215,7 +215,7 @@ public class AbsenceRequests extends Controller {
         absenceForm.groupSelected, absenceForm.from, absenceForm.to,
         absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected, 
         null, null, false, absenceManager);
-    render("@edit", absenceRequest, persist, insertReport);
+    render("@edit", absenceRequest, insertable, insertReport);
 
   }
 
@@ -229,13 +229,15 @@ public class AbsenceRequests extends Controller {
   public static void edit(AbsenceRequest absenceRequest) {
 
     rules.checkIfPermitted(absenceRequest);
+    boolean insertable = true;
     if (absenceRequest.startAt == null || absenceRequest.endTo == null) {
       Validation.addError("absenceRequest.startAt", 
           "Entrambi i campi data devono essere valorizzati");
       Validation.addError("absenceRequest.endTo", 
           "Entrambi i campi data devono essere valorizzati");
       response.status = 400;
-      render("@edit", absenceRequest);
+      insertable = false;
+      render("@edit", absenceRequest, insertable);
     }
     if (absenceRequest.startAt.isAfter(absenceRequest.endTo)) {
       Validation.addError("absenceRequest.startAt", 
@@ -247,13 +249,16 @@ public class AbsenceRequests extends Controller {
       Validation.addError("absenceRequest.startAt", "Esiste già una richiesta in questa data");
       Validation.addError("absenceRequest.endTo", "Esiste già una richiesta in questa data");
       response.status = 400;
-      render("@edit", absenceRequest);
+      insertable = false;
+      render("@edit", absenceRequest, insertable);
     }
 
     if (Validation.hasErrors()) {
       response.status = 400;
+      insertable = false;
       flash.error(Web.msgHasErrors());
-      render("@edit", absenceRequest);
+      
+      render("@edit", absenceRequest, insertable);
       return;
     }
     GroupAbsenceType groupAbsenceType = absenceRequestManager.getGroupAbsenceType(absenceRequest);
@@ -266,7 +271,7 @@ public class AbsenceRequests extends Controller {
         absenceForm.groupSelected, absenceForm.from, absenceForm.to,
         absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected, 
         null, null, false, absenceManager);
-    render(absenceRequest, insertReport, absenceForm);
+    render(absenceRequest, insertReport, absenceForm, insertable);
   }
 
   /**
@@ -365,13 +370,17 @@ public class AbsenceRequests extends Controller {
    *     seconda dei parametri.
    * @param id l'id della richiesta di assenza
    */
-  public static void disapproval(long id) {
+  public static void disapproval(long id, boolean disapproval, String reason) {
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     User user = Security.getUser().get(); 
+    if (!disapproval) {
+      disapproval = true;
+      render(absenceRequest, disapproval);
+    }
     if (absenceRequest.managerApprovalRequired && absenceRequest.managerApproved == null
         && user.hasRoles(Role.GROUP_MANAGER)) {
       //caso di approvazione da parte del responsabile di gruppo.
-      absenceRequestManager.managerDisapproval(id);
+      absenceRequestManager.managerDisapproval(id, reason);
       flash.error("Richiesta respinta");
       render("@show", absenceRequest, user);
     }
@@ -379,14 +388,14 @@ public class AbsenceRequests extends Controller {
         && absenceRequest.administrativeApproved == null
         && user.hasRoles(Role.PERSONNEL_ADMIN)) {
       //caso di approvazione da parte dell'amministratore del personale
-      absenceRequestManager.personnelAdministratorDisapproval(id);
+      absenceRequestManager.personnelAdministratorDisapproval(id, reason);
       flash.error("Richiesta respinta");
       render("@show", absenceRequest, user);
     }
     if (absenceRequest.officeHeadApprovalRequired && absenceRequest.officeHeadApproved == null 
         && user.hasRoles(Role.SEAT_SUPERVISOR)) {
       //caso di approvazione da parte del responsabile di sede
-      absenceRequestManager.officeHeadDisapproval(id);
+      absenceRequestManager.officeHeadDisapproval(id, reason);
       flash.error("Richiesta respinta");
       render("@show", absenceRequest, user);
     }
@@ -419,6 +428,7 @@ public class AbsenceRequests extends Controller {
     notFoundIfNull(absenceRequest);
     rules.checkIfPermitted(absenceRequest);
     User user = Security.getUser().get();
-    render(absenceRequest, type, user);
+    boolean disapproval = false;
+    render(absenceRequest, type, user, disapproval);
   }
 }

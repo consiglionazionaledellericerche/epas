@@ -574,6 +574,16 @@ then
   $c.grant();
 end
 
+rule EmployCanDeleteSpecificAbsenceRequest
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $ar: AbsenceRequest(person == currentOperator.person, flowEnded == false,
+  		managerApproved == null, administrativeApproved == null, officeHeadApproved == null)
+  $c: PermissionCheck( action in ("AbsenceRequests.delete" ), target==$ar, granted == false)
+then
+  $c.grant();
+end
+
 
 rule personInCharge
 when
@@ -590,7 +600,7 @@ when
 			"AbsenceRequests.listToApprove",
 			"AbsenceRequests.vacationsToApprove",
 			"AbsenceRequests.compensatoryRestsToApprove",
-			"AbsenceRequests.delete",
+			
 			"AbsenceRequests.vacations",
 			"AbsenceRequests.compensatoryRests",
 			"AbsenceRequests.shortTermPermits",
@@ -628,7 +638,7 @@ when
 			"AbsenceRequests.listToApprove",
 			"AbsenceRequests.vacationsToApprove",
 			"AbsenceRequests.compensatoryRestsToApprove",
-			"AbsenceRequests.delete",
+			
 			"AbsenceRequests.vacations",
 			"AbsenceRequests.compensatoryRests",
 			"AbsenceRequests.shortTermPermits",
@@ -1039,7 +1049,7 @@ when
 		"AbsenceRequests.listToApprove",
 		"AbsenceRequests.vacationsToApprove",
 		"AbsenceRequests.compensatoryRestsToApprove",
-		"AbsenceRequests.delete",
+		
 		"AbsenceRequests.vacations",
 		"AbsenceRequests.compensatoryRests",
 		"AbsenceRequests.shortTermPermits",
@@ -1069,7 +1079,7 @@ when
 		"AbsenceRequests.listToApprove",
 		"AbsenceRequests.vacationsToApprove",
 		"AbsenceRequests.compensatoryRestsToApprove",
-		"AbsenceRequests.delete",
+		
 		"AbsenceRequests.vacations",
 		"AbsenceRequests.compensatoryRests",
 		"AbsenceRequests.shortTermPermits",
@@ -1088,11 +1098,10 @@ when
  Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
  $ar: AbsenceRequest(officeHeadApprovalRequired == true && officeHeadApproved == null && flowEnded == false)
  $c: PermissionCheck(action in (
+		"AbsenceRequests.edit",
 		"AbsenceRequests.show",
 		"AbsenceRequests.approval",
-		"AbsenceRequests.disapproval",
-		"AbsenceRequests.delete",
-		"AbsenceRequests.edit"
+		"AbsenceRequests.disapproval"
 		), target == $ar, granted == false)
 then
  $c.grant();

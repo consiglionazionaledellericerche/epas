@@ -21,11 +21,11 @@
     <p>Elenco degli stati di approvazione della <strong>#{f.value 'absenceRequest.type', value:absenceRequest.type /}</strong>
     per <strong>#{f.value 'absenceRequest.person.fullname', value:absenceRequest.person.fullname /}</strong>:</p>
  #{/alert}
- #{alert color:'warning'}
- 	<p>La richiesta è per i giorni da <strong>${absenceRequest.startAt.toLocalDate().format()}</strong> 
- 	   a <strong>${absenceRequest.endTo.toLocalDate().format()}</strong>
- 	</p>
- #{/alert}
+ <div class="container-fluid center color:info">
+ 
+ 	#{f.view 'absenceRequest.startAt', value:absenceRequest.startAt?.format() /}<br>
+	#{f.view 'absenceRequest.endTo', value:absenceRequest.endTo?.format() /}
+</div>	
 <table class="table table-striped">
 <tr>
 	<th>Autore</th>
@@ -36,7 +36,8 @@
 #{list items:absenceRequest.events, as:'item'}
 <tr #{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.MANAGER_REFUSAL) 
 	|| item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.ADMINISTRATIVE_REFUSAL)
-	|| item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.OFFICE_HEAD_REFUSAL))} class="danger" #{/if}
+	|| item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.OFFICE_HEAD_REFUSAL))
+	|| item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.DELETE)} class="danger" #{/if}
 	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.MANAGER_APPROVAL) 
 	|| item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.ADMINISTRATIVE_APPROVAL)
 	|| item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.OFFICE_HEAD_APPROVAL))} class="success" #{/if}	
@@ -48,18 +49,15 @@
 #{/list}
 </table>
 
-	#{b.buttons center:true}  
-		#{secure.check 'AbsenceRequests.edit', target:absenceRequest}
-			#{b.link @edit(absenceRequest.id), color:'primary', title:'Modifica'/}			
-		#{/secure.check}
+	#{b.buttons center:true}
 		#{secure.check 'AbsenceRequests.delete', target:absenceRequest}
-			#{b.link @delete(absenceRequest.id), color:'danger', title:'Elimina'/}			
+			#{b.link @delete(absenceRequest.id), color:'danger', title:'Revoca' /}
 		#{/secure.check}
 		#{secure.check 'AbsenceRequests.approval', target:absenceRequest}
 			#{b.link @approval(absenceRequest.id), color:'success', title:'Approva'/}
 		#{/secure.check}
 		#{secure.check 'AbsenceRequests.disapproval', target:absenceRequest}
-			#{b.link @disapproval(absenceRequest.id), color:'warning', title:'Rifiuta'/}			
+			#{b.link @disapproval(absenceRequest.id, disapproval), 'data-async-modal': '#defaultModal', color:'warning', title:'Rifiuta'/}			
 		#{/secure.check}
 	#{/b.buttons}
 </div>

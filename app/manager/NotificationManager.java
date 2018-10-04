@@ -49,10 +49,10 @@ public class NotificationManager {
 
   private static final String DTF = "dd/MM/YYYY - HH:mm";
   private static final String DF = "dd/MM/YYYY";
-  
+
   private static final String BASE_URL = Play.configuration.getProperty("application.baseUrl");
-  private static final String VACATIONS_PATH = "absencerequest/vacationstoapprove";
-  private static final String COMPENSATORY_REST_PATH = "absencerequest/compensatoryresttoapprove";
+  private static final String PATH = "absencerequest/show";
+
 
   /**
    * Tipi di operazioni sulle entity.
@@ -85,19 +85,19 @@ public class NotificationManager {
     final String message = String.format(template, person.fullName(), stamping.date.toString(DTF));
 
     person.office.usersRolesOffices.stream()
-        .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
+    .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
         || uro.role.name.equals(Role.SEAT_SUPERVISOR))
-        .map(uro -> uro.user).forEach(user -> {
-          if (operation != Crud.DELETE) {
-            Notification.builder().destination(user).message(message)
-            .subject(NotificationSubject.STAMPING, stamping.id).create();
-          } else {
-            // per la notifica delle delete niente redirect altrimenti tocca
-            // andare a prelevare l'entity dallo storico
-            Notification.builder().destination(user).message(message)
+    .map(uro -> uro.user).forEach(user -> {
+      if (operation != Crud.DELETE) {
+        Notification.builder().destination(user).message(message)
+        .subject(NotificationSubject.STAMPING, stamping.id).create();
+      } else {
+        // per la notifica delle delete niente redirect altrimenti tocca
+        // andare a prelevare l'entity dallo storico
+        Notification.builder().destination(user).message(message)
         .subject(NotificationSubject.STAMPING).create();
-          }
-        });
+      }
+    });
   }
 
   /**
@@ -126,12 +126,12 @@ public class NotificationManager {
         absence.personDay.date.toString(DF), absence.absenceType.code);
 
     person.office.usersRolesOffices.stream()
-        .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
-            || uro.role.name.equals(Role.SEAT_SUPERVISOR))
-        .map(uro -> uro.user).forEach(user -> {
-          Notification.builder().destination(user).message(message)
-          .subject(NotificationSubject.ABSENCE, absence.id).create();
-        });
+    .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
+        || uro.role.name.equals(Role.SEAT_SUPERVISOR))
+    .map(uro -> uro.user).forEach(user -> {
+      Notification.builder().destination(user).message(message)
+      .subject(NotificationSubject.ABSENCE, absence.id).create();
+    });
   }
 
   /**
@@ -163,11 +163,11 @@ public class NotificationManager {
       return;
     }
     person.office.usersRolesOffices.stream()
-        .filter(uro -> uro.role.equals(roleDestination))
-          .map(uro -> uro.user).forEach(user -> {
-            Notification.builder().destination(user).message(message)
-            .subject(NotificationSubject.ABSENCE_REQUEST, absenceRequest.id).create();
-          });
+    .filter(uro -> uro.role.equals(roleDestination))
+    .map(uro -> uro.user).forEach(user -> {
+      Notification.builder().destination(user).message(message)
+      .subject(NotificationSubject.ABSENCE_REQUEST, absenceRequest.id).create();
+    });
   }
 
   /**
@@ -331,11 +331,11 @@ public class NotificationManager {
     });
 
     person.office.usersRolesOffices.stream()
-        .filter(uro -> uro.role.name.equals(role.name))
-          .map(uro -> uro.user).forEach(user -> {
-            Notification.builder().destination(user).message(message.toString())
-            .subject(NotificationSubject.ABSENCE, absences.stream().findFirst().get().id).create();
-          });
+    .filter(uro -> uro.role.name.equals(role.name))
+    .map(uro -> uro.user).forEach(user -> {
+      Notification.builder().destination(user).message(message.toString())
+      .subject(NotificationSubject.ABSENCE, absences.stream().findFirst().get().id).create();
+    });
   }
 
   /**
@@ -354,7 +354,7 @@ public class NotificationManager {
       return;
     }
   }
-  
+
   /**
    * Metodo pubblico che chiama l'invio delle email ai destinatari all'approvazione della richiesta
    *     d'assenza.
@@ -390,22 +390,22 @@ public class NotificationManager {
       return;
     }
     person.office.usersRolesOffices.stream()
-        .filter(uro -> uro.role.equals(roleDestination))
-          .map(uro -> uro.user).forEach(user -> {
-            try {
-              simpleEmail.addTo(user.person.email);
-            } catch (EmailException e) {
-              e.printStackTrace();
-            }
-            simpleEmail.setSubject("ePas Approvazione flusso");
-            try {
-              simpleEmail.setMsg(createAbsenceRequestEmail(absenceRequest, user));
-            } catch (EmailException e) {
-              e.printStackTrace();
-            }
-            Mail.send(simpleEmail);
-          });
-    
+    .filter(uro -> uro.role.equals(roleDestination))
+    .map(uro -> uro.user).forEach(user -> {
+      try {
+        simpleEmail.addTo(user.person.email);
+      } catch (EmailException e) {
+        e.printStackTrace();
+      }
+      simpleEmail.setSubject("ePas Approvazione flusso");
+      try {
+        simpleEmail.setMsg(createAbsenceRequestEmail(absenceRequest, user));
+      } catch (EmailException e) {
+        e.printStackTrace();
+      }
+      Mail.send(simpleEmail);
+    });
+
   }
 
   /**
@@ -440,14 +440,11 @@ public class NotificationManager {
     if (!baseUrl.endsWith("/")) {
       baseUrl = baseUrl + "/";
     }
-    if (absenceRequest.type == AbsenceRequestType.COMPENSATORY_REST) {
-      baseUrl = baseUrl + COMPENSATORY_REST_PATH;
-    }
-    if (absenceRequest.type == AbsenceRequestType.VACATION_REQUEST) {
-      baseUrl = baseUrl + VACATIONS_PATH;
-    }    
+
+    baseUrl = baseUrl + PATH + "?id=" + absenceRequest.id + "&type=" + absenceRequest.type;
+
     message.append(String.format("\r\n Verifica cliccando sul link seguente: %s", baseUrl));
-    
+
     return message.toString();
   }
 }
