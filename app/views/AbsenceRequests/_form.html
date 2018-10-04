@@ -15,7 +15,7 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 	#{f.hidden 'absenceRequest.type' /}
 	#{f.hidden 'persist', value:persist /}
 	#{f.date 'absenceRequest.startAt', required:true, value:absenceRequest.startAt?.format() /}
-	#{f.date 'absenceRequest.endTo' /}
+	#{f.date 'absenceRequest.endTo', value:absenceRequest.endTo?.format() /}
 	
 	<div class="container-fluid"> 
    	#{include './_report.html' /}
@@ -38,6 +38,11 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
       
             
 	#{b.buttons center:true}
+		 #{if insertable}
          #{b.submit 'Inserisci'/}
+         #{/if}
+         #{else}
+         #{b.submit 'Inserisci', disabled:true /}
+         #{/else}
     #{/b.buttons}
 #{/form}	  

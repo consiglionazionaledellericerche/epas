@@ -539,13 +539,13 @@ public class AbsenceRequestManager {
    * Metodo che permette la disapprovazione della richiesta.
    * @param id l'identificativo della richiesta di assenza
    */
-  public void managerDisapproval(long id) {
+  public void managerDisapproval(long id, String reason) {
 
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     val currentPerson = Security.getUser().get().person;
     executeEvent(
         absenceRequest, currentPerson, 
-        AbsenceRequestEventType.MANAGER_REFUSAL, Optional.absent());
+        AbsenceRequestEventType.MANAGER_REFUSAL, Optional.fromNullable(reason));
     log.info("{} disapprovata dal responsabile di gruppo {}.",
         absenceRequest, currentPerson.getFullname());
 
@@ -555,13 +555,13 @@ public class AbsenceRequestManager {
    * Approvazione richiesta assenza da parte del responsabile di sede.
    * @param id id della richiesta di assenza.
    */
-  public void officeHeadDisapproval(long id) {
+  public void officeHeadDisapproval(long id, String reason) {
 
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     val currentPerson = Security.getUser().get().person;
     executeEvent(
         absenceRequest, currentPerson, 
-        AbsenceRequestEventType.OFFICE_HEAD_REFUSAL, Optional.absent());
+        AbsenceRequestEventType.OFFICE_HEAD_REFUSAL, Optional.fromNullable(reason));
     log.info("{} disapprovata dal responsabile di sede {}.",
         absenceRequest, currentPerson.getFullname());   
 
@@ -571,12 +571,12 @@ public class AbsenceRequestManager {
    * Approvazione della richiesta di assenza da parte dell'amministratore del personale.
    * @param id l'id della richiesta di assenza.
    */
-  public void personnelAdministratorDisapproval(long id) {
+  public void personnelAdministratorDisapproval(long id, String reason) {
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     val currentPerson = Security.getUser().get().person;
     executeEvent(
         absenceRequest, currentPerson, 
-        AbsenceRequestEventType.ADMINISTRATIVE_REFUSAL, Optional.absent());
+        AbsenceRequestEventType.ADMINISTRATIVE_REFUSAL, Optional.fromNullable(reason));
     log.info("{} disapprovata dall'amministratore del personale {}.",
         absenceRequest, currentPerson.getFullname());    
 
