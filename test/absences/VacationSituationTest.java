@@ -63,7 +63,7 @@ public class VacationSituationTest extends UnitTest {
         new LocalDate(2016, 9, 11), Optional.absent(), 0, person);
 
     VacationSituation vacationSituation = absenceService.buildVacationSituation(
-        person.contracts.get(0), 2016, vacationGroup, Optional.of(today), false, null);
+        person.contracts.get(0), 2016, vacationGroup, Optional.of(today), false);
 
     assertTrue(vacationSituation.lastYear.expired());
     assertEquals(vacationSituation.lastYear.total(), 28);
@@ -97,7 +97,7 @@ public class VacationSituationTest extends UnitTest {
         new LocalDate(2016, 9, 11), Optional.absent(), 0, person2);
     
     VacationSituation vacationSituation2 = absenceService.buildVacationSituation(
-        person2.contracts.get(0), 2016, vacationGroup, Optional.of(today), false, null);
+        person2.contracts.get(0), 2016, vacationGroup, Optional.of(today), false);
     
     assertTrue(vacationSituation2.lastYear.expired());
     assertEquals(vacationSituation2.lastYear.total(), 28);
@@ -109,13 +109,48 @@ public class VacationSituationTest extends UnitTest {
     assertEquals(vacationSituation2.currentYear.total(), 21);
     assertEquals(vacationSituation2.currentYear.used(), 1);
     assertEquals(vacationSituation2.currentYear.usableTotal(), 20);
-    assertEquals(vacationSituation2.currentYear.usable(), 17);
+    assertEquals(vacationSituation2.currentYear.usable(), 20);   // con la vecchia politica era 17
     
     assertFalse(vacationSituation2.permissions.expired());
     assertEquals(vacationSituation2.permissions.total(), 3);
     assertEquals(vacationSituation2.permissions.used(), 1);
     assertEquals(vacationSituation2.permissions.usableTotal(), 2);
     assertEquals(vacationSituation2.permissions.usable(), 2);
+  }
+  
+  /**
+   * Si assicura che fino al primo anno di contratto il dipendente può usufruire soltanto delle
+   * ferie maturate.
+   * Dal secondo anno può usufruire di tutte le ferie.
+   */
+  @Test
+  public void onlyAccruedUntilFirstContractYear() {
+    
+    absenceService.enumInitializator();
+
+    GroupAbsenceType vacationGroup = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
+
+    final LocalDate contractBegin = new LocalDate(2017, 7, 1);
+
+    Person person = h2Examples.normalEmployee(contractBegin, Optional.absent());
+
+    // riepilogo all'ultimo giorno del primo anno, posso prendere solo quelle maturate
+    LocalDate today = contractBegin.plusYears(1).minusDays(1);
+    VacationSituation vacationSituation = absenceService.buildVacationSituation(
+        person.contracts.get(0), 2018, vacationGroup, Optional.of(today), false);
+
+    assertEquals(vacationSituation.currentYear.total(), 26);
+    assertEquals(vacationSituation.currentYear.usable(), 13);
+
+    // riepilogo al primo giorno del secondo anno, posso prenderle tutte
+    today = contractBegin.plusYears(1);
+    vacationSituation = absenceService.buildVacationSituation(
+        person.contracts.get(0), 2018, vacationGroup, Optional.of(today), false);
+    
+    assertEquals(vacationSituation.currentYear.total(), 26);
+    assertEquals(vacationSituation.currentYear.usable(), 26);
+
   }
   
   /**
@@ -147,7 +182,7 @@ public class VacationSituationTest extends UnitTest {
     final LocalDate today = new LocalDate(2015, 1, 1); //recap date
 
     VacationSituation vacationSituation = absenceService.buildVacationSituation(
-        person.contracts.get(0), 2015, vacationGroup, Optional.of(today), false, null);
+        person.contracts.get(0), 2015, vacationGroup, Optional.of(today), false);
 
     assertEquals(vacationSituation.currentYear.total(), 26);
     assertEquals(vacationSituation.currentYear.accrued(), 1);
@@ -174,7 +209,7 @@ public class VacationSituationTest extends UnitTest {
     final LocalDate today = new LocalDate(2016, 1, 1); //recap date
 
     VacationSituation vacationSituation = absenceService.buildVacationSituation(
-        person.contracts.get(0), 2016, vacationGroup, Optional.of(today), false, null);
+        person.contracts.get(0), 2016, vacationGroup, Optional.of(today), false);
 
     assertEquals(vacationSituation.currentYear.total(), 28);
     assertEquals(vacationSituation.currentYear.accrued(), 0);
@@ -213,12 +248,12 @@ public class VacationSituationTest extends UnitTest {
         .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
     
     VacationSituation vacationSituation = absenceService.buildVacationSituation(
-        contract, 2016, vacationGroup, Optional.of(new LocalDate(2016, 1, 1)), false, null);
+        contract, 2016, vacationGroup, Optional.of(new LocalDate(2016, 1, 1)), false);
 
     assertEquals(vacationSituation.currentYear.usable(), 23);
 
     VacationSituation vacationSituation2 = absenceService.buildVacationSituation(
-        contract, 2017, vacationGroup, Optional.of(new LocalDate(2017, 1, 1)), false, null);
+        contract, 2017, vacationGroup, Optional.of(new LocalDate(2017, 1, 1)), false);
     
     assertEquals(vacationSituation2.lastYear.usable(), 23);
     

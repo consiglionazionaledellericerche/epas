@@ -49,6 +49,9 @@ public class QPersonReperibilityType extends EntityPathBase<PersonReperibilityTy
 
     public final QPerson supervisor;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QPersonReperibilityType(String variable) {
         this(PersonReperibilityType.class, forVariable(variable), INITS);
     }

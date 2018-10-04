@@ -125,6 +125,7 @@ public class CompetenceManager {
 
 
   /**
+   * Metodo che genera la lista di stringhe contenente i codici per straordinari.
    * @return la lista di stringhe popolata con i codici dei vari tipi di straordinario prendibili.
    */
   public List<String> populateListWithOvertimeCodes() {
@@ -136,6 +137,7 @@ public class CompetenceManager {
   }
 
   /**
+   * Metodo che conteggia il monte ore di straordinari.
    * @return il quantitativo di straordinari totali.
    */
   public Integer getTotalOvertime(List<TotalOvertime> total) {
@@ -147,6 +149,7 @@ public class CompetenceManager {
   }
 
   /**
+   * Metodo che conteggia il quantitativo annuale degli straordinari.
    * @return il quantitativo su base annuale di straordinari.
    */
   public int getTotalYearlyOvertime(List<Competence> competenceYearList) {
@@ -159,6 +162,7 @@ public class CompetenceManager {
   }
 
   /**
+   * Metodo che conteggia il quantitativo mensile degli straordinari.
    * @return il quantitativo su base mensile di straordinari.
    */
   public int getTotalMonthlyOvertime(List<Competence> competenceMonthList) {
@@ -205,6 +209,7 @@ public class CompetenceManager {
   }
 
   /**
+   * Metodo che genera la tabella per la visualizzazione degli straordinari.
    * @return la tabella formata da persone, dato e valore intero relativi ai quantitativi orari su
    *     orario di lavoro, straordinario, riposi compensativi per l'anno year e il mese month per le
    *     persone dell'ufficio office.
@@ -253,6 +258,7 @@ public class CompetenceManager {
   }
 
   /**
+   * Metodo per la creazione del file per l'esportazione degli straordinari.
    * @return il file contenente tutti gli straordinari effettuati dalle persone presenti nella lista
    *     personList nell'anno year.
    */
@@ -328,6 +334,7 @@ public class CompetenceManager {
 
 
   /**
+   * Metodo che verifica la possibilità di aggiungere la competenza.
    * @param comp  la competenza da aggiornare
    * @param value il quantitativo per quella competenza da aggiornare
    * @return La stringa contenente il messaggio da far visualizzare come errore, se riscontrato.
@@ -389,7 +396,7 @@ public class CompetenceManager {
         break;
       case onMonthlyPresence:
         PersonStampingRecap psDto = 
-        stampingsRecapFactory.create(comp.person, comp.year, comp.month, true);
+            stampingsRecapFactory.create(comp.person, comp.year, comp.month, true);
         if (psDto.basedWorkingDays != value) {
           result = Messages.get("CompManager.diffBasedWorkingDay");
         }
@@ -426,6 +433,7 @@ public class CompetenceManager {
 
 
   /**
+   * Metodo per il conteggio dei giorni di reperibilità massimi in un mese/anno.
    * @param yearMonth l'anno/mese di riferimento
    * @param office    la sede per cui si cercano i servizi per reperibilità abilitati
    * @return il numero di giorni di reperibilità disponibili sulla base di quanti servizi per
@@ -437,11 +445,12 @@ public class CompetenceManager {
         ? reperibilityDao.getReperibilityTypeByOffice(
             office, Optional.fromNullable(false)).size()
             : 0;
-            return numbers * (new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1)
-                .dayOfMonth().getMaximumValue());
+    return numbers * (new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1)
+        .dayOfMonth().getMaximumValue());
   }
 
   /**
+   * Metodo per la verifica sui servizi abilitati.
    * @param office la sede su cui cercare.
    * @return true se ci sono servizi attivi per la reperibilità. False altrimenti.
    */
@@ -456,6 +465,8 @@ public class CompetenceManager {
 
 
   /**
+   * Metodo che verifica la pertinenza della quantità di giorni di reperibilità assegnati 
+   *    in base ai limiti previsti.
    * @param comp  la competenza
    * @param value il quantitativo per la competenza
    * @param group il gruppo di codici di competenza
@@ -483,6 +494,7 @@ public class CompetenceManager {
   }
 
   /**
+   * Metodo per il controllo dell'abilitazione di una competenza a una persona.
    * @param comp la competenza
    * @return true se la competenza è abilitata per la persona. False altrimenti.
    */
@@ -497,6 +509,7 @@ public class CompetenceManager {
   }
 
   /**
+   * Metodo per il controllo sull'esistenza di un servizio di reperibilità.
    * @return true se esiste almeno un servizio per reperibilità inizializzato, false altrimenti.
    */
   public boolean isServiceForReperibilityInitialized(
@@ -514,6 +527,7 @@ public class CompetenceManager {
 
 
   /**
+   * Metodo che ritorna la lista dei codici di competenza da salvare.
    * @param pccList     la lista di PersonCompetenceCodes di partenza
    * @param codeListIds la lista di id di codici competenza da confrontare
    * @return la lista dei codici di assenza da aggiungere alla configurazione dei
@@ -545,6 +559,7 @@ public class CompetenceManager {
   }
 
   /**
+   * Metodo che ritorna la lista dei codici di competenza da rimuovere.
    * @param pccList     la lista di personcompetencecode
    * @param codeListIds la lista di id che rappresentano i codici di assenza
    * @return la lista dei codici di competenza da rimuovere da quelli associati alla persona a cui
@@ -594,11 +609,11 @@ public class CompetenceManager {
         boolean found = false;
         while (counter < pccList.size() && found == false) {
           DateInterval interval = null;
-          if (pccList.get(counter).endDate != null ) {            
+          if (pccList.get(counter).endDate != null) {            
             interval = new DateInterval(pccList.get(counter).beginDate, 
                 pccList.get(counter).endDate);
           } else {
-            interval = new DateInterval(pccList.get(counter).beginDate, 
+            interval = DateInterval.withBegin(pccList.get(counter).beginDate, 
                 Optional.<LocalDate>absent());
           }
 
@@ -721,6 +736,7 @@ public class CompetenceManager {
   }
 
   /**
+   * Metodo per la creazione della lista di competenze.
    * @param personList la lista di persone attive
    * @param date       la data in cui si richiedono le competenze
    * @return la creazione della lista di competenze per il mese/anno.
@@ -739,7 +755,6 @@ public class CompetenceManager {
         competence.competenceCode = code;
         competence.month = date.getMonthOfYear();
         competence.year = date.getYear();
-        competence.save();
         compList.add(competence);
       }
 
@@ -748,7 +763,7 @@ public class CompetenceManager {
   }
 
   /**
-   *
+   * Metodo per creazione della mappa che associa la persona alle competenze assegnate.
    * @param competenceList la lista delle competenze assegnate nell'anno/mese a una persona
    * @return una mappa già formata per la visualizzazione della situazione mensile delle competenze
    *     della singola persona.
@@ -769,7 +784,7 @@ public class CompetenceManager {
   }
 
   /**
-   * 
+   * Metodo che ritorna la lista dei dto modellati per esigenza di template.
    * @param list la lista contenente tutte le timetable dei turni disponibili
    * @return una lista di dto modellati per esigenze di template.
    */
@@ -794,13 +809,13 @@ public class CompetenceManager {
       dto.startMorningLunchTime = shiftTimeTable.startMorningLunchTime.toString(stamping_format);
       dto.startEvening = shiftTimeTable.startEvening != null 
           ? shiftTimeTable.startEvening.toString(stamping_format) : "";
-          dto.endEvening = shiftTimeTable.endEvening != null 
+      dto.endEvening = shiftTimeTable.endEvening != null 
               ? shiftTimeTable.endEvening.toString(stamping_format) : "";
-              dto.startEveningLunchTime = shiftTimeTable.startEveningLunchTime != null 
-                  ? shiftTimeTable.startEveningLunchTime.toString(stamping_format) : "";
-                  dto.endEveningLunchTime = shiftTimeTable.endEveningLunchTime != null 
-                      ? shiftTimeTable.endEveningLunchTime.toString(stamping_format) : "";
-                      return dto;
+      dto.startEveningLunchTime = shiftTimeTable.startEveningLunchTime != null 
+              ? shiftTimeTable.startEveningLunchTime.toString(stamping_format) : "";
+      dto.endEveningLunchTime = shiftTimeTable.endEveningLunchTime != null 
+              ? shiftTimeTable.endEveningLunchTime.toString(stamping_format) : "";
+      return dto;
     }).collect(Collectors.toList());
     return dtoList;
   }
@@ -944,7 +959,7 @@ public class CompetenceManager {
       switch (code.limitType) {
         case onMonthlyPresence:
           PersonStampingRecap psDto = stampingsRecapFactory
-          .create(person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true);
+              .create(person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true);
           addSpecialCompetence(person, yearMonth, code, Optional.fromNullable(psDto));
           break;
         case entireMonth:
@@ -1001,8 +1016,7 @@ public class CompetenceManager {
     personShift = personShiftDayDao.getPersonShiftByPerson(person, date);
     if (personShift != null) {
       log.info("L'utente {} è già presente in tabella person_shift", person.fullName());
-//      personShift.disabled = false;
-//      personShift.save();
+
     } else {
       personShift = new PersonShift();
       personShift.person = person;

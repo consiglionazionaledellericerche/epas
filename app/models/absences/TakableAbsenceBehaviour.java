@@ -77,7 +77,17 @@ public class TakableAbsenceBehaviour extends BaseModel {
   }
   
   public enum TakeAmountAdjustment {
-    workingPeriodPercent, workingTimeAndWorkingPeriodPercent;
+    workingTimePercent(true, false),
+    workingPeriodPercent(false, true),
+    workingTimeAndWorkingPeriodPercent(true, true);
+    
+    public boolean workTime;
+    public boolean periodTime;
+
+    private TakeAmountAdjustment(boolean workTime, boolean periodTime) {
+      this.workTime = workTime;
+      this.periodTime = periodTime;
+    }
   }
   
   /**

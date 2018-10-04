@@ -27,20 +27,24 @@
     background: white;
     padding-top: 1em;
     }
+    
+    .break{
+    page-break-after: always;
+    }
 
   </style>
 </head>
 
 <body>
-
-<h3>Situazione presenze mensile ${org.joda.time.LocalDate.now().withYear(psDto.year).withMonthOfYear(psDto.month).toString("MMMM YYYY")} di ${psDto.person.fullname}</h3>
+#{list dtoList, as:'dto'}
+<h3>Situazione presenze mensile ${org.joda.time.LocalDate.now().withYear(dto.psDto.year).withMonthOfYear(dto.psDto.month).toString("MMMM YYYY")} di ${dto.psDto.person.fullname}</h3>
 
 <table>
   <tr>
     <th>Buono mensa</th>
     <th>Giorno</th>
     <th>Codice di assenza</th>
-    #{list items:1..psDto.numberOfInOut}
+    #{list items:1..dto.psDto.numberOfInOut}
     <th>${_}° entrata</th>
     <th>${_}° uscita</th>
     #{/list}
@@ -49,7 +53,7 @@
     <th>Progressivo</th>
     <th>Tipo Orario</th>
   </tr>
-  #{list psDto.daysRecap,as:'dayRecap'}
+  #{list dto.psDto.daysRecap,as:'dayRecap'}
 	  #{if dayRecap.ignoreDay}
 	  #{set ignore:true /}
 	  #{/if}
@@ -122,18 +126,18 @@
 </table>
 <br>
 
-  #{list items:psDto.contractMonths, as:'mese'}
+  #{list items:dto.psDto.contractMonths, as:'mese'}
 
   <!-- solo last in month -->
-  #{if mese.contract.isLastInMonth((int)psDto.month, (int)psDto.year)}
-    <br>Numero di giorni lavorativi in sede: <strong>${psDto.basedWorkingDays}</strong>
-    <br>Numero di riposi compensativi usati fin'ora (nell'anno in corso): <strong>${psDto.numberOfCompensatoryRestUntilToday} giorni</strong>
+  #{if mese.contract.isLastInMonth((int)dto.psDto.month, (int)dto.psDto.year)}
+    <br>Numero di giorni lavorativi in sede: <strong>${dto.psDto.basedWorkingDays}</strong>
+    <br>Numero di riposi compensativi usati fin'ora (nell'anno in corso): <strong>${dto.psDto.numberOfCompensatoryRestUntilToday} giorni</strong>
   #{/if}
   #{else}
     <em>Il contratto e' terminato nel corso di questo mese.</em>
   #{/else}
-  <br>Numero di buoni pasto maturati in questo mese: <strong>${psDto.numberOfMealTicketToUse}</strong>
-  <br>Totale ore di lavoro effettuate nel mese: <strong>${psDto.totalWorkingTime.toHourTime()}</strong>
+  <br>Numero di buoni pasto maturati in questo mese: <strong>${dto.psDto.numberOfMealTicketToUse}</strong>
+  <br>Totale ore di lavoro effettuate nel mese: <strong>${dto.psDto.totalWorkingTime.toHourTime()}</strong>
   #{if mese.getPreviousRecapInYear().present}
     <br>Monte ore all'inizio del mese:
     <strong>${mese.getPreviousRecapInYear().get().remainingMinutesCurrentYear.toHourTime()}</strong>
@@ -172,7 +176,7 @@
 </p>
 
 <div id="tabelleRiassuntive">
-  #{ifnot psDto.stampModificationTypeSet.isEmpty()}
+  #{ifnot dto.psDto.stampModificationTypeSet.isEmpty()}
   <strong style="margin-top: 2em">Note:</strong>
   <br>
   <table>
@@ -180,43 +184,58 @@
       <th>Codice timbratura</th>
       <th>Descrizione</th>
     </tr>
-    #{list psDto.stampModificationTypeSet}
+    #{list dto.psDto.stampModificationTypeSet, as:'smt'}
     <tr>
-      <td>${_.code}</td>
-      <td>${_.description}</td>
+      <td>${smt.code}</td>
+      <td>${smt.description}</td>
     </tr>
     #{/list}
-    #{list psDto.stampTypeSet}
+    #{list dto.psDto.stampTypeSet, as:'sts'}
     <tr>
-      <td>${_.identifier}</td>
-      <td>${_.description}</td>
+      <td>${sts.identifier}</td>
+      <td>${sts.description}</td>
     </tr>
     #{/list}
   </table>
   #{/ifnot}
 
-  #{ifnot psDto.absenceCodeMap.entrySet().isEmpty()}
+  #{ifnot dto.psDto.absenceList.isEmpty()}
   *{Significato codici assenza}*
   <br>
   <strong style="margin-top: 2em">Tabella codici di assenza:</strong>
   <br>
   <table>
     <tr>
+      <th>Data</th>
       <th>Codice assenza</th>
       <th>Descrizione</th>
-      <th>Numero giorni</th>
+      <th>Ore e minuti</th>
     </tr>
-    #{list psDto.absenceCodeMap.entrySet()}
+    #{list dto.psDto.absenceList, as:'abs'}
+    #{if abs.justifiedMinutes != null}
     <tr>
-      <td>${_.getKey().code}</td>
-      <td>${_.getKey().description}</td>
-      <td>${_.getValue()}</td>
+      <td>${abs.personDay.date}</td>
+      <td>${abs.absenceType.code}</td>
+      <td>${abs.absenceType.description}</td>
+      <td>
+      #{if abs.justifiedType.name.equals(models.absences.JustifiedType.JustifiedTypeName.all_day)}
+        Tutto il giorno
+      #{/if}
+      #{elseif abs.justifiedType.name.equals(models.absences.JustifiedType.JustifiedTypeName.complete_day_and_add_overtime)}
+      	A completamento giornaliero
+      #{/elseif}
+      #{else}
+      	${abs.justifiedMinutes} minuti
+      #{/else}
+      </td>  
+          
     </tr>
+    #{/if}
     #{/list}
   </table>
 </div>
 #{/ifnot}
-#{if includeStampingDetails == true}
+#{if dto.includeStampingDetails == true}
 <h2 id="stampingsDetailsTitle">Dettagli Timbrature modificate dall'amministratore</h2>
 <table>
   <tr>
@@ -227,21 +246,25 @@
     <th>&{'stamping.way'}</th>
     <th>&{'stamping.stampType'}</th>
     <th>&{'stamping.note'}</th>
+    <th>&{'stamping.reason'}</th>
+    <th>&{'stamping.place'}</th>
   </tr>
 
-  #{list historyStampingsList,as:'stampHistory'}
+  #{list dto.historyStampingsList,as:'stampHistory'}
   <tr>
     <td colspan="7" class="emptycell"></td>
   </tr>
-  #{list stampHistory}
+  #{list stampHistory, as:'history'}
   <tr>
-    <td>${_.value?.date.format()}</td>
-    <td>${_.formattedRevisionDate()}</td>
-    <td>&{_.type}</td>
-    <td>${_.formattedOwner()}</td>
-    <td>${_.value?.way.label()}</td>
-    <td>${_.value?.stampType.label()}</td>
-    <td>${_.value?.note}</td>
+    <td>${history.value?.date.format()}</td>
+    <td>${history.formattedRevisionDate()}</td>
+    <td>${history.type}</td>
+    <td>${history.formattedOwner()}</td>
+    <td>${history.value?.way.label()}</td>
+    <td>${history.value?.stampType.label()}</td>
+    <td>${history.value?.note}</td>
+    <td>${history.value?.reason}</td>
+    <td>${history.value?.place}</td>
   </tr>
   #{/list}
   #{/list}
@@ -255,5 +278,10 @@
   _____________________________
 </p>
 #{/if}
+<div class="break">
+&nbsp;
+</div>
+#{/list}
 </body>
+
 </html>

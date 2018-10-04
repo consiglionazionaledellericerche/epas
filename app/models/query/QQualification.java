@@ -41,6 +41,9 @@ public class QQualification extends EntityPathBase<Qualification> {
 
     public final NumberPath<Integer> qualification = createNumber("qualification", Integer.class);
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QQualification(String variable) {
         super(Qualification.class, forVariable(variable));
     }

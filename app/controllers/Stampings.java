@@ -5,6 +5,9 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
+import com.beust.jcommander.Strings;
+
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -24,11 +27,13 @@ import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
 import manager.NotificationManager;
 import manager.PersonDayManager;
 import manager.SecureManager;
 import manager.StampingManager;
+import manager.configurations.EpasParam;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
@@ -40,6 +45,8 @@ import models.PersonDay;
 import models.Role;
 import models.Stamping;
 import models.User;
+import models.enumerate.StampTypes;
+
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import play.data.binding.As;
@@ -56,6 +63,7 @@ import security.SecurityRules;
  *
  * @author alessandro
  */
+@Slf4j
 @With({Resecure.class})
 public class Stampings extends Controller {
 
@@ -91,6 +99,7 @@ public class Stampings extends Controller {
   static NotificationManager notificationManager;
   @Inject
   static UserDao userDao;
+
 
   /**
    * Tabellone timbrature dipendente.
@@ -153,7 +162,7 @@ public class Stampings extends Controller {
     }
 
     PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, true);
-
+    
     // Questo mi serve per poter fare le verifiche tramite le drools per l'inserimento timbrature in
     // un determinato mese
     final YearMonth yearMonth = new YearMonth(year, month);
@@ -181,6 +190,54 @@ public class Stampings extends Controller {
   }
 
   /**
+   * Restituisce la form compilata secondo la modalità di chi fa la richiesta.
+   * @param personId l'id della persona
+   * @param date la data in cui si vuole inserire la timbratura
+   */
+  public static void insert(Long personId, LocalDate date) {
+    
+    final Person person = personDao.getPersonById(personId);
+
+    notFoundIfNull(person);
+
+    Preconditions.checkState(!date.isAfter(LocalDate.now()));
+
+    rules.checkIfPermitted(person);
+    
+    List<StampTypes> offsite = Lists.newArrayList();
+    offsite.add(StampTypes.LAVORO_FUORI_SEDE);
+    boolean insertOffsite = false;
+    boolean insertNormal = true;
+    boolean autocertification = false;
+    
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      render(person, date, offsite, insertOffsite, insertNormal, autocertification);
+    }
+    IWrapperPerson wrperson = wrapperFactory
+        .create(Security.getUser().get().person);
+    if (user.person != null && user.person.equals(person)) {
+      if (UserDao.getAllowedStampTypes(user).contains(StampTypes.LAVORO_FUORI_SEDE)) {
+        insertOffsite = true;
+        insertNormal = false;        
+      }
+    }
+    
+    if (user.person != null && user.person.equals(person) 
+        && !wrperson.isTechnician()) {
+      if (person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")) {
+        autocertification = true;
+      }
+    }
+    
+    if (autocertification == true  && insertOffsite == true) {
+      insertOffsite = false;
+    }
+    render(person, date, offsite, insertOffsite, insertNormal, autocertification);
+  }
+
+  
+  /**
    * Modifica timbratura dall'amministratore.
    *
    * @param stampingId ID timbratura
@@ -198,6 +255,9 @@ public class Stampings extends Controller {
 
     final Person person = stamping.personDay.person;
     final LocalDate date = stamping.personDay.date;
+    if (stamping.isOffSiteWork()) {
+      render("@editOffSite", stamping,person, date, historyStamping);
+    }
 
     render(stamping, person, date, historyStamping);
   }
@@ -231,6 +291,76 @@ public class Stampings extends Controller {
 
       render("@edit", stamping, person, date, time, historyStamping);
     }
+    stamping.date = stampingManager.deparseStampingDateTime(date, time);
+
+    // serve per poter discriminare dopo aver fatto la save della timbratura se si
+    // trattava di una nuova timbratura o di una modifica
+    boolean newInsert = !stamping.isPersistent();
+
+    // Se si tratta di un update ha già tutti i riferimenti al personday
+    if (newInsert) {
+      final PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(person, date);
+      stamping.personDay = personDay;
+      // non è usato il costruttore con la add, quindi aggiungiamo qui a mano:
+      personDay.stampings.add(stamping);
+    }
+        
+    rules.checkIfPermitted(stamping);
+    final User currentUser = Security.getUser().get();
+    String result = stampingManager
+        .persistStamping(stamping, date, time, person, currentUser, newInsert);
+    if (!Strings.isStringEmpty(result)) {
+      flash.error(result);
+    } else {
+      flash.success(Web.msgSaved(Stampings.class));
+    }
+    
+    
+    //redirection stuff
+    if (!currentUser.isSystemUser() && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)
+        && currentUser.person.id.equals(person.id)) {
+      stampings(date.getYear(), date.getMonthOfYear());
+    }
+    personStamping(person.id, date.getYear(), date.getMonthOfYear());
+  }
+  
+  /**
+   * Metodo che permette il salvataggio della timbratura per lavoro fuori sede.
+   * @param personId l'id della persona
+   * @param date la data per cui si vuole salvare la timbratura
+   * @param stamping la timbratura da salvare
+   * @param time l'orario della timbratura
+   */
+  public static void saveOffSite(Long personId, @Required LocalDate date, 
+      @Required Stamping stamping, @Required @CheckWith(StringIsTime.class) String time) {
+    Preconditions.checkState(!date.isAfter(LocalDate.now()));
+
+    final Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    
+    if (stamping.way == null) {
+      Validation.addError("stamping.way", "Obbligatorio");
+    }
+    if (Strings.isStringEmpty(stamping.reason)) {
+      Validation.addError("stamping.reason", "Obbligatorio");
+    }
+    if (Strings.isStringEmpty(stamping.place)) {
+      Validation.addError("stamping.place", "Obbligatorio");
+    }
+    if (Validation.hasErrors()) {
+      response.status = 400;     
+      List<StampTypes> offsite = Lists.newArrayList();
+      offsite.add(StampTypes.LAVORO_FUORI_SEDE);
+      boolean disableInsert = false;
+      User user = Security.getUser().get();
+      if (user.person != null) {
+        if (person.office.checkConf(EpasParam.WORKING_OFF_SITE, "true") 
+            && person.checkConf(EpasParam.OFF_SITE_STAMPING, "true")) {
+          disableInsert = true;
+        }
+      }
+      render("@insert", stamping, person, date, time, disableInsert, offsite);
+    }
         
     stamping.date = stampingManager.deparseStampingDateTime(date, time);
 
@@ -245,44 +375,19 @@ public class Stampings extends Controller {
       // non è usato il costruttore con la add, quindi aggiungiamo qui a mano:
       personDay.stampings.add(stamping);
     }
-
+    log.info("inizio salvataggio della timbratura fuori sede, person = {}", person);
     rules.checkIfPermitted(stamping);
-
+    log.info("dopo permessi -> salvataggio della timbratura fuori sede, person = {}", person);
+    
     final User currentUser = Security.getUser().get();
     
-    val alreadyPresentStamping = stampingDao.getStamping(stamping.date, person, stamping.way);
-    //Se la timbratura allo stesso orario e con lo stesso verso non è già presente o è una modifica
-    //alla timbratura esistente allora creo/modifico la timbratura.
-    if (!alreadyPresentStamping.isPresent() || alreadyPresentStamping.get().id.equals(stamping.id)) {
-
-      if (!currentUser.isSystemUser()) {
-        if (currentUser.hasRoles(Role.PERSONNEL_ADMIN)) {
-          stamping.markedByEmployee = false;
-          stamping.markedByAdmin = true;
-        } else {
-          stamping.markedByEmployee = true;
-          stamping.markedByAdmin = false;
-        }
-      }
-      stamping.save();
-
-      consistencyManager.updatePersonSituation(stamping.personDay.person.id, stamping.personDay.date);
-
-      flash.success(Web.msgSaved(Stampings.class));
-
-      notificationManager
-      .notificationStampingPolicy(currentUser, stamping, newInsert, !newInsert, false);
+    String result = stampingManager
+        .persistStamping(stamping, date, time, person, currentUser, newInsert);
+    if (!Strings.isStringEmpty(result)) {
+      flash.error(result);
     } else {
-      if ((stamping.stampType != null && !stamping.stampType.equals(alreadyPresentStamping.get().stampType)) ||
-          (stamping.stampType == null && alreadyPresentStamping.get().stampType != null)) {
-        flash.error("Timbratura già presente ma con causale diversa, modificare la timbratura presente.");  
-      } else {
-        flash.error("Timbratura ignorata perché già presente.");
-      }
+      flash.success(Web.msgSaved(Stampings.class));
     }
-    
-    
-    //redirection stuff
     if (!currentUser.isSystemUser() && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)
         && currentUser.person.id.equals(person.id)) {
       stampings(date.getYear(), date.getMonthOfYear());
@@ -291,6 +396,7 @@ public class Stampings extends Controller {
   }
   
 
+  
   /**
    * Elimina la timbratura.
    *

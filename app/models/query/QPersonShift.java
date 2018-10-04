@@ -51,6 +51,9 @@ public class QPersonShift extends EntityPathBase<PersonShift> {
 
     public final ListPath<models.PersonShiftShiftType, QPersonShiftShiftType> personShiftShiftTypes = this.<models.PersonShiftShiftType, QPersonShiftShiftType>createList("personShiftShiftTypes", models.PersonShiftShiftType.class, QPersonShiftShiftType.class, PathInits.DIRECT2);
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QPersonShift(String variable) {
         this(PersonShift.class, forVariable(variable), INITS);
     }

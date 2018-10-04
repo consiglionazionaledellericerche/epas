@@ -53,6 +53,8 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.joda.time.Minutes;
 import org.joda.time.Period;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.testng.collections.Lists;
 
 import play.db.jpa.JPA;
@@ -95,7 +97,9 @@ public class MissionManager {
     this.wrapperFactory = wrapperFactory;
   }
 
-    
+  private static final DateTimeFormatter DT_FORMATTER =
+      DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss");
+  
   /**
    * Metodo che verifica se al numero di matricola passato come parametro nel dto corrisponde
    * effettivamente una persona in anagrafica.
@@ -314,7 +318,10 @@ public class MissionManager {
     }
     absenceForm =
         absenceService.buildAbsenceForm(body.person, from.toLocalDate(), tab,
-            to.toLocalDate(), type, false, mission, justifiedType, localHours, localMinutes, false);
+
+            to.toLocalDate(), null, type, false, mission, 
+            justifiedType, hours, minutes, false);
+
     InsertReport insertReport = 
         absenceService.insert(body.person, absenceForm.groupSelected, from.toLocalDate(), 
             to.toLocalDate(), mission, absenceForm.justifiedTypeSelected, 
@@ -328,7 +335,9 @@ public class MissionManager {
           absence.externalIdentifier = body.idOrdine;
         } else {
           absence.externalIdentifier = body.id;
-        }        
+        }
+        absence.note = "Inizio: " + DT_FORMATTER.print(body.dataInizio)
+            + System.lineSeparator() + "Fine: " + DT_FORMATTER.print(body.dataFine);
         personDay.absences.add(absence);
         absence.save();
         personDay.save();
@@ -405,7 +414,7 @@ public class MissionManager {
     Integer minutes = null;
     AbsenceForm absenceForm =
         absenceService.buildAbsenceForm(body.person, body.dataInizio.toLocalDate(), 
-            categoryTab, body.dataFine.toLocalDate(),
+            categoryTab, body.dataFine.toLocalDate(), null, 
             groupAbsenceType, false, absenceType, justifiedType, hours, minutes, false);
     return absenceForm;
   }

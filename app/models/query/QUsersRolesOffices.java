@@ -41,6 +41,9 @@ public class QUsersRolesOffices extends EntityPathBase<UsersRolesOffices> {
 
     public final QUser user;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QUsersRolesOffices(String variable) {
         this(UsersRolesOffices.class, forVariable(variable), INITS);
     }

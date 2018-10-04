@@ -16,6 +16,7 @@ Action = (stamping != null && stamping.persistent) ? 'Modifica' : 'Nuova'
   <!-- Inserimento / Modifica Timbratura -->
   #{tabContentItem id:'edit', active:true}
 	<div id="stampingData">
+	
 	  #{form action:@save(), method:'POST', autocomplete:false, 'data-async':'#page_content',
 	    class:'form form-horizontal', 'data-async-error':'#stampingData', 'data-spinner':'#defaultSpinner'}
 	
@@ -51,7 +52,7 @@ Action = (stamping != null && stamping.persistent) ? 'Modifica' : 'Nuova'
 	  #{else}
 	    #{f.selectEnum 'stamping.stampType', items:stampTypes /}
 	  #{/else}
-	
+
 	  #{f.input 'stamping.note' /}
 
       <!-- Buttons -->	
@@ -64,10 +65,10 @@ Action = (stamping != null && stamping.persistent) ? 'Modifica' : 'Nuova'
 	  #{/b.buttons}
 	
 	  #{/form}
-	
+	 
 	</div>
   #{/tabContentItem}
-
+  
   <!-- Elimina Timbratura -->
   #{tabContentItem id:'delete'}
 	#{if stamping?.persistent}
@@ -79,6 +80,7 @@ Action = (stamping != null && stamping.persistent) ? 'Modifica' : 'Nuova'
 	  #{f.view 'Dipendente', value:stamping.personDay.person.fullname /}
 	  #{f.view 'Inserita il', value:state.formattedRevisionDate() /}
 	  #{f.view 'Inserita da', value:state.formattedOwner() /}
+
 	  #{/if}
 	  #{/list}
 	</form>

@@ -64,6 +64,7 @@ public enum DefaultGroup {
       DefaultCategoryType.PERMESSI_PERSONALI, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.year, 
       DefaultTakable.T_661, DefaultComplation.C_661, null, false, true),
+
   G_89("89 - Permesso diritto allo studio 150 ore anno", 
       "", 
       DefaultCategoryType.PERMESSI_PERSONALI, 1,
@@ -79,11 +80,11 @@ public enum DefaultGroup {
       DefaultCategoryType.VISITA_MEDICA, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.always, 
       DefaultTakable.T_09, DefaultComplation.C_09, null, false, true),
-  G_631("631 - Permesso giornaliero visita medica", 
+  G_631("631 - Permesso per visita medica", 
       "", 
       DefaultCategoryType.VISITA_MEDICA, 1,
-      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
-      DefaultTakable.T_631, null, null, false, false),
+      GroupAbsenceTypePattern.programmed, PeriodType.year, 
+      DefaultTakable.T_631, DefaultComplation.C_631, null, false, true),
   MISSIONE("Missione", 
       "", 
       DefaultCategoryType.MISSIONE_CNR, 0,
@@ -117,6 +118,12 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
       DefaultTakable.T_RIPOSI_CNR_FESTIVO, null, null, false, false),
   
+  RIPOSI_CNR_CHIUSURA_ENTE("91CE - Riposo compensativo per chiusura ente",
+      "",
+      DefaultCategoryType.RIPOSI_COMPENSATIVI_CNR, 1,
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always,
+      DefaultTakable.T_RIPOSI_CHIUSURA_ENTE, null, null, false, false),
+  
   RIPOSI_CNR_DIPENDENTI("91 - Riposo compensativo", 
       "", 
       DefaultCategoryType.RIPOSI_COMPENSATIVI_DIPENDENTI, 1, //must be greater than RIPOSI_CNR
@@ -128,6 +135,12 @@ public enum DefaultGroup {
       DefaultCategoryType.MALATTIA_DIPENDENTE, 0,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
       DefaultTakable.T_MALATTIA, null, null, false, false),
+  
+  VISITA_MEDICA_TERAPIE("Codici visita medica per terapie", 
+      "", 
+      DefaultCategoryType.VISITA_MEDICA_TERAPIE, 0,
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+      DefaultTakable.T_VISITE_MEDICHE_TERAPIE, null, null, false, false),
     
   MALATTIA_FIGLIO_1("12/13/14 - Malattia primo figlio", 
       "", 
@@ -212,6 +225,12 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
       DefaultTakable.T_CONGEDO_MATRIMONIO, null, null, false, false),
   
+  G_441("441 - Permesso esami",
+      "",
+      DefaultCategoryType.PERMESSO_ESAMI, 0,
+      GroupAbsenceTypePattern.programmed, PeriodType.year,
+      DefaultTakable.T_441, null, null, false, false),
+  
 
   
   G_ALTRI_CODICI("Altri Codici", 
@@ -260,7 +279,23 @@ public enum DefaultGroup {
       "", 
       DefaultCategoryType.CODICI_AUTOMATICI, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.year, 
-      DefaultTakable.T_PB, null, null, true, true);
+      DefaultTakable.T_PB, null, null, true, true),
+  
+  G_681("681 - Permesso primo lutto",
+      "",
+      DefaultCategoryType.PERMESSO_PRIMO_LUTTO, 0,
+      GroupAbsenceTypePattern.programmed, PeriodType.year,
+      DefaultTakable.T_681, null, null, false, false),
+  G_682("682 - Permesso secondo lutto",
+      "",
+      DefaultCategoryType.PERMESSO_SECONDO_LUTTO, 0,
+      GroupAbsenceTypePattern.programmed, PeriodType.year,
+      DefaultTakable.T_682, null, null, false, false),
+  G_683("683 - Permesso terzo lutto",
+      "",
+      DefaultCategoryType.PERMESSO_TERZO_LUTTO, 0,
+      GroupAbsenceTypePattern.programmed, PeriodType.year,
+      DefaultTakable.T_683, null, null, false, false);
 
   public String description;
   public String chainDescription;

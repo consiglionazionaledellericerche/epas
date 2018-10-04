@@ -47,6 +47,9 @@ public class QPersonMonthRecap extends EntityPathBase<PersonMonthRecap> {
 
     public final NumberPath<Integer> trainingHours = createNumber("trainingHours", Integer.class);
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public final NumberPath<Integer> year = createNumber("year", Integer.class);
 
     public QPersonMonthRecap(String variable) {

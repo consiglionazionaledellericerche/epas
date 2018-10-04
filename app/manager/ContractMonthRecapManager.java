@@ -30,6 +30,7 @@ import models.Contract;
 import models.ContractMonthRecap;
 import models.ContractWorkingTimeType;
 import models.PersonDay;
+import models.TimeVariation;
 import models.WorkingTimeTypeDay;
 import models.absences.Absence;
 
@@ -77,10 +78,13 @@ public class ContractMonthRecapManager {
    * 
    * @param recapPreviousMonth    se presente è il riepilogo precedente.
    * @param otherCompensatoryRest altri riposi compensativi non persistiti nel db.
+   * @param compensatoryRestClosureSeatRecovering variazioni orarie per recuperare i riposi 
+   *      compensativi per chiusura ente.
    */
   public Optional<ContractMonthRecap> computeResidualModule(ContractMonthRecap cmr,
       Optional<ContractMonthRecap> recapPreviousMonth, YearMonth yearMonth, LocalDate calcolaFinoA,
-      List<Absence> otherCompensatoryRest) {
+      List<Absence> otherCompensatoryRest, 
+      Optional<List<TimeVariation>> compensatoryRestClosureSeatRecovering) {
 
     Contract contract = cmr.contract;
 
@@ -202,12 +206,13 @@ public class ContractMonthRecapManager {
     setMealTicketsInformation(cmr, validDataForMealTickets);
     setPersonDayInformation(cmr, validDataForPersonDay, otherCompensatoryRest);
     setPersonMonthInformation(cmr, wrContract,
-        validDataForCompensatoryRest, otherCompensatoryRest);
+        validDataForCompensatoryRest, otherCompensatoryRest, compensatoryRestClosureSeatRecovering);
 
     //Imputazioni
     assegnaProgressivoFinaleNegativo(cmr);
     assegnaStraordinari(cmr);
     assegnaRiposiCompensativi(cmr);
+    assegnaRiposiCompensativiChiusuraEnte(cmr);
 
     //Correzioni alle imputazioni
 
@@ -356,7 +361,7 @@ public class ContractMonthRecapManager {
     DateInterval contractIntervalForMealTicket =
         wrapperFactory.create(contract).getContractDatabaseIntervalForMealTicket();
     DateInterval mealTicketIntervalInOffice =
-        new DateInterval(dateStartMealTicketInOffice, Optional.<LocalDate>absent());
+        DateInterval.withBegin(dateStartMealTicketInOffice, Optional.<LocalDate>absent());
 
     DateInterval validDataForMealTickets = null;
     if (monthInterval != null) {
@@ -468,10 +473,13 @@ public class ContractMonthRecapManager {
    *                                     compensativi
    * @param otherCompensatoryRest        i riposi compensativi inseriti e non persistiti (usato per
    *                                     le simulazioni di inserimento assenze).
+   * @param compensatoryRestClosureSeatRecovering la lista delle variazioni orarie per 
+   *      recuperare i riposi compensativi per chiusura ente fatte nel mese.
    */
   private void setPersonMonthInformation(
       ContractMonthRecap cmr, IWrapperContract wrContract,
-      DateInterval validDataForCompensatoryRest, List<Absence> otherCompensatoryRest) {
+      DateInterval validDataForCompensatoryRest, List<Absence> otherCompensatoryRest,
+      Optional<List<TimeVariation>> compensatoryRestClosureSeatRecovering) {
 
     //gli straordinari li assegno solo all'ultimo contratto attivo del mese
     if (wrContract.isLastInMonth(cmr.month, cmr.year)) {
@@ -550,6 +558,13 @@ public class ContractMonthRecapManager {
       }
 
       cmr.riposiCompensativiMinutiPrint = cmr.riposiCompensativiMinuti;
+      if (compensatoryRestClosureSeatRecovering.isPresent()) {
+        for (TimeVariation tv : compensatoryRestClosureSeatRecovering.get()) {
+          cmr.riposiCompensativiChiusuraEnteMinuti += tv.timeVariation;
+        }
+        cmr.riposiCompensativiChiusuraEnteMinutiPrint = cmr.riposiCompensativiChiusuraEnteMinuti;
+      }
+      
     }
   }
 
@@ -643,6 +658,49 @@ public class ContractMonthRecapManager {
     monthRecap.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese =
         monthRecap.riposiCompensativiMinuti;
 
+  }
+  
+  private void assegnaRiposiCompensativiChiusuraEnte(ContractMonthRecap monthRecap) {
+  //quello che assegno al monte ore passato
+    if (monthRecap.riposiCompensativiChiusuraEnteMinuti < monthRecap.remainingMinutesLastYear) {
+      monthRecap.remainingMinutesLastYear =
+          monthRecap.remainingMinutesLastYear - monthRecap.riposiCompensativiChiusuraEnteMinuti;
+      monthRecap.riposiCompensativiChiusuraEnteMinutiImputatoAnnoPassato 
+          = monthRecap.riposiCompensativiChiusuraEnteMinuti;
+      return;
+    } else {
+      monthRecap.riposiCompensativiChiusuraEnteMinutiImputatoAnnoPassato 
+          = monthRecap.remainingMinutesLastYear;
+      monthRecap.remainingMinutesLastYear = 0;
+      monthRecap.riposiCompensativiChiusuraEnteMinuti =
+          monthRecap.riposiCompensativiChiusuraEnteMinuti
+              -
+              monthRecap.riposiCompensativiChiusuraEnteMinutiImputatoAnnoPassato;
+    }
+
+    //quello che assegno al monte ore corrente
+    if (monthRecap.riposiCompensativiChiusuraEnteMinuti < monthRecap.remainingMinutesCurrentYear) {
+      monthRecap.remainingMinutesCurrentYear =
+          monthRecap.remainingMinutesCurrentYear - monthRecap.riposiCompensativiChiusuraEnteMinuti;
+      monthRecap.riposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente =
+          monthRecap.riposiCompensativiChiusuraEnteMinuti;
+      return;
+    } else {
+      monthRecap.riposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente =
+          monthRecap.remainingMinutesCurrentYear;
+      monthRecap.remainingMinutesCurrentYear = 0;
+      monthRecap.riposiCompensativiChiusuraEnteMinuti =
+          monthRecap.riposiCompensativiChiusuraEnteMinuti
+              -
+              monthRecap.riposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente;
+    }
+    //quello che assegno al progressivo positivo del mese
+    monthRecap.progressivoFinalePositivoMeseAux =
+        monthRecap.progressivoFinalePositivoMeseAux
+            -
+            monthRecap.riposiCompensativiChiusuraEnteMinuti;
+    monthRecap.riposiCompensativiChiusuraEnteMinutiImputatoProgressivoFinalePositivoMese =
+        monthRecap.riposiCompensativiChiusuraEnteMinuti;
   }
 }
 

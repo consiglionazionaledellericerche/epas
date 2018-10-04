@@ -12,13 +12,6 @@ import com.mysema.query.jpa.JPQLQueryFactory;
 
 import dao.DaoBase;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-
-import javax.persistence.EntityManager;
-
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -28,17 +21,21 @@ import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.InitializationGroup;
+import models.absences.JustifiedBehaviour;
+import models.absences.JustifiedBehaviour.JustifiedBehaviourName;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceTrouble;
 import models.absences.query.QAbsenceType;
+import models.absences.query.QAbsenceTypeJustifiedBehaviour;
 import models.absences.query.QCategoryGroupAbsenceType;
 import models.absences.query.QCategoryTab;
 import models.absences.query.QComplationAbsenceBehaviour;
 import models.absences.query.QGroupAbsenceType;
 import models.absences.query.QInitializationGroup;
+import models.absences.query.QJustifiedBehaviour;
 import models.absences.query.QJustifiedType;
 import models.absences.query.QTakableAbsenceBehaviour;
 import models.query.QPerson;
@@ -47,6 +44,13 @@ import models.query.QPersonDay;
 import org.joda.time.LocalDate;
 
 import play.db.jpa.JPA;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+
+import javax.persistence.EntityManager;
 
 /**
  * Dao per il componente assenze.
@@ -60,8 +64,8 @@ public class AbsenceComponentDao extends DaoBase {
   }
 
   
-  
   /**
+   * AbsenceType per id.
    * @return l'absenceType relativo all'id passato come parametro.
    */
   public Optional<AbsenceType> absenceTypeById(Long id) {
@@ -72,6 +76,7 @@ public class AbsenceComponentDao extends DaoBase {
   }
 
   /**
+   * AbsenceType per campo code.
    * @return l'absenceType relativo al codice passato come parametro.
    */
   public Optional<AbsenceType> absenceTypeByCode(String string) {
@@ -84,6 +89,7 @@ public class AbsenceComponentDao extends DaoBase {
   }
   
   /**
+   * AbsenceType per campo certification.
    * @return l'absenceType relativo al codice passato come parametro nel campo certification.
    */
   public List<AbsenceType> absenceTypesByCertificationCode(String string) {
@@ -126,6 +132,24 @@ public class AbsenceComponentDao extends DaoBase {
         .singleResult(justifiedType);
     if (obj == null) {
       obj = new JustifiedType();
+      obj.name = name;
+      obj.save();
+    }
+    return obj;
+  }
+  
+  /**
+   * Ritorna il JustifiedBehaviour con quel nome. Se non esiste lo crea.
+   * @param name nome
+   * @return entity
+   */
+  public JustifiedBehaviour getOrBuildJustifiedBehaviour(JustifiedBehaviourName name) {
+    QJustifiedBehaviour justifiedBehaviour = QJustifiedBehaviour.justifiedBehaviour;
+    JustifiedBehaviour obj = getQueryFactory()
+        .from(justifiedBehaviour).where(justifiedBehaviour.name.eq(name))
+        .singleResult(justifiedBehaviour);
+    if (obj == null) {
+      obj = new JustifiedBehaviour();
       obj.name = name;
       obj.save();
     }
@@ -428,8 +452,9 @@ public class AbsenceComponentDao extends DaoBase {
       Set<AbsenceType> codeSet) {
 
     final QAbsence absence = QAbsence.absence;
+    final QAbsenceTypeJustifiedBehaviour behaviour = 
+        QAbsenceTypeJustifiedBehaviour.absenceTypeJustifiedBehaviour;
    
-    
     BooleanBuilder conditions = new BooleanBuilder();
     if (begin != null) {
       conditions.and(absence.personDay.date.goe(begin));
@@ -447,6 +472,8 @@ public class AbsenceComponentDao extends DaoBase {
         .leftJoin(absence.absenceType.replacingGroup).fetch()
         .leftJoin(absence.absenceType.takableGroup).fetch()
         .leftJoin(absence.absenceType.takenGroup).fetch()
+        .leftJoin(absence.absenceType.justifiedBehaviours, behaviour).fetch()
+        .leftJoin(behaviour.justifiedBehaviour).fetch()
         .leftJoin(absence.troubles).fetch()
         .leftJoin(absence.personDay).fetch()
         .where(absence.personDay.person.eq(person)

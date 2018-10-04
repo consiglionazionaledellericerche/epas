@@ -40,7 +40,7 @@ public class PersonDaysTest extends UnitTest {
   public static StampTypes serviceST = StampTypes.MOTIVI_DI_SERVIZIO;
   
   public static PersonDayManager personDayManager = new PersonDayManager(
-      null, null, null, null, null, null);
+      null, null, null, null, null, null, null);
   
   /**
    * Test su un giorno Normale.
@@ -60,8 +60,9 @@ public class PersonDaysTest extends UnitTest {
     PersonDay previousForProgressive = new PersonDay(person, first, 0, 0, 60);
     
     personDayManager.updateTimeAtWork(personDay, normalDay(), false, 
-        startLunch, endLunch, startWork, endWork);
-    personDayManager.updateDifference(personDay, normalDay(), false);
+        startLunch, endLunch, startWork, endWork, Optional.absent());
+    personDayManager.updateDifference(personDay, normalDay(), false,
+        startLunch, endLunch, startWork, endWork, Optional.absent());
     personDayManager.updateProgressive(personDay, Optional.fromNullable(previousForProgressive));
     
     org.assertj.core.api.Assertions.assertThat(
@@ -93,7 +94,7 @@ public class PersonDaysTest extends UnitTest {
     personDay.setStampings(stampings);
     
     personDayManager.updateTimeAtWork(personDay, normalDay(), false, 
-        startLunch, endLunch, startWork, endWork);
+        startLunch, endLunch, startWork, endWork, Optional.absent());
     
     org.assertj.core.api.Assertions.assertThat(
         personDay.getTimeAtWork()).isEqualTo(420);   //7:00 ore
@@ -123,7 +124,7 @@ public class PersonDaysTest extends UnitTest {
     //coppia valida con dentro una timbratura di servizio ok
     PersonDay personDay = new PersonDay(null, second);
     List<Stamping> stamps = Lists.newArrayList();
-    stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE));
+    stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.LAVORO_FUORI_SEDE));
     stamps.add(stampings(personDay, 15, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO));
     stamps.add(stampings(personDay, 19, 30, WayType.out, null));
     personDayManager.setValidPairStampings(personDay.stampings);
@@ -132,7 +133,7 @@ public class PersonDaysTest extends UnitTest {
     //coppia valida con dentro timbrature di servizio con ordine sparso ok 
     personDay = new PersonDay(null, second);
     stamps = Lists.newArrayList();
-    stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE));
+    stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.LAVORO_FUORI_SEDE));
     stamps.add(stampings(personDay, 14, 30, WayType.out, StampTypes.MOTIVI_DI_SERVIZIO));
     stamps.add(stampings(personDay, 15, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO));
     stamps.add(stampings(personDay, 16, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO));
@@ -143,7 +144,7 @@ public class PersonDaysTest extends UnitTest {
     //coppia non valida 
     personDay = new PersonDay(null, second);
     stamps = Lists.newArrayList();
-    stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE));
+    stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.LAVORO_FUORI_SEDE));
     stamps.add(stampings(personDay, 15, 30, WayType.in, null));
     stamps.add(stampings(personDay, 19, 30, WayType.out, null));
     personDayManager.setValidPairStampings(personDay.stampings);
@@ -171,7 +172,7 @@ public class PersonDaysTest extends UnitTest {
     personDay.setStampings(stampings);
     
     personDayManager.updateTimeAtWork(personDay, normalDay(), false, 
-        startLunch, endLunch, startWork, endWork);
+        startLunch, endLunch, startWork, endWork, Optional.absent());
     
     org.assertj.core.api.Assertions.assertThat(
         personDay.getTimeAtWork()).isEqualTo(420);     //7:00 ore
@@ -195,7 +196,7 @@ public class PersonDaysTest extends UnitTest {
     personDay.setStampings(stampings);
     
     personDayManager.updateTimeAtWork(personDay, normalDay(), false, 
-        startLunch, endLunch, startWork, endWork);
+        startLunch, endLunch, startWork, endWork, Optional.absent());
     
     org.assertj.core.api.Assertions.assertThat(
         personDay.getTimeAtWork()).isEqualTo(420);     //7:00 ore

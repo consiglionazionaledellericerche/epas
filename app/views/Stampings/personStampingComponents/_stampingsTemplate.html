@@ -38,17 +38,19 @@
       #{/if}
       #{list items:stampingTemplate.stampModificationTypes, as:'smt'}
         <p><strong>${smt.code}</strong> ${smt.description}</p>
-      #{/list}
+      #{/list}      
+      #{if stampingTemplate.stamping.place}<strong>Luogo: </strong><em>${stampingTemplate.stamping.place}</em></p>#{/if}
+      #{if stampingTemplate.stamping.reason}<strong>Motivazione: </strong><em>${stampingTemplate.stamping.reason}</em></p>#{/if}
       #{if stampingTemplate.stamping.note}<strong>note: </strong><em>${stampingTemplate.stamping.note}</em></p>#{/if}
       </div>
     #{/if}
     #{/list}
 
-    #{secure.check 'Stampings.blank', target: person}
-      #{secure.check 'Stampings.blank', target: yearMonth }
+    #{secure.check 'Stampings.insert', target: person}
+      #{secure.check 'Stampings.insert', target: yearMonth }
       <td class="inserisciTimbratura default-single">
         #{if !dayRecap.personDay.future}
-          <a href="@{Stampings.blank(dayRecap.personDay.person.id, dayRecap.personDay.date.format())}" data-async-modal="#modalStamping">
+          <a href="@{Stampings.insert(dayRecap.personDay.person.id, dayRecap.personDay.date.format())}" data-async-modal="#modalStamping">
         		+++
       		</a>
       	#{/if}

@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import dao.AbsenceDao;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
@@ -23,7 +24,10 @@ import models.PersonDay;
 import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
+import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.JustifiedType.JustifiedTypeName;
+import models.dto.AbsenceToRecoverDto;
 import models.enumerate.StampTypes;
 
 import org.joda.time.LocalDate;
@@ -61,9 +65,14 @@ public class PersonStampingRecap {
   public Set<StampModificationType> stampModificationTypeSet = Sets.newHashSet();
   public Set<StampTypes> stampTypeSet = Sets.newHashSet();
   public Map<AbsenceType, Integer> absenceCodeMap = new HashMap<AbsenceType, Integer>();
+  public List<Absence> absenceList = Lists.newArrayList();
 
   //I riepiloghi mensili (uno per ogni contratto attivo nel mese)
   public List<IWrapperContractMonthRecap> contractMonths = Lists.newArrayList();
+  
+  //Le informazioni su eventuali assenze a recupero (es.: 91CE)
+  public boolean absenceToRecoverYet = false;
+  public List<AbsenceToRecoverDto> absencesToRecoverList = Lists.newArrayList();
 
   //Template
   public int numberOfInOut = 0;
@@ -187,6 +196,17 @@ public class PersonStampingRecap {
 
     this.basedWorkingDays = personManager.basedWorkingDays(personDays, monthContracts, end);
     this.absenceCodeMap = personManager.countAbsenceCodes(totalPersonDays);
-
+    this.absenceList = personManager.listAbsenceCodes(totalPersonDays);
+    LocalDate from = person.office.getBeginDate();
+    List<Absence> list = personManager.absencesToRecover(person, from, 
+        LocalDate.now(), JustifiedTypeName.recover_time);
+    this.absencesToRecoverList = personManager.dtoList(list);
+        
+    if (list.isEmpty()) {
+      this.absenceToRecoverYet = false;
+    } else {
+      this.absenceToRecoverYet = true;
+    }        
+    
   }
 }

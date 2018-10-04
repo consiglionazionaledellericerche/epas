@@ -46,6 +46,7 @@ beginDate=Data Inizio
 endDate=Data Fine
 from=Da
 to=A
+recoveryDate=Da recuperare entro
 
 calendar.competencesApproved = Le competenze per questo mese sono state approvate
 calendar.competencesToBeApproved = Le competenze per questo mese sono da approvare
@@ -55,8 +56,13 @@ calendar.allValidShifts= Tutti i turni risultano validi
 calendar.notAllValidShifts= Uno o più turni risultano non validi
 calendar.warningShifts= Alcuni turni hanno riduzioni d'orario
 
-
 category=Categoria
+
+categoryGroupAbsenceTypes =Categorie di gruppi di assenza
+
+categoryTab.name =nome
+categoryTab.description =descrizione
+categoryTab.priority =priorità
 
 child.bornDate= Data di Nascita
 child.name= Nome
@@ -100,6 +106,35 @@ Contract= Contratto
 contract.endContract= Terminato Il
 contract.endDate= Fine Contratto
 contract.onCertificate= In attestati
+
+contractualClause =Istituto contrattuale
+contractualClause.name =nome
+contractualClause.context =contesto
+contractualClause.beginDate =data di inizio
+contractualClause.endDate =data di fine
+contractualClause.categoryGroupAbsenceTypes =Categorie di gruppi di assenza
+contractualClause.contractualReferences =Riferimenti contrattuali
+contractualClause.fruitionTime =Tempi di fruizione
+contractualClause.howToRequest =Modalità di richiesta
+contractualClause.supportingDocumentation =Documentazione giustificativa
+contractualClause.legalAndEconomic =Caratteristiche giuridico economiche
+contractualClause.otherInfos =Altre informazioni
+contractualClause.validity =validità temporale
+
+ContractualClauses.list =Istituti contrattuali
+
+ContractualClauseContext.ABSENCE =assenze
+ContractualClauseContext.ABSENCE_AND_PRESENCE =assenze e presenze
+ContractualClauseContext.PRESENCE =presenze
+
+contractualReference.name =nome
+contractualReference.url =indirizzo web
+contractualReference.beginDate =data di inizio
+contractualReference.endDate =data di fine
+contractualReference.file =Allegato
+
+ContractualReferences.list =Riferimenti normativi
+
 sourceDateMealTicket= Data inizializzazione
 sourceDateResidual= Data inizializzazione
 sourceDateVacation= Data inizializzazione
@@ -386,6 +421,8 @@ psst.jolly =Jolly
 
 qualification=Livello
 
+regulations =Normativa
+
 recapMealTickets=Riepilogo Buoni Pasto
 report=Descrizione problema
 restoreUser= Torna chi eri
@@ -415,10 +452,14 @@ sourceDateVacation=Data inizializzazione
 stamping= Timbratura
 stamping.in= Timbratura di ingresso
 stamping.note= Note
+stamping.place= Luogo
+stamping.reason= Motivo
 stamping.out= Timbratura di uscita
 stamping.stampType= Causale Timbratura
 stamping.stampModificationType= Modifiche Timbratura
 stamping.way= Verso Timbratura
+
+stampingNote= Timbratura inserita automaticamente dal sistema per chiudere l'attività di lavoro fuori sede.
 
 stampings= Timbratura
 stampType= Causale
@@ -651,6 +692,8 @@ Stampings.personStamping= Timbrature
 Stampings.stampings= Situazione Mensile
 Synchronizations.institutes= Sincronizza Sedi
 Synchronizations.people= Sincronizza Personale
+TimeVariations.show= Riposi compensativi chiusura ente
+TimeVariations.personShow= Riposi compensativi chiusura ente
 Users.list= Gestione Utenti
 Vacations.show= Ferie
 Vacations.list= Ferie e Permessi
@@ -670,6 +713,7 @@ AccountRole.ADMIN= Admin
 AccountRole.RO_ADMIN= Admin in sola lettura
 AccountRole.ABSENCES_MANAGER= Gestore assenze
 AccountRole.MISSIONS_MANAGER= Gestore missioni
+AccountRole.CONTRACTUAL_MANAGER =Gestore normativa
 
 chartType= Tipo di grafico
 ChartTypes.BARS= Grafico a barre
@@ -710,6 +754,7 @@ StampTypes.PERMESSO_BREVE= Permesso breve (36 ore anno)
 
 ShiftSlot.MORNING = Mattina
 ShiftSlot.AFTERNOON = Pomeriggio
+ShiftSlot.EVENING = Sera
 
 
 shift.absenceInDay = La persona nel giorno selezionato è assente
@@ -913,6 +958,8 @@ categoryGroupAbsenceType.name=Nome
 categoryGroupAbsenceType.description=Descrizione
 categoryGroupAbsenceType.priority=Priorità
 categoryGroupAbsenceType.tab=Tab
+categoryGroupAbsenceType.groupAbsenceTypes =Gruppi di assenze
+categoryGroupAbsenceType.absenceTypes =Tipi di assenza
 
 justifiedType=Tempo giustificato
 
@@ -950,6 +997,10 @@ TakeAmountAdjustment.workingPeriodPercent=Percentuale periodo lavorato
 TakeAmountAdjustment.workingTimeAndWorkingPeriodPercent=Percentuale tipo orario e periodo lavorato
 AmountType.minutes=Minuti
 AmountType.units=Giorni
+no_overtime=No straordinari assegnabili 
+minimumTime=Quantità minima 
+maximumTime=Quantità massima
+takenPercentageTime=Consumo dal monte disponibile (in caso di orario normale)
 
 initializationGroup.hoursInput =Ore Utilizzate
 initializationGroup.minutesInput =Minuti Utilizzati
@@ -969,6 +1020,9 @@ InReperibilityOrShift=In Turno o Reperibilità
 InShift=In Turno
 ForceInsert=Inserimento forzato
 IgnoredBeforeInitialization=Precedente l'inizializzazione
+Migration661=In questa data il codice non dovrebbe essere uguale o superiore alle 6 ore
+MinimumTimeViolated=Quantità minima richiesta non soddisfatta
+MaximumTimeExceed=Quantità massima giornaliera superata
 
 child1_0_3=Primo figlio 0-3 anni
 child1_0_6=Primo figlio 0-6 anni

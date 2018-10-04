@@ -41,6 +41,9 @@ public class QConfYear extends EntityPathBase<ConfYear> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public final NumberPath<Integer> year = createNumber("year", Integer.class);
 
     public QConfYear(String variable) {

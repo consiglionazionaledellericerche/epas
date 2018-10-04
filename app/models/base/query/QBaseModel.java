@@ -31,6 +31,8 @@ public class QBaseModel extends EntityPathBase<BaseModel> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    public final NumberPath<Integer> version = createNumber("version", Integer.class);
+
     public QBaseModel(String variable) {
         super(BaseModel.class, forVariable(variable));
     }

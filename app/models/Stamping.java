@@ -59,6 +59,12 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 
   @As(binder = NullStringBinder.class)
   public String note;
+  
+  @As(binder = NullStringBinder.class)
+  public String place;
+  
+  @As(binder = NullStringBinder.class)
+  public String reason;
 
   /**
    * questo campo booleano consente di determinare se la timbratura è stata effettuata dall'utente

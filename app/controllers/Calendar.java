@@ -74,6 +74,7 @@ public class Calendar extends Controller {
   static CompetenceCodeDao competenceCodeDao;
 
   private static String nighCode = "T3";
+  
   /**
    * ritorna alla view le info necessarie per creare il calendario.
    *
@@ -140,11 +141,11 @@ public class Calendar extends Controller {
         }
         index++;
       }
-
+      List<ShiftSlot> slotList = shiftManager2.getSlotsFromTimeTable(activity.get().shiftTimeTable);
       shiftWorkers.sort(Comparator.comparing(ShiftEvent::getTitle));
       jolly.sort(Comparator.comparing(ShiftEvent::getTitle));
 
-      render(shiftWorkers, jolly);
+      render(shiftWorkers, jolly, slotList);
     }
   }
 
@@ -224,7 +225,7 @@ public class Calendar extends Controller {
 
   /**
    * Carica la lista dei turni di un certo tipo associati ad una determinata persona in
-   * un intervallo di tempo
+   * un intervallo di tempo.
    *
    * @param shiftType attività di turno
    * @param person persona associata ai turni

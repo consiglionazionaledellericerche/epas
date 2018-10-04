@@ -53,6 +53,9 @@ public class QVacationPeriod extends EntityPathBase<VacationPeriod> {
 
     public final SimplePath<Object> value = createSimple("value", Object.class);
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QVacationPeriod(String variable) {
         this(VacationPeriod.class, forVariable(variable), INITS);
     }

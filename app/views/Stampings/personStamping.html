@@ -6,6 +6,8 @@
   #{stylesheet 'stampingsTable.css'/}
 #{/set}
 
+
+
 <div class="col-xs-12 col-lg-8">
 
   <table id="tabellonetimbrature" class="table table-bordered table-condensed">
@@ -22,8 +24,8 @@
       <th class="group-right">${i}<sup>a</sup> <br/>uscita</th>
       #{/list}
 
-      #{secure.check 'Stampings.blank', target: person}
-        #{secure.check 'Stampings.blank', target: yearMonth }
+      #{secure.check 'Stampings.insert', target: person}
+        #{secure.check 'Stampings.insert', target: yearMonth }
         <th class="group-single">Inserisci<br>timbratura</th>
         #{/secure.check}
       #{/secure.check}
@@ -71,6 +73,9 @@
 	#{/secure.link}
 	}*
     #{include './personStampingComponents/_alerts.html' /}
+    #{if psDto.absenceToRecoverYet}
+    	#{include './personStampingComponents/_absencesRecap.html' /}
+    #{/if}
     #{include './personStampingComponents/_contractsRecap.html' /}
   </div>
 
@@ -89,6 +94,8 @@
 <div id="modalAbsence" class="modal fade container" tabindex="-1"></div>
 
 <div id="modalGroupAbsence" class="modal fade container" tabindex="-1"></div>
+
+<div id="modalVariation" class="modal fade container" tabindex="-1"></div>
 
 
 

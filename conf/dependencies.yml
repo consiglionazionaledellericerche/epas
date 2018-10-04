@@ -9,7 +9,7 @@ require:
           transitive: false
     - org.jadira.usertype -> usertype.core 4.0.0.GA
     - com.google.guava -> guava 22.0
-    - com.google.inject -> guice 4.1.0:
+    - com.google.inject -> guice 4.2.0:
        exclude:
         - org.ow2.asm -> asm *
     - com.google.inject.extensions -> guice-assistedinject 4.1.0:
@@ -51,7 +51,7 @@ require:
         - org.springframework.roo -> org.springframework.roo.annotations *
         - org.eclipse.persistence -> eclipselink *
     - asufana -> play-lombok 1.2.3
-    - org.projectlombok -> lombok 1.16.16
+    - org.projectlombok -> lombok 1.18.2
     - com.fatboyindustrial.gson-jodatime-serialisers -> gson-jodatime-serialisers 1.2.0
     - com.fasterxml.jackson.core -> jackson-core 2.7.3
     - com.fasterxml.jackson.core -> jackson-annotations 2.7.3
@@ -65,6 +65,7 @@ require:
     - org.graylog2 -> gelfj 1.1.15
     - org.apache.commons -> commons-csv 1.4
     - org.apache.commons -> commons-compress 1.13
+    - io.micrometer -> micrometer-registry-prometheus 1.0.6
 
 # My custom repository
 

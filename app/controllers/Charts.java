@@ -277,7 +277,7 @@ public class Charts extends Controller {
     try {
       file = chartsManager
           .buildFile(office, forAll, onlyMission, peopleIds, beginDate, endDate, exportFile);
-    } catch ( ArchiveException | IOException ex ) {
+    } catch (ArchiveException | IOException ex) {
       flash.error("Errore durante l'esportazione del tempo al lavoro");
       listForExcelFile(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear(), officeId);
       log.error("Errore durante l'esportazione del tempo al lavoro", ex);

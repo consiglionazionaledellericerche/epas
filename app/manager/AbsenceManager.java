@@ -1,5 +1,15 @@
 package manager;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.MultiPartEmail;
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
+
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -15,36 +25,24 @@ import dao.PersonShiftDayDao;
 import dao.WorkingTimeTypeDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
+import dao.wrapper.IWrapperPerson;
 import lombok.extern.slf4j.Slf4j;
-
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
-import manager.services.vacations.IVacationsService;
-
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
 import models.PersonDay;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
+import models.WorkingTimeType;
+import models.WorkingTimeTypeDay;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
-
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.MultiPartEmail;
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-
 import play.db.jpa.Blob;
 import play.libs.Mail;
 
@@ -62,7 +60,6 @@ public class AbsenceManager {
   private final WorkingTimeTypeDao workingTimeTypeDao;
   private final PersonManager personManager;
   private final PersonDayDao personDayDao;
-  private final IVacationsService vacationsService;
   private final ContractDao contractDao;
   private final AbsenceDao absenceDao;
   private final PersonReperibilityDayDao personReperibilityDayDao;
@@ -87,7 +84,6 @@ public class AbsenceManager {
    * @param consistencyManager        consistencyManager
    * @param configurationManager      configurationManager
    * @param wrapperFactory            wrapperFactory
-   * @param vacationsService          vacationsService
    */
   @Inject
   public AbsenceManager(
@@ -103,8 +99,7 @@ public class AbsenceManager {
       ConsistencyManager consistencyManager,
       ConfigurationManager configurationManager,
       PersonDayManager personDayManager,
-      IWrapperFactory wrapperFactory,
-      IVacationsService vacationsService) {
+      IWrapperFactory wrapperFactory) {
 
     this.absenceComponentDao = absenceComponentDao;
     this.contractMonthRecapManager = contractMonthRecapManager;
@@ -112,7 +107,6 @@ public class AbsenceManager {
     this.personManager = personManager;
     this.personDayDao = personDayDao;
     this.configurationManager = configurationManager;
-    this.vacationsService = vacationsService;
     this.contractDao = contractDao;
     this.absenceDao = absenceDao;
     this.personReperibilityDayDao = personReperibilityDayDao;
@@ -179,7 +173,7 @@ public class AbsenceManager {
     }
 
     Optional<ContractMonthRecap> recap = contractMonthRecapManager.computeResidualModule(cmr,
-        previousMonthRecap, yearMonth, dateForRecap, otherCompensatoryRest);
+        previousMonthRecap, yearMonth, dateForRecap, otherCompensatoryRest, Optional.absent());
 
     if (recap.isPresent()) {
       int residualMinutes = recap.get().remainingMinutesCurrentYear
@@ -197,11 +191,12 @@ public class AbsenceManager {
    * person situation - no invio email per conflitto reperibilità
    */
   public AbsenceInsertReport insertAbsenceSimulation(
-      Person person, LocalDate dateFrom, Optional<LocalDate> dateTo,
-      AbsenceType absenceType, Optional<Blob> file, Optional<String> mealTicket,
-      Optional<Integer> justifiedMinutes) {
+      Person person, LocalDate dateFrom, Optional<LocalDate> dateTo, 
+      AbsenceType absenceType, Optional<Blob> file, 
+      Optional<String> mealTicket, Optional<Integer> justifiedMinutes) {
 
-    return insertAbsence(person, dateFrom, dateTo, absenceType, file, mealTicket, justifiedMinutes,
+    return insertAbsence(person, dateFrom, dateTo,  
+        absenceType, file, mealTicket, justifiedMinutes,
         true, false);
   }
 
@@ -210,11 +205,12 @@ public class AbsenceManager {
    * email per conflitto reperibilità
    */
   public AbsenceInsertReport insertAbsenceRecompute(
-      Person person, LocalDate dateFrom, Optional<LocalDate> dateTo,
-      AbsenceType absenceType, Optional<Blob> file, Optional<String> mealTicket,
-      Optional<Integer> justifiedMinutes) {
+      Person person, LocalDate dateFrom, Optional<LocalDate> dateTo, 
+      Optional<LocalDate> recoveryDate, AbsenceType absenceType, Optional<Blob> file, 
+      Optional<String> mealTicket, Optional<Integer> justifiedMinutes) {
 
-    return insertAbsence(person, dateFrom, dateTo, absenceType, file, mealTicket, justifiedMinutes,
+    return insertAbsence(person, dateFrom, dateTo, 
+        absenceType, file, mealTicket, justifiedMinutes,
         false, true);
   }
 
@@ -225,18 +221,20 @@ public class AbsenceManager {
    * reperibilità
    */
   public AbsenceInsertReport insertAbsenceNotRecompute(
-      Person person, LocalDate dateFrom, Optional<LocalDate> dateTo,
-      AbsenceType absenceType, Optional<Blob> file, Optional<String> mealTicket,
-      Optional<Integer> justifiedMinutes) {
+      Person person, LocalDate dateFrom, Optional<LocalDate> dateTo, 
+      Optional<LocalDate> recoveryDate, AbsenceType absenceType, Optional<Blob> file, 
+      Optional<String> mealTicket, Optional<Integer> justifiedMinutes) {
 
-    return insertAbsence(person, dateFrom, dateTo, absenceType, file, mealTicket, justifiedMinutes,
+    return insertAbsence(person, dateFrom, dateTo,  
+        absenceType, file, mealTicket, justifiedMinutes,
         false, false);
   }
 
   private AbsenceInsertReport insertAbsence(
-      Person person, LocalDate dateFrom, Optional<LocalDate> dateTo,
-      AbsenceType absenceType, Optional<Blob> file, Optional<String> mealTicket,
-      Optional<Integer> justifiedMinutes, boolean onlySimulation, boolean recompute) {
+      Person person, LocalDate dateFrom, Optional<LocalDate> dateTo, 
+      AbsenceType absenceType, Optional<Blob> file, 
+      Optional<String> mealTicket, Optional<Integer> justifiedMinutes, 
+      boolean onlySimulation, boolean recompute) {
 
     Preconditions.checkNotNull(person);
     Preconditions.checkNotNull(absenceType);
@@ -294,17 +292,6 @@ public class AbsenceManager {
         aiList.add(
             handlerCompensatoryRest(
                 person, actualDate, absenceType, file, otherAbsences, !onlySimulation));
-      } else if (AbsenceTypeMapping.FER.is(absenceType)) {
-        aiList.add(
-            handlerFer(person, actualDate, absenceType, file, otherAbsences, !onlySimulation));
-      } else if (AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.is(absenceType)
-          || AbsenceTypeMapping.FERIE_ANNO_CORRENTE.is(absenceType)
-          || AbsenceTypeMapping.FESTIVITA_SOPPRESSE.is(absenceType)) {
-        aiList.add(
-            handler31_32_94(person, actualDate, absenceType, file, otherAbsences, !onlySimulation));
-      } else if (AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.is(absenceType)) {
-        aiList.add(
-            handler37(person, actualDate, absenceType, file, otherAbsences, !onlySimulation));
       } else {
         aiList.add(handlerGenericAbsenceType(person, actualDate, absenceType, file,
             mealTicket, justifiedMinutes, !onlySimulation));
@@ -528,66 +515,6 @@ public class AbsenceManager {
     return new AbsencesResponse(date, absenceType.code, AbsencesResponse.MONTE_ORE_INSUFFICIENTE);
   }
 
-  /**
-   * Gestisce l'inserimento esplicito dei codici 31, 32 e 94.
-   */
-  private AbsencesResponse handler31_32_94(Person person, LocalDate date, AbsenceType absenceType,
-      Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
-
-
-    if (AbsenceTypeMapping.FERIE_ANNO_CORRENTE.is(absenceType)
-        && vacationsService.canTake32(person, date, otherAbsences)) {
-      return insert(person, date, absenceType, file, Optional.<Integer>absent(), persist);
-    }
-
-    if (AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.is(absenceType)
-        && vacationsService.canTake31(person, date, otherAbsences)) {
-      return insert(person, date, absenceType, file, Optional.<Integer>absent(), persist);
-    }
-
-    if (AbsenceTypeMapping.FESTIVITA_SOPPRESSE.is(absenceType)
-        && vacationsService.canTake94(person, date, otherAbsences)) {
-      return insert(person, date, absenceType, file, Optional.<Integer>absent(), persist);
-    }
-
-    //codice ferie non disponibile
-    return new AbsencesResponse(date, absenceType.code,
-        AbsencesResponse.NESSUN_CODICE_FERIE_DISPONIBILE_PER_IL_PERIODO_RICHIESTO);
-  }
-
-  /**
-   * Gestisce una richiesta di inserimento codice 37 (utilizzo ferie anno precedente scadute).
-   */
-  private AbsencesResponse handler37(Person person, LocalDate date, AbsenceType absenceType,
-      Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
-
-    if (AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.is(absenceType)
-        && vacationsService.canTake37(person, date, otherAbsences)) {
-      return insert(person, date, absenceType, file, Optional.<Integer>absent(), persist);
-
-    }
-
-    //37 non disponibile
-    return new AbsencesResponse(date, absenceType.code,
-        AbsencesResponse.NESSUN_CODICE_FERIE_ANNO_PRECEDENTE_37);
-  }
-
-  /**
-   * Gestisce l'inserimento dei codici FER, 94-31-32 nell'ordine. Fino ad esaurimento.
-   */
-  private AbsencesResponse handlerFer(Person person, LocalDate date, AbsenceType absenceType,
-      Optional<Blob> file, List<Absence> otherAbsences, boolean persist) {
-
-    AbsenceType wichFer = vacationsService.whichVacationCode(person, date, otherAbsences);
-
-    //FER esauriti
-    if (wichFer == null) {
-      return new AbsencesResponse(date, absenceType.code,
-          AbsencesResponse.NESSUN_CODICE_FERIE_DISPONIBILE_PER_IL_PERIODO_RICHIESTO);
-    }
-    return insert(person, date, wichFer, file, Optional.<Integer>absent(), persist);
-  }
-
   private AbsencesResponse handlerGenericAbsenceType(
       Person person, LocalDate date, AbsenceType absenceType, Optional<Blob> file,
       Optional<String> mealTicket, Optional<Integer> justifiedMinutes, boolean persist) {
@@ -641,6 +568,30 @@ public class AbsenceManager {
       pd.save();
       return;
     }
+  }
+  
+  /**
+   * Metodo di utilità per popolare correttamente i cmapi dell'absence.
+   * @param absence l'assenza
+   * @param person la persona
+   * @param recoveryDate la data entro cui recuperare il riposo compensativo CE
+   * @return l'assenza con aggiunti i campi utili per i riposi compensativi a recupero.
+   */
+  public Absence handleRecoveryAbsence(Absence absence, Person person, LocalDate recoveryDate) {
+    absence.expireRecoverDate = recoveryDate;
+    IWrapperPerson wrPerson = wrapperFactory.create(person);
+    Optional<WorkingTimeType> wtt = wrPerson.getCurrentWorkingTimeType();
+    if (wtt.isPresent()) {
+      java.util.Optional<WorkingTimeTypeDay> wttd = wtt.get().workingTimeTypeDays.stream()
+          .filter(w -> w.dayOfWeek == absence.getAbsenceDate().getDayOfWeek()).findFirst();
+      if (wttd.isPresent()) {
+        absence.timeToRecover = wttd.get().workingTime;
+      } else {
+        absence.timeToRecover = 432;
+      }
+      
+    }
+    return absence;
   }
 
   /**

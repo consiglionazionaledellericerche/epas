@@ -38,6 +38,8 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
     public final StringPath description = createString("description");
 
+    public final StringPath documentation = createString("documentation");
+
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
@@ -46,14 +48,20 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
     public final BooleanPath internalUse = createBoolean("internalUse");
 
+    public final SetPath<models.absences.AbsenceTypeJustifiedBehaviour, QAbsenceTypeJustifiedBehaviour> justifiedBehaviours = this.<models.absences.AbsenceTypeJustifiedBehaviour, QAbsenceTypeJustifiedBehaviour>createSet("justifiedBehaviours", models.absences.AbsenceTypeJustifiedBehaviour.class, QAbsenceTypeJustifiedBehaviour.class, PathInits.DIRECT2);
+
     public final NumberPath<Integer> justifiedTime = createNumber("justifiedTime", Integer.class);
 
     public final SetPath<models.absences.JustifiedType, QJustifiedType> justifiedTypesPermitted = this.<models.absences.JustifiedType, QJustifiedType>createSet("justifiedTypesPermitted", models.absences.JustifiedType.class, QJustifiedType.class, PathInits.DIRECT2);
+
+    public final BooleanPath noOvertime = createBoolean("noOvertime");
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
     public final ListPath<models.Qualification, models.query.QQualification> qualifications = this.<models.Qualification, models.query.QQualification>createList("qualifications", models.Qualification.class, models.query.QQualification.class, PathInits.DIRECT2);
+
+    public final BooleanPath reduceOvertime = createBoolean("reduceOvertime");
 
     public final SetPath<models.absences.ComplationAbsenceBehaviour, QComplationAbsenceBehaviour> replacingGroup = this.<models.absences.ComplationAbsenceBehaviour, QComplationAbsenceBehaviour>createSet("replacingGroup", models.absences.ComplationAbsenceBehaviour.class, QComplationAbsenceBehaviour.class, PathInits.DIRECT2);
 
@@ -70,6 +78,9 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
     public final DatePath<org.joda.time.LocalDate> validFrom = createDate("validFrom", org.joda.time.LocalDate.class);
 
     public final DatePath<org.joda.time.LocalDate> validTo = createDate("validTo", org.joda.time.LocalDate.class);
+
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
 
     public QAbsenceType(String variable) {
         this(AbsenceType.class, forVariable(variable), INITS);
