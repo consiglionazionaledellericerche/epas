@@ -21,7 +21,7 @@ public class TakenAbsence {
 
   public int takenAmount;
   
-  public boolean beforeInitialization = false; 
+  public boolean beforeInitialization; // = false;
   
   public boolean toInsert;          //segnala che è l'assenza da inserire nella chain
   

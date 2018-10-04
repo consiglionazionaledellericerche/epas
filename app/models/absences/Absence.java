@@ -1,7 +1,24 @@
 package models.absences;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
+import lombok.Getter;
+
+import models.Person;
+import models.PersonDay;
+import models.TimeVariation;
+import models.absences.JustifiedBehaviour.JustifiedBehaviourName;
+import models.absences.JustifiedType.JustifiedTypeName;
+import models.base.BaseModel;
+
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
+
+import play.db.jpa.Blob;
 
 import java.util.List;
 import java.util.Set;
@@ -15,20 +32,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
-import lombok.Getter;
-
-import models.Person;
-import models.PersonDay;
-import models.absences.JustifiedType.JustifiedTypeName;
-import models.base.BaseModel;
-
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-
-import play.db.jpa.Blob;
 
 @Audited
 @Entity
@@ -70,6 +73,22 @@ public class Absence extends BaseModel {
   //Nuovo campo per la gestione delle missioni in caso di modifica delle date
   @Column(name = "external_identifier")
   public Long externalIdentifier;
+  
+
+  //Nuovi campi per la possibilità di inserire le decurtazioni di tempo per i 91s
+  @Column(name = "expire_recover_date")
+  public LocalDate expireRecoverDate;
+  
+  @Column(name = "time_to_recover")
+  public int timeToRecover;
+  
+  @Audited
+  @OneToMany(mappedBy = "absence", cascade = {CascadeType.ALL})
+  public Set<TimeVariation> timeVariations = Sets.newHashSet();
+
+  @Column(name = "note")
+  public String note;
+
   
   @Override
   public String toString() {
@@ -254,5 +273,23 @@ public class Absence extends BaseModel {
    */
   public String getCode() {
     return absenceType.code;
+  }
+  
+  public boolean violateMinimumTime() {
+    Optional<AbsenceTypeJustifiedBehaviour> behaviour = 
+        this.absenceType.getBehaviour(JustifiedBehaviourName.minimumTime);
+    if (behaviour.isPresent()) {
+      return behaviour.get().getData() > this.justifiedMinutes;
+    }
+    return false;
+  }
+  
+  public boolean violateMaximumTime() {
+    Optional<AbsenceTypeJustifiedBehaviour> behaviour = 
+        this.absenceType.getBehaviour(JustifiedBehaviourName.maximumTime);
+    if (behaviour.isPresent()) {
+      return behaviour.get().getData() < this.justifiedMinutes;
+    }
+    return false;
   }
 }

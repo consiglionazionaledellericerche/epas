@@ -64,6 +64,7 @@ import models.dto.TimeTableDto;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import play.cache.Cache;
+import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -511,19 +512,31 @@ public class Competences extends Controller {
   /**
    * genera la form di inserimento per le competenze.
    *
-   * @param competenceId l'id della competenza da aggiornare.
+   * @param personId l'id della persona
+   * @param competenceCodeId l'id del codice di competenza
+   * @param year l'anno
+   * @param month il mese
    */
-  public static void editCompetence(Long competenceId) {
-    Competence competence = competenceDao.getCompetenceById(competenceId);
-    notFoundIfNull(competence);
-    Office office = competence.person.office;
-    if (competence.competenceCode.code.equals("S1")) {
-      PersonStampingRecap psDto = stampingsRecapFactory.create(competence.person,
-          competence.year, competence.month, true);
-      render(competence, psDto, office);
+  public static void editCompetence(long personId, long competenceCodeId, int year, int month) {
+    
+    Person person = personDao.getPersonById(personId);
+    CompetenceCode code = competenceCodeDao.getCompetenceCodeById(competenceCodeId);
+    Optional<Competence> comp = competenceDao.getCompetence(person, year, month, code);
+    Competence competence = new Competence();
+    if (comp.isPresent()) {
+      competence = comp.get();
+    }
+    
+    notFoundIfNull(code);
+    notFoundIfNull(person);
+    Office office = person.office;
+    if (code.code.equals("S1")) {
+      PersonStampingRecap psDto = stampingsRecapFactory.create(person,
+          year, month, true);
+      render(person, code, year, month, psDto, office, competence);
     }
 
-    render(competence, office);
+    render(person, code, year, month, office, competence);
   }
 
   /**
@@ -531,9 +544,10 @@ public class Competences extends Controller {
    *
    * @param competence la competenza relativa alla persona
    */
-  public static void saveCompetence(Integer valueApproved, @Valid Competence competence) {
+  public static void saveCompetence(Integer valueApproved, @Required Competence competence) {
 
     notFoundIfNull(competence);
+    
     Office office = competence.person.office;
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
@@ -549,7 +563,9 @@ public class Competences extends Controller {
     if (Validation.hasErrors()) {
 
       response.status = 400;
-      render("@editCompetence", competence, office);
+      Person person = competence.person;
+      CompetenceCode code = competence.competenceCode;
+      render("@editCompetence", competence, office, person, code);
     }
 
     competenceManager.saveCompetence(competence, valueApproved);
@@ -814,8 +830,9 @@ public class Competences extends Controller {
   public static void addReperibility(Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
+    List<Office> linkedOffices = officeDao.byInstitute(office.institute);
     rules.checkIfPermitted(office);
-    List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
+    List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(linkedOffices),
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
 
     render("@editReperibility", officePeople, office);
@@ -829,8 +846,9 @@ public class Competences extends Controller {
   public static void addShift(Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
+    List<Office> linkedOffices = officeDao.byInstitute(office.institute);
     rules.checkIfPermitted(office);
-    List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
+    List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(linkedOffices),
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
     boolean nuovo = true;
     render("@editShift", officePeople, office, nuovo);
@@ -926,8 +944,9 @@ public class Competences extends Controller {
   public static void editReperibility(Long reperibilityTypeId) {
     PersonReperibilityType type = reperibilityDao.getPersonReperibilityTypeById(reperibilityTypeId);
     Office office = type.office;
+    List<Office> linkedOffices = officeDao.byInstitute(office.institute);
     rules.checkIfPermitted(office);
-    List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
+    List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(linkedOffices),
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
 
     render(type, officePeople, office);
@@ -974,10 +993,10 @@ public class Competences extends Controller {
   public static void editShift(Long shiftCategoryId) {
     ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
     Office office = cat.office;
-
+    List<Office> linkedOffices = officeDao.byInstitute(office.institute);
     rules.checkIfPermitted(office);
     Map<ShiftType, List<PersonShiftShiftType>> map = Maps.newHashMap();
-    List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
+    List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(linkedOffices),
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
     cat.shiftTypes.forEach(item -> {
       List<PersonShiftShiftType> psstList = shiftDao
@@ -1138,13 +1157,21 @@ public class Competences extends Controller {
     }
   }
 
-  public static void handlePersonShiftShiftType(Long id){
+  /**
+   * Ritorna la form di associazione tra persona e turno.
+   * @param id identificativo dell'associazione tra persona e turno
+   */
+  public static void handlePersonShiftShiftType(Long id) {
     PersonShiftShiftType psst = shiftDao.getById(id);
     notFoundIfNull(psst);
     rules.checkIfPermitted(psst.personShift.person.office);    
     render(psst);
   }
 
+  /**
+   * metodo per il salvataggio dell'associazione.
+   * @param psst l'oggetto associazione tra persona e turno.
+   */
   public static void updatePersonShiftShiftType(PersonShiftShiftType psst) {
     rules.checkIfPermitted(psst.personShift.person.office);
     psst.save();
@@ -1210,6 +1237,27 @@ public class Competences extends Controller {
       LocalDate beginDate, boolean jolly) {
     notFoundIfNull(person);
     rules.checkIfPermitted(person.person.office);
+    if (beginDate == null) {
+      Validation.addError("beginDate", "inserire una data di inizio!");
+    }
+    
+    if (!person.isPersistent()) {
+      Validation.addError("person", "selezionare una persona!");
+    }
+    if (Validation.hasErrors()) {
+      List<PersonShiftShiftType> psstList = shiftDao.getAssociatedPeopleToShift(activity, 
+          Optional.fromNullable(LocalDate.now()));
+      List<PersonShift> peopleForShift = 
+          shiftDao.getPeopleForShift(activity.shiftCategories.office, LocalDate.now());
+
+      List<PersonShift> available = peopleForShift.stream()
+          .filter(e -> (psstList.stream()
+              .filter(d -> d.personShift.equals(e))
+              .count()) < 1)
+          .collect(Collectors.toList());
+      response.status = 400;
+      render("@linkPeopleToShift", activity, available);
+    }
     competenceManager.persistPersonShiftShiftType(person, beginDate, activity, jolly);
     flash.success("Aggiunto %s all'attività", person.person.fullName());
     manageShiftType(activity.id);
@@ -1281,7 +1329,7 @@ public class Competences extends Controller {
     notFoundIfNull(type);
     rules.checkIfPermitted(type.office);
     List<PersonReperibility> people = type.personReperibilities.stream()
-        .filter(pr -> !pr.startDate.isAfter(LocalDate.now()) 
+        .filter(pr -> pr.startDate != null 
             && (pr.endDate == null || pr.endDate.isAfter(LocalDate.now())))
         .collect(Collectors.toList());
     LocalDate date = LocalDate.now();
@@ -1301,7 +1349,7 @@ public class Competences extends Controller {
 
     rules.checkIfPermitted(type.office);
     List<PersonReperibility> people = type.personReperibilities.stream()
-        .filter(pr -> pr.startDate.isBefore(LocalDate.now()) 
+        .filter(pr -> pr.startDate != null 
             && (pr.endDate == null || pr.endDate.isAfter(LocalDate.now())))
         .collect(Collectors.toList());
     

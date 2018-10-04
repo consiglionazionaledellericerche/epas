@@ -12,6 +12,9 @@
      #{else}
        #{f.date 'to', disabled:true  /} 
      #{/else}
+     #{if absenceForm.justifiedTypeSelected.name.equals(models.absences.JustifiedType.JustifiedTypeName.recover_time)}
+     	#{f.date 'recoveryDate', value:absenceForm.recoveryDate?.format() /}
+     #{/if}
      
    
      #{f.hidden 'groupAbsenceType.id', value:absenceForm.groupSelected.id /}

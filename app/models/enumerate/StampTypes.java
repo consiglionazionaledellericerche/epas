@@ -27,8 +27,8 @@ public enum StampTypes {
    */
 
   MOTIVI_DI_SERVIZIO("s", "motiviDiServizio", "Motivi di servizio", false, true),
-  MOTIVI_DI_SERVIZIO_FUORI_SEDE("sf", "servizioFuoriSede", "Motivi di Servizio Fuori Sede", 
-      false, true),
+  MOTIVI_DI_SERVIZIO_FUORI_SEDE("sf", "servizioFuoriSede", "Motivi di Servizio Fuori Sede",
+      false, false),
   LAVORO_FUORI_SEDE("lfs", "lavoroFuoriSede", "Lavoro fuori sede", true, true),
   PAUSA_PRANZO("pr", "pausaPranzo", "Pausa Pranzo", true, true),
   
@@ -40,7 +40,7 @@ public enum StampTypes {
   MOTIVI_PERSONALI("mp", "motiviPersonali", "Motivi personali", false, false),
   REPERIBILITA("r", "reperibilita", "Reperibilità ", false, false),
   INTRAMOENIA("i", "intramoenia", "Intramoenia", false, false),
-  GUARDIA_MEDICA("gm", "guardiaMedica", "Guardia Medica" ,false, false),
+  GUARDIA_MEDICA("gm", "guardiaMedica", "Guardia Medica",false, false),
   PERMESSO_BREVE("pb", "permessoBreve", "Permesso Breve", false, true);
 
   private String identifier;
@@ -89,9 +89,18 @@ public enum StampTypes {
    * @return la lista degli stamptypes attivi.
    */
   public static List<StampTypes> onlyActive() {
-    return Arrays.stream(values()).filter(StampTypes::isActive).collect(Collectors.toList());
+    return Arrays.stream(values())
+        .filter(StampTypes::isActive).collect(Collectors.toList());
   }
 
+  /**
+   * Lista delle stampTypes attive ma senza il lavoro fuori sede.
+   * @return lista delle stampTypes attive ma senza il lavoro fuori sede.
+   */
+  public static List<StampTypes> onlyActiveWithoutOffSiteWork() {
+    return onlyActive().stream().filter(StampTypes::isNotOffSiteWork).collect(Collectors.toList());
+  }
+  
   /**
    * @return true se la causale passata come parametro è attiva. False altrimenti
    */
@@ -106,7 +115,15 @@ public enum StampTypes {
    * @return true se la timbratura corrisponde ad un timbrature per lavoro effettuato fuori sede
    */
   public boolean isOffSiteWork() {
-    return this == MOTIVI_DI_SERVIZIO_FUORI_SEDE || this == LAVORO_FUORI_SEDE;
+    return this == LAVORO_FUORI_SEDE;
+  }
+  
+  /**
+   * 
+   * @return
+   */
+  public boolean isNotOffSiteWork() {
+    return this != LAVORO_FUORI_SEDE;
   }
 
 }

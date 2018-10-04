@@ -1,6 +1,8 @@
 package manager;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
 
 import dao.AbsenceDao;
@@ -15,6 +17,7 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.persistence.Query;
@@ -22,8 +25,12 @@ import javax.persistence.Query;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
+import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.JustifiedType.JustifiedTypeName;
+import models.dto.AbsenceToRecoverDto;
 
+import org.assertj.core.util.Lists;
 import org.joda.time.LocalDate;
 
 import play.db.jpa.JPA;
@@ -106,10 +113,32 @@ public class PersonManager {
 
     return absenceCodeMap;
   }
+  
+  /**
+   * Metodo utile per il calcolo dei codici di assenza presenti in un certo arco temporale
+   *     derivante dalla lista dei personday.
+   * @param personDays la lista dei personDay
+   * @return la lista dei codici di assenza presenti nella lista dei personDay.
+   */
+  public List<Absence> listAbsenceCodes(List<PersonDay> personDays) {
+    final List<Absence> list = Lists.newArrayList();
+    personDays.stream().flatMap(personDay -> personDay.absences.stream()
+        .<Absence>map(absence -> absence)).forEach(absence -> {          
+          list.add(absence);
+        });
+        
+    return list;
+  }
 
 
   /**
-   * @return il numero di giorni lavorati in sede.
+   * Metodo che determina quanti giorni di lavoro in sede sono stati effettuati. Controlla anche
+   *     che tra questi giorni non ci siano giorni di lavoro FUORI SEDE che vengono sottratti
+   *     dal conteggio.
+   * @param personDays la lista dei personDay
+   * @param contracts la lista dei contratti
+   * @param end la data di fine
+   * @return la lista dei giorni di lavoro IN SEDE derivanti dai parametri passati.
    */
   public int basedWorkingDays(List<PersonDay> personDays,
       List<Contract> contracts, LocalDate end) {
@@ -136,8 +165,13 @@ public class PersonManager {
 
       if (fixed && !personDayManager.isAllDayAbsences(pd)) {
         basedDays++;
+      } else if (!fixed && pd.stampings.size() > 0 
+          && !personDayManager.isAllDayAbsences(pd) 
+          && pd.person.qualification.qualification < 4) {
+        basedDays++;
       } else if (!fixed && pd.stampings.size() > 0
-          && !personDayManager.isAllDayAbsences(pd)) {
+          && !personDayManager.isAllDayAbsences(pd) 
+          && personDayManager.enoughTimeInSeat(pd.stampings, day)) {
         basedDays++;
       }
 
@@ -194,7 +228,7 @@ public class PersonManager {
         .getHolidayWorkingTime(person, year, month);
     int value = 0;
     for (PersonDay pd : pdList) {
-      value += pd.getOnHoliday() - pd.getApprovedOnHoliday() ;
+      value += pd.getOnHoliday() - pd.getApprovedOnHoliday();
     }
     return value;
   }
@@ -236,6 +270,57 @@ public class PersonManager {
       value += pd.timeAtWork;
     }
     return value;
+  }
+  
+  /**
+   * Metodo che ritorna la lista delle assenze di tipo recover_time non ancora evase nell'arco 
+   * temporale compreso tra from e to.
+   * @param person la persona di cui si cercano le assenze
+   * @param from la data da cui si cercano le assenze
+   * @param to la data fino a cui si cercano le assenze
+   * @param justifiedTypeName il tipo di giustificativo 
+   * @return la lista di assenze di tipo recovery_time presenti nei parametri specificati
+   */
+  public List<Absence> absencesToRecover(Person person, LocalDate from, 
+      LocalDate to, JustifiedTypeName justifiedTypeName) {
+    List<Absence> absencesToRecover = Lists.newArrayList();
+    List<Absence> absences = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), 
+        Optional.absent(), from, to, Optional.fromNullable(justifiedTypeName), 
+        false, false);
+    for (Absence abs : absences) {
+      int sum = abs.timeVariations.stream().mapToInt(o -> o.timeVariation).sum();
+      if (sum < abs.timeToRecover) {
+        absencesToRecover.add(abs);
+      }
+    }
+        
+    return absencesToRecover;
+  }
+  
+  /**
+   * Metodo di utilità per trasformare una lista di assenze in lista di dto per il template.
+   * @param list lista di assenze a giustificazione recover_time
+   * @return la lista di dto da ritornare alla vista.
+   */
+  public List<AbsenceToRecoverDto> dtoList(List<Absence> list) {
+
+    List<AbsenceToRecoverDto> absencesToRecover =
+        FluentIterable.from(list).transform(
+            new Function<Absence, AbsenceToRecoverDto>() {
+              @Override
+              public AbsenceToRecoverDto apply(Absence absence) {
+                return new AbsenceToRecoverDto(
+                absence, absence.personDay.date, absence.expireRecoverDate,
+                absence.timeToRecover,
+                absence.timeVariations.stream().mapToInt(i -> i.timeVariation).sum(),
+                Math.round(absence.timeVariations.stream().mapToInt(i -> i.timeVariation).sum() 
+                / (float) absence.timeToRecover * 100)
+                );
+              }
+            }
+       ).toList();
+
+    return absencesToRecover;
   }
 
 }

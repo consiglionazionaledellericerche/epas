@@ -2,9 +2,12 @@ package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
 
+import cnr.sync.dto.DayRecap;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.history.HistoryValue;
 import dao.history.StampingHistoryDao;
@@ -14,13 +17,22 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import lombok.extern.slf4j.Slf4j;
+
+import manager.PrintTagsManager;
 import manager.SecureManager;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 
+import models.Office;
 import models.Person;
 import models.Stamping;
+import models.absences.Absence;
+import models.absences.AbsenceType;
+import models.absences.JustifiedType;
+import models.dto.PrintTagsInfo;
+import models.dto.ShiftEvent;
 
 import org.joda.time.LocalDate;
 
@@ -29,11 +41,14 @@ import play.mvc.With;
 
 import security.SecurityRules;
 
+@Slf4j
 @With({Resecure.class})
 public class PrintTags extends Controller {
 
   @Inject
   static PersonDao personDao;
+  @Inject
+  private static OfficeDao officeDao;
   @Inject
   static SecurityRules rules;
   @Inject
@@ -41,7 +56,7 @@ public class PrintTags extends Controller {
   @Inject
   static SecureManager secureManager;
   @Inject
-  static StampingHistoryDao stampingHistoryDao;
+  static PrintTagsManager printTagsManager;
   @Inject
   static IWrapperFactory wrapperFactory;
 
@@ -52,32 +67,60 @@ public class PrintTags extends Controller {
    * @param year l'anno di interesse
    * @param includeStampingDetails se includere anche i dettagli
    */
-  public static void showTag(Person person, int month, int year, boolean includeStampingDetails) {
+  public static void showTag(Person person, int year, int month, boolean includeStampingDetails, 
+      boolean forAll, Long officeId) {
 
-    if (person == null) {
+    if (person == null && !forAll) {
       flash.error("Selezionare una persona dall'elenco del personale.");
-      listPersonForPrintTags(year, month);
+      listPersonForPrintTags(year, month, officeId);
     }
 
-    rules.checkIfPermitted(person);
-
-    PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
-
-    List<List<HistoryValue<Stamping>>> historyStampingsList = Lists.newArrayList();
-    if (includeStampingDetails) {
-      for (PersonStampingDayRecap day : psDto.daysRecap) {
-        if (!day.ignoreDay) {
-          for (Stamping stamping : day.personDay.stampings) {
-            if (stamping.markedByAdmin) {
-              historyStampingsList.add(stampingHistoryDao.stampings(stamping.id));
-            }
-          }
-        }
-      }
+    //conrtrollo chi ha chiamato questa funzionalità: se la persona per stampare il proprio 
+    //cartellino o l'amministratore del personale.
+    Office office = null;
+    if (officeId == null) {
+      //office = person.office;
+      rules.checkIfPermitted(person);
+    } else {
+      office = officeDao.getOfficeById(officeId);
+      rules.checkIfPermitted(office);
     }
 
-    renderPDF(psDto, includeStampingDetails, historyStampingsList);
+    
+    List<PrintTagsInfo> dtoList = Lists.newArrayList();
+    List<Person> personList = Lists.newArrayList();
+
+    LocalDate date = new LocalDate(year, month, 1);
+    if (!forAll) {
+      personList.add(person);
+    } else {
+      personList = personDao.list(
+          Optional.<String>absent(),
+          secureManager.officesReadAllowed(Security.getUser().get()),
+          false, date, date.dayOfMonth().withMaximumValue(), true).list();
+    }
+
+    for (Person p : personList) {
+      PersonStampingRecap psDto = stampingsRecapFactory.create(p, year, month, false);
+      log.debug("Creato il person stamping recap per {}", psDto.person.fullName());
+      List<List<HistoryValue<Stamping>>> historyStampingsList = Lists.newArrayList();
+      if (includeStampingDetails) {
+        historyStampingsList = printTagsManager.getHistoricalList(psDto);
+      }        
+      PrintTagsInfo info = PrintTagsInfo.builder()
+          .psDto(psDto)
+          .person(p)
+          .includeStampingDetails(includeStampingDetails)
+          .historyStampingsList(historyStampingsList)
+          .build();
+      log.debug("Creato il PrintTagsInfo per {}", info.person.fullName());
+      dtoList.add(info);
+      log.debug("Inserito nella lista: {}", info.person.fullName());
+    }
+    renderPDF(dtoList);
   }
+
+
 
   /**
    * restituisce il template contenente la lista di persone attive per cui stampare il 
@@ -85,15 +128,16 @@ public class PrintTags extends Controller {
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
    */
-  public static void listPersonForPrintTags(int year, int month) {
+  public static void listPersonForPrintTags(int year, int month, Long officeId) {
 
     LocalDate date = new LocalDate(year, month, 1);
-
+    Office office = officeDao.getOfficeById(officeId);
     List<Person> personList = personDao.list(
         Optional.<String>absent(),
         secureManager.officesReadAllowed(Security.getUser().get()),
         false, date, date.dayOfMonth().withMaximumValue(), true).list();
+    boolean forAll = true;
 
-    render(personList, date, year, month);
+    render(personList, date, year, month, forAll, office);
   }
 }

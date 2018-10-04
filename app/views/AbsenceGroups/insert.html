@@ -179,7 +179,7 @@ title:'Nuovo codice assenza in data ' + absenceForm.from?.format()
          *{ #{if alldaySelected } }*
           #{f.hidden 'to', value:absenceForm.to?.format() /}
          *{ #{/if} }*
-   
+   	  #{f.hidden 'recoveryDate', value:absenceForm.recoveryDate?.format() /}
       #{f.hidden 'groupAbsenceType.id', value:absenceForm.groupSelected.id /}
       #{f.hidden 'absenceType.id', value:absenceForm.absenceTypeSelected?.id /}
       #{f.hidden 'justifiedType.id', value:absenceForm.justifiedTypeSelected.id /}

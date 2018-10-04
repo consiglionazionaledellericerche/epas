@@ -51,6 +51,9 @@ public class QNotification extends EntityPathBase<Notification> {
     //inherited
     public final DateTimePath<org.joda.time.LocalDateTime> updatedAt = _super.updatedAt;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QNotification(String variable) {
         this(Notification.class, forVariable(variable), INITS);
     }

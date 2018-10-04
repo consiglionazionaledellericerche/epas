@@ -47,6 +47,9 @@ public class QConfiguration extends EntityPathBase<Configuration> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QConfiguration(String variable) {
         this(Configuration.class, forVariable(variable), INITS);
     }

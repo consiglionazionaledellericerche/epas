@@ -10,14 +10,10 @@ import dao.PersonDayDao;
 import dao.PersonShiftDayDao;
 import dao.WorkingTimeTypeDao;
 import dao.ZoneDao;
+import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperPersonDay;
 
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,6 +31,7 @@ import models.Stamping.WayType;
 import models.WorkingTimeTypeDay;
 import models.ZoneToZones;
 import models.absences.Absence;
+import models.absences.JustifiedBehaviour.JustifiedBehaviourName;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.StampTypes;
@@ -46,6 +43,11 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 
 @Slf4j
 public class PersonDayManager {
@@ -54,6 +56,7 @@ public class PersonDayManager {
   private final PersonDayInTroubleManager personDayInTroubleManager;
   private final PersonShiftDayDao personShiftDayDao;
   private final PersonDayDao personDayDao;
+  private final AbsenceComponentDao absenceComponentDao;
   private final WorkingTimeTypeDao workingTimeTypeDao;
   private final ZoneDao zoneDao;
 
@@ -67,10 +70,12 @@ public class PersonDayManager {
   @Inject
   public PersonDayManager(ConfigurationManager configurationManager,
       PersonDayInTroubleManager personDayInTroubleManager, PersonDayDao personDayDao,
+      AbsenceComponentDao absenceComponentDao,
       PersonShiftDayDao personShiftDayDao, WorkingTimeTypeDao workingTimeTypeDao, ZoneDao zoneDao) {
 
     this.configurationManager = configurationManager;
     this.personDayInTroubleManager = personDayInTroubleManager;
+    this.absenceComponentDao = absenceComponentDao;
     this.personShiftDayDao = personShiftDayDao;
     this.personDayDao = personDayDao;
     this.workingTimeTypeDao = workingTimeTypeDao;
@@ -95,13 +100,15 @@ public class PersonDayManager {
    */
   public Optional<Absence> getAllDay(PersonDay personDay) {
     for (Absence absence : personDay.absences) {
-      if (absence.justifiedType.name.equals(JustifiedTypeName.all_day)) { 
+      if (absence.justifiedType.name.equals(JustifiedTypeName.all_day)
+          || absence.justifiedType.name.equals(JustifiedTypeName.recover_time)) { 
         return Optional.of(absence);
       }
     }
     return Optional.absent();
   }
   
+ 
   /**
    * 
    * @param personDay il personDay in cui cercare l'assenza
@@ -313,27 +320,6 @@ public class PersonDayManager {
    * @param startLunch inizio fascia pranzo
    * @param endLunch fine fascia pranzo
    * @param startWork inizio apertura sede
-   * @param endWork fine apertura sede 
-   * @return personDay modificato
-   */
-  public PersonDay updateTimeAtWork(PersonDay personDay, WorkingTimeTypeDay wttd,
-      boolean fixedTimeAtWork, LocalTime startLunch, LocalTime endLunch,
-      LocalTime startWork, LocalTime endWork) {
-
-    return updateTimeAtWork(personDay, wttd, fixedTimeAtWork, startLunch, endLunch,
-        startWork, endWork,
-        Optional.absent());
-  }
-
-  /**
-   * Calcolo del tempo a lavoro e del buono pasto.
-   *
-   * @param personDay personDay
-   * @param wttd tipo orario
-   * @param fixedTimeAtWork se la persona ha la presenza automatica
-   * @param startLunch inizio fascia pranzo
-   * @param endLunch fine fascia pranzo
-   * @param startWork inizio apertura sede
    * @param endWork fine apertura sede
    * @param exitingNow timbratura fittizia uscendo in questo momento 
    * @return personDay modificato
@@ -395,7 +381,7 @@ public class PersonDayManager {
       setTicketStatusIfNotForced(personDay, false);
       return personDay;
     }
-
+    
     //Giustificativi a grana minuti nel giorno
     for (Absence abs : personDay.getAbsences()) {
 
@@ -586,7 +572,9 @@ public class PersonDayManager {
    */
   private PersonDay updateTimeAtWorkFixed(PersonDay personDay, WorkingTimeTypeDay wttd) {
 
-    if (personDay.isHoliday || getAllDay(personDay).isPresent()) {
+    if (personDay.isHoliday || getAllDay(personDay).isPresent() 
+        || getAssignAllDay(personDay).isPresent() 
+        || getCompleteDayAndAddOvertime(personDay).isPresent()) {
       personDay.setTimeAtWork(0);
       setTicketStatusIfNotForced(personDay, false);
       return personDay;
@@ -640,7 +628,8 @@ public class PersonDayManager {
    * @param fixedTimeAtWork fixedTimeAtWork
    */
   public void updateDifference(PersonDay personDay, WorkingTimeTypeDay wttd,
-      boolean fixedTimeAtWork) {
+      boolean fixedTimeAtWork,  LocalTime startLunch, LocalTime endLunch,
+      LocalTime startWork, LocalTime endWork, Optional<Stamping> exitingNow) {
 
     // Patch fixed: la differenza è sempre 0
     if (fixedTimeAtWork) {
@@ -655,10 +644,58 @@ public class PersonDayManager {
       plannedWorkingTime = 0;
     }
 
+    // del caso di assenze giornaliere la differenza è 0 ed il calcolo è concluso.
     if (isAllDayAbsences(personDay)) {
       personDay.setDifference(0);
-    } else {
-      personDay.setDifference(personDay.getTimeAtWork() - plannedWorkingTime);
+      return;
+    } 
+    
+    personDay.setDifference(personDay.getTimeAtWork() - plannedWorkingTime);
+    
+    // Decurtazione straordinari
+    
+    // in ogni caso nessun straordinario 
+    for (Absence absence : personDay.absences) {
+      if (absence.absenceType.getBehaviour(JustifiedBehaviourName.no_overtime).isPresent()) {
+        personDay.setDifference(Math.min(personDay.getDifference(), 0));
+        personDay.setTimeAtWork(Math.min(personDay.getTimeAtWork(), plannedWorkingTime));
+        return;
+      }
+    }
+
+    // riduce l'assenza per impedire lo straordinario
+    boolean recompute = false;
+    for (Absence absence : personDay.absences) {
+      if (personDay.difference <= 0) {
+        continue;
+      }
+      if (!absence.absenceType.getBehaviour(JustifiedBehaviourName.reduce_overtime).isPresent()) {
+        continue;
+      }
+      if (absence.justifiedType.name.equals(JustifiedTypeName.specified_minutes)) {
+        if (absence.justifiedMinutes > 0) {
+          int decurted = personDay.difference > absence.justifiedMinutes 
+              ? absence.justifiedMinutes : personDay.difference;
+          if (decurted > 0) {
+            absence.justifiedMinutes = absence.justifiedMinutes - decurted;
+            recompute = true;
+            if (!exitingNow.isPresent()) {
+              absence.save();
+            }            
+          }
+        }
+      } else {
+        throw new IllegalStateException("Handler noOvertime non ancora implementato per " 
+          + absence.justifiedType.name);
+      }
+    }
+
+    if (recompute) {
+      updateTimeAtWork(personDay, wttd, fixedTimeAtWork, 
+          startLunch, endLunch, startWork, endWork, exitingNow);
+
+      updateDifference(personDay, wttd, fixedTimeAtWork, 
+          startLunch, endLunch, startWork, endWork, exitingNow);
     }
   }
 
@@ -744,7 +781,8 @@ public class PersonDayManager {
     updateTimeAtWork(personDay, wttd, fixed, lunchInterval.from, lunchInterval.to,
         workInterval.from, workInterval.to, Optional.of(stampingExitingNow));
 
-    updateDifference(personDay, wttd, fixed);
+    updateDifference(personDay, wttd, fixed, lunchInterval.from, lunchInterval.to,
+        workInterval.from, workInterval.to, Optional.of(stampingExitingNow));
 
     updateProgressive(personDay, previousForProgressive);
   }
@@ -967,8 +1005,8 @@ public class PersonDayManager {
         LocalDateTime outTime = validPair.second.date;
         LocalDateTime inTime = validPair.first.date;
         if (stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime)) {
-          if (validPair.second.stampType == StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE
-              || validPair.first.stampType == StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE) {
+          if (validPair.second.stampType == StampTypes.LAVORO_FUORI_SEDE
+              || validPair.first.stampType == StampTypes.LAVORO_FUORI_SEDE) {
             belongToValidPairOutsite = true;
           } else {
             belongToValidPairNotOutsite = true;
@@ -1313,6 +1351,76 @@ public class PersonDayManager {
 
     //tempo a lavoro
     return workingTimeTypeDay.get().holiday;
+  }
+  
+  /**
+   * Metodo che controlla se si è trascorso abbastanza tempo in sede per essere considerati 
+   *    presenti.
+   * @param stampings la lista delle timbrature
+   * @return true se il tempo trascorso in sede è sufficiente, false altrimenti.
+   */
+  public boolean enoughTimeInSeat(List<Stamping> stampings, IWrapperPersonDay day) {
+    if (stampings.isEmpty()) {
+      return false;
+    }
+    final List<Stamping> orderedStampings = ImmutableList
+        .copyOf(stampings.stream().sorted().collect(Collectors.toList()));
+    List<PairStamping> pairStampings = computeValidPairStampings(orderedStampings);
+    boolean enough = false;
+    int timeInSeat = 0;
+    //int timeOffSeat = 0;
+    if (pairStampings.isEmpty()) {
+      return false;
+    }
+    for (PairStamping pair : pairStampings) {
+      if ((pair.first.stampType != null 
+          && pair.first.stampType.equals(StampTypes.LAVORO_FUORI_SEDE)) 
+          || (pair.second.stampType != null 
+          && pair.second.stampType.equals(StampTypes.LAVORO_FUORI_SEDE))) {
+        //timeOffSeat += pair.timeInPair;
+      } else {
+        timeInSeat += pair.timeInPair;
+      }
+    }
+    if (timeInSeat >= day.getWorkingTimeTypeDay().get().workingTime / 2) {
+      enough = true;
+    }
+    return enough;
+  }
+  
+  /**
+   * Implementazione bizzarra dei permessi brevi... Andrà superata.
+   * @param pd personDay
+   */
+  public void handleShortPermission(IWrapperPersonDay pd) {
+    //Gestione permessi brevi 36 ore anno
+    int timeShortPermission = shortPermissionTime(pd.getValue());
+    Absence shortPermission = null;
+    for (Absence absence : pd.getValue().absences) {
+      if (absence.absenceType.code.equals("PB")) {
+        shortPermission = absence;
+      }
+    }
+
+    if (timeShortPermission == 0 && shortPermission != null) {
+      //delete
+      shortPermission.delete();
+      pd.getValue().absences.remove(shortPermission);
+    } else if (timeShortPermission > 0 && shortPermission == null) {
+      //create
+      shortPermission = new Absence();
+      shortPermission.personDay = pd.getValue();
+      shortPermission.absenceType = absenceComponentDao.absenceTypeByCode("PB").get();
+      shortPermission.justifiedType = absenceComponentDao
+          .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes_limit);
+      shortPermission.justifiedMinutes = timeShortPermission;
+      shortPermission.save();
+      pd.getValue().absences.add(shortPermission);
+    } else if (timeShortPermission > 0 && shortPermission != null) {
+      //edit
+      shortPermission.justifiedMinutes = timeShortPermission;
+      shortPermission.save();
+    }
   }
 
 }

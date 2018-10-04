@@ -92,6 +92,19 @@ then
  $c.grant();
 end
 
+/*
+ *	Azioni eseguibili dagli impiegati per visualizzare la propria situazione via REST.
+ */
+rule canEmployeeAccessOwnRestInfo
+when
+  $p: Person() from currentOperator.person
+  $c: PermissionCheck(action in (
+  		"rest.PersonDays.getMonthSituation", "rest.PersonDays.getDaySituation"), 
+  		granted == false, target == $p)
+then
+ $c.grant();
+end
+
 /*Questa parte per il nuovo ruolo supervisore dei turni */
 rule isShiftSupervisor_generic
 when 
@@ -265,7 +278,6 @@ when
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilityTypes
-  //$st: ShiftType() from $sc.shiftTypes
   $c: PermissionCheck(action in ("ReperibilityCalendar.show",
                                  "ReperibilityCalendar.reperibilityPeople",
                                  "ReperibilityCalendar.deleteReperibility",
@@ -286,7 +298,6 @@ when
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilityTypes
-  //$st: ShiftType() from $sc.shiftTypes
   $target: ReperibilityTypeMonth((!approved && personReperibilityType == $prt) || this == null)
   $c: PermissionCheck(action in ("ReperibilityCalendar.deleteReperibility",
   								 "ReperibilityCalendar.changeReperibility",
@@ -303,7 +314,6 @@ when
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilityTypes
-  //$st: ShiftType() from $sc.shiftTypes
   $target: ReperibilityTypeMonth(personReperibilityType == $prt)
   $c: PermissionCheck(action in ("ReperibilityCalendar.approveReperibilityInMonth",
   								 "ReperibilityCalendar.removeApprovation")
@@ -344,7 +354,6 @@ when
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilities
-  //$st: ShiftType() from $sc.shiftTypes
   $c: PermissionCheck(action in ("ReperibilityCalendar.show",
                                  "ReperibilityCalendar.reperibilityPeople",
                                  "ReperibilityCalendar.deleteReperibility",
@@ -364,7 +373,6 @@ when
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilities
-  //$st: ShiftType() from $sc.shiftTypes
   $target: ReperibilityTypeMonth((!approved && personReperibilityType == $prt) || this == null)
   $c: PermissionCheck(action in ("ReperibilityCalendar.deleteReperibility",
   								 "ReperibilityCalendar.changeReperibility",
@@ -410,6 +418,8 @@ then
 $c.grant();
 end
 
+
+
 /*Ruolo per vedere il calendario per i reperibili*/
 
 rule isAvailable_general
@@ -435,7 +445,6 @@ when
   	Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
 	$pr: PersonReperibility() from $p.reperibility
 	$prt: PersonReperibilityType() from $pr.personReperibilityType
-	//$st: ShiftType() from $psst.shiftType
 	$c: PermissionCheck(action in (
        "ReperibilityCalendar.show",
        "ReperibilityCalendar.reperibilityPeople",
@@ -465,6 +474,9 @@ when
 
      	/* Assenze annuali */
      	"Absences.absencesPerPerson",
+     	
+     	/* Gestione riposi compensativi per chiusura ente*/
+     	"TimeVariations.personShow",
 
      	/* Ferie */
      	"Vacations.show",
@@ -542,7 +554,7 @@ when
  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
  $target: Stamping()
  Office(persons.contains($target.getOwner())) from $uro.office
- $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"),
+ $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.saveOffSite", "Stampings.delete"),
   target == $target, granted == false )
 then
  $c.grant();
@@ -569,7 +581,7 @@ rule HasRightOnHimselfExceptFor
 when
   $p: Person(this == currentOperator.person)
   $c: PermissionCheck(action not in (
-      "Stampings.blank",
+      "Stampings.insert",
       "AbsenceGroups.insert"),target == $p, granted == false)
 then
  $c.grant();
@@ -582,7 +594,7 @@ rule PersonnelAdmin_onPerson
 when
   $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
   $o: Office() from $uro.office
-  $c: PermissionCheck($o.persons contains target, granted == false)
+  $c: PermissionCheck($o.persons contains target, granted == false, action not in ("Persons.updateEppn"))
 then
  $c.grant();
 end
@@ -595,7 +607,7 @@ when
   $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN_MINI)
   $o: Office() from $uro.office
   $c: PermissionCheck(action not in (
-    "Stampings.blank",
+    "Stampings.insert",
     "AbsenceGroups.insert"), $o.persons contains target, granted == false)
 then
  $c.grant();
@@ -685,6 +697,9 @@ when
     "Contracts.initializationsStatus",
     "Contracts.initializationsVacation",
     "Contracts.initializationsMeal",
+    "ContractualReferences.list",
+    "ContractualClauses.list",
+    "ContractualClauses.show",
     "Institutes.list",
     "MealTickets.editPersonMealTickets",
     "MealTickets.findCodeBlock",
@@ -728,6 +743,7 @@ when
  Role(name == Role.TECHNICAL_ADMIN) from $uro.role
  $c: PermissionCheck(action in (
 
+		"Configurations.show",
         "Users.edit",
         "Users.show",
         "Users.addRole",
@@ -826,6 +842,7 @@ when
  Role(name == Role.TECHNICAL_ADMIN) from $uro.role
  $c: PermissionCheck(action in (
 
+	   "Configurations.show",
  	   "Institutes.edit",
  	   "Institutes.save",
 	   "Institutes.delete",
@@ -878,6 +895,36 @@ then
  $c.grant();
 end
 
+/*Con queste due regole si permette all'amministratore tecnico di accedere alla schermata delle configurazioni
+  e di poter modificare solo due parametri: l'abilitazione alla timbratura web e la specifica degli indirizzi ip.*/
+rule TechnicalAdmin_CanModifyConf
+when 
+ $uro: UsersRolesOffices()
+ Role(name == Role.TECHNICAL_ADMIN) from $uro.role
+ $c: PermissionCheck(action in (
+		"Configurations.show",
+		"Configurations.edit",
+		"Configurations.update"
+		
+        ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule CanModifySpecificParameter
+when 
+ $uro: UsersRolesOffices()
+ $target: Configuration(office == $uro.office, epasParam in(EpasParam.ADDRESSES_ALLOWED, EpasParam.WEB_STAMPING_ALLOWED))
+ $c: PermissionCheck(action in (
+		"Configurations.show",
+		"Configurations.edit",
+		"Configurations.update"
+
+        ), target == $target, granted == false)
+then
+ $c.grant();
+end
+
 /*******************************************************************************
  * Azioni utente con ruolo SEAT_SUPERVISOR
  ******************************************************************************/
@@ -887,7 +934,9 @@ when
  Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
  $c: PermissionCheck(action in (
 
-        "Stampings.personStamping"
+        "Stampings.personStamping",
+        "Vacations.list",
+        "Vacations.vacationSummary"
 
         ), target == null, granted == false)
 then
@@ -901,7 +950,9 @@ when
  Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
  $c: PermissionCheck(action in (
  
-        "Stampings.personStamping"
+        "Stampings.personStamping",
+        "Vacations.list",
+        "Vacations.vacationSummary"
 
         ), target == $o, granted == false)
 then
@@ -1197,10 +1248,17 @@ when
      	"Absences.removeAttach",
      	"Absences.overtimeMission",
 
-        "Stampings.blank",
+        "Stampings.insert",
+        "Stampings.insertOffsite",
        	"Stampings.edit",
+       	"Stampings.editOffSite",
      	"Stampings.save",
+     	"Stampings.saveOffSite",
      	"Stampings.delete",
+     	"TimeVariations.addVariation",
+     	"TimeVariations.saveVariation",
+     	"TimeVariations.removeVariation",
+     	"TimeVariations.show",
      	"PersonDays.workingHoliday",
      	"PersonDays.approveWorkingHoliday",
      	"PersonDays.workingOutOpening",
@@ -1372,10 +1430,17 @@ when
      	"Absences.removeAttach",
      	"Absences.overtimeMission",
 
-       	"Stampings.blank",
+       	"Stampings.insert",
+       	"Stampings.insertOffsite",
        	"Stampings.edit",
+       	"Stampings.editOffSite",
      	"Stampings.save",
+     	"Stampings.saveOffSite",
      	"Stampings.delete",
+     	"TimeVariations.addVariation",
+     	"TimeVariations.saveVariation",
+     	"TimeVariations.removeVariation",
+     	"TimeVariations.show",
      	"PersonDays.workingHoliday",
      	"PersonDays.approveWorkingHoliday",
      	"PersonDays.workingOutOpening",
@@ -1492,7 +1557,7 @@ rule adminCanInsertStampingsAndAbsences_inDate
 when
  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
  $target: YearMonth()
- $c: PermissionCheck(action in ("AbsenceGroups.insert", "Stampings.blank"), target == $target, granted == false)
+ $c: PermissionCheck(action in ("AbsenceGroups.insert", "Stampings.insert"), target == $target, granted == false)
 then
  $c.grant();
 end
@@ -1562,9 +1627,11 @@ when
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
  PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
  $c: PermissionCheck(action in (
-    "Stampings.blank",
+    "Stampings.insert",
+    "Stampings.insertOffsite",
     "Stampings.edit",
-    "Stampings.save",
+    "Stampings.editOffSite",
+    "Stampings.saveOffSite",
     "Stampings.delete",
     "AbsenceGroups.insert",
     "AbsenceGroups.edit",
@@ -1584,7 +1651,7 @@ when
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
  PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
- $c: PermissionCheck(action in ("AbsenceGroups.insert","Stampings.blank"), target == $p, granted == false)
+ $c: PermissionCheck(action in ("AbsenceGroups.insert","Stampings.insert", "Stampings.insertOffsite", "Stampings.edit", "Stampings.editOffSite", "Stampings.saveOffSite"), target == $p, granted == false)
 then
  $c.grant();
 end
@@ -1598,7 +1665,7 @@ when
  $p: Person() from currentOperator.person
  $o: Office() from $p.office
  $target: Stamping(UserDao.getAllowedStampTypes(currentOperator).contains(stampType), this.getOwner() == $p)
- $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), target == $target, granted == false)
+ $c: PermissionCheck(action in ("Stampings.edit", "Stampings.editOffSite", "Stampings.saveOffSite", "Stampings.delete"), target == $target, granted == false)
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
  PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
@@ -1637,7 +1704,11 @@ when
  $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
- $c: PermissionCheck(action in ("Stampings.blank", "Stampings.edit", "Stampings.save" , "Stampings.delete" ), target == null, granted == false)
+ $c: PermissionCheck(action in ("Stampings.insert", 
+ 							 
+ 							"Stampings.edit",
+ 							"Stampings.save",
+ 							"Stampings.delete" ), target == null, granted == false)
 then
  $c.grant();
 end
@@ -1651,7 +1722,7 @@ when
  $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
- $c: PermissionCheck(action == "Stampings.blank", target == $p, granted == false)
+ $c: PermissionCheck(action == "Stampings.insert", target == $p, granted == false)
 then
  $c.grant();
 end
@@ -1666,7 +1737,7 @@ when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
  $target: YearMonth()
- $c: PermissionCheck(action in("AbsenceGroups.insert", "Stampings.blank"), target == $target, granted == false)
+ $c: PermissionCheck(action in("AbsenceGroups.insert", "Stampings.insert"), target == $target, granted == false)
  /** non più indietro di 2 mesi fa e solo nei mesi non ancora inviati sugli attestati **/
  eval($target.isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target))
 then
@@ -1682,7 +1753,7 @@ when
  $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
  $o: Office() from $p.office
  $target: Stamping(this.getOwner() == $p)
- $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save" , "Stampings.delete"), granted == false, target == $target)
+ $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), granted == false, target == $target)
  Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
   /** non più indietro di 2 mesi fa e solo nei mesi non ancora inviati sugli attestati **/
@@ -1800,7 +1871,6 @@ when
  $abt: AbsenceType(code == "92") 
  $c: PermissionCheck(action == "Absences.overtimeMission", target == $abt, granted == false )
 then
- System.out.println("PUPPAREEEEEEEE: " + $abt);
  $c.grant();
 end
 
@@ -1990,4 +2060,25 @@ when
   $c: PermissionCheck(target == $n, granted == false)
 then
   $c.grant();
+end
+
+/* 
+ * Permessi per la gestione della normativa contrattuale
+*/
+rule ContractualReferences
+when
+ AccountRole(this in (AccountRole.CONTRACTUAL_MANAGER)) 
+ $c: PermissionCheck(action in (
+
+        "ContractualReferences.list", "ContractualReferences.blank",
+        "ContractualReferences.edit", "ContractualReferences.save",
+		"ContractualReferences.delete", "ContractualReferences.manage",
+		
+        "ContractualClauses.list", "ContractualClauses.blank",
+        "ContractualClauses.edit", "ContractualClauses.save",
+        "ContractualClauses.show",
+		"ContractualClauses.delete", "ContractualClauses.manage")
+		, granted == false)
+then
+ $c.grant();
 end

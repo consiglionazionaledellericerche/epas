@@ -41,6 +41,9 @@ public class QPersonDayInTrouble extends EntityPathBase<PersonDayInTrouble> {
 
     public final QPersonDay personDay;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QPersonDayInTrouble(String variable) {
         this(PersonDayInTrouble.class, forVariable(variable), INITS);
     }

@@ -3,7 +3,7 @@ popover: true se si vuole abilitare il popover al momento del click.
 popText: il testo che appare al click. Se mancante utilizza il messages.
 disabled: input disabilitato
 }*
-#{f.edit _arg, label:_label}
+#{f.edit _arg, label:_label, required:_required}
 %{
 value = _value == null ? field.value : _value;
 }%

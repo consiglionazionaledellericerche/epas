@@ -45,7 +45,8 @@ public class QReperibilityTypeMonth extends EntityPathBase<ReperibilityTypeMonth
     //inherited
     public final DateTimePath<org.joda.time.LocalDateTime> updatedAt = _super.updatedAt;
 
-    public final NumberPath<Integer> version = createNumber("version", Integer.class);
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
 
     public final ComparablePath<org.joda.time.YearMonth> yearMonth = createComparable("yearMonth", org.joda.time.YearMonth.class);
 

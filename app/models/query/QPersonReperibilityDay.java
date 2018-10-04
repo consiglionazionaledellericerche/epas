@@ -43,6 +43,9 @@ public class QPersonReperibilityDay extends EntityPathBase<PersonReperibilityDay
 
     public final QPersonReperibilityType reperibilityType;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QPersonReperibilityDay(String variable) {
         this(PersonReperibilityDay.class, forVariable(variable), INITS);
     }

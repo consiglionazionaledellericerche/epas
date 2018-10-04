@@ -16,7 +16,7 @@
       <h3 class="panel-title"><span class="badge">1</span> Dati Personali</h3>
     </div>
     <div class="panel-body">
-
+	  #{f.hidden 'person.beginDate', value:org.joda.time.LocalDate.now() /}
       #{f.input 'person.surname',required:'true'/}
       #{f.input 'person.name',required:'true'/}
       #{f.input 'person.number',type:'number'/}

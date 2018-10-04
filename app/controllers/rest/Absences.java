@@ -132,7 +132,7 @@ public class Absences extends Controller {
     try {
       AbsenceInsertReport air =
           absenceManager.insertAbsenceRecompute(person, begin, Optional.fromNullable(end),
-              absenceTypeDao.getAbsenceTypeByCode(absenceCode).get(),
+              Optional.absent(),absenceTypeDao.getAbsenceTypeByCode(absenceCode).get(),
               Optional.<Blob>absent(), Optional.<String>absent(), Optional.<Integer>absent());
       for (AbsencesResponse ar : air.getAbsences()) {
         AbsenceAddedRest aar = new AbsenceAddedRest();
@@ -310,8 +310,9 @@ public class Absences extends Controller {
 
     try {
       AbsenceInsertReport air = absenceManager
-          .insertAbsenceRecompute(person, begin, Optional.fromNullable(end), absenceType.get(),
-              Optional.<Blob>absent(), Optional.<String>absent(), Optional.<Integer>absent());
+          .insertAbsenceRecompute(person, begin, Optional.fromNullable(end), 
+              Optional.<LocalDate>absent(), absenceType.get(), Optional.<Blob>absent(), 
+              Optional.<String>absent(), Optional.<Integer>absent());
 
       List<AbsenceAddedRest> absencesAdded = Lists.newArrayList();
       for (AbsencesResponse absenceResponse : air.getAbsences()) {

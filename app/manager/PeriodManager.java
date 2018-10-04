@@ -55,7 +55,7 @@ public class PeriodManager {
     //copia dei periodi ordinata
     List<IPropertyInPeriod> originals = Lists.newArrayList();
     for (IPropertyInPeriod originalPeriod :
-          propertyInPeriod.getOwner().periods(propertyInPeriod.getType()) ) {
+          propertyInPeriod.getOwner().periods(propertyInPeriod.getType())) {
       originals.add(originalPeriod);
     }
     Collections.sort(originals);
@@ -377,7 +377,7 @@ public class PeriodManager {
     if (recomputeRecap.recomputeFrom != null
         && !recomputeRecap.recomputeFrom.isAfter(LocalDate.now())) {
       recomputeRecap.days = DateUtility.daysInInterval(
-          new DateInterval(recomputeRecap.recomputeFrom, recomputeRecap.recomputeTo));
+          DateInterval.withBegin(recomputeRecap.recomputeFrom, recomputeRecap.recomputeTo));
     } else {
       recomputeRecap.days = 0;
     }

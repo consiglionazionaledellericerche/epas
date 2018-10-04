@@ -41,6 +41,9 @@ public class QTotalOvertime extends EntityPathBase<TotalOvertime> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public final NumberPath<Integer> year = createNumber("year", Integer.class);
 
     public QTotalOvertime(String variable) {

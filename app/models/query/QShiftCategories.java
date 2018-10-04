@@ -47,6 +47,9 @@ public class QShiftCategories extends EntityPathBase<ShiftCategories> {
 
     public final QPerson supervisor;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QShiftCategories(String variable) {
         this(ShiftCategories.class, forVariable(variable), INITS);
     }

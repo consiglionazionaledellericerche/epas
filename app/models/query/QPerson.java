@@ -119,7 +119,8 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final QUser user;
 
-    public final NumberPath<Integer> version = createNumber("version", Integer.class);
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
 
     public final BooleanPath wantEmail = createBoolean("wantEmail");
 

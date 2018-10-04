@@ -15,6 +15,8 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.persistence.EntityManager;
 import models.Contract;
 import models.Person;
@@ -121,6 +123,7 @@ public class AbsenceDao extends DaoBase {
     return query.list(absence);
 
   }
+  
 
   /**
    * @param person la persona di cui cercare le assenze.

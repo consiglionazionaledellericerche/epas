@@ -1,5 +1,10 @@
 package manager.services.absences;
 
+import java.util.List;
+
+import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
@@ -8,17 +13,10 @@ import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
 
 import controllers.Security;
-
 import dao.PersonChildrenDao;
-import dao.UserDao;
 import dao.absences.AbsenceComponentDao;
-
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.List;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.AbsenceManager;
 import manager.SecureManager;
 import manager.configurations.ConfigurationManager;
@@ -34,14 +32,11 @@ import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.Scanner;
 import manager.services.absences.model.ServiceFactories;
 import manager.services.absences.model.VacationSituation;
-import manager.services.absences.model.VacationSituation.OldVacationSummary;
 import manager.services.absences.model.VacationSituation.VacationSummary;
 import manager.services.absences.model.VacationSituation.VacationSummary.TypeSummary;
 import manager.services.absences.model.VacationSituation.VacationSummaryCached;
-import manager.services.vacations.IVacationsService;
-import manager.services.vacations.VacationsRecap;
-
 import models.Contract;
+import models.Office;
 import models.Person;
 import models.PersonChildren;
 import models.User;
@@ -55,10 +50,6 @@ import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultGroup;
-import models.enumerate.AccountRole;
-
-import org.joda.time.LocalDate;
-
 import play.cache.Cache;
 
 /**
@@ -77,8 +68,7 @@ public class AbsenceService {
   private final EnumAllineator enumAllineator;
   private final ConfigurationManager confManager;
   private final SecureManager secureManager;
-  //TODO: da togliere
-  private final UserDao userDao;
+  private final ConfigurationManager configurationManager;
    
   /**
    * Costruttore injection.
@@ -89,14 +79,15 @@ public class AbsenceService {
    */
   @Inject
   public AbsenceService(
+      ConfigurationManager configurationManager,
       AbsenceEngineUtility absenceEngineUtility,
       ServiceFactories serviceFactories,
       AbsenceComponentDao absenceComponentDao,
       PersonChildrenDao personChildrenDao,
       ConfigurationManager confManager,
       SecureManager secureManager,
-      EnumAllineator enumAllineator,
-      UserDao userDao) {
+      EnumAllineator enumAllineator) {
+    this.configurationManager = configurationManager;
     this.absenceEngineUtility = absenceEngineUtility;
     this.serviceFactories = serviceFactories;
     this.absenceComponentDao = absenceComponentDao;
@@ -104,7 +95,6 @@ public class AbsenceService {
     this.confManager = confManager;
     this.secureManager = secureManager;
     this.enumAllineator = enumAllineator;
-    this.userDao = userDao;
   }
   
   /**
@@ -125,7 +115,7 @@ public class AbsenceService {
           .groupAbsenceTypes.iterator().next();
     }
     
-    AbsenceForm form = buildAbsenceForm(person, date, null, null, 
+    AbsenceForm form = buildAbsenceForm(person, date, null, null, null, 
         groupAbsenceType, true, null, null, null, null, true);
     
     return form;
@@ -149,8 +139,8 @@ public class AbsenceService {
    */
   public AbsenceForm buildAbsenceForm(
       Person person, LocalDate from, CategoryTab categoryTab,                            //tab 
-      LocalDate to, GroupAbsenceType groupAbsenceType,  boolean switchGroup,             //group
-      AbsenceType absenceType, JustifiedType justifiedType,                              //reconf 
+      LocalDate to, LocalDate recoveryDate, GroupAbsenceType groupAbsenceType,  
+      boolean switchGroup, AbsenceType absenceType, JustifiedType justifiedType,         //reconf 
       Integer hours, Integer minutes, boolean readOnly) {
     
     //clean entities
@@ -205,13 +195,13 @@ public class AbsenceService {
     
     //TODO: Preconditions se groupAbsenceType presente verificare che permesso per la persona
     
-    return new AbsenceForm(person, from, to, groupAbsenceType, absenceType, 
+    return new AbsenceForm(person, from, to, recoveryDate, groupAbsenceType, absenceType, 
         justifiedType, hours, minutes, groupsPermitted,
         absenceComponentDao, absenceEngineUtility);
   }
   
   /**
-   * Effettua la simuzione dell'inserimento. Genera il report di inserimento.
+   * Effettua la simulazione dell'inserimento. Genera il report di inserimento.
    * @param person person
    * @param groupAbsenceType gruppo
    * @param from data inizio
@@ -487,6 +477,8 @@ public class AbsenceService {
    */
   public List<GroupAbsenceType> groupsPermitted(Person person, boolean readOnly) {
     List<GroupAbsenceType> groupsPermitted = absenceComponentDao.allGroupAbsenceType(false);
+    log.info("Configurazione groupsPermitted, readOnly = {}, groupsPermitted = {}", 
+        readOnly, groupsPermitted);
     if (readOnly) {
       return groupsPermitted;
     }
@@ -499,12 +491,15 @@ public class AbsenceService {
     final GroupAbsenceType employeeOffseat = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.LAVORO_FUORI_SEDE.name()).get();
 
-    //final User currentUser = Security.getUser().get();
+    final User currentUser = Security.getUser().get();
     //final User currentUser = userDao.byUsername("app.missioni");
-    final User currentUser = userDao.getSystemUserByRole(AccountRole.MISSIONS_MANAGER);
+    //final User currentUser = userDao.getSystemUserByRole(AccountRole.MISSIONS_MANAGER);
      
     final boolean officeWriteAdmin = secureManager
         .officesWriteAllowed(currentUser).contains(person.office);
+    
+    log.info("officeWriteAdmin = {}, officeWriteAllowed = {}", 
+          officeWriteAdmin, secureManager.officesWriteAllowed(currentUser));
     
     //Utente di sistema o amministratore della persona
     if (currentUser.isSystemUser() || officeWriteAdmin) {
@@ -516,7 +511,7 @@ public class AbsenceService {
     
     //Persona stessa non autoamministrata
     if (currentUser.person.equals(person) && !officeWriteAdmin) {
-      
+      log.info("configurazione gruppi per persona, officeWriteAdmin = {}", officeWriteAdmin);
       //vedere le configurazioni
       groupsPermitted = Lists.newArrayList();
   
@@ -534,7 +529,7 @@ public class AbsenceService {
           && person.qualification.qualification <= 3) {
         groupsPermitted.add(employeeCompensatory);  
       }
-      
+      log.info("groupPermitted = {}", groupsPermitted);
       return groupsPermitted;
     }
     
@@ -543,8 +538,8 @@ public class AbsenceService {
   
   @Deprecated
   private InsertReport temporaryInsertCompensatoryRest(Person person, 
-      GroupAbsenceType groupAbsenceType, LocalDate from, LocalDate to, AbsenceType absenceType, 
-      AbsenceManager absenceManager) {
+      GroupAbsenceType groupAbsenceType, LocalDate from, LocalDate to, 
+      AbsenceType absenceType, AbsenceManager absenceManager) {
     
     if (absenceType == null || !absenceType.isPersistent()) {
       absenceType = absenceComponentDao.absenceTypeByCode("91").get();
@@ -552,8 +547,8 @@ public class AbsenceService {
 
     return insertReportFromOldReport(
         absenceManager.insertAbsenceSimulation(person, from, Optional.fromNullable(to), 
-            absenceType, Optional.absent(), Optional.absent(), Optional.absent()), 
-        groupAbsenceType);
+             absenceType, Optional.absent(), 
+            Optional.absent(), Optional.absent()), groupAbsenceType);
     
   }
   
@@ -750,22 +745,12 @@ public class AbsenceService {
    * @return situazione
    */
   public VacationSituation buildVacationSituation(Contract contract, int year, 
-      GroupAbsenceType vacationGroup, Optional<LocalDate> residualDate, boolean cache, 
-      IVacationsService vacationsService) {
+      GroupAbsenceType vacationGroup, Optional<LocalDate> residualDate, boolean cache) {
 
     VacationSituation situation = new VacationSituation();
     situation.person = contract.person;
     situation.contract = contract;
     situation.year = year;
-
-    if (vacationsService != null) { 
-      Optional<VacationsRecap> vr = vacationsService.create(year, contract);
-      if (vr.isPresent()) {
-        situation.oldLastYear = new OldVacationSummary(vr.get().getVacationsLastYear());
-        situation.oldCurrentYear = new OldVacationSummary(vr.get().getVacationsCurrentYear());
-        situation.oldPermissions = new OldVacationSummary(vr.get().getPermissions());
-      }
-    }
 
     //La data target per il riepilogo contrattuale
     LocalDate date = vacationResidualDate(contract, residualDate, year);
@@ -902,5 +887,35 @@ public class AbsenceService {
       return residualDate.get();
     }
   }
-  
+
+  private LocalDate vacationsLastYearExpireDate(int year, Office office) {
+
+    MonthDay dayMonthExpiryVacationPastYear = (MonthDay)configurationManager
+        .configValue(office, EpasParam.EXPIRY_VACATION_PAST_YEAR, year); 
+
+    LocalDate expireDate = LocalDate.now()
+        .withYear(year)
+        .withMonthOfYear(dayMonthExpiryVacationPastYear.getMonthOfYear())
+        .withDayOfMonth(dayMonthExpiryVacationPastYear.getDayOfMonth());
+
+    return expireDate;
+  }
+
+  /**
+   * Se sono scadute le ferie per l'anno passato.
+   * @param year anno
+   * @param office data scadenza
+   * @return esito
+   */
+  public boolean isVacationsLastYearExpired(int year, Office office) {
+    LocalDate today = LocalDate.now();
+
+    LocalDate expireDate = vacationsLastYearExpireDate(year, office);
+    if (year < today.getYear()) {        //query anni passati
+      return true;
+    } else if (year == today.getYear() && today.isAfter(expireDate)) {    //query anno attuale
+      return true;
+    }
+    return false;
+  }
 }

@@ -1,38 +1,39 @@
 package manager.services.absences;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.inject.Inject;
-
-import it.cnr.iit.epas.DateInterval;
-import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
+import org.joda.time.LocalDate;
+import org.testng.collections.Lists;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.gdata.util.common.base.Preconditions;
+import com.google.inject.Inject;
+
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 import manager.services.absences.errors.CriticalError.CriticalProblem;
 import manager.services.absences.errors.ErrorsBox;
 import manager.services.absences.model.AbsencePeriod;
-
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.AbsenceTypeJustifiedBehaviour;
 import models.absences.AmountType;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
+import models.absences.JustifiedBehaviour.JustifiedBehaviourName;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
-
-import org.joda.time.LocalDate;
-import org.testng.collections.Lists;
 
 public class AbsenceEngineUtility {
   
@@ -179,6 +180,15 @@ public class AbsenceEngineUtility {
     } else {
       return amount;
     }
+  }
+  
+  public Integer takenBehaviouralFixes(Absence absence, Integer amount) {
+    Optional<AbsenceTypeJustifiedBehaviour> percentageTaken = 
+        absence.absenceType.getBehaviour(JustifiedBehaviourName.takenPercentageTime);
+    if (percentageTaken.isPresent() && percentageTaken.get().getData() != null) {
+      return amount * percentageTaken.get().getData() / 1000;
+    }
+    return amount;
   }
   
   /**
@@ -329,12 +339,12 @@ public class AbsenceEngineUtility {
    * @param replacingCodesDesc lista popolata
    * @param errorsBox errori popolati
    */
-  public void setReplacingCodesDesc(final AmountType complationAmountType, 
-      final Set<AbsenceType> replacingCodes, final LocalDate date,
-      SortedMap<Integer, AbsenceType> replacingCodesDesc, 
+  public void setReplacingCodesDesc(
+      final AmountType complationAmountType,
+      final Set<AbsenceType> replacingCodes, 
+      final LocalDate date,
+      SortedMap<Integer, List<AbsenceType>> replacingCodesDesc,  // campi valorizzati dal metodo 
       ErrorsBox errorsBox) {
-    
-    //replacingCodesDesc = Maps.newTreeMap(Collections.reverseOrder());          
     
     for (AbsenceType absenceType : replacingCodes) {
       int amount = replacingAmount(absenceType, complationAmountType);
@@ -343,28 +353,44 @@ public class AbsenceEngineUtility {
             CriticalProblem.IncalcolableReplacingAmount);
         continue;
       }
-      if (replacingCodesDesc.get(amount) != null) {
-        AbsenceType conflictingType = replacingCodesDesc.get(amount);
-        errorsBox.addCriticalError(date, absenceType, conflictingType, 
-            CriticalProblem.ConflictingReplacingAmount);
-        continue;
+
+      List<AbsenceType> amountAbsenceType = replacingCodesDesc.get(amount);
+      if (amountAbsenceType == null) {
+        amountAbsenceType = Lists.newArrayList();
+        replacingCodesDesc.put(amount, amountAbsenceType);
       }
-      replacingCodesDesc.put(amount, absenceType);
+      for (AbsenceType potentialConflicting : amountAbsenceType) {
+        if (DateUtility.intervalIntersection(
+            absenceType.validity(), potentialConflicting.validity()) != null) {
+          errorsBox.addCriticalError(date, absenceType, potentialConflicting, 
+              CriticalProblem.ConflictingReplacingAmount);
+          continue;
+        }
+      }
+      amountAbsenceType.add(absenceType);
+
     }
   }
   
   /**
    * Quale rimpiazzamento inserire se aggiungo il complationAmount al period nella data. 
+   * I codici sono ordinati in modo decrescente in modo da testare per primi quelli col valore
+   * più alto.
    * @return tipo del rimpiazzamento
    */
   public Optional<AbsenceType> whichReplacingCode(
-      SortedMap<Integer, AbsenceType> replacingCodesDesc, 
+      SortedMap<Integer, List<AbsenceType>> replacingCodesDesc, 
       LocalDate date, int complationAmount) {
     
     for (Integer replacingTime : replacingCodesDesc.keySet()) {
       int amountToCompare = replacingTime;
       if (amountToCompare <= complationAmount) {
-        return Optional.of(replacingCodesDesc.get(replacingTime));
+        // Il rimpiazzamento è corretto solo se non è scaduto alla data.
+        for (AbsenceType absenceType : replacingCodesDesc.get(amountToCompare)) {
+          if (!absenceType.isExpired(date)) {
+            return Optional.of(absenceType);
+          }  
+        }
       }
     }
     
@@ -430,7 +456,7 @@ public class AbsenceEngineUtility {
       map = Maps.newHashMap();
     }
     for (Absence absence : absences) {
-      Set<Absence> set = map.get(absence);
+      Set<Absence> set = map.get(absence.getAbsenceDate());
       if (set == null) {
         set = Sets.newHashSet();
         map.put(absence.getAbsenceDate(), set);
@@ -449,20 +475,41 @@ public class AbsenceEngineUtility {
    * @param contracts i contratti del dipendente
    * @return valora aggiustato (absent se impossibile calcolarlo)
    */
-  public Optional<Integer> takableAmountAdjustment(int fixed, TakeAmountAdjustment adjustment, 
-      DateInterval periodInterval, List<Contract> contracts) {
+  public Integer takableAmountAdjustment(AbsencePeriod absencePeriod, LocalDate date, 
+      int fixed, TakeAmountAdjustment adjustment, DateInterval periodInterval, 
+      List<Contract> contracts) {
     
-    boolean workTimeAdjustment = false;
-    if (adjustment == TakeAmountAdjustment.workingTimeAndWorkingPeriodPercent) {
-      workTimeAdjustment = true;
-    }
+    boolean workTimeAdjustment = adjustment.workTime;
+    boolean periodAdjustment = adjustment.periodTime;
     
     if (!periodInterval.isClosed()) {
-      return Optional.absent();
+      // Se si verificherà capire la casistica
+      absencePeriod.errorsBox.addCriticalError(date, CriticalProblem.IncalcolableAdjustment);
+      return null;
     }
     
-    int periodDays = DateUtility.daysInInterval(periodInterval);
-    
+    // I giorni del periodo da considerare per la riduzione sono: 
+    // periodAdjustment -> l'intero periodo
+    // !periodAdjustment -> i giorni di contratto attivi nel periodo 
+    //                      (*) in tal caso la somma di tutte le cwttPercent sarà 100%
+    int periodDays = 0;
+    if (periodAdjustment) {
+      periodDays = DateUtility.daysInInterval(periodInterval);
+    } else {
+      for (Contract contract : contracts) {
+        if (DateUtility.intervalIntersection(contract.periodInterval(), periodInterval) == null) {
+          continue;
+        }
+        for (ContractWorkingTimeType cwtt : contract.getContractWorkingTimeTypeOrderedList()) {
+          DateInterval cwttInterval = 
+              DateUtility.intervalIntersection(cwtt.periodInterval(), periodInterval); 
+          if (cwttInterval != null) {
+            periodDays += cwttInterval.dayInInterval();
+          }
+        }
+      }  
+    }
+        
     Double totalAssigned = new Double(0);
     
     //Ricerca dei periodi di attività
@@ -483,7 +530,7 @@ public class AbsenceEngineUtility {
         int cwttDays = DateUtility.daysInInterval(cwttInverval);
 
         //Incidenza cwtt sul periodo totale (in giorni)
-        Double cwttPercent = ((double)cwttDays * 100) / periodDays;
+        Double cwttPercent = ((double)cwttDays * 100) / periodDays; // (*)
         
         //Adeguamento sull'incidenza del periodo
         Double cwttAssigned = (cwttPercent * fixed) / 100;
@@ -497,8 +544,7 @@ public class AbsenceEngineUtility {
       }
     }
     
-    return Optional.of(totalAssigned.intValue());
+    return totalAssigned.intValue();
   }
-  
-      
+    
 }

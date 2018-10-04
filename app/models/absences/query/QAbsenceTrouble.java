@@ -39,6 +39,9 @@ public class QAbsenceTrouble extends EntityPathBase<AbsenceTrouble> {
 
     public final EnumPath<AbsenceTrouble.AbsenceProblem> trouble = createEnum("trouble", AbsenceTrouble.AbsenceProblem.class);
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QAbsenceTrouble(String variable) {
         this(AbsenceTrouble.class, forVariable(variable), INITS);
     }

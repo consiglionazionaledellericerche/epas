@@ -1,0 +1,22 @@
+<i class="fa fa-info-circle" webui-popover-hover data-url="#abt-${absenceType.id}" 
+	data-title="Info tipologia assenza ${absenceType.code}"></i>
+
+<div class="webui-popover-content" id="abt-${absenceType.id}">
+  <div class="form form-horizontal">
+  
+  	#{f.terseView 'absenceType.code' /}
+  	#{f.terseView 'absenceType.certificateCode' /}
+  	#{f.terseView 'absenceType.description' /}
+  	#{f.terseView 'absenceType.internalUse' /}
+	#{f.terseView 'absenceType.consideredWeekEnd' /}
+  	#{f.terseView 'absenceType.justifiedTypesPermitted', bodyonly:true}
+      #{list items:absenceType.justifiedTypesPermitted, as:'justifiedType'}
+	    <span class="label label-default">${justifiedType.label()}</span><br>
+	  #{/list}
+  	#{/f.terseView}
+  	#{f.terseView 'absenceType.tecnici', value:absenceType.isQualificationMapping(models.enumerate.QualificationMapping.TECNICI) /}
+	#{f.terseView 'absenceType.tecnologi', value:absenceType.isQualificationMapping(models.enumerate.QualificationMapping.TECNOLOGI) /}
+	
+  </div>	
+</div>
+  

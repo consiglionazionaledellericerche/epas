@@ -1,6 +1,15 @@
 
 package controllers;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+
+import javax.inject.Inject;
+
+import org.joda.time.LocalDate;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
@@ -11,6 +20,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import dao.AbsenceDao;
+import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.QualificationDao;
@@ -19,21 +29,14 @@ import dao.WorkingTimeTypeDao;
 import dao.absences.AbsenceComponentDao;
 import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
+import dao.wrapper.IWrapperPersonDay;
 import dao.wrapper.function.WrapperModelFunctionFactory;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-
-import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.NotificationManager;
@@ -46,7 +49,7 @@ import manager.services.absences.certifications.CertificationYearSituation;
 import manager.services.absences.certifications.CodeComparation;
 import manager.services.absences.model.AbsencePeriod;
 import manager.services.absences.model.PeriodChain;
-
+import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonDay;
@@ -54,6 +57,7 @@ import models.Qualification;
 import models.Role;
 import models.User;
 import models.WorkingTimeType;
+import models.WorkingTimeTypeDay;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.AmountType;
@@ -64,19 +68,19 @@ import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
+import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
+import models.absences.definitions.DefaultAbsenceType;
 import models.enumerate.QualificationMapping;
-
-import org.joda.time.LocalDate;
-
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.db.jpa.JPA;
+import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
-
+import play.mvc.results.Redirect;
 import security.SecurityRules;
 
 @Slf4j
@@ -115,6 +119,10 @@ public class AbsenceGroups extends Controller {
   private static WrapperModelFunctionFactory wrapperFunctionFactory;
   @Inject
   private static AbsenceDao absenceDao;
+  @Inject
+  private static IWrapperFactory wrapperFactory;
+  @Inject
+  private static ContractDao contractDao;
 
   /**
    * La lista delle categorie definite.
@@ -123,22 +131,6 @@ public class AbsenceGroups extends Controller {
 
     List<CategoryGroupAbsenceType> categories = CategoryGroupAbsenceType.findAll();
     List<CategoryTab> categoryTabs = CategoryTab.findAll();
-
-    //    if (categoryTabs.isEmpty()) {
-    //      int count = 1;
-    //      for (AbsenceInsertTab absenceInsertTab : AbsenceInsertTab.values()) {
-    //        CategoryTab categoryTab = new CategoryTab();
-    //        categoryTab.name = absenceInsertTab.name();
-    //        categoryTab.priority = count;
-    //        if (AbsenceInsertTab.defaultTab() == absenceInsertTab) {
-    //          categoryTab.isDefault = true;
-    //        }
-    //        categoryTab.save();
-    //        count++;
-    //      }
-    //      categoryTabs = CategoryTab.findAll();
-    //    }
-
     render(categories, categoryTabs);
   }
 
@@ -527,14 +519,14 @@ public class AbsenceGroups extends Controller {
    * @param from data selezionata
    */
   public static void findCode(Long personId, LocalDate from) {
-    
+
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     notFoundIfNull(from);
-    
+
     AbsenceForm absenceForm = absenceService.buildAbsenceForm(person, from, null,
-            null, null, true, null, null, null, null, false);
-    
+        null, null, null, true, null, null, null, null, false);
+
     //La lista di tutti i codici takable... con associato il gruppo con maggiore priorità.
     Set<AbsenceType> allTakable = Sets.newHashSet();
     for (GroupAbsenceType group : absenceComponentDao.allGroupAbsenceType(false)) {
@@ -547,11 +539,11 @@ public class AbsenceGroups extends Controller {
       //TODO eventualmente controllo prendibilità della persona alla data (figli, l 104 etc.)
       allTakable.addAll(group.takableAbsenceBehaviour.takableCodes);
     }
-    
+
     render(absenceForm, allTakable);
-    
+
   }
-  
+
   /**
    * End point per la simulazione di inserimento assenze.s
    *
@@ -568,8 +560,8 @@ public class AbsenceGroups extends Controller {
    */
   public static void insert(
       Long personId, LocalDate from, CategoryTab categoryTab,                      //tab
-      LocalDate to, GroupAbsenceType groupAbsenceType, boolean switchGroup, //group
-      AbsenceType absenceType, JustifiedType justifiedType,                 //confGroup 
+      LocalDate to, LocalDate recoveryDate, GroupAbsenceType groupAbsenceType,
+      boolean switchGroup, AbsenceType absenceType, JustifiedType justifiedType,   //confGroup 
       Integer hours, Integer minutes, boolean forceInsert) {
 
     Person person = personDao.getPersonById(personId);
@@ -580,17 +572,21 @@ public class AbsenceGroups extends Controller {
 
     AbsenceForm absenceForm =
         absenceService.buildAbsenceForm(person, from, categoryTab,
-            to, groupAbsenceType, switchGroup, absenceType, justifiedType, hours, minutes, false);
+            to, recoveryDate, groupAbsenceType, switchGroup, absenceType, 
+            justifiedType, hours, minutes, false);
 
     InsertReport insertReport = absenceService.insert(person,
         absenceForm.groupSelected,
         absenceForm.from, absenceForm.to,
         absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
         absenceForm.hours, absenceForm.minutes, forceInsert, absenceManager);
-    render(absenceForm, insertReport, forceInsert);
+    if (recoveryDate != null && !recoveryDate.isAfter(to)) {
+      Validation.addError("recoveryDate", "Deve essere successiva alla data di fine");
+    }
+    render(absenceForm, insertReport, forceInsert, recoveryDate);
 
   }
-  
+
   /**
    * Inserimento assistito partendo dalla ricerca.
    * @param personId persona
@@ -598,14 +594,14 @@ public class AbsenceGroups extends Controller {
    * @param absenceType tipo
    */
   public static void insertAssisted(Long personId, LocalDate from, AbsenceType absenceType) {
-    
+
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     notFoundIfNull(from);
     notFoundIfNull(absenceType);
 
     rules.checkIfPermitted(person);
-    
+
     GroupAbsenceType groupAbsenceType = absenceType.defaultTakableGroup();
     if (groupAbsenceType.firstOfChain() != null) {
       groupAbsenceType = groupAbsenceType.firstOfChain();
@@ -613,17 +609,17 @@ public class AbsenceGroups extends Controller {
     if (!groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.simpleGrouping)) {
       absenceType = null;
     }
-    
+
     AbsenceForm absenceForm =
         absenceService.buildAbsenceForm(person, from, null,
-            null, groupAbsenceType, false, absenceType, null, null, null, false);
+            null, null, groupAbsenceType, false, absenceType, null, null, null, false);
 
     InsertReport insertReport = absenceService.insert(person,
         absenceForm.groupSelected,
-        absenceForm.from, absenceForm.to,
+        absenceForm.from, absenceForm.to, 
         absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
         absenceForm.hours, absenceForm.minutes, false, absenceManager);
-    
+
     render("@insert", absenceForm, insertReport);
   }
 
@@ -640,7 +636,7 @@ public class AbsenceGroups extends Controller {
    * @param minutes          minuti
    * @param forceInsert      forza inserimento
    */
-  public static void save(Long personId, LocalDate from, LocalDate to,
+  public static void save(Long personId, LocalDate from, LocalDate to, LocalDate recoveryDate,
       GroupAbsenceType groupAbsenceType, AbsenceType absenceType,
       JustifiedType justifiedType, Integer hours, Integer minutes, boolean forceInsert) {
 
@@ -664,14 +660,18 @@ public class AbsenceGroups extends Controller {
         PersonDay personDay = personDayManager
             .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
         absence.personDay = personDay;
+        if (justifiedType.name.equals(JustifiedTypeName.recover_time)) {
+
+          absence = absenceManager.handleRecoveryAbsence(absence, person, recoveryDate);
+        }        
         personDay.absences.add(absence);
         rules.checkIfPermitted(absence);
         absence.save();
         personDay.save();
-        
+
         notificationManager.notificationAbsencePolicy(Security.getUser().get(), 
             absence, groupAbsenceType, true, false, false);
-        
+
       }
       if (!insertReport.reperibilityShiftDate().isEmpty()) {
         absenceManager.sendReperibilityShiftEmail(person, insertReport.reperibilityShiftDate());
@@ -681,7 +681,7 @@ public class AbsenceGroups extends Controller {
       JPA.em().flush();
       consistencyManager.updatePersonSituation(person.id, from);
       flash.success("Codici di assenza inseriti.");
-      
+
     }
 
 
@@ -728,42 +728,42 @@ public class AbsenceGroups extends Controller {
         .contains(currentUser)) {
       isAdmin = true;
     }
-    
+
     if (groupAbsenceType.automatic) {
       render(from, groupAbsenceType, periodChain, isAdmin);  //no switcher
     }
-    
+
     AbsenceForm categorySwitcher = absenceService
         .buildForCategorySwitch(person, from, groupAbsenceType);
-    
+
     render(from, categorySwitcher, groupAbsenceType, periodChain, isAdmin);
-    
+
   }
-  
+
   /**
    * Elenco delle inizializzazioni assenze.
    * @param officeId sede
    * @param groupAbsenceTypeId gruppo
    */
   public static void absenceInitializations(Long officeId, Long groupAbsenceTypeId) {
-    
+
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
-    
+
     rules.checkIfPermitted(office);
-    
+
     //Categorie inizializzabili e gruppo selezionato
     List<CategoryGroupAbsenceType> initializableCategories =
         absenceComponentDao.initializablesCategory();
-    
+
     GroupAbsenceType groupAbsenceType = null;
     if (groupAbsenceTypeId != null) {
       groupAbsenceType = absenceComponentDao.groupAbsenceTypeById(groupAbsenceTypeId);
     }
-    
+
     List<InitializationGroup> initializations = Lists.newArrayList();
     List<Person> withoutInitialization = Lists.newArrayList();
-    
+
     //Tutte le persone attive e tutte le inizializzazioni.
     for (Person person : personDao.listFetched(Optional.absent(),
         ImmutableSet.of(office), false, LocalDate.now(), LocalDate.now(), false).list()) {
@@ -776,15 +776,15 @@ public class AbsenceGroups extends Controller {
           initializations.add(initializationGroup);
         }
       }
-      
+
       if (!existInitialization) {
         withoutInitialization.add(person);
       }
     }
-    
+
     render(initializableCategories, groupAbsenceType, initializations,
         withoutInitialization, office);
-   
+
   }
 
   /**
@@ -799,9 +799,9 @@ public class AbsenceGroups extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    
+
     rules.checkIfPermitted(person.office);
-    
+
     GroupAbsenceType groupAbsenceType = GroupAbsenceType.findById(groupAbsenceTypeId);
     notFoundIfNull(groupAbsenceType);
     if (date == null) {
@@ -857,9 +857,9 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(initializationGroup.person);
     notFoundIfNull(initializationGroup.groupAbsenceType);
     notFoundIfNull(initializationGroup.date);
-    
+
     rules.checkIfPermitted(initializationGroup.person.office);
-    
+
     PeriodChain periodChain = absenceService.residual(initializationGroup.person,
         initializationGroup.groupAbsenceType, initializationGroup.date);
     Preconditions.checkState(!periodChain.periods.isEmpty());
@@ -918,7 +918,7 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(initializationGroup);
 
     rules.checkIfPermitted(initializationGroup.person.office);
-    
+
     initializationGroup.delete();
 
     flash.success("Inizializzazione rimossa con successo.");
@@ -1003,26 +1003,26 @@ public class AbsenceGroups extends Controller {
 
     Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
   }
-  
+
   /**
    * Gli errori sulle assenze di quella sede.
    * @param officeId sede
    */
   public static void absenceTroubles(Long officeId, int year, int month) {
-    
+
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-    
+
     //Tutte le persone attive nel mese attuale?
     List<Person> people = personDao.list(Optional.<String>absent(), 
         Sets.newHashSet(office), false, 
         new LocalDate(year, month, 1), 
         new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true).list();
-    
+
     //Tutti gli absenceErrors di quelle persone...
     Map<Person, List<Absence>> mapTroubles = absenceComponentDao.absenceTroubles(people);
-    
+
     render(people, mapTroubles, office, year, month);
   }
 
@@ -1087,7 +1087,7 @@ public class AbsenceGroups extends Controller {
     editAbsenceCriticalValue(absence.id);
 
   }
-  
+
   /**
    * I codici assenza in attestati e loro analisi.
    */
@@ -1098,10 +1098,10 @@ public class AbsenceGroups extends Controller {
     if (eraseErasable) {
       codeComparation.eraseErasable();
     }
-    
+
     render(codeComparation);
   }
- 
+
   /**
    * Se lo stato del db è consistente la modellazione via enumerati (che garantisce il corretto
    * funzionamento).
@@ -1109,7 +1109,7 @@ public class AbsenceGroups extends Controller {
    * Tab, Categorie, Gruppi, Parte takable, Parte completamento, Codici Assenza  
    */
   public static void consistencyGroups() {
-    
+
     List<CategoryTab> allCategoryTabs = absenceComponentDao.tabsByPriority();
     List<CategoryGroupAbsenceType> allCategories = absenceComponentDao.categoriesByPriority();
     List<GroupAbsenceType> allGroups = absenceComponentDao.allGroupAbsenceType(true);
@@ -1127,14 +1127,14 @@ public class AbsenceGroups extends Controller {
     render(allCategoryTabs, allCategories, allGroups, allComplations, allTakables, allAbsenceTypes);
 
   }
-  
+
   /**
    * Allinea la modellazione con gli enumerati.
    */
   public static void consistencyCleans() {
-    
+
     absenceService.enumAllineator();
-    
+
     //TODO: in questi casi bisogna validare per bene gli enumerati....
     //    List<AbsenceType> allAbsenceTypes = AbsenceType.findAll();
     //    for (AbsenceType absenceType : allAbsenceTypes) {
@@ -1160,33 +1160,162 @@ public class AbsenceGroups extends Controller {
   }
 
   /**
+   * Migra tutti i 661MO presi nel 2018, in accordo alle nuove normative.
+   * Una volta che sarà applicato a Roma sarà possibile cancellarlo ...
+   */
+  @SuppressWarnings("deprecation")
+  public static void migration661M() {
+    List<Absence> absences = absenceComponentDao
+        .absences(Lists.newArrayList(DefaultAbsenceType.A_661MO.getCode()));
+
+    DateInterval yearInterval = DateUtility.getYearInterval(2018);
+
+    Set<Person> toUpdate = Sets.newHashSet();
+
+    Set<Person> toScan = Sets.newHashSet();
+
+    JustifiedType allDay = absenceComponentDao.getOrBuildJustifiedType(JustifiedTypeName.all_day);
+    Optional<AbsenceType> a661G = absenceComponentDao
+        .absenceTypeByCode(DefaultAbsenceType.A_661G.getCode());
+
+    LocalDate beginCalculation = null;
+
+    // tutte le assenze 661MO
+    for (Absence absence : absences) {
+
+
+      // utilizzate dal 1/1/2018 al 31/12/2018
+      if (!DateUtility.isDateIntoInterval(absence.personDay.getDate(), yearInterval)) {
+        continue;
+      }
+      IWrapperPerson wPerson = wrapperFactory.create(absence.personDay.person);
+
+      Optional<Contract> contract = wPerson.getCurrentContract(); 
+      if (!contract.isPresent()) {
+        continue;
+      }
+
+      if (!contract.get().beginDate.isBefore(yearInterval.getBegin())) {
+        beginCalculation = contract.get().beginDate;
+      } else {
+        beginCalculation = yearInterval.getBegin();
+      }
+
+      if (!DateUtility.isDateIntoInterval(absence.personDay.getDate(), 
+          new DateInterval(contract.get().beginDate, contract.get().endDate))) {
+        continue;
+      }
+
+
+
+      IWrapperPersonDay wPersonDay = wrapperFactory.create(absence.personDay);  
+
+      Optional<WorkingTimeTypeDay>  wttd = wPersonDay.getWorkingTimeTypeDay();
+
+      if (!wttd.isPresent()) {
+        continue;
+      }
+
+      // di 7:12 quando la persona ha un orario 7:12
+      if (wttd.get().workingTime == 432 && absence.justifiedMinutes == 432) {
+
+        // sono convertite in 661G
+        absence.justifiedMinutes = null;
+        absence.justifiedType = allDay;
+        absence.absenceType = a661G.get();
+        absence.save();
+        toUpdate.add(absence.personDay.person);
+        continue;
+      }
+
+      // di 7:00 quando la persona ha un orario 7:12
+      if (wttd.get().workingTime == 432 && absence.justifiedMinutes == 420) {
+
+        // sono convertite in 661G
+        absence.justifiedMinutes = null;
+        absence.justifiedType = allDay;
+        absence.absenceType = a661G.get();
+        absence.save();
+        toUpdate.add(absence.personDay.person);
+        continue;
+      }
+
+      // non di 7:12 ma di un valore uguale o superiore a 6 ore
+      if (absence.justifiedMinutes > 300) {
+
+        // saranno inserite in uno stato di warning
+        toScan.add(absence.personDay.person);
+      }      
+
+    }
+    JPA.em().flush();
+    JPAPlugin.closeTx(false);
+    
+
+    if (!toUpdate.isEmpty()) {
+      for (Person person : toUpdate) {
+        JPAPlugin.startTx(false);
+        IWrapperPerson wPerson = wrapperFactory.create(person);
+
+        Optional<Contract> contract = wPerson.getCurrentContract();
+        if (!contract.get().beginDate.isBefore(yearInterval.getBegin())) {
+          beginCalculation = contract.get().beginDate;
+        } else {
+          beginCalculation = yearInterval.getBegin();
+        }
+
+        consistencyManager.updatePersonSituation(person.id, beginCalculation);
+        JPA.em().flush();
+        JPAPlugin.closeTx(false);
+      }
+      for (Person person : toScan) {
+        JPAPlugin.startTx(false);
+        IWrapperPerson wPerson = wrapperFactory.create(person);
+
+        Optional<Contract> contract = wPerson.getCurrentContract();
+        if (!contract.get().beginDate.isBefore(yearInterval.getBegin())) {
+          beginCalculation = contract.get().beginDate;
+        } else {
+          beginCalculation = yearInterval.getBegin();
+        }
+
+        consistencyManager.updatePersonSituation(person.id, beginCalculation);
+        JPA.em().flush();
+        JPAPlugin.closeTx(false);
+      }
+    }
+
+    renderText("Migrazione completata.");
+  }
+
+  /**
    * Import (e sincronizzazione) assenze da attestati. Le persone devono avere il monte ore
    * correttamente inizializzato.
    * @param officeId sede
    */
   public static void importCertificationsAbsences(Long officeId) {
-    
+
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
     List<IWrapperPerson> people = Lists.newArrayList(); 
     Map<Integer, Optional<CertificationYearSituation>> certificationsSummary = Maps.newHashMap();
-    
+
     int year = LocalDate.now().getYear();
-    
+
     for (IWrapperPerson wrPerson : FluentIterable.from(personDao.listFetched(Optional.absent(),
         ImmutableSet.of(office), false, null, null, false).list())
         .transform(wrapperFunctionFactory.person()).toList()) {
-      
+
       if (!wrPerson.getCurrentContract().isPresent()) {
         continue;
       }
       //if (wrapperFactory.create(wrPerson.getCurrentContract().get()).initializationMissing()) {
       //  continue;
       //}
-      
+
       people.add(wrPerson);
-      
+
       //prelevo dalla cache la situazione se è già presente.
       certificationsSummary.put(wrPerson.getValue().number, absenceCertificationService
           .certificationYearSituationCached(wrPerson.getValue(), year));
@@ -1194,65 +1323,65 @@ public class AbsenceGroups extends Controller {
 
     render(people, office, year, certificationsSummary);
   }
-  
+
   /** 
    * Le assenze in attestati.
    */
   public static void certificationsAbsences(Long personId, Integer year) 
       throws NoSuchFieldException, ExecutionException {
-    
+
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
-   
+
     CertificationYearSituation yearSituation = absenceCertificationService
         .buildCertificationYearSituation(person, year, false);
-    
+
     render(yearSituation, person);
   }
-  
+
   /**
    * Ricarica lo stato in cache della situazione import assenze.
    * @param personId persona
    */
   public static void reloadCertificationAbsences(Long personId) {
-    
+
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
-    
+
     CertificationYearSituation yearSituation = absenceCertificationService
         .buildCertificationYearSituation(person, LocalDate.now().getYear(), false);
-    
+
     if (yearSituation == null) {
       flash.error("Impossibile recuperare la situazione del dipendente"
           + " all'interno della sede selezionata");
     }
 
     importCertificationsAbsences(person.office.id);
-    
+
   }
-  
+
   /**
    * Importa le assenze mancanti da attestati.
    */
   public static void syncCertificationsAbsences(Long personId, Integer year) 
       throws NoSuchFieldException, ExecutionException {
-    
+
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
     LocalDate updateFrom = LocalDate.now();
-    
+
     List<Absence> absences =  absenceCertificationService.absencesToPersist(person, year);
-    
+
     for (Absence absence : absences) {
       JPA.em().flush(); //potrebbero esserci dei doppioni, per sicurezza flusho a ogni assenza.
       if (!absenceComponentDao
           .findAbsences(person, absence.getAbsenceDate(), absence.absenceType.code).isEmpty()) {
         continue;
       }
-      
+
       PersonDay personDay = personDayManager
           .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
       absence.personDay = personDay;
@@ -1266,11 +1395,11 @@ public class AbsenceGroups extends Controller {
 
     JPA.em().flush();
     consistencyManager.updatePersonSituation(person.id, updateFrom);
-    
+
     absenceCertificationService.buildCertificationYearSituation(person, year, false);
-    
+
     flash.success("Tutti i dati sono stati caricati correttamente.");
-    
+
     importCertificationsAbsences(person.office.id);
   }
 

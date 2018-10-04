@@ -26,6 +26,8 @@ public class QCategoryGroupAbsenceType extends EntityPathBase<CategoryGroupAbsen
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
+    public final models.contractual.query.QContractualClause contractualClause;
+
     public final StringPath description = createString("description");
 
     //inherited
@@ -45,6 +47,9 @@ public class QCategoryGroupAbsenceType extends EntityPathBase<CategoryGroupAbsen
 
     public final QCategoryTab tab;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QCategoryGroupAbsenceType(String variable) {
         this(CategoryGroupAbsenceType.class, forVariable(variable), INITS);
     }
@@ -63,6 +68,7 @@ public class QCategoryGroupAbsenceType extends EntityPathBase<CategoryGroupAbsen
 
     public QCategoryGroupAbsenceType(Class<? extends CategoryGroupAbsenceType> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.contractualClause = inits.isInitialized("contractualClause") ? new models.contractual.query.QContractualClause(forProperty("contractualClause")) : null;
         this.tab = inits.isInitialized("tab") ? new QCategoryTab(forProperty("tab")) : null;
     }
 

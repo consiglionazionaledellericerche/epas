@@ -7,10 +7,39 @@ title:('Riepilogo ore '+mese.value.contractDescription), open:true, color:'prima
 
 <!-- solo last in month -->
 #{if mese.contract.isLastInMonth((int)psDto.month, (int)psDto.year)}
-<p>Il numero di giorni lavorativi in sede è di: <strong>${psDto.basedWorkingDays}</strong></p>
-<p>Tempo disponibile per straordinari: <strong>${mese.value.progressivoFinalePositivoMese.toHourTime()}</strong></p>
-<p>Il numero di riposi compensativi usati nell'anno è <strong>${psDto.numberOfCompensatoryRestUntilToday}</strong></p>
-<p>E' possibile utilizzare il residuo dell'anno precedente? <strong>${mese.value.possibileUtilizzareResiduoAnnoPrecedente==true ? 'sì' : 'no'}</strong></p>
+<p><h4>Info generiche</h4></p>
+<table class="table table-bordered table-condensed">
+  <tr>
+    <td class="col-xs-10">Il numero di giorni lavorativi in sede è di: </td>
+    <td class="col-xs-2 success">${psDto.basedWorkingDays}</td>
+  </tr>
+  <tr>
+    <td class="col-xs-10">Tempo disponibile per straordinari: </td>
+    #{if mese.value.progressivoFinalePositivoMese > 0}
+    	<td class="col-xs-2 success">${mese.value.progressivoFinalePositivoMese.toHourTime()} ore</td>
+    #{/if}
+    #{elseif mese.value.progressivoFinalePositivoMese == 0}
+    	<td class="col-xs-2 warning">${mese.value.progressivoFinalePositivoMese.toHourTime()} ore</td>
+    #{/elseif}
+    #{else}
+    	<td class="col-xs-2 danger">${mese.value.progressivoFinalePositivoMese.toHourTime()} ore</td>
+    #{/else}
+  </tr>
+  <tr>
+    <td class="col-xs-10">Il numero di riposi compensativi usati nell'anno è </td>
+    <td class="col-xs-2 success">${psDto.numberOfCompensatoryRestUntilToday}</td>
+  </tr>
+  <tr>
+    <td class="col-xs-10">E' possibile utilizzare il residuo dell'anno precedente? </td>
+    #{if mese.value.possibileUtilizzareResiduoAnnoPrecedente==true}
+    	<td class="col-xs-2 success">Sì</td>
+    #{/if}
+    #{else}
+    	<td class="col-xs-2 danger">No</td>
+    #{/else}
+    
+  </tr>
+</table>
 #{/if}
 #{else}
 <p class="text-error" style="margin-top: 5px;"><em>Il contratto e' terminato nel corso di questo mese.</em></p>
@@ -32,6 +61,10 @@ title:('Riepilogo ore '+mese.value.contractDescription), open:true, color:'prima
   <tr>
     <td class="col-xs-10">Residuo da anno precedente utilizzato questo mese come riposo compensativo</td>
     <td class="col-xs-2 danger">${mese.value.riposiCompensativiMinutiImputatoAnnoPassato.toHourTimeWithMinus()}</td>
+  </tr>
+  <tr>
+    <td class="col-xs-10">Residuo da anno precedente utilizzato questo mese come recupero riposo compensativo chiusura ente (91CE)</td>
+    <td class="col-xs-2 danger">${mese.value.riposiCompensativiChiusuraEnteMinutiImputatoAnnoPassato.toHourTimeWithMinus()}</td>
   </tr>
   <tr class="warning">
     <td class="col-xs-10">Residuo da anno precedente disponibile alla fine del mese</td>
@@ -105,6 +138,12 @@ title:('Riepilogo ore '+mese.value.contractDescription), open:true, color:'prima
   <tr>
     <td class="col-xs-10">Residuo da anno corrente utilizzato come riposo compensativi</td>
     <td class="col-xs-2 danger">${mese.value.riposiCompensativiMinutiImputatoAnnoCorrente.toHourTimeWithMinus()}</td>
+  </tr>
+  #{/if}
+    #{if mese.value.riposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente != 0}
+  <tr>
+    <td class="col-xs-10">Residuo da anno corrente utilizzato come recupero riposo compensativi chiusura ente (91CE)</td>
+    <td class="col-xs-2 danger">${mese.value.riposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente.toHourTimeWithMinus()}</td>
   </tr>
   #{/if}
 

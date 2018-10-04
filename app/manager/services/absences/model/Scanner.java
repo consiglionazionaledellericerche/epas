@@ -188,6 +188,12 @@ public class Scanner {
         
       }
       for (AbsenceTrouble toAdd : toAddTroubles) {
+        if (Absence.findById(toAdd.absence.getId()) == null) {
+          // FIXME l'assenza di questo trouble è stata cancellata (probabilmente dall'algoritmo
+          // che sistema i completamenti) pertanto non risulta più da persistere. 
+          // Gestire questo caso all'origine.
+          continue;
+        }
         log.info("Aggiungo problem {} {}", absence.toString(), toAdd.trouble);
         toAdd.save();
       }
@@ -258,7 +264,7 @@ public class Scanner {
     }
     
     for (AbsencePeriod absencePeriod : periodChain.periods) {
-      if (absencePeriod.compromisedTwoComplation) {
+      if (absencePeriod.isCompromisedComplation()) {
         continue;
       }
       

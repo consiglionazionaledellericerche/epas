@@ -55,6 +55,9 @@ public class QCertificatedData extends EntityPathBase<CertificatedData> {
 
     public final StringPath trainingHoursSent = createString("trainingHoursSent");
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public final NumberPath<Integer> year = createNumber("year", Integer.class);
 
     public QCertificatedData(String variable) {

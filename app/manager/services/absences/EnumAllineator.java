@@ -6,19 +6,19 @@ import com.google.inject.Inject;
 
 import dao.absences.AbsenceComponentDao;
 
-import java.util.List;
-import java.util.Set;
-
 import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.AbsenceTypeJustifiedBehaviour;
 import models.absences.CategoryGroupAbsenceType;
 import models.absences.CategoryTab;
 import models.absences.ComplationAbsenceBehaviour;
 import models.absences.GroupAbsenceType;
+import models.absences.JustifiedBehaviour;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.definitions.DefaultAbsenceType;
+import models.absences.definitions.DefaultAbsenceType.Behaviour;
 import models.absences.definitions.DefaultCategoryType;
 import models.absences.definitions.DefaultComplation;
 import models.absences.definitions.DefaultGroup;
@@ -27,6 +27,9 @@ import models.absences.definitions.DefaultTakable;
 
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
+
+import java.util.List;
+import java.util.Set;
 
 public class EnumAllineator {
   
@@ -80,6 +83,9 @@ public class EnumAllineator {
         }
         absenceType.validFrom = defaultAbsenceType.get().validFrom;
         absenceType.validTo = defaultAbsenceType.get().validTo;
+        absenceType.save();
+        updateBehaviourSet(absenceType, absenceType.justifiedBehaviours, 
+            defaultAbsenceType.get().behaviour);
         absenceType.save();
       } else {
         //gli absenceType che non sono enumerati li tolgo dai gruppi.
@@ -435,6 +441,63 @@ public class EnumAllineator {
   }
   
   /**
+   * Allinea le liste di behaviour. 
+   * @param oldEntitySet entity set da aggiornare
+   * @param newEnumSet set di enumerati
+   * @return se l'entity set è stato modificato
+   */
+  private boolean updateBehaviourSet(AbsenceType absenceType, 
+      Set<AbsenceTypeJustifiedBehaviour> entitySet, Set<Behaviour> newEnumSet) {
+    
+    boolean edited = false;
+
+    //Eliminare quelli non più contenuti
+    List<AbsenceTypeJustifiedBehaviour> toRemove = Lists.newArrayList();
+    for (AbsenceTypeJustifiedBehaviour behaviour : entitySet) {
+      boolean equal = false;
+      for (Behaviour defaultBehaviour : newEnumSet) { 
+        if (defaultBehaviour.name.equals(behaviour.justifiedBehaviour.name) 
+            && AbsenceType.safeEqual(defaultBehaviour.data, behaviour.data)) {
+          equal = true;
+        }
+      }
+      if (!equal) {
+        toRemove.add(behaviour);
+      }
+    }
+    for (AbsenceTypeJustifiedBehaviour behaviour : toRemove) {
+      entitySet.remove(behaviour);
+      behaviour.delete();
+      edited = true;
+    }
+    
+    //Aggiungere quelli non presenti
+    for (Behaviour enumBehaviour : newEnumSet) {
+      JustifiedBehaviour justifiedBehaviour = absenceComponentDao
+          .getOrBuildJustifiedBehaviour(enumBehaviour.name);
+      
+      boolean equal = false;
+      for (AbsenceTypeJustifiedBehaviour behaviour : entitySet) { 
+        if (enumBehaviour.name.equals(behaviour.justifiedBehaviour.name) 
+            && AbsenceType.safeEqual(enumBehaviour.data, behaviour.data)) {
+          equal = true;
+        }
+      }
+      if (!equal) {
+        AbsenceTypeJustifiedBehaviour b = new AbsenceTypeJustifiedBehaviour();
+        b.absenceType = absenceType;
+        b.justifiedBehaviour = justifiedBehaviour;
+        b.data = enumBehaviour.data;
+        b.save();
+        entitySet.add(b);
+        edited = true;
+      }
+    }
+    
+    return edited;
+  }
+  
+  /**
    * Contenitore di patch specifiche per la generazione di gruppi partendo da situazioni 
    * o codici pregressi.
    */
@@ -444,20 +507,21 @@ public class EnumAllineator {
     // Creare il tipo a minuti 0M e convertire tutte le assenze orarie precedenti a grana oraria. 
     // Una volta creato il codice 0M la patch non deve più essere applicata.
     if (!absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_0M.getCode()).isPresent()) {
-      AbsenceType m = this.buildAbsenceType(DefaultAbsenceType.A_0M);
-      List<Absence> absences = absenceComponentDao.absences(Lists.newArrayList(
-          DefaultAbsenceType.A_01.getCode(), DefaultAbsenceType.A_02.getCode(),
-          DefaultAbsenceType.A_03.getCode(), DefaultAbsenceType.A_04.getCode(),
-          DefaultAbsenceType.A_05.getCode(), DefaultAbsenceType.A_06.getCode(),
-          DefaultAbsenceType.A_07.getCode(), DefaultAbsenceType.A_08.getCode()));
-      for (Absence absence : absences) {
-        //convertire tutti i 01... in 0M
-        absence.justifiedMinutes = absence.absenceType.justifiedTime;
-        absence.justifiedType = absenceComponentDao
-            .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
-        absence.absenceType = m;
-        absence.save();
-      }
+      throw new IllegalStateException();
+//      AbsenceType m = this.buildAbsenceType(DefaultAbsenceType.A_0M);
+//      List<Absence> absences = absenceComponentDao.absences(Lists.newArrayList(
+//          DefaultAbsenceType.A_01.getCode(), DefaultAbsenceType.A_02.getCode(),
+//          DefaultAbsenceType.A_03.getCode(), DefaultAbsenceType.A_04.getCode(),
+//          DefaultAbsenceType.A_05.getCode(), DefaultAbsenceType.A_06.getCode(),
+//          DefaultAbsenceType.A_07.getCode(), DefaultAbsenceType.A_08.getCode()));
+//      for (Absence absence : absences) {
+//        //convertire tutti i 01... in 0M
+//        absence.justifiedMinutes = absence.absenceType.justifiedTime;
+//        absence.justifiedType = absenceComponentDao
+//            .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
+//        absence.absenceType = m;
+//        absence.save();
+//      }
     }
   }
   
@@ -489,6 +553,8 @@ public class EnumAllineator {
     absenceType.validFrom = defaultAbsenceType.validFrom;
     absenceType.validTo = defaultAbsenceType.validTo;
     absenceType.save();
+    updateBehaviourSet(absenceType, absenceType.justifiedBehaviours, 
+        defaultAbsenceType.behaviour);
     return absenceType;
   }
 

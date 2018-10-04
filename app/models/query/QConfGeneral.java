@@ -41,6 +41,9 @@ public class QConfGeneral extends EntityPathBase<ConfGeneral> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
     public QConfGeneral(String variable) {
         this(ConfGeneral.class, forVariable(variable), INITS);
     }

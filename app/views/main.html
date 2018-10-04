@@ -22,7 +22,9 @@
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
   <link rel="stylesheet" href="//cdn.jsdelivr.net/jquery.webui-popover/2.1.15/jquery.webui-popover.min.css">
   <link rel="stylesheet" href="//cdn.datatables.net/u/bs/dt-1.10.12,cr-1.3.2,r-2.1.0/datatables.min.css"/>
-  <link href='//fonts.googleapis.com/css?family=Shadows+Into+Light' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.10.0/ui/trumbowyg.min.css" />
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Shadows+Into+Light"/>
+
 
   #{stylesheet 'my-bootstrap3.css'/}
   #{stylesheet 'pnotify.custom.min.css'/}
@@ -78,11 +80,13 @@
         #{/if}
 
         *{Ruoli di Sistema, Amministratore del personale, Amministratore del personale in sola lettura}*
-        #{if !currentUser.roles.empty || currentUser.hasRoles(models.Role.PERSONNEL_ADMIN, models.Role.PERSONNEL_ADMIN_MINI, models.Role.SEAT_SUPERVISOR) }
+        #{if currentUser.roles.contains(models.enumerate.AccountRole.ADMIN) 
+        	|| currentUser.roles.contains(models.enumerate.AccountRole.DEVELOPER)
+        	|| currentUser.hasRoles(models.Role.PERSONNEL_ADMIN, models.Role.PERSONNEL_ADMIN_MINI, models.Role.SEAT_SUPERVISOR) }
           #{include './_adminMenu.html' /}
         #{/if}
         
-        *{Ruoli di sistema e gestori dei turni e delle repribilità}*
+        *{Ruoli di sistema e gestori dei turni e delle reperibilità}*
         #{if !currentUser.roles.contains(models.enumerate.AccountRole.RO_ADMIN)}
         
         #{if currentUser.roles.contains(models.enumerate.AccountRole.DEVELOPER) 
@@ -94,11 +98,19 @@
           #{include './_shiftMenu.html' /}
         #{/if}
 		#{/if}
+		
         *{ Ruoli di sistema e amministratori delle sedi }*
-        #{if !currentUser.roles.empty || currentUser.hasRoles(models.Role.PERSONNEL_ADMIN,models.Role.PERSONNEL_ADMIN_MINI,models.Role.TECHNICAL_ADMIN) }
+        #{if currentUser.roles.contains(models.enumerate.AccountRole.ADMIN) 
+        	|| currentUser.roles.contains(models.enumerate.AccountRole.DEVELOPER) 
+        	|| currentUser.hasRoles(models.Role.PERSONNEL_ADMIN,models.Role.PERSONNEL_ADMIN_MINI,models.Role.TECHNICAL_ADMIN) }
           #{include './_configMenu.html' /}
         #{/if}
 
+		*{ Ruoli di Sistema e Gestori istituti contrattuali }*
+		#{secure.check 'ContractualClauses.list'}
+          #{include '/_regulationsMenu.html' /}
+        #{/secure.check}
+        
         *{ Ruoli di Sistema }*
         #{if currentUser.roles.contains(models.enumerate.AccountRole.DEVELOPER) || currentUser.roles.contains(models.enumerate.AccountRole.ADMIN)}
           #{include '/_toolsMenu.html' /}
@@ -209,12 +221,13 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.2.0/bootbox.min.js"></script>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
-
 #{script 'feedback.min.js'/}
 <script src="@{ReportCentre.javascript()}"></script>
 #{script 'script.js' /}
 #{script 'list-select.min.js' /}
 #{script 'pnotify.custom.min.js' /}
+#{script 'trumbowyg.min.js' /}
+<script src="//cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.10.0/langs/it.min.js"></script>
 
 #{include '_myModal.html' /}
 #{get 'moreScripts' /}

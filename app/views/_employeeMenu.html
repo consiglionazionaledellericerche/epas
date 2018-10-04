@@ -61,6 +61,10 @@
       #{secure.li @Absences.absencesPerPerson(session.get("yearSelected")) }
       <i class="fa fa-calendar-o" aria-hidden="true"></i>
       #{/secure.li}
+      
+      #{secure.li @TimeVariations.personShow() }
+      <i class="fa fa-search-plus" aria-hidden="true"></i>
+      #{/secure.li}
 
       #{secure.li @Vacations.show(session.get("yearSelected")) }
       <i class="fa fa-plane" aria-hidden="true"></i>
@@ -98,7 +102,7 @@
       <li class="divider"></li>
       #{/secure.check}
 
-      #{secure.li @PrintTags.showTag('id':session.get("personSelected"), session.get("monthSelected"),session.get("yearSelected"), true) }
+      #{secure.li @PrintTags.showTag('id':session.get("personSelected"), session.get("yearSelected"), session.get("monthSelected"), true) }
       <i class="fa fa-print" aria-hidden="true"></i>
       #{/secure.li}
 

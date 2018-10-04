@@ -142,7 +142,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   public String toString() {
     return String.format("Contract[%d] - person.id = %d, "
             + "beginDate = %s, endDate = %s, endContract = %s",
-        id, person.id, beginDate, endDate, endContract);
+        id, person != null ? person.id : null, beginDate, endDate, endContract);
   }
 
   /**
