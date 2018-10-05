@@ -82,8 +82,9 @@ public enum NotificationSubject {
         return toUrl("Stampings.personStamping", params);
       case ABSENCE_REQUEST:
         final AbsenceRequest absenceRequest = AbsenceRequest.findById(referenceId);
+        params.put("id", absenceRequest.id);
         params.put("type", absenceRequest.type);
-        return toUrl("AbsenceRequests.listToApprove", params);
+        return toUrl("AbsenceRequests.show", params);
         
       // case SYSTEM:
       default:
