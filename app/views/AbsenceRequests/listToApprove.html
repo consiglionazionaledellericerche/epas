@@ -25,16 +25,23 @@
   #{breadcrumbs breadcrumbs /}
 
   #{tabList}
-    #{tabItem id:'attivo', title:'Flussi attivi', active:true /}
+    #{if seatSupervisor}
+    #{tabItem id:'attivo', title:'Flussi attivi'/}
+    #{/if}
+    #{tabItem id:'approvandi', title:'Flussi da approvare', active:true /}
     #{tabItem id:'nonAttivo', title:'Flussi terminati' /}
   #{/tabList}
   <br>
   	#{tabContent}	
-  
-  	#{tabContentItem id:'attivo', active:true}
+  	#{if seatSupervisor}
+  	#{tabContentItem id:'attivo'}
+  		#{include './tableElements/_allFlowsTable.html' /}
+  	#{/tabContentItem}
+  	#{/if}
+  	#{tabContentItem id:'approvandi', active:true}
  		#{include './tableElements/_table.html' /}
  	#{/tabContentItem}
-
+  	
   	#{tabContentItem id:'nonAttivo'}
   		#{include './tableElements/_approvedTable.html' /}
   	#{/tabContentItem}

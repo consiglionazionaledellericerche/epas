@@ -50,7 +50,7 @@ public class AbsenceRequestDao extends DaoBase {
             );
     return query.list(absenceRequest);
   }
-  
+
   /**
    * Lista delle richiesta di assenza per persona e data.
    * 
@@ -98,14 +98,14 @@ public class AbsenceRequestDao extends DaoBase {
   public List<AbsenceRequest> findRequestsToApprove(
       List<UsersRolesOffices> uros,
       LocalDateTime fromDate, Optional<LocalDateTime> toDate, 
-      AbsenceRequestType absenceRequestType) {
+      AbsenceRequestType absenceRequestType, boolean mine) {
 
     Preconditions.checkNotNull(fromDate);
 
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
 
     BooleanBuilder conditions = new BooleanBuilder();
-    
+
     if (uros.stream().noneMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER) 
         || uro.role.name.equals(Role.PERSONNEL_ADMIN)
         || uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
@@ -116,7 +116,7 @@ public class AbsenceRequestDao extends DaoBase {
       if (uro.role.name.equals(Role.PERSONNEL_ADMIN)) {
         personnelAdminQuery(conditions);
       } else if (uro.role.name.equals(Role.SEAT_SUPERVISOR)) {
-        seatSupervisorQuery(conditions);
+        seatSupervisorQuery(conditions, mine);
       } else if (uro.role.name.equals(Role.GROUP_MANAGER)) {
         managerQuery(conditions);
       } 
@@ -160,7 +160,7 @@ public class AbsenceRequestDao extends DaoBase {
       }
     }
     conditions.and(absenceRequest.startAt.after(fromDate))
-      .and(absenceRequest.type.eq(absenceRequestType));
+    .and(absenceRequest.type.eq(absenceRequestType));
     if (toDate.isPresent()) {
       conditions.and(absenceRequest.endTo.before(toDate.get()));
     }
@@ -169,18 +169,29 @@ public class AbsenceRequestDao extends DaoBase {
     return query.list(absenceRequest);
   }
 
-  private void seatSupervisorQuery(BooleanBuilder condition) {
+  private void seatSupervisorQuery(BooleanBuilder condition, boolean mine) {
 
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
     if (condition.hasValue()) {
-      condition.or(condition.and(absenceRequest.officeHeadApprovalRequired.isTrue()
-          .and(absenceRequest.officeHeadApproved.isNull()
-              .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse())))));
+      if (mine) {
+        condition.or(condition.and(absenceRequest.officeHeadApprovalRequired.isTrue()
+            .and(absenceRequest.officeHeadApproved.isNotNull()
+                .and(absenceRequest.flowStarted.isTrue()
+                    .and(absenceRequest.flowEnded.isFalse())))));
+      } else {
+        condition.or(condition.and(absenceRequest.officeHeadApprovalRequired.isTrue()
+            .and(absenceRequest.officeHeadApproved.isNull()
+                .and(absenceRequest.flowStarted.isTrue()
+                    .and(absenceRequest.flowEnded.isFalse())))));
+      }
+
     } else {
+
       condition.and(absenceRequest.officeHeadApprovalRequired.isTrue()
           .and(absenceRequest.officeHeadApproved.isNull()
               .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse()))));
-    }
+    }      
+
 
   }
 
