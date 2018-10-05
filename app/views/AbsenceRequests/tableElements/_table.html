@@ -1,4 +1,4 @@
-  #{title title:absenceRequestTypeLabel.capitalize(), administration:true /}
+  
   
   <table  class="table table-striped table-hover table-bordered table-condensed center" datatable width="100%">
 	<thead>
@@ -17,14 +17,14 @@
 		</tr>			
 		#{if approvalRequired}
 			<tr>
-				#{if config.officeHeadApprovalRequired}
-					<th width="20%">Responsabile di sede</th>
-				#{/if}
 				#{if config.managerApprovalRequired}
 					<th width="20%">Responsabile di gruppo</th>
-				#{/if}			
+				#{/if}						
 				#{if config.administrativeApprovalRequired}
 					<th width="20%">&{'absenceRequest.administrativeApproved'}</th>
+				#{/if}
+				#{if config.officeHeadApprovalRequired}
+					<th width="20%">Responsabile di sede</th>
 				#{/if}			
 		#{/if}
 	</thead>
@@ -38,15 +38,15 @@
 								
 				<td>#{f.value 'item.startAt', value:config.allDay ? item.startAtAsDate().format() : item.startAt.format() /}</td>	    
 				<td>#{f.value 'item.endTo', value:config.allDay ? item.endToAsDate().format() : item.endTo.format() /}</td>
-				
-				#{if config.officeHeadApprovalRequired}
-					<td>#{f.value 'item.officeHeadApproved', value:item.officeHeadApproved /}</td>
-				#{/if}
+								
 				#{if config.managerApprovalRequired}
 					<td>#{f.value 'item.managerApproved', value:item.managerApproved /}</td>
 				#{/if}
 				#{if config.administrativeApprovalRequired}
 					<td>#{f.value 'item.administrativeApproved', value:item.administrativeApproved /}</td>
+				#{/if}
+				#{if config.officeHeadApprovalRequired}
+					<td>#{f.value 'item.officeHeadApproved', value:item.officeHeadApproved /}</td>
 				#{/if}
 				<td>${item.note}</td>
 				<td>
