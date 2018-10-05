@@ -18,6 +18,11 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 	#{f.date 'absenceRequest.startAt', required:true, value:absenceRequest.startAt?.format("dd/MM/yyyy") /}
 	#{f.date 'absenceRequest.endTo', value:absenceRequest.endTo?.format("dd/MM/yyyy") /}
 
+	#{if existing != null}
+	<div class="container-fluid"> 
+	#{include './existing.html' /}
+	</div>
+	#{/if}
 	<div class="container-fluid"> 
    	#{include './_report.html' /}
 	</div>

@@ -37,6 +37,7 @@ import models.absences.definitions.DefaultTab;
 import models.flows.AbsenceRequest;
 import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import play.data.validation.Required;
@@ -203,7 +204,8 @@ public class AbsenceRequests extends Controller {
     val absenceRequest = new AbsenceRequest();
     absenceRequest.type = type;
     absenceRequest.person = person;
-    absenceRequest.startAt = absenceRequest.endTo = LocalDateTime.now();
+    
+    absenceRequest.startAt = absenceRequest.endTo = LocalDateTime.now().plusDays(1);
     boolean insertable = true;
     GroupAbsenceType groupAbsenceType = absenceRequestManager.getGroupAbsenceType(absenceRequest);
     AbsenceType absenceType = null;
@@ -245,12 +247,13 @@ public class AbsenceRequests extends Controller {
     }
     //verifico che non esista già una richiesta (non rifiutata) 
     //di assenza che interessa i giorni richiesti
-    if (!absenceRequestManager.checkAbsenceRequest(absenceRequest)) {
+    AbsenceRequest existing = absenceRequestManager.checkAbsenceRequest(absenceRequest); 
+    if (existing != null) {
       Validation.addError("absenceRequest.startAt", "Esiste già una richiesta in questa data");
       Validation.addError("absenceRequest.endTo", "Esiste già una richiesta in questa data");
       response.status = 400;
       insertable = false;
-      render("@edit", absenceRequest, insertable);
+      render("@edit", absenceRequest, insertable, existing);
     }
 
     if (Validation.hasErrors()) {

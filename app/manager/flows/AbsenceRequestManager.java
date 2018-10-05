@@ -617,7 +617,7 @@ public class AbsenceRequestManager {
    * @param absenceRequest la richiesta d'assenza da verificare
    * @return true se la richiesta d'assenza è ammissibile, false altrimenti.
    */
-  public boolean checkAbsenceRequest(AbsenceRequest absenceRequest) {
+  public AbsenceRequest checkAbsenceRequest(AbsenceRequest absenceRequest) {
     List<AbsenceRequest> existingList = absenceRequestDao.existingAbsenceRequests(absenceRequest);
     for (AbsenceRequest ar : existingList) {
       DateInterval interval = new DateInterval(ar.startAt.toLocalDate(), ar.endTo.toLocalDate());
@@ -626,9 +626,9 @@ public class AbsenceRequestManager {
           || DateUtility.intervalIntersection(
               new DateInterval(absenceRequest.startAtAsDate(), 
                   absenceRequest.endToAsDate()), interval) != null) {
-        return false;
+        return ar;
       } 
     }  
-    return true;  
+    return null;  
   }
 }
