@@ -21,6 +21,8 @@ CREATE TABLE absence_requests (
 	version INT DEFAULT 0
 );
 	
+CREATE INDEX absence_requests_person_id_idx ON absence_requests (person_id);
+
 CREATE TABLE absence_requests_history (
 	id BIGINT NOT NULL,
   	_revision INTEGER NOT NULL REFERENCES revinfo(rev),
@@ -52,6 +54,9 @@ CREATE TABLE absence_request_events (
 	version INT DEFAULT 0
 );
 
+CREATE INDEX absence_requests_events_absence_request_id_idx ON absence_request_events(absence_request_id);
+CREATE INDEX absence_requests_events_owner_id_idx ON absence_request_events(owner_id);
+
 INSERT INTO roles (name, version) VALUES ('groupManager', 0);
 
 -- Creo una nouva reviosione
@@ -73,6 +78,10 @@ ALTER TABLE persons DROP COLUMN is_person_in_charge;
 
 
 # ---!Downs
+
+DROP INDEX absence_requests_person_id_idx;
+DROP INDEX absence_requests_events_absence_request_id_idx;
+DROP INDEX absence_requests_events_owner_id_idx;
 
 DROP TABLE absence_request_events;
 DROP TABLE absence_requests_history;
