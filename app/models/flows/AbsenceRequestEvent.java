@@ -51,7 +51,7 @@ public class AbsenceRequestEvent extends BaseModel {
   @PrePersist
   private void onUpdate() {
     if (createdAt == null) {
-      createdAt = LocalDateTime.now();;
+      createdAt = LocalDateTime.now();
     }
   }
 }

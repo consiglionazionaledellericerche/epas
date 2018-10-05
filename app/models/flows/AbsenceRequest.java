@@ -1,6 +1,7 @@
 package models.flows;
 
 import com.beust.jcommander.internal.Lists;
+import java.util.Comparator;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,6 +16,7 @@ import javax.validation.constraints.NotNull;
 import lombok.ToString;
 import models.Person;
 import models.base.MutableModel;
+import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -30,7 +32,7 @@ import play.db.jpa.Blob;
  *
  */
 @ToString(of = {"type", "person", "startAt", "endTo", 
-                "managerApproved", "administrativeApproved", "officeHeadApproved"})
+    "managerApproved", "administrativeApproved", "officeHeadApproved"})
 @Audited
 @Entity
 @Table(name = "absence_requests")
@@ -42,12 +44,12 @@ public class AbsenceRequest extends MutableModel {
   @NotNull
   @Enumerated(EnumType.STRING)
   public AbsenceRequestType type;
-  
+
   @Required
   @NotNull
   @ManyToOne(optional = false)
   public Person person;
-  
+
   /**
    * Data e ora di inizio.
    */
@@ -55,22 +57,22 @@ public class AbsenceRequest extends MutableModel {
   @NotNull
   @Column(name = "start_at")
   public LocalDateTime startAt;
-  
+
   @Column(name = "end_to")
   public LocalDateTime endTo;
-  
+
   /**
    * Descrizione facoltativa della richiesta.
    */
   public String note;
-  
+
   /**
    * Eventuale allegato alla richiesta.
    */
   @Column(name = "attachment", nullable = true)
   public Blob attachment;
-  
-  
+
+
   /**
    * Data di approvazione del responsabile.
    */
@@ -88,7 +90,7 @@ public class AbsenceRequest extends MutableModel {
    */
   @Column(name = "office_head_approved")
   public LocalDate officeHeadApproved;
-  
+
   /**
    * Indica se è richieta l'approvazione da parte del responsabile.
    */
@@ -100,18 +102,18 @@ public class AbsenceRequest extends MutableModel {
    */
   @Column(name = "administrative_approval_required")
   public boolean administrativeApprovalRequired = true;
-  
+
   /**
    * Indica se è richieta l'approvazione da parte del responsabile di sede.
    */
   @Column(name = "office_head_approval_required")
   public boolean officeHeadApprovalRequired = true;
-  
+
   @NotAudited
   @OneToMany(mappedBy = "absenceRequest")
   @OrderBy("createdAt DESC")
   public List<AbsenceRequestEvent> events = Lists.newArrayList();
-  
+
   /**
    * Se il flusso è avviato.
    */
@@ -123,32 +125,32 @@ public class AbsenceRequest extends MutableModel {
    */
   @Column(name = "flow_ended")
   public boolean flowEnded = false;
-  
+
   @Transient
   public LocalDate startAtAsDate() {
     return startAt != null ? startAt.toLocalDate() : null;
   }
-  
+
   @Transient
   public LocalDate endToAsDate() {
     return endTo != null ? endTo.toLocalDate() : null;
   }
-  
+
   @Transient
   public boolean isManagerApproved() {
     return managerApproved != null;
   }
-  
+
   @Transient
   public boolean isAdministrativeApproved() {
     return administrativeApproved != null;
   }
-  
+
   @Transient
   public boolean isOfficeHeadApproved() {
     return officeHeadApproved != null;
   }
-  
+
   /**
    * Se non sono state già rilasciate approvazioni necessarie allora il possessore 
    * può cancellare o modificare la richiesta.
@@ -159,5 +161,11 @@ public class AbsenceRequest extends MutableModel {
     return !flowStarted && (officeHeadApproved == null || !officeHeadApprovalRequired) 
         && (managerApproved == null || !managerApprovalRequired
         && (administrativeApproved == null || !administrativeApprovalRequired));
+  }
+
+  
+  @Transient
+  public AbsenceRequestEvent actualEvent() {
+    return this.events.get(0);
   }
 }
