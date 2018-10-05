@@ -351,7 +351,8 @@ public class AbsenceRequestManager {
 
       case MANAGER_REFUSAL:
         //si riparte dall'inizio del flusso.
-        resetFlow(absenceRequest);
+        //resetFlow(absenceRequest);
+        absenceRequest.flowEnded = true;
         notificationManager.notificationAbsenceRequestRefused(absenceRequest, person);
         break;
 
@@ -361,7 +362,8 @@ public class AbsenceRequestManager {
 
       case ADMINISTRATIVE_REFUSAL:
         //si riparte dall'inizio del flusso.
-        resetFlow(absenceRequest);
+        //resetFlow(absenceRequest);
+        absenceRequest.flowEnded = true;
         notificationManager.notificationAbsenceRequestRefused(absenceRequest, person);
         break;
 
@@ -371,7 +373,8 @@ public class AbsenceRequestManager {
 
       case OFFICE_HEAD_REFUSAL:
         //si riparte dall'inizio del flusso.
-        resetFlow(absenceRequest);
+        //resetFlow(absenceRequest);
+        absenceRequest.flowEnded = true;
         notificationManager.notificationAbsenceRequestRefused(absenceRequest, person);
         break;
 
