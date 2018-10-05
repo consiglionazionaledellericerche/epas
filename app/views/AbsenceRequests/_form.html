@@ -45,7 +45,7 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
             
 	#{b.buttons center:true}
 		 #{b.link @list(absenceRequest.type), color:'default', title:'Indietro' /}
-		 #{if insertable}
+		 #{if insertable && insertReport.howManySuccess() > 0}
          #{b.submit 'Inserisci'/}
          #{/if}
          #{else}
