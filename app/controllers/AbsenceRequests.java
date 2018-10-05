@@ -158,13 +158,19 @@ public class AbsenceRequests extends Controller {
 
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.user);
     List<AbsenceRequest> results = absenceRequestDao
-        .findRequestsToApprove(roleList, fromDate, Optional.absent(), type);
+        .findRequestsToApprove(roleList, fromDate, Optional.absent(), type, false);
+    List<AbsenceRequest> myResults = absenceRequestDao
+        .findRequestsToApprove(roleList, fromDate, Optional.absent(), type, true);
     List<AbsenceRequest> approvedResults = absenceRequestDao
         .findRequestsApproved(roleList, fromDate, Optional.absent(), type);
     val config = absenceRequestManager.getConfiguration(type, person);  
     val onlyOwn = false;
+    boolean seatSupervisor = false;
+    if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      seatSupervisor = true;
+    }
 
-    render(config, results, type, onlyOwn, approvedResults);
+    render(config, results, type, onlyOwn, approvedResults, myResults, seatSupervisor);
   }
 
 
