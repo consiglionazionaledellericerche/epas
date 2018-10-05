@@ -317,8 +317,10 @@ public class AbsenceRequests extends Controller {
     if (absenceRequest.person.user.hasRoles(Role.SEAT_SUPERVISOR)) {
       approval(absenceRequest.id);
     }
+    
     flash.success("Operazione effettuata correttamente");
-    list(absenceRequest.type);
+
+    AbsenceRequests.list(absenceRequest.type);
   }
 
   //  }
