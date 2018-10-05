@@ -515,6 +515,12 @@ public class AbsenceRequestManager {
 
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     val currentPerson = Security.getUser().get().person;
+    if (absenceRequest.managerApprovalRequired && absenceRequest.managerApproved == null) {
+      executeEvent(absenceRequest, currentPerson, 
+          AbsenceRequestEventType.MANAGER_APPROVAL, Optional.absent());
+      log.info("{} approvata dal responsabile di sede {} nelle veci del responsabile di gruppo.",
+          absenceRequest, currentPerson.getFullname());
+    }
     executeEvent(
         absenceRequest, currentPerson, 
         AbsenceRequestEventType.OFFICE_HEAD_APPROVAL, Optional.absent());

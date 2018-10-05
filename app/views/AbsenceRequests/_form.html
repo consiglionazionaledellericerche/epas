@@ -29,10 +29,8 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 	
 #{/form}
 
-
-
 #{form action:@save(), method:'POST', autocomplete:false, class:'form form-horizontal',
-	  'data-async':'#page_content', 'data-spinner':'#defaultSpinner'}
+	  'data-spinner':'#defaultSpinner'}
 	  
 	#{f.hidden 'absenceRequest.id' /}
 	#{f.hidden 'absenceRequest.person.id' /}
