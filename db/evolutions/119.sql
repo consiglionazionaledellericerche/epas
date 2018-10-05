@@ -29,6 +29,9 @@ CREATE TABLE groups_persons (
 	FOREIGN KEY (people_id) REFERENCES persons (id)
 );
 
+CREATE INDEX groups_persons_groups_id_idx ON groups_persons(groups_id);
+CREATE INDEX groups_persons_people_id_idx ON groups_persons(people_id);
+
 CREATE TABLE groups_persons_history (	
     _revision INTEGER NOT NULL REFERENCES revinfo(rev),
     _revision_type SMALLINT NOT NULL,
@@ -41,7 +44,10 @@ CREATE TABLE groups_persons_history (
 
 # ---!Downs
 
-DROP TABLE groups_history;
-DROP TABLE groups;
+DROP INDEX groups_persons_groups_id_idx;
+DROP INDEX groups_persons_people_id_idx;
+
 DROP TABLE groups_persons_history;
 DROP TABLE groups_persons;
+DROP TABLE groups_history;
+DROP TABLE groups;
