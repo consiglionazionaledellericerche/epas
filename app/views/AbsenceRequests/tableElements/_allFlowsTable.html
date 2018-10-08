@@ -31,7 +31,7 @@
 	</thead>
 
 	<tbody>
-		#{list items:myResults, as:'item'}
+		#{list items:results, as:'item'}
 			<tr>
 				#{if !onlyOwn}
 					<td>#{f.value 'item.person.fullname', value:item.person.fullname /}</td>

@@ -421,6 +421,8 @@ public class AbsenceRequestManager {
             || absenceRequest.isAdministrativeApproved())
         && (!absenceRequest.officeHeadApprovalRequired || absenceRequest.isOfficeHeadApproved());
   }
+  
+
 
   /**
    * Controlla se una richiesta di assenza può essere terminata con successo,

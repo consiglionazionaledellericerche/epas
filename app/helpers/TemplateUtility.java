@@ -158,11 +158,19 @@ public class TemplateUtility {
    */
   public final int compensatoryRestRequests() {
     User user = Security.getUser().get();
-    int compensatoryRestRequests = absenceRequestDao
-        .findRequestsToApprove(uroDao.getUsersRolesOfficesByUser(user), 
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<AbsenceRequest> results = absenceRequestDao
+        .findRequestsToApprove(roleList, 
             LocalDateTime.now().minusMonths(1), 
-            Optional.absent(), AbsenceRequestType.COMPENSATORY_REST, false).size();
-    return compensatoryRestRequests;
+            Optional.absent(), AbsenceRequestType.COMPENSATORY_REST);
+    if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      results = results.stream().filter(ab -> 
+      (ab.managerApprovalRequired && ab.isManagerApproved()) 
+          || (ab.administrativeApprovalRequired && ab.isAdministrativeApproved())
+          || (!ab.managerApprovalRequired && !ab.administrativeApprovalRequired))
+          .collect(Collectors.toList());
+    }
+    return results.size();
   }
   
   /**
@@ -172,12 +180,19 @@ public class TemplateUtility {
    */
   public final int vacationRequests() {
     User user = Security.getUser().get();
-
-    int vacationRequests = absenceRequestDao
-        .findRequestsToApprove(uroDao.getUsersRolesOfficesByUser(user), 
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<AbsenceRequest> results = absenceRequestDao
+        .findRequestsToApprove(roleList, 
             LocalDateTime.now().minusMonths(1), 
-            Optional.absent(), AbsenceRequestType.VACATION_REQUEST, false).size();
-    return vacationRequests;
+            Optional.absent(), AbsenceRequestType.VACATION_REQUEST);
+    if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      results = results.stream().filter(ab -> 
+      (ab.managerApprovalRequired && ab.isManagerApproved()) 
+          || (ab.administrativeApprovalRequired && ab.isAdministrativeApproved())
+          || (!ab.managerApprovalRequired && !ab.administrativeApprovalRequired))
+          .collect(Collectors.toList());
+    }
+    return results.size();
   }
 
 
