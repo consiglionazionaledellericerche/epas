@@ -35,9 +35,8 @@ import play.db.jpa.JPA;
 public class MetricsModule extends AbstractModule {
 
   /**
-   * Nome della chiave nella configurazione play per la soglia minima della durata
-   * delle richieste che saranno registrate nei log.
-   *
+   * <p>Nome della chiave nella configurazione play per la soglia minima della durata
+   * delle richieste che saranno registrate nei log.</p>
    * Il valore è espresso in millisecondi.
    */
   public static final String LOG_MIN_DURATION_REQUEST = "log_min_duration_request";
@@ -66,8 +65,8 @@ public class MetricsModule extends AbstractModule {
 
   @Provides
   public HibernateMetrics hibernateMetrics(Provider<EntityManager> emp) {
-      return new HibernateMetrics(emp.get().getEntityManagerFactory(),
-          JPA.DEFAULT, ImmutableList.of());
+    return new HibernateMetrics(emp.get().getEntityManagerFactory(),
+        JPA.DEFAULT, ImmutableList.of());
   }
 
   @Provides

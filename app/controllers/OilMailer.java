@@ -143,7 +143,7 @@ public class OilMailer extends Mailer {
    *
    * @param user utente a cui inviare la risposta.
    * @param oilId id del sistema OIL.
-   * @param action
+   * @param action parametro necessario ad OIL.
    * @param description contiene la risposta dell'utente.
    */
   public static void sendUserReply(Optional<User> user, String oilId, 

@@ -26,7 +26,7 @@ public class OvertimesManager {
 
   /**
    * @return la tabella contenente la struttura di persona-reason della competenza-codice
-   * competenza.
+   *        competenza.
    */
   public Table<String, String, Integer> buildMonthForExport(
       PersonsList body, CompetenceCode code, int year, int month) {

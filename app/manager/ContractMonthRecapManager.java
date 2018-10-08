@@ -661,7 +661,7 @@ public class ContractMonthRecapManager {
   }
   
   private void assegnaRiposiCompensativiChiusuraEnte(ContractMonthRecap monthRecap) {
-  //quello che assegno al monte ore passato
+    //quello che assegno al monte ore passato
     if (monthRecap.riposiCompensativiChiusuraEnteMinuti < monthRecap.remainingMinutesLastYear) {
       monthRecap.remainingMinutesLastYear =
           monthRecap.remainingMinutesLastYear - monthRecap.riposiCompensativiChiusuraEnteMinuti;

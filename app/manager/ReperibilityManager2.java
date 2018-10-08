@@ -212,7 +212,7 @@ public class ReperibilityManager2 {
   }
 
   /**
-   * Verifica se un turno puo' essere inserito senza violare le regole dei turni
+   * Verifica se un turno puo' essere inserito senza violare le regole dei turni.
    *
    * @param personReperibilityDay il personShiftDay da inserire
    * @return l'eventuale stringa contenente l'errore evidenziato in fase di inserimento del turno.

@@ -160,7 +160,7 @@ public class AbsenceRequestDao extends DaoBase {
       }
     }
     conditions.and(absenceRequest.startAt.after(fromDate))
-    .and(absenceRequest.type.eq(absenceRequestType));
+      .and(absenceRequest.type.eq(absenceRequestType));
     if (toDate.isPresent()) {
       conditions.and(absenceRequest.endTo.before(toDate.get()));
     }

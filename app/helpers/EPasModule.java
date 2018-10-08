@@ -11,7 +11,8 @@ import play.Play;
 @AutoRegister
 public class EPasModule extends AbstractModule {
 
-  @Provides @Named("app.instance")
+  @Provides
+  @Named("app.instance")
   public String getAppInstance() {
     String hostname = "devel";
     try  {

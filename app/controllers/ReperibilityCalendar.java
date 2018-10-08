@@ -389,7 +389,7 @@ public class ReperibilityCalendar extends Controller {
 
   /**
    * Calcola le ore di turno effettuate in quel periodo per ciascuna persona dell'attività
-   * specificata
+   * specificata.
    *
    * @param reperibilityId id dell'attività di reperibilità
    * @param start data iniziale
@@ -468,7 +468,7 @@ public class ReperibilityCalendar extends Controller {
 
   /**
    * Carica la lista delle reperibilità di un certo tipo associati ad una determinata persona in
-   * un intervallo di tempo
+   * un intervallo di tempo.
    *
    * @param reperibility attività di reperibilità
    * @param person persona associata ai turni
