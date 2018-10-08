@@ -367,7 +367,8 @@ public class AbsenceRequests extends Controller {
       //caso di approvazione da parte del responsabile di gruppo.
       absenceRequestManager.managerApproval(id);
       if (user.usersRolesOffices.stream()
-          .anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+          .anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR)) 
+          && absenceRequest.officeHeadApprovalRequired) {
         // se il responsabile di gruppo è anche responsabile di sede faccio un'unica approvazione
         absenceRequestManager.officeHeadApproval(id);
       }
