@@ -678,31 +678,33 @@ public class TemplateUtility {
     return people;
   }
   
-//  /**
-//   * 
-//   * @return la quantità di riposi compensativi da approvare per l'utente loggato.
-//   */
-//  public int countCompensatoryRestRequests() {
-//    
-//    List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(Security.getUser().get());
-//    List<AbsenceRequest> list = absenceRequestDao
-//        .findRequestsToApprove(uroList, LocalDateTime.now().minusMonths(1), 
-//            Optional.absent(), AbsenceRequestType.COMPENSATORY_REST);
-//    
-//    return list.size();
-//  }
-//  
-//  /**
-//   * 
-//   * @return la quantità di ferie da approvare per l'utente loggato.
-//   */
-//  public int countVacationsRequests() {
-//    
-//    List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(Security.getUser().get());
-//    List<AbsenceRequest> list = absenceRequestDao
-//        .findRequestsToApprove(uroList, LocalDateTime.now().minusMonths(1), 
-//            Optional.absent(), AbsenceRequestType.VACATION_REQUEST);
-//    
-//    return list.size();
-//  }
+  //  /**
+  //   * 
+  //   * @return la quantità di riposi compensativi da approvare per l'utente loggato.
+  //   */
+  //  public int countCompensatoryRestRequests() {
+  //    
+  //    List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(
+  //      Security.getUser().get());
+  //    List<AbsenceRequest> list = absenceRequestDao
+  //        .findRequestsToApprove(uroList, LocalDateTime.now().minusMonths(1), 
+  //            Optional.absent(), AbsenceRequestType.COMPENSATORY_REST);
+  //    
+  //    return list.size();
+  //  }
+  //  
+  //  /**
+  //   * 
+  //   * @return la quantità di ferie da approvare per l'utente loggato.
+  //   */
+  //  public int countVacationsRequests() {
+  //    
+  //    List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(
+  //        Security.getUser().get());
+  //    List<AbsenceRequest> list = absenceRequestDao
+  //        .findRequestsToApprove(uroList, LocalDateTime.now().minusMonths(1), 
+  //            Optional.absent(), AbsenceRequestType.VACATION_REQUEST);
+  //    
+  //    return list.size();
+  //  }
 }

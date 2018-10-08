@@ -1,11 +1,9 @@
 package it.cnr.iit.epas;
 
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-
 import lombok.NoArgsConstructor;
+import org.joda.time.LocalDate;
 
 @NoArgsConstructor
 public class DateInterval {
@@ -15,8 +13,8 @@ public class DateInterval {
 
   /**
    * Un DateInterval con begin obbligatorio.
-   * @param begin
-   * @param end
+   * @param begin data inizio intervallo.
+   * @param end da fine intervallo.
    * @return
    */
   public static DateInterval withBegin(LocalDate begin, Optional<LocalDate> end) {
@@ -37,8 +35,8 @@ public class DateInterval {
    * - Se begin è null viene impostata MIN_DATE. <br>
    * - Se end è null viene impostata MAX_DATE. <br>
    * Se begin è successiva a end vengono invertite.
-   * @param begin
-   * @param end
+   * @param begin data inizio intervallo, se null impostata a MIN_DATE
+   * @param end data fine intervallo, se null impostata a MAX_DATE
    * @return
    */
   public static DateInterval build(LocalDate begin, LocalDate end) {

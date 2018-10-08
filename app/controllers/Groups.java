@@ -136,19 +136,19 @@ public class Groups extends Controller {
     render("@edit", office);
   }
   
-//  public static void manageGroup() {
-//    User currentUser = Security.getUser().get();
-//    List<Group> managerGroups = Lists.newArrayList();
-//    if (currentUser.isSystemUser()) {
-//      managerGroups = groupDao.groupsByManager(Optional.<Person>absent());
-//    }
-//    if (!currentUser.hasRoles(Role.GROUP_MANAGER)) {
-//      flash.error("L'utente non dispone dei diritti per accedere alla funzionalità");
-//      Application.index();
-//    }
-//    //TODO: fare la regola drools per accedere alla funzionalità
-//    rules.checkIfPermitted();
-//    managerGroups = groupDao.groupsByManager(Optional.fromNullable(currentUser.person));
-//    render(managerGroups);
-//  }
+  //  public static void manageGroup() {
+  //    User currentUser = Security.getUser().get();
+  //    List<Group> managerGroups = Lists.newArrayList();
+  //    if (currentUser.isSystemUser()) {
+  //      managerGroups = groupDao.groupsByManager(Optional.<Person>absent());
+  //    }
+  //    if (!currentUser.hasRoles(Role.GROUP_MANAGER)) {
+  //      flash.error("L'utente non dispone dei diritti per accedere alla funzionalità");
+  //      Application.index();
+  //    }
+  //    //TODO: fare la regola drools per accedere alla funzionalità
+  //    rules.checkIfPermitted();
+  //    managerGroups = groupDao.groupsByManager(Optional.fromNullable(currentUser.person));
+  //    render(managerGroups);
+  //  }
 }

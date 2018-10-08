@@ -182,7 +182,7 @@ public class Certifications extends Controller {
 
   /**
    * invalida tutti i parametri in cache legati a quell'ufficio e quel mese per forzarne il
-   * ricalcolo con le interrogazioni ad attestati
+   * ricalcolo con le interrogazioni ad attestati.
    *
    * @param officeId id del'ufficio
    * @param year anno
@@ -267,7 +267,7 @@ public class Certifications extends Controller {
   }
 
   /**
-   * Effettua l'invio dei dati ad attestati e l'elaborazione di una persona
+   * Effettua l'invio dei dati ad attestati e l'elaborazione di una persona.
    *
    * @param personId id della persona
    * @param year anno

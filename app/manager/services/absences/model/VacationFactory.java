@@ -390,11 +390,6 @@ public class VacationFactory {
   /**
    * Splitta i periodi che ricadono a cavallo del primo anno di contratto.
    * E' importante applicare questo gestore dopo i fix ma prima della inizializzazione!
-   * @param person
-   * @param group
-   * @param contract
-   * @param periods
-   * @return
    */
   private List<AbsencePeriod> handleAccruedFirstYear(Person person, GroupAbsenceType group, 
       Contract contract, List<AbsencePeriod> periods) {
@@ -527,7 +522,7 @@ public class VacationFactory {
   }
   
   /**
-   * Gestore dell'inizializzazione
+   * Gestore dell'inizializzazione.
    * @return l'ammontare da attribuire ai periodi successivi perchè precedente l'inizializzazione.
    */
   private List<AbsencePeriod> handleInitialization(List<AbsencePeriod> periods, 

@@ -1,15 +1,12 @@
 package manager;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Verify;
 import com.google.inject.Inject;
 import dao.RoleDao;
 import helpers.TemplateExtensions;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-
 import manager.configurations.EpasParam;
-
 import models.Notification;
 import models.Person;
 import models.Role;
@@ -24,7 +21,6 @@ import models.flows.AbsenceRequest;
 import models.flows.enumerate.AbsenceRequestType;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
-
 import play.Play;
 import play.i18n.Messages;
 import play.libs.Mail;
@@ -85,19 +81,19 @@ public class NotificationManager {
     final String message = String.format(template, person.fullName(), stamping.date.toString(DTF));
 
     person.office.usersRolesOffices.stream()
-    .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
+        .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
         || uro.role.name.equals(Role.SEAT_SUPERVISOR))
-    .map(uro -> uro.user).forEach(user -> {
-      if (operation != Crud.DELETE) {
-        Notification.builder().destination(user).message(message)
-        .subject(NotificationSubject.STAMPING, stamping.id).create();
-      } else {
-        // per la notifica delle delete niente redirect altrimenti tocca
-        // andare a prelevare l'entity dallo storico
-        Notification.builder().destination(user).message(message)
-        .subject(NotificationSubject.STAMPING).create();
-      }
-    });
+        .map(uro -> uro.user).forEach(user -> {
+          if (operation != Crud.DELETE) {
+            Notification.builder().destination(user).message(message)
+            .subject(NotificationSubject.STAMPING, stamping.id).create();
+          } else {
+            // per la notifica delle delete niente redirect altrimenti tocca
+            // andare a prelevare l'entity dallo storico
+            Notification.builder().destination(user).message(message)
+              .subject(NotificationSubject.STAMPING).create();
+          }
+        });
   }
 
   /**
@@ -127,11 +123,11 @@ public class NotificationManager {
 
     person.office.usersRolesOffices.stream()
         .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
-        || uro.role.name.equals(Role.SEAT_SUPERVISOR))
-        .map(uro -> uro.user).forEach(user -> {
-          Notification.builder().destination(user).message(message)
-          .subject(NotificationSubject.ABSENCE, absence.id).create();
-        });
+            || uro.role.name.equals(Role.SEAT_SUPERVISOR))
+          .map(uro -> uro.user).forEach(user -> {
+            Notification.builder().destination(user).message(message)
+              .subject(NotificationSubject.ABSENCE, absence.id).create();
+          });
   }
 
   /**
@@ -164,10 +160,10 @@ public class NotificationManager {
     }
     person.office.usersRolesOffices.stream()
         .filter(uro -> uro.role.equals(roleDestination))
-          .map(uro -> uro.user).forEach(user -> {
-            Notification.builder().destination(user).message(message)
+        .map(uro -> uro.user).forEach(user -> {
+          Notification.builder().destination(user).message(message)
             .subject(NotificationSubject.ABSENCE_REQUEST, absenceRequest.id).create();
-          });
+        });
   }
 
   /**
@@ -309,7 +305,7 @@ public class NotificationManager {
     .subject(NotificationSubject.ABSENCE_REQUEST, absenceRequest.id).create();
 
   }
-  
+
   /**
    * Notifica che una richiesta di assenza è stata approvata da uno degli 
    * approvatori del flusso.
@@ -362,10 +358,10 @@ public class NotificationManager {
 
     person.office.usersRolesOffices.stream()
         .filter(uro -> uro.role.name.equals(role.name))
-          .map(uro -> uro.user).forEach(user -> {
-            Notification.builder().destination(user).message(message.toString())
+        .map(uro -> uro.user).forEach(user -> {
+          Notification.builder().destination(user).message(message.toString())
             .subject(NotificationSubject.ABSENCE, absences.stream().findFirst().get().id).create();
-          });
+        });
   }
 
   /**
@@ -421,21 +417,20 @@ public class NotificationManager {
     }
     person.office.usersRolesOffices.stream()
         .filter(uro -> uro.role.equals(roleDestination))
-          .map(uro -> uro.user).forEach(user -> {
-            try {
-              simpleEmail.addTo(user.person.email);
-            } catch (EmailException e) {
-              e.printStackTrace();
-            }
-            simpleEmail.setSubject("ePas Approvazione flusso");
-            try {
-              simpleEmail.setMsg(createAbsenceRequestEmail(absenceRequest, user));
-            } catch (EmailException e) {
-              e.printStackTrace();
-            }
-            Mail.send(simpleEmail);
-          });
-
+        .map(uro -> uro.user).forEach(user -> {
+          try {
+            simpleEmail.addTo(user.person.email);
+          } catch (EmailException e) {
+            e.printStackTrace();
+          }
+          simpleEmail.setSubject("ePas Approvazione flusso");
+          try {
+            simpleEmail.setMsg(createAbsenceRequestEmail(absenceRequest, user));
+          } catch (EmailException e) {
+            e.printStackTrace();
+          }
+          Mail.send(simpleEmail);
+        });
   }
 
   /**

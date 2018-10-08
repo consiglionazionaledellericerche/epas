@@ -211,11 +211,11 @@ public class ContractMonthRecap extends BaseModel {
     }
     return false;
   }
+  
   /**
    * Clean dell'oggetto persistito pre ricomputazione.
    */
   public void clean() {
-
     //MODULO RECAP ASSENZE
 
     this.recoveryDayUsed = 0;        //numeroRiposiCompensativi
