@@ -134,14 +134,14 @@ public class AbsenceRequests extends Controller {
         type, person, fromDate);
 
     val config = absenceRequestManager.getConfiguration(type, person);
-    List<AbsenceRequest> results = absenceRequestDao
+    List<AbsenceRequest> myResults = absenceRequestDao
         .findByPersonAndDate(person, fromDate, Optional.absent(), type, true);
     List<AbsenceRequest> closed = absenceRequestDao
         .findByPersonAndDate(person, fromDate, Optional.absent(), type, false);
     val onlyOwn = true;
     boolean persist = false;
 
-    render(config, results, type, onlyOwn, persist, closed);
+    render(config, myResults, type, onlyOwn, persist, closed);
   }
 
   /**
@@ -158,26 +158,31 @@ public class AbsenceRequests extends Controller {
         type, fromDate);   
 
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.user);
-    List<AbsenceRequest> results = absenceRequestDao
-        .findRequestsToApprove(roleList, fromDate, Optional.absent(), type);
     List<AbsenceRequest> myResults = Lists.newArrayList();
-    List<AbsenceRequest> approvedResults = absenceRequestDao
-        .findRequestsApproved(roleList, fromDate, Optional.absent(), type);
+    List<AbsenceRequest> results = 
+        absenceRequestDao.allResults(roleList, fromDate, Optional.absent(), type);
+    List<AbsenceRequest> approvedResults = 
+        absenceRequestDao.totallyApproved(roleList, fromDate, Optional.absent(), type);
     val config = absenceRequestManager.getConfiguration(type, person);  
     val onlyOwn = false;
-    boolean seatSupervisor = false;
+
     if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
       myResults = results.stream().filter(ab -> 
       (ab.managerApprovalRequired && ab.isManagerApproved()) 
           || (ab.administrativeApprovalRequired && ab.isAdministrativeApproved())
           || (!ab.managerApprovalRequired && !ab.administrativeApprovalRequired))
           .collect(Collectors.toList());
-      seatSupervisor = true;
+      //seatSupervisor = true;
+    } else if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
+      myResults = results.stream().filter(ab -> 
+      (ab.managerApprovalRequired && !ab.isManagerApproved()))
+          .collect(Collectors.toList());
+      
     } else {
       myResults = results;
     }
 
-    render(config, results, type, onlyOwn, approvedResults, myResults, seatSupervisor);
+    render(config, results, type, onlyOwn, approvedResults, myResults);
   }
 
 
@@ -365,28 +370,29 @@ public class AbsenceRequests extends Controller {
     if (absenceRequest.managerApprovalRequired && absenceRequest.managerApproved == null
         && user.hasRoles(Role.GROUP_MANAGER)) {
       //caso di approvazione da parte del responsabile di gruppo.
-      absenceRequestManager.managerApproval(id);
+      absenceRequestManager.managerApproval(id, user);
       if (user.usersRolesOffices.stream()
           .anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR)) 
           && absenceRequest.officeHeadApprovalRequired) {
         // se il responsabile di gruppo è anche responsabile di sede faccio un'unica approvazione
-        absenceRequestManager.officeHeadApproval(id);
+        absenceRequestManager.officeHeadApproval(id, user);
       }
     }
     if (absenceRequest.administrativeApprovalRequired 
         && absenceRequest.administrativeApproved == null
         && user.hasRoles(Role.PERSONNEL_ADMIN)) {
       //caso di approvazione da parte dell'amministratore del personale
-      absenceRequestManager.personnelAdministratorApproval(id);
+      absenceRequestManager.personnelAdministratorApproval(id, user);
     }
     if (absenceRequest.officeHeadApprovalRequired && absenceRequest.officeHeadApproved == null 
         && user.hasRoles(Role.SEAT_SUPERVISOR)) {
       //caso di approvazione da parte del responsabile di sede
-      absenceRequestManager.officeHeadApproval(id);
+      absenceRequestManager.officeHeadApproval(id, user);
     }
-    notificationManager.notificationAbsenceRequestPolicy(user, absenceRequest, true);
+    
     flash.success("Operazione conclusa correttamente");
-    render("@show", absenceRequest, user);
+    AbsenceRequests.listToApprove(absenceRequest.type);
+    
   }
 
   /**
