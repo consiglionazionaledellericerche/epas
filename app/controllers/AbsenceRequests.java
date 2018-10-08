@@ -15,7 +15,7 @@ import helpers.jpa.ModelQuery.SimpleResults;
 import javax.inject.Inject;
 
 import java.util.List;
-
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -37,6 +37,7 @@ import models.absences.definitions.DefaultTab;
 import models.flows.AbsenceRequest;
 import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
+import org.apache.commons.compress.utils.Lists;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -158,16 +159,22 @@ public class AbsenceRequests extends Controller {
 
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.user);
     List<AbsenceRequest> results = absenceRequestDao
-        .findRequestsToApprove(roleList, fromDate, Optional.absent(), type, false);
-    List<AbsenceRequest> myResults = absenceRequestDao
-        .findRequestsToApprove(roleList, fromDate, Optional.absent(), type, true);
+        .findRequestsToApprove(roleList, fromDate, Optional.absent(), type);
+    List<AbsenceRequest> myResults = Lists.newArrayList();
     List<AbsenceRequest> approvedResults = absenceRequestDao
         .findRequestsApproved(roleList, fromDate, Optional.absent(), type);
     val config = absenceRequestManager.getConfiguration(type, person);  
     val onlyOwn = false;
     boolean seatSupervisor = false;
     if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      myResults = results.stream().filter(ab -> 
+      (ab.managerApprovalRequired && ab.isManagerApproved()) 
+          || (ab.administrativeApprovalRequired && ab.isAdministrativeApproved())
+          || (!ab.managerApprovalRequired && !ab.administrativeApprovalRequired))
+          .collect(Collectors.toList());
       seatSupervisor = true;
+    } else {
+      myResults = results;
     }
 
     render(config, results, type, onlyOwn, approvedResults, myResults, seatSupervisor);
@@ -359,6 +366,11 @@ public class AbsenceRequests extends Controller {
         && user.hasRoles(Role.GROUP_MANAGER)) {
       //caso di approvazione da parte del responsabile di gruppo.
       absenceRequestManager.managerApproval(id);
+      if (user.usersRolesOffices.stream()
+          .anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+        // se il responsabile di gruppo è anche responsabile di sede faccio un'unica approvazione
+        absenceRequestManager.officeHeadApproval(id);
+      }
     }
     if (absenceRequest.administrativeApprovalRequired 
         && absenceRequest.administrativeApproved == null
