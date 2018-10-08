@@ -122,7 +122,41 @@ public class AbsenceRequestDao extends DaoBase {
       } 
     }
     conditions.and(absenceRequest.startAt.after(fromDate))
-        .and(absenceRequest.type.eq(absenceRequestType));
+      .and(absenceRequest.type.eq(absenceRequestType));
+    if (toDate.isPresent()) {
+      conditions.and(absenceRequest.endTo.before(toDate.get()));
+    }
+    JPQLQuery query = getQueryFactory()
+        .from(absenceRequest).where(conditions);
+    return query.list(absenceRequest);
+  }
+
+  /**
+   * Metodo che ritorna tutti i flussi attivi.
+   * @param uros la lista degli user_role_office associati alla persona pr cui si cercano le 
+   *     richieste da approvare.
+   * @param fromDate la data da cui cercare
+   * @param toDate (opzionale) la data entro cui cercare
+   * @param absenceRequestType il tipo di richiesta da cercare
+   * @return la lista di tutti i flussi attivi indipendentemente dallo stato di approvazione.
+   */
+  public List<AbsenceRequest> allResults(List<UsersRolesOffices> uros,
+      LocalDateTime fromDate, Optional<LocalDateTime> toDate, 
+      AbsenceRequestType absenceRequestType) {
+    Preconditions.checkNotNull(fromDate);
+
+    final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
+
+    BooleanBuilder conditions = new BooleanBuilder();
+    if (uros.stream().noneMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER) 
+        || uro.role.name.equals(Role.PERSONNEL_ADMIN)
+        || uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      return Lists.newArrayList();
+    }
+    
+    conditions.and(absenceRequest.startAt.after(fromDate))
+        .and(absenceRequest.type.eq(absenceRequestType)
+          .and(absenceRequest.flowStarted.isTrue()).and(absenceRequest.flowEnded.isFalse()));
     if (toDate.isPresent()) {
       conditions.and(absenceRequest.endTo.before(toDate.get()));
     }
@@ -161,6 +195,33 @@ public class AbsenceRequestDao extends DaoBase {
     }
     conditions.and(absenceRequest.startAt.after(fromDate))
       .and(absenceRequest.type.eq(absenceRequestType));
+    if (toDate.isPresent()) {
+      conditions.and(absenceRequest.endTo.before(toDate.get()));
+    }
+    JPQLQuery query = getQueryFactory()
+        .from(absenceRequest).where(conditions);
+    return query.list(absenceRequest);
+  }
+
+  /**
+   * Metodo che ritorna la lista delle richieste di assenza già approvate per ruolo data e tipo.
+   * @param uros la lista degli users_roles_offices
+   * @param fromDate la data da cui cercare le richieste di assenza
+   * @param toDate la data fino a cui cercare le richieste di assenza (opzionale)
+   * @param absenceRequestType il tipo della richiesta di assenza.
+   * @return la lista delle richieste totalmente approvate.
+   */
+  public List<AbsenceRequest> totallyApproved(List<UsersRolesOffices> uros,
+      LocalDateTime fromDate, Optional<LocalDateTime> toDate, 
+      AbsenceRequestType absenceRequestType) {
+    Preconditions.checkNotNull(fromDate);
+
+    final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
+    
+    BooleanBuilder conditions = new BooleanBuilder();
+    
+    conditions.and(absenceRequest.startAt.after(fromDate))
+      .and(absenceRequest.type.eq(absenceRequestType).and(absenceRequest.flowEnded.isTrue()));
     if (toDate.isPresent()) {
       conditions.and(absenceRequest.endTo.before(toDate.get()));
     }
@@ -224,11 +285,11 @@ public class AbsenceRequestDao extends DaoBase {
     if (condition.hasValue()) {
       condition.or(condition.and(absenceRequest.officeHeadApprovalRequired.isTrue()
           .and(absenceRequest.officeHeadApproved.isNotNull()
-              .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse())))));
+              .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isTrue())))));
     } else {
       condition.and(absenceRequest.officeHeadApprovalRequired.isTrue()
           .and(absenceRequest.officeHeadApproved.isNotNull()
-              .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse()))));
+              .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isTrue()))));
     }
 
   }
@@ -254,11 +315,11 @@ public class AbsenceRequestDao extends DaoBase {
     if (condition.hasValue()) {
       condition.or(absenceRequest.managerApprovalRequired.isTrue()
           .and(absenceRequest.managerApproved.isNotNull()
-              .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse()))));
+              .and(absenceRequest.flowStarted.isTrue())));
     } else {
       condition.and(absenceRequest.managerApprovalRequired.isTrue()
           .and(absenceRequest.managerApproved.isNotNull()
-              .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse()))));
+              .and(absenceRequest.flowStarted.isTrue())));
     }
 
   }

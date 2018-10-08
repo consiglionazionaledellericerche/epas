@@ -151,6 +151,12 @@ public class NotificationManager {
     final String message = 
         String.format(template, person.fullName(), absenceRequest.startAt.toString(DF));
 
+    //se il flusso è terminato notifico a chi ha fatto la richiesta
+    if (absenceRequest.isFullyApproved()) {
+      Notification.builder().destination(person.user).message(message)
+      .subject(NotificationSubject.ABSENCE_REQUEST, absenceRequest.id).create();
+      return;
+    }
     final Role roleDestination = getProperRole(absenceRequest); 
     if (roleDestination == null) {
       log.info("Non si è trovato il ruolo a cui inviare la notifica per la richiesta d'assenza di "

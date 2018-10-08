@@ -168,4 +168,17 @@ public class AbsenceRequest extends MutableModel {
   public AbsenceRequestEvent actualEvent() {
     return this.events.get(0);
   }
+  
+  /**
+   * Un flusso è completato se tutte le approvazioni richieste sono state
+   * impostate.
+   * 
+   * @return true se è completato, false altrimenti.
+   */
+  public boolean isFullyApproved() {
+    return (!this.managerApprovalRequired || this.isManagerApproved()) 
+        && (!this.administrativeApprovalRequired 
+            || this.isAdministrativeApproved())
+        && (!this.officeHeadApprovalRequired || this.isOfficeHeadApproved());
+  }
 }

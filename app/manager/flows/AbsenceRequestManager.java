@@ -31,6 +31,7 @@ import manager.services.absences.AbsenceService.InsertReport;
 import models.Person;
 import models.PersonDay;
 import models.Role;
+import models.User;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
@@ -408,19 +409,7 @@ public class AbsenceRequestManager {
     return Optional.absent();
   }
 
-  /**
-   * Un flusso è completato se tutte le approvazioni richieste sono state
-   * impostate.
-   * 
-   * @param absenceRequest la richiesta da verificare 
-   * @return true se è completato, false altrimenti.
-   */
-  public boolean isFullyApproved(AbsenceRequest absenceRequest) {
-    return (!absenceRequest.managerApprovalRequired || absenceRequest.isManagerApproved()) 
-        && (!absenceRequest.administrativeApprovalRequired 
-            || absenceRequest.isAdministrativeApproved())
-        && (!absenceRequest.officeHeadApprovalRequired || absenceRequest.isOfficeHeadApproved());
-  }
+
   
 
 
@@ -433,7 +422,7 @@ public class AbsenceRequestManager {
    * @return un report con l'inserimento dell'assenze se è stato possibile farlo.
    */
   public Optional<InsertReport> checkAndCompleteFlow(AbsenceRequest absenceRequest) {
-    if (isFullyApproved(absenceRequest) && !absenceRequest.flowEnded) {
+    if (absenceRequest.isFullyApproved() && !absenceRequest.flowEnded) {
       return Optional.of(completeFlow(absenceRequest));
     }
     return Optional.absent();
@@ -447,7 +436,7 @@ public class AbsenceRequestManager {
    * @return il report con i codici di assenza inseriti.
    */
   private InsertReport completeFlow(AbsenceRequest absenceRequest) {
-    //TODO
+
     absenceRequest.flowEnded = true;
     absenceRequest.save();
     log.info("Flusso relativo a {} terminato. Inserimento in corso delle assenze.", absenceRequest);
@@ -498,7 +487,7 @@ public class AbsenceRequestManager {
    * Approvazione richiesta assenza da parte del responsabile di gruppo.
    * @param id id della richiesta di assenza.
    */
-  public void managerApproval(long id) {
+  public void managerApproval(long id, User user) {
 
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     val currentPerson = Security.getUser().get().person;
@@ -507,13 +496,15 @@ public class AbsenceRequestManager {
         AbsenceRequestEventType.MANAGER_APPROVAL, Optional.absent());
     log.info("{} approvata dal responsabile di gruppo {}.",
         absenceRequest, currentPerson.getFullname());
+    
+    notificationManager.notificationAbsenceRequestPolicy(user, absenceRequest, true);
   }
 
   /**
    * Approvazione richiesta assenza da parte del responsabile di sede.
    * @param id id della richiesta di assenza.
    */
-  public void officeHeadApproval(long id) {
+  public void officeHeadApproval(long id, User user) {
 
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     val currentPerson = Security.getUser().get().person;
@@ -528,6 +519,7 @@ public class AbsenceRequestManager {
         AbsenceRequestEventType.OFFICE_HEAD_APPROVAL, Optional.absent());
     log.info("{} approvata dal responsabile di sede {}.",
         absenceRequest, currentPerson.getFullname());   
+    notificationManager.notificationAbsenceRequestPolicy(user, absenceRequest, true);
 
   }
 
@@ -535,7 +527,7 @@ public class AbsenceRequestManager {
    * Approvazione della richiesta di assenza da parte dell'amministratore del personale.
    * @param id l'id della richiesta di assenza.
    */
-  public void personnelAdministratorApproval(long id) {
+  public void personnelAdministratorApproval(long id, User user) {
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     val currentPerson = Security.getUser().get().person;
     executeEvent(
@@ -543,6 +535,7 @@ public class AbsenceRequestManager {
         AbsenceRequestEventType.ADMINISTRATIVE_APPROVAL, Optional.absent());
     log.info("{} approvata dall'amministratore del personale {}.",
         absenceRequest, currentPerson.getFullname());   
+    notificationManager.notificationAbsenceRequestPolicy(user, absenceRequest, true);
 
   }
 

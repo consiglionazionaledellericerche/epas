@@ -584,6 +584,14 @@ then
   $c.grant();
 end
 
+rule showAbsenceRequest
+when 
+  $ar: AbsenceRequest(person != currentOperator.person, flowEnded == true)
+  $c: PermissionCheck(action == "AbsenceRequests.show", target==$ar, granted == false)
+then
+  $c.revoke();
+end
+
 
 rule personInCharge
 when

@@ -52,9 +52,11 @@
 				<td>${item.note}</td>
 				<td>${item.actualEvent().eventType.label()}</td>
 				<td>
+				#{secure.check 'AbsenceRequests.show', target: item }
 				#{secure.link @AbsenceRequests.show(item.id, type)}	    	  	
 	        	<i class="fa fa-eye" aria-hidden="true"></i> Visualizza
 	        	#{/secure.link}
+	        	#{/secure.check}
 				</td>
 			</tr>
 		#{/list}
