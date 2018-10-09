@@ -1,8 +1,11 @@
 package manager;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.inject.Inject;
+import dao.AbsenceDao;
 import dao.RoleDao;
+import dao.absences.AbsenceComponentDao;
 import helpers.TemplateExtensions;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +16,7 @@ import models.Role;
 import models.Stamping;
 import models.User;
 import models.absences.Absence;
+import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.definitions.DefaultGroup;
 import models.enumerate.AccountRole;
@@ -36,18 +40,23 @@ public class NotificationManager {
 
   private SecureManager secureManager;
   private RoleDao roleDao;
+  private AbsenceDao absenceDao;
+  private AbsenceComponentDao componentDao;
 
   @Inject
-  public NotificationManager(SecureManager secureManager, RoleDao roleDao) {
+  public NotificationManager(SecureManager secureManager, RoleDao roleDao, AbsenceDao absenceDao,
+      AbsenceComponentDao componentDao) {
     this.secureManager = secureManager;
     this.roleDao = roleDao;
+    this.absenceDao = absenceDao;
+    this.componentDao = componentDao;
   }
 
   private static final String DTF = "dd/MM/YYYY - HH:mm";
   private static final String DF = "dd/MM/YYYY";
 
   private static final String BASE_URL = Play.configuration.getProperty("application.baseUrl");
-  private static final String PATH = "absencerequest/show";
+  private static final String PATH = "absencerequests/show";
 
 
   /**
@@ -151,11 +160,23 @@ public class NotificationManager {
     final String message = 
         String.format(template, person.fullName(), absenceRequest.startAt.toString(DF));
 
-    //se il flusso è terminato notifico a chi ha fatto la richiesta
+    //se il flusso è terminato notifico a chi ha fatto la richiesta...
     if (absenceRequest.isFullyApproved()) {
       Notification.builder().destination(person.user).message(message)
       .subject(NotificationSubject.ABSENCE_REQUEST, absenceRequest.id).create();
-      return;
+      //...e all'amministratore del personale
+      List<Absence> absence = absenceDao.findByPersonAndDate(absenceRequest.person, 
+          absenceRequest.startAtAsDate(), Optional.of(absenceRequest.endToAsDate()), 
+          Optional.absent()).list();
+      GroupAbsenceType groupAbsenceType = null;
+      if (absenceRequest.type == AbsenceRequestType.COMPENSATORY_REST) {
+        groupAbsenceType = 
+            componentDao.groupAbsenceTypeByName(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name()).get();
+      } else {
+        groupAbsenceType =
+            componentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR_DIPENDENTI.name()).get();
+      }
+      notificationAbsencePolicy(person.user, absence.get(0), groupAbsenceType, true, false, false);
     }
     final Role roleDestination = getProperRole(absenceRequest); 
     if (roleDestination == null) {
