@@ -3,7 +3,9 @@ package controllers;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
+import com.google.common.collect.Lists;
 import dao.AbsenceRequestDao;
+import dao.GroupDao;
 import dao.PersonDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
@@ -15,6 +17,7 @@ import helpers.jpa.ModelQuery.SimpleResults;
 import javax.inject.Inject;
 
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -35,9 +38,10 @@ import models.absences.CategoryTab;
 import models.absences.GroupAbsenceType;
 import models.absences.definitions.DefaultTab;
 import models.flows.AbsenceRequest;
+import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
-import org.apache.commons.compress.utils.Lists;
+
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -86,6 +90,9 @@ public class AbsenceRequests extends Controller {
 
   @Inject
   static NotificationManager notificationManager;
+  
+  @Inject
+  static GroupDao groupDao;
 
 
   public static void vacations() {
@@ -156,31 +163,16 @@ public class AbsenceRequests extends Controller {
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
     log.debug("Prelevo le richieste da approvare di assenze di tipo {} a partire da {}", 
         type, fromDate);   
-
+    List<Group> groups = groupDao.groupsByOffice(person.office, Optional.absent());
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.user);
     List<AbsenceRequest> myResults = Lists.newArrayList();
     List<AbsenceRequest> results = 
-        absenceRequestDao.allResults(roleList, fromDate, Optional.absent(), type);
+        absenceRequestDao.allResults(roleList, fromDate, Optional.absent(), type, groups, person);
     List<AbsenceRequest> approvedResults = 
         absenceRequestDao.totallyApproved(roleList, fromDate, Optional.absent(), type);
     val config = absenceRequestManager.getConfiguration(type, person);  
     val onlyOwn = false;
-
-    if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
-      myResults = results.stream().filter(ab -> 
-      (ab.managerApprovalRequired && ab.isManagerApproved()) 
-          || (ab.administrativeApprovalRequired && ab.isAdministrativeApproved())
-          || (!ab.managerApprovalRequired && !ab.administrativeApprovalRequired))
-          .collect(Collectors.toList());
-      //seatSupervisor = true;
-    } else if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
-      myResults = results.stream().filter(ab -> 
-      (ab.managerApprovalRequired && !ab.isManagerApproved()))
-          .collect(Collectors.toList());
-      
-    } else {
-      myResults = results;
-    }
+    myResults = results;
 
     render(config, results, type, onlyOwn, approvedResults, myResults);
   }

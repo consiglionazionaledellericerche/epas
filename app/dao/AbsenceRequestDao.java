@@ -5,18 +5,25 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
+import com.mysema.query.group.QPair;
+import com.mysema.query.jpa.JPASubQuery;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
+import com.mysema.query.types.Expression;
 import helpers.jpa.ModelQuery;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.Person;
 import models.Role;
 import models.UsersRolesOffices;
 import models.flows.AbsenceRequest;
+import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.query.QAbsenceRequest;
+import models.flows.query.QGroup;
+import models.query.QPerson;
 import org.joda.time.LocalDateTime;
 
 
@@ -122,7 +129,7 @@ public class AbsenceRequestDao extends DaoBase {
       } 
     }
     conditions.and(absenceRequest.startAt.after(fromDate))
-      .and(absenceRequest.type.eq(absenceRequestType));
+    .and(absenceRequest.type.eq(absenceRequestType));
     if (toDate.isPresent()) {
       conditions.and(absenceRequest.endTo.before(toDate.get()));
     }
@@ -142,26 +149,46 @@ public class AbsenceRequestDao extends DaoBase {
    */
   public List<AbsenceRequest> allResults(List<UsersRolesOffices> uros,
       LocalDateTime fromDate, Optional<LocalDateTime> toDate, 
-      AbsenceRequestType absenceRequestType) {
+      AbsenceRequestType absenceRequestType, List<Group> groups, Person signer) {
     Preconditions.checkNotNull(fromDate);
 
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
+    final QPerson person = QPerson.person;
+    final QGroup group = QGroup.group;
 
     BooleanBuilder conditions = new BooleanBuilder();
+
+    JPQLQuery query = null;
     if (uros.stream().noneMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER) 
         || uro.role.name.equals(Role.PERSONNEL_ADMIN)
         || uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
       return Lists.newArrayList();
     }
-    
     conditions.and(absenceRequest.startAt.after(fromDate))
         .and(absenceRequest.type.eq(absenceRequestType)
-          .and(absenceRequest.flowStarted.isTrue()).and(absenceRequest.flowEnded.isFalse()));
+        .and(absenceRequest.flowStarted.isTrue()).and(absenceRequest.flowEnded.isFalse()));
     if (toDate.isPresent()) {
       conditions.and(absenceRequest.endTo.before(toDate.get()));
     }
-    JPQLQuery query = getQueryFactory()
-        .from(absenceRequest).where(conditions);
+    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      conditions.and(absenceRequest.person.office.eq(signer.office))
+          .andAnyOf(absenceRequest.managerApprovalRequired.isFalse(), 
+          absenceRequest.administrativeApprovalRequired.isFalse(),
+          absenceRequest.managerApprovalRequired.isTrue(), 
+          absenceRequest.managerApproved.isNotNull());      
+      query = getQueryFactory().from(absenceRequest).where(conditions);
+
+    } else if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {      
+      conditions.and(absenceRequest.managerApprovalRequired)
+      .and(absenceRequest.managerApproved.isNull()) 
+        .and(absenceRequest.person.office.eq(signer.office));          
+      query = getQueryFactory().from(absenceRequest).leftJoin(absenceRequest.person, person)
+          .where(person.in(new JPASubQuery()
+              .from(group).where(group.manager.eq(signer)
+                  .and(group.people.contains(absenceRequest.person))).list(person)));
+    }
+
+
     return query.list(absenceRequest);
   }
 
@@ -194,7 +221,7 @@ public class AbsenceRequestDao extends DaoBase {
       }
     }
     conditions.and(absenceRequest.startAt.after(fromDate))
-      .and(absenceRequest.type.eq(absenceRequestType));
+    .and(absenceRequest.type.eq(absenceRequestType));
     if (toDate.isPresent()) {
       conditions.and(absenceRequest.endTo.before(toDate.get()));
     }
@@ -217,11 +244,11 @@ public class AbsenceRequestDao extends DaoBase {
     Preconditions.checkNotNull(fromDate);
 
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
-    
+
     BooleanBuilder conditions = new BooleanBuilder();
-    
+
     conditions.and(absenceRequest.startAt.after(fromDate))
-      .and(absenceRequest.type.eq(absenceRequestType).and(absenceRequest.flowEnded.isTrue()));
+    .and(absenceRequest.type.eq(absenceRequestType).and(absenceRequest.flowEnded.isTrue()));
     if (toDate.isPresent()) {
       conditions.and(absenceRequest.endTo.before(toDate.get()));
     }
