@@ -4,10 +4,12 @@ import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.inject.Inject;
 import dao.AbsenceDao;
+import dao.GroupDao;
 import dao.RoleDao;
 import dao.absences.AbsenceComponentDao;
 import helpers.TemplateExtensions;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import manager.configurations.EpasParam;
 import models.Notification;
@@ -22,6 +24,7 @@ import models.absences.definitions.DefaultGroup;
 import models.enumerate.AccountRole;
 import models.enumerate.NotificationSubject;
 import models.flows.AbsenceRequest;
+import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
@@ -42,14 +45,16 @@ public class NotificationManager {
   private RoleDao roleDao;
   private AbsenceDao absenceDao;
   private AbsenceComponentDao componentDao;
+  private GroupDao groupDao;
 
   @Inject
   public NotificationManager(SecureManager secureManager, RoleDao roleDao, AbsenceDao absenceDao,
-      AbsenceComponentDao componentDao) {
+      AbsenceComponentDao componentDao, GroupDao groupDao) {
     this.secureManager = secureManager;
     this.roleDao = roleDao;
     this.absenceDao = absenceDao;
     this.componentDao = componentDao;
+    this.groupDao = groupDao;
   }
 
   private static final String DTF = "dd/MM/YYYY - HH:mm";
@@ -97,10 +102,10 @@ public class NotificationManager {
             Notification.builder().destination(user).message(message)
             .subject(NotificationSubject.STAMPING, stamping.id).create();
           } else {
-            // per la notifica delle delete niente redirect altrimenti tocca
-            // andare a prelevare l'entity dallo storico
+          // per la notifica delle delete niente redirect altrimenti tocca
+          // andare a prelevare l'entity dallo storico
             Notification.builder().destination(user).message(message)
-              .subject(NotificationSubject.STAMPING).create();
+            .subject(NotificationSubject.STAMPING).create();
           }
         });
   }
@@ -133,10 +138,10 @@ public class NotificationManager {
     person.office.usersRolesOffices.stream()
         .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
             || uro.role.name.equals(Role.SEAT_SUPERVISOR))
-          .map(uro -> uro.user).forEach(user -> {
-            Notification.builder().destination(user).message(message)
-              .subject(NotificationSubject.ABSENCE, absence.id).create();
-          });
+        .map(uro -> uro.user).forEach(user -> {
+          Notification.builder().destination(user).message(message)
+          .subject(NotificationSubject.ABSENCE, absence.id).create();
+        });
   }
 
   /**
@@ -185,12 +190,27 @@ public class NotificationManager {
           absenceRequest.person, absenceRequest.type, absenceRequest.startAt, absenceRequest.endTo);
       return;
     }
-    person.office.usersRolesOffices.stream()
+    List<User> users = person.office.usersRolesOffices.stream()
         .filter(uro -> uro.role.equals(roleDestination))
-        .map(uro -> uro.user).forEach(user -> {
-          Notification.builder().destination(user).message(message)
+        .map(uro -> uro.user).collect(Collectors.toList());
+    if (roleDestination.name.equals(Role.GROUP_MANAGER)) {
+      List<Group> groups = groupDao.groupsByOffice(person.office, Optional.absent());
+      for (User user : users) {
+        for (Group group : groups) {
+          if (group.manager.equals(user.person) && group.people.contains(person)) {
+            Notification.builder().destination(user).message(message)
             .subject(NotificationSubject.ABSENCE_REQUEST, absenceRequest.id).create();
-        });
+          }
+        }
+      }
+      return;
+    } else {
+      users.forEach(user -> {
+        Notification.builder().destination(user).message(message)
+        .subject(NotificationSubject.ABSENCE_REQUEST, absenceRequest.id).create();
+      });
+    }
+    
   }
 
   /**
@@ -387,7 +407,7 @@ public class NotificationManager {
         .filter(uro -> uro.role.name.equals(role.name))
         .map(uro -> uro.user).forEach(user -> {
           Notification.builder().destination(user).message(message.toString())
-            .subject(NotificationSubject.ABSENCE, absences.stream().findFirst().get().id).create();
+          .subject(NotificationSubject.ABSENCE, absences.stream().findFirst().get().id).create();
         });
   }
 

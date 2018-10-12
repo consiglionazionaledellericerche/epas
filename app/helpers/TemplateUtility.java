@@ -13,6 +13,7 @@ import dao.BadgeSystemDao;
 import dao.CategoryGroupAbsenceTypeDao;
 import dao.CompetenceCodeDao;
 import dao.ContractualReferenceDao;
+import dao.GroupDao;
 import dao.MemoizedCollection;
 import dao.MemoizedResults;
 import dao.NotificationDao;
@@ -59,6 +60,7 @@ import models.enumerate.LimitType;
 import models.enumerate.NotificationSubject;
 import models.enumerate.StampTypes;
 import models.flows.AbsenceRequest;
+import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -94,6 +96,7 @@ public class TemplateUtility {
   private final MemoizedCollection<Notification> archivedNotifications;
   private final AbsenceRequestDao absenceRequestDao;
   private final UsersRolesOfficesDao uroDao;
+  private final GroupDao groupDao;
   
    
   
@@ -109,7 +112,7 @@ public class TemplateUtility {
       NotificationDao notificationDao, UserDao userDao,
       CategoryGroupAbsenceTypeDao categoryGroupAbsenceTypeDao,
       ContractualReferenceDao contractualReferenceDao, AbsenceRequestDao absenceRequestDao,
-      UsersRolesOfficesDao uroDao) {
+      UsersRolesOfficesDao uroDao, GroupDao groupDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -129,6 +132,7 @@ public class TemplateUtility {
     this.contractualReferenceDao = contractualReferenceDao;
     this.absenceRequestDao = absenceRequestDao;
     this.uroDao = uroDao;
+    this.groupDao = groupDao;
     
     notifications = MemoizedResults
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
@@ -159,6 +163,7 @@ public class TemplateUtility {
   public final int compensatoryRestRequests() {
     User user = Security.getUser().get();
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    
     List<AbsenceRequest> results = absenceRequestDao
         .findRequestsToApprove(roleList, 
             LocalDateTime.now().minusMonths(1), 
@@ -166,8 +171,17 @@ public class TemplateUtility {
     if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
       results = results.stream().filter(ab -> 
       (ab.managerApprovalRequired && ab.isManagerApproved()) 
+      && ab.person.office.equals(user.person.office)
           || (ab.administrativeApprovalRequired && ab.isAdministrativeApproved())
           || (!ab.managerApprovalRequired && !ab.administrativeApprovalRequired))
+          .collect(Collectors.toList());
+    }
+    if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
+      List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent());
+      results = results.stream().filter(ab -> (ab.managerApprovalRequired 
+          && !ab.isManagerApproved() && ab.person.office.equals(user.person.office) 
+          && groups.stream().anyMatch(g -> g.manager.equals(user.person) 
+              && g.people.stream().anyMatch(p -> p.equals(ab.person)))))
           .collect(Collectors.toList());
     }
     return results.size();
@@ -188,8 +202,17 @@ public class TemplateUtility {
     if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
       results = results.stream().filter(ab -> 
       (ab.managerApprovalRequired && ab.isManagerApproved()) 
+      && ab.person.office.equals(user.person.office)
           || (ab.administrativeApprovalRequired && ab.isAdministrativeApproved())
           || (!ab.managerApprovalRequired && !ab.administrativeApprovalRequired))
+          .collect(Collectors.toList());
+    }
+    if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
+      List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent());
+      results = results.stream().filter(ab -> (ab.managerApprovalRequired 
+          && !ab.isManagerApproved() && ab.person.office.equals(user.person.office) 
+          && groups.stream().anyMatch(g -> g.manager.equals(user.person) 
+              && g.people.stream().anyMatch(p -> p.equals(ab.person)))))
           .collect(Collectors.toList());
     }
     return results.size();
