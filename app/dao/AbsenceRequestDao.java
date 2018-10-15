@@ -179,16 +179,16 @@ public class AbsenceRequestDao extends DaoBase {
       query = getQueryFactory().from(absenceRequest).where(conditions);
 
     } else if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {      
-      conditions.and(absenceRequest.managerApprovalRequired)
+      conditions.and(absenceRequest.managerApprovalRequired.isTrue())
       .and(absenceRequest.managerApproved.isNull()) 
-        .and(absenceRequest.person.office.eq(signer.office));          
-      query = getQueryFactory().from(absenceRequest).leftJoin(absenceRequest.person, person)
-          .where(person.in(new JPASubQuery()
-              .from(group).where(group.manager.eq(signer)
-                  .and(group.people.contains(absenceRequest.person))).list(person)));
+        .and(person.office.eq(signer.office));          
+      query = getQueryFactory().from(absenceRequest)
+          .join(absenceRequest.person, person)
+          .join(person.groups, group)
+          .where(group.manager.eq(signer).and(conditions));
+      
     }
-
-
+    
     return query.list(absenceRequest);
   }
 
@@ -240,20 +240,36 @@ public class AbsenceRequestDao extends DaoBase {
    */
   public List<AbsenceRequest> totallyApproved(List<UsersRolesOffices> uros,
       LocalDateTime fromDate, Optional<LocalDateTime> toDate, 
-      AbsenceRequestType absenceRequestType) {
+      AbsenceRequestType absenceRequestType, List<Group> groups, Person signer) {
     Preconditions.checkNotNull(fromDate);
 
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
+    final QPerson person = QPerson.person;
+    final QGroup group = QGroup.group;
 
     BooleanBuilder conditions = new BooleanBuilder();
-
+    JPQLQuery query = null;
     conditions.and(absenceRequest.startAt.after(fromDate))
-    .and(absenceRequest.type.eq(absenceRequestType).and(absenceRequest.flowEnded.isTrue()));
+        .and(absenceRequest.type.eq(absenceRequestType).and(absenceRequest.flowEnded.isTrue())
+          .and(absenceRequest.person.office.eq(signer.office)));
+
     if (toDate.isPresent()) {
       conditions.and(absenceRequest.endTo.before(toDate.get()));
     }
-    JPQLQuery query = getQueryFactory()
-        .from(absenceRequest).where(conditions);
+    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {      
+      conditions.and(absenceRequest.managerApprovalRequired.isTrue())
+      .and(absenceRequest.managerApproved.isNotNull()) 
+        .and(person.office.eq(signer.office));          
+      query = getQueryFactory().from(absenceRequest)
+          .join(absenceRequest.person, person)
+          .join(person.groups, group)
+          .where(group.manager.eq(signer).and(conditions));
+      
+    } else {
+      query = getQueryFactory()
+          .from(absenceRequest).where(conditions);
+    }
+    
     return query.list(absenceRequest);
   }
 

@@ -75,6 +75,7 @@ public class AbsenceRequestManager {
     boolean officeHeadApprovalRequired;
     boolean managerApprovalRequired;
     boolean administrativeApprovalRequired;
+    boolean officeHeadApprovalForManagerRequired;
     boolean allDay;
   }
 
@@ -210,6 +211,17 @@ public class AbsenceRequestManager {
                 person.office, requestType.officeHeadApprovalRequiredTechnicianLevel.get(), 
                 LocalDate.now());  
       }
+      
+    }
+    if (requestType.alwaysSkipOfficeHeadApprovalForManager) {
+      absenceRequestConfiguration.officeHeadApprovalForManagerRequired = false;
+    } else {
+      if (person.user.usersRolesOffices.stream()
+          .anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
+        absenceRequestConfiguration.officeHeadApprovalForManagerRequired =
+            (Boolean) configurationManager.configValue(person.office, 
+                requestType.officeHeadApprovalRequiredForManager.get(), LocalDate.now());
+      }
     }
     absenceRequestConfiguration.allDay = requestType.allDay;
     return absenceRequestConfiguration;
@@ -231,6 +243,8 @@ public class AbsenceRequestManager {
     absenceRequest.officeHeadApprovalRequired = config.officeHeadApprovalRequired;
     absenceRequest.managerApprovalRequired = config.managerApprovalRequired;
     absenceRequest.administrativeApprovalRequired = config.administrativeApprovalRequired;
+    absenceRequest.officeHeadApprovalForManagerRequired = 
+        config.officeHeadApprovalForManagerRequired;
   }
 
   /**
