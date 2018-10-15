@@ -108,6 +108,9 @@ public class AbsenceRequest extends MutableModel {
    */
   @Column(name = "office_head_approval_required")
   public boolean officeHeadApprovalRequired = true;
+  
+  @Column(name = "office_head_approval_for_manager_required")
+  public boolean officeHeadApprovalForManagerRequired = true;
 
   @NotAudited
   @OneToMany(mappedBy = "absenceRequest")

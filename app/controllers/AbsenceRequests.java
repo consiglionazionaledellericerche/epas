@@ -169,10 +169,22 @@ public class AbsenceRequests extends Controller {
     List<AbsenceRequest> results = 
         absenceRequestDao.allResults(roleList, fromDate, Optional.absent(), type, groups, person);
     List<AbsenceRequest> approvedResults = 
-        absenceRequestDao.totallyApproved(roleList, fromDate, Optional.absent(), type);
+        absenceRequestDao
+        .totallyApproved(roleList, fromDate, Optional.absent(), type, groups, person);
     val config = absenceRequestManager.getConfiguration(type, person);  
     val onlyOwn = false;
-    myResults = results;
+    if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
+      myResults = results.stream().filter(ar -> !ar.flowEnded 
+          && ar.managerApprovalRequired && ar.managerApproved == null)
+          .collect(Collectors.toList());
+    } 
+    if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      results = results.stream().filter(ar -> ar.flowEnded == false).collect(Collectors.toList());
+      myResults = results.stream().filter(ar -> !ar.flowEnded 
+          && ar.officeHeadApprovalRequired && ar.officeHeadApproved == null)
+          .collect(Collectors.toList());
+    }
+    
 
     render(config, results, type, onlyOwn, approvedResults, myResults);
   }
@@ -324,7 +336,9 @@ public class AbsenceRequests extends Controller {
       .sendEmailAbsenceRequestPolicy(absenceRequest.person.user, absenceRequest, true);
     } 
 
-    if (absenceRequest.person.user.hasRoles(Role.SEAT_SUPERVISOR)) {
+    if (absenceRequest.person.user.hasRoles(Role.SEAT_SUPERVISOR) 
+        || (absenceRequest.person.user.hasRoles(Role.GROUP_MANAGER) 
+            && !absenceRequest.officeHeadApprovalForManagerRequired)) {
       approval(absenceRequest.id);
     }
     

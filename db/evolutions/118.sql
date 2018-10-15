@@ -14,6 +14,7 @@ CREATE TABLE absence_requests (
 	manager_approval_required BOOLEAN DEFAULT TRUE,
 	administrative_approval_required BOOLEAN DEFAULT TRUE,
 	office_head_approval_required BOOLEAN DEFAULT TRUE,
+	office_head_approval_for_manager_required BOOLEAN DEFAULT TRUE,
 	flow_started BOOLEAN DEFAULT FALSE,
 	flow_ended BOOLEAN DEFAULT FALSE,
 	created_at TIMESTAMP WITHOUT TIME ZONE,
@@ -39,6 +40,7 @@ CREATE TABLE absence_requests_history (
 	manager_approval_required BOOLEAN,
 	administrative_approval_required BOOLEAN,
 	office_head_approval_required BOOLEAN,
+	office_head_approval_for_manager_required BOOLEAN,
 	flow_started BOOLEAN,
 	flow_ended BOOLEAN,
 	PRIMARY KEY (id, _revision, _revision_type)
