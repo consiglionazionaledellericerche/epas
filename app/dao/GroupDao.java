@@ -25,7 +25,7 @@ public class GroupDao extends DaoBase {
   }
   
   /**
-   * 
+   * Metodo che ritorna la lista dei gruppi che appartengono alla sede passata come parametro.
    * @param office la sede di cui si richiedono i gruppi
    * @return la lista dei gruppi i cui responsabili appartengono alla sede passata come parametro.
    */
@@ -41,7 +41,7 @@ public class GroupDao extends DaoBase {
   }
   
   /**
-   * 
+   * Metodo che ritorna la lista dei gruppi di cui Person è responsabile.
    * @param person la persona di cui cerco i gruppi in cui è responsabile
    * @return la lista dei gruppi di cui Person è responsabile.
    */
@@ -52,6 +52,17 @@ public class GroupDao extends DaoBase {
       builder.and(group.manager.eq(person.get()));
     }    
     final JPQLQuery query = getQueryFactory().from(group).where(builder);
+    return query.list(group);
+  }
+  
+  /**
+   * Metodo che ritorna la lista dei gruppi di cui fa parte la person passata come parametro.
+   * @param person la persona di cui si cercano i gruppi di cui fa parte
+   * @return la lista dei gruppi di cui fa parte la persona passata come parametro.
+   */
+  public List<Group> myGroups(Person person) {
+    final QGroup group = QGroup.group;
+    final JPQLQuery query = getQueryFactory().from(group).where(group.people.contains(person));
     return query.list(group);
   }
 }

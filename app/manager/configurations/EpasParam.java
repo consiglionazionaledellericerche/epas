@@ -326,6 +326,18 @@ public enum EpasParam {
       EpasParamValueType.formatValue(true),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
+  
+  /**
+   * Per i livelli I-III è necessaria l'approvazione delle ferie da parte del responsabile di sede.
+   */
+  VACATION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "vacation_request_manager_office_head_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
 
 
   /**
@@ -398,18 +410,6 @@ public enum EpasParam {
    */
   COMPENSATORY_REST_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED(
       "compensatory_rest_manager_request_office_head_approval_required",
-      EpasParamCategory.FLOWS,
-      EpasParamTimeType.PERIODIC,
-      EpasParamValueType.BOOLEAN,
-      EpasParamValueType.formatValue(true),
-      Lists.<RecomputationType>newArrayList(),
-      Office.class),
-  
-  /**
-   * Per i livelli I-III è necessaria l'approvazione delle ferie da parte del responsabile di sede.
-   */
-  VACATION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED(
-      "vacation_request_manager_office_head_approval_required",
       EpasParamCategory.FLOWS,
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.BOOLEAN,

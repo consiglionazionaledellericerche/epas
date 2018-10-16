@@ -182,6 +182,7 @@ public class AbsenceRequest extends MutableModel {
     return (!this.managerApprovalRequired || this.isManagerApproved()) 
         && (!this.administrativeApprovalRequired 
             || this.isAdministrativeApproved())
-        && (!this.officeHeadApprovalRequired || this.isOfficeHeadApproved());
+        && (!this.officeHeadApprovalRequired || this.isOfficeHeadApproved())
+            || (!this.officeHeadApprovalForManagerRequired || this.isManagerApproved());
   }
 }

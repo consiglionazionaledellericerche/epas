@@ -92,62 +92,18 @@ public class AbsenceRequestDao extends DaoBase {
     return query.list(absenceRequest);
   }
 
+
+
   /**
-   * Lista di richieste da approvare per ruolo, data e tipo.
-   * 
+   * Metodo che ritorna tutti i flussi attivi da approvare.
    * @param uros la lista degli user_role_office associati alla persona pr cui si cercano le 
    *     richieste da approvare.
    * @param fromDate la data da cui cercare
    * @param toDate (opzionale) la data entro cui cercare
    * @param absenceRequestType il tipo di richiesta da cercare
-   * @return La lista delle richieste di assenza da approvare per il ruolo passato. 
+   * @return la lista di tutti i flussi attivi da approvare.
    */
-  public List<AbsenceRequest> findRequestsToApprove(
-      List<UsersRolesOffices> uros,
-      LocalDateTime fromDate, Optional<LocalDateTime> toDate, 
-      AbsenceRequestType absenceRequestType) {
-
-    Preconditions.checkNotNull(fromDate);
-
-    final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
-
-    BooleanBuilder conditions = new BooleanBuilder();
-
-    if (uros.stream().noneMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER) 
-        || uro.role.name.equals(Role.PERSONNEL_ADMIN)
-        || uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
-      return Lists.newArrayList();
-    }
-
-    for (UsersRolesOffices uro : uros) {
-      if (uro.role.name.equals(Role.PERSONNEL_ADMIN)) {
-        personnelAdminQuery(conditions);
-      } else if (uro.role.name.equals(Role.SEAT_SUPERVISOR)) {
-        seatSupervisorQuery(conditions);
-      } else if (uro.role.name.equals(Role.GROUP_MANAGER)) {
-        managerQuery(conditions);
-      } 
-    }
-    conditions.and(absenceRequest.startAt.after(fromDate))
-    .and(absenceRequest.type.eq(absenceRequestType));
-    if (toDate.isPresent()) {
-      conditions.and(absenceRequest.endTo.before(toDate.get()));
-    }
-    JPQLQuery query = getQueryFactory()
-        .from(absenceRequest).where(conditions);
-    return query.list(absenceRequest);
-  }
-
-  /**
-   * Metodo che ritorna tutti i flussi attivi.
-   * @param uros la lista degli user_role_office associati alla persona pr cui si cercano le 
-   *     richieste da approvare.
-   * @param fromDate la data da cui cercare
-   * @param toDate (opzionale) la data entro cui cercare
-   * @param absenceRequestType il tipo di richiesta da cercare
-   * @return la lista di tutti i flussi attivi indipendentemente dallo stato di approvazione.
-   */
-  public List<AbsenceRequest> allResults(List<UsersRolesOffices> uros,
+  public List<AbsenceRequest> toApproveResults(List<UsersRolesOffices> uros,
       LocalDateTime fromDate, Optional<LocalDateTime> toDate, 
       AbsenceRequestType absenceRequestType, List<Group> groups, Person signer) {
     Preconditions.checkNotNull(fromDate);
@@ -166,69 +122,75 @@ public class AbsenceRequestDao extends DaoBase {
     }
     conditions.and(absenceRequest.startAt.after(fromDate))
         .and(absenceRequest.type.eq(absenceRequestType)
-        .and(absenceRequest.flowStarted.isTrue()).and(absenceRequest.flowEnded.isFalse()));
+        .and(absenceRequest.flowStarted.isTrue())
+        .and(absenceRequest.flowEnded.isFalse()));
     if (toDate.isPresent()) {
       conditions.and(absenceRequest.endTo.before(toDate.get()));
     }
     if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
-      conditions.and(absenceRequest.person.office.eq(signer.office))
-          .andAnyOf(absenceRequest.managerApprovalRequired.isFalse(), 
-          absenceRequest.administrativeApprovalRequired.isFalse(),
-          absenceRequest.managerApprovalRequired.isTrue(), 
-          absenceRequest.managerApproved.isNotNull());      
+      conditions = seatSupervisorQuery(conditions, signer);     
       query = getQueryFactory().from(absenceRequest).where(conditions);
 
     } else if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {      
-      conditions.and(absenceRequest.managerApprovalRequired.isTrue())
-      .and(absenceRequest.managerApproved.isNull()) 
-        .and(person.office.eq(signer.office));          
+      conditions = managerQuery(conditions, signer);          
       query = getQueryFactory().from(absenceRequest)
           .join(absenceRequest.person, person)
           .join(person.groups, group)
           .where(group.manager.eq(signer).and(conditions));
-      
     }
-    
     return query.list(absenceRequest);
   }
 
   /**
-   * Metodo che ritorna la lista delle richieste di assenza già approvate per ruolo data e tipo.
-   * @param uros la lista degli users_roles_offices
-   * @param fromDate la data da cui cercare le richieste di assenza
-   * @param toDate la data fino a cui cercare le richieste di assenza (opzionale)
-   * @param absenceRequestType il tipo della richiesta di assenza.
-   * @return la lista delle richieste di assenza approvate.
+   * Metodo che ritorna la lista di tutte le richieste di assenza attive.
+   * @param uros la lista dei ruoli della persona che deve approvare
+   * @param fromDate da quando cercare le richieste
+   * @param toDate a quando cercare le richieste (opzionale)
+   * @param absenceRequestType il tipo della richiesta
+   * @param groups la lista dei gruppi di cui fa parte il dipendente che fa la richiesta
+   * @param signer il dipendente deputato all'approvazione
+   * @return la lista di tutte le richieste di assenza attive.
    */
-  public List<AbsenceRequest> findRequestsApproved(
-      List<UsersRolesOffices> uros,
+  public List<AbsenceRequest> allResults(List<UsersRolesOffices> uros,
       LocalDateTime fromDate, Optional<LocalDateTime> toDate, 
-      AbsenceRequestType absenceRequestType) {
-
+      AbsenceRequestType absenceRequestType, List<Group> groups, Person signer) {
     Preconditions.checkNotNull(fromDate);
 
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
+    final QPerson person = QPerson.person;
+    final QGroup group = QGroup.group;
 
     BooleanBuilder conditions = new BooleanBuilder();
 
-    for (UsersRolesOffices uro : uros) {
-      if (uro.role.name.equals(Role.PERSONNEL_ADMIN)) {
-        personnelAdminQueryApproved(conditions);
-      } else if (uro.role.name.equals(Role.SEAT_SUPERVISOR)) {
-        seatSupervisorQueryApproved(conditions);
-      } else if (uro.role.name.equals(Role.GROUP_MANAGER)) {
-        managerQueryApproved(conditions);
-      }
+    if (uros.stream().noneMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER) 
+        || uro.role.name.equals(Role.PERSONNEL_ADMIN)
+        || uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      return Lists.newArrayList();
     }
+    JPQLQuery query = null;
     conditions.and(absenceRequest.startAt.after(fromDate))
-    .and(absenceRequest.type.eq(absenceRequestType));
+        .and(absenceRequest.type.eq(absenceRequestType)
+        .and(absenceRequest.flowStarted.isTrue())
+        .and(absenceRequest.flowEnded.isFalse())
+        .and(absenceRequest.person.office.eq(signer.office)));
     if (toDate.isPresent()) {
       conditions.and(absenceRequest.endTo.before(toDate.get()));
     }
-    JPQLQuery query = getQueryFactory()
-        .from(absenceRequest).where(conditions);
+    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {      
+      conditions.and(absenceRequest.managerApprovalRequired.isTrue())
+      .and(absenceRequest.managerApproved.isNotNull()) 
+        .and(person.office.eq(signer.office));  
+      query = getQueryFactory().from(absenceRequest)
+          .join(absenceRequest.person, person)
+          .join(person.groups, group)
+          .where(group.manager.eq(signer).and(conditions));
+    } else {
+      query = getQueryFactory().from(absenceRequest).where(conditions);
+    }
+
     return query.list(absenceRequest);
   }
+
 
   /**
    * Metodo che ritorna la lista delle richieste di assenza già approvate per ruolo data e tipo.
@@ -251,7 +213,7 @@ public class AbsenceRequestDao extends DaoBase {
     JPQLQuery query = null;
     conditions.and(absenceRequest.startAt.after(fromDate))
         .and(absenceRequest.type.eq(absenceRequestType).and(absenceRequest.flowEnded.isTrue())
-          .and(absenceRequest.person.office.eq(signer.office)));
+        .and(absenceRequest.person.office.eq(signer.office)));
 
     if (toDate.isPresent()) {
       conditions.and(absenceRequest.endTo.before(toDate.get()));
@@ -259,34 +221,30 @@ public class AbsenceRequestDao extends DaoBase {
     if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {      
       conditions.and(absenceRequest.managerApprovalRequired.isTrue())
       .and(absenceRequest.managerApproved.isNotNull()) 
-        .and(person.office.eq(signer.office));          
+          .and(person.office.eq(signer.office));          
       query = getQueryFactory().from(absenceRequest)
           .join(absenceRequest.person, person)
           .join(person.groups, group)
           .where(group.manager.eq(signer).and(conditions));
-      
+
     } else {
       query = getQueryFactory()
           .from(absenceRequest).where(conditions);
     }
-    
+
     return query.list(absenceRequest);
   }
 
-  private void seatSupervisorQuery(BooleanBuilder condition) {
+  private BooleanBuilder seatSupervisorQuery(BooleanBuilder condition, Person signer) {
 
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
-    if (condition.hasValue()) {
-
-      condition.or(condition.and(absenceRequest.officeHeadApprovalRequired.isTrue()
-          .and(absenceRequest.officeHeadApproved.isNull()
-              .and(absenceRequest.flowStarted.isTrue()
-                  .and(absenceRequest.flowEnded.isFalse())))));
-    } else {
-      condition.and(absenceRequest.officeHeadApprovalRequired.isTrue()
-          .and(absenceRequest.officeHeadApproved.isNull()
-              .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse()))));
-    }      
+    condition.and(absenceRequest.person.office.eq(signer.office))
+        .andAnyOf(absenceRequest.managerApprovalRequired.isFalse(), 
+        absenceRequest.administrativeApprovalRequired.isFalse(),
+        absenceRequest.managerApprovalRequired.isTrue(), 
+        absenceRequest.managerApproved.isNotNull()); 
+  
+    return condition;
 
 
   }
@@ -306,18 +264,12 @@ public class AbsenceRequestDao extends DaoBase {
 
   }
 
-  private void managerQuery(BooleanBuilder condition) {
-
+  private BooleanBuilder managerQuery(BooleanBuilder condition, Person signer) {
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
-    if (condition.hasValue()) {
-      condition.or(absenceRequest.managerApprovalRequired.isTrue()
-          .and(absenceRequest.managerApproved.isNull()
-              .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse()))));
-    } else {
-      condition.and(absenceRequest.managerApprovalRequired.isTrue()
-          .and(absenceRequest.managerApproved.isNull()
-              .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse()))));
-    }
+    condition.and(absenceRequest.managerApprovalRequired.isTrue())
+    .and(absenceRequest.managerApproved.isNull()) 
+      .and(absenceRequest.person.office.eq(signer.office)); 
+    return condition;
 
   }
 

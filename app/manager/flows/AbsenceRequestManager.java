@@ -7,6 +7,7 @@ import controllers.Security;
 
 import dao.AbsenceDao;
 import dao.AbsenceRequestDao;
+import dao.GroupDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
 import dao.absences.AbsenceComponentDao;
@@ -65,6 +66,7 @@ public class AbsenceRequestManager {
   private PersonDayManager personDayManager;
   private ConsistencyManager consistencyManager;
   private AbsenceRequestDao absenceRequestDao;
+  private GroupDao groupDao;
 
   @Data
   @RequiredArgsConstructor
@@ -91,7 +93,7 @@ public class AbsenceRequestManager {
       UsersRolesOfficesDao uroDao, RoleDao roleDao, NotificationManager notificationManager,
       AbsenceService absenceService, AbsenceManager absenceManager, 
       AbsenceComponentDao absenceDao, PersonDayManager personDayManager, 
-      ConsistencyManager consistencyManager, AbsenceRequestDao absenceRequestDao) {
+      ConsistencyManager consistencyManager, AbsenceRequestDao absenceRequestDao, GroupDao groupDao) {
     this.configurationManager = configurationManager;
     this.uroDao = uroDao;
     this.roleDao = roleDao;
@@ -102,6 +104,7 @@ public class AbsenceRequestManager {
     this.personDayManager = personDayManager;
     this.consistencyManager = consistencyManager;
     this.absenceRequestDao = absenceRequestDao;
+    this.groupDao = groupDao;
   }
 
   private static final String FERIE_CNR = "FERIE_CNR";
@@ -130,6 +133,17 @@ public class AbsenceRequestManager {
               + "L'ufficio %s non ha impostato nessun amministratore del personale. "
               + "Contattare l'ufficio del personale.",
               person.office.getName())); 
+    }
+    
+    if (config.isManagerApprovalRequired() 
+         
+        && groupDao.myGroups(person).isEmpty()) {
+      problems.add(
+          String.format("Approvazione del responsabile di gruppo richiesta. "
+              + "La persona %s non ha impostato nessun responsabile di gruppo "
+              + "e non appartiene ad alcun gruppo. "
+              + "Contattare l'ufficio del personale.",
+              person.getFullname())); 
     }
 
     if (config.isOfficeHeadApprovalRequired() 
@@ -394,7 +408,7 @@ public class AbsenceRequestManager {
         break;
 
       case COMPLETE:
-        completeFlow(absenceRequest);
+        absenceRequest.managerApproved = LocalDate.now();
         break;
 
       case DELETE:
@@ -402,7 +416,6 @@ public class AbsenceRequestManager {
         break;
       case EPAS_REFUSAL:
         resetFlow(absenceRequest);
-        //TODO: bisogna notificare alla persona che ha fatto la richiesta dell'assenza
         notificationManager.notificationAbsenceRequestRefused(absenceRequest, person);
         break;
 
@@ -422,9 +435,6 @@ public class AbsenceRequestManager {
     checkAndCompleteFlow(absenceRequest);
     return Optional.absent();
   }
-
-
-  
 
 
   /**
@@ -596,10 +606,25 @@ public class AbsenceRequestManager {
         absenceRequest, currentPerson, 
         AbsenceRequestEventType.ADMINISTRATIVE_REFUSAL, Optional.fromNullable(reason));
     log.info("{} disapprovata dall'amministratore del personale {}.",
-        absenceRequest, currentPerson.getFullname());    
-
+        absenceRequest, currentPerson.getFullname());
   }
 
+  /**
+   * Approvazione della richiesta d'assenza da parte del manager per se stesso in 
+   *    caso di approvazione senza passare dal responsabile di sede.
+   * @param id l'id della richiesta d'assenza
+   * @param user l'utente che sta provando l'approvazione della richiesta
+   */
+  public void managerSelfApproval(long id, User user) {
+    AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
+    val currentPerson = Security.getUser().get().person;
+    executeEvent(
+        absenceRequest, currentPerson, 
+        AbsenceRequestEventType.COMPLETE, Optional.absent());
+    log.info("{} auto approvata dal responsabile del gruppo {}.",
+        absenceRequest, currentPerson.getFullname());
+  }
+  
   /**
    * Metodo che ritorna il gruppo di assenze per inoltrare la richiesta.
    * @param absenceRequest la richiesta d'assenza
