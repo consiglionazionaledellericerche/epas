@@ -79,10 +79,10 @@
           #{include './_employeeMenu.html' /}
         #{/if}
 
-        *{ Ruolo Dipendente }*
-        #{if currentUser.hasRoles(models.Role.EMPLOYEE) }
+        *{ Abilitazione richiesta dei flussi in configurazione }*
+        #{secure.check 'AbsenceRequests.show'}
           #{include './_workflowsMenu.html' /}
-        #{/if}
+        #{/secure.check}
 
         *{Ruoli di Sistema, Amministratore del personale, Amministratore del personale in sola lettura}*
         #{if currentUser.roles.contains(models.enumerate.AccountRole.ADMIN) 
@@ -111,6 +111,7 @@
 		  #{include './groupMenu.html' /}	
 		#{/if}
 		
+			
         *{ Ruoli di sistema e amministratori delle sedi }*
         #{if currentUser.roles.contains(models.enumerate.AccountRole.ADMIN) 
         	|| currentUser.roles.contains(models.enumerate.AccountRole.DEVELOPER) 

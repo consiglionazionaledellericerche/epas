@@ -465,6 +465,15 @@ public class NotificationManager {
     person.office.usersRolesOffices.stream()
         .filter(uro -> uro.role.equals(roleDestination))
         .map(uro -> uro.user).forEach(user -> {
+          Optional<Group> group = groupDao.checkManagerPerson(user.person, person);
+          if (!group.isPresent()) {
+            return;
+          }
+          if (!group.get().sendFlowsEmail) {
+            log.info("Non verrà inviata la mail al responsabile del gruppo {} poichè l'invio è stato disattivato.", 
+                user.person.fullName());
+            return;
+          }          
           try {
             simpleEmail.addTo(user.person.email);
           } catch (EmailException e) {
