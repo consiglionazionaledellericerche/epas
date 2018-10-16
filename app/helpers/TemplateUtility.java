@@ -163,27 +163,12 @@ public class TemplateUtility {
   public final int compensatoryRestRequests() {
     User user = Security.getUser().get();
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    
+    List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent());
     List<AbsenceRequest> results = absenceRequestDao
-        .findRequestsToApprove(roleList, 
+        .toApproveResults(roleList, 
             LocalDateTime.now().minusMonths(1), 
-            Optional.absent(), AbsenceRequestType.COMPENSATORY_REST);
-    if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
-      results = results.stream().filter(ab -> 
-      (ab.managerApprovalRequired && ab.isManagerApproved()) 
-      && ab.person.office.equals(user.person.office)
-          || (ab.administrativeApprovalRequired && ab.isAdministrativeApproved())
-          || (!ab.managerApprovalRequired && !ab.administrativeApprovalRequired))
-          .collect(Collectors.toList());
-    }
-    if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
-      List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent());
-      results = results.stream().filter(ab -> (ab.managerApprovalRequired 
-          && !ab.isManagerApproved() && ab.person.office.equals(user.person.office) 
-          && groups.stream().anyMatch(g -> g.manager.equals(user.person) 
-              && g.people.stream().anyMatch(p -> p.equals(ab.person)))))
-          .collect(Collectors.toList());
-    }
+            Optional.absent(), AbsenceRequestType.COMPENSATORY_REST, groups, user.person);
+
     return results.size();
   }
   
@@ -195,26 +180,12 @@ public class TemplateUtility {
   public final int vacationRequests() {
     User user = Security.getUser().get();
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent());
     List<AbsenceRequest> results = absenceRequestDao
-        .findRequestsToApprove(roleList, 
+        .toApproveResults(roleList, 
             LocalDateTime.now().minusMonths(1), 
-            Optional.absent(), AbsenceRequestType.VACATION_REQUEST);
-    if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
-      results = results.stream().filter(ab -> 
-      (ab.managerApprovalRequired && ab.isManagerApproved()) 
-      && ab.person.office.equals(user.person.office)
-          || (ab.administrativeApprovalRequired && ab.isAdministrativeApproved())
-          || (!ab.managerApprovalRequired && !ab.administrativeApprovalRequired))
-          .collect(Collectors.toList());
-    }
-    if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
-      List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent());
-      results = results.stream().filter(ab -> (ab.managerApprovalRequired 
-          && !ab.isManagerApproved() && ab.person.office.equals(user.person.office) 
-          && groups.stream().anyMatch(g -> g.manager.equals(user.person) 
-              && g.people.stream().anyMatch(p -> p.equals(ab.person)))))
-          .collect(Collectors.toList());
-    }
+            Optional.absent(), AbsenceRequestType.VACATION_REQUEST, groups, user.person);
+
     return results.size();
   }
 

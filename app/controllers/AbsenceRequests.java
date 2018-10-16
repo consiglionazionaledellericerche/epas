@@ -175,27 +175,18 @@ public class AbsenceRequests extends Controller {
         type, fromDate);   
     List<Group> groups = groupDao.groupsByOffice(person.office, Optional.absent());
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.user);
-    List<AbsenceRequest> myResults = Lists.newArrayList();
-    List<AbsenceRequest> results = 
-        absenceRequestDao.allResults(roleList, fromDate, Optional.absent(), type, groups, person);
+    List<AbsenceRequest> results = absenceRequestDao
+        .allResults(roleList, fromDate, Optional.absent(), type, groups, person);
+    List<AbsenceRequest> myResults = 
+        absenceRequestDao.toApproveResults(roleList, fromDate, Optional.absent(), 
+            type, groups, person);
     List<AbsenceRequest> approvedResults = 
         absenceRequestDao
         .totallyApproved(roleList, fromDate, Optional.absent(), type, groups, person);
     val config = absenceRequestManager.getConfiguration(type, person);  
     val onlyOwn = false;
-    if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
-      myResults = results.stream().filter(ar -> !ar.flowEnded 
-          && ar.managerApprovalRequired && ar.managerApproved == null)
-          .collect(Collectors.toList());
-    } 
-    if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
-      results = results.stream().filter(ar -> ar.flowEnded == false).collect(Collectors.toList());
-      myResults = results.stream().filter(ar -> !ar.flowEnded 
-          && ar.officeHeadApprovalRequired && ar.officeHeadApproved == null)
-          .collect(Collectors.toList());
-    }
     
-
+    
     render(config, results, type, onlyOwn, approvedResults, myResults);
   }
 
@@ -348,20 +339,20 @@ public class AbsenceRequests extends Controller {
       absenceRequestManager.executeEvent(
           absenceRequest, absenceRequest.person, 
           AbsenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
-      //invio la notifica al primo che deve validare la mia richiesta 
-      notificationManager
-      .notificationAbsenceRequestPolicy(absenceRequest.person.user, absenceRequest, true);
-      
-      notificationManager
-      .sendEmailAbsenceRequestPolicy(absenceRequest.person.user, absenceRequest, true);
-    } 
-
-    if (absenceRequest.person.user.hasRoles(Role.SEAT_SUPERVISOR) 
-        || (absenceRequest.person.user.hasRoles(Role.GROUP_MANAGER) 
-            && !absenceRequest.officeHeadApprovalForManagerRequired)) {
-      approval(absenceRequest.id);
-    }
-    
+      if (absenceRequest.person.user.hasRoles(Role.SEAT_SUPERVISOR) 
+          || (absenceRequest.person.user.hasRoles(Role.GROUP_MANAGER) 
+              && !absenceRequest.officeHeadApprovalForManagerRequired)) {
+        approval(absenceRequest.id);
+      } else {
+        //invio la notifica al primo che deve validare la mia richiesta 
+        notificationManager
+        .notificationAbsenceRequestPolicy(absenceRequest.person.user, absenceRequest, true);
+        // invio anche la mail
+        notificationManager
+        .sendEmailAbsenceRequestPolicy(absenceRequest.person.user, absenceRequest, true);
+      }
+            
+    }    
     flash.success("Operazione effettuata correttamente");
 
     AbsenceRequests.list(absenceRequest.type);
@@ -393,6 +384,11 @@ public class AbsenceRequests extends Controller {
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     User user = Security.getUser().get(); 
     //verifico se posso inserire l'assenza
+    if (!absenceRequest.officeHeadApprovalForManagerRequired && user.hasRoles(Role.GROUP_MANAGER)) {
+      absenceRequestManager.managerSelfApproval(id, user);
+      flash.success("Operazione conclusa correttamente");
+      AbsenceRequests.listToApprove(absenceRequest.type);
+    }
     if (absenceRequest.managerApprovalRequired && absenceRequest.managerApproved == null
         && user.hasRoles(Role.GROUP_MANAGER)) {
       //caso di approvazione da parte del responsabile di gruppo.
