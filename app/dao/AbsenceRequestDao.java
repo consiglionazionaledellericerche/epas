@@ -137,6 +137,8 @@ public class AbsenceRequestDao extends DaoBase {
           .join(absenceRequest.person, person)
           .join(person.groups, group)
           .where(group.manager.eq(signer).and(conditions));
+    } else {
+      return Lists.newArrayList();
     }
     return query.list(absenceRequest);
   }

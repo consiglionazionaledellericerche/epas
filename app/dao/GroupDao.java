@@ -65,4 +65,17 @@ public class GroupDao extends DaoBase {
     final JPQLQuery query = getQueryFactory().from(group).where(group.people.contains(person));
     return query.list(group);
   }
+  
+  /**
+   * Metodo che ritorna il gruppo, se esiste, con manager manager e come appartenente person.
+   * @param manager il manager del gruppo 
+   * @param person la persona appartenente al gruppo
+   * @return il gruppo, se esiste, che ha come manager manager e come appartenente person.
+   */
+  public Optional<Group> checkManagerPerson(Person manager, Person person) {
+    final QGroup group = QGroup.group;
+    final JPQLQuery query = getQueryFactory().from(group)
+        .where(group.manager.eq(manager).and(group.people.contains(person)));
+    return Optional.fromNullable(query.singleResult(group));
+  }
 }

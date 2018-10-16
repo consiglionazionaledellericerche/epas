@@ -162,6 +162,9 @@ public class TemplateUtility {
    */
   public final int compensatoryRestRequests() {
     User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent());
     List<AbsenceRequest> results = absenceRequestDao
@@ -179,6 +182,9 @@ public class TemplateUtility {
    */
   public final int vacationRequests() {
     User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent());
     List<AbsenceRequest> results = absenceRequestDao

@@ -2262,3 +2262,17 @@ when
 then
  $c.grant();
 end
+
+/*
+ * Permesso per l'abilitazione alla visualizzazione dei flussi delle assenze
+ */
+rule isFlowsVisible
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person() from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_VACATION_REQUEST, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action == "AbsenceRequests.show", granted == false, target == null)
+then
+  $c.grant();
+end
