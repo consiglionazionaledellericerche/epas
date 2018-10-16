@@ -7,7 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
+import javax.validation.constraints.NotNull;
 import models.base.BaseModel;
 
 import org.joda.time.LocalDate;
@@ -21,15 +21,16 @@ import play.data.validation.Required;
  * @author cristian
  */
 //@Audited
-@Table(name = "person_months_recap")
+@Table(name = "person_month_recap")
 @Entity
 public class PersonMonthRecap extends BaseModel {
 
   private static final long serialVersionUID = -8423858325056981355L;
 
+  @NotNull
   @Required
   @ManyToOne(optional = false)
-  @JoinColumn(name = "person_id", nullable = false, updatable = false)
+  @JoinColumn(updatable = false)
   public Person person;
 
 
@@ -37,16 +38,12 @@ public class PersonMonthRecap extends BaseModel {
 
   public Integer month;
 
-
   public LocalDate fromDate;
-
 
   public LocalDate toDate;
 
-  @Column(name = "training_hours")
   public Integer trainingHours;
 
-  @Column(name = "hours_approved")
   public Boolean hoursApproved = false;
   
   /**

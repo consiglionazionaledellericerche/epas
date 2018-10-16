@@ -32,6 +32,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
 
 @Audited
 @Entity
@@ -41,29 +42,26 @@ public class Absence extends BaseModel {
   private static final long serialVersionUID = -1963061850354314327L;
 
   // Vecchia Modellazione (da rimuovere)
-  
+
   @Getter
+  @NotNull
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
-  @JoinColumn(name = "personDay_id", nullable = false)
+  @JoinColumn(nullable = false)
   public PersonDay personDay;
 
   // Nuova Modellazione
   
   @Getter
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "absence_type_id")
   public AbsenceType absenceType;
   
-  @Column(name = "absence_file", nullable = true)
   public Blob absenceFile;
 
   @Getter
-  @Column(name = "justified_minutes", nullable = true)
   public Integer justifiedMinutes;
 
   @Getter
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "justified_type_id")
   public JustifiedType justifiedType;
   
   @NotAudited
@@ -71,24 +69,19 @@ public class Absence extends BaseModel {
   public Set<AbsenceTrouble> troubles = Sets.newHashSet();
   
   //Nuovo campo per la gestione delle missioni in caso di modifica delle date
-  @Column(name = "external_identifier")
   public Long externalIdentifier;
   
 
   //Nuovi campi per la possibilità di inserire le decurtazioni di tempo per i 91s
-  @Column(name = "expire_recover_date")
   public LocalDate expireRecoverDate;
   
-  @Column(name = "time_to_recover")
   public int timeToRecover;
   
   @Audited
   @OneToMany(mappedBy = "absence", cascade = {CascadeType.ALL})
   public Set<TimeVariation> timeVariations = Sets.newHashSet();
 
-  @Column(name = "note")
   public String note;
-
   
   @Override
   public String toString() {

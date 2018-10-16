@@ -26,7 +26,6 @@ import play.data.validation.Required;
  */
 @Entity
 @Audited
-@Table(name = "person_children")
 public class PersonChildren extends BaseModel {
 
   private static final long serialVersionUID = 2528486222814596830L;
@@ -42,6 +41,5 @@ public class PersonChildren extends BaseModel {
   public LocalDate bornDate;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "person_id")
   public Person person;
 }
