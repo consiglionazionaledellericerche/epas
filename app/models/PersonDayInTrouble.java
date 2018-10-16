@@ -7,7 +7,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
+import javax.validation.constraints.NotNull;
 import models.base.BaseModel;
 import models.enumerate.Troubles;
 
@@ -15,7 +15,6 @@ import org.hibernate.envers.Audited;
 
 @Audited
 @Entity
-@Table(name = "person_days_in_trouble")
 public class PersonDayInTrouble extends BaseModel {
 
   private static final long serialVersionUID = 4802468368796902865L;
@@ -25,8 +24,9 @@ public class PersonDayInTrouble extends BaseModel {
 
   public boolean emailSent;
 
+  @NotNull
   @ManyToOne
-  @JoinColumn(name = "personday_id", nullable = false, updatable = false)
+  @JoinColumn(updatable = false)
   public PersonDay personDay;
 
   public PersonDayInTrouble(PersonDay pd, Troubles cause) {

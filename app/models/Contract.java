@@ -41,10 +41,8 @@ import play.data.validation.Required;
 public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -4472102414284745470L;
-
-  @Column(name = "perseo_id")
+  
   public Long perseoId;
-
   /**
    * Patch per gestire i contratti con dati mancanti da dcp. E' true unicamente per segnalare tempo
    * determinato senza data fine specificata.
@@ -57,49 +55,44 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
    * anche la sourceDateMealTicket
    */
   @Getter
-  @Column(name = "source_date_residual")
   public LocalDate sourceDateResidual = null;
   
   @Getter
-  @Column(name = "source_date_vacation")
   public LocalDate sourceDateVacation = null;
 
   @Getter
-  @Column(name = "source_date_meal_ticket")
   public LocalDate sourceDateMealTicket = null;
 
-  @Column(name = "source_by_admin")
   public boolean sourceByAdmin = true;
 
-  @Getter @Min(0) @Max(32)
-  @Column(name = "source_vacation_last_year_used")
+  @Getter 
+  @Min(0) 
+  @Max(32)
   public Integer sourceVacationLastYearUsed = null;
 
-  @Getter @Min(0) @Max(32)
-  @Column(name = "source_vacation_current_year_used")
+  @Getter 
+  @Min(0) 
+  @Max(32)
   public Integer sourceVacationCurrentYearUsed = null;
 
-  @Getter @Min(0) @Max(4)
-  @Column(name = "source_permission_used")
+  @Getter 
+  @Min(0) 
+  @Max(4)
   public Integer sourcePermissionUsed = null;
 
   // Valore puramente indicativo per impedire che vengano inseriti i riposi compensativi in minuti
-  @Min(0) @Max(100)
-  @Column(name = "source_recovery_day_used")
+  @Min(0) 
+  @Max(100)
   public Integer sourceRecoveryDayUsed = null;
 
-  @Column(name = "source_remaining_minutes_last_year")
   public Integer sourceRemainingMinutesLastYear = null;
 
-  @Column(name = "source_remaining_minutes_current_year")
   public Integer sourceRemainingMinutesCurrentYear = null;
 
   @Getter
-  @Column(name = "source_remaining_meal_ticket")
   public Integer sourceRemainingMealTicket = null;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "person_id")
   public Person person;
 
   @Getter
@@ -114,7 +107,6 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   //data di termine contratto in casi di licenziamento, pensione, morte, ecc ecc...
 
   @Getter
-  @Column(name = "end_contract")
   public LocalDate endContract;
 
   @Getter

@@ -300,7 +300,7 @@ public class StampingManager {
       log.error("Impossibile recuperare l'utente che ha inviato la timbratura: {}", stamping);
       return Optional.absent();
     }
-    if (user.get().badgeReader == null) {
+    if (user.get().getBadgeReader() == null) {
       log.error("L'utente {} utilizzato per l'invio della timbratura"
           + " non ha una istanza badgeReader valida associata.", user.get().username);
       return Optional.absent();
@@ -309,7 +309,7 @@ public class StampingManager {
       return Optional.absent();
     }
     final Optional<Person> person = Optional.fromNullable(personDao
-        .getPersonByBadgeNumber(stamping.numeroBadge, user.get().badgeReader));
+        .getPersonByBadgeNumber(stamping.numeroBadge, user.get().getBadgeReader()));
 
     if (person.isPresent()) {
       stamping.person = person.get();      

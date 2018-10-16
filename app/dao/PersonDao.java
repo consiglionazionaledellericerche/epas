@@ -553,6 +553,7 @@ public final class PersonDao extends DaoBase {
    *
    * @return persone
    */
+  @Deprecated
   public List<Person> activeWithBadgeNumber(Office office) {
 
     final QPerson person = QPerson.person;

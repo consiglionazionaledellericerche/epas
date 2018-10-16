@@ -56,7 +56,6 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -2293369685203872207L;
 
-  @Column(name = "perseo_id")
   public Long perseoId;
 
   @Required
@@ -65,10 +64,8 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @Required
   public String surname;
 
-  @Column(name = "other_surnames")
   public String othersSurnames;
 
-  @Column(name = "birthday")
   public LocalDate birthday;
 
   @Email
@@ -78,7 +75,6 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   public String email;
 
   @OneToOne(optional = false, fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id")
   public User user;
 
   /**
@@ -113,7 +109,6 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   public String mobile;
 
-  @Column(name = "want_email")
   public boolean wantEmail;
 
   /**
@@ -125,7 +120,6 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   public List<Person> people = Lists.newArrayList();
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "person_in_charge")
   @Nullable
   public Person personInCharge;
 
@@ -202,12 +196,10 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   public List<PersonShift> personShifts = Lists.newArrayList();
 
   @ManyToOne
-  @JoinColumn(name = "qualification_id")
   @Required
   public Qualification qualification;
 
   @ManyToOne
-  @JoinColumn(name = "office_id")
   @Required
   public Office office;
 

@@ -2,20 +2,20 @@
 
 require:
     - play
+    - play -> secure    
     - play -> shibboleth 1.2
-    - play -> secure
-    - play-codeborne -> fastergt 1.9
-    - org.hibernate -> hibernate-envers 4.2.19.Final:
-          transitive: false
-    - org.jadira.usertype -> usertype.core 4.0.0.GA
-    - com.google.guava -> guava 22.0
-    - com.google.inject -> guice 4.2.0:
+    - play-modules -> play-fastergt 1.9.4
+    - org.hibernate -> hibernate-envers 5.2.10.Final:
+       transitive: false
+    - org.jadira.usertype -> usertype.core 6.0.1.GA
+    - com.google.guava -> guava 26.0-jre
+    - com.google.inject -> guice 4.2.1:
        exclude:
         - org.ow2.asm -> asm *
-    - com.google.inject.extensions -> guice-assistedinject 4.1.0:
+    - com.google.inject.extensions -> guice-assistedinject 4.2.1:
        exclude:
         - org.ow2.asm -> asm *
-    - org.eclipse.jdt.core.compiler -> ecj 4.4.2
+    - org.eclipse.jdt.core.compiler -> ecj 4.6.1
     - play -> pdf 0.9:
        exclude:
         - jaxen -> jaxen *
@@ -41,6 +41,7 @@ require:
         - org.mongodb.morphia -> morphia *
         - org.springframework.roo -> org.springframework.roo.annotations *
         - org.eclipse.persistence -> eclipselink *
+        - org.hibernate.javax.persistence -> hibernate-jpa-2.0-api *        
     - com.mysema.querydsl -> querydsl-apt 3.7.3:
        exclude:
         - asm -> asm *
@@ -50,15 +51,16 @@ require:
         - org.mongodb.morphia -> morphia *
         - org.springframework.roo -> org.springframework.roo.annotations *
         - org.eclipse.persistence -> eclipselink *
-    - asufana -> play-lombok 1.2.3
+        - org.hibernate.javax.persistence -> hibernate-jpa-2.0-api *
+    - play-modules -> play-lombok 1.2.6
     - org.projectlombok -> lombok 1.18.2
     - com.fatboyindustrial.gson-jodatime-serialisers -> gson-jodatime-serialisers 1.2.0
-    - com.fasterxml.jackson.core -> jackson-core 2.7.3
-    - com.fasterxml.jackson.core -> jackson-annotations 2.7.3
-    - com.fasterxml.jackson.core -> jackson-databind 2.7.3
-    - com.fasterxml.jackson.datatype -> jackson-datatype-joda 2.7.3
-    - com.fasterxml.jackson.datatype -> jackson-datatype-hibernate4 2.7.3
-    - com.fasterxml.jackson.module -> jackson-module-afterburner 2.7.3
+    - com.fasterxml.jackson.core -> jackson-core 2.9.6
+    - com.fasterxml.jackson.core -> jackson-annotations 2.9.6
+    - com.fasterxml.jackson.core -> jackson-databind 2.9.6
+    - com.fasterxml.jackson.datatype -> jackson-datatype-joda 2.9.6
+    - com.fasterxml.jackson.datatype -> jackson-datatype-hibernate4 2.9.6
+    - com.fasterxml.jackson.module -> jackson-module-afterburner 2.9.6
     - com.github.fge -> jackson-coreutils 1.8
     - org.testng -> testng 6.9.10
     - org.apache.poi -> poi 3.14
@@ -66,15 +68,17 @@ require:
     - org.apache.commons -> commons-csv 1.4
     - org.apache.commons -> commons-compress 1.13
     - io.micrometer -> micrometer-registry-prometheus 1.0.6
-
+    - org.postgresql ->  postgresql 9.4.1207:
+       force: true
+       exclude:
+        - org.osgi -> org.osgi.core
+        - org.osgi -> org.osgi.enterprise
+    - xerces -> xercesImpl 2.9.1        
+    #- org.apache.odftoolkit -> simple-odf 0.8.1-incubating
+    
 # My custom repository
 
 repositories:
-    - codeborne:
-        type: http
-        artifact: https://repo.codeborne.com/play-[module]/[module]-[revision].zip
-        contains:
-            - play-codeborne -> *
     - github:
          type:      http
          artifact:  "https://github.com/jackmoore/colorbox"
@@ -85,3 +89,14 @@ repositories:
         artifact:   "https://raw.githubusercontent.com/asufana/[module]/master/dist/[module]-[revision].zip"
         contains:
             - asufana -> play-lombok
+    - bsbo_play_modules:
+        type: http
+        artifact: https://dl.bintray.com/besmartbeopen/play-modules/[module]-[revision].zip
+        contains:
+            - play-modules -> *
+    - compatibility:
+        type: local
+        artifact: ${application.path}/[module].jar
+        contains:
+            - it.besmartbeopen -> hibernate-compatibility            
+            

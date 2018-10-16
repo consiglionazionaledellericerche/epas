@@ -74,14 +74,12 @@ public class WorkingTimeTypeDay extends BaseModel {
    * pasto.
    */
   @Getter
-  @Column(name = "ticket_afternoon_threshold")
   public Integer ticketAfternoonThreshold = 0;
 
   /**
    * La quantità di lavoro dopo la soglia pomeridiana necessaria per avere diritto al buono pasto.
    */
   @Getter
-  @Column(name = "ticket_afternoon_working_time")
   public Integer ticketAfternoonWorkingTime = 0;
 
 

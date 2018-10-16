@@ -162,8 +162,8 @@ public class BadgeReaders extends Controller {
   public static void changePassword(@Valid User user,
       @MinSize(5) @Required String newPass) {
 
-    notFoundIfNull(user.badgeReader);
-    BadgeReader badgeReader = user.badgeReader;
+    notFoundIfNull(user.getBadgeReader());
+    BadgeReader badgeReader = user.getBadgeReader();
     rules.checkIfPermitted(badgeReader.user.owner);
 
     if (Validation.hasErrors()) {
