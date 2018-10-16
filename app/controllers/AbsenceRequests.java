@@ -24,7 +24,11 @@ import lombok.val;
 
 import manager.AbsenceManager;
 import manager.NotificationManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import manager.flows.AbsenceRequestManager;
+import manager.recaps.personstamping.PersonStampingRecap;
+import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
@@ -93,6 +97,12 @@ public class AbsenceRequests extends Controller {
   
   @Inject
   static GroupDao groupDao;
+  
+  @Inject
+  static PersonStampingRecapFactory stampingsRecapFactory;
+  
+  @Inject
+  static ConfigurationManager configurationManager;
 
 
   public static void vacations() {
@@ -222,11 +232,20 @@ public class AbsenceRequests extends Controller {
       list(type);
       return;
     }
-
+    int compensatoryRestAvailable = 0;
+    boolean handleCompensatoryRestSituation = false;
     val absenceRequest = new AbsenceRequest();
     absenceRequest.type = type;
     absenceRequest.person = person;
-    
+    if (type.equals(AbsenceRequestType.COMPENSATORY_REST) && person.isTopQualification()) {
+      PersonStampingRecap psDto = 
+          stampingsRecapFactory.create(person, LocalDate.now().getYear(), 
+              LocalDate.now().getMonthOfYear(), true);
+      int maxDays = (Integer) configurationManager
+          .configValue(person.office, EpasParam.MAX_RECOVERY_DAYS_13, LocalDate.now().getYear());
+      compensatoryRestAvailable = maxDays - psDto.numberOfCompensatoryRestUntilToday;
+      handleCompensatoryRestSituation = true;
+    }
     absenceRequest.startAt = absenceRequest.endTo = LocalDateTime.now().plusDays(1);
     boolean insertable = true;
     GroupAbsenceType groupAbsenceType = absenceRequestManager.getGroupAbsenceType(absenceRequest);
@@ -239,7 +258,8 @@ public class AbsenceRequests extends Controller {
         absenceForm.groupSelected, absenceForm.from, absenceForm.to,
         absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected, 
         null, null, false, absenceManager);
-    render("@edit", absenceRequest, insertable, insertReport);
+    render("@edit", absenceRequest, insertable, insertReport, 
+        compensatoryRestAvailable, handleCompensatoryRestSituation);
 
   }
 

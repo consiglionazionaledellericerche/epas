@@ -17,7 +17,15 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 
 	#{f.date 'absenceRequest.startAt', required:true, value:absenceRequest.startAt?.format("dd/MM/yyyy") /}
 	#{f.date 'absenceRequest.endTo', value:absenceRequest.endTo?.format("dd/MM/yyyy") /}
-
+	#{if handleCompensatoryRestSituation}
+	<div class="container-fluid">
+	<h3>Riposi compensativi rimasti: 
+	<span #{if compensatoryRestAvailable > 10 } class="label label-info"#{/if} 
+		  #{if compensatoryRestAvailable > 5  && compensatoryRestAvailable < 10} class="label label-warning"#{/if}
+		  #{if compensatoryRestAvailable > 0  && compensatoryRestAvailable < 5} class="label label-danger"#{/if}>
+		  ${compensatoryRestAvailable}</span></h3>
+	</div>
+	#{/if}
 	#{if existing != null}
 	<div class="container-fluid"> 
 	#{include './existing.html' /}
