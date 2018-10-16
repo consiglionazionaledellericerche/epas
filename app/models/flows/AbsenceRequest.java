@@ -15,6 +15,7 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import lombok.ToString;
 import models.Person;
+import models.Role;
 import models.base.MutableModel;
 import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
@@ -183,6 +184,7 @@ public class AbsenceRequest extends MutableModel {
         && (!this.administrativeApprovalRequired 
             || this.isAdministrativeApproved())
         && (!this.officeHeadApprovalRequired || this.isOfficeHeadApproved())
-            || (!this.officeHeadApprovalForManagerRequired || this.isManagerApproved());
+            || (!this.officeHeadApprovalForManagerRequired 
+                && this.person.user.hasRoles(Role.GROUP_MANAGER) && this.isManagerApproved());
   }
 }
