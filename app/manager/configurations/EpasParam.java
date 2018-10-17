@@ -265,10 +265,10 @@ public enum EpasParam {
   // FLOWS PARAMS
 
   /**
-   * Attivazione o meno della richieste di ferie.
+   * Attivazione o meno della richieste di assenza generico.
    */
-  ENABLE_VACATION_REQUEST(
-      "enable_vacation_request",
+  ENABLE_FLOWS(
+      "enable_flows",
       EpasParamCategory.FLOWS,
       EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
@@ -339,19 +339,7 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Office.class),
 
-
-  /**
-   * Attivazione o meno della richieste di ferie.
-   */
-  ENABLE_COMPENSATORY_REST_REQUEST(
-      "enable_compensatory_rest_request",
-      EpasParamCategory.FLOWS,
-      EpasParamTimeType.GENERAL,
-      EpasParamValueType.BOOLEAN,
-      EpasParamValueType.formatValue(false),
-      Lists.<RecomputationType>newArrayList(),
-      Office.class),
-  
+ 
   /**
    * Per i livelli I-III è necessaria l'approvazione dei riposi compensativi da parte del 
    * responsabile di sede.
