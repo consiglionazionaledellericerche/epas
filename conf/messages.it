@@ -893,8 +893,7 @@ DAYS=Ricalcoli giornalieri.
 RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
 RESIDUAL_MEALTICKETS=Ricalcoli mensili sul residuo buoni pasto.
 
-ENABLE_VACATION_REQUEST =Flusso di richiesta ferie attivato
-ENABLE_COMPENSATORY_REST_REQUEST =Flusso di richiesta riposo compensativo attivato
+ENABLE_FLOWS =Flusso di richiesta assenza attivato
 
 VACATION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione ferie per i livelli I-III da parte del Responsabile Sede  
 VACATION_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione ferie per i livelli IV-VIII da parte del Responsabile Sede 

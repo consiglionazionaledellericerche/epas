@@ -80,7 +80,7 @@
         #{/if}
 
         *{ Abilitazione richiesta dei flussi in configurazione }*
-        #{secure.check 'AbsenceRequests.show'}
+        #{secure.check 'AbsenceRequests.enabled'}
           #{include './_workflowsMenu.html' /}
         #{/secure.check}
 
