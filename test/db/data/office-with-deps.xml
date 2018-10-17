@@ -29,8 +29,8 @@
 
   <institutes id="1" created_at="2015-12-10 15:31:53.718061" code="IIT" name="Istituto IIT" cds="044"/>
 
-  <office id="1" name="IIT - Pisa" address="Via Moruzzi 1, Pisa" code_id="223400" code="044000" institute_id="1" headquarter="false" begin_date="2012-07-30"/>
-  <office id="2" name="IIT - UOS Cosenza" address="Via P. Bucci 1, Cosenza" code_id="223410" code="044001" joining_date="2013-03-14" institute_id="1" headquarter="false" begin_date="2014-03-06"/>
+  <office id="1" name="IIT - Pisa" address="Via Moruzzi 1, Pisa" code_id="223400" code="044000" institute_id="1" head_quarter="false" begin_date="2012-07-30"/>
+  <office id="2" name="IIT - UOS Cosenza" address="Via P. Bucci 1, Cosenza" code_id="223410" code="044001" joining_date="2013-03-14" institute_id="1" head_quarter="false" begin_date="2014-03-06"/>
 
   <conf_year id="1" field="month_expiry_vacation_past_year" field_value="8" year="2014" office_id="1"/>
   <conf_year id="2" field="day_expiry_vacation_past_year" field_value="31" year="2014" office_id="1"/>
@@ -95,47 +95,47 @@
   <conf_year id="61" field="max_recovery_days_13" field_value="22" year="2012" office_id="1"/>
   <conf_year id="62" field="max_recovery_days_49" field_value="0" year="2012" office_id="1"/>
 
-  <total_overtime id="1" date="2003-12-03" numberofhours="1530" year="2003" office_id="1"/>
-  <total_overtime id="2" date="2004-04-19" numberofhours="1575" year="2004" office_id="1"/>
-  <total_overtime id="3" date="2006-06-05" numberofhours="925" year="2006" office_id="1"/>
-  <total_overtime id="4" date="2006-07-17" numberofhours="1021" year="2006" office_id="1"/>
-  <total_overtime id="5" date="2006-07-17" numberofhours="-281" year="2006" office_id="1"/>
-  <total_overtime id="6" date="2007-02-01" numberofhours="950" year="2007" office_id="1"/>
-  <total_overtime id="7" date="2007-07-05" numberofhours="1710" year="2007" office_id="1"/>
-  <total_overtime id="8" date="2007-07-05" numberofhours="-100" year="2007" office_id="1"/>
-  <total_overtime id="9" date="2007-07-05" numberofhours="-100" year="2007" office_id="1"/>
-  <total_overtime id="10" date="2007-07-05" numberofhours="100" year="2007" office_id="1"/>
-  <total_overtime id="11" date="2007-07-05" numberofhours="-100" year="2007" office_id="1"/>
-  <total_overtime id="12" date="2007-07-05" numberofhours="-800" year="2007" office_id="1"/>
-  <total_overtime id="13" date="2007-07-05" numberofhours="50" year="2007" office_id="1"/>
-  <total_overtime id="14" date="2008-01-29" numberofhours="90" year="2008" office_id="1"/>
-  <total_overtime id="15" date="2008-01-30" numberofhours="1025" year="2008" office_id="1"/>
-  <total_overtime id="16" date="2008-01-30" numberofhours="-925" year="2008" office_id="1"/>
-  <total_overtime id="17" date="2008-01-30" numberofhours="835" year="2008" office_id="1"/>
-  <total_overtime id="18" date="2008-02-05" numberofhours="50" year="2008" office_id="1"/>
-  <total_overtime id="19" date="2008-06-05" numberofhours="860" year="2008" office_id="1"/>
-  <total_overtime id="20" date="2009-01-29" numberofhours="925" year="2009" office_id="1"/>
-  <total_overtime id="21" date="2009-02-06" numberofhours="175" year="2009" office_id="1"/>
-  <total_overtime id="22" date="2009-09-07" numberofhours="880" year="2009" office_id="1"/>
-  <total_overtime id="23" date="2010-01-21" numberofhours="1200" year="2010" office_id="1"/>
-  <total_overtime id="24" date="2010-08-11" numberofhours="1095" year="2010" office_id="1"/>
-  <total_overtime id="25" date="2011-02-02" numberofhours="1200" year="2011" office_id="1"/>
-  <total_overtime id="26" date="2011-07-05" numberofhours="1200" year="2011" office_id="1"/>
-  <total_overtime id="27" date="2011-07-06" numberofhours="-285" year="2011" office_id="1"/>
-  <total_overtime id="28" date="2012-02-06" numberofhours="1550" year="2012" office_id="1"/>
-  <total_overtime id="29" date="2012-07-05" numberofhours="1195" year="2012" office_id="1"/>
-  <total_overtime id="30" date="2013-02-06" numberofhours="1375" year="2013" office_id="1"/>
-  <total_overtime id="31" date="2013-07-08" numberofhours="1100" year="2013" office_id="1"/>
-  <total_overtime id="32" date="2014-01-28" numberofhours="13" year="2014" office_id="1"/>
-  <total_overtime id="33" date="2014-01-28" numberofhours="1362" year="2014" office_id="1"/>
-  <total_overtime id="34" date="2014-07-15" numberofhours="100" year="2014" office_id="2"/>
-  <total_overtime id="35" date="2014-07-17" numberofhours="1140" year="2014" office_id="1"/>
-  <total_overtime id="36" date="2014-11-28" numberofhours="-85" year="2014" office_id="1"/>
-  <total_overtime id="37" date="2015-02-11" numberofhours="1325" year="2015" office_id="1"/>
-  <total_overtime id="38" date="2015-07-31" numberofhours="1060" year="2015" office_id="1"/>
-  <total_overtime id="39" date="2015-12-02" numberofhours="90" year="2015" office_id="2"/>
-  <total_overtime id="40" date="2016-03-02" numberofhours="90" year="2016" office_id="2"/>
-  <total_overtime id="41" date="2016-03-14" numberofhours="1300" year="2016" office_id="1"/>
+  <total_overtime id="1" date="2003-12-03" number_of_hours="1530" year="2003" office_id="1"/>
+  <total_overtime id="2" date="2004-04-19" number_of_hours="1575" year="2004" office_id="1"/>
+  <total_overtime id="3" date="2006-06-05" number_of_hours="925" year="2006" office_id="1"/>
+  <total_overtime id="4" date="2006-07-17" number_of_hours="1021" year="2006" office_id="1"/>
+  <total_overtime id="5" date="2006-07-17" number_of_hours="-281" year="2006" office_id="1"/>
+  <total_overtime id="6" date="2007-02-01" number_of_hours="950" year="2007" office_id="1"/>
+  <total_overtime id="7" date="2007-07-05" number_of_hours="1710" year="2007" office_id="1"/>
+  <total_overtime id="8" date="2007-07-05" number_of_hours="-100" year="2007" office_id="1"/>
+  <total_overtime id="9" date="2007-07-05" number_of_hours="-100" year="2007" office_id="1"/>
+  <total_overtime id="10" date="2007-07-05" number_of_hours="100" year="2007" office_id="1"/>
+  <total_overtime id="11" date="2007-07-05" number_of_hours="-100" year="2007" office_id="1"/>
+  <total_overtime id="12" date="2007-07-05" number_of_hours="-800" year="2007" office_id="1"/>
+  <total_overtime id="13" date="2007-07-05" number_of_hours="50" year="2007" office_id="1"/>
+  <total_overtime id="14" date="2008-01-29" number_of_hours="90" year="2008" office_id="1"/>
+  <total_overtime id="15" date="2008-01-30" number_of_hours="1025" year="2008" office_id="1"/>
+  <total_overtime id="16" date="2008-01-30" number_of_hours="-925" year="2008" office_id="1"/>
+  <total_overtime id="17" date="2008-01-30" number_of_hours="835" year="2008" office_id="1"/>
+  <total_overtime id="18" date="2008-02-05" number_of_hours="50" year="2008" office_id="1"/>
+  <total_overtime id="19" date="2008-06-05" number_of_hours="860" year="2008" office_id="1"/>
+  <total_overtime id="20" date="2009-01-29" number_of_hours="925" year="2009" office_id="1"/>
+  <total_overtime id="21" date="2009-02-06" number_of_hours="175" year="2009" office_id="1"/>
+  <total_overtime id="22" date="2009-09-07" number_of_hours="880" year="2009" office_id="1"/>
+  <total_overtime id="23" date="2010-01-21" number_of_hours="1200" year="2010" office_id="1"/>
+  <total_overtime id="24" date="2010-08-11" number_of_hours="1095" year="2010" office_id="1"/>
+  <total_overtime id="25" date="2011-02-02" number_of_hours="1200" year="2011" office_id="1"/>
+  <total_overtime id="26" date="2011-07-05" number_of_hours="1200" year="2011" office_id="1"/>
+  <total_overtime id="27" date="2011-07-06" number_of_hours="-285" year="2011" office_id="1"/>
+  <total_overtime id="28" date="2012-02-06" number_of_hours="1550" year="2012" office_id="1"/>
+  <total_overtime id="29" date="2012-07-05" number_of_hours="1195" year="2012" office_id="1"/>
+  <total_overtime id="30" date="2013-02-06" number_of_hours="1375" year="2013" office_id="1"/>
+  <total_overtime id="31" date="2013-07-08" number_of_hours="1100" year="2013" office_id="1"/>
+  <total_overtime id="32" date="2014-01-28" number_of_hours="13" year="2014" office_id="1"/>
+  <total_overtime id="33" date="2014-01-28" number_of_hours="1362" year="2014" office_id="1"/>
+  <total_overtime id="34" date="2014-07-15" number_of_hours="100" year="2014" office_id="2"/>
+  <total_overtime id="35" date="2014-07-17" number_of_hours="1140" year="2014" office_id="1"/>
+  <total_overtime id="36" date="2014-11-28" number_of_hours="-85" year="2014" office_id="1"/>
+  <total_overtime id="37" date="2015-02-11" number_of_hours="1325" year="2015" office_id="1"/>
+  <total_overtime id="38" date="2015-07-31" number_of_hours="1060" year="2015" office_id="1"/>
+  <total_overtime id="39" date="2015-12-02" number_of_hours="90" year="2015" office_id="2"/>
+  <total_overtime id="40" date="2016-03-02" number_of_hours="90" year="2016" office_id="2"/>
+  <total_overtime id="41" date="2016-03-14" number_of_hours="1300" year="2016" office_id="1"/>
 
   <badge_systems id="1" name="Badge IIT Pisa" enabled="true" office_id="1"/>
   <badge_systems id="2" name="Badge IIT Cosenza" enabled="true" office_id="2"/>
@@ -221,8 +221,8 @@
   <badge_readers id="1" code="pisaBadge" enabled="true" user_id="10004"/>
   <badge_readers id="2" code="cosenzaBadge" enabled="true" user_id="10005"/>
 
-  <badge_readers_badge_systems badgereaders_id="1" badgesystems_id="1"/>
-  <badge_readers_badge_systems badgereaders_id="2" badgesystems_id="2"/>
+  <badge_readers_badge_systems badge_readers_id="1" badge_systems_id="1"/>
+  <badge_readers_badge_systems badge_readers_id="2" badge_systems_id="2"/>
 
 
 </dataset>
