@@ -10,7 +10,8 @@ import dao.PersonDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
 import dao.absences.AbsenceComponentDao;
-
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
 import helpers.Web;
 import helpers.jpa.ModelQuery.SimpleResults;
 
@@ -32,7 +33,8 @@ import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
-
+import manager.services.absences.model.VacationSituation;
+import models.Contract;
 import models.Person;
 import models.Role;
 import models.User;
@@ -40,6 +42,7 @@ import models.UsersRolesOffices;
 import models.absences.AbsenceType;
 import models.absences.CategoryTab;
 import models.absences.GroupAbsenceType;
+import models.absences.definitions.DefaultGroup;
 import models.absences.definitions.DefaultTab;
 import models.flows.AbsenceRequest;
 import models.flows.Group;
@@ -103,6 +106,12 @@ public class AbsenceRequests extends Controller {
   
   @Inject
   static ConfigurationManager configurationManager;
+  
+  @Inject
+  static AbsenceComponentDao absenceComponentDao;
+  
+  @Inject
+  static IWrapperFactory wrapperFactory;
 
 
   public static void vacations() {
@@ -223,7 +232,11 @@ public class AbsenceRequests extends Controller {
       list(type);
       return;
     }
+    //extra info per richiesta riposo compensativo o ferie
     int compensatoryRestAvailable = 0;
+    List<VacationSituation> vacationSituations = Lists.newArrayList();
+    boolean showVacationPeriods = false;
+    
     boolean handleCompensatoryRestSituation = false;
     val absenceRequest = new AbsenceRequest();
     absenceRequest.type = type;
@@ -236,7 +249,20 @@ public class AbsenceRequests extends Controller {
           .configValue(person.office, EpasParam.MAX_RECOVERY_DAYS_13, LocalDate.now().getYear());
       compensatoryRestAvailable = maxDays - psDto.numberOfCompensatoryRestUntilToday;
       handleCompensatoryRestSituation = true;
+    } else {
+      GroupAbsenceType vacationGroup = absenceComponentDao
+          .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
+      IWrapperPerson wperson = wrapperFactory.create(person);
+      
+
+      for (Contract contract : wperson.orderedYearContracts(LocalDate.now().getYear())) {        
+        VacationSituation vacationSituation = 
+            absenceService.buildVacationSituation(contract, LocalDate.now().getYear(), 
+            vacationGroup, Optional.absent(), false);
+        vacationSituations.add(vacationSituation);
+      }
     }
+    
     absenceRequest.startAt = absenceRequest.endTo = LocalDateTime.now().plusDays(1);
     boolean insertable = true;
     GroupAbsenceType groupAbsenceType = absenceRequestManager.getGroupAbsenceType(absenceRequest);
@@ -249,8 +275,8 @@ public class AbsenceRequests extends Controller {
         absenceForm.groupSelected, absenceForm.from, absenceForm.to,
         absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected, 
         null, null, false, absenceManager);
-    render("@edit", absenceRequest, insertable, insertReport, 
-        compensatoryRestAvailable, handleCompensatoryRestSituation);
+    render("@edit", absenceRequest, insertable, insertReport, vacationSituations, 
+        compensatoryRestAvailable, handleCompensatoryRestSituation, showVacationPeriods);
 
   }
 
