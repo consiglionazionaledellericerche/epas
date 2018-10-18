@@ -51,7 +51,7 @@ import manager.SecureManager;
 import manager.UserManager;
 import manager.attestati.dto.internal.clean.ContrattoAttestati;
 import manager.attestati.service.CertificationService;
-
+import manager.configurations.ConfigurationManager;
 import models.CompetenceCode;
 import models.Contract;
 import models.ContractMonthRecap;
@@ -114,7 +114,8 @@ public class Administration extends Controller {
   static CertificationService certService;
   @Inject
   static ContractManager contractManager;
-
+  @Inject
+  static ConfigurationManager configurationManager;
 
   /**
    * metodo che renderizza la pagina di utilities.
@@ -760,4 +761,11 @@ public class Administration extends Controller {
     renderBinary(inputStream, "cmr-situation-506.csv");
   }
 
+  /**
+   * @see manager.configurations.ConfigurationManager::updateAllOfficeConfigurations
+   */
+  public static void updateAllOfficeConfigurations() {
+    configurationManager.updateAllOfficesConfigurations();
+    renderText("Aggiornati i parametri di configuratione di tutti gli uffici.");
+  }
 }
