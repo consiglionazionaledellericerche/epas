@@ -125,6 +125,9 @@ public class AbsenceRequestManager {
     val problems = Lists.<String>newArrayList();
     val config = getConfiguration(requestType, person);
 
+    if (person.user.hasRoles(Role.GROUP_MANAGER, Role.SEAT_SUPERVISOR)) {
+      return Lists.newArrayList();
+    }
     if (config.isAdministrativeApprovalRequired() 
         && uroDao.getUsersWithRoleOnOffice(
             roleDao.getRoleByName(Role.PERSONNEL_ADMIN), person.office).isEmpty()) {

@@ -1,12 +1,19 @@
+<div class="container-fluid">
+#{if !vacationSituations.isEmpty()}
+ 	#{accordionItem 'infoFerie', parent:'info', title:'Info situazione ferie', open:false, color:'info' }
+ 	#{include './../Vacations/vacationsElements/info.html' /}
+ 	#{/accordionItem}
+ #{/if}
+</div>
+<br>
+<div class="container-fluid">
 #{alert color: 'info' }
 <p>Compila il form sottostante per inviare una richiesta di assenza.
-Specifica:<br>
-  - la data di inizio<br>
-  - la data di fine <br>
-  
+Specifica la <strong>data di inizio</strong> e la <strong>data di fine</strong><br>.  
 Ogni volta che cambierai il campo relativo alle date, il sistema <strong>automaticamente</strong> calcolerà l'esito della richiesta,
 riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 #{/alert}
+</div>
 #{form action:@edit(), method:'POST', autocomplete:false,
 	class:'form form-horizontal auto-submit', 'data-spinner':'#modalSpinner' }
                         

@@ -88,8 +88,8 @@ public class Vacations extends Controller {
           vacationGroup, Optional.absent(), false);
       vacationSituations.add(vacationSituation);
     }
-
-    render(vacationSituations, year);
+    boolean showVacationPeriods = true;
+    render(vacationSituations, year, showVacationPeriods);
   }
   
   /**
