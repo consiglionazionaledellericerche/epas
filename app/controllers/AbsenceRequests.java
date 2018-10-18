@@ -384,7 +384,8 @@ public class AbsenceRequests extends Controller {
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     User user = Security.getUser().get(); 
     //verifico se posso inserire l'assenza
-    if (!absenceRequest.officeHeadApprovalForManagerRequired && user.hasRoles(Role.GROUP_MANAGER)) {
+    if (!absenceRequest.officeHeadApprovalForManagerRequired && user.hasRoles(Role.GROUP_MANAGER) 
+        && absenceRequest.person.equals(user.person)) {
       absenceRequestManager.managerSelfApproval(id, user);
       flash.success("Operazione conclusa correttamente");
       AbsenceRequests.listToApprove(absenceRequest.type);
