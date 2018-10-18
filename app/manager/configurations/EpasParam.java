@@ -241,11 +241,12 @@ public enum EpasParam {
           RecomputationType.RESIDUAL_MEALTICKETS),
       Office.class),
   
-  HOUR_START_WORK_LAST_MISSION_DAY("hour_start_work_last_mission_day",
+  WORK_INTERVAL_MISSION_DAY("work_interval_mission_day",
       EpasParamCategory.PERIODIC,
       EpasParamTimeType.PERIODIC,
-      EpasParamValueType.LOCALTIME,
-      EpasParamValueType.formatValue(new LocalTime(7, 0)),
+      EpasParamValueType.LOCALTIME_INTERVAL,
+      EpasParamValueType
+          .formatValue(new LocalTimeInterval(new LocalTime(7, 0), new LocalTime(19, 0))),
       Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS,
           RecomputationType.RESIDUAL_MEALTICKETS),
       Office.class),

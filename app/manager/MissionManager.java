@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
+import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
@@ -137,6 +138,11 @@ public class MissionManager {
   public boolean createMissionFromClient(MissionFromClient body, boolean recompute) {
 
     AbsenceForm absenceForm = buildAbsenceForm(body);
+    if (body.dataInizio.isAfter(body.dataFine)) {
+      log.warn("Le date di inizio e fine sono invertite!! La missione {} di {} "
+          + "non può essere processata!! Verificare!", body.idOrdine, body.person.fullName());
+      return false;
+    }
     //controllo che la missione sia su più giorni
     if (body.dataFine.toLocalDate().isAfter(body.dataInizio.toLocalDate())) {
             
@@ -146,24 +152,36 @@ public class MissionManager {
         return false;
       }
       //verifico il parametro di ora inizio lavoro in sede
-      LocalTime beginWorkHour = (LocalTime)configurationManager
-          .configValue(office.get(), EpasParam.HOUR_START_WORK_LAST_MISSION_DAY, LocalDate.now());
-      if (beginWorkHour == null) {
-        log.warn("Il parametro di inizio orario di lavoro per ultimo giorno di missione "
+
+      LocalTimeInterval workInterval = (LocalTimeInterval) configurationManager.configValue(
+          office.get(), EpasParam.WORK_INTERVAL, body.dataInizio.toLocalDate());
+      if (workInterval == null) {
+        log.warn("Il parametro di orario di lavoro missione "
             + "non è valorizzato per la sede {}", office.get().name);
         return false;
       }
       //WorkingTimeTypeDay day = getFromDayOfMission(body, body.dataFine.toLocalDate());
       LocalDateTime beginMission = body.dataInizio;
-      LocalDateTime secondLast = body.dataFine.minusDays(1).withHourOfDay(23).withMinuteOfHour(59);
-      LocalDateTime beginWork = body.dataFine
-          .withTime(beginWorkHour.getHourOfDay(), beginWorkHour.getMinuteOfHour(), 0, 0);
-      boolean check1 = insertMission(body, absenceForm, null, null, beginMission, secondLast);
-      boolean check2 = insertMission(body, absenceForm, null, null, beginWork, body.dataFine);
-      if (check1 && check2) {
-        recalculate(body, Optional.<List<Absence>>absent());
-        return true;
+      LocalDateTime endMission = body.dataFine;
+      //caso in cui la missione inizia nell'intervallo di lavoro
+      if (workInterval.from.isBefore(beginMission) && workInterval.to.isAfter(beginMission)
+          && workInterval.from.isBefore(endMission) && workInterval.to.isAfter(endMission)) {
+        boolean check1 = insertMission(body, absenceForm, null, null, beginMission, endMission);
+        boolean check2 = insertMission(body, absenceForm, null, null, beginMission, endMission);
+      } else if (workInterval.from.isBefore(beginMission)) {
+        //la missione inizia prima della giornata lavorativa: attribuisco un 92
+      } else {
+        //la missione inizia dopo la giornata lavorativa: cosa attribuisco?
       }
+//      LocalDateTime secondLast = body.dataFine.minusDays(1).withHourOfDay(23).withMinuteOfHour(59);
+//      LocalDateTime beginWork = body.dataFine
+//          .withTime(beginWorkHour.getHourOfDay(), beginWorkHour.getMinuteOfHour(), 0, 0);
+//      boolean check1 = insertMission(body, absenceForm, null, null, beginMission, secondLast);
+//      boolean check2 = insertMission(body, absenceForm, null, null, beginWork, body.dataFine);
+//      if (check1 && check2) {
+//        recalculate(body, Optional.<List<Absence>>absent());
+//        return true;
+//      }
       
     } else {
       if (insertMission(body, absenceForm, null, null, body.dataInizio, body.dataFine)) {
@@ -298,13 +316,7 @@ public class MissionManager {
        
       localHours = to.getHourOfDay() - from.getHourOfDay();
       localMinutes = to.getMinuteOfHour() - from.getMinuteOfHour();
-//      if (localMinutes < 0) {
-//        localHours = localHours - 1;
-//      }
-//      
-//      if (localMinutes > DateTimeConstants.MINUTES_PER_HOUR / 2) {
-//        localHours = localHours + 1;
-//      }
+
       int day = getFromDayOfMission(body, to.toLocalDate()).dayOfWeek;
       if (day == DateTimeConstants.SATURDAY || day == DateTimeConstants.SUNDAY) {
         mission = absenceTypeDao.getAbsenceTypeByCode("92").get();
