@@ -1,0 +1,42 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Utility Supreme' /}
+
+<div class="container">
+<h3><i class="fa fa-adjust"></i> Rimodula sedi</h3>
+<br>
+#{alert color:'warning'}
+<p>Da utilizzare nel caso ci fosse un cambio di appartenenza di una sede a un istituto dovuto a un accorpamento degli istituti.</p>
+#{/alert}
+#{form @Administration.adjustSeats(),class:'form-horizontal'}
+<div class="col-sm-6">
+#{alert color:'info', center:true}
+Seleziona la sede da associare
+#{/alert}
+	#{f.selectModel 'office', items:officeList /}
+    
+</div>
+
+<div class="col-sm-6">
+#{alert color:'info', center:true}
+Seleziona l'istituo a cui associarla 
+#{/alert}
+    #{f.selectModel 'institute', items:instituteList /}
+</div>
+
+
+<div class="col-sm-6 col-sm-offset-3">
+#{alert color:'info', center:true}
+Info aggiuntive:
+#{/alert}
+#{f.input 'sedeId' /}
+#{f.input 'codiceSede' /}
+</div>
+
+<div class="col-sm-12">
+  #{b.buttons center:true}
+  	<button type="submit" class="btn btn-default">Imposta relazione</button>
+  #{/b.buttons}
+</div>
+#{/form}
+</div>

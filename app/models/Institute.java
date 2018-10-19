@@ -52,5 +52,15 @@ public class Institute extends MutableModel {
 
   @OneToMany(mappedBy = "institute")
   public Set<Office> seats = Sets.newHashSet();
+  
+  @Override
+  public String getLabel() {
+    return this.code;
+  }
+  
+  @Override
+  public String toString() {
+    return getLabel();
+  }
 
 }
