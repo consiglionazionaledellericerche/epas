@@ -1,43 +1,47 @@
 import controllers.shib.MockShibboleth;
-
+import dao.PersonDao;
+import injection.StaticInject;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-
-import models.Person;
-
-import org.hamcrest.core.IsNull;
+import lombok.val;
+import org.hamcrest.core.Is;
 import org.junit.AfterClass;
 import org.junit.Test;
-
 import play.mvc.Http;
 import play.mvc.Http.Response;
 import play.mvc.Router;
 import play.test.FunctionalTest;
 
 @Slf4j
+@StaticInject
 public class ShibbolethTest extends FunctionalTest {
 
-
+  private static final String DEFAULT_USER_NAME = "cristian.lucchesi";
+  private static final String DEFAULT_USER_EMAIL = DEFAULT_USER_NAME + "@iit.cnr.it";
+  
+  @Inject
+  public static PersonDao personDao; 
+  
   /**
    * The basic test to authenticate as a user using Shibboleth.
    */
   @Test
   public void testShibbolethAuthentication() {
-    assertThat(
-        Person.find("SELECT p FROM Person p where email = ?", "cristian.lucchesi@iit.cnr.it")
-          .first(),
-        IsNull.notNullValue());
+    
+    val defaultPerson = personDao.byEmail(DEFAULT_USER_EMAIL);
+    assertThat(defaultPerson.isPresent(), Is.is(true));
     // Set up the mock shibboleth attributes that
     // will be used to authenticate the next user which
     // logins in.
     MockShibboleth.removeAll();
-    MockShibboleth.set("eppn","cristian.lucchesi@iit.cnr.it");
+    MockShibboleth.set("eppn",DEFAULT_USER_EMAIL);
 
     final String loginUrl = Router.reverse("shib.Shibboleth.login").url;
     Response response = httpGet(loginUrl,true);
     assertIsOk(response);
     log.debug("response.contentType = {}", response.contentType);
     assertContentType("text/html", response);
-    assertTrue(response.cookies.get("PLAY_SESSION").value.contains("cristian.lucchesi"));
+    assertTrue(response.cookies.get("PLAY_SESSION").value.contains(DEFAULT_USER_NAME));
 
   }
 
