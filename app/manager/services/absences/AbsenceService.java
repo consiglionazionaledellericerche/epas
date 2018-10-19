@@ -419,7 +419,6 @@ public class AbsenceService {
    */
   public Scanner scanner(Person person, LocalDate from) {
     
-    log.debug("");
     log.debug("Lanciata procedura scan assenze person={}, from={}", person.fullName(), from);
 
     List<Absence> absencesToScan = absenceComponentDao.orderedAbsences(person, from, 
@@ -741,7 +740,6 @@ public class AbsenceService {
    * @param vacationGroup injected
    * @param residualDate data per maturazione giorni
    * @param cache se prelevare i dati dalla cache
-   * @param vacationsService per costruire il vecchio ripilogo da confrontare col nuovo
    * @return situazione
    */
   public VacationSituation buildVacationSituation(Contract contract, int year, 
