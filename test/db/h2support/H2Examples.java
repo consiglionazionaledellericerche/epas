@@ -73,11 +73,13 @@ public class H2Examples {
    */
   private Person createPerson(Office office, String username) {
 
-    User user = new User();
+    User user = new User();    
     user.username = username;
     user.password = "UnaPasswordQualsiasi";
     user.save();
     Person person = new Person();
+    person.name = "Name " + username;
+    person.surname = "Surname " + username;
     person.user = user;
     person.office = office;
     person.save();
