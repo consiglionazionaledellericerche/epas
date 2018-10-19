@@ -144,7 +144,11 @@ public class WorkingTimeTypeDao extends DaoBase {
       return Optional.absent();
     }
     int index = date.getDayOfWeek() - 1;
-    Verify.verify(index < wtt.get().workingTimeTypeDays.size());
+    Verify.verify(index < wtt.get().workingTimeTypeDays.size(), 
+        String.format("Definiti %d giorni nel WorkingTimeType %s, "
+            + "richiesto giorno non presente con indice %d", 
+            wtt.get().workingTimeTypeDays.size(), wtt.get(), index));
+    
     Optional<WorkingTimeTypeDay> wttd = 
         Optional.fromNullable(wtt.get().workingTimeTypeDays.get(index));
 
