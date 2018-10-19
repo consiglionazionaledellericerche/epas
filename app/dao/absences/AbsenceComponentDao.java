@@ -5,13 +5,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
-
 import dao.DaoBase;
-
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import javax.persistence.EntityManager;
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -40,17 +42,8 @@ import models.absences.query.QJustifiedType;
 import models.absences.query.QTakableAbsenceBehaviour;
 import models.query.QPerson;
 import models.query.QPersonDay;
-
 import org.joda.time.LocalDate;
-
 import play.db.jpa.JPA;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-
-import javax.persistence.EntityManager;
 
 /**
  * Dao per il componente assenze.
@@ -452,6 +445,7 @@ public class AbsenceComponentDao extends DaoBase {
       Set<AbsenceType> codeSet) {
 
     final QAbsence absence = QAbsence.absence;
+    final QAbsenceType absenceType = QAbsenceType.absenceType;
     final QAbsenceTypeJustifiedBehaviour behaviour = 
         QAbsenceTypeJustifiedBehaviour.absenceTypeJustifiedBehaviour;
    
@@ -467,12 +461,12 @@ public class AbsenceComponentDao extends DaoBase {
     }
     return getQueryFactory().from(absence)
         .leftJoin(absence.justifiedType).fetch()
-        .leftJoin(absence.absenceType).fetch()
-        .leftJoin(absence.absenceType.complationGroup).fetch()
-        .leftJoin(absence.absenceType.replacingGroup).fetch()
-        .leftJoin(absence.absenceType.takableGroup).fetch()
-        .leftJoin(absence.absenceType.takenGroup).fetch()
-        .leftJoin(absence.absenceType.justifiedBehaviours, behaviour).fetch()
+        .leftJoin(absence.absenceType, absenceType).fetch()
+        .leftJoin(absenceType.complationGroup).fetch()
+        .leftJoin(absenceType.replacingGroup).fetch()
+        .leftJoin(absenceType.takableGroup).fetch()
+        .leftJoin(absenceType.takenGroup).fetch()
+        .leftJoin(absenceType.justifiedBehaviours, behaviour).fetch()
         .leftJoin(behaviour.justifiedBehaviour).fetch()
         .leftJoin(absence.troubles).fetch()
         .leftJoin(absence.personDay).fetch()
