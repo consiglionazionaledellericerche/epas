@@ -350,7 +350,7 @@ public enum DefaultAbsenceType {
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, Sets.newHashSet(), null, null),
   
-  A_91CE("91CE", "Riposo compensativo per chiusura ente", false, 
+  A_91CE("91", "Riposo compensativo per chiusura ente", false, 
       ImmutableSet.of(JustifiedTypeName.recover_time), 0,
       false, false, 0, null, Sets.newHashSet(), null, null),
 
