@@ -3,17 +3,15 @@ package db.h2support.base;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-
 import dao.WorkingTimeTypeDao;
-
 import db.h2support.base.WorkingTimeTypeDefinitions.WorkingDayDefinition;
 import db.h2support.base.WorkingTimeTypeDefinitions.WorkingDefinition;
-
 import java.util.List;
-
+import lombok.extern.slf4j.Slf4j;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 
+@Slf4j
 public class H2WorkingTimeTypeSupport {
 
   private final WorkingTimeTypeDao workingTimeTypeDao;
@@ -63,13 +61,13 @@ public class H2WorkingTimeTypeSupport {
       return workingTimeType;
     }
     
+    log.debug("Costruisco il workingTimeType {}", workingDefinition);
     workingTimeType = new WorkingTimeType();
     workingTimeType.description = workingDefinition.name();
     workingTimeType.horizontal = workingDefinition.horizontal;
     workingTimeType.save();
     workingTimeType.workingTimeTypeDays = 
         createWorkingTimeTypeDays(workingDefinition.orderedWorkingDayDefinition, workingTimeType);
-    workingTimeType.refresh();
     return workingTimeType;
   }
   
