@@ -1,19 +1,13 @@
 package absences;
 
-import java.util.List;
-
-import org.joda.time.LocalDate;
-import org.junit.Test;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-
 import dao.absences.AbsenceComponentDao;
 import db.h2support.H2Examples;
 import db.h2support.base.H2AbsenceSupport;
 import injection.StaticInject;
-import manager.services.absences.AbsenceEngineUtility;
+import java.util.List;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.ServiceFactories;
@@ -23,6 +17,8 @@ import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
+import org.joda.time.LocalDate;
+import org.junit.Test;
 import play.test.UnitTest;
 
 
@@ -172,7 +168,8 @@ public class Absences661Test extends UnitTest {
     Person person = h2Examples.normalEmployee(BEGIN_2016, Optional.absent());
     
     // persisto una assenza di tipo 661G
-    h2AbsenceSupport.absence(DefaultAbsenceType.A_661G, FERIAL_1_2018, Optional.absent(), 0, person);
+    h2AbsenceSupport.absence(
+        DefaultAbsenceType.A_661G, FERIAL_1_2018, Optional.absent(), 0, person);
     
     // eseguo lo scanner
     absenceService.scanner(person, BEGIN_2018);
