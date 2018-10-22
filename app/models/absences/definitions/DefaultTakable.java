@@ -361,7 +361,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_407, DefaultAbsenceType.A_50,
           DefaultAbsenceType.A_NC, DefaultAbsenceType.A_62, DefaultAbsenceType.A_35R,
           DefaultAbsenceType.A_96, DefaultAbsenceType.A_96A, DefaultAbsenceType.A_96B,
-          DefaultAbsenceType.A_98),
+          DefaultAbsenceType.A_98, DefaultAbsenceType.A_52),
       ImmutableSet.of(DefaultAbsenceType.A_102,
           DefaultAbsenceType.A_103, DefaultAbsenceType.A_103BP, 
           DefaultAbsenceType.A_105BP,
@@ -403,7 +403,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_407, DefaultAbsenceType.A_50,
           DefaultAbsenceType.A_NC, DefaultAbsenceType.A_62, DefaultAbsenceType.A_35R,
           DefaultAbsenceType.A_96, DefaultAbsenceType.A_96A, DefaultAbsenceType.A_96B,
-          DefaultAbsenceType.A_98),
+          DefaultAbsenceType.A_98, DefaultAbsenceType.A_52),
       -1, null),
   
   T_CONGEDO_MATRIMONIO(AmountType.units, 

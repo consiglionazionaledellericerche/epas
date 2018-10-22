@@ -1393,6 +1393,10 @@ public enum DefaultAbsenceType {
       true, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
       0, null, Sets.newHashSet(), null, null),
   
+  A_52("52", "aspettativa per infermita' causa servizio",
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      0, null, Sets.newHashSet(), null, null),
+  
   A_96("96", "sosp.ne cautelare e/o dal servizio",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, Sets.newHashSet(), null, null),
