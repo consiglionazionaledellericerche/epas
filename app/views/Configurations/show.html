@@ -163,13 +163,14 @@
         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
         &{'tr_autocertification.alert'}
         #{/alert}
-
+		#{secure.check 'Configurations.uploadAttachment'}
         #{form action:@uploadAttachment(), method:'POST', class:'form-horizontal', enctype:'multipart/form-data'}
         #{f.hidden 'officeId', value:office.id /}
 
         #{f.input 'file', type: 'file', onChange:'javascript:this.form.submit()' /}
 
         #{/form}
+        #{/secure.check}
         #{/else}
       </div>
     </div>
