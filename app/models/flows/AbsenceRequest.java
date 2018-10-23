@@ -78,19 +78,19 @@ public class AbsenceRequest extends MutableModel {
    * Data di approvazione del responsabile.
    */
   @Column(name = "manager_approved")
-  public LocalDate managerApproved;
+  public LocalDateTime managerApproved;
 
   /**
    * Data di approvazione dell'amministrativo.
    */
   @Column(name = "administrative_approved")
-  public LocalDate administrativeApproved;
+  public LocalDateTime administrativeApproved;
 
   /**
    * Data di approvazione del responsabili sede.
    */
   @Column(name = "office_head_approved")
-  public LocalDate officeHeadApproved;
+  public LocalDateTime officeHeadApproved;
 
   /**
    * Indica se è richieta l'approvazione da parte del responsabile.
