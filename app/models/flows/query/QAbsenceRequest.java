@@ -28,7 +28,7 @@ public class QAbsenceRequest extends EntityPathBase<AbsenceRequest> {
 
     public final BooleanPath administrativeApprovalRequired = createBoolean("administrativeApprovalRequired");
 
-    public final DatePath<org.joda.time.LocalDate> administrativeApproved = createDate("administrativeApproved", org.joda.time.LocalDate.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> administrativeApproved = createDateTime("administrativeApproved", org.joda.time.LocalDateTime.class);
 
     public final SimplePath<play.db.jpa.Blob> attachment = createSimple("attachment", play.db.jpa.Blob.class);
 
@@ -46,18 +46,22 @@ public class QAbsenceRequest extends EntityPathBase<AbsenceRequest> {
 
     public final BooleanPath flowStarted = createBoolean("flowStarted");
 
+    public final BooleanPath fullyApproved = createBoolean("fullyApproved");
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 
     public final BooleanPath managerApprovalRequired = createBoolean("managerApprovalRequired");
 
-    public final DatePath<org.joda.time.LocalDate> managerApproved = createDate("managerApproved", org.joda.time.LocalDate.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> managerApproved = createDateTime("managerApproved", org.joda.time.LocalDateTime.class);
 
     public final StringPath note = createString("note");
 
+    public final BooleanPath officeHeadApprovalForManagerRequired = createBoolean("officeHeadApprovalForManagerRequired");
+
     public final BooleanPath officeHeadApprovalRequired = createBoolean("officeHeadApprovalRequired");
 
-    public final DatePath<org.joda.time.LocalDate> officeHeadApproved = createDate("officeHeadApproved", org.joda.time.LocalDate.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> officeHeadApproved = createDateTime("officeHeadApproved", org.joda.time.LocalDateTime.class);
 
     //inherited
     public final BooleanPath persistent = _super.persistent;

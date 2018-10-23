@@ -469,6 +469,10 @@ public class AbsenceRequests extends Controller {
       //caso di approvazione da parte del responsabile di sede
       absenceRequestManager.officeHeadApproval(id, user);
     }
+    if (absenceRequest.officeHeadApprovalForManagerRequired 
+        && absenceRequest.officeHeadApproved == null && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+      absenceRequestManager.officeHeadApproval(id, user);
+    }
     
     flash.success("Operazione conclusa correttamente");
     AbsenceRequests.listToApprove(absenceRequest.type);

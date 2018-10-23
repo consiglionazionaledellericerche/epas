@@ -43,7 +43,7 @@ import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
 import org.apache.commons.compress.utils.Lists;
 import org.joda.time.LocalDate;
-
+import org.joda.time.LocalDateTime;
 import play.db.jpa.JPA;
 
 /**
@@ -93,7 +93,8 @@ public class AbsenceRequestManager {
       UsersRolesOfficesDao uroDao, RoleDao roleDao, NotificationManager notificationManager,
       AbsenceService absenceService, AbsenceManager absenceManager, 
       AbsenceComponentDao absenceDao, PersonDayManager personDayManager, 
-      ConsistencyManager consistencyManager, AbsenceRequestDao absenceRequestDao, GroupDao groupDao) {
+      ConsistencyManager consistencyManager, AbsenceRequestDao absenceRequestDao, 
+      GroupDao groupDao) {
     this.configurationManager = configurationManager;
     this.uroDao = uroDao;
     this.roleDao = roleDao;
@@ -378,7 +379,7 @@ public class AbsenceRequestManager {
         break;
 
       case MANAGER_APPROVAL:
-        absenceRequest.managerApproved = LocalDate.now();
+        absenceRequest.managerApproved = LocalDateTime.now();
         break;
 
       case MANAGER_REFUSAL:
@@ -389,7 +390,7 @@ public class AbsenceRequestManager {
         break;
 
       case ADMINISTRATIVE_APPROVAL:
-        absenceRequest.administrativeApproved = LocalDate.now();
+        absenceRequest.administrativeApproved = LocalDateTime.now();
         break;
 
       case ADMINISTRATIVE_REFUSAL:
@@ -400,7 +401,7 @@ public class AbsenceRequestManager {
         break;
 
       case OFFICE_HEAD_APPROVAL:
-        absenceRequest.officeHeadApproved = LocalDate.now();
+        absenceRequest.officeHeadApproved = LocalDateTime.now();
         break;
 
       case OFFICE_HEAD_REFUSAL:
@@ -411,7 +412,7 @@ public class AbsenceRequestManager {
         break;
 
       case COMPLETE:
-        absenceRequest.managerApproved = LocalDate.now();
+        absenceRequest.managerApproved = LocalDateTime.now();
         break;
 
       case DELETE:

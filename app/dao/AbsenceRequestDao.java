@@ -241,10 +241,9 @@ public class AbsenceRequestDao extends DaoBase {
 
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
     condition.and(absenceRequest.person.office.eq(signer.office))
-        .andAnyOf(absenceRequest.managerApprovalRequired.isFalse(), 
-        absenceRequest.administrativeApprovalRequired.isFalse(),
-        absenceRequest.managerApprovalRequired.isTrue(), 
-        absenceRequest.managerApproved.isNotNull()); 
+        .andAnyOf(absenceRequest.officeHeadApprovalForManagerRequired.isTrue(),
+            (absenceRequest.managerApprovalRequired.isTrue()
+                .and(absenceRequest.managerApproved.isNotNull()))); 
   
     return condition;
 

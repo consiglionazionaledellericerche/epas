@@ -16,24 +16,24 @@ import manager.configurations.EpasParam;
 public enum AbsenceRequestType {
   
   //Richiesta Ferie
-  VACATION_REQUEST(true, false, false, true, true, false,
+  VACATION_REQUEST(true, false, false, true, false, false,
       Optional.of(EpasParam.VACATION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED),
       Optional.of(EpasParam.VACATION_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED),
       Optional.of(EpasParam.VACATION_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED),
       Optional.of(EpasParam.VACATION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED),
-      Optional.of(EpasParam.VACATION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED),
       Optional.absent(),
-      Optional.absent()),
+      Optional.absent(),
+      Optional.of(EpasParam.VACATION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED)),
   
   //Riposo compensatvio
-  COMPENSATORY_REST(true, false, false, true, true, false,
+  COMPENSATORY_REST(true, false, false, true, false, false,
       Optional.of(EpasParam.COMPENSATORY_REST_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED),
       Optional.of(EpasParam.COMPENSATORY_REST_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED),
       Optional.of(EpasParam.COMPENSATORY_REST_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED),
       Optional.of(EpasParam.COMPENSATORY_REST_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED),
-      Optional.of(EpasParam.VACATION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED),
       Optional.absent(),
-      Optional.absent()),
+      Optional.absent(),
+      Optional.of(EpasParam.VACATION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED)),
   
   //Permessso breve
   SHORT_TERM_PERMIT(false, false, false, false, false, false,
