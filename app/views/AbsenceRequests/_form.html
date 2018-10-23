@@ -1,5 +1,5 @@
 <div class="container-fluid">
-#{if !vacationSituations.isEmpty()}
+#{if vacationSituations != null && !vacationSituations.isEmpty()}
  	#{accordionItem 'infoFerie', parent:'info', title:'Info situazione ferie', open:false, color:'info' }
  	#{include './../Vacations/vacationsElements/info.html' /}
  	#{/accordionItem}

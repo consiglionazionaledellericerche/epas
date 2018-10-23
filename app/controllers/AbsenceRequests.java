@@ -249,7 +249,8 @@ public class AbsenceRequests extends Controller {
           .configValue(person.office, EpasParam.MAX_RECOVERY_DAYS_13, LocalDate.now().getYear());
       compensatoryRestAvailable = maxDays - psDto.numberOfCompensatoryRestUntilToday;
       handleCompensatoryRestSituation = true;
-    } else {
+    } 
+    if (type.equals(AbsenceRequestType.VACATION_REQUEST)) {
       GroupAbsenceType vacationGroup = absenceComponentDao
           .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
       IWrapperPerson wperson = wrapperFactory.create(person);
@@ -291,6 +292,7 @@ public class AbsenceRequests extends Controller {
 
     rules.checkIfPermitted(absenceRequest);
     boolean insertable = true;
+
     if (absenceRequest.startAt == null || absenceRequest.endTo == null) {
       Validation.addError("absenceRequest.startAt", 
           "Entrambi i campi data devono essere valorizzati");
@@ -333,7 +335,36 @@ public class AbsenceRequests extends Controller {
         absenceForm.groupSelected, absenceForm.from, absenceForm.to,
         absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected, 
         null, null, false, absenceManager);
-    render(absenceRequest, insertReport, absenceForm, insertable);
+    boolean handleCompensatoryRestSituation = false;
+    int compensatoryRestAvailable = 0;
+    if (absenceRequest.type.equals(AbsenceRequestType.COMPENSATORY_REST) 
+        && absenceRequest.person.isTopQualification()) {
+      PersonStampingRecap psDto = 
+          stampingsRecapFactory.create(absenceRequest.person, LocalDate.now().getYear(), 
+              LocalDate.now().getMonthOfYear(), true);
+      int maxDays = (Integer) configurationManager
+          .configValue(absenceRequest.person.office, 
+              EpasParam.MAX_RECOVERY_DAYS_13, LocalDate.now().getYear());
+      compensatoryRestAvailable = maxDays - psDto.numberOfCompensatoryRestUntilToday;
+      handleCompensatoryRestSituation = true;
+    }
+    List<VacationSituation> vacationSituations = Lists.newArrayList();
+    if (absenceRequest.type.equals(AbsenceRequestType.VACATION_REQUEST)) {
+      GroupAbsenceType vacationGroup = absenceComponentDao
+          .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
+      IWrapperPerson wperson = wrapperFactory.create(absenceRequest.person);
+      
+
+      for (Contract contract : wperson.orderedYearContracts(LocalDate.now().getYear())) {        
+        VacationSituation vacationSituation = 
+            absenceService.buildVacationSituation(contract, LocalDate.now().getYear(), 
+            vacationGroup, Optional.absent(), false);
+        vacationSituations.add(vacationSituation);
+      }
+    }
+    
+    render(absenceRequest, insertReport, absenceForm, insertable, 
+        vacationSituations, compensatoryRestAvailable);
   }
 
   /**
