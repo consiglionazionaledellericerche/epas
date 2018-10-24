@@ -40,7 +40,13 @@ CREATE TABLE groups_persons_history (
     PRIMARY KEY (_revision, _revision_type, groups_id, people_id)
 );
 
+ALTER TABLE absence_requests ALTER COLUMN administrative_approved TYPE TIMESTAMP WITHOUT TIME ZONE;
+ALTER TABLE absence_requests ALTER COLUMN office_head_approved TYPE TIMESTAMP WITHOUT TIME ZONE;
+ALTER TABLE absence_requests ALTER COLUMN manager_approved TYPE TIMESTAMP WITHOUT TIME ZONE;
 
+ALTER TABLE absence_requests_history ALTER COLUMN administrative_approved TYPE TIMESTAMP WITHOUT TIME ZONE;
+ALTER TABLE absence_requests_history ALTER COLUMN office_head_approved TYPE TIMESTAMP WITHOUT TIME ZONE;
+ALTER TABLE absence_requests_history ALTER COLUMN manager_approved TYPE TIMESTAMP WITHOUT TIME ZONE;
 
 # ---!Downs
 
@@ -51,3 +57,13 @@ DROP TABLE groups_persons_history;
 DROP TABLE groups_persons;
 DROP TABLE groups_history;
 DROP TABLE groups;
+
+ALTER TABLE absence_requests_history ALTER COLUMN administrative_approved TYPE DATE;
+ALTER TABLE absence_requests_history ALTER COLUMN office_head_approved TYPE DATE;
+ALTER TABLE absence_requests_history ALTER COLUMN manager_approved TYPE DATE;
+
+ALTER TABLE absence_requests ALTER COLUMN administrative_approved TYPE DATE;
+ALTER TABLE absence_requests ALTER COLUMN office_head_approved TYPE DATE;
+ALTER TABLE absence_requests ALTER COLUMN manager_approved TYPE DATE;
+
+
