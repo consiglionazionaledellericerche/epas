@@ -52,6 +52,7 @@ import models.flows.enumerate.AbsenceRequestType;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.YearMonth;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -315,6 +316,15 @@ public class AbsenceRequests extends Controller {
       response.status = 400;
       insertable = false;
       render("@edit", absenceRequest, insertable, existing);
+    }
+    if (!absenceRequest.person.checkLastCertificationDate(
+        new YearMonth(absenceRequest.startAtAsDate().getYear(), 
+            absenceRequest.startAtAsDate().getMonthOfYear()))) {
+      Validation.addError("absenceRequest.startAt", 
+          "Non è possibile fare una richiesta per una data di un mese già processato in Attestati");
+      response.status = 400;
+      insertable = false;
+      render("@edit", absenceRequest, insertable);
     }
 
     if (Validation.hasErrors()) {
