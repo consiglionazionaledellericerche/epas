@@ -111,6 +111,16 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Office.class),
   
+  SEND_ADMIN_NOTIFICATION("send_admin_notification",
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+
+  
   /**
    * Di quanto indietro nel tempo effettuare il ricalcolo dei personDays.
    */
@@ -273,6 +283,14 @@ public enum EpasParam {
       EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  SEND_FLOWS_NOTIFICATION("send_flows_notification",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
 

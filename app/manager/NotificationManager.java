@@ -10,7 +10,9 @@ import dao.absences.AbsenceComponentDao;
 import helpers.TemplateExtensions;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import models.Notification;
 import models.Person;
@@ -28,6 +30,7 @@ import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
+import org.joda.time.LocalDate;
 import play.Play;
 import play.i18n.Messages;
 import play.libs.Mail;
@@ -46,15 +49,17 @@ public class NotificationManager {
   private AbsenceDao absenceDao;
   private AbsenceComponentDao componentDao;
   private GroupDao groupDao;
+  private ConfigurationManager configurationManager;
 
   @Inject
   public NotificationManager(SecureManager secureManager, RoleDao roleDao, AbsenceDao absenceDao,
-      AbsenceComponentDao componentDao, GroupDao groupDao) {
+      AbsenceComponentDao componentDao, GroupDao groupDao, ConfigurationManager configurationManager) {
     this.secureManager = secureManager;
     this.roleDao = roleDao;
     this.absenceDao = absenceDao;
     this.componentDao = componentDao;
     this.groupDao = groupDao;
+    this.configurationManager = configurationManager;
   }
 
   private static final String DTF = "dd/MM/YYYY - HH:mm";
@@ -134,7 +139,12 @@ public class NotificationManager {
     }
     final String message = String.format(template, modifier,
         absence.personDay.date.toString(DF), absence.absenceType.code);
-
+    //controllare se dalla configurazione è possibile notificare le assenze da flusso 
+    val config = configurationManager
+        .configValue(person.office, EpasParam.SEND_FLOWS_NOTIFICATION, LocalDate.now());
+    if (config.equals(Boolean.FALSE)) {
+      return;
+    }
     person.office.usersRolesOffices.stream()
         .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
             || uro.role.name.equals(Role.SEAT_SUPERVISOR))
@@ -268,7 +278,13 @@ public class NotificationManager {
     }
 
     //negli altri casi notifica agli amministratori del personale ed al responsabile sede
-
+    // controllo se il parametro di abilitazione alle notifiche è true
+    val config = configurationManager
+        .configValue(currentUser.person.office, EpasParam.SEND_ADMIN_NOTIFICATION, LocalDate.now());
+    if (config.equals(Boolean.FALSE)) {
+      return;
+    }
+    
     if (insert) {
       notifyStamping(stamping, NotificationManager.Crud.CREATE);
       return;

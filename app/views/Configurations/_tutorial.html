@@ -51,6 +51,13 @@
       <p><i class="fa fa-info-circle"></i> Inserire per esempio un indirizzo di segreteria amministrativa.</p>
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.SEND_ADMIN_NOTIFICATION) }
+      <p>Tramite questo parametro è possibile specificare se l'amministratore del personale deve essere notificato o meno,
+      attraverso i banner in alto sulla barra di menu, ogni qualvolta viene effettuata una timbratura per lavoro fuori sede.</p>
+      
+    #{/if}
+    
+    
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.RECOMPUTATION_LIMIT) }
 
       <p>   
@@ -109,6 +116,13 @@
       
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.SEND_FLOWS_NOTIFICATION) }
+      <p>Abilitando questa funzionalità sarà possibile notificare a tutti gli <u>amministratori del personale</u> di <strong>${configuration.office.name}</strong> 
+      gli inserimenti delle assenze avvenuti attraverso la procedura di flusso di approvazione.<br>
+      Per la configurazione del flusso di approvazione vedi la scheda: <strong>"Flussi di lavoro"</strong>.<p>
+           
+    #{/if}
+    
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.EXPIRY_VACATION_PAST_YEAR) }
       <p>Questo parametro configurabile su base annuale specifica il giorno di scadenza delle ferie anno precedente.
       <p>Esempio: <em>impostando il valore 31/8 per l'anno 2016 si otterrà che le ferie dell'anno 2015 si
@@ -154,6 +168,13 @@
     
      #{if configuration.epasParam.equals(manager.configurations.EpasParam.MATERNITY_PERIOD) }
       <p>Inserire lo stato di maternità per il dipendente <strong>${configuration.person.fullname}</strong> e la date di inizio e fine periodo.</p>
+    #{/if}
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_FLOWS) }
+      <p>Abilitando questo paramentro si permette alla sede <strong>${configuration.office.name}</strong> di usufruire del sistema integrato
+      di approvazione delle richieste di assenza. <br>
+      Esso permette di far richiedere al dipendente un'assenza di tipo <strong>ferie</strong> o <strong>riposo compensativo</strong> direttamente 
+      al proprio responsabile di gruppo o al proprio responsabile di sede o a entrambi in sequenza (a seconda di quale deve essere il flusso di approvazione standard presente nella sede).</p>
     #{/if}
     
   #{/alert} 
