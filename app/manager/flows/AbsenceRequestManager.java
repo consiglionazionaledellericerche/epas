@@ -44,6 +44,7 @@ import models.flows.enumerate.AbsenceRequestType;
 import org.apache.commons.compress.utils.Lists;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import play.Play;
 import play.db.jpa.JPA;
 
 /**
@@ -678,4 +679,5 @@ public class AbsenceRequestManager {
     }  
     return null;  
   }
+  
 }

@@ -74,6 +74,7 @@ fi
 
 # configure ePAS
 SKIP_IP_CHECK=${SKIP_IP_CHECK:-false}
+FLOWS_ACTIVE=${FLOWS_ACTIVE:-false}
 
 cp ${APP_HOME}/docker_conf/prod.conf ${APP_HOME}/conf/
 
@@ -192,6 +193,7 @@ else
 fi
 
 sed 's#{{SKIP_IP_CHECK}}#'"${SKIP_IP_CHECK}"'#' -i ${APP_HOME}/conf/prod.conf
+sed 's#{{FLOWS_ACTIVE}}#'"${FLOWS_ACTIVE}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{EPAS_SHIB_LOGIN}}#'"${EPAS_SHIB_LOGIN}"'#' -i ${APP_HOME}/conf/prod.conf
 
 appRun () {
