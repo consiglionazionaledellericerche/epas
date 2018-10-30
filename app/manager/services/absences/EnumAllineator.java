@@ -508,20 +508,20 @@ public class EnumAllineator {
     // Una volta creato il codice 0M la patch non deve più essere applicata.
     if (!absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_0M.getCode()).isPresent()) {
       throw new IllegalStateException();
-//      AbsenceType m = this.buildAbsenceType(DefaultAbsenceType.A_0M);
-//      List<Absence> absences = absenceComponentDao.absences(Lists.newArrayList(
-//          DefaultAbsenceType.A_01.getCode(), DefaultAbsenceType.A_02.getCode(),
-//          DefaultAbsenceType.A_03.getCode(), DefaultAbsenceType.A_04.getCode(),
-//          DefaultAbsenceType.A_05.getCode(), DefaultAbsenceType.A_06.getCode(),
-//          DefaultAbsenceType.A_07.getCode(), DefaultAbsenceType.A_08.getCode()));
-//      for (Absence absence : absences) {
-//        //convertire tutti i 01... in 0M
-//        absence.justifiedMinutes = absence.absenceType.justifiedTime;
-//        absence.justifiedType = absenceComponentDao
-//            .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
-//        absence.absenceType = m;
-//        absence.save();
-//      }
+      //      AbsenceType m = this.buildAbsenceType(DefaultAbsenceType.A_0M);
+      //      List<Absence> absences = absenceComponentDao.absences(Lists.newArrayList(
+      //          DefaultAbsenceType.A_01.getCode(), DefaultAbsenceType.A_02.getCode(),
+      //          DefaultAbsenceType.A_03.getCode(), DefaultAbsenceType.A_04.getCode(),
+      //          DefaultAbsenceType.A_05.getCode(), DefaultAbsenceType.A_06.getCode(),
+      //          DefaultAbsenceType.A_07.getCode(), DefaultAbsenceType.A_08.getCode()));
+      //      for (Absence absence : absences) {
+      //        //convertire tutti i 01... in 0M
+      //        absence.justifiedMinutes = absence.absenceType.justifiedTime;
+      //        absence.justifiedType = absenceComponentDao
+      //            .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
+      //        absence.absenceType = m;
+      //        absence.save();
+      //      }
     }
   }
   

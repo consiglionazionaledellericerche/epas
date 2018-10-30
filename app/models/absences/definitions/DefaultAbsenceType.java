@@ -4,15 +4,12 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
+import java.util.List;
+import java.util.Set;
 import models.absences.AbsenceType;
 import models.absences.JustifiedBehaviour.JustifiedBehaviourName;
 import models.absences.JustifiedType.JustifiedTypeName;
-
 import org.joda.time.LocalDate;
-
-import java.util.List;
-import java.util.Set;
 
 /**
  * Tipi assenza di default.
@@ -205,16 +202,20 @@ public enum DefaultAbsenceType {
       300, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), null, null),
   A_661H6("661H6", "Permesso orario per motivi personali completamento 6 ore",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
-      360, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), null, new LocalDate(2018, 12, 31)),
+      360, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), null, 
+      new LocalDate(2018, 12, 31)),
   A_661H7("661H7", "Permesso orario per motivi personali completamento 7 ore",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
-      420, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), null, new LocalDate(2018, 12, 31)),
+      420, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), null, 
+      new LocalDate(2018, 12, 31)),
   A_661H8("661H8", "Permesso orario per motivi personali completamento 8 ore",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
-      480, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), null, new LocalDate(2018, 12, 31)),
+      480, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), null, 
+      new LocalDate(2018, 12, 31)),
   A_661H9("661H9", "Permesso orario per motivi personali completamento 9 ore",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
-      540, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), null, new LocalDate(2018, 12, 31)),
+      540, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), null, 
+      new LocalDate(2018, 12, 31)),
 
   
   A_631M("631M", "Permesso orario visita medica in ore e minuti",
@@ -224,22 +225,28 @@ public enum DefaultAbsenceType {
       new LocalDate(2018, 7, 1), null),
   A_631H1("631H1", "Permesso orario visita medica completamento 1 ora",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
-      60, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), new LocalDate(2018, 7, 1), null),
+      60, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), 
+      new LocalDate(2018, 7, 1), null),
   A_631H2("631H2", "Permesso orario visita medica completamento 2 ore",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
-      120, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), new LocalDate(2018, 7, 1), null),
+      120, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), 
+      new LocalDate(2018, 7, 1), null),
   A_631H3("631H3", "Permesso orario visita medica completamento 3 ore",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
-      180, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), new LocalDate(2018, 7, 1), null),
+      180, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), 
+      new LocalDate(2018, 7, 1), null),
   A_631H4("631H4", "Permesso orario visita medica completamento 4 ore",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
-      240, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), new LocalDate(2018, 7, 1), null),
+      240, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), 
+      new LocalDate(2018, 7, 1), null),
   A_631H5("631H5", "Permesso orario visita medica completamento 5 ore",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
-      300, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), new LocalDate(2018, 7, 1), null),
+      300, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), 
+      new LocalDate(2018, 7, 1), null),
   A_631H6("631H6", "Permesso orario visita medica completamento 6 ore",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
-      360, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), new LocalDate(2018, 7, 1), null),
+      360, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), 
+      new LocalDate(2018, 7, 1), null),
   A_631G("631G", "Permesso visita medica intera giornata",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, Sets.newHashSet(), new LocalDate(2018, 7, 1), null),
@@ -1452,10 +1459,12 @@ public enum DefaultAbsenceType {
   public static class Behaviour {
     public JustifiedBehaviourName name;
     public Integer data;
+    
     public Behaviour(JustifiedBehaviourName name, Integer data) {
       this.name = name;
       this.data = data;
     }
+    
     public Behaviour(JustifiedBehaviourName name) {
       this.name = name;
       this.data = null;

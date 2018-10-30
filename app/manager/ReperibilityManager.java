@@ -439,8 +439,8 @@ public class ReperibilityManager {
    * @param year anno di riferimento del calendario
    * @param reperibilityType tipo di reperibilità di cui costrire il calendario
    * @return Lista di tabelle (una per ogni mese dell'anno) contenenti per ogni persona e giorno del
-   * mese l'indicazione se la persona ha effettuato un turno di reperibilità festivo (FS) o feriale
-   * (FR)
+   *        mese l'indicazione se la persona ha effettuato un turno di reperibilità festivo (FS) o 
+   *        feriale (FR)
    */
   public List<Table<Person, Integer, String>> buildYearlyReperibilityCalendar(
       int year, PersonReperibilityType reperibilityType) {
@@ -481,7 +481,7 @@ public class ReperibilityManager {
    * sulla base di un calendario annuale passato come parametro.
    *
    * @param reperibilityMonths contiene una tabella per ogni mese di un anno che contiene per ogni
-   * giorno e persona coinvolta se ha lavorato una reperibilità festiva o feriale
+   *        giorno e persona coinvolta se ha lavorato una reperibilità festiva o feriale
    * @return tabella che contiene per ogni
    */
   public Table<Person, String, Integer> buildYearlyReperibilityReport(
@@ -661,17 +661,17 @@ public class ReperibilityManager {
           person.surname, person.id, year, month, competenceCodeFs.id);
 
       // save the FS reperibility competences in the DB
-      Optional<Competence> FsCompetence =
+      Optional<Competence> fsCompetence =
           competenceDao.getCompetence(person, year, month, competenceCodeFs);
 
-      if (FsCompetence.isPresent()) {
-        log.debug("Trovato competenza FS ={}", FsCompetence);
+      if (fsCompetence.isPresent()) {
+        log.debug("Trovato competenza FS ={}", fsCompetence);
         // update the requested hours
-        FsCompetence.get().valueApproved = numOfFsDays;
-        FsCompetence.get().reason = fsReason;
-        FsCompetence.get().save();
+        fsCompetence.get().valueApproved = numOfFsDays;
+        fsCompetence.get().reason = fsReason;
+        fsCompetence.get().save();
 
-        log.debug("Aggiornata competenza {}", FsCompetence);
+        log.debug("Aggiornata competenza {}", fsCompetence);
         numSavedCompetences++;
       } else {
         log.debug("Trovato nessuna competenza FS");
@@ -692,7 +692,7 @@ public class ReperibilityManager {
 
       if (frCompetence.isPresent()) {
         // update the requested hours
-        log.debug("Trovato competenza FR ={}", FsCompetence);
+        log.debug("Trovato competenza FR ={}", fsCompetence);
         frCompetence.get().valueApproved = numOfFrDays;
         frCompetence.get().reason = frReason;
         frCompetence.get().save();
@@ -719,8 +719,8 @@ public class ReperibilityManager {
   /**
    * @param competenceList lista di competenze.
    * @param personsApprovedCompetence tabella contnente per ogni persona, coinvolta nelle competenze
-   * passate come parametro, e per ogni tipo di competenza, il valore approvato per quella
-   * competenza.
+   *        passate come parametro, e per ogni tipo di competenza, il valore approvato per quella
+   *        competenza.
    */
   public void updateReperibilityDaysReportFromCompetences(
       Table<Person, String, Integer> personsApprovedCompetence, List<Competence> competenceList) {
@@ -737,7 +737,7 @@ public class ReperibilityManager {
   /**
    * @param competenceList lista di competenze.
    * @param reperibilityDateDays tabella contnente per ogni persona, coinvolta nelle competenze
-   * passate come eparametro, e per ogni tipo di competenza, il valore della reason
+   *        passate come eparametro, e per ogni tipo di competenza, il valore della reason
    */
   public void updateReperibilityDatesReportFromCompetences(
       Table<Person, String, List<String>> reperibilityDateDays, List<Competence> competenceList) {

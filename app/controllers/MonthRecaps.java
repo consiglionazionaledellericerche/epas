@@ -147,7 +147,8 @@ public class MonthRecaps extends Controller {
         CustomRecapDTO danilaDto = new CustomRecapDTO();
         danilaDto.ferieAnnoCorrente = situation.currentYear.usableTotal();
 
-        danilaDto.ferieAnnoPassato = situation.lastYear != null ? situation.lastYear.usableTotal() : 0;
+        danilaDto.ferieAnnoPassato = situation.lastYear != null 
+            ? situation.lastYear.usableTotal() : 0;
 
         danilaDto.permessi = situation.permissions.usableTotal();
 

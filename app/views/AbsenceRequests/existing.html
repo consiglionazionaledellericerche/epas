@@ -1,0 +1,29 @@
+#{alert color:'warning' }
+	<p>E' stata rilevata la seguente richiesta di assenza che comprende i giorni richiesti: </p>
+#{/alert}
+<br>
+#{f.view 'absenceRequest.startAt', value:existing.startAt.format() /}
+#{f.view 'absenceRequest.endTo', value:existing.endTo.format() /}
+#{f.view 'absenceRequest.type' /}
+<table class="table table-striped">
+<tr>
+	<th>Autore</th>
+	<th>Tipo evento</th>
+	<th>Descrizione</th>
+	
+</tr>
+#{list items:absenceRequest.events, as:'item'}
+<tr #{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.MANAGER_REFUSAL) 
+	|| item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.ADMINISTRATIVE_REFUSAL)
+	|| item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.OFFICE_HEAD_REFUSAL))
+	|| item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.DELETE)} class="danger" #{/if}
+	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.MANAGER_APPROVAL) 
+	|| item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.ADMINISTRATIVE_APPROVAL)
+	|| item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.OFFICE_HEAD_APPROVAL))} class="success" #{/if}	
+	>
+	<td>#{f.value 'item.owner.person.fullname', value:item.owner.person.fullname /}</td>
+	<td>#{f.value 'item.eventType', value:item.eventType /}</td>
+	<td>#{f.value 'item.description', value:item.description /}</td>
+</tr>
+#{/list}
+</table>

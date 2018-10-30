@@ -28,6 +28,7 @@ import org.joda.time.format.PeriodFormatterBuilder;
 import play.db.jpa.GenericModel;
 import play.i18n.Messages;
 import play.libs.Crypto;
+import play.libs.I18N;
 import play.templates.JavaExtensions;
 
 /**
@@ -78,10 +79,18 @@ public class TemplateExtensions extends JavaExtensions {
     return format(date.toDate());
   }
 
+  public static String format(LocalDate date, String format) {
+    return format(date.toDate(), format, I18N.getDateFormat());
+  }
+  
   public static String format(LocalDateTime dt) {
     return DT_FORMATTER.print(dt);
   }
 
+  public static String format(LocalDateTime dt, String format) {
+    return DateTimeFormat.forPattern(format).print(dt);
+  }
+  
   public static String format(MonthDay md) {
     return md.toString("dd/MM");
   }

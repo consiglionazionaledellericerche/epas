@@ -1,0 +1,18 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set absenceRequestTypeLabel: messages.get('AbsenceRequestType.' + absenceRequest.type.toString() + 'S') /}
+#{set title:('ePAS - ' + absenceRequest.isPersistent() ? 'Modifica ' : 'Inserimento ' + absenceRequest.type.label()) /}
+
+#{switcher year:true, month:true /}
+
+#{set breadcrumbs:[(absenceRequestTypeLabel):@AbsenceRequests.list(absenceRequest.type), ('Modifica'):null] /}
+
+<div class="container">
+  #{breadcrumbs breadcrumbs /}
+  #{title title:(absenceRequest.isPersistent() ? 'Modifica ' : 'Inserimento ' + absenceRequest.type.label()) /}
+</div>
+
+<div class="container">
+	#{include './_form.html' /}
+</div>
+

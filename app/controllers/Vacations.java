@@ -88,8 +88,8 @@ public class Vacations extends Controller {
           vacationGroup, Optional.absent(), false);
       vacationSituations.add(vacationSituation);
     }
-
-    render(vacationSituations, year);
+    boolean showVacationPeriods = true;
+    render(vacationSituations, year, showVacationPeriods);
   }
   
   /**
@@ -173,7 +173,8 @@ public class Vacations extends Controller {
 
     boolean isVacationLastYearExpired = absenceService.isVacationsLastYearExpired(year, office);
 
-    boolean isVacationCurrentYearExpired = absenceService.isVacationsLastYearExpired(year + 1, office);
+    boolean isVacationCurrentYearExpired = 
+        absenceService.isVacationsLastYearExpired(year + 1, office);
 
     boolean isPermissionCurrentYearExpired = false;
     if (new LocalDate(year, 12, 31).isBefore(LocalDate.now())) {

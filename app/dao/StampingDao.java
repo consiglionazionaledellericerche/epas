@@ -41,7 +41,8 @@ public class StampingDao extends DaoBase {
   public Optional<Stamping> getStamping(LocalDateTime dateTime, Person person, WayType way) {
     final QStamping stamping = QStamping.stamping;
     final JPQLQuery query = getQueryFactory().from(stamping)
-        .where(stamping.date.eq(dateTime).and(stamping.personDay.person.eq(person)).and(stamping.way.eq(way)))
+        .where(stamping.date.eq(dateTime).and(stamping.personDay.person.eq(person))
+            .and(stamping.way.eq(way)))
         .orderBy(stamping.id.desc())
         .limit(1);
     return Optional.fromNullable(query.singleResult(stamping));

@@ -507,42 +507,5 @@ public class Persons extends Controller {
     children(child.person.id);
   }
 
-  public static void workGroup(Long personId) {
-    Person person = personDao.getPersonById(personId);
-    Set<Office> offices = Sets.newHashSet();
-    offices.add(person.office);
-    List<Person> people = personDao
-        .list(Optional.<String>absent(), offices, false, LocalDate.now(), LocalDate.now(), true)
-        .list();
-    render(people, person);
-  }
-
-
-  public static void confirmGroup(@Required List<Long> peopleGroupId, Long personId) {
-    Person person = personDao.getPersonById(personId);
-    Person p = null;
-    for (Long id : peopleGroupId) {
-      p = personDao.getPersonById(id);
-      p.personInCharge = person;
-      p.save();
-      person.people.add(p);
-    }
-    person.save();
-    flash.success("Aggiunte persone al gruppo di %s %s", person.name, person.surname);
-    workGroup(person.id);
-  }
-
-  public static void removePersonFromGroup(Long pId) {
-
-    Person person = personDao.getPersonById(pId);
-    Person supervisor = personDao.getPersonInCharge(person);
-    person.personInCharge = null;
-
-    supervisor.save();
-    person.save();
-    flash.success("Rimosso %s %s dal gruppo di %s %s", person.name, person.surname, supervisor.name,
-        supervisor.surname);
-    workGroup(supervisor.id);
-  }
 
 }

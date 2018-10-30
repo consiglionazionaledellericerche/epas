@@ -36,7 +36,7 @@ public class ChartJob extends Job<List<RenderResult>> {
   static AbsenceDao absenceDao;
 
   /**
-   * Costruttore
+   * Costruttore.
    * @param person Persona
    * @param list   Lista delle assenze estratte dallo schedone annuale delle assenze.
    */

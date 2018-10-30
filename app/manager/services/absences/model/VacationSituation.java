@@ -156,7 +156,8 @@ public class VacationSituation {
     
     private int computeUsed(AbsencePeriod period) {
       return period
-          .computePeriodTakenAmount(TakeCountBehaviour.sumAllPeriod, lastSubPeriod(period).to) / 100;
+          .computePeriodTakenAmount(
+              TakeCountBehaviour.sumAllPeriod, lastSubPeriod(period).to) / 100;
     }
     
     private boolean isContractUpperLimit(LocalDate date) {

@@ -52,11 +52,11 @@ public class Security extends Secure.Security {
    * In questo metodo viene gestito sia il caso di connessione tramite interfaccia che tramite Basic
    * Auth. Non viene però salvata però da nessuna parte il tipo di autenticazione effettuata.
    *
-   * Perciò è possibile utilizzare tramite autenticazione Basic sia i controller standard che quelli
-   * con l'annotation '@BasicAuth'.
+   * <p>Perciò è possibile utilizzare tramite autenticazione Basic sia i controller standard che 
+   * quelli con l'annotation '@BasicAuth'.</p>
    *
-   * Per cambiare questo comportamento bisognerebbe salvare quest'informazione
-   * (anche in sessione volendo), e utilizzarla nel metodo Resecure.checkAccess.
+   * <p>Per cambiare questo comportamento bisognerebbe salvare quest'informazione
+   * (anche in sessione volendo), e utilizzarla nel metodo Resecure.checkAccess.</p>
    *
    * @return l'utente corrente, se presente, altrimenti "absent".
    */
@@ -89,7 +89,7 @@ public class Security extends Secure.Security {
 
   /**
    * @return Vero se c'è almeno un istituto abilitato dall'ip contenuto nella richiesta HTTP
-   * ricevuta, false altrimenti.
+   *        ricevuta, false altrimenti.
    */
   @Util
   public static boolean checkForWebstamping() {

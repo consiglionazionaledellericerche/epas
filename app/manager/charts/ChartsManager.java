@@ -370,9 +370,6 @@ public class ChartsManager {
     GroupAbsenceType vacationGroup = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
     
-    VacationSituation vacationSituation = absenceService.buildVacationSituation(contract.get(), 
-        LocalDate.now().getYear(), vacationGroup, Optional.absent(), false);
-
     Optional<ContractMonthRecap> recap =
         wrapperFactory.create(contract.get()).getContractMonthRecap(new YearMonth(LocalDate.now()));
 
@@ -384,6 +381,9 @@ public class ChartsManager {
     Optional<WorkingTimeType> wtt = wrPerson.getCurrentWorkingTimeType();
 
     Preconditions.checkState(wtt.isPresent());
+
+    VacationSituation vacationSituation = absenceService.buildVacationSituation(contract.get(), 
+        LocalDate.now().getYear(), vacationGroup, Optional.absent(), false);
 
     out.append(person.surname + ' ' + person.name + ',');
 
