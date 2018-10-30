@@ -1,3 +1,5 @@
+# ---!Ups
+
 CREATE TABLE absence_requests (
 	id BIGSERIAL PRIMARY KEY,
 	type TEXT,
