@@ -63,8 +63,8 @@ public class ReportCentre extends Controller {
     if ("true".equals(Play.configuration.getProperty("oil.enabled")) && currentUser.isPresent()) {
       if (userDao.hasAdminRoles(currentUser.get())) {
         OilMailer.sendFeedbackToOil(data, session, currentUser.get());
-        log.info("Inviata segnalazione ad OIL. Utente {}. Categoria: '{}'. Url: {}. "
-            + "Note: {}", currentUser.get().username, OilConfig.categoryMap().get(data.getCategory()), 
+        log.info("Inviata segnalazione ad OIL. Utente {}. Categoria: '{}'. Url: {}. Note: {}", 
+            currentUser.get().username, OilConfig.categoryMap().get(data.getCategory()), 
             data.getUrl(), data.getNote());
       } else {
         ReportMailer.feedback(data, session, currentUser);  

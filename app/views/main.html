@@ -79,6 +79,11 @@
           #{include './_employeeMenu.html' /}
         #{/if}
 
+        *{ Abilitazione richiesta dei flussi in configurazione }*
+        #{secure.check 'AbsenceRequests.enabled'}
+          #{include './_workflowsMenu.html' /}
+        #{/secure.check}
+
         *{Ruoli di Sistema, Amministratore del personale, Amministratore del personale in sola lettura}*
         #{if currentUser.roles.contains(models.enumerate.AccountRole.ADMIN) 
         	|| currentUser.roles.contains(models.enumerate.AccountRole.DEVELOPER)
@@ -99,6 +104,14 @@
         #{/if}
 		#{/if}
 		
+		*{Ruolo di responsabile di gruppo di lavoro}*
+		#{if currentUser.roles.contains(models.enumerate.AccountRole.DEVELOPER)
+			|| currentUser.roles.contains(models.enumerate.AccountRole.ADMIN)
+			|| currentUser.hasRoles(models.Role.GROUP_MANAGER)}
+		  #{include './groupMenu.html' /}	
+		#{/if}
+		
+			
         *{ Ruoli di sistema e amministratori delle sedi }*
         #{if currentUser.roles.contains(models.enumerate.AccountRole.ADMIN) 
         	|| currentUser.roles.contains(models.enumerate.AccountRole.DEVELOPER) 

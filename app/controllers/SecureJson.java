@@ -18,7 +18,7 @@ public class SecureJson extends Controller {
 
   /**
    * Questo metodo deve essere chiamata passando i corretti header http Content-type:
-   * application/json Accept: application/json
+   * application/json Accept: application/json.
    *
    * @param body json nella forma {"username": "cristian.lucchesi", "password": "lapassword"}
    *

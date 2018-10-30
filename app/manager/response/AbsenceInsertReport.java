@@ -17,7 +17,8 @@ public class AbsenceInsertReport {
   private int absenceInReperibilityOrShift = 0;
 
   /**
-   * Aggiunge il riepilogo dell'inserimento assenza e incrementa i contatori corretti
+   * Aggiunge il riepilogo dell'inserimento assenza e incrementa i contatori corretti.
+   * 
    * @param response Il riepilogo dell'inserimento assenza.
    */
   public void add(AbsencesResponse response) {
@@ -71,7 +72,8 @@ public class AbsenceInsertReport {
   }
 
   /**
-   * Setter del campo absenceInReperibilityOrShift
+   * Setter del campo absenceInReperibilityOrShift.
+   * 
    * @param absenceInReperibilityOrShift numero di assenze in giorni di reperibilità o turno.
    */
   public void setAbsenceInReperibilityOrShift(int absenceInReperibilityOrShift) {

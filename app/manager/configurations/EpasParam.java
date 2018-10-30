@@ -111,6 +111,16 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Office.class),
   
+  SEND_ADMIN_NOTIFICATION("send_admin_notification",
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+
+  
   /**
    * Di quanto indietro nel tempo effettuare il ricalcolo dei personDays.
    */
@@ -259,9 +269,162 @@ public enum EpasParam {
           .formatValue(new LocalTimeInterval(new LocalTime(0, 0), new LocalTime(23, 59))),
       Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS,
           RecomputationType.RESIDUAL_MEALTICKETS),
-      Office.class);
+      Office.class),
   
+  //#######################################
+  // FLOWS PARAMS
 
+  /**
+   * Attivazione o meno della richieste di assenza generico.
+   */
+  ENABLE_FLOWS(
+      "enable_flows",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  SEND_FLOWS_NOTIFICATION("send_flows_notification",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli I-III è necessaria l'approvazione delle ferie da parte del responsabile di sede.
+   */
+  VACATION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "vacation_request_i_iii_office_head_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli IV-VIII è necessaria l'approvazione delle ferie da parte del 
+   * responsabile di sede.
+   */
+  VACATION_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "vacation_request_iv_viii_office_head_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli I-III è necessaria l'approvazione delle ferie da parte dell'eventuale
+   * responsabile del gruppo di lavoro.
+   */
+  VACATION_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED(
+      "vacation_request_i_iii_manager_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli IV-VIII è necessaria l'approvazione delle ferie da parte dell'eventuale
+   * responsabile del gruppo di lavoro.
+   */
+  VACATION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED(
+      "vacation_request_iv_viii_manager_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Per i livelli I-III è necessaria l'approvazione delle ferie da parte del responsabile di sede.
+   */
+  VACATION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "vacation_request_manager_office_head_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+ 
+  /**
+   * Per i livelli I-III è necessaria l'approvazione dei riposi compensativi da parte del 
+   * responsabile di sede.
+   */
+  COMPENSATORY_REST_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "compensatory_rest_i_iii_request_office_head_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli IV-VIII è necessaria l'approvazione dei riposi compensativi da parte del 
+   * responsabile di sede.
+   */
+  COMPENSATORY_REST_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "compensatory_rest_iv_viii_request_office_head_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Per i livelli I-III è necessaria l'approvazione dei riposi compensativi da parte 
+   * dell'eventuale responsabile di gruppo.
+   */
+  COMPENSATORY_REST_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED(
+      "compensatory_rest_i_iii_request_manager_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli IV-VIII è necessaria l'approvazione dei riposi compensativi da parte 
+   * dell'eventuale responsabile di gruppo.
+   */
+  COMPENSATORY_REST_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED(
+      "compensatory_rest_iv_viii_request_manager_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Per i livelli I-III è necessaria l'approvazione dei riposi compensativi da parte del 
+   * responsabile di sede.
+   */
+  COMPENSATORY_REST_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "compensatory_rest_manager_request_office_head_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class)
+
+  ;
+  
   public final String name;
   public final EpasParamCategory category;
   public final EpasParamTimeType epasParamTimeType;
@@ -296,11 +459,15 @@ public enum EpasParam {
   }
 
   public enum EpasParamCategory {
-    GENERAL, YEARLY, PERIODIC, AUTOCERTIFICATION
+    GENERAL, YEARLY, PERIODIC, AUTOCERTIFICATION, FLOWS
   }
 
   public enum EpasParamTimeType {
-    GENERAL, YEARLY, PERIODIC
+    GENERAL, YEARLY, PERIODIC;
+    
+    public boolean isGeneral() {
+      return this == GENERAL;
+    }
   }
 
   public enum RecomputationType {

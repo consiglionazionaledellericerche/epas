@@ -1,0 +1,41 @@
+#{modalAsync id:'modalInsertInstitute', button:'Salva', title:'Nuovo gruppo di lavoro' }
+
+
+<div class="alert alert-info" role="alert">
+  Compila il form sottostante per creare un nuovo <strong><i class="fa fa-users"></i> gruppo di lavoro</strong>.
+</div>
+
+<div id="groupData">
+
+  #{form action:@createGroup(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#groupData'}
+  #{if group?.persistent}
+    #{f.hidden 'group.id', value: group.id /}
+  #{/if}
+  #{f.input 'group.name', required:true /}
+  #{f.input 'group.description' /}
+  #{f.hidden 'office.id' /}  
+  #{f.selectModel 'group.manager', items: templateUtility.peopleForGroups(office), required:true /}
+  #{f.selectMultipleModel 'group.people', values: templateUtility.peopleForGroups(office) /}
+  #{f.booleanRadio 'group.sendFlowsEmail' /}
+
+  #{b.buttons center:true}
+    
+    #{b.save /}
+  #{/b.buttons}
+
+  #{alert color:'info'}
+  <p>
+    <strong>Note:</strong> Soltanto gli amministratori del personale della sede potranno
+    gestire questo gruppo, fra cui la modifica delle persone appartenenti allo stesso e
+    il responsabile.
+  </p>
+  #{/alert}
+  #{/form}
+
+</div>
+
+
+
+#{/modalAsync}

@@ -28,7 +28,8 @@ public class PersonShiftDayInTroubleDao extends DaoBase{
    * @param trouble la causa per cui si ricerca il trouble
    * @return il personShiftDayInTrouble, se esiste, relativo ai parametri passati al metodo.
    */
-  public Optional<PersonShiftDayInTrouble> getPersonShiftDayInTroubleByType(PersonShiftDay pd, ShiftTroubles trouble) {
+  public Optional<PersonShiftDayInTrouble> getPersonShiftDayInTroubleByType(
+      PersonShiftDay pd, ShiftTroubles trouble) {
     QPersonShiftDayInTrouble pdit = QPersonShiftDayInTrouble.personShiftDayInTrouble;
     final JPQLQuery query = getQueryFactory()
         .from(pdit)

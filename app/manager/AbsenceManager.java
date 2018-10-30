@@ -674,7 +674,7 @@ public class AbsenceManager {
   }
 
   /**
-   * La data iniziale di una sequenza consecutiva di assenze dello stesso tipo
+   * La data iniziale di una sequenza consecutiva di assenze dello stesso tipo.
    *
    * @param date        data
    * @param person      persona

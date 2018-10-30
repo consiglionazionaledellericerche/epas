@@ -14,7 +14,6 @@ import models.PersonShiftDay;
 import models.ShiftCategories;
 import models.ShiftType;
 import models.enumerate.ShiftSlot;
-import models.query.QPersonDay;
 import models.query.QPersonShift;
 import models.query.QPersonShiftDay;
 import models.query.QShiftCategories;
@@ -71,6 +70,8 @@ public class PersonShiftDayDao extends DaoBase {
   }
   
   /**
+   * Cerca il PersonShiftDay per ShiftType, data, ShiftSlot.
+   * 
    * @return il personShiftDay relativo al tipo 'shiftType' nel giorno 'date' con lo slot
    *     'shiftSlot'.
    */
@@ -86,6 +87,8 @@ public class PersonShiftDayDao extends DaoBase {
 
 
   /**
+   * PersonShift associato alla persona passata.
+   * 
    * @return il personShift associato alla persona passata come parametro.
    */
   public PersonShift getPersonShiftByPerson(Person person, LocalDate date) {
@@ -107,6 +110,8 @@ public class PersonShiftDayDao extends DaoBase {
   }
 
   /**
+   * Tutti i PersonReperibilityType.
+   * 
    * @return la lista di tutti i PersonReperibilityType presenti sul db.
    */
   public List<ShiftCategories> getAllShiftType() {
@@ -116,9 +121,10 @@ public class PersonShiftDayDao extends DaoBase {
   }
 
   /**
+   * Cerca un PersonShiftDay per persona e data.
    * 
-   * @param person
-   * @param date
+   * @param person Person da cercare.
+   * @param date data del personShiftDay.
    * @return
    */
   public Optional<PersonShiftDay> byPersonAndDate(Person person, LocalDate date) {
@@ -130,9 +136,10 @@ public class PersonShiftDayDao extends DaoBase {
   }
 
   /**
-   *
-   * @param shiftType
-   * @param person
+   * Cerca un PersonShiftDay per typo e data.
+   * 
+   * @param shiftType tipo del PersonShiftDay
+   * @param date data del PersonShiftDay da cercare
    * @return
    */
   public Optional<PersonShiftDay> byTypeAndDate(ShiftType shiftType, LocalDate date) {

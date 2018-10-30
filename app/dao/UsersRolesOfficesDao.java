@@ -39,6 +39,22 @@ public class UsersRolesOfficesDao extends DaoBase {
   }
 
   /**
+   * La lista degli utenti che hanno un determinato permesso su un'ufficio.
+   * 
+   * @param role il ruolo da verificare
+   * @param office l'ufficio su cui avere il ruolo.
+   * @return la lista degli user che hanno il ruolo specificato nell'ufficio
+   *     indicato.
+   */
+  public List<User> getUsersWithRoleOnOffice(Role role, Office office) {
+    final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
+    final JPQLQuery query = getQueryFactory().from(uro)
+        .where(uro.role.eq(role)
+            .and(uro.office.eq(office)));
+    return query.list(uro.user);
+  }
+  
+  /**
    * @return l'usersRolesOffice associato ai parametri passati.
    */
   public Optional<UsersRolesOffices> getUsersRolesOffices(User user, Role role, Office office) {

@@ -99,12 +99,6 @@ public class Shift extends Controller {
 
     log.debug("Shift personList called, found {} shift person", personList.size());
 
-    /*if (log.isTraceEnabled()) {
-      for (PersonShiftShiftType p : personList) {
-       log.trace("name={} surname={} id={} jolly={}",
-            p.personShift.person.name, p.personShift.person.surname, p.personShift.person.id, p.jolly);
-       }
-    }*/
     render(personList);
   }
 
@@ -308,8 +302,8 @@ public class Shift extends Controller {
 
       // Memorizzo le inconsistenze del turno
       log.debug(
-          "Chiamo la getShiftInconsistencyTimestampTable PER TROVARE LE INCONSISTENZE del turno %s e memorizzarle",
-          type);
+          "Chiamo la getShiftInconsistencyTimestampTable PER TROVARE LE INCONSISTENZE "
+          + "del turno %s e memorizzarle", type);
       shiftManager
           .getShiftInconsistencyTimestampTable(personsShiftDays, personsShiftInconsistentAbsences,
               shiftType);

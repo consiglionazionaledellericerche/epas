@@ -81,7 +81,7 @@ public class ReperibilityTypeMonthDao extends DaoBase {
 
   /**
    * Questo metodo è utile in fase di assegnazione delle competenze in seguito all'approvazione
-   * del responsabile di turno (bisogna ricalcolare tutte le competenze delle persone coinvolte)
+   * del responsabile di turno (bisogna ricalcolare tutte le competenze delle persone coinvolte).
    *
    * @param month mese richiesto
    * @param people lista delle persone coinvolte nel mese richiesto

@@ -248,7 +248,8 @@ public class Absence extends BaseModel {
   }
 
   /**
-   * Fondamentale per far funzionare alcune drools
+   * Fondamentale per far funzionare alcune drools.
+   * 
    * @return Restituisce il proprietario della timbratura.
    */
   public Person getOwner() {
@@ -256,7 +257,8 @@ public class Absence extends BaseModel {
   }
 
   /**
-   * Utile per effettuare i controlli temporali sulle drools
+   * Utile per effettuare i controlli temporali sulle drools.
+   * 
    * @return il mese relativo alla data della timbratura.
    */
   public YearMonth getYearMonth() {

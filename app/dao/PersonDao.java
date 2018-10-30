@@ -35,6 +35,7 @@ import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.flows.query.QGroup;
 import models.query.QBadge;
 import models.query.QConfiguration;
 import models.query.QContract;
@@ -540,15 +541,6 @@ public final class PersonDao extends DaoBase {
 
 
   /**
-   * @return il responsabile per la persona passata come parametro.
-   */
-  public Person getPersonInCharge(Person person) {
-    final QPerson qperson = QPerson.person;
-    final JPQLQuery query = getQueryFactory().from(qperson).where(qperson.people.contains(person));
-    return query.singleResult(qperson);
-  }
-
-  /**
    * Le persone attive della sede con il vecchio campo person.badgeNumber popolato.
    *
    * @return persone
@@ -590,7 +582,7 @@ public final class PersonDao extends DaoBase {
   private JPQLQuery personQuery(JPQLQuery injectedQuery, Optional<String> name, Set<Office> offices,
       boolean onlyTechnician, Optional<LocalDate> start, Optional<LocalDate> end,
       boolean onlyOnCertificate, Optional<CompetenceCode> compCode,
-      Optional<Person> personInCharge, boolean onlySynchronized) {
+      /*Optional<Person> personInCharge,*/ boolean onlySynchronized) {
 
     final BooleanBuilder condition = new BooleanBuilder();
 
@@ -602,7 +594,7 @@ public final class PersonDao extends DaoBase {
     if (start.isPresent()) {
       filterCompetenceCodeEnabled(condition, compCode, start.get());
     }    
-    filterPersonInCharge(condition, personInCharge);
+    //filterPersonInCharge(condition, personInCharge);
     filterOnlySynchronized(condition, onlySynchronized);
 
     return injectedQuery.where(condition);
@@ -637,6 +629,7 @@ public final class PersonDao extends DaoBase {
         .leftJoin(person.contracts, contract).fetch()
         .leftJoin(person.personCompetenceCodes, QPersonCompetenceCodes.personCompetenceCodes)
         .leftJoin(person.user, QUser.user)
+        .leftJoin(person.groups, QGroup.group)
         // join one to one
         .leftJoin(person.reperibility, QPersonReperibility.personReperibility).fetch()
         .leftJoin(
@@ -706,15 +699,23 @@ public final class PersonDao extends DaoBase {
   }
 
 
+  /**
+   * Filtra solo i livelli IV-VIII.
+   * @param condition la condizione
+   * @param value true se vogliamo solo i tecnici/amministrativi, false altrimenti
+   */
   private void filterOnlyTechnician(BooleanBuilder condition, boolean value) {
-
-
     if (value == true) {
       final QPerson person = QPerson.person;
       condition.and(person.qualification.qualification.gt(3));
     }
   }
 
+  /**
+   * Filtra solo le persone che devono andare su attestati.
+   * @param condition la condizione
+   * @param value true se vogliamo quelli che vanno su attestati, false altrimenti
+   */
   private void filterOnlyOnCertificate(BooleanBuilder condition, boolean value) {
     if (value) {
       final QContract contract = QContract.contract;
@@ -722,13 +723,23 @@ public final class PersonDao extends DaoBase {
     }
   }
 
+  /**
+   * Filtra le persone che appartengono al gruppo di lavoro del personInCharge.
+   * @param condition la condizione
+   * @param personInCharge il responsabile se presente
+   */
   private void filterPersonInCharge(BooleanBuilder condition, Optional<Person> personInCharge) {
-    if (personInCharge.isPresent()) {
-      final QPerson person = QPerson.person;
-      condition.and(person.personInCharge.eq(personInCharge.get()));
+    if (personInCharge.isPresent()) {      
+      final QGroup group = QGroup.group;
+      condition.and(group.manager.eq(personInCharge.get()));
     }
   }
 
+  /**
+   * Filtra le persone sincronizzate con perseo.
+   * @param condition la condizione
+   * @param value true se vogliamo solo i sincronizzati con perseo, false altrimenti 
+   */
   private void filterOnlySynchronized(BooleanBuilder condition, boolean value) {
     if (value == true) {
       final QPerson person = QPerson.person;
@@ -842,7 +853,7 @@ public final class PersonDao extends DaoBase {
 
 
     lightQuery = personQuery(lightQuery, Optional.<String>absent(), offices, false, beginMonth,
-        endMonth, true, Optional.<CompetenceCode>absent(), Optional.<Person>absent(), false);
+        endMonth, true, Optional.<CompetenceCode>absent(), /*Optional.<Person>absent(),*/ false);
 
     QBean<PersonLite> bean =
         Projections.bean(PersonLite.class, person.id, person.name, person.surname);
@@ -868,7 +879,7 @@ public final class PersonDao extends DaoBase {
 
 
     lightQuery = personQuery(lightQuery, Optional.absent(), offices, false, Optional.absent(),
-        Optional.absent(), true, Optional.absent(), Optional.absent(), false);
+        Optional.absent(), true, Optional.absent(), /*Optional.absent(),*/ false);
 
     QBean<PersonLite> bean =
         Projections.bean(PersonLite.class, person.id, person.name, person.surname);

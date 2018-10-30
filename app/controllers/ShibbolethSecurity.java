@@ -1,18 +1,11 @@
 package controllers;
 
-
 import com.google.common.net.UrlEscapers;
-
 import dao.PersonDao;
-
 import java.util.HashMap;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import models.Person;
-
 import play.Logger;
 import play.Play;
 import play.Play.Mode;

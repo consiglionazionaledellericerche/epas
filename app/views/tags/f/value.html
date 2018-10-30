@@ -1,0 +1,35 @@
+*{
+ arg field.name
+ value (optional) if empty fallback on field.value
+ label (optional) if empty fallback to arg
+ link (optional) if href create a with href
+ description (optional) if not empty add an help-block
+}*
+#{field _arg}
+%{
+  if (_value != null) {
+    value = _value
+  } else {
+    value = field.value
+  }
+  empty = value == null || ((value instanceof String ) && value.empty)
+  // XXX: attenzione gli a-capo nel seguito in alcuni casi mancano volutamente.
+}%
+	<span id="${field.id}">
+        #{if !empty}
+	        #{if _link}<a href="${_link}">#{/if}
+	            #{if value instanceof String}${value}#{/if}
+	            #{elseif value instanceof Boolean}
+	                 <i class="fa ${value ? 'fa-check-square-o' : 'fa-square-o text-muted'}"></i>
+	                 <span class="sr-only">${value ? 'si':'no'}</span>
+	            #{/elseif}
+	            #{elseif value instanceof Enum}${value.label()}#{/elseif}
+	            #{else}${value.format()}#{/else}
+	        #{if _link}</a>#{/if}
+	        #{/if}
+        #{else}
+            <span class="text-muted">${'non presente'.label()}</span>
+        #{/else}
+        #{if _description}<span class="help-block">${_description}</span>#{/if}       
+	</span>
+#{/field}

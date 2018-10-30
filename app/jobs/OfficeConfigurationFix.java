@@ -15,6 +15,9 @@ import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 
 /**
+ * Job per aggiornare le configurazioni degli uffici con gli eventuali nuovi
+ * paramtri di configurazione.
+ * 
  * @author daniele
  * @since 30/06/16.
  */
@@ -34,10 +37,6 @@ public class OfficeConfigurationFix extends Job<Void> {
       return;
     }
 
-    List<Office> offices = Office.findAll();
-    for (Office office : offices) {
-      log.debug("Fix parametri di configurazione della sede {}", office);
-      configurationManager.updateConfigurations(office);
-    }
+    configurationManager.updateAllOfficesConfigurations();
   }
 }
