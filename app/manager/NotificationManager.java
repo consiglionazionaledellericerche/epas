@@ -53,7 +53,8 @@ public class NotificationManager {
 
   @Inject
   public NotificationManager(SecureManager secureManager, RoleDao roleDao, AbsenceDao absenceDao,
-      AbsenceComponentDao componentDao, GroupDao groupDao, ConfigurationManager configurationManager) {
+      AbsenceComponentDao componentDao, GroupDao groupDao, 
+      ConfigurationManager configurationManager) {
     this.secureManager = secureManager;
     this.roleDao = roleDao;
     this.absenceDao = absenceDao;

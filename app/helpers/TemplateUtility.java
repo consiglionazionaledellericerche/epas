@@ -62,6 +62,7 @@ import models.enumerate.StampTypes;
 import models.flows.AbsenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
+import play.Play;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import synch.diagnostic.SynchDiagnostic;
@@ -75,6 +76,7 @@ public class TemplateUtility {
   
   private final String WORKDAYS_REP = "207";
   private final String HOLIDAYS_REP = "208";
+  private final String FLOWS_ACTIVE = "flows.active";
 
   private final SecureManager secureManager;
   private final OfficeDao officeDao;
@@ -316,6 +318,18 @@ public class TemplateUtility {
   
   public List<ContractualReference> allContractualReferences() {
     return contractualReferenceDao.all(Optional.of(false));
+  }
+  
+  /**
+   * Controlla se i flussi sono attivi.
+   * @return true se sono attivi i flussi su ePAS, false altrimenti.
+   * @throws NoSuchFieldException lancia eccezione se non esiste il campo in conf.
+   */
+  public boolean isFlowsActive() throws NoSuchFieldException {
+    if ("true".equals(Play.configuration.getProperty(FLOWS_ACTIVE))) {
+      return true;
+    }
+    return false;
   }
   
   /**

@@ -29,7 +29,9 @@
   #{tabItem id:'YEARLY', title:'Annuali', active:yearlyActive /}
   #{tabItem id:'PERIODIC', title:'Periodici', active:periodicActive /}
   #{tabItem id:'AUTOCERTIFICATION', title:'Autocertificazioni', active:autocertificationActive /}
+  #{if templateUtility.isFlowsActive()}
   #{tabItem id:'FLOWS', title:'Flussi di lavoro', active:flowsActive /}
+  #{/if}
   #{/tabList}
 
   <br>
@@ -179,7 +181,8 @@
     </div>
   </div>
   #{/tabContentItem}
-
+	
+  #{if templateUtility.isFlowsActive()}	
   #{tabContentItem id:'FLOWS', active:flowsActive}
   <div id="editFlows">
     #{alert color:'info'}
@@ -223,6 +226,7 @@
     </table>
   </div>
   #{/tabContentItem}
+  #{/if}
 
   #{/tabContent}
 
