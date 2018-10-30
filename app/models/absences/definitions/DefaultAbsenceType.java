@@ -263,6 +263,9 @@ public enum DefaultAbsenceType {
   A_89M("89M", "Permesso diritto allo studio in ore e minuti",
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
       0, null, Sets.newHashSet(), null, null),
+  A_98("98", "Assenza Ingiustificata",
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      0, null, Sets.newHashSet(), null, null),
   A_99("99", "permesso per diritto allo studio",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, Sets.newHashSet(), null, null),
@@ -357,7 +360,7 @@ public enum DefaultAbsenceType {
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, Sets.newHashSet(), null, null),
   
-  A_91CE("91CE", "Riposo compensativo per chiusura ente", false, 
+  A_91CE("91", "Riposo compensativo per chiusura ente", false, 
       ImmutableSet.of(JustifiedTypeName.recover_time), 0,
       false, false, 0, null, Sets.newHashSet(), null, null),
 
@@ -1395,6 +1398,10 @@ public enum DefaultAbsenceType {
   
   A_50("50", "aspettativa per ricongiungimento familiare all'estero",
       true, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
+      0, null, Sets.newHashSet(), null, null),
+  
+  A_52("52", "aspettativa per infermita' causa servizio",
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, Sets.newHashSet(), null, null),
   
   A_96("96", "sosp.ne cautelare e/o dal servizio",
