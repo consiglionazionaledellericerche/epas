@@ -572,16 +572,25 @@ public class PersonDayManager {
    */
   private PersonDay updateTimeAtWorkFixed(PersonDay personDay, WorkingTimeTypeDay wttd) {
 
-    if (personDay.isHoliday || getAllDay(personDay).isPresent() 
-        || getAssignAllDay(personDay).isPresent() 
+    if (getAllDay(personDay).isPresent() 
+          && !getAllDay(personDay).get().absenceType.timeForMealTicket
+        || (getAssignAllDay(personDay).isPresent() 
+            && !getAssignAllDay(personDay).get().absenceType.timeForMealTicket)
+        || (getCompleteDayAndAddOvertime(personDay).isPresent() 
+            && !getCompleteDayAndAddOvertime(personDay).get().absenceType.timeForMealTicket)) {
+      setTicketStatusIfNotForced(personDay, false);
+    } else {
+      setTicketStatusIfNotForced(personDay, true);
+    }
+    
+    if (personDay.isHoliday
+        || getAllDay(personDay).isPresent()
         || getCompleteDayAndAddOvertime(personDay).isPresent()) {
       personDay.setTimeAtWork(0);
-      setTicketStatusIfNotForced(personDay, false);
       return personDay;
     }
 
     personDay.setTimeAtWork(wttd.workingTime);
-    setTicketStatusIfNotForced(personDay, true);
 
     return personDay;
   }

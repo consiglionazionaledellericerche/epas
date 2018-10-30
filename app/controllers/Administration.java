@@ -55,6 +55,7 @@ import manager.configurations.ConfigurationManager;
 import models.CompetenceCode;
 import models.Contract;
 import models.ContractMonthRecap;
+import models.Institute;
 import models.Office;
 import models.Person;
 import models.PersonDay;
@@ -761,11 +762,63 @@ public class Administration extends Controller {
     renderBinary(inputStream, "cmr-situation-506.csv");
   }
 
+
   /**
    * @see manager.configurations.ConfigurationManager::updateAllOfficeConfigurations
    */
   public static void updateAllOfficeConfigurations() {
     configurationManager.updateAllOfficesConfigurations();
     renderText("Aggiornati i parametri di configuratione di tutti gli uffici.");
+  }
+
+  
+  /**
+   * Metodo che riposiziona una sede in un nuovo istituto in caso di accorpamenti.
+   * @param office la sede da spostare
+   * @param institute l'istituto in cui spostare la sede
+   */
+  public static void adjustSeats(Office office, Institute institute, 
+      String sedeId, String codiceSede) {
+    List<Office> officeList = Office.findAll();
+    List<Institute> instituteList = Institute.findAll();
+    if (!office.isPersistent() || !institute.isPersistent()) {
+      render(officeList, instituteList);
+    } else {
+      changeSeatLocation(office, institute, sedeId, codiceSede);
+      officeList = Office.findAll();
+      instituteList = Institute.findAll();
+      flash.success("Aggiornato rapporto tra %s e %s", office.name, institute.code);
+      render(officeList, instituteList);
+    }    
+    
+  }
+  
+  /**
+   * Metodo privato che fa il cambio di appartenenza di una sede.
+   * @param office la sede da spostare
+   * @param institute l'istituto in cui spostare la sede
+   */
+  private static void changeSeatLocation(Office office, Institute institute, 
+      String sedeId, String codiceSede) {
+    Institute oldInstitute = office.institute;
+    oldInstitute.seats.remove(office);
+    office.institute = institute;
+    int separatorChar = office.name.indexOf("-");
+    if (separatorChar == -1) {
+      separatorChar = office.name.indexOf(" ");
+    }
+    String city = office.name.substring(separatorChar, office.name.length());
+    office.name = institute.code + city;
+    if (!Strings.isNullOrEmpty(sedeId)) {
+      office.codeId = sedeId;
+    }
+    if (!Strings.isNullOrEmpty(codiceSede)) {
+      office.code = codiceSede;
+    }
+    institute.seats.add(office);
+    oldInstitute.save();
+    office.save();
+    institute.save();
+
   }
 }

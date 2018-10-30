@@ -688,6 +688,7 @@ AbsenceGroups.showCategories=Categorie Assenze
 AbsenceGroups.certificationsAbsenceCodes=Codici Assenza Attestati
 AbsenceGroups.certificationsAbsences=Cruscotto Dipendente Attestati
 Administration.internalSearch=Ricerca
+Administration.adjustSeats=Rimodula sedi
 Administration.playConfiguration= Informazioni Applicazione
 Administration.utilities= Utilities
 BadgeReaders.list= Sorgenti Timbrature
