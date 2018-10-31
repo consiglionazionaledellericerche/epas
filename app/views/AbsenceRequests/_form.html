@@ -24,6 +24,9 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 
 	#{f.date 'absenceRequest.startAt', required:true, value:absenceRequest.startAt?.format("dd/MM/yyyy") /}
 	#{f.date 'absenceRequest.endTo', value:absenceRequest.endTo?.format("dd/MM/yyyy") /}
+	#{if retroactiveAbsence}
+		#{f.input 'absenceRequest.note', required:true, value:absenceRequest.note /}
+	#{/if}
 	#{if handleCompensatoryRestSituation}
 	<div class="container-fluid">
 	<h3>Riposi compensativi rimasti: 
