@@ -854,12 +854,12 @@ public class AbsenceCertificationService {
           } 
 
           //4) 09 (visita medica). Utilizzo il codice sostitutivo.
-          if (code.equals(DefaultAbsenceType.A_09B.getCode())) {
-            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_09BI.getCode()).get();
-            absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
-                  aux, nothing, 0, 0).absencesToPersist); 
-            continue;
-          }
+//          if (code.equals(DefaultAbsenceType.A_09B.getCode())) {
+//            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_09BI.getCode()).get();
+//            absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
+//                  aux, nothing, 0, 0).absencesToPersist); 
+//            continue;
+//          }
           
           //Gli altri li inserisco senza paura 
           // (a patto che il tipo sia allDay o absence_type_minutes)
