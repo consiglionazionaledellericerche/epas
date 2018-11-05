@@ -338,8 +338,7 @@ public class AbsenceRequests extends Controller {
       return;
     }
     
-    if (absenceRequest.startAtAsDate().isBefore(LocalDate.now()) 
-        && absenceRequest.endToAsDate().isBefore(LocalDate.now())) {
+    if (absenceRequest.startAtAsDate().isBefore(LocalDate.now())) {
       retroactiveAbsence = true;
       if (Strings.isNullOrEmpty(absenceRequest.note)) {
         Validation.addError("absenceRequest.note", 
@@ -359,7 +358,7 @@ public class AbsenceRequests extends Controller {
         absenceForm.groupSelected, absenceForm.from, absenceForm.to,
         absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected, 
         null, null, false, absenceManager);
-    boolean handleCompensatoryRestSituation = false;
+    
     int compensatoryRestAvailable = 0;
     if (absenceRequest.type.equals(AbsenceRequestType.COMPENSATORY_REST) 
         && absenceRequest.person.isTopQualification()) {
@@ -370,7 +369,7 @@ public class AbsenceRequests extends Controller {
           .configValue(absenceRequest.person.office, 
               EpasParam.MAX_RECOVERY_DAYS_13, LocalDate.now().getYear());
       compensatoryRestAvailable = maxDays - psDto.numberOfCompensatoryRestUntilToday;
-      handleCompensatoryRestSituation = true;
+      
     }
     List<VacationSituation> vacationSituations = Lists.newArrayList();
     if (absenceRequest.type.equals(AbsenceRequestType.VACATION_REQUEST)) {
