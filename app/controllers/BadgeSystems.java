@@ -97,9 +97,7 @@ public class BadgeSystems extends Controller {
     List<Badge> badges = badgeSystemDao.badges(badgeSystem)
         .stream().distinct().collect(Collectors.toList());
 
-    List<Person> personsOldBadge = personDao.activeWithBadgeNumber(badgeSystem.office);
-
-    render(badgeSystem, badgeReadersResults, badges, personsOldBadge);
+    render(badgeSystem, badgeReadersResults, badges);
 
   }
 
@@ -274,64 +272,7 @@ public class BadgeSystems extends Controller {
     }
   }
 
-  /**
-   * Associa nel gruppo per tutti i dipendenti il vecchio campo person.badgeNumber
-   */
-  public static void joinOldBadgeNumbers(Long badgeSystemId) {
 
-    BadgeSystem badgeSystem = badgeSystemDao.byId(badgeSystemId);
-    notFoundIfNull(badgeSystem);
-    rules.checkIfPermitted(badgeSystem.office);
-
-    List<Person> personsOldBadge = personDao.activeWithBadgeNumber(badgeSystem.office);
-
-    int personsInError = 0;
-
-    for (Person person : personsOldBadge) {
-
-      List<Badge> violatedBadges = Lists.newArrayList();
-      List<Badge> validBadges = Lists.newArrayList();
-
-      for (BadgeReader badgeReader : badgeSystem.badgeReaders) {
-        Badge badge = new Badge();
-        badge.person = person;
-        badge.code = person.badgeNumber.replaceFirst("^0+(?!$)", "");
-        badgeManager.normalizeBadgeCode(badge, false);
-        badge.badgeSystem = badgeSystem;
-        badge.badgeReader = badgeReader;
-
-        Optional<Badge> alreadyExists = alreadyExists(badge);
-        if (alreadyExists.isPresent()) {
-          if (!alreadyExists.get().person.equals(badge.person)) {
-            violatedBadges.add(alreadyExists.get());
-          }
-        } else {
-          validBadges.add(badge);
-        }
-      }
-
-      if (!violatedBadges.isEmpty()) {
-        // segnalare il caso in modo più puntuale?
-        personsInError++;
-      } else {
-        for (Badge badge : validBadges) {
-          badge.save();
-        }
-        //person.badgeNumber = null;
-        //person.save();
-      }
-    }
-
-    if (personsInError == 0) {
-      flash.success("Operazione completata con successo.");
-    } else {
-      flash.error("Operazione completata ma per %s dipendenti non è stato possibile "
-          + "inserire il badge a causa di conflitto codici.", personsInError);
-    }
-
-    edit(badgeSystem.id);
-
-  }
 
   /**
    * Associa nel gruppo per tutti i dipendenti il vecchio campo person.number
