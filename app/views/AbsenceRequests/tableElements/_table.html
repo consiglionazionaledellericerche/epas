@@ -16,6 +16,7 @@
 			<th #{if approvalRequired}rowspan="2"#{/if}>Stato attuale</th>
 			<th #{if approvalRequired}rowspan="2"#{/if}>Visualizza</th>
 			<th #{if approvalRequired}rowspan="2"#{/if}>Azioni</th>
+			<th #{if approvalRequired}rowspan="2"#{/if}>Note</th>
 				
 		</tr>			
 		#{if approvalRequired}
@@ -71,6 +72,11 @@
         		Rifiuta
       			</a>
       			#{/secure.check}
+      			</td>
+      			<td #{if item.note != null && !item.note.equals("")} 
+      				webui-popover-hover data-content="${item.note}">      			
+      				<i class="fa fa-exclamation-triangle fa-2x text-danger" aria-hidden="true" ></i>
+      				#{/if}
       			</td>
 			</tr>
 		#{/list}
