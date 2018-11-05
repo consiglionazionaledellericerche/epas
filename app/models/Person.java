@@ -210,12 +210,6 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @Transient
   public Long perseoOfficeId = null;
 
-  /**
-   * Rimuoverlo quando sarà stata effettuata la migrazione di tutti i badge alla tabella badges.
-   */
-  @Deprecated
-  @As(binder = NullStringBinder.class)
-  public String badgeNumber;
 
   /**
    * Sono stati implementati i metodi Equals e HashCode sulla classe Badge in modo che Se sono

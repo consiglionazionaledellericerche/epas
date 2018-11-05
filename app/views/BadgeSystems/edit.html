@@ -112,9 +112,7 @@
         #{if badge.code.equals(badge.person.number+"") }
         <span class="label label-info">Matricola</span>
         #{/if}
-        #{if badge.code.equals(badge.person.badgeNumber) }
-        <span class="label label-success">Old</span>
-        #{/if}
+
       </td>
       <td>
         <a class="btn btn-danger btn-xs" href="@{BadgeSystems.deleteBadge(badge.id)}"
@@ -153,39 +151,6 @@
     </a>
   </div>
   #{/alert}
-  #{/panel}
-
-  #{panel title:'Vecchi Codici'}
-  #{if !personsOldBadge.empty}
-  #{alert color:'info'}
-  <div class="text-center">
-    <p>Associa a <strong>${badgeSystem.name}</strong> per tutti i dipendenti attivi di <strong>${badgeSystem.office.name}</strong>
-      tutti i codici badge della precedente gestione badge.</p>
-    <a class="btn btn-primary" href="@{joinOldBadgeNumbers(badgeSystem.id)}">
-      Associa Tutti i Vecchi Codici
-    </a>
-  </div>
-  #{/alert}
-  <div class="col-md-6 col-md-offset-3">
-    <table class="table">
-      <thead>
-      <tr>
-        <th>Nome</th>
-        <th><i class="fa fa-credit-card"></i> Vecchio Codice</th>
-      </tr>
-      </thead>
-      <tbody>
-      #{list items:personsOldBadge, as:'personOldBadge'}
-      <tr>
-        <td>${personOldBadge.fullname}</td>
-        <td>${personOldBadge.badgeNumber}</td>
-      </tr>
-
-      #{/list}
-      </tbody>
-    </table>
-  </div>
-  #{/if}
   #{/panel}
 
   #{/else}
