@@ -2,6 +2,7 @@ package controllers;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import dao.AbsenceRequestDao;
@@ -237,7 +238,7 @@ public class AbsenceRequests extends Controller {
     int compensatoryRestAvailable = 0;
     List<VacationSituation> vacationSituations = Lists.newArrayList();
     boolean showVacationPeriods = false;
-    
+    boolean retroactiveAbsence = false;
     boolean handleCompensatoryRestSituation = false;
     val absenceRequest = new AbsenceRequest();
     absenceRequest.type = type;
@@ -278,7 +279,8 @@ public class AbsenceRequests extends Controller {
         absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected, 
         null, null, false, absenceManager);
     render("@edit", absenceRequest, insertable, insertReport, vacationSituations, 
-        compensatoryRestAvailable, handleCompensatoryRestSituation, showVacationPeriods);
+        compensatoryRestAvailable, handleCompensatoryRestSituation, 
+        showVacationPeriods, retroactiveAbsence);
 
   }
 
@@ -286,10 +288,9 @@ public class AbsenceRequests extends Controller {
    * Form di modifica di una richiesta di assenza.
    * 
    * @param absenceRequest richiesta di assenza da modificare.
-   *     TODO: spostare qui dentro la logica del ricontrollo ogni volta che viene modificato un 
-   *     parametro nella richiesta sulla form e mantenere la persistenza solo nella @save()
+   *     
    */
-  public static void edit(AbsenceRequest absenceRequest) {
+  public static void edit(AbsenceRequest absenceRequest, boolean retroactiveAbsence) {
 
     rules.checkIfPermitted(absenceRequest);
     boolean insertable = true;
@@ -301,12 +302,13 @@ public class AbsenceRequests extends Controller {
           "Entrambi i campi data devono essere valorizzati");
       response.status = 400;
       insertable = false;
-      render("@edit", absenceRequest, insertable);
+      render("@edit", absenceRequest, insertable, retroactiveAbsence);
     }
     if (absenceRequest.startAt.isAfter(absenceRequest.endTo)) {
       Validation.addError("absenceRequest.startAt", 
           "La data di inizio non può essere successiva alla data di fine");      
     }
+    
     //verifico che non esista già una richiesta (non rifiutata) 
     //di assenza che interessa i giorni richiesti
     AbsenceRequest existing = absenceRequestManager.checkAbsenceRequest(absenceRequest); 
@@ -315,7 +317,7 @@ public class AbsenceRequests extends Controller {
       Validation.addError("absenceRequest.endTo", "Esiste già una richiesta in questa data");
       response.status = 400;
       insertable = false;
-      render("@edit", absenceRequest, insertable, existing);
+      render("@edit", absenceRequest, insertable, existing, retroactiveAbsence);
     }
     if (!absenceRequest.person.checkLastCertificationDate(
         new YearMonth(absenceRequest.startAtAsDate().getYear(), 
@@ -324,7 +326,7 @@ public class AbsenceRequests extends Controller {
           "Non è possibile fare una richiesta per una data di un mese già processato in Attestati");
       response.status = 400;
       insertable = false;
-      render("@edit", absenceRequest, insertable);
+      render("@edit", absenceRequest, insertable, retroactiveAbsence);
     }
 
     if (Validation.hasErrors()) {
@@ -332,8 +334,19 @@ public class AbsenceRequests extends Controller {
       insertable = false;
       flash.error(Web.msgHasErrors());
       
-      render("@edit", absenceRequest, insertable);
+      render("@edit", absenceRequest, insertable, retroactiveAbsence);
       return;
+    }
+    
+    if (absenceRequest.startAtAsDate().isBefore(LocalDate.now())) {
+      retroactiveAbsence = true;
+      if (Strings.isNullOrEmpty(absenceRequest.note)) {
+        Validation.addError("absenceRequest.note", 
+            "Inserire una motivazione per l'assenza nel passato");
+        response.status = 400;
+        insertable = false;
+        render("@edit", absenceRequest, insertable, retroactiveAbsence);
+      }
     }
     GroupAbsenceType groupAbsenceType = absenceRequestManager.getGroupAbsenceType(absenceRequest);
     AbsenceType absenceType = null;
@@ -345,7 +358,7 @@ public class AbsenceRequests extends Controller {
         absenceForm.groupSelected, absenceForm.from, absenceForm.to,
         absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected, 
         null, null, false, absenceManager);
-    boolean handleCompensatoryRestSituation = false;
+    
     int compensatoryRestAvailable = 0;
     if (absenceRequest.type.equals(AbsenceRequestType.COMPENSATORY_REST) 
         && absenceRequest.person.isTopQualification()) {
@@ -356,7 +369,7 @@ public class AbsenceRequests extends Controller {
           .configValue(absenceRequest.person.office, 
               EpasParam.MAX_RECOVERY_DAYS_13, LocalDate.now().getYear());
       compensatoryRestAvailable = maxDays - psDto.numberOfCompensatoryRestUntilToday;
-      handleCompensatoryRestSituation = true;
+      
     }
     List<VacationSituation> vacationSituations = Lists.newArrayList();
     if (absenceRequest.type.equals(AbsenceRequestType.VACATION_REQUEST)) {
@@ -374,7 +387,7 @@ public class AbsenceRequests extends Controller {
     }
     
     render(absenceRequest, insertReport, absenceForm, insertable, 
-        vacationSituations, compensatoryRestAvailable);
+        vacationSituations, compensatoryRestAvailable, retroactiveAbsence);
   }
 
   /**
