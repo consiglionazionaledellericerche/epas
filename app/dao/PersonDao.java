@@ -540,22 +540,6 @@ public final class PersonDao extends DaoBase {
   }
 
 
-  /**
-   * Le persone attive della sede con il vecchio campo person.badgeNumber popolato.
-   *
-   * @return persone
-   */
-  public List<Person> activeWithBadgeNumber(Office office) {
-
-    final QPerson person = QPerson.person;
-
-    JPQLQuery query = personQuery(Optional.<String>absent(), Sets.newHashSet(office), false,
-        Optional.fromNullable(LocalDate.now()), Optional.fromNullable(LocalDate.now()),
-        true, Optional.<CompetenceCode>absent(), Optional.<Person>absent(), false)
-        .where(person.badgeNumber.isNotNull().and(person.badgeNumber.isNotEmpty()));
-
-    return query.list(person);
-  }
 
   /**
    * Le persone attive della sede con il campo matricola popolato.

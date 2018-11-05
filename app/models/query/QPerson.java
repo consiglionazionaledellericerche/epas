@@ -26,8 +26,6 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final models.base.query.QPeriodModel _super = new models.base.query.QPeriodModel(this);
 
-    public final StringPath badgeNumber = createString("badgeNumber");
-
     public final SetPath<models.Badge, QBadge> badges = this.<models.Badge, QBadge>createSet("badges", models.Badge.class, QBadge.class, PathInits.DIRECT2);
 
     //inherited
