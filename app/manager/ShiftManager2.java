@@ -1,15 +1,12 @@
 package manager;
 
-
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
-
 import controllers.Security;
-
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.PersonDayDao;
@@ -18,10 +15,8 @@ import dao.PersonShiftDayDao;
 import dao.ShiftDao;
 import dao.ShiftTypeMonthDao;
 import dao.history.HistoricalDao;
-
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -30,13 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.services.PairStamping;
-
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
@@ -53,12 +44,10 @@ import models.ShiftTypeMonth;
 import models.User;
 import models.enumerate.ShiftSlot;
 import models.enumerate.ShiftTroubles;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
-
 import play.i18n.Messages;
 
 
@@ -146,8 +135,7 @@ public class ShiftManager2 {
 
   /**
    * Controlla se il PersonShiftDay è compatibile con la presenza in Istituto in
-   * un determinato giorno:
-   * - assenza o missione
+   * un determinato giorno: assenza o missione.
    *
    * @return ShiftTroubles.PERSON_IS_ABSENT, ""
    */
@@ -199,7 +187,7 @@ public class ShiftManager2 {
 
 
   /**
-   * Verifica se un turno puo' essere inserito senza violare le regole dei turni
+   * Verifica se un turno puo' essere inserito senza violare le regole dei turni.
    *
    * @param personShiftDay il personShiftDay da inserire
    * @return l'eventuale stringa contenente l'errore evidenziato in fase di inserimento del turno.
@@ -524,7 +512,7 @@ public class ShiftManager2 {
 
   /**
    * Effettua il calcolo dei minuti di turno maturati nel mese su un'attività per ogni persona in
-   * turno
+   * turno.
    *
    * @param activity attività sulla quale effettuare i calcoli
    * @param from data di inizio da cui calcolare

@@ -37,7 +37,7 @@ public enum ShiftTroubles {
 
   /**
    * @return la lista degli errori che sono specifici di un singolo turno (non include quelli
-   * derivanti dai controlli sul giorno di turno).
+   *        derivanti dai controlli sul giorno di turno).
    */
   public static List<ShiftTroubles> shiftSpecific() {
     return Lists.newArrayList(

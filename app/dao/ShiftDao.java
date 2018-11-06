@@ -5,12 +5,9 @@ import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
-
 import java.util.List;
-
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-
 import models.Office;
 import models.Person;
 import models.PersonShift;
@@ -28,8 +25,6 @@ import models.query.QShiftCancelled;
 import models.query.QShiftCategories;
 import models.query.QShiftTimeTable;
 import models.query.QShiftType;
-import play.db.jpa.JPA;
-
 import org.joda.time.LocalDate;
 
 /**
@@ -271,7 +266,8 @@ public class ShiftDao extends DaoBase {
    */
   public List<ShiftTimeTable> getAllShifts(Office office) {
     final QShiftTimeTable stt = QShiftTimeTable.shiftTimeTable;
-    JPQLQuery query = getQueryFactory().from(stt).where(stt.office.isNull().or(stt.office.eq(office)));
+    JPQLQuery query = 
+        getQueryFactory().from(stt).where(stt.office.isNull().or(stt.office.eq(office)));
     return query.list(stt);
   }
   
@@ -326,11 +322,6 @@ public class ShiftDao extends DaoBase {
   }
   
 
-  /**
-   * 
-   * @param id
-   * @return
-   */
   public PersonShiftShiftType getById(Long id) {
     final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
     JPQLQuery query = getQueryFactory().from(psst)
@@ -340,11 +331,10 @@ public class ShiftDao extends DaoBase {
 
   /**
    * 
-   * @param personShift
-   * @param date
    * @return la lista delle associazioni persona/attività relative ai parametri passati.
    */
-  public List<PersonShiftShiftType> getByPersonShiftAndDate(PersonShift personShift, LocalDate date) {
+  public List<PersonShiftShiftType> getByPersonShiftAndDate(
+      PersonShift personShift, LocalDate date) {
     final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
     JPQLQuery query = getQueryFactory().from(psst)
         .where(psst.personShift.eq(personShift)

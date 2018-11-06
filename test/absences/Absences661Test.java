@@ -172,7 +172,8 @@ public class Absences661Test extends UnitTest {
     Person person = h2Examples.normalEmployee(BEGIN_2016, Optional.absent());
     
     // persisto una assenza di tipo 661G
-    h2AbsenceSupport.absence(DefaultAbsenceType.A_661G, FERIAL_1_2018, Optional.absent(), 0, person);
+    h2AbsenceSupport.absence(
+        DefaultAbsenceType.A_661G, FERIAL_1_2018, Optional.absent(), 0, person);
     
     // eseguo lo scanner
     absenceService.scanner(person, BEGIN_2018);

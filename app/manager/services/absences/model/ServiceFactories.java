@@ -647,7 +647,8 @@ public class ServiceFactories {
     }
     
     if (absence.absenceType.code.equals(DefaultAbsenceType.A_661MO.getCode())
-        && DateUtility.isDateIntoInterval(absence.getAbsenceDate(), DateUtility.getYearInterval(2018)) 
+        && DateUtility.isDateIntoInterval(absence.getAbsenceDate(), 
+              DateUtility.getYearInterval(2018)) 
         && absence.justifiedMinutes != null 
         && absence.justifiedMinutes >= 360) {
       genericErrors.addAbsenceWarning(absence, AbsenceProblem.Migration661);

@@ -17,6 +17,9 @@
     if (paramCategory.equals(manager.configurations.EpasParam.EpasParamCategory.AUTOCERTIFICATION)) {
       autocertificationActive = true;
     }
+    if (paramCategory.equals(manager.configurations.EpasParam.EpasParamCategory.FLOWS)) {
+      flowsActive = true;
+    }
   }%
   
   #{title title:('Parametri configurazione ' + office.name), administration:true /}
@@ -26,6 +29,9 @@
   #{tabItem id:'YEARLY', title:'Annuali', active:yearlyActive /}
   #{tabItem id:'PERIODIC', title:'Periodici', active:periodicActive /}
   #{tabItem id:'AUTOCERTIFICATION', title:'Autocertificazioni', active:autocertificationActive /}
+  #{if templateUtility.isFlowsActive()}
+  #{tabItem id:'FLOWS', title:'Flussi di lavoro', active:flowsActive /}
+  #{/if}
   #{/tabList}
 
   <br>
@@ -166,18 +172,65 @@
         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
         &{'tr_autocertification.alert'}
         #{/alert}
-
+		#{secure.check 'Configurations.uploadAttachment'}
         #{form action:@uploadAttachment(), method:'POST', class:'form-horizontal', enctype:'multipart/form-data'}
         #{f.hidden 'officeId', value:office.id /}
 
         #{f.input 'file', type: 'file', onChange:'javascript:this.form.submit()' /}
 
         #{/form}
+        #{/secure.check}
         #{/else}
       </div>
     </div>
   </div>
   #{/tabContentItem}
+	
+  #{if templateUtility.isFlowsActive()}	
+  #{tabContentItem id:'FLOWS', active:flowsActive}
+  <div id="editFlows">
+    #{alert color:'info'}
+    <p>Elenco dei parametri di configurazione a cadenza periodica relativi ai flussi di lavoro per la sede
+      <strong>${office.name}</strong>, il loro valore attuale ed il periodo di riferimento.</p>
+    #{/alert}
+
+    <table class="table">
+      <tr>
+        <th>Attivazione</th>
+        <th>Valore</th>
+      </tr>
+      #{list flows.findAll({it.epasParam.general}), as:'conf'}
+      <tr>
+        <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
+          &{conf.epasParam}#{/secure.link}
+        </td>
+        <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
+      </tr>
+      #{/list}
+    </table>
+
+
+    <table class="table">
+      <tr>
+        <th>Parametri specifici</th>
+        <th>Valore</th>
+        <th>Dal</th>
+        <th>Al</th>
+      </tr>
+      #{list flows.findAll({!it.epasParam.general}), as:'conf'}
+      <tr>
+        <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
+          &{conf.epasParam}#{/secure.link}
+        </td>
+        <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
+        <td>${conf.beginDate.format()}</td>
+        <td>${conf.calculatedEnd()?.format()}</td>
+      </tr>
+      #{/list}
+    </table>
+  </div>
+  #{/tabContentItem}
+  #{/if}
 
   #{/tabContent}
 

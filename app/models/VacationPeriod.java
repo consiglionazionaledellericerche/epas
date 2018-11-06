@@ -1,8 +1,6 @@
 package models;
 
-
 import it.cnr.iit.epas.DateInterval;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -12,14 +10,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PropertyInPeriod;
 import models.enumerate.VacationCode;
-
 import org.hibernate.envers.Audited;
-
 import play.data.validation.Required;
 
 /**

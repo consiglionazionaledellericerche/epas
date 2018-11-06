@@ -50,6 +50,10 @@
       #{secure.li @Competences.activateServices(currentData.officeId) }
         <i class="fa fa-comments" aria-hidden="true"></i>
       #{/secure.li}
+      
+      #{secure.li @Groups.showGroups(currentData.officeId) }
+        <i class="fa fa-users" aria-hidden="true"></i>
+      #{/secure.li}
 
       <li class="divider"></li>
 

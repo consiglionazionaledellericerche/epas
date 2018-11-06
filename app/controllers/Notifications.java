@@ -50,11 +50,11 @@ public class Notifications extends Controller {
     }
     final SearchResults<Notification> notifications = notificationDao
         .listFor(Security.getUser().get(), Optional.fromNullable(message), 
-            Optional.of(filter)).listResults();
+            Optional.of(filter), Optional.absent()).listResults();
     
     final SearchResults<Notification> unReadNotifications = notificationDao
         .listFor(Security.getUser().get(), Optional.fromNullable(message), 
-            Optional.of(NotificationFilter.TO_READ)).listResults();
+            Optional.of(NotificationFilter.TO_READ), Optional.absent()).listResults();
     render(notifications, unReadNotifications, message, filter);
   }
 
@@ -96,7 +96,7 @@ public class Notifications extends Controller {
     
     rules.checkIfPermitted();
     List<Notification> list = notificationDao.listAllFor(Security.getUser().get(), 
-        Optional.fromNullable(message), Optional.fromNullable(filter));
+        Optional.fromNullable(message), Optional.fromNullable(filter), Optional.absent());
     for (Notification notification : list) {
       if (notification.read) {
         continue;

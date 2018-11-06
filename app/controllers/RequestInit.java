@@ -261,6 +261,7 @@ public class RequestInit extends Controller {
         "Charts.listForExcelFile",
         "Charts.exportTimesheetSituation",
         "Competences.activateServices",
+        "Groups.showGroups",
         "Contracts.initializationsStatus",
         "Contracts.initializationsVacation",
         "Contracts.initializationsMeal",

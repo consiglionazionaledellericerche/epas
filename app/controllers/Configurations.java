@@ -226,14 +226,24 @@ public class Configurations extends Controller {
         .filter(conf -> conf.epasParam.category == EpasParam.EpasParamCategory.AUTOCERTIFICATION)
         .collect(Collectors.toList());
 
+    final List<Configuration> flows = configurations.stream()
+        .filter(conf -> conf.epasParam.category == EpasParam.EpasParamCategory.FLOWS)
+        .collect(Collectors.toList());
+    
     // id relativo all'allegato di autorizzazione per l'attivazione dell'autocertificazione
     final Attachment autocert = office.attachments.stream()
         .filter(attachment -> attachment.type == AttachmentType.TR_AUTOCERTIFICATION).findFirst()
         .orElse(null);
-    LocalDate date = LocalDate.now();
-    LocalDate limitShow = new LocalDate(2018,6,1);
-    render(office, paramCategory, generals, yearlies, 
-        periodics, autocertifications, autocert, limitShow, date);
+//<<<<<<< HEAD
+//    LocalDate date = LocalDate.now();
+//    LocalDate limitShow = new LocalDate(2018,6,1);
+//    render(office, paramCategory, generals, yearlies, 
+//        periodics, autocertifications, autocert, limitShow, date);
+//=======
+
+    render(office, paramCategory, generals, yearlies, periodics, 
+        autocertifications, autocert, flows);
+
   }
 
   /**

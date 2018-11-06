@@ -1,6 +1,5 @@
 package controllers;
 
-
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import controllers.Resecure.BasicAuth;
