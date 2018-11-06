@@ -34,6 +34,8 @@ public class QQualification extends EntityPathBase<Qualification> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
+    public final StringPath label = createString("label");
+
     //inherited
     public final BooleanPath persistent = _super.persistent;
 

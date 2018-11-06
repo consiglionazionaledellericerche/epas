@@ -107,9 +107,9 @@ public enum DefaultComplation {
           DefaultAbsenceType.A_04, DefaultAbsenceType.A_05, DefaultAbsenceType.A_06,
           DefaultAbsenceType.A_07, DefaultAbsenceType.A_08)),
   
-  C_09(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_09M), 
-      ImmutableSet.of(DefaultAbsenceType.A_09B)),
+//  C_09(AmountType.units, 
+//      ImmutableSet.of(DefaultAbsenceType.A_09M), 
+//      ImmutableSet.of(DefaultAbsenceType.A_09B)),
   
   C_23(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_23M), 

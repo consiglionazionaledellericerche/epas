@@ -1,0 +1,54 @@
+<ul class="nav navbar-nav">
+
+  #{set actions:[
+  'AbsenceRequests.blank',
+  'AbsenceRequests.save',
+  'AbsenceRequests.list'] 
+  /}
+
+  <li class="dropdown #{if request.action in actions}active#{/if}">
+
+    *{ responsività dropDown }*
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+		<i class="fa fa-recycle fa-fw"></i>  
+		    #{if templateUtility.compensatoryRestRequests() > 0 || templateUtility.vacationRequests() > 0}
+      			<span class="label label-danger label-badge">${templateUtility.compensatoryRestRequests() + templateUtility.vacationRequests()}</span>
+    		#{/if}       
+	     <!-- visualizza l'username -->
+	     <div class="visible-lg-inline visible-xs-inline"> Flussi di lavoro
+	        <span class="caret"></span>
+	     </div>      
+    </a>
+
+    *{ items }*
+    <ul class="dropdown-menu">
+
+      #{secure.li @AbsenceRequests.vacations()}
+        <i class="fa fa-plane" aria-hidden="true"></i>
+      #{/secure.li}
+
+      #{secure.li @AbsenceRequests.compensatoryRests()}
+        <i class="fa fa-bath" aria-hidden="true"></i>
+      #{/secure.li}
+      
+      <li class="divider"></li>
+      
+	  #{secure.li @AbsenceRequests.vacationsToApprove()}
+        <i class="fa fa-plane" aria-hidden="true"></i>
+       	#{if templateUtility.vacationRequests() > 0}
+      		<span class="label label-danger label-badge">${templateUtility.vacationRequests()}</span>
+    	#{/if} 
+      #{/secure.li}
+
+      #{secure.li @AbsenceRequests.compensatoryRestsToApprove()}
+        <i class="fa fa-bath" aria-hidden="true"></i>
+        #{if templateUtility.compensatoryRestRequests() > 0}
+      		<span class="label label-danger label-badge">${templateUtility.compensatoryRestRequests()}</span>
+    	#{/if}
+      #{/secure.li}
+            
+
+    </ul>
+    *{ end items }*
+  </li>
+</ul>

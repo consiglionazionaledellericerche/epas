@@ -93,8 +93,10 @@
 		    #{if absence.persistent}
 		    #{f.hidden 'absenceId', value: absence.id /}
 		    #{/if}
-	  		#{f.input 'hours', type:'number' /}
-	  		#{f.input 'minutes', type:'number' /}
+	  		#{f.input 'hours', type:'number', 
+	  				value:(absence.personDay.workingTimeInMission ? absence.personDay.workingTimeInMission.intdiv(60) : 0) /}
+	  		#{f.input 'minutes', type:'number', 
+	  				value:(absence.personDay.workingTimeInMission ? absence.personDay.workingTimeInMission % 60 : 0) /}
 	     	#{b.buttons center:true}   
 	      		#{b.submit 'Salva', color:'primary', fa:'check' /}
 	    	#{/b.buttons}

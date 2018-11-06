@@ -27,6 +27,8 @@ import play.data.validation.Required;
 
 
 /**
+ * Modello della Timbratura.
+ * 
  * @author cristian.
  */
 @Audited
@@ -120,6 +122,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   
 
   /**
+   * Verifica se è lavoro fuori sede.
    * @return @see StampTypes::isOffSiteWork
    */
   @Transient
@@ -169,6 +172,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   }
 
   /**
+   * Orario formattato come HH:mm.
    * @return orario della timbratura formattato come HH:mm.
    */
   @Transient
@@ -181,6 +185,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   }
 
   /**
+   * Rappresentazione compatta della timbratura.
    * @return Una rappresentazione compatta della timbratura.
    */
   @Transient
@@ -192,7 +197,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   }
 
   /**
-   * Fondamentale per far funzionare alcune drools
+   * Fondamentale per far funzionare alcune drools.
    *
    * @return Restituisce il proprietario della timbratura.
    */
@@ -201,7 +206,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   }
 
   /**
-   * Utile per effettuare i controlli temporali sulle drools
+   * Utile per effettuare i controlli temporali sulle drools.
    *
    * @return il mese relativo alla data della timbratura.
    */

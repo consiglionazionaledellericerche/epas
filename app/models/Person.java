@@ -30,6 +30,7 @@ import models.absences.InitializationGroup;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
+import models.flows.Group;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
@@ -117,26 +118,17 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   public boolean wantEmail;
 
   /**
-   * i successivi due campi servono per la nuova relazione tra Person e Person relativa ai
-   * responsabili.
+   * nuova relazione tra Person e Groups relativa ai responsabili e ai gruppi.
    */
-  @OneToMany(mappedBy = "personInCharge")
-  @OrderBy("surname")
-  public List<Person> people = Lists.newArrayList();
+  @ManyToMany(mappedBy = "people")
+  public List<Group> groups = Lists.newArrayList();
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "person_in_charge")
-  @Nullable
-  public Person personInCharge;
+  @OneToMany(mappedBy="manager")
+  public List<Group> groupsPeople = Lists.newArrayList();
+
 
   /**
-   * questo campo booleano serve a stabilire se una persona è un responsabile o no.
-   */
-  @Column(name = "is_person_in_charge")
-  public boolean isPersonInCharge;
-
-  /**
-   * relazione con i turni.
+   * relazione con i turni e le reperibilità.
    */
   @OneToMany(mappedBy = "supervisor")
   public List<ShiftCategories> shiftCategories = Lists.newArrayList();
@@ -218,12 +210,6 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @Transient
   public Long perseoOfficeId = null;
 
-  /**
-   * Rimuoverlo quando sarà stata effettuata la migrazione di tutti i badge alla tabella badges.
-   */
-  @Deprecated
-  @As(binder = NullStringBinder.class)
-  public String badgeNumber;
 
   /**
    * Sono stati implementati i metodi Equals e HashCode sulla classe Badge in modo che Se sono
@@ -261,6 +247,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   }
 
   /**
+   * Nome completo della persona.
    * @return il nome completo.
    */
   public String getFullname() {
@@ -323,6 +310,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   }
 
   /**
+   * Controlla il valore del parametro indicato.
    * @param param Parametro di configurazione da controllare.
    * @param value valore atteso
    * @return true se la persona contiene il parametro di configurazione specificato con il valore
@@ -359,5 +347,14 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     return badges.stream().<ZoneToZones>flatMap(b -> b.badgeReader.zones.stream()
         .map(z -> z.zoneLinkedAsMaster.stream().findAny().orElse(null)))       
         .collect(Collectors.toList());
+  }
+  
+  /**
+   * Verifica se è un livello I-III.
+   * @return true se è un livello I-III, false altrimenti.
+   */
+  @Transient
+  public boolean isTopQualification() {
+    return qualification != null && qualification.isTopQualification();
   }
 }
