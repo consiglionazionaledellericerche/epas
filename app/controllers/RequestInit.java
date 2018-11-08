@@ -113,8 +113,8 @@ public class RequestInit extends Controller {
       val personList = personDao.liteList(offices, year, month);
       if (!personList.isEmpty()) {
         personId = personList.iterator().next().id;
+        session.put("personSelected", personId);
       }
-	  session.put("personSelected", personId);
     }
 
     // Popolamento del dropdown degli anni
