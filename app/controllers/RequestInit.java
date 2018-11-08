@@ -18,7 +18,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-
+import lombok.val;
 import manager.SecureManager;
 
 import models.Office;
@@ -102,7 +102,7 @@ public class RequestInit extends Controller {
     Set<Office> offices = secureManager.officesForNavbar(currentUser);
 
     // person init //////////////////////////////////////////////////////////////
-    Long personId;
+    Long personId = null;
     if (params.get("personId") != null) {
       personId = Long.parseLong(params.get("personId"));
     } else if (session.get("personSelected") != null) {
@@ -110,10 +110,12 @@ public class RequestInit extends Controller {
     } else if (currentUser.person != null) {
       personId = currentUser.person.id;
     } else {
-      personId = personDao.liteList(offices, year, month).iterator().next().id;
+      val personList = personDao.liteList(offices, year, month);
+      if (!personList.isEmpty()) {
+        personId = personList.iterator().next().id;
+        session.put("personSelected", personId);
+      }
     }
-
-    session.put("personSelected", personId);
 
     // Popolamento del dropdown degli anni
     List<Integer> years = Lists.newArrayList();
