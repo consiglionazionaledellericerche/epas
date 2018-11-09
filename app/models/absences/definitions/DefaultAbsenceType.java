@@ -314,7 +314,9 @@ public enum DefaultAbsenceType {
   A_92E("92E", "Missione all'estero",
       false, ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, true, false,
       0, null, Sets.newHashSet(), null, null),
-
+//A_09M("09M", "Permesso visita medica in ore e minuti",
+//true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
+//0, null, Sets.newHashSet(), null, new LocalDate(2018, 8, 15)),
   A_92M("92M", "Missione in ore e minuti",
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
       0, null, Sets.newHashSet(), null, null),
