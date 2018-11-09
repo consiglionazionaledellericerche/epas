@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.persistence.PersistenceException;
-
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.configurations.ConfigurationManager;
@@ -138,7 +138,7 @@ public class MissionManager {
    */
   public boolean createMissionFromClient(MissionFromClient body, boolean recompute) {
 
-    AbsenceForm absenceForm = buildAbsenceForm(body);
+    //AbsenceForm absenceForm = buildAbsenceForm(body);
     if (body.dataInizio.isAfter(body.dataFine)) {
       log.warn("Le date di inizio e fine sono invertite!! La missione {} di {} "
           + "non può essere processata!! Verificare!", body.idOrdine, body.person.fullName());
@@ -158,38 +158,44 @@ public class MissionManager {
       return false;
     }
 
+    Situation situation;
+    
+    if (body.dataInizio.toLocalDate().isEqual(body.dataFine.toLocalDate())) {
+      //caso di giorno unico di missione
+      situation = getSituation(body.dataInizio, body, workInterval);
+      if (insertMission(body.person, 
+          new Integer(situation.difference / DateTimeConstants.MINUTES_PER_HOUR), 
+          new Integer(situation.difference % DateTimeConstants.MINUTES_PER_HOUR),
+          body.dataInizio, body.dataFine, body.id, body.idOrdine)) {
+        recalculate(body, Optional.<List<Absence>>absent());
+        return true;
+      }        
+    }
+
     LocalDateTime actualDate = body.dataInizio;
     while (!actualDate.isAfter(body.dataFine)) {
-      if (actualDate.toLocalDate().isEqual(body.dataFine.toLocalDate()) 
-          && actualDate.toLocalDate().isEqual(body.dataInizio.toLocalDate())) {
-        //caso di giorno unico di missione
-        if (insertMission(body, absenceForm, null, null, body.dataInizio, body.dataFine)) {
-          recalculate(body, Optional.<List<Absence>>absent());
-          return true;
-        }        
-      }
-      Situation situation = getSituation(actualDate, body, workInterval);      
+      situation = getSituation(actualDate, body, workInterval);      
 
       if (situation.isFirstOrLastDay) {
         if (situation.difference < 0) {
           //sono partito dopo la fine della giornata lavorativa o sono tornato prima dell'inizio 
           //della stessa --> metto un 92M con 1 minuto
-          if (insertMission(body, absenceForm, new Integer(0), new Integer(1), 
-              actualDate, actualDate)) {
+          if (insertMission(body.person, new Integer(0), new Integer(1), 
+              actualDate, actualDate, body.id, body.idOrdine)) {
             recalculate(body, Optional.<List<Absence>>absent());            
           } 
         } else {
           //sono partito nell'intervallo della giornata lavorativa
-          if (insertMission(body, absenceForm, 
+          if (insertMission(body.person,  
               new Integer(situation.difference / DateTimeConstants.MINUTES_PER_HOUR), 
               new Integer(situation.difference % DateTimeConstants.MINUTES_PER_HOUR), 
-              actualDate, actualDate)) {
+              actualDate, actualDate, body.id, body.idOrdine)) {
             recalculate(body, Optional.<List<Absence>>absent());            
           } 
         }
       } else {
-        if (insertMission(body, absenceForm, 
-            null, null, actualDate, actualDate)) {
+        if (insertMission(body.person,  
+            null, null, actualDate, actualDate, body.id, body.idOrdine)) {
           recalculate(body, Optional.<List<Absence>>absent());            
         } 
       }
@@ -211,7 +217,17 @@ public class MissionManager {
     Situation situation = new Situation();
     int workMinutes = 0;
     int missionMinutes = 0;
-    if (actualDate.toLocalDate().isEqual(body.dataInizio.toLocalDate())) {
+    if (actualDate.toLocalDate().isEqual(body.dataInizio.toLocalDate()) 
+        && actualDate.toLocalDate().isEqual(body.dataFine.toLocalDate())) {
+      
+      //TODO: verificare nel caso di un solo giorno di missioni se è possibile attribuire tutti i
+      //minuti in caso di missione che comincia prima dell'inizio della giornata di missione o termini dopo la fine della
+      //giornata di missione
+      situation.difference = (body.dataFine.getHourOfDay() * DateTimeConstants.MINUTES_PER_HOUR + body.dataFine.getMinuteOfHour()) 
+          - (body.dataInizio.getHourOfDay() * DateTimeConstants.MINUTES_PER_HOUR + body.dataInizio.getMinuteOfHour());
+      situation.isFirstOrLastDay = true;
+
+    } else if (actualDate.toLocalDate().isEqual(body.dataInizio.toLocalDate())) {
       //primo giorno di missione
     
       workMinutes = workInterval.to.getHourOfDay() * DateTimeConstants.MINUTES_PER_HOUR
@@ -247,8 +263,8 @@ public class MissionManager {
    * @param actualDate il giorno di missione
    * @return il workingTimeTypeDay dell'ultimo giorno di missione.
    */
-  private WorkingTimeTypeDay getFromDayOfMission(MissionFromClient body, LocalDate actualDate) {
-    IWrapperPerson wrappedPerson = wrapperFactory.create(body.person);  
+  private WorkingTimeTypeDay getFromDayOfMission(Person person, LocalDate actualDate) {
+    IWrapperPerson wrappedPerson = wrapperFactory.create(person);  
     Optional<ContractWorkingTimeType> cwtt = wrappedPerson.getCurrentContractWorkingTimeType();
     WorkingTimeTypeDay dayNumber = null;
     if (cwtt.isPresent()) {
@@ -296,8 +312,8 @@ public class MissionManager {
 
     boolean result = false;
     for (LocalDate date : toAdd) {
-      result = insertMission(body, absenceForm, null, null, 
-          date.toLocalDateTime(LocalTime.MIDNIGHT), date.toLocalDateTime(LocalTime.MIDNIGHT));
+      result = insertMission(body.person, null, null, 
+          date.toLocalDateTime(LocalTime.MIDNIGHT), date.toLocalDateTime(LocalTime.MIDNIGHT), body.id, body.idOrdine);
     }
     recalculate(body, Optional.fromNullable(missions));
     if (result) {
@@ -350,51 +366,47 @@ public class MissionManager {
    * @param to la data di fine fino a cui inserire la missione
    * @return true se la missione è stata inserita, false altrimenti.
    */
-  private boolean insertMission(MissionFromClient body, AbsenceForm absenceForm, 
-      Integer hours, Integer minutes, LocalDateTime from, LocalDateTime to) {
+  private boolean insertMission(Person person, 
+      Integer hours, Integer minutes, LocalDateTime from, LocalDateTime to,
+      Long id, Long idOrdine) {
 
     AbsenceType mission = null;
     int quantity = 0;
     if (hours != null && minutes != null) {
       quantity = hours * DateTimeConstants.MINUTES_PER_HOUR + minutes;
     }
-    int day = getFromDayOfMission(body, to.toLocalDate()).dayOfWeek;
-    if (quantity == 0 || quantity > getFromDayOfMission(body, to.toLocalDate()).workingTime
+    int day = getFromDayOfMission(person, to.toLocalDate()).dayOfWeek;
+    if (quantity == 0 || quantity > getFromDayOfMission(person, to.toLocalDate()).workingTime
         || day == DateTimeConstants.SATURDAY || day == DateTimeConstants.SUNDAY) {
       mission = absenceTypeDao.getAbsenceTypeByCode("92").get();
     } else {
       mission = absenceTypeDao.getAbsenceTypeByCode("92M").get();
-    }      
-    CategoryTab tab = absenceForm.categoryTabSelected;
-    GroupAbsenceType type = absenceForm.groupSelected;
-    JustifiedType justifiedType = absenceForm.justifiedTypeSelected;
+    }
+    
+    log.debug("Sto per inserire una missione per {}. Codice {}, {} - {}, tempo {}:{}", 
+        person, mission.code, from, to, hours, minutes);
+    
     Integer localHours = hours;
     Integer localMinutes = minutes;
-
-    if (mission == null) {
-      mission = absenceForm.absenceTypeSelected;
-    }
-    absenceForm =
-        absenceService.buildAbsenceForm(body.person, from.toLocalDate(), tab,
-            to.toLocalDate(), null, type, false, mission, 
-            justifiedType, hours, minutes, false, false);
+  
+    val absenceForm = buildAbsenceForm(person, from.toLocalDate(), to.toLocalDate());
 
     InsertReport insertReport = 
-        absenceService.insert(body.person, absenceForm.groupSelected, from.toLocalDate(), 
+        absenceService.insert(person, absenceForm.groupSelected, from.toLocalDate(), 
             to.toLocalDate(), mission, absenceForm.justifiedTypeSelected, 
             localHours, localMinutes, false, absenceManager);
     if (insertReport.criticalErrors.isEmpty() || insertReport.warningsPreviousVersion.isEmpty()) {
       for (Absence absence : insertReport.absencesToPersist) {
         PersonDay personDay = personDayManager
-            .getOrCreateAndPersistPersonDay(body.person, absence.getAbsenceDate());
+            .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
         absence.personDay = personDay;
-        if (body.idOrdine != null) {
-          absence.externalIdentifier = body.idOrdine;
+        if (idOrdine != null) {
+          absence.externalIdentifier = idOrdine;
         } else {
-          absence.externalIdentifier = body.id;
+          absence.externalIdentifier = id;
         }
-        absence.note = "Inizio: " + DT_FORMATTER.print(body.dataInizio)
-          + System.lineSeparator() + "Fine: " + DT_FORMATTER.print(body.dataFine);
+        absence.note = "Inizio: " + DT_FORMATTER.print(from)
+          + System.lineSeparator() + "Fine: " + DT_FORMATTER.print(to);
         personDay.absences.add(absence);
         absence.save();
         personDay.save();
@@ -408,9 +420,9 @@ public class MissionManager {
       }
       if (!insertReport.reperibilityShiftDate().isEmpty()) {
         absenceManager
-        .sendReperibilityShiftEmail(body.person, insertReport.reperibilityShiftDate());
+        .sendReperibilityShiftEmail(person, insertReport.reperibilityShiftDate());
         log.info("Inserite assenze con reperibilità e turni {} {}. Le email sono disabilitate.",
-            body.person.fullName(), insertReport.reperibilityShiftDate());
+            person.fullName(), insertReport.reperibilityShiftDate());
       }
       JPA.em().flush();
       return true;
@@ -476,6 +488,10 @@ public class MissionManager {
     return absenceForm;
   }
 
+  private AbsenceForm buildAbsenceForm(Person person, LocalDate dataInizio, LocalDate dataFine) {
+    return absenceService.buildAbsenceForm(person, dataInizio, null, dataFine, null, null, false, 
+        null, null, null, null, false, false);
+  }
 
   /**
    * ricalcola la situazione del dipendente.
