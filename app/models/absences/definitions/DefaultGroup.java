@@ -88,7 +88,7 @@ public enum DefaultGroup {
   MISSIONE("Missione", 
       "", 
       DefaultCategoryType.MISSIONE_CNR, 0,
-      GroupAbsenceTypePattern.programmed, PeriodType.always, 
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
       DefaultTakable.T_MISSIONE, DefaultComplation.C_92, null, false, false),
   FERIE_CNR("31/94/32 - Ferie e permessi legge", 
       "", 
