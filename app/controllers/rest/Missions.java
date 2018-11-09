@@ -47,7 +47,7 @@ public class Missions extends Controller {
    * @param body il dto costruito a partire dal binder
    */
   @BasicAuth
-  public static void amqpreceiver(@As(binder = JsonMissionBinder.class) MissionFromClient body) {
+  public static void amqpreceiver(@As(binder = JsonMissionBinder.class)MissionFromClient body) {
 
     log.info("Arrivato messaggio da {} ", body);
     // Malformed Json (400)
