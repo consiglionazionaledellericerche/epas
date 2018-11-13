@@ -115,7 +115,7 @@ public class AbsenceEngineUtility {
     if (allDayFound == 1) {
       justifiedTypes.add(allDayVar);
     }
-    if (completeDayAddOvertimeFound == 1) {
+    if (completeDayAddOvertimeFound >= 1) {
       justifiedTypes.add(completeDayAddOvertimeVar);
     }
     if (halfDayFound == 1) {
