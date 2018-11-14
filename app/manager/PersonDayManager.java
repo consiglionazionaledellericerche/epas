@@ -572,6 +572,13 @@ public class PersonDayManager {
    */
   private PersonDay updateTimeAtWorkFixed(PersonDay personDay, WorkingTimeTypeDay wttd) {
 
+    //In caso di giorno festivo niente tempo a lavoro ne festivo.
+    if (personDay.isHoliday()) {
+      personDay.setTimeAtWork(0);
+      setTicketStatusIfNotForced(personDay, false);
+      return personDay;
+    }
+    
     if (getAllDay(personDay).isPresent() 
           && !getAllDay(personDay).get().absenceType.timeForMealTicket
         || (getAssignAllDay(personDay).isPresent() 
@@ -583,8 +590,7 @@ public class PersonDayManager {
       setTicketStatusIfNotForced(personDay, true);
     }
     
-    if (personDay.isHoliday
-        || getAllDay(personDay).isPresent()
+    if (getAllDay(personDay).isPresent()
         || getCompleteDayAndAddOvertime(personDay).isPresent()) {
       personDay.setTimeAtWork(0);
       return personDay;
