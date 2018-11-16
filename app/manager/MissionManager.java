@@ -173,7 +173,7 @@ public class MissionManager {
     }
 
     LocalDateTime actualDate = body.dataInizio;
-    while (!actualDate.isAfter(body.dataFine)) {
+    while (!actualDate.toLocalDate().isAfter(body.dataFine.toLocalDate())) {
       situation = getSituation(actualDate, body, workInterval);      
 
       atomicInsert(situation, body, actualDate);
@@ -466,7 +466,8 @@ public class MissionManager {
       final User currentUser = Security.getUser().get();
       notificationManager.notificationAbsencePolicy(currentUser, 
           abs, absenceForm.groupSelected, false, true, false);
-      log.info("rimossa assenza {} del {}", abs.absenceType.code, abs.personDay.date);
+      log.info("rimossa assenza {} del {} per {}", 
+          abs.absenceType.code, abs.personDay.date, abs.personDay.person.getFullname());
 
     }
     if (result) {
