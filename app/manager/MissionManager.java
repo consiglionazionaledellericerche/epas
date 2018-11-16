@@ -157,6 +157,15 @@ public class MissionManager {
           + "non è valorizzato per la sede {}", office.get().name);
       return false;
     }
+    List<Absence> existingMission = absenceDao.absencesPersistedByMissions(body.idOrdine);
+    if (!existingMission.isEmpty()) {
+      //Se esiste già una missione con quell'identificativo, la cancello e la reinserisco con i 
+      //nuovi dati con il prosieguo dell'algoritmo.
+      log.warn("E' stata riscontrata una missione con lo stesso identificativo di quella passata "
+          + "come parametro. La missione precedentemente inseritaverrà cancellata e verrà "
+          + "inserita questa");
+      deleteMissionFromClient(body, true);
+    }
 
     Situation situation;
     
