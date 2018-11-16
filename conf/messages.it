@@ -526,6 +526,7 @@ time= Orario
 
 type.type =Nome attività
 type.description =Descrizione
+type.allowUnpairSlots =Permetti disparità tra gli slot di turno 
 type.office =Sede
 type.supervisor =Supervisore servizio
 type.managers =Gestori reperibilità
@@ -967,6 +968,7 @@ type.exitMaxTolerance.popover = Tolleranza entro la quale la timbratura di uscit
 type.breakInShift.popover = Tolleranza entro la quale la timbratura di pausa pranzo concorre comunque al conteggio intero del tempo in turno 
 type.breakMaxInShift.popover = Tolleranza entro la quale la timbratura di pausa pranzo concorre comunque al conteggio del tempo in turno, ma in quantità ridotta
 type.enableHolidays.popover = Abilita l&#39;inserimento (e il conteggio) di turni anche nei giorni festivi
+type.allowUnpairSlots.popover = Permette di avere differenza di persone in numero tra i vari slot di turno (es.: 2 la mattina e 1 il pomeriggio o viceversa)
 
 ###########################################################################
 #	Messaggi utilizzati nelle viste
