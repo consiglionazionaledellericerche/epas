@@ -834,6 +834,8 @@ ShiftSlot.EVENING = Sera
 
 shift.absenceInDay = La persona nel giorno selezionato è assente
 shift.alreadyInShift = Già in turno per l'attività %s
+shift.maxQuantityInSlot = Non si può eccedere la differenza di 1 persona tra slot per l'attività %s
+shift.maxQuantity = Al massimo 3 persone al giorno sull'attività %s
 shift.slotAlreadyAssigned = Slot già assegnato a %s
 shift.personInactive = Persona non attiva sul turno
 shift.holidayShiftNotEnabled = La persona non ha abilitato il turno festivo
