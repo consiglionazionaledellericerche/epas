@@ -108,7 +108,7 @@ public enum DefaultTakable {
 
   T_MISSIONE(AmountType.minutes, 
       ImmutableSet.of(DefaultAbsenceType.A_92M,DefaultAbsenceType.A_92,
-          DefaultAbsenceType.A_92E/*,
+          DefaultAbsenceType.A_92E, DefaultAbsenceType.A_92NG/*,
           DefaultAbsenceType.A_92H1, 
           DefaultAbsenceType.A_92H2, 
           DefaultAbsenceType.A_92H3, 
@@ -117,7 +117,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_92H6, 
           DefaultAbsenceType.A_92H7*/), 
       ImmutableSet.of(DefaultAbsenceType.A_92M, DefaultAbsenceType.A_92,
-          DefaultAbsenceType.A_92E/*,
+          DefaultAbsenceType.A_92E, DefaultAbsenceType.A_92NG/*,
           DefaultAbsenceType.A_92H1, 
           DefaultAbsenceType.A_92H2, 
           DefaultAbsenceType.A_92H3, 
