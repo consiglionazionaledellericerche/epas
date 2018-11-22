@@ -9,6 +9,7 @@
 	
 		#{f.input 'type.type', popover:'true',required:'true'/}
 		#{f.input 'type.description', value:type?.description, popover:'true', required:'true'/}
+		#{f.booleanRadio 'type.allowUnpairSlots', popover:'true',required:'true' /}
 		
 		#{if breakInRange == false}
 			#{f.input 'type.entranceTolerance', type:'number', popover:'true', required:'true'/}

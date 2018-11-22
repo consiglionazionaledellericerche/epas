@@ -35,6 +35,9 @@ public class ShiftType extends BaseModel {
   
   public String description;
   
+  @Column(name = "allow_unpair_slots")
+  public boolean allowUnpairSlots = false;
+  
   @Min(0)
   @Column(name = "entrance_tolerance")
   public int entranceTolerance;
