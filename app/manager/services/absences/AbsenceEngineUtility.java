@@ -195,7 +195,7 @@ public class AbsenceEngineUtility {
    * Il tempo di lavoro nel giorno dell'assenza.<br>
    * @param person persona
    * @param absence assenza
-   * @return tempo a lavoro assenza, -1 in caso di giorno contrattuale festivo
+   * @return tempo a lavoro assenza, 0 in caso di giorno contrattuale festivo
    */
   private int absenceWorkingTime(Person person, Absence absence) {
     LocalDate date = absence.getAbsenceDate();
@@ -203,7 +203,7 @@ public class AbsenceEngineUtility {
       for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
         if (DateUtility.isDateIntoInterval(date, cwtt.periodInterval())) {
           if (cwtt.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek() - 1).holiday) {
-            return -1;
+            return 0;
           }
           return cwtt.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek() - 1)
               .workingTime;
