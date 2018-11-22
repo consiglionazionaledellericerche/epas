@@ -63,6 +63,8 @@ public class ShiftManager2 {
   private static final String codShiftHolyday = "T3";
   private static final String codShift = "T1";
   private static final int SIXTY_MINUTES = 60;
+  private static final long MAX_QUANTITY_IN_SLOT = 2;
+  private static final long MAX_QUANTITY = 3;
 
   private final PersonDayManager personDayManager;
   private final PersonShiftDayDao personShiftDayDao;
@@ -221,6 +223,7 @@ public class ShiftManager2 {
       return Optional.of(Messages.get("shift.alreadyInShift", personShift.get().shiftType));
     }
 
+    // Controllo se sono assente il giorno di turno
     final Optional<PersonDay> personDay = personDayDao
         .getPersonDay(personShiftDay.personShift.person, personShiftDay.date);
 
@@ -244,14 +247,29 @@ public class ShiftManager2 {
     List<PersonShiftDay> list = personShiftDayDao
         .byTypeInPeriod(personShiftDay.date, personShiftDay.date,
             personShiftDay.shiftType, Optional.absent());
-
-    for (PersonShiftDay registeredDay : list) {
-      //controlla che il turno in quello slot sia già stato assegnato ad un'altra persona
-      if (registeredDay.shiftSlot == personShiftDay.shiftSlot) {
-        return Optional.of(Messages
-            .get("shift.slotAlreadyAssigned", registeredDay.personShift.person.fullName()));
+    
+    //Controllo se è abilitata la disparità di slot nell'attività di turno
+    if (!personShiftDay.shiftType.allowUnpairSlots) {
+      for (PersonShiftDay registeredDay : list) {
+        //controlla che il turno in quello slot sia già stato assegnato ad un'altra persona
+        if (registeredDay.shiftSlot == personShiftDay.shiftSlot) {
+          return Optional.of(Messages
+              .get("shift.slotAlreadyAssigned", registeredDay.personShift.person.fullName()));
+        }
+      }
+    } else {
+      long count = 1;
+      long sum = list.stream()
+          .filter(psd -> psd.shiftSlot == personShiftDay.shiftSlot).count();
+      if (sum + count > MAX_QUANTITY_IN_SLOT) {
+        return Optional.of(Messages.get("shift.maxQuantityInSlot", personShiftDay.shiftType.type));
+      }
+      long total = list.stream().count();
+      if (total + count > MAX_QUANTITY) {
+        return Optional.of(Messages.get("shift.maxQuantity", personShiftDay.shiftType.type));
       }
     }
+    
     return Optional.absent();
   }
 

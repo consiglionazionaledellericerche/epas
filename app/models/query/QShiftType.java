@@ -26,6 +26,8 @@ public class QShiftType extends EntityPathBase<ShiftType> {
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
+    public final BooleanPath allowUnpairSlots = createBoolean("allowUnpairSlots");
+
     public final NumberPath<Integer> breakInShift = createNumber("breakInShift", Integer.class);
 
     public final NumberPath<Integer> breakMaxInShift = createNumber("breakMaxInShift", Integer.class);
