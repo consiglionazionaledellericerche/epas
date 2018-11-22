@@ -400,7 +400,10 @@ public class MissionManager {
       quantity = hours * DateTimeConstants.MINUTES_PER_HOUR + minutes;
     }
     int day = getFromDayOfMission(person, to.toLocalDate()).dayOfWeek;
-    if (quantity == 0 || quantity > getFromDayOfMission(person, to.toLocalDate()).workingTime
+    if (quantity < 0) {
+      mission = absenceTypeDao.getAbsenceTypeByCode("92NG").get();
+      type = absComponentDao.getOrBuildJustifiedType(JustifiedTypeName.nothing);
+    } else if (quantity == 0 || quantity > getFromDayOfMission(person, to.toLocalDate()).workingTime
         || day == DateTimeConstants.SATURDAY || day == DateTimeConstants.SUNDAY) {
       mission = absenceTypeDao.getAbsenceTypeByCode("92").get();
       type = absComponentDao
@@ -571,7 +574,7 @@ public class MissionManager {
       if (situation.difference < 0) {
         //sono partito dopo la fine della giornata lavorativa o sono tornato prima dell'inizio 
         //della stessa --> metto un 92M con 1 minuto
-        if (insertMission(body.person, new Integer(0), new Integer(1), 
+        if (insertMission(body.person, new Integer(0), new Integer(-1), 
             actualDate, actualDate, body.id, body.idOrdine)) {
           recalculate(body, Optional.<List<Absence>>absent());            
         } 
