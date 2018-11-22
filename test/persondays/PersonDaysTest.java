@@ -88,11 +88,11 @@ public class PersonDaysTest extends UnitTest {
     val person = new Person();
     PersonDay personDay = new PersonDay(person, second);
     List<Stamping> stampings = Lists.newArrayList();
-    stampings.add(stampings(personDay, 8, 30, WayType.in, null, "dioporco"));
-    stampings.add(stampings(personDay, 11, 30, WayType.out, null, "dioporco"));
+    stampings.add(stampings(personDay, 8, 30, WayType.in, null, null));
+    stampings.add(stampings(personDay, 11, 30, WayType.out, null, null));
     
-    stampings.add(stampings(personDay, 15, 30, WayType.in, null, "diomerda"));
-    stampings.add(stampings(personDay, 19, 30, WayType.out, null, "diomerda"));
+    stampings.add(stampings(personDay, 15, 30, WayType.in, null, null));
+    stampings.add(stampings(personDay, 19, 30, WayType.out, null, null));
     
     personDay.setStampings(stampings);
     
