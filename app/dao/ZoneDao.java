@@ -1,6 +1,7 @@
 package dao;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.mysema.query.jpa.JPQLQuery;
@@ -53,6 +54,9 @@ public class ZoneDao extends DaoBase {
    * @return il link, se esiste, tra le zone passate come parametro.
    */
   public Optional<ZoneToZones> getByLinkNames(String name1, String name2) {
+    if (Strings.isNullOrEmpty(name1) || Strings.isNullOrEmpty(name2)) {
+      return Optional.absent();
+    }
     final QZoneToZones zones = QZoneToZones.zoneToZones;
     JPQLQuery query = getQueryFactory()
         .from(zones)
