@@ -379,6 +379,7 @@ errorsInSendingToNewAttestati= Ci sono stati dei problemi nell'invio delle infor
 
 office.address=Indirizzo
 office.code= Codice
+office.beginDate =Data inizio utilizzo 
 office.codeId= Sede Id
 officeFilter= Filtra per Sede
 office.headQuarter=Sede principale
