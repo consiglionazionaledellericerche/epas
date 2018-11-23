@@ -418,6 +418,7 @@ public class ConsistencyManager {
     }
 
     // decido festivo / lavorativo
+    pd.getValue().refresh();
     pd.getValue().isHoliday = personDayManager.isHoliday(pd.getValue().person, pd.getValue().date);
     pd.getValue().save();
 
