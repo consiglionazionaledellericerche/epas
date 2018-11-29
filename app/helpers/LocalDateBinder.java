@@ -15,7 +15,7 @@ import play.data.binding.types.DateBinder;
 public class LocalDateBinder implements TypeBinder<LocalDate> {
 
   private static final DateBinder DATE_BINDER = new DateBinder();
-  private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("YYYY-MM-dd");
+  private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/YYYY");
 
   @SuppressWarnings("rawtypes")
   @Override

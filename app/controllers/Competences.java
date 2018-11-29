@@ -1076,7 +1076,7 @@ public class Competences extends Controller {
       step++;
       Cache.safeAdd(key2, list2, "10mn");
       enableExitTolerance = false;
-      //type = new ShiftType();
+
       if (Range.closed(stt.startMorning, stt.endMorning)
           .encloses(Range.closed(stt.startMorningLunchTime, stt.endMorningLunchTime))) {
         //ritornare un'informazione per far visualizzare diversamente la costruzione della form
