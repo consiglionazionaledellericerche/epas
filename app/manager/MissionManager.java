@@ -437,10 +437,9 @@ public class MissionManager {
           absence.externalIdentifier = id;
         }
         absence.note = "Identificativo Missione: " + absence.externalIdentifier;
-        personDay.absences.add(absence);
+                
         absence.save();
-        personDay.save();
-
+        
         final User currentUser = Security.getUser().get();
         notificationManager.notificationAbsencePolicy(currentUser, 
             absence, absenceForm.groupSelected, true, false, false);
