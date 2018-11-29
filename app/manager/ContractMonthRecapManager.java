@@ -560,7 +560,10 @@ public class ContractMonthRecapManager {
       cmr.riposiCompensativiMinutiPrint = cmr.riposiCompensativiMinuti;
       if (compensatoryRestClosureSeatRecovering.isPresent()) {
         for (TimeVariation tv : compensatoryRestClosureSeatRecovering.get()) {
-          cmr.riposiCompensativiChiusuraEnteMinuti += tv.timeVariation;
+          if (tv.dateVariation.getYear() == cmr.year 
+              && tv.dateVariation.getMonthOfYear() == cmr.month) {
+            cmr.riposiCompensativiChiusuraEnteMinuti += tv.timeVariation;
+          }          
         }
         cmr.riposiCompensativiChiusuraEnteMinutiPrint = cmr.riposiCompensativiChiusuraEnteMinuti;
       }

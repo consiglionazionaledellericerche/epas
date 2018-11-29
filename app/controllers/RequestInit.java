@@ -4,28 +4,21 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.UserDao;
-
 import helpers.TemplateDataInjector;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
-
+import lombok.val;
 import manager.SecureManager;
-
 import models.Office;
 import models.User;
-
 import org.joda.time.LocalDate;
-
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -102,7 +95,7 @@ public class RequestInit extends Controller {
     Set<Office> offices = secureManager.officesForNavbar(currentUser);
 
     // person init //////////////////////////////////////////////////////////////
-    Long personId;
+    Long personId = null;
     if (params.get("personId") != null) {
       personId = Long.parseLong(params.get("personId"));
     } else if (session.get("personSelected") != null) {
@@ -110,10 +103,12 @@ public class RequestInit extends Controller {
     } else if (currentUser.person != null) {
       personId = currentUser.person.id;
     } else {
-      personId = personDao.liteList(offices, year, month).iterator().next().id;
+      val personList = personDao.liteList(offices, year, month);
+      if (!personList.isEmpty()) {
+        personId = personList.iterator().next().id;
+        session.put("personSelected", personId);
+      }
     }
-
-    session.put("personSelected", personId);
 
     // Popolamento del dropdown degli anni
     List<Integer> years = Lists.newArrayList();
@@ -137,7 +132,8 @@ public class RequestInit extends Controller {
     Long officeId = null;
     if (params.get("officeId") != null) {
       officeId = Long.valueOf(params.get("officeId"));
-    } else if (session.get("officeSelected") != null) {
+      //la not equals("null") è a causa di un problema con il play 1.4.2
+    } else if (session.get("officeSelected") != null && !session.get("officeSelected").equals("null")) {
       officeId = Long.valueOf(session.get("officeSelected"));
     } else if (!offices.isEmpty()) {
       officeId = offices.stream()
@@ -145,7 +141,7 @@ public class RequestInit extends Controller {
     } else if (currentUser.person != null && currentUser.person.office != null) {
       officeId = currentUser.person.office.id;      
     }
-
+    
     session.put("officeSelected", officeId);
 
     //TODO: Da offices rimuovo la sede di cui ho solo il ruolo employee

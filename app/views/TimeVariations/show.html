@@ -14,7 +14,7 @@
 	<table class="table table-striped table-hover" width="100%" datatable>
 		<thead>
 			<tr>
-				<th class="col-md-4">Nome</th>
+				<th class="col-md-3">Nome</th>
 				<th class="center">Riposi per chiusura ente</th>
 			</tr>
 		</thead>
@@ -31,6 +31,7 @@
 						<th>Lista dei recuperi</th>
 						<th>Situazione recupero</th>
 						<th>Scadenza recupero</th>
+						
 					</tr>
 					#{list items:key.getValue(), as:'dto'}
 					<tr>
@@ -38,10 +39,17 @@
 					    <td>
 					    <ul class="list-group">
 					    #{list items:dto.absence.timeVariations, as:'tv'}
-					  		<li class="list-group-item">   
+					  		<li class="list-group-item">
+					  		<div class="pull-left btn-group">
+					  			<a class="btn btn-danger btn-xs" href="@{TimeVariations.removeVariation(tv.id)}">
+        					Rimuovi
+      						</a>   
+      						</div>
 					  		<span class="badge">${(int)(tv.timeVariation / 60)} ore e ${tv.timeVariation % 60} minuti</span> 
-					    	${tv.dateVariation.format()}
+					    	${tv.dateVariation.format()}			    
+					    				    						  		
 					  		</li>
+					  		
 					  	#{/list}
 						</ul>
 					    
@@ -55,7 +63,7 @@
 							</div>
 						</td>	
 						<td>${dto.absence.expireRecoverDate.format()}</td>
-					
+											
 				  	</tr>
 					#{/list}	
 					</table>
