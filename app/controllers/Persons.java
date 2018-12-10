@@ -11,6 +11,9 @@ import dao.PersonChildrenDao;
 import dao.PersonDao;
 import dao.UserDao;
 import dao.WorkingTimeTypeDao;
+import dao.absences.AbsenceComponentDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
@@ -27,12 +30,17 @@ import lombok.extern.slf4j.Slf4j;
 import manager.ContractManager;
 import manager.EmailManager;
 import manager.OfficeManager;
+import manager.PersonManager;
 import manager.SecureManager;
+import manager.StabilizeManager;
 import manager.UserManager;
 import manager.configurations.ConfigurationManager;
+import manager.recaps.personstamping.PersonStampingRecap;
+import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.services.absences.AbsenceService;
-
+import manager.services.absences.model.VacationSituation;
 import models.Contract;
+import models.ContractMonthRecap;
 import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
@@ -42,7 +50,8 @@ import models.Role;
 import models.User;
 import models.VacationPeriod;
 import models.WorkingTimeType;
-
+import models.absences.GroupAbsenceType;
+import models.absences.definitions.DefaultGroup;
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
 
@@ -94,6 +103,15 @@ public class Persons extends Controller {
   static OfficeDao officeDao;
   @Inject
   static AbsenceService absenceService;
+  @Inject
+  static PersonStampingRecapFactory stampingsRecapFactory;
+  @Inject
+  static AbsenceComponentDao absenceComponentDao;
+  @Inject
+  static PersonManager personManager;
+  @Inject
+  static StabilizeManager stabilizeManager;
+  
 
 
   /**
@@ -122,6 +140,71 @@ public class Persons extends Controller {
     render(personList, office);
   }
 
+  /**
+   * Metodo che visualizza il risultato della funzionalità di stabilizzazione e permette 
+   * la persistenza dell'informazione.
+   * @param personId l'identificativo della persona da stabilizzare
+   */
+  public static void stabilize(Long personId, boolean step, Integer residuoOrario, 
+      Integer buoniPasto, Integer ferieAnnoPassato, Integer ferieAnnoPresente, Integer permessi) {
+    LocalDate date = new LocalDate(2018,12,27);
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    
+    rules.checkIfPermitted(person.office);
+    IWrapperPerson wrPerson = wrapperFactory.create(person);
+    boolean isNotTime = false;
+    //Controllo se non sono ancora al 27 dicembre...
+//    if (LocalDate.now().isBefore(date)) {
+//      isNotTime = true;
+//      render(date, step, isNotTime, wrPerson);
+//    }
+    Optional<Contract> contract = wrPerson.getCurrentContract();
+    if (!step) {
+      //Qui faccio vedere all'amministratore cosa caricherò sul nuovo contratto che sto per creare
+      step = true;
+      
+      if (contract.isPresent()) {
+        
+        PersonStampingRecap psDto = stampingsRecapFactory.create(person, LocalDate.now().getYear(), 
+            LocalDate.now().getMonthOfYear(), true);
+        for (IWrapperContractMonthRecap mese : psDto.contractMonths) {
+          if (mese.getValue().month == date.getMonthOfYear()) {
+            residuoOrario = mese.getValue().remainingMinutesCurrentYear 
+                + mese.getValue().remainingMinutesLastYear;
+            buoniPasto = mese.getValue().remainingMealTickets;
+          }
+        }
+        GroupAbsenceType vacationGroup = absenceComponentDao
+            .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
+        VacationSituation vacationSituation = absenceService.buildVacationSituation(contract.get(), 
+            date.getYear(), vacationGroup, Optional.absent(), true);
+        if (vacationSituation == null) {
+          log.warn("Non esiste il riepilogo!!!");
+          render(date, step, psDto, isNotTime, wrPerson, residuoOrario, 
+              buoniPasto, ferieAnnoPassato, ferieAnnoPresente, permessi);
+        }
+        ferieAnnoPassato = vacationSituation.lastYearCached.usableTotal;
+        ferieAnnoPresente = vacationSituation.currentYearCached.usableTotal;
+        permessi = vacationSituation.permissionsCached.usableTotal;
+        
+        render(date, step, psDto, isNotTime, wrPerson, residuoOrario, 
+            buoniPasto, ferieAnnoPassato, ferieAnnoPresente, permessi);        
+      } else {
+        Boolean outOfContract = true;
+        render(date, step, isNotTime, outOfContract);
+      }
+    } else {
+
+      stabilizeManager.stabilizePerson(wrPerson, residuoOrario, buoniPasto, 
+          ferieAnnoPassato, ferieAnnoPresente, permessi);
+      list(person.office.id, null);
+    }
+    
+    
+    render(wrPerson, date, isNotTime);
+  }
+  
   /**
    * metodo che gestisce la pagina di inserimento persona.
    */
