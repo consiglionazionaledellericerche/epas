@@ -10,10 +10,11 @@ import dao.ContractDao;
 import dao.PersonDayDao;
 import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
 import dao.wrapper.IWrapperPersonDay;
 
 import it.cnr.iit.epas.DateUtility;
-
+import lombok.extern.slf4j.Slf4j;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import org.joda.time.LocalDate;
 
 import play.db.jpa.JPA;
 
+@Slf4j
 public class PersonManager {
 
   private final ContractDao contractDao;
@@ -42,6 +44,7 @@ public class PersonManager {
   public final PersonDayManager personDayManager;
   private final IWrapperFactory wrapperFactory;
   private final AbsenceDao absenceDao;
+  
 
   /**
    * Costrutture.
@@ -64,6 +67,7 @@ public class PersonManager {
     this.absenceDao = absenceDao;
     this.personDayManager = personDayManager;
     this.wrapperFactory = wrapperFactory;
+    
   }
 
   /**
@@ -322,5 +326,7 @@ public class PersonManager {
 
     return absencesToRecover;
   }
+
+  
 
 }
