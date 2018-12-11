@@ -3,13 +3,17 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import dao.AbsenceDao;
+import dao.AbsenceTypeDao;
 import dao.wrapper.IWrapperPerson;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import manager.services.absences.AbsenceService;
+import manager.services.absences.AbsenceService.InsertReport;
 import models.Contract;
 import models.absences.Absence;
+import models.absences.AbsenceType;
 import org.joda.time.LocalDate;
 import org.testng.collections.Maps;
 
@@ -18,15 +22,22 @@ import org.testng.collections.Maps;
 public class StabilizeManager {
 
   private final AbsenceDao absenceDao;
+  private final AbsenceManager absenceManager;
+  private final AbsenceService absenceService;
   private final PersonDayManager personDayManager;
   private final ConsistencyManager consistencyManager;
+  private final AbsenceTypeDao absenceTypeDao;
   
   @Inject
-  public StabilizeManager(AbsenceDao absenceDao, PersonDayManager personDayManager, 
-      ConsistencyManager consistencyManager) {
+  public StabilizeManager(AbsenceDao absenceDao, AbsenceManager absenceManager, 
+      AbsenceService absenceService, PersonDayManager personDayManager, 
+      ConsistencyManager consistencyManager, AbsenceTypeDao absenceTypeDao) {
     this.absenceDao = absenceDao;
+    this.absenceManager = absenceManager;
+    this.absenceService = absenceService;
     this.personDayManager = personDayManager;
     this.consistencyManager = consistencyManager;
+    this.absenceTypeDao = absenceTypeDao;
   }
   
   /**
@@ -51,6 +62,12 @@ public class StabilizeManager {
       }
       dates.add(abs.personDay.date);
       map.put(abs.absenceType.code, dates);
+      int removed = absenceManager.removeAbsencesInPeriod(contract.person, 
+          abs.personDay.date, abs.personDay.date, abs.absenceType);
+      if (removed == 0) {
+        log.warn("Non è stata rimossa l'assenza {} del giorno {} per {}", 
+            abs.absenceType.code, abs.personDay.date, contract.person);
+      }
     }
     return map;
   }
@@ -81,13 +98,14 @@ public class StabilizeManager {
           checkAbsenceInContract(contract.get(), lastDayBeforeNewContract);
       contract.get().endContract = lastDayBeforeNewContract;
       contract.get().save();
+      //Creo il nuovo contratto con l'inizializzazione
       Contract newContract = new Contract();
-      newContract.beginDate = lastDayBeforeNewContract.plusDays(1);
+      newContract.beginDate = lastDayBeforeNewContract;
       newContract.onCertificate = true;
       newContract.person = wrPerson.getValue();
-      newContract.sourceDateMealTicket = lastDayBeforeNewContract.plusDays(1);
-      newContract.sourceDateResidual = lastDayBeforeNewContract.plusDays(1);
-      newContract.sourceDateVacation = lastDayBeforeNewContract.plusDays(1);
+      newContract.sourceDateMealTicket = lastDayBeforeNewContract;
+      newContract.sourceDateResidual = lastDayBeforeNewContract;
+      newContract.sourceDateVacation = lastDayBeforeNewContract;
       newContract.sourcePermissionUsed = permessi;
       newContract.sourceRemainingMealTicket = buoniPasto;
       newContract.sourceRemainingMinutesCurrentYear = residuoOrario;
@@ -96,7 +114,15 @@ public class StabilizeManager {
       newContract.save();
       log.info("Creato nuovo contratto a {} a partire dalla data {}", 
           wrPerson.getValue().fullName(), lastDayBeforeNewContract);
-      
+      //Riposiziono le assenze precedentemente recuperate
+      for (Map.Entry<String, List<LocalDate>> entry : absencesToRecreate.entrySet()) {
+        Optional<AbsenceType> type = absenceTypeDao.getAbsenceTypeByCode(entry.getKey());
+        for (LocalDate date : entry.getValue()) {
+          InsertReport insertReport = absenceService.insert(wrPerson.getValue(), groupAbsenceType, date, date,
+              type, justifiedType, null, null, false, absenceManager);
+        }
+      }
+      consistencyManager.updatePersonSituation(wrPerson.getValue().id, lastDayBeforeNewContract);
     }
   }
 }

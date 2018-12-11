@@ -184,9 +184,9 @@ public class Persons extends Controller {
           render(date, step, psDto, isNotTime, wrPerson, residuoOrario, 
               buoniPasto, ferieAnnoPassato, ferieAnnoPresente, permessi);
         }
-        ferieAnnoPassato = vacationSituation.lastYearCached.usableTotal;
-        ferieAnnoPresente = vacationSituation.currentYearCached.usableTotal;
-        permessi = vacationSituation.permissionsCached.usableTotal;
+        ferieAnnoPassato = vacationSituation.lastYearCached.used;
+        ferieAnnoPresente = vacationSituation.currentYearCached.used;
+        permessi = vacationSituation.permissionsCached.used;
         
         render(date, step, psDto, isNotTime, wrPerson, residuoOrario, 
             buoniPasto, ferieAnnoPassato, ferieAnnoPresente, permessi);        
