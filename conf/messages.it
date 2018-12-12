@@ -643,6 +643,15 @@ zone =Zona di timbratura
 zone.name =Nome della zona di timbratura
 zone.description =Descrizione
 
+#######################################################
+# Traduzioni per form di stabilizzazione (provvisoria)#
+#######################################################
+residuoOrario=Residuo orario (ore:minuti)
+buoniPasto= Buoni pasto rimanenti
+ferieAnnoPassato= Ferie anno passato (da fare)
+ferieAnnoPresente= Ferie anno corrente (da fare)
+permessi= Permessi legge (da fare)
+
 ###########################
 # Messaggi di validazione
 ###########################

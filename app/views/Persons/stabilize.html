@@ -23,7 +23,8 @@
 	#{/if}
 	#{else}
 	
-	#{f.hidden 'step', value:step /}
+	
+	
 	#{form action:@Persons.stabilize(), method:'POST', autocomplete:false,
   		class:'form form-horizontal', 'data-async':'#page_content',
   		'data-async-error':'#stabilize'}
@@ -33,21 +34,29 @@
 	a tempo indeterminato per ${wrPerson.value.fullname} prevede:
 	</p>
 	#{/alert}
+	#{f.hidden 'step', value:step /}
+	
+	#{f.hidden 'personId', value:wrPerson.value.id /}
 		<div class="container-fluid">
 		<div class="col-md-8 col-md-offset-4">
-		#{f.view 'Residuo orario (ore:minuti)', value:residuoOrario.toHourTime() /}
+		#{f.view 'residuoOrario', value:residuoOrario.toHourTime() /}
+		#{f.hidden 'residuoOrario', value:residuoOrario /}
 		</div>
 		<div class="col-md-8 col-md-offset-4">
-		#{f.view 'Buoni pasto', value:buoniPasto /}
+		#{f.view 'buoniPasto', value:buoniPasto /}
+		#{f.hidden 'buoniPasto', value:buoniPasto /}
 		</div>
 		<div class="col-md-8 col-md-offset-4">
-		#{f.view 'Ferie anno passato usate', value:ferieAnnoPassato /}
+		#{f.view 'ferieAnnoPassato', value:ferieAnnoPassato /}
+		#{f.hidden 'ferieAnnoPassato', value:ferieAnnoPassato /}
 		</div>
 		<div class="col-md-8 col-md-offset-4">
-		#{f.view 'Ferie anno corrente usate', value:ferieAnnoPresente /}
+		#{f.view 'ferieAnnoPresente', value:ferieAnnoPresente /}
+		#{f.hidden 'ferieAnnoPresente', value:ferieAnnoPresente /}
 		</div>
 		<div class="col-md-8 col-md-offset-4">
-		#{f.view 'Ex permessi legge usati', value:permessi /}
+		#{f.view 'permessi', value:permessi /}
+		#{f.hidden 'permessi', value:permessi /}
 		</div>
 
 	</div>
