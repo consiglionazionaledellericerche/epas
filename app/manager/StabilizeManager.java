@@ -169,7 +169,7 @@ public class StabilizeManager {
     if (contract.isPresent()) {
       //prima di terminare il contratto devo recuperare tutte le assenze dal 26 dicembre in poi sul 
       //contratto, salvarle in una mappa e poi eliminarle dal contratto
-      LocalDate lastDayBeforeNewContract = new LocalDate(2018,12,12);
+      LocalDate lastDayBeforeNewContract = new LocalDate(2018,12,27);
       Map<String, List<LocalDate>> absencesToRecreate = 
           checkAbsenceInContract(contract.get(), lastDayBeforeNewContract);
       Contract newContract = createNewContract(contract, lastDayBeforeNewContract, wrPerson);
