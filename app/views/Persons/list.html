@@ -69,7 +69,7 @@
             data-content="${('Il database non è sincronizzato. Possibile causa, malfunzionamento durante la procedura notturna di chiusura giorno. Questo problema si risolverà automaticamente non appena perverranno nuove timbrature.').escape()}"
             *{ title="Configurazione ${person.value.fullname}" }*><i class="fa fa-exclamation-triangle text-muted"></i></a>
         #{/elseif}
-	  <td> #{if person.currentContract.get().endDate}
+	  <td> #{if person.currentContract.get().endDate && !person.currentContract.get().endContract}
 	  		<a href="@{stabilize(person.value.id, false)}"  data-async-modal="#defaultModal">Stabilizza</a>
 	  		#{/if}
 	  </td>	

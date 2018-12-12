@@ -147,7 +147,7 @@ public class Persons extends Controller {
    */
   public static void stabilize(Long personId, boolean step, Integer residuoOrario, 
       Integer buoniPasto, Integer ferieAnnoPassato, Integer ferieAnnoPresente, Integer permessi) {
-    LocalDate date = new LocalDate(2018,12,27);
+    LocalDate date = new LocalDate(2018,12,12);
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     
@@ -155,10 +155,10 @@ public class Persons extends Controller {
     IWrapperPerson wrPerson = wrapperFactory.create(person);
     boolean isNotTime = false;
     //Controllo se non sono ancora al 27 dicembre...
-//    if (LocalDate.now().isBefore(date)) {
-//      isNotTime = true;
-//      render(date, step, isNotTime, wrPerson);
-//    }
+    if (LocalDate.now().isBefore(date)) {
+      isNotTime = true;
+      render(date, step, isNotTime, wrPerson);
+    }
     Optional<Contract> contract = wrPerson.getCurrentContract();
     if (!step) {
       //Qui faccio vedere all'amministratore cosa caricherò sul nuovo contratto che sto per creare
@@ -184,9 +184,9 @@ public class Persons extends Controller {
           render(date, step, psDto, isNotTime, wrPerson, residuoOrario, 
               buoniPasto, ferieAnnoPassato, ferieAnnoPresente, permessi);
         }
-        ferieAnnoPassato = vacationSituation.lastYearCached.used;
-        ferieAnnoPresente = vacationSituation.currentYearCached.used;
-        permessi = vacationSituation.permissionsCached.used;
+        ferieAnnoPassato = vacationSituation.lastYearCached.usable;
+        ferieAnnoPresente = vacationSituation.currentYearCached.usable;
+        permessi = vacationSituation.permissionsCached.usable;
         
         render(date, step, psDto, isNotTime, wrPerson, residuoOrario, 
             buoniPasto, ferieAnnoPassato, ferieAnnoPresente, permessi);        
@@ -198,11 +198,9 @@ public class Persons extends Controller {
 
       stabilizeManager.stabilizePerson(wrPerson, residuoOrario, buoniPasto, 
           ferieAnnoPassato, ferieAnnoPresente, permessi);
+      flash.success("Stabilizzato %s", wrPerson.getValue().fullName());
       list(person.office.id, null);
     }
-    
-    
-    render(wrPerson, date, isNotTime);
   }
   
   /**
