@@ -40,6 +40,10 @@ import org.testng.collections.Maps;
 
 @Slf4j
 public class StabilizeManager {
+  
+  //Data della stabilizzazione: 27/12/2018
+  private final LocalDate lastDayBeforeNewContract = new LocalDate(2018,12,13);
+  private final List<String> codesToSave = Lists.newArrayList("91", "32", "94", "31", "37");
 
   private final AbsenceDao absenceDao;
   private final AbsenceManager absenceManager;
@@ -83,7 +87,7 @@ public class StabilizeManager {
   private Map<String, List<LocalDate>> checkAbsenceInContract(Contract contract, 
       LocalDate lastDayBeforeNewContract) {
     Map<String, List<LocalDate>> map = Maps.newHashMap();
-    List<String> codesToSave = Lists.newArrayList("32", "94", "31", "37");
+    
     List<LocalDate> dates = null;
     List<Absence> absences = absenceDao
         .getAbsencesInPeriod(Optional.fromNullable(contract.person), 
@@ -126,8 +130,13 @@ public class StabilizeManager {
       if (type.isPresent()) {
         JustifiedType justifiedType = 
             absComponentDao.getOrBuildJustifiedType(JustifiedTypeName.all_day);
-        groupAbsenceType =
-            absComponentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name());
+        if (type.get().code.equals("91")) {
+          groupAbsenceType =
+              absComponentDao.groupAbsenceTypeByName(DefaultGroup.RIPOSI_CNR.name());
+        } else {
+          groupAbsenceType =
+              absComponentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name());
+        }
 
         for (LocalDate date : entry.getValue()) {
 
@@ -169,10 +178,14 @@ public class StabilizeManager {
     if (contract.isPresent()) {
       //prima di terminare il contratto devo recuperare tutte le assenze dal 26 dicembre in poi sul 
       //contratto, salvarle in una mappa e poi eliminarle dal contratto
-      LocalDate lastDayBeforeNewContract = new LocalDate(2018,12,27);
+      int minutesToAdd = 0;
       Map<String, List<LocalDate>> absencesToRecreate = 
           checkAbsenceInContract(contract.get(), lastDayBeforeNewContract);
       Contract newContract = createNewContract(contract, lastDayBeforeNewContract, wrPerson);
+      if (absencesToRecreate.containsKey("91")) {
+        minutesToAdd = absencesToRecreate.get("91").size() * 432;
+      }
+      residuoOrario = residuoOrario + minutesToAdd;
       initializeNewContract(newContract, permessi, buoniPasto, residuoOrario, 
           ferieAnnoPresente, ferieAnnoPassato, lastDayBeforeNewContract);
       log.info("Inizializzato il nuovo contratto id {}", wrPerson.getValue().fullName());
@@ -189,7 +202,13 @@ public class StabilizeManager {
     final DateInterval previousInterval = wrappedContract.getContractDatabaseInterval();
 
     // Attribuisco il nuovo stato al contratto per effettuare il controllo incrociato
-
+    List<VacationPeriod> vpList = contract.get().vacationPeriods;
+    VacationPeriod period = null;
+    for (VacationPeriod vp : vpList) {
+      if (DateUtility.isDateIntoInterval(LocalDate.now(), new DateInterval(vp.beginDate, vp.endDate))) {
+        period = vp;
+      }
+    }
     contract.get().endContract = lastDayBeforeNewContract.minusDays(1);
 
     DateInterval newInterval = wrappedContract.getContractDatabaseInterval();
