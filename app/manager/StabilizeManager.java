@@ -205,9 +205,17 @@ public class StabilizeManager {
     List<VacationPeriod> vpList = contract.get().vacationPeriods;
     VacationPeriod period = null;
     for (VacationPeriod vp : vpList) {
-      if (DateUtility.isDateIntoInterval(LocalDate.now(), new DateInterval(vp.beginDate, vp.endDate))) {
+      if (DateUtility.isDateIntoInterval(LocalDate.now(), 
+          new DateInterval(vp.beginDate, vp.endDate))) {
         period = vp;
       }
+    }
+    LocalDate endVacationPeriod = null;
+    if (period.vacationCode.name.equals("28+4")) {
+      //se il dipendente è già a 28+4 non devo fare niente
+      log.info("Piano ferie già al 28+4, non occorre modificare nulla.");
+    } else {
+      endVacationPeriod = period.endDate;
     }
     contract.get().endContract = lastDayBeforeNewContract.minusDays(1);
 

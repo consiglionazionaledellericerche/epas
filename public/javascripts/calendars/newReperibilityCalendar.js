@@ -3,7 +3,7 @@ $(document).ready(function() {
   // Calendario delle reperibilità
   $('[data-calendar]', this).each(function() {
     var $this = $(this);
-    var $dateFormat = 'YYYY-MM-DD';
+    var $dateFormat = 'dd/MM/YYYY';
     var data = {
       height: 'auto',
       columnFormat: 'dddd',
