@@ -42,7 +42,7 @@ import org.testng.collections.Maps;
 public class StabilizeManager {
   
   //Data della stabilizzazione: 27/12/2018
-  private final LocalDate lastDayBeforeNewContract = new LocalDate(2018,12,13);
+  private final LocalDate lastDayBeforeNewContract = new LocalDate(2018,12,17);
   private final List<String> codesToSave = Lists.newArrayList("91", "32", "94", "31", "37");
 
   private final AbsenceDao absenceDao;
@@ -217,6 +217,7 @@ public class StabilizeManager {
     } else {
       endVacationPeriod = period.endDate;
     }
+        
     contract.get().endContract = lastDayBeforeNewContract.minusDays(1);
 
     DateInterval newInterval = wrappedContract.getContractDatabaseInterval();
@@ -233,6 +234,21 @@ public class StabilizeManager {
     newContract.beginDate = lastDayBeforeNewContract;
     newContract.onCertificate = true;
     newContract.person = wrPerson.getValue();
+    newContract.save();
+    contractManager.recomputeContract(newContract,
+        Optional.fromNullable(lastDayBeforeNewContract), false, false);
+    
+    //Aggiungo il piano ferie
+    VacationPeriod vp = new VacationPeriod();
+    vp.vacationCode = period.vacationCode;
+    vp.beginDate = lastDayBeforeNewContract;
+    vp.endDate = period.endDate;
+    vp.vacationCode = period.vacationCode;
+    vp.contract = newContract;
+    vp.save();
+    periodManager.updatePeriods(vp, true);
+    contractManager.recomputeContract(newContract,
+        Optional.fromNullable(lastDayBeforeNewContract), false, false);
 
     WorkingTimeType wtt = wttDao.workingTypeTypeByDescription("Normale", Optional.absent());
     contractManager.properContractCreate(newContract, Optional.fromNullable(wtt), true);
