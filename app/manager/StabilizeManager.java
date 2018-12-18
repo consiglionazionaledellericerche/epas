@@ -2,6 +2,7 @@ package manager;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import controllers.Security;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
@@ -13,6 +14,7 @@ import dao.wrapper.IWrapperPerson;
 import helpers.Web;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
@@ -22,6 +24,8 @@ import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
 import manager.services.absences.model.VacationSituation;
 import models.Contract;
+import models.Office;
+import models.Person;
 import models.PersonDay;
 import models.VacationPeriod;
 import models.WorkingTimeType;
@@ -32,17 +36,21 @@ import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultGroup;
+import models.base.IPropertyInPeriod;
+import models.enumerate.VacationCode;
 import play.data.validation.Validation;
 import play.db.jpa.JPA;
+import play.jobs.Job;
+import play.libs.F.Promise;
 import org.joda.time.LocalDate;
 import org.testng.collections.Maps;
 
 
 @Slf4j
 public class StabilizeManager {
-  
+
   //Data della stabilizzazione: 27/12/2018
-  private final LocalDate lastDayBeforeNewContract = new LocalDate(2018,12,17);
+  private final LocalDate lastDayBeforeNewContract = new LocalDate(2018,12,18);
   private final List<String> codesToSave = Lists.newArrayList("91", "32", "94", "31", "37");
 
   private final AbsenceDao absenceDao;
@@ -56,7 +64,7 @@ public class StabilizeManager {
   private final WorkingTimeTypeDao wttDao;
   private final IWrapperFactory wrapperFactory;
   private final PeriodManager periodManager;
-  
+
 
   @Inject
   public StabilizeManager(AbsenceDao absenceDao, AbsenceManager absenceManager, 
@@ -87,7 +95,7 @@ public class StabilizeManager {
   private Map<String, List<LocalDate>> checkAbsenceInContract(Contract contract, 
       LocalDate lastDayBeforeNewContract) {
     Map<String, List<LocalDate>> map = Maps.newHashMap();
-    
+
     List<LocalDate> dates = null;
     List<Absence> absences = absenceDao
         .getAbsencesInPeriod(Optional.fromNullable(contract.person), 
@@ -181,19 +189,49 @@ public class StabilizeManager {
       int minutesToAdd = 0;
       Map<String, List<LocalDate>> absencesToRecreate = 
           checkAbsenceInContract(contract.get(), lastDayBeforeNewContract);
+      
+      //Controllo quando sarebbe avvenuto il cambio di piano ferie
+      List<VacationPeriod> vpList = contract.get().vacationPeriods;
+      LocalDate beginDate = null;
+      for (VacationPeriod vp : vpList) {
+        if (vp.vacationCode.name.equals("28+4")) {
+          beginDate = vp.beginDate;          
+        }
+      }
+      final VacationCode code = VacationCode.CODE_28_4;
+      
+      //Creo il nuovo contratto
       Contract newContract = createNewContract(contract, lastDayBeforeNewContract, wrPerson);
+            
+      //Inizializzo il nuovo contratto
       if (absencesToRecreate.containsKey("91")) {
         minutesToAdd = absencesToRecreate.get("91").size() * 432;
       }
-      residuoOrario = residuoOrario + minutesToAdd;
+      residuoOrario = residuoOrario + minutesToAdd;      
       initializeNewContract(newContract, permessi, buoniPasto, residuoOrario, 
           ferieAnnoPresente, ferieAnnoPassato, lastDayBeforeNewContract);
       log.info("Inizializzato il nuovo contratto id {}", wrPerson.getValue().fullName());
+      
+      //Sistemo il piano ferie al contratto se necessario
+      if (beginDate != null) {
+        if (beginDate.isBefore(newContract.beginDate)) {
+          beginDate = newContract.beginDate;        
+        }
+        changeVacationPeriod(newContract, code, beginDate);
+      }            
+      
       //Riposiziono le assenze precedentemente recuperate
       putAbsencesInNewContract(wrPerson, absencesToRecreate);      
     }
   }
 
+  /**
+   * Metodo che crea il nuovo contratto.
+   * @param contract il vecchio contratto 
+   * @param lastDayBeforeNewContract la data da cui far partire il nuovo contratto
+   * @param wrPerson il wrapper della persona
+   * @return il nuovo contratto per la persona contenuta nel wrapper.
+   */
   private Contract createNewContract(Optional<Contract> contract, 
       LocalDate lastDayBeforeNewContract, IWrapperPerson wrPerson) {
 
@@ -202,22 +240,8 @@ public class StabilizeManager {
     final DateInterval previousInterval = wrappedContract.getContractDatabaseInterval();
 
     // Attribuisco il nuovo stato al contratto per effettuare il controllo incrociato
-    List<VacationPeriod> vpList = contract.get().vacationPeriods;
-    VacationPeriod period = null;
-    for (VacationPeriod vp : vpList) {
-      if (DateUtility.isDateIntoInterval(LocalDate.now(), 
-          new DateInterval(vp.beginDate, vp.endDate))) {
-        period = vp;
-      }
-    }
-    LocalDate endVacationPeriod = null;
-    if (period.vacationCode.name.equals("28+4")) {
-      //se il dipendente è già a 28+4 non devo fare niente
-      log.info("Piano ferie già al 28+4, non occorre modificare nulla.");
-    } else {
-      endVacationPeriod = period.endDate;
-    }
-        
+
+
     contract.get().endContract = lastDayBeforeNewContract.minusDays(1);
 
     DateInterval newInterval = wrappedContract.getContractDatabaseInterval();
@@ -237,24 +261,42 @@ public class StabilizeManager {
     newContract.save();
     contractManager.recomputeContract(newContract,
         Optional.fromNullable(lastDayBeforeNewContract), false, false);
-    
-    //Aggiungo il piano ferie
-    VacationPeriod vp = new VacationPeriod();
-    vp.vacationCode = period.vacationCode;
-    vp.beginDate = lastDayBeforeNewContract;
-    vp.endDate = period.endDate;
-    vp.vacationCode = period.vacationCode;
-    vp.contract = newContract;
-    vp.save();
-    periodManager.updatePeriods(vp, true);
-    contractManager.recomputeContract(newContract,
-        Optional.fromNullable(lastDayBeforeNewContract), false, false);
 
     WorkingTimeType wtt = wttDao.workingTypeTypeByDescription("Normale", Optional.absent());
     contractManager.properContractCreate(newContract, Optional.fromNullable(wtt), true);
     return newContract;
   }
   
+  /**
+   * Metodo che modifica i vacationPeriods.
+   * @param newContract il nuovo contratto per cui cambiare i vacationPeriods
+   * @param code il vacationCode da inserire
+   * @param beginDate la data da cui far partire il vacationPeriod
+   */
+  private void changeVacationPeriod(Contract newContract, VacationCode code, 
+      LocalDate beginDate) {    
+    
+    VacationPeriod vp = new VacationPeriod();
+    vp.beginDate = beginDate;
+    vp.vacationCode = code;
+    vp.endDate = newContract.endDate;
+    vp.contract = newContract;
+    //vp.merge();
+    IWrapperContract wrappedContract = wrapperFactory.create(newContract);
+    
+    //Modifico il piano ferie
+
+    List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(vp, false);
+    RecomputeRecap recomputeRecap =
+        periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(),
+            Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
+            periodRecaps, Optional.fromNullable(newContract.sourceDateResidual));
+    recomputeRecap.initMissing = wrappedContract.initializationMissing();
+    
+    periodManager.updatePeriods(vp, true);
+    
+  }
+
   /**
    * Metodo che imposta l'inizializzazione sul nuovo contratto.
    * @param newContract il nuovo contratto da inizializzare
@@ -265,19 +307,20 @@ public class StabilizeManager {
    * @param ferieAnnoPassato le ferie dell'anno passato fatte
    * @param lastDayBeforeNewContract la data a cui impostare l'inizializzazione
    */
-  public void initializeNewContract(Contract newContract, Integer permessi, 
+  private void initializeNewContract(Contract newContract, Integer permessi, 
       Integer buoniPasto, Integer residuoOrario, Integer ferieAnnoPresente, 
       Integer ferieAnnoPassato, LocalDate lastDayBeforeNewContract) {
 
-    contractManager.setSourceContractProperly(newContract);
+    contractManager.setSourceContractProperly(newContract);    
+    
+    newContract.sourceDateMealTicket = lastDayBeforeNewContract;
+    newContract.sourceDateResidual = lastDayBeforeNewContract;
+    newContract.sourceDateVacation = lastDayBeforeNewContract;
     GroupAbsenceType vacationGroup = absComponentDao
         .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
     VacationSituation vacationSituation = 
         absenceService.buildVacationSituation(newContract, 
-        lastDayBeforeNewContract.getYear(), vacationGroup, Optional.absent(), true);
-    newContract.sourceDateMealTicket = lastDayBeforeNewContract;
-    newContract.sourceDateResidual = lastDayBeforeNewContract;
-    newContract.sourceDateVacation = lastDayBeforeNewContract;
+            lastDayBeforeNewContract.getYear(), vacationGroup, Optional.absent(), true);
     newContract.sourcePermissionUsed = vacationSituation.permissionsCached.total - permessi;
     newContract.sourceRemainingMealTicket = buoniPasto;
     newContract.sourceRemainingMinutesCurrentYear = residuoOrario;
@@ -285,11 +328,11 @@ public class StabilizeManager {
         vacationSituation.currentYearCached.total - ferieAnnoPresente;
     newContract.sourceVacationLastYearUsed = ferieAnnoPassato;
     newContract.save();
-    
+
     absenceService.emptyVacationCache(newContract);
-    
+
     contractManager.properContractUpdate(newContract, lastDayBeforeNewContract, true);
-    
-        
+
+
   }
 }
