@@ -50,7 +50,7 @@ import org.testng.collections.Maps;
 public class StabilizeManager {
 
   //Data della stabilizzazione: 27/12/2018
-  private final LocalDate lastDayBeforeNewContract = new LocalDate(2018,12,18);
+  private final LocalDate lastDayBeforeNewContract = new LocalDate(2018,12,27);
   private final List<String> codesToSave = Lists.newArrayList("91", "32", "94", "31", "37");
 
   private final AbsenceDao absenceDao;

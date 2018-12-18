@@ -147,7 +147,7 @@ public class Persons extends Controller {
    */
   public static void stabilize(Long personId, boolean step, Integer residuoOrario, 
       Integer buoniPasto, Integer ferieAnnoPassato, Integer ferieAnnoPresente, Integer permessi) {
-    LocalDate date = new LocalDate(2018,12,18);
+    LocalDate date = new LocalDate(2018,12,27);
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     
