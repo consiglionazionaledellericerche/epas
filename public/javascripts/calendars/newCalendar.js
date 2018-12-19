@@ -6,7 +6,7 @@ $(document).ready(function() {
   // Calendario dei turni
   $('[data-calendar]', this).each(function() {
     var $this = $(this);
-    var $dateFormat = 'YYYY-MM-DD';
+    var $dateFormat = 'DD/MM/YYYY';
     var data = {
       height: 'auto',
       columnFormat: 'dddd',
@@ -33,7 +33,7 @@ $(document).ready(function() {
             type: 'GET',
             data: {
               activityId: activity,
-              start: view.start.format()
+              start: view.start.format($dateFormat)
             },
             success: function(response) {
               var isEditable = response === 'true';
@@ -47,8 +47,8 @@ $(document).ready(function() {
           // elementi esterni (persone e riepiloghi)
           var data = {
             activityId: activity,
-            start: view.start.format(),
-            end: view.end.clone().subtract(1, 'days').format()
+            start: view.start.format($dateFormat),
+            end: view.end.clone().subtract(1, 'days').format($dateFormat)
           };
           $('[data-render-load]').each(function() {
             var url = $(this).data('render-load');
@@ -69,8 +69,8 @@ $(document).ready(function() {
           type: 'GET',
           data: {
             activityId: activity,
-            start: start.format(),
-            end: end.clone().subtract(1, 'days').format()
+            start: start.format($dateFormat),
+            end: end.clone().subtract(1, 'days').format($dateFormat)
           },
           success: function(response) {
             callback(response);
@@ -267,6 +267,6 @@ $(document).ajaxStop(function() {
 });
 
 function getCurrentViewDate(input) {
-  var currentViewDate = $('[data-calendar]').fullCalendar('getDate').format();
+  var currentViewDate = $('[data-calendar]').fullCalendar('getDate').format('DD/MM/YYYY');
   $(input).val(currentViewDate);
 }
