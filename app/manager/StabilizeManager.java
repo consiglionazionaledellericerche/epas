@@ -50,7 +50,7 @@ import org.testng.collections.Maps;
 public class StabilizeManager {
 
   //Data della stabilizzazione: 27/12/2018
-  private final LocalDate lastDayBeforeNewContract = new LocalDate(2018,12,27);
+  public final static LocalDate firstDayNewContract = new LocalDate(2018,12,27);
   private final List<String> codesToSave = Lists.newArrayList("91", "32", "94", "31", "37");
 
   private final AbsenceDao absenceDao;
@@ -161,7 +161,6 @@ public class StabilizeManager {
               personDay.save();
             } 
             JPA.em().flush();
-            consistencyManager.updatePersonSituation(wrPerson.getValue().id, date);
           }
         }
       }
@@ -188,7 +187,9 @@ public class StabilizeManager {
       //contratto, salvarle in una mappa e poi eliminarle dal contratto
       int minutesToAdd = 0;
       Map<String, List<LocalDate>> absencesToRecreate = 
-          checkAbsenceInContract(contract.get(), lastDayBeforeNewContract);
+          checkAbsenceInContract(contract.get(), firstDayNewContract);
+      
+      log.info("Rimosse assenze per {}. Assenze: {}", wrPerson.getValue().getFullname(), absencesToRecreate);
       
       //Controllo quando sarebbe avvenuto il cambio di piano ferie
       List<VacationPeriod> vpList = contract.get().vacationPeriods;
@@ -201,7 +202,7 @@ public class StabilizeManager {
       final VacationCode code = VacationCode.CODE_28_4;
       
       //Creo il nuovo contratto
-      Contract newContract = createNewContract(contract, lastDayBeforeNewContract, wrPerson);
+      Contract newContract = createNewContract(contract, firstDayNewContract, wrPerson);
             
       //Inizializzo il nuovo contratto
       if (absencesToRecreate.containsKey("91")) {
@@ -209,7 +210,7 @@ public class StabilizeManager {
       }
       residuoOrario = residuoOrario + minutesToAdd;      
       initializeNewContract(newContract, permessi, buoniPasto, residuoOrario, 
-          ferieAnnoPresente, ferieAnnoPassato, lastDayBeforeNewContract);
+          ferieAnnoPresente, ferieAnnoPassato, firstDayNewContract);
       log.info("Inizializzato il nuovo contratto id {}", wrPerson.getValue().fullName());
       
       //Sistemo il piano ferie al contratto se necessario
@@ -221,7 +222,16 @@ public class StabilizeManager {
       }            
       
       //Riposiziono le assenze precedentemente recuperate
-      putAbsencesInNewContract(wrPerson, absencesToRecreate);      
+      putAbsencesInNewContract(wrPerson, absencesToRecreate);
+      
+      new Job<Void>() {
+        @Override
+        public void doJob() {
+          consistencyManager.updatePersonSituation(wrPerson.getValue().id, 
+              new LocalDate(firstDayNewContract.dayOfMonth().withMinimumValue()));          
+        }
+      }.afterRequest();
+
     }
   }
 
@@ -235,6 +245,7 @@ public class StabilizeManager {
   private Contract createNewContract(Optional<Contract> contract, 
       LocalDate lastDayBeforeNewContract, IWrapperPerson wrPerson) {
 
+    log.debug("Inizio chiusura contratto attuale e creazione nuovo contratto per {}", wrPerson.getValue().getFullname());
     IWrapperContract wrappedContract = wrapperFactory.create(contract.get());
     // Salvo la situazione precedente
     final DateInterval previousInterval = wrappedContract.getContractDatabaseInterval();
@@ -253,6 +264,8 @@ public class StabilizeManager {
     } else {
       contractManager.properContractUpdate(contract.get(), LocalDate.now(), false);
     }
+    log.info("Terminato contratto {} per {}", contract.get(), wrPerson.getValue().getFullname());
+    
     //Creo il nuovo contratto con l'inizializzazione
     Contract newContract = new Contract();
     newContract.beginDate = lastDayBeforeNewContract;
@@ -264,6 +277,7 @@ public class StabilizeManager {
 
     WorkingTimeType wtt = wttDao.workingTypeTypeByDescription("Normale", Optional.absent());
     contractManager.properContractCreate(newContract, Optional.fromNullable(wtt), true);
+    log.info("Creato nuovo contratto {} per {}", newContract, wrPerson.getValue().getFullname());
     return newContract;
   }
   
