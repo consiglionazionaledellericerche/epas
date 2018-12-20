@@ -338,7 +338,8 @@ public class ConsistencyManager {
         public void doJob() {
           Verify.verifyNotNull(contract.get().id);          
           Contract currentContract = Contract.findById(contract.get().id);
-          Verify.verifyNotNull(currentContract, String.format("currentcontract is null, contract.id = %s", contract.get().id));
+          Verify.verifyNotNull(currentContract, 
+              String.format("currentcontract is null, contract.id = %s", contract.get().id));
           GroupAbsenceType vacationGroup = absenceComponentDao
               .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
           absenceService.buildVacationSituation(currentContract, LocalDate.now().getYear(),
