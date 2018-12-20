@@ -172,6 +172,10 @@ public class Persons extends Controller {
           if (mese.getValue().month == date.getMonthOfYear()) {
             residuoOrario = mese.getValue().remainingMinutesCurrentYear 
                 + mese.getValue().remainingMinutesLastYear;
+            //sottraggo dal residuo mensile la somma delle eventuali differenze maturate dal giorno 
+            //della stabilizzazione al giorno in cui viene lanciata la procedura se questa viene 
+            //lanciata in un giorno successivo al 27/12/2018
+            residuoOrario = residuoOrario - stabilizeManager.adjustResidual(wrPerson);
             buoniPasto = mese.getValue().remainingMealTickets;
           }
         }

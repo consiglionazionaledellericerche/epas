@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import controllers.Security;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
+import dao.PersonDayDao;
 import dao.WorkingTimeTypeDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperContract;
@@ -50,7 +51,7 @@ import org.testng.collections.Maps;
 public class StabilizeManager {
 
   //Data della stabilizzazione: 27/12/2018
-  public final static LocalDate firstDayNewContract = new LocalDate(2018,12,27);
+  public static final LocalDate firstDayNewContract = new LocalDate(2018,12,27);
   private final List<String> codesToSave = Lists.newArrayList("91", "32", "94", "31", "37");
 
   private final AbsenceDao absenceDao;
@@ -64,6 +65,7 @@ public class StabilizeManager {
   private final WorkingTimeTypeDao wttDao;
   private final IWrapperFactory wrapperFactory;
   private final PeriodManager periodManager;
+  private final PersonDayDao personDayDao;
 
 
   @Inject
@@ -71,7 +73,8 @@ public class StabilizeManager {
       AbsenceService absenceService, PersonDayManager personDayManager, 
       ConsistencyManager consistencyManager, AbsenceTypeDao absenceTypeDao,
       AbsenceComponentDao absComponentDao, ContractManager contractManager,
-      WorkingTimeTypeDao wttDao, IWrapperFactory wrapperFactory, PeriodManager periodManager) {
+      WorkingTimeTypeDao wttDao, IWrapperFactory wrapperFactory, PeriodManager periodManager,
+      PersonDayDao personDayDao) {
     this.absenceDao = absenceDao;
     this.absenceManager = absenceManager;
     this.absenceService = absenceService;
@@ -83,6 +86,7 @@ public class StabilizeManager {
     this.wttDao = wttDao;
     this.wrapperFactory = wrapperFactory;
     this.periodManager = periodManager;
+    this.personDayDao = personDayDao;
   }
 
   /**
@@ -94,8 +98,9 @@ public class StabilizeManager {
    */
   private Map<String, List<LocalDate>> checkAbsenceInContract(Contract contract, 
       LocalDate lastDayBeforeNewContract) {
+    
     Map<String, List<LocalDate>> map = Maps.newHashMap();
-
+    
     List<LocalDate> dates = null;
     List<Absence> absences = absenceDao
         .getAbsencesInPeriod(Optional.fromNullable(contract.person), 
@@ -186,10 +191,12 @@ public class StabilizeManager {
       //prima di terminare il contratto devo recuperare tutte le assenze dal 26 dicembre in poi sul 
       //contratto, salvarle in una mappa e poi eliminarle dal contratto
       int minutesToAdd = 0;
+      
       Map<String, List<LocalDate>> absencesToRecreate = 
           checkAbsenceInContract(contract.get(), firstDayNewContract);
       
-      log.info("Rimosse assenze per {}. Assenze: {}", wrPerson.getValue().getFullname(), absencesToRecreate);
+      log.info("Rimosse assenze per {}. Assenze: {}", 
+          wrPerson.getValue().getFullname(), absencesToRecreate);
       
       //Controllo quando sarebbe avvenuto il cambio di piano ferie
       List<VacationPeriod> vpList = contract.get().vacationPeriods;
@@ -245,7 +252,8 @@ public class StabilizeManager {
   private Contract createNewContract(Optional<Contract> contract, 
       LocalDate lastDayBeforeNewContract, IWrapperPerson wrPerson) {
 
-    log.debug("Inizio chiusura contratto attuale e creazione nuovo contratto per {}", wrPerson.getValue().getFullname());
+    log.debug("Inizio chiusura contratto attuale e creazione nuovo contratto per {}", 
+        wrPerson.getValue().getFullname());
     IWrapperContract wrappedContract = wrapperFactory.create(contract.get());
     // Salvo la situazione precedente
     final DateInterval previousInterval = wrappedContract.getContractDatabaseInterval();
@@ -324,7 +332,7 @@ public class StabilizeManager {
   private void initializeNewContract(Contract newContract, Integer permessi, 
       Integer buoniPasto, Integer residuoOrario, Integer ferieAnnoPresente, 
       Integer ferieAnnoPassato, LocalDate lastDayBeforeNewContract) {
-
+    log.debug("Inizializzo nuovo contratto...");
     contractManager.setSourceContractProperly(newContract);    
     
     newContract.sourceDateMealTicket = lastDayBeforeNewContract;
@@ -346,7 +354,30 @@ public class StabilizeManager {
     absenceService.emptyVacationCache(newContract);
 
     contractManager.properContractUpdate(newContract, lastDayBeforeNewContract, true);
-
-
+  }
+  
+  /**
+   * Metodo privato per il calcolo delle differenze da aggiungere/rimuovere rispetto 
+   *    al residuo calcolato al giorno della stabilizzazione.
+   * @param wrPerson il wrapper della persona
+   * @return l'aggiustamento del residuo dovuto al giorno in cui viene lanciata la 
+   *        procedura di stabilizzazione.
+   */
+  public int adjustResidual(IWrapperPerson wrPerson) {
+    if (!LocalDate.now().isAfter(firstDayNewContract)) {
+      return 0;
+    } else {
+      int adjustedResidual = 0;
+      LocalDate temp = firstDayNewContract;
+      while (!temp.isAfter(LocalDate.now())) {
+        Optional<PersonDay> pd = personDayDao.getPersonDay(wrPerson.getValue(), temp);
+        if (pd.isPresent()) {
+          adjustedResidual = adjustedResidual + pd.get().difference;
+        }
+        temp = temp.plusDays(1);
+      }      
+      
+      return adjustedResidual;
+    }
   }
 }
