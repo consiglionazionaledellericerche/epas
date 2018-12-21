@@ -1343,6 +1343,7 @@ when
 		/*********** duplicate prima di avere il contesto office  *************/
 
 		/* Vecchio permesso editPerson */
+		"Persons.stabilize",
         "Persons.edit",
         "Persons.update",
         "Persons.save",
@@ -1538,6 +1539,7 @@ when
  $c: PermissionCheck(action in (
 
  		/* Vecchio permesso editPerson */
+ 		"Persons.stabilize",
         "Persons.edit",
         "Persons.update",
         "Persons.save",

@@ -4,24 +4,18 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
-
 import dao.AbsenceDao;
 import dao.ContractDao;
 import dao.PersonDayDao;
 import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
-
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 import javax.inject.Inject;
 import javax.persistence.Query;
-
 import models.Contract;
 import models.Person;
 import models.PersonDay;
@@ -29,10 +23,8 @@ import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.dto.AbsenceToRecoverDto;
-
 import org.assertj.core.util.Lists;
 import org.joda.time.LocalDate;
-
 import play.db.jpa.JPA;
 
 public class PersonManager {
@@ -42,6 +34,7 @@ public class PersonManager {
   public final PersonDayManager personDayManager;
   private final IWrapperFactory wrapperFactory;
   private final AbsenceDao absenceDao;
+  
 
   /**
    * Costrutture.
@@ -64,6 +57,7 @@ public class PersonManager {
     this.absenceDao = absenceDao;
     this.personDayManager = personDayManager;
     this.wrapperFactory = wrapperFactory;
+    
   }
 
   /**
