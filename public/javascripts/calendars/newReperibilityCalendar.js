@@ -4,6 +4,7 @@ $(document).ready(function() {
   $('[data-calendar]', this).each(function() {
     var $this = $(this);
     var $dateFormat = 'DD/MM/YYYY';
+
     var data = {
       height: 'auto',
       columnFormat: 'dddd',
