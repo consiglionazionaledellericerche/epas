@@ -122,7 +122,7 @@ public class RequestInit extends Controller {
     if (user.get().person != null && user.get().person.office != null) {
       minYear = user.get().person.office.beginDate.getYear();
     }
-    for (int i = minYear; i <= LocalDate.now().getYear(); i++) {
+    for (int i = minYear; i <= LocalDate.now().plusYears(1).getYear(); i++) {
       years.add(i);
     }
     renderArgs.put("navYears", years);
@@ -133,7 +133,8 @@ public class RequestInit extends Controller {
     if (params.get("officeId") != null) {
       officeId = Long.valueOf(params.get("officeId"));
       //la not equals("null") è a causa di un problema con il play 1.4.2
-    } else if (session.get("officeSelected") != null && !session.get("officeSelected").equals("null")) {
+    } else if (session.get("officeSelected") != null 
+        && !session.get("officeSelected").equals("null")) {
       officeId = Long.valueOf(session.get("officeSelected"));
     } else if (!offices.isEmpty()) {
       officeId = offices.stream()
