@@ -4,25 +4,18 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
-
 import dao.AbsenceDao;
 import dao.ContractDao;
 import dao.PersonDayDao;
 import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPerson;
 import dao.wrapper.IWrapperPersonDay;
-
 import it.cnr.iit.epas.DateUtility;
-import lombok.extern.slf4j.Slf4j;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 import javax.inject.Inject;
 import javax.persistence.Query;
-
 import models.Contract;
 import models.Person;
 import models.PersonDay;
@@ -30,13 +23,10 @@ import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.dto.AbsenceToRecoverDto;
-
 import org.assertj.core.util.Lists;
 import org.joda.time.LocalDate;
-
 import play.db.jpa.JPA;
 
-@Slf4j
 public class PersonManager {
 
   private final ContractDao contractDao;
@@ -326,7 +316,5 @@ public class PersonManager {
 
     return absencesToRecover;
   }
-
-  
 
 }
