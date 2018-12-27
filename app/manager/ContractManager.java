@@ -221,7 +221,9 @@ public class ContractManager {
       // TODO: anche quelli sulle ferie quando ci saranno
       for (ContractMonthRecap cmr : contract.contractMonthRecaps) {
         if (!yearMonthFrom.isAfter(new YearMonth(cmr.year, cmr.month))) {
-          cmr.delete();
+          if (cmr.isPersistent()) {
+            cmr.delete();
+          }          
         }
       }
       
