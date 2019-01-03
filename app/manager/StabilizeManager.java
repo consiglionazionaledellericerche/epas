@@ -369,10 +369,12 @@ public class StabilizeManager {
     } else {
       int adjustedResidual = 0;
       LocalDate temp = firstDayNewContract;
-      while (!temp.isAfter(LocalDate.now())) {
+      while (!temp.isAfter(firstDayNewContract.dayOfMonth().withMaximumValue())) {
         Optional<PersonDay> pd = personDayDao.getPersonDay(wrPerson.getValue(), temp);
         if (pd.isPresent()) {
           adjustedResidual = adjustedResidual + pd.get().difference;
+          log.debug("Person = {}, adjustedResidual = {}, pd.date = {}, pd.difference", 
+              wrPerson.getValue().getFullname(), adjustedResidual, pd.get().date, pd.get().difference);
         }
         temp = temp.plusDays(1);
       }      
