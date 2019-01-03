@@ -147,7 +147,7 @@ public class Persons extends Controller {
    */
   public static void stabilize(Long personId, boolean step, Integer residuoOrario, 
       Integer buoniPasto, Integer ferieAnnoPassato, Integer ferieAnnoPresente, Integer permessi) {
-    LocalDate date = StabilizeManager.firstDayNewContract;
+    LocalDate firstDayNewContract = StabilizeManager.firstDayNewContract;
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     
@@ -155,9 +155,9 @@ public class Persons extends Controller {
     IWrapperPerson wrPerson = wrapperFactory.create(person);
     boolean isNotTime = false;
     //Controllo se non sono ancora al 27 dicembre...
-    if (LocalDate.now().isBefore(date)) {
+    if (LocalDate.now().isBefore(firstDayNewContract)) {
       isNotTime = true;
-      render(date, step, isNotTime, wrPerson);
+      render(firstDayNewContract, step, isNotTime, wrPerson);
     }
     Optional<Contract> contract = wrPerson.getCurrentContract();
     if (!step) {
@@ -166,12 +166,18 @@ public class Persons extends Controller {
       
       if (contract.isPresent()) {
         
-        PersonStampingRecap psDto = stampingsRecapFactory.create(person, LocalDate.now().getYear(), 
-            LocalDate.now().getMonthOfYear(), true);
+        PersonStampingRecap psDto = stampingsRecapFactory.create(person, firstDayNewContract.getYear(), 
+            firstDayNewContract.getMonthOfYear(), true);
         for (IWrapperContractMonthRecap mese : psDto.contractMonths) {
-          if (mese.getValue().month == date.getMonthOfYear()) {
-            residuoOrario = mese.getValue().remainingMinutesCurrentYear 
-                + mese.getValue().remainingMinutesLastYear;
+          if (mese.getValue().month == firstDayNewContract.getMonthOfYear()) {
+            //Se la procedura di stabilizzazione è stata fatta l'anno dopo il
+            //residuo è solo quello dell'anno prima.
+            if (LocalDate.now().getYear() > firstDayNewContract.getYear()) {
+              residuoOrario = mese.getValue().remainingMinutesLastYear;
+            } else {
+              residuoOrario = mese.getValue().remainingMinutesCurrentYear 
+                  + mese.getValue().remainingMinutesLastYear;
+            }            
             //sottraggo dal residuo mensile la somma delle eventuali differenze maturate dal giorno 
             //della stabilizzazione al giorno in cui viene lanciata la procedura se questa viene 
             //lanciata in un giorno successivo al 27/12/2018
@@ -182,21 +188,21 @@ public class Persons extends Controller {
         GroupAbsenceType vacationGroup = absenceComponentDao
             .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
         VacationSituation vacationSituation = absenceService.buildVacationSituation(contract.get(), 
-            date.getYear(), vacationGroup, Optional.absent(), true);
+            firstDayNewContract.getYear(), vacationGroup, Optional.absent(), true);
         if (vacationSituation == null) {
           log.warn("Non esiste il riepilogo!!!");
-          render(date, step, psDto, isNotTime, wrPerson, residuoOrario, 
+          render(firstDayNewContract, step, psDto, isNotTime, wrPerson, residuoOrario, 
               buoniPasto, ferieAnnoPassato, ferieAnnoPresente, permessi);
         }
         ferieAnnoPassato = vacationSituation.lastYearCached.usable;
         ferieAnnoPresente = vacationSituation.currentYearCached.usable;
         permessi = vacationSituation.permissionsCached.usable;
         
-        render(date, step, psDto, isNotTime, wrPerson, residuoOrario, 
+        render(firstDayNewContract, step, psDto, isNotTime, wrPerson, residuoOrario, 
             buoniPasto, ferieAnnoPassato, ferieAnnoPresente, permessi);        
       } else {
         Boolean outOfContract = true;
-        render(date, step, isNotTime, outOfContract);
+        render(firstDayNewContract, step, isNotTime, outOfContract);
       }
     } else {
 
