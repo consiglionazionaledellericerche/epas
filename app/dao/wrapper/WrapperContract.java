@@ -108,7 +108,7 @@ public class WrapperContract implements IWrapperContract {
 
     DateInterval contractInterval = getContractDateInterval();
     if (value.sourceDateResidual != null) {
-      return new DateInterval(value.sourceDateResidual.plusDays(1),
+      return new DateInterval(value.sourceDateResidual,
           contractInterval.getEnd());
     }
 
@@ -126,7 +126,7 @@ public class WrapperContract implements IWrapperContract {
 
     DateInterval contractDatebaseInterval = getContractDatabaseInterval();
     if (value.sourceDateMealTicket != null) {
-      return new DateInterval(value.sourceDateMealTicket.plusDays(1),
+      return new DateInterval(value.sourceDateMealTicket,
           contractDatebaseInterval.getEnd());
     }
 
