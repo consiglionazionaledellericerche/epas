@@ -403,7 +403,7 @@ public class ConsistencyManager {
     // Nel caso in cui il personDay non sia successivo a sourceContract imposto i valori a 0
     if (pd.getPersonDayContract().isPresent()
         && pd.getPersonDayContract().get().sourceDateResidual != null
-        && !pd.getValue().date.isAfter(pd.getPersonDayContract().get().sourceDateResidual)) {
+        && pd.getValue().date.isBefore(pd.getPersonDayContract().get().sourceDateResidual)) {
 
       pd.getValue().isHoliday = false;
       pd.getValue().timeAtWork = 0;
