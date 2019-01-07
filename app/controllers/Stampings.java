@@ -383,9 +383,9 @@ public class Stampings extends Controller {
       // non è usato il costruttore con la add, quindi aggiungiamo qui a mano:
       personDay.stampings.add(stamping);
     }
-    log.info("inizio salvataggio della timbratura fuori sede, person = {}", person);
+    log.debug("inizio salvataggio della timbratura fuori sede, person = {}", person);
     rules.checkIfPermitted(stamping);
-    log.info("dopo permessi -> salvataggio della timbratura fuori sede, person = {}", person);
+    log.debug("dopo permessi -> salvataggio della timbratura fuori sede, person = {}", person);
     
     final User currentUser = Security.getUser().get();
     
