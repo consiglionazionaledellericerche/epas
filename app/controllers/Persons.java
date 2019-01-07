@@ -170,14 +170,8 @@ public class Persons extends Controller {
             firstDayNewContract.getMonthOfYear(), true);
         for (IWrapperContractMonthRecap mese : psDto.contractMonths) {
           if (mese.getValue().month == firstDayNewContract.getMonthOfYear()) {
-            //Se la procedura di stabilizzazione è stata fatta l'anno dopo il
-            //residuo è solo quello dell'anno prima.
-            if (LocalDate.now().getYear() > firstDayNewContract.getYear()) {
-              residuoOrario = mese.getValue().remainingMinutesLastYear;
-            } else {
               residuoOrario = mese.getValue().remainingMinutesCurrentYear 
-                  + mese.getValue().remainingMinutesLastYear;
-            }            
+                  + mese.getValue().remainingMinutesLastYear;           
             //sottraggo dal residuo mensile la somma delle eventuali differenze maturate dal giorno 
             //della stabilizzazione al giorno in cui viene lanciata la procedura se questa viene 
             //lanciata in un giorno successivo al 27/12/2018
