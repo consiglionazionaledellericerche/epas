@@ -29,7 +29,7 @@
 </div>
 <br>
 #{secure.check 'Calendar.monthShiftsApprovement', target: shiftType }
-#{b.link @monthShiftsApprovement(shiftType.id, start.toString()),class: 'btn-sm', color:'warning',
+#{b.link @monthShiftsApprovement(shiftType.id, start.format()),class: 'btn-sm', color:'warning',
 fa:
 'thumbs-o-down' }
   &{'calendar.removeApprovation'}
@@ -42,7 +42,7 @@ fa:
 </div>
 <br>
 #{secure.check 'Calendar.monthShiftsApprovement', target: shiftType  }
-#{b.link @monthShiftsApprovement(shiftType.id, start.toString()),class: 'btn-sm', color:'info', fa:
+#{b.link @monthShiftsApprovement(shiftType.id, start.format()),class: 'btn-sm', color:'info', fa:
 'thumbs-o-up' }
 &{'calendar.approve'}
 #{/b.link}

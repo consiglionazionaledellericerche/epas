@@ -105,9 +105,16 @@ public class ReperibilityCalendar extends Controller {
 
     final List<PersonReperibilityType> reperibilities = reperibilityManager2.getUserActivities();
 
+    if (reperibilities.isEmpty()) {
+      log.info("Richiesta visualizzazione reperibilità ma nessun servizio di reperibilità presente");
+      flash.error("Nessun tipo di reperibilità presente");
+      Application.index();
+    }
+    
     final PersonReperibilityType reperibilitySelected = 
         reperibility.id != null ? reperibility : reperibilities.get(0);
 
+    
     rules.checkIfPermitted(reperibilitySelected);
 
     render(reperibilities, reperibilitySelected, currentDate);
@@ -543,8 +550,7 @@ public class ReperibilityCalendar extends Controller {
     List<HolidaysReperibilityDto> listHolidaysRep = Lists.newArrayList();
     final List<Person> people = reperibilityManager2
         .involvedReperibilityWorkers(reperibility, monthbegin, monthEnd);
-    final Map<Person, Integer> reperibilityWorkDaysCalculatedCompetences = new HashMap<>();
-    final Map<Person, Integer> reperibilityHolidaysCalculatedCompetences = new HashMap<>();
+
     CompetenceCode workDayReperibility = 
         competenceCodeDao.getCompetenceCodeByCode(REPERIBILITY_WORKDAYS);
     CompetenceCode holidayReperibility = 
