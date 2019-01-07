@@ -28,7 +28,7 @@
 </div>
 <br>
 #{secure.check 'ReperibilityCalendar.monthReperibilityApprovement', target: reperibility }
-#{b.link @monthReperibilityApprovement(reperibility.id, start.toString()),class: 'btn-sm', color:'warning',
+#{b.link @monthReperibilityApprovement(reperibility.id, start.format()),class: 'btn-sm', color:'warning',
 fa:
 'thumbs-o-down' }
   &{'calendar.removeApprovation'}
@@ -41,7 +41,7 @@ fa:
 </div>
 <br>
 #{secure.check 'ReperibilityCalendar.monthReperibilityApprovement', target: reperibility  }
-#{b.link @monthReperibilityApprovement(reperibility.id, start.toString()),class: 'btn-sm', color:'info', fa:
+#{b.link @monthReperibilityApprovement(reperibility.id, start.format()),class: 'btn-sm', color:'info', fa:
 'thumbs-o-up' }
 &{'calendar.approve'}
 #{/b.link}
