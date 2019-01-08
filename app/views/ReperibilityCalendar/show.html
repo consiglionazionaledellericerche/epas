@@ -16,7 +16,7 @@
     <div class="col-sm-6 col-sm-offset-3">
         #{form action:@ReperibilityCalendar.show(), method:'POST', class:'form form-horizontal',
         onChange:"getCurrentViewDate('#date'); this.submit();" }
-        #{f.hidden 'date' /}
+        #{f.hidden 'date', value:date.format() /}
         #{f.selectModel 'reperibility', items:reperibilities, value: reperibilitySelected /}
         #{/form}
     </div>
