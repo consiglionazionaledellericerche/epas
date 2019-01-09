@@ -456,6 +456,7 @@ person.surname=Cognome
 person.telephone=Telefono
 person.user.username= Username in ePAS
 person.wantEmail=Invio Email
+person.beginDate=Data attivazione in ePAS
 
 personUser= Utente associato ad una persona
 
