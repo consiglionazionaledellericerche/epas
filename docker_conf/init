@@ -199,16 +199,18 @@ sed 's#{{EPAS_SHIB_LOGIN}}#'"${EPAS_SHIB_LOGIN}"'#' -i ${APP_HOME}/conf/prod.con
 ### Impostazione autenticazione LDAP
 
 LDAP_LOGIN=${LDAP_LOGIN:false}
-LDAP_TIMEOUT=${LDAP_TIMEOUT:1000}
-LDAP_LOGIN_RETURN=${LDAP_LOGIN_RETURN:/}
+LDAP_URL=${LDAP_URL}
+LDAP_DN_BASE=${LDAP_DN_BASE}
+LDAP_TIMEOUT=${LDAP_TIMEOUT:-1000}
+LDAP_LOGIN_RETURN=${LDAP_LOGIN_RETURN:-/}
 
 sed 's#{{LDAP_LOGIN}}#'"${LDAP_LOGIN}"'#' -i ${APP_HOME}/conf/prod.conf
 
-if [ ${LDAP_LOGIN} == "true" ]; then
+if [ ${LDAP_LOGIN} = "true" ]; then
   sed 's#{{LDAP_URL}}#'"${LDAP_URL}"'#' -i ${APP_HOME}/conf/prod.conf
   sed 's#{{LDAP_TIMEOUT}}#'"${LDAP_TIMEOUT}"'#' -i ${APP_HOME}/conf/prod.conf
   sed 's#{{LDAP_DN_BASE}}#'"${LDAP_DN_BASE}"'#' -i ${APP_HOME}/conf/prod.conf
-  sed 's#{{LDAP_LOGIN_RETURN}}#'"${LDAP_LOGIN_RETURN}"'#' -i ${APP_HOME}/conf/prod.conf  
+  sed 's#{{LDAP_LOGIN_RETURN}}#'"${LDAP_LOGIN_RETURN}"'#' -i ${APP_HOME}/conf/prod.conf    
 else
   sed -n '/LDAP_URL/!p' -i ${APP_HOME}/conf/prod.conf
   sed -n '/LDAP_TIMEOUT/!p' -i ${APP_HOME}/conf/prod.conf
