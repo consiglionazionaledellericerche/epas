@@ -57,14 +57,13 @@ import models.absences.CategoryGroupAbsenceType;
 import models.absences.GroupAbsenceType;
 import models.contractual.ContractualReference;
 import models.enumerate.LimitType;
-import models.enumerate.NotificationSubject;
 import models.enumerate.StampTypes;
 import models.flows.AbsenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
-import play.Play;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import play.Play;
 import synch.diagnostic.SynchDiagnostic;
 
 /**
@@ -74,9 +73,9 @@ import synch.diagnostic.SynchDiagnostic;
  */
 public class TemplateUtility {
   
-  private final String WORKDAYS_REP = "207";
-  private final String HOLIDAYS_REP = "208";
-  private final String FLOWS_ACTIVE = "flows.active";
+  private static final String WORKDAYS_REP = "207";
+  private static final String HOLIDAYS_REP = "208";
+  private static final String FLOWS_ACTIVE = "flows.active";
 
   private final SecureManager secureManager;
   private final OfficeDao officeDao;
@@ -102,6 +101,9 @@ public class TemplateUtility {
   
    
   
+  /**
+   * Costruttotore di default per l'injection dei vari componenti.
+   */
   @Inject
   public TemplateUtility(
       SecureManager secureManager, OfficeDao officeDao, PersonDao personDao,
@@ -360,6 +362,7 @@ public class TemplateUtility {
   }
 
   /**
+   * Persone assegnabili ad un certo utente dall'operatore corrente.
    * @return Una lista delle persone assegnabili ad un certo utente dall'operatore corrente.
    */
   public List<PersonDao.PersonLite> assignablePeople() {
@@ -543,46 +546,10 @@ public class TemplateUtility {
     return archivedNotifications;
   }
 
-  //FIXME metodo provvisorio per fare le prove.
-  public String printAmount(int amount, AmountType amountType) {
-    String format = "";
-    if (amountType.equals(AmountType.units)) {
-      if (amount == 0) {
-        return "0%";// giorno lavorativo";
-      }
-      //      int units = amount / 100;
-      //      int percent = amount % 100;
-      //      String label = " giorni lavorativi";
-      //      if (units == 1) {
-      //        label = " giorno lavorativo";
-      //      }
-      //      if (units > 0 && percent > 0) {
-      //        return units + label + " + " + percent + "% di un giorno lavorativo";
-      //      } else if (units > 0) {
-      //        return units + label;
-      //      } else if (percent > 0) {
-      //        return percent + "% di un giorno lavorativo";
-      //      }
-      return amount + "%";
-    }
-    if (amountType.equals(AmountType.minutes)) {
-      if (amount == 0) {
-        return "0 minuti";
-      }
-      int hours = amount / 60; //since both are ints, you get an int
-      int minutes = amount % 60;
 
-      if (hours > 0 && minutes > 0) {
-        format = hours + " ore " + minutes + " minuti";
-      } else if (hours > 0) {
-        format = hours + " ore";
-      } else if (minutes > 0) {
-        format = minutes + " minuti";
-      }
-    }
-    return format;
-  }
-
+  /**
+   * Verifica se un tipo di assenza è utilizzata come assenza di rimpiazzamento.
+   */
   public boolean isReplacingCode(AbsenceType absenceType, GroupAbsenceType group) {
     if (group.complationAbsenceBehaviour != null
         && group.complationAbsenceBehaviour.replacingCodes.contains(absenceType)) {
@@ -591,7 +558,9 @@ public class TemplateUtility {
     return false;
   }
 
-
+  /**
+   * Verifica se un tipo di assenza è utilizzata come assenza di completamento.
+   */
   public boolean isComplationCode(AbsenceType absenceType, GroupAbsenceType group) {
     if (group.complationAbsenceBehaviour != null
         && group.complationAbsenceBehaviour.complationCodes.contains(absenceType)) {
@@ -658,6 +627,9 @@ public class TemplateUtility {
     return format;
   }
 
+  /**
+   * Url del servizio Attestati.
+   */
   public String getAttestatiUrl() {
     try {
       return AttestatiApis.getAttestatiBaseUrl();
@@ -668,6 +640,7 @@ public class TemplateUtility {
   }
   
   /**
+   * Verifica se la persona è reperible in data odierna.
    * 
    * @param person la persona di cui si intende sapere se è reperibile
    * @return se la persona è reperibile in data odierna.
@@ -681,7 +654,7 @@ public class TemplateUtility {
   }
   
   /**
-   * 
+   * Lista di persone appartententi all'ufficio passato (in questo anno).
    * @param office la sede per cui si ricercano le persone
    * @return la lista di persone della sede abili a far parte di un gruppo.
    */
@@ -692,33 +665,25 @@ public class TemplateUtility {
     return people;
   }
   
-  //  /**
-  //   * 
-  //   * @return la quantità di riposi compensativi da approvare per l'utente loggato.
-  //   */
-  //  public int countCompensatoryRestRequests() {
-  //    
-  //    List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(
-  //      Security.getUser().get());
-  //    List<AbsenceRequest> list = absenceRequestDao
-  //        .findRequestsToApprove(uroList, LocalDateTime.now().minusMonths(1), 
-  //            Optional.absent(), AbsenceRequestType.COMPENSATORY_REST);
-  //    
-  //    return list.size();
-  //  }
-  //  
-  //  /**
-  //   * 
-  //   * @return la quantità di ferie da approvare per l'utente loggato.
-  //   */
-  //  public int countVacationsRequests() {
-  //    
-  //    List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(
-  //        Security.getUser().get());
-  //    List<AbsenceRequest> list = absenceRequestDao
-  //        .findRequestsToApprove(uroList, LocalDateTime.now().minusMonths(1), 
-  //            Optional.absent(), AbsenceRequestType.VACATION_REQUEST);
-  //    
-  //    return list.size();
-  //  }
+  /**
+   * Sigla dell'ente/azienda che utilizza ePAS.
+   */
+  public String getCompanyCode() {
+    return CompanyConfig.code();    
+  }
+  
+  /**
+   * Nome dell'ente/azienda che utilizza ePAS.
+   */
+  public String getCompanyName() {
+    return CompanyConfig.name();
+  }
+  
+  /**
+   * Indirizzo sito/web dell'ente/azienda che utilizza ePAS.
+   */
+  public String getCompanyUrl() {
+    return CompanyConfig.url();
+  }
+
 }
