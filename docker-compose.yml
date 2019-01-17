@@ -2,7 +2,7 @@
 ###    Correggere all'occorrenza i path per le cartelle sull'host ma lasciare inalterati i path sui container docker  
 
 postgres:
-  image: postgres:9.4
+  image: postgres:10
 
   volumes:
     - /opt/epas/db/data:/var/lib/postgresql/data
@@ -30,7 +30,7 @@ nginx:
 
 epas:
 
-  image: docker-registry.services.iit.cnr.it/epas:latest
+  image: docker-registry.services.iit.cnr.it:epas/epas:latest
 
   volumes:
     - /opt/epas/logs:/home/epas/epas/logs
@@ -97,6 +97,7 @@ epas:
 #    - LDAP_TIMEOUT=                         # default: 1000. Time in millisecondi della connessione LDAP.
 #    - LDAP_DN_BASE=                         # DN per la ricerca degli utenti su LDAP, per esempio ou=People,dc=iit,dc=cnr,dc=it
 #    - LDAP_LOGIN_RETURN=                    # default: /. Indirizzo relativo di reindirizzamento dopo il login LDAP.
+#    - LDAP_EPPN_ATTRIBUTE_NAME=             # default: eduPersonPrincipalName. Campo LDAP utilizzato per il mapping con il campo eppn presente in ePAS.
 #### Dati dell'ente/azienda utilizzatrice ####
 #    - COMPANY_CODE=                         # default: CNR
 #    - COMPANY_NAME=                         # default: Consiglio Nazionale delle Ricerche

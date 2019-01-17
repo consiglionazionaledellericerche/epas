@@ -27,6 +27,13 @@ public class LdapService {
       Integer.parseInt(Play.configuration.getProperty("ldap.timeout", "1000"));  
 
   /**
+   * Utilizzato per decidere qualche attributo LDAP utilizzare per fare il mapping
+   * con l'attributo eppn presente in ePAS.
+   */
+  private static final String eppnAttributeName = 
+      Play.configuration.getProperty("ldap.eppn.attribute.name", "eduPersonPrincipalName"); 
+      
+  /**
    * Esempio autenticazione LDAP.
    * 
    * @param username utente ldap
@@ -58,7 +65,7 @@ public class LdapService {
           authContext.search(baseDn, "(uid=" + username + ")", ctrls);
       javax.naming.directory.SearchResult result = answers.nextElement();      
 
-      return Optional.of(LdapUser.create(result.getAttributes()));
+      return Optional.of(LdapUser.create(result.getAttributes(), eppnAttributeName));
     } catch (AuthenticationException authEx) {
       log.info("LDAP Authentication failed for {}", username);
       return Optional.absent();
