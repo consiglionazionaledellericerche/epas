@@ -67,7 +67,7 @@ public class Ldap extends Controller {
       redirect("/login");
     }
     
-    val eppn = ldapUser.get().getMail();
+    val eppn = ldapUser.get().getEppn();
     
     log.debug("LDAP user = {}", ldapUser.get());
     

@@ -203,6 +203,7 @@ LDAP_URL=${LDAP_URL}
 LDAP_DN_BASE=${LDAP_DN_BASE}
 LDAP_TIMEOUT=${LDAP_TIMEOUT:-1000}
 LDAP_LOGIN_RETURN=${LDAP_LOGIN_RETURN:-/}
+LDAP_EPPN_ATTRIBUTE_NAME=${LDAP_EPPN_ATTRIBUTE_NAME}
 
 sed 's#{{LDAP_LOGIN}}#'"${LDAP_LOGIN}"'#' -i ${APP_HOME}/conf/prod.conf
 
@@ -211,11 +212,13 @@ if [ ${LDAP_LOGIN} = "true" ]; then
   sed 's#{{LDAP_TIMEOUT}}#'"${LDAP_TIMEOUT}"'#' -i ${APP_HOME}/conf/prod.conf
   sed 's#{{LDAP_DN_BASE}}#'"${LDAP_DN_BASE}"'#' -i ${APP_HOME}/conf/prod.conf
   sed 's#{{LDAP_LOGIN_RETURN}}#'"${LDAP_LOGIN_RETURN}"'#' -i ${APP_HOME}/conf/prod.conf    
+  sed 's#{{LDAP_EPPN_ATTRIBUTE_NAME}}#'"${LDAP_EPPN_ATTRIBUTE_NAME}"'#' -i ${APP_HOME}/conf/prod.conf
 else
   sed -n '/LDAP_URL/!p' -i ${APP_HOME}/conf/prod.conf
   sed -n '/LDAP_TIMEOUT/!p' -i ${APP_HOME}/conf/prod.conf
   sed -n '/LDAP_DN_BASE/!p' -i ${APP_HOME}/conf/prod.conf
-  sed -n '/LDAP_LOGIN_RETURN/!p' -i ${APP_HOME}/conf/prod.conf  
+  sed -n '/LDAP_LOGIN_RETURN/!p' -i ${APP_HOME}/conf/prod.conf
+  sed -n '/LDAP_EPPN_ATTRIBUTE_NAME/!p' -i ${APP_HOME}/conf/prod.conf  
 fi
 
 ### Fine impostazione autenticazione LDAP
